@@ -159,4 +159,47 @@ bot.onText(/^\/profile(?:@\w+)?$/, (msg) => {
 
   bot.sendMessage(msg.chat.id, profileMessage);
 });
+bot.onText(/^\/wallet(?:@\w+)?(?:\s+(.+))?$/, (msg, match) => {
+  const data = loadData();
+  const id = msg.from.id.toString();
+  const walletAddress = match && match[1] ? match[1].trim() : "";
+
+  if (!data.users[id]) {
+    return bot.sendMessage(
+      msg.chat.id,
+      "❌ You are not registered.\n\nUse /register first."
+    );
+  }
+
+  if (!walletAddress) {
+    const currentWallet = data.users[id].wallet;
+
+    if (currentWallet) {
+      return bot.sendMessage(
+        msg.chat.id,
+        `👛 Your saved wallet:\n\n${currentWallet}\n\nTo update it, use:\n/wallet YOUR_PUBLIC_WALLET`
+      );
+    }
+
+    return bot.sendMessage(
+      msg.chat.id,
+      "👛 No wallet saved yet.\n\nUse:\n/wallet YOUR_PUBLIC_WALLET"
+    );
+  }
+
+  if (walletAddress.length < 32 || walletAddress.length > 44) {
+    return bot.sendMessage(
+      msg.chat.id,
+      "❌ That wallet address does not look valid.\n\nPlease enter a public Solana wallet address."
+    );
+  }
+
+  data.users[id].wallet = walletAddress;
+  saveData(data);
+
+  bot.sendMessage(
+    msg.chat.id,
+    `✅ Wallet saved successfully!\n\n👛 ${walletAddress}\n\nUse /profile to view your updated Legend profile.`
+  );
+});
 console.log("CryptoWorldz Bot is running...");
