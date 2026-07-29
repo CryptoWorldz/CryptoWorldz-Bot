@@ -30,5 +30,20 @@ Together We Raaiiidd • Together We Grow 💜
 
   bot.sendMessage(msg.chat.id, welcomeMessage);
 });
+bot.onText(/^\/help(?:@\w+)?$/, (msg) => {
+  const helpMessage = `
+🤖💜 CryptoWorldz Legend Bot Commands
 
+/start - Open the welcome message
+/help - View this command list
+/raaiiidd - View the current Raaiiidd mission
+/leaderboard - View team rankings
+/wallet - Register or view your wallet
+/alerts - View launch alerts
+
+More Legend Bot features are coming soon. 🚀
+`;
+
+  bot.sendMessage(msg.chat.id, helpMessage);
+});
 console.log("CryptoWorldz Bot is running...");
