@@ -103,4 +103,30 @@ bot.onText(/^\/register(?:@\w+)?$/, (msg) => {
     );
   }
 });
+bot.onText(/^\/profile(?:@\w+)?$/, (msg) => {
+  const data = loadData();
+  const id = msg.from.id.toString();
+
+  if (!data.users[id]) {
+    return bot.sendMessage(
+      msg.chat.id,
+      "❌ You are not registered.\n\nUse /register first."
+    );
+  }
+
+  const user = data.users[id];
+
+  const profileMessage = `
+🏆 CryptoWorldz Legend Profile
+
+👤 ${user.name}
+⭐ Points: ${user.points}
+🚀 Raaiiidds: ${user.raids}
+👛 Wallet: ${user.wallet || "Not Set"}
+
+🎖 Rank: Recruit
+`;
+
+  bot.sendMessage(msg.chat.id, profileMessage);
+});
 console.log("CryptoWorldz Bot is running...");
