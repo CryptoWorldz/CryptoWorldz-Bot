@@ -22,25 +22,54 @@ if (!token) {
 
 const bot = new TelegramBot(token, { polling: true });
 
-bot.onText(/\/start/, (msg) => {
+bot.onText(/^\/start(?:@\w+)?$/, async (msg) => {
+  const telegramId = msg.from.id;
+  const username = msg.from.username || "";
+  const firstName = msg.from.first_name || "Legend";
+    const { error } = await supabase
+    .from("users")
+    .upsert(
+      {
+        telegram_id: telegramId,
+        username: username,
+        first_name: firstName
+      },
+      {
+        onConflict: "telegram_id"
+      }
+    );
+
+  if (error) {
+    console.error("Supabase registration error:", error.message);
+
+    return bot.sendMessage(
+      msg.chat.id,
+      "❌ I couldn't create your Legend profile. Please try again shortly."
+    );
+  }
+
   const welcomeMessage = `
-🤖💜 Welcome to CryptoWorldz Legend Bot!
+🤖💜 Hello CryptoWorldz!
+
+Welcome to the CryptoWorldz Legend Bot.
 
 🌍 One World • One Mission • One SolFam
 
 🚀 Raaiiidd Missions
 🏆 Leaderboards
 👛 Wallet Registration
-📢 Launch Alerts
 🎁 Community Rewards
 
-Type /help to see available commands.
+Use /profile to view your Legend profile.
+Use /help to see all commands.
 
 Together We Raaiiidd • Together We Grow 💜
 `;
 
   bot.sendMessage(msg.chat.id, welcomeMessage);
-});
+  });
+
+
 bot.onText(/^\/help(?:@\w+)?$/, (msg) => {
   const helpMessage = `
 🤖💜 CryptoWorldz Legend Bot Commands
