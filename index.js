@@ -46,7 +46,7 @@ More Legend Bot features are coming soon. 🚀
 
   bot.sendMessage(msg.chat.id, helpMessage);
 });
-bot.onText(/^\/raaiiidd(?:@\w+)?$/, (msg) => {
+bot.onText(/^\/(?:raid|raaiiidd)(?:@\w+)?$/, (msg) => {
   const raidMessage = `
 🚀💜 CryptoWorldz Raaiiidd Mission
 
