@@ -77,5 +77,30 @@ Together We Raaiiidd • Together We Grow 💜
 
   bot.sendMessage(msg.chat.id, raidMessage);
 });
+bot.onText(/^\/register(?:@\w+)?$/, (msg) => {
+  const data = loadData();
+  const id = msg.from.id.toString();
 
+  if (!data.users[id]) {
+    data.users[id] = {
+      username: msg.from.username || "",
+      name: msg.from.first_name || "Legend",
+      wallet: "",
+      points: 0,
+      raids: 0
+    };
+
+    saveData(data);
+
+    bot.sendMessage(
+      msg.chat.id,
+      "🎉 Registration complete!\n\nWelcome to the CryptoWorldz Legend Bot.\n\nUse /wallet to save your public wallet."
+    );
+  } else {
+    bot.sendMessage(
+      msg.chat.id,
+      "✅ You are already registered!"
+    );
+  }
+});
 console.log("CryptoWorldz Bot is running...");
