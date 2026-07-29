@@ -1,0 +1,17 @@
+{
+  "name": "cryptoworldz-bot",
+  "version": "1.0.0",
+  "description": "Official CryptoWorldz Telegram Bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}
