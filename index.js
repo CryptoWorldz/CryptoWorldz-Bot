@@ -1,5 +1,15 @@
 require("dotenv").config();
+const fs = require("fs");
 
+const DATA_FILE = "data.json";
+
+function loadData() {
+  return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+}
+
+function saveData(data) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
 const TelegramBot = require("node-telegram-bot-api");
 
 const token = process.env.BOT_TOKEN;
