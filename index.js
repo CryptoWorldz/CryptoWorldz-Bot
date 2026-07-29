@@ -46,4 +46,26 @@ More Legend Bot features are coming soon. 🚀
 
   bot.sendMessage(msg.chat.id, helpMessage);
 });
+bot.onText(/^\/raaiiidd(?:@\w+)?$/, (msg) => {
+  const raidMessage = `
+🚀💜 CryptoWorldz Raaiiidd Mission
+
+🎯 Today's Mission
+
+❤️ Like
+🔁 Repost
+💬 Comment
+⭐ Bookmark
+
+🔗 Target:
+https://x.com/CryptoWorldzX
+
+Reply with ✅ DONE once you've completed today's Raaiiidd.
+
+Together We Raaiiidd • Together We Grow 💜
+`;
+
+  bot.sendMessage(msg.chat.id, raidMessage);
+});
+
 console.log("CryptoWorldz Bot is running...");
