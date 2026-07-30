@@ -189,6 +189,48 @@ async function saveWallet(telegramId, walletAddress) {
   }
 }
 
+async function addLegendPoints(telegramId, amount) {
+  const user = await getUser(telegramId);
+
+  if (!user) {
+    return null;
+  }
+
+  const currentPoints = Number(user.points) || 0;
+  const newPoints = currentPoints + amount;
+
+  const { data, error } = await supabase
+    .from("users")
+    .update({
+      points: newPoints,
+      updated_at: new Date().toISOString()
+    })
+    .eq("telegram_id", telegramId)
+    .select("*")
+    .single();
+
+  if (error) {
+    console.error("Supabase points update error:", error.message);
+    throw error;
+  }
+
+  return data;
+}
+
+function isSameUtcDay(dateValue, now = new Date()) {
+  if (!dateValue) {
+    return false;
+  }
+
+  const savedDate = new Date(`${dateValue}T00:00:00.000Z`);
+
+  return (
+    savedDate.getUTCFullYear() === now.getUTCFullYear() &&
+    savedDate.getUTCMonth() === now.getUTCMonth() &&
+    savedDate.getUTCDate() === now.getUTCDate()
+  );
+}
+
 function getRank(points) {
   if (points >= 5000) return "Founding Legend";
   if (points >= 2000) return "Legend";
@@ -388,6 +430,118 @@ bot.on("message", async (msg) => {
   }
 });
 
+bot.onText(/^\/points(?:@\w+)?$/, async (msg) => {
+  try {
+    const user = await getUser(msg.from.id);
+
+    if (!user) {
+      return bot.sendMessage(
+        msg.chat.id,
+        "❌ You are not registered.\n\nUse /register first."
+      );
+    }
+
+    const points = Number(user.points) || 0;
+
+    return bot.sendMessage(
+      msg.chat.id,
+      `⭐ Legend Points\n\nYou currently have ${points} Legend Points.\n🎖 Rank: ${getRank(points)}`
+    );
+  } catch {
+    return bot.sendMessage(
+      msg.chat.id,
+      "❌ I couldn't load your Legend Points. Please try again shortly."
+    );
+  }
+});
+
+bot.onText(/^\/checkin(?:@\w+)?$/, async (msg) => {
+  try {
+    const user = await getUser(msg.from.id);
+
+    if (!user) {
+      return bot.sendMessage(
+        msg.chat.id,
+        "❌ You are not registered.\n\nUse /register first."
+      );
+    }
+
+    if (isSameUtcDay(user.last_checkin)) {
+      return bot.sendMessage(
+        msg.chat.id,
+        `✅ You have already checked in today.\n\n⭐ Legend Points: ${Number(user.points) || 0}\nCome back tomorrow for another reward.`
+      );
+    }
+
+    const updatedUser = await addLegendPoints(msg.from.id, 2);
+    const today = new Date().toISOString().slice(0, 10);
+
+    const { error } = await supabase
+      .from("users")
+      .update({
+        last_checkin: today,
+        updated_at: new Date().toISOString()
+      })
+      .eq("telegram_id", msg.from.id);
+
+    if (error) {
+      console.error("Supabase check-in update error:", error.message);
+      throw error;
+    }
+
+    return bot.sendMessage(
+      msg.chat.id,
+      `✅ Daily Check-In Complete!\n\n⭐ +2 Legend Points\n🏆 Total: ${Number(updatedUser.points) || 0}\n🎖 Rank: ${getRank(Number(updatedUser.points) || 0)}`
+    );
+  } catch {
+    return bot.sendMessage(
+      msg.chat.id,
+      "❌ I couldn't complete your check-in. Please try again shortly."
+    );
+  }
+});
+
+bot.onText(/^\/leaderboard(?:@\w+)?$/, async (msg) => {
+  try {
+    const { data: leaders, error } = await supabase
+      .from("users")
+      .select("first_name, username, points")
+      .order("points", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error("Supabase leaderboard error:", error.message);
+      throw error;
+    }
+
+    if (!leaders || leaders.length === 0) {
+      return bot.sendMessage(
+        msg.chat.id,
+        "🏆 CryptoWorldz Leaderboard\n\nNo Legends have joined yet."
+      );
+    }
+
+    const medals = ["🥇", "🥈", "🥉"];
+    const rows = leaders.map((leader, index) => {
+      const name =
+        leader.first_name ||
+        (leader.username ? `@${leader.username}` : "Legend");
+      const marker = medals[index] || `${index + 1}.`;
+      return `${marker} ${name} — ${Number(leader.points) || 0} LP`;
+    });
+
+    return bot.sendMessage(
+      msg.chat.id,
+      `🏆 CryptoWorldz Leaderboard\n\n${rows.join("\n")}\n\n⭐ LP = Legend Points`
+    );
+  } catch {
+    return bot.sendMessage(
+      msg.chat.id,
+      "❌ I couldn't load the leaderboard. Please try again shortly."
+    );
+  }
+});
+
 bot.onText(/^\/help(?:@\w+)?$/, (msg) => {
   const helpMessage = `
 🤖💜 Zed — CryptoWorldz Command
@@ -395,10 +549,12 @@ bot.onText(/^\/help(?:@\w+)?$/, (msg) => {
 /start — Open CryptoWorldz Command
 /register — Register your Legend Profile
 /profile — View your Legend Profile
+/points — View your Legend Points
+/checkin — Collect your daily points
+/leaderboard — View team rankings
 /wallet — Connect or update your public Solana wallet
 /cancel — Cancel wallet registration
 /raaiiidd — View the current Raaiiidd Mission
-/leaderboard — View team rankings
 /alerts — View launch alerts
 
 ⚠️ Never provide a private key or seed phrase.
@@ -432,5 +588,4 @@ bot.on("polling_error", (error) => {
 });
 
 console.log("CryptoWorldz Zed Bot is running...");
-
-  
+      
