@@ -7,7 +7,7 @@ const supabase = require("./db");
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("CryptoWorldz Bot is running");
+  res.send("CryptoWorldz Zed Bot is running");
 });
 
 const PORT = process.env.PORT || 3000;
@@ -23,12 +23,53 @@ if (!token) {
   process.exit(1);
 }
 
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+if (
+  !process.env.SUPABASE_URL ||
+  (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_ANON_KEY)
+) {
   console.error("Supabase environment variables are missing.");
   process.exit(1);
 }
 
 const bot = new TelegramBot(token, { polling: true });
+const pendingWalletRegistration = new Set();
+
+function decodeBase58(value) {
+  const alphabet =
+    "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  const bytes = [0];
+
+  for (const character of value) {
+    const alphabetIndex = alphabet.indexOf(character);
+
+    if (alphabetIndex === -1) {
+      return null;
+    }
+
+    let carry = alphabetIndex;
+
+    for (let index = 0; index < bytes.length; index += 1) {
+      carry += bytes[index] * 58;
+      bytes[index] = carry & 0xff;
+      carry >>= 8;
+    }
+
+    while (carry > 0) {
+      bytes.push(carry & 0xff);
+      carry >>= 8;
+    }
+  }
+
+  for (
+    let index = 0;
+    index < value.length - 1 && value[index] === "1";
+    index += 1
+  ) {
+    bytes.push(0);
+  }
+
+  return Uint8Array.from(bytes.reverse());
+}
 
 function isValidSolanaAddress(address) {
   if (typeof address !== "string") {
@@ -37,8 +78,20 @@ function isValidSolanaAddress(address) {
 
   const trimmed = address.trim();
 
-  // Solana public keys use Base58 and are normally 32–44 characters.
-  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed);
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) {
+    return false;
+  }
+
+  const decoded = decodeBase58(trimmed);
+  return decoded !== null && decoded.length === 32;
+}
+
+function shortenWallet(address) {
+  if (!address) {
+    return "Not Set";
+  }
+
+  return `${address.slice(0, 6)}...${address.slice(-6)}`;
 }
 
 async function registerUser(msg) {
@@ -121,6 +174,21 @@ async function getUser(telegramId) {
   return data;
 }
 
+async function saveWallet(telegramId, walletAddress) {
+  const { error } = await supabase
+    .from("users")
+    .update({
+      wallet: walletAddress,
+      updated_at: new Date().toISOString()
+    })
+    .eq("telegram_id", telegramId);
+
+  if (error) {
+    console.error("Supabase wallet update error:", error.message);
+    throw error;
+  }
+}
+
 function getRank(points) {
   if (points >= 5000) return "Founding Legend";
   if (points >= 2000) return "Legend";
@@ -137,26 +205,26 @@ bot.onText(/^\/start(?:@\w+)?$/, async (msg) => {
     const welcomeMessage = `
 🤖💜 Hello ${msg.from.first_name || "Legend"}!
 
-Welcome to the CryptoWorldz Legend Bot.
-
-🌍 One World • One Mission • One SolFam
+I'm Zed — your guide to CryptoWorldz Command.
 
 🚀 Raaiiidd Missions
-🏆 Leaderboards
+🏆 Leaderboards & Rewards
 👛 Wallet Registration
-🎁 Community Rewards
+🗳️ Governance & Voting
+💰 Treasury Transparency
+🎁 Airdrops & Events
 
-Use /profile to view your Legend profile.
-Use /help to see all commands.
+Use /profile to view your Legend Profile.
+Use /help to open the Command Menu.
 
-Together We Raaiiidd • Together We Grow 💜
+🌍 One World • One Mission • One CryptoWorldz
 `;
 
     await bot.sendMessage(msg.chat.id, welcomeMessage);
   } catch {
     await bot.sendMessage(
       msg.chat.id,
-      "❌ I couldn't create your Legend profile. Please try again shortly."
+      "❌ I couldn't create your Legend Profile. Please try again shortly."
     );
   }
 });
@@ -168,13 +236,13 @@ bot.onText(/^\/register(?:@\w+)?$/, async (msg) => {
     if (result.created) {
       return bot.sendMessage(
         msg.chat.id,
-        "🎉 Registration complete!\n\nWelcome to the CryptoWorldz Legend Bot.\n\nUse /wallet YOUR_PUBLIC_WALLET to save your Solana wallet."
+        "🎉 Registration complete!\n\nWelcome to CryptoWorldz Command.\n\nUse /wallet to connect your public Solana wallet."
       );
     }
 
     return bot.sendMessage(
       msg.chat.id,
-      "✅ You are already registered!\n\nYour profile details have been refreshed."
+      "✅ You are already registered!\n\nYour Legend Profile has been refreshed."
     );
   } catch {
     return bot.sendMessage(
@@ -195,15 +263,20 @@ bot.onText(/^\/profile(?:@\w+)?$/, async (msg) => {
       );
     }
 
+    const walletStatus = user.wallet
+      ? `Connected ✅\n${shortenWallet(user.wallet)}`
+      : "Not Set";
+
     const profileMessage = `
 🏆 CryptoWorldz Legend Profile
 
 👤 ${user.first_name || "Legend"}
-⭐ Points: ${user.points || 0}
+⭐ Legend Points: ${user.points || 0}
 🚀 Raaiiidds: ${user.raids || 0}
-👛 Wallet: ${user.wallet || "Not Set"}
-
 🎖 Rank: ${getRank(user.points || 0)}
+
+👛 Wallet
+${walletStatus}
 `;
 
     return bot.sendMessage(msg.chat.id, profileMessage);
@@ -218,9 +291,7 @@ bot.onText(/^\/profile(?:@\w+)?$/, async (msg) => {
 bot.onText(/^\/wallet(?:@\w+)?(?:\s+(.+))?$/, async (msg, match) => {
   try {
     const telegramId = msg.from.id;
-    const walletAddress =
-      match && match[1] ? match[1].trim() : "";
-
+    const suppliedWallet = match && match[1] ? match[1].trim() : "";
     const user = await getUser(telegramId);
 
     if (!user) {
@@ -230,43 +301,84 @@ bot.onText(/^\/wallet(?:@\w+)?(?:\s+(.+))?$/, async (msg, match) => {
       );
     }
 
-    if (!walletAddress) {
-      if (user.wallet) {
-        return bot.sendMessage(
-          msg.chat.id,
-          `👛 Your saved wallet:\n\n${user.wallet}\n\nTo update it, use:\n/wallet YOUR_PUBLIC_WALLET`
-        );
-      }
+    if (!suppliedWallet) {
+      pendingWalletRegistration.add(telegramId);
+
+      const currentWallet = user.wallet
+        ? `\n\nCurrent wallet: ${shortenWallet(user.wallet)}`
+        : "";
 
       return bot.sendMessage(
         msg.chat.id,
-        "👛 No wallet saved yet.\n\nUse:\n/wallet YOUR_PUBLIC_WALLET\n\n⚠️ Never send your seed phrase or private key."
+        `👛 Wallet Registration${currentWallet}\n\nSend your public Solana wallet address in your next message.\n\n⚠️ Never send a seed phrase or private key.\n\nUse /cancel to stop.`
       );
     }
 
-    if (!isValidSolanaAddress(walletAddress)) {
+    if (!isValidSolanaAddress(suppliedWallet)) {
       return bot.sendMessage(
         msg.chat.id,
-        "❌ That does not look like a valid Solana public wallet address.\n\nOnly send your public wallet address.\nNever send a seed phrase or private key."
+        "❌ That isn't a valid Solana public wallet address.\n\nCheck the address and try again.\nNever send a seed phrase or private key."
       );
     }
 
-    const { error } = await supabase
-      .from("users")
-      .update({
-        wallet: walletAddress,
-        updated_at: new Date().toISOString()
-      })
-      .eq("telegram_id", telegramId);
-
-    if (error) {
-      console.error("Supabase wallet update error:", error.message);
-      throw error;
-    }
+    await saveWallet(telegramId, suppliedWallet);
+    pendingWalletRegistration.delete(telegramId);
 
     return bot.sendMessage(
       msg.chat.id,
-      `✅ Wallet saved successfully!\n\n👛 ${walletAddress}\n\nUse /profile to view your updated Legend profile.`
+      `✅ Wallet Connected!\n\n👛 ${shortenWallet(suppliedWallet)}\n\nYour public wallet has been linked to your Legend Profile.\nUse /profile to view your details.`
+    );
+  } catch {
+    return bot.sendMessage(
+      msg.chat.id,
+      "❌ I couldn't save your wallet. Please try again shortly."
+    );
+  }
+});
+
+bot.onText(/^\/cancel(?:@\w+)?$/, (msg) => {
+  if (pendingWalletRegistration.delete(msg.from.id)) {
+    return bot.sendMessage(msg.chat.id, "✅ Wallet registration cancelled.");
+  }
+
+  return bot.sendMessage(msg.chat.id, "There is nothing to cancel.");
+});
+
+bot.on("message", async (msg) => {
+  if (
+    !msg.text ||
+    msg.text.startsWith("/") ||
+    !pendingWalletRegistration.has(msg.from.id)
+  ) {
+    return;
+  }
+
+  const walletAddress = msg.text.trim();
+
+  if (!isValidSolanaAddress(walletAddress)) {
+    return bot.sendMessage(
+      msg.chat.id,
+      "❌ That isn't a valid Solana public wallet address.\n\nPlease check it and send it again, or use /cancel."
+    );
+  }
+
+  try {
+    const user = await getUser(msg.from.id);
+
+    if (!user) {
+      pendingWalletRegistration.delete(msg.from.id);
+      return bot.sendMessage(
+        msg.chat.id,
+        "❌ You are not registered.\n\nUse /register first."
+      );
+    }
+
+    await saveWallet(msg.from.id, walletAddress);
+    pendingWalletRegistration.delete(msg.from.id);
+
+    return bot.sendMessage(
+      msg.chat.id,
+      `✅ Wallet Connected!\n\n👛 ${shortenWallet(walletAddress)}\n\nYour public wallet has been linked to your Legend Profile.\nUse /profile to view your details.`
     );
   } catch {
     return bot.sendMessage(
@@ -278,16 +390,16 @@ bot.onText(/^\/wallet(?:@\w+)?(?:\s+(.+))?$/, async (msg, match) => {
 
 bot.onText(/^\/help(?:@\w+)?$/, (msg) => {
   const helpMessage = `
-🤖💜 CryptoWorldz Legend Bot Commands
+🤖💜 Zed — CryptoWorldz Command
 
-/start - Open the welcome message
-/register - Register your Legend profile
-/profile - View your profile
-/wallet - View your saved wallet
-/wallet ADDRESS - Save your public Solana wallet
-/raaiiidd - View the current Raaiiidd mission
-/leaderboard - View team rankings
-/alerts - View launch alerts
+/start — Open CryptoWorldz Command
+/register — Register your Legend Profile
+/profile — View your Legend Profile
+/wallet — Connect or update your public Solana wallet
+/cancel — Cancel wallet registration
+/raaiiidd — View the current Raaiiidd Mission
+/leaderboard — View team rankings
+/alerts — View launch alerts
 
 ⚠️ Never provide a private key or seed phrase.
 `;
@@ -310,8 +422,6 @@ bot.onText(/^\/(?:raid|raaiiidd)(?:@\w+)?$/, (msg) => {
 https://x.com/CryptoWorldzX
 
 Reply with ✅ DONE once completed.
-
-Together We Raaiiidd • Together We Grow 💜
 `;
 
   bot.sendMessage(msg.chat.id, raidMessage);
@@ -321,4 +431,6 @@ bot.on("polling_error", (error) => {
   console.error("Telegram polling error:", error.message);
 });
 
-console.log("CryptoWorldz Bot is running...");
+console.log("CryptoWorldz Zed Bot is running...");
+
+  
