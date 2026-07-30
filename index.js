@@ -1,7 +1,20 @@
 require("dotenv").config();
 
+const express = require("express");
 const TelegramBot = require("node-telegram-bot-api");
 const supabase = require("./db");
+
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("CryptoWorldz Bot is running");
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Web server listening on port ${PORT}`);
+});
 
 const token = process.env.BOT_TOKEN;
 
