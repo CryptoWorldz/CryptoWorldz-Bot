@@ -1,26 +1,24 @@
 require("dotenv").config();
 
+const crypto = require("crypto");
 const express = require("express");
 const TelegramBot = require("node-telegram-bot-api");
 const supabase = require("./db");
 
 const app = express();
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("CryptoWorldz Zed Bot is running");
-});
+app.use(express.json({ limit: "32kb" }));
 
 const PORT = process.env.PORT || 3000;
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const ADMIN_API_TOKEN = process.env.ADMIN_API_TOKEN;
+const ALLOWED_CHAT_IDS = new Set(
+  String(process.env.ALLOWED_CHAT_IDS || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+);
 
-app.listen(PORT, () => {
-  console.log(`Web server listening on port ${PORT}`);
-});
-
-const token = process.env.BOT_TOKEN;
-const ADMIN_API_TOKEN = process.env.ADMIN_API_TOKEN; // token to protect the admin HTTP API
-
-if (!token) {
+if (!BOT_TOKEN) {
   console.error("BOT_TOKEN not found.");
   process.exit(1);
 }
@@ -33,27 +31,35 @@ if (
   process.exit(1);
 }
 
-if (!ADMIN_API_TOKEN) {
-  console.warn("ADMIN_API_TOKEN not set. Admin HTTP API will be disabled until you set it in your environment.");
-}
-
-const bot = new TelegramBot(token, { polling: true });
+const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 const pendingWalletRegistration = new Set();
 
+function safeTokenMatch(received, expected) {
+  if (typeof received !== "string" || typeof expected !== "string") return false;
+  const receivedBuffer = Buffer.from(received);
+  const expectedBuffer = Buffer.from(expected);
+  if (receivedBuffer.length !== expectedBuffer.length) return false;
+  return crypto.timingSafeEqual(receivedBuffer, expectedBuffer);
+}
+
+function audit(event, details = {}) {
+  console.log(JSON.stringify({
+    type: "admin_api_audit",
+    event,
+    timestamp: new Date().toISOString(),
+    ...details
+  }));
+}
+
 function decodeBase58(value) {
-  const alphabet =
-    "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
   const bytes = [0];
 
   for (const character of value) {
     const alphabetIndex = alphabet.indexOf(character);
-
-    if (alphabetIndex === -1) {
-      return null;
-    }
+    if (alphabetIndex === -1) return null;
 
     let carry = alphabetIndex;
-
     for (let index = 0; index < bytes.length; index += 1) {
       carry += bytes[index] * 58;
       bytes[index] = carry & 0xff;
@@ -66,11 +72,7 @@ function decodeBase58(value) {
     }
   }
 
-  for (
-    let index = 0;
-    index < value.length - 1 && value[index] === "1";
-    index += 1
-  ) {
+  for (let index = 0; index < value.length - 1 && value[index] === "1"; index += 1) {
     bytes.push(0);
   }
 
@@ -78,163 +80,15 @@ function decodeBase58(value) {
 }
 
 function isValidSolanaAddress(address) {
-  if (typeof address !== "string") {
-    return false;
-  }
-
+  if (typeof address !== "string") return false;
   const trimmed = address.trim();
-
-  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) {
-    return false;
-  }
-
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)) return false;
   const decoded = decodeBase58(trimmed);
   return decoded !== null && decoded.length === 32;
 }
 
 function shortenWallet(address) {
-  if (!address) {
-    return "Not Set";
-  }
-
-  return `${address.slice(0, 6)}...${address.slice(-6)}`;
-}
-
-async function registerUser(msg) {
-  const telegramId = msg.from.id;
-  const username = msg.from.username || "";
-  const firstName = msg.from.first_name || "Legend";
-
-  const { data: existingUser, error: readError } = await supabase
-    .from("users")
-    .select("*")
-    .eq("telegram_id", telegramId)
-    .maybeSingle();
-
-  if (readError) {
-    console.error("Supabase user lookup error:", readError.message);
-    throw readError;
-  }
-
-  if (existingUser) {
-    const { error: updateError } = await supabase
-      .from("users")
-      .update({
-        username,
-        first_name: firstName,
-        updated_at: new Date().toISOString()
-      })
-      .eq("telegram_id", telegramId);
-
-    if (updateError) {
-      console.error("Supabase profile update error:", updateError.message);
-      throw updateError;
-    }
-
-    return {
-      user: {
-        ...existingUser,
-        username,
-        first_name: firstName
-      },
-      created: false
-    };
-  }
-
-  const { data: newUser, error: insertError } = await supabase
-    .from("users")
-    .insert({
-      telegram_id: telegramId,
-      username,
-      first_name: firstName,
-      wallet: null,
-      points: 0,
-      raids: 0
-    })
-    .select("*")
-    .single();
-
-  if (insertError) {
-    console.error("Supabase registration error:", insertError.message);
-    throw insertError;
-  }
-
-  return {
-    user: newUser,
-    created: true
-  };
-}
-
-async function getUser(telegramId) {
-  const { data, error } = await supabase
-    .from("users")
-    .select("*")
-    .eq("telegram_id", telegramId)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Supabase user fetch error:", error.message);
-    throw error;
-  }
-
-  return data;
-}
-
-async function saveWallet(telegramId, walletAddress) {
-  const { error } = await supabase
-    .from("users")
-    .update({
-      wallet: walletAddress,
-      updated_at: new Date().toISOString()
-    })
-    .eq("telegram_id", telegramId);
-
-  if (error) {
-    console.error("Supabase wallet update error:", error.message);
-    throw error;
-  }
-}
-
-async function addLegendPoints(telegramId, amount) {
-  const user = await getUser(telegramId);
-
-  if (!user) {
-    return null;
-  }
-
-  const currentPoints = Number(user.points) || 0;
-  const newPoints = currentPoints + amount;
-
-  const { data, error } = await supabase
-    .from("users")
-    .update({
-      points: newPoints,
-      updated_at: new Date().toISOString()
-    })
-    .eq("telegram_id", telegramId)
-    .select("*")
-    .single();
-
-  if (error) {
-    console.error("Supabase points update error:", error.message);
-    throw error;
-  }
-
-  return data;
-}
-
-function isSameUtcDay(dateValue, now = new Date()) {
-  if (!dateValue) {
-    return false;
-  }
-
-  const savedDate = new Date(`${dateValue}T00:00:00.000Z`);
-
-  return (
-    savedDate.getUTCFullYear() === now.getUTCFullYear() &&
-    savedDate.getUTCMonth() === now.getUTCMonth() &&
-    savedDate.getUTCDate() === now.getUTCDate()
-  );
+  return address ? `${address.slice(0, 6)}...${address.slice(-6)}` : "Not Set";
 }
 
 function getRank(points) {
@@ -246,12 +100,169 @@ function getRank(points) {
   return "Recruit";
 }
 
+async function getUser(telegramId) {
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("telegram_id", telegramId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+async function registerUser(msg) {
+  const telegramId = msg.from.id;
+  const username = msg.from.username || "";
+  const firstName = msg.from.first_name || "Legend";
+  const existing = await getUser(telegramId);
+
+  if (existing) {
+    const { error } = await supabase
+      .from("users")
+      .update({
+        username,
+        first_name: firstName,
+        updated_at: new Date().toISOString()
+      })
+      .eq("telegram_id", telegramId);
+
+    if (error) throw error;
+    return { created: false };
+  }
+
+  const { error } = await supabase.from("users").insert({
+    telegram_id: telegramId,
+    username,
+    first_name: firstName,
+    wallet: null,
+    points: 0,
+    raids: 0
+  });
+
+  if (error) throw error;
+  return { created: true };
+}
+
+async function saveWallet(telegramId, wallet) {
+  const { error } = await supabase
+    .from("users")
+    .update({
+      wallet,
+      updated_at: new Date().toISOString()
+    })
+    .eq("telegram_id", telegramId);
+
+  if (error) throw error;
+}
+
+app.get("/", (req, res) => {
+  res.json({ ok: true, service: "CryptoWorldz Zed Bot" });
+});
+
+app.get("/health", (req, res) => {
+  res.json({ ok: true });
+});
+
+app.post("/api/command", async (req, res) => {
+  const requestId = crypto.randomUUID();
+  const authHeader = req.get("authorization") || "";
+  const bearerMatch = authHeader.match(/^Bearer\s+(.+)$/i);
+  const suppliedToken = bearerMatch ? bearerMatch[1].trim() : "";
+
+  if (!ADMIN_API_TOKEN || !safeTokenMatch(suppliedToken, ADMIN_API_TOKEN)) {
+    audit("auth_failed", { request_id: requestId, ip: req.ip });
+    return res.status(401).json({
+      ok: false,
+      error: "unauthorized",
+      request_id: requestId
+    });
+  }
+
+  const { action, chat_id: chatId, text } = req.body || {};
+
+  if (action !== "send_message") {
+    audit("action_rejected", {
+      request_id: requestId,
+      action: String(action || "")
+    });
+
+    return res.status(400).json({
+      ok: false,
+      error: "unsupported_action",
+      request_id: requestId
+    });
+  }
+
+  const normalizedChatId = String(chatId || "").trim();
+
+  if (!normalizedChatId || typeof text !== "string" || !text.trim()) {
+    return res.status(400).json({
+      ok: false,
+      error: "chat_id_and_text_required",
+      request_id: requestId
+    });
+  }
+
+  if (text.length > 4096) {
+    return res.status(400).json({
+      ok: false,
+      error: "text_too_long",
+      request_id: requestId
+    });
+  }
+
+  if (!ALLOWED_CHAT_IDS.has(normalizedChatId)) {
+    audit("chat_rejected", {
+      request_id: requestId,
+      chat_id: normalizedChatId
+    });
+
+    return res.status(403).json({
+      ok: false,
+      error: "chat_not_allowed",
+      request_id: requestId
+    });
+  }
+
+  try {
+    await bot.sendMessage(normalizedChatId, text.trim());
+
+    audit("message_sent", {
+      request_id: requestId,
+      chat_id: normalizedChatId
+    });
+
+    return res.json({
+      ok: true,
+      request_id: requestId
+    });
+  } catch (error) {
+    console.error("Admin API Telegram send failed", {
+      request_id: requestId,
+      name: error && error.name ? error.name : "Error"
+    });
+
+    audit("message_failed", {
+      request_id: requestId,
+      chat_id: normalizedChatId
+    });
+
+    return res.status(502).json({
+      ok: false,
+      error: "telegram_send_failed",
+      request_id: requestId
+    });
+  }
+});
+
 bot.onText(/^\/start(?:@\w+)?$/, async (msg) => {
   try {
     await registerUser(msg);
 
-    const welcomeMessage = `
-🤖💜 Hello ${msg.from.first_name || "Legend"}!
+    await bot.sendMessage(
+      msg.chat.id,
+      `🤖💜 Hello ${msg.from.first_name || "Legend"}!
 
 I'm Zed — your guide to CryptoWorldz Command.
 
@@ -265,11 +276,10 @@ I'm Zed — your guide to CryptoWorldz Command.
 Use /profile to view your Legend Profile.
 Use /help to open the Command Menu.
 
-🌍 One World • One Mission • One CryptoWorldz
-`;
-
-    await bot.sendMessage(msg.chat.id, welcomeMessage);
-  } catch {
+🌍 One World • One Mission • One CryptoWorldz`
+    );
+  } catch (error) {
+    console.error("Start command failed:", error.message);
     await bot.sendMessage(
       msg.chat.id,
       "❌ I couldn't create your Legend Profile. Please try again shortly."
@@ -281,19 +291,15 @@ bot.onText(/^\/register(?:@\w+)?$/, async (msg) => {
   try {
     const result = await registerUser(msg);
 
-    if (result.created) {
-      return bot.sendMessage(
-        msg.chat.id,
-        "🎉 Registration complete!\n\nWelcome to CryptoWorldz Command.\n\nUse /wallet to connect your public Solana wallet."
-      );
-    }
-
-    return bot.sendMessage(
+    await bot.sendMessage(
       msg.chat.id,
-      "✅ You are already registered!\n\nYour Legend Profile has been refreshed."
+      result.created
+        ? "🎉 Registration complete!\n\nUse /wallet to connect your public Solana wallet."
+        : "✅ You are already registered!\n\nYour Legend Profile has been refreshed."
     );
-  } catch {
-    return bot.sendMessage(
+  } catch (error) {
+    console.error("Register command failed:", error.message);
+    await bot.sendMessage(
       msg.chat.id,
       "❌ Registration failed. Please try again shortly."
     );
@@ -307,89 +313,74 @@ bot.onText(/^\/profile(?:@\w+)?$/, async (msg) => {
     if (!user) {
       return bot.sendMessage(
         msg.chat.id,
-        "❌ You are not registered.\n\nUse /register first."
+        "❌ You are not registered. Use /register first."
       );
     }
 
-    const walletStatus = user.wallet
-      ? `Connected ✅\n${shortenWallet(user.wallet)}`
-      : "Not Set";
+    const points = Number(user.points) || 0;
 
-    const profileMessage = `
-🏆 CryptoWorldz Legend Profile
-
-👤 ${user.first_name || "Legend"}
-⭐ Legend Points: ${user.points || 0}
-🚀 Raaiiidds: ${user.raids || 0}
-🎖 Rank: ${getRank(user.points || 0)}
-
-👛 Wallet
-${walletStatus}
-`;
-
-    return bot.sendMessage(msg.chat.id, profileMessage);
-  } catch {
     return bot.sendMessage(
       msg.chat.id,
-      "❌ I couldn't load your profile. Please try again shortly."
+      `🏆 CryptoWorldz Legend Profile
+
+👤 ${user.first_name || "Legend"}
+⭐ Legend Points: ${points}
+🚀 Raaiiidds: ${user.raids || 0}
+🎖 Rank: ${getRank(points)}
+
+👛 Wallet
+${user.wallet ? `Connected ✅\n${shortenWallet(user.wallet)}` : "Not Set"}`
     );
+  } catch (error) {
+    console.error("Profile command failed:", error.message);
+    return bot.sendMessage(msg.chat.id, "❌ I couldn't load your profile.");
   }
 });
 
 bot.onText(/^\/wallet(?:@\w+)?(?:\s+(.+))?$/, async (msg, match) => {
   try {
-    const telegramId = msg.from.id;
-    const suppliedWallet = match && match[1] ? match[1].trim() : "";
-    const user = await getUser(telegramId);
+    const user = await getUser(msg.from.id);
 
     if (!user) {
       return bot.sendMessage(
         msg.chat.id,
-        "❌ You are not registered.\n\nUse /register first."
+        "❌ You are not registered. Use /register first."
       );
     }
 
-    if (!suppliedWallet) {
-      pendingWalletRegistration.add(telegramId);
+    const supplied = match && match[1] ? match[1].trim() : "";
 
-      const currentWallet = user.wallet
-        ? `\n\nCurrent wallet: ${shortenWallet(user.wallet)}`
-        : "";
+    if (!supplied) {
+      pendingWalletRegistration.add(msg.from.id);
 
       return bot.sendMessage(
         msg.chat.id,
-        `👛 Wallet Registration${currentWallet}\n\nSend your public Solana wallet address in your next message.\n\n⚠️ Never send a seed phrase or private key.\n\nUse /cancel to stop.`
+        "👛 Send your public Solana wallet address in your next message.\n\n⚠️ Never send a seed phrase or private key.\nUse /cancel to stop."
       );
     }
 
-    if (!isValidSolanaAddress(suppliedWallet)) {
+    if (!isValidSolanaAddress(supplied)) {
       return bot.sendMessage(
         msg.chat.id,
-        "❌ That isn't a valid Solana public wallet address.\n\nCheck the address and try again.\nNever send a seed phrase or private key."
+        "❌ That isn't a valid Solana public wallet address."
       );
     }
 
-    await saveWallet(telegramId, suppliedWallet);
-    pendingWalletRegistration.delete(telegramId);
+    await saveWallet(msg.from.id, supplied);
 
     return bot.sendMessage(
       msg.chat.id,
-      `✅ Wallet Connected!\n\n👛 ${shortenWallet(suppliedWallet)}\n\nYour public wallet has been linked to your Legend Profile.\nUse /profile to view your details.`
+      `✅ Wallet Connected!\n\n👛 ${shortenWallet(supplied)}`
     );
-  } catch {
-    return bot.sendMessage(
-      msg.chat.id,
-      "❌ I couldn't save your wallet. Please try again shortly."
-    );
+  } catch (error) {
+    console.error("Wallet command failed:", error.message);
+    return bot.sendMessage(msg.chat.id, "❌ I couldn't save your wallet.");
   }
 });
 
 bot.onText(/^\/cancel(?:@\w+)?$/, (msg) => {
-  if (pendingWalletRegistration.delete(msg.from.id)) {
-    return bot.sendMessage(msg.chat.id, "✅ Wallet registration cancelled.");
-  }
-
-  return bot.sendMessage(msg.chat.id, "There is nothing to cancel.");
+  pendingWalletRegistration.delete(msg.from.id);
+  bot.sendMessage(msg.chat.id, "✅ Wallet registration cancelled.");
 });
 
 bot.on("message", async (msg) => {
@@ -401,38 +392,26 @@ bot.on("message", async (msg) => {
     return;
   }
 
-  const walletAddress = msg.text.trim();
+  const wallet = msg.text.trim();
 
-  if (!isValidSolanaAddress(walletAddress)) {
+  if (!isValidSolanaAddress(wallet)) {
     return bot.sendMessage(
       msg.chat.id,
-      "❌ That isn't a valid Solana public wallet address.\n\nPlease check it and send it again, or use /cancel."
+      "❌ That isn't a valid Solana public wallet address. Try again or use /cancel."
     );
   }
 
   try {
-    const user = await getUser(msg.from.id);
-
-    if (!user) {
-      pendingWalletRegistration.delete(msg.from.id);
-      return bot.sendMessage(
-        msg.chat.id,
-        "❌ You are not registered.\n\nUse /register first."
-      );
-    }
-
-    await saveWallet(msg.from.id, walletAddress);
+    await saveWallet(msg.from.id, wallet);
     pendingWalletRegistration.delete(msg.from.id);
 
-    return bot.sendMessage(
+    await bot.sendMessage(
       msg.chat.id,
-      `✅ Wallet Connected!\n\n👛 ${shortenWallet(walletAddress)}\n\nYour public wallet has been linked to your Legend Profile.\nUse /profile to view your details.`
+      `✅ Wallet Connected!\n\n👛 ${shortenWallet(wallet)}`
     );
-  } catch {
-    return bot.sendMessage(
-      msg.chat.id,
-      "❌ I couldn't save your wallet. Please try again shortly."
-    );
+  } catch (error) {
+    console.error("Wallet message save failed:", error.message);
+    await bot.sendMessage(msg.chat.id, "❌ I couldn't save your wallet.");
   }
 });
 
@@ -443,7 +422,7 @@ bot.onText(/^\/points(?:@\w+)?$/, async (msg) => {
     if (!user) {
       return bot.sendMessage(
         msg.chat.id,
-        "❌ You are not registered.\n\nUse /register first."
+        "❌ You are not registered. Use /register first."
       );
     }
 
@@ -451,179 +430,76 @@ bot.onText(/^\/points(?:@\w+)?$/, async (msg) => {
 
     return bot.sendMessage(
       msg.chat.id,
-      `⭐ Legend Points\n\nYou currently have ${points} Legend Points.\n🎖 Rank: ${getRank(points)}`
+      `⭐ Legend Points
+
+You currently have ${points} Legend Points.
+🎖 Rank: ${getRank(points)}`
     );
-  } catch {
+  } catch (error) {
+    console.error("Points command failed:", error.message);
     return bot.sendMessage(
       msg.chat.id,
-      "❌ I couldn't load your Legend Points. Please try again shortly."
-    );
-  }
-});
-
-bot.onText(/^\/checkin(?:@\w+)?$/, async (msg) => {
-  try {
-    const user = await getUser(msg.from.id);
-
-    if (!user) {
-      return bot.sendMessage(
-        msg.chat.id,
-        "❌ You are not registered.\n\nUse /register first."
-      );
-    }
-
-    if (isSameUtcDay(user.last_checkin)) {
-      return bot.sendMessage(
-        msg.chat.id,
-        `✅ You have already checked in today.\n\n⭐ Legend Points: ${Number(user.points) || 0}\nCome back tomorrow for another reward.`
-      );
-    }
-
-    const updatedUser = await addLegendPoints(msg.from.id, 2);
-    const today = new Date().toISOString().slice(0, 10);
-
-    const { error } = await supabase
-      .from("users")
-      .update({
-        last_checkin: today,
-        updated_at: new Date().toISOString()
-      })
-      .eq("telegram_id", msg.from.id);
-
-    if (error) {
-      console.error("Supabase check-in update error:", error.message);
-      throw error;
-    }
-
-    return bot.sendMessage(
-      msg.chat.id,
-      `✅ Daily Check-In Complete!\n\n⭐ +2 Legend Points\n🏆 Total: ${Number(updatedUser.points) || 0}\n🎖 Rank: ${getRank(Number(updatedUser.points) || 0)}`
-    );
-  } catch {
-    return bot.sendMessage(
-      msg.chat.id,
-      "❌ I couldn't complete your check-in. Please try again shortly."
+      "❌ I couldn't load your Legend Points."
     );
   }
 });
 
 bot.onText(/^\/leaderboard(?:@\w+)?$/, async (msg) => {
   try {
-    const { data: leaders, error } = await supabase
+    const { data, error } = await supabase
       .from("users")
-      .select("first_name, username, points")
+      .select("first_name,username,points")
       .order("points", { ascending: false })
       .limit(10);
 
-    if (error) {
-      console.error("Supabase leaderboard error:", error.message);
-      throw error;
-    }
+    if (error) throw error;
 
-    if (!leaders || leaders.length === 0) {
+    if (!data || data.length === 0) {
       return bot.sendMessage(
         msg.chat.id,
         "🏆 CryptoWorldz Leaderboard\n\nNo Legends have joined yet."
       );
     }
 
-    const medals = ["🥇", "🥈", "🥉"];
-    const rows = leaders.map((leader, index) => {
-      const name =
-        leader.first_name ||
-        (leader.username ? `@${leader.username}` : "Legend");
-      const marker = medals[index] || `${index + 1}.`;
-      return `${marker} ${name} — ${Number(leader.points) || 0} LP`;
-    });
+    const rows = data.map(
+      (user, index) =>
+        `${index + 1}. ${
+          user.first_name ||
+          (user.username ? `@${user.username}` : "Legend")
+        } — ${Number(user.points) || 0} LP`
+    );
 
     return bot.sendMessage(
       msg.chat.id,
-      `🏆 CryptoWorldz Leaderboard\n\n${rows.join("\n")}\n\n⭐ LP = Legend Points`
+      `🏆 CryptoWorldz Leaderboard\n\n${rows.join("\n")}`
     );
-  } catch {
+  } catch (error) {
+    console.error("Leaderboard command failed:", error.message);
     return bot.sendMessage(
       msg.chat.id,
-      "❌ I couldn't load the leaderboard. Please try again shortly."
+      "❌ I couldn't load the leaderboard."
     );
   }
 });
 
-bot.onText(/^\/help(?:@\w+)?$/, (msg) => {
-  const helpMessage = `
-🤖💜 Zed — CryptoWorldz Command
-
-/start — Open CryptoWorldz Command
-/register — Register your Legend Profile
-/profile — View your Legend Profile
-/points — View your Legend Points
-/checkin — Collect your daily points
-/leaderboard — View team rankings
-/wallet — Connect or update your public Solana wallet
-/cancel — Cancel wallet registration
-/raaiiidd — View the current Raaiiidd Mission
-/alerts — View launch alerts
-
-⚠️ Never provide a private key or seed phrase.
-`;
-
-  bot.sendMessage(msg.chat.id, helpMessage);
+bot.onText(/^\/(?:raid|raaiiidd)(?:@\w+)?$/, (msg) => {
+  bot.sendMessage(
+    msg.chat.id,
+    "🚀💜 CryptoWorldz Raaiiidd Mission\n\n❤️ Like\n🔁 Repost\n💬 Comment\n⭐ Bookmark\n\n🔗 https://x.com/CryptoWorldzX\n\nReply with ✅ DONE once completed."
+  );
 });
 
-bot.onText(/^\/(?:raid|raaiiidd)(?:@\w+)?$/, (msg) => {
-  const raidMessage = `
-🚀💜 CryptoWorldz Raaiiidd Mission
-
-🎯 Today's Mission
-
-❤️ Like
-🔁 Repost
-💬 Comment
-⭐ Bookmark
-
-🔗 Target:
-https://x.com/CryptoWorldzX
-
-Reply with ✅ DONE once completed.
-`;
-
-  bot.sendMessage(msg.chat.id, raidMessage);
+bot.onText(/^\/help(?:@\w+)?$/, (msg) => {
+  bot.sendMessage(
+    msg.chat.id,
+    "🤖💜 Zed — CryptoWorldz Command\n\n/start\n/register\n/profile\n/points\n/leaderboard\n/wallet\n/cancel\n/raaiiidd\n\n⚠️ Never provide a private key or seed phrase."
+  );
 });
 
 bot.on("polling_error", (error) => {
   console.error("Telegram polling error:", error.message);
 });
 
-// Admin HTTP API: allows authenticated HTTP clients (like ChatGPT or other tools) to send commands/messages
-app.post("/api/command", async (req, res) => {
-  // Accept token in Authorization header (Bearer) or in body.token
-  const authHeader = req.headers.authorization || "";
-  const headerToken = authHeader.startsWith("Bearer ")
-    ? authHeader.slice(7)
-    : null;
-
-  const token = headerToken || req.body.token;
-
-  if (!ADMIN_API_TOKEN || !token || token !== ADMIN_API_TOKEN) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
-  const { action, chat_id, text } = req.body || {};
-
-  if (action === "send_message") {
-    if (!chat_id || !text) {
-      return res.status(400).json({ error: "chat_id and text are required for send_message" });
-    }
-
-    try {
-      await bot.sendMessage(chat_id, text);
-      return res.json({ ok: true });
-    } catch (err) {
-      console.error("Admin API send_message error:", err.message);
-      return res.status(500).json({ error: err.message });
-    }
-  }
-
-  return res.status(400).json({ error: "unknown action" });
+app.listen(PORT, () => {
+  console.log(`CryptoWorldz Zed Bot listening on port ${PORT}`);
 });
-
-console.log("CryptoWorldz Zed Bot is running...");
