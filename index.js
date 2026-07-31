@@ -5,6 +5,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const supabase = require("./db");
 
 const app = express();
+app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("CryptoWorldz Zed Bot is running");
@@ -17,6 +18,7 @@ app.listen(PORT, () => {
 });
 
 const token = process.env.BOT_TOKEN;
+const ADMIN_API_TOKEN = process.env.ADMIN_API_TOKEN; // token to protect the admin HTTP API
 
 if (!token) {
   console.error("BOT_TOKEN not found.");
@@ -29,6 +31,10 @@ if (
 ) {
   console.error("Supabase environment variables are missing.");
   process.exit(1);
+}
+
+if (!ADMIN_API_TOKEN) {
+  console.warn("ADMIN_API_TOKEN not set. Admin HTTP API will be disabled until you set it in your environment.");
 }
 
 const bot = new TelegramBot(token, { polling: true });
@@ -587,5 +593,37 @@ bot.on("polling_error", (error) => {
   console.error("Telegram polling error:", error.message);
 });
 
+// Admin HTTP API: allows authenticated HTTP clients (like ChatGPT or other tools) to send commands/messages
+app.post("/api/command", async (req, res) => {
+  // Accept token in Authorization header (Bearer) or in body.token
+  const authHeader = req.headers.authorization || "";
+  const headerToken = authHeader.startsWith("Bearer ")
+    ? authHeader.slice(7)
+    : null;
+
+  const token = headerToken || req.body.token;
+
+  if (!ADMIN_API_TOKEN || !token || token !== ADMIN_API_TOKEN) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const { action, chat_id, text } = req.body || {};
+
+  if (action === "send_message") {
+    if (!chat_id || !text) {
+      return res.status(400).json({ error: "chat_id and text are required for send_message" });
+    }
+
+    try {
+      await bot.sendMessage(chat_id, text);
+      return res.json({ ok: true });
+    } catch (err) {
+      console.error("Admin API send_message error:", err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  return res.status(400).json({ error: "unknown action" });
+});
+
 console.log("CryptoWorldz Zed Bot is running...");
-      
