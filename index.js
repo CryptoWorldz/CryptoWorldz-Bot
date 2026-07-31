@@ -31,7 +31,7 @@ if (
   process.exit(1);
 }
 
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+const bot = new TelegramBot(BOT_TOKEN);
 const pendingWalletRegistration = new Set();
 
 function safeTokenMatch(received, expected) {
@@ -496,10 +496,20 @@ bot.onText(/^\/help(?:@\w+)?$/, (msg) => {
   );
 });
 
-bot.on("polling_error", (error) => {
-  console.error("Telegram polling error:", error.message);
+app.post("/telegram-webhook", (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
 });
 
-app.listen(PORT, () => {
-  console.log(`CryptoWorldz Zed Bot listening on port ${PORT}`);
+app.listen(PORT, async () => {
+  try {
+    await bot.setWebHook(
+      "https://cryptobotz.cryptoworldz.xyz/telegram-webhook"
+    );
+
+    console.log(`CryptoWorldz Zed Bot listening on port ${PORT}`);
+    console.log("Telegram webhook configured successfully");
+  } catch (error) {
+    console.error("Telegram webhook setup failed:", error.message);
+  }
 });
