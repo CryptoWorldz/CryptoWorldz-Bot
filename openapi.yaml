@@ -1,0 +1,61 @@
+openapi: 3.1.0
+info:
+  title: CryptoWorldz Bot Command Centre
+  version: 1.0.0
+  description: Securely sends approved Telegram messages through the CryptoWorldz bot.
+servers:
+  - url: https://cryptobotz.cryptoworldz.xyz
+paths:
+  /api/command:
+    post:
+      operationId: sendCryptoWorldzMessage
+      summary: Send a message to an approved Telegram chat
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - action
+                - chat_id
+                - text
+              properties:
+                action:
+                  type: string
+                  enum:
+                    - send_message
+                chat_id:
+                  type: string
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 4096
+      responses:
+        "200":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  request_id:
+                    type: string
+        "400":
+          description: Invalid request
+        "401":
+          description: Invalid or missing bearer token
+        "403":
+          description: Telegram chat is not approved
+        "502":
+          description: Telegram delivery failed
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
