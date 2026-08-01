@@ -13,7 +13,7 @@
     "node": "20.x"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.111.0",
+    "@supabase/supabase-js": "2.109.0",
     "dotenv": "16.6.1",
     "express": "4.22.2",
     "node-telegram-bot-api": "1.2.0"
