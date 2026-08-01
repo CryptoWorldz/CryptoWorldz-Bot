@@ -37,6 +37,12 @@ test("Mini App page is served while protected data rejects unsigned browser IDs"
   assert.equal(page.status, 200);
   assert.match(await page.text(), /CryptoWorldz Command Centre/);
 
+  const miniAppScript = await fetch(`http://127.0.0.1:${port}/miniapp/app.js`);
+  assert.equal(miniAppScript.status, 200);
+  const miniAppSource = await miniAppScript.text();
+  assert.match(miniAppSource, /Copy.*Address/);
+  assert.match(miniAppSource, /navigator\.clipboard\.writeText/);
+
   const protectedResponse = await fetch(`http://127.0.0.1:${port}/api/mini/bootstrap`, {
     headers: { "X-Telegram-Init-Data": "user=%7B%22id%22%3A8029135300%7D" }
   });
