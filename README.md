@@ -80,6 +80,8 @@ Feature configuration:
 - `WEBSITE_LAUNCHED=false`
 - `TELEGRAM_WEBHOOK_URL=https://cryptobotz.cryptoworldz.xyz/telegram-webhook`
 - `PORT=3000`
+- `SOLANA_RPC_URL=https://api.mainnet-beta.solana.com`
+- `SOLANA_USDC_MINT=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`
 
 Use `.env.example` as the variable list. Never commit a real environment file, token, private key, service-role key, wallet seed phrase or secret.
 
@@ -121,7 +123,11 @@ Zed 3.0 includes the mobile-first CryptoWorldz Command Centre at:
 https://cryptobotz.cryptoworldz.xyz/miniapp/
 ```
 
-The first secure release provides Home, Active Raaiiidds, Legend Profile, Leaderboard, Rewards, Wallet status, Community, Governance foundation and an Admin Centre pending-submissions view. Approval and rejection remain in Telegram while the dashboard controls complete live testing.
+The working release provides Home, Active Raaiiidds, Legend Profile, Leaderboard, Rewards, Wallet status, Community, Governance foundation, SOL/USDC Kitty payment tools and a full Admin Centre. Members can submit DONE with an optional HTTPS proof link. Authorized admins can create Raaiiidds and approve or reject submissions inside Telegram or the Mini App.
+
+Kitty contributions use Solana Pay links and QR codes. Claims are awarded only after Zed verifies a finalized on-chain transfer to the configured public Kitty address. Transaction signatures are single-use. Contribution Points remain disabled until the owner configures and enables an asset rule with Points per unit, a minimum amount and a maximum award. Zed never stores signing authority and never moves funds.
+
+Professional partner roles are invitation-ready foundations only. Do not activate a partner profile, assign an outside person, contact them, or represent them as part of the team until they explicitly agree. All future roles remain owner-controlled and auditable.
 
 Every protected request validates Telegram `initData` server-side using the bot-token HMAC signature, rejects expired data, derives the Telegram ID only from the verified payload and applies rate limits. The browser never receives the Supabase service-role key.
 

@@ -83,6 +83,12 @@ function createRepository(supabase) {
     return { duplicate: false, submission: data };
   }
 
+  async function getMission(missionId) {
+    const { data, error } = await supabase.from("missions").select("*").eq("id", missionId).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+
   async function approveSubmission(submissionId, reviewerTelegramId = null) {
     const { data, error } = await supabase
       .rpc("approve_mission_completion", {
@@ -218,6 +224,40 @@ function createRepository(supabase) {
 
   async function listTreasuryAccounts() {
     const { data, error } = await supabase.from("treasury_accounts").select("id,label,network,asset,public_address,status,created_at").eq("status", "active").order("asset", { ascending: true });
+    if (error && error.code === "42P01") return [];
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function getContributionRule(asset) {
+    const { data, error } = await supabase.from("auto_approval_rules").select("*").eq("rule_key", `kitty_${String(asset).toLowerCase()}`).maybeSingle();
+    if (error && error.code === "42P01") return null;
+    if (error) throw error;
+    return data;
+  }
+
+  async function setContributionRule({ asset, enabled, pointsPerUnit, minimumAmount, maxPoints }, actorTelegramId) {
+    const rule = { rule_key: `kitty_${asset.toLowerCase()}`, platform: "solana", verification_type: "onchain_transfer", enabled, points_awarded: 0, max_points: maxPoints, config: { asset, points_per_unit: pointsPerUnit, minimum_amount: minimumAmount }, set_by: actorTelegramId, updated_at: new Date().toISOString() };
+    const { data, error } = await supabase.from("auto_approval_rules").upsert(rule, { onConflict: "rule_key" }).select("*").single();
+    if (error) throw error;
+    await recordHistory({ missionId: null, action: "contribution_rule_changed", actorTelegramId, details: { asset, enabled, points_per_unit: pointsPerUnit, minimum_amount: minimumAmount, max_points: maxPoints } });
+    return data;
+  }
+
+  async function recordVerifiedContribution({ accountId, telegramId, signature, asset, amount, sender, slot, blockTime, points }) {
+    const { data, error } = await supabase.rpc("record_verified_contribution", { p_treasury_account_id: accountId, p_telegram_id: telegramId, p_transaction_signature: signature, p_asset: asset, p_amount: amount, p_sender_address: sender, p_slot: slot, p_block_time: blockTime ? new Date(blockTime * 1000).toISOString() : null, p_points: points }).single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function listContributions(telegramId, limit = 20) {
+    const { data, error } = await supabase.from("treasury_contributions").select("id,transaction_signature,asset,amount,status,points_awarded,confirmed_at,created_at").eq("telegram_id", telegramId).order("created_at", { ascending: false }).limit(limit);
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function listPartners() {
+    const { data, error } = await supabase.from("partner_profiles").select("id,display_name,organization,partner_role,status,created_at").eq("status", "active").order("created_at", { ascending: false });
     if (error && error.code === "42P01") return [];
     if (error) throw error;
     return data || [];
@@ -459,8 +499,10 @@ function createRepository(supabase) {
     endMission,
     getAdminAccess,
     getCurrentMission,
+    getContributionRule,
     getLeaderboard,
     getMissionHistory,
+    getMission,
     getMemberDetails,
     getProfile,
     getSubmission,
@@ -472,18 +514,22 @@ function createRepository(supabase) {
     isManagedAdmin,
     listActiveMissions,
     listActivity,
+    listContributions,
     listAdmins,
     listGovernanceProposals,
     listPending,
+    listPartners,
     listRegisteredTelegramIds,
     listTreasuryAccounts,
     recordHistory,
+    recordVerifiedContribution,
     registerUser,
     rejectSubmission,
     saveWallet,
     setAdmin,
     setAdminPermission,
     setAdminRole,
+    setContributionRule,
     setPartnerProfile,
     setTreasuryAccount,
     submitMissionClaim

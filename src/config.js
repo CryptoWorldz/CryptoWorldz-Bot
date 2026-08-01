@@ -41,6 +41,8 @@ function loadConfig(env = process.env) {
     communitySupportUrl: String(env.COMMUNITY_SUPPORT_URL || "").trim(),
     websiteUrl: String(env.WEBSITE_URL || "https://CryptoWorldz.xyz").trim(),
     websiteLaunched: parseBoolean(env.WEBSITE_LAUNCHED, false),
+    solanaRpcUrl: String(env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com").trim(),
+    solanaUsdcMint: String(env.SOLANA_USDC_MINT || "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v").trim(),
     webhookUrl,
     webhookSecret: crypto.createHash("sha256").update(botToken).digest("hex"),
     port: Number(env.PORT) || 3000
