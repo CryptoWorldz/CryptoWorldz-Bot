@@ -1,0 +1,57 @@
+const crypto = require("crypto");
+const { parseBoolean, parseIdSet } = require("./core");
+
+function required(name, env) {
+  const value = String(env[name] || "").trim();
+  if (!value) throw new Error(`${name} is required.`);
+  return value;
+}
+
+function loadConfig(env = process.env) {
+  const botToken = required("BOT_TOKEN", env);
+  const supabaseUrl = required("SUPABASE_URL", env);
+  const supabaseServiceRoleKey = required("SUPABASE_SERVICE_ROLE_KEY", env);
+  const webhookUrl = String(
+    env.TELEGRAM_WEBHOOK_URL ||
+      "https://cryptobotz.cryptoworldz.xyz/telegram-webhook"
+  ).trim();
+
+  try {
+    const parsedWebhookUrl = new URL(webhookUrl);
+    if (parsedWebhookUrl.protocol !== "https:") throw new Error("Webhook must use HTTPS.");
+  } catch {
+    throw new Error("TELEGRAM_WEBHOOK_URL must be a valid HTTPS URL.");
+  }
+
+  return {
+    botToken,
+    supabaseUrl,
+    supabaseServiceRoleKey,
+    adminApiToken: String(env.ADMIN_API_TOKEN || ""),
+    allowedChatIds: parseIdSet(env.ALLOWED_CHAT_IDS),
+    adminTelegramIds: parseIdSet(env.ADMIN_TELEGRAM_IDS),
+    autoApproveMissionClaims: parseBoolean(env.AUTO_APPROVE_MISSION_CLAIMS, false),
+    communityTelegramUrl: String(env.COMMUNITY_TELEGRAM_URL || "").trim(),
+    communityXUrl: String(env.COMMUNITY_X_URL || "").trim(),
+    communityWebsiteUrl: String(
+      env.COMMUNITY_WEBSITE_URL || "https://CryptoWorldz.xyz"
+    ).trim(),
+    communityAnnouncementsUrl: String(env.COMMUNITY_ANNOUNCEMENTS_URL || "").trim(),
+    communitySupportUrl: String(env.COMMUNITY_SUPPORT_URL || "").trim(),
+    websiteUrl: String(env.WEBSITE_URL || "https://CryptoWorldz.xyz").trim(),
+    websiteLaunched: parseBoolean(env.WEBSITE_LAUNCHED, false),
+    webhookUrl,
+    webhookSecret: crypto.createHash("sha256").update(botToken).digest("hex"),
+    port: Number(env.PORT) || 3000
+  };
+}
+
+function configWarnings(config) {
+  const warnings = [];
+  if (!config.adminApiToken) warnings.push("ADMIN_API_TOKEN is not configured; /api/command is disabled.");
+  if (config.allowedChatIds.size === 0) warnings.push("ALLOWED_CHAT_IDS is empty; /api/command cannot send messages.");
+  if (config.adminTelegramIds.size === 0) warnings.push("ADMIN_TELEGRAM_IDS is empty; Telegram admin commands are disabled.");
+  return warnings;
+}
+
+module.exports = { configWarnings, loadConfig };

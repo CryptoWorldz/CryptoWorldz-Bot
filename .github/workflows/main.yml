@@ -35,42 +35,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check JavaScript syntax
-        run: |
-          node --check index.js
-
-          if [ -f db.js ]; then
-            node --check db.js
-          fi
-
-          find commands handlers services utils config \
-            -type f -name "*.js" \
-            -exec node --check {} \; 2>/dev/null || true
-
-      - name: Run automated tests
-        run: |
-          if npm pkg get scripts.test | grep -qv null; then
-            npm test
-          else
-            echo "No automated test script exists yet."
-          fi
+      - name: Check and test Zed Bot
+        run: npm run verify
 
       - name: Verify required project files
         run: |
           test -f package.json
+          test -f package-lock.json
           test -f index.js
-
-          if [ ! -f README.md ]; then
-            echo "::warning::README.md is missing"
-          fi
-
-          if [ ! -f .well-known/openapi.yaml ]; then
-            echo "::warning::.well-known/openapi.yaml is missing"
-          fi
+          test -f README.md
+          test -f .well-known/openapi.yaml
+          test -f openapi.yaml
+          cmp .well-known/openapi.yaml openapi.yaml
+          test -n "$(find supabase/migrations -type f -name '*.sql' -print -quit)"
+          test ! -f .well-known/ai-plugin.json
 
       - name: Prevent committed environment files
         run: |
-          if git ls-files | grep -E '(^|/)\.env($|\.)'; then
+          if git ls-files | grep -E '(^|/)\.env($|\.local$|\.production$|\.development$|\.test$)'; then
             echo "::error::An environment file is committed."
             exit 1
           fi

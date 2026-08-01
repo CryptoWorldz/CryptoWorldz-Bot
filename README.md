@@ -1,78 +1,132 @@
-# CryptoWorldz Bot
+# CryptoWorldz Zed Bot
 
-Secure Telegram bot and ChatGPT Action command endpoint for the CryptoWorldz Bot Command Centre.
+Zed is the Telegram command centre for CryptoWorldz. The production service runs at `https://cryptobotz.cryptoworldz.xyz` and uses the existing Supabase project `hknymhhyqldtzmplzuzh`.
 
-## Required environment variables
+## Public commands
 
-- `BOT_TOKEN` — Telegram bot token.
-- `SUPABASE_URL` — Supabase project URL.
-- `SUPABASE_SERVICE_ROLE_KEY` — Server-side Supabase key.
-- `ADMIN_API_TOKEN` — Long random token used only in the `Authorization: Bearer ...` header.
-- `ALLOWED_CHAT_IDS` — Comma-separated Telegram chat IDs approved to receive messages.
-- `PORT` — Optional. Defaults to `3000`.
+- `/start` — open Zed and register or refresh a Legend Profile.
+- `/register` — register a Legend Profile.
+- `/profile` — show rank, points, completed missions, wallet and earned rewards.
+- `/points` — show Legend Points and rank.
+- `/leaderboard` — show the Top 25 Legends.
+- `/raid` or `/raaiiidd` — show the newest active mission from Supabase.
+- `/missions` — list every active mission, newest first.
+- `DONE` or `✅ DONE` — submit the newest active mission for review.
+- `/wallet [public_address]` — connect a public Solana wallet.
+- `/cancel` — cancel pending wallet registration.
+- `/community` — show configured CryptoWorldz community links.
+- `/website` — show the CryptoWorldz website or pre-launch message.
+- `/help` — show the public command menu.
 
-Example:
+## Admin commands
 
-```env
-BOT_TOKEN=replace_in_hosting_environment
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=replace_in_hosting_environment
-ADMIN_API_TOKEN=use-a-long-random-secret
-ALLOWED_CHAT_IDS=-1001234567890,123456789
-PORT=3000
+Admin commands require the sender's Telegram ID in `ADMIN_TELEGRAM_IDS`. They are deliberately excluded from the public `/help` menu.
+
+- `/newmission Title | Platform | Reward Points | Link | Description | Instructions`
+- `/editmission mission_id field | new value`
+- `/endmission mission_id`
+- `/approve submission_id`
+- `/reject submission_id reason`
+- `/points telegram_id amount`
+- `/broadcast Your message here`
+- `/confirmbroadcast` or `/cancelbroadcast`
+
+Mission edits allow only `title`, `description`, `platform`, `link`, `instructions`, `reward_points` and `status`. Broadcasts use a two-step confirmation, rate limiting and per-recipient failure handling.
+
+## Environment variables
+
+Required for startup:
+
+- `BOT_TOKEN`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+Required for the secured command API:
+
+- `ADMIN_API_TOKEN` — long random bearer token.
+- `ALLOWED_CHAT_IDS` — comma-separated Telegram chat IDs.
+
+Feature configuration:
+
+- `ADMIN_TELEGRAM_IDS` — comma-separated Telegram admin user IDs.
+- `AUTO_APPROVE_MISSION_CLAIMS=false`
+- `COMMUNITY_TELEGRAM_URL`
+- `COMMUNITY_X_URL`
+- `COMMUNITY_WEBSITE_URL=https://CryptoWorldz.xyz`
+- `COMMUNITY_ANNOUNCEMENTS_URL`
+- `COMMUNITY_SUPPORT_URL`
+- `WEBSITE_URL=https://CryptoWorldz.xyz`
+- `WEBSITE_LAUNCHED=false`
+- `TELEGRAM_WEBHOOK_URL=https://cryptobotz.cryptoworldz.xyz/telegram-webhook`
+- `PORT=3000`
+
+Use `.env.example` as the variable list. Never commit a real environment file, token, private key, service-role key, wallet seed phrase or secret.
+
+## Database safety
+
+The migration in `supabase/migrations` is additive and preserves existing users, wallets, missions, submissions, rewards and history. It provides:
+
+- unique mission claims on `(mission_id, telegram_id)`;
+- RLS on all Zed tables with server-only service-role access;
+- an atomic `approve_mission_completion` function that awards once;
+- an atomic `adjust_legend_points` function that records every change;
+- mission submission, reward and history ledgers.
+
+`AUTO_APPROVE_MISSION_CLAIMS` defaults to `false`, so DONE claims stay pending until an admin runs `/approve`.
+
+## Local verification
+
+```bash
+npm ci
+npm run verify
+npm audit --audit-level=high
 ```
 
-Never commit real secrets, API keys, Telegram tokens, seed phrases, private keys, or service-role keys.
+Tests use Node's built-in test runner and mocked repositories. They do not call live Telegram or Supabase services.
 
 ## Deployment
 
-1. Add the environment variables in the hosting dashboard.
-2. Deploy the repository.
-3. Confirm the health endpoint:
+The Hostinger application tracks `main`.
+
+1. Add the environment variables in Hostinger.
+2. Apply the checked-in migration to the existing Supabase project.
+3. Push the verified commit to `main`.
+4. Confirm:
 
 ```bash
 curl https://cryptobotz.cryptoworldz.xyz/health
+curl https://cryptobotz.cryptoworldz.xyz/.well-known/openapi.yaml
 ```
 
-Expected response:
+The health response is:
 
 ```json
 {"ok":true}
 ```
 
-## Test the command endpoint
+## Secured command API
+
+Only the `send_message` action is accepted. Authentication is Bearer-only and the destination must be in `ALLOWED_CHAT_IDS`.
 
 ```bash
-curl -X POST https://cryptobotz.cryptoworldz.xyz/api/command   -H "Authorization: Bearer YOUR_ADMIN_API_TOKEN"   -H "Content-Type: application/json"   -d '{
+curl -X POST https://cryptobotz.cryptoworldz.xyz/api/command \
+  -H "Authorization: Bearer YOUR_ADMIN_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
     "action": "send_message",
     "chat_id": "-1001234567890",
     "text": "CryptoWorldz Command Centre test 🤖💜"
   }'
 ```
 
-The chat ID must exist in `ALLOWED_CHAT_IDS`.
+Audit logs contain request IDs and approved chat IDs, but never bearer tokens or message contents.
 
-## Custom GPT Action setup
+## Custom GPT Action
 
-1. Open the Custom GPT editor.
-2. Open **Actions**.
-3. Import:
+In the Custom GPT editor, create an Action and import:
 
 ```text
 https://cryptobotz.cryptoworldz.xyz/.well-known/openapi.yaml
 ```
 
-4. Set authentication to **API Key**.
-5. Choose **Bearer** authentication.
-6. Enter the same value stored as `ADMIN_API_TOKEN`.
-7. Test `sendCryptoWorldzMessage`.
-
-The legacy `ai-plugin.json` file is intentionally not used.
-
-## Security
-
-- Only `send_message` is supported.
-- Authentication is accepted only through the Bearer header.
-- Telegram chats must be explicitly listed in `ALLOWED_CHAT_IDS`.
-- Audit logs record request IDs and chat IDs, but never tokens or message contents.
-- API responses do not expose Telegram errors or secrets.
+Choose API key authentication, Bearer, and enter the same value stored as `ADMIN_API_TOKEN`. Test `sendCryptoWorldzMessage` in Preview. The legacy `ai-plugin.json` format is intentionally not used.
