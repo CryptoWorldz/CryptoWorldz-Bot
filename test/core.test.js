@@ -17,18 +17,19 @@ const {
   parseEditMissionPayload,
   parseIdSet,
   parseNewMissionPayload,
+  parseSimpleRaid,
   parsePointsAdjustment,
   shortenWallet,
   splitTelegramMessage
 } = require("../src/core");
 
 test("rank calculation covers every Legend tier", () => {
-  assert.equal(getRank(0), "Recruit");
-  assert.equal(getRank(100), "Raider");
-  assert.equal(getRank(500), "Guardian");
-  assert.equal(getRank(1000), "Hero");
-  assert.equal(getRank(2000), "Legend");
-  assert.equal(getRank(5000), "Founding Legend");
+  assert.equal(getRank(0), "New Legend");
+  assert.equal(getRank(50), "Raaiiidd Legend");
+  assert.equal(getRank(150), "CryptoWorldz Warrior");
+  assert.equal(getRank(350), "Worldz Champion");
+  assert.equal(getRank(750), "Purple Diamond Legend");
+  assert.equal(getRank(1500), "CryptoWorldz Commander");
 });
 
 test("wallet validation accepts a 32-byte Solana address", () => {
@@ -146,10 +147,31 @@ test("website command supports pre-launch and launched states", () => {
   );
 });
 
-test("community command uses Coming soon for missing links", () => {
+test("community command omits missing links", () => {
   const formatted = formatCommunity({ communityWebsiteUrl: "https://CryptoWorldz.xyz" });
-  assert.match(formatted, /💬 Telegram:\nComing soon\./);
+  assert.doesNotMatch(formatted, /Coming soon/);
   assert.match(formatted, /https:\/\/CryptoWorldz\.xyz/);
+});
+
+for (const [platform, url] of Object.entries({
+  X: "https://x.com/example/status/123", Telegram: "https://t.me/example/123",
+  YouTube: "https://youtube.com/watch?v=123", TikTok: "https://tiktok.com/@example/video/123",
+  Instagram: "https://instagram.com/p/123", Facebook: "https://facebook.com/example/posts/123",
+  Reddit: "https://reddit.com/r/test/comments/123", Discord: "https://discord.gg/example",
+  Website: "https://example.org/news"
+})) test(`simple Raaiiidd detects ${platform}`, () => {
+  const parsed = parseSimpleRaid(url);
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.mission.platform, platform);
+  assert.equal(parsed.mission.reward_points, 10);
+});
+
+test("simple Raaiiidd rejects unsafe schemes and parses duration", () => {
+  assert.equal(parseSimpleRaid("javascript:alert(1)").ok, false);
+  assert.equal(parseSimpleRaid("http://example.org").ok, false);
+  const parsed = parseSimpleRaid("https://x.com/example/status/1 | 20 | 24h");
+  assert.equal(parsed.mission.reward_points, 20);
+  assert.ok(parsed.mission.expires_at);
 });
 
 test("boolean environment parsing uses safe defaults", () => {

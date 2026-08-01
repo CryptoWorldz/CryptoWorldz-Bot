@@ -1,6 +1,6 @@
 {
   "name": "cryptoworldz-bot",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Official CryptoWorldz Telegram Bot",
   "main": "index.js",
   "scripts": {

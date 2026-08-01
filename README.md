@@ -1,8 +1,14 @@
-# CryptoWorldz Zed Bot
+# CryptoWorldz Zed Bot 3.0
+
+Zed is the webhook-driven Telegram Command Centre for CryptoWorldz. Version 3.0 preserves Legend registration, public Solana-wallet registration, points, missions, submissions, approvals, broadcasts, the secured OpenAI Action and Hostinger deployment.
+
+Fast mission creation: `/raid https://x.com/CryptoWorldzX/status/123` or `/raid <link> | 10 | 24h`. Only HTTPS URLs are accepted; duplicate links are rejected. X, Telegram, YouTube, TikTok, Instagram, Facebook, Reddit, Discord and general websites receive platform-specific defaults. `/newmission` remains available for custom missions.
 
 Zed is the Telegram command centre for CryptoWorldz. The production service runs at `https://cryptobotz.cryptoworldz.xyz` and uses the existing Supabase project `hknymhhyqldtzmplzuzh`.
 
 ## Public commands
+
+`/start`, `/help`, `/register`, `/profile`, `/points`, `/leaderboard [daily|weekly|monthly|all]`, `/raid`, `/raaiiidd`, `/missions`, `/rewards`, `/wallet`, `/cancel`, `/community`, `/website`.
 
 - `/start` — open Zed and register or refresh a Legend Profile.
 - `/register` — register a Legend Profile.
@@ -19,6 +25,10 @@ Zed is the Telegram command centre for CryptoWorldz. The production service runs
 - `/help` — show the public command menu.
 
 ## Admin commands
+
+Admin Team: `/admin`, `/raid <link>`, `/newmission`, `/editmission`, `/endmission`, `/pending`, `/approve`, `/reject`, `/broadcast`, `/admins`, `/stats`, `/activity`.
+
+Owner only: `/addadmin telegram_id`, `/removeadmin telegram_id`, and `/points telegram_id amount`. Set one permanent `OWNER_TELEGRAM_ID`; it cannot be removed. `ADMIN_TELEGRAM_IDS` remains the comma-separated bootstrap/fallback list, while managed admins persist in Supabase.
 
 Admin commands require the sender's Telegram ID in `ADMIN_TELEGRAM_IDS`. They are deliberately excluded from the public `/help` menu.
 
@@ -49,6 +59,7 @@ Required for the secured command API:
 Feature configuration:
 
 - `ADMIN_TELEGRAM_IDS` — comma-separated Telegram admin user IDs.
+- `OWNER_TELEGRAM_ID` — permanent primary owner ID for team management and point adjustments.
 - `AUTO_APPROVE_MISSION_CLAIMS=false`
 - `COMMUNITY_TELEGRAM_URL`
 - `COMMUNITY_X_URL`
@@ -64,6 +75,8 @@ Use `.env.example` as the variable list. Never commit a real environment file, t
 
 ## Database safety
 
+Use only Supabase project `hknymhhyqldtzmplzuzh`. Apply `supabase/migrations` in timestamp order. Zed 3.0 migrations are additive: existing users, wallets, points, missions, submissions and legacy rewards are retained. New server-only tables have RLS enabled and public roles revoked.
+
 The migration in `supabase/migrations` is additive and preserves existing users, wallets, missions, submissions, rewards and history. It provides:
 
 - unique mission claims on `(mission_id, telegram_id)`;
@@ -76,6 +89,8 @@ The migration in `supabase/migrations` is additive and preserves existing users,
 
 ## Local verification
 
+Run `npm run verify` and `npm audit --audit-level=high`.
+
 ```bash
 npm ci
 npm run verify
@@ -85,6 +100,12 @@ npm audit --audit-level=high
 Tests use Node's built-in test runner and mocked repositories. They do not call live Telegram or Supabase services.
 
 ## Deployment
+
+Run `npm ci` then `npm start`. `index.js` calls `app.listen()` immediately without a `require.main` guard. Keep the HTTPS Telegram webhook at `https://cryptobotz.cryptoworldz.xyz/telegram-webhook`. Startup registers BotFather commands automatically.
+
+Do not enable the Mini App menu until the mobile interface and server-side Telegram `initData` validation are deployed and tested. Future protected routes must derive identity from signed `initData`, rate-limit requests and never expose the Supabase service-role key.
+
+Rollback: redeploy the previous known-good Git commit. Do not delete production records or reverse additive migrations without a verified backup and an exact recovery plan.
 
 The Hostinger application tracks `main`.
 

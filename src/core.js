@@ -58,14 +58,67 @@ function shortenWallet(address) {
   return address ? `${address.slice(0, 6)}...${address.slice(-6)}` : "Not Set";
 }
 
+const RANKS = Object.freeze([
+  [1500, "CryptoWorldz Commander"], [750, "Purple Diamond Legend"],
+  [350, "Worldz Champion"], [150, "CryptoWorldz Warrior"],
+  [50, "Raaiiidd Legend"], [0, "New Legend"]
+]);
+
 function getRank(pointsValue) {
   const points = Number(pointsValue) || 0;
-  if (points >= 5000) return "Founding Legend";
-  if (points >= 2000) return "Legend";
-  if (points >= 1000) return "Hero";
-  if (points >= 500) return "Guardian";
-  if (points >= 100) return "Raider";
-  return "Recruit";
+  return RANKS.find(([minimum]) => points >= minimum)[1];
+}
+
+const PLATFORM_DEFAULTS = Object.freeze({
+  X: ["CryptoWorldz X Raaiiidd", "❤️ Like\n🔁 Repost\n💬 Leave a genuine relevant comment\n⭐ Bookmark when useful"],
+  Telegram: ["CryptoWorldz Telegram Raaiiidd", "👀 View the post\n💬 React or reply genuinely\n📣 Share when useful"],
+  YouTube: ["CryptoWorldz YouTube Raaiiidd", "▶️ Watch the video\n👍 Like\n💬 Leave a genuine relevant comment\n🔔 Subscribe when useful"],
+  TikTok: ["CryptoWorldz TikTok Raaiiidd", "▶️ Watch\n❤️ Like\n💬 Leave a genuine relevant comment\n🔁 Share when useful"],
+  Instagram: ["CryptoWorldz Instagram Raaiiidd", "❤️ Like\n💬 Leave a genuine relevant comment\n📣 Share or save when useful"],
+  Facebook: ["CryptoWorldz Facebook Raaiiidd", "❤️ React\n💬 Leave a genuine relevant comment\n🔁 Share when useful"],
+  Reddit: ["CryptoWorldz Reddit Raaiiidd", "⬆️ Upvote when deserved\n💬 Add a genuine relevant comment"],
+  Discord: ["CryptoWorldz Discord Raaiiidd", "👀 View the message\n💬 Join the discussion genuinely"],
+  Website: ["CryptoWorldz Website Raaiiidd", "🌐 Visit the page\n📖 Read the update\n📣 Share when useful"],
+  Other: ["CryptoWorldz Community Raaiiidd", "🌐 Open the link\n✅ Complete the requested community action"]
+});
+
+function detectPlatform(url) {
+  const host = url.hostname.toLowerCase().replace(/^www\./, "");
+  if (["x.com", "twitter.com"].includes(host)) return "X";
+  if (host === "t.me" || host.endsWith(".telegram.me")) return "Telegram";
+  if (["youtube.com", "youtu.be"].includes(host)) return "YouTube";
+  if (host === "tiktok.com" || host.endsWith(".tiktok.com")) return "TikTok";
+  if (host === "instagram.com" || host.endsWith(".instagram.com")) return "Instagram";
+  if (host === "facebook.com" || host.endsWith(".facebook.com") || host === "fb.watch") return "Facebook";
+  if (host === "reddit.com" || host.endsWith(".reddit.com") || host === "redd.it") return "Reddit";
+  if (["discord.com", "discord.gg"].includes(host)) return "Discord";
+  return "Website";
+}
+
+function parseSimpleRaid(value) {
+  const parts = String(value || "").split("|").map((item) => item.trim());
+  if (!parts[0] || parts.length > 3) return { ok: false, error: "invalid_format" };
+  let url;
+  try {
+    url = new URL(parts[0]);
+    if (url.protocol !== "https:" || url.username || url.password) throw new Error();
+  } catch { return { ok: false, error: "invalid_link" }; }
+  const reward = parts[1] ? Number(parts[1]) : 10;
+  if (!Number.isSafeInteger(reward) || reward < 0 || reward > MAX_POINT_ADJUSTMENT) return { ok: false, error: "invalid_reward" };
+  let expiresAt = null;
+  if (parts[2]) {
+    const match = parts[2].match(/^(\d+)(h|d)$/i);
+    if (!match) return { ok: false, error: "invalid_duration" };
+    const hours = Number(match[1]) * (match[2].toLowerCase() === "d" ? 24 : 1);
+    if (hours < 1 || hours > 24 * 365) return { ok: false, error: "invalid_duration" };
+    expiresAt = new Date(Date.now() + hours * 3600000).toISOString();
+  }
+  const platform = detectPlatform(url);
+  const [title, instructions] = PLATFORM_DEFAULTS[platform] || PLATFORM_DEFAULTS.Other;
+  return { ok: true, mission: { title, platform, reward_points: reward, link: url.href, target_url: url.href,
+    description: "Support this CryptoWorldz community post.",
+    instructions: `${instructions}\n✅ Reply DONE after completing the mission`, status: "active",
+    starts_at: new Date().toISOString(), expires_at: expiresAt, difficulty: "standard" } };
 }
 
 function missionLink(mission) {
@@ -252,7 +305,7 @@ function formatCommunity(config) {
     ["🛟 Support", config.communitySupportUrl]
   ];
 
-  const rows = links.map(([label, link]) => `${label}:\n${link || "Coming soon."}`);
+  const rows = links.filter(([, link]) => link).map(([label, link]) => `${label}:\n${link}`);
   return `🌍 CryptoWorldz Community\n\n${rows.join("\n\n")}`;
 }
 
@@ -318,6 +371,7 @@ module.exports = {
   parseEditMissionPayload,
   parseIdSet,
   parseNewMissionPayload,
+  parseSimpleRaid,
   parsePointsAdjustment,
   parsePositiveId,
   shortenWallet,

@@ -55,7 +55,8 @@ function createRepository(supabase) {
       .order("created_at", { ascending: false })
       .order("id", { ascending: false });
     if (error) throw error;
-    return data || [];
+    const now = Date.now();
+    return (data || []).filter((mission) => !mission.expires_at || Date.parse(mission.expires_at) > now);
   }
 
   async function getCurrentMission() {
@@ -63,13 +64,13 @@ function createRepository(supabase) {
     return missions[0] || null;
   }
 
-  async function submitMissionClaim({ missionId, telegramId, completionText }) {
+  async function submitMissionClaim({ missionId, telegramId, completionText, proofUrl = "" }) {
     const { data, error } = await supabase
       .from("mission_submissions")
       .insert({
         mission_id: missionId,
         telegram_id: telegramId,
-        proof_url: "",
+        proof_url: proofUrl,
         completion_text: completionText,
         status: "pending",
         points_awarded: 0
@@ -149,6 +150,74 @@ function createRepository(supabase) {
       details: { title: data.title, platform: data.platform, reward_points: data.reward_points }
     });
     return data;
+  }
+
+  async function findMissionByUrl(url) {
+    const { data, error } = await supabase.from("missions").select("id,status").eq("target_url", url).limit(1);
+    if (error) throw error;
+    return (data || [])[0] || null;
+  }
+
+  async function isManagedAdmin(telegramId, fallbackIds = new Set(), ownerId = "") {
+    if (String(telegramId) === String(ownerId) || fallbackIds.has(String(telegramId))) return true;
+    const { data, error } = await supabase.from("bot_admins").select("status").eq("telegram_id", telegramId).eq("status", "active").maybeSingle();
+    if (error && error.code !== "42P01") throw error;
+    return Boolean(data);
+  }
+
+  async function listAdmins() {
+    const { data, error } = await supabase.from("bot_admins").select("telegram_id,role,status,added_by,created_at").order("created_at", { ascending: true });
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function setAdmin(telegramId, status, actorTelegramId) {
+    const { data, error } = await supabase.from("bot_admins").upsert({ telegram_id: telegramId, role: "admin", status, added_by: actorTelegramId, updated_at: new Date().toISOString() }, { onConflict: "telegram_id" }).select("*").single();
+    if (error) throw error;
+    await recordHistory({ missionId: null, action: status === "active" ? "admin_added" : "admin_removed", actorTelegramId, details: { telegram_id: telegramId } });
+    return data;
+  }
+
+  async function listPending(limit = 20) {
+    const { data, error } = await supabase.from("mission_submissions").select("*,missions(title),users(username,first_name)").eq("status", "pending").order("submitted_at", { ascending: false }).limit(limit);
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function getRewards(telegramId, limit = 10) {
+    const { data, error } = await supabase.from("reward_transactions").select("*").eq("telegram_id", telegramId).order("created_at", { ascending: false }).limit(limit);
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function getMemberDetails(telegramId) {
+    const profile = await getProfile(telegramId);
+    if (!profile) return null;
+    const { data, error } = await supabase.from("mission_submissions").select("status,points_awarded").eq("telegram_id", telegramId);
+    if (error) throw error;
+    const submissions = data || [];
+    return { ...profile, pending: submissions.filter((r) => r.status === "pending").length,
+      approved: submissions.filter((r) => r.status === "approved").length,
+      rejected: submissions.filter((r) => r.status === "rejected").length };
+  }
+
+  async function getStats() {
+    const [users, wallets, missions, completed, pending, rewards] = await Promise.all([
+      supabase.from("users").select("id", { count: "exact", head: true }),
+      supabase.from("users").select("id", { count: "exact", head: true }).not("wallet", "is", null),
+      supabase.from("missions").select("id", { count: "exact", head: true }).in("status", ["active", "open"]),
+      supabase.from("missions").select("id", { count: "exact", head: true }).in("status", ["completed", "closed"]),
+      supabase.from("mission_submissions").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      supabase.from("reward_transactions").select("amount")
+    ]);
+    for (const result of [users, wallets, missions, completed, pending, rewards]) if (result.error) throw result.error;
+    return { users: users.count || 0, wallets: wallets.count || 0, active: missions.count || 0, completed: completed.count || 0, pending: pending.count || 0, points: (rewards.data || []).reduce((n, r) => n + Math.max(0, Number(r.amount) || 0), 0) };
+  }
+
+  async function listActivity(limit = 15) {
+    const { data, error } = await supabase.from("mission_history").select("action,actor_telegram_id,created_at").order("created_at", { ascending: false }).limit(limit);
+    if (error) throw error;
+    return data || [];
   }
 
   async function editMission(missionId, field, newValue, actorTelegramId) {
@@ -281,15 +350,24 @@ function createRepository(supabase) {
     endMission,
     getCurrentMission,
     getLeaderboard,
+    getMemberDetails,
     getProfile,
     getSubmission,
+    findMissionByUrl,
+    getRewards,
+    getStats,
     getUser,
     listActiveMissions,
+    listActivity,
+    listAdmins,
+    listPending,
     listRegisteredTelegramIds,
     recordHistory,
     registerUser,
     rejectSubmission,
     saveWallet,
+    setAdmin,
+    isManagedAdmin,
     submitMissionClaim
   };
 }

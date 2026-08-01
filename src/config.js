@@ -30,6 +30,7 @@ function loadConfig(env = process.env) {
     adminApiToken: String(env.ADMIN_API_TOKEN || ""),
     allowedChatIds: parseIdSet(env.ALLOWED_CHAT_IDS),
     adminTelegramIds: parseIdSet(env.ADMIN_TELEGRAM_IDS),
+    ownerTelegramId: String(env.OWNER_TELEGRAM_ID || "").trim(),
     autoApproveMissionClaims: parseBoolean(env.AUTO_APPROVE_MISSION_CLAIMS, false),
     communityTelegramUrl: String(env.COMMUNITY_TELEGRAM_URL || "").trim(),
     communityXUrl: String(env.COMMUNITY_X_URL || "").trim(),
@@ -51,6 +52,7 @@ function configWarnings(config) {
   if (!config.adminApiToken) warnings.push("ADMIN_API_TOKEN is not configured; /api/command is disabled.");
   if (config.allowedChatIds.size === 0) warnings.push("ALLOWED_CHAT_IDS is empty; /api/command cannot send messages.");
   if (config.adminTelegramIds.size === 0) warnings.push("ADMIN_TELEGRAM_IDS is empty; Telegram admin commands are disabled.");
+  if (!config.ownerTelegramId) warnings.push("OWNER_TELEGRAM_ID is empty; owner-only commands are disabled.");
   return warnings;
 }
 
