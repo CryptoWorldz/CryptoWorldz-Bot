@@ -10,7 +10,7 @@
     "verify": "npm run check && npm test"
   },
   "engines": {
-    "node": "20.x"
+    "node": ">=20 <25"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.109.0",
