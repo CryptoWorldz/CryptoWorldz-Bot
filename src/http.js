@@ -51,7 +51,13 @@ function createHttpApp({ bot, config, repository }) {
   app.get("/.well-known/openapi.yaml", serveOpenApi);
   app.get("/openapi.yaml", serveOpenApi);
 
-  app.use("/miniapp", express.static(miniAppPath, { index: "index.html", maxAge: "1h" }));
+  app.use("/miniapp", express.static(miniAppPath, {
+    index: "index.html",
+    etag: false,
+    lastModified: false,
+    maxAge: 0,
+    setHeaders: (res) => res.setHeader("Cache-Control", "no-store, max-age=0")
+  }));
   app.get("/api/public/mini-config", (req, res) => res.json({
     ok: true,
     community: {

@@ -35,6 +35,7 @@ test("Mini App page is served while protected data rejects unsigned browser IDs"
 
   const page = await fetch(`http://127.0.0.1:${port}/miniapp/`);
   assert.equal(page.status, 200);
+  assert.equal(page.headers.get("cache-control"), "no-store, max-age=0");
   const miniAppPage = await page.text();
   assert.match(miniAppPage, /CryptoWorldz Command Centre/);
   assert.match(miniAppPage, /\.payment-qr\[hidden\]\{display:none\}/);
