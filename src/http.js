@@ -74,14 +74,15 @@ function createHttpApp({ bot, config, repository }) {
   app.get("/api/mini/bootstrap", authenticateMiniApp, async (req, res) => {
     try {
       const telegramId = req.telegramUser.id;
-      const [profile, missions, leaderboard, rewards, history, governance, admin] = await Promise.all([
+      const [profile, missions, leaderboard, rewards, history, governance, adminAccess, treasury] = await Promise.all([
         repository.getMemberDetails(telegramId),
         repository.listActiveMissions(),
         repository.getLeaderboard(),
         repository.getRewards(telegramId, 10),
         repository.getMissionHistory(telegramId, 25),
         repository.listGovernanceProposals(20),
-        repository.isManagedAdmin(telegramId, config.adminTelegramIds, config.ownerTelegramId)
+        repository.getAdminAccess(telegramId, config.adminTelegramIds, config.ownerTelegramId),
+        repository.listTreasuryAccounts()
       ]);
       const user = profile && profile.user;
       const points = Number(user && user.points) || 0;
@@ -107,7 +108,9 @@ function createHttpApp({ bot, config, repository }) {
         rewards,
         mission_history: history,
         governance,
-        admin
+        admin: adminAccess.authorized,
+        admin_access: adminAccess,
+        treasury
       });
     } catch (error) {
       console.error("Mini App bootstrap failed", { name: error && error.name ? error.name : "Error" });
@@ -117,7 +120,7 @@ function createHttpApp({ bot, config, repository }) {
 
   app.get("/api/mini/admin/submissions", authenticateMiniApp, async (req, res) => {
     try {
-      const allowed = await repository.isManagedAdmin(req.telegramUser.id, config.adminTelegramIds, config.ownerTelegramId);
+      const allowed = await repository.hasPermission(req.telegramUser.id, "submission.view", config.adminTelegramIds, config.ownerTelegramId);
       if (!allowed) return res.status(403).json({ ok: false, error: "admin_required" });
       return res.json({ ok: true, submissions: await repository.listPending(50) });
     } catch (error) {
@@ -129,7 +132,7 @@ function createHttpApp({ bot, config, repository }) {
   app.post("/api/mini/admin/missions", authenticateMiniApp, async (req, res) => {
     try {
       const telegramId = req.telegramUser.id;
-      const allowed = await repository.isManagedAdmin(telegramId, config.adminTelegramIds, config.ownerTelegramId);
+      const allowed = await repository.hasPermission(telegramId, "mission.create", config.adminTelegramIds, config.ownerTelegramId);
       if (!allowed) return res.status(403).json({ ok: false, error: "admin_required" });
       const url = req.body && req.body.url;
       const reward = req.body && req.body.reward;

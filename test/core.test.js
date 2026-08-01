@@ -19,6 +19,7 @@ const {
   parseNewMissionPayload,
   parseSimpleRaid,
   parsePointsAdjustment,
+  permissionsForRole,
   shortenWallet,
   splitTelegramMessage
 } = require("../src/core");
@@ -40,6 +41,15 @@ test("wallet validation accepts a 32-byte Solana address", () => {
 
 test("wallet shortening does not expose the whole address", () => {
   assert.equal(shortenWallet("123456789ABCDEFGHJKLMNPQRSTUVWXYZ"), "123456...UVWXYZ");
+});
+
+test("admin roles receive least-privilege defaults", () => {
+  assert.equal(permissionsForRole("admin").has("submission.approve"), true);
+  assert.equal(permissionsForRole("moderator").has("submission.approve"), false);
+  assert.equal(permissionsForRole("recap_manager").has("recap.publish"), true);
+  assert.equal(permissionsForRole("partner_manager").has("mission.create"), true);
+  assert.equal(permissionsForRole("treasury_manager").has("treasury.reconcile"), true);
+  assert.equal(permissionsForRole("unknown").size, 0);
 });
 
 test("admin ID parsing rejects non-numeric entries", () => {

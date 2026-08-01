@@ -1,4 +1,4 @@
-const { isDuplicateError } = require("./core");
+const { isDuplicateError, permissionsForRole } = require("./core");
 
 function createRepository(supabase) {
   async function getUser(telegramId) {
@@ -165,6 +165,30 @@ function createRepository(supabase) {
     return Boolean(data);
   }
 
+  async function getAdminAccess(telegramId, fallbackIds = new Set(), ownerId = "") {
+    if (String(telegramId) === String(ownerId)) {
+      return { authorized: true, role: "owner", permissions: [...permissionsForRole("owner")] };
+    }
+    const { data: managed, error: managedError } = await supabase.from("bot_admins").select("role,status").eq("telegram_id", telegramId).maybeSingle();
+    if (managedError && managedError.code !== "42P01") throw managedError;
+    if (managed && managed.status !== "active") return { authorized: false, role: managed.role, permissions: [] };
+    const role = managed ? managed.role : fallbackIds.has(String(telegramId)) ? "admin" : null;
+    if (!role) return { authorized: false, role: null, permissions: [] };
+    const permissions = permissionsForRole(role);
+    const { data: overrides, error: overrideError } = await supabase.from("bot_admin_permissions").select("permission,enabled").eq("telegram_id", telegramId);
+    if (overrideError && overrideError.code !== "42P01") throw overrideError;
+    for (const override of overrides || []) {
+      if (override.enabled) permissions.add(override.permission);
+      else permissions.delete(override.permission);
+    }
+    return { authorized: true, role, permissions: [...permissions].sort() };
+  }
+
+  async function hasPermission(telegramId, permission, fallbackIds = new Set(), ownerId = "") {
+    const access = await getAdminAccess(telegramId, fallbackIds, ownerId);
+    return access.authorized && access.permissions.includes(permission);
+  }
+
   async function listAdmins() {
     const { data, error } = await supabase.from("bot_admins").select("telegram_id,role,status,added_by,created_at").order("created_at", { ascending: true });
     if (error) throw error;
@@ -175,6 +199,42 @@ function createRepository(supabase) {
     const { data, error } = await supabase.from("bot_admins").upsert({ telegram_id: telegramId, role: "admin", status, added_by: actorTelegramId, updated_at: new Date().toISOString() }, { onConflict: "telegram_id" }).select("*").single();
     if (error) throw error;
     await recordHistory({ missionId: null, action: status === "active" ? "admin_added" : "admin_removed", actorTelegramId, details: { telegram_id: telegramId } });
+    return data;
+  }
+
+  async function setAdminRole(telegramId, role, actorTelegramId) {
+    const { data, error } = await supabase.from("bot_admins").upsert({ telegram_id: telegramId, role, status: "active", added_by: actorTelegramId, updated_at: new Date().toISOString() }, { onConflict: "telegram_id" }).select("*").single();
+    if (error) throw error;
+    await recordHistory({ missionId: null, action: "admin_role_changed", actorTelegramId, details: { telegram_id: telegramId, role } });
+    return data;
+  }
+
+  async function setAdminPermission(telegramId, permission, enabled, actorTelegramId) {
+    const { data, error } = await supabase.from("bot_admin_permissions").upsert({ telegram_id: telegramId, permission, enabled, set_by: actorTelegramId, updated_at: new Date().toISOString() }, { onConflict: "telegram_id,permission" }).select("*").single();
+    if (error) throw error;
+    await recordHistory({ missionId: null, action: "admin_permission_changed", actorTelegramId, details: { telegram_id: telegramId, permission, enabled } });
+    return data;
+  }
+
+  async function listTreasuryAccounts() {
+    const { data, error } = await supabase.from("treasury_accounts").select("id,label,network,asset,public_address,status,created_at").eq("status", "active").order("asset", { ascending: true });
+    if (error && error.code === "42P01") return [];
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function setTreasuryAccount({ asset, publicAddress, label }, actorTelegramId) {
+    const { data, error } = await supabase.from("treasury_accounts").upsert({ asset, public_address: publicAddress, label, network: "solana", status: "active", created_by: actorTelegramId, updated_at: new Date().toISOString() }, { onConflict: "network,asset,public_address" }).select("*").single();
+    if (error) throw error;
+    await recordHistory({ missionId: null, action: "treasury_account_configured", actorTelegramId, details: { asset, account_id: data.id } });
+    return data;
+  }
+
+  async function setPartnerProfile({ telegramId, displayName, organization, partnerRole }, actorTelegramId) {
+    const { data, error } = await supabase.from("partner_profiles").upsert({ telegram_id: telegramId, display_name: displayName, organization, partner_role: partnerRole, status: "active", created_by: actorTelegramId, updated_at: new Date().toISOString() }, { onConflict: "telegram_id" }).select("*").single();
+    if (error) throw error;
+    await setAdminRole(telegramId, partnerRole, actorTelegramId);
+    await recordHistory({ missionId: null, action: "partner_profile_configured", actorTelegramId, details: { telegram_id: telegramId, organization, partner_role: partnerRole } });
     return data;
   }
 
@@ -397,6 +457,7 @@ function createRepository(supabase) {
     createMission,
     editMission,
     endMission,
+    getAdminAccess,
     getCurrentMission,
     getLeaderboard,
     getMissionHistory,
@@ -407,18 +468,24 @@ function createRepository(supabase) {
     getRewards,
     getStats,
     getUser,
+    hasPermission,
+    isManagedAdmin,
     listActiveMissions,
     listActivity,
     listAdmins,
     listGovernanceProposals,
     listPending,
     listRegisteredTelegramIds,
+    listTreasuryAccounts,
     recordHistory,
     registerUser,
     rejectSubmission,
     saveWallet,
     setAdmin,
-    isManagedAdmin,
+    setAdminPermission,
+    setAdminRole,
+    setPartnerProfile,
+    setTreasuryAccount,
     submitMissionClaim
   };
 }

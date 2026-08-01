@@ -1,5 +1,25 @@
 const MAX_POINT_ADJUSTMENT = 10000;
 
+const ADMIN_PERMISSIONS = Object.freeze([
+  "mission.create", "mission.edit", "mission.end",
+  "submission.view", "submission.approve", "submission.reject",
+  "communication.broadcast", "recap.publish", "member.view", "report.view",
+  "treasury.view", "treasury.reconcile", "partner.report"
+]);
+
+const ROLE_PERMISSIONS = Object.freeze({
+  owner: ADMIN_PERMISSIONS,
+  admin: ["mission.create", "mission.edit", "mission.end", "submission.view", "submission.approve", "submission.reject", "communication.broadcast", "member.view", "report.view"],
+  moderator: ["submission.view", "submission.reject", "member.view"],
+  recap_manager: ["recap.publish", "report.view"],
+  partner_manager: ["mission.create", "partner.report", "report.view"],
+  treasury_manager: ["treasury.view", "treasury.reconcile", "report.view"]
+});
+
+function permissionsForRole(role) {
+  return new Set(ROLE_PERMISSIONS[role] || []);
+}
+
 function parseBoolean(value, fallback = false) {
   if (value === undefined || value === null || value === "") return fallback;
   return ["1", "true", "yes", "on"].includes(String(value).trim().toLowerCase());
@@ -351,6 +371,7 @@ function createRateLimiter({ maxEvents, intervalMs, now = () => Date.now() }) {
 }
 
 module.exports = {
+  ADMIN_PERMISSIONS,
   EDITABLE_MISSION_FIELDS,
   MAX_POINT_ADJUSTMENT,
   calculateAdjustedPoints,
@@ -374,6 +395,8 @@ module.exports = {
   parseSimpleRaid,
   parsePointsAdjustment,
   parsePositiveId,
+  permissionsForRole,
+  ROLE_PERMISSIONS,
   shortenWallet,
   splitTelegramMessage
 };

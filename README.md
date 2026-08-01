@@ -26,7 +26,17 @@ Zed is the Telegram command centre for CryptoWorldz. The production service runs
 
 ## Admin commands
 
-Admin Team: `/admin`, `/raid <link>`, `/newmission`, `/editmission`, `/endmission`, `/pending`, `/approve`, `/reject`, `/broadcast`, `/admins`, `/stats`, `/activity`.
+Admin Team: `/admin`, `/raid <link>`, `/newmission`, `/editmission`, `/endmission`, `/pending`, `/approve`, `/reject`, `/broadcast`, `/admins`, `/permissions`, `/stats`, `/activity`.
+
+Owner controls: `/addadmin`, `/removeadmin`, `/setrole`, `/setpermission`, `/setpartner`, and `/setkitty`. Roles are least-privilege defaults (`admin`, `moderator`, `recap_manager`, `partner_manager`, `treasury_manager`), and the owner can switch individual permissions on or off without granting unrestricted authority.
+
+## Community Kitty and professional partners
+
+`/kitty` displays owner-configured public Solana addresses for SOL or USDC. Configure one with `/setkitty SOL public_address Label` or `/setkitty USDC public_address Label`. Zed stores public addresses only: never enter a seed phrase or private key. Zed does not custody funds, initiate transfers, or award Points merely because someone submits a transaction signature.
+
+Contribution records and automatic approval rules are prepared in Supabase. Automatic Points must remain disabled until the claimed transaction and recipient can be verified on-chain. Social tasks such as X likes or comments remain manually reviewed unless a trustworthy platform verification method is integrated.
+
+Professional collaborators can be added with `/setpartner telegram_id recap_manager|partner_manager|treasury_manager | Name | Organization`. This supports carefully scoped roles for recap publishing, approved partner missions/reporting, and treasury reconciliation. Direct bot-to-bot automation requires the partner service's authenticated API or webhook; Zed does not trust ordinary chat messages as proof.
 
 Owner only: `/addadmin telegram_id`, `/removeadmin telegram_id`, and `/points telegram_id amount`. Set one permanent `OWNER_TELEGRAM_ID`; it cannot be removed. `ADMIN_TELEGRAM_IDS` remains the comma-separated bootstrap/fallback list, while managed admins persist in Supabase.
 

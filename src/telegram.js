@@ -1,4 +1,5 @@
 const {
+  ADMIN_PERMISSIONS,
   createRateLimiter,
   formatCommunity,
   formatMission,
@@ -29,6 +30,7 @@ const PUBLIC_COMMANDS = [
   { command: "raaiiidd", description: "View the newest active Raaiiidd" },
   { command: "missions", description: "View every active Raaiiidd" },
   { command: "wallet", description: "Connect a public Solana wallet" },
+  { command: "kitty", description: "View the community SOL/USDC kitty" },
   { command: "cancel", description: "Cancel wallet registration" },
   { command: "community", description: "Open CryptoWorldz community links" },
   { command: "website", description: "Open CryptoWorldz.xyz" }
@@ -56,6 +58,7 @@ function registerTelegramHandlers({ bot, repository, config }) {
   };
   const denyAdmin = (msg) => send(msg.chat.id, "⛔ Admin access required.");
   const adminAllowed = (msg) => repository.isManagedAdmin(msg.from.id, config.adminTelegramIds, config.ownerTelegramId);
+  const permissionAllowed = (msg, permission) => repository.hasPermission(msg.from.id, permission, config.adminTelegramIds, config.ownerTelegramId);
   const ownerAllowed = (msg) => String(msg.from.id) === String(config.ownerTelegramId);
 
   bot.onText(/^\/start(?:@\w+)?$/, async (msg) => {
@@ -217,7 +220,7 @@ Use /help to open the Command Menu.
   bot.onText(/^\/(?:raid|raaiiidd)(?:@\w+)?$/, sendCurrentMission);
 
   bot.onText(/^\/raid(?:@\w+)?\s+([\s\S]+)$/, async (msg, match) => {
-    if (!(await adminAllowed(msg))) return denyAdmin(msg);
+    if (!(await permissionAllowed(msg, "mission.create"))) return denyAdmin(msg);
     const parsed = parseSimpleRaid(match && match[1]);
     if (!parsed.ok) return send(msg.chat.id, "❌ Use a safe HTTPS link: /raid <link> | 10 | 24h");
     try {
@@ -241,17 +244,26 @@ Use /help to open the Command Menu.
 
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(msg.chat.id, formatCommunity(config)));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, formatWebsite(config)));
+  bot.onText(/^\/kitty(?:@\w+)?$/, async (msg) => {
+    try {
+      const accounts = await repository.listTreasuryAccounts();
+      if (!accounts.length) return send(msg.chat.id, "💜 The CryptoWorldz Community Kitty is being prepared. No contribution address is active yet.");
+      const rows = accounts.map((account) => `💰 ${account.asset} on Solana\n${account.public_address}\n${account.label}`).join("\n\n");
+      return send(msg.chat.id, `💜 CryptoWorldz Community Kitty\n\n${rows}\n\nContributions are recorded only after verifiable on-chain confirmation.\n⚠️ Zed will never ask for your seed phrase or private key and will never move funds automatically.`);
+    } catch (error) { safeError("Kitty command", error); return send(msg.chat.id, "❌ I couldn't load the Community Kitty."); }
+  });
 
   bot.onText(/^\/help(?:@\w+)?$/, (msg) =>
     send(
       msg.chat.id,
-      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/cancel\n/community\n/website\n\n⚠️ Never provide a private key or seed phrase."
+      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/cancel\n/community\n/website\n\n⚠️ Never provide a private key or seed phrase."
     )
   );
 
   bot.onText(/^\/admin(?:@\w+)?$/, async (msg) => {
     if (!(await adminAllowed(msg))) return denyAdmin(msg);
-    return send(msg.chat.id, "🛡️ Zed Admin Command Centre\n\n🚀 Missions\n/raid <link>\n/newmission\n/editmission\n/endmission\n/missions\n\n📥 Submissions\n/pending\n/approve\n/reject\n\n🏆 Legend Management\n/member telegram_id\n/points\n/admins\n\n📢 Communication\n/broadcast\n\n📊 Reports\n/stats\n/activity");
+    const access = await repository.getAdminAccess(msg.from.id, config.adminTelegramIds, config.ownerTelegramId);
+    return send(msg.chat.id, `🛡️ Zed Admin Command Centre\n\nRole: ${access.role}\n\n🚀 Missions\n/raid <link>\n/newmission\n/editmission\n/endmission\n/missions\n\n📥 Submissions\n/pending\n/approve\n/reject\n\n🏆 Legend Management\n/member telegram_id\n/points\n/admins\n/permissions\n\n💜 Community Operations\n/kitty\n/setkitty\n/setrole\n/setpermission\n/setpartner\n\n📢 Communication\n/broadcast\n\n📊 Reports\n/stats\n/activity`);
   });
 
   bot.onText(/^\/admins(?:@\w+)?$/, async (msg) => {
@@ -273,8 +285,51 @@ Use /help to open the Command Menu.
     catch { return send(msg.chat.id, "❌ I couldn't update the Admin Team."); }
   });
 
-  bot.onText(/^\/pending(?:@\w+)?$/, async (msg) => {
+  bot.onText(/^\/permissions(?:@\w+)?(?:\s+(\d+))?$/, async (msg, match) => {
     if (!(await adminAllowed(msg))) return denyAdmin(msg);
+    const id = parsePositiveId(match && match[1]) || msg.from.id;
+    if (String(id) !== String(msg.from.id) && !ownerAllowed(msg)) return send(msg.chat.id, "⛔ Owner access required.");
+    try {
+      const access = await repository.getAdminAccess(id, config.adminTelegramIds, config.ownerTelegramId);
+      return send(msg.chat.id, `🛡️ Zed Permissions\n\n👤 ${id}\n🎖 Role: ${access.role || "none"}\n${access.permissions.length ? access.permissions.map((permission) => `✅ ${permission}`).join("\n") : "No active permissions."}`);
+    } catch { return send(msg.chat.id, "❌ I couldn't load permissions."); }
+  });
+
+  bot.onText(/^\/setrole(?:@\w+)?(?:\s+(\d+)\s+(owner|admin|moderator|recap_manager|partner_manager|treasury_manager))?$/, async (msg, match) => {
+    if (!ownerAllowed(msg)) return send(msg.chat.id, "⛔ Owner access required.");
+    const id = parsePositiveId(match && match[1]); const role = match && match[2];
+    if (!id || !role || role === "owner") return send(msg.chat.id, "❌ Use: /setrole telegram_id admin|moderator|recap_manager|partner_manager|treasury_manager");
+    try { await repository.setAdminRole(id, role, msg.from.id); return send(msg.chat.id, `✅ ${id} now has the ${role} role.`); }
+    catch { return send(msg.chat.id, "❌ I couldn't update that role."); }
+  });
+
+  bot.onText(/^\/setpermission(?:@\w+)?(?:\s+(\d+)\s+([a-z.]+)\s+(on|off))?$/, async (msg, match) => {
+    if (!ownerAllowed(msg)) return send(msg.chat.id, "⛔ Owner access required.");
+    const id = parsePositiveId(match && match[1]); const permission = match && match[2]; const enabled = match && match[3] === "on";
+    if (!id || !ADMIN_PERMISSIONS.includes(permission) || !match[3]) return send(msg.chat.id, `❌ Use: /setpermission telegram_id permission on|off\n\nAllowed:\n${ADMIN_PERMISSIONS.join("\n")}`);
+    try { await repository.setAdminPermission(id, permission, enabled, msg.from.id); return send(msg.chat.id, `✅ ${permission} turned ${enabled ? "on" : "off"} for ${id}.`); }
+    catch { return send(msg.chat.id, "❌ I couldn't update that permission."); }
+  });
+
+  bot.onText(/^\/setkitty(?:@\w+)?(?:\s+(SOL|USDC)\s+(\S+)(?:\s+([\s\S]+))?)?$/, async (msg, match) => {
+    if (!ownerAllowed(msg)) return send(msg.chat.id, "⛔ Owner access required.");
+    const asset = match && match[1]; const publicAddress = match && match[2]; const label = (match && match[3] || "CryptoWorldz Community Kitty").trim();
+    if (!asset || !isValidSolanaAddress(publicAddress)) return send(msg.chat.id, "❌ Use: /setkitty SOL|USDC public_solana_address Optional Label\n\nNever send a private key or seed phrase.");
+    if (label.length > 100) return send(msg.chat.id, "❌ Kitty labels must be 100 characters or fewer.");
+    try { await repository.setTreasuryAccount({ asset, publicAddress, label }, msg.from.id); return send(msg.chat.id, `✅ ${asset} Community Kitty configured with a public Solana address.\n\n⚠️ No private keys are stored and Zed cannot move funds.`); }
+    catch { return send(msg.chat.id, "❌ I couldn't configure that Kitty account."); }
+  });
+
+  bot.onText(/^\/setpartner(?:@\w+)?(?:\s+(\d+)\s+(recap_manager|partner_manager|treasury_manager)\s*\|\s*([^|]+)\s*\|\s*([^|]+))?$/, async (msg, match) => {
+    if (!ownerAllowed(msg)) return send(msg.chat.id, "⛔ Owner access required.");
+    const telegramId = parsePositiveId(match && match[1]); const partnerRole = match && match[2]; const displayName = match && match[3] && match[3].trim(); const organization = match && match[4] && match[4].trim();
+    if (!telegramId || !partnerRole || !displayName || !organization) return send(msg.chat.id, "❌ Use: /setpartner telegram_id recap_manager|partner_manager|treasury_manager | Name | Organization");
+    try { await repository.setPartnerProfile({ telegramId, displayName, organization, partnerRole }, msg.from.id); return send(msg.chat.id, `✅ Partner profile created.\n\n👤 ${displayName}\n🏢 ${organization}\n🎖 ${partnerRole}\n\nPermissions remain owner-adjustable with /setpermission.`); }
+    catch { return send(msg.chat.id, "❌ I couldn't configure that partner profile."); }
+  });
+
+  bot.onText(/^\/pending(?:@\w+)?$/, async (msg) => {
+    if (!(await permissionAllowed(msg, "submission.view"))) return denyAdmin(msg);
     try { const rows = await repository.listPending(); if (!rows.length) return send(msg.chat.id, "📥 No pending submissions.");
       return sendLong(msg.chat.id, `📥 Pending Submissions\n\n${rows.map((r) => `#${r.id} • Mission #${r.mission_id}\n👤 ${r.users?.username ? `@${r.users.username}` : r.users?.first_name || "Legend"} (${r.telegram_id})\n🎯 ${r.missions?.title || "Mission"}\n🕒 ${r.submitted_at}\n📝 ${r.proof_url || r.completion_text || "DONE"}\nStatus: ${r.status}`).join("\n\n")}\n\n/approve submission_id\n/reject submission_id reason`); }
     catch { return send(msg.chat.id, "❌ I couldn't load pending submissions."); }
@@ -296,7 +351,7 @@ Use /help to open the Command Menu.
   });
 
   bot.onText(/^\/member(?:@\w+)?(?:\s+(\d+))?$/, async (msg, match) => {
-    if (!(await adminAllowed(msg))) return denyAdmin(msg); const id = parsePositiveId(match && match[1]);
+    if (!(await permissionAllowed(msg, "member.view"))) return denyAdmin(msg); const id = parsePositiveId(match && match[1]);
     if (!id) return send(msg.chat.id, "❌ Use: /member telegram_id");
     try { const p = await repository.getMemberDetails(id); if (!p) return send(msg.chat.id, "❌ Legend not found."); const u = p.user; const points = Number(u.points) || 0;
       return send(msg.chat.id, `👤 Legend Member\n\n🆔 Telegram ID: ${u.telegram_id}\n👤 ${u.username ? `@${u.username}` : u.first_name || "Legend"}\n📅 Registered: ${u.registered_at || u.created_at}\n👛 Wallet: ${u.wallet ? shortenWallet(u.wallet) : "Not connected"}\n⭐ Points: ${points}\n🎖 Rank: ${getRank(points)}\n✅ Approved: ${p.approved}\n📥 Pending: ${p.pending}\n❌ Rejected: ${p.rejected}\n🎁 Rewards earned: ${p.rewardsEarned} LP`); }
@@ -307,7 +362,7 @@ Use /help to open the Command Menu.
   bot.onText(/^\/activity(?:@\w+)?$/, async (msg) => { if (!(await adminAllowed(msg))) return denyAdmin(msg); try { const rows = await repository.listActivity(); return send(msg.chat.id, `📊 Recent Safe Activity\n\n${rows.map((r) => `${r.created_at} — ${r.action} — ${r.actor_telegram_id || "system"}`).join("\n") || "No activity yet."}`); } catch { return send(msg.chat.id, "❌ I couldn't load activity."); } });
 
   bot.onText(/^\/newmission(?:@\w+)?(?:\s+([\s\S]+))?$/, async (msg, match) => {
-    if (!(await adminAllowed(msg))) return denyAdmin(msg);
+    if (!(await permissionAllowed(msg, "mission.create"))) return denyAdmin(msg);
     const parsed = parseNewMissionPayload(match && match[1]);
     if (!parsed.ok) {
       return send(
@@ -325,7 +380,7 @@ Use /help to open the Command Menu.
   });
 
   bot.onText(/^\/editmission(?:@\w+)?(?:\s+([\s\S]+))?$/, async (msg, match) => {
-    if (!(await adminAllowed(msg))) return denyAdmin(msg);
+    if (!(await permissionAllowed(msg, "mission.edit"))) return denyAdmin(msg);
     const parsed = parseEditMissionPayload(match && match[1]);
     if (!parsed.ok) {
       return send(
@@ -350,7 +405,7 @@ Use /help to open the Command Menu.
   });
 
   bot.onText(/^\/endmission(?:@\w+)?(?:\s+(\d+))?$/, async (msg, match) => {
-    if (!(await adminAllowed(msg))) return denyAdmin(msg);
+    if (!(await permissionAllowed(msg, "mission.end"))) return denyAdmin(msg);
     const missionId = parsePositiveId(match && match[1]);
     if (!missionId) return send(msg.chat.id, "❌ Use: /endmission mission_id");
     try {
@@ -365,7 +420,7 @@ Use /help to open the Command Menu.
   });
 
   bot.onText(/^\/approve(?:@\w+)?(?:\s+(\d+))?$/, async (msg, match) => {
-    if (!(await adminAllowed(msg))) return denyAdmin(msg);
+    if (!(await permissionAllowed(msg, "submission.approve"))) return denyAdmin(msg);
     const submissionId = parsePositiveId(match && match[1]);
     if (!submissionId) return send(msg.chat.id, "❌ Use: /approve submission_id");
     try {
@@ -393,7 +448,7 @@ Use /help to open the Command Menu.
   });
 
   bot.onText(/^\/reject(?:@\w+)?(?:\s+(\d+)\s+([\s\S]+))?$/, async (msg, match) => {
-    if (!(await adminAllowed(msg))) return denyAdmin(msg);
+    if (!(await permissionAllowed(msg, "submission.reject"))) return denyAdmin(msg);
     const submissionId = parsePositiveId(match && match[1]);
     const reason = match && match[2] ? match[2].trim() : "";
     if (!submissionId || !reason) return send(msg.chat.id, "❌ Use: /reject submission_id reason");
@@ -421,7 +476,7 @@ Use /help to open the Command Menu.
   });
 
   bot.onText(/^\/broadcast(?:@\w+)?(?:\s+([\s\S]+))?$/, async (msg, match) => {
-    if (!(await adminAllowed(msg))) return denyAdmin(msg);
+    if (!(await permissionAllowed(msg, "communication.broadcast"))) return denyAdmin(msg);
     const message = match && match[1] ? match[1].trim() : "";
     if (!message) return send(msg.chat.id, "❌ Use: /broadcast Your message here");
     if (message.length > 4096) return send(msg.chat.id, "❌ Broadcasts must be 4096 characters or fewer.");
@@ -437,13 +492,13 @@ Use /help to open the Command Menu.
   });
 
   bot.onText(/^\/cancelbroadcast(?:@\w+)?$/, async (msg) => {
-    if (!(await adminAllowed(msg))) return denyAdmin(msg);
+    if (!(await permissionAllowed(msg, "communication.broadcast"))) return denyAdmin(msg);
     pendingBroadcasts.delete(msg.from.id);
     return send(msg.chat.id, "✅ Broadcast cancelled.");
   });
 
   bot.onText(/^\/confirmbroadcast(?:@\w+)?$/, async (msg) => {
-    if (!(await adminAllowed(msg))) return denyAdmin(msg);
+    if (!(await permissionAllowed(msg, "communication.broadcast"))) return denyAdmin(msg);
     const draft = pendingBroadcasts.get(msg.from.id);
     if (!draft || Date.now() - draft.createdAt > 10 * 60 * 1000) {
       pendingBroadcasts.delete(msg.from.id);
