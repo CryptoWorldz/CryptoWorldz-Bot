@@ -179,9 +179,36 @@ function createRepository(supabase) {
   }
 
   async function listPending(limit = 20) {
-    const { data, error } = await supabase.from("mission_submissions").select("*,missions(title),users(username,first_name)").eq("status", "pending").order("submitted_at", { ascending: false }).limit(limit);
+    const { data, error } = await supabase
+      .from("mission_submissions")
+      .select("*")
+      .eq("status", "pending")
+      .order("submitted_at", { ascending: false })
+      .limit(limit);
     if (error) throw error;
-    return data || [];
+    const submissions = data || [];
+    if (submissions.length === 0) return [];
+
+    const missionIds = [...new Set(submissions.map((row) => row.mission_id).filter((id) => id != null))];
+    const telegramIds = [...new Set(submissions.map((row) => row.telegram_id).filter((id) => id != null))];
+    const [missionsResult, usersResult] = await Promise.all([
+      missionIds.length
+        ? supabase.from("missions").select("id,title").in("id", missionIds)
+        : Promise.resolve({ data: [], error: null }),
+      telegramIds.length
+        ? supabase.from("users").select("telegram_id,username,first_name").in("telegram_id", telegramIds)
+        : Promise.resolve({ data: [], error: null })
+    ]);
+    if (missionsResult.error) throw missionsResult.error;
+    if (usersResult.error) throw usersResult.error;
+
+    const missionsById = new Map((missionsResult.data || []).map((mission) => [String(mission.id), mission]));
+    const usersByTelegramId = new Map((usersResult.data || []).map((user) => [String(user.telegram_id), user]));
+    return submissions.map((submission) => ({
+      ...submission,
+      missions: missionsById.get(String(submission.mission_id)) || null,
+      users: usersByTelegramId.get(String(submission.telegram_id)) || null
+    }));
   }
 
   async function getRewards(telegramId, limit = 10) {

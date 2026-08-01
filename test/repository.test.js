@@ -83,3 +83,69 @@ test("repository maps the transactional points RPC total", async () => {
   });
   assert.equal(result.new_points, 90);
 });
+
+test("repository loads pending submission details without an embedded users relationship", async () => {
+  const submissions = [
+    { id: 16, mission_id: 8, telegram_id: 7615025841, status: "pending", submitted_at: "2026-08-01T08:07:00Z" }
+  ];
+  const calls = [];
+  const supabase = {
+    from(table) {
+      calls.push(table);
+      if (table === "mission_submissions") {
+        return {
+          select(columns) {
+            assert.equal(columns, "*");
+            return {
+              eq(column, value) {
+                assert.deepEqual([column, value], ["status", "pending"]);
+                return {
+                  order(column, options) {
+                    assert.deepEqual([column, options], ["submitted_at", { ascending: false }]);
+                    return {
+                      async limit(value) {
+                        assert.equal(value, 20);
+                        return { data: submissions, error: null };
+                      }
+                    };
+                  }
+                };
+              }
+            };
+          }
+        };
+      }
+      if (table === "missions") {
+        return {
+          select(columns) {
+            assert.equal(columns, "id,title");
+            return {
+              async in(column, values) {
+                assert.deepEqual([column, values], ["id", [8]]);
+                return { data: [{ id: 8, title: "CryptoWorldz X Raaiiidd" }], error: null };
+              }
+            };
+          }
+        };
+      }
+      assert.equal(table, "users");
+      return {
+        select(columns) {
+          assert.equal(columns, "telegram_id,username,first_name");
+          return {
+            async in(column, values) {
+              assert.deepEqual([column, values], ["telegram_id", [7615025841]]);
+              return { data: [{ telegram_id: 7615025841, username: "stepper", first_name: "Stepper" }], error: null };
+            }
+          };
+        }
+      };
+    }
+  };
+
+  const repository = createRepository(supabase);
+  const result = await repository.listPending();
+  assert.deepEqual(calls, ["mission_submissions", "missions", "users"]);
+  assert.equal(result[0].missions.title, "CryptoWorldz X Raaiiidd");
+  assert.equal(result[0].users.first_name, "Stepper");
+});
