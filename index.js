@@ -60,14 +60,12 @@ async function start() {
   return { app, bot, config, repository, server };
 }
 
-if (require.main === module) {
-  start().catch((error) => {
-    console.error("Zed Bot startup failed", {
-      name: error && error.name ? error.name : "Error",
-      message: error && error.message ? error.message : "Unknown startup error"
-    });
-    process.exit(1);
+start().catch((error) => {
+  console.error("Zed Bot startup failed", {
+    name: error && error.name ? error.name : "Error",
+    message: error && error.message ? error.message : "Unknown startup error"
   });
-}
+  process.exit(1);
+});
 
 module.exports = { start };
