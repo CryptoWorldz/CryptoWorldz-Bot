@@ -343,6 +343,28 @@ function createRepository(supabase) {
     return data || [];
   }
 
+  async function getMissionHistory(telegramId, limit = 25) {
+    const { data, error } = await supabase
+      .from("mission_submissions")
+      .select("id,mission_id,status,points_awarded,submitted_at,reviewed_at,rejection_reason")
+      .eq("telegram_id", telegramId)
+      .order("submitted_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function listGovernanceProposals(limit = 20) {
+    const { data, error } = await supabase
+      .from("governance_proposals")
+      .select("id,title,description,options,status,starts_at,ends_at,created_at")
+      .in("status", ["active", "open", "completed"])
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data || [];
+  }
+
   async function listRegisteredTelegramIds() {
     const ids = [];
     const pageSize = 1000;
@@ -377,6 +399,7 @@ function createRepository(supabase) {
     endMission,
     getCurrentMission,
     getLeaderboard,
+    getMissionHistory,
     getMemberDetails,
     getProfile,
     getSubmission,
@@ -387,6 +410,7 @@ function createRepository(supabase) {
     listActiveMissions,
     listActivity,
     listAdmins,
+    listGovernanceProposals,
     listPending,
     listRegisteredTelegramIds,
     recordHistory,

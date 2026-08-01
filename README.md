@@ -103,7 +103,27 @@ Tests use Node's built-in test runner and mocked repositories. They do not call 
 
 Run `npm ci` then `npm start`. `index.js` calls `app.listen()` immediately without a `require.main` guard. Keep the HTTPS Telegram webhook at `https://cryptobotz.cryptoworldz.xyz/telegram-webhook`. Startup registers BotFather commands automatically.
 
-Do not enable the Mini App menu until the mobile interface and server-side Telegram `initData` validation are deployed and tested. Future protected routes must derive identity from signed `initData`, rate-limit requests and never expose the Supabase service-role key.
+## Telegram Mini App
+
+Zed 3.0 includes the mobile-first CryptoWorldz Command Centre at:
+
+```text
+https://cryptobotz.cryptoworldz.xyz/miniapp/
+```
+
+The first secure release provides Home, Active Raaiiidds, Legend Profile, Leaderboard, Rewards, Wallet status, Community, Governance foundation and an Admin Centre pending-submissions view. Approval and rejection remain in Telegram while the dashboard controls complete live testing.
+
+Every protected request validates Telegram `initData` server-side using the bot-token HMAC signature, rejects expired data, derives the Telegram ID only from the verified payload and applies rate limits. The browser never receives the Supabase service-role key.
+
+After deployment and testing, configure BotFather:
+
+1. Open `/mybots` and select `@CryptoWorldzBot`.
+2. Choose **Bot Settings → Configure Mini App → Enable Mini App**.
+3. Set the URL to `https://cryptobotz.cryptoworldz.xyz/miniapp/`.
+4. Add the launch name **CryptoWorldz Command Centre**.
+5. Upload approved screenshots only after testing inside Telegram.
+
+Do not activate the BotFather menu before the HTTPS page and signed Telegram launch have both been tested.
 
 Rollback: redeploy the previous known-good Git commit. Do not delete production records or reverse additive migrations without a verified backup and an exact recovery plan.
 

@@ -17,7 +17,7 @@ async function start() {
   const repository = createRepository(supabase);
 
   registerTelegramHandlers({ bot, repository, config });
-  const app = createHttpApp({ bot, config });
+  const app = createHttpApp({ bot, config, repository });
 
   for (const warning of configWarnings(config)) console.warn(warning);
 
