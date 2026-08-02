@@ -6,7 +6,8 @@
   <meta name="theme-color" content="#09040f">
   <title>CryptoWorldz Command Centre</title>
   <script src="https://telegram.org/js/telegram-web-app.js?63"></script>
-  <link rel="stylesheet" href="/miniapp/styles.css?v=3.0.3">
+  <link rel="stylesheet" href="/miniapp/styles.css?v=3.0.4">
+  <link rel="stylesheet" href="/miniapp/impact.css?v=1.0.0">
   <style>
     .kitty-card{overflow:hidden}
     .kitty-address{display:flex;flex-direction:column;gap:7px;margin:16px 0 4px;padding:13px 15px;background:rgba(21,9,35,.8);border:1px solid var(--line);border-radius:14px;min-width:0}
@@ -47,7 +48,7 @@
         <article><span>📥</span><strong id="pending">0</strong><small>Pending</small></article>
       </section>
 
-      <section id="home" class="screen active"><div id="current-mission"></div><div id="home-rewards"></div></section>
+      <section id="home" class="screen active"><div id="home-impact"></div><div id="current-mission"></div><div id="home-rewards"></div></section>
       <section id="missions" class="screen"><div class="section-title"><h2>🚀 Active Raaiiidds</h2></div><div id="mission-list"></div></section>
       <section id="profile" class="screen"><div class="section-title"><h2>🏆 Legend Profile</h2></div><div id="profile-card"></div></section>
       <section id="leaderboard" class="screen"><div class="section-title"><h2>🏅 Top Legends</h2></div><div id="leaderboard-list"></div></section>
@@ -55,6 +56,7 @@
       <section id="community" class="screen"><div class="section-title"><h2>🌍 Community</h2></div><div id="community-links"></div><div class="panel security"><b>Wallet Security</b><p>⚠️ Zed will never ask for your seed phrase or private key.</p></div></section>
       <section id="kitty" class="screen"><div class="section-title"><h2>💜 Community Kitty</h2></div><div id="kitty-list"></div></section>
       <section id="governance" class="screen"><div class="section-title"><h2>🗳️ Governance</h2></div><div id="governance-list"></div></section>
+      <section id="impact" class="screen"><div class="section-title"><h2>💜 Real-World Impact</h2></div><div id="impact-list"></div></section>
       <section id="admin" class="screen"><div class="section-title"><h2>🛡️ Admin Centre</h2></div><div id="admin-panel"></div></section>
     </div>
   </main>
@@ -66,6 +68,6 @@
     <button data-screen="profile"><span>👤</span>Profile</button>
     <button data-screen="community"><span>🌍</span>More</button>
   </nav>
-  <script src="/miniapp/app.js?v=3.0.3" defer></script>
+  <script src="/miniapp/app.js?v=3.0.4" defer></script>
 </body>
 </html>

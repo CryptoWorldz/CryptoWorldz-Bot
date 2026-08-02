@@ -34,6 +34,8 @@ const PUBLIC_COMMANDS = [
   { command: "kitty", description: "View the community SOL/USDC kitty" },
   { command: "governance", description: "View active community votes" },
   { command: "vote", description: "Vote on a governance proposal" },
+  { command: "impact", description: "Open the featured impact mission" },
+  { command: "donate", description: "Support Reagan's GoFundMe" },
   { command: "cancel", description: "Cancel wallet registration" },
   { command: "community", description: "Open CryptoWorldz community links" },
   { command: "website", description: "Open CryptoWorldz.xyz" }
@@ -247,6 +249,15 @@ Use /help to open the Command Menu.
 
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(msg.chat.id, formatCommunity(config)));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, formatWebsite(config)));
+  bot.onText(/^\/(?:impact|donate)(?:@\w+)?$/, (msg) => bot.sendMessage(
+    msg.chat.id,
+    "💜 Featured CryptoWorldz Impact Mission\n\nHelp Reagan Feed 60 Orphaned Children in Uganda\n\nImmediate help is needed for food, medical care, rent, hygiene, education and safer mattresses.\n\nDonations are completed securely on GoFundMe. Zed never asks for payment details and does not award Legend Points based on donation amounts.",
+    { reply_markup: { inline_keyboard: [
+      [{ text: "💜 Donate on GoFundMe", url: "https://gofund.me/65129e58a" }],
+      [{ text: "📣 Share Campaign", url: "https://t.me/share/url?url=https%3A%2F%2Fgofund.me%2F65129e58a&text=Help%20Reagan%20Feed%2060%20Orphaned%20Children%20in%20Uganda" }],
+      [{ text: "Facebook", url: "https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr" }, { text: "TikTok", url: "https://www.tiktok.com/@actionspreadsmilesorg" }, { text: "YouTube", url: "https://youtube.com/@action_spread_smiles" }]
+    ] } }
+  ));
   bot.onText(/^\/kitty(?:@\w+)?$/, async (msg) => {
     try {
       const accounts = await repository.listTreasuryAccounts();
@@ -289,7 +300,7 @@ Use /help to open the Command Menu.
   bot.onText(/^\/help(?:@\w+)?$/, (msg) =>
     send(
       msg.chat.id,
-      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/governance\n/vote proposal_id option\n/cancel\n/community\n/website\n\n⚠️ Never provide a private key or seed phrase."
+      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/governance\n/vote proposal_id option\n/impact\n/donate\n/cancel\n/community\n/website\n\n⚠️ Never provide a private key or seed phrase."
     )
   );
 

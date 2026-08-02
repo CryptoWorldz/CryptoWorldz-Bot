@@ -8,7 +8,7 @@ Zed is the Telegram command centre for CryptoWorldz. The production service runs
 
 ## Public commands
 
-`/start`, `/help`, `/register`, `/profile`, `/points`, `/leaderboard [daily|weekly|monthly|all]`, `/raid`, `/raaiiidd`, `/missions`, `/rewards`, `/wallet`, `/cancel`, `/community`, `/website`.
+`/start`, `/help`, `/register`, `/profile`, `/points`, `/leaderboard [daily|weekly|monthly|all]`, `/raid`, `/raaiiidd`, `/missions`, `/rewards`, `/wallet`, `/impact`, `/donate`, `/cancel`, `/community`, `/website`.
 
 - `/start` — open Zed and register or refresh a Legend Profile.
 - `/register` — register a Legend Profile.
@@ -22,6 +22,7 @@ Zed is the Telegram command centre for CryptoWorldz. The production service runs
 - `/cancel` — cancel pending wallet registration.
 - `/community` — show configured CryptoWorldz community links.
 - `/website` — show the CryptoWorldz website or pre-launch message.
+- `/impact` or `/donate` — open the featured Reagan GoFundMe impact mission and social links.
 - `/help` — show the public command menu.
 
 ## Admin commands
@@ -124,6 +125,8 @@ https://cryptobotz.cryptoworldz.xyz/miniapp/
 ```
 
 The working release provides Home, Active Raaiiidds, Legend Profile, Leaderboard, Rewards, Wallet status, Community, Governance foundation, SOL/USDC Kitty payment tools and a full Admin Centre. Members can submit DONE with an optional HTTPS proof link. Authorized admins can create Raaiiidds and approve or reject submissions inside Telegram or the Mini App.
+
+The Real-World Impact screen features the GoFundMe campaign **Help Reagan Feed 60 Orphaned Children in Uganda**, with direct GoFundMe, sharing, Facebook, TikTok and YouTube links. Donations are completed outside Zed on GoFundMe; Zed never receives payment details and does not award Legend Points according to donation amount.
 
 Kitty contributions use Solana Pay links and QR codes. Claims are awarded only after Zed verifies a finalized on-chain transfer to the configured public Kitty address. Transaction signatures are single-use. Contribution Points remain disabled until the owner configures and enables an asset rule with Points per unit, a minimum amount and a maximum award. Zed never stores signing authority and never moves funds.
 
