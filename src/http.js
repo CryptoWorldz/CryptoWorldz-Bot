@@ -88,7 +88,7 @@ function createHttpApp({ bot, config, repository }) {
         repository.getLeaderboard(),
         repository.getRewards(telegramId, 10),
         repository.getMissionHistory(telegramId, 25),
-        repository.listGovernanceProposals(20),
+        repository.listGovernanceProposals(20, telegramId),
         repository.getAdminAccess(telegramId, config.adminTelegramIds, config.ownerTelegramId),
         repository.listTreasuryAccounts()
       ]);
@@ -174,6 +174,21 @@ function createHttpApp({ bot, config, repository }) {
       if (result.duplicate) return res.status(409).json({ ok: false, error: "duplicate_submission" });
       return res.status(201).json({ ok: true, submission: result.submission });
     } catch (error) { console.error("Mini App mission submission failed", { name: error && error.name || "Error" }); return res.status(500).json({ ok: false, error: "submission_failed" }); }
+  });
+
+  app.post("/api/mini/governance/:id/vote", authenticateMiniApp, async (req, res) => {
+    try {
+      const proposalId = Number(req.params.id);
+      const selectedOption = String(req.body && req.body.selected_option || "");
+      if (!Number.isSafeInteger(proposalId) || proposalId < 1 || !/^\d+$/.test(selectedOption)) return res.status(400).json({ ok: false, error: "invalid_vote" });
+      const result = await repository.castGovernanceVote(proposalId, req.telegramUser.id, selectedOption);
+      const status = { unregistered: 403, not_found: 404, closed: 409, invalid_option: 400, duplicate: 409 }[result.outcome];
+      if (status) return res.status(status).json({ ok: false, error: result.outcome === "duplicate" ? "already_voted" : result.outcome });
+      return res.status(201).json({ ok: true, result });
+    } catch (error) {
+      console.error("Governance vote failed", { name: error && error.name || "Error" });
+      return res.status(500).json({ ok: false, error: "vote_failed" });
+    }
   });
 
   app.get("/api/mini/kitty/qr", authenticateMiniApp, async (req, res) => {

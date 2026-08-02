@@ -13,6 +13,7 @@ const {
   isDoneClaim,
   isDuplicateError,
   isValidSolanaAddress,
+  normalizeGovernanceOption,
   parseBoolean,
   parseEditMissionPayload,
   parseIdSet,
@@ -50,6 +51,14 @@ test("admin roles receive least-privilege defaults", () => {
   assert.equal(permissionsForRole("partner_manager").has("mission.create"), true);
   assert.equal(permissionsForRole("treasury_manager").has("treasury.reconcile"), true);
   assert.equal(permissionsForRole("unknown").size, 0);
+});
+
+test("Governance choices accept only numbered proposal options", () => {
+  assert.equal(normalizeGovernanceOption("1", 3), "1");
+  assert.equal(normalizeGovernanceOption(3, 3), "3");
+  assert.equal(normalizeGovernanceOption("0", 3), null);
+  assert.equal(normalizeGovernanceOption("4", 3), null);
+  assert.equal(normalizeGovernanceOption("Shared", 3), null);
 });
 
 test("admin ID parsing rejects non-numeric entries", () => {

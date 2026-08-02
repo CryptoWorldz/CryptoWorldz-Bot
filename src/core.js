@@ -370,6 +370,12 @@ function createRateLimiter({ maxEvents, intervalMs, now = () => Date.now() }) {
   };
 }
 
+function normalizeGovernanceOption(value, optionCount) {
+  const option = Number(value);
+  if (!Number.isSafeInteger(option) || option < 1 || option > optionCount) return null;
+  return String(option);
+}
+
 module.exports = {
   ADMIN_PERMISSIONS,
   EDITABLE_MISSION_FIELDS,
@@ -387,6 +393,7 @@ module.exports = {
   isDuplicateError,
   isValidSolanaAddress,
   medalFor,
+  normalizeGovernanceOption,
   missionLink,
   parseBoolean,
   parseEditMissionPayload,

@@ -454,7 +454,7 @@ function createRepository(supabase) {
     return data || [];
   }
 
-  async function listGovernanceProposals(limit = 20) {
+  async function listGovernanceProposals(limit = 20, telegramId = null) {
     const { data, error } = await supabase
       .from("governance_proposals")
       .select("id,title,description,options,status,starts_at,ends_at,created_at")
@@ -462,7 +462,40 @@ function createRepository(supabase) {
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) throw error;
-    return data || [];
+    const proposals = data || [];
+    if (!proposals.length) return proposals;
+    const { data: votes, error: votesError } = await supabase
+      .from("governance_votes")
+      .select("proposal_id,telegram_id,selected_option,voting_power")
+      .in("proposal_id", proposals.map((proposal) => proposal.id));
+    if (votesError) throw votesError;
+    return proposals.map((proposal) => {
+      const proposalVotes = (votes || []).filter((vote) => String(vote.proposal_id) === String(proposal.id));
+      const voteCounts = {};
+      for (const vote of proposalVotes) voteCounts[vote.selected_option] = (voteCounts[vote.selected_option] || 0) + 1;
+      const selected = telegramId === null ? null : proposalVotes.find((vote) => String(vote.telegram_id) === String(telegramId));
+      return { ...proposal, vote_counts: voteCounts, total_votes: proposalVotes.length, selected_option: selected ? selected.selected_option : null };
+    });
+  }
+
+  async function castGovernanceVote(proposalId, telegramId, selectedOption) {
+    const user = await getUser(telegramId);
+    if (!user) return { outcome: "unregistered" };
+    const { data: proposal, error: proposalError } = await supabase
+      .from("governance_proposals")
+      .select("id,title,options,status,starts_at,ends_at")
+      .eq("id", proposalId)
+      .maybeSingle();
+    if (proposalError) throw proposalError;
+    if (!proposal) return { outcome: "not_found" };
+    const now = Date.now();
+    if (!["active", "open"].includes(proposal.status) || proposal.starts_at && Date.parse(proposal.starts_at) > now || proposal.ends_at && Date.parse(proposal.ends_at) <= now) return { outcome: "closed", proposal };
+    const options = Array.isArray(proposal.options) ? proposal.options : [];
+    if (!/^\d+$/.test(String(selectedOption)) || Number(selectedOption) < 1 || Number(selectedOption) > options.length) return { outcome: "invalid_option", proposal };
+    const { data: vote, error } = await supabase.from("governance_votes").insert({ proposal_id: proposal.id, telegram_id: telegramId, selected_option: String(selectedOption), voting_power: 1 }).select("id,proposal_id,telegram_id,selected_option,created_at").single();
+    if (isDuplicateError(error)) return { outcome: "duplicate", proposal };
+    if (error) throw error;
+    return { outcome: "recorded", proposal, vote, option: options[Number(selectedOption) - 1] };
   }
 
   async function listRegisteredTelegramIds() {
@@ -494,6 +527,7 @@ function createRepository(supabase) {
   return {
     adjustPoints,
     approveSubmission,
+    castGovernanceVote,
     createMission,
     editMission,
     endMission,
