@@ -6,6 +6,16 @@ Keep one Hostinger Business plan under `jayjayteamdev@outlook.com` with `cryptow
 
 `OneWorldz.com` remains the public ecosystem headquarters without needing a second Hostinger package.
 
+## Existing websites confirmed in hPanel
+
+- temporary Hostinger/Horizons site: `orange-cobra-109642.hostingersite.com`
+- Zed Node Web App: `cryptobotz.cryptoworldz.xyz`
+- existing WordPress site: `cryptoworldz.xyz`
+- existing website: `purplediamondcrew.com`
+- existing legacy website: `solworld.fun`
+
+Do not delete or overwrite any existing site until its files and content have been backed up.
+
 ## Static websites on the Business plan
 
 - `oneworldz.com`
@@ -14,6 +24,7 @@ Keep one Hostinger Business plan under `jayjayteamdev@outlook.com` with `cryptow
 - `learn.oneworldz.com`
 - `test.oneworldz.com`
 - `cryptoworldz.xyz`
+- `purplediamondcrew.com`
 - `solworldz.xyz`
 - `baseworldz.xyz`
 - `xrpworldz.xyz`
@@ -24,6 +35,16 @@ Keep one Hostinger Business plan under `jayjayteamdev@outlook.com` with `cryptow
 - `robinworldz.xyz`
 - `bitcoinworldz.xyz` or `bitworldz.xyz`
 - `hodlerworldz.xyz`
+
+## Purple Diamond Crew role
+
+`purplediamondcrew.com` becomes the public directory for existing ecosystem tokens that are already live. It will show only verified live-token records, with contract addresses, DEX charts, trading links, official links and project purpose.
+
+New token launches continue through ImpactBased / Based.bid and then appear on CryptoWorldz and the relevant blockchain World after verification.
+
+## SolWorld.fun role
+
+Keep `solworld.fun` active temporarily as a legacy site. After `solworldz.xyz` is live and verified, either redirect `solworld.fun` to `solworldz.xyz` or convert it into a clearly labelled archive. Do not cancel its domain before the redirect decision is complete.
 
 ## Separate Web App
 
@@ -37,15 +58,18 @@ Before launch, a chain site displays a contract-pending placeholder. After the o
 
 ## Activation order
 
-1. `test.oneworldz.com`
-2. `cryptoworldz.xyz`
-3. `oneworldz.com`
-4. `impact.oneworldz.com`
-5. `solworldz.xyz`
-6. Remaining blockchain World domains
-7. `law.oneworldz.com`
-8. `learn.oneworldz.com`
-9. `hodlerworldz.xyz`
+1. Back up `cryptoworldz.xyz`, `purplediamondcrew.com` and `solworld.fun`
+2. `test.oneworldz.com`
+3. `cryptoworldz.xyz`
+4. `oneworldz.com`
+5. `impact.oneworldz.com`
+6. `purplediamondcrew.com` live-token directory
+7. `solworldz.xyz`
+8. Remaining blockchain World domains
+9. `law.oneworldz.com`
+10. `learn.oneworldz.com`
+11. `hodlerworldz.xyz`
+12. Decide the final `solworld.fun` redirect/archive role
 
 ## Billing rule
 
