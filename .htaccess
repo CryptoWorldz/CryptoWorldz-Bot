@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Use HodlerGalaxy.xyz as the isolated HodlerWorldz production-suite test domain.
+RewriteCond %{HTTP_HOST} ^(www\.)?hodlergalaxy\.xyz$ [NC]
+RewriteCond %{QUERY_STRING} !(^|&)site= [NC]
+RewriteRule ^$ /?site=hodlerworldz [R=302,L]
+
+# Prevent directory listings on every Worldz deployment.
+Options -Indexes
