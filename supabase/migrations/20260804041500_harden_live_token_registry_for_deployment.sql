@@ -5,7 +5,7 @@ security invoker
 set search_path = public
 as $$
 begin
-  new.updated_at = now();
+  new.updated_at = clock_timestamp();
   return new;
 end;
 $$;
