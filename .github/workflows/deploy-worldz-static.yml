@@ -87,7 +87,9 @@ jobs:
             target="$(sed -n 's/^target=//p' deployments/worldz-static.request | tail -n1)"
             confirmation="$(sed -n 's/^confirmation=//p' deployments/worldz-static.request | tail -n1)"
             source_commit="$(sed -n 's/^source_commit=//p' deployments/worldz-static.request | tail -n1)"
-            test "$source_commit" = "$GITHUB_SHA"
+            approved_commit="$(git rev-parse HEAD^)"
+            test -n "$source_commit"
+            test "$source_commit" = "$approved_commit"
           fi
 
           case "$target" in
