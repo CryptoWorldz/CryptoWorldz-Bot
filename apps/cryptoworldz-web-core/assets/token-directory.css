@@ -1,0 +1,33 @@
+.token-logo {
+  overflow: hidden;
+}
+
+.token-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.token-purpose {
+  display: grid;
+  gap: 14px;
+  padding: 0 22px 22px;
+}
+
+.token-purpose p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.token-purpose .button {
+  min-height: 38px;
+  padding: 7px 12px;
+  font-size: .78rem;
+}
+
+@media (max-width: 720px) {
+  .token-purpose {
+    padding: 0 16px 18px;
+  }
+}
