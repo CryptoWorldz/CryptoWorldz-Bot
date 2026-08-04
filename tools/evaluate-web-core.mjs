@@ -17,7 +17,8 @@ const requiredFiles = [
   'assets/pdc-directory.js',
   'assets/pdc-site.js',
   'assets/pdc-site.css',
-  'assets/pdc-hope-chest-bg.jpg',
+  'assets/pdc-asset.js',
+  'assets/pdc-asset.css',
   'assets/styles.css',
   'assets/token-directory.css',
   'config/worlds.js',
@@ -35,16 +36,17 @@ const appSource = read('assets/app.js');
 const pdcDirectorySource = read('assets/pdc-directory.js');
 const pdcSiteSource = read('assets/pdc-site.js');
 const pdcStyleSource = read('assets/pdc-site.css');
+const pdcAssetSource = read('assets/pdc-asset.js');
+const pdcAssetStyleSource = read('assets/pdc-asset.css');
 const configSource = read('config/worlds.js');
 const fallbackSource = read('404.html');
 const headerSource = read('_headers');
 const hostingerSource = read('.htaccess');
-const hopeChestPath = path.join(webRoot, 'assets', 'pdc-hope-chest-bg.jpg');
 
 assert.doesNotThrow(() => new Function(appSource), 'assets/app.js contains invalid JavaScript');
 assert.doesNotThrow(() => new Function(pdcDirectorySource), 'assets/pdc-directory.js contains invalid JavaScript');
 assert.doesNotThrow(() => new Function(pdcSiteSource), 'assets/pdc-site.js contains invalid JavaScript');
-assert.ok(fs.statSync(hopeChestPath).size > 10000, 'Hope Chest production background is missing or unexpectedly small');
+assert.doesNotThrow(() => new Function(pdcAssetSource), 'assets/pdc-asset.js contains invalid JavaScript');
 
 const context = { window: {} };
 vm.createContext(context);
@@ -104,16 +106,24 @@ assert.match(pdcSiteSource, /verified_at=not\.is\.null/, 'PDC Hope Chest must re
 assert.match(pdcSiteSource, /if \(safeUrl\(token\.trade_url\)\) return \['Invest'/, 'Invest must require a verified trade URL');
 assert.match(pdcSiteSource, /not a guarantee of liquidity, price, recovery or investment return/, 'PDC revival disclosure is missing');
 assert.match(pdcStyleSource, /repeat\(5, minmax\(0, 1fr\)\)/, 'Desktop Hope Chest must use two rows of five for ten tokens');
-assert.match(pdcStyleSource, /pdc-hope-chest-bg\.jpg/, 'Hope Chest background is not wired into the page');
 assert.match(pdcStyleSource, /background: rgba\(12, 7, 19, \.7\)/, 'Legacy cards must remain translucent over the treasured image');
+
+assert.match(pdcAssetSource, /rest\/v1\/site_assets/, 'Hope Chest asset must be loaded from the protected public asset registry');
+assert.match(pdcAssetSource, /slug=eq\.pdc-hope-chest/, 'Hope Chest asset slug is missing');
+assert.match(pdcAssetSource, /startsWith\('data:image\/jpeg;base64,'\)/, 'Hope Chest image data must be validated before use');
+assert.match(pdcAssetSource, /data\.hopeChestAsset = 'verified'/, 'Hope Chest asset verification state is missing');
+assert.match(pdcAssetStyleSource, /hope-chest-page/, 'Hope Chest fallback styling is missing');
+assert.ok(!pdcStyleSource.includes('pdc-hope-chest-bg.jpg'), 'Obsolete static Hope Chest image reference remains');
 
 assert.match(indexSource, /assets\/styles\.css/, 'Base stylesheet is not loaded');
 assert.match(indexSource, /assets\/token-directory\.css/, 'Token directory stylesheet is not loaded');
 assert.match(indexSource, /assets\/pdc-site\.css/, 'PDC website stylesheet is not loaded');
+assert.match(indexSource, /assets\/pdc-asset\.css/, 'PDC Hope Chest asset stylesheet is not loaded');
 assert.match(indexSource, /config\/worlds\.js/, 'Domain configuration is not loaded');
 assert.match(indexSource, /hostname === 'purplediamondcrew\.com'/, 'PDC hostname routing is missing');
 assert.match(indexSource, /\? '\.\/assets\/pdc-site\.js'/, 'PurpleDiamondCrew.com must route to the complete PDC website');
 assert.match(indexSource, /assets\/pdc-directory\.js/, 'Standalone directory mode must remain available');
+assert.match(indexSource, /assets\/pdc-asset\.js/, 'Verified Hope Chest asset loader is not loaded');
 assert.match(indexSource, /assets\/app\.js/, 'Main application script is not routed');
 assert.match(fallbackSource, /location\.replace\('\/'\)/, '404 fallback must return visitors to the app root');
 assert.match(headerSource, /connect-src[^\n]*supabase\.co/, 'Portable CSP must permit the Supabase registry');
@@ -129,6 +139,8 @@ const combinedPublicSource = [
   pdcDirectorySource,
   pdcSiteSource,
   pdcStyleSource,
+  pdcAssetSource,
+  pdcAssetStyleSource,
   configSource,
   headerSource,
   hostingerSource
