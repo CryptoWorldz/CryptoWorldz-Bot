@@ -7,7 +7,9 @@
     "start": "node index.js",
     "test": "node --test",
     "check": "node --check index.js && node --check db.js && find src test public -type f -name '*.js' -exec node --check {} +",
-    "verify": "npm run check && npm test"
+    "check:web": "node --check apps/cryptoworldz-web-core/assets/app.js && node tools/evaluate-web-core.mjs",
+    "verify:web": "npm run check:web",
+    "verify": "npm run check && npm test && npm run check:web"
   },
   "engines": {
     "node": ">=20 <25"
