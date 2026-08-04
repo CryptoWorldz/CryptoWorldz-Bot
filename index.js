@@ -3,6 +3,8 @@ require("dotenv").config();
 const telegramLibrary = require("node-telegram-bot-api");
 const TelegramBot = telegramLibrary.TelegramBot || telegramLibrary.default || telegramLibrary;
 const { createClient } = require("@supabase/supabase-js");
+const { createAutoClient } = require("./src/auto/client");
+const { registerAutoTelegramHandlers } = require("./src/auto/telegram");
 const { configWarnings, loadConfig } = require("./src/config");
 const { createHttpApp } = require("./src/http");
 const { createRepository } = require("./src/repository");
@@ -15,8 +17,10 @@ async function start() {
   });
   const bot = new TelegramBot(config.botToken);
   const repository = createRepository(supabase);
+  const autoClient = createAutoClient(config);
 
   registerTelegramHandlers({ bot, repository, config });
+  registerAutoTelegramHandlers({ bot, config, autoClient });
   const app = createHttpApp({ bot, config, repository });
 
   for (const warning of configWarnings(config)) console.warn(warning);
@@ -57,7 +61,7 @@ async function start() {
   process.once("SIGTERM", () => shutdown("SIGTERM"));
   process.once("SIGINT", () => shutdown("SIGINT"));
 
-  return { app, bot, config, repository, server };
+  return { app, autoClient, bot, config, repository, server };
 }
 
 start().catch((error) => {
