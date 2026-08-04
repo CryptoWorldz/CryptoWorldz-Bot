@@ -14,6 +14,7 @@ const requiredFiles = [
   '.htaccess',
   '_headers',
   'assets/app.js',
+  'assets/pdc-directory.js',
   'assets/styles.css',
   'assets/token-directory.css',
   'config/worlds.js',
@@ -28,12 +29,14 @@ for (const relativePath of requiredFiles) {
 
 const indexSource = read('index.html');
 const appSource = read('assets/app.js');
+const pdcSource = read('assets/pdc-directory.js');
 const configSource = read('config/worlds.js');
 const fallbackSource = read('404.html');
 const headerSource = read('_headers');
 const hostingerSource = read('.htaccess');
 
 assert.doesNotThrow(() => new Function(appSource), 'assets/app.js contains invalid JavaScript');
+assert.doesNotThrow(() => new Function(pdcSource), 'assets/pdc-directory.js contains invalid JavaScript');
 
 const context = { window: {} };
 vm.createContext(context);
@@ -74,17 +77,23 @@ for (const [domain, route] of Object.entries(config.domains)) {
   assert.ok(supportedModes.has(route.mode), `${domain} uses unsupported mode ${route.mode}`);
 }
 
-assert.match(appSource, /launch_status === 'live'/, 'Live-token directory must require live status');
-assert.match(appSource, /Boolean\(token\.contract_address\)/, 'Live-token directory must require a contract address');
-assert.match(appSource, /Boolean\(token\.verified_at\)/, 'Live-token directory must require verification');
 assert.match(appSource, /https:\/\/purplediamondcrew\.com/, 'CryptoWorldz must link to Purple Diamond Crew');
 assert.match(appSource, /metadata\.x_url/, 'Token social metadata support is missing');
 assert.match(appSource, /feeSplitLabel/, 'Token fee split rendering is missing');
 
+assert.match(pdcSource, /slug=eq\.purple-diamond-crew/, 'PDC directory must select the verified project record');
+assert.match(pdcSource, /launch_status=in\.\(live,paused,archived\)/, 'PDC directory must include verified current and historical statuses');
+assert.match(pdcSource, /token\.contract_address && token\.verified_at/, 'PDC directory must require contract and verification data');
+assert.match(pdcSource, /https:\/\/x\.com\/PDCrew/, 'PDC directory must use the canonical X page');
+assert.match(pdcSource, /https:\/\/t\.me\/PurpleDiamondCrew/, 'PDC directory must use the canonical Telegram group');
+assert.match(pdcSource, /does not imply current liquidity or tradability/, 'PDC historical records must include a market-status warning');
+
 assert.match(indexSource, /assets\/styles\.css/, 'Base stylesheet is not loaded');
 assert.match(indexSource, /assets\/token-directory\.css/, 'Token directory stylesheet is not loaded');
 assert.match(indexSource, /config\/worlds\.js/, 'Domain configuration is not loaded');
-assert.match(indexSource, /assets\/app\.js/, 'Application script is not loaded');
+assert.match(indexSource, /assets\/pdc-directory\.js/, 'PDC directory application is not routed');
+assert.match(indexSource, /hostname === 'purplediamondcrew\.com'/, 'PDC hostname routing is missing');
+assert.match(indexSource, /assets\/app\.js/, 'Main application script is not routed');
 assert.match(fallbackSource, /location\.replace\('\/'\)/, '404 fallback must return visitors to the app root');
 assert.match(headerSource, /connect-src[^\n]*supabase\.co/, 'Portable CSP must permit the Supabase registry');
 assert.match(headerSource, /frame-src[^\n]*dexscreener\.com/, 'Portable CSP must permit DEX Screener charts');
@@ -93,7 +102,7 @@ assert.match(hostingerSource, /Content-Security-Policy/, 'Hostinger security hea
 assert.match(hostingerSource, /supabase\.co/, 'Hostinger CSP must permit the Supabase registry');
 assert.match(hostingerSource, /dexscreener\.com/, 'Hostinger CSP must permit DEX Screener charts');
 
-const combinedPublicSource = [indexSource, appSource, configSource, headerSource, hostingerSource].join('\n');
+const combinedPublicSource = [indexSource, appSource, pdcSource, configSource, headerSource, hostingerSource].join('\n');
 for (const forbidden of ['service_role', 'SUPABASE_SERVICE_ROLE', 'sb_secret_']) {
   assert.ok(!combinedPublicSource.includes(forbidden), `Public web files contain forbidden secret marker: ${forbidden}`);
 }
