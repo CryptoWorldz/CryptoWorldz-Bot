@@ -72,7 +72,7 @@ Tracked migrations:
 - `supabase/migrations/20260804041500_harden_live_token_registry_for_deployment.sql`
 - `supabase/migrations/20260804043000_fix_registry_updated_at_clock.sql`
 
-## Security evaluation
+## Security and Hostinger evaluation
 
 - Only the Supabase publishable key is present in frontend files.
 - No service-role key or secret key is present.
@@ -81,12 +81,15 @@ Tracked migrations:
 - Content Security Policy permits only the required Supabase and DEX Screener connections.
 - No wallet private keys or recovery phrases are requested or stored.
 - The live Zed Node.js deployment remains separate and is not overwritten by the static website package.
+- Hostinger `.htaccess` routing sends unknown paths to `index.html`.
+- Hostinger `.htaccess` applies security headers, compression and static-asset caching.
+- The portable `_headers` file remains available for compatible static hosts.
 
 Supabase security and performance advisors were run after the schema changes. The registry tables produced no new security errors. Existing informational notices concern other private Zed tables with RLS and no public policies, plus indexes that have not yet recorded usage.
 
 ## Automated evaluation
 
-The repeatable evaluator checks required files, JavaScript syntax, domain routing, supported website modes, live-token verification gates, cross-site links, CSP requirements and secret-key markers.
+The repeatable evaluator checks required files, JavaScript syntax, domain routing, supported website modes, live-token verification gates, cross-site links, Hostinger routing, CSP requirements and secret-key markers.
 
 Command:
 
@@ -97,7 +100,7 @@ npm run verify:web
 Evaluation result:
 
 ```text
-CryptoWorldz web-core evaluation passed: 33 domain routes, 10 required files.
+CryptoWorldz web-core evaluation passed: 33 domain routes, 11 required files.
 ```
 
 The GitHub Actions workflow is configured to run the evaluation and create:
@@ -105,7 +108,7 @@ The GitHub Actions workflow is configured to run the evaluation and create:
 - `cryptoworldz-web-core-deploy.zip`
 - `cryptoworldz-web-core-deploy.sha256`
 
-The deployment ZIP contains the exact static package for Hostinger.
+The deployment ZIP contains the exact static package for Hostinger, including `.htaccess`.
 
 ## Remaining input
 
