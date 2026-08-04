@@ -1,29 +1,35 @@
 function createAutoClient(config) {
   const baseUrl = String(config.autoServiceUrl || "").replace(/\/$/, "");
-  const token = String(config.autoInternalToken || "");
+  const authToken = String(config.autoAuthToken || config.autoInternalToken || "");
   const ownerId = String(config.ownerTelegramId || "");
 
   function configured() {
-    return Boolean(baseUrl && token && ownerId);
+    return Boolean(baseUrl && authToken && ownerId);
   }
 
-  async function request(path, options = {}) {
+  async function request(path = "", options = {}) {
     if (!configured()) {
       const error = new Error("Auto service is not configured.");
       error.code = "AUTO_NOT_CONFIGURED";
       throw error;
     }
+
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
+    const method = options.method || "GET";
+    const body = options.body === undefined
+      ? undefined
+      : { ...options.body, telegram_id: Number(ownerId) };
+
     try {
       const response = await fetch(`${baseUrl}${path}`, {
-        method: options.method || "GET",
+        method,
         headers: {
           "content-type": "application/json",
-          "x-auto-internal-token": token,
+          authorization: `Bearer ${authToken}`,
           "x-owner-telegram-id": ownerId
         },
-        body: options.body === undefined ? undefined : JSON.stringify(options.body),
+        body: body === undefined ? undefined : JSON.stringify(body),
         signal: controller.signal
       });
       const payload = await response.json().catch(() => ({}));
@@ -41,11 +47,11 @@ function createAutoClient(config) {
 
   return {
     configured,
-    emergencyStop: () => request("/internal/emergency-stop", { method: "POST", body: {} }),
-    pause: () => request("/internal/pause", { method: "POST", body: {} }),
-    resumeSimulation: () => request("/internal/resume-simulation", { method: "POST", body: {} }),
-    simulate: (body) => request("/internal/simulate", { method: "POST", body }),
-    status: () => request("/internal/status")
+    emergencyStop: () => request("/emergency-stop", { method: "POST", body: {} }),
+    pause: () => request("/pause", { method: "POST", body: {} }),
+    resumeSimulation: () => request("/resume", { method: "POST", body: {} }),
+    simulate: (body) => request("/simulate", { method: "POST", body }),
+    status: () => request("")
   };
 }
 
