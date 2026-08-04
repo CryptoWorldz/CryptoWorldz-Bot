@@ -1,0 +1,10 @@
+/* Mobile viewport containment: prevents the rotated outer orbit from widening the page. */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.hero-art {
+  max-width: 100%;
+  overflow: hidden;
+}
