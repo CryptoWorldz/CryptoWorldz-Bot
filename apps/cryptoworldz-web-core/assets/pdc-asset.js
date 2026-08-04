@@ -41,7 +41,8 @@
       'aria-label',
       hopeChestAsset.alt_text || 'OneWorldz Hope Chest preserving treasured legacy tokens'
     );
-    section.dataset.hopeChestAsset = 'verified';
+    const data = section.dataset;
+    data.hopeChestAsset = 'verified';
     return true;
   }
 
