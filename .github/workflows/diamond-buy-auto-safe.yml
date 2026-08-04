@@ -1,0 +1,105 @@
+name: Diamond Buy Auto Safe Checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'auto-server.js'
+      - 'src/auto/**'
+      - 'test/auto-core.test.js'
+      - 'supabase/migrations/*diamond_buy_auto*'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/diamond-buy-auto-safe.yml'
+  pull_request:
+    paths:
+      - 'auto-server.js'
+      - 'src/auto/**'
+      - 'test/auto-core.test.js'
+      - 'supabase/migrations/*diamond_buy_auto*'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/diamond-buy-auto-safe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diamond-buy-auto-safe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-safe-locked:
+    name: Verify Auto SAFE LOCKED package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify Zed and Auto source
+        run: npm run verify
+
+      - name: Verify Auto safety tests separately
+        run: npm run verify:auto
+
+      - name: Confirm execution code is structurally absent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f auto-server.js
+          test -f src/auto/core.js
+          test -f supabase/migrations/20260805080000_diamond_buy_auto_safe_locked.sql
+          grep -Fq 'AUTO_EXECUTION_ENABLED must remain false' src/auto/config.js
+          grep -Fq 'Wallet signing secrets are forbidden' src/auto/config.js
+          grep -Fq 'execution_enabled boolean not null default false check (execution_enabled = false)' supabase/migrations/20260805080000_diamond_buy_auto_safe_locked.sql
+          grep -Fq 'transaction_signature text check (transaction_signature is null)' supabase/migrations/20260805080000_diamond_buy_auto_safe_locked.sql
+
+          if grep -RInE 'sendRawTransaction|sendTransaction|signTransaction|Keypair\.fromSecretKey|fromSeed|privateKeyToAccount|wallet\.sendTransaction' auto-server.js src/auto; then
+            echo 'Auto SAFE LOCKED source contains a forbidden signing or transaction-submission primitive.' >&2
+            exit 1
+          fi
+
+      - name: Prevent committed secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -E '(^|/)\.env($|\.)'; then
+            echo 'A real environment file is committed.' >&2
+            exit 1
+          fi
+          if git grep -nEi '(seed phrase|private key|service_role_key)\s*[:=]\s*[^[:space:]]+' -- ':!*.md' ':!.env.example'; then
+            echo 'A possible secret value is committed.' >&2
+            exit 1
+          fi
+
+      - name: Package separate Auto service
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p auto-safe-package/src
+          cp auto-server.js package.json package-lock.json .env.example auto-safe-package/
+          cp -R src/auto auto-safe-package/src/
+          cp supabase/migrations/20260805080000_diamond_buy_auto_safe_locked.sql auto-safe-package/
+          zip -qr diamond-buy-auto-safe-locked.zip auto-safe-package
+          sha256sum diamond-buy-auto-safe-locked.zip > diamond-buy-auto-safe-locked.sha256
+
+      - name: Upload reviewed SAFE LOCKED package
+        uses: actions/upload-artifact@v4
+        with:
+          name: diamond-buy-auto-safe-locked
+          path: |
+            diamond-buy-auto-safe-locked.zip
+            diamond-buy-auto-safe-locked.sha256
+          if-no-files-found: error
+          retention-days: 30
