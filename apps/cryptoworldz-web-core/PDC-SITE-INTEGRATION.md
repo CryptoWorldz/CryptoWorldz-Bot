@@ -66,3 +66,16 @@ The Hope Chest records the intended gradual revival direction without promising 
 ## Deployment position
 
 The integration is committed to the shared web-core package and included in automatic evaluation and Hostinger artifact packaging. It has not been represented as publicly deployed until the final Hostinger deployment and domain verification are completed.
+
+## Deployment approval
+
+Approved by JayJayTeamDev on 5 August 2026, Australia/Sydney.
+
+Approved scope:
+
+- Run the complete automated website evaluation.
+- Generate a fresh Hostinger deployment archive.
+- Preserve the existing live PurpleDiamondCrew.com site until the replacement package passes validation.
+- Back up the current public files before switching the domain.
+- Deploy the approved three-page Purple Diamond Crew experience.
+- Verify HTTPS, mobile display, navigation, public links, Supabase records and rollback readiness after deployment.
