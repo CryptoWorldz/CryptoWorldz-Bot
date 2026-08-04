@@ -52,6 +52,17 @@
   </dialog>
 
   <script src="./config/worlds.js"></script>
-  <script type="module" src="./assets/app.js"></script>
+  <script>
+    (() => {
+      const hostname = location.hostname.replace(/^www\./, '').toLowerCase();
+      const requestedMode = new URLSearchParams(location.search).get('mode');
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = hostname === 'purplediamondcrew.com' || requestedMode === 'directory'
+        ? './assets/pdc-directory.js'
+        : './assets/app.js';
+      document.body.appendChild(script);
+    })();
+  </script>
 </body>
 </html>
