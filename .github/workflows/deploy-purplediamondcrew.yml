@@ -1,0 +1,239 @@
+name: Deploy PurpleDiamondCrew.com
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/deploy-purplediamondcrew.yml'
+      - 'apps/cryptoworldz-web-core/**'
+      - 'tools/evaluate-web-core.mjs'
+      - 'package.json'
+  workflow_dispatch:
+    inputs:
+      confirm_live_deploy:
+        description: 'Confirm the live PurpleDiamondCrew.com deployment'
+        required: true
+        default: 'CANCEL'
+        type: choice
+        options:
+          - 'CANCEL'
+          - 'DEPLOY PURPLEDIAMONDCREW.COM'
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/purplediamondcrew.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: purplediamondcrew-production
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate Purple Diamond Crew package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run complete web-core evaluation
+        run: npm run verify:web
+
+      - name: Confirm production files
+        shell: bash
+        run: |
+          set -euo pipefail
+          root='apps/cryptoworldz-web-core'
+          test -f "$root/index.html"
+          test -f "$root/.htaccess"
+          test -f "$root/assets/pdc-site.js"
+          test -f "$root/assets/pdc-site.css"
+          test -f "$root/assets/pdc-hope-chest-bg.jpg"
+          grep -Fq "PAGE ONE • ACTION TEAM ON THE GROUND" "$root/assets/pdc-site.js"
+          grep -Fq "PAGE THREE • A SECRET FOR THOSE WHO CHOOSE TO SEARCH" "$root/assets/pdc-site.js"
+          grep -Fq "hostname === 'purplediamondcrew.com'" "$root/index.html"
+
+      - name: Create reviewed deployment package
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd apps/cryptoworldz-web-core
+          zip -qr ../../purplediamondcrew-production-${GITHUB_SHA}.zip . \
+            -x '*.DS_Store' '*.md' '.gitignore' 'docs/*'
+          cd ../..
+          sha256sum purplediamondcrew-production-${GITHUB_SHA}.zip \
+            > purplediamondcrew-production-${GITHUB_SHA}.sha256
+
+      - name: Save reviewed deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: purplediamondcrew-reviewed-package
+          path: |
+            purplediamondcrew-production-${{ github.sha }}.zip
+            purplediamondcrew-production-${{ github.sha }}.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+  deploy:
+    name: Confirm and deploy PurpleDiamondCrew.com
+    needs: validate
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' &&
+      inputs.confirm_live_deploy == 'DEPLOY PURPLEDIAMONDCREW.COM')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: purplediamondcrew-production
+      url: https://purplediamondcrew.com
+    env:
+      FTP_HOST: ${{ secrets.PDC_FTP_HOST || secrets.HOSTINGER_FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.PDC_FTP_USERNAME || secrets.HOSTINGER_FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.PDC_FTP_PASSWORD || secrets.HOSTINGER_FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.PDC_FTP_PORT || vars.HOSTINGER_FTP_PORT || '21' }}
+      FTP_SERVER_DIR: ${{ vars.PDC_FTP_SERVER_DIR || vars.HOSTINGER_FTP_SERVER_DIR }}
+      FTP_ACCOUNT_SCOPE: ${{ vars.PDC_FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.PDC_DEPLOY_GUARD }}
+      LIVE_URL: https://purplediamondcrew.com
+    steps:
+      - name: Check out approved main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Re-run complete verification
+        run: npm run verify:web
+
+      - name: Verify protected environment settings
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'main'
+          test "$DEPLOY_GUARD" = 'PURPLEDIAMONDCREW.COM'
+          test "$FTP_ACCOUNT_SCOPE" = 'DOMAIN_ONLY'
+          test -n "$FTP_HOST"
+          test -n "$FTP_USERNAME"
+          test -n "$FTP_PASSWORD"
+          test -n "$FTP_SERVER_DIR"
+
+          if [[ "$FTP_SERVER_DIR" != '/' && "$FTP_SERVER_DIR" != *'purplediamondcrew.com'* ]]; then
+            echo 'Refusing deployment: PDC_FTP_SERVER_DIR is not restricted to PurpleDiamondCrew.com.' >&2
+            exit 1
+          fi
+
+          echo "::add-mask::$FTP_USERNAME"
+          echo 'Protected production environment passed all deployment guards.'
+
+      - name: Install secure FTP client
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp zip
+
+      - name: Back up current live website
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup_dir="$RUNNER_TEMP/pdc-predeploy-backup"
+          mkdir -p "$backup_dir"
+
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          cd "$FTP_SERVER_DIR"
+          lcd "$backup_dir"
+          mirror --verbose=1 --parallel=3 --exclude-glob ".well-known/**" --exclude-glob ".env*" --exclude-glob "*.log" --exclude-glob "cgi-bin/**" .
+          bye
+          LFTP
+
+          cd "$backup_dir"
+          zip -qr "$RUNNER_TEMP/pdc-predeploy-backup-${GITHUB_RUN_ID}.zip" .
+
+      - name: Preserve rollback backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: purplediamondcrew-predeploy-backup-${{ github.run_id }}
+          path: ${{ runner.temp }}/pdc-predeploy-backup-${{ github.run_id }}.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Deploy approved static website
+        shell: bash
+        run: |
+          set -euo pipefail
+          local_dir="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
+
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          cd "$FTP_SERVER_DIR"
+          lcd "$local_dir"
+          mirror --reverse --overwrite --verbose=1 --parallel=4 --exclude-glob ".git*" --exclude-glob "*.md" --exclude-glob "docs/**" .
+          bye
+          LFTP
+
+      - name: Verify the live deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          cache_bust="deploy=${GITHUB_SHA}-${GITHUB_RUN_ID}"
+          curl -fsSL --retry 5 --retry-delay 5 "$LIVE_URL/?$cache_bust" -o "$RUNNER_TEMP/pdc-home.html"
+          curl -fsSL --retry 5 --retry-delay 5 "$LIVE_URL/assets/pdc-site.js?$cache_bust" -o "$RUNNER_TEMP/pdc-site.js"
+          curl -fsSL --retry 5 --retry-delay 5 "$LIVE_URL/assets/pdc-site.css?$cache_bust" -o "$RUNNER_TEMP/pdc-site.css"
+          grep -Fq 'PAGE ONE • ACTION TEAM ON THE GROUND' "$RUNNER_TEMP/pdc-site.js"
+          grep -Fq 'PAGE THREE • A SECRET FOR THOSE WHO CHOOSE TO SEARCH' "$RUNNER_TEMP/pdc-site.js"
+          grep -Fq 'Purple Diamond Crew' "$RUNNER_TEMP/pdc-home.html"
+          echo 'PurpleDiamondCrew.com passed the live production checks.'
+
+      - name: Restore the previous website after a failed live check
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup_dir="$RUNNER_TEMP/pdc-predeploy-backup"
+          test -d "$backup_dir"
+
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          cd "$FTP_SERVER_DIR"
+          lcd "$backup_dir"
+          mirror --reverse --overwrite --verbose=1 --parallel=3 .
+          bye
+          LFTP
+
+          echo 'The previous live website was restored because validation failed.' >&2
+
+      - name: Publish deployment summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## PurpleDiamondCrew.com Production Deployment'
+            echo
+            echo "- Source commit: \`$GITHUB_SHA\`"
+            echo "- Workflow run: \`$GITHUB_RUN_ID\`"
+            echo '- Protected environment: `purplediamondcrew-production`'
+            echo '- Live URL: https://purplediamondcrew.com'
+            echo '- Zed Bot deployment: untouched'
+            echo '- Other hosted domains: untouched by domain-restricted FTP account'
+          } >> "$GITHUB_STEP_SUMMARY"
