@@ -1,0 +1,11 @@
+Diamond Buy Auto Supabase Edge deployment
+
+Status: ACTIVE
+Project: hknymhhyqldtzmplzuzh
+Function: diamond-buy-auto
+Mode: SAFE LOCKED
+Execution: disabled
+Signing: disabled
+Owner Telegram ID: 8029135300
+Website gateway function: worldz-live
+Pinned website source commit: 9c4444a08337516525387fe9252e7393e33ba7b2
