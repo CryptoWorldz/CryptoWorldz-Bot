@@ -66,7 +66,8 @@ function createAutoRepository(supabase) {
       .from("auto_settings")
       .update({
         paused,
-        emergency_stop: paused ? undefined : true,
+        emergency_stop: paused,
+        execution_enabled: false,
         updated_by: actorTelegramId,
         updated_at: new Date().toISOString()
       })
