@@ -11,6 +11,7 @@ const read = (relativePath) => fs.readFileSync(path.join(webRoot, relativePath),
 const requiredFiles = [
   'index.html',
   '404.html',
+  '.htaccess',
   '_headers',
   'assets/app.js',
   'assets/styles.css',
@@ -30,6 +31,7 @@ const appSource = read('assets/app.js');
 const configSource = read('config/worlds.js');
 const fallbackSource = read('404.html');
 const headerSource = read('_headers');
+const hostingerSource = read('.htaccess');
 
 assert.doesNotThrow(() => new Function(appSource), 'assets/app.js contains invalid JavaScript');
 
@@ -84,10 +86,14 @@ assert.match(indexSource, /assets\/token-directory\.css/, 'Token directory style
 assert.match(indexSource, /config\/worlds\.js/, 'Domain configuration is not loaded');
 assert.match(indexSource, /assets\/app\.js/, 'Application script is not loaded');
 assert.match(fallbackSource, /location\.replace\('\/'\)/, '404 fallback must return visitors to the app root');
-assert.match(headerSource, /connect-src[^\n]*supabase\.co/, 'CSP must permit the Supabase registry');
-assert.match(headerSource, /frame-src[^\n]*dexscreener\.com/, 'CSP must permit DEX Screener charts');
+assert.match(headerSource, /connect-src[^\n]*supabase\.co/, 'Portable CSP must permit the Supabase registry');
+assert.match(headerSource, /frame-src[^\n]*dexscreener\.com/, 'Portable CSP must permit DEX Screener charts');
+assert.match(hostingerSource, /RewriteRule \^ index\.html \[L\]/, 'Hostinger must route unknown paths to index.html');
+assert.match(hostingerSource, /Content-Security-Policy/, 'Hostinger security headers are missing');
+assert.match(hostingerSource, /supabase\.co/, 'Hostinger CSP must permit the Supabase registry');
+assert.match(hostingerSource, /dexscreener\.com/, 'Hostinger CSP must permit DEX Screener charts');
 
-const combinedPublicSource = [indexSource, appSource, configSource, headerSource].join('\n');
+const combinedPublicSource = [indexSource, appSource, configSource, headerSource, hostingerSource].join('\n');
 for (const forbidden of ['service_role', 'SUPABASE_SERVICE_ROLE', 'sb_secret_']) {
   assert.ok(!combinedPublicSource.includes(forbidden), `Public web files contain forbidden secret marker: ${forbidden}`);
 }
