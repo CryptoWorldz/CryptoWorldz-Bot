@@ -197,7 +197,8 @@ jobs:
           curl -fsSL --retry 5 --retry-delay 5 "$LIVE_URL/assets/pdc-site.css?$cache_bust" -o "$RUNNER_TEMP/pdc-site.css"
           grep -Fq 'PAGE ONE • ACTION TEAM ON THE GROUND' "$RUNNER_TEMP/pdc-site.js"
           grep -Fq 'PAGE THREE • A SECRET FOR THOSE WHO CHOOSE TO SEARCH' "$RUNNER_TEMP/pdc-site.js"
-          grep -Fq 'Purple Diamond Crew' "$RUNNER_TEMP/pdc-home.html"
+          grep -Fq "hostname === 'purplediamondcrew.com'" "$RUNNER_TEMP/pdc-home.html"
+          grep -Fq './assets/pdc-site.js' "$RUNNER_TEMP/pdc-home.html"
           echo 'PurpleDiamondCrew.com passed the live production checks.'
 
       - name: Restore the previous website after a failed live check
