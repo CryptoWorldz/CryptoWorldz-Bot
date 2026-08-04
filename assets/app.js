@@ -1,3 +1,123 @@
+const mobileLayoutFix = document.createElement('style');
+mobileLayoutFix.textContent = `
+  html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+  }
+
+  body { position: relative; }
+
+  main, header, footer, section, .section,
+  .hero, .mission, .explore, .impact, .launch, .cta,
+  .feature-grid, .portal-grid, .launch-grid, .impact-panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .hero > *, .feature-grid > *, .portal-grid > *,
+  .launch-grid > *, .impact-panel > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .hero-art {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  h1, h2, h3, p, a, strong, span {
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 760px) {
+    .header {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .brand {
+      min-width: 0;
+      max-width: calc(100% - 58px);
+    }
+
+    .brand-copy {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .brand-copy strong {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .section {
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .hero {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .hero h1 {
+      width: 100%;
+      max-width: 100%;
+      font-size: clamp(2.25rem, 12.5vw, 3.55rem);
+      letter-spacing: -0.035em;
+    }
+
+    .hero h1 strong {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      word-break: break-word;
+    }
+
+    .hero-art {
+      min-height: 320px;
+    }
+
+    .planet {
+      width: min(62vw, 235px);
+      max-width: 235px;
+    }
+
+    .orbit {
+      width: min(84vw, 340px);
+      max-width: calc(100vw - 28px);
+    }
+
+    .orbit-b {
+      width: min(92vw, 370px);
+      max-width: calc(100vw - 16px);
+    }
+
+    .row {
+      align-items: flex-start;
+    }
+
+    .row strong {
+      max-width: 55%;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .mobile-nav {
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+`;
+document.head.appendChild(mobileLayoutFix);
+
 const SITES = {
   solworldz: {
     domains:['solworldz.xyz'], name:'SolWorldz', code:'SOL', chain:'Solana',
