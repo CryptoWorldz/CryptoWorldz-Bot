@@ -5,11 +5,17 @@ window.CRYPTOWORLDZ_CONFIG = {
   domains: {
     "cryptoworldz.xyz": { slug: "cryptoworldz", mode: "markets" },
     "www.cryptoworldz.xyz": { slug: "cryptoworldz", mode: "markets" },
+    "test.oneworldz.com": { slug: "cryptoworldz", mode: "markets" },
 
     "oneworldz.com": { slug: "oneworldz", mode: "mission" },
     "www.oneworldz.com": { slug: "oneworldz", mode: "mission" },
     "impact.oneworldz.com": { slug: "impactbased", mode: "impact" },
     "impactbased.oneworldz.com": { slug: "impactbased", mode: "impact" },
+    "law.oneworldz.com": { slug: "robinhoodlaw", mode: "law" },
+    "learn.oneworldz.com": { slug: "learnworldz", mode: "learn" },
+
+    "purplediamondcrew.com": { slug: "purplediamondcrew", mode: "directory" },
+    "www.purplediamondcrew.com": { slug: "purplediamondcrew", mode: "directory" },
 
     "solworldz.xyz": { slug: "solworldz", mode: "world" },
     "www.solworldz.xyz": { slug: "solworldz", mode: "world" },
@@ -27,10 +33,10 @@ window.CRYPTOWORLDZ_CONFIG = {
     "www.hyperworldz.xyz": { slug: "hyperworldz", mode: "world" },
     "robinworldz.xyz": { slug: "robinworldz", mode: "world" },
     "www.robinworldz.xyz": { slug: "robinworldz", mode: "world" },
-    "bitcoinworldz.xyz": { slug: "bitworldz", mode: "world" },
-    "www.bitcoinworldz.xyz": { slug: "bitworldz", mode: "world" },
-    "bitworldz.xyz": { slug: "bitworldz", mode: "world" },
-    "www.bitworldz.xyz": { slug: "bitworldz", mode: "world" },
+    "bitcoinworldz.xyz": { slug: "bitcoinworldz", mode: "world" },
+    "www.bitcoinworldz.xyz": { slug: "bitcoinworldz", mode: "world" },
+    "bitworldz.xyz": { slug: "bitcoinworldz", mode: "world" },
+    "www.bitworldz.xyz": { slug: "bitcoinworldz", mode: "world" },
     "hodlerworldz.xyz": { slug: "hodlerworldz", mode: "portfolio" },
     "www.hodlerworldz.xyz": { slug: "hodlerworldz", mode: "portfolio" }
   }
