@@ -1,0 +1,215 @@
+name: Deploy Approved Worldz Site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/worldz-approved.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldz-approved-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Validate approved release request
+    runs-on: ubuntu-latest
+    outputs:
+      target: ${{ steps.resolve.outputs.target }}
+      environment: ${{ steps.resolve.outputs.environment }}
+      live_url: ${{ steps.resolve.outputs.live_url }}
+      guard: ${{ steps.resolve.outputs.guard }}
+      expected_script: ${{ steps.resolve.outputs.expected_script }}
+    steps:
+      - name: Check out request
+        uses: actions/checkout@v4
+
+      - id: resolve
+        name: Resolve immutable approved source
+        shell: bash
+        env:
+          APPROVED_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          test -f deployments/worldz-approved.request
+          target="$(sed -n 's/^target=//p' deployments/worldz-approved.request | tail -n1)"
+          confirmation="$(sed -n 's/^confirmation=//p' deployments/worldz-approved.request | tail -n1)"
+          source_commit="$(sed -n 's/^source_commit=//p' deployments/worldz-approved.request | tail -n1)"
+          test "$confirmation" = 'APPROVE TOTAL DEPLOYMENT'
+          test -n "$source_commit"
+          test "$source_commit" = "$APPROVED_BEFORE"
+
+          case "$target" in
+            test-oneworldz) environment='test-preproduction'; live_url='https://test.oneworldz.com'; guard='TEST.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
+            purplediamondcrew) environment='purplediamondcrew-production'; live_url='https://purplediamondcrew.com'; guard='PURPLEDIAMONDCREW.COM'; expected_script='assets/pdc-site.js' ;;
+            solworldz) environment='solworldz-production'; live_url='https://solworldz.xyz'; guard='SOLWORLDZ.XYZ'; expected_script='assets/app.js' ;;
+            cryptoworldz) environment='cryptoworldz-production'; live_url='https://cryptoworldz.xyz'; guard='CRYPTOWORLDZ.XYZ'; expected_script='assets/app.js' ;;
+            oneworldz) environment='oneworldz-production'; live_url='https://oneworldz.com'; guard='ONEWORLDZ.COM'; expected_script='assets/oneworldz.js' ;;
+            impactbased) environment='impactbased-production'; live_url='https://impactbased.oneworldz.com'; guard='IMPACTBASED.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
+            law-oneworldz) environment='law-oneworldz-production'; live_url='https://law.oneworldz.com'; guard='LAW.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
+            learn-oneworldz) environment='learn-oneworldz-production'; live_url='https://learn.oneworldz.com'; guard='LEARN.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
+            *) echo 'Unsupported approved deployment target.' >&2; exit 1 ;;
+          esac
+
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+          echo "environment=$environment" >> "$GITHUB_OUTPUT"
+          echo "live_url=$live_url" >> "$GITHUB_OUTPUT"
+          echo "guard=$guard" >> "$GITHUB_OUTPUT"
+          echo "expected_script=$expected_script" >> "$GITHUB_OUTPUT"
+
+  validate:
+    name: Validate approved package
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out approved request commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run complete verification
+        run: npm run verify
+
+      - name: Package static release
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd apps/cryptoworldz-web-core
+          zip -qr ../../worldz-approved-${GITHUB_SHA}.zip . -x '*.DS_Store' '*.md' '.gitignore' 'docs/*'
+          cd ../..
+          sha256sum worldz-approved-${GITHUB_SHA}.zip > worldz-approved-${GITHUB_SHA}.sha256
+
+      - name: Preserve release package
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldz-approved-${{ needs.prepare.outputs.target }}
+          path: |
+            worldz-approved-${{ github.sha }}.zip
+            worldz-approved-${{ github.sha }}.sha256
+          retention-days: 30
+          if-no-files-found: error
+
+  deploy:
+    name: Back up, deploy and verify
+    needs: [prepare, validate]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: ${{ needs.prepare.outputs.environment }}
+      url: ${{ needs.prepare.outputs.live_url }}
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
+      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      EXPECTED_GUARD: ${{ needs.prepare.outputs.guard }}
+      LIVE_URL: ${{ needs.prepare.outputs.live_url }}
+      EXPECTED_SCRIPT: ${{ needs.prepare.outputs.expected_script }}
+    steps:
+      - name: Check out approved package
+        uses: actions/checkout@v4
+
+      - name: Verify domain-restricted credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$FTP_ACCOUNT_SCOPE" = 'DOMAIN_ONLY'
+          test "$DEPLOY_GUARD" = "$EXPECTED_GUARD"
+          test "$FTP_SERVER_DIR" = '/'
+          test -n "$FTP_HOST"
+          test -n "$FTP_USERNAME"
+          test -n "$FTP_PASSWORD"
+          echo "::add-mask::$FTP_USERNAME"
+
+      - name: Install secure FTP client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp zip
+
+      - name: Back up current website
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/worldz-backup"
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          cd "$FTP_SERVER_DIR"
+          lcd "$RUNNER_TEMP/worldz-backup"
+          mirror --parallel=3 --exclude-glob '.well-known/**' --exclude-glob '.env*' --exclude-glob '*.log' --exclude-glob 'cgi-bin/**' .
+          bye
+          LFTP
+          cd "$RUNNER_TEMP/worldz-backup"
+          zip -qr "$RUNNER_TEMP/worldz-backup-${GITHUB_RUN_ID}.zip" .
+
+      - name: Preserve rollback artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldz-rollback-${{ needs.prepare.outputs.target }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/worldz-backup-${{ github.run_id }}.zip
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload approved website
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          cd "$FTP_SERVER_DIR"
+          lcd "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
+          mirror --reverse --overwrite --parallel=4 --exclude-glob '.git*' --exclude-glob '*.md' --exclude-glob 'docs/**' .
+          bye
+          LFTP
+
+      - name: Verify live website
+        shell: bash
+        run: |
+          set -euo pipefail
+          cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
+          curl -fsSL --retry 6 --retry-delay 5 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/index.html"
+          curl -fsSL --retry 6 --retry-delay 5 "$LIVE_URL/$EXPECTED_SCRIPT?$cache" -o "$RUNNER_TEMP/expected.js"
+          grep -Fq './config/worlds.js' "$RUNNER_TEMP/index.html"
+          test -s "$RUNNER_TEMP/expected.js"
+
+      - name: Roll back after failed upload or verification
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d "$RUNNER_TEMP/worldz-backup"
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          cd "$FTP_SERVER_DIR"
+          lcd "$RUNNER_TEMP/worldz-backup"
+          mirror --reverse --overwrite --parallel=3 .
+          bye
+          LFTP
