@@ -63,9 +63,14 @@ Verified against the active `CryptoWorldz-Bot` Supabase project:
 - Record `updated_at` timestamps maintained automatically
 - Live status requires a contract address, verification timestamp and a market/trade reference
 
-The database hardening migration is tracked in:
+A behavioral database test inserted a private temporary record, confirmed that the update timestamp advanced, confirmed that an invalid live record was rejected, and removed all evaluation records. Final evaluation-record count: `0`.
 
-`supabase/migrations/20260804041500_harden_live_token_registry_for_deployment.sql`
+The behavioral test identified that PostgreSQL `now()` remains constant during one transaction. The trigger was corrected to use `clock_timestamp()` and then passed the repeated test.
+
+Tracked migrations:
+
+- `supabase/migrations/20260804041500_harden_live_token_registry_for_deployment.sql`
+- `supabase/migrations/20260804043000_fix_registry_updated_at_clock.sql`
 
 ## Security evaluation
 
@@ -76,6 +81,8 @@ The database hardening migration is tracked in:
 - Content Security Policy permits only the required Supabase and DEX Screener connections.
 - No wallet private keys or recovery phrases are requested or stored.
 - The live Zed Node.js deployment remains separate and is not overwritten by the static website package.
+
+Supabase security and performance advisors were run after the schema changes. The registry tables produced no new security errors. Existing informational notices concern other private Zed tables with RLS and no public policies, plus indexes that have not yet recorded usage.
 
 ## Automated evaluation
 
@@ -93,7 +100,7 @@ Evaluation result:
 CryptoWorldz web-core evaluation passed: 33 domain routes, 10 required files.
 ```
 
-GitHub Actions now runs the evaluation and creates:
+The GitHub Actions workflow is configured to run the evaluation and create:
 
 - `cryptoworldz-web-core-deploy.zip`
 - `cryptoworldz-web-core-deploy.sha256`
