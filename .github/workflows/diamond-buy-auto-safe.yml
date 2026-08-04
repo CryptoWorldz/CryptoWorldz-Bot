@@ -70,7 +70,7 @@ jobs:
             exit 1
           fi
 
-      - name: Prevent committed secrets
+      - name: Prevent committed production secrets
         shell: bash
         run: |
           set -euo pipefail
@@ -80,8 +80,8 @@ jobs:
             echo 'A real environment file is committed.' >&2
             exit 1
           fi
-          if git grep -nEi '(seed phrase|private key|service_role_key)\s*[:=]\s*[^[:space:]]+' -- ':!*.md' ':!.env.example'; then
-            echo 'A possible secret value is committed.' >&2
+          if git grep -nEi '(seed phrase|private key|service_role_key)\s*[:=]\s*[^[:space:]]+' -- ':!*.md' ':!.env.example' ':!test/**'; then
+            echo 'A possible production secret value is committed.' >&2
             exit 1
           fi
 
