@@ -1,0 +1,53 @@
+name: CryptoWorldz Web Core
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/cryptoworldz-web-core/**'
+      - 'tools/evaluate-web-core.mjs'
+      - 'package.json'
+      - '.github/workflows/cryptoworldz-web-core.yml'
+  pull_request:
+    paths:
+      - 'apps/cryptoworldz-web-core/**'
+      - 'tools/evaluate-web-core.mjs'
+      - 'package.json'
+      - '.github/workflows/cryptoworldz-web-core.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run complete web-core evaluation
+        run: npm run verify:web
+
+      - name: Create Hostinger deployment archive
+        run: |
+          cd apps/cryptoworldz-web-core
+          zip -r ../../cryptoworldz-web-core-deploy.zip . \
+            -x '*.DS_Store' '*.md' '.gitignore'
+          cd ../..
+          sha256sum cryptoworldz-web-core-deploy.zip > cryptoworldz-web-core-deploy.sha256
+
+      - name: Upload deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: cryptoworldz-web-core-deploy
+          path: |
+            cryptoworldz-web-core-deploy.zip
+            cryptoworldz-web-core-deploy.sha256
+          if-no-files-found: error
+          retention-days: 30
