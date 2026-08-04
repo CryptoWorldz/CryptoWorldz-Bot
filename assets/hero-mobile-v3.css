@@ -1,0 +1,72 @@
+/* Verified mobile hero containment. Isolated from the rest of the site. */
+
+@media (max-width: 760px) {
+  .hero.section {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    padding-left: 18px;
+    padding-right: 18px;
+    overflow: hidden;
+  }
+
+  .hero-copy,
+  .hero-art {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .hero-copy {
+    text-align: center;
+  }
+
+  .hero-copy > * {
+    max-width: 100%;
+  }
+
+  .hero h1 {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: clamp(2.25rem, 12vw, 3.15rem);
+    letter-spacing: -0.045em;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .hero h1 strong {
+    white-space: nowrap;
+  }
+
+  .hero .actions,
+  .hero .chips {
+    width: auto;
+    max-width: 100%;
+    justify-content: center;
+  }
+
+  .hero .button {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .hero-art {
+    min-height: 350px;
+    overflow: hidden;
+    contain: layout paint;
+  }
+
+  .hero-art .orbit {
+    width: min(74vw, 330px);
+  }
+
+  .hero-art .orbit-b {
+    width: min(84vw, 370px);
+  }
+}
