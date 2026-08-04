@@ -23,6 +23,15 @@ function loadConfig(env = process.env) {
     throw new Error("TELEGRAM_WEBHOOK_URL must be a valid HTTPS URL.");
   }
 
+  const autoServiceUrl = String(env.AUTO_SERVICE_URL || "").trim();
+  if (autoServiceUrl) {
+    try {
+      if (new URL(autoServiceUrl).protocol !== "https:") throw new Error();
+    } catch {
+      throw new Error("AUTO_SERVICE_URL must be a valid HTTPS URL.");
+    }
+  }
+
   return {
     botToken,
     supabaseUrl,
@@ -32,6 +41,8 @@ function loadConfig(env = process.env) {
     adminTelegramIds: parseIdSet(env.ADMIN_TELEGRAM_IDS),
     ownerTelegramId: String(env.OWNER_TELEGRAM_ID || "").trim(),
     autoApproveMissionClaims: parseBoolean(env.AUTO_APPROVE_MISSION_CLAIMS, false),
+    autoServiceUrl,
+    autoInternalToken: String(env.AUTO_INTERNAL_TOKEN || "").trim(),
     communityTelegramUrl: String(env.COMMUNITY_TELEGRAM_URL || "").trim(),
     communityXUrl: String(env.COMMUNITY_X_URL || "").trim(),
     communityWebsiteUrl: String(
@@ -55,6 +66,7 @@ function configWarnings(config) {
   if (config.allowedChatIds.size === 0) warnings.push("ALLOWED_CHAT_IDS is empty; /api/command cannot send messages.");
   if (config.adminTelegramIds.size === 0) warnings.push("ADMIN_TELEGRAM_IDS is empty; Telegram admin commands are disabled.");
   if (!config.ownerTelegramId) warnings.push("OWNER_TELEGRAM_ID is empty; owner-only commands are disabled.");
+  if (!config.autoServiceUrl || !config.autoInternalToken) warnings.push("Auto SAFE LOCKED service is not connected; owner Auto commands will remain unavailable.");
   return warnings;
 }
 

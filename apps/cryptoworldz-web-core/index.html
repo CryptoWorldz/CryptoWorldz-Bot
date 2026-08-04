@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0f051d" />
-  <meta name="description" content="CryptoWorldz markets, verified ecosystem tokens, ImpactBased launches and blockchain World portals." />
+  <meta name="description" content="OneWorldz and CryptoWorldz connect humanitarian action, transparent impact, education and verified blockchain World portals." />
   <meta name="robots" content="index,follow" />
   <title>CryptoWorldz</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -20,7 +20,7 @@
   <div class="ambient ambient-two"></div>
 
   <header class="site-header">
-    <a class="brand" href="/" aria-label="CryptoWorldz home">
+    <a class="brand" href="/" aria-label="Worldz home">
       <span class="brand-emblem">O</span>
       <span>
         <strong id="brand-title">CRYPTOWORLDZ</strong>
@@ -34,13 +34,13 @@
   <main id="app" class="page-shell" aria-live="polite">
     <section class="loading-panel">
       <div class="spinner"></div>
-      <p>Loading the CryptoWorldz registry…</p>
+      <p>Loading the Worldz experience…</p>
     </section>
   </main>
 
   <footer class="site-footer">
     <p>One World • One Mission • Helping the People Who Help People</p>
-    <p class="footer-note">Public market information only. Always verify contract addresses before interacting.</p>
+    <p class="footer-note">Public information only. Verify contract addresses and external destinations before interacting.</p>
   </footer>
 
   <dialog id="wallet-dialog" class="modal">
@@ -62,9 +62,11 @@
       script.type = 'module';
       script.src = hostname === 'purplediamondcrew.com'
         ? './assets/pdc-site.js'
-        : requestedMode === 'directory'
-          ? './assets/pdc-directory.js'
-          : './assets/app.js';
+        : hostname === 'oneworldz.com' || requestedMode === 'mission'
+          ? './assets/oneworldz.js'
+          : requestedMode === 'directory'
+            ? './assets/pdc-directory.js'
+            : './assets/app.js';
       document.body.appendChild(script);
     })();
   </script>
