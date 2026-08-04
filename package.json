@@ -1,6 +1,6 @@
 {
   "name": "cryptoworldz-bot",
-  "version": "3.1.0-safe-auto",
+  "version": "3.0.0",
   "description": "Official CryptoWorldz Telegram Bot with Diamond Buy Auto SAFE LOCKED service",
   "main": "index.js",
   "scripts": {
