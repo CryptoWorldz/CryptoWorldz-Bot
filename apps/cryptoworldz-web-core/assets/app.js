@@ -8,10 +8,10 @@ const walletDialog = document.querySelector('#wallet-dialog');
 
 const hostname = location.hostname.replace(/^www\./, '').toLowerCase();
 const params = new URLSearchParams(location.search);
-const previewSlug = params.get('world');
-const previewMode = params.get('mode');
-const site = previewSlug
-  ? { slug: previewSlug, mode: previewMode || (previewSlug === 'cryptoworldz' ? 'markets' : 'world') }
+const requestedWorld = params.get('world');
+const requestedMode = params.get('mode');
+const site = requestedWorld
+  ? { slug: requestedWorld, mode: requestedMode || (requestedWorld === 'cryptoworldz' ? 'markets' : 'world') }
   : config.domains[hostname] || { slug: 'cryptoworldz', mode: 'markets' };
 
 walletButton?.addEventListener('click', () => walletDialog?.showModal());
@@ -38,6 +38,41 @@ function linkButton(label, href, primary = false) {
   return url
     ? `<a class="button ${primary ? 'button-primary' : 'button-secondary'}" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`
     : '';
+}
+
+function metadataFor(token) {
+  return token?.metadata && typeof token.metadata === 'object' ? token.metadata : {};
+}
+
+function socialButtons(token) {
+  const metadata = metadataFor(token);
+  const links = [
+    ['Website', metadata.website_url],
+    ['X', metadata.x_url],
+    ['Telegram', metadata.telegram_url],
+    ['Facebook', metadata.facebook_url],
+    ['YouTube', metadata.youtube_url],
+    ['TikTok', metadata.tiktok_url],
+    ['Explorer', token.explorer_url],
+    ['GeckoTerminal', token.geckoterminal_url]
+  ];
+
+  return links.map(([label, href]) => linkButton(label, href)).join('');
+}
+
+function tokenLogo(token) {
+  const logo = safeUrl(token.logo_url);
+  return logo
+    ? `<span class="token-logo"><img src="${escapeHtml(logo)}" alt="" loading="lazy" /></span>`
+    : `<span class="token-logo">${escapeHtml(token.symbol.slice(0, 2))}</span>`;
+}
+
+function feeSplitLabel(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return 'Not disclosed';
+  const entries = Object.entries(value)
+    .filter(([, amount]) => amount !== null && amount !== undefined && amount !== '')
+    .map(([label, amount]) => `${String(label).replaceAll('_', ' ')}: ${amount}${typeof amount === 'number' ? '%' : ''}`);
+  return entries.length ? entries.join(' • ') : 'Not disclosed';
 }
 
 async function readTable(table, query) {
@@ -70,8 +105,19 @@ function setBrand(title, subtitle) {
 
 function renderNav(missionOnly = false) {
   const links = missionOnly
-    ? [['Mission', '#mission'], ['Impact', '#impact'], ['Learn', 'https://learn.oneworldz.com'], ['Explore CryptoWorldz', 'https://cryptoworldz.xyz']]
-    : [['Markets', 'https://cryptoworldz.xyz/markets'], ['ImpactBased', 'https://impactbased.oneworldz.com'], ['OneWorldz', 'https://oneworldz.com'], ['Zed', 'https://cryptobotz.cryptoworldz.xyz']];
+    ? [
+        ['Mission', '#mission'],
+        ['Impact', 'https://impactbased.oneworldz.com'],
+        ['Learn', 'https://learn.oneworldz.com'],
+        ['CryptoWorldz', 'https://cryptoworldz.xyz']
+      ]
+    : [
+        ['Markets', 'https://cryptoworldz.xyz'],
+        ['Live Tokens', 'https://purplediamondcrew.com'],
+        ['ImpactBased', 'https://impactbased.oneworldz.com'],
+        ['OneWorldz', 'https://oneworldz.com'],
+        ['Zed', 'https://cryptobotz.cryptoworldz.xyz']
+      ];
   nav.innerHTML = links.map(([label, href]) => `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`).join('');
 }
 
@@ -101,7 +147,7 @@ function chartUrl(token) {
 
 function tokenButton(token, world, selected) {
   return `<button class="token-card ${selected ? 'selected' : ''}" data-token-id="${escapeHtml(token.id)}" type="button">
-    <span class="token-logo">${escapeHtml(token.symbol.slice(0, 2))}</span>
+    ${tokenLogo(token)}
     <span class="token-copy"><strong>$${escapeHtml(token.symbol)}</strong><small>${escapeHtml(token.name)}</small></span>
     <span class="status status-${escapeHtml(token.launch_status)}">${escapeHtml(statusLabel(token.launch_status))}</span>
     <span class="token-world">${escapeHtml(world?.name || token.chain_id)}</span>
@@ -115,39 +161,48 @@ function placeholder(worldName, directory = false) {
       <p class="eyebrow">${directory ? 'VERIFIED DIRECTORY READY' : 'LAUNCH SYSTEM READY'}</p>
       <h2>${escapeHtml(worldName)} registry prepared</h2>
       <p>${directory
-        ? 'Verified live token records will appear here with contract addresses, official links and DEX charts.'
+        ? 'Verified live token records will appear here with official links, contract addresses and DEX charts.'
         : 'Official launch cards, verified contract addresses and live charts will appear automatically as each token is deployed.'}</p>
-      <div class="launch-flow"><span>ImpactBased Approval</span><b>→</b><span>Based.bid Launch</span><b>→</b><span>CA Verification</span><b>→</b><span>DEX Chart</span></div>
+      <div class="launch-flow"><span>ImpactBased Approval</span><b>→</b><span>Launch</span><b>→</b><span>CA Verification</span><b>→</b><span>DEX Chart</span></div>
     </div>
   </section>`;
 }
 
 function tokenPanel(token, world) {
   const embed = chartUrl(token);
+  const metadata = metadataFor(token);
   const contract = token.contract_address || 'Added and verified at launch';
   const creatorBuy = token.initial_creator_buy
     ? `${token.initial_creator_buy} ${token.initial_creator_buy_currency || ''}`.trim()
-    : 'Disclosed at launch';
+    : 'Not disclosed';
   const liquidity = token.real_liquidity_amount
     ? `${token.real_liquidity_amount} ${token.real_liquidity_currency || ''}`.trim()
-    : 'Optional addition disclosed at launch';
-  const fee = Number.isInteger(token.fee_total_bps) ? `${token.fee_total_bps / 100}%` : 'To be confirmed';
+    : 'Not disclosed';
+  const fee = Number.isInteger(token.fee_total_bps) ? `${token.fee_total_bps / 100}%` : 'Not disclosed';
+  const purpose = token.description || metadata.purpose || 'Official ecosystem token record.';
 
   return `<section class="chart-panel">
     <div class="chart-toolbar">
       <div><p class="eyebrow">${escapeHtml(world?.name || token.chain_id)} • ${escapeHtml(statusLabel(token.launch_status))}</p><h2>${escapeHtml(token.name)} <span>$${escapeHtml(token.symbol)}</span></h2></div>
       <div class="button-row">${linkButton('Launch Page', token.launch_url)}${linkButton('Trade', token.trade_url, true)}${linkButton('DEX Screener', token.dexscreener_url)}</div>
     </div>
+    <div class="token-purpose">
+      <p>${escapeHtml(purpose)}</p>
+      <div class="button-row">${socialButtons(token)}</div>
+    </div>
     ${embed
       ? `<iframe class="dex-frame" src="${escapeHtml(embed)}" title="${escapeHtml(token.name)} DEX chart" loading="lazy" referrerpolicy="no-referrer"></iframe>`
-      : `<div class="chart-placeholder"><span class="pulse-orbit"></span><p class="eyebrow">CHART ACTIVATES AFTER VERIFIED LAUNCH</p><h3>Contract and pair address pending</h3><p>When the official CA is verified, this panel automatically changes into the live DEX Screener chart.</p></div>`}
+      : `<div class="chart-placeholder"><span class="pulse-orbit"></span><p class="eyebrow">CHART ACTIVATES AFTER VERIFIED LAUNCH</p><h3>Contract or pair data is pending</h3><p>The live chart activates when the official DEX Screener URL or pair address is recorded.</p></div>`}
     <div class="detail-grid">
       <article><span>Contract Address</span><strong class="mono">${escapeHtml(contract)}</strong></article>
-      <article><span>Launch Model</span><strong>${escapeHtml(token.launch_model ? token.launch_model.toUpperCase() : 'To be selected')}</strong></article>
+      <article><span>Launch Provider</span><strong>${escapeHtml(token.launch_provider || 'Not disclosed')}</strong></article>
+      <article><span>Launch Model</span><strong>${escapeHtml(token.launch_model ? token.launch_model.toUpperCase() : 'Not disclosed')}</strong></article>
       <article><span>Creator Initial Buy</span><strong>${escapeHtml(creatorBuy)}</strong></article>
       <article><span>Trading Fee</span><strong>${escapeHtml(fee)}</strong></article>
+      <article><span>Fee Split</span><strong>${escapeHtml(feeSplitLabel(token.fee_split))}</strong></article>
       <article><span>Real Liquidity</span><strong>${escapeHtml(liquidity)}</strong></article>
-      <article><span>Verification</span><strong>${token.verified_at ? 'On-chain verified' : 'Required before publishing'}</strong></article>
+      <article><span>Verification</span><strong>${token.verified_at ? 'Verified record' : 'Required before publishing'}</strong></article>
+      <article><span>Chain</span><strong>${escapeHtml(token.chain_id)}</strong></article>
     </div>
   </section>`;
 }
@@ -170,7 +225,11 @@ function renderMarkets(registry, lockedWorld = 'all', options = {}) {
   renderNav();
 
   const eligibleTokens = liveOnly
-    ? registry.tokens.filter((token) => token.launch_status === 'live' && token.contract_address && token.verified_at)
+    ? registry.tokens.filter((token) =>
+        token.launch_status === 'live'
+        && Boolean(token.contract_address)
+        && Boolean(token.verified_at)
+      )
     : registry.tokens;
   const state = { world: lockedWorld, token: null };
 
@@ -185,18 +244,21 @@ function renderMarkets(registry, lockedWorld = 'all', options = {}) {
     app.innerHTML = `<section class="hero compact-hero">
       <p class="eyebrow">${directory ? 'REAL PROJECTS • VERIFIED TOKENS • VISIBLE PURPOSE' : 'POWERED BY THE SHARED CRYPTOWORLDZ REGISTRY'}</p>
       <h1>${directory
-        ? 'The live-token directory for projects already building across the ecosystem.'
+        ? 'The official directory for previously launched ecosystem tokens.'
         : (state.world === 'all' ? 'Every World. Every Official Launch. One Market Centre.' : `${escapeHtml(worldName)} Dedicated DEX Charts.`)}</h1>
       <p>${directory
         ? 'Only verified live records are shown. Always confirm the contract address before interacting.'
         : (state.world === 'all' ? 'Track verified CryptoWorldz ecosystem launches across every supported blockchain.' : 'Switch between every verified token launched within this blockchain World.')}</p>
-      <div class="trust-strip"><span>✓ Verified CA publishing</span><span>✓ No private keys stored</span><span>✓ Live DEX Screener charts</span></div>
+      <div class="button-row hero-actions">${directory
+        ? linkButton('Open CryptoWorldz', 'https://cryptoworldz.xyz', true)
+        : `${linkButton('View Live Token Directory', 'https://purplediamondcrew.com', true)}${linkButton('Open Zed Command Centre', 'https://cryptobotz.cryptoworldz.xyz')}`}</div>
+      <div class="trust-strip"><span>✓ Verified CA publishing</span><span>✓ No private keys stored</span><span>✓ Live DEX charts</span></div>
     </section>
     ${(locked || directory) ? '' : tabs(registry.worlds, state.world)}
     <section class="market-layout">
       <aside class="token-list"><div class="section-heading"><p class="eyebrow">${directory ? 'VERIFIED LIVE TOKENS' : 'OFFICIAL TOKENS'}</p><strong>${filtered.length}</strong></div>${filtered.length
         ? filtered.map((token) => tokenButton(token, worldForToken(token, registry.worlds), token.id === state.token)).join('')
-        : `<p class="empty-copy">${directory ? 'No verified live-token records have been published yet.' : 'No token contracts have been published yet.'}</p>`}</aside>
+        : `<p class="empty-copy">${directory ? 'Live token links are ready to be added.' : 'No token contracts have been published yet.'}</p>`}</aside>
       <div>${selected ? tokenPanel(selected, worldForToken(selected, registry.worlds)) : placeholder(worldName, directory)}</div>
     </section>`;
 
@@ -214,12 +276,12 @@ function renderImpact(registry) {
   app.innerHTML = `<section class="hero impact-hero">
     <p class="eyebrow">HELPING THE PEOPLE WHO HELP PEOPLE</p>
     <h1>Impact launches built around transparent action.</h1>
-    <p>${escapeHtml(project?.short_description || 'ImpactBased connects approved projects, programmable launch fees and visible real-world outcomes.')}</p>
-    <div class="button-row hero-actions">${linkButton('Open Current Board', board, true)}<a class="button button-secondary" href="https://cryptoworldz.xyz/markets">View Markets</a></div>
+    <p>${escapeHtml(project?.short_description || 'ImpactBased connects approved projects, programmable token fees and visible real-world outcomes.')}</p>
+    <div class="button-row hero-actions">${linkButton('Open Current Board', board, true)}${linkButton('View Markets', 'https://cryptoworldz.xyz')}${linkButton('Live Token Directory', 'https://purplediamondcrew.com')}</div>
   </section>
   <section class="process-grid">
     <article><b>01</b><h3>Review</h3><p>Projects are checked for mission alignment, public information and a realistic impact plan.</p></article>
-    <article><b>02</b><h3>Launch</h3><p>Approved projects select Flash, LBP or another documented Based.bid launch model.</p></article>
+    <article><b>02</b><h3>Launch</h3><p>Approved projects select the most appropriate documented launch model.</p></article>
     <article><b>03</b><h3>Verify</h3><p>The contract address, creator purchase, fee split and liquidity information are published.</p></article>
     <article><b>04</b><h3>Report</h3><p>Impact updates connect on-chain activity with visible outcomes and supporting evidence.</p></article>
   </section>
@@ -230,7 +292,7 @@ function renderMission() {
   setBrand('OneWorldz', 'One World • One Mission');
   renderNav(true);
   walletButton.hidden = true;
-  app.innerHTML = `<section id="mission" class="hero mission-hero"><p class="eyebrow">ONE WORLD • ONE MISSION • ONE FUTURE</p><h1>Helping the People Who Help People.</h1><p>OneWorldz is the mission headquarters connecting humanitarian action, learning, research, community leadership and the wider Worldz ecosystem.</p><a class="button button-primary" href="https://cryptoworldz.xyz">Explore CryptoWorldz</a></section>
+  app.innerHTML = `<section id="mission" class="hero mission-hero"><p class="eyebrow">ONE WORLD • ONE MISSION • ONE FUTURE</p><h1>Helping the People Who Help People.</h1><p>OneWorldz is the mission headquarters connecting humanitarian action, learning, research, community leadership and the wider Worldz ecosystem.</p><div class="button-row hero-actions">${linkButton('Explore CryptoWorldz', 'https://cryptoworldz.xyz', true)}${linkButton('Live Token Directory', 'https://purplediamondcrew.com')}</div></section>
   <section id="impact" class="process-grid mission-grid"><article><b>💜</b><h3>Purple Diamond Crew</h3><p>Real people on the ground delivering practical support where it matters most.</p></article><article><b>⚖</b><h3>Robin Hood Law</h3><p>Research and pathways helping ordinary people better understand rights, debt and recovery.</p></article><article><b>🌍</b><h3>ImpactBased</h3><p>Transparent launches connecting community participation with measurable outcomes.</p></article><article id="research"><b>📚</b><h3>Research & Learning</h3><p>Accessible education and ideas for building stronger communities.</p></article></section>`;
 }
 
@@ -255,7 +317,7 @@ function renderLearn() {
 function renderPortfolio() {
   setBrand('HodlerWorldz', 'Read-only Multi-chain Portfolio');
   renderNav();
-  app.innerHTML = `<section class="hero compact-hero"><p class="eyebrow">PERSONAL INVESTMENTS • PHASE 2</p><h1>One read-only view across the Worldz.</h1><p>Wallet ownership will be verified by signed message. Private keys and recovery phrases will never be requested.</p><button class="button button-primary" id="portfolio-wallet">Preview Secure Login</button></section>
+  app.innerHTML = `<section class="hero compact-hero"><p class="eyebrow">PERSONAL INVESTMENTS • PHASE 2</p><h1>One read-only view across the Worldz.</h1><p>Wallet ownership will be verified by signed message. Private keys and recovery phrases will never be requested.</p><button class="button button-primary" id="portfolio-wallet">Secure Login Information</button></section>
   <section class="content-panel"><h2>Planned portfolio controls</h2><div class="detail-grid"><article><span>Wallet Support</span><strong>Solana, EVM, XRPL, Sui and Bitcoin adapters</strong></article><article><span>Access</span><strong>Read-only balances and holdings</strong></article><article><span>Privacy</span><strong>Hide-balance control</strong></article><article><span>Trading</span><strong>Verified external DEX links first</strong></article></div></section>`;
   document.querySelector('#portfolio-wallet')?.addEventListener('click', () => walletDialog?.showModal());
 }
