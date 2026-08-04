@@ -93,9 +93,10 @@
   padding: clamp(1rem, 3vw, 2rem);
   border: 1px solid rgba(255, 218, 128, .3);
   border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(7, 3, 12, .2), rgba(7, 3, 12, .87)),
-    url("./pdc-hope-chest-bg.jpg") center / cover no-repeat;
+  background: linear-gradient(180deg, rgba(7, 3, 12, .2), rgba(7, 3, 12, .87));
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   box-shadow: 0 28px 80px rgba(0, 0, 0, .42);
 }
 
