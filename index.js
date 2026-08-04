@@ -4,6 +4,7 @@ const telegramLibrary = require("node-telegram-bot-api");
 const TelegramBot = telegramLibrary.TelegramBot || telegramLibrary.default || telegramLibrary;
 const { createClient } = require("@supabase/supabase-js");
 const { createAutoClient } = require("./src/auto/client");
+const { registerAutoMiniRoutes } = require("./src/auto/zed-router");
 const { registerAutoTelegramHandlers } = require("./src/auto/telegram");
 const { configWarnings, loadConfig } = require("./src/config");
 const { createHttpApp } = require("./src/http");
@@ -22,6 +23,7 @@ async function start() {
   registerTelegramHandlers({ bot, repository, config });
   registerAutoTelegramHandlers({ bot, config, autoClient });
   const app = createHttpApp({ bot, config, repository });
+  registerAutoMiniRoutes({ app, config, autoClient });
 
   for (const warning of configWarnings(config)) console.warn(warning);
 
