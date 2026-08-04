@@ -148,12 +148,12 @@ Example:
 
 ```text
 target=purplediamondcrew
-source_commit=<the exact main commit containing this request>
+source_commit=<approved parent commit containing the tested deployment package>
 requested_by=Jason Wright / JayJayTeamDev
 confirmation=APPROVE TOTAL DEPLOYMENT
 ```
 
-The workflow rejects a request whose recorded commit does not match the triggering commit.
+The release-request commit is intentionally separate from the approved package commit. The workflow rejects the request unless `source_commit` exactly matches the request commit's parent (`HEAD^`). This prevents an untested or moving source revision from being deployed.
 
 ## Unavoidable one-time configuration
 
