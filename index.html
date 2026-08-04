@@ -1,98 +1,209 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0617" />
-  <meta name="description" content="A CryptoWorldz ecosystem portal." />
-  <title>Worldz | CryptoWorldz</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08030f">
+  <meta name="description" content="One connected Worldz ecosystem helping communities learn, build and create real-world impact.">
+  <title>Worldz Ecosystem</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/styles.css" />
-  <link rel="stylesheet" href="assets/mobile-fix.css" />
+  <link rel="stylesheet" href="assets/styles.css?v=20260804a">
 </head>
 <body>
-  <div class="space" aria-hidden="true"></div>
-  <header class="header">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="stars" aria-hidden="true"></div>
+
+  <header class="site-header">
     <a class="brand" href="#home" aria-label="Home">
-      <span class="brand-orb" id="brandOrb">W</span>
-      <span class="brand-copy"><strong id="brandName">Worldz</strong><small>POWERED BY CRYPTOWORLDZ</small></span>
+      <span class="brand-mark" id="brandMark">W</span>
+      <span class="brand-text">
+        <strong id="brandName">Worldz</strong>
+        <small id="brandSubline">A CONNECTED ECOSYSTEM</small>
+      </span>
     </a>
-    <button class="menu" id="menuButton" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
-    <nav id="nav">
-      <a href="#home">Home</a><a href="#mission">Mission</a><a href="#explore">Explore</a><a href="#impact">Impact</a><a href="#launch">Launch</a>
-      <a class="nav-button" href="https://t.me/CryptoWorldzBot" target="_blank" rel="noopener">Enter Zed</a>
+    <button class="menu-button" id="menuButton" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" id="siteNav" aria-label="Primary navigation">
+      <a href="#home">Home</a>
+      <a href="#mission">Mission</a>
+      <a href="#worldz">Worldz</a>
+      <a href="#impact">Impact</a>
+      <a href="#launches">Launches</a>
+      <a class="nav-cta" href="https://t.me/CryptoWorldzBot" target="_blank" rel="noopener noreferrer">Open Zed</a>
     </nav>
   </header>
 
-  <main>
+  <main id="main">
     <section class="hero section" id="home">
       <div class="hero-copy reveal">
-        <p class="kicker" id="kicker">THE BLOCKCHAIN WORLD OF CRYPTOWORLDZ</p>
-        <h1><span>WELCOME TO</span><br><strong id="heroName">WORLDZ</strong></h1>
-        <p class="tagline" id="tagline">One World • One Mission • One Future</p>
-        <p class="intro" id="intro"></p>
-        <div class="actions">
-          <a class="button primary" href="#explore">Explore This World</a>
-          <a class="button ghost" href="https://t.me/CryptoWorldzBot" target="_blank" rel="noopener">Open Zed Command Centre</a>
+        <p class="eyebrow" id="heroEyebrow">ONE CONNECTED ECOSYSTEM</p>
+        <h1 id="heroTitle">Worldz</h1>
+        <p class="hero-motto" id="heroMotto">One World • One Mission • One Future</p>
+        <p class="hero-intro" id="heroIntro"></p>
+        <div class="hero-actions">
+          <a class="button primary" id="primaryAction" href="#worldz">Explore the Worldz</a>
+          <a class="button secondary" href="https://t.me/CryptoWorldzBot" target="_blank" rel="noopener noreferrer">Open Zed Command Centre</a>
         </div>
-        <div class="chips"><span id="chainChip">Built for the ecosystem</span><span>💜 Community First</span><span>🌍 Real-World Impact</span></div>
+        <div class="trust-row" aria-label="Ecosystem principles">
+          <span id="networkChip">Connected ecosystem</span>
+          <span>Community first</span>
+          <span>Verified links only</span>
+        </div>
       </div>
-      <div class="hero-art reveal">
-        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
-        <div class="planet"><div class="planet-shine"></div><span id="planetCode">W</span><small id="planetLabel">WORLDZ</small></div>
-        <div class="satellite satellite-one"></div><div class="satellite satellite-two"></div>
+
+      <div class="hero-visual reveal" aria-hidden="true">
+        <div class="orbit orbit-one"></div>
+        <div class="orbit orbit-two"></div>
+        <div class="world-orb">
+          <span id="orbCode">W</span>
+          <small id="orbLabel">WORLDZ</small>
+        </div>
       </div>
     </section>
 
-    <section class="mission section" id="mission">
-      <div class="heading reveal"><p class="kicker">ONE CONNECTED ECOSYSTEM</p><h2 id="missionTitle">A World Built With Purpose</h2><p id="missionText"></p></div>
-      <div class="feature-grid">
-        <article class="card reveal"><span>📚</span><h3>Learn</h3><p>Clear education and safer participation for newcomers and experienced community members.</p></article>
-        <article class="card reveal"><span>🤝</span><h3>Connect</h3><p>Bring communities, creators, builders and supporters together without losing each World’s identity.</p></article>
-        <article class="card reveal"><span>🚀</span><h3>Build</h3><p>Support useful projects, transparent launches and shared tools that can grow across CryptoWorldz.</p></article>
-        <article class="card reveal"><span>❤️</span><h3>Impact</h3><p>Turn online attention into real-world support for people already helping others on the ground.</p></article>
+    <section class="section mission-section" id="mission">
+      <div class="section-heading reveal">
+        <p class="eyebrow">PURPOSE BEFORE HYPE</p>
+        <h2 id="missionTitle">Built With Purpose</h2>
+        <p id="missionText"></p>
+      </div>
+      <div class="principle-grid" id="principleGrid"></div>
+    </section>
+
+    <section class="section worldz-section" id="worldz">
+      <div class="section-heading reveal">
+        <p class="eyebrow">EXPLORE THE ECOSYSTEM</p>
+        <h2>Every World Has a Role</h2>
+        <p>Each portal keeps its own identity while contributing to one shared mission.</p>
+      </div>
+      <div class="world-grid" id="worldGrid"></div>
+    </section>
+
+    <section class="section focus-section" id="focus">
+      <div class="focus-panel reveal">
+        <div>
+          <p class="eyebrow" id="focusEyebrow">THIS WORLD</p>
+          <h2 id="focusTitle">A Clear Place to Start</h2>
+          <p id="focusText"></p>
+          <div class="focus-list" id="focusList"></div>
+        </div>
+        <div class="focus-badge">
+          <span id="focusCode">W</span>
+          <strong id="focusBadgeTitle">WORLDZ</strong>
+          <small id="focusBadgeText">ONE MISSION</small>
+        </div>
       </div>
     </section>
 
-    <section class="explore section" id="explore">
-      <div class="heading reveal"><p class="kicker">YOUR WORLD PORTALS</p><h2>Explore the Ecosystem</h2><p>Every World keeps its own community and focus while contributing to one shared mission.</p></div>
-      <div class="portal-grid">
-        <a class="portal reveal" href="https://cryptoworldz.xyz" target="_blank" rel="noopener"><b>CW</b><h3>CryptoWorldz</h3><p>The central ecosystem, Worldz directory and crypto market hub.</p><span>Open CryptoWorldz →</span></a>
-        <a class="portal reveal" href="https://t.me/CryptoWorldzBot" target="_blank" rel="noopener"><b>Z</b><h3>Zed Command Centre</h3><p>Registration, missions, points, governance and community coordination.</p><span>Start Zed →</span></a>
-        <a class="portal reveal" href="#impact"><b>IB</b><h3>ImpactBased</h3><p>Purpose-focused launches and programmable impact pathways.</p><span>See the Mission →</span></a>
-        <a class="portal reveal" href="#launch"><b id="worldBadge">W</b><h3 id="worldPortalName">This World</h3><p id="worldPortalText"></p><span>View Launch Centre →</span></a>
+    <section class="section impact-section" id="impact">
+      <div class="section-heading reveal">
+        <p class="eyebrow">HELPING THE PEOPLE WHO HELP PEOPLE</p>
+        <h2>Impact Beyond the Screen</h2>
+        <p>Digital communities can help support food, clean water, medication, shelter, education, dignity and equal opportunity.</p>
+      </div>
+      <div class="impact-grid">
+        <article class="impact-card reveal">
+          <span>💜</span>
+          <h3>Purple Diamond Crew</h3>
+          <p>Real people supporting homeless communities, families, schools, medical needs and practical local action.</p>
+          <a href="https://purplediamondcrew.com" target="_blank" rel="noopener noreferrer">Open the crew hub →</a>
+        </article>
+        <article class="impact-card reveal">
+          <span>🌍</span>
+          <h3>Action Creates Smiles</h3>
+          <p>Uganda-focused humanitarian support including food, medicine, school needs, hygiene supplies, rent and mattresses.</p>
+          <a href="https://cryptoworldz.xyz/#impact" target="_blank" rel="noopener noreferrer">View impact updates →</a>
+        </article>
+        <article class="impact-card reveal">
+          <span>🔍</span>
+          <h3>Transparent Action</h3>
+          <p>Show who was helped, what was delivered, what remains needed and which links are officially verified.</p>
+          <a href="#security">See safety rules →</a>
+        </article>
       </div>
     </section>
 
-    <section class="impact section" id="impact">
-      <div class="impact-panel reveal">
-        <div><p class="kicker">HELPING THE PEOPLE WHO HELP PEOPLE</p><h2>Impact Beyond the Screen</h2><p>CryptoWorldz connects digital communities with transparent humanitarian action involving food, clean water, medical support, shelter, education and dignity.</p><a class="button primary" href="https://cryptoworldz.xyz/#impact" target="_blank" rel="noopener">Explore Real-World Impact</a></div>
-        <div class="impact-orb"><span>1</span><strong>WORLD</strong><i>ONE MISSION</i></div>
+    <section class="section launch-section" id="launches">
+      <div class="section-heading reveal">
+        <p class="eyebrow">OFFICIAL PROJECT DIRECTORY</p>
+        <h2 id="launchHeading">Verified Launches Only</h2>
+        <p>Contracts, charts and trading links appear only after official deployment and verification.</p>
+      </div>
+      <div class="project-grid" id="projectGrid"></div>
+    </section>
+
+    <section class="section security-section" id="security">
+      <div class="security-panel reveal">
+        <div>
+          <p class="eyebrow">ANTI-SCAM STANDARD</p>
+          <h2>Verify Before You Trust</h2>
+          <p>Never copy a contract address from a reply, direct message or unofficial page. Use only the official website and confirmed CryptoWorldz channels.</p>
+        </div>
+        <ul>
+          <li>Official website first</li>
+          <li>Official channel confirmation</li>
+          <li>Contract shown only after verification</li>
+          <li>Independent research before participation</li>
+        </ul>
       </div>
     </section>
 
-    <section class="launch section" id="launch">
-      <div class="heading reveal"><p class="kicker">OFFICIAL LAUNCH CENTRE</p><h2 id="launchTitle">Verified Projects Only</h2><p>Contract addresses, charts and trading links appear only after official deployment and verification.</p></div>
-      <div class="launch-grid">
-        <article class="launch-card reveal"><label>WORLD STATUS</label><h3 id="statusTitle">Building</h3><p id="statusText"></p><div class="row"><span>Network</span><strong id="networkName">TBA</strong></div><div class="row"><span>Official contract</span><strong>Not deployed</strong></div></article>
-        <article class="launch-card reveal"><label>SECURITY</label><h3>Verify Before You Trust</h3><p>Never copy a contract address from a reply, private message or unofficial page.</p><div class="security">✓ Official website<br>✓ Official CryptoWorldz channels<br>✓ Verified launch links only</div></article>
-        <article class="launch-card reveal"><label>COMMAND CENTRE</label><h3>Powered by Zed</h3><p>Join missions, community governance and future ecosystem activity through the official Telegram bot.</p><a class="text-link" href="https://t.me/CryptoWorldzBot" target="_blank" rel="noopener">Enter Zed →</a></article>
+    <section class="section zed-section" id="zed">
+      <div class="zed-panel reveal">
+        <div class="zed-emblem" aria-hidden="true">ZED</div>
+        <div>
+          <p class="eyebrow">POWERED BY THE ZED COMMAND CENTRE</p>
+          <h2>One Community Command Centre</h2>
+          <p>Registration, profiles, missions, Raaiiidd activity, points, leaderboards, governance and contribution verification.</p>
+          <a class="button primary" href="https://t.me/CryptoWorldzBot" target="_blank" rel="noopener noreferrer">Start @CryptoWorldzBot</a>
+        </div>
       </div>
     </section>
 
-    <section class="cta section"><div class="cta-box reveal"><p class="kicker">THE FUTURE IS BUILT TOGETHER</p><h2 id="ctaTitle">Welcome to the Worldz</h2><p id="ctaText">One World • One Mission • One Future</p><div class="actions centered"><a class="button primary" id="socialLink" href="https://x.com/CryptoWorldzX" target="_blank" rel="noopener">Follow CryptoWorldz</a><a class="button ghost" href="https://t.me/CryptoWorldzRaaiiiddTeam" target="_blank" rel="noopener">Join the Raaiiidd Team</a></div></div></section>
+    <section class="section final-cta">
+      <div class="final-panel reveal">
+        <p class="eyebrow">THE FUTURE IS BUILT TOGETHER</p>
+        <h2 id="finalTitle">Join the Worldz</h2>
+        <p id="finalText">One World • One Mission • One Future</p>
+        <div class="hero-actions centered">
+          <a class="button primary" id="socialAction" href="https://x.com/CryptoWorldzX" target="_blank" rel="noopener noreferrer">Follow CryptoWorldz</a>
+          <a class="button secondary" href="https://t.me/CryptoWorldzRaaiiiddTeam" target="_blank" rel="noopener noreferrer">Join the Raaiiidd Team</a>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <footer>
-    <div class="footer-brand"><span class="brand-orb small" id="footerOrb">W</span><div><strong id="footerName">Worldz</strong><small>A CRYPTOWORLDZ ECOSYSTEM</small></div></div>
-    <div class="footer-links"><a href="https://cryptoworldz.xyz" target="_blank" rel="noopener">CryptoWorldz</a><a href="https://x.com/CryptoWorldzX" target="_blank" rel="noopener">X / CryptoWorldz</a><a href="https://t.me/CryptoWorldzBot" target="_blank" rel="noopener">Zed Bot</a><a href="https://t.me/CryptoWorldzRaaiiiddTeam" target="_blank" rel="noopener">Raaiiidd Team</a></div>
-    <p class="disclaimer">Community and educational content only. Nothing on this website is financial advice. Always verify official links and conduct independent research.</p>
-    <p class="copyright">© <span id="year"></span> <span id="copyrightName">Worldz</span> • CryptoWorldz</p>
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <span class="brand-mark small" id="footerMark">W</span>
+      <div><strong id="footerName">Worldz</strong><small>ONE CONNECTED ECOSYSTEM</small></div>
+    </div>
+    <div class="footer-links">
+      <a href="https://cryptoworldz.xyz" target="_blank" rel="noopener noreferrer">CryptoWorldz</a>
+      <a href="https://x.com/CryptoWorldzX" target="_blank" rel="noopener noreferrer">X</a>
+      <a href="https://t.me/CryptoWorldzBot" target="_blank" rel="noopener noreferrer">Zed Bot</a>
+      <a href="https://t.me/CryptoWorldzRaaiiiddTeam" target="_blank" rel="noopener noreferrer">Raaiiidd Team</a>
+    </div>
+    <p class="disclaimer">Community and educational content only. Nothing on this website is financial, legal or investment advice.</p>
+    <p class="copyright">© <span id="year"></span> Jason Wright / JayJayTeamDev • <span id="copyrightName">Worldz</span></p>
   </footer>
 
-  <nav class="mobile-nav"><a href="#home"><span>⌂</span>Home</a><a href="#explore"><span>◈</span>Worldz</a><a href="#impact"><span>♥</span>Impact</a><a href="https://t.me/CryptoWorldzBot" target="_blank" rel="noopener"><span>⚡</span>Zed</a><a href="#launch"><span>●</span>Launch</a></nav>
-  <script src="assets/app.js"></script>
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <a href="#home"><span>⌂</span>Home</a>
+    <a href="#worldz"><span>◈</span>Worldz</a>
+    <a href="#impact"><span>♥</span>Impact</a>
+    <a href="https://t.me/CryptoWorldzBot" target="_blank" rel="noopener noreferrer"><span>⚡</span>Zed</a>
+    <a href="#launches"><span>●</span>Launch</a>
+  </nav>
+
+  <aside class="preview-panel" id="previewPanel" hidden>
+    <strong>Worldz Preview</strong>
+    <select id="previewSelect" aria-label="Choose preview site"></select>
+  </aside>
+
+  <script src="assets/app.js?v=20260804a"></script>
 </body>
 </html>
