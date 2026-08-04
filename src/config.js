@@ -9,7 +9,7 @@ function required(name, env) {
 
 function loadConfig(env = process.env) {
   const botToken = required("BOT_TOKEN", env);
-  const supabaseUrl = required("SUPABASE_URL", env);
+  const supabaseUrl = required("SUPABASE_URL", env).replace(/\/$/, "");
   const supabaseServiceRoleKey = required("SUPABASE_SERVICE_ROLE_KEY", env);
   const webhookUrl = String(
     env.TELEGRAM_WEBHOOK_URL ||
@@ -23,14 +23,17 @@ function loadConfig(env = process.env) {
     throw new Error("TELEGRAM_WEBHOOK_URL must be a valid HTTPS URL.");
   }
 
-  const autoServiceUrl = String(env.AUTO_SERVICE_URL || "").trim();
-  if (autoServiceUrl) {
-    try {
-      if (new URL(autoServiceUrl).protocol !== "https:") throw new Error();
-    } catch {
-      throw new Error("AUTO_SERVICE_URL must be a valid HTTPS URL.");
-    }
+  const autoServiceUrl = String(
+    env.AUTO_SERVICE_URL || `${supabaseUrl}/functions/v1/diamond-buy-auto`
+  ).trim().replace(/\/$/, "");
+  try {
+    if (new URL(autoServiceUrl).protocol !== "https:") throw new Error();
+  } catch {
+    throw new Error("AUTO_SERVICE_URL must be a valid HTTPS URL.");
   }
+
+  const autoInternalToken = String(env.AUTO_INTERNAL_TOKEN || "").trim();
+  const autoAuthToken = autoInternalToken || supabaseServiceRoleKey;
 
   return {
     botToken,
@@ -42,7 +45,8 @@ function loadConfig(env = process.env) {
     ownerTelegramId: String(env.OWNER_TELEGRAM_ID || "").trim(),
     autoApproveMissionClaims: parseBoolean(env.AUTO_APPROVE_MISSION_CLAIMS, false),
     autoServiceUrl,
-    autoInternalToken: String(env.AUTO_INTERNAL_TOKEN || "").trim(),
+    autoAuthToken,
+    autoInternalToken,
     communityTelegramUrl: String(env.COMMUNITY_TELEGRAM_URL || "").trim(),
     communityXUrl: String(env.COMMUNITY_X_URL || "").trim(),
     communityWebsiteUrl: String(
@@ -66,7 +70,7 @@ function configWarnings(config) {
   if (config.allowedChatIds.size === 0) warnings.push("ALLOWED_CHAT_IDS is empty; /api/command cannot send messages.");
   if (config.adminTelegramIds.size === 0) warnings.push("ADMIN_TELEGRAM_IDS is empty; Telegram admin commands are disabled.");
   if (!config.ownerTelegramId) warnings.push("OWNER_TELEGRAM_ID is empty; owner-only commands are disabled.");
-  if (!config.autoServiceUrl || !config.autoInternalToken) warnings.push("Auto SAFE LOCKED service is not connected; owner Auto commands will remain unavailable.");
+  if (!config.autoServiceUrl || !config.autoAuthToken) warnings.push("Auto SAFE LOCKED service is not connected; owner Auto commands will remain unavailable.");
   return warnings;
 }
 
