@@ -9,11 +9,12 @@ const walletDialog = document.querySelector('#wallet-dialog');
 const hostname = location.hostname.replace(/^www\./, '').toLowerCase();
 const params = new URLSearchParams(location.search);
 const previewSlug = params.get('world');
+const previewMode = params.get('mode');
 const site = previewSlug
-  ? { slug: previewSlug, mode: params.get('mode') || (previewSlug === 'cryptoworldz' ? 'markets' : 'world') }
+  ? { slug: previewSlug, mode: previewMode || (previewSlug === 'cryptoworldz' ? 'markets' : 'world') }
   : config.domains[hostname] || { slug: 'cryptoworldz', mode: 'markets' };
 
-walletButton.addEventListener('click', () => walletDialog.showModal());
+walletButton?.addEventListener('click', () => walletDialog?.showModal());
 
 const escapeHtml = (value = '') => String(value)
   .replaceAll('&', '&amp;')
@@ -69,7 +70,7 @@ function setBrand(title, subtitle) {
 
 function renderNav(missionOnly = false) {
   const links = missionOnly
-    ? [['Mission', '#mission'], ['Impact', '#impact'], ['Research', '#research'], ['Explore CryptoWorldz', 'https://cryptoworldz.xyz']]
+    ? [['Mission', '#mission'], ['Impact', '#impact'], ['Learn', 'https://learn.oneworldz.com'], ['Explore CryptoWorldz', 'https://cryptoworldz.xyz']]
     : [['Markets', 'https://cryptoworldz.xyz/markets'], ['ImpactBased', 'https://impactbased.oneworldz.com'], ['OneWorldz', 'https://oneworldz.com'], ['Zed', 'https://cryptobotz.cryptoworldz.xyz']];
   nav.innerHTML = links.map(([label, href]) => `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`).join('');
 }
@@ -107,13 +108,15 @@ function tokenButton(token, world, selected) {
   </button>`;
 }
 
-function placeholder(worldName) {
+function placeholder(worldName, directory = false) {
   return `<section class="chart-panel">
     <div class="chart-placeholder">
       <span class="pulse-orbit"></span>
-      <p class="eyebrow">LAUNCH SYSTEM READY</p>
+      <p class="eyebrow">${directory ? 'VERIFIED DIRECTORY READY' : 'LAUNCH SYSTEM READY'}</p>
       <h2>${escapeHtml(worldName)} registry prepared</h2>
-      <p>Official launch cards, verified contract addresses and live charts will appear automatically as each token is deployed.</p>
+      <p>${directory
+        ? 'Verified live token records will appear here with contract addresses, official links and DEX charts.'
+        : 'Official launch cards, verified contract addresses and live charts will appear automatically as each token is deployed.'}</p>
       <div class="launch-flow"><span>ImpactBased Approval</span><b>→</b><span>Based.bid Launch</span><b>→</b><span>CA Verification</span><b>→</b><span>DEX Chart</span></div>
     </div>
   </section>`;
@@ -156,31 +159,45 @@ function tabs(worlds, active) {
     .join('')}</div>`;
 }
 
-function renderMarkets(registry, lockedWorld = 'all') {
+function renderMarkets(registry, lockedWorld = 'all', options = {}) {
   const locked = lockedWorld !== 'all';
+  const liveOnly = options.liveOnly === true;
+  const directory = options.directory === true;
   const siteWorld = registry.worlds.find((world) => world.slug === lockedWorld);
-  setBrand(locked ? siteWorld?.name || 'CryptoWorldz' : 'CryptoWorldz', locked ? 'Dedicated DEX Chart Portal' : 'Total Market Command Centre');
+  const title = directory ? 'Purple Diamond Crew' : (locked ? siteWorld?.name || 'CryptoWorldz' : 'CryptoWorldz');
+  const subtitle = directory ? 'Verified Live Token Directory' : (locked ? 'Dedicated DEX Chart Portal' : 'Total Market Command Centre');
+  setBrand(title, subtitle);
   renderNav();
 
+  const eligibleTokens = liveOnly
+    ? registry.tokens.filter((token) => token.launch_status === 'live' && token.contract_address && token.verified_at)
+    : registry.tokens;
   const state = { world: lockedWorld, token: null };
+
   function draw() {
-    const filtered = registry.tokens.filter((token) => state.world === 'all' || worldForToken(token, registry.worlds)?.slug === state.world);
+    const filtered = eligibleTokens.filter((token) => state.world === 'all' || worldForToken(token, registry.worlds)?.slug === state.world);
     if (!filtered.some((token) => token.id === state.token)) state.token = filtered.find((token) => token.is_featured)?.id || filtered[0]?.id || null;
     const selected = filtered.find((token) => token.id === state.token);
-    const worldName = state.world === 'all' ? 'CryptoWorldz' : registry.worlds.find((world) => world.slug === state.world)?.name || 'This World';
+    const worldName = directory
+      ? 'Purple Diamond Crew'
+      : (state.world === 'all' ? 'CryptoWorldz' : registry.worlds.find((world) => world.slug === state.world)?.name || 'This World');
 
     app.innerHTML = `<section class="hero compact-hero">
-      <p class="eyebrow">POWERED BY THE SHARED CRYPTOWORLDZ REGISTRY</p>
-      <h1>${state.world === 'all' ? 'Every World. Every Official Launch. One Market Centre.' : `${escapeHtml(worldName)} Dedicated DEX Charts.`}</h1>
-      <p>${state.world === 'all' ? 'Track verified CryptoWorldz ecosystem launches across every supported blockchain.' : 'Switch between every verified token launched within this blockchain World.'}</p>
+      <p class="eyebrow">${directory ? 'REAL PROJECTS • VERIFIED TOKENS • VISIBLE PURPOSE' : 'POWERED BY THE SHARED CRYPTOWORLDZ REGISTRY'}</p>
+      <h1>${directory
+        ? 'The live-token directory for projects already building across the ecosystem.'
+        : (state.world === 'all' ? 'Every World. Every Official Launch. One Market Centre.' : `${escapeHtml(worldName)} Dedicated DEX Charts.`)}</h1>
+      <p>${directory
+        ? 'Only verified live records are shown. Always confirm the contract address before interacting.'
+        : (state.world === 'all' ? 'Track verified CryptoWorldz ecosystem launches across every supported blockchain.' : 'Switch between every verified token launched within this blockchain World.')}</p>
       <div class="trust-strip"><span>✓ Verified CA publishing</span><span>✓ No private keys stored</span><span>✓ Live DEX Screener charts</span></div>
     </section>
-    ${locked ? '' : tabs(registry.worlds, state.world)}
+    ${(locked || directory) ? '' : tabs(registry.worlds, state.world)}
     <section class="market-layout">
-      <aside class="token-list"><div class="section-heading"><p class="eyebrow">OFFICIAL TOKENS</p><strong>${filtered.length}</strong></div>${filtered.length
+      <aside class="token-list"><div class="section-heading"><p class="eyebrow">${directory ? 'VERIFIED LIVE TOKENS' : 'OFFICIAL TOKENS'}</p><strong>${filtered.length}</strong></div>${filtered.length
         ? filtered.map((token) => tokenButton(token, worldForToken(token, registry.worlds), token.id === state.token)).join('')
-        : '<p class="empty-copy">No token contracts have been published yet.</p>'}</aside>
-      <div>${selected ? tokenPanel(selected, worldForToken(selected, registry.worlds)) : placeholder(worldName)}</div>
+        : `<p class="empty-copy">${directory ? 'No verified live-token records have been published yet.' : 'No token contracts have been published yet.'}</p>`}</aside>
+      <div>${selected ? tokenPanel(selected, worldForToken(selected, registry.worlds)) : placeholder(worldName, directory)}</div>
     </section>`;
 
     app.querySelectorAll('[data-token-id]').forEach((button) => button.addEventListener('click', () => { state.token = button.dataset.tokenId; draw(); }));
@@ -206,7 +223,7 @@ function renderImpact(registry) {
     <article><b>03</b><h3>Verify</h3><p>The contract address, creator purchase, fee split and liquidity information are published.</p></article>
     <article><b>04</b><h3>Report</h3><p>Impact updates connect on-chain activity with visible outcomes and supporting evidence.</p></article>
   </section>
-  <section class="content-panel"><p class="eyebrow">MIGRATION STATUS</p><h2>Charity.Based → Impact.Based</h2><p>The current Board stays linked during migration. The public portal, market registry and Zed integrations are being prepared around the new ImpactBased identity.</p><div class="status-roadmap"><span class="done">Registry foundation</span><span class="active">Website portals</span><span>Board rename</span><span>First controlled launch</span></div></section>`;
+  <section class="content-panel"><p class="eyebrow">MIGRATION STATUS</p><h2>Charity.Based → Impact.Based</h2><p>The current Board stays linked during migration. The public portal, market registry and Zed integrations are prepared around the new ImpactBased identity.</p><div class="status-roadmap"><span class="done">Registry foundation</span><span class="done">Website portals</span><span class="active">Board rename</span><span>First controlled launch</span></div></section>`;
 }
 
 function renderMission() {
@@ -217,12 +234,30 @@ function renderMission() {
   <section id="impact" class="process-grid mission-grid"><article><b>💜</b><h3>Purple Diamond Crew</h3><p>Real people on the ground delivering practical support where it matters most.</p></article><article><b>⚖</b><h3>Robin Hood Law</h3><p>Research and pathways helping ordinary people better understand rights, debt and recovery.</p></article><article><b>🌍</b><h3>ImpactBased</h3><p>Transparent launches connecting community participation with measurable outcomes.</p></article><article id="research"><b>📚</b><h3>Research & Learning</h3><p>Accessible education and ideas for building stronger communities.</p></article></section>`;
 }
 
+function renderLaw() {
+  setBrand('Robin Hood Law', 'Recover • Understand • Rebuild');
+  renderNav(true);
+  walletButton.hidden = true;
+  app.innerHTML = `<section class="hero compact-hero"><p class="eyebrow">RECOVERYOURDEBT • PUBLIC INFORMATION PORTAL</p><h1>Clear pathways for people facing debt, disputes and financial pressure.</h1><p>Robin Hood Law is being prepared as an information and referral portal. It does not replace qualified legal or financial advice.</p></section>
+  <section class="process-grid"><article><b>01</b><h3>Understand</h3><p>Plain-language explanations of common debt and recovery processes.</p></article><article><b>02</b><h3>Prepare</h3><p>Document checklists and questions to organise before seeking help.</p></article><article><b>03</b><h3>Connect</h3><p>Links to appropriate legal, financial counselling and support services.</p></article><article><b>04</b><h3>Recover</h3><p>Practical education designed to help people rebuild with dignity.</p></article></section>
+  <section class="content-panel"><p class="eyebrow">LAUNCH STATUS</p><h2>Portal shell ready for verified resources.</h2><p>Service links and jurisdiction-specific information must be reviewed before public publication.</p></section>`;
+}
+
+function renderLearn() {
+  setBrand('LearnWorldz', 'Simple Education for Every World');
+  renderNav(true);
+  walletButton.hidden = true;
+  app.innerHTML = `<section class="hero compact-hero"><p class="eyebrow">LEARN SAFELY • VERIFY EVERYTHING • BUILD TOGETHER</p><h1>Crypto, technology and impact education without the confusion.</h1><p>LearnWorldz provides beginner-friendly pathways across wallets, blockchains, token launches, online safety and transparent impact reporting.</p></section>
+  <section class="process-grid"><article><b>01</b><h3>Crypto Basics</h3><p>Wallets, networks, fees, contracts and safe verification habits.</p></article><article><b>02</b><h3>Launch Education</h3><p>How launch models, liquidity and programmable fees work.</p></article><article><b>03</b><h3>Security</h3><p>Scam awareness, private-key protection and safer online behaviour.</p></article><article><b>04</b><h3>Impact</h3><p>How to document outcomes and connect public claims with evidence.</p></article></section>
+  <section class="content-panel"><p class="eyebrow">CONTENT STATUS</p><h2>Learning portal structure ready.</h2><p>Lessons can be published progressively without changing the shared site architecture.</p></section>`;
+}
+
 function renderPortfolio() {
   setBrand('HodlerWorldz', 'Read-only Multi-chain Portfolio');
   renderNav();
   app.innerHTML = `<section class="hero compact-hero"><p class="eyebrow">PERSONAL INVESTMENTS • PHASE 2</p><h1>One read-only view across the Worldz.</h1><p>Wallet ownership will be verified by signed message. Private keys and recovery phrases will never be requested.</p><button class="button button-primary" id="portfolio-wallet">Preview Secure Login</button></section>
   <section class="content-panel"><h2>Planned portfolio controls</h2><div class="detail-grid"><article><span>Wallet Support</span><strong>Solana, EVM, XRPL, Sui and Bitcoin adapters</strong></article><article><span>Access</span><strong>Read-only balances and holdings</strong></article><article><span>Privacy</span><strong>Hide-balance control</strong></article><article><span>Trading</span><strong>Verified external DEX links first</strong></article></div></section>`;
-  document.querySelector('#portfolio-wallet').addEventListener('click', () => walletDialog.showModal());
+  document.querySelector('#portfolio-wallet')?.addEventListener('click', () => walletDialog?.showModal());
 }
 
 function renderError(error) {
@@ -232,10 +267,14 @@ function renderError(error) {
 
 async function start() {
   if (site.mode === 'mission') return renderMission();
+  if (site.mode === 'law') return renderLaw();
+  if (site.mode === 'learn') return renderLearn();
+  if (site.mode === 'portfolio') return renderPortfolio();
+
   try {
     const registry = await loadRegistry();
     if (site.mode === 'impact') return renderImpact(registry);
-    if (site.mode === 'portfolio') return renderPortfolio();
+    if (site.mode === 'directory') return renderMarkets(registry, 'all', { liveOnly: true, directory: true });
     if (site.mode === 'world') return renderMarkets(registry, site.slug);
     return renderMarkets(registry);
   } catch (error) {
