@@ -74,7 +74,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git ls-files | grep -E '(^|/)\.env($|\.)'; then
+          real_env_files="$(git ls-files | grep -E '(^|/)\.env($|\.)' | grep -vE '(^|/)\.env\.example$' || true)"
+          if [[ -n "$real_env_files" ]]; then
+            echo "$real_env_files"
             echo 'A real environment file is committed.' >&2
             exit 1
           fi
