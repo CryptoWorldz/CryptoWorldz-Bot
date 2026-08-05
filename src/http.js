@@ -6,6 +6,7 @@ const QRCode = require("qrcode");
 const { getRank, parseSimpleRaid, shortenWallet } = require("./core");
 const { createRequestLimiter, validateTelegramInitData } = require("./miniapp-auth");
 const { solanaPayUri, verifySolanaContribution } = require("./solana");
+const { registerPdcHost } = require("./pdc-host");
 
 function safeTokenMatch(received, expected) {
   if (typeof received !== "string" || typeof expected !== "string") return false;
@@ -36,6 +37,8 @@ function createHttpApp({ bot, config, repository }) {
 
   app.disable("x-powered-by");
   app.use(express.json({ limit: "32kb", type: "application/json" }));
+
+  registerPdcHost(app);
 
   app.get("/", (req, res) => {
     res.json({ ok: true, service: "CryptoWorldz Zed Bot" });
