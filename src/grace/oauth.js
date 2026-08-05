@@ -87,6 +87,17 @@ function buildAuthorizeUrl({ clientId, redirectUri, state, codeChallenge }) {
   return url.toString();
 }
 
+function tokenRequest({ clientId, clientSecret, params }) {
+  const headers = { "Content-Type": "application/x-www-form-urlencoded" };
+  const body = new URLSearchParams(params);
+  if (clientSecret) {
+    headers.Authorization = `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`;
+  } else {
+    body.set("client_id", clientId);
+  }
+  return { headers, body };
+}
+
 async function parseJson(response) {
   return response.json().catch(() => ({}));
 }
@@ -95,6 +106,7 @@ function createXOAuthService(options = {}) {
   const repository = options.repository;
   const fetchImpl = options.fetchImpl || global.fetch;
   const clientId = String(options.clientId || "").trim();
+  const clientSecret = String(options.clientSecret || "").trim();
   const redirectUri = String(options.redirectUri || "").trim();
   const encryptionSecret = String(options.encryptionSecret || "").trim();
   if (!repository) throw new Error("A Grace OAuth repository is required.");
@@ -153,17 +165,20 @@ function createXOAuthService(options = {}) {
   }
 
   async function exchangeCode(code, verifier) {
-    const body = new URLSearchParams({
-      code,
-      grant_type: "authorization_code",
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      code_verifier: verifier
+    const request = tokenRequest({
+      clientId,
+      clientSecret,
+      params: {
+        code,
+        grant_type: "authorization_code",
+        redirect_uri: redirectUri,
+        code_verifier: verifier
+      }
     });
     const response = await fetchImpl("https://api.x.com/2/oauth2/token", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
+      headers: request.headers,
+      body: request.body,
       signal: AbortSignal.timeout(20000)
     });
     const payload = await parseJson(response);
@@ -256,15 +271,18 @@ function createXOAuthService(options = {}) {
         code: "X_REFRESH_TOKEN_MISSING"
       });
     }
-    const body = new URLSearchParams({
-      refresh_token: refreshToken,
-      grant_type: "refresh_token",
-      client_id: clientId
+    const request = tokenRequest({
+      clientId,
+      clientSecret,
+      params: {
+        refresh_token: refreshToken,
+        grant_type: "refresh_token"
+      }
     });
     const response = await fetchImpl("https://api.x.com/2/oauth2/token", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
+      headers: request.headers,
+      body: request.body,
       signal: AbortSignal.timeout(20000)
     });
     const token = await parseJson(response);
@@ -318,5 +336,6 @@ module.exports = {
   encryptSecret,
   normalizeHandle,
   pkceChallenge,
-  stateHash
+  stateHash,
+  tokenRequest
 };
