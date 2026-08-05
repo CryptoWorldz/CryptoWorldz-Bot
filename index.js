@@ -6,6 +6,8 @@ const { createClient } = require("@supabase/supabase-js");
 const { createAutoClient } = require("./src/auto/client");
 const { registerAutoMiniRoutes } = require("./src/auto/zed-router");
 const { registerAutoTelegramHandlers } = require("./src/auto/telegram");
+const { registerExecutiveRoutes } = require("./src/executive/http");
+const { EXECUTIVE_COMMANDS, registerExecutiveTelegramHandlers } = require("./src/executive/telegram");
 const { createGracePublisher } = require("./src/grace/adapters");
 const { registerGraceRoutes } = require("./src/grace/http");
 const { createXOAuthService } = require("./src/grace/oauth");
@@ -62,10 +64,12 @@ async function start() {
 
   registerTelegramHandlers({ bot, repository, config });
   registerAutoTelegramHandlers({ bot, config, autoClient });
+  registerExecutiveTelegramHandlers({ bot, repository, supabase, config });
   registerGraceTelegramHandlers({ bot, repository, graceRepository, config });
   registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });
   const app = createHttpApp({ bot, config, repository });
   registerAutoMiniRoutes({ app, config, autoClient });
+  registerExecutiveRoutes({ app, repository, supabase, config });
   registerGraceRoutes({ app, graceRepository, graceOAuth, apiSecret: process.env.GRACE_API_SECRET || "" });
 
   for (const warning of configWarnings(config)) console.warn(warning);
@@ -77,7 +81,12 @@ async function start() {
 
     const webhookResult = await Promise.allSettled([
       bot.setWebHook(config.webhookUrl, { secret_token: config.webhookSecret }),
-      bot.setMyCommands([...PUBLIC_COMMANDS, ...GRACE_COMMANDS, ...GRACE_X_OAUTH_COMMANDS])
+      bot.setMyCommands([
+        ...PUBLIC_COMMANDS,
+        ...EXECUTIVE_COMMANDS,
+        ...GRACE_COMMANDS,
+        ...GRACE_X_OAUTH_COMMANDS
+      ])
     ]);
 
     if (webhookResult[0].status === "fulfilled") {
