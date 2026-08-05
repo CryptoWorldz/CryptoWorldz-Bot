@@ -8,8 +8,19 @@
   const brandTitle = document.querySelector('#brand-title');
   const brandSubtitle = document.querySelector('#brand-subtitle');
   const walletButton = document.querySelector('#wallet-button');
+  const footer = document.querySelector('.site-footer');
 
   if (!config || !app) return;
+
+  const links = Object.freeze({
+    goFundMeProfile: 'https://www.gofundme.com/u/cryptouniverse',
+    ugandaCampaign: 'https://gofund.me/65129e58a',
+    cryptoWorldz: 'https://cryptoworldz.xyz',
+    oneWorldz: 'https://oneworldz.com',
+    impactBased: 'https://impactbased.oneworldz.com',
+    telegram: 'https://t.me/CryptoWorldzRaaiiiddTeam',
+    x: 'https://x.com/CryptoWorldzX'
+  });
 
   const escapeHtml = (value = '') => String(value)
     .replaceAll('&', '&amp;')
@@ -103,12 +114,12 @@
   }
 
   const actionCards = [
-    ['🍽', 'BBQs & food support', 'Hot meals, food relief, drinks and practical kindness for people doing it tough.'],
-    ['🎒', 'Backpacks & essential packs', 'Backpacks, hoodies, blankets, hygiene supplies and everyday essentials delivered with dignity.'],
-    ['🏕', 'Homeless support & shelter', 'Street support, temporary shelter supplies and a helping hand toward safer, more stable pathways.'],
-    ['💧', 'Water wells & regeneration', 'Bore drilling, clean-water access, soil regeneration and sustainable land recovery.'],
-    ['🌱', 'Farming tools & opportunity', 'Practical implements, gardening support and farming systems that strengthen local independence.'],
-    ['🏠', 'Homes, schools & OneWorldz', 'Larger projects grow into the OneWorld One Hope direction as laws pass and trusted teams unite.']
+    ['🍽', 'Food & community BBQs', 'Hot meals, food relief, drinks and practical kindness for people doing it tough.'],
+    ['🧥', 'Clothing, blankets & tents', 'Warm clothing, blankets, tents, hygiene supplies and essential packs delivered with dignity.'],
+    ['🏫', 'Schools & learning support', 'School construction, fees, uniforms, mattresses, learning supplies and safer places for children.'],
+    ['💧', 'Clean water & bore projects', 'Bore drilling, clean-water access, soil regeneration and sustainable community infrastructure.'],
+    ['🏥', 'Medical & hospital assistance', 'Helping trusted people on the ground respond to urgent medical and hospital needs.'],
+    ['🌱', 'Gardens, farming & independence', 'Gardening support, farming tools and systems that help communities build long-term opportunity.']
   ];
 
   function legacyCard(token, selectedId) {
@@ -158,23 +169,55 @@
     </article>`;
   }
 
-  function pageMarkup(tokens, selectedId) {
+  function hopeChestMarkup(tokens, selectedId, legacyState) {
     const selected = tokens.find((token) => token.id === selectedId) || tokens[0] || null;
     const liveCount = tokens.filter((token) => token.launch_status === 'live').length;
     const revivalCount = tokens.filter((token) => token.launch_status === 'paused').length;
     const legacyCount = tokens.filter((token) => token.launch_status === 'archived').length;
+    const statusCopy = legacyState === 'loading'
+      ? 'The verified Hope Chest records are loading securely…'
+      : legacyState === 'error'
+        ? 'The main Purple Diamond Crew website is live. The optional Hope Chest records are temporarily unavailable and will retry on your next visit.'
+        : tokens.length
+          ? ''
+          : 'The Hope Chest is waiting for its verified treasures.';
 
-    return `<div class="pdc-shell">
-      <section class="hero pdc-hero">
-        <p class="eyebrow">ONE WORLD • ONE CREW • HELPING THE PEOPLE WHO HELP PEOPLE</p>
-        <h1>Action on the ground. Support with heart. A legacy worth reviving.</h1>
-        <p>Purple Diamond Crew connects practical humanitarian action with people who are ready to contribute, volunteer and help build lasting change.</p>
-        <div class="button-row hero-actions">
-          ${anchorButton('Action Team', '#ground', true)}
-          ${anchorButton('Support & Contribute', '#support')}
-          ${anchorButton('Find the Hope Chest', '#hope-chest')}
+    return `<section id="hope-chest" class="pdc-page hope-chest-page">
+      <div class="hope-chest-shade">
+        <div class="hope-chest-intro">
+          <p class="eyebrow">PAGE THREE • A SECRET FOR THOSE WHO CHOOSE TO SEARCH</p>
+          <h2>The OneWorldz Hope Chest</h2>
+          <h3>If only some things could be new again...</h3>
+          <p>Purple Diamond Crew legacy contracts are preserved here transparently for careful review by the community and the diamond hands who stayed.</p>
+          <p>Nothing here promises instant liquidity, price recovery or investment return. Every visitor must verify the contract and current market before interacting.</p>
+          <div class="hope-chest-stats">
+            <span><strong>${tokens.length || '—'}</strong><small>Verified treasures</small></span>
+            <span><strong>${revivalCount || '—'}</strong><small>Revival candidates</small></span>
+            <span><strong>${legacyCount || '—'}</strong><small>Legacy records</small></span>
+            <span><strong>${liveCount || '—'}</strong><small>Revived / live</small></span>
+          </div>
+          ${statusCopy ? `<p class="support-safety">${escapeHtml(statusCopy)}</p>` : ''}
         </div>
-        <div class="trust-strip"><span>✓ Practical field support</span><span>✓ Community participation</span><span>✓ Verified legacy contracts</span></div>
+        ${tokens.length ? `<div class="legacy-token-grid">${tokens.map((token) => legacyCard(token, selected?.id)).join('')}</div>` : ''}
+        ${selected ? legacyDetail(selected) : ''}
+      </div>
+    </section>`;
+  }
+
+  function pageMarkup(tokens, selectedId, legacyState) {
+    return `<div class="pdc-shell">
+      <section id="home" class="hero pdc-hero">
+        <p class="eyebrow">ONE WORLD • ONE CREW • HELPING THE PEOPLE WHO HELP PEOPLE</p>
+        <h1>Purple Diamond Crew</h1>
+        <h2>Real People. Real Action. Real Impact.</h2>
+        <p>We support trusted people already working on the ground — feeding the hungry, sheltering the cold, helping children, strengthening communities and delivering practical assistance where it matters most.</p>
+        <div class="button-row hero-actions">
+          ${externalButton('Support the Mission', links.goFundMeProfile, true)}
+          ${externalButton('Help Reagan Care for Children', links.ugandaCampaign)}
+          ${anchorButton('Meet the Action Team', '#ground')}
+          ${externalButton('Explore CryptoWorldz', links.cryptoWorldz)}
+        </div>
+        <div class="trust-strip"><span>✓ Dignity first</span><span>✓ Community-led action</span><span>✓ Transparent progress</span><span>✓ Stronger together</span></div>
       </section>
 
       <section id="ground" class="pdc-page">
@@ -186,10 +229,26 @@
         <div class="pdc-action-grid">
           ${actionCards.map(([icon, title, copy]) => `<article class="pdc-action-card"><span>${icon}</span><h3>${escapeHtml(title)}</h3><p>${escapeHtml(copy)}</p></article>`).join('')}
         </div>
-        <article class="content-panel pdc-direction">
-          <p class="eyebrow">THE BIGGER DIRECTION</p>
-          <h3>Purple Diamond Crew remains the team on the ground. OneWorldz carries the larger future.</h3>
-          <p>As the crew grows and suitable legal structures are established, major water, farming, housing and school projects can connect into the wider OneWorld One Hope mission and trusted partner teams.</p>
+
+        <article id="mission" class="content-panel pdc-direction">
+          <p class="eyebrow">CURRENT FEATURED MISSION</p>
+          <h3>Helping Reagan care for children in Uganda</h3>
+          <p>Current needs include food, medication, school fees, uniforms, rent, hygiene supplies and mattresses. Support is directed through the public campaign link so every visitor can review the campaign details before contributing.</p>
+          <div class="button-row">
+            ${externalButton('View the GoFundMe', links.ugandaCampaign, true)}
+            ${externalButton('JayJayTeamDev GoFundMe Profile', links.goFundMeProfile)}
+          </div>
+        </article>
+
+        <article id="dream" class="content-panel pdc-direction">
+          <p class="eyebrow">A DREAM BUILT ON KINDNESS</p>
+          <h3>Technology should help create dignity, hope and real opportunity.</h3>
+          <p>JayJayTeamDev’s dream is to build technology and communities that do more than create money — helping provide food, clean water, shelter, education, medical care, dignity and hope.</p>
+          <p>One long-held dream is to see machines once created for conflict transformed into machines of kindness, even delivering teddy bears to children around the world at Christmas.</p>
+          <div class="button-row">
+            ${externalButton('Support JayJayTeamDev’s Mission', links.goFundMeProfile, true)}
+            ${externalButton('Visit OneWorldz', links.oneWorldz)}
+          </div>
         </article>
       </section>
 
@@ -197,51 +256,47 @@
         <div class="pdc-section-heading">
           <p class="eyebrow">PAGE TWO • SUPPORT, CONTRIBUTIONS & APPLICATIONS</p>
           <h2>Choose how you can help</h2>
-          <p>Volunteer, contribute supplies, suggest a project, form a partnership or follow the mission through its verified community channels.</p>
+          <p>You do not need to be rich, famous or technical to make a difference. Every honest action counts.</p>
         </div>
         <div class="pdc-support-grid">
-          <article><b>🤝</b><h3>Apply to help on the ground</h3><p>Register interest in field work, logistics, food runs, supply distribution or local coordination.</p>${externalButton('Open Telegram', 'https://t.me/PurpleDiamondCrew', true)}</article>
-          <article><b>💜</b><h3>Contribute supplies or support</h3><p>Offer practical supplies or discuss a verified contribution pathway before sending funds or goods.</p>${externalButton('Contact the Crew', 'https://x.com/PDCrew', true)}</article>
-          <article><b>💡</b><h3>Suggest a project</h3><p>Share an idea for homelessness support, food relief, farming, water access or community development.</p>${externalButton('Open ImpactBased', 'https://impactbased.oneworldz.com', true)}</article>
-          <article><b>🌍</b><h3>Build the bigger mission</h3><p>Explore the connected OneWorldz and CryptoWorldz ecosystem as the movement expands.</p>${externalButton('OneWorldz', 'https://oneworldz.com', true)}${externalButton('CryptoWorldz', 'https://cryptoworldz.xyz')}</article>
+          <article><b>🤝</b><h3>Join the community</h3><p>Connect with the CryptoWorldz Command Centre and help organise practical action, missions and community support.</p>${externalButton('Open Telegram', links.telegram, true)}</article>
+          <article><b>💜</b><h3>Support verified campaigns</h3><p>Review the named public campaigns, their purpose and their updates before deciding whether to contribute.</p>${externalButton('GoFundMe Profile', links.goFundMeProfile, true)}</article>
+          <article><b>💡</b><h3>Suggest a project</h3><p>Share an idea for homelessness support, food relief, farming, water access, education or community development.</p>${externalButton('Open ImpactBased', links.impactBased, true)}</article>
+          <article><b>🌍</b><h3>Build the bigger mission</h3><p>Explore the connected OneWorldz and CryptoWorldz ecosystem as the movement expands.</p>${externalButton('OneWorldz', links.oneWorldz, true)}${externalButton('CryptoWorldz', links.cryptoWorldz)}</article>
         </div>
-        <p class="support-safety">Donation links will only be published after the destination, purpose and receiving account are verified.</p>
+        <article class="content-panel pdc-direction">
+          <p class="eyebrow">TRANSPARENCY FIRST</p>
+          <h3>Check the destination. Understand the purpose. Never rely on promises.</h3>
+          <p>Purple Diamond Crew does not guarantee financial returns. Use verified campaign links only, review project evidence before contributing and confirm all crypto contracts and market conditions independently.</p>
+          <div class="button-row">
+            ${externalButton('Follow CryptoWorldz on X', links.x)}
+            ${externalButton('Explore CryptoWorldz', links.cryptoWorldz)}
+          </div>
+        </article>
       </section>
 
-      <section id="hope-chest" class="pdc-page hope-chest-page">
-        <div class="hope-chest-shade">
-          <div class="hope-chest-intro">
-            <p class="eyebrow">PAGE THREE • A SECRET FOR THOSE WHO CHOOSE TO SEARCH</p>
-            <h2>The OneWorldz Hope Chest</h2>
-            <h3>If only some things could be new again...</h3>
-            <p>Ten treasured Purple Diamond Crew contracts are preserved here — not dismissed as forgotten tokens, but held as transparent revival candidates for the diamond hands who stayed.</p>
-            <p>The long-term plan is careful and gradual: controlled dev-wallet buys, support for eligible RevShare distribution wallets and slow funding from future Worldz ecosystem fees. Nothing here promises instant liquidity or recovery.</p>
-            <div class="hope-chest-stats">
-              <span><strong>${tokens.length}</strong><small>Verified treasures</small></span>
-              <span><strong>${revivalCount}</strong><small>Revival candidates</small></span>
-              <span><strong>${legacyCount}</strong><small>Legacy records</small></span>
-              <span><strong>${liveCount}</strong><small>Revived / live</small></span>
-            </div>
-          </div>
-          <div class="legacy-token-grid">${tokens.map((token) => legacyCard(token, selected?.id)).join('')}</div>
-          ${selected ? legacyDetail(selected) : '<p class="empty-copy">The Hope Chest is waiting for its verified treasures.</p>'}
-        </div>
-      </section>
+      ${hopeChestMarkup(tokens, selectedId, legacyState)}
     </div>`;
   }
 
   function setIdentity() {
-    document.title = 'Purple Diamond Crew • Action • Support • Hope Chest';
+    document.title = 'Purple Diamond Crew • Real People • Real Action • Real Impact';
+    const description = document.querySelector('meta[name="description"]');
+    if (description) description.content = 'Purple Diamond Crew supports real people delivering food, shelter, education, clean water, medical help and community-led action.';
     if (brandTitle) brandTitle.textContent = 'PURPLE DIAMOND CREW';
-    if (brandSubtitle) brandSubtitle.textContent = 'ACTION • SUPPORT • HOPE CHEST';
+    if (brandSubtitle) brandSubtitle.textContent = 'REAL PEOPLE • REAL ACTION • REAL IMPACT';
     if (walletButton) walletButton.hidden = true;
+    if (footer) {
+      footer.innerHTML = '<p>One World • One Mission • One Future</p><p class="footer-note">Helping the People Who Help People. Verify campaign links, contracts and external destinations before interacting.</p>';
+    }
     if (nav) {
       nav.innerHTML = [
+        ['Home', '#home'],
         ['Action', '#ground'],
+        ['Mission', '#mission'],
         ['Support', '#support'],
         ['Hope Chest', '#hope-chest'],
-        ['CryptoWorldz', 'https://cryptoworldz.xyz'],
-        ['OneWorldz', 'https://oneworldz.com']
+        ['CryptoWorldz', links.cryptoWorldz]
       ].map(([label, href]) => `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`).join('');
     }
   }
@@ -249,13 +304,13 @@
   let tokens = [];
   let selectedId = null;
   let rendering = false;
+  let legacyState = 'loading';
 
   function render() {
-    if (!tokens.length) return;
     rendering = true;
     setIdentity();
-    if (!tokens.some((token) => token.id === selectedId)) selectedId = tokens[0].id;
-    app.innerHTML = pageMarkup(tokens, selectedId);
+    if (tokens.length && !tokens.some((token) => token.id === selectedId)) selectedId = tokens[0].id;
+    app.innerHTML = pageMarkup(tokens, selectedId, legacyState);
     app.querySelectorAll('[data-legacy-token]').forEach((button) => {
       button.addEventListener('click', () => {
         selectedId = button.dataset.legacyToken;
@@ -267,18 +322,21 @@
   }
 
   const observer = new MutationObserver(() => {
-    if (!rendering && tokens.length && !app.querySelector('.pdc-shell')) render();
+    if (!rendering && !app.querySelector('.pdc-shell')) render();
   });
   observer.observe(app, { childList: true });
 
+  render();
+
   loadLegacyTokens()
     .then((rows) => {
-      tokens = rows;
+      tokens = Array.isArray(rows) ? rows : [];
+      legacyState = 'ready';
       render();
-      setTimeout(render, 500);
-      setTimeout(render, 1500);
     })
     .catch((error) => {
+      legacyState = 'error';
       console.error('Purple Diamond Crew integration failed', error);
+      render();
     });
 })();
