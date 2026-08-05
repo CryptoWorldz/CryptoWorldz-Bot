@@ -7,7 +7,8 @@ const {
   encryptSecret,
   normalizeHandle,
   pkceChallenge,
-  stateHash
+  stateHash,
+  tokenRequest
 } = require("../src/grace/oauth");
 
 const secret = "test-only-encryption-key-that-is-long-enough-123";
@@ -36,6 +37,18 @@ test("X authorization URL requests only required posting scopes", () => {
   assert.equal(url.origin, "https://x.com");
   assert.equal(url.searchParams.get("code_challenge_method"), "S256");
   assert.equal(url.searchParams.get("scope"), "tweet.read tweet.write users.read offline.access");
+});
+
+test("public X clients send the Client ID in the token body", () => {
+  const request = tokenRequest({ clientId: "public-id", clientSecret: "", params: { grant_type: "refresh_token" } });
+  assert.equal(request.body.get("client_id"), "public-id");
+  assert.equal(request.headers.Authorization, undefined);
+});
+
+test("confidential X clients authenticate with HTTP Basic", () => {
+  const request = tokenRequest({ clientId: "client-id", clientSecret: "client-secret", params: { grant_type: "refresh_token" } });
+  assert.equal(request.body.get("client_id"), null);
+  assert.equal(request.headers.Authorization, `Basic ${Buffer.from("client-id:client-secret").toString("base64")}`);
 });
 
 test("handle normalization is exact and case-insensitive", () => {
