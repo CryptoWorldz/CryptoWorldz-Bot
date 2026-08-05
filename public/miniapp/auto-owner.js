@@ -56,11 +56,18 @@
       return;
     }
 
+    const owner = Boolean(payload.access && payload.access.owner);
     statusHolder.className = 'panel';
-    statusHolder.innerHTML = `${statusMarkup(payload)}<div class="form-row">
+    statusHolder.innerHTML = `${statusMarkup(payload)}<div class="panel security"><b>${owner ? 'Permanent Owner Control' : 'Executive Safety Control'}</b><p>${owner ? 'You may simulate, pause, resume simulation and trigger the emergency stop.' : 'You may view status, pause and trigger the emergency stop. Simulation and resume remain owner-only.'}</p></div><div class="form-row">
       <button id="auto-pause" class="button secondary" type="button">Pause</button>
-      <button id="auto-resume" class="button secondary" type="button">Resume Simulation</button>
+      ${owner ? '<button id="auto-resume" class="button secondary" type="button">Resume Simulation</button>' : ''}
     </div><button id="auto-emergency" class="button" type="button">Emergency Stop</button>`;
+
+    panel.querySelector('#auto-pause').addEventListener('click', () => control('/api/mini/auto/pause', 'Auto simulations paused.'));
+    panel.querySelector('#auto-resume')?.addEventListener('click', () => control('/api/mini/auto/resume', 'Auto simulation mode resumed. Live execution remains disabled.'));
+    panel.querySelector('#auto-emergency').addEventListener('click', () => control('/api/mini/auto/emergency-stop', 'Auto emergency stop confirmed.'));
+
+    if (!owner) return;
 
     const form = document.createElement('form');
     form.id = 'auto-simulation-form';
@@ -74,10 +81,6 @@
       <button class="button" type="submit">Run Safe Simulation</button>
       <small>No transaction is built, signed, scheduled or submitted.</small>`;
     panel.appendChild(form);
-
-    panel.querySelector('#auto-pause').addEventListener('click', () => control('/api/mini/auto/pause', 'Auto simulations paused.'));
-    panel.querySelector('#auto-resume').addEventListener('click', () => control('/api/mini/auto/resume', 'Auto simulation mode resumed. Live execution remains disabled.'));
-    panel.querySelector('#auto-emergency').addEventListener('click', () => control('/api/mini/auto/emergency-stop', 'Auto emergency stop confirmed.'));
     form.addEventListener('submit', simulate);
   }
 
