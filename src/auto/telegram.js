@@ -1,9 +1,25 @@
-function registerAutoTelegramHandlers({ bot, config, autoClient }) {
+function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
   const isOwner = (msg) => String(msg.from?.id || "") === String(config.ownerTelegramId || "");
   const send = (msg, text) => bot.sendMessage(msg.chat.id, text);
 
+  async function isSafetyExecutive(msg) {
+    if (isOwner(msg)) return true;
+    if (!supabase || !msg.from?.id) return false;
+    const { data, error } = await supabase
+      .from("executive_admins")
+      .select("status")
+      .eq("telegram_id", msg.from.id)
+      .maybeSingle();
+    if (error && error.code !== "42P01") throw error;
+    return Boolean(data && data.status === "active");
+  }
+
   function ownerRequired(msg) {
-    return send(msg, "⛔ Auto controls are restricted to the primary owner.");
+    return send(msg, "⛔ This Auto control is restricted to the permanent owner.");
+  }
+
+  function executiveRequired(msg) {
+    return send(msg, "⛔ Permanent Owner or Executive Leader safety access required.");
   }
 
   function formatStatus(payload) {
@@ -27,13 +43,14 @@ function registerAutoTelegramHandlers({ bot, config, autoClient }) {
       `Monthly cap: ${limits.maxMonthlyAmount || 0}`,
       `Minimum interval: ${limits.minIntervalMinutes || 0} minutes`,
       "",
-      "SAFE LOCKED MODE can simulate approved plans but cannot build, sign or submit transactions."
+      "Executive Leaders may view status, pause and trigger the emergency stop.",
+      "Only the permanent owner may simulate or resume Auto."
     ].join("\n");
   }
 
   bot.onText(/^\/auto(?:@\w+)?$/, async (msg) => {
-    if (!isOwner(msg)) return ownerRequired(msg);
     try {
+      if (!(await isSafetyExecutive(msg))) return executiveRequired(msg);
       const payload = await autoClient.status();
       return send(msg, formatStatus(payload));
     } catch (error) {
@@ -99,8 +116,8 @@ function registerAutoTelegramHandlers({ bot, config, autoClient }) {
   });
 
   bot.onText(/^\/autopause(?:@\w+)?$/, async (msg) => {
-    if (!isOwner(msg)) return ownerRequired(msg);
     try {
+      if (!(await isSafetyExecutive(msg))) return executiveRequired(msg);
       await autoClient.pause();
       return send(msg, "⏸ Auto simulations paused. Execution remains locked.");
     } catch {
@@ -119,8 +136,8 @@ function registerAutoTelegramHandlers({ bot, config, autoClient }) {
   });
 
   bot.onText(/^\/autoemergency(?:@\w+)?$/, async (msg) => {
-    if (!isOwner(msg)) return ownerRequired(msg);
     try {
+      if (!(await isSafetyExecutive(msg))) return executiveRequired(msg);
       await autoClient.emergencyStop();
       return send(msg, "🛑 Auto emergency stop confirmed. Simulations are paused and execution is locked.");
     } catch {
