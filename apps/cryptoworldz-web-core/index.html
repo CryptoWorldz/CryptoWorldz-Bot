@@ -20,7 +20,7 @@
   <div class="ambient ambient-two"></div>
 
   <header class="site-header">
-    <a class="brand" href="/" aria-label="Worldz home">
+    <a class="brand" href="./" aria-label="Worldz home">
       <span class="brand-emblem">O</span>
       <span>
         <strong id="brand-title">CRYPTOWORLDZ</strong>
@@ -57,10 +57,13 @@
   <script>
     (() => {
       const hostname = location.hostname.replace(/^www\./, '').toLowerCase();
-      const requestedMode = new URLSearchParams(location.search).get('mode');
+      const params = new URLSearchParams(location.search);
+      const requestedMode = params.get('mode');
+      const requestedSite = params.get('site');
+      const pdcPreview = hostname === 'cryptoworldz.github.io' || requestedSite === 'pdc';
       const script = document.createElement('script');
       script.type = 'module';
-      script.src = hostname === 'purplediamondcrew.com'
+      script.src = hostname === 'purplediamondcrew.com' || pdcPreview
         ? './assets/pdc-site.js'
         : hostname === 'oneworldz.com' || requestedMode === 'mission'
           ? './assets/oneworldz.js'
