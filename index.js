@@ -43,7 +43,10 @@ async function start() {
     clientId: process.env.GRACE_X_CLIENT_ID || "",
     clientSecret: process.env.GRACE_X_CLIENT_SECRET || "",
     redirectUri: process.env.GRACE_X_REDIRECT_URI || defaultGraceRedirectUri(config.webhookUrl),
-    encryptionSecret: process.env.GRACE_TOKEN_ENCRYPTION_KEY || process.env.GRACE_API_SECRET || ""
+    encryptionSecret:
+      process.env.GRACE_TOKEN_ENCRYPTION_KEY ||
+      process.env.GRACE_API_SECRET ||
+      config.webhookSecret
   });
   const gracePublisher = createGracePublisher({
     tokenProvider: async (target) => {
