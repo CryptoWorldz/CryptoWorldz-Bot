@@ -1,12 +1,28 @@
 const GRACE_X_OAUTH_COMMANDS = [
-  { command: "connectx", description: "Connect an approved X account to Grace" }
+  { command: "connectx", description: "Connect an approved X account to Grace" },
+  { command: "gracex", description: "Alias for the Grace X connection" },
+  { command: "gracestatus", description: "Owner: check the live Grace X runtime" }
 ];
 
 function registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config }) {
   const send = (msg, text, options) => bot.sendMessage(msg.chat.id, text, options);
   const ownerAllowed = (msg) => String(msg.from?.id || "") === String(config.ownerTelegramId || "");
 
-  bot.onText(/^\/connectx(?:@\w+)?(?:\s+(\d+))?$/, async (msg, match) => {
+  bot.onText(/^\/gracestatus(?:@\w+)?$/, async (msg) => {
+    if (!ownerAllowed(msg)) return send(msg, "⛔ Grace X diagnostics are restricted to the primary owner.");
+    return send(msg, [
+      "✅ Grace X Runtime Check",
+      "",
+      "Build: Executive Leadership 2026-08-06",
+      `OAuth configured: ${graceOAuth.configured() ? "YES" : "NO"}`,
+      "Connection command: /connectx 1",
+      "Alias: /gracex 1",
+      "",
+      "Posting remains approval-controlled and disabled until the owner enables Grace."
+    ].join("\n"));
+  });
+
+  bot.onText(/^\/(?:connectx|gracex)(?:@\w+)?(?:\s+(\d+))?$/, async (msg, match) => {
     if (!ownerAllowed(msg)) return send(msg, "⛔ X account connection is restricted to the primary owner.");
     const accountId = Number(match?.[1] || 1);
     if (!Number.isSafeInteger(accountId) || accountId < 1) {
@@ -14,14 +30,15 @@ function registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config }) {
     }
     if (!graceOAuth.configured()) {
       return send(msg, [
-        "⚠️ Grace X OAuth is built but the X Developer App Client ID is not configured yet.",
+        "⚠️ Grace X OAuth is live, but its Hostinger configuration is incomplete.",
         "",
-        "Required Hostinger settings:",
+        "Check these existing environment variables:",
         "GRACE_X_CLIENT_ID",
+        "GRACE_X_CLIENT_SECRET",
         "GRACE_X_REDIRECT_URI",
-        "GRACE_TOKEN_ENCRYPTION_KEY",
         "",
-        "Do not send passwords, phone login codes or API secrets through Telegram."
+        "The encryption key is supplied securely by the server runtime.",
+        "Do not send passwords, login codes or API secrets through Telegram."
       ].join("\n"));
     }
 
