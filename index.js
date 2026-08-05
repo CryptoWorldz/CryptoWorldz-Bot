@@ -6,6 +6,11 @@ const { createClient } = require("@supabase/supabase-js");
 const { createAutoClient } = require("./src/auto/client");
 const { registerAutoMiniRoutes } = require("./src/auto/zed-router");
 const { registerAutoTelegramHandlers } = require("./src/auto/telegram");
+const { createGracePublisher } = require("./src/grace/adapters");
+const { registerGraceRoutes } = require("./src/grace/http");
+const { createGraceRepository } = require("./src/grace/repository");
+const { GRACE_COMMANDS, registerGraceTelegramHandlers } = require("./src/grace/telegram");
+const { createGraceWorker } = require("./src/grace/worker");
 const { configWarnings, loadConfig } = require("./src/config");
 const { createHttpApp } = require("./src/http");
 const { createRepository } = require("./src/repository");
@@ -19,20 +24,37 @@ async function start() {
   const bot = new TelegramBot(config.botToken);
   const repository = createRepository(supabase);
   const autoClient = createAutoClient(config);
+  const graceRepository = createGraceRepository(supabase, {
+    workspaceSlug: process.env.GRACE_WORKSPACE_SLUG || "cryptoworldz"
+  });
+  const gracePublisher = createGracePublisher();
+  const graceWorker = createGraceWorker({
+    repository: graceRepository,
+    publisher: gracePublisher,
+    intervalMs: Number(process.env.GRACE_WORKER_INTERVAL_MS) || 60000
+  });
 
   registerTelegramHandlers({ bot, repository, config });
   registerAutoTelegramHandlers({ bot, config, autoClient });
+  registerGraceTelegramHandlers({ bot, repository, graceRepository, config });
   const app = createHttpApp({ bot, config, repository });
   registerAutoMiniRoutes({ app, config, autoClient });
+  registerGraceRoutes({
+    app,
+    graceRepository,
+    apiSecret: process.env.GRACE_API_SECRET || ""
+  });
 
   for (const warning of configWarnings(config)) console.warn(warning);
 
   const server = app.listen(config.port, async () => {
     console.log(`CryptoWorldz Zed Bot listening on port ${config.port}`);
+    graceWorker.start();
+    console.log("Grace Social Engine worker started in approval-controlled mode");
 
     const webhookResult = await Promise.allSettled([
       bot.setWebHook(config.webhookUrl, { secret_token: config.webhookSecret }),
-      bot.setMyCommands(PUBLIC_COMMANDS)
+      bot.setMyCommands([...PUBLIC_COMMANDS, ...GRACE_COMMANDS])
     ]);
 
     if (webhookResult[0].status === "fulfilled") {
@@ -56,6 +78,7 @@ async function start() {
 
   const shutdown = (signal) => {
     console.log(`${signal} received; closing HTTP server.`);
+    graceWorker.stop();
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(1), 10000).unref();
   };
@@ -63,7 +86,17 @@ async function start() {
   process.once("SIGTERM", () => shutdown("SIGTERM"));
   process.once("SIGINT", () => shutdown("SIGINT"));
 
-  return { app, autoClient, bot, config, repository, server };
+  return {
+    app,
+    autoClient,
+    bot,
+    config,
+    gracePublisher,
+    graceRepository,
+    graceWorker,
+    repository,
+    server
+  };
 }
 
 start().catch((error) => {
