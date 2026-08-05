@@ -21,6 +21,8 @@ const { createHttpApp } = require("./src/http");
 const { createRepository } = require("./src/repository");
 const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
 
+const RUNTIME_BUILD = "2026-08-06-executive-grace-x";
+
 function defaultGraceRedirectUri(webhookUrl) {
   try {
     return new URL("/grace/oauth/x/callback", webhookUrl).toString();
@@ -68,6 +70,13 @@ async function start() {
   registerGraceTelegramHandlers({ bot, repository, graceRepository, config });
   registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });
   const app = createHttpApp({ bot, config, repository });
+  app.get("/api/public/runtime", (req, res) => res.json({
+    ok: true,
+    build: RUNTIME_BUILD,
+    grace_x_oauth_configured: graceOAuth.configured(),
+    executive_controls: true,
+    posting_enabled: false
+  }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
   registerExecutiveRoutes({ app, repository, supabase, config });
   registerGraceRoutes({ app, graceRepository, graceOAuth, apiSecret: process.env.GRACE_API_SECRET || "" });
@@ -76,6 +85,7 @@ async function start() {
 
   const server = app.listen(config.port, async () => {
     console.log(`CryptoWorldz Zed Bot listening on port ${config.port}`);
+    console.log(`Runtime build ${RUNTIME_BUILD}`);
     graceWorker.start();
     console.log("Grace Social Engine worker started in approval-controlled mode");
 
@@ -137,4 +147,4 @@ start().catch((error) => {
   process.exit(1);
 });
 
-module.exports = { defaultGraceRedirectUri, start };
+module.exports = { RUNTIME_BUILD, defaultGraceRedirectUri, start };
