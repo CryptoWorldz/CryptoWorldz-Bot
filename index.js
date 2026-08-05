@@ -63,12 +63,12 @@ async function start() {
   });
 
   registerTelegramHandlers({ bot, repository, config });
-  registerAutoTelegramHandlers({ bot, config, autoClient });
+  registerAutoTelegramHandlers({ bot, config, autoClient, supabase });
   registerExecutiveTelegramHandlers({ bot, repository, supabase, config });
   registerGraceTelegramHandlers({ bot, repository, graceRepository, config });
   registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });
   const app = createHttpApp({ bot, config, repository });
-  registerAutoMiniRoutes({ app, config, autoClient });
+  registerAutoMiniRoutes({ app, config, autoClient, supabase });
   registerExecutiveRoutes({ app, repository, supabase, config });
   registerGraceRoutes({ app, graceRepository, graceOAuth, apiSecret: process.env.GRACE_API_SECRET || "" });
 
