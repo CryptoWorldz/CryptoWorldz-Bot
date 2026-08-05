@@ -36,10 +36,19 @@ function composeCaption(target) {
 function createGracePublisher(options = {}) {
   const fetchImpl = options.fetchImpl || global.fetch;
   const env = options.env || process.env;
+  const tokenProvider = options.tokenProvider;
   if (typeof fetchImpl !== "function") throw new Error("A Fetch API implementation is required.");
 
+  async function resolveToken(target) {
+    if (typeof tokenProvider === "function") {
+      const oauthToken = await tokenProvider(target);
+      if (oauthToken) return oauthToken;
+    }
+    return readCredential(env, target.credential_secret_ref);
+  }
+
   async function publishToX(target) {
-    const token = readCredential(env, target.credential_secret_ref);
+    const token = await resolveToken(target);
     const text = composeCaption(target);
     if (!text) {
       throw new GracePublishError("The X caption is empty.", {
