@@ -15,6 +15,8 @@
   <link rel="stylesheet" href="./assets/pdc-site.css" />
   <link rel="stylesheet" href="./assets/pdc-asset.css" />
   <link rel="stylesheet" href="./assets/oneworldz.css" />
+  <link rel="stylesheet" href="./assets/worldz-imagery.css" />
+  <link rel="stylesheet" href="./assets/jayjayteamdev.css" />
 </head>
 <body>
   <div class="ambient ambient-one"></div>
@@ -61,6 +63,8 @@
       const params = new URLSearchParams(location.search);
       const requestedMode = params.get('mode');
       const requestedSite = params.get('site');
+      const requestedPage = params.get('page');
+      const jayJayPage = requestedPage === 'jayjayteamdev' || location.pathname.replace(/\/+$/, '').endsWith('/jayjayteamdev');
       const pdcPreview = hostname === 'cryptoworldz.github.io' || requestedSite === 'pdc';
       const comingSoonHosts = new Set([
         'ethworldz.xyz',
@@ -76,18 +80,21 @@
       ]);
       const script = document.createElement('script');
       script.type = 'module';
-      script.src = hostname === 'purplediamondcrew.com' || pdcPreview
-        ? './assets/pdc-site.js'
-        : hostname === 'oneworldz.com' || requestedMode === 'mission'
-          ? './assets/oneworldz.js'
-          : comingSoonHosts.has(hostname) || requestedMode === 'coming-soon'
-            ? './assets/coming-soon.js'
-            : requestedMode === 'directory'
-              ? './assets/pdc-directory.js'
-              : './assets/app.js';
+      script.src = jayJayPage
+        ? './assets/jayjayteamdev.js'
+        : hostname === 'purplediamondcrew.com' || pdcPreview
+          ? './assets/pdc-site.js'
+          : hostname === 'oneworldz.com' || requestedMode === 'mission'
+            ? './assets/oneworldz.js'
+            : comingSoonHosts.has(hostname) || requestedMode === 'coming-soon'
+              ? './assets/coming-soon.js'
+              : requestedMode === 'directory'
+                ? './assets/pdc-directory.js'
+                : './assets/app.js';
       document.body.appendChild(script);
     })();
   </script>
   <script type="module" src="./assets/pdc-asset.js"></script>
+  <script type="module" src="./assets/worldz-imagery.js"></script>
 </body>
 </html>
