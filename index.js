@@ -29,8 +29,9 @@ const { REWARD_SETTLEMENT_COMMANDS, registerRewardSettlementHandlers } = require
 const { registerScopedBroadcastHandlers } = require("./src/scoped-broadcast");
 const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
 const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/websites-telegram");
+const { WORLDZCAST_COMMANDS, registerWorldzCastSystem } = require("./src/worldzcast");
 
-const RUNTIME_BUILD = "2026-08-06-wallet-command-centre";
+const RUNTIME_BUILD = "2026-08-07-worldzcast";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -93,6 +94,7 @@ async function start() {
   registerRewardSettlementHandlers({ bot, repository, supabase, config });
   const app = createHttpApp({ bot, config, repository });
   registerProjectWalletSystem({ app, bot, config, supabase });
+  registerWorldzCastSystem({ app, bot, config, repository, supabase });
   app.get("/api/public/runtime", (req, res) => res.json({
     ok: true,
     build: RUNTIME_BUILD,
@@ -110,6 +112,8 @@ async function start() {
     four_wallet_plan: true,
     profile_contribution_wallets: true,
     transparent_owner_investment_policy: true,
+    worldzcast_enabled: true,
+    worldzcast_member_dms: false,
     posting_enabled: false
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
@@ -145,6 +149,7 @@ async function start() {
         ...REFERRAL_COMMANDS,
         ...REWARD_SETTLEMENT_COMMANDS,
         ...PROJECT_WALLET_COMMANDS,
+        ...WORLDZCAST_COMMANDS,
         ...CAUSE_COMMANDS,
         ...EXECUTIVE_COMMANDS,
         ...GRACE_COMMANDS,
