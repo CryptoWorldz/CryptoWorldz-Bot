@@ -43,14 +43,14 @@
 
   function renderPanel(status) {
     latestStatus = status;
-    const admin = document.getElementById("admin-panel");
-    if (!admin) return false;
+    const root = document.getElementById("worldzcast-root");
+    if (!root) return false;
     let panel = document.getElementById("worldzcast-panel");
     if (!panel) {
       panel = document.createElement("section");
       panel.id = "worldzcast-panel";
       panel.className = "panel worldzcast-panel";
-      admin.appendChild(panel);
+      root.appendChild(panel);
     }
     panel.innerHTML = `<span class="worldzcast-badge">WORLDZCAST™</span><h3>📡 One Post Across CryptoWorldz</h3><p>Create one message with an optional image and send it to every owner-approved CryptoWorldz group, channel or topic after confirmation.</p><p class="worldzcast-status">Active destinations: ${status.targets.length}</p><div class="worldzcast-targets">${targetRows(status.targets)}</div>${status.owner ? '<p><small>Owner setup: run <b>/worldzcaston</b> inside each approved destination. Use <b>/worldzcastoff</b> to remove one.</small></p>' : ""}<form id="worldzcast-form" class="worldzcast-form"><label>Message<textarea name="body" maxlength="8000" required placeholder="Write the Zed, Auto, G.R.A.C.E, rewards or community announcement here..."></textarea></label><label>Optional image<input name="image" type="file" accept="image/jpeg,image/png,image/webp"></label><button class="button" type="submit">Create WorldzCast Draft</button></form>${draftPanel()}<div class="worldzcast-history"><b>Recent WorldzCasts</b>${historyRows(status.posts || [])}</div><div class="panel security"><p>Nothing is sent without confirmation. WorldzCast posts only to approved groups, channels and topics—not member DMs.</p></div>`;
     return true;
@@ -62,7 +62,6 @@
       renderPanel(status);
       return true;
     } catch (error) {
-      if (["broadcast_permission_required", "invalid_init_data", "missing_init_data"].includes(error.code)) return false;
       return false;
     }
   }
@@ -112,12 +111,12 @@
       notify(`WorldzCast draft ready for ${created.target_count} destination${created.target_count === 1 ? "" : "s"}.`);
     } catch (error) {
       const messages = {
-        no_worldzcast_targets: "No WorldzCast destinations are enabled yet.",
         draft_rate_limited: "Too many drafts. Wait one minute.",
         image_too_large: "The image is too large.",
         worldzcast_image_failed: "The image could not be attached securely."
       };
       notify(messages[error.code] || "WorldzCast draft creation failed.");
+      if (currentDraft) renderPanel(latestStatus);
     } finally {
       button.disabled = false;
       button.textContent = "Create WorldzCast Draft";
@@ -160,7 +159,7 @@
 
   async function mount() {
     for (let attempt = 0; attempt < 30; attempt += 1) {
-      if (document.getElementById("admin-panel") && await loadStatus()) return;
+      if (document.getElementById("worldzcast-root") && await loadStatus()) return;
       await new Promise((resolve) => setTimeout(resolve, 400));
     }
   }
