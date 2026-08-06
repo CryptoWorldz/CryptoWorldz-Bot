@@ -7,6 +7,7 @@ const { createAutoClient } = require("./src/auto/client");
 const { registerAutoMiniRoutes } = require("./src/auto/zed-router");
 const { registerAutoTelegramHandlers } = require("./src/auto/telegram");
 const { CAUSE_COMMANDS, registerCauseTelegramHandlers } = require("./src/causes/telegram");
+const { DIRECTORY_COMMANDS, registerCommunityDirectoryHandlers } = require("./src/community-directory");
 const { registerExecutiveRoutes } = require("./src/executive/http");
 const { EXECUTIVE_COMMANDS, registerExecutiveTelegramHandlers } = require("./src/executive/telegram");
 const { createGracePublisher } = require("./src/grace/adapters");
@@ -25,7 +26,7 @@ const { registerScopedBroadcastHandlers } = require("./src/scoped-broadcast");
 const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
 const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/websites-telegram");
 
-const RUNTIME_BUILD = "2026-08-06-auto-dca-grace-websites";
+const RUNTIME_BUILD = "2026-08-06-auto-dca-grace-community-directory";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -77,6 +78,7 @@ async function start() {
   registerGraceTelegramHandlers({ bot, repository, graceRepository, config });
   registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });
   registerWebsiteTelegramHandlers({ bot, config });
+  registerCommunityDirectoryHandlers({ bot, supabase, config });
   const app = createHttpApp({ bot, config, repository });
   app.get("/api/public/runtime", (req, res) => res.json({
     ok: true,
@@ -87,6 +89,7 @@ async function start() {
     grace_manager_role: true,
     auto_dca_controls: true,
     website_directory_commands: true,
+    community_directory_commands: true,
     posting_enabled: false
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
@@ -106,6 +109,7 @@ async function start() {
       bot.setMyCommands([
         ...PUBLIC_COMMANDS,
         ...WEBSITE_COMMANDS,
+        ...DIRECTORY_COMMANDS,
         ...CAUSE_COMMANDS,
         ...EXECUTIVE_COMMANDS,
         ...GRACE_COMMANDS,
