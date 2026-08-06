@@ -2,7 +2,7 @@ const { parseSimpleRaid } = require("./core");
 
 const RAID_CREATE_PATTERN = /^\/raid(?:@\w+)?\s+([\s\S]+)$/;
 const REWARD_PLAN_PATTERN = /^\/rewardplan(?:@\w+)?$/i;
-const REWARD_BUDGET_PATTERN = /^\/rewardbudget(?:@\w+)?(?:\s+([0-9]+(?:\.[0-9]{1,2})?))?$/i;
+const REWARD_BUDGET_PATTERN = /^\/rewardbudget(?:@\w+)?(?:\s+([0-9]+(?:\.[0-9]{1,2})?|off))?$/i;
 const SPECIAL_REWARD_PATTERN = /^\/specialreward(?:@\w+)?(?:\s+(\d+)\s*\|\s*([\s\S]+))?$/i;
 
 function formatAud(cents) {
@@ -140,7 +140,7 @@ function registerRewardPolicyHandlers({ bot, repository, supabase, config }) {
   bot.onText(REWARD_BUDGET_PATTERN, async (msg, match) => {
     if (!ownerAllowed(msg)) return send(msg.chat.id, "⛔ Owner access required.");
 
-    const supplied = String((match && match[1]) || "").trim();
+    const supplied = String((match && match[1]) || "").trim().toLowerCase();
     if (!supplied) {
       try {
         const status = await getBudgetStatus();
@@ -151,6 +151,10 @@ function registerRewardPolicyHandlers({ bot, repository, supabase, config }) {
       } catch (error) {
         return send(msg.chat.id, "❌ Zed couldn't load the weekly reward budget.");
       }
+    }
+
+    if (supplied === "off") {
+      return send(msg.chat.id, "🛡 The launch reward plan cannot be switched off accidentally. Set a smaller amount from AUD $1.00 to AUD $80.00 instead.");
     }
 
     const cents = Math.round(Number(supplied) * 100);
