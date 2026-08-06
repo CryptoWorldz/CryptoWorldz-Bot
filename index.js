@@ -19,10 +19,12 @@ const { GRACE_COMMANDS, registerGraceTelegramHandlers } = require("./src/grace/t
 const { createGraceWorker } = require("./src/grace/worker");
 const { configWarnings, loadConfig } = require("./src/config");
 const { createHttpApp } = require("./src/http");
+const { registerRoleProfileHandler } = require("./src/profile-role");
 const { createRepository } = require("./src/repository");
+const { registerScopedBroadcastHandlers } = require("./src/scoped-broadcast");
 const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
 
-const RUNTIME_BUILD = "2026-08-06-impact-cause-register";
+const RUNTIME_BUILD = "2026-08-06-auto-dca-grace-music";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -66,6 +68,8 @@ async function start() {
   });
 
   registerTelegramHandlers({ bot, repository, config });
+  registerRoleProfileHandler({ bot, repository, config, supabase });
+  registerScopedBroadcastHandlers({ bot, repository, config });
   registerAutoTelegramHandlers({ bot, config, autoClient, supabase });
   registerCauseTelegramHandlers({ bot, repository, supabase, config });
   registerExecutiveTelegramHandlers({ bot, repository, supabase, config });
@@ -78,6 +82,8 @@ async function start() {
     grace_x_oauth_configured: graceOAuth.configured(),
     executive_controls: true,
     impact_cause_register: true,
+    grace_manager_role: true,
+    auto_dca_controls: true,
     posting_enabled: false
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
