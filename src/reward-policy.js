@@ -2,6 +2,7 @@ const { parseSimpleRaid } = require("./core");
 
 const RAID_CREATE_PATTERN = /^\/raid(?:@\w+)?\s+([\s\S]+)$/;
 const REWARD_PLAN_PATTERN = /^\/rewardplan(?:@\w+)?$/i;
+const REWARD_BUDGET_PATTERN = /^\/rewardbudget(?:@\w+)?(?:\s+([0-9]+(?:\.[0-9]{1,2})?))?$/i;
 const SPECIAL_REWARD_PATTERN = /^\/specialreward(?:@\w+)?(?:\s+(\d+)\s*\|\s*([\s\S]+))?$/i;
 
 function formatAud(cents) {
@@ -95,6 +96,7 @@ function registerRewardPolicyHandlers({ bot, repository, supabase, config }) {
   if (typeof bot.removeTextListener === "function") {
     bot.removeTextListener(RAID_CREATE_PATTERN);
     bot.removeTextListener(REWARD_PLAN_PATTERN);
+    bot.removeTextListener(REWARD_BUDGET_PATTERN);
   }
 
   bot.onText(RAID_CREATE_PATTERN, async (msg, match) => {
@@ -132,6 +134,49 @@ function registerRewardPolicyHandlers({ bot, repository, supabase, config }) {
         name: error && error.name ? error.name : "Error"
       });
       return send(msg.chat.id, "❌ Zed couldn't load the weekly reward plan.");
+    }
+  });
+
+  bot.onText(REWARD_BUDGET_PATTERN, async (msg, match) => {
+    if (!ownerAllowed(msg)) return send(msg.chat.id, "⛔ Owner access required.");
+
+    const supplied = String((match && match[1]) || "").trim();
+    if (!supplied) {
+      try {
+        const status = await getBudgetStatus();
+        return send(
+          msg.chat.id,
+          `${buildLaunchRewardPlan(status)}\n\nThe planning budget is protected at a maximum of AUD $80.00.`
+        );
+      } catch (error) {
+        return send(msg.chat.id, "❌ Zed couldn't load the weekly reward budget.");
+      }
+    }
+
+    const cents = Math.round(Number(supplied) * 100);
+    if (!Number.isSafeInteger(cents) || cents < 100 || cents > 8000) {
+      return send(msg.chat.id, "❌ Set a weekly planning budget from AUD $1.00 to the protected maximum of AUD $80.00.");
+    }
+
+    try {
+      const { error } = await supabase
+        .from("reward_budget_settings")
+        .update({
+          weekly_budget_cents: cents,
+          updated_by: Number(msg.from.id),
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", "global");
+      if (error) throw error;
+      return send(
+        msg.chat.id,
+        `✅ Weekly planning budget updated to ${formatAud(cents)}.\n\nThe protected point pools remain fixed:\n🔗 Referrals: 1,000 LP\n🚀 Raaiiidds: 1,500 LP\n🎁 Buffer: 500 LP\n🚨 Hard ceiling: 3,000 LP`
+      );
+    } catch (error) {
+      console.error("Protected reward budget update failed", {
+        name: error && error.name ? error.name : "Error"
+      });
+      return send(msg.chat.id, "❌ Zed couldn't update the weekly reward budget.");
     }
   });
 
@@ -191,6 +236,7 @@ function registerRewardPolicyHandlers({ bot, repository, supabase, config }) {
 
 module.exports = {
   RAID_CREATE_PATTERN,
+  REWARD_BUDGET_PATTERN,
   REWARD_PLAN_PATTERN,
   SPECIAL_REWARD_PATTERN,
   buildLaunchRewardPlan,
