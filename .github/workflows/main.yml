@@ -19,7 +19,7 @@ concurrency:
 jobs:
   test-and-verify:
     name: Test and Verify Zed Bot
-    runs-on: macos-14
+    runs-on: ubuntu-slim
     timeout-minutes: 15
 
     steps:
