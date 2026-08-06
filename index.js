@@ -21,6 +21,7 @@ const { createGraceWorker } = require("./src/grace/worker");
 const { configWarnings, loadConfig } = require("./src/config");
 const { createHttpApp } = require("./src/http");
 const { registerRoleProfileHandler } = require("./src/profile-role");
+const { PROJECT_WALLET_COMMANDS, registerProjectWalletSystem } = require("./src/project-wallets");
 const { REFERRAL_COMMANDS, registerReferralTelegramHandlers } = require("./src/referrals");
 const { createRepository } = require("./src/repository");
 const { registerRewardPolicyHandlers } = require("./src/reward-policy");
@@ -29,7 +30,7 @@ const { registerScopedBroadcastHandlers } = require("./src/scoped-broadcast");
 const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
 const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/websites-telegram");
 
-const RUNTIME_BUILD = "2026-08-06-usdc-reward-funding";
+const RUNTIME_BUILD = "2026-08-06-wallet-command-centre";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -91,6 +92,7 @@ async function start() {
   registerRewardPolicyHandlers({ bot, repository, supabase, config });
   registerRewardSettlementHandlers({ bot, repository, supabase, config });
   const app = createHttpApp({ bot, config, repository });
+  registerProjectWalletSystem({ app, bot, config, supabase });
   app.get("/api/public/runtime", (req, res) => res.json({
     ok: true,
     build: RUNTIME_BUILD,
@@ -105,6 +107,9 @@ async function start() {
     protected_reward_pools: true,
     usdc_reward_funding: true,
     reward_asset_choices: true,
+    four_wallet_plan: true,
+    profile_contribution_wallets: true,
+    transparent_owner_investment_policy: true,
     posting_enabled: false
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
@@ -139,6 +144,7 @@ async function start() {
         ...DIRECTORY_COMMANDS,
         ...REFERRAL_COMMANDS,
         ...REWARD_SETTLEMENT_COMMANDS,
+        ...PROJECT_WALLET_COMMANDS,
         ...CAUSE_COMMANDS,
         ...EXECUTIVE_COMMANDS,
         ...GRACE_COMMANDS,

@@ -6,8 +6,9 @@
   <meta name="theme-color" content="#09040f">
   <title>CryptoWorldz Command Centre</title>
   <script src="https://telegram.org/js/telegram-web-app.js?63"></script>
-  <link rel="stylesheet" href="/miniapp/styles.css?v=3.0.5">
+  <link rel="stylesheet" href="/miniapp/styles.css?v=3.0.6">
   <link rel="stylesheet" href="/miniapp/impact.css?v=1.0.0">
+  <link rel="stylesheet" href="/miniapp/contributions.css?v=1.0.0">
   <style>
     .kitty-card{overflow:hidden}
     .kitty-address{display:flex;flex-direction:column;gap:7px;margin:16px 0 4px;padding:13px 15px;background:rgba(21,9,35,.8);border:1px solid var(--line);border-radius:14px;min-width:0}
@@ -50,7 +51,7 @@
 
       <section id="home" class="screen active"><div id="home-impact"></div><div id="current-mission"></div><div id="home-rewards"></div></section>
       <section id="missions" class="screen"><div class="section-title"><h2>🚀 Active Raaiiidds</h2></div><div id="mission-list"></div></section>
-      <section id="profile" class="screen"><div class="section-title"><h2>🏆 Legend Profile</h2></div><div id="profile-card"></div></section>
+      <section id="profile" class="screen"><div class="section-title"><h2>🏆 Legend Profile</h2></div><div id="profile-card"></div><div id="profile-impact"></div><div id="profile-contributions"></div></section>
       <section id="leaderboard" class="screen"><div class="section-title"><h2>🏅 Top Legends</h2></div><div id="leaderboard-list"></div></section>
       <section id="rewards" class="screen"><div class="section-title"><h2>🎁 Reward History</h2></div><div id="reward-list"></div></section>
       <section id="community" class="screen"><div class="section-title"><h2>🌍 Community</h2></div><div id="community-links"></div><div class="panel security"><b>Wallet Security</b><p>⚠️ Zed will never ask for your seed phrase or private key.</p></div></section>
@@ -68,7 +69,8 @@
     <button data-screen="profile"><span>👤</span>Profile</button>
     <button data-screen="community"><span>🌍</span>More</button>
   </nav>
-  <script src="/miniapp/app.js?v=3.0.5" defer></script>
+  <script src="/miniapp/app.js?v=3.0.6" defer></script>
+  <script src="/miniapp/contributions.js?v=1.0.0" defer></script>
   <script src="/miniapp/auto-owner.js?v=2.0.0" defer></script>
   <script src="/miniapp/executive-admin.js?v=1.0.0" defer></script>
 </body>
