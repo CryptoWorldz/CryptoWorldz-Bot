@@ -33,7 +33,7 @@ const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/web
 const { WORK_EVIDENCE_COMMANDS, registerWorkEvidenceHandlers } = require("./src/work-evidence");
 const { WORLDZCAST_COMMANDS, registerWorldzCastSystem } = require("./src/worldzcast");
 
-const RUNTIME_BUILD = "2026-08-07-grace-workspace-auto-wallet";
+const RUNTIME_BUILD = "2026-08-07-grace-x-confidential-oauth";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -41,6 +41,14 @@ function defaultGraceRedirectUri(webhookUrl) {
   } catch {
     return "";
   }
+}
+
+function missingGraceXSecretError() {
+  const error = new Error(
+    "Grace X is configured as a confidential Web/Bot app, but its Client Secret is missing from the server. Add GRACE_X_CLIENT_SECRET in Hostinger using the value from X Developer Portal → Keys and Tokens."
+  );
+  error.code = "X_CLIENT_SECRET_MISSING";
+  return error;
 }
 
 async function start() {
@@ -54,18 +62,49 @@ async function start() {
   const graceWorkspaceSlug = String(process.env.GRACE_WORKSPACE_SLUG || "cryptoworldz")
     .trim()
     .toLowerCase();
+  const graceXClientId = String(
+    process.env.GRACE_X_CLIENT_ID ||
+      process.env.X_CLIENT_ID ||
+      process.env.TWITTER_CLIENT_ID ||
+      ""
+  ).trim();
+  const graceXClientSecret = String(
+    process.env.GRACE_X_CLIENT_SECRET ||
+      process.env.X_CLIENT_SECRET ||
+      process.env.TWITTER_CLIENT_SECRET ||
+      ""
+  ).trim();
+  const graceXRedirectUri = String(
+    process.env.GRACE_X_REDIRECT_URI || defaultGraceRedirectUri(config.webhookUrl)
+  ).trim();
   const graceRepository = createGraceRepository(supabase, { workspaceSlug: graceWorkspaceSlug });
   const graceOAuthRepository = createGraceOAuthRepository(supabase, { workspaceSlug: graceWorkspaceSlug });
-  const graceOAuth = createXOAuthService({
+  const graceOAuthBase = createXOAuthService({
     repository: graceOAuthRepository,
-    clientId: process.env.GRACE_X_CLIENT_ID || "",
-    clientSecret: process.env.GRACE_X_CLIENT_SECRET || "",
-    redirectUri: process.env.GRACE_X_REDIRECT_URI || defaultGraceRedirectUri(config.webhookUrl),
+    clientId: graceXClientId,
+    clientSecret: graceXClientSecret,
+    redirectUri: graceXRedirectUri,
     encryptionSecret:
       process.env.GRACE_TOKEN_ENCRYPTION_KEY ||
       process.env.GRACE_API_SECRET ||
       config.webhookSecret
   });
+  const graceOAuth = {
+    ...graceOAuthBase,
+    configured: () => Boolean(graceXClientSecret && graceOAuthBase.configured()),
+    beginConnection: (...args) => {
+      if (!graceXClientSecret) throw missingGraceXSecretError();
+      return graceOAuthBase.beginConnection(...args);
+    },
+    completeConnection: (...args) => {
+      if (!graceXClientSecret) throw missingGraceXSecretError();
+      return graceOAuthBase.completeConnection(...args);
+    },
+    getAccessToken: (...args) => {
+      if (!graceXClientSecret) throw missingGraceXSecretError();
+      return graceOAuthBase.getAccessToken(...args);
+    }
+  };
   const gracePublisher = createGracePublisher({
     tokenProvider: async (target) => {
       if (!graceOAuth.configured()) return null;
@@ -105,6 +144,9 @@ async function start() {
     ok: true,
     build: RUNTIME_BUILD,
     grace_x_oauth_configured: graceOAuth.configured(),
+    grace_x_confidential_client: true,
+    grace_x_client_id_configured: Boolean(graceXClientId),
+    grace_x_client_secret_configured: Boolean(graceXClientSecret),
     executive_controls: true,
     impact_cause_register: true,
     grace_manager_role: true,
@@ -220,4 +262,4 @@ start().catch((error) => {
   process.exit(1);
 });
 
-module.exports = { RUNTIME_BUILD, defaultGraceRedirectUri, start };
+module.exports = { RUNTIME_BUILD, defaultGraceRedirectUri, missingGraceXSecretError, start };
