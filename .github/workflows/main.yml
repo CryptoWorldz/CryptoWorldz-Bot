@@ -19,7 +19,7 @@ concurrency:
 jobs:
   test-and-verify:
     name: Test and Verify Zed Bot
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 15
 
     steps:
