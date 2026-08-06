@@ -1,5 +1,6 @@
 name: Verify Complete Production on Slim Runner
 
+# Registered production certification workflow. Updating this marker triggers an independent run.
 on:
   push:
     branches: [main]
