@@ -17,19 +17,49 @@ function validUuid(value) {
 function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorker }) {
   const app = express();
   const router = express.Router();
+  const dcaPrepared = Boolean(dcaRepository && trader);
+  const lockedDcaStatus = Object.freeze({
+    mode: "owner_dca",
+    prepared: false,
+    enabled: false,
+    paused: true,
+    emergency_stop: true,
+    execution_enabled: false,
+    signer_ready: false,
+    api_ready: false,
+    wallet_address: null,
+    wallet_matches_signer: false,
+    active_schedules: 0,
+    draft_schedules: 0,
+    completed_schedules: 0,
+    total_executions: 0
+  });
+
   app.disable("x-powered-by");
   app.use(express.json({ limit: "32kb", type: "application/json" }));
 
+  function requireDca(res) {
+    if (dcaPrepared) return true;
+    res.status(503).json({ ok: false, error: "dca_not_prepared" });
+    return false;
+  }
+
+  function dcaRuntime(settings) {
+    return trader && typeof trader.runtimeStatus === "function"
+      ? trader.runtimeStatus(settings?.wallet_address)
+      : { apiReady: false, signerReady: false, walletMatches: false };
+  }
+
   app.get("/health", async (req, res) => {
-    let dca = { prepared: Boolean(dcaRepository), execution_enabled: false };
+    let dca = { ...lockedDcaStatus, prepared: dcaPrepared };
     try {
-      if (dcaRepository) {
+      if (dcaPrepared) {
         const settings = await dcaRepository.getSettings();
         const counts = await dcaRepository.countStatus();
-        dca = dcaPublicStatus(settings, counts, trader.runtimeStatus(settings.wallet_address));
+        dca = dcaPublicStatus(settings, counts, dcaRuntime(settings));
       }
     } catch {
-      dca = { prepared: true, database_ready: false, execution_enabled: false };
+      dca = { ...lockedDcaStatus, prepared: true, database_ready: false };
     }
     return res.json({ ok: true, service: "Diamond Buy Auto", legacy_mode: "safe_locked", dca });
   });
@@ -46,9 +76,21 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   }
 
   async function combinedStatus() {
-    const [settings, tokens, dcaSettings, dcaCounts, schedules] = await Promise.all([
+    const [settings, tokens] = await Promise.all([
       repository.getSettings(),
-      repository.listAllowlistedTokens(),
+      repository.listAllowlistedTokens()
+    ]);
+    if (!dcaPrepared) {
+      return {
+        ok: true,
+        status: publicStatus(settings, { allowlistedTokens: tokens.length }),
+        tokens,
+        dca: lockedDcaStatus,
+        dca_schedules: []
+      };
+    }
+
+    const [dcaSettings, dcaCounts, schedules] = await Promise.all([
       dcaRepository.getSettings(),
       dcaRepository.countStatus(),
       dcaRepository.listSchedules(25)
@@ -57,7 +99,7 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
       ok: true,
       status: publicStatus(settings, { allowlistedTokens: tokens.length }),
       tokens,
-      dca: dcaPublicStatus(dcaSettings, dcaCounts, trader.runtimeStatus(dcaSettings.wallet_address)),
+      dca: dcaPublicStatus(dcaSettings, dcaCounts, dcaRuntime(dcaSettings)),
       dca_schedules: schedules
     };
   }
@@ -94,11 +136,13 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   router.post("/pause", async (req, res) => {
     try {
       const settings = await repository.setPaused({ paused: true, actorTelegramId: req.ownerTelegramId });
-      await dcaRepository.setControl({
-        patch: { paused: true, execution_enabled: false },
-        action: "dca_paused",
-        actorTelegramId: req.ownerTelegramId
-      });
+      if (dcaPrepared) {
+        await dcaRepository.setControl({
+          patch: { paused: true, execution_enabled: false },
+          action: "dca_paused",
+          actorTelegramId: req.ownerTelegramId
+        });
+      }
       return res.json({ ok: true, status: publicStatus(settings) });
     } catch {
       return res.status(500).json({ ok: false, error: "auto_pause_failed" });
@@ -117,11 +161,13 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   router.post("/emergency-stop", async (req, res) => {
     try {
       const settings = await repository.emergencyStop(req.ownerTelegramId);
-      await dcaRepository.setControl({
-        patch: { enabled: false, paused: true, emergency_stop: true, execution_enabled: false },
-        action: "dca_emergency_stop",
-        actorTelegramId: req.ownerTelegramId
-      });
+      if (dcaPrepared) {
+        await dcaRepository.setControl({
+          patch: { enabled: false, paused: true, emergency_stop: true, execution_enabled: false },
+          action: "dca_emergency_stop",
+          actorTelegramId: req.ownerTelegramId
+        });
+      }
       return res.json({ ok: true, status: publicStatus(settings) });
     } catch {
       return res.status(500).json({ ok: false, error: "auto_emergency_stop_failed" });
@@ -129,12 +175,13 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   });
 
   router.get("/dca", async (req, res) => {
+    if (!requireDca(res)) return undefined;
     try {
       const settings = await dcaRepository.getSettings();
       const counts = await dcaRepository.countStatus();
       return res.json({
         ok: true,
-        dca: dcaPublicStatus(settings, counts, trader.runtimeStatus(settings.wallet_address)),
+        dca: dcaPublicStatus(settings, counts, dcaRuntime(settings)),
         schedules: await dcaRepository.listSchedules(100),
         tokens: await dcaRepository.listAllowlistedTokens()
       });
@@ -145,17 +192,19 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   });
 
   router.post("/dca/wallet", async (req, res) => {
+    if (!requireDca(res)) return undefined;
     const walletAddress = String(req.body?.wallet_address || "").trim();
     if (!isValidSolanaAddress(walletAddress)) return res.status(400).json({ ok: false, error: "invalid_wallet_address" });
     try {
       const settings = await dcaRepository.setWalletAddress({ walletAddress, actorTelegramId: req.ownerTelegramId });
-      return res.json({ ok: true, settings, runtime: trader.runtimeStatus(settings.wallet_address) });
+      return res.json({ ok: true, settings, runtime: dcaRuntime(settings) });
     } catch {
       return res.status(500).json({ ok: false, error: "dca_wallet_update_failed" });
     }
   });
 
   router.post("/dca/limits", async (req, res) => {
+    if (!requireDca(res)) return undefined;
     const fields = ["max_order_amount", "max_daily_amount", "max_weekly_amount", "max_monthly_amount", "min_interval_minutes", "max_slippage_bps", "max_price_impact_bps"];
     const patch = {};
     for (const field of fields) {
@@ -174,6 +223,7 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   });
 
   router.post("/dca/schedules", async (req, res) => {
+    if (!requireDca(res)) return undefined;
     try {
       const [settings, tokens] = await Promise.all([
         dcaRepository.getSettings(),
@@ -194,6 +244,7 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   });
 
   router.post("/dca/schedules/:id/:action", async (req, res) => {
+    if (!requireDca(res)) return undefined;
     const id = String(req.params.id || "");
     const action = String(req.params.action || "").toLowerCase();
     if (!validUuid(id)) return res.status(400).json({ ok: false, error: "invalid_schedule_id" });
@@ -203,7 +254,7 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
     try {
       if (["start", "resume"].includes(action)) {
         const settings = await dcaRepository.getSettings();
-        const runtime = trader.runtimeStatus(settings.wallet_address);
+        const runtime = dcaRuntime(settings);
         if (!settings.enabled || !settings.execution_enabled || settings.paused || settings.emergency_stop || !runtime.walletMatches || !runtime.apiReady || !runtime.signerReady) {
           return res.status(409).json({ ok: false, error: "dca_activation_incomplete", runtime });
         }
@@ -216,9 +267,10 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   });
 
   router.post("/dca/enable", async (req, res) => {
+    if (!requireDca(res)) return undefined;
     try {
       const settings = await dcaRepository.getSettings();
-      const runtime = trader.runtimeStatus(settings.wallet_address);
+      const runtime = dcaRuntime(settings);
       if (!runtime.apiReady || !runtime.signerReady || !runtime.walletMatches) {
         return res.status(409).json({ ok: false, error: "dca_runtime_not_ready", runtime });
       }
@@ -234,6 +286,7 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   });
 
   router.post("/dca/disable", async (req, res) => {
+    if (!requireDca(res)) return undefined;
     try {
       const settings = await dcaRepository.setControl({
         patch: { enabled: false, paused: true, execution_enabled: false },
@@ -247,6 +300,7 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   });
 
   router.post("/dca/tick", async (req, res) => {
+    if (!requireDca(res) || !dcaWorker) return undefined;
     try {
       await dcaWorker.tick();
       return res.json({ ok: true });
