@@ -1,5 +1,6 @@
 (() => {
   const host = location.hostname.replace(/^www\./, '').toLowerCase();
+  const pathname = location.pathname.replace(/\/+$/, '').toLowerCase();
   const params = new URLSearchParams(location.search);
 
   const hostMap = {
@@ -24,6 +25,35 @@
     'learn.oneworldz.com': 'learnworldz'
   };
 
+  const previewPathMap = {
+    '/purple-diamond-crew': 'purplediamondcrew',
+    '/worldz/oneworldz': 'oneworldz',
+    '/worldz/cryptoworldz': 'cryptoworldz',
+    '/worldz/solworldz': 'solworldz',
+    '/worldz/ethworldz': 'ethworldz',
+    '/worldz/baseworldz': 'baseworldz',
+    '/worldz/bnbworldz': 'bnbworldz',
+    '/worldz/xrpworldz': 'xrpworldz',
+    '/worldz/suiworldz': 'suiworldz',
+    '/worldz/hyperworldz': 'hyperworldz',
+    '/worldz/robinworldz': 'robinworldz',
+    '/worldz/bitcoinworldz': 'bitcoinworldz',
+    '/worldz/bitworldz': 'bitcoinworldz',
+    '/worldz/hodlerworldz': 'hodlerworldz',
+    '/worldz/impactbased': 'impactbased',
+    '/worldz/impact': 'impactbased',
+    '/worldz/law': 'robinhoodlaw',
+    '/worldz/learn': 'learnworldz'
+  };
+
+  const requestedAliases = {
+    pdc: 'purplediamondcrew',
+    impact: 'impactbased',
+    law: 'robinhoodlaw',
+    learn: 'learnworldz',
+    bitworldz: 'bitcoinworldz'
+  };
+
   const visuals = {
     cryptoworldz: { title: 'CRYPTOWORLDZ', subtitle: 'ZED • GRACE • AUTO', icon: 'CW', accent: '#b96cff', accent2: '#46d9ff', caption: 'Command Centre systems connected through one secure ecosystem.' },
     oneworldz: { title: 'ONEWORLDZ', subtitle: 'ONE VISION', icon: '1W', accent: '#b96cff', accent2: '#f2ca59', caption: 'One global gateway for action, learning, dignity and connected Worldz.' },
@@ -44,8 +74,10 @@
   };
 
   function resolveVisual() {
-    const requested = params.get('world') || params.get('site');
+    const rawRequested = String(params.get('world') || params.get('site') || '').toLowerCase();
+    const requested = requestedAliases[rawRequested] || rawRequested;
     if (requested && visuals[requested]) return requested;
+    if (previewPathMap[pathname]) return previewPathMap[pathname];
     if (params.get('mode') === 'impact') return 'impactbased';
     if (params.get('mode') === 'law') return 'robinhoodlaw';
     if (params.get('mode') === 'learn') return 'learnworldz';
@@ -99,7 +131,7 @@
   }
 
   function addFounderSpotlight() {
-    if (host !== 'oneworldz.com' || document.querySelector('.worldz-founder-strip')) return;
+    if (resolveVisual() !== 'oneworldz' || document.querySelector('.worldz-founder-strip')) return;
     const hero = document.querySelector('#app .ow-hero, #app .hero');
     if (!hero) return;
     const strip = document.createElement('section');
