@@ -84,7 +84,7 @@ for (const hostname of [
   'law.oneworldz.com',
   'learn.oneworldz.com'
 ]) {
-  assert.ok(hostSource.includes(`\"${hostname}\"`), `Zed host routing is missing ${hostname}`);
+  assert.ok(hostSource.includes(`"${hostname}"`), `Zed host routing is missing ${hostname}`);
 }
 
 assert.match(hostSource, /pdc-asset\.js/, 'PDC Hope Chest fallback asset route is missing');
