@@ -18,10 +18,12 @@ test("investment funding parser accepts an AUD allocation, USDC amount and Solan
     usdc: 26.15,
     signature
   });
-  assert.equal(parseInvestmentFunding(`101 | 70 | ${signature}`).ok, false);
+  assert.equal(parseInvestmentFunding(`200 | 140 | ${signature}`).ok, true);
+  assert.equal(parseInvestmentFunding(`201 | 140 | ${signature}`).ok, false);
   assert.equal(parseInvestmentFunding("40 | 26.15 | bad").ok, false);
 });
 
-test("AUD values are formatted for the owner funding plan", () => {
+test("AUD values are formatted for owner funding controls", () => {
   assert.equal(formatAud(10000), "AUD $100.00");
+  assert.equal(formatAud(20000), "AUD $200.00");
 });

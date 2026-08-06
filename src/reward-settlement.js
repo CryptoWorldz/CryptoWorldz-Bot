@@ -30,7 +30,7 @@ function parseFundingRecord(value) {
   const signature = parts[2];
   const audCents = Math.round(audDollars * 100);
 
-  if (!Number.isFinite(audDollars) || audCents < 1 || audCents > 8000) {
+  if (!Number.isFinite(audDollars) || audCents < 1 || audCents > 20000) {
     return { ok: false, error: "invalid_aud_value" };
   }
   if (!Number.isFinite(usdcAmount) || usdcAmount <= 0 || usdcAmount > 1000000) {
@@ -55,19 +55,21 @@ function buildFundingPlan(status, treasuryAccount = null) {
   return [
     "💰 CryptoWorldz Weekly Reward Funding",
     "",
-    `🎯 Weekly limit: ${formatAud(status.weekly_target_aud_cents)}`,
-    `⭐ Reward ceiling: ${Number(status.weekly_target_points) || 0} LP`,
+    `🎯 Operating target: ${formatAud(status.weekly_target_aud_cents)}`,
+    `🛡 Absolute wallet deposit-recording cap: ${formatAud(status.weekly_max_aud_cents)}`,
+    `⭐ Reward hard ceiling: ${Number(status.weekly_target_points) || 0} LP`,
     `🏦 Funding asset: ${status.funding_asset} on Solana`,
     `✅ Recorded this week: ${formatAud(status.recorded_aud_cents)}`,
-    `📊 Remaining this week: ${formatAud(status.remaining_aud_cents)}`,
+    `📊 Target remaining: ${formatAud(status.remaining_aud_cents)}`,
+    `🚨 Hard-cap remaining: ${formatAud(status.max_remaining_aud_cents)}`,
     "",
-    "Planned deposits:",
+    "Planned operating deposits:",
     ...(rows.length ? rows : ["• No active deposit schedule"]),
     wallet,
     "",
     "Members may choose USDC or SOL. USDC is the default. A SOL reward keeps the same USDC value and is converted using the current quote only when the payout is approved.",
     "",
-    "No automatic transfers are enabled. Deposits and payouts remain owner-controlled and require an on-chain transaction."
+    "The AUD $200 wallet cap is an emergency maximum, not a spending recommendation. No automatic transfers are enabled."
   ].join("\n");
 }
 
@@ -168,7 +170,7 @@ function registerRewardSettlementHandlers({ bot, repository, supabase, config })
     if (!parsed.ok) {
       return send(
         msg.chat.id,
-        "❌ Use: /funded AUD value | USDC amount | Solana transaction signature\nExample: /funded 40 | 26.15 | 5K...\n\nThe AUD value is the part of the weekly AUD $80 limit; the actual USDC amount is recorded from your transfer."
+        "❌ Use: /funded AUD value | USDC amount | Solana transaction signature\nExample: /funded 40 | 26.15 | 5K...\n\nOperating target: AUD $100. Absolute weekly wallet-recording cap: AUD $200."
       );
     }
 
@@ -182,10 +184,10 @@ function registerRewardSettlementHandlers({ bot, repository, supabase, config })
       if (error) throw error;
       const result = Array.isArray(data) ? data[0] : data;
 
-      if (!result || result.outcome === "weekly_target_exceeded") {
+      if (!result || result.outcome === "weekly_max_exceeded") {
         return send(
           msg.chat.id,
-          `🛑 That entry would exceed the AUD $80 weekly funding limit.\n\nAlready recorded: ${formatAud(result ? result.weekly_recorded_aud_cents : 0)}\nRemaining: ${formatAud(result ? result.weekly_remaining_aud_cents : 0)}`
+          `🛑 That entry would exceed the AUD $200 weekly Reward Wallet cap.\n\nAlready recorded: ${formatAud(result ? result.weekly_recorded_aud_cents : 0)}\nHard-cap remaining: ${formatAud(result ? result.weekly_max_remaining_aud_cents : 0)}`
         );
       }
       if (result.outcome === "duplicate_transaction") {
@@ -197,7 +199,7 @@ function registerRewardSettlementHandlers({ bot, repository, supabase, config })
 
       return send(
         msg.chat.id,
-        `✅ USDC reward funding recorded.\n\n💵 AUD allocation: ${formatAud(parsed.audCents)}\n🏦 Deposited: ${formatUsdc(parsed.usdcAmount)}\n📊 Weekly recorded total: ${formatAud(result.weekly_recorded_aud_cents)}\n🎯 Weekly remaining: ${formatAud(result.weekly_remaining_aud_cents)}\n\nThis records the owner-provided transaction reference; it does not authorize automatic spending.`
+        `✅ USDC reward funding recorded.\n\n💵 AUD allocation: ${formatAud(parsed.audCents)}\n🏦 Deposited: ${formatUsdc(parsed.usdcAmount)}\n📊 Weekly recorded total: ${formatAud(result.weekly_recorded_aud_cents)}\n🎯 Operating-target remaining: ${formatAud(result.weekly_remaining_aud_cents)}\n🛡 Hard-cap remaining: ${formatAud(result.weekly_max_remaining_aud_cents)}\n\nThis records the owner-provided transaction reference; it does not authorize automatic spending.`
       );
     } catch (error) {
       console.error("Reward funding record failed", {

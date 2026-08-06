@@ -35,7 +35,7 @@ function parseInvestmentFunding(value) {
   const usdc = Number(parts[1]);
   const signature = parts[2];
   const audCents = Math.round(aud * 100);
-  if (!Number.isFinite(aud) || audCents < 1 || audCents > 10000) return { ok: false };
+  if (!Number.isFinite(aud) || audCents < 1 || audCents > 20000) return { ok: false };
   if (!Number.isFinite(usdc) || usdc <= 0 || usdc > 1000000) return { ok: false };
   if (!SOLANA_SIGNATURE_PATTERN.test(signature)) return { ok: false };
   return { ok: true, audCents, usdc, signature };
@@ -57,7 +57,7 @@ function registerProjectWalletSystem({ app, bot, config, supabase }) {
   async function listWallets() {
     const { data, error } = await supabase
       .from("project_wallets")
-      .select("purpose,label,network,public_address,wallet_type,control_policy,status,contribution_enabled,accepted_assets,notes,updated_at")
+      .select("purpose,label,network,public_address,wallet_type,control_policy,status,contribution_enabled,accepted_assets,notes,weekly_owner_deposit_cap_aud_cents,updated_at")
       .order("purpose", { ascending: true });
     if (error) throw error;
     return data || [];
@@ -66,7 +66,7 @@ function registerProjectWalletSystem({ app, bot, config, supabase }) {
   async function getWallet(purpose) {
     const { data, error } = await supabase
       .from("project_wallets")
-      .select("purpose,label,network,public_address,wallet_type,control_policy,status,contribution_enabled,accepted_assets,notes")
+      .select("purpose,label,network,public_address,wallet_type,control_policy,status,contribution_enabled,accepted_assets,notes,weekly_owner_deposit_cap_aud_cents")
       .eq("purpose", purpose)
       .maybeSingle();
     if (error) throw error;
@@ -84,7 +84,8 @@ function registerProjectWalletSystem({ app, bot, config, supabase }) {
     const rows = PURPOSES.map((purpose) => {
       const wallet = byPurpose.get(purpose);
       const status = wallet && wallet.status === "active" && wallet.public_address ? "ACTIVE" : "SETUP PENDING";
-      return `${purposeIcon(purpose)} ${purposeLabel(purpose)} — ${status}`;
+      const cap = wallet ? formatAud(wallet.weekly_owner_deposit_cap_aud_cents) : "AUD $200.00";
+      return `${purposeIcon(purpose)} ${purposeLabel(purpose)} — ${status}\n   Weekly owner deposit-recording cap: ${cap}`;
     });
     return [
       "👛 CryptoWorldz Four-Wallet Plan",
@@ -99,10 +100,13 @@ function registerProjectWalletSystem({ app, bot, config, supabase }) {
       "• Six approved amount presets: 2, 3, 5, 7, 10 or 15 USDC",
       "• Maximum six completed buys per day",
       "• Minimum four hours between buys in a schedule",
-      "• AUD $100 weekly funding ceiling",
+      `• Operating target: ${formatAud(funding.weekly_target_aud_cents)}`,
+      `• Absolute weekly recording cap: ${formatAud(funding.weekly_max_aud_cents)}`,
       `• Recorded this week: ${formatAud(funding.recorded_aud_cents)}`,
-      `• Remaining: ${formatAud(funding.remaining_aud_cents)}`,
+      `• Target remaining: ${formatAud(funding.remaining_aud_cents)}`,
+      `• Hard-cap remaining: ${formatAud(funding.max_remaining_aud_cents)}`,
       "",
+      "The AUD $200 limits are emergency maximums, not weekly spending targets.",
       "Zed stores public addresses and audit records only. No seed phrase or private key belongs in Telegram, GitHub or Supabase."
     ].join("\n");
   }
@@ -167,7 +171,7 @@ function registerProjectWalletSystem({ app, bot, config, supabase }) {
     if (!isOwnerId(msg.from && msg.from.id)) return send(msg.chat.id, "⛔ Owner access required.");
     const parsed = parseInvestmentFunding(match && match[1]);
     if (!parsed.ok) {
-      return send(msg.chat.id, "❌ Use: /investmentfunded AUD_VALUE | USDC_AMOUNT | SOLANA_TRANSACTION_SIGNATURE\nExample: /investmentfunded 40 | 26.10 | 5K...full signature");
+      return send(msg.chat.id, "❌ Use: /investmentfunded AUD_VALUE | USDC_AMOUNT | SOLANA_TRANSACTION_SIGNATURE\nExample: /investmentfunded 40 | 26.10 | 5K...full signature\n\nOperating target: AUD $100. Absolute weekly cap: AUD $200.");
     }
     try {
       const { data, error } = await supabase.rpc("record_investment_funding_deposit", {
@@ -178,12 +182,12 @@ function registerProjectWalletSystem({ app, bot, config, supabase }) {
       });
       if (error) throw error;
       const result = Array.isArray(data) ? data[0] : data;
-      if (!result || result.outcome === "weekly_target_exceeded") {
-        return send(msg.chat.id, `🛑 That would exceed the AUD $100 weekly investment limit.\n\nRecorded: ${formatAud(result && result.weekly_recorded_aud_cents)}\nRemaining: ${formatAud(result && result.weekly_remaining_aud_cents)}`);
+      if (!result || result.outcome === "weekly_max_exceeded") {
+        return send(msg.chat.id, `🛑 That would exceed the AUD $200 weekly Investment Wallet cap.\n\nRecorded: ${formatAud(result && result.weekly_recorded_aud_cents)}\nHard-cap remaining: ${formatAud(result && result.weekly_max_remaining_aud_cents)}`);
       }
       if (result.outcome === "duplicate_transaction") return send(msg.chat.id, "⚠️ That transaction signature is already recorded.");
       if (result.outcome !== "recorded") return send(msg.chat.id, "❌ That investment funding entry was not accepted.");
-      return send(msg.chat.id, `✅ Investment funding recorded.\n\nAUD allocation: ${formatAud(parsed.audCents)}\nActual deposit: ${parsed.usdc} USDC\nWeekly recorded: ${formatAud(result.weekly_recorded_aud_cents)}\nWeekly remaining: ${formatAud(result.weekly_remaining_aud_cents)}\n\nNo automatic buy or transfer was authorised.`);
+      return send(msg.chat.id, `✅ Investment funding recorded.\n\nAUD allocation: ${formatAud(parsed.audCents)}\nActual deposit: ${parsed.usdc} USDC\nWeekly recorded: ${formatAud(result.weekly_recorded_aud_cents)}\nTarget remaining: ${formatAud(result.weekly_remaining_aud_cents)}\nHard-cap remaining: ${formatAud(result.weekly_max_remaining_aud_cents)}\n\nNo automatic buy or transfer was authorised.`);
     } catch (error) {
       console.error("Investment funding record failed", { name: error && error.name || "Error" });
       return send(msg.chat.id, "❌ Zed couldn't record that investment funding transaction.");

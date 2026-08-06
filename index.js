@@ -20,6 +20,7 @@ const { GRACE_COMMANDS, registerGraceTelegramHandlers } = require("./src/grace/t
 const { createGraceWorker } = require("./src/grace/worker");
 const { configWarnings, loadConfig } = require("./src/config");
 const { createHttpApp } = require("./src/http");
+const { LEGEND_V8_COMMANDS, registerLegendV8System } = require("./src/legend-v8");
 const { registerRoleProfileHandler } = require("./src/profile-role");
 const { PROJECT_WALLET_COMMANDS, registerProjectWalletSystem } = require("./src/project-wallets");
 const { REFERRAL_COMMANDS, registerReferralTelegramHandlers } = require("./src/referrals");
@@ -29,9 +30,10 @@ const { REWARD_SETTLEMENT_COMMANDS, registerRewardSettlementHandlers } = require
 const { registerScopedBroadcastHandlers } = require("./src/scoped-broadcast");
 const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
 const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/websites-telegram");
+const { WORK_EVIDENCE_COMMANDS, registerWorkEvidenceHandlers } = require("./src/work-evidence");
 const { WORLDZCAST_COMMANDS, registerWorldzCastSystem } = require("./src/worldzcast");
 
-const RUNTIME_BUILD = "2026-08-07-worldzcast";
+const RUNTIME_BUILD = "2026-08-07-model-348-v8-rewards";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -92,8 +94,10 @@ async function start() {
   });
   registerRewardPolicyHandlers({ bot, repository, supabase, config });
   registerRewardSettlementHandlers({ bot, repository, supabase, config });
+  registerWorkEvidenceHandlers({ bot, config, supabase });
   const app = createHttpApp({ bot, config, repository });
   registerProjectWalletSystem({ app, bot, config, supabase });
+  registerLegendV8System({ app, bot, config, repository, supabase });
   registerWorldzCastSystem({ app, bot, config, repository, supabase });
   app.get("/api/public/runtime", (req, res) => res.json({
     ok: true,
@@ -114,6 +118,11 @@ async function start() {
     transparent_owner_investment_policy: true,
     worldzcast_enabled: true,
     worldzcast_member_dms: false,
+    model_348_v8_rewards: true,
+    shill_boosts: true,
+    purchase_based_points: false,
+    holding_recognition_points: false,
+    owner_work_evidence: true,
     posting_enabled: false
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
@@ -149,6 +158,8 @@ async function start() {
         ...REFERRAL_COMMANDS,
         ...REWARD_SETTLEMENT_COMMANDS,
         ...PROJECT_WALLET_COMMANDS,
+        ...LEGEND_V8_COMMANDS,
+        ...WORK_EVIDENCE_COMMANDS,
         ...WORLDZCAST_COMMANDS,
         ...CAUSE_COMMANDS,
         ...EXECUTIVE_COMMANDS,
