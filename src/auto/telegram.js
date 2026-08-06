@@ -26,6 +26,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
     const status = payload.status || {};
     const limits = status.limits || {};
     const dca = payload.dca || {};
+    const policy = dca.policy || {};
     return [
       "💎 Diamond Buy™ Auto",
       "",
@@ -35,41 +36,50 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
       `Emergency stop: ${status.emergency_stop ? "ACTIVE" : "CLEAR"}`,
       `Allowlisted tokens: ${status.allowlisted_tokens || 0}`,
       "",
-      "🤖 Auto DCA",
+      "🤖 Owner Investment DCA",
       `Prepared: ${dca.prepared ? "YES" : "NO"}`,
       `Execution: ${dca.execution_enabled ? "ENABLED" : "ACTIVATION PENDING"}`,
-      `Wallet: ${dca.wallet_address || "Not attached"}`,
+      `Dedicated wallet: ${dca.wallet_address || "Not attached"}`,
       `Executor ready: ${dca.signer_ready ? "YES" : "NO"}`,
       `Executor API ready: ${dca.api_ready ? "YES" : "NO"}`,
       `Active schedules: ${dca.active_schedules || 0}`,
       "",
-      `Maximum order: ${limits.maxOrderAmount || 0}`,
-      `Daily cap: ${limits.maxDailyAmount || 0}`,
+      `Funding asset: ${policy.allowed_input_currency || "USDC"}`,
+      `Approved amounts: ${(policy.amount_presets || [2, 3, 5, 7, 10, 15]).join(", ")} USDC`,
+      `Maximum order: ${limits.maxOrderAmount || 0} USDC`,
+      `Daily spending cap: ${limits.maxDailyAmount || 0} USDC`,
+      `Maximum completed buys: ${policy.max_buys_per_day || 6} per day`,
       `Minimum interval: ${limits.minIntervalMinutes || 0} minutes`,
+      "Buy only: YES • One wallet only: YES • Randomisation: OFF",
       "",
       "Executive Leaders may view status, pause and trigger the emergency stop.",
-      "DCA creation, activation and wallet controls are permanent-owner only."
+      "Schedule creation, activation and wallet controls are permanent-owner only."
     ].join("\n");
   }
 
   function formatDca(payload) {
     const dca = payload.dca || {};
+    const policy = dca.policy || {};
     const schedules = payload.schedules || payload.dca_schedules || [];
     const rows = schedules.slice(0, 10).map((schedule) =>
       `• ${schedule.id}\n  ${schedule.amount_per_buy} ${schedule.input_currency} × ${schedule.order_count} • ${schedule.interval_minutes}m\n  ${String(schedule.status).toUpperCase()} • ${schedule.completed_buys || 0}/${schedule.order_count}`
     );
     return [
-      "🤖 Auto DCA Command Centre",
+      "🤖 Owner Investment DCA Command Centre",
       "",
       `Execution: ${dca.execution_enabled ? "ENABLED" : "ACTIVATION PENDING"}`,
-      `Wallet: ${dca.wallet_address || "Not attached"}`,
+      `Dedicated wallet: ${dca.wallet_address || "Not attached"}`,
       `Executor: ${dca.signer_ready ? "READY" : "NOT CONFIGURED"}`,
       `Executor API: ${dca.api_ready ? "READY" : "NOT CONFIGURED"}`,
       `Emergency stop: ${dca.emergency_stop ? "ACTIVE" : "CLEAR"}`,
       "",
+      `Policy: BUY ONLY • USDC • one wallet • no randomisation`,
+      `Presets: ${(policy.amount_presets || [2, 3, 5, 7, 10, 15]).join(", ")} USDC`,
+      `Limit: ${policy.max_buys_per_day || 6} completed buys per day • minimum 240 minutes`,
+      "",
       rows.length ? rows.join("\n\n") : "No DCA schedules yet.",
       "",
-      "Create: /autodcanew MINT 0.01 SOL 10 60 150 300",
+      "Create: /autodcanew MINT 5 USDC 6 240 150 250",
       "Actions: /autodcastart UUID • /autodcapause UUID • /autodcaresume UUID • /autodcacancel UUID"
     ].join("\n");
   }
@@ -95,7 +105,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
         "/autosimulate token_mint amount SOL|USDC orders interval_minutes slippage_bps price_impact_bps liquidity_usd",
         "",
         "Example:",
-        "/autosimulate MINT 0.01 SOL 4 120 50 50 25000",
+        "/autosimulate MINT 5 USDC 6 240 150 250 25000",
         "",
         "This creates a simulation record only."
       ].join("\n"));
@@ -132,7 +142,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
     if (!isOwner(msg)) return ownerRequired(msg);
     const values = String(match?.[1] || "").trim().split(/\s+/);
     if (values.length !== 7) {
-      return send(msg, "❌ Use: /autodcanew MINT amount SOL|USDC buys interval_minutes slippage_bps max_price_impact_bps\nExample: /autodcanew MINT 0.01 SOL 10 60 150 300");
+      return send(msg, "❌ Use: /autodcanew MINT preset_amount USDC buys interval_minutes slippage_bps max_price_impact_bps\nExample: /autodcanew MINT 5 USDC 6 240 150 250\n\nApproved amounts: 2, 3, 5, 7, 10 or 15 USDC. Minimum interval: 240 minutes.");
     }
     const [tokenMint, amount, currency, orderCount, intervalMinutes, slippageBps, maxPriceImpactBps] = values;
     try {
@@ -145,7 +155,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
         slippage_bps: slippageBps,
         max_price_impact_bps: maxPriceImpactBps
       });
-      return send(msg, `✅ Auto DCA Draft Created\n\nID: ${payload.schedule.id}\nBuy: ${payload.schedule.amount_per_buy} ${payload.schedule.input_currency}\nOrders: ${payload.schedule.order_count}\nInterval: ${payload.schedule.interval_minutes} minutes\n\nThe schedule remains a draft until Auto DCA activation is complete and you use /autodcastart.`);
+      return send(msg, `✅ Owner Investment DCA Draft Created\n\nID: ${payload.schedule.id}\nBuy: ${payload.schedule.amount_per_buy} ${payload.schedule.input_currency}\nOrders: ${payload.schedule.order_count}\nInterval: ${payload.schedule.interval_minutes} minutes\n\nThe schedule remains a draft until the dedicated wallet and secure executor are verified and you use /autodcastart.`);
     } catch (error) {
       const errors = error.payload?.errors;
       return send(msg, `⚠️ DCA draft rejected.\n\n${Array.isArray(errors) ? errors.join("\n") : error.code || "validation_failed"}`);
@@ -176,7 +186,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
     if (!match?.[1]) return send(msg, "❌ Use: /autodcawallet PUBLIC_SOLANA_ADDRESS\nNever send a seed phrase or private key.");
     try {
       await autoClient.dcaSetWallet(match[1]);
-      return send(msg, "✅ Auto DCA public wallet address recorded. Execution remains disabled until the separate secure executor and matching wallet are verified.");
+      return send(msg, "✅ Dedicated Owner Investment Wallet recorded. Execution remains disabled until the separate secure executor and matching wallet are verified.");
     } catch (error) {
       return send(msg, `❌ Auto DCA wallet could not be recorded: ${error.code || "wallet_update_failed"}`);
     }
@@ -184,13 +194,13 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
 
   bot.onText(/^\/autodcaenable(?:@\w+)?$/, async (msg) => {
     if (!isOwner(msg)) return ownerRequired(msg);
-    try { await autoClient.dcaEnable(); return send(msg, "✅ Auto DCA execution enabled. Only owner-created, allowlisted, capped buy schedules can run."); }
+    try { await autoClient.dcaEnable(); return send(msg, "✅ Owner Investment DCA enabled. Only owner-created, allowlisted, USDC-funded, capped buy-only schedules can run."); }
     catch (error) { return send(msg, `⚠️ Auto DCA activation is incomplete: ${error.code || "runtime_not_ready"}`); }
   });
 
   bot.onText(/^\/autodcadisable(?:@\w+)?$/, async (msg) => {
     if (!isOwner(msg)) return ownerRequired(msg);
-    try { await autoClient.dcaDisable(); return send(msg, "🔒 Auto DCA disabled and paused."); }
+    try { await autoClient.dcaDisable(); return send(msg, "🔒 Owner Investment DCA disabled and paused."); }
     catch { return send(msg, "❌ Auto DCA could not confirm the disable request. Use /autoemergency."); }
   });
 
