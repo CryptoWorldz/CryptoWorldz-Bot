@@ -2,7 +2,13 @@ const assert = require("node:assert/strict");
 const http = require("node:http");
 const test = require("node:test");
 const express = require("express");
-const { WORLDZ_HOSTS, injectPreviewSelection, normalizeHost, registerPdcHost } = require("../src/pdc-host");
+const {
+  WORLDZ_HOSTS,
+  allowPdcPreview,
+  injectPreviewSelection,
+  normalizeHost,
+  registerPdcHost
+} = require("../src/pdc-host");
 
 function request(server, pathname, headers = {}) {
   const address = server.address();
@@ -60,7 +66,14 @@ test("injects immutable preview selections without changing the shared package",
   assert.match(result, /const requestedSite = "xrpworldz" \|\| params\.get\('site'\);/);
 });
 
-test("serves the complete Purple Diamond Crew site from the Zed host preview path", async (t) => {
+test("opens Purple Diamond Crew scripts only for the verified domain or fallback route", () => {
+  const source = "const hostname = location.hostname;\nif (hostname !== 'purplediamondcrew.com') return;\nconsole.log('loaded');";
+  const result = allowPdcPreview(source);
+  assert.match(result, /hostname !== 'purplediamondcrew\.com'/);
+  assert.match(result, /location\.pathname\.startsWith\('\/purple-diamond-crew'\)/);
+});
+
+test("serves the complete Purple Diamond Crew site and Hope Chest visual from the Zed fallback", async (t) => {
   const app = express();
   registerPdcHost(app);
   app.get("/", (req, res) => res.json({ ok: true }));
@@ -72,11 +85,17 @@ test("serves the complete Purple Diamond Crew site from the Zed host preview pat
   assert.match(page.headers["content-type"], /text\/html/);
   assert.match(page.body, /const requestedSite = "pdc" \|\| params\.get\('site'\);/);
   assert.match(page.body, /assets\/pdc-site\.js/);
+  assert.match(page.body, /assets\/pdc-asset\.js/);
 
   const script = await request(server, "/purple-diamond-crew/assets/pdc-site.js");
   assert.equal(script.status, 200);
   assert.match(script.body, /location\.pathname\.startsWith\('\/purple-diamond-crew'\)/);
   assert.match(script.body, /Real People\. Real Action\. Real Impact\./);
+
+  const asset = await request(server, "/purple-diamond-crew/assets/pdc-asset.js");
+  assert.equal(asset.status, 200);
+  assert.match(asset.body, /location\.pathname\.startsWith\('\/purple-diamond-crew'\)/);
+  assert.match(asset.body, /pdc-hope-chest/);
 });
 
 test("serves OneWorldz and blockchain Worldz preview routes", async (t) => {
