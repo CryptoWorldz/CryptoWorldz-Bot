@@ -9,7 +9,7 @@
     "test": "node --test",
     "check": "node --check index.js && node --check db.js && find src test public -type f -name '*.js' -exec node --check {} +",
     "check:auto": "node --check auto-server.js && find src/auto -type f -name '*.js' -exec node --check {} +",
-    "check:web": "node --check apps/cryptoworldz-web-core/assets/app.js && node --check apps/cryptoworldz-web-core/assets/oneworldz.js && node --check apps/cryptoworldz-web-core/assets/pdc-site.js && node --check apps/cryptoworldz-web-core/assets/worldz-imagery.js && node --check apps/cryptoworldz-web-core/assets/jayjayteamdev.js && node tools/evaluate-web-core.mjs",
+    "check:web": "node --check apps/cryptoworldz-web-core/assets/app.js && node --check apps/cryptoworldz-web-core/assets/oneworldz.js && node --check apps/cryptoworldz-web-core/assets/pdc-site.js && node --check apps/cryptoworldz-web-core/assets/worldz-imagery.js && node --check apps/cryptoworldz-web-core/assets/jayjayteamdev.js && node tools/evaluate-web-core.mjs && node tools/evaluate-complete-release.mjs",
     "verify:web": "npm run check:web",
     "verify:auto": "npm run check:auto && node --test test/auto-core.test.js",
     "verify": "npm run check && npm test && npm run check:web && npm run check:auto"
