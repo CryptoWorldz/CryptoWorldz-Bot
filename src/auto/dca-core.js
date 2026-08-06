@@ -1,6 +1,7 @@
 const SOL_MINT = "So11111111111111111111111111111111111111112";
 const DEFAULT_USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const SUPPORTED_INPUTS = Object.freeze({ SOL: 9, USDC: 6 });
+const DEFAULT_AMOUNT_PRESETS = Object.freeze([2, 3, 5, 7, 10, 15]);
 const DCA_STATUSES = Object.freeze(["draft", "active", "paused", "cancelled", "completed", "error"]);
 
 function finiteNumber(value) {
@@ -22,6 +23,11 @@ function normalizeCurrency(value) {
   return String(value || "SOL").trim().toUpperCase();
 }
 
+function normalizePresets(value) {
+  const source = Array.isArray(value) ? value : DEFAULT_AMOUNT_PRESETS;
+  return [...new Set(source.map(Number).filter((item) => Number.isFinite(item) && item > 0))].sort((a, b) => a - b);
+}
+
 function isValidSolanaAddress(value) {
   return typeof value === "string" && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(value.trim());
 }
@@ -41,6 +47,10 @@ function decimalToBaseUnits(value, decimals) {
 }
 
 function loadDcaLimits(settings = {}) {
+  let presets = settings.amount_presets;
+  if (typeof presets === "string") {
+    try { presets = JSON.parse(presets); } catch { presets = null; }
+  }
   return {
     enabled: settings.enabled === true,
     paused: settings.paused !== false,
@@ -53,7 +63,14 @@ function loadDcaLimits(settings = {}) {
     maxMonthlyAmount: nonNegativeNumber(settings.max_monthly_amount) ?? 0,
     minIntervalMinutes: Math.max(15, Math.floor(nonNegativeNumber(settings.min_interval_minutes) ?? 60)),
     maxSlippageBps: Math.max(1, Math.floor(nonNegativeNumber(settings.max_slippage_bps) ?? 300)),
-    maxPriceImpactBps: Math.max(1, Math.floor(nonNegativeNumber(settings.max_price_impact_bps) ?? 500))
+    maxPriceImpactBps: Math.max(1, Math.floor(nonNegativeNumber(settings.max_price_impact_bps) ?? 500)),
+    allowedInputCurrency: normalizeCurrency(settings.allowed_input_currency || "USDC"),
+    maxBuysPerDay: Math.max(1, Math.min(6, Math.floor(nonNegativeNumber(settings.max_buys_per_day) ?? 6))),
+    amountPresets: normalizePresets(presets),
+    weeklyBudgetAudCents: Math.max(0, Math.floor(nonNegativeNumber(settings.weekly_budget_aud_cents) ?? 10000)),
+    buyOnly: settings.buy_only !== false,
+    multiwalletEnabled: settings.multiwallet_enabled === true,
+    randomizedExecution: settings.randomized_execution === true
   };
 }
 
@@ -72,12 +89,15 @@ function validateDcaSchedule(input = {}, context = {}) {
 
   if (!isValidSolanaAddress(tokenMint)) errors.push("invalid_token_mint");
   if (!Object.prototype.hasOwnProperty.call(SUPPORTED_INPUTS, currency)) errors.push("currency_not_allowed");
+  if (currency !== limits.allowedInputCurrency) errors.push("investment_currency_must_be_usdc");
   if (amount === null) errors.push("invalid_amount");
+  if (amount !== null && !limits.amountPresets.some((preset) => Math.abs(preset - amount) < 0.0000001)) errors.push("amount_not_approved_preset");
   if (!Number.isSafeInteger(orderCount) || orderCount < 1 || orderCount > 10000) errors.push("invalid_order_count");
   if (!Number.isSafeInteger(intervalMinutes) || intervalMinutes < limits.minIntervalMinutes) errors.push("interval_below_minimum");
   if (!Number.isSafeInteger(slippageBps) || slippageBps < 1 || slippageBps > limits.maxSlippageBps) errors.push("slippage_limit_exceeded");
   if (!Number.isSafeInteger(maxPriceImpactBps) || maxPriceImpactBps < 1 || maxPriceImpactBps > limits.maxPriceImpactBps) errors.push("price_impact_limit_exceeded");
   if (Number.isNaN(startAt.getTime())) errors.push("invalid_start_time");
+  if (!limits.buyOnly || limits.multiwalletEnabled || limits.randomizedExecution) errors.push("investment_policy_locked");
 
   const allowlistedTokens = context.allowlistedTokens instanceof Set
     ? context.allowlistedTokens
@@ -128,7 +148,7 @@ function dcaPublicStatus(settings = {}, counts = {}, runtime = {}) {
   const apiReady = runtime.apiReady === true;
   const walletMatches = runtime.walletMatches === true;
   return {
-    mode: "owner_dca",
+    mode: "owner_investment_dca",
     prepared: true,
     enabled: limits.enabled,
     paused: limits.paused,
@@ -142,12 +162,22 @@ function dcaPublicStatus(settings = {}, counts = {}, runtime = {}) {
     draft_schedules: Number(counts.draft) || 0,
     completed_schedules: Number(counts.completed) || 0,
     total_executions: Number(counts.executions) || 0,
+    policy: {
+      buy_only: limits.buyOnly,
+      one_wallet_only: !limits.multiwalletEnabled,
+      randomized_execution: limits.randomizedExecution,
+      allowed_input_currency: limits.allowedInputCurrency,
+      amount_presets: limits.amountPresets,
+      max_buys_per_day: limits.maxBuysPerDay,
+      weekly_budget_aud_cents: limits.weeklyBudgetAudCents
+    },
     limits
   };
 }
 
 module.exports = {
   DCA_STATUSES,
+  DEFAULT_AMOUNT_PRESETS,
   DEFAULT_USDC_MINT,
   SOL_MINT,
   SUPPORTED_INPUTS,
@@ -156,5 +186,6 @@ module.exports = {
   isValidSolanaAddress,
   loadDcaLimits,
   normalizeCurrency,
+  normalizePresets,
   validateDcaSchedule
 };
