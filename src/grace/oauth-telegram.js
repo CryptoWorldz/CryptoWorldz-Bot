@@ -4,6 +4,8 @@ const GRACE_X_OAUTH_COMMANDS = [
   { command: "gracestatus", description: "Owner: check the live Grace X runtime" }
 ];
 
+const GRACE_X_RUNTIME_BUILD = "Grace X Confidential OAuth 2026-08-07.2";
+
 function registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config }) {
   const send = (msg, text, options) => bot.sendMessage(msg.chat.id, text, options);
   const ownerAllowed = (msg) => String(msg.from?.id || "") === String(config.ownerTelegramId || "");
@@ -13,8 +15,11 @@ function registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config }) {
     return send(msg, [
       "✅ Grace X Runtime Check",
       "",
-      "Build: Executive Leadership 2026-08-06",
-      `OAuth configured: ${graceOAuth.configured() ? "YES" : "NO"}`,
+      `Build: ${GRACE_X_RUNTIME_BUILD}`,
+      "Client type: Confidential Web App / Automated App / Bot",
+      `OAuth credentials detected: ${graceOAuth.configured() ? "YES" : "NO"}`,
+      "Token authentication: HTTP Basic (OAuth 2.0 Client ID + Client Secret)",
+      "Redirect: /grace/oauth/x/callback",
       "Connection command: /connectx 1",
       "Alias: /gracex 1",
       "",
@@ -37,7 +42,8 @@ function registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config }) {
         "GRACE_X_CLIENT_SECRET",
         "GRACE_X_REDIRECT_URI",
         "",
-        "The encryption key is supplied securely by the server runtime.",
+        "Use the OAuth 2.0 Client ID and OAuth 2.0 Client Secret from the same X App.",
+        "Do not use the OAuth 1.0 API Key Secret.",
         "Do not send passwords, login codes or API secrets through Telegram."
       ].join("\n"));
     }
@@ -67,4 +73,4 @@ function registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config }) {
   });
 }
 
-module.exports = { GRACE_X_OAUTH_COMMANDS, registerGraceXOAuthTelegramHandlers };
+module.exports = { GRACE_X_OAUTH_COMMANDS, GRACE_X_RUNTIME_BUILD, registerGraceXOAuthTelegramHandlers };
