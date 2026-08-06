@@ -23,8 +23,9 @@ const { registerRoleProfileHandler } = require("./src/profile-role");
 const { createRepository } = require("./src/repository");
 const { registerScopedBroadcastHandlers } = require("./src/scoped-broadcast");
 const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
+const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/websites-telegram");
 
-const RUNTIME_BUILD = "2026-08-06-auto-dca-grace-music";
+const RUNTIME_BUILD = "2026-08-06-auto-dca-grace-websites";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -75,6 +76,7 @@ async function start() {
   registerExecutiveTelegramHandlers({ bot, repository, supabase, config });
   registerGraceTelegramHandlers({ bot, repository, graceRepository, config });
   registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });
+  registerWebsiteTelegramHandlers({ bot, config });
   const app = createHttpApp({ bot, config, repository });
   app.get("/api/public/runtime", (req, res) => res.json({
     ok: true,
@@ -84,6 +86,7 @@ async function start() {
     impact_cause_register: true,
     grace_manager_role: true,
     auto_dca_controls: true,
+    website_directory_commands: true,
     posting_enabled: false
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
@@ -102,6 +105,7 @@ async function start() {
       bot.setWebHook(config.webhookUrl, { secret_token: config.webhookSecret }),
       bot.setMyCommands([
         ...PUBLIC_COMMANDS,
+        ...WEBSITE_COMMANDS,
         ...CAUSE_COMMANDS,
         ...EXECUTIVE_COMMANDS,
         ...GRACE_COMMANDS,
