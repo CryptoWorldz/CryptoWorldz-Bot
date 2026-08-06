@@ -23,11 +23,12 @@ const { createHttpApp } = require("./src/http");
 const { registerRoleProfileHandler } = require("./src/profile-role");
 const { REFERRAL_COMMANDS, registerReferralTelegramHandlers } = require("./src/referrals");
 const { createRepository } = require("./src/repository");
+const { registerRewardPolicyHandlers } = require("./src/reward-policy");
 const { registerScopedBroadcastHandlers } = require("./src/scoped-broadcast");
 const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
 const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/websites-telegram");
 
-const RUNTIME_BUILD = "2026-08-06-referral-shill-rewards";
+const RUNTIME_BUILD = "2026-08-06-reward-pools-v2";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -86,6 +87,7 @@ async function start() {
     supabase,
     config
   });
+  registerRewardPolicyHandlers({ bot, repository, supabase, config });
   const app = createHttpApp({ bot, config, repository });
   app.get("/api/public/runtime", (req, res) => res.json({
     ok: true,
@@ -98,6 +100,7 @@ async function start() {
     website_directory_commands: true,
     community_directory_commands: true,
     referral_reward_controls: true,
+    protected_reward_pools: true,
     posting_enabled: false
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
