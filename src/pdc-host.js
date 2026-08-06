@@ -2,11 +2,44 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 
+const WORLDZ_HOSTS = Object.freeze({
+  "purplediamondcrew.com": { slug: "purplediamondcrew", site: "pdc", previewPath: "/purple-diamond-crew" },
+  "oneworldz.com": { slug: "oneworldz", mode: "mission", previewPath: "/worldz/oneworldz" },
+  "cryptoworldz.xyz": { slug: "cryptoworldz", previewPath: "/worldz/cryptoworldz" },
+  "solworldz.xyz": { slug: "solworldz", previewPath: "/worldz/solworldz" },
+  "ethworldz.xyz": { slug: "ethworldz", mode: "coming-soon", previewPath: "/worldz/ethworldz" },
+  "baseworldz.xyz": { slug: "baseworldz", mode: "coming-soon", previewPath: "/worldz/baseworldz" },
+  "bnbworldz.xyz": { slug: "bnbworldz", mode: "coming-soon", previewPath: "/worldz/bnbworldz" },
+  "xrpworldz.xyz": { slug: "xrpworldz", mode: "coming-soon", previewPath: "/worldz/xrpworldz" },
+  "suiworldz.xyz": { slug: "suiworldz", mode: "coming-soon", previewPath: "/worldz/suiworldz" },
+  "hyperworldz.xyz": { slug: "hyperworldz", mode: "coming-soon", previewPath: "/worldz/hyperworldz" },
+  "robinworldz.xyz": { slug: "robinworldz", mode: "coming-soon", previewPath: "/worldz/robinworldz" },
+  "bitcoinworldz.xyz": { slug: "bitcoinworldz", mode: "coming-soon", previewPath: "/worldz/bitcoinworldz" },
+  "bitworldz.xyz": { slug: "bitcoinworldz", mode: "coming-soon", previewPath: "/worldz/bitworldz" },
+  "hodlerworldz.xyz": { slug: "hodlerworldz", mode: "coming-soon", previewPath: "/worldz/hodlerworldz" },
+  "impactbased.oneworldz.com": { slug: "impactbased", mode: "impact", previewPath: "/worldz/impactbased" },
+  "impact.oneworldz.com": { slug: "impactbased", mode: "impact", previewPath: "/worldz/impact" },
+  "law.oneworldz.com": { slug: "robinhoodlaw", mode: "law", previewPath: "/worldz/law" },
+  "learn.oneworldz.com": { slug: "learnworldz", mode: "learn", previewPath: "/worldz/learn" }
+});
+
 function normalizeHost(req) {
   return String(req.hostname || req.get("host") || "")
     .split(":")[0]
     .replace(/^www\./, "")
     .toLowerCase();
+}
+
+function injectPreviewSelection(source, world) {
+  return source
+    .replace(
+      "const requestedMode = params.get('mode');",
+      `const requestedMode = ${JSON.stringify(world.mode || "")} || params.get('mode');`
+    )
+    .replace(
+      "const requestedSite = params.get('site');",
+      `const requestedSite = ${JSON.stringify(world.site || world.slug)} || params.get('site');`
+    );
 }
 
 function registerPdcHost(app) {
@@ -15,7 +48,7 @@ function registerPdcHost(app) {
   const pdcScriptPath = path.join(webRoot, "assets", "pdc-site.js");
 
   if (!fs.existsSync(indexPath) || !fs.existsSync(pdcScriptPath)) {
-    console.warn("Purple Diamond Crew static package is unavailable");
+    console.warn("Worldz static package is unavailable");
     return;
   }
 
@@ -28,16 +61,13 @@ function registerPdcHost(app) {
     }
   });
 
-  const sendIndex = (req, res) => {
-    const source = fs.readFileSync(indexPath, "utf8").replace(
-      "const requestedSite = params.get('site');",
-      "const requestedSite = 'pdc';"
-    );
+  const sendIndex = (world) => (req, res) => {
+    const source = injectPreviewSelection(fs.readFileSync(indexPath, "utf8"), world);
     res.setHeader("Cache-Control", "no-store, max-age=0");
     return res.type("html").send(source);
   };
 
-  const sendPdcScript = (req, res) => {
+  const sendPreviewPdcScript = (req, res) => {
     const source = fs.readFileSync(pdcScriptPath, "utf8").replace(
       "if (hostname !== 'purplediamondcrew.com') return;",
       "if (hostname !== 'purplediamondcrew.com' && new URLSearchParams(location.search).get('site') !== 'pdc' && !location.pathname.startsWith('/purple-diamond-crew')) return;"
@@ -46,16 +76,22 @@ function registerPdcHost(app) {
     return res.type("application/javascript").send(source);
   };
 
-  app.get(["/purple-diamond-crew", "/purple-diamond-crew/"], sendIndex);
-  app.get("/purple-diamond-crew/assets/pdc-site.js", sendPdcScript);
-  app.use("/purple-diamond-crew", staticSite);
+  for (const world of Object.values(WORLDZ_HOSTS)) {
+    const previewPath = world.previewPath;
+    const indexHandler = sendIndex(world);
+    app.get([previewPath, `${previewPath}/`], indexHandler);
+    if (world.site === "pdc") {
+      app.get(`${previewPath}/assets/pdc-site.js`, sendPreviewPdcScript);
+    }
+    app.use(previewPath, staticSite);
+  }
 
   app.use((req, res, next) => {
-    if (normalizeHost(req) !== "purplediamondcrew.com") return next();
-    if (req.path === "/") return sendIndex(req, res);
-    if (req.path === "/assets/pdc-site.js") return sendPdcScript(req, res);
+    const world = WORLDZ_HOSTS[normalizeHost(req)];
+    if (!world) return next();
+    if (req.path === "/") return sendIndex(world)(req, res);
     return staticSite(req, res, next);
   });
 }
 
-module.exports = { normalizeHost, registerPdcHost };
+module.exports = { WORLDZ_HOSTS, injectPreviewSelection, normalizeHost, registerPdcHost };
