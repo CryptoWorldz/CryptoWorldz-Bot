@@ -6,6 +6,7 @@ const { createClient } = require("@supabase/supabase-js");
 const { createAutoClient } = require("./src/auto/client");
 const { registerAutoMiniRoutes } = require("./src/auto/zed-router");
 const { registerAutoTelegramHandlers } = require("./src/auto/telegram");
+const { CAUSE_COMMANDS, registerCauseTelegramHandlers } = require("./src/causes/telegram");
 const { registerExecutiveRoutes } = require("./src/executive/http");
 const { EXECUTIVE_COMMANDS, registerExecutiveTelegramHandlers } = require("./src/executive/telegram");
 const { createGracePublisher } = require("./src/grace/adapters");
@@ -21,7 +22,7 @@ const { createHttpApp } = require("./src/http");
 const { createRepository } = require("./src/repository");
 const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
 
-const RUNTIME_BUILD = "2026-08-06-executive-grace-x";
+const RUNTIME_BUILD = "2026-08-06-impact-cause-register";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -66,6 +67,7 @@ async function start() {
 
   registerTelegramHandlers({ bot, repository, config });
   registerAutoTelegramHandlers({ bot, config, autoClient, supabase });
+  registerCauseTelegramHandlers({ bot, repository, supabase, config });
   registerExecutiveTelegramHandlers({ bot, repository, supabase, config });
   registerGraceTelegramHandlers({ bot, repository, graceRepository, config });
   registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });
@@ -75,6 +77,7 @@ async function start() {
     build: RUNTIME_BUILD,
     grace_x_oauth_configured: graceOAuth.configured(),
     executive_controls: true,
+    impact_cause_register: true,
     posting_enabled: false
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
@@ -93,6 +96,7 @@ async function start() {
       bot.setWebHook(config.webhookUrl, { secret_token: config.webhookSecret }),
       bot.setMyCommands([
         ...PUBLIC_COMMANDS,
+        ...CAUSE_COMMANDS,
         ...EXECUTIVE_COMMANDS,
         ...GRACE_COMMANDS,
         ...GRACE_X_OAUTH_COMMANDS
