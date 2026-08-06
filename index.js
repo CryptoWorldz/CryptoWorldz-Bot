@@ -24,11 +24,12 @@ const { registerRoleProfileHandler } = require("./src/profile-role");
 const { REFERRAL_COMMANDS, registerReferralTelegramHandlers } = require("./src/referrals");
 const { createRepository } = require("./src/repository");
 const { registerRewardPolicyHandlers } = require("./src/reward-policy");
+const { REWARD_SETTLEMENT_COMMANDS, registerRewardSettlementHandlers } = require("./src/reward-settlement");
 const { registerScopedBroadcastHandlers } = require("./src/scoped-broadcast");
 const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
 const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/websites-telegram");
 
-const RUNTIME_BUILD = "2026-08-06-reward-pools-v2";
+const RUNTIME_BUILD = "2026-08-06-usdc-reward-funding";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -88,6 +89,7 @@ async function start() {
     config
   });
   registerRewardPolicyHandlers({ bot, repository, supabase, config });
+  registerRewardSettlementHandlers({ bot, repository, supabase, config });
   const app = createHttpApp({ bot, config, repository });
   app.get("/api/public/runtime", (req, res) => res.json({
     ok: true,
@@ -101,6 +103,8 @@ async function start() {
     community_directory_commands: true,
     referral_reward_controls: true,
     protected_reward_pools: true,
+    usdc_reward_funding: true,
+    reward_asset_choices: true,
     posting_enabled: false
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
@@ -134,6 +138,7 @@ async function start() {
         ...WEBSITE_COMMANDS,
         ...DIRECTORY_COMMANDS,
         ...REFERRAL_COMMANDS,
+        ...REWARD_SETTLEMENT_COMMANDS,
         ...CAUSE_COMMANDS,
         ...EXECUTIVE_COMMANDS,
         ...GRACE_COMMANDS,
