@@ -4,6 +4,7 @@ const GRACE_X_OAUTH_COMMANDS = [
   { command: "gracestatus", description: "Owner: check the live Grace X runtime" }
 ];
 
+// This build marker is intentionally visible through /gracestatus for live deployment verification.
 const GRACE_X_RUNTIME_BUILD = "Grace X Confidential OAuth 2026-08-07.2";
 
 function registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config }) {
