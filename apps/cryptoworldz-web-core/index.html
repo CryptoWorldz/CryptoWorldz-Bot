@@ -82,15 +82,17 @@
       script.type = 'module';
       script.src = jayJayPage
         ? './assets/jayjayteamdev.js'
-        : hostname === 'purplediamondcrew.com' || pdcPreview
+        : hostname === 'purplediamondcrew.com'
           ? './assets/pdc-site.js'
-          : hostname === 'oneworldz.com' || requestedMode === 'mission'
-            ? './assets/oneworldz.js'
-            : comingSoonHosts.has(hostname) || requestedMode === 'coming-soon'
-              ? './assets/coming-soon.js'
-              : requestedMode === 'directory'
-                ? './assets/pdc-directory.js'
-                : './assets/app.js';
+          : pdcPreview
+            ? './assets/pdc-fallback.js'
+            : hostname === 'oneworldz.com' || requestedMode === 'mission'
+              ? './assets/oneworldz.js'
+              : comingSoonHosts.has(hostname) || requestedMode === 'coming-soon'
+                ? './assets/coming-soon.js'
+                : requestedMode === 'directory'
+                  ? './assets/pdc-directory.js'
+                  : './assets/app.js';
       document.body.appendChild(script);
     })();
   </script>
