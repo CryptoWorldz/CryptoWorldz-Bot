@@ -42,12 +42,20 @@ function injectPreviewSelection(source, world) {
     );
 }
 
+function allowPdcPreview(source) {
+  return source.replace(
+    "if (hostname !== 'purplediamondcrew.com') return;",
+    "if (hostname !== 'purplediamondcrew.com' && new URLSearchParams(location.search).get('site') !== 'pdc' && !location.pathname.startsWith('/purple-diamond-crew')) return;"
+  );
+}
+
 function registerPdcHost(app) {
   const webRoot = path.join(__dirname, "..", "apps", "cryptoworldz-web-core");
   const indexPath = path.join(webRoot, "index.html");
   const pdcScriptPath = path.join(webRoot, "assets", "pdc-site.js");
+  const pdcAssetPath = path.join(webRoot, "assets", "pdc-asset.js");
 
-  if (!fs.existsSync(indexPath) || !fs.existsSync(pdcScriptPath)) {
+  if (!fs.existsSync(indexPath) || !fs.existsSync(pdcScriptPath) || !fs.existsSync(pdcAssetPath)) {
     console.warn("Worldz static package is unavailable");
     return;
   }
@@ -67,11 +75,8 @@ function registerPdcHost(app) {
     return res.type("html").send(source);
   };
 
-  const sendPreviewPdcScript = (req, res) => {
-    const source = fs.readFileSync(pdcScriptPath, "utf8").replace(
-      "if (hostname !== 'purplediamondcrew.com') return;",
-      "if (hostname !== 'purplediamondcrew.com' && new URLSearchParams(location.search).get('site') !== 'pdc' && !location.pathname.startsWith('/purple-diamond-crew')) return;"
-    );
+  const sendPreviewScript = (filePath) => (req, res) => {
+    const source = allowPdcPreview(fs.readFileSync(filePath, "utf8"));
     res.setHeader("Cache-Control", "no-store, max-age=0");
     return res.type("application/javascript").send(source);
   };
@@ -81,7 +86,8 @@ function registerPdcHost(app) {
     const indexHandler = sendIndex(world);
     app.get([previewPath, `${previewPath}/`], indexHandler);
     if (world.site === "pdc") {
-      app.get(`${previewPath}/assets/pdc-site.js`, sendPreviewPdcScript);
+      app.get(`${previewPath}/assets/pdc-site.js`, sendPreviewScript(pdcScriptPath));
+      app.get(`${previewPath}/assets/pdc-asset.js`, sendPreviewScript(pdcAssetPath));
     }
     app.use(previewPath, staticSite);
   }
@@ -94,4 +100,10 @@ function registerPdcHost(app) {
   });
 }
 
-module.exports = { WORLDZ_HOSTS, injectPreviewSelection, normalizeHost, registerPdcHost };
+module.exports = {
+  WORLDZ_HOSTS,
+  allowPdcPreview,
+  injectPreviewSelection,
+  normalizeHost,
+  registerPdcHost
+};
