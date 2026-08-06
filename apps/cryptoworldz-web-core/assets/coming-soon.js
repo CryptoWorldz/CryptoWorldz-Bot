@@ -7,6 +7,8 @@
   if (!app) return;
 
   const hostname = location.hostname.replace(/^www\./, '').toLowerCase();
+  const params = new URLSearchParams(location.search);
+  const requestedWorld = (params.get('world') || '').toLowerCase();
   const catalogue = {
     'ethworldz.xyz': ['EthWorldz', 'Ξ'],
     'baseworldz.xyz': ['BaseWorldz', '🔵'],
@@ -15,11 +17,21 @@
     'suiworldz.xyz': ['SuiWorldz', '💧'],
     'hyperworldz.xyz': ['HyperWorldz', '⚡'],
     'robinworldz.xyz': ['RobinWorldz', '⚖️'],
-    'bitcoinworldz.xyz': ['BitWorldz', '₿'],
+    'bitcoinworldz.xyz': ['BitcoinWorldz', '₿'],
     'bitworldz.xyz': ['BitWorldz', '₿'],
-    'hodlerworldz.xyz': ['HodlerWorldz', '💎']
+    'hodlerworldz.xyz': ['HodlerWorldz', '💎'],
+    ethworldz: ['EthWorldz', 'Ξ'],
+    baseworldz: ['BaseWorldz', '🔵'],
+    bnbworldz: ['BNBWorldz', '🟡'],
+    xrpworldz: ['XRPWorldz', '✕'],
+    suiworldz: ['SuiWorldz', '💧'],
+    hyperworldz: ['HyperWorldz', '⚡'],
+    robinworldz: ['RobinWorldz', '⚖️'],
+    bitcoinworldz: ['BitcoinWorldz', '₿'],
+    bitworldz: ['BitWorldz', '₿'],
+    hodlerworldz: ['HodlerWorldz', '💎']
   };
-  const [name, icon] = catalogue[hostname] || ['Blockchain Worldz', '🌐'];
+  const [name, icon] = catalogue[hostname] || catalogue[requestedWorld] || ['Blockchain Worldz', '🌐'];
   const telegram = 'https://t.me/CryptoWorldzHQ';
 
   document.title = `${name} • Coming Soon`;
