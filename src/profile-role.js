@@ -49,11 +49,23 @@ function registerRoleProfileHandler({ bot, repository, config, supabase }) {
   bot.removeTextListener(PROFILE_PATTERN);
   bot.onText(PROFILE_PATTERN, async (msg) => {
     try {
-      const [profile, teamRole] = await Promise.all([
-        repository.getMemberDetails(msg.from.id),
-        resolveTeamRole({ telegramId: msg.from.id, repository, config, supabase })
-      ]);
+      const profile = await repository.getMemberDetails(msg.from.id);
       if (!profile) return bot.sendMessage(msg.chat.id, "❌ You are not registered. Use /register first.");
+
+      let teamRole = null;
+      try {
+        teamRole = await resolveTeamRole({
+          telegramId: msg.from.id,
+          repository,
+          config,
+          supabase
+        });
+      } catch (error) {
+        console.error("Role profile lookup failed", {
+          name: error?.name || "Error",
+          code: error?.code || undefined
+        });
+      }
 
       const { user, rewardsEarned } = profile;
       const points = Number(user.points) || 0;
@@ -68,7 +80,10 @@ function registerRoleProfileHandler({ bot, repository, config, supabase }) {
         `🏆 CryptoWorldz Legend Profile\n\n👤 Username: ${displayName}\n🆔 Telegram ID: ${user.telegram_id}${roleLines}\n🎖 Legend Rank: ${getRank(points)}\n⭐ Legend Points: ${points}\n🚀 Raaiiidds Completed: ${completed}\n📥 Pending Submissions: ${profile.pending}\n👛 Wallet Connected: ${user.wallet ? `Yes ✅\n${shortenWallet(user.wallet)}` : "No"}\n🎁 Rewards Earned: ${rewardsEarned} Legend Points\n📅 Member Since: ${user.registered_at || user.created_at}`
       );
     } catch (error) {
-      console.error("Role profile command failed", { name: error?.name || "Error" });
+      console.error("Role profile command failed", {
+        name: error?.name || "Error",
+        code: error?.code || undefined
+      });
       return bot.sendMessage(msg.chat.id, "❌ I couldn't load your profile.");
     }
   });
