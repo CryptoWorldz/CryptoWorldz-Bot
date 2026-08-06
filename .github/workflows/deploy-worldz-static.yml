@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'Static site target'
+        description: Static site target
         required: true
         type: choice
         options:
@@ -36,13 +36,13 @@ on:
           - bitcoinworldz
           - hodlerworldz
       confirmation:
-        description: 'Exact production confirmation'
+        description: Exact production confirmation
         required: true
-        default: 'CANCEL'
+        default: CANCEL
         type: choice
         options:
-          - 'CANCEL'
-          - 'APPROVE TOTAL DEPLOYMENT'
+          - CANCEL
+          - APPROVE TOTAL DEPLOYMENT
 
 permissions:
   contents: read
@@ -73,6 +73,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           INPUT_TARGET: ${{ inputs.target }}
           INPUT_CONFIRMATION: ${{ inputs.confirmation }}
+          APPROVED_BEFORE: ${{ github.event.before }}
         run: |
           set -euo pipefail
 
@@ -87,9 +88,9 @@ jobs:
             target="$(sed -n 's/^target=//p' deployments/worldz-static.request | tail -n1)"
             confirmation="$(sed -n 's/^confirmation=//p' deployments/worldz-static.request | tail -n1)"
             source_commit="$(sed -n 's/^source_commit=//p' deployments/worldz-static.request | tail -n1)"
-            approved_commit="$(git rev-parse HEAD^)"
             test -n "$source_commit"
-            test "$source_commit" = "$approved_commit"
+            test -n "$APPROVED_BEFORE"
+            test "$source_commit" = "$APPROVED_BEFORE"
           fi
 
           case "$target" in
@@ -102,15 +103,15 @@ jobs:
             impactbased) environment='impactbased-production'; live_url='https://impactbased.oneworldz.com'; guard='IMPACTBASED.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
             law-oneworldz) environment='law-oneworldz-production'; live_url='https://law.oneworldz.com'; guard='LAW.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
             learn-oneworldz) environment='learn-oneworldz-production'; live_url='https://learn.oneworldz.com'; guard='LEARN.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
-            ethworldz) environment='ethworldz-production'; live_url='https://ethworldz.xyz'; guard='ETHWORLDZ.XYZ'; expected_script='assets/app.js' ;;
-            baseworldz) environment='baseworldz-production'; live_url='https://baseworldz.xyz'; guard='BASEWORLDZ.XYZ'; expected_script='assets/app.js' ;;
-            bnbworldz) environment='bnbworldz-production'; live_url='https://bnbworldz.xyz'; guard='BNBWORLDZ.XYZ'; expected_script='assets/app.js' ;;
-            xrpworldz) environment='xrpworldz-production'; live_url='https://xrpworldz.xyz'; guard='XRPWORLDZ.XYZ'; expected_script='assets/app.js' ;;
-            suiworldz) environment='suiworldz-production'; live_url='https://suiworldz.xyz'; guard='SUIWORLDZ.XYZ'; expected_script='assets/app.js' ;;
-            hyperworldz) environment='hyperworldz-production'; live_url='https://hyperworldz.xyz'; guard='HYPERWORLDZ.XYZ'; expected_script='assets/app.js' ;;
-            robinworldz) environment='robinworldz-production'; live_url='https://robinworldz.xyz'; guard='ROBINWORLDZ.XYZ'; expected_script='assets/app.js' ;;
-            bitcoinworldz) environment='bitcoinworldz-production'; live_url='https://bitcoinworldz.xyz'; guard='BITCOINWORLDZ.XYZ'; expected_script='assets/app.js' ;;
-            hodlerworldz) environment='hodlerworldz-production'; live_url='https://hodlerworldz.xyz'; guard='HODLERWORLDZ.XYZ'; expected_script='assets/app.js' ;;
+            ethworldz) environment='ethworldz-production'; live_url='https://ethworldz.xyz'; guard='ETHWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
+            baseworldz) environment='baseworldz-production'; live_url='https://baseworldz.xyz'; guard='BASEWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
+            bnbworldz) environment='bnbworldz-production'; live_url='https://bnbworldz.xyz'; guard='BNBWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
+            xrpworldz) environment='xrpworldz-production'; live_url='https://xrpworldz.xyz'; guard='XRPWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
+            suiworldz) environment='suiworldz-production'; live_url='https://suiworldz.xyz'; guard='SUIWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
+            hyperworldz) environment='hyperworldz-production'; live_url='https://hyperworldz.xyz'; guard='HYPERWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
+            robinworldz) environment='robinworldz-production'; live_url='https://robinworldz.xyz'; guard='ROBINWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
+            bitcoinworldz) environment='bitcoinworldz-production'; live_url='https://bitcoinworldz.xyz'; guard='BITCOINWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
+            hodlerworldz) environment='hodlerworldz-production'; live_url='https://hodlerworldz.xyz'; guard='HODLERWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
             *) echo 'Unsupported deployment target.' >&2; exit 1 ;;
           esac
 
@@ -152,8 +153,7 @@ jobs:
         run: |
           set -euo pipefail
           cd apps/cryptoworldz-web-core
-          zip -qr ../../worldz-static-${GITHUB_SHA}.zip . \
-            -x '*.DS_Store' '*.md' '.gitignore' 'docs/*'
+          zip -qr ../../worldz-static-${GITHUB_SHA}.zip . -x '*.DS_Store' '*.md' '.gitignore' 'docs/*'
           cd ../..
           sha256sum worldz-static-${GITHUB_SHA}.zip > worldz-static-${GITHUB_SHA}.sha256
 
