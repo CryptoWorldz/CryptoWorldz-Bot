@@ -1,7 +1,12 @@
 const WEBSITE_COMMANDS = Object.freeze([
   { command: "websites", description: "Explore the CryptoWorldz website network" },
+  { command: "worldzlive", description: "Open the verified live Worldz directory" },
   { command: "solworldz", description: "Open SolWorldz.xyz" }
 ]);
+
+const RELEASE_BUILD = "b4950719f1280511b17dfa36d7835366404d3bfc";
+const RELEASE_ROOT = `https://raw.githack.com/CryptoWorldz/CryptoWorldz-Bot/${RELEASE_BUILD}/apps/cryptoworldz-web-core`;
+const LIVE_DIRECTORY_URL = `${RELEASE_ROOT}/live.html`;
 
 const PRIMARY_WEBSITES = Object.freeze([
   { label: "🌐 CryptoWorldz.xyz", url: "https://CryptoWorldz.xyz", purpose: "CryptoWorldz main gateway" },
@@ -33,7 +38,7 @@ function buildWebsiteMessage(config = {}) {
     "",
     url,
     "",
-    "Use /websites to explore the full website network."
+    "Use /websites for the full network or /worldzlive for the verified working backup."
   ].join("\n");
 }
 
@@ -44,10 +49,27 @@ function buildWebsiteDirectoryMessage() {
     "",
     mainRows,
     "",
-    "🚧 Worldz Being Connected",
+    "✅ Verified Live Directory",
+    "All 18 Worldz routes, shared visuals and website images are available through /worldzlive while final custom-domain deployment completes.",
+    "",
+    "🚧 Custom Domains Being Connected",
     CONNECTING_WORLDZ.join(" • "),
     "",
-    "Unfinished Worldz direct Legends to CryptoWorldz HQ for updates and support."
+    "Use the live directory whenever a custom domain is still updating."
+  ].join("\n");
+}
+
+function buildLiveDirectoryMessage() {
+  return [
+    "✅ Worldz Live Directory",
+    "",
+    "18 verified browser routes are online from the pinned public release package.",
+    "",
+    "Includes OneWorldz, JayJayTeamDev, CryptoWorldz, Purple Diamond Crew, SolWorldz, every blockchain World, ImpactBased, Robin Hood Law and LearnWorldz.",
+    "",
+    `Build: ${RELEASE_BUILD.slice(0, 12)}`,
+    "",
+    "This public fallback never requests seed phrases, private keys or wallet-signing credentials."
   ].join("\n");
 }
 
@@ -59,6 +81,8 @@ function buildSolWorldzMessage() {
     "",
     "https://SolWorldz.xyz",
     "",
+    "If the custom domain is updating, open /worldzlive.",
+    "",
     "🌍 One World • One Mission"
   ].join("\n");
 }
@@ -68,6 +92,7 @@ function websiteKeyboard(url) {
     reply_markup: {
       inline_keyboard: [
         [{ text: "🌐 Open CryptoWorldz.xyz", url }],
+        [{ text: "✅ Verified Live Directory", url: LIVE_DIRECTORY_URL }],
         [{ text: "🌍 Explore All Websites", callback_data: "worldz_websites_directory" }],
         [{ text: "💬 Join CryptoWorldz HQ", url: HQ_URL }]
       ]
@@ -79,6 +104,7 @@ function directoryKeyboard() {
   return {
     reply_markup: {
       inline_keyboard: [
+        [{ text: "✅ Open All 18 Live Worldz", url: LIVE_DIRECTORY_URL }],
         [
           { text: "🌐 CryptoWorldz", url: PRIMARY_WEBSITES[0].url },
           { text: "🌏 OneWorldz", url: PRIMARY_WEBSITES[1].url }
@@ -93,11 +119,23 @@ function directoryKeyboard() {
   };
 }
 
+function liveDirectoryKeyboard() {
+  return {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "✅ Open Worldz Live Directory", url: LIVE_DIRECTORY_URL }],
+        [{ text: "💬 CryptoWorldz HQ", url: HQ_URL }]
+      ]
+    }
+  };
+}
+
 function solWorldzKeyboard() {
   return {
     reply_markup: {
       inline_keyboard: [
         [{ text: "⚡ Open SolWorldz.xyz", url: PRIMARY_WEBSITES[2].url }],
+        [{ text: "✅ Verified Live Directory", url: LIVE_DIRECTORY_URL }],
         [{ text: "🌍 Explore All Websites", callback_data: "worldz_websites_directory" }]
       ]
     }
@@ -120,6 +158,10 @@ function registerWebsiteTelegramHandlers({ bot, config }) {
     bot.sendMessage(msg.chat.id, buildWebsiteDirectoryMessage(), directoryKeyboard())
   );
 
+  bot.onText(/^\/worldzlive(?:@\w+)?$/, (msg) =>
+    bot.sendMessage(msg.chat.id, buildLiveDirectoryMessage(), liveDirectoryKeyboard())
+  );
+
   bot.onText(/^\/solworldz(?:@\w+)?$/, (msg) =>
     bot.sendMessage(msg.chat.id, buildSolWorldzMessage(), solWorldzKeyboard())
   );
@@ -139,12 +181,16 @@ function registerWebsiteTelegramHandlers({ bot, config }) {
 
 module.exports = {
   CONNECTING_WORLDZ,
+  LIVE_DIRECTORY_URL,
   PRIMARY_WEBSITES,
+  RELEASE_BUILD,
   WEBSITE_COMMANDS,
+  buildLiveDirectoryMessage,
   buildSolWorldzMessage,
   buildWebsiteDirectoryMessage,
   buildWebsiteMessage,
   directoryKeyboard,
+  liveDirectoryKeyboard,
   registerWebsiteTelegramHandlers,
   solWorldzKeyboard,
   websiteKeyboard
