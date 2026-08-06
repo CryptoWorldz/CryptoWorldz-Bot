@@ -21,12 +21,13 @@ const { createGraceWorker } = require("./src/grace/worker");
 const { configWarnings, loadConfig } = require("./src/config");
 const { createHttpApp } = require("./src/http");
 const { registerRoleProfileHandler } = require("./src/profile-role");
+const { REFERRAL_COMMANDS, registerReferralTelegramHandlers } = require("./src/referrals");
 const { createRepository } = require("./src/repository");
 const { registerScopedBroadcastHandlers } = require("./src/scoped-broadcast");
 const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
 const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/websites-telegram");
 
-const RUNTIME_BUILD = "2026-08-06-auto-dca-grace-community-directory";
+const RUNTIME_BUILD = "2026-08-06-referral-shill-rewards";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -79,6 +80,12 @@ async function start() {
   registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });
   registerWebsiteTelegramHandlers({ bot, config });
   registerCommunityDirectoryHandlers({ bot, supabase, config });
+  const referralController = registerReferralTelegramHandlers({
+    bot,
+    repository,
+    supabase,
+    config
+  });
   const app = createHttpApp({ bot, config, repository });
   app.get("/api/public/runtime", (req, res) => res.json({
     ok: true,
@@ -90,6 +97,7 @@ async function start() {
     auto_dca_controls: true,
     website_directory_commands: true,
     community_directory_commands: true,
+    referral_reward_controls: true,
     posting_enabled: false
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
@@ -105,11 +113,24 @@ async function start() {
     console.log("Grace Social Engine worker started in approval-controlled mode");
 
     const webhookResult = await Promise.allSettled([
-      bot.setWebHook(config.webhookUrl, { secret_token: config.webhookSecret }),
+      bot.setWebHook(config.webhookUrl, {
+        secret_token: config.webhookSecret,
+        allowed_updates: [
+          "message",
+          "edited_message",
+          "channel_post",
+          "edited_channel_post",
+          "callback_query",
+          "chat_member",
+          "my_chat_member",
+          "chat_join_request"
+        ]
+      }),
       bot.setMyCommands([
         ...PUBLIC_COMMANDS,
         ...WEBSITE_COMMANDS,
         ...DIRECTORY_COMMANDS,
+        ...REFERRAL_COMMANDS,
         ...CAUSE_COMMANDS,
         ...EXECUTIVE_COMMANDS,
         ...GRACE_COMMANDS,
@@ -134,6 +155,7 @@ async function start() {
 
   const shutdown = (signal) => {
     console.log(`${signal} received; closing HTTP server.`);
+    referralController.stop();
     graceWorker.stop();
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(1), 10000).unref();
@@ -152,6 +174,7 @@ async function start() {
     gracePublisher,
     graceRepository,
     graceWorker,
+    referralController,
     repository,
     server
   };
