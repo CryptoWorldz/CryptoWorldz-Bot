@@ -33,7 +33,7 @@ const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/web
 const { WORK_EVIDENCE_COMMANDS, registerWorkEvidenceHandlers } = require("./src/work-evidence");
 const { WORLDZCAST_COMMANDS, registerWorldzCastSystem } = require("./src/worldzcast");
 
-const RUNTIME_BUILD = "2026-08-07-model-348-v8-rewards";
+const RUNTIME_BUILD = "2026-08-07-grace-workspace-auto-wallet";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -51,7 +51,9 @@ async function start() {
   const bot = new TelegramBot(config.botToken);
   const repository = createRepository(supabase);
   const autoClient = createAutoClient(config);
-  const graceWorkspaceSlug = process.env.GRACE_WORKSPACE_SLUG || "cryptoworldz";
+  const graceWorkspaceSlug = String(process.env.GRACE_WORKSPACE_SLUG || "cryptoworldz")
+    .trim()
+    .toLowerCase();
   const graceRepository = createGraceRepository(supabase, { workspaceSlug: graceWorkspaceSlug });
   const graceOAuthRepository = createGraceOAuthRepository(supabase, { workspaceSlug: graceWorkspaceSlug });
   const graceOAuth = createXOAuthService({
