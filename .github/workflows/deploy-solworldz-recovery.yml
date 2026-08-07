@@ -1,11 +1,16 @@
 name: Deploy SolWorldz Recovery
-# CSP-safe router deployment validation v2
+# CSP-safe router deployment validation v3
 
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/deploy-solworldz-recovery.yml'
+      - 'apps/cryptoworldz-web-core/**'
+      - 'tools/evaluate-web-core.mjs'
+      - 'tools/evaluate-complete-release.mjs'
+      - 'src/pdc-host.js'
+      - 'test/pdc-host.test.js'
   workflow_dispatch:
 
 permissions:
