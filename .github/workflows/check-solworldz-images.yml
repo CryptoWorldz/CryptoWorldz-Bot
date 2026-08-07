@@ -1,0 +1,72 @@
+name: Check SolWorldz Images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/check-solworldz-images.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  images:
+    name: Verify live SolWorldz image files
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Install WebP tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq webp
+
+      - name: Validate every SolWorldz page image
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://solworldz.xyz'
+          images=(
+            '/assets/images/website-core/solworldz/solworldz-desktop-hero.webp'
+            '/assets/images/website-core/solworldz/solworldz-mobile-hero.webp'
+            '/assets/images/website-core/action-creates-smiles/action-creates-smiles-reagan-kids.webp'
+            '/assets/images/website-core/action-creates-smiles/kids-cartoon-kindness-changes-everything.webp'
+            '/assets/images/website-core/action-creates-smiles/kids-cartoon-bunk-bed.webp'
+          )
+          failed=0
+          i=0
+          for image in "${images[@]}"; do
+            i=$((i+1))
+            out="$RUNNER_TEMP/image-$i.webp"
+            headers="$RUNNER_TEMP/image-$i.headers"
+            code="$(curl -L -sS -A 'Mozilla/5.0 (Linux; Android 13; Mobile) SolWorldzImageCheck' -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 45 -D "$headers" -o "$out" -w '%{http_code}' "${base}${image}?imgcheck=${GITHUB_RUN_ID}" || true)"
+            type="$(awk 'BEGIN{IGNORECASE=1} /^content-type:/{gsub(/\r/,""); sub(/^[^:]+:[[:space:]]*/,""); v=$0} END{print v}' "$headers" 2>/dev/null || true)"
+            bytes="$(wc -c < "$out" 2>/dev/null | tr -d ' ' || echo 0)"
+            filetype="$(file -b "$out" 2>/dev/null || true)"
+            echo "IMAGE=$image"
+            echo "HTTP=$code CONTENT_TYPE=$type BYTES=$bytes"
+            echo "FILE=$filetype"
+            if [[ "$code" != '200' || "$type" != image/webp* || "$bytes" -lt 1000 ]]; then
+              echo "::error::Bad live response for $image"
+              failed=1
+              continue
+            fi
+            if ! webpinfo "$out" > "$RUNNER_TEMP/webp-$i.txt" 2>&1; then
+              cat "$RUNNER_TEMP/webp-$i.txt"
+              echo "::error::Corrupt WebP: $image"
+              failed=1
+              continue
+            fi
+            grep -E 'Canvas size|Width|Height' "$RUNNER_TEMP/webp-$i.txt" | head -n 8 || true
+            echo '---'
+          done
+          exit "$failed"
+
+      - name: Publish image check
+        if: always()
+        run: |
+          {
+            echo '## SolWorldz Image Integrity Check'
+            echo '- Checks all five locally rendered SolWorldz images'
+            echo '- Requires HTTP 200, image/webp, non-empty file and successful WebP decoding'
+          } >> "$GITHUB_STEP_SUMMARY"
