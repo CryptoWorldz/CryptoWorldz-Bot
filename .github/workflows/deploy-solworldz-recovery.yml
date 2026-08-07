@@ -76,6 +76,8 @@ jobs:
           cache: npm
 
       - name: Install and verify package
+        env:
+          FTP_TLS_VERIFY: 'yes'
         run: |
           npm ci
           npm run verify
