@@ -208,8 +208,15 @@ jobs:
           [[ -n "$FTP_USERNAME" ]] || missing+=(FTP_USERNAME)
           [[ -n "$FTP_PASSWORD" ]] || missing+=(FTP_PASSWORD)
           if [[ "$FTP_TLS_VERIFY" == 'no' ]]; then
+            ftp_host_check="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+            ftp_host_check="${ftp_host_check#ftp://}"
+            ftp_host_check="${ftp_host_check#ftps://}"
+            ftp_host_check="${ftp_host_check%%/*}"
+            if [[ "$ftp_host_check" != *:*:* && "$ftp_host_check" == *:* ]]; then
+              ftp_host_check="${ftp_host_check%%:*}"
+            fi
             [[ "$EXPECTED_GUARD" == 'CRYPTOWORLDZ.XYZ' ]] || missing+=(FTP_TLS_VERIFY_TARGET)
-            [[ "$FTP_HOST" == '145.223.108.40' ]] || missing+=(FTP_TLS_VERIFY_HOST)
+            [[ "$ftp_host_check" == '145.223.108.40' ]] || missing+=(FTP_TLS_VERIFY_HOST)
           fi
           if (( ${#missing[@]} )); then
             printf '::error::Deployment environment is incomplete or does not match this domain: %s\n' "${missing[*]}"
