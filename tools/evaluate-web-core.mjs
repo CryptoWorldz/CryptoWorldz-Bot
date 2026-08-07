@@ -13,6 +13,7 @@ const requiredFiles = [
   '404.html',
   '.htaccess',
   '_headers',
+  'assets/site-router.js',
   'assets/app.js',
   'assets/pdc-directory.js',
   'assets/pdc-site.js',
@@ -32,6 +33,7 @@ for (const relativePath of requiredFiles) {
 }
 
 const indexSource = read('index.html');
+const routerSource = read('assets/site-router.js');
 const appSource = read('assets/app.js');
 const pdcDirectorySource = read('assets/pdc-directory.js');
 const pdcSiteSource = read('assets/pdc-site.js');
@@ -43,6 +45,7 @@ const fallbackSource = read('404.html');
 const headerSource = read('_headers');
 const hostingerSource = read('.htaccess');
 
+assert.doesNotThrow(() => new Function(routerSource), 'assets/site-router.js contains invalid JavaScript');
 assert.doesNotThrow(() => new Function(appSource), 'assets/app.js contains invalid JavaScript');
 assert.doesNotThrow(() => new Function(pdcDirectorySource), 'assets/pdc-directory.js contains invalid JavaScript');
 assert.doesNotThrow(() => new Function(pdcSiteSource), 'assets/pdc-site.js contains invalid JavaScript');
@@ -120,11 +123,14 @@ assert.match(indexSource, /assets\/token-directory\.css/, 'Token directory style
 assert.match(indexSource, /assets\/pdc-site\.css/, 'PDC website stylesheet is not loaded');
 assert.match(indexSource, /assets\/pdc-asset\.css/, 'PDC Hope Chest asset stylesheet is not loaded');
 assert.match(indexSource, /config\/worlds\.js/, 'Domain configuration is not loaded');
-assert.match(indexSource, /hostname === 'purplediamondcrew\.com'/, 'PDC hostname routing is missing');
-assert.match(indexSource, /\? '\.\/assets\/pdc-site\.js'/, 'PurpleDiamondCrew.com must route to the complete PDC website');
-assert.match(indexSource, /assets\/pdc-directory\.js/, 'Standalone directory mode must remain available');
+assert.match(indexSource, /assets\/site-router\.js/, 'CSP-safe Worldz router is not loaded');
+assert.match(routerSource, /hostname === 'purplediamondcrew\.com'/, 'PDC hostname routing is missing');
+assert.match(routerSource, /\? '\.\/assets\/pdc-site\.js'/, 'PurpleDiamondCrew.com must route to the complete PDC website');
+assert.match(routerSource, /assets\/pdc-directory\.js/, 'Standalone directory mode must remain available');
 assert.match(indexSource, /assets\/pdc-asset\.js/, 'Verified Hope Chest asset loader is not loaded');
-assert.match(indexSource, /assets\/app\.js/, 'Main application script is not routed');
+assert.match(routerSource, /assets\/app\.js/, 'Main application script is not routed');
+assert.match(routerSource, /hostname === 'solworldz\.xyz'/, 'SolWorldz hostname routing is missing');
+assert.match(routerSource, /assets\/solworldz\.js/, 'SolWorldz must route to its dedicated script');
 assert.match(fallbackSource, /location\.replace\('\/'\)/, '404 fallback must return visitors to the app root');
 assert.match(headerSource, /connect-src[^\n]*supabase\.co/, 'Portable CSP must permit the Supabase registry');
 assert.match(headerSource, /frame-src[^\n]*dexscreener\.com/, 'Portable CSP must permit DEX Screener charts');
@@ -135,6 +141,7 @@ assert.match(hostingerSource, /dexscreener\.com/, 'Hostinger CSP must permit DEX
 
 const combinedPublicSource = [
   indexSource,
+  routerSource,
   appSource,
   pdcDirectorySource,
   pdcSiteSource,
