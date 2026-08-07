@@ -31,15 +31,12 @@ function normalizeHost(req) {
 }
 
 function injectPreviewSelection(source, world) {
-  return source
-    .replace(
-      "const requestedMode = params.get('mode');",
-      `const requestedMode = ${JSON.stringify(world.mode || "")} || params.get('mode');`
-    )
-    .replace(
-      "const requestedSite = params.get('site');",
-      `const requestedSite = ${JSON.stringify(world.site || world.slug)} || params.get('site');`
-    );
+  const site = world.site || world.slug || "";
+  const mode = world.mode || "";
+  return source.replace(
+    "<body>",
+    `<body data-worldz-site=${JSON.stringify(site)} data-worldz-mode=${JSON.stringify(mode)}>`
+  );
 }
 
 function allowPdcPreview(source) {
