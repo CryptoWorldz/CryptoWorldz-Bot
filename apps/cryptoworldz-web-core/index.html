@@ -19,85 +19,16 @@
   <link rel="stylesheet" href="./assets/jayjayteamdev.css" />
 </head>
 <body>
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
-
-  <header class="site-header">
-    <a class="brand" href="./" aria-label="Worldz home">
-      <span class="brand-emblem">O</span>
-      <span>
-        <strong id="brand-title">CRYPTOWORLDZ</strong>
-        <small id="brand-subtitle">ONE WORLD • ONE MISSION</small>
-      </span>
-    </a>
-    <nav id="main-nav" class="main-nav" aria-label="Main navigation"></nav>
-    <button id="wallet-button" class="button button-muted" type="button">Wallet Login • Phase 2</button>
-  </header>
-
-  <main id="app" class="page-shell" aria-live="polite">
-    <section class="loading-panel">
-      <div class="spinner"></div>
-      <p>Loading the Worldz experience…</p>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <p>One World • One Mission • Helping the People Who Help People</p>
-    <p class="footer-note">Public information only. Verify fundraiser links, contract addresses and external destinations before interacting.</p>
-  </footer>
-
-  <dialog id="wallet-dialog" class="modal">
-    <form method="dialog">
-      <button class="modal-close" aria-label="Close">×</button>
-      <p class="eyebrow">SECURE WALLET ACCESS</p>
-      <h2>Read-only wallet login is next</h2>
-      <p>The wallet system will use signed-message verification. No private key or recovery phrase will ever be requested or stored.</p>
-      <button class="button button-primary" value="close">Understood</button>
-    </form>
-  </dialog>
-
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="site-header"><a class="brand" href="./" aria-label="Worldz home"><span class="brand-emblem">O</span><span><strong id="brand-title">CRYPTOWORLDZ</strong><small id="brand-subtitle">ONE WORLD • ONE MISSION</small></span></a><nav id="main-nav" class="main-nav" aria-label="Main navigation"></nav><button id="wallet-button" class="button button-muted" type="button">Wallet Login • Phase 2</button></header>
+  <main id="app" class="page-shell" aria-live="polite"><section class="loading-panel"><div class="spinner"></div><p>Loading the Worldz experience…</p></section></main>
+  <footer class="site-footer"><p>One World • One Mission • Helping the People Who Help People</p><p class="footer-note">Public information only. Verify fundraiser links, contract addresses and external destinations before interacting.</p></footer>
+  <dialog id="wallet-dialog" class="modal"><form method="dialog"><button class="modal-close" aria-label="Close">×</button><p class="eyebrow">SECURE WALLET ACCESS</p><h2>Read-only wallet login is next</h2><p>The wallet system will use signed-message verification. No private key or recovery phrase will ever be requested or stored.</p><button class="button button-primary" value="close">Understood</button></form></dialog>
   <script src="./config/worlds.js"></script>
-  <script>
-    (() => {
-      const hostname = location.hostname.replace(/^www\./, '').toLowerCase();
-      const params = new URLSearchParams(location.search);
-      const requestedMode = params.get('mode');
-      const requestedSite = params.get('site');
-      const requestedPage = params.get('page');
-      const jayJayPage = requestedPage === 'jayjayteamdev' || location.pathname.replace(/\/+$/, '').endsWith('/jayjayteamdev');
-      const pdcPreview = hostname === 'cryptoworldz.github.io' || requestedSite === 'pdc';
-      const comingSoonHosts = new Set([
-        'ethworldz.xyz',
-        'baseworldz.xyz',
-        'bnbworldz.xyz',
-        'xrpworldz.xyz',
-        'suiworldz.xyz',
-        'hyperworldz.xyz',
-        'robinworldz.xyz',
-        'bitcoinworldz.xyz',
-        'bitworldz.xyz',
-        'hodlerworldz.xyz'
-      ]);
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = jayJayPage
-        ? './assets/jayjayteamdev.js'
-        : hostname === 'purplediamondcrew.com'
-          ? './assets/pdc-site.js'
-          : pdcPreview
-            ? './assets/pdc-fallback.js'
-            : hostname === 'oneworldz.com' || requestedMode === 'mission'
-              ? './assets/oneworldz.js'
-              : comingSoonHosts.has(hostname) || requestedMode === 'coming-soon'
-                ? './assets/coming-soon.js'
-                : requestedMode === 'directory'
-                  ? './assets/pdc-directory.js'
-                  : './assets/app.js';
-      document.body.appendChild(script);
-    })();
-  </script>
+  <script>(()=>{const hostname=location.hostname.replace(/^www\./,'').toLowerCase();const params=new URLSearchParams(location.search);const requestedMode=params.get('mode');const requestedSite=params.get('site');const requestedPage=params.get('page');const jayJayPage=requestedPage==='jayjayteamdev'||location.pathname.replace(/\/+$/,'').endsWith('/jayjayteamdev');const pdcPreview=hostname==='cryptoworldz.github.io'||requestedSite==='pdc';const comingSoonHosts=new Set(['ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz','bitcoinworldz.xyz','bitworldz.xyz','hodlerworldz.xyz']);const script=document.createElement('script');script.type='module';script.src=jayJayPage?'./assets/jayjayteamdev.js':hostname==='purplediamondcrew.com'?'./assets/pdc-site.js':pdcPreview?'./assets/pdc-fallback.js':hostname==='oneworldz.com'||requestedMode==='mission'?'./assets/oneworldz.js':comingSoonHosts.has(hostname)||requestedMode==='coming-soon'?'./assets/coming-soon.js':requestedMode==='directory'?'./assets/pdc-directory.js':'./assets/app.js';document.body.appendChild(script)})();</script>
   <script type="module" src="./assets/pdc-asset.js"></script>
   <script type="module" src="./assets/worldz-imagery.js"></script>
+  <script type="module" src="./assets/cryptoworldz-core-assets.js"></script>
   <script type="module" src="./assets/oneworldz-core-assets.js"></script>
 </body>
 </html>
