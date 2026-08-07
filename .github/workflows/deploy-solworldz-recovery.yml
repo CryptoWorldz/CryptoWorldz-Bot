@@ -1,0 +1,217 @@
+name: Deploy SolWorldz Recovery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-solworldz-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: solworldz-recovery-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy SolWorldz guarded static target
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: solworldz-production
+      url: https://solworldz.xyz
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
+      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      FTP_TLS_VERIFY: 'no'
+      LIVE_URL: https://solworldz.xyz
+      EXPECTED_SCRIPT: assets/app.js
+      VERIFY_USER_AGENT: Mozilla/5.0 (compatible; CryptoWorldzDeployment/1.0; +https://cryptoworldz.xyz)
+    steps:
+      - name: Check out approved main commit
+        uses: actions/checkout@v4
+
+      - name: Verify SolWorldz-only deployment guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          normalize_host() {
+            local value="$1"
+            value="$(printf '%s' "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+            value="${value#ftp://}"
+            value="${value#ftps://}"
+            value="${value%%/*}"
+            if [[ "$value" != *:*:* && "$value" == *:* ]]; then
+              value="${value%%:*}"
+            fi
+            printf '%s' "$value"
+          }
+          ftp_host_check="$(normalize_host "$FTP_HOST")"
+          missing=()
+          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]] || missing+=(FTP_ACCOUNT_SCOPE)
+          [[ "$DEPLOY_GUARD" == 'SOLWORLDZ.XYZ' ]] || missing+=(DEPLOY_GUARD)
+          [[ "$ftp_host_check" == '145.223.108.40' ]] || missing+=(FTP_HOST)
+          [[ "$FTP_PORT" == '21' ]] || missing+=(FTP_PORT)
+          [[ "$FTP_SERVER_DIR" == '/' ]] || missing+=(FTP_SERVER_DIR)
+          [[ -n "$FTP_USERNAME" ]] || missing+=(FTP_USERNAME)
+          [[ -n "$FTP_PASSWORD" ]] || missing+=(FTP_PASSWORD)
+          if (( ${#missing[@]} )); then
+            printf '::error::SolWorldz deployment environment does not match the locked target: %s\n' "${missing[*]}"
+            exit 1
+          fi
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_HOST"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install and verify package
+        run: |
+          npm ci
+          npm run verify
+          bash -n tools/worldz-direct-ftp.sh
+
+      - name: Install secure FTP client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp zip
+
+      - name: Confirm encrypted Hostinger FTP target
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 15
+          set net:idle 15
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate no
+          cd "$FTP_SERVER_DIR"
+          bye
+          LFTP
+          echo "Confirmed encrypted SolWorldz FTP document root: $FTP_SERVER_DIR"
+
+      - name: Capture rollback snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_root="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
+          backup="$RUNNER_TEMP/solworldz-backup"
+          commands="$RUNNER_TEMP/solworldz-backup-${GITHUB_RUN_ID}.lftp"
+          mkdir -p "$backup"
+          mapfile -d '' files < <(
+            {
+              for relative in 404.html _headers live.html .htaccess; do
+                [[ -f "$source_root/$relative" ]] && printf '%s\0' "$source_root/$relative"
+              done
+              for directory in assets config; do
+                [[ -d "$source_root/$directory" ]] && find "$source_root/$directory" -type f -print0
+              done
+              [[ -f "$source_root/index.html" ]] && printf '%s\0' "$source_root/index.html"
+            } | sort -z
+          )
+          {
+            echo 'set cmd:fail-exit no'
+            echo 'set net:max-retries 1'
+            echo 'set net:timeout 20'
+            echo 'set net:idle 20'
+            echo 'set ftp:ssl-force yes'
+            echo 'set ftp:ssl-protect-data yes'
+            echo 'set ssl:verify-certificate no'
+            printf 'cd "%s"\n' "$FTP_SERVER_DIR"
+            for file in "${files[@]}"; do
+              relative="${file#"$source_root"/}"
+              mkdir -p "$backup/$(dirname "$relative")"
+              printf 'get "%s" -o "%s"\n' "$relative" "$backup/$relative"
+            done
+            echo 'bye'
+          } > "$commands"
+          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" < "$commands" || true
+          find "$backup" -type f -size 0 -delete || true
+          find "$backup" -type d -empty -delete || true
+          if ! find "$backup" -type f -print -quit | grep -q .; then
+            touch "$backup/.empty-target"
+          fi
+          cd "$backup"
+          zip -qr "$RUNNER_TEMP/solworldz-backup-${GITHUB_RUN_ID}.zip" .
+
+      - name: Preserve rollback package
+        uses: actions/upload-artifact@v4
+        with:
+          name: solworldz-predeploy-backup-${{ github.run_id }}
+          path: ${{ runner.temp }}/solworldz-backup-${{ github.run_id }}.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload approved SolWorldz package
+        shell: bash
+        env:
+          FTP_TRANSFER_TIMEOUT: '300'
+        run: bash tools/worldz-direct-ftp.sh upload "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
+
+      - name: Verify live SolWorldz
+        shell: bash
+        run: |
+          set -euo pipefail
+          verified='false'
+          for attempt in 1 2 3 4 5 6; do
+            cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
+            if curl -fsSL -A "$VERIFY_USER_AGENT" -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/index.html" \
+              && curl -fsSL -A "$VERIFY_USER_AGENT" -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL/$EXPECTED_SCRIPT?$cache" -o "$RUNNER_TEMP/expected.js" \
+              && grep -Fq './config/worlds.js' "$RUNNER_TEMP/index.html" \
+              && test -s "$RUNNER_TEMP/expected.js"; then
+              verified='true'
+              break
+            fi
+            sleep 5
+          done
+          [[ "$verified" == 'true' ]] || { echo '::error::SolWorldz live verification failed.' >&2; exit 1; }
+          echo 'SolWorldz live target verified.'
+
+      - name: Restore previous SolWorldz site if deployment fails
+        if: failure()
+        shell: bash
+        env:
+          FTP_TRANSFER_TIMEOUT: '180'
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/solworldz-backup"
+          if [[ ! -d "$backup" ]]; then
+            echo 'No upload-capable backup exists; rollback is not required.' >&2
+            exit 0
+          fi
+          rm -f "$backup/.empty-target"
+          if find "$backup" -type f -print -quit | grep -q .; then
+            bash tools/worldz-direct-ftp.sh restore "$backup"
+            echo 'Previous SolWorldz files restored.' >&2
+          else
+            echo 'No pre-existing SolWorldz package files were captured.' >&2
+          fi
+
+      - name: Publish deployment summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## SolWorldz Recovery Deployment'
+            echo
+            echo '- Target: solworldz.xyz'
+            echo '- Environment: solworldz-production'
+            echo '- Connection: encrypted FTPS on port 21 to locked Hostinger IP'
+            echo '- Certificate exception: restricted to exact approved Hostinger FTP IP'
+            echo "- Source commit: $GITHUB_SHA"
+            echo '- Zed Node service: untouched'
+            echo '- Auto service: untouched'
+          } >> "$GITHUB_STEP_SUMMARY"
