@@ -1,0 +1,170 @@
+name: Diagnose OneWorldz FTP
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/oneworldz-ftp.request'
+  pull_request:
+    paths:
+      - '.github/workflows/diagnose-oneworldz-ftp.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate workflow syntax and safety markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'oneworldz-production' .github/workflows/diagnose-oneworldz-ftp.yml
+          grep -Fq 'FTP_ACCOUNT_SCOPE' .github/workflows/diagnose-oneworldz-ftp.yml
+          grep -Fq 'DEPLOY_GUARD' .github/workflows/diagnose-oneworldz-ftp.yml
+          ! grep -Eq '^[[:space:]]+(put|mput|mirror[[:space:]]+--reverse|rm[[:space:]]|delete[[:space:]])' .github/workflows/diagnose-oneworldz-ftp.yml
+
+  diagnose:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment: oneworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
+      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate approved diagnostic request
+        shell: bash
+        env:
+          APPROVED_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          test -f diagnostics/oneworldz-ftp.request
+          test "$(sed -n 's/^confirmation=//p' diagnostics/oneworldz-ftp.request | tail -n1)" = 'APPROVE NON-DESTRUCTIVE DIAGNOSTIC'
+          test "$(sed -n 's/^source_commit=//p' diagnostics/oneworldz-ftp.request | tail -n1)" = "$APPROVED_BEFORE"
+          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]]
+          [[ "$DEPLOY_GUARD" == 'ONEWORLDZ.COM' ]]
+          [[ "$FTP_SERVER_DIR" == '/' ]]
+          [[ -n "$FTP_HOST" && -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]]
+          echo "::add-mask::$FTP_USERNAME"
+
+      - name: Install diagnostic clients
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp netcat-openbsd openssl curl
+
+      - name: Test DNS and TCP control port
+        shell: bash
+        run: |
+          set +e
+          echo '=== DNS resolution ==='
+          getent ahosts "$FTP_HOST" | awk '{print $1}' | sort -u || true
+          echo '=== TCP port ==='
+          timeout 12 nc -vz "$FTP_HOST" "$FTP_PORT"
+          echo "tcp_exit=$?"
+          exit 0
+
+      - name: Test explicit TLS handshake
+        shell: bash
+        run: |
+          set +e
+          echo '=== FTP explicit TLS handshake ==='
+          timeout 20 openssl s_client -starttls ftp -connect "$FTP_HOST:$FTP_PORT" -servername "$FTP_HOST" -brief </dev/null
+          echo "tls_exit=$?"
+          exit 0
+
+      - name: Test authenticated control channel only
+        shell: bash
+        run: |
+          set +e
+          echo '=== Authenticated FTP control channel ==='
+          timeout 30 lftp -d -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<'LFTP'
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 10
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          pwd
+          quote SYST
+          quote FEAT
+          bye
+          LFTP
+          echo "control_exit=$?"
+          exit 0
+
+      - name: Test passive protected data channel
+        shell: bash
+        run: |
+          set +e
+          echo '=== Passive FTPS listing with protected data ==='
+          timeout 30 lftp -d -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 10
+          set net:idle 10
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ftp:passive-mode yes
+          set ssl:verify-certificate yes
+          cd "$FTP_SERVER_DIR"
+          cls -1
+          bye
+          LFTP
+          echo "protected_passive_exit=$?"
+          exit 0
+
+      - name: Test passive clear-data channel over TLS control
+        shell: bash
+        run: |
+          set +e
+          echo '=== Passive listing with TLS control and clear data ==='
+          timeout 30 lftp -d -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 10
+          set net:idle 10
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data no
+          set ftp:passive-mode yes
+          set ssl:verify-certificate yes
+          cd "$FTP_SERVER_DIR"
+          cls -1
+          bye
+          LFTP
+          echo "clear_passive_exit=$?"
+          exit 0
+
+      - name: Test curl FTPES passive listing
+        shell: bash
+        run: |
+          set +e
+          echo '=== curl FTPES passive listing ==='
+          timeout 30 curl --silent --show-error --verbose \
+            --ftp-ssl-reqd --ftp-pasv \
+            --connect-timeout 10 --max-time 25 \
+            --user "$FTP_USERNAME:$FTP_PASSWORD" \
+            "ftp://$FTP_HOST:$FTP_PORT$FTP_SERVER_DIR" \
+            -o /dev/null
+          echo "curl_ftpes_exit=$?"
+          exit 0
+
+      - name: Diagnostic summary
+        run: |
+          {
+            echo '## OneWorldz FTP diagnostic'
+            echo
+            echo '- No files were uploaded, modified, or deleted.'
+            echo '- DNS, TCP, TLS, authentication, protected passive data, clear passive data, and curl FTPES were tested.'
+            echo '- Review step logs for the first failing protocol layer.'
+          } >> "$GITHUB_STEP_SUMMARY"
