@@ -25,7 +25,7 @@ jobs:
           grep -Fq 'oneworldz-production' .github/workflows/diagnose-oneworldz-ftp.yml
           grep -Fq 'FTP_ACCOUNT_SCOPE' .github/workflows/diagnose-oneworldz-ftp.yml
           grep -Fq 'DEPLOY_GUARD' .github/workflows/diagnose-oneworldz-ftp.yml
-          ! grep -Eq 'upload-artifact|put |mirror --reverse' .github/workflows/diagnose-oneworldz-ftp.yml
+          ! grep -Eq '^[[:space:]]+(put|mput|mirror[[:space:]]+--reverse|rm[[:space:]]|delete[[:space:]])' .github/workflows/diagnose-oneworldz-ftp.yml
 
   diagnose:
     if: github.event_name == 'push'
