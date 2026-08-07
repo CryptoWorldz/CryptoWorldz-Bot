@@ -103,7 +103,10 @@ fi
   echo 'bye'
 } > "$command_file"
 
-file_count=$(( ${#ordinary_files[@]} + (index_file != "" ? 1 : 0) ))
+file_count=${#ordinary_files[@]}
+if [[ -n "$index_file" ]]; then
+  ((file_count += 1))
+fi
 if (( file_count == 0 )); then
   echo "No files available for $mode." >&2
   exit 0
