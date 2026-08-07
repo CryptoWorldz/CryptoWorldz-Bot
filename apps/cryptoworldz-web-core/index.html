@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="./assets/worldz-imagery.css" />
   <link rel="stylesheet" href="./assets/jayjayteamdev.css" />
   <link rel="stylesheet" href="./assets/worldz-pages.css" />
+  <link rel="stylesheet" href="./assets/worldz-expansion.css" />
 </head>
 <body>
   <div class="ambient ambient-one"></div>
@@ -92,13 +93,19 @@
               ? './assets/pdc-site.js'
               : pdcPreview
                 ? './assets/pdc-fallback.js'
-                : hostname === 'oneworldz.com' || requestedMode === 'mission'
-                  ? './assets/oneworldz.js'
-                  : comingSoonHosts.has(hostname) || requestedMode === 'coming-soon'
-                    ? './assets/coming-soon.js'
-                    : requestedMode === 'directory'
-                      ? './assets/pdc-directory.js'
-                      : './assets/app.js';
+                : hostname === 'impactbased.oneworldz.com' || requestedMode === 'impact'
+                  ? './assets/impactbased.js'
+                  : hostname === 'oneworldz.com'
+                    ? './assets/oneworldz-next.js'
+                    : hostname === 'oneworldz.com' || requestedMode === 'mission'
+                      ? './assets/oneworldz.js'
+                      : comingSoonHosts.has(hostname)
+                        ? './assets/coming-soon-next.js'
+                        : comingSoonHosts.has(hostname) || requestedMode === 'coming-soon'
+                          ? './assets/coming-soon.js'
+                          : requestedMode === 'directory'
+                            ? './assets/pdc-directory.js'
+                            : './assets/app.js';
       document.body.appendChild(script);
     })();
   </script>
@@ -106,5 +113,7 @@
   <script type="module" src="./assets/worldz-imagery.js"></script>
   <script type="module" src="./assets/cryptoworldz-core-assets.js"></script>
   <script type="module" src="./assets/oneworldz-core-assets.js"></script>
+  <script type="module" src="./assets/pdc-enhancements.js"></script>
+  <script type="module" src="./assets/site-page-brand.js"></script>
 </body>
 </html>
