@@ -59,11 +59,11 @@ test("registers every required custom Worldz hostname", () => {
   }
 });
 
-test("injects immutable preview selections without changing the shared package", () => {
-  const source = "const requestedMode = params.get('mode');\nconst requestedSite = params.get('site');";
+test("injects immutable preview selections without changing executable scripts", () => {
+  const source = "<!doctype html><html><body><main>Preview</main></body></html>";
   const result = injectPreviewSelection(source, { slug: "xrpworldz", mode: "coming-soon" });
-  assert.match(result, /const requestedMode = "coming-soon" \|\| params\.get\('mode'\);/);
-  assert.match(result, /const requestedSite = "xrpworldz" \|\| params\.get\('site'\);/);
+  assert.match(result, /<body data-worldz-site="xrpworldz" data-worldz-mode="coming-soon">/);
+  assert.match(result, /<main>Preview<\/main>/);
 });
 
 test("opens Purple Diamond Crew scripts only for the verified domain or fallback route", () => {
@@ -83,9 +83,14 @@ test("serves the complete Purple Diamond Crew site and Hope Chest visual from th
   const page = await request(server, "/purple-diamond-crew/");
   assert.equal(page.status, 200);
   assert.match(page.headers["content-type"], /text\/html/);
-  assert.match(page.body, /const requestedSite = "pdc" \|\| params\.get\('site'\);/);
-  assert.match(page.body, /assets\/pdc-site\.js/);
+  assert.match(page.body, /data-worldz-site="pdc"/);
+  assert.match(page.body, /assets\/site-router\.js/);
   assert.match(page.body, /assets\/pdc-asset\.js/);
+
+  const router = await request(server, "/purple-diamond-crew/assets/site-router.js");
+  assert.equal(router.status, 200);
+  assert.match(router.body, /document\.body\.dataset\.worldzSite/);
+  assert.match(router.body, /assets\/pdc-fallback\.js/);
 
   const script = await request(server, "/purple-diamond-crew/assets/pdc-site.js");
   assert.equal(script.status, 200);
@@ -106,12 +111,15 @@ test("serves OneWorldz and blockchain Worldz preview routes", async (t) => {
 
   const oneWorldz = await request(server, "/worldz/oneworldz/");
   assert.equal(oneWorldz.status, 200);
-  assert.match(oneWorldz.body, /const requestedMode = "mission"/);
+  assert.match(oneWorldz.body, /data-worldz-site="oneworldz"/);
+  assert.match(oneWorldz.body, /data-worldz-mode="mission"/);
+  assert.match(oneWorldz.body, /assets\/site-router\.js/);
 
   const xrp = await request(server, "/worldz/xrpworldz/");
   assert.equal(xrp.status, 200);
-  assert.match(xrp.body, /const requestedMode = "coming-soon"/);
-  assert.match(xrp.body, /const requestedSite = "xrpworldz"/);
+  assert.match(xrp.body, /data-worldz-site="xrpworldz"/);
+  assert.match(xrp.body, /data-worldz-mode="coming-soon"/);
+  assert.match(xrp.body, /assets\/site-router\.js/);
 });
 
 test("serves registered Worldz domains at root and preserves the Zed host fallback", async (t) => {
@@ -123,11 +131,12 @@ test("serves registered Worldz domains at root and preserves the Zed host fallba
 
   const pdc = await request(server, "/", { Host: "purplediamondcrew.com" });
   assert.equal(pdc.status, 200);
-  assert.match(pdc.body, /const requestedSite = "pdc"/);
+  assert.match(pdc.body, /data-worldz-site="pdc"/);
 
   const oneWorldz = await request(server, "/", { Host: "oneworldz.com" });
   assert.equal(oneWorldz.status, 200);
-  assert.match(oneWorldz.body, /const requestedMode = "mission"/);
+  assert.match(oneWorldz.body, /data-worldz-site="oneworldz"/);
+  assert.match(oneWorldz.body, /data-worldz-mode="mission"/);
 
   const fallback = await request(server, "/", { Host: "cryptobotz.cryptoworldz.xyz" });
   assert.equal(fallback.status, 200);
