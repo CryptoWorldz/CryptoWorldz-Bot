@@ -6,6 +6,7 @@ on:
       - '.github/workflows/deploy-worldz-static.yml'
       - 'apps/cryptoworldz-web-core/**'
       - 'tools/evaluate-web-core.mjs'
+      - 'tools/worldz-direct-ftp.sh'
       - 'package.json'
   push:
     branches: [main]
@@ -148,6 +149,9 @@ jobs:
       - name: Run complete repository verification
         run: npm run verify
 
+      - name: Validate direct FTP helper
+        run: bash -n tools/worldz-direct-ftp.sh
+
       - name: Package reviewed static files
         shell: bash
         run: |
@@ -258,24 +262,11 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Upload approved static web core
+      - name: Upload approved static web core without remote listing
         shell: bash
-        run: |
-          set -euo pipefail
-          local_root="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
-          timeout 300 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-          set cmd:fail-exit yes
-          set net:max-retries 2
-          set net:timeout 30
-          set net:idle 30
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ssl:verify-certificate yes
-          cd "$FTP_SERVER_DIR"
-          lcd "$local_root"
-          mirror --reverse --overwrite --parallel=4 --exclude-glob '.git*' --exclude-glob '*.md' --exclude-glob 'docs/**' .
-          bye
-          LFTP
+        env:
+          FTP_TRANSFER_TIMEOUT: '300'
+        run: bash tools/worldz-direct-ftp.sh upload "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
 
       - name: Verify live target
         shell: bash
@@ -290,6 +281,8 @@ jobs:
       - name: Restore previous site if verification fails
         if: failure()
         shell: bash
+        env:
+          FTP_TRANSFER_TIMEOUT: '180'
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/worldz-backup"
@@ -302,19 +295,7 @@ jobs:
             echo 'No recoverable predeployment files were captured.' >&2
             exit 0
           fi
-          timeout 300 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-          set cmd:fail-exit yes
-          set net:max-retries 2
-          set net:timeout 30
-          set net:idle 30
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ssl:verify-certificate yes
-          cd "$FTP_SERVER_DIR"
-          lcd "$backup"
-          mirror --reverse --overwrite --parallel=3 .
-          bye
-          LFTP
+          bash tools/worldz-direct-ftp.sh restore "$backup"
           echo 'Previous target files restored after failed verification.' >&2
 
       - name: Publish deployment summary
@@ -328,6 +309,7 @@ jobs:
             echo "- Environment: ${{ needs.prepare.outputs.environment }}"
             echo "- Live URL: $LIVE_URL"
             echo "- Source commit: $GITHUB_SHA"
+            echo '- Transfer method: direct PUT without remote directory listing'
             echo '- Hostinger Horizons credits: 0'
             echo '- Zed Node service: untouched'
             echo '- Auto service: untouched'
