@@ -112,6 +112,12 @@ if (( file_count == 0 )); then
   exit 0
 fi
 
+if [[ "${WORLDZ_FTP_DRY_RUN:-0}" == "1" ]]; then
+  test -s "$command_file"
+  echo "Direct $mode dry run generated $file_count file commands."
+  exit 0
+fi
+
 echo "Starting direct $mode of $file_count files without remote directory listing."
 timeout "$FTP_TRANSFER_TIMEOUT" \
   lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" \
