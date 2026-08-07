@@ -30,7 +30,7 @@
 
   const script = document.createElement('script');
   script.type = 'module';
-  script.src = jayJayPage
+  const selectedScript = jayJayPage
     ? './assets/jayjayteamdev.js'
     : sharedPage
       ? './assets/site-pages.js'
@@ -53,5 +53,6 @@
                       : requestedMode === 'directory'
                         ? './assets/pdc-directory.js'
                         : './assets/app.js';
+  script.src = `${selectedScript}?v=20260808-mobile3`;
   document.body.appendChild(script);
 })();
