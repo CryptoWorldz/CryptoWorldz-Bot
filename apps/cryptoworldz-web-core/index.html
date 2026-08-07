@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="./assets/oneworldz.css" />
   <link rel="stylesheet" href="./assets/worldz-imagery.css" />
   <link rel="stylesheet" href="./assets/jayjayteamdev.css" />
+  <link rel="stylesheet" href="./assets/worldz-pages.css" />
 </head>
 <body>
   <div class="ambient ambient-one"></div>
@@ -65,6 +66,7 @@
       const requestedSite = params.get('site');
       const requestedPage = params.get('page');
       const jayJayPage = requestedPage === 'jayjayteamdev' || location.pathname.replace(/\/+$/, '').endsWith('/jayjayteamdev');
+      const sharedPage = ['help', 'donate', 'tokens'].includes(requestedPage);
       const pdcPreview = hostname === 'cryptoworldz.github.io' || requestedSite === 'pdc';
       const comingSoonHosts = new Set([
         'ethworldz.xyz',
@@ -82,17 +84,21 @@
       script.type = 'module';
       script.src = jayJayPage
         ? './assets/jayjayteamdev.js'
-        : hostname === 'purplediamondcrew.com'
-          ? './assets/pdc-site.js'
-          : pdcPreview
-            ? './assets/pdc-fallback.js'
-            : hostname === 'oneworldz.com' || requestedMode === 'mission'
-              ? './assets/oneworldz.js'
-              : comingSoonHosts.has(hostname) || requestedMode === 'coming-soon'
-                ? './assets/coming-soon.js'
-                : requestedMode === 'directory'
-                  ? './assets/pdc-directory.js'
-                  : './assets/app.js';
+        : sharedPage
+          ? './assets/site-pages.js'
+          : hostname === 'solworldz.xyz'
+            ? './assets/solworldz.js'
+            : hostname === 'purplediamondcrew.com'
+              ? './assets/pdc-site.js'
+              : pdcPreview
+                ? './assets/pdc-fallback.js'
+                : hostname === 'oneworldz.com' || requestedMode === 'mission'
+                  ? './assets/oneworldz.js'
+                  : comingSoonHosts.has(hostname) || requestedMode === 'coming-soon'
+                    ? './assets/coming-soon.js'
+                    : requestedMode === 'directory'
+                      ? './assets/pdc-directory.js'
+                      : './assets/app.js';
       document.body.appendChild(script);
     })();
   </script>
