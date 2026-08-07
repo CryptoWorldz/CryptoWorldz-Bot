@@ -1,0 +1,108 @@
+@media (max-width: 1050px) {
+  .site-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand action"
+      "nav nav";
+    gap: 8px 10px;
+  }
+
+  .site-header .brand { grid-area: brand; min-width: 0; }
+  .site-header .button-muted { grid-area: action; }
+
+  .site-header .main-nav {
+    grid-area: nav;
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    gap: 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 9px 0 2px;
+    border-top: 1px solid rgba(188, 140, 242, .16);
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .site-header .main-nav a {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 7px 10px;
+    border: 1px solid rgba(188, 140, 242, .2);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .035);
+    font-size: .78rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .site-header {
+    width: calc(100% - 12px);
+    margin-top: 6px;
+    padding: 8px;
+    gap: 7px 8px;
+  }
+
+  .site-header .brand { gap: 8px; }
+  .site-header .brand-emblem { width: 38px; height: 38px; flex: 0 0 38px; }
+  .site-header .brand strong { font-size: .78rem; letter-spacing: .045em; }
+  .site-header .brand small { display: none; }
+
+  .site-header .button-muted {
+    max-width: 124px;
+    min-height: 38px;
+    padding: 7px 9px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.05;
+    font-size: .68rem;
+  }
+
+  .site-header .main-nav {
+    margin: 0;
+    padding-top: 7px;
+  }
+
+  .site-header .main-nav a {
+    min-height: 34px;
+    padding: 6px 9px;
+    font-size: .72rem;
+  }
+
+  .worldz-rich-page .page-shell {
+    width: calc(100% - 12px);
+    margin-top: 8px;
+    padding-bottom: 40px;
+  }
+
+  .sw-shell { gap: 14px; }
+  .sw-hero { min-height: 520px; border-radius: 18px; }
+  .sw-hero-copy { min-height: 520px; padding: 26px 16px; }
+  .sw-hero h1 { font-size: clamp(2.35rem, 16vw, 4rem); }
+  .sw-hero-copy p { font-size: 1rem; line-height: 1.4; }
+
+  .sw-section { padding: 16px; border-radius: 16px; }
+  .sw-heading h2 { font-size: clamp(1.45rem, 8vw, 2.2rem); }
+  .sw-token-card { min-height: 0; }
+  .sw-token-art { height: 180px; }
+  .sw-media-row img { min-height: 210px; }
+  .sw-impact-art { min-height: 250px; }
+  .sw-impact-logo { width: 140px; height: 140px; font-size: 4rem; }
+  .sw-world-link { padding: 13px 10px; }
+
+  .sw-btn,
+  .sw-card-actions .sw-btn {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 390px) {
+  .site-header .brand strong { font-size: .72rem; }
+  .site-header .button-muted { max-width: 108px; font-size: .63rem; }
+  .sw-hero { min-height: 490px; }
+  .sw-hero-copy { min-height: 490px; }
+  .sw-hero h1 { font-size: 2.55rem; }
+}
