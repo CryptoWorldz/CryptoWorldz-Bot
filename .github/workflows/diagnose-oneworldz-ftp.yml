@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate workflow syntax and safety markers
+      - name: Validate non-destructive workflow
         shell: bash
         run: |
           set -euo pipefail
@@ -30,7 +30,7 @@ jobs:
   diagnose:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 6
     environment: oneworldz-production
     env:
       FTP_HOST: ${{ secrets.FTP_HOST }}
@@ -58,113 +58,91 @@ jobs:
           [[ -n "$FTP_HOST" && -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]]
           echo "::add-mask::$FTP_USERNAME"
 
+      - name: Normalize stored FTP host without revealing it
+        id: normalize
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw="$FTP_HOST"
+          trimmed="$(printf '%s' "$raw" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+          normalized="$trimmed"
+          normalized="${normalized#ftp://}"
+          normalized="${normalized#ftps://}"
+          normalized="${normalized#sftp://}"
+          normalized="${normalized%%/*}"
+          if [[ "$normalized" != *:*:* && "$normalized" == *:* ]]; then
+            normalized="${normalized%%:*}"
+          fi
+          echo "::add-mask::$normalized"
+          echo "FTP_HOST_NORMALIZED=$normalized" >> "$GITHUB_ENV"
+          [[ "$raw" == *'://'* ]] && has_scheme=yes || has_scheme=no
+          [[ "$raw" =~ [[:space:]] ]] && has_whitespace=yes || has_whitespace=no
+          [[ "$normalized" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] && normalized_is_ipv4=yes || normalized_is_ipv4=no
+          {
+            echo '### Stored host shape'
+            echo "- Contains protocol scheme: $has_scheme"
+            echo "- Contains whitespace: $has_whitespace"
+            echo "- Normalized value is IPv4: $normalized_is_ipv4"
+            echo "- Raw length: ${#raw}"
+            echo "- Normalized length: ${#normalized}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Install diagnostic clients
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp netcat-openbsd openssl curl
 
-      - name: Test DNS and TCP control port
+      - name: Test normalized stored host
         shell: bash
         run: |
           set +e
-          echo '=== DNS resolution ==='
-          getent ahosts "$FTP_HOST" | awk '{print $1}' | sort -u || true
-          echo '=== TCP port ==='
-          timeout 12 nc -vz "$FTP_HOST" "$FTP_PORT"
-          echo "tcp_exit=$?"
+          echo '=== Normalized stored host ==='
+          getent ahostsv4 "$FTP_HOST_NORMALIZED" | awk '{print $1}' | sort -u
+          echo "normalized_dns_exit=$?"
+          timeout 8 nc -vz "$FTP_HOST_NORMALIZED" "$FTP_PORT"
+          echo "normalized_ftp_port_exit=$?"
+          timeout 8 nc -vz "$FTP_HOST_NORMALIZED" 65002
+          echo "normalized_sftp_port_exit=$?"
           exit 0
 
-      - name: Test explicit TLS handshake
+      - name: Test OneWorldz DNS candidates
         shell: bash
         run: |
           set +e
-          echo '=== FTP explicit TLS handshake ==='
-          timeout 20 openssl s_client -starttls ftp -connect "$FTP_HOST:$FTP_PORT" -servername "$FTP_HOST" -brief </dev/null
-          echo "tls_exit=$?"
+          echo '=== Public candidate records ==='
+          for name in oneworldz.com ftp.oneworldz.com sftp.oneworldz.com ssh.oneworldz.com; do
+            echo "candidate_name=$name"
+            getent ahostsv4 "$name" | awk '{print $1}' | sort -u || true
+          done
+          echo '=== Candidate ports ==='
+          mapfile -t ips < <(getent ahostsv4 oneworldz.com | awk '{print $1}' | sort -u)
+          for ip in "${ips[@]}"; do
+            echo "candidate_ip=$ip"
+            timeout 8 nc -vz "$ip" 21
+            echo "ftp21_exit=$?"
+            timeout 8 nc -vz "$ip" 65002
+            echo "sftp65002_exit=$?"
+          done
           exit 0
 
-      - name: Test authenticated control channel only
+      - name: Test TLS only where the normalized host resolves
         shell: bash
         run: |
           set +e
-          echo '=== Authenticated FTP control channel ==='
-          timeout 30 lftp -d -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<'LFTP'
-          set cmd:fail-exit yes
-          set net:max-retries 1
-          set net:timeout 10
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ssl:verify-certificate yes
-          pwd
-          quote SYST
-          quote FEAT
-          bye
-          LFTP
-          echo "control_exit=$?"
-          exit 0
-
-      - name: Test passive protected data channel
-        shell: bash
-        run: |
-          set +e
-          echo '=== Passive FTPS listing with protected data ==='
-          timeout 30 lftp -d -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-          set cmd:fail-exit yes
-          set net:max-retries 1
-          set net:timeout 10
-          set net:idle 10
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ftp:passive-mode yes
-          set ssl:verify-certificate yes
-          cd "$FTP_SERVER_DIR"
-          cls -1
-          bye
-          LFTP
-          echo "protected_passive_exit=$?"
-          exit 0
-
-      - name: Test passive clear-data channel over TLS control
-        shell: bash
-        run: |
-          set +e
-          echo '=== Passive listing with TLS control and clear data ==='
-          timeout 30 lftp -d -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-          set cmd:fail-exit yes
-          set net:max-retries 1
-          set net:timeout 10
-          set net:idle 10
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data no
-          set ftp:passive-mode yes
-          set ssl:verify-certificate yes
-          cd "$FTP_SERVER_DIR"
-          cls -1
-          bye
-          LFTP
-          echo "clear_passive_exit=$?"
-          exit 0
-
-      - name: Test curl FTPES passive listing
-        shell: bash
-        run: |
-          set +e
-          echo '=== curl FTPES passive listing ==='
-          timeout 30 curl --silent --show-error --verbose \
-            --ftp-ssl-reqd --ftp-pasv \
-            --connect-timeout 10 --max-time 25 \
-            --user "$FTP_USERNAME:$FTP_PASSWORD" \
-            "ftp://$FTP_HOST:$FTP_PORT$FTP_SERVER_DIR" \
-            -o /dev/null
-          echo "curl_ftpes_exit=$?"
+          if getent ahostsv4 "$FTP_HOST_NORMALIZED" >/dev/null 2>&1; then
+            timeout 15 openssl s_client -starttls ftp -connect "$FTP_HOST_NORMALIZED:$FTP_PORT" -servername "$FTP_HOST_NORMALIZED" -brief </dev/null
+            echo "normalized_tls_exit=$?"
+          else
+            echo 'normalized_tls_exit=skipped_unresolvable'
+          fi
           exit 0
 
       - name: Diagnostic summary
         run: |
           {
-            echo '## OneWorldz FTP diagnostic'
+            echo '## OneWorldz FTP host diagnostic'
             echo
             echo '- No files were uploaded, modified, or deleted.'
-            echo '- DNS, TCP, TLS, authentication, protected passive data, clear passive data, and curl FTPES were tested.'
-            echo '- Review step logs for the first failing protocol layer.'
+            echo '- The stored host was normalized in memory only.'
+            echo '- DNS and ports 21/65002 were tested for the normalized host and public OneWorldz candidates.'
           } >> "$GITHUB_STEP_SUMMARY"
