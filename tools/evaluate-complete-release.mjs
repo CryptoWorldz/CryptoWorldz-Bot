@@ -25,19 +25,22 @@ for (const relativePath of visualFiles) {
 }
 
 const indexSource = read('index.html');
+const routerSource = read('assets/site-router.js');
 const oneWorldzSource = read('assets/oneworldz.js');
 const imagerySource = read('assets/worldz-imagery.js');
 const founderSource = read('assets/jayjayteamdev.js');
 const pdcAssetSource = read('assets/pdc-asset.js');
 const hostSource = fs.readFileSync(path.join(repoRoot, 'src', 'pdc-host.js'), 'utf8');
 
+assert.doesNotThrow(() => new Function(routerSource), 'Worldz router JavaScript is invalid');
 assert.doesNotThrow(() => new Function(imagerySource), 'Shared Worldz imagery JavaScript is invalid');
 assert.doesNotThrow(() => new Function(founderSource), 'JayJayTeamDev page JavaScript is invalid');
 
 assert.match(indexSource, /worldz-imagery\.css/, 'Shared Worldz imagery stylesheet is not loaded');
 assert.match(indexSource, /worldz-imagery\.js/, 'Shared Worldz imagery script is not loaded');
 assert.match(indexSource, /jayjayteamdev\.css/, 'Founder page stylesheet is not loaded');
-assert.match(indexSource, /jayjayteamdev\.js/, 'Founder page route is not loaded');
+assert.match(indexSource, /site-router\.js/, 'External Worldz router is not loaded');
+assert.match(routerSource, /jayjayteamdev\.js/, 'Founder page route is not loaded');
 
 assert.match(oneWorldzSource, /oneworldz-hero\.webp/, 'OneWorldz hero image is not displayed');
 assert.match(oneWorldzSource, /oneworldz-impact-mosaic\.webp/, 'OneWorldz impact image is not displayed');
@@ -97,7 +100,7 @@ for (const forbidden of [
   'AUTO_SIGNER_SECRET',
   'GRACE_X_CLIENT_SECRET='
 ]) {
-  assert.ok(![indexSource, oneWorldzSource, imagerySource, founderSource].join('\n').includes(forbidden), `Public release contains forbidden secret marker: ${forbidden}`);
+  assert.ok(![indexSource, routerSource, oneWorldzSource, imagerySource, founderSource].join('\n').includes(forbidden), `Public release contains forbidden secret marker: ${forbidden}`);
 }
 
 console.log(`Complete release evaluation passed: ${visualFiles.length} visual files and all registered Worldz routes verified.`);
