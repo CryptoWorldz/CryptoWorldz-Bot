@@ -1,0 +1,117 @@
+name: Check SolWorldz Live Load
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/check-solworldz-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check complete SolWorldz browser load
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check required live assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://solworldz.xyz'
+          assets=(
+            '/'
+            '/config/worlds.js'
+            '/assets/site-router.js'
+            '/assets/solworldz.js'
+            '/assets/styles.css'
+            '/assets/token-directory.css'
+            '/assets/pdc-site.css'
+            '/assets/pdc-asset.css'
+            '/assets/oneworldz.css'
+            '/assets/worldz-imagery.css'
+            '/assets/jayjayteamdev.css'
+            '/assets/worldz-pages.css'
+            '/assets/worldz-expansion.css'
+            '/assets/pdc-asset.js'
+            '/assets/worldz-imagery.js'
+            '/assets/cryptoworldz-core-assets.js'
+            '/assets/oneworldz-core-assets.js'
+            '/assets/pdc-enhancements.js'
+            '/assets/site-page-brand.js'
+            '/assets/images/website-core/solworldz/solworldz-desktop-hero.webp'
+            '/assets/images/website-core/solworldz/solworldz-mobile-hero.webp'
+            '/assets/images/website-core/action-creates-smiles/action-creates-smiles-reagan-kids.webp'
+            '/assets/images/website-core/action-creates-smiles/kids-cartoon-kindness-changes-everything.webp'
+            '/assets/images/website-core/action-creates-smiles/kids-cartoon-bunk-bed.webp'
+          )
+          failed=0
+          for path in "${assets[@]}"; do
+            url="${base}${path}?diag=${GITHUB_RUN_ID}"
+            headers="$RUNNER_TEMP/headers.txt"
+            body="$RUNNER_TEMP/body.bin"
+            code="$(curl -L -sS -A 'Mozilla/5.0 (SolWorldz Live Diagnostic)' -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 -D "$headers" -o "$body" -w '%{http_code}' "$url" || true)"
+            type="$(awk 'BEGIN{IGNORECASE=1} /^content-type:/{gsub(/\r/,""); sub(/^[^:]+:[[:space:]]*/,""); v=$0} END{print v}' "$headers")"
+            size="$(wc -c < "$body" | tr -d ' ')"
+            printf '%-100s HTTP=%s bytes=%s type=%s\n' "$path" "$code" "$size" "$type"
+            if [[ "$code" != '200' || "$size" -lt 20 ]]; then
+              echo "::error::Broken or empty SolWorldz asset: $path (HTTP $code, $size bytes)"
+              failed=1
+            fi
+          done
+          exit "$failed"
+
+      - name: Check homepage routing markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L -fsS -A 'Mozilla/5.0 (SolWorldz Live Diagnostic)' -H 'Cache-Control: no-cache' --max-time 30 "https://solworldz.xyz/?diag=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/index.html"
+          curl -L -fsS -A 'Mozilla/5.0 (SolWorldz Live Diagnostic)' -H 'Cache-Control: no-cache' --max-time 30 "https://solworldz.xyz/assets/site-router.js?diag=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/router.js"
+          curl -L -fsS -A 'Mozilla/5.0 (SolWorldz Live Diagnostic)' -H 'Cache-Control: no-cache' --max-time 30 "https://solworldz.xyz/assets/solworldz.js?diag=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/solworldz.js"
+          grep -Fq './assets/site-router.js' "$RUNNER_TEMP/index.html"
+          grep -Fq 'Open Worldz' "$RUNNER_TEMP/index.html"
+          ! grep -Fq 'Wallet Login • Phase 2</button>' "$RUNNER_TEMP/index.html"
+          grep -Fq "hostname === 'solworldz.xyz'" "$RUNNER_TEMP/router.js"
+          grep -Fq "'./assets/solworldz.js'" "$RUNNER_TEMP/router.js"
+          grep -Fq 'SolWorldz • Solana Community, Impact & Launches' "$RUNNER_TEMP/solworldz.js"
+          grep -Fq 'solworldz-desktop-hero.webp' "$RUNNER_TEMP/solworldz.js"
+          grep -Fq 'Zed Command Centre' "$RUNNER_TEMP/solworldz.js"
+          echo 'Static routing markers are correct.'
+
+      - name: Check rendered browser DOM
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [[ -z "$chrome" ]]; then
+            echo '::warning::Chrome is not installed on this runner; static live checks still ran.'
+            exit 0
+          fi
+          "$chrome" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,1400 --virtual-time-budget=10000 --dump-dom "https://solworldz.xyz/?diag=${GITHUB_RUN_ID}" > "$RUNNER_TEMP/rendered.html" 2> "$RUNNER_TEMP/chrome.log" || {
+            cat "$RUNNER_TEMP/chrome.log"
+            exit 1
+          }
+          grep -Fq 'SolWorldz' "$RUNNER_TEMP/rendered.html"
+          grep -Fq 'ImpactBased launch pipeline' "$RUNNER_TEMP/rendered.html"
+          grep -Fq 'Action Creates Smiles' "$RUNNER_TEMP/rendered.html"
+          grep -Fq 'Explore the Network' "$RUNNER_TEMP/rendered.html"
+          grep -Fq 'Zed Command Centre' "$RUNNER_TEMP/rendered.html"
+          if grep -Fq 'Loading the Worldz experience…' "$RUNNER_TEMP/rendered.html"; then
+            echo '::error::SolWorldz is still stuck on the loading shell after browser execution.'
+            exit 1
+          fi
+          echo 'Rendered browser DOM contains the complete SolWorldz page.'
+
+      - name: Publish diagnostic summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## SolWorldz Full Live-Load Diagnostic'
+            echo
+            echo '- Checked: homepage, router, SolWorldz script, shared CSS/JS, hero images, humanitarian images'
+            echo '- Browser render: verifies the page leaves the loading shell and renders key SolWorldz sections'
+            echo '- Target: https://solworldz.xyz'
+          } >> "$GITHUB_STEP_SUMMARY"
