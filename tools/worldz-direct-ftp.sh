@@ -16,6 +16,29 @@ esac
 : "${FTP_SERVER_DIR:=/}"
 : "${FTP_TRANSFER_TIMEOUT:=300}"
 
+normalize_ftp_host() {
+  local value="$1"
+  value="$(printf '%s' "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+  value="${value#ftp://}"
+  value="${value#ftps://}"
+  value="${value#sftp://}"
+  value="${value%%/*}"
+
+  # Strip an optional host:port suffix while preserving a possible IPv6 literal.
+  if [[ "$value" != *:*:* && "$value" == *:* ]]; then
+    value="${value%%:*}"
+  fi
+
+  printf '%s' "$value"
+}
+
+FTP_HOST="$(normalize_ftp_host "$FTP_HOST")"
+if [[ -z "$FTP_HOST" || "$FTP_HOST" == *$'\n'* || "$FTP_HOST" == *$'\r'* ]]; then
+  echo '::error::FTP_HOST is empty or malformed after normalization.' >&2
+  exit 5
+fi
+echo "::add-mask::$FTP_HOST"
+
 test -d "$source_root"
 command_file="${RUNNER_TEMP:-/tmp}/worldz-${mode}-${GITHUB_RUN_ID:-manual}.lftp"
 
@@ -116,6 +139,11 @@ if [[ "${WORLDZ_FTP_DRY_RUN:-0}" == "1" ]]; then
   test -s "$command_file"
   echo "Direct $mode dry run generated $file_count file commands."
   exit 0
+fi
+
+if ! getent ahosts "$FTP_HOST" >/dev/null 2>&1; then
+  echo '::error::FTP_HOST does not resolve. Replace it with the Hostinger FTP IP shown in hPanel → Files → FTP Accounts or Plan Details.' >&2
+  exit 6
 fi
 
 echo "Starting direct $mode of $file_count files without remote directory listing."
