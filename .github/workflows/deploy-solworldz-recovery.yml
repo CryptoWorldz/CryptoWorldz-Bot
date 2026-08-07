@@ -32,7 +32,8 @@ jobs:
       DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
       FTP_TLS_VERIFY: 'no'
       LIVE_URL: https://solworldz.xyz
-      EXPECTED_SCRIPT: assets/app.js
+      EXPECTED_SCRIPT: assets/solworldz.js
+      ROUTER_SCRIPT: assets/site-router.js
       VERIFY_USER_AGENT: Mozilla/5.0 (compatible; CryptoWorldzDeployment/1.0; +https://cryptoworldz.xyz)
     steps:
       - name: Check out approved main commit
@@ -82,6 +83,10 @@ jobs:
           npm ci
           npm run verify
           bash -n tools/worldz-direct-ftp.sh
+          node --check apps/cryptoworldz-web-core/assets/site-router.js
+          node --check apps/cryptoworldz-web-core/assets/solworldz.js
+          grep -Fq './assets/site-router.js' apps/cryptoworldz-web-core/index.html
+          grep -Fq "hostname === 'solworldz.xyz'" apps/cryptoworldz-web-core/assets/site-router.js
 
       - name: Install secure FTP client
         run: |
@@ -171,8 +176,13 @@ jobs:
           for attempt in 1 2 3 4 5 6; do
             cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
             if curl -fsSL -A "$VERIFY_USER_AGENT" -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/index.html" \
+              && curl -fsSL -A "$VERIFY_USER_AGENT" -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL/$ROUTER_SCRIPT?$cache" -o "$RUNNER_TEMP/router.js" \
               && curl -fsSL -A "$VERIFY_USER_AGENT" -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL/$EXPECTED_SCRIPT?$cache" -o "$RUNNER_TEMP/expected.js" \
               && grep -Fq './config/worlds.js' "$RUNNER_TEMP/index.html" \
+              && grep -Fq './assets/site-router.js' "$RUNNER_TEMP/index.html" \
+              && grep -Fq "hostname === 'solworldz.xyz'" "$RUNNER_TEMP/router.js" \
+              && grep -Fq 'Zed Command Centre' "$RUNNER_TEMP/expected.js" \
+              && test -s "$RUNNER_TEMP/router.js" \
               && test -s "$RUNNER_TEMP/expected.js"; then
               verified='true'
               break
@@ -180,7 +190,7 @@ jobs:
             sleep 5
           done
           [[ "$verified" == 'true' ]] || { echo '::error::SolWorldz live verification failed.' >&2; exit 1; }
-          echo 'SolWorldz live target verified.'
+          echo 'SolWorldz live target verified with dedicated CSP-safe router.'
 
       - name: Restore previous SolWorldz site if deployment fails
         if: failure()
@@ -213,6 +223,8 @@ jobs:
             echo '- Environment: solworldz-production'
             echo '- Connection: encrypted FTPS on port 21 to locked Hostinger IP'
             echo '- Certificate exception: restricted to exact approved Hostinger FTP IP'
+            echo '- Router: external CSP-safe Worldz router'
+            echo '- Live verification: dedicated SolWorldz script required'
             echo "- Source commit: $GITHUB_SHA"
             echo '- Zed Node service: untouched'
             echo '- Auto service: untouched'
