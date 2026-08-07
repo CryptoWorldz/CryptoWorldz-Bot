@@ -1,8 +1,8 @@
 (() => {
   const hostname = location.hostname.replace(/^www\./, '').toLowerCase();
   const params = new URLSearchParams(location.search);
-  const requestedMode = params.get('mode');
-  const requestedSite = params.get('site');
+  const requestedMode = document.body.dataset.worldzMode || params.get('mode');
+  const requestedSite = document.body.dataset.worldzSite || params.get('site');
   const requestedPage = params.get('page');
   const jayJayPage = requestedPage === 'jayjayteamdev' || location.pathname.replace(/\/+$/, '').endsWith('/jayjayteamdev');
   const sharedPage = ['help', 'donate', 'tokens'].includes(requestedPage);
