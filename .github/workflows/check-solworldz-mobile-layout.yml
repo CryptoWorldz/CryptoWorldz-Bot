@@ -36,93 +36,111 @@ jobs:
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
           [[ -n "$chrome" ]] || { echo '::error::Chrome is unavailable'; exit 1; }
 
+          mkdir -p "$RUNNER_TEMP/chrome-profile"
           "$chrome" \
             --headless=new \
             --no-sandbox \
             --disable-gpu \
+            --disable-dev-shm-usage \
+            --remote-allow-origins='*' \
             --remote-debugging-port=9222 \
+            --user-data-dir="$RUNNER_TEMP/chrome-profile" \
             --window-size=390,844 \
             "https://solworldz.xyz/?mobilecheck=${GITHUB_RUN_ID}" \
             >"$RUNNER_TEMP/chrome.out" 2>"$RUNNER_TEMP/chrome.err" &
           chrome_pid=$!
           trap 'kill "$chrome_pid" 2>/dev/null || true' EXIT
 
+          ready='false'
           for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:9222/json/list -o "$RUNNER_TEMP/tabs.json"; then break; fi
+            if curl -fsS http://127.0.0.1:9222/json/list -o "$RUNNER_TEMP/tabs.json"; then ready='true'; break; fi
             sleep 1
           done
+          if [[ "$ready" != 'true' ]]; then
+            cat "$RUNNER_TEMP/chrome.err" || true
+            echo '::error::Chrome remote debugging did not start.'
+            exit 1
+          fi
 
           node <<'NODE'
-          const fs = require('fs');
-          const tabs = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/tabs.json', 'utf8'));
-          const tab = tabs.find(t => t.type === 'page');
-          if (!tab?.webSocketDebuggerUrl) throw new Error('No Chrome page target');
+          (async () => {
+            const fs = require('fs');
+            const tabs = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/tabs.json', 'utf8'));
+            const tab = tabs.find(t => t.type === 'page');
+            if (!tab?.webSocketDebuggerUrl) throw new Error('No Chrome page target');
 
-          const ws = new WebSocket(tab.webSocketDebuggerUrl);
-          let seq = 0;
-          const pending = new Map();
-          ws.onmessage = event => {
-            const msg = JSON.parse(event.data);
-            if (msg.id && pending.has(msg.id)) {
-              const {resolve, reject} = pending.get(msg.id);
-              pending.delete(msg.id);
-              msg.error ? reject(new Error(JSON.stringify(msg.error))) : resolve(msg.result);
-            }
-          };
-          const send = (method, params = {}) => new Promise((resolve, reject) => {
-            const id = ++seq;
-            pending.set(id, {resolve, reject});
-            ws.send(JSON.stringify({id, method, params}));
-          });
-
-          await new Promise((resolve, reject) => {
-            ws.onopen = resolve;
-            ws.onerror = reject;
-          });
-          await send('Runtime.enable');
-          await new Promise(r => setTimeout(r, 5000));
-
-          const expression = `(() => {
-            const q = s => document.querySelector(s);
-            const nav = q('.main-nav');
-            const header = q('.site-header');
-            const hero = q('.sw-hero');
-            const grid = q('.sw-token-grid');
-            const button = q('#wallet-button');
-            const rect = el => el ? el.getBoundingClientRect() : null;
-            return {
-              innerWidth,
-              scrollWidth: document.documentElement.scrollWidth,
-              navDisplay: nav ? getComputedStyle(nav).display : null,
-              navOverflowX: nav ? getComputedStyle(nav).overflowX : null,
-              navLinks: nav ? nav.querySelectorAll('a').length : 0,
-              header: rect(header),
-              hero: rect(hero),
-              wallet: rect(button),
-              tokenColumns: grid ? getComputedStyle(grid).gridTemplateColumns : null,
-              loadingVisible: document.body.innerText.includes('Loading the Worldz experience…'),
-              hasSolWorldz: document.body.innerText.includes('SolWorldz'),
-              hasImpactBased: document.body.innerText.includes('ImpactBased'),
-              hasNetwork: document.body.innerText.includes('Explore the Network')
+            const ws = new WebSocket(tab.webSocketDebuggerUrl);
+            let seq = 0;
+            const pending = new Map();
+            ws.onmessage = event => {
+              const msg = JSON.parse(event.data);
+              if (msg.id && pending.has(msg.id)) {
+                const {resolve, reject} = pending.get(msg.id);
+                pending.delete(msg.id);
+                msg.error ? reject(new Error(JSON.stringify(msg.error))) : resolve(msg.result);
+              }
             };
-          })()`;
-          const result = await send('Runtime.evaluate', {expression, returnByValue: true});
-          const m = result.result.value;
-          console.log(JSON.stringify(m, null, 2));
+            const send = (method, params = {}) => new Promise((resolve, reject) => {
+              const id = ++seq;
+              pending.set(id, {resolve, reject});
+              ws.send(JSON.stringify({id, method, params}));
+            });
 
-          const fail = msg => { console.error('MOBILE_LAYOUT_ERROR:', msg); process.exitCode = 1; };
-          if (m.scrollWidth > m.innerWidth + 2) fail(`horizontal overflow ${m.scrollWidth}px > ${m.innerWidth}px`);
-          if (m.navDisplay !== 'flex') fail(`mobile nav display is ${m.navDisplay}`);
-          if (!['auto', 'scroll'].includes(m.navOverflowX)) fail(`mobile nav overflow-x is ${m.navOverflowX}`);
-          if (m.navLinks < 6) fail(`only ${m.navLinks} mobile nav links rendered`);
-          if (!m.header || m.header.width > m.innerWidth + 1) fail('header exceeds viewport');
-          if (!m.hero || m.hero.width > m.innerWidth + 1) fail('hero exceeds viewport');
-          if (!m.wallet || m.wallet.right > m.innerWidth + 1) fail('Zed button exceeds viewport');
-          if (m.tokenColumns && m.tokenColumns.includes(' ')) fail(`token grid is not single-column: ${m.tokenColumns}`);
-          if (m.loadingVisible) fail('loading shell remains visible');
-          if (!m.hasSolWorldz || !m.hasImpactBased || !m.hasNetwork) fail('key SolWorldz sections are missing');
-          ws.close();
-          if (process.exitCode) process.exit(process.exitCode);
+            await new Promise((resolve, reject) => {
+              ws.onopen = resolve;
+              ws.onerror = reject;
+            });
+            await send('Runtime.enable');
+            await new Promise(r => setTimeout(r, 5000));
+
+            const expression = `(() => {
+              const q = s => document.querySelector(s);
+              const nav = q('.main-nav');
+              const header = q('.site-header');
+              const hero = q('.sw-hero');
+              const grid = q('.sw-token-grid');
+              const button = q('#wallet-button');
+              const rect = el => el ? ({left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right,width:el.getBoundingClientRect().width}) : null;
+              return {
+                innerWidth,
+                scrollWidth: document.documentElement.scrollWidth,
+                navDisplay: nav ? getComputedStyle(nav).display : null,
+                navOverflowX: nav ? getComputedStyle(nav).overflowX : null,
+                navLinks: nav ? nav.querySelectorAll('a').length : 0,
+                header: rect(header),
+                hero: rect(hero),
+                wallet: rect(button),
+                tokenColumns: grid ? getComputedStyle(grid).gridTemplateColumns : null,
+                loadingVisible: document.body.innerText.includes('Loading the Worldz experience…'),
+                hasSolWorldz: document.body.innerText.includes('SolWorldz'),
+                hasImpactBased: document.body.innerText.includes('ImpactBased'),
+                hasNetwork: document.body.innerText.includes('Explore the Network')
+              };
+            })()`;
+            const result = await send('Runtime.evaluate', {expression, returnByValue: true});
+            const m = result.result.value;
+            console.log(JSON.stringify(m, null, 2));
+
+            const failures = [];
+            if (m.scrollWidth > m.innerWidth + 2) failures.push(`horizontal overflow ${m.scrollWidth}px > ${m.innerWidth}px`);
+            if (m.navDisplay !== 'flex') failures.push(`mobile nav display is ${m.navDisplay}`);
+            if (!['auto', 'scroll'].includes(m.navOverflowX)) failures.push(`mobile nav overflow-x is ${m.navOverflowX}`);
+            if (m.navLinks < 6) failures.push(`only ${m.navLinks} mobile nav links rendered`);
+            if (!m.header || m.header.width > m.innerWidth + 1) failures.push('header exceeds viewport');
+            if (!m.hero || m.hero.width > m.innerWidth + 1) failures.push('hero exceeds viewport');
+            if (!m.wallet || m.wallet.right > m.innerWidth + 1) failures.push('Zed button exceeds viewport');
+            if (m.tokenColumns && m.tokenColumns.includes(' ')) failures.push(`token grid is not single-column: ${m.tokenColumns}`);
+            if (m.loadingVisible) failures.push('loading shell remains visible');
+            if (!m.hasSolWorldz || !m.hasImpactBased || !m.hasNetwork) failures.push('key SolWorldz sections are missing');
+            ws.close();
+            if (failures.length) {
+              for (const failure of failures) console.error('MOBILE_LAYOUT_ERROR:', failure);
+              process.exit(1);
+            }
+          })().catch(error => {
+            console.error(error);
+            process.exit(1);
+          });
           NODE
 
       - name: Publish mobile check
