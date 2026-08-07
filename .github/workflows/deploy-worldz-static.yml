@@ -220,9 +220,9 @@ jobs:
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/worldz-backup"
-          mkdir -p "$backup"
-          timeout 300 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-          set cmd:fail-exit yes
+          mkdir -p "$backup/assets" "$backup/config"
+          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit no
           set net:max-retries 2
           set net:timeout 30
           set net:idle 30
@@ -230,19 +230,18 @@ jobs:
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
           cd "$FTP_SERVER_DIR"
-          lcd "$backup"
-          mirror --parallel=4 \
-            --include-glob '.htaccess' \
-            --include-glob '404.html' \
-            --include-glob '_headers' \
-            --include-glob 'index.html' \
-            --include-glob 'live.html' \
-            --include-glob 'assets/**' \
-            --include-glob 'config/**' \
-            --exclude-glob '*' .
+          get '.htaccess' -o '$backup/.htaccess'
+          get '404.html' -o '$backup/404.html'
+          get '_headers' -o '$backup/_headers'
+          get 'index.html' -o '$backup/index.html'
+          get 'live.html' -o '$backup/live.html'
+          mirror --parallel=4 'assets' '$backup/assets'
+          mirror --parallel=4 'config' '$backup/config'
           bye
           LFTP
+          find "$backup" -type d -empty -delete || true
           if ! find "$backup" -type f -print -quit | grep -q .; then
+            mkdir -p "$backup"
             touch "$backup/.empty-target"
           fi
           cd "$backup"
