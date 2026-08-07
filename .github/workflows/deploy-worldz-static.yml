@@ -192,6 +192,7 @@ jobs:
       EXPECTED_GUARD: ${{ needs.prepare.outputs.guard }}
       LIVE_URL: ${{ needs.prepare.outputs.live_url }}
       EXPECTED_SCRIPT: ${{ needs.prepare.outputs.expected_script }}
+      VERIFY_USER_AGENT: Mozilla/5.0 (compatible; CryptoWorldzDeployment/1.0; +https://cryptoworldz.xyz)
     steps:
       - name: Check out approved main commit
         uses: actions/checkout@v4
@@ -236,11 +237,11 @@ jobs:
           backup="$RUNNER_TEMP/worldz-backup"
           mkdir -p "$backup/assets" "$backup/config"
 
-          curl -fsSL --max-time 20 "$LIVE_URL/?predeploy=${GITHUB_RUN_ID}" -o "$backup/index.html" || true
-          curl -fsSL --max-time 20 "$LIVE_URL/assets/app.js?predeploy=${GITHUB_RUN_ID}" -o "$backup/assets/app.js" || true
-          curl -fsSL --max-time 20 "$LIVE_URL/assets/style.css?predeploy=${GITHUB_RUN_ID}" -o "$backup/assets/style.css" || true
-          curl -fsSL --max-time 20 "$LIVE_URL/404.html?predeploy=${GITHUB_RUN_ID}" -o "$backup/404.html" || true
-          curl -fsSL --max-time 20 "$LIVE_URL/live.html?predeploy=${GITHUB_RUN_ID}" -o "$backup/live.html" || true
+          curl -fsSL -A "$VERIFY_USER_AGENT" --max-time 20 "$LIVE_URL/?predeploy=${GITHUB_RUN_ID}" -o "$backup/index.html" || true
+          curl -fsSL -A "$VERIFY_USER_AGENT" --max-time 20 "$LIVE_URL/assets/app.js?predeploy=${GITHUB_RUN_ID}" -o "$backup/assets/app.js" || true
+          curl -fsSL -A "$VERIFY_USER_AGENT" --max-time 20 "$LIVE_URL/assets/style.css?predeploy=${GITHUB_RUN_ID}" -o "$backup/assets/style.css" || true
+          curl -fsSL -A "$VERIFY_USER_AGENT" --max-time 20 "$LIVE_URL/404.html?predeploy=${GITHUB_RUN_ID}" -o "$backup/404.html" || true
+          curl -fsSL -A "$VERIFY_USER_AGENT" --max-time 20 "$LIVE_URL/live.html?predeploy=${GITHUB_RUN_ID}" -o "$backup/live.html" || true
 
           timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP || true
           set cmd:fail-exit no
@@ -285,8 +286,8 @@ jobs:
         run: |
           set -euo pipefail
           cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
-          curl -fsSL --retry 6 --retry-delay 5 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/index.html"
-          curl -fsSL --retry 6 --retry-delay 5 "$LIVE_URL/$EXPECTED_SCRIPT?$cache" -o "$RUNNER_TEMP/expected.js"
+          curl -fsSL -A "$VERIFY_USER_AGENT" --retry 6 --retry-delay 5 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/index.html"
+          curl -fsSL -A "$VERIFY_USER_AGENT" --retry 6 --retry-delay 5 "$LIVE_URL/$EXPECTED_SCRIPT?$cache" -o "$RUNNER_TEMP/expected.js"
           grep -Fq './config/worlds.js' "$RUNNER_TEMP/index.html"
           test -s "$RUNNER_TEMP/expected.js"
 
