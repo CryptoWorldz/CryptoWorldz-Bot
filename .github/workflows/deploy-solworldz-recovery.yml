@@ -1,5 +1,5 @@
 name: Deploy SolWorldz Recovery
-# CSP-safe router deployment validation
+# CSP-safe router deployment validation v2
 
 on:
   push:
