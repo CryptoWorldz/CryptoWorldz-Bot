@@ -20,12 +20,12 @@
     'hodlerworldz.xyz'
   ]);
 
-  if (hostname === 'solworldz.xyz') {
-    const walletButton = document.querySelector('#wallet-button');
-    if (walletButton) {
-      walletButton.textContent = 'Zed Command Centre';
-      walletButton.onclick = () => window.open('https://t.me/CryptoWorldzBot', '_blank', 'noopener,noreferrer');
-    }
+  const walletButton = document.querySelector('#wallet-button');
+  if (hostname === 'solworldz.xyz' && walletButton) {
+    walletButton.textContent = 'Zed Command Centre';
+    walletButton.onclick = () => window.open('https://t.me/CryptoWorldzBot', '_blank', 'noopener,noreferrer');
+  } else if (hostname === 'cryptoworldz.xyz' && walletButton) {
+    walletButton.textContent = 'Wallet Login • Phase 2';
   }
 
   const script = document.createElement('script');
