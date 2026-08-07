@@ -47,8 +47,6 @@ on:
 permissions:
   contents: read
 
-# Every approved push is a separate deployment request. Using github.sha prevents
-# GitHub from cancelling older pending Worldz deployments when a new request lands.
 concurrency:
   group: worldz-static-${{ github.event.inputs.target || github.sha }}
   cancel-in-progress: false
@@ -215,30 +213,35 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp zip
 
-      - name: Back up files that may be overwritten
+      - name: Capture bounded rollback snapshot
         shell: bash
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/worldz-backup"
           mkdir -p "$backup/assets" "$backup/config"
-          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+
+          curl -fsSL --max-time 20 "$LIVE_URL/?predeploy=${GITHUB_RUN_ID}" -o "$backup/index.html" || true
+          curl -fsSL --max-time 20 "$LIVE_URL/assets/app.js?predeploy=${GITHUB_RUN_ID}" -o "$backup/assets/app.js" || true
+          curl -fsSL --max-time 20 "$LIVE_URL/assets/style.css?predeploy=${GITHUB_RUN_ID}" -o "$backup/assets/style.css" || true
+          curl -fsSL --max-time 20 "$LIVE_URL/404.html?predeploy=${GITHUB_RUN_ID}" -o "$backup/404.html" || true
+          curl -fsSL --max-time 20 "$LIVE_URL/live.html?predeploy=${GITHUB_RUN_ID}" -o "$backup/live.html" || true
+
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP || true
           set cmd:fail-exit no
-          set net:max-retries 2
-          set net:timeout 30
-          set net:idle 30
+          set net:max-retries 1
+          set net:timeout 15
+          set net:idle 15
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
           cd "$FTP_SERVER_DIR"
           get '.htaccess' -o '$backup/.htaccess'
-          get '404.html' -o '$backup/404.html'
           get '_headers' -o '$backup/_headers'
-          get 'index.html' -o '$backup/index.html'
-          get 'live.html' -o '$backup/live.html'
-          mirror --parallel=4 'assets' '$backup/assets'
-          mirror --parallel=4 'config' '$backup/config'
+          get 'config/worlds.js' -o '$backup/config/worlds.js'
           bye
           LFTP
+
+          find "$backup" -type f -size 0 -delete || true
           find "$backup" -type d -empty -delete || true
           if ! find "$backup" -type f -print -quit | grep -q .; then
             mkdir -p "$backup"
@@ -296,7 +299,7 @@ jobs:
           fi
           rm -f "$backup/.empty-target"
           if ! find "$backup" -type f -print -quit | grep -q .; then
-            echo 'The target had no matching files before deployment; nothing can be restored.' >&2
+            echo 'No recoverable predeployment files were captured.' >&2
             exit 0
           fi
           timeout 300 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
