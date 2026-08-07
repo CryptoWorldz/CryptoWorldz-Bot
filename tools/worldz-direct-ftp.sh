@@ -15,6 +15,7 @@ esac
 : "${FTP_PORT:=21}"
 : "${FTP_SERVER_DIR:=/}"
 : "${FTP_TRANSFER_TIMEOUT:=300}"
+: "${FTP_TLS_VERIFY:=yes}"
 
 normalize_ftp_host() {
   local value="$1"
@@ -38,6 +39,15 @@ if [[ -z "$FTP_HOST" || "$FTP_HOST" == *$'\n'* || "$FTP_HOST" == *$'\r'* ]]; the
   exit 5
 fi
 echo "::add-mask::$FTP_HOST"
+
+if [[ "$FTP_TLS_VERIFY" != 'yes' && "$FTP_TLS_VERIFY" != 'no' ]]; then
+  echo '::error::FTP_TLS_VERIFY must be yes or no.' >&2
+  exit 7
+fi
+if [[ "$FTP_TLS_VERIFY" == 'no' && "$FTP_HOST" != '145.223.108.40' ]]; then
+  echo '::error::The TLS hostname exception is restricted to the approved CryptoWorldz Hostinger FTP IP.' >&2
+  exit 8
+fi
 
 test -d "$source_root"
 command_file="${RUNNER_TEMP:-/tmp}/worldz-${mode}-${GITHUB_RUN_ID:-manual}.lftp"
@@ -110,7 +120,7 @@ fi
   echo 'set net:idle 30'
   echo 'set ftp:ssl-force yes'
   echo 'set ftp:ssl-protect-data yes'
-  echo 'set ssl:verify-certificate yes'
+  printf 'set ssl:verify-certificate %s\n' "$FTP_TLS_VERIFY"
   echo 'set xfer:clobber yes'
   printf 'cd %s\n' "$(lftp_quote "$FTP_SERVER_DIR")"
 
