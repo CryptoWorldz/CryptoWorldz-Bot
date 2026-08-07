@@ -47,8 +47,10 @@ on:
 permissions:
   contents: read
 
+# Every approved push is a separate deployment request. Using github.sha prevents
+# GitHub from cancelling older pending Worldz deployments when a new request lands.
 concurrency:
-  group: worldz-static-${{ github.event.inputs.target || github.ref }}
+  group: worldz-static-${{ github.event.inputs.target || github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -172,7 +174,7 @@ jobs:
     needs: [prepare, validate]
     if: needs.prepare.outputs.deploy == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     environment:
       name: ${{ needs.prepare.outputs.environment }}
       url: ${{ needs.prepare.outputs.live_url }}
@@ -195,12 +197,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$FTP_ACCOUNT_SCOPE" = 'DOMAIN_ONLY'
-          test "$DEPLOY_GUARD" = "$EXPECTED_GUARD"
-          test "$FTP_SERVER_DIR" = '/'
-          test -n "$FTP_HOST"
-          test -n "$FTP_USERNAME"
-          test -n "$FTP_PASSWORD"
+          missing=()
+          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]] || missing+=(FTP_ACCOUNT_SCOPE)
+          [[ "$DEPLOY_GUARD" == "$EXPECTED_GUARD" ]] || missing+=(DEPLOY_GUARD)
+          [[ "$FTP_SERVER_DIR" == '/' ]] || missing+=(FTP_SERVER_DIR)
+          [[ -n "$FTP_HOST" ]] || missing+=(FTP_HOST)
+          [[ -n "$FTP_USERNAME" ]] || missing+=(FTP_USERNAME)
+          [[ -n "$FTP_PASSWORD" ]] || missing+=(FTP_PASSWORD)
+          if (( ${#missing[@]} )); then
+            printf '::error::Deployment environment is incomplete or does not match this domain: %s\n' "${missing[*]}"
+            exit 1
+          fi
           echo "::add-mask::$FTP_USERNAME"
 
       - name: Install secure FTP client
@@ -208,24 +215,36 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp zip
 
-      - name: Back up current target
+      - name: Back up files that may be overwritten
         shell: bash
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/worldz-backup"
           mkdir -p "$backup"
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 300 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 2
           set net:timeout 30
+          set net:idle 30
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
           cd "$FTP_SERVER_DIR"
           lcd "$backup"
-          mirror --parallel=3 --exclude-glob '.well-known/**' --exclude-glob '.env*' --exclude-glob '*.log' --exclude-glob 'cgi-bin/**' .
+          mirror --parallel=4 \
+            --include-glob '.htaccess' \
+            --include-glob '404.html' \
+            --include-glob '_headers' \
+            --include-glob 'index.html' \
+            --include-glob 'live.html' \
+            --include-glob 'assets/**' \
+            --include-glob 'config/**' \
+            --exclude-glob '*' .
           bye
           LFTP
+          if ! find "$backup" -type f -print -quit | grep -q .; then
+            touch "$backup/.empty-target"
+          fi
           cd "$backup"
           zip -qr "$RUNNER_TEMP/worldz-backup-${GITHUB_RUN_ID}.zip" .
 
@@ -242,10 +261,11 @@ jobs:
         run: |
           set -euo pipefail
           local_root="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 300 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 2
           set net:timeout 30
+          set net:idle 30
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
@@ -271,11 +291,20 @@ jobs:
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/worldz-backup"
-          test -d "$backup"
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          if [[ -z "$FTP_HOST" || -z "$FTP_USERNAME" || -z "$FTP_PASSWORD" || ! -d "$backup" ]]; then
+            echo 'No upload-capable session or backup exists; rollback is not required.' >&2
+            exit 0
+          fi
+          rm -f "$backup/.empty-target"
+          if ! find "$backup" -type f -print -quit | grep -q .; then
+            echo 'The target had no matching files before deployment; nothing can be restored.' >&2
+            exit 0
+          fi
+          timeout 300 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 2
           set net:timeout 30
+          set net:idle 30
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
@@ -284,7 +313,7 @@ jobs:
           mirror --reverse --overwrite --parallel=3 .
           bye
           LFTP
-          echo 'Previous target restored after failed verification.' >&2
+          echo 'Previous target files restored after failed verification.' >&2
 
       - name: Publish deployment summary
         if: always()
