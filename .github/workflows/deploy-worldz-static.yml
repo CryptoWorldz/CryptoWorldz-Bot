@@ -185,7 +185,7 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
+      FTP_SERVER_DIR: ${{ needs.prepare.outputs.environment == 'cryptoworldz-production' && '/domains/cryptoworldz.xyz/public_html' || vars.FTP_SERVER_DIR || '/' }}
       FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE || (needs.prepare.outputs.environment == 'cryptoworldz-production' && 'DOMAIN_ONLY' || '') }}
       DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD || (needs.prepare.outputs.environment == 'cryptoworldz-production' && 'CRYPTOWORLDZ.XYZ' || '') }}
       FTP_TLS_VERIFY: ${{ needs.prepare.outputs.environment == 'cryptoworldz-production' && 'no' || 'yes' }}
@@ -204,10 +204,16 @@ jobs:
           missing=()
           [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]] || missing+=(FTP_ACCOUNT_SCOPE)
           [[ "$DEPLOY_GUARD" == "$EXPECTED_GUARD" ]] || missing+=(DEPLOY_GUARD)
-          [[ "$FTP_SERVER_DIR" == '/' ]] || missing+=(FTP_SERVER_DIR)
           [[ -n "$FTP_HOST" ]] || missing+=(FTP_HOST)
           [[ -n "$FTP_USERNAME" ]] || missing+=(FTP_USERNAME)
           [[ -n "$FTP_PASSWORD" ]] || missing+=(FTP_PASSWORD)
+
+          if [[ "$EXPECTED_GUARD" == 'CRYPTOWORLDZ.XYZ' ]]; then
+            [[ "$FTP_SERVER_DIR" == '/domains/cryptoworldz.xyz/public_html' ]] || missing+=(FTP_SERVER_DIR)
+          else
+            [[ "$FTP_SERVER_DIR" == '/' ]] || missing+=(FTP_SERVER_DIR)
+          fi
+
           if [[ "$FTP_TLS_VERIFY" == 'no' ]]; then
             ftp_host_check="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
             ftp_host_check="${ftp_host_check#ftp://}"
@@ -219,6 +225,7 @@ jobs:
             [[ "$EXPECTED_GUARD" == 'CRYPTOWORLDZ.XYZ' ]] || missing+=(FTP_TLS_VERIFY_TARGET)
             [[ "$ftp_host_check" == '145.223.108.40' ]] || missing+=(FTP_TLS_VERIFY_HOST)
           fi
+
           if (( ${#missing[@]} )); then
             printf '::error::Deployment environment is incomplete or does not match this domain: %s\n' "${missing[*]}"
             exit 1
@@ -230,21 +237,12 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp zip
 
-      - name: Capture bounded rollback snapshot
+      - name: Confirm target document root exists
         shell: bash
         run: |
           set -euo pipefail
-          backup="$RUNNER_TEMP/worldz-backup"
-          mkdir -p "$backup/assets" "$backup/config"
-
-          curl -fsSL -A "$VERIFY_USER_AGENT" --max-time 20 "$LIVE_URL/?predeploy=${GITHUB_RUN_ID}" -o "$backup/index.html" || true
-          curl -fsSL -A "$VERIFY_USER_AGENT" --max-time 20 "$LIVE_URL/assets/app.js?predeploy=${GITHUB_RUN_ID}" -o "$backup/assets/app.js" || true
-          curl -fsSL -A "$VERIFY_USER_AGENT" --max-time 20 "$LIVE_URL/assets/style.css?predeploy=${GITHUB_RUN_ID}" -o "$backup/assets/style.css" || true
-          curl -fsSL -A "$VERIFY_USER_AGENT" --max-time 20 "$LIVE_URL/404.html?predeploy=${GITHUB_RUN_ID}" -o "$backup/404.html" || true
-          curl -fsSL -A "$VERIFY_USER_AGENT" --max-time 20 "$LIVE_URL/live.html?predeploy=${GITHUB_RUN_ID}" -o "$backup/live.html" || true
-
-          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP || true
-          set cmd:fail-exit no
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
           set net:max-retries 1
           set net:timeout 15
           set net:idle 15
@@ -252,16 +250,52 @@ jobs:
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate $FTP_TLS_VERIFY
           cd "$FTP_SERVER_DIR"
-          get '.htaccess' -o '$backup/.htaccess'
-          get '_headers' -o '$backup/_headers'
-          get 'config/worlds.js' -o '$backup/config/worlds.js'
           bye
           LFTP
+          echo "Confirmed FTP document root: $FTP_SERVER_DIR"
 
+      - name: Capture exact rollback snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_root="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
+          backup="$RUNNER_TEMP/worldz-backup"
+          command_file="$RUNNER_TEMP/worldz-backup-${GITHUB_RUN_ID}.lftp"
+          mkdir -p "$backup"
+
+          mapfile -d '' files < <(
+            {
+              for relative in 404.html _headers live.html .htaccess; do
+                [[ -f "$source_root/$relative" ]] && printf '%s\0' "$source_root/$relative"
+              done
+              for directory in assets config; do
+                [[ -d "$source_root/$directory" ]] && find "$source_root/$directory" -type f -print0
+              done
+              [[ -f "$source_root/index.html" ]] && printf '%s\0' "$source_root/index.html"
+            } | sort -z
+          )
+
+          {
+            echo 'set cmd:fail-exit no'
+            echo 'set net:max-retries 1'
+            echo 'set net:timeout 15'
+            echo 'set net:idle 15'
+            echo 'set ftp:ssl-force yes'
+            echo 'set ftp:ssl-protect-data yes'
+            printf 'set ssl:verify-certificate %s\n' "$FTP_TLS_VERIFY"
+            printf 'cd "%s"\n' "$FTP_SERVER_DIR"
+            for file in "${files[@]}"; do
+              relative="${file#"$source_root"/}"
+              mkdir -p "$backup/$(dirname "$relative")"
+              printf 'get "%s" -o "%s"\n' "$relative" "$backup/$relative"
+            done
+            echo 'bye'
+          } > "$command_file"
+
+          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" < "$command_file" || true
           find "$backup" -type f -size 0 -delete || true
           find "$backup" -type d -empty -delete || true
           if ! find "$backup" -type f -print -quit | grep -q .; then
-            mkdir -p "$backup"
             touch "$backup/.empty-target"
           fi
           cd "$backup"
@@ -285,11 +319,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
-          curl -fsSL -A "$VERIFY_USER_AGENT" --retry 6 --retry-delay 5 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/index.html"
-          curl -fsSL -A "$VERIFY_USER_AGENT" --retry 6 --retry-delay 5 "$LIVE_URL/$EXPECTED_SCRIPT?$cache" -o "$RUNNER_TEMP/expected.js"
-          grep -Fq './config/worlds.js' "$RUNNER_TEMP/index.html"
-          test -s "$RUNNER_TEMP/expected.js"
+          verified='false'
+          for attempt in 1 2 3 4 5 6; do
+            cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
+            if curl -fsSL -A "$VERIFY_USER_AGENT" -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/index.html" \
+              && curl -fsSL -A "$VERIFY_USER_AGENT" -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL/$EXPECTED_SCRIPT?$cache" -o "$RUNNER_TEMP/expected.js" \
+              && grep -Fq './config/worlds.js' "$RUNNER_TEMP/index.html" \
+              && test -s "$RUNNER_TEMP/expected.js"; then
+              verified='true'
+              break
+            fi
+            sleep 5
+          done
+          if [[ "$verified" != 'true' ]]; then
+            echo '::error::Uploaded files did not become the live static site after six verification attempts.' >&2
+            exit 1
+          fi
+          echo 'Live static target verified.'
 
       - name: Restore previous site if verification fails
         if: failure()
@@ -298,18 +344,52 @@ jobs:
           FTP_TRANSFER_TIMEOUT: '180'
         run: |
           set -euo pipefail
+          source_root="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
           backup="$RUNNER_TEMP/worldz-backup"
+          delete_commands="$RUNNER_TEMP/worldz-delete-${GITHUB_RUN_ID}.lftp"
+
           if [[ -z "$FTP_HOST" || -z "$FTP_USERNAME" || -z "$FTP_PASSWORD" || ! -d "$backup" ]]; then
             echo 'No upload-capable session or backup exists; rollback is not required.' >&2
             exit 0
           fi
+
+          mapfile -d '' files < <(
+            {
+              for relative in 404.html _headers live.html .htaccess; do
+                [[ -f "$source_root/$relative" ]] && printf '%s\0' "$source_root/$relative"
+              done
+              for directory in assets config; do
+                [[ -d "$source_root/$directory" ]] && find "$source_root/$directory" -type f -print0
+              done
+              [[ -f "$source_root/index.html" ]] && printf '%s\0' "$source_root/index.html"
+            } | sort -z
+          )
+
+          {
+            echo 'set cmd:fail-exit no'
+            echo 'set net:max-retries 1'
+            echo 'set net:timeout 15'
+            echo 'set net:idle 15'
+            echo 'set ftp:ssl-force yes'
+            echo 'set ftp:ssl-protect-data yes'
+            printf 'set ssl:verify-certificate %s\n' "$FTP_TLS_VERIFY"
+            printf 'cd "%s"\n' "$FTP_SERVER_DIR"
+            for file in "${files[@]}"; do
+              relative="${file#"$source_root"/}"
+              printf 'rm "%s"\n' "$relative"
+            done
+            echo 'bye'
+          } > "$delete_commands"
+
+          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" < "$delete_commands" || true
+
           rm -f "$backup/.empty-target"
-          if ! find "$backup" -type f -print -quit | grep -q .; then
-            echo 'No recoverable predeployment files were captured.' >&2
-            exit 0
+          if find "$backup" -type f -print -quit | grep -q .; then
+            bash tools/worldz-direct-ftp.sh restore "$backup"
+            echo 'Previous target files restored after failed verification.' >&2
+          else
+            echo 'No pre-existing package files were present; uploaded package files were removed.' >&2
           fi
-          bash tools/worldz-direct-ftp.sh restore "$backup"
-          echo 'Previous target files restored after failed verification.' >&2
 
       - name: Publish deployment summary
         if: always()
@@ -321,6 +401,7 @@ jobs:
             echo "- Target: ${{ needs.prepare.outputs.target }}"
             echo "- Environment: ${{ needs.prepare.outputs.environment }}"
             echo "- Live URL: $LIVE_URL"
+            echo "- FTP document root: $FTP_SERVER_DIR"
             echo "- Source commit: $GITHUB_SHA"
             echo '- Transfer method: direct PUT without remote directory listing'
             echo '- Hostinger Horizons credits: 0'
