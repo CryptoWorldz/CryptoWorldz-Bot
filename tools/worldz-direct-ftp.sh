@@ -71,7 +71,11 @@ emit_file() {
   fi
 
   if [[ "$remote_dir" != "." && -z "${created_dirs[$remote_dir]+set}" ]]; then
+    # Hostinger may return FTP 550 when mkdir targets an existing directory.
+    # Ignore only the directory-creation command; the following PUT remains fail-fast.
+    echo 'set cmd:fail-exit no'
     printf 'mkdir -p %s\n' "$(lftp_quote "$remote_dir")"
+    echo 'set cmd:fail-exit yes'
     created_dirs[$remote_dir]=1
   fi
 
