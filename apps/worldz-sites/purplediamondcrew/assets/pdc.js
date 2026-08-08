@@ -15,7 +15,11 @@
         return;
       }
       stage.style.backgroundImage = `linear-gradient(180deg,rgba(7,3,12,.05),rgba(7,3,12,.8)),url("${source}")`;
+      stage.style.backgroundSize = 'cover';
+      stage.style.backgroundPosition = 'center';
       stage.dataset.masterLoaded = 'true';
+      const fallback = stage.querySelector('svg');
+      if (fallback) fallback.style.display = 'none';
       if (label) stage.setAttribute('aria-label', label);
     };
     probe.onerror = () => { stage.dataset.masterLoaded = 'false'; };
