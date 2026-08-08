@@ -49,7 +49,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: worldz-static-${{ github.event.inputs.target || github.sha }}
+  group: worldz-static-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -66,6 +66,7 @@ jobs:
       account_scope_override: ${{ steps.resolve.outputs.account_scope_override }}
       deploy_guard_override: ${{ steps.resolve.outputs.deploy_guard_override }}
       tls_verify_override: ${{ steps.resolve.outputs.tls_verify_override }}
+      fallback_only: ${{ steps.resolve.outputs.fallback_only }}
       deploy: ${{ steps.resolve.outputs.deploy }}
     steps:
       - name: Check out request
@@ -86,6 +87,7 @@ jobs:
           account_scope_override=''
           deploy_guard_override=''
           tls_verify_override=''
+          fallback_only='false'
 
           if [[ "$EVENT_NAME" == 'pull_request' ]]; then
             target='validation-only'
@@ -158,13 +160,10 @@ jobs:
               ;;
             bitcoinworldz)
               environment='cryptoworldz-production'
-              live_url='https://bitcoinworldz.xyz'
-              guard='BITCOINWORLDZ.XYZ'
+              live_url='https://cryptoworldz.xyz/?world=bitcoinworldz&mode=coming-soon'
+              guard='BITCOINWORLDZ-FALLBACK'
               expected_script='assets/coming-soon.js'
-              ftp_server_dir='/domains/bitcoinworldz.xyz/public_html'
-              account_scope_override='HOSTING_ACCOUNT'
-              deploy_guard_override='BITCOINWORLDZ.XYZ'
-              tls_verify_override='no'
+              fallback_only='true'
               ;;
             hodlerworldz)
               environment='cryptoworldz-production'
@@ -193,6 +192,7 @@ jobs:
           echo "account_scope_override=$account_scope_override" >> "$GITHUB_OUTPUT"
           echo "deploy_guard_override=$deploy_guard_override" >> "$GITHUB_OUTPUT"
           echo "tls_verify_override=$tls_verify_override" >> "$GITHUB_OUTPUT"
+          echo "fallback_only=$fallback_only" >> "$GITHUB_OUTPUT"
           echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
 
   validate:
@@ -238,10 +238,68 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  verify-fallback:
+    name: Verify routed live fallback
+    needs: [prepare, validate]
+    if: needs.prepare.outputs.deploy == 'true' && needs.prepare.outputs.fallback_only == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: ${{ needs.prepare.outputs.environment }}
+      url: ${{ needs.prepare.outputs.live_url }}
+    env:
+      LIVE_URL: ${{ needs.prepare.outputs.live_url }}
+      EXPECTED_SCRIPT: ${{ needs.prepare.outputs.expected_script }}
+      VERIFY_USER_AGENT: Mozilla/5.0 (compatible; CryptoWorldzDeployment/1.0; +https://cryptoworldz.xyz)
+    steps:
+      - name: Check out approved main commit
+        uses: actions/checkout@v4
+
+      - name: Verify the public fallback matches the approved release
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_root="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
+          expected_index_sha="$(sha256sum "$source_root/index.html" | awk '{print $1}')"
+          expected_script_sha="$(sha256sum "$source_root/$EXPECTED_SCRIPT" | awk '{print $1}')"
+          base_url="${LIVE_URL%%\?*}"
+          verified='false'
+          for attempt in 1 2 3 4 5 6; do
+            cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
+            if curl -fsSL -A "$VERIFY_USER_AGENT" -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL&$cache" -o "$RUNNER_TEMP/index.html" \
+              && curl -fsSL -A "$VERIFY_USER_AGENT" -H 'Cache-Control: no-cache' --max-time 20 "${base_url%/}/$EXPECTED_SCRIPT?$cache" -o "$RUNNER_TEMP/expected.js" \
+              && [[ "$(sha256sum "$RUNNER_TEMP/index.html" | awk '{print $1}')" == "$expected_index_sha" ]] \
+              && [[ "$(sha256sum "$RUNNER_TEMP/expected.js" | awk '{print $1}')" == "$expected_script_sha" ]] \
+              && grep -Fq 'content="20260809-recovery1"' "$RUNNER_TEMP/index.html"; then
+              verified='true'
+              break
+            fi
+            sleep 5
+          done
+          if [[ "$verified" != 'true' ]]; then
+            echo '::error::The BitcoinWorldz fallback did not match the approved live release.' >&2
+            exit 1
+          fi
+          echo 'BitcoinWorldz fallback matches the approved live release.'
+
+      - name: Publish fallback summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## Worldz Routed Fallback'
+            echo
+            echo "- Target: ${{ needs.prepare.outputs.target }}"
+            echo "- Live URL: $LIVE_URL"
+            echo "- Source commit: $GITHUB_SHA"
+            echo '- Hostinger FTP changes: none'
+            echo '- Verification: exact approved index and runtime asset'
+          } >> "$GITHUB_STEP_SUMMARY"
+
   deploy:
     name: Deploy guarded static target
     needs: [prepare, validate]
-    if: needs.prepare.outputs.deploy == 'true' && github.ref == 'refs/heads/main'
+    if: needs.prepare.outputs.deploy == 'true' && needs.prepare.outputs.fallback_only != 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
