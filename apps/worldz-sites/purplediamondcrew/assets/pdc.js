@@ -13,6 +13,17 @@
     }
   });
 
+  const archive = document.querySelector('details[data-mobile-collapse]');
+  if (archive) {
+    const mq = window.matchMedia('(max-width:620px)');
+    const setArchiveState = (mobile) => {
+      if (mobile) archive.removeAttribute('open');
+      else archive.setAttribute('open', '');
+    };
+    setArchiveState(mq.matches);
+    mq.addEventListener?.('change', (event) => setArchiveState(event.matches));
+  }
+
   const stage = document.querySelector('[data-hope-chest-master]');
   if (!stage) return;
 
