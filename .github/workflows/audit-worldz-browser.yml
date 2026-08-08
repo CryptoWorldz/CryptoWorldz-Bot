@@ -6,6 +6,7 @@ on:
     paths:
       - 'diagnostics/worldz-browser-audit.request'
       - 'tools/worldz-browser-audit.mjs'
+      - 'tools/print-worldz-browser-audit.mjs'
       - '.github/workflows/audit-worldz-browser.yml'
 
 permissions:
@@ -65,15 +66,7 @@ jobs:
         shell: bash
         run: |
           if [ -f browser-audit/report.json ]; then
-            node - <<'NODE'
-            const fs = require('fs');
-            const r = JSON.parse(fs.readFileSync('browser-audit/report.json','utf8'));
-            console.log(JSON.stringify(r.totals, null, 2));
-            for (const x of r.results) {
-              const s = x.summary || {};
-              console.log(`${s.pass ? 'PASS' : 'FAIL'} ${x.viewport.padEnd(7)} ${x.url} visible=${s.visibleImages ?? '-'} broken=${s.brokenImages ?? '-'} undersized=${s.undersizedImages ?? '-'} bgBroken=${s.brokenBackgrounds ?? '-'} bgSmall=${s.undersizedBackgrounds ?? '-'} net=${s.networkFailures ?? '-'}`);
-            }
-            NODE
+            node tools/print-worldz-browser-audit.mjs browser-audit/report.json
           fi
 
       - name: Fail job if any rendered site is broken
@@ -81,11 +74,4 @@ jobs:
         shell: bash
         run: |
           test -f browser-audit/report.json
-          node - <<'NODE'
-          const fs = require('fs');
-          const r = JSON.parse(fs.readFileSync('browser-audit/report.json','utf8'));
-          if (r.totals.failed > 0) {
-            console.error(`${r.totals.failed} browser audit targets failed.`);
-            process.exit(1);
-          }
-          NODE
+          node tools/print-worldz-browser-audit.mjs browser-audit/report.json --fail

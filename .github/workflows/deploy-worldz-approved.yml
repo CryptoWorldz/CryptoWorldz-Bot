@@ -189,11 +189,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
-          curl -fsSL --retry 6 --retry-delay 5 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/index.html"
-          curl -fsSL --retry 6 --retry-delay 5 "$LIVE_URL/$EXPECTED_SCRIPT?$cache" -o "$RUNNER_TEMP/expected.js"
-          grep -Fq './config/worlds.js' "$RUNNER_TEMP/index.html"
-          test -s "$RUNNER_TEMP/expected.js"
+          source_root="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
+          expected_index_sha="$(sha256sum "$source_root/index.html" | awk '{print $1}')"
+          expected_script_sha="$(sha256sum "$source_root/$EXPECTED_SCRIPT" | awk '{print $1}')"
+          verified='false'
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
+            if curl -fsSL -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/index.html" \
+              && curl -fsSL -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL/$EXPECTED_SCRIPT?$cache" -o "$RUNNER_TEMP/expected.js" \
+              && [[ "$(sha256sum "$RUNNER_TEMP/index.html" | awk '{print $1}')" == "$expected_index_sha" ]] \
+              && [[ "$(sha256sum "$RUNNER_TEMP/expected.js" | awk '{print $1}')" == "$expected_script_sha" ]] \
+              && grep -Fq 'content="20260809-recovery1"' "$RUNNER_TEMP/index.html"; then
+              verified='true'
+              break
+            fi
+            sleep 5
+          done
+          [[ "$verified" == 'true' ]]
+          echo 'Live website matches the exact approved release.'
 
       - name: Roll back after failed upload or verification
         if: failure()

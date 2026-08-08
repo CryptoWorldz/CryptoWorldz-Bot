@@ -53,6 +53,6 @@
                       : requestedMode === 'directory'
                         ? './assets/pdc-directory.js'
                         : './assets/app.js';
-  script.src = `${selectedScript}?v=20260808-mobile3`;
+  script.src = `${selectedScript}?v=20260809-recovery1`;
   document.body.appendChild(script);
 })();

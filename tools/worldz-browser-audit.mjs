@@ -173,7 +173,7 @@ const pageExpression = `
     title: document.title,
     url: location.href,
     readyState: document.readyState,
-    bodyPreview: (document.body?.innerText || '').slice(0, 500),
+    bodyPreview: (document.body?.innerText || '').slice(0, 2000),
     images: imageRows,
     backgrounds: bgItems
   };
@@ -210,7 +210,21 @@ try {
 
   let activeFailures = [];
   let activeResponses = [];
-  cdp.on('Network.loadingFailed', p => activeFailures.push({ requestId: p.requestId, errorText: p.errorText, canceled: p.canceled, blockedReason: p.blockedReason || '' }));
+  let activeRequests = new Map();
+  cdp.on('Network.requestWillBeSent', p => {
+    activeRequests.set(p.requestId, { url: p.request?.url || '', type: p.type || '' });
+  });
+  cdp.on('Network.loadingFailed', p => {
+    const request = activeRequests.get(p.requestId) || {};
+    activeFailures.push({
+      requestId: p.requestId,
+      url: request.url || '',
+      type: p.type || request.type || '',
+      errorText: p.errorText,
+      canceled: p.canceled,
+      blockedReason: p.blockedReason || ''
+    });
+  });
   cdp.on('Network.responseReceived', p => {
     const r = p.response || {};
     activeResponses.push({ url: r.url, status: r.status, mimeType: r.mimeType, type: p.type, fromDiskCache: r.fromDiskCache || false, fromServiceWorker: r.fromServiceWorker || false });
@@ -220,6 +234,7 @@ try {
     for (const vp of VIEWPORTS) {
       activeFailures = [];
       activeResponses = [];
+      activeRequests = new Map();
       const item = { url, viewport: vp.name, width: vp.width, height: vp.height };
       const stem = `${safeName(url)}-${vp.name}`;
       console.log(`AUDIT ${url} ${vp.name}`);
@@ -255,7 +270,36 @@ try {
         const brokenBg = (item.page?.backgrounds || []).filter(i => i.broken);
         const undersizedBg = (item.page?.backgrounds || []).filter(i => i.undersized);
         const badHttpImages = item.responses.filter(r => r.type === 'Image' && Number(r.status) >= 400);
+        const documentResponses = item.responses.filter(r => r.type === 'Document');
+        const mainDocument = documentResponses.at(-1);
+        const documentFailures = activeFailures.filter(f => f.type === 'Document');
+        const bodyText = String(item.page?.bodyPreview || '').trim();
+        const normalizedBody = bodyText.toLowerCase();
+        const normalizedTitle = String(item.page?.title || '').trim().toLowerCase();
+        const renderedUrl = String(item.page?.url || '');
+        const blockedPatterns = [
+          'checking your browser before accessing',
+          'loading the worldz experience',
+          'this site can\'t be reached',
+          'err_name_not_resolved',
+          'default page'
+        ];
+        const blockedPattern = blockedPatterns.find(pattern => normalizedBody.includes(pattern));
+        const failureReasons = [];
+        if (!mainDocument) failureReasons.push('No main document response was recorded');
+        if (mainDocument && Number(mainDocument.status) >= 400) failureReasons.push(`Main document returned HTTP ${mainDocument.status}`);
+        if (documentFailures.length) failureReasons.push(`Main document network failure: ${documentFailures[0].errorText || 'unknown error'}`);
+        if (!renderedUrl || renderedUrl.startsWith('chrome-error://')) failureReasons.push('Browser rendered an internal error page');
+        if (!bodyText) failureReasons.push('Rendered page body is empty');
+        if (blockedPattern) failureReasons.push(`Blocked or placeholder content detected: ${blockedPattern}`);
+        if (!normalizedTitle || normalizedTitle === 'default page') failureReasons.push('Page title is missing or a hosting placeholder');
+        if (brokenImgs.length) failureReasons.push(`${brokenImgs.length} visible image(s) are broken`);
+        if (undersizedImgs.length) failureReasons.push(`${undersizedImgs.length} visible image(s) are undersized`);
+        if (brokenBg.length) failureReasons.push(`${brokenBg.length} background image(s) are broken`);
+        if (undersizedBg.length) failureReasons.push(`${undersizedBg.length} background image(s) are undersized`);
+        if (badHttpImages.length) failureReasons.push(`${badHttpImages.length} image request(s) returned HTTP errors`);
         item.summary = {
+          mainDocumentStatus: mainDocument?.status ?? null,
           visibleImages: (item.page?.images || []).filter(i => i.visible).length,
           backgroundImages: (item.page?.backgrounds || []).length,
           brokenImages: brokenImgs.length,
@@ -264,7 +308,9 @@ try {
           undersizedBackgrounds: undersizedBg.length,
           badHttpImages: badHttpImages.length,
           networkFailures: activeFailures.length,
-          pass: brokenImgs.length === 0 && undersizedImgs.length === 0 && brokenBg.length === 0 && undersizedBg.length === 0 && badHttpImages.length === 0
+          documentFailures: documentFailures.length,
+          failureReasons,
+          pass: failureReasons.length === 0
         };
       } catch (error) {
         item.error = String(error?.stack || error);
