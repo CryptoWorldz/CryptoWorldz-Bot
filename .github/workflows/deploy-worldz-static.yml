@@ -188,7 +188,7 @@ jobs:
       FTP_SERVER_DIR: ${{ needs.prepare.outputs.environment == 'cryptoworldz-production' && '/domains/cryptoworldz.xyz/public_html' || vars.FTP_SERVER_DIR || '/' }}
       FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE || (needs.prepare.outputs.environment == 'cryptoworldz-production' && 'DOMAIN_ONLY' || '') }}
       DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD || (needs.prepare.outputs.environment == 'cryptoworldz-production' && 'CRYPTOWORLDZ.XYZ' || '') }}
-      FTP_TLS_VERIFY: ${{ needs.prepare.outputs.environment == 'cryptoworldz-production' && 'no' || 'yes' }}
+      FTP_TLS_VERIFY: ${{ (needs.prepare.outputs.environment == 'cryptoworldz-production' || needs.prepare.outputs.environment == 'solworldz-production') && 'no' || 'yes' }}
       EXPECTED_GUARD: ${{ needs.prepare.outputs.guard }}
       LIVE_URL: ${{ needs.prepare.outputs.live_url }}
       EXPECTED_SCRIPT: ${{ needs.prepare.outputs.expected_script }}
@@ -222,7 +222,7 @@ jobs:
             if [[ "$ftp_host_check" != *:*:* && "$ftp_host_check" == *:* ]]; then
               ftp_host_check="${ftp_host_check%%:*}"
             fi
-            [[ "$EXPECTED_GUARD" == 'CRYPTOWORLDZ.XYZ' ]] || missing+=(FTP_TLS_VERIFY_TARGET)
+            [[ "$EXPECTED_GUARD" == 'CRYPTOWORLDZ.XYZ' || "$EXPECTED_GUARD" == 'SOLWORLDZ.XYZ' ]] || missing+=(FTP_TLS_VERIFY_TARGET)
             [[ "$ftp_host_check" == '145.223.108.40' ]] || missing+=(FTP_TLS_VERIFY_HOST)
           fi
 
