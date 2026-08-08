@@ -1,0 +1,78 @@
+name: Diagnose OneWorldz Live Routing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/oneworldz-live.request'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate non-destructive request
+        shell: bash
+        env:
+          APPROVED_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          test -f diagnostics/oneworldz-live.request
+          test "$(sed -n 's/^confirmation=//p' diagnostics/oneworldz-live.request | tail -n1)" = 'APPROVE READ ONLY DIAGNOSTIC'
+          test "$(sed -n 's/^source_commit=//p' diagnostics/oneworldz-live.request | tail -n1)" = "$APPROVED_BEFORE"
+
+      - name: Resolve public OneWorldz DNS
+        shell: bash
+        run: |
+          set +e
+          echo '=== getent IPv4 ==='
+          getent ahostsv4 oneworldz.com
+          echo '=== getent IPv6 ==='
+          getent ahostsv6 oneworldz.com
+          echo '=== dig A ==='
+          dig +short oneworldz.com A
+          echo '=== dig AAAA ==='
+          dig +short oneworldz.com AAAA
+          echo '=== dig CNAME ==='
+          dig +short oneworldz.com CNAME
+          echo '=== dig NS ==='
+          dig +short oneworldz.com NS
+          exit 0
+
+      - name: Inspect public HTTPS routing
+        shell: bash
+        run: |
+          set +e
+          echo '=== public homepage ==='
+          curl -vkI --max-time 20 'https://oneworldz.com/?diagnostic=github' 2>&1
+          echo "homepage_exit=$?"
+          echo '=== public expected asset ==='
+          curl -vkI --max-time 20 'https://oneworldz.com/assets/oneworldz.js?diagnostic=github' 2>&1
+          echo "asset_exit=$?"
+          exit 0
+
+      - name: Inspect Hostinger IP with OneWorldz host header
+        shell: bash
+        run: |
+          set +e
+          echo '=== Hostinger forced HTTPS ==='
+          curl -vkI --resolve 'oneworldz.com:443:145.223.108.40' --max-time 20 'https://oneworldz.com/?diagnostic=hostinger' 2>&1
+          echo "forced_https_exit=$?"
+          echo '=== Hostinger forced HTTP ==='
+          curl -vI --resolve 'oneworldz.com:80:145.223.108.40' --max-time 20 'http://oneworldz.com/?diagnostic=hostinger' 2>&1
+          echo "forced_http_exit=$?"
+          exit 0
+
+      - name: Summary
+        run: |
+          {
+            echo '## OneWorldz live routing diagnostic'
+            echo
+            echo '- Read only: no FTP, DNS, repository runtime, or production files changed.'
+            echo '- Compared public DNS/HTTPS with the verified Hostinger server IP.'
+          } >> "$GITHUB_STEP_SUMMARY"
