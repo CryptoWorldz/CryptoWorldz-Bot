@@ -1,0 +1,110 @@
+name: Diagnose Hostinger control access
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/diagnose-hostinger-control.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diagnose-hostinger-control
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    name: Probe account control without exposing values
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: cryptoworldz-production
+    env:
+      HOSTINGER_API_TOKEN_PRIMARY: ${{ secrets.HOSTINGER_API_TOKEN }}
+      HOSTINGER_API_TOKEN_LEGACY: ${{ secrets.API_TOKEN }}
+      HOSTINGER_API_TOKEN_ALT: ${{ secrets.HAPI_TOKEN }}
+      HOSTINGER_API_TOKEN_KEY: ${{ secrets.HOSTINGER_API_KEY }}
+    steps:
+      - name: Select a configured Hostinger API token
+        shell: bash
+        run: |
+          set -euo pipefail
+          token=''
+          for candidate in \
+            "$HOSTINGER_API_TOKEN_PRIMARY" \
+            "$HOSTINGER_API_TOKEN_LEGACY" \
+            "$HOSTINGER_API_TOKEN_ALT" \
+            "$HOSTINGER_API_TOKEN_KEY"; do
+            if [[ -n "$candidate" ]]; then
+              token="$candidate"
+              break
+            fi
+          done
+
+          if [[ -z "$token" ]]; then
+            echo '::error::No Hostinger API token is configured in the cryptoworldz-production environment.'
+            exit 1
+          fi
+
+          echo "::add-mask::$token"
+          echo "HOSTINGER_CONTROL_TOKEN=$token" >> "$GITHUB_ENV"
+          echo 'Hostinger API token is configured.'
+
+      - name: Inspect domain portfolio and control endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://developers.hostinger.com'
+          portfolio="$RUNNER_TEMP/hostinger-domain-portfolio.json"
+
+          portfolio_status="$(curl -sS --max-time 30 \
+            -H "Authorization: Bearer $HOSTINGER_CONTROL_TOKEN" \
+            -H 'Accept: application/json' \
+            -o "$portfolio" \
+            -w '%{http_code}' \
+            "$base/api/domains/v1/portfolio")"
+
+          echo "portfolio_status=$portfolio_status"
+          [[ "$portfolio_status" == '200' ]] || {
+            echo '::error::GitHub has a Hostinger API token, but the portfolio endpoint rejected it.'
+            exit 1
+          }
+
+          PORTFOLIO_FILE="$portfolio" node <<'NODE'
+          const fs = require('node:fs');
+          const payload = JSON.parse(fs.readFileSync(process.env.PORTFOLIO_FILE, 'utf8'));
+          const body = JSON.stringify(payload).toLowerCase();
+          for (const domain of ['bitcoinworldz.xyz', 'bitworldz.xyz']) {
+            console.log(`portfolio.${domain}=${body.includes(domain) ? 'present' : 'absent'}`);
+          }
+          NODE
+
+          for domain in bitcoinworldz.xyz bitworldz.xyz; do
+            dns_status="$(curl -sS --max-time 30 \
+              -H "Authorization: Bearer $HOSTINGER_CONTROL_TOKEN" \
+              -H 'Accept: application/json' \
+              -o /dev/null \
+              -w '%{http_code}' \
+              "$base/api/dns/v1/zones/$domain")"
+            forwarding_status="$(curl -sS --max-time 30 \
+              -H "Authorization: Bearer $HOSTINGER_CONTROL_TOKEN" \
+              -H 'Accept: application/json' \
+              -o /dev/null \
+              -w '%{http_code}' \
+              "$base/api/domains/v1/forwarding/$domain")"
+            echo "dns.$domain=$dns_status"
+            echo "forwarding.$domain=$forwarding_status"
+          done
+
+      - name: Publish safe diagnostic summary
+        if: always()
+        run: |
+          {
+            echo '## Hostinger Control Diagnostic'
+            echo
+            echo '- Read-only checks only'
+            echo '- No token, domain portfolio, or account values were logged'
+            echo '- Targets restricted to bitcoinworldz.xyz and bitworldz.xyz'
+          } >> "$GITHUB_STEP_SUMMARY"
