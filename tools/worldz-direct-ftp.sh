@@ -94,7 +94,7 @@ declare -a ordinary_files=()
 index_file=""
 
 if [[ "$mode" == "upload" ]]; then
-  for relative in 404.html _headers live.html .htaccess donate.html robots.txt sitemap.xml; do
+  for relative in 404.html _headers live.html .htaccess donate.html reagan-kauja.html robots.txt sitemap.xml; do
     [[ -f "$source_root/$relative" ]] && ordinary_files+=("$source_root/$relative")
   done
 
