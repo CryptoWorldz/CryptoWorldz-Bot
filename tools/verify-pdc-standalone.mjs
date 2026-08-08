@@ -25,9 +25,7 @@ for (const [label, html] of [['home', home], ['crew', crew], ['hope-chest', ches
 
 assert.match(home, /THE ACTION TEAM ON THE GROUND/i, 'Action Team page missing');
 assert.match(home, /WE DON.?T JUST TALK/i, 'Locked PDC action motto missing');
-for (const need of ['FOOD', 'WATER', 'HEALTHCARE', 'HOUSING', 'EDUCATION']) {
-  assert.ok(home.includes(need), `Action Team category missing: ${need}`);
-}
+for (const need of ['FOOD', 'WATER', 'HEALTHCARE', 'HOUSING', 'EDUCATION']) assert.ok(home.includes(need), `Action Team category missing: ${need}`);
 assert.match(crew, /SUPPORT • CONTRIBUTE • APPLY/i, 'Crew three-lane structure missing');
 assert.match(crew, /Bring a Project/i, 'Project application pathway missing');
 assert.ok(home.includes('https://gofund.me/65129e58'), 'Current donation link missing');
@@ -38,21 +36,6 @@ assert.ok(crew.includes('https://x.com/PDCrew'), 'PDC X link missing');
 assert.match(chest, /THE ONEWORLDZ HOPE CHEST/i, 'Hope Chest identity missing');
 assert.match(chest, /not presented as active/i, 'Legacy archive disclaimer missing');
 assert.match(chest, /Watch the chest\. Watch the Worldz\./i, 'Hidden revival clue missing');
-assert.match(chest, /data-hope-chest-master="pdc-hope-chest"/, 'Verified Hope Chest master hook missing');
-assert.match(js, /\/assets\/media\/pdc-mission-board\.webp/, 'Local PDC mission master is not wired');
-assert.match(js, /\/assets\/media\/pdc-hope-chest\.webp/, 'Local Hope Chest master is not wired');
-assert.match(js, /\/assets\/media\/pdc-crest\.webp/, 'Local PDC crest master is not wired');
-assert.ok(!js.includes('supabase.co'), 'PDC required master media must not depend on Supabase delivery');
-
-const masterFiles = ['pdc-mission-board.webp', 'pdc-hope-chest.webp', 'pdc-crest.webp'];
-for (const file of masterFiles) {
-  const target = path.join(site, 'assets', 'media', file);
-  assert.ok(fs.existsSync(target), `Approved PDC master was not restored: ${file}`);
-  const bytes = fs.readFileSync(target);
-  assert.ok(bytes.length > 10000, `Approved PDC master is unexpectedly small: ${file}`);
-  assert.equal(bytes.subarray(0, 4).toString('ascii'), 'RIFF', `Invalid WebP RIFF header: ${file}`);
-  assert.equal(bytes.subarray(8, 12).toString('ascii'), 'WEBP', `Invalid WebP signature: ${file}`);
-}
 
 const tokens = [
   ['Devy', '4vfa4vqqWq8qax1BeBtSaohvE898MD4x6diL2z5nBcDr'],
@@ -71,15 +54,17 @@ for (const [name, ca] of tokens) {
   assert.ok(chest.includes(ca), `Verified contract missing for ${name}`);
 }
 assert.equal((chest.match(/class="token-card"/g) || []).length, 10, 'Hope Chest must contain exactly 10 legacy token cards');
-assert.ok((chest.match(/<svg\b/g) || []).length >= 11, 'Hope Chest needs vector fallback art for chest + all tokens');
-assert.equal((chest.match(/data-optional-logo/g) || []).length, 10, 'Each legacy token must mark its remote logo as optional');
+assert.ok((home.match(/<svg\b/g) || []).length >= 4, 'Action Team must contain inline vector production artwork');
+assert.ok((chest.match(/<svg\b/g) || []).length >= 11, 'Hope Chest needs inline vector art for chest + all tokens');
+assert.equal((chest.match(/data-optional-logo/g) || []).length, 10, 'Each legacy remote token logo must remain optional');
 assert.match(js, /img\.remove\(\)/, 'Broken optional-logo cleanup missing');
 assert.match(js, /data-mobile-collapse/, 'Mobile Hope Chest collapse behavior missing');
+assert.ok(!/\/assets\/media\/pdc-/.test(js), 'Required PDC visuals must not depend on raster master files');
+assert.ok(!js.includes('supabase.co'), 'Required PDC visuals must not depend on Supabase');
 assert.match(css, /grid-template-columns:repeat\(5,1fr\)/, 'Desktop Hope Chest must be two rows of five');
 assert.match(css, /@media\(max-width:620px\)/, 'Phone layout breakpoint missing');
-
 assert.match(htaccess, /Cache-Control "no-store, no-cache/, 'HTML no-cache rule missing');
 assert.match(htaccess, /Content-Security-Policy/, 'CSP missing');
-assert.ok(!pages.some((html) => /<img(?![^>]*data-optional-logo)/i.test(html)), 'A required image depends on an external raster URL');
+assert.ok(!pages.some((html) => /<img(?![^>]*data-optional-logo)/i.test(html)), 'A required visual depends on an external raster URL');
 
-console.log('PurpleDiamondCrew standalone production gate passed: 3 pages, 10 verified legacy tokens, 3 verified local master images, and inline SVG fallbacks.');
+console.log('PurpleDiamondCrew standalone production gate passed: required artwork is inline SVG, 10 verified legacy tokens, zero required raster dependencies.');
