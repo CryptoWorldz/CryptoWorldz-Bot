@@ -19,13 +19,13 @@ jobs:
     environment:
       name: purplediamondcrew-production
     env:
-      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_HOST: 145.223.108.40
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
-      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
-      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      FTP_PORT: '21'
+      FTP_SERVER_DIR: '/'
+      FTP_ACCOUNT_SCOPE: DOMAIN_ONLY
+      DEPLOY_GUARD: PURPLEDIAMONDCREW.COM
     steps:
       - name: Check out approved main commit
         uses: actions/checkout@v4
@@ -38,19 +38,17 @@ jobs:
         run: |
           set -euo pipefail
           ready=true
-          [[ -n "$FTP_HOST" ]] || { echo '::warning::FTP_HOST is not configured'; ready=false; }
           [[ -n "$FTP_USERNAME" ]] || { echo '::warning::FTP_USERNAME is not configured'; ready=false; }
           [[ -n "$FTP_PASSWORD" ]] || { echo '::warning::FTP_PASSWORD is not configured'; ready=false; }
-          [[ "$FTP_PORT" == '21' ]] || { echo '::warning::FTP_PORT must be 21'; ready=false; }
-          [[ "$FTP_SERVER_DIR" == '/' ]] || { echo '::warning::FTP_SERVER_DIR must be / for the domain-only account'; ready=false; }
-          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]] || { echo '::warning::FTP_ACCOUNT_SCOPE must be DOMAIN_ONLY'; ready=false; }
-          [[ "$DEPLOY_GUARD" == 'PURPLEDIAMONDCREW.COM' ]] || { echo '::warning::DEPLOY_GUARD must be PURPLEDIAMONDCREW.COM'; ready=false; }
+          [[ "$FTP_HOST" == '145.223.108.40' ]] || { echo '::error::Locked Hostinger IP changed'; exit 1; }
+          [[ "$FTP_PORT" == '21' && "$FTP_SERVER_DIR" == '/' ]] || { echo '::error::Locked FTP target changed'; exit 1; }
+          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' && "$DEPLOY_GUARD" == 'PURPLEDIAMONDCREW.COM' ]] || { echo '::error::PDC guard changed'; exit 1; }
           if [[ "$ready" == true ]]; then
             echo 'PDC_INFRA_READY=true' >> "$GITHUB_ENV"
             echo 'PurpleDiamondCrew production environment is ready for guarded deployment.'
           else
             echo 'PDC_INFRA_READY=false' >> "$GITHUB_ENV"
-            echo 'PurpleDiamondCrew website package is valid; production credentials are not fully configured.'
+            echo 'PurpleDiamondCrew website package is valid; only the PDC FTP username/password are missing.'
           fi
 
       - name: Publish readiness summary
@@ -62,6 +60,7 @@ jobs:
             echo '- Required artwork: built-in vector fallbacks'
             echo '- Hope Chest: verified master enhancement + fallback'
             echo '- Legacy tokens: 10 verified records'
-            echo "- Production FTP ready: ${PDC_INFRA_READY:-unknown}"
+            echo '- Hostinger target: locked'
+            echo "- PDC FTP credentials ready: ${PDC_INFRA_READY:-unknown}"
             echo '- Upload performed: no'
           } >> "$GITHUB_STEP_SUMMARY"
