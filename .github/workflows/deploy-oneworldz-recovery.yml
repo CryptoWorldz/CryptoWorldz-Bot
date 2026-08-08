@@ -140,7 +140,7 @@ jobs:
 
           timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" < "$command_file" || true
           find "$backup" -type f -size 0 -delete || true
-          find "$backup" -type d -empty -delete || true
+          find "$backup" -mindepth 1 -type d -empty -delete || true
           if ! find "$backup" -type f -print -quit | grep -q .; then
             touch "$backup/.empty-target"
           fi
