@@ -137,7 +137,25 @@ async function render() {
 
   app.innerHTML = `<div class="sw-shell">
     <section class="sw-hero">
-      <picture><source media="(max-width:680px)" srcset="./assets/images/website-core/solworldz/solworldz-mobile-hero.webp"><img src="./assets/images/website-core/solworldz/solworldz-desktop-hero.webp" alt="SolWorldz Solana ecosystem" fetchpriority="high"></picture>
+      <svg class="sw-hero-visual" viewBox="0 0 1440 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="SolWorldz Solana ecosystem" style="position:absolute;inset:0;width:100%;height:100%">
+        <title>SolWorldz Solana ecosystem</title>
+        <defs>
+          <radialGradient id="swHeroSpace" cx="74%" cy="45%" r="72%"><stop stop-color="#30196f"/><stop offset=".47" stop-color="#11102c"/><stop offset="1" stop-color="#05020a"/></radialGradient>
+          <linearGradient id="swHeroSol" x1="0" x2="1"><stop stop-color="#a35fff"/><stop offset=".5" stop-color="#36ddff"/><stop offset="1" stop-color="#5dff9a"/></linearGradient>
+          <filter id="swHeroGlow"><feGaussianBlur stdDeviation="9" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect width="1440" height="720" fill="url(#swHeroSpace)"/>
+        <g fill="none" stroke="#6d5cc8" opacity=".2"><path d="M0 120h1440M0 240h1440M0 360h1440M0 480h1440M0 600h1440"/><path d="M180 0v720M420 0v720M660 0v720M900 0v720M1140 0v720M1380 0v720"/></g>
+        <g transform="translate(1040 340)">
+          <circle r="252" fill="#070815" stroke="#38ddff" stroke-width="3" opacity=".9"/>
+          <circle r="305" fill="none" stroke="#a45fff" stroke-width="2" opacity=".48"/>
+          <circle r="350" fill="none" stroke="#39d8ff" opacity=".24"/>
+          <circle cx="-278" cy="-126" r="13" fill="#a35fff" filter="url(#swHeroGlow)"/><circle cx="270" cy="-185" r="18" fill="#5dff9a" filter="url(#swHeroGlow)"/><circle cx="310" cy="142" r="9" fill="#39d8ff"/>
+          <g filter="url(#swHeroGlow)"><path d="M-150-92h310l-62 60h-310zM-212 14H98l62 60h-310zM-150 120h310l-62 60h-310z" fill="url(#swHeroSol)"/></g>
+          <text x="0" y="266" text-anchor="middle" fill="#fff" font-family="Orbitron, sans-serif" font-size="44" font-weight="900" letter-spacing="4">SOLWORLDZ</text>
+          <text x="0" y="307" text-anchor="middle" fill="#a9b7db" font-family="Rajdhani, sans-serif" font-size="20" font-weight="700" letter-spacing="8">SOLANA ECOSYSTEM</text>
+        </g>
+      </svg>
       <div class="sw-hero-copy"><span class="sw-kicker">Solana • Community • Impact • Innovation</span><h1>SolWorldz</h1><p>One Solana world connecting projects, people, impact and the next purpose-led launches through the ImpactBased board.</p><div class="sw-hero-actions">${outbound(LINKS.impact,'Visit ImpactBased','sw-btn gold')}<a class="sw-btn green" href="?page=help">Help the People</a>${outbound(LINKS.zedHQ,'Join CryptoWorldz HQ')} ${outbound(LINKS.zedBot,'Open @CryptoWorldzBot')}</div></div>
     </section>
 
