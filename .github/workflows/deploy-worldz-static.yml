@@ -211,7 +211,7 @@ jobs:
           if [[ "$EXPECTED_GUARD" == 'CRYPTOWORLDZ.XYZ' ]]; then
             [[ "$FTP_SERVER_DIR" == '/domains/cryptoworldz.xyz/public_html' ]] || missing+=(FTP_SERVER_DIR)
           else
-            [[ "$FTP_SERVER_DIR" == '/' ]] || missing+=(FTP_SERVER_DIR)
+            [[ "$FTP_SERVER_DIR" == '/' || "$FTP_SERVER_DIR" == '/public_html' ]] || missing+=(FTP_SERVER_DIR)
           fi
 
           if [[ "$FTP_TLS_VERIFY" == 'no' ]]; then
