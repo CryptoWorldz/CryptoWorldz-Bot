@@ -11,3 +11,5 @@ PurpleDiamondCrew.com follows the standalone Worldz deployment standard.
 7. Production HTML is no-cache.
 8. Deployment requires the exact `PURPLEDIAMONDCREW.COM` guard, a domain-only FTP account, rollback capture, upload, and live verification.
 9. Zed and Auto services are outside the PurpleDiamondCrew static document root and must remain untouched.
+
+Credential readiness recheck requested after environment secrets update: 2026-08-08.
