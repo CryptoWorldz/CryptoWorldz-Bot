@@ -33,9 +33,11 @@ for (const relativePath of requiredFiles) {
 }
 
 const indexSource = read('index.html');
+const reaganSource = read('reagan-kauja.html');
 const routerSource = read('assets/site-router.js');
 const appSource = read('assets/app.js');
 const solworldzSource = read('assets/solworldz.js');
+const reaganHeroMediaSource = read('assets/reagan-hero-media.js');
 const pdcDirectorySource = read('assets/pdc-directory.js');
 const pdcSiteSource = read('assets/pdc-site.js');
 const pdcStyleSource = read('assets/pdc-site.css');
@@ -134,6 +136,13 @@ assert.match(routerSource, /hostname === 'solworldz\.xyz'/, 'SolWorldz hostname 
 assert.match(routerSource, /assets\/solworldz\.js/, 'SolWorldz must route to its dedicated script');
 assert.match(solworldzSource, /class="sw-hero-visual"/, 'SolWorldz must ship its code-native hero visual');
 assert.doesNotMatch(solworldzSource, /solworldz-(?:desktop|mobile)-hero\.webp/, 'SolWorldz must not depend on the corrupt Hostinger hero WebPs');
+assert.match(reaganSource, /reagan-hero-media\.js\?v=20260809-recovery3/, 'Reagan poster media must use the repaired cache version');
+const reaganHeroMatch = reaganHeroMediaSource.match(/base64,([^']+)'/);
+assert.ok(reaganHeroMatch, 'Reagan poster WebP payload is missing');
+const reaganHeroBytes = Buffer.from(reaganHeroMatch[1], 'base64');
+assert.equal(reaganHeroBytes.subarray(0, 4).toString(), 'RIFF', 'Reagan poster is not a RIFF file');
+assert.equal(reaganHeroBytes.subarray(8, 12).toString(), 'WEBP', 'Reagan poster is not a WebP file');
+assert.equal(reaganHeroBytes.readUInt32LE(4) + 8, reaganHeroBytes.length, 'Reagan poster WebP payload length is corrupt');
 assert.match(fallbackSource, /location\.replace\('\/'\)/, '404 fallback must return visitors to the app root');
 assert.match(headerSource, /connect-src[^\n]*supabase\.co/, 'Portable CSP must permit the Supabase registry');
 assert.match(headerSource, /frame-src[^\n]*dexscreener\.com/, 'Portable CSP must permit DEX Screener charts');
