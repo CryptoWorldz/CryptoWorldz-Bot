@@ -1,0 +1,91 @@
+name: Audit Worldz Browser Rendering
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'diagnostics/worldz-browser-audit.request'
+      - 'tools/worldz-browser-audit.mjs'
+      - '.github/workflows/audit-worldz-browser.yml'
+
+permissions:
+  contents: read
+
+env:
+  FORCE_COLOR: '1'
+
+jobs:
+  browser-audit:
+    name: Render every Worldz site in Chrome
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out production source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Confirm browser availability
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v google-chrome >/dev/null 2>&1; then
+            google-chrome --version
+          elif command -v google-chrome-stable >/dev/null 2>&1; then
+            google-chrome-stable --version
+          elif command -v chromium >/dev/null 2>&1; then
+            chromium --version
+          elif command -v chromium-browser >/dev/null 2>&1; then
+            chromium-browser --version
+          else
+            echo 'No Chrome/Chromium found on GitHub runner' >&2
+            exit 1
+          fi
+
+      - name: Run browser-render image audit
+        id: audit
+        continue-on-error: true
+        shell: bash
+        run: node tools/worldz-browser-audit.mjs
+
+      - name: Upload browser screenshots and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldz-browser-audit-${{ github.run_id }}
+          path: browser-audit/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Print concise audit summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f browser-audit/report.json ]; then
+            node - <<'NODE'
+            const fs = require('fs');
+            const r = JSON.parse(fs.readFileSync('browser-audit/report.json','utf8'));
+            console.log(JSON.stringify(r.totals, null, 2));
+            for (const x of r.results) {
+              const s = x.summary || {};
+              console.log(`${s.pass ? 'PASS' : 'FAIL'} ${x.viewport.padEnd(7)} ${x.url} visible=${s.visibleImages ?? '-'} broken=${s.brokenImages ?? '-'} undersized=${s.undersizedImages ?? '-'} bgBroken=${s.brokenBackgrounds ?? '-'} bgSmall=${s.undersizedBackgrounds ?? '-'} net=${s.networkFailures ?? '-'}`);
+            }
+            NODE
+          fi
+
+      - name: Fail job if any rendered site is broken
+        if: always()
+        shell: bash
+        run: |
+          test -f browser-audit/report.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const r = JSON.parse(fs.readFileSync('browser-audit/report.json','utf8'));
+          if (r.totals.failed > 0) {
+            console.error(`${r.totals.failed} browser audit targets failed.`);
+            process.exit(1);
+          }
+          NODE
