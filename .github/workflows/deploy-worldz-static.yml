@@ -185,7 +185,7 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-      FTP_SERVER_DIR: ${{ needs.prepare.outputs.environment == 'cryptoworldz-production' && '/domains/cryptoworldz.xyz/public_html' || vars.FTP_SERVER_DIR || '/' }}
+      FTP_SERVER_DIR: ${{ needs.prepare.outputs.environment == 'cryptoworldz-production' && '/domains/cryptoworldz.xyz/public_html' || needs.prepare.outputs.environment == 'bnbworldz-production' && '/public_html' || vars.FTP_SERVER_DIR || '/' }}
       FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE || (needs.prepare.outputs.environment == 'cryptoworldz-production' && 'DOMAIN_ONLY' || '') }}
       DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD || (needs.prepare.outputs.environment == 'cryptoworldz-production' && 'CRYPTOWORLDZ.XYZ' || '') }}
       FTP_TLS_VERIFY: ${{ (needs.prepare.outputs.environment == 'cryptoworldz-production' || needs.prepare.outputs.environment == 'solworldz-production') && 'no' || 'yes' }}
