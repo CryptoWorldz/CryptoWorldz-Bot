@@ -53,6 +53,6 @@
                       : requestedMode === 'directory'
                         ? './assets/pdc-directory.js'
                         : './assets/app.js';
-  script.src = `${selectedScript}?v=20260809-recovery1`;
+  script.src = `${selectedScript}?v=20260809-recovery1-solsvg`;
   document.body.appendChild(script);
 })();
