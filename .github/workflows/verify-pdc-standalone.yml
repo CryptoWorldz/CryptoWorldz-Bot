@@ -2,12 +2,11 @@ name: Verify PurpleDiamondCrew Standalone
 
 on:
   push:
-    branches: [fix/pdc-standalone-production]
+    branches: [main]
     paths:
       - 'apps/worldz-sites/purplediamondcrew/**'
       - 'tools/verify-pdc-standalone.mjs'
       - '.github/workflows/verify-pdc-standalone.yml'
-      - '.github/workflows/deploy-pdc-standalone.yml'
   workflow_dispatch:
 
 permissions:
@@ -28,7 +27,7 @@ jobs:
       FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
       DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
     steps:
-      - name: Check out branch
+      - name: Check out approved main commit
         uses: actions/checkout@v4
 
       - name: Run standalone production gate
