@@ -25,7 +25,6 @@ normalize_ftp_host() {
   value="${value#sftp://}"
   value="${value%%/*}"
 
-  # Strip an optional host:port suffix while preserving a possible IPv6 literal.
   if [[ "$value" != *:*:* && "$value" == *:* ]]; then
     value="${value%%:*}"
   fi
@@ -79,8 +78,6 @@ emit_file() {
   fi
 
   if [[ "$remote_dir" != "." && -z "${created_dirs[$remote_dir]+set}" ]]; then
-    # Hostinger may return FTP 550 when mkdir targets an existing directory.
-    # Ignore only the directory-creation command; the following PUT remains fail-fast.
     echo 'set cmd:fail-exit no'
     printf 'mkdir -p %s\n' "$(lftp_quote "$remote_dir")"
     echo 'set cmd:fail-exit yes'
@@ -97,7 +94,7 @@ declare -a ordinary_files=()
 index_file=""
 
 if [[ "$mode" == "upload" ]]; then
-  for relative in 404.html _headers live.html .htaccess; do
+  for relative in 404.html _headers live.html .htaccess donate.html robots.txt sitemap.xml; do
     [[ -f "$source_root/$relative" ]] && ordinary_files+=("$source_root/$relative")
   done
 
@@ -140,7 +137,6 @@ fi
     emit_file "$file"
   done
 
-  # Switch the public page only after every dependency has uploaded.
   if [[ -n "$index_file" ]]; then
     emit_file "$index_file"
   fi
