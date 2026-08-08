@@ -1,5 +1,5 @@
 (() => {
-  const VERSION = '2026-08-08-media-payload-1';
+  const VERSION = '2026-08-09-media-payload-2';
   const MANIFEST_URL = `/assets/media-payload/manifest.json?v=${VERSION}`;
   const cache = new Map();
   let manifestPromise;
@@ -28,6 +28,22 @@
     }
   }
 
+  function decodes(dataUrl) {
+    return new Promise(resolve => {
+      const probe = new Image();
+      let settled = false;
+      const finish = ok => {
+        if (settled) return;
+        settled = true;
+        resolve(ok);
+      };
+      probe.onload = () => finish(probe.naturalWidth > 0 && probe.naturalHeight > 0);
+      probe.onerror = () => finish(false);
+      probe.src = dataUrl;
+      setTimeout(() => finish(false), 8000);
+    });
+  }
+
   async function resolve(value) {
     const key = localPath(value);
     if (!key) return null;
@@ -41,7 +57,10 @@
       if (!response.ok) throw new Error(`${part} ${response.status}`);
       return response.text();
     })))
-      .then(parts => `data:${entry.mime};base64,${parts.join('').replace(/\s+/g, '')}`)
+      .then(async parts => {
+        const dataUrl = `data:${entry.mime};base64,${parts.join('').replace(/\s+/g, '')}`;
+        return await decodes(dataUrl) ? dataUrl : null;
+      })
       .catch(() => null);
 
     cache.set(key, promise);
