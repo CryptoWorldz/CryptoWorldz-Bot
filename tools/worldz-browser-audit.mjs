@@ -145,8 +145,12 @@ const pageExpression = `
     if (!bg || bg === 'none') continue;
     const urls = [...bg.matchAll(/url\\(["']?(.*?)["']?\\)/g)].map(m => m[1]).filter(Boolean);
     for (const raw of urls) {
-      if (raw.startsWith('#')) continue;
-      const src = raw.startsWith('data:') ? raw : new URL(raw, location.href).href;
+      let decodedRaw = raw;
+      try { decodedRaw = decodeURIComponent(raw); } catch {}
+      if (decodedRaw.startsWith('#')) continue;
+      const parsed = raw.startsWith('data:') ? null : new URL(raw, location.href);
+      if (parsed && /^\/%23/i.test(parsed.pathname)) continue;
+      const src = parsed ? parsed.href : raw;
       const key = src + '|' + el.tagName + '|' + el.className;
       if (seen.has(key)) continue;
       seen.add(key);
