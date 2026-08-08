@@ -14,7 +14,7 @@ const URLS = [
   'https://suiworldz.xyz/',
   'https://hyperworldz.xyz/',
   'https://robinworldz.xyz/',
-  'https://bitcoinworldz.xyz/',
+  'https://cryptoworldz.xyz/?world=bitcoinworldz&mode=coming-soon',
   'https://hodlerworldz.xyz/',
   'https://purplediamondcrew.com/'
 ];
