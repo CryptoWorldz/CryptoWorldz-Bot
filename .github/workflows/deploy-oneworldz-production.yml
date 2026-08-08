@@ -1,0 +1,226 @@
+name: Deploy OneWorldz Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/oneworldz-production.request'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-production-v2
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Back up, deploy and verify OneWorldz.com
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: oneworldz-production
+      url: https://oneworldz.com
+    env:
+      FTP_HOST: '145.223.108.40'
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: '21'
+      FTP_SERVER_DIR: '/public_html'
+      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      LIVE_URL: https://oneworldz.com
+    steps:
+      - name: Check out approved main commit
+        uses: actions/checkout@v4
+
+      - name: Validate immutable OneWorldz approval
+        shell: bash
+        env:
+          APPROVED_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          test -f deployments/oneworldz-production.request
+          test "$(sed -n 's/^target=//p' deployments/oneworldz-production.request | tail -n1)" = 'oneworldz.com'
+          test "$(sed -n 's/^confirmation=//p' deployments/oneworldz-production.request | tail -n1)" = 'APPROVE TOTAL DEPLOYMENT'
+          test "$(sed -n 's/^source_commit=//p' deployments/oneworldz-production.request | tail -n1)" = "$APPROVED_BEFORE"
+
+      - name: Lock deployment to OneWorldz only
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$FTP_HOST" == '145.223.108.40' ]]
+          [[ "$FTP_PORT" == '21' ]]
+          [[ "$FTP_SERVER_DIR" == '/public_html' ]]
+          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]]
+          [[ "$DEPLOY_GUARD" == 'ONEWORLDZ.COM' ]]
+          [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]]
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_HOST"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build dedicated OneWorldz package
+        shell: bash
+        run: |
+          set -euo pipefail
+          stage="$RUNNER_TEMP/oneworldz-package"
+          rm -rf "$stage"
+          cp -a "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core" "$stage"
+          cp "$stage/oneworldz-index.html" "$stage/index.html"
+          cp "$stage/oneworldz-robots.txt" "$stage/robots.txt"
+          cp "$stage/oneworldz-sitemap.xml" "$stage/sitemap.xml"
+          rm -f "$stage/oneworldz-index.html" "$stage/oneworldz-robots.txt" "$stage/oneworldz-sitemap.xml"
+
+          grep -Fq '<title>OneWorldz 🌏 One Vision' "$stage/index.html"
+          grep -Fq 'property="og:site_name" content="OneWorldz"' "$stage/index.html"
+          grep -Fq 'property="og:url" content="https://oneworldz.com/"' "$stage/index.html"
+          ! grep -Fq '<title>CryptoWorldz' "$stage/index.html"
+          grep -Fq 'Action Spread Smiles Organisation' "$stage/donate.html"
+          grep -Fq 'https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr' "$stage/donate.html"
+          grep -Fq 'https://www.facebook.com/share/18BmqfH7MS/' "$stage/donate.html"
+          grep -Fq 'https://www.tiktok.com/@actionspreadsmilesorg' "$stage/donate.html"
+          grep -Fq 'https://youtube.com/@action_spread_smiles' "$stage/donate.html"
+          grep -Fq 'help-reagan-feed-60-orphaned-children-in-uganda' "$stage/donate.html"
+          ! grep -Fq 'Action Creates Smiles' "$stage/assets/oneworldz-next.js"
+          ! grep -Fq 'Action Creates Smiles' "$stage/donate.html"
+          grep -Fq '/donate/' "$stage/assets/oneworldz-next.js"
+          echo 'Dedicated OneWorldz package gate passed.'
+
+      - name: Verify repository and deployment helper
+        run: |
+          npm ci
+          npm run verify
+          bash -n tools/worldz-direct-ftp.sh
+
+      - name: Install secure FTP tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp zip
+
+      - name: Confirm encrypted OneWorldz target
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 15
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate no
+          cd "$FTP_SERVER_DIR"
+          pwd
+          bye
+          LFTP
+
+      - name: Capture full rollback snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/oneworldz-backup"
+          mkdir -p "$backup"
+          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 20
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate no
+          cd "$FTP_SERVER_DIR"
+          lcd "$backup"
+          mirror --parallel=3 . .
+          bye
+          LFTP
+          cd "$backup"
+          zip -qr "$RUNNER_TEMP/oneworldz-predeploy.zip" .
+
+      - name: Preserve rollback package
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-predeploy-${{ github.run_id }}
+          path: ${{ runner.temp }}/oneworldz-predeploy.zip
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload dedicated OneWorldz package
+        shell: bash
+        env:
+          FTP_TRANSFER_TIMEOUT: '300'
+          FTP_TLS_VERIFY: 'no'
+        run: |
+          set -euo pipefail
+          echo 'ONEWORLDZ_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
+          bash tools/worldz-direct-ftp.sh upload "$RUNNER_TEMP/oneworldz-package"
+
+      - name: Verify live OneWorldz identity, donation page and SEO
+        shell: bash
+        run: |
+          set -euo pipefail
+          agent='Mozilla/5.0 (OneWorldz Production Verify)'
+          verified='false'
+          for attempt in 1 2 3 4 5 6; do
+            cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
+            if curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/home.html" \
+              && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/donate/?$cache" -o "$RUNNER_TEMP/donate.html" \
+              && curl -fsSL -A "$agent" --connect-timeout 15 --max-time 30 "$LIVE_URL/robots.txt?$cache" -o "$RUNNER_TEMP/robots.txt" \
+              && curl -fsSL -A "$agent" --connect-timeout 15 --max-time 30 "$LIVE_URL/sitemap.xml?$cache" -o "$RUNNER_TEMP/sitemap.xml"; then
+              if grep -Fq '<title>OneWorldz 🌏 One Vision' "$RUNNER_TEMP/home.html" \
+                && grep -Fq 'property="og:site_name" content="OneWorldz"' "$RUNNER_TEMP/home.html" \
+                && ! grep -Fq '<title>CryptoWorldz' "$RUNNER_TEMP/home.html" \
+                && grep -Fq 'Action Spread Smiles Organisation' "$RUNNER_TEMP/donate.html" \
+                && grep -Fq 'https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr' "$RUNNER_TEMP/donate.html" \
+                && grep -Fq 'https://www.tiktok.com/@actionspreadsmilesorg' "$RUNNER_TEMP/donate.html" \
+                && grep -Fq 'https://youtube.com/@action_spread_smiles' "$RUNNER_TEMP/donate.html" \
+                && grep -Fq 'Sitemap: https://oneworldz.com/sitemap.xml' "$RUNNER_TEMP/robots.txt" \
+                && grep -Fq 'https://oneworldz.com/donate/' "$RUNNER_TEMP/sitemap.xml"; then
+                verified='true'
+                break
+              fi
+            fi
+            sleep 5
+          done
+          [[ "$verified" == 'true' ]] || { echo '::error::OneWorldz live identity/SEO/donation verification failed.'; exit 1; }
+          echo 'OneWorldz live identity, donation directory and SEO verified.'
+
+      - name: Restore previous OneWorldz site if deployment fails
+        if: failure() && env.ONEWORLDZ_UPLOAD_STARTED == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/oneworldz-backup"
+          [[ -d "$backup" ]] || { echo 'No rollback snapshot exists; restore skipped.'; exit 0; }
+          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 20
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate no
+          cd "$FTP_SERVER_DIR"
+          lcd "$backup"
+          mirror --reverse --delete --parallel=3 . .
+          bye
+          LFTP
+          echo 'Previous OneWorldz site restored after failed live verification.'
+
+      - name: Publish deployment summary
+        if: always()
+        run: |
+          {
+            echo '## OneWorldz Production'
+            echo '- Canonical identity: OneWorldz 🌏 One Vision'
+            echo '- Social metadata: OneWorldz-only'
+            echo '- Donation directory: /donate/'
+            echo '- Action Spread Smiles Organisation: canonical wording'
+            echo '- SEO: canonical URL + robots.txt + sitemap.xml + structured data'
+            echo '- Rollback snapshot: required before upload'
+            echo '- Target: OneWorldz.com only'
+            echo '- Zed: untouched'
+            echo '- Auto: untouched'
+          } >> "$GITHUB_STEP_SUMMARY"
