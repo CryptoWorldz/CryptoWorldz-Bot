@@ -120,7 +120,7 @@ function worldLinks() {
     ['OneWorldz', 'https://oneworldz.com'], ['CryptoWorldz', 'https://cryptoworldz.xyz'], ['Purple Diamond Crew', 'https://purplediamondcrew.com'],
     ['EthWorldz', 'https://ethworldz.xyz'], ['BaseWorldz', 'https://baseworldz.xyz'], ['BNBWorldz', 'https://bnbworldz.xyz'],
     ['XRPWorldz', 'https://xrpworldz.xyz'], ['SuiWorldz', 'https://suiworldz.xyz'], ['HyperWorldz', 'https://hyperworldz.xyz'],
-    ['RobinWorldz', 'https://robinworldz.xyz'], ['BitcoinWorldz', 'https://bitcoinworldz.xyz'], ['HodlerWorldz', 'https://hodlerworldz.xyz']
+    ['RobinWorldz', 'https://robinworldz.xyz'], ['BitcoinWorldz', 'https://cryptoworldz.xyz/?world=bitcoinworldz&mode=coming-soon'], ['HodlerWorldz', 'https://hodlerworldz.xyz']
   ];
   return worlds.map(([name, url]) => `<a class="sw-world-link" href="${url}" target="_blank" rel="noopener noreferrer">Visit ${name}</a>`).join('');
 }
