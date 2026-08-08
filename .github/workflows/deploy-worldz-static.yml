@@ -111,7 +111,16 @@ jobs:
             purplediamondcrew) environment='purplediamondcrew-production'; live_url='https://purplediamondcrew.com'; guard='PURPLEDIAMONDCREW.COM'; expected_script='assets/pdc-site.js' ;;
             solworldz) environment='solworldz-production'; live_url='https://solworldz.xyz'; guard='SOLWORLDZ.XYZ'; expected_script='assets/app.js' ;;
             cryptoworldz) environment='cryptoworldz-production'; live_url='https://cryptoworldz.xyz'; guard='CRYPTOWORLDZ.XYZ'; expected_script='assets/app.js' ;;
-            oneworldz) environment='oneworldz-production'; live_url='https://oneworldz.com'; guard='ONEWORLDZ.COM'; expected_script='assets/oneworldz.js' ;;
+            oneworldz)
+              environment='cryptoworldz-production'
+              live_url='https://oneworldz.com'
+              guard='ONEWORLDZ.COM'
+              expected_script='assets/oneworldz.js'
+              ftp_server_dir='/domains/oneworldz.com/public_html'
+              account_scope_override='HOSTING_ACCOUNT'
+              deploy_guard_override='ONEWORLDZ.COM'
+              tls_verify_override='no'
+              ;;
             impactbased) environment='impactbased-production'; live_url='https://impactbased.oneworldz.com'; guard='IMPACTBASED.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
             law-oneworldz) environment='law-oneworldz-production'; live_url='https://law.oneworldz.com'; guard='LAW.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
             learn-oneworldz) environment='learn-oneworldz-production'; live_url='https://learn.oneworldz.com'; guard='LEARN.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
@@ -349,7 +358,7 @@ jobs:
 
           if [[ "$FTP_ACCOUNT_SCOPE" == 'HOSTING_ACCOUNT' ]]; then
             case "$EXPECTED_GUARD" in
-              XRPWORLDZ.XYZ|SUIWORLDZ.XYZ|HYPERWORLDZ.XYZ|ROBINWORLDZ.XYZ|BITCOINWORLDZ.XYZ|HODLERWORLDZ.XYZ) ;;
+              ONEWORLDZ.COM|XRPWORLDZ.XYZ|SUIWORLDZ.XYZ|HYPERWORLDZ.XYZ|ROBINWORLDZ.XYZ|BITCOINWORLDZ.XYZ|HODLERWORLDZ.XYZ) ;;
               *) missing+=(HOSTING_ACCOUNT_TARGET) ;;
             esac
             expected_domain="${EXPECTED_GUARD,,}"
@@ -363,7 +372,7 @@ jobs:
 
           if [[ "$FTP_TLS_VERIFY" == 'no' ]]; then
             case "$EXPECTED_GUARD" in
-              CRYPTOWORLDZ.XYZ|SOLWORLDZ.XYZ|XRPWORLDZ.XYZ|SUIWORLDZ.XYZ|HYPERWORLDZ.XYZ|ROBINWORLDZ.XYZ|BITCOINWORLDZ.XYZ|HODLERWORLDZ.XYZ) ;;
+              CRYPTOWORLDZ.XYZ|ONEWORLDZ.COM|SOLWORLDZ.XYZ|XRPWORLDZ.XYZ|SUIWORLDZ.XYZ|HYPERWORLDZ.XYZ|ROBINWORLDZ.XYZ|BITCOINWORLDZ.XYZ|HODLERWORLDZ.XYZ) ;;
               *) missing+=(FTP_TLS_VERIFY_TARGET) ;;
             esac
             [[ "$ftp_host_check" == '145.223.108.40' ]] || missing+=(FTP_TLS_VERIFY_HOST)
