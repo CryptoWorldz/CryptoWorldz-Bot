@@ -50,6 +50,14 @@ if [[ "$FTP_TLS_VERIFY" == 'no' && "$FTP_HOST" != '145.223.108.40' ]]; then
 fi
 
 test -d "$source_root"
+
+if [[ "$mode" == "upload" ]]; then
+  payload_builder="${GITHUB_WORKSPACE:-$(pwd)}/tools/build-worldz-media-payloads.mjs"
+  if [[ -f "$payload_builder" ]]; then
+    node "$payload_builder" "$source_root"
+  fi
+fi
+
 command_file="${RUNNER_TEMP:-/tmp}/worldz-${mode}-${GITHUB_RUN_ID:-manual}.lftp"
 
 lftp_quote() {
