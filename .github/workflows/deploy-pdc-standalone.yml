@@ -8,8 +8,6 @@ on:
       - '.github/workflows/deploy-pdc-standalone.yml'
       - 'apps/worldz-sites/purplediamondcrew/**'
       - 'tools/verify-pdc-standalone.mjs'
-      - 'tools/restore-approved-worldz-media.sh'
-      - 'media/approved-worldz/**'
   workflow_dispatch:
 
 permissions:
@@ -43,24 +41,7 @@ jobs:
       - name: Install verification and secure FTP tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp zip webp
-
-      - name: Restore approved PDC master media
-        shell: bash
-        run: |
-          set -euo pipefail
-          restored="$RUNNER_TEMP/approved-worldz-media"
-          site_media="$GITHUB_WORKSPACE/apps/worldz-sites/purplediamondcrew/assets/media"
-          bash tools/restore-approved-worldz-media.sh "$restored"
-          mkdir -p "$site_media"
-          cp "$restored/pdc/pdc-mission-board.webp" "$site_media/pdc-mission-board.webp"
-          cp "$restored/pdc/pdc-hope-chest.webp" "$site_media/pdc-hope-chest.webp"
-          cp "$restored/pdc/pdc-crest.webp" "$site_media/pdc-crest.webp"
-          for file in "$site_media"/*.webp; do
-            test "$(wc -c < "$file" | tr -d ' ')" -gt 10000
-            webpinfo "$file" >/dev/null
-          done
-          echo 'Approved PDC master media restored, hash-verified and WebP-decoded.'
+          sudo apt-get install -y -qq lftp zip
 
       - name: Run standalone production gate
         run: node tools/verify-pdc-standalone.mjs
@@ -140,7 +121,7 @@ jobs:
           bye
           LFTP
 
-      - name: Verify live three-page PDC site and master media
+      - name: Verify live three-page PDC site
         shell: bash
         run: |
           set -euo pipefail
@@ -149,7 +130,7 @@ jobs:
             local ok=false
             for attempt in 1 2 3 4 5 6; do
               if curl -L -fsS -A 'Mozilla/5.0 (PDC Production Verify)' -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL$path?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" -o "$out"; then
-                if grep -Fqi "$marker1" "$out" && grep -Fqi "$marker2" "$out" && ! grep -Fqi 'Loading the Worldz experience' "$out"; then ok=true; break; fi
+                if grep -Fqi "$marker1" "$out" && grep -Fqi "$marker2" "$out" && grep -Fq '<svg' "$out" && ! grep -Fqi 'Loading the Worldz experience' "$out"; then ok=true; break; fi
               fi
               sleep 5
             done
@@ -161,19 +142,9 @@ jobs:
           curl -L -fsS "$LIVE_URL/assets/pdc.css?release=$GITHUB_SHA" -o "$RUNNER_TEMP/pdc.css"
           curl -L -fsS "$LIVE_URL/assets/pdc.js?release=$GITHUB_SHA" -o "$RUNNER_TEMP/pdc.js"
           grep -Fq 'token-grid' "$RUNNER_TEMP/pdc.css"
-          grep -Fq '/assets/media/pdc-hope-chest.webp' "$RUNNER_TEMP/pdc.js"
-          grep -Fq '/assets/media/pdc-mission-board.webp' "$RUNNER_TEMP/pdc.js"
-          grep -Fq '/assets/media/pdc-crest.webp' "$RUNNER_TEMP/pdc.js"
-          i=0
-          for media in pdc-mission-board.webp pdc-hope-chest.webp pdc-crest.webp; do
-            i=$((i+1))
-            out="$RUNNER_TEMP/pdc-master-$i.webp"
-            curl -L -fsS -A 'Mozilla/5.0 (PDC Media Verify)' -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/assets/media/$media?release=${GITHUB_SHA}-${GITHUB_RUN_ID}" -o "$out"
-            test "$(wc -c < "$out" | tr -d ' ')" -gt 10000
-            webpinfo "$out" >/dev/null
-            echo "LIVE_MASTER_OK=$media BYTES=$(wc -c < "$out" | tr -d ' ')"
-          done
-          echo 'PurpleDiamondCrew live verification passed with all three approved master images.'
+          grep -Fq 'img.remove()' "$RUNNER_TEMP/pdc.js"
+          ! grep -Fq '/assets/media/pdc-' "$RUNNER_TEMP/pdc.js"
+          echo 'PurpleDiamondCrew live verification passed with self-contained vector production artwork.'
 
       - name: Restore previous site if deployment fails
         if: failure() && env.PDC_UPLOAD_STARTED == 'true'
@@ -202,9 +173,9 @@ jobs:
             echo '## PurpleDiamondCrew Standalone Production'
             echo '- Dedicated domain bundle: yes'
             echo '- Pages: Action Team / Crew / Hope Chest'
+            echo '- Required artwork: inline SVG, resolution-independent'
+            echo '- Required raster dependencies: zero'
             echo '- Hope Chest legacy records: 10'
-            echo '- Approved master media: mission board / Hope Chest / crest'
-            echo '- Required visual fallbacks: inline SVG'
             echo '- Hostinger target: locked to 145.223.108.40:21'
             echo '- Rollback snapshot: required before upload'
             echo '- Zed: untouched'
