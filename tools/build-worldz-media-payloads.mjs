@@ -77,7 +77,7 @@ for (const file of files) {
 }
 
 const manifest = {
-  version: '2026-08-08-media-payload-1',
+  version: '2026-08-09-media-payload-2',
   generatedAt: new Date().toISOString(),
   assetCount: Object.keys(assets).length,
   assets
