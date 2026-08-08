@@ -58,17 +58,7 @@ jobs:
           check_dir() {
             local dir="$1"
             set +e
-            timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-set cmd:fail-exit yes
-set net:max-retries 1
-set net:timeout 15
-set net:idle 15
-set ftp:ssl-force yes
-set ftp:ssl-protect-data yes
-set ssl:verify-certificate no
-cd "$dir"
-bye
-LFTP
+            timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set net:idle 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no; cd \"$dir\"; bye"
             rc=$?
             set -e
             printf '%s exit=%s\n' "$dir" "$rc"
