@@ -208,6 +208,20 @@ jobs:
           [[ -n "$FTP_USERNAME" ]] || missing+=(FTP_USERNAME)
           [[ -n "$FTP_PASSWORD" ]] || missing+=(FTP_PASSWORD)
 
+          ftp_host_check="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+          ftp_host_check="${ftp_host_check#ftp://}"
+          ftp_host_check="${ftp_host_check#ftps://}"
+          ftp_host_check="${ftp_host_check%%/*}"
+          if [[ "$ftp_host_check" != *:*:* && "$ftp_host_check" == *:* ]]; then
+            ftp_host_check="${ftp_host_check%%:*}"
+          fi
+
+          if [[ "$ftp_host_check" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+            echo 'FTP_TLS_CHECK_HOSTNAME=no' >> "$GITHUB_ENV"
+          else
+            echo 'FTP_TLS_CHECK_HOSTNAME=yes' >> "$GITHUB_ENV"
+          fi
+
           if [[ "$EXPECTED_GUARD" == 'CRYPTOWORLDZ.XYZ' ]]; then
             [[ "$FTP_SERVER_DIR" == '/domains/cryptoworldz.xyz/public_html' ]] || missing+=(FTP_SERVER_DIR)
           else
@@ -215,13 +229,6 @@ jobs:
           fi
 
           if [[ "$FTP_TLS_VERIFY" == 'no' ]]; then
-            ftp_host_check="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-            ftp_host_check="${ftp_host_check#ftp://}"
-            ftp_host_check="${ftp_host_check#ftps://}"
-            ftp_host_check="${ftp_host_check%%/*}"
-            if [[ "$ftp_host_check" != *:*:* && "$ftp_host_check" == *:* ]]; then
-              ftp_host_check="${ftp_host_check%%:*}"
-            fi
             [[ "$EXPECTED_GUARD" == 'CRYPTOWORLDZ.XYZ' || "$EXPECTED_GUARD" == 'SOLWORLDZ.XYZ' ]] || missing+=(FTP_TLS_VERIFY_TARGET)
             [[ "$ftp_host_check" == '145.223.108.40' ]] || missing+=(FTP_TLS_VERIFY_HOST)
           fi
@@ -249,6 +256,7 @@ jobs:
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate $FTP_TLS_VERIFY
+          set ssl:check-hostname $FTP_TLS_CHECK_HOSTNAME
           cd "$FTP_SERVER_DIR"
           bye
           LFTP
@@ -283,6 +291,7 @@ jobs:
             echo 'set ftp:ssl-force yes'
             echo 'set ftp:ssl-protect-data yes'
             printf 'set ssl:verify-certificate %s\n' "$FTP_TLS_VERIFY"
+            printf 'set ssl:check-hostname %s\n' "$FTP_TLS_CHECK_HOSTNAME"
             printf 'cd "%s"\n' "$FTP_SERVER_DIR"
             for file in "${files[@]}"; do
               relative="${file#"$source_root"/}"
@@ -377,6 +386,7 @@ jobs:
             echo 'set ftp:ssl-force yes'
             echo 'set ftp:ssl-protect-data yes'
             printf 'set ssl:verify-certificate %s\n' "$FTP_TLS_VERIFY"
+            printf 'set ssl:check-hostname %s\n' "$FTP_TLS_CHECK_HOSTNAME"
             printf 'cd "%s"\n' "$FTP_SERVER_DIR"
             for file in "${files[@]}"; do
               relative="${file#"$source_root"/}"
