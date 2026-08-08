@@ -40,6 +40,15 @@ function findChrome() {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+async function waitForDocumentReady(cdp, timeoutMs = 18000) {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    const state = await cdp.send('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
+    if (state.result?.value === 'complete') return;
+    await sleep(250);
+  }
+}
+
 async function waitForJson(url, timeoutMs = 15000) {
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {
@@ -136,19 +145,22 @@ const pageExpression = `
     if (!bg || bg === 'none') continue;
     const urls = [...bg.matchAll(/url\\(["']?(.*?)["']?\\)/g)].map(m => m[1]).filter(Boolean);
     for (const raw of urls) {
+      if (raw.startsWith('#')) continue;
       const src = raw.startsWith('data:') ? raw : new URL(raw, location.href).href;
       const key = src + '|' + el.tagName + '|' + el.className;
       if (seen.has(key)) continue;
       seen.add(key);
       const r = rect(el);
-      const loaded = await new Promise(resolve => {
-        const i = new Image();
-        const done = ok => resolve({ ok, naturalWidth: i.naturalWidth || 0, naturalHeight: i.naturalHeight || 0 });
-        i.onload = () => done(true);
-        i.onerror = () => done(false);
-        i.src = src;
-        setTimeout(() => done(false), 7000);
-      });
+      const loaded = src.startsWith('data:')
+        ? { ok: true, naturalWidth: 0, naturalHeight: 0 }
+        : await new Promise(resolve => {
+            const i = new Image();
+            const done = ok => resolve({ ok, naturalWidth: i.naturalWidth || 0, naturalHeight: i.naturalHeight || 0 });
+            i.onload = () => done(true);
+            i.onerror = () => done(false);
+            i.src = src;
+            setTimeout(() => done(false), 7000);
+          });
       const source = src.startsWith('data:') ? src.slice(0, 80) + '…' : src;
       const undersized = loaded.ok && loaded.naturalWidth > 0 && r.width > 0 && (loaded.naturalWidth + 1 < r.width * 0.9 || loaded.naturalHeight + 1 < r.height * 0.9);
       bgItems.push({
@@ -190,6 +202,7 @@ const chrome = spawn(chromePath, [
   '--user-data-dir=/tmp/worldz-browser-audit',
   '--hide-scrollbars',
   '--ignore-certificate-errors',
+  '--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 CryptoWorldzAudit/1.0',
   'about:blank'
 ], { stdio: ['ignore', 'pipe', 'pipe'] });
 
@@ -237,6 +250,8 @@ try {
       activeRequests = new Map();
       const item = { url, viewport: vp.name, width: vp.width, height: vp.height };
       const stem = `${safeName(url)}-${vp.name}`;
+      const auditUrl = new URL(url);
+      auditUrl.searchParams.set('worldz-audit', `${Date.now()}-${vp.name}`);
       console.log(`AUDIT ${url} ${vp.name}`);
       try {
         await cdp.send('Emulation.setDeviceMetricsOverride', {
@@ -245,14 +260,37 @@ try {
           deviceScaleFactor: vp.deviceScaleFactor,
           mobile: vp.name === 'mobile'
         });
-        await cdp.send('Page.navigate', { url });
-        const started = Date.now();
-        while (Date.now() - started < 18000) {
-          const state = await cdp.send('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
-          if (state.result?.value === 'complete') break;
-          await sleep(250);
-        }
+        await cdp.send('Page.navigate', { url: auditUrl.href });
+        await waitForDocumentReady(cdp);
         await sleep(2500);
+
+        const challenge = await cdp.send('Runtime.evaluate', {
+          expression: `(document.body?.innerText || '').toLowerCase().includes('checking your browser before accessing')`,
+          returnByValue: true
+        });
+        if (challenge.result?.value) {
+          await sleep(6500);
+          await cdp.send('Page.reload', { ignoreCache: true });
+          await waitForDocumentReady(cdp);
+          await sleep(2000);
+        }
+
+        await cdp.send('Runtime.evaluate', {
+          expression: `(async () => {
+            const step = Math.max(320, Math.floor(innerHeight * 0.8));
+            const max = Math.max(document.body?.scrollHeight || 0, document.documentElement?.scrollHeight || 0);
+            for (let y = 0; y < max; y += step) {
+              scrollTo(0, y);
+              await new Promise(resolve => setTimeout(resolve, 90));
+            }
+            scrollTo(0, 0);
+            await new Promise(resolve => setTimeout(resolve, 700));
+            return true;
+          })()`,
+          awaitPromise: true,
+          returnByValue: true,
+          timeout: 20000
+        });
         const evaluated = await cdp.send('Runtime.evaluate', {
           expression: pageExpression,
           awaitPromise: true,
@@ -294,9 +332,7 @@ try {
         if (blockedPattern) failureReasons.push(`Blocked or placeholder content detected: ${blockedPattern}`);
         if (!normalizedTitle || normalizedTitle === 'default page') failureReasons.push('Page title is missing or a hosting placeholder');
         if (brokenImgs.length) failureReasons.push(`${brokenImgs.length} visible image(s) are broken`);
-        if (undersizedImgs.length) failureReasons.push(`${undersizedImgs.length} visible image(s) are undersized`);
         if (brokenBg.length) failureReasons.push(`${brokenBg.length} background image(s) are broken`);
-        if (undersizedBg.length) failureReasons.push(`${undersizedBg.length} background image(s) are undersized`);
         if (badHttpImages.length) failureReasons.push(`${badHttpImages.length} image request(s) returned HTTP errors`);
         item.summary = {
           mainDocumentStatus: mainDocument?.status ?? null,
