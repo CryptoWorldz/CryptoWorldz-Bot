@@ -56,7 +56,7 @@ jobs:
           test -s supabase/migrations/20260806200500_register_founder_page_and_pdc_fallback.sql
           grep -Fq 'Grace X Confidential OAuth 2026-08-07.2' src/grace/oauth-telegram.js
           grep -Fq 'worldz-imagery.js' apps/cryptoworldz-web-core/index.html
-          grep -Fq 'jayjayteamdev.js' apps/cryptoworldz-web-core/index.html
+          grep -Fq './assets/jayjayteamdev.js' apps/cryptoworldz-web-core/assets/site-router.js
           grep -Fq '365%' apps/cryptoworldz-web-core/assets/jayjayteamdev.js
           grep -Fq 'oneworldz.com' src/pdc-host.js
           grep -Fq 'xrpworldz.xyz' src/pdc-host.js
