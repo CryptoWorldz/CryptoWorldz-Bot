@@ -126,11 +126,56 @@ jobs:
               deploy_guard_override='XRPWORLDZ.XYZ'
               tls_verify_override='no'
               ;;
-            suiworldz) environment='suiworldz-production'; live_url='https://suiworldz.xyz'; guard='SUIWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
-            hyperworldz) environment='hyperworldz-production'; live_url='https://hyperworldz.xyz'; guard='HYPERWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
-            robinworldz) environment='robinworldz-production'; live_url='https://robinworldz.xyz'; guard='ROBINWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
-            bitcoinworldz) environment='bitcoinworldz-production'; live_url='https://bitcoinworldz.xyz'; guard='BITCOINWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
-            hodlerworldz) environment='hodlerworldz-production'; live_url='https://hodlerworldz.xyz'; guard='HODLERWORLDZ.XYZ'; expected_script='assets/coming-soon.js' ;;
+            suiworldz)
+              environment='cryptoworldz-production'
+              live_url='https://suiworldz.xyz'
+              guard='SUIWORLDZ.XYZ'
+              expected_script='assets/coming-soon.js'
+              ftp_server_dir='/domains/suiworldz.xyz/public_html'
+              account_scope_override='HOSTING_ACCOUNT'
+              deploy_guard_override='SUIWORLDZ.XYZ'
+              tls_verify_override='no'
+              ;;
+            hyperworldz)
+              environment='cryptoworldz-production'
+              live_url='https://hyperworldz.xyz'
+              guard='HYPERWORLDZ.XYZ'
+              expected_script='assets/coming-soon.js'
+              ftp_server_dir='/domains/hyperworldz.xyz/public_html'
+              account_scope_override='HOSTING_ACCOUNT'
+              deploy_guard_override='HYPERWORLDZ.XYZ'
+              tls_verify_override='no'
+              ;;
+            robinworldz)
+              environment='cryptoworldz-production'
+              live_url='https://robinworldz.xyz'
+              guard='ROBINWORLDZ.XYZ'
+              expected_script='assets/coming-soon.js'
+              ftp_server_dir='/domains/robinworldz.xyz/public_html'
+              account_scope_override='HOSTING_ACCOUNT'
+              deploy_guard_override='ROBINWORLDZ.XYZ'
+              tls_verify_override='no'
+              ;;
+            bitcoinworldz)
+              environment='cryptoworldz-production'
+              live_url='https://bitcoinworldz.xyz'
+              guard='BITCOINWORLDZ.XYZ'
+              expected_script='assets/coming-soon.js'
+              ftp_server_dir='/domains/bitcoinworldz.xyz/public_html'
+              account_scope_override='HOSTING_ACCOUNT'
+              deploy_guard_override='BITCOINWORLDZ.XYZ'
+              tls_verify_override='no'
+              ;;
+            hodlerworldz)
+              environment='cryptoworldz-production'
+              live_url='https://hodlerworldz.xyz'
+              guard='HODLERWORLDZ.XYZ'
+              expected_script='assets/coming-soon.js'
+              ftp_server_dir='/domains/hodlerworldz.xyz/public_html'
+              account_scope_override='HOSTING_ACCOUNT'
+              deploy_guard_override='HODLERWORLDZ.XYZ'
+              tls_verify_override='no'
+              ;;
             *) echo 'Unsupported deployment target.' >&2; exit 1 ;;
           esac
 
@@ -245,7 +290,10 @@ jobs:
           fi
 
           if [[ "$FTP_ACCOUNT_SCOPE" == 'HOSTING_ACCOUNT' ]]; then
-            [[ "$EXPECTED_GUARD" == 'XRPWORLDZ.XYZ' ]] || missing+=(HOSTING_ACCOUNT_TARGET)
+            case "$EXPECTED_GUARD" in
+              XRPWORLDZ.XYZ|SUIWORLDZ.XYZ|HYPERWORLDZ.XYZ|ROBINWORLDZ.XYZ|BITCOINWORLDZ.XYZ|HODLERWORLDZ.XYZ) ;;
+              *) missing+=(HOSTING_ACCOUNT_TARGET) ;;
+            esac
             expected_domain="${EXPECTED_GUARD,,}"
             [[ "$FTP_SERVER_DIR" == "/domains/$expected_domain/public_html" ]] || missing+=(FTP_SERVER_DIR)
             [[ "$ftp_host_check" == '145.223.108.40' ]] || missing+=(FTP_HOST)
@@ -256,7 +304,10 @@ jobs:
           fi
 
           if [[ "$FTP_TLS_VERIFY" == 'no' ]]; then
-            [[ "$EXPECTED_GUARD" == 'CRYPTOWORLDZ.XYZ' || "$EXPECTED_GUARD" == 'SOLWORLDZ.XYZ' || "$EXPECTED_GUARD" == 'XRPWORLDZ.XYZ' ]] || missing+=(FTP_TLS_VERIFY_TARGET)
+            case "$EXPECTED_GUARD" in
+              CRYPTOWORLDZ.XYZ|SOLWORLDZ.XYZ|XRPWORLDZ.XYZ|SUIWORLDZ.XYZ|HYPERWORLDZ.XYZ|ROBINWORLDZ.XYZ|BITCOINWORLDZ.XYZ|HODLERWORLDZ.XYZ) ;;
+              *) missing+=(FTP_TLS_VERIFY_TARGET) ;;
+            esac
             [[ "$ftp_host_check" == '145.223.108.40' ]] || missing+=(FTP_TLS_VERIFY_HOST)
           fi
 
