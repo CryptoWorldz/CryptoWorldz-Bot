@@ -26,7 +26,7 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: '21'
-      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
+      FTP_SERVER_DIR: '/public_html'
       FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
       DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
       FTP_TLS_VERIFY: 'yes'
@@ -56,7 +56,7 @@ jobs:
           [[ "$DEPLOY_GUARD" == 'ONEWORLDZ.COM' ]] || missing+=(DEPLOY_GUARD)
           [[ "$FTP_HOST" == '145.223.108.40' ]] || missing+=(FTP_HOST)
           [[ "$FTP_PORT" == '21' ]] || missing+=(FTP_PORT)
-          [[ "$FTP_SERVER_DIR" == '/' ]] || missing+=(FTP_SERVER_DIR)
+          [[ "$FTP_SERVER_DIR" == '/public_html' ]] || missing+=(FTP_SERVER_DIR)
           [[ -n "$FTP_USERNAME" ]] || missing+=(FTP_USERNAME)
           [[ -n "$FTP_PASSWORD" ]] || missing+=(FTP_PASSWORD)
           if (( ${#missing[@]} )); then
@@ -244,6 +244,7 @@ jobs:
             echo
             echo '- Target: oneworldz.com'
             echo '- Environment: oneworldz-production'
+            echo '- FTP document root: /public_html'
             echo '- Host: locked Hostinger FTP endpoint'
             echo '- Transfer: encrypted FTPS on port 21'
             echo '- Rollback snapshot: captured before upload'
