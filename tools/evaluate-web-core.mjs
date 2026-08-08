@@ -35,6 +35,7 @@ for (const relativePath of requiredFiles) {
 const indexSource = read('index.html');
 const routerSource = read('assets/site-router.js');
 const appSource = read('assets/app.js');
+const solworldzSource = read('assets/solworldz.js');
 const pdcDirectorySource = read('assets/pdc-directory.js');
 const pdcSiteSource = read('assets/pdc-site.js');
 const pdcStyleSource = read('assets/pdc-site.css');
@@ -131,6 +132,8 @@ assert.match(indexSource, /assets\/pdc-asset\.js/, 'Verified Hope Chest asset lo
 assert.match(routerSource, /assets\/app\.js/, 'Main application script is not routed');
 assert.match(routerSource, /hostname === 'solworldz\.xyz'/, 'SolWorldz hostname routing is missing');
 assert.match(routerSource, /assets\/solworldz\.js/, 'SolWorldz must route to its dedicated script');
+assert.match(solworldzSource, /class="sw-hero-visual"/, 'SolWorldz must ship its code-native hero visual');
+assert.doesNotMatch(solworldzSource, /solworldz-(?:desktop|mobile)-hero\.webp/, 'SolWorldz must not depend on the corrupt Hostinger hero WebPs');
 assert.match(fallbackSource, /location\.replace\('\/'\)/, '404 fallback must return visitors to the app root');
 assert.match(headerSource, /connect-src[^\n]*supabase\.co/, 'Portable CSP must permit the Supabase registry');
 assert.match(headerSource, /frame-src[^\n]*dexscreener\.com/, 'Portable CSP must permit DEX Screener charts');
