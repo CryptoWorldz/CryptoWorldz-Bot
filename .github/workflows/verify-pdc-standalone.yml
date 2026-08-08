@@ -1,4 +1,5 @@
 name: Verify PurpleDiamondCrew Standalone
+# readiness recheck after environment secret update
 
 on:
   push:
