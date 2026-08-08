@@ -23,6 +23,7 @@ jobs:
         run: |
           set -euo pipefail
           grep -Fq 'oneworldz-production' .github/workflows/diagnose-oneworldz-ftp.yml
+          grep -Fq '145.223.108.40' .github/workflows/diagnose-oneworldz-ftp.yml
           grep -Fq 'FTP_ACCOUNT_SCOPE' .github/workflows/diagnose-oneworldz-ftp.yml
           grep -Fq 'DEPLOY_GUARD' .github/workflows/diagnose-oneworldz-ftp.yml
           ! grep -Eq '^[[:space:]]+(put|mput|mirror[[:space:]]+--reverse|rm[[:space:]]|delete[[:space:]])' .github/workflows/diagnose-oneworldz-ftp.yml
@@ -33,13 +34,13 @@ jobs:
     timeout-minutes: 6
     environment: oneworldz-production
     env:
-      FTP_HOST: ${{ secrets.FTP_HOST }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
       FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
       DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      APPROVED_FTP_HOST: '145.223.108.40'
+      FTP_PORT: '21'
     steps:
       - uses: actions/checkout@v4
 
@@ -55,94 +56,64 @@ jobs:
           [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]]
           [[ "$DEPLOY_GUARD" == 'ONEWORLDZ.COM' ]]
           [[ "$FTP_SERVER_DIR" == '/' ]]
-          [[ -n "$FTP_HOST" && -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]]
+          [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]]
           echo "::add-mask::$FTP_USERNAME"
-
-      - name: Normalize stored FTP host without revealing it
-        id: normalize
-        shell: bash
-        run: |
-          set -euo pipefail
-          raw="$FTP_HOST"
-          trimmed="$(printf '%s' "$raw" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-          normalized="$trimmed"
-          normalized="${normalized#ftp://}"
-          normalized="${normalized#ftps://}"
-          normalized="${normalized#sftp://}"
-          normalized="${normalized%%/*}"
-          if [[ "$normalized" != *:*:* && "$normalized" == *:* ]]; then
-            normalized="${normalized%%:*}"
-          fi
-          echo "::add-mask::$normalized"
-          echo "FTP_HOST_NORMALIZED=$normalized" >> "$GITHUB_ENV"
-          [[ "$raw" == *'://'* ]] && has_scheme=yes || has_scheme=no
-          [[ "$raw" =~ [[:space:]] ]] && has_whitespace=yes || has_whitespace=no
-          [[ "$normalized" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] && normalized_is_ipv4=yes || normalized_is_ipv4=no
-          {
-            echo '### Stored host shape'
-            echo "- Contains protocol scheme: $has_scheme"
-            echo "- Contains whitespace: $has_whitespace"
-            echo "- Normalized value is IPv4: $normalized_is_ipv4"
-            echo "- Raw length: ${#raw}"
-            echo "- Normalized length: ${#normalized}"
-          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Install diagnostic clients
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp netcat-openbsd openssl curl
+          sudo apt-get install -y -qq lftp netcat-openbsd openssl
 
-      - name: Test normalized stored host
+      - name: Test locked Hostinger control ports
         shell: bash
         run: |
           set +e
-          echo '=== Normalized stored host ==='
-          getent ahostsv4 "$FTP_HOST_NORMALIZED" | awk '{print $1}' | sort -u
-          echo "normalized_dns_exit=$?"
-          timeout 8 nc -vz "$FTP_HOST_NORMALIZED" "$FTP_PORT"
-          echo "normalized_ftp_port_exit=$?"
-          timeout 8 nc -vz "$FTP_HOST_NORMALIZED" 65002
-          echo "normalized_sftp_port_exit=$?"
+          echo '=== Locked Hostinger endpoint ==='
+          timeout 12 nc -vz "$APPROVED_FTP_HOST" "$FTP_PORT"
+          echo "ftp21_exit=$?"
+          timeout 12 nc -vz "$APPROVED_FTP_HOST" 65002
+          echo "sftp65002_exit=$?"
           exit 0
 
-      - name: Test OneWorldz DNS candidates
+      - name: Test explicit TLS handshake on locked Hostinger IP
         shell: bash
         run: |
           set +e
-          echo '=== Public candidate records ==='
-          for name in oneworldz.com ftp.oneworldz.com sftp.oneworldz.com ssh.oneworldz.com; do
-            echo "candidate_name=$name"
-            getent ahostsv4 "$name" | awk '{print $1}' | sort -u || true
-          done
-          echo '=== Candidate ports ==='
-          mapfile -t ips < <(getent ahostsv4 oneworldz.com | awk '{print $1}' | sort -u)
-          for ip in "${ips[@]}"; do
-            echo "candidate_ip=$ip"
-            timeout 8 nc -vz "$ip" 21
-            echo "ftp21_exit=$?"
-            timeout 8 nc -vz "$ip" 65002
-            echo "sftp65002_exit=$?"
-          done
+          timeout 20 openssl s_client -starttls ftp -connect "$APPROVED_FTP_HOST:$FTP_PORT" -servername "$APPROVED_FTP_HOST" -brief </dev/null
+          echo "tls_exit=$?"
           exit 0
 
-      - name: Test TLS only where the normalized host resolves
+      - name: Test OneWorldz authenticated control channel only
+        id: auth
         shell: bash
         run: |
           set +e
-          if getent ahostsv4 "$FTP_HOST_NORMALIZED" >/dev/null 2>&1; then
-            timeout 15 openssl s_client -starttls ftp -connect "$FTP_HOST_NORMALIZED:$FTP_PORT" -servername "$FTP_HOST_NORMALIZED" -brief </dev/null
-            echo "normalized_tls_exit=$?"
-          else
-            echo 'normalized_tls_exit=skipped_unresolvable'
-          fi
+          timeout 40 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$APPROVED_FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 15
+          set net:idle 15
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate no
+          cd "$FTP_SERVER_DIR"
+          pwd
+          quote SYST
+          bye
+          LFTP
+          status=$?
+          echo "auth_control_exit=$status"
+          echo "auth_control_exit=$status" >> "$GITHUB_OUTPUT"
           exit 0
 
       - name: Diagnostic summary
+        shell: bash
         run: |
           {
-            echo '## OneWorldz FTP host diagnostic'
+            echo '## OneWorldz locked-IP FTP diagnostic'
             echo
-            echo '- No files were uploaded, modified, or deleted.'
-            echo '- The stored host was normalized in memory only.'
-            echo '- DNS and ports 21/65002 were tested for the normalized host and public OneWorldz candidates.'
+            echo '- No files were uploaded, modified, renamed, or deleted.'
+            echo '- Target was locked to Hostinger IP 145.223.108.40.'
+            echo '- OneWorldz domain-only credentials were tested only for encrypted FTP control authentication.'
+            echo "- Authentication control exit: ${{ steps.auth.outputs.auth_control_exit }}"
           } >> "$GITHUB_STEP_SUMMARY"
