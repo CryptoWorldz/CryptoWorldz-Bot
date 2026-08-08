@@ -1,0 +1,74 @@
+name: Audit Worldz Live Targets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/worldz-live-audit.request'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate read-only audit request
+        shell: bash
+        env:
+          APPROVED_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          test -f diagnostics/worldz-live-audit.request
+          test "$(sed -n 's/^confirmation=//p' diagnostics/worldz-live-audit.request | tail -n1)" = 'APPROVE READ ONLY AUDIT'
+          test "$(sed -n 's/^source_commit=//p' diagnostics/worldz-live-audit.request | tail -n1)" = "$APPROVED_BEFORE"
+
+      - name: Audit DNS and HTTPS without changing anything
+        shell: bash
+        run: |
+          set +e
+          targets=(
+            cryptoworldz.xyz
+            solworldz.xyz
+            purplediamondcrew.com
+            oneworldz.com
+            impactbased.oneworldz.com
+            law.oneworldz.com
+            learn.oneworldz.com
+            ethworldz.xyz
+            baseworldz.xyz
+            bnbworldz.xyz
+            xrpworldz.xyz
+            suiworldz.xyz
+            hyperworldz.xyz
+            robinworldz.xyz
+            bitcoinworldz.xyz
+            hodlerworldz.xyz
+          )
+
+          printf '%-34s | %-4s | %-4s | %s\n' 'TARGET' 'DNS' 'HTTP' 'A/CNAME'
+          printf '%s\n' '------------------------------------------------------------------------------------------------'
+          for host in "${targets[@]}"; do
+            a="$(dig +short "$host" A | paste -sd, -)"
+            cname="$(dig +short "$host" CNAME | paste -sd, -)"
+            dns='NO'
+            [[ -n "$a$cname" ]] && dns='YES'
+            code="$(curl -L -sS -o /dev/null -w '%{http_code}' --connect-timeout 5 --max-time 12 "https://$host/?worldz-audit=${GITHUB_RUN_ID}" 2>/dev/null)"
+            [[ -n "$code" ]] || code='ERR'
+            routing="$a"
+            [[ -n "$cname" ]] && routing="${routing:+$routing;}$cname"
+            printf '%-34s | %-4s | %-4s | %s\n' "$host" "$dns" "$code" "$routing"
+          done
+          exit 0
+
+      - name: Audit summary
+        run: |
+          {
+            echo '## Worldz live deployment inventory'
+            echo
+            echo '- Read only: DNS and HTTPS checks only.'
+            echo '- No website, FTP, DNS, bot, or environment changes were made.'
+          } >> "$GITHUB_STEP_SUMMARY"
