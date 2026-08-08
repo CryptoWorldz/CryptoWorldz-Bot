@@ -1,0 +1,5 @@
+requested_by=JayJayTeamDev
+scope=all-worldz-production-sites
+verification=real-browser-desktop-and-mobile
+requested_at=2026-08-09T00:45:00+10:00
+rule=do-not-mark-fixed-until-browser-images-render
