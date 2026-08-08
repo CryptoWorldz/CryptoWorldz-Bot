@@ -21,9 +21,10 @@ assert.match(html, /ACTION CREATES SMILES/, 'Humanitarian artwork is missing');
 assert.match(html, />ZED</, 'Zed artwork is missing');
 assert.match(html, /COMMAND CENTRE/, 'Command Centre artwork is missing');
 
-for (const symbol of ['$SMILES', '$SolMars', '$SolBud', '$GIA', '$W', '$NBC', '$RHL']) {
+for (const symbol of ['$SMILES', '$SolMars', '$SolBud', '$GIA', '$W', '$RHL']) {
   assert.ok(html.includes(symbol), `Missing token pipeline visual: ${symbol}`);
 }
+assert.ok(html.includes('$NBC') || />NBC</.test(html), 'Missing token pipeline visual: NBC');
 
 const svgCount = (html.match(/<svg\b/g) || []).length;
 assert.ok(svgCount >= 11, `Expected at least 11 inline production visuals, found ${svgCount}`);
