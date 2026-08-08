@@ -20,7 +20,7 @@ const LINKS = {
 
 const sites = [
   ['SolWorldz','https://solworldz.xyz'],['OneWorldz','https://oneworldz.com'],['CryptoWorldz','https://cryptoworldz.xyz'],['Purple Diamond Crew','https://purplediamondcrew.com'],
-  ['EthWorldz','https://ethworldz.xyz'],['BaseWorldz','https://baseworldz.xyz'],['BNBWorldz','https://bnbworldz.xyz'],['XRPWorldz','https://xrpworldz.xyz'],['SuiWorldz','https://suiworldz.xyz'],['HyperWorldz','https://hyperworldz.xyz'],['RobinWorldz','https://robinworldz.xyz'],['BitcoinWorldz','https://bitcoinworldz.xyz'],['HodlerWorldz','https://hodlerworldz.xyz']
+  ['EthWorldz','https://ethworldz.xyz'],['BaseWorldz','https://baseworldz.xyz'],['BNBWorldz','https://bnbworldz.xyz'],['XRPWorldz','https://xrpworldz.xyz'],['SuiWorldz','https://suiworldz.xyz'],['HyperWorldz','https://hyperworldz.xyz'],['RobinWorldz','https://robinworldz.xyz'],['BitcoinWorldz','https://cryptoworldz.xyz/?world=bitcoinworldz&mode=coming-soon'],['HodlerWorldz','https://hodlerworldz.xyz']
 ];
 
 const pipeline = [
