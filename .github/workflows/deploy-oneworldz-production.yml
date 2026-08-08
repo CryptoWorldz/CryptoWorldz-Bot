@@ -128,10 +128,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          confirmed='false'
+          for attempt in 1 2 3; do
+            echo "Encrypted OneWorldz FTP target check attempt ${attempt}/3"
+            if timeout 35 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
-          set net:timeout 15
+          set net:timeout 12
+          set ftp:passive-mode yes
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate no
@@ -139,6 +143,15 @@ jobs:
           pwd
           bye
           LFTP
+            then
+              confirmed='true'
+              echo "Encrypted OneWorldz FTP target confirmed on attempt ${attempt}."
+              break
+            fi
+            echo "Attempt ${attempt} did not complete; waiting before retry."
+            sleep $((attempt * 4))
+          done
+          [[ "$confirmed" == 'true' ]] || { echo '::error::Encrypted OneWorldz FTP target did not respond after three guarded attempts.'; exit 1; }
 
       - name: Capture full rollback snapshot
         shell: bash
@@ -150,6 +163,7 @@ jobs:
           set cmd:fail-exit yes
           set net:max-retries 1
           set net:timeout 20
+          set ftp:passive-mode yes
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate no
@@ -227,6 +241,7 @@ jobs:
           set cmd:fail-exit yes
           set net:max-retries 1
           set net:timeout 20
+          set ftp:passive-mode yes
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate no
@@ -248,6 +263,7 @@ jobs:
             echo '- Reagan Kauja SEO profile: /reagan-kauja/'
             echo '- Action Spread Smiles Organisation: canonical wording'
             echo '- SEO: canonical URL + robots.txt + sitemap.xml + ProfilePage/Person/Organization/FAQ structured data'
+            echo '- FTP target: encrypted, passive mode, guarded retry'
             echo '- Rollback snapshot: required before upload'
             echo '- Target: OneWorldz.com only'
             echo '- Zed: untouched'
