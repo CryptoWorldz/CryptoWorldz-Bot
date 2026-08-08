@@ -81,22 +81,43 @@ jobs:
           grep -Fq 'property="og:site_name" content="OneWorldz"' "$stage/index.html"
           grep -Fq 'property="og:url" content="https://oneworldz.com/"' "$stage/index.html"
           ! grep -Fq '<title>CryptoWorldz' "$stage/index.html"
+
           grep -Fq 'Action Spread Smiles Organisation' "$stage/donate.html"
           grep -Fq 'https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr' "$stage/donate.html"
           grep -Fq 'https://www.facebook.com/share/18BmqfH7MS/' "$stage/donate.html"
           grep -Fq 'https://www.tiktok.com/@actionspreadsmilesorg' "$stage/donate.html"
           grep -Fq 'https://youtube.com/@action_spread_smiles' "$stage/donate.html"
           grep -Fq 'help-reagan-feed-60-orphaned-children-in-uganda' "$stage/donate.html"
+
+          test -f "$stage/reagan-kauja.html"
+          grep -Fq '<title>Reagan Kauja | Action Spread Smiles Organisation Uganda | OneWorldz</title>' "$stage/reagan-kauja.html"
+          grep -Fq 'https://oneworldz.com/reagan-kauja/' "$stage/reagan-kauja.html"
+          grep -Fq '"@type":"ProfilePage"' "$stage/reagan-kauja.html"
+          grep -Fq '"@type":"Person"' "$stage/reagan-kauja.html"
+          grep -Fq '"@type":"Organization"' "$stage/reagan-kauja.html"
+          grep -Fq '"@type":"FAQPage"' "$stage/reagan-kauja.html"
+          grep -Fq 'Mayuge District, Uganda' "$stage/reagan-kauja.html"
+          grep -Fq 'https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr' "$stage/reagan-kauja.html"
+          grep -Fq 'https://www.tiktok.com/@actionspreadsmilesorg' "$stage/reagan-kauja.html"
+          grep -Fq 'https://youtube.com/@action_spread_smiles' "$stage/reagan-kauja.html"
+          grep -Fq 'help-reagan-feed-60-orphaned-children-in-uganda' "$stage/reagan-kauja.html"
+          grep -Fq 'help-build-a-permanent-home-for-150-children-in-uganda' "$stage/reagan-kauja.html"
+          ! grep -Fq 'Action Creates Smiles' "$stage/reagan-kauja.html"
+
           ! grep -Fq 'Action Creates Smiles' "$stage/assets/oneworldz-next.js"
           ! grep -Fq 'Action Creates Smiles' "$stage/donate.html"
           grep -Fq '/donate/' "$stage/assets/oneworldz-next.js"
-          echo 'Dedicated OneWorldz package gate passed.'
+          grep -Fq '/reagan-kauja/' "$stage/assets/oneworldz-next.js"
+          grep -Fq 'https://oneworldz.com/reagan-kauja/' "$stage/sitemap.xml"
+          grep -Fq 'RewriteRule ^reagan-kauja/?$ reagan-kauja.html [L]' "$stage/.htaccess"
+          echo 'Dedicated OneWorldz package and Reagan SEO gate passed.'
 
       - name: Verify repository and deployment helper
         run: |
           npm ci
           npm run verify
           bash -n tools/worldz-direct-ftp.sh
+          WORLDZ_FTP_DRY_RUN=1 FTP_HOST=145.223.108.40 FTP_USERNAME=dry FTP_PASSWORD=dry FTP_TLS_VERIFY=no bash tools/worldz-direct-ftp.sh upload "$RUNNER_TEMP/oneworldz-package"
 
       - name: Install secure FTP tools
         run: |
@@ -158,7 +179,7 @@ jobs:
           echo 'ONEWORLDZ_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
           bash tools/worldz-direct-ftp.sh upload "$RUNNER_TEMP/oneworldz-package"
 
-      - name: Verify live OneWorldz identity, donation page and SEO
+      - name: Verify live OneWorldz identity, donation pages and Reagan SEO
         shell: bash
         run: |
           set -euo pipefail
@@ -168,25 +189,32 @@ jobs:
             cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
             if curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/home.html" \
               && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/donate/?$cache" -o "$RUNNER_TEMP/donate.html" \
+              && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/reagan-kauja/?$cache" -o "$RUNNER_TEMP/reagan.html" \
               && curl -fsSL -A "$agent" --connect-timeout 15 --max-time 30 "$LIVE_URL/robots.txt?$cache" -o "$RUNNER_TEMP/robots.txt" \
               && curl -fsSL -A "$agent" --connect-timeout 15 --max-time 30 "$LIVE_URL/sitemap.xml?$cache" -o "$RUNNER_TEMP/sitemap.xml"; then
               if grep -Fq '<title>OneWorldz 🌏 One Vision' "$RUNNER_TEMP/home.html" \
                 && grep -Fq 'property="og:site_name" content="OneWorldz"' "$RUNNER_TEMP/home.html" \
                 && ! grep -Fq '<title>CryptoWorldz' "$RUNNER_TEMP/home.html" \
                 && grep -Fq 'Action Spread Smiles Organisation' "$RUNNER_TEMP/donate.html" \
-                && grep -Fq 'https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr' "$RUNNER_TEMP/donate.html" \
-                && grep -Fq 'https://www.tiktok.com/@actionspreadsmilesorg' "$RUNNER_TEMP/donate.html" \
-                && grep -Fq 'https://youtube.com/@action_spread_smiles' "$RUNNER_TEMP/donate.html" \
+                && grep -Fq '<title>Reagan Kauja | Action Spread Smiles Organisation Uganda | OneWorldz</title>' "$RUNNER_TEMP/reagan.html" \
+                && grep -Fq 'property="og:url" content="https://oneworldz.com/reagan-kauja/"' "$RUNNER_TEMP/reagan.html" \
+                && grep -Fq '"@type":"ProfilePage"' "$RUNNER_TEMP/reagan.html" \
+                && grep -Fq '"@type":"FAQPage"' "$RUNNER_TEMP/reagan.html" \
+                && grep -Fq 'Mayuge District, Uganda' "$RUNNER_TEMP/reagan.html" \
+                && grep -Fq 'https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr' "$RUNNER_TEMP/reagan.html" \
+                && grep -Fq 'https://www.tiktok.com/@actionspreadsmilesorg' "$RUNNER_TEMP/reagan.html" \
+                && grep -Fq 'https://youtube.com/@action_spread_smiles' "$RUNNER_TEMP/reagan.html" \
                 && grep -Fq 'Sitemap: https://oneworldz.com/sitemap.xml' "$RUNNER_TEMP/robots.txt" \
-                && grep -Fq 'https://oneworldz.com/donate/' "$RUNNER_TEMP/sitemap.xml"; then
+                && grep -Fq 'https://oneworldz.com/donate/' "$RUNNER_TEMP/sitemap.xml" \
+                && grep -Fq 'https://oneworldz.com/reagan-kauja/' "$RUNNER_TEMP/sitemap.xml"; then
                 verified='true'
                 break
               fi
             fi
             sleep 5
           done
-          [[ "$verified" == 'true' ]] || { echo '::error::OneWorldz live identity/SEO/donation verification failed.'; exit 1; }
-          echo 'OneWorldz live identity, donation directory and SEO verified.'
+          [[ "$verified" == 'true' ]] || { echo '::error::OneWorldz live identity/donation/Reagan SEO verification failed.'; exit 1; }
+          echo 'OneWorldz live identity, donation directory and Reagan SEO profile verified.'
 
       - name: Restore previous OneWorldz site if deployment fails
         if: failure() && env.ONEWORLDZ_UPLOAD_STARTED == 'true'
@@ -217,8 +245,9 @@ jobs:
             echo '- Canonical identity: OneWorldz 🌏 One Vision'
             echo '- Social metadata: OneWorldz-only'
             echo '- Donation directory: /donate/'
+            echo '- Reagan Kauja SEO profile: /reagan-kauja/'
             echo '- Action Spread Smiles Organisation: canonical wording'
-            echo '- SEO: canonical URL + robots.txt + sitemap.xml + structured data'
+            echo '- SEO: canonical URL + robots.txt + sitemap.xml + ProfilePage/Person/Organization/FAQ structured data'
             echo '- Rollback snapshot: required before upload'
             echo '- Target: OneWorldz.com only'
             echo '- Zed: untouched'
