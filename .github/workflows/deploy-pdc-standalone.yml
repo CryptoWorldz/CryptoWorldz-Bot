@@ -23,13 +23,13 @@ jobs:
       name: purplediamondcrew-production
       url: https://purplediamondcrew.com
     env:
-      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_HOST: 145.223.108.40
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
-      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
-      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      FTP_PORT: '21'
+      FTP_SERVER_DIR: '/'
+      FTP_ACCOUNT_SCOPE: DOMAIN_ONLY
+      DEPLOY_GUARD: PURPLEDIAMONDCREW.COM
       LIVE_URL: https://purplediamondcrew.com
     steps:
       - name: Check out approved main commit
@@ -39,29 +39,14 @@ jobs:
         run: node tools/verify-pdc-standalone.mjs
 
       - name: Lock deployment to PurpleDiamondCrew only
-        id: guard
         shell: bash
         run: |
           set -euo pipefail
-          normalize_host() {
-            local value="$1"
-            value="$(printf '%s' "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-            value="${value#ftp://}"; value="${value#ftps://}"; value="${value%%/*}"
-            if [[ "$value" != *:*:* && "$value" == *:* ]]; then value="${value%%:*}"; fi
-            printf '%s' "$value"
-          }
-          host="$(normalize_host "$FTP_HOST")"
-          [[ -n "$host" ]] || { echo '::error::FTP_HOST missing'; exit 1; }
+          [[ "$FTP_HOST" == '145.223.108.40' ]] || { echo '::error::Locked Hostinger IP changed'; exit 1; }
           [[ -n "$FTP_USERNAME" ]] || { echo '::error::FTP_USERNAME missing'; exit 1; }
           [[ -n "$FTP_PASSWORD" ]] || { echo '::error::FTP_PASSWORD missing'; exit 1; }
-          [[ "$FTP_PORT" == '21' ]] || { echo '::error::FTP_PORT must be 21'; exit 1; }
-          [[ "$FTP_SERVER_DIR" == '/' ]] || { echo '::error::FTP_SERVER_DIR must be /'; exit 1; }
-          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]] || { echo '::error::FTP_ACCOUNT_SCOPE must be DOMAIN_ONLY'; exit 1; }
-          [[ "$DEPLOY_GUARD" == 'PURPLEDIAMONDCREW.COM' ]] || { echo '::error::DEPLOY_GUARD mismatch'; exit 1; }
-          tls_verify=yes
-          if [[ "$host" == '145.223.108.40' ]]; then tls_verify=no; fi
-          echo "host=$host" >> "$GITHUB_OUTPUT"
-          echo "tls_verify=$tls_verify" >> "$GITHUB_OUTPUT"
+          [[ "$FTP_PORT" == '21' && "$FTP_SERVER_DIR" == '/' ]] || { echo '::error::Locked FTP target changed'; exit 1; }
+          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' && "$DEPLOY_GUARD" == 'PURPLEDIAMONDCREW.COM' ]] || { echo '::error::PDC guard changed'; exit 1; }
           echo "::add-mask::$FTP_USERNAME"
           echo "::add-mask::$FTP_HOST"
 
@@ -80,7 +65,7 @@ jobs:
           set net:timeout 15
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
-          set ssl:verify-certificate ${{ steps.guard.outputs.tls_verify }}
+          set ssl:verify-certificate no
           cd "$FTP_SERVER_DIR"
           bye
           LFTP
@@ -97,7 +82,7 @@ jobs:
           set net:timeout 20
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
-          set ssl:verify-certificate ${{ steps.guard.outputs.tls_verify }}
+          set ssl:verify-certificate no
           cd "$FTP_SERVER_DIR"
           lcd "$backup"
           mirror --parallel=3 . .
@@ -126,7 +111,7 @@ jobs:
           set net:timeout 20
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
-          set ssl:verify-certificate ${{ steps.guard.outputs.tls_verify }}
+          set ssl:verify-certificate no
           cd "$FTP_SERVER_DIR"
           lcd "$source"
           mirror --reverse --delete --parallel=3 . .
@@ -170,7 +155,7 @@ jobs:
           set net:timeout 20
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
-          set ssl:verify-certificate ${{ steps.guard.outputs.tls_verify }}
+          set ssl:verify-certificate no
           cd "$FTP_SERVER_DIR"
           lcd "$backup"
           mirror --reverse --delete --parallel=3 . .
@@ -186,6 +171,7 @@ jobs:
             echo '- Pages: Action Team / Crew / Hope Chest'
             echo '- Hope Chest legacy records: 10'
             echo '- Required visual fallbacks: inline SVG'
+            echo '- Hostinger target: locked to 145.223.108.40:21'
             echo '- Rollback snapshot: required before upload'
             echo '- Zed: untouched'
             echo '- Auto: untouched'
