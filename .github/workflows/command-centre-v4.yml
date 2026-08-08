@@ -1,0 +1,37 @@
+name: Command Centre v4
+
+on:
+  push:
+    branches:
+      - main
+      - clean-platform-v4
+    paths:
+      - "platform/**"
+      - "supabase/migrations/20260808235139_command_centre_v4_bootstrap.sql"
+      - ".github/workflows/command-centre-v4.yml"
+  pull_request:
+    paths:
+      - "platform/**"
+      - "supabase/migrations/20260808235139_command_centre_v4_bootstrap.sql"
+      - ".github/workflows/command-centre-v4.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: platform/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm run verify
+      - run: docker build .
