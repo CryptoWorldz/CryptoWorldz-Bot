@@ -39,8 +39,20 @@ assert.match(chest, /THE ONEWORLDZ HOPE CHEST/i, 'Hope Chest identity missing');
 assert.match(chest, /not presented as active/i, 'Legacy archive disclaimer missing');
 assert.match(chest, /Watch the chest\. Watch the Worldz\./i, 'Hidden revival clue missing');
 assert.match(chest, /data-hope-chest-master="pdc-hope-chest"/, 'Verified Hope Chest master hook missing');
-assert.match(js, /slug=eq\.pdc-hope-chest/, 'Verified Hope Chest registry lookup missing');
-assert.match(js, /asset\.data_uri\.length < 10000/, 'Hope Chest integrity gate missing');
+assert.match(js, /\/assets\/media\/pdc-mission-board\.webp/, 'Local PDC mission master is not wired');
+assert.match(js, /\/assets\/media\/pdc-hope-chest\.webp/, 'Local Hope Chest master is not wired');
+assert.match(js, /\/assets\/media\/pdc-crest\.webp/, 'Local PDC crest master is not wired');
+assert.ok(!js.includes('supabase.co'), 'PDC required master media must not depend on Supabase delivery');
+
+const masterFiles = ['pdc-mission-board.webp', 'pdc-hope-chest.webp', 'pdc-crest.webp'];
+for (const file of masterFiles) {
+  const target = path.join(site, 'assets', 'media', file);
+  assert.ok(fs.existsSync(target), `Approved PDC master was not restored: ${file}`);
+  const bytes = fs.readFileSync(target);
+  assert.ok(bytes.length > 10000, `Approved PDC master is unexpectedly small: ${file}`);
+  assert.equal(bytes.subarray(0, 4).toString('ascii'), 'RIFF', `Invalid WebP RIFF header: ${file}`);
+  assert.equal(bytes.subarray(8, 12).toString('ascii'), 'WEBP', `Invalid WebP signature: ${file}`);
+}
 
 const tokens = [
   ['Devy', '4vfa4vqqWq8qax1BeBtSaohvE898MD4x6diL2z5nBcDr'],
@@ -68,7 +80,6 @@ assert.match(css, /@media\(max-width:620px\)/, 'Phone layout breakpoint missing'
 
 assert.match(htaccess, /Cache-Control "no-store, no-cache/, 'HTML no-cache rule missing');
 assert.match(htaccess, /Content-Security-Policy/, 'CSP missing');
-assert.match(htaccess, /hknymhhyqldtzmplzuzh\.supabase\.co/, 'Hope Chest Supabase CSP permission missing');
 assert.ok(!pages.some((html) => /<img(?![^>]*data-optional-logo)/i.test(html)), 'A required image depends on an external raster URL');
 
-console.log('PurpleDiamondCrew standalone production gate passed: 3 pages, 10 verified legacy tokens, built-in vector fallbacks, resilient Hope Chest master.');
+console.log('PurpleDiamondCrew standalone production gate passed: 3 pages, 10 verified legacy tokens, 3 verified local master images, and inline SVG fallbacks.');
