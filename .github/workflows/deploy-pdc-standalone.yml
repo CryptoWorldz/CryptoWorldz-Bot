@@ -1,0 +1,192 @@
+name: Deploy PurpleDiamondCrew Standalone
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/pdc-standalone.request'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: purplediamondcrew-standalone-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Back up, deploy and verify PurpleDiamondCrew.com
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: purplediamondcrew-production
+      url: https://purplediamondcrew.com
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
+      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      LIVE_URL: https://purplediamondcrew.com
+    steps:
+      - name: Check out approved main commit
+        uses: actions/checkout@v4
+
+      - name: Run standalone production gate
+        run: node tools/verify-pdc-standalone.mjs
+
+      - name: Lock deployment to PurpleDiamondCrew only
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          normalize_host() {
+            local value="$1"
+            value="$(printf '%s' "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+            value="${value#ftp://}"; value="${value#ftps://}"; value="${value%%/*}"
+            if [[ "$value" != *:*:* && "$value" == *:* ]]; then value="${value%%:*}"; fi
+            printf '%s' "$value"
+          }
+          host="$(normalize_host "$FTP_HOST")"
+          [[ -n "$host" ]] || { echo '::error::FTP_HOST missing'; exit 1; }
+          [[ -n "$FTP_USERNAME" ]] || { echo '::error::FTP_USERNAME missing'; exit 1; }
+          [[ -n "$FTP_PASSWORD" ]] || { echo '::error::FTP_PASSWORD missing'; exit 1; }
+          [[ "$FTP_PORT" == '21' ]] || { echo '::error::FTP_PORT must be 21'; exit 1; }
+          [[ "$FTP_SERVER_DIR" == '/' ]] || { echo '::error::FTP_SERVER_DIR must be /'; exit 1; }
+          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]] || { echo '::error::FTP_ACCOUNT_SCOPE must be DOMAIN_ONLY'; exit 1; }
+          [[ "$DEPLOY_GUARD" == 'PURPLEDIAMONDCREW.COM' ]] || { echo '::error::DEPLOY_GUARD mismatch'; exit 1; }
+          tls_verify=yes
+          if [[ "$host" == '145.223.108.40' ]]; then tls_verify=no; fi
+          echo "host=$host" >> "$GITHUB_OUTPUT"
+          echo "tls_verify=$tls_verify" >> "$GITHUB_OUTPUT"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_HOST"
+
+      - name: Install secure FTP client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp zip
+
+      - name: Confirm encrypted Hostinger target
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 15
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate ${{ steps.guard.outputs.tls_verify }}
+          cd "$FTP_SERVER_DIR"
+          bye
+          LFTP
+
+      - name: Capture full rollback snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/pdc-backup"
+          mkdir -p "$backup"
+          timeout 90 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 20
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate ${{ steps.guard.outputs.tls_verify }}
+          cd "$FTP_SERVER_DIR"
+          lcd "$backup"
+          mirror --parallel=3 . .
+          bye
+          LFTP
+          cd "$backup"
+          zip -qr "$RUNNER_TEMP/pdc-predeploy.zip" .
+
+      - name: Preserve rollback package
+        uses: actions/upload-artifact@v4
+        with:
+          name: purplediamondcrew-predeploy-${{ github.run_id }}
+          path: ${{ runner.temp }}/pdc-predeploy.zip
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload standalone PurpleDiamondCrew
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'PDC_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
+          source="$GITHUB_WORKSPACE/apps/worldz-sites/purplediamondcrew"
+          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 20
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate ${{ steps.guard.outputs.tls_verify }}
+          cd "$FTP_SERVER_DIR"
+          lcd "$source"
+          mirror --reverse --delete --parallel=3 . .
+          bye
+          LFTP
+
+      - name: Verify live three-page PDC site
+        shell: bash
+        run: |
+          set -euo pipefail
+          check_page() {
+            local path="$1" marker1="$2" marker2="$3" out="$4"
+            local ok=false
+            for attempt in 1 2 3 4 5 6; do
+              if curl -L -fsS -A 'Mozilla/5.0 (PDC Production Verify)' -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL$path?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" -o "$out"; then
+                if grep -Fqi "$marker1" "$out" && grep -Fqi "$marker2" "$out" && ! grep -Fqi 'Loading the Worldz experience' "$out"; then ok=true; break; fi
+              fi
+              sleep 5
+            done
+            [[ "$ok" == true ]] || { echo "::error::Live verification failed for $path"; exit 1; }
+          }
+          check_page '/' 'PURPLE DIAMOND CREW' 'Action Team' "$RUNNER_TEMP/home.html"
+          check_page '/crew/' 'Support' 'Contribute' "$RUNNER_TEMP/crew.html"
+          check_page '/hope-chest/' 'THE ONEWORLDZ HOPE CHEST' 'Baby Emu' "$RUNNER_TEMP/chest.html"
+          curl -L -fsS "$LIVE_URL/assets/pdc.css?release=$GITHUB_SHA" -o "$RUNNER_TEMP/pdc.css"
+          curl -L -fsS "$LIVE_URL/assets/pdc.js?release=$GITHUB_SHA" -o "$RUNNER_TEMP/pdc.js"
+          grep -Fq 'token-grid' "$RUNNER_TEMP/pdc.css"
+          grep -Fq 'pdc-hope-chest' "$RUNNER_TEMP/pdc.js"
+          echo 'PurpleDiamondCrew three-page live verification passed.'
+
+      - name: Restore previous site if deployment fails
+        if: failure() && env.PDC_UPLOAD_STARTED == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/pdc-backup"
+          [[ -d "$backup" ]] || { echo 'No rollback snapshot exists; restore skipped.'; exit 0; }
+          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 1
+          set net:timeout 20
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate ${{ steps.guard.outputs.tls_verify }}
+          cd "$FTP_SERVER_DIR"
+          lcd "$backup"
+          mirror --reverse --delete --parallel=3 . .
+          bye
+          LFTP
+
+      - name: Publish deployment summary
+        if: always()
+        run: |
+          {
+            echo '## PurpleDiamondCrew Standalone Production'
+            echo '- Dedicated domain bundle: yes'
+            echo '- Pages: Action Team / Crew / Hope Chest'
+            echo '- Hope Chest legacy records: 10'
+            echo '- Required visual fallbacks: inline SVG'
+            echo '- Rollback snapshot: required before upload'
+            echo '- Zed: untouched'
+            echo '- Auto: untouched'
+          } >> "$GITHUB_STEP_SUMMARY"
