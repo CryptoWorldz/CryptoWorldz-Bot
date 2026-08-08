@@ -1,0 +1,64 @@
+name: Audit Worldz Live Content
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/worldz-content-audit.request'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate read-only request
+        shell: bash
+        env:
+          APPROVED_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          test -f diagnostics/worldz-content-audit.request
+          test "$(sed -n 's/^confirmation=//p' diagnostics/worldz-content-audit.request | tail -n1)" = 'APPROVE READ ONLY AUDIT'
+          test "$(sed -n 's/^source_commit=//p' diagnostics/worldz-content-audit.request | tail -n1)" = "$APPROVED_BEFORE"
+
+      - name: Fingerprint live content without changes
+        shell: bash
+        run: |
+          set +e
+          targets=(
+            ethworldz.xyz
+            baseworldz.xyz
+            bnbworldz.xyz
+            xrpworldz.xyz
+            hyperworldz.xyz
+            robinworldz.xyz
+            hodlerworldz.xyz
+          )
+          printf '%-24s | %-4s | %-8s | %-8s | %s\n' 'TARGET' 'HTTP' 'WORLDZ' 'HOSTINGER' 'TITLE'
+          printf '%s\n' '------------------------------------------------------------------------------------------------'
+          for host in "${targets[@]}"; do
+            body="$RUNNER_TEMP/${host}.html"
+            code="$(curl -L -sS -o "$body" -w '%{http_code}' --connect-timeout 5 --max-time 15 "https://$host/?content-audit=${GITHUB_RUN_ID}" 2>/dev/null)"
+            [[ -n "$code" ]] || code='ERR'
+            worldz='NO'
+            hostinger='NO'
+            grep -Fq './config/worlds.js' "$body" 2>/dev/null && worldz='YES'
+            grep -Eqi 'hostinger|website builder|parked domain|coming soon' "$body" 2>/dev/null && hostinger='YES'
+            title="$(tr '\n' ' ' < "$body" 2>/dev/null | sed -n 's:.*<title[^>]*>\([^<]*\)</title>.*:\1:p' | head -c 100)"
+            printf '%-24s | %-4s | %-8s | %-8s | %s\n' "$host" "$code" "$worldz" "$hostinger" "$title"
+          done
+          exit 0
+
+      - name: Summary
+        run: |
+          {
+            echo '## Worldz content fingerprint'
+            echo
+            echo '- Read only. No hosting or DNS changes.'
+            echo '- WORLDZ=YES means the shared Worldz runtime marker is present.'
+          } >> "$GITHUB_STEP_SUMMARY"
