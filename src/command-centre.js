@@ -27,7 +27,7 @@ const MENUS = {
       ["🧪 Simulation", "/autosimulate"],
       ["📅 DCA", "/autodca"],
       ["⏸ Pause", "/autopause"],
-      ["🛑 Emergency Stop", "/autostop"]
+      ["🛑 Emergency Stop", "/autoemergency"]
     ]
   },
   grace: {
@@ -43,20 +43,20 @@ const MENUS = {
   admin: {
     title: "🛡 ADMIN",
     rows: [
-      ["👥 Users & Roles", "/execs"],
-      ["🎯 Missions", "/missionadmin"],
-      ["📣 Broadcast", "/broadcast"],
-      ["📜 Audit", "/worklog"],
+      ["👥 Executive Team", "/executives"],
+      ["➕ Add Scoped Admin", "/addscopedadmin"],
+      ["🚫 Disable Admin", "/disableadmin"],
+      ["👑 Appoint Executive", "/appointexecutive"],
       ["⚙️ Settings", "/zedsettings"]
     ]
   },
   admingrace: {
     title: "🛡 GRACE ADMIN",
     rows: [
-      ["👥 Grace Admins", "/graceadmins"],
+      ["👩‍💼 Grace Status", "/secretary"],
       ["📱 Social Accounts", "/accounts"],
-      ["🔐 Permissions", "/gracepermissions"],
-      ["✅ Approval Rules", "/secretary"],
+      ["🔗 Connect X", "/connectx"],
+      ["🩺 X Runtime", "/gracestatus"],
       ["🛑 Emergency Stop", "/pauseall"]
     ]
   },
