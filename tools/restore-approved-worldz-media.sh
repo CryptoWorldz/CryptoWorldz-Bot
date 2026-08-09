@@ -37,15 +37,31 @@ cp "$out_dir/blockchains/solworldz.png" "$out_dir/solworldz/solworldz-hero-deskt
 cp "$out_dir/blockchains/solworldz.png" "$out_dir/solworldz/solworldz-hero-mobile.png"
 cp "$out_dir/blockchains/solworldz.png" "$out_dir/solworldz/solworldz-approved-atlas.png"
 
-for file in \
-  "$out_dir/pdc/pdc-mission-board.png" \
-  "$out_dir/pdc/pdc-hope-chest.png" \
-  "$out_dir/pdc/pdc-crest.png" \
-  "$out_dir/solworldz/solworldz-hero-desktop.png" \
-  "$out_dir/solworldz/solworldz-hero-mobile.png" \
-  "$out_dir/solworldz/solworldz-approved-atlas.png"; do
+compat=(
+  "$out_dir/pdc/pdc-mission-board.png"
+  "$out_dir/pdc/pdc-hope-chest.png"
+  "$out_dir/pdc/pdc-crest.png"
+  "$out_dir/solworldz/solworldz-hero-desktop.png"
+  "$out_dir/solworldz/solworldz-hero-mobile.png"
+  "$out_dir/solworldz/solworldz-approved-atlas.png"
+)
+for file in "${compat[@]}"; do
   [[ -s "$file" ]] || { echo "approved compatibility image missing: $file" >&2; exit 1; }
   [[ "$(wc -c < "$file")" -gt 50000 ]] || { echo "approved compatibility image too small: $file" >&2; exit 1; }
 done
 
-echo "Approved Worldz master imagery restored and verified at $out_dir"
+# Exact fingerprints used by production verification. A live file must match these bytes,
+# not merely share a filename or exceed a size threshold.
+(
+  cd "$out_dir"
+  sha256sum \
+    pdc/pdc-mission-board.png \
+    pdc/pdc-hope-chest.png \
+    pdc/pdc-crest.png \
+    solworldz/solworldz-hero-desktop.png \
+    solworldz/solworldz-hero-mobile.png \
+    solworldz/solworldz-approved-atlas.png \
+    > APPROVED-COMPATIBILITY-SHA256.txt
+)
+
+echo "Approved Worldz master imagery restored, fingerprinted and verified at $out_dir"
