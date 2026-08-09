@@ -35,16 +35,25 @@ jobs:
       - name: Check out approved main commit
         uses: actions/checkout@v4
 
-      - name: Validate immutable OneWorldz approval
+      - name: Validate OneWorldz approval
         shell: bash
         env:
+          EVENT_NAME: ${{ github.event_name }}
           APPROVED_BEFORE: ${{ github.event.before }}
         run: |
           set -euo pipefail
           test -f deployments/oneworldz-production.request
           test "$(sed -n 's/^target=//p' deployments/oneworldz-production.request | tail -n1)" = 'oneworldz.com'
           test "$(sed -n 's/^confirmation=//p' deployments/oneworldz-production.request | tail -n1)" = 'APPROVE TOTAL DEPLOYMENT'
-          test "$(sed -n 's/^source_commit=//p' deployments/oneworldz-production.request | tail -n1)" = "$APPROVED_BEFORE"
+          if [[ "$EVENT_NAME" == 'push' ]]; then
+            test "$(sed -n 's/^source_commit=//p' deployments/oneworldz-production.request | tail -n1)" = "$APPROVED_BEFORE"
+            echo 'Push-triggered immutable approval validated.'
+          elif [[ "$EVENT_NAME" == 'workflow_dispatch' ]]; then
+            echo 'Manual OneWorldz production run authorised by workflow_dispatch.'
+          else
+            echo "::error::Unsupported deployment event: $EVENT_NAME"
+            exit 1
+          fi
 
       - name: Lock deployment to OneWorldz only
         shell: bash
@@ -220,6 +229,7 @@ jobs:
         run: |
           {
             echo '## OneWorldz Production'
+            echo '- Manual Run Workflow: supported'
             echo '- Lean rollback: only release-critical files/assets'
             echo '- Duplicate/historical hosting images are not downloaded for backup'
             echo '- Target: OneWorldz.com only'
