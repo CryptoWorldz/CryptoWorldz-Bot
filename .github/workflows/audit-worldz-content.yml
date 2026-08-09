@@ -83,6 +83,6 @@ jobs:
             echo '## Worldz content fingerprint'
             echo
             echo '- Read only. No hosting or DNS changes.'
-            echo '- This workflow now FAILS when a required target is unavailable, parked/default, or lacks a usable title.'
-            echo '- A green result is no longer produced by unconditional exit 0.'
+            echo '- Required target faults make this workflow fail.'
+            echo '- The summary never overrides the job conclusion.'
           } >> "$GITHUB_STEP_SUMMARY"
