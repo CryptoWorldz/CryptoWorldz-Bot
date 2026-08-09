@@ -15,16 +15,7 @@ const sites={
 const site=sites[host]||{title:'CryptoWorldz',label:'CONNECTED WORLDZ'};
 const HQ='https://t.me/CryptoWorldzHQ';
 const BOT='https://t.me/CryptoWorldzBot';
-const ROOT='./assets/images/website-core';
-const HERO_PARTS=[1,2,3].map(n=>`${ROOT}/cryptoworldz/payload/hero.part${String(n).padStart(2,'0')}.b64`);
-
-async function approvedHero(){
-  const chunks=await Promise.all(HERO_PARTS.map(path=>fetch(path,{cache:'force-cache'}).then(response=>{
-    if(!response.ok) throw new Error(`Approved CryptoWorldz hero missing: ${path}`);
-    return response.text();
-  })));
-  return `data:image/webp;base64,${chunks.join('').replace(/\s+/g,'')}`;
-}
+const HERO='./assets/worldz-master/cryptoworldz/we-need-you.png';
 
 function installStyles(){
   if(document.querySelector('#idle-worldz-approved-art')) return;
@@ -47,16 +38,10 @@ function installStyles(){
   document.head.appendChild(style);
 }
 
-async function render(){
+function render(){
   document.body.classList.add('comingsoon-next','worldz-rich-page');
   document.title=`${site.title} • CryptoWorldz`;
   installStyles();
-  let hero='';
-  try{hero=await approvedHero();}catch(error){console.error(error);}
-  if(!hero){
-    app.outerHTML=`<main class="cs-page"><section class="cs-card"><h1>${site.title}</h1><p>Approved CryptoWorldz artwork failed integrity loading. Deployment must not be considered visually verified.</p></section></main>`;
-    return;
-  }
-  app.outerHTML=`<main class="cs-page approved-cw-hero" data-approved-art="cryptoworldz-we-need-you"><img class="cs-art" src="${hero}" alt="CryptoWorldz We Need You — approved Worldz recruitment artwork"><div class="cs-overlay"><section class="cs-glass"><span class="cs-world-label">${site.label}</span><h1>${site.title}</h1><p>One World • One Mission • One CryptoWorldz</p><div class="wx-actions"><a class="wx-btn green" href="${HQ}" target="_blank" rel="noopener noreferrer">Join CryptoWorldz HQ</a><a class="wx-btn" href="${BOT}" target="_blank" rel="noopener noreferrer">Open @CryptoWorldzBot</a><a class="wx-btn gold" href="https://oneworldz.com">Visit OneWorldz</a><a class="wx-btn" href="https://cryptoworldz.xyz">Visit CryptoWorldz</a></div></section></div></main>`;
+  app.outerHTML=`<main class="cs-page approved-cw-hero" data-approved-art="cryptoworldz-we-need-you"><img class="cs-art" src="${HERO}" alt="CryptoWorldz We Need You — approved Worldz recruitment artwork" decoding="async" fetchpriority="high"><div class="cs-overlay"><section class="cs-glass"><span class="cs-world-label">${site.label}</span><h1>${site.title}</h1><p>One World • One Mission • One CryptoWorldz</p><div class="wx-actions"><a class="wx-btn green" href="${HQ}" target="_blank" rel="noopener noreferrer">Join CryptoWorldz HQ</a><a class="wx-btn" href="${BOT}" target="_blank" rel="noopener noreferrer">Open @CryptoWorldzBot</a><a class="wx-btn gold" href="https://oneworldz.com">Visit OneWorldz</a><a class="wx-btn" href="https://cryptoworldz.xyz">Visit CryptoWorldz</a></div></section></div></main>`;
 }
 render();
