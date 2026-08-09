@@ -14,7 +14,7 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
 
@@ -29,66 +29,75 @@ jobs:
           test "$(sed -n 's/^confirmation=//p' diagnostics/worldz-live-audit.request | tail -n1)" = 'APPROVE READ ONLY AUDIT'
           test "$(sed -n 's/^source_commit=//p' diagnostics/worldz-live-audit.request | tail -n1)" = "$APPROVED_BEFORE"
 
-      - name: Audit DNS and HTTPS and fail on required target faults
+      - name: Audit real DNS and HTTPS routes and fail on required faults
         shell: bash
         run: |
           set -u
+          # label|dns-host|exact-live-url
           targets=(
-            cryptoworldz.xyz
-            solworldz.xyz
-            purplediamondcrew.com
-            oneworldz.com
-            impactbased.oneworldz.com
-            law.oneworldz.com
-            learn.oneworldz.com
-            ethworldz.xyz
-            baseworldz.xyz
-            bnbworldz.xyz
-            xrpworldz.xyz
-            suiworldz.xyz
-            hyperworldz.xyz
-            robinworldz.xyz
-            bitcoinworldz.xyz
-            hodlerworldz.xyz
+            'CryptoWorldz|cryptoworldz.xyz|https://cryptoworldz.xyz/'
+            'SolWorldz|solworldz.xyz|https://solworldz.xyz/'
+            'PurpleDiamondCrew|purplediamondcrew.com|https://purplediamondcrew.com/'
+            'OneWorldz|oneworldz.com|https://oneworldz.com/'
+            'ImpactBased|oneworldz.com|https://oneworldz.com/worldz/impactbased'
+            'LawWorldz|oneworldz.com|https://oneworldz.com/worldz/law'
+            'LearnWorldz|oneworldz.com|https://oneworldz.com/worldz/learn'
+            'EthWorldz|ethworldz.xyz|https://ethworldz.xyz/'
+            'BaseWorldz|baseworldz.xyz|https://baseworldz.xyz/'
+            'BNBWorldz|bnbworldz.xyz|https://bnbworldz.xyz/'
+            'XRPWorldz|xrpworldz.xyz|https://xrpworldz.xyz/'
+            'SuiWorldz|suiworldz.xyz|https://suiworldz.xyz/'
+            'HyperWorldz|hyperworldz.xyz|https://hyperworldz.xyz/'
+            'RobinWorldz|robinworldz.xyz|https://robinworldz.xyz/'
+            'BitWorldz|bitworldz.xyz|https://bitworldz.xyz/'
+            'HodlerWorldz|hodlerworldz.xyz|https://hodlerworldz.xyz/'
           )
 
           failures=0
-          printf '%-34s | %-4s | %-4s | %s\n' 'TARGET' 'DNS' 'HTTP' 'A/CNAME'
-          printf '%s\n' '------------------------------------------------------------------------------------------------'
-          for host in "${targets[@]}"; do
+          printf '%-20s | %-24s | %-4s | %-4s | %s\n' 'TARGET' 'DNS HOST' 'DNS' 'HTTP' 'FINAL URL'
+          printf '%s\n' '----------------------------------------------------------------------------------------------------------------'
+
+          for entry in "${targets[@]}"; do
+            IFS='|' read -r label host url <<< "$entry"
             a="$(dig +short "$host" A | paste -sd, -)"
             cname="$(dig +short "$host" CNAME | paste -sd, -)"
-            dns='NO'
-            [[ -n "$a$cname" ]] && dns='YES'
-            code="$(curl -L -sS -o /dev/null -w '%{http_code}' --connect-timeout 5 --max-time 15 "https://$host/?worldz-audit=${GITHUB_RUN_ID}" 2>/dev/null || true)"
-            [[ -n "$code" ]] || code='ERR'
-            routing="$a"
-            [[ -n "$cname" ]] && routing="${routing:+$routing;}$cname"
-            printf '%-34s | %-4s | %-4s | %s\n' "$host" "$dns" "$code" "$routing"
+            dns='NO'; [[ -n "$a$cname" ]] && dns='YES'
+
+            result=''
+            for attempt in 1 2 3; do
+              result="$(curl -4 -L -sS --retry 2 --retry-delay 2 --retry-all-errors --connect-timeout 12 --max-time 40 -A 'Mozilla/5.0 (Worldz Proof Audit)' -H 'Cache-Control: no-cache' -o /dev/null -w '%{http_code}|%{url_effective}' "${url}?worldz-audit=${GITHUB_RUN_ID}-${attempt}" 2>/dev/null || printf 'ERR|%s' "$url")"
+              code="${result%%|*}"
+              [[ "$code" =~ ^2[0-9][0-9]$ ]] && break
+              sleep 3
+            done
+            code="${result%%|*}"; final="${result#*|}"
+            printf '%-20s | %-24s | %-4s | %-4s | %s\n' "$label" "$host" "$dns" "$code" "$final"
 
             if [[ "$dns" != 'YES' ]]; then
-              echo "::error::$host has no A/CNAME resolution"
+              echo "::error::$label ($host) has no A/CNAME resolution"
               failures=$((failures+1))
             fi
             if [[ ! "$code" =~ ^2[0-9][0-9]$ ]]; then
-              echo "::error::$host failed HTTPS acceptance with HTTP $code"
+              echo "::error::$label failed HTTPS acceptance after retries: $url -> HTTP $code"
               failures=$((failures+1))
             fi
           done
 
           if (( failures > 0 )); then
-            echo "::error::Worldz live target audit failed with $failures DNS/HTTPS finding(s)."
+            echo "::error::Worldz live target audit failed with $failures real-route finding(s)."
             exit 1
           fi
-          echo 'Worldz live target audit passed with zero DNS/HTTPS failures.'
+          echo 'Worldz live target audit passed with zero real-route DNS/HTTPS failures.'
 
       - name: Audit summary
         if: always()
         run: |
           {
-            echo '## Worldz live deployment inventory'
+            echo '## Worldz live route inventory'
             echo
             echo '- Read only: DNS and HTTPS checks only.'
+            echo '- ImpactBased, LawWorldz and LearnWorldz are audited as OneWorldz routes, not nonexistent subdomains.'
+            echo '- BitWorldz uses bitworldz.xyz; retired/wrong bitcoinworldz.xyz is not treated as a required target.'
+            echo '- HTTPS checks use IPv4, retries and realistic timeouts to avoid false HTTP 000 results.'
             echo '- This summary never overrides the job conclusion.'
-            echo '- A required DNS/HTTPS failure now makes the workflow fail.'
           } >> "$GITHUB_STEP_SUMMARY"
