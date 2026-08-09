@@ -2,6 +2,62 @@ import { EXACT_GRACE_X_REDIRECT_URI, runtimeReadiness } from "./config.mjs";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const GATEWAY_COMMANDS = [
+  { command: "zedstart", description: "Open the Zed Command Centre" },
+  { command: "zed", description: "Open Zed controls" },
+  { command: "auto", description: "Open Auto controls" },
+  { command: "grace", description: "Open Grace Auto Post controls" },
+  { command: "admin", description: "Open Admin controls" },
+  { command: "admingrace", description: "Open Grace Admin controls" },
+  { command: "zedsettings", description: "Open Command Centre settings" },
+  { command: "help", description: "Show the simple command guide" },
+];
+
+const GATEWAY_MENUS = Object.freeze({
+  zed: [
+    ["👩‍💼 Grace", "/grace"],
+    ["💎 Auto", "/auto"],
+    ["🌐 Websites", "/websites"],
+    ["🩺 Grace Status", "/gracestatus"],
+    ["📘 Help", "/help"],
+  ],
+  auto: [
+    ["📊 Auto Status", "/autostatus"],
+    ["👩‍💼 Grace", "/grace"],
+    ["🛡 Admin", "/admin"],
+    ["⚙️ Settings", "/zedsettings"],
+    ["📘 Help", "/help"],
+  ],
+  grace: [
+    ["🩺 Grace Status", "/gracestatus"],
+    ["🔗 Connect X", "/connectx 1"],
+    ["✍️ Queue Post", "/gracequeue 1 | your post"],
+    ["✅ Approve Post", "/graceapprove POST_ID"],
+    ["🛑 Emergency Stop", "/gracepause"],
+  ],
+  admin: [
+    ["🛡 Grace Admin", "/admingrace"],
+    ["⚙️ Settings", "/zedsettings"],
+    ["🩺 Grace Status", "/gracestatus"],
+    ["📊 Auto Status", "/autostatus"],
+    ["🌐 Websites", "/websites"],
+  ],
+  admingrace: [
+    ["🩺 Grace Status", "/gracestatus"],
+    ["🔗 Connect X", "/connectx 1"],
+    ["▶️ Publishing On", "/graceon"],
+    ["⏸ Publishing Off", "/graceoff"],
+    ["🛑 Emergency Stop", "/gracepause"],
+  ],
+  settings: [
+    ["🤖 Zed", "/zed"],
+    ["💎 Auto", "/auto"],
+    ["👩‍💼 Grace", "/grace"],
+    ["🛡 Admin", "/admin"],
+    ["🛡 Grace Admin", "/admingrace"],
+  ],
+});
+
 function commandName(text) {
   return String(text || "")
     .trim()
@@ -16,6 +72,16 @@ function commandTail(text) {
 
 function yesNo(value) {
   return value ? "YES" : "NO";
+}
+
+function menuText(title, rows) {
+  return [
+    title,
+    "",
+    ...rows.map(([label, command]) => `${label} — ${command}`),
+    "",
+    "Advanced controls still work. You only need to remember the gateway commands.",
+  ].join("\n");
 }
 
 export function createTelegramController({
@@ -68,7 +134,7 @@ export function createTelegramController({
     return false;
   }
 
-  async function handleStart(message) {
+  async function handleGatewayStart(message) {
     return send(
       message,
       [
@@ -78,30 +144,62 @@ export function createTelegramController({
         "",
         "Raaiiidd with purpose: lawful action, transparent audits and real help on the ground.",
         "",
-        "Use /help for the Command Centre controls.",
+        "🌐 CryptoWorldz Command Centre",
+        "ONE SIMPLE START POINT",
+        "Choose Zed, Auto, Grace, Admin or Settings.",
+        "",
+        "/zedstart • /zed • /auto • /grace • /admin • /admingrace • /zedsettings • /help",
       ].join("\n"),
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "🤖 ZED", callback_data: "cc:menu:zed" },
+              { text: "💎 AUTO", callback_data: "cc:menu:auto" },
+            ],
+            [
+              { text: "👩‍💼 GRACE", callback_data: "cc:menu:grace" },
+              { text: "🛡 ADMIN", callback_data: "cc:menu:admin" },
+            ],
+            [{ text: "⚙️ SETTINGS", callback_data: "cc:menu:settings" }],
+          ],
+        },
+      },
     );
+  }
+
+  async function handleGatewayMenu(message, key) {
+    const titles = {
+      zed: "🤖 ZED COMMAND CENTRE",
+      auto: "💎 AUTO",
+      grace: "👩‍💼 GRACE AUTO POST™",
+      admin: "🛡 ADMIN",
+      admingrace: "🛡 GRACE ADMIN",
+      settings: "⚙️ COMMAND CENTRE SETTINGS",
+    };
+    if (["grace", "admin", "admingrace", "settings"].includes(key) && !(await ownerOnly(message))) return;
+    return send(message, menuText(titles[key], GATEWAY_MENUS[key]));
+  }
+
+  async function handleStart(message) {
+    return handleGatewayStart(message);
   }
 
   async function handleHelp(message) {
     return send(
       message,
       [
-        "ZED — Command Centre",
+        "📘 SIMPLE COMMAND GUIDE",
         "",
-        "/gracestatus — Grace, X and queue status",
-        "/connectx 1 — fresh 10-minute X connection",
-        "/gracequeue 1 | your post — create approval preview",
-        "/graceapprove POST_ID — approve the preview",
-        "/graceon — allow approved posts to publish",
-        "/graceoff — stop publishing",
-        "/gracepause — emergency stop",
-        "/graceresume — clear emergency stop (publishing stays off)",
-        "/autostatus — Auto’s buy-only safety state",
-        "/websites — OneWorldz network and Action Spread Smiles",
+        "/zedstart — everything starts here",
+        "/zed — Zed controls",
+        "/auto — Auto finance status and controls",
+        "/grace — Grace Auto Post™",
+        "/admin — Admin controls",
+        "/admingrace — Grace permissions and publishing safety",
+        "/zedsettings — Command Centre settings",
         "",
-        "Follow ✅ Like ✅ Comment ✅ Share ✅ — human-led and platform-compliant.",
-        "Grace does not automate likes or bulk follows.",
+        "Advanced commands remain available underneath these gateways.",
       ].join("\n"),
     );
   }
@@ -256,7 +354,18 @@ export function createTelegramController({
     );
   }
 
+  async function handleCallback(update) {
+    const query = update?.callback_query;
+    const match = String(query?.data || "").match(/^cc:menu:(zed|auto|grace|admin|settings)$/);
+    if (!query?.message?.chat?.id || !match) return false;
+    const message = { ...query.message, from: query.from };
+    await telegram("answerCallbackQuery", { callback_query_id: query.id });
+    await handleGatewayMenu(message, match[1]);
+    return true;
+  }
+
   async function handleUpdate(update) {
+    if (await handleCallback(update)) return { handled: "callback_query" };
     const message = update?.message;
     if (!message?.chat?.id || typeof message.text !== "string") {
       return { ignored: "not_a_text_message" };
@@ -266,7 +375,26 @@ export function createTelegramController({
     try {
       switch (name) {
         case "/start":
+        case "/zedstart":
           await handleStart(message);
+          break;
+        case "/zed":
+          await handleGatewayMenu(message, "zed");
+          break;
+        case "/auto":
+          await handleGatewayMenu(message, "auto");
+          break;
+        case "/grace":
+          await handleGatewayMenu(message, "grace");
+          break;
+        case "/admin":
+          await handleGatewayMenu(message, "admin");
+          break;
+        case "/admingrace":
+          await handleGatewayMenu(message, "admingrace");
+          break;
+        case "/zedsettings":
+          await handleGatewayMenu(message, "settings");
           break;
         case "/help":
           await handleHelp(message);
@@ -330,20 +458,10 @@ export function createTelegramController({
   }
 
   async function registerCommands() {
-    return telegram("setMyCommands", {
-      commands: [
-        { command: "start", description: "Open the OneWorldz Command Centre" },
-        { command: "gracestatus", description: "Owner: Grace and X status" },
-        { command: "connectx", description: "Owner: connect an approved X account" },
-        { command: "gracequeue", description: "Owner: queue an X post for approval" },
-        { command: "graceapprove", description: "Owner: approve a queued post" },
-        { command: "gracepause", description: "Owner: emergency-stop Grace" },
-        { command: "autostatus", description: "Owner: Auto buy-only status" },
-        { command: "websites", description: "Open OneWorldz and Action Spread Smiles" },
-        { command: "help", description: "Show all controls" },
-      ],
-    });
+    return telegram("setMyCommands", { commands: GATEWAY_COMMANDS });
   }
 
   return { handleUpdate, registerCommands, sendMessage: telegram };
 }
+
+export { GATEWAY_COMMANDS, GATEWAY_MENUS };
