@@ -8,8 +8,12 @@ const walletButton = document.querySelector('#wallet-button');
 const BOARD = config.basedBidBoardUrl || 'https://www.based.bid/b/Charity.Based';
 const HQ = 'https://t.me/CryptoWorldzHQ';
 const BOT = 'https://t.me/CryptoWorldzBot';
+const COMMAND = 'https://cryptobotz.cryptoworldz.xyz';
+const RECAP = 'https://t.me/ReCapThisBot';
+const RECAP_PORTAL = 'https://t.me/ReCapThisBot_Portal';
+const RECAP_TRENDING = 'https://t.me/recapthisbot_trending';
+const RECAP_WEB = 'https://RecapThisBot.com';
 const PIPELINE = [
-  ['$SMILES','Action Creates Smiles','Uganda • food • water • education • medical care'],
   ['$SolMars','MuskMan','SolWorldz community launch pipeline'],
   ['$SolBud','Black Bud','SolWorldz community launch pipeline'],
   ['$GIA','Global Impact Alliance','Global impact project pipeline'],
@@ -39,25 +43,25 @@ async function render(){
   document.title='ImpactBased • Purpose-led Launch Board';
   brandTitle.textContent='IMPACTBASED';
   brandSubtitle.textContent='HELPING THE PEOPLE WHO HELP PEOPLE';
-  walletButton.textContent='Open @CryptoWorldzBot';
-  walletButton.onclick=()=>window.open(BOT,'_blank','noopener,noreferrer');
+  walletButton.textContent='Open Command Centre';
+  walletButton.onclick=()=>window.open(COMMAND,'_blank','noopener,noreferrer');
   nav.innerHTML=[
-    ['Home','#home'],['Launch Pipeline','#pipeline'],['Help the People','?page=help'],['Token Feature','?page=tokens'],['Open Based.bid Board',BOARD],['Visit OneWorldz','https://oneworldz.com'],['Zed HQ',HQ]
+    ['Home','#home'],['Launch Pipeline','#pipeline'],['Partnerships','#partners'],['Help the People','?page=help'],['Token Feature','?page=tokens'],['Based.bid Board',BOARD],['Command Centre',COMMAND]
   ].map(([l,u])=>`<a href="${u}"${u.startsWith('http')?' target="_blank" rel="noopener noreferrer"':''}>${l}</a>`).join('');
 
   const live=await liveTokens();
-  const liveCards=live.length?live.map(t=>`<article class="wx-card"><span class="wx-tag live">LIVE • VERIFIED REGISTRY</span><div class="wx-symbol">${esc(t.symbol)}</div><h3>${esc(t.name)}</h3><p>${esc(t.description||`${t.chain_id||'Blockchain'} token`)}</p>${t.contract_address?`<p style="font-size:.78rem;word-break:break-all">${esc(t.contract_address)}</p>`:''}<div class="wx-actions">${t.dexscreener_url?btn(t.dexscreener_url,'DEX Screener'):''}${t.trade_url?btn(t.trade_url,'Market'):''}${t.launch_url?btn(t.launch_url,'Launch Page'):''}</div></article>`).join(''):`<div class="wx-note" style="grid-column:1/-1">There are currently no public token records marked <strong>live</strong> in the shared registry. ImpactBased pipeline cards below are preparation/status cards, not trading claims.</div>`;
+  const liveCards=live.length?live.map(t=>`<article class="wx-card"><span class="wx-tag live">LIVE • VERIFIED REGISTRY</span><div class="wx-symbol">${esc(t.symbol)}</div><h3>${esc(t.name)}</h3><p>${esc(t.description||`${t.chain_id||'Blockchain'} token`)}</p>${t.contract_address?`<p style="font-size:.78rem;word-break:break-all">${esc(t.contract_address)}</p>`:''}<div class="wx-actions">${t.dexscreener_url?btn(t.dexscreener_url,'DEX Screener'):''}${t.trade_url?btn(t.trade_url,'Trade Station'):''}${t.launch_url?btn(t.launch_url,'Launch Page'):''}</div></article>`).join(''):`<div class="wx-note" style="grid-column:1/-1">There are currently no public token records marked <strong>live</strong> in the shared registry. Pipeline cards below are preparation/status cards, not trading claims.</div>`;
 
   app.innerHTML=`<div class="wx-shell">
-    <section id="home" class="wx-hero"><img class="wx-hero-bg" src="./assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp" alt="CryptoWorldz blockchain ecosystem"><div class="wx-hero-copy"><span class="wx-kicker">Purpose • transparency • community</span><h1>ImpactBased</h1><p>A purpose-led launch front door connecting real-world impact projects with clear public launch information and the established Based.bid board.</p><div class="wx-actions">${btn(BOARD,'Open Current Based.bid Board','wx-btn green')}<a class="wx-btn gold" href="?page=tokens">Token Feature</a><a class="wx-btn" href="?page=help">Help the People</a>${btn(HQ,'Visit CryptoWorldz HQ')}</div></div></section>
+    <section id="home" class="wx-hero"><img class="wx-hero-bg" src="./assets/worldz-master/cryptoworldz/impactbased.png" alt="Approved ImpactBased artwork"><div class="wx-hero-copy"><span class="wx-kicker">Purpose • transparency • community</span><h1>ImpactBased</h1><p>A purpose-led launch front door connecting real-world impact, CryptoWorldz technology, Based.bid launch pathways and ReCap community visibility.</p><div class="wx-actions">${btn(BOARD,'Open Based.bid Board','wx-btn green')}${btn(RECAP,'Open ReCap Bot')}${btn(COMMAND,'Open Command Centre','wx-btn gold')}</div></div></section>
 
-    <section class="wx-panel wx-feature"><div class="wx-copy"><span class="wx-kicker">Current board destination</span><h2>Launch with Purpose.</h2><p>The public Based.bid board is live now. It still uses the legacy <strong>Charity.Based</strong> route while this ImpactBased front door carries the updated ecosystem identity.</p><div class="wx-actions">${btn(BOARD,'Visit ImpactBased on Based.bid','wx-btn green')}${btn('https://solworldz.xyz','Visit SolWorldz')}</div></div><div style="display:grid;place-items:center"><div class="impact-orb">b</div></div></section>
+    <section id="partners" class="wx-panel"><span class="wx-kicker">CONNECTED PARTNERSHIP</span><h2>CryptoWorldz • Based.bid • ReCapThisBot</h2><p>ImpactBased connects launch pathways, community coordination and transparent project information through the wider CryptoWorldz ecosystem.</p><div class="wx-grid"><article class="wx-card"><h3>Based.bid</h3><p>Current launch-board pathway. The public board still uses the legacy Charity.Based route until an approved board migration is complete.</p><div class="wx-actions">${btn(BOARD,'Open Current Board','wx-btn green')}</div></article><article class="wx-card"><h3>ReCapThisBot</h3><p>Community recap, portal and trending links connected to the CryptoWorldz partnership network.</p><div class="wx-actions">${btn(RECAP,'ReCap Bot')}${btn(RECAP_PORTAL,'ReCap Portal')}${btn(RECAP_TRENDING,'Trending')}${btn(RECAP_WEB,'Website')}</div></article><article class="wx-card"><h3>Command Centre</h3><p>Zed, Auto and Grace references stay connected through the CryptoWorldz Command Centre.</p><div class="wx-actions">${btn(COMMAND,'Open Command Centre','wx-btn gold')}${btn(BOT,'Open @CryptoWorldzBot')}</div></article></div></section>
 
-    <section id="pipeline" class="wx-panel"><span class="wx-kicker">Next to launch / preparing</span><h2>ImpactBased Pipeline</h2><p>These projects can be pictured and introduced while their final public launch details are prepared. A pipeline card does not mean a contract, pool or market is live.</p><div class="wx-grid">${PIPELINE.map(([s,n,c])=>`<article class="wx-card"><span class="wx-tag">PIPELINE</span><div class="wx-symbol">${esc(s)}</div><h3>${esc(n)}</h3><p>${esc(c)}</p>${btn(BOARD,'View Board','wx-btn gold')}</article>`).join('')}</div></section>
+    <section id="pipeline" class="wx-panel"><span class="wx-kicker">Next to launch / preparing</span><h2>ImpactBased Pipeline</h2><p>These projects can be introduced while final public launch details are prepared. A pipeline card does not mean a contract, pool or market is live.</p><div class="wx-grid">${PIPELINE.map(([s,n,c])=>`<article class="wx-card"><span class="wx-tag">PIPELINE</span><div class="wx-symbol">${esc(s)}</div><h3>${esc(n)}</h3><p>${esc(c)}</p>${btn(BOARD,'View Board','wx-btn gold')}</article>`).join('')}</div></section>
 
     <section class="wx-panel"><span class="wx-kicker">Verified public registry</span><h2>Live Tokens</h2><div class="wx-grid">${liveCards}</div></section>
 
-    <section class="wx-panel wx-feature"><img src="./assets/images/website-core/action-creates-smiles/action-creates-smiles-reagan-kids.webp" alt="Action Creates Smiles Uganda" loading="lazy"><div class="wx-copy"><span class="wx-kicker">Impact that leaves the screen</span><h2>Helping the People who Help People.</h2><p>ImpactBased exists to connect launch technology with projects that can show why they matter — food, shelter, water, education, care, dignity and stronger communities.</p><div class="wx-actions"><a class="wx-btn green" href="?page=help">Open Help the People</a>${btn('https://purplediamondcrew.com','Visit Purple Diamond Crew')}</div></div></section>
+    <section class="wx-panel wx-feature"><img src="./assets/worldz-master/oneworldz/reagan-kauja.png" alt="Approved Reagan humanitarian artwork" loading="lazy"><div class="wx-copy"><span class="wx-kicker">Impact that leaves the screen</span><h2>Helping the People who Help People.</h2><p>ImpactBased connects launch technology with projects that can show why they matter — food, shelter, water, education, care, dignity and stronger communities.</p><div class="wx-actions"><a class="wx-btn green" href="?page=help">Open Help the People</a>${btn('https://purplediamondcrew.com','Visit Purple Diamond Crew')}</div></div></section>
 
     <section class="wx-panel"><span class="wx-kicker">One ecosystem • many Worldz</span><h2>Visit the Network</h2><div class="wx-worlds">${worlds()}</div></section>
     <p class="sw-disclaimer">Always verify a token contract, launch status and external destination before interacting. ImpactBased pipeline status is informational and does not represent financial advice or a live market.</p>
