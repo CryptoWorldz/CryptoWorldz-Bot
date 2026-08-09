@@ -57,7 +57,7 @@ async function start() {
   const supabase = createClient(config.supabaseUrl, config.supabaseServiceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false }
   });
-  const bot = new TelegramBot(config.botToken);
+  const bot = new TelegramBot(config.botToken, { onlyFirstMatch: true });
   const repository = createRepository(supabase);
   const autoClient = createAutoClient(config);
   const graceWorkspaceSlug = String(process.env.GRACE_WORKSPACE_SLUG || "cryptoworldz")
@@ -118,8 +118,8 @@ async function start() {
     intervalMs: Number(process.env.GRACE_WORKER_INTERVAL_MS) || 60000
   });
 
-  registerTelegramHandlers({ bot, repository, config });
   registerCommandCentreHandlers({ bot, repository, config });
+  registerTelegramHandlers({ bot, repository, config });
   registerRoleProfileHandler({ bot, repository, config, supabase });
   registerScopedBroadcastHandlers({ bot, repository, config });
   registerAutoTelegramHandlers({ bot, config, autoClient, supabase });
