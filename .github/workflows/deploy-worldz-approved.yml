@@ -1,6 +1,26 @@
-name: Deploy Approved Worldz Site
+name: Deploy Approved Worldz Site — Proof First
 
 on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Approved Worldz target'
+        required: true
+        type: choice
+        options:
+          - oneworldz
+          - impactbased
+          - law-oneworldz
+          - learn-oneworldz
+          - ethworldz
+          - baseworldz
+          - bnbworldz
+          - xrpworldz
+          - suiworldz
+          - hyperworldz
+          - robinworldz
+          - bitcoinworldz
+          - hodlerworldz
   push:
     branches: [main]
     paths:
@@ -10,78 +30,106 @@ permissions:
   contents: read
 
 concurrency:
-  group: worldz-approved-${{ github.ref }}
+  group: worldz-approved-${{ github.event.inputs.target || github.ref }}
   cancel-in-progress: false
 
 jobs:
   prepare:
-    name: Validate approved release request
+    name: Resolve locked target
     runs-on: ubuntu-latest
     outputs:
       target: ${{ steps.resolve.outputs.target }}
       environment: ${{ steps.resolve.outputs.environment }}
       live_url: ${{ steps.resolve.outputs.live_url }}
       guard: ${{ steps.resolve.outputs.guard }}
-      expected_script: ${{ steps.resolve.outputs.expected_script }}
+      expected_text: ${{ steps.resolve.outputs.expected_text }}
+      hero_image: ${{ steps.resolve.outputs.hero_image }}
+      secondary_image: ${{ steps.resolve.outputs.secondary_image }}
+      art_marker: ${{ steps.resolve.outputs.art_marker }}
     steps:
-      - name: Check out request
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - id: resolve
-        name: Resolve immutable approved source
+        name: Resolve approved target and forbid protected sites
         shell: bash
         env:
           APPROVED_BEFORE: ${{ github.event.before }}
+          INPUT_TARGET: ${{ inputs.target }}
         run: |
           set -euo pipefail
-          test -f deployments/worldz-approved.request
-          target="$(sed -n 's/^target=//p' deployments/worldz-approved.request | tail -n1)"
-          confirmation="$(sed -n 's/^confirmation=//p' deployments/worldz-approved.request | tail -n1)"
-          source_commit="$(sed -n 's/^source_commit=//p' deployments/worldz-approved.request | tail -n1)"
-          test "$confirmation" = 'APPROVE TOTAL DEPLOYMENT'
-          test -n "$source_commit"
-          test "$source_commit" = "$APPROVED_BEFORE"
+          if [[ "${{ github.event_name }}" == 'workflow_dispatch' ]]; then
+            target="$INPUT_TARGET"
+          else
+            test -f deployments/worldz-approved.request
+            target="$(sed -n 's/^target=//p' deployments/worldz-approved.request | tail -n1)"
+            confirmation="$(sed -n 's/^confirmation=//p' deployments/worldz-approved.request | tail -n1)"
+            source_commit="$(sed -n 's/^source_commit=//p' deployments/worldz-approved.request | tail -n1)"
+            test "$confirmation" = 'APPROVE TOTAL DEPLOYMENT'
+            test -n "$source_commit"
+            test "$source_commit" = "$APPROVED_BEFORE"
+          fi
 
+          # CryptoWorldz is intentionally absent: it is the frozen visual reference.
+          # PDC and SolWorldz use their dedicated standalone proof workflows.
           case "$target" in
-            test-oneworldz) environment='test-preproduction'; live_url='https://test.oneworldz.com'; guard='TEST.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
-            purplediamondcrew) environment='purplediamondcrew-production'; live_url='https://purplediamondcrew.com'; guard='PURPLEDIAMONDCREW.COM'; expected_script='assets/pdc-site.js' ;;
-            solworldz) environment='solworldz-production'; live_url='https://solworldz.xyz'; guard='SOLWORLDZ.XYZ'; expected_script='assets/app.js' ;;
-            cryptoworldz) environment='cryptoworldz-production'; live_url='https://cryptoworldz.xyz'; guard='CRYPTOWORLDZ.XYZ'; expected_script='assets/app.js' ;;
-            oneworldz) environment='oneworldz-production'; live_url='https://oneworldz.com'; guard='ONEWORLDZ.COM'; expected_script='assets/oneworldz.js' ;;
-            impactbased) environment='impactbased-production'; live_url='https://impactbased.oneworldz.com'; guard='IMPACTBASED.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
-            law-oneworldz) environment='law-oneworldz-production'; live_url='https://law.oneworldz.com'; guard='LAW.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
-            learn-oneworldz) environment='learn-oneworldz-production'; live_url='https://learn.oneworldz.com'; guard='LEARN.ONEWORLDZ.COM'; expected_script='assets/app.js' ;;
-            *) echo 'Unsupported approved deployment target.' >&2; exit 1 ;;
+            oneworldz)
+              environment='oneworldz-production'; live_url='https://oneworldz.com'; guard='ONEWORLDZ.COM'; expected_text='OneWorldz'; hero_image='assets/worldz-master/oneworldz/oneworldz-master.png'; secondary_image='assets/worldz-master/oneworldz/oneworldz-gpt.png'; art_marker='oneworldz-master.png' ;;
+            impactbased)
+              environment='impactbased-production'; live_url='https://impactbased.oneworldz.com'; guard='IMPACTBASED.ONEWORLDZ.COM'; expected_text='ImpactBased'; hero_image='assets/worldz-master/cryptoworldz/impactbased.png'; secondary_image=''; art_marker='impactbased.png' ;;
+            law-oneworldz)
+              environment='law-oneworldz-production'; live_url='https://law.oneworldz.com'; guard='LAW.ONEWORLDZ.COM'; expected_text='Robin Hood'; hero_image='assets/worldz-master/tokens/robin-hood-law.png'; secondary_image=''; art_marker='robin-hood-law.png' ;;
+            learn-oneworldz)
+              environment='learn-oneworldz-production'; live_url='https://learn.oneworldz.com'; guard='LEARN.ONEWORLDZ.COM'; expected_text='LearnWorldz'; hero_image='assets/worldz-master/oneworldz/oneworldz-gpt.png'; secondary_image=''; art_marker='oneworldz-gpt.png' ;;
+            ethworldz)
+              environment='ethworldz-production'; live_url='https://ethworldz.xyz'; guard='ETHWORLDZ.XYZ'; expected_text='EthWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/ethworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            baseworldz)
+              environment='baseworldz-production'; live_url='https://baseworldz.xyz'; guard='BASEWORLDZ.XYZ'; expected_text='BaseWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/baseworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            bnbworldz)
+              environment='bnbworldz-production'; live_url='https://bnbworldz.xyz'; guard='BNBWORLDZ.XYZ'; expected_text='BNBWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/bnbworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            xrpworldz)
+              environment='xrpworldz-production'; live_url='https://xrpworldz.xyz'; guard='XRPWORLDZ.XYZ'; expected_text='XRPWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/xrpworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            suiworldz)
+              environment='suiworldz-production'; live_url='https://suiworldz.xyz'; guard='SUIWORLDZ.XYZ'; expected_text='SuiWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/suiworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            hyperworldz)
+              environment='hyperworldz-production'; live_url='https://hyperworldz.xyz'; guard='HYPERWORLDZ.XYZ'; expected_text='HyperWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/hyperworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            robinworldz)
+              environment='robinworldz-production'; live_url='https://robinworldz.xyz'; guard='ROBINWORLDZ.XYZ'; expected_text='RobinWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/robinworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            bitcoinworldz)
+              environment='bitcoinworldz-production'; live_url='https://bitcoinworldz.xyz'; guard='BITCOINWORLDZ.XYZ'; expected_text='BitcoinWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/bitworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            hodlerworldz)
+              environment='hodlerworldz-production'; live_url='https://hodlerworldz.xyz'; guard='HODLERWORLDZ.XYZ'; expected_text='HodlerWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image=''; art_marker='cryptoworldz-we-need-you' ;;
+            cryptoworldz|purplediamondcrew|solworldz)
+              echo '::error::This target is protected from the generic deployment workflow.'; exit 1 ;;
+            *) echo '::error::Unsupported approved deployment target.'; exit 1 ;;
           esac
 
           echo "target=$target" >> "$GITHUB_OUTPUT"
           echo "environment=$environment" >> "$GITHUB_OUTPUT"
           echo "live_url=$live_url" >> "$GITHUB_OUTPUT"
           echo "guard=$guard" >> "$GITHUB_OUTPUT"
-          echo "expected_script=$expected_script" >> "$GITHUB_OUTPUT"
+          echo "expected_text=$expected_text" >> "$GITHUB_OUTPUT"
+          echo "hero_image=$hero_image" >> "$GITHUB_OUTPUT"
+          echo "secondary_image=$secondary_image" >> "$GITHUB_OUTPUT"
+          echo "art_marker=$art_marker" >> "$GITHUB_OUTPUT"
 
   validate:
-    name: Validate approved package
+    name: Build and prove package before upload
     needs: prepare
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
-      - name: Check out approved request commit
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Restore exact approved master images
         shell: bash
         run: |
           set -euo pipefail
-          bundle='media/approved-worldz/worldz-master-images-approved-v2.zip'
-          test -s "$bundle"
           rm -rf apps/cryptoworldz-web-core/assets/worldz-master
-          mkdir -p apps/cryptoworldz-web-core/assets/worldz-master
-          unzip -oq "$bundle" -d apps/cryptoworldz-web-core/assets/worldz-master
-          test -s apps/cryptoworldz-web-core/assets/worldz-master/MANIFEST.json
+          bash tools/restore-approved-worldz-media.sh apps/cryptoworldz-web-core/assets/worldz-master
+          test -s "apps/cryptoworldz-web-core/${{ needs.prepare.outputs.hero_image }}"
+          if [[ -n "${{ needs.prepare.outputs.secondary_image }}" ]]; then test -s "apps/cryptoworldz-web-core/${{ needs.prepare.outputs.secondary_image }}"; fi
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
@@ -89,33 +137,45 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Run complete verification
+      - name: Run complete repository verification
         run: npm run verify
 
-      - name: Package static release
+      - name: Forbid retired domain and placeholder deployment patterns
         shell: bash
         run: |
           set -euo pipefail
-          cd apps/cryptoworldz-web-core
+          ! grep -RniE 'solworld\.fun' apps/cryptoworldz-web-core --exclude-dir='archive' --exclude='*.md'
+          ! grep -RniE 'Loading the Worldz experience' apps/cryptoworldz-web-core/index.html
+          grep -Fq 'assets/worldz-master/cryptoworldz/we-need-you.png' apps/cryptoworldz-web-core/assets/coming-soon-next.js
+
+      - name: Package exact release and checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_root='apps/cryptoworldz-web-core'
+          sha256sum "$source_root/${{ needs.prepare.outputs.hero_image }}" > hero.sha256
+          if [[ -n "${{ needs.prepare.outputs.secondary_image }}" ]]; then sha256sum "$source_root/${{ needs.prepare.outputs.secondary_image }}" > secondary.sha256; fi
+          cd "$source_root"
           zip -qr ../../worldz-approved-${GITHUB_SHA}.zip . -x '*.DS_Store' '*.md' '.gitignore' 'docs/*'
           cd ../..
           sha256sum worldz-approved-${GITHUB_SHA}.zip > worldz-approved-${GITHUB_SHA}.sha256
 
-      - name: Preserve release package
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: worldz-approved-${{ needs.prepare.outputs.target }}
           path: |
             worldz-approved-${{ github.sha }}.zip
             worldz-approved-${{ github.sha }}.sha256
+            hero.sha256
+            secondary.sha256
           retention-days: 30
-          if-no-files-found: error
+          if-no-files-found: ignore
 
   deploy:
-    name: Back up, deploy and verify
+    name: Backup, deploy, hash-check and browser-prove
     needs: [prepare, validate]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     environment:
       name: ${{ needs.prepare.outputs.environment }}
       url: ${{ needs.prepare.outputs.live_url }}
@@ -129,121 +189,124 @@ jobs:
       DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
       EXPECTED_GUARD: ${{ needs.prepare.outputs.guard }}
       LIVE_URL: ${{ needs.prepare.outputs.live_url }}
-      EXPECTED_SCRIPT: ${{ needs.prepare.outputs.expected_script }}
+      HERO_IMAGE: ${{ needs.prepare.outputs.hero_image }}
+      SECONDARY_IMAGE: ${{ needs.prepare.outputs.secondary_image }}
+      EXPECTED_TEXT: ${{ needs.prepare.outputs.expected_text }}
+      ART_MARKER: ${{ needs.prepare.outputs.art_marker }}
+      FTP_TLS_VERIFY: yes
+      FTP_TLS_CHECK_HOSTNAME: yes
     steps:
-      - name: Check out approved package
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Restore exact approved master images
         shell: bash
         run: |
           set -euo pipefail
-          bundle='media/approved-worldz/worldz-master-images-approved-v2.zip'
-          test -s "$bundle"
           rm -rf apps/cryptoworldz-web-core/assets/worldz-master
-          mkdir -p apps/cryptoworldz-web-core/assets/worldz-master
-          unzip -oq "$bundle" -d apps/cryptoworldz-web-core/assets/worldz-master
+          bash tools/restore-approved-worldz-media.sh apps/cryptoworldz-web-core/assets/worldz-master
 
-      - name: Verify domain-restricted credentials
+      - name: Verify domain-restricted credentials and target
         shell: bash
         run: |
           set -euo pipefail
           test "$FTP_ACCOUNT_SCOPE" = 'DOMAIN_ONLY'
           test "$DEPLOY_GUARD" = "$EXPECTED_GUARD"
-          test "$FTP_SERVER_DIR" = '/'
-          test -n "$FTP_HOST"
-          test -n "$FTP_USERNAME"
-          test -n "$FTP_PASSWORD"
-          echo "::add-mask::$FTP_USERNAME"
+          [[ "$FTP_SERVER_DIR" == '/' || "$FTP_SERVER_DIR" == '/public_html' ]] || { echo '::error::Unexpected FTP root'; exit 1; }
+          test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
+          echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_HOST"
 
-      - name: Install secure FTP client
+      - name: Install secure transfer tools
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp zip unzip
 
-      - name: Back up current website
+      - name: Confirm certificate-validated encrypted target
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/worldz-backup"
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" -e "set cmd:fail-exit yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; bye"
+
+      - name: Capture mandatory full rollback snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/worldz-backup"; mkdir -p "$backup"
+          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 2
           set net:timeout 30
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
+          set ssl:check-hostname yes
           cd "$FTP_SERVER_DIR"
-          lcd "$RUNNER_TEMP/worldz-backup"
+          lcd "$backup"
           mirror --parallel=3 --exclude-glob '.well-known/**' --exclude-glob '.env*' --exclude-glob '*.log' --exclude-glob 'cgi-bin/**' .
           bye
           LFTP
-          cd "$RUNNER_TEMP/worldz-backup"
-          zip -qr "$RUNNER_TEMP/worldz-backup-${GITHUB_RUN_ID}.zip" .
+          test -n "$(find "$backup" -mindepth 1 -print -quit)"
+          cd "$backup"; zip -qr "$RUNNER_TEMP/worldz-backup-${GITHUB_RUN_ID}.zip" .
+          test -s "$RUNNER_TEMP/worldz-backup-${GITHUB_RUN_ID}.zip"
 
-      - name: Preserve rollback artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: worldz-rollback-${{ needs.prepare.outputs.target }}-${{ github.run_id }}
           path: ${{ runner.temp }}/worldz-backup-${{ github.run_id }}.zip
           retention-days: 14
           if-no-files-found: error
 
-      - name: Upload approved website
+      - name: Upload exact approved website
         shell: bash
         run: |
           set -euo pipefail
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-          set cmd:fail-exit yes
-          set net:max-retries 2
-          set net:timeout 30
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ssl:verify-certificate yes
-          cd "$FTP_SERVER_DIR"
-          lcd "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
-          mirror --reverse --overwrite --parallel=4 --exclude-glob '.git*' --exclude-glob '*.md' --exclude-glob 'docs/**' .
-          bye
-          LFTP
+          echo 'WORLDZ_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
+          FTP_TRANSFER_TIMEOUT=360 bash tools/worldz-direct-ftp.sh upload "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
 
-      - name: Verify live website
+      - name: Prove exact live master-image hashes
         shell: bash
         run: |
           set -euo pipefail
-          source_root="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
-          expected_index_sha="$(sha256sum "$source_root/index.html" | awk '{print $1}')"
-          expected_script_sha="$(sha256sum "$source_root/$EXPECTED_SCRIPT" | awk '{print $1}')"
-          verified='false'
-          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
-            if curl -fsSL -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/index.html" \
-              && curl -fsSL -H 'Cache-Control: no-cache' --max-time 20 "$LIVE_URL/$EXPECTED_SCRIPT?$cache" -o "$RUNNER_TEMP/expected.js" \
-              && [[ "$(sha256sum "$RUNNER_TEMP/index.html" | awk '{print $1}')" == "$expected_index_sha" ]] \
-              && [[ "$(sha256sum "$RUNNER_TEMP/expected.js" | awk '{print $1}')" == "$expected_script_sha" ]] \
-              && grep -Fq 'content="20260809-recovery1"' "$RUNNER_TEMP/index.html"; then
-              verified='true'
-              break
-            fi
-            sleep 5
+          cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
+          for rel in "$HERO_IMAGE" "$SECONDARY_IMAGE"; do
+            [[ -n "$rel" ]] || continue
+            source="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core/$rel"
+            live="$RUNNER_TEMP/$(basename "$rel")"
+            curl -L -fsS -H 'Cache-Control: no-cache' --max-time 30 "$LIVE_URL/$rel?$cache" -o "$live"
+            [[ "$(sha256sum "$source" | awk '{print $1}')" == "$(sha256sum "$live" | awk '{print $1}')" ]] || { echo "::error::Live master-image hash mismatch: $rel"; exit 1; }
           done
-          [[ "$verified" == 'true' ]]
-          echo 'Live website matches the exact approved release.'
 
-      - name: Roll back after failed upload or verification
-        if: failure()
+      - name: Prove rendered desktop and mobile website in Chrome
         shell: bash
         run: |
           set -euo pipefail
-          test -d "$RUNNER_TEMP/worldz-backup"
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-          set cmd:fail-exit yes
-          set net:max-retries 2
-          set net:timeout 30
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ssl:verify-certificate yes
-          cd "$FTP_SERVER_DIR"
-          lcd "$RUNNER_TEMP/worldz-backup"
-          mirror --reverse --overwrite --parallel=3 .
-          bye
-          LFTP
+          WORLDZ_PROOF_DIR="$RUNNER_TEMP/worldz-proof" node tools/prove-live-worldz.mjs "$LIVE_URL" "$EXPECTED_TEXT" "$ART_MARKER"
+
+      - name: Preserve browser proof screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldz-production-proof-${{ needs.prepare.outputs.target }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/worldz-proof/
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Roll back on any post-upload failure
+        if: failure() && env.WORLDZ_UPLOAD_STARTED == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/worldz-backup"
+          test -n "$(find "$backup" -mindepth 1 -print -quit)"
+          FTP_TRANSFER_TIMEOUT=360 bash tools/worldz-direct-ftp.sh restore "$backup"
+
+      - name: Publish factual result contract
+        if: always()
+        run: |
+          {
+            echo '## Worldz Production Proof'
+            echo '- This summary never overrides the job conclusion.'
+            echo '- CryptoWorldz is protected and cannot be selected here.'
+            echo '- Exact approved master-image SHA-256 equality is mandatory.'
+            echo '- Desktop + mobile real-browser proof is mandatory.'
+            echo '- Any post-upload failure triggers rollback.'
+          } >> "$GITHUB_STEP_SUMMARY"

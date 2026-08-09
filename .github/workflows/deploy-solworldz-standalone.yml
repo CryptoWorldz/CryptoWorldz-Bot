@@ -1,15 +1,11 @@
 name: Deploy SolWorldz Standalone
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - 'apps/worldz-sites/solworldz/**'
-      - 'media/approved-worldz/**'
-      - 'tools/restore-approved-worldz-media.sh'
-      - 'tools/verify-solworldz-standalone.mjs'
-      - '.github/workflows/deploy-solworldz-standalone.yml'
-  workflow_dispatch:
+      - 'deployments/solworldz-standalone.request'
 
 permissions:
   contents: read
@@ -20,9 +16,9 @@ concurrency:
 
 jobs:
   deploy:
-    name: Verify and deploy approved SolWorldz
+    name: Back up, deploy and prove SolWorldz.xyz
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 18
     environment:
       name: solworldz-production
       url: https://solworldz.xyz
@@ -39,7 +35,7 @@ jobs:
       - name: Check out approved main commit
         uses: actions/checkout@v4
 
-      - name: Restore exact approved SolWorldz media
+      - name: Restore and fingerprint exact approved SolWorldz media
         shell: bash
         run: |
           set -euo pipefail
@@ -47,10 +43,13 @@ jobs:
           mkdir -p apps/worldz-sites/solworldz/assets/media
           cp "$RUNNER_TEMP/approved-worldz/solworldz/"*.png apps/worldz-sites/solworldz/assets/media/
           for image in solworldz-hero-desktop.png solworldz-hero-mobile.png solworldz-approved-atlas.png; do
-            test "$(wc -c < "apps/worldz-sites/solworldz/assets/media/$image")" -gt 50000
+            src="$RUNNER_TEMP/approved-worldz/solworldz/$image"
+            dst="apps/worldz-sites/solworldz/assets/media/$image"
+            test -s "$src" && test -s "$dst"
+            test "$(sha256sum "$src" | awk '{print $1}')" = "$(sha256sum "$dst" | awk '{print $1}')"
           done
 
-      - name: Run approved-image production gate
+      - name: Run static production gate
         run: node tools/verify-solworldz-standalone.mjs
 
       - name: Lock deployment to SolWorldz only
@@ -69,24 +68,32 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp zip
 
-      - name: Capture rollback snapshot
+      - name: Confirm encrypted Hostinger target with certificate validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; cd '$FTP_SERVER_DIR'; bye"
+
+      - name: Capture mandatory rollback snapshot
         shell: bash
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/solworldz-backup"; mkdir -p "$backup"
-          timeout 90 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP || true
-          set cmd:fail-exit no
+          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
           set net:max-retries 1
-          set net:timeout 20
+          set net:timeout 25
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
-          set ssl:verify-certificate no
+          set ssl:verify-certificate yes
           cd "$FTP_SERVER_DIR"
           lcd "$backup"
           mirror --parallel=3 . .
           bye
           LFTP
+          test -n "$(find "$backup" -mindepth 1 -print -quit)"
           cd "$backup"; zip -qr "$RUNNER_TEMP/solworldz-predeploy.zip" .
+          test -s "$RUNNER_TEMP/solworldz-predeploy.zip"
 
       - name: Preserve rollback package
         uses: actions/upload-artifact@v4
@@ -102,34 +109,35 @@ jobs:
           set -euo pipefail
           echo 'SOL_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
           source="$GITHUB_WORKSPACE/apps/worldz-sites/solworldz"
-          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
-          set net:timeout 25
+          set net:timeout 30
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
-          set ssl:verify-certificate no
+          set ssl:verify-certificate yes
           cd "$FTP_SERVER_DIR"
           lcd "$source"
           mirror --reverse --delete --parallel=3 . .
           bye
           LFTP
 
-      - name: Verify live approved SolWorldz imagery
+      - name: Prove live SolWorldz exact imagery and content
         shell: bash
         run: |
           set -euo pipefail
           cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
-          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/live.html"
+          curl -L -fsS -H 'Cache-Control: no-cache' --max-time 30 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/live.html"
           grep -Fq 'data-approved-art="solworldz-hero"' "$RUNNER_TEMP/live.html"
           grep -Fq 'solworldz-hero-desktop.png' "$RUNNER_TEMP/live.html"
           grep -Fq 'solworldz-hero-mobile.png' "$RUNNER_TEMP/live.html"
-          grep -Fq 'RecoverYourDebt belongs to Robin Hood Chain / RobinWorldz' "$RUNNER_TEMP/live.html"
+          ! grep -Eqi 'Loading the Worldz experience|default page|parked domain|solworld\.fun' "$RUNNER_TEMP/live.html"
           for image in solworldz-hero-desktop.png solworldz-hero-mobile.png solworldz-approved-atlas.png; do
-            curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/assets/media/$image?$cache" -o "$RUNNER_TEMP/$image"
-            test "$(wc -c < "$RUNNER_TEMP/$image")" -gt 50000
+            live="$RUNNER_TEMP/live-$image"; source="$RUNNER_TEMP/approved-worldz/solworldz/$image"
+            curl -L -fsS -H 'Cache-Control: no-cache' --max-time 30 "$LIVE_URL/assets/media/$image?$cache" -o "$live"
+            test "$(sha256sum "$source" | awk '{print $1}')" = "$(sha256sum "$live" | awk '{print $1}')" || { echo "::error::LIVE IMAGE HASH MISMATCH: $image"; exit 1; }
           done
-          echo 'SolWorldz live approved-image verification passed.'
+          echo 'SOLWORLDZ PRODUCTION PROOF PASSED: live HTML and exact approved image hashes verified.'
 
       - name: Restore previous site if deployment fails
         if: failure() && env.SOL_UPLOAD_STARTED == 'true'
@@ -137,29 +145,27 @@ jobs:
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/solworldz-backup"
-          [[ -d "$backup" ]] || exit 0
-          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          test -n "$(find "$backup" -mindepth 1 -print -quit)"
+          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
-          set net:timeout 25
+          set net:timeout 30
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
-          set ssl:verify-certificate no
+          set ssl:verify-certificate yes
           cd "$FTP_SERVER_DIR"
           lcd "$backup"
           mirror --reverse --delete --parallel=3 . .
           bye
           LFTP
 
-      - name: Publish summary
+      - name: Publish factual summary
         if: always()
         run: |
           {
-            echo '## SolWorldz Approved Production'
-            echo '- Approved desktop PNG hero: required + byte-verified'
-            echo '- Approved mobile PNG hero: required + byte-verified'
-            echo '- Approved PNG ecosystem atlas: required + byte-verified'
-            echo '- RecoverYourDebt: Robin Hood Chain / RobinWorldz'
-            echo '- DEX / Trade Station: CryptoWorldz registry links'
-            echo '- Rollback snapshot: required before upload'
+            echo '## SolWorldz Production Proof'
+            echo '- Job conclusion is authoritative; this summary does not override failures.'
+            echo '- Exact desktop/mobile/atlas SHA-256 equality: required'
+            echo '- SolWorld.fun references: forbidden'
+            echo '- Rollback snapshot: mandatory before upload'
           } >> "$GITHUB_STEP_SUMMARY"
