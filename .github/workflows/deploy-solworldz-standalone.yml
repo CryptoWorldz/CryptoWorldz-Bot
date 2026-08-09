@@ -45,8 +45,8 @@ jobs:
           set -euo pipefail
           bash tools/restore-approved-worldz-media.sh "$RUNNER_TEMP/approved-worldz"
           mkdir -p apps/worldz-sites/solworldz/assets/media
-          cp "$RUNNER_TEMP/approved-worldz/solworldz/"*.webp apps/worldz-sites/solworldz/assets/media/
-          for image in solworldz-hero-desktop.webp solworldz-hero-mobile.webp solworldz-approved-atlas.webp; do
+          cp "$RUNNER_TEMP/approved-worldz/solworldz/"*.png apps/worldz-sites/solworldz/assets/media/
+          for image in solworldz-hero-desktop.png solworldz-hero-mobile.png solworldz-approved-atlas.png; do
             test "$(wc -c < "apps/worldz-sites/solworldz/assets/media/$image")" -gt 50000
           done
 
@@ -122,10 +122,10 @@ jobs:
           cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
           curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/live.html"
           grep -Fq 'data-approved-art="solworldz-hero"' "$RUNNER_TEMP/live.html"
-          grep -Fq 'solworldz-hero-desktop.webp' "$RUNNER_TEMP/live.html"
-          grep -Fq 'solworldz-hero-mobile.webp' "$RUNNER_TEMP/live.html"
+          grep -Fq 'solworldz-hero-desktop.png' "$RUNNER_TEMP/live.html"
+          grep -Fq 'solworldz-hero-mobile.png' "$RUNNER_TEMP/live.html"
           grep -Fq 'RecoverYourDebt belongs to Robin Hood Chain / RobinWorldz' "$RUNNER_TEMP/live.html"
-          for image in solworldz-hero-desktop.webp solworldz-hero-mobile.webp solworldz-approved-atlas.webp; do
+          for image in solworldz-hero-desktop.png solworldz-hero-mobile.png solworldz-approved-atlas.png; do
             curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/assets/media/$image?$cache" -o "$RUNNER_TEMP/$image"
             test "$(wc -c < "$RUNNER_TEMP/$image")" -gt 50000
           done
@@ -156,9 +156,9 @@ jobs:
         run: |
           {
             echo '## SolWorldz Approved Production'
-            echo '- Approved desktop hero: required + byte-verified'
-            echo '- Approved mobile hero: required + byte-verified'
-            echo '- Approved ecosystem atlas: required + byte-verified'
+            echo '- Approved desktop PNG hero: required + byte-verified'
+            echo '- Approved mobile PNG hero: required + byte-verified'
+            echo '- Approved PNG ecosystem atlas: required + byte-verified'
             echo '- RecoverYourDebt: Robin Hood Chain / RobinWorldz'
             echo '- DEX / Trade Station: CryptoWorldz registry links'
             echo '- Rollback snapshot: required before upload'
