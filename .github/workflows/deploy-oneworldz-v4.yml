@@ -21,7 +21,7 @@ jobs:
   deploy:
     name: Back up, replace, and verify OneWorldz.com
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     environment:
       name: oneworldz-production
       url: https://oneworldz.com
@@ -286,7 +286,7 @@ jobs:
           grep -Fq 'https://gogetfunding.com/?p=9560167' "$RUNNER_TEMP/origin-donate.html"
           grep -Fq 'Follow ✅' "$RUNNER_TEMP/origin-facebook.html"
           grep -Fq 'Raaiiidd' "$RUNNER_TEMP/origin-command.html"
-          grep -Fq '50 SITE POSITIONS' "$RUNNER_TEMP/origin-network.html"
+          grep -Fq '50 sites. One source of truth.' "$RUNNER_TEMP/origin-network.html"
           grep -Fq 'Action Spread Smiles' "$RUNNER_TEMP/origin-site-donate.html"
           grep -Fq 'Action Spread Smiles' "$RUNNER_TEMP/origin-site-facebook.html"
           grep -Fq 'oneworldz-clean-static-v4' "$RUNNER_TEMP/origin-manifest.json"
@@ -317,7 +317,7 @@ jobs:
             echo '::error::Rollback package is unavailable.'
             exit 1
           }
-          timeout 240 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 600 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 2
           set net:timeout 30
