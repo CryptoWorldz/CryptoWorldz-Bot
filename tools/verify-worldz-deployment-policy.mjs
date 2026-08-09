@@ -36,8 +36,6 @@ for (const file of files) {
     if (!/rollback|restore previous|restore previous site/i.test(text)) fail(file, 'no rollback path');
     if (!/backup|snapshot/i.test(text)) fail(file, 'no pre-deploy backup');
 
-    // Production deploys may be started manually or by a dedicated approval-request file only.
-    // A code/media/workflow push must never silently become a production deployment.
     const pushBlock = text.match(/\n\s*push:\s*\n([\s\S]*?)(?=\n\s*[a-zA-Z_][\w-]*:\s*\n|\npermissions:|\nconcurrency:)/)?.[1] || '';
     if (pushBlock) {
       const quotedPaths = [...pushBlock.matchAll(/-\s*['"]([^'"]+)['"]/g)].map(m => m[1]);
@@ -61,9 +59,23 @@ if (!comingSoon.includes("./assets/worldz-master/cryptoworldz/we-need-you.png"))
 if (/hero\.part\d+.*\.b64/i.test(comingSoon)) fail('coming-soon-next.js', 'legacy split base64 hero loader still present');
 
 const pdc = fs.readFileSync(path.join(workflowsDir, 'deploy-pdc-standalone.yml'), 'utf8');
-for (const required of ['https://gofund.me/65129e58', 'https://impactbased.oneworldz.com', 'LIVE IMAGE HASH MISMATCH']) {
+for (const required of ['https://gofund.me/65129e58', 'https://oneworldz.com/worldz/impactbased', 'LIVE IMAGE HASH MISMATCH']) {
   if (!pdc.includes(required)) fail('deploy-pdc-standalone.yml', `missing required PDC proof: ${required}`);
 }
+if (pdc.includes('https://impactbased.oneworldz.com')) fail('deploy-pdc-standalone.yml', 'broken ImpactBased subdomain is forbidden');
+
+const pdcHome = fs.readFileSync(path.join(root, 'apps', 'worldz-sites', 'purplediamondcrew', 'index.html'), 'utf8');
+if (!pdcHome.includes('https://oneworldz.com/worldz/impactbased')) fail('purplediamondcrew/index.html', 'PDC ImpactBased button does not use canonical OneWorldz route');
+if (pdcHome.includes('https://impactbased.oneworldz.com')) fail('purplediamondcrew/index.html', 'PDC still contains broken ImpactBased subdomain');
+
+const audit = fs.readFileSync(path.join(workflowsDir, 'audit-worldz-live-targets.yml'), 'utf8');
+for (const forbiddenTarget of ['impactbased.oneworldz.com', 'law.oneworldz.com', 'learn.oneworldz.com', 'bitcoinworldz.xyz']) {
+  if (audit.includes(forbiddenTarget)) fail('audit-worldz-live-targets.yml', `noncanonical/dead target is forbidden: ${forbiddenTarget}`);
+}
+for (const requiredRoute of ['https://oneworldz.com/worldz/impactbased', 'https://oneworldz.com/worldz/law', 'https://oneworldz.com/worldz/learn', 'https://bitworldz.xyz/']) {
+  if (!audit.includes(requiredRoute)) fail('audit-worldz-live-targets.yml', `canonical live route missing: ${requiredRoute}`);
+}
+if (!audit.includes('--retry-all-errors')) fail('audit-worldz-live-targets.yml', 'robust HTTP retry proof missing');
 
 const sol = fs.readFileSync(path.join(workflowsDir, 'deploy-solworldz-standalone.yml'), 'utf8');
 if (!/solworld\\?\.fun/i.test(sol) && !sol.includes('solworld\\.fun')) fail('deploy-solworldz-standalone.yml', 'retired SolWorld.fun rejection check missing');
@@ -72,4 +84,4 @@ if (failures.length) {
   for (const item of failures) console.error(`POLICY FAILURE: ${item}`);
   process.exit(1);
 }
-console.log(`WORLDZ DEPLOYMENT POLICY PASSED: ${canonicalDeploys.size} canonical workflows, legacy deploys retired, unsafe bypasses and automatic production triggers forbidden.`);
+console.log(`WORLDZ DEPLOYMENT POLICY PASSED: ${canonicalDeploys.size} canonical workflows, broken route assumptions and unsafe deployment patterns forbidden.`);
