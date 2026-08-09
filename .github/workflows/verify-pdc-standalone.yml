@@ -1,67 +1,17 @@
-name: Verify PurpleDiamondCrew Standalone
-# readiness recheck after environment secret update
+name: RETIRED — PDC Standalone Readiness
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/worldz-sites/purplediamondcrew/**'
-      - 'tools/verify-pdc-standalone.mjs'
-      - '.github/workflows/verify-pdc-standalone.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  verify:
-    name: Verify PDC package and production readiness
+  retired:
     runs-on: ubuntu-latest
-    environment:
-      name: purplediamondcrew-production
-    env:
-      FTP_HOST: 145.223.108.40
-      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      FTP_PORT: '21'
-      FTP_SERVER_DIR: '/'
-      FTP_ACCOUNT_SCOPE: DOMAIN_ONLY
-      DEPLOY_GUARD: PURPLEDIAMONDCREW.COM
     steps:
-      - name: Check out approved main commit
-        uses: actions/checkout@v4
-
-      - name: Run standalone production gate
-        run: node tools/verify-pdc-standalone.mjs
-
-      - name: Check production environment without connecting
-        shell: bash
+      - name: Block stale readiness verifier
         run: |
-          set -euo pipefail
-          ready=true
-          [[ -n "$FTP_USERNAME" ]] || { echo '::warning::FTP_USERNAME is not configured'; ready=false; }
-          [[ -n "$FTP_PASSWORD" ]] || { echo '::warning::FTP_PASSWORD is not configured'; ready=false; }
-          [[ "$FTP_HOST" == '145.223.108.40' ]] || { echo '::error::Locked Hostinger IP changed'; exit 1; }
-          [[ "$FTP_PORT" == '21' && "$FTP_SERVER_DIR" == '/' ]] || { echo '::error::Locked FTP target changed'; exit 1; }
-          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' && "$DEPLOY_GUARD" == 'PURPLEDIAMONDCREW.COM' ]] || { echo '::error::PDC guard changed'; exit 1; }
-          if [[ "$ready" == true ]]; then
-            echo 'PDC_INFRA_READY=true' >> "$GITHUB_ENV"
-            echo 'PurpleDiamondCrew production environment is ready for guarded deployment.'
-          else
-            echo 'PDC_INFRA_READY=false' >> "$GITHUB_ENV"
-            echo 'PurpleDiamondCrew website package is valid; only the PDC FTP username/password are missing.'
-          fi
-
-      - name: Publish readiness summary
-        if: always()
-        run: |
-          {
-            echo '## PurpleDiamondCrew Standalone Readiness'
-            echo '- Package: 3 dedicated pages'
-            echo '- Required artwork: built-in vector fallbacks'
-            echo '- Hope Chest: verified master enhancement + fallback'
-            echo '- Legacy tokens: 10 verified records'
-            echo '- Hostinger target: locked'
-            echo "- PDC FTP credentials ready: ${PDC_INFRA_READY:-unknown}"
-            echo '- Upload performed: no'
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo '::error::This readiness workflow is retired because it described obsolete vector fallbacks, only three pages, and could report readiness without proving the live site.'
+          echo 'Use the proof inside: Deploy PurpleDiamondCrew Standalone'
+          exit 1
