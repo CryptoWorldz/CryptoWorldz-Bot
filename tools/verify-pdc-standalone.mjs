@@ -27,7 +27,7 @@ for (const [label, html] of [['home',home],['crew',crew],['mission',mission],['o
   assert.ok(!html.includes('Loading the Worldz experience'), `${label}: shared loading shell leaked in`);
 }
 
-assert.match(home, /pdc-mission-board\.webp/, 'Approved PDC mission board is not the home hero');
+assert.match(home, /pdc-mission-board\.png/, 'Approved PDC mission board is not the home hero');
 assert.match(home, /Real People/i, 'PDC action identity missing');
 for (const need of ['FOOD','CLOTHING','CLEAN WATER','MEDICAL HELP','SHELTER','EDUCATION','GARDENS']) assert.match(home, new RegExp(need,'i'), `PDC category missing: ${need}`);
 assert.match(home, /A DREAM BUILT ON KINDNESS/i, 'Kindness section missing');
@@ -39,7 +39,7 @@ assert.ok(pages.some(html => html.includes('https://oneworldz.com')), 'OneWorldz
 assert.ok(pages.some(html => html.includes('https://impactbased.oneworldz.com')), 'ImpactBased link missing');
 
 assert.match(chest, /THE ONEWORLDZ HOPE CHEST/i, 'Hope Chest identity missing');
-assert.match(chest, /pdc-hope-chest\.webp/, 'Approved Hope Chest raster is not used');
+assert.match(chest, /pdc-hope-chest\.png/, 'Approved Hope Chest raster is not used');
 assert.match(chest, /data-approved-art="pdc-hope-chest"/, 'Hope Chest approved-art marker missing');
 assert.match(chest, /glass-dock/, 'Hope Chest glass button dock missing');
 assert.match(chest, /not presented as active|not presented as current|not presented as active launches|not presented as active launches or endorsements/i, 'Legacy archive disclaimer missing');
@@ -51,7 +51,7 @@ const tokens = [
 for (const [name,ca] of tokens) { assert.match(chest,new RegExp(`>${name}<`),`Legacy token missing: ${name}`); assert.ok(chest.includes(ca),`Verified contract missing for ${name}`); }
 assert.equal((chest.match(/class="token-card"/g)||[]).length,10,'Hope Chest must contain exactly 10 legacy token cards');
 
-for (const media of ['pdc-mission-board.webp','pdc-hope-chest.webp','pdc-crest.webp']) {
+for (const media of ['pdc-mission-board.png','pdc-hope-chest.png','pdc-crest.png']) {
   assert.ok(exists('assets','media',media), `Approved PDC media missing: ${media}`);
   assert.ok(fs.statSync(path.join(site,'assets','media',media)).size > 50000, `Approved PDC media is unexpectedly small: ${media}`);
 }
@@ -59,4 +59,4 @@ assert.match(css,/backdrop-filter:blur\(18px\)/,'Glass treatment missing');
 assert.match(css,/filter:none!important/,'Approved raster anti-blur rule missing');
 assert.match(htaccess,/Content-Security-Policy/,'CSP missing');
 assert.ok(!js.includes('supabase.co'),'PDC visuals must not depend on Supabase');
-console.log('PurpleDiamondCrew production gate passed: approved raster artwork, glass Hope Chest links, seven site pages and 10 legacy records verified.');
+console.log('PurpleDiamondCrew production gate passed: approved PNG artwork, glass Hope Chest links, seven site pages and 10 legacy records verified.');
