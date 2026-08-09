@@ -1,16 +1,11 @@
 name: Deploy PurpleDiamondCrew Standalone
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'deployments/pdc-standalone.request'
-      - '.github/workflows/deploy-pdc-standalone.yml'
-      - 'apps/worldz-sites/purplediamondcrew/**'
-      - 'media/approved-worldz/**'
-      - 'tools/restore-approved-worldz-media.sh'
-      - 'tools/verify-pdc-standalone.mjs'
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -70,16 +65,10 @@ jobs:
           set -euo pipefail
           grep -RFlq "$FUNDRAISER_URL" apps/worldz-sites/purplediamondcrew
           grep -RFlq "$IMPACTBASED_URL" apps/worldz-sites/purplediamondcrew
-
           fundraiser_final="$(curl -L -fsS --max-time 30 -o /dev/null -w '%{url_effective}' "$FUNDRAISER_URL")"
-          [[ "$fundraiser_final" =~ ^https://(www\.)?gofundme\.com/f/ ]] || {
-            echo "::error::Fundraiser resolved to unexpected/generic destination: $fundraiser_final"; exit 1;
-          }
-
+          [[ "$fundraiser_final" =~ ^https://(www\.)?gofundme\.com/f/ ]] || { echo "::error::Fundraiser resolved to unexpected/generic destination: $fundraiser_final"; exit 1; }
           impact_code="$(curl -L -sS --max-time 30 -o /dev/null -w '%{http_code}' "$IMPACTBASED_URL/")"
-          [[ "$impact_code" =~ ^2[0-9][0-9]$ ]] || {
-            echo "::error::ImpactBased destination is not live: HTTP $impact_code"; exit 1;
-          }
+          [[ "$impact_code" =~ ^2[0-9][0-9]$ ]] || { echo "::error::ImpactBased destination is not live: HTTP $impact_code"; exit 1; }
 
       - name: Lock deployment to PurpleDiamondCrew only
         shell: bash
@@ -89,8 +78,7 @@ jobs:
           [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]] || { echo '::error::FTP credentials missing'; exit 1; }
           [[ "$FTP_PORT" == '21' && "$FTP_SERVER_DIR" == '/' ]] || { echo '::error::Locked FTP target changed'; exit 1; }
           [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' && "$DEPLOY_GUARD" == 'PURPLEDIAMONDCREW.COM' ]] || { echo '::error::PDC guard changed'; exit 1; }
-          echo "::add-mask::$FTP_USERNAME"
-          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_HOST"
 
       - name: Confirm encrypted Hostinger target with certificate validation
         shell: bash
@@ -159,29 +147,20 @@ jobs:
             grep -Fqi 'PURPLE DIAMOND CREW' "$out"
             ! grep -Eqi 'Loading the Worldz experience|default page|parked domain' "$out"
           done
-
           for image in pdc-mission-board.png pdc-hope-chest.png pdc-crest.png; do
-            live="$RUNNER_TEMP/live-$image"
-            source="$RUNNER_TEMP/approved-worldz/pdc/$image"
+            live="$RUNNER_TEMP/live-$image"; source="$RUNNER_TEMP/approved-worldz/pdc/$image"
             curl -L -fsS -H 'Cache-Control: no-cache' --max-time 30 "$LIVE_URL/assets/media/$image?$cache" -o "$live"
-            test "$(sha256sum "$source" | awk '{print $1}')" = "$(sha256sum "$live" | awk '{print $1}')" || {
-              echo "::error::LIVE IMAGE HASH MISMATCH: $image"; exit 1;
-            }
+            test "$(sha256sum "$source" | awk '{print $1}')" = "$(sha256sum "$live" | awk '{print $1}')" || { echo "::error::LIVE IMAGE HASH MISMATCH: $image"; exit 1; }
           done
-
-          home="$RUNNER_TEMP/page-_.html"
-          donate="$RUNNER_TEMP/page-_donate_.html"
-          hope="$RUNNER_TEMP/page-_hope-chest_.html"
+          home="$RUNNER_TEMP/page-_.html"; donate="$RUNNER_TEMP/page-_donate_.html"; hope="$RUNNER_TEMP/page-_hope-chest_.html"
           grep -Fq "$FUNDRAISER_URL" "$home"
           grep -Fq "$FUNDRAISER_URL" "$donate"
           grep -Fq "$IMPACTBASED_URL" "$home"
           grep -Fq 'data-approved-art="pdc-hope-chest"' "$hope"
-
           fundraiser_final="$(curl -L -fsS --max-time 30 -o /dev/null -w '%{url_effective}' "$FUNDRAISER_URL")"
           [[ "$fundraiser_final" =~ ^https://(www\.)?gofundme\.com/f/ ]] || { echo "::error::Live fundraiser destination became generic/wrong: $fundraiser_final"; exit 1; }
           impact_code="$(curl -L -sS --max-time 30 -o /dev/null -w '%{http_code}' "$IMPACTBASED_URL/")"
           [[ "$impact_code" =~ ^2[0-9][0-9]$ ]] || { echo "::error::Live ImpactBased link is broken: HTTP $impact_code"; exit 1; }
-
           echo 'verified=true' >> "$GITHUB_OUTPUT"
           echo 'PDC PRODUCTION PROOF PASSED: pages, exact image hashes, fundraiser destination and ImpactBased destination verified.'
 
@@ -211,11 +190,11 @@ jobs:
         run: |
           {
             echo '## PurpleDiamondCrew Production Proof'
-            echo "- Job conclusion is authoritative; this summary does not override failures."
-            echo "- Exact live image SHA-256 equality: required"
-            echo "- Seven requested pages: required"
-            echo "- Exact fundraiser destination: required"
-            echo "- Working ImpactBased destination: required"
-            echo "- Rollback snapshot: mandatory"
-            echo "- CryptoWorldz / Zed / Auto: untouched"
+            echo '- Job conclusion is authoritative; this summary does not override failures.'
+            echo '- Exact live image SHA-256 equality: required'
+            echo '- Seven requested pages: required'
+            echo '- Exact fundraiser destination: required'
+            echo '- Working ImpactBased destination: required'
+            echo '- Rollback snapshot: mandatory'
+            echo '- CryptoWorldz / Zed / Auto: untouched'
           } >> "$GITHUB_STEP_SUMMARY"
