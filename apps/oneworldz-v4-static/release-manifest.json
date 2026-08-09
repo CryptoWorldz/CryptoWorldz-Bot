@@ -1,0 +1,19 @@
+{
+  "release": "oneworldz-clean-static-v4",
+  "generatedAt": "2026-08-09T00:14:47.373Z",
+  "siteIdentities": 50,
+  "renderedRoutes": 160,
+  "sharedRoutesPerIdentity": [
+    "home",
+    "donate",
+    "facebook"
+  ],
+  "source": "oneworldz-rebuild production build",
+  "assets": {
+    "assets/index-Ca8ipCgd.css": "cdfecbeea71fee125d8cae7f9741a5b674c02f6d10e9ea89bf2ba7c6ca4175a1",
+    "images/action-spread-smiles.jpg": "f5549d4afa1822bf508976c37b45803ecf9f2ae1e3f346d3c1ba0cf2fce81735",
+    "images/command-centre.jpg": "f3ba23f77684253ef3ee1a605a3f1cdeea358ea2671b878cefcc044eec276fe7",
+    "images/future-builder.jpg": "af68630ff04a71772ea25528f9a805f44a06a3866a1686cc2a12479602eaca09",
+    "images/oneworldz-hope-chest.jpg": "59ab59f846fc960320bdb844c2b6feefe53d4a10bfcc275fc5fce80493520766"
+  }
+}
