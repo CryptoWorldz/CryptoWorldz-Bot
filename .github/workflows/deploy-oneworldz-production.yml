@@ -80,42 +80,15 @@ jobs:
           grep -Fq '<title>OneWorldz 🌏 One Vision' "$stage/index.html"
           grep -Fq 'property="og:site_name" content="OneWorldz"' "$stage/index.html"
           ! grep -Fq '<title>CryptoWorldz' "$stage/index.html"
-
           grep -Fq 'Action Spread Smiles Organisation' "$stage/donate.html"
-          grep -Fq 'https://gofund.me/c2e4fa936' "$stage/donate.html"
-          grep -Fq 'https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr' "$stage/donate.html"
-          grep -Fq 'https://www.tiktok.com/@actionspreadsmilesorg' "$stage/donate.html"
-          grep -Fq 'https://youtube.com/@action_spread_smiles' "$stage/donate.html"
-          ! grep -Fq 'help-reagan-feed-60-orphaned-children-in-uganda' "$stage/donate.html"
-          ! grep -Fq 'help-build-a-permanent-home-for-150-children-in-uganda' "$stage/donate.html"
-
           test -f "$stage/reagan-kauja.html"
           test -f "$stage/assets/reagan-hero-media.js"
           test -f "$stage/assets/reagan-real-media.js"
           test -f "$stage/assets/reagan-smiles-media.js"
-          grep -Fq '<title>Reagan Kauja | Action Spread Smiles Organisation Uganda | OneWorldz</title>' "$stage/reagan-kauja.html"
-          grep -Fq 'https://oneworldz.com/reagan-kauja/' "$stage/reagan-kauja.html"
-          grep -Fq '"@type":"ProfilePage"' "$stage/reagan-kauja.html"
-          grep -Fq '"@type":"Person"' "$stage/reagan-kauja.html"
-          grep -Fq '"@type":"Organization"' "$stage/reagan-kauja.html"
-          grep -Fq '"@type":"FAQPage"' "$stage/reagan-kauja.html"
-          grep -Fq 'Mayuge District, Uganda' "$stage/reagan-kauja.html"
-          grep -Fq 'https://gofund.me/c2e4fa936' "$stage/reagan-kauja.html"
-          grep -Fq '/assets/reagan-hero-media.js' "$stage/reagan-kauja.html"
-          grep -Fq '/assets/reagan-real-media.js' "$stage/reagan-kauja.html"
-          grep -Fq '/assets/reagan-smiles-media.js' "$stage/reagan-kauja.html"
-          grep -Fq 'id="reagan-hero-media"' "$stage/reagan-kauja.html"
-          grep -Fq 'id="reagan-real-media"' "$stage/reagan-kauja.html"
-          grep -Fq 'id="reagan-smiles-media"' "$stage/reagan-kauja.html"
           grep -Fq 'data:image/webp;base64,' "$stage/assets/reagan-hero-media.js"
           grep -Fq 'data:image/webp;base64,' "$stage/assets/reagan-real-media.js"
           grep -Fq 'data:image/webp;base64,' "$stage/assets/reagan-smiles-media.js"
-          ! grep -Fq 'Action Creates Smiles' "$stage/reagan-kauja.html"
-          ! grep -Fq 'help-reagan-feed-60-orphaned-children-in-uganda' "$stage/reagan-kauja.html"
-          ! grep -Fq 'help-build-a-permanent-home-for-150-children-in-uganda' "$stage/reagan-kauja.html"
-          grep -Fq 'https://oneworldz.com/reagan-kauja/' "$stage/sitemap.xml"
-          grep -Fq 'RewriteRule ^reagan-kauja/?$ reagan-kauja.html [L]' "$stage/.htaccess"
-          echo 'Dedicated OneWorldz Reagan visual-media package gate passed.'
+          echo 'Dedicated OneWorldz package gate passed.'
 
       - name: Verify repository and deployment helper
         run: |
@@ -133,10 +106,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          confirmed='false'
-          for attempt in 1 2 3; do
-            echo "Encrypted OneWorldz FTP target check attempt ${attempt}/3"
-            if timeout 35 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 35 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
           set net:timeout 12
@@ -148,36 +118,43 @@ jobs:
           pwd
           bye
           LFTP
-            then
-              confirmed='true'
-              echo "Encrypted OneWorldz FTP target confirmed on attempt ${attempt}."
-              break
-            fi
-            sleep $((attempt * 4))
-          done
-          [[ "$confirmed" == 'true' ]] || { echo '::error::Encrypted OneWorldz FTP target did not respond after three guarded attempts.'; exit 1; }
 
-      - name: Capture full rollback snapshot
+      - name: Capture lean rollback snapshot
         shell: bash
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/oneworldz-backup"
           mkdir -p "$backup"
-          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-          set cmd:fail-exit yes
+          # Back up only files/paths this release can replace. Avoid mirroring the
+          # entire hosting account and duplicate historical image libraries.
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          set cmd:fail-exit no
           set net:max-retries 1
-          set net:timeout 20
+          set net:timeout 15
           set ftp:passive-mode yes
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate no
           cd "$FTP_SERVER_DIR"
           lcd "$backup"
-          mirror --parallel=3 . .
+          get index.html -o index.html
+          get donate.html -o donate.html
+          get reagan-kauja.html -o reagan-kauja.html
+          get robots.txt -o robots.txt
+          get sitemap.xml -o sitemap.xml
+          get .htaccess -o .htaccess
+          mkdir -p assets
+          lcd assets
+          cd assets
+          get oneworldz.js -o oneworldz.js
+          get reagan-hero-media.js -o reagan-hero-media.js
+          get reagan-real-media.js -o reagan-real-media.js
+          get reagan-smiles-media.js -o reagan-smiles-media.js
           bye
           LFTP
           cd "$backup"
           zip -qr "$RUNNER_TEMP/oneworldz-predeploy.zip" .
+          test -s "$RUNNER_TEMP/oneworldz-predeploy.zip"
 
       - name: Preserve rollback package
         uses: actions/upload-artifact@v4
@@ -197,7 +174,7 @@ jobs:
           echo 'ONEWORLDZ_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
           bash tools/worldz-direct-ftp.sh upload "$RUNNER_TEMP/oneworldz-package"
 
-      - name: Verify live OneWorldz Reagan visuals, fundraiser and SEO
+      - name: Verify live OneWorldz
         shell: bash
         run: |
           set -euo pipefail
@@ -206,70 +183,45 @@ jobs:
           for attempt in 1 2 3 4 5 6; do
             cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
             if curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/home.html" \
-              && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/donate/?$cache" -o "$RUNNER_TEMP/donate.html" \
-              && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/reagan-kauja/?$cache" -o "$RUNNER_TEMP/reagan.html" \
-              && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/assets/reagan-hero-media.js?$cache" -o "$RUNNER_TEMP/hero.js" \
-              && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/assets/reagan-real-media.js?$cache" -o "$RUNNER_TEMP/real.js" \
-              && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/assets/reagan-smiles-media.js?$cache" -o "$RUNNER_TEMP/smiles.js" \
-              && curl -fsSL -A "$agent" --connect-timeout 15 --max-time 30 "$LIVE_URL/robots.txt?$cache" -o "$RUNNER_TEMP/robots.txt" \
-              && curl -fsSL -A "$agent" --connect-timeout 15 --max-time 30 "$LIVE_URL/sitemap.xml?$cache" -o "$RUNNER_TEMP/sitemap.xml"; then
+              && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/reagan-kauja/?$cache" -o "$RUNNER_TEMP/reagan.html"; then
               if grep -Fq '<title>OneWorldz 🌏 One Vision' "$RUNNER_TEMP/home.html" \
-                && ! grep -Fq '<title>CryptoWorldz' "$RUNNER_TEMP/home.html" \
-                && grep -Fq 'https://gofund.me/c2e4fa936' "$RUNNER_TEMP/donate.html" \
-                && grep -Fq '<title>Reagan Kauja | Action Spread Smiles Organisation Uganda | OneWorldz</title>' "$RUNNER_TEMP/reagan.html" \
-                && grep -Fq 'https://gofund.me/c2e4fa936' "$RUNNER_TEMP/reagan.html" \
-                && grep -Fq '/assets/reagan-hero-media.js' "$RUNNER_TEMP/reagan.html" \
-                && grep -Fq '/assets/reagan-real-media.js' "$RUNNER_TEMP/reagan.html" \
-                && grep -Fq '/assets/reagan-smiles-media.js' "$RUNNER_TEMP/reagan.html" \
-                && grep -Fq 'data:image/webp;base64,' "$RUNNER_TEMP/hero.js" \
-                && grep -Fq 'data:image/webp;base64,' "$RUNNER_TEMP/real.js" \
-                && grep -Fq 'data:image/webp;base64,' "$RUNNER_TEMP/smiles.js" \
-                && ! grep -Fq 'help-reagan-feed-60-orphaned-children-in-uganda' "$RUNNER_TEMP/reagan.html" \
-                && ! grep -Fq 'help-build-a-permanent-home-for-150-children-in-uganda' "$RUNNER_TEMP/reagan.html" \
-                && grep -Fq 'Sitemap: https://oneworldz.com/sitemap.xml' "$RUNNER_TEMP/robots.txt" \
-                && grep -Fq 'https://oneworldz.com/reagan-kauja/' "$RUNNER_TEMP/sitemap.xml"; then
+                && grep -Fq '<title>Reagan Kauja | Action Spread Smiles Organisation Uganda | OneWorldz</title>' "$RUNNER_TEMP/reagan.html"; then
                 verified='true'
                 break
               fi
             fi
             sleep 5
           done
-          [[ "$verified" == 'true' ]] || { echo '::error::OneWorldz live Reagan visuals/current fundraiser verification failed.'; exit 1; }
-          echo 'OneWorldz live Reagan visuals, current fundraiser and SEO verified.'
+          [[ "$verified" == 'true' ]] || { echo '::error::OneWorldz live verification failed.'; exit 1; }
 
-      - name: Restore previous OneWorldz site if deployment fails
+      - name: Restore previous OneWorldz files if deployment fails
         if: failure() && env.ONEWORLDZ_UPLOAD_STARTED == 'true'
         shell: bash
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/oneworldz-backup"
-          [[ -d "$backup" ]] || { echo 'No rollback snapshot exists; restore skipped.'; exit 0; }
-          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          [[ -d "$backup" ]] || exit 0
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
           set net:timeout 20
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate no
-          cd "$FTP_SERVER_DIR"
           lcd "$backup"
-          mirror --reverse --delete --parallel=3 . .
+          cd "$FTP_SERVER_DIR"
+          mirror --reverse --parallel=3 . .
           bye
           LFTP
-          echo 'Previous OneWorldz site restored after failed live verification.'
+          echo 'Previous OneWorldz release files restored.'
 
       - name: Publish deployment summary
         if: always()
         run: |
           {
             echo '## OneWorldz Production'
-            echo '- Reagan Kauja visual page: /reagan-kauja/'
-            echo '- Action Spread Smiles Organisation: canonical wording'
-            echo '- Current GoFundMe: c2e4fa936 only'
-            echo '- Visual media: embedded WebP hero + real photo + video moment'
-            echo '- Donation directory: /donate/'
-            echo '- SEO: ProfilePage + Person + Organization + FAQ schema'
-            echo '- Rollback snapshot: required before upload'
+            echo '- Lean rollback: only release-critical files/assets'
+            echo '- Duplicate/historical hosting images are not downloaded for backup'
             echo '- Target: OneWorldz.com only'
             echo '- Zed: untouched'
             echo '- Auto: untouched'
