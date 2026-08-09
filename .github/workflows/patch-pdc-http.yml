@@ -1,63 +1,17 @@
-name: Wire Purple Diamond Crew Hosting
+name: RETIRED — PDC HTTP Patch
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'src/pdc-host.js'
-      - '.github/workflows/patch-pdc-http.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  patch:
+  retired:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Register Purple Diamond Crew middleware before root routes
-        shell: bash
+      - name: Block retired patch path
         run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs = require('fs');
-          const file = 'src/http.js';
-          let source = fs.readFileSync(file, 'utf8');
-          const requireLine = 'const { registerPdcHost } = require("./pdc-host");';
-          if (!source.includes(requireLine)) {
-            source = source.replace(
-              'const { solanaPayUri, verifySolanaContribution } = require("./solana");',
-              'const { solanaPayUri, verifySolanaContribution } = require("./solana");\n' + requireLine
-            );
-          }
-          const registration = '  registerPdcHost(app);';
-          if (!source.includes(registration)) {
-            source = source.replace(
-              '  app.use(express.json({ limit: "32kb", type: "application/json" }));',
-              '  app.use(express.json({ limit: "32kb", type: "application/json" }));\n\n' + registration
-            );
-          }
-          if (!source.includes(requireLine) || !source.includes(registration)) {
-            throw new Error('Purple Diamond Crew middleware patch could not be applied safely');
-          }
-          fs.writeFileSync(file, source);
-          NODE
-
-      - name: Commit safe wiring update
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- src/http.js; then
-            echo 'Purple Diamond Crew middleware already wired.'
-            exit 0
-          fi
-          git config user.name 'CryptoWorldz Deployment Bot'
-          git config user.email 'jayjayteamdev@outlook.com'
-          git add src/http.js
-          git commit -m 'Wire Purple Diamond Crew site into Zed hosting'
-          git push origin HEAD:main
+          echo '::error::This ad-hoc PDC patch workflow is retired. Production PDC changes must use the dedicated proof-first standalone workflow with backup, exact image hashes and exact link checks.'
+          echo 'Use: Deploy PurpleDiamondCrew Standalone'
+          exit 1
