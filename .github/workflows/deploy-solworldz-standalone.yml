@@ -1,15 +1,11 @@
 name: Deploy SolWorldz Standalone
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - 'apps/worldz-sites/solworldz/**'
-      - 'media/approved-worldz/**'
-      - 'tools/restore-approved-worldz-media.sh'
-      - 'tools/verify-solworldz-standalone.mjs'
-      - '.github/workflows/deploy-solworldz-standalone.yml'
-  workflow_dispatch:
+      - 'deployments/solworldz-standalone.request'
 
 permissions:
   contents: read
@@ -136,14 +132,10 @@ jobs:
           grep -Fq 'solworldz-hero-desktop.png' "$RUNNER_TEMP/live.html"
           grep -Fq 'solworldz-hero-mobile.png' "$RUNNER_TEMP/live.html"
           ! grep -Eqi 'Loading the Worldz experience|default page|parked domain|solworld\.fun' "$RUNNER_TEMP/live.html"
-
           for image in solworldz-hero-desktop.png solworldz-hero-mobile.png solworldz-approved-atlas.png; do
-            live="$RUNNER_TEMP/live-$image"
-            source="$RUNNER_TEMP/approved-worldz/solworldz/$image"
+            live="$RUNNER_TEMP/live-$image"; source="$RUNNER_TEMP/approved-worldz/solworldz/$image"
             curl -L -fsS -H 'Cache-Control: no-cache' --max-time 30 "$LIVE_URL/assets/media/$image?$cache" -o "$live"
-            test "$(sha256sum "$source" | awk '{print $1}')" = "$(sha256sum "$live" | awk '{print $1}')" || {
-              echo "::error::LIVE IMAGE HASH MISMATCH: $image"; exit 1;
-            }
+            test "$(sha256sum "$source" | awk '{print $1}')" = "$(sha256sum "$live" | awk '{print $1}')" || { echo "::error::LIVE IMAGE HASH MISMATCH: $image"; exit 1; }
           done
           echo 'SOLWORLDZ PRODUCTION PROOF PASSED: live HTML and exact approved image hashes verified.'
 
