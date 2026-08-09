@@ -16,7 +16,6 @@ function fail(file, reason) { failures.push(`${file}: ${reason}`); }
 for (const file of files) {
   const full = path.join(workflowsDir, file);
   const text = fs.readFileSync(full, 'utf8');
-  const lower = text.toLowerCase();
 
   if (file.startsWith('deploy-') && !canonicalDeploys.has(file)) {
     if (!/^name:\s*retired\b/im.test(text)) fail(file, 'legacy deployment workflow is not marked RETIRED');
@@ -36,6 +35,16 @@ for (const file of files) {
     if (!/sha256sum/i.test(text)) fail(file, 'no exact SHA-256 verification');
     if (!/rollback|restore previous|restore previous site/i.test(text)) fail(file, 'no rollback path');
     if (!/backup|snapshot/i.test(text)) fail(file, 'no pre-deploy backup');
+
+    // Production deploys may be started manually or by a dedicated approval-request file only.
+    // A code/media/workflow push must never silently become a production deployment.
+    const pushBlock = text.match(/\n\s*push:\s*\n([\s\S]*?)(?=\n\s*[a-zA-Z_][\w-]*:\s*\n|\npermissions:|\nconcurrency:)/)?.[1] || '';
+    if (pushBlock) {
+      const quotedPaths = [...pushBlock.matchAll(/-\s*['"]([^'"]+)['"]/g)].map(m => m[1]);
+      const illegal = quotedPaths.filter(p => !p.startsWith('deployments/') || !p.endsWith('.request'));
+      if (illegal.length) fail(file, `automatic production trigger paths forbidden: ${illegal.join(', ')}`);
+    }
+    if (!/workflow_dispatch\s*:/.test(text)) fail(file, 'manual workflow_dispatch trigger missing');
   }
 
   if ((file.startsWith('audit-worldz-') || canonicalDeploys.has(file)) && /\bexit\s+0\b/.test(text)) {
@@ -63,4 +72,4 @@ if (failures.length) {
   for (const item of failures) console.error(`POLICY FAILURE: ${item}`);
   process.exit(1);
 }
-console.log(`WORLDZ DEPLOYMENT POLICY PASSED: ${canonicalDeploys.size} canonical deployment workflows, legacy deploys retired, unsafe bypasses forbidden.`);
+console.log(`WORLDZ DEPLOYMENT POLICY PASSED: ${canonicalDeploys.size} canonical workflows, legacy deploys retired, unsafe bypasses and automatic production triggers forbidden.`);
