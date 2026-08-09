@@ -7,6 +7,7 @@ const { createAutoClient } = require("./src/auto/client");
 const { registerAutoMiniRoutes } = require("./src/auto/zed-router");
 const { registerAutoTelegramHandlers } = require("./src/auto/telegram");
 const { CAUSE_COMMANDS, registerCauseTelegramHandlers } = require("./src/causes/telegram");
+const { BOT_MENU_COMMANDS, registerCommandCentreHandlers } = require("./src/command-centre");
 const { DIRECTORY_COMMANDS, registerCommunityDirectoryHandlers } = require("./src/community-directory");
 const { registerExecutiveRoutes } = require("./src/executive/http");
 const { EXECUTIVE_COMMANDS, registerExecutiveTelegramHandlers } = require("./src/executive/telegram");
@@ -33,7 +34,7 @@ const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/web
 const { WORK_EVIDENCE_COMMANDS, registerWorkEvidenceHandlers } = require("./src/work-evidence");
 const { WORLDZCAST_COMMANDS, registerWorldzCastSystem } = require("./src/worldzcast");
 
-const RUNTIME_BUILD = "2026-08-07-grace-x-confidential-oauth";
+const RUNTIME_BUILD = "2026-08-10-grace-build1-command-centre";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -118,6 +119,7 @@ async function start() {
   });
 
   registerTelegramHandlers({ bot, repository, config });
+  registerCommandCentreHandlers({ bot, repository, config });
   registerRoleProfileHandler({ bot, repository, config, supabase });
   registerScopedBroadcastHandlers({ bot, repository, config });
   registerAutoTelegramHandlers({ bot, config, autoClient, supabase });
@@ -167,7 +169,8 @@ async function start() {
     purchase_based_points: false,
     holding_recognition_points: false,
     owner_work_evidence: true,
-    posting_enabled: false
+    posting_enabled: false,
+    simplified_command_centre: true
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
   registerExecutiveRoutes({ app, repository, supabase, config });
@@ -195,21 +198,7 @@ async function start() {
           "chat_join_request"
         ]
       }),
-      bot.setMyCommands([
-        ...PUBLIC_COMMANDS,
-        ...WEBSITE_COMMANDS,
-        ...DIRECTORY_COMMANDS,
-        ...REFERRAL_COMMANDS,
-        ...REWARD_SETTLEMENT_COMMANDS,
-        ...PROJECT_WALLET_COMMANDS,
-        ...LEGEND_V8_COMMANDS,
-        ...WORK_EVIDENCE_COMMANDS,
-        ...WORLDZCAST_COMMANDS,
-        ...CAUSE_COMMANDS,
-        ...EXECUTIVE_COMMANDS,
-        ...GRACE_COMMANDS,
-        ...GRACE_X_OAUTH_COMMANDS
-      ])
+      bot.setMyCommands(BOT_MENU_COMMANDS)
     ]);
 
     if (webhookResult[0].status === "fulfilled") {
