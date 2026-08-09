@@ -1,42 +1,17 @@
-name: Verify Purple Diamond Crew Live Routes
+name: RETIRED — PDC Live Verifier
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/verify-pdc-live.yml'
 
 permissions:
   contents: read
 
 jobs:
-  verify:
+  retired:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for Hostinger automatic deployment
-        run: sleep 75
-
-      - name: Check Zed-hosted Purple Diamond Crew site
-        shell: bash
+      - name: Block contradictory verifier
         run: |
-          set -euo pipefail
-          url='https://cryptobotz.cryptoworldz.xyz/purple-diamond-crew/'
-          curl -fsSL --retry 8 --retry-delay 10 --connect-timeout 15 --max-time 45 "$url" -o /tmp/pdc.html
-          grep -Fq "const requestedSite = 'pdc';" /tmp/pdc.html
-          curl -fsSL --retry 8 --retry-delay 10 --connect-timeout 15 --max-time 45 'https://cryptobotz.cryptoworldz.xyz/purple-diamond-crew/assets/pdc-site.js' -o /tmp/pdc.js
-          grep -Fq 'Real People. Real Action. Real Impact.' /tmp/pdc.js
-          echo 'Zed-hosted Purple Diamond Crew route is live and serving the complete site.'
-
-      - name: Report custom-domain status
-        if: always()
-        shell: bash
-        run: |
-          set +e
-          code="$(curl -L -sS --connect-timeout 15 --max-time 45 -o /tmp/pdc-domain.html -w '%{http_code}' 'https://purplediamondcrew.com/')"
-          echo "PurpleDiamondCrew.com HTTP status: $code"
-          if grep -Fq 'Purple Diamond Crew' /tmp/pdc-domain.html 2>/dev/null; then
-            echo 'PurpleDiamondCrew.com is serving Purple Diamond Crew content.'
-          else
-            echo 'PurpleDiamondCrew.com is not yet routed to the new Zed-hosted site.'
-          fi
+          echo '::error::This verifier is retired because it checked a different Zed-hosted route and could leave the custom-domain failure as a non-failing report.'
+          echo 'Use the proof inside: Deploy PurpleDiamondCrew Standalone'
+          exit 1
