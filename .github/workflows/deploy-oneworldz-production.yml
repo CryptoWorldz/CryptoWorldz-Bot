@@ -133,37 +133,25 @@ jobs:
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/oneworldz-backup"
+          rm -rf "$backup"
           mkdir -p "$backup"
-          # Back up only files/paths this release can replace. Avoid mirroring the
-          # entire hosting account and duplicate historical image libraries.
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-          set cmd:fail-exit no
-          set net:max-retries 1
-          set net:timeout 15
-          set ftp:passive-mode yes
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ssl:verify-certificate no
-          cd "$FTP_SERVER_DIR"
-          lcd "$backup"
-          get index.html -o index.html
-          get donate.html -o donate.html
-          get reagan-kauja.html -o reagan-kauja.html
-          get robots.txt -o robots.txt
-          get sitemap.xml -o sitemap.xml
-          get .htaccess -o .htaccess
-          mkdir -p assets
-          lcd assets
-          cd assets
-          get oneworldz.js -o oneworldz.js
-          get reagan-hero-media.js -o reagan-hero-media.js
-          get reagan-real-media.js -o reagan-real-media.js
-          get reagan-smiles-media.js -o reagan-smiles-media.js
-          bye
-          LFTP
+
+          # The current live site predates donate/reagan media files, so only
+          # snapshot files that actually exist now. New release-only files do
+          # not need a previous copy to be preserved.
+          for file in index.html robots.txt sitemap.xml .htaccess; do
+            echo "Backing up existing live file: $file"
+            timeout 35 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:passive-mode yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no; cd $FTP_SERVER_DIR; get $file -o $backup/$file; bye" || {
+              echo "::warning::Live $file was absent or unavailable; continuing lean snapshot."
+              rm -f "$backup/$file"
+            }
+          done
+
+          test -s "$backup/index.html" || { echo '::error::Current live index.html could not be backed up.'; exit 1; }
           cd "$backup"
           zip -qr "$RUNNER_TEMP/oneworldz-predeploy.zip" .
           test -s "$RUNNER_TEMP/oneworldz-predeploy.zip"
+          echo 'Lean rollback snapshot captured successfully.'
 
       - name: Preserve rollback package
         uses: actions/upload-artifact@v4
@@ -209,8 +197,8 @@ jobs:
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/oneworldz-backup"
-          [[ -d "$backup" ]] || exit 0
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          [[ -s "$backup/index.html" ]] || { echo 'No usable rollback snapshot exists; restore skipped.'; exit 0; }
+          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
           set net:timeout 20
@@ -219,10 +207,10 @@ jobs:
           set ssl:verify-certificate no
           lcd "$backup"
           cd "$FTP_SERVER_DIR"
-          mirror --reverse --parallel=3 . .
+          mirror --reverse --parallel=2 . .
           bye
           LFTP
-          echo 'Previous OneWorldz release files restored.'
+          echo 'Previous OneWorldz live files restored.'
 
       - name: Publish deployment summary
         if: always()
@@ -230,8 +218,8 @@ jobs:
           {
             echo '## OneWorldz Production'
             echo '- Manual Run Workflow: supported'
-            echo '- Lean rollback: only release-critical files/assets'
-            echo '- Duplicate/historical hosting images are not downloaded for backup'
+            echo '- Lean rollback: current live root files only'
+            echo '- Duplicate/historical image libraries: excluded'
             echo '- Target: OneWorldz.com only'
             echo '- Zed: untouched'
             echo '- Auto: untouched'
