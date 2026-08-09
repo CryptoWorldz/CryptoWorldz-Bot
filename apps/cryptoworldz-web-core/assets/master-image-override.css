@@ -1,0 +1,4 @@
+.worldz-master-art,.worldz-master-hero{margin:1.25rem 0 0;width:100%;border-radius:22px;overflow:hidden;border:1px solid rgba(190,112,255,.42);background:#07020d;box-shadow:0 18px 55px rgba(0,0,0,.38),0 0 32px rgba(139,61,255,.18)}
+.worldz-master-art img,.worldz-master-hero img{display:block;width:100%;height:auto;max-width:100%;object-fit:contain;background:#05020a}
+.worldz-official-art.worldz-master-art figcaption{display:none}
+@media (max-width:700px){.worldz-master-art,.worldz-master-hero{border-radius:14px;margin-top:.9rem}.worldz-master-art img,.worldz-master-hero img{image-rendering:auto}}
