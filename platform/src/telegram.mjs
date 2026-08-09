@@ -138,8 +138,13 @@ export function createTelegramController({
     return send(
       message,
       [
-        "🌐 CryptoWorldz Command Centre",
+        "ZED",
+        "OneWorldz 🌏 One Vision",
+        "CryptoWorldz 🌏 One Mission",
         "",
+        "Raaiiidd with purpose: lawful action, transparent audits and real help on the ground.",
+        "",
+        "🌐 CryptoWorldz Command Centre",
         "ONE SIMPLE START POINT",
         "Choose Zed, Auto, Grace, Admin or Settings.",
         "",
