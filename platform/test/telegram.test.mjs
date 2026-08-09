@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { loadConfig } from "../src/config.mjs";
-import { createTelegramController } from "../src/telegram.mjs";
+import { createTelegramController, GATEWAY_COMMANDS, GATEWAY_MENUS } from "../src/telegram.mjs";
 
 function makeController(overrides = {}) {
   const sent = [];
@@ -79,6 +79,17 @@ function update(text, from = 123) {
   return { message: { text, from: { id: from }, chat: { id: 999 } } };
 }
 
+test("gateway commands stay simple and ordered", () => {
+  assert.deepEqual(
+    GATEWAY_COMMANDS.map(({ command }) => command),
+    ["zedstart", "zed", "auto", "grace", "admin", "admingrace", "zedsettings", "help"],
+  );
+});
+
+test("every gateway section stays at five core actions", () => {
+  for (const rows of Object.values(GATEWAY_MENUS)) assert.equal(rows.length, 5);
+});
+
 test("Zed introduces the complete identity and correct Raaiiidd spelling", async () => {
   const { controller, sent } = makeController();
   await controller.handleUpdate(update("/start", 456));
@@ -86,6 +97,15 @@ test("Zed introduces the complete identity and correct Raaiiidd spelling", async
   assert.match(sent[0].body.text, /OneWorldz 🌏 One Vision/);
   assert.match(sent[0].body.text, /CryptoWorldz 🌏 One Mission/);
   assert.match(sent[0].body.text, /Raaiiidd/);
+  assert.equal(sent[0].body.reply_markup.inline_keyboard.length, 3);
+});
+
+test("Zed opens the Grace gateway with five memorable actions for the owner", async () => {
+  const { controller, sent } = makeController();
+  await controller.handleUpdate(update("/grace"));
+  assert.match(sent.at(-1).body.text, /GRACE AUTO POST/);
+  assert.match(sent.at(-1).body.text, /\/connectx 1/);
+  assert.match(sent.at(-1).body.text, /\/gracepause/);
 });
 
 test("Zed blocks every owner control for a different Telegram user", async () => {
