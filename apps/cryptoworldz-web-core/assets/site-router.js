@@ -42,17 +42,15 @@
             ? './assets/pdc-fallback.js'
             : hostname === 'impactbased.oneworldz.com' || requestedMode === 'impact'
               ? './assets/impactbased.js'
-              : hostname === 'oneworldz.com'
+              : hostname === 'oneworldz.com' || requestedMode === 'mission'
                 ? './assets/oneworldz-next.js'
-                : hostname === 'oneworldz.com' || requestedMode === 'mission'
-                  ? './assets/oneworldz.js'
-                  : comingSoonHosts.has(hostname)
-                    ? './assets/coming-soon-next.js'
-                    : comingSoonHosts.has(hostname) || requestedMode === 'coming-soon'
-                      ? './assets/coming-soon.js'
-                      : requestedMode === 'directory'
-                        ? './assets/pdc-directory.js'
-                        : './assets/app.js';
-  script.src = `${selectedScript}?v=20260809-recovery1-solsvg`;
+                : comingSoonHosts.has(hostname)
+                  ? './assets/coming-soon-next.js'
+                  : requestedMode === 'coming-soon'
+                    ? './assets/coming-soon.js'
+                    : requestedMode === 'directory'
+                      ? './assets/pdc-directory.js'
+                      : './assets/app.js';
+  script.src = `${selectedScript}?v=20260809-onevision-v1`;
   document.body.appendChild(script);
 })();
