@@ -7,6 +7,8 @@ on:
       - 'deployments/pdc-standalone.request'
       - '.github/workflows/deploy-pdc-standalone.yml'
       - 'apps/worldz-sites/purplediamondcrew/**'
+      - 'media/approved-worldz/**'
+      - 'tools/restore-approved-worldz-media.sh'
       - 'tools/verify-pdc-standalone.mjs'
   workflow_dispatch:
 
@@ -38,12 +40,23 @@ jobs:
       - name: Check out approved main commit
         uses: actions/checkout@v4
 
+      - name: Restore exact approved PDC media
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash tools/restore-approved-worldz-media.sh "$RUNNER_TEMP/approved-worldz"
+          mkdir -p apps/worldz-sites/purplediamondcrew/assets/media
+          cp "$RUNNER_TEMP/approved-worldz/pdc/"*.webp apps/worldz-sites/purplediamondcrew/assets/media/
+          test "$(wc -c < apps/worldz-sites/purplediamondcrew/assets/media/pdc-mission-board.webp)" -gt 50000
+          test "$(wc -c < apps/worldz-sites/purplediamondcrew/assets/media/pdc-hope-chest.webp)" -gt 50000
+          test "$(wc -c < apps/worldz-sites/purplediamondcrew/assets/media/pdc-crest.webp)" -gt 50000
+
       - name: Install verification and secure FTP tools
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp zip
 
-      - name: Run standalone production gate
+      - name: Run approved-image production gate
         run: node tools/verify-pdc-standalone.mjs
 
       - name: Lock deployment to PurpleDiamondCrew only
@@ -51,8 +64,7 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$FTP_HOST" == '145.223.108.40' ]] || { echo '::error::Locked Hostinger IP changed'; exit 1; }
-          [[ -n "$FTP_USERNAME" ]] || { echo '::error::FTP_USERNAME missing'; exit 1; }
-          [[ -n "$FTP_PASSWORD" ]] || { echo '::error::FTP_PASSWORD missing'; exit 1; }
+          [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]] || { echo '::error::FTP credentials missing'; exit 1; }
           [[ "$FTP_PORT" == '21' && "$FTP_SERVER_DIR" == '/' ]] || { echo '::error::Locked FTP target changed'; exit 1; }
           [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' && "$DEPLOY_GUARD" == 'PURPLEDIAMONDCREW.COM' ]] || { echo '::error::PDC guard changed'; exit 1; }
           echo "::add-mask::$FTP_USERNAME"
@@ -62,23 +74,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-          set cmd:fail-exit yes
-          set net:max-retries 1
-          set net:timeout 15
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ssl:verify-certificate no
-          cd "$FTP_SERVER_DIR"
-          bye
-          LFTP
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no; cd '$FTP_SERVER_DIR'; bye"
 
       - name: Capture full rollback snapshot
         shell: bash
         run: |
           set -euo pipefail
-          backup="$RUNNER_TEMP/pdc-backup"
-          mkdir -p "$backup"
+          backup="$RUNNER_TEMP/pdc-backup"; mkdir -p "$backup"
           timeout 90 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
@@ -91,8 +93,7 @@ jobs:
           mirror --parallel=3 . .
           bye
           LFTP
-          cd "$backup"
-          zip -qr "$RUNNER_TEMP/pdc-predeploy.zip" .
+          cd "$backup"; zip -qr "$RUNNER_TEMP/pdc-predeploy.zip" .
 
       - name: Preserve rollback package
         uses: actions/upload-artifact@v4
@@ -108,10 +109,10 @@ jobs:
           set -euo pipefail
           echo 'PDC_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
           source="$GITHUB_WORKSPACE/apps/worldz-sites/purplediamondcrew"
-          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
-          set net:timeout 20
+          set net:timeout 25
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate no
@@ -121,30 +122,24 @@ jobs:
           bye
           LFTP
 
-      - name: Verify live three-page PDC site
+      - name: Verify live approved PDC imagery and pages
+        id: verify
         shell: bash
         run: |
           set -euo pipefail
-          check_page() {
-            local path="$1" marker1="$2" marker2="$3" out="$4"
-            local ok=false
-            for attempt in 1 2 3 4 5 6; do
-              if curl -L -fsS -A 'Mozilla/5.0 (PDC Production Verify)' -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL$path?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" -o "$out"; then
-                if grep -Fqi "$marker1" "$out" && grep -Fqi "$marker2" "$out" && grep -Fq '<svg' "$out" && ! grep -Fqi 'Loading the Worldz experience' "$out"; then ok=true; break; fi
-              fi
-              sleep 5
-            done
-            [[ "$ok" == true ]] || { echo "::error::Live verification failed for $path"; exit 1; }
-          }
-          check_page '/' 'PURPLE DIAMOND CREW' 'Action Team' "$RUNNER_TEMP/home.html"
-          check_page '/crew/' 'Support' 'Contribute' "$RUNNER_TEMP/crew.html"
-          check_page '/hope-chest/' 'THE ONEWORLDZ HOPE CHEST' 'Baby Emu' "$RUNNER_TEMP/chest.html"
-          curl -L -fsS "$LIVE_URL/assets/pdc.css?release=$GITHUB_SHA" -o "$RUNNER_TEMP/pdc.css"
-          curl -L -fsS "$LIVE_URL/assets/pdc.js?release=$GITHUB_SHA" -o "$RUNNER_TEMP/pdc.js"
-          grep -Fq 'token-grid' "$RUNNER_TEMP/pdc.css"
-          grep -Fq 'img.remove()' "$RUNNER_TEMP/pdc.js"
-          ! grep -Fq '/assets/media/pdc-' "$RUNNER_TEMP/pdc.js"
-          echo 'PurpleDiamondCrew live verification passed with self-contained vector production artwork.'
+          cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
+          for path in / /mission/ /our-work/ /impact/ /crew/ /donate/ /hope-chest/; do
+            curl -L -fsS -A 'Mozilla/5.0 (PDC Approved Image Verify)' -H 'Cache-Control: no-cache' --max-time 30 "$LIVE_URL$path?$cache" -o "$RUNNER_TEMP/page.html"
+            grep -Fqi 'PURPLE DIAMOND CREW' "$RUNNER_TEMP/page.html"
+            ! grep -Fqi 'Loading the Worldz experience' "$RUNNER_TEMP/page.html"
+          done
+          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/assets/media/pdc-mission-board.webp?$cache" -o "$RUNNER_TEMP/mission.webp"
+          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/assets/media/pdc-hope-chest.webp?$cache" -o "$RUNNER_TEMP/chest.webp"
+          test "$(wc -c < "$RUNNER_TEMP/mission.webp")" -gt 50000
+          test "$(wc -c < "$RUNNER_TEMP/chest.webp")" -gt 50000
+          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/?$cache" | grep -Fq 'pdc-mission-board.webp'
+          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/hope-chest/?$cache" | grep -Fq 'data-approved-art="pdc-hope-chest"'
+          echo 'verified=true' >> "$GITHUB_OUTPUT"
 
       - name: Restore previous site if deployment fails
         if: failure() && env.PDC_UPLOAD_STARTED == 'true'
@@ -152,11 +147,11 @@ jobs:
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/pdc-backup"
-          [[ -d "$backup" ]] || { echo 'No rollback snapshot exists; restore skipped.'; exit 0; }
-          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          [[ -d "$backup" ]] || exit 0
+          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
-          set net:timeout 20
+          set net:timeout 25
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate no
@@ -170,14 +165,12 @@ jobs:
         if: always()
         run: |
           {
-            echo '## PurpleDiamondCrew Standalone Production'
-            echo '- Dedicated domain bundle: yes'
-            echo '- Pages: Action Team / Crew / Hope Chest'
-            echo '- Required artwork: inline SVG, resolution-independent'
-            echo '- Required raster dependencies: zero'
-            echo '- Hope Chest legacy records: 10'
-            echo '- Hostinger target: locked to 145.223.108.40:21'
+            echo '## PurpleDiamondCrew Approved Production'
+            echo '- Approved mission board raster: required and byte-verified'
+            echo '- Approved Hope Chest raster: required and byte-verified'
+            echo '- Glass Hope Chest action links: required'
+            echo '- Pages: Home / Mission / Our Work / Impact / Join / Donate / Hope Chest'
+            echo '- Legacy records preserved: 10'
             echo '- Rollback snapshot: required before upload'
-            echo '- Zed: untouched'
-            echo '- Auto: untouched'
+            echo '- Zed / Auto services: untouched'
           } >> "$GITHUB_STEP_SUMMARY"
