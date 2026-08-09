@@ -1,10 +1,12 @@
 name: Audit Worldz Live Content
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'diagnostics/worldz-content-audit.request'
+      - '.github/workflows/audit-worldz-content.yml'
 
 permissions:
   contents: read
@@ -12,11 +14,12 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate read-only request
+      - name: Validate read-only request when push-triggered
+        if: github.event_name == 'push'
         shell: bash
         env:
           APPROVED_BEFORE: ${{ github.event.before }}
@@ -26,10 +29,10 @@ jobs:
           test "$(sed -n 's/^confirmation=//p' diagnostics/worldz-content-audit.request | tail -n1)" = 'APPROVE READ ONLY AUDIT'
           test "$(sed -n 's/^source_commit=//p' diagnostics/worldz-content-audit.request | tail -n1)" = "$APPROVED_BEFORE"
 
-      - name: Fingerprint live content without changes
+      - name: Fingerprint live content and fail on required-site errors
         shell: bash
         run: |
-          set +e
+          set -u
           targets=(
             ethworldz.xyz
             baseworldz.xyz
@@ -39,26 +42,47 @@ jobs:
             robinworldz.xyz
             hodlerworldz.xyz
           )
+          failures=0
           printf '%-24s | %-4s | %-8s | %-8s | %s\n' 'TARGET' 'HTTP' 'WORLDZ' 'HOSTINGER' 'TITLE'
           printf '%s\n' '------------------------------------------------------------------------------------------------'
           for host in "${targets[@]}"; do
             body="$RUNNER_TEMP/${host}.html"
-            code="$(curl -L -sS -o "$body" -w '%{http_code}' --connect-timeout 5 --max-time 15 "https://$host/?content-audit=${GITHUB_RUN_ID}" 2>/dev/null)"
+            code="$(curl -L -sS -o "$body" -w '%{http_code}' --connect-timeout 5 --max-time 15 "https://$host/?content-audit=${GITHUB_RUN_ID}" 2>/dev/null || true)"
             [[ -n "$code" ]] || code='ERR'
             worldz='NO'
             hostinger='NO'
             grep -Fq './config/worlds.js' "$body" 2>/dev/null && worldz='YES'
-            grep -Eqi 'hostinger|website builder|parked domain|coming soon' "$body" 2>/dev/null && hostinger='YES'
+            grep -Eqi 'hostinger|website builder|parked domain|default page' "$body" 2>/dev/null && hostinger='YES'
             title="$(tr '\n' ' ' < "$body" 2>/dev/null | sed -n 's:.*<title[^>]*>\([^<]*\)</title>.*:\1:p' | head -c 100)"
             printf '%-24s | %-4s | %-8s | %-8s | %s\n' "$host" "$code" "$worldz" "$hostinger" "$title"
+
+            if [[ "$code" != '200' ]]; then
+              echo "::error::$host returned HTTP $code"
+              failures=$((failures+1))
+            fi
+            if [[ "$hostinger" == 'YES' ]]; then
+              echo "::error::$host rendered hosting/default/parked content"
+              failures=$((failures+1))
+            fi
+            if [[ -z "$title" ]]; then
+              echo "::error::$host has no usable title"
+              failures=$((failures+1))
+            fi
           done
-          exit 0
+
+          if (( failures > 0 )); then
+            echo "::error::Worldz live content audit failed with $failures required finding(s)."
+            exit 1
+          fi
+          echo 'Worldz live content audit passed with zero required-site failures.'
 
       - name: Summary
+        if: always()
         run: |
           {
             echo '## Worldz content fingerprint'
             echo
             echo '- Read only. No hosting or DNS changes.'
-            echo '- WORLDZ=YES means the shared Worldz runtime marker is present.'
+            echo '- This workflow now FAILS when a required target is unavailable, parked/default, or lacks a usable title.'
+            echo '- A green result is no longer produced by unconditional exit 0.'
           } >> "$GITHUB_STEP_SUMMARY"
