@@ -1,0 +1,22 @@
+{
+  "status": "approved-source-map",
+  "source": "images supplied in build conversation on 2026-08-09",
+  "dimensions": "1536x512",
+  "assets": [
+    {"target":"bitworldz.webp","source":"1000022624.png","identity":"BitWorldz / Bitcoin"},
+    {"target":"solworldz.webp","source":"1000022623.png","identity":"SolWorldz / Solana"},
+    {"target":"ethworldz.webp","source":"1000022622.png","identity":"EthWorldz / Ethereum"},
+    {"target":"baseworldz.webp","source":"1000022621.png","identity":"BaseWorldz / Base"},
+    {"target":"bnbworldz.webp","source":"1000022620.png","identity":"BNBWorldz / BNB Chain"},
+    {"target":"xrpworldz.webp","source":"1000022619.png","identity":"XRPWorldz / XRP Ledger"},
+    {"target":"suiworldz.webp","source":"1000022618.png","identity":"SuiWorldz / Sui"},
+    {"target":"hyperworldz.webp","source":"1000022617.png","identity":"HyperWorldz / Hyperliquid"},
+    {"target":"robinworldz.webp","source":"1000022597.png","identity":"RobinWorldz / Robin Hood Chain"}
+  ],
+  "rules": [
+    "Use the supplied source image without redesigning it.",
+    "Do not substitute generated SVG or placeholder artwork.",
+    "Preserve full 1536x512 source resolution for master asset generation.",
+    "Verify target file size and live rendering before production deployment."
+  ]
+}
