@@ -1,5 +1,6 @@
 export const EXACT_GRACE_X_REDIRECT_URI =
   "https://cryptobotz.cryptoworldz.xyz/grace/oauth/x/callback";
+export const COMMAND_CENTRE_BUILD = "grace-build1-2026-08-10";
 
 function text(value) {
   return String(value ?? "").trim();
@@ -49,7 +50,8 @@ export function loadConfig(env = process.env) {
 export function runtimeReadiness(config) {
   return {
     service: "oneworldz-command-centre",
-    version: "4.0.0",
+    version: "4.1.0",
+    build: COMMAND_CENTRE_BUILD,
     zed: {
       telegram_configured: Boolean(
         config.telegramBotToken &&
@@ -57,6 +59,7 @@ export function runtimeReadiness(config) {
           config.ownerTelegramId,
       ),
       owner_controls: true,
+      simplified_gateway_commands: true,
     },
     grace: {
       x_oauth_configured: Boolean(
@@ -67,6 +70,8 @@ export function runtimeReadiness(config) {
       exact_redirect_uri: EXACT_GRACE_X_REDIRECT_URI,
       approval_controlled: true,
       workers_enabled: config.runWorkers,
+      account_permissions: true,
+      publish_results_required: true,
     },
     auto: {
       mode: "owner_controlled_buy_only",
