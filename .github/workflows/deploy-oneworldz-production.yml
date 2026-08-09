@@ -89,6 +89,11 @@ jobs:
           grep -Fq '<title>OneWorldz 🌏 One Vision' "$stage/index.html"
           grep -Fq 'property="og:site_name" content="OneWorldz"' "$stage/index.html"
           ! grep -Fq '<title>CryptoWorldz' "$stage/index.html"
+          grep -Fq 'THE ONE VISION BLUEPRINT' "$stage/assets/oneworldz-next.js"
+          grep -Fq 'Research → Compare → Verify → Recommend → Implement → Measure → Improve Again' "$stage/assets/oneworldz-next.js"
+          grep -Fq '20260809-onevision-v1' "$stage/assets/site-router.js"
+          test -s "$stage/assets/images/website-core/oneworldz/oneworldz-one-vision-one-future.webp"
+          test -s "$stage/assets/images/website-core/purple-diamond-crew/hope-chest-1927-approved.jpg"
           grep -Fq 'Action Spread Smiles Organisation' "$stage/donate.html"
           test -f "$stage/reagan-kauja.html"
           test -f "$stage/assets/reagan-hero-media.js"
@@ -135,10 +140,6 @@ jobs:
           backup="$RUNNER_TEMP/oneworldz-backup"
           rm -rf "$backup"
           mkdir -p "$backup"
-
-          # The current live site predates donate/reagan media files, so only
-          # snapshot files that actually exist now. New release-only files do
-          # not need a previous copy to be preserved.
           for file in index.html robots.txt sitemap.xml .htaccess; do
             echo "Backing up existing live file: $file"
             timeout 35 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:passive-mode yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no; cd $FTP_SERVER_DIR; get $file -o $backup/$file; bye" || {
@@ -146,7 +147,6 @@ jobs:
               rm -f "$backup/$file"
             }
           done
-
           test -s "$backup/index.html" || { echo '::error::Current live index.html could not be backed up.'; exit 1; }
           cd "$backup"
           zip -qr "$RUNNER_TEMP/oneworldz-predeploy.zip" .
@@ -180,8 +180,12 @@ jobs:
           for attempt in 1 2 3 4 5 6; do
             cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
             if curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/home.html" \
+              && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/assets/oneworldz-next.js?$cache" -o "$RUNNER_TEMP/oneworldz-next.js" \
+              && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/assets/images/website-core/oneworldz/oneworldz-one-vision-one-future.webp?$cache" -o "$RUNNER_TEMP/oneworldz-hero.webp" \
               && curl -fsSL -A "$agent" -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$LIVE_URL/reagan-kauja/?$cache" -o "$RUNNER_TEMP/reagan.html"; then
               if grep -Fq '<title>OneWorldz 🌏 One Vision' "$RUNNER_TEMP/home.html" \
+                && grep -Fq 'THE ONE VISION BLUEPRINT' "$RUNNER_TEMP/oneworldz-next.js" \
+                && test -s "$RUNNER_TEMP/oneworldz-hero.webp" \
                 && grep -Fq '<title>Reagan Kauja | Action Spread Smiles Organisation Uganda | OneWorldz</title>' "$RUNNER_TEMP/reagan.html"; then
                 verified='true'
                 break
@@ -218,8 +222,9 @@ jobs:
           {
             echo '## OneWorldz Production'
             echo '- Manual Run Workflow: supported'
+            echo '- One Vision blueprint gate: enabled'
+            echo '- Hero image delivery check: enabled'
             echo '- Lean rollback: current live root files only'
-            echo '- Duplicate/historical image libraries: excluded'
             echo '- Target: OneWorldz.com only'
             echo '- Zed: untouched'
             echo '- Auto: untouched'
