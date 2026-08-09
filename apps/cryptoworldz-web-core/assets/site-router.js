@@ -3,9 +3,10 @@
   const params = new URLSearchParams(location.search);
   const requestedMode = document.body.dataset.worldzMode || params.get('mode');
   const requestedSite = document.body.dataset.worldzSite || params.get('site');
-  const requestedPage = params.get('page');
+  const requestedPage = (params.get('page') || '').toLowerCase();
   const jayJayPage = requestedPage === 'jayjayteamdev' || location.pathname.replace(/\/+$/, '').endsWith('/jayjayteamdev');
   const sharedPage = ['help', 'donate', 'tokens'].includes(requestedPage);
+  const ecosystemPage = ['command-centre','commandcentre','trade','trade-station','recap','recapthisbot','partnership','partnerships','learn','learnworldz'].includes(requestedPage);
   const pdcPreview = hostname === 'cryptoworldz.github.io' || requestedSite === 'pdc';
   const comingSoonHosts = new Set([
     'ethworldz.xyz',
@@ -34,23 +35,25 @@
     ? './assets/jayjayteamdev.js'
     : sharedPage
       ? './assets/site-pages.js'
-      : hostname === 'solworldz.xyz'
-        ? './assets/solworldz.js'
-        : hostname === 'purplediamondcrew.com'
-          ? './assets/pdc-site.js'
-          : pdcPreview
-            ? './assets/pdc-fallback.js'
-            : hostname === 'impactbased.oneworldz.com' || requestedMode === 'impact'
-              ? './assets/impactbased.js'
-              : hostname === 'oneworldz.com' || requestedMode === 'mission'
-                ? './assets/oneworldz-next.js'
-                : comingSoonHosts.has(hostname)
-                  ? './assets/coming-soon-next.js'
-                  : requestedMode === 'coming-soon'
-                    ? './assets/coming-soon.js'
-                    : requestedMode === 'directory'
-                      ? './assets/pdc-directory.js'
-                      : './assets/app.js';
-  script.src = `${selectedScript}?v=20260809-onevision-v1`;
+      : ecosystemPage
+        ? './assets/ecosystem-pages.js'
+        : hostname === 'solworldz.xyz'
+          ? './assets/solworldz.js'
+          : hostname === 'purplediamondcrew.com'
+            ? './assets/pdc-site.js'
+            : pdcPreview
+              ? './assets/pdc-fallback.js'
+              : hostname === 'impactbased.oneworldz.com' || requestedMode === 'impact'
+                ? './assets/impactbased.js'
+                : hostname === 'oneworldz.com' || requestedMode === 'mission'
+                  ? './assets/oneworldz-next.js'
+                  : comingSoonHosts.has(hostname)
+                    ? './assets/coming-soon-next.js'
+                    : requestedMode === 'coming-soon'
+                      ? './assets/coming-soon.js'
+                      : requestedMode === 'directory'
+                        ? './assets/pdc-directory.js'
+                        : './assets/app.js';
+  script.src = `${selectedScript}?v=20260809-consolidated-v1`;
   document.body.appendChild(script);
 })();
