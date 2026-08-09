@@ -97,7 +97,7 @@ jobs:
             echo
             echo '- Read only: DNS and HTTPS checks only.'
             echo '- ImpactBased, LawWorldz and LearnWorldz are audited as OneWorldz routes, not nonexistent subdomains.'
-            echo '- BitWorldz uses bitworldz.xyz; retired/wrong bitcoinworldz.xyz is not treated as a required target.'
+            echo '- BitWorldz uses its active .xyz domain; obsolete aliases are excluded.'
             echo '- HTTPS checks use IPv4, retries and realistic timeouts to avoid false HTTP 000 results.'
             echo '- This summary never overrides the job conclusion.'
           } >> "$GITHUB_STEP_SUMMARY"
