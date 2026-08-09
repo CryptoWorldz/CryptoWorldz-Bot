@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'apps/worldz-sites/solworldz/**'
+      - 'media/approved-worldz/**'
+      - 'tools/restore-approved-worldz-media.sh'
       - 'tools/verify-solworldz-standalone.mjs'
       - '.github/workflows/deploy-solworldz-standalone.yml'
   workflow_dispatch:
@@ -18,9 +20,9 @@ concurrency:
 
 jobs:
   deploy:
-    name: Verify and deploy standalone SolWorldz
+    name: Verify and deploy approved SolWorldz
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     environment:
       name: solworldz-production
       url: https://solworldz.xyz
@@ -37,136 +39,115 @@ jobs:
       - name: Check out approved main commit
         uses: actions/checkout@v4
 
+      - name: Restore exact approved SolWorldz media
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash tools/restore-approved-worldz-media.sh "$RUNNER_TEMP/approved-worldz"
+          mkdir -p apps/worldz-sites/solworldz/assets/media
+          cp "$RUNNER_TEMP/approved-worldz/solworldz/"*.webp apps/worldz-sites/solworldz/assets/media/
+          for image in solworldz-hero-desktop.webp solworldz-hero-mobile.webp solworldz-approved-atlas.webp; do
+            test "$(wc -c < "apps/worldz-sites/solworldz/assets/media/$image")" -gt 50000
+          done
+
+      - name: Run approved-image production gate
+        run: node tools/verify-solworldz-standalone.mjs
+
       - name: Lock deployment to SolWorldz only
         shell: bash
         run: |
           set -euo pipefail
           host="${FTP_HOST#ftp://}"; host="${host#ftps://}"; host="${host%%/*}"; host="${host%%:*}"
           [[ "$host" == '145.223.108.40' ]] || { echo '::error::Wrong FTP host'; exit 1; }
-          [[ "$FTP_PORT" == '21' ]] || { echo '::error::Wrong FTP port'; exit 1; }
-          [[ "$FTP_SERVER_DIR" == '/' ]] || { echo '::error::Wrong document root'; exit 1; }
-          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]] || { echo '::error::FTP scope is not domain-only'; exit 1; }
-          [[ "$DEPLOY_GUARD" == 'SOLWORLDZ.XYZ' ]] || { echo '::error::Wrong deploy guard'; exit 1; }
+          [[ "$FTP_PORT" == '21' && "$FTP_SERVER_DIR" == '/' ]] || { echo '::error::Wrong FTP target'; exit 1; }
+          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' && "$DEPLOY_GUARD" == 'SOLWORLDZ.XYZ' ]] || { echo '::error::Wrong deploy guard'; exit 1; }
           [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]] || { echo '::error::FTP credentials missing'; exit 1; }
-          echo "::add-mask::$FTP_USERNAME"
-          echo "::add-mask::$FTP_HOST"
-
-      - name: Run production media gate
-        run: |
-          node tools/verify-solworldz-standalone.mjs
-          test -s apps/worldz-sites/solworldz/index.html
-          test -s apps/worldz-sites/solworldz/.htaccess
+          echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_HOST"
 
       - name: Install secure FTP client
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp zip
 
-      - name: Confirm encrypted Hostinger target
-        shell: bash
-        run: |
-          set -euo pipefail
-          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
-          set cmd:fail-exit yes
-          set net:max-retries 1
-          set net:timeout 15
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ssl:verify-certificate no
-          cd "$FTP_SERVER_DIR"
-          bye
-          LFTP
-
       - name: Capture rollback snapshot
         shell: bash
         run: |
           set -euo pipefail
-          backup="$RUNNER_TEMP/solworldz-standalone-backup"
-          mkdir -p "$backup"
-          timeout 60 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP || true
+          backup="$RUNNER_TEMP/solworldz-backup"; mkdir -p "$backup"
+          timeout 90 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP || true
           set cmd:fail-exit no
           set net:max-retries 1
-          set net:timeout 15
+          set net:timeout 20
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate no
           cd "$FTP_SERVER_DIR"
-          get index.html -o "$backup/index.html"
-          get .htaccess -o "$backup/.htaccess"
+          lcd "$backup"
+          mirror --parallel=3 . .
           bye
           LFTP
-          find "$backup" -type f -size 0 -delete || true
-          cd "$backup"
-          zip -qr "$RUNNER_TEMP/solworldz-standalone-backup.zip" .
+          cd "$backup"; zip -qr "$RUNNER_TEMP/solworldz-predeploy.zip" .
 
       - name: Preserve rollback package
         uses: actions/upload-artifact@v4
         with:
-          name: solworldz-standalone-predeploy-${{ github.run_id }}
-          path: ${{ runner.temp }}/solworldz-standalone-backup.zip
+          name: solworldz-predeploy-${{ github.run_id }}
+          path: ${{ runner.temp }}/solworldz-predeploy.zip
           retention-days: 14
           if-no-files-found: error
 
-      - name: Upload standalone SolWorldz
+      - name: Upload approved SolWorldz bundle
         shell: bash
         run: |
           set -euo pipefail
+          echo 'SOL_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
           source="$GITHUB_WORKSPACE/apps/worldz-sites/solworldz"
-          timeout 90 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
-          set net:timeout 20
+          set net:timeout 25
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate no
           cd "$FTP_SERVER_DIR"
-          put "$source/index.html" -o index.html
-          put "$source/.htaccess" -o .htaccess
+          lcd "$source"
+          mirror --reverse --delete --parallel=3 . .
           bye
           LFTP
 
-      - name: Verify live standalone SolWorldz
+      - name: Verify live approved SolWorldz imagery
         shell: bash
         run: |
           set -euo pipefail
-          ok=false
-          for attempt in 1 2 3 4 5 6; do
-            url="$LIVE_URL/?standalone=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
-            if curl -L -fsS -A 'Mozilla/5.0 (SolWorldz Production Verify)' -H 'Cache-Control: no-cache' --connect-timeout 15 --max-time 30 "$url" -o "$RUNNER_TEMP/live.html"; then
-              if grep -Fq 'SOLWORLDZ' "$RUNNER_TEMP/live.html" \
-                && grep -Fq 'FLAGSHIP OPEN PIPELINE' "$RUNNER_TEMP/live.html" \
-                && grep -Fq 'IMPACTBASED' "$RUNNER_TEMP/live.html" \
-                && grep -Fq 'ACTION CREATES SMILES' "$RUNNER_TEMP/live.html" \
-                && grep -Fq 'COMMAND CENTRE' "$RUNNER_TEMP/live.html" \
-                && grep -Fq '$SolMars' "$RUNNER_TEMP/live.html" \
-                && grep -Fq '$RHL' "$RUNNER_TEMP/live.html" \
-                && ! grep -Eqi '<img[[:space:]>]' "$RUNNER_TEMP/live.html" \
-                && ! grep -Fq 'Loading the Worldz experience' "$RUNNER_TEMP/live.html"; then
-                ok=true; break
-              fi
-            fi
-            sleep 5
+          cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
+          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/?$cache" -o "$RUNNER_TEMP/live.html"
+          grep -Fq 'data-approved-art="solworldz-hero"' "$RUNNER_TEMP/live.html"
+          grep -Fq 'solworldz-hero-desktop.webp' "$RUNNER_TEMP/live.html"
+          grep -Fq 'solworldz-hero-mobile.webp' "$RUNNER_TEMP/live.html"
+          grep -Fq 'RecoverYourDebt belongs to Robin Hood Chain / RobinWorldz' "$RUNNER_TEMP/live.html"
+          for image in solworldz-hero-desktop.webp solworldz-hero-mobile.webp solworldz-approved-atlas.webp; do
+            curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/assets/media/$image?$cache" -o "$RUNNER_TEMP/$image"
+            test "$(wc -c < "$RUNNER_TEMP/$image")" -gt 50000
           done
-          [[ "$ok" == true ]] || { echo '::error::Standalone SolWorldz live verification failed'; exit 1; }
-          echo 'Standalone SolWorldz live verification passed.'
+          echo 'SolWorldz live approved-image verification passed.'
 
-      - name: Restore previous index if deployment fails
-        if: failure()
+      - name: Restore previous site if deployment fails
+        if: failure() && env.SOL_UPLOAD_STARTED == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          backup="$RUNNER_TEMP/solworldz-standalone-backup"
-          [[ -s "$backup/index.html" ]] || { echo 'No prior index captured; no rollback upload performed.'; exit 0; }
-          timeout 90 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          backup="$RUNNER_TEMP/solworldz-backup"
+          [[ -d "$backup" ]] || exit 0
+          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
-          set net:timeout 20
+          set net:timeout 25
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate no
           cd "$FTP_SERVER_DIR"
-          put "$backup/index.html" -o index.html
-          $( [[ -s "$backup/.htaccess" ]] && printf 'put "%s" -o .htaccess' "$backup/.htaccess" )
+          lcd "$backup"
+          mirror --reverse --delete --parallel=3 . .
           bye
           LFTP
 
@@ -174,12 +155,11 @@ jobs:
         if: always()
         run: |
           {
-            echo '## SolWorldz Standalone Production'
-            echo '- Dedicated domain bundle: yes'
-            echo '- Shared hostname router: no'
-            echo '- Required visuals: inline SVG'
-            echo '- External image dependencies: zero'
-            echo '- Token pipeline visuals: 7/7 required'
-            echo '- Zed Node service: untouched'
-            echo '- Auto service: untouched'
+            echo '## SolWorldz Approved Production'
+            echo '- Approved desktop hero: required + byte-verified'
+            echo '- Approved mobile hero: required + byte-verified'
+            echo '- Approved ecosystem atlas: required + byte-verified'
+            echo '- RecoverYourDebt: Robin Hood Chain / RobinWorldz'
+            echo '- DEX / Trade Station: CryptoWorldz registry links'
+            echo '- Rollback snapshot: required before upload'
           } >> "$GITHUB_STEP_SUMMARY"
