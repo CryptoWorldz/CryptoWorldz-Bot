@@ -72,9 +72,10 @@ const audit = fs.readFileSync(path.join(workflowsDir, 'audit-worldz-live-targets
 for (const forbiddenTarget of ['impactbased.oneworldz.com', 'law.oneworldz.com', 'learn.oneworldz.com', 'bitcoinworldz.xyz']) {
   if (audit.includes(forbiddenTarget)) fail('audit-worldz-live-targets.yml', `noncanonical/dead target is forbidden: ${forbiddenTarget}`);
 }
-for (const requiredRoute of ['https://oneworldz.com/worldz/impactbased', 'https://oneworldz.com/worldz/law', 'https://oneworldz.com/worldz/learn', 'https://bitworldz.xyz/']) {
+for (const requiredRoute of ['https://oneworldz.com/worldz/impactbased', 'https://oneworldz.com/worldz/law', 'https://oneworldz.com/worldz/learn', 'https://oneworldz.com/worldz/bitworldz']) {
   if (!audit.includes(requiredRoute)) fail('audit-worldz-live-targets.yml', `canonical live route missing: ${requiredRoute}`);
 }
+if (/bitworldz\.xyz/.test(audit)) fail('audit-worldz-live-targets.yml', 'standalone BitWorldz domain cannot be claimed live before DNS exists');
 if (!audit.includes('--retry-all-errors')) fail('audit-worldz-live-targets.yml', 'robust HTTP retry proof missing');
 
 const sol = fs.readFileSync(path.join(workflowsDir, 'deploy-solworldz-standalone.yml'), 'utf8');
