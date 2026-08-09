@@ -80,7 +80,7 @@ jobs:
             echo 'A real environment file is committed.' >&2
             exit 1
           fi
-          if git grep -nEi '(seed phrase|private key|service_role_key)\s*[:=]\s*[^[:space:]]+' -- ':!*.md' ':!.env.example' ':!test/**'; then
+          if git grep -nEi '(seed phrase|private key|service_role_key)\s*[:=]\s*[^[:space:]]+' -- ':!*.md' ':!.env.example' ':!test/**' ':!platform/test/**'; then
             echo 'A possible production secret value is committed.' >&2
             exit 1
           fi

@@ -46,10 +46,10 @@ jobs:
           set -euo pipefail
           bash tools/restore-approved-worldz-media.sh "$RUNNER_TEMP/approved-worldz"
           mkdir -p apps/worldz-sites/purplediamondcrew/assets/media
-          cp "$RUNNER_TEMP/approved-worldz/pdc/"*.webp apps/worldz-sites/purplediamondcrew/assets/media/
-          test "$(wc -c < apps/worldz-sites/purplediamondcrew/assets/media/pdc-mission-board.webp)" -gt 50000
-          test "$(wc -c < apps/worldz-sites/purplediamondcrew/assets/media/pdc-hope-chest.webp)" -gt 50000
-          test "$(wc -c < apps/worldz-sites/purplediamondcrew/assets/media/pdc-crest.webp)" -gt 50000
+          cp "$RUNNER_TEMP/approved-worldz/pdc/"*.png apps/worldz-sites/purplediamondcrew/assets/media/
+          test "$(wc -c < apps/worldz-sites/purplediamondcrew/assets/media/pdc-mission-board.png)" -gt 50000
+          test "$(wc -c < apps/worldz-sites/purplediamondcrew/assets/media/pdc-hope-chest.png)" -gt 50000
+          test "$(wc -c < apps/worldz-sites/purplediamondcrew/assets/media/pdc-crest.png)" -gt 50000
 
       - name: Install verification and secure FTP tools
         run: |
@@ -133,11 +133,11 @@ jobs:
             grep -Fqi 'PURPLE DIAMOND CREW' "$RUNNER_TEMP/page.html"
             ! grep -Fqi 'Loading the Worldz experience' "$RUNNER_TEMP/page.html"
           done
-          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/assets/media/pdc-mission-board.webp?$cache" -o "$RUNNER_TEMP/mission.webp"
-          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/assets/media/pdc-hope-chest.webp?$cache" -o "$RUNNER_TEMP/chest.webp"
-          test "$(wc -c < "$RUNNER_TEMP/mission.webp")" -gt 50000
-          test "$(wc -c < "$RUNNER_TEMP/chest.webp")" -gt 50000
-          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/?$cache" | grep -Fq 'pdc-mission-board.webp'
+          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/assets/media/pdc-mission-board.png?$cache" -o "$RUNNER_TEMP/mission.png"
+          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/assets/media/pdc-hope-chest.png?$cache" -o "$RUNNER_TEMP/chest.png"
+          test "$(wc -c < "$RUNNER_TEMP/mission.png")" -gt 50000
+          test "$(wc -c < "$RUNNER_TEMP/chest.png")" -gt 50000
+          curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/?$cache" | grep -Fq 'pdc-mission-board.png'
           curl -L -fsS -H 'Cache-Control: no-cache' "$LIVE_URL/hope-chest/?$cache" | grep -Fq 'data-approved-art="pdc-hope-chest"'
           echo 'verified=true' >> "$GITHUB_OUTPUT"
 
@@ -166,8 +166,8 @@ jobs:
         run: |
           {
             echo '## PurpleDiamondCrew Approved Production'
-            echo '- Approved mission board raster: required and byte-verified'
-            echo '- Approved Hope Chest raster: required and byte-verified'
+            echo '- Approved mission board PNG: required and byte-verified'
+            echo '- Approved Hope Chest PNG: required and byte-verified'
             echo '- Glass Hope Chest action links: required'
             echo '- Pages: Home / Mission / Our Work / Impact / Join / Donate / Hope Chest'
             echo '- Legacy records preserved: 10'

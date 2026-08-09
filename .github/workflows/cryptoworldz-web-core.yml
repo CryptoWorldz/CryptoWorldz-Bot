@@ -5,12 +5,18 @@ on:
     branches: [main]
     paths:
       - 'apps/cryptoworldz-web-core/**'
+      - 'media/approved-worldz/**'
+      - 'tools/restore-approved-worldz-media.sh'
+      - 'tools/verify-worldz-master-images.mjs'
       - 'tools/evaluate-web-core.mjs'
       - 'package.json'
       - '.github/workflows/cryptoworldz-web-core.yml'
   pull_request:
     paths:
       - 'apps/cryptoworldz-web-core/**'
+      - 'media/approved-worldz/**'
+      - 'tools/restore-approved-worldz-media.sh'
+      - 'tools/verify-worldz-master-images.mjs'
       - 'tools/evaluate-web-core.mjs'
       - 'package.json'
       - '.github/workflows/cryptoworldz-web-core.yml'
@@ -30,6 +36,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Restore exact approved master imagery
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash tools/restore-approved-worldz-media.sh "$RUNNER_TEMP/approved-worldz"
+          rm -rf apps/cryptoworldz-web-core/assets/worldz-master
+          mkdir -p apps/cryptoworldz-web-core/assets/worldz-master
+          cp -R "$RUNNER_TEMP/approved-worldz/oneworldz" apps/cryptoworldz-web-core/assets/worldz-master/
+          cp -R "$RUNNER_TEMP/approved-worldz/cryptoworldz" apps/cryptoworldz-web-core/assets/worldz-master/
+          cp -R "$RUNNER_TEMP/approved-worldz/blockchains" apps/cryptoworldz-web-core/assets/worldz-master/
+          cp -R "$RUNNER_TEMP/approved-worldz/tokens" apps/cryptoworldz-web-core/assets/worldz-master/
+          cp -R "$RUNNER_TEMP/approved-worldz/purple-diamond-crew" apps/cryptoworldz-web-core/assets/worldz-master/
 
       - name: Run complete web-core evaluation
         run: npm run verify:web

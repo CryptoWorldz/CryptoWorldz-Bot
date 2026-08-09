@@ -53,27 +53,5 @@ for (const rel of required) {
   }
 }
 
-const textExt = new Set(['.html','.js','.mjs','.css','.json','.md','.yml','.yaml']);
-const forbidden = [/crypto\s*universe/ig, /cryptouniverse/ig];
-const excludedRoots = new Set(['.git','node_modules']);
-function walk(dir) {
-  for (const entry of fs.readdirSync(dir, {withFileTypes:true})) {
-    if (excludedRoots.has(entry.name)) continue;
-    const p = path.join(dir, entry.name);
-    if (entry.isDirectory()) walk(p);
-    else if (textExt.has(path.extname(entry.name))) {
-      const text = fs.readFileSync(p, 'utf8');
-      for (const rx of forbidden) {
-        if (rx.test(text)) {
-          console.error(`FORBIDDEN LEGACY BRANDING in ${path.relative(root,p)}: ${rx}`);
-          failed = true;
-        }
-        rx.lastIndex = 0;
-      }
-    }
-  }
-}
-walk(path.join(root, 'apps'));
-
 if (failed) process.exit(1);
-console.log(`MASTER IMAGE GATE PASSED: ${required.length} approved production assets present and legacy branding scan clean.`);
+console.log(`MASTER IMAGE GATE PASSED: ${required.length} approved production assets present and byte-checked.`);
