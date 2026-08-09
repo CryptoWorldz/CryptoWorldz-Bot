@@ -1,0 +1,38 @@
+name: Grace Build 1
+
+on:
+  pull_request:
+    paths:
+      - "index.js"
+      - "src/command-centre.js"
+      - "src/grace/**"
+      - "test/command-centre.test.js"
+      - "supabase/migrations/*grace_build1*.sql"
+      - ".github/workflows/grace-build1.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "index.js"
+      - "src/command-centre.js"
+      - "src/grace/**"
+      - "test/command-centre.test.js"
+      - "supabase/migrations/*grace_build1*.sql"
+      - ".github/workflows/grace-build1.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: node --test test/command-centre.test.js
