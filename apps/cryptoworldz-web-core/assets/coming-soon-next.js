@@ -1,30 +1,62 @@
 const app=document.querySelector('#app');
 const host=location.hostname.replace(/^www\./,'').toLowerCase();
 const sites={
- 'ethworldz.xyz':{title:'EthWorldz',icon:'Ξ',accent:'#8c8cff',accent2:'#d7d7ff',label:'ETHEREUM COMMUNITY'},
- 'baseworldz.xyz':{title:'BaseWorldz',icon:'B',accent:'#276cff',accent2:'#8bb8ff',label:'BASE COMMUNITY'},
- 'bnbworldz.xyz':{title:'BNBWorldz',icon:'BNB',accent:'#f3ba2f',accent2:'#ffe590',label:'BNB COMMUNITY'},
- 'xrpworldz.xyz':{title:'XRPWorldz',icon:'X',accent:'#6fd8ff',accent2:'#ffffff',label:'XRPL COMMUNITY'},
- 'suiworldz.xyz':{title:'SuiWorldz',icon:'SUI',accent:'#6fbcf0',accent2:'#ccecff',label:'SUI COMMUNITY'},
- 'hyperworldz.xyz':{title:'HyperWorldz',icon:'H',accent:'#49e6c2',accent2:'#b5fff0',label:'HYPERLIQUID COMMUNITY'},
- 'robinworldz.xyz':{title:'RobinWorldz',icon:'R',accent:'#6be39c',accent2:'#f2ca59',label:'RECOVER • REBUILD'},
- 'bitcoinworldz.xyz':{title:'BitcoinWorldz',icon:'₿',accent:'#f7931a',accent2:'#ffe3b4',label:'BITCOIN COMMUNITY'},
- 'bitworldz.xyz':{title:'BitWorldz',icon:'₿',accent:'#f7931a',accent2:'#ffe3b4',label:'BITCOIN COMMUNITY'},
- 'hodlerworldz.xyz':{title:'HodlerWorldz',icon:'H',accent:'#c26cff',accent2:'#48d9ff',label:'READ-ONLY PORTFOLIO'}
+ 'ethworldz.xyz':{title:'EthWorldz',label:'ETHEREUM COMMUNITY'},
+ 'baseworldz.xyz':{title:'BaseWorldz',label:'BASE COMMUNITY'},
+ 'bnbworldz.xyz':{title:'BNBWorldz',label:'BNB COMMUNITY'},
+ 'xrpworldz.xyz':{title:'XRPWorldz',label:'XRPL COMMUNITY'},
+ 'suiworldz.xyz':{title:'SuiWorldz',label:'SUI COMMUNITY'},
+ 'hyperworldz.xyz':{title:'HyperWorldz',label:'HYPERLIQUID COMMUNITY'},
+ 'robinworldz.xyz':{title:'RobinWorldz',label:'ROBIN HOOD CHAIN • RECOVER YOUR DEBT'},
+ 'bitcoinworldz.xyz':{title:'BitcoinWorldz',label:'BITCOIN COMMUNITY'},
+ 'bitworldz.xyz':{title:'BitWorldz',label:'BITCOIN COMMUNITY'},
+ 'hodlerworldz.xyz':{title:'HodlerWorldz',label:'READ-ONLY PORTFOLIO'}
 };
-const site=sites[host]||{title:'CryptoWorldz',icon:'CW',accent:'#b96cff',accent2:'#46d9ff',label:'CONNECTED WORLDZ'};
+const site=sites[host]||{title:'CryptoWorldz',label:'CONNECTED WORLDZ'};
 const HQ='https://t.me/CryptoWorldzHQ';
 const BOT='https://t.me/CryptoWorldzBot';
+const ROOT='./assets/images/website-core';
+const HERO_PARTS=[1,2,3].map(n=>`${ROOT}/cryptoworldz/payload/hero.part${String(n).padStart(2,'0')}.b64`);
 
-function vectorHero(){
- const stars=Array.from({length:42},(_,i)=>`<circle cx="${(i*137+43)%1180}" cy="${(i*83+27)%690}" r="${i%7===0?3:i%3===0?2:1}"/>`).join('');
- const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720"><defs><radialGradient id="s"><stop stop-color="#35105d"/><stop offset=".5" stop-color="#120528"/><stop offset="1" stop-color="#030613"/></radialGradient><linearGradient id="r" x2="1" y2="1"><stop stop-color="${site.accent2}"/><stop offset=".5" stop-color="${site.accent}"/><stop offset="1" stop-color="#6725a9"/></linearGradient></defs><rect width="1200" height="720" fill="url(#s)"/><g fill="#fff" opacity=".7">${stars}</g><circle cx="600" cy="330" r="225" fill="none" stroke="${site.accent}" stroke-opacity=".18" stroke-width="48"/><circle cx="600" cy="330" r="185" fill="#080415" stroke="url(#r)" stroke-width="10"/><circle cx="600" cy="330" r="150" fill="none" stroke="${site.accent2}" stroke-opacity=".38" stroke-width="3" stroke-dasharray="14 18"/><text x="600" y="365" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="900" font-size="96">${site.icon}</text><text x="600" y="610" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="900" font-size="54">${site.title.toUpperCase()}</text><text x="600" y="658" text-anchor="middle" fill="${site.accent2}" font-family="Arial,sans-serif" font-weight="700" font-size="24" letter-spacing="5">${site.label}</text><text x="70" y="70" fill="${site.accent2}" font-family="Arial,sans-serif" font-size="20">ONE WORLD • ONE MISSION</text></svg>`;
- return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+async function approvedHero(){
+  const chunks=await Promise.all(HERO_PARTS.map(path=>fetch(path,{cache:'force-cache'}).then(response=>{
+    if(!response.ok) throw new Error(`Approved CryptoWorldz hero missing: ${path}`);
+    return response.text();
+  })));
+  return `data:image/webp;base64,${chunks.join('').replace(/\s+/g,'')}`;
 }
 
-function render(){
- document.body.classList.add('comingsoon-next','worldz-rich-page');
- document.title=`${site.title} • Coming Soon`;
- app.outerHTML=`<main class="cs-page"><div class="cs-bg" aria-label="Official ${site.title} vector artwork" style="background-image:url('${vectorHero()}')"></div><div class="cs-shade"><section class="cs-card"><span class="wx-kicker">One World • One Mission • One CryptoWorldz</span><h1>${site.title}</h1><p><strong>We Need You.</strong> This Worldz portal is being prepared for its full launch. Join CryptoWorldz HQ, speak with the Executive Leaders and follow the ecosystem while this site comes online.</p><div class="wx-actions"><a class="wx-btn green" href="${HQ}" target="_blank" rel="noopener noreferrer">Join CryptoWorldz HQ</a><a class="wx-btn" href="${BOT}" target="_blank" rel="noopener noreferrer">Open @CryptoWorldzBot</a><a class="wx-btn gold" href="https://oneworldz.com" target="_blank" rel="noopener noreferrer">Visit OneWorldz</a><a class="wx-btn" href="?page=help">Help the People</a></div></section></div></main>`;
+function installStyles(){
+  if(document.querySelector('#idle-worldz-approved-art')) return;
+  const style=document.createElement('style');
+  style.id='idle-worldz-approved-art';
+  style.textContent=`
+    .cs-page.approved-cw-hero{min-height:calc(100vh - 110px);position:relative;overflow:hidden;background:#05010c;color:#fff}
+    .approved-cw-hero .cs-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;filter:none!important;transform:none!important;image-rendering:auto;z-index:0}
+    .approved-cw-hero .cs-overlay{position:relative;z-index:2;min-height:calc(100vh - 110px);display:flex;align-items:flex-end;padding:clamp(18px,4vw,58px);background:linear-gradient(180deg,rgba(3,1,10,.02) 22%,rgba(3,1,10,.18) 54%,rgba(3,1,10,.90) 100%)}
+    .approved-cw-hero .cs-glass{width:min(760px,100%);padding:clamp(18px,3vw,32px);border:1px solid rgba(185,108,255,.48);border-radius:22px;background:rgba(7,2,18,.62);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 22px 70px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08)}
+    .approved-cw-hero .cs-glass h1{margin:.28rem 0 .3rem;font-family:Orbitron,sans-serif;font-size:clamp(2rem,5vw,4.25rem)}
+    .approved-cw-hero .cs-glass p{margin:.25rem 0 1rem;font-size:clamp(1rem,2vw,1.2rem)}
+    .approved-cw-hero .cs-world-label{font-family:Orbitron,sans-serif;letter-spacing:.14em;color:#66dcff;text-transform:uppercase;font-size:.78rem}
+    .approved-cw-hero .wx-actions{display:flex;flex-wrap:wrap;gap:10px}
+    .approved-cw-hero .wx-btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 16px;border:1px solid rgba(193,123,255,.5);border-radius:13px;background:linear-gradient(135deg,rgba(91,25,160,.82),rgba(172,58,235,.82));color:#fff;text-decoration:none;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,255,255,.13)}
+    .approved-cw-hero .wx-btn.green{background:linear-gradient(135deg,rgba(8,116,74,.9),rgba(14,151,94,.86));border-color:rgba(79,236,163,.55)}
+    .approved-cw-hero .wx-btn.gold{background:linear-gradient(135deg,rgba(125,80,7,.92),rgba(177,118,20,.86));border-color:rgba(245,196,91,.55)}
+    @media(max-width:720px){.cs-page.approved-cw-hero{min-height:76vh}.approved-cw-hero .cs-art{object-fit:contain;object-position:center top;background:#05010c}.approved-cw-hero .cs-overlay{min-height:76vh;align-items:flex-end;padding:12px}.approved-cw-hero .cs-glass{border-radius:16px;padding:16px}.approved-cw-hero .wx-btn{flex:1 1 46%;font-size:.87rem}}
+  `;
+  document.head.appendChild(style);
+}
+
+async function render(){
+  document.body.classList.add('comingsoon-next','worldz-rich-page');
+  document.title=`${site.title} • CryptoWorldz`;
+  installStyles();
+  let hero='';
+  try{hero=await approvedHero();}catch(error){console.error(error);}
+  if(!hero){
+    app.outerHTML=`<main class="cs-page"><section class="cs-card"><h1>${site.title}</h1><p>Approved CryptoWorldz artwork failed integrity loading. Deployment must not be considered visually verified.</p></section></main>`;
+    return;
+  }
+  app.outerHTML=`<main class="cs-page approved-cw-hero" data-approved-art="cryptoworldz-we-need-you"><img class="cs-art" src="${hero}" alt="CryptoWorldz We Need You — approved Worldz recruitment artwork"><div class="cs-overlay"><section class="cs-glass"><span class="cs-world-label">${site.label}</span><h1>${site.title}</h1><p>One World • One Mission • One CryptoWorldz</p><div class="wx-actions"><a class="wx-btn green" href="${HQ}" target="_blank" rel="noopener noreferrer">Join CryptoWorldz HQ</a><a class="wx-btn" href="${BOT}" target="_blank" rel="noopener noreferrer">Open @CryptoWorldzBot</a><a class="wx-btn gold" href="https://oneworldz.com">Visit OneWorldz</a><a class="wx-btn" href="https://cryptoworldz.xyz">Visit CryptoWorldz</a></div></section></div></main>`;
 }
 render();
