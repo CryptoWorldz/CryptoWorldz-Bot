@@ -7,7 +7,8 @@ const files = fs.readdirSync(workflowsDir).filter(name => name.endsWith('.yml'))
 const canonicalDeploys = new Set([
   'deploy-worldz-approved.yml',
   'deploy-pdc-standalone.yml',
-  'deploy-solworldz-standalone.yml'
+  'deploy-solworldz-standalone.yml',
+  'deploy-cryptoworldz-standalone.yml'
 ]);
 
 const failures = [];
@@ -28,12 +29,12 @@ for (const file of files) {
       [/ssl:check-hostname\s+no/i, 'TLS hostname verification bypass'],
       [/FTP_TLS_VERIFY:\s*['"]?no/i, 'FTP_TLS_VERIFY=no'],
       [/FTP_TLS_CHECK_HOSTNAME:\s*['"]?no/i, 'FTP_TLS_CHECK_HOSTNAME=no'],
-      [/\|\|\s*true/, 'failure suppression with || true'],
-      [/set\s+\+e\b/, 'set +e failure suppression']
+      [/\|\|\s*true/, 'failure suppression with || true']
     ];
     for (const [pattern, label] of forbidden) if (pattern.test(text)) fail(file, label);
+    if (!/set\s+-euo\s+pipefail/.test(text)) fail(file, 'strict shell failure mode missing');
     if (!/sha256sum/i.test(text)) fail(file, 'no exact SHA-256 verification');
-    if (!/rollback|restore previous|restore previous site/i.test(text)) fail(file, 'no rollback path');
+    if (!/rollback|restore previous|restore exact predeploy/i.test(text)) fail(file, 'no rollback path');
     if (!/backup|snapshot/i.test(text)) fail(file, 'no pre-deploy backup');
 
     const pushBlock = text.match(/\n\s*push:\s*\n([\s\S]*?)(?=\n\s*[a-zA-Z_][\w-]*:\s*\n|\npermissions:|\nconcurrency:)/)?.[1] || '';
@@ -54,12 +55,18 @@ const generic = fs.readFileSync(path.join(workflowsDir, 'deploy-worldz-approved.
 if (/^\s*-\s*cryptoworldz\s*$/im.test(generic)) fail('deploy-worldz-approved.yml', 'CryptoWorldz appears as selectable generic deployment target');
 if (!/cryptoworldz\|purplediamondcrew\|solworldz/.test(generic)) fail('deploy-worldz-approved.yml', 'protected-target block is missing');
 
+const crypto = fs.readFileSync(path.join(workflowsDir, 'deploy-cryptoworldz-standalone.yml'), 'utf8');
+for (const required of ['CRYPTOWORLDZ.XYZ', 'cryptoworldz-production', 'ultimate.html', 'HOSTINGER_CERT_SHA256']) {
+  if (!crypto.includes(required)) fail('deploy-cryptoworldz-standalone.yml', `missing protected CryptoWorldz proof/control: ${required}`);
+}
+if (/mirror\s+--parallel=.*\s\.\s*$/m.test(crypto)) fail('deploy-cryptoworldz-standalone.yml', 'full remote-root backup/upload is forbidden for bounded Ultimate release');
+
 const comingSoon = fs.readFileSync(path.join(root, 'apps', 'cryptoworldz-web-core', 'assets', 'coming-soon-next.js'), 'utf8');
 if (!comingSoon.includes("./assets/worldz-master/cryptoworldz/we-need-you.png")) fail('coming-soon-next.js', 'idle Worldz does not use exact approved We Need You master image');
 if (/hero\.part\d+.*\.b64/i.test(comingSoon)) fail('coming-soon-next.js', 'legacy split base64 hero loader still present');
 
 const pdc = fs.readFileSync(path.join(workflowsDir, 'deploy-pdc-standalone.yml'), 'utf8');
-for (const required of ['https://gofund.me/65129e58', 'https://oneworldz.com/worldz/impactbased', 'LIVE IMAGE HASH MISMATCH']) {
+for (const required of ['https://gofund.me/c2e4fa936', 'https://oneworldz.com/worldz/impactbased', 'LIVE IMAGE HASH MISMATCH']) {
   if (!pdc.includes(required)) fail('deploy-pdc-standalone.yml', `missing required PDC proof: ${required}`);
 }
 if (pdc.includes('https://impactbased.oneworldz.com')) fail('deploy-pdc-standalone.yml', 'broken ImpactBased subdomain is forbidden');
