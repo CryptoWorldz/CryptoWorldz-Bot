@@ -266,7 +266,10 @@ async function proveViewport(viewport) {
   } finally {
     cdp?.close();
     try { browser?.chrome?.kill('SIGTERM'); } catch {}
-    if (browser?.dir) rmSync(browser.dir, { recursive: true, force: true });
+    await sleep(300);
+    if (browser?.dir) {
+      try { rmSync(browser.dir, { recursive: true, force: true, maxRetries: 8, retryDelay: 100 }); } catch {}
+    }
   }
 }
 
