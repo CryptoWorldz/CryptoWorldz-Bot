@@ -40,6 +40,17 @@ jobs:
           test -n "$FTP_USERNAME"
           test -n "$FTP_PASSWORD"
 
+      - name: Inspect public FTPS certificate identity without credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          host="${FTP_HOST#ftp://}"; host="${host#ftps://}"; host="${host%%/*}"
+          if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
+          test "$host" = '145.223.108.40'
+          echo "Reverse DNS: $(getent hosts "$host" | awk '{print $2}' | head -n1 || true)"
+          timeout 20 openssl s_client -starttls ftp -connect "$host:$FTP_PORT" -showcerts </dev/null 2>/dev/null \
+            | openssl x509 -noout -subject -issuer -ext subjectAltName
+
       - name: Install lftp
         run: |
           sudo apt-get update -qq
