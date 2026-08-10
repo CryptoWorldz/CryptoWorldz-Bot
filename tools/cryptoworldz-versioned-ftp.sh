@@ -31,14 +31,14 @@ cmd="${RUNNER_TEMP:-/tmp}/cw-versioned-${mode}-${GITHUB_RUN_ID:-manual}.lftp"
       ;;
     upload)
       [[ -s "$local_file" ]] || { echo 'release file missing' >&2; exit 2; }
-      printf 'put -o %s %s\n' "$(q "$remote_name")" "$(q "$local_file")"
+      printf 'put %s -o %s\n' "$(q "$local_file")" "$(q "$remote_name")"
       ;;
     verify)
       printf 'get %s -o %s\n' "$(q "$remote_name")" "$(q "$local_file")"
       ;;
     restore)
       if [[ -s "$local_file" ]]; then
-        printf 'put -o %s %s\n' "$(q "$remote_name")" "$(q "$local_file")"
+        printf 'put %s -o %s\n' "$(q "$local_file")" "$(q "$remote_name")"
       else
         echo 'set cmd:fail-exit no'
         printf 'rm %s\n' "$(q "$remote_name")"
