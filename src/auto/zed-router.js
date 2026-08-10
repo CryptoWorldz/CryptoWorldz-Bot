@@ -2,6 +2,7 @@ const { createRequestLimiter, validateTelegramInitData } = require("../miniapp-a
 
 function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
   const allowRequest = createRequestLimiter({ maxEvents: 30, intervalMs: 60000 });
+  let ultimateModulesPromise = null;
 
   async function authenticateSafety(req, res, next) {
     const result = validateTelegramInitData(req.get("x-telegram-init-data") || "", config.botToken);
@@ -36,9 +37,47 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
     return res.status(status).json(payload);
   }
 
+  async function ultimateStatusPayload() {
+    if (!ultimateModulesPromise) {
+      ultimateModulesPromise = Promise.all([
+        import("../../platform/src/ultimate.mjs"),
+        import("../../platform/src/ultimate-adapters.mjs")
+      ]);
+    }
+    const [ultimate, adapters] = await ultimateModulesPromise;
+    const blueprint = ultimate.ultimatePublicBlueprint();
+    const nextFunding = ultimate.nextFundingWindow(new Date());
+    const providers = Object.fromEntries(Object.entries(adapters.ULTIMATE_PROVIDER_CAPABILITIES).map(([name, provider]) => [name, {
+      role: provider.role,
+      mode: provider.mode,
+      external_authorization_required: provider.canAutoAuthorize === false,
+      secret_custody: provider.canHoldSecrets ? "provider" : "prohibited"
+    }]));
+    return {
+      ok: true,
+      ultimate: {
+        ...blueprint,
+        nextFunding,
+        signers: ultimate.ULTIMATE_SIGNERS.map(({ handle, role, immutable }) => ({ handle, role, immutable })),
+        providers,
+        launch: {
+          concept: "OneWorldz Kindness",
+          ticker: "$KIND",
+          status: "legal_review"
+        },
+        publicUrl: "https://cryptoworldz.xyz/command-centre-ultimate-20260811.html"
+      }
+    };
+  }
+
   app.get("/api/mini/auto/status", authenticateSafety, async (req, res) => {
     try { return res.json({ ...(await autoClient.status()), access: req.autoAuthority }); }
     catch (error) { return res.status(502).json({ ok: false, error: error.code || "auto_status_failed" }); }
+  });
+
+  app.get("/api/mini/auto/ultimate", authenticateSafety, ownerOnly, async (req, res) => {
+    try { return res.json(await ultimateStatusPayload()); }
+    catch (error) { return res.status(500).json({ ok: false, error: error.code || "ultimate_status_failed" }); }
   });
 
   app.post("/api/mini/auto/simulate", authenticateSafety, ownerOnly, async (req, res) => {

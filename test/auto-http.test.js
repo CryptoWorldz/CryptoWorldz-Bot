@@ -89,17 +89,35 @@ test("Zed Mini App Auto routes require signed primary-owner identity", async (t)
   });
   assert.equal(nonOwner.status, 403);
 
-  const owner = await fetch(`${base}/api/mini/auto/status`, {
-    headers: { "x-telegram-init-data": signedInitData({ id: ownerId, first_name: "Owner" }, botToken) }
-  });
+  const ownerHeaders = { "x-telegram-init-data": signedInitData({ id: ownerId, first_name: "Owner" }, botToken) };
+  const owner = await fetch(`${base}/api/mini/auto/status`, { headers: ownerHeaders });
   assert.equal(owner.status, 200);
   assert.equal((await owner.json()).status.execution_enabled, false);
+
+  const ultimate = await fetch(`${base}/api/mini/auto/ultimate`, { headers: ownerHeaders });
+  assert.equal(ultimate.status, 200);
+  const ultimatePayload = await ultimate.json();
+  assert.equal(ultimatePayload.ultimate.name, "Command Centre Ultimate™");
+  assert.equal(ultimatePayload.ultimate.multisig.threshold, 2);
+  assert.equal(ultimatePayload.ultimate.multisig.signers, 3);
+  assert.equal(ultimatePayload.ultimate.multisig.immutableOwner, "JayJayTeamDev");
+  assert.equal(ultimatePayload.ultimate.executionEnabled, false);
+  assert.equal(ultimatePayload.ultimate.fundingSchedule.hour, 18);
+  assert.equal(ultimatePayload.ultimate.fundingSchedule.minute, 30);
+  assert.equal(ultimatePayload.ultimate.providers.jupiter.secret_custody, "prohibited");
+  assert.equal(ultimatePayload.ultimate.launch.status, "legal_review");
+  assert.equal(ultimatePayload.ultimate.signers.find((signer) => signer.role === "owner").immutable, true);
+
+  const deniedUltimate = await fetch(`${base}/api/mini/auto/ultimate`, {
+    headers: { "x-telegram-init-data": signedInitData({ id: 999, first_name: "Admin" }, botToken) }
+  });
+  assert.equal(deniedUltimate.status, 403);
 
   const simulation = await fetch(`${base}/api/mini/auto/simulate`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-telegram-init-data": signedInitData({ id: ownerId, first_name: "Owner" }, botToken)
+      ...ownerHeaders
     },
     body: JSON.stringify({ network: "solana", amount: 1 })
   });
