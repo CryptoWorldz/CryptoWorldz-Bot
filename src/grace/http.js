@@ -33,6 +33,11 @@ function registerGraceRoutes({ app, graceRepository, graceOAuth = null, graceFac
     res.json({
       ok: true,
       service: "grace-social-engine",
+      stage3_power_upgrade: true,
+      campaign_centre: true,
+      analytics: true,
+      ads_budget_controls: true,
+      automatic_ad_spend: false,
       posting: "approval-controlled",
       x_oauth_configured: Boolean(graceOAuth?.configured?.()),
       facebook_oauth_configured: Boolean(graceFacebookOAuth?.configured?.()),
