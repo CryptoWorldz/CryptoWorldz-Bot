@@ -1,0 +1,104 @@
+name: Prove Admin Gateway Live
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/admin-gateway-live.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-gateway-live-proof
+  cancel-in-progress: true
+
+jobs:
+  prove:
+    name: Prove clean Admin Centre on cryptobotz production
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm explicit read-only request
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          APPROVED_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          test "$(sed -n 's/^target=//p' diagnostics/admin-gateway-live.request | tail -n1)" = 'cryptobotz.cryptoworldz.xyz'
+          test "$(sed -n 's/^mode=//p' diagnostics/admin-gateway-live.request | tail -n1)" = 'read-only-admin-gateway-proof'
+          test "$(sed -n 's/^approval=//p' diagnostics/admin-gateway-live.request | tail -n1)" = 'Approved by JayJayTeamDev'
+          test "$(sed -n 's/^source_commit=//p' diagnostics/admin-gateway-live.request | tail -n1)" = "$APPROVED_BEFORE"
+
+      - name: Prove Mini App loads Admin gateway assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://cryptobotz.cryptoworldz.xyz'
+          html="$RUNNER_TEMP/miniapp.html"
+          ok=0
+          for attempt in $(seq 1 8); do
+            set +e
+            code="$(curl -4 -L -sS -o "$html" -w '%{http_code}' --retry 1 --retry-all-errors --connect-timeout 12 --max-time 40 -A 'Mozilla/5.0 (Admin Gateway Production Proof)' -H 'Cache-Control: no-cache, no-store, must-revalidate' "$base/miniapp/?admin_proof=${GITHUB_RUN_ID}-${attempt}")"
+            status=$?
+            set -e
+            if [[ "$status" == '0' && "$code" == '200' ]] \
+              && grep -Fq '/miniapp/admin-gateway.css?v=1.0.0' "$html" \
+              && grep -Fq '/miniapp/admin-gateway.js?v=1.0.0' "$html"; then ok=1; break; fi
+            sleep 4
+          done
+          [[ "$ok" == '1' ]] || { echo '::error::Live Mini App shell has not converged to Admin gateway release'; exit 1; }
+          echo 'ADMIN_GATEWAY_SHELL_PROOF=PASS'
+
+      - name: Prove exactly five Admin gateways and preservation mappings
+        shell: bash
+        run: |
+          set -euo pipefail
+          js="$RUNNER_TEMP/admin-gateway.js"
+          curl -4 -L -sS --fail --retry 2 --retry-all-errors --connect-timeout 12 --max-time 40 -A 'Mozilla/5.0 (Admin Gateway Production Proof)' -H 'Cache-Control: no-cache, no-store, must-revalidate' -o "$js" "https://cryptobotz.cryptoworldz.xyz/miniapp/admin-gateway.js?proof=${GITHUB_RUN_ID}"
+          test -s "$js"
+          for required in \
+            "id: 'ultimate'" \
+            "id: 'operations'" \
+            "id: 'raaiiidds'" \
+            "id: 'team'" \
+            "id: 'points'" \
+            'auto-owner-panel' \
+            'mission-create' \
+            'points-rule' \
+            'executive-admin-panel' \
+            'admin-submissions' \
+            'worldzcast-root'; do
+            grep -Fq "$required" "$js" || { echo "::error::Live Admin gateway missing: $required"; exit 1; }
+          done
+          count="$(grep -Eo "id: '(ultimate|operations|raaiiidds|team|points)'" "$js" | wc -l | tr -d ' ')"
+          [[ "$count" == '5' ]] || { echo "::error::Expected exactly 5 Admin gateways; found $count"; exit 1; }
+          node --check "$js"
+          echo 'ADMIN_GATEWAY_SCRIPT_PROOF=PASS'
+
+      - name: Prove Admin gateway styles
+        shell: bash
+        run: |
+          set -euo pipefail
+          css="$RUNNER_TEMP/admin-gateway.css"
+          curl -4 -L -sS --fail --retry 2 --retry-all-errors --connect-timeout 12 --max-time 40 -A 'Mozilla/5.0 (Admin Gateway Production Proof)' -H 'Cache-Control: no-cache, no-store, must-revalidate' -o "$css" "https://cryptobotz.cryptoworldz.xyz/miniapp/admin-gateway.css?proof=${GITHUB_RUN_ID}"
+          test -s "$css"
+          for required in '.admin-gateway-shell' '.admin-gateway-nav' '.admin-gateway-empty'; do
+            grep -Fq "$required" "$css" || { echo "::error::Live Admin stylesheet missing $required"; exit 1; }
+          done
+          echo 'ADMIN_GATEWAY_STYLE_PROOF=PASS'
+
+      - name: Proof summary
+        if: always()
+        run: |
+          {
+            echo '## Zed Admin Centre production proof'
+            echo
+            echo '- Read-only HTTPS proof only'
+            echo '- Exactly five Admin gateways required'
+            echo '- Existing Ultimate, Raaiiidd, points, team, submissions and WorldzCast mappings required'
+          } >> "$GITHUB_STEP_SUMMARY"
