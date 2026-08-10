@@ -3,9 +3,15 @@ name: Audit Worldz Browser Rendering
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
+      - forensics/browser-proof-gate-v4
     paths:
       - 'diagnostics/worldz-browser-audit.request'
+      - 'tools/worldz-browser-audit-fast-v5.mjs'
+      - 'tools/worldz-css-url-parser.mjs'
+      - 'tools/worldz-css-url-parser.test.mjs'
+      - '.github/workflows/audit-worldz-browser.yml'
 
 permissions:
   contents: read
@@ -14,32 +20,49 @@ env:
   FORCE_COLOR: '1'
 
 jobs:
+  parser-regression:
+    name: Validate browser proof parser guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check out audit source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run CSS image URL regression tests
+        run: node --test tools/worldz-css-url-parser.test.mjs
+      - name: Syntax-check Browser Proof Gate v5
+        run: node --check tools/worldz-browser-audit-fast-v5.mjs
+
   browser-audit:
+    needs: parser-regression
     name: Render ${{ matrix.target.name }} in Chrome
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 8
     strategy:
       fail-fast: false
       max-parallel: 4
       matrix:
         target:
-          - { name: OneWorldz, url: 'https://oneworldz.com/' }
-          - { name: Reagan, url: 'https://oneworldz.com/reagan-kauja/' }
-          - { name: ImpactBased, url: 'https://oneworldz.com/worldz/impactbased' }
-          - { name: LawWorldz, url: 'https://oneworldz.com/worldz/law' }
-          - { name: LearnWorldz, url: 'https://oneworldz.com/worldz/learn' }
-          - { name: BitWorldz, url: 'https://oneworldz.com/worldz/bitworldz' }
-          - { name: CryptoWorldz, url: 'https://cryptoworldz.xyz/' }
-          - { name: SolWorldz, url: 'https://solworldz.xyz/' }
-          - { name: EthWorldz, url: 'https://ethworldz.xyz/' }
-          - { name: BaseWorldz, url: 'https://baseworldz.xyz/' }
-          - { name: BNBWorldz, url: 'https://bnbworldz.xyz/' }
-          - { name: XRPWorldz, url: 'https://xrpworldz.xyz/' }
-          - { name: SuiWorldz, url: 'https://suiworldz.xyz/' }
-          - { name: HyperWorldz, url: 'https://hyperworldz.xyz/' }
-          - { name: RobinWorldz, url: 'https://robinworldz.xyz/' }
-          - { name: HodlerWorldz, url: 'https://hodlerworldz.xyz/' }
-          - { name: PurpleDiamondCrew, url: 'https://purplediamondcrew.com/' }
+          - { name: OneWorldz, url: 'https://oneworldz.com/', require_image: 'true' }
+          - { name: Reagan, url: 'https://oneworldz.com/reagan-kauja/', require_image: 'true' }
+          - { name: ImpactBased, url: 'https://impactbased.oneworldz.com/', require_image: 'true' }
+          - { name: LawWorldz, url: 'https://law.oneworldz.com/', require_image: 'true' }
+          - { name: LearnWorldz, url: 'https://learn.oneworldz.com/', require_image: 'true' }
+          - { name: BitcoinWorldz, url: 'https://bitcoinworldz.xyz/', require_image: 'true' }
+          - { name: CryptoWorldz, url: 'https://cryptoworldz.xyz/', require_image: 'false' }
+          - { name: SolWorldz, url: 'https://solworldz.xyz/', require_image: 'true' }
+          - { name: EthWorldz, url: 'https://ethworldz.xyz/', require_image: 'true' }
+          - { name: BaseWorldz, url: 'https://baseworldz.xyz/', require_image: 'true' }
+          - { name: BNBWorldz, url: 'https://bnbworldz.xyz/', require_image: 'true' }
+          - { name: XRPWorldz, url: 'https://xrpworldz.xyz/', require_image: 'true' }
+          - { name: SuiWorldz, url: 'https://suiworldz.xyz/', require_image: 'true' }
+          - { name: HyperWorldz, url: 'https://hyperworldz.xyz/', require_image: 'true' }
+          - { name: RobinWorldz, url: 'https://robinworldz.xyz/', require_image: 'true' }
+          - { name: HodlerWorldz, url: 'https://hodlerworldz.xyz/', require_image: 'true' }
+          - { name: PurpleDiamondCrew, url: 'https://purplediamondcrew.com/', require_image: 'true' }
 
     steps:
       - name: Check out production source
@@ -67,13 +90,14 @@ jobs:
             exit 1
           fi
 
-      - name: Run challenge-aware desktop/mobile browser proof
+      - name: Run direct-launch desktop/mobile browser proof v5
         id: audit
         continue-on-error: true
         env:
           TARGET_NAME: ${{ matrix.target.name }}
           TARGET_URL: ${{ matrix.target.url }}
-        run: node tools/worldz-browser-audit-fast-v3.mjs
+          REQUIRE_REAL_IMAGE: ${{ matrix.target.require_image }}
+        run: node tools/worldz-browser-audit-fast-v5.mjs
 
       - name: Upload this target screenshots and report
         if: always()
