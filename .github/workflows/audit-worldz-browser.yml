@@ -3,11 +3,9 @@ name: Audit Worldz Browser Rendering
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - 'diagnostics/worldz-browser-audit.request'
-      - 'tools/worldz-browser-audit.mjs'
-      - 'tools/print-worldz-browser-audit.mjs'
-      - '.github/workflows/audit-worldz-browser.yml'
 
 permissions:
   contents: read
@@ -17,9 +15,32 @@ env:
 
 jobs:
   browser-audit:
-    name: Render every Worldz site in Chrome
+    name: Render ${{ matrix.target.name }} in Chrome
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 7
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        target:
+          - { name: OneWorldz, url: 'https://oneworldz.com/' }
+          - { name: Reagan, url: 'https://oneworldz.com/reagan-kauja/' }
+          - { name: ImpactBased, url: 'https://oneworldz.com/worldz/impactbased' }
+          - { name: LawWorldz, url: 'https://oneworldz.com/worldz/law' }
+          - { name: LearnWorldz, url: 'https://oneworldz.com/worldz/learn' }
+          - { name: BitWorldz, url: 'https://oneworldz.com/worldz/bitworldz' }
+          - { name: CryptoWorldz, url: 'https://cryptoworldz.xyz/' }
+          - { name: SolWorldz, url: 'https://solworldz.xyz/' }
+          - { name: EthWorldz, url: 'https://ethworldz.xyz/' }
+          - { name: BaseWorldz, url: 'https://baseworldz.xyz/' }
+          - { name: BNBWorldz, url: 'https://bnbworldz.xyz/' }
+          - { name: XRPWorldz, url: 'https://xrpworldz.xyz/' }
+          - { name: SuiWorldz, url: 'https://suiworldz.xyz/' }
+          - { name: HyperWorldz, url: 'https://hyperworldz.xyz/' }
+          - { name: RobinWorldz, url: 'https://robinworldz.xyz/' }
+          - { name: HodlerWorldz, url: 'https://hodlerworldz.xyz/' }
+          - { name: PurpleDiamondCrew, url: 'https://purplediamondcrew.com/' }
+
     steps:
       - name: Check out production source
         uses: actions/checkout@v4
@@ -46,32 +67,32 @@ jobs:
             exit 1
           fi
 
-      - name: Run browser-render image audit
+      - name: Run bounded desktop/mobile browser proof
         id: audit
         continue-on-error: true
-        shell: bash
-        run: node tools/worldz-browser-audit.mjs
+        env:
+          TARGET_NAME: ${{ matrix.target.name }}
+          TARGET_URL: ${{ matrix.target.url }}
+        run: node tools/worldz-browser-audit-fast.mjs
 
-      - name: Upload browser screenshots and reports
+      - name: Upload this target screenshots and report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: worldz-browser-audit-${{ github.run_id }}
+          name: worldz-browser-${{ matrix.target.name }}-${{ github.run_id }}
           path: browser-audit/
           if-no-files-found: error
           retention-days: 14
 
-      - name: Print concise audit summary
-        if: always()
-        shell: bash
-        run: |
-          if [ -f browser-audit/report.json ]; then
-            node tools/print-worldz-browser-audit.mjs browser-audit/report.json
-          fi
-
-      - name: Fail job if any rendered site is broken
+      - name: Print proof result
         if: always()
         shell: bash
         run: |
           test -f browser-audit/report.json
-          node tools/print-worldz-browser-audit.mjs browser-audit/report.json --fail
+          node -e "const r=require('./browser-audit/report.json'); for (const x of r.results) console.log((x.ok?'PASS ':'FAIL ')+r.target+' '+x.viewport+(x.reasons.length?' :: '+x.reasons.join('; '):'')); if(!r.passed) process.exit(1)"
+
+      - name: Enforce audit outcome
+        if: always()
+        shell: bash
+        run: |
+          test '${{ steps.audit.outcome }}' = 'success'
