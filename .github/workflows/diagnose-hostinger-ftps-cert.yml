@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Inspect public FTP TLS identity
+      - name: Inspect public FTP TLS and SFTP identities
         shell: bash
         run: |
           set -euo pipefail
@@ -24,3 +24,7 @@ jobs:
           echo "TLS certificate:"
           timeout 20 openssl s_client -starttls ftp -connect "$ip:21" -showcerts </dev/null 2>/dev/null \
             | openssl x509 -noout -subject -issuer -serial -fingerprint -sha256 -ext subjectAltName
+          echo "SFTP/SSH host keys on port 65002:"
+          timeout 20 ssh-keyscan -T 10 -p 65002 "$ip" 2>/dev/null | tee /tmp/hostinger-known-hosts
+          test -s /tmp/hostinger-known-hosts
+          ssh-keygen -lf /tmp/hostinger-known-hosts -E sha256
