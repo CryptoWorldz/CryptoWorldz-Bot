@@ -1,0 +1,285 @@
+name: Deploy CryptoWorldz Standalone — Proof First
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/cryptoworldz-standalone.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cryptoworldz-standalone-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Back up, deploy and prove CryptoWorldz.xyz
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: cryptoworldz-production
+      url: https://cryptoworldz.xyz
+    env:
+      FTP_HOST: '145.223.108.40'
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: '21'
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
+      FTP_ACCOUNT_SCOPE: DOMAIN_ONLY
+      DEPLOY_GUARD: CRYPTOWORLDZ.XYZ
+      LIVE_URL: https://cryptoworldz.xyz
+      HOSTINGER_LOCKED_IP: '145.223.108.40'
+      HOSTINGER_TLS_ALIAS: 'cryptoworldz-ftp-pinned.hstgr.io'
+      HOSTINGER_CERT_SHA256: '47:E1:B5:DC:5D:61:02:E8:ED:8C:01:21:61:AF:8B:22:53:70:AB:55:63:B0:0C:AF:14:6C:BD:7A:96:51:E9:5E'
+      FTP_TLS_VERIFY: yes
+      FTP_TLS_CHECK_HOSTNAME: yes
+    steps:
+      - name: Check out approved main commit
+        uses: actions/checkout@v4
+
+      - name: Validate explicit CryptoWorldz request when triggered by push
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          APPROVED_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          test -f deployments/cryptoworldz-standalone.request
+          test "$(sed -n 's/^target=//p' deployments/cryptoworldz-standalone.request | tail -n1)" = 'cryptoworldz.xyz'
+          test "$(sed -n 's/^bundle=//p' deployments/cryptoworldz-standalone.request | tail -n1)" = 'apps/cryptoworldz-web-core'
+          test "$(sed -n 's/^approval=//p' deployments/cryptoworldz-standalone.request | tail -n1)" = 'Approved by JayJayTeamDev'
+          source_commit="$(sed -n 's/^source_commit=//p' deployments/cryptoworldz-standalone.request | tail -n1)"
+          test -n "$source_commit"
+          test "$source_commit" = "$APPROVED_BEFORE"
+
+      - name: Restore and verify approved Worldz media
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf apps/cryptoworldz-web-core/assets/worldz-master
+          bash tools/restore-approved-worldz-media.sh apps/cryptoworldz-web-core/assets/worldz-master
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run complete repository verification
+        run: npm run verify
+
+      - name: Validate CryptoWorldz Ultimate release files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s apps/cryptoworldz-web-core/index.html
+          test -s apps/cryptoworldz-web-core/ultimate.html
+          grep -Fq 'Command Centre Ultimate' apps/cryptoworldz-web-core/ultimate.html
+          grep -Fq './ultimate.html' apps/cryptoworldz-web-core/index.html
+          bash -n tools/worldz-direct-ftp.sh
+          node --check tools/prove-live-worldz-v2.mjs
+          node --check tools/worldz-upload-manifest.mjs
+
+      - name: Install secure transfer and visual proof tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp zip imagemagick
+
+      - name: Lock deployment to CryptoWorldz only
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$FTP_HOST" == "$HOSTINGER_LOCKED_IP" ]] || { echo '::error::Locked Hostinger IP changed'; exit 1; }
+          [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]] || { echo '::error::CryptoWorldz FTP credentials missing'; exit 1; }
+          [[ "$FTP_PORT" == '21' ]] || { echo '::error::Locked FTPS port changed'; exit 1; }
+          [[ "$FTP_SERVER_DIR" == '/' || "$FTP_SERVER_DIR" == '/public_html' ]] || { echo '::error::Unexpected CryptoWorldz FTP root'; exit 1; }
+          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' && "$DEPLOY_GUARD" == 'CRYPTOWORLDZ.XYZ' ]] || { echo '::error::CryptoWorldz guard changed'; exit 1; }
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+
+      - name: Establish pinned certificate-validated Hostinger FTPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$HOSTINGER_LOCKED_IP $HOSTINGER_TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
+          test "$(getent ahostsv4 "$HOSTINGER_TLS_ALIAS" | awk 'NR==1{print $1}')" = "$HOSTINGER_LOCKED_IP"
+          cert_ok=0
+          cert="$RUNNER_TEMP/hostinger-cert.pem"
+          for attempt in 1 2 3; do
+            session="$RUNNER_TEMP/hostinger-session-$attempt.txt"
+            err="$RUNNER_TEMP/hostinger-openssl-$attempt.err"
+            rm -f "$cert" "$session" "$err"
+            set +e
+            timeout 25 openssl s_client -starttls ftp -connect "$HOSTINGER_LOCKED_IP:21" -verify_return_error -showcerts </dev/null >"$session" 2>"$err"
+            rc=$?
+            set -e
+            if [[ "$rc" -ne 0 ]]; then sleep $((attempt * 2)); continue; fi
+            sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$session" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
+            [[ -s "$cert" ]] || { sleep $((attempt * 2)); continue; }
+            fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
+            if [[ "$fp" == "$HOSTINGER_CERT_SHA256" ]] \
+              && openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io' \
+              && grep -Fq 'Verify return code: 0 (ok)' "$session" \
+              && ! grep -Eqi 'verify error|certificate verify failed' "$err"; then
+              cert_ok=1
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          [[ "$cert_ok" == '1' ]] || { echo '::error::Unable to prove pinned Hostinger FTPS identity'; exit 1; }
+          echo "FTP_CONNECT_HOST=$HOSTINGER_TLS_ALIAS" >> "$GITHUB_ENV"
+
+      - name: Confirm encrypted CryptoWorldz target
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; bye"
+
+      - name: Capture mandatory rollback snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/cryptoworldz-backup"
+          mkdir -p "$backup"
+          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          set ssl:check-hostname yes
+          cd "$FTP_SERVER_DIR"
+          lcd "$backup"
+          mirror --parallel=3 --exclude-glob '.well-known/**' --exclude-glob '.env*' --exclude-glob '*.log' --exclude-glob 'cgi-bin/**' .
+          bye
+          LFTP
+          test -n "$(find "$backup" -mindepth 1 -print -quit)"
+          (cd "$backup" && find . -type f -printf '%P\n' | sort) > "$RUNNER_TEMP/cryptoworldz-backup-manifest.txt"
+          (cd "$backup" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sed 's#  \./#  #') > "$RUNNER_TEMP/cryptoworldz-backup.sha256"
+          cd "$backup"
+          zip -qr "$RUNNER_TEMP/cryptoworldz-predeploy-${GITHUB_RUN_ID}.zip" .
+          test -s "$RUNNER_TEMP/cryptoworldz-predeploy-${GITHUB_RUN_ID}.zip"
+
+      - name: Prepare upload and rollback-new-file manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_root="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
+          node tools/build-worldz-media-payloads.mjs "$source_root"
+          node tools/worldz-upload-manifest.mjs "$source_root" "$RUNNER_TEMP/cryptoworldz-upload-manifest.txt"
+          test -s "$RUNNER_TEMP/cryptoworldz-upload-manifest.txt"
+          comm -23 "$RUNNER_TEMP/cryptoworldz-upload-manifest.txt" "$RUNNER_TEMP/cryptoworldz-backup-manifest.txt" > "$RUNNER_TEMP/cryptoworldz-rollback-new-files.txt"
+          if grep -nE '(^/|(^|/)\.\.(/|$)|[[:cntrl:]])' "$RUNNER_TEMP/cryptoworldz-rollback-new-files.txt"; then
+            echo '::error::Unsafe path in rollback-new-file manifest.'
+            exit 1
+          fi
+
+      - name: Preserve rollback package
+        uses: actions/upload-artifact@v4
+        with:
+          name: cryptoworldz-predeploy-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/cryptoworldz-predeploy-${{ github.run_id }}.zip
+            ${{ runner.temp }}/cryptoworldz-backup.sha256
+            ${{ runner.temp }}/cryptoworldz-upload-manifest.txt
+            ${{ runner.temp }}/cryptoworldz-rollback-new-files.txt
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload approved CryptoWorldz bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'CRYPTOWORLDZ_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
+          FTP_TRANSFER_TIMEOUT=360 bash tools/worldz-direct-ftp.sh upload "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
+
+      - name: Prove live homepage and Ultimate page
+        shell: bash
+        run: |
+          set -euo pipefail
+          cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
+          home="$RUNNER_TEMP/cryptoworldz-home.html"
+          ultimate="$RUNNER_TEMP/cryptoworldz-ultimate.html"
+          curl -4 -L -fsS --retry 2 --retry-all-errors -H 'Cache-Control: no-cache' --max-time 45 "$LIVE_URL/?$cache" -o "$home"
+          curl -4 -L -fsS --retry 2 --retry-all-errors -H 'Cache-Control: no-cache' --max-time 45 "$LIVE_URL/ultimate.html?$cache" -o "$ultimate"
+          grep -Fqi 'CRYPTOWORLDZ' "$home"
+          grep -Fq 'Command Centre Ultimate' "$home"
+          grep -Fq 'Command Centre Ultimate' "$ultimate"
+          grep -Fq 'JayJayTeamDev' "$ultimate"
+          ! grep -Eqi 'Loading the Worldz experience|default page|parked domain' "$home"
+          ! grep -Eqi 'default page|parked domain' "$ultimate"
+
+      - name: Prove desktop and mobile CryptoWorldz rendering
+        shell: bash
+        run: |
+          set -euo pipefail
+          WORLDZ_PROOF_DIR="$RUNNER_TEMP/cryptoworldz-home-proof" node tools/prove-live-worldz-v2.mjs "$LIVE_URL" 'CryptoWorldz'
+          WORLDZ_PROOF_DIR="$RUNNER_TEMP/cryptoworldz-ultimate-proof" node tools/prove-live-worldz-v2.mjs "$LIVE_URL/ultimate.html" 'Command Centre Ultimate'
+
+      - name: Preserve browser proof screenshots
+        if: success() && env.CRYPTOWORLDZ_UPLOAD_STARTED == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cryptoworldz-production-proof-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/cryptoworldz-home-proof/
+            ${{ runner.temp }}/cryptoworldz-ultimate-proof/
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Restore previous site exactly if deployment fails
+        if: failure() && env.CRYPTOWORLDZ_UPLOAD_STARTED == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/cryptoworldz-backup"
+          new_files="$RUNNER_TEMP/cryptoworldz-rollback-new-files.txt"
+          test -n "$(find "$backup" -mindepth 1 -print -quit)"
+          if [[ -f "$new_files" && -s "$new_files" ]]; then
+            cleanup="$RUNNER_TEMP/cryptoworldz-remove-new-files.lftp"
+            {
+              echo 'set cmd:fail-exit no'
+              echo 'set net:max-retries 2'
+              echo 'set net:timeout 30'
+              echo 'set ftp:ssl-force yes'
+              echo 'set ftp:ssl-protect-data yes'
+              echo 'set ssl:verify-certificate yes'
+              echo 'set ssl:check-hostname yes'
+              printf 'cd "%s"\n' "${FTP_SERVER_DIR//\"/\\\"}"
+              while IFS= read -r rel; do
+                [[ -n "$rel" ]] || continue
+                escaped="${rel//\\/\\\\}"
+                escaped="${escaped//\"/\\\"}"
+                printf 'rm "%s"\n' "$escaped"
+              done < "$new_files"
+              echo 'bye'
+            } > "$cleanup"
+            set +e
+            timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" < "$cleanup"
+            set -e
+          fi
+          FTP_TRANSFER_TIMEOUT=360 bash tools/worldz-direct-ftp.sh restore "$backup"
+          verify="$RUNNER_TEMP/cryptoworldz-rollback-verify"
+          mkdir -p "$verify"
+          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          set ssl:check-hostname yes
+          cd "$FTP_SERVER_DIR"
+          lcd "$verify"
+          mirror --parallel=3 --exclude-glob '.well-known/**' --exclude-glob '.env*' --exclude-glob '*.log' --exclude-glob 'cgi-bin/**' .
+          bye
+          LFTP
+          (cd "$verify" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sed 's#  \./#  #') > "$RUNNER_TEMP/cryptoworldz-rollback-verify.sha256"
+          diff -u "$RUNNER_TEMP/cryptoworldz-backup.sha256" "$RUNNER_TEMP/cryptoworldz-rollback-verify.sha256"
+          echo 'CRYPTOWORLDZ_ROLLBACK_EXACT=PASS'
