@@ -46,10 +46,10 @@ case "$mode" in
       common
       printf 'cd %s\n' "$(quote_lftp "$FTP_SERVER_DIR")"
       # index.html is known production state and is mandatory for rollback.
-      printf 'get -o %s %s\n' "$(quote_lftp "$root/index.html")" "$(quote_lftp 'index.html')"
+      printf 'get %s -o %s\n' "$(quote_lftp 'index.html')" "$(quote_lftp "$root/index.html")"
       # ultimate.html may not exist on the first Ultimate deployment.
       echo 'set cmd:fail-exit no'
-      printf 'get -o %s %s\n' "$(quote_lftp "$root/ultimate.html")" "$(quote_lftp 'ultimate.html')"
+      printf 'get %s -o %s\n' "$(quote_lftp 'ultimate.html')" "$(quote_lftp "$root/ultimate.html")"
       echo 'set cmd:fail-exit yes'
       echo 'bye'
     } > "$command_file"
