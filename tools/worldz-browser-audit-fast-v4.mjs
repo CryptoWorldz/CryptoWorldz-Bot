@@ -120,9 +120,9 @@ async function clearAndNavigate(cdp, url, responses, failures) {
   await waitReady(cdp, 12000);
   await sleep(1800);
   let text = await getText(cdp);
-  if (challengeText(text)) {
-    console.log(`CHALLENGE ${TARGET_NAME}: waiting for browser verification`);
-    await sleep(7500);
+  for (let challengeAttempt = 1; challengeAttempt <= 2 && challengeText(text); challengeAttempt++) {
+    console.log(`CHALLENGE ${TARGET_NAME}: verification wait ${challengeAttempt}/2`);
+    await sleep(6500);
     await cdp.send('Page.reload', { ignoreCache: true }, 20000);
     await waitReady(cdp, 12000);
     await sleep(2200);
@@ -157,8 +157,8 @@ const pageExpr = `
   return {title:document.title,url:location.href,body:(document.body?.innerText||'').slice(0,3000),images,backgrounds,links};
 })()`;
 
-function launchChrome(attempt) {
-  const userDataDir = `/tmp/worldz-browser-${process.pid}-${attempt}`;
+function launchChrome(attempt, label) {
+  const userDataDir = `/tmp/worldz-browser-${process.pid}-${safe(label)}-${attempt}-${Date.now()}`;
   rmSync(userDataDir, { recursive: true, force: true });
   const proc = spawn(chromePath(), [
     '--headless=new','--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--remote-debugging-port=0',
@@ -168,10 +168,10 @@ function launchChrome(attempt) {
   return { proc, userDataDir, stderr: () => stderr };
 }
 
-async function openBrowser() {
+async function openBrowser(label) {
   const errors = [];
   for (let attempt = 1; attempt <= 2; attempt++) {
-    const launched = launchChrome(attempt);
+    const launched = launchChrome(attempt, label);
     try {
       const port = await waitDevtoolsPort(launched.userDataDir, 15000);
       const targets = await waitJson(`http://127.0.0.1:${port}/json/list`, 12000);
@@ -188,59 +188,61 @@ async function openBrowser() {
 }
 
 const results=[];
-let browser;
-let cdp;
-let fatalError='';
-try {
-  browser = await openBrowser();
-  cdp=new CDP(browser.target.webSocketDebuggerUrl); await cdp.open();
-  await cdp.send('Page.enable'); await cdp.send('Runtime.enable'); await cdp.send('Network.enable');
-  let responses=[], failures=[];
-  cdp.on('Network.responseReceived',p=>{const r=p.response||{};responses.push({url:r.url,status:r.status,type:p.type||'',mimeType:r.mimeType||''});});
-  cdp.on('Network.loadingFailed',p=>failures.push({type:p.type||'',errorText:p.errorText||'',blockedReason:p.blockedReason||''}));
+const infraErrors=[];
+const stderrParts=[];
+for (const vp of VIEWPORTS) {
+  const item={target:TARGET_NAME,url:TARGET_URL,viewport:vp.name,ok:false,reasons:[]};
+  let browser;
+  let cdp;
+  const responses=[];
+  const failures=[];
+  try {
+    browser = await openBrowser(vp.name);
+    cdp=new CDP(browser.target.webSocketDebuggerUrl); await cdp.open();
+    await cdp.send('Page.enable'); await cdp.send('Runtime.enable'); await cdp.send('Network.enable');
+    cdp.on('Network.responseReceived',p=>{const r=p.response||{};responses.push({url:r.url,status:r.status,type:p.type||'',mimeType:r.mimeType||''});});
+    cdp.on('Network.loadingFailed',p=>failures.push({type:p.type||'',errorText:p.errorText||'',blockedReason:p.blockedReason||''}));
 
-  for (const vp of VIEWPORTS) {
-    const item={target:TARGET_NAME,url:TARGET_URL,viewport:vp.name,ok:false,reasons:[]};
-    try {
-      await cdp.send('Emulation.setDeviceMetricsOverride',{width:vp.width,height:vp.height,deviceScaleFactor:1,mobile:vp.name==='mobile'});
-      const u=new URL(TARGET_URL); u.searchParams.set('worldz-audit',`${Date.now()}-${vp.name}`);
-      await clearAndNavigate(cdp, u.href, responses, failures);
-      const evald=await cdp.send('Runtime.evaluate',{expression:pageExpr,awaitPromise:true,returnByValue:true},20000);
-      item.page=evald.result?.value||{};
-      const shot=await cdp.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false},20000);
-      writeFileSync(join(outDir,`${safe(TARGET_NAME)}-${vp.name}.png`),Buffer.from(shot.data,'base64'));
-      const docs=responses.filter(r=>r.type==='Document'); const doc=docs.at(-1);
-      const body=String(item.page.body||'').trim().toLowerCase();
-      const title=String(item.page.title||'').trim().toLowerCase();
-      const stillChallenge = body.includes('checking your browser before accessing') || body.includes('please wait for up to 5 seconds') || title.includes('checking your browser before accessing');
-      if(stillChallenge)item.reasons.push('Browser verification challenge did not clear');
-      if(!doc)item.reasons.push('No document response');
-      else if(Number(doc.status)>=400 && !stillChallenge)item.reasons.push(`Document HTTP ${doc.status}`);
-      for (const bad of ['loading oneworldz','loading the worldz experience','default page','this site can\'t be reached','err_name_not_resolved']) if(body.includes(bad)) item.reasons.push(`Placeholder/error text: ${bad}`);
-      if(!body)item.reasons.push('Empty body');
-      if(!title||title==='default page')item.reasons.push('Missing/placeholder title');
-      const visibleImgs=(item.page.images||[]).filter(x=>x.visible);
-      const brokenImgs=visibleImgs.filter(x=>x.broken); if(brokenImgs.length)item.reasons.push(`${brokenImgs.length} visible image(s) broken`);
-      const brokenBg=(item.page.backgrounds||[]).filter(x=>x.broken); if(brokenBg.length)item.reasons.push(`${brokenBg.length} background image(s) broken`);
-      const goodBg=(item.page.backgrounds||[]).filter(x=>!x.broken);
-      if(visibleImgs.length===0 && goodBg.length===0)item.reasons.push('No real rendered image proof');
-      const badImageHttp=responses.filter(r=>r.type==='Image'&&Number(r.status)>=400); if(badImageHttp.length)item.reasons.push(`${badImageHttp.length} image request(s) HTTP error`);
-      const docFail=failures.find(f=>f.type==='Document'); if(docFail&&!stillChallenge)item.reasons.push(`Document network failure: ${docFail.errorText}`);
-      item.summary={documentStatus:doc?.status??null,visibleImages:visibleImgs.length,backgroundImages:(item.page.backgrounds||[]).length,visibleLinks:(item.page.links||[]).length};
-      item.ok=item.reasons.length===0;
-    } catch (e) { item.reasons.push(e?.message||String(e)); }
-    results.push(item);
-    console.log(`${item.ok?'PASS':'FAIL'} ${TARGET_NAME} ${vp.name}${item.reasons.length?` :: ${item.reasons.join('; ')}`:''}`);
+    await cdp.send('Emulation.setDeviceMetricsOverride',{width:vp.width,height:vp.height,deviceScaleFactor:1,mobile:vp.name==='mobile'});
+    const u=new URL(TARGET_URL); u.searchParams.set('worldz-audit',`${Date.now()}-${vp.name}`);
+    await clearAndNavigate(cdp, u.href, responses, failures);
+    const evald=await cdp.send('Runtime.evaluate',{expression:pageExpr,awaitPromise:true,returnByValue:true},20000);
+    item.page=evald.result?.value||{};
+    const shot=await cdp.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false},20000);
+    writeFileSync(join(outDir,`${safe(TARGET_NAME)}-${vp.name}.png`),Buffer.from(shot.data,'base64'));
+    const docs=responses.filter(r=>r.type==='Document'); const doc=docs.at(-1);
+    const body=String(item.page.body||'').trim().toLowerCase();
+    const title=String(item.page.title||'').trim().toLowerCase();
+    const stillChallenge = body.includes('checking your browser before accessing') || body.includes('please wait for up to 5 seconds') || title.includes('checking your browser before accessing');
+    if(stillChallenge)item.reasons.push('Browser verification challenge did not clear');
+    if(!doc)item.reasons.push('No document response');
+    else if(Number(doc.status)>=400 && !stillChallenge)item.reasons.push(`Document HTTP ${doc.status}`);
+    for (const bad of ['loading oneworldz','loading the worldz experience','default page','this site can\'t be reached','err_name_not_resolved']) if(body.includes(bad)) item.reasons.push(`Placeholder/error text: ${bad}`);
+    if(!body)item.reasons.push('Empty body');
+    if(!title||title==='default page')item.reasons.push('Missing/placeholder title');
+    const visibleImgs=(item.page.images||[]).filter(x=>x.visible);
+    const brokenImgs=visibleImgs.filter(x=>x.broken); if(brokenImgs.length)item.reasons.push(`${brokenImgs.length} visible image(s) broken`);
+    const brokenBg=(item.page.backgrounds||[]).filter(x=>x.broken); if(brokenBg.length)item.reasons.push(`${brokenBg.length} background image(s) broken`);
+    const goodBg=(item.page.backgrounds||[]).filter(x=>!x.broken);
+    if(visibleImgs.length===0 && goodBg.length===0)item.reasons.push('No real rendered image proof');
+    const badImageHttp=responses.filter(r=>r.type==='Image'&&Number(r.status)>=400); if(badImageHttp.length)item.reasons.push(`${badImageHttp.length} image request(s) HTTP error`);
+    const docFail=failures.find(f=>f.type==='Document'); if(docFail&&!stillChallenge)item.reasons.push(`Document network failure: ${docFail.errorText}`);
+    item.summary={documentStatus:doc?.status??null,visibleImages:visibleImgs.length,backgroundImages:(item.page.backgrounds||[]).length,visibleLinks:(item.page.links||[]).length};
+    item.ok=item.reasons.length===0;
+  } catch (e) {
+    const reason=`Browser audit infrastructure failure: ${e?.message||String(e)}`;
+    item.reasons.push(reason);
+    infraErrors.push(`${vp.name}: ${e?.stack||e?.message||String(e)}`);
+  } finally {
+    try { if (browser?.stderr) stderrParts.push(`${vp.name}: ${browser.stderr().slice(-2000)}`); } catch {}
+    try { cdp?.close(); } catch {}
+    try { browser?.proc?.kill('SIGTERM'); } catch {}
+    await sleep(300);
   }
-} catch (e) {
-  fatalError=e?.stack||e?.message||String(e);
-  console.error(fatalError);
-  for (const vp of VIEWPORTS) results.push({target:TARGET_NAME,url:TARGET_URL,viewport:vp.name,ok:false,reasons:[`Browser audit infrastructure failure: ${e?.message||String(e)}`]});
-} finally {
-  try { cdp?.close(); } catch {}
-  try { browser?.proc?.kill('SIGTERM'); } catch {}
+  results.push(item);
+  console.log(`${item.ok?'PASS':'FAIL'} ${TARGET_NAME} ${vp.name}${item.reasons.length?` :: ${item.reasons.join('; ')}`:''}`);
 }
 
-const report={target:TARGET_NAME,url:TARGET_URL,results,passed:results.length===2&&results.every(r=>r.ok),fatalError,chromeStderr:(browser?.stderr?.()||'').slice(-4000)};
+const report={target:TARGET_NAME,url:TARGET_URL,results,passed:results.length===2&&results.every(r=>r.ok),fatalError:infraErrors.join('\n---\n'),chromeStderr:stderrParts.join('\n---\n').slice(-4000)};
 writeFileSync(join(outDir,'report.json'),JSON.stringify(report,null,2));
 if(!report.passed) process.exitCode=1;
