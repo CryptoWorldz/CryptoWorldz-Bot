@@ -52,15 +52,25 @@ function createFacebookOAuthService(options = {}) {
   if (!repository) throw new Error("A Grace Facebook OAuth repository is required.");
   if (typeof fetchImpl !== "function") throw new Error("A Fetch API implementation is required.");
 
+  function configurationStatus() {
+    return {
+      appId: Boolean(appId),
+      appSecret: Boolean(appSecret),
+      redirectUri: Boolean(redirectUri),
+      encryptionSecret: encryptionSecret.length >= 32,
+      configured: Boolean(appId && appSecret && redirectUri && encryptionSecret.length >= 32)
+    };
+  }
+
   function configured() {
-    return Boolean(appId && appSecret && redirectUri && encryptionSecret.length >= 32);
+    return configurationStatus().configured;
   }
 
   function requireConfigured() {
     if (!appId) throw new GraceFacebookOAuthError("GRACE_META_APP_ID is not configured.", { code: "META_APP_ID_MISSING" });
     if (!appSecret) throw new GraceFacebookOAuthError("GRACE_META_APP_SECRET is not configured.", { code: "META_APP_SECRET_MISSING" });
     if (!redirectUri) throw new GraceFacebookOAuthError("GRACE_META_REDIRECT_URI is not configured.", { code: "META_REDIRECT_URI_MISSING" });
-    if (encryptionSecret.length < 32) throw new GraceFacebookOAuthError("Grace token encryption is not configured.", { code: "META_ENCRYPTION_MISSING" });
+    if (encryptionSecret.length < 32) throw new GraceFacebookOAuthError("Grace token encryption is not configured. Add a 32+ character GRACE_TOKEN_ENCRYPTION_KEY in Hostinger.", { code: "META_ENCRYPTION_MISSING" });
   }
 
   async function beginConnection(accountId, actorTelegramId) {
@@ -88,12 +98,7 @@ function createFacebookOAuthService(options = {}) {
     return {
       account,
       expiresAt,
-      authorizationUrl: buildFacebookAuthorizationUrl({
-        appId,
-        redirectUri,
-        state,
-        graphVersion
-      })
+      authorizationUrl: buildFacebookAuthorizationUrl({ appId, redirectUri, state, graphVersion })
     };
   }
 
@@ -106,10 +111,7 @@ function createFacebookOAuthService(options = {}) {
     const response = await fetchImpl(url, { signal: AbortSignal.timeout(20000) });
     const payload = await json(response);
     if (!response.ok || !payload.access_token) {
-      throw new GraceFacebookOAuthError(
-        payload?.error?.message || `Meta token exchange returned HTTP ${response.status}.`,
-        { code: "META_TOKEN_EXCHANGE_FAILED", status: response.status }
-      );
+      throw new GraceFacebookOAuthError(payload?.error?.message || `Meta token exchange returned HTTP ${response.status}.`, { code: "META_TOKEN_EXCHANGE_FAILED", status: response.status });
     }
     return payload;
   }
@@ -134,10 +136,7 @@ function createFacebookOAuthService(options = {}) {
     const response = await fetchImpl(url, { signal: AbortSignal.timeout(20000) });
     const payload = await json(response);
     if (!response.ok || !Array.isArray(payload.data)) {
-      throw new GraceFacebookOAuthError(
-        payload?.error?.message || `Meta Page lookup returned HTTP ${response.status}.`,
-        { code: "META_PAGE_LOOKUP_FAILED", status: response.status }
-      );
+      throw new GraceFacebookOAuthError(payload?.error?.message || `Meta Page lookup returned HTTP ${response.status}.`, { code: "META_PAGE_LOOKUP_FAILED", status: response.status });
     }
     return payload.data;
   }
@@ -203,6 +202,7 @@ function createFacebookOAuthService(options = {}) {
   return {
     beginConnection,
     completeConnection,
+    configurationStatus,
     configured,
     getAccessToken,
     graphVersion

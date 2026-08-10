@@ -1,11 +1,29 @@
 const GRACE_FACEBOOK_OAUTH_COMMANDS = [
   { command: "connectfacebook", description: "Connect the approved CryptoWorldz Facebook Page" },
-  { command: "gracefacebook", description: "Alias for Grace Facebook connection" }
+  { command: "gracefacebook", description: "Alias for Grace Facebook connection" },
+  { command: "metacheck", description: "Owner: check Meta OAuth configuration" }
 ];
 
 function registerGraceFacebookOAuthTelegramHandlers({ bot, facebookOAuth, config }) {
   const send = (msg, text, options) => bot.sendMessage(msg.chat.id, text, options);
   const ownerAllowed = (msg) => String(msg.from?.id || "") === String(config.ownerTelegramId || "");
+
+  bot.onText(/^\/metacheck(?:@\w+)?$/, async (msg) => {
+    if (!ownerAllowed(msg)) return send(msg, "⛔ Meta diagnostics are restricted to the primary owner.");
+    const status = facebookOAuth.configurationStatus();
+    return send(msg, [
+      "🔎 Grace Meta Configuration Check",
+      "",
+      `GRACE_META_APP_ID: ${status.appId ? "YES ✅" : "NO ❌"}`,
+      `GRACE_META_APP_SECRET: ${status.appSecret ? "YES ✅" : "NO ❌"}`,
+      `GRACE_META_REDIRECT_URI: ${status.redirectUri ? "YES ✅" : "NO ❌"}`,
+      `Grace token encryption (32+ chars): ${status.encryptionSecret ? "YES ✅" : "NO ❌"}`,
+      "",
+      `Facebook OAuth ready: ${status.configured ? "YES ✅" : "NO ❌"}`,
+      "",
+      "No secret values are displayed by this diagnostic."
+    ].join("\n"));
+  });
 
   bot.onText(/^\/(?:connectfacebook|gracefacebook)(?:@\w+)?(?:\s+(\d+))?$/, async (msg, match) => {
     if (!ownerAllowed(msg)) return send(msg, "⛔ Facebook Page connection is restricted to the primary owner.");
@@ -14,18 +32,17 @@ function registerGraceFacebookOAuthTelegramHandlers({ bot, facebookOAuth, config
       return send(msg, "❌ Use: /connectfacebook account_id\nExample: /connectfacebook 11");
     }
     if (!facebookOAuth.configured()) {
+      const status = facebookOAuth.configurationStatus();
       return send(msg, [
-        "⚠️ Grace Facebook OAuth route is live, but Meta credentials are not configured in Hostinger yet.",
+        "⚠️ Grace Facebook OAuth route is live, but configuration is incomplete.",
         "",
-        "Required environment variables:",
-        "GRACE_META_APP_ID",
-        "GRACE_META_APP_SECRET",
-        "GRACE_META_REDIRECT_URI",
+        `GRACE_META_APP_ID: ${status.appId ? "YES ✅" : "NO ❌"}`,
+        `GRACE_META_APP_SECRET: ${status.appSecret ? "YES ✅" : "NO ❌"}`,
+        `GRACE_META_REDIRECT_URI: ${status.redirectUri ? "YES ✅" : "NO ❌"}`,
+        `Grace token encryption (32+ chars): ${status.encryptionSecret ? "YES ✅" : "NO ❌"}`,
         "",
-        "Redirect URI:",
-        "https://cryptobotz.cryptoworldz.xyz/grace/oauth/facebook/callback",
-        "",
-        "Never send the Meta App Secret through Telegram or commit it to GitHub."
+        "Run /metacheck any time for this safe diagnostic.",
+        "Never send secret values through Telegram or commit them to GitHub."
       ].join("\n"));
     }
 
