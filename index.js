@@ -6,49 +6,52 @@ const { createClient } = require("@supabase/supabase-js");
 const { createAutoClient } = require("./src/auto/client");
 const { registerAutoMiniRoutes } = require("./src/auto/zed-router");
 const { registerAutoTelegramHandlers } = require("./src/auto/telegram");
-const { CAUSE_COMMANDS, registerCauseTelegramHandlers } = require("./src/causes/telegram");
+const { registerCauseTelegramHandlers } = require("./src/causes/telegram");
 const { BOT_MENU_COMMANDS, registerCommandCentreHandlers } = require("./src/command-centre");
-const { DIRECTORY_COMMANDS, registerCommunityDirectoryHandlers } = require("./src/community-directory");
+const { registerCommunityDirectoryHandlers } = require("./src/community-directory");
 const { registerExecutiveRoutes } = require("./src/executive/http");
-const { EXECUTIVE_COMMANDS, registerExecutiveTelegramHandlers } = require("./src/executive/telegram");
+const { registerExecutiveTelegramHandlers } = require("./src/executive/telegram");
 const { createGracePublisher } = require("./src/grace/adapters");
 const { registerGraceBuild2Handlers } = require("./src/grace/build2");
+const { createFacebookOAuthService } = require("./src/grace/facebook-oauth");
+const { createGraceFacebookOAuthRepository } = require("./src/grace/facebook-oauth-repository");
+const { registerGraceFacebookOAuthTelegramHandlers } = require("./src/grace/facebook-oauth-telegram");
 const { registerGraceRoutes } = require("./src/grace/http");
 const { createXOAuthService } = require("./src/grace/oauth");
 const { createGraceOAuthRepository } = require("./src/grace/oauth-repository");
-const { GRACE_X_OAUTH_COMMANDS, registerGraceXOAuthTelegramHandlers } = require("./src/grace/oauth-telegram");
+const { registerGraceXOAuthTelegramHandlers } = require("./src/grace/oauth-telegram");
 const { createGraceRepository } = require("./src/grace/repository");
-const { GRACE_COMMANDS, registerGraceTelegramHandlers } = require("./src/grace/telegram");
+const { registerGraceTelegramHandlers } = require("./src/grace/telegram");
 const { createGraceWorker } = require("./src/grace/worker");
 const { configWarnings, loadConfig } = require("./src/config");
 const { createHttpApp } = require("./src/http");
-const { LEGEND_V8_COMMANDS, registerLegendV8System } = require("./src/legend-v8");
+const { registerLegendV8System } = require("./src/legend-v8");
 const { registerRoleProfileHandler } = require("./src/profile-role");
-const { PROJECT_WALLET_COMMANDS, registerProjectWalletSystem } = require("./src/project-wallets");
-const { REFERRAL_COMMANDS, registerReferralTelegramHandlers } = require("./src/referrals");
+const { registerProjectWalletSystem } = require("./src/project-wallets");
+const { registerReferralTelegramHandlers } = require("./src/referrals");
 const { createRepository } = require("./src/repository");
 const { registerRewardPolicyHandlers } = require("./src/reward-policy");
-const { REWARD_SETTLEMENT_COMMANDS, registerRewardSettlementHandlers } = require("./src/reward-settlement");
+const { registerRewardSettlementHandlers } = require("./src/reward-settlement");
 const { registerScopedBroadcastHandlers } = require("./src/scoped-broadcast");
-const { PUBLIC_COMMANDS, registerTelegramHandlers } = require("./src/telegram");
-const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/websites-telegram");
-const { WORK_EVIDENCE_COMMANDS, registerWorkEvidenceHandlers } = require("./src/work-evidence");
-const { WORLDZCAST_COMMANDS, registerWorldzCastSystem } = require("./src/worldzcast");
+const { registerTelegramHandlers } = require("./src/telegram");
+const { registerWebsiteTelegramHandlers } = require("./src/websites-telegram");
+const { registerWorkEvidenceHandlers } = require("./src/work-evidence");
+const { registerWorldzCastSystem } = require("./src/worldzcast");
 
-const RUNTIME_BUILD = "2026-08-10-grace-build2-multisocial-autopost";
+const RUNTIME_BUILD = "2026-08-10-grace-build2-meta-facebook-oauth";
 
 function defaultGraceRedirectUri(webhookUrl) {
-  try {
-    return new URL("/grace/oauth/x/callback", webhookUrl).toString();
-  } catch {
-    return "";
-  }
+  try { return new URL("/grace/oauth/x/callback", webhookUrl).toString(); }
+  catch { return ""; }
+}
+
+function defaultGraceMetaRedirectUri(webhookUrl) {
+  try { return new URL("/grace/oauth/facebook/callback", webhookUrl).toString(); }
+  catch { return ""; }
 }
 
 function missingGraceXSecretError() {
-  const error = new Error(
-    "Grace X is configured as a confidential Web/Bot app, but its Client Secret is missing from the server. Add GRACE_X_CLIENT_SECRET in Hostinger using the value from X Developer Portal → Keys and Tokens."
-  );
+  const error = new Error("Grace X is configured as a confidential Web/Bot app, but its Client Secret is missing from the server. Add GRACE_X_CLIENT_SECRET in Hostinger using the value from X Developer Portal → Keys and Tokens.");
   error.code = "X_CLIENT_SECRET_MISSING";
   return error;
 }
@@ -61,24 +64,18 @@ async function start() {
   const bot = new TelegramBot(config.botToken, { onlyFirstMatch: true });
   const repository = createRepository(supabase);
   const autoClient = createAutoClient(config);
-  const graceWorkspaceSlug = String(process.env.GRACE_WORKSPACE_SLUG || "cryptoworldz")
-    .trim()
-    .toLowerCase();
-  const graceXClientId = String(
-    process.env.GRACE_X_CLIENT_ID ||
-      process.env.X_CLIENT_ID ||
-      process.env.TWITTER_CLIENT_ID ||
-      ""
-  ).trim();
-  const graceXClientSecret = String(
-    process.env.GRACE_X_CLIENT_SECRET ||
-      process.env.X_CLIENT_SECRET ||
-      process.env.TWITTER_CLIENT_SECRET ||
-      ""
-  ).trim();
-  const graceXRedirectUri = String(
-    process.env.GRACE_X_REDIRECT_URI || defaultGraceRedirectUri(config.webhookUrl)
-  ).trim();
+  const graceWorkspaceSlug = String(process.env.GRACE_WORKSPACE_SLUG || "cryptoworldz").trim().toLowerCase();
+  const encryptionSecret = String(process.env.GRACE_TOKEN_ENCRYPTION_KEY || process.env.GRACE_API_SECRET || config.webhookSecret || "").trim();
+
+  const graceXClientId = String(process.env.GRACE_X_CLIENT_ID || process.env.X_CLIENT_ID || process.env.TWITTER_CLIENT_ID || "").trim();
+  const graceXClientSecret = String(process.env.GRACE_X_CLIENT_SECRET || process.env.X_CLIENT_SECRET || process.env.TWITTER_CLIENT_SECRET || "").trim();
+  const graceXRedirectUri = String(process.env.GRACE_X_REDIRECT_URI || defaultGraceRedirectUri(config.webhookUrl)).trim();
+
+  const graceMetaAppId = String(process.env.GRACE_META_APP_ID || process.env.META_APP_ID || "").trim();
+  const graceMetaAppSecret = String(process.env.GRACE_META_APP_SECRET || process.env.META_APP_SECRET || "").trim();
+  const graceMetaRedirectUri = String(process.env.GRACE_META_REDIRECT_URI || defaultGraceMetaRedirectUri(config.webhookUrl)).trim();
+  const graceMetaGraphVersion = String(process.env.GRACE_META_GRAPH_VERSION || "v24.0").trim();
+
   const graceRepository = createGraceRepository(supabase, { workspaceSlug: graceWorkspaceSlug });
   const graceOAuthRepository = createGraceOAuthRepository(supabase, { workspaceSlug: graceWorkspaceSlug });
   const graceOAuthBase = createXOAuthService({
@@ -86,10 +83,7 @@ async function start() {
     clientId: graceXClientId,
     clientSecret: graceXClientSecret,
     redirectUri: graceXRedirectUri,
-    encryptionSecret:
-      process.env.GRACE_TOKEN_ENCRYPTION_KEY ||
-      process.env.GRACE_API_SECRET ||
-      config.webhookSecret
+    encryptionSecret
   });
   const graceOAuth = {
     ...graceOAuthBase,
@@ -107,10 +101,29 @@ async function start() {
       return graceOAuthBase.getAccessToken(...args);
     }
   };
+
+  const graceFacebookOAuthRepository = createGraceFacebookOAuthRepository(supabase, { workspaceSlug: graceWorkspaceSlug });
+  const graceFacebookOAuth = createFacebookOAuthService({
+    repository: graceFacebookOAuthRepository,
+    appId: graceMetaAppId,
+    appSecret: graceMetaAppSecret,
+    redirectUri: graceMetaRedirectUri,
+    encryptionSecret,
+    graphVersion: graceMetaGraphVersion
+  });
+
   const gracePublisher = createGracePublisher({
+    metaGraphVersion: graceMetaGraphVersion,
     tokenProvider: async (target) => {
-      if (!graceOAuth.configured()) return null;
-      return graceOAuth.getAccessToken(target.account_id);
+      if (target.platform === "x") {
+        if (!graceOAuth.configured()) return null;
+        return graceOAuth.getAccessToken(target.account_id);
+      }
+      if (target.platform === "facebook") {
+        if (!graceFacebookOAuth.configured()) return null;
+        return graceFacebookOAuth.getAccessToken(target.account_id);
+      }
+      return null;
     }
   });
   const graceWorker = createGraceWorker({
@@ -129,17 +142,14 @@ async function start() {
   registerGraceTelegramHandlers({ bot, repository, graceRepository, config });
   registerGraceBuild2Handlers({ bot, repository, graceRepository, supabase, config });
   registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });
+  registerGraceFacebookOAuthTelegramHandlers({ bot, facebookOAuth: graceFacebookOAuth, config });
   registerWebsiteTelegramHandlers({ bot, config });
   registerCommunityDirectoryHandlers({ bot, supabase, config });
-  const referralController = registerReferralTelegramHandlers({
-    bot,
-    repository,
-    supabase,
-    config
-  });
+  const referralController = registerReferralTelegramHandlers({ bot, repository, supabase, config });
   registerRewardPolicyHandlers({ bot, repository, supabase, config });
   registerRewardSettlementHandlers({ bot, repository, supabase, config });
   registerWorkEvidenceHandlers({ bot, config, supabase });
+
   const app = createHttpApp({ bot, config, repository });
   registerProjectWalletSystem({ app, bot, config, supabase });
   registerLegendV8System({ app, bot, config, repository, supabase });
@@ -148,14 +158,17 @@ async function start() {
     ok: true,
     build: RUNTIME_BUILD,
     grace_x_oauth_configured: graceOAuth.configured(),
-    grace_x_confidential_client: true,
-    grace_x_client_id_configured: Boolean(graceXClientId),
-    grace_x_client_secret_configured: Boolean(graceXClientSecret),
+    grace_meta_facebook_oauth_configured: graceFacebookOAuth.configured(),
+    grace_meta_app_id_configured: Boolean(graceMetaAppId),
+    grace_meta_app_secret_configured: Boolean(graceMetaAppSecret),
+    grace_meta_redirect_uri: "/grace/oauth/facebook/callback",
+    grace_meta_graph_version: graceFacebookOAuth.graphVersion,
     grace_build2_multisocial: true,
     grace_autopost: true,
     grace_delegated_admin_management: true,
     grace_account1_shared_oauth: true,
     grace_multi_account_directory: true,
+    facebook_page_publishing_ready: true,
     executive_controls: true,
     impact_cause_register: true,
     grace_manager_role: true,
@@ -181,7 +194,13 @@ async function start() {
   }));
   registerAutoMiniRoutes({ app, config, autoClient, supabase });
   registerExecutiveRoutes({ app, repository, supabase, config });
-  registerGraceRoutes({ app, graceRepository, graceOAuth, apiSecret: process.env.GRACE_API_SECRET || "" });
+  registerGraceRoutes({
+    app,
+    graceRepository,
+    graceOAuth,
+    graceFacebookOAuth,
+    apiSecret: process.env.GRACE_API_SECRET || ""
+  });
 
   for (const warning of configWarnings(config)) console.warn(warning);
 
@@ -194,33 +213,14 @@ async function start() {
     const webhookResult = await Promise.allSettled([
       bot.setWebHook(config.webhookUrl, {
         secret_token: config.webhookSecret,
-        allowed_updates: [
-          "message",
-          "edited_message",
-          "channel_post",
-          "edited_channel_post",
-          "callback_query",
-          "chat_member",
-          "my_chat_member",
-          "chat_join_request"
-        ]
+        allowed_updates: ["message","edited_message","channel_post","edited_channel_post","callback_query","chat_member","my_chat_member","chat_join_request"]
       }),
       bot.setMyCommands(BOT_MENU_COMMANDS)
     ]);
 
-    if (webhookResult[0].status === "fulfilled") {
-      console.log("Telegram webhook configured successfully");
-    } else {
-      console.error("Telegram webhook setup failed", {
-        name: webhookResult[0].reason && webhookResult[0].reason.name ? webhookResult[0].reason.name : "Error"
-      });
-    }
-
-    if (webhookResult[1].status === "rejected") {
-      console.error("Telegram command menu setup failed", {
-        name: webhookResult[1].reason && webhookResult[1].reason.name ? webhookResult[1].reason.name : "Error"
-      });
-    }
+    if (webhookResult[0].status === "fulfilled") console.log("Telegram webhook configured successfully");
+    else console.error("Telegram webhook setup failed", { name: webhookResult[0].reason?.name || "Error" });
+    if (webhookResult[1].status === "rejected") console.error("Telegram command menu setup failed", { name: webhookResult[1].reason?.name || "Error" });
   });
 
   const shutdown = (signal) => {
@@ -239,6 +239,8 @@ async function start() {
     autoClient,
     bot,
     config,
+    graceFacebookOAuth,
+    graceFacebookOAuthRepository,
     graceOAuth,
     graceOAuthRepository,
     gracePublisher,
@@ -252,10 +254,10 @@ async function start() {
 
 start().catch((error) => {
   console.error("Zed Bot startup failed", {
-    name: error && error.name ? error.name : "Error",
-    message: error && error.message ? error.message : "Unknown startup error"
+    name: error?.name || "Error",
+    message: error?.message || "Unknown startup error"
   });
   process.exit(1);
 });
 
-module.exports = { RUNTIME_BUILD, defaultGraceRedirectUri, missingGraceXSecretError, start };
+module.exports = { RUNTIME_BUILD, defaultGraceMetaRedirectUri, defaultGraceRedirectUri, missingGraceXSecretError, start };
