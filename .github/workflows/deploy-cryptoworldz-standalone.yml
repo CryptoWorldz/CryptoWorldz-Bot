@@ -27,9 +27,10 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: '21'
-      FTP_SERVER_DIR: '/public_html'
+      FTP_SERVER_DIR: '/domains/cryptoworldz.xyz/public_html'
       FTP_ACCOUNT_SCOPE: DOMAIN_ONLY
       DEPLOY_GUARD: CRYPTOWORLDZ.XYZ
+      LIVE_HOME: https://cryptoworldz.xyz/
       LIVE_URL: https://cryptoworldz.xyz/command-centre-ultimate-20260811.html
       RELEASE_FILE: apps/cryptoworldz-web-core/command-centre-ultimate-20260811.html
       REMOTE_FILE: command-centre-ultimate-20260811.html
@@ -83,7 +84,7 @@ jobs:
           set -euo pipefail
           [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]] || { echo '::error::CryptoWorldz FTP credentials missing'; exit 1; }
           [[ "$FTP_HOST" == "$HOSTINGER_LOCKED_IP" && "$FTP_PORT" == '21' ]] || { echo '::error::Locked Hostinger target changed'; exit 1; }
-          [[ "$FTP_SERVER_DIR" == '/public_html' ]] || { echo '::error::CryptoWorldz production root must be /public_html'; exit 1; }
+          [[ "$FTP_SERVER_DIR" == '/domains/cryptoworldz.xyz/public_html' ]] || { echo '::error::CryptoWorldz production root changed from proven live domain root'; exit 1; }
           [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' && "$DEPLOY_GUARD" == 'CRYPTOWORLDZ.XYZ' ]] || { echo '::error::CryptoWorldz guard changed'; exit 1; }
           echo "::add-mask::$FTP_USERNAME"
           echo "::add-mask::$FTP_PASSWORD"
@@ -106,11 +107,20 @@ jobs:
           [[ "$ok" == '1' ]] || { echo '::error::Pinned Hostinger TLS proof failed'; exit 1; }
           echo "FTP_CONNECT_HOST=$HOSTINGER_TLS_ALIAS" >> "$GITHUB_ENV"
 
-      - name: Prove encrypted domain-only target
+      - name: Prove encrypted target is the exact live CryptoWorldz origin
         shell: bash
         run: |
           set -euo pipefail
-          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; test -f index.html; bye"
+          ftp_index="$RUNNER_TEMP/proven-origin-index.html"
+          public_index="$RUNNER_TEMP/public-origin-index.html"
+          timeout 60 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; get index.html -o '$ftp_index'; bye"
+          test -s "$ftp_index"
+          curl -4 -L -sS --fail --max-time 45 -o "$public_index" -H 'Cache-Control: no-cache, no-store, must-revalidate' "$LIVE_HOME?origin_lock=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          test -s "$public_index"
+          ftp_sha="$(sha256sum "$ftp_index" | awk '{print $1}')"
+          public_sha="$(sha256sum "$public_index" | awk '{print $1}')"
+          [[ "$ftp_sha" == "$public_sha" ]] || { echo '::error::FTP target is not the document root currently serving cryptoworldz.xyz'; exit 1; }
+          echo "CRYPTOWORLDZ_LIVE_ORIGIN_PROOF=PASS $ftp_sha"
 
       - name: Capture exact predeploy state
         shell: bash
@@ -151,7 +161,7 @@ jobs:
           remote="$RUNNER_TEMP/versioned-after.html"
           FTP_TRANSFER_TIMEOUT=90 bash tools/cryptoworldz-versioned-ftp.sh verify "$remote" "$REMOTE_FILE"
           remote_sha="$(sha256sum "$remote" | awk '{print $1}')"
-          [[ "$remote_sha" == "$APPROVED_RELEASE_SHA" ]] || { echo "::error::Remote SHA mismatch"; exit 1; }
+          [[ "$remote_sha" == "$APPROVED_RELEASE_SHA" ]] || { echo '::error::Remote SHA mismatch'; exit 1; }
           echo "CRYPTOWORLDZ_REMOTE_SHA256=PASS $remote_sha"
 
       - name: Prove uncached public URL
