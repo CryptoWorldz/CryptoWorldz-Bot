@@ -1,0 +1,124 @@
+name: Diagnose CryptoWorldz Production Origin
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/cryptoworldz-origin.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cryptoworldz-origin-diagnostic
+  cancel-in-progress: false
+
+jobs:
+  fingerprint:
+    name: Compare FTP root with live CryptoWorldz
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: '21'
+      FTP_ROOT: '/'
+      HOSTINGER_LOCKED_IP: '145.223.108.40'
+      HOSTINGER_TLS_ALIAS: 'cryptoworldz-ftp-pinned.hstgr.io'
+      HOSTINGER_CERT_SHA256: '47:E1:B5:DC:5D:61:02:E8:ED:8C:01:21:61:AF:8B:22:53:70:AB:55:63:B0:0C:AF:14:6C:BD:7A:96:51:E9:5E'
+      LIVE_HOME: 'https://cryptoworldz.xyz/'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate diagnostic request
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          APPROVED_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          test "$(sed -n 's/^target=//p' diagnostics/cryptoworldz-origin.request | tail -n1)" = 'cryptoworldz.xyz'
+          test "$(sed -n 's/^mode=//p' diagnostics/cryptoworldz-origin.request | tail -n1)" = 'read-only-origin-fingerprint'
+          test "$(sed -n 's/^approval=//p' diagnostics/cryptoworldz-origin.request | tail -n1)" = 'Approved by JayJayTeamDev'
+          test "$(sed -n 's/^source_commit=//p' diagnostics/cryptoworldz-origin.request | tail -n1)" = "$APPROVED_BEFORE"
+
+      - name: Install diagnostic tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp dnsutils
+
+      - name: Prove pinned Hostinger identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]] || { echo '::error::CryptoWorldz FTP credentials missing'; exit 1; }
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          echo "$HOSTINGER_LOCKED_IP $HOSTINGER_TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
+          cert="$RUNNER_TEMP/hostinger-cert.pem"
+          session="$RUNNER_TEMP/hostinger-session.txt"
+          timeout 30 openssl s_client -starttls ftp -connect "$HOSTINGER_LOCKED_IP:21" -verify_return_error -showcerts </dev/null >"$session" 2>/dev/null
+          sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$session" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
+          [[ "$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)" == "$HOSTINGER_CERT_SHA256" ]]
+          openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io'
+          grep -Fq 'Verify return code: 0 (ok)' "$session"
+
+      - name: Fingerprint FTP root without writing
+        shell: bash
+        run: |
+          set -euo pipefail
+          ftp_index="$RUNNER_TEMP/ftp-index.html"
+          ftp_list="$RUNNER_TEMP/ftp-root-list.txt"
+          timeout 60 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$HOSTINGER_TLS_ALIAS" -e "set cmd:fail-exit yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_ROOT'; cls -1 > '$ftp_list'; get index.html -o '$ftp_index'; bye"
+          test -s "$ftp_index"
+          echo "FTP_INDEX_SHA256=$(sha256sum "$ftp_index" | awk '{print $1}')"
+          echo "FTP_INDEX_BYTES=$(wc -c < "$ftp_index" | tr -d ' ')"
+          printf 'FTP_TITLE='; sed -n 's:.*<title>\(.*\)</title>.*:\1:p' "$ftp_index" | head -n1
+          printf 'FTP_H1='; sed -n 's:.*<h1[^>]*>\(.*\)</h1>.*:\1:p' "$ftp_index" | sed 's/<[^>]*>//g' | head -n1
+          if grep -Fq 'WELCOME TO' "$ftp_index"; then echo 'FTP_MARKER_WELCOME=YES'; else echo 'FTP_MARKER_WELCOME=NO'; fi
+          if grep -Fq 'Command Centre Ultimate' "$ftp_index"; then echo 'FTP_MARKER_ULTIMATE=YES'; else echo 'FTP_MARKER_ULTIMATE=NO'; fi
+          echo 'FTP_ROOT_FILES_BEGIN'
+          sed -n '1,120p' "$ftp_list"
+          echo 'FTP_ROOT_FILES_END'
+
+      - name: Fingerprint public site and DNS
+        shell: bash
+        run: |
+          set -euo pipefail
+          public="$RUNNER_TEMP/public-index.html"
+          headers="$RUNNER_TEMP/public-headers.txt"
+          nonce="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          curl -4 -L -sS --fail --max-time 45 -D "$headers" -o "$public" -H 'Cache-Control: no-cache, no-store, must-revalidate' "${LIVE_HOME}?origin_diag=${nonce}"
+          test -s "$public"
+          echo "PUBLIC_INDEX_SHA256=$(sha256sum "$public" | awk '{print $1}')"
+          echo "PUBLIC_INDEX_BYTES=$(wc -c < "$public" | tr -d ' ')"
+          printf 'PUBLIC_TITLE='; sed -n 's:.*<title>\(.*\)</title>.*:\1:p' "$public" | head -n1
+          printf 'PUBLIC_H1='; sed -n 's:.*<h1[^>]*>\(.*\)</h1>.*:\1:p' "$public" | sed 's/<[^>]*>//g' | head -n1
+          if grep -Fq 'WELCOME TO' "$public"; then echo 'PUBLIC_MARKER_WELCOME=YES'; else echo 'PUBLIC_MARKER_WELCOME=NO'; fi
+          if grep -Fq 'Command Centre Ultimate' "$public"; then echo 'PUBLIC_MARKER_ULTIMATE=YES'; else echo 'PUBLIC_MARKER_ULTIMATE=NO'; fi
+          echo "PUBLIC_A=$(dig +short A cryptoworldz.xyz | paste -sd, -)"
+          echo "PUBLIC_AAAA=$(dig +short AAAA cryptoworldz.xyz | paste -sd, -)"
+          echo "PUBLIC_CNAME=$(dig +short CNAME cryptoworldz.xyz | paste -sd, -)"
+          echo 'PUBLIC_HEADERS_BEGIN'
+          grep -Ei '^(HTTP/|server:|cache-control:|age:|etag:|last-modified:|x-|cf-|via:)' "$headers" | head -n40
+          echo 'PUBLIC_HEADERS_END'
+
+      - name: Compare fingerprints
+        shell: bash
+        run: |
+          set -euo pipefail
+          ftp_index="$RUNNER_TEMP/ftp-index.html"
+          public="$RUNNER_TEMP/public-index.html"
+          ftp_sha="$(sha256sum "$ftp_index" | awk '{print $1}')"
+          public_sha="$(sha256sum "$public" | awk '{print $1}')"
+          if [[ "$ftp_sha" == "$public_sha" ]]; then
+            echo 'CRYPTOWORLDZ_ORIGIN_MATCH=EXACT'
+          else
+            echo 'CRYPTOWORLDZ_ORIGIN_MATCH=DIFFERENT'
+            echo '::notice::The verified FTP root is not the exact document currently served at cryptoworldz.xyz.'
+          fi
