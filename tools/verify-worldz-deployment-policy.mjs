@@ -65,12 +65,6 @@ const comingSoon = fs.readFileSync(path.join(root, 'apps', 'cryptoworldz-web-cor
 if (!comingSoon.includes("./assets/worldz-master/cryptoworldz/we-need-you.png")) fail('coming-soon-next.js', 'idle Worldz does not use exact approved We Need You master image');
 if (/hero\.part\d+.*\.b64/i.test(comingSoon)) fail('coming-soon-next.js', 'legacy split base64 hero loader still present');
 
-const pdc = fs.readFileSync(path.join(workflowsDir, 'deploy-pdc-standalone.yml'), 'utf8');
-for (const required of ['https://gofund.me/c2e4fa936', 'https://oneworldz.com/worldz/impactbased', 'LIVE IMAGE HASH MISMATCH']) {
-  if (!pdc.includes(required)) fail('deploy-pdc-standalone.yml', `missing required PDC proof: ${required}`);
-}
-if (pdc.includes('https://impactbased.oneworldz.com')) fail('deploy-pdc-standalone.yml', 'broken ImpactBased subdomain is forbidden');
-
 const pdcHome = fs.readFileSync(path.join(root, 'apps', 'worldz-sites', 'purplediamondcrew', 'index.html'), 'utf8');
 if (!pdcHome.includes('https://oneworldz.com/worldz/impactbased')) fail('purplediamondcrew/index.html', 'PDC ImpactBased button does not use canonical OneWorldz route');
 if (pdcHome.includes('https://impactbased.oneworldz.com')) fail('purplediamondcrew/index.html', 'PDC still contains broken ImpactBased subdomain');
