@@ -12,23 +12,28 @@ permissions:
 jobs:
   ftps:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 7
     environment: ethworldz-production
     env:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
       DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/public_html' }}
       LOCKED_IP: '145.223.108.40'
       TLS_ALIAS: 'worldz-ftp-pinned.hstgr.io'
       CERT_SHA256: '47:E1:B5:DC:5D:61:02:E8:ED:8C:01:21:61:AF:8B:22:53:70:AB:55:63:B0:0C:AF:14:6C:BD:7A:96:51:E9:5E'
+      HERO_REL: 'assets/worldz-master/cryptoworldz/we-need-you.png'
     steps:
+      - uses: actions/checkout@v4
+
       - name: Verify domain-restricted credentials
         shell: bash
         run: |
           set -euo pipefail
           test "$FTP_ACCOUNT_SCOPE" = 'DOMAIN_ONLY'
           test "$DEPLOY_GUARD" = 'ETHWORLDZ.XYZ'
+          [[ "$FTP_SERVER_DIR" == '/' || "$FTP_SERVER_DIR" == '/public_html' ]]
           test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
           echo "::add-mask::$FTP_USERNAME"
           echo "::add-mask::$FTP_PASSWORD"
@@ -37,6 +42,14 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
+
+      - name: Restore approved local hero for comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf apps/cryptoworldz-web-core/assets/worldz-master
+          bash tools/restore-approved-worldz-media.sh apps/cryptoworldz-web-core/assets/worldz-master
+          test -s "apps/cryptoworldz-web-core/$HERO_REL"
 
       - name: Pin exact Hostinger IP to certificate-valid local alias
         shell: bash
@@ -60,9 +73,27 @@ jobs:
           ! grep -Eqi 'verify error|certificate verify failed' "$RUNNER_TEMP/openssl.err"
           echo "Locked Hostinger FTPS certificate verified: $fp"
 
-      - name: Authenticate and list EthWorldz root read-only with wildcard hostname verification ON
+      - name: Download current remote hero and current public hero read-only
         shell: bash
         run: |
           set -euo pipefail
-          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p 21 "$TLS_ALIAS" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:passive-mode yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; pwd; cls -la; bye"
-          echo 'PINNED_FTPS_READ_ONLY=PASS'
+          remote="$RUNNER_TEMP/remote-we-need-you.png"
+          public="$RUNNER_TEMP/public-we-need-you.bin"
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p 21 "$TLS_ALIAS" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:passive-mode yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; get '$HERO_REL' -o '$remote'; bye"
+          curl -L -fsS -D "$RUNNER_TEMP/public-headers.txt" -H 'Cache-Control: no-cache' --max-time 30 "https://ethworldz.xyz/$HERO_REL?diag=${GITHUB_RUN_ID}" -o "$public"
+          local_hash="$(sha256sum "apps/cryptoworldz-web-core/$HERO_REL" | awk '{print $1}')"
+          remote_hash="$(sha256sum "$remote" | awk '{print $1}')"
+          public_hash="$(sha256sum "$public" | awk '{print $1}')"
+          remote_type="$(file -b "$remote")"
+          public_type="$(file -b "$public")"
+          echo "APPROVED_SHA256=$local_hash"
+          echo "FTP_SHA256=$remote_hash"
+          echo "HTTP_SHA256=$public_hash"
+          echo "FTP_TYPE=$remote_type"
+          echo "HTTP_TYPE=$public_type"
+          echo 'HTTP_HEADERS_BEGIN'
+          grep -Ei '^(HTTP/|content-type:|content-length:|cache-control:|age:|x-|server:|cf-|cdn-|etag:|last-modified:|via:)' "$RUNNER_TEMP/public-headers.txt" || true
+          echo 'HTTP_HEADERS_END'
+          if [[ "$local_hash" == "$remote_hash" ]]; then echo 'FTP_MATCHES_APPROVED=yes'; else echo 'FTP_MATCHES_APPROVED=no'; fi
+          if [[ "$remote_hash" == "$public_hash" ]]; then echo 'HTTP_MATCHES_FTP=yes'; else echo 'HTTP_MATCHES_FTP=no'; fi
+          if [[ "$local_hash" == "$public_hash" ]]; then echo 'HTTP_MATCHES_APPROVED=yes'; else echo 'HTTP_MATCHES_APPROVED=no'; fi
