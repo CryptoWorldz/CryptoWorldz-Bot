@@ -89,7 +89,7 @@ async function launch(viewport) {
     '--headless=new', '--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu',
     '--remote-debugging-port=0', `--user-data-dir=${dir}`, '--hide-scrollbars',
     `--window-size=${viewport.width},${viewport.height}`,
-    '--user-agent=Mozilla/5.0 (WorldzProductionProof/2.0)', u.href
+    u.href
   ], { stdio: ['ignore', 'ignore', 'pipe'] });
   let stderr = '';
   chrome.stderr.on('data', d => { stderr += d.toString(); });
@@ -148,17 +148,47 @@ const inspectExpression = `(() => {
   };
 })()`;
 
-async function waitForPageAndImages(cdp, maxMs = 20000) {
+function normalizedPageText(page) {
+  return `${page?.title || ''}\n${page?.body || ''}`.toLowerCase();
+}
+
+function isChallengePage(page) {
+  const text = normalizedPageText(page);
+  return text.includes('checking your browser before accessing')
+    || text.includes('please wait for up to 5 seconds')
+    || (text.includes('just a moment') && text.includes('checking your browser'));
+}
+
+function isLoadingFallback(page) {
+  const text = normalizedPageText(page);
+  return text.includes('loading the worldz experience') || text.includes('loading oneworldz');
+}
+
+async function waitForRealPageAndImages(cdp, maxMs = 38000) {
   const end = Date.now() + maxMs;
   let page = {};
+  let challengeSeen = false;
+  let loadingSeen = false;
   while (Date.now() < end) {
     try { page = await evaluate(cdp, inspectExpression, false, 5000) || {}; } catch {}
+    if (isChallengePage(page)) {
+      challengeSeen = true;
+      await sleep(700);
+      continue;
+    }
+    if (isLoadingFallback(page)) {
+      loadingSeen = true;
+      await sleep(700);
+      continue;
+    }
     const visibleImages = (page.imgs || []).filter(i => i.visible);
     const imagesSettled = visibleImages.length === 0 || visibleImages.every(i => i.complete && i.naturalWidth > 0 && i.naturalHeight > 0);
-    if (page.ready === 'complete' && String(page.body || '').trim() && imagesSettled) return page;
+    if (page.ready === 'complete' && String(page.body || '').trim() && imagesSettled) {
+      return { page, challengeSeen, loadingSeen };
+    }
     await sleep(500);
   }
-  return page;
+  return { page, challengeSeen, loadingSeen };
 }
 
 async function proveViewport(viewport) {
@@ -166,6 +196,8 @@ async function proveViewport(viewport) {
   let cdp;
   let page = {};
   let reloaded = false;
+  let challengeSeen = false;
+  let loadingSeen = false;
   try {
     browser = await launch(viewport);
     cdp = new CDP(browser.target.webSocketDebuggerUrl);
@@ -179,22 +211,31 @@ async function proveViewport(viewport) {
       mobile: viewport.mobile
     });
 
-    page = await waitForPageAndImages(cdp, 18000);
+    let waited = await waitForRealPageAndImages(cdp, 38000);
+    page = waited.page;
+    challengeSeen = waited.challengeSeen;
+    loadingSeen = waited.loadingSeen;
+
     let visible = (page.imgs || []).filter(i => i.visible);
     let broken = visible.filter(i => !i.complete || !i.naturalWidth || !i.naturalHeight);
-    if (broken.length) {
+    if (!isChallengePage(page) && !isLoadingFallback(page) && broken.length) {
       reloaded = true;
       await cdp.send('Page.reload', { ignoreCache: true }, 15000);
-      page = await waitForPageAndImages(cdp, 18000);
+      waited = await waitForRealPageAndImages(cdp, 26000);
+      page = waited.page;
+      challengeSeen = challengeSeen || waited.challengeSeen;
+      loadingSeen = loadingSeen || waited.loadingSeen;
       visible = (page.imgs || []).filter(i => i.visible);
       broken = visible.filter(i => !i.complete || !i.naturalWidth || !i.naturalHeight);
     }
 
     const blurred = visible.filter(i => i.filter && i.filter !== 'none');
     const backgroundBlurred = (page.bgs || []).filter(i => i.filter && i.filter !== 'none');
-    const lower = `${page.title || ''}\n${page.body || ''}`.toLowerCase();
+    const lower = normalizedPageText(page);
     const reasons = [];
-    for (const bad of ['loading the worldz experience', 'loading oneworldz', 'default page', 'parked domain', 'this site can\'t be reached', 'err_name_not_resolved']) {
+    if (isChallengePage(page)) reasons.push('browser verification challenge did not clear');
+    if (isLoadingFallback(page)) reasons.push('loading fallback did not clear');
+    for (const bad of ['default page', 'parked domain', 'this site can\'t be reached', 'err_name_not_resolved']) {
       if (lower.includes(bad)) reasons.push(`placeholder/error content: ${bad}`);
     }
     if (!String(page.body || '').trim()) reasons.push('empty page body');
@@ -216,6 +257,10 @@ async function proveViewport(viewport) {
       brokenImages: broken.length,
       filteredImages: blurred.length,
       reloaded,
+      challengeSeen,
+      challengePresent: isChallengePage(page),
+      loadingSeen,
+      loadingPresent: isLoadingFallback(page),
       reasons
     };
   } finally {
@@ -234,14 +279,14 @@ for (const viewport of [
   try {
     const report = await proveViewport(viewport);
     reports.push(report);
-    console.log(`${report.reasons.length ? 'FAIL' : 'PASS'} ${viewport.name} ${url} images=${report.visibleImages} backgrounds=${report.backgrounds} reloaded=${report.reloaded} reasons=${report.reasons.join('; ') || '-'}`);
+    console.log(`${report.reasons.length ? 'FAIL' : 'PASS'} ${viewport.name} ${url} images=${report.visibleImages} backgrounds=${report.backgrounds} challengeSeen=${report.challengeSeen} reloaded=${report.reloaded} reasons=${report.reasons.join('; ') || '-'}`);
   } catch (error) {
     fatalError += `${viewport.name}: ${error?.stack || error}\n`;
-    reports.push({ viewport: viewport.name, url, title: '', visibleImages: 0, backgrounds: 0, brokenImages: 0, filteredImages: 0, reloaded: false, reasons: [`browser proof infrastructure failure: ${error?.message || error}`] });
+    reports.push({ viewport: viewport.name, url, title: '', visibleImages: 0, backgrounds: 0, brokenImages: 0, filteredImages: 0, reloaded: false, challengeSeen: false, challengePresent: false, loadingSeen: false, loadingPresent: false, reasons: [`browser proof infrastructure failure: ${error?.message || error}`] });
   }
 }
 
 const failed = reports.length !== 2 || reports.some(r => r.reasons.length) || Boolean(fatalError);
-writeFileSync(join(outDir, 'report.json'), JSON.stringify({ gate: 'production-v2-isolated', url, expectedText, expectedArt, failed, fatalError, reports }, null, 2));
+writeFileSync(join(outDir, 'report.json'), JSON.stringify({ gate: 'production-v2-isolated-challenge-aware', url, expectedText, expectedArt, failed, fatalError, reports }, null, 2));
 if (failed) process.exit(1);
 console.log('WORLDZ REAL-BROWSER PROOF V2 PASSED.');
