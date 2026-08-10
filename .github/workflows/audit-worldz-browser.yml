@@ -3,9 +3,15 @@ name: Audit Worldz Browser Rendering
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
+      - forensics/browser-proof-gate-v4
     paths:
       - 'diagnostics/worldz-browser-audit.request'
+      - 'tools/worldz-browser-audit-fast-v4.mjs'
+      - 'tools/worldz-css-url-parser.mjs'
+      - 'tools/worldz-css-url-parser.test.mjs'
+      - '.github/workflows/audit-worldz-browser.yml'
 
 permissions:
   contents: read
@@ -14,7 +20,24 @@ env:
   FORCE_COLOR: '1'
 
 jobs:
+  parser-regression:
+    name: Validate browser proof parser guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check out audit source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run CSS image URL regression tests
+        run: node --test tools/worldz-css-url-parser.test.mjs
+      - name: Syntax-check Browser Proof Gate v4
+        run: node --check tools/worldz-browser-audit-fast-v4.mjs
+
   browser-audit:
+    needs: parser-regression
     name: Render ${{ matrix.target.name }} in Chrome
     runs-on: ubuntu-latest
     timeout-minutes: 7
@@ -67,13 +90,13 @@ jobs:
             exit 1
           fi
 
-      - name: Run challenge-aware desktop/mobile browser proof
+      - name: Run challenge-aware desktop/mobile browser proof v4
         id: audit
         continue-on-error: true
         env:
           TARGET_NAME: ${{ matrix.target.name }}
           TARGET_URL: ${{ matrix.target.url }}
-        run: node tools/worldz-browser-audit-fast-v3.mjs
+        run: node tools/worldz-browser-audit-fast-v4.mjs
 
       - name: Upload this target screenshots and report
         if: always()
