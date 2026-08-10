@@ -23,20 +23,22 @@ const targets = [
 ];
 
 const fundraiserCandidates = [
-  ['PDC/Reagan campaign candidate','https://gofund.me/65129e58'],
-  ['OneWorldz/Reagan campaign candidate','https://gofund.me/c2e4fa936']
+  ['Verified Reagan / Action Spread Smiles campaign','https://gofund.me/c2e4fa936']
 ];
 
 const sourceChecks = [
   ['PDC Crew HQ','apps/worldz-sites/purplediamondcrew/index.html','https://t.me/PurpleDiamondCrew'],
-  ['PDC donation candidate','apps/worldz-sites/purplediamondcrew/index.html','https://gofund.me/65129e58'],
+  ['PDC verified donation campaign','apps/worldz-sites/purplediamondcrew/index.html','https://gofund.me/c2e4fa936'],
   ['PDC Reagan page','apps/worldz-sites/purplediamondcrew/index.html','https://oneworldz.com/reagan-kauja/'],
   ['PDC CryptoWorldz','apps/worldz-sites/purplediamondcrew/index.html','https://cryptoworldz.xyz'],
+  ['PDC intended ImpactBased route','apps/worldz-sites/purplediamondcrew/index.html','https://impactbased.oneworldz.com'],
+  ['PDC donate page verified campaign','apps/worldz-sites/purplediamondcrew/donate/index.html','https://gofund.me/c2e4fa936'],
+  ['PDC Hope Chest verified campaign','apps/worldz-sites/purplediamondcrew/hope-chest/index.html','https://gofund.me/c2e4fa936'],
   ['Reagan Facebook','apps/cryptoworldz-web-core/reagan-kauja.html','https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr'],
   ['Reagan TikTok','apps/cryptoworldz-web-core/reagan-kauja.html','https://www.tiktok.com/@actionspreadsmilesorg'],
   ['Reagan YouTube','apps/cryptoworldz-web-core/reagan-kauja.html','https://youtube.com/@action_spread_smiles'],
   ['Reagan WhatsApp','apps/cryptoworldz-web-core/reagan-kauja.html','https://wa.me/256752673029'],
-  ['Reagan donation candidate','apps/cryptoworldz-web-core/reagan-kauja.html','https://gofund.me/c2e4fa936'],
+  ['Reagan donation campaign','apps/cryptoworldz-web-core/reagan-kauja.html','https://gofund.me/c2e4fa936'],
   ['Reagan approved children media','apps/cryptoworldz-web-core/assets/reagan-smiles-media.js','/assets/images/website-core/action-creates-smiles/action-creates-smiles-reagan-kids.webp'],
   ['Approved chain hero','apps/cryptoworldz-web-core/assets/coming-soon-next.js','assets/worldz-master/cryptoworldz/we-need-you.png']
 ];
@@ -49,7 +51,9 @@ const requiredFiles = [
   'apps/worldz-sites/purplediamondcrew/donate/index.html',
   'apps/worldz-sites/purplediamondcrew/hope-chest/index.html',
   'apps/cryptoworldz-web-core/assets/images/website-core/action-creates-smiles/action-creates-smiles-reagan-kids.webp',
-  'apps/worldz-master-library/blockchains/approved-blockchain-image-map.json'
+  'media/approved-worldz/worldz-master-images-approved-v2.zip',
+  'media/approved-worldz/worldz-master-images-approved-v2.sha256',
+  'tools/restore-approved-worldz-media.sh'
 ];
 
 async function probeUrl(url, timeoutMs=20000) {
@@ -73,7 +77,7 @@ for (const [name,url] of targets) {
   const host = new URL(url).hostname;
   let dns;
   try { dns = await lookup(host,{all:true}); }
-  catch (error) { dns = []; }
+  catch { dns = []; }
   const web = dns.length ? await probeUrl(url) : {ok:false,status:null,finalUrl:null,error:'DNS_NOT_RESOLVED'};
   const row = {name,url,host,dnsResolved:dns.length>0,addresses:dns.map(x=>x.address),https:web};
   result.targets.push(row);
