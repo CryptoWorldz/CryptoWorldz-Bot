@@ -96,7 +96,7 @@ if [[ "$mode" == "upload" ]]; then
   for relative in 404.html _headers live.html .htaccess donate.html reagan-kauja.html robots.txt sitemap.xml; do
     [[ -f "$source_root/$relative" ]] && ordinary_files+=("$source_root/$relative")
   done
-  for directory in assets config; do
+  for directory in assets config command-centre; do
     if [[ -d "$source_root/$directory" ]]; then
       while IFS= read -r -d '' file; do ordinary_files+=("$file"); done < <(find "$source_root/$directory" -type f -print0 | sort -z)
     fi
