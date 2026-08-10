@@ -1,3 +1,5 @@
+const { registerGraceBuild3Handlers } = require("./build3");
+
 const TOP_EXECUTIVES = new Set(["8029135300", "7615025841", "8604306923", "5978625584"]);
 
 function parseAutoPostInput(raw) {
@@ -30,6 +32,8 @@ function parseGraceAdminInput(raw) {
 }
 
 function registerGraceBuild2Handlers({ bot, repository, graceRepository, supabase, config }) {
+  registerGraceBuild3Handlers({ bot, repository, supabase, config });
+
   const send = (msg, text) => bot.sendMessage(msg.chat.id, text);
   const ownerId = String(config.ownerTelegramId || "");
   const allowed = (msg, permission) => repository.hasPermission(msg.from.id, permission, config.adminTelegramIds, config.ownerTelegramId);
