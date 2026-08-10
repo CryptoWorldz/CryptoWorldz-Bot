@@ -1,0 +1,62 @@
+name: Diagnose EthWorldz SFTP
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/ethworldz-sftp.request'
+
+permissions:
+  contents: read
+
+jobs:
+  sftp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: ethworldz-production
+    env:
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+    steps:
+      - name: Verify domain-restricted credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$FTP_ACCOUNT_SCOPE" = 'DOMAIN_ONLY'
+          test "$DEPLOY_GUARD" = 'ETHWORLDZ.XYZ'
+          test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
+          echo "::add-mask::$FTP_USERNAME"
+
+      - name: Install SFTP password helper
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq sshpass
+
+      - name: Pin Hostinger SFTP host identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/hostinger-known-hosts" <<'EOF'
+          [145.223.108.40]:65002 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII6QTxkUjjhCXv55AjcO7C0hXy5smtcRMmRPfvY9YF5M
+          EOF
+          fingerprint="$(ssh-keygen -lf "$RUNNER_TEMP/hostinger-known-hosts" -E sha256 | awk '{print $2}')"
+          test "$fingerprint" = 'SHA256:apwe9E0KsTfhNEY1awO36PlNdAeRB4Gobmy0A2a93OY'
+          echo "Pinned Hostinger SFTP key: $fingerprint"
+
+      - name: Test authenticated SFTP read-only access
+        shell: bash
+        env:
+          SSHPASS: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          opts=(-P 65002 -oStrictHostKeyChecking=yes -oUserKnownHostsFile="$RUNNER_TEMP/hostinger-known-hosts" -oConnectTimeout=20)
+          printf 'pwd\nls -la\nbye\n' > "$RUNNER_TEMP/sftp-root.batch"
+          sshpass -e sftp "${opts[@]}" -b "$RUNNER_TEMP/sftp-root.batch" "$FTP_USERNAME@145.223.108.40"
+          set +e
+          printf 'cd public_html\npwd\nls -la\nbye\n' > "$RUNNER_TEMP/sftp-public-html.batch"
+          sshpass -e sftp "${opts[@]}" -b "$RUNNER_TEMP/sftp-public-html.batch" "$FTP_USERNAME@145.223.108.40"
+          rc=$?
+          set -e
+          echo "public_html_probe_exit=$rc"
