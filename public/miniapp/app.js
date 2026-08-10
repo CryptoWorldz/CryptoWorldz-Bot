@@ -9,7 +9,7 @@ const IMPACT_CAMPAIGN = {
   title: "Help Reagan Feed 60 Orphaned Children in Uganda",
   organization: "Action Spread Smiles Organisation • Mayuge, Uganda",
   description: "Immediate help for food, medical care, rent, hygiene, education and safer mattresses for children in Reagan's care.",
-  fundraiser: "https://gofund.me/65129e58a",
+  fundraiser: "https://www.gofundme.com/f/action-spread-smiles-organisation",
   facebook: "https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr",
   tiktok: "https://www.tiktok.com/@actionspreadsmilesorg",
   youtube: "https://youtube.com/@action_spread_smiles"
