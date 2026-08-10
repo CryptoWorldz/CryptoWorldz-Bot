@@ -27,7 +27,7 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: '21'
-      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
+      FTP_SERVER_DIR: '/public_html'
       FTP_ACCOUNT_SCOPE: DOMAIN_ONLY
       DEPLOY_GUARD: CRYPTOWORLDZ.XYZ
       LIVE_URL: https://cryptoworldz.xyz/command-centre-ultimate-20260811.html
@@ -83,7 +83,7 @@ jobs:
           set -euo pipefail
           [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]] || { echo '::error::CryptoWorldz FTP credentials missing'; exit 1; }
           [[ "$FTP_HOST" == "$HOSTINGER_LOCKED_IP" && "$FTP_PORT" == '21' ]] || { echo '::error::Locked Hostinger target changed'; exit 1; }
-          [[ "$FTP_SERVER_DIR" == '/' || "$FTP_SERVER_DIR" == '/public_html' ]] || { echo '::error::Unexpected CryptoWorldz FTP root'; exit 1; }
+          [[ "$FTP_SERVER_DIR" == '/public_html' ]] || { echo '::error::CryptoWorldz production root must be /public_html'; exit 1; }
           [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' && "$DEPLOY_GUARD" == 'CRYPTOWORLDZ.XYZ' ]] || { echo '::error::CryptoWorldz guard changed'; exit 1; }
           echo "::add-mask::$FTP_USERNAME"
           echo "::add-mask::$FTP_PASSWORD"
@@ -110,7 +110,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; bye"
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; test -f index.html; bye"
 
       - name: Capture exact predeploy state
         shell: bash
@@ -161,8 +161,11 @@ jobs:
           body="$RUNNER_TEMP/versioned-live.html"
           ok=0
           for attempt in $(seq 1 12); do
-            code="$(curl -4 -L -sS -o "$body" -w '%{http_code}' --retry 1 --retry-all-errors -H 'Cache-Control: no-cache, no-store, must-revalidate' --max-time 30 "$LIVE_URL?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
-            if [[ "$code" == '200' ]] \
+            set +e
+            code="$(curl -4 -L -sS -o "$body" -w '%{http_code}' --retry 1 --retry-all-errors -H 'Cache-Control: no-cache, no-store, must-revalidate' --max-time 30 "$LIVE_URL?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}")"
+            curl_status=$?
+            set -e
+            if [[ "$curl_status" == '0' && "$code" == '200' ]] \
               && grep -Fq 'Command Centre Ultimate' "$body" \
               && grep -Fq 'JayJayTeamDev' "$body" \
               && grep -Fq 'STATUS: LEGAL REVIEW' "$body"; then ok=1; break; fi
