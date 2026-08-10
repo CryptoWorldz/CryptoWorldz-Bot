@@ -40,7 +40,7 @@ jobs:
     needs: parser-regression
     name: Render ${{ matrix.target.name }} in Chrome
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 8
     strategy:
       fail-fast: false
       max-parallel: 4
@@ -48,10 +48,10 @@ jobs:
         target:
           - { name: OneWorldz, url: 'https://oneworldz.com/' }
           - { name: Reagan, url: 'https://oneworldz.com/reagan-kauja/' }
-          - { name: ImpactBased, url: 'https://oneworldz.com/worldz/impactbased' }
-          - { name: LawWorldz, url: 'https://oneworldz.com/worldz/law' }
-          - { name: LearnWorldz, url: 'https://oneworldz.com/worldz/learn' }
-          - { name: BitWorldz, url: 'https://oneworldz.com/worldz/bitworldz' }
+          - { name: ImpactBased, url: 'https://impactbased.oneworldz.com/' }
+          - { name: LawWorldz, url: 'https://law.oneworldz.com/' }
+          - { name: LearnWorldz, url: 'https://learn.oneworldz.com/' }
+          - { name: BitcoinWorldz, url: 'https://bitcoinworldz.xyz/' }
           - { name: CryptoWorldz, url: 'https://cryptoworldz.xyz/' }
           - { name: SolWorldz, url: 'https://solworldz.xyz/' }
           - { name: EthWorldz, url: 'https://ethworldz.xyz/' }
