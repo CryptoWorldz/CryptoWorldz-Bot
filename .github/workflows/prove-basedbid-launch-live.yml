@@ -1,0 +1,93 @@
+name: Prove Based.bid Launch Policy Live
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/basedbid-launch-live.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: basedbid-launch-live-proof
+  cancel-in-progress: true
+
+jobs:
+  prove:
+    name: Prove Ultimate Based.bid launch policy on production
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm explicit read-only request
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          APPROVED_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          test "$(sed -n 's/^target=//p' diagnostics/basedbid-launch-live.request | tail -n1)" = 'cryptobotz.cryptoworldz.xyz'
+          test "$(sed -n 's/^mode=//p' diagnostics/basedbid-launch-live.request | tail -n1)" = 'read-only-basedbid-launch-proof'
+          test "$(sed -n 's/^approval=//p' diagnostics/basedbid-launch-live.request | tail -n1)" = 'Approved by JayJayTeamDev'
+          test "$(sed -n 's/^source_commit=//p' diagnostics/basedbid-launch-live.request | tail -n1)" = "$APPROVED_BEFORE"
+
+      - name: Prove Mini App loads Based.bid launch view
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://cryptobotz.cryptoworldz.xyz'
+          html="$RUNNER_TEMP/miniapp.html"
+          ok=0
+          for attempt in $(seq 1 8); do
+            set +e
+            code="$(curl -4 -L -sS -o "$html" -w '%{http_code}' --retry 1 --retry-all-errors --connect-timeout 12 --max-time 40 -A 'Mozilla/5.0 (BasedBid Production Proof)' -H 'Cache-Control: no-cache, no-store, must-revalidate' "$base/miniapp/?basedbid_proof=${GITHUB_RUN_ID}-${attempt}")"
+            status=$?
+            set -e
+            if [[ "$status" == '0' && "$code" == '200' ]] && grep -Fq '/miniapp/based-bid-launch-view.js?v=1.0.0' "$html"; then ok=1; break; fi
+            sleep 4
+          done
+          [[ "$ok" == '1' ]] || { echo '::error::Live Mini App has not converged to Based.bid launch-view release'; exit 1; }
+          echo 'BASED_BID_LAUNCH_SHELL_PROOF=PASS'
+
+      - name: Prove live launch policy script
+        shell: bash
+        run: |
+          set -euo pipefail
+          js="$RUNNER_TEMP/based-bid-launch-view.js"
+          curl -4 -L -sS --fail --retry 2 --retry-all-errors --connect-timeout 12 --max-time 40 -A 'Mozilla/5.0 (BasedBid Production Proof)' -H 'Cache-Control: no-cache, no-store, must-revalidate' -o "$js" "https://cryptobotz.cryptoworldz.xyz/miniapp/based-bid-launch-view.js?proof=${GITHUB_RUN_ID}"
+          test -s "$js"
+          for required in \
+            'Based.bid Launch Packet' \
+            'Meteora v5' \
+            '1.00% initial' \
+            '0.75% after 100 completed trades' \
+            '0.50% after 500 completed trades' \
+            'Programmatic Based.bid launch API is not verified' \
+            'cannot auto-launch or auto-sign'; do
+            grep -Fq "$required" "$js" || { echo "::error::Live Based.bid launch view missing: $required"; exit 1; }
+          done
+          node --check "$js"
+          echo 'BASED_BID_LAUNCH_SCRIPT_PROOF=PASS'
+
+      - name: Prove owner-only Ultimate API route exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$RUNNER_TEMP/ultimate-api.json"
+          code="$(curl -4 -L -sS -o "$body" -w '%{http_code}' --retry 2 --retry-all-errors --connect-timeout 12 --max-time 40 -H 'Cache-Control: no-cache' 'https://cryptobotz.cryptoworldz.xyz/api/mini/auto/ultimate')"
+          [[ "$code" == '401' ]] || { echo "::error::Expected protected Ultimate API route to reject unsigned access with 401; got $code"; cat "$body"; exit 1; }
+          echo 'ULTIMATE_OWNER_API_ROUTE_PROOF=PASS'
+
+      - name: Proof summary
+        if: always()
+        run: |
+          {
+            echo '## Ultimate Based.bid production proof'
+            echo
+            echo '- Read-only HTTPS proof only'
+            echo '- Requires current Based.bid launch-view asset and conservative fee-stage markers'
+            echo '- Requires owner-only Ultimate API route to exist and reject unsigned access'
+          } >> "$GITHUB_STEP_SUMMARY"
