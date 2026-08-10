@@ -21,6 +21,10 @@ jobs:
           ip='145.223.108.40'
           echo "PTR candidates:"
           getent hosts "$ip" || true
+          echo "Plain FTP service banner:"
+          timeout 8 bash -c "printf 'QUIT\r\n' | nc -v '$ip' 21" 2>&1 || true
+          echo "FTP FEAT response:"
+          timeout 8 bash -c "printf 'FEAT\r\nQUIT\r\n' | nc '$ip' 21" 2>&1 || true
           echo "TLS certificate:"
           timeout 20 openssl s_client -starttls ftp -connect "$ip:21" -showcerts </dev/null 2>/dev/null \
             | openssl x509 -noout -subject -issuer -serial -fingerprint -sha256 -ext subjectAltName
