@@ -41,12 +41,14 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
     if (!ultimateModulesPromise) {
       ultimateModulesPromise = Promise.all([
         import("../../platform/src/ultimate.mjs"),
-        import("../../platform/src/ultimate-adapters.mjs")
+        import("../../platform/src/ultimate-adapters.mjs"),
+        import("../../platform/src/based-bid-launch-policy.mjs")
       ]);
     }
-    const [ultimate, adapters] = await ultimateModulesPromise;
+    const [ultimate, adapters, basedBid] = await ultimateModulesPromise;
     const blueprint = ultimate.ultimatePublicBlueprint();
     const nextFunding = ultimate.nextFundingWindow(new Date());
+    const launchPolicy = basedBid.buildBasedBidLaunchPacket();
     const providers = Object.fromEntries(Object.entries(adapters.ULTIMATE_PROVIDER_CAPABILITIES).map(([name, provider]) => [name, {
       role: provider.role,
       mode: provider.mode,
@@ -61,10 +63,11 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
         signers: ultimate.ULTIMATE_SIGNERS.map(({ handle, role, immutable }) => ({ handle, role, immutable })),
         providers,
         launch: {
-          concept: "OneWorldz Kindness",
-          ticker: "$KIND",
-          status: "legal_review"
+          concept: basedBid.ULTIMATE_FIRST_TOKEN_DRAFT.name,
+          ticker: basedBid.ULTIMATE_FIRST_TOKEN_DRAFT.displaySymbol,
+          status: basedBid.ULTIMATE_FIRST_TOKEN_DRAFT.status
         },
+        launchPolicy,
         publicUrl: "https://cryptoworldz.xyz/command-centre-ultimate-20260811.html"
       }
     };
