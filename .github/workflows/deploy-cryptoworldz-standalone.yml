@@ -18,7 +18,7 @@ jobs:
   deploy:
     name: Back up, deploy and prove CryptoWorldz.xyz
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     environment:
       name: cryptoworldz-production
       url: https://cryptoworldz.xyz
@@ -82,6 +82,7 @@ jobs:
           grep -Fq 'Command Centre Ultimate' apps/cryptoworldz-web-core/ultimate.html
           grep -Fq './ultimate.html' apps/cryptoworldz-web-core/index.html
           bash -n tools/cryptoworldz-ultimate-ftp.sh
+          bash -n tools/prove-cryptoworldz-ultimate-release.sh
           node --check tools/prove-live-worldz-v2.mjs
 
       - name: Install secure transfer and visual proof tools
@@ -172,21 +173,11 @@ jobs:
           echo 'CRYPTOWORLDZ_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
           FTP_TRANSFER_TIMEOUT=120 bash tools/cryptoworldz-ultimate-ftp.sh upload "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
 
-      - name: Prove live homepage and Ultimate page
+      - name: Prove server hashes and public HTTP convergence
         shell: bash
         run: |
           set -euo pipefail
-          cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
-          home="$RUNNER_TEMP/cryptoworldz-home.html"
-          ultimate="$RUNNER_TEMP/cryptoworldz-ultimate.html"
-          curl -4 -L -fsS --retry 2 --retry-all-errors -H 'Cache-Control: no-cache' --max-time 45 "$LIVE_URL/?$cache" -o "$home"
-          curl -4 -L -fsS --retry 2 --retry-all-errors -H 'Cache-Control: no-cache' --max-time 45 "$LIVE_URL/ultimate.html?$cache" -o "$ultimate"
-          grep -Fqi 'CRYPTOWORLDZ' "$home"
-          grep -Fq 'Command Centre Ultimate' "$home"
-          grep -Fq 'Command Centre Ultimate' "$ultimate"
-          grep -Fq 'JayJayTeamDev' "$ultimate"
-          ! grep -Eqi 'Loading the Worldz experience|default page|parked domain' "$home"
-          ! grep -Eqi 'default page|parked domain' "$ultimate"
+          bash tools/prove-cryptoworldz-ultimate-release.sh "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core" "$LIVE_URL"
 
       - name: Prove desktop and mobile CryptoWorldz rendering
         shell: bash
