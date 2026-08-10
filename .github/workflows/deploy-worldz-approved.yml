@@ -140,6 +140,14 @@ jobs:
       - name: Run complete repository verification
         run: npm run verify
 
+      - name: Validate deployment safety scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check tools/worldz-upload-manifest.mjs
+          bash -n tools/prove-worldz-origin-media.sh
+          bash -n tools/worldz-direct-ftp.sh
+
       - name: Forbid retired domain and placeholder deployment patterns
         shell: bash
         run: |
@@ -172,7 +180,7 @@ jobs:
           if-no-files-found: ignore
 
   deploy:
-    name: Backup, deploy, hash-check and browser-prove
+    name: Backup, deploy, origin/media-check and browser-prove
     needs: [prepare, validate]
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -198,6 +206,7 @@ jobs:
       HOSTINGER_LOCKED_IP: '145.223.108.40'
       HOSTINGER_TLS_ALIAS: 'worldz-ftp-pinned.hstgr.io'
       HOSTINGER_CERT_SHA256: '47:E1:B5:DC:5D:61:02:E8:ED:8C:01:21:61:AF:8B:22:53:70:AB:55:63:B0:0C:AF:14:6C:BD:7A:96:51:E9:5E'
+      WORLDZ_MEDIA_RMSE_MAX: '0.05'
     steps:
       - uses: actions/checkout@v4
 
@@ -218,10 +227,10 @@ jobs:
           test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
           echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_PASSWORD"
 
-      - name: Install secure transfer tools
+      - name: Install secure transfer and visual proof tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp zip unzip
+          sudo apt-get install -y -qq lftp zip unzip imagemagick
 
       - name: Establish certificate-validated transfer host
         shell: bash
@@ -276,13 +285,36 @@ jobs:
           bye
           LFTP
           test -n "$(find "$backup" -mindepth 1 -print -quit)"
+          (cd "$backup" && find . -type f -printf '%P\n' | sort) > "$RUNNER_TEMP/worldz-backup-manifest.txt"
+          (cd "$backup" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sed 's#  \./#  #') > "$RUNNER_TEMP/worldz-backup.sha256"
           cd "$backup"; zip -qr "$RUNNER_TEMP/worldz-backup-${GITHUB_RUN_ID}.zip" .
           test -s "$RUNNER_TEMP/worldz-backup-${GITHUB_RUN_ID}.zip"
+
+      - name: Prepare exact upload and rollback-new-file manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_root="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
+          node tools/build-worldz-media-payloads.mjs "$source_root"
+          node tools/worldz-upload-manifest.mjs "$source_root" "$RUNNER_TEMP/worldz-upload-manifest.txt"
+          test -s "$RUNNER_TEMP/worldz-upload-manifest.txt"
+          comm -23 "$RUNNER_TEMP/worldz-upload-manifest.txt" "$RUNNER_TEMP/worldz-backup-manifest.txt" > "$RUNNER_TEMP/worldz-rollback-new-files.txt"
+          if grep -nE '(^/|(^|/)\.\.(/|$)|[[:cntrl:]])' "$RUNNER_TEMP/worldz-rollback-new-files.txt"; then
+            echo '::error::Unsafe path in rollback-new-file manifest.'
+            exit 1
+          fi
+          echo "Upload files: $(wc -l < "$RUNNER_TEMP/worldz-upload-manifest.txt")"
+          echo "Files that must be deleted during rollback if newly introduced: $(wc -l < "$RUNNER_TEMP/worldz-rollback-new-files.txt")"
 
       - uses: actions/upload-artifact@v4
         with:
           name: worldz-rollback-${{ needs.prepare.outputs.target }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/worldz-backup-${{ github.run_id }}.zip
+          path: |
+            ${{ runner.temp }}/worldz-backup-${{ github.run_id }}.zip
+            ${{ runner.temp }}/worldz-backup-manifest.txt
+            ${{ runner.temp }}/worldz-backup.sha256
+            ${{ runner.temp }}/worldz-upload-manifest.txt
+            ${{ runner.temp }}/worldz-rollback-new-files.txt
           retention-days: 14
           if-no-files-found: error
 
@@ -293,18 +325,11 @@ jobs:
           echo 'WORLDZ_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
           FTP_TRANSFER_TIMEOUT=360 bash tools/worldz-direct-ftp.sh upload "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
 
-      - name: Prove exact live master-image hashes
+      - name: Prove exact origin bytes and CDN visual media
         shell: bash
         run: |
           set -euo pipefail
-          cache="release=${GITHUB_SHA}-${GITHUB_RUN_ID}"
-          for rel in "$HERO_IMAGE" "$SECONDARY_IMAGE"; do
-            [[ -n "$rel" ]] || continue
-            source="$GITHUB_WORKSPACE/apps/cryptoworldz-web-core/$rel"
-            live="$RUNNER_TEMP/$(basename "$rel")"
-            curl -L -fsS -H 'Cache-Control: no-cache' --max-time 30 "$LIVE_URL/$rel?$cache" -o "$live"
-            [[ "$(sha256sum "$source" | awk '{print $1}')" == "$(sha256sum "$live" | awk '{print $1}')" ]] || { echo "::error::Live master-image hash mismatch: $rel"; exit 1; }
-          done
+          bash tools/prove-worldz-origin-media.sh "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core" "$HERO_IMAGE" "$SECONDARY_IMAGE"
 
       - name: Prove rendered desktop and mobile website in Chrome
         shell: bash
@@ -321,14 +346,62 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
-      - name: Roll back on any post-upload failure
+      - name: Roll back exactly on any post-upload failure
         if: failure() && env.WORLDZ_UPLOAD_STARTED == 'true'
         shell: bash
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/worldz-backup"
+          new_files="$RUNNER_TEMP/worldz-rollback-new-files.txt"
           test -n "$(find "$backup" -mindepth 1 -print -quit)"
+          test -f "$new_files"
+
+          if [[ -s "$new_files" ]]; then
+            cleanup="$RUNNER_TEMP/worldz-remove-new-files.lftp"
+            {
+              echo 'set cmd:fail-exit no'
+              echo 'set net:max-retries 2'
+              echo 'set net:timeout 30'
+              echo 'set ftp:ssl-force yes'
+              echo 'set ftp:ssl-protect-data yes'
+              echo 'set ssl:verify-certificate yes'
+              echo 'set ssl:check-hostname yes'
+              printf 'cd "%s"\n' "${FTP_SERVER_DIR//\"/\\\"}"
+              while IFS= read -r rel; do
+                [[ -n "$rel" ]] || continue
+                escaped="${rel//\\/\\\\}"; escaped="${escaped//\"/\\\"}"
+                printf 'rm "%s"\n' "$escaped"
+              done < "$new_files"
+              while IFS= read -r dir; do
+                [[ -n "$dir" && "$dir" != '.' ]] || continue
+                escaped="${dir//\\/\\\\}"; escaped="${escaped//\"/\\\"}"
+                printf 'rmdir "%s"\n' "$escaped"
+              done < <(awk -F/ 'NF>1 { $NF=""; sub(/\/$/,""); print }' OFS=/ "$new_files" | awk 'NF' | sort -u | awk '{print gsub(/\//,"/"), $0}' | sort -rn | cut -d' ' -f2-)
+              echo 'bye'
+            } > "$cleanup"
+            timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" < "$cleanup"
+          fi
+
           FTP_TRANSFER_TIMEOUT=360 bash tools/worldz-direct-ftp.sh restore "$backup"
+
+          verify="$RUNNER_TEMP/worldz-rollback-verify"
+          rm -rf "$verify"; mkdir -p "$verify"
+          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          set ssl:check-hostname yes
+          cd "$FTP_SERVER_DIR"
+          lcd "$verify"
+          mirror --parallel=3 --exclude-glob '.well-known/**' --exclude-glob '.env*' --exclude-glob '*.log' --exclude-glob 'cgi-bin/**' .
+          bye
+          LFTP
+          (cd "$verify" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sed 's#  \./#  #') > "$RUNNER_TEMP/worldz-rollback-verify.sha256"
+          diff -u "$RUNNER_TEMP/worldz-backup.sha256" "$RUNNER_TEMP/worldz-rollback-verify.sha256"
+          echo 'WORLDZ_ROLLBACK_EXACT=PASS'
 
       - name: Publish factual result contract
         if: always()
@@ -337,7 +410,8 @@ jobs:
             echo '## Worldz Production Proof'
             echo '- This summary never overrides the job conclusion.'
             echo '- CryptoWorldz is protected and cannot be selected here.'
-            echo '- Exact approved master-image SHA-256 equality is mandatory.'
+            echo '- Approved media must match exact SHA-256 bytes at the FTP origin.'
+            echo '- Hostinger CDN copies must preserve dimensions and remain within normalized RMSE 0.05 of the approved pixels.'
             echo '- Desktop + mobile real-browser proof is mandatory.'
-            echo '- Any post-upload failure triggers rollback.'
+            echo '- Any post-upload failure deletes deployment-new files, restores the snapshot, and SHA-verifies the rollback.'
           } >> "$GITHUB_STEP_SUMMARY"
