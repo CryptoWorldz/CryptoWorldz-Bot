@@ -12,6 +12,7 @@ const { DIRECTORY_COMMANDS, registerCommunityDirectoryHandlers } = require("./sr
 const { registerExecutiveRoutes } = require("./src/executive/http");
 const { EXECUTIVE_COMMANDS, registerExecutiveTelegramHandlers } = require("./src/executive/telegram");
 const { createGracePublisher } = require("./src/grace/adapters");
+const { registerGraceBuild2Handlers } = require("./src/grace/build2");
 const { registerGraceRoutes } = require("./src/grace/http");
 const { createXOAuthService } = require("./src/grace/oauth");
 const { createGraceOAuthRepository } = require("./src/grace/oauth-repository");
@@ -34,7 +35,7 @@ const { WEBSITE_COMMANDS, registerWebsiteTelegramHandlers } = require("./src/web
 const { WORK_EVIDENCE_COMMANDS, registerWorkEvidenceHandlers } = require("./src/work-evidence");
 const { WORLDZCAST_COMMANDS, registerWorldzCastSystem } = require("./src/worldzcast");
 
-const RUNTIME_BUILD = "2026-08-10-grace-build1-command-centre";
+const RUNTIME_BUILD = "2026-08-10-grace-build2-multisocial-autopost";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try {
@@ -126,6 +127,7 @@ async function start() {
   registerCauseTelegramHandlers({ bot, repository, supabase, config });
   registerExecutiveTelegramHandlers({ bot, repository, supabase, config });
   registerGraceTelegramHandlers({ bot, repository, graceRepository, config });
+  registerGraceBuild2Handlers({ bot, repository, graceRepository, supabase, config });
   registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });
   registerWebsiteTelegramHandlers({ bot, config });
   registerCommunityDirectoryHandlers({ bot, supabase, config });
@@ -149,6 +151,11 @@ async function start() {
     grace_x_confidential_client: true,
     grace_x_client_id_configured: Boolean(graceXClientId),
     grace_x_client_secret_configured: Boolean(graceXClientSecret),
+    grace_build2_multisocial: true,
+    grace_autopost: true,
+    grace_delegated_admin_management: true,
+    grace_account1_shared_oauth: true,
+    grace_multi_account_directory: true,
     executive_controls: true,
     impact_cause_register: true,
     grace_manager_role: true,
