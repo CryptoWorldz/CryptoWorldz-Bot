@@ -1,0 +1,54 @@
+name: Prove Reagan GoFundMe Live
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/prove-reagan-gofundme.request'
+
+permissions:
+  contents: read
+
+jobs:
+  prove-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm explicit read-only request
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(sed -n 's/^confirmation=//p' diagnostics/prove-reagan-gofundme.request | tail -n1)" = 'APPROVE READ ONLY REAGAN GOFUNDME PROOF'
+
+      - name: Prove live Mini App shell cache version
+        shell: bash
+        run: |
+          set -euo pipefail
+          shell_file="$RUNNER_TEMP/miniapp.html"
+          curl -4 -fsSL --retry 3 --retry-delay 2 --retry-all-errors --connect-timeout 12 --max-time 45 -H 'Cache-Control: no-cache' "https://cryptobotz.cryptoworldz.xyz/miniapp/?proof=${GITHUB_RUN_ID}" -o "$shell_file"
+          grep -Fq '/miniapp/app.js?v=3.0.9' "$shell_file"
+
+      - name: Prove current fundraiser and reject banned URL
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_file="$RUNNER_TEMP/app.js"
+          curl -4 -fsSL --retry 3 --retry-delay 2 --retry-all-errors --connect-timeout 12 --max-time 45 -H 'Cache-Control: no-cache' "https://cryptobotz.cryptoworldz.xyz/miniapp/app.js?proof=${GITHUB_RUN_ID}" -o "$app_file"
+          grep -Fq 'https://www.gofundme.com/f/action-spread-smiles-organisation' "$app_file"
+          if grep -Fq 'https://gofund.me/65129e58a' "$app_file"; then
+            echo '::error::Banned Reagan fundraiser URL is still live.'
+            exit 1
+          fi
+          grep -Fq 'Help Reagan Feed 60 Orphaned Children in Uganda' "$app_file"
+
+      - name: Proof summary
+        run: |
+          {
+            echo '## Reagan fundraiser production proof'
+            echo
+            echo '- Live cryptobotz Mini App serves app.js?v=3.0.9'
+            echo '- Current Action Spread Smiles Organisation GoFundMe URL is present'
+            echo '- Banned gofund.me/65129e58a URL is absent'
+          } >> "$GITHUB_STEP_SUMMARY"
