@@ -195,6 +195,9 @@ jobs:
       ART_MARKER: ${{ needs.prepare.outputs.art_marker }}
       FTP_TLS_VERIFY: yes
       FTP_TLS_CHECK_HOSTNAME: yes
+      HOSTINGER_LOCKED_IP: '145.223.108.40'
+      HOSTINGER_TLS_ALIAS: 'worldz-ftp-pinned.hstgr.io'
+      HOSTINGER_CERT_SHA256: '47:E1:B5:DC:5D:61:02:E8:ED:8C:01:21:61:AF:8B:22:53:70:AB:55:63:B0:0C:AF:14:6C:BD:7A:96:51:E9:5E'
     steps:
       - uses: actions/checkout@v4
 
@@ -213,25 +216,53 @@ jobs:
           test "$DEPLOY_GUARD" = "$EXPECTED_GUARD"
           [[ "$FTP_SERVER_DIR" == '/' || "$FTP_SERVER_DIR" == '/public_html' ]] || { echo '::error::Unexpected FTP root'; exit 1; }
           test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
-          echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_PASSWORD"
 
       - name: Install secure transfer tools
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp zip unzip
 
+      - name: Establish certificate-validated transfer host
+        shell: bash
+        run: |
+          set -euo pipefail
+          host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
+          test -n "$host"
+          if [[ "$host" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            test "$host" = "$HOSTINGER_LOCKED_IP" || { echo '::error::Unapproved numeric FTP host.'; exit 1; }
+            test "$FTP_PORT" = '21' || { echo '::error::Pinned Hostinger FTPS requires port 21.'; exit 1; }
+            echo "$HOSTINGER_LOCKED_IP $HOSTINGER_TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
+            test "$(getent ahostsv4 "$HOSTINGER_TLS_ALIAS" | awk 'NR==1{print $1}')" = "$HOSTINGER_LOCKED_IP"
+            cert="$RUNNER_TEMP/hostinger-cert.pem"
+            timeout 20 openssl s_client -starttls ftp -connect "$HOSTINGER_LOCKED_IP:21" -verify_return_error -showcerts </dev/null >"$RUNNER_TEMP/hostinger-session.txt" 2>"$RUNNER_TEMP/hostinger-openssl.err"
+            sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$RUNNER_TEMP/hostinger-session.txt" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
+            test -s "$cert"
+            fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
+            test "$fp" = "$HOSTINGER_CERT_SHA256" || { echo '::error::Hostinger FTPS certificate fingerprint changed.'; exit 1; }
+            openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io'
+            grep -Fq 'Verify return code: 0 (ok)' "$RUNNER_TEMP/hostinger-session.txt"
+            ! grep -Eqi 'verify error|certificate verify failed' "$RUNNER_TEMP/hostinger-openssl.err"
+            echo "FTP_CONNECT_HOST=$HOSTINGER_TLS_ALIAS" >> "$GITHUB_ENV"
+            echo 'Using locked Hostinger IP + pinned certificate + wildcard hostname verification.'
+          else
+            echo "FTP_CONNECT_HOST=$host" >> "$GITHUB_ENV"
+            echo 'Using configured DNS hostname with CA and hostname verification.'
+          fi
+
       - name: Confirm certificate-validated encrypted target
         shell: bash
         run: |
           set -euo pipefail
-          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" -e "set cmd:fail-exit yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; bye"
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; bye"
 
       - name: Capture mandatory full rollback snapshot
         shell: bash
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/worldz-backup"; mkdir -p "$backup"
-          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 2
           set net:timeout 30
