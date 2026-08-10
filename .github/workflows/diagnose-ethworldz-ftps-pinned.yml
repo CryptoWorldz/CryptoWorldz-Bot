@@ -45,22 +45,22 @@ jobs:
           echo "$LOCKED_IP $TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
           test "$(getent ahostsv4 "$TLS_ALIAS" | awk 'NR==1{print $1}')" = "$LOCKED_IP"
 
-      - name: Verify live certificate chain identity and fingerprint
+      - name: Verify live certificate chain identity and fingerprint at locked IP
         shell: bash
         run: |
           set -euo pipefail
           cert="$RUNNER_TEMP/hostinger-cert.pem"
-          err="$RUNNER_TEMP/openssl.err"
-          timeout 20 openssl s_client -starttls ftp -connect "$TLS_ALIAS:21" -servername "$TLS_ALIAS" -verify_return_error -showcerts </dev/null >"$RUNNER_TEMP/session.txt" 2>"$err"
+          timeout 20 openssl s_client -starttls ftp -connect "$LOCKED_IP:21" -verify_return_error -showcerts </dev/null >"$RUNNER_TEMP/session.txt" 2>"$RUNNER_TEMP/openssl.err"
           sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$RUNNER_TEMP/session.txt" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
           test -s "$cert"
           fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
           test "$fp" = "$CERT_SHA256"
           openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io'
-          ! grep -Eqi 'verify error|certificate verify failed' "$err"
-          echo "Pinned Hostinger FTPS certificate verified: $fp"
+          grep -Fq 'Verify return code: 0 (ok)' "$RUNNER_TEMP/session.txt"
+          ! grep -Eqi 'verify error|certificate verify failed' "$RUNNER_TEMP/openssl.err"
+          echo "Locked Hostinger FTPS certificate verified: $fp"
 
-      - name: Authenticate and list EthWorldz root read-only with verification ON
+      - name: Authenticate and list EthWorldz root read-only with wildcard hostname verification ON
         shell: bash
         run: |
           set -euo pipefail
