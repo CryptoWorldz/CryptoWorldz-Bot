@@ -18,12 +18,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax-check challenge-aware browser proof
-        run: node --check tools/prove-live-worldz-v2.mjs
-      - name: Run read-only desktop/mobile browser proof against current EthWorldz
+      - name: Syntax-check production browser proof
+        run: |
+          node --check tools/prove-live-worldz-v2.mjs
+          node --check tools/prove-live-worldz.mjs
+      - name: Run read-only desktop/mobile production browser proof against current EthWorldz
         env:
           WORLDZ_PROOF_DIR: ${{ runner.temp }}/eth-browser-proof
-        run: node tools/prove-live-worldz-v2.mjs 'https://ethworldz.xyz' 'EthWorldz' ''
+        run: node tools/prove-live-worldz.mjs 'https://ethworldz.xyz' 'EthWorldz' ''
       - name: Preserve read-only proof
         if: always()
         uses: actions/upload-artifact@v4
