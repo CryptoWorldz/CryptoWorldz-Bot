@@ -33,10 +33,16 @@ function composeCaption(target) {
   return `${caption}\n\n${link}`.trim();
 }
 
+function normalizeGraphVersion(value) {
+  const text = String(value || "v24.0").trim();
+  return /^v\d+\.\d+$/.test(text) ? text : "v24.0";
+}
+
 function createGracePublisher(options = {}) {
   const fetchImpl = options.fetchImpl || global.fetch;
   const env = options.env || process.env;
   const tokenProvider = options.tokenProvider;
+  const metaGraphVersion = normalizeGraphVersion(options.metaGraphVersion || env.GRACE_META_GRAPH_VERSION);
   if (typeof fetchImpl !== "function") throw new Error("A Fetch API implementation is required.");
 
   async function resolveToken(target) {
@@ -94,11 +100,58 @@ function createGracePublisher(options = {}) {
     };
   }
 
+  async function publishToFacebook(target) {
+    const token = await resolveToken(target);
+    const pageId = String(target.external_account_id || "").trim();
+    const message = String(target.caption || "").trim();
+    const link = String(target.link_url || "").trim();
+    if (!pageId) {
+      throw new GracePublishError("The Facebook Page ID is missing from the Grace account connection.", {
+        code: "FACEBOOK_PAGE_ID_MISSING",
+        permanent: true
+      });
+    }
+    if (!message && !link) {
+      throw new GracePublishError("The Facebook Page post is empty.", {
+        code: "EMPTY_CAPTION",
+        permanent: true
+      });
+    }
+
+    const body = new URLSearchParams();
+    if (message) body.set("message", message);
+    if (link) body.set("link", link);
+    body.set("access_token", token);
+
+    const response = await fetchImpl(`https://graph.facebook.com/${metaGraphVersion}/${encodeURIComponent(pageId)}/feed`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+      signal: AbortSignal.timeout(20000)
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.id) {
+      const detail = payload?.error?.message || `Meta returned HTTP ${response.status}.`;
+      const permanent = [400, 401, 403, 404].includes(response.status);
+      throw new GracePublishError(detail, {
+        code: "FACEBOOK_API_ERROR",
+        permanent,
+        status: response.status
+      });
+    }
+    return {
+      externalPostId: String(payload.id),
+      platform: "facebook",
+      response: payload
+    };
+  }
+
   async function publish(target) {
     switch (target.platform) {
       case "x":
         return publishToX(target);
       case "facebook":
+        return publishToFacebook(target);
       case "instagram":
       case "youtube":
       case "tiktok":
@@ -117,4 +170,4 @@ function createGracePublisher(options = {}) {
   return { publish };
 }
 
-module.exports = { GracePublishError, composeCaption, createGracePublisher, readCredential };
+module.exports = { GracePublishError, composeCaption, createGracePublisher, normalizeGraphVersion, readCredential };
