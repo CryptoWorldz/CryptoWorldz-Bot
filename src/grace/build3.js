@@ -134,17 +134,13 @@ function registerGraceBuild3Handlers({ bot, repository, supabase, config }) {
       const ws = await workspace();
       const since = new Date(Date.now() - days * 86400000).toISOString();
       const [{ data: results, error: rErr }, { data: growth, error: gErr }] = await Promise.all([
-        supabase.from("grace_publish_results").select("status,actual_cost_usd,created_at").eq("workspace_id", ws.id).gte("created_at", since),
+        supabase.from("grace_publish_results").select("status,created_at").eq("workspace_id", ws.id).gte("created_at", since),
         supabase.from("grace_growth_snapshots").select("followers,views,engagements,recorded_at").eq("workspace_id", ws.id).gte("recorded_at", since).order("recorded_at", { ascending: true })
       ]);
       if (rErr) throw rErr;
       if (gErr) throw gErr;
       const counts = {};
-      let spend = 0;
-      for (const row of results || []) {
-        counts[row.status] = (counts[row.status] || 0) + 1;
-        spend += Number(row.actual_cost_usd || 0);
-      }
+      for (const row of results || []) counts[row.status] = (counts[row.status] || 0) + 1;
       const first = growth?.[0] || null;
       const last = growth?.at(-1) || null;
       const followerDelta = first && last ? Number(last.followers || 0) - Number(first.followers || 0) : 0;
@@ -156,7 +152,6 @@ function registerGraceBuild3Handlers({ bot, repository, supabase, config }) {
         `Publish results: ${(results || []).length}`,
         `Succeeded: ${counts.success || counts.published || 0}`,
         `Failed: ${counts.failed || counts.error || 0}`,
-        `Recorded API cost: $${spend.toFixed(2)} USD`,
         "",
         `Follower change: ${followerDelta >= 0 ? "+" : ""}${followerDelta}`,
         `View change: ${viewsDelta >= 0 ? "+" : ""}${viewsDelta}`,
