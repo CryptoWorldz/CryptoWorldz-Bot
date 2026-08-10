@@ -12,7 +12,7 @@ permissions:
 jobs:
   ftps:
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 8
     environment: ethworldz-production
     env:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -38,10 +38,10 @@ jobs:
           echo "::add-mask::$FTP_USERNAME"
           echo "::add-mask::$FTP_PASSWORD"
 
-      - name: Install FTPS client
+      - name: Install FTPS and image comparison tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp
+          sudo apt-get install -y -qq lftp imagemagick
 
       - name: Restore approved local hero for comparison
         shell: bash
@@ -73,27 +73,40 @@ jobs:
           ! grep -Eqi 'verify error|certificate verify failed' "$RUNNER_TEMP/openssl.err"
           echo "Locked Hostinger FTPS certificate verified: $fp"
 
-      - name: Download current remote hero and current public hero read-only
+      - name: Compare exact FTP bytes and CDN-rendered pixels read-only
         shell: bash
         run: |
           set -euo pipefail
+          approved="apps/cryptoworldz-web-core/$HERO_REL"
           remote="$RUNNER_TEMP/remote-we-need-you.png"
           public="$RUNNER_TEMP/public-we-need-you.bin"
           timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p 21 "$TLS_ALIAS" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:passive-mode yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; get '$HERO_REL' -o '$remote'; bye"
           curl -L -fsS -D "$RUNNER_TEMP/public-headers.txt" -H 'Cache-Control: no-cache' --max-time 30 "https://ethworldz.xyz/$HERO_REL?diag=${GITHUB_RUN_ID}" -o "$public"
-          local_hash="$(sha256sum "apps/cryptoworldz-web-core/$HERO_REL" | awk '{print $1}')"
+          local_hash="$(sha256sum "$approved" | awk '{print $1}')"
           remote_hash="$(sha256sum "$remote" | awk '{print $1}')"
           public_hash="$(sha256sum "$public" | awk '{print $1}')"
-          remote_type="$(file -b "$remote")"
-          public_type="$(file -b "$public")"
+          approved_dims="$(identify -format '%wx%h' "$approved")"
+          remote_dims="$(identify -format '%wx%h' "$remote")"
+          public_dims="$(identify -format '%wx%h' "$public")"
+          set +e
+          rmse_raw="$(compare -metric RMSE "$approved" "$public" null: 2>&1 >/dev/null)"
+          compare_rc=$?
+          set -e
+          rmse_norm="$(printf '%s' "$rmse_raw" | sed -n 's/.*(\([0-9.eE+-]*\)).*/\1/p')"
+          test -n "$rmse_norm"
           echo "APPROVED_SHA256=$local_hash"
           echo "FTP_SHA256=$remote_hash"
           echo "HTTP_SHA256=$public_hash"
-          echo "FTP_TYPE=$remote_type"
-          echo "HTTP_TYPE=$public_type"
+          echo "APPROVED_DIMS=$approved_dims"
+          echo "FTP_DIMS=$remote_dims"
+          echo "HTTP_DIMS=$public_dims"
+          echo "CDN_RMSE_NORMALIZED=$rmse_norm"
           echo 'HTTP_HEADERS_BEGIN'
           grep -Ei '^(HTTP/|content-type:|content-length:|cache-control:|age:|x-|server:|cf-|cdn-|etag:|last-modified:|via:)' "$RUNNER_TEMP/public-headers.txt" || true
           echo 'HTTP_HEADERS_END'
-          if [[ "$local_hash" == "$remote_hash" ]]; then echo 'FTP_MATCHES_APPROVED=yes'; else echo 'FTP_MATCHES_APPROVED=no'; fi
-          if [[ "$remote_hash" == "$public_hash" ]]; then echo 'HTTP_MATCHES_FTP=yes'; else echo 'HTTP_MATCHES_FTP=no'; fi
-          if [[ "$local_hash" == "$public_hash" ]]; then echo 'HTTP_MATCHES_APPROVED=yes'; else echo 'HTTP_MATCHES_APPROVED=no'; fi
+          test "$local_hash" = "$remote_hash"
+          test "$approved_dims" = "$remote_dims"
+          test "$approved_dims" = "$public_dims"
+          awk -v n="$rmse_norm" 'BEGIN { if (n > 0.05) exit 1 }'
+          echo 'FTP_MATCHES_APPROVED_EXACT=yes'
+          echo 'HTTP_VISUALLY_EQUIVALENT_TO_APPROVED=yes'
