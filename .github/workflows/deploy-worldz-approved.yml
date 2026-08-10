@@ -145,6 +145,8 @@ jobs:
         run: |
           set -euo pipefail
           node --check tools/worldz-upload-manifest.mjs
+          node --check tools/prove-live-worldz-v2.mjs
+          node --check tools/prove-live-worldz.mjs
           bash -n tools/prove-worldz-origin-media.sh
           bash -n tools/worldz-direct-ftp.sh
 
@@ -244,15 +246,45 @@ jobs:
             test "$FTP_PORT" = '21' || { echo '::error::Pinned Hostinger FTPS requires port 21.'; exit 1; }
             echo "$HOSTINGER_LOCKED_IP $HOSTINGER_TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
             test "$(getent ahostsv4 "$HOSTINGER_TLS_ALIAS" | awk 'NR==1{print $1}')" = "$HOSTINGER_LOCKED_IP"
+
+            cert_ok=0
             cert="$RUNNER_TEMP/hostinger-cert.pem"
-            timeout 20 openssl s_client -starttls ftp -connect "$HOSTINGER_LOCKED_IP:21" -verify_return_error -showcerts </dev/null >"$RUNNER_TEMP/hostinger-session.txt" 2>"$RUNNER_TEMP/hostinger-openssl.err"
-            sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$RUNNER_TEMP/hostinger-session.txt" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
-            test -s "$cert"
-            fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
-            test "$fp" = "$HOSTINGER_CERT_SHA256" || { echo '::error::Hostinger FTPS certificate fingerprint changed.'; exit 1; }
-            openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io'
-            grep -Fq 'Verify return code: 0 (ok)' "$RUNNER_TEMP/hostinger-session.txt"
-            ! grep -Eqi 'verify error|certificate verify failed' "$RUNNER_TEMP/hostinger-openssl.err"
+            for attempt in 1 2 3; do
+              session="$RUNNER_TEMP/hostinger-session-$attempt.txt"
+              err="$RUNNER_TEMP/hostinger-openssl-$attempt.err"
+              rm -f "$cert" "$session" "$err"
+              set +e
+              timeout 25 openssl s_client -starttls ftp -connect "$HOSTINGER_LOCKED_IP:21" -verify_return_error -showcerts </dev/null >"$session" 2>"$err"
+              rc=$?
+              set -e
+              if [[ "$rc" -ne 0 ]]; then
+                echo "::warning::Hostinger FTPS public certificate probe attempt $attempt failed with exit $rc."
+                sleep $((attempt * 2))
+                continue
+              fi
+              sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$session" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
+              if [[ ! -s "$cert" ]]; then
+                echo "::warning::Hostinger FTPS probe attempt $attempt returned no leaf certificate."
+                sleep $((attempt * 2))
+                continue
+              fi
+              fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
+              if [[ "$fp" == "$HOSTINGER_CERT_SHA256" ]] \
+                && openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io' \
+                && grep -Fq 'Verify return code: 0 (ok)' "$session" \
+                && ! grep -Eqi 'verify error|certificate verify failed' "$err"; then
+                cert_ok=1
+                echo "Pinned Hostinger FTPS certificate verified on attempt $attempt: $fp"
+                break
+              fi
+              echo "::warning::Hostinger FTPS identity checks did not pass on attempt $attempt."
+              sleep $((attempt * 2))
+            done
+            if [[ "$cert_ok" != '1' ]]; then
+              echo '::error::Unable to prove the locked Hostinger FTPS certificate identity after 3 bounded attempts.'
+              exit 1
+            fi
+
             echo "FTP_CONNECT_HOST=$HOSTINGER_TLS_ALIAS" >> "$GITHUB_ENV"
             echo 'Using locked Hostinger IP + pinned certificate + wildcard hostname verification.'
           else
@@ -338,7 +370,7 @@ jobs:
           WORLDZ_PROOF_DIR="$RUNNER_TEMP/worldz-proof" node tools/prove-live-worldz.mjs "$LIVE_URL" "$EXPECTED_TEXT" "$ART_MARKER"
 
       - name: Preserve browser proof screenshots
-        if: always()
+        if: always() && env.WORLDZ_UPLOAD_STARTED == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: worldz-production-proof-${{ needs.prepare.outputs.target }}-${{ github.run_id }}
