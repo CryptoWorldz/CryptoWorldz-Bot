@@ -1,5 +1,6 @@
 requested_by=JayJayTeamDev
 scope=all-worldz-production-sites
 verification=real-browser-desktop-and-mobile
-requested_at=2026-08-10T10:34:00+10:00
+requested_at=2026-08-10T15:13:00+10:00
 rule=do-not-mark-fixed-until-browser-images-render
+gate=browser-proof-v2
