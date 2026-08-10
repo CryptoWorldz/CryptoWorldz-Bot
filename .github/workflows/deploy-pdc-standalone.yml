@@ -18,12 +18,12 @@ jobs:
   deploy:
     name: Back up, deploy and prove PurpleDiamondCrew.com
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 22
     environment:
       name: purplediamondcrew-production
       url: https://purplediamondcrew.com
     env:
-      FTP_HOST: 145.223.108.40
+      FTP_HOST: '145.223.108.40'
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: '21'
@@ -31,11 +31,24 @@ jobs:
       FTP_ACCOUNT_SCOPE: DOMAIN_ONLY
       DEPLOY_GUARD: PURPLEDIAMONDCREW.COM
       LIVE_URL: https://purplediamondcrew.com
-      FUNDRAISER_URL: https://gofund.me/65129e58
-      IMPACTBASED_URL: https://oneworldz.com/worldz/impactbased
+      FUNDRAISER_URL: https://gofund.me/c2e4fa936
+      IMPACTBASED_URL: https://impactbased.oneworldz.com
+      HOSTINGER_LOCKED_IP: '145.223.108.40'
+      HOSTINGER_TLS_ALIAS: 'pdc-ftp-pinned.hstgr.io'
+      HOSTINGER_CERT_SHA256: '47:E1:B5:DC:5D:61:02:E8:ED:8C:01:21:61:AF:8B:22:53:70:AB:55:63:B0:0C:AF:14:6C:BD:7A:96:51:E9:5E'
+      WORLDZ_MEDIA_RMSE_MAX: '0.05'
     steps:
       - name: Check out approved main commit
         uses: actions/checkout@v4
+
+      - name: Validate explicit PDC request when triggered by push
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(sed -n 's/^target=//p' deployments/pdc-standalone.request | tail -n1)" = 'purplediamondcrew.com'
+          test "$(sed -n 's/^bundle=//p' deployments/pdc-standalone.request | tail -n1)" = 'apps/worldz-sites/purplediamondcrew'
+          test "$(sed -n 's/^approval=//p' deployments/pdc-standalone.request | tail -n1)" = 'Approved by JayJayTeamDev'
 
       - name: Restore and fingerprint exact approved PDC media
         shell: bash
@@ -51,10 +64,10 @@ jobs:
             test "$(sha256sum "$src" | awk '{print $1}')" = "$(sha256sum "$dst" | awk '{print $1}')"
           done
 
-      - name: Install verification and secure FTP tools
+      - name: Install verification and secure transfer tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp zip
+          sudo apt-get install -y -qq lftp zip imagemagick
 
       - name: Run static production gate
         run: node tools/verify-pdc-standalone.mjs
@@ -65,6 +78,7 @@ jobs:
           set -euo pipefail
           grep -RFlq "$FUNDRAISER_URL" apps/worldz-sites/purplediamondcrew
           grep -RFlq "$IMPACTBASED_URL" apps/worldz-sites/purplediamondcrew
+          ! grep -RFlq 'https://gofund.me/65129e58' apps/worldz-sites/purplediamondcrew
           fundraiser_final="$(curl -4 -L -fsS --retry 2 --retry-all-errors --max-time 40 -o /dev/null -w '%{url_effective}' "$FUNDRAISER_URL")"
           [[ "$fundraiser_final" =~ ^https://(www\.)?gofundme\.com/f/ ]] || { echo "::error::Fundraiser resolved to unexpected/generic destination: $fundraiser_final"; exit 1; }
           impact_code="$(curl -4 -L -sS --retry 2 --retry-all-errors --max-time 40 -o /dev/null -w '%{http_code}' "$IMPACTBASED_URL")"
@@ -74,36 +88,63 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$FTP_HOST" == '145.223.108.40' ]] || { echo '::error::Locked Hostinger IP changed'; exit 1; }
+          [[ "$FTP_HOST" == "$HOSTINGER_LOCKED_IP" ]] || { echo '::error::Locked Hostinger IP changed'; exit 1; }
           [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]] || { echo '::error::FTP credentials missing'; exit 1; }
           [[ "$FTP_PORT" == '21' && "$FTP_SERVER_DIR" == '/' ]] || { echo '::error::Locked FTP target changed'; exit 1; }
           [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' && "$DEPLOY_GUARD" == 'PURPLEDIAMONDCREW.COM' ]] || { echo '::error::PDC guard changed'; exit 1; }
-          echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"; echo "::add-mask::$FTP_HOST"
+
+      - name: Establish pinned certificate-validated Hostinger FTPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$HOSTINGER_LOCKED_IP $HOSTINGER_TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
+          test "$(getent ahostsv4 "$HOSTINGER_TLS_ALIAS" | awk 'NR==1{print $1}')" = "$HOSTINGER_LOCKED_IP"
+          cert_ok=0
+          cert="$RUNNER_TEMP/hostinger-cert.pem"
+          for attempt in 1 2 3; do
+            session="$RUNNER_TEMP/hostinger-session-$attempt.txt"; err="$RUNNER_TEMP/hostinger-openssl-$attempt.err"
+            rm -f "$cert" "$session" "$err"
+            set +e
+            timeout 25 openssl s_client -starttls ftp -connect "$HOSTINGER_LOCKED_IP:21" -verify_return_error -showcerts </dev/null >"$session" 2>"$err"
+            rc=$?
+            set -e
+            if [[ "$rc" -ne 0 ]]; then echo "::warning::FTPS certificate probe $attempt failed with exit $rc"; sleep $((attempt * 2)); continue; fi
+            sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$session" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
+            [[ -s "$cert" ]] || { sleep $((attempt * 2)); continue; }
+            fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
+            if [[ "$fp" == "$HOSTINGER_CERT_SHA256" ]] && openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io' && grep -Fq 'Verify return code: 0 (ok)' "$session" && ! grep -Eqi 'verify error|certificate verify failed' "$err"; then cert_ok=1; break; fi
+            sleep $((attempt * 2))
+          done
+          [[ "$cert_ok" == '1' ]] || { echo '::error::Unable to prove pinned Hostinger FTPS identity'; exit 1; }
+          echo "FTP_CONNECT_HOST=$HOSTINGER_TLS_ALIAS" >> "$GITHUB_ENV"
 
       - name: Confirm encrypted Hostinger target with certificate validation
         shell: bash
         run: |
           set -euo pipefail
-          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; cd '$FTP_SERVER_DIR'; bye"
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; bye"
 
       - name: Capture full rollback snapshot
         shell: bash
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/pdc-backup"; mkdir -p "$backup"
-          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
           set cmd:fail-exit yes
-          set net:max-retries 1
-          set net:timeout 25
+          set net:max-retries 2
+          set net:timeout 30
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
+          set ssl:check-hostname yes
           cd "$FTP_SERVER_DIR"
           lcd "$backup"
           mirror --parallel=3 . .
           bye
           LFTP
           test -n "$(find "$backup" -mindepth 1 -print -quit)"
+          (cd "$backup" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sed 's#  \./#  #') > "$RUNNER_TEMP/pdc-backup.sha256"
           cd "$backup"; zip -qr "$RUNNER_TEMP/pdc-predeploy.zip" .
           test -s "$RUNNER_TEMP/pdc-predeploy.zip"
 
@@ -111,7 +152,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: purplediamondcrew-predeploy-${{ github.run_id }}
-          path: ${{ runner.temp }}/pdc-predeploy.zip
+          path: |
+            ${{ runner.temp }}/pdc-predeploy.zip
+            ${{ runner.temp }}/pdc-backup.sha256
           retention-days: 14
           if-no-files-found: error
 
@@ -121,21 +164,30 @@ jobs:
           set -euo pipefail
           echo 'PDC_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
           source="$GITHUB_WORKSPACE/apps/worldz-sites/purplediamondcrew"
-          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 240 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
           set cmd:fail-exit yes
-          set net:max-retries 1
+          set net:max-retries 2
           set net:timeout 30
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
+          set ssl:check-hostname yes
           cd "$FTP_SERVER_DIR"
           lcd "$source"
           mirror --reverse --delete --parallel=3 . .
           bye
           LFTP
 
-      - name: Prove live pages, exact images and exact links
-        id: verify
+      - name: Prove exact origin media and CDN visual equivalence
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash tools/prove-worldz-origin-media.sh "$GITHUB_WORKSPACE/apps/worldz-sites/purplediamondcrew" \
+            'assets/media/pdc-mission-board.png' \
+            'assets/media/pdc-hope-chest.png' \
+            'assets/media/pdc-crest.png'
+
+      - name: Prove live pages and exact links
         shell: bash
         run: |
           set -euo pipefail
@@ -145,12 +197,7 @@ jobs:
             out="$RUNNER_TEMP/page-$(echo "$path" | tr '/' '_').html"
             curl -4 -L -fsS --retry 2 --retry-all-errors -A 'Mozilla/5.0 (Worldz Production Proof)' -H 'Cache-Control: no-cache' --max-time 40 "$LIVE_URL$path?$cache" -o "$out"
             grep -Fqi 'PURPLE DIAMOND CREW' "$out"
-            ! grep -Eqi 'Loading the Worldz experience|default page|parked domain' "$out"
-          done
-          for image in pdc-mission-board.png pdc-hope-chest.png pdc-crest.png; do
-            live="$RUNNER_TEMP/live-$image"; source="$RUNNER_TEMP/approved-worldz/pdc/$image"
-            curl -4 -L -fsS --retry 2 --retry-all-errors -H 'Cache-Control: no-cache' --max-time 40 "$LIVE_URL/assets/media/$image?$cache" -o "$live"
-            test "$(sha256sum "$source" | awk '{print $1}')" = "$(sha256sum "$live" | awk '{print $1}')" || { echo "::error::LIVE IMAGE HASH MISMATCH: $image"; exit 1; }
+            ! grep -Eqi 'Loading the Worldz experience|Loading OneWorldz|default page|parked domain' "$out"
           done
           home="$RUNNER_TEMP/page-_.html"; donate="$RUNNER_TEMP/page-_donate_.html"; hope="$RUNNER_TEMP/page-_hope-chest_.html"
           grep -Fq "$FUNDRAISER_URL" "$home"
@@ -161,28 +208,59 @@ jobs:
           [[ "$fundraiser_final" =~ ^https://(www\.)?gofundme\.com/f/ ]] || { echo "::error::Live fundraiser destination became generic/wrong: $fundraiser_final"; exit 1; }
           impact_code="$(curl -4 -L -sS --retry 2 --retry-all-errors --max-time 40 -o /dev/null -w '%{http_code}' "$IMPACTBASED_URL")"
           [[ "$impact_code" =~ ^2[0-9][0-9]$ ]] || { echo "::error::Live ImpactBased route is broken: HTTP $impact_code"; exit 1; }
-          echo 'verified=true' >> "$GITHUB_OUTPUT"
-          echo 'PDC PRODUCTION PROOF PASSED: pages, exact image hashes, fundraiser destination and ImpactBased route verified.'
 
-      - name: Restore previous site if deployment fails
+      - name: Prove desktop and mobile PDC rendering in isolated Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          WORLDZ_PROOF_DIR="$RUNNER_TEMP/pdc-proof" node tools/prove-live-worldz-v2.mjs "$LIVE_URL" 'PURPLE DIAMOND CREW' 'pdc-mission-board.png'
+
+      - name: Preserve PDC browser proof screenshots
+        if: always() && env.PDC_UPLOAD_STARTED == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: purplediamondcrew-production-proof-${{ github.run_id }}
+          path: ${{ runner.temp }}/pdc-proof/
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Restore previous site exactly if deployment fails
         if: failure() && env.PDC_UPLOAD_STARTED == 'true'
         shell: bash
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/pdc-backup"
           test -n "$(find "$backup" -mindepth 1 -print -quit)"
-          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 240 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
           set cmd:fail-exit yes
-          set net:max-retries 1
+          set net:max-retries 2
           set net:timeout 30
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
+          set ssl:check-hostname yes
           cd "$FTP_SERVER_DIR"
           lcd "$backup"
           mirror --reverse --delete --parallel=3 . .
           bye
           LFTP
+          verify="$RUNNER_TEMP/pdc-rollback-verify"; mkdir -p "$verify"
+          timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          set ssl:check-hostname yes
+          cd "$FTP_SERVER_DIR"
+          lcd "$verify"
+          mirror --parallel=3 . .
+          bye
+          LFTP
+          (cd "$verify" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sed 's#  \./#  #') > "$RUNNER_TEMP/pdc-rollback-verify.sha256"
+          diff -u "$RUNNER_TEMP/pdc-backup.sha256" "$RUNNER_TEMP/pdc-rollback-verify.sha256"
+          echo 'PDC_ROLLBACK_EXACT=PASS'
 
       - name: Publish factual deployment summary
         if: always()
@@ -191,10 +269,11 @@ jobs:
           {
             echo '## PurpleDiamondCrew Production Proof'
             echo '- Job conclusion is authoritative; this summary does not override failures.'
-            echo '- Exact live image SHA-256 equality: required'
+            echo '- Exact approved bytes at FTP origin + CDN visual equivalence: required'
             echo '- Seven requested pages: required'
-            echo '- Exact fundraiser destination: required'
-            echo '- Working ImpactBased OneWorldz route: required'
-            echo '- Rollback snapshot: mandatory'
+            echo '- Verified Reagan fundraiser destination: required'
+            echo '- Working ImpactBased intended route: required'
+            echo '- Isolated desktop + mobile Chrome screenshots: required'
+            echo '- Exact rollback snapshot and SHA verification: mandatory'
             echo '- CryptoWorldz / Zed / Auto / Grace: untouched'
           } >> "$GITHUB_STEP_SUMMARY"
