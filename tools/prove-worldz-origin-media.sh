@@ -49,10 +49,32 @@ prove_one() {
 
   local cache_sep='?'
   [[ "$LIVE_URL/$rel" == *\?* ]] && cache_sep='&'
-  curl -L -fsS -D "$headers" -H 'Cache-Control: no-cache' --max-time 40 \
-    "$LIVE_URL/$rel${cache_sep}worldz-proof=${GITHUB_SHA:-manual}-${GITHUB_RUN_ID:-manual}-$token" \
-    -o "$public"
-  test -s "$public"
+
+  local public_ok=0 attempt curl_rc proof_url
+  for attempt in 1 2 3 4; do
+    rm -f "$public" "$headers"
+    proof_url="$LIVE_URL/$rel${cache_sep}worldz-proof=${GITHUB_SHA:-manual}-${GITHUB_RUN_ID:-manual}-$token-$attempt"
+    set +e
+    curl -L -fsS -D "$headers" \
+      -A 'Mozilla/5.0 WorldzProductionProof/2.1' \
+      -H 'Accept: image/avif,image/webp,image/apng,image/*,*/*;q=0.8' \
+      -H 'Cache-Control: no-cache' \
+      --connect-timeout 15 --max-time 40 \
+      "$proof_url" -o "$public"
+    curl_rc=$?
+    set -e
+    if [[ "$curl_rc" -eq 0 && -s "$public" ]]; then
+      public_ok=1
+      [[ "$attempt" -gt 1 ]] && echo "Public CDN media fetch recovered on attempt $attempt for $rel"
+      break
+    fi
+    echo "::warning::Public CDN media fetch attempt $attempt failed for $rel (curl exit $curl_rc). Exact FTP-origin bytes already passed; retrying fresh public request."
+    sleep $((attempt * 2))
+  done
+  if [[ "$public_ok" != '1' ]]; then
+    echo "::error::Public CDN media could not be fetched after 4 bounded attempts for $rel" >&2
+    return 1
+  fi
 
   local approved_dims origin_dims public_dims
   approved_dims="$(identify -format '%wx%h' "$approved")"
