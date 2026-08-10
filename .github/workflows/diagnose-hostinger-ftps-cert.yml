@@ -1,0 +1,26 @@
+name: Diagnose Hostinger FTPS Certificate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/hostinger-ftps-cert.request'
+
+permissions:
+  contents: read
+
+jobs:
+  certificate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Inspect public FTP TLS identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          ip='145.223.108.40'
+          echo "PTR candidates:"
+          getent hosts "$ip" || true
+          echo "TLS certificate:"
+          timeout 20 openssl s_client -starttls ftp -connect "$ip:21" -showcerts </dev/null 2>/dev/null \
+            | openssl x509 -noout -subject -issuer -serial -fingerprint -sha256 -ext subjectAltName
