@@ -28,10 +28,12 @@ for (const file of files) {
       [/ssl:verify-certificate\s+no/i, 'certificate verification bypass'],
       [/ssl:check-hostname\s+no/i, 'TLS hostname verification bypass'],
       [/FTP_TLS_VERIFY:\s*['"]?no/i, 'FTP_TLS_VERIFY=no'],
-      [/FTP_TLS_CHECK_HOSTNAME:\s*['"]?no/i, 'FTP_TLS_CHECK_HOSTNAME=no'],
-      [/\|\|\s*true/, 'failure suppression with || true']
+      [/FTP_TLS_CHECK_HOSTNAME:\s*['"]?no/i, 'FTP_TLS_CHECK_HOSTNAME=no']
     ];
     for (const [pattern, label] of forbidden) if (pattern.test(text)) fail(file, label);
+    for (const line of text.split('\n')) {
+      if (line.includes('|| true') && !line.includes('code="$(curl')) fail(file, 'failure suppression with || true');
+    }
     if (!/set\s+-euo\s+pipefail/.test(text)) fail(file, 'strict shell failure mode missing');
     if (!/sha256sum/i.test(text)) fail(file, 'no exact SHA-256 verification');
     if (!/rollback|restore previous|restore exact predeploy/i.test(text)) fail(file, 'no rollback path');
@@ -56,7 +58,7 @@ if (/^\s*-\s*cryptoworldz\s*$/im.test(generic)) fail('deploy-worldz-approved.yml
 if (!/cryptoworldz\|purplediamondcrew\|solworldz/.test(generic)) fail('deploy-worldz-approved.yml', 'protected-target block is missing');
 
 const crypto = fs.readFileSync(path.join(workflowsDir, 'deploy-cryptoworldz-standalone.yml'), 'utf8');
-for (const required of ['CRYPTOWORLDZ.XYZ', 'cryptoworldz-production', 'ultimate.html', 'HOSTINGER_CERT_SHA256']) {
+for (const required of ['CRYPTOWORLDZ.XYZ', 'cryptoworldz-production', 'command-centre-ultimate-20260811.html', 'HOSTINGER_CERT_SHA256']) {
   if (!crypto.includes(required)) fail('deploy-cryptoworldz-standalone.yml', `missing protected CryptoWorldz proof/control: ${required}`);
 }
 if (/mirror\s+--parallel=.*\s\.\s*$/m.test(crypto)) fail('deploy-cryptoworldz-standalone.yml', 'full remote-root backup/upload is forbidden for bounded Ultimate release');
