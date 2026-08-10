@@ -1,0 +1,119 @@
+name: Prove Ultimate Mini App Live
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/ultimate-miniapp-live.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ultimate-miniapp-live-proof
+  cancel-in-progress: true
+
+jobs:
+  prove:
+    name: Prove Ultimate UI on cryptobotz production
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm explicit read-only request
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          APPROVED_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          test "$(sed -n 's/^target=//p' diagnostics/ultimate-miniapp-live.request | tail -n1)" = 'cryptobotz.cryptoworldz.xyz'
+          test "$(sed -n 's/^mode=//p' diagnostics/ultimate-miniapp-live.request | tail -n1)" = 'read-only-ultimate-miniapp-proof'
+          test "$(sed -n 's/^approval=//p' diagnostics/ultimate-miniapp-live.request | tail -n1)" = 'Approved by JayJayTeamDev'
+          test "$(sed -n 's/^source_commit=//p' diagnostics/ultimate-miniapp-live.request | tail -n1)" = "$APPROVED_BEFORE"
+
+      - name: Prove Mini App shell release fingerprint
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://cryptobotz.cryptoworldz.xyz'
+          html="$RUNNER_TEMP/miniapp.html"
+          code=''
+          for attempt in $(seq 1 6); do
+            set +e
+            code="$(curl -4 -L -sS -o "$html" -w '%{http_code}' --retry 1 --retry-all-errors --connect-timeout 12 --max-time 40 -A 'Mozilla/5.0 (Ultimate Mini App Production Proof)' -H 'Cache-Control: no-cache, no-store, must-revalidate' "$base/miniapp/?proof=${GITHUB_RUN_ID}-${attempt}")"
+            status=$?
+            set -e
+            if [[ "$status" == '0' && "$code" == '200' ]] \
+              && grep -Fq '/miniapp/styles.css?v=3.1.0' "$html" \
+              && grep -Fq '/miniapp/auto-owner.js?v=3.0.0' "$html"; then
+              break
+            fi
+            sleep 4
+          done
+          test "$code" = '200' || { echo "::error::Mini App returned HTTP $code"; exit 1; }
+          grep -Fq '/miniapp/styles.css?v=3.1.0' "$html" || { echo '::error::Live Mini App is still serving the old stylesheet release'; exit 1; }
+          grep -Fq '/miniapp/auto-owner.js?v=3.0.0' "$html" || { echo '::error::Live Mini App is still serving the old Auto owner release'; exit 1; }
+          echo 'ULTIMATE_MINIAPP_SHELL_PROOF=PASS'
+
+      - name: Prove five-gateway Ultimate owner script
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://cryptobotz.cryptoworldz.xyz'
+          js="$RUNNER_TEMP/auto-owner.js"
+          curl -4 -L -sS --fail --retry 2 --retry-all-errors --connect-timeout 12 --max-time 40 -A 'Mozilla/5.0 (Ultimate Mini App Production Proof)' -H 'Cache-Control: no-cache, no-store, must-revalidate' -o "$js" "$base/miniapp/auto-owner.js?proof=${GITHUB_RUN_ID}"
+          test -s "$js"
+          for required in \
+            'Command Centre Ultimate' \
+            'data-ultimate-view="plan"' \
+            'data-ultimate-view="treasury"' \
+            'data-ultimate-view="diamond"' \
+            'data-ultimate-view="multisig"' \
+            'data-ultimate-view="launch"' \
+            '/api/mini/auto/ultimate' \
+            'Westpac → Coinbase Australia → USDC'; do
+            grep -Fq "$required" "$js" || { echo "::error::Live Ultimate script missing: $required"; exit 1; }
+          done
+          node --check "$js"
+          echo 'ULTIMATE_FIVE_GATEWAY_SCRIPT_PROOF=PASS'
+
+      - name: Prove Ultimate styles
+        shell: bash
+        run: |
+          set -euo pipefail
+          css="$RUNNER_TEMP/styles.css"
+          curl -4 -L -sS --fail --retry 2 --retry-all-errors --connect-timeout 12 --max-time 40 -A 'Mozilla/5.0 (Ultimate Mini App Production Proof)' -H 'Cache-Control: no-cache, no-store, must-revalidate' -o "$css" "https://cryptobotz.cryptoworldz.xyz/miniapp/styles.css?proof=${GITHUB_RUN_ID}"
+          test -s "$css"
+          for required in '.ultimate-owner' '.ultimate-gateway' '.ultimate-view' '.ultimate-safety-actions'; do
+            grep -Fq "$required" "$css" || { echo "::error::Live stylesheet missing $required"; exit 1; }
+          done
+          echo 'ULTIMATE_STYLE_PROOF=PASS'
+
+      - name: Prove service health without credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/health.json"
+          code="$(curl -4 -L -sS -o "$out" -w '%{http_code}' --retry 2 --retry-all-errors --connect-timeout 12 --max-time 40 -H 'Cache-Control: no-cache' 'https://cryptobotz.cryptoworldz.xyz/health?ultimate_proof=${GITHUB_RUN_ID}')"
+          test "$code" = '200' || { echo "::error::cryptobotz health returned HTTP $code"; exit 1; }
+          node - "$out" <<'NODE'
+          const fs = require('fs');
+          const body = fs.readFileSync(process.argv[2], 'utf8');
+          if (!body.trim()) throw new Error('health response empty');
+          console.log('CRYPTOWORLDZ_NODE_HEALTH=PASS');
+          NODE
+
+      - name: Production proof summary
+        if: always()
+        run: |
+          {
+            echo '## Command Centre Ultimate Mini App production proof'
+            echo
+            echo '- Read-only HTTPS proof only; no production writes'
+            echo '- Requires Mini App shell v3.1.0 / Auto owner v3.0.0'
+            echo '- Requires PLAN / TREASURY / DIAMOND BUY / MULTISIG / LAUNCH script markers'
+            echo '- Requires Ultimate styles and cryptobotz health'
+          } >> "$GITHUB_STEP_SUMMARY"
