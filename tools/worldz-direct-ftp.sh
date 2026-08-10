@@ -17,6 +17,7 @@ esac
 : "${FTP_TRANSFER_TIMEOUT:=300}"
 : "${FTP_TLS_VERIFY:=yes}"
 : "${FTP_TLS_CHECK_HOSTNAME:=yes}"
+: "${FTP_CONNECT_HOST:=$FTP_HOST}"
 
 normalize_ftp_host() {
   local value="$1"
@@ -30,11 +31,17 @@ normalize_ftp_host() {
 }
 
 FTP_HOST="$(normalize_ftp_host "$FTP_HOST")"
+FTP_CONNECT_HOST="$(normalize_ftp_host "$FTP_CONNECT_HOST")"
 if [[ -z "$FTP_HOST" || "$FTP_HOST" == *$'\n'* || "$FTP_HOST" == *$'\r'* ]]; then
   echo '::error::FTP_HOST is empty or malformed after normalization.' >&2
   exit 5
 fi
+if [[ -z "$FTP_CONNECT_HOST" || "$FTP_CONNECT_HOST" == *$'\n'* || "$FTP_CONNECT_HOST" == *$'\r'* ]]; then
+  echo '::error::FTP_CONNECT_HOST is empty or malformed after normalization.' >&2
+  exit 11
+fi
 echo "::add-mask::$FTP_HOST"
+echo "::add-mask::$FTP_CONNECT_HOST"
 
 # Production rule: certificate and hostname verification are mandatory.
 # Old workflows were able to set these to "no", hiding target/certificate faults.
@@ -132,11 +139,11 @@ if [[ "${WORLDZ_FTP_DRY_RUN:-0}" == "1" ]]; then
   exit 0
 fi
 
-if ! getent ahosts "$FTP_HOST" >/dev/null 2>&1; then
-  echo '::error::FTP_HOST does not resolve.' >&2
+if ! getent ahosts "$FTP_CONNECT_HOST" >/dev/null 2>&1; then
+  echo '::error::FTP_CONNECT_HOST does not resolve.' >&2
   exit 6
 fi
 
 echo "Starting direct $mode of $file_count files with certificate and hostname verification enforced."
-timeout "$FTP_TRANSFER_TIMEOUT" lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" < "$command_file"
+timeout "$FTP_TRANSFER_TIMEOUT" lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" < "$command_file"
 echo "Direct $mode completed for $file_count files."
