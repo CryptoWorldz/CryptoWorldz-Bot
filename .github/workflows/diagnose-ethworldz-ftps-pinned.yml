@@ -1,0 +1,68 @@
+name: Diagnose EthWorldz Pinned FTPS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'diagnostics/ethworldz-ftps-pinned.request'
+
+permissions:
+  contents: read
+
+jobs:
+  ftps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    environment: ethworldz-production
+    env:
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      LOCKED_IP: '145.223.108.40'
+      TLS_ALIAS: 'worldz-ftp-pinned.hstgr.io'
+      CERT_SHA256: '47:E1:B5:DC:5D:61:02:E8:ED:8C:01:21:61:AF:8B:22:53:70:AB:55:63:B0:0C:AF:14:6C:BD:7A:96:51:E9:5E'
+    steps:
+      - name: Verify domain-restricted credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$FTP_ACCOUNT_SCOPE" = 'DOMAIN_ONLY'
+          test "$DEPLOY_GUARD" = 'ETHWORLDZ.XYZ'
+          test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+
+      - name: Install FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+      - name: Pin exact Hostinger IP to certificate-valid local alias
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$LOCKED_IP $TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
+          test "$(getent ahostsv4 "$TLS_ALIAS" | awk 'NR==1{print $1}')" = "$LOCKED_IP"
+
+      - name: Verify live certificate chain identity and fingerprint
+        shell: bash
+        run: |
+          set -euo pipefail
+          cert="$RUNNER_TEMP/hostinger-cert.pem"
+          err="$RUNNER_TEMP/openssl.err"
+          timeout 20 openssl s_client -starttls ftp -connect "$TLS_ALIAS:21" -servername "$TLS_ALIAS" -verify_return_error -showcerts </dev/null >"$RUNNER_TEMP/session.txt" 2>"$err"
+          sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$RUNNER_TEMP/session.txt" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
+          test -s "$cert"
+          fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
+          test "$fp" = "$CERT_SHA256"
+          openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io'
+          ! grep -Eqi 'verify error|certificate verify failed' "$err"
+          echo "Pinned Hostinger FTPS certificate verified: $fp"
+
+      - name: Authenticate and list EthWorldz root read-only with verification ON
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p 21 "$TLS_ALIAS" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:passive-mode yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; pwd; cls -la; bye"
+          echo 'PINNED_FTPS_READ_ONLY=PASS'
