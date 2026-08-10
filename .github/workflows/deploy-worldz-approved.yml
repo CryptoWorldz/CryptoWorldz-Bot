@@ -48,7 +48,6 @@ jobs:
       art_marker: ${{ steps.resolve.outputs.art_marker }}
     steps:
       - uses: actions/checkout@v4
-
       - id: resolve
         name: Resolve approved target and forbid protected sites
         shell: bash
@@ -68,41 +67,23 @@ jobs:
             test -n "$source_commit"
             test "$source_commit" = "$APPROVED_BEFORE"
           fi
-
-          # CryptoWorldz is intentionally absent: it is the frozen visual reference.
-          # PDC and SolWorldz use their dedicated standalone proof workflows.
           case "$target" in
-            oneworldz)
-              environment='oneworldz-production'; live_url='https://oneworldz.com'; guard='ONEWORLDZ.COM'; expected_text='OneWorldz'; hero_image='assets/worldz-master/oneworldz/oneworldz-master.png'; secondary_image='assets/worldz-master/oneworldz/oneworldz-gpt.png'; art_marker='oneworldz-master.png' ;;
-            impactbased)
-              environment='impactbased-production'; live_url='https://impactbased.oneworldz.com'; guard='IMPACTBASED.ONEWORLDZ.COM'; expected_text='ImpactBased'; hero_image='assets/worldz-master/cryptoworldz/impactbased.png'; secondary_image=''; art_marker='impactbased.png' ;;
-            law-oneworldz)
-              environment='law-oneworldz-production'; live_url='https://law.oneworldz.com'; guard='LAW.ONEWORLDZ.COM'; expected_text='Robin Hood'; hero_image='assets/worldz-master/tokens/robin-hood-law.png'; secondary_image=''; art_marker='robin-hood-law.png' ;;
-            learn-oneworldz)
-              environment='learn-oneworldz-production'; live_url='https://learn.oneworldz.com'; guard='LEARN.ONEWORLDZ.COM'; expected_text='LearnWorldz'; hero_image='assets/worldz-master/oneworldz/oneworldz-gpt.png'; secondary_image=''; art_marker='oneworldz-gpt.png' ;;
-            ethworldz)
-              environment='ethworldz-production'; live_url='https://ethworldz.xyz'; guard='ETHWORLDZ.XYZ'; expected_text='EthWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/ethworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
-            baseworldz)
-              environment='baseworldz-production'; live_url='https://baseworldz.xyz'; guard='BASEWORLDZ.XYZ'; expected_text='BaseWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/baseworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
-            bnbworldz)
-              environment='bnbworldz-production'; live_url='https://bnbworldz.xyz'; guard='BNBWORLDZ.XYZ'; expected_text='BNBWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/bnbworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
-            xrpworldz)
-              environment='xrpworldz-production'; live_url='https://xrpworldz.xyz'; guard='XRPWORLDZ.XYZ'; expected_text='XRPWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/xrpworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
-            suiworldz)
-              environment='suiworldz-production'; live_url='https://suiworldz.xyz'; guard='SUIWORLDZ.XYZ'; expected_text='SuiWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/suiworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
-            hyperworldz)
-              environment='hyperworldz-production'; live_url='https://hyperworldz.xyz'; guard='HYPERWORLDZ.XYZ'; expected_text='HyperWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/hyperworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
-            robinworldz)
-              environment='robinworldz-production'; live_url='https://robinworldz.xyz'; guard='ROBINWORLDZ.XYZ'; expected_text='RobinWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/robinworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
-            bitcoinworldz)
-              environment='bitcoinworldz-production'; live_url='https://bitcoinworldz.xyz'; guard='BITCOINWORLDZ.XYZ'; expected_text='BitcoinWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/bitworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
-            hodlerworldz)
-              environment='hodlerworldz-production'; live_url='https://hodlerworldz.xyz'; guard='HODLERWORLDZ.XYZ'; expected_text='HodlerWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image=''; art_marker='cryptoworldz-we-need-you' ;;
-            cryptoworldz|purplediamondcrew|solworldz)
-              echo '::error::This target is protected from the generic deployment workflow.'; exit 1 ;;
+            oneworldz) environment='oneworldz-production'; live_url='https://oneworldz.com'; guard='ONEWORLDZ.COM'; expected_text='OneWorldz'; hero_image='assets/worldz-master/oneworldz/oneworldz-master.png'; secondary_image='assets/worldz-master/oneworldz/oneworldz-gpt.png'; art_marker='oneworldz-master.png' ;;
+            impactbased) environment='impactbased-production'; live_url='https://impactbased.oneworldz.com'; guard='IMPACTBASED.ONEWORLDZ.COM'; expected_text='ImpactBased'; hero_image='assets/worldz-master/cryptoworldz/impactbased.png'; secondary_image=''; art_marker='impactbased.png' ;;
+            law-oneworldz) environment='law-oneworldz-production'; live_url='https://law.oneworldz.com'; guard='LAW.ONEWORLDZ.COM'; expected_text='Robin Hood'; hero_image='assets/worldz-master/tokens/robin-hood-law.png'; secondary_image=''; art_marker='robin-hood-law.png' ;;
+            learn-oneworldz) environment='learn-oneworldz-production'; live_url='https://learn.oneworldz.com'; guard='LEARN.ONEWORLDZ.COM'; expected_text='LearnWorldz'; hero_image='assets/worldz-master/oneworldz/oneworldz-gpt.png'; secondary_image=''; art_marker='oneworldz-gpt.png' ;;
+            ethworldz) environment='ethworldz-production'; live_url='https://ethworldz.xyz'; guard='ETHWORLDZ.XYZ'; expected_text='EthWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/ethworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            baseworldz) environment='baseworldz-production'; live_url='https://baseworldz.xyz'; guard='BASEWORLDZ.XYZ'; expected_text='BaseWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/baseworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            bnbworldz) environment='bnbworldz-production'; live_url='https://bnbworldz.xyz'; guard='BNBWORLDZ.XYZ'; expected_text='BNBWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/bnbworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            xrpworldz) environment='xrpworldz-production'; live_url='https://xrpworldz.xyz'; guard='XRPWORLDZ.XYZ'; expected_text='XRPWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/xrpworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            suiworldz) environment='suiworldz-production'; live_url='https://suiworldz.xyz'; guard='SUIWORLDZ.XYZ'; expected_text='SuiWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/suiworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            hyperworldz) environment='hyperworldz-production'; live_url='https://hyperworldz.xyz'; guard='HYPERWORLDZ.XYZ'; expected_text='HyperWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/hyperworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            robinworldz) environment='robinworldz-production'; live_url='https://robinworldz.xyz'; guard='ROBINWORLDZ.XYZ'; expected_text='RobinWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/robinworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            bitcoinworldz) environment='bitcoinworldz-production'; live_url='https://bitcoinworldz.xyz'; guard='BITCOINWORLDZ.XYZ'; expected_text='BitcoinWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image='assets/worldz-master/blockchains/bitworldz.png'; art_marker='cryptoworldz-we-need-you' ;;
+            hodlerworldz) environment='hodlerworldz-production'; live_url='https://hodlerworldz.xyz'; guard='HODLERWORLDZ.XYZ'; expected_text='HodlerWorldz'; hero_image='assets/worldz-master/cryptoworldz/we-need-you.png'; secondary_image=''; art_marker='cryptoworldz-we-need-you' ;;
+            cryptoworldz|purplediamondcrew|solworldz) echo '::error::This target is protected from the generic deployment workflow.'; exit 1 ;;
             *) echo '::error::Unsupported approved deployment target.'; exit 1 ;;
           esac
-
           echo "target=$target" >> "$GITHUB_OUTPUT"
           echo "environment=$environment" >> "$GITHUB_OUTPUT"
           echo "live_url=$live_url" >> "$GITHUB_OUTPUT"
@@ -119,7 +100,6 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-
       - name: Restore exact approved master images
         shell: bash
         run: |
@@ -128,18 +108,14 @@ jobs:
           bash tools/restore-approved-worldz-media.sh apps/cryptoworldz-web-core/assets/worldz-master
           test -s "apps/cryptoworldz-web-core/${{ needs.prepare.outputs.hero_image }}"
           if [[ -n "${{ needs.prepare.outputs.secondary_image }}" ]]; then test -s "apps/cryptoworldz-web-core/${{ needs.prepare.outputs.secondary_image }}"; fi
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - name: Install locked dependencies
         run: npm ci
-
       - name: Run complete repository verification
         run: npm run verify
-
       - name: Validate deployment safety scripts
         shell: bash
         run: |
@@ -149,7 +125,6 @@ jobs:
           node --check tools/prove-live-worldz.mjs
           bash -n tools/prove-worldz-origin-media.sh
           bash -n tools/worldz-direct-ftp.sh
-
       - name: Forbid retired domain and placeholder deployment patterns
         shell: bash
         run: |
@@ -157,7 +132,6 @@ jobs:
           ! grep -RniE 'solworld\.fun' apps/cryptoworldz-web-core --exclude-dir='archive' --exclude='*.md'
           ! grep -RniE 'Loading the Worldz experience' apps/cryptoworldz-web-core/index.html
           grep -Fq 'assets/worldz-master/cryptoworldz/we-need-you.png' apps/cryptoworldz-web-core/assets/coming-soon-next.js
-
       - name: Package exact release and checksums
         shell: bash
         run: |
@@ -169,7 +143,6 @@ jobs:
           zip -qr ../../worldz-approved-${GITHUB_SHA}.zip . -x '*.DS_Store' '*.md' '.gitignore' 'docs/*'
           cd ../..
           sha256sum worldz-approved-${GITHUB_SHA}.zip > worldz-approved-${GITHUB_SHA}.sha256
-
       - uses: actions/upload-artifact@v4
         with:
           name: worldz-approved-${{ needs.prepare.outputs.target }}
@@ -211,14 +184,12 @@ jobs:
       WORLDZ_MEDIA_RMSE_MAX: '0.05'
     steps:
       - uses: actions/checkout@v4
-
       - name: Restore exact approved master images
         shell: bash
         run: |
           set -euo pipefail
           rm -rf apps/cryptoworldz-web-core/assets/worldz-master
           bash tools/restore-approved-worldz-media.sh apps/cryptoworldz-web-core/assets/worldz-master
-
       - name: Verify domain-restricted credentials and target
         shell: bash
         run: |
@@ -228,12 +199,10 @@ jobs:
           [[ "$FTP_SERVER_DIR" == '/' || "$FTP_SERVER_DIR" == '/public_html' ]] || { echo '::error::Unexpected FTP root'; exit 1; }
           test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
           echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_PASSWORD"
-
       - name: Install secure transfer and visual proof tools
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp zip unzip imagemagick
-
       - name: Establish certificate-validated transfer host
         shell: bash
         run: |
@@ -246,58 +215,33 @@ jobs:
             test "$FTP_PORT" = '21' || { echo '::error::Pinned Hostinger FTPS requires port 21.'; exit 1; }
             echo "$HOSTINGER_LOCKED_IP $HOSTINGER_TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
             test "$(getent ahostsv4 "$HOSTINGER_TLS_ALIAS" | awk 'NR==1{print $1}')" = "$HOSTINGER_LOCKED_IP"
-
             cert_ok=0
             cert="$RUNNER_TEMP/hostinger-cert.pem"
             for attempt in 1 2 3; do
-              session="$RUNNER_TEMP/hostinger-session-$attempt.txt"
-              err="$RUNNER_TEMP/hostinger-openssl-$attempt.err"
-              rm -f "$cert" "$session" "$err"
+              session="$RUNNER_TEMP/hostinger-session-$attempt.txt"; err="$RUNNER_TEMP/hostinger-openssl-$attempt.err"; rm -f "$cert" "$session" "$err"
               set +e
               timeout 25 openssl s_client -starttls ftp -connect "$HOSTINGER_LOCKED_IP:21" -verify_return_error -showcerts </dev/null >"$session" 2>"$err"
               rc=$?
               set -e
-              if [[ "$rc" -ne 0 ]]; then
-                echo "::warning::Hostinger FTPS public certificate probe attempt $attempt failed with exit $rc."
-                sleep $((attempt * 2))
-                continue
-              fi
+              if [[ "$rc" -ne 0 ]]; then echo "::warning::Hostinger FTPS public certificate probe attempt $attempt failed with exit $rc."; sleep $((attempt * 2)); continue; fi
               sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$session" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
-              if [[ ! -s "$cert" ]]; then
-                echo "::warning::Hostinger FTPS probe attempt $attempt returned no leaf certificate."
-                sleep $((attempt * 2))
-                continue
-              fi
+              if [[ ! -s "$cert" ]]; then echo "::warning::Hostinger FTPS probe attempt $attempt returned no leaf certificate."; sleep $((attempt * 2)); continue; fi
               fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
-              if [[ "$fp" == "$HOSTINGER_CERT_SHA256" ]] \
-                && openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io' \
-                && grep -Fq 'Verify return code: 0 (ok)' "$session" \
-                && ! grep -Eqi 'verify error|certificate verify failed' "$err"; then
-                cert_ok=1
-                echo "Pinned Hostinger FTPS certificate verified on attempt $attempt: $fp"
-                break
-              fi
-              echo "::warning::Hostinger FTPS identity checks did not pass on attempt $attempt."
-              sleep $((attempt * 2))
+              if [[ "$fp" == "$HOSTINGER_CERT_SHA256" ]] && openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io' && grep -Fq 'Verify return code: 0 (ok)' "$session" && ! grep -Eqi 'verify error|certificate verify failed' "$err"; then cert_ok=1; echo "Pinned Hostinger FTPS certificate verified on attempt $attempt: $fp"; break; fi
+              echo "::warning::Hostinger FTPS identity checks did not pass on attempt $attempt."; sleep $((attempt * 2))
             done
-            if [[ "$cert_ok" != '1' ]]; then
-              echo '::error::Unable to prove the locked Hostinger FTPS certificate identity after 3 bounded attempts.'
-              exit 1
-            fi
-
+            if [[ "$cert_ok" != '1' ]]; then echo '::error::Unable to prove the locked Hostinger FTPS certificate identity after 3 bounded attempts.'; exit 1; fi
             echo "FTP_CONNECT_HOST=$HOSTINGER_TLS_ALIAS" >> "$GITHUB_ENV"
             echo 'Using locked Hostinger IP + pinned certificate + wildcard hostname verification.'
           else
             echo "FTP_CONNECT_HOST=$host" >> "$GITHUB_ENV"
             echo 'Using configured DNS hostname with CA and hostname verification.'
           fi
-
       - name: Confirm certificate-validated encrypted target
         shell: bash
         run: |
           set -euo pipefail
           timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; bye"
-
       - name: Capture mandatory full rollback snapshot
         shell: bash
         run: |
@@ -321,7 +265,6 @@ jobs:
           (cd "$backup" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sed 's#  \./#  #') > "$RUNNER_TEMP/worldz-backup.sha256"
           cd "$backup"; zip -qr "$RUNNER_TEMP/worldz-backup-${GITHUB_RUN_ID}.zip" .
           test -s "$RUNNER_TEMP/worldz-backup-${GITHUB_RUN_ID}.zip"
-
       - name: Prepare exact upload and rollback-new-file manifests
         shell: bash
         run: |
@@ -331,13 +274,9 @@ jobs:
           node tools/worldz-upload-manifest.mjs "$source_root" "$RUNNER_TEMP/worldz-upload-manifest.txt"
           test -s "$RUNNER_TEMP/worldz-upload-manifest.txt"
           comm -23 "$RUNNER_TEMP/worldz-upload-manifest.txt" "$RUNNER_TEMP/worldz-backup-manifest.txt" > "$RUNNER_TEMP/worldz-rollback-new-files.txt"
-          if grep -nE '(^/|(^|/)\.\.(/|$)|[[:cntrl:]])' "$RUNNER_TEMP/worldz-rollback-new-files.txt"; then
-            echo '::error::Unsafe path in rollback-new-file manifest.'
-            exit 1
-          fi
+          if grep -nE '(^/|(^|/)\.\.(/|$)|[[:cntrl:]])' "$RUNNER_TEMP/worldz-rollback-new-files.txt"; then echo '::error::Unsafe path in rollback-new-file manifest.'; exit 1; fi
           echo "Upload files: $(wc -l < "$RUNNER_TEMP/worldz-upload-manifest.txt")"
           echo "Files that must be deleted during rollback if newly introduced: $(wc -l < "$RUNNER_TEMP/worldz-rollback-new-files.txt")"
-
       - uses: actions/upload-artifact@v4
         with:
           name: worldz-rollback-${{ needs.prepare.outputs.target }}-${{ github.run_id }}
@@ -349,35 +288,30 @@ jobs:
             ${{ runner.temp }}/worldz-rollback-new-files.txt
           retention-days: 14
           if-no-files-found: error
-
       - name: Upload exact approved website
         shell: bash
         run: |
           set -euo pipefail
           echo 'WORLDZ_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
           FTP_TRANSFER_TIMEOUT=360 bash tools/worldz-direct-ftp.sh upload "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core"
-
       - name: Prove exact origin bytes and CDN visual media
         shell: bash
         run: |
           set -euo pipefail
           bash tools/prove-worldz-origin-media.sh "$GITHUB_WORKSPACE/apps/cryptoworldz-web-core" "$HERO_IMAGE" "$SECONDARY_IMAGE"
-
       - name: Prove rendered desktop and mobile website in Chrome
         shell: bash
         run: |
           set -euo pipefail
           WORLDZ_PROOF_DIR="$RUNNER_TEMP/worldz-proof" node tools/prove-live-worldz.mjs "$LIVE_URL" "$EXPECTED_TEXT" "$ART_MARKER"
-
       - name: Preserve browser proof screenshots
-        if: always() && env.WORLDZ_UPLOAD_STARTED == 'true'
+        if: success() && env.WORLDZ_UPLOAD_STARTED == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: worldz-production-proof-${{ needs.prepare.outputs.target }}-${{ github.run_id }}
           path: ${{ runner.temp }}/worldz-proof/
           retention-days: 30
           if-no-files-found: error
-
       - name: Roll back exactly on any post-upload failure
         if: failure() && env.WORLDZ_UPLOAD_STARTED == 'true'
         shell: bash
@@ -387,7 +321,6 @@ jobs:
           new_files="$RUNNER_TEMP/worldz-rollback-new-files.txt"
           test -n "$(find "$backup" -mindepth 1 -print -quit)"
           test -f "$new_files"
-
           if [[ -s "$new_files" ]]; then
             cleanup="$RUNNER_TEMP/worldz-remove-new-files.lftp"
             {
@@ -411,11 +344,13 @@ jobs:
               done < <(awk -F/ 'NF>1 { $NF=""; sub(/\/$/,""); print }' OFS=/ "$new_files" | awk 'NF' | sort -u | awk '{print gsub(/\//,"/"), $0}' | sort -rn | cut -d' ' -f2-)
               echo 'bye'
             } > "$cleanup"
+            set +e
             timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" < "$cleanup"
+            cleanup_rc=$?
+            set -e
+            if [[ "$cleanup_rc" -ne 0 ]]; then echo "::warning::Rollback cleanup returned $cleanup_rc; continuing with authoritative snapshot restore."; fi
           fi
-
           FTP_TRANSFER_TIMEOUT=360 bash tools/worldz-direct-ftp.sh restore "$backup"
-
           verify="$RUNNER_TEMP/worldz-rollback-verify"
           rm -rf "$verify"; mkdir -p "$verify"
           timeout 150 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
@@ -434,7 +369,6 @@ jobs:
           (cd "$verify" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sed 's#  \./#  #') > "$RUNNER_TEMP/worldz-rollback-verify.sha256"
           diff -u "$RUNNER_TEMP/worldz-backup.sha256" "$RUNNER_TEMP/worldz-rollback-verify.sha256"
           echo 'WORLDZ_ROLLBACK_EXACT=PASS'
-
       - name: Publish factual result contract
         if: always()
         run: |
