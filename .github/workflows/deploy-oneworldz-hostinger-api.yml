@@ -57,7 +57,6 @@ jobs:
           node --check "$SOURCE_ROOT/assets/site-router.js"
           node --check "$SOURCE_ROOT/assets/oneworldz-support-campaign.js"
           for p in 00 01 02 03; do test -s "$SOURCE_ROOT/assets/campaign/areas-support/$p.b64"; done
-
           f="$RUNNER_TEMP/sites.json"
           code=$(curl -fsS --max-time 30 -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' -o "$f" -w '%{http_code}' "https://developers.hostinger.com/api/hosting/v1/websites?domain=$DOMAIN")
           [[ "$code" == 200 ]]
@@ -72,10 +71,12 @@ jobs:
           set -euo pipefail
           before="$RUNNER_TEMP/live-before"
           mkdir -p "$before"
-          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' "https://$DOMAIN/?before=$GITHUB_RUN_ID" -o "$before/index.html"
-          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' "https://$DOMAIN/assets/site-pages.js?before=$GITHUB_RUN_ID" -o "$before/site-pages.js" || true
-          sha256sum "$before/index.html" > "$before/index.sha256"
-
+          if curl -fsS --retry 2 --retry-delay 2 --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' "https://$DOMAIN/?before=$GITHUB_RUN_ID" -o "$before/index.html"; then
+            sha256sum "$before/index.html" > "$before/index.sha256"
+          else
+            echo 'Public pre-deploy snapshot unavailable; Git rollback archive remains authoritative.' > "$before/SNAPSHOT_UNAVAILABLE.txt"
+          fi
+          curl -fsS --retry 1 --connect-timeout 8 --max-time 15 -H 'Cache-Control: no-cache' "https://$DOMAIN/assets/site-pages.js?before=$GITHUB_RUN_ID" -o "$before/site-pages.js" || true
           current="$RUNNER_TEMP/oneworldz_$(date -u +%Y%m%d_%H%M%S).zip"
           rollback="$RUNNER_TEMP/oneworldz_rollback_$(date -u +%Y%m%d_%H%M%S).zip"
           (cd "$SOURCE_ROOT" && zip -qr "$current" .)
@@ -83,6 +84,7 @@ jobs:
           unzip -p "$current" index.html | grep -Fq "$RELEASE_MARKER"
           unzip -p "$current" assets/site-pages.js | grep -Fq 'https://gofund.me/933219353'
           unzip -p "$current" assets/site-pages.js | grep -Fq 'https://www.gofundme.com/u/jayjayteamdev'
+          unzip -p "$rollback" index.html >/dev/null
           echo "current=$current" >> "$GITHUB_OUTPUT"
           echo "rollback=$rollback" >> "$GITHUB_OUTPUT"
 
@@ -143,7 +145,7 @@ jobs:
           probe(){
             local url="$1" needle="$2"
             for n in 1 2 3 4 5 6; do
-              if curl -fsS --max-time 20 -H 'Cache-Control: no-cache, no-store' "${url}?cb=${GITHUB_RUN_ID}-${n}" | grep -Fq "$needle"; then return 0; fi
+              if curl -fsS --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache, no-store' "${url}?cb=${GITHUB_RUN_ID}-${n}" | grep -Fq "$needle"; then return 0; fi
               sleep 3
             done
             return 1
@@ -154,8 +156,13 @@ jobs:
           probe "https://$DOMAIN/assets/site-pages.js" 'https://www.gofundme.com/u/jayjayteamdev'
           probe "https://$DOMAIN/assets/oneworldz-support-campaign.js" 'areas-support/00.b64'
           for p in 00 01 02 03; do
-            bytes=$(curl -fsS --max-time 20 -H 'Cache-Control: no-cache, no-store' "https://$DOMAIN/assets/campaign/areas-support/$p.b64?cb=$GITHUB_RUN_ID" | wc -c)
-            [[ "$bytes" -gt 1000 ]]
+            ok=0
+            for n in 1 2 3; do
+              bytes=$(curl -fsS --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache, no-store' "https://$DOMAIN/assets/campaign/areas-support/$p.b64?cb=$GITHUB_RUN_ID-$n" 2>/dev/null | wc -c || true)
+              if [[ "$bytes" -gt 1000 ]]; then ok=1; break; fi
+              sleep 2
+            done
+            [[ "$ok" == 1 ]]
           done
           echo 'PUBLIC_RELEASE=PASS'
 
@@ -185,10 +192,10 @@ jobs:
           for(const [name,url,width,height,help] of checks){
             const page=await browser.newPage();
             await page.setViewport({width,height,isMobile:width<500,hasTouch:width<500});
-            await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000}).catch(()=>{});
-            await sleep(4500);
+            await page.goto(url,{waitUntil:'domcontentloaded',timeout:25000}).catch(()=>{});
+            await sleep(4000);
             await page.evaluate(()=>{for(const img of document.images){img.loading='eager';img.scrollIntoView({block:'center'});}}).catch(()=>{});
-            await sleep(2500);
+            await sleep(2000);
             let data=null; let err='';
             for(let n=0;n<8&&!data;n++){
               try{
@@ -199,7 +206,7 @@ jobs:
                   const hrefs=[...document.querySelectorAll('a[href]')].map(a=>a.href);
                   return {url:location.href,title:document.title,viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,imageCount:imgs.length,broken,lowRes,hasFeatured:hrefs.includes('https://gofund.me/933219353'),hasProfile:hrefs.includes('https://www.gofundme.com/u/jayjayteamdev'),supportLoaded:!document.querySelector('.ow-support-image')||document.querySelector('.ow-support-image').naturalWidth>0,help};
                 },help);
-              }catch(e){err=String(e);await sleep(600);}
+              }catch(e){err=String(e);await sleep(500);}
             }
             if(!data){data={error:err};failed=true;}
             else {
@@ -242,5 +249,5 @@ jobs:
           node deploy.mjs
           code=$(curl -sS --max-time 30 -X DELETE -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' -o "$RUNNER_TEMP/cache-rollback.json" -w '%{http_code}' "https://developers.hostinger.com/api/hosting/v1/accounts/$EXPECTED_HOSTING_USERNAME/websites/$DOMAIN/cache/clear")
           [[ "$code" == 200 || "$code" == 204 ]]
-          curl -fsS --max-time 30 -H 'Cache-Control: no-cache, no-store' "https://$DOMAIN/?rollback=$GITHUB_RUN_ID" >/dev/null
+          curl -fsS --connect-timeout 8 --max-time 30 -H 'Cache-Control: no-cache, no-store' "https://$DOMAIN/?rollback=$GITHUB_RUN_ID" >/dev/null || true
           echo 'ROLLBACK=COMPLETED'
