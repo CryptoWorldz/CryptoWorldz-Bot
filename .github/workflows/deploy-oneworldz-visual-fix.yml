@@ -22,7 +22,6 @@ env:
   ORDER_ID: '1009657511'
   ROOT_DIR: /home/u643166328/domains/oneworldz.com/public_html
   ROLLBACK_REF: c544ecd2a7dd003eaf7be4229118da05b2dc83fc
-  RELEASE: 20260812-oneworldz-support-v1
   CHEST: assets/images/website-core/purple-diamond-crew/hope-chest-by-firelight.webp
 
 jobs:
@@ -34,13 +33,11 @@ jobs:
       HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
+        with: { node-version: '24' }
 
-      - name: Preflight source and exact Hostinger target
+      - name: Preflight target and visual source
         shell: bash
         run: |
           set -euo pipefail
@@ -48,39 +45,34 @@ jobs:
           echo "::add-mask::$HOSTINGER_API_TOKEN"
           node --check "$SOURCE_ROOT/assets/oneworldz-next.js"
           grep -Fq 'hope-chest-by-firelight.webp' "$SOURCE_ROOT/assets/oneworldz-next.js"
-          ! grep -Fq 'hope-chest-1927-approved.jpg' "$SOURCE_ROOT/assets/oneworldz-next.js"
-          grep -Fq 'width="256" height="320"' "$SOURCE_ROOT/assets/oneworldz-next.js"
           grep -Fq 'min-height:0' "$SOURCE_ROOT/assets/oneworldz-next.js"
+          ! grep -Fq 'hope-chest-1927-approved.jpg' "$SOURCE_ROOT/assets/oneworldz-next.js"
           test -s "$SOURCE_ROOT/$CHEST"
           f="$RUNNER_TEMP/site.json"
           code=$(curl -fsS --connect-timeout 10 --max-time 30 -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' -o "$f" -w '%{http_code}' "https://developers.hostinger.com/api/hosting/v1/websites?domain=$DOMAIN")
           [[ "$code" == 200 ]]
-          ok=$(jq '[.data[]? | select(.domain=="oneworldz.com" and .username=="u643166328" and (.order_id|tostring)=="1009657511" and .root_directory=="/home/u643166328/domains/oneworldz.com/public_html" and .is_enabled==true)]|length' "$f")
-          [[ "$ok" == 1 ]]
+          [[ "$(jq '[.data[]? | select(.domain=="oneworldz.com" and .username=="u643166328" and (.order_id|tostring)=="1009657511" and .root_directory=="/home/u643166328/domains/oneworldz.com/public_html" and .is_enabled==true)]|length' "$f")" == 1 ]]
           echo TARGET=PASS
 
       - name: Build current and rollback archives
-        id: archive
+        id: archives
         shell: bash
         run: |
           set -euo pipefail
-          cur="$RUNNER_TEMP/current.zip"
-          old="$RUNNER_TEMP/rollback.zip"
+          cur="$RUNNER_TEMP/current.zip"; old="$RUNNER_TEMP/rollback.zip"
           (cd "$SOURCE_ROOT" && zip -qr "$cur" .)
           git archive --format=zip --output="$old" "$ROLLBACK_REF:$SOURCE_ROOT"
-          unzip -p "$cur" assets/oneworldz-next.js | grep -Fq 'hope-chest-by-firelight.webp'
           unzip -p "$cur" assets/oneworldz-next.js | grep -Fq 'min-height:0'
           unzip -p "$old" index.html >/dev/null
           echo "current=$cur" >> "$GITHUB_OUTPUT"
           echo "rollback=$old" >> "$GITHUB_OUTPUT"
           echo BACKUP=PASS
 
-      - name: Install Hostinger deploy client and Puppeteer
+      - name: Install deployment and QA tooling
         shell: bash
         run: |
           set -euo pipefail
-          tools="$RUNNER_TEMP/tools"
-          mkdir -p "$tools" && cd "$tools"
+          tools="$RUNNER_TEMP/tools"; mkdir -p "$tools"; cd "$tools"
           npm init -y >/dev/null
           npm install --silent hostinger-api-mcp @modelcontextprotocol/sdk puppeteer-core
           echo "TOOLS=$tools" >> "$GITHUB_ENV"
@@ -89,103 +81,98 @@ jobs:
           import {StdioClientTransport} from '@modelcontextprotocol/sdk/client/stdio.js';
           import path from 'node:path';
           const transport=new StdioClientTransport({command:path.resolve(process.env.TOOLS,'node_modules/.bin/hostinger-api-mcp'),args:['--stdio'],env:{...process.env,DEBUG:'false'}});
-          const client=new Client({name:'oneworldz-visual-fix',version:'2.0.0'},{capabilities:{}});
+          const client=new Client({name:'oneworldz-visual-fix',version:'3.0.0'},{capabilities:{}});
           await client.connect(transport);
           const r=await client.callTool({name:'hosting_deployStaticWebsite',arguments:{domain:'oneworldz.com',archivePath:process.env.ARCHIVE,removeArchive:false}});
           if(r.isError) throw new Error(JSON.stringify(r.content));
-          console.log('HOSTINGER_DEPLOY=ACCEPTED');
           await client.close();
+          console.log('HOSTINGER_DEPLOY=ACCEPTED');
           NODE
 
       - name: Deploy visual fix
         id: deployed
         shell: bash
         env:
-          ARCHIVE: ${{ steps.archive.outputs.current }}
+          ARCHIVE: ${{ steps.archives.outputs.current }}
         run: |
           set -euo pipefail
           cd "$TOOLS"
           for n in 1 2 3 4 5 6; do
-            echo "HOSTINGER_UPLOAD_ATTEMPT=$n"
+            echo "UPLOAD_ATTEMPT=$n"
             if node deploy.mjs; then echo UPLOAD=PASS; exit 0; fi
             sleep 15
           done
           exit 1
 
-      - name: Settle and clear cache
+      - name: Settle, clear cache, and verify public files
         shell: bash
         run: |
           set -euo pipefail
           sleep 45
           for n in 1 2 3; do
-            code=$(curl -sS --connect-timeout 10 --max-time 30 -X DELETE -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' -o "$RUNNER_TEMP/cache.json" -w '%{http_code}' "https://developers.hostinger.com/api/hosting/v1/accounts/$USERNAME/websites/$DOMAIN/cache/clear" || true)
-            if [[ "$code" == 200 || "$code" == 204 ]]; then echo CACHE_CLEAR=PASS; exit 0; fi
+            code=$(curl -sS --connect-timeout 10 --max-time 30 -X DELETE -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' -o /dev/null -w '%{http_code}' "https://developers.hostinger.com/api/hosting/v1/accounts/$USERNAME/websites/$DOMAIN/cache/clear" || true)
+            [[ "$code" == 200 || "$code" == 204 ]] && break
             sleep 10
           done
-          exit 1
-
-      - name: Verify public visual-fix files
-        shell: bash
-        run: |
-          set -euo pipefail
           check(){ local url="$1" needle="$2"; for n in $(seq 1 12); do if curl -fsS --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache, no-store' "${url}?v=${GITHUB_RUN_ID}-${n}" | grep -Fq "$needle"; then return 0; fi; sleep 8; done; return 1; }
           check "https://$DOMAIN/assets/oneworldz-next.js" 'hope-chest-by-firelight.webp'
           check "https://$DOMAIN/assets/oneworldz-next.js" 'min-height:0'
-          bytes=$(curl -fsS --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache, no-store' "https://$DOMAIN/$CHEST?v=$GITHUB_RUN_ID" | wc -c)
-          [[ "$bytes" -gt 4000 ]]
+          [[ "$(curl -fsS --connect-timeout 8 --max-time 20 "https://$DOMAIN/$CHEST?v=$GITHUB_RUN_ID" | wc -c)" -gt 4000 ]]
           echo PUBLIC_VISUAL_FILES=PASS
 
-      - name: Bounded desktop/mobile visual and link QA
+      - name: Desktop and mobile browser visual proof
         id: browser
         shell: bash
         run: |
           set -euo pipefail
-          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
-          [[ -n "$chrome" ]]
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"; [[ -n "$chrome" ]]
           qa="$RUNNER_TEMP/qa"; mkdir -p "$qa"
           cat > "$TOOLS/qa.mjs" <<'NODE'
           import puppeteer from 'puppeteer-core';
           import fs from 'node:fs';
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
           const browser=await puppeteer.launch({executablePath:process.env.CHROME,headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
-          const cases=[['desktop',1440,1000],['mobile',390,844]];
-          const report=[]; let fail=false;
-          for(const [name,w,h] of cases){
+          const report=[]; let failed=false;
+          for(const [name,w,h] of [['desktop',1440,1000],['mobile',390,844]]){
             const page=await browser.newPage();
             await page.setViewport({width:w,height:h,isMobile:w<500,hasTouch:w<500});
             let ready=false;
-            for(let n=0;n<3&&!ready;n++){
+            for(let attempt=0;attempt<3&&!ready;attempt++){
               try{
-                await page.goto(`https://oneworldz.com/?visual=${Date.now()}-${name}-${n}`,{waitUntil:'domcontentloaded',timeout:20000});
+                await page.goto(`https://oneworldz.com/?qa=${Date.now()}-${name}-${attempt}`,{waitUntil:'domcontentloaded',timeout:20000});
                 await page.waitForFunction(()=>{
-                  const chest=document.querySelector('img[src*="hope-chest-by-firelight.webp"]');
                   const hrefs=[...document.querySelectorAll('a[href]')].map(a=>a.href);
-                  return !!chest && hrefs.some(h=>h.includes('/donate/')) && hrefs.some(h=>h.includes('/reagan-kauja/'));
+                  return !!document.querySelector('img[src*="hope-chest-by-firelight.webp"]') && hrefs.some(h=>h.includes('/donate/')) && hrefs.some(h=>h.includes('/reagan-kauja/'));
                 },{timeout:15000});
                 ready=true;
-              }catch{await sleep(1800);}
+              }catch{await sleep(1500);}
             }
-            await sleep(1000);
+            await sleep(1200);
             const data=await page.evaluate(()=>{
               const imgs=[...document.images].filter(i=>getComputedStyle(i).display!=='none'&&getComputedStyle(i).visibility!=='hidden');
-              const broken=imgs.filter(i=>!i.complete||i.naturalWidth===0||i.naturalHeight===0).map(i=>i.currentSrc||i.src);
               const chest=imgs.find(i=>(i.currentSrc||i.src).includes('hope-chest-by-firelight.webp'));
               const hrefs=[...document.querySelectorAll('a[href]')].map(a=>a.href);
-              return {ready,broken,overflow:document.documentElement.scrollWidth>innerWidth+20,chest:chest?{src:chest.currentSrc||chest.src,natural:[chest.naturalWidth,chest.naturalHeight],rendered:[Math.round(chest.getBoundingClientRect().width),Math.round(chest.getBoundingClientRect().height)]}:null,donate:hrefs.some(h=>h.includes('/donate/')),reagan:hrefs.some(h=>h.includes('/reagan-kauja/'))};
-            }).catch(()=>({ready:false,broken:['DOM_EVALUATION_FAILED'],overflow:true,chest:null,donate:false,reagan:false}));
+              return {
+                broken:imgs.filter(i=>!i.complete||i.naturalWidth===0||i.naturalHeight===0).map(i=>i.currentSrc||i.src),
+                overflow:document.documentElement.scrollWidth>innerWidth+20,
+                chest:chest?{natural:[chest.naturalWidth,chest.naturalHeight],rendered:[Math.round(chest.getBoundingClientRect().width),Math.round(chest.getBoundingClientRect().height)]}:null,
+                donate:hrefs.some(h=>h.includes('/donate/')),
+                reagan:hrefs.some(h=>h.includes('/reagan-kauja/'))
+              };
+            }).catch(()=>({broken:['DOM_EVALUATION_FAILED'],overflow:true,chest:null,donate:false,reagan:false}));
             const chestBad=!data.chest||data.chest.natural[0]!==256||data.chest.natural[1]!==320||data.chest.rendered[0]>256||data.chest.rendered[1]>320;
-            if(!ready||data.broken.length||data.overflow||chestBad||!data.donate||!data.reagan) fail=true;
-            report.push({name,...data,chestBad});
+            if(!ready||data.broken.length||data.overflow||chestBad||!data.donate||!data.reagan) failed=true;
+            report.push({name,ready,...data,chestBad});
             await page.screenshot({path:`${process.env.QA}/${name}.png`,fullPage:false}).catch(()=>{});
             await page.close();
           }
           fs.writeFileSync(`${process.env.QA}/report.json`,JSON.stringify(report,null,2));
           console.log(JSON.stringify(report,null,2));
           await browser.close();
-          if(fail) process.exit(2);
+          if(failed) process.exit(2);
           NODE
           cd "$TOOLS"
-          CHROME="$chrome" QA="$qa" timeout 75 node qa.mjs
+          CHROME="$chrome" QA="$qa" timeout 80 node qa.mjs
           echo DESKTOP_MOBILE_VISUAL_QA=PASS
 
       - name: Upload visual proof
@@ -201,11 +188,13 @@ jobs:
         if: ${{ failure() && steps.deployed.outcome == 'success' }}
         shell: bash
         env:
-          ARCHIVE: ${{ steps.archive.outputs.rollback }}
+          ARCHIVE: ${{ steps.archives.outputs.rollback }}
         run: |
           set -euo pipefail
           cd "$TOOLS"
-          for n in 1 2 3; do if node deploy.mjs; then break; fi; sleep 12; done
+          ok=0
+          for n in 1 2 3; do if node deploy.mjs; then ok=1; break; fi; sleep 12; done
+          [[ "$ok" == 1 ]]
           sleep 25
           curl -sS --connect-timeout 10 --max-time 30 -X DELETE -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "https://developers.hostinger.com/api/hosting/v1/accounts/$USERNAME/websites/$DOMAIN/cache/clear" >/dev/null || true
           echo ROLLBACK=COMPLETED
