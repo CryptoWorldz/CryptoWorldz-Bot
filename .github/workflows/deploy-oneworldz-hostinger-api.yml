@@ -122,24 +122,16 @@ jobs:
           import { Client } from '@modelcontextprotocol/sdk/client/index.js';
           import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
           import path from 'node:path';
-
           const archivePath = process.env.DEPLOY_ARCHIVE;
           if (!archivePath) throw new Error('DEPLOY_ARCHIVE missing');
           const command = path.resolve(process.env.TOOLS_DIR, 'node_modules/.bin/hostinger-api-mcp');
-          const transport = new StdioClientTransport({
-            command,
-            args: ['--stdio'],
-            env: { ...process.env, HOSTINGER_API_TOKEN: process.env.HOSTINGER_API_TOKEN, DEBUG: 'false' }
-          });
-          const client = new Client({ name: 'oneworldz-proof-first-deployer', version: '1.0.0' }, { capabilities: {} });
+          const transport = new StdioClientTransport({command,args:['--stdio'],env:{...process.env,HOSTINGER_API_TOKEN:process.env.HOSTINGER_API_TOKEN,DEBUG:'false'}});
+          const client = new Client({name:'oneworldz-proof-first-deployer',version:'1.0.0'},{capabilities:{}});
           await client.connect(transport);
-          const listed = await client.listTools();
-          if (!listed.tools.some(t => t.name === 'hosting_deployStaticWebsite')) throw new Error('Hostinger static deploy tool unavailable');
-          const result = await client.callTool({
-            name: 'hosting_deployStaticWebsite',
-            arguments: { domain: 'oneworldz.com', archivePath, removeArchive: false }
-          });
-          if (result.isError) throw new Error(`Hostinger deployment failed: ${JSON.stringify(result.content)}`);
+          const listed=await client.listTools();
+          if(!listed.tools.some(t=>t.name==='hosting_deployStaticWebsite')) throw new Error('Hostinger static deploy tool unavailable');
+          const result=await client.callTool({name:'hosting_deployStaticWebsite',arguments:{domain:'oneworldz.com',archivePath,removeArchive:false}});
+          if(result.isError) throw new Error(`Hostinger deployment failed: ${JSON.stringify(result.content)}`);
           console.log('HOSTINGER_DOMAIN_DEPLOY=ACCEPTED');
           await client.close();
           NODE
@@ -195,41 +187,50 @@ jobs:
           cat > "$TOOLS_DIR/qa.mjs" <<'NODE'
           import puppeteer from 'puppeteer-core';
           import fs from 'node:fs';
-          const browser = await puppeteer.launch({ executablePath: process.env.CHROME_BIN, headless: true, args: ['--no-sandbox','--disable-dev-shm-usage'] });
-          const checks = [
-            { name:'desktop-home', url:`https://oneworldz.com/?qa=${Date.now()}`, viewport:{width:1440,height:1000}, help:false },
-            { name:'mobile-home', url:`https://oneworldz.com/?qa=${Date.now()}-m`, viewport:{width:390,height:844,isMobile:true,hasTouch:true}, help:false },
-            { name:'desktop-help', url:`https://oneworldz.com/?page=help&qa=${Date.now()}-h`, viewport:{width:1440,height:1000}, help:true },
-            { name:'mobile-help', url:`https://oneworldz.com/?page=help&qa=${Date.now()}-hm`, viewport:{width:390,height:844,isMobile:true,hasTouch:true}, help:true }
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const browser=await puppeteer.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+          const checks=[
+            {name:'desktop-home',url:`https://oneworldz.com/?qa=${Date.now()}`,viewport:{width:1440,height:1000},help:false},
+            {name:'mobile-home',url:`https://oneworldz.com/?qa=${Date.now()}-m`,viewport:{width:390,height:844,isMobile:true,hasTouch:true},help:false},
+            {name:'desktop-help',url:`https://oneworldz.com/?page=help&qa=${Date.now()}-h`,viewport:{width:1440,height:1000},help:true},
+            {name:'mobile-help',url:`https://oneworldz.com/?page=help&qa=${Date.now()}-hm`,viewport:{width:390,height:844,isMobile:true,hasTouch:true},help:true}
           ];
           const report=[];
           let failed=false;
-          for (const c of checks) {
+          for(const c of checks){
             const page=await browser.newPage();
             await page.setViewport(c.viewport);
-            await page.goto(c.url,{waitUntil:'networkidle2',timeout:60000});
-            await new Promise(r=>setTimeout(r,2500));
-            const data=await page.evaluate((isHelp)=>{
-              const imgs=[...document.images].map(i=>({src:i.currentSrc||i.src,complete:i.complete,w:i.naturalWidth,h:i.naturalHeight,display:getComputedStyle(i).display}));
-              const visible=imgs.filter(i=>i.display!=='none');
-              const broken=visible.filter(i=>!i.complete||i.w===0||i.h===0);
-              const hrefs=[...document.querySelectorAll('a[href]')].map(a=>a.href);
-              return {
-                title:document.title,
-                bodyWidth:document.body.scrollWidth,
-                viewportWidth:window.innerWidth,
-                imageCount:visible.length,
-                broken,
-                hasFeatured:hrefs.includes('https://gofund.me/933219353'),
-                hasProfile:hrefs.includes('https://www.gofundme.com/u/jayjayteamdev'),
-                supportImage:document.querySelector('.ow-support-image') ? {w:document.querySelector('.ow-support-image').naturalWidth,h:document.querySelector('.ow-support-image').naturalHeight} : null,
-                help:isHelp
-              };
-            },c.help);
+            await page.goto(c.url,{waitUntil:'domcontentloaded',timeout:60000});
+            for(let settle=0;settle<4;settle++){
+              try{await page.waitForNetworkIdle({idleTime:900,timeout:8000});break;}catch{await sleep(1000);}
+            }
+            await sleep(1800);
+            await page.evaluate(async()=>{
+              await new Promise(resolve=>{
+                let y=0; const step=500;
+                const timer=setInterval(()=>{window.scrollBy(0,step);y+=step;if(y>=document.body.scrollHeight+1000){clearInterval(timer);window.scrollTo(0,0);setTimeout(resolve,500);}},80);
+              });
+            }).catch(()=>{});
+            await sleep(1200);
+            let data=null;
+            let lastError='';
+            for(let attempt=0;attempt<6&&!data;attempt++){
+              try{
+                data=await page.evaluate((isHelp)=>{
+                  const imgs=[...document.images].map(i=>({src:i.currentSrc||i.src,complete:i.complete,w:i.naturalWidth,h:i.naturalHeight,display:getComputedStyle(i).display,visibility:getComputedStyle(i).visibility}));
+                  const visible=imgs.filter(i=>i.display!=='none'&&i.visibility!=='hidden');
+                  const broken=visible.filter(i=>!i.complete||i.w===0||i.h===0);
+                  const hrefs=[...document.querySelectorAll('a[href]')].map(a=>a.href);
+                  const support=document.querySelector('.ow-support-image');
+                  return {title:document.title,url:location.href,bodyWidth:document.documentElement.scrollWidth,viewportWidth:window.innerWidth,imageCount:visible.length,broken,hasFeatured:hrefs.includes('https://gofund.me/933219353'),hasProfile:hrefs.includes('https://www.gofundme.com/u/jayjayteamdev'),supportImage:support?{w:support.naturalWidth,h:support.naturalHeight}:null,help:isHelp};
+                },c.help);
+              }catch(error){lastError=String(error);await sleep(1200);}
+            }
+            if(!data){report.push({...c,error:lastError});failed=true;await page.close();continue;}
             const overflow=data.bodyWidth>data.viewportWidth+2;
-            const badLinks=c.help && (!data.hasFeatured || !data.hasProfile);
-            const badSupport=!c.help && data.supportImage && (!data.supportImage.w || !data.supportImage.h);
-            if (data.broken.length || overflow || badLinks || badSupport) failed=true;
+            const badLinks=c.help&&(!data.hasFeatured||!data.hasProfile);
+            const badSupport=!c.help&&data.supportImage&&(!data.supportImage.w||!data.supportImage.h);
+            if(data.broken.length||overflow||badLinks||badSupport) failed=true;
             report.push({...c,data,overflow,badLinks,badSupport});
             await page.screenshot({path:`${process.env.QA_DIR}/${c.name}.png`,fullPage:true});
             await page.close();
