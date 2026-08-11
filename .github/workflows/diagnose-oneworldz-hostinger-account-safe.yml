@@ -45,18 +45,18 @@ jobs:
 
           ws=$(curl -sS --max-time 30 "${auth[@]}" -o "$websites" -w '%{http_code}' "$BASE/api/hosting/v1/websites?per_page=100")
           echo "HOSTING_WEBSITES_HTTP=$ws"
-          [[ "$ws" == 200 ]] || { echo '::error::Hostinger website lookup failed'; cat "$websites" | jq -c '{message,errors}' 2>/dev/null || true; exit 1; }
-
+          [[ "$ws" == 200 ]] || { echo '::error::Hostinger website lookup failed'; exit 1; }
           jq -r '[.data[]? | select(((.domain // "") | ascii_downcase) == "oneworldz.com")] | "ONEWORLDZ_MATCH_COUNT=\(length)", (.[] | "ONEWORLDZ_SITE domain=\(.domain // "") username=\(.username // "") vhost_type=\(.vhost_type // "") enabled=\(.is_enabled // "") order_id=\(.order_id // "") root_directory=\(.root_directory // "") created_at=\(.created_at // "")")' "$websites"
-          jq -r '.data[]? | select((((.domain // "") | ascii_downcase) | contains("oneworldz")) or (((.root_directory // "") | ascii_downcase) | contains("oneworldz"))) | "RELATED_SITE domain=\(.domain // "") username=\(.username // "") vhost_type=\(.vhost_type // "") enabled=\(.is_enabled // "") order_id=\(.order_id // "") root_directory=\(.root_directory // "")"' "$websites"
 
           os=$(curl -sS --max-time 30 "${auth[@]}" -o "$orders" -w '%{http_code}' "$BASE/api/hosting/v1/orders?per_page=100")
           echo "HOSTING_ORDERS_HTTP=$os"
-          if [[ "$os" == 200 ]]; then jq -r '.data[]? | "HOSTING_ORDER id=\(.id // .order_id // "") status=\(.status // "") plan=\(.plan // .product_name // .name // "") username=\(.username // "")"' "$orders" | head -100; fi
+          if [[ "$os" == 200 ]]; then jq -r '.data[]? | select((.id // .order_id) == 1009657511) | "HOSTING_ORDER id=\(.id // .order_id // "") status=\(.status // "") plan=\((.plan.name // .plan // .product_name // .name // ""))"' "$orders"; fi
 
           zs=$(curl -sS --max-time 30 "${auth[@]}" -o "$zone" -w '%{http_code}' "$BASE/api/dns/v1/zones/oneworldz.com")
           echo "DNS_ZONE_HTTP=$zs"
-          if [[ "$zs" == 200 ]]; then jq -r '(.data // .) as $z | ($z.records // $z)[]? | select((.type // "") == "A" or (.type // "") == "AAAA" or (.type // "") == "CNAME") | "DNS_RECORD type=\(.type // "") name=\(.name // .host // "") content=\(.content // .value // "") ttl=\(.ttl // "")"' "$zone"; fi
+          if [[ "$zs" == 200 ]]; then
+            jq -r 'if type=="array" then .[] elif (.data|type)=="array" then .data[] elif (.records|type)=="array" then .records[] else empty end | select((.type // "") == "A" or (.type // "") == "AAAA" or (.type // "") == "CNAME") | "DNS_RECORD type=\(.type // "") name=\(.name // .host // "") content=\(.content // .value // .records[0].content // "") ttl=\(.ttl // "")"' "$zone"
+          fi
 
           live_ip=$(getent ahostsv4 oneworldz.com | awk 'NR==1{print $1}')
           echo "PUBLIC_IPV4=$live_ip"
@@ -66,10 +66,5 @@ jobs:
       - name: Safe summary
         if: always()
         run: |
-          {
-            echo '## OneWorldz Hostinger Account Diagnostic'
-            echo '- Read-only Hostinger API inspection only'
-            echo '- Existing Business Hosting account only'
-            echo '- No secrets or credentials printed'
-            echo '- No DNS, SSL, hosting, files, or domain assignments changed'
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo '## OneWorldz Hostinger Account Diagnostic' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Read-only; no DNS, SSL, hosting, files, or domain assignments changed' >> "$GITHUB_STEP_SUMMARY"
