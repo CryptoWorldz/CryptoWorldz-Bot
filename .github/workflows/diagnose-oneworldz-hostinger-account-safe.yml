@@ -12,28 +12,24 @@ permissions:
 
 concurrency:
   group: diagnose-oneworldz-hostinger-account-safe
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     environment: oneworldz-production
     env:
       HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
       BASE: https://developers.hostinger.com
     steps:
-      - name: Install inspection clients
+      - name: Validate tools and Hostinger API token
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq jq openssl
-
-      - name: Validate Hostinger API token presence
-        shell: bash
-        run: |
-          set -euo pipefail
+          command -v curl >/dev/null
+          command -v jq >/dev/null
+          command -v openssl >/dev/null
           [[ -n "$HOSTINGER_API_TOKEN" ]] || { echo '::error::HOSTINGER_API_TOKEN is not configured in oneworldz-production'; exit 1; }
           echo "::add-mask::$HOSTINGER_API_TOKEN"
           echo 'HOSTINGER_API_TOKEN_READY=YES'
@@ -42,43 +38,25 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          token="$HOSTINGER_API_TOKEN"
-          auth=(-H "Authorization: Bearer $token" -H 'Accept: application/json')
+          auth=(-H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json')
           websites="$RUNNER_TEMP/websites.json"
           orders="$RUNNER_TEMP/orders.json"
           zone="$RUNNER_TEMP/zone.json"
 
           ws=$(curl -sS --max-time 30 "${auth[@]}" -o "$websites" -w '%{http_code}' "$BASE/api/hosting/v1/websites?per_page=100")
           echo "HOSTING_WEBSITES_HTTP=$ws"
-          [[ "$ws" == 200 ]] || { echo '::error::Hostinger website lookup failed'; exit 1; }
+          [[ "$ws" == 200 ]] || { echo '::error::Hostinger website lookup failed'; cat "$websites" | jq -c '{message,errors}' 2>/dev/null || true; exit 1; }
 
-          jq -r '
-            [.data[]? | select(((.domain // "") | ascii_downcase) == "oneworldz.com")]
-            | "ONEWORLDZ_MATCH_COUNT=\(length)",
-              (.[] | "ONEWORLDZ_SITE domain=\(.domain // "") username=\(.username // "") vhost_type=\(.vhost_type // "") enabled=\(.is_enabled // "") order_id=\(.order_id // "") root_directory=\(.root_directory // "") created_at=\(.created_at // "")")
-          ' "$websites"
-
-          jq -r '
-            .data[]? | select((((.domain // "") | ascii_downcase) | contains("oneworldz")) or (((.root_directory // "") | ascii_downcase) | contains("oneworldz")))
-            | "RELATED_SITE domain=\(.domain // "") username=\(.username // "") vhost_type=\(.vhost_type // "") enabled=\(.is_enabled // "") order_id=\(.order_id // "") root_directory=\(.root_directory // "")"
-          ' "$websites"
+          jq -r '[.data[]? | select(((.domain // "") | ascii_downcase) == "oneworldz.com")] | "ONEWORLDZ_MATCH_COUNT=\(length)", (.[] | "ONEWORLDZ_SITE domain=\(.domain // "") username=\(.username // "") vhost_type=\(.vhost_type // "") enabled=\(.is_enabled // "") order_id=\(.order_id // "") root_directory=\(.root_directory // "") created_at=\(.created_at // "")")' "$websites"
+          jq -r '.data[]? | select((((.domain // "") | ascii_downcase) | contains("oneworldz")) or (((.root_directory // "") | ascii_downcase) | contains("oneworldz"))) | "RELATED_SITE domain=\(.domain // "") username=\(.username // "") vhost_type=\(.vhost_type // "") enabled=\(.is_enabled // "") order_id=\(.order_id // "") root_directory=\(.root_directory // "")"' "$websites"
 
           os=$(curl -sS --max-time 30 "${auth[@]}" -o "$orders" -w '%{http_code}' "$BASE/api/hosting/v1/orders?per_page=100")
           echo "HOSTING_ORDERS_HTTP=$os"
-          if [[ "$os" == 200 ]]; then
-            jq -r '.data[]? | "HOSTING_ORDER id=\(.id // .order_id // "") status=\(.status // "") plan=\(.plan // .product_name // .name // "") username=\(.username // "")"' "$orders" | head -100
-          fi
+          if [[ "$os" == 200 ]]; then jq -r '.data[]? | "HOSTING_ORDER id=\(.id // .order_id // "") status=\(.status // "") plan=\(.plan // .product_name // .name // "") username=\(.username // "")"' "$orders" | head -100; fi
 
           zs=$(curl -sS --max-time 30 "${auth[@]}" -o "$zone" -w '%{http_code}' "$BASE/api/dns/v1/zones/oneworldz.com")
           echo "DNS_ZONE_HTTP=$zs"
-          if [[ "$zs" == 200 ]]; then
-            jq -r '
-              (.data // .) as $z |
-              ($z.records // $z)[]? |
-              select((.type // "") == "A" or (.type // "") == "AAAA" or (.type // "") == "CNAME") |
-              "DNS_RECORD type=\(.type // "") name=\(.name // .host // "") content=\(.content // .value // "") ttl=\(.ttl // "")"
-            ' "$zone"
-          fi
+          if [[ "$zs" == 200 ]]; then jq -r '(.data // .) as $z | ($z.records // $z)[]? | select((.type // "") == "A" or (.type // "") == "AAAA" or (.type // "") == "CNAME") | "DNS_RECORD type=\(.type // "") name=\(.name // .host // "") content=\(.content // .value // "") ttl=\(.ttl // "")"' "$zone"; fi
 
           live_ip=$(getent ahostsv4 oneworldz.com | awk 'NR==1{print $1}')
           echo "PUBLIC_IPV4=$live_ip"
