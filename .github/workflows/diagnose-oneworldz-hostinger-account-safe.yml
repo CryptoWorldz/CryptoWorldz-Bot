@@ -1,0 +1,96 @@
+name: DIAGNOSE — OneWorldz Hostinger Account — SAFE
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-oneworldz-hostinger-account-safe.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diagnose-oneworldz-hostinger-account-safe
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment: cryptoworldz-production
+    env:
+      TOKEN_PRIMARY: ${{ secrets.HOSTINGER_API_TOKEN }}
+      TOKEN_LEGACY: ${{ secrets.API_TOKEN }}
+      TOKEN_ALT: ${{ secrets.HAPI_TOKEN }}
+      TOKEN_KEY: ${{ secrets.HOSTINGER_API_KEY }}
+      BASE: https://developers.hostinger.com
+    steps:
+      - name: Select configured Hostinger API token without exposing it
+        shell: bash
+        run: |
+          set -euo pipefail
+          token=''
+          for candidate in "$TOKEN_PRIMARY" "$TOKEN_LEGACY" "$TOKEN_ALT" "$TOKEN_KEY"; do
+            if [[ -n "$candidate" ]]; then token="$candidate"; break; fi
+          done
+          [[ -n "$token" ]] || { echo '::error::No Hostinger API token configured'; exit 1; }
+          echo "::add-mask::$token"
+          echo "HOSTINGER_TOKEN=$token" >> "$GITHUB_ENV"
+
+      - name: Inspect OneWorldz website, hosting orders, DNS and SSL-adjacent state
+        shell: bash
+        run: |
+          set -euo pipefail
+          auth=(-H "Authorization: Bearer $HOSTINGER_TOKEN" -H 'Accept: application/json')
+          websites="$RUNNER_TEMP/websites.json"
+          orders="$RUNNER_TEMP/orders.json"
+          zone="$RUNNER_TEMP/zone.json"
+
+          ws=$(curl -sS --max-time 30 "${auth[@]}" -o "$websites" -w '%{http_code}' "$BASE/api/hosting/v1/websites?per_page=100")
+          echo "HOSTING_WEBSITES_HTTP=$ws"
+          [[ "$ws" == 200 ]] || exit 1
+
+          jq -r '
+            [.data[]? | select(((.domain // "") | ascii_downcase) == "oneworldz.com")]
+            | "ONEWORLDZ_MATCH_COUNT=\(length)",
+              (.[] | "ONEWORLDZ_SITE domain=\(.domain // "") username=\(.username // "") vhost_type=\(.vhost_type // "") enabled=\(.is_enabled // "") order_id=\(.order_id // "") root_directory=\(.root_directory // "") created_at=\(.created_at // "")")
+          ' "$websites"
+
+          jq -r '
+            .data[]? | select((((.domain // "") | ascii_downcase) | contains("oneworldz")) or (((.root_directory // "") | ascii_downcase) | contains("oneworldz")))
+            | "RELATED_SITE domain=\(.domain // "") username=\(.username // "") vhost_type=\(.vhost_type // "") enabled=\(.is_enabled // "") order_id=\(.order_id // "") root_directory=\(.root_directory // "")"
+          ' "$websites"
+
+          os=$(curl -sS --max-time 30 "${auth[@]}" -o "$orders" -w '%{http_code}' "$BASE/api/hosting/v1/orders?per_page=100")
+          echo "HOSTING_ORDERS_HTTP=$os"
+          if [[ "$os" == 200 ]]; then
+            jq -r '.data[]? | "HOSTING_ORDER id=\(.id // .order_id // "") status=\(.status // "") plan=\(.plan // .product_name // .name // "") username=\(.username // "")"' "$orders" | head -100
+          fi
+
+          zs=$(curl -sS --max-time 30 "${auth[@]}" -o "$zone" -w '%{http_code}' "$BASE/api/dns/v1/zones/oneworldz.com")
+          echo "DNS_ZONE_HTTP=$zs"
+          if [[ "$zs" == 200 ]]; then
+            jq -r '
+              (.data // .) as $z |
+              ($z.records // $z)[]? |
+              select((.type // "") == "A" or (.type // "") == "AAAA" or (.type // "") == "CNAME") |
+              "DNS_RECORD type=\(.type // "") name=\(.name // .host // "") content=\(.content // .value // "") ttl=\(.ttl // "")"
+            ' "$zone"
+          fi
+
+          live_ip=$(getent ahostsv4 oneworldz.com | awk 'NR==1{print $1}')
+          echo "PUBLIC_IPV4=$live_ip"
+          cert_info=$(echo | openssl s_client -connect oneworldz.com:443 -servername oneworldz.com -verify_return_error 2>/dev/null | openssl x509 -noout -subject -issuer -dates 2>/dev/null | tr '\n' ';' || true)
+          [[ -n "$cert_info" ]] && echo "SSL_CERT=$cert_info"
+
+      - name: Safe summary
+        if: always()
+        run: |
+          {
+            echo '## OneWorldz Hostinger Account Diagnostic'
+            echo '- Read-only Hostinger API inspection only'
+            echo '- No secrets or credentials printed'
+            echo '- No DNS, SSL, hosting, files, or domain assignments changed'
+            echo '- TLS verification remained enabled'
+          } >> "$GITHUB_STEP_SUMMARY"
