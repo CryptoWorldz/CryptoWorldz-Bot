@@ -1,0 +1,268 @@
+name: DEPLOY — OneWorldz — Hostinger Domain API Proof First
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-oneworldz-hostinger-api.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-hostinger-domain-deploy
+  cancel-in-progress: false
+
+env:
+  DOMAIN: oneworldz.com
+  SOURCE_ROOT: apps/cryptoworldz-web-core
+  EXPECTED_HOSTING_USERNAME: u643166328
+  EXPECTED_ORDER_ID: '1009657511'
+  EXPECTED_ROOT: /home/u643166328/domains/oneworldz.com/public_html
+  ROLLBACK_REF: c544ecd2a7dd003eaf7be4229118da05b2dc83fc
+  RELEASE_MARKER: 20260812-oneworldz-support-v1
+
+jobs:
+  deploy:
+    name: Backup → Domain Deploy → Desktop/Mobile QA → Rollback on failure
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: oneworldz-production
+    env:
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+    steps:
+      - name: Checkout deployment source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Preflight source and Hostinger account assignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "$HOSTINGER_API_TOKEN" ]] || { echo '::error::HOSTINGER_API_TOKEN missing'; exit 1; }
+          echo "::add-mask::$HOSTINGER_API_TOKEN"
+          test -f "$SOURCE_ROOT/index.html"
+          test ! -f "$SOURCE_ROOT/package.json"
+          grep -Fq "$RELEASE_MARKER" "$SOURCE_ROOT/index.html"
+          grep -Fq 'https://gofund.me/933219353' "$SOURCE_ROOT/assets/site-pages.js"
+          grep -Fq 'https://www.gofundme.com/u/jayjayteamdev' "$SOURCE_ROOT/assets/site-pages.js"
+          grep -Fq 'oneworldz-support-campaign.js' "$SOURCE_ROOT/assets/site-router.js"
+          for part in 00 01 02 03; do test -s "$SOURCE_ROOT/assets/campaign/areas-support/$part.b64"; done
+          node --check "$SOURCE_ROOT/assets/site-pages.js"
+          node --check "$SOURCE_ROOT/assets/site-router.js"
+          node --check "$SOURCE_ROOT/assets/oneworldz-support-campaign.js"
+
+          tmp="$RUNNER_TEMP/hostinger-sites.json"
+          http=$(curl -sS --max-time 30 -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' -o "$tmp" -w '%{http_code}' "https://developers.hostinger.com/api/hosting/v1/websites?domain=$DOMAIN")
+          [[ "$http" == 200 ]]
+          count=$(jq '[.data[]? | select(.domain=="oneworldz.com" and .username=="u643166328" and (.order_id|tostring)=="1009657511" and .root_directory=="/home/u643166328/domains/oneworldz.com/public_html" and .is_enabled==true)] | length' "$tmp")
+          [[ "$count" == 1 ]] || { echo '::error::Live Hostinger account assignment changed; refusing deployment'; exit 1; }
+          echo 'HOSTINGER_ASSIGNMENT=VERIFIED'
+
+      - name: Capture live proof and rollback archives
+        id: backup
+        shell: bash
+        run: |
+          set -euo pipefail
+          live="$RUNNER_TEMP/live-before"
+          mkdir -p "$live/assets/campaign/areas-support"
+          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' "https://$DOMAIN/?before=${GITHUB_RUN_ID}" -o "$live/index.html"
+          for f in assets/site-router.js assets/site-pages.js assets/oneworldz-next.js assets/oneworldz-support-campaign.js; do
+            mkdir -p "$live/$(dirname "$f")"
+            curl -fsS --max-time 30 -H 'Cache-Control: no-cache' "https://$DOMAIN/$f?before=${GITHUB_RUN_ID}" -o "$live/$f" || true
+          done
+          for part in 00 01 02 03; do
+            curl -fsS --max-time 30 -H 'Cache-Control: no-cache' "https://$DOMAIN/assets/campaign/areas-support/${part}.b64?before=${GITHUB_RUN_ID}" -o "$live/assets/campaign/areas-support/${part}.b64" || true
+          done
+          sha256sum "$live/index.html" | tee "$RUNNER_TEMP/live-before.sha256"
+
+          current="$RUNNER_TEMP/oneworldz_$(date -u +%Y%m%d_%H%M%S).zip"
+          rollback="$RUNNER_TEMP/oneworldz_rollback_$(date -u +%Y%m%d_%H%M%S).zip"
+          (cd "$SOURCE_ROOT" && zip -qr "$current" .)
+          git archive --format=zip --output="$rollback" "$ROLLBACK_REF:$SOURCE_ROOT"
+          unzip -l "$current" | grep -Eq '[[:space:]]index.html$'
+          unzip -p "$current" index.html | grep -Fq "$RELEASE_MARKER"
+          unzip -l "$rollback" | grep -Eq '[[:space:]]index.html$'
+          echo "current_archive=$current" >> "$GITHUB_OUTPUT"
+          echo "rollback_archive=$rollback" >> "$GITHUB_OUTPUT"
+
+      - name: Upload pre-deploy backup proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-before-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/live-before
+            ${{ runner.temp }}/live-before.sha256
+          retention-days: 14
+
+      - name: Install official Hostinger MCP deploy client
+        shell: bash
+        run: |
+          set -euo pipefail
+          tools="$RUNNER_TEMP/hostinger-deploy-tools"
+          mkdir -p "$tools"
+          cd "$tools"
+          npm init -y >/dev/null
+          npm install --silent hostinger-api-mcp @modelcontextprotocol/sdk puppeteer-core
+          test -x node_modules/.bin/hostinger-api-mcp
+          echo "TOOLS_DIR=$tools" >> "$GITHUB_ENV"
+
+      - name: Create domain-aware Hostinger deployment client
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$TOOLS_DIR/deploy.mjs" <<'NODE'
+          import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+          import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+          import path from 'node:path';
+
+          const archivePath = process.env.DEPLOY_ARCHIVE;
+          if (!archivePath) throw new Error('DEPLOY_ARCHIVE missing');
+          const command = path.resolve(process.env.TOOLS_DIR, 'node_modules/.bin/hostinger-api-mcp');
+          const transport = new StdioClientTransport({
+            command,
+            args: ['--stdio'],
+            env: { ...process.env, HOSTINGER_API_TOKEN: process.env.HOSTINGER_API_TOKEN, DEBUG: 'false' }
+          });
+          const client = new Client({ name: 'oneworldz-proof-first-deployer', version: '1.0.0' }, { capabilities: {} });
+          await client.connect(transport);
+          const listed = await client.listTools();
+          if (!listed.tools.some(t => t.name === 'hosting_deployStaticWebsite')) throw new Error('Hostinger static deploy tool unavailable');
+          const result = await client.callTool({
+            name: 'hosting_deployStaticWebsite',
+            arguments: { domain: 'oneworldz.com', archivePath, removeArchive: false }
+          });
+          if (result.isError) throw new Error(`Hostinger deployment failed: ${JSON.stringify(result.content)}`);
+          console.log('HOSTINGER_DOMAIN_DEPLOY=ACCEPTED');
+          await client.close();
+          NODE
+
+      - name: Deploy to live OneWorldz Hostinger website
+        id: upload
+        shell: bash
+        env:
+          DEPLOY_ARCHIVE: ${{ steps.backup.outputs.current_archive }}
+        run: |
+          set -euo pipefail
+          cd "$TOOLS_DIR"
+          node deploy.mjs
+          code=$(curl -sS --max-time 30 -X DELETE -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' -o "$RUNNER_TEMP/cache-clear.json" -w '%{http_code}' "https://developers.hostinger.com/api/hosting/v1/accounts/$EXPECTED_HOSTING_USERNAME/websites/$DOMAIN/cache/clear")
+          echo "CACHE_CLEAR_HTTP=$code"
+          [[ "$code" == 200 || "$code" == 204 ]]
+
+      - name: Verify live files from public origin
+        id: verifyfiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          retry_file() {
+            local url="$1" pattern="$2"
+            for n in 1 2 3 4 5 6 7 8; do
+              body="$RUNNER_TEMP/probe-${RANDOM}.txt"
+              if curl -fsS --max-time 25 -H 'Cache-Control: no-cache, no-store' "${url}?cb=${GITHUB_RUN_ID}-${n}" -o "$body" && grep -Fq "$pattern" "$body"; then return 0; fi
+              sleep 4
+            done
+            return 1
+          }
+          retry_file "https://$DOMAIN/" "$RELEASE_MARKER"
+          retry_file "https://$DOMAIN/assets/site-router.js" 'oneworldz-support-campaign.js'
+          retry_file "https://$DOMAIN/assets/site-pages.js" 'https://gofund.me/933219353'
+          retry_file "https://$DOMAIN/assets/site-pages.js" 'https://www.gofundme.com/u/jayjayteamdev'
+          retry_file "https://$DOMAIN/assets/oneworldz-support-campaign.js" 'areas-support/00.b64'
+          for part in 00 01 02 03; do
+            size=$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache, no-store' "https://$DOMAIN/assets/campaign/areas-support/${part}.b64?cb=${GITHUB_RUN_ID}" | wc -c)
+            [[ "$size" -gt 1000 ]]
+          done
+          echo 'PUBLIC_FILES=PASS'
+
+      - name: Desktop and mobile browser QA
+        id: browserqa
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          [[ -n "$chrome" ]] || { echo '::error::Chrome unavailable on runner'; exit 1; }
+          export CHROME_BIN="$chrome"
+          qa="$RUNNER_TEMP/qa"
+          mkdir -p "$qa"
+          cat > "$TOOLS_DIR/qa.mjs" <<'NODE'
+          import puppeteer from 'puppeteer-core';
+          import fs from 'node:fs';
+          const browser = await puppeteer.launch({ executablePath: process.env.CHROME_BIN, headless: true, args: ['--no-sandbox','--disable-dev-shm-usage'] });
+          const checks = [
+            { name:'desktop-home', url:`https://oneworldz.com/?qa=${Date.now()}`, viewport:{width:1440,height:1000}, help:false },
+            { name:'mobile-home', url:`https://oneworldz.com/?qa=${Date.now()}-m`, viewport:{width:390,height:844,isMobile:true,hasTouch:true}, help:false },
+            { name:'desktop-help', url:`https://oneworldz.com/?page=help&qa=${Date.now()}-h`, viewport:{width:1440,height:1000}, help:true },
+            { name:'mobile-help', url:`https://oneworldz.com/?page=help&qa=${Date.now()}-hm`, viewport:{width:390,height:844,isMobile:true,hasTouch:true}, help:true }
+          ];
+          const report=[];
+          let failed=false;
+          for (const c of checks) {
+            const page=await browser.newPage();
+            await page.setViewport(c.viewport);
+            await page.goto(c.url,{waitUntil:'networkidle2',timeout:60000});
+            await new Promise(r=>setTimeout(r,2500));
+            const data=await page.evaluate((isHelp)=>{
+              const imgs=[...document.images].map(i=>({src:i.currentSrc||i.src,complete:i.complete,w:i.naturalWidth,h:i.naturalHeight,display:getComputedStyle(i).display}));
+              const visible=imgs.filter(i=>i.display!=='none');
+              const broken=visible.filter(i=>!i.complete||i.w===0||i.h===0);
+              const hrefs=[...document.querySelectorAll('a[href]')].map(a=>a.href);
+              return {
+                title:document.title,
+                bodyWidth:document.body.scrollWidth,
+                viewportWidth:window.innerWidth,
+                imageCount:visible.length,
+                broken,
+                hasFeatured:hrefs.includes('https://gofund.me/933219353'),
+                hasProfile:hrefs.includes('https://www.gofundme.com/u/jayjayteamdev'),
+                supportImage:document.querySelector('.ow-support-image') ? {w:document.querySelector('.ow-support-image').naturalWidth,h:document.querySelector('.ow-support-image').naturalHeight} : null,
+                help:isHelp
+              };
+            },c.help);
+            const overflow=data.bodyWidth>data.viewportWidth+2;
+            const badLinks=c.help && (!data.hasFeatured || !data.hasProfile);
+            const badSupport=!c.help && data.supportImage && (!data.supportImage.w || !data.supportImage.h);
+            if (data.broken.length || overflow || badLinks || badSupport) failed=true;
+            report.push({...c,data,overflow,badLinks,badSupport});
+            await page.screenshot({path:`${process.env.QA_DIR}/${c.name}.png`,fullPage:true});
+            await page.close();
+          }
+          fs.writeFileSync(`${process.env.QA_DIR}/report.json`,JSON.stringify(report,null,2));
+          console.log(JSON.stringify(report,null,2));
+          await browser.close();
+          if(failed) process.exit(2);
+          NODE
+          cd "$TOOLS_DIR"
+          QA_DIR="$qa" node qa.mjs
+          echo 'BROWSER_QA=PASS'
+
+      - name: Upload desktop/mobile QA proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-live-qa-${{ github.run_id }}
+          path: ${{ runner.temp }}/qa
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Roll back automatically if deployment proof fails
+        if: ${{ failure() && steps.upload.outcome == 'success' }}
+        shell: bash
+        env:
+          DEPLOY_ARCHIVE: ${{ steps.backup.outputs.rollback_archive }}
+        run: |
+          set -euo pipefail
+          echo 'Live proof failed — deploying pre-change rollback through the same Hostinger domain-aware route.'
+          cd "$TOOLS_DIR"
+          node deploy.mjs
+          code=$(curl -sS --max-time 30 -X DELETE -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' -o "$RUNNER_TEMP/cache-clear-rollback.json" -w '%{http_code}' "https://developers.hostinger.com/api/hosting/v1/accounts/$EXPECTED_HOSTING_USERNAME/websites/$DOMAIN/cache/clear")
+          [[ "$code" == 200 || "$code" == 204 ]]
+          curl -fsS --max-time 30 -H 'Cache-Control: no-cache, no-store' "https://$DOMAIN/?rollback=${GITHUB_RUN_ID}" >/dev/null
+          echo 'ROLLBACK=COMPLETED'
