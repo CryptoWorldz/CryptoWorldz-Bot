@@ -18,12 +18,8 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment: oneworldz-production
+    environment: cryptoworldz-production
     env:
-      TOKEN_PRIMARY: ${{ secrets.HOSTINGER_API_TOKEN }}
-      TOKEN_LEGACY: ${{ secrets.API_TOKEN }}
-      TOKEN_ALT: ${{ secrets.HAPI_TOKEN }}
-      TOKEN_KEY: ${{ secrets.HOSTINGER_API_KEY }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: '21'
@@ -39,39 +35,31 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp jq openssl
 
-      - name: Select existing Hostinger API token without exposing it
+      - name: Retrieve existing account API token securely
         shell: bash
         run: |
           set -euo pipefail
-          token=''
-          for candidate in "$TOKEN_PRIMARY" "$TOKEN_LEGACY" "$TOKEN_ALT" "$TOKEN_KEY"; do
-            if [[ -n "$candidate" ]]; then token="$candidate"; break; fi
-          done
+          [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]] || { echo '::error::CryptoWorldz production FTPS credentials unavailable'; exit 1; }
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
 
-          if [[ -z "$token" ]]; then
-            [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]] || { echo '::error::No Hostinger API token or OneWorldz FTPS credentials configured'; exit 1; }
-            echo "::add-mask::$FTP_USERNAME"
-            echo "::add-mask::$FTP_PASSWORD"
+          session="$RUNNER_TEMP/ftps-session.txt"
+          cert="$RUNNER_TEMP/ftps-cert.pem"
+          timeout 30 openssl s_client -starttls ftp -connect "$LOCKED_IP:$FTP_PORT" -verify_return_error -showcerts </dev/null >"$session" 2>/dev/null
+          grep -Fq 'Verify return code: 0 (ok)' "$session"
+          sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$session" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
+          test -s "$cert"
+          actual_fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
+          [[ "$actual_fp" == "$CERT_SHA256" ]]
+          openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq '*.hstgr.io'
 
-            session="$RUNNER_TEMP/ftps-session.txt"
-            cert="$RUNNER_TEMP/ftps-cert.pem"
-            timeout 25 openssl s_client -starttls ftp -connect "$LOCKED_IP:$FTP_PORT" -servername "$TLS_ALIAS" -verify_return_error -showcerts </dev/null >"$session" 2>/dev/null
-            grep -Fq 'Verify return code: 0 (ok)' "$session"
-            sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$session" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
-            test -s "$cert"
-            actual_fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
-            [[ "$actual_fp" == "$CERT_SHA256" ]]
-            openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq '*.hstgr.io'
-
-            echo "$LOCKED_IP $TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
-            token_file="$RUNNER_TEMP/hostinger-api-token"
-            timeout 60 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$TLS_ALIAS" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '/'; get .api_token -o '$token_file'; bye"
-            test -s "$token_file"
-            chmod 600 "$token_file"
-            token="$(tr -d '\r\n' < "$token_file")"
-          fi
-
-          [[ ${#token} -ge 20 ]] || { echo '::error::Existing Hostinger API token is unavailable or invalid'; exit 1; }
+          echo "$LOCKED_IP $TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
+          token_file="$RUNNER_TEMP/hostinger-api-token"
+          timeout 60 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$TLS_ALIAS" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '/'; get .api_token -o '$token_file'; bye"
+          test -s "$token_file"
+          chmod 600 "$token_file"
+          token="$(tr -d '\r\n' < "$token_file")"
+          [[ ${#token} -ge 20 ]] || { echo '::error::Existing account API token unavailable'; exit 1; }
           echo "::add-mask::$token"
           printf '%s' "$token" > "$RUNNER_TEMP/hostinger-token-clean"
           chmod 600 "$RUNNER_TEMP/hostinger-token-clean"
@@ -130,6 +118,7 @@ jobs:
           {
             echo '## OneWorldz Hostinger Account Diagnostic'
             echo '- Read-only Hostinger API inspection only'
+            echo '- Existing Business Hosting account only'
             echo '- No secrets or credentials printed'
             echo '- No DNS, SSL, hosting, files, or domain assignments changed'
             echo '- FTPS TLS certificate and hostname verification remained enabled'
