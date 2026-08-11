@@ -9,7 +9,8 @@ const page = params.get('page') || 'help';
 const host = location.hostname.replace(/^www\./, '').toLowerCase();
 
 const LINKS = {
-  profile: 'https://www.gofundme.com/u/cryptouniverse',
+  profile: 'https://www.gofundme.com/u/jayjayteamdev',
+  featuredGfm: 'https://gofund.me/933219353',
   davisGfm: 'https://www.gofundme.com/f/the-davis-family-w4qys/cl/s?utm_campaign=fp_sharesheet&utm_content=amp30-no-carousel&utm_medium=customer&utm_source=copy_link&lang=en_GB',
   davisFacebook: 'https://www.facebook.com/share/19TbWGWNUo/',
   smilesGfm: 'https://gofund.me/actioncreatesmiles',
@@ -58,11 +59,11 @@ function allSites(){return sites.map(([name,url])=>`<a class="sw-world-link" hre
 function renderHelp(){
   document.title = `Help the People • ${hostName()}`;
   app.innerHTML = `<div class="wp-shell">
-    <section class="wp-hero"><span class="sw-kicker">One World • One Mission • One Fam</span><h1>Help the People</h1><p>A shared place across the Worldz network for real donation links, real community pages and simple actions anyone can take to help spread the word.</p><div class="wp-actions">${btn(LINKS.profile,'Visit JayJayTeamDev GoFundMe Profile','sw-btn gold')}${btn(LINKS.zedHQ,'Visit CryptoWorldz HQ')}</div></section>
+    <section class="wp-hero"><span class="sw-kicker">One World • One Mission • One Fam</span><h1>Help the People</h1><p>A shared place across the Worldz network for real donation links, real community pages and simple actions anyone can take to help spread the word.</p><div class="wp-actions">${btn(LINKS.featuredGfm,'Open Featured GoFundMe','sw-btn gold')}${btn(LINKS.profile,'Visit JayJayTeamDev GoFundMe Profile','sw-btn gold')}${btn(LINKS.zedHQ,'Visit CryptoWorldz HQ')}</div></section>
 
     <section class="wp-section"><div class="sw-heading"><div><span class="sw-kicker">Direct support</span><h2>Donation Pages</h2></div><p>Open the fundraiser at its official destination. No donation payment is collected by this website.</p></div><div class="wp-donation-grid">
       <article class="wp-donation-card"><img src="./assets/images/website-core/purple-diamond-crew/hope-chest-by-firelight.webp" alt="OneWorldz Hope Chest" loading="lazy"><div class="body"><h3>The Davis Family</h3><p>Visit the Davis Family GoFundMe or open their Facebook page to follow, like, comment and share their story.</p><div class="wp-actions">${btn(LINKS.davisGfm,'Visit Davis Family GoFundMe','sw-btn gold')}${btn(LINKS.davisFacebook,'Visit Facebook Page')}</div></div></article>
-      <article class="wp-donation-card"><img src="./assets/images/website-core/action-creates-smiles/action-creates-smiles-reagan-kids.webp" alt="Action Creates Smiles Uganda" loading="lazy"><div class="body"><h3>Action Creates Smiles • Uganda</h3><p>Support food, clean water, education, medical care, safe shelter and a brighter future for children and the surrounding community.</p><div class="wp-actions">${btn(LINKS.smilesGfm,'Visit Action Creates Smiles GoFundMe','sw-btn gold')}${btn(LINKS.profile,'Visit Organizer Profile')}</div></div></article>
+      <article class="wp-donation-card"><img src="./assets/images/website-core/action-creates-smiles/action-creates-smiles-reagan-kids.webp" alt="Action Creates Smiles Uganda" loading="lazy"><div class="body"><h3>Action Creates Smiles • Uganda</h3><p>Support food, clean water, education, medical care, safe shelter and a brighter future for children and the surrounding community.</p><div class="wp-actions">${btn(LINKS.smilesGfm,'Visit Action Creates Smiles GoFundMe','sw-btn gold')}${btn(LINKS.featuredGfm,'Open Featured GoFundMe')}${btn(LINKS.profile,'Visit Organizer Profile')}</div></div></article>
     </div></section>
 
     <section class="wp-section"><div class="sw-heading"><div><span class="sw-kicker">No donation required</span><h2>Help Get the Word Out</h2></div><p>People who cannot donate can still help a campaign reach someone who can.</p></div><div class="wp-social-grid"><a class="wp-social-action" href="${LINKS.davisFacebook}" target="_blank" rel="noopener noreferrer">✅ FOLLOW</a><a class="wp-social-action" href="${LINKS.davisFacebook}" target="_blank" rel="noopener noreferrer">✅ LIKE</a><a class="wp-social-action" href="${LINKS.davisFacebook}" target="_blank" rel="noopener noreferrer">✅ COMMENT</a><a class="wp-social-action" href="${LINKS.davisFacebook}" target="_blank" rel="noopener noreferrer">✅ SHARE</a></div><p class="wp-hash">#MakeADifferenceTogether</p></section>
