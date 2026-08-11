@@ -1,0 +1,184 @@
+name: PATCH — OneWorldz Areas of Support — Proof First
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - deployments/oneworldz-support-patch.request
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-support-patch-production
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    name: Backup → Patch → Verify → Rollback on failure
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: oneworldz-production
+    env:
+      FTP_HOST: ${{ secrets.ONEWORLDZ_FTP_HOST }}
+      FTP_PORT: ${{ secrets.ONEWORLDZ_FTP_PORT }}
+      FTP_USER: ${{ secrets.ONEWORLDZ_FTP_USER }}
+      FTP_PASS: ${{ secrets.ONEWORLDZ_FTP_PASS }}
+      FTP_SERVER_DIR: ${{ secrets.ONEWORLDZ_FTP_SERVER_DIR }}
+      FTP_CERT_SHA256: ${{ secrets.ONEWORLDZ_FTP_CERT_SHA256 }}
+      FTP_TLS_SERVER_NAME: server875.web-hosting.com
+      SOURCE_ROOT: apps/cryptoworldz-web-core
+      REQUEST_FILE: deployments/oneworldz-support-patch.request
+
+    steps:
+      - name: Checkout requested patch commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate explicit approval and patch payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fx 'target=oneworldz' "$REQUEST_FILE"
+          grep -Fx 'requested_by=JayJayTeamDev' "$REQUEST_FILE"
+          grep -Fx 'confirmation=APPROVE SUPPORT PATCH' "$REQUEST_FILE"
+          source_commit="$(sed -n 's/^source_commit=//p' "$REQUEST_FILE" | head -n1)"
+          [[ -n "$source_commit" ]]
+          [[ "$source_commit" == "${{ github.event.before }}" ]]
+          [[ "$(git rev-parse HEAD^)" == "$source_commit" ]]
+
+          test -f "$SOURCE_ROOT/index.html"
+          test -f "$SOURCE_ROOT/assets/site-router.js"
+          test -f "$SOURCE_ROOT/assets/oneworldz-support-campaign.js"
+          for part in 00 01 02 03; do
+            test -s "$SOURCE_ROOT/assets/campaign/areas-support/$part.b64"
+          done
+
+          node --check "$SOURCE_ROOT/assets/site-router.js"
+          node --check "$SOURCE_ROOT/assets/oneworldz-support-campaign.js"
+          cat "$SOURCE_ROOT"/assets/campaign/areas-support/{00,01,02,03}.b64 | base64 -d > /tmp/oneworldz-areas-support.avif
+          test -s /tmp/oneworldz-areas-support.avif
+          file /tmp/oneworldz-areas-support.avif | grep -Eqi 'AVIF|ISO Media'
+          grep -Fq '20260812-oneworldz-support-v1' "$SOURCE_ROOT/index.html"
+          grep -Fq 'oneworldz-support-campaign.js' "$SOURCE_ROOT/assets/site-router.js"
+          echo 'Patch payload validated.'
+
+      - name: Install FTPS client
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp openssl
+
+      - name: Establish pinned Hostinger FTPS certificate
+        id: cert
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${FTP_HOST:-}" && -n "${FTP_USER:-}" && -n "${FTP_PASS:-}" && -n "${FTP_SERVER_DIR:-}" ]]
+          [[ -n "${FTP_CERT_SHA256:-}" ]]
+          port="${FTP_PORT:-21}"
+          ip="$(getent ahostsv4 "$FTP_HOST" | awk 'NR==1{print $1}')"
+          [[ -n "$ip" ]]
+          cert="$RUNNER_TEMP/oneworldz-ftps-cert.pem"
+          timeout 20 openssl s_client -connect "$ip:$port" -servername "$FTP_TLS_SERVER_NAME" -starttls ftp -showcerts </dev/null 2>/dev/null |
+            awk '/BEGIN CERTIFICATE/{flag=1} flag{print} /END CERTIFICATE/{exit}' > "$cert"
+          grep -q 'BEGIN CERTIFICATE' "$cert"
+          actual="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | sed 's/^sha256 Fingerprint=//; s/://g' | tr '[:lower:]' '[:upper:]')"
+          expected="$(printf '%s' "$FTP_CERT_SHA256" | sed 's/://g' | tr '[:lower:]' '[:upper:]')"
+          [[ "$actual" == "$expected" ]]
+          echo "connect_ip=$ip" >> "$GITHUB_OUTPUT"
+          echo "port=$port" >> "$GITHUB_OUTPUT"
+          echo "cert=$cert" >> "$GITHUB_OUTPUT"
+          echo 'Pinned certificate verified.'
+
+      - name: Capture targeted rollback snapshot
+        id: backup
+        shell: bash
+        env:
+          CONNECT_IP: ${{ steps.cert.outputs.connect_ip }}
+          CONNECT_PORT: ${{ steps.cert.outputs.port }}
+          CERT_FILE: ${{ steps.cert.outputs.cert }}
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/oneworldz-support-backup"
+          mkdir -p "$backup/assets"
+          common="set net:timeout 20; set net:max-retries 2; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate yes; set ssl:ca-file $CERT_FILE; set ssl:check-hostname no;"
+          timeout 45 lftp -u "$FTP_USER","$FTP_PASS" "ftps://$CONNECT_IP:$CONNECT_PORT" -e "$common cd \"$FTP_SERVER_DIR\"; get index.html -o \"$backup/index.html\"; get assets/site-router.js -o \"$backup/assets/site-router.js\"; bye"
+          test -s "$backup/index.html"
+          test -s "$backup/assets/site-router.js"
+          echo "backup_dir=$backup" >> "$GITHUB_OUTPUT"
+          echo 'Targeted rollback snapshot captured.'
+
+      - name: Upload OneWorldz support patch
+        id: upload
+        shell: bash
+        env:
+          CONNECT_IP: ${{ steps.cert.outputs.connect_ip }}
+          CONNECT_PORT: ${{ steps.cert.outputs.port }}
+          CERT_FILE: ${{ steps.cert.outputs.cert }}
+        run: |
+          set -euo pipefail
+          common="set net:timeout 20; set net:max-retries 2; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate yes; set ssl:ca-file $CERT_FILE; set ssl:check-hostname no;"
+          timeout 90 lftp -u "$FTP_USER","$FTP_PASS" "ftps://$CONNECT_IP:$CONNECT_PORT" -e "$common
+            cd \"$FTP_SERVER_DIR\";
+            mkdir -p assets;
+            mkdir -p assets/campaign;
+            mkdir -p assets/campaign/areas-support;
+            put -O . \"$SOURCE_ROOT/index.html\";
+            put -O assets \"$SOURCE_ROOT/assets/site-router.js\";
+            put -O assets \"$SOURCE_ROOT/assets/oneworldz-support-campaign.js\";
+            put -O assets/campaign/areas-support \"$SOURCE_ROOT/assets/campaign/areas-support/00.b64\";
+            put -O assets/campaign/areas-support \"$SOURCE_ROOT/assets/campaign/areas-support/01.b64\";
+            put -O assets/campaign/areas-support \"$SOURCE_ROOT/assets/campaign/areas-support/02.b64\";
+            put -O assets/campaign/areas-support \"$SOURCE_ROOT/assets/campaign/areas-support/03.b64\";
+            bye"
+          echo 'Patch upload completed.'
+
+      - name: Verify live OneWorldz support release
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          cb="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          retry() {
+            local url="$1" pattern="$2"
+            for n in 1 2 3 4 5 6; do
+              if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "${url}?cb=${cb}-${n}" | grep -Fq "$pattern"; then return 0; fi
+              sleep 5
+            done
+            return 1
+          }
+          retry 'https://oneworldz.com/' '20260812-oneworldz-support-v1'
+          retry 'https://oneworldz.com/assets/site-router.js' 'oneworldz-support-campaign.js'
+          retry 'https://oneworldz.com/assets/oneworldz-support-campaign.js' 'areas-support/00.b64'
+          for part in 00 01 02 03; do
+            size="$(curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://oneworldz.com/assets/campaign/areas-support/${part}.b64?cb=${cb}" | wc -c)"
+            [[ "$size" -gt 1000 ]]
+          done
+          echo 'Live OneWorldz support release verified.'
+
+      - name: Roll back patch if upload or live proof fails
+        if: ${{ failure() && steps.backup.outcome == 'success' && steps.upload.outcome != 'skipped' }}
+        shell: bash
+        env:
+          CONNECT_IP: ${{ steps.cert.outputs.connect_ip }}
+          CONNECT_PORT: ${{ steps.cert.outputs.port }}
+          CERT_FILE: ${{ steps.cert.outputs.cert }}
+          BACKUP_DIR: ${{ steps.backup.outputs.backup_dir }}
+        run: |
+          set -euo pipefail
+          common="set net:timeout 20; set net:max-retries 2; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate yes; set ssl:ca-file $CERT_FILE; set ssl:check-hostname no;"
+          timeout 90 lftp -u "$FTP_USER","$FTP_PASS" "ftps://$CONNECT_IP:$CONNECT_PORT" -e "$common
+            cd \"$FTP_SERVER_DIR\";
+            put -O . \"$BACKUP_DIR/index.html\";
+            put -O assets \"$BACKUP_DIR/assets/site-router.js\";
+            rm -f assets/oneworldz-support-campaign.js;
+            rm -f assets/campaign/areas-support/00.b64;
+            rm -f assets/campaign/areas-support/01.b64;
+            rm -f assets/campaign/areas-support/02.b64;
+            rm -f assets/campaign/areas-support/03.b64;
+            bye"
+          echo 'Patch rollback completed.'
