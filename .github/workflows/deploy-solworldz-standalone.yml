@@ -31,6 +31,9 @@ jobs:
       FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
       DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
       LIVE_URL: https://solworldz.xyz
+      HOSTINGER_LOCKED_IP: '145.223.108.40'
+      HOSTINGER_TLS_ALIAS: 'solworldz-ftp-pinned.hstgr.io'
+      HOSTINGER_CERT_SHA256: '47:E1:B5:DC:5D:61:02:E8:ED:8C:01:21:61:AF:8B:22:53:70:AB:55:63:B0:0C:AF:14:6C:BD:7A:96:51:E9:5E'
     steps:
       - name: Check out approved main commit
         uses: actions/checkout@v4
@@ -57,41 +60,62 @@ jobs:
         run: |
           set -euo pipefail
           host="${FTP_HOST#ftp://}"; host="${host#ftps://}"; host="${host%%/*}"; host="${host%%:*}"
-          [[ "$host" == '145.223.108.40' ]] || { echo '::error::Wrong FTP host'; exit 1; }
+          [[ "$host" == "$HOSTINGER_LOCKED_IP" ]] || { echo '::error::Wrong FTP host'; exit 1; }
           [[ "$FTP_PORT" == '21' && "$FTP_SERVER_DIR" == '/' ]] || { echo '::error::Wrong FTP target'; exit 1; }
           [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' && "$DEPLOY_GUARD" == 'SOLWORLDZ.XYZ' ]] || { echo '::error::Wrong deploy guard'; exit 1; }
           [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]] || { echo '::error::FTP credentials missing'; exit 1; }
-          echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"; echo "::add-mask::$FTP_HOST"
 
       - name: Install secure FTP client
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp zip
 
+      - name: Establish pinned certificate-validated Hostinger FTPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$HOSTINGER_LOCKED_IP $HOSTINGER_TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
+          test "$(getent ahostsv4 "$HOSTINGER_TLS_ALIAS" | awk 'NR==1{print $1}')" = "$HOSTINGER_LOCKED_IP"
+          cert="$RUNNER_TEMP/hostinger-cert.pem"
+          session="$RUNNER_TEMP/hostinger-session.txt"
+          err="$RUNNER_TEMP/hostinger-openssl.err"
+          timeout 25 openssl s_client -starttls ftp -connect "$HOSTINGER_LOCKED_IP:21" -verify_return_error -showcerts </dev/null >"$session" 2>"$err"
+          sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$session" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
+          test -s "$cert"
+          fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
+          test "$fp" = "$HOSTINGER_CERT_SHA256"
+          openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io'
+          grep -Fq 'Verify return code: 0 (ok)' "$session"
+          ! grep -Eqi 'verify error|certificate verify failed' "$err"
+          echo "FTP_CONNECT_HOST=$HOSTINGER_TLS_ALIAS" >> "$GITHUB_ENV"
+
       - name: Confirm encrypted Hostinger target with certificate validation
         shell: bash
         run: |
           set -euo pipefail
-          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; cd '$FTP_SERVER_DIR'; bye"
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; bye"
 
       - name: Capture mandatory rollback snapshot
         shell: bash
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/solworldz-backup"; mkdir -p "$backup"
-          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 120 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
           set net:timeout 25
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
+          set ssl:check-hostname yes
           cd "$FTP_SERVER_DIR"
           lcd "$backup"
           mirror --parallel=3 . .
           bye
           LFTP
           test -n "$(find "$backup" -mindepth 1 -print -quit)"
+          (cd "$backup" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sed 's#  \./#  #') > "$RUNNER_TEMP/solworldz-backup.sha256"
           cd "$backup"; zip -qr "$RUNNER_TEMP/solworldz-predeploy.zip" .
           test -s "$RUNNER_TEMP/solworldz-predeploy.zip"
 
@@ -99,7 +123,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: solworldz-predeploy-${{ github.run_id }}
-          path: ${{ runner.temp }}/solworldz-predeploy.zip
+          path: |
+            ${{ runner.temp }}/solworldz-predeploy.zip
+            ${{ runner.temp }}/solworldz-backup.sha256
           retention-days: 14
           if-no-files-found: error
 
@@ -109,13 +135,14 @@ jobs:
           set -euo pipefail
           echo 'SOL_UPLOAD_STARTED=true' >> "$GITHUB_ENV"
           source="$GITHUB_WORKSPACE/apps/worldz-sites/solworldz"
-          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
           set net:timeout 30
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
+          set ssl:check-hostname yes
           cd "$FTP_SERVER_DIR"
           lcd "$source"
           mirror --reverse --delete --parallel=3 . .
@@ -131,13 +158,15 @@ jobs:
           grep -Fq 'data-approved-art="solworldz-hero"' "$RUNNER_TEMP/live.html"
           grep -Fq 'solworldz-hero-desktop.png' "$RUNNER_TEMP/live.html"
           grep -Fq 'solworldz-hero-mobile.png' "$RUNNER_TEMP/live.html"
+          grep -Fq 'https://gofund.me/933219353' "$RUNNER_TEMP/live.html"
+          grep -Fq 'https://oneworldz.com/gofundme/' "$RUNNER_TEMP/live.html"
           ! grep -Eqi 'Loading the Worldz experience|default page|parked domain|solworld\.fun' "$RUNNER_TEMP/live.html"
           for image in solworldz-hero-desktop.png solworldz-hero-mobile.png solworldz-approved-atlas.png; do
             live="$RUNNER_TEMP/live-$image"; source="$RUNNER_TEMP/approved-worldz/solworldz/$image"
             curl -L -fsS -H 'Cache-Control: no-cache' --max-time 30 "$LIVE_URL/assets/media/$image?$cache" -o "$live"
             test "$(sha256sum "$source" | awk '{print $1}')" = "$(sha256sum "$live" | awk '{print $1}')" || { echo "::error::LIVE IMAGE HASH MISMATCH: $image"; exit 1; }
           done
-          echo 'SOLWORLDZ PRODUCTION PROOF PASSED: live HTML and exact approved image hashes verified.'
+          echo 'SOLWORLDZ PRODUCTION PROOF PASSED: live HTML, Survival Fund links and exact approved image hashes verified.'
 
       - name: Restore previous site if deployment fails
         if: failure() && env.SOL_UPLOAD_STARTED == 'true'
@@ -146,13 +175,14 @@ jobs:
           set -euo pipefail
           backup="$RUNNER_TEMP/solworldz-backup"
           test -n "$(find "$backup" -mindepth 1 -print -quit)"
-          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_HOST" <<LFTP
+          timeout 180 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<LFTP
           set cmd:fail-exit yes
           set net:max-retries 1
           set net:timeout 30
           set ftp:ssl-force yes
           set ftp:ssl-protect-data yes
           set ssl:verify-certificate yes
+          set ssl:check-hostname yes
           cd "$FTP_SERVER_DIR"
           lcd "$backup"
           mirror --reverse --delete --parallel=3 . .
@@ -165,7 +195,9 @@ jobs:
           {
             echo '## SolWorldz Production Proof'
             echo '- Job conclusion is authoritative; this summary does not override failures.'
+            echo '- Pinned Hostinger FTPS certificate + hostname proof: required'
             echo '- Exact desktop/mobile/atlas SHA-256 equality: required'
+            echo '- Community Survival Fund links: required'
             echo '- SolWorld.fun references: forbidden'
             echo '- Rollback snapshot: mandatory before upload'
           } >> "$GITHUB_STEP_SUMMARY"
