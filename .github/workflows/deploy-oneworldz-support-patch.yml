@@ -20,13 +20,14 @@ jobs:
     timeout-minutes: 15
     environment: oneworldz-production
     env:
-      FTP_HOST: ${{ secrets.FTP_HOST }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
       FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
-      HOSTINGER_FTPS_HOST: server875.web-hosting.com
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      APPROVED_FTP_HOST: '145.223.108.40'
+      FTP_PORT: '21'
+      APPROVED_CERT_SHA256: '47:E1:B5:DC:5D:61:02:E8:ED:8C:01:21:61:AF:8B:22:53:70:AB:55:63:B0:0C:AF:14:6C:BD:7A:96:51:E9:5E'
       SOURCE_ROOT: apps/cryptoworldz-web-core
       REQUEST_FILE: deployments/oneworldz-support-patch.request
 
@@ -47,9 +48,10 @@ jobs:
           [[ -n "$source_commit" ]]
           [[ "$source_commit" == "${{ github.event.before }}" ]]
           [[ "$(git rev-parse HEAD^)" == "$source_commit" ]]
-          test "$FTP_ACCOUNT_SCOPE" = 'DOMAIN_ONLY'
-          test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
-          [[ "$FTP_SERVER_DIR" == '/' || "$FTP_SERVER_DIR" == '/public_html' ]]
+          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]]
+          [[ "$DEPLOY_GUARD" == 'ONEWORLDZ.COM' ]]
+          [[ "$FTP_SERVER_DIR" == '/' ]]
+          [[ -n "$FTP_USERNAME" && -n "$FTP_PASSWORD" ]]
           test -f "$SOURCE_ROOT/index.html"
           test -f "$SOURCE_ROOT/assets/site-router.js"
           test -f "$SOURCE_ROOT/assets/oneworldz-support-campaign.js"
@@ -67,25 +69,28 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp
+          sudo apt-get install -y -qq lftp openssl
 
-      - name: Establish certificate-validated Hostinger FTPS target
+      - name: Verify locked Hostinger TLS certificate and production root
         id: target
         shell: bash
         run: |
           set -euo pipefail
+          session="$RUNNER_TEMP/oneworldz-ftps-session.txt"
+          cert="$RUNNER_TEMP/oneworldz-ftps-cert.pem"
+          timeout 20 openssl s_client -starttls ftp -connect "$APPROVED_FTP_HOST:$FTP_PORT" -servername "$APPROVED_FTP_HOST" -showcerts </dev/null > "$session" 2>/dev/null
+          grep -Fq 'Verify return code: 0 (ok)' "$session"
+          sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$session" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
+          test -s "$cert"
+          openssl x509 -in "$cert" -noout -subject -ext subjectAltName | grep -Fq '*.hstgr.io'
+          actual_fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
+          [[ "$actual_fp" == "$APPROVED_CERT_SHA256" ]]
+
           probe="$RUNNER_TEMP/oneworldz-live-probe.html"
-          ok=0
-          for attempt in 1 2 3; do
-            rm -f "$probe"
-            if timeout 25 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$HOSTINGER_FTPS_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 12; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; get index.html -o '$probe'; bye"; then
-              if grep -Fq 'site-router.js' "$probe"; then ok=1; break; fi
-            fi
-            sleep $((attempt * 3))
-          done
-          [[ "$ok" == '1' ]]
-          echo "connect_host=$HOSTINGER_FTPS_HOST" >> "$GITHUB_OUTPUT"
-          echo 'Certificate-validated OneWorldz production target confirmed.'
+          timeout 40 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$APPROVED_FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 15; set net:idle 15; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no; cd '$FTP_SERVER_DIR'; get index.html -o '$probe'; bye"
+          grep -Fq 'site-router.js' "$probe"
+          echo "connect_host=$APPROVED_FTP_HOST" >> "$GITHUB_OUTPUT"
+          echo 'Pinned Hostinger FTPS certificate and OneWorldz production root confirmed.'
 
       - name: Capture targeted rollback snapshot
         id: backup
@@ -96,7 +101,7 @@ jobs:
           set -euo pipefail
           backup="$RUNNER_TEMP/oneworldz-support-backup"
           mkdir -p "$backup/assets"
-          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 20; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; get index.html -o '$backup/index.html'; get assets/site-router.js -o '$backup/assets/site-router.js'; bye"
+          timeout 45 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 20; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no; cd '$FTP_SERVER_DIR'; get index.html -o '$backup/index.html'; get assets/site-router.js -o '$backup/assets/site-router.js'; bye"
           test -s "$backup/index.html"
           test -s "$backup/assets/site-router.js"
           echo "backup_dir=$backup" >> "$GITHUB_OUTPUT"
@@ -109,7 +114,7 @@ jobs:
           FTP_CONNECT_HOST: ${{ steps.target.outputs.connect_host }}
         run: |
           set -euo pipefail
-          timeout 90 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 20; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; mkdir -p assets; mkdir -p assets/campaign; mkdir -p assets/campaign/areas-support; put -O . '$SOURCE_ROOT/index.html'; put -O assets '$SOURCE_ROOT/assets/site-router.js'; put -O assets '$SOURCE_ROOT/assets/oneworldz-support-campaign.js'; put -O assets/campaign/areas-support '$SOURCE_ROOT/assets/campaign/areas-support/00.b64'; put -O assets/campaign/areas-support '$SOURCE_ROOT/assets/campaign/areas-support/01.b64'; put -O assets/campaign/areas-support '$SOURCE_ROOT/assets/campaign/areas-support/02.b64'; put -O assets/campaign/areas-support '$SOURCE_ROOT/assets/campaign/areas-support/03.b64'; bye"
+          timeout 90 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 20; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no; cd '$FTP_SERVER_DIR'; mkdir -p assets; mkdir -p assets/campaign; mkdir -p assets/campaign/areas-support; put -O . '$SOURCE_ROOT/index.html'; put -O assets '$SOURCE_ROOT/assets/site-router.js'; put -O assets '$SOURCE_ROOT/assets/oneworldz-support-campaign.js'; put -O assets/campaign/areas-support '$SOURCE_ROOT/assets/campaign/areas-support/00.b64'; put -O assets/campaign/areas-support '$SOURCE_ROOT/assets/campaign/areas-support/01.b64'; put -O assets/campaign/areas-support '$SOURCE_ROOT/assets/campaign/areas-support/02.b64'; put -O assets/campaign/areas-support '$SOURCE_ROOT/assets/campaign/areas-support/03.b64'; bye"
           echo 'Patch upload completed.'
 
       - name: Verify live OneWorldz support release
@@ -143,5 +148,5 @@ jobs:
           BACKUP_DIR: ${{ steps.backup.outputs.backup_dir }}
         run: |
           set -euo pipefail
-          timeout 90 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 20; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; put -O . '$BACKUP_DIR/index.html'; put -O assets '$BACKUP_DIR/assets/site-router.js'; rm -f assets/oneworldz-support-campaign.js; rm -f assets/campaign/areas-support/00.b64; rm -f assets/campaign/areas-support/01.b64; rm -f assets/campaign/areas-support/02.b64; rm -f assets/campaign/areas-support/03.b64; bye"
+          timeout 90 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 20; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no; cd '$FTP_SERVER_DIR'; put -O . '$BACKUP_DIR/index.html'; put -O assets '$BACKUP_DIR/assets/site-router.js'; rm -f assets/oneworldz-support-campaign.js; rm -f assets/campaign/areas-support/00.b64; rm -f assets/campaign/areas-support/01.b64; rm -f assets/campaign/areas-support/02.b64; rm -f assets/campaign/areas-support/03.b64; bye"
           echo 'Patch rollback completed.'
