@@ -31,8 +31,10 @@ assert.match(home, /pdc-mission-board\.png/, 'Approved PDC mission board is not 
 assert.match(home, /Real People/i, 'PDC action identity missing');
 for (const need of ['FOOD','CLOTHING','CLEAN WATER','MEDICAL HELP','SHELTER','EDUCATION','GARDENS']) assert.match(home, new RegExp(need,'i'), `PDC category missing: ${need}`);
 assert.match(home, /A DREAM BUILT ON KINDNESS/i, 'Kindness section missing');
-assert.ok(home.includes('https://gofund.me/65129e58'), 'Current donation link missing');
-assert.ok(donate.includes('https://gofund.me/65129e58'), 'Donate page current fundraiser missing');
+const fundraiser = 'https://gofund.me/c2e4fa936';
+assert.ok(home.includes(fundraiser), 'Current donation link missing');
+assert.ok(donate.includes(fundraiser), 'Donate page current fundraiser missing');
+assert.ok(!pages.some(html => html.includes('https://gofund.me/65129e58')), 'Stale Reagan fundraiser link still present');
 assert.ok(pages.some(html => html.includes('https://t.me/PurpleDiamondCrew')), 'PDC Telegram link missing');
 assert.ok(pages.some(html => html.includes('https://cryptoworldz.xyz')), 'CryptoWorldz link missing');
 assert.ok(pages.some(html => html.includes('https://oneworldz.com')), 'OneWorldz link missing');
@@ -71,4 +73,4 @@ assert.match(css,/backdrop-filter:blur\(18px\)/,'Glass treatment missing');
 assert.match(css,/filter:none!important/,'Approved raster anti-blur rule missing');
 assert.match(htaccess,/Content-Security-Policy/,'CSP missing');
 assert.ok(!js.includes('supabase.co'),'PDC visuals must not depend on Supabase');
-console.log('PurpleDiamondCrew production gate passed: approved PNG artwork, seven site pages, 10 real PDC legacy records and LMTD Streamflow locks verified.');
+console.log('PurpleDiamondCrew production gate passed: approved PNG artwork, current fundraiser, seven site pages, 10 real PDC legacy records and LMTD Streamflow locks verified.');
