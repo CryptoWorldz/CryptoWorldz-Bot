@@ -60,15 +60,10 @@ jobs:
           live="$RUNNER_TEMP/live-oneworldz.html"
           curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://oneworldz.com/?origin_diag=${GITHUB_RUN_ID}" -o "$live"
           live_sha="$(sha256sum "$live" | awk '{print $1}')"
-          echo "PUBLIC_HTTPS_SHA256=$live_sha"
-          echo -n 'PUBLIC_RELEASE='; grep -o 'worldz-release[^>]*' "$live" | head -n1 || true
-          echo -n 'PUBLIC_TITLE='; sed -n 's:.*<title>\(.*\)</title>.*:\1:p' "$live" | head -n1 || true
-
+          public_release="$(grep -o 'worldz-release[^>]*' "$live" | head -n1 || true)"
           web_ip="$(getent ahostsv4 oneworldz.com | awk 'NR==1{print $1}')"
           server_ip="$(getent ahostsv4 server875.web-hosting.com | awk 'NR==1{print $1}')"
-          echo "ONEWORLDZ_DNS_IP=$web_ip"
-          echo "SERVER875_DNS_IP=$server_ip"
-          echo "LOCKED_FTP_IP=$LOCKED_FTP_IP"
+          echo "::warning title=OneWorldz Public Origin::HTTPS_SHA=$live_sha DNS_IP=$web_ip SERVER875_IP=$server_ip RELEASE=${public_release:-none}"
 
           candidates=("$LOCKED_FTP_IP")
           [[ -n "$server_ip" ]] && candidates+=("$server_ip")
@@ -79,33 +74,34 @@ jobs:
             [[ -n "$ip" ]] || continue
             if grep -q "|$ip|" <<<"$seen"; then continue; fi
             seen+="|$ip|"
-            echo "--- CANDIDATE $ip ---"
             set +e
             timeout 8 bash -c "</dev/tcp/$ip/21" 2>/dev/null
             port_rc=$?
             set -e
-            echo "PORT21_RC=$port_rc"
-            [[ "$port_rc" -eq 0 ]] || continue
+            if [[ "$port_rc" -ne 0 ]]; then
+              echo "::warning title=FTPS Candidate $ip::PORT21=closed"
+              continue
+            fi
 
             tls="$RUNNER_TEMP/tls-${ip//./-}.txt"
             set +e
             timeout 15 openssl s_client -starttls ftp -connect "$ip:21" -servername "$ip" </dev/null >"$tls" 2>&1
             tls_rc=$?
             set -e
-            echo "TLS_RC=$tls_rc"
-            grep -E 'subject=|Verify return code:|Verification:' "$tls" | head -n6 || true
+            tls_verify="$(grep -E 'Verify return code:|Verification:' "$tls" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g' | head -c 180 || true)"
 
             remote="$RUNNER_TEMP/index-${ip//./-}.html"
             set +e
             timeout 30 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p 21 "$ip" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 12; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no; cd '$FTP_SERVER_DIR'; get index.html -o '$remote'; bye"
             auth_rc=$?
             set -e
-            echo "FTP_GET_RC=$auth_rc"
+
             if [[ "$auth_rc" -eq 0 && -s "$remote" ]]; then
               remote_sha="$(sha256sum "$remote" | awk '{print $1}')"
-              echo "FTP_INDEX_SHA256=$remote_sha"
-              if [[ "$remote_sha" == "$live_sha" ]]; then echo 'MATCHES_PUBLIC_HTTPS=YES'; else echo 'MATCHES_PUBLIC_HTTPS=NO'; fi
-              echo -n 'FTP_RELEASE='; grep -o 'worldz-release[^>]*' "$remote" | head -n1 || true
-              echo -n 'FTP_TITLE='; sed -n 's:.*<title>\(.*\)</title>.*:\1:p' "$remote" | head -n1 || true
+              remote_release="$(grep -o 'worldz-release[^>]*' "$remote" | head -n1 || true)"
+              match='NO'; [[ "$remote_sha" == "$live_sha" ]] && match='YES'
+              echo "::warning title=FTPS Candidate $ip::PORT21=open TLS_RC=$tls_rc FTP_GET_RC=0 SHA=$remote_sha MATCH_PUBLIC=$match RELEASE=${remote_release:-none} TLS=${tls_verify:-none}"
+            else
+              echo "::warning title=FTPS Candidate $ip::PORT21=open TLS_RC=$tls_rc FTP_GET_RC=$auth_rc TLS=${tls_verify:-none}"
             fi
           done
