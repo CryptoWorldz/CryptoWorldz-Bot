@@ -42,14 +42,26 @@ assert.match(chest, /THE ONEWORLDZ HOPE CHEST/i, 'Hope Chest identity missing');
 assert.match(chest, /pdc-hope-chest\.png/, 'Approved Hope Chest raster is not used');
 assert.match(chest, /data-approved-art="pdc-hope-chest"/, 'Hope Chest approved-art marker missing');
 assert.match(chest, /glass-dock/, 'Hope Chest glass button dock missing');
-assert.match(chest, /not presented as active|not presented as current|not presented as active launches|not presented as active launches or endorsements/i, 'Legacy archive disclaimer missing');
+assert.match(chest, /not presented as active launches/i, 'Legacy archive disclaimer missing');
 assert.match(chest, /Watch the chest\. Watch the Worldz\./i, 'Hope Chest legacy clue missing');
 
 const tokens = [
-  ['Devy','4vfa4vqqWq8qax1BeBtSaohvE898MD4x6diL2z5nBcDr'],['Tony','8TSZFxu5fZY6A4VP7yhUWXPjieTA2BQaqqxSd7X4wUQA'],['Dream','GiuPbVzaWtoLkb41FZ2zsiLcpzyR32LdG9hNpkDAgNmX'],['Guru','HASXsaoHbMQS6WC79BBus4wduEQ1FMqomLCbcBATi1x2'],['Mum','9kbUPambLUzsoLbJDgEqKTwAwLUZiCgmcXinMmBWqc3D'],['PJ','AjAHSAH5ea8yWZ9yPBQm1h9Qp1VmXLufhPQN36zpEaMq'],['Oakwyn','zF3ahKvi1LcLj3hxn7JPtVya5CkMkgXW5JW9KUj2yZc'],['Reagan','9WUncJ4hs9FEZeWDxvjk3AJR3ZADJ6tA5TJ1zuvDbqr1'],['Thirteen','9Hpb8P8if2qGPVVJeBePzhksA2v5MiHWUVKv8JB7n2Qw'],['Baby Emu','8QbrfnGeZGCoSrWbkJ3EE2pLD4YUxXhLVY9pW5NukdUx']
+  ['Original PDC','F82HFwxDLKFAbQWq7BmniWWxMgUerQsVu8jS357epump'],
+  ['First PDC1','PDC1K9aG6vAg5jFYkLin2tdTgwqZypsdvVHhHN2WnWw'],
+  ['PDC1-2','PDC1NgvtvLZwnopTfQdzXT5iAqBeGyLdFXEcqnvsR52'],
+  ['PDCMAGA','7mwWRQeNpwWrnNhRpC48k7xQCdjCXDWfLLuYsphupump'],
+  ['PDCShares','PDCLsBaTM3MxCzTWNoRvQejZ4kkhAWZiSc3ipCsoFuE'],
+  ['PurpleDC','9Jd67VEgqWA2K5mck7yiYGxfLrQnmrTnXXzDYE3b7MLf'],
+  ['OG Purple','DyZP9zn6vRu8J8XCQLNCREgCc12YN4JndnrmE5Upump'],
+  ['PCC1 legacy','DcekG6rLbQ3K5LtZfSMLgecfqnFAZgJUSpoY7tBgmuGv'],
+  ['INVEST','VeSt6vaWE5JsT36sVCzL21daiY7nNNs73TJcJMHgnjC'],
+  ['Limited Edition','Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY']
 ];
-for (const [name,ca] of tokens) { assert.match(chest,new RegExp(`>${name}<`),`Legacy token missing: ${name}`); assert.ok(chest.includes(ca),`Verified contract missing for ${name}`); }
-assert.equal((chest.match(/class="token-card"/g)||[]).length,10,'Hope Chest must contain exactly 10 legacy token cards');
+for (const [name,ca] of tokens) assert.ok(chest.includes(ca), `Verified contract missing for ${name}`);
+assert.equal((chest.match(/class="token-card"/g)||[]).length,10,'Hope Chest must contain exactly 10 real PDC legacy token cards');
+for (const wrong of ['Devy','Tony','Dream','Guru','Oakwyn','Baby Emu']) assert.ok(!chest.includes(`>${wrong}<`), `Unrelated legacy token still present: ${wrong}`);
+assert.ok(chest.includes('H86DeZxeSNMpVrzctTybsmU8xUegfJScsExtbjXfRYyp'), 'LMTD 2036 Dev Streamflow lock missing');
+assert.ok(chest.includes('G3kNk8F6TX4f6VpRAH6BdqPwAANbZh2fa8apAGguf1td'), 'LMTD Community Streamflow lock missing');
 
 for (const media of ['pdc-mission-board.png','pdc-hope-chest.png','pdc-crest.png']) {
   assert.ok(exists('assets','media',media), `Approved PDC media missing: ${media}`);
@@ -59,4 +71,4 @@ assert.match(css,/backdrop-filter:blur\(18px\)/,'Glass treatment missing');
 assert.match(css,/filter:none!important/,'Approved raster anti-blur rule missing');
 assert.match(htaccess,/Content-Security-Policy/,'CSP missing');
 assert.ok(!js.includes('supabase.co'),'PDC visuals must not depend on Supabase');
-console.log('PurpleDiamondCrew production gate passed: approved PNG artwork, glass Hope Chest links, seven site pages and 10 legacy records verified.');
+console.log('PurpleDiamondCrew production gate passed: approved PNG artwork, seven site pages, 10 real PDC legacy records and LMTD Streamflow locks verified.');
