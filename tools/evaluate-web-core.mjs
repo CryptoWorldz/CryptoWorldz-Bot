@@ -9,31 +9,18 @@ const webRoot = path.join(repoRoot, 'apps', 'cryptoworldz-web-core');
 const read = (relativePath) => fs.readFileSync(path.join(webRoot, relativePath), 'utf8');
 
 const requiredFiles = [
-  'index.html',
-  '404.html',
-  '.htaccess',
-  '_headers',
-  'assets/site-router.js',
-  'assets/app.js',
-  'assets/pdc-directory.js',
-  'assets/pdc-site.js',
-  'assets/pdc-site.css',
-  'assets/pdc-asset.js',
-  'assets/pdc-asset.css',
-  'assets/styles.css',
-  'assets/token-directory.css',
-  'config/worlds.js',
-  'docs/DEPLOYMENT.md',
-  'docs/REGISTRY.md',
-  'TOKEN-INTAKE.md'
+  'index.html','404.html','.htaccess','_headers','donate.html','gofundme.html','reagan-kauja.html',
+  'assets/site-router.js','assets/app.js','assets/pdc-directory.js','assets/pdc-site.js','assets/pdc-site.css',
+  'assets/pdc-asset.js','assets/pdc-asset.css','assets/styles.css','assets/token-directory.css','config/worlds.js',
+  'docs/DEPLOYMENT.md','docs/REGISTRY.md','TOKEN-INTAKE.md'
 ];
-
-for (const relativePath of requiredFiles) {
-  assert.ok(fs.existsSync(path.join(webRoot, relativePath)), `Missing required file: ${relativePath}`);
-}
+for (const relativePath of requiredFiles) assert.ok(fs.existsSync(path.join(webRoot, relativePath)), `Missing required file: ${relativePath}`);
 
 const indexSource = read('index.html');
+const donateSource = read('donate.html');
+const gofundmeSource = read('gofundme.html');
 const reaganSource = read('reagan-kauja.html');
+const commandUltimateSource = read('command-centre/ultimate/index.html');
 const routerSource = read('assets/site-router.js');
 const appSource = read('assets/app.js');
 const solworldzSource = read('assets/solworldz.js');
@@ -48,11 +35,7 @@ const fallbackSource = read('404.html');
 const headerSource = read('_headers');
 const hostingerSource = read('.htaccess');
 
-assert.doesNotThrow(() => new Function(routerSource), 'assets/site-router.js contains invalid JavaScript');
-assert.doesNotThrow(() => new Function(appSource), 'assets/app.js contains invalid JavaScript');
-assert.doesNotThrow(() => new Function(pdcDirectorySource), 'assets/pdc-directory.js contains invalid JavaScript');
-assert.doesNotThrow(() => new Function(pdcSiteSource), 'assets/pdc-site.js contains invalid JavaScript');
-assert.doesNotThrow(() => new Function(pdcAssetSource), 'assets/pdc-asset.js contains invalid JavaScript');
+for (const [name,source] of [['site router',routerSource],['app',appSource],['PDC directory',pdcDirectorySource],['PDC site',pdcSiteSource],['PDC asset',pdcAssetSource]]) assert.doesNotThrow(() => new Function(source), `${name} contains invalid JavaScript`);
 
 const context = { window: {} };
 vm.createContext(context);
@@ -62,46 +45,42 @@ assert.ok(config, 'CRYPTOWORLDZ_CONFIG was not created');
 assert.match(config.supabasePublishableKey, /^sb_publishable_/, 'Frontend must use a publishable Supabase key');
 
 const requiredDomains = {
-  'cryptoworldz.xyz': 'markets',
-  'test.oneworldz.com': 'markets',
-  'oneworldz.com': 'mission',
-  'impact.oneworldz.com': 'impact',
-  'impactbased.oneworldz.com': 'impact',
-  'law.oneworldz.com': 'law',
-  'learn.oneworldz.com': 'learn',
-  'purplediamondcrew.com': 'directory',
-  'solworldz.xyz': 'world',
-  'ethworldz.xyz': 'world',
-  'baseworldz.xyz': 'world',
-  'bnbworldz.xyz': 'world',
-  'xrpworldz.xyz': 'world',
-  'suiworldz.xyz': 'world',
-  'hyperworldz.xyz': 'world',
-  'robinworldz.xyz': 'world',
-  'bitcoinworldz.xyz': 'world',
-  'bitworldz.xyz': 'world',
-  'hodlerworldz.xyz': 'portfolio'
+  'cryptoworldz.xyz':'markets','test.oneworldz.com':'markets','oneworldz.com':'mission','impact.oneworldz.com':'impact',
+  'impactbased.oneworldz.com':'impact','law.oneworldz.com':'law','learn.oneworldz.com':'learn','purplediamondcrew.com':'directory',
+  'solworldz.xyz':'world','ethworldz.xyz':'world','baseworldz.xyz':'world','bnbworldz.xyz':'world','xrpworldz.xyz':'world',
+  'suiworldz.xyz':'world','hyperworldz.xyz':'world','robinworldz.xyz':'world','bitcoinworldz.xyz':'world','bitworldz.xyz':'world','hodlerworldz.xyz':'portfolio'
 };
-
-for (const [domain, expectedMode] of Object.entries(requiredDomains)) {
-  assert.equal(config.domains[domain]?.mode, expectedMode, `${domain} must use ${expectedMode} mode`);
-}
-
-const supportedModes = new Set(['markets', 'mission', 'impact', 'law', 'learn', 'directory', 'world', 'portfolio']);
-for (const [domain, route] of Object.entries(config.domains)) {
-  assert.ok(route.slug, `${domain} is missing a slug`);
-  assert.ok(supportedModes.has(route.mode), `${domain} uses unsupported mode ${route.mode}`);
-}
+for (const [domain, expectedMode] of Object.entries(requiredDomains)) assert.equal(config.domains[domain]?.mode, expectedMode, `${domain} must use ${expectedMode} mode`);
+const supportedModes = new Set(['markets','mission','impact','law','learn','directory','world','portfolio']);
+for (const [domain, route] of Object.entries(config.domains)) { assert.ok(route.slug, `${domain} is missing a slug`); assert.ok(supportedModes.has(route.mode), `${domain} uses unsupported mode ${route.mode}`); }
 
 assert.match(appSource, /https:\/\/purplediamondcrew\.com/, 'CryptoWorldz must link to Purple Diamond Crew');
 assert.match(appSource, /metadata\.x_url/, 'Token social metadata support is missing');
 assert.match(appSource, /feeSplitLabel/, 'Token fee split rendering is missing');
 
+// Donation / GoFundMe release gates.
+const communityFund = 'https://gofund.me/933219353';
+const reaganFund = 'https://gofund.me/c2e4fa936';
+const jayProfile = 'https://www.gofundme.com/u/jayjayteamdev';
+for (const [label, source] of [['donation directory',donateSource],['GoFundMe hub',gofundmeSource]]) {
+  assert.ok(source.includes(communityFund), `${label}: Community Survival Fund missing`);
+  assert.ok(source.includes(jayProfile), `${label}: JayJayTeamDev GoFundMe profile missing`);
+}
+assert.ok(donateSource.includes(reaganFund) && gofundmeSource.includes(reaganFund), 'Dedicated Reagan fundraiser must remain separate and present');
+assert.match(donateSource, /The Davis Family/i, 'Davis Family dedicated campaign missing');
+assert.match(gofundmeSource, /The Davis Family/i, 'Davis Family campaign missing from GoFundMe hub');
+assert.match(donateSource, /35 public support profiles/i, '35-profile Facebook support directory missing');
+assert.equal((donateSource.match(/Support Profile \d\d/g)||[]).length,35,'Donation directory must preserve all 35 recovered Facebook support profiles');
+assert.match(donateSource, /not automatic recipients of fundraiser money/i, 'Facebook recipient transparency disclosure missing');
+assert.match(gofundmeSource, /personal allocation: 0%/i, 'Zero personal allocation disclosure missing');
+assert.match(commandUltimateSource, /HUMANITARIAN \/ DONATION RAIL/i, 'Command Centre donation rail missing');
+assert.ok(commandUltimateSource.includes(communityFund) && commandUltimateSource.includes(jayProfile), 'Command Centre donation links missing');
+assert.match(hostingerSource, /RewriteRule \^gofundme\/\?\$ gofundme\.html/, 'Hostinger /gofundme route missing');
+
 assert.match(pdcDirectorySource, /slug=eq\.purple-diamond-crew/, 'PDC directory must select the verified project record');
 assert.match(pdcDirectorySource, /launch_status=in\.\(live,paused,archived\)/, 'PDC directory must include verified current and historical statuses');
 assert.match(pdcDirectorySource, /token\.contract_address && token\.verified_at/, 'PDC directory must require contract and verification data');
 assert.match(pdcDirectorySource, /does not imply current liquidity or tradability/, 'PDC historical records must include a market-status warning');
-
 assert.match(pdcSiteSource, /PAGE ONE • ACTION TEAM ON THE GROUND/, 'PDC action page is missing');
 assert.match(pdcSiteSource, /PAGE TWO • SUPPORT, CONTRIBUTIONS & APPLICATIONS/, 'PDC support page is missing');
 assert.match(pdcSiteSource, /PAGE THREE • A SECRET FOR THOSE WHO CHOOSE TO SEARCH/, 'PDC Hope Chest page is missing');
@@ -113,7 +92,6 @@ assert.match(pdcSiteSource, /if \(safeUrl\(token\.trade_url\)\) return \['Invest
 assert.match(pdcSiteSource, /not a guarantee of liquidity, price, recovery or investment return/, 'PDC revival disclosure is missing');
 assert.match(pdcStyleSource, /repeat\(5, minmax\(0, 1fr\)\)/, 'Desktop Hope Chest must use two rows of five for ten tokens');
 assert.match(pdcStyleSource, /background: rgba\(12, 7, 19, \.7\)/, 'Legacy cards must remain translucent over the treasured image');
-
 assert.match(pdcAssetSource, /rest\/v1\/site_assets/, 'Hope Chest asset must be loaded from the protected public asset registry');
 assert.match(pdcAssetSource, /slug=eq\.pdc-hope-chest/, 'Hope Chest asset slug is missing');
 assert.match(pdcAssetSource, /startsWith\('data:image\/jpeg;base64,'\)/, 'Hope Chest image data must be validated before use');
@@ -151,22 +129,6 @@ assert.match(hostingerSource, /Content-Security-Policy/, 'Hostinger security hea
 assert.match(hostingerSource, /supabase\.co/, 'Hostinger CSP must permit the Supabase registry');
 assert.match(hostingerSource, /dexscreener\.com/, 'Hostinger CSP must permit DEX Screener charts');
 
-const combinedPublicSource = [
-  indexSource,
-  routerSource,
-  appSource,
-  pdcDirectorySource,
-  pdcSiteSource,
-  pdcStyleSource,
-  pdcAssetSource,
-  pdcAssetStyleSource,
-  configSource,
-  headerSource,
-  hostingerSource
-].join('\n');
-
-for (const forbidden of ['service_role', 'SUPABASE_SERVICE_ROLE', 'sb_secret_']) {
-  assert.ok(!combinedPublicSource.includes(forbidden), `Public web files contain forbidden secret marker: ${forbidden}`);
-}
-
-console.log(`CryptoWorldz web-core evaluation passed: ${Object.keys(config.domains).length} domain routes, ${requiredFiles.length} required files.`);
+const combinedPublicSource = [indexSource,donateSource,gofundmeSource,commandUltimateSource,routerSource,appSource,pdcDirectorySource,pdcSiteSource,pdcStyleSource,pdcAssetSource,pdcAssetStyleSource,configSource,headerSource,hostingerSource].join('\n');
+for (const forbidden of ['service_role','SUPABASE_SERVICE_ROLE','sb_secret_']) assert.ok(!combinedPublicSource.includes(forbidden), `Public web files contain forbidden secret marker: ${forbidden}`);
+console.log(`CryptoWorldz web-core evaluation passed: ${Object.keys(config.domains).length} domain routes, ${requiredFiles.length} required files, donation/GoFundMe release verified.`);
