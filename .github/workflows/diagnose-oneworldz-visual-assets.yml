@@ -1,0 +1,44 @@
+name: DIAGNOSE — OneWorldz visual assets
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-oneworldz-visual-assets.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect Hope Chest assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from PIL import Image, ImageStat
+          from pathlib import Path
+          files=[
+            Path('apps/cryptoworldz-web-core/assets/images/website-core/purple-diamond-crew/hope-chest-1927-approved.jpg'),
+            Path('apps/cryptoworldz-web-core/assets/images/website-core/purple-diamond-crew/hope-chest-by-firelight.webp'),
+          ]
+          for p in files:
+            im=Image.open(p).convert('RGB')
+            stat=ImageStat.Stat(im)
+            extrema=im.getextrema()
+            print(f'ASSET={p.name}')
+            print(f'SIZE={im.width}x{im.height} bytes={p.stat().st_size}')
+            print('MEAN=' + ','.join(f'{x:.2f}' for x in stat.mean))
+            print('STDDEV=' + ','.join(f'{x:.2f}' for x in stat.stddev))
+            print(f'EXTREMA={extrema}')
+            thumb=im.copy(); thumb.thumbnail((64,64))
+            colors=thumb.getcolors(maxcolors=64*64)
+            colors=sorted(colors or [], reverse=True)[:8]
+            print(f'TOP_COLORS={colors}')
+            print('---')
+          PY
