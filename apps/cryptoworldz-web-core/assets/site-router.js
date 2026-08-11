@@ -56,4 +56,10 @@
                         : './assets/app.js';
   script.src = `${selectedScript}?v=20260809-consolidated-v1`;
   document.body.appendChild(script);
+
+  if (selectedScript === './assets/oneworldz-next.js') {
+    const supportScript = document.createElement('script');
+    supportScript.src = './assets/oneworldz-support-campaign.js?v=20260812-support-v1';
+    document.body.appendChild(supportScript);
+  }
 })();
