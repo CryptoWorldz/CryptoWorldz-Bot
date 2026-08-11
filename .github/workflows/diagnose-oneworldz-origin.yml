@@ -1,0 +1,111 @@
+name: DIAGNOSE — OneWorldz Public Origin — Non-Destructive
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - diagnostics/oneworldz-origin.request
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diagnose-oneworldz-origin
+  cancel-in-progress: false
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: oneworldz-production
+    env:
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
+      FTP_PORT: '21'
+      LOCKED_FTP_IP: '145.223.108.40'
+      REQUEST_FILE: diagnostics/oneworldz-origin.request
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate non-destructive diagnostic approval
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_commit="$(sed -n 's/^source_commit=//p' "$REQUEST_FILE" | head -n1)"
+          [[ "$source_commit" == "${{ github.event.before }}" ]]
+          [[ "$(git rev-parse HEAD^)" == "$source_commit" ]]
+          grep -Fx 'requested_by=JayJayTeamDev' "$REQUEST_FILE"
+          grep -Fx 'confirmation=APPROVE ORIGIN DIAGNOSTIC' "$REQUEST_FILE"
+          [[ "$FTP_ACCOUNT_SCOPE" == 'DOMAIN_ONLY' ]]
+          [[ "$DEPLOY_GUARD" == 'ONEWORLDZ.COM' ]]
+          [[ "$FTP_SERVER_DIR" == '/' ]]
+
+      - name: Install diagnostic clients
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp openssl curl
+
+      - name: Compare public HTTPS with candidate FTPS roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          live="$RUNNER_TEMP/live-oneworldz.html"
+          curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://oneworldz.com/?origin_diag=${GITHUB_RUN_ID}" -o "$live"
+          live_sha="$(sha256sum "$live" | awk '{print $1}')"
+          echo "PUBLIC_HTTPS_SHA256=$live_sha"
+          echo -n 'PUBLIC_RELEASE='; grep -o 'worldz-release[^>]*' "$live" | head -n1 || true
+          echo -n 'PUBLIC_TITLE='; sed -n 's:.*<title>\(.*\)</title>.*:\1:p' "$live" | head -n1 || true
+
+          web_ip="$(getent ahostsv4 oneworldz.com | awk 'NR==1{print $1}')"
+          server_ip="$(getent ahostsv4 server875.web-hosting.com | awk 'NR==1{print $1}')"
+          echo "ONEWORLDZ_DNS_IP=$web_ip"
+          echo "SERVER875_DNS_IP=$server_ip"
+          echo "LOCKED_FTP_IP=$LOCKED_FTP_IP"
+
+          candidates=("$LOCKED_FTP_IP")
+          [[ -n "$server_ip" ]] && candidates+=("$server_ip")
+          [[ -n "$web_ip" ]] && candidates+=("$web_ip")
+
+          seen=''
+          for ip in "${candidates[@]}"; do
+            [[ -n "$ip" ]] || continue
+            if grep -q "|$ip|" <<<"$seen"; then continue; fi
+            seen+="|$ip|"
+            echo "--- CANDIDATE $ip ---"
+            set +e
+            timeout 8 bash -c "</dev/tcp/$ip/21" 2>/dev/null
+            port_rc=$?
+            set -e
+            echo "PORT21_RC=$port_rc"
+            [[ "$port_rc" -eq 0 ]] || continue
+
+            tls="$RUNNER_TEMP/tls-${ip//./-}.txt"
+            set +e
+            timeout 15 openssl s_client -starttls ftp -connect "$ip:21" -servername "$ip" </dev/null >"$tls" 2>&1
+            tls_rc=$?
+            set -e
+            echo "TLS_RC=$tls_rc"
+            grep -E 'subject=|Verify return code:|Verification:' "$tls" | head -n6 || true
+
+            remote="$RUNNER_TEMP/index-${ip//./-}.html"
+            set +e
+            timeout 30 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p 21 "$ip" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 12; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no; cd '$FTP_SERVER_DIR'; get index.html -o '$remote'; bye"
+            auth_rc=$?
+            set -e
+            echo "FTP_GET_RC=$auth_rc"
+            if [[ "$auth_rc" -eq 0 && -s "$remote" ]]; then
+              remote_sha="$(sha256sum "$remote" | awk '{print $1}')"
+              echo "FTP_INDEX_SHA256=$remote_sha"
+              if [[ "$remote_sha" == "$live_sha" ]]; then echo 'MATCHES_PUBLIC_HTTPS=YES'; else echo 'MATCHES_PUBLIC_HTTPS=NO'; fi
+              echo -n 'FTP_RELEASE='; grep -o 'worldz-release[^>]*' "$remote" | head -n1 || true
+              echo -n 'FTP_TITLE='; sed -n 's:.*<title>\(.*\)</title>.*:\1:p' "$remote" | head -n1 || true
+            fi
+          done
