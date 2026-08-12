@@ -9,7 +9,6 @@ window.CRYPTOWORLDZ_CONFIG = {
 
     "oneworldz.com": { slug: "oneworldz", mode: "mission" },
     "www.oneworldz.com": { slug: "oneworldz", mode: "mission" },
-    "impact.oneworldz.com": { slug: "impactbased", mode: "impact" },
     "impactbased.oneworldz.com": { slug: "impactbased", mode: "impact" },
     "law.oneworldz.com": { slug: "robinhoodlaw", mode: "law" },
     "learn.oneworldz.com": { slug: "learnworldz", mode: "learn" },
@@ -35,8 +34,6 @@ window.CRYPTOWORLDZ_CONFIG = {
     "www.robinworldz.xyz": { slug: "robinworldz", mode: "world" },
     "bitcoinworldz.xyz": { slug: "bitcoinworldz", mode: "world" },
     "www.bitcoinworldz.xyz": { slug: "bitcoinworldz", mode: "world" },
-    "bitworldz.xyz": { slug: "bitcoinworldz", mode: "world" },
-    "www.bitworldz.xyz": { slug: "bitcoinworldz", mode: "world" },
     "hodlerworldz.xyz": { slug: "hodlerworldz", mode: "portfolio" },
     "www.hodlerworldz.xyz": { slug: "hodlerworldz", mode: "portfolio" }
   }
