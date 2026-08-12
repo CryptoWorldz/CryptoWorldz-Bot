@@ -6,7 +6,7 @@ Status: clean-slate source policy, 12 August 2026.
 
 - Keep only current website-required artwork in GitHub.
 - High-resolution originals and historical material belong outside the deployment repository.
-- Do not ship legacy `Crypto Universe` / `CryptoUniverse`, `Charity.Based`, or `Action Creates Smiles` branding.
+- Do not ship retired ecosystem, board, or orphanage branding.
 - `ImpactBased™` is the current purpose-led board identity.
 - `Action Spreads Smile's Orphanage` is the current Reagan humanitarian identity.
 - Blockchain pages use their matching approved blockchain artwork and canonical domain.
@@ -21,7 +21,7 @@ Status: clean-slate source policy, 12 August 2026.
 - Matching blockchain Worldz artwork.
 - Purple Diamond Crew Hope Chest artwork.
 
-Reagan / Action Spreads Smile's Orphanage artwork should be selected or regenerated fresh from approved current references rather than inherited from retired Action Creates media.
+Reagan / Action Spreads Smile's Orphanage artwork should be selected or regenerated fresh from approved current references rather than inherited from retired branding.
 
 ## Planned presentation direction
 
