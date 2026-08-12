@@ -5,7 +5,7 @@
   "rules": [
     "current branding only",
     "no screenshots or transport fragments",
-    "no legacy Action Creates Smiles media",
+    "no retired orphanage-brand media",
     "high-resolution originals are preserved outside the repository",
     "GitHub contains only web assets required by current builds"
   ],
