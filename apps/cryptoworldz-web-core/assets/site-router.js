@@ -17,7 +17,6 @@
     'hyperworldz.xyz',
     'robinworldz.xyz',
     'bitcoinworldz.xyz',
-    'bitworldz.xyz',
     'hodlerworldz.xyz'
   ]);
 
@@ -54,12 +53,6 @@
                       : requestedMode === 'directory'
                         ? './assets/pdc-directory.js'
                         : './assets/app.js';
-  script.src = `${selectedScript}?v=20260812-domain-routing-v1`;
+  script.src = `${selectedScript}?v=20260812-clean-slate-v1`;
   document.body.appendChild(script);
-
-  if (selectedScript === './assets/oneworldz-next.js') {
-    const supportScript = document.createElement('script');
-    supportScript.src = './assets/oneworldz-support-campaign.js?v=20260812-support-v1';
-    document.body.appendChild(supportScript);
-  }
 })();
