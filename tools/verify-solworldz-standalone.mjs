@@ -20,7 +20,7 @@ assert.match(html, /solworldz-desktop-hero\.webp/, 'Desktop approved hero missin
 assert.match(html, /solworldz-mobile-hero\.webp/, 'Mobile approved hero missing');
 assert.match(html, /blockchain-worldz-multichain-directory\.webp/, 'Approved clickable Worldz directory artwork missing');
 assert.match(html, /FLAGSHIP OPEN PIPELINE/, 'Pipeline structure missing');
-assert.match(html, /IMPACTBASED/i, 'ImpactBased link missing');
+assert.match(html, /IMPACTBASED/i, 'ImpactBased presence missing');
 assert.match(html, /ACTION CREATES SMILES/i, 'Humanitarian link missing');
 assert.match(html, /COMMAND CENTRE/i, 'Command Centre reference missing');
 assert.match(html, /Trade Station/i, 'Trade Station link missing');
@@ -37,13 +37,11 @@ assert.ok(!/assets\/site-router\.js/i.test(html), 'Standalone SolWorldz must not
 assert.ok(!/Loading the Worldz experience/i.test(html), 'Shared loading shell leaked into standalone site');
 assert.match(htaccess, /Content-Security-Policy/, 'Security policy is missing');
 
-// Retired legacy-domain hard gate. This deliberately scans the production-facing
-// source files and fails the release if the old domain is ever reintroduced.
 for (const [name, text] of [['index.html', html], ['.htaccess', htaccess]]) {
   assert.ok(!/solworld\.fun/i.test(text), `${name} contains retired SolWorld.fun reference`);
 }
 
-const requiredWorldz = [
+const liveWorldz = [
   'https://oneworldz.com',
   'https://cryptoworldz.xyz',
   'https://solworldz.xyz',
@@ -51,15 +49,25 @@ const requiredWorldz = [
   'https://baseworldz.xyz',
   'https://bnbworldz.xyz',
   'https://xrpworldz.xyz',
-  'https://suiworldz.com',
   'https://hyperworldz.xyz',
-  'https://bitcoinworldz.com',
   'https://robinworldz.xyz',
-  'https://impactbased.oneworldz.com',
-  'https://learn.oneworldz.com',
+  'https://www.based.bid/b/ImpactBased',
   'https://purplediamondcrew.com'
 ];
-for (const url of requiredWorldz) assert.ok(html.includes(url), `Clickable Worldz destination missing: ${url}`);
+for (const url of liveWorldz) assert.ok(html.includes(url), `Clickable Worldz destination missing: ${url}`);
+
+for (const name of ['SuiWorldz', 'BitcoinWorldz', 'LearnWorldz']) {
+  assert.match(html, new RegExp(`${name}<small>COMING SOON<\\/small>`), `${name} must remain visibly marked Coming Soon until its live DNS target passes`);
+}
+
+for (const blockedUntilLive of [
+  'href="https://suiworldz.com"',
+  'href="https://bitcoinworldz.com"',
+  'href="https://impactbased.oneworldz.com"',
+  'href="https://learn.oneworldz.com"'
+]) {
+  assert.ok(!html.includes(blockedUntilLive), `Unreachable Worldz destination must not be published as a clickable link: ${blockedUntilLive}`);
+}
 
 const approvedMedia = [
   path.join(mediaRoot, 'solworldz', 'solworldz-desktop-hero.webp'),
@@ -71,4 +79,4 @@ for (const file of approvedMedia) {
   assert.ok(fs.statSync(file).size > 5000, `Approved media unexpectedly small: ${path.relative(root, file)}`);
 }
 
-console.log('SolWorldz production gate passed: retired domain blocked, canonical approved media present, clickable Worldz destinations verified.');
+console.log('SolWorldz production gate passed: retired domain blocked, canonical approved media present, live Worldz clickable, unconnected Worldz safely marked pending.');
