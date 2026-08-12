@@ -1,4 +1,4 @@
-name: Fix Reagan GoFundMe Live Link
+name: Final Reagan Clean Slate Sweep
 
 on:
   push:
@@ -10,11 +10,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: fix-reagan-gofundme
+  group: final-reagan-clean-slate
   cancel-in-progress: false
 
 jobs:
-  repair:
+  clean:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -23,55 +23,94 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Confirm explicit repair request
+      - name: Confirm explicit cleanup request
         shell: bash
         run: |
           set -euo pipefail
-          test "$(sed -n 's/^confirmation=//p' diagnostics/fix-reagan-gofundme.request | tail -n1)" = 'APPROVE REAGAN GOFUNDME LIVE LINK REPAIR'
+          test "$(sed -n 's/^confirmation=//p' diagnostics/fix-reagan-gofundme.request | tail -n1)" = 'APPROVE FINAL ACTION SPREADS CLEAN SLATE'
 
-      - name: Replace only the banned fundraiser URL and bust Telegram cache
+      - name: Normalize current humanitarian identity and donation destinations
         shell: bash
         run: |
           set -euo pipefail
-          old='https://gofund.me/65129e58a'
-          new='https://www.gofundme.com/f/action-spread-smiles-organisation'
-          grep -Fq "$old" public/miniapp/app.js
-          sed -i "s#${old}#${new}#g" public/miniapp/app.js
-          grep -Fq "$new" public/miniapp/app.js
-          if grep -Fq "$old" public/miniapp/app.js; then
-            echo '::error::Banned fundraiser URL still exists in Mini App source.'
-            exit 1
-          fi
-          sed -i -E 's#(/miniapp/app\.js\?v=)[0-9.]+#\13.0.9#g' public/miniapp/index.html
-          grep -Fq '/miniapp/app.js?v=3.0.9' public/miniapp/index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
 
-      - name: Verify Zed before commit
-        run: |
-          set -euo pipefail
-          npm ci
-          npm run verify
-          npm audit --audit-level=high
+          files = [
+              Path('apps/cryptoworldz-web-core/reagan-kauja.html'),
+              Path('apps/cryptoworldz-web-core/donate.html'),
+              Path('apps/cryptoworldz-web-core/gofundme.html'),
+              Path('public/miniapp/app.js'),
+          ]
 
-      - name: Commit exact repair
+          current_name = "Action Spreads Smile's Orphanage"
+          current_profile = 'https://www.gofundme.com/u/jayjayteamdev'
+          current_reagan = 'https://gofund.me/c2e4fa936'
+          current_survival = 'https://gofund.me/933219353'
+          current_davis = 'https://www.gofundme.com/f/the-davis-family-w4qys'
+          old_fb = 'https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr'
+
+          for path in files:
+              text = path.read_text(encoding='utf-8')
+              text = re.sub(r'Action\s+Creates\s+Smiles', current_name, text, flags=re.I)
+              text = re.sub(r'Action\s+Spread\s+Smiles\s+Organisation', current_name, text, flags=re.I)
+              text = re.sub(r'Action\s+Spreads\s+Smiles(?!\'s Orphanage)', current_name, text, flags=re.I)
+              text = re.sub(r'Action\s+Spread\s+Smiles(?!\s+Organisation)', current_name, text, flags=re.I)
+              text = text.replace('action-creates-smiles', 'action-spreads-smiles-orphanage')
+              text = text.replace('https://www.gofundme.com/u/cryptouniverse', current_profile)
+              text = text.replace('https://gofund.me/65129e58a', current_reagan)
+              text = text.replace('https://gofund.me/65129e58', current_reagan)
+              text = text.replace('https://www.gofundme.com/f/action-spread-smiles-organisation', current_reagan)
+              text = re.sub(r'https://www\.gofundme\.com/f/the-davis-family-w4qys/cl/s\?[^"\'<>\s]+', current_davis, text)
+
+              # Remove Reagan's retired Facebook destination without touching other Facebook support links.
+              text = re.sub(r'\s*facebook:\s*["\']' + re.escape(old_fb) + r'["\'],?\s*\n', '\n', text)
+              text = re.sub(r'<a\b[^>]*href=["\']' + re.escape(old_fb) + r'["\'][^>]*>\s*Facebook\s*</a>', '', text, flags=re.I)
+              text = text.replace('"' + old_fb + '",', '')
+              text = text.replace(',"' + old_fb + '"', '')
+              text = text.replace('"' + old_fb + '"', '')
+              text = re.sub(r'<a href="\$\{escapeHtml\(IMPACT_CAMPAIGN\.facebook\)\}"[^>]*>Facebook</a>', '', text)
+
+              path.write_text(text, encoding='utf-8')
+
+          # Guard the four allowed GoFundMe destinations in current website / mini-app source.
+          allowed = {current_profile, current_reagan, current_survival, current_davis}
+          url_re = re.compile(r'https://(?:www\.)?gofundme\.com/[^"\'<>\s`]+|https://gofund\.me/[A-Za-z0-9]+')
+          for path in files:
+              text = path.read_text(encoding='utf-8')
+              for url in url_re.findall(text):
+                  clean = url.rstrip('.,);]')
+                  if clean not in allowed:
+                      raise SystemExit(f'Unapproved GoFundMe destination remains in {path}: {clean}')
+          PY
+
+      - name: Remove obsolete repair machinery
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name 'CryptoWorldz Repair Bot'
+          git rm -f .github/workflows/prove-reagan-gofundme-live.yml diagnostics/prove-reagan-gofundme.request
+          git rm -f apps/cryptoworldz-web-core/assets/images/website-core/deployment-media-catalog.json 2>/dev/null || true
+
+      - name: Check twice
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! git grep -n -i -E 'Action[[:space:]]+Creates[[:space:]]+Smiles' -- ':!*.zip'
+          ! git grep -n -E 'gofundme\.com/u/cryptouniverse|gofund\.me/65129e58|facebook\.com/share/196pruFjJq' -- ':!*.zip'
+          ! git grep -n -E 'gofundme\.com/f/action-spread-smiles-organisation' -- ':!*.zip'
+          node --check public/miniapp/app.js
+          node --check apps/cryptoworldz-web-core/assets/oneworldz-next.js
+          node --check apps/cryptoworldz-web-core/assets/site-router.js
+
+      - name: Commit cleanup and retire this one-use workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm -f .github/workflows/fix-reagan-gofundme.yml diagnostics/fix-reagan-gofundme.request
+          git config user.name 'CryptoWorldz Cleanup Bot'
           git config user.email 'jayjayteamdev@outlook.com'
-          git add public/miniapp/app.js public/miniapp/index.html
+          git add -A
           git diff --cached --check
-          git diff --cached --quiet && { echo '::error::No repair changes detected.'; exit 1; }
-          git commit -m 'Fix Reagan GoFundMe link in Zed Mini App'
+          git commit -m 'Final Action Spreads clean-slate sweep'
           git push origin HEAD:main
-
-      - name: Repair summary
-        if: always()
-        run: |
-          {
-            echo '## Reagan GoFundMe repair'
-            echo
-            echo '- Replaces only the stale banned fundraiser URL'
-            echo '- Sets current fundraiser: action-spread-smiles-organisation'
-            echo '- Bumps app.js cache key to v3.0.9'
-            echo '- Requires full Zed verification before commit'
-          } >> "$GITHUB_STEP_SUMMARY"
