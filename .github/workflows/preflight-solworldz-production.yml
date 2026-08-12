@@ -46,11 +46,24 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
 
-      - name: Prove FTPS login and read current root
+      - name: Inspect server TLS identity without credentials
         shell: bash
         run: |
           set -euo pipefail
           getent ahosts "$FTP_HOST" >/dev/null || { echo '::error::FTP host does not resolve'; exit 1; }
+          certs="$RUNNER_TEMP/ftp-certs.txt"
+          openssl s_client -starttls ftp -connect "${FTP_HOST}:${FTP_PORT:-21}" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt -showcerts </dev/null >"$certs" 2>/dev/null
+          awk '/-----BEGIN CERTIFICATE-----/{p=1} p{print} /-----END CERTIFICATE-----/{exit}' "$certs" > "$RUNNER_TEMP/ftp-leaf.pem"
+          test -s "$RUNNER_TEMP/ftp-leaf.pem" || { echo '::error::Unable to read FTPS leaf certificate'; exit 1; }
+          echo 'FTPS certificate identity:'
+          openssl x509 -in "$RUNNER_TEMP/ftp-leaf.pem" -noout -subject -issuer -fingerprint -sha256
+          openssl x509 -in "$RUNNER_TEMP/ftp-leaf.pem" -noout -ext subjectAltName || true
+          echo 'Certificate chain validation passed; hostname validation remains mandatory for login.'
+
+      - name: Prove FTPS login and read current root
+        shell: bash
+        run: |
+          set -euo pipefail
           export LFTP_PASSWORD="$FTP_PASSWORD"
           lftp -u "$FTP_USERNAME,$LFTP_PASSWORD" -p "${FTP_PORT:-21}" "$FTP_HOST" <<EOF
           set ftp:ssl-force true
@@ -91,6 +104,6 @@ jobs:
             echo '- Read-only: no files uploaded, deleted or changed'
             echo '- Environment guard required: SOLWORLDZ.XYZ'
             echo '- Domain-only FTP scope required'
-            echo '- TLS certificate verification required'
+            echo '- TLS certificate chain and hostname verification required'
             echo '- Public HTTPS index must byte-match the authenticated FTP-root index'
           } >> "$GITHUB_STEP_SUMMARY"
