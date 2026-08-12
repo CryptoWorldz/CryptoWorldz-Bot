@@ -1,7 +1,7 @@
 window.CRYPTOWORLDZ_CONFIG = {
   supabaseUrl: "https://hknymhhyqldtzmplzuzh.supabase.co",
   supabasePublishableKey: "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV",
-  basedBidBoardUrl: "https://www.based.bid/b/Charity.Based",
+  basedBidBoardUrl: "https://www.based.bid/b/ImpactBased",
   domains: {
     "cryptoworldz.xyz": { slug: "cryptoworldz", mode: "markets" },
     "www.cryptoworldz.xyz": { slug: "cryptoworldz", mode: "markets" },
