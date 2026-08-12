@@ -1,0 +1,60 @@
+name: Inspect Approved Worldz Master Images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-approved-worldz-master-images.yml'
+      - 'media/approved-worldz/worldz-master-images-approved-v2.zip'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    name: Inspect master archive only
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prove archive checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum media/approved-worldz/worldz-master-images-approved-v2.zip
+          cat media/approved-worldz/worldz-master-images-approved-v2.sha256
+
+      - name: List archive contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -l media/approved-worldz/worldz-master-images-approved-v2.zip | tee "$RUNNER_TEMP/archive-list.txt"
+
+      - name: Extract and inspect image files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/worldz-master"
+          unzip -q media/approved-worldz/worldz-master-images-approved-v2.zip -d "$RUNNER_TEMP/worldz-master"
+          echo '--- FILE INVENTORY ---'
+          find "$RUNNER_TEMP/worldz-master" -type f -print0 | while IFS= read -r -d '' file_path; do
+            rel="${file_path#$RUNNER_TEMP/worldz-master/}"
+            bytes="$(stat -c%s "$file_path")"
+            kind="$(file -b "$file_path")"
+            printf '%s\t%s bytes\t%s\n' "$rel" "$bytes" "$kind"
+          done | tee "$RUNNER_TEMP/file-inventory.txt"
+          echo '--- SOLWORLD MATCHES ---'
+          find "$RUNNER_TEMP/worldz-master" -type f \( -iname '*solworld*' -o -iname '*solana*' -o -iname '*worldz*' \) -printf '%P\n' | sort | tee "$RUNNER_TEMP/solworld-matches.txt"
+
+      - name: Upload inspection manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: approved-worldz-master-inspection-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/archive-list.txt
+            ${{ runner.temp }}/file-inventory.txt
+            ${{ runner.temp }}/solworld-matches.txt
+          if-no-files-found: error
+          retention-days: 14
