@@ -6,14 +6,13 @@ const targets = [
   'https://baseworldz.xyz',
   'https://bnbworldz.xyz',
   'https://xrpworldz.xyz',
-  'https://suiworldz.com',
   'https://hyperworldz.xyz',
-  'https://bitcoinworldz.com',
   'https://robinworldz.xyz',
-  'https://impactbased.oneworldz.com',
-  'https://learn.oneworldz.com',
+  'https://www.based.bid/b/ImpactBased',
   'https://purplediamondcrew.com'
 ];
+
+const pending = ['SuiWorldz', 'BitcoinWorldz', 'LearnWorldz'];
 
 async function probe(url) {
   const controller = new AbortController();
@@ -49,9 +48,11 @@ for (const target of targets) {
   console.log(`${result.reachable ? 'OK' : 'FAIL'} ${result.status || 'NET'} ${result.url}${result.finalUrl && result.finalUrl !== result.url ? ` -> ${result.finalUrl}` : ''}${result.error ? ` (${result.error})` : ''}`);
 }
 
+for (const name of pending) console.log(`PENDING ${name} — visible on SolWorldz but intentionally non-clickable until its official live destination passes this gate.`);
+
 const failures = results.filter(result => !result.reachable);
 if (failures.length) {
-  console.error(`SolWorldz link gate failed: ${failures.length} required destination(s) are not currently reachable.`);
+  console.error(`SolWorldz link gate failed: ${failures.length} published clickable destination(s) are not currently reachable.`);
   process.exit(1);
 }
-console.log(`SolWorldz link gate passed: all ${results.length} required Worldz destinations are reachable.`);
+console.log(`SolWorldz link gate passed: all ${results.length} published clickable destinations are reachable; ${pending.length} unconnected Worldz remain safely marked pending.`);
