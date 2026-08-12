@@ -1,14 +1,13 @@
 {
   "package": "Website Package Core Assets",
-  "version": "2026-08-07.1",
+  "version": "2026-08-12-clean-slate-v1",
   "deployment": "one-website-at-a-time",
-  "active_site": "OneWorldz",
   "rules": [
-    "latest approved artwork only",
-    "no screenshots",
-    "no unrelated Post Planning artwork",
-    "high-resolution originals remain preserved in the ChatGPT Library",
-    "GitHub copies are web-optimised deployment derivatives"
+    "current branding only",
+    "no screenshots or transport fragments",
+    "no legacy Action Creates Smiles media",
+    "high-resolution originals are preserved outside the repository",
+    "GitHub contains only web assets required by current builds"
   ],
   "assets": {
     "oneworldz": [
@@ -19,17 +18,7 @@
     ],
     "purple_diamond_crew": [
       "purple-diamond-crew/hope-chest-by-firelight.webp"
-    ],
-    "action_creates_smiles": [
-      "action-creates-smiles/action-creates-smiles-reagan-kids.webp",
-      "action-creates-smiles/kids-cartoon-bunk-bed.webp",
-      "action-creates-smiles/kids-cartoon-kindness-changes-everything.webp"
     ]
   },
-  "next_sites": [
-    "CryptoWorldz",
-    "SolWorldz",
-    "Purple Diamond Crew",
-    "ImpactBased / donation pages"
-  ]
+  "active_humanitarian_identity": "Action Spreads Smile's Orphanage"
 }
