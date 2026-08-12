@@ -11,7 +11,6 @@ const out = path.join(root, 'dist', 'solworldz');
 const files = [
   ['index.html', path.join(site, 'index.html')],
   ['.htaccess', path.join(site, '.htaccess')],
-  ['PRODUCTION_MEDIA_CONTRACT.md', path.join(site, 'PRODUCTION_MEDIA_CONTRACT.md')],
   ['assets/images/website-core/solworldz/solworldz-desktop-hero.webp', path.join(mediaRoot, 'solworldz', 'solworldz-desktop-hero.webp')],
   ['assets/images/website-core/solworldz/solworldz-mobile-hero.webp', path.join(mediaRoot, 'solworldz', 'solworldz-mobile-hero.webp')],
   ['assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp', path.join(mediaRoot, 'blockchain', 'blockchain-worldz-multichain-directory.webp')]
@@ -25,7 +24,7 @@ fs.mkdirSync(out, { recursive: true });
 const manifest = {
   release: 'SolWorldz production candidate',
   domain: 'solworldz.xyz',
-  legacyDomainPolicy: 'SolWorld.fun is retired and forbidden from release output',
+  legacyDomainPolicy: 'retired legacy domain references are forbidden from public release output',
   generatedAt: new Date().toISOString(),
   files: []
 };
@@ -45,7 +44,7 @@ for (const [relative, source] of files) {
 
 for (const relative of ['index.html', '.htaccess']) {
   const text = fs.readFileSync(path.join(out, relative), 'utf8');
-  if (/solworld\.fun/i.test(text)) throw new Error(`Retired SolWorld.fun reference found in release ${relative}`);
+  if (/solworld\.fun/i.test(text)) throw new Error(`Retired legacy-domain reference found in release ${relative}`);
 }
 
 fs.writeFileSync(path.join(out, 'release-manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
