@@ -1,0 +1,40 @@
+name: Diagnose OneWorldz Deploy Environment
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-oneworldz-deploy-env.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: oneworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/public_html' }}
+      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      EXPECTED_GUARD: ONEWORLDZ.COM
+    steps:
+      - name: Report safe deployment readiness
+        shell: bash
+        run: |
+          set -u
+          fail=0
+          check() { if eval "$2"; then echo "$1=PASS"; else echo "$1=FAIL"; fail=1; fi; }
+          check FTP_ACCOUNT_SCOPE "[[ \"$FTP_ACCOUNT_SCOPE\" == 'DOMAIN_ONLY' ]]"
+          check DEPLOY_GUARD "[[ \"$DEPLOY_GUARD\" == \"$EXPECTED_GUARD\" ]]"
+          check FTP_SERVER_DIR "[[ \"$FTP_SERVER_DIR\" == '/' || \"$FTP_SERVER_DIR\" == '/public_html' ]]"
+          check FTP_HOST "[[ -n \"$FTP_HOST\" ]]"
+          check FTP_USERNAME "[[ -n \"$FTP_USERNAME\" ]]"
+          check FTP_PASSWORD "[[ -n \"$FTP_PASSWORD\" ]]"
+          check FTP_PORT "[[ \"$FTP_PORT\" == '21' ]]"
+          exit "$fail"
