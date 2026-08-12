@@ -1,0 +1,207 @@
+name: Recover SolWorldz Approved Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/solworldz-recover.request'
+
+permissions:
+  contents: read
+
+env:
+  EXPECTED_GUARD: SOLWORLDZ.XYZ
+  REQUEST_FILE: deployments/solworldz-recover.request
+
+jobs:
+  recover:
+    name: Prove locally, restore approved package, prove live bytes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: solworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR }}
+      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+    steps:
+      - name: Check out recovery source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Verify one-time recovery request
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="$(grep -E '^target=' "$REQUEST_FILE" | tail -n1 | cut -d= -f2-)"
+          source_commit="$(grep -E '^source_commit=' "$REQUEST_FILE" | tail -n1 | cut -d= -f2-)"
+          requested_by="$(grep -E '^requested_by=' "$REQUEST_FILE" | tail -n1 | cut -d= -f2-)"
+          authorization="$(grep -E '^authorization=' "$REQUEST_FILE" | tail -n1 | cut -d= -f2-)"
+          parent="$(git rev-parse HEAD^)"
+          [[ "$target" == 'solworldz' ]]
+          [[ "$source_commit" == "$parent" ]]
+          [[ "$requested_by" == 'JayJayTeamDev' ]]
+          [[ "$authorization" == 'GO' ]]
+          echo 'One-time SolWorldz recovery request verified.'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build and hard-gate exact approved package
+        run: |
+          node tools/verify-solworldz-standalone.mjs
+          node tools/audit-solworldz-links.mjs
+          node tools/build-solworldz-release.mjs
+          if grep -RFiq 'solworld.fun' dist/solworldz; then
+            echo '::error::Retired SolWorld.fun leaked into approved package.'
+            exit 1
+          fi
+
+      - name: Prove desktop and mobile before touching hosting
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOLWORLDZ_RELEASE_ROOT='dist/solworldz' SOLWORLDZ_RELEASE_PORT=8088 node tools/serve-solworldz-release.mjs > "$RUNNER_TEMP/solworldz-local-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for i in $(seq 1 30); do
+            if curl -fsS 'http://127.0.0.1:8088/' -o /dev/null; then ready=true; break; fi
+            sleep 0.2
+          done
+          [[ "$ready" == 'true' ]] || { cat "$RUNNER_TEMP/solworldz-local-server.log"; echo '::error::Local release server failed'; exit 1; }
+          SOLWORLDZ_PROOF_URL='http://127.0.0.1:8088/' SOLWORLDZ_BROWSER_PROOF_DIR='dist/solworldz-browser-proof' node tools/check-solworldz-live-browser.mjs
+          kill "$server_pid" 2>/dev/null || true
+          trap - EXIT
+
+      - name: Upload pre-deployment desktop/mobile proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: solworldz-approved-browser-proof-${{ github.run_id }}
+          path: dist/solworldz-browser-proof
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Validate domain-only Hostinger gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${FTP_HOST:-}"
+          test -n "${FTP_USERNAME:-}"
+          test -n "${FTP_PASSWORD:-}"
+          [[ "${FTP_PORT:-21}" == '21' ]]
+          [[ "${FTP_SERVER_DIR:-/}" == '/' ]]
+          [[ "${FTP_ACCOUNT_SCOPE:-}" == 'DOMAIN_ONLY' ]]
+          [[ "${DEPLOY_GUARD:-}" == "$EXPECTED_GUARD" ]]
+
+      - name: Install FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+      - name: Prove Hostinger TLS identity independently
+        shell: bash
+        run: |
+          set -euo pipefail
+          ftp_ip="$(getent ahostsv4 "$FTP_HOST" | awk 'NR==1{print $1}')"
+          test -n "$ftp_ip"
+          openssl s_client -starttls ftp -connect "$ftp_ip:${FTP_PORT:-21}" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt -showcerts </dev/null > "$RUNNER_TEMP/ftp-certs.txt" 2>/dev/null
+          awk '/-----BEGIN CERTIFICATE-----/{p=1} p{print} /-----END CERTIFICATE-----/{exit}' "$RUNNER_TEMP/ftp-certs.txt" > "$RUNNER_TEMP/ftp-leaf.pem"
+          openssl x509 -in "$RUNNER_TEMP/ftp-leaf.pem" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io'
+          fingerprint="$(openssl x509 -in "$RUNNER_TEMP/ftp-leaf.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
+          echo "FTP_CERT_SHA256=$fingerprint" >> "$GITHUB_ENV"
+          echo 'CA-verified Hostinger FTPS identity established before login.'
+
+      - name: Record current root state without blocking recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          if lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "${FTP_PORT:-21}" "$FTP_HOST" -e "set cmd:fail-exit true; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; set net:max-retries 1; set net:timeout 20; cd ${FTP_SERVER_DIR:-/}; get index.html -o '$RUNNER_TEMP/before-recovery-index.html'; bye" >/dev/null 2>&1; then
+            sha256sum "$RUNNER_TEMP/before-recovery-index.html" | sed 's#  .*#  pre-recovery-index.html#'
+          else
+            echo 'Current FTP root has no readable index.html; approved release recovery will restore it.'
+          fi
+
+      - name: Restore approved assets first and index last
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "${FTP_PORT:-21}" "$FTP_HOST" <<EOF
+          set cmd:fail-exit true
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          set net:max-retries 1
+          set net:timeout 30
+          cd ${FTP_SERVER_DIR:-/}
+          mkdir -p assets/images/website-core/solworldz
+          mkdir -p assets/images/website-core/blockchain
+          put dist/solworldz/assets/images/website-core/solworldz/solworldz-desktop-hero.webp -o assets/images/website-core/solworldz/solworldz-desktop-hero.webp
+          put dist/solworldz/assets/images/website-core/solworldz/solworldz-mobile-hero.webp -o assets/images/website-core/solworldz/solworldz-mobile-hero.webp
+          put dist/solworldz/assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp -o assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp
+          put dist/solworldz/.htaccess -o .htaccess
+          put dist/solworldz/index.html -o index.html
+          bye
+          EOF
+          echo 'Approved SolWorldz package restored with index.html last.'
+
+      - name: Re-prove FTPS certificate stayed stable
+        shell: bash
+        run: |
+          set -euo pipefail
+          ftp_ip="$(getent ahostsv4 "$FTP_HOST" | awk 'NR==1{print $1}')"
+          openssl s_client -starttls ftp -connect "$ftp_ip:${FTP_PORT:-21}" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt -showcerts </dev/null > "$RUNNER_TEMP/ftp-certs-after.txt" 2>/dev/null
+          awk '/-----BEGIN CERTIFICATE-----/{p=1} p{print} /-----END CERTIFICATE-----/{exit}' "$RUNNER_TEMP/ftp-certs-after.txt" > "$RUNNER_TEMP/ftp-leaf-after.pem"
+          after="$(openssl x509 -in "$RUNNER_TEMP/ftp-leaf-after.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
+          [[ "$after" == "$FTP_CERT_SHA256" ]]
+
+      - name: Prove exact approved HTML and image bytes are live
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://solworldz.xyz'
+          proof="recoveryproof=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          local_sha="$(sha256sum dist/solworldz/index.html | awk '{print $1}')"
+          matched=false
+          for attempt in $(seq 1 12); do
+            if curl -L -fsS --compressed -H 'Cache-Control: no-cache' "$base/?$proof-$attempt" -o "$RUNNER_TEMP/live-index.html"; then
+              live_sha="$(sha256sum "$RUNNER_TEMP/live-index.html" | awk '{print $1}')"
+              if [[ "$live_sha" == "$local_sha" ]]; then matched=true; break; fi
+            fi
+            sleep 2
+          done
+          [[ "$matched" == 'true' ]] || { echo '::error::Live HTML did not converge to approved release'; exit 1; }
+          grep -Fq 'Welcome to <span>SolWorldz</span>' "$RUNNER_TEMP/live-index.html"
+          ! grep -Fiq 'solworld.fun' "$RUNNER_TEMP/live-index.html"
+          files=(
+            'assets/images/website-core/solworldz/solworldz-desktop-hero.webp'
+            'assets/images/website-core/solworldz/solworldz-mobile-hero.webp'
+            'assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp'
+          )
+          for file in "${files[@]}"; do
+            curl -L -fsS --compressed -H 'Cache-Control: no-cache' "$base/$file?$proof" -o "$RUNNER_TEMP/$(basename "$file")"
+            [[ "$(sha256sum "$RUNNER_TEMP/$(basename "$file")" | awk '{print $1}')" == "$(sha256sum "dist/solworldz/$file" | awk '{print $1}')" ]]
+          done
+          node tools/audit-solworldz-links.mjs
+          echo 'Exact approved HTML, all three approved images and all published Worldz links are live.'
+
+      - name: Mark recovery proof complete
+        run: |
+          {
+            echo '## SolWorldz Approved Release — LIVE'
+            echo '- Desktop and mobile release rendering proved before deployment'
+            echo '- Retired SolWorld.fun: hard blocked'
+            echo '- Domain-only FTPS safety gate: passed'
+            echo '- Approved assets deployed before index.html'
+            echo '- Live HTML SHA-256: exact match'
+            echo '- Live approved image SHA-256 values: exact match'
+            echo '- Published Worldz links: passed'
+            echo '- Zed and Auto: untouched'
+          } >> "$GITHUB_STEP_SUMMARY"
