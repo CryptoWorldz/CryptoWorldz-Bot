@@ -8,7 +8,7 @@ The repository is not a permanent image archive. It contains only media required
 
 - Current branding only.
 - `Action Spreads Smile's Orphanage` is the only active Reagan/orphanage identity.
-- Do not discover or deploy retired `Action Creates Smiles`, `CryptoUniverse`, or `Charity.Based` artwork.
+- Do not discover or deploy retired orphanage, legacy ecosystem, or retired board artwork.
 - Preserve the Hope Chest and current Worldz visual anchors required by active designs.
 - Select website-specific derivatives only after their source artwork is deliberately approved.
 - Do not manufacture semantic aliases by copying the same bytes under different names.
