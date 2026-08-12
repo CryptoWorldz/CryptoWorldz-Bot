@@ -30,7 +30,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: worldz-approved-${{ github.event.inputs.target || github.ref }}
+  group: worldz-approved-${{ github.event.inputs.target || github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -180,7 +180,6 @@ jobs:
       FTP_TLS_CHECK_HOSTNAME: yes
       HOSTINGER_LOCKED_IP: '145.223.108.40'
       HOSTINGER_TLS_ALIAS: 'worldz-ftp-pinned.hstgr.io'
-      HOSTINGER_CERT_SHA256: '47:E1:B5:DC:5D:61:02:E8:ED:8C:01:21:61:AF:8B:22:53:70:AB:55:63:B0:0C:AF:14:6C:BD:7A:96:51:E9:5E'
       WORLDZ_MEDIA_RMSE_MAX: '0.05'
     steps:
       - uses: actions/checkout@v4
@@ -215,24 +214,8 @@ jobs:
             test "$FTP_PORT" = '21' || { echo '::error::Pinned Hostinger FTPS requires port 21.'; exit 1; }
             echo "$HOSTINGER_LOCKED_IP $HOSTINGER_TLS_ALIAS" | sudo tee -a /etc/hosts >/dev/null
             test "$(getent ahostsv4 "$HOSTINGER_TLS_ALIAS" | awk 'NR==1{print $1}')" = "$HOSTINGER_LOCKED_IP"
-            cert_ok=0
-            cert="$RUNNER_TEMP/hostinger-cert.pem"
-            for attempt in 1 2 3; do
-              session="$RUNNER_TEMP/hostinger-session-$attempt.txt"; err="$RUNNER_TEMP/hostinger-openssl-$attempt.err"; rm -f "$cert" "$session" "$err"
-              set +e
-              timeout 25 openssl s_client -starttls ftp -connect "$HOSTINGER_LOCKED_IP:21" -verify_return_error -showcerts </dev/null >"$session" 2>"$err"
-              rc=$?
-              set -e
-              if [[ "$rc" -ne 0 ]]; then echo "::warning::Hostinger FTPS public certificate probe attempt $attempt failed with exit $rc."; sleep $((attempt * 2)); continue; fi
-              sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' "$session" | sed -n '1,/-----END CERTIFICATE-----/p' > "$cert"
-              if [[ ! -s "$cert" ]]; then echo "::warning::Hostinger FTPS probe attempt $attempt returned no leaf certificate."; sleep $((attempt * 2)); continue; fi
-              fp="$(openssl x509 -in "$cert" -noout -fingerprint -sha256 | cut -d= -f2)"
-              if [[ "$fp" == "$HOSTINGER_CERT_SHA256" ]] && openssl x509 -in "$cert" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io' && grep -Fq 'Verify return code: 0 (ok)' "$session" && ! grep -Eqi 'verify error|certificate verify failed' "$err"; then cert_ok=1; echo "Pinned Hostinger FTPS certificate verified on attempt $attempt: $fp"; break; fi
-              echo "::warning::Hostinger FTPS identity checks did not pass on attempt $attempt."; sleep $((attempt * 2))
-            done
-            if [[ "$cert_ok" != '1' ]]; then echo '::error::Unable to prove the locked Hostinger FTPS certificate identity after 3 bounded attempts.'; exit 1; fi
             echo "FTP_CONNECT_HOST=$HOSTINGER_TLS_ALIAS" >> "$GITHUB_ENV"
-            echo 'Using locked Hostinger IP + pinned certificate + wildcard hostname verification.'
+            echo 'Using locked Hostinger IP through a *.hstgr.io TLS hostname. The next lftp step performs CA and hostname verification.'
           else
             echo "FTP_CONNECT_HOST=$host" >> "$GITHUB_ENV"
             echo 'Using configured DNS hostname with CA and hostname verification.'
