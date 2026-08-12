@@ -29,4 +29,15 @@ if (!Array.isArray(manifest.assets) || manifest.assets.length !== 34) throw new 
 if (manifest.missing?.length) throw new Error(`approved image bundle reports missing assets: ${manifest.missing.join(', ')}`);
 NODE
 
-echo "Approved Worldz master imagery restored exactly as stored in the approved archive at $out_dir"
+# Charity.Based is retired branding. Historical files may remain inside the old
+# mixed archive until it is safely split, but they must never enter a new build
+# or deployment-discovery tree. ImpactBased is the only active board branding.
+find "$out_dir" -type f \( -iname '*charity.based*' -o -iname '*charity-based*' -o -iname '*charity_based*' -o -iname '*charitybased*' \) -delete
+find "$out_dir" -type d \( -iname '*charity.based*' -o -iname '*charity-based*' -o -iname '*charity_based*' -o -iname '*charitybased*' \) -empty -delete 2>/dev/null || true
+
+if find "$out_dir" -type f \( -iname '*charity.based*' -o -iname '*charity-based*' -o -iname '*charity_based*' -o -iname '*charitybased*' \) | grep -q .; then
+  echo 'retired Charity.Based media survived deployment-media filtering' >&2
+  exit 1
+fi
+
+echo "Approved Worldz imagery restored for current use; retired Charity.Based media excluded from deployment discovery at $out_dir"
