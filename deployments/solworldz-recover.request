@@ -1,0 +1,5 @@
+target=solworldz
+source_commit=3906c8e31899192936d9c57a4fe20650c3ba85f9
+requested_by=JayJayTeamDev
+authorization=GO
+reason=restore approved SolWorldz package after headless browser WAF false-negative
