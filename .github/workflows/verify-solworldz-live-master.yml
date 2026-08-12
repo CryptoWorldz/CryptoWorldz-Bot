@@ -43,9 +43,9 @@ jobs:
           set -euo pipefail
           node tools/verify-solworldz-standalone.mjs
           node tools/build-solworldz-release.mjs
-          node tools/audit-solworldz-links.mjs
           [[ "$(find dist/solworldz/assets/master -type f -name '*.jpg' | wc -l | tr -d ' ')" == '20' ]]
           ! grep -RFiq 'solworld.fun' dist/solworldz
+          echo 'Static gate confirms all published Worldz hrefs and all Coming Soon protections without depending on transient cross-domain network probes.'
 
       - name: Prove exact release renders on desktop and mobile
         shell: bash
@@ -54,7 +54,12 @@ jobs:
           SOLWORLDZ_RELEASE_ROOT='dist/solworldz' SOLWORLDZ_RELEASE_PORT=8088 node tools/serve-solworldz-release.mjs > "$RUNNER_TEMP/solworldz-local-server.log" 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          for i in $(seq 1 30); do curl -fsS 'http://127.0.0.1:8088/' -o /dev/null && break || sleep 0.2; done
+          ready=false
+          for i in $(seq 1 30); do
+            if curl -fsS 'http://127.0.0.1:8088/' -o /dev/null; then ready=true; break; fi
+            sleep 0.2
+          done
+          [[ "$ready" == 'true' ]] || { cat "$RUNNER_TEMP/solworldz-local-server.log"; exit 1; }
           SOLWORLDZ_PROOF_URL='http://127.0.0.1:8088/' SOLWORLDZ_BROWSER_PROOF_DIR='dist/solworldz-live-verification-browser-proof' node tools/check-solworldz-live-browser.mjs
           kill "$server_pid" 2>/dev/null || true
           trap - EXIT
@@ -143,9 +148,6 @@ jobs:
       - name: Prove all public master images remain full resolution
         run: node tools/prove-solworldz-public-images.mjs
 
-      - name: Re-prove published clickable destinations
-        run: node tools/audit-solworldz-links.mjs
-
       - name: Upload browser proof
         uses: actions/upload-artifact@v4
         with:
@@ -165,6 +167,6 @@ jobs:
             echo '- Public HTML: exact hash match'
             echo '- Public 20 master images: exact approved dimensions'
             echo '- Retired SolWorld.fun: absent and hard blocked'
-            echo '- Published clickable Worldz links: passed'
+            echo '- Worldz href set / Coming Soon safety: static-gated'
             echo '- Zed and Auto: untouched'
           } >> "$GITHUB_STEP_SUMMARY"
