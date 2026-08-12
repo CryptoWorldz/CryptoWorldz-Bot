@@ -7,20 +7,21 @@ on:
     paths:
       - '.github/workflows/prepare-solworldz-release.yml'
       - 'apps/worldz-sites/solworldz/**'
-      - 'apps/cryptoworldz-web-core/assets/images/website-core/solworldz/**'
-      - 'apps/cryptoworldz-web-core/assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp'
+      - 'media/approved-worldz/worldz-master-images-approved-v2.zip'
       - 'tools/verify-solworldz-standalone.mjs'
       - 'tools/build-solworldz-release.mjs'
       - 'tools/audit-solworldz-links.mjs'
+      - 'tools/serve-solworldz-release.mjs'
+      - 'tools/check-solworldz-live-browser.mjs'
 
 permissions:
   contents: read
 
 jobs:
   prepare:
-    name: Build and prove SolWorldz release package
+    name: Build and prove SolWorldz approved-master release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Check out approved source
         uses: actions/checkout@v4
@@ -33,41 +34,60 @@ jobs:
       - name: Run SolWorldz hard gate
         run: node tools/verify-solworldz-standalone.mjs
 
-      - name: Prove clickable Worldz destinations are live
+      - name: Prove published clickable Worldz destinations
         run: node tools/audit-solworldz-links.mjs
 
-      - name: Assemble canonical release folder
+      - name: Assemble exact approved-master release
         run: node tools/build-solworldz-release.mjs
 
-      - name: Prove retired domain is absent from public package
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -RFiq 'solworld.fun' dist/solworldz; then
-            echo '::error::Retired SolWorld.fun reference leaked into the public release package.'
-            exit 1
-          fi
-          echo 'Legacy-domain gate passed.'
-
-      - name: Prove required production files and hashes
+      - name: Prove release surface and image inventory
         shell: bash
         run: |
           set -euo pipefail
           test -s dist/solworldz/index.html
           test -s dist/solworldz/.htaccess
-          test -s dist/solworldz/assets/images/website-core/solworldz/solworldz-desktop-hero.webp
-          test -s dist/solworldz/assets/images/website-core/solworldz/solworldz-mobile-hero.webp
-          test -s dist/solworldz/assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp
           test -s dist/solworldz/release-manifest.json
-          sha256sum dist/solworldz/assets/images/website-core/solworldz/solworldz-desktop-hero.webp
-          sha256sum dist/solworldz/assets/images/website-core/solworldz/solworldz-mobile-hero.webp
-          sha256sum dist/solworldz/assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp
+          test -s dist/solworldz/assets/master/blockchains/solworldz.jpg
+          test -s dist/solworldz/assets/master/humanitarian/action-creates-smiles-banner.jpg
+          test -s dist/solworldz/assets/master/cryptoworldz/impactbased.jpg
+          test -s dist/solworldz/assets/master/cryptoworldz/command-centre-five.jpg
+          image_count="$(find dist/solworldz/assets/master -type f -name '*.jpg' | wc -l | tr -d ' ')"
+          [[ "$image_count" == '20' ]] || { echo "::error::Expected 20 approved master images, found $image_count"; exit 1; }
+          if grep -RFiq 'solworld.fun' dist/solworldz; then
+            echo '::error::Retired SolWorld.fun leaked into public release package.'
+            exit 1
+          fi
+          if grep -RFiq 'assets/images/website-core' dist/solworldz/index.html; then
+            echo '::error::Legacy website-core image path leaked into SolWorldz.'
+            exit 1
+          fi
+          sha256sum dist/solworldz/assets/master/blockchains/solworldz.jpg
+          echo "Approved master image count: $image_count"
+
+      - name: Prove exact candidate on desktop and mobile
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOLWORLDZ_RELEASE_ROOT='dist/solworldz' SOLWORLDZ_RELEASE_PORT=8088 node tools/serve-solworldz-release.mjs > "$RUNNER_TEMP/solworldz-local-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for i in $(seq 1 30); do
+            if curl -fsS 'http://127.0.0.1:8088/' -o /dev/null; then ready=true; break; fi
+            sleep 0.2
+          done
+          [[ "$ready" == 'true' ]] || { cat "$RUNNER_TEMP/solworldz-local-server.log"; echo '::error::Local release server failed'; exit 1; }
+          SOLWORLDZ_PROOF_URL='http://127.0.0.1:8088/' SOLWORLDZ_BROWSER_PROOF_DIR='dist/solworldz-browser-proof' node tools/check-solworldz-live-browser.mjs
+          kill "$server_pid" 2>/dev/null || true
+          trap - EXIT
 
       - name: Upload reviewable production candidate
         uses: actions/upload-artifact@v4
         with:
           name: solworldz-production-candidate-${{ github.run_id }}
-          path: dist/solworldz
+          path: |
+            dist/solworldz
+            dist/solworldz-browser-proof
           if-no-files-found: error
           retention-days: 14
 
@@ -77,9 +97,11 @@ jobs:
           {
             echo '## SolWorldz Production Candidate'
             echo '- Active destination: https://solworldz.xyz'
-            echo '- Retired SolWorld.fun reference: BLOCKED by hard gate'
-            echo '- Approved desktop/mobile SolWorldz artwork: packaged from canonical repository assets'
-            echo '- Clickable Worldz network: static + live-destination gated'
+            echo '- Retired SolWorld.fun: BLOCKED by hard gate'
+            echo '- Image source: locked approved Worldz master archive'
+            echo '- 20 exact approved master images required'
+            echo '- Clickable Worldz destinations: live-gated'
+            echo '- Desktop browser proof: required before hosting changes'
+            echo '- Mobile browser proof: required before hosting changes'
             echo '- No production upload performed by this workflow'
-            echo '- Next gate: backup -> guarded deploy -> live desktop/mobile/link proof -> owner acceptance'
           } >> "$GITHUB_STEP_SUMMARY"
