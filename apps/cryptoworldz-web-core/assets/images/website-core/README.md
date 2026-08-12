@@ -1,27 +1,20 @@
 # Website Package Core Assets
 
-Curated website artwork package for the Worldz ecosystem.
+Current web-optimised assets required by the Worldz websites.
 
-## Current deployment slice
+## Clean-slate rules
 
-**OneWorldz — 2026-08-07.1**
+- Use current brand identities only.
+- `Action Spreads Smile's Orphanage` is the active Reagan humanitarian identity.
+- Legacy `Action Creates Smiles` artwork is not part of deployment discovery.
+- Keep only web assets required by a current build; personal/archive originals stay outside this repository.
+- No screenshots, Base64 transport fragments, generic placeholders, or misleading renamed copies.
+- Build one website at a time and verify the real public result before calling it successful.
 
-The first website update uses only the approved visual family:
+## Current retained visual anchors
 
-- OneWorldz latest hero artwork
-- latest multi-chain Blockchain Worldz directory artwork
-- Purple Diamond Crew Hope Chest background
-- Reagan and the kids / Action Creates Smiles artwork
-- latest kids cartoon recreation artwork
+- OneWorldz current hero artwork
+- Blockchain Worldz directory artwork
+- Purple Diamond Crew Hope Chest artwork
 
-## Source policy
-
-- No screenshots are included.
-- No unrelated Post Planning artwork is included.
-- High-resolution originals stay preserved in the ChatGPT Library group `/Website Package Core Assets`.
-- Files in this repository are web-optimised deployment derivatives.
-- Sites are updated one at a time so each release can be checked before the next site is changed.
-
-## Runtime wiring
-
-`assets/oneworldz-core-assets.js` applies this package only to the OneWorldz runtime and leaves the other Worldz sites untouched.
+New Reagan / Action Spreads Smile's Orphanage artwork should be generated or selected fresh for the current build rather than inherited from the retired Action Creates set.
