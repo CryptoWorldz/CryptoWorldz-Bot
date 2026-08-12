@@ -1,60 +1,34 @@
-# WORLDZ MASTER IMAGE LIBRARY — DEPLOYMENT CONTRACT
+# WORLDZ MASTER IMAGE LIBRARY — CURRENT BUILD RULES
 
-Status: staging gate for `worldz-consolidated-rollout-20260809`.
+Status: clean-slate source policy, 12 August 2026.
 
 ## Hard rules
 
-- Use only approved CryptoWorldz / OneWorldz artwork supplied by JayJay in the build conversation.
-- Do not substitute generic gradients, abstract placeholder art, emoji stand-ins, low-resolution cards, or newly invented imagery.
-- Do not ship legacy `Crypto Universe` / `CryptoUniverse` branding.
-- `Action Creates Smiles` is excluded from this rollout unless explicitly re-approved.
-- Blockchain pages use their matching approved blockchain artwork and matching chain identity.
-- RecoverYourDebt belongs to Robin Hood Chain.
-- Image quality must match the established CryptoWorldz production standard: local/static deployment assets, no blurred remote-preview dependency.
+- Keep only current website-required artwork in GitHub.
+- High-resolution originals and historical material belong outside the deployment repository.
+- Do not ship legacy `Crypto Universe` / `CryptoUniverse`, `Charity.Based`, or `Action Creates Smiles` branding.
+- `ImpactBased™` is the current purpose-led board identity.
+- `Action Spreads Smile's Orphanage` is the current Reagan humanitarian identity.
+- Blockchain pages use their matching approved blockchain artwork and canonical domain.
+- Do not create semantic aliases by copying one image under multiple misleading filenames.
+- No Base64 transport fragments, screenshots, generic placeholders, or blurred remote-preview dependencies.
 
-## Required master assets
+## Preserved current visual anchors
 
-These destinations are deployment-stable names. Binary files must exist before any production workflow is allowed to pass.
+- OneWorldz current master imagery.
+- CryptoWorldz current Command Centre / Worldz imagery.
+- ImpactBased current artwork.
+- Matching blockchain Worldz artwork.
+- Purple Diamond Crew Hope Chest artwork.
 
-- `apps/worldz-master-library/oneworldz/oneworldz-gpt.webp`
-- `apps/worldz-master-library/oneworldz/oneworldz-master.webp`
-- `apps/worldz-master-library/oneworldz/little-legend.webp`
-- `apps/worldz-master-library/oneworldz/reagan-kauja.webp`
-- `apps/worldz-master-library/oneworldz/hope-chest.webp`
-- `apps/worldz-master-library/cryptoworldz/command-centre-five.webp`
-- `apps/worldz-master-library/cryptoworldz/command-centre-leader-team.webp`
-- `apps/worldz-master-library/cryptoworldz/zed-command-centre.webp`
-- `apps/worldz-master-library/cryptoworldz/zed-auto.webp`
-- `apps/worldz-master-library/cryptoworldz/grace.webp`
-- `apps/worldz-master-library/cryptoworldz/impactbased.webp`
-- `apps/worldz-master-library/cryptoworldz/cryptoworldz-basedbid.webp`
-- `apps/worldz-master-library/cryptoworldz/we-need-you.webp`
-- `apps/worldz-master-library/blockchains/bitworldz.webp`
-- `apps/worldz-master-library/blockchains/solworldz.webp`
-- `apps/worldz-master-library/blockchains/ethworldz.webp`
-- `apps/worldz-master-library/blockchains/baseworldz.webp`
-- `apps/worldz-master-library/blockchains/bnbworldz.webp`
-- `apps/worldz-master-library/blockchains/xrpworldz.webp`
-- `apps/worldz-master-library/blockchains/suiworldz.webp`
-- `apps/worldz-master-library/blockchains/hyperworldz.webp`
-- `apps/worldz-master-library/blockchains/robinworldz.webp`
-- `apps/worldz-master-library/tokens/recover-your-debt.webp`
-- `apps/worldz-master-library/tokens/uganda-unite.webp`
-- `apps/worldz-master-library/tokens/robin-hood-law.webp`
-- `apps/worldz-master-library/tokens/global-impact-alliance.webp`
-- `apps/worldz-master-library/tokens/next-big-coin.webp`
-- `apps/worldz-master-library/tokens/solmars.webp`
-- `apps/worldz-master-library/tokens/solbud.webp`
-- `apps/worldz-master-library/tokens/soltoken.webp`
+Reagan / Action Spreads Smile's Orphanage artwork should be selected or regenerated fresh from approved current references rather than inherited from retired Action Creates media.
 
-## Page mapping
+## Planned presentation direction
 
-- OneWorldz: OneWorldz master imagery, OneWorldz GPT, Little Legend, Reagan/support imagery, Hope Chest.
-- CryptoWorldz: existing proven production visual architecture plus Command Centre, Zed, Auto, Grace, ReCap/Based.bid partnership and ImpactBased sections.
-- Purple Diamond Crew: Hope Chest hero/background with glass-style controls and action/community imagery.
-- SolWorldz: approved SolWorldz blockchain banner plus Solana token collection artwork.
-- EthWorldz/BaseWorldz/BNBWorldz/XRPWorldz/SuiWorldz/HyperWorldz/RobinWorldz: exact matching approved blockchain banner, not generic coming-soon art.
+- CryptoWorldz: the floating Worldz in the main visual become accessible clickable portals to their canonical Worldz destinations.
+- Purple Diamond Crew: the Hope Chest fireplace artwork becomes the visual anchor for the final/secret page, with semi-transparent glass tiles layered over it.
+- Market pages: live chart viewing stays separate from secure wallet authentication and trade authorization.
 
-## Deployment gate
+## Verification gate
 
-Production deployment must fail when any required file is absent, zero-byte, suspiciously small, or contains a forbidden legacy branding reference in HTML/JS/CSS source.
+A build, checksum, CI pass, upload, or automated browser test is evidence only. Production is successful only after the real public domain is checked in a normal browser on desktop and mobile and the rendered imagery, links, routing, and layout are visually accepted.
