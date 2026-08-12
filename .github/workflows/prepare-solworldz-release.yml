@@ -11,6 +11,7 @@ on:
       - 'apps/cryptoworldz-web-core/assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp'
       - 'tools/verify-solworldz-standalone.mjs'
       - 'tools/build-solworldz-release.mjs'
+      - 'tools/audit-solworldz-links.mjs'
 
 permissions:
   contents: read
@@ -31,6 +32,9 @@ jobs:
 
       - name: Run SolWorldz hard gate
         run: node tools/verify-solworldz-standalone.mjs
+
+      - name: Prove clickable Worldz destinations are live
+        run: node tools/audit-solworldz-links.mjs
 
       - name: Assemble canonical release folder
         run: node tools/build-solworldz-release.mjs
@@ -68,13 +72,14 @@ jobs:
           retention-days: 14
 
       - name: Publish preparation summary
+        if: always()
         run: |
           {
             echo '## SolWorldz Production Candidate'
             echo '- Active destination: https://solworldz.xyz'
             echo '- Retired SolWorld.fun reference: BLOCKED by hard gate'
             echo '- Approved desktop/mobile SolWorldz artwork: packaged from canonical repository assets'
-            echo '- Clickable Worldz network: static-gated'
+            echo '- Clickable Worldz network: static + live-destination gated'
             echo '- No production upload performed by this workflow'
             echo '- Next gate: backup -> guarded deploy -> live desktop/mobile/link proof -> owner acceptance'
           } >> "$GITHUB_STEP_SUMMARY"
