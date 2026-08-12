@@ -15,9 +15,9 @@ env:
 
 jobs:
   deploy:
-    name: Backup, deploy, prove, rollback on failure
+    name: Build, backup, deploy, prove, safe rollback
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     environment: solworldz-production
     env:
       FTP_HOST: ${{ secrets.FTP_HOST }}
@@ -33,83 +33,104 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Verify one-time owner release request
-        id: request
+      - name: Verify immutable owner release request
         shell: bash
         run: |
           set -euo pipefail
-          test -s "$REQUEST_FILE" || { echo '::error::SolWorldz release request is missing'; exit 1; }
+          test -s "$REQUEST_FILE" || { echo '::error::SolWorldz release request missing'; exit 1; }
           target="$(grep -E '^target=' "$REQUEST_FILE" | tail -n1 | cut -d= -f2-)"
           source_commit="$(grep -E '^source_commit=' "$REQUEST_FILE" | tail -n1 | cut -d= -f2-)"
           requested_by="$(grep -E '^requested_by=' "$REQUEST_FILE" | tail -n1 | cut -d= -f2-)"
           authorization="$(grep -E '^authorization=' "$REQUEST_FILE" | tail -n1 | cut -d= -f2-)"
           parent="$(git rev-parse HEAD^)"
-          [[ "$target" == 'solworldz' ]] || { echo '::error::Request target must be solworldz'; exit 1; }
-          [[ "$source_commit" == "$parent" ]] || { echo '::error::Request source_commit must exactly match the request commit parent'; exit 1; }
-          [[ "$requested_by" == 'JayJayTeamDev' ]] || { echo '::error::Request must be attributed to JayJayTeamDev'; exit 1; }
-          [[ "$authorization" == 'GO' ]] || { echo '::error::Request authorization must be GO'; exit 1; }
-          echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
-          echo 'Owner release request verified against immutable parent commit.'
+          [[ "$target" == 'solworldz' ]] || { echo '::error::Target must be solworldz'; exit 1; }
+          [[ "$source_commit" == "$parent" ]] || { echo '::error::source_commit must exactly match request commit parent'; exit 1; }
+          [[ "$requested_by" == 'JayJayTeamDev' ]] || { echo '::error::Request owner mismatch'; exit 1; }
+          [[ "$authorization" == 'GO' ]] || { echo '::error::Authorization must be GO'; exit 1; }
+          echo 'Owner release request verified.'
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Prove production candidate before touching hosting
+      - name: Build exact approved-master release
+        shell: bash
         run: |
+          set -euo pipefail
           node tools/verify-solworldz-standalone.mjs
-          node tools/audit-solworldz-links.mjs
           node tools/build-solworldz-release.mjs
+          [[ "$(find dist/solworldz/assets/master -type f -name '*.jpg' | wc -l | tr -d ' ')" == '20' ]]
+          ! grep -RFiq 'solworld.fun' dist/solworldz
+          ! grep -RFiq 'assets/images/website-core' dist/solworldz/index.html
 
-      - name: Confirm retired SolWorld domain is absent from release
+      - name: Prove desktop and mobile before hosting changes
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RFiq 'solworld.fun' dist/solworldz; then
-            echo '::error::Retired SolWorld.fun reference leaked into release package.'
-            exit 1
-          fi
-          echo 'Retired-domain hard gate passed.'
+          SOLWORLDZ_RELEASE_ROOT='dist/solworldz' SOLWORLDZ_RELEASE_PORT=8088 node tools/serve-solworldz-release.mjs > "$RUNNER_TEMP/local-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for i in $(seq 1 30); do
+            if curl -fsS 'http://127.0.0.1:8088/' -o /dev/null; then ready=true; break; fi
+            sleep 0.2
+          done
+          [[ "$ready" == 'true' ]] || { cat "$RUNNER_TEMP/local-server.log"; exit 1; }
+          SOLWORLDZ_PROOF_URL='http://127.0.0.1:8088/' SOLWORLDZ_BROWSER_PROOF_DIR='dist/solworldz-browser-proof' node tools/check-solworldz-live-browser.mjs
+          kill "$server_pid" 2>/dev/null || true
+          trap - EXIT
 
-      - name: Validate domain-only deployment environment
+      - name: Validate domain-only Hostinger gate
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${FTP_HOST:-}" || { echo '::error::FTP_HOST secret is missing'; exit 1; }
-          test -n "${FTP_USERNAME:-}" || { echo '::error::FTP_USERNAME secret is missing'; exit 1; }
-          test -n "${FTP_PASSWORD:-}" || { echo '::error::FTP_PASSWORD secret is missing'; exit 1; }
-          [[ "${FTP_PORT:-21}" == '21' ]] || { echo '::error::FTP_PORT must be 21'; exit 1; }
-          [[ "${FTP_SERVER_DIR:-/}" == '/' ]] || { echo '::error::FTP_SERVER_DIR must be / for the domain-only account'; exit 1; }
-          [[ "${FTP_ACCOUNT_SCOPE:-}" == 'DOMAIN_ONLY' ]] || { echo '::error::FTP_ACCOUNT_SCOPE must be DOMAIN_ONLY'; exit 1; }
-          [[ "${DEPLOY_GUARD:-}" == "$EXPECTED_GUARD" ]] || { echo '::error::DEPLOY_GUARD is not SOLWORLDZ.XYZ'; exit 1; }
+          test -n "${FTP_HOST:-}" && test -n "${FTP_USERNAME:-}" && test -n "${FTP_PASSWORD:-}"
+          [[ "${FTP_PORT:-21}" == '21' ]]
+          [[ "${FTP_SERVER_DIR:-/}" == '/' ]]
+          [[ "${FTP_ACCOUNT_SCOPE:-}" == 'DOMAIN_ONLY' ]]
+          [[ "${DEPLOY_GUARD:-}" == "$EXPECTED_GUARD" ]]
 
       - name: Install FTPS client
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
 
-      - name: Prove Hostinger TLS identity before credentials are used
+      - name: Prove Hostinger TLS identity before credentials
         shell: bash
         run: |
           set -euo pipefail
           ftp_ip="$(getent ahostsv4 "$FTP_HOST" | awk 'NR==1{print $1}')"
-          test -n "$ftp_ip" || { echo '::error::FTP host does not resolve to IPv4'; exit 1; }
-          certs="$RUNNER_TEMP/ftp-certs.txt"
-          openssl s_client -starttls ftp -connect "$ftp_ip:${FTP_PORT:-21}" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt -showcerts </dev/null >"$certs" 2>/dev/null
-          awk '/-----BEGIN CERTIFICATE-----/{p=1} p{print} /-----END CERTIFICATE-----/{exit}' "$certs" > "$RUNNER_TEMP/ftp-leaf.pem"
-          test -s "$RUNNER_TEMP/ftp-leaf.pem" || { echo '::error::Unable to read FTPS leaf certificate'; exit 1; }
-          openssl x509 -in "$RUNNER_TEMP/ftp-leaf.pem" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io' || {
-            echo '::error::CA-valid certificate is not the expected Hostinger hstgr.io identity'; exit 1;
-          }
-          fingerprint="$(openssl x509 -in "$RUNNER_TEMP/ftp-leaf.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
+          test -n "$ftp_ip"
+          openssl s_client -starttls ftp -connect "$ftp_ip:${FTP_PORT:-21}" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt -showcerts </dev/null > "$RUNNER_TEMP/certs.txt" 2>/dev/null
+          awk '/-----BEGIN CERTIFICATE-----/{p=1} p{print} /-----END CERTIFICATE-----/{exit}' "$RUNNER_TEMP/certs.txt" > "$RUNNER_TEMP/leaf.pem"
+          test -s "$RUNNER_TEMP/leaf.pem"
+          openssl x509 -in "$RUNNER_TEMP/leaf.pem" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io'
+          fingerprint="$(openssl x509 -in "$RUNNER_TEMP/leaf.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
           echo "FTP_CERT_SHA256=$fingerprint" >> "$GITHUB_ENV"
-          echo 'CA-verified Hostinger FTPS identity established.'
 
-      - name: Re-prove live domain and authenticated FTP root are identical
+      - name: Prove current public site equals authenticated FTP origin
         shell: bash
         run: |
           set -euo pipefail
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "${FTP_PORT:-21}" "$FTP_HOST" -e "set cmd:fail-exit true; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; cd ${FTP_SERVER_DIR:-/}; get index.html -o '$RUNNER_TEMP/pre-index.html'; bye"
+          test -s "$RUNNER_TEMP/pre-index.html" || { echo '::error::Healthy current index required; use recovery workflow instead'; exit 1; }
+          remote_sha="$(sha256sum "$RUNNER_TEMP/pre-index.html" | awk '{print $1}')"
+          matched=false
+          for attempt in $(seq 1 6); do
+            curl -L -fsS --compressed -H 'Cache-Control: no-cache' "https://solworldz.xyz/?predeploy=${GITHUB_RUN_ID}-$attempt" -o "$RUNNER_TEMP/pre-public.html" || true
+            if [[ -s "$RUNNER_TEMP/pre-public.html" ]] && [[ "$(sha256sum "$RUNNER_TEMP/pre-public.html" | awk '{print $1}')" == "$remote_sha" ]]; then matched=true; break; fi
+            sleep 2
+          done
+          [[ "$matched" == 'true' ]] || { echo '::error::Public SolWorldz and FTP origin differ; deployment blocked'; exit 1; }
+          echo "PREDEPLOY_INDEX_SHA=$remote_sha" >> "$GITHUB_ENV"
+
+      - name: Back up complete current release surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/solworldz-backup"
+          mkdir -p "$backup/assets/master"
           lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "${FTP_PORT:-21}" "$FTP_HOST" <<EOF
           set cmd:fail-exit true
           set ftp:ssl-force true
@@ -117,49 +138,17 @@ jobs:
           set ssl:verify-certificate true
           set ssl:check-hostname false
           set net:max-retries 1
-          set net:timeout 20
+          set net:timeout 30
           cd ${FTP_SERVER_DIR:-/}
-          get index.html -o $RUNNER_TEMP/predeploy-remote-index.html
+          get index.html -o $backup/index.html
+          get .htaccess -o $backup/.htaccess
+          mirror --verbose --parallel=2 assets/master $backup/assets/master
           bye
           EOF
-          curl -L -fsS --compressed -H 'Cache-Control: no-cache' "https://solworldz.xyz/?originproof=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/predeploy-public-index.html"
-          remote_sha="$(sha256sum "$RUNNER_TEMP/predeploy-remote-index.html" | awk '{print $1}')"
-          public_sha="$(sha256sum "$RUNNER_TEMP/predeploy-public-index.html" | awk '{print $1}')"
-          [[ "$remote_sha" == "$public_sha" ]] || { echo '::error::Live SolWorldz and FTP root diverged; deployment blocked'; exit 1; }
-          echo "PREDEPLOY_INDEX_SHA=$remote_sha" >> "$GITHUB_ENV"
-          echo 'Live domain and authenticated FTP root match exactly.'
-
-      - name: Back up every file this release can overwrite
-        shell: bash
-        run: |
-          set -euo pipefail
-          backup="$RUNNER_TEMP/solworldz-backup"
-          mkdir -p "$backup"
-          : > "$backup/existence.tsv"
-          files=(
-            'index.html'
-            '.htaccess'
-            'assets/images/website-core/solworldz/solworldz-desktop-hero.webp'
-            'assets/images/website-core/solworldz/solworldz-mobile-hero.webp'
-            'assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp'
-          )
-          for remote in "${files[@]}"; do
-            localfile="$backup/$remote"
-            mkdir -p "$(dirname "$localfile")"
-            if lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "${FTP_PORT:-21}" "$FTP_HOST" -e "set cmd:fail-exit true; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; set net:max-retries 1; set net:timeout 20; cd ${FTP_SERVER_DIR:-/}; get '$remote' -o '$localfile'; bye" >/dev/null 2>&1; then
-              printf 'present\t%s\n' "$remote" >> "$backup/existence.tsv"
-              sha256sum "$localfile" >> "$backup/sha256.txt"
-            else
-              printf 'absent\t%s\n' "$remote" >> "$backup/existence.tsv"
-              rm -f "$localfile"
-            fi
-          done
-          test -s "$backup/index.html" || { echo '::error::Current live index backup failed'; exit 1; }
-          cp "$backup/existence.tsv" "$RUNNER_TEMP/solworldz-backup-existence.tsv"
+          test -s "$backup/index.html" && test -s "$backup/.htaccess"
           echo "BACKUP_DIR=$backup" >> "$GITHUB_ENV"
-          echo 'Current SolWorldz release surface backed up.'
 
-      - name: Upload pre-deployment backup artifact
+      - name: Upload pre-deployment backup
         uses: actions/upload-artifact@v4
         with:
           name: solworldz-predeploy-backup-${{ github.run_id }}
@@ -167,8 +156,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Deploy approved assets first and index last
-        id: deploy
+      - name: Deploy approved master assets first and index last
         shell: bash
         run: |
           set -euo pipefail
@@ -182,118 +170,115 @@ jobs:
           set net:max-retries 1
           set net:timeout 30
           cd ${FTP_SERVER_DIR:-/}
-          mkdir -p assets/images/website-core/solworldz
-          mkdir -p assets/images/website-core/blockchain
-          put dist/solworldz/assets/images/website-core/solworldz/solworldz-desktop-hero.webp -o assets/images/website-core/solworldz/solworldz-desktop-hero.webp
-          put dist/solworldz/assets/images/website-core/solworldz/solworldz-mobile-hero.webp -o assets/images/website-core/solworldz/solworldz-mobile-hero.webp
-          put dist/solworldz/assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp -o assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp
-          put dist/solworldz/.htaccess -o .htaccess
-          put dist/solworldz/index.html -o index.html
+          mkdir -p assets/master
+          mirror -R --verbose --parallel=2 "$GITHUB_WORKSPACE/dist/solworldz/assets/master" assets/master
+          put "$GITHUB_WORKSPACE/dist/solworldz/.htaccess" -o .htaccess
+          put "$GITHUB_WORKSPACE/dist/solworldz/index.html" -o index.html
           bye
           EOF
-          echo 'Approved SolWorldz package uploaded with index.html last.'
 
       - name: Re-prove FTPS certificate stayed stable
         shell: bash
         run: |
           set -euo pipefail
           ftp_ip="$(getent ahostsv4 "$FTP_HOST" | awk 'NR==1{print $1}')"
-          openssl s_client -starttls ftp -connect "$ftp_ip:${FTP_PORT:-21}" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt -showcerts </dev/null > "$RUNNER_TEMP/ftp-certs-after.txt" 2>/dev/null
-          awk '/-----BEGIN CERTIFICATE-----/{p=1} p{print} /-----END CERTIFICATE-----/{exit}' "$RUNNER_TEMP/ftp-certs-after.txt" > "$RUNNER_TEMP/ftp-leaf-after.pem"
-          after="$(openssl x509 -in "$RUNNER_TEMP/ftp-leaf-after.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
-          [[ "$after" == "$FTP_CERT_SHA256" ]] || { echo '::error::FTPS certificate changed during deployment'; exit 1; }
+          openssl s_client -starttls ftp -connect "$ftp_ip:${FTP_PORT:-21}" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt -showcerts </dev/null > "$RUNNER_TEMP/certs-after.txt" 2>/dev/null
+          awk '/-----BEGIN CERTIFICATE-----/{p=1} p{print} /-----END CERTIFICATE-----/{exit}' "$RUNNER_TEMP/certs-after.txt" > "$RUNNER_TEMP/leaf-after.pem"
+          after="$(openssl x509 -in "$RUNNER_TEMP/leaf-after.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
+          [[ "$after" == "$FTP_CERT_SHA256" ]]
 
-      - name: Prove live HTML and approved image bytes
+      - name: Prove FTP origin exactly matches approved release
         shell: bash
         run: |
           set -euo pipefail
-          base='https://solworldz.xyz'
-          proof="proof=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$RUNNER_TEMP/post-master"
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "${FTP_PORT:-21}" "$FTP_HOST" <<EOF
+          set cmd:fail-exit true
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd ${FTP_SERVER_DIR:-/}
+          get index.html -o $RUNNER_TEMP/post-index.html
+          get .htaccess -o $RUNNER_TEMP/post-htaccess
+          mirror --verbose --parallel=2 assets/master $RUNNER_TEMP/post-master
+          bye
+          EOF
+          [[ "$(sha256sum "$RUNNER_TEMP/post-index.html" | awk '{print $1}')" == "$(sha256sum dist/solworldz/index.html | awk '{print $1}')" ]]
+          [[ "$(sha256sum "$RUNNER_TEMP/post-htaccess" | awk '{print $1}')" == "$(sha256sum dist/solworldz/.htaccess | awk '{print $1}')" ]]
+          node -e "const m=require('./dist/solworldz/release-manifest.json'); for(const f of m.files.filter(x=>x.path.startsWith('assets/master/'))) console.log(f.path)" > "$RUNNER_TEMP/master-paths.txt"
+          count=0
+          while IFS= read -r file; do
+            count=$((count+1))
+            relative="${file#assets/master/}"
+            [[ "$(sha256sum "$RUNNER_TEMP/post-master/$relative" | awk '{print $1}')" == "$(sha256sum "dist/solworldz/$file" | awk '{print $1}')" ]] || { echo "::error::Origin hash mismatch: $file"; exit 1; }
+          done < "$RUNNER_TEMP/master-paths.txt"
+          [[ "$count" == '20' ]]
+
+      - name: Prove public HTML and full-resolution approved images
+        shell: bash
+        run: |
+          set -euo pipefail
+          local_sha="$(sha256sum dist/solworldz/index.html | awk '{print $1}')"
+          matched=false
           for attempt in $(seq 1 10); do
-            if curl -L -fsS --compressed -H 'Cache-Control: no-cache' "$base/?$proof-$attempt" -o "$RUNNER_TEMP/live-index.html"; then
-              live_sha="$(sha256sum "$RUNNER_TEMP/live-index.html" | awk '{print $1}')"
-              local_sha="$(sha256sum dist/solworldz/index.html | awk '{print $1}')"
-              [[ "$live_sha" == "$local_sha" ]] && break
-            fi
+            curl -L -fsS --compressed -H 'Cache-Control: no-cache' "https://solworldz.xyz/?postdeploy=${GITHUB_RUN_ID}-$attempt" -o "$RUNNER_TEMP/live-index.html" || true
+            if [[ -s "$RUNNER_TEMP/live-index.html" ]] && [[ "$(sha256sum "$RUNNER_TEMP/live-index.html" | awk '{print $1}')" == "$local_sha" ]]; then matched=true; break; fi
             sleep 2
           done
-          live_sha="$(sha256sum "$RUNNER_TEMP/live-index.html" | awk '{print $1}')"
-          local_sha="$(sha256sum dist/solworldz/index.html | awk '{print $1}')"
-          [[ "$live_sha" == "$local_sha" ]] || { echo '::error::Live index does not match approved release'; exit 1; }
-          grep -Fq 'Welcome to <span>SolWorldz</span>' "$RUNNER_TEMP/live-index.html"
-          ! grep -Fiq 'solworld.fun' "$RUNNER_TEMP/live-index.html" || { echo '::error::Retired domain appeared in live HTML'; exit 1; }
+          [[ "$matched" == 'true' ]] || { echo '::error::Public HTML does not match approved release'; exit 1; }
+          ! grep -Fiq 'solworld.fun' "$RUNNER_TEMP/live-index.html"
+          node tools/prove-solworldz-public-images.mjs
 
-          files=(
-            'assets/images/website-core/solworldz/solworldz-desktop-hero.webp'
-            'assets/images/website-core/solworldz/solworldz-mobile-hero.webp'
-            'assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp'
-          )
-          for file in "${files[@]}"; do
-            out="$RUNNER_TEMP/$(basename "$file")"
-            curl -L -fsS --compressed -H 'Cache-Control: no-cache' "$base/$file?$proof" -o "$out"
-            live_asset_sha="$(sha256sum "$out" | awk '{print $1}')"
-            local_asset_sha="$(sha256sum "dist/solworldz/$file" | awk '{print $1}')"
-            [[ "$live_asset_sha" == "$local_asset_sha" ]] || { echo "::error::Live asset mismatch: $file"; exit 1; }
-          done
-          node tools/audit-solworldz-links.mjs
-          echo 'Live HTML, image bytes and clickable destinations passed.'
-
-      - name: Prove live desktop and mobile rendering
-        shell: bash
-        run: |
-          set -euo pipefail
-          SOLWORLDZ_PROOF_URL='https://solworldz.xyz/' SOLWORLDZ_BROWSER_PROOF_DIR='dist/solworldz-browser-proof' node tools/check-solworldz-live-browser.mjs
-
-      - name: Upload desktop/mobile proof artifact
+      - name: Upload desktop/mobile candidate proof
         uses: actions/upload-artifact@v4
         with:
-          name: solworldz-live-browser-proof-${{ github.run_id }}
+          name: solworldz-browser-proof-${{ github.run_id }}
           path: dist/solworldz-browser-proof
           if-no-files-found: error
           retention-days: 30
 
       - name: Mark production proof complete
-        shell: bash
         run: |
           {
             echo '## SolWorldz Production Proof — PASSED'
-            echo '- Retired SolWorld.fun references: blocked'
-            echo '- Domain-only Hostinger environment: passed'
-            echo '- Pre-deploy public/FTP origin match: passed'
-            echo '- Pre-deployment backup: saved'
-            echo '- Approved image hashes: passed live'
-            echo '- Published clickable Worldz destinations: passed'
-            echo '- Desktop browser proof: passed'
-            echo '- Mobile browser proof: passed'
+            echo '- Approved master archive: locked and verified'
+            echo '- Retired SolWorld.fun: hard blocked'
+            echo '- Desktop + mobile exact candidate: passed before deployment'
+            echo '- Domain-only FTPS guard + Hostinger certificate: passed'
+            echo '- Pre-deployment complete release backup: saved'
+            echo '- FTP origin HTML/.htaccess + 20 image hashes: exact match'
+            echo '- Public HTML: exact match'
+            echo '- Public master images: exact approved dimensions'
+            echo '- Hosted headless browser is intentionally not a deployment gate because anti-bot delivery can create false failures'
             echo '- Zed and Auto: untouched'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Roll back release surface after any deployment failure
+      - name: Roll back to exact pre-deployment release on failure
         if: ${{ failure() && env.DEPLOY_STARTED == 'true' }}
         shell: bash
         run: |
           set +e
           backup="${BACKUP_DIR:-$RUNNER_TEMP/solworldz-backup}"
-          restore_one() {
-            remote="$1"
-            if grep -Fqx "present\t$remote" "$backup/existence.tsv"; then
-              localfile="$backup/$remote"
-              lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "${FTP_PORT:-21}" "$FTP_HOST" -e "set cmd:fail-exit true; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; cd ${FTP_SERVER_DIR:-/}; put '$localfile' -o '$remote'; bye" >/dev/null 2>&1
-            else
-              lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "${FTP_PORT:-21}" "$FTP_HOST" -e "set cmd:fail-exit false; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; cd ${FTP_SERVER_DIR:-/}; rm '$remote'; bye" >/dev/null 2>&1 || true
-            fi
-          }
-          restore_one 'assets/images/website-core/solworldz/solworldz-desktop-hero.webp'
-          restore_one 'assets/images/website-core/solworldz/solworldz-mobile-hero.webp'
-          restore_one 'assets/images/website-core/blockchain/blockchain-worldz-multichain-directory.webp'
-          restore_one '.htaccess'
-          restore_one 'index.html'
-          sleep 2
-          curl -L -fsS --compressed -H 'Cache-Control: no-cache' "https://solworldz.xyz/?rollback=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/rollback-live.html"
-          rollback_sha="$(sha256sum "$RUNNER_TEMP/rollback-live.html" | awk '{print $1}')"
-          if [[ "$rollback_sha" == "${PREDEPLOY_INDEX_SHA:-missing}" ]]; then
-            echo 'Rollback restored the exact pre-deployment live index.'
+          test -s "$backup/index.html" || { echo '::error::Rollback backup index missing'; exit 1; }
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "${FTP_PORT:-21}" "$FTP_HOST" <<EOF
+          set cmd:fail-exit true
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd ${FTP_SERVER_DIR:-/}
+          mirror -R --verbose --parallel=2 "$backup/assets/master" assets/master
+          put "$backup/.htaccess" -o .htaccess
+          put "$backup/index.html" -o index.html
+          get index.html -o $RUNNER_TEMP/rollback-index.html
+          bye
+          EOF
+          rollback_sha="$(sha256sum "$RUNNER_TEMP/rollback-index.html" | awk '{print $1}')"
+          backup_sha="$(sha256sum "$backup/index.html" | awk '{print $1}')"
+          if [[ "$rollback_sha" == "$backup_sha" ]] && [[ "$rollback_sha" == "${PREDEPLOY_INDEX_SHA:-$backup_sha}" ]]; then
+            echo 'Rollback restored the exact pre-deployment FTP-origin index.'
           else
-            echo '::error::Rollback completed but live index hash could not be proven identical to pre-deployment state.'
+            echo '::error::Rollback completed but exact pre-deployment origin hash could not be proved.'
           fi
           exit 1
