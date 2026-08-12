@@ -7,10 +7,9 @@ const formatDate = (value) => value ? new Date(value).toLocaleDateString() : "�
 const shortenAddress = (value) => value && value.length > 20 ? `${value.slice(0, 8)}…${value.slice(-8)}` : value;
 const IMPACT_CAMPAIGN = {
   title: "Help Reagan Feed 60 Orphaned Children in Uganda",
-  organization: "Action Spread Smiles Organisation • Mayuge, Uganda",
+  organization: "Action Spreads Smile's Orphanage • Mayuge, Uganda",
   description: "Immediate help for food, medical care, rent, hygiene, education and safer mattresses for children in Reagan's care.",
-  fundraiser: "https://www.gofundme.com/f/action-spread-smiles-organisation",
-  facebook: "https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr",
+  fundraiser: "https://gofund.me/c2e4fa936",
   tiktok: "https://www.tiktok.com/@actionspreadsmilesorg",
   youtube: "https://youtube.com/@action_spread_smiles"
 };
@@ -28,7 +27,7 @@ function missionCard(mission, current = false) {
 
 function impactCard(compact = false) {
   const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(IMPACT_CAMPAIGN.fundraiser)}&text=${encodeURIComponent(IMPACT_CAMPAIGN.title)}`;
-  return `<article class="panel impact-card"><div class="impact-visual" aria-hidden="true"><span>💜</span><b>FEATURED IMPACT MISSION</b></div><div class="impact-body"><div class="impact-badge">URGENT SUPPORT NEEDED</div><h3>${escapeHtml(IMPACT_CAMPAIGN.title)}</h3><p class="impact-organization">${escapeHtml(IMPACT_CAMPAIGN.organization)}</p><p>${escapeHtml(IMPACT_CAMPAIGN.description)}</p><div class="impact-needs"><span>🍲 Food</span><span>🩺 Medical</span><span>🏠 Rent</span><span>🛏️ Mattresses</span></div>${compact ? `<button class="button" data-open="impact" type="button">Open Impact Mission</button>` : `<a class="button impact-donate" href="${escapeHtml(IMPACT_CAMPAIGN.fundraiser)}" target="_blank" rel="noopener">Donate securely on GoFundMe</a><a class="button secondary" href="${escapeHtml(shareUrl)}" target="_blank" rel="noopener">Share Campaign</a><div class="impact-socials"><a href="${escapeHtml(IMPACT_CAMPAIGN.facebook)}" target="_blank" rel="noopener">Facebook</a><a href="${escapeHtml(IMPACT_CAMPAIGN.tiktok)}" target="_blank" rel="noopener">TikTok</a><a href="${escapeHtml(IMPACT_CAMPAIGN.youtube)}" target="_blank" rel="noopener">YouTube</a></div><small>Donations are completed on GoFundMe. Zed never sees payment details and does not award Legend Points based on donation amounts.</small>`}</div></article>`;
+  return `<article class="panel impact-card"><div class="impact-visual" aria-hidden="true"><span>💜</span><b>FEATURED IMPACT MISSION</b></div><div class="impact-body"><div class="impact-badge">URGENT SUPPORT NEEDED</div><h3>${escapeHtml(IMPACT_CAMPAIGN.title)}</h3><p class="impact-organization">${escapeHtml(IMPACT_CAMPAIGN.organization)}</p><p>${escapeHtml(IMPACT_CAMPAIGN.description)}</p><div class="impact-needs"><span>🍲 Food</span><span>🩺 Medical</span><span>🏠 Rent</span><span>🛏️ Mattresses</span></div>${compact ? `<button class="button" data-open="impact" type="button">Open Impact Mission</button>` : `<a class="button impact-donate" href="${escapeHtml(IMPACT_CAMPAIGN.fundraiser)}" target="_blank" rel="noopener">Donate securely on GoFundMe</a><a class="button secondary" href="${escapeHtml(shareUrl)}" target="_blank" rel="noopener">Share Campaign</a><div class="impact-socials"><a href="${escapeHtml(IMPACT_CAMPAIGN.tiktok)}" target="_blank" rel="noopener">TikTok</a><a href="${escapeHtml(IMPACT_CAMPAIGN.youtube)}" target="_blank" rel="noopener">YouTube</a></div><small>Donations are completed on GoFundMe. Zed never sees payment details and does not award Legend Points based on donation amounts.</small>`}</div></article>`;
 }
 
 function render() {
