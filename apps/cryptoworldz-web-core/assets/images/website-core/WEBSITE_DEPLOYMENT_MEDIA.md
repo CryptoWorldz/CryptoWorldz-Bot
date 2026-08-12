@@ -1,24 +1,20 @@
-# Website Deployment Media Package
+# Website Deployment Media
 
-Version: 2026-08-08.2
+State: **clean-slate current-use policy — 12 August 2026**
 
-This catalog is the master approved source list for future Worldz website deployments. It is additive: existing approved website assets remain available and the latest approved uploads are added as deployment candidates.
+The repository is not a permanent image archive. It contains only media required by current website builds.
 
 ## Selection rules
 
-- Choose only context-appropriate media for each website. The package is a source library, not an instruction to place every asset on every page.
-- Existing core assets remain approved and must not be replaced automatically.
-- CryptoWorldz / Zed / G.R.A.C.E. / Auto assets may be used for Command Centre feature and deep-description sections.
-- OneWorldz, humanitarian, Action Creates Smiles, Purple Diamond Crew, ImpactBased, blockchain Worldz and SolWorld assets should be selected according to the destination site and section.
-- Files marked `recoveryourdebt-only` are exclusive to RecoverYourDebt and must not be reused elsewhere.
-- **Uganda Unite animation:** `1000022237.mp4` is the **only approved Uganda Unite animation/GIF/video**.
-- **Uganda Unite still images:** other approved still images may be used. Use the **latest** Uganda Unite images where **$W uses the distinctive Solana-styled W logo treatment**. Exclude older/recreated still artwork using a plain, generic, or different W mark.
-- For production, optimize still images to responsive WebP/AVIF and use MP4/WebM for animation. Lazy-load below-fold media.
+- Current branding only.
+- `Action Spreads Smile's Orphanage` is the only active Reagan/orphanage identity.
+- Do not discover or deploy retired `Action Creates Smiles`, `CryptoUniverse`, or `Charity.Based` artwork.
+- Preserve the Hope Chest and current Worldz visual anchors required by active designs.
+- Select website-specific derivatives only after their source artwork is deliberately approved.
+- Do not manufacture semantic aliases by copying the same bytes under different names.
+- No Base64 transport fragments, generic placeholders, or stale deployment catalogs.
+- Optimize only selected current assets for the destination website.
 
-## Source of truth
+## Verification rule
 
-Persistent Library folder: `/Website Deployment Media Package`
-
-Catalog: `deployment-media-catalog.json`
-
-The Library package contains the full source media archives and checksum manifest. Future deployments should select from this package, optimize only the chosen assets, and commit the final website-specific derivatives into the relevant deployment path.
+A build or checksum pass is evidence, not proof of a successful website. Final success requires the actual public domain to be checked in a normal browser on desktop and mobile and visually accepted.
