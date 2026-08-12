@@ -167,7 +167,7 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/public_html' }}
       FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
       DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
       EXPECTED_GUARD: ${{ needs.prepare.outputs.guard }}
