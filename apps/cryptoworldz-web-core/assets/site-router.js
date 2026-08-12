@@ -8,7 +8,7 @@
   const sharedPage = ['help', 'donate', 'tokens'].includes(requestedPage);
   const ecosystemPage = ['command-centre','commandcentre','trade','trade-station','recap','recapthisbot','partnership','partnerships','learn','learnworldz'].includes(requestedPage);
   const pdcPreview = hostname === 'cryptoworldz.github.io' || requestedSite === 'pdc';
-  const comingSoonHosts = new Set([
+  const blockchainWorldHosts = new Set([
     'ethworldz.xyz',
     'baseworldz.xyz',
     'bnbworldz.xyz',
@@ -47,14 +47,14 @@
                 ? './assets/impactbased.js'
                 : hostname === 'oneworldz.com' || requestedMode === 'mission'
                   ? './assets/oneworldz-next.js'
-                  : comingSoonHosts.has(hostname)
-                    ? './assets/coming-soon-next.js'
+                  : blockchainWorldHosts.has(hostname)
+                    ? './assets/blockchain-world.js'
                     : requestedMode === 'coming-soon'
                       ? './assets/coming-soon.js'
                       : requestedMode === 'directory'
                         ? './assets/pdc-directory.js'
                         : './assets/app.js';
-  script.src = `${selectedScript}?v=20260809-consolidated-v1`;
+  script.src = `${selectedScript}?v=20260812-domain-routing-v1`;
   document.body.appendChild(script);
 
   if (selectedScript === './assets/oneworldz-next.js') {
