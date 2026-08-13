@@ -107,14 +107,14 @@ function renderNav(missionOnly = false) {
   const links = missionOnly
     ? [
         ['Mission', '#mission'],
-        ['Impact', 'https://impactbased.oneworldz.com'],
+        ['Impact', 'https://oneworldz.com/worldz/impactbased'],
         ['Learn', 'https://learn.oneworldz.com'],
         ['CryptoWorldz', 'https://cryptoworldz.xyz']
       ]
     : [
         ['Markets', 'https://cryptoworldz.xyz'],
         ['Live Tokens', 'https://purplediamondcrew.com'],
-        ['ImpactBased', 'https://impactbased.oneworldz.com'],
+        ['ImpactBased', 'https://oneworldz.com/worldz/impactbased'],
         ['OneWorldz', 'https://oneworldz.com'],
         ['Zed', 'https://cryptobotz.cryptoworldz.xyz']
       ];
