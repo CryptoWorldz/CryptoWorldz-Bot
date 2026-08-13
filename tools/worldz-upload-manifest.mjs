@@ -10,7 +10,9 @@ const rootFiles = [
   'live.html',
   '.htaccess',
   'donate.html',
+  'gofundme.html',
   'reagan-kauja.html',
+  'ultimate.html',
   'robots.txt',
   'sitemap.xml'
 ];
@@ -49,7 +51,7 @@ for (const rel of rootFiles) {
   if (await exists(full)) files.push(full);
 }
 
-for (const dirName of ['assets', 'config']) {
+for (const dirName of ['assets', 'config', 'command-centre']) {
   const dir = path.join(sourceRoot, dirName);
   if (await exists(dir)) files.push(...await walk(dir));
 }
