@@ -43,8 +43,6 @@ fi
 echo "::add-mask::$FTP_HOST"
 echo "::add-mask::$FTP_CONNECT_HOST"
 
-# Production rule: certificate and hostname verification are mandatory.
-# Old workflows were able to set these to "no", hiding target/certificate faults.
 if [[ "$FTP_TLS_VERIFY" != 'yes' ]]; then
   echo '::error::FTP_TLS_VERIFY=no is forbidden for Worldz production transfers.' >&2
   exit 7
@@ -93,7 +91,7 @@ declare -a ordinary_files=()
 index_file=""
 
 if [[ "$mode" == "upload" ]]; then
-  for relative in 404.html _headers live.html .htaccess donate.html reagan-kauja.html ultimate.html robots.txt sitemap.xml; do
+  for relative in 404.html _headers live.html .htaccess donate.html gofundme.html reagan-kauja.html ultimate.html robots.txt sitemap.xml; do
     [[ -f "$source_root/$relative" ]] && ordinary_files+=("$source_root/$relative")
   done
   for directory in assets config command-centre; do
