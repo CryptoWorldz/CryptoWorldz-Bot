@@ -4,18 +4,28 @@ on:
   pull_request:
     paths:
       - '.github/workflows/**'
+      - 'package.json'
       - 'tools/worldz-direct-ftp.sh'
       - 'tools/restore-approved-worldz-media.sh'
       - 'tools/verify-worldz-deployment-policy.mjs'
+      - 'tools/evaluate-web-core.mjs'
+      - 'tools/evaluate-complete-release.mjs'
       - 'apps/cryptoworldz-web-core/assets/coming-soon-next.js'
+      - 'apps/cryptoworldz-web-core/assets/oneworldz-next.js'
+      - 'apps/worldz-sites/purplediamondcrew/index.html'
   push:
     branches: [main]
     paths:
       - '.github/workflows/**'
+      - 'package.json'
       - 'tools/worldz-direct-ftp.sh'
       - 'tools/restore-approved-worldz-media.sh'
       - 'tools/verify-worldz-deployment-policy.mjs'
+      - 'tools/evaluate-web-core.mjs'
+      - 'tools/evaluate-complete-release.mjs'
       - 'apps/cryptoworldz-web-core/assets/coming-soon-next.js'
+      - 'apps/cryptoworldz-web-core/assets/oneworldz-next.js'
+      - 'apps/worldz-sites/purplediamondcrew/index.html'
   workflow_dispatch:
 
 permissions:
