@@ -1,0 +1,322 @@
+name: Deploy Shared Worldz Proof First
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/worldz-shared-live.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldz-shared-production
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Resolve locked production target
+    runs-on: ubuntu-latest
+    outputs:
+      target: ${{ steps.resolve.outputs.target }}
+      source_commit: ${{ steps.resolve.outputs.source_commit }}
+      environment: ${{ steps.resolve.outputs.environment }}
+      live_url: ${{ steps.resolve.outputs.live_url }}
+      guard: ${{ steps.resolve.outputs.guard }}
+      preview_query: ${{ steps.resolve.outputs.preview_query }}
+      expected_text: ${{ steps.resolve.outputs.expected_text }}
+      proof_media: ${{ steps.resolve.outputs.proof_media }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+          request='deployments/worldz-shared-live.request'
+          test -s "$request"
+          target="$(grep -E '^target=' "$request" | tail -n1 | cut -d= -f2-)"
+          source_commit="$(grep -E '^source_commit=' "$request" | tail -n1 | cut -d= -f2-)"
+          requested_by="$(grep -E '^requested_by=' "$request" | tail -n1 | cut -d= -f2-)"
+          authorization="$(grep -E '^authorization=' "$request" | tail -n1 | cut -d= -f2-)"
+          parent="$(git rev-parse HEAD^)"
+          [[ "$source_commit" == "$parent" ]] || { echo '::error::source_commit must equal the request commit parent'; exit 1; }
+          [[ "$requested_by" == 'JayJayTeamDev' ]] || { echo '::error::Owner attribution must be JayJayTeamDev'; exit 1; }
+          [[ "$authorization" == 'GO' ]] || { echo '::error::Authorization must be GO'; exit 1; }
+
+          case "$target" in
+            oneworldz)
+              environment='oneworldz-production'; live_url='https://oneworldz.com'; guard='ONEWORLDZ.COM'; preview_query='?mode=mission'; expected_text='OneWorldz'; proof_media='assets/images/website-core/oneworldz/oneworldz-one-vision-one-future.webp' ;;
+            cryptoworldz)
+              environment='cryptoworldz-production'; live_url='https://cryptoworldz.xyz'; guard='CRYPTOWORLDZ.XYZ'; preview_query='?world=cryptoworldz&mode=markets'; expected_text='CryptoWorldz'; proof_media='assets/worldz-master/cryptoworldz/we-need-you.png' ;;
+            purplediamondcrew)
+              environment='purplediamondcrew-production'; live_url='https://purplediamondcrew.com'; guard='PURPLEDIAMONDCREW.COM'; preview_query='?site=purplediamondcrew'; expected_text='Purple Diamond Crew'; proof_media='assets/images/website-core/purple-diamond-crew/hope-chest-by-firelight.webp' ;;
+            ethworldz)
+              environment='ethworldz-production'; live_url='https://ethworldz.xyz'; guard='ETHWORLDZ.XYZ'; preview_query='?world=ethworldz&mode=world'; expected_text='EthWorldz'; proof_media='assets/worldz-master/blockchains/ethworldz.png' ;;
+            baseworldz)
+              environment='baseworldz-production'; live_url='https://baseworldz.xyz'; guard='BASEWORLDZ.XYZ'; preview_query='?world=baseworldz&mode=world'; expected_text='BaseWorldz'; proof_media='assets/worldz-master/blockchains/baseworldz.png' ;;
+            xrpworldz)
+              environment='xrpworldz-production'; live_url='https://xrpworldz.xyz'; guard='XRPWORLDZ.XYZ'; preview_query='?world=xrpworldz&mode=world'; expected_text='XRPWorldz'; proof_media='assets/worldz-master/blockchains/xrpworldz.png' ;;
+            hyperworldz)
+              environment='hyperworldz-production'; live_url='https://hyperworldz.xyz'; guard='HYPERWORLDZ.XYZ'; preview_query='?world=hyperworldz&mode=world'; expected_text='HyperWorldz'; proof_media='assets/worldz-master/blockchains/hyperworldz.png' ;;
+            robinworldz)
+              environment='robinworldz-production'; live_url='https://robinworldz.xyz'; guard='ROBINWORLDZ.XYZ'; preview_query='?world=robinworldz&mode=world'; expected_text='RobinWorldz'; proof_media='assets/worldz-master/blockchains/robinworldz.png' ;;
+            bitcoinworldz)
+              environment='bitcoinworldz-production'; live_url='https://bitcoinworldz.xyz'; guard='BITCOINWORLDZ.XYZ'; preview_query='?world=bitcoinworldz&mode=world'; expected_text='BitcoinWorldz'; proof_media='assets/worldz-master/blockchains/bitworldz.png' ;;
+            hodlerworldz)
+              environment='hodlerworldz-production'; live_url='https://hodlerworldz.xyz'; guard='HODLERWORLDZ.XYZ'; preview_query='?world=hodlerworldz&mode=portfolio'; expected_text='HodlerWorldz'; proof_media='assets/worldz-master/cryptoworldz/we-need-you.png' ;;
+            solworldz) echo '::error::SolWorldz has its own proven deployment workflow.'; exit 1 ;;
+            suiworldz|bitworldz) echo '::error::Unowned/retired domain target is blocked.'; exit 1 ;;
+            *) echo '::error::Unsupported shared production target.'; exit 1 ;;
+          esac
+
+          {
+            echo "target=$target"
+            echo "source_commit=$source_commit"
+            echo "environment=$environment"
+            echo "live_url=$live_url"
+            echo "guard=$guard"
+            echo "preview_query=$preview_query"
+            echo "expected_text=$expected_text"
+            echo "proof_media=$proof_media"
+          } >> "$GITHUB_OUTPUT"
+
+  validate:
+    name: Build and prove desktop/mobile before hosting
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.source_commit }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify complete repository and approved web release
+        run: npm run verify
+      - name: Stage only the current public release surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf dist/worldz-shared
+          mkdir -p dist/worldz-shared
+          node tools/worldz-upload-manifest.mjs apps/cryptoworldz-web-core "$RUNNER_TEMP/worldz-manifest.txt"
+          rsync -a --files-from="$RUNNER_TEMP/worldz-manifest.txt" apps/cryptoworldz-web-core/ dist/worldz-shared/
+          test -s dist/worldz-shared/index.html
+          test -s "dist/worldz-shared/${{ needs.prepare.outputs.proof_media }}"
+          ! test -e dist/worldz-shared/oneworldz-index.html
+          ! test -e dist/worldz-shared/command-centre-ultimate-20260811.html
+      - name: Prove exact candidate on desktop and mobile
+        shell: bash
+        env:
+          PREVIEW_QUERY: ${{ needs.prepare.outputs.preview_query }}
+          EXPECTED_TEXT: ${{ needs.prepare.outputs.expected_text }}
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8088 --bind 127.0.0.1 --directory dist/worldz-shared > "$RUNNER_TEMP/worldz-local.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do curl -fsS 'http://127.0.0.1:8088/' -o /dev/null && break; sleep 0.2; done
+          WORLDZ_PROOF_DIR='worldz-shared-candidate-proof' node tools/prove-live-worldz-v2.mjs "http://127.0.0.1:8088/${PREVIEW_QUERY}" "$EXPECTED_TEXT"
+          kill "$server_pid" 2>/dev/null || true
+          trap - EXIT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldz-shared-candidate-${{ needs.prepare.outputs.target }}-${{ github.run_id }}
+          path: worldz-shared-candidate-proof
+          if-no-files-found: error
+          retention-days: 30
+
+  deploy:
+    name: Backup, deploy, prove origin/CDN, rollback on failure
+    needs: [prepare, validate]
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    environment:
+      name: ${{ needs.prepare.outputs.environment }}
+      url: ${{ needs.prepare.outputs.live_url }}
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
+      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
+      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      EXPECTED_GUARD: ${{ needs.prepare.outputs.guard }}
+      LIVE_URL: ${{ needs.prepare.outputs.live_url }}
+      EXPECTED_TEXT: ${{ needs.prepare.outputs.expected_text }}
+      PROOF_MEDIA: ${{ needs.prepare.outputs.proof_media }}
+      FTP_TLS_VERIFY: yes
+      FTP_TLS_CHECK_HOSTNAME: yes
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.source_commit }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Rebuild the exact verified release
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run verify:web
+          rm -rf dist/worldz-shared
+          mkdir -p dist/worldz-shared
+          node tools/worldz-upload-manifest.mjs apps/cryptoworldz-web-core "$RUNNER_TEMP/worldz-manifest.txt"
+          rsync -a --files-from="$RUNNER_TEMP/worldz-manifest.txt" apps/cryptoworldz-web-core/ dist/worldz-shared/
+          test -s dist/worldz-shared/index.html
+          test -s "dist/worldz-shared/$PROOF_MEDIA"
+      - name: Verify domain-only Hostinger gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$FTP_ACCOUNT_SCOPE" = 'DOMAIN_ONLY'
+          test "$DEPLOY_GUARD" = "$EXPECTED_GUARD"
+          [[ "$FTP_SERVER_DIR" == '/' || "$FTP_SERVER_DIR" == '/public_html' ]]
+          test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+      - name: Install FTPS and image proof tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp imagemagick
+      - name: Establish certificate-verified Hostinger FTPS identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          test -n "$raw_host"
+          if [[ "$raw_host" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            alias_host="worldz-${{ needs.prepare.outputs.target }}-ftp.hstgr.io"
+            echo "$raw_host $alias_host" | sudo tee -a /etc/hosts >/dev/null
+            connect_host="$alias_host"
+          else
+            connect_host="$raw_host"
+          fi
+          timeout 30 openssl s_client -starttls ftp -connect "$connect_host:$FTP_PORT" -servername "$connect_host" -verify_return_error -verify_hostname "$connect_host" -CAfile /etc/ssl/certs/ca-certificates.crt </dev/null > "$RUNNER_TEMP/ftps-cert.txt" 2>&1
+          grep -Fq 'Verify return code: 0 (ok)' "$RUNNER_TEMP/ftps-cert.txt"
+          echo "FTP_CONNECT_HOST=$connect_host" >> "$GITHUB_ENV"
+          echo "::add-mask::$connect_host"
+      - name: Back up complete current domain release
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/worldz-predeploy-backup"
+          mkdir -p "$backup"
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 1
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname true
+          cd $FTP_SERVER_DIR
+          mirror --verbose --parallel=2 --exclude-glob .well-known/** . $backup
+          bye
+          EOF
+          test "$(find "$backup" -type f | wc -l | tr -d ' ')" -gt 0
+          echo "BACKUP_DIR=$backup" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldz-predeploy-backup-${{ needs.prepare.outputs.target }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/worldz-predeploy-backup
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload approved current release with index last
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'DEPLOY_STARTED=true' >> "$GITHUB_ENV"
+          bash tools/worldz-direct-ftp.sh upload dist/worldz-shared
+      - name: Remove known retired duplicate public files
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
+          set cmd:fail-exit false
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname true
+          cd $FTP_SERVER_DIR
+          rm oneworldz-index.html
+          rm oneworldz-robots.txt
+          rm oneworldz-sitemap.xml
+          rm command-centre-ultimate-20260811.html
+          bye
+          EOF
+      - name: Prove FTP origin and public index equal approved release
+        shell: bash
+        run: |
+          set -euo pipefail
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit true; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname true; cd '$FTP_SERVER_DIR'; get index.html -o '$RUNNER_TEMP/origin-index.html'; bye"
+          local_sha="$(sha256sum dist/worldz-shared/index.html | awk '{print $1}')"
+          origin_sha="$(sha256sum "$RUNNER_TEMP/origin-index.html" | awk '{print $1}')"
+          [[ "$local_sha" == "$origin_sha" ]]
+          public_ok=false
+          for attempt in $(seq 1 8); do
+            curl -L -fsS --compressed -H 'Cache-Control: no-cache' "$LIVE_URL/?worldz-release=${GITHUB_RUN_ID}-$attempt" -o "$RUNNER_TEMP/public-index.html" || true
+            if [[ -s "$RUNNER_TEMP/public-index.html" && "$(sha256sum "$RUNNER_TEMP/public-index.html" | awk '{print $1}')" == "$local_sha" ]]; then public_ok=true; break; fi
+            sleep 2
+          done
+          [[ "$public_ok" == 'true' ]]
+      - name: Prove exact approved media at origin and CDN
+        shell: bash
+        run: bash tools/prove-worldz-origin-media.sh dist/worldz-shared "$PROOF_MEDIA"
+      - name: Prove live desktop and mobile render
+        shell: bash
+        run: |
+          set -euo pipefail
+          WORLDZ_PROOF_DIR='worldz-shared-live-proof' node tools/prove-live-worldz-v2.mjs "$LIVE_URL" "$EXPECTED_TEXT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldz-live-proof-${{ needs.prepare.outputs.target }}-${{ github.run_id }}
+          path: worldz-shared-live-proof
+          if-no-files-found: error
+          retention-days: 30
+      - name: Production proof summary
+        run: |
+          {
+            echo '## Shared Worldz Production Proof — PASSED'
+            echo '- Owner-gated immutable release request: passed'
+            echo '- Complete repository verification: passed'
+            echo '- Desktop/mobile candidate before hosting: passed'
+            echo '- Domain-only FTPS guard and certificate identity: passed'
+            echo '- Pre-deployment backup: saved'
+            echo '- Current public release uploaded with index last'
+            echo '- Retired duplicate root files removed'
+            echo '- FTP-origin index exact hash: passed'
+            echo '- Public index exact hash: passed'
+            echo '- Approved media origin/CDN proof: passed'
+            echo '- Live desktop/mobile browser proof: passed'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Roll back exact pre-deployment release on failure
+        if: ${{ failure() && env.DEPLOY_STARTED == 'true' }}
+        shell: bash
+        run: |
+          set +e
+          backup="${BACKUP_DIR:-$RUNNER_TEMP/worldz-predeploy-backup}"
+          test -d "$backup" || { echo '::error::Rollback backup missing'; exit 1; }
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
+          set cmd:fail-exit true
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname true
+          cd $FTP_SERVER_DIR
+          mirror -R --delete --verbose --parallel=2 --exclude-glob .well-known/** "$backup" .
+          bye
+          EOF
+          echo 'Rollback restored the pre-deployment release surface.'
+          exit 1
