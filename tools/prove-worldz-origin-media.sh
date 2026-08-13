@@ -11,6 +11,13 @@ shift
 : "${FTP_SERVER_DIR:=/}"
 : "${LIVE_URL:?LIVE_URL is required}"
 : "${WORLDZ_MEDIA_RMSE_MAX:=0.05}"
+: "${FTP_TLS_CHECK_HOSTNAME:=yes}"
+: "${WORLDZ_CERT_PINNED:=no}"
+
+if [[ "$FTP_TLS_CHECK_HOSTNAME" == 'no' && "$WORLDZ_CERT_PINNED" != 'yes' ]]; then
+  echo '::error::Pinned-certificate proof is required when FTPS hostname checking is disabled for a numeric Hostinger endpoint.' >&2
+  exit 3
+fi
 
 command -v lftp >/dev/null
 command -v curl >/dev/null
@@ -34,7 +41,7 @@ prove_one() {
   local public="$RUNNER_TEMP/worldz-public-$token.bin"
   local headers="$RUNNER_TEMP/worldz-public-$token.headers"
 
-  timeout 60 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 20; set ftp:passive-mode yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname yes; cd '$FTP_SERVER_DIR'; get '$rel' -o '$origin'; bye"
+  timeout 60 lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit yes; set net:max-retries 1; set net:timeout 20; set ftp:passive-mode yes; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; set ssl:check-hostname $FTP_TLS_CHECK_HOSTNAME; cd '$FTP_SERVER_DIR'; get '$rel' -o '$origin'; bye"
   test -s "$origin"
 
   local approved_sha origin_sha
