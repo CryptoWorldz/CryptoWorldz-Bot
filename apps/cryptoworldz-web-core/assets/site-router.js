@@ -19,8 +19,7 @@
     'suiworldz.xyz',
     'hyperworldz.xyz',
     'robinworldz.xyz',
-    'bitcoinworldz.xyz',
-    'hodlerworldz.xyz'
+    'bitcoinworldz.xyz'
   ]);
 
   const walletButton = document.querySelector('#wallet-button');
@@ -49,13 +48,13 @@
                 ? './assets/impactbased.js'
                 : hostname === 'oneworldz.com' || requestedMode === 'mission'
                   ? './assets/oneworldz-next.js'
-                  : blockchainWorldHosts.has(hostname)
+                  : blockchainWorldHosts.has(hostname) || requestedMode === 'world'
                     ? './assets/blockchain-world.js'
                     : requestedMode === 'coming-soon'
                       ? './assets/coming-soon.js'
                       : requestedMode === 'directory'
                         ? './assets/pdc-directory.js'
                         : './assets/app.js';
-  script.src = `${selectedScript}?v=20260813-canonical-routes-v1`;
+  script.src = `${selectedScript}?v=20260813-shared-proof-v1`;
   document.body.appendChild(script);
 })();
