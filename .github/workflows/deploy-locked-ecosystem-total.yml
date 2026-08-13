@@ -78,7 +78,7 @@ jobs:
     name: Backup, deploy and prove ${{ matrix.domain }}
     needs: [authorize, validate]
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 180
     strategy:
       fail-fast: true
       max-parallel: 1
@@ -315,7 +315,7 @@ jobs:
           lines.push('bye');
           fs.writeFileSync(script, lines.join('\n') + '\n');
           NODE
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -f "$script"
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -f "$script" "$FTP_CONNECT_HOST"
           node - "$proof" <<'NODE'
           const fs = require('fs');
           const path = require('path');
