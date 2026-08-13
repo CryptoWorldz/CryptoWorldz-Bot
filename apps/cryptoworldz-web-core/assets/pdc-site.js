@@ -1,6 +1,7 @@
 (() => {
   const hostname = location.hostname.replace(/^www\./, '').toLowerCase();
-  if (hostname !== 'purplediamondcrew.com') return;
+  const previewSite = new URLSearchParams(location.search).get('site');
+  if (hostname !== 'purplediamondcrew.com' && previewSite !== 'purplediamondcrew') return;
 
   const config = window.CRYPTOWORLDZ_CONFIG;
   const app = document.querySelector('#app');
@@ -13,11 +14,11 @@
   if (!config || !app) return;
 
   const links = Object.freeze({
-    goFundMeProfile: 'https://www.gofundme.com/u/cryptouniverse',
-    ugandaCampaign: 'https://gofund.me/65129e58a',
+    goFundMeProfile: 'https://www.gofundme.com/u/jayjayteamdev',
+    ugandaCampaign: 'https://gofund.me/c2e4fa936',
     cryptoWorldz: 'https://cryptoworldz.xyz',
     oneWorldz: 'https://oneworldz.com',
-    impactBased: 'https://impactbased.oneworldz.com',
+    impactBased: 'https://oneworldz.com/worldz/impactbased',
     telegram: 'https://t.me/CryptoWorldzRaaiiiddTeam',
     x: 'https://x.com/CryptoWorldzX'
   });
