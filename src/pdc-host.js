@@ -40,10 +40,16 @@ function injectPreviewSelection(source, world) {
 }
 
 function allowPdcPreview(source) {
-  return source.replace(
-    "if (hostname !== 'purplediamondcrew.com') return;",
-    "if (hostname !== 'purplediamondcrew.com' && new URLSearchParams(location.search).get('site') !== 'pdc' && !location.pathname.startsWith('/purple-diamond-crew')) return;"
-  );
+  const fallbackGuard = "if (hostname !== 'purplediamondcrew.com' && new URLSearchParams(location.search).get('site') !== 'pdc' && !location.pathname.startsWith('/purple-diamond-crew')) return;";
+  return source
+    .replace(
+      "if (hostname !== 'purplediamondcrew.com' && previewSite !== 'purplediamondcrew') return;",
+      "if (hostname !== 'purplediamondcrew.com' && previewSite !== 'purplediamondcrew' && previewSite !== 'pdc' && !location.pathname.startsWith('/purple-diamond-crew')) return;"
+    )
+    .replace(
+      "if (hostname !== 'purplediamondcrew.com') return;",
+      fallbackGuard
+    );
 }
 
 function registerPdcHost(app) {
