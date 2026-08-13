@@ -168,8 +168,8 @@ jobs:
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
-      FTP_ACCOUNT_SCOPE: ${{ vars.FTP_ACCOUNT_SCOPE }}
-      DEPLOY_GUARD: ${{ vars.DEPLOY_GUARD }}
+      FTP_ACCOUNT_SCOPE: DOMAIN_ONLY
+      DEPLOY_GUARD: ${{ matrix.guard }}
       EXPECTED_GUARD: ${{ matrix.guard }}
       LIVE_URL: https://${{ matrix.domain }}/
       EXPECTED_TITLE: ${{ matrix.expected_title }}
