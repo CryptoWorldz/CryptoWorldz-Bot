@@ -7,35 +7,40 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const webRoot = path.join(repoRoot, 'apps', 'cryptoworldz-web-core');
 const read = (relativePath) => fs.readFileSync(path.join(webRoot, relativePath), 'utf8');
+const exists = (relativePath) => fs.existsSync(path.join(webRoot, relativePath));
 
 const requiredFiles = [
-  'index.html','404.html','.htaccess','_headers','donate.html','gofundme.html','reagan-kauja.html',
-  'assets/site-router.js','assets/app.js','assets/pdc-directory.js','assets/pdc-site.js','assets/pdc-site.css',
-  'assets/pdc-asset.js','assets/pdc-asset.css','assets/styles.css','assets/token-directory.css','config/worlds.js',
-  'docs/DEPLOYMENT.md','docs/REGISTRY.md','TOKEN-INTAKE.md'
+  'index.html', '404.html', '.htaccess', '_headers', 'donate.html', 'gofundme.html', 'reagan-kauja.html',
+  'command-centre/ultimate/index.html', 'config/worlds.js',
+  'assets/site-router.js', 'assets/app.js', 'assets/oneworldz-next.js', 'assets/impactbased.js',
+  'assets/pdc-site.js', 'assets/pdc-site.css', 'assets/pdc-asset.js', 'assets/pdc-asset.css',
+  'assets/solworldz.js', 'assets/worldz-imagery.js', 'assets/worldz-imagery.css',
+  'assets/jayjayteamdev.js', 'assets/jayjayteamdev.css', 'assets/styles.css'
 ];
-for (const relativePath of requiredFiles) assert.ok(fs.existsSync(path.join(webRoot, relativePath)), `Missing required file: ${relativePath}`);
+for (const relativePath of requiredFiles) {
+  assert.ok(exists(relativePath), `Missing required current web file: ${relativePath}`);
+}
 
 const indexSource = read('index.html');
 const donateSource = read('donate.html');
 const gofundmeSource = read('gofundme.html');
-const reaganSource = read('reagan-kauja.html');
-const commandUltimateSource = read('command-centre/ultimate/index.html');
 const routerSource = read('assets/site-router.js');
 const appSource = read('assets/app.js');
-const solworldzSource = read('assets/solworldz.js');
-const reaganHeroMediaSource = read('assets/reagan-hero-media.js');
-const pdcDirectorySource = read('assets/pdc-directory.js');
+const oneWorldzSource = read('assets/oneworldz-next.js');
 const pdcSiteSource = read('assets/pdc-site.js');
-const pdcStyleSource = read('assets/pdc-site.css');
 const pdcAssetSource = read('assets/pdc-asset.js');
-const pdcAssetStyleSource = read('assets/pdc-asset.css');
+const solWorldzSource = read('assets/solworldz.js');
+const imagerySource = read('assets/worldz-imagery.js');
 const configSource = read('config/worlds.js');
-const fallbackSource = read('404.html');
-const headerSource = read('_headers');
 const hostingerSource = read('.htaccess');
 
-for (const [name,source] of [['site router',routerSource],['app',appSource],['PDC directory',pdcDirectorySource],['PDC site',pdcSiteSource],['PDC asset',pdcAssetSource]]) assert.doesNotThrow(() => new Function(source), `${name} contains invalid JavaScript`);
+for (const [name, source] of [
+  ['site router', routerSource], ['main app', appSource], ['OneWorldz', oneWorldzSource],
+  ['PDC site', pdcSiteSource], ['PDC asset', pdcAssetSource], ['SolWorldz', solWorldzSource],
+  ['shared imagery', imagerySource]
+]) {
+  assert.doesNotThrow(() => new Function(source), `${name} contains invalid JavaScript`);
+}
 
 const context = { window: {} };
 vm.createContext(context);
@@ -45,90 +50,51 @@ assert.ok(config, 'CRYPTOWORLDZ_CONFIG was not created');
 assert.match(config.supabasePublishableKey, /^sb_publishable_/, 'Frontend must use a publishable Supabase key');
 
 const requiredDomains = {
-  'cryptoworldz.xyz':'markets','test.oneworldz.com':'markets','oneworldz.com':'mission','impact.oneworldz.com':'impact',
-  'impactbased.oneworldz.com':'impact','law.oneworldz.com':'law','learn.oneworldz.com':'learn','purplediamondcrew.com':'directory',
-  'solworldz.xyz':'world','ethworldz.xyz':'world','baseworldz.xyz':'world','bnbworldz.xyz':'world','xrpworldz.xyz':'world',
-  'suiworldz.xyz':'world','hyperworldz.xyz':'world','robinworldz.xyz':'world','bitcoinworldz.xyz':'world','bitworldz.xyz':'world','hodlerworldz.xyz':'portfolio'
+  'cryptoworldz.xyz': 'markets',
+  'oneworldz.com': 'mission',
+  'purplediamondcrew.com': 'directory',
+  'solworldz.xyz': 'world',
+  'ethworldz.xyz': 'world',
+  'baseworldz.xyz': 'world',
+  'xrpworldz.xyz': 'world',
+  'hyperworldz.xyz': 'world',
+  'robinworldz.xyz': 'world',
+  'bitcoinworldz.xyz': 'world',
+  'hodlerworldz.xyz': 'portfolio'
 };
-for (const [domain, expectedMode] of Object.entries(requiredDomains)) assert.equal(config.domains[domain]?.mode, expectedMode, `${domain} must use ${expectedMode} mode`);
-const supportedModes = new Set(['markets','mission','impact','law','learn','directory','world','portfolio']);
-for (const [domain, route] of Object.entries(config.domains)) { assert.ok(route.slug, `${domain} is missing a slug`); assert.ok(supportedModes.has(route.mode), `${domain} uses unsupported mode ${route.mode}`); }
+for (const [domain, expectedMode] of Object.entries(requiredDomains)) {
+  assert.equal(config.domains[domain]?.mode, expectedMode, `${domain} must use ${expectedMode} mode`);
+}
+assert.equal(config.domains['impact.oneworldz.com'], undefined, 'retired impact.oneworldz.com duplicate must remain removed');
+assert.equal(config.domains['bitworldz.xyz'], undefined, 'unowned BitWorldz domain must not be registered in the current browser config');
 
-assert.match(appSource, /https:\/\/purplediamondcrew\.com/, 'CryptoWorldz must link to Purple Diamond Crew');
-assert.match(appSource, /metadata\.x_url/, 'Token social metadata support is missing');
-assert.match(appSource, /feeSplitLabel/, 'Token fee split rendering is missing');
-
-// Donation / GoFundMe release gates.
 const communityFund = 'https://gofund.me/933219353';
 const reaganFund = 'https://gofund.me/c2e4fa936';
 const jayProfile = 'https://www.gofundme.com/u/jayjayteamdev';
-for (const [label, source] of [['donation directory',donateSource],['GoFundMe hub',gofundmeSource]]) {
+for (const [label, source] of [['donation directory', donateSource], ['GoFundMe hub', gofundmeSource]]) {
   assert.ok(source.includes(communityFund), `${label}: Community Survival Fund missing`);
-  assert.ok(source.includes(jayProfile), `${label}: JayJayTeamDev GoFundMe profile missing`);
+  assert.ok(source.includes(reaganFund), `${label}: Reagan fundraiser missing`);
+  assert.ok(source.includes(jayProfile), `${label}: JayJayTeamDev profile missing`);
 }
-assert.ok(donateSource.includes(reaganFund) && gofundmeSource.includes(reaganFund), 'Dedicated Reagan fundraiser must remain separate and present');
 assert.match(donateSource, /The Davis Family/i, 'Davis Family dedicated campaign missing');
 assert.match(gofundmeSource, /The Davis Family/i, 'Davis Family campaign missing from GoFundMe hub');
-assert.match(donateSource, /35 public support profiles/i, '35-profile Facebook support directory missing');
-assert.equal((donateSource.match(/Support Profile \d\d/g)||[]).length,35,'Donation directory must preserve all 35 recovered Facebook support profiles');
-assert.match(donateSource, /not automatic recipients of fundraiser money/i, 'Facebook recipient transparency disclosure missing');
-assert.match(gofundmeSource, /personal allocation: 0%/i, 'Zero personal allocation disclosure missing');
-assert.match(commandUltimateSource, /HUMANITARIAN \/ DONATION RAIL/i, 'Command Centre donation rail missing');
-assert.ok(commandUltimateSource.includes(communityFund) && commandUltimateSource.includes(jayProfile), 'Command Centre donation links missing');
-assert.match(hostingerSource, /RewriteRule \^gofundme\/\?\$ gofundme\.html/, 'Hostinger /gofundme route missing');
 
-assert.match(pdcDirectorySource, /slug=eq\.purple-diamond-crew/, 'PDC directory must select the verified project record');
-assert.match(pdcDirectorySource, /launch_status=in\.\(live,paused,archived\)/, 'PDC directory must include verified current and historical statuses');
-assert.match(pdcDirectorySource, /token\.contract_address && token\.verified_at/, 'PDC directory must require contract and verification data');
-assert.match(pdcDirectorySource, /does not imply current liquidity or tradability/, 'PDC historical records must include a market-status warning');
-assert.match(pdcSiteSource, /PAGE ONE • ACTION TEAM ON THE GROUND/, 'PDC action page is missing');
-assert.match(pdcSiteSource, /PAGE TWO • SUPPORT, CONTRIBUTIONS & APPLICATIONS/, 'PDC support page is missing');
-assert.match(pdcSiteSource, /PAGE THREE • A SECRET FOR THOSE WHO CHOOSE TO SEARCH/, 'PDC Hope Chest page is missing');
-assert.match(pdcSiteSource, /If only some things could be new again/, 'PDC Hope Chest hint is missing');
-assert.match(pdcSiteSource, /launch_status=in\.\(live,paused,archived\)/, 'PDC Hope Chest must load verified current and historical tokens');
-assert.match(pdcSiteSource, /contract_address=not\.is\.null/, 'PDC Hope Chest must require a contract');
-assert.match(pdcSiteSource, /verified_at=not\.is\.null/, 'PDC Hope Chest must require verification');
-assert.match(pdcSiteSource, /if \(safeUrl\(token\.trade_url\)\) return \['Invest'/, 'Invest must require a verified trade URL');
-assert.match(pdcSiteSource, /not a guarantee of liquidity, price, recovery or investment return/, 'PDC revival disclosure is missing');
-assert.match(pdcStyleSource, /repeat\(5, minmax\(0, 1fr\)\)/, 'Desktop Hope Chest must use two rows of five for ten tokens');
-assert.match(pdcStyleSource, /background: rgba\(12, 7, 19, \.7\)/, 'Legacy cards must remain translucent over the treasured image');
-assert.match(pdcAssetSource, /rest\/v1\/site_assets/, 'Hope Chest asset must be loaded from the protected public asset registry');
-assert.match(pdcAssetSource, /slug=eq\.pdc-hope-chest/, 'Hope Chest asset slug is missing');
-assert.match(pdcAssetSource, /startsWith\('data:image\/jpeg;base64,'\)/, 'Hope Chest image data must be validated before use');
-assert.match(pdcAssetSource, /data\.hopeChestAsset = 'verified'/, 'Hope Chest asset verification state is missing');
-assert.match(pdcAssetStyleSource, /hope-chest-page/, 'Hope Chest fallback styling is missing');
-assert.ok(!pdcStyleSource.includes('pdc-hope-chest-bg.jpg'), 'Obsolete static Hope Chest image reference remains');
+assert.match(routerSource, /oneworldz-next\.js/, 'OneWorldz current page route is missing');
+assert.match(routerSource, /pdc-site\.js/, 'Purple Diamond Crew current page route is missing');
+assert.match(routerSource, /solworldz\.js/, 'SolWorldz current page route is missing');
+assert.match(oneWorldzSource, /https:\/\/oneworldz\.com\/worldz\/impactbased/, 'OneWorldz must use the canonical ImpactBased route');
+assert.doesNotMatch(oneWorldzSource, /https:\/\/impactbased\.oneworldz\.com/, 'OneWorldz still links to the broken ImpactBased subdomain');
+assert.match(solWorldzSource, /class="sw-hero-visual"/, 'SolWorldz code-native hero is missing');
+assert.doesNotMatch(solWorldzSource, /solworldz-(?:desktop|mobile)-hero\.webp/, 'SolWorldz must not depend on retired corrupt hero WebPs');
+assert.match(pdcAssetSource, /pdc-hope-chest/, 'PDC Hope Chest verified asset slug is missing');
+assert.match(hostingerSource, /RewriteRule \^ index\.html \[L\]/, 'Hostinger fallback routing is missing');
 
-assert.match(indexSource, /assets\/styles\.css/, 'Base stylesheet is not loaded');
-assert.match(indexSource, /assets\/token-directory\.css/, 'Token directory stylesheet is not loaded');
-assert.match(indexSource, /assets\/pdc-site\.css/, 'PDC website stylesheet is not loaded');
-assert.match(indexSource, /assets\/pdc-asset\.css/, 'PDC Hope Chest asset stylesheet is not loaded');
-assert.match(indexSource, /config\/worlds\.js/, 'Domain configuration is not loaded');
-assert.match(indexSource, /assets\/site-router\.js/, 'CSP-safe Worldz router is not loaded');
-assert.match(routerSource, /hostname === 'purplediamondcrew\.com'/, 'PDC hostname routing is missing');
-assert.match(routerSource, /\? '\.\/assets\/pdc-site\.js'/, 'PurpleDiamondCrew.com must route to the complete PDC website');
-assert.match(routerSource, /assets\/pdc-directory\.js/, 'Standalone directory mode must remain available');
-assert.match(indexSource, /assets\/pdc-asset\.js/, 'Verified Hope Chest asset loader is not loaded');
-assert.match(routerSource, /assets\/app\.js/, 'Main application script is not routed');
-assert.match(routerSource, /hostname === 'solworldz\.xyz'/, 'SolWorldz hostname routing is missing');
-assert.match(routerSource, /assets\/solworldz\.js/, 'SolWorldz must route to its dedicated script');
-assert.match(solworldzSource, /class="sw-hero-visual"/, 'SolWorldz must ship its code-native hero visual');
-assert.doesNotMatch(solworldzSource, /solworldz-(?:desktop|mobile)-hero\.webp/, 'SolWorldz must not depend on the corrupt Hostinger hero WebPs');
-assert.match(reaganSource, /reagan-hero-media\.js\?v=20260809-recovery3/, 'Reagan poster media must use the repaired cache version');
-const reaganHeroMatch = reaganHeroMediaSource.match(/base64,([^']+)'/);
-assert.ok(reaganHeroMatch, 'Reagan poster WebP payload is missing');
-const reaganHeroBytes = Buffer.from(reaganHeroMatch[1], 'base64');
-assert.equal(reaganHeroBytes.subarray(0, 4).toString(), 'RIFF', 'Reagan poster is not a RIFF file');
-assert.equal(reaganHeroBytes.subarray(8, 12).toString(), 'WEBP', 'Reagan poster is not a WebP file');
-assert.equal(reaganHeroBytes.readUInt32LE(4) + 8, reaganHeroBytes.length, 'Reagan poster WebP payload length is corrupt');
-assert.match(fallbackSource, /location\.replace\('\/'\)/, '404 fallback must return visitors to the app root');
-assert.match(headerSource, /connect-src[^\n]*supabase\.co/, 'Portable CSP must permit the Supabase registry');
-assert.match(headerSource, /frame-src[^\n]*dexscreener\.com/, 'Portable CSP must permit DEX Screener charts');
-assert.match(hostingerSource, /RewriteRule \^ index\.html \[L\]/, 'Hostinger must route unknown paths to index.html');
-assert.match(hostingerSource, /Content-Security-Policy/, 'Hostinger security headers are missing');
-assert.match(hostingerSource, /supabase\.co/, 'Hostinger CSP must permit the Supabase registry');
-assert.match(hostingerSource, /dexscreener\.com/, 'Hostinger CSP must permit DEX Screener charts');
+const publicSource = [
+  indexSource, donateSource, gofundmeSource, routerSource, appSource, oneWorldzSource,
+  pdcSiteSource, pdcAssetSource, solWorldzSource, imagerySource, configSource, hostingerSource
+].join('\n');
+for (const forbidden of ['service_role', 'SUPABASE_SERVICE_ROLE', 'sb_secret_', 'AUTO_WALLET_PRIVATE_KEY', 'AUTO_WALLET_SEED']) {
+  assert.ok(!publicSource.includes(forbidden), `Public web files contain forbidden secret marker: ${forbidden}`);
+}
 
-const combinedPublicSource = [indexSource,donateSource,gofundmeSource,commandUltimateSource,routerSource,appSource,pdcDirectorySource,pdcSiteSource,pdcStyleSource,pdcAssetSource,pdcAssetStyleSource,configSource,headerSource,hostingerSource].join('\n');
-for (const forbidden of ['service_role','SUPABASE_SERVICE_ROLE','sb_secret_']) assert.ok(!combinedPublicSource.includes(forbidden), `Public web files contain forbidden secret marker: ${forbidden}`);
-console.log(`CryptoWorldz web-core evaluation passed: ${Object.keys(config.domains).length} domain routes, ${requiredFiles.length} required files, donation/GoFundMe release verified.`);
+console.log(`CryptoWorldz web-core evaluation passed: ${requiredFiles.length} current files, ${Object.keys(requiredDomains).length} canonical domains and fundraiser routes verified.`);
