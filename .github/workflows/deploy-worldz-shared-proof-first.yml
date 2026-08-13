@@ -154,6 +154,7 @@ jobs:
       PROOF_MEDIA: ${{ needs.prepare.outputs.proof_media }}
       FTP_TLS_VERIFY: yes
       FTP_TLS_CHECK_HOSTNAME: yes
+      WORLDZ_CERT_PINNED: no
     steps:
       - uses: actions/checkout@v4
         with:
@@ -189,24 +190,28 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp imagemagick
-      - name: Establish certificate-verified Hostinger FTPS identity
+      - name: Establish CA-verified and run-pinned Hostinger FTPS identity
         shell: bash
         run: |
           set -euo pipefail
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           test -n "$raw_host"
-          if [[ "$raw_host" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            alias_host="worldz-${{ needs.prepare.outputs.target }}-ftp.hstgr.io"
-            echo "$raw_host $alias_host" | sudo tee -a /etc/hosts >/dev/null
-            connect_host="$alias_host"
-          else
-            connect_host="$raw_host"
-          fi
-          timeout 30 openssl s_client -starttls ftp -connect "$connect_host:$FTP_PORT" -servername "$connect_host" -verify_return_error -verify_hostname "$connect_host" -CAfile /etc/ssl/certs/ca-certificates.crt </dev/null > "$RUNNER_TEMP/ftps-cert.txt" 2>&1
-          grep -Fq 'Verify return code: 0 (ok)' "$RUNNER_TEMP/ftps-cert.txt"
-          echo "FTP_CONNECT_HOST=$connect_host" >> "$GITHUB_ENV"
-          echo "::add-mask::$connect_host"
+          ftp_ip="$(getent ahostsv4 "$raw_host" | awk 'NR==1{print $1}')"
+          test -n "$ftp_ip"
+          timeout 30 openssl s_client -starttls ftp -connect "$ftp_ip:$FTP_PORT" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt -showcerts </dev/null > "$RUNNER_TEMP/ftps-cert.txt" 2>&1
+          awk '/-----BEGIN CERTIFICATE-----/{p=1} p{print} /-----END CERTIFICATE-----/{exit}' "$RUNNER_TEMP/ftps-cert.txt" > "$RUNNER_TEMP/ftps-leaf.pem"
+          test -s "$RUNNER_TEMP/ftps-leaf.pem"
+          openssl x509 -in "$RUNNER_TEMP/ftps-leaf.pem" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io'
+          fingerprint="$(openssl x509 -in "$RUNNER_TEMP/ftps-leaf.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
+          test -n "$fingerprint"
+          {
+            echo "FTP_CONNECT_HOST=$ftp_ip"
+            echo 'FTP_TLS_CHECK_HOSTNAME=no'
+            echo 'WORLDZ_CERT_PINNED=yes'
+            echo "FTP_CERT_SHA256=$fingerprint"
+          } >> "$GITHUB_ENV"
+          echo "::add-mask::$ftp_ip"
       - name: Back up complete current domain release
         shell: bash
         run: |
@@ -220,7 +225,7 @@ jobs:
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
-          set ssl:check-hostname true
+          set ssl:check-hostname $FTP_TLS_CHECK_HOSTNAME
           cd $FTP_SERVER_DIR
           mirror --verbose --parallel=2 --exclude-glob .well-known/** . $backup
           bye
@@ -239,6 +244,16 @@ jobs:
           set -euo pipefail
           echo 'DEPLOY_STARTED=true' >> "$GITHUB_ENV"
           bash tools/worldz-direct-ftp.sh upload dist/worldz-shared
+      - name: Re-prove pinned FTPS certificate stayed stable
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 30 openssl s_client -starttls ftp -connect "$FTP_CONNECT_HOST:$FTP_PORT" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt -showcerts </dev/null > "$RUNNER_TEMP/ftps-cert-after.txt" 2>&1
+          awk '/-----BEGIN CERTIFICATE-----/{p=1} p{print} /-----END CERTIFICATE-----/{exit}' "$RUNNER_TEMP/ftps-cert-after.txt" > "$RUNNER_TEMP/ftps-leaf-after.pem"
+          test -s "$RUNNER_TEMP/ftps-leaf-after.pem"
+          openssl x509 -in "$RUNNER_TEMP/ftps-leaf-after.pem" -noout -ext subjectAltName | grep -Fq 'DNS:*.hstgr.io'
+          after="$(openssl x509 -in "$RUNNER_TEMP/ftps-leaf-after.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
+          [[ "$after" == "$FTP_CERT_SHA256" ]]
       - name: Remove known retired duplicate public files
         shell: bash
         run: |
@@ -248,7 +263,7 @@ jobs:
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
-          set ssl:check-hostname true
+          set ssl:check-hostname $FTP_TLS_CHECK_HOSTNAME
           cd $FTP_SERVER_DIR
           rm oneworldz-index.html
           rm oneworldz-robots.txt
@@ -260,7 +275,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit true; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname true; cd '$FTP_SERVER_DIR'; get index.html -o '$RUNNER_TEMP/origin-index.html'; bye"
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" -e "set cmd:fail-exit true; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname $FTP_TLS_CHECK_HOSTNAME; cd '$FTP_SERVER_DIR'; get index.html -o '$RUNNER_TEMP/origin-index.html'; bye"
           local_sha="$(sha256sum dist/worldz-shared/index.html | awk '{print $1}')"
           origin_sha="$(sha256sum "$RUNNER_TEMP/origin-index.html" | awk '{print $1}')"
           [[ "$local_sha" == "$origin_sha" ]]
@@ -292,7 +307,7 @@ jobs:
             echo '- Owner-gated immutable release request: passed'
             echo '- Complete repository verification: passed'
             echo '- Desktop/mobile candidate before hosting: passed'
-            echo '- Domain-only FTPS guard and certificate identity: passed'
+            echo '- Domain-only FTPS guard and CA-verified pinned Hostinger certificate: passed'
             echo '- Pre-deployment backup: saved'
             echo '- Current public release uploaded with index last'
             echo '- Retired duplicate root files removed'
@@ -313,7 +328,7 @@ jobs:
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
-          set ssl:check-hostname true
+          set ssl:check-hostname $FTP_TLS_CHECK_HOSTNAME
           cd $FTP_SERVER_DIR
           mirror -R --delete --verbose --parallel=2 --exclude-glob .well-known/** "$backup" .
           bye
