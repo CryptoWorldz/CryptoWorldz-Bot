@@ -18,6 +18,7 @@ esac
 : "${FTP_TLS_VERIFY:=yes}"
 : "${FTP_TLS_CHECK_HOSTNAME:=yes}"
 : "${FTP_CONNECT_HOST:=$FTP_HOST}"
+: "${WORLDZ_CERT_PINNED:=no}"
 
 normalize_ftp_host() {
   local value="$1"
@@ -47,9 +48,13 @@ if [[ "$FTP_TLS_VERIFY" != 'yes' ]]; then
   echo '::error::FTP_TLS_VERIFY=no is forbidden for Worldz production transfers.' >&2
   exit 7
 fi
-if [[ "$FTP_TLS_CHECK_HOSTNAME" != 'yes' ]]; then
-  echo '::error::FTP_TLS_CHECK_HOSTNAME=no is forbidden for Worldz production transfers.' >&2
+if [[ "$FTP_TLS_CHECK_HOSTNAME" != 'yes' && "$FTP_TLS_CHECK_HOSTNAME" != 'no' ]]; then
+  echo '::error::FTP_TLS_CHECK_HOSTNAME must be yes or no.' >&2
   exit 9
+fi
+if [[ "$FTP_TLS_CHECK_HOSTNAME" == 'no' && "$WORLDZ_CERT_PINNED" != 'yes' ]]; then
+  echo '::error::Hostname checking may only be disabled after the workflow has CA-verified and pinned the Hostinger certificate for this run.' >&2
+  exit 12
 fi
 
 test -d "$source_root"
@@ -116,7 +121,7 @@ fi
   echo 'set ftp:ssl-force yes'
   echo 'set ftp:ssl-protect-data yes'
   echo 'set ssl:verify-certificate yes'
-  echo 'set ssl:check-hostname yes'
+  echo "set ssl:check-hostname $FTP_TLS_CHECK_HOSTNAME"
   echo 'set xfer:clobber yes'
   printf 'cd %s\n' "$(lftp_quote "$FTP_SERVER_DIR")"
   for file in "${ordinary_files[@]}"; do emit_file "$file"; done
@@ -133,7 +138,7 @@ fi
 
 if [[ "${WORLDZ_FTP_DRY_RUN:-0}" == "1" ]]; then
   test -s "$command_file"
-  echo "Direct $mode dry run generated $file_count file commands with TLS verification enforced."
+  echo "Direct $mode dry run generated $file_count file commands with TLS certificate verification enforced."
   exit 0
 fi
 
@@ -142,6 +147,6 @@ if ! getent ahosts "$FTP_CONNECT_HOST" >/dev/null 2>&1; then
   exit 6
 fi
 
-echo "Starting direct $mode of $file_count files with certificate and hostname verification enforced."
+echo "Starting direct $mode of $file_count files with TLS certificate verification enforced."
 timeout "$FTP_TRANSFER_TIMEOUT" lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" < "$command_file"
 echo "Direct $mode completed for $file_count files."
