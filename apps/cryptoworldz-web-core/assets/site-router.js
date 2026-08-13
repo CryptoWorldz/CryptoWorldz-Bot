@@ -4,9 +4,12 @@
   const requestedMode = document.body.dataset.worldzMode || params.get('mode');
   const requestedSite = document.body.dataset.worldzSite || params.get('site');
   const requestedPage = (params.get('page') || '').toLowerCase();
-  const jayJayPage = requestedPage === 'jayjayteamdev' || location.pathname.replace(/\/+$/, '').endsWith('/jayjayteamdev');
+  const cleanPath = location.pathname.replace(/\/+$/, '').toLowerCase();
+  const jayJayPage = requestedPage === 'jayjayteamdev' || cleanPath.endsWith('/jayjayteamdev');
+  const impactBasedPage = cleanPath === '/worldz/impactbased' || cleanPath.endsWith('/worldz/impactbased');
   const sharedPage = ['help', 'donate', 'tokens'].includes(requestedPage);
   const ecosystemPage = ['command-centre','commandcentre','trade','trade-station','recap','recapthisbot','partnership','partnerships','learn','learnworldz'].includes(requestedPage);
+  const pdcExactPreview = requestedSite === 'purplediamondcrew';
   const pdcPreview = hostname === 'cryptoworldz.github.io' || requestedSite === 'pdc';
   const blockchainWorldHosts = new Set([
     'ethworldz.xyz',
@@ -38,11 +41,11 @@
         ? './assets/ecosystem-pages.js'
         : hostname === 'solworldz.xyz'
           ? './assets/solworldz.js'
-          : hostname === 'purplediamondcrew.com'
+          : hostname === 'purplediamondcrew.com' || pdcExactPreview
             ? './assets/pdc-site.js'
             : pdcPreview
               ? './assets/pdc-fallback.js'
-              : hostname === 'impactbased.oneworldz.com' || requestedMode === 'impact'
+              : impactBasedPage || requestedMode === 'impact'
                 ? './assets/impactbased.js'
                 : hostname === 'oneworldz.com' || requestedMode === 'mission'
                   ? './assets/oneworldz-next.js'
@@ -53,6 +56,6 @@
                       : requestedMode === 'directory'
                         ? './assets/pdc-directory.js'
                         : './assets/app.js';
-  script.src = `${selectedScript}?v=20260812-clean-slate-v1`;
+  script.src = `${selectedScript}?v=20260813-canonical-routes-v1`;
   document.body.appendChild(script);
 })();
