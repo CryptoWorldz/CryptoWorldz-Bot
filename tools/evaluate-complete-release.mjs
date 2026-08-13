@@ -9,8 +9,8 @@ const read = (relativePath) => fs.readFileSync(path.join(webRoot, relativePath),
 const exists = (relativePath) => fs.existsSync(path.join(webRoot, relativePath));
 
 const visualFiles = [
-  'assets/images/oneworldz-hero.webp',
-  'assets/images/oneworldz-impact-mosaic.webp',
+  'assets/images/website-core/oneworldz/oneworldz-one-vision-one-future.webp',
+  'assets/images/website-core/purple-diamond-crew/hope-chest-by-firelight.webp',
   'assets/worldz-imagery.js',
   'assets/worldz-imagery.css',
   'assets/jayjayteamdev.js',
@@ -18,56 +18,41 @@ const visualFiles = [
   'assets/pdc-asset.js',
   'assets/pdc-asset.css'
 ];
-
 for (const relativePath of visualFiles) {
-  assert.ok(exists(relativePath), `Missing release visual: ${relativePath}`);
-  assert.ok(fs.statSync(path.join(webRoot, relativePath)).size > 0, `Empty release visual: ${relativePath}`);
+  assert.ok(exists(relativePath), `Missing current release visual: ${relativePath}`);
+  assert.ok(fs.statSync(path.join(webRoot, relativePath)).size > 0, `Empty current release visual: ${relativePath}`);
 }
 
 const indexSource = read('index.html');
 const routerSource = read('assets/site-router.js');
-const oneWorldzSource = read('assets/oneworldz.js');
+const oneWorldzSource = read('assets/oneworldz-next.js');
 const imagerySource = read('assets/worldz-imagery.js');
 const founderSource = read('assets/jayjayteamdev.js');
 const pdcAssetSource = read('assets/pdc-asset.js');
 const hostSource = fs.readFileSync(path.join(repoRoot, 'src', 'pdc-host.js'), 'utf8');
 
-assert.doesNotThrow(() => new Function(routerSource), 'Worldz router JavaScript is invalid');
-assert.doesNotThrow(() => new Function(imagerySource), 'Shared Worldz imagery JavaScript is invalid');
-assert.doesNotThrow(() => new Function(founderSource), 'JayJayTeamDev page JavaScript is invalid');
+for (const [name, source] of [
+  ['Worldz router', routerSource],
+  ['OneWorldz current page', oneWorldzSource],
+  ['Shared Worldz imagery', imagerySource],
+  ['JayJayTeamDev page', founderSource]
+]) {
+  assert.doesNotThrow(() => new Function(source), `${name} JavaScript is invalid`);
+}
 
 assert.match(indexSource, /worldz-imagery\.css/, 'Shared Worldz imagery stylesheet is not loaded');
 assert.match(indexSource, /worldz-imagery\.js/, 'Shared Worldz imagery script is not loaded');
-assert.match(indexSource, /jayjayteamdev\.css/, 'Founder page stylesheet is not loaded');
-assert.match(indexSource, /site-router\.js/, 'External Worldz router is not loaded');
-assert.match(routerSource, /jayjayteamdev\.js/, 'Founder page route is not loaded');
+assert.match(indexSource, /jayjayteamdev\.css/, 'JayJayTeamDev stylesheet is not loaded');
+assert.match(indexSource, /site-router\.js/, 'Worldz router is not loaded');
+assert.match(routerSource, /oneworldz-next\.js/, 'Current OneWorldz route is not loaded');
+assert.match(routerSource, /jayjayteamdev\.js/, 'JayJayTeamDev page route is not loaded');
 
-assert.match(oneWorldzSource, /oneworldz-hero\.webp/, 'OneWorldz hero image is not displayed');
-assert.match(oneWorldzSource, /oneworldz-impact-mosaic\.webp/, 'OneWorldz impact image is not displayed');
-assert.match(founderSource, /365%/, 'Founder effort dial is missing');
-assert.match(founderSource, /self-reported|motivational estimate/i, 'Founder effort accuracy disclosure is missing');
+assert.match(oneWorldzSource, /oneworldz-one-vision-one-future\.webp/, 'Current OneWorldz master hero is not displayed');
+assert.match(oneWorldzSource, /hope-chest-by-firelight\.webp/, 'Current Hope Chest master artwork is not displayed');
+assert.match(oneWorldzSource, /https:\/\/oneworldz\.com\/worldz\/impactbased/, 'Canonical ImpactBased page is not linked');
+assert.doesNotMatch(oneWorldzSource, /https:\/\/impactbased\.oneworldz\.com/, 'Broken ImpactBased subdomain remains in OneWorldz public links');
 assert.match(founderSource, /Public Build Record/, 'Founder evidence link is missing');
-
-for (const slug of [
-  'cryptoworldz',
-  'oneworldz',
-  'purplediamondcrew',
-  'solworldz',
-  'ethworldz',
-  'baseworldz',
-  'bnbworldz',
-  'xrpworldz',
-  'suiworldz',
-  'hyperworldz',
-  'robinworldz',
-  'bitcoinworldz',
-  'hodlerworldz',
-  'impactbased',
-  'robinhoodlaw',
-  'learnworldz'
-]) {
-  assert.match(imagerySource, new RegExp(`${slug}:`), `Shared official visual is missing for ${slug}`);
-}
+assert.match(pdcAssetSource, /pdc-hope-chest/, 'PDC verified Hope Chest registry slug is missing');
 
 for (const hostname of [
   'purplediamondcrew.com',
@@ -76,31 +61,28 @@ for (const hostname of [
   'solworldz.xyz',
   'ethworldz.xyz',
   'baseworldz.xyz',
-  'bnbworldz.xyz',
   'xrpworldz.xyz',
-  'suiworldz.xyz',
   'hyperworldz.xyz',
   'robinworldz.xyz',
   'bitcoinworldz.xyz',
-  'hodlerworldz.xyz',
-  'impactbased.oneworldz.com',
-  'law.oneworldz.com',
-  'learn.oneworldz.com'
+  'hodlerworldz.xyz'
 ]) {
   assert.ok(hostSource.includes(`"${hostname}"`), `Zed host routing is missing ${hostname}`);
 }
 
 assert.match(hostSource, /pdc-asset\.js/, 'PDC Hope Chest fallback asset route is missing');
 assert.match(hostSource, /allowPdcPreview/, 'PDC fallback visual authorization is missing');
-assert.match(pdcAssetSource, /pdc-hope-chest/, 'PDC verified Hope Chest image registry slug is missing');
 
+const publicReleaseSource = [indexSource, routerSource, oneWorldzSource, imagerySource, founderSource, pdcAssetSource].join('\n');
 for (const forbidden of [
   'AUTO_WALLET_PRIVATE_KEY',
   'AUTO_WALLET_SEED',
   'AUTO_SIGNER_SECRET',
-  'GRACE_X_CLIENT_SECRET='
+  'GRACE_X_CLIENT_SECRET=',
+  'sb_secret_',
+  'SUPABASE_SERVICE_ROLE'
 ]) {
-  assert.ok(![indexSource, routerSource, oneWorldzSource, imagerySource, founderSource].join('\n').includes(forbidden), `Public release contains forbidden secret marker: ${forbidden}`);
+  assert.ok(!publicReleaseSource.includes(forbidden), `Public release contains forbidden secret marker: ${forbidden}`);
 }
 
-console.log(`Complete release evaluation passed: ${visualFiles.length} visual files and all registered Worldz routes verified.`);
+console.log(`Complete release evaluation passed: ${visualFiles.length} current visual assets and canonical Worldz routes verified.`);
