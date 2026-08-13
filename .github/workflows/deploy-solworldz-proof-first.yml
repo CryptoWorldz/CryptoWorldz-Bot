@@ -170,7 +170,9 @@ jobs:
           set net:max-retries 1
           set net:timeout 30
           cd ${FTP_SERVER_DIR:-/}
+          set cmd:fail-exit false
           mkdir -p assets/master
+          set cmd:fail-exit true
           mirror -R --verbose --parallel=2 "$GITHUB_WORKSPACE/dist/solworldz/assets/master" assets/master
           put "$GITHUB_WORKSPACE/dist/solworldz/.htaccess" -o .htaccess
           put "$GITHUB_WORKSPACE/dist/solworldz/index.html" -o index.html
