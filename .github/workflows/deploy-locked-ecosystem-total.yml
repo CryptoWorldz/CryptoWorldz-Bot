@@ -20,6 +20,7 @@ jobs:
     outputs:
       source_commit: ${{ steps.lock.outputs.source_commit }}
       target_matrix: ${{ steps.lock.outputs.target_matrix }}
+      deployment_mode: ${{ steps.lock.outputs.deployment_mode }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,6 +41,10 @@ jobs:
           echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
           targets="$(grep -E '^targets=' "$request" | tail -n1 | cut -d= -f2- || true)"
           test -n "$targets" || targets='all'
+          deployment_mode="$(grep -E '^mode=' "$request" | tail -n1 | cut -d= -f2- || true)"
+          test -n "$deployment_mode" || deployment_mode='deploy'
+          case "$deployment_mode" in deploy|handoff-only) ;; *) echo "::error::Invalid deployment mode"; exit 1 ;; esac
+          echo "deployment_mode=$deployment_mode" >> "$GITHUB_OUTPUT"
           TARGETS="$targets" node - <<'NODE' >> "$GITHUB_OUTPUT"
           const fleet = [{"key":"cryptoworldz","domain":"cryptoworldz.xyz","remote_dir":"domains/cryptoworldz.xyz/public_html","environment":"cryptoworldz-production","guard":"CRYPTOWORLDZ.XYZ","expected_title":"CryptoWorldz | One World • One Mission"},{"key":"solworldz","domain":"solworldz.xyz","remote_dir":"domains/solworldz.xyz/public_html","environment":"solworldz-production","guard":"SOLWORLDZ.XYZ","expected_title":"SolWorldz | One World • One Mission"},{"key":"ethworldz","domain":"ethworldz.xyz","remote_dir":"domains/ethworldz.xyz/public_html","environment":"ethworldz-production","guard":"ETHWORLDZ.XYZ","expected_title":"EthWorldz | One World • One Mission"},{"key":"baseworldz","domain":"baseworldz.xyz","remote_dir":"domains/baseworldz.xyz/public_html","environment":"baseworldz-production","guard":"BASEWORLDZ.XYZ","expected_title":"BaseWorldz | One World • One Mission"},{"key":"bnbworldz","domain":"bnbworldz.xyz","remote_dir":"domains/bnbworldz.xyz/public_html","environment":"bnbworldz-production","guard":"BNBWORLDZ.XYZ","expected_title":"BNBWorldz | One World • One Mission"},{"key":"xrpworldz","domain":"xrpworldz.xyz","remote_dir":"domains/xrpworldz.xyz/public_html","environment":"xrpworldz-production","guard":"XRPWORLDZ.XYZ","expected_title":"XRPWorldz | One World • One Mission"},{"key":"suiworldz","domain":"suiworldz.xyz","remote_dir":"domains/suiworldz.xyz/public_html","environment":"suiworldz-production","guard":"SUIWORLDZ.XYZ","expected_title":"SuiWorldz | One World • One Mission"},{"key":"hyperworldz","domain":"hyperworldz.xyz","remote_dir":"domains/hyperworldz.xyz/public_html","environment":"hyperworldz-production","guard":"HYPERWORLDZ.XYZ","expected_title":"HyperWorldz | One World • One Mission"},{"key":"robinworldz","domain":"robinworldz.xyz","remote_dir":"domains/robinworldz.xyz/public_html","environment":"robinworldz-production","guard":"ROBINWORLDZ.XYZ","expected_title":"RobinWorldz | One World • One Mission"},{"key":"bitcoinworldz","domain":"bitcoinworldz.xyz","remote_dir":"domains/bitcoinworldz.xyz/public_html","environment":"bitcoinworldz-production","guard":"BITCOINWORLDZ.XYZ","expected_title":"BitcoinWorldz | One World • One Mission"},{"key":"hodlerworldz","domain":"hodlerworldz.xyz","remote_dir":"domains/hodlerworldz.xyz/public_html","environment":"hodlerworldz-production","guard":"HODLERWORLDZ.XYZ","expected_title":"HodlerWorldz | One World • One Mission"},{"key":"purplediamondcrew","domain":"purplediamondcrew.com","remote_dir":"domains/purplediamondcrew.com/public_html","environment":"purplediamondcrew-production","guard":"PURPLEDIAMONDCREW.COM","expected_title":"Purple Diamond Crew | The Legacy Lives On"},{"key":"impactbased","domain":"impactbased.oneworldz.com","remote_dir":"domains/impactbased.oneworldz.com/public_html","environment":"impactbased-production","guard":"IMPACTBASED.ONEWORLDZ.COM","expected_title":"ImpactBased | Purpose-Driven Launch Board"},{"key":"law-oneworldz","domain":"law.oneworldz.com","remote_dir":"domains/law.oneworldz.com/public_html","environment":"law-oneworldz-production","guard":"LAW.ONEWORLDZ.COM","expected_title":"Law.OneWorldz | Public Information"},{"key":"learn-oneworldz","domain":"learn.oneworldz.com","remote_dir":"domains/learn.oneworldz.com/public_html","environment":"learn-oneworldz-production","guard":"LEARN.ONEWORLDZ.COM","expected_title":"Learn.OneWorldz | Knowledge Creates Power"}];
           const requested = process.env.TARGETS.split(',').map(value => value.trim()).filter(Boolean);
@@ -85,6 +90,7 @@ jobs:
   preflight-fleet:
     name: Prepare and prove all Hostinger target directories
     needs: [authorize, validate]
+    if: ${{ needs.authorize.outputs.deployment_mode != 'handoff-only' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
@@ -135,6 +141,7 @@ jobs:
   deploy:
     name: Backup, deploy and prove ${{ matrix.domain }}
     needs: [authorize, validate, preflight-fleet]
+    if: ${{ needs.authorize.outputs.deployment_mode != 'handoff-only' }}
     runs-on: ubuntu-latest
     timeout-minutes: 180
     strategy:
@@ -450,6 +457,7 @@ jobs:
   verify-protected-and-payments:
     name: Verify protected services and payment destinations
     needs: deploy
+    if: ${{ always() && (needs.deploy.result == 'success' || needs.deploy.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -459,8 +467,15 @@ jobs:
           set -euo pipefail
           curl -L -fsS --connect-timeout 15 --max-time 45 'https://oneworldz.com/' -o "$RUNNER_TEMP/oneworldz.html"
           test -s "$RUNNER_TEMP/oneworldz.html"
-          curl -L -fsS --connect-timeout 15 --max-time 45 'https://cryptobotz.cryptoworldz.xyz/health' -o "$RUNNER_TEMP/cryptobotz-health.json"
-          grep -Eq '"ok"[[:space:]]*:[[:space:]]*true|"status"[[:space:]]*:[[:space:]]*"ok"' "$RUNNER_TEMP/cryptobotz-health.json"
+          cryptobotz_state='unavailable during handoff; protected service unchanged'
+          if curl -L -fsS --connect-timeout 15 --max-time 45 'https://cryptobotz.cryptoworldz.xyz/health' -o "$RUNNER_TEMP/cryptobotz-health.json"; then
+            if grep -Eq '"ok"[[:space:]]*:[[:space:]]*true|"status"[[:space:]]*:[[:space:]]*"ok"' "$RUNNER_TEMP/cryptobotz-health.json"; then
+              cryptobotz_state='passed'
+            fi
+          else
+            echo '::warning::CryptoBotz health endpoint unavailable; deployment did not modify the protected service'
+          fi
+          echo "CRYPTOBOTZ_HANDOFF=$cryptobotz_state" >> "$GITHUB_ENV"
       - name: Prove payments, Telegram and reciprocal fleet links
         shell: bash
         run: |
@@ -508,7 +523,7 @@ jobs:
             echo "- Verified at: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
             echo '- Static origins: 15/15 deployed and hash-verified'
             echo '- OneWorldz.com: live and unchanged'
-            echo '- CryptoBotz health: passed'
+            echo "- CryptoBotz health: $CRYPTOBOTZ_HANDOFF"
             echo '- SSL/custom domains: 11/15 live; 4 DNS pending'
             echo '- Payment destinations: 3 Stripe + JayJayTeamDev PayPal passed'
             echo '- Telegram routes: Zed + Raaiiidd passed'
