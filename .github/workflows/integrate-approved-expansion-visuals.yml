@@ -6,89 +6,68 @@ on:
     branches:
       - build/oneworldz-19-destination-upgrade
     paths:
-      - apps/oneworldz-ecosystem-release/source/approved-visuals/**
-      - apps/oneworldz-ecosystem-release/scripts/integrate-approved-expansion-visuals.mjs
-      - .github/workflows/integrate-approved-expansion-visuals.yml
+      - deployments/oneworldz-19-visual-integrate.request
 
 permissions:
   contents: write
 
+concurrency:
+  group: oneworldz-approved-visual-integration
+  cancel-in-progress: true
+
 jobs:
   integrate:
-    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[visual-integration]')
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - name: Checkout upgrade branch
+      - name: Checkout exact upgrade branch
         uses: actions/checkout@v4
         with:
           ref: build/oneworldz-19-destination-upgrade
           fetch-depth: 0
 
-      - name: Restore approved DonateWorldz chunks
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPOSITORY: ${{ github.repository }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          root="apps/oneworldz-ecosystem-release/source/approved-visuals"
-          mkdir -p "$root"
-          shas=(
-            75c0910e9e7c2f5dd880d0a81c842c90d0077f70
-            da03ba7889565331204aa34799de19074e466daf
-            e91cf0655ed58edbe76dcc94b9a913a03cde5b45
-            258b25bfdc0237141431dc761e7e17b1aa21a0ab
-          )
-          for i in 1 2 3 4; do
-            suffix=$(printf '%02d' "$i")
-            sha="${shas[$((i-1))]}"
-            curl --fail --silent --show-error \
-              -H "Authorization: Bearer ${GH_TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/${REPOSITORY}/git/blobs/${sha}" \
-              | jq -r '.content' \
-              | tr -d '\n' \
-              | base64 --decode \
-              > "$root/donateworldz.part${suffix}.b64"
-          done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-      - name: Materialize approved responsive visuals
+      - name: Materialize the three user-approved responsive visuals
         run: node apps/oneworldz-ecosystem-release/scripts/integrate-approved-expansion-visuals.mjs
 
-      - name: Build complete ecosystem release
+      - name: Build complete 19-destination ecosystem release
+        working-directory: apps/oneworldz-ecosystem-release
+        run: npm run build
+
+      - name: Verify exact architecture and approved artwork references
         shell: bash
         run: |
           set -euo pipefail
-          node apps/oneworldz-ecosystem-release/build.mjs
-          node apps/oneworldz-ecosystem-release/build-expansion.mjs
+          cd apps/oneworldz-ecosystem-release
+          node --test test/*.test.mjs
+          test -f dist/ecosystem/foodworldz/index.html
+          test -f dist/ecosystem/donateworldz/index.html
+          test -f dist/ecosystem/hodlergalaxy/index.html
+          ! grep -Rni --include='*.html' 'solworld\.fun' dist/ecosystem
+          grep -q 'desktop/expansion/foodworldz-hero.avif' expansion-pages.mjs
+          grep -q 'desktop/expansion/donateworldz-hero.avif' expansion-pages.mjs
+          grep -q 'desktop/expansion/hodlergalaxy-hero.avif' expansion-pages.mjs
+          grep -q 'foodworldz-hero.avif' dist/ecosystem/foodworldz/index.html
+          grep -q 'donateworldz-hero.avif' dist/ecosystem/donateworldz/index.html
+          grep -q 'hodlergalaxy-hero.avif' dist/ecosystem/hodlergalaxy/index.html
 
-      - name: Verify 19-destination expansion
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --test apps/oneworldz-ecosystem-release/test/expansion.test.mjs
-          test -f apps/oneworldz-ecosystem-release/dist/ecosystem/foodworldz/index.html
-          test -f apps/oneworldz-ecosystem-release/dist/ecosystem/donateworldz/index.html
-          test -f apps/oneworldz-ecosystem-release/dist/ecosystem/hodlergalaxy/index.html
-          ! grep -Rni --include='*.html' 'solworld\.fun' apps/oneworldz-ecosystem-release/dist/ecosystem
-          grep -q 'foodworldz-hero.avif' apps/oneworldz-ecosystem-release/dist/ecosystem/foodworldz/index.html
-          grep -q 'donateworldz-hero.avif' apps/oneworldz-ecosystem-release/dist/ecosystem/donateworldz/index.html
-          grep -q 'hodlergalaxy-hero.avif' apps/oneworldz-ecosystem-release/dist/ecosystem/hodlergalaxy/index.html
-
-      - name: Commit locked visual integration
+      - name: Commit the locked approved visual materialization
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "OneWorldz Build Bot"
           git config user.email "actions@users.noreply.github.com"
           git add \
-            apps/oneworldz-ecosystem-release/source/approved-visuals \
+            apps/oneworldz-ecosystem-release/source/approved-visuals/approved-visuals.lock.json \
             apps/oneworldz-ecosystem-release/source/assets/desktop/expansion \
             apps/oneworldz-ecosystem-release/source/assets/mobile/expansion \
             apps/oneworldz-ecosystem-release/expansion-pages.mjs
           if git diff --cached --quiet; then
-            echo "Approved visuals already integrated."
+            echo "Approved visuals are already materialized and locked."
             exit 0
           fi
-          git commit -m "[visual-integration] Lock approved expansion visuals"
+          git commit -m "[visual-integration] Materialize approved Food Donate and HodlerGalaxy visuals"
           git push origin HEAD:build/oneworldz-19-destination-upgrade
