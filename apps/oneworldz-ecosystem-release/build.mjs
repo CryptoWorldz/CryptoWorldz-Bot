@@ -48,6 +48,30 @@ function absoluteRoute(domain, route = "") {
   return clean ? `https://${domain}/${clean}/` : `https://${domain}/`;
 }
 
+function applyProductionCorrections(target, route, sourceHtml) {
+  let html = sourceHtml;
+
+  // These destinations are not in the current authorised 13-site production fleet.
+  // Do not present them as live/open cards until a separate verified deployment exists.
+  html = html.replace(/<a class="profile-card[^"]*" href="https:\/\/(?:bitcoinworldz\.xyz|suiworld\.xyz)"[^>]*>[\s\S]*?<\/a>/g, "");
+
+  if (target.key === "cryptoworldz" && route === "") {
+    html = html.replace(
+      "Approved CryptoWorldz headquarters production artwork",
+      "Approved ZED Command Centre artwork for CryptoWorldz headquarters"
+    );
+
+    // The previous desktop mapping showed G.R.A.C.E. alone while labelling the visual as the ZED/AUTO/G.R.A.C.E. trio.
+    // Use the approved trio artwork consistently rather than mislabelling the production image.
+    html = html.replace(
+      /<picture class="production-picture[^"]*">\s*<source media="\(max-width: 720px\)" srcset="\/assets\/mobile\/zed-grace-auto\.webp">\s*<img src="\/assets\/desktop\/cryptoworldz\/grace\.png" alt="Approved ZED G\.R\.A\.C\.E\. and AUTO production artwork" loading="eager" decoding="async">\s*<\/picture>/,
+      '<img class="production-picture" src="/assets/mobile/zed-grace-auto.webp" alt="Approved ZED, AUTO and G.R.A.C.E. production artwork" loading="eager" decoding="async">'
+    );
+  }
+
+  return html;
+}
+
 function optimizeImageLoading(html) {
   let output = html.replaceAll('loading="eager"', 'loading="lazy"');
   const mainStart = output.indexOf('<main id="main-content">');
@@ -64,14 +88,15 @@ function optimizeImageLoading(html) {
 }
 
 function enhanceSeo(target, route, sourceHtml) {
-  const canonicalMatch = sourceHtml.match(/<link rel="canonical" href="([^"]+)">/);
+  const correctedHtml = applyProductionCorrections(target, route, sourceHtml);
+  const canonicalMatch = correctedHtml.match(/<link rel="canonical" href="([^"]+)">/);
   const canonical = canonicalMatch?.[1] || absoluteRoute(target.domain, route);
-  const titleMarkup = sourceHtml.match(/<title>([\s\S]*?)<\/title>/)?.[1] || target.key;
-  const descriptionMarkup = sourceHtml.match(/<meta name="description" content="([^"]*)">/)?.[1] || "";
+  const titleMarkup = correctedHtml.match(/<title>([\s\S]*?)<\/title>/)?.[1] || target.key;
+  const descriptionMarkup = correctedHtml.match(/<meta name="description" content="([^"]*)">/)?.[1] || "";
   const title = decodeEntities(titleMarkup);
   const description = decodeEntities(descriptionMarkup);
   const siteName = title.split("|")[0].trim() || target.key;
-  const heroMarkup = sourceHtml.match(/<section class="[^"]*hero[^"]*"[^>]*>([\s\S]*?)<\/section>/)?.[1] || "";
+  const heroMarkup = correctedHtml.match(/<section class="[^"]*hero[^"]*"[^>]*>([\s\S]*?)<\/section>/)?.[1] || "";
   const heroImage = heroMarkup.match(/<img[^>]+src="([^"]+)"/)?.[1];
   const imageUrl = heroImage ? new URL(heroImage, canonical).href : "";
   const imageAlt = heroMarkup.match(/<img[^>]+alt="([^"]*)"/)?.[1] || `${siteName} official production artwork`;
@@ -115,7 +140,7 @@ function enhanceSeo(target, route, sourceHtml) {
   }
   tags.push(`  <script type="application/ld+json">${schema}</script>`);
 
-  let html = sourceHtml.replace("</head>", `${tags.join("\n")}\n</head>`);
+  let html = correctedHtml.replace("</head>", `${tags.join("\n")}\n</head>`);
   html = optimizeImageLoading(html);
   return html;
 }
