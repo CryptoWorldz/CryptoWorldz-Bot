@@ -1,11 +1,11 @@
 requested_by=JayJayTeamDev
 authorization=APPROVE COMPLETE ECOSYSTEM BUILD AND TOTAL DEPLOYMENT
-scope=LOCKED-ONEWORLDZ-ECOSYSTEM-15-STATIC-TARGETS
+scope=LOCKED-ONEWORLDZ-ECOSYSTEM-14-STATIC-TARGETS
 release=oneworldz-ecosystem-locked-v1
 oneworldz=PROTECTED_UNCHANGED
 cryptobotz=PROTECTED_UNCHANGED
 ftp_account_scope=SHARED_ACCOUNT_EXACT_TARGET
 ftp_server_dir=domains/{domain}/public_html
-targets=cryptoworldz,solworldz,ethworldz,baseworldz,bnbworldz,xrpworldz,hyperworldz,robinworldz,hodlerworldz,purplediamondcrew,impactbased,law-oneworldz,learn-oneworldz
-attempt=approved-seo-production-corrections-20260814
+targets=cryptoworldz,solworldz,ethworldz,baseworldz,bnbworldz,xrpworldz,suiworldz,hyperworldz,robinworldz,hodlerworldz,purplediamondcrew,impactbased,law-oneworldz,learn-oneworldz
+attempt=corrected-owned-suiworldz-no-bitcoin-20260814
 mode=deploy
