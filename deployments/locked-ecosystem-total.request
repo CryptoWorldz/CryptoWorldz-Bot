@@ -7,5 +7,5 @@ cryptobotz=PROTECTED_UNCHANGED
 ftp_account_scope=SHARED_ACCOUNT_EXACT_TARGET
 ftp_server_dir=domains/{domain}/public_html
 targets=cryptoworldz,solworldz,ethworldz,baseworldz,bnbworldz,xrpworldz,hyperworldz,robinworldz,hodlerworldz,purplediamondcrew,impactbased,law-oneworldz,learn-oneworldz
-attempt=repair-deploy-no-unowned-bitcoin-20260814
+attempt=approved-seo-production-corrections-20260814
 mode=deploy
