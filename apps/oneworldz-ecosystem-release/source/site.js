@@ -1,4 +1,32 @@
 (() => {
+  const ecosystemLinks = [
+    ["OneWorldz", "https://oneworldz.com"],
+    ["CryptoWorldz", "https://cryptoworldz.xyz"],
+    ["FoodWorldz", "https://foodworldz.com"],
+    ["DonateWorldz", "https://donateworldz.com"],
+    ["ImpactBased", "https://impactbased.oneworldz.com"],
+    ["Learn", "https://learn.oneworldz.com"],
+    ["Command Centre", "https://cryptobotz.cryptoworldz.xyz"]
+  ];
+
+  const footer = document.querySelector(".site-footer");
+  if (footer && !footer.querySelector(".ecosystem-nav")) {
+    const nav = document.createElement("nav");
+    nav.className = "ecosystem-nav";
+    nav.setAttribute("aria-label", "OneWorldz ecosystem navigation");
+    for (const [label, href] of ecosystemLinks) {
+      const link = document.createElement("a");
+      link.href = href;
+      link.textContent = label;
+      if (new URL(href).host !== window.location.host) {
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+      }
+      nav.append(link);
+    }
+    footer.append(nav);
+  }
+
   const header = document.querySelector(".site-header");
   const button = document.querySelector(".menu-button");
   const menu = document.querySelector(".site-menu");
