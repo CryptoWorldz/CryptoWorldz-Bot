@@ -96,48 +96,32 @@ jobs:
           domains=(cryptoworldz.xyz solworldz.xyz ethworldz.xyz baseworldz.xyz bnbworldz.xyz xrpworldz.xyz suiworldz.xyz hyperworldz.xyz robinworldz.xyz bitcoinworldz.xyz hodlerworldz.xyz purplediamondcrew.com impactbased.oneworldz.com law.oneworldz.com learn.oneworldz.com)
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
-          ftp_ip="$(getent ahostsv4 "$raw_host" | awk 'NR==1{print $1}')"
-          test -n "$ftp_ip"
-          tls_ok=false
-          for attempt in 1 2 3; do
-            if timeout 30 openssl s_client -starttls ftp -connect "$ftp_ip:$FTP_PORT" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt </dev/null >/dev/null 2>&1; then
-              tls_ok=true
-              break
-            fi
-            sleep 3
-          done
-          test "$tls_ok" = true
-          echo 'Hostinger domains visible to the deployment account:'
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$ftp_ip" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 1
-          set net:timeout 30
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          cd domains
-          cls -1
-          bye
-          EOF
-          for domain in "${domains[@]}"; do
-            remote_dir="domains/$domain/public_html"
-            lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$ftp_ip" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 1
-          set net:timeout 30
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          set cmd:fail-exit false
-          mkdir -p $remote_dir
-          set cmd:fail-exit true
-          cd $remote_dir
-          cls -1
-          bye
-          EOF
-          done
+          test -n "$raw_host"
+          script="$RUNNER_TEMP/prepare-fleet.lftp"
+          {
+            echo 'set cmd:fail-exit true'
+            echo 'set net:max-retries 3'
+            echo 'set net:timeout 30'
+            echo 'set ftp:ssl-force true'
+            echo 'set ftp:ssl-protect-data true'
+            echo 'set ssl:verify-certificate true'
+            echo 'set ssl:check-hostname false'
+            echo "echo Hostinger domains visible to the deployment account:"
+            echo 'cd domains'
+            echo 'cls -1'
+            echo 'cd /'
+            for domain in "${domains[@]}"; do
+              remote_dir="domains/$domain/public_html"
+              echo 'set cmd:fail-exit false'
+              echo "mkdir -p $remote_dir"
+              echo 'set cmd:fail-exit true'
+              echo "cd $remote_dir"
+              echo 'pwd'
+              echo 'cd /'
+            done
+            echo 'bye'
+          } > "$script"
+          timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$raw_host"
   deploy:
     name: Backup, deploy and prove ${{ matrix.domain }}
     needs: [authorize, validate, preflight-fleet]
