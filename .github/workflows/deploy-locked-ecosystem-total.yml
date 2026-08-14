@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: locked-oneworldz-ecosystem-production
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   authorize:
@@ -68,15 +68,55 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: locked-ecosystem-verified-${{ github.run_id }}
-          path: |
-            apps/oneworldz-ecosystem-release/dist/ecosystem/fleet-manifest.json
-            apps/oneworldz-ecosystem-release/dist/ecosystem/*/release-manifest.json
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem/
           if-no-files-found: error
           retention-days: 30
 
+  preflight-fleet:
+    name: Prove all Hostinger target directories
+    needs: [authorize, validate]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - name: Install verified FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+      - name: Prove all fifteen exact website roots before any upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          domains=(cryptoworldz.xyz solworldz.xyz ethworldz.xyz baseworldz.xyz bnbworldz.xyz xrpworldz.xyz suiworldz.xyz hyperworldz.xyz robinworldz.xyz bitcoinworldz.xyz hodlerworldz.xyz purplediamondcrew.com impactbased.oneworldz.com law.oneworldz.com learn.oneworldz.com)
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          ftp_ip="$(getent ahostsv4 "$raw_host" | awk 'NR==1{print $1}')"
+          test -n "$ftp_ip"
+          timeout 30 openssl s_client -starttls ftp -connect "$ftp_ip:$FTP_PORT" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt </dev/null >/dev/null 2>&1
+          for domain in "${domains[@]}"; do
+            remote_dir="domains/$domain/public_html"
+            lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$ftp_ip" <<EOF
+            set cmd:fail-exit true
+            set net:max-retries 1
+            set net:timeout 30
+            set ftp:ssl-force true
+            set ftp:ssl-protect-data true
+            set ssl:verify-certificate true
+            set ssl:check-hostname false
+            cd $remote_dir
+            cls -1
+            bye
+            EOF
+          done
   deploy:
     name: Backup, deploy and prove ${{ matrix.domain }}
-    needs: [authorize, validate]
+    needs: [authorize, validate, preflight-fleet]
     runs-on: ubuntu-latest
     timeout-minutes: 180
     strategy:
@@ -86,76 +126,91 @@ jobs:
         include:
           - key: cryptoworldz
             domain: cryptoworldz.xyz
+            remote_dir: domains/cryptoworldz.xyz/public_html
             environment: cryptoworldz-production
             guard: CRYPTOWORLDZ.XYZ
             expected_title: CryptoWorldz | One World • One Mission
           - key: solworldz
             domain: solworldz.xyz
+            remote_dir: domains/solworldz.xyz/public_html
             environment: solworldz-production
             guard: SOLWORLDZ.XYZ
             expected_title: SolWorldz | One World • One Mission
           - key: ethworldz
             domain: ethworldz.xyz
+            remote_dir: domains/ethworldz.xyz/public_html
             environment: ethworldz-production
             guard: ETHWORLDZ.XYZ
             expected_title: EthWorldz | One World • One Mission
           - key: baseworldz
             domain: baseworldz.xyz
+            remote_dir: domains/baseworldz.xyz/public_html
             environment: baseworldz-production
             guard: BASEWORLDZ.XYZ
             expected_title: BaseWorldz | One World • One Mission
           - key: bnbworldz
             domain: bnbworldz.xyz
+            remote_dir: domains/bnbworldz.xyz/public_html
             environment: bnbworldz-production
             guard: BNBWORLDZ.XYZ
             expected_title: BNBWorldz | One World • One Mission
           - key: xrpworldz
             domain: xrpworldz.xyz
+            remote_dir: domains/xrpworldz.xyz/public_html
             environment: xrpworldz-production
             guard: XRPWORLDZ.XYZ
             expected_title: XRPWorldz | One World • One Mission
           - key: suiworldz
             domain: suiworldz.xyz
+            remote_dir: domains/suiworldz.xyz/public_html
             environment: suiworldz-production
             guard: SUIWORLDZ.XYZ
             expected_title: SuiWorldz | One World • One Mission
           - key: hyperworldz
             domain: hyperworldz.xyz
+            remote_dir: domains/hyperworldz.xyz/public_html
             environment: hyperworldz-production
             guard: HYPERWORLDZ.XYZ
             expected_title: HyperWorldz | One World • One Mission
           - key: robinworldz
             domain: robinworldz.xyz
+            remote_dir: domains/robinworldz.xyz/public_html
             environment: robinworldz-production
             guard: ROBINWORLDZ.XYZ
             expected_title: RobinWorldz | One World • One Mission
           - key: bitcoinworldz
             domain: bitcoinworldz.xyz
+            remote_dir: domains/bitcoinworldz.xyz/public_html
             environment: bitcoinworldz-production
             guard: BITCOINWORLDZ.XYZ
             expected_title: BitcoinWorldz | One World • One Mission
           - key: hodlerworldz
             domain: hodlerworldz.xyz
+            remote_dir: domains/hodlerworldz.xyz/public_html
             environment: hodlerworldz-production
             guard: HODLERWORLDZ.XYZ
             expected_title: HodlerWorldz | One World • One Mission
           - key: purplediamondcrew
             domain: purplediamondcrew.com
+            remote_dir: domains/purplediamondcrew.com/public_html
             environment: purplediamondcrew-production
             guard: PURPLEDIAMONDCREW.COM
             expected_title: Purple Diamond Crew | The Legacy Lives On
           - key: impactbased
             domain: impactbased.oneworldz.com
+            remote_dir: domains/impactbased.oneworldz.com/public_html
             environment: impactbased-production
             guard: IMPACTBASED.ONEWORLDZ.COM
             expected_title: ImpactBased | Purpose-Driven Launch Board
           - key: law-oneworldz
             domain: law.oneworldz.com
+            remote_dir: domains/law.oneworldz.com/public_html
             environment: law-oneworldz-production
             guard: LAW.ONEWORLDZ.COM
             expected_title: Law.OneWorldz | Public Information
           - key: learn-oneworldz
             domain: learn.oneworldz.com
+            remote_dir: domains/learn.oneworldz.com/public_html
             environment: learn-oneworldz-production
             guard: LEARN.ONEWORLDZ.COM
             expected_title: Learn.OneWorldz | Knowledge Creates Power
@@ -167,8 +222,9 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-      FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR || '/' }}
-      FTP_ACCOUNT_SCOPE: DOMAIN_ONLY
+      FTP_REMOTE_DIR: ${{ matrix.remote_dir }}
+      EXPECTED_REMOTE_DIR: domains/${{ matrix.domain }}/public_html
+      FTP_ACCOUNT_SCOPE: SHARED_ACCOUNT_EXACT_TARGET
       DEPLOY_GUARD: ${{ matrix.guard }}
       EXPECTED_GUARD: ${{ matrix.guard }}
       LIVE_URL: https://${{ matrix.domain }}/
@@ -181,15 +237,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Rebuild exact verified source commit
-        working-directory: apps/oneworldz-ecosystem-release
-        run: npm run verify
+      - name: Download exact verified release package
+        uses: actions/download-artifact@v4
+        with:
+          name: locked-ecosystem-verified-${{ github.run_id }}
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem
       - name: Enforce exact domain-only Hostinger destination
         shell: bash
         run: |
           set -euo pipefail
-          test "$FTP_ACCOUNT_SCOPE" = 'DOMAIN_ONLY'
-          test "$FTP_SERVER_DIR" = '/'
+          test "$FTP_ACCOUNT_SCOPE" = 'SHARED_ACCOUNT_EXACT_TARGET'
+          test "$FTP_REMOTE_DIR" = "$EXPECTED_REMOTE_DIR"
+          [[ "$FTP_REMOTE_DIR" =~ ^domains/[a-z0-9.-]+/public_html$ ]]
           test "$DEPLOY_GUARD" = "$EXPECTED_GUARD"
           test -n "$FTP_HOST"
           test -n "$FTP_USERNAME"
@@ -243,7 +302,7 @@ jobs:
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
-          cd /
+          cd $FTP_REMOTE_DIR
           mirror --verbose --parallel=2 --exclude-glob .well-known --exclude-glob .well-known/** . $backup
           bye
           EOF
@@ -268,7 +327,7 @@ jobs:
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
-          cd /
+          cd $FTP_REMOTE_DIR
           mirror -R --verbose --parallel=2 --exclude-glob index.html --exclude-glob release-manifest.json --exclude-glob .well-known --exclude-glob .well-known/** $RELEASE_ROOT .
           put $RELEASE_ROOT/release-manifest.json -o release-manifest.json
           put $RELEASE_ROOT/index.html -o index.html
@@ -303,7 +362,7 @@ jobs:
             'set ftp:ssl-protect-data true',
             'set ssl:verify-certificate true',
             'set ssl:check-hostname false',
-            'cd /'
+            `cd ${process.env.FTP_REMOTE_DIR}`
           ];
           const quote = value => `'${String(value).replaceAll("'", "'\\''")}'`;
           for (const file of manifest.files) {
@@ -359,7 +418,7 @@ jobs:
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
-          cd /
+          cd $FTP_REMOTE_DIR
           mirror -R --delete --verbose --parallel=2 --exclude-glob index.html --exclude-glob .well-known --exclude-glob .well-known/** $BACKUP_DIR .
           put $BACKUP_DIR/index.html -o index.html
           bye
