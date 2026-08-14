@@ -43,6 +43,12 @@ export const worldz = Object.freeze([
     focus: ["XRPL foundations", "Transaction verification", "Connected missions"]
   },
   {
+    key: "suiworldz", name: "SuiWorldz", chain: "Sui", domain: "suiworldz.xyz",
+    accent: "#6fbcf0", accent2: "#c4edff", image: "suiworldz",
+    purpose: "Sui network education, safe participation and connected community learning in the OneWorldz ecosystem.",
+    focus: ["Sui foundations", "Safe wallet participation", "Community learning"]
+  },
+  {
     key: "hyperworldz", name: "HyperWorldz", chain: "Hyperliquid", domain: "hyperworldz.xyz",
     accent: "#65fbd2", accent2: "#9bffe5", image: "hyperworldz",
     purpose: "Risk-clear Hyperliquid education and community information with no trading execution on this website.",
