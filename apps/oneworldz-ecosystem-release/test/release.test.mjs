@@ -21,7 +21,7 @@ async function htmlFiles(root, relative = "") {
 }
 
 test("every confirmed domain has a root package and exact Hostinger root contract", async () => {
-  assert.equal(deploymentTargets.length, 15);
+  assert.equal(deploymentTargets.length, 13);
   for (const target of deploymentTargets) {
     const targetRoot = path.join(distRoot, target.key);
     await access(path.join(targetRoot, "index.html"));
@@ -42,7 +42,7 @@ test("OneWorldz and CryptoBotz are never deployment targets", () => {
 
 test("banned images, GoFundMe, placeholders and Coming Soon are absent", async () => {
   const files = await htmlFiles(distRoot);
-  assert.ok(files.length >= 28);
+  assert.ok(files.length >= 26);
   for (const file of files) {
     const html = await readFile(file, "utf8");
     assert.doesNotMatch(html, /go\s?fund\s?me|gofundme/i, file);
@@ -127,9 +127,8 @@ test("PDC registry contains exactly ten verified positions and exact addresses",
 
 test("only currently authorised Worldz destinations are presented as open reciprocal links", async () => {
   const crypto = await readFile(path.join(distRoot, "cryptoworldz", "index.html"), "utf8");
-  const inactive = new Set(["suiworldz", "bitcoinworldz"]);
-  for (const world of worldz.filter(({ key }) => !inactive.has(key))) assert.ok(crypto.includes(`https://${world.domain}`), world.domain);
-  for (const world of worldz.filter(({ key }) => inactive.has(key))) assert.ok(!crypto.includes(`href="https://${world.domain}"`), `${world.domain} must not be presented as open`);
+  for (const world of worldz) assert.ok(crypto.includes(`https://${world.domain}`), world.domain);
+  assert.doesNotMatch(crypto, /bitcoinworldz\.xyz|suiworldz\.xyz/i);
   for (const world of worldz) {
     const html = await readFile(path.join(distRoot, world.key, "index.html"), "utf8");
     assert.ok(html.includes("https://oneworldz.com"));
@@ -187,7 +186,7 @@ test("no production artwork is duplicated inside a page main region", async () =
   }
 });
 
-test("HodlerWorldz never substitutes BitcoinWorldz artwork", async () => {
+test("HodlerWorldz never substitutes Bitcoin artwork", async () => {
   const html = await readFile(path.join(distRoot, "hodlerworldz", "index.html"), "utf8");
   const hero = html.match(/<section class="hero chain-hero">([\s\S]*?)<\/section>/)?.[1] || "";
   assert.doesNotMatch(hero, /bitworldz\.(?:png|webp)/);
