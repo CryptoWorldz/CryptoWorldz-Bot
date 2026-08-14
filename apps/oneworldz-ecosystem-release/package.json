@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node build.mjs && node build-expansion.mjs",
+    "build": "node build.mjs && node build-expansion.mjs && node materialize-approved-visuals.mjs",
     "test": "node --test test/*.test.mjs",
     "verify": "npm run build && npm test"
   }

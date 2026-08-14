@@ -1,0 +1,67 @@
+name: Verify Approved Expansion Visuals
+
+on:
+  pull_request:
+    paths:
+      - 'apps/oneworldz-ecosystem-release/**'
+      - 'deployments/oneworldz-19-visual-materialization.request'
+  push:
+    branches:
+      - build/oneworldz-19-destination-upgrade
+    paths:
+      - 'apps/oneworldz-ecosystem-release/**'
+      - 'deployments/oneworldz-19-visual-materialization.request'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-approved-visuals:
+    name: Materialize and prove approved expansion visuals
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify exact approval boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          request='deployments/oneworldz-19-visual-materialization.request'
+          test -s "$request"
+          test "$(grep '^requested_by=' "$request" | cut -d= -f2-)" = 'JayJayTeamDev'
+          test "$(grep '^authorization=' "$request" | cut -d= -f2-)" = 'APPROVED'
+          test "$(grep '^approved_visuals=' "$request" | cut -d= -f2-)" = 'foodworldz,donateworldz,hodlergalaxy'
+          test "$(grep '^source_policy=' "$request" | cut -d= -f2-)" = 'APPROVED_GENERATED_ARTWORK_ONLY'
+          test "$(grep '^reference_library_substitution=' "$request" | cut -d= -f2-)" = 'FORBIDDEN'
+          test "$(grep '^production_deployment=' "$request" | cut -d= -f2-)" = 'NOT_AUTHORIZED_BY_THIS_REQUEST'
+      - name: Build and run complete verification
+        working-directory: apps/oneworldz-ecosystem-release
+        run: npm run verify
+      - name: Prove materialized files are inside exact three packages only
+        shell: bash
+        run: |
+          set -euo pipefail
+          root='apps/oneworldz-ecosystem-release/dist/ecosystem'
+          for key in foodworldz donateworldz hodlergalaxy; do
+            test -s "$root/$key/assets/approved/desktop/$key-hero.avif"
+            test -s "$root/$key/assets/approved/mobile/$key-hero.avif"
+            grep -q "data-approved-visual=\"$key\"" "$root/$key/index.html"
+          done
+          test -s "$root/approved-visuals-manifest.json"
+          ! find "$root" -path '*/assets/approved/*' -type f | grep -Ev '/(foodworldz|donateworldz|hodlergalaxy)/assets/approved/'
+          test ! -d "$root/oneworldz/assets/approved"
+          test ! -d "$root/cryptobotz/assets/approved"
+          ! grep -Rqi 'solworld\.fun' "$root/approved-visuals-manifest.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: approved-expansion-visuals-${{ github.run_id }}
+          path: |
+            apps/oneworldz-ecosystem-release/dist/ecosystem/foodworldz/
+            apps/oneworldz-ecosystem-release/dist/ecosystem/donateworldz/
+            apps/oneworldz-ecosystem-release/dist/ecosystem/hodlergalaxy/
+            apps/oneworldz-ecosystem-release/dist/ecosystem/approved-visuals-manifest.json
+          if-no-files-found: error
+          retention-days: 30

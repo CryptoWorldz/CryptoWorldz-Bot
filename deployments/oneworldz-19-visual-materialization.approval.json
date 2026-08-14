@@ -1,0 +1,9 @@
+{
+  "visual_materialization": {
+    "approved_by": "JayJayTeamDev",
+    "approved_visuals": ["foodworldz", "donateworldz", "hodlergalaxy"],
+    "source_policy": "APPROVED_GENERATED_ARTWORK_ONLY",
+    "reference_library_substitution": false,
+    "production_deployment_authorized": false
+  }
+}
