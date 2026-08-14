@@ -99,21 +99,40 @@ jobs:
           ftp_ip="$(getent ahostsv4 "$raw_host" | awk 'NR==1{print $1}')"
           test -n "$ftp_ip"
           timeout 30 openssl s_client -starttls ftp -connect "$ftp_ip:$FTP_PORT" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt </dev/null >/dev/null 2>&1
+          echo 'Hostinger domains visible to the deployment account:'
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$ftp_ip" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 1
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd domains
+          cls -1
+          bye
+          EOF
+          missing=0
           for domain in "${domains[@]}"; do
             remote_dir="domains/$domain/public_html"
-            lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$ftp_ip" <<EOF
-            set cmd:fail-exit true
-            set net:max-retries 1
-            set net:timeout 30
-            set ftp:ssl-force true
-            set ftp:ssl-protect-data true
-            set ssl:verify-certificate true
-            set ssl:check-hostname false
-            cd $remote_dir
-            cls -1
-            bye
+            if ! lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$ftp_ip" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 1
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $remote_dir
+          cls -1
+          bye
           EOF
+            then
+              echo "::error::Missing Hostinger website root: $remote_dir"
+              missing=1
+            fi
           done
+          test "$missing" -eq 0
   deploy:
     name: Backup, deploy and prove ${{ matrix.domain }}
     needs: [authorize, validate, preflight-fleet]
