@@ -125,9 +125,11 @@ test("PDC registry contains exactly ten verified positions and exact addresses",
   }
 });
 
-test("all approved Worldz domains are reciprocal links across the fleet", async () => {
+test("only currently authorised Worldz destinations are presented as open reciprocal links", async () => {
   const crypto = await readFile(path.join(distRoot, "cryptoworldz", "index.html"), "utf8");
-  for (const world of worldz) assert.ok(crypto.includes(`https://${world.domain}`), world.domain);
+  const inactive = new Set(["suiworldz", "bitcoinworldz"]);
+  for (const world of worldz.filter(({ key }) => !inactive.has(key))) assert.ok(crypto.includes(`https://${world.domain}`), world.domain);
+  for (const world of worldz.filter(({ key }) => inactive.has(key))) assert.ok(!crypto.includes(`href="https://${world.domain}"`), `${world.domain} must not be presented as open`);
   for (const world of worldz) {
     const html = await readFile(path.join(distRoot, world.key, "index.html"), "utf8");
     assert.ok(html.includes("https://oneworldz.com"));
