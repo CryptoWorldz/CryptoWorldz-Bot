@@ -5,8 +5,6 @@ on:
     branches: [main]
     paths:
       - 'deployments/locked-ecosystem-total.request'
-      - 'apps/oneworldz-ecosystem-release/**'
-      - '.github/workflows/deploy-locked-ecosystem-total.yml'
 
 permissions:
   contents: read
@@ -21,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       source_commit: ${{ steps.lock.outputs.source_commit }}
+      target_matrix: ${{ steps.lock.outputs.target_matrix }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,6 +38,17 @@ jobs:
           test "$authorization" = 'APPROVE COMPLETE ECOSYSTEM BUILD AND TOTAL DEPLOYMENT'
           test "$scope" = 'LOCKED-ONEWORLDZ-ECOSYSTEM-15-STATIC-TARGETS'
           echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
+          targets="$(grep -E '^targets=' "$request" | tail -n1 | cut -d= -f2- || true)"
+          test -n "$targets" || targets='all'
+          TARGETS="$targets" node - <<'NODE' >> "$GITHUB_OUTPUT"
+          const fleet = [{"key":"cryptoworldz","domain":"cryptoworldz.xyz","remote_dir":"domains/cryptoworldz.xyz/public_html","environment":"cryptoworldz-production","guard":"CRYPTOWORLDZ.XYZ","expected_title":"CryptoWorldz | One World • One Mission"},{"key":"solworldz","domain":"solworldz.xyz","remote_dir":"domains/solworldz.xyz/public_html","environment":"solworldz-production","guard":"SOLWORLDZ.XYZ","expected_title":"SolWorldz | One World • One Mission"},{"key":"ethworldz","domain":"ethworldz.xyz","remote_dir":"domains/ethworldz.xyz/public_html","environment":"ethworldz-production","guard":"ETHWORLDZ.XYZ","expected_title":"EthWorldz | One World • One Mission"},{"key":"baseworldz","domain":"baseworldz.xyz","remote_dir":"domains/baseworldz.xyz/public_html","environment":"baseworldz-production","guard":"BASEWORLDZ.XYZ","expected_title":"BaseWorldz | One World • One Mission"},{"key":"bnbworldz","domain":"bnbworldz.xyz","remote_dir":"domains/bnbworldz.xyz/public_html","environment":"bnbworldz-production","guard":"BNBWORLDZ.XYZ","expected_title":"BNBWorldz | One World • One Mission"},{"key":"xrpworldz","domain":"xrpworldz.xyz","remote_dir":"domains/xrpworldz.xyz/public_html","environment":"xrpworldz-production","guard":"XRPWORLDZ.XYZ","expected_title":"XRPWorldz | One World • One Mission"},{"key":"suiworldz","domain":"suiworldz.xyz","remote_dir":"domains/suiworldz.xyz/public_html","environment":"suiworldz-production","guard":"SUIWORLDZ.XYZ","expected_title":"SuiWorldz | One World • One Mission"},{"key":"hyperworldz","domain":"hyperworldz.xyz","remote_dir":"domains/hyperworldz.xyz/public_html","environment":"hyperworldz-production","guard":"HYPERWORLDZ.XYZ","expected_title":"HyperWorldz | One World • One Mission"},{"key":"robinworldz","domain":"robinworldz.xyz","remote_dir":"domains/robinworldz.xyz/public_html","environment":"robinworldz-production","guard":"ROBINWORLDZ.XYZ","expected_title":"RobinWorldz | One World • One Mission"},{"key":"bitcoinworldz","domain":"bitcoinworldz.xyz","remote_dir":"domains/bitcoinworldz.xyz/public_html","environment":"bitcoinworldz-production","guard":"BITCOINWORLDZ.XYZ","expected_title":"BitcoinWorldz | One World • One Mission"},{"key":"hodlerworldz","domain":"hodlerworldz.xyz","remote_dir":"domains/hodlerworldz.xyz/public_html","environment":"hodlerworldz-production","guard":"HODLERWORLDZ.XYZ","expected_title":"HodlerWorldz | One World • One Mission"},{"key":"purplediamondcrew","domain":"purplediamondcrew.com","remote_dir":"domains/purplediamondcrew.com/public_html","environment":"purplediamondcrew-production","guard":"PURPLEDIAMONDCREW.COM","expected_title":"Purple Diamond Crew | The Legacy Lives On"},{"key":"impactbased","domain":"impactbased.oneworldz.com","remote_dir":"domains/impactbased.oneworldz.com/public_html","environment":"impactbased-production","guard":"IMPACTBASED.ONEWORLDZ.COM","expected_title":"ImpactBased | Purpose-Driven Launch Board"},{"key":"law-oneworldz","domain":"law.oneworldz.com","remote_dir":"domains/law.oneworldz.com/public_html","environment":"law-oneworldz-production","guard":"LAW.ONEWORLDZ.COM","expected_title":"Law.OneWorldz | Public Information"},{"key":"learn-oneworldz","domain":"learn.oneworldz.com","remote_dir":"domains/learn.oneworldz.com/public_html","environment":"learn-oneworldz-production","guard":"LEARN.ONEWORLDZ.COM","expected_title":"Learn.OneWorldz | Knowledge Creates Power"}];
+          const requested = process.env.TARGETS.split(',').map(value => value.trim()).filter(Boolean);
+          const selected = requested.includes('all') ? fleet : fleet.filter(site => requested.includes(site.key));
+          const unknown = requested.filter(key => key !== 'all' && !fleet.some(site => site.key === key));
+          if (unknown.length) throw new Error('Unknown deployment targets: ' + unknown.join(','));
+          if (!selected.length) throw new Error('No deployment targets selected');
+          console.log('target_matrix=' + JSON.stringify({include: selected}));
+          NODE
 
   validate:
     name: Build and prove complete locked release
@@ -130,98 +140,7 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 1
-      matrix:
-        include:
-          - key: cryptoworldz
-            domain: cryptoworldz.xyz
-            remote_dir: domains/cryptoworldz.xyz/public_html
-            environment: cryptoworldz-production
-            guard: CRYPTOWORLDZ.XYZ
-            expected_title: CryptoWorldz | One World • One Mission
-          - key: solworldz
-            domain: solworldz.xyz
-            remote_dir: domains/solworldz.xyz/public_html
-            environment: solworldz-production
-            guard: SOLWORLDZ.XYZ
-            expected_title: SolWorldz | One World • One Mission
-          - key: ethworldz
-            domain: ethworldz.xyz
-            remote_dir: domains/ethworldz.xyz/public_html
-            environment: ethworldz-production
-            guard: ETHWORLDZ.XYZ
-            expected_title: EthWorldz | One World • One Mission
-          - key: baseworldz
-            domain: baseworldz.xyz
-            remote_dir: domains/baseworldz.xyz/public_html
-            environment: baseworldz-production
-            guard: BASEWORLDZ.XYZ
-            expected_title: BaseWorldz | One World • One Mission
-          - key: bnbworldz
-            domain: bnbworldz.xyz
-            remote_dir: domains/bnbworldz.xyz/public_html
-            environment: bnbworldz-production
-            guard: BNBWORLDZ.XYZ
-            expected_title: BNBWorldz | One World • One Mission
-          - key: xrpworldz
-            domain: xrpworldz.xyz
-            remote_dir: domains/xrpworldz.xyz/public_html
-            environment: xrpworldz-production
-            guard: XRPWORLDZ.XYZ
-            expected_title: XRPWorldz | One World • One Mission
-          - key: suiworldz
-            domain: suiworldz.xyz
-            remote_dir: domains/suiworldz.xyz/public_html
-            environment: suiworldz-production
-            guard: SUIWORLDZ.XYZ
-            expected_title: SuiWorldz | One World • One Mission
-          - key: hyperworldz
-            domain: hyperworldz.xyz
-            remote_dir: domains/hyperworldz.xyz/public_html
-            environment: hyperworldz-production
-            guard: HYPERWORLDZ.XYZ
-            expected_title: HyperWorldz | One World • One Mission
-          - key: robinworldz
-            domain: robinworldz.xyz
-            remote_dir: domains/robinworldz.xyz/public_html
-            environment: robinworldz-production
-            guard: ROBINWORLDZ.XYZ
-            expected_title: RobinWorldz | One World • One Mission
-          - key: bitcoinworldz
-            domain: bitcoinworldz.xyz
-            remote_dir: domains/bitcoinworldz.xyz/public_html
-            environment: bitcoinworldz-production
-            guard: BITCOINWORLDZ.XYZ
-            expected_title: BitcoinWorldz | One World • One Mission
-          - key: hodlerworldz
-            domain: hodlerworldz.xyz
-            remote_dir: domains/hodlerworldz.xyz/public_html
-            environment: hodlerworldz-production
-            guard: HODLERWORLDZ.XYZ
-            expected_title: HodlerWorldz | One World • One Mission
-          - key: purplediamondcrew
-            domain: purplediamondcrew.com
-            remote_dir: domains/purplediamondcrew.com/public_html
-            environment: purplediamondcrew-production
-            guard: PURPLEDIAMONDCREW.COM
-            expected_title: Purple Diamond Crew | The Legacy Lives On
-          - key: impactbased
-            domain: impactbased.oneworldz.com
-            remote_dir: domains/impactbased.oneworldz.com/public_html
-            environment: impactbased-production
-            guard: IMPACTBASED.ONEWORLDZ.COM
-            expected_title: ImpactBased | Purpose-Driven Launch Board
-          - key: law-oneworldz
-            domain: law.oneworldz.com
-            remote_dir: domains/law.oneworldz.com/public_html
-            environment: law-oneworldz-production
-            guard: LAW.ONEWORLDZ.COM
-            expected_title: Law.OneWorldz | Public Information
-          - key: learn-oneworldz
-            domain: learn.oneworldz.com
-            remote_dir: domains/learn.oneworldz.com/public_html
-            environment: learn-oneworldz-production
-            guard: LEARN.ONEWORLDZ.COM
-            expected_title: Learn.OneWorldz | Knowledge Creates Power
+      matrix: ${{ fromJSON(needs.authorize.outputs.target_matrix) }}
     environment:
       name: cryptoworldz-production
       url: https://${{ matrix.domain }}/
@@ -372,6 +291,7 @@ jobs:
           name: predeploy-backup-${{ matrix.key }}-${{ github.run_id }}
           path: ${{ runner.temp }}/predeploy-backup
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
       - name: Upload locked package with index last
         shell: bash
@@ -560,7 +480,7 @@ jobs:
             echo "- Production version: oneworldz-ecosystem-locked-v1"
             echo "- Production commit: ${{ needs.deploy.result }} / $GITHUB_SHA"
             echo "- Verified at: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            echo '- Static destinations: 15/15 deployment jobs passed'
+            echo '- Static destinations: 15/15 live deployment checks passed'
             echo '- OneWorldz.com: live and unchanged'
             echo '- CryptoBotz health: passed'
             echo '- SSL/custom domains: 15/15 HTTPS checks passed'
