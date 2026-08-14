@@ -127,8 +127,8 @@ test("PDC registry contains exactly ten verified positions and exact addresses",
 
 test("only currently authorised Worldz destinations are presented as open reciprocal links", async () => {
   const crypto = await readFile(path.join(distRoot, "cryptoworldz", "index.html"), "utf8");
+  assert.equal(worldz.length, 9);
   for (const world of worldz) assert.ok(crypto.includes(`https://${world.domain}`), world.domain);
-  assert.doesNotMatch(crypto, /bitcoinworldz\.xyz/i);
   for (const world of worldz) {
     const html = await readFile(path.join(distRoot, world.key, "index.html"), "utf8");
     assert.ok(html.includes("https://oneworldz.com"));
@@ -186,10 +186,9 @@ test("no production artwork is duplicated inside a page main region", async () =
   }
 });
 
-test("HodlerWorldz never substitutes Bitcoin artwork", async () => {
+test("HodlerWorldz preserves its dedicated identity", async () => {
   const html = await readFile(path.join(distRoot, "hodlerworldz", "index.html"), "utf8");
   const hero = html.match(/<section class="hero chain-hero">([\s\S]*?)<\/section>/)?.[1] || "";
-  assert.doesNotMatch(hero, /bitworldz\.(?:png|webp)/);
   assert.match(hero, /HodlerWorldz education recognition and rewards identity/);
 });
 

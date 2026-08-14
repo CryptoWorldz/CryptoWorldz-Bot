@@ -1,0 +1,11 @@
+requested_by=JayJayTeamDev
+stage=FINAL_DOUBLE_PREDEPLOYMENT_DESTINATION_CHECK
+action=READ_ONLY_HOSTINGER_PREFLIGHT
+architecture_destinations=19
+active_owned_root_domains=15
+static_targets=17
+protected=oneworldz.com,cryptobotz.cryptoworldz.xyz
+excluded=solworld.fun
+write_operations=FORBIDDEN
+production_deployment=NOT_AUTHORIZED_BY_THIS_REQUEST
+attempt=4-final-double-predeployment-destination-check-20260815
