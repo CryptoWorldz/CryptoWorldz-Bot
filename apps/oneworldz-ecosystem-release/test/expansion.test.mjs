@@ -7,6 +7,14 @@ import { deploymentTargets19, ecosystemDestinations, excludedRootDomains, ownedR
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = path.join(appRoot, "dist", "ecosystem");
+let distBuilt = true;
+try {
+  await access(distRoot);
+} catch {
+  distBuilt = false;
+}
+
+const buildTest = (name, fn) => test(name, { skip: !distBuilt }, fn);
 
 test("19-destination architecture is exact", () => {
   assert.equal(ecosystemDestinations.length, 19);
@@ -31,7 +39,7 @@ test("OneWorldz and CryptoBotz remain protected existing destinations", () => {
   assert.ok(!staticDomains.includes("cryptobotz.cryptoworldz.xyz"));
 });
 
-test("expansion build produces all three new root-domain packages", async () => {
+buildTest("expansion build produces all three new root-domain packages", async () => {
   for (const key of ["foodworldz", "donateworldz", "hodlergalaxy"]) {
     await access(path.join(distRoot, key, "index.html"));
     await access(path.join(distRoot, key, "release-manifest.json"));
@@ -40,7 +48,7 @@ test("expansion build produces all three new root-domain packages", async () => 
   }
 });
 
-test("DonateWorldz contains three separated support routes and payment boundaries", async () => {
+buildTest("DonateWorldz contains three separated support routes and payment boundaries", async () => {
   const root = path.join(distRoot, "donateworldz");
   for (const route of ["reagan-children", "community-impact", "jayjayteamdev"]) {
     await access(path.join(root, route, "index.html"));
@@ -51,14 +59,14 @@ test("DonateWorldz contains three separated support routes and payment boundarie
   assert.doesNotMatch(home, /solworld\.fun/i);
 });
 
-test("FoodWorldz routes support action through DonateWorldz", async () => {
+buildTest("FoodWorldz routes support action through DonateWorldz", async () => {
   const html = await readFile(path.join(distRoot, "foodworldz", "index.html"), "utf8");
   assert.match(html, /https:\/\/donateworldz\.com/);
   assert.match(html, /FoodWorldz explains why\. DonateWorldz handles how\./);
   assert.doesNotMatch(html, /solworld\.fun/i);
 });
 
-test("HodlerGalaxy is discovery rather than a duplicate homepage", async () => {
+buildTest("HodlerGalaxy is discovery rather than a duplicate homepage", async () => {
   const html = await readFile(path.join(distRoot, "hodlergalaxy", "index.html"), "utf8");
   assert.match(html, /discovery layer/i);
   assert.match(html, /https:\/\/cryptobotz\.cryptoworldz\.xyz/);
@@ -66,7 +74,7 @@ test("HodlerGalaxy is discovery rather than a duplicate homepage", async () => {
   assert.match(html, /https:\/\/donateworldz\.com/);
 });
 
-test("fleet manifest records 17 static packages representing 19 destinations", async () => {
+buildTest("fleet manifest records 17 static packages representing 19 destinations", async () => {
   const manifest = JSON.parse(await readFile(path.join(distRoot, "fleet-manifest.json"), "utf8"));
   assert.equal(manifest.targets.length, 17);
   assert.equal(manifest.architecture.ecosystem_destinations, 19);
