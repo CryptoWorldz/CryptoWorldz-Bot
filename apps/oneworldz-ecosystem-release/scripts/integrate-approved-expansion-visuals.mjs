@@ -10,9 +10,9 @@ const mobileRoot = path.join(appRoot, "source", "assets", "mobile", "expansion")
 const pagesPath = path.join(appRoot, "expansion-pages.mjs");
 
 const specs = {
-  foodworldz: { parts: 5, desktop: "foodworldz-hero.avif", mobile: "foodworldz-hero.svg" },
-  donateworldz: { parts: 4, desktop: "donateworldz-hero.avif", mobile: "donateworldz-hero.svg" },
-  hodlergalaxy: { parts: 4, desktop: "hodlergalaxy-hero.avif", mobile: "hodlergalaxy-hero.svg" },
+  foodworldz: { parts: 6, desktop: "foodworldz-hero.avif", mobile: "foodworldz-hero.svg" },
+  donateworldz: { parts: 6, desktop: "donateworldz-hero.avif", mobile: "donateworldz-hero.svg" },
+  hodlergalaxy: { parts: 6, desktop: "hodlergalaxy-hero.avif", mobile: "hodlergalaxy-hero.svg" },
 };
 
 function sha256(buffer) {
@@ -36,7 +36,7 @@ async function decodeApprovedVisual(key, partCount) {
 }
 
 function mobileSvg(desktopFile, label) {
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 900" role="img" aria-label="${label}">\n  <image href="../../desktop/expansion/${desktopFile}" x="0" y="0" width="720" height="900" preserveAspectRatio="xMaxYMid slice"/>\n</svg>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 900" role="img" aria-label="${label}">\n  <rect width="720" height="900" fill="#070510"/>\n  <image href="../../desktop/expansion/${desktopFile}" x="0" y="0" width="720" height="900" preserveAspectRatio="xMidYMid meet"/>\n</svg>\n`;
 }
 
 await mkdir(desktopRoot, { recursive: true });
@@ -45,6 +45,7 @@ await mkdir(mobileRoot, { recursive: true });
 const manifest = {
   approval: "user-approved-2026-08-14",
   purpose: "OneWorldz 19-destination expansion visual lock",
+  source_policy: "generated-approved-visuals-only-no-reference-library-substitution",
   visuals: {},
 };
 
