@@ -130,7 +130,9 @@ jobs:
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
+          set cmd:fail-exit false
           mkdir -p $remote_dir
+          set cmd:fail-exit true
           cd $remote_dir
           cls -1
           bye
