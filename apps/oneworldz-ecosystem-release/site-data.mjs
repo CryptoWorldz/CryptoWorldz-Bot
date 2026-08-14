@@ -43,12 +43,6 @@ export const worldz = Object.freeze([
     focus: ["XRPL foundations", "Transaction verification", "Connected missions"]
   },
   {
-    key: "suiworldz", name: "SuiWorldz", chain: "Sui", domain: "suiworld.xyz",
-    accent: "#6fbcf0", accent2: "#c7ebff", image: "suiworldz",
-    purpose: "Sui education, object-model learning and verified ecosystem pathways for beginners and builders.",
-    focus: ["Sui foundations", "Object-model education", "Builder pathways"]
-  },
-  {
     key: "hyperworldz", name: "HyperWorldz", chain: "Hyperliquid", domain: "hyperworldz.xyz",
     accent: "#65fbd2", accent2: "#9bffe5", image: "hyperworldz",
     purpose: "Risk-clear Hyperliquid education and community information with no trading execution on this website.",
@@ -59,12 +53,6 @@ export const worldz = Object.freeze([
     accent: "#73e657", accent2: "#f0c85b", image: "robinworldz",
     purpose: "The people-first home of Robin Hood Chain and RecoverYourDebt, kept separate from legal-advice claims.",
     focus: ["Robin Hood Chain", "RecoverYourDebt", "People-first recovery"]
-  },
-  {
-    key: "bitcoinworldz", name: "BitcoinWorldz", chain: "Bitcoin", domain: "bitcoinworldz.xyz",
-    accent: "#f7931a", accent2: "#ffd18a", image: "bitworldz",
-    purpose: "Beginner-clear Bitcoin education, self-custody awareness and verified community pathways.",
-    focus: ["Bitcoin foundations", "Self-custody awareness", "Transaction checks"]
   },
   {
     key: "hodlerworldz", name: "HodlerWorldz", chain: "Portfolio learning", domain: "hodlerworldz.xyz",
