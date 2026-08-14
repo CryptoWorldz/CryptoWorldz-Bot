@@ -1,0 +1,10 @@
+requested_by=JayJayTeamDev
+stage=PRODUCTION_TARGET_MAPPING_AND_DEPLOYMENT_READINESS
+action=READ_ONLY_HOSTINGER_PREFLIGHT
+architecture_destinations=19
+active_owned_root_domains=15
+static_targets=17
+protected=oneworldz.com,cryptobotz.cryptoworldz.xyz
+excluded=solworld.fun
+write_operations=FORBIDDEN
+production_deployment=NOT_AUTHORIZED_BY_THIS_REQUEST
