@@ -223,7 +223,7 @@ jobs:
             guard: LEARN.ONEWORLDZ.COM
             expected_title: Learn.OneWorldz | Knowledge Creates Power
     environment:
-      name: ${{ matrix.environment }}
+      name: cryptoworldz-production
       url: https://${{ matrix.domain }}/
     env:
       FTP_HOST: ${{ secrets.FTP_HOST }}
