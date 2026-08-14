@@ -23,10 +23,107 @@ const sourceRoot = path.join(appRoot, "source");
 const distRoot = path.join(appRoot, "dist", "ecosystem");
 const generatedAt = new Date().toISOString();
 
-async function writeRoute(targetRoot, route, html) {
+const decodeEntities = (value = "") => String(value)
+  .replaceAll("&amp;", "&")
+  .replaceAll("&quot;", '"')
+  .replaceAll("&#39;", "'")
+  .replaceAll("&lt;", "<")
+  .replaceAll("&gt;", ">");
+
+const escapeAttribute = (value = "") => String(value)
+  .replaceAll("&", "&amp;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;");
+
+const escapeXml = (value = "") => String(value)
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&apos;");
+
+function absoluteRoute(domain, route = "") {
+  const clean = String(route).replace(/^\/+|\/+$/g, "");
+  return clean ? `https://${domain}/${clean}/` : `https://${domain}/`;
+}
+
+function optimizeImageLoading(html) {
+  let output = html.replaceAll('loading="eager"', 'loading="lazy"');
+  const mainStart = output.indexOf('<main id="main-content">');
+  const mainEnd = mainStart >= 0 ? output.indexOf("</main>", mainStart) : -1;
+  if (mainStart < 0 || mainEnd < 0) return output;
+  const before = output.slice(0, mainStart);
+  let main = output.slice(mainStart, mainEnd);
+  const after = output.slice(mainEnd);
+  main = main.replace(/<img\b([^>]*?)loading="lazy"([^>]*)>/, (match, left, right) => {
+    const priority = /fetchpriority=/.test(match) ? "" : ' fetchpriority="high"';
+    return `<img${left}loading="eager"${priority}${right}>`;
+  });
+  return `${before}${main}${after}`;
+}
+
+function enhanceSeo(target, route, sourceHtml) {
+  const canonicalMatch = sourceHtml.match(/<link rel="canonical" href="([^"]+)">/);
+  const canonical = canonicalMatch?.[1] || absoluteRoute(target.domain, route);
+  const titleMarkup = sourceHtml.match(/<title>([\s\S]*?)<\/title>/)?.[1] || target.key;
+  const descriptionMarkup = sourceHtml.match(/<meta name="description" content="([^"]*)">/)?.[1] || "";
+  const title = decodeEntities(titleMarkup);
+  const description = decodeEntities(descriptionMarkup);
+  const siteName = title.split("|")[0].trim() || target.key;
+  const heroMarkup = sourceHtml.match(/<section class="[^"]*hero[^"]*"[^>]*>([\s\S]*?)<\/section>/)?.[1] || "";
+  const heroImage = heroMarkup.match(/<img[^>]+src="([^"]+)"/)?.[1];
+  const imageUrl = heroImage ? new URL(heroImage, canonical).href : "";
+  const imageAlt = heroMarkup.match(/<img[^>]+alt="([^"]*)"/)?.[1] || `${siteName} official production artwork`;
+  const schema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: title,
+    description,
+    url: canonical,
+    inLanguage: "en",
+    isPartOf: {
+      "@type": "WebSite",
+      name: siteName,
+      url: `https://${target.domain}/`
+    },
+    creator: {
+      "@type": "Organization",
+      name: "OneWorldz"
+    }
+  }).replaceAll("<", "\\u003c");
+
+  const tags = [
+    '  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">',
+    '  <meta name="author" content="JayJayTeamDev™">',
+    '  <meta name="application-name" content="OneWorldz">',
+    '  <meta property="og:type" content="website">',
+    '  <meta property="og:locale" content="en_AU">',
+    `  <meta property="og:site_name" content="${escapeAttribute(siteName)}">`,
+    `  <meta property="og:title" content="${escapeAttribute(title)}">`,
+    `  <meta property="og:description" content="${escapeAttribute(description)}">`,
+    `  <meta property="og:url" content="${escapeAttribute(canonical)}">`,
+    '  <meta name="twitter:card" content="summary_large_image">',
+    `  <meta name="twitter:title" content="${escapeAttribute(title)}">`,
+    `  <meta name="twitter:description" content="${escapeAttribute(description)}">`,
+    '  <link rel="sitemap" type="application/xml" href="/sitemap.xml">'
+  ];
+  if (imageUrl) {
+    tags.push(`  <meta property="og:image" content="${escapeAttribute(imageUrl)}">`);
+    tags.push(`  <meta property="og:image:alt" content="${escapeAttribute(decodeEntities(imageAlt))}">`);
+    tags.push(`  <meta name="twitter:image" content="${escapeAttribute(imageUrl)}">`);
+  }
+  tags.push(`  <script type="application/ld+json">${schema}</script>`);
+
+  let html = sourceHtml.replace("</head>", `${tags.join("\n")}\n</head>`);
+  html = optimizeImageLoading(html);
+  return html;
+}
+
+async function writeRoute(targetRoot, target, route, html) {
   const routeRoot = path.join(targetRoot, route);
   await mkdir(routeRoot, { recursive: true });
-  await writeFile(path.join(routeRoot, "index.html"), html, "utf8");
+  await writeFile(path.join(routeRoot, "index.html"), enhanceSeo(target, route, html), "utf8");
 }
 
 async function copyShellAssets(targetRoot) {
@@ -74,6 +171,33 @@ async function listFiles(root, relative = "") {
   return files.sort();
 }
 
+async function writeSeoDiscoveryFiles(target, targetRoot) {
+  const files = await listFiles(targetRoot);
+  const pages = files
+    .filter((file) => file.endsWith("index.html"))
+    .map((file) => {
+      if (file === "index.html") return `https://${target.domain}/`;
+      const route = file.replace(/\/index\.html$/, "");
+      return `https://${target.domain}/${route}/`;
+    })
+    .sort();
+  const sitemap = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...pages.map((url) => `  <url><loc>${escapeXml(url)}</loc></url>`),
+    '</urlset>',
+    ''
+  ].join("\n");
+  const robots = [
+    "User-agent: *",
+    "Allow: /",
+    `Sitemap: https://${target.domain}/sitemap.xml`,
+    ""
+  ].join("\n");
+  await writeFile(path.join(targetRoot, "sitemap.xml"), sitemap, "utf8");
+  await writeFile(path.join(targetRoot, "robots.txt"), robots, "utf8");
+}
+
 async function createPackageManifest(target, targetRoot) {
   const files = await listFiles(targetRoot);
   const records = [];
@@ -108,28 +232,29 @@ async function buildTarget(target) {
   await copyShellAssets(targetRoot);
 
   if (target.key === "cryptoworldz") {
-    await writeRoute(targetRoot, "", cryptoHome());
-    await writeRoute(targetRoot, "command-centre", commandCentrePage());
-    await writeRoute(targetRoot, "miniapp", miniAppPage());
-    await writeRoute(targetRoot, "support/reagan-children", supportPage("reagan"));
-    await writeRoute(targetRoot, "support/community-impact", supportPage("community"));
-    await writeRoute(targetRoot, "support/jayjayteamdev", supportPage("jayjay"));
-    for (const division of divisions) await writeRoute(targetRoot, `divisions/${division.key}`, divisionPage(division));
+    await writeRoute(targetRoot, target, "", cryptoHome());
+    await writeRoute(targetRoot, target, "command-centre", commandCentrePage());
+    await writeRoute(targetRoot, target, "miniapp", miniAppPage());
+    await writeRoute(targetRoot, target, "support/reagan-children", supportPage("reagan"));
+    await writeRoute(targetRoot, target, "support/community-impact", supportPage("community"));
+    await writeRoute(targetRoot, target, "support/jayjayteamdev", supportPage("jayjay"));
+    for (const division of divisions) await writeRoute(targetRoot, target, `divisions/${division.key}`, divisionPage(division));
   } else if (target.key === "purplediamondcrew") {
-    await writeRoute(targetRoot, "", pdcPage());
+    await writeRoute(targetRoot, target, "", pdcPage());
   } else if (target.key === "impactbased") {
-    await writeRoute(targetRoot, "", impactBasedPage());
+    await writeRoute(targetRoot, target, "", impactBasedPage());
   } else if (target.key === "law-oneworldz") {
-    await writeRoute(targetRoot, "", lawPage());
+    await writeRoute(targetRoot, target, "", lawPage());
   } else if (target.key === "learn-oneworldz") {
-    await writeRoute(targetRoot, "", learnPage());
+    await writeRoute(targetRoot, target, "", learnPage());
   } else {
     const world = worldz.find((candidate) => candidate.key === target.key);
     if (!world) throw new Error(`No Worldz configuration for ${target.key}`);
-    await writeRoute(targetRoot, "", chainHome(world));
+    await writeRoute(targetRoot, target, "", chainHome(world));
   }
 
   await copyReferencedMedia(targetRoot);
+  await writeSeoDiscoveryFiles(target, targetRoot);
   await createPackageManifest(target, targetRoot);
 }
 
