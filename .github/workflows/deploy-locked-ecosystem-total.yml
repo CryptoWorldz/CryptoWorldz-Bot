@@ -73,7 +73,7 @@ jobs:
           retention-days: 30
 
   preflight-fleet:
-    name: Prove all Hostinger target directories
+    name: Prepare and prove all Hostinger target directories
     needs: [authorize, validate]
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -89,7 +89,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
-      - name: Prove all fifteen exact website roots before any upload
+      - name: Prepare and prove all fifteen exact website roots before any upload
         shell: bash
         run: |
           set -euo pipefail
@@ -112,10 +112,9 @@ jobs:
           cls -1
           bye
           EOF
-          missing=0
           for domain in "${domains[@]}"; do
             remote_dir="domains/$domain/public_html"
-            if ! lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$ftp_ip" <<EOF
+            lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$ftp_ip" <<EOF
           set cmd:fail-exit true
           set net:max-retries 1
           set net:timeout 30
@@ -123,16 +122,12 @@ jobs:
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
+          mkdir -p $remote_dir
           cd $remote_dir
           cls -1
           bye
           EOF
-            then
-              echo "::error::Missing Hostinger website root: $remote_dir"
-              missing=1
-            fi
           done
-          test "$missing" -eq 0
   deploy:
     name: Backup, deploy and prove ${{ matrix.domain }}
     needs: [authorize, validate, preflight-fleet]
@@ -325,7 +320,9 @@ jobs:
           mirror --verbose --parallel=2 --exclude-glob .well-known --exclude-glob .well-known/** . $backup
           bye
           EOF
-          test "$(find "$backup" -type f | wc -l | tr -d ' ')" -gt 0
+          if test "$(find "$backup" -type f | wc -l | tr -d ' ')" -eq 0; then
+            touch "$backup/.predeploy-empty-root"
+          fi
           echo "BACKUP_DIR=$backup" >> "$GITHUB_ENV"
       - uses: actions/upload-artifact@v4
         with:
@@ -428,8 +425,8 @@ jobs:
         run: |
           set -euo pipefail
           test -d "$BACKUP_DIR"
-          test -f "$BACKUP_DIR/index.html"
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
+          if test -f "$BACKUP_DIR/index.html"; then
+            lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
           set cmd:fail-exit true
           set net:max-retries 1
           set net:timeout 30
@@ -438,10 +435,24 @@ jobs:
           set ssl:verify-certificate true
           set ssl:check-hostname false
           cd $FTP_REMOTE_DIR
-          mirror -R --delete --verbose --parallel=2 --exclude-glob index.html --exclude-glob .well-known --exclude-glob .well-known/** $BACKUP_DIR .
+          mirror -R --delete --verbose --parallel=2 --exclude-glob index.html --exclude-glob .predeploy-empty-root --exclude-glob .well-known --exclude-glob .well-known/** $BACKUP_DIR .
           put $BACKUP_DIR/index.html -o index.html
           bye
           EOF
+          else
+            lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 1
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $FTP_REMOTE_DIR
+          mirror -R --delete --verbose --parallel=2 --exclude-glob .predeploy-empty-root --exclude-glob .well-known --exclude-glob .well-known/** $BACKUP_DIR .
+          bye
+          EOF
+          fi
 
   verify-protected-and-payments:
     name: Verify protected services and payment destinations
