@@ -43,7 +43,7 @@ export const worldz = Object.freeze([
     focus: ["XRPL foundations", "Transaction verification", "Connected missions"]
   },
   {
-    key: "suiworldz", name: "SuiWorldz", chain: "Sui", domain: "suiworldz.xyz",
+    key: "suiworldz", name: "SuiWorldz", chain: "Sui", domain: "suiworld.xyz",
     accent: "#6fbcf0", accent2: "#c7ebff", image: "suiworldz",
     purpose: "Sui education, object-model learning and verified ecosystem pathways for beginners and builders.",
     focus: ["Sui foundations", "Object-model education", "Builder pathways"]
