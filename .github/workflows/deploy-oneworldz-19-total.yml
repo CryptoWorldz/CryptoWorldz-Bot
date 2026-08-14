@@ -214,7 +214,28 @@ jobs:
           backup="$RUNNER_TEMP/remote-backup"
           mkdir -p "$backup"
           script="$RUNNER_TEMP/deploy.lftp"
-          cat > "$script" <<EOF
+          if [ "$LIVE_URL" = 'https://cryptoworldz.xyz/' ]; then
+            cat > "$script" <<EOF
+          set cmd:fail-exit false
+          set net:max-retries 3
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $FTP_REMOTE_DIR
+          get index.html -o $backup/index.html
+          get release-manifest.json -o $backup/release-manifest.json
+          get robots.txt -o $backup/robots.txt
+          get sitemap.xml -o $backup/sitemap.xml
+          mirror --verbose assets $backup/assets
+          set cmd:fail-exit true
+          lcd $RELEASE_ROOT
+          mirror -R --verbose . .
+          bye
+          EOF
+          else
+            cat > "$script" <<EOF
           set cmd:fail-exit true
           set net:max-retries 3
           set net:timeout 30
@@ -228,6 +249,7 @@ jobs:
           mirror -R --delete --verbose . .
           bye
           EOF
+          fi
           timeout 1800 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$raw_host"
       - id: liveproof
         name: Prove exact live title after upload
@@ -236,13 +258,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for attempt in 1 2 3 4 5 6; do
+          for attempt in $(seq 1 30); do
             html="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 -H 'Cache-Control: no-cache' "${LIVE_URL}?release=${GITHUB_SHA}-${GITHUB_RUN_ID}" || true)"
             if printf '%s' "$html" | grep -Fq "<title>$EXPECTED_TITLE</title>"; then
               echo "Live proof passed: $LIVE_URL"
               exit 0
             fi
-            sleep 10
+            sleep 30
           done
           echo "::error::Live title proof failed for $LIVE_URL"
           exit 1
@@ -256,7 +278,27 @@ jobs:
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           script="$RUNNER_TEMP/rollback.lftp"
-          cat > "$script" <<EOF
+          if [ "$LIVE_URL" = 'https://cryptoworldz.xyz/' ]; then
+            cat > "$script" <<EOF
+          set cmd:fail-exit false
+          set net:max-retries 3
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $FTP_REMOTE_DIR
+          rm index.html
+          rm release-manifest.json
+          rm robots.txt
+          rm sitemap.xml
+          rm -r assets
+          lcd $backup
+          mirror -R --verbose . .
+          bye
+          EOF
+          else
+            cat > "$script" <<EOF
           set cmd:fail-exit true
           set net:max-retries 3
           set net:timeout 30
@@ -269,6 +311,7 @@ jobs:
           mirror -R --delete --verbose . .
           bye
           EOF
+          fi
           timeout 1800 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$raw_host"
       - name: Fail release after rollback
         if: ${{ steps.transfer.outcome == 'failure' || steps.liveproof.outcome == 'failure' }}
