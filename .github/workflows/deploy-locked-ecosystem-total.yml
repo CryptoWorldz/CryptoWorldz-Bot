@@ -329,7 +329,9 @@ jobs:
             const relative = remotePath.replace(/^\//, '');
             const local = path.join(backup, relative);
             fs.mkdirSync(path.dirname(local), {recursive: true});
-            lines.push(`catch get ${quote(relative)} -o ${quote(local)}`);
+            lines.push('set cmd:fail-exit false');
+            lines.push(`get ${quote(relative)} -o ${quote(local)}`);
+            lines.push('set cmd:fail-exit true');
           }
           lines.push('bye');
           fs.writeFileSync(script, lines.join('\n') + '\n');
@@ -488,7 +490,11 @@ jobs:
             'set ssl:check-hostname false',
             `cd ${process.env.FTP_REMOTE_DIR}`
           ];
-          for (const relative of missing) lines.push(`catch rm ${quote(relative)}`);
+          for (const relative of missing) {
+            lines.push('set cmd:fail-exit false');
+            lines.push(`rm ${quote(relative)}`);
+            lines.push('set cmd:fail-exit true');
+          }
           lines.push('bye');
           fs.writeFileSync(script, lines.join('\n') + '\n');
           NODE
