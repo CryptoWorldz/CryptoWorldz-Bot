@@ -1,0 +1,92 @@
+name: Preflight OneWorldz Hostinger Targets
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - build/oneworldz-19-destination-upgrade
+    paths:
+      - 'deployments/oneworldz-19-hostinger-preflight.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-hostinger-readonly-preflight
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    name: Read-only proof of all 17 Hostinger roots
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate exact read-only target list from locked topology
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd apps/oneworldz-ecosystem-release
+          node --input-type=module <<'NODE' > "$RUNNER_TEMP/targets.txt"
+          import { productionTargets } from './production-targets.mjs';
+          if (productionTargets.length !== 17) throw new Error('Expected 17 static targets');
+          for (const target of productionTargets) console.log(`${target.key}|${target.domain}|${target.remoteDir}`);
+          NODE
+          test "$(wc -l < "$RUNNER_TEMP/targets.txt" | tr -d ' ')" = 17
+          ! grep -qi 'solworld\.fun' "$RUNNER_TEMP/targets.txt"
+          ! grep -qi '^oneworldz|' "$RUNNER_TEMP/targets.txt"
+          ! grep -qi 'cryptobotz\.cryptoworldz\.xyz' "$RUNNER_TEMP/targets.txt"
+      - name: Install FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+      - name: Authenticate and prove every target directory without writing anything
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$FTP_HOST"
+          test -n "$FTP_USERNAME"
+          test -n "$FTP_PASSWORD"
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          test -n "$raw_host"
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          script="$RUNNER_TEMP/preflight.lftp"
+          {
+            echo 'set cmd:fail-exit true'
+            echo 'set net:max-retries 2'
+            echo 'set net:timeout 30'
+            echo 'set ftp:ssl-force true'
+            echo 'set ftp:ssl-protect-data true'
+            echo 'set ssl:verify-certificate true'
+            echo 'set ssl:check-hostname false'
+            while IFS='|' read -r key domain remote_dir; do
+              printf 'echo VERIFY %s %s\n' "$key" "$domain"
+              printf 'cd %s\n' "$remote_dir"
+              echo 'pwd'
+              echo 'cls -1'
+              echo 'cd /'
+            done < "$RUNNER_TEMP/targets.txt"
+            echo 'bye'
+          } > "$script"
+          # READ-ONLY: no mkdir, mirror, put, rm, mv or chmod commands are permitted in this workflow.
+          ! grep -Eiq '(^|[[:space:]])(mkdir|mirror|put|mput|rm|mv|chmod)([[:space:]]|$)' "$script"
+          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$raw_host"
+      - name: Record preflight boundary
+        run: |
+          echo '17 exact static roots proved read-only.'
+          echo 'OneWorldz.com and CryptoBotz remain protected and were not touched.'
+          echo 'SolWorld.fun remains excluded.'
+          echo 'No production files were uploaded, deleted, renamed, created or changed.'
