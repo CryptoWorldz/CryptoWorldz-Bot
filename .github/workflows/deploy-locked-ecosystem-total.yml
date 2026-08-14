@@ -350,7 +350,7 @@ jobs:
           lines.push('bye');
           fs.writeFileSync(script, lines.join('\n') + '\n');
           NODE
-          timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -f "$script" "$FTP_CONNECT_HOST"
+          timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$FTP_CONNECT_HOST"
           node - "$backup" <<'NODE'
           const fs = require('fs');
           const path = require('path');
@@ -440,7 +440,7 @@ jobs:
           lines.push('bye');
           fs.writeFileSync(script, lines.join('\n') + '\n');
           NODE
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -f "$script" "$FTP_CONNECT_HOST"
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$FTP_CONNECT_HOST"
           node - "$proof" <<'NODE'
           const fs = require('fs');
           const path = require('path');
@@ -508,7 +508,7 @@ jobs:
           lines.push('bye');
           fs.writeFileSync(script, lines.join('\n') + '\n');
           NODE
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -f "$delete_script" "$FTP_CONNECT_HOST"
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $delete_script" "$FTP_CONNECT_HOST"
           if test -f "$BACKUP_DIR/index.html"; then
             lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
           set cmd:fail-exit true
