@@ -50,7 +50,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
-      - name: Authenticate and prove every target directory without writing anything
+      - name: Authenticate and inventory all target roots without writing anything
         shell: bash
         run: |
           set -euo pipefail
@@ -63,27 +63,25 @@ jobs:
           echo "::add-mask::$FTP_HOST"
           echo "::add-mask::$FTP_USERNAME"
           echo "::add-mask::$FTP_PASSWORD"
-          script="$RUNNER_TEMP/preflight.lftp"
-          {
-            echo 'set cmd:fail-exit true'
-            echo 'set net:max-retries 2'
-            echo 'set net:timeout 30'
-            echo 'set ftp:ssl-force true'
-            echo 'set ftp:ssl-protect-data true'
-            echo 'set ssl:verify-certificate true'
-            echo 'set ssl:check-hostname false'
-            while IFS='|' read -r key domain remote_dir; do
-              printf 'echo VERIFY %s %s\n' "$key" "$domain"
-              printf 'cd %s\n' "$remote_dir"
-              echo 'pwd'
-              echo 'cls -1'
-              echo 'cd /'
-            done < "$RUNNER_TEMP/targets.txt"
-            echo 'bye'
-          } > "$script"
-          # READ-ONLY: no mkdir, mirror, put, rm, mv or chmod commands are permitted in this workflow.
-          ! grep -Eiq '(^|[[:space:]])(mkdir|mirror|put|mput|rm|mv|chmod)([[:space:]]|$)' "$script"
-          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$raw_host"
+          common='set cmd:fail-exit true; set net:max-retries 2; set net:timeout 30; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false;'
+          echo 'HOSTINGER DOMAIN ROOT INVENTORY:'
+          timeout 90 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "$common cd domains; cls -1; bye" "$raw_host"
+          missing="$RUNNER_TEMP/missing-targets.txt"
+          : > "$missing"
+          while IFS='|' read -r key domain remote_dir; do
+            echo "VERIFY $key $domain -> $remote_dir"
+            if timeout 90 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "$common cd $remote_dir; pwd; bye" "$raw_host"; then
+              echo "OK $domain"
+            else
+              echo "$key|$domain|$remote_dir" | tee -a "$missing"
+            fi
+          done < "$RUNNER_TEMP/targets.txt"
+          if [ -s "$missing" ]; then
+            echo '::error::One or more required Hostinger roots do not exist.'
+            echo 'MISSING ROOTS:'
+            cat "$missing"
+            exit 1
+          fi
       - name: Record preflight boundary
         run: |
           echo '17 exact static roots proved read-only.'
