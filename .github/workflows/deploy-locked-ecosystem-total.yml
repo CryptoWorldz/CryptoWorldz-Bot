@@ -315,27 +315,56 @@ jobs:
           pwd
           bye
           EOF
-      - name: Back up complete current domain root
+      - name: Back up every release path that can be overwritten
         shell: bash
         run: |
           set -euo pipefail
           backup="$RUNNER_TEMP/predeploy-backup"
+          script="$RUNNER_TEMP/backup-release-paths.lftp"
           mkdir -p "$backup"
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 1
-          set net:timeout 30
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          cd $FTP_REMOTE_DIR
-          mirror --verbose --parallel=2 --exclude-glob .well-known --exclude-glob .well-known/** . $backup
-          bye
-          EOF
-          if test "$(find "$backup" -type f | wc -l | tr -d ' ')" -eq 0; then
-            touch "$backup/.predeploy-empty-root"
-          fi
+          node - "$backup" "$script" <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const backup = process.argv[2];
+          const script = process.argv[3];
+          const manifest = JSON.parse(fs.readFileSync(process.env.RELEASE_ROOT + '/release-manifest.json'));
+          const paths = new Set(manifest.files.map(file => file.path));
+          paths.add('/release-manifest.json');
+          const quote = value => `'${String(value).replaceAll("'", "'\\''")}'`;
+          const lines = [
+            'set cmd:fail-exit true',
+            'set net:max-retries 2',
+            'set net:timeout 30',
+            'set ftp:ssl-force true',
+            'set ftp:ssl-protect-data true',
+            'set ssl:verify-certificate true',
+            'set ssl:check-hostname false',
+            `cd ${process.env.FTP_REMOTE_DIR}`
+          ];
+          for (const remotePath of [...paths].sort()) {
+            const relative = remotePath.replace(/^\//, '');
+            const local = path.join(backup, relative);
+            fs.mkdirSync(path.dirname(local), {recursive: true});
+            lines.push(`catch get ${quote(relative)} -o ${quote(local)}`);
+          }
+          lines.push('bye');
+          fs.writeFileSync(script, lines.join('\n') + '\n');
+          NODE
+          timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -f "$script" "$FTP_CONNECT_HOST"
+          node - "$backup" <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const backup = process.argv[2];
+          const manifest = JSON.parse(fs.readFileSync(process.env.RELEASE_ROOT + '/release-manifest.json'));
+          const paths = new Set(manifest.files.map(file => file.path));
+          paths.add('/release-manifest.json');
+          const missing = [...paths]
+            .map(remotePath => remotePath.replace(/^\//, ''))
+            .filter(relative => !fs.existsSync(path.join(backup, relative)))
+            .sort();
+          fs.writeFileSync(path.join(backup, '.predeploy-missing-paths'), missing.join('\n') + (missing.length ? '\n' : ''));
+          fs.writeFileSync(path.join(backup, '.predeploy-backup-ready'), 'exact release-path backup complete\n');
+          NODE
           echo "BACKUP_DIR=$backup" >> "$GITHUB_ENV"
       - uses: actions/upload-artifact@v4
         with:
@@ -440,37 +469,57 @@ jobs:
           test "$success" = 'true'
           ! grep -Eiq 'gofundme|go fund me|coming soon|one-world-one-mission\.webp|100002482[01]|Screenshot_2026' "$RUNNER_TEMP/live.html"
           curl -fsSI --connect-timeout 15 --max-time 30 "${LIVE_URL}assets/css/site.css" | grep -Eq '^HTTP/[^ ]+ 200'
-      - name: Roll back exact pre-deployment root on failure
+      - name: Roll back every changed release path on failure
         if: ${{ failure() && env.DEPLOY_STARTED == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
-          test -d "$BACKUP_DIR"
+          test -f "$BACKUP_DIR/.predeploy-backup-ready"
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $FTP_REMOTE_DIR
+          mirror -R --verbose --parallel=2 --exclude-glob index.html --exclude-glob .predeploy-missing-paths --exclude-glob .predeploy-backup-ready --exclude-glob .well-known --exclude-glob .well-known/** $BACKUP_DIR .
+          bye
+          EOF
+          delete_script="$RUNNER_TEMP/delete-new-release-paths.lftp"
+          node - "$BACKUP_DIR/.predeploy-missing-paths" "$delete_script" <<'NODE'
+          const fs = require('fs');
+          const missingFile = process.argv[2];
+          const script = process.argv[3];
+          const quote = value => `'${String(value).replaceAll("'", "'\\''")}'`;
+          const missing = fs.readFileSync(missingFile, 'utf8').split(/\r?\n/).filter(Boolean);
+          const lines = [
+            'set cmd:fail-exit true',
+            'set net:max-retries 2',
+            'set net:timeout 30',
+            'set ftp:ssl-force true',
+            'set ftp:ssl-protect-data true',
+            'set ssl:verify-certificate true',
+            'set ssl:check-hostname false',
+            `cd ${process.env.FTP_REMOTE_DIR}`
+          ];
+          for (const relative of missing) lines.push(`catch rm ${quote(relative)}`);
+          lines.push('bye');
+          fs.writeFileSync(script, lines.join('\n') + '\n');
+          NODE
+          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -f "$delete_script" "$FTP_CONNECT_HOST"
           if test -f "$BACKUP_DIR/index.html"; then
             lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
           set cmd:fail-exit true
-          set net:max-retries 1
+          set net:max-retries 2
           set net:timeout 30
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
           cd $FTP_REMOTE_DIR
-          mirror -R --delete --verbose --parallel=2 --exclude-glob index.html --exclude-glob .predeploy-empty-root --exclude-glob .well-known --exclude-glob .well-known/** $BACKUP_DIR .
           put $BACKUP_DIR/index.html -o index.html
-          bye
-          EOF
-          else
-            lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 1
-          set net:timeout 30
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          cd $FTP_REMOTE_DIR
-          mirror -R --delete --verbose --parallel=2 --exclude-glob .predeploy-empty-root --exclude-glob .well-known --exclude-glob .well-known/** $BACKUP_DIR .
           bye
           EOF
           fi
