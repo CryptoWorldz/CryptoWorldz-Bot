@@ -112,7 +112,7 @@ jobs:
             cd $remote_dir
             cls -1
             bye
-            EOF
+          EOF
           done
   deploy:
     name: Backup, deploy and prove ${{ matrix.domain }}
