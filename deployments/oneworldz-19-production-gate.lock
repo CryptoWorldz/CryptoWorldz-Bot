@@ -1,0 +1,16 @@
+stage=PRODUCTION_TARGET_MAPPING_AND_DEPLOYMENT_READINESS
+requested_by=JayJayTeamDev
+architecture_destinations=19
+active_owned_root_domains=15
+static_targets=17
+protected_existing_destinations=oneworldz.com,cryptobotz.cryptoworldz.xyz
+excluded_owned_root_domain=solworld.fun
+excluded_action=DO_NOT_BUILD_DO_NOT_DEPLOY
+remote_path_contract=domains/{domain}/public_html
+ftp_account_scope=SHARED_ACCOUNT_EXACT_TARGET
+readiness_validation=REQUIRED
+remote_preflight=READ_ONLY_REQUIRED
+production_deployment_state=NOT_EXECUTED
+pull_request=80
+pull_request_state=DRAFT_UNMERGED
+status=MAPPING_COMPLETE_PENDING_REMOTE_PREFLIGHT
