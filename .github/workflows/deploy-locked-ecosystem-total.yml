@@ -300,20 +300,19 @@ jobs:
           set -euo pipefail
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
-          ftp_ip="$(getent ahostsv4 "$raw_host" | awk 'NR==1{print $1}')"
-          test -n "$ftp_ip"
-          echo "FTP_CONNECT_HOST=$ftp_ip" >> "$GITHUB_ENV"
-          echo "::add-mask::$ftp_ip"
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$ftp_ip" <<EOF
+          test -n "$raw_host"
+          echo "FTP_CONNECT_HOST=$raw_host" >> "$GITHUB_ENV"
+          echo "::add-mask::$raw_host"
+          timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$raw_host" <<EOF
           set cmd:fail-exit true
-          set net:max-retries 3
+          set net:max-retries 2
           set net:timeout 30
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
           cd $FTP_REMOTE_DIR
-          cls -1
+          pwd
           bye
           EOF
       - name: Back up complete current domain root
@@ -367,16 +366,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
+          timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
           set cmd:fail-exit true
-          set net:max-retries 3
+          set net:max-retries 2
           set net:timeout 30
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
           cd $FTP_REMOTE_DIR
-          cls -1
+          pwd
           bye
           EOF
       - name: Prove origin files exactly match manifest
