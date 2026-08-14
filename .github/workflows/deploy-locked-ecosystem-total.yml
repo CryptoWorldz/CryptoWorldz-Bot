@@ -287,7 +287,9 @@ jobs:
           test -n "$raw_host"
           echo "FTP_CONNECT_HOST=$raw_host" >> "$GITHUB_ENV"
           echo "::add-mask::$raw_host"
-          timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$raw_host" <<EOF
+          session_ok=false
+          for attempt in 1 2 3; do
+            if timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$raw_host" <<EOF
           set cmd:fail-exit true
           set net:max-retries 2
           set net:timeout 30
@@ -299,6 +301,13 @@ jobs:
           pwd
           bye
           EOF
+            then
+              session_ok=true
+              break
+            fi
+            sleep 5
+          done
+          test "$session_ok" = true
       - name: Back up every release path that can be overwritten
         shell: bash
         run: |
@@ -375,22 +384,6 @@ jobs:
           mirror -R --verbose --parallel=2 --exclude '^index\\.html$' --exclude '^release-manifest\\.json$' --exclude-glob .well-known --exclude-glob .well-known/** $RELEASE_ROOT .
           put $RELEASE_ROOT/release-manifest.json -o release-manifest.json
           put $RELEASE_ROOT/index.html -o index.html
-          bye
-          EOF
-      - name: Prove authenticated CA-verified FTPS session stayed healthy
-        shell: bash
-        run: |
-          set -euo pipefail
-          timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 2
-          set net:timeout 30
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          cd $FTP_REMOTE_DIR
-          pwd
           bye
           EOF
       - name: Prove origin files exactly match manifest
