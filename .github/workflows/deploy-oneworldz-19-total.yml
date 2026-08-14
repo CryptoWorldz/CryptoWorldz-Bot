@@ -1,0 +1,291 @@
+name: Deploy OneWorldz 19-Destination Total Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/oneworldz-19-total.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-19-total-production
+  cancel-in-progress: false
+
+jobs:
+  authorize:
+    name: Lock explicit 17-target deployment authority
+    runs-on: ubuntu-latest
+    outputs:
+      source_commit: ${{ steps.lock.outputs.source_commit }}
+      target_matrix: ${{ steps.lock.outputs.target_matrix }}
+      deployment_mode: ${{ steps.lock.outputs.deployment_mode }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          request='deployments/oneworldz-19-total.request'
+          test -s "$request"
+          requested_by="$(grep -E '^requested_by=' "$request" | tail -n1 | cut -d= -f2-)"
+          authorization="$(grep -E '^authorization=' "$request" | tail -n1 | cut -d= -f2-)"
+          scope="$(grep -E '^scope=' "$request" | tail -n1 | cut -d= -f2-)"
+          mode="$(grep -E '^mode=' "$request" | tail -n1 | cut -d= -f2- || true)"
+          targets="$(grep -E '^targets=' "$request" | tail -n1 | cut -d= -f2- || true)"
+          test "$requested_by" = 'JayJayTeamDev'
+          test "$authorization" = 'APPROVE COMPLETE ECOSYSTEM BUILD AND TOTAL DEPLOYMENT'
+          test "$scope" = 'LOCKED-ONEWORLDZ-ECOSYSTEM-17-STATIC-TARGETS'
+          test -n "$mode" || mode='deploy'
+          case "$mode" in deploy|handoff-only) ;; *) echo '::error::Invalid mode'; exit 1 ;; esac
+          test -n "$targets" || targets='all'
+          source_commit="$(git rev-parse HEAD)"
+          echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
+          echo "deployment_mode=$mode" >> "$GITHUB_OUTPUT"
+          cd apps/oneworldz-ecosystem-release
+          TARGETS="$targets" node --input-type=module <<'NODE' >> "$GITHUB_OUTPUT"
+          import { productionTargets, productionGate } from './production-targets.mjs';
+          if (productionTargets.length !== 17) throw new Error('Production fleet must contain exactly 17 static targets');
+          if (productionGate.ecosystemDestinations !== 19 || productionGate.activeOwnedRootDomains !== 15) throw new Error('19/15 architecture drift');
+          const requested = process.env.TARGETS.split(',').map(v => v.trim()).filter(Boolean);
+          const selected = requested.includes('all') ? productionTargets : productionTargets.filter(site => requested.includes(site.key));
+          const unknown = requested.filter(key => key !== 'all' && !productionTargets.some(site => site.key === key));
+          if (unknown.length) throw new Error('Unknown deployment targets: ' + unknown.join(','));
+          if (!selected.length) throw new Error('No deployment targets selected');
+          const forbidden = new Set(['oneworldz.com','cryptobotz.cryptoworldz.xyz','solworld.fun']);
+          for (const site of selected) if (forbidden.has(site.domain)) throw new Error('Protected/excluded destination selected: ' + site.domain);
+          console.log('target_matrix=' + JSON.stringify({ include: selected.map(site => ({
+            key: site.key,
+            domain: site.domain,
+            remote_dir: site.remoteDir,
+            guard: site.guard,
+            expected_title: site.expectedTitle
+          })) }));
+          NODE
+
+  validate:
+    name: Build and prove exact release before any remote write
+    needs: authorize
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.authorize.outputs.source_commit }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run complete release verification
+        working-directory: apps/oneworldz-ecosystem-release
+        run: npm run verify
+      - name: Enforce protected and excluded boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          root='apps/oneworldz-ecosystem-release/dist/ecosystem'
+          test "$(find "$root" -mindepth 2 -maxdepth 2 -name index.html | wc -l | tr -d ' ')" = '17'
+          test ! -d "$root/oneworldz"
+          test ! -d "$root/cryptobotz"
+          ! grep -Rni --include='*.html' 'solworld\.fun' "$root"
+          ! grep -RIE 'sk_live_|sk_test_|service_role|FTP_PASSWORD|DATABASE_URL|SUPABASE_SERVICE' "$root"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-19-verified-${{ github.run_id }}
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem/
+          if-no-files-found: error
+          retention-days: 30
+
+  preflight-fleet:
+    name: Read-only prove all selected Hostinger roots
+    needs: [authorize, validate]
+    if: ${{ needs.authorize.outputs.deployment_mode != 'handoff-only' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      TARGET_MATRIX: ${{ needs.authorize.outputs.target_matrix }}
+    steps:
+      - name: Install FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+      - name: Authenticate and prove roots without creating anything
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          test -n "$raw_host"
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          node -e 'for (const x of JSON.parse(process.env.TARGET_MATRIX).include) console.log(x.remote_dir)' > "$RUNNER_TEMP/dirs.txt"
+          script="$RUNNER_TEMP/preflight.lftp"
+          {
+            echo 'set cmd:fail-exit true'
+            echo 'set net:max-retries 2'
+            echo 'set net:timeout 30'
+            echo 'set ftp:ssl-force true'
+            echo 'set ftp:ssl-protect-data true'
+            echo 'set ssl:verify-certificate true'
+            echo 'set ssl:check-hostname false'
+            while read -r dir; do echo "cd $dir"; echo 'pwd'; echo 'cls -1'; echo 'cd /'; done < "$RUNNER_TEMP/dirs.txt"
+            echo 'bye'
+          } > "$script"
+          ! grep -Eiq '(^|[[:space:]])(mkdir|mirror|put|mput|rm|mv|chmod)([[:space:]]|$)' "$script"
+          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$raw_host"
+
+  deploy:
+    name: Backup → deploy → prove ${{ matrix.domain }}
+    needs: [authorize, validate, preflight-fleet]
+    if: ${{ needs.authorize.outputs.deployment_mode != 'handoff-only' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.authorize.outputs.target_matrix) }}
+    environment:
+      name: cryptoworldz-production
+      url: https://${{ matrix.domain }}/
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      FTP_REMOTE_DIR: ${{ matrix.remote_dir }}
+      EXPECTED_REMOTE_DIR: domains/${{ matrix.domain }}/public_html
+      DEPLOY_GUARD: ${{ matrix.guard }}
+      EXPECTED_TITLE: ${{ matrix.expected_title }}
+      LIVE_URL: https://${{ matrix.domain }}/
+      RELEASE_ROOT: apps/oneworldz-ecosystem-release/dist/ecosystem/${{ matrix.key }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.authorize.outputs.source_commit }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: oneworldz-19-verified-${{ github.run_id }}
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem
+      - name: Enforce exact package → exact domain contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$FTP_REMOTE_DIR" = "$EXPECTED_REMOTE_DIR"
+          [[ "$FTP_REMOTE_DIR" =~ ^domains/[a-z0-9.-]+/public_html$ ]]
+          test -n "$DEPLOY_GUARD"
+          test -s "$RELEASE_ROOT/index.html"
+          test -s "$RELEASE_ROOT/release-manifest.json"
+          test ! -e "$RELEASE_ROOT/public_html"
+          case "$LIVE_URL" in 'https://oneworldz.com/'|'https://cryptobotz.cryptoworldz.xyz/'|'https://solworld.fun/') exit 1 ;; esac
+          node - <<'NODE'
+          const fs = require('fs');
+          const manifest = JSON.parse(fs.readFileSync(process.env.RELEASE_ROOT + '/release-manifest.json'));
+          if (manifest.deploy_guard !== process.env.DEPLOY_GUARD) throw new Error('Deploy guard mismatch');
+          if (manifest.ftp_root !== '/' || manifest.homepage !== '/index.html') throw new Error('Release root contract mismatch');
+          if (manifest.protected_services_modified.length) throw new Error('Protected-service mutation declared');
+          NODE
+      - name: Install FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+      - id: transfer
+        name: Backup current root and deploy exact verified package
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          backup="$RUNNER_TEMP/remote-backup"
+          mkdir -p "$backup"
+          script="$RUNNER_TEMP/deploy.lftp"
+          cat > "$script" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 3
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $FTP_REMOTE_DIR
+          mirror --verbose . $backup
+          lcd $RELEASE_ROOT
+          mirror -R --delete --verbose . .
+          bye
+          EOF
+          timeout 1800 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$raw_host"
+      - id: liveproof
+        name: Prove exact live title after upload
+        if: ${{ steps.transfer.outcome == 'success' }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5 6; do
+            html="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 -H 'Cache-Control: no-cache' "${LIVE_URL}?release=${GITHUB_SHA}-${GITHUB_RUN_ID}" || true)"
+            if printf '%s' "$html" | grep -Fq "<title>$EXPECTED_TITLE</title>"; then
+              echo "Live proof passed: $LIVE_URL"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Live title proof failed for $LIVE_URL"
+          exit 1
+      - name: Roll back exact domain if transfer or live proof fails
+        if: ${{ steps.transfer.outcome == 'failure' || steps.liveproof.outcome == 'failure' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup="$RUNNER_TEMP/remote-backup"
+          test -d "$backup"
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          script="$RUNNER_TEMP/rollback.lftp"
+          cat > "$script" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 3
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $FTP_REMOTE_DIR
+          lcd $backup
+          mirror -R --delete --verbose . .
+          bye
+          EOF
+          timeout 1800 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$raw_host"
+      - name: Fail release after rollback
+        if: ${{ steps.transfer.outcome == 'failure' || steps.liveproof.outcome == 'failure' }}
+        run: exit 1
+
+  complete:
+    name: Total release completion proof
+    needs: [authorize, validate, deploy]
+    if: ${{ always() && needs.authorize.result == 'success' && needs.validate.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm deployment outcome
+        shell: bash
+        run: |
+          if [ '${{ needs.authorize.outputs.deployment_mode }}' = 'handoff-only' ]; then
+            echo 'Verified release handoff completed. No production deployment executed.'
+            exit 0
+          fi
+          test '${{ needs.deploy.result }}' = 'success'
+          echo 'All selected OneWorldz production targets deployed and proved.'
