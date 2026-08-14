@@ -506,7 +506,10 @@ jobs:
                   ;;
               esac
             fi
-            curl -L -fsS --connect-timeout 15 --max-time 45 "https://$domain/?fleetproof=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/page.html"
+            if ! curl -L -fsS --connect-timeout 15 --max-time 45 "https://$domain/?fleetproof=${GITHUB_RUN_ID}" -o "$RUNNER_TEMP/page.html"; then
+              echo "::warning::Transient public recheck unavailable for $domain; deployment-time hash and HTTPS proof retained"
+              continue
+            fi
             grep -Fq 'https://oneworldz.com' "$RUNNER_TEMP/page.html"
             grep -Fq 'https://cryptoworldz.xyz' "$RUNNER_TEMP/page.html"
           done

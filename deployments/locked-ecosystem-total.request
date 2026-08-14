@@ -7,5 +7,5 @@ cryptobotz=PROTECTED_UNCHANGED
 ftp_account_scope=SHARED_ACCOUNT_EXACT_TARGET
 ftp_server_dir=domains/{domain}/public_html
 targets=bitcoinworldz,impactbased,law-oneworldz,learn-oneworldz
-attempt=handoff-v2
+attempt=handoff-v3
 mode=handoff-only
