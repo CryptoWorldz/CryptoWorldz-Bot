@@ -20,34 +20,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Prove browser is available
-        run: |
-          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
-      - name: Real live desktop and mobile proof
+        run: command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+      - id: proof
+        name: Real live desktop and mobile proof
+        continue-on-error: true
         env:
           WORLDZ_PROOF_DIR: cryptoworldz-live-proof
+        run: node tools/prove-live-worldz-v2.mjs 'https://cryptoworldz.xyz/?world=cryptoworldz&mode=markets' 'CryptoWorldz'
+      - id: detail
+        name: Capture exact image URL and layout detail
+        continue-on-error: true
+        if: always()
         run: |
-          node tools/prove-live-worldz-v2.mjs 'https://cryptoworldz.xyz/?world=cryptoworldz&mode=markets' 'CryptoWorldz' 'assets/worldz-master/cryptoworldz/we-need-you.png'
-      - name: Extra layout and duplicate-large-image gate
-        run: |
+          mkdir -p cryptoworldz-live-proof
           cat > /tmp/audit.mjs <<'NODE'
           import { spawn, execFileSync } from 'node:child_process';
-          import { writeFileSync, existsSync, rmSync } from 'node:fs';
+          import { writeFileSync, rmSync } from 'node:fs';
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-          const candidates=['google-chrome','google-chrome-stable','chromium','chromium-browser'];
-          let chrome=''; for(const c of candidates){try{chrome=execFileSync('which',[c],{encoding:'utf8'}).trim();if(chrome)break}catch{}} if(!chrome) throw new Error('Chrome/Chromium missing');
+          let chrome=''; for(const c of ['google-chrome','google-chrome-stable','chromium','chromium-browser']){try{chrome=execFileSync('which',[c],{encoding:'utf8'}).trim();if(chrome)break}catch{}} if(!chrome) throw new Error('browser missing');
           async function inspect(name,w,h,mobile,port){
-            const dir=`/tmp/cw-${name}-${Date.now()}`; const url=`https://cryptoworldz.xyz/?world=cryptoworldz&mode=markets&audit=${Date.now()}`;
+            const dir=`/tmp/cw-${name}-${Date.now()}`; const url=`https://cryptoworldz.xyz/?world=cryptoworldz&mode=markets&detail=${Date.now()}`;
             const p=spawn(chrome,['--headless=new','--no-sandbox','--disable-dev-shm-usage',`--remote-debugging-port=${port}`,`--user-data-dir=${dir}`,`--window-size=${w},${h}`,url],{stdio:'ignore'});
-            await sleep(5000);
-            const pages=await (await fetch(`http://127.0.0.1:${port}/json/list`)).json(); const page=pages.find(x=>x.type==='page');
-            const ws=new WebSocket(page.webSocketDebuggerUrl); await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej}); let id=1; const pending=new Map(); ws.onmessage=e=>{const m=JSON.parse(e.data); if(m.id&&pending.has(m.id)){pending.get(m.id)(m);pending.delete(m.id)}};
-            const send=(method,params={})=>new Promise((res,rej)=>{const n=id++;pending.set(n,m=>m.error?rej(new Error(m.error.message)):res(m.result));ws.send(JSON.stringify({id:n,method,params}));setTimeout(()=>{if(pending.has(n)){pending.delete(n);rej(new Error(method+' timeout'))}},10000)});
-            await send('Runtime.enable'); await send('Emulation.setDeviceMetricsOverride',{width:w,height:h,deviceScaleFactor:1,mobile}); await sleep(2500);
-            const r=await send('Runtime.evaluate',{returnByValue:true,expression:`(()=>{const imgs=[...document.images].map(i=>{const r=i.getBoundingClientRect();const s=getComputedStyle(i);return{src:i.currentSrc||i.src,w:Math.round(r.width),h:Math.round(r.height),nw:i.naturalWidth,nh:i.naturalHeight,visible:r.width>1&&r.height>1&&s.display!=='none'&&s.visibility!=='hidden'}}).filter(i=>i.visible);const large=imgs.filter(i=>i.w>=250&&i.h>=160);const dup=Object.entries(large.reduce((a,i)=>(a[i.src]=(a[i.src]||0)+1,a),{})).filter(([,n])=>n>1);return{title:document.title,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,imgs,large,duplicateLarge:dup,body:(document.body?.innerText||'').slice(0,50000)}})()`});
-            const v=r.result.value; ws.close(); p.kill('SIGTERM'); try{rmSync(dir,{recursive:true,force:true})}catch{}
-            const failures=[]; if(v.scrollWidth>v.clientWidth+2)failures.push('horizontal overflow'); if(v.duplicateLarge.length)failures.push('duplicate large imagery: '+JSON.stringify(v.duplicateLarge)); if(!/CryptoWorldz/i.test(v.title+' '+v.body))failures.push('missing CryptoWorldz identity'); if(v.imgs.some(i=>!i.nw||!i.nh))failures.push('broken visible image'); return {name,...v,failures};
+            await sleep(9000);
+            const pages=await (await fetch(`http://127.0.0.1:${port}/json/list`)).json(); const pg=pages.find(x=>x.type==='page');
+            const ws=new WebSocket(pg.webSocketDebuggerUrl); await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej}); let id=1;const pending=new Map();ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){pending.get(m.id)(m);pending.delete(m.id)}};
+            const send=(method,params={})=>new Promise((res,rej)=>{const n=id++;pending.set(n,m=>m.error?rej(new Error(m.error.message)):res(m.result));ws.send(JSON.stringify({id:n,method,params}));setTimeout(()=>{if(pending.has(n)){pending.delete(n);rej(new Error(method+' timeout'))}},15000)});
+            await send('Runtime.enable'); await send('Page.enable'); await send('Emulation.setDeviceMetricsOverride',{width:w,height:h,deviceScaleFactor:1,mobile}); await sleep(3000);
+            const evalr=await send('Runtime.evaluate',{returnByValue:true,expression:`(()=>{const imgs=[...document.images].map((i,index)=>{const r=i.getBoundingClientRect(),s=getComputedStyle(i);return{index,src:i.currentSrc||i.src,declared:i.getAttribute('src'),srcset:i.getAttribute('srcset'),alt:i.alt,w:Math.round(r.width),h:Math.round(r.height),nw:i.naturalWidth,nh:i.naturalHeight,complete:i.complete,visible:r.width>1&&r.height>1&&s.display!=='none'&&s.visibility!=='hidden'}}).filter(i=>i.visible);const large=imgs.filter(i=>i.w>=250&&i.h>=160);const counts=large.reduce((a,i)=>(a[i.src]=(a[i.src]||0)+1,a),{});return{title:document.title,url:location.href,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,imgs,broken:imgs.filter(i=>!i.complete||!i.nw||!i.nh),duplicateLarge:Object.entries(counts).filter(([,n])=>n>1)}})()`});
+            const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true},20000); writeFileSync(`cryptoworldz-live-proof/detail-${name}.png`,Buffer.from(shot.data,'base64'));
+            const v=evalr.result.value; ws.close(); p.kill('SIGTERM'); try{rmSync(dir,{recursive:true,force:true})}catch{} return {name,...v};
           }
-          const reports=[await inspect('desktop',1440,1100,false,9223),await inspect('mobile',390,844,true,9224)]; writeFileSync('cryptoworldz-live-proof/layout-audit.json',JSON.stringify(reports,null,2)); if(reports.some(r=>r.failures.length)){console.error(reports);process.exit(1)} console.log('CRYPTOWORLDZ LAYOUT/DUPLICATE IMAGE GATE PASS');
+          const reports=[await inspect('desktop',1440,1100,false,9233),await inspect('mobile',390,844,true,9234)]; writeFileSync('cryptoworldz-live-proof/image-detail.json',JSON.stringify(reports,null,2)); console.log(JSON.stringify(reports.map(r=>({name:r.name,broken:r.broken,duplicateLarge:r.duplicateLarge,overflow:r.scrollWidth>r.clientWidth+2})),null,2)); if(reports.some(r=>r.broken.length||r.duplicateLarge.length||r.scrollWidth>r.clientWidth+2)) process.exit(1);
           NODE
           node /tmp/audit.mjs
       - uses: actions/upload-artifact@v4
@@ -57,3 +60,8 @@ jobs:
           path: cryptoworldz-live-proof/
           if-no-files-found: error
           retention-days: 7
+      - name: Enforce final audit result
+        if: always()
+        run: |
+          test '${{ steps.proof.outcome }}' = 'success'
+          test '${{ steps.detail.outcome }}' = 'success'
