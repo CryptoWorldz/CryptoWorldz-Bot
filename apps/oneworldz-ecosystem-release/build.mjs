@@ -51,6 +51,13 @@ function absoluteRoute(domain, route = "") {
 function applyProductionCorrections(target, route, sourceHtml) {
   let html = sourceHtml;
 
+  // ImpactBased belongs under CryptoWorldz. Replace every legacy OneWorldz URL
+  // before SEO enhancement so canonical, social metadata and page links all agree.
+  html = html.replaceAll(
+    "https://impactbased.oneworldz.com",
+    "https://impactbased.cryptoworldz.xyz"
+  );
+
   // These destinations are not in the current authorised 13-site production fleet.
   // Do not present them as live/open cards until a separate verified deployment exists.
   html = html.replace(/<a class="profile-card[^"]*" href="https:\/\/(?:bitcoinworldz\.xyz|suiworld\.xyz)"[^>]*>[\s\S]*?<\/a>/g, "");
