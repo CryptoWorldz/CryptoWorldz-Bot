@@ -1,0 +1,18 @@
+{
+  "id": "com.oneworldz.full-support",
+  "version": "0.0.1",
+  "name": "OneWorldz Full Support",
+  "icon": "./assets/oneworldz-icon.png",
+  "distribution_type": "private",
+  "sandbox_install_compatible": true,
+  "stripe_api_access_type": "platform",
+  "permissions": [],
+  "ui_extension": {
+    "views": [
+      {
+        "viewport": "stripe.dashboard.drawer.default",
+        "component": "App"
+      }
+    ]
+  }
+}
