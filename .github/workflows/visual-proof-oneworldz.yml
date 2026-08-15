@@ -1,0 +1,59 @@
+name: Visual Proof OneWorldz
+
+on:
+  push:
+    branches: [oneworldz-recovery]
+    paths:
+      - deployments/oneworldz-visual-proof.request
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Capture live desktop and mobile proof
+        run: |
+          cat > /tmp/capture.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const browser = await chromium.launch({headless:true});
+          for (const [name,width,height] of [['desktop',1440,1200],['mobile',390,844]]) {
+            const page = await browser.newPage({viewport:{width,height}, deviceScaleFactor:1});
+            const errors=[];
+            page.on('console',m=>{ if(m.type()==='error') errors.push('console: '+m.text()) });
+            page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+            await page.goto('https://oneworldz.com/?visualproof='+Date.now(), {waitUntil:'networkidle', timeout:60000});
+            await page.screenshot({path:`${name}.png`, fullPage:true});
+            const audit = await page.evaluate(() => ({
+              title: document.title,
+              h1:[...document.querySelectorAll('h1')].map(x=>x.innerText),
+              bodyText: document.body.innerText.slice(0,8000),
+              images:[...document.images].map(i=>({src:i.src,naturalWidth:i.naturalWidth,naturalHeight:i.naturalHeight,width:i.clientWidth,height:i.clientHeight,complete:i.complete})),
+              links:[...document.links].map(a=>({text:a.innerText.trim(),href:a.href})).slice(0,100)
+            }));
+            audit.errors=errors;
+            require('fs').writeFileSync(`${name}.json`, JSON.stringify(audit,null,2));
+          }
+          await browser.close();
+          NODE
+          node /tmp/capture.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-live-visual-proof
+          path: |
+            desktop.png
+            mobile.png
+            desktop.json
+            mobile.json
+          retention-days: 7
