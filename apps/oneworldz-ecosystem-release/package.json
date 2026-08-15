@@ -4,7 +4,6 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs && node build-expansion.mjs && node materialize-approved-visuals.mjs",
-    "build:oneworldz-v2": "node build-oneworldz-head-v2.mjs",
     "test": "node --test test/*.test.mjs",
     "verify": "npm run build && npm test"
   }
