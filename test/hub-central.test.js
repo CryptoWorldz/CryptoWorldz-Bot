@@ -5,6 +5,7 @@ const {
   buildARecordUpdate,
   cleanDomain,
   cleanIpv4,
+  createHostingerClient,
   requireWriteConfirmation
 } = require("../src/hub-central/hostinger-client");
 const { extractOpenAIText, extractProposals, safeTokenMatch } = require("../src/hub-central/http");
@@ -34,6 +35,29 @@ test("Hub bearer comparison is exact and timing-safe compatible", () => {
   assert.equal(safeTokenMatch("secret", "Secret"), false);
   assert.equal(safeTokenMatch("short", "longer"), false);
   assert.equal(safeTokenMatch("", ""), false);
+});
+
+test("Hub Central resolves websites returned through Hostinger shared-account access", async () => {
+  const responses = [{
+    data: [
+      { domain: "admin-owned.example", username: "u100000001", order_id: 1001 },
+      { domain: "donateworldz.com", username: "u643166328", order_id: 2002, parent_domain: null }
+    ]
+  }];
+  const fetchImpl = async (url, options) => {
+    assert.equal(url, "https://developers.hostinger.com/api/hosting/v1/websites");
+    assert.equal(options.headers.authorization, "Bearer shared-admin-token");
+    return {
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify(responses.shift())
+    };
+  };
+  const client = createHostingerClient({ token: "shared-admin-token", fetchImpl });
+  const website = await client.findWebsite("DonateWorldz.com");
+  assert.equal(website.domain, "donateworldz.com");
+  assert.equal(website.username, "u643166328");
+  assert.equal(website.order_id, 2002);
 });
 
 test("Hub Central extracts OpenAI text and action proposals without executing them", () => {
