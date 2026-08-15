@@ -1,5 +1,5 @@
-target=oneworldz
-source_commit=8591a8c1f5dcece322bf22fc55da8ad90fa852f6
+target=cryptoworldz
+source_commit=31fef3239bdf7754b60131bbf11a44dafec881c6
 requested_by=JayJayTeamDev
 authorization=GO
-scope=OneWorldz only; domain-only Hostinger account; proof-first; backup and rollback required
+scope=CryptoWorldz only; domain-only Hostinger account; proof-first; backup and rollback required
