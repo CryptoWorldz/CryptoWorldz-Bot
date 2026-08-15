@@ -12,6 +12,7 @@ permissions:
 env:
   TARGET_DOMAIN: cryptobotz.cryptoworldz.xyz
   REMOTE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
+  RESTART_DIR: /domains/cryptobotz.cryptoworldz.xyz/public_html/tmp
   EXPECTED_LIVE_INDEX_SHA: 27fc71f6ee077546b7de5833a245dc6463ba827757584906966be7cc172cecc7
 
 concurrency:
@@ -126,7 +127,8 @@ jobs:
           set ssl:check-hostname false
           put $RUNNER_TEMP/hub-central-live.js -o $REMOTE_ROOT/hub-central-live.js
           put $RUNNER_TEMP/patched-index.js -o $REMOTE_ROOT/index.js
-          put $RUNNER_TEMP/restart.txt -o $REMOTE_ROOT/tmp/restart.txt
+          mkdir -p $RESTART_DIR
+          put $RUNNER_TEMP/restart.txt -o $RESTART_DIR/restart.txt
           bye
           EOF
           timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$raw_host"
@@ -174,7 +176,8 @@ jobs:
           set ssl:check-hostname false
           put $RUNNER_TEMP/original-index.js -o $REMOTE_ROOT/index.js
           rm -f $REMOTE_ROOT/hub-central-live.js
-          put $RUNNER_TEMP/restart-rollback.txt -o $REMOTE_ROOT/tmp/restart.txt
+          mkdir -p $RESTART_DIR
+          put $RUNNER_TEMP/restart-rollback.txt -o $RESTART_DIR/restart.txt
           bye
           EOF
           timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/rollback.lftp" "$raw_host" || true
