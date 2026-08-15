@@ -19,7 +19,7 @@ const ASSET='./assets/images/oneworldz-pass110';
 const HERO_DESKTOP=`${ASSET}/desktop/oneworldz-hero.webp`;
 const HERO_MOBILE=`${ASSET}/mobile/oneworldz-hero.webp`;
 const CHEST_DESKTOP=`${ASSET}/desktop/hope-chest.webp`;
-const CHEST_MOBILE=`${ASSET}/mobile/hope-chest.webp`;
+const CHEST_MOBILE=`${ASSET}/mobile/hope-chest.webp?r4-cache-bust`;
 
 function btn(u,l,k='wx-btn') { const external=u.startsWith('http'); return `<a class="${k}" href="${u}"${external?' target="_blank" rel="noopener noreferrer"':''}>${l}</a>`; }
 function responsiveImage(desktop,mobile,alt) { return `<picture><source media="(max-width:780px)" srcset="${mobile}"><img src="${desktop}" alt="${alt}" loading="eager" decoding="async"></picture>`; }
