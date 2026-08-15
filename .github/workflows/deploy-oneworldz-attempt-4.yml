@@ -11,12 +11,12 @@ permissions:
 
 concurrency:
   group: oneworldz-production-attempt-4
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy-oneworldz-only:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 30
     environment:
       name: cryptoworldz-production
       url: https://oneworldz.com/
@@ -33,7 +33,7 @@ jobs:
       - name: Install deployment tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq imagemagick lftp rsync curl
+          sudo apt-get install -y -qq imagemagick lftp curl
 
       - name: Build 20 OneWorldz production images from approved references
         run: bash apps/cryptoworldz-web-core/scripts/build-oneworldz-attempt-4-images.sh
@@ -41,53 +41,56 @@ jobs:
       - name: Run hard recovery gate
         run: node apps/cryptoworldz-web-core/scripts/verify-oneworldz-recovery.mjs
 
-      - name: Prepare OneWorldz-only release
+      - name: Prepare surgical OneWorldz release
         run: |
+          set -euo pipefail
+          root='apps/cryptoworldz-web-core'
           rm -rf /tmp/oneworldz-release
-          mkdir -p /tmp/oneworldz-release
-          rsync -a apps/cryptoworldz-web-core/ /tmp/oneworldz-release/ --exclude scripts --exclude '*.md'
-          cp apps/cryptoworldz-web-core/oneworldz-index.html /tmp/oneworldz-release/index.html
+          mkdir -p /tmp/oneworldz-release/assets/images /tmp/oneworldz-release/config
+          cp "$root/oneworldz-index.html" /tmp/oneworldz-release/index.html
+          cp "$root/assets/oneworldz-next.js" /tmp/oneworldz-release/assets/oneworldz-next.js
+          cp "$root/assets/oneworldz-recovery.css" /tmp/oneworldz-release/assets/oneworldz-recovery.css
+          cp -a "$root/assets/images/oneworldz-recovery" /tmp/oneworldz-release/assets/images/
           test -s /tmp/oneworldz-release/index.html
           test -s /tmp/oneworldz-release/assets/oneworldz-next.js
           test -s /tmp/oneworldz-release/assets/oneworldz-recovery.css
-          test "$(find /tmp/oneworldz-release/assets/images/oneworldz-recovery -type f -name '*.webp' | wc -l | tr -d ' ')" = "20"
+          test "$(find /tmp/oneworldz-release/assets/images/oneworldz-recovery -type f -name '*.webp' | wc -l | tr -d ' ')" = '20'
 
       - name: Resolve and prove Hostinger target
         run: |
           set -euo pipefail
-          test -n "$FTP_HOST"
-          test -n "$FTP_USERNAME"
-          test -n "$FTP_PASSWORD"
+          test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           echo "RAW_FTP_HOST=$raw_host" >> "$GITHUB_ENV"
-          echo "::add-mask::$FTP_HOST"
-          echo "::add-mask::$FTP_USERNAME"
-          echo "::add-mask::$FTP_PASSWORD"
+          echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
           timeout 90 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "set cmd:fail-exit true; set net:max-retries 2; set net:timeout 25; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; cd $REMOTE_DIR; pwd; cls -1; bye" "$raw_host"
 
-      - name: Backup current OneWorldz production
+      - name: Surgical backup of files Attempt 4 can replace
         run: |
           set -euo pipefail
           rm -rf /tmp/oneworldz-backup
-          mkdir -p /tmp/oneworldz-backup
+          mkdir -p /tmp/oneworldz-backup/assets
           script="$RUNNER_TEMP/oneworldz-backup.lftp"
           cat > "$script" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 3
+          set cmd:fail-exit false
+          set net:max-retries 2
           set net:timeout 30
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
           cd $REMOTE_DIR
-          mirror --verbose . /tmp/oneworldz-backup
+          get index.html -o /tmp/oneworldz-backup/index.html
+          get assets/oneworldz-next.js -o /tmp/oneworldz-backup/assets/oneworldz-next.js
+          get assets/oneworldz-recovery.css -o /tmp/oneworldz-backup/assets/oneworldz-recovery.css
           bye
           EOF
-          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
           test -s /tmp/oneworldz-backup/index.html
+          test -s /tmp/oneworldz-backup/assets/oneworldz-next.js
 
-      - name: Deploy Attempt 4 to OneWorldz only
+      - name: Deploy surgical Attempt 4 package
         id: deploy
         continue-on-error: true
         run: |
@@ -103,10 +106,10 @@ jobs:
           set ssl:check-hostname false
           cd $REMOTE_DIR
           lcd /tmp/oneworldz-release
-          mirror -R --delete --verbose . .
+          mirror -R --verbose . .
           bye
           EOF
-          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
+          timeout 420 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
 
       - name: Live proof OneWorldz
         id: proof
@@ -124,14 +127,13 @@ jobs:
           done
           exit 1
 
-      - name: Roll back automatically if deploy or live proof fails
+      - name: Roll back surgical package if deploy or proof fails
         if: ${{ steps.deploy.outcome == 'failure' || steps.proof.outcome == 'failure' }}
         run: |
           set -euo pipefail
-          echo 'Attempt 4 failed proof — restoring OneWorldz backup.'
           script="$RUNNER_TEMP/oneworldz-rollback.lftp"
           cat > "$script" <<EOF
-          set cmd:fail-exit true
+          set cmd:fail-exit false
           set net:max-retries 3
           set net:timeout 30
           set ftp:ssl-force true
@@ -139,11 +141,15 @@ jobs:
           set ssl:verify-certificate true
           set ssl:check-hostname false
           cd $REMOTE_DIR
+          rm assets/oneworldz-recovery.css
+          rm -r assets/images/oneworldz-recovery
           lcd /tmp/oneworldz-backup
-          mirror -R --delete --verbose . .
+          put index.html -o index.html
+          put assets/oneworldz-next.js -o assets/oneworldz-next.js
+          put assets/oneworldz-recovery.css -o assets/oneworldz-recovery.css
           bye
           EOF
-          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
+          timeout 420 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
 
       - name: Fail after rollback
         if: ${{ steps.deploy.outcome == 'failure' || steps.proof.outcome == 'failure' }}
