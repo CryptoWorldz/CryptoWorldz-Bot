@@ -20,12 +20,18 @@ const expectedTitles = Object.freeze({
   donateworldz: "DonateWorldz | Choose a Purpose • Support Clearly"
 });
 
+const exactRemoteDirs = Object.freeze({
+  impactbased: "domains/cryptoworldz.xyz/public_html/impactbased",
+  "law-oneworldz": "domains/oneworldz.com/public_html/law",
+  "learn-oneworldz": "domains/oneworldz.com/public_html/learn"
+});
+
 export const productionTargets = Object.freeze(deploymentTargets19.map((target) => {
   const expectedTitle = expectedTitles[target.key];
   if (!expectedTitle) throw new Error(`Missing production title contract for ${target.key}`);
   return Object.freeze({
     ...target,
-    remoteDir: `domains/${target.domain}/public_html`,
+    remoteDir: exactRemoteDirs[target.key] || `domains/${target.domain}/public_html`,
     expectedTitle,
     accountScope: "SHARED_ACCOUNT_EXACT_TARGET"
   });
