@@ -12,7 +12,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,32 +23,77 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.55.0 >/dev/null 2>&1
           npx playwright install chromium >/dev/null
-      - name: Capture live desktop and mobile proof
+      - name: Capture and audit live desktop and mobile
         run: |
-          cat > /tmp/capture.mjs <<'NODE'
+          cat > capture-oneworldz.mjs <<'NODE'
           import { chromium } from 'playwright';
-          const browser = await chromium.launch({headless:true});
-          for (const [name,width,height] of [['desktop',1440,1200],['mobile',390,844]]) {
-            const page = await browser.newPage({viewport:{width,height}, deviceScaleFactor:1});
-            const errors=[];
-            page.on('console',m=>{ if(m.type()==='error') errors.push('console: '+m.text()) });
-            page.on('pageerror',e=>errors.push('pageerror: '+e.message));
-            await page.goto('https://oneworldz.com/?visualproof='+Date.now(), {waitUntil:'networkidle', timeout:60000});
-            await page.screenshot({path:`${name}.png`, fullPage:true});
-            const audit = await page.evaluate(() => ({
-              title: document.title,
-              h1:[...document.querySelectorAll('h1')].map(x=>x.innerText),
-              bodyText: document.body.innerText.slice(0,8000),
-              images:[...document.images].map(i=>({src:i.src,naturalWidth:i.naturalWidth,naturalHeight:i.naturalHeight,width:i.clientWidth,height:i.clientHeight,complete:i.complete})),
-              links:[...document.links].map(a=>({text:a.innerText.trim(),href:a.href})).slice(0,100)
-            }));
-            audit.errors=errors;
-            require('fs').writeFileSync(`${name}.json`, JSON.stringify(audit,null,2));
+          import { writeFileSync } from 'node:fs';
+
+          const browser = await chromium.launch({ headless: true });
+          const viewports = [
+            ['desktop', 1440, 1100],
+            ['mobile', 390, 844]
+          ];
+
+          for (const [name, width, height] of viewports) {
+            const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
+            const errors = [];
+            const failedRequests = [];
+            page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
+            page.on('pageerror', e => errors.push('pageerror: ' + e.message));
+            page.on('requestfailed', r => failedRequests.push({ url: r.url(), error: r.failure()?.errorText || 'failed' }));
+
+            const response = await page.goto('https://oneworldz.com/?visualproof=' + Date.now(), {
+              waitUntil: 'networkidle',
+              timeout: 60000
+            });
+            await page.waitForTimeout(1500);
+
+            const audit = await page.evaluate(() => {
+              const imgs = [...document.images].map((i, index) => ({
+                index,
+                src: i.currentSrc || i.src,
+                alt: i.alt,
+                naturalWidth: i.naturalWidth,
+                naturalHeight: i.naturalHeight,
+                clientWidth: i.clientWidth,
+                clientHeight: i.clientHeight,
+                complete: i.complete,
+                visible: !!(i.offsetWidth || i.offsetHeight || i.getClientRects().length)
+              }));
+              const srcCounts = imgs.reduce((m, i) => {
+                m[i.src] = (m[i.src] || 0) + 1;
+                return m;
+              }, {});
+              return {
+                title: document.title,
+                h1: [...document.querySelectorAll('h1')].map(x => x.innerText.trim()),
+                bodyText: document.body.innerText.slice(0, 12000),
+                images: imgs,
+                duplicateImageSources: Object.entries(srcCounts).filter(([, count]) => count > 1),
+                links: [...document.links].map((a, index) => ({ index, text: a.innerText.trim(), href: a.href })),
+                scrollWidth: document.documentElement.scrollWidth,
+                clientWidth: document.documentElement.clientWidth,
+                scrollHeight: document.documentElement.scrollHeight
+              };
+            });
+
+            audit.httpStatus = response?.status() || 0;
+            audit.errors = errors;
+            audit.failedRequests = failedRequests;
+            audit.brokenImages = audit.images.filter(i => !i.complete || i.naturalWidth === 0 || i.naturalHeight === 0);
+            audit.horizontalOverflow = audit.scrollWidth > audit.clientWidth + 2;
+
+            await page.screenshot({ path: `${name}.png`, fullPage: true });
+            writeFileSync(`${name}.json`, JSON.stringify(audit, null, 2));
           }
+
           await browser.close();
           NODE
-          node /tmp/capture.mjs
-      - uses: actions/upload-artifact@v4
+          node capture-oneworldz.mjs
+      - name: Upload visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: oneworldz-live-visual-proof
           path: |
