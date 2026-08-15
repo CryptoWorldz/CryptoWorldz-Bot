@@ -1,5 +1,5 @@
 target=cryptobotz.cryptoworldz.xyz
 mode=read-only-runtime-discovery
 authority=JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY
-purpose=List exact CryptoBotz Node.js runtime root before Hub Central deployment
-retry=3
+purpose=Compare safe live runtime manifests before Hub Central deployment
+retry=4
