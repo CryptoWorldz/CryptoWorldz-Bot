@@ -1,0 +1,5 @@
+target=cryptobotz.cryptoworldz.xyz
+mode=deploy-additive-live-v1
+authority=JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY
+expected_live_index_sha=27fc71f6ee077546b7de5833a245dc6463ba827757584906966be7cc172cecc7
+purpose=Add OneWorldz Hub Central without replacing the existing ZED runtime
