@@ -13,7 +13,7 @@ jobs:
   diagnose:
     name: Read-only Hostinger directory scan
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     environment:
       name: cryptoworldz-production
     env:
@@ -26,7 +26,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
-      - name: Read-only scan candidate roots
+      - name: Read-only scan exact parent roots
         shell: bash
         run: |
           set -euo pipefail
@@ -37,28 +37,22 @@ jobs:
           echo "::add-mask::$FTP_PASSWORD"
           cat > "$RUNNER_TEMP/scan.lftp" <<'EOF'
           set cmd:fail-exit false
-          set net:max-retries 2
-          set net:timeout 30
+          set net:max-retries 1
+          set net:timeout 20
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
-          echo === ROOT ===
-          cls -1 /
-          echo === DOMAINS ===
-          cls -1 /domains
-          echo === CRYPTOWORLDZ PARENT ===
-          cls -1 /domains/cryptoworldz.xyz
-          echo === ONEWORLDZ PARENT ===
-          cls -1 /domains/oneworldz.com
-          echo === IMPACTBASED CANDIDATE ===
-          cls -1 /domains/impactbased.cryptoworldz.xyz
-          echo === LAW CANDIDATE ===
-          cls -1 /domains/law.oneworldz.com
-          echo === LEARN CANDIDATE ===
-          cls -1 /domains/learn.oneworldz.com
-          echo === PUBLIC_HTML ROOT ===
-          cls -1 /public_html
+          echo === CRYPTOWORLDZ PUBLIC_HTML ===
+          cls -1 /domains/cryptoworldz.xyz/public_html
+          echo === IMPACTBASED SUBFOLDER ===
+          cls -1 /domains/cryptoworldz.xyz/public_html/impactbased
+          echo === ONEWORLDZ PUBLIC_HTML ===
+          cls -1 /domains/oneworldz.com/public_html
+          echo === LAW SUBFOLDER ===
+          cls -1 /domains/oneworldz.com/public_html/law
+          echo === LEARN SUBFOLDER ===
+          cls -1 /domains/oneworldz.com/public_html/learn
           bye
           EOF
-          timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/scan.lftp" "$raw_host"
+          timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/scan.lftp" "$raw_host"
