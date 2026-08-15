@@ -1,4 +1,4 @@
-name: Deploy OneWorldz Attempt 4
+name: Deploy OneWorldz Sequential Pass
 
 on:
   push:
@@ -10,13 +10,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: oneworldz-production-attempt-4
+  group: oneworldz-sequential-production
   cancel-in-progress: true
 
 jobs:
-  deploy-oneworldz-only:
+  one-site-until-passed:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     environment:
       name: cryptoworldz-production
       url: https://oneworldz.com/
@@ -30,18 +30,21 @@ jobs:
       - name: Checkout recovery branch
         uses: actions/checkout@v4
 
-      - name: Install deployment tools
+      - name: Install build and browser tools
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq imagemagick lftp curl
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
 
-      - name: Build 20 OneWorldz production images from approved references
+      - name: Build exact desktop and mobile image assets
         run: bash apps/cryptoworldz-web-core/scripts/build-oneworldz-attempt-4-images.sh
 
-      - name: Run hard recovery gate
+      - name: Source gate
         run: node apps/cryptoworldz-web-core/scripts/verify-oneworldz-recovery.mjs
 
-      - name: Prepare surgical OneWorldz release
+      - name: Prepare surgical release
         run: |
           set -euo pipefail
           root='apps/cryptoworldz-web-core'
@@ -49,14 +52,12 @@ jobs:
           mkdir -p /tmp/oneworldz-release/assets/images
           cp "$root/oneworldz-index.html" /tmp/oneworldz-release/index.html
           cp "$root/assets/oneworldz-next.js" /tmp/oneworldz-release/assets/oneworldz-next.js
-          cp "$root/assets/oneworldz-recovery.css" /tmp/oneworldz-release/assets/oneworldz-recovery.css
-          cp -a "$root/assets/images/oneworldz-recovery" /tmp/oneworldz-release/assets/images/
+          cp -a "$root/assets/images/oneworldz-pass110" /tmp/oneworldz-release/assets/images/
           test -s /tmp/oneworldz-release/index.html
           test -s /tmp/oneworldz-release/assets/oneworldz-next.js
-          test -s /tmp/oneworldz-release/assets/oneworldz-recovery.css
-          test "$(find /tmp/oneworldz-release/assets/images/oneworldz-recovery -type f -name '*.webp' | wc -l | tr -d ' ')" = '20'
+          test "$(find /tmp/oneworldz-release/assets/images/oneworldz-pass110 -type f -name '*.webp' | wc -l | tr -d ' ')" = '4'
 
-      - name: Resolve and prove Hostinger target
+      - name: Resolve Hostinger target
         run: |
           set -euo pipefail
           test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
@@ -64,15 +65,14 @@ jobs:
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           echo "RAW_FTP_HOST=$raw_host" >> "$GITHUB_ENV"
           echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
-          timeout 90 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "set cmd:fail-exit true; set net:max-retries 2; set net:timeout 25; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; cd $REMOTE_DIR; pwd; cls -1; bye" "$raw_host"
+          timeout 90 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "set cmd:fail-exit true; set net:max-retries 2; set net:timeout 25; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; cd $REMOTE_DIR; pwd; bye" "$raw_host"
 
-      - name: Surgical backup of live files Attempt 4 replaces
+      - name: Surgical backup
         run: |
           set -euo pipefail
           rm -rf /tmp/oneworldz-backup
           mkdir -p /tmp/oneworldz-backup/assets
-          script="$RUNNER_TEMP/oneworldz-backup.lftp"
-          cat > "$script" <<EOF
+          cat > "$RUNNER_TEMP/ow-backup.lftp" <<EOF
           set cmd:fail-exit true
           set net:max-retries 2
           set net:timeout 30
@@ -85,17 +85,16 @@ jobs:
           get assets/oneworldz-next.js -o /tmp/oneworldz-backup/assets/oneworldz-next.js
           bye
           EOF
-          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/ow-backup.lftp" "$RAW_FTP_HOST"
           test -s /tmp/oneworldz-backup/index.html
           test -s /tmp/oneworldz-backup/assets/oneworldz-next.js
 
-      - name: Deploy surgical Attempt 4 package
+      - name: Deploy OneWorldz only
         id: deploy
         continue-on-error: true
         run: |
           set -euo pipefail
-          script="$RUNNER_TEMP/oneworldz-deploy.lftp"
-          cat > "$script" <<EOF
+          cat > "$RUNNER_TEMP/ow-deploy.lftp" <<EOF
           set cmd:fail-exit true
           set net:max-retries 3
           set net:timeout 30
@@ -108,30 +107,88 @@ jobs:
           mirror -R --verbose . .
           bye
           EOF
-          timeout 420 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
+          timeout 420 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/ow-deploy.lftp" "$RAW_FTP_HOST"
 
-      - name: Live proof OneWorldz
+      - name: Render, visual, wording and link gate
         id: proof
         if: ${{ steps.deploy.outcome == 'success' }}
         continue-on-error: true
         run: |
-          set -euo pipefail
-          for i in $(seq 1 20); do
-            body="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 35 -H 'Cache-Control: no-cache' "https://oneworldz.com/?attempt4=${GITHUB_SHA}-${GITHUB_RUN_ID}" || true)"
-            if printf '%s' "$body" | grep -Fqi '<title>OneWorldz' && printf '%s' "$body" | grep -Fqi 'Helping the People Who Help People'; then
-              echo 'OneWorldz live proof passed.'
-              exit 0
-            fi
-            sleep 15
-          done
-          exit 1
+          cat > oneworldz-live-gate.mjs <<'NODE'
+          import { chromium, request } from 'playwright';
+          import { writeFileSync } from 'node:fs';
 
-      - name: Roll back surgical package if deploy or proof fails
+          const browser = await chromium.launch({headless:true});
+          const api = await request.newContext({ignoreHTTPSErrors:false, extraHTTPHeaders:{'Cache-Control':'no-cache'}});
+          const requiredText = ['OneWorldz','Helping the People Who Help People','Knowledge Creates Power.','Understand the pathway.','Ideas with Purpose. Projects with Proof.','Explore the Worldz'];
+          const requiredIds = ['home','vision','framework','action','learn','law','impact','worldz'];
+          const results = {};
+          let failed = false;
+
+          for (const [name,width,height] of [['desktop',1440,1100],['mobile',390,844]]) {
+            const page = await browser.newPage({viewport:{width,height}, deviceScaleFactor:1});
+            const consoleErrors=[]; const requestFailures=[];
+            page.on('console',m=>{if(m.type()==='error') consoleErrors.push(m.text())});
+            page.on('pageerror',e=>consoleErrors.push(e.message));
+            page.on('requestfailed',r=>requestFailures.push({url:r.url(),error:r.failure()?.errorText||'failed'}));
+            const response=await page.goto(`https://oneworldz.com/?pass110=${Date.now()}`,{waitUntil:'networkidle',timeout:60000});
+            await page.waitForTimeout(1800);
+            const audit=await page.evaluate(({requiredText,requiredIds})=>{
+              const imgs=[...document.images].map(i=>({src:i.currentSrc||i.src,alt:i.alt,nw:i.naturalWidth,nh:i.naturalHeight,w:i.clientWidth,h:i.clientHeight,complete:i.complete,visible:!!(i.offsetWidth||i.offsetHeight||i.getClientRects().length)}));
+              const body=document.body.innerText;
+              const ids=requiredIds.map(id=>({id,exists:!!document.getElementById(id)}));
+              const links=[...document.links].map(a=>({text:a.innerText.trim(),href:a.href}));
+              return {title:document.title,h1:[...document.querySelectorAll('h1')].map(x=>x.innerText.trim()),body,imgs,ids,links,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,scrollHeight:document.documentElement.scrollHeight,missingText:requiredText.filter(t=>!body.includes(t))};
+            },{requiredText,requiredIds});
+            audit.httpStatus=response?.status()||0;
+            audit.consoleErrors=consoleErrors;
+            audit.requestFailures=requestFailures;
+            audit.brokenImages=audit.imgs.filter(i=>!i.complete||i.nw===0||i.nh===0||!i.visible);
+            audit.horizontalOverflow=audit.scrollWidth>audit.clientWidth+2;
+            audit.badIds=audit.ids.filter(x=>!x.exists);
+            audit.wrongImageCount=audit.imgs.length!==2;
+            audit.assetPathWrong=audit.imgs.some(i=>!i.src.includes('/oneworldz-pass110/'));
+            audit.imageSources=[...new Set(audit.imgs.map(i=>i.src))];
+            if(audit.httpStatus!==200||audit.brokenImages.length||audit.horizontalOverflow||audit.badIds.length||audit.missingText.length||audit.consoleErrors.length||audit.requestFailures.length||audit.wrongImageCount||audit.assetPathWrong) failed=true;
+            await page.screenshot({path:`oneworldz-${name}.png`,fullPage:true});
+            writeFileSync(`oneworldz-${name}.json`,JSON.stringify(audit,null,2));
+            results[name]=audit;
+            await page.close();
+          }
+
+          const hrefs=[...new Set(results.desktop.links.map(x=>x.href))];
+          const checkable=hrefs.filter(h=>h.startsWith('https://oneworldz.com/')||h==='https://cryptoworldz.xyz/'||h==='https://purplediamondcrew.com/'||h.startsWith('https://cryptobotz.cryptoworldz.xyz'));
+          const linkResults=[];
+          for(const href of checkable){
+            if(href.includes('#')) continue;
+            try{const r=await api.get(href,{timeout:30000,maxRedirects:8}); linkResults.push({href,status:r.status(),ok:r.status()>=200&&r.status()<400}); if(!(r.status()>=200&&r.status()<400)) failed=true;}catch(e){linkResults.push({href,status:0,ok:false,error:String(e)});failed=true;}
+          }
+          writeFileSync('oneworldz-links.json',JSON.stringify(linkResults,null,2));
+          await api.dispose(); await browser.close();
+          if(failed){console.error('ONEWORLDZ LIVE VISUAL/FUNCTIONAL GATE: FAIL');process.exit(1);}
+          console.log('ONEWORLDZ LIVE VISUAL/FUNCTIONAL GATE: PASS ✅');
+          NODE
+          node oneworldz-live-gate.mjs
+
+      - name: Upload real visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-pass110-proof
+          path: |
+            oneworldz-desktop.png
+            oneworldz-mobile.png
+            oneworldz-desktop.json
+            oneworldz-mobile.json
+            oneworldz-links.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Roll back if ANY live gate fails
         if: ${{ steps.deploy.outcome == 'failure' || steps.proof.outcome == 'failure' }}
         run: |
           set -euo pipefail
-          script="$RUNNER_TEMP/oneworldz-rollback.lftp"
-          cat > "$script" <<EOF
+          cat > "$RUNNER_TEMP/ow-rollback.lftp" <<EOF
           set cmd:fail-exit false
           set net:max-retries 3
           set net:timeout 30
@@ -140,22 +197,20 @@ jobs:
           set ssl:verify-certificate true
           set ssl:check-hostname false
           cd $REMOTE_DIR
-          rm assets/oneworldz-recovery.css
-          rm -r assets/images/oneworldz-recovery
+          rm -r assets/images/oneworldz-pass110
           lcd /tmp/oneworldz-backup
           put index.html -o index.html
           put assets/oneworldz-next.js -o assets/oneworldz-next.js
           bye
           EOF
-          timeout 420 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
+          timeout 420 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/ow-rollback.lftp" "$RAW_FTP_HOST"
 
-      - name: Fail after rollback
+      - name: Block progression after rollback
         if: ${{ steps.deploy.outcome == 'failure' || steps.proof.outcome == 'failure' }}
         run: exit 1
 
-      - name: Final release marker
+      - name: OneWorldz 100 percent machine gate marker
         if: success()
         run: |
-          echo 'ONEWORLDZ ATTEMPT 4: DEPLOYED AND LIVE-PROVED ✅'
-          echo 'Scope: OneWorldz.com only'
-          echo 'Images: 20/20 built at deployment from approved repo references'
+          echo 'ONEWORLDZ: DEPLOYED + DESKTOP RENDER + MOBILE RENDER + IMAGES + WORDING + LINKS = PASS ✅'
+          echo 'No next website is authorised by this workflow; visual evidence must be reviewed first.'
