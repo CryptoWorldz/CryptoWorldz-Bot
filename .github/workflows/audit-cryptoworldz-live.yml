@@ -16,13 +16,12 @@ concurrency:
 jobs:
   live-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Install Chromium
+      - name: Prove browser is available
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq chromium-browser || sudo apt-get install -y -qq chromium
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
       - name: Real live desktop and mobile proof
         env:
           WORLDZ_PROOF_DIR: cryptoworldz-live-proof
@@ -31,23 +30,24 @@ jobs:
       - name: Extra layout and duplicate-large-image gate
         run: |
           cat > /tmp/audit.mjs <<'NODE'
-          import { spawn } from 'node:child_process';
-          import { readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
+          import { spawn, execFileSync } from 'node:child_process';
+          import { writeFileSync, existsSync, rmSync } from 'node:fs';
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-          const chrome=['/usr/bin/chromium-browser','/usr/bin/chromium'].find(existsSync); if(!chrome) throw new Error('chromium missing');
-          async function inspect(name,w,h,mobile){
+          const candidates=['google-chrome','google-chrome-stable','chromium','chromium-browser'];
+          let chrome=''; for(const c of candidates){try{chrome=execFileSync('which',[c],{encoding:'utf8'}).trim();if(chrome)break}catch{}} if(!chrome) throw new Error('Chrome/Chromium missing');
+          async function inspect(name,w,h,mobile,port){
             const dir=`/tmp/cw-${name}-${Date.now()}`; const url=`https://cryptoworldz.xyz/?world=cryptoworldz&mode=markets&audit=${Date.now()}`;
-            const p=spawn(chrome,['--headless=new','--no-sandbox','--disable-dev-shm-usage','--remote-debugging-port=9223',`--user-data-dir=${dir}`,`--window-size=${w},${h}`,url],{stdio:'ignore'});
+            const p=spawn(chrome,['--headless=new','--no-sandbox','--disable-dev-shm-usage',`--remote-debugging-port=${port}`,`--user-data-dir=${dir}`,`--window-size=${w},${h}`,url],{stdio:'ignore'});
             await sleep(5000);
-            const pages=await (await fetch('http://127.0.0.1:9223/json/list')).json(); const page=pages.find(x=>x.type==='page');
+            const pages=await (await fetch(`http://127.0.0.1:${port}/json/list`)).json(); const page=pages.find(x=>x.type==='page');
             const ws=new WebSocket(page.webSocketDebuggerUrl); await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej}); let id=1; const pending=new Map(); ws.onmessage=e=>{const m=JSON.parse(e.data); if(m.id&&pending.has(m.id)){pending.get(m.id)(m);pending.delete(m.id)}};
             const send=(method,params={})=>new Promise((res,rej)=>{const n=id++;pending.set(n,m=>m.error?rej(new Error(m.error.message)):res(m.result));ws.send(JSON.stringify({id:n,method,params}));setTimeout(()=>{if(pending.has(n)){pending.delete(n);rej(new Error(method+' timeout'))}},10000)});
             await send('Runtime.enable'); await send('Emulation.setDeviceMetricsOverride',{width:w,height:h,deviceScaleFactor:1,mobile}); await sleep(2500);
-            const r=await send('Runtime.evaluate',{returnByValue:true,expression:`(()=>{const imgs=[...document.images].map(i=>{const r=i.getBoundingClientRect();return{src:i.currentSrc||i.src,w:Math.round(r.width),h:Math.round(r.height),nw:i.naturalWidth,nh:i.naturalHeight,visible:r.width>1&&r.height>1&&getComputedStyle(i).display!=='none'}}).filter(i=>i.visible);const large=imgs.filter(i=>i.w>=250&&i.h>=160);const dup=Object.entries(large.reduce((a,i)=>(a[i.src]=(a[i.src]||0)+1,a),{})).filter(([,n])=>n>1);return{title:document.title,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,imgs,large,duplicateLarge:dup,body:(document.body?.innerText||'').slice(0,50000)}})()`});
+            const r=await send('Runtime.evaluate',{returnByValue:true,expression:`(()=>{const imgs=[...document.images].map(i=>{const r=i.getBoundingClientRect();const s=getComputedStyle(i);return{src:i.currentSrc||i.src,w:Math.round(r.width),h:Math.round(r.height),nw:i.naturalWidth,nh:i.naturalHeight,visible:r.width>1&&r.height>1&&s.display!=='none'&&s.visibility!=='hidden'}}).filter(i=>i.visible);const large=imgs.filter(i=>i.w>=250&&i.h>=160);const dup=Object.entries(large.reduce((a,i)=>(a[i.src]=(a[i.src]||0)+1,a),{})).filter(([,n])=>n>1);return{title:document.title,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,imgs,large,duplicateLarge:dup,body:(document.body?.innerText||'').slice(0,50000)}})()`});
             const v=r.result.value; ws.close(); p.kill('SIGTERM'); try{rmSync(dir,{recursive:true,force:true})}catch{}
-            const failures=[]; if(v.scrollWidth>v.clientWidth+2)failures.push('horizontal overflow'); if(v.duplicateLarge.length)failures.push('duplicate large imagery: '+JSON.stringify(v.duplicateLarge)); if(!/CryptoWorldz/i.test(v.title+' '+v.body))failures.push('missing CryptoWorldz identity'); return {name,...v,failures};
+            const failures=[]; if(v.scrollWidth>v.clientWidth+2)failures.push('horizontal overflow'); if(v.duplicateLarge.length)failures.push('duplicate large imagery: '+JSON.stringify(v.duplicateLarge)); if(!/CryptoWorldz/i.test(v.title+' '+v.body))failures.push('missing CryptoWorldz identity'); if(v.imgs.some(i=>!i.nw||!i.nh))failures.push('broken visible image'); return {name,...v,failures};
           }
-          const reports=[]; for(const v of [['desktop',1440,1100,false],['mobile',390,844,true]]) reports.push(await inspect(...v)); writeFileSync('cryptoworldz-live-proof/layout-audit.json',JSON.stringify(reports,null,2)); if(reports.some(r=>r.failures.length)){console.error(reports);process.exit(1)} console.log('CRYPTOWORLDZ LAYOUT/DUPLICATE IMAGE GATE PASS');
+          const reports=[await inspect('desktop',1440,1100,false,9223),await inspect('mobile',390,844,true,9224)]; writeFileSync('cryptoworldz-live-proof/layout-audit.json',JSON.stringify(reports,null,2)); if(reports.some(r=>r.failures.length)){console.error(reports);process.exit(1)} console.log('CRYPTOWORLDZ LAYOUT/DUPLICATE IMAGE GATE PASS');
           NODE
           node /tmp/audit.mjs
       - uses: actions/upload-artifact@v4
