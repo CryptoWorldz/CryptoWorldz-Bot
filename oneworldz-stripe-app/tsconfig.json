@@ -1,0 +1,9 @@
+{
+  "extends": "@stripe/ui-extension-tools/tsconfig",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "baseUrl": "."
+  },
+  "include": ["src", "images.d.ts"]
+}
