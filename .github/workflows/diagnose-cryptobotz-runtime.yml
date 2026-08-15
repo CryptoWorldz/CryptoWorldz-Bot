@@ -26,6 +26,9 @@ jobs:
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Install FTPS client
         run: |
           sudo apt-get update -qq
