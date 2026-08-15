@@ -1,0 +1,64 @@
+name: Diagnose Three Hostinger Roots
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/diagnose-three-hostinger-roots.request'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    name: Read-only Hostinger directory scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - name: Install FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+      - name: Read-only scan candidate roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          cat > "$RUNNER_TEMP/scan.lftp" <<'EOF'
+          set cmd:fail-exit false
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          echo === ROOT ===
+          cls -1 /
+          echo === DOMAINS ===
+          cls -1 /domains
+          echo === CRYPTOWORLDZ PARENT ===
+          cls -1 /domains/cryptoworldz.xyz
+          echo === ONEWORLDZ PARENT ===
+          cls -1 /domains/oneworldz.com
+          echo === IMPACTBASED CANDIDATE ===
+          cls -1 /domains/impactbased.cryptoworldz.xyz
+          echo === LAW CANDIDATE ===
+          cls -1 /domains/law.oneworldz.com
+          echo === LEARN CANDIDATE ===
+          cls -1 /domains/learn.oneworldz.com
+          echo === PUBLIC_HTML ROOT ===
+          cls -1 /public_html
+          bye
+          EOF
+          timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/scan.lftp" "$raw_host"
