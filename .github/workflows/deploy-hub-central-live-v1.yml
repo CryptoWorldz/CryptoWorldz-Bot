@@ -1,0 +1,200 @@
+name: Deploy Hub Central Additive Live V1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/hub-central-live-v1.request'
+
+permissions:
+  contents: read
+
+env:
+  TARGET_DOMAIN: cryptobotz.cryptoworldz.xyz
+  REMOTE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
+  EXPECTED_LIVE_INDEX_SHA: 27fc71f6ee077546b7de5833a245dc6463ba827757584906966be7cc172cecc7
+
+concurrency:
+  group: deploy-hub-central-live-v1
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Backup → additive deploy → restart → prove → rollback on failure
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - name: Checkout approved source
+        uses: actions/checkout@v4
+
+      - name: Prove explicit authority and exact target
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(sed -n 's/^target=//p' deployments/hub-central-live-v1.request | tail -n1)" = "$TARGET_DOMAIN"
+          test "$(sed -n 's/^mode=//p' deployments/hub-central-live-v1.request | tail -n1)" = 'deploy-additive-live-v1'
+          test "$(sed -n 's/^authority=//p' deployments/hub-central-live-v1.request | tail -n1)" = 'JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY'
+          test "$(sed -n 's/^expected_live_index_sha=//p' deployments/hub-central-live-v1.request | tail -n1)" = "$EXPECTED_LIVE_INDEX_SHA"
+          test -f src/hub-central/live-v1.js
+          node --check src/hub-central/live-v1.js
+
+      - name: Install FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+      - name: Capture exact public baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 20 "https://$TARGET_DOMAIN/" -o "$RUNNER_TEMP/baseline-root"
+          test -s "$RUNNER_TEMP/baseline-root"
+          sha256sum "$RUNNER_TEMP/baseline-root" | tee "$RUNNER_TEMP/baseline-root.sha256"
+
+      - name: Backup and verify exact live runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          printf '%s' "$raw_host" > "$RUNNER_TEMP/raw-host"
+          cat > "$RUNNER_TEMP/download.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 1
+          set net:timeout 20
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          get $REMOTE_ROOT/index.js -o $RUNNER_TEMP/original-index.js
+          get $REMOTE_ROOT/package.json -o $RUNNER_TEMP/original-package.json
+          bye
+          EOF
+          timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/download.lftp" "$raw_host"
+          actual_sha="$(sha256sum "$RUNNER_TEMP/original-index.js" | cut -d' ' -f1)"
+          test "$actual_sha" = "$EXPECTED_LIVE_INDEX_SHA"
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/original-package.json','utf8'));
+          if (p.name !== 'cryptoworldz-bot' || p.version !== '1.0.0' || p.scripts?.start !== 'node index.js') process.exit(1);
+          NODE
+
+      - name: Build additive patch against the downloaded live file
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp src/hub-central/live-v1.js "$RUNNER_TEMP/hub-central-live.js"
+          node - <<'NODE'
+          const fs = require('fs');
+          const sourcePath = process.env.RUNNER_TEMP + '/original-index.js';
+          const targetPath = process.env.RUNNER_TEMP + '/patched-index.js';
+          let text = fs.readFileSync(sourcePath,'utf8');
+          if (text.includes('registerHubCentralLive')) throw new Error('hub_central_already_present');
+          const needle = 'const app = express();';
+          const count = text.split(needle).length - 1;
+          if (count !== 1) throw new Error('unexpected_express_app_structure');
+          text = text.replace(needle, needle + '\nconst { registerHubCentralLive } = require("./hub-central-live");\nregisterHubCentralLive(app);');
+          fs.writeFileSync(targetPath,text);
+          NODE
+          node --check "$RUNNER_TEMP/patched-index.js"
+          node --check "$RUNNER_TEMP/hub-central-live.js"
+          touch "$RUNNER_TEMP/restart.txt"
+
+      - name: Upload additive module and patched entry file then restart
+        id: write
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
+          cat > "$RUNNER_TEMP/upload.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 1
+          set net:timeout 20
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          put $RUNNER_TEMP/hub-central-live.js -o $REMOTE_ROOT/hub-central-live.js
+          put $RUNNER_TEMP/patched-index.js -o $REMOTE_ROOT/index.js
+          put $RUNNER_TEMP/restart.txt -o $REMOTE_ROOT/tmp/restart.txt
+          bye
+          EOF
+          timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$raw_host"
+          echo "written=true" >> "$GITHUB_OUTPUT"
+
+      - name: Prove old root unchanged and Hub Central live
+        id: proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          success=0
+          for attempt in $(seq 1 36); do
+            sleep 5
+            if curl --fail --silent --show-error --max-time 15 "https://$TARGET_DOMAIN/" -o "$RUNNER_TEMP/current-root" \
+              && cmp -s "$RUNNER_TEMP/baseline-root" "$RUNNER_TEMP/current-root" \
+              && curl --fail --silent --show-error --max-time 15 "https://$TARGET_DOMAIN/hub-central" -o "$RUNNER_TEMP/hub.html" \
+              && grep -Fq 'OneWorldz Hub Central | Full Support' "$RUNNER_TEMP/hub.html" \
+              && curl --fail --silent --show-error --max-time 15 "https://$TARGET_DOMAIN/api/hub-central/status" -o "$RUNNER_TEMP/status.json" \
+              && node -e "const j=require(process.env.RUNNER_TEMP+'/status.json'); if(!j.ok||j.service!=='OneWorldz Hub Central'||j.owned_destinations!==19) process.exit(1)" \
+              && curl --fail --silent --show-error --max-time 15 "https://$TARGET_DOMAIN/api/hub-central/public-dns?domain=cryptobotz.cryptoworldz.xyz" -o "$RUNNER_TEMP/dns.json" \
+              && node -e "const j=require(process.env.RUNNER_TEMP+'/dns.json'); if(!j.ok||!j.dns?.root_resolves) process.exit(1)"; then
+              success=1
+              break
+            fi
+            echo "Hub Central convergence attempt $attempt/36"
+          done
+          test "$success" = 1
+          echo "proved=true" >> "$GITHUB_OUTPUT"
+          echo "Hub Central live proof passed; existing root response is byte-identical."
+
+      - name: Roll back exact original entry file on any failed live proof
+        if: ${{ failure() && steps.write.outputs.written == 'true' && steps.proof.outputs.proved != 'true' }}
+        shell: bash
+        run: |
+          set -u
+          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
+          touch "$RUNNER_TEMP/restart-rollback.txt"
+          cat > "$RUNNER_TEMP/rollback.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 1
+          set net:timeout 20
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          put $RUNNER_TEMP/original-index.js -o $REMOTE_ROOT/index.js
+          rm -f $REMOTE_ROOT/hub-central-live.js
+          put $RUNNER_TEMP/restart-rollback.txt -o $REMOTE_ROOT/tmp/restart.txt
+          bye
+          EOF
+          timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/rollback.lftp" "$raw_host" || true
+          for attempt in $(seq 1 24); do
+            sleep 5
+            if curl --fail --silent --show-error --max-time 15 "https://$TARGET_DOMAIN/" -o "$RUNNER_TEMP/rollback-root" && cmp -s "$RUNNER_TEMP/baseline-root" "$RUNNER_TEMP/rollback-root"; then
+              echo "Exact original public root restored."
+              exit 0
+            fi
+          done
+          echo "Rollback upload completed but public convergence was not proven within the bounded window."
+
+      - name: Preserve pre-deploy rollback evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cryptobotz-hub-central-predeploy-backup-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/original-index.js
+            ${{ runner.temp }}/original-package.json
+            ${{ runner.temp }}/baseline-root.sha256
+          if-no-files-found: ignore
+          retention-days: 14
