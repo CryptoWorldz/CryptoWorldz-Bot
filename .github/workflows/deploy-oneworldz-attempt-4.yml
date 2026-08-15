@@ -1,0 +1,97 @@
+name: Deploy OneWorldz Attempt 4
+
+on:
+  push:
+    branches: [oneworldz-recovery]
+    paths:
+      - deployments/oneworldz-attempt-4.request
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-production-attempt-4
+  cancel-in-progress: false
+
+jobs:
+  deploy-oneworldz-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      FTP_HOST: ${{ secrets.HOSTINGER_FTP_SERVER }}
+      FTP_USER: ${{ secrets.HOSTINGER_FTP_USERNAME }}
+      FTP_PASS: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+      REMOTE_DIR: domains/oneworldz.com/public_html
+    steps:
+      - name: Checkout recovery branch
+        uses: actions/checkout@v4
+
+      - name: Install deployment tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick lftp rsync curl
+
+      - name: Build 20 OneWorldz production images from approved references
+        run: bash apps/cryptoworldz-web-core/scripts/build-oneworldz-attempt-4-images.sh
+
+      - name: Run hard recovery gate
+        run: node apps/cryptoworldz-web-core/scripts/verify-oneworldz-recovery.mjs
+
+      - name: Prepare OneWorldz-only release
+        run: |
+          rm -rf /tmp/oneworldz-release
+          mkdir -p /tmp/oneworldz-release
+          rsync -a apps/cryptoworldz-web-core/ /tmp/oneworldz-release/ \
+            --exclude scripts \
+            --exclude '*.md'
+          cp apps/cryptoworldz-web-core/oneworldz-index.html /tmp/oneworldz-release/index.html
+          test -s /tmp/oneworldz-release/index.html
+          test -s /tmp/oneworldz-release/assets/oneworldz-next.js
+          test -s /tmp/oneworldz-release/assets/oneworldz-recovery.css
+          test "$(find /tmp/oneworldz-release/assets/images/oneworldz-recovery -type f -name '*.webp' | wc -l | tr -d ' ')" = "20"
+
+      - name: Prove Hostinger target exists
+        run: |
+          test -n "$FTP_HOST"
+          test -n "$FTP_USER"
+          test -n "$FTP_PASS"
+          timeout 90 lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 25; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; cd '$REMOTE_DIR'; cls -1; bye"
+
+      - name: Backup current OneWorldz production
+        run: |
+          rm -rf /tmp/oneworldz-backup
+          mkdir -p /tmp/oneworldz-backup
+          timeout 600 lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 30; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; mirror --parallel=4 '$REMOTE_DIR' /tmp/oneworldz-backup; bye"
+          test -s /tmp/oneworldz-backup/index.html
+
+      - name: Deploy Attempt 4 to OneWorldz only
+        id: deploy
+        run: |
+          timeout 600 lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 30; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; mirror -R --parallel=4 --delete --exclude-glob '.well-known/**' /tmp/oneworldz-release '$REMOTE_DIR'; bye"
+
+      - name: Live proof OneWorldz
+        id: proof
+        run: |
+          ok=0
+          for i in $(seq 1 12); do
+            body="$(curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://oneworldz.com/?attempt4=${GITHUB_SHA}" || true)"
+            if printf '%s' "$body" | grep -Fqi 'OneWorldz' && printf '%s' "$body" | grep -Fqi 'Helping the People Who Help People'; then
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          test "$ok" = "1"
+
+      - name: Roll back automatically if deploy or live proof fails
+        if: failure() && steps.deploy.outcome != 'skipped'
+        run: |
+          echo 'Attempt 4 failed proof — restoring OneWorldz backup.'
+          timeout 600 lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 30; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; mirror -R --parallel=4 --delete /tmp/oneworldz-backup '$REMOTE_DIR'; bye"
+
+      - name: Final release marker
+        if: success()
+        run: |
+          echo 'ONEWORLDZ ATTEMPT 4: DEPLOYED AND LIVE-PROVED ✅'
+          echo 'Scope: OneWorldz.com only'
+          echo 'Images: 20/20 built at deployment from approved repo references'
