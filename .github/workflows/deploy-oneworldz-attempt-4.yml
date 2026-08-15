@@ -17,10 +17,14 @@ jobs:
   deploy-oneworldz-only:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    environment:
+      name: cryptoworldz-production
+      url: https://oneworldz.com/
     env:
-      FTP_HOST: ${{ secrets.HOSTINGER_FTP_SERVER }}
-      FTP_USER: ${{ secrets.HOSTINGER_FTP_USERNAME }}
-      FTP_PASS: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       REMOTE_DIR: domains/oneworldz.com/public_html
     steps:
       - name: Checkout recovery branch
@@ -28,8 +32,8 @@ jobs:
 
       - name: Install deployment tools
         run: |
-          sudo apt-get update
-          sudo apt-get install -y imagemagick lftp rsync curl
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq imagemagick lftp rsync curl
 
       - name: Build 20 OneWorldz production images from approved references
         run: bash apps/cryptoworldz-web-core/scripts/build-oneworldz-attempt-4-images.sh
@@ -41,53 +45,109 @@ jobs:
         run: |
           rm -rf /tmp/oneworldz-release
           mkdir -p /tmp/oneworldz-release
-          rsync -a apps/cryptoworldz-web-core/ /tmp/oneworldz-release/ \
-            --exclude scripts \
-            --exclude '*.md'
+          rsync -a apps/cryptoworldz-web-core/ /tmp/oneworldz-release/ --exclude scripts --exclude '*.md'
           cp apps/cryptoworldz-web-core/oneworldz-index.html /tmp/oneworldz-release/index.html
           test -s /tmp/oneworldz-release/index.html
           test -s /tmp/oneworldz-release/assets/oneworldz-next.js
           test -s /tmp/oneworldz-release/assets/oneworldz-recovery.css
           test "$(find /tmp/oneworldz-release/assets/images/oneworldz-recovery -type f -name '*.webp' | wc -l | tr -d ' ')" = "20"
 
-      - name: Prove Hostinger target exists
+      - name: Resolve and prove Hostinger target
         run: |
+          set -euo pipefail
           test -n "$FTP_HOST"
-          test -n "$FTP_USER"
-          test -n "$FTP_PASS"
-          timeout 90 lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 25; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; cd '$REMOTE_DIR'; cls -1; bye"
+          test -n "$FTP_USERNAME"
+          test -n "$FTP_PASSWORD"
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          echo "RAW_FTP_HOST=$raw_host" >> "$GITHUB_ENV"
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          timeout 90 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "set cmd:fail-exit true; set net:max-retries 2; set net:timeout 25; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; cd $REMOTE_DIR; pwd; cls -1; bye" "$raw_host"
 
       - name: Backup current OneWorldz production
         run: |
+          set -euo pipefail
           rm -rf /tmp/oneworldz-backup
           mkdir -p /tmp/oneworldz-backup
-          timeout 600 lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 30; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; mirror --parallel=4 '$REMOTE_DIR' /tmp/oneworldz-backup; bye"
+          script="$RUNNER_TEMP/oneworldz-backup.lftp"
+          cat > "$script" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 3
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $REMOTE_DIR
+          mirror --verbose . /tmp/oneworldz-backup
+          bye
+          EOF
+          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
           test -s /tmp/oneworldz-backup/index.html
 
       - name: Deploy Attempt 4 to OneWorldz only
         id: deploy
+        continue-on-error: true
         run: |
-          timeout 600 lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 30; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; mirror -R --parallel=4 --delete --exclude-glob '.well-known/**' /tmp/oneworldz-release '$REMOTE_DIR'; bye"
+          set -euo pipefail
+          script="$RUNNER_TEMP/oneworldz-deploy.lftp"
+          cat > "$script" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 3
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $REMOTE_DIR
+          lcd /tmp/oneworldz-release
+          mirror -R --delete --verbose . .
+          bye
+          EOF
+          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
 
       - name: Live proof OneWorldz
         id: proof
+        if: ${{ steps.deploy.outcome == 'success' }}
+        continue-on-error: true
         run: |
-          ok=0
-          for i in $(seq 1 12); do
-            body="$(curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://oneworldz.com/?attempt4=${GITHUB_SHA}" || true)"
-            if printf '%s' "$body" | grep -Fqi 'OneWorldz' && printf '%s' "$body" | grep -Fqi 'Helping the People Who Help People'; then
-              ok=1
-              break
+          set -euo pipefail
+          for i in $(seq 1 20); do
+            body="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 35 -H 'Cache-Control: no-cache' "https://oneworldz.com/?attempt4=${GITHUB_SHA}-${GITHUB_RUN_ID}" || true)"
+            if printf '%s' "$body" | grep -Fqi '<title>OneWorldz' && printf '%s' "$body" | grep -Fqi 'Helping the People Who Help People'; then
+              echo 'OneWorldz live proof passed.'
+              exit 0
             fi
-            sleep 10
+            sleep 15
           done
-          test "$ok" = "1"
+          exit 1
 
       - name: Roll back automatically if deploy or live proof fails
-        if: failure() && steps.deploy.outcome != 'skipped'
+        if: ${{ steps.deploy.outcome == 'failure' || steps.proof.outcome == 'failure' }}
         run: |
+          set -euo pipefail
           echo 'Attempt 4 failed proof — restoring OneWorldz backup.'
-          timeout 600 lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" -e "set cmd:fail-exit yes; set net:max-retries 2; set net:timeout 30; set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate yes; mirror -R --parallel=4 --delete /tmp/oneworldz-backup '$REMOTE_DIR'; bye"
+          script="$RUNNER_TEMP/oneworldz-rollback.lftp"
+          cat > "$script" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 3
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $REMOTE_DIR
+          lcd /tmp/oneworldz-backup
+          mirror -R --delete --verbose . .
+          bye
+          EOF
+          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
+
+      - name: Fail after rollback
+        if: ${{ steps.deploy.outcome == 'failure' || steps.proof.outcome == 'failure' }}
+        run: exit 1
 
       - name: Final release marker
         if: success()
