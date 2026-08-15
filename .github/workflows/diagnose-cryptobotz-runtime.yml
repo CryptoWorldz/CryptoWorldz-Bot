@@ -42,7 +42,7 @@ jobs:
           test "$(sed -n 's/^mode=//p' deployments/diagnose-cryptobotz-runtime.request | tail -n1)" = 'read-only-runtime-discovery'
           test "$(sed -n 's/^authority=//p' deployments/diagnose-cryptobotz-runtime.request | tail -n1)" = 'JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY'
 
-      - name: Download only safe runtime manifests for comparison
+      - name: Download safe live routing files
         shell: bash
         run: |
           set -euo pipefail
@@ -59,25 +59,34 @@ jobs:
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
-          get /domains/cryptobotz.cryptoworldz.xyz/nodejs/package.json -o $RUNNER_TEMP/remote-package.json
           get /domains/cryptobotz.cryptoworldz.xyz/nodejs/index.js -o $RUNNER_TEMP/remote-index.js
+          get /domains/cryptobotz.cryptoworldz.xyz/public_html/.htaccess -o $RUNNER_TEMP/remote-htaccess
           bye
           EOF
           timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/scan.lftp" "$raw_host"
 
-      - name: Compare live runtime with current approved source
+      - name: Report structure only, never environment values
         shell: bash
         run: |
           set -euo pipefail
-          echo "REMOTE_INDEX_SHA=$(sha256sum "$RUNNER_TEMP/remote-index.js" | cut -d' ' -f1)"
-          echo "CURRENT_INDEX_SHA=$(sha256sum index.js | cut -d' ' -f1)"
-          echo "REMOTE_PACKAGE_SHA=$(sha256sum "$RUNNER_TEMP/remote-package.json" | cut -d' ' -f1)"
-          echo "CURRENT_PACKAGE_SHA=$(sha256sum package.json | cut -d' ' -f1)"
           node - <<'NODE'
           const fs = require('fs');
-          const live = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/remote-package.json','utf8'));
-          const current = JSON.parse(fs.readFileSync('package.json','utf8'));
-          const safe = (p) => ({name:p.name,version:p.version,main:p.main,start:p.scripts?.start || null,dependencies:Object.keys(p.dependencies || {}).sort()});
-          console.log('LIVE_SAFE_PACKAGE=' + JSON.stringify(safe(live)));
-          console.log('CURRENT_SAFE_PACKAGE=' + JSON.stringify(safe(current)));
+          const text = fs.readFileSync(process.env.RUNNER_TEMP + '/remote-index.js','utf8');
+          const lines = text.split(/\r?\n/);
+          const requires = [...text.matchAll(/require\(["']([^"']+)["']\)/g)].map(m => m[1]);
+          const routes = [...text.matchAll(/app\.(?:get|post|put|delete|use)\(["']([^"']+)["']/g)].map(m => m[1]);
+          const positions = {};
+          for (const needle of ['express()','app.listen(','express.json(','express.static(']) {
+            const i = lines.findIndex(line => line.includes(needle));
+            positions[needle] = i >= 0 ? i + 1 : null;
+          }
+          console.log('LIVE_INDEX_LINES=' + lines.length);
+          console.log('LIVE_REQUIRES=' + JSON.stringify([...new Set(requires)].sort()));
+          console.log('LIVE_ROUTE_PATHS=' + JSON.stringify([...new Set(routes)].sort()));
+          console.log('LIVE_STRUCTURE_POSITIONS=' + JSON.stringify(positions));
+          const ht = fs.readFileSync(process.env.RUNNER_TEMP + '/remote-htaccess','utf8');
+          console.log('HTACCESS_REWRITE_ENGINE=' + /RewriteEngine\s+On/i.test(ht));
+          console.log('HTACCESS_FILE_BYPASS=' + /REQUEST_FILENAME[^\n]*!-f/i.test(ht));
+          console.log('HTACCESS_DIR_BYPASS=' + /REQUEST_FILENAME[^\n]*!-d/i.test(ht));
+          console.log('HTACCESS_SHA=' + require('crypto').createHash('sha256').update(ht).digest('hex'));
           NODE
