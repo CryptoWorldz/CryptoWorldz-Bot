@@ -1,136 +1,95 @@
-const app = document.querySelector('#app');
-const nav = document.querySelector('#main-nav');
-const brandTitle = document.querySelector('#brand-title');
-const brandSubtitle = document.querySelector('#brand-subtitle');
-const walletButton = document.querySelector('#wallet-button');
+const config=window.CRYPTOWORLDZ_CONFIG||{};
+const app=document.querySelector('#app');
+const nav=document.querySelector('#main-nav');
+const brandTitle=document.querySelector('#brand-title');
+const brandSubtitle=document.querySelector('#brand-subtitle');
+const walletButton=document.querySelector('#wallet-button');
 
-const LINKS = Object.freeze({
-  crypto: 'https://cryptoworldz.xyz',
-  pdc: 'https://purplediamondcrew.com',
-  learn: 'https://learn.oneworldz.com',
-  law: 'https://law.oneworldz.com',
-  impact: 'https://impactbased.oneworldz.com',
-  food: 'https://foodworldz.com',
-  donate: 'https://donateworldz.com',
-  command: 'https://cryptobotz.cryptoworldz.xyz',
-  bot: 'https://t.me/CryptoWorldzBot'
+const HQ='https://t.me/CryptoWorldzRaaiiiddTeam';
+const BOT='https://t.me/CryptoWorldzBot';
+const COMMAND='https://cryptobotz.cryptoworldz.xyz';
+const IMPACT_BOARD=config.basedBidBoardUrl||'https://www.based.bid/b/ImpactBased';
+const LINKS=Object.freeze({
+  crypto:'https://cryptoworldz.xyz',
+  pdc:'https://purplediamondcrew.com',
+  learn:'https://learn.oneworldz.com',
+  law:'https://law.oneworldz.com',
+  impact:'https://impactbased.oneworldz.com',
+  food:'https://foodworldz.com',
+  donate:'https://donateworldz.com',
+  sol:'https://solworldz.xyz',
+  eth:'https://ethworldz.xyz',
+  base:'https://baseworldz.xyz',
+  bnb:'https://bnbworldz.xyz',
+  xrp:'https://xrpworldz.xyz',
+  sui:'https://suiworldz.xyz',
+  hyper:'https://hyperworldz.xyz',
+  robin:'https://robinworldz.xyz',
+  hodler:'https://hodlerworldz.xyz'
 });
 
-const MEDIA = Object.freeze({
-  gateway: ['01-global-gateway.webp', 'OneWorldz global gateway — One Vision'],
-  future: ['02-little-legend-future.webp', 'Children, learning, kindness and the future'],
-  action: ['03-humanitarian-action.webp', 'People helping people through practical humanitarian action'],
-  pillars: ['04-people-planet-tech-leadership.webp', 'People, planet, technology and responsible leadership'],
-  learn: ['05-learn.webp', 'Learn.OneWorldz — Knowledge Creates Power'],
-  law: ['06-law.webp', 'Law.OneWorldz — fairness, understanding and public pathways'],
-  impact: ['07-impactbased.webp', 'ImpactBased — ideas with purpose and projects with proof'],
-  hope: ['08-hope-chest.webp', 'The OneWorldz Hope Chest — legacy, lessons and second chances'],
-  ecosystem: ['09-worldz-ecosystem.webp', 'The connected OneWorldz ecosystem'],
-  stand: ['10-stand-as-one-2030.webp', 'Stand As One 2026 to 2030 humanitarian event concept']
-});
+const ASSET='./assets/images/oneworldz-pass110';
+const HERO_DESKTOP=`${ASSET}/desktop/oneworldz-hero.webp`;
+const HERO_MOBILE=`${ASSET}/mobile/oneworldz-hero.webp`;
+const CHEST_DESKTOP=`${ASSET}/desktop/hope-chest.webp`;
+const CHEST_MOBILE=`${ASSET}/mobile/hope-chest.webp`;
 
-const esc = (value = '') => String(value)
-  .replaceAll('&', '&amp;')
-  .replaceAll('<', '&lt;')
-  .replaceAll('>', '&gt;')
-  .replaceAll('"', '&quot;');
-
-function picture(key, className = '') {
-  const [file, alt] = MEDIA[key];
-  return `<picture class="${className}">
-    <source media="(max-width:780px)" srcset="./assets/images/oneworldz-recovery/mobile/${file}">
-    <img src="./assets/images/oneworldz-recovery/desktop/${file}" alt="${esc(alt)}" loading="lazy" decoding="async">
-  </picture>`;
+function btn(u,l,k='wx-btn'){
+  const external=u.startsWith('http');
+  return `<a class="${k}" href="${u}"${external?' target="_blank" rel="noopener noreferrer"':''}>${l}</a>`;
 }
-
-function button(label, href, variant = '') {
-  const external = href.startsWith('http');
-  return `<a class="button button-primary ${variant}" href="${href}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(label)}</a>`;
+function responsiveImage(desktop,mobile,alt,cls=''){
+  return `<picture${cls?` class="${cls}"`:''}><source media="(max-width:780px)" srcset="${mobile}"><img src="${desktop}" alt="${alt}" loading="eager" decoding="async"></picture>`;
 }
-
-function card(icon, title, copy, href = '') {
-  return `<article class="ow-action-card"><span class="ow-check" aria-hidden="true">${icon}</span><div><h3>${esc(title)}</h3><p>${esc(copy)}</p></div>${href ? button(`Open ${title}`, href) : ''}</article>`;
+function worldGrid(){
+  return [
+    ['CryptoWorldz',LINKS.crypto],['SolWorldz',LINKS.sol],['Purple Diamond Crew',LINKS.pdc],
+    ['Learn.OneWorldz',LINKS.learn],['Law.OneWorldz',LINKS.law],['ImpactBased',LINKS.impact],
+    ['FoodWorldz',LINKS.food],['DonateWorldz',LINKS.donate],['EthWorldz',LINKS.eth],
+    ['BaseWorldz',LINKS.base],['BNBWorldz',LINKS.bnb],['XRPWorldz',LINKS.xrp],
+    ['SuiWorldz',LINKS.sui],['HyperWorldz',LINKS.hyper],['RobinWorldz',LINKS.robin],['HodlerWorldz',LINKS.hodler]
+  ].map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener noreferrer">Visit ${n}</a>`).join('');
 }
+function pillar(icon,title,copy){return `<article class="pdc-action-card"><span>${icon}</span><h3>${title}</h3><p>${copy}</p></article>`;}
 
-brandTitle.textContent = 'ONEWORLDZ';
-brandSubtitle.textContent = 'ONEWORLDZ 🌏 ONE VISION';
-document.title = 'OneWorldz 🌏 One Vision | Helping the People Who Help People';
-document.body.classList.add('oneworldz-recovered');
+document.body.classList.remove('oneworldz-recovered');
+document.body.classList.add('worldz-rich-page');
+document.title='OneWorldz 🌏 One Vision';
+brandTitle.textContent='ONEWORLDZ';
+brandSubtitle.textContent='ONEWORLDZ 🌏 ONE VISION';
+walletButton.textContent='Open Command Centre';
+walletButton.onclick=()=>window.open(COMMAND,'_blank','noopener,noreferrer');
+nav.innerHTML=[
+  ['Home','#home'],['Vision','#vision'],['Framework','#framework'],['Action','#action'],
+  ['Learn','#learn'],['Law','#law'],['ImpactBased','#impact'],['Worldz','#worldz']
+].map(([l,u])=>`<a href="${u}">${l}</a>`).join('');
 
-walletButton.textContent = 'Open Command Centre';
-walletButton.onclick = () => window.open(LINKS.command, '_blank', 'noopener,noreferrer');
+app.innerHTML=`<div class="wx-shell">
+<section id="home" class="wx-hero">
+  <picture><source media="(max-width:780px)" srcset="${HERO_MOBILE}"><img class="wx-hero-bg" src="${HERO_DESKTOP}" alt="OneWorldz One Vision master artwork" loading="eager" decoding="async"></picture>
+  <div class="wx-hero-copy"><span class="wx-kicker">OneWorldz 🌏 One Vision</span><h1>OneWorldz</h1><p>The master gateway for one connected vision: people, planet, technology and leadership working together to turn ideas into measurable action.</p><div class="wx-actions"><a class="wx-btn green" href="#action">Help People</a><a class="wx-btn gold" href="${COMMAND}" target="_blank" rel="noopener noreferrer">Command Centre Ultimate™</a><a class="wx-btn" href="#worldz">Explore the Worldz</a>${btn(LINKS.pdc,'Purple Diamond Crew','wx-btn gold')}${btn(LINKS.crypto,'Enter CryptoWorldz')}</div></div>
+</section>
 
-nav.innerHTML = [
-  ['Home', '#home'], ['Vision', '#vision'], ['Action', '#action'], ['Learn', LINKS.learn],
-  ['Law', LINKS.law], ['ImpactBased', LINKS.impact], ['Worldz', '#worldz'], ['2030', '#stand-as-one']
-].map(([label, href]) => `<a href="${href}"${href.startsWith('http') ? ' target="_blank" rel="noopener noreferrer"' : ''}>${label}</a>`).join('');
+<section id="vision" class="wx-panel"><span class="wx-kicker">THE ONE VISION BLUEPRINT</span><h2>Vision → Mission → Principles → Action</h2><p>OneWorldz is the structure connecting projects, communities and practical action around a shared goal: helping people, strengthening communities and building systems that can be measured and improved.</p><div class="pdc-action-grid">${pillar('🌍','Vision','A connected world where people, communities and technology work together for practical positive change.')}${pillar('🎯','Mission','Turn research, ideas and community effort into real projects with clear purpose and transparent outcomes.')}${pillar('🤝','Core Principles','Kindness, fairness, transparency, participation, accountability and respect for the people being helped.')}${pillar('📊','Results','Measure what was attempted, what worked, what failed and what should improve next.')}</div></section>
 
-const worldCards = [
-  ['CryptoWorldz', 'Crypto headquarters, education, communities and the protected Command Centre.', LINKS.crypto],
-  ['Learn.OneWorldz', 'Knowledge Creates Power — practical learning, confidence and opportunity.', LINKS.learn],
-  ['Law.OneWorldz', 'Plain-language public information, fairness and pathways without pretending to replace professional legal advice.', LINKS.law],
-  ['ImpactBased', 'Ideas with Purpose. Projects with Proof. Purpose-led projects and transparent participation.', LINKS.impact],
-  ['FoodWorldz', 'See needs, food projects and practical impact.', LINKS.food],
-  ['DonateWorldz', 'Choose clearly separated support pathways.', LINKS.donate],
-  ['Purple Diamond Crew', 'Legacy, community action and the Hope Chest story.', LINKS.pdc],
-  ['Command Centre', 'Protected ZED / CryptoBotz operating destination.', LINKS.command]
-].map(([name, copy, href]) => `<article class="ow-world-card"><span class="ow-status">CONNECTED DESTINATION</span><span class="ow-world-icon" aria-hidden="true">◎</span><h3>${esc(name)}</h3><p>${esc(copy)}</p>${button(`Visit ${name}`, href)}</article>`).join('');
+<section class="wx-panel"><span class="wx-kicker">FOUR PILLARS</span><h2>People • Planet • Technology • Leadership</h2><div class="pdc-action-grid">${pillar('👥','People','Food, shelter, education, health, dignity, opportunity and stronger communities.')}${pillar('🌱','Planet','Water, farming, sustainable systems, regeneration and responsible use of resources.')}${pillar('💻','Technology','Use digital systems, AI and blockchain where they genuinely improve access, coordination or transparency.')}${pillar('🧭','Leadership','Clear responsibility, public reasoning, measurable goals and accountable decision-making.')}</div></section>
 
-app.innerHTML = `<div class="ow-shell">
-  <section id="home" class="ow-hero">
-    <div class="ow-hero-copy">
-      <p class="eyebrow">ONEWORLDZ 🌏 ONE VISION</p>
-      <h1>OneWorldz</h1>
-      <p>The global gateway connecting people, humanitarian action, knowledge, fair pathways, responsible technology and specialised Worldz around one practical mission: helping people help people.</p>
-      <div class="button-row ow-hero-actions">${button('Explore the Worldz', '#worldz')}${button('Help People', LINKS.donate, 'button-muted')}${button('Learn', LINKS.learn, 'button-muted')}</div>
-      <div class="ow-trust-strip"><span>One World • One Mission</span><span>Kindness Matters</span><span>Action Creates Change</span></div>
-    </div>
-    ${picture('gateway', 'ow-hero-art')}
-  </section>
+<section id="framework" class="wx-panel"><span class="wx-kicker">GLOBAL RESEARCH + IMPROVEMENT LOOP</span><h2>Research → Compare → Verify → Recommend → Implement → Measure → Improve Again</h2><p>Ideas are researched, compared and verified before recommendations are made. Projects are then implemented, measured and improved instead of being called finished simply because they launched.</p></section>
 
-  <div class="ow-rally"><strong>Helping the People Who Help People</strong><span>One connected vision • many specialised destinations</span></div>
+<section id="action" class="wx-panel"><span class="wx-kicker">HUMANITARIAN ACTION STAYS CENTRAL</span><h2>Helping the People Who Help People.</h2><p>Food, water, shelter, education, medical support, dignity and hope remain visible at the master gateway. Reagan Kauja and Action Spreads Smiles remain a real example of practical support connected to the wider OneWorldz vision.</p><div class="wx-actions"><a class="wx-btn green" href="#worldz">Open Support Pathways</a><a class="wx-btn" href="/reagan-kauja/">Reagan Kauja • Action Spreads Smiles</a></div></section>
 
-  <section id="vision" class="ow-impact-gallery">
-    ${picture('future')}
-    <div><p class="eyebrow">THE ONE VISION BLUEPRINT</p><h2>The future is the reason.</h2><p>OneWorldz starts with people — especially children and communities whose opportunities should never depend on where they were born. The goal is not another website network. It is a structure people can understand, join, test and improve.</p><div class="button-row">${button('Knowledge Creates Power', LINKS.learn)}${button('See Humanitarian Action', '#action', 'button-muted')}</div></div>
-  </section>
+<section class="wx-panel wx-feature"><div class="wx-hope-chest-media" style="display:flex;align-items:center;justify-content:center;min-width:0">${responsiveImage(CHEST_DESKTOP,CHEST_MOBILE,'The OneWorldz Hope Chest')}</div><div class="wx-copy"><span class="wx-kicker">STORIES • LEGACY • SECOND CHANCES</span><h2>The Hope Chest</h2><p>Useful work, lessons and community history are preserved without confusing old branding or legacy records with current production information.</p>${btn(LINKS.pdc,'Visit Purple Diamond Crew')}</div></section>
 
-  <section class="ow-section"><div class="ow-section-heading"><p class="eyebrow">VISION → MISSION → PRINCIPLES → ACTION</p><h2>A framework that keeps improving.</h2><p>Research → Compare → Verify → Recommend → Implement → Measure Results → Improve Again.</p></div><div class="ow-action-grid">
-    ${card('1','Vision','A connected world where people, communities and technology work together for practical positive change.')}
-    ${card('2','Mission','Turn ideas and community effort into real projects with clear purpose and transparent outcomes.')}
-    ${card('3','Core Principles','Kindness, fairness, transparency, participation, accountability and respect.')}
-  </div></section>
+<section id="learn" class="wx-panel"><span class="wx-kicker">LEARN.ONEWORLDZ.COM</span><h2>Knowledge Creates Power.</h2><p>Practical learning, digital literacy, confidence and opportunity — designed to make difficult systems easier to understand.</p><div class="wx-actions"><a class="wx-btn" href="#worldz">Learn destination is part of the Worldz rollout</a></div></section>
 
-  <section class="ow-impact-gallery">
-    ${picture('pillars')}
-    <div><p class="eyebrow">FOUR PILLARS</p><h2>People • Planet • Technology • Leadership</h2><p>Food, dignity and opportunity. Water, farming and sustainable systems. Technology used where it genuinely improves access or transparency. Leadership measured by responsibility and outcomes.</p></div>
-  </section>
+<section id="law" class="wx-panel"><span class="wx-kicker">LAW.ONEWORLDZ.COM</span><h2>Understand the pathway.</h2><p>Plain-language public information, rights awareness and understandable pathways with clear boundaries around professional legal advice.</p><div class="wx-actions"><a class="wx-btn" href="#worldz">Law destination is part of the Worldz rollout</a></div></section>
 
-  <section id="action" class="ow-impact-gallery">
-    ${picture('action')}
-    <div><p class="eyebrow">HUMANITARIAN ACTION STAYS CENTRAL</p><h2>See the need. Understand it. Then act.</h2><p>FoodWorldz explains needs and projects. DonateWorldz keeps support pathways clearly separated. OneWorldz connects that action to the wider mission without turning humanitarian work into a side feature.</p><div class="button-row">${button('Open FoodWorldz', LINKS.food)}${button('Open DonateWorldz', LINKS.donate, 'button-muted')}</div></div>
-  </section>
+<section id="impact" class="wx-panel"><span class="wx-kicker">IMPACTBASED.ONEWORLDZ.COM</span><h2>Ideas with Purpose. Projects with Proof.</h2><p>Purpose-driven projects, transparent information and participation — with public claims tied to what can actually be verified.</p><div class="wx-actions">${btn(IMPACT_BOARD,'Open Based.bid Board','wx-btn gold')}</div></section>
 
-  <section class="ow-section"><div class="ow-section-heading"><p class="eyebrow">FLAGSHIP PATHWAYS</p><h2>Three different jobs. One shared standard.</h2></div><div class="ow-action-grid">
-    ${card('L','Learn.OneWorldz','Knowledge Creates Power — education, digital literacy, practical skills and confident participation.', LINKS.learn)}
-    ${card('⚖','Law.OneWorldz','Public information, rights awareness and understandable pathways with clear professional-advice boundaries.', LINKS.law)}
-    ${card('♥','ImpactBased','Ideas with Purpose. Projects with Proof. Discover projects, purpose and transparent ways to participate.', LINKS.impact)}
-  </div></section>
+<section class="wx-panel"><span class="wx-kicker">CRYPTO + BLOCKCHAIN HUB</span><h2>CryptoWorldz carries the deeper blockchain structure.</h2><p>Blockchain Worldz, Command Centre, launch partners, tokens and project communities sit under CryptoWorldz instead of overwhelming the OneWorldz front gate.</p><div class="wx-actions">${btn(COMMAND,'Open Ultimate™','wx-btn gold')}${btn(LINKS.crypto,'Enter CryptoWorldz','wx-btn green')}${btn(HQ,'CryptoWorldz Team')}${btn(BOT,'Open @CryptoWorldzBot')}</div></section>
 
-  <section class="ow-split-section">
-    <article class="ow-story-panel ow-story-purple">${picture('learn')}<p class="eyebrow">LEARN.ONEWORLDZ.COM</p><h2>Knowledge Creates Power.</h2><p>Learning should make difficult systems easier to understand and give people confidence to participate safely.</p>${button('Enter Learn', LINKS.learn)}</article>
-    <article class="ow-story-panel ow-story-gold">${picture('law')}<p class="eyebrow">LAW.ONEWORLDZ.COM</p><h2>Understand the pathway.</h2><p>Clear public information about systems, rights, options and questions to ask — without false legal-advice claims.</p>${button('Enter Law', LINKS.law)}</article>
-  </section>
+<section id="worldz" class="wx-panel"><span class="wx-kicker">ONE ECOSYSTEM • MANY WORLDZ</span><h2>Explore the Worldz</h2><div class="wx-worlds">${worldGrid()}</div></section>
 
-  <section class="ow-impact-gallery">${picture('impact')}<div><p class="eyebrow">IMPACTBASED.ONEWORLDZ.COM</p><h2>Ideas with Purpose. Projects with Proof.</h2><p>ImpactBased connects purpose-driven projects, transparent information and participation while keeping claims tied to what can actually be verified.</p>${button('Enter ImpactBased', LINKS.impact)}</div></section>
-
-  <section class="ow-impact-gallery">${picture('hope')}<div><p class="eyebrow">STORIES • LEGACY • SECOND CHANCES</p><h2>The Hope Chest</h2><p>History, lessons, people and useful work are preserved without confusing legacy information with current production status.</p>${button('Visit Purple Diamond Crew', LINKS.pdc)}</div></section>
-
-  <section id="worldz" class="ow-section"><div class="ow-section-heading">${picture('ecosystem')}<p class="eyebrow">ONE ECOSYSTEM • MANY WORLDZ</p><h2>Go directly to what you came here for.</h2><p>OneWorldz is the map and global gateway. Each connected destination has a specialised purpose.</p></div><div class="ow-world-grid">${worldCards}</div></section>
-
-  <section id="stand-as-one" class="ow-impact-gallery">${picture('stand')}<div><p class="eyebrow">2026 → 2030</p><h2>Stand As One.</h2><p>A developing humanitarian music, community and practical-action concept: people gathering to help, learn, share food, support infrastructure and celebrate what humanity can build together. Artists, sponsors and venues are only described as confirmed when they genuinely are.</p><div class="button-row">${button('Explore the Mission', '#vision')}${button('Command Centre', LINKS.command, 'button-muted')}</div></div></section>
-
-  <section class="ow-section"><div class="ow-section-heading"><p class="eyebrow">LONG-TERM GOAL</p><h2>Build a structure people can join, understand and improve.</h2><p>Progress is judged by practical outcomes, transparent learning and whether the system helps people help people.</p></div></section>
-
-  <p class="sw-disclaimer">OneWorldz is a public gateway. Verify external destinations before interacting. It does not provide personalised legal advice, store payment credentials, expose private Command Centre controls or guarantee financial or humanitarian outcomes.</p>
+<section class="wx-panel"><span class="wx-kicker">LONG-TERM GOAL</span><h2>Build a structure people can join, understand and improve.</h2><p>OneWorldz holds the shared vision. The connected Worldz give different communities a clear place to contribute. Progress is judged by practical outcomes, transparent learning and whether the system helps people help people.</p></section>
+<p class="sw-disclaimer">External fundraiser, social, blockchain and launch links should always be checked at their destination before interacting.</p>
 </div>`;
