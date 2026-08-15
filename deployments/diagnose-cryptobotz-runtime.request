@@ -1,5 +1,5 @@
 target=cryptobotz.cryptoworldz.xyz
 mode=read-only-runtime-discovery
 authority=JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY
-purpose=Discover exact Hostinger Node.js runtime root before Hub Central deployment
-retry=2
+purpose=List exact CryptoBotz Node.js runtime root before Hub Central deployment
+retry=3
