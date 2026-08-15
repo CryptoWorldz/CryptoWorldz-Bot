@@ -1,0 +1,68 @@
+name: Diagnose OneWorldz Hub Root
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/diagnose-oneworldz-hub-root.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diagnose-oneworldz-hub-root
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      ROOT: /domains/oneworldz.com/public_html
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prove authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(sed -n 's/^target=//p' deployments/diagnose-oneworldz-hub-root.request | tail -n1)" = 'oneworldz.com'
+          test "$(sed -n 's/^mode=//p' deployments/diagnose-oneworldz-hub-root.request | tail -n1)" = 'read-only-hub-discovery'
+          test "$(sed -n 's/^authority=//p' deployments/diagnose-oneworldz-hub-root.request | tail -n1)" = 'JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY'
+      - name: Install FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+      - name: List protected OneWorldz root only
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          cat > "$RUNNER_TEMP/scan.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 1
+          set net:timeout 20
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $ROOT
+          pwd
+          cls -1
+          bye
+          EOF
+          timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/scan.lftp" "$raw_host"
+      - name: Prove public root remains reachable
+        run: |
+          curl --fail --silent --show-error --max-time 20 https://oneworldz.com/ -o "$RUNNER_TEMP/root.html"
+          test -s "$RUNNER_TEMP/root.html"
+          echo "PUBLIC_ROOT_SHA=$(sha256sum "$RUNNER_TEMP/root.html" | cut -d' ' -f1)"
