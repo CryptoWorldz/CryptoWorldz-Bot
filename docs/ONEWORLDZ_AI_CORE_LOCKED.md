@@ -34,6 +34,51 @@ Default partner capabilities:
 
 Eligibility is not automatic account access. A person must be invited/verified and linked to an authenticated user before partner access becomes active.
 
+## Dedicated beneficiary access — LOCKED
+
+Reagan and the Davis Family are separate from the general 35-partner access model because each has a dedicated humanitarian funding stream.
+
+### Reagan
+- dedicated Reagan Direct Impact workspace
+- can view his own donation page, campaign, donation history, transfer history, evidence and payout-rail status
+- can confirm receipt of support
+- cannot approve or execute payouts
+- cannot view Davis Family private funding records
+
+### Davis Family
+- dedicated Davis Family Direct Impact workspace
+- can view their own donation page, campaign, donation history, transfer history, evidence and payout-rail status
+- can confirm receipt of support
+- cannot approve or execute payouts
+- cannot view Reagan private funding records
+- Davis Family remains a current priority OneWorldz human-impact story; no private details about children are stored unnecessarily
+
+Account access becomes active only after the correct person is identity-linked to an authenticated account.
+
+## Uganda mobile-money payout rails — LOCKED
+
+Four beneficiary payout slots are registered:
+
+- Reagan — MTN Uganda Mobile Money
+- Reagan — Airtel Money
+- Davis Family — MTN Uganda Mobile Money
+- Davis Family — Airtel Money
+
+Rules:
+
+- currency: UGX
+- recipient account must be fully registered, active and verified
+- mobile-money account numbers are not committed to GitHub or public source
+- recipient data is entered only through a secure payment/provider setup
+- JayJayTeamDev owner approval is mandatory before payout progression
+- no beneficiary can approve or execute their own payout
+- receipt/evidence is required for completed support transfers
+- automation remains disabled until provider, compliance and identity verification are complete
+
+The initial supported Australia-to-Uganda route is WorldRemit mobile money. Direct provider API expansion may be added later only after provider approval and compliance review.
+
+`fundsprepare_historical_transfers` is the evidence ledger for importing verified past WorldRemit/other transfer receipts for Reagan and the Davis Family.
+
 ## Research engines
 
 ### OneWorldz general research
@@ -94,20 +139,23 @@ Target reporting:
 ## Security rules
 
 - No OpenAI secret keys in GitHub or public client code.
-- No Stripe secret keys or raw bank data in the AI Core.
-- Authenticated partner access must be linked to an approved support profile.
+- No Stripe secret keys or raw bank/mobile-money account data in the AI Core.
+- Authenticated partner access must be linked to an approved support profile or dedicated beneficiary identity.
 - Publishing, payments and billing management require separate explicit permissions.
 - Community AI work is traceable to a user/job.
 - Public knowledge requires verification status `verified` and visibility `public`.
 - Sensitive operational tables remain server/service-role controlled.
+- Outgoing beneficiary support cannot be marked sent without JayJayTeamDev owner approval and execution evidence.
 
 ## Current live foundation
 
-Applied Supabase migration:
+Applied Supabase migrations:
 
 `20260815103921_oneworldz_ai_core_and_community_partner_access`
 
-Created live foundation tables:
+`20260815105139_beneficiary_workspaces_mobile_money_and_owner_approval`
+
+Created live foundation tables include:
 
 - `oneworldz_ai_partner_access`
 - `oneworldz_knowledge_items`
@@ -117,8 +165,10 @@ Created live foundation tables:
 - `oneworldz_ai_grace_links`
 - `oneworldz_ai_usage`
 - `oneworldz_ai_budgets`
+- `fundsprepare_beneficiary_access`
+- `fundsprepare_historical_transfers`
 
-35 eligible community-partner records have been seeded from the existing active OneWorldz support directory.
+35 eligible community-partner records have been seeded from the existing active OneWorldz support directory. Reagan and the Davis Family additionally have isolated beneficiary-workspace records awaiting identity linkage.
 
 ## Build order — LOCKED
 
@@ -129,11 +179,12 @@ Created live foundation tables:
 5. Robin Hood Law research mode
 6. G.R.A.C.E. research/post/image workflow
 7. CryptoWorldz admin/member AI tools
-8. Community-partner invitation/onboarding
+8. Community-partner + dedicated-beneficiary invitation/onboarding
 9. AI Cost Control dashboard
 10. Stripe/DonateWorldz support routing integration
-11. analytics + growth measurement
-12. controlled automation expansion
+11. WorldRemit/mobile-money receipt import + payout workflow
+12. analytics + growth measurement
+13. controlled automation expansion
 
 ## Permanent design rule
 
