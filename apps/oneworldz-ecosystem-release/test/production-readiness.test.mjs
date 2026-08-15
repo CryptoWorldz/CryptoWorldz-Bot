@@ -10,6 +10,11 @@ const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const distRoot = path.join(appRoot, "dist", "ecosystem");
 
 const unique = (values) => new Set(values).size === values.length;
+const expectedRemoteDirs = Object.freeze({
+  impactbased: "domains/cryptoworldz.xyz/public_html/impactbased",
+  "law-oneworldz": "domains/oneworldz.com/public_html/law",
+  "learn-oneworldz": "domains/oneworldz.com/public_html/learn"
+});
 
 test("production gate locks the exact 19 / 15 / 17 architecture", () => {
   assert.equal(ecosystemDestinations.length, 19);
@@ -40,7 +45,7 @@ test("every static target has one exact Hostinger root and deployment guard", ()
   assert.ok(unique(remoteDirs), "remote directories must be unique");
   assert.ok(unique(guards), "deployment guards must be unique");
   for (const target of productionTargets) {
-    assert.equal(target.remoteDir, `domains/${target.domain}/public_html`);
+    assert.equal(target.remoteDir, expectedRemoteDirs[target.key] || `domains/${target.domain}/public_html`);
     assert.equal(target.root, "/");
     assert.equal(target.accountScope, "SHARED_ACCOUNT_EXACT_TARGET");
     assert.ok(target.expectedTitle.length > 10, `${target.key}: title proof required`);
