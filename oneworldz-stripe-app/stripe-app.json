@@ -1,12 +1,22 @@
 {
+  "$schema": "https://stripe.com/stripe-app.schema.json",
   "id": "com.oneworldz.full-support",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "name": "OneWorldz Full Support",
   "icon": "./assets/oneworldz-icon.png",
   "distribution_type": "private",
   "sandbox_install_compatible": true,
   "stripe_api_access_type": "platform",
-  "permissions": [],
+  "permissions": [
+    {
+      "permission": "connected_account_read",
+      "purpose": "Read OneWorldz connected-account status so beneficiary support streams can be verified before use."
+    },
+    {
+      "permission": "payment_links_read",
+      "purpose": "Read OneWorldz payment-link status and routing metadata for each approved support stream."
+    }
+  ],
   "ui_extension": {
     "views": [
       {
