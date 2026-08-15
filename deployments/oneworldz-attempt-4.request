@@ -2,4 +2,4 @@ ONEWORLDZ_ATTEMPT_4=AUTHORIZED
 SCOPE=oneworldz.com-only
 IMAGE_BUILD=deployment-time-from-approved-repo-references
 ROLLBACK=required-on-failed-live-proof
-RETRY=3
+RETRY=4
