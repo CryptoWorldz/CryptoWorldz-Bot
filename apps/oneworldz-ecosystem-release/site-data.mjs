@@ -165,7 +165,7 @@ export const deploymentTargets = Object.freeze([
   ["cryptoworldz", "cryptoworldz.xyz", "cryptoworldz-production", "CRYPTOWORLDZ.XYZ"],
   ...worldz.map((world) => [world.key, world.domain, `${world.key}-production`, world.domain.toUpperCase()]),
   ["purplediamondcrew", "purplediamondcrew.com", "purplediamondcrew-production", "PURPLEDIAMONDCREW.COM"],
-  ["impactbased", "impactbased.oneworldz.com", "impactbased-production", "IMPACTBASED.ONEWORLDZ.COM"],
+  ["impactbased", "impactbased.cryptoworldz.xyz", "impactbased-production", "IMPACTBASED.CRYPTOWORLDZ.XYZ"],
   ["law-oneworldz", "law.oneworldz.com", "law-oneworldz-production", "LAW.ONEWORLDZ.COM"],
   ["learn-oneworldz", "learn.oneworldz.com", "learn-oneworldz-production", "LEARN.ONEWORLDZ.COM"]
 ].map(([key, domain, environment, guard]) => ({ key, domain, environment, guard, root: "/" })));
