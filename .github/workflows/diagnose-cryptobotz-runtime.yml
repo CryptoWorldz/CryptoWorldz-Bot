@@ -42,7 +42,7 @@ jobs:
           test "$(sed -n 's/^mode=//p' deployments/diagnose-cryptobotz-runtime.request | tail -n1)" = 'read-only-runtime-discovery'
           test "$(sed -n 's/^authority=//p' deployments/diagnose-cryptobotz-runtime.request | tail -n1)" = 'JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY'
 
-      - name: Scan exact Hostinger runtime paths without reading secrets
+      - name: Scan proven Node.js runtime root without reading file contents
         shell: bash
         run: |
           set -euo pipefail
@@ -52,25 +52,15 @@ jobs:
           echo "::add-mask::$FTP_USERNAME"
           echo "::add-mask::$FTP_PASSWORD"
           cat > "$RUNNER_TEMP/scan.lftp" <<'EOF'
-          set cmd:fail-exit false
+          set cmd:fail-exit true
           set net:max-retries 1
           set net:timeout 20
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
-          echo === FTP ROOT ===
-          cls -1 /
-          echo === DOMAINS ROOT ===
-          cls -1 /domains
-          echo === CRYPTOBOTZ DOMAIN ROOT ===
-          cls -1 /domains/cryptobotz.cryptoworldz.xyz
-          echo === CRYPTOBOTZ PUBLIC_HTML ===
-          cls -1 /domains/cryptobotz.cryptoworldz.xyz/public_html
-          echo === CRYPTOBOTZ PUBLIC ===
-          cls -1 /domains/cryptobotz.cryptoworldz.xyz/public_html/public
-          echo === CRYPTOBOTZ SRC ===
-          cls -1 /domains/cryptobotz.cryptoworldz.xyz/public_html/src
+          echo === CRYPTOBOTZ NODEJS ROOT ===
+          cls -1 /domains/cryptobotz.cryptoworldz.xyz/nodejs
           bye
           EOF
           timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/scan.lftp" "$raw_host"
