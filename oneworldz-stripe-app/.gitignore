@@ -1,0 +1,12 @@
+node_modules/
+.pnpm-store/
+.yarn/
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/
+dist/
+build/
+.stripe/
+*.log
