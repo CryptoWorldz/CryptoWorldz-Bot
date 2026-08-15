@@ -1,0 +1,130 @@
+name: Deploy Three Verified Subdomains
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/three-subdomains.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: three-verified-subdomains-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy and prove ${{ matrix.domain }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - key: impactbased
+            domain: impactbased.cryptoworldz.xyz
+            remote_dir: domains/cryptoworldz.xyz/public_html/impactbased
+            expected_title: ImpactBased | Purpose-Driven Launch Board
+          - key: law-oneworldz
+            domain: law.oneworldz.com
+            remote_dir: domains/oneworldz.com/public_html/law
+            expected_title: Law.OneWorldz | Public Information
+          - key: learn-oneworldz
+            domain: learn.oneworldz.com
+            remote_dir: domains/oneworldz.com/public_html/learn
+            expected_title: Learn.OneWorldz | Knowledge Creates Power
+    environment:
+      name: cryptoworldz-production
+      url: https://${{ matrix.domain }}/
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      DOMAIN: ${{ matrix.domain }}
+      FTP_REMOTE_DIR: ${{ matrix.remote_dir }}
+      EXPECTED_TITLE: ${{ matrix.expected_title }}
+      RELEASE_ROOT: apps/oneworldz-ecosystem-release/dist/ecosystem/${{ matrix.key }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify complete release
+        run: npm run verify
+      - name: Enforce exact three-site package contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$RELEASE_ROOT/index.html"
+          test -s "$RELEASE_ROOT/release-manifest.json"
+          grep -Fq "<title>$EXPECTED_TITLE</title>" "$RELEASE_ROOT/index.html"
+          case "$DOMAIN" in
+            impactbased.cryptoworldz.xyz) test "$FTP_REMOTE_DIR" = 'domains/cryptoworldz.xyz/public_html/impactbased' ;;
+            law.oneworldz.com) test "$FTP_REMOTE_DIR" = 'domains/oneworldz.com/public_html/law' ;;
+            learn.oneworldz.com) test "$FTP_REMOTE_DIR" = 'domains/oneworldz.com/public_html/learn' ;;
+            *) echo '::error::Unexpected domain'; exit 1 ;;
+          esac
+      - name: Install FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+      - name: Backup and upload exact verified package
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          backup="$RUNNER_TEMP/remote-backup"
+          mkdir -p "$backup"
+          cat > "$RUNNER_TEMP/deploy.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 3
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          cd $FTP_REMOTE_DIR
+          mirror --verbose . $backup
+          lcd $RELEASE_ROOT
+          mirror -R --delete --verbose . .
+          bye
+          EOF
+          timeout 1200 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/deploy.lftp" "$raw_host"
+      - name: Prove uploaded server copy before public DNS
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          remote_copy="$RUNNER_TEMP/remote-index.html"
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "set cmd:fail-exit true; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; cd $FTP_REMOTE_DIR; get index.html -o $remote_copy; bye" "$raw_host"
+          test -s "$remote_copy"
+          grep -Fq "<title>$EXPECTED_TITLE</title>" "$remote_copy"
+          echo "Server-copy proof passed for $DOMAIN"
+      - name: Prove public DNS HTTPS and exact live title
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 16); do
+            echo "Public proof attempt $attempt for $DOMAIN"
+            if getent ahostsv4 "$DOMAIN" >/dev/null 2>&1; then
+              html="$(curl --fail --silent --show-error --location --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "https://$DOMAIN/?release=${GITHUB_SHA}-${GITHUB_RUN_ID}" || true)"
+              if printf '%s' "$html" | grep -Fq "<title>$EXPECTED_TITLE</title>"; then
+                echo "LIVE PROOF PASSED: https://$DOMAIN/"
+                exit 0
+              fi
+            fi
+            sleep 15
+          done
+          echo "::error::Files are deployed but public DNS/HTTPS/title proof is not ready for $DOMAIN"
+          exit 1
