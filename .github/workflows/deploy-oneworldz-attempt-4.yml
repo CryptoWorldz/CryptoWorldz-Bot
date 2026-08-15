@@ -46,7 +46,7 @@ jobs:
           set -euo pipefail
           root='apps/cryptoworldz-web-core'
           rm -rf /tmp/oneworldz-release
-          mkdir -p /tmp/oneworldz-release/assets/images /tmp/oneworldz-release/config
+          mkdir -p /tmp/oneworldz-release/assets/images
           cp "$root/oneworldz-index.html" /tmp/oneworldz-release/index.html
           cp "$root/assets/oneworldz-next.js" /tmp/oneworldz-release/assets/oneworldz-next.js
           cp "$root/assets/oneworldz-recovery.css" /tmp/oneworldz-release/assets/oneworldz-recovery.css
@@ -66,14 +66,14 @@ jobs:
           echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
           timeout 90 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "set cmd:fail-exit true; set net:max-retries 2; set net:timeout 25; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; cd $REMOTE_DIR; pwd; cls -1; bye" "$raw_host"
 
-      - name: Surgical backup of files Attempt 4 can replace
+      - name: Surgical backup of live files Attempt 4 replaces
         run: |
           set -euo pipefail
           rm -rf /tmp/oneworldz-backup
           mkdir -p /tmp/oneworldz-backup/assets
           script="$RUNNER_TEMP/oneworldz-backup.lftp"
           cat > "$script" <<EOF
-          set cmd:fail-exit false
+          set cmd:fail-exit true
           set net:max-retries 2
           set net:timeout 30
           set ftp:ssl-force true
@@ -83,7 +83,6 @@ jobs:
           cd $REMOTE_DIR
           get index.html -o /tmp/oneworldz-backup/index.html
           get assets/oneworldz-next.js -o /tmp/oneworldz-backup/assets/oneworldz-next.js
-          get assets/oneworldz-recovery.css -o /tmp/oneworldz-backup/assets/oneworldz-recovery.css
           bye
           EOF
           timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
@@ -146,7 +145,6 @@ jobs:
           lcd /tmp/oneworldz-backup
           put index.html -o index.html
           put assets/oneworldz-next.js -o assets/oneworldz-next.js
-          put assets/oneworldz-recovery.css -o assets/oneworldz-recovery.css
           bye
           EOF
           timeout 420 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$RAW_FTP_HOST"
