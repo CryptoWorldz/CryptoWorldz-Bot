@@ -1,5 +1,7 @@
-ONEWORLDZ_ATTEMPT_4=AUTHORIZED
+ONEWORLDZ_SEQUENTIAL_PASS=AUTHORIZED
 SCOPE=oneworldz.com-only
-IMAGE_BUILD=deployment-time-from-approved-repo-references
-ROLLBACK=required-on-failed-live-proof
-RETRY=4
+BASELINE=last-good-aug13-layout
+IMAGE_BUILD=fresh-versioned-desktop-mobile-assets
+LIVE_GATE=desktop-mobile-images-wording-links
+ROLLBACK=required-on-any-gate-failure
+RUN=110-ONEWORLDZ
