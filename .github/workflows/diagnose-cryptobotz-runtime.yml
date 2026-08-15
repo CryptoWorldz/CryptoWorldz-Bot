@@ -1,0 +1,73 @@
+name: Diagnose CryptoBotz Hostinger Runtime
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/diagnose-cryptobotz-runtime.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diagnose-cryptobotz-runtime
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    name: Read-only CryptoBotz runtime scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - name: Install FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+      - name: Prove request authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(sed -n 's/^target=//p' deployments/diagnose-cryptobotz-runtime.request | tail -n1)" = 'cryptobotz.cryptoworldz.xyz'
+          test "$(sed -n 's/^mode=//p' deployments/diagnose-cryptobotz-runtime.request | tail -n1)" = 'read-only-runtime-discovery'
+          test "$(sed -n 's/^authority=//p' deployments/diagnose-cryptobotz-runtime.request | tail -n1)" = 'JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY'
+
+      - name: Scan exact Hostinger runtime paths without reading secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          cat > "$RUNNER_TEMP/scan.lftp" <<'EOF'
+          set cmd:fail-exit false
+          set net:max-retries 1
+          set net:timeout 20
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          echo === FTP ROOT ===
+          cls -1 /
+          echo === DOMAINS ROOT ===
+          cls -1 /domains
+          echo === CRYPTOBOTZ DOMAIN ROOT ===
+          cls -1 /domains/cryptobotz.cryptoworldz.xyz
+          echo === CRYPTOBOTZ PUBLIC_HTML ===
+          cls -1 /domains/cryptobotz.cryptoworldz.xyz/public_html
+          echo === CRYPTOBOTZ PUBLIC ===
+          cls -1 /domains/cryptobotz.cryptoworldz.xyz/public_html/public
+          echo === CRYPTOBOTZ SRC ===
+          cls -1 /domains/cryptobotz.cryptoworldz.xyz/public_html/src
+          bye
+          EOF
+          timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/scan.lftp" "$raw_host"
