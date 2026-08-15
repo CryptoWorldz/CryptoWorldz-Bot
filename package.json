@@ -4,7 +4,7 @@
   "description": "Official CryptoWorldz Telegram Bot with Diamond Buy Auto SAFE LOCKED service",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node -r ./src/hub-central/preload.js index.js",
     "start:auto": "node auto-server.js",
     "test": "node --test",
     "check": "node --check index.js && node --check db.js && find src test public -type f -name '*.js' -exec node --check {} +",
