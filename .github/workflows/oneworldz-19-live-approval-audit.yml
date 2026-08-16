@@ -1,0 +1,151 @@
+name: OneWorldz 19-Destination Live Approval Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/oneworldz-19-live-approval-audit.request'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Run complete 19-destination live approval audit
+        shell: bash
+        run: |
+          set -u
+          mkdir -p "$RUNNER_TEMP/oneworldz-audit"
+          report="$RUNNER_TEMP/oneworldz-audit/approval-report.md"
+          jsonl="$RUNNER_TEMP/oneworldz-audit/results.jsonl"
+          : > "$jsonl"
+
+          cat > "$report" <<'HDR'
+          # OneWorldz 19-Destination Live Approval Audit
+
+          **Standard:** JayJayTeamDev × ChatGPT Approval Rating
+
+          | Destination | HTTPS | HTTP | Identity | Mobile | Brand | Clean | Score | Result |
+          |---|---:|---:|---:|---:|---:|---:|---:|---|
+          HDR
+
+          targets=$(cat <<'EOF'
+          OneWorldz|https://oneworldz.com/||OneWorldz
+          CryptoWorldz|https://cryptoworldz.xyz/|CryptoWorldz | One World • One Mission|CryptoWorldz
+          SolWorldz|https://solworldz.xyz/|SolWorldz | One World • One Mission|SolWorldz
+          EthWorldz|https://ethworldz.xyz/|EthWorldz | One World • One Mission|EthWorldz
+          BaseWorldz|https://baseworldz.xyz/|BaseWorldz | One World • One Mission|BaseWorldz
+          BNBWorldz|https://bnbworldz.xyz/|BNBWorldz | One World • One Mission|BNBWorldz
+          XRPWorldz|https://xrpworldz.xyz/|XRPWorldz | One World • One Mission|XRPWorldz
+          SuiWorldz|https://suiworldz.xyz/|SuiWorldz | One World • One Mission|SuiWorldz
+          HyperWorldz|https://hyperworldz.xyz/|HyperWorldz | One World • One Mission|HyperWorldz
+          RobinWorldz|https://robinworldz.xyz/|RobinWorldz | One World • One Mission|RobinWorldz
+          HodlerWorldz|https://hodlerworldz.xyz/|HodlerWorldz | One World • One Mission|HodlerWorldz
+          HodlerGalaxy|https://hodlergalaxy.xyz/|HodlerGalaxy | Explore the OneWorldz Ecosystem|HodlerGalaxy
+          Purple Diamond Crew|https://purplediamondcrew.com/|Purple Diamond Crew | The Legacy Lives On|Purple Diamond Crew
+          FoodWorldz|https://foodworldz.com/|FoodWorldz | See the Need • Support the Mission|FoodWorldz
+          DonateWorldz|https://donateworldz.com/|DonateWorldz | Choose a Purpose • Support Clearly|DonateWorldz
+          ImpactBased|https://impactbased.cryptoworldz.xyz/|ImpactBased | Purpose-Driven Launch Board|ImpactBased
+          Law.OneWorldz|https://law.oneworldz.com/|Law.OneWorldz | Public Information|Law.OneWorldz
+          Learn.OneWorldz|https://learn.oneworldz.com/|Learn.OneWorldz | Knowledge Creates Power|Learn.OneWorldz
+          CryptoBotz Command Centre|https://cryptobotz.cryptoworldz.xyz/||CryptoBotz
+          EOF
+          )
+
+          total=0
+          passed=0
+          failed=0
+
+          while IFS='|' read -r name url expected_title brand; do
+            [ -n "$name" ] || continue
+            total=$((total+1))
+            slug="$(printf '%s' "$name" | tr '[:upper:] ' '[:lower:]-' | tr -cd 'a-z0-9.-')"
+            body="$RUNNER_TEMP/oneworldz-audit/${slug}.html"
+            headers="$RUNNER_TEMP/oneworldz-audit/${slug}.headers"
+            err="$RUNNER_TEMP/oneworldz-audit/${slug}.err"
+
+            score=0
+            https=0
+            http=0
+            identity=0
+            mobile=0
+            brand_ok=0
+            clean=0
+            status='FAIL'
+            code='000'
+            final_url=''
+            title=''
+
+            meta="$(curl --silent --show-error --location \
+              --connect-timeout 15 --max-time 45 \
+              -D "$headers" -o "$body" \
+              -w '%{http_code}|%{url_effective}|%{ssl_verify_result}' \
+              "$url" 2>"$err" || true)"
+            IFS='|' read -r code final_url ssl_verify <<< "$meta"
+
+            if [ "${ssl_verify:-1}" = '0' ] && [ -s "$body" ]; then https=25; score=$((score+25)); fi
+            if [[ "${code:-000}" =~ ^2[0-9][0-9]$ ]]; then http=20; score=$((score+20)); fi
+
+            if [ -s "$body" ]; then
+              title="$(python3 - "$body" <<'PY'
+          import html, re, sys
+          text=open(sys.argv[1], encoding='utf-8', errors='ignore').read()
+          m=re.search(r'<title[^>]*>(.*?)</title>', text, re.I|re.S)
+          print(html.unescape(re.sub(r'\s+',' ',m.group(1)).strip()) if m else '')
+          PY
+              )"
+
+              if [ -n "$expected_title" ]; then
+                if [ "$title" = "$expected_title" ]; then identity=15; score=$((score+15)); fi
+              else
+                if [ -n "$title" ] && grep -Fqi "$brand" "$body"; then identity=15; score=$((score+15)); fi
+              fi
+
+              if grep -Eqi '<meta[^>]+name=["'"']viewport["'"']' "$body"; then mobile=10; score=$((score+10)); fi
+              if grep -Fqi "$brand" "$body" || grep -Fqi 'OneWorldz' "$body"; then brand_ok=15; score=$((score+15)); fi
+
+              if ! grep -Eqi 'default web site page|website coming soon|hostinger default|apache2 ubuntu default page|nginx welcome|index of /' "$body"; then
+                clean=15; score=$((score+15))
+              fi
+            fi
+
+            if [ "$score" -ge 85 ]; then status='PASS'; passed=$((passed+1)); else failed=$((failed+1)); fi
+
+            printf '| %s | %s/25 | %s/20 | %s/15 | %s/10 | %s/15 | %s/15 | **%s/100** | **%s** |\n' \
+              "$name" "$https" "$http" "$identity" "$mobile" "$brand_ok" "$clean" "$score" "$status" >> "$report"
+
+            jq -n \
+              --arg name "$name" --arg url "$url" --arg final_url "$final_url" --arg code "$code" \
+              --arg title "$title" --arg expected_title "$expected_title" --arg result "$status" \
+              --arg error "$(cat "$err" 2>/dev/null || true)" \
+              --argjson score "$score" \
+              '{name:$name,url:$url,final_url:$final_url,http_code:$code,title:$title,expected_title:$expected_title,score:$score,result:$result,error:$error}' \
+              >> "$jsonl"
+
+            echo "$name :: HTTP ${code:-000} :: $score/100 :: $status :: $title"
+          done <<< "$targets"
+
+          {
+            echo
+            echo "## Fleet result"
+            echo
+            echo "- Destinations tested: **$total**"
+            echo "- Approval passes (>=85): **$passed**"
+            echo "- Approval failures: **$failed**"
+            echo "- Full-fleet approval: **$([ "$failed" -eq 0 ] && echo PASS || echo NOT YET)**"
+          } >> "$report"
+
+          jq -s '.' "$jsonl" > "$RUNNER_TEMP/oneworldz-audit/results.json"
+          cat "$report"
+
+      - name: Upload audit evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-19-live-approval-${{ github.run_id }}
+          path: ${{ runner.temp }}/oneworldz-audit/
+          if-no-files-found: error
+          retention-days: 14
