@@ -1,0 +1,9 @@
+requested_by=JayJayTeamDev
+authority=JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY
+target=cryptobotz.cryptoworldz.xyz
+mode=secure-runtime-env
+secrets=OPENAI_API_KEY,HOSTINGER_API_TOKEN
+storage=server-only-dotenv
+restart=official-hostinger-nodejs-restart-api
+proof=hub-auth,gpt-status,gpt-live,community-35
+requested_at=2026-08-16T16:25:00+10:00
