@@ -171,12 +171,14 @@ A site/page cannot receive JayJayTeamDev × ChatGPT approval if ANY applies:
 
 ## Hostinger destination law
 
-- Authenticate the exact Hostinger website/account before each static destination can pass the destination gate.
-- Record the actual Hostinger website home directory and the credential scope as evidence.
-- The deployment contract may use remote `/` only when the chosen credential is already scoped/chrooted to that exact website root.
-- Never guess, prepend or probe `public_html`, `domains/<domain>/public_html` or sibling-domain paths after a mismatch.
-- If authenticated Hostinger evidence disagrees with the target contract, correct the contract first and do not attempt a second route.
+- The existing shared Hostinger FTP credential set used by the successful authenticated 18-root proof is the sole static-fleet transport credential boundary for the current rail.
+- Website/package root remains `/`; homepage remains `/index.html`; assets remain `/assets/`.
+- The exact 18 physical Hostinger transport directories authenticated by the proof are stored once as `hostingerTransportDir` values in `apps/oneworldz-ecosystem-release/production-targets.mjs`.
+- Production execution must read the exact stored transport directory for the target. It must not derive a directory from a domain name, append another `public_html`, probe siblings, fall back to `/`, or select another old environment after a mismatch.
+- The current authenticated Hostinger proof is run `31925927520`, job `95113450775`, against topology tree SHA `5e4bffb4a40a6968d432ca73e619feb15705859c`; that topology SHA still matches current `main`.
+- OneWorldz exact-root transport was subsequently reconfirmed by run `31967183758`, job `95214059999`.
+- Any current re-authentication mismatch is a hard failure. Do not attempt a second route.
 
 ## Cleanup rule
 
-Keep one canonical active build path for the static fleet. Temporary repair workflows, one-off request files, old GitHub Environments and superseded deployment helpers are not production authority. Legacy/reference material may remain only when clearly quarantined from production manifests. Unknown files are dependency-checked before destructive deletion.
+Keep one canonical active build path for the static fleet. Temporary repair workflows, one-off request files, old GitHub Environments and superseded deployment helpers are not production authority. If GitHub Actions is used, `.github/workflows/main.yml` is the only permitted static-fleet execution file. Legacy/reference material may remain only when clearly quarantined from production manifests. Unknown files are dependency-checked before destructive deletion.
