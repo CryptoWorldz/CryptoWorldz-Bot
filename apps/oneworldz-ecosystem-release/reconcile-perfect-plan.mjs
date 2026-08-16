@@ -79,7 +79,7 @@ function ensureProductionSeo(html, domain) {
 }
 
 function reconcileImpactBased(html) {
-  const official = links.impactBased;
+  const official = links.impactBased.endsWith("/") ? links.impactBased : `${links.impactBased}/`;
   html = html.replace(/<link rel="canonical" href="[^"]+">/, `<link rel="canonical" href="${official}">`);
   html = html.replace(/<meta property="og:url" content="[^"]+">/g, `<meta property="og:url" content="${official}">`);
   html = html.replace(
@@ -192,7 +192,7 @@ for (const key of ["oneworldz", "purplediamondcrew", "law-oneworldz", "learn-one
   await refreshManifest(key);
 }
 await refreshManifest("impactbased", {
-  official_public_url: links.impactBased,
+  official_public_url: links.impactBased.endsWith("/") ? links.impactBased : `${links.impactBased}/`,
   transport_target_unchanged: true,
   impactbased_identity: "Helping the People Who Help People • Real Impact • Real People • Real Change"
 });
