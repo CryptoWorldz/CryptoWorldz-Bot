@@ -26,37 +26,19 @@ jobs:
           websites="$(curl --fail --silent --show-error -H "$auth" -H 'Accept: application/json' "$api/api/hosting/v1/websites")"
           printf '%s' "$websites" | jq -e '.data[] | select(.domain=="foodworldz.com" and .is_enabled==true and .username=="u643166328" and .order_id==1009657511)' >/dev/null
           printf '%s' "$websites" | jq -e '.data[] | select(.domain=="donateworldz.com" and .is_enabled==true and .username=="u643166328" and .order_id==1009657511)' >/dev/null
-          echo 'FoodWorldz and DonateWorldz are active on the expected Hostinger Business hosting account.'
+          echo 'FoodWorldz and DonateWorldz are active on the same expected Hostinger Business hosting account.'
 
-      - name: Verify external-domain hosting ownership state
-        shell: bash
-        run: |
-          set -euo pipefail
-          api='https://developers.hostinger.com'
-          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
-          for domain in foodworldz.com donateworldz.com; do
-            echo "=== verify $domain ==="
-            curl --silent --show-error --location \
-              -H "$auth" -H 'Accept: application/json' -H 'Content-Type: application/json' \
-              --data "{\"domain\":\"$domain\"}" \
-              "$api/api/hosting/v1/domains/verify-ownership" || true
-            echo
-          done
-
-      - name: Derive current hosting IPv4 from live sibling domains
+      - name: Derive current web IPv4 from proven DonateWorldz endpoint
         id: target
         shell: bash
         run: |
           set -euo pipefail
           donate_ip="$(dig +short A donateworldz.com | grep -E '^[0-9.]+$' | head -n1)"
-          galaxy_ip="$(dig +short A hodlergalaxy.xyz | grep -E '^[0-9.]+$' | head -n1)"
-          hyper_ip="$(dig +short A hyperworldz.xyz | grep -E '^[0-9.]+$' | head -n1)"
           test -n "$donate_ip"
-          test -n "$galaxy_ip"
-          test -n "$hyper_ip"
-          test "$donate_ip" = "$galaxy_ip"
-          test "$donate_ip" = "$hyper_ip"
-          echo "Canonical shared-hosting IPv4 confirmed: $donate_ip"
+          headers="$(curl --fail --silent --show-error --head --connect-timeout 10 --max-time 20 https://donateworldz.com/)"
+          printf '%s\n' "$headers" | grep -Eiq '^platform:[[:space:]]*hostinger'
+          printf '%s\n' "$headers" | grep -Eiq '^server:[[:space:]]*LiteSpeed'
+          echo "Proven Hostinger web IPv4: $donate_ip"
           echo "ipv4=$donate_ip" >> "$GITHUB_OUTPUT"
 
       - name: Snapshot current FoodWorldz zone evidence
