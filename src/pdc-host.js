@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 const express = require("express");
+const { registerHubCentralLive } = require("./hub-central/live-v1");
+const { registerCommunitySupportLive } = require("./community-support/live-v1");
 
 const WORLDZ_HOSTS = Object.freeze({
   "purplediamondcrew.com": { slug: "purplediamondcrew", site: "pdc", previewPath: "/purple-diamond-crew" },
@@ -53,6 +55,11 @@ function allowPdcPreview(source) {
 }
 
 function registerPdcHost(app) {
+  // These protected OneWorldz services are part of the real Git-deployed CryptoBotz
+  // Express runtime. Register them before optional static Worldz preview handling.
+  registerHubCentralLive(app);
+  registerCommunitySupportLive(app);
+
   const webRoot = path.join(__dirname, "..", "apps", "cryptoworldz-web-core");
   const indexPath = path.join(webRoot, "index.html");
   const pdcScriptPath = path.join(webRoot, "assets", "pdc-site.js");
