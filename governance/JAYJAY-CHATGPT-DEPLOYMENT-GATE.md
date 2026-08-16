@@ -1,66 +1,104 @@
-# JayJayTeamDev × ChatGPT Deployment Gate
+# JayJayTeamDev × ChatGPT — Single-Rail Total Deployment Gate
 
 Status: LOCKED PRODUCTION RULE
 Owner: JayJayTeamDev
-Applies to: every OneWorldz ecosystem production update from this point forward.
+Operator pair: JayJayTeamDev × ChatGPT
+Applies to: the current canonical OneWorldz static fleet and every later production update unless JayJayTeamDev explicitly replaces this rule.
 
-## Core rule
+## Authority and non-authority
 
-No build, commit, test result, HTTP 200 response, title check, workflow success or deployment upload may be described as a **100% PASS** by itself.
+The latest direct JayJayTeamDev instruction is the release authority. The current instruction `Perform TOTAL DEPLOYMENT PLAN` authorises the current canonical release to proceed through planning, build, verification, Hostinger destination proof, production deployment and live verification without another repeated deployment-approval prompt, provided the approved plan and destination set do not change.
 
-A release receives **100% PASS** only when every gate below is complete for the exact same release candidate.
+These are never production authority: archive material, old branches, old GitHub Environments, old deployment request files, retired workflows, historical screenshots, previous assistant claims or a successful HTTP response by itself.
 
-## One canonical release pipeline
+A new owner review is required only if one of these changes after the current authority is recorded:
 
-1. **BUILD PASS**
-   - Build the exact approved plan.
-   - Run tests, secret checks, protected-service boundaries and destination-contract checks.
+- public content or imagery outside the locked plan;
+- target domain or destination mapping;
+- payment destination;
+- DNS, mail or registrar configuration;
+- protected CryptoBotz, ZED, AUTO, G.R.A.C.E., Supabase or owner/admin security boundaries;
+- a secret, wallet signing capability or financial-control permission.
+
+If none of those changes, do not ask JayJayTeamDev to re-approve the same release stage again.
+
+## One canonical source
+
+Static source/build authority: `apps/oneworldz-ecosystem-release/` only.
+
+Production artwork used by the static fleet must enter through that canonical app source and its manifest/build rules. `archive/` is evidence/reference only and must never be auto-imported, searched as a fallback image source or treated as a second build source.
+
+`cryptobotz.cryptoworldz.xyz` is a separate protected Node application and is never a static deployment target.
+
+## Single deterministic deployment pipeline
+
+The exact same candidate must pass these gates in order:
+
+1. **CLEAN SOURCE LOCK**
+   - Retired gateways, duplicate builders, alternate deployment helpers and parallel production routes remain outside the active tree.
+   - The structural guard must pass.
+
+2. **BUILD PASS**
+   - Build the exact locked plan from the canonical app.
+   - Run tests, secret checks, protected-service boundaries and target-contract checks.
    - No production write occurs here.
 
-2. **PREVIEW VISUAL PASS — ChatGPT**
-   - Render the candidate in real browser viewports.
-   - Capture desktop and mobile proof for every changed destination.
-   - Check required artwork, identity, crop, proportions, text readability, menu behaviour, buttons/links, broken images, console errors, horizontal overflow, spacing and mobile fitment.
-   - ChatGPT must explicitly record `CHATGPT_VISUAL_PASS` for the exact candidate. A technical test cannot substitute for this gate.
+3. **PREVIEW VISUAL PASS — ChatGPT**
+   - Render the exact candidate in real desktop and mobile browser viewports.
+   - Check required artwork, identity, crop, proportions, text readability, menu behaviour, buttons/links, broken images, browser/page errors, spacing and horizontal overflow.
+   - Record the proof against the exact candidate commit/build digest.
 
-3. **DEPLOYMENT APPROVAL — JayJayTeamDev**
-   - JayJayTeamDev sees the approved candidate/proof and gives one deployment-stage approval for that exact candidate.
-   - Build and planning work before this point does not require repeated deployment permission.
-   - Any content change after approval invalidates the approval and returns the release to BUILD PASS.
+4. **HOSTINGER DESTINATION PASS**
+   - Authenticate the exact Hostinger hosting account and website for every target before any write.
+   - Record the domain, authenticated hosting account, actual Hostinger website home directory and the credential's allowed directory/scope.
+   - The deployment rail may use remote `/` only when that credential is already scoped/chrooted to that exact website root.
+   - Never guess, prepend or probe alternative `public_html`, `domains/.../public_html` or sibling-domain paths after authentication fails.
+   - If Hostinger shows a different intended website/root, correct the target contract first; do not try another path during deployment.
 
-4. **PRODUCTION DEPLOY**
-   - Back up only the exact package-owned production files.
-   - Deploy only to the authenticated exact destination.
-   - Never guess a hosting root or alter protected services, DNS, mail or unrelated files.
-   - Failure at any transfer/proof step blocks completion and triggers safe rollback where a valid backup exists.
+5. **PRODUCTION DEPLOY**
+   - Use exactly one authenticated static-fleet deployment rail.
+   - Back up only the package-owned production files for the exact target.
+   - Upload assets before the homepage switch where the transfer mechanism allows it.
+   - Preserve DNS, mail, registrar records, unrelated files and protected services.
+   - No domain-specific emergency rail, fallback gateway or second deployment workflow may be introduced.
 
-5. **LIVE TECHNICAL PASS**
-   - Verify the live release identity, required pages/assets, links, HTTP behaviour and protected-service boundaries.
-   - A title-only check is insufficient.
+6. **LIVE TECHNICAL PASS**
+   - Verify release identity, required pages/assets, links, HTTP behaviour and protected-service boundaries on the live destination.
+   - A title-only or HTTP-200-only check is insufficient.
 
-6. **LIVE VISUAL PASS — JayJayTeamDev × ChatGPT**
-   - Capture fresh production desktop and mobile browser proof after deployment with cache bypass.
-   - Verify the live rendering matches the approved candidate and has no broken/missing imagery, distortion, overlap, unreadable content, mobile overflow or obvious layout regression.
-   - JayJayTeamDev and ChatGPT are the final visual approval pair.
+7. **LIVE VISUAL PASS — JayJayTeamDev × ChatGPT**
+   - Capture fresh cache-bypassed desktop and mobile production proof.
+   - Verify live rendering matches the approved candidate with no missing imagery, distortion, overlap, unreadable content, mobile overflow or obvious regression.
 
-7. **FINAL STATUS**
-   - Only after gates 1–6 pass may the release state be written or reported as:
+8. **FINAL STATUS**
+   - Only after gates 1–7 pass may the release be recorded as:
      `JAYJAYTEAMDEV × CHATGPT — 100% PRODUCTION PASS`
 
-## Mandatory status language
+## GitHub deployment-route law
 
-Use only these release states:
+No GitHub Actions static deployment workflow is required by this gate. The cleaned repository may remain without a production-write workflow.
 
+Existing GitHub Environments from historical deployment attempts are inert metadata unless the single canonical rail explicitly adopts one later. They must not be selected merely because they exist.
+
+If automation is introduced later, it must replace the current production-transfer mechanism as the one canonical rail; it must never coexist as another alternate route.
+
+## Mandatory release states
+
+Use only these operational states:
+
+- `CLEAN SOURCE LOCK`
 - `BUILD PASS`
 - `PREVIEW VISUAL PASS`
-- `AWAITING JAYJAYTEAMDEV DEPLOYMENT APPROVAL`
+- `HOSTINGER DESTINATION PROOF REQUIRED`
+- `HOSTINGER DESTINATION PASS`
 - `DEPLOYING`
 - `LIVE TECHNICAL PASS`
 - `LIVE VISUAL PASS`
+- `OWNER REVIEW REQUIRED`
 - `JAYJAYTEAMDEV × CHATGPT — 100% PRODUCTION PASS`
 - `FAIL — NOT APPROVED`
 
-If any gate is missing, failed, cancelled, skipped or unverified, the release is **not** 100% passed.
+A missing destination proof is not permission to guess another route. It remains `HOSTINGER DESTINATION PROOF REQUIRED` until authenticated evidence exists.
 
 ## Visual evidence requirement
 
@@ -74,12 +112,8 @@ Every changed public site must produce at minimum:
 - required identity/artwork check;
 - menu and primary action-link check.
 
-Visual proof must be tied to the exact candidate commit/build digest. Old screenshots never approve a newer build.
+Old screenshots never approve a newer build.
 
-## Deployment safety rule
+## No-repeat approval rule for the current total deployment
 
-Production Actions remain disabled during TOTAL Outside Access Lockdown™ until the canonical deployment workflow itself is repaired and reviewed. Obsolete production workflows are not to be re-enabled as alternate deployment paths.
-
-## Current OneWorldz correction
-
-The August 2026 OneWorldz master candidate must not be labelled 100% deployed merely because its build verification passed. Its production deployment and live visual proof are separate gates and must be completed successfully under this policy.
+JayJayTeamDev's explicit `Perform TOTAL DEPLOYMENT PLAN` instruction is the standing owner deployment authority for the current canonical candidate chain. ChatGPT may continue through the stages above without stopping for another approval phrase while the candidate remains inside the locked plan and every authenticated safety boundary is preserved.
