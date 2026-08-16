@@ -42,9 +42,13 @@ const requiredIdentityText = Object.freeze({
   donateworldz: "DonateWorldz"
 });
 
+// Pipe-separated alternatives are intentional responsive identities: at least
+// one approved token must be present in the actual image selected by each
+// desktop/mobile viewport. Empty means the page uses a deliberate CSS identity
+// rather than an image asset.
 const requiredIdentityImage = Object.freeze({
-  oneworldz: "little-legend",
-  cryptoworldz: "zed-command-centre",
+  oneworldz: "oneworldz-master|little-legend",
+  cryptoworldz: "zed-command-centre|blockchain-portal",
   solworldz: "solworldz",
   ethworldz: "ethworldz",
   baseworldz: "baseworldz",
@@ -54,13 +58,13 @@ const requiredIdentityImage = Object.freeze({
   hyperworldz: "hyperworldz",
   robinworldz: "robinworldz",
   hodlerworldz: "",
-  purplediamondcrew: "banner.png",
+  purplediamondcrew: "banner.png|hope-chest",
   impactbased: "impactbased",
-  "law-oneworldz": "",
-  "learn-oneworldz": "",
-  hodlergalaxy: "we-need-you",
-  foodworldz: "action-creates-smiles-banner",
-  donateworldz: "oneworldz-master"
+  "law-oneworldz": "robin-hood-law",
+  "learn-oneworldz": "oneworldz-gpt|little-legend",
+  hodlergalaxy: "hodlergalaxy-hero",
+  foodworldz: "foodworldz-hero",
+  donateworldz: "donateworldz-hero"
 });
 
 // Exact Hostinger transport destinations authenticated by the successful
