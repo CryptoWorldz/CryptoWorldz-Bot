@@ -80,7 +80,10 @@ jobs:
             echo 'A real environment file is committed.' >&2
             exit 1
           fi
-          if git grep -nEi '(seed phrase|private key|service_role_key)\s*[:=]\s*[^[:space:]]+' -- ':!*.md' ':!.env.example' ':!test/**' ':!platform/test/**'; then
+          # Scan application/config payloads for actual secret assignments. Workflow
+          # scripts are excluded because they legitimately contain validation regexes
+          # and protected GitHub secret expressions, not committed secret values.
+          if git grep -nEi '(seed phrase|private key|service_role_key)\s*[:=]\s*[^[:space:]]+' -- ':!*.md' ':!.env.example' ':!test/**' ':!platform/test/**' ':!.github/workflows/**'; then
             echo 'A possible production secret value is committed.' >&2
             exit 1
           fi
