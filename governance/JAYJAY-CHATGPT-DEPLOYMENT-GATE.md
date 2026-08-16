@@ -76,7 +76,7 @@ The exact same static candidate must pass these gates in order:
 
 ## GitHub execution law
 
-Only `.github/workflows/main.yml` may be used as the static-fleet execution rail if GitHub Actions is used for this release. It is not permission to create a fourth workflow.
+Only .github/workflows/main.yml may be used as the static-fleet execution rail if GitHub Actions is used for this release. It is not permission to create a fourth workflow.
 
 The other retained workflows are verification/support workflows only and must never receive static Hostinger deployment authority.
 
