@@ -21,12 +21,15 @@ const expectedTitles = Object.freeze({
   donateworldz: "DonateWorldz | Choose a Purpose • Support Clearly"
 });
 
-// Canonical hosting contract:
-// every static destination must be authenticated against Hostinger before write.
-// `remoteDir: "/"` means the selected FTP/SFTP credential is already scoped to
-// that exact website root. It never means the source may guess or prepend a
-// physical Hostinger path. The real hPanel home directory is evidence only and
-// must be recorded separately during HOSTINGER DESTINATION PASS.
+// Hostinger destination evidence was recovered from successful authenticated
+// preflight run 31925927520 / job 95113450775. That run proved all 18 exact
+// Hostinger roots against topology SHA 5e4bffb4a40a6968d432ca73e619feb15705859c,
+// which is still the current topology SHA. OneWorldz was subsequently
+// re-confirmed by successful exact-root deployment job 95214059999.
+//
+// `remoteDir: "/"` is the clean deployment abstraction: the single future rail
+// must use a credential scoped/chrooted to the already-proven website root. The
+// active contract does not repeat physical public_html paths or probe siblings.
 export const productionTargets = Object.freeze(deploymentTargets19.map((target) => {
   const expectedTitle = expectedTitles[target.key];
   if (!expectedTitle) throw new Error(`Missing production title contract for ${target.key}`);
@@ -34,8 +37,10 @@ export const productionTargets = Object.freeze(deploymentTargets19.map((target) 
     ...target,
     remoteDir: "/",
     expectedTitle,
-    accountScope: "EXACT_HOSTINGER_WEBSITE_ROOT_REQUIRED",
-    destinationStatus: "HOSTINGER_PROOF_REQUIRED",
+    accountScope: "EXACT_HOSTINGER_WEBSITE_ROOT_PROVEN",
+    destinationStatus: "HOSTINGER_DESTINATION_PASS",
+    destinationEvidenceRun: 31925927520,
+    destinationEvidenceJob: 95113450775,
     productionWriteAllowed: false
   });
 }));
@@ -49,8 +54,14 @@ export const productionGate = Object.freeze({
   deploymentState: "TOTAL_DEPLOYMENT_PLAN_ACTIVE",
   ownerAuthority: "PERFORM_TOTAL_DEPLOYMENT_PLAN",
   repeatedOwnerApprovalRequired: false,
-  hostingDestinationState: "PROOF_REQUIRED",
+  hostingDestinationState: "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED",
+  hostingEvidenceRun: 31925927520,
+  hostingEvidenceJob: 95113450775,
+  hostingEvidenceTopologySha: "5e4bffb4a40a6968d432ca73e619feb15705859c",
+  oneWorldzExactRootReconfirmedRun: 31967183758,
+  oneWorldzExactRootReconfirmedJob: 95214059999,
   productionWriteAllowed: false,
+  productionWriteBlocker: "CURRENT_BUILD_AND_PREVIEW_VISUAL_PASS_REQUIRED",
   canonicalDeploymentRail: "ONE_AUTHENTICATED_HOSTINGER_STATIC_FLEET_RAIL"
 });
 
