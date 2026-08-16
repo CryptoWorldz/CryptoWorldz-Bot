@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ecosystemDestinations, excludedRootDomains, ownedRootDomains, protectedDestinations } from "./ecosystem-topology.mjs";
+import { links } from "./site-data.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const source = path.join(root, "source");
@@ -64,7 +65,6 @@ function ensureProductionSeo(html, domain) {
   ].join("");
   html = html.replace("</head>", `${tags}</head>`);
 
-  // Exactly one first-main priority image; all later images remain lazy.
   const mainStart = html.indexOf('<main id="main-content">');
   const mainEnd = mainStart >= 0 ? html.indexOf("</main>", mainStart) : -1;
   if (mainStart >= 0 && mainEnd >= 0) {
@@ -74,6 +74,27 @@ function ensureProductionSeo(html, domain) {
     main = main.replaceAll('loading="eager"', 'loading="lazy"').replaceAll(' fetchpriority="high"', "");
     main = main.replace(/<img\b([^>]*?)loading="lazy"([^>]*)>/, (match, left, right) => `<img${left}loading="eager" fetchpriority="high"${right}>`);
     html = `${before}${main}${after}`;
+  }
+  return html;
+}
+
+function reconcileImpactBased(html) {
+  const official = links.impactBased;
+  html = html.replace(/<link rel="canonical" href="[^"]+">/, `<link rel="canonical" href="${official}">`);
+  html = html.replace(/<meta property="og:url" content="[^"]+">/g, `<meta property="og:url" content="${official}">`);
+  html = html.replace(
+    '<p>Transparent project identity, community discovery and real-world impact—kept separate from investment performance claims.</p>',
+    '<p>Helping the People Who Help People 💜 Real Impact • Real People • Real Change. Purpose-led project identity, community discovery and real-world action—kept separate from investment performance claims.</p>'
+  );
+  const purposeMarker = '<section class="section" id="purpose">';
+  if (!html.includes('id="impactbased-official"')) {
+    const officialBlock = `<section class="section section-dark" id="impactbased-official"><div class="section-heading"><p class="eyebrow">IMPACTBASED 🌍</p><h2>Helping the People Who Help People 💜</h2><p>Real Impact • Real People • Real Change</p></div><div class="info-grid"><article><span>01</span><h3>Powered by Based.bid</h3><p>ImpactBased connects to the reviewed Based.bid pathway without claiming automatic launch authority.</p><a href="${links.basedBid}" target="_blank" rel="noopener noreferrer">Open Based.bid →</a></article><article><span>02</span><h3>@CryptoWorldzBot</h3><p>ZED connects verified community missions, profiles, points and governance presentation.</p><a href="${links.zed}" target="_blank" rel="noopener noreferrer">Open ZED →</a></article><article><span>03</span><h3>AUTO • ZED • G.R.A.C.E.</h3><p>Command Centre Ultimate™ keeps protected system roles separate. AUTO remains owner-funds only and execution-disabled until its safety and compliance gates are satisfied.</p><a href="${links.zedCommandCentre}" target="_blank" rel="noopener noreferrer">Command Centre Ultimate™ →</a></article></div></section>`;
+    const pos = html.indexOf(purposeMarker);
+    if (pos < 0) throw new Error("ImpactBased purpose insertion point missing");
+    html = html.slice(0, pos) + officialBlock + html.slice(pos);
+  }
+  for (const required of ["Helping the People Who Help People", "Real Impact • Real People • Real Change", "Powered by Based.bid", "@CryptoWorldzBot", "AUTO • ZED • G.R.A.C.E.", "Command Centre Ultimate™", official]) {
+    if (!html.includes(required)) throw new Error(`ImpactBased locked identity missing: ${required}`);
   }
   return html;
 }
@@ -92,9 +113,6 @@ async function refreshManifest(key, additions = {}) {
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 }
 
-// The approved master build permits the new OneWorldz gateway build. Keep the
-// protected CryptoBotz application separate. Reconcile the generated fleet to
-// that exact 18-static + 1-protected = 19-destination topology.
 const fleetPath = path.join(dist, "fleet-manifest.json");
 const fleet = JSON.parse(await readFile(fleetPath, "utf8"));
 fleet.architecture = {
@@ -106,11 +124,9 @@ fleet.architecture = {
 };
 fleet.ecosystem_destinations = ecosystemDestinations;
 fleet.protected_unchanged = protectedDestinations.map(({ domain }) => `https://${domain}`);
+fleet.public_aliases = { impactbased: links.impactBased };
 await writeFile(fleetPath, JSON.stringify(fleet, null, 2) + "\n", "utf8");
 
-// build-perfect intentionally rewrites these four human/global surfaces. Bring
-// their metadata/loading behaviour back to the same verified production standard
-// used by the rest of the release.
 for (const [key, domain] of [
   ["oneworldz", "oneworldz.com"],
   ["purplediamondcrew", "purplediamondcrew.com"],
@@ -123,9 +139,14 @@ for (const [key, domain] of [
   await writeFile(file, html, "utf8");
 }
 
-// The OneWorldz Little Legend is the scholar/future-builder hero on mobile.
-// The Uganda section must not repeat that exact production artwork, so use the
-// already-approved Uganda Unite mobile artwork there instead.
+{
+  const file = path.join(dist, "impactbased", "index.html");
+  let html = await readFile(file, "utf8");
+  html = reconcileImpactBased(html);
+  html = ensureProductionSeo(html, "impactbased.oneworldz.com");
+  await writeFile(file, html, "utf8");
+}
+
 {
   const target = path.join(dist, "oneworldz");
   const file = path.join(target, "index.html");
@@ -140,8 +161,6 @@ for (const [key, domain] of [
   await writeFile(file, html, "utf8");
 }
 
-// Restore the final approved-visual contract after the perfect-plan layer has
-// refreshed package manifests. No raw reference-library substitution is made.
 for (const key of ["foodworldz", "donateworldz", "hodlergalaxy"]) {
   await refreshManifest(key, {
     approved_visual: {
@@ -155,5 +174,10 @@ for (const key of ["foodworldz", "donateworldz", "hodlergalaxy"]) {
 for (const key of ["oneworldz", "purplediamondcrew", "law-oneworldz", "learn-oneworldz"]) {
   await refreshManifest(key);
 }
+await refreshManifest("impactbased", {
+  official_public_url: links.impactBased,
+  transport_target_unchanged: true,
+  impactbased_identity: "Helping the People Who Help People • Real Impact • Real People • Real Change"
+});
 
-console.log("Perfect Plan reconciled: 18 static packages + protected CryptoBotz = 19 destinations, production SEO restored, approved visuals preserved.");
+console.log("Perfect Plan reconciled: 18 static packages + protected CryptoBotz = 19 destinations, production SEO restored, approved visuals preserved, ImpactBased official identity and public alias recorded.");
