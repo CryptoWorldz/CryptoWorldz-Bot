@@ -16,7 +16,7 @@ Purpose: one build authority, one active static source tree, no competing websit
 
 ### One canonical static ecosystem build
 - `apps/oneworldz-ecosystem-release/`
-- `apps/oneworldz-ecosystem-release/production-targets.mjs` is the only static destination contract.
+- `apps/oneworldz-ecosystem-release/production-targets.mjs` is the only static destination + authenticated Hostinger transport contract.
 - `apps/oneworldz-ecosystem-release/source/` is the only active static-site source area.
 - Generated `dist/` is build output, never a second source tree.
 
@@ -37,7 +37,14 @@ A sealed historical approved-image bundle is retained only under `archive/refere
 - `deployments/README.md`
 - `deployments/oneworldz-19-total.request`
 
-The request file is a state record only. It is not a workflow trigger.
+The request file is a state record only. It must never multiply into domain-specific request files.
+
+### GitHub execution boundary
+- `.github/workflows/main.yml` is the only file permitted to contain static-fleet Hostinger deployment execution if GitHub Actions is used.
+- `.github/workflows/command-centre-v4.yml` remains verification only.
+- `.github/workflows/resolve-community-facebook-profiles.yml` remains metadata/support only.
+
+No fourth workflow is permitted by the structural guard.
 
 ## RETIRED — REMOVED FROM ACTIVE TREE
 
@@ -66,8 +73,8 @@ The current total-deployment instruction authorises the unchanged canonical rele
 
 1. Build only from `apps/oneworldz-ecosystem-release/`.
 2. Verify with `npm run verify:web` and the root structural/runtime checks.
-3. Produce candidate desktop/mobile browser proof.
-4. Authenticate and record the exact Hostinger account/site/root for every target.
+3. Produce candidate desktop/mobile browser proof and bind it to the exact canonical static-source tree SHA.
+4. Use the already authenticated 18-destination Hostinger proof and re-authenticate the exact recorded transport directories before write.
 5. Use exactly one Hostinger static-fleet production rail.
 6. Verify live technical behaviour.
 7. Produce fresh live desktop/mobile proof.
@@ -77,16 +84,16 @@ No per-domain deployment workflow, emergency direct route, alternate gateway or 
 
 ## HOSTING LAW
 
-The source tree does not guess a physical Hostinger path.
+There are two different roots and they must never be confused again:
 
-Hostinger may show a website home directory such as `/home/<account>/domains/<domain>/public_html` or `/home/<account>/public_html`. That physical path must be captured only as authenticated evidence.
+- **Website/package root:** `/` with homepage `/index.html` and assets `/assets/`.
+- **Hostinger transport directory:** the physical folder reached by the existing shared Hostinger FTP account.
 
-The deployment contract uses remote `/` only when the selected FTP/SFTP credential is already scoped to that exact website root. Therefore:
+All 18 transport directories were authenticated by the successful read-only proof recorded as run `31925927520`, job `95113450775`, against the unchanged current topology tree SHA `5e4bffb4a40a6968d432ca73e619feb15705859c`.
 
-- never prepend `public_html` to a credential that already lands inside the website root;
-- never guess `domains/<domain>/public_html` from another account's layout;
-- never try sibling directories after a failed authentication/path check;
-- correct the target contract before production if Hostinger evidence disagrees.
+Those exact transport directories are now stored once as `hostingerTransportDir` in `production-targets.mjs`. Deployment code must read the exact value. It may not generate a path from the domain name, append `public_html`, probe a sibling folder, fall back to `/`, or choose another historical environment when a path fails.
+
+A transport mismatch is a hard failure and the release stops.
 
 DNS, mail, registrar records and the protected CryptoBotz Node application are outside the static deployment rail.
 
@@ -94,10 +101,10 @@ DNS, mail, registrar records and the protected CryptoBotz Node application are o
 
 Historical GitHub Environments and old branches are non-authoritative metadata. Their existence must not influence planning, target selection or deployment routing.
 
-Current source of truth is `main` plus the governance and canonical build paths above. A stale environment such as an old test or retired-domain environment cannot become active merely because its name matches an old workflow.
+The sole exception is the already proven `cryptoworldz-production` environment when `.github/workflows/main.yml` uses its existing shared Hostinger FTP credential set for the one canonical rail. It is not one option among many; it is the credential boundary that produced the authenticated 18-root proof.
 
-Git history remains evidence. Old branches are not production authorities and must never be selected by planning/build/deployment logic.
+Current source of truth is `main` plus the governance and canonical build paths above. Git history remains evidence. Old branches are not production authorities and must never be selected by planning/build/deployment logic.
 
 ## FAIL-CLOSED STRUCTURE RULE
 
-Root `package.json` runs a structural guard. If a retired gateway/source path or legacy static deployment workflow reappears, canonical verification fails instead of silently choosing between routes.
+Root `package.json` runs a structural guard. If a retired gateway/source path, a fourth workflow, a competing deployment state file or a stale deployment-gate marker reappears, canonical verification fails instead of silently choosing between routes.
