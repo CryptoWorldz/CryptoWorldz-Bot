@@ -6,7 +6,7 @@
   const callout = document.createElement("section");
   callout.className = "oneworldz-gpt-callout";
   callout.id = "oneworldz-gpt";
-  callout.innerHTML = `<div><small>AI GUIDED SUPPORT • POWERED BY OPENAI</small><h2>Ask OneWorldz GPT</h2><p>Ask where to help, what each OneWorldz destination does, how to volunteer, or which approved support pathway fits. Payments stay on the secure DonateWorldz pages — never inside chat.</p></div><button type="button" data-gpt-open>Open OneWorldz GPT</button>`;
+  callout.innerHTML = `<div class="oneworldz-gpt-reference"><img src="/assets/oneworldz-gpt/oneworldz-gpt.png" alt="OneWorldz DonateWorldz AI guide reference artwork" loading="lazy" decoding="async"></div><div class="oneworldz-gpt-copy"><small>AI GUIDED SUPPORT • POWERED BY OPENAI</small><h2>Ask OneWorldz GPT</h2><p>Ask where to help, what each OneWorldz destination does, how to volunteer, or which approved support pathway fits. Payments stay on the secure DonateWorldz pages — never inside chat.</p><button type="button" data-gpt-open>Open OneWorldz GPT</button></div>`;
 
   const footer = document.querySelector(".site-footer");
   if (footer) footer.before(callout);
