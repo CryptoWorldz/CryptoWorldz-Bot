@@ -32,7 +32,7 @@ Production artwork used by the static fleet must enter through that canonical ap
 
 ## Single deterministic deployment pipeline
 
-The exact same candidate must pass these gates in order:
+The exact same static candidate must pass these gates in order:
 
 1. **CLEAN SOURCE LOCK**
    - Retired gateways, duplicate builders, alternate deployment helpers and parallel production routes remain outside the active tree.
@@ -46,19 +46,19 @@ The exact same candidate must pass these gates in order:
 3. **PREVIEW VISUAL PASS — ChatGPT**
    - Render the exact candidate in real desktop and mobile browser viewports.
    - Check required artwork, identity, crop, proportions, text readability, menu behaviour, buttons/links, broken images, browser/page errors, spacing and horizontal overflow.
-   - Record the proof against the exact candidate commit/build digest.
+   - Record the proof against the exact canonical static-source tree digest.
 
 4. **HOSTINGER DESTINATION PASS**
-   - Authenticate the exact Hostinger hosting account and website for every target before any write.
-   - Record the domain, authenticated hosting account, actual Hostinger website home directory and the credential's allowed directory/scope.
-   - The deployment rail may use remote `/` only when that credential is already scoped/chrooted to that exact website root.
-   - Never guess, prepend or probe alternative `public_html`, `domains/.../public_html` or sibling-domain paths after authentication fails.
-   - If Hostinger shows a different intended website/root, correct the target contract first; do not try another path during deployment.
+   - Use only the existing shared Hostinger account and the exact 18 transport directories already authenticated by the recorded read-only Hostinger proof.
+   - The 18 exact transport destinations are stored once in `apps/oneworldz-ecosystem-release/production-targets.mjs` as `hostingerTransportDir` values.
+   - Website/package root remains `/`; homepage remains `/index.html`; website assets remain `/assets/`.
+   - `hostingerTransportDir` is transport evidence for the shared Hostinger account only. It must never be derived, guessed, concatenated, probed or substituted at deployment time.
+   - A destination mismatch is `FAIL — NOT APPROVED`; do not try another directory, account, gateway or workflow.
 
 5. **PRODUCTION DEPLOY**
-   - Use exactly one authenticated static-fleet deployment rail.
+   - Use exactly one authenticated Hostinger static-fleet rail and the exact verified `hostingerTransportDir` for each target.
    - Back up only the package-owned production files for the exact target.
-   - Upload assets before the homepage switch where the transfer mechanism allows it.
+   - Upload non-homepage files first and switch `/index.html` last where the transfer mechanism allows it.
    - Preserve DNS, mail, registrar records, unrelated files and protected services.
    - No domain-specific emergency rail, fallback gateway or second deployment workflow may be introduced.
 
@@ -74,13 +74,21 @@ The exact same candidate must pass these gates in order:
    - Only after gates 1–7 pass may the release be recorded as:
      `JAYJAYTEAMDEV × CHATGPT — 100% PRODUCTION PASS`
 
-## GitHub deployment-route law
+## GitHub execution law
 
-No GitHub Actions static deployment workflow is required by this gate. The cleaned repository may remain without a production-write workflow.
+Only `.github/workflows/main.yml` may be used as the static-fleet execution rail if GitHub Actions is used for this release. It is not permission to create a fourth workflow.
 
-Existing GitHub Environments from historical deployment attempts are inert metadata unless the single canonical rail explicitly adopts one later. They must not be selected merely because they exist.
+The other retained workflows are verification/support workflows only and must never receive static Hostinger deployment authority.
 
-If automation is introduced later, it must replace the current production-transfer mechanism as the one canonical rail; it must never coexist as another alternate route.
+Existing GitHub Environments from historical deployment attempts are inert metadata except the already proven `cryptoworldz-production` environment if `.github/workflows/main.yml` uses its existing Hostinger FTP credentials for the single rail. No other historical environment may be selected merely because it exists.
+
+No retired static deployment workflow may be restored. No domain-specific workflow may be added. Any future replacement execution mechanism must replace the single rail rather than coexist with it.
+
+## Exact candidate law
+
+A preview pass approves a canonical static-source tree, not an arbitrary later commit. Before production write, `.github/workflows/main.yml` must prove that the current `apps/oneworldz-ecosystem-release/` Git tree SHA matches the tree SHA recorded by the ChatGPT preview pass.
+
+A state-only deployment-control commit may follow preview approval. Any change inside the canonical static app invalidates the preview and returns the release to `BUILD PASS`.
 
 ## Mandatory release states
 
@@ -89,7 +97,6 @@ Use only these operational states:
 - `CLEAN SOURCE LOCK`
 - `BUILD PASS`
 - `PREVIEW VISUAL PASS`
-- `HOSTINGER DESTINATION PROOF REQUIRED`
 - `HOSTINGER DESTINATION PASS`
 - `DEPLOYING`
 - `LIVE TECHNICAL PASS`
@@ -98,7 +105,7 @@ Use only these operational states:
 - `JAYJAYTEAMDEV × CHATGPT — 100% PRODUCTION PASS`
 - `FAIL — NOT APPROVED`
 
-A missing destination proof is not permission to guess another route. It remains `HOSTINGER DESTINATION PROOF REQUIRED` until authenticated evidence exists.
+A Hostinger destination mismatch is never permission to guess another route.
 
 ## Visual evidence requirement
 
@@ -112,7 +119,7 @@ Every changed public site must produce at minimum:
 - required identity/artwork check;
 - menu and primary action-link check.
 
-Old screenshots never approve a newer build.
+Old screenshots never approve a newer static-source tree.
 
 ## No-repeat approval rule for the current total deployment
 
