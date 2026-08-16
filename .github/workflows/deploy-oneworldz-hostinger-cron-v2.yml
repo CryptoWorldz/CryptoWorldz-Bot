@@ -186,6 +186,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/oneworldz-proof"
+          npm install --no-save --package-lock=false playwright@1.62.1 >/dev/null
           npx playwright install chromium >/dev/null
           node --input-type=module <<'NODE'
           import { chromium } from 'playwright';
