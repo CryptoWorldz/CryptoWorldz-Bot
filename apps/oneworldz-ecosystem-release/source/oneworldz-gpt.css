@@ -1,110 +1,31 @@
 .oneworldz-gpt-callout {
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: minmax(0,1fr) auto;
-  gap: 1.4rem;
-  align-items: center;
-  margin: 0;
-  padding: clamp(2.2rem,5vw,4.4rem) max(22px,calc((100vw - var(--content))/2));
-  border-block: 1px solid rgba(255,255,255,.09);
-  background:
-    radial-gradient(circle at 14% 50%, color-mix(in srgb,var(--accent) 28%,transparent), transparent 24rem),
-    radial-gradient(circle at 88% 40%, color-mix(in srgb,var(--accent-2) 20%,transparent), transparent 22rem),
-    linear-gradient(135deg,#080714,#11102a 58%,#070712);
-}
-.oneworldz-gpt-callout::before {
-  content:"W";
-  position:absolute;
-  right:clamp(1rem,8vw,7rem);
-  top:50%;
-  transform:translateY(-50%);
-  display:grid;
-  place-items:center;
-  width:clamp(110px,16vw,210px);
-  height:clamp(110px,16vw,210px);
-  border:2px solid color-mix(in srgb,var(--accent) 74%,white);
-  border-radius:50%;
-  color:rgba(255,255,255,.08);
-  font:700 clamp(4rem,9vw,8rem)/1 Georgia,"Times New Roman",serif;
-  box-shadow:0 0 60px color-mix(in srgb,var(--accent) 24%,transparent), inset 0 0 60px rgba(255,255,255,.03);
-}
-.oneworldz-gpt-callout > div { position:relative; z-index:1; max-width:820px; }
-.oneworldz-gpt-callout small { display:block; color:var(--accent-2); font-size:.72rem; font-weight:900; letter-spacing:.22em; text-transform:uppercase; }
-.oneworldz-gpt-callout h2 { margin:.45rem 0 .7rem; font:500 clamp(2.2rem,4.6vw,4.5rem)/1 Georgia,"Times New Roman",serif; letter-spacing:-.03em; }
-.oneworldz-gpt-callout p { max-width:720px; margin:0; color:var(--muted); font-size:clamp(1rem,1.5vw,1.18rem); }
-.oneworldz-gpt-callout button { position:relative; z-index:1; min-height:54px; padding:.85rem 1.35rem; border:1px solid color-mix(in srgb,var(--accent) 72%,white); border-radius:.6rem; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#080510; font-weight:900; cursor:pointer; box-shadow:0 14px 40px color-mix(in srgb,var(--accent) 22%,transparent); }
-
-.oneworldz-gpt-launcher {
-  position:fixed;
-  right:max(18px,env(safe-area-inset-right));
-  bottom:max(18px,env(safe-area-inset-bottom));
-  z-index:190;
-  display:flex;
-  align-items:center;
-  gap:.7rem;
-  min-height:58px;
-  padding:.7rem 1rem .7rem .72rem;
-  border:1px solid color-mix(in srgb,var(--accent) 70%,white);
-  border-radius:999px;
-  background:rgba(8,5,16,.96);
-  color:#fff;
-  font-weight:900;
-  box-shadow:0 18px 60px rgba(0,0,0,.45),0 0 32px color-mix(in srgb,var(--accent) 28%,transparent);
-  cursor:pointer;
-}
-.oneworldz-gpt-launcher .orb {
-  display:grid;
-  place-items:center;
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,#fff 0 4%,var(--accent-2) 12%,var(--accent) 46%,#13082b 74%);
-  color:#fff;
-  font:700 1.2rem Georgia,"Times New Roman",serif;
-  box-shadow:inset 0 0 18px rgba(255,255,255,.18),0 0 24px color-mix(in srgb,var(--accent) 48%,transparent);
-}
-
-.oneworldz-gpt-panel {
-  position:fixed;
-  right:max(18px,env(safe-area-inset-right));
-  bottom:92px;
-  z-index:191;
-  display:none;
-  grid-template-rows:auto minmax(220px,1fr) auto;
-  width:min(430px,calc(100vw - 28px));
-  max-height:min(720px,calc(100svh - 120px));
+  position:relative;
   overflow:hidden;
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:1rem;
-  background:rgba(7,5,16,.98);
-  box-shadow:0 28px 100px rgba(0,0,0,.62),0 0 50px color-mix(in srgb,var(--accent) 20%,transparent);
-  backdrop-filter:blur(20px);
+  display:grid;
+  grid-template-columns:minmax(260px,.85fr) minmax(0,1.15fr);
+  gap:clamp(1.4rem,4vw,4rem);
+  align-items:center;
+  margin:0;
+  padding:clamp(2.2rem,5vw,4.4rem) max(22px,calc((100vw - var(--content))/2));
+  border-block:1px solid rgba(255,255,255,.09);
+  background:radial-gradient(circle at 14% 50%,color-mix(in srgb,var(--accent) 28%,transparent),transparent 24rem),radial-gradient(circle at 88% 40%,color-mix(in srgb,var(--accent-2) 20%,transparent),transparent 22rem),linear-gradient(135deg,#080714,#11102a 58%,#070712);
 }
-.oneworldz-gpt-panel[data-open="true"] { display:grid; }
-.oneworldz-gpt-head { display:flex; align-items:center; gap:.8rem; padding:1rem; border-bottom:1px solid rgba(255,255,255,.1); background:linear-gradient(135deg,rgba(183,99,255,.13),rgba(121,191,255,.08)); }
-.oneworldz-gpt-head .orb { display:grid; place-items:center; flex:0 0 42px; width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#080510; font:700 1.25rem Georgia,"Times New Roman",serif; }
-.oneworldz-gpt-head strong { display:block; font-size:1rem; }
-.oneworldz-gpt-head small { display:block; color:var(--muted); font-size:.72rem; }
-.oneworldz-gpt-close { margin-left:auto; width:42px; height:42px; border:0; border-radius:.55rem; background:rgba(255,255,255,.06); color:#fff; font-size:1.35rem; cursor:pointer; }
-.oneworldz-gpt-messages { overflow:auto; padding:1rem; }
-.oneworldz-gpt-message { max-width:90%; margin:.55rem 0; padding:.78rem .9rem; border-radius:.8rem; white-space:pre-wrap; }
-.oneworldz-gpt-message.assistant { background:rgba(255,255,255,.055); color:#f3edf9; border:1px solid rgba(255,255,255,.08); }
-.oneworldz-gpt-message.user { margin-left:auto; background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 72%,#20122f),color-mix(in srgb,var(--accent-2) 55%,#11182d)); color:#fff; }
-.oneworldz-gpt-links { display:flex; flex-wrap:wrap; gap:.45rem; margin:.6rem 0 1rem; }
-.oneworldz-gpt-links a { padding:.52rem .7rem; border:1px solid color-mix(in srgb,var(--accent) 52%,rgba(255,255,255,.2)); border-radius:.5rem; color:#fff; background:rgba(255,255,255,.035); font-size:.76rem; font-weight:800; text-decoration:none; }
-.oneworldz-gpt-quick { display:flex; flex-wrap:wrap; gap:.45rem; margin:.4rem 0 1rem; }
-.oneworldz-gpt-quick button { border:1px solid rgba(255,255,255,.12); border-radius:999px; background:rgba(255,255,255,.045); color:#ddd4e8; padding:.5rem .7rem; font-size:.74rem; cursor:pointer; }
-.oneworldz-gpt-form { display:grid; grid-template-columns:1fr auto; gap:.6rem; padding:1rem; border-top:1px solid rgba(255,255,255,.1); }
-.oneworldz-gpt-form textarea { min-height:52px; max-height:130px; resize:vertical; border:1px solid rgba(255,255,255,.16); border-radius:.65rem; background:#0b0813; color:#fff; padding:.8rem; font:inherit; }
-.oneworldz-gpt-form button { min-width:76px; border:0; border-radius:.65rem; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#080510; font-weight:900; cursor:pointer; }
-.oneworldz-gpt-note { grid-column:1/-1; margin:0; color:#a99db7; font-size:.68rem; }
-
-@media (max-width:720px) {
-  .oneworldz-gpt-callout { grid-template-columns:1fr; padding-bottom:6.5rem; }
-  .oneworldz-gpt-callout::before { right:-2.5rem; top:auto; bottom:-3.5rem; transform:none; }
-  .oneworldz-gpt-callout button { justify-self:start; }
-  .oneworldz-gpt-launcher span.label { display:none; }
-  .oneworldz-gpt-launcher { width:58px; padding:.7rem; }
-  .oneworldz-gpt-panel { right:14px; bottom:84px; width:calc(100vw - 28px); max-height:calc(100svh - 104px); }
-}
+.oneworldz-gpt-reference,.oneworldz-gpt-copy{position:relative;z-index:1;min-width:0}
+.oneworldz-gpt-reference{max-width:520px}
+.oneworldz-gpt-reference img{display:block;width:100%;height:auto;max-height:520px;object-fit:contain;border:1px solid rgba(255,255,255,.13);border-radius:.9rem;background:#090713;box-shadow:0 22px 70px rgba(0,0,0,.42),0 0 36px color-mix(in srgb,var(--accent) 16%,transparent)}
+.oneworldz-gpt-copy{max-width:760px}
+.oneworldz-gpt-callout small{display:block;color:var(--accent-2);font-size:.72rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase}
+.oneworldz-gpt-callout h2{margin:.45rem 0 .7rem;font:500 clamp(2.2rem,4.6vw,4.5rem)/1 Georgia,"Times New Roman",serif;letter-spacing:-.03em}
+.oneworldz-gpt-callout p{max-width:720px;margin:0;color:var(--muted);font-size:clamp(1rem,1.5vw,1.18rem)}
+.oneworldz-gpt-callout button{min-height:54px;margin-top:1.2rem;padding:.85rem 1.35rem;border:1px solid color-mix(in srgb,var(--accent) 72%,white);border-radius:.6rem;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#080510;font-weight:900;cursor:pointer;box-shadow:0 14px 40px color-mix(in srgb,var(--accent) 22%,transparent)}
+.oneworldz-gpt-launcher{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:190;display:flex;align-items:center;gap:.7rem;min-height:58px;padding:.7rem 1rem .7rem .72rem;border:1px solid color-mix(in srgb,var(--accent) 70%,white);border-radius:999px;background:rgba(8,5,16,.96);color:#fff;font-weight:900;box-shadow:0 18px 60px rgba(0,0,0,.45),0 0 32px color-mix(in srgb,var(--accent) 28%,transparent);cursor:pointer}
+.oneworldz-gpt-launcher .orb{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 4%,var(--accent-2) 12%,var(--accent) 46%,#13082b 74%);color:#fff;font:700 1.2rem Georgia,"Times New Roman",serif;box-shadow:inset 0 0 18px rgba(255,255,255,.18),0 0 24px color-mix(in srgb,var(--accent) 48%,transparent)}
+.oneworldz-gpt-panel{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:92px;z-index:191;display:none;grid-template-rows:auto minmax(220px,1fr) auto;width:min(430px,calc(100vw - 28px));max-height:min(720px,calc(100svh - 120px));overflow:hidden;border:1px solid rgba(255,255,255,.18);border-radius:1rem;background:rgba(7,5,16,.98);box-shadow:0 28px 100px rgba(0,0,0,.62),0 0 50px color-mix(in srgb,var(--accent) 20%,transparent);backdrop-filter:blur(20px)}
+.oneworldz-gpt-panel[data-open="true"]{display:grid}
+.oneworldz-gpt-head{display:flex;align-items:center;gap:.8rem;padding:1rem;border-bottom:1px solid rgba(255,255,255,.1);background:linear-gradient(135deg,rgba(183,99,255,.13),rgba(121,191,255,.08))}
+.oneworldz-gpt-head .orb{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#080510;font:700 1.25rem Georgia,"Times New Roman",serif}
+.oneworldz-gpt-head strong{display:block;font-size:1rem}.oneworldz-gpt-head small{display:block;color:var(--muted);font-size:.72rem}.oneworldz-gpt-close{margin-left:auto;width:42px;height:42px;border:0;border-radius:.55rem;background:rgba(255,255,255,.06);color:#fff;font-size:1.35rem;cursor:pointer}
+.oneworldz-gpt-messages{overflow:auto;padding:1rem}.oneworldz-gpt-message{max-width:90%;margin:.55rem 0;padding:.78rem .9rem;border-radius:.8rem;white-space:pre-wrap}.oneworldz-gpt-message.assistant{background:rgba(255,255,255,.055);color:#f3edf9;border:1px solid rgba(255,255,255,.08)}.oneworldz-gpt-message.user{margin-left:auto;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 72%,#20122f),color-mix(in srgb,var(--accent-2) 55%,#11182d));color:#fff}
+.oneworldz-gpt-links,.oneworldz-gpt-quick{display:flex;flex-wrap:wrap;gap:.45rem;margin:.6rem 0 1rem}.oneworldz-gpt-links a{padding:.52rem .7rem;border:1px solid color-mix(in srgb,var(--accent) 52%,rgba(255,255,255,.2));border-radius:.5rem;color:#fff;background:rgba(255,255,255,.035);font-size:.76rem;font-weight:800;text-decoration:none}.oneworldz-gpt-quick button{margin:0;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.045);color:#ddd4e8;padding:.5rem .7rem;min-height:auto;font-size:.74rem;box-shadow:none;cursor:pointer}
+.oneworldz-gpt-form{display:grid;grid-template-columns:1fr auto;gap:.6rem;padding:1rem;border-top:1px solid rgba(255,255,255,.1)}.oneworldz-gpt-form textarea{min-height:52px;max-height:130px;resize:vertical;border:1px solid rgba(255,255,255,.16);border-radius:.65rem;background:#0b0813;color:#fff;padding:.8rem;font:inherit}.oneworldz-gpt-form button{min-width:76px;border:0;border-radius:.65rem;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#080510;font-weight:900;cursor:pointer}.oneworldz-gpt-note{grid-column:1/-1;margin:0;color:#a99db7;font-size:.68rem}
+@media(max-width:720px){.oneworldz-gpt-callout{grid-template-columns:1fr;gap:1.25rem}.oneworldz-gpt-reference{max-width:460px}.oneworldz-gpt-copy{max-width:none}.oneworldz-gpt-launcher span.label{display:none}.oneworldz-gpt-launcher{width:58px;padding:.7rem}.oneworldz-gpt-panel{right:14px;bottom:84px;width:calc(100vw - 28px);max-height:calc(100svh - 104px)}}
