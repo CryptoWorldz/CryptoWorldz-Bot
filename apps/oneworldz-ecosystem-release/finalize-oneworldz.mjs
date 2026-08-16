@@ -59,18 +59,19 @@ function injectPreviewMeta(html, { title, description, canonical, image, imageAl
     `<meta name="twitter:image:alt" content="${escapeHtml(imageAlt)}">`,
     `<meta property="og:url" content="${canonical}">`
   ].join("");
-  // Replace the original og:url so the page keeps exactly one canonical Open Graph URL.
   html = html.replace(/<meta property="og:url" content="[^"]+">/g, "");
   return html.replace("</head>", `${tags}</head>`);
 }
 
 function addDestinationPreview(html, href, image, alt) {
+  const destinationsStart = html.indexOf('id="destinations"');
+  if (destinationsStart < 0) throw new Error("OneWorldz destinations section missing");
   const hrefNeedle = `href="${href}"`;
-  const hrefIndex = html.indexOf(hrefNeedle);
+  const hrefIndex = html.indexOf(hrefNeedle, destinationsStart);
   if (hrefIndex < 0) throw new Error(`OneWorldz destination link missing: ${href}`);
   const openStart = html.lastIndexOf('<a class="profile-card', hrefIndex);
   const openEnd = html.indexOf(">", hrefIndex);
-  if (openStart < 0 || openEnd < 0) throw new Error(`OneWorldz preview card opening tag missing: ${href}`);
+  if (openStart < destinationsStart || openEnd < 0) throw new Error(`OneWorldz preview card opening tag missing: ${href}`);
 
   let opening = html.slice(openStart, openEnd + 1);
   if (!opening.includes("destination-preview-card")) {
