@@ -21,6 +21,48 @@ const expectedTitles = Object.freeze({
   donateworldz: "DonateWorldz | Choose a Purpose • Support Clearly"
 });
 
+const requiredIdentityText = Object.freeze({
+  oneworldz: "OneWorldz",
+  cryptoworldz: "CryptoWorldz",
+  solworldz: "SolWorldz",
+  ethworldz: "EthWorldz",
+  baseworldz: "BaseWorldz",
+  bnbworldz: "BNBWorldz",
+  xrpworldz: "XRPWorldz",
+  suiworldz: "SuiWorldz",
+  hyperworldz: "HyperWorldz",
+  robinworldz: "RobinWorldz",
+  hodlerworldz: "HodlerWorldz",
+  purplediamondcrew: "Purple Diamond Crew",
+  impactbased: "ImpactBased",
+  "law-oneworldz": "Law.OneWorldz",
+  "learn-oneworldz": "Learn.OneWorldz",
+  hodlergalaxy: "HodlerGalaxy",
+  foodworldz: "FoodWorldz",
+  donateworldz: "DonateWorldz"
+});
+
+const requiredIdentityImage = Object.freeze({
+  oneworldz: "little-legend",
+  cryptoworldz: "zed-command-centre",
+  solworldz: "solworldz",
+  ethworldz: "ethworldz",
+  baseworldz: "baseworldz",
+  bnbworldz: "bnbworldz",
+  xrpworldz: "xrpworldz",
+  suiworldz: "suiworldz",
+  hyperworldz: "hyperworldz",
+  robinworldz: "robinworldz",
+  hodlerworldz: "",
+  purplediamondcrew: "banner.png",
+  impactbased: "impactbased",
+  "law-oneworldz": "",
+  "learn-oneworldz": "",
+  hodlergalaxy: "we-need-you",
+  foodworldz: "action-creates-smiles-banner",
+  donateworldz: "oneworldz-master"
+});
+
 // Exact Hostinger transport destinations authenticated by the successful
 // read-only 18-root proof (run 31925927520 / job 95113450775). These are
 // transport-layer locations for the existing shared Hostinger FTP credential.
@@ -48,15 +90,20 @@ const verifiedHostingerTransportDirs = Object.freeze({
 
 export const productionTargets = Object.freeze(deploymentTargets19.map((target) => {
   const expectedTitle = expectedTitles[target.key];
+  const identityText = requiredIdentityText[target.key];
+  const identityImage = requiredIdentityImage[target.key];
   const hostingerTransportDir = verifiedHostingerTransportDirs[target.key];
   if (!expectedTitle) throw new Error(`Missing production title contract for ${target.key}`);
+  if (!identityText) throw new Error(`Missing required identity text for ${target.key}`);
+  if (identityImage === undefined) throw new Error(`Missing required identity-image contract for ${target.key}`);
   if (!hostingerTransportDir) throw new Error(`Missing authenticated Hostinger transport directory for ${target.key}`);
   return Object.freeze({
     ...target,
-    // Website/package root law remains `/`.
     remoteDir: "/",
     hostingerTransportDir,
     expectedTitle,
+    requiredIdentityText: identityText,
+    requiredIdentityImage: identityImage,
     accountScope: "EXISTING_SHARED_HOSTINGER_ACCOUNT_EXACT_VERIFIED_DIR",
     destinationStatus: "HOSTINGER_DESTINATION_PASS",
     destinationEvidenceRun: 31925927520,
