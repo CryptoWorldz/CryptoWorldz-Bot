@@ -40,11 +40,10 @@ async function verifyHostingerAccess(token) {
 }
 
 function runtimeRoot() {
-  const root = path.resolve(__dirname, "..", "..");
-  const packagePath = path.join(root, "package.json");
-  const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
-  if (pkg.name !== "cryptoworldz-bot" || pkg.scripts?.start !== "node index.js") {
-    throw new Error("unexpected_runtime_root");
+  const root = process.cwd();
+  const indexPath = path.join(root, "index.js");
+  if (!fs.existsSync(indexPath) || !fs.statSync(indexPath).isFile()) {
+    throw new Error("runtime_index_missing");
   }
   return root;
 }
@@ -71,7 +70,7 @@ function mergeProtectedEnv(values) {
 }
 
 function safeBootstrapError(error) {
-  if (error?.message === "unexpected_runtime_root") return "unexpected_runtime_root";
+  if (error?.message === "runtime_index_missing") return "runtime_index_missing";
   if (error?.code === "EACCES" || error?.code === "EPERM" || error?.code === "EROFS") return "runtime_env_not_writable";
   if (error?.code === "ENOENT") return "runtime_file_missing";
   return "secure_runtime_bootstrap_failed";
