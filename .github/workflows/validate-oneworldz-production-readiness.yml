@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   readiness:
-    name: Prove 19 destinations and 17 exact static targets
+    name: Prove 19 destinations and 18 exact static targets
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -39,14 +39,16 @@ jobs:
         run: |
           set -euo pipefail
           cd apps/oneworldz-ecosystem-release
-          node - <<'NODE'
+          node --input-type=module <<'NODE'
           import { productionGate, productionTargets } from './production-targets.mjs';
           if (productionGate.ecosystemDestinations !== 19) throw new Error('Destination count drift');
           if (productionGate.activeOwnedRootDomains !== 15) throw new Error('Owned-domain count drift');
-          if (productionTargets.length !== 17) throw new Error('Static-target count drift');
+          if (productionTargets.length !== 18) throw new Error('Static-target count drift');
+          if (productionGate.staticTargets !== 18) throw new Error('Production gate static-target drift');
           if (productionGate.deploymentState !== 'NOT_EXECUTED') throw new Error('Readiness CI cannot authorize deployment');
           const domains = productionTargets.map(site => site.domain);
           if (domains.includes('solworld.fun')) throw new Error('Legacy SolWorld.fun entered production fleet');
-          if (domains.includes('oneworldz.com')) throw new Error('Protected OneWorldz package detected');
+          if (!domains.includes('oneworldz.com')) throw new Error('OneWorldz global-gateway package missing');
           if (domains.includes('cryptobotz.cryptoworldz.xyz')) throw new Error('Protected CryptoBotz package detected');
+          if (JSON.stringify(productionGate.protectedDestinations) !== JSON.stringify(['cryptobotz.cryptoworldz.xyz'])) throw new Error('Protected destination drift');
           NODE
