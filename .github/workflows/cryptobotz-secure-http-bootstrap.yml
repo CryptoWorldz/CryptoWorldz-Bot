@@ -42,7 +42,7 @@ jobs:
           echo "::add-mask::$OPENAI_API_KEY"
           echo "::add-mask::$HOSTINGER_API_TOKEN"
 
-      - name: Wait for the Git-deployed bootstrap route to be live
+      - name: Wait for this Hostinger Git build to complete
         shell: bash
         run: |
           set -euo pipefail
@@ -69,21 +69,17 @@ jobs:
               except Exception: continue
               if created >= commit: recent.append((created,item))
           if not recent: raise SystemExit(2)
-          created,item=max(recent,key=lambda x:x[0])
+          _,item=max(recent,key=lambda x:x[0])
           state=str(item.get('state') or item.get('status') or '').lower()
-          if state in {'pending','running','queued','in_progress'}: raise SystemExit(3)
-          if state != 'completed': raise SystemExit(4)
+          raise SystemExit(0 if state == 'completed' else 3)
           PY
-            then
-              ready=1
-              break
-            fi
-            echo "Waiting for secure bootstrap build $attempt/180"
+            then ready=1; break; fi
+            echo "Waiting for Hostinger build $attempt/180"
             sleep 5
           done
           test "$ready" = 1
 
-      - name: Install server-only runtime secrets through verified HTTPS bootstrap
+      - name: Install protected runtime secrets once
         shell: bash
         run: |
           set -euo pipefail
@@ -92,22 +88,16 @@ jobs:
             --arg hostinger "$HOSTINGER_API_TOKEN" \
             --arg openai "$OPENAI_API_KEY" \
             '{confirmation:$confirmation,hostinger_api_token:$hostinger,openai_api_key:$openai}' > "$RUNNER_TEMP/bootstrap-body.json"
-          success=0
-          for attempt in $(seq 1 12); do
-            code="$(curl --silent --show-error --location --connect-timeout 10 --max-time 45 \
-              -H 'Content-Type: application/json' \
-              --data-binary @"$RUNNER_TEMP/bootstrap-body.json" \
-              -o "$RUNNER_TEMP/bootstrap.json" -w '%{http_code}' \
-              "https://$TARGET_DOMAIN/api/hub-central/secure-runtime-bootstrap" || true)"
-            if [ "$code" = 200 ] && node -e "const j=require(process.env.RUNNER_TEMP+'/bootstrap.json');if(!j.ok||!j.persisted||!j.hostinger_access_verified||!j.openai_configured)process.exit(1)"; then
-              success=1
-              break
-            fi
-            echo "Secure HTTPS bootstrap convergence $attempt/12 (HTTP $code)"
-            sleep 5
-          done
+          code="$(curl --silent --show-error --location --connect-timeout 10 --max-time 45 \
+            -H 'Content-Type: application/json' \
+            --data-binary @"$RUNNER_TEMP/bootstrap-body.json" \
+            -o "$RUNNER_TEMP/bootstrap.json" -w '%{http_code}' \
+            "https://$TARGET_DOMAIN/api/hub-central/secure-runtime-bootstrap" || true)"
           rm -f "$RUNNER_TEMP/bootstrap-body.json"
-          test "$success" = 1
+          echo "Secure bootstrap HTTP $code"
+          cat "$RUNNER_TEMP/bootstrap.json" || true
+          test "$code" = 200
+          node -e "const j=require(process.env.RUNNER_TEMP+'/bootstrap.json');if(!j.ok||!j.persisted||!j.hostinger_access_verified||!j.openai_configured)process.exit(1)"
 
       - name: Restart Node.js through official Hostinger API
         shell: bash
@@ -140,10 +130,7 @@ jobs:
           if(!gpt.ok||gpt.openai_api_configured!==true||gpt.payments_in_chat!==false) process.exit(1);
           if(!community.ok||community.count!==35||(community.profiles||[]).length!==35) process.exit(1);
           NODE
-            then
-              success=1
-              break
-            fi
+            then success=1; break; fi
             echo "Protected runtime convergence $attempt/48"
           done
           test "$success" = 1
@@ -151,10 +138,7 @@ jobs:
             -H 'Origin: https://oneworldz.com' -H 'Content-Type: application/json' \
             -d '{"page":"deployment-proof","message":"Reply with one short sentence confirming the OneWorldz guide is online."}' \
             "https://$TARGET_DOMAIN/api/oneworldz-gpt/chat" -o "$RUNNER_TEMP/gpt-live.json"
-          node - <<'NODE'
-          const j=require(process.env.RUNNER_TEMP+'/gpt-live.json');
-          if(!j.ok||j.powered_by!=='OpenAI'||!String(j.text||'').trim()) process.exit(1);
-          NODE
+          node -e "const j=require(process.env.RUNNER_TEMP+'/gpt-live.json');if(!j.ok||j.powered_by!=='OpenAI'||!String(j.text||'').trim())process.exit(1)"
 
       - name: Preserve non-secret proof
         if: always()
