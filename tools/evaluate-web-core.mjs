@@ -12,7 +12,7 @@ const exists = (relativePath) => fs.existsSync(path.join(webRoot, relativePath))
 const requiredFiles = [
   'index.html', '404.html', '.htaccess', '_headers', 'donate.html', 'gofundme.html', 'reagan-kauja.html',
   'command-centre/ultimate/index.html', 'config/worlds.js',
-  'assets/site-router.js', 'assets/app.js', 'assets/oneworldz-next.js', 'assets/impactbased.js',
+  'assets/site-router.js', 'assets/app.js', 'assets/oneworldz-next.js', 'assets/oneworldz-live-fix.css', 'assets/impactbased.js',
   'assets/pdc-site.js', 'assets/pdc-site.css', 'assets/pdc-asset.js', 'assets/pdc-asset.css',
   'assets/solworldz.js', 'assets/worldz-imagery.js', 'assets/worldz-imagery.css',
   'assets/jayjayteamdev.js', 'assets/jayjayteamdev.css', 'assets/styles.css'
@@ -80,10 +80,13 @@ assert.match(donateSource, /The Davis Family/i, 'Davis Family dedicated campaign
 assert.match(gofundmeSource, /The Davis Family/i, 'Davis Family campaign missing from GoFundMe hub');
 
 assert.match(routerSource, /oneworldz-next\.js/, 'OneWorldz current page route is missing');
+assert.match(routerSource, /oneworldz-live-fix\.css/, 'OneWorldz strict visual repair stylesheet is not routed');
 assert.match(routerSource, /pdc-site\.js/, 'Purple Diamond Crew current page route is missing');
 assert.match(routerSource, /solworldz\.js/, 'SolWorldz current page route is missing');
-assert.match(oneWorldzSource, /https:\/\/oneworldz\.com\/worldz\/impactbased/, 'OneWorldz must use the canonical ImpactBased route');
-assert.doesNotMatch(oneWorldzSource, /https:\/\/impactbased\.oneworldz\.com/, 'OneWorldz still links to the broken ImpactBased subdomain');
+assert.match(oneWorldzSource, /https:\/\/impactbased\.cryptoworldz\.xyz\//, 'OneWorldz must use the current ImpactBased production route');
+assert.doesNotMatch(oneWorldzSource, /https:\/\/impactbased\.oneworldz\.com/, 'OneWorldz still links to the retired ImpactBased subdomain');
+assert.doesNotMatch(oneWorldzSource, /NEXT PASS/i, 'OneWorldz production directory must not contain NEXT PASS placeholders');
+assert.match(oneWorldzSource, /https:\/\/donateworldz\.com\/reagan-children\//, 'OneWorldz must expose the dedicated Action Spreads Smiles / Reagan support route');
 assert.match(solWorldzSource, /class="sw-hero-visual"/, 'SolWorldz code-native hero is missing');
 assert.doesNotMatch(solWorldzSource, /solworldz-(?:desktop|mobile)-hero\.webp/, 'SolWorldz must not depend on retired corrupt hero WebPs');
 assert.match(pdcAssetSource, /pdc-hope-chest/, 'PDC Hope Chest verified asset slug is missing');
