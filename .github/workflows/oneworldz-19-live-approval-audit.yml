@@ -33,7 +33,7 @@ jobs:
           out.mkdir(parents=True, exist_ok=True)
 
           targets = [
-              ('OneWorldz','https://oneworldz.com/','', 'OneWorldz'),
+              ('OneWorldz','https://oneworldz.com/','OneWorldz | OneWorldz One Vision', 'OneWorldz'),
               ('CryptoWorldz','https://cryptoworldz.xyz/','CryptoWorldz | One World • One Mission','CryptoWorldz'),
               ('SolWorldz','https://solworldz.xyz/','SolWorldz | One World • One Mission','SolWorldz'),
               ('EthWorldz','https://ethworldz.xyz/','EthWorldz | One World • One Mission','EthWorldz'),
@@ -45,12 +45,12 @@ jobs:
               ('RobinWorldz','https://robinworldz.xyz/','RobinWorldz | One World • One Mission','RobinWorldz'),
               ('HodlerWorldz','https://hodlerworldz.xyz/','HodlerWorldz | One World • One Mission','HodlerWorldz'),
               ('HodlerGalaxy','https://hodlergalaxy.xyz/','HodlerGalaxy | Explore the OneWorldz Ecosystem','HodlerGalaxy'),
-              ('Purple Diamond Crew','https://purplediamondcrew.com/','Purple Diamond Crew | The Legacy Lives On','Purple Diamond Crew'),
+              ('Purple Diamond Crew','https://purplediamondcrew.com/','Purple Diamond Crew | On the Ground','Purple Diamond Crew'),
               ('FoodWorldz','https://foodworldz.com/','FoodWorldz | See the Need • Support the Mission','FoodWorldz'),
               ('DonateWorldz','https://donateworldz.com/','DonateWorldz | Choose a Purpose • Support Clearly','DonateWorldz'),
               ('ImpactBased','https://impactbased.cryptoworldz.xyz/','ImpactBased | Purpose-Driven Launch Board','ImpactBased'),
-              ('Law.OneWorldz','https://law.oneworldz.com/','Law.OneWorldz | Public Information','Law.OneWorldz'),
-              ('Learn.OneWorldz','https://learn.oneworldz.com/','Learn.OneWorldz | Knowledge Creates Power','Learn.OneWorldz'),
+              ('Law.OneWorldz','https://law.oneworldz.com/','Law.OneWorldz | People-First Public Ideas','Law.OneWorldz'),
+              ('Learn.OneWorldz','https://learn.oneworldz.com/','Learn.OneWorldz | Learn • Share • Do','Learn.OneWorldz'),
               ('CryptoBotz Command Centre','https://cryptobotz.cryptoworldz.xyz/','', 'CryptoBotz'),
           ]
 
