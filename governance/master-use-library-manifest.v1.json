@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "asset_count": 45,
+  "asset_count": 44,
   "files": [
     {"path":"ARCHITECTURE.md","bytes":2669,"sha256":"cea2dad396c91d87cbb213ee194ebbb404431bdb71637db6734825ae272ea8f1"},
     {"path":"reference/vision-blueprint-x-post/13.jpg","bytes":110037,"sha256":"b50f2d760c737dc0158e31b16ce193a9cb8ae4bdcb8bc28491b8d50d7d3d4a19"},
