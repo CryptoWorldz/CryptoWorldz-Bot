@@ -11,6 +11,7 @@ const exists = (relativePath) => fs.existsSync(path.join(webRoot, relativePath))
 const visualFiles = [
   'assets/images/website-core/oneworldz/oneworldz-one-vision-one-future.webp',
   'assets/images/website-core/purple-diamond-crew/hope-chest-by-firelight.webp',
+  'assets/oneworldz-live-fix.css',
   'assets/worldz-imagery.js',
   'assets/worldz-imagery.css',
   'assets/jayjayteamdev.js',
@@ -45,12 +46,15 @@ assert.match(indexSource, /worldz-imagery\.js/, 'Shared Worldz imagery script is
 assert.match(indexSource, /jayjayteamdev\.css/, 'JayJayTeamDev stylesheet is not loaded');
 assert.match(indexSource, /site-router\.js/, 'Worldz router is not loaded');
 assert.match(routerSource, /oneworldz-next\.js/, 'Current OneWorldz route is not loaded');
+assert.match(routerSource, /oneworldz-live-fix\.css/, 'Strict OneWorldz visual repair stylesheet is not loaded');
 assert.match(routerSource, /jayjayteamdev\.js/, 'JayJayTeamDev page route is not loaded');
 
 assert.match(oneWorldzSource, /oneworldz-one-vision-one-future\.webp/, 'Current OneWorldz master hero is not displayed');
 assert.match(oneWorldzSource, /hope-chest-by-firelight\.webp/, 'Current Hope Chest master artwork is not displayed');
-assert.match(oneWorldzSource, /https:\/\/oneworldz\.com\/worldz\/impactbased/, 'Canonical ImpactBased page is not linked');
-assert.doesNotMatch(oneWorldzSource, /https:\/\/impactbased\.oneworldz\.com/, 'Broken ImpactBased subdomain remains in OneWorldz public links');
+assert.match(oneWorldzSource, /https:\/\/impactbased\.cryptoworldz\.xyz\//, 'Current ImpactBased production page is not linked');
+assert.doesNotMatch(oneWorldzSource, /https:\/\/impactbased\.oneworldz\.com/, 'Retired ImpactBased subdomain remains in OneWorldz public links');
+assert.match(oneWorldzSource, /https:\/\/donateworldz\.com\/reagan-children\//, 'Dedicated Action Spreads Smiles support page is not linked');
+assert.doesNotMatch(oneWorldzSource, /NEXT PASS/i, 'Internal deployment placeholder text remains on the OneWorldz public page');
 assert.match(founderSource, /Public Build Record/, 'Founder evidence link is missing');
 assert.match(pdcAssetSource, /pdc-hope-chest/, 'PDC verified Hope Chest registry slug is missing');
 
