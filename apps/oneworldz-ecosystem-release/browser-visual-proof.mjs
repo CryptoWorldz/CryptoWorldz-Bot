@@ -13,6 +13,7 @@ const liveUrl = args.get("--url");
 const outDir = path.resolve(args.get("--out") || `visual-proof/${name}`);
 const expectedTitle = args.get("--expected-title") || "";
 const requiredImage = args.get("--required-image") || "";
+const requiredText = args.get("--required-text") || "";
 if (!rootArg && !liveUrl) throw new Error("Provide --root for candidate proof or --url for live proof");
 
 await mkdir(outDir, { recursive: true });
@@ -66,6 +67,7 @@ const report = {
   url: targetUrl,
   expectedTitle,
   requiredImage,
+  requiredText,
   generatedAt: new Date().toISOString(),
   viewports: {},
   pass: true,
@@ -101,7 +103,7 @@ for (const vp of viewports) {
   }
   await page.waitForTimeout(500);
 
-  const dom = await page.evaluate(({ requiredImage }) => {
+  const dom = await page.evaluate(({ requiredImage, requiredText }) => {
     const images = [...document.images].map((img) => ({
       src: img.getAttribute("src") || "",
       currentSrc: img.currentSrc || "",
@@ -111,8 +113,10 @@ for (const vp of viewports) {
       naturalHeight: img.naturalHeight,
       rect: { width: Math.round(img.getBoundingClientRect().width), height: Math.round(img.getBoundingClientRect().height) }
     }));
+    const bodyText = (document.body?.innerText || "").trim();
     const brokenImages = images.filter((img) => !img.complete || img.naturalWidth <= 0 || img.naturalHeight <= 0);
     const requiredImagePresent = !requiredImage || images.some((img) => img.src.includes(requiredImage) || img.currentSrc.includes(requiredImage));
+    const requiredTextPresent = !requiredText || bodyText.toLocaleLowerCase().includes(requiredText.toLocaleLowerCase());
     const interactive = [...document.querySelectorAll("a[href],button")].map((el) => ({
       tag: el.tagName.toLowerCase(),
       text: (el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 120),
@@ -122,17 +126,18 @@ for (const vp of viewports) {
     return {
       title: document.title,
       h1: document.querySelector("h1")?.textContent?.trim() || "",
-      textLength: (document.body?.innerText || "").trim().length,
+      textLength: bodyText.length,
       scrollWidth: document.documentElement.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
       horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth),
       images,
       brokenImages,
       requiredImagePresent,
+      requiredTextPresent,
       interactiveCount: interactive.filter((x) => x.visible).length,
       emptyVisibleLinks: interactive.filter((x) => x.tag === "a" && x.visible && (!x.href || x.href === "#" || /^javascript:/i.test(x.href)))
     };
-  }, { requiredImage });
+  }, { requiredImage, requiredText });
 
   let menu = { present: false, tested: false, opened: null, closed: null };
   const menuButton = page.locator('button[aria-controls="site-menu"]').first();
@@ -159,9 +164,13 @@ for (const vp of viewports) {
   if (dom.brokenImages.length) failures.push(`broken images: ${dom.brokenImages.length}`);
   if (dom.horizontalOverflow > 4) failures.push(`horizontal overflow: ${dom.horizontalOverflow}px`);
   if (!dom.requiredImagePresent) failures.push(`required image missing: ${requiredImage}`);
+  if (!dom.requiredTextPresent) failures.push(`required identity text missing: ${requiredText}`);
+  if (dom.interactiveCount < 2) failures.push(`too few visible actions: ${dom.interactiveCount}`);
+  if (dom.emptyVisibleLinks.length) failures.push(`empty or unsafe visible links: ${dom.emptyVisibleLinks.length}`);
   if (failedRequests.length) failures.push(`same-origin failed requests: ${failedRequests.length}`);
   if (pageErrors.length) failures.push(`page errors: ${pageErrors.length}`);
   if (consoleErrors.length) failures.push(`console errors: ${consoleErrors.length}`);
+  if (!menu.present) failures.push("site menu missing");
   if (menu.tested && (!menu.opened || !menu.closed)) failures.push("menu open/close behaviour failed");
 
   report.viewports[vp.key] = { ...dom, menu, consoleErrors, pageErrors, failedRequests, navigationError, screenshot, failures };
