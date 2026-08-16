@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Build and verify 19-destination architecture
+    name: Build and verify 19 destinations / 18 static targets
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -34,9 +34,11 @@ jobs:
           node --input-type=module <<'NODE'
           import { readFile } from 'node:fs/promises';
           const manifest = JSON.parse(await readFile('dist/ecosystem/fleet-manifest.json', 'utf8'));
-          if (manifest.targets.length !== 17) throw new Error(`Expected 17 static packages, got ${manifest.targets.length}`);
+          if (manifest.targets.length !== 18) throw new Error(`Expected 18 static packages, got ${manifest.targets.length}`);
+          if (manifest.architecture?.static_build_targets !== 18) throw new Error('Expected 18 static build targets in architecture manifest');
           if (manifest.architecture?.ecosystem_destinations !== 19) throw new Error('Expected 19 ecosystem destinations');
           if (manifest.architecture?.active_owned_root_domains !== 15) throw new Error('Expected 15 active owned root domains');
+          if (JSON.stringify(manifest.architecture?.protected_existing_destinations) !== JSON.stringify(['https://cryptobotz.cryptoworldz.xyz'])) throw new Error('CryptoBotz protected destination contract missing');
           if (JSON.stringify(manifest.architecture?.excluded_owned_root_domains) !== JSON.stringify(['solworld.fun'])) throw new Error('SolWorld.fun exclusion missing');
-          console.log('OneWorldz architecture verified: 15 active owned roots + 4 subdomains = 19 destinations.');
+          console.log('OneWorldz architecture verified: 18 static destinations + protected CryptoBotz = 19 total.');
           NODE

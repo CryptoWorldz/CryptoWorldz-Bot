@@ -1,6 +1,7 @@
 import { deploymentTargets19, excludedRootDomains, protectedDestinations } from "./ecosystem-topology.mjs";
 
 const expectedTitles = Object.freeze({
+  oneworldz: "OneWorldz | OneWorldz One Vision",
   cryptoworldz: "CryptoWorldz | One World • One Mission",
   solworldz: "SolWorldz | One World • One Mission",
   ethworldz: "EthWorldz | One World • One Mission",
@@ -11,10 +12,10 @@ const expectedTitles = Object.freeze({
   hyperworldz: "HyperWorldz | One World • One Mission",
   robinworldz: "RobinWorldz | One World • One Mission",
   hodlerworldz: "HodlerWorldz | One World • One Mission",
-  purplediamondcrew: "Purple Diamond Crew | The Legacy Lives On",
+  purplediamondcrew: "Purple Diamond Crew | On the Ground",
   impactbased: "ImpactBased | Purpose-Driven Launch Board",
-  "law-oneworldz": "Law.OneWorldz | Public Information",
-  "learn-oneworldz": "Learn.OneWorldz | Knowledge Creates Power",
+  "law-oneworldz": "Law.OneWorldz | People-First Public Ideas",
+  "learn-oneworldz": "Learn.OneWorldz | Learn • Share • Do",
   hodlergalaxy: "HodlerGalaxy | Explore the OneWorldz Ecosystem",
   foodworldz: "FoodWorldz | See the Need • Support the Mission",
   donateworldz: "DonateWorldz | Choose a Purpose • Support Clearly"
@@ -46,4 +47,4 @@ export const productionGate = Object.freeze({
   deploymentState: "NOT_EXECUTED"
 });
 
-if (productionTargets.length !== 17) throw new Error(`Expected 17 production targets, got ${productionTargets.length}`);
+if (productionTargets.length !== 18) throw new Error(`Expected 18 production targets, got ${productionTargets.length}`);
