@@ -1,0 +1,24 @@
+name: OneWorldz Production Emergency Hold
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/oneworldz-production.hold'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-19-total-production
+  cancel-in-progress: true
+
+jobs:
+  hold:
+    name: Cancel stale total release before remote writes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm explicit hold marker
+        shell: bash
+        run: |
+          echo 'OneWorldz production hold acquired. Any older run in the same production concurrency group is cancelled.'
