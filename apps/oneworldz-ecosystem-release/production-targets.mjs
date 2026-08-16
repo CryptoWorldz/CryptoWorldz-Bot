@@ -21,23 +21,43 @@ const expectedTitles = Object.freeze({
   donateworldz: "DonateWorldz | Choose a Purpose • Support Clearly"
 });
 
-// Hostinger destination evidence was recovered from successful authenticated
-// preflight run 31925927520 / job 95113450775. That run proved all 18 exact
-// Hostinger roots against topology SHA 5e4bffb4a40a6968d432ca73e619feb15705859c,
-// which is still the current topology SHA. OneWorldz was subsequently
-// re-confirmed by successful exact-root deployment job 95214059999.
-//
-// `remoteDir: "/"` is the clean deployment abstraction: the single future rail
-// must use a credential scoped/chrooted to the already-proven website root. The
-// active contract does not repeat physical public_html paths or probe siblings.
+// Exact Hostinger transport destinations authenticated by the successful
+// read-only 18-root proof (run 31925927520 / job 95113450775). These are
+// transport-layer locations for the existing shared Hostinger FTP credential.
+// They are NOT public URL roots and they must never be dynamically guessed.
+const verifiedHostingerTransportDirs = Object.freeze({
+  oneworldz: "domains/oneworldz.com/public_html",
+  cryptoworldz: "domains/cryptoworldz.xyz/public_html",
+  solworldz: "domains/solworldz.xyz/public_html",
+  ethworldz: "domains/ethworldz.xyz/public_html",
+  baseworldz: "domains/baseworldz.xyz/public_html",
+  bnbworldz: "domains/bnbworldz.xyz/public_html",
+  xrpworldz: "domains/xrpworldz.xyz/public_html",
+  suiworldz: "domains/suiworldz.xyz/public_html",
+  hyperworldz: "domains/hyperworldz.xyz/public_html",
+  robinworldz: "domains/robinworldz.xyz/public_html",
+  hodlerworldz: "domains/hodlerworldz.xyz/public_html",
+  purplediamondcrew: "domains/purplediamondcrew.com/public_html",
+  impactbased: "domains/cryptoworldz.xyz/public_html/impactbased",
+  "law-oneworldz": "domains/oneworldz.com/public_html/law",
+  "learn-oneworldz": "domains/oneworldz.com/public_html/learn",
+  hodlergalaxy: "domains/hodlergalaxy.xyz/public_html",
+  foodworldz: "domains/foodworldz.com/public_html",
+  donateworldz: "domains/donateworldz.com/public_html"
+});
+
 export const productionTargets = Object.freeze(deploymentTargets19.map((target) => {
   const expectedTitle = expectedTitles[target.key];
+  const hostingerTransportDir = verifiedHostingerTransportDirs[target.key];
   if (!expectedTitle) throw new Error(`Missing production title contract for ${target.key}`);
+  if (!hostingerTransportDir) throw new Error(`Missing authenticated Hostinger transport directory for ${target.key}`);
   return Object.freeze({
     ...target,
+    // Website/package root law remains `/`.
     remoteDir: "/",
+    hostingerTransportDir,
     expectedTitle,
-    accountScope: "EXACT_HOSTINGER_WEBSITE_ROOT_PROVEN",
+    accountScope: "EXISTING_SHARED_HOSTINGER_ACCOUNT_EXACT_VERIFIED_DIR",
     destinationStatus: "HOSTINGER_DESTINATION_PASS",
     destinationEvidenceRun: 31925927520,
     destinationEvidenceJob: 95113450775,
@@ -66,3 +86,4 @@ export const productionGate = Object.freeze({
 });
 
 if (productionTargets.length !== 18) throw new Error(`Expected 18 production targets, got ${productionTargets.length}`);
+if (Object.keys(verifiedHostingerTransportDirs).length !== 18) throw new Error("Expected 18 authenticated Hostinger transport directories");
