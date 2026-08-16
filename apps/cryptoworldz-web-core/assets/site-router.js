@@ -22,6 +22,13 @@
     'bitcoinworldz.xyz'
   ]);
 
+  if (hostname === 'oneworldz.com' || requestedMode === 'mission') {
+    const visualFix = document.createElement('link');
+    visualFix.rel = 'stylesheet';
+    visualFix.href = './assets/oneworldz-live-fix.css?v=20260816-visual2';
+    document.head.appendChild(visualFix);
+  }
+
   const walletButton = document.querySelector('#wallet-button');
   if (hostname === 'solworldz.xyz' && walletButton) {
     walletButton.textContent = 'Zed Command Centre';
@@ -55,6 +62,6 @@
                       : requestedMode === 'directory'
                         ? './assets/pdc-directory.js'
                         : './assets/app.js';
-  script.src = `${selectedScript}?v=20260813-shared-proof-v1`;
+  script.src = `${selectedScript}?v=20260816-oneworldz-visual2`;
   document.body.appendChild(script);
 })();
