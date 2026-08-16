@@ -144,24 +144,26 @@
   border-color: color-mix(in srgb, var(--accent) 74%, white);
 }
 
-.cw-link-preview picture,
+.cw-link-preview-image,
 .cw-link-preview img {
   width: 100%;
   height: 100%;
 }
 
-.cw-link-preview picture {
+.cw-link-preview-image {
   display: block;
   overflow: hidden;
+  padding: 0;
   background: #080510;
 }
 
 .cw-link-preview img {
+  display: block;
   object-fit: cover;
   object-position: center;
 }
 
-.cw-link-preview span {
+.cw-link-preview > span:not(.cw-link-preview-image) {
   display: grid;
   gap: .25rem;
   align-content: center;
@@ -236,5 +238,5 @@
 
   .cw-link-preview-grid { grid-template-columns: 1fr; }
   .cw-link-preview { grid-template-columns: 112px minmax(0, 1fr); grid-template-rows: none; min-height: 112px; }
-  .cw-link-preview picture { min-height: 112px; }
+  .cw-link-preview-image { min-height: 112px; }
 }
