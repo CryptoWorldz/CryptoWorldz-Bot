@@ -33,4 +33,5 @@ build_pass=PASS_RUN_31977292122
 chatgpt_preview_visual_pass=PENDING_TRIGGERED_RUN
 live_technical_pass=PENDING
 live_visual_pass=PENDING
+preview_trigger_nonce=2026-08-17T09:08:00+10:00
 next_action=CANONICAL_PREVIEW_RUN_BUILD_AND_DESKTOP_MOBILE_VISUAL_PROOF_NO_PRODUCTION_WRITE
