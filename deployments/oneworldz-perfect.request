@@ -7,4 +7,4 @@ excluded=solworld.fun
 release=oneworldz-perfect-plan-2026-08-16
 mode=proof-first-exact-file
 rollback=restore-only-exact-prior-files
-retry=2026-08-16-after-lftp-existing-directory-fix
+retry=2026-08-16-install-dependencies-before-perfect-plan-verification
