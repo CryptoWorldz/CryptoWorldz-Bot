@@ -23,47 +23,52 @@ jobs:
           test -n "$HOSTINGER_API_TOKEN"
           echo "Hostinger API token is available to Actions."
 
-      - name: Audit Hostinger DNS and hosting state
+      - name: Audit Hostinger API account visibility
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           api='https://developers.hostinger.com'
           auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
           mkdir -p "$RUNNER_TEMP/hostinger-audit"
 
+          request() {
+            label="$1"; url="$2"; outfile="$3"
+            echo "===== $label ====="
+            code="$(curl --silent --show-error --location \
+              -H "$auth" -H 'Accept: application/json' \
+              -o "$outfile" -w '%{http_code}' "$url" || true)"
+            echo "HTTP $code"
+            cat "$outfile" 2>/dev/null || true
+            echo
+          }
+
+          request 'HOSTING ORDERS' \
+            "$api/api/hosting/v1/orders" \
+            "$RUNNER_TEMP/hostinger-audit/hosting-orders.json"
+
+          request 'HOSTING WEBSITES' \
+            "$api/api/hosting/v1/websites" \
+            "$RUNNER_TEMP/hostinger-audit/hosting-websites.json"
+
+          request 'DOMAIN PORTFOLIO' \
+            "$api/api/domains/v1/portfolio" \
+            "$RUNNER_TEMP/hostinger-audit/domain-portfolio.json"
+
           for domain in donateworldz.com foodworldz.com; do
-            echo "===== $domain : DNS ZONE ====="
-            curl --fail --silent --show-error \
-              -H "$auth" -H 'Accept: application/json' \
+            request "$domain : DNS ZONE" \
               "$api/api/dns/v1/zones/$domain" \
-              | tee "$RUNNER_TEMP/hostinger-audit/${domain}-dns.json"
-            echo
+              "$RUNNER_TEMP/hostinger-audit/${domain}-dns.json"
 
-            echo "===== $domain : DOMAIN PORTFOLIO ====="
-            curl --fail --silent --show-error \
-              -H "$auth" -H 'Accept: application/json' \
+            request "$domain : DOMAIN DETAILS" \
               "$api/api/domains/v1/portfolio/$domain" \
-              | tee "$RUNNER_TEMP/hostinger-audit/${domain}-portfolio.json" || true
-            echo
-
-            echo "===== $domain : HOSTING WEBSITE ====="
-            curl --fail --silent --show-error --get \
-              -H "$auth" -H 'Accept: application/json' \
-              --data-urlencode "domain=$domain" \
-              "$api/api/hosting/v1/websites" \
-              | tee "$RUNNER_TEMP/hostinger-audit/${domain}-website.json"
-            echo
+              "$RUNNER_TEMP/hostinger-audit/${domain}-portfolio.json"
 
             echo "===== $domain : PUBLIC DNS ====="
-            echo 'A:'
-            dig +short A "$domain" || true
-            echo 'AAAA:'
-            dig +short AAAA "$domain" || true
-            echo 'NS:'
-            dig +short NS "$domain" || true
-            echo 'www:'
-            dig +short CNAME "www.$domain" || true
-            dig +short A "www.$domain" || true
+            echo 'A:'; dig +short A "$domain" || true
+            echo 'AAAA:'; dig +short AAAA "$domain" || true
+            echo 'NS:'; dig +short NS "$domain" || true
+            echo 'www CNAME:'; dig +short CNAME "www.$domain" || true
+            echo 'www A:'; dig +short A "www.$domain" || true
 
             echo "===== $domain : HTTPS ====="
             curl --silent --show-error --location --head \
@@ -77,5 +82,5 @@ jobs:
         with:
           name: hostinger-dns-audit-${{ github.run_id }}
           path: ${{ runner.temp }}/hostinger-audit/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
