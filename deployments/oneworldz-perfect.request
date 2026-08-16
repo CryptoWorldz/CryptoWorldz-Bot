@@ -1,0 +1,10 @@
+requested_by=JayJayTeamDev
+authorization=APPROVE COMPLETE ECOSYSTEM BUILD AND TOTAL DEPLOYMENT
+destinations=19
+static_targets=18
+protected=cryptobotz.cryptoworldz.xyz
+excluded=solworld.fun
+release=oneworldz-perfect-plan-2026-08-16
+mode=proof-first-exact-file
+rollback=restore-only-exact-prior-files
+retry=2026-08-16-after-lftp-existing-directory-fix
