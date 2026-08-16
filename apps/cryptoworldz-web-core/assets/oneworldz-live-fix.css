@@ -1,0 +1,62 @@
+/* OneWorldz production visual repair — scoped to OneWorldz only. */
+body.oneworldz-live .page-shell{width:min(1120px,calc(100% - 24px));margin-top:18px}
+body.oneworldz-live .wx-shell{gap:18px}
+body.oneworldz-live .wx-panel{overflow:hidden}
+
+body.oneworldz-live .owz-fixed-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);min-height:0;background:linear-gradient(145deg,#08030f,#120721);align-items:stretch}
+body.oneworldz-live .owz-fixed-hero::after{display:none}
+body.oneworldz-live .wx-hero-media{min-width:0;padding:18px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,rgba(133,54,211,.2),transparent 62%)}
+body.oneworldz-live .wx-hero-media img{display:block;width:100%;height:auto;max-height:560px;object-fit:contain;border-radius:18px;border:1px solid rgba(178,91,255,.25)}
+body.oneworldz-live .owz-fixed-hero .wx-hero-copy{min-height:0;max-width:none;padding:38px 34px;justify-content:center}
+body.oneworldz-live .owz-fixed-hero h1{font-size:clamp(2rem,4vw,4rem);line-height:1.02;letter-spacing:-.04em;margin:10px 0 16px}
+body.oneworldz-live .owz-fixed-hero p{font-size:clamp(1rem,1.7vw,1.22rem);line-height:1.5}
+
+body.oneworldz-live .owz-loop-panel h2{font-size:clamp(1.75rem,4vw,3rem);margin-bottom:18px}
+body.oneworldz-live .wx-loop{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 20px}
+body.oneworldz-live .wx-loop span{position:relative;padding:13px 12px;border:1px solid rgba(93,220,255,.22);border-radius:12px;background:rgba(9,17,32,.64);font:700 .78rem/1.25 Orbitron,sans-serif;text-align:center;color:#f5efff}
+body.oneworldz-live .wx-loop span:not(:last-child)::after{content:'→';position:absolute;right:-9px;top:50%;transform:translateY(-50%);z-index:2;color:#7ddfff;font-size:.8rem}
+
+body.oneworldz-live .owz-worlds-panel>p{margin-bottom:18px}
+body.oneworldz-live .wx-worlds{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+body.oneworldz-live .wx-world-link{display:flex;min-height:112px;padding:15px;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;gap:4px}
+body.oneworldz-live .wx-world-link strong{font:700 .8rem/1.2 Orbitron,sans-serif;color:#fff}
+body.oneworldz-live .wx-world-link span{font:500 .82rem/1.25 Rajdhani,sans-serif;color:#bcaeca}
+body.oneworldz-live .wx-world-link b{margin-top:6px;font:700 .62rem Orbitron,sans-serif;color:#62d9ff}
+body.oneworldz-live .owz-command-row{margin-top:16px}
+body.oneworldz-live .wx-hope-chest-media{display:flex;align-items:center;justify-content:center;min-width:0;padding:16px}
+body.oneworldz-live .wx-hope-chest-media img{display:block;width:min(100%,280px);height:auto;min-height:0;aspect-ratio:4/5;object-fit:cover;border-radius:18px}
+
+@media(max-width:820px){
+ body.oneworldz-live .site-header{width:calc(100% - 18px);margin-top:8px;padding:10px 12px;gap:10px;grid-template-columns:minmax(0,1fr) auto}
+ body.oneworldz-live .site-header .main-nav{display:none}
+ body.oneworldz-live .site-header .button-muted{font-size:.78rem;padding:9px 11px;min-height:42px;white-space:nowrap}
+ body.oneworldz-live .brand-emblem{width:44px;height:44px}
+ body.oneworldz-live .brand strong{font-size:.82rem;letter-spacing:.05em}
+ body.oneworldz-live .brand small{display:none}
+ body.oneworldz-live .owz-fixed-hero{grid-template-columns:1fr}
+ body.oneworldz-live .wx-hero-media{padding:12px 12px 0}
+ body.oneworldz-live .wx-hero-media img{max-height:none;width:100%;object-fit:contain}
+ body.oneworldz-live .owz-fixed-hero .wx-hero-copy{padding:24px 18px 22px}
+ body.oneworldz-live .owz-fixed-hero h1{font-size:clamp(1.8rem,8.4vw,2.7rem);line-height:1.04}
+ body.oneworldz-live .wx-panel{padding:21px 18px}
+ body.oneworldz-live .wx-panel h2{font-size:clamp(1.55rem,7vw,2.25rem);line-height:1.08;overflow-wrap:break-word}
+ body.oneworldz-live .wx-loop{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body.oneworldz-live .wx-loop span:not(:last-child)::after{display:none}
+ body.oneworldz-live .wx-worlds{grid-template-columns:1fr 1fr}
+ body.oneworldz-live .wx-world-link{min-height:104px}
+}
+
+@media(max-width:460px){
+ body.oneworldz-live .page-shell{width:calc(100% - 14px);margin-top:12px}
+ body.oneworldz-live .site-header .button-muted{font-size:.7rem;max-width:150px}
+ body.oneworldz-live .brand{gap:8px}
+ body.oneworldz-live .brand strong{font-size:.75rem}
+ body.oneworldz-live .wx-hero-media{padding:8px 8px 0}
+ body.oneworldz-live .owz-fixed-hero .wx-hero-copy{padding:20px 15px}
+ body.oneworldz-live .wx-actions{gap:8px}
+ body.oneworldz-live .wx-btn{min-height:48px;padding:12px 13px;font-size:.93rem}
+ body.oneworldz-live .wx-loop{grid-template-columns:1fr 1fr;gap:8px}
+ body.oneworldz-live .wx-loop span{padding:11px 8px;font-size:.66rem}
+ body.oneworldz-live .wx-worlds{grid-template-columns:1fr}
+ body.oneworldz-live .wx-world-link{min-height:86px}
+}
