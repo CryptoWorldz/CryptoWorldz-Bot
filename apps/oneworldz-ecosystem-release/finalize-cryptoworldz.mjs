@@ -47,6 +47,11 @@ function injectBodyClass(html, routeClass) {
   return html.replace(/<body\s+style="([^"]*)">/, `<body class="cryptoworldz-visual route-${routeClass}" style="$1">`);
 }
 
+function keepDivisionIdentityOnMobile(html, routeClass) {
+  if (!routeClass.startsWith("division-")) return html;
+  return html.replace(/(<picture class="production-picture hero-art">\s*)<source[^>]*>\s*/i, "$1");
+}
+
 function injectLinkPreviews(html) {
   if (html.includes('class="section section-dark cw-link-previews"')) return html;
   const pos = html.lastIndexOf("</main>");
@@ -80,6 +85,7 @@ await cp(cssSource, cssTarget);
 for (const [routeClass, relative] of pages) {
   const file = path.join(target, relative);
   let html = await readFile(file, "utf8");
+  html = keepDivisionIdentityOnMobile(html, routeClass);
   html = injectVisualCss(html);
   html = injectBodyClass(html, routeClass);
   html = injectLinkPreviews(html);
@@ -90,6 +96,7 @@ for (const [routeClass, relative] of pages) {
   if (!html.includes('property="og:image"')) throw new Error(`${relative}: Open Graph image missing`);
   if (!html.includes('name="twitter:card" content="summary_large_image"')) throw new Error(`${relative}: Twitter large preview missing`);
   if ((html.match(/class="cw-link-preview"/g) || []).length !== 4) throw new Error(`${relative}: four visual link previews required`);
+  if (routeClass.startsWith("division-") && /<picture class="production-picture hero-art">\s*<source/i.test(html)) throw new Error(`${relative}: division mobile hero must preserve the matching desktop identity artwork`);
   verifyHashes(html, relative);
   await writeFile(file, html, "utf8");
 }
@@ -109,6 +116,7 @@ manifest.cryptoworldz_visual_contract = {
   page_routes: pages.map(([, file]) => file === "index.html" ? "/" : `/${file.replace(/index\.html$/, "")}`),
   desktop_mobile_main_visuals: true,
   full_background_hero_treatment: true,
+  division_identity_art_consistent_on_mobile: true,
   support_pages_ambient_full_backgrounds: true,
   visual_link_previews_per_page: 4,
   open_graph_preview_images: true,
