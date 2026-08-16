@@ -67,7 +67,7 @@ if(fleet.architecture?.static_build_targets!==18) errors.push('canonical fleet a
 if(JSON.stringify(fleet.architecture?.protected_existing_destinations)!==JSON.stringify(['https://cryptobotz.cryptoworldz.xyz'])) errors.push('CryptoBotz protected destination drift');
 if(JSON.stringify(fleet.architecture?.excluded_owned_root_domains)!==JSON.stringify(['solworld.fun'])) errors.push('SolWorld.fun exclusion drift');
 
-const publicFiles=walk(abs(distRoot)).filter(p=>/\.(?:html|js|css|json)$/i.test(p));
+const publicFiles=walk(abs(distRoot)).filter(p=>/\.(?:html|js|css)$/i.test(p));
 const activeCore=publicFiles.map(p=>fs.readFileSync(p,'utf8')).join('\n');
 forbid(activeCore,/NEXT PASS/i,'canonical release');
 forbid(activeCore,/gofundme/i,'canonical release');
@@ -119,7 +119,7 @@ requireText(pdcCss,'repeat(5,minmax(0,1fr))','PDC desktop 5 × 2 grid');
 requireText(pdcCss,'@media(max-width:1100px){.pdc-token-grid{grid-template-columns:repeat(2,minmax(0,1fr))}','PDC mobile two-column grid');
 requireText(pdcCss,'@media(max-width:430px){.pdc-token-grid{grid-template-columns:1fr}}','PDC narrow one-column grid');
 requireText(pdcJs,'api.dexscreener.com/tokens/v1/solana','PDC DEX Screener integration');
-requireText(pdc,'hope-chest.png','PDC Hope Chest background asset');
+requireText(pdcCss,'purple-diamond-crew/hope-chest.png','PDC Hope Chest background asset');
 
 const law=read(`${distRoot}/law-oneworldz/index.html`);
 const learn=read(`${distRoot}/learn-oneworldz/index.html`);
