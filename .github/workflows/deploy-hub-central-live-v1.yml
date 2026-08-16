@@ -72,6 +72,7 @@ jobs:
           echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
           [ -z "$OPENAI_API_KEY" ] || echo "::add-mask::$OPENAI_API_KEY"
           printf '%s' "$raw_host" > "$RUNNER_TEMP/raw-host"
+
           cat > "$RUNNER_TEMP/download.lftp" <<EOF
           set cmd:fail-exit false
           set net:max-retries 2
@@ -87,11 +88,14 @@ jobs:
           get $REMOTE_ROOT/.env -o $RUNNER_TEMP/original.env
           bye
           EOF
-          timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/download.lftp" "$raw_host"
+          # Missing optional module/.env files are valid for a first additive install.
+          # The two required runtime files are proven immediately afterwards.
+          timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/download.lftp" "$raw_host" || true
           test -s "$RUNNER_TEMP/original-index.js"
           test -s "$RUNNER_TEMP/original-package.json"
           node - <<'NODE'
-          const fs=require('fs'); const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/original-package.json','utf8'));
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/original-package.json','utf8'));
           if(p.name!=='cryptoworldz-bot'||p.scripts?.start!=='node index.js') throw new Error('unexpected_live_runtime');
           NODE
           [ -s "$RUNNER_TEMP/original-hub-central-live.js" ] && touch "$RUNNER_TEMP/had-hub" || true
@@ -100,7 +104,9 @@ jobs:
 
           cp "$RUNNER_TEMP/original-index.js" "$RUNNER_TEMP/patched-index.js"
           node - <<'NODE'
-          const fs=require('fs'); const p=process.env.RUNNER_TEMP+'/patched-index.js'; let text=fs.readFileSync(p,'utf8');
+          const fs=require('fs');
+          const p=process.env.RUNNER_TEMP+'/patched-index.js';
+          let text=fs.readFileSync(p,'utf8');
           const needle='const app = express();';
           if(!text.includes(needle)) throw new Error('unexpected_express_app_structure');
           const lines=[];
@@ -111,14 +117,15 @@ jobs:
           NODE
           node --check "$RUNNER_TEMP/patched-index.js"
 
+          # Hostinger may provide the existing Supabase variables through its app
+          # environment rather than a physical .env file. Preserve any .env that
+          # exists, and add only the protected OpenAI key when it is absent.
           if [ -s "$RUNNER_TEMP/original.env" ]; then cp "$RUNNER_TEMP/original.env" "$RUNNER_TEMP/patched.env"; else : > "$RUNNER_TEMP/patched.env"; fi
           if ! grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/patched.env"; then
             test -n "$OPENAI_API_KEY" || { echo '::error::OPENAI_API_KEY unavailable in protected server or GitHub environment'; exit 1; }
             printf '\nOPENAI_API_KEY=%s\nONEWORLDZ_OPENAI_MODEL=gpt-5.6\n' "$OPENAI_API_KEY" >> "$RUNNER_TEMP/patched.env"
           fi
           grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/patched.env"
-          grep -Eq '^SUPABASE_URL=.+$' "$RUNNER_TEMP/patched.env" || { echo '::error::Live SUPABASE_URL missing'; exit 1; }
-          grep -Eq '^SUPABASE_SERVICE_ROLE_KEY=.+$' "$RUNNER_TEMP/patched.env" || { echo '::error::Live SUPABASE_SERVICE_ROLE_KEY missing'; exit 1; }
           cp src/hub-central/live-v1.js "$RUNNER_TEMP/hub-central-live.js"
           cp src/community-support/live-v1.js "$RUNNER_TEMP/community-support-live.js"
           touch "$RUNNER_TEMP/restart.txt"
@@ -148,7 +155,7 @@ jobs:
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$raw_host"
           echo 'written=true' >> "$GITHUB_OUTPUT"
 
-      - name: Prove root unchanged, OpenAI live, and 35-profile Supabase registry live
+      - name: Prove root unchanged OpenAI live and 35-profile Supabase registry live
         id: proof
         shell: bash
         run: |
