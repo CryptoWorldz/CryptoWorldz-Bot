@@ -1,4 +1,4 @@
-name: Deploy Hub Central Additive Live V1
+name: Deploy Hub Central + OneWorldz GPT Live
 
 on:
   push:
@@ -13,17 +13,16 @@ env:
   TARGET_DOMAIN: cryptobotz.cryptoworldz.xyz
   REMOTE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
   RESTART_DIR: /domains/cryptobotz.cryptoworldz.xyz/public_html/tmp
-  EXPECTED_LIVE_INDEX_SHA: 27fc71f6ee077546b7de5833a245dc6463ba827757584906966be7cc172cecc7
 
 concurrency:
-  group: deploy-hub-central-live-v1
+  group: deploy-hub-central-oneworldz-gpt
   cancel-in-progress: false
 
 jobs:
   deploy:
-    name: Backup → additive deploy → restart → prove → rollback on failure
+    name: Backup → upgrade module → restart → live OpenAI proof → rollback on failure
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     environment:
       name: cryptoworldz-production
     env:
@@ -31,20 +30,25 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - name: Checkout approved source
         uses: actions/checkout@v4
 
-      - name: Prove explicit authority and exact target
+      - name: Prove explicit authority and source safety
         shell: bash
         run: |
           set -euo pipefail
-          test "$(sed -n 's/^target=//p' deployments/hub-central-live-v1.request | tail -n1)" = "$TARGET_DOMAIN"
-          test "$(sed -n 's/^mode=//p' deployments/hub-central-live-v1.request | tail -n1)" = 'deploy-additive-live-v1'
-          test "$(sed -n 's/^authority=//p' deployments/hub-central-live-v1.request | tail -n1)" = 'JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY'
-          test "$(sed -n 's/^expected_live_index_sha=//p' deployments/hub-central-live-v1.request | tail -n1)" = "$EXPECTED_LIVE_INDEX_SHA"
-          test -f src/hub-central/live-v1.js
+          request='deployments/hub-central-live-v1.request'
+          test "$(sed -n 's/^target=//p' "$request" | tail -n1)" = "$TARGET_DOMAIN"
+          test "$(sed -n 's/^mode=//p' "$request" | tail -n1)" = 'upgrade-hub-central-oneworldz-gpt'
+          test "$(sed -n 's/^authority=//p' "$request" | tail -n1)" = 'JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY'
+          test "$(sed -n 's/^openai_mode=//p' "$request" | tail -n1)" = 'server-side-responses-api'
+          test -s src/hub-central/live-v1.js
           node --check src/hub-central/live-v1.js
+          grep -Fq '/api/oneworldz-gpt/chat' src/hub-central/live-v1.js
+          grep -Fq 'https://api.openai.com/v1/responses' src/hub-central/live-v1.js
+          ! grep -Eiq 'sk-proj-|sk-live-|sk_live_|sk_test_' src/hub-central/live-v1.js
 
       - name: Install FTPS client
         run: |
@@ -59,59 +63,82 @@ jobs:
           test -s "$RUNNER_TEMP/baseline-root"
           sha256sum "$RUNNER_TEMP/baseline-root" | tee "$RUNNER_TEMP/baseline-root.sha256"
 
-      - name: Backup and verify exact live runtime
+      - name: Backup live runtime and prepare safe upgrade
         shell: bash
         run: |
           set -euo pipefail
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          test -n "$raw_host"
           echo "::add-mask::$FTP_HOST"
           echo "::add-mask::$FTP_USERNAME"
           echo "::add-mask::$FTP_PASSWORD"
+          [ -z "$OPENAI_API_KEY" ] || echo "::add-mask::$OPENAI_API_KEY"
           printf '%s' "$raw_host" > "$RUNNER_TEMP/raw-host"
+
           cat > "$RUNNER_TEMP/download.lftp" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 1
-          set net:timeout 20
+          set cmd:fail-exit false
+          set net:max-retries 2
+          set net:timeout 25
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
           get $REMOTE_ROOT/index.js -o $RUNNER_TEMP/original-index.js
           get $REMOTE_ROOT/package.json -o $RUNNER_TEMP/original-package.json
+          get $REMOTE_ROOT/hub-central-live.js -o $RUNNER_TEMP/original-hub-central-live.js
+          get $REMOTE_ROOT/.env -o $RUNNER_TEMP/original.env
           bye
           EOF
-          timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/download.lftp" "$raw_host"
-          actual_sha="$(sha256sum "$RUNNER_TEMP/original-index.js" | cut -d' ' -f1)"
-          test "$actual_sha" = "$EXPECTED_LIVE_INDEX_SHA"
+          timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/download.lftp" "$raw_host"
+          test -s "$RUNNER_TEMP/original-index.js"
+          test -s "$RUNNER_TEMP/original-package.json"
           node - <<'NODE'
           const fs = require('fs');
           const p = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/original-package.json','utf8'));
-          if (p.name !== 'cryptoworldz-bot' || p.version !== '1.0.0' || p.scripts?.start !== 'node index.js') process.exit(1);
+          if (p.name !== 'cryptoworldz-bot' || p.scripts?.start !== 'node index.js') throw new Error('unexpected_live_runtime');
           NODE
 
-      - name: Build additive patch against the downloaded live file
-        shell: bash
-        run: |
-          set -euo pipefail
-          cp src/hub-central/live-v1.js "$RUNNER_TEMP/hub-central-live.js"
+          [ -s "$RUNNER_TEMP/original-hub-central-live.js" ] && touch "$RUNNER_TEMP/had-original-module" || true
+          [ -s "$RUNNER_TEMP/original.env" ] && touch "$RUNNER_TEMP/had-original-env" || true
+
+          cp "$RUNNER_TEMP/original-index.js" "$RUNNER_TEMP/patched-index.js"
           node - <<'NODE'
           const fs = require('fs');
-          const sourcePath = process.env.RUNNER_TEMP + '/original-index.js';
-          const targetPath = process.env.RUNNER_TEMP + '/patched-index.js';
-          let text = fs.readFileSync(sourcePath,'utf8');
-          if (text.includes('registerHubCentralLive')) throw new Error('hub_central_already_present');
-          const needle = 'const app = express();';
-          const count = text.split(needle).length - 1;
-          if (count !== 1) throw new Error('unexpected_express_app_structure');
-          text = text.replace(needle, needle + '\nconst { registerHubCentralLive } = require("./hub-central-live");\nregisterHubCentralLive(app);');
-          fs.writeFileSync(targetPath,text);
+          const p = process.env.RUNNER_TEMP + '/patched-index.js';
+          let text = fs.readFileSync(p,'utf8');
+          const already = text.includes('registerHubCentralLive') && text.includes('./hub-central-live');
+          if (!already) {
+            const needle = 'const app = express();';
+            if ((text.split(needle).length - 1) !== 1) throw new Error('unexpected_express_app_structure');
+            text = text.replace(needle, needle + '\nconst { registerHubCentralLive } = require("./hub-central-live");\nregisterHubCentralLive(app);');
+          }
+          fs.writeFileSync(p,text);
           NODE
           node --check "$RUNNER_TEMP/patched-index.js"
+
+          if [ -s "$RUNNER_TEMP/original.env" ]; then cp "$RUNNER_TEMP/original.env" "$RUNNER_TEMP/patched.env"; else : > "$RUNNER_TEMP/patched.env"; fi
+          if grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/patched.env"; then
+            echo 'Protected server already has OPENAI_API_KEY configured.'
+          elif [ -n "$OPENAI_API_KEY" ]; then
+            node - <<'NODE'
+          const fs = require('fs');
+          const p = process.env.RUNNER_TEMP + '/patched.env';
+          let text = fs.readFileSync(p,'utf8').replace(/(^|\n)OPENAI_API_KEY=.*(?=\n|$)/g,'$1').replace(/(^|\n)ONEWORLDZ_OPENAI_MODEL=.*(?=\n|$)/g,'$1').replace(/\n{3,}/g,'\n\n').trimEnd();
+          text += `${text ? '\n' : ''}OPENAI_API_KEY=${process.env.OPENAI_API_KEY}\nONEWORLDZ_OPENAI_MODEL=gpt-5.6\n`;
+          fs.writeFileSync(p,text,{mode:0o600});
+          NODE
+            echo 'Prepared server-only OPENAI_API_KEY from protected GitHub environment secret.'
+          else
+            echo '::error::OPENAI_API_KEY is not configured in the protected server .env or GitHub production environment.'
+            exit 1
+          fi
+          grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/patched.env"
+          cp src/hub-central/live-v1.js "$RUNNER_TEMP/hub-central-live.js"
           node --check "$RUNNER_TEMP/hub-central-live.js"
           touch "$RUNNER_TEMP/restart.txt"
 
-      - name: Upload additive module and patched entry file then restart
+      - name: Upload server-only upgrade and restart
         id: write
         shell: bash
         run: |
@@ -119,22 +146,23 @@ jobs:
           raw_host="$(cat "$RUNNER_TEMP/raw-host")"
           cat > "$RUNNER_TEMP/upload.lftp" <<EOF
           set cmd:fail-exit true
-          set net:max-retries 1
-          set net:timeout 20
+          set net:max-retries 2
+          set net:timeout 25
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
           put $RUNNER_TEMP/hub-central-live.js -o $REMOTE_ROOT/hub-central-live.js
           put $RUNNER_TEMP/patched-index.js -o $REMOTE_ROOT/index.js
+          put $RUNNER_TEMP/patched.env -o $REMOTE_ROOT/.env
           mkdir -p $RESTART_DIR
           put $RUNNER_TEMP/restart.txt -o $RESTART_DIR/restart.txt
           bye
           EOF
-          timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$raw_host"
-          echo "written=true" >> "$GITHUB_OUTPUT"
+          timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$raw_host"
+          echo 'written=true' >> "$GITHUB_OUTPUT"
 
-      - name: Prove old root unchanged and Hub Central live
+      - name: Prove public root unchanged plus live OneWorldz GPT OpenAI response
         id: proof
         shell: bash
         run: |
@@ -146,58 +174,62 @@ jobs:
               && cmp -s "$RUNNER_TEMP/baseline-root" "$RUNNER_TEMP/current-root" \
               && curl --fail --silent --show-error --max-time 15 "https://$TARGET_DOMAIN/hub-central" -o "$RUNNER_TEMP/hub.html" \
               && grep -Fq 'OneWorldz Hub Central | Full Support' "$RUNNER_TEMP/hub.html" \
-              && curl --fail --silent --show-error --max-time 15 "https://$TARGET_DOMAIN/api/hub-central/status" -o "$RUNNER_TEMP/status.json" \
-              && node -e "const j=require(process.env.RUNNER_TEMP+'/status.json'); if(!j.ok||j.service!=='OneWorldz Hub Central'||j.owned_destinations!==19) process.exit(1)" \
-              && curl --fail --silent --show-error --max-time 15 "https://$TARGET_DOMAIN/api/hub-central/public-dns?domain=cryptobotz.cryptoworldz.xyz" -o "$RUNNER_TEMP/dns.json" \
-              && node -e "const j=require(process.env.RUNNER_TEMP+'/dns.json'); if(!j.ok||!j.dns?.root_resolves) process.exit(1)"; then
+              && curl --fail --silent --show-error --max-time 15 "https://$TARGET_DOMAIN/api/hub-central/status" -o "$RUNNER_TEMP/hub-status.json" \
+              && node -e "const j=require(process.env.RUNNER_TEMP+'/hub-status.json'); if(!j.ok||j.owned_destinations!==19||j.oneworldz_gpt!=='configured') process.exit(1)" \
+              && curl --fail --silent --show-error --max-time 15 "https://$TARGET_DOMAIN/api/oneworldz-gpt/status" -o "$RUNNER_TEMP/gpt-status.json" \
+              && node -e "const j=require(process.env.RUNNER_TEMP+'/gpt-status.json'); if(!j.ok||j.service!=='OneWorldz GPT'||j.openai_api_configured!==true||j.payments_in_chat!==false) process.exit(1)" \
+              && curl --fail --silent --show-error --max-time 45 -H 'Origin: https://oneworldz.com' -H 'Content-Type: application/json' -d '{"page":"deployment-proof","message":"What is OneWorldz GPT for? Reply in one short sentence."}' "https://$TARGET_DOMAIN/api/oneworldz-gpt/chat" -o "$RUNNER_TEMP/gpt-live-proof.json" \
+              && node -e "const j=require(process.env.RUNNER_TEMP+'/gpt-live-proof.json'); if(!j.ok||j.service!=='OneWorldz GPT'||j.powered_by!=='OpenAI'||!j.text) process.exit(1)"; then
               success=1
               break
             fi
-            echo "Hub Central convergence attempt $attempt/36"
+            echo "OneWorldz GPT convergence attempt $attempt/36"
           done
           test "$success" = 1
-          echo "proved=true" >> "$GITHUB_OUTPUT"
-          echo "Hub Central live proof passed; existing root response is byte-identical."
+          echo 'proved=true' >> "$GITHUB_OUTPUT"
+          echo 'OneWorldz GPT live OpenAI proof passed; existing CryptoBotz public root stayed byte-identical.'
 
-      - name: Roll back exact original entry file on any failed live proof
+      - name: Roll back runtime, module and environment on failed proof
         if: ${{ failure() && steps.write.outputs.written == 'true' && steps.proof.outputs.proved != 'true' }}
         shell: bash
         run: |
           set -u
           raw_host="$(cat "$RUNNER_TEMP/raw-host")"
           touch "$RUNNER_TEMP/restart-rollback.txt"
-          cat > "$RUNNER_TEMP/rollback.lftp" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 1
-          set net:timeout 20
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          put $RUNNER_TEMP/original-index.js -o $REMOTE_ROOT/index.js
-          rm -f $REMOTE_ROOT/hub-central-live.js
-          mkdir -p $RESTART_DIR
-          put $RUNNER_TEMP/restart-rollback.txt -o $RESTART_DIR/restart.txt
-          bye
-          EOF
-          timeout 240 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/rollback.lftp" "$raw_host" || true
+          {
+            echo 'set cmd:fail-exit false'
+            echo 'set net:max-retries 2'
+            echo 'set net:timeout 25'
+            echo 'set ftp:ssl-force true'
+            echo 'set ftp:ssl-protect-data true'
+            echo 'set ssl:verify-certificate true'
+            echo 'set ssl:check-hostname false'
+            echo "put $RUNNER_TEMP/original-index.js -o $REMOTE_ROOT/index.js"
+            if [ -f "$RUNNER_TEMP/had-original-module" ]; then echo "put $RUNNER_TEMP/original-hub-central-live.js -o $REMOTE_ROOT/hub-central-live.js"; else echo "rm -f $REMOTE_ROOT/hub-central-live.js"; fi
+            if [ -f "$RUNNER_TEMP/had-original-env" ]; then echo "put $RUNNER_TEMP/original.env -o $REMOTE_ROOT/.env"; else echo "rm -f $REMOTE_ROOT/.env"; fi
+            echo "mkdir -p $RESTART_DIR"
+            echo "put $RUNNER_TEMP/restart-rollback.txt -o $RESTART_DIR/restart.txt"
+            echo 'bye'
+          } > "$RUNNER_TEMP/rollback.lftp"
+          timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/rollback.lftp" "$raw_host" || true
           for attempt in $(seq 1 24); do
             sleep 5
             if curl --fail --silent --show-error --max-time 15 "https://$TARGET_DOMAIN/" -o "$RUNNER_TEMP/rollback-root" && cmp -s "$RUNNER_TEMP/baseline-root" "$RUNNER_TEMP/rollback-root"; then
-              echo "Exact original public root restored."
+              echo 'Original CryptoBotz public root restored.'
               exit 0
             fi
           done
-          echo "Rollback upload completed but public convergence was not proven within the bounded window."
+          echo '::warning::Rollback uploaded but public convergence was not proven inside the bounded window.'
 
-      - name: Preserve pre-deploy rollback evidence
+      - name: Preserve non-secret deployment proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cryptobotz-hub-central-predeploy-backup-${{ github.run_id }}
+          name: cryptobotz-oneworldz-gpt-proof-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/original-index.js
-            ${{ runner.temp }}/original-package.json
             ${{ runner.temp }}/baseline-root.sha256
+            ${{ runner.temp }}/hub-status.json
+            ${{ runner.temp }}/gpt-status.json
+            ${{ runner.temp }}/gpt-live-proof.json
           if-no-files-found: ignore
           retention-days: 14
