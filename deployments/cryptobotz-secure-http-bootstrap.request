@@ -7,5 +7,5 @@ hostinger_verification=required-before-write
 storage=server-only-dotenv
 restart=official-hostinger-nodejs-restart-api
 proof=hub-auth,gpt-status,gpt-live,community-35
-requested_at=2026-08-16T17:31:00+10:00
-retry_reason=robust-post-restart-proof-and-live-openai-response
+requested_at=2026-08-16T17:36:00+10:00
+retry_reason=moderation-429-safe-responses-api-fallback

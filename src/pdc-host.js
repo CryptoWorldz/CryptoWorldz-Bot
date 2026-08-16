@@ -3,6 +3,7 @@ const path = require("path");
 const express = require("express");
 const { registerHubCentralLive } = require("./hub-central/live-v1");
 const { registerSecureRuntimeBootstrap } = require("./hub-central/secure-runtime-bootstrap");
+const { registerOneWorldzGptGateway } = require("./hub-central/oneworldz-gpt-gateway");
 const { registerCommunitySupportLive } = require("./community-support/live-v1");
 
 const WORLDZ_HOSTS = Object.freeze({
@@ -56,8 +57,10 @@ function allowPdcPreview(source) {
 }
 
 function registerPdcHost(app) {
-  // These protected OneWorldz services are part of the real Git-deployed CryptoBotz
-  // Express runtime. Register them before optional static Worldz preview handling.
+  // Protected OneWorldz services are part of the real Git-deployed CryptoBotz runtime.
+  // Register the resilient GPT gateway first so moderation-only 429s can fall back to
+  // the Responses API safety layer without weakening other moderation failures.
+  registerOneWorldzGptGateway(app);
   registerHubCentralLive(app);
   registerSecureRuntimeBootstrap(app);
   registerCommunitySupportLive(app);
