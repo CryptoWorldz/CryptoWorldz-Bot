@@ -28,30 +28,56 @@ jobs:
           printf '%s' "$websites" | jq -e '.data[] | select(.domain=="donateworldz.com" and .is_enabled==true and .username=="u643166328" and .order_id==1009657511)' >/dev/null
           echo 'FoodWorldz and DonateWorldz are active on the same expected Hostinger Business hosting account.'
 
-      - name: Derive current web IPv4 from proven DonateWorldz endpoint
-        id: target
-        shell: bash
-        run: |
-          set -euo pipefail
-          donate_ip="$(dig +short A donateworldz.com | grep -E '^[0-9.]+$' | head -n1)"
-          test -n "$donate_ip"
-          headers="$(curl --fail --silent --show-error --head --connect-timeout 10 --max-time 20 https://donateworldz.com/)"
-          printf '%s\n' "$headers" | grep -Eiq '^platform:[[:space:]]*hostinger'
-          printf '%s\n' "$headers" | grep -Eiq '^server:[[:space:]]*LiteSpeed'
-          echo "Proven Hostinger web IPv4: $donate_ip"
-          echo "ipv4=$donate_ip" >> "$GITHUB_OUTPUT"
-
       - name: Snapshot current FoodWorldz zone evidence
+        id: before
         shell: bash
         run: |
           set -euo pipefail
           api='https://developers.hostinger.com'
           auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
           mkdir -p "$RUNNER_TEMP/food-dns"
-          curl --fail --silent --show-error \
-            -H "$auth" -H 'Accept: application/json' \
-            "$api/api/dns/v1/zones/foodworldz.com" \
-            | tee "$RUNNER_TEMP/food-dns/before.json"
+          zone="$(curl --fail --silent --show-error -H "$auth" -H 'Accept: application/json' "$api/api/dns/v1/zones/foodworldz.com")"
+          printf '%s\n' "$zone" | tee "$RUNNER_TEMP/food-dns/before.json"
+          count="$(printf '%s' "$zone" | jq 'length')"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+
+      - name: Initialize empty Hostinger DNS zone
+        if: ${{ steps.before.outputs.count == '0' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          api='https://developers.hostinger.com'
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          payload='{"sync":true,"reset_email_records":false,"whitelisted_record_types":["MX","TXT"]}'
+          code="$(curl --silent --show-error --location \
+            -H "$auth" -H 'Accept: application/json' -H 'Content-Type: application/json' \
+            --data "$payload" -o "$RUNNER_TEMP/food-dns/reset-response.json" -w '%{http_code}' \
+            "$api/api/dns/v1/zones/foodworldz.com/reset" || true)"
+          echo "Hostinger zone initialization HTTP $code"
+          cat "$RUNNER_TEMP/food-dns/reset-response.json" 2>/dev/null || true
+          echo
+          test "$code" = '200'
+
+      - name: Read initialized zone and select Hostinger web IPv4
+        id: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          api='https://developers.hostinger.com'
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          zone="$(curl --fail --silent --show-error -H "$auth" -H 'Accept: application/json' "$api/api/dns/v1/zones/foodworldz.com")"
+          printf '%s\n' "$zone" | tee "$RUNNER_TEMP/food-dns/initialized.json"
+          ip="$(printf '%s' "$zone" | jq -r '[.[] | select(.name=="@" and .type=="A") | .records[]?.content] | first // empty')"
+          if [ -z "$ip" ]; then
+            ip="$(dig +short A donateworldz.com | grep -E '^[0-9.]+$' | head -n1)"
+            test -n "$ip"
+            headers="$(curl --fail --silent --show-error --head --connect-timeout 10 --max-time 20 https://donateworldz.com/)"
+            printf '%s\n' "$headers" | grep -Eiq '^platform:[[:space:]]*hostinger'
+            echo "No default A record returned; using proven sibling Hostinger web IPv4: $ip"
+          else
+            echo "Hostinger initialized web IPv4: $ip"
+          fi
+          echo "ipv4=$ip" >> "$GITHUB_OUTPUT"
 
       - name: Validate exact FoodWorldz web DNS records
         shell: bash
@@ -65,8 +91,7 @@ jobs:
           printf '%s\n' "$payload" | tee "$RUNNER_TEMP/food-dns/proposed.json"
           curl --fail --silent --show-error --location \
             -H "$auth" -H 'Accept: application/json' -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$api/api/dns/v1/zones/foodworldz.com/validate"
+            --data "$payload" "$api/api/dns/v1/zones/foodworldz.com/validate"
           echo
           echo 'Hostinger validation passed.'
 
@@ -79,11 +104,14 @@ jobs:
           api='https://developers.hostinger.com'
           auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
           payload="$(jq -n --arg ip "$HOSTING_IPV4" '{overwrite:true,zone:[{name:"@",type:"A",ttl:1800,records:[{content:$ip}]},{name:"www",type:"CNAME",ttl:300,records:[{content:"foodworldz.com"}]}]}')"
-          curl --fail --silent --show-error --location --request PUT \
+          code="$(curl --silent --show-error --location --request PUT \
             -H "$auth" -H 'Accept: application/json' -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$api/api/dns/v1/zones/foodworldz.com"
+            --data "$payload" -o "$RUNNER_TEMP/food-dns/update-response.json" -w '%{http_code}' \
+            "$api/api/dns/v1/zones/foodworldz.com" || true)"
+          echo "Hostinger DNS update HTTP $code"
+          cat "$RUNNER_TEMP/food-dns/update-response.json" 2>/dev/null || true
           echo
+          test "$code" = '200'
 
       - name: Prove Hostinger zone now contains intended records
         shell: bash
