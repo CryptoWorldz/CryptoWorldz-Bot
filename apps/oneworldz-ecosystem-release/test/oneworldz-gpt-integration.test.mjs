@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { perfectPlan } from "../perfect-plan.mjs";
@@ -8,10 +8,15 @@ import { perfectPlan } from "../perfect-plan.mjs";
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
 for (const key of ["oneworldz", "donateworldz"]) {
-  test(`${key} includes OneWorldz GPT browser assets`, async () => {
-    const html = await readFile(path.join(root, "dist", "ecosystem", key, "index.html"), "utf8");
+  test(`${key} includes OneWorldz GPT browser assets and approved reference artwork`, async () => {
+    const packageRoot = path.join(root, "dist", "ecosystem", key);
+    const html = await readFile(path.join(packageRoot, "index.html"), "utf8");
+    const js = await readFile(path.join(packageRoot, "assets", "js", "oneworldz-gpt.js"), "utf8");
     assert.match(html, /\/assets\/css\/oneworldz-gpt\.css/);
     assert.match(html, /\/assets\/js\/oneworldz-gpt\.js/);
+    assert.match(js, /\/assets\/oneworldz-gpt\/oneworldz-gpt\.png/);
+    const artwork = await stat(path.join(packageRoot, "assets", "oneworldz-gpt", "oneworldz-gpt.png"));
+    assert.ok(artwork.size > 100000, `${key}: OneWorldz GPT reference artwork must be present and non-trivial`);
   });
 }
 
