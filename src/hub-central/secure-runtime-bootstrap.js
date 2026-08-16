@@ -4,6 +4,7 @@ const express = require("express");
 
 const TARGET_DOMAIN = "cryptobotz.cryptoworldz.xyz";
 const CONFIRMATION = "APPROVE SECURE RUNTIME";
+const BOOTSTRAP_VERSION = "cwd-index-v3";
 const buckets = new Map();
 
 function allowAttempt(req) {
@@ -77,7 +78,12 @@ function safeBootstrapError(error) {
 }
 
 function registerSecureRuntimeBootstrap(app) {
-  if (!app || typeof app.post !== "function") throw new Error("express_app_required");
+  if (!app || typeof app.post !== "function" || typeof app.get !== "function") throw new Error("express_app_required");
+
+  app.get("/api/hub-central/secure-runtime-bootstrap/status", (req, res) => {
+    res.set("Cache-Control", "no-store, max-age=0");
+    return res.json({ ok: true, service: "secure-runtime-bootstrap", version: BOOTSTRAP_VERSION, target: TARGET_DOMAIN });
+  });
 
   app.post(
     "/api/hub-central/secure-runtime-bootstrap",
@@ -112,7 +118,8 @@ function registerSecureRuntimeBootstrap(app) {
           persisted: true,
           hostinger_access_verified: true,
           openai_configured: true,
-          target: TARGET_DOMAIN
+          target: TARGET_DOMAIN,
+          bootstrap_version: BOOTSTRAP_VERSION
         });
       } catch (error) {
         const safeError = safeBootstrapError(error);
@@ -123,4 +130,4 @@ function registerSecureRuntimeBootstrap(app) {
   );
 }
 
-module.exports = { registerSecureRuntimeBootstrap, verifyHostingerAccess };
+module.exports = { BOOTSTRAP_VERSION, registerSecureRuntimeBootstrap, verifyHostingerAccess };

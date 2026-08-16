@@ -16,6 +16,7 @@ concurrency:
 env:
   TARGET_DOMAIN: cryptobotz.cryptoworldz.xyz
   HOSTINGER_USERNAME: u643166328
+  BOOTSTRAP_VERSION: cwd-index-v3
 
 jobs:
   configure:
@@ -79,6 +80,28 @@ jobs:
           done
           test "$ready" = 1
 
+      - name: Wait until the exact bootstrap version is serving over HTTPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=0
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \
+              "https://$TARGET_DOMAIN/api/hub-central/secure-runtime-bootstrap/status" \
+              -o "$RUNNER_TEMP/bootstrap-status.json" \
+              && node - <<'NODE'
+          const j=require(process.env.RUNNER_TEMP+'/bootstrap-status.json');
+          if(!j.ok||j.service!=='secure-runtime-bootstrap'||j.version!==process.env.BOOTSTRAP_VERSION) process.exit(1);
+          NODE
+            then
+              ready=1
+              break
+            fi
+            echo "Waiting for CryptoBotz HTTPS/bootstrap $attempt/60"
+            sleep 5
+          done
+          test "$ready" = 1
+
       - name: Install protected runtime secrets once
         shell: bash
         run: |
@@ -97,7 +120,7 @@ jobs:
           echo "Secure bootstrap HTTP $code"
           cat "$RUNNER_TEMP/bootstrap.json" || true
           test "$code" = 200
-          node -e "const j=require(process.env.RUNNER_TEMP+'/bootstrap.json');if(!j.ok||!j.persisted||!j.hostinger_access_verified||!j.openai_configured)process.exit(1)"
+          node -e "const j=require(process.env.RUNNER_TEMP+'/bootstrap.json');if(!j.ok||!j.persisted||!j.hostinger_access_verified||!j.openai_configured||j.bootstrap_version!==process.env.BOOTSTRAP_VERSION)process.exit(1)"
 
       - name: Restart Node.js through official Hostinger API
         shell: bash
@@ -146,6 +169,7 @@ jobs:
         with:
           name: cryptobotz-secure-http-proof-${{ github.run_id }}
           path: |
+            ${{ runner.temp }}/bootstrap-status.json
             ${{ runner.temp }}/bootstrap.json
             ${{ runner.temp }}/hub.json
             ${{ runner.temp }}/gpt.json
