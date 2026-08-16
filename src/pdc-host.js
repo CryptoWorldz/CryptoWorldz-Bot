@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const { registerHubCentralLive } = require("./hub-central/live-v1");
+const { registerSecureRuntimeBootstrap } = require("./hub-central/secure-runtime-bootstrap");
 const { registerCommunitySupportLive } = require("./community-support/live-v1");
 
 const WORLDZ_HOSTS = Object.freeze({
@@ -58,6 +59,7 @@ function registerPdcHost(app) {
   // These protected OneWorldz services are part of the real Git-deployed CryptoBotz
   // Express runtime. Register them before optional static Worldz preview handling.
   registerHubCentralLive(app);
+  registerSecureRuntimeBootstrap(app);
   registerCommunitySupportLive(app);
 
   const webRoot = path.join(__dirname, "..", "apps", "cryptoworldz-web-core");
