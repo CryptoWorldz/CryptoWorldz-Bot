@@ -1,0 +1,159 @@
+name: Repair FoodWorldz DNS via Hostinger API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/hostinger-dns-repair-foodworldz.request'
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+    steps:
+      - name: Confirm API token and active hosting target
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$HOSTINGER_API_TOKEN"
+          api='https://developers.hostinger.com'
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          websites="$(curl --fail --silent --show-error -H "$auth" -H 'Accept: application/json' "$api/api/hosting/v1/websites")"
+          printf '%s' "$websites" | jq -e '.data[] | select(.domain=="foodworldz.com" and .is_enabled==true and .username=="u643166328" and .order_id==1009657511)' >/dev/null
+          printf '%s' "$websites" | jq -e '.data[] | select(.domain=="donateworldz.com" and .is_enabled==true and .username=="u643166328" and .order_id==1009657511)' >/dev/null
+          echo 'FoodWorldz and DonateWorldz are active on the expected Hostinger Business hosting account.'
+
+      - name: Verify external-domain hosting ownership state
+        shell: bash
+        run: |
+          set -euo pipefail
+          api='https://developers.hostinger.com'
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          for domain in foodworldz.com donateworldz.com; do
+            echo "=== verify $domain ==="
+            curl --silent --show-error --location \
+              -H "$auth" -H 'Accept: application/json' -H 'Content-Type: application/json' \
+              --data "{\"domain\":\"$domain\"}" \
+              "$api/api/hosting/v1/domains/verify-ownership" || true
+            echo
+          done
+
+      - name: Derive current hosting IPv4 from live sibling domains
+        id: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          donate_ip="$(dig +short A donateworldz.com | grep -E '^[0-9.]+$' | head -n1)"
+          galaxy_ip="$(dig +short A hodlergalaxy.xyz | grep -E '^[0-9.]+$' | head -n1)"
+          hyper_ip="$(dig +short A hyperworldz.xyz | grep -E '^[0-9.]+$' | head -n1)"
+          test -n "$donate_ip"
+          test -n "$galaxy_ip"
+          test -n "$hyper_ip"
+          test "$donate_ip" = "$galaxy_ip"
+          test "$donate_ip" = "$hyper_ip"
+          echo "Canonical shared-hosting IPv4 confirmed: $donate_ip"
+          echo "ipv4=$donate_ip" >> "$GITHUB_OUTPUT"
+
+      - name: Snapshot current FoodWorldz zone evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          api='https://developers.hostinger.com'
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          mkdir -p "$RUNNER_TEMP/food-dns"
+          curl --fail --silent --show-error \
+            -H "$auth" -H 'Accept: application/json' \
+            "$api/api/dns/v1/zones/foodworldz.com" \
+            | tee "$RUNNER_TEMP/food-dns/before.json"
+
+      - name: Validate exact FoodWorldz web DNS records
+        shell: bash
+        env:
+          HOSTING_IPV4: ${{ steps.target.outputs.ipv4 }}
+        run: |
+          set -euo pipefail
+          api='https://developers.hostinger.com'
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          payload="$(jq -n --arg ip "$HOSTING_IPV4" '{overwrite:true,zone:[{name:"@",type:"A",ttl:1800,records:[{content:$ip}]},{name:"www",type:"CNAME",ttl:300,records:[{content:"foodworldz.com"}]}]}')"
+          printf '%s\n' "$payload" | tee "$RUNNER_TEMP/food-dns/proposed.json"
+          curl --fail --silent --show-error --location \
+            -H "$auth" -H 'Accept: application/json' -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$api/api/dns/v1/zones/foodworldz.com/validate"
+          echo
+          echo 'Hostinger validation passed.'
+
+      - name: Apply FoodWorldz web DNS records only
+        shell: bash
+        env:
+          HOSTING_IPV4: ${{ steps.target.outputs.ipv4 }}
+        run: |
+          set -euo pipefail
+          api='https://developers.hostinger.com'
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          payload="$(jq -n --arg ip "$HOSTING_IPV4" '{overwrite:true,zone:[{name:"@",type:"A",ttl:1800,records:[{content:$ip}]},{name:"www",type:"CNAME",ttl:300,records:[{content:"foodworldz.com"}]}]}')"
+          curl --fail --silent --show-error --location --request PUT \
+            -H "$auth" -H 'Accept: application/json' -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$api/api/dns/v1/zones/foodworldz.com"
+          echo
+
+      - name: Prove Hostinger zone now contains intended records
+        shell: bash
+        env:
+          HOSTING_IPV4: ${{ steps.target.outputs.ipv4 }}
+        run: |
+          set -euo pipefail
+          api='https://developers.hostinger.com'
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          zone="$(curl --fail --silent --show-error -H "$auth" -H 'Accept: application/json' "$api/api/dns/v1/zones/foodworldz.com")"
+          printf '%s\n' "$zone" | tee "$RUNNER_TEMP/food-dns/after.json"
+          printf '%s' "$zone" | jq -e --arg ip "$HOSTING_IPV4" '.[] | select(.name=="@" and .type=="A") | .records[] | select(.content==$ip)' >/dev/null
+          printf '%s' "$zone" | jq -e '.[] | select(.name=="www" and .type=="CNAME") | .records[] | select(.content=="foodworldz.com")' >/dev/null
+          echo 'Hostinger DNS zone proof passed.'
+
+      - name: Wait for public FoodWorldz DNS
+        shell: bash
+        env:
+          HOSTING_IPV4: ${{ steps.target.outputs.ipv4 }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            public_ip="$(dig +short A foodworldz.com | grep -E '^[0-9.]+$' | head -n1 || true)"
+            if [ "$public_ip" = "$HOSTING_IPV4" ]; then
+              echo "Public DNS live: foodworldz.com -> $public_ip"
+              exit 0
+            fi
+            echo "Waiting for DNS propagation ($attempt/30)..."
+            sleep 20
+          done
+          echo '::error::FoodWorldz public DNS did not reach the intended Hostinger IP within 10 minutes.'
+          exit 1
+
+      - name: Check FoodWorldz HTTPS readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --show-error --head --connect-timeout 10 --max-time 20 https://foodworldz.com/ >/dev/null; then
+              echo 'FoodWorldz HTTPS is responding.'
+              exit 0
+            fi
+            echo "Waiting for HTTPS/SSL readiness ($attempt/20)..."
+            sleep 30
+          done
+          echo '::warning::DNS is repaired, but HTTPS is not ready yet. Deployment should wait for SSL readiness.'
+
+      - name: Upload repair evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: foodworldz-dns-repair-${{ github.run_id }}
+          path: ${{ runner.temp }}/food-dns/
+          if-no-files-found: warn
+          retention-days: 14
