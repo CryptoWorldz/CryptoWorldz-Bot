@@ -1,0 +1,39 @@
+name: Verify OneWorldz Perfect Plan
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/oneworldz-ecosystem-release/**'
+      - 'src/oneworldz-gpt/**'
+      - 'src/hub-central/preload.js'
+      - '.env.example'
+      - 'test/oneworldz-gpt.test.js'
+      - '.github/workflows/verify-oneworldz-perfect-plan.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check OneWorldz GPT server code
+        run: |
+          node --check src/oneworldz-gpt/http.js
+          node --check src/hub-central/preload.js
+          node --test test/oneworldz-gpt.test.js
+      - name: Build and verify locked ecosystem package
+        run: npm --prefix apps/oneworldz-ecosystem-release run verify
+      - name: Prove no OpenAI secret is present in static output
+        run: |
+          ! grep -RIE 'OPENAI_API_KEY|sk-proj-|Bearer[[:space:]]+sk-' apps/oneworldz-ecosystem-release/dist/ecosystem
+          test -f apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz/assets/js/oneworldz-gpt.js
+          test -f apps/oneworldz-ecosystem-release/dist/ecosystem/donateworldz/assets/js/oneworldz-gpt.js
