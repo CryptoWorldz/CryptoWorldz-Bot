@@ -58,8 +58,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --max-time 20 "https://$TARGET_DOMAIN/" -o "$RUNNER_TEMP/baseline-root"
-          test -s "$RUNNER_TEMP/baseline-root"
+          success=0
+          for attempt in $(seq 1 6); do
+            if curl --fail --silent --show-error --connect-timeout 10 --max-time 30 "https://$TARGET_DOMAIN/" -o "$RUNNER_TEMP/baseline-root" \
+              && test -s "$RUNNER_TEMP/baseline-root"; then
+              success=1
+              break
+            fi
+            echo "Baseline availability attempt $attempt/6"
+            sleep 5
+          done
+          test "$success" = 1
           sha256sum "$RUNNER_TEMP/baseline-root" > "$RUNNER_TEMP/baseline-root.sha256"
 
       - name: Backup live runtime and prepare additive upgrade
