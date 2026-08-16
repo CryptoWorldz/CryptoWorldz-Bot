@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node build.mjs && node build-expansion.mjs && node materialize-approved-visuals.mjs && node build-perfect.mjs && node reconcile-perfect-plan.mjs && node enhance-pdc.mjs && node build-community-support.mjs && node integrate-oneworldz-gpt.mjs",
+    "build": "node build.mjs && node build-expansion.mjs && node materialize-approved-visuals.mjs && node build-perfect.mjs && node reconcile-perfect-plan.mjs && node enhance-pdc.mjs && node build-community-support.mjs && node finalize-oneworldz.mjs && node integrate-oneworldz-gpt.mjs",
     "test": "node --test test/*.test.mjs",
     "verify": "npm run build && npm test"
   }
