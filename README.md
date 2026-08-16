@@ -27,31 +27,34 @@ The fleet topology and destination contract are defined by:
 
 `apps/oneworldz-ecosystem-release/production-targets.mjs`
 
-There is no static production-write GitHub workflow while cleanup/security lockdown is active.
+There is no static production-write GitHub workflow and none is required for the current plan. Production may use only one authenticated Hostinger static-fleet rail after destination proof.
 
-## Deployment approval
+## Total deployment authority
 
-Production status and approvals are controlled by:
+Production status and authority are controlled by:
 
 - `governance/ONEWORLDZ-CANONICAL-BUILD-AUTHORITY.md`
+- `governance/FLEET-REQUIREMENTS.md`
 - `governance/JAYJAY-CHATGPT-DEPLOYMENT-GATE.md`
 - `deployments/oneworldz-19-total.request`
 
-A build/test pass is not a production pass. Static production remains locked until preview visual proof passes, JayJayTeamDev approves the exact candidate, the authenticated Hostinger destination is proven, live technical proof passes and JayJayTeamDev × ChatGPT complete the live visual pass.
+JayJayTeamDev's current `Perform TOTAL DEPLOYMENT PLAN` instruction is standing authority for the unchanged canonical candidate chain. Repeated approval prompts are not required unless content, target mapping, payments, DNS/mail, protected runtime or security boundaries change.
+
+A build/test pass is not a production pass. Final status still requires preview visual proof, authenticated Hostinger destination proof, production deployment, live technical proof and JayJayTeamDev × ChatGPT live visual proof.
 
 ## Hosting root law
 
-Every static target requires a destination-scoped hosting account whose visible website root is `/`.
+Every static target must be authenticated against the exact Hostinger website/account before production write.
 
-The source model must never guess or prepend `domains/.../public_html`. If the authenticated Hostinger account does not expose the intended site at `/`, deployment stops and the hosting account/root is corrected before any write.
+Hostinger can expose a physical website home directory ending in `public_html`. The canonical deployment contract uses remote `/` only when the chosen FTP/SFTP credential is already scoped to that exact website root. Never prepend or probe alternative directory structures after a mismatch; correct the target contract first.
 
 ## Images
 
 Active production website media belongs only inside the canonical static app source. Historical approved media is sealed under `archive/reference-media/` for provenance only and is never auto-restored into a build.
 
-## Archive
+## Archive and historical GitHub metadata
 
-`archive/` contains historical documentation, old certifications and sealed reference material. Archive content is evidence/reference only; it is not build authority, runtime authority, deployment authority or a fallback source.
+`archive/`, old branches and historical GitHub Environments are evidence/reference only. They are not build, runtime, target-selection or deployment authority.
 
 ## Verification
 
@@ -61,4 +64,4 @@ npm run verify
 npm audit --audit-level=high
 ```
 
-`npm run verify` includes a structural guard that fails if retired website roots, old gateway folders, alternate workflow sets or legacy source locations return.
+`npm run verify` includes a structural guard that fails if retired website roots, old gateway folders, alternate static deployment workflow sets or legacy source locations return.
