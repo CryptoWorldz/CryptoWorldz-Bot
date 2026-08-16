@@ -1,26 +1,31 @@
-name: CryptoWorldz Zed Bot Checks
+name: JayJayTeamDev + ChatGPT Canonical Gate
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
-  group: zed-bot-${{ github.ref }}
-  cancel-in-progress: true
+  group: jayjay-chatgpt-oneworldz-single-rail
+  cancel-in-progress: false
 
 jobs:
-  test-and-verify:
-    name: Test and Verify Zed Bot
+  verify:
+    name: Clean source + canonical build verification
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
+    timeout-minutes: 30
+    outputs:
+      phase: ${{ steps.state.outputs.phase }}
+      static_tree: ${{ steps.state.outputs.static_tree }}
+      preview_run_id: ${{ steps.state.outputs.preview_run_id }}
+      approved_static_tree: ${{ steps.state.outputs.approved_static_tree }}
+      preview_pass: ${{ steps.state.outputs.preview_pass }}
     steps:
-      - name: Checkout repository
+      - name: Checkout exact main candidate
         uses: actions/checkout@v4
 
       - name: Set up Node.js 22
@@ -29,38 +34,428 @@ jobs:
           node-version: "22"
           cache: npm
 
-      - name: Install dependencies
+      - id: state
+        name: Lock JayJayTeamDev + ChatGPT state and static tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          request='deployments/oneworldz-19-total.request'
+          test "$(sed -n 's/^state=//p' "$request" | tail -n1)" = 'TOTAL_DEPLOYMENT_PLAN_ACTIVE'
+          test "$(sed -n 's/^owner_authority=//p' "$request" | tail -n1)" = 'PERFORM_TOTAL_DEPLOYMENT_PLAN'
+          test "$(sed -n 's/^canonical_deployment_rail=//p' "$request" | tail -n1)" = 'ONE_AUTHENTICATED_HOSTINGER_STATIC_FLEET_RAIL'
+          test "$(sed -n 's/^hostinger_destination_pass=//p' "$request" | tail -n1)" = 'PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED'
+          phase="$(sed -n 's/^execution_phase=//p' "$request" | tail -n1)"; phase="${phase:-IDLE}"
+          preview_run_id="$(sed -n 's/^preview_run_id=//p' "$request" | tail -n1)"; preview_run_id="${preview_run_id:-NONE}"
+          approved_static_tree="$(sed -n 's/^approved_static_tree=//p' "$request" | tail -n1)"; approved_static_tree="${approved_static_tree:-NONE}"
+          preview_pass="$(sed -n 's/^chatgpt_preview_visual_pass=//p' "$request" | tail -n1)"; preview_pass="${preview_pass:-PENDING}"
+          static_tree="$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)"
+          echo "phase=$phase" >> "$GITHUB_OUTPUT"
+          echo "preview_run_id=$preview_run_id" >> "$GITHUB_OUTPUT"
+          echo "approved_static_tree=$approved_static_tree" >> "$GITHUB_OUTPUT"
+          echo "preview_pass=$preview_pass" >> "$GITHUB_OUTPUT"
+          echo "static_tree=$static_tree" >> "$GITHUB_OUTPUT"
+          {
+            echo '## Canonical source lock'
+            echo "- Phase: $phase"
+            echo "- Static tree: $static_tree"
+            echo '- Deployment rail: ONE_AUTHENTICATED_HOSTINGER_STATIC_FLEET_RAIL'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install locked runtime dependencies
         run: npm ci
 
-      - name: Check and test Zed Bot
+      - name: Run full protected + static verification
         run: npm run verify
 
-      - name: Verify required project files
-        run: |
-          test -f package.json
-          test -f package-lock.json
-          test -f index.js
-          test -f README.md
-          test -f .well-known/openapi.yaml
-          test -f openapi.yaml
-          cmp .well-known/openapi.yaml openapi.yaml
-          test -n "$(find supabase/migrations -type f -name '*.sql' -print -quit)"
-          test ! -f .well-known/ai-plugin.json
-
-      - name: Prevent committed environment files
-        run: |
-          if git ls-files | grep -E '(^|/)\.env($|\.local$|\.production$|\.development$|\.test$)'; then
-            echo "::error::An environment file is committed."
-            exit 1
-          fi
-
-      - name: Scan for dangerous secret files
-        run: |
-          if git ls-files | grep -Ei \
-            '\.(pem|key|p12|pfx)$|(^|/)(seed|private[-_]?key)(/|$)|(^|/)service[-_]?role([^/]*)$'; then
-            echo "::error::A potentially sensitive file is committed."
-            exit 1
-          fi
+      - name: Run canonical ecosystem release tests
+        run: npm --prefix apps/oneworldz-ecosystem-release test
 
       - name: Dependency security audit
         run: npm audit --audit-level=high
+
+      - name: Upload immutable preview candidate
+        if: ${{ steps.state.outputs.phase == 'PREVIEW' && github.event_name == 'push' && github.event.head_commit.message == 'PREPARE JAYJAYTEAMDEV CHATGPT TOTAL DEPLOYMENT' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-candidate-${{ github.run_id }}
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem/
+          if-no-files-found: error
+          retention-days: 30
+
+  preview:
+    name: ChatGPT candidate desktop + mobile proof — NO PRODUCTION WRITE
+    needs: verify
+    if: ${{ needs.verify.outputs.phase == 'PREVIEW' && github.event_name == 'push' && github.event.head_commit.message == 'PREPARE JAYJAYTEAMDEV CHATGPT TOTAL DEPLOYMENT' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Download exact candidate built by verification job
+        uses: actions/download-artifact@v4
+        with:
+          name: oneworldz-candidate-${{ github.run_id }}
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem
+
+      - name: Install browser proof runtime
+        working-directory: apps/oneworldz-ecosystem-release
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Prove all 18 candidate sites at desktop and mobile sizes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p visual-proof
+          cd apps/oneworldz-ecosystem-release
+          node --input-type=module <<'NODE' > "$RUNNER_TEMP/targets.tsv"
+          import { productionTargets } from './production-targets.mjs';
+          for (const target of productionTargets) {
+            console.log([target.key,target.expectedTitle,target.requiredIdentityText,target.requiredIdentityImage].join('\t'));
+          }
+          NODE
+          test "$(wc -l < "$RUNNER_TEMP/targets.tsv" | tr -d ' ')" = '18'
+          while IFS=$'\t' read -r key title required_text required_image; do
+            node browser-visual-proof.mjs \
+              --name "$key" \
+              --root "dist/ecosystem/$key" \
+              --expected-title "$title" \
+              --required-text "$required_text" \
+              --required-image "$required_image" \
+              --out "$GITHUB_WORKSPACE/visual-proof/$key"
+          done < "$RUNNER_TEMP/targets.tsv"
+          test "$(find "$GITHUB_WORKSPACE/visual-proof" -name visual-report.json | wc -l | tr -d ' ')" = '18'
+          test "$(find "$GITHUB_WORKSPACE/visual-proof" -name desktop.png | wc -l | tr -d ' ')" = '18'
+          test "$(find "$GITHUB_WORKSPACE/visual-proof" -name mobile.png | wc -l | tr -d ' ')" = '18'
+
+      - name: Upload ChatGPT preview visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-preview-visual-${{ github.run_id }}
+          path: visual-proof/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Preview handoff summary
+        if: always()
+        run: |
+          {
+            echo '## PREVIEW VISUAL EVIDENCE READY'
+            echo '- Production write: NO'
+            echo '- Candidate run: ${{ github.run_id }}'
+            echo '- Static source tree: ${{ needs.verify.outputs.static_tree }}'
+            echo '- ChatGPT must inspect the uploaded desktop/mobile evidence before the DEPLOY phase is armed.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: One proven Hostinger rail — exact-file fleet deployment
+    needs: verify
+    if: ${{ needs.verify.outputs.phase == 'DEPLOY' && needs.verify.outputs.preview_pass == 'PASS' && github.event_name == 'push' && github.event.head_commit.message == 'EXECUTE JAYJAYTEAMDEV CHATGPT TOTAL DEPLOYMENT' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      PREVIEW_RUN_ID: ${{ needs.verify.outputs.preview_run_id }}
+      APPROVED_STATIC_TREE: ${{ needs.verify.outputs.approved_static_tree }}
+      CURRENT_STATIC_TREE: ${{ needs.verify.outputs.static_tree }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail closed unless this is the exact ChatGPT-approved static tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$APPROVED_STATIC_TREE"
+          test "$APPROVED_STATIC_TREE" != 'NONE'
+          test "$APPROVED_STATIC_TREE" = "$CURRENT_STATIC_TREE"
+          case "$PREVIEW_RUN_ID" in ''|NONE|*[!0-9]*) echo 'Invalid preview run id' >&2; exit 1 ;; esac
+          test -n "$FTP_HOST"
+          test -n "$FTP_USERNAME"
+          test -n "$FTP_PASSWORD"
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+
+      - name: Download the exact immutable candidate inspected by ChatGPT
+        uses: actions/download-artifact@v4
+        with:
+          name: oneworldz-candidate-${{ needs.verify.outputs.preview_run_id }}
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem
+          github-token: ${{ github.token }}
+          repository: CryptoWorldz/CryptoWorldz-Bot
+          run-id: ${{ needs.verify.outputs.preview_run_id }}
+
+      - name: Prove downloaded candidate boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          root='apps/oneworldz-ecosystem-release/dist/ecosystem'
+          test "$(find "$root" -mindepth 2 -maxdepth 2 -name index.html | wc -l | tr -d ' ')" = '18'
+          test -s "$root/oneworldz/index.html"
+          test ! -d "$root/cryptobotz"
+          ! grep -Rni --include='*.html' 'solworld\.fun' "$root"
+          ! grep -RIE 'OPENAI_API_KEY|sk-proj-|sk_live_|sk_test_|service_role|FTP_PASSWORD|DATABASE_URL|SUPABASE_SERVICE' "$root"
+
+      - name: Install exact-file FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+      - name: Re-authenticate the 18 proven Hostinger transport directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE' > "$RUNNER_TEMP/targets.tsv"
+          import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
+          for (const target of productionTargets) {
+            console.log([target.key,target.domain,target.hostingerTransportDir,target.guard,target.expectedTitle].join('\t'));
+          }
+          NODE
+          test "$(wc -l < "$RUNNER_TEMP/targets.tsv" | tr -d ' ')" = '18'
+          host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"
+          if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
+          {
+            echo 'set cmd:fail-exit true'
+            echo 'set net:max-retries 2'
+            echo 'set net:timeout 30'
+            echo 'set ftp:ssl-force true'
+            echo 'set ftp:ssl-protect-data true'
+            echo 'set ssl:verify-certificate true'
+            echo 'set ssl:check-hostname false'
+            while IFS=$'\t' read -r key domain transport guard title; do
+              printf 'cd "%s"\n' "$transport"
+              echo 'pwd'
+              echo 'cd /'
+            done < "$RUNNER_TEMP/targets.tsv"
+            echo 'bye'
+          } > "$RUNNER_TEMP/preflight.lftp"
+          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/preflight.lftp" "$host"
+
+      - name: Back up exact owned files, deploy assets first and index last, rollback fleet on failure
+        shell: bash
+        run: |
+          set -uo pipefail
+          host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"
+          if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
+          : > "$RUNNER_TEMP/touched.tsv"
+          failure=0
+          failed_key=''
+
+          while IFS=$'\t' read -r key domain transport guard title; do
+            release_root="$GITHUB_WORKSPACE/apps/oneworldz-ecosystem-release/dist/ecosystem/$key"
+            files="$RUNNER_TEMP/$key.files"
+            nonindex="$RUNNER_TEMP/$key.nonindex"
+            dirs="$RUNNER_TEMP/$key.dirs"
+            inventory="$RUNNER_TEMP/$key.inventory"
+            existing="$RUNNER_TEMP/$key.existing"
+            backup="$RUNNER_TEMP/backups/$key"
+            mkdir -p "$backup"
+
+            if ! (
+              set -euo pipefail
+              test -s "$release_root/index.html"
+              test -s "$release_root/release-manifest.json"
+              node - "$release_root/release-manifest.json" "$guard" <<'NODE'
+              const fs=require('fs');
+              const [manifestPath,guard]=process.argv.slice(2);
+              const m=JSON.parse(fs.readFileSync(manifestPath,'utf8'));
+              if(m.deploy_guard!==guard||m.ftp_root!=='/'||m.homepage!=='/index.html'||m.assets_root!=='/assets/') throw new Error('release destination contract mismatch');
+              if((m.protected_services_modified||[]).length) throw new Error('protected-service mutation declared');
+              NODE
+              (cd "$release_root" && find . -type f -printf '%P\n' | sort) > "$files"
+              test -s "$files"
+              grep -Fxq 'index.html' "$files"
+              ! grep -Eq '^/|(^|/)\.\.(/|$)' "$files"
+              grep -v '^index\.html$' "$files" > "$nonindex" || true
+              while IFS= read -r rel; do d="$(dirname "$rel")"; [ "$d" = '.' ] || echo "$d"; done < "$files" | sort -u > "$dirs"
+
+              timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "set cmd:fail-exit true; set net:max-retries 2; set net:timeout 30; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; cd \"$transport\"; find; bye" "$host" \
+                | sed -e 's#^\./##' -e 's#/$##' > "$inventory"
+              : > "$existing"
+              while IFS= read -r rel; do
+                if grep -Fxq "$rel" "$inventory"; then
+                  echo "$rel" >> "$existing"
+                  mkdir -p "$backup/$(dirname "$rel")"
+                fi
+              done < "$files"
+
+              {
+                echo 'set cmd:fail-exit true'
+                echo 'set net:max-retries 2'
+                echo 'set net:timeout 30'
+                echo 'set ftp:ssl-force true'
+                echo 'set ftp:ssl-protect-data true'
+                echo 'set ssl:verify-certificate true'
+                echo 'set ssl:check-hostname false'
+                printf 'cd "%s"\n' "$transport"
+                while IFS= read -r rel; do printf 'get "%s" -o "%s"\n' "$rel" "$backup/$rel"; done < "$existing"
+                echo 'bye'
+              } > "$RUNNER_TEMP/$key.backup.lftp"
+              timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.backup.lftp" "$host"
+
+              printf '%s\t%s\t%s\t%s\n' "$key" "$domain" "$transport" "$title" >> "$RUNNER_TEMP/touched.tsv"
+
+              {
+                echo 'set cmd:fail-exit true'
+                echo 'set net:max-retries 3'
+                echo 'set net:timeout 30'
+                echo 'set ftp:ssl-force true'
+                echo 'set ftp:ssl-protect-data true'
+                echo 'set ssl:verify-certificate true'
+                echo 'set ssl:check-hostname false'
+                printf 'cd "%s"\n' "$transport"
+                printf 'lcd "%s"\n' "$release_root"
+                while IFS= read -r dir; do [ -n "$dir" ] && printf 'mkdir -p "%s"\n' "$dir"; done < "$dirs"
+                while IFS= read -r rel; do printf 'put "%s" -o "%s"\n' "$rel" "$rel"; done < "$nonindex"
+                echo 'put "index.html" -o "index.html"'
+                echo 'bye'
+              } > "$RUNNER_TEMP/$key.upload.lftp"
+              timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.upload.lftp" "$host"
+
+              proved=0
+              for attempt in $(seq 1 24); do
+                html="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 -H 'Cache-Control: no-cache, no-store' "https://$domain/?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
+                if printf '%s' "$html" | grep -Fq "<title>$title</title>"; then proved=1; break; fi
+                sleep 10
+              done
+              test "$proved" = '1'
+              echo "DEPLOYED_AND_TITLE_PROVED https://$domain/"
+            ); then
+              failure=1
+              failed_key="$key"
+              break
+            fi
+          done < "$RUNNER_TEMP/targets.tsv"
+
+          if [ "$failure" = '1' ]; then
+            echo "::error::Deployment failed at $failed_key. Rolling back every touched target."
+            rollback_failed=0
+            while IFS=$'\t' read -r key domain transport title; do
+              files="$RUNNER_TEMP/$key.files"
+              nonindex="$RUNNER_TEMP/$key.nonindex"
+              dirs="$RUNNER_TEMP/$key.dirs"
+              existing="$RUNNER_TEMP/$key.existing"
+              backup="$RUNNER_TEMP/backups/$key"
+              {
+                echo 'set cmd:fail-exit false'
+                echo 'set net:max-retries 2'
+                echo 'set net:timeout 30'
+                echo 'set ftp:ssl-force true'
+                echo 'set ftp:ssl-protect-data true'
+                echo 'set ssl:verify-certificate true'
+                echo 'set ssl:check-hostname false'
+                printf 'cd "%s"\n' "$transport"
+                while IFS= read -r rel; do printf 'rm -f "%s"\n' "$rel"; done < "$files"
+                while IFS= read -r dir; do [ -n "$dir" ] && printf 'mkdir -p "%s"\n' "$dir"; done < "$dirs"
+                echo 'set cmd:fail-exit true'
+                printf 'lcd "%s"\n' "$backup"
+                while IFS= read -r rel; do [ "$rel" = 'index.html' ] || printf 'put "%s" -o "%s"\n' "$rel" "$rel"; done < "$existing"
+                if grep -Fxq 'index.html' "$existing"; then echo 'put "index.html" -o "index.html"'; fi
+                echo 'bye'
+              } > "$RUNNER_TEMP/$key.rollback.lftp"
+              timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.rollback.lftp" "$host" || rollback_failed=1
+              echo "ROLLBACK_ATTEMPTED https://$domain/"
+            done < <(tac "$RUNNER_TEMP/touched.tsv")
+            [ "$rollback_failed" = '0' ] || echo '::error::At least one rollback command failed.'
+            mkdir -p "$GITHUB_WORKSPACE/deployment-proof"
+            cp "$RUNNER_TEMP/touched.tsv" "$GITHUB_WORKSPACE/deployment-proof/touched.tsv" || true
+            exit 1
+          fi
+
+          mkdir -p "$GITHUB_WORKSPACE/deployment-proof"
+          cp "$RUNNER_TEMP/touched.tsv" "$GITHUB_WORKSPACE/deployment-proof/touched.tsv"
+          test "$(wc -l < "$GITHUB_WORKSPACE/deployment-proof/touched.tsv" | tr -d ' ')" = '18'
+          printf 'preview_run_id=%s\napproved_static_tree=%s\ndeploy_run_id=%s\n' "$PREVIEW_RUN_ID" "$APPROVED_STATIC_TREE" "$GITHUB_RUN_ID" > "$GITHUB_WORKSPACE/deployment-proof/release.txt"
+
+      - name: Upload deployment ledger
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-deployment-ledger-${{ github.run_id }}
+          path: deployment-proof/
+          if-no-files-found: warn
+          retention-days: 30
+
+  live-proof:
+    name: Live technical + desktop/mobile evidence for ChatGPT
+    needs: [verify, deploy]
+    if: ${{ needs.deploy.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install browser proof runtime
+        working-directory: apps/oneworldz-ecosystem-release
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Prove all 18 live sites at desktop and mobile sizes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p live-proof
+          cd apps/oneworldz-ecosystem-release
+          node --input-type=module <<'NODE' > "$RUNNER_TEMP/live-targets.tsv"
+          import { productionTargets } from './production-targets.mjs';
+          for (const target of productionTargets) {
+            console.log([target.key,target.domain,target.expectedTitle,target.requiredIdentityText,target.requiredIdentityImage].join('\t'));
+          }
+          NODE
+          test "$(wc -l < "$RUNNER_TEMP/live-targets.tsv" | tr -d ' ')" = '18'
+          while IFS=$'\t' read -r key domain title required_text required_image; do
+            node browser-visual-proof.mjs \
+              --name "$key" \
+              --url "https://$domain/?live_proof=${GITHUB_RUN_ID}-${key}" \
+              --expected-title "$title" \
+              --required-text "$required_text" \
+              --required-image "$required_image" \
+              --out "$GITHUB_WORKSPACE/live-proof/$key"
+          done < "$RUNNER_TEMP/live-targets.tsv"
+          test "$(find "$GITHUB_WORKSPACE/live-proof" -name visual-report.json | wc -l | tr -d ' ')" = '18'
+          test "$(find "$GITHUB_WORKSPACE/live-proof" -name desktop.png | wc -l | tr -d ' ')" = '18'
+          test "$(find "$GITHUB_WORKSPACE/live-proof" -name mobile.png | wc -l | tr -d ' ')" = '18'
+
+      - name: Prove protected CryptoBotz remained separate
+        shell: bash
+        run: |
+          set -euo pipefail
+          health="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache' https://cryptobotz.cryptoworldz.xyz/health)"
+          printf '%s' "$health" | grep -Fq '"ok":true'
+          root="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache' https://cryptobotz.cryptoworldz.xyz/)"
+          test -n "$root"
+
+      - name: Upload fresh live visual evidence for ChatGPT final review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-live-visual-${{ github.run_id }}
+          path: live-proof/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Final automated handoff
+        if: always()
+        run: |
+          {
+            echo '## LIVE EVIDENCE READY FOR JAYJAYTEAMDEV × CHATGPT FINAL PASS'
+            echo '- Automated live browser proof completed before this handoff only if this job is green.'
+            echo '- Final 100% status is intentionally not self-declared by the workflow.'
+            echo '- ChatGPT must inspect the fresh desktop/mobile artifact before recording final production pass.'
+          } >> "$GITHUB_STEP_SUMMARY"
