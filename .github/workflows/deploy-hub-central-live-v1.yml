@@ -12,7 +12,7 @@ permissions:
 env:
   TARGET_DOMAIN: cryptobotz.cryptoworldz.xyz
   REMOTE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
-  RESTART_DIR: /domains/cryptobotz.cryptoworldz.xyz/nodejs/tmp
+  HOSTINGER_USERNAME: u643166328
 
 concurrency:
   group: deploy-hub-central-oneworldz-services
@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Backup → additive services → restart → live proof → rollback on failure
+    name: Backup → additive services → Hostinger restart → live proof → rollback on failure
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
@@ -31,6 +31,7 @@ jobs:
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -43,6 +44,7 @@ jobs:
           test "$(sed -n 's/^mode=//p' "$request" | tail -n1)" = 'upgrade-hub-central-oneworldz-gpt'
           test "$(sed -n 's/^authority=//p' "$request" | tail -n1)" = 'JayJayTeamDev FULL ACCESS PERMISSION & AUTHORITY'
           test "$(sed -n 's/^openai_mode=//p' "$request" | tail -n1)" = 'server-side-responses-api'
+          test -n "$HOSTINGER_API_TOKEN"
           for file in src/hub-central/live-v1.js src/community-support/live-v1.js; do test -s "$file"; node --check "$file"; done
           grep -Fq '/api/oneworldz-gpt/chat' src/hub-central/live-v1.js
           grep -Fq 'https://api.openai.com/v1/responses' src/hub-central/live-v1.js
@@ -78,7 +80,7 @@ jobs:
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           test -n "$raw_host"
-          echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
+          echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"; echo "::add-mask::$HOSTINGER_API_TOKEN"
           [ -z "$OPENAI_API_KEY" ] || echo "::add-mask::$OPENAI_API_KEY"
           printf '%s' "$raw_host" > "$RUNNER_TEMP/raw-host"
 
@@ -132,9 +134,8 @@ jobs:
           grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/patched.env"
           cp src/hub-central/live-v1.js "$RUNNER_TEMP/hub-central-live.js"
           cp src/community-support/live-v1.js "$RUNNER_TEMP/community-support-live.js"
-          touch "$RUNNER_TEMP/restart.txt"
 
-      - name: Upload additive server services and restart
+      - name: Upload additive server services and restart through Hostinger API
         id: write
         shell: bash
         run: |
@@ -152,14 +153,19 @@ jobs:
           put $RUNNER_TEMP/community-support-live.js -o $REMOTE_ROOT/community-support-live.js
           put $RUNNER_TEMP/patched-index.js -o $REMOTE_ROOT/index.js
           put $RUNNER_TEMP/patched.env -o $REMOTE_ROOT/.env
-          set cmd:fail-exit false
-          mkdir -p $RESTART_DIR
-          set cmd:fail-exit true
-          put $RUNNER_TEMP/restart.txt -o $RESTART_DIR/restart.txt
           bye
           EOF
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$raw_host"
           echo 'written=true' >> "$GITHUB_OUTPUT"
+
+          restart_url="https://developers.hostinger.com/api/hosting/v1/accounts/$HOSTINGER_USERNAME/websites/$TARGET_DOMAIN/nodejs/server/restart"
+          code="$(curl --silent --show-error --location --request POST \
+            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+            -H 'Accept: application/json' \
+            -H 'Content-Type: application/json' \
+            -o "$RUNNER_TEMP/hostinger-restart.json" -w '%{http_code}' "$restart_url")"
+          echo "Hostinger NodeJS restart HTTP $code"
+          case "$code" in 200|201|202|204) ;; *) cat "$RUNNER_TEMP/hostinger-restart.json" 2>/dev/null || true; exit 1;; esac
 
       - name: Prove root unchanged OpenAI live and 35-profile Supabase registry live
         id: proof
@@ -191,16 +197,21 @@ jobs:
         shell: bash
         run: |
           set -u
-          raw_host="$(cat "$RUNNER_TEMP/raw-host")"; touch "$RUNNER_TEMP/restart-rollback.txt"
+          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
           {
             echo 'set cmd:fail-exit false'; echo 'set net:max-retries 2'; echo 'set net:timeout 25'; echo 'set ftp:ssl-force true'; echo 'set ftp:ssl-protect-data true'; echo 'set ssl:verify-certificate true'; echo 'set ssl:check-hostname false'
             echo "put $RUNNER_TEMP/original-index.js -o $REMOTE_ROOT/index.js"
             if [ -f "$RUNNER_TEMP/had-hub" ]; then echo "put $RUNNER_TEMP/original-hub-central-live.js -o $REMOTE_ROOT/hub-central-live.js"; else echo "rm -f $REMOTE_ROOT/hub-central-live.js"; fi
             if [ -f "$RUNNER_TEMP/had-community" ]; then echo "put $RUNNER_TEMP/original-community-support-live.js -o $REMOTE_ROOT/community-support-live.js"; else echo "rm -f $REMOTE_ROOT/community-support-live.js"; fi
             if [ -f "$RUNNER_TEMP/had-env" ]; then echo "put $RUNNER_TEMP/original.env -o $REMOTE_ROOT/.env"; else echo "rm -f $REMOTE_ROOT/.env"; fi
-            echo "mkdir -p $RESTART_DIR"; echo "put $RUNNER_TEMP/restart-rollback.txt -o $RESTART_DIR/restart.txt"; echo 'bye'
+            echo 'bye'
           } > "$RUNNER_TEMP/rollback.lftp"
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/rollback.lftp" "$raw_host" || true
+          restart_url="https://developers.hostinger.com/api/hosting/v1/accounts/$HOSTINGER_USERNAME/websites/$TARGET_DOMAIN/nodejs/server/restart"
+          curl --silent --show-error --location --request POST \
+            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+            -H 'Accept: application/json' -H 'Content-Type: application/json' \
+            -o "$RUNNER_TEMP/hostinger-rollback-restart.json" "$restart_url" || true
 
       - name: Preserve non-secret proof
         if: always()
@@ -209,6 +220,7 @@ jobs:
           name: oneworldz-protected-services-proof-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/baseline-root.sha256
+            ${{ runner.temp }}/hostinger-restart.json
             ${{ runner.temp }}/hub-status.json
             ${{ runner.temp }}/gpt-status.json
             ${{ runner.temp }}/gpt-live-proof.json
