@@ -16,23 +16,24 @@ const expectedRemoteDirs = Object.freeze({
   "learn-oneworldz": "domains/oneworldz.com/public_html/learn"
 });
 
-test("production gate locks the exact 19 / 15 / 17 architecture", () => {
+test("production gate locks the exact 19 / 15 / 18 architecture", () => {
   assert.equal(ecosystemDestinations.length, 19);
   assert.equal(ownedRootDomains.length, 15);
-  assert.equal(productionTargets.length, 17);
+  assert.equal(productionTargets.length, 18);
   assert.equal(productionGate.ecosystemDestinations, 19);
   assert.equal(productionGate.activeOwnedRootDomains, 15);
-  assert.equal(productionGate.staticTargets, 17);
+  assert.equal(productionGate.staticTargets, 18);
   assert.equal(productionGate.deploymentState, "NOT_EXECUTED");
 });
 
-test("SolWorld.fun is excluded and protected live services are never static targets", () => {
+test("SolWorld.fun is excluded and CryptoBotz remains the protected non-static destination", () => {
   assert.deepEqual(excludedRootDomains, ["solworld.fun"]);
   assert.deepEqual(productionGate.excludedOwnedRootDomains, ["solworld.fun"]);
   const domains = productionTargets.map(({ domain }) => domain);
   assert.ok(!domains.includes("solworld.fun"));
+  assert.ok(domains.includes("oneworldz.com"));
   for (const { domain } of protectedDestinations) assert.ok(!domains.includes(domain), `${domain} must remain protected`);
-  assert.deepEqual(new Set(productionGate.protectedDestinations), new Set(["oneworldz.com", "cryptobotz.cryptoworldz.xyz"]));
+  assert.deepEqual(new Set(productionGate.protectedDestinations), new Set(["cryptobotz.cryptoworldz.xyz"]));
 });
 
 test("every static target has one exact Hostinger root and deployment guard", () => {
@@ -52,7 +53,7 @@ test("every static target has one exact Hostinger root and deployment guard", ()
   }
 });
 
-test("the verified build produces all 17 exact production packages with title contracts", async () => {
+test("the verified build produces all 18 exact production packages with title contracts", async () => {
   for (const target of productionTargets) {
     const homepage = path.join(distRoot, target.key, "index.html");
     const info = await stat(homepage);
@@ -62,14 +63,15 @@ test("the verified build produces all 17 exact production packages with title co
   }
 });
 
-test("fleet manifest records the same architecture and never creates protected packages", async () => {
+test("fleet manifest records the same architecture and never creates CryptoBotz as a static package", async () => {
   const manifest = JSON.parse(await readFile(path.join(distRoot, "fleet-manifest.json"), "utf8"));
-  assert.equal(manifest.targets.length, 17);
+  assert.equal(manifest.targets.length, 18);
   assert.equal(manifest.architecture?.ecosystem_destinations, 19);
   assert.equal(manifest.architecture?.active_owned_root_domains, 15);
-  assert.equal(manifest.architecture?.static_build_targets, 17);
+  assert.equal(manifest.architecture?.static_build_targets, 18);
   assert.deepEqual(manifest.architecture?.excluded_owned_root_domains, ["solworld.fun"]);
   assert.equal(manifest.ecosystem_destinations?.length, 19);
-  await assert.rejects(stat(path.join(distRoot, "oneworldz")));
+  const oneWorldz = await stat(path.join(distRoot, "oneworldz", "index.html"));
+  assert.ok(oneWorldz.size > 0);
   await assert.rejects(stat(path.join(distRoot, "cryptobotz")));
 });
