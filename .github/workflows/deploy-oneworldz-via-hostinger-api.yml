@@ -1,0 +1,279 @@
+name: Deploy OneWorldz Visual Repair via Hostinger API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/oneworldz-hostinger-api-repair.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-oneworldz-hostinger-api-repair
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: oneworldz-production
+      url: https://oneworldz.com
+    env:
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+      API: https://developers.hostinger.com
+      LIVE_URL: https://oneworldz.com
+    steps:
+      - name: Checkout request and exact candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Lock exact authorised repair candidate
+        id: lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          request='deployments/oneworldz-hostinger-api-repair.request'
+          test -s "$request"
+          source_commit="$(sed -n 's/^source_commit=//p' "$request" | tail -n1)"
+          test "$(sed -n 's/^target=//p' "$request" | tail -n1)" = 'oneworldz.com'
+          test "$(sed -n 's/^authorization=//p' "$request" | tail -n1)" = 'GO'
+          test "$source_commit" = '${{ github.event.before }}'
+          git cat-file -e "$source_commit^{commit}"
+          git checkout --detach "$source_commit"
+          test -s ops/oneworldz/remote-visual-repair.sh
+          bash -n ops/oneworldz/remote-visual-repair.sh
+          test -s apps/cryptoworldz-web-core/assets/oneworldz-next.js
+          test -s apps/cryptoworldz-web-core/assets/oneworldz-live-fix.css
+          ! grep -Eqi 'NEXT PASS' apps/cryptoworldz-web-core/assets/oneworldz-next.js
+          grep -Fq 'One Connected Gateway' apps/cryptoworldz-web-core/assets/oneworldz-next.js
+          grep -Fq 'https://donateworldz.com/reagan-children/' apps/cryptoworldz-web-core/assets/oneworldz-next.js
+          grep -Fq 'https://impactbased.cryptoworldz.xyz/' apps/cryptoworldz-web-core/assets/oneworldz-next.js
+          grep -Fq '20260816-oneworldz-visual2' apps/cryptoworldz-web-core/index.html
+          echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
+          echo 'Exact OneWorldz repair candidate locked.'
+
+      - name: Verify candidate before any Hostinger write
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run verify:web
+
+      - name: Resolve exact OneWorldz Hostinger account and root
+        id: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$HOSTINGER_API_TOKEN"
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          websites="$(curl --fail --silent --show-error -H "$auth" -H 'Accept: application/json' "$API/api/hosting/v1/websites?domain=oneworldz.com")"
+          row="$(printf '%s' "$websites" | jq -c '.data[] | select(.domain=="oneworldz.com" and .is_enabled==true)' | head -n1)"
+          test -n "$row"
+          username="$(printf '%s' "$row" | jq -r '.username')"
+          root="$(printf '%s' "$row" | jq -r '.root_directory')"
+          test -n "$username"
+          case "$root" in /home/*/domains/oneworldz.com/public_html) ;; *) echo '::error::Unexpected OneWorldz root returned by Hostinger API'; exit 1;; esac
+          echo "::add-mask::$username"
+          echo "::add-mask::$root"
+          echo "username=$username" >> "$GITHUB_OUTPUT"
+          echo "root=$root" >> "$GITHUB_OUTPUT"
+          echo 'Authenticated Hostinger API resolved the exact OneWorldz account and document root.'
+
+      - name: Deploy four-file visual repair through one-shot Hostinger cron
+        id: cron_deploy
+        shell: bash
+        env:
+          USERNAME: ${{ steps.target.outputs.username }}
+          ROOT: ${{ steps.target.outputs.root }}
+          SOURCE_COMMIT: ${{ steps.lock.outputs.source_commit }}
+        run: |
+          set -euo pipefail
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          script_url="https://raw.githubusercontent.com/CryptoWorldz/CryptoWorldz-Bot/$SOURCE_COMMIT/ops/oneworldz/remote-visual-repair.sh"
+          remote_script="\$HOME/.oneworldz-visual-repair-${GITHUB_RUN_ID}.sh"
+          printf -v q_url '%q' "$script_url"
+          printf -v q_root '%q' "$ROOT"
+          printf -v q_commit '%q' "$SOURCE_COMMIT"
+          printf -v q_run '%q' "$GITHUB_RUN_ID"
+          command="if command -v curl >/dev/null 2>&1; then curl -fsSL --retry 2 --connect-timeout 15 --max-time 60 $q_url -o $remote_script; elif command -v wget >/dev/null 2>&1; then wget -q --timeout=60 -O $remote_script $q_url; else php -r '\$u=\$argv[1];\$d=\$argv[2];\$x=@file_get_contents(\$u);if(\$x===false){exit(2);}file_put_contents(\$d,\$x);' $q_url $remote_script; fi && /bin/bash $remote_script deploy $q_root $q_commit $q_run"
+          payload="$(jq -n --arg time '* * * * *' --arg command "$command" '{time:$time,command:$command}')"
+          created="$(curl --fail --silent --show-error --request POST -H "$auth" -H 'Accept: application/json' -H 'Content-Type: application/json' --data "$payload" "$API/api/hosting/v1/accounts/$USERNAME/cron-jobs")"
+          uid="$(printf '%s' "$created" | jq -r '.uid // empty')"
+          test -n "$uid"
+          echo "::add-mask::$uid"
+          echo "uid=$uid" >> "$GITHUB_OUTPUT"
+          deployed=0
+          for attempt in $(seq 1 36); do
+            sleep 5
+            output_json="$(curl --fail --silent --show-error -H "$auth" -H 'Accept: application/json' "$API/api/hosting/v1/accounts/$USERNAME/cron-jobs/$uid/output")"
+            output="$(printf '%s' "$output_json" | jq -r '.output // empty')"
+            if printf '%s' "$output" | grep -Fq "ONEWORLDZ_VISUAL_REPAIR_OK $GITHUB_RUN_ID"; then
+              deployed=1
+              break
+            fi
+            if printf '%s' "$output" | grep -Fq 'ONEWORLDZ_VISUAL_REPAIR_FAILED'; then
+              echo '::error::Hostinger-side repair script reported failure.'
+              exit 1
+            fi
+            echo "Waiting for guarded Hostinger cron execution ($attempt/36)..."
+          done
+          curl --fail --silent --show-error --request DELETE -H "$auth" -H 'Accept: application/json' "$API/api/hosting/v1/accounts/$USERNAME/cron-jobs/$uid" >/dev/null || true
+          test "$deployed" = 1
+          echo 'deployed=true' >> "$GITHUB_OUTPUT"
+          echo 'Hostinger-side four-file OneWorldz repair completed and cron job was removed.'
+
+      - name: Clear OneWorldz Hostinger cache
+        shell: bash
+        env:
+          USERNAME: ${{ steps.target.outputs.username }}
+        run: |
+          set -euo pipefail
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          curl --fail --silent --show-error --request DELETE -H "$auth" -H 'Accept: application/json' "$API/api/hosting/v1/accounts/$USERNAME/websites/oneworldz.com/cache/clear" >/dev/null
+          echo 'OneWorldz Hostinger cache cleared.'
+
+      - name: Prove exact repaired public assets
+        id: public
+        shell: bash
+        run: |
+          set -euo pipefail
+          success=0
+          mkdir -p "$RUNNER_TEMP/oneworldz-proof"
+          for attempt in $(seq 1 36); do
+            router="$(curl --fail --silent --show-error --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache' "$LIVE_URL/assets/site-router.js?v=${GITHUB_RUN_ID}-$attempt" || true)"
+            page="$(curl --fail --silent --show-error --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache' "$LIVE_URL/assets/oneworldz-next.js?v=${GITHUB_RUN_ID}-$attempt" || true)"
+            css="$(curl --fail --silent --show-error --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache' "$LIVE_URL/assets/oneworldz-live-fix.css?v=${GITHUB_RUN_ID}-$attempt" || true)"
+            index="$(curl --fail --silent --show-error --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache' "$LIVE_URL/?visual-repair=${GITHUB_RUN_ID}-$attempt" || true)"
+            if printf '%s' "$router" | grep -Fq 'oneworldz-live-fix.css' \
+              && printf '%s' "$page" | grep -Fq 'One Connected Gateway' \
+              && printf '%s' "$page" | grep -Fq 'reagan-children/' \
+              && ! printf '%s' "$page" | grep -Eqi 'NEXT PASS' \
+              && printf '%s' "$css" | grep -Fq 'owz-fixed-hero' \
+              && printf '%s' "$index" | grep -Fq '20260816-oneworldz-visual2'; then
+              printf '%s' "$router" > "$RUNNER_TEMP/oneworldz-proof/site-router.js"
+              printf '%s' "$page" > "$RUNNER_TEMP/oneworldz-proof/oneworldz-next.js"
+              printf '%s' "$css" > "$RUNNER_TEMP/oneworldz-proof/oneworldz-live-fix.css"
+              success=1
+              break
+            fi
+            echo "Waiting for public CDN convergence ($attempt/36)..."
+            sleep 5
+          done
+          test "$success" = 1
+          echo 'proved=true' >> "$GITHUB_OUTPUT"
+          echo 'Exact repaired OneWorldz assets are public.'
+
+      - name: Run strict mobile visual UX proof
+        id: visual
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/oneworldz-proof"
+          npx playwright install chromium >/dev/null
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const out=process.env.RUNNER_TEMP+'/oneworldz-proof';
+          const browser=await chromium.launch({headless:true});
+          try {
+            const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
+            await page.goto('https://oneworldz.com/?strict-mobile-proof='+process.env.GITHUB_RUN_ID,{waitUntil:'networkidle',timeout:90000});
+            await page.waitForSelector('.owz-fixed-hero',{timeout:30000});
+            const result=await page.evaluate(()=>{
+              const bodyText=document.body.innerText;
+              const worlds=[...document.querySelectorAll('.wx-world-link')];
+              const hero=document.querySelector('.owz-fixed-hero');
+              const heroImg=document.querySelector('.wx-hero-media img');
+              const h1=document.querySelector('.owz-fixed-hero h1');
+              const header=document.querySelector('.site-header');
+              const research=[...document.querySelectorAll('.wx-loop span')];
+              return {
+                viewport: window.innerWidth,
+                scrollWidth: document.documentElement.scrollWidth,
+                nextPass: /NEXT PASS/i.test(bodyText),
+                connectedGateway: /One Connected Gateway/i.test(bodyText),
+                reagan: /Action Spreads Smiles/i.test(bodyText),
+                worldCount: worlds.length,
+                heroExists: !!hero,
+                imageLoaded: !!heroImg && heroImg.complete && heroImg.naturalWidth>0,
+                imageWidth: heroImg?.getBoundingClientRect().width || 0,
+                h1Size: h1 ? parseFloat(getComputedStyle(h1).fontSize) : 999,
+                headerHeight: header?.getBoundingClientRect().height || 999,
+                researchCount: research.length
+              };
+            });
+            fs.writeFileSync(out+'/mobile-proof.json',JSON.stringify(result,null,2));
+            if(result.scrollWidth>result.viewport+2) throw new Error('horizontal_overflow');
+            if(result.nextPass) throw new Error('stale_next_pass_visible');
+            if(!result.connectedGateway) throw new Error('new_hero_copy_missing');
+            if(!result.reagan) throw new Error('reagan_path_missing');
+            if(result.worldCount<17) throw new Error('world_directory_incomplete');
+            if(!result.heroExists||!result.imageLoaded) throw new Error('hero_not_rendered');
+            if(result.imageWidth>result.viewport-10) throw new Error('hero_image_overflow');
+            if(result.h1Size>48) throw new Error('mobile_heading_oversized');
+            if(result.headerHeight>100) throw new Error('mobile_header_oversized');
+            if(result.researchCount!==7) throw new Error('research_loop_incomplete');
+            await page.screenshot({path:out+'/mobile-390x844.png',fullPage:true});
+
+            const desktop=await browser.newPage({viewport:{width:1440,height:1100},deviceScaleFactor:1});
+            await desktop.goto('https://oneworldz.com/?strict-desktop-proof='+process.env.GITHUB_RUN_ID,{waitUntil:'networkidle',timeout:90000});
+            await desktop.waitForSelector('.owz-fixed-hero',{timeout:30000});
+            const desktopOverflow=await desktop.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
+            if(desktopOverflow) throw new Error('desktop_horizontal_overflow');
+            await desktop.screenshot({path:out+'/desktop-1440x1100.png',fullPage:true});
+          } finally { await browser.close(); }
+          NODE
+          echo 'proved=true' >> "$GITHUB_OUTPUT"
+          echo 'Strict mobile + desktop visual UX proof passed.'
+
+      - name: Roll back via Hostinger API if public or visual proof fails
+        if: ${{ failure() && steps.cron_deploy.outputs.deployed == 'true' && (steps.public.outputs.proved != 'true' || steps.visual.outputs.proved != 'true') }}
+        shell: bash
+        env:
+          USERNAME: ${{ steps.target.outputs.username }}
+          ROOT: ${{ steps.target.outputs.root }}
+          SOURCE_COMMIT: ${{ steps.lock.outputs.source_commit }}
+        run: |
+          set -u
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          script_url="https://raw.githubusercontent.com/CryptoWorldz/CryptoWorldz-Bot/$SOURCE_COMMIT/ops/oneworldz/remote-visual-repair.sh"
+          remote_script="\$HOME/.oneworldz-visual-repair-${GITHUB_RUN_ID}.sh"
+          printf -v q_url '%q' "$script_url"
+          printf -v q_root '%q' "$ROOT"
+          printf -v q_commit '%q' "$SOURCE_COMMIT"
+          printf -v q_run '%q' "$GITHUB_RUN_ID"
+          command="if command -v curl >/dev/null 2>&1; then curl -fsSL $q_url -o $remote_script; elif command -v wget >/dev/null 2>&1; then wget -q -O $remote_script $q_url; else php -r '\$u=\$argv[1];\$d=\$argv[2];\$x=@file_get_contents(\$u);if(\$x===false){exit(2);}file_put_contents(\$d,\$x);' $q_url $remote_script; fi && /bin/bash $remote_script rollback $q_root $q_commit $q_run"
+          payload="$(jq -n --arg time '* * * * *' --arg command "$command" '{time:$time,command:$command}')"
+          created="$(curl --fail --silent --show-error --request POST -H "$auth" -H 'Accept: application/json' -H 'Content-Type: application/json' --data "$payload" "$API/api/hosting/v1/accounts/$USERNAME/cron-jobs" || true)"
+          uid="$(printf '%s' "$created" | jq -r '.uid // empty' 2>/dev/null || true)"
+          if [ -n "$uid" ]; then
+            for attempt in $(seq 1 36); do
+              sleep 5
+              output_json="$(curl --fail --silent --show-error -H "$auth" -H 'Accept: application/json' "$API/api/hosting/v1/accounts/$USERNAME/cron-jobs/$uid/output" || true)"
+              output="$(printf '%s' "$output_json" | jq -r '.output // empty' 2>/dev/null || true)"
+              if printf '%s' "$output" | grep -Fq "ONEWORLDZ_VISUAL_ROLLBACK_OK $GITHUB_RUN_ID"; then break; fi
+            done
+            curl --silent --request DELETE -H "$auth" "$API/api/hosting/v1/accounts/$USERNAME/cron-jobs/$uid" >/dev/null || true
+            curl --silent --request DELETE -H "$auth" "$API/api/hosting/v1/accounts/$USERNAME/websites/oneworldz.com/cache/clear" >/dev/null || true
+          fi
+          echo 'Rollback path completed/attempted after failed external proof.'
+
+      - name: Upload visual approval evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-strict-visual-proof-${{ github.run_id }}
+          path: ${{ runner.temp }}/oneworldz-proof/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Final real approval gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test '${{ steps.public.outputs.proved }}' = 'true'
+          test '${{ steps.visual.outputs.proved }}' = 'true'
+          echo 'ONEWORLDZ REAL VISUAL/UX APPROVAL GATE PASSED.'
