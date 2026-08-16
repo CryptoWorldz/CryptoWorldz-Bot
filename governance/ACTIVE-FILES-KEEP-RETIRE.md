@@ -1,61 +1,85 @@
-# Active Files — KEEP / RETIRE / QUARANTINE
+# Active Files — Canonical Keep / Retire Record
 
-Purpose: stop the repository becoming a second uncontrolled library.
+Status: CLEANUP EXECUTED CONTROL MAP
+Owner: JayJayTeamDev
+Purpose: one build authority, one active static source tree, no competing website gateways and no parallel static deployment routes.
 
-## KEEP — build authority / protected runtime
+## ACTIVE — KEEP
 
+### Protected CryptoBotz runtime
+- `index.js`
+- `auto-server.js`
+- `src/` except retired public-domain gateway code
+- required `public/` Mini App / Hub Central assets
+- required `supabase/` integration and migrations
+- runtime tests that protect ZED, AUTO, G.R.A.C.E., Command Centre and owner/admin boundaries
+
+### One canonical static ecosystem build
+- `apps/oneworldz-ecosystem-release/`
+- `apps/oneworldz-ecosystem-release/production-targets.mjs` is the only static destination contract.
+- `apps/oneworldz-ecosystem-release/source/` is the only active static-site source area.
+- Generated `dist/` is build output, never a second source tree.
+
+### One active visual source boundary
+All production website artwork used by the static fleet must enter through `apps/oneworldz-ecosystem-release/source/` and its manifest/build rules. No other app or root folder may act as a second production image library.
+
+A sealed historical approved-image bundle is retained only under `archive/reference-media/` for provenance/recovery. It is not imported, restored, copied or searched by the active build.
+
+### Governance
 - `governance/ONEWORLDZ-CANONICAL-BUILD-AUTHORITY.md`
 - `governance/FLEET-REQUIREMENTS.md`
-- `tools/verify-oneworldz-canonical.mjs`
-- current protected CryptoBotz Node runtime (`index.js`, `src/`, required `public/`, current Supabase integration)
-- current active static-fleet release source/build only after it passes the canonical gate
-- approved/restored Worldz image-reference package and its integrity checksum
-- current working Spaceship DNS control for FoodWorldz while it remains needed
-- current total-fleet production target/topology definitions until safely replaced
-- source/history required to prove genuine Purple Diamond Crew legacy data and protected roles
+- `governance/JAYJAY-CHATGPT-DEPLOYMENT-GATE.md`
+- `governance/master-use-library-manifest.v1.json`
+- `governance/community-support-links.json`
+- this file
 
-## RETIRED / DELETED ALREADY
+### Deployment state
+- `deployments/README.md`
+- `deployments/oneworldz-19-total.request`
 
-Temporary repair machinery created during the failed OneWorldz visual-repair cycle has been removed:
+The request file is a state record only. There is no static production-write workflow during cleanup/security lockdown.
 
-- `.github/workflows/deploy-oneworldz-visual-repair.yml`
-- `.github/workflows/deploy-oneworldz-via-hostinger-api.yml`
-- `.github/workflows/deploy-oneworldz-hostinger-cron-v2.yml`
-- `deployments/oneworldz-visual-repair.request`
-- `deployments/oneworldz-hostinger-api-repair.request`
-- `deployments/oneworldz-hostinger-cron-v2.request`
-- `ops/oneworldz/remote-visual-repair.sh`
-- obsolete Hostinger-side FoodWorldz DNS repair workflow/request (FoodWorldz registrar control is via Spaceship)
+## RETIRED — REMOVED FROM ACTIVE TREE
 
-These must not be recreated as parallel deployment authorities.
+The following competing website/gateway roots are retired:
+- `apps/cryptoworldz-web-core/`
+- `apps/oneworldz-hub-central/`
+- `apps/worldz-sites/`
+- `src/pdc-host.js` public Worldz host-routing gateway
+- `master-use-library/` legacy architecture location
+- `media/` active/restoration image route
+- `diagnostics/` one-off request-trigger directory
 
-## RETIRE FROM ACTIVE PRODUCTION SOURCE
+The following categories are retired:
+- domain-specific and `*-only` static deployment workflows;
+- parallel OneWorldz/CryptoWorldz/SolWorldz FTP deployment workflows;
+- repair, rollback, preflight and alternate-root workflows from previous deployment attempts;
+- one-off deployment/audit request trigger files;
+- legacy direct FTP helpers and root-discovery helpers;
+- standalone SolWorldz/Purple Diamond Crew static builders superseded by the canonical fleet build;
+- scripts that restore/copy the old approved-image ZIP into a legacy app tree;
+- duplicate browser audit generations superseded by the canonical browser proof harness.
 
-The following are superseded by the current support plan and must not appear in a production manifest/build:
+## STATIC DEPLOYMENT LAW
 
-- active GoFundMe navigation/routes/configuration;
-- old GoFundMe campaign cover wiring;
-- generic `Facebook Support Profile 01...35` labels as public labels;
-- `NEXT PASS` / internal deployment-state copy;
-- text-only Worldz destination cards without unique profile imagery;
-- duplicate OneWorldz home implementations that compete with the canonical gateway;
-- ad-hoc visual repair CSS/JS once the clean canonical OneWorldz source replaces it.
+Until a new production rail passes the JayJayTeamDev × ChatGPT gate:
 
-Historical evidence may be retained only outside production manifests where it is clearly labelled archive/reference.
+1. Build only from `apps/oneworldz-ecosystem-release/`.
+2. Verify with `npm run verify:web`.
+3. Produce candidate desktop/mobile browser proof.
+4. Do not write to Hostinger production.
+5. Prove the exact authenticated Hostinger remote-root mapping once.
+6. Only then may one canonical production workflow be designed and reviewed.
+7. No per-domain deployment workflow, emergency direct route or alternative gateway may be added alongside it.
 
-## QUARANTINE / DEPENDENCY REVIEW BEFORE DELETE
+## HOSTING LAW
 
-Do not mass-delete these until references/imports/workflows are checked:
+The source tree does not guess `public_html`, `/`, domain folders or subdomain roots. Hosting destinations are facts to be authenticated and recorded in the one target contract. If remote structure conflicts with the contract, deployment stops; it does not try another path.
 
-- older SolWorldz and Purple Diamond Crew workflows;
-- older ecosystem release tools/build folders;
-- duplicated website/hub folders;
-- diagnostics/evidence needed to verify ownership/deployment history;
-- legacy image folders that may contain the only provenance for a protected identity;
-- historical token evidence.
+## BRANCHES / HISTORY
 
-Rule: if a file is not referenced by runtime, canonical build, approved reference provenance, verified deployment, rollback, or evidence/audit needs, it is eligible for deletion after dependency proof.
+Git history remains evidence. Old branches are not production authorities and must never be selected by planning/build/deployment logic. The active source of truth is `main` plus the governance and canonical build paths above. Branch-reference deletion is a separate repository-maintenance operation and does not create another build route.
 
-## File Library rule
+## FAIL-CLOSED STRUCTURE RULE
 
-ChatGPT File Library is treated as reference/evidence storage, not as the active build source. Only the latest approved authority and explicitly selected reference assets may influence a build. Older drafts and duplicate images are ignored unless needed for provenance. Repository production code must never scrape or guess from arbitrary library duplicates.
+Root `package.json` runs a structural guard. If a retired gateway/source path or legacy static deployment workflow reappears, canonical verification fails instead of silently choosing between routes.

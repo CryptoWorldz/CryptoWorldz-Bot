@@ -1,38 +1,22 @@
-# ChatGPT-Controlled Deployment Requests
+# OneWorldz Deployment Control
 
-Files in this directory are release authorisation records. They contain no passwords, API keys, wallet secrets or private financial information.
+This directory is a **state/approval record only**. It is not a collection of workflow trigger files.
 
-## No approval is currently recorded
+## Single static-fleet route
 
-A production request file must not be created until Jason Wright / JayJayTeamDev types exactly:
+- Canonical source/build root: `apps/oneworldz-ecosystem-release/`
+- Canonical topology and Hostinger destination contract: `apps/oneworldz-ecosystem-release/production-targets.mjs`
+- Canonical verification: `npm run verify:web`
+- Deployment approval law: `governance/JAYJAY-CHATGPT-DEPLOYMENT-GATE.md`
+- Static production deployment workflow: **NONE while cleanup/security lockdown is active**
+- Protected Node runtime: `cryptobotz.cryptoworldz.xyz` remains separate and is never a static target.
 
-`APPROVE TOTAL DEPLOYMENT`
+Only `oneworldz-19-total.request` is retained here. It records the current release state; changing it does not deploy anything.
 
-## Static Worldz sites
+## Rule
 
-Request file:
+Do not recreate domain-specific request files, repair triggers, `*-only.request` files, alternate FTP routes, visual-repair triggers, deployment holds, or parallel production gateways.
 
-`deployments/worldz-static.request`
+Before any future production workflow exists, the exact authenticated Hostinger remote-root contract must be proven once and the workflow must implement the JayJayTeamDev × ChatGPT approval gate.
 
-Supported targets are defined in `.github/workflows/deploy-worldz-static.yml`.
-
-The workflow requires:
-
-- An exact approval line.
-- A request commit matching the triggering main commit.
-- A matching domain-specific GitHub Environment.
-- A domain-restricted FTP account.
-- A matching deployment guard.
-- Validation, backup, live check and rollback.
-
-## Zed
-
-Zed remains on its existing Hostinger Node service. A merge to `main` may cause Hostinger's connected Git deployment to update Zed. Therefore the master integration branch must not be merged until total deployment approval is recorded and Zed checks have passed.
-
-## Auto
-
-Auto is packaged separately and may be deployed only in SAFE LOCKED MODE. The first Auto production service must not receive a wallet private key, seed phrase or signing secret.
-
-## Secrets
-
-Never place secrets in a request file. Missing production settings must fail closed.
+Secrets never belong in this directory.

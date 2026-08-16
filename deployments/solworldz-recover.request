@@ -1,5 +1,0 @@
-target=solworldz
-source_commit=4277b3f7e4600304bfe6364394536e2c80da5fe2
-requested_by=JayJayTeamDev
-authorization=GO
-reason=restore SolWorldz from locked approved master archive after prior rollback failure

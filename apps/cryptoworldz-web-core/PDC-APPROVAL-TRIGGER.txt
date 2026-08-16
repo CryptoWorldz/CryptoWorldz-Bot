@@ -1,2 +1,0 @@
-PurpleDiamondCrew.com deployment approved by JayJayTeamDev on 5 August 2026.
-This file intentionally triggers the complete web-core validation and Hostinger packaging workflow.
