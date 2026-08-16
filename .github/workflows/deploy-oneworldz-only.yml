@@ -1,0 +1,259 @@
+name: Deploy OneWorldz Only — Visual Pass
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/oneworldz-only.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-only-production
+  cancel-in-progress: true
+
+env:
+  DOMAIN: oneworldz.com
+  REMOTE: domains/oneworldz.com/public_html
+  PACKAGE: apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz
+  TITLE: OneWorldz | OneWorldz One Vision
+
+jobs:
+  build:
+    name: Build and prove OneWorldz only
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Prove OneWorldz-only authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          f='deployments/oneworldz-only.request'
+          test "$(sed -n 's/^requested_by=//p' "$f" | tail -n1)" = 'JayJayTeamDev'
+          test "$(sed -n 's/^authorization=//p' "$f" | tail -n1)" = 'FIX ONE SITE AT A TIME'
+          test "$(sed -n 's/^target=//p' "$f" | tail -n1)" = 'oneworldz.com'
+          test "$(sed -n 's/^visual_pass=//p' "$f" | tail -n1)" = 'DESKTOP_AND_MOBILE_REQUIRED'
+          test "$(sed -n 's/^links=//p' "$f" | tail -n1)" = 'PREVIEWS_AND_WORKING_LINKS_REQUIRED'
+      - name: Build canonical perfect package
+        run: npm --prefix apps/oneworldz-ecosystem-release run build:perfect
+      - name: Run OneWorldz release tests
+        run: |
+          npm --prefix apps/oneworldz-ecosystem-release run test:release
+          npm --prefix apps/oneworldz-ecosystem-release run test:seo
+          npm --prefix apps/oneworldz-ecosystem-release run test:readiness
+      - name: Prove two-page visual contract before upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$PACKAGE/index.html"
+          test -s "$PACKAGE/community-support/index.html"
+          test -s "$PACKAGE/assets/css/oneworldz-visual.css"
+          test -s "$PACKAGE/assets/desktop/oneworldz/oneworldz-master.png"
+          test -s "$PACKAGE/assets/mobile/little-legend.webp"
+          test -s "$PACKAGE/assets/previews/community-impact-background.png"
+          grep -Fq 'class="oneworldz-blue-white"' "$PACKAGE/index.html"
+          grep -Fq 'property="og:image"' "$PACKAGE/index.html"
+          grep -Fq 'name="twitter:card" content="summary_large_image"' "$PACKAGE/index.html"
+          grep -Fq 'class="community-support-hero"' "$PACKAGE/community-support/index.html"
+          grep -Fq 'property="og:image"' "$PACKAGE/community-support/index.html"
+          test "$(grep -o 'class="destination-preview"' "$PACKAGE/index.html" | wc -l | tr -d ' ')" = 8
+          node - <<'NODE'
+          const fs = require('fs');
+          const m = JSON.parse(fs.readFileSync(process.env.PACKAGE + '/release-manifest.json', 'utf8'));
+          const v = m.oneworldz_visual_contract || {};
+          if (JSON.stringify(v.pages) !== JSON.stringify(['/', '/community-support/'])) throw new Error('page inventory drift');
+          if (!v.desktop_mobile_backgrounds || !v.home_full_background_picture || !v.community_support_full_background_image) throw new Error('background contract failed');
+          if (v.destination_preview_cards !== 8 || !v.open_graph_preview_images || !v.twitter_large_image_previews || !v.local_hash_links_verified) throw new Error('preview/link contract failed');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-only-package-${{ github.run_id }}
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz/
+          if-no-files-found: error
+          retention-days: 30
+
+  deploy:
+    name: Backup → deploy OneWorldz only → live proof
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment:
+      name: cryptoworldz-production
+      url: https://oneworldz.com/
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: oneworldz-only-package-${{ github.run_id }}
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz
+      - name: Install FTP client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+      - name: Preflight exact OneWorldz Hostinger root
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$FTP_HOST"; test -n "$FTP_USERNAME"; test -n "$FTP_PASSWORD"
+          host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"; if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
+          echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
+          timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "set cmd:fail-exit true; set net:max-retries 2; set net:timeout 25; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate true; set ssl:check-hostname false; cd $REMOTE; pwd; bye" "$host"
+      - name: Enumerate exact OneWorldz package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$PACKAGE/index.html"; test -s "$PACKAGE/release-manifest.json"
+          (cd "$PACKAGE" && find . -type f -printf '%P\n' | sort) > "$RUNNER_TEMP/files.txt"
+          grep '/' "$RUNNER_TEMP/files.txt" | sed 's#/[^/]*$##' | sort -u > "$RUNNER_TEMP/dirs.txt" || true
+          while read -r rel; do mkdir -p "$RUNNER_TEMP/backup/$(dirname "$rel")"; done < "$RUNNER_TEMP/files.txt"
+      - id: write
+        name: Exact-file backup and OneWorldz-only upload
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"; if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
+          {
+            echo 'set cmd:fail-exit false'; echo 'set net:max-retries 2'; echo 'set net:timeout 25'; echo 'set ftp:ssl-force true'; echo 'set ftp:ssl-protect-data true'; echo 'set ssl:verify-certificate true'; echo 'set ssl:check-hostname false'; echo "cd $REMOTE"
+            while read -r rel; do echo "get $rel -o $RUNNER_TEMP/backup/$rel"; done < "$RUNNER_TEMP/files.txt"
+            echo bye
+          } > "$RUNNER_TEMP/backup.lftp"
+          timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/backup.lftp" "$host" || true
+          {
+            echo 'set cmd:fail-exit false'; echo 'set net:max-retries 3'; echo 'set net:timeout 30'; echo 'set ftp:ssl-force true'; echo 'set ftp:ssl-protect-data true'; echo 'set ssl:verify-certificate true'; echo 'set ssl:check-hostname false'; echo "cd $REMOTE"; echo "lcd $PACKAGE"
+            while read -r dir; do [ -n "$dir" ] && echo "mkdir -p $dir"; done < "$RUNNER_TEMP/dirs.txt"
+            while read -r rel; do echo "rmdir $rel"; done < "$RUNNER_TEMP/files.txt"
+            echo 'set cmd:fail-exit true'
+            while read -r rel; do echo "put $rel -o $rel"; done < "$RUNNER_TEMP/files.txt"
+            echo bye
+          } > "$RUNNER_TEMP/upload.lftp"
+          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$host"
+      - id: proof
+        name: Prove both live OneWorldz pages and required assets
+        if: ${{ steps.write.outcome == 'success' }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for n in $(seq 1 30); do
+            home="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 -H 'Cache-Control: no-cache' "https://$DOMAIN/?release=${GITHUB_SHA}-${GITHUB_RUN_ID}" || true)"
+            support="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 -H 'Cache-Control: no-cache' "https://$DOMAIN/community-support/?release=${GITHUB_SHA}-${GITHUB_RUN_ID}" || true)"
+            if printf '%s' "$home" | grep -Fq "<title>$TITLE</title>" \
+              && printf '%s' "$home" | grep -Fq 'class="oneworldz-blue-white"' \
+              && printf '%s' "$home" | grep -Fq 'property="og:image"' \
+              && printf '%s' "$support" | grep -Fq '<title>Community Support | OneWorldz Full Support</title>' \
+              && printf '%s' "$support" | grep -Fq 'property="og:image"'; then ok=1; break; fi
+            sleep 10
+          done
+          test "$ok" = 1
+          for asset in \
+            /assets/css/oneworldz-visual.css \
+            /assets/desktop/oneworldz/oneworldz-master.png \
+            /assets/mobile/little-legend.webp \
+            /assets/previews/community-impact-background.png; do
+            curl --fail --silent --show-error --location --max-time 45 "https://$DOMAIN$asset?release=${GITHUB_RUN_ID}" >/dev/null
+          done
+      - name: Restore exact prior files on failed write or live proof
+        if: ${{ steps.write.outcome == 'failure' || steps.proof.outcome == 'failure' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"; if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
+          {
+            echo 'set cmd:fail-exit false'; echo 'set net:max-retries 2'; echo 'set net:timeout 25'; echo 'set ftp:ssl-force true'; echo 'set ftp:ssl-protect-data true'; echo 'set ssl:verify-certificate true'; echo 'set ssl:check-hostname false'; echo "cd $REMOTE"
+            while read -r rel; do
+              echo "rm $rel"
+              echo "rmdir $rel"
+              if [ -f "$RUNNER_TEMP/backup/$rel" ]; then echo "put $RUNNER_TEMP/backup/$rel -o $rel"; fi
+            done < "$RUNNER_TEMP/files.txt"
+            echo bye
+          } > "$RUNNER_TEMP/restore.lftp"
+          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/restore.lftp" "$host" || true
+      - name: Fail after rollback
+        if: ${{ steps.write.outcome == 'failure' || steps.proof.outcome == 'failure' }}
+        run: exit 1
+
+  audit:
+    name: Desktop + mobile screenshots and live link audit
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Locate headless Chrome
+        id: chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || true)"
+          test -n "$chrome"
+          echo "path=$chrome" >> "$GITHUB_OUTPUT"
+      - name: Capture desktop and mobile proof for both pages
+        shell: bash
+        env:
+          CHROME: ${{ steps.chrome.outputs.path }}
+        run: |
+          set -euo pipefail
+          mkdir -p visual-proof
+          for route in home community-support; do
+            if [ "$route" = home ]; then url="https://oneworldz.com/?visual=${GITHUB_RUN_ID}"; else url="https://oneworldz.com/community-support/?visual=${GITHUB_RUN_ID}"; fi
+            "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,1000 --screenshot="visual-proof/${route}-desktop.png" "$url"
+            "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot="visual-proof/${route}-mobile.png" "$url"
+            "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=10000 --dump-dom "$url" > "visual-proof/${route}-dom.html"
+          done
+          test -s visual-proof/home-desktop.png
+          test -s visual-proof/home-mobile.png
+          test -s visual-proof/community-support-desktop.png
+          test -s visual-proof/community-support-mobile.png
+          grep -Fq 'class="oneworldz-blue-white"' visual-proof/home-dom.html
+          test "$(grep -o 'class="destination-preview"' visual-proof/home-dom.html | wc -l | tr -d ' ')" = 8
+          grep -Fq 'class="community-support-hero"' visual-proof/community-support-dom.html
+      - name: Verify public links from OneWorldz
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/links.txt" <<'LINKS'
+          https://purplediamondcrew.com
+          https://donateworldz.com
+          https://foodworldz.com
+          https://law.oneworldz.com
+          https://learn.oneworldz.com
+          https://cryptoworldz.xyz
+          https://donateworldz.com/reagan-children/
+          https://donateworldz.com/community-impact/
+          https://donateworldz.com/jayjayteamdev/
+          LINKS
+          failures=0
+          while read -r url; do
+            [ -z "$url" ] && continue
+            code="$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --connect-timeout 15 --max-time 45 "$url" || printf '000')"
+            if [[ "$code" =~ ^(2|3) ]]; then echo "OK $code $url"; else echo "BROKEN $code $url"; failures=$((failures+1)); fi
+          done < "$RUNNER_TEMP/links.txt"
+          test "$failures" = 0
+      - name: Prove 35 Community Support link cards materialize
+        shell: bash
+        run: |
+          set -euo pipefail
+          count="$(grep -o 'community-support-card' visual-proof/community-support-dom.html | wc -l | tr -d ' ')"
+          test "$count" -ge 35
+          href_count="$(grep -o 'href="https:[^"]*"' visual-proof/community-support-dom.html | wc -l | tr -d ' ')"
+          test "$href_count" -ge 35
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oneworldz-visual-proof-${{ github.run_id }}
+          path: visual-proof/
+          if-no-files-found: error
+          retention-days: 30
