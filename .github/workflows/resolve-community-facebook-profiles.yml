@@ -1,0 +1,67 @@
+name: Resolve Community Support Facebook Profiles
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/resolve-community-facebook-profiles.yml'
+      - 'tools/resolve-community-facebook-metadata.mjs'
+      - 'governance/community-support-links.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve public Facebook names and previews
+        run: |
+          set -euo pipefail
+          node tools/resolve-community-facebook-metadata.mjs governance/community-support-links.json tmp/community-facebook-metadata.json
+
+      - name: Summarize resolution
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          if [ -s tmp/community-facebook-metadata.json ]; then
+            resolved="$(jq -r '.resolved_count' tmp/community-facebook-metadata.json)"
+            unresolved="$(jq -r '.unresolved_count' tmp/community-facebook-metadata.json)"
+            {
+              echo '## Community Support Facebook Metadata'
+              echo
+              echo "- Resolved: $resolved / 35"
+              echo "- Unresolved: $unresolved"
+              echo '- No unresolved profile is permitted to receive an invented public name.'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload resolver evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: community-facebook-metadata-${{ github.run_id }}
+          path: tmp/community-facebook-metadata.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Final 35-profile metadata gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(jq -r '.source_count' tmp/community-facebook-metadata.json)" = '35'
+          resolved="$(jq -r '.resolved_count' tmp/community-facebook-metadata.json)"
+          if [ "$resolved" != '35' ]; then
+            echo "::error::Only $resolved/35 Facebook profiles exposed both a real public name and preview image anonymously. Final Community Support page remains blocked; no generic labels will be published."
+            exit 1
+          fi
+          jq -e 'all(.profiles[]; .resolved == true and (.display_name|length)>0 and (.preview_image|length)>0)' tmp/community-facebook-metadata.json >/dev/null
+          echo 'All 35 public Facebook profile names and previews resolved.'
