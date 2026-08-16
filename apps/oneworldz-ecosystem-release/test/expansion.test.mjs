@@ -19,8 +19,8 @@ const buildTest = (name, fn) => test(name, { skip: !distBuilt }, fn);
 test("19-destination architecture is exact", () => {
   assert.equal(ecosystemDestinations.length, 19);
   assert.equal(ownedRootDomains.length, 15);
-  assert.equal(protectedDestinations.length, 2);
-  assert.equal(deploymentTargets19.length, 17);
+  assert.equal(protectedDestinations.length, 1);
+  assert.equal(deploymentTargets19.length, 18);
   assert.deepEqual(excludedRootDomains, ["solworld.fun"]);
   assert.ok(!ecosystemDestinations.some(({ domain }) => domain === "solworld.fun"));
 });
@@ -31,11 +31,11 @@ test("active root-domain fleet contains FoodWorldz DonateWorldz and HodlerGalaxy
   }
 });
 
-test("OneWorldz and CryptoBotz remain protected existing destinations", () => {
+test("OneWorldz is the rebuilt global gateway while CryptoBotz remains protected", () => {
   const protectedDomains = protectedDestinations.map(({ domain }) => domain);
-  assert.deepEqual(protectedDomains, ["oneworldz.com", "cryptobotz.cryptoworldz.xyz"]);
+  assert.deepEqual(protectedDomains, ["cryptobotz.cryptoworldz.xyz"]);
   const staticDomains = deploymentTargets19.map(({ domain }) => domain);
-  assert.ok(!staticDomains.includes("oneworldz.com"));
+  assert.ok(staticDomains.includes("oneworldz.com"));
   assert.ok(!staticDomains.includes("cryptobotz.cryptoworldz.xyz"));
 });
 
@@ -74,11 +74,13 @@ buildTest("HodlerGalaxy is discovery rather than a duplicate homepage", async ()
   assert.match(html, /https:\/\/donateworldz\.com/);
 });
 
-buildTest("fleet manifest records 17 static packages representing 19 destinations", async () => {
+buildTest("fleet manifest records 18 static packages representing 19 destinations", async () => {
   const manifest = JSON.parse(await readFile(path.join(distRoot, "fleet-manifest.json"), "utf8"));
-  assert.equal(manifest.targets.length, 17);
+  assert.equal(manifest.targets.length, 18);
   assert.equal(manifest.architecture.ecosystem_destinations, 19);
   assert.equal(manifest.architecture.active_owned_root_domains, 15);
+  assert.equal(manifest.architecture.static_build_targets, 18);
   assert.deepEqual(manifest.architecture.excluded_owned_root_domains, ["solworld.fun"]);
+  assert.deepEqual(manifest.architecture.protected_existing_destinations, ["https://cryptobotz.cryptoworldz.xyz"]);
   assert.equal(manifest.ecosystem_destinations.length, 19);
 });
