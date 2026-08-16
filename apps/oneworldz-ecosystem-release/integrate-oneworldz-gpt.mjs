@@ -7,6 +7,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const source = path.join(root, "source");
 const dist = path.join(root, "dist", "ecosystem");
 const targets = ["oneworldz", "donateworldz"];
+const referenceArtwork = path.join(source, "assets", "desktop", "oneworldz", "oneworldz-gpt.png");
 
 const hash = (buffer) => createHash("sha256").update(buffer).digest("hex");
 
@@ -33,6 +34,12 @@ async function refreshManifest(target) {
   manifest.generated_at = new Date().toISOString();
   manifest.files = files;
   manifest.integrations = Array.from(new Set([...(manifest.integrations || []), "oneworldz-gpt-openai-api"]));
+  manifest.oneworldz_gpt = {
+    api: "https://cryptobotz.cryptoworldz.xyz/api/oneworldz-gpt/chat",
+    reference_artwork: "/assets/oneworldz-gpt/oneworldz-gpt.png",
+    secret_location: "protected-server-only",
+    payments_in_chat: false
+  };
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 }
 
@@ -40,8 +47,10 @@ for (const key of targets) {
   const target = path.join(dist, key);
   await mkdir(path.join(target, "assets", "css"), { recursive: true });
   await mkdir(path.join(target, "assets", "js"), { recursive: true });
+  await mkdir(path.join(target, "assets", "oneworldz-gpt"), { recursive: true });
   await cp(path.join(source, "oneworldz-gpt.css"), path.join(target, "assets", "css", "oneworldz-gpt.css"));
   await cp(path.join(source, "oneworldz-gpt.js"), path.join(target, "assets", "js", "oneworldz-gpt.js"));
+  await cp(referenceArtwork, path.join(target, "assets", "oneworldz-gpt", "oneworldz-gpt.png"));
 
   const indexPath = path.join(target, "index.html");
   let html = await readFile(indexPath, "utf8");
@@ -55,4 +64,4 @@ for (const key of targets) {
   await refreshManifest(target);
 }
 
-console.log("OneWorldz GPT integrated into OneWorldz.com and DonateWorldz.com static packages.");
+console.log("OneWorldz GPT integrated into OneWorldz.com and DonateWorldz.com with the approved OneWorldz GPT reference artwork.");
