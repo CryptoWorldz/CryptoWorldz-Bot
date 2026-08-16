@@ -1,7 +1,8 @@
 # OneWorldz Fleet Requirements
 
 Control: `governance/ONEWORLDZ-CANONICAL-BUILD-AUTHORITY.md`
-Rule: missing plan detail = BLOCKED, never invented.
+Deployment control: `governance/JAYJAY-CHATGPT-DEPLOYMENT-GATE.md`
+Rule: missing authenticated destination fact = `HOSTINGER DESTINATION PROOF REQUIRED`, never invention or fallback-path guessing.
 
 ## Shared visual / navigation contract
 
@@ -45,7 +46,7 @@ Same shared World portal contract; BNB-specific education/content; BNB unique pr
 Same shared World portal contract; XRP-specific education/content; XRP unique profile image and XRP-respective palette/background.
 
 ## 8 — SuiWorldz.xyz
-Current project destination: SuiWorldz.xyz. Use Sui identity artwork/profile mapping; Sui-specific education/content and palette. Older `SuiWorld.xyz` approval-document naming is superseded by later authenticated project topology. Do not silently swap domains.
+Current repository topology destination: SuiWorldz.xyz. Use Sui identity artwork/profile mapping; Sui-specific education/content and palette. Do not silently swap domains; any later authenticated registrar/hosting correction must update topology and this control file together before deployment.
 
 ## 9 — HyperWorldz.xyz
 Same shared World portal contract; Hyper-specific education/content; Hyper unique profile image and respective palette/background.
@@ -54,10 +55,12 @@ Same shared World portal contract; Hyper-specific education/content; Hyper uniqu
 World portal for Robinhood/Robin World context. Keep RobinWorldz, RecoverYourDebt and Robin Hood Law identities/scopes clearly separate. Do not imply legal advice or a chain/token relationship that is not verified. Unique RobinWorldz profile identity and palette.
 
 ## 11 — HodlerWorldz.xyz
-Education/recognition/rewards/holder-community identity. Must have its own profile image and visual treatment; not a generic chain clone. Detailed individual page plan must be recovered/locked before final approval.
+Locked role: portfolio-learning, recognition and holder-community pathway.
+Required: dedicated HodlerWorldz identity; long-term portfolio education; risk/time-horizon explanations; community learning; connected OneWorldz/CryptoWorldz navigation; support routes where planned; acknowledgements last. No guaranteed returns, trading execution or generic chain-clone presentation.
 
 ## 12 — HodlerGalaxy.xyz
-Expansion identity. Must not receive blanket approval from the shared template alone. Detailed individual page plan + unique image map are required before final approval.
+Locked role: ecosystem discovery layer, not another duplicate homepage.
+Required: dedicated HodlerGalaxy identity; clear discovery hero; directory cards to the active OneWorldz destinations; separate protected Command Centre route; HodlerWorldz route; learning/safety context; reciprocal OneWorldz/CryptoWorldz navigation; acknowledgements. Discovery only—no trading execution or fallback hosting role.
 
 ## 13 — PurpleDiamondCrew.com
 Role: legacy-token history + people-on-the-ground action/impact.
@@ -68,16 +71,16 @@ Role: ImpactBased purpose-driven launch/board context.
 Required: approved ImpactBased identity/profile/landscape imagery; transparent impact/funding context; Based.bid relationship described only to verified scope; no false launch/fee/external-authority claims; route back to CryptoWorldz/OneWorldz; support streams distinct.
 
 ## 15 — law.oneworldz.com
-Role: Law.OneWorldz / Robin Hood Law information pathway.
-Required: unique identity/profile treatment; verified information and clear distinction from RobinWorldz and RecoverYourDebt; no unverified legal-advice/service claim; connected OneWorldz route. Detailed individual page plan must be recovered/locked before final approval.
+Locked role: Law.OneWorldz / Robin Hood Law public-information pathway.
+Required: unique Law.OneWorldz identity; people-first public ideas; Robin Hood Law context clearly separated from RobinWorldz and RecoverYourDebt; research/information framing; connected OneWorldz navigation; acknowledgements where applicable. No personalised legal advice, representation claim or unverified legal-service claim.
 
 ## 16 — learn.oneworldz.com
-Role: education pathway.
-Required: unique Learn identity/profile treatment; readable learning-first pages; connected OneWorldz route; safe/verified content. Detailed individual page plan must be recovered/locked before final approval.
+Locked role: ecosystem learning centre.
+Required: unique Learn.OneWorldz identity; Learn • Share • Do framing; plain-language research and education; OneWorldz research workflow; connected FoodWorldz and ecosystem pathways where relevant; safe/verified content; mobile-readable learning cards; reciprocal OneWorldz navigation; acknowledgements where applicable.
 
 ## 17 — FoodWorldz.com
-Role: humanitarian/food impact expansion destination.
-Required: unique FoodWorldz identity/profile treatment; connected OneWorldz/DonateWorldz pathways; humanitarian accuracy and no invented outcomes. A complete individual content/page plan must be recovered/locked before final visual approval.
+Locked role: public food-needs, projects and impact information layer.
+Required: `Need → Action → Impact` structure; clear food/dignity/community identity; explain needs/projects/outcomes without invented results; route payment action to DonateWorldz rather than storing payment credentials; connected Community Impact, Learn.OneWorldz and OneWorldz routes; safety boundary; acknowledgements where applicable.
 
 ## 18 — DonateWorldz.com
 Role: dedicated support/donation gateway.
@@ -94,10 +97,14 @@ Required: service health + Mini App proof; ZED identity; profiles/wallet associa
 
 ## 35-profile Community Support acceptance
 
-Source of truth: Supabase `public.oneworldz_support_profiles`, exactly 35 active ordered records currently recovered.
+Source of truth: the verified 35-destination registry used by the canonical build, with Supabase `public.oneworldz_support_profiles` retained as the protected live data source where that API surface is used.
 
-Final card requirements: resolved real display name; available public preview/profile image; safe short label/context; original verified Facebook URL; order 1–35; no duplicates/missing records; desktop and mobile proof. Temporary database labels `Facebook Support Profile 01...35` are NOT final-public acceptance labels.
+Final card requirements: real resolved display name where publicly available; available public preview/profile image where permitted; safe short label/context; original verified Facebook URL; order 1–35; no duplicates/missing records; desktop and mobile proof. Generic `Facebook Support Profile 01...35` labels are not acceptable final-public names.
 
 ## Fleet approval rule
 
-No `100/100`, `COMPLETE`, `TOTAL DEPLOYMENT`, or JayJayTeamDev × ChatGPT final approval is valid merely because a route is live. Every relevant item above must be proven on the rendered site. Destinations with a missing detailed individual plan remain `PLAN REQUIRED / NOT APPROVED` until recovered and locked.
+The individual plan lock is complete for all 18 static targets in this control file plus the canonical generator/source. A target is no longer blocked merely because an older document said its individual plan still needed recovery.
+
+Final production approval still requires the same exact candidate to pass the JayJayTeamDev × ChatGPT gate: build, preview visual proof, authenticated Hostinger destination proof, production deployment, live technical proof and live visual proof.
+
+No `100/100`, `COMPLETE`, `TOTAL DEPLOYMENT`, or final JayJayTeamDev × ChatGPT production pass is valid merely because a route is live.
