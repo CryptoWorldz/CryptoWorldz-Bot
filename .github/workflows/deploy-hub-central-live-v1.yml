@@ -12,7 +12,7 @@ permissions:
 env:
   TARGET_DOMAIN: cryptobotz.cryptoworldz.xyz
   REMOTE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
-  RESTART_DIR: /domains/cryptobotz.cryptoworldz.xyz/public_html/tmp
+  RESTART_DIR: /domains/cryptobotz.cryptoworldz.xyz/nodejs/tmp
 
 concurrency:
   group: deploy-hub-central-oneworldz-services
@@ -88,8 +88,6 @@ jobs:
           get $REMOTE_ROOT/.env -o $RUNNER_TEMP/original.env
           bye
           EOF
-          # Missing optional module/.env files are valid for a first additive install.
-          # The two required runtime files are proven immediately afterwards.
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/download.lftp" "$raw_host" || true
           test -s "$RUNNER_TEMP/original-index.js"
           test -s "$RUNNER_TEMP/original-package.json"
@@ -117,9 +115,6 @@ jobs:
           NODE
           node --check "$RUNNER_TEMP/patched-index.js"
 
-          # Hostinger may provide the existing Supabase variables through its app
-          # environment rather than a physical .env file. Preserve any .env that
-          # exists, and add only the protected OpenAI key when it is absent.
           if [ -s "$RUNNER_TEMP/original.env" ]; then cp "$RUNNER_TEMP/original.env" "$RUNNER_TEMP/patched.env"; else : > "$RUNNER_TEMP/patched.env"; fi
           if ! grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/patched.env"; then
             test -n "$OPENAI_API_KEY" || { echo '::error::OPENAI_API_KEY unavailable in protected server or GitHub environment'; exit 1; }
