@@ -1,0 +1,158 @@
+name: Build CryptoWorldz Visual Preview — No Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/cryptoworldz-preview-build.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cryptoworldz-preview-build
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Build and render 14-page CryptoWorldz candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Prove no-deploy candidate authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          f='deployments/cryptoworldz-preview-build.request'
+          test "$(sed -n 's/^requested_by=//p' "$f" | tail -n1)" = 'JayJayTeamDev'
+          test "$(sed -n 's/^target=//p' "$f" | tail -n1)" = 'cryptoworldz.xyz'
+          test "$(sed -n 's/^mode=//p' "$f" | tail -n1)" = 'BUILD_PREVIEW_NO_DEPLOY'
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Build canonical ecosystem candidate
+        run: npm --prefix apps/oneworldz-ecosystem-release run build:perfect
+      - name: Run release tests
+        run: |
+          npm --prefix apps/oneworldz-ecosystem-release run test:release
+          npm --prefix apps/oneworldz-ecosystem-release run test:seo
+          npm --prefix apps/oneworldz-ecosystem-release run test:readiness
+      - name: Prove CryptoWorldz visual manifest contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg='apps/oneworldz-ecosystem-release/dist/ecosystem/cryptoworldz'
+          test -s "$pkg/index.html"
+          test -s "$pkg/assets/css/cryptoworldz-visual.css"
+          node <<'NODE'
+          const fs=require('fs');
+          const pkg='apps/oneworldz-ecosystem-release/dist/ecosystem/cryptoworldz';
+          const m=JSON.parse(fs.readFileSync(pkg+'/release-manifest.json','utf8'));
+          const v=m.cryptoworldz_visual_contract||{};
+          if(v.pages!==14) throw new Error('expected 14 CryptoWorldz pages');
+          if(!v.desktop_mobile_main_visuals||!v.full_background_hero_treatment||!v.division_identity_art_consistent_on_mobile||!v.support_pages_ambient_full_backgrounds) throw new Error('visual contract incomplete');
+          if(v.visual_link_previews_per_page!==4||!v.open_graph_preview_images||!v.twitter_large_image_previews||!v.local_hash_links_verified) throw new Error('preview/link contract incomplete');
+          if(v.protected_cryptobotz_modified!==false) throw new Error('protected app boundary violated');
+          NODE
+      - name: Define exact 14 pages
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/routes.tsv" <<'ROUTES'
+          home	/
+          command-centre	/command-centre/
+          miniapp	/miniapp/
+          support-reagan	/support/reagan-children/
+          support-community	/support/community-impact/
+          support-jayjay	/support/jayjayteamdev/
+          division-vision	/divisions/visionworldz/
+          division-ai	/divisions/aiworldz/
+          division-music	/divisions/musicworldz/
+          division-movie	/divisions/movieworldz/
+          division-art	/divisions/artworldz/
+          division-learn	/divisions/learnworldz/
+          division-business	/divisions/businessworldz/
+          division-law	/divisions/lawworldz/
+          ROUTES
+      - name: Start local candidate server
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/server.mjs" <<'NODE'
+          import { createServer } from 'node:http';
+          import { readFile, stat } from 'node:fs/promises';
+          import path from 'node:path';
+          const root=path.resolve('apps/oneworldz-ecosystem-release/dist/ecosystem/cryptoworldz');
+          const types={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.json':'application/json'};
+          createServer(async(req,res)=>{
+            try{
+              const u=new URL(req.url,'http://127.0.0.1');
+              let rel=decodeURIComponent(u.pathname).replace(/^\/+/, '');
+              let file=path.join(root,rel);
+              let s=await stat(file).catch(()=>null);
+              if(s?.isDirectory()) file=path.join(file,'index.html');
+              else if(!s && !path.extname(file)) file=path.join(file,'index.html');
+              if(!file.startsWith(root)) throw new Error('unsafe path');
+              const data=await readFile(file);
+              res.writeHead(200,{'content-type':types[path.extname(file)]||'application/octet-stream'});res.end(data);
+            }catch{res.writeHead(404);res.end('not found')}
+          }).listen(4173,'127.0.0.1');
+          NODE
+          node "$RUNNER_TEMP/server.mjs" > "$RUNNER_TEMP/server.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/server.pid"
+          for n in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+          curl -fsS http://127.0.0.1:4173/ >/dev/null
+      - name: Locate Chrome
+        id: chrome
+        shell: bash
+        run: |
+          chrome="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || true)"
+          test -n "$chrome"
+          echo "path=$chrome" >> "$GITHUB_OUTPUT"
+      - name: Capture candidate desktop and mobile proof
+        shell: bash
+        env:
+          CHROME: ${{ steps.chrome.outputs.path }}
+        run: |
+          set -euo pipefail
+          mkdir -p cryptoworldz-candidate-proof
+          while IFS=$'\t' read -r name route; do
+            url="http://127.0.0.1:4173${route}"
+            "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,1000 --virtual-time-budget=3000 --screenshot="cryptoworldz-candidate-proof/${name}-desktop.png" "$url"
+            "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,844 --virtual-time-budget=3000 --screenshot="cryptoworldz-candidate-proof/${name}-mobile.png" "$url"
+            "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=5000 --dump-dom "$url" > "cryptoworldz-candidate-proof/${name}-dom.html"
+          done < "$RUNNER_TEMP/routes.tsv"
+          test "$(find cryptoworldz-candidate-proof -name '*-desktop.png' | wc -l | tr -d ' ')" = 14
+          test "$(find cryptoworldz-candidate-proof -name '*-mobile.png' | wc -l | tr -d ' ')" = 14
+      - name: Prove visual layer on all candidate pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const routes=fs.readFileSync(process.env.RUNNER_TEMP+'/routes.tsv','utf8').trim().split('\n').map(x=>x.split('\t'));
+          const failures=[];
+          for(const [name] of routes){
+            const html=fs.readFileSync(`cryptoworldz-candidate-proof/${name}-dom.html`,'utf8');
+            if(!/cryptoworldz-visual/.test(html)) failures.push(`${name}: visual class missing`);
+            if(!/cryptoworldz-visual\.css/.test(html)) failures.push(`${name}: visual css missing`);
+            if((html.match(/class="cw-link-preview"/g)||[]).length!==4) failures.push(`${name}: link previews != 4`);
+            if(!/property="og:image"/.test(html)) failures.push(`${name}: og image missing`);
+            if(!/name="twitter:card" content="summary_large_image"/.test(html)) failures.push(`${name}: twitter preview missing`);
+          }
+          if(failures.length){console.error(failures.join('\n'));process.exit(1)}
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cryptoworldz-candidate-proof-${{ github.run_id }}
+          path: cryptoworldz-candidate-proof/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Stop local server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/server.pid" ]; then kill "$(cat "$RUNNER_TEMP/server.pid")" 2>/dev/null || true; fi
