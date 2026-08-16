@@ -58,7 +58,7 @@ const requiredIdentityImage = Object.freeze({
   hyperworldz: "hyperworldz",
   robinworldz: "robinworldz",
   hodlerworldz: "",
-  purplediamondcrew: "banner.png|hope-chest",
+  purplediamondcrew: "banner.png|hope-chest|action-team",
   impactbased: "impactbased",
   "law-oneworldz": "robin-hood-law",
   "learn-oneworldz": "oneworldz-gpt|little-legend",
