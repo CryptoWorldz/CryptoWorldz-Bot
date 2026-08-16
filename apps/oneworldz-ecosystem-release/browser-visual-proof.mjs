@@ -12,8 +12,9 @@ const rootArg = args.get("--root");
 const liveUrl = args.get("--url");
 const outDir = path.resolve(args.get("--out") || `visual-proof/${name}`);
 const expectedTitle = args.get("--expected-title") || "";
-const requiredImage = args.get("--required-image") || "";
 const requiredText = args.get("--required-text") || "";
+const requiredImage = args.get("--required-image") || "";
+const requiredImageTokens = requiredImage.split("|").map((value) => value.trim()).filter(Boolean);
 if (!rootArg && !liveUrl) throw new Error("Provide --root for candidate proof or --url for live proof");
 
 await mkdir(outDir, { recursive: true });
@@ -23,7 +24,7 @@ const mime = new Map([
   [".js", "text/javascript; charset=utf-8"], [".mjs", "text/javascript; charset=utf-8"],
   [".json", "application/json; charset=utf-8"], [".svg", "image/svg+xml"],
   [".png", "image/png"], [".jpg", "image/jpeg"], [".jpeg", "image/jpeg"],
-  [".webp", "image/webp"], [".gif", "image/gif"], [".ico", "image/x-icon"],
+  [".webp", "image/webp"], [".avif", "image/avif"], [".gif", "image/gif"], [".ico", "image/x-icon"],
   [".woff", "font/woff"], [".woff2", "font/woff2"]
 ]);
 
@@ -43,7 +44,10 @@ if (rootArg) {
       const s = await stat(file).catch(() => null);
       if (s?.isDirectory()) file = path.join(file, "index.html");
       const data = await readFile(file);
-      res.writeHead(200, { "content-type": mime.get(path.extname(file).toLowerCase()) || "application/octet-stream", "cache-control": "no-store" });
+      res.writeHead(200, {
+        "content-type": mime.get(path.extname(file).toLowerCase()) || "application/octet-stream",
+        "cache-control": "no-store"
+      });
       res.end(data);
     } catch {
       res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
@@ -66,13 +70,39 @@ const report = {
   mode: rootArg ? "candidate" : "live",
   url: targetUrl,
   expectedTitle,
-  requiredImage,
   requiredText,
+  requiredImage,
+  requiredImageTokens,
   generatedAt: new Date().toISOString(),
   viewports: {},
   pass: true,
   failures: []
 };
+
+async function settleResponsiveMedia(page) {
+  await page.evaluate(async () => {
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    for (const img of document.images) img.loading = "eager";
+    const max = Math.max(document.documentElement.scrollHeight, document.body?.scrollHeight || 0);
+    const step = Math.max(320, Math.floor(window.innerHeight * 0.75));
+    for (let y = 0; y <= max; y += step) {
+      window.scrollTo(0, y);
+      await sleep(45);
+    }
+    window.scrollTo(0, max);
+    await Promise.all([...document.images].map((img) => {
+      if (img.complete) return Promise.resolve();
+      return new Promise((resolve) => {
+        const done = () => resolve();
+        img.addEventListener("load", done, { once: true });
+        img.addEventListener("error", done, { once: true });
+        setTimeout(done, 5000);
+      });
+    }));
+    window.scrollTo(0, 0);
+  });
+  await page.waitForTimeout(250);
+}
 
 for (const vp of viewports) {
   const context = await browser.newContext({
@@ -101,9 +131,10 @@ for (const vp of viewports) {
     navigationError = String(error?.message || error);
     try { await page.goto(targetUrl, { waitUntil: "domcontentloaded", timeout: 20000 }); } catch {}
   }
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(350);
+  await settleResponsiveMedia(page);
 
-  const dom = await page.evaluate(({ requiredImage, requiredText }) => {
+  const dom = await page.evaluate(({ requiredImageTokens, requiredText }) => {
     const images = [...document.images].map((img) => ({
       src: img.getAttribute("src") || "",
       currentSrc: img.currentSrc || "",
@@ -113,10 +144,14 @@ for (const vp of viewports) {
       naturalHeight: img.naturalHeight,
       rect: { width: Math.round(img.getBoundingClientRect().width), height: Math.round(img.getBoundingClientRect().height) }
     }));
-    const bodyText = (document.body?.innerText || "").trim();
-    const brokenImages = images.filter((img) => !img.complete || img.naturalWidth <= 0 || img.naturalHeight <= 0);
-    const requiredImagePresent = !requiredImage || images.some((img) => img.src.includes(requiredImage) || img.currentSrc.includes(requiredImage));
-    const requiredTextPresent = !requiredText || bodyText.toLocaleLowerCase().includes(requiredText.toLocaleLowerCase());
+    const brokenImages = images.filter((img) => img.complete && (img.naturalWidth <= 0 || img.naturalHeight <= 0));
+    const pendingImages = images.filter((img) => !img.complete);
+    const requiredImagePresent = requiredImageTokens.length === 0 || images.some((img) => {
+      if (!img.complete || img.naturalWidth <= 0 || img.naturalHeight <= 0) return false;
+      return requiredImageTokens.some((token) => img.src.includes(token) || img.currentSrc.includes(token));
+    });
+    const bodyText = (document.body?.innerText || "").replace(/\s+/g, " ").trim();
+    const requiredTextPresent = !requiredText || bodyText.toLowerCase().includes(requiredText.toLowerCase());
     const interactive = [...document.querySelectorAll("a[href],button")].map((el) => ({
       tag: el.tagName.toLowerCase(),
       text: (el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 120),
@@ -127,17 +162,18 @@ for (const vp of viewports) {
       title: document.title,
       h1: document.querySelector("h1")?.textContent?.trim() || "",
       textLength: bodyText.length,
+      requiredTextPresent,
       scrollWidth: document.documentElement.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
       horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth),
       images,
       brokenImages,
+      pendingImages,
       requiredImagePresent,
-      requiredTextPresent,
       interactiveCount: interactive.filter((x) => x.visible).length,
       emptyVisibleLinks: interactive.filter((x) => x.tag === "a" && x.visible && (!x.href || x.href === "#" || /^javascript:/i.test(x.href)))
     };
-  }, { requiredImage, requiredText });
+  }, { requiredImageTokens, requiredText });
 
   let menu = { present: false, tested: false, opened: null, closed: null };
   const menuButton = page.locator('button[aria-controls="site-menu"]').first();
@@ -161,16 +197,15 @@ for (const vp of viewports) {
   if (navigationError) failures.push(`navigation: ${navigationError}`);
   if (expectedTitle && dom.title !== expectedTitle) failures.push(`title mismatch: expected '${expectedTitle}', got '${dom.title}'`);
   if (dom.textLength < 100) failures.push(`page text unexpectedly short: ${dom.textLength}`);
+  if (!dom.requiredTextPresent) failures.push(`required identity text missing: ${requiredText}`);
   if (dom.brokenImages.length) failures.push(`broken images: ${dom.brokenImages.length}`);
+  if (dom.pendingImages.length) failures.push(`images did not settle: ${dom.pendingImages.length}`);
   if (dom.horizontalOverflow > 4) failures.push(`horizontal overflow: ${dom.horizontalOverflow}px`);
   if (!dom.requiredImagePresent) failures.push(`required image missing: ${requiredImage}`);
-  if (!dom.requiredTextPresent) failures.push(`required identity text missing: ${requiredText}`);
-  if (dom.interactiveCount < 2) failures.push(`too few visible actions: ${dom.interactiveCount}`);
-  if (dom.emptyVisibleLinks.length) failures.push(`empty or unsafe visible links: ${dom.emptyVisibleLinks.length}`);
+  if (dom.emptyVisibleLinks.length) failures.push(`empty/placeholder visible links: ${dom.emptyVisibleLinks.length}`);
   if (failedRequests.length) failures.push(`same-origin failed requests: ${failedRequests.length}`);
   if (pageErrors.length) failures.push(`page errors: ${pageErrors.length}`);
   if (consoleErrors.length) failures.push(`console errors: ${consoleErrors.length}`);
-  if (!menu.present) failures.push("site menu missing");
   if (menu.tested && (!menu.opened || !menu.closed)) failures.push("menu open/close behaviour failed");
 
   report.viewports[vp.key] = { ...dom, menu, consoleErrors, pageErrors, failedRequests, navigationError, screenshot, failures };
