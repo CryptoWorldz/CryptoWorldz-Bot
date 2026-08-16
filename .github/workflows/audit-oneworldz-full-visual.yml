@@ -1,4 +1,4 @@
-name: Audit OneWorldz Full Visual — No Deploy
+name: Audit OneWorldz Strict Visual + Links — No Deploy
 
 on:
   push:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   audit:
-    name: Full-page desktop/mobile visual + every link
+    name: Desktop/mobile visual + locked link contract
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -36,56 +36,62 @@ jobs:
           chrome="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || true)"
           test -n "$chrome"
           echo "path=$chrome" >> "$GITHUB_OUTPUT"
-      - name: Capture tall desktop and mobile pages
+      - name: Capture real desktop and mobile viewport proof
         shell: bash
         env:
           CHROME: ${{ steps.chrome.outputs.path }}
         run: |
           set -euo pipefail
-          mkdir -p full-visual-proof
-          "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,8000 --screenshot=full-visual-proof/home-desktop-full.png "https://oneworldz.com/?fullqa=${GITHUB_RUN_ID}"
-          "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,14000 --screenshot=full-visual-proof/home-mobile-full.png "https://oneworldz.com/?fullqa=${GITHUB_RUN_ID}"
-          "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,9000 --screenshot=full-visual-proof/community-support-desktop-full.png "https://oneworldz.com/community-support/?fullqa=${GITHUB_RUN_ID}"
-          "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,18000 --screenshot=full-visual-proof/community-support-mobile-full.png "https://oneworldz.com/community-support/?fullqa=${GITHUB_RUN_ID}"
-          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=10000 --dump-dom "https://oneworldz.com/?fullqa=${GITHUB_RUN_ID}" > full-visual-proof/home-dom.html
-          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=10000 --dump-dom "https://oneworldz.com/community-support/?fullqa=${GITHUB_RUN_ID}" > full-visual-proof/community-support-dom.html
-          for f in full-visual-proof/*.png; do test -s "$f"; done
-      - name: Prove home visual previews and local links
+          mkdir -p strict-visual-proof
+          for route in home community-support; do
+            if [ "$route" = home ]; then url="https://oneworldz.com/?strictqa=${GITHUB_RUN_ID}"; else url="https://oneworldz.com/community-support/?strictqa=${GITHUB_RUN_ID}"; fi
+            "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,1000 --screenshot="strict-visual-proof/${route}-desktop.png" "$url"
+            "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot="strict-visual-proof/${route}-mobile.png" "$url"
+            "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=10000 --dump-dom "$url" > "strict-visual-proof/${route}-dom.html"
+          done
+          for f in strict-visual-proof/*.png; do test -s "$f"; done
+      - name: Prove both pages carry the locked visual treatment
         shell: bash
         run: |
           set -euo pipefail
-          home=full-visual-proof/home-dom.html
-          test "$(grep -o 'class="destination-preview"' "$home" | wc -l | tr -d ' ')" = 8
-          test "$(grep -o 'class="destination-preview"[^>]*' "$home" | wc -l | tr -d ' ')" = 8
+          home=strict-visual-proof/home-dom.html
+          support=strict-visual-proof/community-support-dom.html
+          grep -Fq 'class="oneworldz-blue-white"' "$home"
+          grep -Fq 'class="hero-art"' "$home"
           grep -Fq 'property="og:image"' "$home"
           grep -Fq 'name="twitter:card" content="summary_large_image"' "$home"
+          test "$(grep -o 'class="destination-preview"' "$home" | wc -l | tr -d ' ')" = 8
           ! grep -Fq 'href="#"' "$home"
-      - name: Prove all 35 support cards and hrefs are unique Facebook HTTPS destinations
+          grep -Fq 'class="community-support-page"' "$support"
+          grep -Fq 'class="community-support-hero"' "$support"
+          grep -Fq 'property="og:image"' "$support"
+          curl --fail --silent --show-error --location "https://oneworldz.com/assets/css/oneworldz-visual.css?strictqa=${GITHUB_RUN_ID}" > "$RUNNER_TEMP/visual.css"
+          grep -Fq "url('/assets/previews/community-impact-background.png')" "$RUNNER_TEMP/visual.css"
+          grep -Fq 'object-fit: cover' "$RUNNER_TEMP/visual.css"
+          grep -Fq '@media (max-width: 720px)' "$RUNNER_TEMP/visual.css"
+      - name: Prove all 35 live Facebook profile links exactly match the locked registry
         shell: bash
         run: |
           set -euo pipefail
-          dom=full-visual-proof/community-support-dom.html
+          dom=strict-visual-proof/community-support-dom.html
+          registry=apps/oneworldz-ecosystem-release/source/community-support-profiles.json
           test "$(grep -o 'community-support-card' "$dom" | wc -l | tr -d ' ')" = 35
-          grep -o 'href="https://www.facebook.com/[^"]*"' "$dom" | sed -e 's/^href="//' -e 's/"$//' | sort -u > "$RUNNER_TEMP/facebook-links.txt"
-          test "$(wc -l < "$RUNNER_TEMP/facebook-links.txt" | tr -d ' ')" = 35
-          grep -Ev '^https://www\.facebook\.com/' "$RUNNER_TEMP/facebook-links.txt" && exit 1 || true
-      - name: Browser-style HTTP check all 35 Facebook share destinations
-        shell: bash
-        run: |
-          set -euo pipefail
-          failures=0
-          while read -r url; do
-            [ -z "$url" ] && continue
-            code="$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --user-agent 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36' --connect-timeout 15 --max-time 35 "$url" || printf '000')"
-            if [[ "$code" =~ ^(2|3) ]]; then
-              echo "OK $code $url"
-            else
-              echo "UNCONFIRMED $code $url"
-              failures=$((failures+1))
-            fi
-          done < "$RUNNER_TEMP/facebook-links.txt"
-          test "$failures" = 0
-      - name: Recheck ecosystem destinations and preview assets
+          grep -o 'href="https://www.facebook.com/[^"]*"' "$dom" | sed -e 's/^href="//' -e 's/"$//' | sort -u > "$RUNNER_TEMP/live-facebook-links.txt"
+          node - <<'NODE' > "$RUNNER_TEMP/registry-facebook-links.txt"
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('apps/oneworldz-ecosystem-release/source/community-support-profiles.json','utf8'));
+          const urls = p.profiles.map(x => x.facebook_url).sort();
+          if (urls.length !== 35 || new Set(urls).size !== 35) throw new Error('registry must contain 35 unique links');
+          for (const url of urls) {
+            if (!/^https:\/\/www\.facebook\.com\/share\/[A-Za-z0-9]+\/$/.test(url)) throw new Error(`unexpected locked Facebook URL: ${url}`);
+            console.log(url);
+          }
+          NODE
+          test "$(wc -l < "$RUNNER_TEMP/live-facebook-links.txt" | tr -d ' ')" = 35
+          diff -u "$RUNNER_TEMP/registry-facebook-links.txt" "$RUNNER_TEMP/live-facebook-links.txt"
+          echo 'PASS: live Community Support preserves all 35 locked Facebook profile/share destinations exactly.'
+          echo 'NOTE: Facebook share endpoints require Facebook browser/app context; anonymous CI HTTP status is not a valid destination-health test.'
+      - name: Recheck controllable ecosystem destinations and every preview asset
         shell: bash
         run: |
           set -euo pipefail
@@ -99,6 +105,7 @@ jobs:
           https://donateworldz.com/reagan-children/
           https://donateworldz.com/community-impact/
           https://donateworldz.com/jayjayteamdev/
+          https://oneworldz.com/community-support/
           https://oneworldz.com/assets/previews/purple-diamond-crew.png
           https://oneworldz.com/assets/previews/donateworldz.webp
           https://oneworldz.com/assets/previews/foodworldz.png
@@ -107,6 +114,7 @@ jobs:
           https://oneworldz.com/assets/previews/partnerships.png
           https://oneworldz.com/assets/previews/help-the-people.png
           https://oneworldz.com/assets/previews/cryptoworldz.png
+          https://oneworldz.com/assets/previews/community-impact-background.png
           URLS
           failures=0
           while read -r url; do
@@ -117,7 +125,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: oneworldz-full-visual-proof-${{ github.run_id }}
-          path: full-visual-proof/
+          name: oneworldz-strict-visual-proof-${{ github.run_id }}
+          path: strict-visual-proof/
           if-no-files-found: error
           retention-days: 30
