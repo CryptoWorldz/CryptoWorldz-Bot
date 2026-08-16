@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   authorize:
-    name: Lock explicit 17-target deployment authority
+    name: Lock canonical 17-static-target total authority
     runs-on: ubuntu-latest
     outputs:
       source_commit: ${{ steps.lock.outputs.source_commit }}
@@ -23,8 +23,6 @@ jobs:
       deployment_mode: ${{ steps.lock.outputs.deployment_mode }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -39,28 +37,35 @@ jobs:
           scope="$(grep -E '^scope=' "$request" | tail -n1 | cut -d= -f2-)"
           mode="$(grep -E '^mode=' "$request" | tail -n1 | cut -d= -f2- || true)"
           targets="$(grep -E '^targets=' "$request" | tail -n1 | cut -d= -f2- || true)"
+
           test "$requested_by" = 'JayJayTeamDev'
           test "$authorization" = 'APPROVE COMPLETE ECOSYSTEM BUILD AND TOTAL DEPLOYMENT'
           test "$scope" = 'LOCKED-ONEWORLDZ-ECOSYSTEM-17-STATIC-TARGETS'
           test -n "$mode" || mode='deploy'
-          case "$mode" in deploy|handoff-only) ;; *) echo '::error::Invalid mode'; exit 1 ;; esac
+          case "$mode" in deploy|handoff-only) ;; *) echo '::error::Invalid deployment mode'; exit 1 ;; esac
+
+          # This is the TOTAL rail. Partial recovery must never rewrite it to one site.
           test -n "$targets" || targets='all'
+          if [ "$targets" != 'all' ]; then
+            echo '::error::The canonical total-release request must remain targets=all. Use a separate recovery rail for any isolated repair.'
+            exit 1
+          fi
+
           source_commit="$(git rev-parse HEAD)"
           echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
           echo "deployment_mode=$mode" >> "$GITHUB_OUTPUT"
+
           cd apps/oneworldz-ecosystem-release
-          TARGETS="$targets" node --input-type=module <<'NODE' >> "$GITHUB_OUTPUT"
+          node --input-type=module <<'NODE' >> "$GITHUB_OUTPUT"
           import { productionTargets, productionGate } from './production-targets.mjs';
           if (productionTargets.length !== 17) throw new Error('Production fleet must contain exactly 17 static targets');
-          if (productionGate.ecosystemDestinations !== 19 || productionGate.activeOwnedRootDomains !== 15) throw new Error('19/15 architecture drift');
-          const requested = process.env.TARGETS.split(',').map(v => v.trim()).filter(Boolean);
-          const selected = requested.includes('all') ? productionTargets : productionTargets.filter(site => requested.includes(site.key));
-          const unknown = requested.filter(key => key !== 'all' && !productionTargets.some(site => site.key === key));
-          if (unknown.length) throw new Error('Unknown deployment targets: ' + unknown.join(','));
-          if (!selected.length) throw new Error('No deployment targets selected');
-          const forbidden = new Set(['oneworldz.com','cryptobotz.cryptoworldz.xyz','solworld.fun']);
-          for (const site of selected) if (forbidden.has(site.domain)) throw new Error('Protected/excluded destination selected: ' + site.domain);
-          console.log('target_matrix=' + JSON.stringify({ include: selected.map(site => ({
+          if (productionGate.ecosystemDestinations !== 19) throw new Error('Ecosystem must contain exactly 19 destinations');
+          if (productionGate.activeOwnedRootDomains !== 15) throw new Error('Active owned roots must contain exactly 15 domains');
+          const forbidden = new Set(['oneworldz.com', 'cryptobotz.cryptoworldz.xyz', 'solworld.fun']);
+          for (const site of productionTargets) {
+            if (forbidden.has(site.domain)) throw new Error('Protected/excluded destination entered static deployment fleet: ' + site.domain);
+          }
+          console.log('target_matrix=' + JSON.stringify({ include: productionTargets.map(site => ({
             key: site.key,
             domain: site.domain,
             remote_dir: site.remoteDir,
@@ -70,7 +75,7 @@ jobs:
           NODE
 
   validate:
-    name: Build and prove exact release before any remote write
+    name: Build and prove canonical release before remote write
     needs: authorize
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -81,7 +86,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Run complete release verification
+      - name: Run complete canonical verification
         working-directory: apps/oneworldz-ecosystem-release
         run: npm run verify
       - name: Enforce protected and excluded boundaries
@@ -102,7 +107,7 @@ jobs:
           retention-days: 30
 
   preflight-fleet:
-    name: Read-only prove all selected Hostinger roots
+    name: Read-only prove all 17 Hostinger deployment roots
     needs: [authorize, validate]
     if: ${{ needs.authorize.outputs.deployment_mode != 'handoff-only' }}
     runs-on: ubuntu-latest
@@ -131,6 +136,7 @@ jobs:
           echo "::add-mask::$FTP_USERNAME"
           echo "::add-mask::$FTP_PASSWORD"
           node -e 'for (const x of JSON.parse(process.env.TARGET_MATRIX).include) console.log(x.remote_dir)' > "$RUNNER_TEMP/dirs.txt"
+          test "$(wc -l < "$RUNNER_TEMP/dirs.txt" | tr -d ' ')" = '17'
           script="$RUNNER_TEMP/preflight.lftp"
           {
             echo 'set cmd:fail-exit true'
@@ -165,7 +171,7 @@ jobs:
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       FTP_REMOTE_DIR: ${{ matrix.remote_dir }}
-      EXPECTED_REMOTE_DIR: domains/${{ matrix.domain }}/public_html
+      DOMAIN: ${{ matrix.domain }}
       DEPLOY_GUARD: ${{ matrix.guard }}
       EXPECTED_TITLE: ${{ matrix.expected_title }}
       LIVE_URL: https://${{ matrix.domain }}/
@@ -178,12 +184,17 @@ jobs:
         with:
           name: oneworldz-19-verified-${{ github.run_id }}
           path: apps/oneworldz-ecosystem-release/dist/ecosystem
-      - name: Enforce exact package → exact domain contract
+      - name: Enforce exact package → exact destination contract
         shell: bash
         run: |
           set -euo pipefail
-          test "$FTP_REMOTE_DIR" = "$EXPECTED_REMOTE_DIR"
-          [[ "$FTP_REMOTE_DIR" =~ ^domains/[a-z0-9.-]+/public_html$ ]]
+          case "$DOMAIN" in
+            impactbased.cryptoworldz.xyz) expected_remote='domains/cryptoworldz.xyz/public_html/impactbased' ;;
+            law.oneworldz.com) expected_remote='domains/oneworldz.com/public_html/law' ;;
+            learn.oneworldz.com) expected_remote='domains/oneworldz.com/public_html/learn' ;;
+            *) expected_remote="domains/$DOMAIN/public_html" ;;
+          esac
+          test "$FTP_REMOTE_DIR" = "$expected_remote"
           test -n "$DEPLOY_GUARD"
           test -s "$RELEASE_ROOT/index.html"
           test -s "$RELEASE_ROOT/release-manifest.json"
@@ -214,7 +225,7 @@ jobs:
           backup="$RUNNER_TEMP/remote-backup"
           mkdir -p "$backup"
           script="$RUNNER_TEMP/deploy.lftp"
-          if [ "$LIVE_URL" = 'https://cryptoworldz.xyz/' ]; then
+          if [ "$DOMAIN" = 'cryptoworldz.xyz' ]; then
             cat > "$script" <<EOF
           set cmd:fail-exit false
           set net:max-retries 3
@@ -268,7 +279,7 @@ jobs:
           done
           echo "::error::Live title proof failed for $LIVE_URL"
           exit 1
-      - name: Roll back exact domain if transfer or live proof fails
+      - name: Roll back exact destination if transfer or live proof fails
         if: ${{ steps.transfer.outcome == 'failure' || steps.liveproof.outcome == 'failure' }}
         shell: bash
         run: |
@@ -278,7 +289,7 @@ jobs:
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           script="$RUNNER_TEMP/rollback.lftp"
-          if [ "$LIVE_URL" = 'https://cryptoworldz.xyz/' ]; then
+          if [ "$DOMAIN" = 'cryptoworldz.xyz' ]; then
             cat > "$script" <<EOF
           set cmd:fail-exit false
           set net:max-retries 3
@@ -327,8 +338,8 @@ jobs:
         shell: bash
         run: |
           if [ '${{ needs.authorize.outputs.deployment_mode }}' = 'handoff-only' ]; then
-            echo 'Verified release handoff completed. No production deployment executed.'
+            echo 'Verified canonical release handoff completed. No production deployment executed.'
             exit 0
           fi
           test '${{ needs.deploy.result }}' = 'success'
-          echo 'All selected OneWorldz production targets deployed and proved.'
+          echo 'All 17 static OneWorldz production targets deployed and proved; 2 protected destinations remained outside static write scope.'
