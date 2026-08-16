@@ -8,7 +8,7 @@ const links = Object.freeze({
   foodWorldz: "https://foodworldz.com",
   donateWorldz: "https://donateworldz.com",
   hodlerGalaxy: "https://hodlergalaxy.xyz",
-  impactBased: "https://impactbased.oneworldz.com",
+  impactBased: "https://impactbased.cryptoworldz.xyz",
   learn: "https://learn.oneworldz.com",
   law: "https://law.oneworldz.com",
   commandCentre: "https://cryptobotz.cryptoworldz.xyz"
