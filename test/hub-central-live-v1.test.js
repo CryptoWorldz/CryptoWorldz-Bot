@@ -19,22 +19,32 @@ test("live compatibility diagnostics reject domains outside the OneWorldz regist
   assert.throws(() => normalizeOwnedDomain("example.com"), /domain_not_in_oneworldz_register/);
 });
 
-test("live compatibility UI contains the locked OneWorldz Full Support identity", () => {
+test("live compatibility UI contains the locked OneWorldz Full Support and OneWorldz GPT identity", () => {
   const html = hubHtml();
   assert.match(html, /OneWorldz Hub Central \| Full Support/);
   assert.match(html, /ONEWORLDZ 🌐 FULL SUPPORT™/);
-  assert.match(html, /HOSTINGER WRITES/);
-  assert.match(html, /SECURE AUTH PENDING/);
+  assert.match(html, /ONEWORLDZ GPT/);
+  assert.match(html, /server-side OpenAI key/i);
 });
 
-test("live compatibility module registers only additive GET routes", () => {
-  const routes = [];
-  const app = { get(path, handler) { routes.push([path, handler]); } };
+test("live compatibility module registers additive Hub Central and OneWorldz GPT routes", () => {
+  const registrations = [];
+  const app = {
+    get(path, handler) { registrations.push(["GET", path, handler]); },
+    post(path, handler) { registrations.push(["POST", path, handler]); },
+    options(path, handler) { registrations.push(["OPTIONS", path, handler]); },
+    use(path, handler) { registrations.push(["USE", path, handler]); }
+  };
   registerHubCentralLive(app);
-  assert.deepEqual(routes.map(([path]) => path), [
-    "/hub-central",
-    "/api/hub-central/status",
-    "/api/hub-central/public-dns"
+
+  assert.deepEqual(registrations.map(([method, path]) => `${method} ${path}`), [
+    "GET /hub-central",
+    "GET /api/hub-central/status",
+    "GET /api/hub-central/public-dns",
+    "USE /api/oneworldz-gpt",
+    "OPTIONS /api/oneworldz-gpt/*",
+    "GET /api/oneworldz-gpt/status",
+    "POST /api/oneworldz-gpt/chat"
   ]);
-  assert.equal(routes.every(([, handler]) => typeof handler === "function"), true);
+  assert.equal(registrations.every(([, , handler]) => typeof handler === "function"), true);
 });
