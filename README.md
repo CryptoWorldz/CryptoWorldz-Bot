@@ -20,14 +20,14 @@ Canonical commands:
 
 ```bash
 npm run build:ecosystem-release
-npm run verify:web
+npm run verify
 ```
 
-The fleet topology and destination contract are defined by:
+The fleet topology, visual identity contract and exact authenticated Hostinger transport destinations are defined once in:
 
 `apps/oneworldz-ecosystem-release/production-targets.mjs`
 
-There is no static production-write GitHub workflow and none is required for the current plan. Production may use only one authenticated Hostinger static-fleet rail after destination proof.
+If GitHub Actions is used, `.github/workflows/main.yml` is the **only** static-fleet execution rail. No fourth workflow, domain-specific deployer, fallback gateway or alternate FTP route is permitted.
 
 ## Total deployment authority
 
@@ -40,13 +40,24 @@ Production status and authority are controlled by:
 
 JayJayTeamDev's current `Perform TOTAL DEPLOYMENT PLAN` instruction is standing authority for the unchanged canonical candidate chain. Repeated approval prompts are not required unless content, target mapping, payments, DNS/mail, protected runtime or security boundaries change.
 
-A build/test pass is not a production pass. Final status still requires preview visual proof, authenticated Hostinger destination proof, production deployment, live technical proof and JayJayTeamDev × ChatGPT live visual proof.
+The canonical workflow is two-phase by design:
+
+1. build + automated desktop/mobile candidate evidence, with **no production write**;
+2. after ChatGPT inspects that evidence and records the approved static-source tree, deploy the exact immutable candidate through the one proven Hostinger rail and generate fresh live desktop/mobile evidence.
+
+Final `JAYJAYTEAMDEV × CHATGPT — 100% PRODUCTION PASS` is recorded only after the fresh live evidence is reviewed.
 
 ## Hosting root law
 
-Every static target must be authenticated against the exact Hostinger website/account before production write.
+The website/package contract remains:
 
-Hostinger can expose a physical website home directory ending in `public_html`. The canonical deployment contract uses remote `/` only when the chosen FTP/SFTP credential is already scoped to that exact website root. Never prepend or probe alternative directory structures after a mismatch; correct the target contract first.
+- root `/`;
+- homepage `/index.html`;
+- assets `/assets/`.
+
+The existing shared Hostinger FTP account reaches physical transport directories beneath the hosting account. All 18 exact transport directories were authenticated by the successful read-only proof and are stored as `hostingerTransportDir` values in the canonical target contract.
+
+Deployment code reads those exact stored transport values. It never derives a Hostinger directory from a domain, appends another `public_html`, probes siblings, falls back to `/`, or chooses another historical environment after a mismatch.
 
 ## Images
 
@@ -54,7 +65,7 @@ Active production website media belongs only inside the canonical static app sou
 
 ## Archive and historical GitHub metadata
 
-`archive/`, old branches and historical GitHub Environments are evidence/reference only. They are not build, runtime, target-selection or deployment authority.
+`archive/`, old branches and historical GitHub Environments are evidence/reference only. The sole production credential boundary retained from historical environment metadata is `cryptoworldz-production`, because its existing Hostinger credential set produced the successful 18-root authentication proof and is now bound only to `.github/workflows/main.yml`.
 
 ## Verification
 
@@ -64,4 +75,4 @@ npm run verify
 npm audit --audit-level=high
 ```
 
-`npm run verify` includes a structural guard that fails if retired website roots, old gateway folders, alternate static deployment workflow sets or legacy source locations return.
+`npm run verify` includes a structural guard that fails if retired website roots, old gateway folders, a fourth workflow, alternate static deployment routes or legacy active-source locations return.
