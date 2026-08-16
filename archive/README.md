@@ -1,5 +1,9 @@
-# Archive — Reference Only
+# Archive — Evidence / Reference Only
 
-Nothing under `archive/` is an active build source, deployment source, runtime source or fallback gateway.
+Nothing under `archive/` is an active build source, runtime source, deployment source, approval source or fallback gateway.
 
-`reference-media/` contains the sealed historical approved Worldz image bundle and checksum only for provenance/recovery. The canonical static build must not automatically restore, copy or discover images from this archive.
+- `reference-media/` — sealed historical approved Worldz image bundle and checksum for provenance/recovery only.
+- `legacy-docs/` — superseded planning, deployment and audit documents retained only as history.
+- `legacy-certifications/` — old pass/certification records retained only as history; they cannot approve a current release.
+
+Current authority lives in `governance/` and the canonical static build lives in `apps/oneworldz-ecosystem-release/`.
