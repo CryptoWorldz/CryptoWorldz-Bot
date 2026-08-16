@@ -1,15 +1,25 @@
 .cryptoworldz-visual {
-  --cw-deep: #05020d;
-  --cw-panel: rgba(10, 5, 23, .82);
+  --accent: #8d5cff;
+  --accent-2: #59b8ff;
+  --cw-deep: #05041a;
+  --cw-panel: rgba(10, 8, 35, .84);
+  --cw-blue: #59b8ff;
+  --cw-purple: #8d5cff;
   background:
-    radial-gradient(circle at 14% 0%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 34rem),
-    radial-gradient(circle at 90% 28%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 38rem),
+    radial-gradient(circle at 14% 0%, rgba(141,92,255,.28), transparent 34rem),
+    radial-gradient(circle at 90% 28%, rgba(89,184,255,.20), transparent 38rem),
     var(--cw-deep);
 }
 
 .cryptoworldz-visual .site-header {
-  background: rgba(5, 2, 13, .90);
-  border-bottom-color: color-mix(in srgb, var(--accent) 18%, rgba(255,255,255,.10));
+  background: rgba(5, 4, 26, .92);
+  border-bottom-color: rgba(126, 105, 255, .24);
+}
+
+.cryptoworldz-visual .site-brand small,
+.cryptoworldz-visual .profile-copy small,
+.cryptoworldz-visual .eyebrow {
+  color: var(--cw-blue);
 }
 
 .cryptoworldz-visual .hero {
@@ -37,7 +47,7 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
-  filter: saturate(1.05) contrast(1.03);
+  filter: saturate(1.08) contrast(1.04);
 }
 
 .cryptoworldz-visual.route-home .hero-art img { object-position: 64% center; }
@@ -46,8 +56,8 @@
 
 .cryptoworldz-visual .hero::after {
   background:
-    linear-gradient(90deg, rgba(5,2,13,.97) 0%, rgba(5,2,13,.82) 39%, rgba(5,2,13,.28) 72%),
-    linear-gradient(0deg, rgba(5,2,13,.93) 0%, transparent 48%);
+    linear-gradient(90deg, rgba(5,4,26,.97) 0%, rgba(5,4,26,.82) 39%, rgba(17,12,54,.28) 72%),
+    linear-gradient(0deg, rgba(5,4,26,.94) 0%, transparent 48%);
 }
 
 .cryptoworldz-visual .hero-copy {
@@ -94,17 +104,17 @@
 .cryptoworldz-visual .support-hero::after {
   z-index: -1;
   background:
-    linear-gradient(90deg, rgba(5,2,13,.58), rgba(5,2,13,.90) 58%, rgba(5,2,13,.96)),
-    linear-gradient(0deg, rgba(5,2,13,.92), transparent 58%);
+    linear-gradient(90deg, rgba(5,4,26,.58), rgba(5,4,26,.90) 58%, rgba(5,4,26,.96)),
+    linear-gradient(0deg, rgba(5,4,26,.92), transparent 58%);
 }
 
 .cryptoworldz-visual .support-emblem {
   position: relative;
   z-index: 1;
-  border-color: color-mix(in srgb, var(--accent) 48%, white);
-  background: rgba(5,2,13,.46);
+  border-color: rgba(141,92,255,.48);
+  background: rgba(5,4,26,.46);
   backdrop-filter: blur(14px);
-  box-shadow: 0 24px 90px rgba(0,0,0,.50), 0 0 42px color-mix(in srgb, var(--accent) 20%, transparent);
+  box-shadow: 0 24px 90px rgba(0,0,0,.50), 0 0 42px rgba(141,92,255,.20);
 }
 
 .cryptoworldz-visual .support-hero > div {
@@ -112,7 +122,7 @@
   z-index: 1;
   padding: clamp(1.1rem, 2vw, 2rem);
   border-radius: .9rem;
-  background: linear-gradient(135deg, rgba(5,2,13,.70), rgba(5,2,13,.36));
+  background: linear-gradient(135deg, rgba(5,4,26,.72), rgba(13,9,46,.38));
   backdrop-filter: blur(10px);
 }
 
@@ -133,7 +143,7 @@
   min-width: 0;
   border: 1px solid rgba(255,255,255,.14);
   border-radius: .85rem;
-  background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+  background: linear-gradient(145deg, rgba(141,92,255,.10), rgba(89,184,255,.035));
   color: inherit;
   text-decoration: none;
   transition: transform .2s ease, border-color .2s ease;
@@ -141,7 +151,7 @@
 
 .cw-link-preview:hover {
   transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--accent) 74%, white);
+  border-color: rgba(118,150,255,.74);
 }
 
 .cw-link-preview-image,
@@ -154,7 +164,7 @@
   display: block;
   overflow: hidden;
   padding: 0;
-  background: #080510;
+  background: #07051c;
 }
 
 .cw-link-preview img {
@@ -171,7 +181,7 @@
 }
 
 .cw-link-preview small {
-  color: var(--accent-2);
+  color: var(--cw-blue);
   font-size: .65rem;
   font-weight: 900;
   letter-spacing: .14em;
@@ -191,10 +201,119 @@
   font-weight: 800;
 }
 
+.cw-registry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.cw-registry-card {
+  display: grid;
+  align-content: start;
+  min-height: 180px;
+  padding: 1.2rem;
+  border: 1px solid rgba(124,126,255,.24);
+  border-radius: .85rem;
+  background: linear-gradient(145deg, rgba(36,22,82,.76), rgba(5,10,35,.96));
+  color: #fff;
+  text-decoration: none;
+  transition: transform .2s ease, border-color .2s ease;
+}
+
+.cw-registry-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(89,184,255,.70);
+}
+
+.cw-registry-card small {
+  color: var(--cw-blue);
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.cw-registry-card strong {
+  margin-top: .65rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.45rem;
+  line-height: 1.08;
+}
+
+.cw-registry-card em {
+  margin-top: auto;
+  padding-top: 1rem;
+  overflow-wrap: anywhere;
+  color: #b9dfff;
+  font-size: .72rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.cw-project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.cw-project-card {
+  padding: 1.2rem;
+  border: 1px solid rgba(141,92,255,.24);
+  border-radius: .85rem;
+  background: linear-gradient(145deg, rgba(45,23,92,.72), rgba(4,8,29,.96));
+}
+
+.cw-project-card > span {
+  color: var(--cw-blue);
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  overflow-wrap: anywhere;
+}
+
+.cw-project-card h3 {
+  margin: .6rem 0 .4rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  line-height: 1.08;
+}
+
+.cw-project-card p {
+  color: var(--muted);
+  font-size: .88rem;
+}
+
+.cw-project-card a {
+  color: #a9d8ff;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.cw-auto-law {
+  margin-top: 1.2rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid rgba(89,184,255,.32);
+  border-radius: .9rem;
+  background: linear-gradient(135deg, rgba(26,18,72,.90), rgba(4,14,39,.96));
+}
+
+.cw-auto-law strong {
+  color: #fff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.5rem, 2.6vw, 2.35rem);
+}
+
+.cw-auto-law p { color: #cfdaef; }
+
+@media (max-width: 1100px) {
+  .cw-registry-grid,
+  .cw-project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (max-width: 960px) {
   .cw-link-preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cryptoworldz-visual .hero::after {
-    background: linear-gradient(0deg, rgba(5,2,13,.98) 0%, rgba(5,2,13,.82) 48%, rgba(5,2,13,.24) 100%);
+    background: linear-gradient(0deg, rgba(5,4,26,.98) 0%, rgba(5,4,26,.82) 48%, rgba(11,8,42,.24) 100%);
   }
   .cryptoworldz-visual .hero-art img,
   .cryptoworldz-visual.route-home .hero-art img { object-position: center; }
@@ -229,14 +348,17 @@
   }
 
   .cryptoworldz-visual .support-hero::after {
-    background: linear-gradient(0deg, rgba(5,2,13,.98) 0%, rgba(5,2,13,.84) 52%, rgba(5,2,13,.38) 100%);
+    background: linear-gradient(0deg, rgba(5,4,26,.98) 0%, rgba(5,4,26,.84) 52%, rgba(9,7,40,.38) 100%);
   }
 
   .cryptoworldz-visual .support-emblem {
     max-width: min(360px, 82vw);
   }
 
-  .cw-link-preview-grid { grid-template-columns: 1fr; }
+  .cw-link-preview-grid,
+  .cw-registry-grid,
+  .cw-project-grid { grid-template-columns: 1fr; }
   .cw-link-preview { grid-template-columns: 112px minmax(0, 1fr); grid-template-rows: none; min-height: 112px; }
   .cw-link-preview-image { min-height: 112px; }
+  .cw-registry-card { min-height: 0; }
 }
