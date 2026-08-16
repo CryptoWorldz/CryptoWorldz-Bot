@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { ecosystemDestinations, excludedRootDomains, ownedRootDomains, protectedDestinations } from "../ecosystem-topology.mjs";
+import { autoControlPolicy, links, officialDirectory, supportDirectory, worldz } from "../site-data.mjs";
 import { productionGate, productionTargets } from "../production-targets.mjs";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -93,6 +94,68 @@ test("the verified build produces all 18 exact production packages with title co
     const html = await readFile(homepage, "utf8");
     assert.match(html, new RegExp(`<title>${target.expectedTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</title>`));
   }
+});
+
+test("OneWorldz, CryptoWorldz and Purple Diamond Crew keep three distinct locked themes", async () => {
+  const oneworldz = await readFile(path.join(distRoot, "oneworldz", "index.html"), "utf8");
+  const cryptoworldz = await readFile(path.join(distRoot, "cryptoworldz", "index.html"), "utf8");
+  const pdc = await readFile(path.join(distRoot, "purplediamondcrew", "index.html"), "utf8");
+  assert.match(oneworldz, /class="oneworldz-blue-white"/);
+  assert.match(oneworldz, /--accent:#4da3ff;--accent-2:#ffffff/);
+  assert.match(cryptoworldz, /class="cryptoworldz-visual route-home"/);
+  assert.match(cryptoworldz, /cryptoworldz-visual\.css/);
+  assert.match(pdc, /class="pdc-purple-theme"/);
+  assert.match(pdc, /pdc-market\.css/);
+});
+
+test("every Blockchain World renders the matching approved profile identity for its own chain", async () => {
+  for (const world of worldz) {
+    const html = await readFile(path.join(distRoot, world.key, "index.html"), "utf8");
+    assert.match(html, new RegExp(`--accent:${world.accent.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`), `${world.key}: own accent required`);
+    assert.match(html, new RegExp(`--accent-2:${world.accent2.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`), `${world.key}: own second accent required`);
+    if (world.image) {
+      assert.ok(html.includes(`/assets/desktop/blockchains/${world.image}.png`), `${world.key}: exact desktop profile artwork required`);
+      assert.ok(html.includes(`/assets/mobile/${world.image}.webp`), `${world.key}: exact mobile profile artwork required`);
+      for (const other of worldz.filter((candidate) => candidate.image && candidate.key !== world.key)) {
+        const hero = html.match(/<section class="hero chain-hero">([\s\S]*?)<\/section>/)?.[1] || "";
+        assert.ok(!hero.includes(`/assets/desktop/blockchains/${other.image}.png`), `${world.key}: must not use ${other.key} hero art`);
+      }
+    }
+  }
+});
+
+test("official public directory and locked support pathways appear on OneWorldz and CryptoWorldz", async () => {
+  const oneworldz = await readFile(path.join(distRoot, "oneworldz", "index.html"), "utf8");
+  const cryptoworldz = await readFile(path.join(distRoot, "cryptoworldz", "index.html"), "utf8");
+  for (const entry of officialDirectory) {
+    assert.ok(oneworldz.includes(`href="${entry.url}"`), `OneWorldz directory missing ${entry.url}`);
+    assert.ok(cryptoworldz.includes(`href="${entry.url}"`), `CryptoWorldz directory missing ${entry.url}`);
+  }
+  for (const entry of supportDirectory) assert.ok(oneworldz.includes(`href="${entry.url}"`), `OneWorldz support path missing ${entry.url}`);
+  assert.ok(oneworldz.includes(links.reaganChildren));
+  assert.ok(oneworldz.includes(links.communityDirectory));
+  assert.ok(oneworldz.includes(links.communityImpact));
+  assert.ok(oneworldz.includes(links.jayjaySupport));
+  assert.ok(oneworldz.includes(links.foodWorldz));
+  assert.ok(cryptoworldz.includes(links.impactBased));
+  assert.ok(cryptoworldz.includes(links.raaiiidd));
+  assert.ok(cryptoworldz.includes(links.nextBigCoin));
+});
+
+test("Command Centre registry keeps ZED AUTO GRACE and owner-funds compliance boundaries explicit", async () => {
+  const cryptoworldz = await readFile(path.join(distRoot, "cryptoworldz", "index.html"), "utf8");
+  assert.ok(cryptoworldz.includes("Command Centre Ultimate™"));
+  assert.ok(cryptoworldz.includes("ZED™"));
+  assert.ok(cryptoworldz.includes("AUTO • Diamond Buy™"));
+  assert.ok(cryptoworldz.includes("G.R.A.C.E.™"));
+  assert.ok(cryptoworldz.includes("RECAP™"));
+  assert.ok(cryptoworldz.includes("ImpactBased™ × BASED.BID"));
+  assert.equal(autoControlPolicy.executionDefault, "DISABLED");
+  assert.equal(autoControlPolicy.publicFundsAllowed, false);
+  assert.equal(autoControlPolicy.clientCustodyAllowed, false);
+  assert.equal(autoControlPolicy.manipulationAllowed, false);
+  assert.match(autoControlPolicy.legalCeilingRule, /lowest of JayJayTeamDev's approved owned-funds budget/i);
+  assert.match(cryptoworldz, /It never controls donor, customer, beneficiary or community money\./);
 });
 
 test("fleet manifest records the same architecture and never creates CryptoBotz as a static package", async () => {
