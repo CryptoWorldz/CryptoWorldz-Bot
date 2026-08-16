@@ -1,0 +1,240 @@
+.cryptoworldz-visual {
+  --cw-deep: #05020d;
+  --cw-panel: rgba(10, 5, 23, .82);
+  background:
+    radial-gradient(circle at 14% 0%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 34rem),
+    radial-gradient(circle at 90% 28%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 38rem),
+    var(--cw-deep);
+}
+
+.cryptoworldz-visual .site-header {
+  background: rgba(5, 2, 13, .90);
+  border-bottom-color: color-mix(in srgb, var(--accent) 18%, rgba(255,255,255,.10));
+}
+
+.cryptoworldz-visual .hero {
+  min-height: min(900px, calc(100svh - 84px));
+  background: var(--cw-deep);
+}
+
+.cryptoworldz-visual .compact-hero {
+  min-height: min(780px, calc(100svh - 84px));
+}
+
+.cryptoworldz-visual .hero-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: var(--cw-deep);
+  box-shadow: none;
+}
+
+.cryptoworldz-visual .hero-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(1.05) contrast(1.03);
+}
+
+.cryptoworldz-visual.route-home .hero-art img { object-position: 64% center; }
+.cryptoworldz-visual.route-command-centre .hero-art img,
+.cryptoworldz-visual.route-miniapp .hero-art img { object-position: center; }
+
+.cryptoworldz-visual .hero::after {
+  background:
+    linear-gradient(90deg, rgba(5,2,13,.97) 0%, rgba(5,2,13,.82) 39%, rgba(5,2,13,.28) 72%),
+    linear-gradient(0deg, rgba(5,2,13,.93) 0%, transparent 48%);
+}
+
+.cryptoworldz-visual .hero-copy {
+  text-shadow: 0 2px 28px rgba(0,0,0,.62);
+}
+
+.cryptoworldz-visual .support-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: min(820px, calc(100svh - 84px));
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  background: var(--cw-deep);
+}
+
+.cryptoworldz-visual .support-hero::before,
+.cryptoworldz-visual .support-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cryptoworldz-visual .support-hero::before {
+  z-index: -2;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  filter: blur(8px) saturate(1.15) brightness(.48);
+  transform: scale(1.04);
+  opacity: .84;
+}
+
+.cryptoworldz-visual.route-support-reagan .support-hero::before {
+  background-image: url('/assets/support/desktop/reagan-children-emblem-desktop.webp');
+}
+.cryptoworldz-visual.route-support-community .support-hero::before {
+  background-image: url('/assets/support/desktop/community-impact-emblem-desktop.webp');
+}
+.cryptoworldz-visual.route-support-jayjay .support-hero::before {
+  background-image: url('/assets/support/desktop/jayjayteamdev-emblem-desktop.webp');
+}
+
+.cryptoworldz-visual .support-hero::after {
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(5,2,13,.58), rgba(5,2,13,.90) 58%, rgba(5,2,13,.96)),
+    linear-gradient(0deg, rgba(5,2,13,.92), transparent 58%);
+}
+
+.cryptoworldz-visual .support-emblem {
+  position: relative;
+  z-index: 1;
+  border-color: color-mix(in srgb, var(--accent) 48%, white);
+  background: rgba(5,2,13,.46);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 24px 90px rgba(0,0,0,.50), 0 0 42px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.cryptoworldz-visual .support-hero > div {
+  position: relative;
+  z-index: 1;
+  padding: clamp(1.1rem, 2vw, 2rem);
+  border-radius: .9rem;
+  background: linear-gradient(135deg, rgba(5,2,13,.70), rgba(5,2,13,.36));
+  backdrop-filter: blur(10px);
+}
+
+.cw-link-previews {
+  overflow: hidden;
+}
+
+.cw-link-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.cw-link-preview {
+  display: grid;
+  grid-template-rows: 150px 1fr;
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: .85rem;
+  background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+  color: inherit;
+  text-decoration: none;
+  transition: transform .2s ease, border-color .2s ease;
+}
+
+.cw-link-preview:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 74%, white);
+}
+
+.cw-link-preview picture,
+.cw-link-preview img {
+  width: 100%;
+  height: 100%;
+}
+
+.cw-link-preview picture {
+  display: block;
+  overflow: hidden;
+  background: #080510;
+}
+
+.cw-link-preview img {
+  object-fit: cover;
+  object-position: center;
+}
+
+.cw-link-preview span {
+  display: grid;
+  gap: .25rem;
+  align-content: center;
+  padding: 1rem;
+}
+
+.cw-link-preview small {
+  color: var(--accent-2);
+  font-size: .65rem;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.cw-link-preview strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.2rem;
+  line-height: 1.08;
+}
+
+.cw-link-preview em {
+  color: var(--muted);
+  font-size: .75rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+@media (max-width: 960px) {
+  .cw-link-preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cryptoworldz-visual .hero::after {
+    background: linear-gradient(0deg, rgba(5,2,13,.98) 0%, rgba(5,2,13,.82) 48%, rgba(5,2,13,.24) 100%);
+  }
+  .cryptoworldz-visual .hero-art img,
+  .cryptoworldz-visual.route-home .hero-art img { object-position: center; }
+}
+
+@media (max-width: 720px) {
+  .cryptoworldz-visual .hero,
+  .cryptoworldz-visual .compact-hero,
+  .cryptoworldz-visual .support-hero {
+    min-height: calc(100svh - 76px);
+  }
+
+  .cryptoworldz-visual .hero-art img {
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .cryptoworldz-visual .support-hero {
+    grid-template-columns: 1fr;
+    align-content: end;
+    padding-top: 3.5rem;
+  }
+
+  .cryptoworldz-visual.route-support-reagan .support-hero::before {
+    background-image: url('/assets/support/mobile/reagan-children-emblem-mobile.webp');
+  }
+  .cryptoworldz-visual.route-support-community .support-hero::before {
+    background-image: url('/assets/support/mobile/community-impact-emblem-mobile.webp');
+  }
+  .cryptoworldz-visual.route-support-jayjay .support-hero::before {
+    background-image: url('/assets/support/mobile/jayjayteamdev-emblem-mobile.webp');
+  }
+
+  .cryptoworldz-visual .support-hero::after {
+    background: linear-gradient(0deg, rgba(5,2,13,.98) 0%, rgba(5,2,13,.84) 52%, rgba(5,2,13,.38) 100%);
+  }
+
+  .cryptoworldz-visual .support-emblem {
+    max-width: min(360px, 82vw);
+  }
+
+  .cw-link-preview-grid { grid-template-columns: 1fr; }
+  .cw-link-preview { grid-template-columns: 112px minmax(0, 1fr); grid-template-rows: none; min-height: 112px; }
+  .cw-link-preview picture { min-height: 112px; }
+}
