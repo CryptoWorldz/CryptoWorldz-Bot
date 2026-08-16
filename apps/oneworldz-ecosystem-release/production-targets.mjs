@@ -21,20 +21,22 @@ const expectedTitles = Object.freeze({
   donateworldz: "DonateWorldz | Choose a Purpose • Support Clearly"
 });
 
-const exactRemoteDirs = Object.freeze({
-  impactbased: "domains/cryptoworldz.xyz/public_html/impactbased",
-  "law-oneworldz": "domains/oneworldz.com/public_html/law",
-  "learn-oneworldz": "domains/oneworldz.com/public_html/learn"
-});
-
+// Canonical hosting contract:
+// every static destination must be reached through an authenticated,
+// destination-scoped Hostinger account whose visible website root is `/`.
+// Never guess or prepend `domains/.../public_html` inside the release model.
+// If Hostinger does not present `/` as the intended destination root for the
+// authenticated account, production deployment must stop until the account
+// scope/root is corrected and re-proved.
 export const productionTargets = Object.freeze(deploymentTargets19.map((target) => {
   const expectedTitle = expectedTitles[target.key];
   if (!expectedTitle) throw new Error(`Missing production title contract for ${target.key}`);
   return Object.freeze({
     ...target,
-    remoteDir: exactRemoteDirs[target.key] || `domains/${target.domain}/public_html`,
+    remoteDir: "/",
     expectedTitle,
-    accountScope: "SHARED_ACCOUNT_EXACT_TARGET"
+    accountScope: "DOMAIN_SCOPED_FTP_ROOT_REQUIRED",
+    destinationStatus: "UNVERIFIED_UNTIL_AUTHENTICATED"
   });
 }));
 
@@ -44,7 +46,9 @@ export const productionGate = Object.freeze({
   staticTargets: productionTargets.length,
   protectedDestinations: protectedDestinations.map(({ domain }) => domain),
   excludedOwnedRootDomains: [...excludedRootDomains],
-  deploymentState: "NOT_EXECUTED"
+  deploymentState: "CLEANUP_LOCK",
+  hostingDestinationState: "UNVERIFIED",
+  productionWriteAllowed: false
 });
 
 if (productionTargets.length !== 18) throw new Error(`Expected 18 production targets, got ${productionTargets.length}`);

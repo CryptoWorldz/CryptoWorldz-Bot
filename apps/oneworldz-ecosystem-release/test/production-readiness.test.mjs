@@ -10,20 +10,17 @@ const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const distRoot = path.join(appRoot, "dist", "ecosystem");
 
 const unique = (values) => new Set(values).size === values.length;
-const expectedRemoteDirs = Object.freeze({
-  impactbased: "domains/cryptoworldz.xyz/public_html/impactbased",
-  "law-oneworldz": "domains/oneworldz.com/public_html/law",
-  "learn-oneworldz": "domains/oneworldz.com/public_html/learn"
-});
 
-test("production gate locks the exact 19 / 15 / 18 architecture", () => {
+test("production gate locks the exact 19 / 15 / 18 architecture and cleanup hold", () => {
   assert.equal(ecosystemDestinations.length, 19);
   assert.equal(ownedRootDomains.length, 15);
   assert.equal(productionTargets.length, 18);
   assert.equal(productionGate.ecosystemDestinations, 19);
   assert.equal(productionGate.activeOwnedRootDomains, 15);
   assert.equal(productionGate.staticTargets, 18);
-  assert.equal(productionGate.deploymentState, "NOT_EXECUTED");
+  assert.equal(productionGate.deploymentState, "CLEANUP_LOCK");
+  assert.equal(productionGate.hostingDestinationState, "UNVERIFIED");
+  assert.equal(productionGate.productionWriteAllowed, false);
 });
 
 test("SolWorld.fun is excluded and CryptoBotz remains the protected non-static destination", () => {
@@ -36,21 +33,25 @@ test("SolWorld.fun is excluded and CryptoBotz remains the protected non-static d
   assert.deepEqual(new Set(productionGate.protectedDestinations), new Set(["cryptobotz.cryptoworldz.xyz"]));
 });
 
-test("every static target has one exact Hostinger root and deployment guard", () => {
+test("every static target uses one domain-scoped Hostinger account rooted at slash", () => {
   const keys = productionTargets.map(({ key }) => key);
   const domains = productionTargets.map(({ domain }) => domain);
-  const remoteDirs = productionTargets.map(({ remoteDir }) => remoteDir);
+  const environments = productionTargets.map(({ environment }) => environment);
   const guards = productionTargets.map(({ guard }) => guard);
   assert.ok(unique(keys), "target keys must be unique");
   assert.ok(unique(domains), "target domains must be unique");
-  assert.ok(unique(remoteDirs), "remote directories must be unique");
+  assert.ok(unique(environments), "target environments must be unique");
   assert.ok(unique(guards), "deployment guards must be unique");
   for (const target of productionTargets) {
-    assert.equal(target.remoteDir, expectedRemoteDirs[target.key] || `domains/${target.domain}/public_html`);
+    assert.equal(target.remoteDir, "/");
     assert.equal(target.root, "/");
-    assert.equal(target.accountScope, "SHARED_ACCOUNT_EXACT_TARGET");
+    assert.equal(target.accountScope, "DOMAIN_SCOPED_FTP_ROOT_REQUIRED");
+    assert.equal(target.destinationStatus, "UNVERIFIED_UNTIL_AUTHENTICATED");
     assert.ok(target.expectedTitle.length > 10, `${target.key}: title proof required`);
   }
+  const serialized = JSON.stringify(productionTargets);
+  assert.doesNotMatch(serialized, /public_html/i);
+  assert.doesNotMatch(serialized, /domains\//i);
 });
 
 test("the verified build produces all 18 exact production packages with title contracts", async () => {
