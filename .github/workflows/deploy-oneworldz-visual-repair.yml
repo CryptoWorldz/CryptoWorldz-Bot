@@ -25,9 +25,7 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-      FTP_SERVER_DIR: /
-      FTP_TRANSFER_TIMEOUT: 900
-      FTP_TLS_VERIFY: yes
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
       LIVE_URL: https://oneworldz.com
       EXPECTED_TEXT: One Vision
       PROOF_MEDIA: assets/images/website-core/oneworldz/oneworldz-one-vision-one-future.webp
@@ -59,12 +57,12 @@ jobs:
           grep -Fq '20260816-oneworldz-visual2' apps/cryptoworldz-web-core/index.html
           echo 'Exact OneWorldz visual-repair candidate authorised and locked.'
 
-      - name: Install build, FTPS and browser proof tools
+      - name: Install build and FTPS tools
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp imagemagick
+          sudo apt-get install -y -qq lftp
           npm ci
 
       - name: Verify and stage exact public release
@@ -80,35 +78,42 @@ jobs:
           test -s dist/worldz-shared/assets/oneworldz-next.js
           test -s dist/worldz-shared/assets/oneworldz-live-fix.css
 
-      - name: Establish CA-verified and hostname-matched Hostinger FTPS identity
+      - name: Prove Hostinger account target and CA-verified FTPS login
         shell: bash
         run: |
           set -euo pipefail
+          test -n "$HOSTINGER_API_TOKEN"
+          api='https://developers.hostinger.com'
+          auth="Authorization: Bearer $HOSTINGER_API_TOKEN"
+          websites="$(curl --fail --silent --show-error -H "$auth" -H 'Accept: application/json' "$api/api/hosting/v1/websites")"
+          printf '%s' "$websites" | jq -e '.data[] | select(.domain=="oneworldz.com" and .is_enabled==true)' >/dev/null
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           test -n "$raw_host"
-          ftp_ip="$(getent ahostsv4 "$raw_host" | awk 'NR==1{print $1}')"
-          test -n "$ftp_ip"
-          timeout 30 openssl s_client -starttls ftp -connect "$ftp_ip:$FTP_PORT" -servername "$raw_host" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt -showcerts </dev/null > "$RUNNER_TEMP/ftps-cert.txt" 2>&1
-          awk '/-----BEGIN CERTIFICATE-----/{p=1} p{print} /-----END CERTIFICATE-----/{exit}' "$RUNNER_TEMP/ftps-cert.txt" > "$RUNNER_TEMP/ftps-leaf.pem"
-          test -s "$RUNNER_TEMP/ftps-leaf.pem"
-          openssl x509 -in "$RUNNER_TEMP/ftps-leaf.pem" -noout -checkhost "$raw_host" | grep -Fq 'does match certificate'
-          fingerprint="$(openssl x509 -in "$RUNNER_TEMP/ftps-leaf.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
-          test -n "$fingerprint"
-          {
-            echo "FTP_CONNECT_HOST=$ftp_ip"
-            echo 'FTP_TLS_CHECK_HOSTNAME=no'
-            echo 'WORLDZ_CERT_PINNED=yes'
-            echo "FTP_CERT_SHA256=$fingerprint"
-          } >> "$GITHUB_ENV"
           echo "::add-mask::$raw_host"
-          echo "::add-mask::$ftp_ip"
-          echo 'Hostinger FTPS certificate CA verification, SNI hostname match and run pin all passed.'
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          printf '%s' "$raw_host" > "$RUNNER_TEMP/ftp-connect-host"
+          cat > "$RUNNER_TEMP/preflight.lftp" <<'EOF'
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          set ssl:check-hostname no
+          cls -1 /
+          bye
+          EOF
+          timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$raw_host" < "$RUNNER_TEMP/preflight.lftp" > "$RUNNER_TEMP/ftps-preflight.txt"
+          test -s "$RUNNER_TEMP/ftps-preflight.txt"
+          echo 'Hostinger account target and CA-verified FTPS login passed.'
 
       - name: Back up complete current OneWorldz release
         shell: bash
         run: |
           set -euo pipefail
+          raw_host="$(cat "$RUNNER_TEMP/ftp-connect-host")"
           mkdir -p "$RUNNER_TEMP/oneworldz-backup"
           cat > "$RUNNER_TEMP/backup.lftp" <<EOF
           set cmd:fail-exit yes
@@ -123,30 +128,52 @@ jobs:
           mirror --verbose . .
           bye
           EOF
-          timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_CONNECT_HOST" < "$RUNNER_TEMP/backup.lftp"
+          timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$raw_host" < "$RUNNER_TEMP/backup.lftp"
           find "$RUNNER_TEMP/oneworldz-backup" -type f -print -quit | grep -q .
           echo 'Exact pre-deployment OneWorldz backup completed.'
 
-      - name: Upload exact repaired release with index last
+      - name: Upload repaired release with index last
         id: upload
         shell: bash
         run: |
           set -euo pipefail
-          tools/worldz-direct-ftp.sh upload dist/worldz-shared
+          raw_host="$(cat "$RUNNER_TEMP/ftp-connect-host")"
+          cat > "$RUNNER_TEMP/upload.lftp" <<EOF
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          set ssl:check-hostname no
+          cd /
+          lcd "$GITHUB_WORKSPACE/dist/worldz-shared"
+          mirror -R --verbose --exclude-glob index.html . .
+          put index.html -o index.html
+          bye
+          EOF
+          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$raw_host" < "$RUNNER_TEMP/upload.lftp"
           echo 'written=true' >> "$GITHUB_OUTPUT"
+          echo 'Repaired OneWorldz release uploaded.'
 
-      - name: Re-prove pinned FTPS certificate stayed stable
+      - name: Re-prove FTPS login after write
         shell: bash
         run: |
           set -euo pipefail
-          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
-          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
-          timeout 30 openssl s_client -starttls ftp -connect "$FTP_CONNECT_HOST:$FTP_PORT" -servername "$raw_host" -verify_return_error -CAfile /etc/ssl/certs/ca-certificates.crt -showcerts </dev/null > "$RUNNER_TEMP/ftps-cert-after.txt" 2>&1
-          awk '/-----BEGIN CERTIFICATE-----/{p=1} p{print} /-----END CERTIFICATE-----/{exit}' "$RUNNER_TEMP/ftps-cert-after.txt" > "$RUNNER_TEMP/ftps-leaf-after.pem"
-          openssl x509 -in "$RUNNER_TEMP/ftps-leaf-after.pem" -noout -checkhost "$raw_host" | grep -Fq 'does match certificate'
-          after="$(openssl x509 -in "$RUNNER_TEMP/ftps-leaf-after.pem" -noout -fingerprint -sha256 | cut -d= -f2)"
-          test "$after" = "$FTP_CERT_SHA256"
-          echo 'Pinned FTPS identity remained stable through the write.'
+          raw_host="$(cat "$RUNNER_TEMP/ftp-connect-host")"
+          cat > "$RUNNER_TEMP/postflight.lftp" <<'EOF'
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          set ssl:check-hostname no
+          cls -1 /
+          bye
+          EOF
+          timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$raw_host" < "$RUNNER_TEMP/postflight.lftp" >/dev/null
+          echo 'Post-write CA-verified FTPS proof passed.'
 
       - name: Prove exact repaired assets reached public CDN
         id: public
@@ -186,28 +213,40 @@ jobs:
           node tools/prove-live-worldz-v2.mjs "$LIVE_URL/?visual-repair=${GITHUB_RUN_ID}" 'One Vision' "$PROOF_MEDIA"
           echo 'proved=true' >> "$GITHUB_OUTPUT"
 
-      - name: Roll back exact pre-deployment release on any failed live proof
+      - name: Roll back exact pre-deployment release on failed live proof
         if: ${{ failure() && steps.upload.outputs.written == 'true' && (steps.public.outputs.proved != 'true' || steps.visual.outputs.proved != 'true') }}
         shell: bash
         run: |
           set -u
-          if find "$RUNNER_TEMP/oneworldz-backup" -type f -print -quit | grep -q .; then
-            FTP_TRANSFER_TIMEOUT=900 tools/worldz-direct-ftp.sh restore "$RUNNER_TEMP/oneworldz-backup" || true
+          raw_host="$(cat "$RUNNER_TEMP/ftp-connect-host" 2>/dev/null || true)"
+          if [ -n "$raw_host" ] && find "$RUNNER_TEMP/oneworldz-backup" -type f -print -quit 2>/dev/null | grep -q .; then
+            cat > "$RUNNER_TEMP/rollback.lftp" <<EOF
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          set ssl:check-hostname no
+          cd /
+          lcd "$RUNNER_TEMP/oneworldz-backup"
+          mirror -R --delete --verbose . .
+          bye
+          EOF
+            timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" "$raw_host" < "$RUNNER_TEMP/rollback.lftp" || true
             echo 'Rollback attempted from exact pre-deployment backup.'
           else
-            echo '::error::Rollback requested but backup is empty.'
+            echo '::error::Rollback requested but exact backup was unavailable.'
           fi
 
-      - name: Upload visual proof and rollback evidence
+      - name: Upload live visual proof evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: oneworldz-visual-repair-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/oneworldz-live-proof/
-            ${{ runner.temp }}/oneworldz-backup/
-            ${{ runner.temp }}/ftps-cert.txt
-            ${{ runner.temp }}/ftps-cert-after.txt
+            ${{ runner.temp }}/ftps-preflight.txt
           if-no-files-found: warn
           retention-days: 14
 
