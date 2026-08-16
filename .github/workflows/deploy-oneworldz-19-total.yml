@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   authorize:
-    name: Lock canonical 17-static-target total authority
+    name: Lock canonical 18-static-target total authority
     runs-on: ubuntu-latest
     outputs:
       source_commit: ${{ steps.lock.outputs.source_commit }}
@@ -32,39 +32,29 @@ jobs:
           set -euo pipefail
           request='deployments/oneworldz-19-total.request'
           test -s "$request"
-          requested_by="$(grep -E '^requested_by=' "$request" | tail -n1 | cut -d= -f2-)"
-          authorization="$(grep -E '^authorization=' "$request" | tail -n1 | cut -d= -f2-)"
-          scope="$(grep -E '^scope=' "$request" | tail -n1 | cut -d= -f2-)"
-          mode="$(grep -E '^mode=' "$request" | tail -n1 | cut -d= -f2- || true)"
-          targets="$(grep -E '^targets=' "$request" | tail -n1 | cut -d= -f2- || true)"
-
+          requested_by="$(sed -n 's/^requested_by=//p' "$request" | tail -n1)"
+          authorization="$(sed -n 's/^authorization=//p' "$request" | tail -n1)"
+          scope="$(sed -n 's/^scope=//p' "$request" | tail -n1)"
+          mode="$(sed -n 's/^mode=//p' "$request" | tail -n1)"
+          targets="$(sed -n 's/^targets=//p' "$request" | tail -n1)"
           test "$requested_by" = 'JayJayTeamDev'
           test "$authorization" = 'APPROVE COMPLETE ECOSYSTEM BUILD AND TOTAL DEPLOYMENT'
-          test "$scope" = 'LOCKED-ONEWORLDZ-ECOSYSTEM-17-STATIC-TARGETS'
-          test -n "$mode" || mode='deploy'
+          test "$scope" = 'LOCKED-ONEWORLDZ-ECOSYSTEM-18-STATIC-TARGETS'
+          test "$targets" = 'all'
           case "$mode" in deploy|handoff-only) ;; *) echo '::error::Invalid deployment mode'; exit 1 ;; esac
-
-          # This is the TOTAL rail. Partial recovery must never rewrite it to one site.
-          test -n "$targets" || targets='all'
-          if [ "$targets" != 'all' ]; then
-            echo '::error::The canonical total-release request must remain targets=all. Use a separate recovery rail for any isolated repair.'
-            exit 1
-          fi
-
           source_commit="$(git rev-parse HEAD)"
           echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
           echo "deployment_mode=$mode" >> "$GITHUB_OUTPUT"
-
           cd apps/oneworldz-ecosystem-release
           node --input-type=module <<'NODE' >> "$GITHUB_OUTPUT"
           import { productionTargets, productionGate } from './production-targets.mjs';
-          if (productionTargets.length !== 17) throw new Error('Production fleet must contain exactly 17 static targets');
+          if (productionTargets.length !== 18) throw new Error('Production fleet must contain exactly 18 static targets');
           if (productionGate.ecosystemDestinations !== 19) throw new Error('Ecosystem must contain exactly 19 destinations');
           if (productionGate.activeOwnedRootDomains !== 15) throw new Error('Active owned roots must contain exactly 15 domains');
-          const forbidden = new Set(['oneworldz.com', 'cryptobotz.cryptoworldz.xyz', 'solworld.fun']);
-          for (const site of productionTargets) {
-            if (forbidden.has(site.domain)) throw new Error('Protected/excluded destination entered static deployment fleet: ' + site.domain);
-          }
+          if (JSON.stringify(productionGate.protectedDestinations) !== JSON.stringify(['cryptobotz.cryptoworldz.xyz'])) throw new Error('CryptoBotz protection drift');
+          const forbidden = new Set(['cryptobotz.cryptoworldz.xyz','solworld.fun']);
+          for (const site of productionTargets) if (forbidden.has(site.domain)) throw new Error('Protected/excluded destination entered static fleet: ' + site.domain);
+          if (!productionTargets.some(site => site.domain === 'oneworldz.com')) throw new Error('OneWorldz global gateway missing from static fleet');
           console.log('target_matrix=' + JSON.stringify({ include: productionTargets.map(site => ({
             key: site.key,
             domain: site.domain,
@@ -75,7 +65,7 @@ jobs:
           NODE
 
   validate:
-    name: Build and prove canonical release before remote write
+    name: Build and prove the whole release before any remote write
     needs: authorize
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -89,25 +79,25 @@ jobs:
       - name: Run complete canonical verification
         working-directory: apps/oneworldz-ecosystem-release
         run: npm run verify
-      - name: Enforce protected and excluded boundaries
+      - name: Enforce whole-system boundaries and no public secrets
         shell: bash
         run: |
           set -euo pipefail
           root='apps/oneworldz-ecosystem-release/dist/ecosystem'
-          test "$(find "$root" -mindepth 2 -maxdepth 2 -name index.html | wc -l | tr -d ' ')" = '17'
-          test ! -d "$root/oneworldz"
+          test "$(find "$root" -mindepth 2 -maxdepth 2 -name index.html | wc -l | tr -d ' ')" = '18'
+          test -s "$root/oneworldz/index.html"
           test ! -d "$root/cryptobotz"
           ! grep -Rni --include='*.html' 'solworld\.fun' "$root"
-          ! grep -RIE 'sk_live_|sk_test_|service_role|FTP_PASSWORD|DATABASE_URL|SUPABASE_SERVICE' "$root"
+          ! grep -RIE 'OPENAI_API_KEY|sk-proj-|sk_live_|sk_test_|service_role|FTP_PASSWORD|DATABASE_URL|SUPABASE_SERVICE' "$root"
       - uses: actions/upload-artifact@v4
         with:
-          name: oneworldz-19-verified-${{ github.run_id }}
+          name: oneworldz-19-perfect-${{ github.run_id }}
           path: apps/oneworldz-ecosystem-release/dist/ecosystem/
           if-no-files-found: error
           retention-days: 30
 
   preflight-fleet:
-    name: Read-only prove all 17 Hostinger deployment roots
+    name: Read-only prove all 18 exact Hostinger roots
     needs: [authorize, validate]
     if: ${{ needs.authorize.outputs.deployment_mode != 'handoff-only' }}
     runs-on: ubuntu-latest
@@ -125,7 +115,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
-      - name: Authenticate and prove roots without creating anything
+      - name: Authenticate and prove exact roots without creating or deleting anything
         shell: bash
         run: |
           set -euo pipefail
@@ -136,8 +126,7 @@ jobs:
           echo "::add-mask::$FTP_USERNAME"
           echo "::add-mask::$FTP_PASSWORD"
           node -e 'for (const x of JSON.parse(process.env.TARGET_MATRIX).include) console.log(x.remote_dir)' > "$RUNNER_TEMP/dirs.txt"
-          test "$(wc -l < "$RUNNER_TEMP/dirs.txt" | tr -d ' ')" = '17'
-          script="$RUNNER_TEMP/preflight.lftp"
+          test "$(wc -l < "$RUNNER_TEMP/dirs.txt" | tr -d ' ')" = '18'
           {
             echo 'set cmd:fail-exit true'
             echo 'set net:max-retries 2'
@@ -148,16 +137,16 @@ jobs:
             echo 'set ssl:check-hostname false'
             while read -r dir; do echo "cd $dir"; echo 'pwd'; echo 'cls -1'; echo 'cd /'; done < "$RUNNER_TEMP/dirs.txt"
             echo 'bye'
-          } > "$script"
-          ! grep -Eiq '(^|[[:space:]])(mkdir|mirror|put|mput|rm|mv|chmod)([[:space:]]|$)' "$script"
-          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$raw_host"
+          } > "$RUNNER_TEMP/preflight.lftp"
+          ! grep -Eiq '(^|[[:space:]])(mkdir|mirror|put|mput|rm|mv|chmod)([[:space:]]|$)' "$RUNNER_TEMP/preflight.lftp"
+          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/preflight.lftp" "$raw_host"
 
   deploy:
-    name: Backup → deploy → prove ${{ matrix.domain }}
+    name: Backup owned paths → deploy → prove ${{ matrix.domain }}
     needs: [authorize, validate, preflight-fleet]
     if: ${{ needs.authorize.outputs.deployment_mode != 'handoff-only' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 55
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -182,7 +171,7 @@ jobs:
           ref: ${{ needs.authorize.outputs.source_commit }}
       - uses: actions/download-artifact@v4
         with:
-          name: oneworldz-19-verified-${{ github.run_id }}
+          name: oneworldz-19-perfect-${{ github.run_id }}
           path: apps/oneworldz-ecosystem-release/dist/ecosystem
       - name: Enforce exact package → exact destination contract
         shell: bash
@@ -195,24 +184,25 @@ jobs:
             *) expected_remote="domains/$DOMAIN/public_html" ;;
           esac
           test "$FTP_REMOTE_DIR" = "$expected_remote"
-          test -n "$DEPLOY_GUARD"
           test -s "$RELEASE_ROOT/index.html"
           test -s "$RELEASE_ROOT/release-manifest.json"
-          test ! -e "$RELEASE_ROOT/public_html"
-          case "$LIVE_URL" in 'https://oneworldz.com/'|'https://cryptobotz.cryptoworldz.xyz/'|'https://solworld.fun/') exit 1 ;; esac
+          case "$LIVE_URL" in 'https://cryptobotz.cryptoworldz.xyz/'|'https://solworld.fun/') exit 1 ;; esac
           node - <<'NODE'
           const fs = require('fs');
           const manifest = JSON.parse(fs.readFileSync(process.env.RELEASE_ROOT + '/release-manifest.json'));
           if (manifest.deploy_guard !== process.env.DEPLOY_GUARD) throw new Error('Deploy guard mismatch');
-          if (manifest.ftp_root !== '/' || manifest.homepage !== '/index.html') throw new Error('Release root contract mismatch');
-          if (manifest.protected_services_modified.length) throw new Error('Protected-service mutation declared');
+          if (manifest.ftp_root !== '/' || manifest.homepage !== '/index.html') throw new Error('Release-root contract mismatch');
+          if ((manifest.protected_services_modified || []).length) throw new Error('Protected-service mutation declared');
           NODE
+          find "$RELEASE_ROOT" -mindepth 1 -maxdepth 1 -printf '%f\n' | sort > "$RUNNER_TEMP/top-level.txt"
+          test -s "$RUNNER_TEMP/top-level.txt"
+          ! grep -Eq '[[:space:]/]' "$RUNNER_TEMP/top-level.txt"
       - name: Install FTPS client
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
       - id: transfer
-        name: Backup current root and deploy exact verified package
+        name: Backup only package-owned paths and upload exact verified package
         continue-on-error: true
         shell: bash
         run: |
@@ -224,44 +214,34 @@ jobs:
           echo "::add-mask::$FTP_PASSWORD"
           backup="$RUNNER_TEMP/remote-backup"
           mkdir -p "$backup"
-          script="$RUNNER_TEMP/deploy.lftp"
-          if [ "$DOMAIN" = 'cryptoworldz.xyz' ]; then
-            cat > "$script" <<EOF
-          set cmd:fail-exit false
-          set net:max-retries 3
-          set net:timeout 30
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          cd $FTP_REMOTE_DIR
-          get index.html -o $backup/index.html
-          get release-manifest.json -o $backup/release-manifest.json
-          get robots.txt -o $backup/robots.txt
-          get sitemap.xml -o $backup/sitemap.xml
-          mirror --verbose assets $backup/assets
-          set cmd:fail-exit true
-          lcd $RELEASE_ROOT
-          mirror -R --verbose . .
-          bye
-          EOF
-          else
-            cat > "$script" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 3
-          set net:timeout 30
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          cd $FTP_REMOTE_DIR
-          mirror --verbose . $backup
-          lcd $RELEASE_ROOT
-          mirror -R --delete --verbose . .
-          bye
-          EOF
-          fi
-          timeout 1800 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$raw_host"
+          {
+            echo 'set cmd:fail-exit false'
+            echo 'set net:max-retries 3'
+            echo 'set net:timeout 30'
+            echo 'set ftp:ssl-force true'
+            echo 'set ftp:ssl-protect-data true'
+            echo 'set ssl:verify-certificate true'
+            echo 'set ssl:check-hostname false'
+            echo "cd $FTP_REMOTE_DIR"
+            while read -r name; do
+              if [ -d "$RELEASE_ROOT/$name" ]; then
+                echo "mirror --verbose $name $backup/$name"
+              else
+                echo "get $name -o $backup/$name"
+              fi
+            done < "$RUNNER_TEMP/top-level.txt"
+            echo 'set cmd:fail-exit true'
+            echo "lcd $RELEASE_ROOT"
+            while read -r name; do
+              if [ -d "$RELEASE_ROOT/$name" ]; then
+                echo "mirror -R --delete --verbose $name $name"
+              else
+                echo "put $name -o $name"
+              fi
+            done < "$RUNNER_TEMP/top-level.txt"
+            echo 'bye'
+          } > "$RUNNER_TEMP/deploy.lftp"
+          timeout 1800 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/deploy.lftp" "$raw_host"
       - id: liveproof
         name: Prove exact live title after upload
         if: ${{ steps.transfer.outcome == 'success' }}
@@ -275,11 +255,11 @@ jobs:
               echo "Live proof passed: $LIVE_URL"
               exit 0
             fi
-            sleep 30
+            sleep 20
           done
           echo "::error::Live title proof failed for $LIVE_URL"
           exit 1
-      - name: Roll back exact destination if transfer or live proof fails
+      - name: Roll back only package-owned paths if transfer or live proof fails
         if: ${{ steps.transfer.outcome == 'failure' || steps.liveproof.outcome == 'failure' }}
         shell: bash
         run: |
@@ -288,58 +268,63 @@ jobs:
           test -d "$backup"
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
-          script="$RUNNER_TEMP/rollback.lftp"
-          if [ "$DOMAIN" = 'cryptoworldz.xyz' ]; then
-            cat > "$script" <<EOF
-          set cmd:fail-exit false
-          set net:max-retries 3
-          set net:timeout 30
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          cd $FTP_REMOTE_DIR
-          rm index.html
-          rm release-manifest.json
-          rm robots.txt
-          rm sitemap.xml
-          rm -r assets
-          lcd $backup
-          mirror -R --verbose . .
-          bye
-          EOF
-          else
-            cat > "$script" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 3
-          set net:timeout 30
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          cd $FTP_REMOTE_DIR
-          lcd $backup
-          mirror -R --delete --verbose . .
-          bye
-          EOF
-          fi
-          timeout 1800 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $script" "$raw_host"
-      - name: Fail release after rollback
+          {
+            echo 'set cmd:fail-exit false'
+            echo 'set net:max-retries 3'
+            echo 'set net:timeout 30'
+            echo 'set ftp:ssl-force true'
+            echo 'set ftp:ssl-protect-data true'
+            echo 'set ssl:verify-certificate true'
+            echo 'set ssl:check-hostname false'
+            echo "cd $FTP_REMOTE_DIR"
+            while read -r name; do
+              if [ -d "$RELEASE_ROOT/$name" ]; then echo "rm -r $name"; else echo "rm $name"; fi
+            done < "$RUNNER_TEMP/top-level.txt"
+            while read -r name; do
+              if [ -d "$backup/$name" ]; then
+                echo "lcd $backup"
+                echo "mirror -R --verbose $name $name"
+              elif [ -f "$backup/$name" ]; then
+                echo "put $backup/$name -o $name"
+              fi
+            done < "$RUNNER_TEMP/top-level.txt"
+            echo 'bye'
+          } > "$RUNNER_TEMP/rollback.lftp"
+          timeout 1800 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/rollback.lftp" "$raw_host"
+      - name: Fail after rollback
         if: ${{ steps.transfer.outcome == 'failure' || steps.liveproof.outcome == 'failure' }}
         run: exit 1
 
   complete:
-    name: Total release completion proof
+    name: Prove the 18 static destinations and protected CryptoBotz
     needs: [authorize, validate, deploy]
     if: ${{ always() && needs.authorize.result == 'success' && needs.validate.result == 'success' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TARGET_MATRIX: ${{ needs.authorize.outputs.target_matrix }}
+      DEPLOYMENT_MODE: ${{ needs.authorize.outputs.deployment_mode }}
     steps:
-      - name: Confirm deployment outcome
+      - name: Require all deployments or acknowledge handoff-only
+        shell: bash
+        env:
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+        run: |
+          set -euo pipefail
+          if [ "$DEPLOYMENT_MODE" = 'handoff-only' ]; then exit 0; fi
+          test "$DEPLOY_RESULT" = 'success'
+      - name: Prove every static homepage and protected application
+        if: ${{ env.DEPLOYMENT_MODE != 'handoff-only' }}
         shell: bash
         run: |
-          if [ '${{ needs.authorize.outputs.deployment_mode }}' = 'handoff-only' ]; then
-            echo 'Verified canonical release handoff completed. No production deployment executed.'
-            exit 0
-          fi
-          test '${{ needs.deploy.result }}' = 'success'
-          echo 'All 17 static OneWorldz production targets deployed and proved; 2 protected destinations remained outside static write scope.'
+          set -euo pipefail
+          node -e 'for (const x of JSON.parse(process.env.TARGET_MATRIX).include) console.log([x.domain,x.expected_title].join("\t"))' > "$RUNNER_TEMP/targets.tsv"
+          test "$(wc -l < "$RUNNER_TEMP/targets.tsv" | tr -d ' ')" = '18'
+          while IFS=$'\t' read -r domain title; do
+            html="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 -H 'Cache-Control: no-cache' "https://$domain/?final=${GITHUB_SHA}-${GITHUB_RUN_ID}")"
+            printf '%s' "$html" | grep -Fq "<title>$title</title>"
+            echo "VERIFIED https://$domain/"
+          done < "$RUNNER_TEMP/targets.tsv"
+          curl --fail --silent --show-error --max-time 30 https://cryptobotz.cryptoworldz.xyz/ > "$RUNNER_TEMP/cryptobotz-root.html"
+          test -s "$RUNNER_TEMP/cryptobotz-root.html"
+          echo 'VERIFIED protected https://cryptobotz.cryptoworldz.xyz/'
