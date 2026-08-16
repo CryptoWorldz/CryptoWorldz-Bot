@@ -12,6 +12,7 @@
   function buildCard(row) {
     const article = document.createElement("article");
     article.className = "community-support-card";
+    article.dataset.displayOrder = String(row.display_order);
     const number = document.createElement("span");
     number.className = "number";
     number.textContent = String(row.display_order).padStart(2, "0");
@@ -37,23 +38,21 @@
     return article;
   }
 
-  async function load() {
+  async function refreshFromLiveRegistry() {
     try {
       const response = await fetch(API, { cache: "no-store", headers: { accept: "application/json" } });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload.ok || payload.count !== 35 || !Array.isArray(payload.profiles)) throw new Error(payload.error || "registry_incomplete");
+      if (!response.ok || !payload.ok || payload.count !== 35 || !Array.isArray(payload.profiles)) return;
       const profiles = [...payload.profiles].sort((a, b) => Number(a.display_order) - Number(b.display_order));
-      if (profiles.length !== 35 || new Set(profiles.map((row) => Number(row.display_order))).size !== 35) throw new Error("registry_incomplete");
+      if (profiles.length !== 35 || new Set(profiles.map((row) => Number(row.display_order))).size !== 35) return;
       grid.replaceChildren(...profiles.map(buildCard));
-      if (count) count.textContent = "35 / 35 verified links loaded";
+      if (count) count.textContent = "35 / 35 verified links live-synced";
       const resolvedCount = profiles.filter((row) => row.metadata_status === "resolved").length;
       if (resolved) resolved.textContent = `${resolvedCount} public names independently resolved • ${35 - resolvedCount} controlled neutral labels`;
     } catch {
-      grid.innerHTML = '<div class="community-support-error"><strong>Community Support registry is temporarily unavailable.</strong><br>The page will not invent missing profiles, names or links. Please try again shortly.</div>';
-      if (count) count.textContent = "Registry proof unavailable";
-      if (resolved) resolved.textContent = "No invented replacements";
+      // The 35 verified links are already embedded in the HTML. A live API outage must never blank the page.
     }
   }
 
-  load();
+  refreshFromLiveRegistry();
 })();
