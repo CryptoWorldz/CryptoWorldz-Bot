@@ -17,129 +17,120 @@ jobs:
       - name: Run complete 19-destination live approval audit
         shell: bash
         run: |
-          set -u
+          set -euo pipefail
           mkdir -p "$RUNNER_TEMP/oneworldz-audit"
-          report="$RUNNER_TEMP/oneworldz-audit/approval-report.md"
-          jsonl="$RUNNER_TEMP/oneworldz-audit/results.jsonl"
-          : > "$jsonl"
+          python3 - <<'PY'
+          import html
+          import json
+          import os
+          import re
+          import ssl
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
 
-          cat > "$report" <<'HDR'
-          # OneWorldz 19-Destination Live Approval Audit
+          out = Path(os.environ['RUNNER_TEMP']) / 'oneworldz-audit'
+          out.mkdir(parents=True, exist_ok=True)
 
-          **Standard:** JayJayTeamDev × ChatGPT Approval Rating
+          targets = [
+              ('OneWorldz','https://oneworldz.com/','', 'OneWorldz'),
+              ('CryptoWorldz','https://cryptoworldz.xyz/','CryptoWorldz | One World • One Mission','CryptoWorldz'),
+              ('SolWorldz','https://solworldz.xyz/','SolWorldz | One World • One Mission','SolWorldz'),
+              ('EthWorldz','https://ethworldz.xyz/','EthWorldz | One World • One Mission','EthWorldz'),
+              ('BaseWorldz','https://baseworldz.xyz/','BaseWorldz | One World • One Mission','BaseWorldz'),
+              ('BNBWorldz','https://bnbworldz.xyz/','BNBWorldz | One World • One Mission','BNBWorldz'),
+              ('XRPWorldz','https://xrpworldz.xyz/','XRPWorldz | One World • One Mission','XRPWorldz'),
+              ('SuiWorldz','https://suiworldz.xyz/','SuiWorldz | One World • One Mission','SuiWorldz'),
+              ('HyperWorldz','https://hyperworldz.xyz/','HyperWorldz | One World • One Mission','HyperWorldz'),
+              ('RobinWorldz','https://robinworldz.xyz/','RobinWorldz | One World • One Mission','RobinWorldz'),
+              ('HodlerWorldz','https://hodlerworldz.xyz/','HodlerWorldz | One World • One Mission','HodlerWorldz'),
+              ('HodlerGalaxy','https://hodlergalaxy.xyz/','HodlerGalaxy | Explore the OneWorldz Ecosystem','HodlerGalaxy'),
+              ('Purple Diamond Crew','https://purplediamondcrew.com/','Purple Diamond Crew | The Legacy Lives On','Purple Diamond Crew'),
+              ('FoodWorldz','https://foodworldz.com/','FoodWorldz | See the Need • Support the Mission','FoodWorldz'),
+              ('DonateWorldz','https://donateworldz.com/','DonateWorldz | Choose a Purpose • Support Clearly','DonateWorldz'),
+              ('ImpactBased','https://impactbased.cryptoworldz.xyz/','ImpactBased | Purpose-Driven Launch Board','ImpactBased'),
+              ('Law.OneWorldz','https://law.oneworldz.com/','Law.OneWorldz | Public Information','Law.OneWorldz'),
+              ('Learn.OneWorldz','https://learn.oneworldz.com/','Learn.OneWorldz | Knowledge Creates Power','Learn.OneWorldz'),
+              ('CryptoBotz Command Centre','https://cryptobotz.cryptoworldz.xyz/','', 'CryptoBotz'),
+          ]
 
-          | Destination | HTTPS | HTTP | Identity | Mobile | Brand | Clean | Score | Result |
-          |---|---:|---:|---:|---:|---:|---:|---:|---|
-          HDR
+          ctx = ssl.create_default_context()
+          opener = urllib.request.build_opener(urllib.request.HTTPRedirectHandler())
+          ua = {'User-Agent': 'OneWorldz-Live-Approval-Audit/1.0'}
+          placeholder_re = re.compile(r'default web site page|website coming soon|hostinger default|apache2 ubuntu default page|nginx welcome|index of /', re.I)
+          viewport_re = re.compile(r'<meta[^>]+name\s*=\s*["\']viewport["\']', re.I)
+          title_re = re.compile(r'<title[^>]*>(.*?)</title>', re.I | re.S)
 
-          targets=$(cat <<'EOF'
-          OneWorldz|https://oneworldz.com/||OneWorldz
-          CryptoWorldz|https://cryptoworldz.xyz/|CryptoWorldz | One World • One Mission|CryptoWorldz
-          SolWorldz|https://solworldz.xyz/|SolWorldz | One World • One Mission|SolWorldz
-          EthWorldz|https://ethworldz.xyz/|EthWorldz | One World • One Mission|EthWorldz
-          BaseWorldz|https://baseworldz.xyz/|BaseWorldz | One World • One Mission|BaseWorldz
-          BNBWorldz|https://bnbworldz.xyz/|BNBWorldz | One World • One Mission|BNBWorldz
-          XRPWorldz|https://xrpworldz.xyz/|XRPWorldz | One World • One Mission|XRPWorldz
-          SuiWorldz|https://suiworldz.xyz/|SuiWorldz | One World • One Mission|SuiWorldz
-          HyperWorldz|https://hyperworldz.xyz/|HyperWorldz | One World • One Mission|HyperWorldz
-          RobinWorldz|https://robinworldz.xyz/|RobinWorldz | One World • One Mission|RobinWorldz
-          HodlerWorldz|https://hodlerworldz.xyz/|HodlerWorldz | One World • One Mission|HodlerWorldz
-          HodlerGalaxy|https://hodlergalaxy.xyz/|HodlerGalaxy | Explore the OneWorldz Ecosystem|HodlerGalaxy
-          Purple Diamond Crew|https://purplediamondcrew.com/|Purple Diamond Crew | The Legacy Lives On|Purple Diamond Crew
-          FoodWorldz|https://foodworldz.com/|FoodWorldz | See the Need • Support the Mission|FoodWorldz
-          DonateWorldz|https://donateworldz.com/|DonateWorldz | Choose a Purpose • Support Clearly|DonateWorldz
-          ImpactBased|https://impactbased.cryptoworldz.xyz/|ImpactBased | Purpose-Driven Launch Board|ImpactBased
-          Law.OneWorldz|https://law.oneworldz.com/|Law.OneWorldz | Public Information|Law.OneWorldz
-          Learn.OneWorldz|https://learn.oneworldz.com/|Learn.OneWorldz | Knowledge Creates Power|Learn.OneWorldz
-          CryptoBotz Command Centre|https://cryptobotz.cryptoworldz.xyz/||CryptoBotz
-          EOF
-          )
+          results = []
+          for name, url, expected_title, brand in targets:
+              score = 0
+              checks = {'https':0,'http':0,'identity':0,'mobile':0,'brand':0,'clean':0}
+              code = '000'
+              final_url = ''
+              title = ''
+              error = ''
+              body = ''
+              try:
+                  req = urllib.request.Request(url, headers=ua)
+                  with urllib.request.urlopen(req, timeout=45, context=ctx) as resp:
+                      code = str(resp.status)
+                      final_url = resp.geturl()
+                      raw = resp.read(8_000_000)
+                      body = raw.decode(resp.headers.get_content_charset() or 'utf-8', errors='replace')
+                  if final_url.startswith('https://') and body:
+                      checks['https'] = 25; score += 25
+                  if code.startswith('2'):
+                      checks['http'] = 20; score += 20
+              except Exception as exc:
+                  error = f'{type(exc).__name__}: {exc}'
 
-          total=0
-          passed=0
-          failed=0
+              if body:
+                  m = title_re.search(body)
+                  if m:
+                      title = html.unescape(re.sub(r'\s+', ' ', m.group(1)).strip())
+                  if expected_title:
+                      if title == expected_title:
+                          checks['identity'] = 15; score += 15
+                  elif title and brand.lower() in body.lower():
+                      checks['identity'] = 15; score += 15
+                  if viewport_re.search(body):
+                      checks['mobile'] = 10; score += 10
+                  if brand.lower() in body.lower() or 'oneworldz' in body.lower():
+                      checks['brand'] = 15; score += 15
+                  if not placeholder_re.search(body):
+                      checks['clean'] = 15; score += 15
 
-          while IFS='|' read -r name url expected_title brand; do
-            [ -n "$name" ] || continue
-            total=$((total+1))
-            slug="$(printf '%s' "$name" | tr '[:upper:] ' '[:lower:]-' | tr -cd 'a-z0-9.-')"
-            body="$RUNNER_TEMP/oneworldz-audit/${slug}.html"
-            headers="$RUNNER_TEMP/oneworldz-audit/${slug}.headers"
-            err="$RUNNER_TEMP/oneworldz-audit/${slug}.err"
+              status = 'PASS' if score >= 85 else 'FAIL'
+              result = {
+                  'name': name, 'url': url, 'final_url': final_url, 'http_code': code,
+                  'title': title, 'expected_title': expected_title, 'checks': checks,
+                  'score': score, 'result': status, 'error': error,
+              }
+              results.append(result)
+              slug = re.sub(r'[^a-z0-9.-]+','-',name.lower()).strip('-')
+              (out / f'{slug}.html').write_text(body, encoding='utf-8')
+              print(f'{name} :: HTTP {code} :: {score}/100 :: {status} :: {title or error}')
 
-            score=0
-            https=0
-            http=0
-            identity=0
-            mobile=0
-            brand_ok=0
-            clean=0
-            status='FAIL'
-            code='000'
-            final_url=''
-            title=''
-
-            meta="$(curl --silent --show-error --location \
-              --connect-timeout 15 --max-time 45 \
-              -D "$headers" -o "$body" \
-              -w '%{http_code}|%{url_effective}|%{ssl_verify_result}' \
-              "$url" 2>"$err" || true)"
-            IFS='|' read -r code final_url ssl_verify <<< "$meta"
-
-            if [ "${ssl_verify:-1}" = '0' ] && [ -s "$body" ]; then https=25; score=$((score+25)); fi
-            if [[ "${code:-000}" =~ ^2[0-9][0-9]$ ]]; then http=20; score=$((score+20)); fi
-
-            if [ -s "$body" ]; then
-              title="$(python3 - "$body" <<'PY'
-          import html, re, sys
-          text=open(sys.argv[1], encoding='utf-8', errors='ignore').read()
-          m=re.search(r'<title[^>]*>(.*?)</title>', text, re.I|re.S)
-          print(html.unescape(re.sub(r'\s+',' ',m.group(1)).strip()) if m else '')
+          passed = sum(r['result']=='PASS' for r in results)
+          lines = [
+              '# OneWorldz 19-Destination Live Approval Audit', '',
+              '**Standard:** JayJayTeamDev × ChatGPT Approval Rating', '',
+              '| Destination | HTTPS | HTTP | Identity | Mobile | Brand | Clean | Score | Result |',
+              '|---|---:|---:|---:|---:|---:|---:|---:|---|'
+          ]
+          for r in results:
+              c=r['checks']
+              lines.append(f"| {r['name']} | {c['https']}/25 | {c['http']}/20 | {c['identity']}/15 | {c['mobile']}/10 | {c['brand']}/15 | {c['clean']}/15 | **{r['score']}/100** | **{r['result']}** |")
+          lines += ['', '## Fleet result', '',
+                    f'- Destinations tested: **{len(results)}**',
+                    f'- Approval passes (>=85): **{passed}**',
+                    f'- Approval failures: **{len(results)-passed}**',
+                    f"- Full-fleet approval: **{'PASS' if passed == len(results) else 'NOT YET'}**"]
+          report='\n'.join(lines)+'\n'
+          (out/'approval-report.md').write_text(report, encoding='utf-8')
+          (out/'results.json').write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding='utf-8')
+          print('\n'+report)
           PY
-              )"
-
-              if [ -n "$expected_title" ]; then
-                if [ "$title" = "$expected_title" ]; then identity=15; score=$((score+15)); fi
-              else
-                if [ -n "$title" ] && grep -Fqi "$brand" "$body"; then identity=15; score=$((score+15)); fi
-              fi
-
-              if grep -Eqi '<meta[^>]+name=["'"']viewport["'"']' "$body"; then mobile=10; score=$((score+10)); fi
-              if grep -Fqi "$brand" "$body" || grep -Fqi 'OneWorldz' "$body"; then brand_ok=15; score=$((score+15)); fi
-
-              if ! grep -Eqi 'default web site page|website coming soon|hostinger default|apache2 ubuntu default page|nginx welcome|index of /' "$body"; then
-                clean=15; score=$((score+15))
-              fi
-            fi
-
-            if [ "$score" -ge 85 ]; then status='PASS'; passed=$((passed+1)); else failed=$((failed+1)); fi
-
-            printf '| %s | %s/25 | %s/20 | %s/15 | %s/10 | %s/15 | %s/15 | **%s/100** | **%s** |\n' \
-              "$name" "$https" "$http" "$identity" "$mobile" "$brand_ok" "$clean" "$score" "$status" >> "$report"
-
-            jq -n \
-              --arg name "$name" --arg url "$url" --arg final_url "$final_url" --arg code "$code" \
-              --arg title "$title" --arg expected_title "$expected_title" --arg result "$status" \
-              --arg error "$(cat "$err" 2>/dev/null || true)" \
-              --argjson score "$score" \
-              '{name:$name,url:$url,final_url:$final_url,http_code:$code,title:$title,expected_title:$expected_title,score:$score,result:$result,error:$error}' \
-              >> "$jsonl"
-
-            echo "$name :: HTTP ${code:-000} :: $score/100 :: $status :: $title"
-          done <<< "$targets"
-
-          {
-            echo
-            echo "## Fleet result"
-            echo
-            echo "- Destinations tested: **$total**"
-            echo "- Approval passes (>=85): **$passed**"
-            echo "- Approval failures: **$failed**"
-            echo "- Full-fleet approval: **$([ "$failed" -eq 0 ] && echo PASS || echo NOT YET)**"
-          } >> "$report"
-
-          jq -s '.' "$jsonl" > "$RUNNER_TEMP/oneworldz-audit/results.json"
-          cat "$report"
 
       - name: Upload audit evidence
         if: ${{ always() }}
