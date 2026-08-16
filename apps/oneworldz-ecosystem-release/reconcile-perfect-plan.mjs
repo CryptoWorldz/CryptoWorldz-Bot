@@ -99,6 +99,22 @@ function reconcileImpactBased(html) {
   return html;
 }
 
+async function reconcileImpactDiscovery() {
+  const target = path.join(dist, "impactbased");
+  const oldOrigin = "https://impactbased.cryptoworldz.xyz";
+  const officialOrigin = links.impactBased.replace(/\/$/, "");
+  const robotsPath = path.join(target, "robots.txt");
+  const sitemapPath = path.join(target, "sitemap.xml");
+  let robots = await readFile(robotsPath, "utf8");
+  let sitemap = await readFile(sitemapPath, "utf8");
+  robots = robots.replaceAll(oldOrigin, officialOrigin);
+  sitemap = sitemap.replaceAll(oldOrigin, officialOrigin);
+  if (!robots.includes(`Sitemap: ${officialOrigin}/sitemap.xml`)) throw new Error("ImpactBased official robots sitemap URL missing");
+  if (!sitemap.includes(`<loc>${officialOrigin}/</loc>`)) throw new Error("ImpactBased official sitemap URL missing");
+  await writeFile(robotsPath, robots, "utf8");
+  await writeFile(sitemapPath, sitemap, "utf8");
+}
+
 async function refreshManifest(key, additions = {}) {
   const target = path.join(dist, key);
   const manifestPath = path.join(target, "release-manifest.json");
@@ -145,6 +161,7 @@ for (const [key, domain] of [
   html = reconcileImpactBased(html);
   html = ensureProductionSeo(html, "impactbased.oneworldz.com");
   await writeFile(file, html, "utf8");
+  await reconcileImpactDiscovery();
 }
 
 {
