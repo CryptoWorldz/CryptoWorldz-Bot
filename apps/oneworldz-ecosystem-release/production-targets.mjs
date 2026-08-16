@@ -22,12 +22,11 @@ const expectedTitles = Object.freeze({
 });
 
 // Canonical hosting contract:
-// every static destination must be reached through an authenticated,
-// destination-scoped Hostinger account whose visible website root is `/`.
-// Never guess or prepend `domains/.../public_html` inside the release model.
-// If Hostinger does not present `/` as the intended destination root for the
-// authenticated account, production deployment must stop until the account
-// scope/root is corrected and re-proved.
+// every static destination must be authenticated against Hostinger before write.
+// `remoteDir: "/"` means the selected FTP/SFTP credential is already scoped to
+// that exact website root. It never means the source may guess or prepend a
+// physical Hostinger path. The real hPanel home directory is evidence only and
+// must be recorded separately during HOSTINGER DESTINATION PASS.
 export const productionTargets = Object.freeze(deploymentTargets19.map((target) => {
   const expectedTitle = expectedTitles[target.key];
   if (!expectedTitle) throw new Error(`Missing production title contract for ${target.key}`);
@@ -35,8 +34,9 @@ export const productionTargets = Object.freeze(deploymentTargets19.map((target) 
     ...target,
     remoteDir: "/",
     expectedTitle,
-    accountScope: "DOMAIN_SCOPED_FTP_ROOT_REQUIRED",
-    destinationStatus: "UNVERIFIED_UNTIL_AUTHENTICATED"
+    accountScope: "EXACT_HOSTINGER_WEBSITE_ROOT_REQUIRED",
+    destinationStatus: "HOSTINGER_PROOF_REQUIRED",
+    productionWriteAllowed: false
   });
 }));
 
@@ -46,9 +46,12 @@ export const productionGate = Object.freeze({
   staticTargets: productionTargets.length,
   protectedDestinations: protectedDestinations.map(({ domain }) => domain),
   excludedOwnedRootDomains: [...excludedRootDomains],
-  deploymentState: "CLEANUP_LOCK",
-  hostingDestinationState: "UNVERIFIED",
-  productionWriteAllowed: false
+  deploymentState: "TOTAL_DEPLOYMENT_PLAN_ACTIVE",
+  ownerAuthority: "PERFORM_TOTAL_DEPLOYMENT_PLAN",
+  repeatedOwnerApprovalRequired: false,
+  hostingDestinationState: "PROOF_REQUIRED",
+  productionWriteAllowed: false,
+  canonicalDeploymentRail: "ONE_AUTHENTICATED_HOSTINGER_STATIC_FLEET_RAIL"
 });
 
 if (productionTargets.length !== 18) throw new Error(`Expected 18 production targets, got ${productionTargets.length}`);
