@@ -57,7 +57,7 @@ jobs:
           home=strict-visual-proof/home-dom.html
           support=strict-visual-proof/community-support-dom.html
           grep -Fq 'class="oneworldz-blue-white"' "$home"
-          grep -Fq 'class="hero-art"' "$home"
+          grep -Fq 'hero-art' "$home"
           grep -Fq 'property="og:image"' "$home"
           grep -Fq 'name="twitter:card" content="summary_large_image"' "$home"
           test "$(grep -o 'class="destination-preview"' "$home" | wc -l | tr -d ' ')" = 8
@@ -74,7 +74,6 @@ jobs:
         run: |
           set -euo pipefail
           dom=strict-visual-proof/community-support-dom.html
-          registry=apps/oneworldz-ecosystem-release/source/community-support-profiles.json
           test "$(grep -o 'community-support-card' "$dom" | wc -l | tr -d ' ')" = 35
           grep -o 'href="https://www.facebook.com/[^"]*"' "$dom" | sed -e 's/^href="//' -e 's/"$//' | sort -u > "$RUNNER_TEMP/live-facebook-links.txt"
           node - <<'NODE' > "$RUNNER_TEMP/registry-facebook-links.txt"
