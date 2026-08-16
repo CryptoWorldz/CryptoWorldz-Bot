@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { cp, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { links, officialDirectory, supportDirectory } from "./site-data.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const source = path.join(root, "source");
@@ -25,14 +26,14 @@ const previewAssets = [
 ];
 
 const destinationPreviews = [
-  ["https://purplediamondcrew.com", "/assets/previews/purple-diamond-crew.png", "Purple Diamond Crew on-the-ground action preview"],
-  ["https://donateworldz.com", "/assets/previews/donateworldz.webp", "DonateWorldz support preview"],
-  ["https://foodworldz.com", "/assets/previews/foodworldz.png", "FoodWorldz humanitarian action preview"],
-  ["https://law.oneworldz.com", "/assets/previews/law-oneworldz.png", "Law.OneWorldz preview"],
-  ["https://learn.oneworldz.com", "/assets/previews/learn-oneworldz.png", "Learn.OneWorldz preview"],
+  [links.purpleDiamondCrew, "/assets/previews/purple-diamond-crew.png", "Purple Diamond Crew on-the-ground action preview"],
+  [links.donateWorldz, "/assets/previews/donateworldz.webp", "DonateWorldz support preview"],
+  [links.foodWorldz, "/assets/previews/foodworldz.png", "FoodWorldz humanitarian action preview"],
+  [links.oneWorldzLaw, "/assets/previews/law-oneworldz.png", "Law.OneWorldz preview"],
+  [links.learnWorldz, "/assets/previews/learn-oneworldz.png", "Learn.OneWorldz preview"],
   ["#partnerships", "/assets/previews/partnerships.png", "OneWorldz partnerships and sponsors preview"],
   ["#movement", "/assets/previews/help-the-people.png", "2026 to 2030 Help the People movement preview"],
-  ["https://cryptoworldz.xyz", "/assets/previews/cryptoworldz.png", "CryptoWorldz preview"]
+  [links.cryptoworldz, "/assets/previews/cryptoworldz.png", "CryptoWorldz preview"]
 ];
 
 const escapeHtml = (value) => String(value)
@@ -40,6 +41,8 @@ const escapeHtml = (value) => String(value)
   .replaceAll("<", "&lt;")
   .replaceAll(">", "&gt;")
   .replaceAll('"', "&quot;");
+
+const external = (href) => /^https?:\/\//.test(href) ? ' target="_blank" rel="noopener noreferrer"' : "";
 
 function injectStylesheet(html) {
   if (html.includes('/assets/css/oneworldz-visual.css')) return html;
@@ -89,6 +92,26 @@ function addDestinationPreview(html, href, image, alt) {
   return html;
 }
 
+function officialDirectorySection() {
+  const cards = officialDirectory.map((entry, index) => `<a class="official-directory-card" href="${entry.url}"${external(entry.url)}><span>${String(index + 1).padStart(2, "0")}</span><strong>${escapeHtml(entry.name)}</strong><small>${escapeHtml(entry.role)}</small><em>${escapeHtml(entry.url.replace(/^https?:\/\//, ""))}</em></a>`).join("");
+  return `<section class="section section-dark official-directory" id="official-directory"><div class="section-heading"><p class="eyebrow">ONEWORLDZ OFFICIAL WEBSITE DIRECTORY</p><h2>One connected ecosystem. One trusted directory.</h2><p>Save these addresses. They are the owner-designated public destinations for the OneWorldz and CryptoWorldz ecosystem. A listed address is not a claim that every planned feature is already active.</p></div><div class="official-directory-grid">${cards}</div></section>`;
+}
+
+function supportDirectorySection() {
+  const cards = supportDirectory.map((entry, index) => `<a class="official-directory-card support-directory-card" href="${entry.url}"${external(entry.url)}><span>${String(index + 1).padStart(2, "0")}</span><strong>${escapeHtml(entry.name)}</strong><small>OneWorldz Full Support™</small><em>${escapeHtml(entry.url.replace(/^https?:\/\//, ""))}</em></a>`).join("");
+  return `<section class="section support-directory" id="support-directory"><div class="section-heading"><p class="eyebrow">SUPPORT • ACTION • FOOD</p><h2>Every support pathway stays clear and separate.</h2><p>Reagan &amp; Children, the 35-destination Community Support directory, Community Impact, JayJayTeamDev support and FoodWorldz each keep their own purpose and destination.</p></div><div class="official-directory-grid">${cards}</div></section>`;
+}
+
+function injectOfficialSections(html) {
+  if (html.includes('id="official-directory"')) return html;
+  const acknowledgement = html.indexOf('<section class="section" id="acknowledgements">');
+  const alternateAcknowledgement = html.indexOf('<section class="section section-dark" id="acknowledgements">');
+  const pos = acknowledgement >= 0 ? acknowledgement : alternateAcknowledgement;
+  if (pos < 0) throw new Error("OneWorldz acknowledgements insertion point missing");
+  const sections = `${officialDirectorySection()}${supportDirectorySection()}`;
+  return html.slice(0, pos) + sections + html.slice(pos);
+}
+
 function verifyHashLinks(html, pageName) {
   const ids = new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]));
   const hashes = [...html.matchAll(/href="#([^"]+)"/g)].map((match) => match[1]);
@@ -130,11 +153,18 @@ home = injectPreviewMeta(home, {
   imageAlt: "OneWorldz One Vision humanitarian gateway"
 });
 for (const [href, image, alt] of destinationPreviews) home = addDestinationPreview(home, href, image, alt);
+home = injectOfficialSections(home);
 
 if (!home.includes("little-legend.webp")) throw new Error("Little Legend mobile / future scholar lead visual missing from OneWorldz");
 if (!home.includes('href="/community-support/"')) throw new Error("Dedicated Community Support route missing from OneWorldz");
 if (!home.includes("2026–2030 HELP THE PEOPLE MOVEMENT")) throw new Error("2026–2030 Help the People movement missing from OneWorldz");
 if ((home.match(/class="destination-preview"/g) || []).length !== destinationPreviews.length) throw new Error("Every OneWorldz destination card must have a visual preview");
+for (const entry of officialDirectory) if (!home.includes(`href="${entry.url}"`)) throw new Error(`Official directory link missing: ${entry.url}`);
+for (const entry of supportDirectory) if (!home.includes(`href="${entry.url}"`)) throw new Error(`Support directory link missing: ${entry.url}`);
+if (!home.includes(links.impactBased)) throw new Error("Owner-designated ImpactBased URL missing");
+if (!home.includes(links.nextBigCoin)) throw new Error("Next Big Coin official portal missing");
+if (!home.includes(links.zedCommandCentre)) throw new Error("Zed Command Centre official address missing");
+if (!home.includes(links.raaiiidd)) throw new Error("CryptoWorldz Raaiiidd Team address missing");
 verifyHashLinks(home, "OneWorldz home");
 await writeFile(homeFile, home, "utf8");
 
@@ -164,14 +194,17 @@ manifest.generated_at = new Date().toISOString();
 manifest.files = files;
 manifest.oneworldz_visual_contract = {
   pages: ["/", "/community-support/"],
+  theme: "BLUE_WHITE",
   desktop_mobile_backgrounds: true,
   home_full_background_picture: true,
   community_support_full_background_image: true,
   destination_preview_cards: destinationPreviews.length,
+  official_directory_entries: officialDirectory.length,
+  support_directory_entries: supportDirectory.length,
   open_graph_preview_images: true,
   twitter_large_image_previews: true,
   local_hash_links_verified: true
 };
 await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 
-console.log("OneWorldz finalised: both pages carry full visual treatment, destination previews, social previews and verified local links.");
+console.log(`OneWorldz finalised: blue/white visual treatment, ${officialDirectory.length} official directory entries, ${supportDirectory.length} support pathways and verified desktop/mobile links.`);
