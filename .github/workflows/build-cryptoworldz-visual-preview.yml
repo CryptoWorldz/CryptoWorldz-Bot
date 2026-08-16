@@ -54,8 +54,8 @@ jobs:
           const m=JSON.parse(fs.readFileSync(pkg+'/release-manifest.json','utf8'));
           const v=m.cryptoworldz_visual_contract||{};
           if(v.pages!==14) throw new Error('expected 14 CryptoWorldz pages');
-          if(!v.desktop_mobile_main_visuals||!v.full_background_hero_treatment||!v.division_identity_art_consistent_on_mobile||!v.support_pages_ambient_full_backgrounds) throw new Error('visual contract incomplete');
-          if(v.visual_link_previews_per_page!==4||!v.open_graph_preview_images||!v.twitter_large_image_previews||!v.local_hash_links_verified) throw new Error('preview/link contract incomplete');
+          if(!v.desktop_mobile_main_visuals||!v.full_background_hero_treatment||!v.approved_separate_mobile_hero_assets_preserved||!v.support_pages_ambient_full_backgrounds) throw new Error('visual contract incomplete');
+          if(v.visual_link_previews_per_page!==4||!v.isolated_link_preview_assets||!v.open_graph_preview_images||!v.twitter_large_image_previews||!v.local_hash_links_verified) throw new Error('preview/link contract incomplete');
           if(v.protected_cryptobotz_modified!==false) throw new Error('protected app boundary violated');
           NODE
       - name: Define exact 14 pages
@@ -136,7 +136,7 @@ jobs:
           const failures=[];
           for(const [name] of routes){
             const html=fs.readFileSync(`cryptoworldz-candidate-proof/${name}-dom.html`,'utf8');
-            if(!/cryptoworldz-visual/.test(html)) failures.push(`${name}: visual class missing`);
+            if(!/class="cryptoworldz-visual route-/.test(html)) failures.push(`${name}: visual class missing`);
             if(!/cryptoworldz-visual\.css/.test(html)) failures.push(`${name}: visual css missing`);
             if((html.match(/class="cw-link-preview"/g)||[]).length!==4) failures.push(`${name}: link previews != 4`);
             if(!/property="og:image"/.test(html)) failures.push(`${name}: og image missing`);
