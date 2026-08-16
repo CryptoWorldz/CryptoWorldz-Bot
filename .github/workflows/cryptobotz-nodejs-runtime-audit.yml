@@ -1,0 +1,59 @@
+name: CryptoBotz NodeJS Runtime Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/cryptobotz-nodejs-runtime-audit.request'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    environment:
+      name: cryptoworldz-production
+    env:
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+      HOSTINGER_USERNAME: u643166328
+      TARGET_DOMAIN: cryptobotz.cryptoworldz.xyz
+    steps:
+      - name: Inspect Hostinger website and NodeJS builds read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$HOSTINGER_API_TOKEN"
+          echo "::add-mask::$HOSTINGER_API_TOKEN"
+          base="https://developers.hostinger.com/api/hosting/v1"
+          curl --fail --silent --show-error --location \
+            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+            "$base/websites" -o "$RUNNER_TEMP/websites.json"
+          curl --fail --silent --show-error --location \
+            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+            "$base/accounts/$HOSTINGER_USERNAME/websites/$TARGET_DOMAIN/nodejs/builds" -o "$RUNNER_TEMP/builds.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])
+          websites=json.loads((root/'websites.json').read_text())
+          builds=json.loads((root/'builds.json').read_text())
+          print('=== TARGET WEBSITE ===')
+          items=websites if isinstance(websites,list) else websites.get('data',websites.get('items',[])) if isinstance(websites,dict) else []
+          for item in items:
+              if isinstance(item,dict) and item.get('domain')==os.environ['TARGET_DOMAIN']:
+                  print(json.dumps(item,indent=2))
+          print('=== NODEJS BUILDS ===')
+          print(json.dumps(builds,indent=2))
+          PY
+
+      - name: Preserve runtime audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cryptobotz-nodejs-runtime-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/websites.json
+            ${{ runner.temp }}/builds.json
+          if-no-files-found: ignore
+          retention-days: 7
