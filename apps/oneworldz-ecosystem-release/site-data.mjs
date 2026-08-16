@@ -1,5 +1,20 @@
 export const links = Object.freeze({
   oneworldz: "https://oneworldz.com",
+  cryptoworldz: "https://cryptoworldz.xyz",
+  solworldz: "https://solworldz.xyz",
+  robinworldz: "https://robinworldz.xyz",
+  purpleDiamondCrew: "https://purplediamondcrew.com",
+  nextBigCoin: "https://nextbigcoin.oneworldz.com",
+  zedCommandCentre: "https://cryptobotz.cryptoworldz.xyz",
+  impactBased: "https://impactbased.oneworldz.com",
+  learnWorldz: "https://learn.oneworldz.com",
+  oneWorldzLaw: "https://law.oneworldz.com",
+  donateWorldz: "https://donateworldz.com",
+  reaganChildren: "https://donateworldz.com/reagan-children/",
+  communityDirectory: "https://oneworldz.com/community-support/",
+  communityImpact: "https://donateworldz.com/community-impact/",
+  jayjaySupport: "https://donateworldz.com/jayjayteamdev/",
+  foodWorldz: "https://foodworldz.com",
   zed: "https://t.me/CryptoWorldzBot",
   raaiiidd: "https://t.me/CryptoWorldzRaaiiiddTeam",
   protectedMiniApp: "https://cryptobotz.cryptoworldz.xyz/miniapp/",
@@ -10,6 +25,31 @@ export const links = Object.freeze({
   jayjayStripe: "https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00",
   jayjayPaypal: "https://www.paypal.me/Jayjay3480"
 });
+
+export const officialDirectory = Object.freeze([
+  ["OneWorldz", "Main Headquarters", links.oneworldz],
+  ["CryptoWorldz", "Blockchain Ecosystem", links.cryptoworldz],
+  ["SolWorldz", "Solana World", links.solworldz],
+  ["Purple Diamond Crew", "On-the-ground action", links.purpleDiamondCrew],
+  ["RobinWorldz", "Robin Hood Chain World", links.robinworldz],
+  ["Next Big Coin", "$NBC official portal", links.nextBigCoin],
+  ["Zed Command Centre", "Command Centre Ultimate™ protected app", links.zedCommandCentre],
+  ["ImpactBased", "Purpose-led launch and impact pathway", links.impactBased],
+  ["LearnWorldz", "Learning hub", links.learnWorldz],
+  ["OneWorldz Law", "Public-interest law and policy ideas", links.oneWorldzLaw],
+  ["DonateWorldz", "Three separated support pathways", links.donateWorldz],
+  ["FoodWorldz", "Food, water and practical support", links.foodWorldz],
+  ["CryptoWorldz Raaiiidd Team", "Official Telegram action team", links.raaiiidd]
+].map(([name, role, url]) => Object.freeze({ name, role, url })));
+
+export const supportDirectory = Object.freeze([
+  ["Reagan & Children / Action Spread Smiles", links.reaganChildren],
+  ["35 Community Support Destinations", links.communityDirectory],
+  ["DonateWorldz", links.donateWorldz],
+  ["Community Impact", links.communityImpact],
+  ["Support JayJayTeamDev", links.jayjaySupport],
+  ["FoodWorldz", links.foodWorldz]
+].map(([name, url]) => Object.freeze({ name, url })));
 
 export const worldz = Object.freeze([
   {
@@ -151,9 +191,27 @@ export const lessons = Object.freeze([
   ["06", "Smart contracts", "Code that follows published rules and conditions."]
 ]);
 
+export const autoControlPolicy = Object.freeze({
+  name: "AUTO • Diamond Buy™ Owner Control",
+  owner: "JayJayTeamDev",
+  publicFundsAllowed: false,
+  clientCustodyAllowed: false,
+  manipulationAllowed: false,
+  executionDefault: "DISABLED",
+  legalCeilingRule: "Never hard-code a maximum legal amount. The executable ceiling is always the lowest of JayJayTeamDev's approved owned-funds budget, available owner-wallet balance, configured risk cap, venue/platform limit, and the applicable legal/compliance limit at execution time.",
+  activationRequirements: Object.freeze([
+    "Owner-controlled wallet and source of funds verified.",
+    "Token/project legal classification and applicable licensing obligations reviewed before execution.",
+    "No customer, donor, charity, community or third-party money may enter AUTO.",
+    "No wash trading, false volume, artificial price support, misleading market activity or hidden execution.",
+    "Every enabled buy policy must have a hard budget, per-order cap, daily cap, cooldown, destination allowlist, immutable audit record and emergency stop.",
+    "Legacy-token fee routing and new-token fee routing remain separately disclosed and may only activate after exact percentages, wallets, contracts and legal/compliance review are recorded."
+  ])
+});
+
 export const systemRoles = Object.freeze([
   ["ZED", "Telegram Commander", "Profiles, wallet association, Raaiiidd missions, points and governance presentation."],
-  ["AUTO", "Finance Investment Controller", "Education and status only. Signing, buying and transfers remain disabled."],
+  ["AUTO", "Diamond Buy™ Owner Treasury Controller", "Owner-controlled policy engine only. Execution remains disabled until the owner-owned funds, legal/compliance ceiling, risk caps, wallet allowlist and audit controls are verified. It never controls donor, customer or community funds."],
   ["G.R.A.C.E.", "Raaiiidd Team Organizer", "Approved post coordination, team organisation and social support."],
   ["RECAP", "Community Management", "Recaps, protection and transparency in confirmed partner context only."],
   ["BASED.BID", "Impact Launch Engine", "Reviewed LaunchBoard pathways without automatic token-launch authority."]
@@ -165,6 +223,9 @@ export const deploymentTargets = Object.freeze([
   ["cryptoworldz", "cryptoworldz.xyz", "cryptoworldz-production", "CRYPTOWORLDZ.XYZ"],
   ...worldz.map((world) => [world.key, world.domain, `${world.key}-production`, world.domain.toUpperCase()]),
   ["purplediamondcrew", "purplediamondcrew.com", "purplediamondcrew-production", "PURPLEDIAMONDCREW.COM"],
+  // The current proven Hostinger transport target remains the existing CryptoWorldz subdirectory.
+  // Public navigation uses the owner-designated ImpactBased URL above; changing the transport
+  // destination requires a fresh authenticated Hostinger proof and must never be guessed.
   ["impactbased", "impactbased.cryptoworldz.xyz", "impactbased-production", "IMPACTBASED.CRYPTOWORLDZ.XYZ"],
   ["law-oneworldz", "law.oneworldz.com", "law-oneworldz-production", "LAW.ONEWORLDZ.COM"],
   ["learn-oneworldz", "learn.oneworldz.com", "learn-oneworldz-production", "LEARN.ONEWORLDZ.COM"]
