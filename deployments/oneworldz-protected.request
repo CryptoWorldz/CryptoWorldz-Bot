@@ -1,0 +1,10 @@
+requested_by=JayJayTeamDev
+authorization=FULL ACCESS APPROVED
+target=cryptobotz.cryptoworldz.xyz
+preserve=ZED,AUTO,GRACE,current-public-root
+add=OneWorldz-GPT,Community-Support-35,Hub-Central
+openai=server-side-only
+restart=/domains/cryptobotz.cryptoworldz.xyz/nodejs/tmp/restart.txt
+proof=byte-identical-root,hub-status,OpenAI-live-response,35-profile-registry
+rollback=exact-prior-runtime
+retry=2026-08-16-no-mkdir-existing-directory
