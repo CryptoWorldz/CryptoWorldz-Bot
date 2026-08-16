@@ -3,7 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { deploymentTargets } from "../site-data.mjs";
+import { deploymentTargets, links } from "../site-data.mjs";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = path.join(appRoot, "dist", "ecosystem");
@@ -24,12 +24,17 @@ function pageUrl(domain, file) {
   return `https://${domain}/${file.replace(/\/index\.html$/, "")}/`;
 }
 
+function publicDomain(target) {
+  return target.key === "impactbased" ? new URL(links.impactBased).hostname : target.domain;
+}
+
 test("every production page has complete indexable SEO metadata", async () => {
   for (const target of deploymentTargets) {
     const targetRoot = path.join(distRoot, target.key);
+    const domain = publicDomain(target);
     for (const file of await htmlFiles(targetRoot)) {
       const html = await readFile(path.join(targetRoot, file), "utf8");
-      const expectedUrl = pageUrl(target.domain, file);
+      const expectedUrl = pageUrl(domain, file);
       assert.equal((html.match(/<title>/g) || []).length, 1, `${target.key}/${file}: title count`);
       assert.match(html, /<meta name="description" content="[^"]{30,220}">/, `${target.key}/${file}: description`);
       assert.match(html, /<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">/, `${target.key}/${file}: robots`);
@@ -55,15 +60,16 @@ test("every production page has complete indexable SEO metadata", async () => {
 test("every production domain publishes robots.txt and a complete sitemap.xml", async () => {
   for (const target of deploymentTargets) {
     const targetRoot = path.join(distRoot, target.key);
+    const domain = publicDomain(target);
     const files = await htmlFiles(targetRoot);
     const robots = await readFile(path.join(targetRoot, "robots.txt"), "utf8");
     const sitemap = await readFile(path.join(targetRoot, "sitemap.xml"), "utf8");
-    assert.match(robots, /^User-agent: \*$/m, target.domain);
-    assert.match(robots, /^Allow: \/$/m, target.domain);
-    assert.ok(robots.includes(`Sitemap: https://${target.domain}/sitemap.xml`), target.domain);
-    assert.match(sitemap, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/, target.domain);
+    assert.match(robots, /^User-agent: \*$/m, domain);
+    assert.match(robots, /^Allow: \/$/m, domain);
+    assert.ok(robots.includes(`Sitemap: https://${domain}/sitemap.xml`), domain);
+    assert.match(sitemap, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/, domain);
     for (const file of files) {
-      assert.ok(sitemap.includes(`<loc>${pageUrl(target.domain, file)}</loc>`), `${target.domain}: ${file}`);
+      assert.ok(sitemap.includes(`<loc>${pageUrl(domain, file)}</loc>`), `${domain}: ${file}`);
     }
   }
 });
