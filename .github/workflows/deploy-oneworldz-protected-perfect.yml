@@ -120,7 +120,6 @@ jobs:
           bye
           EOF
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/put.lftp" "$host"
-          echo 'written=true' >> "$GITHUB_OUTPUT"
       - id: proof
         name: Prove ZED unchanged plus GPT OpenAI and 35-profile registry live
         if: ${{ steps.write.outcome == 'success' }}
@@ -141,13 +140,12 @@ jobs:
               && curl --fail --silent --show-error --max-time 20 -H 'Origin: https://oneworldz.com' "https://$DOMAIN/api/oneworldz-community-support" -o "$RUNNER_TEMP/community.json" \
               && node -e "const j=require(process.env.RUNNER_TEMP+'/community.json');if(!j.ok||j.count!==35||j.profiles?.length!==35||j.profiles.some(x=>/^Facebook Support Profile/i.test(x.display_name)))process.exit(1)"; then
               echo 'PROTECTED ONEWORLDZ SERVICES VERIFIED'
-              echo 'proved=true' >> "$GITHUB_OUTPUT"
               exit 0
             fi
           done
           exit 1
       - name: Restore exact prior protected runtime on failed proof
-        if: ${{ steps.write.outputs.written == 'true' && steps.proof.outputs.proved != 'true' }}
+        if: ${{ steps.write.outcome == 'success' && steps.proof.outcome != 'success' }}
         shell: bash
         run: |
           set -u
@@ -163,7 +161,7 @@ jobs:
           } > "$RUNNER_TEMP/restore.lftp"
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/restore.lftp" "$host" || true
       - name: Require protected proof
-        if: ${{ steps.proof.outputs.proved != 'true' }}
+        if: ${{ steps.proof.outcome != 'success' }}
         run: exit 1
       - uses: actions/upload-artifact@v4
         if: always()
