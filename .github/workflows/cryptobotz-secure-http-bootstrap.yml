@@ -138,30 +138,51 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          success=0
+          stable=0
           for attempt in $(seq 1 48); do
             sleep 5
-            if curl --fail --silent --show-error --max-time 20 "https://$TARGET_DOMAIN/api/hub-central/status" -o "$RUNNER_TEMP/hub.json" \
-              && curl --fail --silent --show-error --max-time 20 "https://$TARGET_DOMAIN/api/oneworldz-gpt/status" -o "$RUNNER_TEMP/gpt.json" \
-              && curl --fail --silent --show-error --max-time 20 -H 'Origin: https://oneworldz.com' "https://$TARGET_DOMAIN/api/oneworldz-community-support" -o "$RUNNER_TEMP/community.json" \
-              && node - <<'NODE'
+            if ! curl --fail --silent --show-error --connect-timeout 5 --max-time 20 "https://$TARGET_DOMAIN/api/hub-central/status" -o "$RUNNER_TEMP/hub.json"; then
+              echo "Hub status not ready $attempt/48"; continue
+            fi
+            if ! curl --fail --silent --show-error --connect-timeout 5 --max-time 20 "https://$TARGET_DOMAIN/api/oneworldz-gpt/status" -o "$RUNNER_TEMP/gpt.json"; then
+              echo "GPT status not ready $attempt/48"; continue
+            fi
+            if ! curl --fail --silent --show-error --connect-timeout 5 --max-time 20 -H 'Origin: https://oneworldz.com' "https://$TARGET_DOMAIN/api/oneworldz-community-support" -o "$RUNNER_TEMP/community.json"; then
+              echo "Community status not ready $attempt/48"; continue
+            fi
+            if node - <<'NODE'
           const fs=require('fs'), root=process.env.RUNNER_TEMP;
-          const hub=JSON.parse(fs.readFileSync(root+'/hub.json'));
-          const gpt=JSON.parse(fs.readFileSync(root+'/gpt.json'));
-          const community=JSON.parse(fs.readFileSync(root+'/community.json'));
+          const hub=JSON.parse(fs.readFileSync(root+'/hub.json','utf8'));
+          const gpt=JSON.parse(fs.readFileSync(root+'/gpt.json','utf8'));
+          const community=JSON.parse(fs.readFileSync(root+'/community.json','utf8'));
           if(!hub.ok||hub.hostinger_write_control!=='configured'||hub.oneworldz_gpt!=='configured') process.exit(1);
           if(!gpt.ok||gpt.openai_api_configured!==true||gpt.payments_in_chat!==false) process.exit(1);
           if(!community.ok||community.count!==35||(community.profiles||[]).length!==35) process.exit(1);
           NODE
-            then success=1; break; fi
-            echo "Protected runtime convergence $attempt/48"
+            then stable=1; break
+            fi
+            echo "Protected runtime values not settled $attempt/48"
           done
-          test "$success" = 1
-          curl --fail --silent --show-error --max-time 60 \
-            -H 'Origin: https://oneworldz.com' -H 'Content-Type: application/json' \
-            -d '{"page":"deployment-proof","message":"Reply with one short sentence confirming the OneWorldz guide is online."}' \
-            "https://$TARGET_DOMAIN/api/oneworldz-gpt/chat" -o "$RUNNER_TEMP/gpt-live.json"
-          node -e "const j=require(process.env.RUNNER_TEMP+'/gpt-live.json');if(!j.ok||j.powered_by!=='OpenAI'||!String(j.text||'').trim())process.exit(1)"
+          test "$stable" = 1
+
+          live=0
+          for attempt in $(seq 1 12); do
+            code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 60 \
+              -H 'Origin: https://oneworldz.com' -H 'Content-Type: application/json' \
+              -d '{"page":"deployment-proof","message":"Reply with one short sentence confirming the OneWorldz guide is online."}' \
+              "https://$TARGET_DOMAIN/api/oneworldz-gpt/chat" \
+              -o "$RUNNER_TEMP/gpt-live.json" -w '%{http_code}' || true)"
+            echo "OneWorldz GPT live proof attempt $attempt/12 HTTP $code"
+            if [ "$code" = 200 ] && node - <<'NODE'
+          const j=require(process.env.RUNNER_TEMP+'/gpt-live.json');
+          if(!j.ok||j.powered_by!=='OpenAI'||!String(j.text||'').trim()) process.exit(1);
+          NODE
+            then live=1; break
+            fi
+            if [ -s "$RUNNER_TEMP/gpt-live.json" ]; then cat "$RUNNER_TEMP/gpt-live.json"; echo; fi
+            sleep 5
+          done
+          test "$live" = 1
 
       - name: Preserve non-secret proof
         if: always()
@@ -171,6 +192,7 @@ jobs:
           path: |
             ${{ runner.temp }}/bootstrap-status.json
             ${{ runner.temp }}/bootstrap.json
+            ${{ runner.temp }}/restart.json
             ${{ runner.temp }}/hub.json
             ${{ runner.temp }}/gpt.json
             ${{ runner.temp }}/community.json
