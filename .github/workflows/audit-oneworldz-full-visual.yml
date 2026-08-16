@@ -1,0 +1,123 @@
+name: Audit OneWorldz Full Visual — No Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deployments/oneworldz-final-audit.request'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-final-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Full-page desktop/mobile visual + every link
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prove no-deploy audit authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          f='deployments/oneworldz-final-audit.request'
+          test "$(sed -n 's/^requested_by=//p' "$f" | tail -n1)" = 'JayJayTeamDev'
+          test "$(sed -n 's/^target=//p' "$f" | tail -n1)" = 'oneworldz.com'
+          test "$(sed -n 's/^mode=//p' "$f" | tail -n1)" = 'AUDIT_ONLY_NO_DEPLOY'
+      - name: Locate Chrome
+        id: chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || true)"
+          test -n "$chrome"
+          echo "path=$chrome" >> "$GITHUB_OUTPUT"
+      - name: Capture tall desktop and mobile pages
+        shell: bash
+        env:
+          CHROME: ${{ steps.chrome.outputs.path }}
+        run: |
+          set -euo pipefail
+          mkdir -p full-visual-proof
+          "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,8000 --screenshot=full-visual-proof/home-desktop-full.png "https://oneworldz.com/?fullqa=${GITHUB_RUN_ID}"
+          "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,14000 --screenshot=full-visual-proof/home-mobile-full.png "https://oneworldz.com/?fullqa=${GITHUB_RUN_ID}"
+          "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=1440,9000 --screenshot=full-visual-proof/community-support-desktop-full.png "https://oneworldz.com/community-support/?fullqa=${GITHUB_RUN_ID}"
+          "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,18000 --screenshot=full-visual-proof/community-support-mobile-full.png "https://oneworldz.com/community-support/?fullqa=${GITHUB_RUN_ID}"
+          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=10000 --dump-dom "https://oneworldz.com/?fullqa=${GITHUB_RUN_ID}" > full-visual-proof/home-dom.html
+          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=10000 --dump-dom "https://oneworldz.com/community-support/?fullqa=${GITHUB_RUN_ID}" > full-visual-proof/community-support-dom.html
+          for f in full-visual-proof/*.png; do test -s "$f"; done
+      - name: Prove home visual previews and local links
+        shell: bash
+        run: |
+          set -euo pipefail
+          home=full-visual-proof/home-dom.html
+          test "$(grep -o 'class="destination-preview"' "$home" | wc -l | tr -d ' ')" = 8
+          test "$(grep -o 'class="destination-preview"[^>]*' "$home" | wc -l | tr -d ' ')" = 8
+          grep -Fq 'property="og:image"' "$home"
+          grep -Fq 'name="twitter:card" content="summary_large_image"' "$home"
+          ! grep -Fq 'href="#"' "$home"
+      - name: Prove all 35 support cards and hrefs are unique Facebook HTTPS destinations
+        shell: bash
+        run: |
+          set -euo pipefail
+          dom=full-visual-proof/community-support-dom.html
+          test "$(grep -o 'community-support-card' "$dom" | wc -l | tr -d ' ')" = 35
+          grep -o 'href="https://www.facebook.com/[^"]*"' "$dom" | sed -e 's/^href="//' -e 's/"$//' | sort -u > "$RUNNER_TEMP/facebook-links.txt"
+          test "$(wc -l < "$RUNNER_TEMP/facebook-links.txt" | tr -d ' ')" = 35
+          grep -Ev '^https://www\.facebook\.com/' "$RUNNER_TEMP/facebook-links.txt" && exit 1 || true
+      - name: Browser-style HTTP check all 35 Facebook share destinations
+        shell: bash
+        run: |
+          set -euo pipefail
+          failures=0
+          while read -r url; do
+            [ -z "$url" ] && continue
+            code="$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --user-agent 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36' --connect-timeout 15 --max-time 35 "$url" || printf '000')"
+            if [[ "$code" =~ ^(2|3) ]]; then
+              echo "OK $code $url"
+            else
+              echo "UNCONFIRMED $code $url"
+              failures=$((failures+1))
+            fi
+          done < "$RUNNER_TEMP/facebook-links.txt"
+          test "$failures" = 0
+      - name: Recheck ecosystem destinations and preview assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/urls.txt" <<'URLS'
+          https://purplediamondcrew.com
+          https://donateworldz.com
+          https://foodworldz.com
+          https://law.oneworldz.com
+          https://learn.oneworldz.com
+          https://cryptoworldz.xyz
+          https://donateworldz.com/reagan-children/
+          https://donateworldz.com/community-impact/
+          https://donateworldz.com/jayjayteamdev/
+          https://oneworldz.com/assets/previews/purple-diamond-crew.png
+          https://oneworldz.com/assets/previews/donateworldz.webp
+          https://oneworldz.com/assets/previews/foodworldz.png
+          https://oneworldz.com/assets/previews/law-oneworldz.png
+          https://oneworldz.com/assets/previews/learn-oneworldz.png
+          https://oneworldz.com/assets/previews/partnerships.png
+          https://oneworldz.com/assets/previews/help-the-people.png
+          https://oneworldz.com/assets/previews/cryptoworldz.png
+          URLS
+          failures=0
+          while read -r url; do
+            code="$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --connect-timeout 15 --max-time 35 "$url" || printf '000')"
+            if [[ "$code" =~ ^(2|3) ]]; then echo "OK $code $url"; else echo "BROKEN $code $url"; failures=$((failures+1)); fi
+          done < "$RUNNER_TEMP/urls.txt"
+          test "$failures" = 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oneworldz-full-visual-proof-${{ github.run_id }}
+          path: full-visual-proof/
+          if-no-files-found: error
+          retention-days: 30
