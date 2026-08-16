@@ -143,7 +143,9 @@ jobs:
           put $RUNNER_TEMP/community-support-live.js -o $REMOTE_ROOT/community-support-live.js
           put $RUNNER_TEMP/patched-index.js -o $REMOTE_ROOT/index.js
           put $RUNNER_TEMP/patched.env -o $REMOTE_ROOT/.env
+          set cmd:fail-exit false
           mkdir -p $RESTART_DIR
+          set cmd:fail-exit true
           put $RUNNER_TEMP/restart.txt -o $RESTART_DIR/restart.txt
           bye
           EOF
