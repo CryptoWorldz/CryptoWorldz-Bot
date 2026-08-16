@@ -43,7 +43,7 @@ function injectVisualCss(html) {
 }
 
 function injectBodyClass(html, routeClass) {
-  if (html.includes('cryptoworldz-visual')) return html;
+  if (html.includes('class="cryptoworldz-visual')) return html;
   return html.replace(/<body\s+style="([^"]*)">/, `<body class="cryptoworldz-visual route-${routeClass}" style="$1">`);
 }
 
