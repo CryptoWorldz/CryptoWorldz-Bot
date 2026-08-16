@@ -136,7 +136,7 @@ jobs:
           NODE
           (cd "$PACKAGE" && find . -type f -printf '%P\n' | sort) > "$RUNNER_TEMP/files.txt"
           while read -r rel; do mkdir -p "$RUNNER_TEMP/backup/$(dirname "$rel")"; done < "$RUNNER_TEMP/files.txt"
-          sed 's#/[^/]*$##' "$RUNNER_TEMP/files.txt" | grep -v '^$' | sort -u > "$RUNNER_TEMP/dirs.txt" || true
+          grep '/' "$RUNNER_TEMP/files.txt" | sed 's#/[^/]*$##' | sort -u > "$RUNNER_TEMP/dirs.txt" || true
       - run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
@@ -157,6 +157,8 @@ jobs:
           {
             echo 'set cmd:fail-exit false'; echo 'set net:max-retries 3'; echo 'set net:timeout 30'; echo 'set ftp:ssl-force true'; echo 'set ftp:ssl-protect-data true'; echo 'set ssl:verify-certificate true'; echo 'set ssl:check-hostname false'; echo "cd $REMOTE"; echo "lcd $PACKAGE"
             while read -r dir; do [ -n "$dir" ] && echo "mkdir -p $dir"; done < "$RUNNER_TEMP/dirs.txt"
+            # Repair only empty leaf directories that an earlier faulty deployment rail could have created where this release requires a file.
+            while read -r rel; do echo "rmdir $rel"; done < "$RUNNER_TEMP/files.txt"
             echo 'set cmd:fail-exit true'
             while read -r rel; do echo "put $rel -o $rel"; done < "$RUNNER_TEMP/files.txt"
             echo bye
@@ -184,7 +186,9 @@ jobs:
           {
             echo 'set cmd:fail-exit false'; echo 'set net:max-retries 2'; echo 'set net:timeout 25'; echo 'set ftp:ssl-force true'; echo 'set ftp:ssl-protect-data true'; echo 'set ssl:verify-certificate true'; echo 'set ssl:check-hostname false'; echo "cd $REMOTE"
             while read -r rel; do
-              if [ -f "$RUNNER_TEMP/backup/$rel" ]; then echo "put $RUNNER_TEMP/backup/$rel -o $rel"; else echo "rm $rel"; fi
+              echo "rm $rel"
+              echo "rmdir $rel"
+              if [ -f "$RUNNER_TEMP/backup/$rel" ]; then echo "put $RUNNER_TEMP/backup/$rel -o $rel"; fi
             done < "$RUNNER_TEMP/files.txt"
             echo bye
           } > "$RUNNER_TEMP/restore.lftp"
