@@ -8,6 +8,7 @@ const source = path.join(root, "source");
 const target = path.join(root, "dist", "ecosystem", "cryptoworldz");
 const cssSource = path.join(source, "cryptoworldz-visual.css");
 const cssTarget = path.join(target, "assets", "css", "cryptoworldz-visual.css");
+const previewDir = path.join(target, "assets", "link-previews");
 
 const pages = [
   ["home", "index.html"],
@@ -26,14 +27,21 @@ const pages = [
   ["division-law", "divisions/lawworldz/index.html"]
 ];
 
+const previewAssets = [
+  [path.join(source, "assets", "desktop", "cryptoworldz", "zed-command-centre.png"), "cryptoworldz.png"],
+  [path.join(source, "assets", "desktop", "cryptoworldz", "command-centre-five.png"), "command-centre.png"],
+  [path.join(source, "assets", "desktop", "cryptoworldz", "zed-auto.png"), "miniapp.png"],
+  [path.join(source, "assets", "desktop", "oneworldz", "oneworldz-master.png"), "oneworldz.png"]
+];
+
 const previewCards = `
 <section class="section section-dark cw-link-previews" aria-labelledby="cw-connected-title">
   <div class="section-heading"><p class="eyebrow">CONNECTED CRYPTOWORLDZ LINKS</p><h2 id="cw-connected-title">See where each link takes you.</h2><p>Visual previews keep the main CryptoWorldz destinations clear on desktop and mobile.</p></div>
   <div class="cw-link-preview-grid">
-    <a class="cw-link-preview" href="/"><picture><source media="(max-width:720px)" srcset="/assets/mobile/blockchain-portal.webp"><img src="/assets/desktop/cryptoworldz/zed-command-centre.png" alt="CryptoWorldz headquarters preview" loading="lazy" decoding="async"></picture><span><small>Headquarters</small><strong>CryptoWorldz</strong><em>Open home →</em></span></a>
-    <a class="cw-link-preview" href="/command-centre/"><picture><source media="(max-width:720px)" srcset="/assets/mobile/five-leaders-master.webp"><img src="/assets/desktop/cryptoworldz/command-centre-five.png" alt="Command Centre Ultimate preview" loading="lazy" decoding="async"></picture><span><small>Protected roles</small><strong>Command Centre Ultimate™</strong><em>Open preview →</em></span></a>
-    <a class="cw-link-preview" href="/miniapp/"><picture><source media="(max-width:720px)" srcset="/assets/mobile/zed-grace-auto.webp"><img src="/assets/desktop/cryptoworldz/zed-auto.png" alt="CryptoWorldz MiniApp preview" loading="lazy" decoding="async"></picture><span><small>Protected entry</small><strong>CryptoWorldz MiniApp</strong><em>Open splash →</em></span></a>
-    <a class="cw-link-preview" href="https://oneworldz.com" target="_blank" rel="noopener noreferrer"><picture><source media="(max-width:720px)" srcset="/assets/mobile/little-legend.webp"><img src="/assets/desktop/oneworldz/oneworldz-master.png" alt="OneWorldz gateway preview" loading="lazy" decoding="async"></picture><span><small>Human gateway</small><strong>OneWorldz</strong><em>Open gateway →</em></span></a>
+    <a class="cw-link-preview" href="/"><span class="cw-link-preview-image"><img src="/assets/link-previews/cryptoworldz.png" alt="CryptoWorldz headquarters preview" loading="lazy" decoding="async"></span><span><small>Headquarters</small><strong>CryptoWorldz</strong><em>Open home →</em></span></a>
+    <a class="cw-link-preview" href="/command-centre/"><span class="cw-link-preview-image"><img src="/assets/link-previews/command-centre.png" alt="Command Centre Ultimate preview" loading="lazy" decoding="async"></span><span><small>Protected roles</small><strong>Command Centre Ultimate™</strong><em>Open preview →</em></span></a>
+    <a class="cw-link-preview" href="/miniapp/"><span class="cw-link-preview-image"><img src="/assets/link-previews/miniapp.png" alt="CryptoWorldz MiniApp preview" loading="lazy" decoding="async"></span><span><small>Protected entry</small><strong>CryptoWorldz MiniApp</strong><em>Open splash →</em></span></a>
+    <a class="cw-link-preview" href="https://oneworldz.com" target="_blank" rel="noopener noreferrer"><span class="cw-link-preview-image"><img src="/assets/link-previews/oneworldz.png" alt="OneWorldz gateway preview" loading="lazy" decoding="async"></span><span><small>Human gateway</small><strong>OneWorldz</strong><em>Open gateway →</em></span></a>
   </div>
 </section>`;
 
@@ -45,11 +53,6 @@ function injectVisualCss(html) {
 function injectBodyClass(html, routeClass) {
   if (html.includes('class="cryptoworldz-visual')) return html;
   return html.replace(/<body\s+style="([^"]*)">/, `<body class="cryptoworldz-visual route-${routeClass}" style="$1">`);
-}
-
-function keepDivisionIdentityOnMobile(html, routeClass) {
-  if (!routeClass.startsWith("division-")) return html;
-  return html.replace(/(<picture class="production-picture hero-art">\s*)<source[^>]*>\s*/i, "$1");
 }
 
 function injectLinkPreviews(html) {
@@ -80,12 +83,13 @@ async function listFiles(dir, rel = "") {
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
 await mkdir(path.dirname(cssTarget), { recursive: true });
+await mkdir(previewDir, { recursive: true });
 await cp(cssSource, cssTarget);
+for (const [from, filename] of previewAssets) await cp(from, path.join(previewDir, filename));
 
 for (const [routeClass, relative] of pages) {
   const file = path.join(target, relative);
   let html = await readFile(file, "utf8");
-  html = keepDivisionIdentityOnMobile(html, routeClass);
   html = injectVisualCss(html);
   html = injectBodyClass(html, routeClass);
   html = injectLinkPreviews(html);
@@ -96,7 +100,6 @@ for (const [routeClass, relative] of pages) {
   if (!html.includes('property="og:image"')) throw new Error(`${relative}: Open Graph image missing`);
   if (!html.includes('name="twitter:card" content="summary_large_image"')) throw new Error(`${relative}: Twitter large preview missing`);
   if ((html.match(/class="cw-link-preview"/g) || []).length !== 4) throw new Error(`${relative}: four visual link previews required`);
-  if (routeClass.startsWith("division-") && /<picture class="production-picture hero-art">\s*<source/i.test(html)) throw new Error(`${relative}: division mobile hero must preserve the matching desktop identity artwork`);
   verifyHashes(html, relative);
   await writeFile(file, html, "utf8");
 }
@@ -116,9 +119,10 @@ manifest.cryptoworldz_visual_contract = {
   page_routes: pages.map(([, file]) => file === "index.html" ? "/" : `/${file.replace(/index\.html$/, "")}`),
   desktop_mobile_main_visuals: true,
   full_background_hero_treatment: true,
-  division_identity_art_consistent_on_mobile: true,
+  approved_separate_mobile_hero_assets_preserved: true,
   support_pages_ambient_full_backgrounds: true,
   visual_link_previews_per_page: 4,
+  isolated_link_preview_assets: true,
   open_graph_preview_images: true,
   twitter_large_image_previews: true,
   local_hash_links_verified: true,
