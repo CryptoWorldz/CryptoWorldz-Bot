@@ -19,21 +19,30 @@ jobs:
       HOSTINGER_USERNAME: u643166328
       TARGET_DOMAIN: cryptobotz.cryptoworldz.xyz
     steps:
-      - name: Inspect Hostinger website and NodeJS builds read-only
+      - uses: actions/checkout@v4
+
+      - name: Inspect Hostinger website NodeJS builds and requested build log read-only
         shell: bash
         run: |
           set -euo pipefail
           test -n "$HOSTINGER_API_TOKEN"
           echo "::add-mask::$HOSTINGER_API_TOKEN"
           base="https://developers.hostinger.com/api/hosting/v1"
+          request='deployments/cryptobotz-nodejs-runtime-audit.request'
+          build_uuid="$(sed -n 's/^build_uuid=//p' "$request" | tail -n1)"
           curl --fail --silent --show-error --location \
             -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
             "$base/websites" -o "$RUNNER_TEMP/websites.json"
           curl --fail --silent --show-error --location \
             -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
             "$base/accounts/$HOSTINGER_USERNAME/websites/$TARGET_DOMAIN/nodejs/builds" -o "$RUNNER_TEMP/builds.json"
+          if [ -n "$build_uuid" ]; then
+            curl --fail --silent --show-error --location \
+              -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+              "$base/accounts/$HOSTINGER_USERNAME/websites/$TARGET_DOMAIN/nodejs/builds/$build_uuid/logs" -o "$RUNNER_TEMP/build-log.json"
+          fi
           python3 - <<'PY'
-          import json, os
+          import json, os, re
           from pathlib import Path
           root=Path(os.environ['RUNNER_TEMP'])
           websites=json.loads((root/'websites.json').read_text())
@@ -43,11 +52,30 @@ jobs:
           for item in items:
               if isinstance(item,dict) and item.get('domain')==os.environ['TARGET_DOMAIN']:
                   print(json.dumps(item,indent=2))
-          print('=== NODEJS BUILDS ===')
+          print('=== RECENT NODEJS BUILDS ===')
           print(json.dumps(builds,indent=2))
+          log_path=root/'build-log.json'
+          if log_path.exists():
+              raw=log_path.read_text(errors='replace')
+              try:
+                  obj=json.loads(raw)
+                  raw=json.dumps(obj,indent=2,ensure_ascii=False)
+              except Exception:
+                  pass
+              patterns=[
+                  (r'sk-[A-Za-z0-9_-]{12,}','[REDACTED_OPENAI_KEY]'),
+                  (r'gh[pousr]_[A-Za-z0-9_]{12,}','[REDACTED_GITHUB_TOKEN]'),
+                  (r'\b\d{6,}:[A-Za-z0-9_-]{20,}\b','[REDACTED_BOT_TOKEN]'),
+                  (r'(?i)Bearer\s+[A-Za-z0-9._~+/=-]{12,}','Bearer [REDACTED]'),
+                  (r'(?i)((?:TOKEN|PASSWORD|SECRET|API_KEY|SERVICE_ROLE_KEY)\s*[=:]\s*)[^\s,;]+',r'\1[REDACTED]')
+              ]
+              for pat,repl in patterns: raw=re.sub(pat,repl,raw)
+              lines=raw.splitlines()
+              print('=== REQUESTED BUILD LOG (SANITIZED) ===')
+              print('\n'.join(lines[-400:]))
           PY
 
-      - name: Preserve runtime audit
+      - name: Preserve non-secret runtime audit
         if: always()
         uses: actions/upload-artifact@v4
         with:
