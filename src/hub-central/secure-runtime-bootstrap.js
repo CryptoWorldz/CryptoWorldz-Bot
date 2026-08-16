@@ -39,17 +39,19 @@ async function verifyHostingerAccess(token) {
   return websiteItems(payload).some((item) => String(item?.domain || "").toLowerCase() === TARGET_DOMAIN);
 }
 
-function verifyRuntimeRoot() {
-  const packagePath = path.join(process.cwd(), "package.json");
+function runtimeRoot() {
+  const root = path.resolve(__dirname, "..", "..");
+  const packagePath = path.join(root, "package.json");
   const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
   if (pkg.name !== "cryptoworldz-bot" || pkg.scripts?.start !== "node index.js") {
     throw new Error("unexpected_runtime_root");
   }
+  return root;
 }
 
 function mergeProtectedEnv(values) {
-  verifyRuntimeRoot();
-  const envPath = path.join(process.cwd(), ".env");
+  const root = runtimeRoot();
+  const envPath = path.join(root, ".env");
   const existing = fs.existsSync(envPath) ? fs.readFileSync(envPath, "utf8").split(/\r?\n/) : [];
   const keys = new Set(Object.keys(values));
   const kept = existing.filter((line) => {
@@ -66,6 +68,13 @@ function mergeProtectedEnv(values) {
   fs.renameSync(tempPath, envPath);
   try { fs.chmodSync(envPath, 0o600); } catch {}
   return envPath;
+}
+
+function safeBootstrapError(error) {
+  if (error?.message === "unexpected_runtime_root") return "unexpected_runtime_root";
+  if (error?.code === "EACCES" || error?.code === "EPERM" || error?.code === "EROFS") return "runtime_env_not_writable";
+  if (error?.code === "ENOENT") return "runtime_file_missing";
+  return "secure_runtime_bootstrap_failed";
 }
 
 function registerSecureRuntimeBootstrap(app) {
@@ -107,8 +116,9 @@ function registerSecureRuntimeBootstrap(app) {
           target: TARGET_DOMAIN
         });
       } catch (error) {
-        console.error("Secure runtime bootstrap failed", error?.message || error);
-        return res.status(500).json({ ok: false, error: "secure_runtime_bootstrap_failed" });
+        const safeError = safeBootstrapError(error);
+        console.error("Secure runtime bootstrap failed", safeError);
+        return res.status(500).json({ ok: false, error: safeError });
       }
     }
   );
