@@ -15,6 +15,17 @@ export const perfectPlan = Object.freeze({
     cryptoworldz: "Crypto headquarters only: blockchain Worldz, crypto education, Command Centre, LaunchPad, Based.bid and crypto-specific community systems.",
     commandCentre: "Protected CryptoBotz application. Static website builds must not overwrite its code, authentication, Supabase logic, owner controls or financial execution boundaries."
   }),
+  openAI: Object.freeze({
+    publicGuideName: "OneWorldz GPT",
+    publicGuideSurfaces: ["https://oneworldz.com", "https://donateworldz.com"],
+    publicApi: "https://cryptobotz.cryptoworldz.xyz/api/oneworldz-gpt/chat",
+    ownerOperations: "OneWorldz Hub Central remains the separate owner-authenticated OpenAI operations planner.",
+    apiMode: "OpenAI Responses API, server-side only",
+    secretRule: "OPENAI_API_KEY must exist only in protected server environment configuration; never in static site code, browser JavaScript, GitHub content or user-visible responses.",
+    donationRule: "OneWorldz GPT may explain and route the three approved support purposes, but it never requests card/bank details and never completes a payment inside chat.",
+    safetyRule: "Public prompts are moderated. The guide must not invent partnerships, donation status, tax deductibility, legal advice, medical advice, deployment status or financial execution.",
+    cryptoRule: "OneWorldz GPT keeps the human/global OneWorldz experience non-crypto by default and routes crypto-specific questions to CryptoWorldz."
+  }),
   oneWorldzPathways: Object.freeze([
     ["On the Ground", "https://purplediamondcrew.com", "People turning support into practical work: food, clothing, water, shelter, gardens and community help."],
     ["DonateWorldz", "https://donateworldz.com", "Three clearly separated support purposes with separate payment destinations and records."],
@@ -45,10 +56,14 @@ export const perfectPlan = Object.freeze({
     "Use approved production assets without distortion; no new image generation is required for this plan.",
     "Desktop and mobile routes must both render cleanly with square/rectangular media shells and self-closing navigation.",
     "Every destination must have reciprocal working links and one clear job.",
+    "OneWorldz GPT must be present on OneWorldz.com and DonateWorldz.com and call the protected server API only.",
+    "OneWorldz GPT must never expose OPENAI_API_KEY or collect card, bank, seed phrase, private key or password data in chat.",
+    "The three donation purposes remain separate even when OneWorldz GPT guides a visitor to them.",
     "Backup before production writes; verify after writes; roll back on failed proof.",
-    "Protected CryptoBotz remains untouched by the static release."
+    "Protected CryptoBotz remains untouched by the static release except for separately reviewed protected application changes."
   ])
 });
 
 if (perfectPlan.structure.ecosystemDestinations !== 19) throw new Error("Perfect Plan must remain 19 destinations");
 if (perfectPlan.structure.staticBuildTargets !== 18) throw new Error("Perfect Plan must remain 18 static targets + 1 protected app");
+if (perfectPlan.openAI.publicGuideSurfaces.length !== 2) throw new Error("OneWorldz GPT must remain integrated on OneWorldz and DonateWorldz");
