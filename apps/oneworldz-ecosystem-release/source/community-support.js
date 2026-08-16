@@ -5,6 +5,7 @@
   const resolved = document.querySelector("#community-support-resolved");
   if (!grid) return;
 
+  // Accuracy law: this renderer will not invent missing profiles, names or links.
   function safeText(value) { return String(value || "").trim(); }
   function categoryLabel(value) {
     return safeText(value).replaceAll("_", " ").replace(/\b\w/g, (m) => m.toUpperCase()) || "Community Support";
