@@ -26,6 +26,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
       - name: Prove total-deployment authority
         shell: bash
         run: |
