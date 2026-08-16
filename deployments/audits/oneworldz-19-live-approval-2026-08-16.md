@@ -1,40 +1,60 @@
-# OneWorldz 19-Destination Live Approval Audit
+# OneWorldz 19-Destination Approval Audit — Corrected Standard
 
 Audit date: 2026-08-16
 Standard: JayJayTeamDev × ChatGPT Approval Rating
-Pass threshold: 85/100
 
-## Fleet result
+## Correction
 
-- Destinations in locked plan: 19
-- Purpose-correct live approvals: 18
-- Not yet approved: 1
-- Full-fleet approval: NOT YET
+The first fleet audit was a technical live-response audit, not a sufficient visual-quality approval. It proved HTTPS/HTTP, page identity, responsive markup and placeholder detection, but it did not prove that each page actually looked acceptable on a real mobile viewport.
 
-| Destination | Rating | Result | Live proof |
-|---|---:|---|---|
-| OneWorldz | 100/100 | PASS | HTTPS 200, branded live page, mobile viewport, clean content |
-| CryptoWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| SolWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| EthWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| BaseWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| BNBWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| XRPWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| SuiWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| HyperWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| RobinWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| HodlerWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| HodlerGalaxy | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| Purple Diamond Crew | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| FoodWorldz | 0/100 current live gate | FAIL / PENDING | Public HTTPS currently returns TLSV1_ALERT_INTERNAL_ERROR while registrar/DNS propagation workflow is still running |
-| DonateWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| ImpactBased | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| Law.OneWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| Learn.OneWorldz | 100/100 | PASS | HTTPS 200, exact production title, mobile viewport, clean content |
-| CryptoBotz Command Centre | 100/100 protected-purpose PASS | PASS | Root HTTPS 200 JSON service health; /miniapp/ HTTPS 200 HTML, title `CryptoWorldz Command Centre`, mobile viewport present, CryptoWorldz + ZED markers present |
+JayJayTeamDev's mobile screenshots exposed that gap on OneWorldz.com. The earlier `100/100` visual interpretation for OneWorldz is therefore withdrawn and must not be used as evidence of visual approval.
 
-## Important interpretation
+From this point forward, **technical-live PASS and visual/UX PASS are separate gates**. A JayJayTeamDev × ChatGPT final approval requires both.
 
-The generic webpage audit initially scored CryptoBotz at 60/100 because the protected root intentionally returns JSON rather than a normal HTML webpage. A dedicated protected-service audit then verified both the root service and the actual `/miniapp/` interface, so CryptoBotz is purpose-correct and approved.
+## OneWorldz strict repair result
 
-FoodWorldz is the only current blocker. Its Spaceship API credentials, registrar ownership, nameserver switch, DNS record save, and registrar control-plane proof have already passed. The active workflow is still waiting for public nameserver/A-record propagation, after which HTTPS/SSL must pass before FoodWorldz receives final approval.
+OneWorldz.com was repaired after the screenshots showed:
+
+- duplicated/competing hero branding and poor mobile composition;
+- oversized research-loop typography;
+- stale internal `NEXT PASS` labels visible to the public;
+- incomplete destination activation/presentation;
+- insufficiently prominent humanitarian support routing.
+
+The repaired live version now has:
+
+- a contained hero image plus separate readable gateway copy;
+- compact mobile header and typography;
+- a seven-step research/verification loop rendered as controlled chips;
+- no public `NEXT PASS` placeholders;
+- 17 real connected destination cards;
+- a dedicated `Action Spreads Smiles • Reagan & Children` action linking to `https://donateworldz.com/reagan-children/`;
+- the current ImpactBased route at `https://impactbased.cryptoworldz.xyz/`;
+- responsive desktop and mobile layouts.
+
+### Strict live proof
+
+GitHub Actions run: `31919518086`
+
+The final guarded Hostinger deployment completed successfully. The workflow proved the exact repaired public assets, then rendered the **live** page at 390×844 mobile and 1440×1100 desktop viewports. The strict mobile result recorded:
+
+- viewport width: 390;
+- document scroll width: 390 — no horizontal overflow;
+- `NEXT PASS`: absent;
+- new `One Connected Gateway` hero: present;
+- Action Spreads Smiles route: present;
+- connected Worldz cards: 17;
+- research-loop items: 7;
+- hero image: loaded;
+- mobile header height: 76px;
+- hero H1 size: 32.76px.
+
+Both mobile and desktop screenshot proofs passed. No rollback was executed.
+
+**OneWorldz.com current strict visual/UX result: PASS.**
+
+## Fleet status after correction
+
+The earlier fleet-level `100/100` ratings remain valid only as **technical-live checks** where applicable. They are **not** blanket visual/UX approvals.
+
+A fresh strict visual review must be used before declaring the entire 19-destination ecosystem fully approved under the JayJayTeamDev × ChatGPT standard.
