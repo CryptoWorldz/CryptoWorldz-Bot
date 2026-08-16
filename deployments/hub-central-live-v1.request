@@ -7,4 +7,4 @@ required_live_proof=hub-status,gpt-status,live-openai-response,community-support
 secret_rule=OPENAI_API_KEY server-only from existing protected server env or GitHub production environment secret
 restart_path=nodejs/tmp/restart.txt
 rollback=restore-index,module,and-env-on-proof-failure
-retry=2026-08-16-correct-node-restart-path
+retry=2026-08-16-existing-restart-directory-safe
