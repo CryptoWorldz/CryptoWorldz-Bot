@@ -1,0 +1,140 @@
+.oneworldz-blue-white {
+  --ow-blue: #061328;
+  --ow-blue-deep: #020817;
+  --ow-white: #ffffff;
+  --ow-sky: #65b9ff;
+  background: var(--ow-blue-deep);
+  color: var(--ow-white);
+}
+
+.oneworldz-blue-white .site-header {
+  background: rgba(2, 8, 23, .88);
+  border-bottom-color: rgba(101, 185, 255, .24);
+}
+
+.oneworldz-blue-white .hero {
+  min-height: min(900px, calc(100svh - 84px));
+  background: var(--ow-blue-deep);
+}
+
+.oneworldz-blue-white .hero-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--ow-blue-deep);
+}
+
+.oneworldz-blue-white .hero-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.oneworldz-blue-white .hero::after {
+  background:
+    linear-gradient(90deg, rgba(2, 8, 23, .96) 0%, rgba(2, 8, 23, .80) 38%, rgba(2, 8, 23, .20) 72%),
+    linear-gradient(0deg, rgba(2, 8, 23, .90), transparent 45%);
+}
+
+.oneworldz-blue-white .section-dark {
+  background: linear-gradient(180deg, rgba(40, 122, 210, .08), rgba(255, 255, 255, .025));
+  border-block-color: rgba(101, 185, 255, .12);
+}
+
+.oneworldz-blue-white .profile-card.destination-preview-card {
+  grid-template-columns: clamp(118px, 15vw, 174px) 1fr;
+  background: linear-gradient(135deg, rgba(12, 50, 92, .76), rgba(3, 15, 35, .96));
+}
+
+.destination-preview {
+  display: block;
+  min-height: 100%;
+  overflow: hidden;
+  background: #031126;
+}
+
+.destination-preview img {
+  width: 100%;
+  height: 100%;
+  min-height: 118px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.community-support-page .community-support-hero {
+  min-height: min(760px, calc(100svh - 84px));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  isolation: isolate;
+  background-image:
+    linear-gradient(0deg, rgba(2, 10, 25, .96) 0%, rgba(3, 19, 43, .78) 48%, rgba(4, 24, 52, .34) 100%),
+    url('/assets/previews/community-impact-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.community-support-page .community-support-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(101, 185, 255, .14), transparent 42rem);
+  pointer-events: none;
+}
+
+.community-support-page .community-support-hero::after {
+  display: none;
+}
+
+.community-support-page .community-support-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 960px) {
+  .oneworldz-blue-white .hero::after {
+    background: linear-gradient(0deg, rgba(2, 8, 23, .98) 0%, rgba(2, 8, 23, .80) 48%, rgba(2, 8, 23, .22) 100%);
+  }
+
+  .oneworldz-blue-white .hero-art img {
+    object-position: center top;
+  }
+}
+
+@media (max-width: 720px) {
+  .oneworldz-blue-white .hero {
+    min-height: calc(100svh - 76px);
+  }
+
+  .oneworldz-blue-white .hero-art img {
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .oneworldz-blue-white .profile-card.destination-preview-card {
+    grid-template-columns: 104px minmax(0, 1fr);
+    min-height: 112px;
+  }
+
+  .destination-preview img {
+    min-height: 112px;
+  }
+
+  .community-support-page .community-support-hero {
+    min-height: calc(100svh - 76px);
+    background-position: center center;
+  }
+}
+
+@media (max-width: 390px) {
+  .oneworldz-blue-white .profile-card.destination-preview-card {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+}
