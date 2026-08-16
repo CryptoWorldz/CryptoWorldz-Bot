@@ -22,13 +22,11 @@ export const excludedRootDomains = Object.freeze([
   "solworld.fun"
 ]);
 
+// The CryptoBotz Node application is the one protected non-static destination.
+// OneWorldz.com is deliberately rebuilt as the human/global gateway under the
+// latest approved master-plan direction; it is no longer treated as an
+// untouchable legacy static package.
 export const protectedDestinations = Object.freeze([
-  {
-    key: "oneworldz",
-    domain: "oneworldz.com",
-    role: "Global gateway, mission, people, impact and ecosystem directory",
-    protected: true
-  },
   {
     key: "cryptobotz",
     domain: "cryptobotz.cryptoworldz.xyz",
@@ -36,6 +34,14 @@ export const protectedDestinations = Object.freeze([
     protected: true
   }
 ]);
+
+export const oneWorldzTarget = Object.freeze({
+  key: "oneworldz",
+  domain: "oneworldz.com",
+  environment: "oneworldz-production",
+  guard: "ONEWORLDZ.COM",
+  root: "/"
+});
 
 export const expansionTargets = Object.freeze([
   {
@@ -62,6 +68,7 @@ export const expansionTargets = Object.freeze([
 ]);
 
 export const deploymentTargets19 = Object.freeze([
+  oneWorldzTarget,
   ...existingTargets,
   ...expansionTargets
 ]);
@@ -82,4 +89,4 @@ export const ecosystemDestinations = Object.freeze([
 
 if (ownedRootDomains.length !== 15) throw new Error(`Expected 15 active owned root domains, got ${ownedRootDomains.length}`);
 if (ecosystemDestinations.length !== 19) throw new Error(`Expected 19 ecosystem destinations, got ${ecosystemDestinations.length}`);
-if (deploymentTargets19.length !== 17) throw new Error(`Expected 17 static build targets, got ${deploymentTargets19.length}`);
+if (deploymentTargets19.length !== 18) throw new Error(`Expected 18 static build targets, got ${deploymentTargets19.length}`);
