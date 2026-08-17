@@ -9,7 +9,8 @@ import { fileURLToPath } from "node:url";
 const run = promisify(execFile);
 const appRoot = path.dirname(fileURLToPath(import.meta.url));
 const sourcePartsRoot = path.join(appRoot, "source", "approved-visuals");
-const supportAssetsRoot = path.join(appRoot, "source", "assets", "support");
+const productionAssetsRoot = path.join(appRoot, "source", "assets");
+const supportAssetsRoot = path.join(productionAssetsRoot, "support");
 const distRoot = path.join(appRoot, "dist", "ecosystem");
 
 const approved = Object.freeze([
@@ -39,9 +40,10 @@ const approved = Object.freeze([
   {
     key: "hodlergalaxy",
     domain: "hodlergalaxy.xyz",
-    sourceMode: "approved-avif-master",
-    expectedParts: 4,
-    alt: "Approved HodlerGalaxy production artwork"
+    sourceMode: "approved-production-pair",
+    desktopSource: "desktop/oneworldz/oneworldz-master.png",
+    mobileSource: "mobile/blockchain-portal.webp",
+    alt: "HodlerGalaxy OneWorldz ecosystem exploration portal"
   }
 ]);
 
@@ -303,6 +305,24 @@ for (const spec of approved) {
       mobile_source_bytes: mobileSource.sourceBytes,
       desktop_source_sha256: desktopSource.sourceSha256,
       mobile_source_sha256: mobileSource.sourceSha256
+    };
+  } else if (spec.sourceMode === "approved-production-pair") {
+    const desktopSource = path.join(productionAssetsRoot, spec.desktopSource);
+    const mobileSource = path.join(productionAssetsRoot, spec.mobileSource);
+    const [desktopSourceBytes, mobileSourceBytes] = await Promise.all([
+      readFile(desktopSource),
+      readFile(mobileSource)
+    ]);
+    desktopBytes = await renderProductionVariant(renderer, desktopSource, desktopFile, 1920, 90);
+    mobileBytes = await renderProductionVariant(renderer, mobileSource, mobileFile, 960, 86);
+    sourceRecord = {
+      source_mode: spec.sourceMode,
+      desktop_source_asset: spec.desktopSource,
+      mobile_source_asset: spec.mobileSource,
+      desktop_source_bytes: desktopSourceBytes.byteLength,
+      mobile_source_bytes: mobileSourceBytes.byteLength,
+      desktop_source_sha256: sha256(desktopSourceBytes),
+      mobile_source_sha256: sha256(mobileSourceBytes)
     };
   } else {
     throw new Error(`${spec.key}: unsupported approved source mode ${spec.sourceMode}`);
