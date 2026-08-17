@@ -48,6 +48,27 @@ async function discoverCandidateRoutes(root) {
   return [...new Set(routes)].sort();
 }
 
+async function discoverSitemapRoutes(baseUrl) {
+  try {
+    const base = new URL(baseUrl);
+    const sitemap = new URL("/sitemap.xml", base);
+    sitemap.searchParams.set("visual_proof", String(Date.now()));
+    const response = await fetch(sitemap, { headers: { "cache-control": "no-cache, no-store" } });
+    if (!response.ok) return [];
+    const xml = await response.text();
+    const paths = [];
+    for (const match of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+      try {
+        const published = new URL(match[1].trim());
+        paths.push(published.pathname.endsWith("/") || path.posix.extname(published.pathname) ? published.pathname : `${published.pathname}/`);
+      } catch {}
+    }
+    return [...new Set(paths.length ? paths : ["/"])].sort();
+  } catch {
+    return [];
+  }
+}
+
 let server;
 let targetUrl = liveUrl;
 let candidateRoutes = [];
@@ -82,6 +103,9 @@ if (rootArg) {
   targetUrl = `http://127.0.0.1:${address.port}/`;
 }
 
+const sitemapRoutes = await discoverSitemapRoutes(targetUrl);
+const expectedRoutes = rootArg ? candidateRoutes : (sitemapRoutes.length ? sitemapRoutes : ["/"]);
+
 const browser = await chromium.launch({ headless: true });
 const viewports = [
   { key: "desktop", width: 1440, height: 1000, isMobile: false },
@@ -97,6 +121,8 @@ const report = {
   requiredImage,
   requiredImageTokens,
   candidateRoutes,
+  sitemapRoutes,
+  expectedRoutes,
   generatedAt: new Date().toISOString(),
   viewports: {},
   routeAudit: {},
@@ -312,9 +338,7 @@ for (const vp of viewports) {
     } catch {}
   };
 
-  if (rootArg) {
-    for (const route of candidateRoutes) if (route !== "/") enqueue(new URL(route, base).href);
-  }
+  for (const route of expectedRoutes) if (route !== "/") enqueue(new URL(route, base).href);
   for (const href of rootResult.dom.hrefs) enqueue(href);
 
   const routeResults = {};
@@ -363,16 +387,14 @@ report.totalHtmlPagesAudited = {
   desktop: 1 + report.localRoutesAudited.desktop,
   mobile: 1 + report.localRoutesAudited.mobile
 };
-if (rootArg) {
-  const expected = candidateRoutes.length;
-  if (report.totalHtmlPagesAudited.desktop !== expected) {
-    report.pass = false;
-    report.failures.push(`desktop: expected ${expected} candidate HTML pages audited, got ${report.totalHtmlPagesAudited.desktop}`);
-  }
-  if (report.totalHtmlPagesAudited.mobile !== expected) {
-    report.pass = false;
-    report.failures.push(`mobile: expected ${expected} candidate HTML pages audited, got ${report.totalHtmlPagesAudited.mobile}`);
-  }
+const expectedCount = expectedRoutes.length;
+if (report.totalHtmlPagesAudited.desktop < expectedCount) {
+  report.pass = false;
+  report.failures.push(`desktop: expected at least ${expectedCount} HTML pages audited, got ${report.totalHtmlPagesAudited.desktop}`);
+}
+if (report.totalHtmlPagesAudited.mobile < expectedCount) {
+  report.pass = false;
+  report.failures.push(`mobile: expected at least ${expectedCount} HTML pages audited, got ${report.totalHtmlPagesAudited.mobile}`);
 }
 await writeFile(path.join(outDir, "visual-report.json"), JSON.stringify(report, null, 2));
 console.log(JSON.stringify({ name, mode: report.mode, pass: report.pass, totalHtmlPagesAudited: report.totalHtmlPagesAudited, failures: report.failures }, null, 2));
