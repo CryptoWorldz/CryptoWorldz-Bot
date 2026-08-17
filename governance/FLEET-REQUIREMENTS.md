@@ -66,9 +66,11 @@ Required: dedicated HodlerGalaxy identity; clear discovery hero; directory cards
 Role: legacy-token history + people-on-the-ground action/impact.
 Required: distinct PDC identity/theme; Hope Chest/fireplace treatment where planned; real-world action; exactly 10 verified legacy-token records before production token claims; 2×5 desktop token grid; two-column mobile / one-column narrow; investment and humanitarian language clearly separated; connected OneWorldz route; Acknowledgements.
 
-## 14 — impactbased.cryptoworldz.xyz
+## 14 — impactbased.oneworldz.com
 Role: ImpactBased purpose-driven launch/board context.
 Required: approved ImpactBased identity/profile/landscape imagery; transparent impact/funding context; Based.bid relationship described only to verified scope; no false launch/fee/external-authority claims; route back to CryptoWorldz/OneWorldz; support streams distinct.
+
+Public URL lock: `https://impactbased.oneworldz.com/`. The physical Hostinger transport directory is a separate authenticated transport fact and must never be inferred from the public hostname. Any older `impactbased.cryptoworldz.xyz` reference is historical only and is not an approved public route.
 
 ## 15 — law.oneworldz.com
 Locked role: Law.OneWorldz / Robin Hood Law public-information pathway.
