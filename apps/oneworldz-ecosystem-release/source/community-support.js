@@ -40,6 +40,10 @@
   }
 
   async function refreshFromLiveRegistry() {
+    // Candidate visual proof is intentionally served from localhost. The page already contains
+    // all 35 verified links, so do not create a meaningless cross-origin CORS error while proving
+    // the immutable static candidate. The real API enhancement is tested only on the real origin.
+    if (location.hostname === "127.0.0.1" || location.hostname === "localhost") return;
     try {
       const response = await fetch(API, { cache: "no-store", headers: { accept: "application/json" } });
       const payload = await response.json().catch(() => ({}));
