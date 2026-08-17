@@ -48,7 +48,7 @@ const visionFooter = `<footer class="site-footer vision-footer"><div><strong>Cre
 function enforceSupportEmblemRendering(html) {
   return html.replace(
     /<picture class="([^"]*support-emblem[^"]*)">\s*<source media="\(max-width:\s*720px\)" srcset="([^"]*\/support\/mobile\/([^"]+)-mobile\.webp)">\s*<img src="([^"]*\/support\/desktop\/\3-desktop\.webp)"/g,
-    '<picture class="$1"><source media="(min-width: 721px)" srcset="$2"><source media="(max-width: 720px)" srcset="$2"><img src="$4"'
+    '<picture class="$1"><source media="(min-width: 0px)" srcset="$2"><img src="$4"'
   );
 }
 
@@ -206,7 +206,7 @@ for (const entry of packageEntries) {
     const file = path.join(packageDir, relative);
     const html = await readFile(file, "utf8");
     const next = enforceVisionFooter(html, `${entry.name}/${relative}`);
-    if (next.includes('media="(min-width: 721px)"') && next.includes('support-emblem')) supportEmblemFallbackCount += 1;
+    if (next.includes('media="(min-width: 0px)"') && next.includes('support-emblem')) supportEmblemFallbackCount += 1;
     await writeFile(file, next, "utf8");
     footerPageCount += 1;
   }
@@ -215,4 +215,4 @@ for (const entry of packageEntries) {
 
 console.log(`CryptoWorldz finalised: blue-purple visual treatment, ${perfectPlan.officialDirectory.length} official links, ${perfectPlan.projectRegistry.length} labelled projects and protected AUTO boundary.`);
 console.log(`Permanent OneWorldz vision footer enforced on ${footerPageCount} static HTML pages across all 18 packages.`);
-console.log(`Approved support-emblem desktop rendering source enforced on ${supportEmblemFallbackCount} support pages.`);
+console.log(`Approved support-emblem responsive rendering source enforced on ${supportEmblemFallbackCount} support pages.`);
