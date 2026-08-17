@@ -317,13 +317,7 @@ jobs:
               set -euo pipefail
               test -s "$release_root/index.html"
               test -s "$release_root/release-manifest.json"
-              node - "$release_root/release-manifest.json" "$guard" <<'NODE'
-              const fs=require('fs');
-              const [manifestPath,guard]=process.argv.slice(2);
-              const m=JSON.parse(fs.readFileSync(manifestPath,'utf8'));
-              if(m.deploy_guard!==guard||m.ftp_root!=='/'||m.homepage!=='/index.html'||m.assets_root!=='/assets/') throw new Error('release destination contract mismatch');
-              if((m.protected_services_modified||[]).length) throw new Error('protected-service mutation declared');
-              NODE
+              node -e 'const fs=require("fs"); const [manifestPath,guard]=process.argv.slice(1); const m=JSON.parse(fs.readFileSync(manifestPath,"utf8")); if(m.deploy_guard!==guard||m.ftp_root!=="/"||m.homepage!=="/index.html"||m.assets_root!=="/assets/") throw new Error("release destination contract mismatch"); if((m.protected_services_modified||[]).length) throw new Error("protected-service mutation declared");' "$release_root/release-manifest.json" "$guard"
               (cd "$release_root" && find . -type f -printf '%P\n' | sort) > "$files"
               test -s "$files"
               grep -Fxq 'index.html' "$files"
