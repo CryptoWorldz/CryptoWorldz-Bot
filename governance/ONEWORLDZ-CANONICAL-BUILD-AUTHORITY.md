@@ -10,7 +10,7 @@ Deployment gate: `governance/JAYJAY-CHATGPT-DEPLOYMENT-GATE.md`
 1. Latest direct JayJayTeamDev instruction.
 2. Authenticated account / repository / deployment evidence.
 3. `OneWorldz_Locked_Master_Build_Specification_APPROVED.docx` (13 August 2026) and its approved Master Use Library mapping.
-4. Approved Master Use Library / 44-file hashed manifest and architecture references.
+4. Current approved library manifest and canonical repository control files where not superseded by later direct instruction.
 5. Earlier blueprint/register only where not superseded.
 6. Prior assistant statements are never proof by themselves.
 
@@ -26,15 +26,17 @@ No domain proceeds merely because it returns HTTP 200. Technical-live and visual
 
 ## Image authority
 
-- The Main/Master Use Library is the identity and art-reference authority.
-- Latest JayJayTeamDev direction controls image production: use the approved library as the reference and create purpose-built high-resolution website images for the exact desktop/mobile placement when required; do not casually use raw library/reference screenshots as production art.
+- The approved Master Use Library is the identity and art-reference authority.
+- Latest JayJayTeamDev direction controls image production: use approved references to create purpose-built high-resolution website images for exact desktop/mobile placement when required; do not casually use raw library/reference screenshots as production art.
 - Protected logos, emblems, named characters and identity designs must not be mutated, distorted or substituted.
 - Every Worldz entry must carry its own unique approved profile identity/image.
 - Top-left site identity uses that domain's unique profile/logo treatment and returns to Home.
 - No stretching, blur, random replacement, duplicate identity, arch-window treatment or overlapping artwork/text.
 - Desktop: full/background or image-led layouts where planned, clear header, natural image proportions.
 - Mobile: banner/main image first where planned; long rectangular image-left or stacked cards; profile image visibly included; full-width buttons where appropriate; no collision or horizontal overflow.
-- Active production website media enters only through `apps/oneworldz-ecosystem-release/source/` and its canonical build rules. `archive/` is evidence/reference only and must never become a fallback production image source.
+- All deployable static-site image files live only under `apps/oneworldz-ecosystem-release/source/assets/`.
+- `source/approved-visuals/` contains only encoded build inputs for three already-approved AVIF masters and is not a second reference/image-selection library.
+- No root media folder, archive image bundle, restoration library or alternate static image route is permitted.
 
 ## OneWorldz.com — human/global gateway
 
@@ -81,13 +83,16 @@ Required OneWorldz architecture:
 2. **Community Charity Support / Community Impact**
    - Separate funding stream and separate Stripe-backed destination.
    - Dedicated OneWorldz page containing all 35 saved Facebook support profiles/pages.
-   - Data source: Supabase `public.oneworldz_support_profiles` in display order 1–35 where the protected live API surface is used.
+   - Canonical public directory route: `https://oneworldz.com/community-support/`.
+   - Dedicated support route: `https://donateworldz.com/community-impact/`.
+   - Data source: the verified 35-destination registry; Supabase `public.oneworldz_support_profiles` may remain the protected live source where that API surface is used.
    - Each card requires resolved public display name, available preview/profile image where permitted, short safe label and its original verified Facebook link.
    - Final production MUST NOT use `Facebook Support Profile 01` ... `35` as public display names.
    - Missing metadata must block final approval rather than be invented.
 
 3. **Support JayJayTeamDev**
    - Separate voluntary builder/mission support page.
+   - Canonical public route: `https://donateworldz.com/jayjayteamdev/`.
    - PayPal preferred; Stripe permitted.
    - Must not be represented as a tax-deductible charitable donation unless independently verified.
 
@@ -146,9 +151,11 @@ Known chain identity set includes SolWorldz, EthWorldz, BaseWorldz, BNBWorldz, X
 
 ## Fleet destinations tracked by current project
 
-OneWorldz.com; CryptoWorldz.xyz; SolWorldz.xyz; EthWorldz.xyz; BaseWorldz.xyz; BNBWorldz.xyz; XRPWorldz.xyz; SuiWorldz.xyz; HyperWorldz.xyz; RobinWorldz.xyz; HodlerWorldz.xyz; HodlerGalaxy.xyz; PurpleDiamondCrew.com; impactbased.cryptoworldz.xyz; law.oneworldz.com; learn.oneworldz.com; FoodWorldz.com; DonateWorldz.com; cryptobotz.cryptoworldz.xyz.
+OneWorldz.com; CryptoWorldz.xyz; SolWorldz.xyz; EthWorldz.xyz; BaseWorldz.xyz; BNBWorldz.xyz; XRPWorldz.xyz; SuiWorldz.xyz; HyperWorldz.xyz; RobinWorldz.xyz; HodlerWorldz.xyz; HodlerGalaxy.xyz; PurpleDiamondCrew.com; impactbased.oneworldz.com; law.oneworldz.com; learn.oneworldz.com; FoodWorldz.com; DonateWorldz.com; cryptobotz.cryptoworldz.xyz.
 
 `solworld.fun` is not an active static deployment target unless JayJayTeamDev later changes that instruction.
+
+The current owner-designated public ImpactBased address is `https://impactbased.oneworldz.com/`. Any older `impactbased.cryptoworldz.xyz` topology reference is superseded as a public route and must not be used as deployment proof. The physical Hostinger transport directory remains a separate fact and must be re-authenticated rather than guessed.
 
 All 18 static-target plans are represented by this authority, `governance/FLEET-REQUIREMENTS.md` and the canonical generator/source. No old “individual plan recovery” instruction may create a new build or deployment path.
 
@@ -167,18 +174,21 @@ A site/page cannot receive JayJayTeamDev × ChatGPT approval if ANY applies:
 - the 35-profile page is missing, incomplete, duplicated, out of order, uses invented links, or exposes generic Profile 01–35 names as final labels;
 - Reagan page uses unrelated imagery;
 - protected bot/admin/financial boundary is crossed;
-- a destination/ownership/live claim lacks authenticated proof.
+- a destination/ownership/live claim lacks authenticated proof;
+- a canonical public URL disagrees with active topology or live proof.
 
 ## Hostinger destination law
 
-- The existing shared Hostinger FTP credential set used by the successful authenticated 18-root proof is the sole static-fleet transport credential boundary for the current rail.
+- The existing shared Hostinger FTP credential set used by the authenticated read-only proof is the sole static-fleet transport credential boundary for the current rail.
 - Website/package root remains `/`; homepage remains `/index.html`; assets remain `/assets/`.
-- The exact 18 physical Hostinger transport directories authenticated by the proof are stored once as `hostingerTransportDir` values in `apps/oneworldz-ecosystem-release/production-targets.mjs`.
+- Physical Hostinger transport directories are stored as `hostingerTransportDir` values in `apps/oneworldz-ecosystem-release/production-targets.mjs`.
+- A physical Hostinger folder does not define the public URL. Public domain and physical transport path are separate fields and both must be proven.
 - Production execution must read the exact stored transport directory for the target. It must not derive a directory from a domain name, append another `public_html`, probe siblings, fall back to `/`, or select another old environment after a mismatch.
-- The current authenticated Hostinger proof is run `31925927520`, job `95113450775`, against topology tree SHA `5e4bffb4a40a6968d432ca73e619feb15705859c`; that topology SHA still matches current `main`.
+- Historical Hostinger proof run `31925927520`, job `95113450775`, remains evidence of the shared-account transport topology at that time, not permission to preserve a superseded public alias.
 - OneWorldz exact-root transport was subsequently reconfirmed by run `31967183758`, job `95214059999`.
+- Before production write, current public-domain mapping and transport access must both match the current canonical target contract.
 - Any current re-authentication mismatch is a hard failure. Do not attempt a second route.
 
 ## Cleanup rule
 
-Keep one canonical active build path for the static fleet. Temporary repair workflows, one-off request files, old GitHub Environments and superseded deployment helpers are not production authority. If GitHub Actions is used, `.github/workflows/main.yml` is the only permitted static-fleet execution file. Legacy/reference material may remain only when clearly quarantined from production manifests. Unknown files are dependency-checked before destructive deletion.
+Keep one canonical active build path for the static fleet. Temporary repair workflows, one-off request files, old GitHub Environments, archive folders and superseded deployment helpers are not production authority and are not retained as active source on `main`. Git history is sufficient for historical recovery. If GitHub Actions is used, `.github/workflows/main.yml` is the only permitted static-fleet execution file. Unknown files are dependency-checked before destructive deletion.
