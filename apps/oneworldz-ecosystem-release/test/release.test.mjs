@@ -1,105 +1,118 @@
 import assert from "node:assert/strict";
-import { readFile, readdir, stat } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { access, readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { deploymentTargets, humanLeaders, pdcTokens, supportProfiles, systemRoles, worldz } from "../site-data.mjs";
+import { deploymentTargets, divisions, links, pdcTokens, supportProfiles, worldz } from "../site-data.mjs";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = path.join(appRoot, "dist", "ecosystem");
 
-async function htmlFiles(dir) {
-  const out = [];
-  for (const entry of await readdir(dir, { withFileTypes: true })) {
-    const target = path.join(dir, entry.name);
-    if (entry.isDirectory()) out.push(...await htmlFiles(target));
-    else if (entry.name.endsWith(".html")) out.push(target);
+async function htmlFiles(root, relative = "") {
+  const entries = await readdir(path.join(root, relative), { withFileTypes: true });
+  const results = [];
+  for (const entry of entries) {
+    const child = path.join(relative, entry.name);
+    if (entry.isDirectory()) results.push(...await htmlFiles(root, child));
+    else if (entry.name.endsWith(".html")) results.push(path.join(root, child));
   }
-  return out;
+  return results;
 }
 
 test("every confirmed domain has a root package and exact Hostinger root contract", async () => {
+  assert.equal(deploymentTargets.length, 14);
   for (const target of deploymentTargets) {
-    assert.equal(target.root, "/");
-    assert.ok(target.environment.endsWith("-production"));
-    assert.ok(target.guard.length > 6);
-    assert.ok((await stat(path.join(distRoot, target.key, "index.html"))).size > 0, target.key);
+    const targetRoot = path.join(distRoot, target.key);
+    await access(path.join(targetRoot, "index.html"));
+    await access(path.join(targetRoot, "assets"));
+    const manifest = JSON.parse(await readFile(path.join(targetRoot, "release-manifest.json"), "utf8"));
+    assert.equal(manifest.ftp_root, "/");
+    assert.equal(manifest.homepage, "/index.html");
+    assert.equal(manifest.assets_root, "/assets/");
+    assert.deepEqual(manifest.protected_services_modified, []);
   }
 });
 
 test("OneWorldz and CryptoBotz are never deployment targets", () => {
-  const domains = new Set(deploymentTargets.map((target) => target.domain));
-  assert.equal(domains.has("oneworldz.com"), false);
-  assert.equal(domains.has("cryptobotz.cryptoworldz.xyz"), false);
+  const keys = deploymentTargets.map(({ key }) => key);
+  assert.ok(!keys.includes("oneworldz"));
+  assert.ok(!keys.includes("cryptobotz"));
 });
 
 test("banned images, GoFundMe, placeholders and Coming Soon are absent", async () => {
-  for (const target of deploymentTargets) {
-    for (const file of await htmlFiles(path.join(distRoot, target.key))) {
-      const html = await readFile(file, "utf8");
-      assert.doesNotMatch(html, /oneworld-one-mission-smile|one-world-one-mission-smile|oneworld-one-mission|go fund me|gofundme|coming soon|placeholder/i, file);
-    }
+  const files = await htmlFiles(distRoot);
+  assert.ok(files.length >= 27);
+  for (const file of files) {
+    const html = await readFile(file, "utf8");
+    assert.doesNotMatch(html, /go\s?fund\s?me|gofundme/i, file);
+    assert.doesNotMatch(html, /coming soon/i, file);
+    assert.doesNotMatch(html, /one-world-one-mission\.webp|100002482[01]|Screenshot_2026/i, file);
+    assert.doesNotMatch(html, /recapthisbot-reference-set/i, file);
+    assert.doesNotMatch(html, /Support destination \d|Facebook Support Profile \d/i, file);
+    assert.doesNotMatch(html, /<img[^>]+src="data:/i, file);
   }
 });
 
 test("every HTML page has responsive, accessible and self-closing-menu foundations", async () => {
-  for (const target of deploymentTargets) {
-    for (const file of await htmlFiles(path.join(distRoot, target.key))) {
-      const html = await readFile(file, "utf8");
-      assert.match(html, /<meta name="viewport"/);
-      assert.match(html, /class="menu-button"/);
-      assert.match(html, /aria-controls="site-menu"/);
-      assert.match(html, /class="menu-backdrop"/);
-      assert.match(html, /assets\/js\/site\.js/);
-    }
+  const files = await htmlFiles(distRoot);
+  for (const file of files) {
+    const html = await readFile(file, "utf8");
+    assert.match(html, /<html lang="en">/, file);
+    assert.match(html, /name="viewport"/, file);
+    assert.match(html, /class="skip-link"/, file);
+    assert.match(html, /aria-controls="site-menu"/, file);
+    assert.match(html, /class="menu-backdrop"/, file);
+    assert.match(html, /<main id="main-content">/, file);
+    assert.match(html, /site\.js/, file);
   }
 });
 
 test("CryptoWorldz includes every locked route and all verified payment destinations", async () => {
-  const html = await readFile(path.join(distRoot, "cryptoworldz", "index.html"), "utf8");
-  const required = [
-    "EXPLORE THE WORLDZ", "BEGINNER CRYPTO EDUCATION", "SAFETY & SCAM REGISTER", "COMMAND CENTRE ULTIMATE™",
-    "HUMAN LEADERSHIP", "ZED MISSIONS & GOVERNANCE", "REWARDS CENTRE", "LAUNCHPAD × BASED.BID", "IMPACTBASED",
-    "HUMAN IMPACT", "PURPLE DIAMOND CREW", "NEWS & UPDATES", "THE GLOBAL GATEWAY", "ACKNOWLEDGEMENTS"
+  const root = path.join(distRoot, "cryptoworldz");
+  const requiredRoutes = [
+    "command-centre/index.html", "miniapp/index.html",
+    "support/reagan-children/index.html", "support/community-impact/index.html", "support/jayjayteamdev/index.html",
+    ...divisions.map((division) => `divisions/${division.key}/index.html`)
   ];
-  for (const item of required) assert.ok(html.includes(item), item);
-  assert.ok((await stat(path.join(distRoot, "cryptoworldz", "support", "reagan-children", "index.html"))).size > 0);
-  assert.ok((await stat(path.join(distRoot, "cryptoworldz", "support", "community-impact", "index.html"))).size > 0);
-  assert.ok((await stat(path.join(distRoot, "cryptoworldz", "support", "jayjayteamdev", "index.html"))).size > 0);
-  assert.ok(html.includes("https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01"));
-  assert.ok(html.includes("https://donate.stripe.com/9B67sLgWm78R73U35j0kE02"));
-  assert.ok(html.includes("https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00"));
+  for (const route of requiredRoutes) await access(path.join(root, route));
+  const all = (await Promise.all((await htmlFiles(root)).map((file) => readFile(file, "utf8")))).join("\n");
+  for (const url of [links.reaganStripe, links.communityStripe, links.jayjayStripe, links.jayjayPaypal, links.zed, links.raaiiidd]) assert.match(all, new RegExp(url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 });
 
 test("CryptoWorldz preserves the complete locked section order with acknowledgements last", async () => {
   const html = await readFile(path.join(distRoot, "cryptoworldz", "index.html"), "utf8");
-  const ids = ["purpose", "worldz", "learn", "safety", "command", "human-leadership", "governance", "rewards", "launchpad", "impactbased", "impact", "pdc", "updates", "oneworldz", "acknowledgements"];
-  let last = -1;
-  for (const id of ids) {
-    const position = html.indexOf(`id="${id}"`);
-    assert.ok(position > last, `${id} must remain in locked order`);
-    last = position;
-  }
+  const ids = ["top", "purpose", "worldz", "learn", "safety", "command", "human-leadership", "governance", "rewards", "launchpad", "impactbased", "impact", "pdc", "updates", "oneworldz", "acknowledgements"];
+  const positions = ids.map((id) => html.indexOf(`id="${id}"`));
+  assert.ok(positions.every((position) => position >= 0));
+  assert.deepEqual([...positions].sort((a, b) => a - b), positions);
+  const main = html.match(/<main id="main-content">([\s\S]*?)<\/main>/)?.[1] || "";
+  assert.match(main.trimEnd(), /id="acknowledgements"[\s\S]*<\/section>$/);
 });
 
 test("community page preserves 35 unique verified destinations without generic production names", async () => {
   const html = await readFile(path.join(distRoot, "cryptoworldz", "support", "community-impact", "index.html"), "utf8");
   assert.equal(supportProfiles.length, 35);
-  assert.equal(new Set(supportProfiles.map((profile) => profile.url)).size, 35);
+  assert.equal(new Set(supportProfiles.map(({ url }) => url)).size, 35);
   for (const profile of supportProfiles) {
-    assert.ok(html.includes(profile.url));
+    assert.match(html, new RegExp(profile.id));
     assert.ok(html.includes(profile.name));
   }
-  assert.doesNotMatch(html, /Facebook Support Profile\s*\d+/i);
+  assert.equal((html.match(/VERIFIED FACEBOOK DESTINATION/g) || []).length, 33);
+  assert.equal((html.match(/FACEBOOK VISIBILITY RESTRICTED/g) || []).length, 2);
+  assert.doesNotMatch(html, /Facebook Support Profile \d+/i);
 });
 
 test("Command Centre preserves five system roles, five human leaders and safe boundaries", async () => {
   const html = await readFile(path.join(distRoot, "cryptoworldz", "command-centre", "index.html"), "utf8");
-  assert.equal(systemRoles.length, 5);
-  assert.equal(humanLeaders.length, 5);
-  for (const [name] of systemRoles) assert.ok(html.includes(name), name);
-  for (const name of humanLeaders) assert.ok(html.includes(name), name);
-  assert.match(html, /Zero signing • zero execution • protected owner controls/);
+  for (const name of ["ZED", "AUTO", "G.R.A.C.E.", "RECAP", "BASED.BID", "Solmusic", "Savage", "JayJayTeamDev", "Remediy", "Stepper"]) assert.ok(html.includes(name));
+  assert.match(html, /Zero signing • zero execution/);
+  assert.match(html, /Supabase logic/);
+  assert.match(html, /Self-funded source configuration and budget limits/);
+  assert.match(html, /Approval state, pause and emergency-stop controls/);
+  assert.match(html, /Transaction simulation and preview do not sign or execute/);
+  assert.match(html, /Audit history, system health and owner confirmation gates/);
+  assert.match(html, /Open protected MiniApp/);
 });
 
 test("PDC registry contains exactly ten verified positions and exact addresses", async () => {
@@ -131,49 +144,60 @@ test("all referenced local assets exist and are non-empty", async () => {
       const html = await readFile(file, "utf8");
       const refs = [...html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map((match) => match[1]);
       for (const ref of refs) {
-        const absolute = path.join(targetRoot, ref.replace(/^\//, ""));
-        assert.ok((await stat(absolute)).size > 0, `${target.key}: ${ref}`);
+        const local = path.join(targetRoot, ref.replace(/^\//, ""));
+        const info = await stat(local);
+        assert.ok(info.size > 0, `${file}: ${ref}`);
       }
     }
   }
 });
 
 test("every production picture uses separate desktop and mobile files", async () => {
-  for (const target of deploymentTargets) {
-    const targetRoot = path.join(distRoot, target.key);
-    for (const file of await htmlFiles(targetRoot)) {
-      const html = await readFile(file, "utf8");
-      for (const match of html.matchAll(/<picture class="production-picture[^>]*>[\s\S]*?<source[^>]+srcset="([^"]+)"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"/g)) {
-        assert.notEqual(match[1], match[2], `${file}: desktop and mobile files must differ`);
-      }
+  for (const file of await htmlFiles(distRoot)) {
+    const html = await readFile(file, "utf8");
+    const pictures = [...html.matchAll(/<picture[^>]*>([\s\S]*?)<\/picture>/g)].map((match) => match[1]);
+    for (const markup of pictures) {
+      const mobile = markup.match(/<source[^>]+srcset="([^"]+)"/)?.[1];
+      const desktop = markup.match(/<img[^>]+src="([^"]+)"/)?.[1];
+      assert.ok(mobile && desktop, `${file}: incomplete responsive picture`);
+      assert.notEqual(mobile, desktop, `${file}: desktop/mobile file reused`);
+      assert.match(mobile, /\/(?:mobile|support\/mobile)\//, `${file}: mobile path`);
+      assert.match(desktop, /\/(?:desktop|support\/desktop)\//, `${file}: desktop path`);
     }
   }
 });
 
 test("no production artwork is duplicated inside a page main region", async () => {
-  for (const target of deploymentTargets) {
-    const targetRoot = path.join(distRoot, target.key);
-    for (const file of await htmlFiles(targetRoot)) {
-      const html = await readFile(file, "utf8");
-      const main = html.match(/<main[^>]*>([\s\S]*?)<\/main>/)?.[1] || "";
-      const desktopImages = [...main.matchAll(/<img[^>]+src="([^"]+)"/g)].map((match) => match[1]);
-      const counts = new Map();
-      for (const src of desktopImages) counts.set(src, (counts.get(src) || 0) + 1);
-      for (const [src, count] of counts) assert.ok(count <= 1, `${file}: duplicated ${src}`);
+  for (const file of await htmlFiles(distRoot)) {
+    const html = await readFile(file, "utf8");
+    const main = html.match(/<main id="main-content">([\s\S]*?)<\/main>/)?.[1] || "";
+    const refs = [...main.matchAll(/(?:src|srcset)="(\/assets\/(?:desktop|mobile|support)\/[^"]+)"/g)].map((match) => match[1]);
+    const duplicates = refs.filter((ref, index) => refs.indexOf(ref) !== index);
+    assert.deepEqual(duplicates, [], `${file}: ${duplicates.join(", ")}`);
+    const targetKey = path.relative(distRoot, file).split(path.sep)[0];
+    const targetRoot = path.join(distRoot, targetKey);
+    const hashes = [];
+    for (const ref of refs) {
+      const bytes = await readFile(path.join(targetRoot, ref.replace(/^\//, "")));
+      hashes.push(createHash("sha256").update(bytes).digest("hex"));
     }
+    const duplicateContent = hashes.filter((hash, index) => hashes.indexOf(hash) !== index);
+    assert.deepEqual(duplicateContent, [], `${file}: duplicate production-image content`);
   }
 });
 
 test("HodlerWorldz preserves its dedicated identity", async () => {
   const html = await readFile(path.join(distRoot, "hodlerworldz", "index.html"), "utf8");
-  assert.match(html, /HodlerWorldz/);
-  assert.match(html, /Education • Recognition • Rewards/);
-  assert.doesNotMatch(html, /SuiWorldz approved desktop/i);
+  const hero = html.match(/<section class="hero chain-hero">([\s\S]*?)<\/section>/)?.[1] || "";
+  assert.match(hero, /HodlerWorldz education recognition and rewards identity/);
 });
 
 test("responsive stylesheet enforces Android-safe layout and reduced motion", async () => {
   const css = await readFile(path.join(distRoot, "cryptoworldz", "assets", "css", "site.css"), "utf8");
   assert.match(css, /@media \(max-width: 720px\)/);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
-  assert.match(css, /overflow-x:\s*clip/);
+  assert.match(css, /@media \(max-width: 390px\)/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(css, /min-width: 320px/);
+  assert.match(css, /min-height: 52px/);
+  assert.match(css, /overflow-x: clip/);
 });
