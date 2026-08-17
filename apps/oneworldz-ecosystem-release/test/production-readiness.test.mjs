@@ -42,12 +42,13 @@ test("production gate locks the exact 19 / 15 / 18 architecture and total-deploy
   assert.equal(productionGate.deploymentState, "TOTAL_DEPLOYMENT_PLAN_ACTIVE");
   assert.equal(productionGate.ownerAuthority, "PERFORM_TOTAL_DEPLOYMENT_PLAN");
   assert.equal(productionGate.repeatedOwnerApprovalRequired, false);
-  assert.equal(productionGate.hostingDestinationState, "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED");
+  assert.equal(productionGate.historicalTransportEvidenceState, "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED");
+  assert.equal(productionGate.currentDestinationState, "PENDING_REVALIDATION_IMPACTBASED_PUBLIC_ROUTE");
   assert.equal(productionGate.hostingEvidenceRun, 31925927520);
   assert.equal(productionGate.hostingEvidenceJob, 95113450775);
   assert.equal(productionGate.hostingEvidenceTopologySha, "5e4bffb4a40a6968d432ca73e619feb15705859c");
   assert.equal(productionGate.productionWriteAllowed, false);
-  assert.equal(productionGate.productionWriteBlocker, "CURRENT_BUILD_AND_PREVIEW_VISUAL_PASS_REQUIRED");
+  assert.equal(productionGate.productionWriteBlocker, "CLEANUP_BUILD_PREVIEW_AND_CURRENT_DESTINATION_PASS_REQUIRED");
   assert.equal(productionGate.canonicalDeploymentRail, "ONE_AUTHENTICATED_HOSTINGER_STATIC_FLEET_RAIL");
 });
 
@@ -57,11 +58,13 @@ test("SolWorld.fun is excluded and CryptoBotz remains the protected non-static d
   const domains = productionTargets.map(({ domain }) => domain);
   assert.ok(!domains.includes("solworld.fun"));
   assert.ok(domains.includes("oneworldz.com"));
+  assert.ok(domains.includes("impactbased.oneworldz.com"));
+  assert.ok(!domains.includes("impactbased.cryptoworldz.xyz"));
   for (const { domain } of protectedDestinations) assert.ok(!domains.includes(domain), `${domain} must remain protected`);
   assert.deepEqual(new Set(productionGate.protectedDestinations), new Set(["cryptobotz.cryptoworldz.xyz"]));
 });
 
-test("every static target has one website root and one exact authenticated Hostinger transport destination", () => {
+test("every static target has one website root and one exact recorded Hostinger transport destination", () => {
   const keys = productionTargets.map(({ key }) => key);
   const domains = productionTargets.map(({ domain }) => domain);
   const environments = productionTargets.map(({ environment }) => environment);
@@ -77,8 +80,16 @@ test("every static target has one website root and one exact authenticated Hosti
     assert.equal(target.remoteDir, "/");
     assert.equal(target.root, "/");
     assert.equal(target.hostingerTransportDir, expectedTransportDirs[target.key]);
-    assert.equal(target.accountScope, "EXISTING_SHARED_HOSTINGER_ACCOUNT_EXACT_VERIFIED_DIR");
-    assert.equal(target.destinationStatus, "HOSTINGER_DESTINATION_PASS");
+    assert.equal(target.accountScope, "EXISTING_SHARED_HOSTINGER_ACCOUNT_EXACT_RECORDED_DIR");
+    assert.equal(target.historicalTransportStatus, "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED");
+    if (target.key === "impactbased") {
+      assert.equal(target.domain, "impactbased.oneworldz.com");
+      assert.equal(target.publicDomainStatus, "PENDING_REVALIDATION_AFTER_PUBLIC_HOSTNAME_CHANGE");
+      assert.equal(target.destinationStatus, "CURRENT_DESTINATION_REVALIDATION_REQUIRED");
+    } else {
+      assert.equal(target.publicDomainStatus, "UNCHANGED_FROM_HISTORICAL_TRANSPORT_PROOF");
+      assert.equal(target.destinationStatus, "HOSTINGER_DESTINATION_PASS");
+    }
     assert.equal(target.destinationEvidenceRun, 31925927520);
     assert.equal(target.destinationEvidenceJob, 95113450775);
     assert.equal(target.productionWriteAllowed, false);
