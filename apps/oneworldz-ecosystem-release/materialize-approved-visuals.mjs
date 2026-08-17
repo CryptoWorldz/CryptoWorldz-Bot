@@ -65,7 +65,7 @@ async function readApprovedBytes(spec) {
   throw new Error(`${spec.key}: approved visual parts do not materialize to a valid AVIF`);
 }
 
-async function resolveImageMagick() {
+async function findImageMagick() {
   for (const command of ["magick", "convert"]) {
     try {
       await run(command, ["-version"], { timeout: 15000 });
@@ -74,6 +74,30 @@ async function resolveImageMagick() {
       // Try the next supported ImageMagick entry point.
     }
   }
+  return null;
+}
+
+async function resolveImageMagick() {
+  const existing = await findImageMagick();
+  if (existing) return existing;
+
+  // GitHub's Ubuntu runner image can change independently of the locked site
+  // candidate. Install the required renderer only in GitHub Actions when the
+  // runner does not already provide it; local/non-CI environments still fail
+  // closed instead of mutating the host system.
+  if (process.env.GITHUB_ACTIONS === "true") {
+    await run("sudo", ["apt-get", "update", "-qq"], {
+      timeout: 180000,
+      maxBuffer: 1024 * 1024 * 8
+    });
+    await run("sudo", ["apt-get", "install", "-y", "-qq", "imagemagick"], {
+      timeout: 180000,
+      maxBuffer: 1024 * 1024 * 16
+    });
+    const installed = await findImageMagick();
+    if (installed) return installed;
+  }
+
   throw new Error("Responsive production visual rendering requires ImageMagick (magick or convert)");
 }
 
