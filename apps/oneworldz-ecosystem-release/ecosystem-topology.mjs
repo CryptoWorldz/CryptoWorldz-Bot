@@ -81,7 +81,7 @@ export const ecosystemDestinations = Object.freeze([
   { key: "purplediamondcrew", name: "Purple Diamond Crew", domain: "purplediamondcrew.com", type: "root", role: "Legacy and impact history" },
   { key: "foodworldz", name: "FoodWorldz", domain: "foodworldz.com", type: "root", role: "Food support, needs, projects and impact" },
   { key: "donateworldz", name: "DonateWorldz", domain: "donateworldz.com", type: "root", role: "Central donation and support action hub" },
-  { key: "impactbased", name: "ImpactBased", domain: "impactbased.cryptoworldz.xyz", type: "subdomain", role: "Purpose-driven project and Based.bid pathway under CryptoWorldz" },
+  { key: "impactbased", name: "ImpactBased", domain: "impactbased.oneworldz.com", type: "subdomain", role: "Purpose-driven project and Based.bid pathway under OneWorldz" },
   { key: "law-oneworldz", name: "Law.OneWorldz", domain: "law.oneworldz.com", type: "subdomain", role: "Public legal-information pathway" },
   { key: "learn-oneworldz", name: "Learn.OneWorldz", domain: "learn.oneworldz.com", type: "subdomain", role: "Ecosystem learning centre" },
   { key: "cryptobotz", name: "CryptoBotz Command Centre", domain: "cryptobotz.cryptoworldz.xyz", type: "subdomain", role: "Protected ZED / Command Centre application" }
