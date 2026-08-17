@@ -1,0 +1,45 @@
+name: Diagnose OneWorldz verify
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/debug-oneworldz-verify.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Run verification and preserve complete log
+        shell: bash
+        run: |
+          set +e
+          npm ci > verify.log 2>&1
+          ci_rc=$?
+          if [ "$ci_rc" -eq 0 ]; then
+            npm run verify >> verify.log 2>&1
+            verify_rc=$?
+          else
+            verify_rc=$ci_rc
+          fi
+          printf '\nVERIFY_EXIT=%s\n' "$verify_rc" >> verify.log
+          echo "$verify_rc" > verify-exit.txt
+          exit 0
+      - name: Upload diagnostic evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-verify-diagnostic-${{ github.run_id }}
+          path: |
+            verify.log
+            verify-exit.txt
+          if-no-files-found: error
+          retention-days: 3
