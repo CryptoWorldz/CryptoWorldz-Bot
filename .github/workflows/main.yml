@@ -87,7 +87,7 @@ jobs:
     needs: verify
     if: ${{ needs.verify.outputs.phase == 'PREVIEW' && github.event_name == 'push' && github.event.head_commit.message == 'PREPARE JAYJAYTEAMDEV CHATGPT TOTAL DEPLOYMENT' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -107,10 +107,10 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Prove all 18 candidate sites at desktop and mobile sizes
+      - name: Prove all 18 candidate sites and every packaged HTML page at desktop and mobile sizes
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           mkdir -p visual-proof
           cd apps/oneworldz-ecosystem-release
           node --input-type=module <<'NODE' > "$RUNNER_TEMP/targets.tsv"
@@ -119,7 +119,8 @@ jobs:
             console.log([target.key,target.expectedTitle,target.requiredIdentityText,target.requiredIdentityImage].join('\t'));
           }
           NODE
-          test "$(wc -l < "$RUNNER_TEMP/targets.tsv" | tr -d ' ')" = '18'
+          test "$(wc -l < "$RUNNER_TEMP/targets.tsv" | tr -d ' ')" = '18' || exit 1
+          failed=0
           while IFS=$'\t' read -r key title required_text required_image; do
             node browser-visual-proof.mjs \
               --name "$key" \
@@ -127,11 +128,17 @@ jobs:
               --expected-title "$title" \
               --required-text "$required_text" \
               --required-image "$required_image" \
-              --out "$GITHUB_WORKSPACE/visual-proof/$key"
+              --out "$GITHUB_WORKSPACE/visual-proof/$key" || failed=1
           done < "$RUNNER_TEMP/targets.tsv"
-          test "$(find "$GITHUB_WORKSPACE/visual-proof" -name visual-report.json | wc -l | tr -d ' ')" = '18'
-          test "$(find "$GITHUB_WORKSPACE/visual-proof" -name desktop.png | wc -l | tr -d ' ')" = '18'
-          test "$(find "$GITHUB_WORKSPACE/visual-proof" -name mobile.png | wc -l | tr -d ' ')" = '18'
+          while IFS=$'\t' read -r key _; do
+            test -s "$GITHUB_WORKSPACE/visual-proof/$key/visual-report.json" || failed=1
+            test -s "$GITHUB_WORKSPACE/visual-proof/$key/desktop.png" || failed=1
+            test -s "$GITHUB_WORKSPACE/visual-proof/$key/mobile.png" || failed=1
+          done < "$RUNNER_TEMP/targets.tsv"
+          test "$(find "$GITHUB_WORKSPACE/visual-proof" -mindepth 2 -maxdepth 2 -name visual-report.json | wc -l | tr -d ' ')" = '18' || failed=1
+          test "$(find "$GITHUB_WORKSPACE/visual-proof" -mindepth 2 -maxdepth 2 -name desktop.png | wc -l | tr -d ' ')" = '18' || failed=1
+          test "$(find "$GITHUB_WORKSPACE/visual-proof" -mindepth 2 -maxdepth 2 -name mobile.png | wc -l | tr -d ' ')" = '18' || failed=1
+          exit "$failed"
 
       - name: Upload ChatGPT preview visual evidence
         if: always()
@@ -150,11 +157,12 @@ jobs:
             echo '- Production write: NO'
             echo '- Candidate run: ${{ github.run_id }}'
             echo '- Static source tree: ${{ needs.verify.outputs.static_tree }}'
-            echo '- ChatGPT must inspect the uploaded desktop/mobile evidence before the DEPLOY phase is armed.'
+            echo '- Every packaged HTML page is audited at desktop and mobile size by the current proof harness.'
+            echo '- ChatGPT must inspect the uploaded evidence before the DEPLOY phase is armed.'
           } >> "$GITHUB_STEP_SUMMARY"
 
   deploy:
-    name: One proven Hostinger rail — exact-file fleet deployment
+    name: Hostinger destination proof + one exact-file fleet deployment
     needs: verify
     if: ${{ needs.verify.outputs.phase == 'DEPLOY' && needs.verify.outputs.preview_pass == 'PASS' && github.event_name == 'push' && github.event.head_commit.message == 'EXECUTE JAYJAYTEAMDEV CHATGPT TOTAL DEPLOYMENT' }}
     runs-on: ubuntu-latest
@@ -212,7 +220,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
 
-      - name: Re-authenticate the 18 proven Hostinger transport directories
+      - name: Re-authenticate all 18 Hostinger directories and prove each current public domain maps to that exact folder
         shell: bash
         run: |
           set -euo pipefail
@@ -225,6 +233,8 @@ jobs:
           test "$(wc -l < "$RUNNER_TEMP/targets.tsv" | tr -d ' ')" = '18'
           host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"
           if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
+          proofdir="$RUNNER_TEMP/destination-proof"
+          mkdir -p "$proofdir"
           {
             echo 'set cmd:fail-exit true'
             echo 'set net:max-retries 2'
@@ -236,11 +246,32 @@ jobs:
             while IFS=$'\t' read -r key domain transport guard title; do
               printf 'cd "%s"\n' "$transport"
               echo 'pwd'
+              printf 'get "index.html" -o "%s/%s.remote.html"\n' "$proofdir" "$key"
               echo 'cd /'
             done < "$RUNNER_TEMP/targets.tsv"
             echo 'bye'
           } > "$RUNNER_TEMP/preflight.lftp"
           timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/preflight.lftp" "$host"
+
+          while IFS=$'\t' read -r key domain transport guard title; do
+            remote="$proofdir/$key.remote.html"
+            live="$proofdir/$key.live.html"
+            test -s "$remote"
+            proved=0
+            for attempt in $(seq 1 8); do
+              if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
+                -H 'Cache-Control: no-cache, no-store' \
+                "https://$domain/?destination_proof=${GITHUB_RUN_ID}-${key}-${attempt}" -o "$live"; then
+                if cmp -s "$remote" "$live"; then proved=1; break; fi
+              fi
+              sleep 5
+            done
+            if [ "$proved" != '1' ]; then
+              echo "::error::Public domain $domain did not byte-match the exact current index.html at authenticated Hostinger directory $transport. No production write is allowed."
+              exit 1
+            fi
+            echo "DESTINATION_PROVED $domain -> $transport"
+          done < "$RUNNER_TEMP/targets.tsv"
 
       - name: Back up exact owned files, deploy assets first and index last, rollback fleet on failure
         shell: bash
@@ -392,7 +423,7 @@ jobs:
     needs: [verify, deploy]
     if: ${{ needs.deploy.result == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
 
@@ -406,10 +437,10 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Prove all 18 live sites at desktop and mobile sizes
+      - name: Prove all 18 live sites and every published sitemap page at desktop and mobile sizes
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           mkdir -p live-proof
           cd apps/oneworldz-ecosystem-release
           node --input-type=module <<'NODE' > "$RUNNER_TEMP/live-targets.tsv"
@@ -418,7 +449,8 @@ jobs:
             console.log([target.key,target.domain,target.expectedTitle,target.requiredIdentityText,target.requiredIdentityImage].join('\t'));
           }
           NODE
-          test "$(wc -l < "$RUNNER_TEMP/live-targets.tsv" | tr -d ' ')" = '18'
+          test "$(wc -l < "$RUNNER_TEMP/live-targets.tsv" | tr -d ' ')" = '18' || exit 1
+          failed=0
           while IFS=$'\t' read -r key domain title required_text required_image; do
             node browser-visual-proof.mjs \
               --name "$key" \
@@ -426,11 +458,17 @@ jobs:
               --expected-title "$title" \
               --required-text "$required_text" \
               --required-image "$required_image" \
-              --out "$GITHUB_WORKSPACE/live-proof/$key"
+              --out "$GITHUB_WORKSPACE/live-proof/$key" || failed=1
           done < "$RUNNER_TEMP/live-targets.tsv"
-          test "$(find "$GITHUB_WORKSPACE/live-proof" -name visual-report.json | wc -l | tr -d ' ')" = '18'
-          test "$(find "$GITHUB_WORKSPACE/live-proof" -name desktop.png | wc -l | tr -d ' ')" = '18'
-          test "$(find "$GITHUB_WORKSPACE/live-proof" -name mobile.png | wc -l | tr -d ' ')" = '18'
+          while IFS=$'\t' read -r key _; do
+            test -s "$GITHUB_WORKSPACE/live-proof/$key/visual-report.json" || failed=1
+            test -s "$GITHUB_WORKSPACE/live-proof/$key/desktop.png" || failed=1
+            test -s "$GITHUB_WORKSPACE/live-proof/$key/mobile.png" || failed=1
+          done < "$RUNNER_TEMP/live-targets.tsv"
+          test "$(find "$GITHUB_WORKSPACE/live-proof" -mindepth 2 -maxdepth 2 -name visual-report.json | wc -l | tr -d ' ')" = '18' || failed=1
+          test "$(find "$GITHUB_WORKSPACE/live-proof" -mindepth 2 -maxdepth 2 -name desktop.png | wc -l | tr -d ' ')" = '18' || failed=1
+          test "$(find "$GITHUB_WORKSPACE/live-proof" -mindepth 2 -maxdepth 2 -name mobile.png | wc -l | tr -d ' ')" = '18' || failed=1
+          exit "$failed"
 
       - name: Prove protected CryptoBotz remained separate
         shell: bash
@@ -456,6 +494,7 @@ jobs:
           {
             echo '## LIVE EVIDENCE READY FOR JAYJAYTEAMDEV × CHATGPT FINAL PASS'
             echo '- Automated live browser proof completed before this handoff only if this job is green.'
+            echo '- Every published sitemap HTML page is included in desktop/mobile proof.'
             echo '- Final 100% status is intentionally not self-declared by the workflow.'
             echo '- ChatGPT must inspect the fresh desktop/mobile artifact before recording final production pass.'
           } >> "$GITHUB_STEP_SUMMARY"
