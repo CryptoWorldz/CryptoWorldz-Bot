@@ -65,51 +65,75 @@ async function readApprovedBytes(spec) {
   throw new Error(`${spec.key}: approved visual parts do not materialize to a valid AVIF`);
 }
 
-async function findImageMagick() {
-  for (const command of ["magick", "convert"]) {
+async function findCommand(commands) {
+  for (const command of commands) {
     try {
-      await run(command, ["-version"], { timeout: 15000 });
+      await run(command, command === "avifenc" ? ["--version"] : ["-version"], { timeout: 15000 });
       return command;
     } catch {
-      // Try the next supported ImageMagick entry point.
+      // Try the next supported entry point.
     }
   }
   return null;
 }
 
-async function resolveImageMagick() {
-  const existing = await findImageMagick();
-  if (existing) return existing;
+async function resolveRenderTools() {
+  let imageMagick = await findCommand(["magick", "convert"]);
+  let avifenc = await findCommand(["avifenc"]);
 
   // GitHub's Ubuntu runner image can change independently of the locked site
-  // candidate. Install the required renderer only in GitHub Actions when the
-  // runner does not already provide it; local/non-CI environments still fail
-  // closed instead of mutating the host system.
-  if (process.env.GITHUB_ACTIONS === "true") {
+  // candidate. Install only the two required production render tools in
+  // GitHub Actions when absent; local/non-CI environments still fail closed.
+  if ((!imageMagick || !avifenc) && process.env.GITHUB_ACTIONS === "true") {
     await run("sudo", ["apt-get", "update", "-qq"], {
       timeout: 180000,
       maxBuffer: 1024 * 1024 * 8
     });
-    await run("sudo", ["apt-get", "install", "-y", "-qq", "imagemagick"], {
+    await run("sudo", ["apt-get", "install", "-y", "-qq", "imagemagick", "libavif-bin"], {
       timeout: 180000,
       maxBuffer: 1024 * 1024 * 16
     });
-    const installed = await findImageMagick();
-    if (installed) return installed;
+    imageMagick = imageMagick || await findCommand(["magick", "convert"]);
+    avifenc = avifenc || await findCommand(["avifenc"]);
   }
 
-  throw new Error("Responsive production visual rendering requires ImageMagick (magick or convert)");
+  if (!imageMagick) {
+    throw new Error("Responsive production visual rendering requires ImageMagick (magick or convert)");
+  }
+  if (!avifenc) {
+    throw new Error("Responsive production AVIF encoding requires avifenc from libavif-bin");
+  }
+
+  return Object.freeze({ imageMagick, avifenc });
 }
 
-async function renderProductionVariant(command, input, output, maxWidth, quality) {
-  await run(command, [
-    input,
-    "-auto-orient",
-    "-resize", `${maxWidth}x${maxWidth}>`,
-    "-strip",
-    "-quality", String(quality),
-    output
-  ], { timeout: 120000, maxBuffer: 1024 * 1024 * 4 });
+async function renderProductionVariant(tools, input, output, maxWidth, quality) {
+  const png = `${output}.${process.pid}.png`;
+  const quantizer = quality >= 90 ? 12 : 18;
+
+  try {
+    // ImageMagick handles orientation + resize without upscaling and writes a
+    // neutral PNG intermediate. avifenc performs the final AVIF encoding so
+    // the runner does not depend on ImageMagick's optional AVIF delegate.
+    await run(tools.imageMagick, [
+      input,
+      "-auto-orient",
+      "-resize", `${maxWidth}x${maxWidth}>`,
+      "-strip",
+      png
+    ], { timeout: 120000, maxBuffer: 1024 * 1024 * 8 });
+
+    await run(tools.avifenc, [
+      "--jobs", "all",
+      "--min", String(quantizer),
+      "--max", String(quantizer),
+      "-s", "6",
+      png,
+      output
+    ], { timeout: 180000, maxBuffer: 1024 * 1024 * 8 });
+  } finally {
+    await unlink(png).catch(() => {});
+  }
 
   const bytes = await readFile(output);
   if (!isAvif(bytes)) throw new Error(`${path.basename(output)}: responsive renderer did not produce AVIF`);
@@ -193,7 +217,7 @@ const visualManifest = {
   visuals: []
 };
 
-const renderer = await resolveImageMagick();
+const renderer = await resolveRenderTools();
 
 for (const spec of approved) {
   const { bytes, method, names } = await readApprovedBytes(spec);
@@ -237,7 +261,7 @@ for (const spec of approved) {
     materialization_method: method,
     source_bytes: bytes.byteLength,
     source_sha256: sha256(bytes),
-    renderer,
+    renderer: `${renderer.imageMagick}+${renderer.avifenc}`,
     format: "avif",
     desktop: {
       max_width: 1920,
@@ -254,7 +278,7 @@ for (const spec of approved) {
     responsive_policy: "distinct-desktop-and-mobile-production-renders"
   });
 
-  console.log(`RENDERED ${spec.key} desktop=${desktopBytes.byteLength}/${desktopSha} mobile=${mobileBytes.byteLength}/${mobileSha} via ${renderer}`);
+  console.log(`RENDERED ${spec.key} desktop=${desktopBytes.byteLength}/${desktopSha} mobile=${mobileBytes.byteLength}/${mobileSha} via ${renderer.imageMagick}+${renderer.avifenc}`);
 }
 
 await writeFile(path.join(distRoot, "approved-visuals-manifest.json"), `${JSON.stringify(visualManifest, null, 2)}\n`, "utf8");
