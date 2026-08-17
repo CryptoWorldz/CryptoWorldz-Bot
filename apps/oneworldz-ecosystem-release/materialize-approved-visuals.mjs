@@ -42,7 +42,24 @@ function isAvif(bytes) {
     && bytes.subarray(8, 12).toString("ascii") === "avif";
 }
 
-async function readApprovedBytes(spec) {
+async function validateAvifBytes(avifdec, bytes, label) {
+  if (!isAvif(bytes)) return false;
+  const probe = path.join(tmpdir(), `oneworldz-${label}-${process.pid}-${Date.now()}.avif`);
+  await writeFile(probe, bytes);
+  try {
+    await run(avifdec, ["--info", probe], {
+      timeout: 30000,
+      maxBuffer: 1024 * 1024 * 8
+    });
+    return true;
+  } catch {
+    return false;
+  } finally {
+    await unlink(probe).catch(() => {});
+  }
+}
+
+async function readApprovedBytes(spec, avifdec) {
   const names = (await readdir(sourcePartsRoot))
     .filter((name) => new RegExp(`^${spec.key}\\.part\\d+\\.b64$`).test(name))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
@@ -54,37 +71,49 @@ async function readApprovedBytes(spec) {
   const texts = await Promise.all(names.map((name) => readFile(path.join(sourcePartsRoot, name), "utf8")));
   const cleaned = texts.map((value) => value.replace(/\s+/g, ""));
 
-  // Support either a single base64 stream split across files or independently
-  // encoded binary segments. Only an AVIF signature is accepted.
+  // The approved masters may be stored either as one base64 stream split across
+  // files or as independently base64-encoded binary segments. A header-only
+  // test can accept a truncated first segment, so both candidates are decoded
+  // and positively validated by libavif before either can become build input.
   const joined = Buffer.from(cleaned.join(""), "base64");
-  if (isAvif(joined)) return { bytes: joined, method: "joined-base64-stream", names };
-
   const segmented = Buffer.concat(cleaned.map((value) => Buffer.from(value, "base64")));
-  if (isAvif(segmented)) return { bytes: segmented, method: "decoded-segments", names };
+  const candidates = [
+    { bytes: joined, method: "joined-base64-stream" },
+    { bytes: segmented, method: "decoded-segments" }
+  ];
+  const seen = new Set();
 
-  throw new Error(`${spec.key}: approved visual parts do not materialize to a valid AVIF`);
-}
-
-async function findCommand(commands) {
-  for (const command of commands) {
-    try {
-      await run(command, command === "avifenc" ? ["--version"] : ["-version"], { timeout: 15000 });
-      return command;
-    } catch {
-      // Try the next supported entry point.
+  for (const candidate of candidates) {
+    const digest = sha256(candidate.bytes);
+    if (seen.has(digest)) continue;
+    seen.add(digest);
+    if (await validateAvifBytes(avifdec, candidate.bytes, `${spec.key}-${candidate.method}`)) {
+      return { ...candidate, names };
     }
   }
-  return null;
+
+  throw new Error(`${spec.key}: approved visual parts do not materialize to a complete decodable AVIF`);
+}
+
+async function findCommand(command, args) {
+  try {
+    await run(command, args, { timeout: 15000 });
+    return command;
+  } catch {
+    return null;
+  }
 }
 
 async function resolveRenderTools() {
-  let imageMagick = await findCommand(["magick", "convert"]);
-  let avifenc = await findCommand(["avifenc"]);
+  let imageMagick = await findCommand("magick", ["-version"])
+    || await findCommand("convert", ["-version"]);
+  let avifenc = await findCommand("avifenc", ["--version"]);
+  let avifdec = await findCommand("avifdec", ["--version"]);
 
   // GitHub's Ubuntu runner image can change independently of the locked site
-  // candidate. Install only the two required production render tools in
+  // candidate. Install only the two required production render packages in
   // GitHub Actions when absent; local/non-CI environments still fail closed.
-  if ((!imageMagick || !avifenc) && process.env.GITHUB_ACTIONS === "true") {
+  if ((!imageMagick || !avifenc || !avifdec) && process.env.GITHUB_ACTIONS === "true") {
     await run("sudo", ["apt-get", "update", "-qq"], {
       timeout: 180000,
       maxBuffer: 1024 * 1024 * 8
@@ -93,18 +122,21 @@ async function resolveRenderTools() {
       timeout: 180000,
       maxBuffer: 1024 * 1024 * 16
     });
-    imageMagick = imageMagick || await findCommand(["magick", "convert"]);
-    avifenc = avifenc || await findCommand(["avifenc"]);
+    imageMagick = imageMagick
+      || await findCommand("magick", ["-version"])
+      || await findCommand("convert", ["-version"]);
+    avifenc = avifenc || await findCommand("avifenc", ["--version"]);
+    avifdec = avifdec || await findCommand("avifdec", ["--version"]);
   }
 
   if (!imageMagick) {
     throw new Error("Responsive production visual rendering requires ImageMagick (magick or convert)");
   }
-  if (!avifenc) {
-    throw new Error("Responsive production AVIF encoding requires avifenc from libavif-bin");
+  if (!avifenc || !avifdec) {
+    throw new Error("Responsive production AVIF validation/encoding requires avifenc and avifdec from libavif-bin");
   }
 
-  return Object.freeze({ imageMagick, avifenc });
+  return Object.freeze({ imageMagick, avifenc, avifdec });
 }
 
 async function renderProductionVariant(tools, input, output, maxWidth, quality) {
@@ -136,7 +168,9 @@ async function renderProductionVariant(tools, input, output, maxWidth, quality) 
   }
 
   const bytes = await readFile(output);
-  if (!isAvif(bytes)) throw new Error(`${path.basename(output)}: responsive renderer did not produce AVIF`);
+  if (!await validateAvifBytes(tools.avifdec, bytes, `render-${path.basename(output)}`)) {
+    throw new Error(`${path.basename(output)}: responsive renderer did not produce a complete decodable AVIF`);
+  }
   return bytes;
 }
 
@@ -220,7 +254,7 @@ const visualManifest = {
 const renderer = await resolveRenderTools();
 
 for (const spec of approved) {
-  const { bytes, method, names } = await readApprovedBytes(spec);
+  const { bytes, method, names } = await readApprovedBytes(spec, renderer.avifdec);
   const targetRoot = path.join(distRoot, spec.key);
   const desktopDir = path.join(targetRoot, "assets", "approved", "desktop");
   const mobileDir = path.join(targetRoot, "assets", "approved", "mobile");
@@ -262,6 +296,7 @@ for (const spec of approved) {
     source_bytes: bytes.byteLength,
     source_sha256: sha256(bytes),
     renderer: `${renderer.imageMagick}+${renderer.avifenc}`,
+    validator: renderer.avifdec,
     format: "avif",
     desktop: {
       max_width: 1920,
@@ -278,7 +313,7 @@ for (const spec of approved) {
     responsive_policy: "distinct-desktop-and-mobile-production-renders"
   });
 
-  console.log(`RENDERED ${spec.key} desktop=${desktopBytes.byteLength}/${desktopSha} mobile=${mobileBytes.byteLength}/${mobileSha} via ${renderer.imageMagick}+${renderer.avifenc}`);
+  console.log(`RENDERED ${spec.key} source=${method} desktop=${desktopBytes.byteLength}/${desktopSha} mobile=${mobileBytes.byteLength}/${mobileSha} via ${renderer.imageMagick}+${renderer.avifenc}`);
 }
 
 await writeFile(path.join(distRoot, "approved-visuals-manifest.json"), `${JSON.stringify(visualManifest, null, 2)}\n`, "utf8");
