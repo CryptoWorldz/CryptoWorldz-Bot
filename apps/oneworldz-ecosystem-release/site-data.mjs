@@ -223,10 +223,9 @@ export const deploymentTargets = Object.freeze([
   ["cryptoworldz", "cryptoworldz.xyz", "cryptoworldz-production", "CRYPTOWORLDZ.XYZ"],
   ...worldz.map((world) => [world.key, world.domain, `${world.key}-production`, world.domain.toUpperCase()]),
   ["purplediamondcrew", "purplediamondcrew.com", "purplediamondcrew-production", "PURPLEDIAMONDCREW.COM"],
-  // The current proven Hostinger transport target remains the existing CryptoWorldz subdirectory.
-  // Public navigation uses the owner-designated ImpactBased URL above; changing the transport
-  // destination requires a fresh authenticated Hostinger proof and must never be guessed.
-  ["impactbased", "impactbased.cryptoworldz.xyz", "impactbased-production", "IMPACTBASED.CRYPTOWORLDZ.XYZ"],
+  // Public identity is the owner-designated OneWorldz address. Physical Hostinger transport
+  // remains a separate authenticated field in production-targets.mjs and must never be inferred from this URL.
+  ["impactbased", "impactbased.oneworldz.com", "impactbased-production", "IMPACTBASED.ONEWORLDZ.COM"],
   ["law-oneworldz", "law.oneworldz.com", "law-oneworldz-production", "LAW.ONEWORLDZ.COM"],
   ["learn-oneworldz", "learn.oneworldz.com", "learn-oneworldz-production", "LEARN.ONEWORLDZ.COM"]
 ].map(([key, domain, environment, guard]) => ({ key, domain, environment, guard, root: "/" })));
