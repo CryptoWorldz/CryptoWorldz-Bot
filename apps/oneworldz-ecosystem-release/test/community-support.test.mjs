@@ -16,12 +16,13 @@ test("OneWorldz contains a dedicated Community Support page linked from home", a
   assert.doesNotMatch(page, /Facebook Support Profile\s*0?\d+/i);
 });
 
-test("Community Support renderer requires all 35 ordered registry entries and never invents replacements", async () => {
+test("Community Support renderer uses the embedded 35-entry registry with no cross-origin runtime dependency", async () => {
   const js = await readFile(path.join(one, "assets", "js", "community-support.js"), "utf8");
-  assert.match(js, /api\/oneworldz-community-support/);
-  assert.match(js, /payload\.count !== 35/);
-  assert.match(js, /new Set\(profiles\.map/);
-  assert.match(js, /will not invent missing profiles, names or links/i);
+  assert.match(js, /querySelectorAll\("\.community-support-card"\)/);
+  assert.match(js, /cards\.length === 35/);
+  assert.match(js, /authoritative public registry/i);
+  assert.doesNotMatch(js, /fetch\s*\(/);
+  assert.doesNotMatch(js, /api\/oneworldz-community-support/);
   assert.doesNotMatch(js, /Facebook Support Profile\s*0?\d+/i);
 });
 
