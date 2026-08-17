@@ -126,10 +126,8 @@ const supportCards = (base = "https://cryptoworldz.xyz") => `<div class="profile
 
 const legal = (extra = "") => `<div class="legal-band"><strong>Safety boundary</strong><p>Educational and community information only. Nothing here is financial or legal advice, a guarantee of returns, custody, a token launch, wallet signing, buying, selling, transfer execution or payment credential storage. Verify every destination before acting.${extra ? ` ${escapeHtml(extra)}` : ""}</p></div>`;
 
-const footer = (name, acknowledgementHref = "#acknowledgements") => `<footer class="site-footer">
-  <div><strong>${escapeHtml(name)}</strong><span>One World • One Mission</span></div>
-  <nav aria-label="Footer"><a href="${links.oneworldz}"${external(links.oneworldz)}>OneWorldz</a><a href="https://cryptoworldz.xyz">CryptoWorldz</a><a href="${acknowledgementHref}">Acknowledgements</a></nav>
-  <p>Designed by JayJayTeamDev™ • Helping the People Who Help People</p>
+const footer = () => `<footer class="site-footer vision-footer">
+  <div><strong>Created with the Vision</strong><span>When Someone say's You can't Change the World 🌐 just Say “Why can't I?”</span></div>
 </footer>`;
 
 const commandRoles = () => `<div class="role-grid">${systemRoles.map(([name, role, boundary], index) => `<article><span>${String(index + 1).padStart(2, "0")}</span><h3>${escapeHtml(name)}</h3><strong>${escapeHtml(role)}</strong><p>${escapeHtml(boundary)}</p></article>`).join("")}</div>`;
