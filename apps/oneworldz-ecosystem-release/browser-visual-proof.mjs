@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { readFile, stat, mkdir, writeFile } from "node:fs/promises";
+import { readFile, stat, mkdir, writeFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { chromium } from "playwright";
@@ -15,6 +15,9 @@ const expectedTitle = args.get("--expected-title") || "";
 const requiredText = args.get("--required-text") || "";
 const requiredImage = args.get("--required-image") || "";
 const requiredImageTokens = requiredImage.split("|").map((value) => value.trim()).filter(Boolean);
+const footerLine1 = "Created with the Vision";
+const footerLine2 = "When Someone say's You can't Change the World 🌐 just Say “Why can't I?”";
+const exactFooterText = `${footerLine1} ${footerLine2}`;
 if (!rootArg && !liveUrl) throw new Error("Provide --root for candidate proof or --url for live proof");
 
 await mkdir(outDir, { recursive: true });
@@ -28,10 +31,30 @@ const mime = new Map([
   [".woff", "font/woff"], [".woff2", "font/woff2"]
 ]);
 
+async function discoverCandidateRoutes(root) {
+  const routes = [];
+  async function walk(dir, rel = "") {
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      const childRel = path.join(rel, entry.name);
+      const child = path.join(dir, entry.name);
+      if (entry.isDirectory()) await walk(child, childRel);
+      else if (entry.name === "index.html") {
+        const parent = path.dirname(childRel).split(path.sep).join("/");
+        routes.push(parent === "." ? "/" : `/${parent.replace(/^\/+|\/+$/g, "")}/`);
+      }
+    }
+  }
+  await walk(root);
+  return [...new Set(routes)].sort();
+}
+
 let server;
 let targetUrl = liveUrl;
+let candidateRoutes = [];
 if (rootArg) {
   const root = path.resolve(rootArg);
+  candidateRoutes = await discoverCandidateRoutes(root);
+  if (!candidateRoutes.includes("/")) throw new Error(`${name}: candidate root index.html missing`);
   server = createServer(async (req, res) => {
     try {
       const raw = decodeURIComponent((req.url || "/").split("?")[0]);
@@ -73,6 +96,7 @@ const report = {
   requiredText,
   requiredImage,
   requiredImageTokens,
+  candidateRoutes,
   generatedAt: new Date().toISOString(),
   viewports: {},
   routeAudit: {},
@@ -138,6 +162,11 @@ async function collectDom(page, { identityChecks = false } = {}) {
       visible: !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length)
     }));
     const h1Count = document.querySelectorAll("h1").length;
+    const footers = [...document.querySelectorAll("footer.site-footer")];
+    const footer = footers[0] || null;
+    const footerText = footer ? (footer.textContent || "").replace(/\s+/g, " ").trim() : "";
+    const footerLinks = footer ? footer.querySelectorAll("a[href]").length : 0;
+    const retiredFooterCredit = /(Created|Designed) by JayJayTeamDev/i.test(footerText);
     return {
       title: document.title,
       h1: document.querySelector("h1")?.textContent?.trim() || "",
@@ -153,7 +182,11 @@ async function collectDom(page, { identityChecks = false } = {}) {
       requiredImagePresent,
       interactiveCount: interactive.filter((x) => x.visible).length,
       emptyVisibleLinks: interactive.filter((x) => x.tag === "a" && x.visible && (!x.href || x.href === "#" || /^javascript:/i.test(x.href))),
-      hrefs: [...document.querySelectorAll("a[href]")].map((a) => a.href)
+      hrefs: [...document.querySelectorAll("a[href]")].map((a) => a.href),
+      footerCount: footers.length,
+      footerText,
+      footerLinks,
+      retiredFooterCredit
     };
   }, { requiredImageTokens, requiredText, identityChecks });
 }
@@ -198,6 +231,10 @@ function pageFailures({ navigationError, dom, menu, consoleErrors, pageErrors, f
   if (pageErrors.length) failures.push(`page errors: ${pageErrors.length}`);
   if (consoleErrors.length) failures.push(`console errors: ${consoleErrors.length}`);
   if (menu.tested && (!menu.opened || !menu.closed)) failures.push("menu open/close behaviour failed");
+  if (dom.footerCount !== 1) failures.push(`expected exactly one permanent footer, got ${dom.footerCount}`);
+  if (dom.footerText !== exactFooterText) failures.push("permanent footer text drift");
+  if (dom.footerLinks !== 0) failures.push(`permanent footer must contain no extra links, got ${dom.footerLinks}`);
+  if (dom.retiredFooterCredit) failures.push("retired Created/Designed by JayJayTeamDev footer credit returned");
   return failures;
 }
 
@@ -274,10 +311,14 @@ for (const vp of viewports) {
       queue.push(clean);
     } catch {}
   };
+
+  if (rootArg) {
+    for (const route of candidateRoutes) if (route !== "/") enqueue(new URL(route, base).href);
+  }
   for (const href of rootResult.dom.hrefs) enqueue(href);
 
   const routeResults = {};
-  while (queue.length && Object.keys(routeResults).length < 50) {
+  while (queue.length && Object.keys(routeResults).length < 100) {
     const routeUrl = queue.shift();
     const route = new URL(routeUrl);
     const slug = slugForPath(route.pathname);
@@ -295,6 +336,9 @@ for (const vp of viewports) {
       brokenImages: result.dom.brokenImages.length,
       pendingImages: result.dom.pendingImages.length,
       interactiveCount: result.dom.interactiveCount,
+      footerCount: result.dom.footerCount,
+      footerText: result.dom.footerText,
+      footerLinks: result.dom.footerLinks,
       menu: result.menu,
       screenshot,
       failures: result.failures
@@ -315,6 +359,21 @@ report.localRoutesAudited = {
   desktop: Object.keys(report.routeAudit.desktop || {}).length,
   mobile: Object.keys(report.routeAudit.mobile || {}).length
 };
+report.totalHtmlPagesAudited = {
+  desktop: 1 + report.localRoutesAudited.desktop,
+  mobile: 1 + report.localRoutesAudited.mobile
+};
+if (rootArg) {
+  const expected = candidateRoutes.length;
+  if (report.totalHtmlPagesAudited.desktop !== expected) {
+    report.pass = false;
+    report.failures.push(`desktop: expected ${expected} candidate HTML pages audited, got ${report.totalHtmlPagesAudited.desktop}`);
+  }
+  if (report.totalHtmlPagesAudited.mobile !== expected) {
+    report.pass = false;
+    report.failures.push(`mobile: expected ${expected} candidate HTML pages audited, got ${report.totalHtmlPagesAudited.mobile}`);
+  }
+}
 await writeFile(path.join(outDir, "visual-report.json"), JSON.stringify(report, null, 2));
-console.log(JSON.stringify({ name, mode: report.mode, pass: report.pass, localRoutesAudited: report.localRoutesAudited, failures: report.failures }, null, 2));
+console.log(JSON.stringify({ name, mode: report.mode, pass: report.pass, totalHtmlPagesAudited: report.totalHtmlPagesAudited, failures: report.failures }, null, 2));
 if (!report.pass) process.exitCode = 1;
