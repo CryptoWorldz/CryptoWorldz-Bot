@@ -19,27 +19,31 @@ Only `oneworldz-19-total.request` is retained here. It records current release s
 
 Do not recreate domain-specific request files, repair triggers, `*-only.request` files, alternate FTP routes, visual-repair triggers, deployment holds, fallback gateways or parallel production workflows.
 
-Historical GitHub Environments are not deployment authority. The only historical environment that may be reused by the canonical `.github/workflows/main.yml` rail is `cryptoworldz-production`, because its shared Hostinger FTP credential set is the one that successfully authenticated all 18 recorded target directories. No other old environment may be selected as a fallback.
+Historical GitHub Environments are not deployment authority. The only historical environment that may be reused by the canonical `.github/workflows/main.yml` rail is `cryptoworldz-production`, because its shared Hostinger FTP credential set is the credential boundary used for the recorded transport proof. No other old environment may be selected as a fallback.
 
-## Hostinger destination proof
+## Public URL and Hostinger transport are separate facts
 
-The authenticated 18-root proof is recorded against run `31925927520`, job `95113450775`, and the unchanged current topology tree SHA `5e4bffb4a40a6968d432ca73e619feb15705859c`.
+The historical authenticated transport proof is run `31925927520`, job `95113450775`, against the topology that existed at that time. It remains evidence that the shared Hostinger account could reach the recorded physical directories; it is **not** proof that a later public hostname still maps to the same public destination.
 
-The exact 18 transport directories are stored once as `hostingerTransportDir` in `production-targets.mjs`.
+The canonical public ImpactBased address is now `https://impactbased.oneworldz.com/`. The older `impactbased.cryptoworldz.xyz` public alias is superseded.
+
+The exact physical transport directories remain stored once as `hostingerTransportDir` in `production-targets.mjs`. A physical folder may remain valid even when a public hostname changes, but both facts must be revalidated together before production write.
 
 The website/package contract remains:
 - website root `/`;
 - homepage `/index.html`;
 - assets `/assets/`.
 
-The transport directory is only the physical location used by the existing shared Hostinger FTP account. It must be read from the verified target contract exactly. Never derive it from a domain name, prepend another `public_html`, probe sibling directories or select another account after a mismatch.
+Never derive a transport path from a public domain name, prepend another `public_html`, probe sibling directories, invent an alias or select another account after a mismatch.
 
-A mismatch is a failed destination gate, not permission to try another route.
+A public-domain mismatch or transport mismatch is a failed destination gate, not permission to try another route.
 
 ## Current approval behaviour
 
 JayJayTeamDev's current total-deployment instruction is standing authority for the unchanged canonical candidate chain. Do not request another approval phrase for the same release unless content, target mapping, payments, DNS/mail, protected runtime or security boundaries change.
 
-The current release still requires a fresh build and ChatGPT preview visual pass for the current static-source tree before production write.
+Current cleanup changed the canonical **public** ImpactBased hostname only. Therefore the historical transport proof is retained as evidence, but current public-domain/transport revalidation is required before the deployment phase can be armed.
+
+The release also requires a fresh build and ChatGPT preview visual pass after cleanup and the newly locked footer/advertising update before production write.
 
 Secrets never belong in this directory.
