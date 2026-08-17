@@ -55,17 +55,25 @@ The website/package contract remains:
 - homepage `/index.html`;
 - assets `/assets/`.
 
-The existing shared Hostinger FTP account reaches physical transport directories beneath the hosting account. All 18 exact transport directories were authenticated by the successful read-only proof and are stored as `hostingerTransportDir` values in the canonical target contract.
+The existing shared Hostinger FTP account reaches physical transport directories beneath the hosting account. All exact transport directories must be read from the canonical target contract and re-authenticated before a production write.
 
 Deployment code reads those exact stored transport values. It never derives a Hostinger directory from a domain, appends another `public_html`, probes siblings, falls back to `/`, or chooses another historical environment after a mismatch.
 
 ## Images
 
-Active production website media belongs only inside the canonical static app source. Historical approved media is sealed under `archive/reference-media/` for provenance only and is never auto-restored into a build.
+All active static-site production image files belong under one boundary only:
 
-## Archive and historical GitHub metadata
+`apps/oneworldz-ecosystem-release/source/assets/`
 
-`archive/`, old branches and historical GitHub Environments are evidence/reference only. The sole production credential boundary retained from historical environment metadata is `cryptoworldz-production`, because its existing Hostinger credential set produced the successful 18-root authentication proof and is now bound only to `.github/workflows/main.yml`.
+The small `source/approved-visuals/` folder contains encoded source fragments required to materialize three already-approved AVIF masters during the build. It is not a second browsing/reference library and contains no deployable image files.
+
+No root-level image library, archive image bundle, restoration folder or alternate media source is permitted to return.
+
+## Historical material
+
+Old branches and Git history remain historical evidence only. They are never production authority and are never selected by planning, building or deployment logic.
+
+The sole production credential boundary retained from historical GitHub Environment metadata is `cryptoworldz-production`, because its existing Hostinger credential set produced the authenticated shared-account proof and is bound only to `.github/workflows/main.yml`.
 
 ## Verification
 
@@ -75,4 +83,4 @@ npm run verify
 npm audit --audit-level=high
 ```
 
-`npm run verify` includes a structural guard that fails if retired website roots, old gateway folders, a fourth workflow, alternate static deployment routes or legacy active-source locations return.
+`npm run verify` includes a structural guard that fails if retired website roots, old gateway folders, an `archive/` tree, a fourth workflow, alternate static deployment authority, extra deployment state files, extra tools, or static image files outside the canonical assets root return.
