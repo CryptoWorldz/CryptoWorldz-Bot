@@ -45,10 +45,18 @@ const external = (href) => /^https?:\/\//.test(href) ? ' target="_blank" rel="no
 
 const visionFooter = `<footer class="site-footer vision-footer"><div><strong>Created with the Vision</strong><span>When Someone say's You can't Change the World 🌐 just Say “Why can't I?”</span></div></footer>`;
 
+function enforceSupportEmblemRendering(html) {
+  return html.replace(
+    /<picture class="([^"]*support-emblem[^"]*)">\s*<source media="\(max-width:\s*720px\)" srcset="([^"]*\/support\/mobile\/([^"]+)-mobile\.webp)">\s*<img src="([^"]*\/support\/desktop\/\3-desktop\.webp)"/g,
+    '<picture class="$1"><source media="(min-width: 721px)" srcset="$2"><source media="(max-width: 720px)" srcset="$2"><img src="$4"'
+  );
+}
+
 function enforceVisionFooter(html, pageName) {
   const footerMatches = html.match(/<footer\b[^>]*class="[^"]*site-footer[^"]*"[^>]*>[\s\S]*?<\/footer>/g) || [];
   if (footerMatches.length !== 1) throw new Error(`${pageName}: expected exactly one site footer, found ${footerMatches.length}`);
-  const output = html.replace(footerMatches[0], visionFooter);
+  let output = html.replace(footerMatches[0], visionFooter);
+  output = enforceSupportEmblemRendering(output);
   if (!output.includes("Created with the Vision")) throw new Error(`${pageName}: permanent vision footer missing`);
   if (!output.includes("When Someone say's You can't Change the World 🌐 just Say “Why can't I?”")) throw new Error(`${pageName}: permanent vision phrase missing`);
   if (/(Created|Designed) by JayJayTeamDev/i.test(output)) throw new Error(`${pageName}: retired JayJayTeamDev footer credit returned`);
@@ -187,6 +195,7 @@ manifest.cryptoworldz_visual_contract = {
 await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 
 let footerPageCount = 0;
+let supportEmblemFallbackCount = 0;
 const packageEntries = (await readdir(ecosystemRoot, { withFileTypes: true })).filter((entry) => entry.isDirectory());
 if (packageEntries.length !== 18) throw new Error(`Permanent footer expected 18 static packages, found ${packageEntries.length}`);
 for (const entry of packageEntries) {
@@ -196,7 +205,9 @@ for (const entry of packageEntries) {
   for (const relative of htmlFiles) {
     const file = path.join(packageDir, relative);
     const html = await readFile(file, "utf8");
-    await writeFile(file, enforceVisionFooter(html, `${entry.name}/${relative}`), "utf8");
+    const next = enforceVisionFooter(html, `${entry.name}/${relative}`);
+    if (next.includes('media="(min-width: 721px)"') && next.includes('support-emblem')) supportEmblemFallbackCount += 1;
+    await writeFile(file, next, "utf8");
     footerPageCount += 1;
   }
   await refreshManifest(packageDir);
@@ -204,3 +215,4 @@ for (const entry of packageEntries) {
 
 console.log(`CryptoWorldz finalised: blue-purple visual treatment, ${perfectPlan.officialDirectory.length} official links, ${perfectPlan.projectRegistry.length} labelled projects and protected AUTO boundary.`);
 console.log(`Permanent OneWorldz vision footer enforced on ${footerPageCount} static HTML pages across all 18 packages.`);
+console.log(`Approved support-emblem desktop rendering source enforced on ${supportEmblemFallbackCount} support pages.`);
