@@ -144,6 +144,11 @@ home = home.replace(
   '<body class="oneworldz-blue-white" style="--accent:#4da3ff;--accent-2:#ffffff;background:#061328;color:#ffffff">'
 );
 if (!home.includes('class="oneworldz-blue-white"')) throw new Error("OneWorldz blue/white theme marker missing");
+home = home.replace(
+  '<h1>OneWorldz One Vision</h1>',
+  '<h1 class="visually-hidden-page-title" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">OneWorldz One Vision</h1>'
+);
+if (!home.includes('class="visually-hidden-page-title"')) throw new Error("OneWorldz duplicate visible title suppression missing");
 home = injectStylesheet(home);
 home = injectPreviewMeta(home, {
   title: "OneWorldz | OneWorldz One Vision",
@@ -201,6 +206,7 @@ manifest.oneworldz_visual_contract = {
   destination_preview_cards: destinationPreviews.length,
   official_directory_entries: officialDirectory.length,
   support_directory_entries: supportDirectory.length,
+  duplicate_visible_title_removed: true,
   open_graph_preview_images: true,
   twitter_large_image_previews: true,
   local_hash_links_verified: true
