@@ -22,7 +22,7 @@ const pages = [
   ["division-vision", "divisions/visionworldz/index.html"],
   ["division-ai", "divisions/aiworldz/index.html"],
   ["division-music", "divisions/musicworldz/index.html"],
-  ["division-movie", "divisions/moviewz/index.html"],
+  ["division-movie", "divisions/movieworldz/index.html"],
   ["division-art", "divisions/artworldz/index.html"],
   ["division-learn", "divisions/learnworldz/index.html"],
   ["division-business", "divisions/businessworldz/index.html"],
@@ -119,6 +119,8 @@ async function listFiles(dir, rel = "") {
   return out.sort();
 }
 
+const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
+
 async function refreshManifest(packageDir) {
   const manifestPath = path.join(packageDir, "release-manifest.json");
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
@@ -132,8 +134,6 @@ async function refreshManifest(packageDir) {
   manifest.files = records;
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 }
-
-const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
 await mkdir(path.dirname(cssTarget), { recursive: true });
 await mkdir(previewDir, { recursive: true });
