@@ -5,6 +5,21 @@ export const perfectPlan = Object.freeze({
   authority: "OneWorldz_Locked_Master_Build_Specification_APPROVED + JayJayTeamDev TOTAL DEPLOYMENT PLAN",
   motto: "OneWorldz One Vision",
   mission: "Helping the People Who Help People",
+  footerContract: Object.freeze({
+    line1: "Created with the Vision",
+    line2: "When Someone say's You can't Change the World 🌐 just Say “Why can't I?”",
+    retiredCredits: Object.freeze(["Created by JayJayTeamDev", "Designed by JayJayTeamDev"]),
+    rule: "Every public static HTML page uses this exact two-line footer. No creator/designer attribution may replace or compete with it."
+  }),
+  advertisingContract: Object.freeze({
+    strategy: "ONEWORLDZ_SINGLE_ACTION",
+    visual: "Approved OneWorldz visual",
+    phrase: "When Someone say's You can't Change the World 🌐 just Say “Why can't I?”",
+    ctaLabel: "OneWorldz.com",
+    ctaUrl: links.oneworldz,
+    primaryActions: 1,
+    rule: "Advertising stays deliberately simple: one approved OneWorldz visual, the locked phrase and one clear button to OneWorldz.com. No competing primary CTA or alternate destination."
+  }),
   brandContract: Object.freeze({
     oneworldz: Object.freeze({ theme: "BLUE_WHITE", background: "deep blue", primary: "white", accent: "sky blue", rule: "OneWorldz stays human-first and visually blue/white." }),
     cryptoworldz: Object.freeze({ theme: "BLUE_PURPLE", background: "deep blue-purple", primary: "electric blue-purple", accent: "silver/white", rule: "CryptoWorldz is visibly separate from Purple Diamond Crew." }),
@@ -109,6 +124,8 @@ export const perfectPlan = Object.freeze({
     "Every Blockchain World must use the profile/hero artwork that belongs to that exact chain on desktop and mobile.",
     "Desktop and mobile routes must both render cleanly with square/rectangular media shells and self-closing navigation.",
     "Every destination must have reciprocal working links and one clear job.",
+    "Every public static HTML page must use the exact two-line Created with the Vision footer and must not restore Created by/Designed by JayJayTeamDev footer credit.",
+    "OneWorldz advertising uses one approved visual, the locked Why can't I phrase and one primary button to OneWorldz.com; no competing primary CTA.",
     "The official directory and support directory must use the single canonical URL registry from site-data.mjs.",
     "OneWorldz GPT must be present on OneWorldz.com and DonateWorldz.com and call the protected server API only.",
     "OneWorldz GPT must never expose OPENAI_API_KEY or collect card, bank, seed phrase, private key or password data in chat.",
@@ -125,3 +142,5 @@ if (perfectPlan.openAI.publicGuideSurfaces.length !== 2) throw new Error("OneWor
 if (perfectPlan.officialDirectory.length < 10) throw new Error("Official ecosystem directory is incomplete");
 if (perfectPlan.supportDirectory.length !== 6) throw new Error("Support directory must keep the six locked public pathways");
 if (perfectPlan.projectRegistry.length < 15) throw new Error("Project registry is incomplete");
+if (perfectPlan.advertisingContract.primaryActions !== 1 || perfectPlan.advertisingContract.ctaUrl !== links.oneworldz) throw new Error("Advertising contract drift");
+if (perfectPlan.footerContract.line1 !== "Created with the Vision") throw new Error("Footer contract drift");
