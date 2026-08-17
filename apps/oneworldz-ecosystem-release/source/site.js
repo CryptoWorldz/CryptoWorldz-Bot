@@ -1,4 +1,10 @@
 (() => {
+  for (const footer of document.querySelectorAll("footer.site-footer.vision-footer")) {
+    const strong = footer.querySelector("strong");
+    const span = footer.querySelector("span");
+    if (strong && span && strong.nextSibling === span) span.before(document.createTextNode("\n"));
+  }
+
   const header = document.querySelector(".site-header");
   const button = document.querySelector(".menu-button");
   const menu = document.querySelector(".site-menu");
