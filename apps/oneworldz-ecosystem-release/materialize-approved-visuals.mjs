@@ -9,24 +9,37 @@ import { fileURLToPath } from "node:url";
 const run = promisify(execFile);
 const appRoot = path.dirname(fileURLToPath(import.meta.url));
 const sourcePartsRoot = path.join(appRoot, "source", "approved-visuals");
+const supportAssetsRoot = path.join(appRoot, "source", "assets", "support");
 const distRoot = path.join(appRoot, "dist", "ecosystem");
 
 const approved = Object.freeze([
   {
     key: "foodworldz",
     domain: "foodworldz.com",
+    sourceMode: "approved-avif-master",
     expectedParts: 6,
     alt: "Approved FoodWorldz production artwork"
   },
   {
     key: "donateworldz",
     domain: "donateworldz.com",
-    expectedParts: 4,
-    alt: "Approved DonateWorldz production artwork"
+    sourceMode: "approved-support-composite",
+    desktopSources: [
+      "desktop/reagan-children-emblem-desktop.webp",
+      "desktop/community-impact-emblem-desktop.webp",
+      "desktop/jayjayteamdev-emblem-desktop.webp"
+    ],
+    mobileSources: [
+      "mobile/reagan-children-emblem-mobile.webp",
+      "mobile/community-impact-emblem-mobile.webp",
+      "mobile/jayjayteamdev-emblem-mobile.webp"
+    ],
+    alt: "DonateWorldz support pathways: Reagan and Children, Community Impact and JayJayTeamDev"
   },
   {
     key: "hodlergalaxy",
     domain: "hodlergalaxy.xyz",
+    sourceMode: "approved-avif-master",
     expectedParts: 4,
     alt: "Approved HodlerGalaxy production artwork"
   }
@@ -47,10 +60,7 @@ async function validateAvifBytes(avifdec, bytes, label) {
   const probe = path.join(tmpdir(), `oneworldz-${label}-${process.pid}-${Date.now()}.avif`);
   await writeFile(probe, bytes);
   try {
-    await run(avifdec, ["--info", probe], {
-      timeout: 30000,
-      maxBuffer: 1024 * 1024 * 8
-    });
+    await run(avifdec, ["--info", probe], { timeout: 30000, maxBuffer: 1024 * 1024 * 8 });
     return true;
   } catch {
     return false;
@@ -70,11 +80,6 @@ async function readApprovedBytes(spec, avifdec) {
 
   const texts = await Promise.all(names.map((name) => readFile(path.join(sourcePartsRoot, name), "utf8")));
   const cleaned = texts.map((value) => value.replace(/\s+/g, ""));
-
-  // The approved masters may be stored either as one base64 stream split across
-  // files or as independently base64-encoded binary segments. A header-only
-  // test can accept a truncated first segment, so both candidates are decoded
-  // and positively validated by libavif before either can become build input.
   const joined = Buffer.from(cleaned.join(""), "base64");
   const segmented = Buffer.concat(cleaned.map((value) => Buffer.from(value, "base64")));
   const candidates = [
@@ -110,68 +115,70 @@ async function resolveRenderTools() {
   let avifenc = await findCommand("avifenc", ["--version"]);
   let avifdec = await findCommand("avifdec", ["--version"]);
 
-  // GitHub's Ubuntu runner image can change independently of the locked site
-  // candidate. Install only the two required production render packages in
-  // GitHub Actions when absent; local/non-CI environments still fail closed.
   if ((!imageMagick || !avifenc || !avifdec) && process.env.GITHUB_ACTIONS === "true") {
-    await run("sudo", ["apt-get", "update", "-qq"], {
-      timeout: 180000,
-      maxBuffer: 1024 * 1024 * 8
-    });
+    await run("sudo", ["apt-get", "update", "-qq"], { timeout: 180000, maxBuffer: 1024 * 1024 * 8 });
     await run("sudo", ["apt-get", "install", "-y", "-qq", "imagemagick", "libavif-bin"], {
       timeout: 180000,
       maxBuffer: 1024 * 1024 * 16
     });
-    imageMagick = imageMagick
-      || await findCommand("magick", ["-version"])
-      || await findCommand("convert", ["-version"]);
+    imageMagick = imageMagick || await findCommand("magick", ["-version"]) || await findCommand("convert", ["-version"]);
     avifenc = avifenc || await findCommand("avifenc", ["--version"]);
     avifdec = avifdec || await findCommand("avifdec", ["--version"]);
   }
 
-  if (!imageMagick) {
-    throw new Error("Responsive production visual rendering requires ImageMagick (magick or convert)");
-  }
-  if (!avifenc || !avifdec) {
-    throw new Error("Responsive production AVIF validation/encoding requires avifenc and avifdec from libavif-bin");
-  }
-
+  if (!imageMagick) throw new Error("Responsive production visual rendering requires ImageMagick");
+  if (!avifenc || !avifdec) throw new Error("Responsive production AVIF validation/encoding requires libavif-bin");
   return Object.freeze({ imageMagick, avifenc, avifdec });
 }
 
 async function renderProductionVariant(tools, input, output, maxWidth, quality) {
   const png = `${output}.${process.pid}.png`;
   const quantizer = quality >= 90 ? 12 : 18;
-
   try {
-    // ImageMagick handles orientation + resize without upscaling and writes a
-    // neutral PNG intermediate. avifenc performs the final AVIF encoding so
-    // the runner does not depend on ImageMagick's optional AVIF delegate.
-    await run(tools.imageMagick, [
-      input,
-      "-auto-orient",
-      "-resize", `${maxWidth}x${maxWidth}>`,
-      "-strip",
-      png
-    ], { timeout: 120000, maxBuffer: 1024 * 1024 * 8 });
-
-    await run(tools.avifenc, [
-      "--jobs", "all",
-      "--min", String(quantizer),
-      "--max", String(quantizer),
-      "-s", "6",
-      png,
-      output
-    ], { timeout: 180000, maxBuffer: 1024 * 1024 * 8 });
+    await run(tools.imageMagick, [input, "-auto-orient", "-resize", `${maxWidth}x${maxWidth}>`, "-strip", png], {
+      timeout: 120000,
+      maxBuffer: 1024 * 1024 * 8
+    });
+    await run(tools.avifenc, ["--jobs", "all", "--min", String(quantizer), "--max", String(quantizer), "-s", "6", png, output], {
+      timeout: 180000,
+      maxBuffer: 1024 * 1024 * 8
+    });
   } finally {
     await unlink(png).catch(() => {});
   }
 
   const bytes = await readFile(output);
   if (!await validateAvifBytes(tools.avifdec, bytes, `render-${path.basename(output)}`)) {
-    throw new Error(`${path.basename(output)}: responsive renderer did not produce a complete decodable AVIF`);
+    throw new Error(`${path.basename(output)}: renderer did not produce a complete decodable AVIF`);
   }
   return bytes;
+}
+
+async function buildSupportComposite(tools, relativeSources, label) {
+  const sourceFiles = relativeSources.map((rel) => path.join(supportAssetsRoot, rel));
+  const sourceBytes = await Promise.all(sourceFiles.map((file) => readFile(file)));
+  const output = path.join(tmpdir(), `oneworldz-${label}-${process.pid}-${Date.now()}.png`);
+
+  await run(tools.imageMagick, [
+    ...sourceFiles,
+    "-auto-orient",
+    "-thumbnail", "900x900>",
+    "-background", "#0b0718",
+    "-gravity", "center",
+    "+append",
+    "-strip",
+    output
+  ], { timeout: 120000, maxBuffer: 1024 * 1024 * 16 });
+
+  const compositeBytes = await readFile(output);
+  if (compositeBytes.byteLength < 10_000) throw new Error(`${label}: support composite is unexpectedly small`);
+
+  return {
+    file: output,
+    sourceFiles: relativeSources,
+    sourceBytes: sourceBytes.reduce((sum, bytes) => sum + bytes.byteLength, 0),
+    sourceSha256: sha256(Buffer.concat(sourceBytes))
+  };
 }
 
 function replaceHeroMedia(html, spec) {
@@ -183,18 +190,12 @@ function replaceHeroMedia(html, spec) {
   const before = html.slice(0, heroStart);
   let hero = html.slice(heroStart, heroEnd + "</section>".length);
   const after = html.slice(heroEnd + "</section>".length);
-
   hero = hero.replace('<section class="hero">', `<section class="hero" data-approved-visual="${spec.key}">`);
 
   const mobilePath = `/assets/approved/mobile/${spec.key}-hero.avif`;
   const desktopPath = `/assets/approved/desktop/${spec.key}-hero.avif`;
-
-  if (!/<source\b[^>]*srcset="[^"]+"[^>]*>/.test(hero)) {
-    throw new Error(`${spec.key}: hero mobile source not found`);
-  }
-  if (!/<img\b[^>]*src="[^"]+"[^>]*>/.test(hero)) {
-    throw new Error(`${spec.key}: hero desktop image not found`);
-  }
+  if (!/<source\b[^>]*srcset="[^"]+"[^>]*>/.test(hero)) throw new Error(`${spec.key}: hero mobile source not found`);
+  if (!/<img\b[^>]*src="[^"]+"[^>]*>/.test(hero)) throw new Error(`${spec.key}: hero desktop image not found`);
 
   hero = hero.replace(/<source\b([^>]*?)srcset="[^"]+"([^>]*)>/, `<source$1srcset="${mobilePath}"$2>`);
   hero = hero.replace(/<img\b([^>]*?)src="[^"]+"([^>]*)>/, (match, left, right) => {
@@ -236,7 +237,8 @@ async function refreshReleaseManifest(spec, targetRoot) {
     key: spec.key,
     desktop: `/assets/approved/desktop/${spec.key}-hero.avif`,
     mobile: `/assets/approved/mobile/${spec.key}-hero.avif`,
-    responsive_policy: "distinct-production-renders"
+    responsive_policy: "distinct-production-renders",
+    source_mode: spec.sourceMode
   };
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 }
@@ -244,7 +246,7 @@ async function refreshReleaseManifest(spec, targetRoot) {
 const visualManifest = {
   stage: "FINAL_APPROVED_VISUAL_MATERIALIZATION",
   approved_by: "JayJayTeamDev",
-  source_policy: "APPROVED_GENERATED_MASTERS_SOURCE_ONLY",
+  source_policy: "APPROVED_GENERATED_PRODUCTION_ASSETS_ONLY",
   reference_library_policy: "REFERENCE_ONLY_NEVER_DEPLOY",
   reference_library_substitution: false,
   responsive_policy: "DISTINCT_DESKTOP_AND_MOBILE_PRODUCTION_RENDERS",
@@ -254,34 +256,61 @@ const visualManifest = {
 const renderer = await resolveRenderTools();
 
 for (const spec of approved) {
-  const { bytes, method, names } = await readApprovedBytes(spec, renderer.avifdec);
   const targetRoot = path.join(distRoot, spec.key);
   const desktopDir = path.join(targetRoot, "assets", "approved", "desktop");
   const mobileDir = path.join(targetRoot, "assets", "approved", "mobile");
   await mkdir(desktopDir, { recursive: true });
   await mkdir(mobileDir, { recursive: true });
-
   const desktopFile = path.join(desktopDir, `${spec.key}-hero.avif`);
   const mobileFile = path.join(mobileDir, `${spec.key}-hero.avif`);
-  const sourceFile = path.join(tmpdir(), `oneworldz-${spec.key}-${process.pid}.avif`);
-  await writeFile(sourceFile, bytes);
 
   let desktopBytes;
   let mobileBytes;
-  try {
-    // The approved generated master is source-only. Produce separate web assets
-    // for the actual desktop and mobile containers without stretching or upscaling.
-    desktopBytes = await renderProductionVariant(renderer, sourceFile, desktopFile, 1920, 90);
-    mobileBytes = await renderProductionVariant(renderer, sourceFile, mobileFile, 960, 86);
-  } finally {
-    await unlink(sourceFile).catch(() => {});
+  let sourceRecord;
+
+  if (spec.sourceMode === "approved-avif-master") {
+    const { bytes, method, names } = await readApprovedBytes(spec, renderer.avifdec);
+    const sourceFile = path.join(tmpdir(), `oneworldz-${spec.key}-${process.pid}.avif`);
+    await writeFile(sourceFile, bytes);
+    try {
+      desktopBytes = await renderProductionVariant(renderer, sourceFile, desktopFile, 1920, 90);
+      mobileBytes = await renderProductionVariant(renderer, sourceFile, mobileFile, 960, 86);
+    } finally {
+      await unlink(sourceFile).catch(() => {});
+    }
+    sourceRecord = {
+      source_mode: spec.sourceMode,
+      source_parts: names,
+      materialization_method: method,
+      source_bytes: bytes.byteLength,
+      source_sha256: sha256(bytes)
+    };
+  } else if (spec.sourceMode === "approved-support-composite") {
+    const desktopSource = await buildSupportComposite(renderer, spec.desktopSources, `${spec.key}-desktop-source`);
+    const mobileSource = await buildSupportComposite(renderer, spec.mobileSources, `${spec.key}-mobile-source`);
+    try {
+      desktopBytes = await renderProductionVariant(renderer, desktopSource.file, desktopFile, 1920, 90);
+      mobileBytes = await renderProductionVariant(renderer, mobileSource.file, mobileFile, 960, 86);
+    } finally {
+      await unlink(desktopSource.file).catch(() => {});
+      await unlink(mobileSource.file).catch(() => {});
+    }
+    sourceRecord = {
+      source_mode: spec.sourceMode,
+      desktop_source_assets: desktopSource.sourceFiles,
+      mobile_source_assets: mobileSource.sourceFiles,
+      desktop_source_bytes: desktopSource.sourceBytes,
+      mobile_source_bytes: mobileSource.sourceBytes,
+      desktop_source_sha256: desktopSource.sourceSha256,
+      mobile_source_sha256: mobileSource.sourceSha256
+    };
+  } else {
+    throw new Error(`${spec.key}: unsupported approved source mode ${spec.sourceMode}`);
   }
 
   const desktopSha = sha256(desktopBytes);
   const mobileSha = sha256(mobileBytes);
-  if (desktopSha === mobileSha) {
-    throw new Error(`${spec.key}: desktop and mobile production renders must be distinct files`);
-  }
+  if (desktopSha === mobileSha) throw new Error(`${spec.key}: desktop and mobile production renders must be distinct files`);
 
   const homepagePath = path.join(targetRoot, "index.html");
   const homepage = await readFile(homepagePath, "utf8");
@@ -291,30 +320,17 @@ for (const spec of approved) {
   visualManifest.visuals.push({
     key: spec.key,
     domain: spec.domain,
-    source_parts: names,
-    materialization_method: method,
-    source_bytes: bytes.byteLength,
-    source_sha256: sha256(bytes),
+    ...sourceRecord,
     renderer: `${renderer.imageMagick}+${renderer.avifenc}`,
     validator: renderer.avifdec,
     format: "avif",
-    desktop: {
-      max_width: 1920,
-      quality: 90,
-      bytes: desktopBytes.byteLength,
-      sha256: desktopSha
-    },
-    mobile: {
-      max_width: 960,
-      quality: 86,
-      bytes: mobileBytes.byteLength,
-      sha256: mobileSha
-    },
+    desktop: { max_width: 1920, quality: 90, bytes: desktopBytes.byteLength, sha256: desktopSha },
+    mobile: { max_width: 960, quality: 86, bytes: mobileBytes.byteLength, sha256: mobileSha },
     responsive_policy: "distinct-desktop-and-mobile-production-renders"
   });
 
-  console.log(`RENDERED ${spec.key} source=${method} desktop=${desktopBytes.byteLength}/${desktopSha} mobile=${mobileBytes.byteLength}/${mobileSha} via ${renderer.imageMagick}+${renderer.avifenc}`);
+  console.log(`RENDERED ${spec.key} source=${spec.sourceMode} desktop=${desktopBytes.byteLength}/${desktopSha} mobile=${mobileBytes.byteLength}/${mobileSha}`);
 }
 
 await writeFile(path.join(distRoot, "approved-visuals-manifest.json"), `${JSON.stringify(visualManifest, null, 2)}\n`, "utf8");
-console.log("Approved FoodWorldz, DonateWorldz and HodlerGalaxy masters rendered into distinct desktop and mobile production assets.");
+console.log("Approved FoodWorldz, DonateWorldz and HodlerGalaxy visuals rendered into distinct desktop and mobile production assets.");
