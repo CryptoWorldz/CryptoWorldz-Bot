@@ -8,6 +8,8 @@ const source = path.join(root, "source");
 const dist = path.join(root, "dist", "ecosystem");
 const targets = ["oneworldz", "donateworldz"];
 const referenceArtwork = path.join(source, "assets", "desktop", "oneworldz", "oneworldz-gpt.png");
+const oneWorldzX = "https://x.com/OneWorldzX";
+const oneWorldzTelegram = "https://t.me/OneWorldzTG";
 
 const hash = (buffer) => createHash("sha256").update(buffer).digest("hex");
 
@@ -22,7 +24,7 @@ async function listFiles(dir, rel = "") {
   return out.sort();
 }
 
-async function refreshManifest(target) {
+async function refreshManifest(target, key) {
   const manifestPath = path.join(target, "release-manifest.json");
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
   const files = [];
@@ -40,7 +42,23 @@ async function refreshManifest(target) {
     secret_location: "protected-server-only",
     payments_in_chat: false
   };
+  if (key === "oneworldz") {
+    manifest.official_social_channels = {
+      x: oneWorldzX,
+      telegram: oneWorldzTelegram
+    };
+  }
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
+}
+
+function injectOfficialChannels(html) {
+  if (html.includes('id="official-channels"')) return html;
+  const section = `<section class="section section-dark" id="official-channels"><div class="section-heading"><p class="eyebrow">OFFICIAL ONEWORLDZ CHANNELS</p><h2>Follow OneWorldz. Join the movement.</h2><p>Follow the official OneWorldz X page and join the OneWorldz Telegram community for updates, action and connection.</p></div><div class="button-row"><a class="button primary" href="${oneWorldzX}" target="_blank" rel="noopener noreferrer">Follow @OneWorldzX</a><a class="button secondary" href="${oneWorldzTelegram}" target="_blank" rel="noopener noreferrer">Join OneWorldz Telegram</a></div></section>`;
+  const acknowledgement = html.indexOf('<section class="section" id="acknowledgements">');
+  const alternateAcknowledgement = html.indexOf('<section class="section section-dark" id="acknowledgements">');
+  const pos = acknowledgement >= 0 ? acknowledgement : alternateAcknowledgement;
+  if (pos < 0) throw new Error("OneWorldz acknowledgements insertion point missing for official channels");
+  return html.slice(0, pos) + section + html.slice(pos);
 }
 
 for (const key of targets) {
@@ -60,8 +78,13 @@ for (const key of targets) {
   if (!html.includes("/assets/js/oneworldz-gpt.js")) {
     html = html.replace("</body>", '<script src="/assets/js/oneworldz-gpt.js" defer></script></body>');
   }
+  if (key === "oneworldz") {
+    html = injectOfficialChannels(html);
+    if (!html.includes(`href="${oneWorldzX}"`)) throw new Error("Official OneWorldz X link missing");
+    if (!html.includes(`href="${oneWorldzTelegram}"`)) throw new Error("Official OneWorldz Telegram link missing");
+  }
   await writeFile(indexPath, html, "utf8");
-  await refreshManifest(target);
+  await refreshManifest(target, key);
 }
 
-console.log("OneWorldz GPT integrated into OneWorldz.com and DonateWorldz.com with the approved OneWorldz GPT reference artwork.");
+console.log("OneWorldz GPT integrated into OneWorldz.com and DonateWorldz.com; official OneWorldz X and Telegram channels are included on OneWorldz.com.");
