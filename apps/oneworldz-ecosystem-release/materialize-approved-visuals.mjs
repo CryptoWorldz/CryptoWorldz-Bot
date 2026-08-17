@@ -81,7 +81,7 @@ async function renderProductionVariant(command, input, output, maxWidth, quality
   await run(command, [
     input,
     "-auto-orient",
-    "-resize", `${maxWidth}x${maxWidth}>",
+    "-resize", `${maxWidth}x${maxWidth}>`,
     "-strip",
     "-quality", String(quality),
     output
