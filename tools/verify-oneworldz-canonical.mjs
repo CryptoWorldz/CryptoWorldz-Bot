@@ -93,8 +93,11 @@ const community=read(`${distRoot}/oneworldz/community-support/index.html`);
 const communityJs=read(`${distRoot}/oneworldz/assets/js/community-support.js`);
 requireText(community,'35 verified support links','Community Support page');
 requireText(community,'public.oneworldz_support_profiles','Community Support source');
-requireText(communityJs,'api/oneworldz-community-support','Community Support protected API');
-requireText(communityJs,'payload.count !== 35','Community Support 35-card completeness gate');
+if(count(community,/class="community-support-card"/g)!==35) errors.push('Community Support page must embed exactly 35 verified support cards');
+requireText(communityJs,'querySelectorAll(".community-support-card")','Community Support embedded registry renderer');
+requireText(communityJs,'cards.length === 35','Community Support 35-card completeness gate');
+forbid(communityJs,/fetch\s*\(/i,'Community Support runtime dependency');
+forbid(communityJs,/api\/oneworldz-community-support/i,'Community Support cross-origin API dependency');
 forbid(community+communityJs,/Facebook Support Profile\s*0?\d+/i,'Community Support public page');
 
 const donate=read(`${distRoot}/donateworldz/index.html`);
