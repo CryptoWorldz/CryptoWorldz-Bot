@@ -6,7 +6,8 @@ import { perfectPlan } from "./perfect-plan.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const source = path.join(root, "source");
-const target = path.join(root, "dist", "ecosystem", "cryptoworldz");
+const ecosystemRoot = path.join(root, "dist", "ecosystem");
+const target = path.join(ecosystemRoot, "cryptoworldz");
 const cssSource = path.join(source, "cryptoworldz-visual.css");
 const cssTarget = path.join(target, "assets", "css", "cryptoworldz-visual.css");
 const previewDir = path.join(target, "assets", "link-previews");
@@ -21,7 +22,7 @@ const pages = [
   ["division-vision", "divisions/visionworldz/index.html"],
   ["division-ai", "divisions/aiworldz/index.html"],
   ["division-music", "divisions/musicworldz/index.html"],
-  ["division-movie", "divisions/movieworldz/index.html"],
+  ["division-movie", "divisions/moviewz/index.html"],
   ["division-art", "divisions/artworldz/index.html"],
   ["division-learn", "divisions/learnworldz/index.html"],
   ["division-business", "divisions/businessworldz/index.html"],
@@ -41,6 +42,18 @@ const escapeHtml = (value) => String(value)
   .replaceAll(">", "&gt;")
   .replaceAll('"', "&quot;");
 const external = (href) => /^https?:\/\//.test(href) ? ' target="_blank" rel="noopener noreferrer"' : "";
+
+const visionFooter = `<footer class="site-footer vision-footer"><div><strong>Created with the Vision</strong><span>When Someone say's You can't Change the World 🌐 just Say “Why can't I?”</span></div></footer>`;
+
+function enforceVisionFooter(html, pageName) {
+  const footerMatches = html.match(/<footer\b[^>]*class="[^"]*site-footer[^"]*"[^>]*>[\s\S]*?<\/footer>/g) || [];
+  if (footerMatches.length !== 1) throw new Error(`${pageName}: expected exactly one site footer, found ${footerMatches.length}`);
+  const output = html.replace(footerMatches[0], visionFooter);
+  if (!output.includes("Created with the Vision")) throw new Error(`${pageName}: permanent vision footer missing`);
+  if (!output.includes("When Someone say's You can't Change the World 🌐 just Say “Why can't I?”")) throw new Error(`${pageName}: permanent vision phrase missing`);
+  if (/(Created|Designed) by JayJayTeamDev/i.test(output)) throw new Error(`${pageName}: retired JayJayTeamDev footer credit returned`);
+  return output;
+}
 
 const previewCards = `
 <section class="section section-dark cw-link-previews" aria-labelledby="cw-connected-title">
@@ -106,6 +119,20 @@ async function listFiles(dir, rel = "") {
   return out.sort();
 }
 
+async function refreshManifest(packageDir) {
+  const manifestPath = path.join(packageDir, "release-manifest.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  const records = [];
+  for (const file of await listFiles(packageDir)) {
+    if (file === "release-manifest.json") continue;
+    const bytes = await readFile(path.join(packageDir, file));
+    records.push({ path: `/${file}`, bytes: bytes.byteLength, sha256: hash(bytes) });
+  }
+  manifest.generated_at = new Date().toISOString();
+  manifest.files = records;
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
+}
+
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
 await mkdir(path.dirname(cssTarget), { recursive: true });
@@ -139,14 +166,6 @@ for (const [routeClass, relative] of pages) {
 
 const manifestPath = path.join(target, "release-manifest.json");
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
-const files = [];
-for (const file of await listFiles(target)) {
-  if (file === "release-manifest.json") continue;
-  const bytes = await readFile(path.join(target, file));
-  files.push({ path: `/${file}`, bytes: bytes.byteLength, sha256: hash(bytes) });
-}
-manifest.generated_at = new Date().toISOString();
-manifest.files = files;
 manifest.cryptoworldz_visual_contract = {
   pages: pages.length,
   theme: "BLUE_PURPLE",
@@ -167,4 +186,21 @@ manifest.cryptoworldz_visual_contract = {
 };
 await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 
+let footerPageCount = 0;
+const packageEntries = (await readdir(ecosystemRoot, { withFileTypes: true })).filter((entry) => entry.isDirectory());
+if (packageEntries.length !== 18) throw new Error(`Permanent footer expected 18 static packages, found ${packageEntries.length}`);
+for (const entry of packageEntries) {
+  const packageDir = path.join(ecosystemRoot, entry.name);
+  const htmlFiles = (await listFiles(packageDir)).filter((file) => file.endsWith(".html"));
+  if (!htmlFiles.length) throw new Error(`${entry.name}: no HTML pages found for permanent footer enforcement`);
+  for (const relative of htmlFiles) {
+    const file = path.join(packageDir, relative);
+    const html = await readFile(file, "utf8");
+    await writeFile(file, enforceVisionFooter(html, `${entry.name}/${relative}`), "utf8");
+    footerPageCount += 1;
+  }
+  await refreshManifest(packageDir);
+}
+
 console.log(`CryptoWorldz finalised: blue-purple visual treatment, ${perfectPlan.officialDirectory.length} official links, ${perfectPlan.projectRegistry.length} labelled projects and protected AUTO boundary.`);
+console.log(`Permanent OneWorldz vision footer enforced on ${footerPageCount} static HTML pages across all 18 packages.`);
