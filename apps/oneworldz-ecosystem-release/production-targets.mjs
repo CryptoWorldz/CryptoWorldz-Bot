@@ -67,10 +67,11 @@ const requiredIdentityImage = Object.freeze({
   donateworldz: "donateworldz-hero"
 });
 
-// Exact Hostinger transport destinations authenticated by the successful
-// read-only 18-root proof (run 31925927520 / job 95113450775). These are
-// transport-layer locations for the existing shared Hostinger FTP credential.
-// They are NOT public URL roots and they must never be dynamically guessed.
+// Physical Hostinger transport destinations authenticated by historical
+// read-only proof run 31925927520 / job 95113450775. These are transport-layer
+// locations for the existing shared Hostinger credential boundary. They are
+// NOT public URLs. A public hostname can change without implying that this
+// physical folder changed, so current public routing is independently gated.
 const verifiedHostingerTransportDirs = Object.freeze({
   oneworldz: "domains/oneworldz.com/public_html",
   cryptoworldz: "domains/cryptoworldz.xyz/public_html",
@@ -101,6 +102,9 @@ export const productionTargets = Object.freeze(deploymentTargets19.map((target) 
   if (!identityText) throw new Error(`Missing required identity text for ${target.key}`);
   if (identityImage === undefined) throw new Error(`Missing required identity-image contract for ${target.key}`);
   if (!hostingerTransportDir) throw new Error(`Missing authenticated Hostinger transport directory for ${target.key}`);
+  const publicDomainStatus = target.key === "impactbased"
+    ? "PENDING_REVALIDATION_AFTER_PUBLIC_HOSTNAME_CHANGE"
+    : "UNCHANGED_FROM_HISTORICAL_TRANSPORT_PROOF";
   return Object.freeze({
     ...target,
     remoteDir: "/",
@@ -108,8 +112,10 @@ export const productionTargets = Object.freeze(deploymentTargets19.map((target) 
     expectedTitle,
     requiredIdentityText: identityText,
     requiredIdentityImage: identityImage,
-    accountScope: "EXISTING_SHARED_HOSTINGER_ACCOUNT_EXACT_VERIFIED_DIR",
-    destinationStatus: "HOSTINGER_DESTINATION_PASS",
+    accountScope: "EXISTING_SHARED_HOSTINGER_ACCOUNT_EXACT_RECORDED_DIR",
+    historicalTransportStatus: "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED",
+    publicDomainStatus,
+    destinationStatus: target.key === "impactbased" ? "CURRENT_DESTINATION_REVALIDATION_REQUIRED" : "HOSTINGER_DESTINATION_PASS",
     destinationEvidenceRun: 31925927520,
     destinationEvidenceJob: 95113450775,
     productionWriteAllowed: false
@@ -125,16 +131,17 @@ export const productionGate = Object.freeze({
   deploymentState: "TOTAL_DEPLOYMENT_PLAN_ACTIVE",
   ownerAuthority: "PERFORM_TOTAL_DEPLOYMENT_PLAN",
   repeatedOwnerApprovalRequired: false,
-  hostingDestinationState: "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED",
+  historicalTransportEvidenceState: "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED",
+  currentDestinationState: "PENDING_REVALIDATION_IMPACTBASED_PUBLIC_ROUTE",
   hostingEvidenceRun: 31925927520,
   hostingEvidenceJob: 95113450775,
   hostingEvidenceTopologySha: "5e4bffb4a40a6968d432ca73e619feb15705859c",
   oneWorldzExactRootReconfirmedRun: 31967183758,
   oneWorldzExactRootReconfirmedJob: 95214059999,
   productionWriteAllowed: false,
-  productionWriteBlocker: "CURRENT_BUILD_AND_PREVIEW_VISUAL_PASS_REQUIRED",
+  productionWriteBlocker: "CLEANUP_BUILD_PREVIEW_AND_CURRENT_DESTINATION_PASS_REQUIRED",
   canonicalDeploymentRail: "ONE_AUTHENTICATED_HOSTINGER_STATIC_FLEET_RAIL"
 });
 
 if (productionTargets.length !== 18) throw new Error(`Expected 18 production targets, got ${productionTargets.length}`);
-if (Object.keys(verifiedHostingerTransportDirs).length !== 18) throw new Error("Expected 18 authenticated Hostinger transport directories");
+if (Object.keys(verifiedHostingerTransportDirs).length !== 18) throw new Error("Expected 18 recorded Hostinger transport directories");
