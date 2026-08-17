@@ -43,12 +43,16 @@ test("production gate locks the exact 19 / 15 / 18 architecture and total-deploy
   assert.equal(productionGate.ownerAuthority, "PERFORM_TOTAL_DEPLOYMENT_PLAN");
   assert.equal(productionGate.repeatedOwnerApprovalRequired, false);
   assert.equal(productionGate.historicalTransportEvidenceState, "PASS_AUTHENTICATED_17_UNCHANGED_ROOTS_PLUS_ONE_SUPERSEDED_IMPACTBASED_ROOT");
-  assert.equal(productionGate.currentDestinationState, "IMPACTBASED_NEW_ONEWORLDZ_SUBDOMAIN_ROOT_REAUTHENTICATION_REQUIRED");
-  assert.equal(productionGate.hostingEvidenceRun, 31925927520);
-  assert.equal(productionGate.hostingEvidenceJob, 95113450775);
+  assert.equal(productionGate.currentDestinationState, "PASS_AUTHENTICATED_READ_ONLY_18_TARGET_REVALIDATION");
+  assert.equal(productionGate.hostingEvidenceRun, 31987973244);
+  assert.equal(productionGate.hostingEvidenceJob, 95266212497);
+  assert.equal(productionGate.hostingEvidenceArtifact, 9274418556);
+  assert.equal(productionGate.hostingEvidenceArtifactDigest, "sha256:d4eaa90ebe29e33bcdf8c156e7c82c96c91995fdb9e8d0af916f9eaa0b076792");
+  assert.equal(productionGate.historicalHostingEvidenceRun, 31925927520);
+  assert.equal(productionGate.historicalHostingEvidenceJob, 95113450775);
   assert.equal(productionGate.hostingEvidenceTopologySha, "5e4bffb4a40a6968d432ca73e619feb15705859c");
   assert.equal(productionGate.productionWriteAllowed, false);
-  assert.equal(productionGate.productionWriteBlocker, "IMPACTBASED_EXACT_NEW_HOSTINGER_ROOT_MUST_PASS_CANONICAL_READ_ONLY_PREFLIGHT");
+  assert.equal(productionGate.productionWriteBlocker, "REQUIRES_EXACT_APPROVED_STATIC_TREE_AND_EXECUTION_PHASE_DEPLOY");
   assert.equal(productionGate.canonicalDeploymentRail, "ONE_AUTHENTICATED_HOSTINGER_STATIC_FLEET_RAIL");
 });
 
@@ -64,7 +68,7 @@ test("SolWorld.fun is excluded and CryptoBotz remains the protected non-static d
   assert.deepEqual(new Set(productionGate.protectedDestinations), new Set(["cryptobotz.cryptoworldz.xyz"]));
 });
 
-test("every static target has one website root and one exact recorded Hostinger transport destination", () => {
+test("every static target has one website root and one exact freshly revalidated Hostinger transport destination", () => {
   const keys = productionTargets.map(({ key }) => key);
   const domains = productionTargets.map(({ domain }) => domain);
   const environments = productionTargets.map(({ environment }) => environment);
@@ -81,19 +85,17 @@ test("every static target has one website root and one exact recorded Hostinger 
     assert.equal(target.root, "/");
     assert.equal(target.hostingerTransportDir, expectedTransportDirs[target.key]);
     assert.equal(target.accountScope, "EXISTING_SHARED_HOSTINGER_ACCOUNT_EXACT_RECORDED_DIR");
+    assert.equal(target.destinationEvidenceRun, 31987973244);
+    assert.equal(target.destinationEvidenceJob, 95266212497);
     if (target.key === "impactbased") {
       assert.equal(target.domain, "impactbased.oneworldz.com");
       assert.equal(target.historicalTransportStatus, "SUPERSEDED_BY_CANONICAL_ONEWORLDZ_SUBDOMAIN");
-      assert.equal(target.publicDomainStatus, "TLS_CONFIRMED_BY_OWNER_ROOT_REAUTHENTICATION_REQUIRED");
-      assert.equal(target.destinationStatus, "EXACT_NEW_ROOT_REAUTHENTICATION_REQUIRED");
-      assert.equal(target.destinationEvidenceRun, null);
-      assert.equal(target.destinationEvidenceJob, null);
+      assert.equal(target.publicDomainStatus, "PASS_HTTP_200_COMPOSITE_NEW_DEFAULT_SUBDOMAIN_ROOT_PROOF");
+      assert.equal(target.destinationStatus, "HOSTINGER_DESTINATION_PASS_COMPOSITE_NEW_ROOT_PROOF");
     } else {
       assert.equal(target.historicalTransportStatus, "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED");
-      assert.equal(target.publicDomainStatus, "UNCHANGED_FROM_HISTORICAL_TRANSPORT_PROOF");
+      assert.equal(target.publicDomainStatus, "PASS_ROBOTS_BYTE_MATCH_FRESH_STEP_4");
       assert.equal(target.destinationStatus, "HOSTINGER_DESTINATION_PASS");
-      assert.equal(target.destinationEvidenceRun, 31925927520);
-      assert.equal(target.destinationEvidenceJob, 95113450775);
     }
     assert.equal(target.productionWriteAllowed, false);
     assert.ok(target.expectedTitle.length > 10, `${target.key}: title proof required`);
