@@ -52,8 +52,11 @@ async function discoverSitemapRoutes(baseUrl) {
   try {
     const base = new URL(baseUrl);
     const sitemap = new URL("/sitemap.xml", base);
-    sitemap.searchParams.set("visual_proof", String(Date.now()));
-    const response = await fetch(sitemap, { headers: { "cache-control": "no-cache, no-store" } });
+    sitemap.searchParams.set("visual_proof", `${Date.now()}-${name}`);
+    const response = await fetch(sitemap, {
+      cache: "no-store",
+      headers: { "cache-control": "no-cache, no-store, max-age=0", pragma: "no-cache" }
+    });
     if (!response.ok) return [];
     const xml = await response.text();
     const paths = [];
@@ -90,11 +93,13 @@ if (rootArg) {
       const data = await readFile(file);
       res.writeHead(200, {
         "content-type": mime.get(path.extname(file).toLowerCase()) || "application/octet-stream",
-        "cache-control": "no-store"
+        "cache-control": "no-store, no-cache, must-revalidate, max-age=0",
+        pragma: "no-cache",
+        expires: "0"
       });
       res.end(data);
     } catch {
-      res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+      res.writeHead(404, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
       res.end("Not found");
     }
   });
@@ -152,9 +157,7 @@ async function settleResponsiveMedia(page) {
     }));
     await Promise.all([...document.images].map(async (img) => {
       if (!img.complete || img.naturalWidth <= 0) return;
-      try {
-        await Promise.race([img.decode(), sleep(3000)]);
-      } catch {}
+      try { await Promise.race([img.decode(), sleep(3000)]); } catch {}
     }));
     window.scrollTo(0, 0);
     await sleep(180);
@@ -187,16 +190,15 @@ async function collectDom(page, { identityChecks = false } = {}) {
       href: el.tagName === "A" ? el.getAttribute("href") : null,
       visible: !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length)
     }));
-    const h1Count = document.querySelectorAll("h1").length;
     const footers = [...document.querySelectorAll("footer.site-footer")];
     const footer = footers[0] || null;
-    const footerText = footer ? (footer.textContent || "").replace(/\s+/g, " ").trim() : "";
+    const footerText = footer ? (footer.innerText || "").replace(/\s+/g, " ").trim() : "";
     const footerLinks = footer ? footer.querySelectorAll("a[href]").length : 0;
     const retiredFooterCredit = /(Created|Designed) by JayJayTeamDev/i.test(footerText);
     return {
       title: document.title,
       h1: document.querySelector("h1")?.textContent?.trim() || "",
-      h1Count,
+      h1Count: document.querySelectorAll("h1").length,
       textLength: bodyText.length,
       requiredTextPresent,
       scrollWidth: document.documentElement.scrollWidth,
@@ -264,6 +266,13 @@ function pageFailures({ navigationError, dom, menu, consoleErrors, pageErrors, f
   return failures;
 }
 
+function freshLiveUrl(input, routeKey = "root") {
+  if (rootArg) return input;
+  const url = new URL(input);
+  url.searchParams.set("live_proof", `${Date.now()}-${name}-${routeKey}`);
+  return url.href;
+}
+
 for (const vp of viewports) {
   const context = await browser.newContext({
     viewport: { width: vp.width, height: vp.height },
@@ -274,6 +283,7 @@ for (const vp of viewports) {
   const page = await context.newPage();
 
   const auditOne = async (url, { rootIdentity = false, screenshotPath = null } = {}) => {
+    const navigationUrl = freshLiveUrl(url, `${vp.key}-${slugForPath(new URL(url).pathname)}`);
     const consoleErrors = [];
     const pageErrors = [];
     const failedRequests = [];
@@ -281,8 +291,12 @@ for (const vp of viewports) {
     const onPageError = (err) => pageErrors.push(String(err?.message || err));
     const onRequestFailed = (request) => {
       try {
-        const pageOrigin = new URL(url).origin;
-        if (new URL(request.url()).origin === pageOrigin) failedRequests.push({ url: request.url(), error: request.failure()?.errorText || "request failed" });
+        const pageOrigin = new URL(navigationUrl).origin;
+        if (new URL(request.url()).origin !== pageOrigin) return;
+        const error = request.failure()?.errorText || "request failed";
+        const resourceType = request.resourceType();
+        if (error === "net::ERR_ABORTED" && resourceType === "image") return;
+        failedRequests.push({ url: request.url(), error, resourceType });
       } catch {}
     };
     page.on("console", onConsole);
@@ -291,10 +305,10 @@ for (const vp of viewports) {
 
     let navigationError = null;
     try {
-      await page.goto(url, { waitUntil: "networkidle", timeout: 45000 });
+      await page.goto(navigationUrl, { waitUntil: "networkidle", timeout: 45000 });
     } catch (error) {
       navigationError = String(error?.message || error);
-      try { await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20000 }); } catch {}
+      try { await page.goto(navigationUrl, { waitUntil: "domcontentloaded", timeout: 20000 }); } catch {}
     }
     await page.waitForTimeout(300);
     await settleResponsiveMedia(page);
@@ -308,12 +322,22 @@ for (const vp of viewports) {
     page.off("console", onConsole);
     page.off("pageerror", onPageError);
     page.off("requestfailed", onRequestFailed);
-    return { dom, menu, consoleErrors, pageErrors, failedRequests, navigationError, failures };
+    return { dom, menu, consoleErrors, pageErrors, failedRequests, navigationError, failures, navigationUrl };
   };
 
   const rootScreenshot = path.join(outDir, `${vp.key}.png`);
   const rootResult = await auditOne(targetUrl, { rootIdentity: true, screenshotPath: rootScreenshot });
-  report.viewports[vp.key] = { ...rootResult.dom, menu: rootResult.menu, consoleErrors: rootResult.consoleErrors, pageErrors: rootResult.pageErrors, failedRequests: rootResult.failedRequests, navigationError: rootResult.navigationError, screenshot: rootScreenshot, failures: rootResult.failures };
+  report.viewports[vp.key] = {
+    ...rootResult.dom,
+    menu: rootResult.menu,
+    consoleErrors: rootResult.consoleErrors,
+    pageErrors: rootResult.pageErrors,
+    failedRequests: rootResult.failedRequests,
+    navigationError: rootResult.navigationError,
+    navigationUrl: rootResult.navigationUrl,
+    screenshot: rootScreenshot,
+    failures: rootResult.failures
+  };
   if (rootResult.failures.length) {
     report.pass = false;
     report.failures.push(...rootResult.failures.map((failure) => `${vp.key}: ${failure}`));
@@ -364,6 +388,11 @@ for (const vp of viewports) {
       footerText: result.dom.footerText,
       footerLinks: result.dom.footerLinks,
       menu: result.menu,
+      consoleErrors: result.consoleErrors,
+      pageErrors: result.pageErrors,
+      failedRequests: result.failedRequests,
+      navigationError: result.navigationError,
+      navigationUrl: result.navigationUrl,
       screenshot,
       failures: result.failures
     };
