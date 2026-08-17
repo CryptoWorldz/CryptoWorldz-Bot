@@ -24,7 +24,7 @@ const expectedTransportDirs = Object.freeze({
   robinworldz: "domains/robinworldz.xyz/public_html",
   hodlerworldz: "domains/hodlerworldz.xyz/public_html",
   purplediamondcrew: "domains/purplediamondcrew.com/public_html",
-  impactbased: "domains/cryptoworldz.xyz/public_html/impactbased",
+  impactbased: "domains/oneworldz.com/public_html/impactbased",
   "law-oneworldz": "domains/oneworldz.com/public_html/law",
   "learn-oneworldz": "domains/oneworldz.com/public_html/learn",
   hodlergalaxy: "domains/hodlergalaxy.xyz/public_html",
@@ -42,13 +42,13 @@ test("production gate locks the exact 19 / 15 / 18 architecture and total-deploy
   assert.equal(productionGate.deploymentState, "TOTAL_DEPLOYMENT_PLAN_ACTIVE");
   assert.equal(productionGate.ownerAuthority, "PERFORM_TOTAL_DEPLOYMENT_PLAN");
   assert.equal(productionGate.repeatedOwnerApprovalRequired, false);
-  assert.equal(productionGate.historicalTransportEvidenceState, "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED");
-  assert.equal(productionGate.currentDestinationState, "PENDING_REVALIDATION_IMPACTBASED_PUBLIC_ROUTE");
+  assert.equal(productionGate.historicalTransportEvidenceState, "PASS_AUTHENTICATED_17_UNCHANGED_ROOTS_PLUS_ONE_SUPERSEDED_IMPACTBASED_ROOT");
+  assert.equal(productionGate.currentDestinationState, "IMPACTBASED_NEW_ONEWORLDZ_SUBDOMAIN_ROOT_REAUTHENTICATION_REQUIRED");
   assert.equal(productionGate.hostingEvidenceRun, 31925927520);
   assert.equal(productionGate.hostingEvidenceJob, 95113450775);
   assert.equal(productionGate.hostingEvidenceTopologySha, "5e4bffb4a40a6968d432ca73e619feb15705859c");
   assert.equal(productionGate.productionWriteAllowed, false);
-  assert.equal(productionGate.productionWriteBlocker, "CLEANUP_BUILD_PREVIEW_AND_CURRENT_DESTINATION_PASS_REQUIRED");
+  assert.equal(productionGate.productionWriteBlocker, "IMPACTBASED_EXACT_NEW_HOSTINGER_ROOT_MUST_PASS_CANONICAL_READ_ONLY_PREFLIGHT");
   assert.equal(productionGate.canonicalDeploymentRail, "ONE_AUTHENTICATED_HOSTINGER_STATIC_FLEET_RAIL");
 });
 
@@ -81,17 +81,20 @@ test("every static target has one website root and one exact recorded Hostinger 
     assert.equal(target.root, "/");
     assert.equal(target.hostingerTransportDir, expectedTransportDirs[target.key]);
     assert.equal(target.accountScope, "EXISTING_SHARED_HOSTINGER_ACCOUNT_EXACT_RECORDED_DIR");
-    assert.equal(target.historicalTransportStatus, "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED");
     if (target.key === "impactbased") {
       assert.equal(target.domain, "impactbased.oneworldz.com");
-      assert.equal(target.publicDomainStatus, "PENDING_REVALIDATION_AFTER_PUBLIC_HOSTNAME_CHANGE");
-      assert.equal(target.destinationStatus, "CURRENT_DESTINATION_REVALIDATION_REQUIRED");
+      assert.equal(target.historicalTransportStatus, "SUPERSEDED_BY_CANONICAL_ONEWORLDZ_SUBDOMAIN");
+      assert.equal(target.publicDomainStatus, "TLS_CONFIRMED_BY_OWNER_ROOT_REAUTHENTICATION_REQUIRED");
+      assert.equal(target.destinationStatus, "EXACT_NEW_ROOT_REAUTHENTICATION_REQUIRED");
+      assert.equal(target.destinationEvidenceRun, null);
+      assert.equal(target.destinationEvidenceJob, null);
     } else {
+      assert.equal(target.historicalTransportStatus, "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED");
       assert.equal(target.publicDomainStatus, "UNCHANGED_FROM_HISTORICAL_TRANSPORT_PROOF");
       assert.equal(target.destinationStatus, "HOSTINGER_DESTINATION_PASS");
+      assert.equal(target.destinationEvidenceRun, 31925927520);
+      assert.equal(target.destinationEvidenceJob, 95113450775);
     }
-    assert.equal(target.destinationEvidenceRun, 31925927520);
-    assert.equal(target.destinationEvidenceJob, 95113450775);
     assert.equal(target.productionWriteAllowed, false);
     assert.ok(target.expectedTitle.length > 10, `${target.key}: title proof required`);
   }
