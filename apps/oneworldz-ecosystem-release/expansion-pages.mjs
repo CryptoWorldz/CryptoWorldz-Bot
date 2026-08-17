@@ -8,7 +8,7 @@ const links = Object.freeze({
   foodWorldz: "https://foodworldz.com",
   donateWorldz: "https://donateworldz.com",
   hodlerGalaxy: "https://hodlergalaxy.xyz",
-  impactBased: "https://impactbased.cryptoworldz.xyz",
+  impactBased: coreLinks.impactBased,
   learn: "https://learn.oneworldz.com",
   law: "https://law.oneworldz.com",
   commandCentre: "https://cryptobotz.cryptoworldz.xyz"
@@ -45,11 +45,7 @@ const header = (name, nav = []) => `<header class="site-header">
 </header>
 <button class="menu-backdrop" type="button" aria-label="Close menu" tabindex="-1"></button>`;
 
-const footer = (name) => `<footer class="site-footer">
-  <div><strong>${escapeHtml(name)}</strong><span>One World • One Mission</span></div>
-  <nav aria-label="Footer"><a href="${links.oneWorldz}">OneWorldz</a><a href="${links.cryptoWorldz}">CryptoWorldz</a><a href="${links.donateWorldz}">DonateWorldz</a></nav>
-  <p>Designed by JayJayTeamDev™ • Helping the People Who Help People</p>
-</footer>`;
+const footer = () => `<footer class="site-footer vision-footer"><div><strong>Created with the Vision</strong><span>When Someone say's You can't Change the World 🌐 just Say “Why can't I?”</span></div></footer>`;
 
 const sectionHeading = (eyebrow, title, copy = "") => `<div class="section-heading">
   <p class="eyebrow">${escapeHtml(eyebrow)}</p>
