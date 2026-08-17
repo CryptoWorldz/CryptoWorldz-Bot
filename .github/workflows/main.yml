@@ -220,6 +220,8 @@ jobs:
           test -s "$root/oneworldz/index.html"
           test ! -d "$root/cryptobotz"
           ! grep -Rni --include='*.html' 'solworld\.fun' "$root"
+          ! grep -RIE --include='*.html' 'Created by JayJayTeamDev|Designed by JayJayTeamDev' "$root"
+          grep -RFl --include='*.html' 'Created with the Vision' "$root" >/dev/null
           ! grep -RIE 'OPENAI_API_KEY|sk-proj-|sk_live_|sk_test_|service_role|FTP_PASSWORD|DATABASE_URL|SUPABASE_SERVICE' "$root"
 
       - name: Install exact-file FTPS client
@@ -281,7 +283,7 @@ jobs:
             proved=0
             for attempt in $(seq 1 8); do
               if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
-                -H 'Cache-Control: no-cache, no-store' \
+                -H 'Cache-Control: no-cache, no-store' -H 'Pragma: no-cache' \
                 "https://$domain/robots.txt?destination_proof=${GITHUB_RUN_ID}-${key}-${attempt}" -o "$live"; then
                 if cmp -s "$remote" "$live"; then proved=1; break; fi
               fi
@@ -294,7 +296,7 @@ jobs:
             echo "DESTINATION_PROVED $domain -> $transport"
           done < "$RUNNER_TEMP/targets.tsv"
 
-      - name: Backup package paths, repair only empty collisions, upload homepage last, rollback fleet on failure
+      - name: Backup exact package paths, replace exact files, prove exact public bytes, rollback fleet on failure
         shell: bash
         run: |
           set -uo pipefail
@@ -311,7 +313,8 @@ jobs:
             dirs="$RUNNER_TEMP/$key.dirs"
             existing="$RUNNER_TEMP/$key.existing"
             backup="$RUNNER_TEMP/backups/$key"
-            mkdir -p "$backup"
+            postwrite="$RUNNER_TEMP/postwrite/$key"
+            mkdir -p "$backup" "$postwrite"
 
             if ! (
               set -euo pipefail
@@ -324,6 +327,7 @@ jobs:
               ! grep -Eq '^/|(^|/)\.\.(/|$)' "$files"
               grep -v '^index\.html$' "$files" > "$nonindex" || true
               while IFS= read -r rel; do d="$(dirname "$rel")"; [ "$d" = '.' ] || echo "$d"; done < "$files" | sort -u > "$dirs"
+              while IFS= read -r rel; do mkdir -p "$backup/$(dirname "$rel")"; done < "$files"
 
               {
                 echo 'set cmd:fail-exit false'
@@ -353,24 +357,61 @@ jobs:
                 echo 'set ssl:verify-certificate true'
                 echo 'set ssl:check-hostname false'
                 printf 'cd "%s"\n' "$transport"
-                while IFS= read -r rel; do printf 'rmdir "%s"\n' "$rel"; done < "$files"
-                echo 'set cmd:fail-exit true'
+                while IFS= read -r rel; do printf 'rm -f "%s"\n' "$rel"; done < "$files"
                 printf 'lcd "%s"\n' "$release_root"
                 while IFS= read -r dir; do [ -n "$dir" ] && printf 'mkdir -p "%s"\n' "$dir"; done < "$dirs"
+                echo 'set cmd:fail-exit true'
                 while IFS= read -r rel; do printf 'put "%s" -o "%s"\n' "$rel" "$rel"; done < "$nonindex"
                 echo 'put "index.html" -o "index.html"'
                 echo 'bye'
               } > "$RUNNER_TEMP/$key.upload.lftp"
               timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.upload.lftp" "$host"
 
+              {
+                echo 'set cmd:fail-exit true'
+                echo 'set net:max-retries 2'
+                echo 'set net:timeout 30'
+                echo 'set ftp:ssl-force true'
+                echo 'set ftp:ssl-protect-data true'
+                echo 'set ssl:verify-certificate true'
+                echo 'set ssl:check-hostname false'
+                printf 'cd "%s"\n' "$transport"
+                printf 'get "index.html" -o "%s/index.html"\n' "$postwrite"
+                printf 'get "release-manifest.json" -o "%s/release-manifest.json"\n' "$postwrite"
+                echo 'bye'
+              } > "$RUNNER_TEMP/$key.postwrite.lftp"
+              timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.postwrite.lftp" "$host"
+              cmp -s "$release_root/index.html" "$postwrite/index.html"
+              cmp -s "$release_root/release-manifest.json" "$postwrite/release-manifest.json"
+              echo "FTPS_EXACT_BYTES_PROVED $domain -> $transport"
+
+              public_index="$RUNNER_TEMP/$key.public.index.html"
+              public_manifest="$RUNNER_TEMP/$key.public.release-manifest.json"
               proved=0
-              for attempt in $(seq 1 24); do
-                html="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 -H 'Cache-Control: no-cache, no-store' "https://$domain/?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
-                if printf '%s' "$html" | grep -Fq "<title>$title</title>"; then proved=1; break; fi
+              for attempt in $(seq 1 18); do
+                rm -f "$public_index" "$public_manifest"
+                if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
+                    -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
+                    "https://$domain/?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${key}-${attempt}" -o "$public_index" \
+                  && curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
+                    -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
+                    "https://$domain/release-manifest.json?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${key}-${attempt}" -o "$public_manifest"; then
+                  if cmp -s "$release_root/index.html" "$public_index" \
+                    && cmp -s "$release_root/release-manifest.json" "$public_manifest"; then
+                    proved=1
+                    break
+                  fi
+                fi
                 sleep 10
               done
-              test "$proved" = '1'
-              echo "DEPLOYED_AND_TITLE_PROVED https://$domain/"
+              if [ "$proved" != '1' ]; then
+                echo "::error::Public origin for $domain did not serve the exact approved index.html + release-manifest.json bytes after upload."
+                exit 1
+              fi
+              grep -Fq 'Created with the Vision' "$public_index"
+              grep -Fq "Why can't I?" "$public_index"
+              ! grep -Eiq 'Created by JayJayTeamDev|Designed by JayJayTeamDev' "$public_index"
+              echo "DEPLOYED_AND_EXACT_PUBLIC_BYTES_PROVED https://$domain/"
             ); then
               failure=1
               failed_key="$key"
@@ -415,7 +456,7 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/deployment-proof"
           cp "$RUNNER_TEMP/touched.tsv" "$GITHUB_WORKSPACE/deployment-proof/touched.tsv"
           test "$(wc -l < "$GITHUB_WORKSPACE/deployment-proof/touched.tsv" | tr -d ' ')" = '18'
-          printf 'preview_run_id=%s\napproved_static_tree=%s\ndeploy_run_id=%s\n' "$PREVIEW_RUN_ID" "$APPROVED_STATIC_TREE" "$GITHUB_RUN_ID" > "$GITHUB_WORKSPACE/deployment-proof/release.txt"
+          printf 'preview_run_id=%s\napproved_static_tree=%s\ndeploy_run_id=%s\nproof=EXACT_FTPS_AND_PUBLIC_INDEX_MANIFEST_BYTES\n' "$PREVIEW_RUN_ID" "$APPROVED_STATIC_TREE" "$GITHUB_RUN_ID" > "$GITHUB_WORKSPACE/deployment-proof/release.txt"
 
       - name: Upload deployment ledger
         if: always()
