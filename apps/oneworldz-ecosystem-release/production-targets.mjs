@@ -67,11 +67,15 @@ const requiredIdentityImage = Object.freeze({
   donateworldz: "donateworldz-hero"
 });
 
-// Physical Hostinger transport destinations authenticated by historical
-// read-only proof run 31925927520 / job 95113450775. These are transport-layer
-// locations for the existing shared Hostinger credential boundary. They are
-// NOT public URLs. A public hostname can change without implying that this
-// physical folder changed, so current public routing is independently gated.
+// Physical Hostinger transport destinations. All unchanged targets retain the
+// recovered authenticated evidence from run 31925927520 / job 95113450775.
+// ImpactBased is intentionally different: JayJayTeamDev created the canonical
+// impactbased.oneworldz.com subdomain under OneWorldz using Hostinger's default
+// subdomain directory. Hostinger's documented default is a folder named after
+// the subdomain inside the parent domain public_html, so the only allowed
+// candidate transport root is domains/oneworldz.com/public_html/impactbased.
+// It remains WRITE-BLOCKED until the canonical rail re-authenticates that exact
+// directory and proves the public hostname maps to it. No fallback path exists.
 const verifiedHostingerTransportDirs = Object.freeze({
   oneworldz: "domains/oneworldz.com/public_html",
   cryptoworldz: "domains/cryptoworldz.xyz/public_html",
@@ -85,7 +89,7 @@ const verifiedHostingerTransportDirs = Object.freeze({
   robinworldz: "domains/robinworldz.xyz/public_html",
   hodlerworldz: "domains/hodlerworldz.xyz/public_html",
   purplediamondcrew: "domains/purplediamondcrew.com/public_html",
-  impactbased: "domains/cryptoworldz.xyz/public_html/impactbased",
+  impactbased: "domains/oneworldz.com/public_html/impactbased",
   "law-oneworldz": "domains/oneworldz.com/public_html/law",
   "learn-oneworldz": "domains/oneworldz.com/public_html/learn",
   hodlergalaxy: "domains/hodlergalaxy.xyz/public_html",
@@ -102,8 +106,9 @@ export const productionTargets = Object.freeze(deploymentTargets19.map((target) 
   if (!identityText) throw new Error(`Missing required identity text for ${target.key}`);
   if (identityImage === undefined) throw new Error(`Missing required identity-image contract for ${target.key}`);
   if (!hostingerTransportDir) throw new Error(`Missing authenticated Hostinger transport directory for ${target.key}`);
-  const publicDomainStatus = target.key === "impactbased"
-    ? "PENDING_REVALIDATION_AFTER_PUBLIC_HOSTNAME_CHANGE"
+  const isImpactBased = target.key === "impactbased";
+  const publicDomainStatus = isImpactBased
+    ? "TLS_CONFIRMED_BY_OWNER_ROOT_REAUTHENTICATION_REQUIRED"
     : "UNCHANGED_FROM_HISTORICAL_TRANSPORT_PROOF";
   return Object.freeze({
     ...target,
@@ -113,11 +118,15 @@ export const productionTargets = Object.freeze(deploymentTargets19.map((target) 
     requiredIdentityText: identityText,
     requiredIdentityImage: identityImage,
     accountScope: "EXISTING_SHARED_HOSTINGER_ACCOUNT_EXACT_RECORDED_DIR",
-    historicalTransportStatus: "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED",
+    historicalTransportStatus: isImpactBased
+      ? "SUPERSEDED_BY_CANONICAL_ONEWORLDZ_SUBDOMAIN"
+      : "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED",
     publicDomainStatus,
-    destinationStatus: target.key === "impactbased" ? "CURRENT_DESTINATION_REVALIDATION_REQUIRED" : "HOSTINGER_DESTINATION_PASS",
-    destinationEvidenceRun: 31925927520,
-    destinationEvidenceJob: 95113450775,
+    destinationStatus: isImpactBased
+      ? "EXACT_NEW_ROOT_REAUTHENTICATION_REQUIRED"
+      : "HOSTINGER_DESTINATION_PASS",
+    destinationEvidenceRun: isImpactBased ? null : 31925927520,
+    destinationEvidenceJob: isImpactBased ? null : 95113450775,
     productionWriteAllowed: false
   });
 }));
@@ -131,15 +140,15 @@ export const productionGate = Object.freeze({
   deploymentState: "TOTAL_DEPLOYMENT_PLAN_ACTIVE",
   ownerAuthority: "PERFORM_TOTAL_DEPLOYMENT_PLAN",
   repeatedOwnerApprovalRequired: false,
-  historicalTransportEvidenceState: "PASS_AUTHENTICATED_18_ROOT_PROOF_RECOVERED",
-  currentDestinationState: "PENDING_REVALIDATION_IMPACTBASED_PUBLIC_ROUTE",
+  historicalTransportEvidenceState: "PASS_AUTHENTICATED_17_UNCHANGED_ROOTS_PLUS_ONE_SUPERSEDED_IMPACTBASED_ROOT",
+  currentDestinationState: "IMPACTBASED_NEW_ONEWORLDZ_SUBDOMAIN_ROOT_REAUTHENTICATION_REQUIRED",
   hostingEvidenceRun: 31925927520,
   hostingEvidenceJob: 95113450775,
   hostingEvidenceTopologySha: "5e4bffb4a40a6968d432ca73e619feb15705859c",
   oneWorldzExactRootReconfirmedRun: 31967183758,
   oneWorldzExactRootReconfirmedJob: 95214059999,
   productionWriteAllowed: false,
-  productionWriteBlocker: "CLEANUP_BUILD_PREVIEW_AND_CURRENT_DESTINATION_PASS_REQUIRED",
+  productionWriteBlocker: "IMPACTBASED_EXACT_NEW_HOSTINGER_ROOT_MUST_PASS_CANONICAL_READ_ONLY_PREFLIGHT",
   canonicalDeploymentRail: "ONE_AUTHENTICATED_HOSTINGER_STATIC_FLEET_RAIL"
 });
 
