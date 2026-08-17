@@ -3,30 +3,36 @@
 Status: LOCKED PRODUCTION RULE
 Owner: JayJayTeamDev
 Operator pair: JayJayTeamDev × ChatGPT
-Applies to: the current canonical OneWorldz static fleet and every later production update unless JayJayTeamDev explicitly replaces this rule.
+Applies to: the canonical OneWorldz static fleet and every later production update unless JayJayTeamDev explicitly replaces this rule.
 
 ## Authority and non-authority
 
-The latest direct JayJayTeamDev instruction is the release authority. The current instruction `Perform TOTAL DEPLOYMENT PLAN` authorises the current canonical release to proceed through planning, build, verification, Hostinger destination proof, production deployment and live verification without another repeated deployment-approval prompt, provided the approved plan and destination set do not change.
+The latest direct JayJayTeamDev instruction is the release authority. The current instruction `Perform TOTAL DEPLOYMENT PLAN` authorises the current canonical release to proceed through cleanup, planning, build, verification, authenticated Hostinger destination proof, production deployment and live verification without another repeated approval prompt, provided the approved plan, public destinations, payment destinations and protected boundaries do not change.
 
-These are never production authority: archive material, old branches, old GitHub Environments, old deployment request files, retired workflows, historical screenshots, previous assistant claims or a successful HTTP response by itself.
+These are never production authority: old branches, historical GitHub Environments, deleted/retired deployment files, old screenshots, Git history, previous assistant claims or a successful HTTP response by itself.
 
 A new owner review is required only if one of these changes after the current authority is recorded:
 
 - public content or imagery outside the locked plan;
-- target domain or destination mapping;
+- public target domain or authenticated Hostinger destination mapping;
 - payment destination;
 - DNS, mail or registrar configuration;
 - protected CryptoBotz, ZED, AUTO, G.R.A.C.E., Supabase or owner/admin security boundaries;
 - a secret, wallet signing capability or financial-control permission.
 
-If none of those changes, do not ask JayJayTeamDev to re-approve the same release stage again.
+If none of those changes, do not ask JayJayTeamDev to re-approve the same unchanged release stage again.
 
 ## One canonical source
 
 Static source/build authority: `apps/oneworldz-ecosystem-release/` only.
 
-Production artwork used by the static fleet must enter through that canonical app source and its manifest/build rules. `archive/` is evidence/reference only and must never be auto-imported, searched as a fallback image source or treated as a second build source.
+Deployable static-site image files may exist only under:
+
+`apps/oneworldz-ecosystem-release/source/assets/`
+
+The encoded fragments in `source/approved-visuals/` are build inputs for three already-approved AVIF masters only. They are not a second reference library, deployment tree or image-selection route.
+
+No root media library, archive tree, restoration folder, alternate app, fallback public gateway or second static source is permitted.
 
 `cryptobotz.cryptoworldz.xyz` is a separate protected Node application and is never a static deployment target.
 
@@ -35,35 +41,40 @@ Production artwork used by the static fleet must enter through that canonical ap
 The exact same static candidate must pass these gates in order:
 
 1. **CLEAN SOURCE LOCK**
-   - Retired gateways, duplicate builders, alternate deployment helpers and parallel production routes remain outside the active tree.
-   - The structural guard must pass.
+   - `apps/` contains only `oneworldz-ecosystem-release`.
+   - `deployments/` contains only its README and the single fleet state record.
+   - `tools/` contains only canonical verification and community-metadata support.
+   - exactly three approved workflows exist and only `.github/workflows/main.yml` may contain static Hostinger deployment execution.
+   - no retired gateway, alternate FTP helper, archive tree, old request route or alternate static image area exists.
+   - the structural guard passes.
 
 2. **BUILD PASS**
    - Build the exact locked plan from the canonical app.
-   - Run tests, secret checks, protected-service boundaries and target-contract checks.
+   - Run tests, secret checks, protected-service boundaries, SEO/link checks and target-contract checks.
    - No production write occurs here.
 
 3. **PREVIEW VISUAL PASS — ChatGPT**
    - Render the exact candidate in real desktop and mobile browser viewports.
-   - Check required artwork, identity, crop, proportions, text readability, menu behaviour, buttons/links, broken images, browser/page errors, spacing and horizontal overflow.
+   - Check all locally linked pages, required artwork, identity, crop, proportions, text readability, menu behaviour, buttons/links, broken images, browser/page errors, spacing and horizontal overflow.
    - Record the proof against the exact canonical static-source tree digest.
 
 4. **HOSTINGER DESTINATION PASS**
-   - Use only the existing shared Hostinger account and the exact 18 transport directories already authenticated by the recorded read-only Hostinger proof.
-   - The 18 exact transport destinations are stored once in `apps/oneworldz-ecosystem-release/production-targets.mjs` as `hostingerTransportDir` values.
+   - Use only the existing shared Hostinger credential boundary and exact stored transport directories.
    - Website/package root remains `/`; homepage remains `/index.html`; website assets remain `/assets/`.
-   - `hostingerTransportDir` is transport evidence for the shared Hostinger account only. It must never be derived, guessed, concatenated, probed or substituted at deployment time.
-   - A destination mismatch is `FAIL — NOT APPROVED`; do not try another directory, account, gateway or workflow.
+   - `hostingerTransportDir` is physical transport evidence only. It does **not** determine the public URL.
+   - Every public domain must independently match the current canonical public-domain contract before write.
+   - A public-domain mismatch or transport mismatch is `FAIL — NOT APPROVED`; do not try another directory, alias, account, gateway or workflow.
 
 5. **PRODUCTION DEPLOY**
-   - Use exactly one authenticated Hostinger static-fleet rail and the exact verified `hostingerTransportDir` for each target.
-   - Back up only the package-owned production files for the exact target.
+   - Use exactly one authenticated Hostinger static-fleet rail: `.github/workflows/main.yml`.
+   - Use the exact verified `hostingerTransportDir` for each target.
+   - Back up only package-owned production files for the exact target.
    - Upload non-homepage files first and switch `/index.html` last where the transfer mechanism allows it.
    - Preserve DNS, mail, registrar records, unrelated files and protected services.
    - No domain-specific emergency rail, fallback gateway or second deployment workflow may be introduced.
 
 6. **LIVE TECHNICAL PASS**
-   - Verify release identity, required pages/assets, links, HTTP behaviour and protected-service boundaries on the live destination.
+   - Verify the canonical public URL, release identity, required pages/assets, internal and external links, HTTP behaviour and protected-service boundaries.
    - A title-only or HTTP-200-only check is insufficient.
 
 7. **LIVE VISUAL PASS — JayJayTeamDev × ChatGPT**
@@ -78,9 +89,9 @@ The exact same static candidate must pass these gates in order:
 
 Only .github/workflows/main.yml may be used as the static-fleet execution rail if GitHub Actions is used for this release. It is not permission to create a fourth workflow.
 
-The other retained workflows are verification/support workflows only and must never receive static Hostinger deployment authority.
+The two other retained workflows are verification/support workflows only and are structurally forbidden from containing static FTP/Hostinger deployment authority.
 
-Existing GitHub Environments from historical deployment attempts are inert metadata except the already proven `cryptoworldz-production` environment if `.github/workflows/main.yml` uses its existing Hostinger FTP credentials for the single rail. No other historical environment may be selected merely because it exists.
+Existing GitHub Environments from historical attempts are inert metadata except the proven `cryptoworldz-production` credential boundary used by `.github/workflows/main.yml`. No other historical environment may be selected merely because it exists.
 
 No retired static deployment workflow may be restored. No domain-specific workflow may be added. Any future replacement execution mechanism must replace the single rail rather than coexist with it.
 
@@ -105,7 +116,7 @@ Use only these operational states:
 - `JAYJAYTEAMDEV × CHATGPT — 100% PRODUCTION PASS`
 - `FAIL — NOT APPROVED`
 
-A Hostinger destination mismatch is never permission to guess another route.
+A public-domain or Hostinger destination mismatch is never permission to guess another route.
 
 ## Visual evidence requirement
 
@@ -113,6 +124,7 @@ Every changed public site must produce at minimum:
 
 - desktop browser proof at a standard wide viewport;
 - mobile browser proof at a standard phone viewport;
+- every linked same-origin HTML page audited in both viewports;
 - broken-image result;
 - horizontal-overflow result;
 - browser console/page-error result;
