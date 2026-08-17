@@ -1,8 +1,12 @@
+import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
+import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 
+const run = promisify(execFile);
 const appRoot = path.dirname(fileURLToPath(import.meta.url));
 const sourcePartsRoot = path.join(appRoot, "source", "approved-visuals");
 const distRoot = path.join(appRoot, "dist", "ecosystem");
@@ -59,6 +63,33 @@ async function readApprovedBytes(spec) {
   if (isAvif(segmented)) return { bytes: segmented, method: "decoded-segments", names };
 
   throw new Error(`${spec.key}: approved visual parts do not materialize to a valid AVIF`);
+}
+
+async function resolveImageMagick() {
+  for (const command of ["magick", "convert"]) {
+    try {
+      await run(command, ["-version"], { timeout: 15000 });
+      return command;
+    } catch {
+      // Try the next supported ImageMagick entry point.
+    }
+  }
+  throw new Error("Responsive production visual rendering requires ImageMagick (magick or convert)");
+}
+
+async function renderProductionVariant(command, input, output, maxWidth, quality) {
+  await run(command, [
+    input,
+    "-auto-orient",
+    "-resize", `${maxWidth}x${maxWidth}>",
+    "-strip",
+    "-quality", String(quality),
+    output
+  ], { timeout: 120000, maxBuffer: 1024 * 1024 * 4 });
+
+  const bytes = await readFile(output);
+  if (!isAvif(bytes)) throw new Error(`${path.basename(output)}: responsive renderer did not produce AVIF`);
+  return bytes;
 }
 
 function replaceHeroMedia(html, spec) {
@@ -122,7 +153,8 @@ async function refreshReleaseManifest(spec, targetRoot) {
   manifest.approved_visual = {
     key: spec.key,
     desktop: `/assets/approved/desktop/${spec.key}-hero.avif`,
-    mobile: `/assets/approved/mobile/${spec.key}-hero.avif`
+    mobile: `/assets/approved/mobile/${spec.key}-hero.avif`,
+    responsive_policy: "distinct-production-renders"
   };
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 }
@@ -130,10 +162,14 @@ async function refreshReleaseManifest(spec, targetRoot) {
 const visualManifest = {
   stage: "FINAL_APPROVED_VISUAL_MATERIALIZATION",
   approved_by: "JayJayTeamDev",
-  source_policy: "APPROVED_GENERATED_ARTWORK_ONLY",
+  source_policy: "APPROVED_GENERATED_MASTERS_SOURCE_ONLY",
+  reference_library_policy: "REFERENCE_ONLY_NEVER_DEPLOY",
   reference_library_substitution: false,
+  responsive_policy: "DISTINCT_DESKTOP_AND_MOBILE_PRODUCTION_RENDERS",
   visuals: []
 };
+
+const renderer = await resolveImageMagick();
 
 for (const spec of approved) {
   const { bytes, method, names } = await readApprovedBytes(spec);
@@ -145,11 +181,25 @@ for (const spec of approved) {
 
   const desktopFile = path.join(desktopDir, `${spec.key}-hero.avif`);
   const mobileFile = path.join(mobileDir, `${spec.key}-hero.avif`);
+  const sourceFile = path.join(tmpdir(), `oneworldz-${spec.key}-${process.pid}.avif`);
+  await writeFile(sourceFile, bytes);
 
-  // Preserve the exact approved master on both responsive paths. No unapproved
-  // crop, redraw, recompression or library substitution is introduced here.
-  await writeFile(desktopFile, bytes);
-  await writeFile(mobileFile, bytes);
+  let desktopBytes;
+  let mobileBytes;
+  try {
+    // The approved generated master is source-only. Produce separate web assets
+    // for the actual desktop and mobile containers without stretching or upscaling.
+    desktopBytes = await renderProductionVariant(renderer, sourceFile, desktopFile, 1920, 90);
+    mobileBytes = await renderProductionVariant(renderer, sourceFile, mobileFile, 960, 86);
+  } finally {
+    await unlink(sourceFile).catch(() => {});
+  }
+
+  const desktopSha = sha256(desktopBytes);
+  const mobileSha = sha256(mobileBytes);
+  if (desktopSha === mobileSha) {
+    throw new Error(`${spec.key}: desktop and mobile production renders must be distinct files`);
+  }
 
   const homepagePath = path.join(targetRoot, "index.html");
   const homepage = await readFile(homepagePath, "utf8");
@@ -161,14 +211,27 @@ for (const spec of approved) {
     domain: spec.domain,
     source_parts: names,
     materialization_method: method,
-    bytes: bytes.byteLength,
-    sha256: sha256(bytes),
+    source_bytes: bytes.byteLength,
+    source_sha256: sha256(bytes),
+    renderer,
     format: "avif",
-    responsive_policy: "exact-approved-master-on-desktop-and-mobile-paths"
+    desktop: {
+      max_width: 1920,
+      quality: 90,
+      bytes: desktopBytes.byteLength,
+      sha256: desktopSha
+    },
+    mobile: {
+      max_width: 960,
+      quality: 86,
+      bytes: mobileBytes.byteLength,
+      sha256: mobileSha
+    },
+    responsive_policy: "distinct-desktop-and-mobile-production-renders"
   });
 
-  console.log(`MATERIALIZED ${spec.key} ${bytes.byteLength} bytes ${sha256(bytes)} via ${method}`);
+  console.log(`RENDERED ${spec.key} desktop=${desktopBytes.byteLength}/${desktopSha} mobile=${mobileBytes.byteLength}/${mobileSha} via ${renderer}`);
 }
 
 await writeFile(path.join(distRoot, "approved-visuals-manifest.json"), `${JSON.stringify(visualManifest, null, 2)}\n`, "utf8");
-console.log("Approved FoodWorldz, DonateWorldz and HodlerGalaxy visuals materialized into the verified release packages.");
+console.log("Approved FoodWorldz, DonateWorldz and HodlerGalaxy masters rendered into distinct desktop and mobile production assets.");
