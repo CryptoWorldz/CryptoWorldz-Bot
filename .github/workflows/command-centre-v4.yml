@@ -87,8 +87,7 @@ jobs:
           grep -Fq 'require("./src/hub-central/preload")' index.js
           grep -Fq 'oneworldz-public-low-cost-v1' src/oneworldz-gpt/http.js
           grep -Fq 'model: "gpt-4o-mini"' src/hub-central/live-v1.js
-          test -n "$OPENAI_API_KEY"
-          test -n "$HOSTINGER_API_TOKEN"
+          test -n "$OPENAI_API_KEY"; test -n "$HOSTINGER_API_TOKEN"
           test -n "$FTP_HOST"; test -n "$FTP_USERNAME"; test -n "$FTP_PASSWORD"
           echo "::add-mask::$OPENAI_API_KEY"; echo "::add-mask::$HOSTINGER_API_TOKEN"
           echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
@@ -121,6 +120,31 @@ jobs:
           echo "::add-mask::$username"
           printf '%s' "$username" > "$RUNNER_TEMP/hostinger-username"
           echo 'HOSTINGER_MANAGED_APP_RESOLVED=PASS'
+
+      - name: Preserve current protected environment before rebuild
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          printf '%s' "$raw_host" > "$RUNNER_TEMP/raw-host"
+          cat > "$RUNNER_TEMP/get-env.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 2
+          set net:timeout 25
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/protected.env
+          bye
+          EOF
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-env.lftp" "$raw_host"
+          test -s "$RUNNER_TEMP/protected.env"
+          for key in BOT_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
+            if grep -Eq "^${key}=.+$" "$RUNNER_TEMP/protected.env"; then echo "PRESERVED_${key}=PASS"; else echo "::error::Protected environment missing $key before rebuild"; exit 1; fi
+          done
+          echo 'PROTECTED_ENV_PRESERVED=PASS'
 
       - name: Wait for fresh Hostinger managed Git build
         shell: bash
@@ -165,25 +189,10 @@ jobs:
           echo '::error::Fresh Hostinger managed Git build did not reach completed state.'
           exit 1
 
-      - name: Preserve protected env and apply OpenAI guard settings
+      - name: Restore protected environment with OpenAI guard settings
         shell: bash
         run: |
           set -euo pipefail
-          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
-          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
-          cat > "$RUNNER_TEMP/get-env.lftp" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 2
-          set net:timeout 25
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/protected.env
-          bye
-          EOF
-          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-env.lftp" "$raw_host"
-          test -s "$RUNNER_TEMP/protected.env"
           OPENAI_API_KEY="$OPENAI_API_KEY" node - <<'NODE'
           const fs=require('fs');
           const p=process.env.RUNNER_TEMP+'/protected.env';
@@ -194,6 +203,7 @@ jobs:
           NODE
           for key in BOT_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY OPENAI_API_KEY; do grep -Eq "^${key}=.+$" "$RUNNER_TEMP/protected.env"; done
           grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/protected.env"
+          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
           cat > "$RUNNER_TEMP/put-env.lftp" <<EOF
           set cmd:fail-exit true
           set net:max-retries 2
