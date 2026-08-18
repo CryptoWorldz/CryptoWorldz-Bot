@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Inspect protected Hostinger NodeJS builds and report this diagnostic run
+      - name: Inspect protected Hostinger NodeJS build configuration
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: '86'
@@ -38,55 +38,30 @@ jobs:
           echo "::add-mask::$HOSTINGER_API_TOKEN"
           domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
           websites_url="https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25"
-          curl --fail --silent --show-error --location \
-            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-            "$websites_url" -o /tmp/websites.json
+          curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$websites_url" -o /tmp/websites.json
           username="$(node - <<'NODE'
-          const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync('/tmp/websites.json','utf8'));
-          const d=process.env.PROTECTED_DOMAIN.toLowerCase();
-          const row=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d);
-          if(!row?.username) process.exit(2);
-          process.stdout.write(String(row.username));
+          const fs=require('fs');const p=JSON.parse(fs.readFileSync('/tmp/websites.json','utf8'));const d=process.env.PROTECTED_DOMAIN.toLowerCase();const row=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d);if(!row?.username)process.exit(2);process.stdout.write(String(row.username));
           NODE
           )"
           echo "::add-mask::$username"
           user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
           base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
-          curl --fail --silent --show-error --location \
-            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-            "$base/builds?per_page=10" -o /tmp/builds.json
+          curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds?per_page=10" -o /tmp/builds.json
           node - <<'NODE'
-          const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync('/tmp/builds.json','utf8'));
-          const rows=p.data||[];
-          console.log('NODE_BUILD_COUNT_RETURNED='+rows.length);
-          for(const x of rows.slice(0,10)) console.log(JSON.stringify({uuid:x.uuid,state:x.state,created_at:x.created_at,updated_at:x.updated_at,build_options:x.build_options,source_options:x.source_options}));
-          if(rows[0]?.uuid) fs.writeFileSync('/tmp/latest-uuid',String(rows[0].uuid));
+          const fs=require('fs');const p=JSON.parse(fs.readFileSync('/tmp/builds.json','utf8'));const rows=p.data||[];console.log('NODE_BUILD_COUNT_RETURNED='+rows.length);for(const x of rows.slice(0,10))console.log(JSON.stringify({uuid:x.uuid,state:x.state,created_at:x.created_at,updated_at:x.updated_at,options:x.options}));if(rows[0]?.uuid)fs.writeFileSync('/tmp/latest-uuid',String(rows[0].uuid));
           NODE
           if [ -s /tmp/latest-uuid ]; then
             uuid="$(cat /tmp/latest-uuid)"
-            curl --fail --silent --show-error --location \
-              -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-              "$base/builds/$uuid/logs?from_line=0" -o /tmp/build-logs.json || true
+            curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds/$uuid/logs?from_line=0" -o /tmp/build-logs.json || true
             if [ -s /tmp/build-logs.json ]; then
               node - <<'NODE'
-          const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync('/tmp/build-logs.json','utf8'));
-          let text=String(p.content||p.logs||p.output||'');
-          text=text.replace(/sk-[A-Za-z0-9_-]+/g,'[OPENAI_KEY_MASKED]').replace(/Bearer\s+[A-Za-z0-9._-]+/gi,'Bearer [TOKEN_MASKED]');
-          console.log('LATEST_NODE_BUILD_LOG_BEGIN');
-          console.log(text.split(/\r?\n/).slice(-120).join('\n'));
-          console.log('LATEST_NODE_BUILD_LOG_END');
+          const fs=require('fs');const p=JSON.parse(fs.readFileSync('/tmp/build-logs.json','utf8'));let text=String(p.content||p.logs||p.output||'');text=text.replace(/sk-[A-Za-z0-9_-]+/g,'[OPENAI_KEY_MASKED]').replace(/Bearer\s+[A-Za-z0-9._-]+/gi,'Bearer [TOKEN_MASKED]');console.log('LATEST_NODE_BUILD_LOG_BEGIN');console.log(text.split(/\r?\n/).slice(-120).join('\n'));console.log('LATEST_NODE_BUILD_LOG_END');
           NODE
             fi
           fi
-          body="PROTECTED_NODE_DIAGNOSTIC_RUN_ID=$GITHUB_RUN_ID SHA=$GITHUB_SHA"
+          body="PROTECTED_NODE_OPTIONS_RUN_ID=$GITHUB_RUN_ID SHA=$GITHUB_SHA"
           jq -n --arg body "$body" '{body:$body}' > /tmp/comment.json
-          curl --fail --silent --show-error -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" \
-            --data-binary @/tmp/comment.json >/dev/null
+          curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @/tmp/comment.json >/dev/null
 
       - uses: actions/setup-node@v4
         with:
@@ -112,15 +87,6 @@ jobs:
               echo '- No unresolved profile is permitted to receive an invented public name.'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
-
-      - name: Upload resolver evidence
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: community-facebook-metadata-${{ github.run_id }}
-          path: tmp/community-facebook-metadata.json
-          if-no-files-found: error
-          retention-days: 14
 
       - name: Final 35-profile metadata gate
         shell: bash
