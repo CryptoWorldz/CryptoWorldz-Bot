@@ -8,30 +8,30 @@
     if (strong && span && strong.nextSibling === span) span.before(document.createTextNode("\n"));
 
     const links = [...footer.querySelectorAll("a[href]")];
-    if (!links.length) return;
+    if (links.length) {
+      let nav = footer.previousElementSibling;
+      if (!nav || !nav.classList.contains("footer-nav")) {
+        nav = document.createElement("nav");
+        nav.className = "footer-nav";
+        nav.setAttribute("aria-label", "Footer navigation");
+        footer.before(nav);
+      }
+      for (const link of links) nav.append(link);
 
-    let nav = footer.previousElementSibling;
-    if (!nav || !nav.classList.contains("footer-nav")) {
-      nav = document.createElement("nav");
-      nav.className = "footer-nav";
-      nav.setAttribute("aria-label", "Footer navigation");
-      footer.before(nav);
+      for (const child of [...footer.children]) {
+        if (child === strong?.parentElement || child.contains(strong) || child.contains(span)) continue;
+        if (!(child.textContent || "").trim()) child.remove();
+      }
     }
-    for (const link of links) nav.append(link);
 
-    for (const child of [...footer.children]) {
-      if (child === strong?.parentElement || child.contains(strong) || child.contains(span)) continue;
-      if (!(child.textContent || "").trim()) child.remove();
-    }
-
-    if (strong) strong.textContent = footerLine1;
-    if (span) span.textContent = footerLine2;
+    if (strong && strong.textContent !== footerLine1) strong.textContent = footerLine1;
+    if (span && span.textContent !== footerLine2) span.textContent = footerLine2;
   };
 
   for (const footer of document.querySelectorAll("footer.site-footer.vision-footer")) {
     enforceVisionFooter(footer);
     const observer = new MutationObserver(() => enforceVisionFooter(footer));
-    observer.observe(footer, { childList: true, subtree: true });
+    observer.observe(footer, { childList: true, subtree: true, characterData: true });
   }
 
   const header = document.querySelector(".site-header");
