@@ -7,7 +7,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["zedstart", "Open the complete CryptoWorldz Command Centre"], ["help", "Simple command help"],
     ["commands", "Show commands available to your access level"], ["commandtree", "Show the Command Centre structural tree"],
     ["directory", "Open Directory@OneWorldz"], ["acknowledgements", "Open Acknowledgements@OneWorldz"],
-    ["supportjay", "Open JayJayTeamDev@DonateWorldz"], ["donate", "Open the current DonateWorldz Reagan & Children page"]
+    ["supportjay", "Open JayJayTeamDev@DonateWorldz"], ["donate", "Open the current DonateWorldz support choices"]
   ]),
   group("legend", "🤖 ZED • Legend Profile", "member", [
     ["zed", "Open ZED profile, wallet and mission controls"], ["start", "Start or reopen ZED"],
@@ -17,11 +17,13 @@ const COMMAND_GROUPS = Object.freeze([
     ["legendstatus", "View Legend recognition status"], ["specialtiers", "View Special Request tiers"],
     ["uniquelegend", "Apply for Unique Legend review"], ["boostshill", "Boost an eligible referred Legend"]
   ]),
-  group("missions", "🚀 Missions & Raaiiidd", "member", [
-    ["raaiiidd", "Open Raaiiidd missions"], ["missions", "List active missions"], ["raid", "Open or record a Raaiiidd link"]
+  group("missions", "🚀 Missions, Creator & Raaiiidd", "member", [
+    ["raaiiidd", "Open Raaiiidd missions"], ["missions", "List active missions"], ["raid", "Open or record a Raaiiidd link"],
+    ["creator", "Open ZED Raaiiidd Creator for post, artwork, preview and Admin review"]
   ]),
-  group("community", "💜 Community, Causes & Social Directory", "member", [
-    ["impact", "Open impact and support information"], ["kitty", "View public Community Kitty addresses"],
+  group("community", "💜 Community, Heroes, Causes & Social Directory", "member", [
+    ["impact", "Open current DonateWorldz impact choices"], ["supportreagan", "Open Reagan & Children on DonateWorldz"],
+    ["heroes", "Open Real-World Hero evidence and recognition"], ["kitty", "View public Community Kitty addresses"],
     ["governance", "Open governance information"], ["vote", "Vote in an active governance proposal"],
     ["causes", "List registered causes"], ["cause", "View one cause"], ["shilllink", "Create your referral/shill link"],
     ["referrals", "View referral status"], ["rewardplan", "View reward-plan rules"], ["website", "Open a website by project"],
@@ -29,8 +31,9 @@ const COMMAND_GROUPS = Object.freeze([
     ["tg", "Open this project's Telegram link"], ["tglinks", "View official Telegram links"],
     ["x", "Open this project's X page"], ["xlinks", "View official X pages"]
   ]),
-  group("admin-missions", "🛡 Admin • Missions, Members & Settings", "admin", [
+  group("admin-missions", "🛡 Admin • Missions, Reviews, Members & Settings", "admin", [
     ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"],
+    ["reviewqueue", "Open mission, Creator and Hero human-review queues"],
     ["newmission", "Create a mission"], ["editmission", "Edit a mission"], ["endmission", "End a mission"],
     ["pending", "Review pending mission submissions"], ["approve", "Approve an authorised pending action"],
     ["reject", "Reject an authorised pending action"], ["member", "Inspect a Legend member"], ["admins", "List managed admins"],
