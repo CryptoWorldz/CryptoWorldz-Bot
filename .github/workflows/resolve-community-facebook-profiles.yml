@@ -16,118 +16,127 @@ permissions:
   issues: write
 
 jobs:
-  live-hostinger-managed-runtime:
+  restore-protected-openai:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
       name: cryptoworldz-production
     env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
       PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
+      PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
       ISSUE_NUMBER: '86'
     steps:
-      - name: Report live monitor start
+      - name: Report recovery start
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          body="HOSTINGER_LIVE_MONITOR_RUN_ID=$GITHUB_RUN_ID TARGET_SHA=$GITHUB_SHA STATUS=STARTED"
+          for key in FTP_HOST FTP_USERNAME FTP_PASSWORD OPENAI_API_KEY HOSTINGER_API_TOKEN; do
+            test -n "${!key:-}"
+            echo "::add-mask::${!key}"
+          done
+          body="PROTECTED_OPENAI_RECOVERY_RUN_ID=$GITHUB_RUN_ID TARGET_SHA=$GITHUB_SHA STATUS=STARTED"
           jq -n --arg body "$body" '{body:$body}' > "$RUNNER_TEMP/comment.json"
-          curl --fail --silent --show-error -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" \
-            --data-binary @"$RUNNER_TEMP/comment.json" >/dev/null
+          curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @"$RUNNER_TEMP/comment.json" >/dev/null
 
-      - name: Wait for managed build then restart and prove live API
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Install FTPS utility
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+      - name: Write protected OpenAI environment and verify bytes
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$HOSTINGER_API_TOKEN"
-          echo "::add-mask::$HOSTINGER_API_TOKEN"
-          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
-          curl --fail --silent --show-error --location \
-            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-            "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" \
-            -o "$RUNNER_TEMP/websites.json"
-          username="$(node - <<'NODE'
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          : > "$RUNNER_TEMP/protected.env"
+          cat > "$RUNNER_TEMP/get-env.lftp" <<EOF
+          set cmd:fail-exit false
+          set net:max-retries 2
+          set net:timeout 25
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/protected.env
+          bye
+          EOF
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-env.lftp" "$raw_host" || true
+          node - <<'NODE'
           const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/websites.json','utf8'));
-          const d=process.env.PROTECTED_DOMAIN.toLowerCase();
-          const row=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d);
-          if(!row?.username) process.exit(2);
-          process.stdout.write(String(row.username));
+          const p=process.env.RUNNER_TEMP+'/protected.env';
+          let rows=[];
+          try { rows=fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean); } catch {}
+          const overrides={OPENAI_API_KEY:process.env.OPENAI_API_KEY,ONEWORLDZ_OPENAI_MODEL:'gpt-4o-mini'};
+          rows=rows.filter(row=>!Object.keys(overrides).some(k=>row.startsWith(k+'=')));
+          for(const [k,v] of Object.entries(overrides)) rows.push(`${k}=${v}`);
+          fs.writeFileSync(p,rows.join('\n')+'\n');
+          NODE
+          grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/protected.env"
+          grep -Fxq 'ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini' "$RUNNER_TEMP/protected.env"
+          cat > "$RUNNER_TEMP/put-env.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 2
+          set net:timeout 25
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          put $RUNNER_TEMP/protected.env -o $PROTECTED_NODE_ROOT/.env
+          get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/remote.env
+          bye
+          EOF
+          rm -f "$RUNNER_TEMP/remote.env"
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/put-env.lftp" "$raw_host"
+          cmp -s "$RUNNER_TEMP/protected.env" "$RUNNER_TEMP/remote.env"
+          echo 'PROTECTED_OPENAI_ENV_REMOTE_MATCH=PASS'
+
+      - name: Restart Hostinger managed Node server
+        shell: bash
+        run: |
+          set -euo pipefail
+          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
+          curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+            "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" -o "$RUNNER_TEMP/websites.json"
+          username="$(node - <<'NODE'
+          const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/websites.json','utf8'));
+          const d=process.env.PROTECTED_DOMAIN.toLowerCase();const row=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d);
+          if(!row?.username) process.exit(2);process.stdout.write(String(row.username));
           NODE
           )"
           echo "::add-mask::$username"
           user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
           base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
+          code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST \
+            -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/server/restart")"
+          echo "HOSTINGER_MANAGED_RESTART_HTTP=$code"
+          case "$code" in 200|201|202|204) ;; *) cat "$RUNNER_TEMP/restart.json"; exit 1 ;; esac
 
-          latest=''
-          uuid=''
-          state=''
-          for attempt in $(seq 1 120); do
-            curl --fail --silent --show-error --location \
-              -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-              "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
-            latest="$(node - <<'NODE'
-          const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/builds.json','utf8'));
-          const rows=(p.data||[]).filter(x=>String(x.options?.source_type||'')==='git').sort((a,b)=>Date.parse(b.created_at||0)-Date.parse(a.created_at||0));
-          const x=rows[0]||{};
-          process.stdout.write(JSON.stringify({uuid:x.uuid||'',state:x.state||'',created_at:x.created_at||'',options:x.options||{}}));
-          NODE
-          )"
-            uuid="$(printf '%s' "$latest" | jq -r '.uuid')"
-            state="$(printf '%s' "$latest" | jq -r '.state')"
-            active="$(node -e "const p=require(process.env.RUNNER_TEMP+'/builds.json');process.stdout.write(String((p.data||[]).filter(x=>!['completed','failed'].includes(String(x.state||'').toLowerCase())).length))")"
-            echo "HOSTINGER_LIVE_BUILD attempt=$attempt uuid=$uuid state=$state active=$active"
-            if [ -n "$uuid" ] && [ "$state" = completed ] && [ "$active" = 0 ]; then break; fi
-            if [ -n "$uuid" ] && [ "$state" = failed ]; then break; fi
-            sleep 5
-          done
-
-          sanitize() {
-            sed -E \
-              -e 's/sk-[A-Za-z0-9_-]+/[REDACTED_OPENAI_KEY]/g' \
-              -e 's/(Bearer )[A-Za-z0-9._-]+/\1[REDACTED]/g' \
-              -e 's/(password|token|secret|auth_key|rest_auth_key)[=:][^[:space:]",}]+/\1=[REDACTED]/Ig'
-          }
-
-          curl --silent --show-error --location \
-            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-            "$base/builds/$uuid/logs?from_line=0" -o "$RUNNER_TEMP/build-logs.txt" || true
-          build_excerpt="$(cat "$RUNNER_TEMP/build-logs.txt" | sanitize | tail -c 7000)"
-
-          if [ "$state" != completed ]; then
-            body="HOSTINGER_LIVE_MONITOR_RUN_ID=$GITHUB_RUN_ID STATUS=BUILD_FAILURE\nLATEST_BUILD=$latest\nBUILD_LOG_TAIL=$build_excerpt"
-            jq -n --arg body "$body" '{body:$body}' > "$RUNNER_TEMP/comment.json"
-            curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @"$RUNNER_TEMP/comment.json" >/dev/null
-            exit 1
-          fi
-
-          restart_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST \
-            -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' \
-            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-            "$base/server/restart")"
-          echo "HOSTINGER_MANAGED_RESTART_HTTP=$restart_code"
-          case "$restart_code" in 200|201|202|204) ;; *) exit 1 ;; esac
-
+      - name: Prove protected production API full pass
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
           final_code=''
           final_body=''
           for i in $(seq 1 60); do
             sleep 5
-            final_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 \
-              -o "$RUNNER_TEMP/live.json" -w '%{http_code}' \
+            final_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/live.json" -w '%{http_code}' \
               "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
             final_body="$(cat "$RUNNER_TEMP/live.json" 2>/dev/null | head -c 2000)"
-            echo "HOSTINGER_LIVE_PROOF attempt=$i HTTP=$final_code"
+            echo "PROTECTED_OPENAI_LIVE_PROOF attempt=$i HTTP=$final_code"
             if [ "$final_code" = 200 ] && LIVE="$RUNNER_TEMP/live.json" node - <<'NODE'
-          const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync(process.env.LIVE,'utf8'));
+          const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.env.LIVE,'utf8'));
           if(p.ok!==true||p.openai_api_configured!==true) process.exit(1);
           if(p.guard_profile!=="oneworldz-public-low-cost-v1"||p.guard_enforced!==true) process.exit(1);
           if(p.model!=="gpt-4o-mini"||p.max_output_tokens!==320) process.exit(1);
@@ -135,15 +144,14 @@ jobs:
           if(p.payments_in_chat!==false||p.secrets_in_browser!==false) process.exit(1);
           NODE
             then
-              body="HOSTINGER_LIVE_MONITOR_RUN_ID=$GITHUB_RUN_ID STATUS=FULL_PASS ✅\nLATEST_BUILD=$latest\nLIVE_HTTP=200 LIVE_BODY=$final_body"
+              body="PROTECTED_OPENAI_RECOVERY_RUN_ID=$GITHUB_RUN_ID STATUS=FULL_PASS ✅\nLIVE_HTTP=200 LIVE_BODY=$final_body"
               jq -n --arg body "$body" '{body:$body}' > "$RUNNER_TEMP/comment.json"
               curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
                 "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @"$RUNNER_TEMP/comment.json" >/dev/null
               exit 0
             fi
           done
-
-          body="HOSTINGER_LIVE_MONITOR_RUN_ID=$GITHUB_RUN_ID STATUS=LIVE_FAILURE\nLATEST_BUILD=$latest\nLIVE_HTTP=$final_code LIVE_BODY=$final_body\nBUILD_LOG_TAIL=$build_excerpt"
+          body="PROTECTED_OPENAI_RECOVERY_RUN_ID=$GITHUB_RUN_ID STATUS=LIVE_FAILURE\nLIVE_HTTP=$final_code LIVE_BODY=$final_body"
           jq -n --arg body "$body" '{body:$body}' > "$RUNNER_TEMP/comment.json"
           curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @"$RUNNER_TEMP/comment.json" >/dev/null
