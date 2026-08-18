@@ -16,9 +16,9 @@ permissions:
   issues: write
 
 jobs:
-  inspect-hostinger-managed-runtime:
+  live-hostinger-managed-runtime:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     environment:
       name: cryptoworldz-production
     env:
@@ -26,7 +26,20 @@ jobs:
       PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
       ISSUE_NUMBER: '86'
     steps:
-      - name: Inspect active managed build and runtime endpoints
+      - name: Report live monitor start
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="HOSTINGER_LIVE_MONITOR_RUN_ID=$GITHUB_RUN_ID TARGET_SHA=$GITHUB_SHA STATUS=STARTED"
+          jq -n --arg body "$body" '{body:$body}' > "$RUNNER_TEMP/comment.json"
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" \
+            --data-binary @"$RUNNER_TEMP/comment.json" >/dev/null
+
+      - name: Wait for managed build then restart and prove live API
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -51,49 +64,90 @@ jobs:
           echo "::add-mask::$username"
           user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
           base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
-          curl --fail --silent --show-error --location \
-            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-            "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
-          latest="$(node - <<'NODE'
+
+          latest=''
+          uuid=''
+          state=''
+          for attempt in $(seq 1 120); do
+            curl --fail --silent --show-error --location \
+              -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+              "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
+            latest="$(node - <<'NODE'
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/builds.json','utf8'));
-          const rows=(p.data||[]).sort((a,b)=>Date.parse(b.created_at||0)-Date.parse(a.created_at||0));
+          const rows=(p.data||[]).filter(x=>String(x.options?.source_type||'')==='git').sort((a,b)=>Date.parse(b.created_at||0)-Date.parse(a.created_at||0));
           const x=rows[0]||{};
           process.stdout.write(JSON.stringify({uuid:x.uuid||'',state:x.state||'',created_at:x.created_at||'',options:x.options||{}}));
           NODE
           )"
-          uuid="$(printf '%s' "$latest" | jq -r '.uuid')"
-          test -n "$uuid"
-          curl --silent --show-error --location \
-            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-            "$base/builds/$uuid/logs?from_line=0" -o "$RUNNER_TEMP/build-logs.txt" || true
+            uuid="$(printf '%s' "$latest" | jq -r '.uuid')"
+            state="$(printf '%s' "$latest" | jq -r '.state')"
+            active="$(node -e "const p=require(process.env.RUNNER_TEMP+'/builds.json');process.stdout.write(String((p.data||[]).filter(x=>!['completed','failed'].includes(String(x.state||'').toLowerCase())).length))")"
+            echo "HOSTINGER_LIVE_BUILD attempt=$attempt uuid=$uuid state=$state active=$active"
+            if [ -n "$uuid" ] && [ "$state" = completed ] && [ "$active" = 0 ]; then break; fi
+            if [ -n "$uuid" ] && [ "$state" = failed ]; then break; fi
+            sleep 5
+          done
+
           sanitize() {
             sed -E \
               -e 's/sk-[A-Za-z0-9_-]+/[REDACTED_OPENAI_KEY]/g' \
               -e 's/(Bearer )[A-Za-z0-9._-]+/\1[REDACTED]/g' \
               -e 's/(password|token|secret|auth_key|rest_auth_key)[=:][^[:space:]",}]+/\1=[REDACTED]/Ig'
           }
+
+          curl --silent --show-error --location \
+            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+            "$base/builds/$uuid/logs?from_line=0" -o "$RUNNER_TEMP/build-logs.txt" || true
           build_excerpt="$(cat "$RUNNER_TEMP/build-logs.txt" | sanitize | tail -c 7000)"
-          probes=''
-          for suffix in '' '/server' '/logs' '/server/logs' '/settings'; do
-            safe="$(printf '%s' "$suffix" | tr '/-' '__')"
-            code="$(curl --silent --show-error --location --connect-timeout 10 --max-time 20 \
-              -o "$RUNNER_TEMP/probe${safe}.txt" -w '%{http_code}' \
-              -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-              "$base$suffix" || true)"
-            body="$(cat "$RUNNER_TEMP/probe${safe}.txt" 2>/dev/null | sanitize | head -c 1400)"
-            probes="${probes}\nGET ${suffix:-/nodejs} HTTP=${code} BODY=${body}"
+
+          if [ "$state" != completed ]; then
+            body="HOSTINGER_LIVE_MONITOR_RUN_ID=$GITHUB_RUN_ID STATUS=BUILD_FAILURE\nLATEST_BUILD=$latest\nBUILD_LOG_TAIL=$build_excerpt"
+            jq -n --arg body "$body" '{body:$body}' > "$RUNNER_TEMP/comment.json"
+            curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @"$RUNNER_TEMP/comment.json" >/dev/null
+            exit 1
+          fi
+
+          restart_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST \
+            -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' \
+            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+            "$base/server/restart")"
+          echo "HOSTINGER_MANAGED_RESTART_HTTP=$restart_code"
+          case "$restart_code" in 200|201|202|204) ;; *) exit 1 ;; esac
+
+          final_code=''
+          final_body=''
+          for i in $(seq 1 60); do
+            sleep 5
+            final_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 \
+              -o "$RUNNER_TEMP/live.json" -w '%{http_code}' \
+              "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
+            final_body="$(cat "$RUNNER_TEMP/live.json" 2>/dev/null | head -c 2000)"
+            echo "HOSTINGER_LIVE_PROOF attempt=$i HTTP=$final_code"
+            if [ "$final_code" = 200 ] && LIVE="$RUNNER_TEMP/live.json" node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync(process.env.LIVE,'utf8'));
+          if(p.ok!==true||p.openai_api_configured!==true) process.exit(1);
+          if(p.guard_profile!=="oneworldz-public-low-cost-v1"||p.guard_enforced!==true) process.exit(1);
+          if(p.model!=="gpt-4o-mini"||p.max_output_tokens!==320) process.exit(1);
+          if(p.per_ip_limit_10m!==8||p.daily_request_limit!==1000) process.exit(1);
+          if(p.payments_in_chat!==false||p.secrets_in_browser!==false) process.exit(1);
+          NODE
+            then
+              body="HOSTINGER_LIVE_MONITOR_RUN_ID=$GITHUB_RUN_ID STATUS=FULL_PASS ✅\nLATEST_BUILD=$latest\nLIVE_HTTP=200 LIVE_BODY=$final_body"
+              jq -n --arg body "$body" '{body:$body}' > "$RUNNER_TEMP/comment.json"
+              curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
+                "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @"$RUNNER_TEMP/comment.json" >/dev/null
+              exit 0
+            fi
           done
-          live_code="$(curl --silent --show-error --location --connect-timeout 10 --max-time 20 \
-            -o "$RUNNER_TEMP/live.txt" -w '%{http_code}' \
-            "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?diag=${GITHUB_SHA}" || true)"
-          live_body="$(cat "$RUNNER_TEMP/live.txt" 2>/dev/null | head -c 1200)"
-          body="HOSTINGER_ACTIVE_RUNTIME_DIAG\nLATEST_BUILD=${latest}\nLIVE_HTTP=${live_code} LIVE_BODY=${live_body}\nPROBES=${probes}\nBUILD_LOG_TAIL=${build_excerpt}"
+
+          body="HOSTINGER_LIVE_MONITOR_RUN_ID=$GITHUB_RUN_ID STATUS=LIVE_FAILURE\nLATEST_BUILD=$latest\nLIVE_HTTP=$final_code LIVE_BODY=$final_body\nBUILD_LOG_TAIL=$build_excerpt"
           jq -n --arg body "$body" '{body:$body}' > "$RUNNER_TEMP/comment.json"
-          curl --fail --silent --show-error -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" \
-            --data-binary @"$RUNNER_TEMP/comment.json" >/dev/null
+          curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @"$RUNNER_TEMP/comment.json" >/dev/null
+          exit 1
 
   resolve:
     runs-on: ubuntu-latest
