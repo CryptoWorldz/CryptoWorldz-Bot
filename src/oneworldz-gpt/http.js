@@ -37,9 +37,9 @@ function extractOpenAIText(payload) {
 
 function normalizeHistory(history) {
   if (!Array.isArray(history)) return [];
-  return history.slice(-8).flatMap((item) => {
+  return history.slice(-4).flatMap((item) => {
     const role = item?.role === "assistant" ? "assistant" : item?.role === "user" ? "user" : null;
-    const content = String(item?.content || "").trim().slice(0, 1800);
+    const content = String(item?.content || "").trim().slice(0, 1000);
     return role && content ? [{ role, content }] : [];
   });
 }
@@ -74,7 +74,7 @@ function corsForPublicGuide(req, res, next) {
   return next();
 }
 
-function createRateLimiter({ limit = 24, windowMs = 10 * 60 * 1000 } = {}) {
+function createRateLimiter({ limit = 8, windowMs = 10 * 60 * 1000 } = {}) {
   const buckets = new Map();
   return (req, res, next) => {
     const now = Date.now();
@@ -86,6 +86,21 @@ function createRateLimiter({ limit = 24, windowMs = 10 * 60 * 1000 } = {}) {
     }
     current.count += 1;
     if (current.count > limit) return res.status(429).json({ ok: false, error: "rate_limited" });
+    return next();
+  };
+}
+
+function createDailyLimiter({ limit = 1000 } = {}) {
+  let day = new Date().toISOString().slice(0, 10);
+  let count = 0;
+  return (req, res, next) => {
+    const today = new Date().toISOString().slice(0, 10);
+    if (today !== day) {
+      day = today;
+      count = 0;
+    }
+    count += 1;
+    if (count > limit) return res.status(429).json({ ok: false, error: "daily_limit_reached" });
     return next();
   };
 }
@@ -109,14 +124,14 @@ async function moderateInput({ apiKey, input, fetchImpl = globalThis.fetch }) {
   return Boolean(payload?.results?.[0]?.flagged);
 }
 
-async function askOneWorldzGPT({ apiKey, model, message, history = [], page = "oneworldz", fetchImpl = globalThis.fetch }) {
+async function askOneWorldzGPT({ apiKey, model, message, history = [], page = "oneworldz", maxOutputTokens = 320, fetchImpl = globalThis.fetch }) {
   if (!apiKey) {
     const error = new Error("openai_api_not_configured");
     error.status = 503;
     throw error;
   }
 
-  const cleanMessage = String(message || "").trim().slice(0, 2500);
+  const cleanMessage = String(message || "").trim().slice(0, 1200);
   if (!cleanMessage) {
     const error = new Error("message_required");
     error.status = 400;
@@ -143,6 +158,7 @@ async function askOneWorldzGPT({ apiKey, model, message, history = [], page = "o
     body: JSON.stringify({
       model,
       store: false,
+      max_output_tokens: maxOutputTokens,
       instructions: [
         "You are OneWorldz GPT, the public AI guide for OneWorldz Full Support.",
         "Mission: Helping the People Who Help People. Keep the tone clear, practical, respectful and hopeful.",
@@ -153,7 +169,7 @@ async function askOneWorldzGPT({ apiKey, model, message, history = [], page = "o
         "Never request or accept card numbers, bank details, passwords, API keys, wallet seed phrases, private keys or other secrets. Direct payment actions must happen only on the approved DonateWorldz/Stripe payment pages, not in chat.",
         "Do not claim donations are tax deductible, guaranteed to reach a recipient, or already transferred unless that fact is explicitly verified by the system.",
         "Do not give individual legal, medical or financial advice. Explain general information and route users to appropriate professional or official sources where necessary.",
-        "When useful, finish with one short action the visitor can take next. Do not overwhelm them with a long list.",
+        "Keep responses concise. When useful, finish with one short action the visitor can take next.",
         `Current website surface: ${String(page || "oneworldz").slice(0, 80)}.`
       ].join(" "),
       input
@@ -163,7 +179,9 @@ async function askOneWorldzGPT({ apiKey, model, message, history = [], page = "o
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(`openai_api_${response.status}`);
+    const code = String(payload?.error?.code || payload?.error?.type || "");
+    const quota = code === "insufficient_quota" || code === "billing_hard_limit_reached";
+    const error = new Error(quota ? "openai_quota_exhausted" : `openai_api_${response.status}`);
     error.status = response.status;
     throw error;
   }
@@ -172,14 +190,19 @@ async function askOneWorldzGPT({ apiKey, model, message, history = [], page = "o
   return {
     text: text || "I can help you find the right OneWorldz support pathway.",
     suggestions: suggestedRoutes(`${cleanMessage}\n${text}`),
-    response_id: payload.id || null
+    response_id: payload.id || null,
+    usage: payload.usage || null
   };
 }
 
 function registerOneWorldzGptRoutes({ app }) {
   const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
-  const model = String(process.env.ONEWORLDZ_OPENAI_MODEL || process.env.HUB_OPENAI_MODEL || "gpt-5.6").trim();
-  const rateLimit = createRateLimiter();
+  const model = String(process.env.ONEWORLDZ_OPENAI_MODEL || "gpt-4o-mini").trim();
+  const maxOutputTokens = Math.max(80, Math.min(600, Number(process.env.ONEWORLDZ_GPT_MAX_OUTPUT_TOKENS || 320)));
+  const perIpLimit = Math.max(1, Math.min(60, Number(process.env.ONEWORLDZ_GPT_RATE_LIMIT || 8)));
+  const dailyLimit = Math.max(1, Math.min(100000, Number(process.env.ONEWORLDZ_GPT_DAILY_REQUEST_LIMIT || 1000)));
+  const rateLimit = createRateLimiter({ limit: perIpLimit });
+  const dailyRateLimit = createDailyLimiter({ limit: dailyLimit });
 
   app.use("/api/oneworldz-gpt", corsForPublicGuide);
 
@@ -189,22 +212,37 @@ function registerOneWorldzGptRoutes({ app }) {
       service: "OneWorldz GPT",
       openai_api_configured: Boolean(apiKey),
       model,
+      max_output_tokens: maxOutputTokens,
+      per_ip_limit_10m: perIpLimit,
+      daily_request_limit: dailyLimit,
       mode: "public_guidance",
       payments_in_chat: false,
       secrets_in_browser: false
     });
   });
 
-  app.post("/api/oneworldz-gpt/chat", rateLimit, async (req, res) => {
+  app.post("/api/oneworldz-gpt/chat", dailyRateLimit, rateLimit, async (req, res) => {
     try {
       const result = await askOneWorldzGPT({
         apiKey,
         model,
         message: req.body?.message,
         history: req.body?.history,
-        page: req.body?.page
+        page: req.body?.page,
+        maxOutputTokens
       });
-      return res.json({ ok: true, service: "OneWorldz GPT", powered_by: "OpenAI", ...result });
+      const { usage, ...publicResult } = result;
+      if (usage) {
+        console.info(JSON.stringify({
+          event: "oneworldz_gpt_usage",
+          model,
+          response_id: result.response_id,
+          input_tokens: Number(usage.input_tokens || 0),
+          output_tokens: Number(usage.output_tokens || 0),
+          total_tokens: Number(usage.total_tokens || 0)
+        }));
+      }
+      return res.json({ ok: true, service: "OneWorldz GPT", powered_by: "OpenAI", ...publicResult });
     } catch (error) {
       const status = Number(error?.status) || 500;
       return res.status(status).json({ ok: false, error: error?.message || "oneworldz_gpt_failed" });
@@ -217,6 +255,7 @@ module.exports = {
   ROUTES,
   askOneWorldzGPT,
   corsForPublicGuide,
+  createDailyLimiter,
   createRateLimiter,
   extractOpenAIText,
   moderateInput,
