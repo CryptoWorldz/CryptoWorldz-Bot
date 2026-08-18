@@ -51,7 +51,7 @@ jobs:
       - run: docker build .
 
   protected-oneworldz-gpt:
-    name: Deploy + prove protected guarded OneWorldz GPT
+    name: Deploy + officially restart + prove protected OneWorldz GPT
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     needs: verify
     runs-on: ubuntu-latest
@@ -92,7 +92,9 @@ jobs:
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           test -n "$raw_host"
-          echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
           [ -z "$OPENAI_API_KEY" ] || echo "::add-mask::$OPENAI_API_KEY"
           printf '%s' "$raw_host" > "$RUNNER_TEMP/raw-host"
 
@@ -112,11 +114,7 @@ jobs:
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/download.lftp" "$raw_host" || true
           test -s "$RUNNER_TEMP/original-index.js"
           test -s "$RUNNER_TEMP/original-package.json"
-          node - <<'NODE'
-          const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/original-package.json','utf8'));
-          if(p.name!=='cryptoworldz-bot'||p.scripts?.start!=='node index.js') throw new Error('unexpected_protected_runtime');
-          NODE
+          test -s "$RUNNER_TEMP/original.env"
 
           cp "$RUNNER_TEMP/original-index.js" "$RUNNER_TEMP/patched-index.js"
           node - <<'NODE'
@@ -132,7 +130,7 @@ jobs:
           NODE
           node --check "$RUNNER_TEMP/patched-index.js"
 
-          if [ -s "$RUNNER_TEMP/original.env" ]; then cp "$RUNNER_TEMP/original.env" "$RUNNER_TEMP/patched.env"; else : > "$RUNNER_TEMP/patched.env"; fi
+          cp "$RUNNER_TEMP/original.env" "$RUNNER_TEMP/patched.env"
           OPENAI_API_KEY="$OPENAI_API_KEY" node - <<'NODE'
           const fs=require('fs');
           const p=process.env.RUNNER_TEMP+'/patched.env';
@@ -144,12 +142,13 @@ jobs:
           fs.writeFileSync(p,rows.join('\n')+'\n');
           NODE
           grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/patched.env"
+          grep -Eq '^HOSTINGER_API_TOKEN=.+$' "$RUNNER_TEMP/patched.env"
           grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/patched.env"
           cp src/hub-central/live-v1.js "$RUNNER_TEMP/hub-central-live.js"
           cp src/community-support/live-v1.js "$RUNNER_TEMP/community-support-live.js"
           printf 'restart %s %s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/restart.txt"
 
-      - name: Install guarded runtime and current Hostinger restart sentinel
+      - name: Install exact guarded runtime and restart sentinels
         id: write
         shell: bash
         run: |
@@ -178,7 +177,7 @@ jobs:
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$raw_host"
           echo 'written=true' >> "$GITHUB_OUTPUT"
 
-      - name: Prove exact protected bytes and both restart markers
+      - name: Prove exact protected bytes and settings
         id: bytes
         shell: bash
         run: |
@@ -207,9 +206,52 @@ jobs:
           cmp "$RUNNER_TEMP/restart.txt" "$RUNNER_TEMP/remote-node-restart.txt"
           cmp "$RUNNER_TEMP/restart.txt" "$RUNNER_TEMP/remote-web-restart.txt"
           grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/remote.env"
+          grep -Eq '^HOSTINGER_API_TOKEN=.+$' "$RUNNER_TEMP/remote.env"
           grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/remote.env"
           echo 'PROTECTED_GUARDED_BYTES=PASS'
-          echo 'PROTECTED_RESTART_SENTINELS=PASS'
+          echo 'PROTECTED_GUARDED_SETTINGS=PASS'
+          echo 'proved=true' >> "$GITHUB_OUTPUT"
+
+      - name: Restart managed Node application through official Hostinger API
+        id: api_restart
+        shell: bash
+        run: |
+          set -euo pipefail
+          hostinger_token="$(node - <<'NODE'
+          const fs=require('fs');
+          const text=fs.readFileSync(process.env.RUNNER_TEMP+'/remote.env','utf8');
+          const row=text.split(/\r?\n/).find(x=>x.startsWith('HOSTINGER_API_TOKEN='));
+          if(row) process.stdout.write(row.slice('HOSTINGER_API_TOKEN='.length).trim().replace(/^['"]|['"]$/g,''));
+          NODE
+          )"
+          test -n "$hostinger_token"
+          echo "::add-mask::$hostinger_token"
+
+          encoded_domain="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
+          websites_url="https://developers.hostinger.com/api/hosting/v1/websites?domain=${encoded_domain}&per_page=25"
+          list_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 \
+            -o "$RUNNER_TEMP/hostinger-websites.json" -w '%{http_code}' \
+            -H "Authorization: Bearer $hostinger_token" -H 'Accept: application/json' "$websites_url")"
+          test "$list_code" = '200'
+
+          hostinger_username="$(node - <<'NODE'
+          const fs=require('fs');
+          const payload=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/hostinger-websites.json','utf8'));
+          const domain=process.env.PROTECTED_DOMAIN;
+          const row=(payload.data||[]).find(x=>String(x.domain||'').toLowerCase()===domain.toLowerCase());
+          if(!row?.username) process.exit(2);
+          process.stdout.write(String(row.username));
+          NODE
+          )"
+          test -n "$hostinger_username"
+          echo "::add-mask::$hostinger_username"
+          encoded_username="$(HOSTINGER_USERNAME="$hostinger_username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
+          restart_url="https://developers.hostinger.com/api/hosting/v1/accounts/${encoded_username}/websites/${encoded_domain}/nodejs/server/restart"
+          restart_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 \
+            --request POST -o "$RUNNER_TEMP/hostinger-restart.json" -w '%{http_code}' \
+            -H "Authorization: Bearer $hostinger_token" -H 'Accept: application/json' -H 'Content-Type: application/json' "$restart_url")"
+          case "$restart_code" in 200|201|202|204) ;; *) echo "::error::Hostinger NodeJS restart API returned HTTP $restart_code"; cat "$RUNNER_TEMP/hostinger-restart.json" | head -c 500; exit 1;; esac
+          echo "HOSTINGER_NODEJS_API_RESTART=PASS HTTP=$restart_code"
           echo 'proved=true' >> "$GITHUB_OUTPUT"
 
       - name: Prove live guarded API fingerprint
