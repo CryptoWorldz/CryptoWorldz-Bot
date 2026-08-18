@@ -25,7 +25,7 @@ jobs:
       - name: Report protected GPT production deployment run id
         env:
           GH_TOKEN: ${{ github.token }}
-          TARGET_SHA: 'a899bb25f747931f10689ca73c458f6739186fcb'
+          TARGET_SHA: '3fa6d0658b26654c922a859b5a427dcf8b3edede'
           ISSUE_NUMBER: '86'
         shell: bash
         run: |
@@ -44,7 +44,7 @@ jobs:
           run_id="$(printf '%s' "$run" | jq -r '.id')"
           status="$(printf '%s' "$run" | jq -r '.status')"
           conclusion="$(printf '%s' "$run" | jq -r '.conclusion // "pending"')"
-          body="PROTECTED_GPT_FINAL_PROOF_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion"
+          body="PROTECTED_GPT_KEY_BOOTSTRAP_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion"
           jq -n --arg body "$body" '{body:$body}' > /tmp/comment.json
           curl --fail --silent --show-error -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
