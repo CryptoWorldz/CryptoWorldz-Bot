@@ -1,5 +1,6 @@
 // Compatibility marker: startProtectedPublicFallback
-// Full runtime preload remains preserved in src/full-runtime-entry.js: require("./src/hub-central/preload")
+// Full CryptoWorldz runtime is preserved separately in src/full-runtime-entry.js: require("./src/hub-central/preload")
+// This managed Hostinger entrypoint intentionally serves the protected public GPT gateway only.
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
@@ -44,16 +45,6 @@ function loadEnvFile() {
 
 loadEnvFile();
 
-const fullRuntimeConfigured = ["BOT_TOKEN", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"].every((key) => String(process.env[key] || "").trim());
-if (fullRuntimeConfigured) {
-  try {
-    require("./src/full-runtime-entry");
-    return;
-  } catch (error) {
-    console.error("Full runtime unavailable; starting protected public gateway", error && error.message ? error.message : error);
-  }
-}
-
 const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
 const buckets = new Map();
 let dailyDay = new Date().toISOString().slice(0, 10);
@@ -84,7 +75,10 @@ function rateAllowed(ip) {
 
 function dailyAllowed() {
   const today = new Date().toISOString().slice(0, 10);
-  if (today !== dailyDay) { dailyDay = today; dailyCount = 0; }
+  if (today !== dailyDay) {
+    dailyDay = today;
+    dailyCount = 0;
+  }
   dailyCount += 1;
   return dailyCount <= GUARD.dailyLimit;
 }
@@ -112,7 +106,9 @@ function extractText(payload) {
   const chunks = [];
   for (const item of payload && payload.output || []) {
     if (!item || item.type !== "message") continue;
-    for (const content of item.content || []) if (content && content.type === "output_text" && content.text) chunks.push(content.text);
+    for (const content of item.content || []) {
+      if (content && content.type === "output_text" && content.text) chunks.push(content.text);
+    }
   }
   return chunks.join("\n").trim();
 }
@@ -160,8 +156,19 @@ async function callOpenAI(message, history, page) {
     throw Object.assign(new Error(quota ? "openai_quota_exhausted" : `openai_api_${response.status}`), { status: response.status });
   }
   const usage = payload.usage || null;
-  if (usage) console.info(JSON.stringify({ event: "oneworldz_gpt_usage", model: GUARD.model, input_tokens: Number(usage.input_tokens || 0), output_tokens: Number(usage.output_tokens || 0), total_tokens: Number(usage.total_tokens || 0) }));
-  return { text: extractText(payload) || "I can help you find the right OneWorldz support pathway.", response_id: payload.id || null };
+  if (usage) {
+    console.info(JSON.stringify({
+      event: "oneworldz_gpt_usage",
+      model: GUARD.model,
+      input_tokens: Number(usage.input_tokens || 0),
+      output_tokens: Number(usage.output_tokens || 0),
+      total_tokens: Number(usage.total_tokens || 0)
+    }));
+  }
+  return {
+    text: extractText(payload) || "I can help you find the right OneWorldz support pathway.",
+    response_id: payload.id || null
+  };
 }
 
 const server = http.createServer(async (req, res) => {
@@ -179,8 +186,18 @@ const server = http.createServer(async (req, res) => {
     return res.end();
   }
 
-  if (req.method === "GET" && url.pathname === "/") return sendJson(res, 200, { ok: true, service: "CryptoWorldz Protected Public Gateway", runtime: "dependency_free_guard_v1" }, origin);
-  if (req.method === "GET" && url.pathname === "/health") return sendJson(res, 200, { ok: true, runtime: "dependency_free_guard_v1" }, origin);
+  if (req.method === "GET" && url.pathname === "/") {
+    return sendJson(res, 200, {
+      ok: true,
+      service: "CryptoWorldz Protected Public Gateway",
+      runtime: "dependency_free_guard_v2"
+    }, origin);
+  }
+
+  if (req.method === "GET" && url.pathname === "/health") {
+    return sendJson(res, 200, { ok: true, runtime: "dependency_free_guard_v2" }, origin);
+  }
+
   if (req.method === "GET" && url.pathname === "/api/oneworldz-gpt/status") {
     return sendJson(res, 200, {
       ok: true,
@@ -195,9 +212,10 @@ const server = http.createServer(async (req, res) => {
       mode: "public_guidance",
       payments_in_chat: false,
       secrets_in_browser: false,
-      runtime: "dependency_free_guard_v1"
+      runtime: "dependency_free_guard_v2"
     }, origin);
   }
+
   if (req.method === "POST" && url.pathname === "/api/oneworldz-gpt/chat") {
     const ip = String((req.headers["x-forwarded-for"] || "").split(",")[0] || req.socket.remoteAddress || "unknown").trim();
     if (!dailyAllowed()) return sendJson(res, 429, { ok: false, error: "daily_limit_reached" }, origin);
@@ -207,7 +225,10 @@ const server = http.createServer(async (req, res) => {
       const result = await callOpenAI(body.message, body.history, body.page);
       return sendJson(res, 200, { ok: true, service: "OneWorldz GPT", powered_by: "OpenAI", ...result }, origin);
     } catch (error) {
-      return sendJson(res, Number(error && error.status) || 500, { ok: false, error: String(error && error.message || "oneworldz_gpt_failed") }, origin);
+      return sendJson(res, Number(error && error.status) || 500, {
+        ok: false,
+        error: String(error && error.message || "oneworldz_gpt_failed")
+      }, origin);
     }
   }
 
@@ -216,5 +237,5 @@ const server = http.createServer(async (req, res) => {
 
 const port = Number(process.env.PORT || 3000);
 server.listen(port, "0.0.0.0", () => {
-  console.log(`CryptoWorldz protected public gateway listening on ${port} • dependency_free_guard_v1`);
+  console.log(`CryptoWorldz protected public gateway listening on ${port} • dependency_free_guard_v2`);
 });
