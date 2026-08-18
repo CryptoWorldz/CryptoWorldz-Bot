@@ -101,3 +101,5 @@ const out = {
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, JSON.stringify(out, null, 2));
 console.log(`Resolved ${resolvedCount}/${input.count}. Output: ${outputPath}`);
+
+// Protected Hostinger live-monitor trigger: dependency-free GPT startup isolation v2.
