@@ -5,12 +5,9 @@ on:
     branches: [main, clean-platform-v4]
     paths:
       - "platform/**"
-      - "src/hub-central/live-v1.js"
-      - "src/hub-central/preload.js"
-      - "src/oneworldz-gpt/**"
-      - "src/community-support/live-v1.js"
-      - "test/oneworldz-gpt.test.js"
-      - "test/hub-central-live-v1.test.js"
+      - "src/**"
+      - "public/**"
+      - "test/**"
       - "index.js"
       - "package.json"
       - "package-lock.json"
@@ -18,12 +15,9 @@ on:
   pull_request:
     paths:
       - "platform/**"
-      - "src/hub-central/live-v1.js"
-      - "src/hub-central/preload.js"
-      - "src/oneworldz-gpt/**"
-      - "src/community-support/live-v1.js"
-      - "test/oneworldz-gpt.test.js"
-      - "test/hub-central-live-v1.test.js"
+      - "src/**"
+      - "public/**"
+      - "test/**"
       - "index.js"
       - "package.json"
       - "package-lock.json"
@@ -31,6 +25,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: cryptobotz-protected-runtime
+  cancel-in-progress: false
 
 env:
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
@@ -55,11 +53,11 @@ jobs:
       - run: docker build .
 
   protected-oneworldz-gpt:
-    name: Deploy + prove protected guarded OneWorldz GPT
+    name: Deploy + prove full Zed + guarded OneWorldz GPT
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     needs: verify
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     environment:
       name: cryptoworldz-production
     env:
@@ -69,6 +67,9 @@ jobs:
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+      BOT_TOKEN_SECRET: ${{ secrets.BOT_TOKEN }}
+      SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -76,22 +77,31 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Verify hard-locked protected public runtime
+      - name: Verify full protected runtime source
         shell: bash
         run: |
           set -euo pipefail
           npm ci
           node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js
           node --check index.js
+          node --check src/full-runtime-entry.js
+          node --check src/http.js
           grep -Fq 'startProtectedPublicFallback' index.js
+          grep -Fq 'require("./src/full-runtime-entry")' index.js
           grep -Fq 'require("./src/hub-central/preload")' index.js
           grep -Fq 'oneworldz-public-low-cost-v1' src/oneworldz-gpt/http.js
+          grep -Fq 'app.use("/miniapp"' src/http.js
+          grep -Fq 'service: "CryptoWorldz Zed Bot"' src/http.js
           grep -Fq 'model: "gpt-4o-mini"' src/hub-central/live-v1.js
           for key in OPENAI_API_KEY HOSTINGER_API_TOKEN FTP_HOST FTP_USERNAME FTP_PASSWORD; do
             test -n "${!key:-}"
             echo "::add-mask::${!key}"
           done
-          echo 'PROTECTED_PUBLIC_GUARD_SOURCE=PASS'
+          for key in BOT_TOKEN_SECRET SUPABASE_URL_SECRET SUPABASE_SERVICE_ROLE_KEY_SECRET; do
+            value="${!key:-}"
+            [ -z "$value" ] || echo "::add-mask::$value"
+          done
+          echo 'PROTECTED_FULL_RUNTIME_SOURCE=PASS'
 
       - name: Install protected runtime utilities
         run: |
@@ -161,7 +171,47 @@ jobs:
           bye
           EOF
           timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-env.lftp" "$raw_host" || true
-          echo 'PROTECTED_ENV_CAPTURE=PASS'
+          echo 'PROTECTED_ENV_CAPTURE_ATTEMPT=PASS'
+
+      - name: Build complete protected runtime environment and fail closed if core Zed secrets are absent
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=process.env.RUNNER_TEMP+'/protected.env';
+          let rows=[];
+          try { rows=fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean); } catch {}
+          const candidates={
+            OPENAI_API_KEY:process.env.OPENAI_API_KEY,
+            ONEWORLDZ_OPENAI_MODEL:'gpt-4o-mini',
+            BOT_TOKEN:process.env.BOT_TOKEN_SECRET,
+            SUPABASE_URL:process.env.SUPABASE_URL_SECRET,
+            SUPABASE_SERVICE_ROLE_KEY:process.env.SUPABASE_SERVICE_ROLE_KEY_SECRET
+          };
+          const overrides=Object.fromEntries(Object.entries(candidates).filter(([,v])=>String(v||'').trim()));
+          rows=rows.filter(row=>!Object.keys(overrides).some(k=>row.startsWith(k+'=')));
+          for(const [k,v] of Object.entries(overrides)) rows.push(`${k}=${String(v).trim()}`);
+          fs.writeFileSync(p,rows.join('\n')+'\n');
+          NODE
+          for key in BOT_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY OPENAI_API_KEY; do
+            grep -Eq "^${key}=.+$" "$RUNNER_TEMP/protected.env" || { echo "::error::Required protected runtime value ${key} is absent. Refusing GPT-only downgrade."; exit 1; }
+          done
+          grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/protected.env"
+          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
+          cat > "$RUNNER_TEMP/put-env.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 2
+          set net:timeout 25
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          put $RUNNER_TEMP/protected.env -o $PROTECTED_NODE_ROOT/.env
+          bye
+          EOF
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/put-env.lftp" "$raw_host"
+          echo 'PROTECTED_COMPLETE_RUNTIME_ENV=PASS'
 
       - name: Force exact protected Node runtime source to Hostinger
         shell: bash
@@ -191,43 +241,12 @@ jobs:
           timeout 480 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/sync-runtime.lftp" "$raw_host"
           echo 'PROTECTED_RUNTIME_SOURCE_SYNC=PASS'
 
-      - name: Apply protected OpenAI guard environment
-        shell: bash
-        run: |
-          set -euo pipefail
-          node - <<'NODE'
-          const fs=require('fs');
-          const p=process.env.RUNNER_TEMP+'/protected.env';
-          let rows=[];
-          try { rows=fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean); } catch {}
-          const overrides={OPENAI_API_KEY:process.env.OPENAI_API_KEY,ONEWORLDZ_OPENAI_MODEL:'gpt-4o-mini'};
-          rows=rows.filter(row=>!Object.keys(overrides).some(k=>row.startsWith(k+'=')));
-          for(const [k,v] of Object.entries(overrides)) rows.push(`${k}=${v}`);
-          fs.writeFileSync(p,rows.join('\n')+'\n');
-          NODE
-          grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/protected.env"
-          grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/protected.env"
-          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
-          cat > "$RUNNER_TEMP/put-env.lftp" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 2
-          set net:timeout 25
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          put $RUNNER_TEMP/protected.env -o $PROTECTED_NODE_ROOT/.env
-          bye
-          EOF
-          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/put-env.lftp" "$raw_host"
-          echo 'PROTECTED_OPENAI_GUARD_ENV=PASS'
-
-      - name: Verify remote runtime fingerprints
+      - name: Verify remote full-runtime fingerprints
         shell: bash
         run: |
           set -euo pipefail
           raw_host="$(cat "$RUNNER_TEMP/raw-host")"
-          rm -f "$RUNNER_TEMP/remote-index.js" "$RUNNER_TEMP/remote-http.js"
+          rm -f "$RUNNER_TEMP/remote-index.js" "$RUNNER_TEMP/remote-gpt-http.js" "$RUNNER_TEMP/remote-full-runtime-entry.js" "$RUNNER_TEMP/remote-http.js"
           cat > "$RUNNER_TEMP/get-proof.lftp" <<EOF
           set cmd:fail-exit true
           set net:max-retries 2
@@ -237,13 +256,17 @@ jobs:
           set ssl:verify-certificate true
           set ssl:check-hostname false
           get $PROTECTED_NODE_ROOT/index.js -o $RUNNER_TEMP/remote-index.js
-          get $PROTECTED_NODE_ROOT/src/oneworldz-gpt/http.js -o $RUNNER_TEMP/remote-http.js
+          get $PROTECTED_NODE_ROOT/src/oneworldz-gpt/http.js -o $RUNNER_TEMP/remote-gpt-http.js
+          get $PROTECTED_NODE_ROOT/src/full-runtime-entry.js -o $RUNNER_TEMP/remote-full-runtime-entry.js
+          get $PROTECTED_NODE_ROOT/src/http.js -o $RUNNER_TEMP/remote-http.js
           bye
           EOF
           timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-proof.lftp" "$raw_host"
           cmp -s index.js "$RUNNER_TEMP/remote-index.js"
-          cmp -s src/oneworldz-gpt/http.js "$RUNNER_TEMP/remote-http.js"
-          echo 'PROTECTED_REMOTE_SOURCE_FINGERPRINT=PASS'
+          cmp -s src/oneworldz-gpt/http.js "$RUNNER_TEMP/remote-gpt-http.js"
+          cmp -s src/full-runtime-entry.js "$RUNNER_TEMP/remote-full-runtime-entry.js"
+          cmp -s src/http.js "$RUNNER_TEMP/remote-http.js"
+          echo 'PROTECTED_REMOTE_FULL_RUNTIME_FINGERPRINT=PASS'
 
       - name: Official Hostinger managed restart
         shell: bash
@@ -256,14 +279,21 @@ jobs:
           code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$url")"
           case "$code" in 200|201|202|204) echo "HOSTINGER_MANAGED_RESTART=PASS HTTP=$code" ;; *) cat "$RUNNER_TEMP/restart.json"; exit 1 ;; esac
 
-      - name: Prove protected production API live fingerprint
+      - name: Prove full Zed runtime, Mini App and protected OneWorldz GPT live together
         shell: bash
         run: |
           set -euo pipefail
           for i in $(seq 1 60); do
             sleep 5
-            code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/status.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
-            if [ "$code" = 200 ] && STATUS="$RUNNER_TEMP/status.json" node - <<'NODE'
+            root_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/root.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
+            health_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/health.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/health?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
+            mini_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/miniapp.html" -w '%{http_code}' "https://$PROTECTED_DOMAIN/miniapp/?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
+            status_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/status.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
+            if [ "$root_code" = 200 ] && [ "$health_code" = 200 ] && [ "$mini_code" = 200 ] && [ "$status_code" = 200 ] \
+              && grep -Fq '"service":"CryptoWorldz Zed Bot"' "$RUNNER_TEMP/root.json" \
+              && grep -Fq '"ok":true' "$RUNNER_TEMP/health.json" \
+              && grep -Eiq '<!doctype html|<html' "$RUNNER_TEMP/miniapp.html" \
+              && STATUS="$RUNNER_TEMP/status.json" node - <<'NODE'
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync(process.env.STATUS,'utf8'));
           if(p.ok!==true||p.openai_api_configured!==true) process.exit(1);
@@ -273,11 +303,12 @@ jobs:
           if(p.payments_in_chat!==false||p.secrets_in_browser!==false) process.exit(1);
           NODE
             then
-              echo 'PROTECTED_ONEWORLDZ_GPT_PRODUCTION=PASS'
+              echo 'PROTECTED_FULL_ZED_MINIAPP_GPT_PRODUCTION=PASS'
+              cat "$RUNNER_TEMP/root.json"
               cat "$RUNNER_TEMP/status.json"
               exit 0
             fi
-            echo "Protected API convergence $i/60 HTTP=$code"
+            echo "Full Zed convergence $i/60 root=$root_code health=$health_code mini=$mini_code gpt=$status_code"
           done
-          echo '::error::Protected production API live fingerprint failed.'
+          echo '::error::Full Zed + Mini App + protected OneWorldz GPT production proof failed.'
           exit 1
