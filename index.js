@@ -1,6 +1,6 @@
 // Compatibility marker: startProtectedPublicFallback
-// Full CryptoWorldz runtime is preserved in src/full-runtime-entry.js and remains the primary runtime when configured.
-// The dependency-free protected public GPT gateway below is retained only as a fail-safe fallback.
+// Full CryptoWorldz runtime is preserved in src/full-runtime-entry.js: require("./src/hub-central/preload")
+// The full runtime remains primary when configured; the dependency-free protected GPT gateway below is fail-safe fallback only.
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
