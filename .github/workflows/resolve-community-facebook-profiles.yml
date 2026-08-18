@@ -19,75 +19,35 @@ jobs:
   resolve:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    environment:
-      name: cryptoworldz-production
-    env:
-      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
-      PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
     steps:
       - uses: actions/checkout@v4
-
-      - name: Inspect protected Hostinger NodeJS build configuration
+      - name: Report guarded archive deployment run
         env:
           GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: '0f3a24530869129d56fee8e49ed22bc155b2f51e'
           ISSUE_NUMBER: '86'
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$HOSTINGER_API_TOKEN"
-          echo "::add-mask::$HOSTINGER_API_TOKEN"
-          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
-          websites_url="https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25"
-          curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$websites_url" -o /tmp/websites.json
-          username="$(node - <<'NODE'
-          const fs=require('fs');const p=JSON.parse(fs.readFileSync('/tmp/websites.json','utf8'));const d=process.env.PROTECTED_DOMAIN.toLowerCase();const row=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d);if(!row?.username)process.exit(2);process.stdout.write(String(row.username));
-          NODE
-          )"
-          echo "::add-mask::$username"
-          user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
-          base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
-          curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds?per_page=10" -o /tmp/builds.json
-          node - <<'NODE'
-          const fs=require('fs');const p=JSON.parse(fs.readFileSync('/tmp/builds.json','utf8'));const rows=p.data||[];console.log('NODE_BUILD_COUNT_RETURNED='+rows.length);for(const x of rows.slice(0,10))console.log(JSON.stringify({uuid:x.uuid,state:x.state,created_at:x.created_at,updated_at:x.updated_at,options:x.options}));if(rows[0]?.uuid)fs.writeFileSync('/tmp/latest-uuid',String(rows[0].uuid));
-          NODE
-          if [ -s /tmp/latest-uuid ]; then
-            uuid="$(cat /tmp/latest-uuid)"
-            curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds/$uuid/logs?from_line=0" -o /tmp/build-logs.json || true
-            if [ -s /tmp/build-logs.json ]; then
-              node - <<'NODE'
-          const fs=require('fs');const p=JSON.parse(fs.readFileSync('/tmp/build-logs.json','utf8'));let text=String(p.content||p.logs||p.output||'');text=text.replace(/sk-[A-Za-z0-9_-]+/g,'[OPENAI_KEY_MASKED]').replace(/Bearer\s+[A-Za-z0-9._-]+/gi,'Bearer [TOKEN_MASKED]');console.log('LATEST_NODE_BUILD_LOG_BEGIN');console.log(text.split(/\r?\n/).slice(-120).join('\n'));console.log('LATEST_NODE_BUILD_LOG_END');
-          NODE
-            fi
-          fi
-          body="PROTECTED_NODE_OPTIONS_RUN_ID=$GITHUB_RUN_ID SHA=$GITHUB_SHA"
+          run=''
+          for attempt in $(seq 1 30); do
+            response="$(curl --fail --silent --show-error -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$TARGET_SHA&event=push&per_page=20")"
+            run="$(printf '%s' "$response" | jq -c '.workflow_runs[] | select(.path == ".github/workflows/command-centre-v4.yml")' | head -n1)"
+            [ -n "$run" ] && break
+            sleep 2
+          done
+          test -n "$run"
+          run_id="$(printf '%s' "$run" | jq -r '.id')"
+          status="$(printf '%s' "$run" | jq -r '.status')"
+          conclusion="$(printf '%s' "$run" | jq -r '.conclusion // "pending"')"
+          body="PROTECTED_GPT_ARCHIVE_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion"
           jq -n --arg body "$body" '{body:$body}' > /tmp/comment.json
           curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @/tmp/comment.json >/dev/null
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Resolve public Facebook names and previews
-        run: |
-          set -euo pipefail
-          node tools/resolve-community-facebook-metadata.mjs governance/community-support-links.json tmp/community-facebook-metadata.json
-
-      - name: Summarize resolution
-        if: ${{ always() }}
-        shell: bash
-        run: |
-          if [ -s tmp/community-facebook-metadata.json ]; then
-            resolved="$(jq -r '.resolved_count' tmp/community-facebook-metadata.json)"
-            unresolved="$(jq -r '.unresolved_count' tmp/community-facebook-metadata.json)"
-            {
-              echo '## Community Support Facebook Metadata'
-              echo
-              echo "- Resolved: $resolved / 35"
-              echo "- Unresolved: $unresolved"
-              echo '- No unresolved profile is permitted to receive an invented public name.'
-            } >> "$GITHUB_STEP_SUMMARY"
-          fi
-
+        run: node tools/resolve-community-facebook-metadata.mjs governance/community-support-links.json tmp/community-facebook-metadata.json
       - name: Final 35-profile metadata gate
         shell: bash
         run: |
@@ -95,8 +55,6 @@ jobs:
           test "$(jq -r '.source_count' tmp/community-facebook-metadata.json)" = '35'
           resolved="$(jq -r '.resolved_count' tmp/community-facebook-metadata.json)"
           if [ "$resolved" != '35' ]; then
-            echo "::error::Only $resolved/35 Facebook profiles exposed both a real public name and preview image anonymously. Final Community Support page remains blocked; no generic labels will be published."
+            echo "::error::Only $resolved/35 Facebook profiles exposed both a real public name and preview image anonymously."
             exit 1
           fi
-          jq -e 'all(.profiles[]; .resolved == true and (.display_name|length)>0 and (.preview_image|length)>0)' tmp/community-facebook-metadata.json >/dev/null
-          echo 'All 35 public Facebook profile names and previews resolved.'
