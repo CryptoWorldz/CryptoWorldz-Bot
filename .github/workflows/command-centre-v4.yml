@@ -7,11 +7,15 @@ on:
       - clean-platform-v4
     paths:
       - "platform/**"
+      - "src/oneworldz-gpt/**"
+      - "test/oneworldz-gpt.test.js"
       - "supabase/migrations/20260808235139_command_centre_v4_bootstrap.sql"
       - ".github/workflows/command-centre-v4.yml"
   pull_request:
     paths:
       - "platform/**"
+      - "src/oneworldz-gpt/**"
+      - "test/oneworldz-gpt.test.js"
       - "supabase/migrations/20260808235139_command_centre_v4_bootstrap.sql"
       - ".github/workflows/command-centre-v4.yml"
 
@@ -35,3 +39,56 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run verify
       - run: docker build .
+
+  protected-oneworldz-gpt:
+    name: Protected OneWorldz GPT guarded production proof
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked root runtime
+        run: npm ci
+      - name: Prove hard-locked public GPT guard in source
+        run: node --test test/oneworldz-gpt.test.js
+      - name: Prove protected production is serving the guarded build
+        shell: bash
+        run: |
+          set -euo pipefail
+          endpoint='https://cryptobotz.cryptoworldz.xyz/api/oneworldz-gpt/status'
+          health_endpoint='https://cryptobotz.cryptoworldz.xyz/health'
+          proved=0
+          for attempt in $(seq 1 18); do
+            health="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache, no-store' "${health_endpoint}?guard_proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
+            status="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache, no-store' "${endpoint}?guard_proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
+            if HEALTH="$health" STATUS="$status" node <<'NODE'
+          const health = JSON.parse(process.env.HEALTH || "{}");
+          const status = JSON.parse(process.env.STATUS || "{}");
+          if (health.ok !== true) process.exit(1);
+          if (status.ok !== true) process.exit(1);
+          if (status.openai_api_configured !== true) process.exit(1);
+          if (status.guard_profile !== "oneworldz-public-low-cost-v1") process.exit(1);
+          if (status.guard_enforced !== true) process.exit(1);
+          if (status.model !== "gpt-4o-mini") process.exit(1);
+          if (status.max_output_tokens !== 320) process.exit(1);
+          if (status.per_ip_limit_10m !== 8) process.exit(1);
+          if (status.daily_request_limit !== 1000) process.exit(1);
+          if (status.payments_in_chat !== false) process.exit(1);
+          if (status.secrets_in_browser !== false) process.exit(1);
+          NODE
+            then
+              proved=1
+              printf '%s\n' "$status"
+              break
+            fi
+            sleep 10
+          done
+          if [ "$proved" != '1' ]; then
+            echo '::error::Protected CryptoBotz production is not yet serving the exact OneWorldz public GPT low-cost guard.'
+            exit 1
+          fi
+          echo 'PROTECTED_ONEWORLDZ_GPT_GUARD=PASS'
