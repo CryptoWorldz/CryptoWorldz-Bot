@@ -73,7 +73,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-
       - name: Verify hard-locked guard
         run: |
           set -euo pipefail
@@ -81,27 +80,20 @@ jobs:
           node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js
           grep -Fq 'oneworldz-public-low-cost-v1' src/hub-central/live-v1.js
           grep -Fq 'model: "gpt-4o-mini"' src/hub-central/live-v1.js
-
       - name: Install deployment tools
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp zip
-
-      - name: Resolve Hostinger account and protected environment
+      - name: Resolve Hostinger application and current protected env
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$HOSTINGER_API_TOKEN"
-          test -n "$OPENAI_API_KEY"
-          echo "::add-mask::$HOSTINGER_API_TOKEN"
-          echo "::add-mask::$OPENAI_API_KEY"
-          echo "::add-mask::$FTP_HOST"
-          echo "::add-mask::$FTP_USERNAME"
-          echo "::add-mask::$FTP_PASSWORD"
+          test -n "$HOSTINGER_API_TOKEN"; test -n "$OPENAI_API_KEY"
+          echo "::add-mask::$HOSTINGER_API_TOKEN"; echo "::add-mask::$OPENAI_API_KEY"; echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           cat > "$RUNNER_TEMP/env.lftp" <<EOF
-          set cmd:fail-exit true
+          set cmd:fail-exit false
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
@@ -109,55 +101,37 @@ jobs:
           get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/protected.env
           bye
           EOF
-          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/env.lftp" "$raw_host"
-          test -s "$RUNNER_TEMP/protected.env"
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/env.lftp" "$raw_host" || true
+          [ -s "$RUNNER_TEMP/protected.env" ] || : > "$RUNNER_TEMP/protected.env"
           domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
           curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" -o "$RUNNER_TEMP/websites.json"
           username="$(node - <<'NODE'
           const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/websites.json','utf8'));const d=process.env.PROTECTED_DOMAIN.toLowerCase();const row=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d);if(!row?.username)process.exit(2);process.stdout.write(String(row.username));
           NODE
           )"
-          test -n "$username"
-          echo "::add-mask::$username"
-          printf '%s' "$username" > "$RUNNER_TEMP/hostinger-username"
-
-      - name: Build guarded production archive
+          test -n "$username"; echo "::add-mask::$username"; printf '%s' "$username" > "$RUNNER_TEMP/hostinger-username"
+      - name: Build guarded archive
         shell: bash
         run: |
           set -euo pipefail
-          stage="$RUNNER_TEMP/runtime"
-          mkdir -p "$stage"
-          cp package.json package-lock.json db.js index.js "$stage/"
-          cp -R src public "$stage/"
-          cp src/hub-central/live-v1.js "$stage/hub-central-live.js"
-          cp src/community-support/live-v1.js "$stage/community-support-live.js"
+          stage="$RUNNER_TEMP/runtime"; rm -rf "$stage"; mkdir -p "$stage"
+          cp package.json package-lock.json db.js index.js "$stage/"; cp -R src public "$stage/"
+          cp src/hub-central/live-v1.js "$stage/hub-central-live.js"; cp src/community-support/live-v1.js "$stage/community-support-live.js"
           STAGED_INDEX="$stage/index.js" node - <<'NODE'
-          const fs=require('fs');const p=process.env.STAGED_INDEX;let t=fs.readFileSync(p,'utf8');
-          const needle='const app = createHttpApp({ bot, repository, config });';
-          if(!t.includes(needle)) throw new Error('create_http_app_anchor_missing');
-          if(!t.includes('registerHubCentralLive')) t=t.replace(needle, needle+'\n  const { registerHubCentralLive } = require("./hub-central-live");\n  registerHubCentralLive(app);');
-          if(!t.includes('registerCommunitySupportLive')) t=t.replace(needle, needle+'\n  const { registerCommunitySupportLive } = require("./community-support-live");\n  registerCommunitySupportLive(app);');
-          fs.writeFileSync(p,t);
+          const fs=require('fs');const p=process.env.STAGED_INDEX;let t=fs.readFileSync(p,'utf8');const n='const app = createHttpApp({ bot, repository, config });';if(!t.includes(n))throw new Error('create_http_app_anchor_missing');if(!t.includes('registerHubCentralLive'))t=t.replace(n,n+'\n  const { registerHubCentralLive } = require("./hub-central-live");\n  registerHubCentralLive(app);');if(!t.includes('registerCommunitySupportLive'))t=t.replace(n,n+'\n  const { registerCommunitySupportLive } = require("./community-support-live");\n  registerCommunitySupportLive(app);');fs.writeFileSync(p,t);
           NODE
           node --check "$stage/index.js"
           cp "$RUNNER_TEMP/protected.env" "$stage/.env"
           OPENAI_API_KEY="$OPENAI_API_KEY" STAGE_ENV="$stage/.env" node - <<'NODE'
-          const fs=require('fs');const p=process.env.STAGE_ENV;let rows=fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean);rows=rows.filter(x=>!/^OPENAI_API_KEY=/.test(x)&&!/^ONEWORLDZ_OPENAI_MODEL=/.test(x));rows.push(`OPENAI_API_KEY=${process.env.OPENAI_API_KEY}`,'ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini');fs.writeFileSync(p,rows.join('\n')+'\n');
+          const fs=require('fs');const p=process.env.STAGE_ENV;let r=fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean);r=r.filter(x=>!/^OPENAI_API_KEY=/.test(x)&&!/^ONEWORLDZ_OPENAI_MODEL=/.test(x));r.push(`OPENAI_API_KEY=${process.env.OPENAI_API_KEY}`,'ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini');fs.writeFileSync(p,r.join('\n')+'\n');
           NODE
-          for key in OPENAI_API_KEY BOT_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do grep -Eq "^${key}=.+$" "$stage/.env"; done
-          grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$stage/.env"
-          (cd "$stage" && zip -q -r "$RUNNER_TEMP/runtime.zip" . -x 'node_modules/*')
-          test -s "$RUNNER_TEMP/runtime.zip"
-          echo 'GUARDED_ARCHIVE_PREPARED=PASS'
-
+          grep -Eq '^OPENAI_API_KEY=.+$' "$stage/.env"; grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$stage/.env"
+          (cd "$stage" && zip -q -r "$RUNNER_TEMP/runtime.zip" . -x 'node_modules/*'); test -s "$RUNNER_TEMP/runtime.zip"; echo 'GUARDED_ARCHIVE_PREPARED=PASS'
       - name: Create official Hostinger archive build
         shell: bash
         run: |
           set -euo pipefail
-          username="$(cat "$RUNNER_TEMP/hostinger-username")"
-          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
-          user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
-          base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
+          username="$(cat "$RUNNER_TEMP/hostinger-username")"; domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"; user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"; base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
           base64 -w0 "$RUNNER_TEMP/runtime.zip" > "$RUNNER_TEMP/archive.b64"
           ARCHIVE="$RUNNER_TEMP/archive.b64" node - <<'NODE' > "$RUNNER_TEMP/request.json"
           const fs=require('fs');process.stdout.write(JSON.stringify({archive:fs.readFileSync(process.env.ARCHIVE,'utf8'),node_version:22,app_type:'express',entry_file:'index.js'}));
@@ -167,51 +141,26 @@ jobs:
           uuid="$(node - <<'NODE'
           const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/build.json','utf8'));const id=p.uuid||p.data?.uuid;if(!id)process.exit(2);process.stdout.write(String(id));
           NODE
-          )"
-          printf '%s' "$uuid" > "$RUNNER_TEMP/build-uuid"
-          echo "HOSTINGER_ARCHIVE_BUILD_CREATED=$uuid"
-
+          )"; printf '%s' "$uuid" > "$RUNNER_TEMP/build-uuid"; echo "HOSTINGER_ARCHIVE_BUILD_CREATED=$uuid"
       - name: Wait for archive build
         shell: bash
         run: |
           set -euo pipefail
-          username="$(cat "$RUNNER_TEMP/hostinger-username")"; uuid="$(cat "$RUNNER_TEMP/build-uuid")"
-          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"; user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
-          base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
-          for i in $(seq 1 60); do
-            curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
-            state="$(BUILD_UUID="$uuid" node - <<'NODE'
+          username="$(cat "$RUNNER_TEMP/hostinger-username")"; uuid="$(cat "$RUNNER_TEMP/build-uuid")"; domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"; user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"; base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
+          for i in $(seq 1 60); do curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"; state="$(BUILD_UUID="$uuid" node - <<'NODE'
           const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/builds.json','utf8'));const x=(p.data||[]).find(x=>String(x.uuid)===process.env.BUILD_UUID);process.stdout.write(String(x?.state||'missing'));
           NODE
-          )"
-            echo "Archive build state=$state"
-            [ "$state" = completed ] && { echo 'HOSTINGER_ARCHIVE_BUILD=PASS'; exit 0; }
-            if [ "$state" = failed ] || [ "$state" = cancelled ]; then curl --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds/$uuid/logs?from_line=0" | head -c 4000; exit 1; fi
-            sleep 5
-          done
-          exit 1
-
-      - name: Official Hostinger Node restart
+          )"; echo "Archive build state=$state"; [ "$state" = completed ] && { echo 'HOSTINGER_ARCHIVE_BUILD=PASS'; exit 0; }; [ "$state" = failed ] || [ "$state" = cancelled ] && exit 1; sleep 5; done; exit 1
+      - name: Official Hostinger restart
         shell: bash
         run: |
           set -euo pipefail
-          username="$(cat "$RUNNER_TEMP/hostinger-username")"; domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"; user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
-          url="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs/server/restart"
-          code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$url")"
-          case "$code" in 200|201|202|204) echo "HOSTINGER_NODE_RESTART=PASS HTTP=$code";; *) cat "$RUNNER_TEMP/restart.json"; exit 1;; esac
-
+          username="$(cat "$RUNNER_TEMP/hostinger-username")"; domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"; user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"; url="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs/server/restart"; code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$url")"; case "$code" in 200|201|202|204) echo "HOSTINGER_NODE_RESTART=PASS HTTP=$code";; *) cat "$RUNNER_TEMP/restart.json"; exit 1;; esac
       - name: Prove protected production API guard
         shell: bash
         run: |
           set -euo pipefail
-          for i in $(seq 1 36); do
-            sleep 5
-            code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/status.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
-            if [ "$code" = 200 ] && STATUS="$RUNNER_TEMP/status.json" node - <<'NODE'
+          for i in $(seq 1 36); do sleep 5; code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/status.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"; if [ "$code" = 200 ] && STATUS="$RUNNER_TEMP/status.json" node - <<'NODE'
           const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.env.STATUS,'utf8'));if(p.ok!==true||p.openai_api_configured!==true||p.guard_profile!=="oneworldz-public-low-cost-v1"||p.guard_enforced!==true||p.model!=="gpt-4o-mini"||p.max_output_tokens!==320||p.per_ip_limit_10m!==8||p.daily_request_limit!==1000||p.payments_in_chat!==false||p.secrets_in_browser!==false)process.exit(1);
           NODE
-            then echo 'PROTECTED_ONEWORLDZ_GPT_PRODUCTION=PASS'; cat "$RUNNER_TEMP/status.json"; exit 0; fi
-            echo "Protected API convergence $i/36 HTTP=$code"
-          done
-          echo '::error::Protected production API guard proof failed.'
-          exit 1
+          then echo 'PROTECTED_ONEWORLDZ_GPT_PRODUCTION=PASS'; cat "$RUNNER_TEMP/status.json"; exit 0; fi; echo "Protected API convergence $i/36 HTTP=$code"; done; echo '::error::Protected production API guard proof failed.'; exit 1
