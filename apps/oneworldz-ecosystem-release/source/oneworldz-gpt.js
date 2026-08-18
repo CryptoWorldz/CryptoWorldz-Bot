@@ -38,7 +38,7 @@
       </div>
     </div>
     <form class="oneworldz-gpt-form">
-      <textarea name="message" aria-label="Message OneWorldz GPT" placeholder="Ask OneWorldz GPT…" maxlength="2500" required></textarea>
+      <textarea name="message" aria-label="Message OneWorldz GPT" placeholder="Ask OneWorldz GPT…" maxlength="1200" required></textarea>
       <button type="submit">Send</button>
       <p class="oneworldz-gpt-note">Do not enter card, bank, password, API-key, seed-phrase or private-key information.</p>
     </form>`;
@@ -106,17 +106,21 @@
         body: JSON.stringify({
           page,
           message,
-          history: history.slice(-8, -1)
+          history: history.slice(-4, -1)
         })
       });
       const payload = await response.json().catch(() => ({}));
       thinking.remove();
       if (!response.ok || !payload.ok) {
         const text = payload.error === "openai_api_not_configured"
-          ? "OneWorldz GPT is built but the protected OpenAI API key is not active on the server yet."
-          : payload.error === "rate_limited"
-            ? "Too many requests from this connection. Try again shortly."
-            : "OneWorldz GPT could not answer that request right now.";
+          ? "OneWorldz GPT is built, but its protected OpenAI API key is not active on the server."
+          : payload.error === "openai_quota_exhausted"
+            ? "OneWorldz GPT is temporarily paused because the OpenAI API credit is exhausted. The normal OneWorldz and DonateWorldz links still work."
+            : payload.error === "daily_limit_reached"
+              ? "OneWorldz GPT has reached its daily public-use safety limit. The normal OneWorldz and DonateWorldz links still work."
+              : payload.error === "rate_limited"
+                ? "Too many requests from this connection. Try again shortly."
+                : "OneWorldz GPT could not answer that request right now.";
         addMessage("assistant", text);
         return;
       }
@@ -124,7 +128,7 @@
       addMessage("assistant", answer);
       addLinks(payload.suggestions);
       history.push({ role: "assistant", content: answer });
-      if (history.length > 8) history.splice(0, history.length - 8);
+      if (history.length > 6) history.splice(0, history.length - 6);
     } catch {
       thinking.remove();
       addMessage("assistant", "OneWorldz GPT is temporarily unreachable. The normal OneWorldz and DonateWorldz links still work.");
