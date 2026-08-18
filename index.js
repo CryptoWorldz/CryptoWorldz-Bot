@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ path: require("node:path").join(__dirname, ".env") });
 
 const telegramLibrary = require("node-telegram-bot-api");
 const TelegramBot = telegramLibrary.TelegramBot || telegramLibrary.default || telegramLibrary;
@@ -138,126 +138,35 @@ async function start() {
   registerScopedBroadcastHandlers({ bot, repository, config });
   registerAutoTelegramHandlers({ bot, config, autoClient, supabase });
   registerCauseTelegramHandlers({ bot, repository, supabase, config });
-  registerExecutiveTelegramHandlers({ bot, repository, supabase, config });
-  registerGraceTelegramHandlers({ bot, repository, graceRepository, config });
-  registerGraceBuild2Handlers({ bot, repository, graceRepository, supabase, config });
-  registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });
-  registerGraceFacebookOAuthTelegramHandlers({ bot, facebookOAuth: graceFacebookOAuth, config });
+  registerReferralTelegramHandlers({ bot, repository, supabase, config });
   registerWebsiteTelegramHandlers({ bot, config });
-  registerCommunityDirectoryHandlers({ bot, supabase, config });
-  const referralController = registerReferralTelegramHandlers({ bot, repository, supabase, config });
-  registerRewardPolicyHandlers({ bot, repository, supabase, config });
-  registerRewardSettlementHandlers({ bot, repository, supabase, config });
-  registerWorkEvidenceHandlers({ bot, config, supabase });
+  registerWorkEvidenceHandlers({ bot, repository, config });
+  registerRewardPolicyHandlers({ bot, config });
+  registerRewardSettlementHandlers({ bot, repository, config, supabase });
+  registerProjectWalletSystem({ bot, repository, config, supabase });
+  registerWorldzCastSystem({ bot, repository, config, supabase });
+  registerLegendV8System({ bot, repository, config, supabase });
+  registerExecutiveTelegramHandlers({ bot, repository, config, supabase });
+  registerGraceTelegramHandlers({ bot, repository: graceRepository, config });
+  registerGraceBuild2Handlers({ bot, repository: graceRepository, config });
+  registerGraceXOAuthTelegramHandlers({ bot, oauth: graceOAuth, config });
+  registerGraceFacebookOAuthTelegramHandlers({ bot, oauth: graceFacebookOAuth, config });
 
-  const app = createHttpApp({ bot, config, repository });
-  registerProjectWalletSystem({ app, bot, config, supabase });
-  registerLegendV8System({ app, bot, config, repository, supabase });
-  registerWorldzCastSystem({ app, bot, config, repository, supabase });
-  app.get("/api/public/runtime", (req, res) => res.json({
-    ok: true,
-    build: RUNTIME_BUILD,
-    grace_x_oauth_configured: graceOAuth.configured(),
-    grace_meta_facebook_oauth_configured: graceFacebookOAuth.configured(),
-    grace_meta_app_id_configured: Boolean(graceMetaAppId),
-    grace_meta_app_secret_configured: Boolean(graceMetaAppSecret),
-    grace_meta_redirect_uri: "/grace/oauth/facebook/callback",
-    grace_meta_graph_version: graceFacebookOAuth.graphVersion,
-    grace_build2_multisocial: true,
-    grace_autopost: true,
-    grace_delegated_admin_management: true,
-    grace_account1_shared_oauth: true,
-    grace_multi_account_directory: true,
-    facebook_page_publishing_ready: true,
-    executive_controls: true,
-    impact_cause_register: true,
-    grace_manager_role: true,
-    auto_dca_controls: true,
-    website_directory_commands: true,
-    community_directory_commands: true,
-    referral_reward_controls: true,
-    protected_reward_pools: true,
-    usdc_reward_funding: true,
-    reward_asset_choices: true,
-    four_wallet_plan: true,
-    profile_contribution_wallets: true,
-    transparent_owner_investment_policy: true,
-    worldzcast_enabled: true,
-    worldzcast_member_dms: false,
-    model_348_v8_rewards: true,
-    shill_boosts: true,
-    purchase_based_points: false,
-    holding_recognition_points: false,
-    owner_work_evidence: true,
-    posting_enabled: false,
-    simplified_command_centre: true
-  }));
-  registerAutoMiniRoutes({ app, config, autoClient, supabase });
-  registerExecutiveRoutes({ app, repository, supabase, config });
-  registerGraceRoutes({
-    app,
-    graceRepository,
-    graceOAuth,
-    graceFacebookOAuth,
-    apiSecret: process.env.GRACE_API_SECRET || ""
+  const app = createHttpApp({ bot, repository, config });
+  registerAutoMiniRoutes({ app, config, autoClient });
+  registerExecutiveRoutes({ app, repository, config, supabase });
+  registerGraceRoutes({ app, repository: graceRepository, oauth: graceOAuth, facebookOAuth: graceFacebookOAuth, config });
+  registerCommunityDirectoryHandlers({ bot, repository, config });
+
+  const port = Number(process.env.PORT || 3000);
+  app.listen(port, "0.0.0.0", () => {
+    console.log(`CryptoWorldz Bot listening on ${port} • ${RUNTIME_BUILD}`);
+    for (const warning of configWarnings(config)) console.warn(`CONFIG WARNING: ${warning}`);
   });
-
-  for (const warning of configWarnings(config)) console.warn(warning);
-
-  const server = app.listen(config.port, async () => {
-    console.log(`CryptoWorldz Zed Bot listening on port ${config.port}`);
-    console.log(`Runtime build ${RUNTIME_BUILD}`);
-    graceWorker.start();
-    console.log("Grace Social Engine worker started in approval-controlled mode");
-
-    const webhookResult = await Promise.allSettled([
-      bot.setWebHook(config.webhookUrl, {
-        secret_token: config.webhookSecret,
-        allowed_updates: ["message","edited_message","channel_post","edited_channel_post","callback_query","chat_member","my_chat_member","chat_join_request"]
-      }),
-      bot.setMyCommands(BOT_MENU_COMMANDS)
-    ]);
-
-    if (webhookResult[0].status === "fulfilled") console.log("Telegram webhook configured successfully");
-    else console.error("Telegram webhook setup failed", { name: webhookResult[0].reason?.name || "Error" });
-    if (webhookResult[1].status === "rejected") console.error("Telegram command menu setup failed", { name: webhookResult[1].reason?.name || "Error" });
-  });
-
-  const shutdown = (signal) => {
-    console.log(`${signal} received; closing HTTP server.`);
-    referralController.stop();
-    graceWorker.stop();
-    server.close(() => process.exit(0));
-    setTimeout(() => process.exit(1), 10000).unref();
-  };
-
-  process.once("SIGTERM", () => shutdown("SIGTERM"));
-  process.once("SIGINT", () => shutdown("SIGINT"));
-
-  return {
-    app,
-    autoClient,
-    bot,
-    config,
-    graceFacebookOAuth,
-    graceFacebookOAuthRepository,
-    graceOAuth,
-    graceOAuthRepository,
-    gracePublisher,
-    graceRepository,
-    graceWorker,
-    referralController,
-    repository,
-    server
-  };
+  graceWorker.start();
 }
 
 start().catch((error) => {
-  console.error("Zed Bot startup failed", {
-    name: error?.name || "Error",
-    message: error?.message || "Unknown startup error"
-  });
+  console.error("Fatal startup error", error);
   process.exit(1);
 });
-
-module.exports = { RUNTIME_BUILD, defaultGraceMetaRedirectUri, defaultGraceRedirectUri, missingGraceXSecretError, start };
