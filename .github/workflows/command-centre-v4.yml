@@ -64,6 +64,7 @@ jobs:
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      HOSTINGER_API_TOKEN_SECRET: ${{ secrets.HOSTINGER_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -92,10 +93,9 @@ jobs:
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           test -n "$raw_host"
-          echo "::add-mask::$FTP_HOST"
-          echo "::add-mask::$FTP_USERNAME"
-          echo "::add-mask::$FTP_PASSWORD"
+          echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
           [ -z "$OPENAI_API_KEY" ] || echo "::add-mask::$OPENAI_API_KEY"
+          [ -z "$HOSTINGER_API_TOKEN_SECRET" ] || echo "::add-mask::$HOSTINGER_API_TOKEN_SECRET"
           printf '%s' "$raw_host" > "$RUNNER_TEMP/raw-host"
 
           cat > "$RUNNER_TEMP/download.lftp" <<EOF
@@ -142,14 +142,12 @@ jobs:
           fs.writeFileSync(p,rows.join('\n')+'\n');
           NODE
           grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/patched.env"
-          grep -Eq '^HOSTINGER_API_TOKEN=.+$' "$RUNNER_TEMP/patched.env"
           grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/patched.env"
           cp src/hub-central/live-v1.js "$RUNNER_TEMP/hub-central-live.js"
           cp src/community-support/live-v1.js "$RUNNER_TEMP/community-support-live.js"
           printf 'restart %s %s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/restart.txt"
 
       - name: Install exact guarded runtime and restart sentinels
-        id: write
         shell: bash
         run: |
           set -euo pipefail
@@ -175,10 +173,8 @@ jobs:
           bye
           EOF
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$raw_host"
-          echo 'written=true' >> "$GITHUB_OUTPUT"
 
       - name: Prove exact protected bytes and settings
-        id: bytes
         shell: bash
         run: |
           set -euo pipefail
@@ -206,39 +202,45 @@ jobs:
           cmp "$RUNNER_TEMP/restart.txt" "$RUNNER_TEMP/remote-node-restart.txt"
           cmp "$RUNNER_TEMP/restart.txt" "$RUNNER_TEMP/remote-web-restart.txt"
           grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/remote.env"
-          grep -Eq '^HOSTINGER_API_TOKEN=.+$' "$RUNNER_TEMP/remote.env"
           grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/remote.env"
           echo 'PROTECTED_GUARDED_BYTES=PASS'
           echo 'PROTECTED_GUARDED_SETTINGS=PASS'
-          echo 'proved=true' >> "$GITHUB_OUTPUT"
 
       - name: Restart managed Node application through official Hostinger API
-        id: api_restart
         shell: bash
         run: |
           set -euo pipefail
-          hostinger_token="$(node - <<'NODE'
+          hostinger_token="$HOSTINGER_API_TOKEN_SECRET"
+          if [ -z "$hostinger_token" ]; then
+            hostinger_token="$(node - <<'NODE'
           const fs=require('fs');
           const text=fs.readFileSync(process.env.RUNNER_TEMP+'/remote.env','utf8');
-          const row=text.split(/\r?\n/).find(x=>x.startsWith('HOSTINGER_API_TOKEN='));
-          if(row) process.stdout.write(row.slice('HOSTINGER_API_TOKEN='.length).trim().replace(/^['"]|['"]$/g,''));
+          const names=['HOSTINGER_API_TOKEN','HOSTINGER_API_KEY'];
+          for(const name of names){
+            const row=text.split(/\r?\n/).find(x=>x.startsWith(name+'='));
+            if(row){process.stdout.write(row.slice(name.length+1).trim().replace(/^['"]|['"]$/g,''));break;}
+          }
           NODE
           )"
-          test -n "$hostinger_token"
+          fi
+          if [ -z "$hostinger_token" ]; then
+            echo '::error::No protected Hostinger API credential is available for the official NodeJS restart endpoint.'
+            echo 'Available protected Hostinger variable names:'
+            sed -n 's/^\(HOSTINGER_[A-Z0-9_]*\)=.*/\1/p' "$RUNNER_TEMP/remote.env" | sort -u
+            exit 1
+          fi
           echo "::add-mask::$hostinger_token"
 
           encoded_domain="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
           websites_url="https://developers.hostinger.com/api/hosting/v1/websites?domain=${encoded_domain}&per_page=25"
-          list_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 \
-            -o "$RUNNER_TEMP/hostinger-websites.json" -w '%{http_code}' \
-            -H "Authorization: Bearer $hostinger_token" -H 'Accept: application/json' "$websites_url")"
-          test "$list_code" = '200'
+          list_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 -o "$RUNNER_TEMP/hostinger-websites.json" -w '%{http_code}' -H "Authorization: Bearer $hostinger_token" -H 'Accept: application/json' "$websites_url")"
+          if [ "$list_code" != '200' ]; then echo "::error::Hostinger website discovery API returned HTTP $list_code"; exit 1; fi
 
           hostinger_username="$(node - <<'NODE'
           const fs=require('fs');
           const payload=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/hostinger-websites.json','utf8'));
-          const domain=process.env.PROTECTED_DOMAIN;
-          const row=(payload.data||[]).find(x=>String(x.domain||'').toLowerCase()===domain.toLowerCase());
+          const domain=process.env.PROTECTED_DOMAIN.toLowerCase();
+          const row=(payload.data||[]).find(x=>String(x.domain||'').toLowerCase()===domain);
           if(!row?.username) process.exit(2);
           process.stdout.write(String(row.username));
           NODE
@@ -247,15 +249,11 @@ jobs:
           echo "::add-mask::$hostinger_username"
           encoded_username="$(HOSTINGER_USERNAME="$hostinger_username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
           restart_url="https://developers.hostinger.com/api/hosting/v1/accounts/${encoded_username}/websites/${encoded_domain}/nodejs/server/restart"
-          restart_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 \
-            --request POST -o "$RUNNER_TEMP/hostinger-restart.json" -w '%{http_code}' \
-            -H "Authorization: Bearer $hostinger_token" -H 'Accept: application/json' -H 'Content-Type: application/json' "$restart_url")"
-          case "$restart_code" in 200|201|202|204) ;; *) echo "::error::Hostinger NodeJS restart API returned HTTP $restart_code"; cat "$RUNNER_TEMP/hostinger-restart.json" | head -c 500; exit 1;; esac
+          restart_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST -o "$RUNNER_TEMP/hostinger-restart.json" -w '%{http_code}' -H "Authorization: Bearer $hostinger_token" -H 'Accept: application/json' "$restart_url")"
+          case "$restart_code" in 200|201|202|204) ;; *) echo "::error::Hostinger NodeJS restart API returned HTTP $restart_code"; head -c 500 "$RUNNER_TEMP/hostinger-restart.json"; exit 1;; esac
           echo "HOSTINGER_NODEJS_API_RESTART=PASS HTTP=$restart_code"
-          echo 'proved=true' >> "$GITHUB_OUTPUT"
 
       - name: Prove live guarded API fingerprint
-        id: live
         shell: bash
         run: |
           set -euo pipefail
@@ -278,7 +276,6 @@ jobs:
             then
               echo 'PROTECTED_ONEWORLDZ_GPT_GUARD=PASS'
               cat "$RUNNER_TEMP/gpt.json"
-              echo 'proved=true' >> "$GITHUB_OUTPUT"
               exit 0
             fi
             echo "Protected convergence $attempt/36 root=$root_code gpt=$gpt_code hub=$hub_code"
