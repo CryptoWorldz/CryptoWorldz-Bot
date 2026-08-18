@@ -11,6 +11,14 @@ const ALLOWED_ORIGINS = new Set([
   "https://www.purplediamondcrew.com"
 ]);
 
+const PUBLIC_GPT_GUARD = Object.freeze({
+  profile: "oneworldz-public-low-cost-v1",
+  model: "gpt-4o-mini",
+  maxOutputTokens: 320,
+  perIpLimit: 8,
+  dailyLimit: 1000
+});
+
 const ROUTES = Object.freeze({
   reagan: { label: "Reagan & Children", href: "https://donateworldz.com/reagan-children/" },
   community: { label: "Community Impact", href: "https://donateworldz.com/community-impact/" },
@@ -197,10 +205,10 @@ async function askOneWorldzGPT({ apiKey, model, message, history = [], page = "o
 
 function registerOneWorldzGptRoutes({ app }) {
   const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
-  const model = String(process.env.ONEWORLDZ_OPENAI_MODEL || "gpt-4o-mini").trim();
-  const maxOutputTokens = Math.max(80, Math.min(600, Number(process.env.ONEWORLDZ_GPT_MAX_OUTPUT_TOKENS || 320)));
-  const perIpLimit = Math.max(1, Math.min(60, Number(process.env.ONEWORLDZ_GPT_RATE_LIMIT || 8)));
-  const dailyLimit = Math.max(1, Math.min(100000, Number(process.env.ONEWORLDZ_GPT_DAILY_REQUEST_LIMIT || 1000)));
+  const model = PUBLIC_GPT_GUARD.model;
+  const maxOutputTokens = PUBLIC_GPT_GUARD.maxOutputTokens;
+  const perIpLimit = PUBLIC_GPT_GUARD.perIpLimit;
+  const dailyLimit = PUBLIC_GPT_GUARD.dailyLimit;
   const rateLimit = createRateLimiter({ limit: perIpLimit });
   const dailyRateLimit = createDailyLimiter({ limit: dailyLimit });
 
@@ -211,6 +219,8 @@ function registerOneWorldzGptRoutes({ app }) {
       ok: true,
       service: "OneWorldz GPT",
       openai_api_configured: Boolean(apiKey),
+      guard_profile: PUBLIC_GPT_GUARD.profile,
+      guard_enforced: true,
       model,
       max_output_tokens: maxOutputTokens,
       per_ip_limit_10m: perIpLimit,
@@ -252,6 +262,7 @@ function registerOneWorldzGptRoutes({ app }) {
 
 module.exports = {
   ALLOWED_ORIGINS,
+  PUBLIC_GPT_GUARD,
   ROUTES,
   askOneWorldzGPT,
   corsForPublicGuide,
