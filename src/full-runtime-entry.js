@@ -35,11 +35,12 @@ const { registerRewardPolicyHandlers } = require("./reward-policy");
 const { registerRewardSettlementHandlers } = require("./reward-settlement");
 const { registerScopedBroadcastHandlers } = require("./scoped-broadcast");
 const { registerTelegramHandlers } = require("./telegram");
+const { registerUserExperienceSystem } = require("./user-experience");
 const { registerWebsiteTelegramHandlers } = require("./websites-telegram");
 const { registerWorkEvidenceHandlers } = require("./work-evidence");
 const { registerWorldzCastSystem } = require("./worldzcast");
 
-const RUNTIME_BUILD = "2026-08-18-full-cryptoworldz-runtime";
+const RUNTIME_BUILD = "2026-08-19-oneworldz-participant-experience";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try { return new URL("/grace/oauth/x/callback", webhookUrl).toString(); }
@@ -91,6 +92,9 @@ async function start() {
     }
   });
   const graceWorker = createGraceWorker({ repository: graceRepository, publisher: gracePublisher, intervalMs: Number(process.env.GRACE_WORKER_INTERVAL_MS) || 60000 });
+  const app = createHttpApp({ bot, repository, config });
+
+  registerUserExperienceSystem({ app, bot, repository, config, supabase });
   registerCommandCentreHandlers({ bot, repository, config });
   registerTelegramHandlers({ bot, repository, config });
   registerRoleProfileHandler({ bot, repository, config, supabase });
@@ -110,7 +114,6 @@ async function start() {
   registerGraceBuild2Handlers({ bot, repository: graceRepository, config });
   registerGraceXOAuthTelegramHandlers({ bot, oauth: graceOAuth, config });
   registerGraceFacebookOAuthTelegramHandlers({ bot, oauth: graceFacebookOAuth, config });
-  const app = createHttpApp({ bot, repository, config });
   registerAutoMiniRoutes({ app, config, autoClient });
   registerExecutiveRoutes({ app, repository, config, supabase });
   registerGraceRoutes({ app, repository: graceRepository, oauth: graceOAuth, facebookOAuth: graceFacebookOAuth, config });
