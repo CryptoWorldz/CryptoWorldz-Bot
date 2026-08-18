@@ -1,0 +1,11 @@
+result=FAIL
+run_id=32083749589
+commit=abace44f6118d59bfc86797fbf74b267a76cf8b7
+canonical_build=failure
+runtime_contract=skipped
+candidate_18_site_35_page_desktop_mobile=skipped
+targeted_footer_deploy_9_sites=skipped
+live_18_site_all_sitemap_desktop_mobile=skipped
+protected_cryptobotz=skipped
+proof_artifact=oneworldz-footer-final-100-32083749589
+final_100_percent_pass=FAIL
