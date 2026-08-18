@@ -10,6 +10,7 @@ const { registerAutoTelegramHandlers } = require("./auto/telegram");
 const { registerCauseTelegramHandlers } = require("./causes/telegram");
 const { registerCommandCentreHandlers } = require("./command-centre");
 const { registerCommunityDirectoryHandlers } = require("./community-directory");
+const { registerCurrentImpactHandlers } = require("./current-impact");
 const { registerExecutiveRoutes } = require("./executive/http");
 const { registerExecutiveTelegramHandlers } = require("./executive/telegram");
 const { createGracePublisher } = require("./grace/adapters");
@@ -27,6 +28,7 @@ const { createGraceWorker } = require("./grace/worker");
 const { configWarnings, loadConfig } = require("./config");
 const { createHttpApp } = require("./http");
 const { registerLegendV8System } = require("./legend-v8");
+const { registerOneWorldzPublicCors } = require("./oneworldz-public-cors");
 const { registerRoleProfileHandler } = require("./profile-role");
 const { registerProjectWalletSystem } = require("./project-wallets");
 const { registerReferralTelegramHandlers } = require("./referrals");
@@ -95,6 +97,8 @@ async function start() {
   const graceWorker = createGraceWorker({ repository: graceRepository, publisher: gracePublisher, intervalMs: Number(process.env.GRACE_WORKER_INTERVAL_MS) || 60000 });
   const app = createHttpApp({ bot, repository, config });
 
+  registerOneWorldzPublicCors(app);
+  registerCurrentImpactHandlers({ bot });
   registerUserExperienceSystem({ app, bot, repository, config, supabase });
   registerZedGuide({ app, repository, config, supabase });
   registerCommandCentreHandlers({ bot, repository, config });
