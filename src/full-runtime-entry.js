@@ -1,4 +1,5 @@
 require("dotenv").config({ path: require("node:path").join(__dirname, "..", ".env") });
+process.env.ONEWORLDZ_IMAGE_MODEL = process.env.ONEWORLDZ_IMAGE_MODEL || "gpt-image-2";
 require("./hub-central/preload");
 
 const telegramLibrary = require("node-telegram-bot-api");
