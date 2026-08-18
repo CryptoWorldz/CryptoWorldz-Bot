@@ -34,18 +34,42 @@ Before BUILD PASS may succeed, the exact generated candidate must include and pr
 
 If any of these requirements disappears, the canonical verification must fail and production deployment is forbidden.
 
+## JayJayTeamDev participant-experience contract
+
+Canonical participant experience: `apps/oneworldz-ecosystem-release/experience-contract.mjs`.
+
+The production PASS must also prove the real user journey, not only the static fleet:
+
+- the protected MiniApp has the unique Command Centre SplashBack;
+- ZED, AUTO, G.R.A.C.E., RECAP and BASED.BID are presented as five system roles with human leadership kept separate;
+- signed-in Legends can reach live mission context through the authenticated ZED guide as well as direct Missions access;
+- referral/Shill-Link recognition and qualification progress are visible without weakening anti-abuse rules;
+- a Legend can use the Raaiiidd Creator to draft copy, generate approved-theme artwork, preview it and submit it for human review;
+- generated content never auto-publishes and never auto-approves;
+- Admin review covers mission evidence, participant-created Raaiiidds and Real-World Hero evidence;
+- the designated reviewer receives the once-hourly pending-review check while every approval remains a human decision;
+- people who were already helping in the real world can submit reviewable evidence without pretending their work started inside OneWorldz;
+- `https://oneworldz.com/heroes/` exists as a canonical, crawlable, sitemap-listed public destination;
+- approved Hero recognition is sourced from reviewed records and never fabricated as a fallback;
+- the current Reagan support route is `https://donateworldz.com/reagan-children/` and active MiniApp/Command Centre support paths do not use GoFundMe;
+- `https://donateworldz.com/support-jayjayteamdev/` is the canonical JayJayTeamDev support route and superseded public support URLs do not survive the final static candidate;
+- the locked destination theme contract is physically applied without flattening distinct identities into one generic skin;
+- every new public page remains inside sitemap-driven SEO, Lighthouse, desktop and mobile proof.
+
+If any participant-experience contract test fails, production deployment is forbidden.
+
 ## One direct deployment path
 
-Only .github/workflows/main.yml may execute production deployment.
+Only `.github/workflows/main.yml` may execute production deployment.
 
 There is no second ZED deployment rail, no domain-specific repair workflow, no PREVIEW/EXECUTE relay, no duplicate deployment workflow and no fallback FTP route.
 
 The canonical workflow must run these gates in this exact order:
 
 1. CLEAN SOURCE LOCK
-2. BUILD PASS
+2. BUILD PASS — including launch contract and participant-experience contract
 3. PREVIEW VISUAL PASS
-4. ZED + MINI APP + GUARDED GPT PASS
+4. ZED + MINI APP + AUTHENTICATED PARTICIPANT EXPERIENCE + GUARDED GPT PASS
 5. HOSTINGER DESTINATION PASS
 6. EXACT 18-SITE PRODUCTION DEPLOY
 7. LIVE TECHNICAL PASS
@@ -96,7 +120,8 @@ The protected ZED runtime must:
 - retain BOT, Supabase and OpenAI runtime requirements;
 - sync only the protected Node application root;
 - use the official Hostinger managed restart;
-- prove ZED root, `/health`, Mini App and guarded OneWorldz GPT together.
+- prove ZED root, `/health`, Mini App, authenticated participant surfaces and guarded OneWorldz GPT together;
+- keep generated Raaiiidd artwork in private protected storage and keep human approval boundaries intact.
 
 ## Final PASS law
 
@@ -105,9 +130,10 @@ A successful build, HTTP 200, FTPS upload or partial visual check is not the fin
 `final_100_percent_pass=YES` may be written only after:
 
 - the JayJayTeamDev launch-contract tests pass in the exact candidate;
-- all launch-contract routes are included in sitemap-driven desktop/mobile preview and live browser proof;
+- the JayJayTeamDev participant-experience tests pass in the exact candidate/protected runtime;
+- all launch and participant public routes are included in sitemap-driven desktop/mobile preview and live browser proof;
 - all 18 static candidates pass desktop/mobile preview;
-- ZED + Mini App + guarded GPT pass production proof;
+- ZED + Mini App + authenticated participant experience + guarded GPT pass production proof;
 - all 18 exact Hostinger destinations pass prewrite authentication;
 - all 18 static targets pass exact production-byte proof;
 - all 18 live sites pass desktop/mobile browser proof;
