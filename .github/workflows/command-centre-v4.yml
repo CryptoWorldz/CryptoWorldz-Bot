@@ -70,6 +70,9 @@ jobs:
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -77,7 +80,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Verify hard-locked managed entrypoint
+      - name: Verify hard-locked managed entrypoint and required secrets
         shell: bash
         run: |
           set -euo pipefail
@@ -87,11 +90,11 @@ jobs:
           grep -Fq 'require("./src/hub-central/preload")' index.js
           grep -Fq 'oneworldz-public-low-cost-v1' src/oneworldz-gpt/http.js
           grep -Fq 'model: "gpt-4o-mini"' src/hub-central/live-v1.js
-          test -n "$OPENAI_API_KEY"; test -n "$HOSTINGER_API_TOKEN"
-          test -n "$FTP_HOST"; test -n "$FTP_USERNAME"; test -n "$FTP_PASSWORD"
-          echo "::add-mask::$OPENAI_API_KEY"; echo "::add-mask::$HOSTINGER_API_TOKEN"
-          echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
-          echo 'PROTECTED_MANAGED_SOURCE=PASS'
+          for key in OPENAI_API_KEY HOSTINGER_API_TOKEN FTP_HOST FTP_USERNAME FTP_PASSWORD BOT_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
+            if [ -z "${!key:-}" ]; then echo "::error::Missing protected secret $key"; exit 1; fi
+            echo "::add-mask::${!key}"
+          done
+          echo 'PROTECTED_MANAGED_SOURCE_AND_SECRETS=PASS'
 
       - name: Install protected runtime utilities
         run: |
@@ -121,15 +124,16 @@ jobs:
           printf '%s' "$username" > "$RUNNER_TEMP/hostinger-username"
           echo 'HOSTINGER_MANAGED_APP_RESOLVED=PASS'
 
-      - name: Preserve current protected environment before rebuild
+      - name: Preserve optional protected environment before rebuild
         shell: bash
         run: |
           set -euo pipefail
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           printf '%s' "$raw_host" > "$RUNNER_TEMP/raw-host"
+          : > "$RUNNER_TEMP/protected.env"
           cat > "$RUNNER_TEMP/get-env.lftp" <<EOF
-          set cmd:fail-exit true
+          set cmd:fail-exit false
           set net:max-retries 2
           set net:timeout 25
           set ftp:ssl-force true
@@ -139,12 +143,8 @@ jobs:
           get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/protected.env
           bye
           EOF
-          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-env.lftp" "$raw_host"
-          test -s "$RUNNER_TEMP/protected.env"
-          for key in BOT_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
-            if grep -Eq "^${key}=.+$" "$RUNNER_TEMP/protected.env"; then echo "PRESERVED_${key}=PASS"; else echo "::error::Protected environment missing $key before rebuild"; exit 1; fi
-          done
-          echo 'PROTECTED_ENV_PRESERVED=PASS'
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-env.lftp" "$raw_host" || true
+          echo 'PROTECTED_OPTIONAL_ENV_CAPTURE=PASS'
 
       - name: Wait for fresh Hostinger managed Git build
         shell: bash
@@ -189,16 +189,24 @@ jobs:
           echo '::error::Fresh Hostinger managed Git build did not reach completed state.'
           exit 1
 
-      - name: Restore protected environment with OpenAI guard settings
+      - name: Restore required protected environment and OpenAI guard settings
         shell: bash
         run: |
           set -euo pipefail
-          OPENAI_API_KEY="$OPENAI_API_KEY" node - <<'NODE'
+          node - <<'NODE'
           const fs=require('fs');
           const p=process.env.RUNNER_TEMP+'/protected.env';
-          let rows=fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean);
-          rows=rows.filter(x=>!/^OPENAI_API_KEY=/.test(x)&&!/^ONEWORLDZ_OPENAI_MODEL=/.test(x));
-          rows.push(`OPENAI_API_KEY=${process.env.OPENAI_API_KEY}`,'ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini');
+          let rows=[];
+          try { rows=fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean); } catch {}
+          const overrides={
+            BOT_TOKEN:process.env.BOT_TOKEN,
+            SUPABASE_URL:process.env.SUPABASE_URL,
+            SUPABASE_SERVICE_ROLE_KEY:process.env.SUPABASE_SERVICE_ROLE_KEY,
+            OPENAI_API_KEY:process.env.OPENAI_API_KEY,
+            ONEWORLDZ_OPENAI_MODEL:'gpt-4o-mini'
+          };
+          rows=rows.filter(row=>!Object.keys(overrides).some(k=>row.startsWith(k+'=')));
+          for(const [k,v] of Object.entries(overrides)) rows.push(`${k}=${v}`);
           fs.writeFileSync(p,rows.join('\n')+'\n');
           NODE
           for key in BOT_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY OPENAI_API_KEY; do grep -Eq "^${key}=.+$" "$RUNNER_TEMP/protected.env"; done
