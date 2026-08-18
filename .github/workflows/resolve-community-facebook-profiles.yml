@@ -21,10 +21,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Report final managed Hostinger guarded deployment run
+      - name: Report final Hostinger managed archive deployment run
         env:
           GH_TOKEN: ${{ github.token }}
-          TARGET_SHA: 'c440d6d57995db94016b9f837f3b8a83a95c6bb4'
+          TARGET_SHA: '51dbbda93097a684c2cb7f747bccb43f68c10f43'
           ISSUE_NUMBER: '86'
         shell: bash
         run: |
@@ -40,7 +40,7 @@ jobs:
           run_id="$(printf '%s' "$run" | jq -r '.id')"
           status="$(printf '%s' "$run" | jq -r '.status')"
           conclusion="$(printf '%s' "$run" | jq -r '.conclusion // "pending"')"
-          body="PROTECTED_GPT_FINAL_MANAGED_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion"
+          body="PROTECTED_GPT_MCP_ARCHIVE_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion"
           jq -n --arg body "$body" '{body:$body}' > /tmp/comment.json
           curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @/tmp/comment.json >/dev/null
       - uses: actions/setup-node@v4
