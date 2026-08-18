@@ -24,7 +24,7 @@ jobs:
       - name: Report canonical PREVIEW run id
         env:
           GH_TOKEN: ${{ github.token }}
-          TARGET_SHA: 'a84ef28501186a9e3e8b70577b04a3ae18724817'
+          TARGET_SHA: '798b02d4cacec7725bec23500d39c6a0172566b4'
           ISSUE_NUMBER: '86'
         shell: bash
         run: |
