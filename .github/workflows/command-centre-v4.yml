@@ -30,6 +30,7 @@ env:
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
   PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
   PROTECTED_RESTART_DIR: /domains/cryptobotz.cryptoworldz.xyz/nodejs/tmp
+  PROTECTED_WEB_RESTART: /domains/cryptobotz.cryptoworldz.xyz/public_html/tmp/restart.txt
 
 jobs:
   verify:
@@ -86,7 +87,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
 
-      - name: Backup runtime and prepare historical proven startup pattern
+      - name: Backup runtime and prepare guarded startup
         shell: bash
         run: |
           set -euo pipefail
@@ -154,7 +155,7 @@ jobs:
           cp src/community-support/live-v1.js "$RUNNER_TEMP/community-support-live.js"
           printf 'restart %s %s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/restart.txt"
 
-      - name: Upload guarded services and force protected restart
+      - name: Upload guarded services and trigger both protected restart sentinels
         id: write
         shell: bash
         run: |
@@ -173,12 +174,13 @@ jobs:
           put $RUNNER_TEMP/patched-index.js -o $PROTECTED_NODE_ROOT/index.js
           put $RUNNER_TEMP/patched.env -o $PROTECTED_NODE_ROOT/.env
           put $RUNNER_TEMP/restart.txt -o $PROTECTED_RESTART_DIR/restart.txt
+          put $RUNNER_TEMP/restart.txt -o $PROTECTED_WEB_RESTART
           bye
           EOF
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$raw_host"
           echo 'written=true' >> "$GITHUB_OUTPUT"
 
-      - name: Prove exact guarded bytes and environment marker
+      - name: Prove exact guarded bytes, environment and restart markers
         id: bytes
         shell: bash
         run: |
@@ -196,19 +198,22 @@ jobs:
           get $PROTECTED_NODE_ROOT/community-support-live.js -o $RUNNER_TEMP/remote-community.js
           get $PROTECTED_NODE_ROOT/index.js -o $RUNNER_TEMP/remote-index.js
           get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/remote.env
-          get $PROTECTED_RESTART_DIR/restart.txt -o $RUNNER_TEMP/remote-restart.txt
+          get $PROTECTED_RESTART_DIR/restart.txt -o $RUNNER_TEMP/remote-node-restart.txt
+          get $PROTECTED_WEB_RESTART -o $RUNNER_TEMP/remote-web-restart.txt
           bye
           EOF
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/prove.lftp" "$raw_host"
           cmp "$RUNNER_TEMP/hub-central-live.js" "$RUNNER_TEMP/remote-hub.js"
           cmp "$RUNNER_TEMP/community-support-live.js" "$RUNNER_TEMP/remote-community.js"
           cmp "$RUNNER_TEMP/patched-index.js" "$RUNNER_TEMP/remote-index.js"
-          cmp "$RUNNER_TEMP/restart.txt" "$RUNNER_TEMP/remote-restart.txt"
+          cmp "$RUNNER_TEMP/restart.txt" "$RUNNER_TEMP/remote-node-restart.txt"
+          cmp "$RUNNER_TEMP/restart.txt" "$RUNNER_TEMP/remote-web-restart.txt"
           grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/remote.env"
           grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/remote.env"
           sha256sum "$RUNNER_TEMP/remote-hub.js" "$RUNNER_TEMP/remote-community.js" "$RUNNER_TEMP/remote-index.js"
           echo 'proved=true' >> "$GITHUB_OUTPUT"
           echo 'PROTECTED_GUARDED_BYTES=PASS'
+          echo 'PROTECTED_HOSTINGER_WEB_RESTART_SENTINEL=PASS'
 
       - name: Prove live guarded API fingerprint
         id: live
