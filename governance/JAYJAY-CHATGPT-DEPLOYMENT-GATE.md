@@ -12,6 +12,28 @@ Protected runtime authority: the current `index.js`, `src/`, `public/`, package 
 
 `cryptobotz.cryptoworldz.xyz` remains a protected Node application and is never a static deployment target.
 
+## JayJayTeamDev launch contract
+
+The launch requirements recovered from JayJayTeamDev's ChatGPT instructions are a production gate, not optional copy.
+
+Canonical launch contract: `apps/oneworldz-ecosystem-release/jayjay-launch-contract.mjs`.
+
+Before BUILD PASS may succeed, the exact generated candidate must include and prove:
+
+- official OneWorldz X and OneWorldz Telegram routes;
+- official CryptoWorldz X, ZED Bot and CryptoWorldz Raaiiidd Team routes;
+- CryptoWorldz total market coverage at `/markets/`;
+- a dedicated `/dex/` route on every Blockchain World, with token switching only for already-verified token addresses and no invented addresses;
+- OneWorldz Sponsor / Apply and CryptoWorldz Sponsor / Apply / Project Review routes;
+- personal wallet/profile visibility only through the protected CryptoBotz Mini App / Command Centre boundary, with no private-key or seed-phrase request in the static fleet;
+- no token chart, trading interface or wallet-portfolio surface on OneWorldz;
+- separated support purposes with no GoFundMe reference in the production build;
+- no `Coming Soon` or placeholder launch content;
+- Acknowledgements as the final content section wherever that section exists;
+- every added route included in sitemap-driven desktop and mobile candidate and live proof.
+
+If any of these requirements disappears, the canonical verification must fail and production deployment is forbidden.
+
 ## One direct deployment path
 
 Only .github/workflows/main.yml may execute production deployment.
@@ -82,6 +104,8 @@ A successful build, HTTP 200, FTPS upload or partial visual check is not the fin
 
 `final_100_percent_pass=YES` may be written only after:
 
+- the JayJayTeamDev launch-contract tests pass in the exact candidate;
+- all launch-contract routes are included in sitemap-driven desktop/mobile preview and live browser proof;
 - all 18 static candidates pass desktop/mobile preview;
 - ZED + Mini App + guarded GPT pass production proof;
 - all 18 exact Hostinger destinations pass prewrite authentication;
