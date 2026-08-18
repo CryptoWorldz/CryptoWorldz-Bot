@@ -1,11 +1,22 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
+  PUBLIC_GPT_GUARD,
   askOneWorldzGPT,
   extractOpenAIText,
   normalizeHistory,
   suggestedRoutes
 } = require("../src/oneworldz-gpt/http");
+
+test("public OneWorldz GPT cost guard is hard locked", () => {
+  assert.deepEqual(PUBLIC_GPT_GUARD, {
+    profile: "oneworldz-public-low-cost-v1",
+    model: "gpt-4o-mini",
+    maxOutputTokens: 320,
+    perIpLimit: 8,
+    dailyLimit: 1000
+  });
+});
 
 test("suggestedRoutes keeps donation purposes separate", () => {
   const routes = suggestedRoutes("I want to help Reagan and children in Uganda with food");
