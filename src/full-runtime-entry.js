@@ -39,6 +39,7 @@ const { registerUserExperienceSystem } = require("./user-experience");
 const { registerWebsiteTelegramHandlers } = require("./websites-telegram");
 const { registerWorkEvidenceHandlers } = require("./work-evidence");
 const { registerWorldzCastSystem } = require("./worldzcast");
+const { registerZedGuide } = require("./zed-guide");
 
 const RUNTIME_BUILD = "2026-08-19-oneworldz-participant-experience";
 
@@ -95,6 +96,7 @@ async function start() {
   const app = createHttpApp({ bot, repository, config });
 
   registerUserExperienceSystem({ app, bot, repository, config, supabase });
+  registerZedGuide({ app, repository, config, supabase });
   registerCommandCentreHandlers({ bot, repository, config });
   registerTelegramHandlers({ bot, repository, config });
   registerRoleProfileHandler({ bot, repository, config, supabase });
