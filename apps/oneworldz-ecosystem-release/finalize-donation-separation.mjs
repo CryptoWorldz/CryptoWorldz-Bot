@@ -136,7 +136,8 @@ donateHome = insertOnce(donateHome, '<div class="profile-grid support-card-grid"
 donateHome = donateHome
   .replaceAll("Three clearly separated support pathways.", "Four clearly separated support pathways.")
   .replaceAll("three support streams", "four support streams")
-  .replaceAll("three support pathways", "four support pathways");
+  .replaceAll("three support pathways", "four support pathways")
+  .replaceAll("Three separated support pathways", "Four separated support pathways");
 await write("donateworldz/index.html", donateHome);
 
 let cryptoHome = await read("cryptoworldz/index.html");
@@ -150,8 +151,9 @@ if (!oneWorldzHome.includes(donation.davis.page)) {
   const acknowledgementMarker = '<section class="section" id="acknowledgements">';
   const davisSection = `<section class="section section-dark" id="davis-family-support"><div class="section-heading"><p class="eyebrow">DAVIS FAMILY • DEDICATED SUPPORT</p><h2>A separate DonateWorldz pathway.</h2><p>Davis Family support is kept separate from Reagan &amp; Children, Community Impact and Support JayJayTeamDev.</p></div><div class="button-row"><a class="button primary" href="${donation.davis.page}" target="_blank" rel="noopener noreferrer">Open Davis Family Support</a><a class="button secondary" href="https://donateworldz.com" target="_blank" rel="noopener noreferrer">Open DonateWorldz</a></div></section>`;
   oneWorldzHome = insertOnce(oneWorldzHome, acknowledgementMarker, davisSection, "OneWorldz acknowledgements");
-  await write("oneworldz/index.html", oneWorldzHome);
 }
+oneWorldzHome = oneWorldzHome.replaceAll("Three separated support pathways", "Four separated support pathways");
+await write("oneworldz/index.html", oneWorldzHome);
 
 let donateSitemap = await read("donateworldz/sitemap.xml");
 donateSitemap = addSitemapUrl(donateSitemap, donation.davis.page);
@@ -175,14 +177,20 @@ if (!donateDavis.includes(donation.davis.stripe)) throw new Error("Davis Family 
 const stripeDestinations = Object.values(donation).map((stream) => stream.stripe);
 if (new Set(stripeDestinations).size !== 4) throw new Error("Donation Stripe destinations must be four unique live links");
 
+const bankClaim = "This support stream has a separate Stripe payment destination and separate Stripe records. Cause-specific bank payout routing is shown as active only after the verified destination bank account is connected in Stripe.";
 const htmlFiles = (await listFiles(distRoot)).filter((file) => file.endsWith(".html"));
 for (const file of htmlFiles) {
-  const html = await read(file);
+  let html = await read(file);
+  html = html
+    .replaceAll("This humanitarian support stream has its own Stripe destination, associated bank settlement configuration and separate records.", bankClaim)
+    .replaceAll("This community support stream has its own Stripe destination, associated bank settlement configuration and separate records.", bankClaim)
+    .replaceAll("Three separated support pathways", "Four separated support pathways");
   if (/gofund\.me|gofundme/i.test(html)) throw new Error(`GoFundMe reference remains in built HTML: ${file}`);
   for (const match of html.matchAll(/href="(https?:\/\/[^"#]+)"/g)) {
     const url = new URL(match[1]);
     if (url.protocol !== "https:") throw new Error(`Non-HTTPS external link in ${file}: ${url.href}`);
   }
+  await write(file, html);
 }
 
 const report = {
@@ -199,9 +207,16 @@ const report = {
     "https://donateworldz.com/community-impact/"
   ],
   stripe_destinations_unique: true,
+  stripe_optional_managed_payments_disabled: true,
+  stripe_automatic_tax_disabled_for_donation_links: true,
+  stripe_invoice_creation_disabled_for_donation_links: true,
+  stripe_account_payout_schedule: "daily",
+  stripe_connected_bank_destinations_observed: 1,
+  cause_specific_bank_payout_routing_active: false,
+  cause_specific_bank_payout_activation_requirement: "Connect and verify a separate eligible Stripe payout bank destination/account for each support stream before claiming direct bank separation.",
   gofundme_references_in_static_build: 0,
   public_bank_credentials_stored: false
 };
 await write("donateworldz/donation-separation-report.json", `${JSON.stringify(report, null, 2)}\n`);
 
-console.log("Donation separation finalized: 4 unique Stripe destinations, Davis Family added, 35 Facebook destinations verified, GoFundMe absent from static HTML.");
+console.log("Donation separation finalized: 4 unique Stripe destinations, Davis Family added, 35 Facebook destinations verified, GoFundMe absent from static HTML, and bank-routing claims kept exact.");
