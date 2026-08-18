@@ -1,17 +1,20 @@
 (() => {
   const X_PAGES = Object.freeze([
-    { name: "JayJayTeamDev", handle: "@JayJayTeamDev", url: "https://x.com/JayJayTeamDev", status: "CONNECTED" },
-    { name: "OneWorldz", handle: "@OneWorldzX", url: "https://x.com/OneWorldzX", status: "CONNECTED" },
-    { name: "CryptoWorldz", handle: "@CryptoWorldzX", url: "https://x.com/CryptoWorldzX", status: "CONNECTED" },
-    { name: "SolWorld", handle: "@SolWorldX", url: "https://x.com/SolWorldX", status: "CONNECTED" },
-    { name: "ImpactBased", handle: "@ImpactBased", url: "https://x.com/ImpactBased", status: "CONNECTED" },
-    { name: "Robin Hood Law", handle: "@RobinHoodLawX", url: "https://x.com/RobinHoodLawX", status: "CONNECTED" },
-    { name: "Global Impact Alliance", handle: "@GIA_Token", url: "https://x.com/GIA_Token", status: "CONNECTED" },
-    { name: "Next Big Coin", handle: "@BigCoinNext", url: "https://x.com/BigCoinNext", status: "CONNECTED" },
-    { name: "RecoverYourDebt", handle: "@RecoverYourDebt", url: "https://x.com/RecoverYourDebt", status: "CONNECTED" },
-    { name: "Uganda Unite", handle: "@UgandaUniteX", url: "https://x.com/UgandaUniteX", status: "VERIFY" },
-    { name: "Black Bud / SolBud", handle: "@BlackBudToken", url: "https://x.com/BlackBudToken", status: "VERIFY" },
-    { name: "MUSKMAN / SolMars", handle: "@MuskManMars", url: "https://x.com/MuskManMars", status: "VERIFY" }
+    { name: "Purple Diamond Crew", handle: "@PDCrew", url: "https://x.com/PDCrew", status: "CONFIRMED" },
+    { name: "Limited Edition", handle: "@LimitedTo10M", url: "https://x.com/LimitedTo10M", status: "CONFIRMED" },
+    { name: "The Next Big Coin!", handle: "@BigCoinNext", url: "https://x.com/BigCoinNext", status: "CONFIRMED" },
+    { name: "ImpactBased", handle: "@ImpactBased", url: "https://x.com/ImpactBased", status: "CONFIRMED" },
+    { name: "Black Bud / SolBud", handle: "@BlackBudToken", url: "https://x.com/BlackBudToken", status: "CONFIRMED" },
+    { name: "MUSKMAN / SolMars", handle: "@MuskManMars", url: "https://x.com/MuskManMars", status: "CONFIRMED" },
+    { name: "CryptoWorldz", handle: "@CryptoWorldzX", url: "https://x.com/CryptoWorldzX", status: "CONFIRMED" },
+    { name: "XrpWorldz", handle: "@XrpWorldz", url: "https://x.com/XrpWorldz", status: "CONFIRMED" },
+    { name: "OneWorldz", handle: "@OneWorldzX", url: "https://x.com/OneWorldzX", status: "CONFIRMED" },
+    { name: "JayJayTeamDev", handle: "@JayJayTeamDev", url: "https://x.com/JayJayTeamDev", status: "KNOWN" },
+    { name: "SolWorld / SolWorldz", handle: "@SolWorldX", url: "https://x.com/SolWorldX", status: "KNOWN" },
+    { name: "Robin Hood Law", handle: "@RobinHoodLawX", url: "https://x.com/RobinHoodLawX", status: "KNOWN" },
+    { name: "RecoverYourDebt", handle: "@RecoverYourDebt", url: "https://x.com/RecoverYourDebt", status: "KNOWN" },
+    { name: "Uganda Unite", handle: "@UgandaUniteX", url: "https://x.com/UgandaUniteX", status: "KNOWN" },
+    { name: "Global Impact Alliance", handle: "@gia_token", url: "https://x.com/gia_token", status: "KNOWN" }
   ]);
 
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({
@@ -23,15 +26,15 @@
   })[character]);
 
   function directoryMarkup() {
-    const connected = X_PAGES.filter((page) => page.status === "CONNECTED").length;
-    const verify = X_PAGES.length - connected;
+    const confirmed = X_PAGES.filter((page) => page.status === "CONFIRMED").length;
+    const known = X_PAGES.length - confirmed;
     return `<section class="panel x-pages-directory" id="x-pages-directory">
       <div class="section-title"><h2>𝕏 OneWorldz X Network</h2></div>
-      <p><strong>${connected} connected/current</strong> • ${verify} known project handles marked VERIFY.</p>
+      <p><strong>${X_PAGES.length} known X pages</strong> • ${confirmed} account-level confirmed • ${known} previously recorded.</p>
       <div class="links x-page-links">
         ${X_PAGES.map((page) => `<a class="link x-page-link" href="${escapeHtml(page.url)}" target="_blank" rel="noopener noreferrer"><span><strong>${escapeHtml(page.name)}</strong><small>${escapeHtml(page.handle)}</small></span><b>${escapeHtml(page.status)}</b></a>`).join("")}
       </div>
-      <small>Legacy @CharityBased is represented by the current ImpactBased identity and is not counted twice. VERIFY means the handle exists in the project registry but still requires account-level confirmation before it is labelled connected.</small>
+      <small>CONFIRMED means the account was directly evidenced from the signed-in X account selector. KNOWN means the handle is already recorded in the OneWorldz/CryptoWorldz project records but was not shown in the latest account-selector evidence. Legacy @CharityBased is represented by the current @ImpactBased identity and is not counted twice.</small>
     </section>`;
   }
 
