@@ -25,7 +25,7 @@ jobs:
       - name: Report protected GPT official restart run id
         env:
           GH_TOKEN: ${{ github.token }}
-          TARGET_SHA: '50d2959ee65b13fc6c7cf0f802ed00d54ea36b39'
+          TARGET_SHA: '4b818e2f5d488a16b8ba5e45f125d7b39756bbdf'
           ISSUE_NUMBER: '86'
         shell: bash
         run: |
