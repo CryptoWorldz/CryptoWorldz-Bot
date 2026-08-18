@@ -1,6 +1,6 @@
 // Compatibility marker: startProtectedPublicFallback
-// Full CryptoWorldz runtime is preserved separately in src/full-runtime-entry.js: require("./src/hub-central/preload")
-// This managed Hostinger entrypoint intentionally serves the protected public GPT gateway only.
+// Full CryptoWorldz runtime is preserved in src/full-runtime-entry.js and remains the primary runtime when configured.
+// The dependency-free protected public GPT gateway below is retained only as a fail-safe fallback.
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
@@ -44,6 +44,16 @@ function loadEnvFile() {
 }
 
 loadEnvFile();
+
+const fullRuntimeConfigured = ["BOT_TOKEN", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"].every((key) => String(process.env[key] || "").trim());
+if (fullRuntimeConfigured) {
+  try {
+    require("./src/full-runtime-entry");
+    return;
+  } catch (error) {
+    console.error("Full runtime unavailable; starting protected public gateway", error && error.message ? error.message : error);
+  }
+}
 
 const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
 const buckets = new Map();
