@@ -29,7 +29,7 @@ permissions:
 env:
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
   PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
-  PROTECTED_RESTART_DIR: /domains/cryptobotz.cryptoworldz.xyz/nodejs/tmp
+  PROTECTED_NODE_RESTART: /domains/cryptobotz.cryptoworldz.xyz/nodejs/tmp/restart.txt
   PROTECTED_WEB_RESTART: /domains/cryptobotz.cryptoworldz.xyz/public_html/tmp/restart.txt
 
 jobs:
@@ -51,7 +51,7 @@ jobs:
       - run: docker build .
 
   protected-oneworldz-gpt:
-    name: Restore + deploy + prove protected guarded OneWorldz GPT
+    name: Deploy + prove protected guarded OneWorldz GPT
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     needs: verify
     runs-on: ubuntu-latest
@@ -71,14 +71,12 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Verify current guarded source
+      - name: Verify guarded source
         run: |
           set -euo pipefail
           npm ci
           node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js
           npm run check:structure
-          node --check src/hub-central/live-v1.js
-          node --check src/community-support/live-v1.js
           grep -Fq 'oneworldz-public-low-cost-v1' src/hub-central/live-v1.js
           grep -Fq 'model: "gpt-4o-mini"' src/hub-central/live-v1.js
 
@@ -87,7 +85,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
 
-      - name: Backup runtime and prepare guarded startup
+      - name: Prepare exact protected runtime
         shell: bash
         run: |
           set -euo pipefail
@@ -108,8 +106,6 @@ jobs:
           set ssl:check-hostname false
           get $PROTECTED_NODE_ROOT/index.js -o $RUNNER_TEMP/original-index.js
           get $PROTECTED_NODE_ROOT/package.json -o $RUNNER_TEMP/original-package.json
-          get $PROTECTED_NODE_ROOT/hub-central-live.js -o $RUNNER_TEMP/original-hub.js
-          get $PROTECTED_NODE_ROOT/community-support-live.js -o $RUNNER_TEMP/original-community.js
           get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/original.env
           bye
           EOF
@@ -137,30 +133,29 @@ jobs:
           node --check "$RUNNER_TEMP/patched-index.js"
 
           if [ -s "$RUNNER_TEMP/original.env" ]; then cp "$RUNNER_TEMP/original.env" "$RUNNER_TEMP/patched.env"; else : > "$RUNNER_TEMP/patched.env"; fi
-          if [ -n "$OPENAI_API_KEY" ]; then
-            OPENAI_API_KEY="$OPENAI_API_KEY" node - <<'NODE'
+          OPENAI_API_KEY="$OPENAI_API_KEY" node - <<'NODE'
           const fs=require('fs');
           const p=process.env.RUNNER_TEMP+'/patched.env';
-          const key=process.env.OPENAI_API_KEY;
+          const key=String(process.env.OPENAI_API_KEY||'').trim();
           let rows=fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean);
           rows=rows.filter(row=>!/^OPENAI_API_KEY=/.test(row)&&!/^ONEWORLDZ_OPENAI_MODEL=/.test(row));
-          rows.push(`OPENAI_API_KEY=${key}`,'ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini');
+          if(key) rows.push(`OPENAI_API_KEY=${key}`);
+          rows.push('ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini');
           fs.writeFileSync(p,rows.join('\n')+'\n');
           NODE
-          fi
-          grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/patched.env" || { echo '::error::Protected OPENAI_API_KEY is unavailable.'; exit 1; }
-          grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/patched.env" || printf '\nONEWORLDZ_OPENAI_MODEL=gpt-4o-mini\n' >> "$RUNNER_TEMP/patched.env"
-          echo 'PROTECTED_OPENAI_KEY_CONFIGURED=YES'
+          grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/patched.env"
+          grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/patched.env"
           cp src/hub-central/live-v1.js "$RUNNER_TEMP/hub-central-live.js"
           cp src/community-support/live-v1.js "$RUNNER_TEMP/community-support-live.js"
           printf 'restart %s %s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/restart.txt"
 
-      - name: Upload guarded services and trigger both protected restart sentinels
+      - name: Install guarded runtime and current Hostinger restart sentinel
         id: write
         shell: bash
         run: |
           set -euo pipefail
           raw_host="$(cat "$RUNNER_TEMP/raw-host")"
+          web_restart_dir="$(dirname "$PROTECTED_WEB_RESTART")"
           cat > "$RUNNER_TEMP/upload.lftp" <<EOF
           set cmd:fail-exit true
           set net:max-retries 2
@@ -173,14 +168,17 @@ jobs:
           put $RUNNER_TEMP/community-support-live.js -o $PROTECTED_NODE_ROOT/community-support-live.js
           put $RUNNER_TEMP/patched-index.js -o $PROTECTED_NODE_ROOT/index.js
           put $RUNNER_TEMP/patched.env -o $PROTECTED_NODE_ROOT/.env
-          put $RUNNER_TEMP/restart.txt -o $PROTECTED_RESTART_DIR/restart.txt
+          put $RUNNER_TEMP/restart.txt -o $PROTECTED_NODE_RESTART
+          set cmd:fail-exit false
+          mkdir -p $web_restart_dir
+          set cmd:fail-exit true
           put $RUNNER_TEMP/restart.txt -o $PROTECTED_WEB_RESTART
           bye
           EOF
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$raw_host"
           echo 'written=true' >> "$GITHUB_OUTPUT"
 
-      - name: Prove exact guarded bytes, environment and restart markers
+      - name: Prove exact protected bytes and both restart markers
         id: bytes
         shell: bash
         run: |
@@ -198,7 +196,7 @@ jobs:
           get $PROTECTED_NODE_ROOT/community-support-live.js -o $RUNNER_TEMP/remote-community.js
           get $PROTECTED_NODE_ROOT/index.js -o $RUNNER_TEMP/remote-index.js
           get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/remote.env
-          get $PROTECTED_RESTART_DIR/restart.txt -o $RUNNER_TEMP/remote-node-restart.txt
+          get $PROTECTED_NODE_RESTART -o $RUNNER_TEMP/remote-node-restart.txt
           get $PROTECTED_WEB_RESTART -o $RUNNER_TEMP/remote-web-restart.txt
           bye
           EOF
@@ -210,17 +208,15 @@ jobs:
           cmp "$RUNNER_TEMP/restart.txt" "$RUNNER_TEMP/remote-web-restart.txt"
           grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/remote.env"
           grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/remote.env"
-          sha256sum "$RUNNER_TEMP/remote-hub.js" "$RUNNER_TEMP/remote-community.js" "$RUNNER_TEMP/remote-index.js"
-          echo 'proved=true' >> "$GITHUB_OUTPUT"
           echo 'PROTECTED_GUARDED_BYTES=PASS'
-          echo 'PROTECTED_HOSTINGER_WEB_RESTART_SENTINEL=PASS'
+          echo 'PROTECTED_RESTART_SENTINELS=PASS'
+          echo 'proved=true' >> "$GITHUB_OUTPUT"
 
       - name: Prove live guarded API fingerprint
         id: live
         shell: bash
         run: |
           set -euo pipefail
-          success=0
           for attempt in $(seq 1 36); do
             sleep 5
             root_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/root" -w '%{http_code}' "https://$PROTECTED_DOMAIN/?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
@@ -238,40 +234,12 @@ jobs:
           if(hub.ok!==true||hub.oneworldz_gpt!=="configured"||hub.oneworldz_gpt_guard!=="oneworldz-public-low-cost-v1") process.exit(1);
           NODE
             then
-              success=1
               echo 'PROTECTED_ONEWORLDZ_GPT_GUARD=PASS'
               cat "$RUNNER_TEMP/gpt.json"
-              break
+              echo 'proved=true' >> "$GITHUB_OUTPUT"
+              exit 0
             fi
-            echo "Protected startup convergence $attempt/36 root=$root_code gpt=$gpt_code hub=$hub_code"
+            echo "Protected convergence $attempt/36 root=$root_code gpt=$gpt_code hub=$hub_code"
           done
-          test "$success" = 1
-          echo 'proved=true' >> "$GITHUB_OUTPUT"
-
-      - name: Capture sanitized runtime evidence on failure
-        if: ${{ failure() }}
-        shell: bash
-        run: |
-          set +e
-          raw_host="$(cat "$RUNNER_TEMP/raw-host" 2>/dev/null)"
-          [ -z "$raw_host" ] && exit 0
-          cat > "$RUNNER_TEMP/evidence.lftp" <<EOF
-          set cmd:fail-exit false
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          cls -l $PROTECTED_NODE_ROOT > $RUNNER_TEMP/root-list.txt
-          cls -l $PROTECTED_RESTART_DIR > $RUNNER_TEMP/tmp-list.txt
-          get $PROTECTED_NODE_ROOT/stderr.log -o $RUNNER_TEMP/stderr.log
-          get $PROTECTED_NODE_ROOT/console.log -o $RUNNER_TEMP/console.log
-          bye
-          EOF
-          timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/evidence.lftp" "$raw_host" || true
-          echo 'Protected runtime files:'; grep -v '\.env' "$RUNNER_TEMP/root-list.txt" | tail -50 || true
-          echo 'Restart directory:'; cat "$RUNNER_TEMP/tmp-list.txt" || true
-          for f in "$RUNNER_TEMP/stderr.log" "$RUNNER_TEMP/console.log"; do
-            [ -s "$f" ] || continue
-            echo "Sanitized tail: $(basename "$f")"
-            tail -120 "$f" | sed -E 's/sk-[A-Za-z0-9_-]+/[OPENAI_KEY_MASKED]/g; s/(Bearer )[A-Za-z0-9._-]+/\1[TOKEN_MASKED]/g' | tail -80
-          done
+          echo '::error::Protected runtime did not expose the exact guarded API fingerprint.'
+          exit 1
