@@ -8,19 +8,30 @@ on:
     paths:
       - "platform/**"
       - "src/oneworldz-gpt/**"
+      - "src/hub-central/live-v1.js"
       - "test/oneworldz-gpt.test.js"
+      - "test/hub-central-live-v1.test.js"
+      - "package.json"
       - "supabase/migrations/20260808235139_command_centre_v4_bootstrap.sql"
       - ".github/workflows/command-centre-v4.yml"
   pull_request:
     paths:
       - "platform/**"
       - "src/oneworldz-gpt/**"
+      - "src/hub-central/live-v1.js"
       - "test/oneworldz-gpt.test.js"
+      - "test/hub-central-live-v1.test.js"
+      - "package.json"
       - "supabase/migrations/20260808235139_command_centre_v4_bootstrap.sql"
       - ".github/workflows/command-centre-v4.yml"
 
 permissions:
   contents: read
+
+env:
+  PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
+  PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
+  PROTECTED_RESTART_DIR: /domains/cryptobotz.cryptoworldz.xyz/nodejs/tmp
 
 jobs:
   verify:
@@ -41,54 +52,202 @@ jobs:
       - run: docker build .
 
   protected-oneworldz-gpt:
-    name: Protected OneWorldz GPT guarded production proof
+    name: Deploy + prove protected OneWorldz GPT guarded production
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: verify
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 20
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - name: Install locked root runtime
-        run: npm ci
-      - name: Prove hard-locked public GPT guard in source
-        run: node --test test/oneworldz-gpt.test.js
-      - name: Prove protected production is serving the guarded build
+
+      - name: Prove both OneWorldz GPT runtime guards in source
+        run: |
+          set -euo pipefail
+          npm ci
+          node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js
+          npm run check:structure
+          node --check src/hub-central/live-v1.js
+
+      - name: Install protected FTPS client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+      - name: Capture protected production baseline and backup runtime
         shell: bash
         run: |
           set -euo pipefail
-          endpoint='https://cryptobotz.cryptoworldz.xyz/api/oneworldz-gpt/status'
-          health_endpoint='https://cryptobotz.cryptoworldz.xyz/health'
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          test -n "$raw_host"
+          echo "::add-mask::$FTP_HOST"
+          echo "::add-mask::$FTP_USERNAME"
+          echo "::add-mask::$FTP_PASSWORD"
+          printf '%s' "$raw_host" > "$RUNNER_TEMP/protected-host"
+
+          curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
+            -H 'Cache-Control: no-cache, no-store' "https://$PROTECTED_DOMAIN/" -o "$RUNNER_TEMP/baseline-root"
+          test -s "$RUNNER_TEMP/baseline-root"
+          sha256sum "$RUNNER_TEMP/baseline-root" > "$RUNNER_TEMP/baseline-root.sha256"
+
+          cat > "$RUNNER_TEMP/download-protected.lftp" <<EOF
+          set cmd:fail-exit false
+          set net:max-retries 2
+          set net:timeout 25
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          get $PROTECTED_NODE_ROOT/index.js -o $RUNNER_TEMP/original-index.js
+          get $PROTECTED_NODE_ROOT/package.json -o $RUNNER_TEMP/original-package.json
+          get $PROTECTED_NODE_ROOT/hub-central-live.js -o $RUNNER_TEMP/original-hub-central-live.js
+          bye
+          EOF
+          timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/download-protected.lftp" "$raw_host"
+          test -s "$RUNNER_TEMP/original-index.js"
+          test -s "$RUNNER_TEMP/original-package.json"
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/original-package.json','utf8'));
+          if(p.name!=='cryptoworldz-bot'||p.scripts?.start!=='node index.js') throw new Error('unexpected_protected_runtime');
+          NODE
+          [ -s "$RUNNER_TEMP/original-hub-central-live.js" ] && touch "$RUNNER_TEMP/had-hub-central" || true
+
+          cp "$RUNNER_TEMP/original-index.js" "$RUNNER_TEMP/patched-index.js"
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=process.env.RUNNER_TEMP+'/patched-index.js';
+          let text=fs.readFileSync(p,'utf8');
+          const needle='const app = express();';
+          if(!text.includes('registerHubCentralLive')) {
+            if(!text.includes(needle)) throw new Error('unexpected_express_app_structure');
+            text=text.replace(needle, 'const { registerHubCentralLive } = require("./hub-central-live");\n'+needle+'\nregisterHubCentralLive(app);');
+          }
+          fs.writeFileSync(p,text);
+          NODE
+          node --check "$RUNNER_TEMP/patched-index.js"
+          cp src/hub-central/live-v1.js "$RUNNER_TEMP/guarded-hub-central-live.js"
+          node --check "$RUNNER_TEMP/guarded-hub-central-live.js"
+          touch "$RUNNER_TEMP/restart-guard.txt"
+
+      - name: Upload guarded protected runtime and restart
+        id: protected_write
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(cat "$RUNNER_TEMP/protected-host")"
+          cat > "$RUNNER_TEMP/upload-protected.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 2
+          set net:timeout 25
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          put $RUNNER_TEMP/guarded-hub-central-live.js -o $PROTECTED_NODE_ROOT/hub-central-live.js
+          put $RUNNER_TEMP/patched-index.js -o $PROTECTED_NODE_ROOT/index.js
+          mkdir -p $PROTECTED_RESTART_DIR
+          put $RUNNER_TEMP/restart-guard.txt -o $PROTECTED_RESTART_DIR/restart.txt
+          bye
+          EOF
+          timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload-protected.lftp" "$raw_host"
+          echo 'written=true' >> "$GITHUB_OUTPUT"
+
+      - name: Prove exact guarded build is live
+        id: protected_proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          endpoint="https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status"
+          hub_endpoint="https://$PROTECTED_DOMAIN/api/hub-central/status"
           proved=0
-          for attempt in $(seq 1 18); do
-            health="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache, no-store' "${health_endpoint}?guard_proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
-            status="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache, no-store' "${endpoint}?guard_proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
-            if HEALTH="$health" STATUS="$status" node <<'NODE'
-          const health = JSON.parse(process.env.HEALTH || "{}");
-          const status = JSON.parse(process.env.STATUS || "{}");
-          if (health.ok !== true) process.exit(1);
-          if (status.ok !== true) process.exit(1);
-          if (status.openai_api_configured !== true) process.exit(1);
-          if (status.guard_profile !== "oneworldz-public-low-cost-v1") process.exit(1);
-          if (status.guard_enforced !== true) process.exit(1);
-          if (status.model !== "gpt-4o-mini") process.exit(1);
-          if (status.max_output_tokens !== 320) process.exit(1);
-          if (status.per_ip_limit_10m !== 8) process.exit(1);
-          if (status.daily_request_limit !== 1000) process.exit(1);
-          if (status.payments_in_chat !== false) process.exit(1);
-          if (status.secrets_in_browser !== false) process.exit(1);
+          for attempt in $(seq 1 30); do
+            sleep 6
+            root_ok=0
+            if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 \
+              -H 'Cache-Control: no-cache, no-store' "https://$PROTECTED_DOMAIN/?guard=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" \
+              -o "$RUNNER_TEMP/current-root"; then
+              cmp -s "$RUNNER_TEMP/baseline-root" "$RUNNER_TEMP/current-root" && root_ok=1 || true
+            fi
+            status="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 \
+              -H 'Cache-Control: no-cache, no-store' "${endpoint}?guard=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
+            hub="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 \
+              -H 'Cache-Control: no-cache, no-store' "${hub_endpoint}?guard=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
+            if [ "$root_ok" = '1' ] && STATUS="$status" HUB="$hub" node <<'NODE'
+          const status=JSON.parse(process.env.STATUS||'{}');
+          const hub=JSON.parse(process.env.HUB||'{}');
+          if(status.ok!==true) process.exit(1);
+          if(status.openai_api_configured!==true) process.exit(1);
+          if(status.guard_profile!=="oneworldz-public-low-cost-v1") process.exit(1);
+          if(status.guard_enforced!==true) process.exit(1);
+          if(status.model!=="gpt-4o-mini") process.exit(1);
+          if(status.max_output_tokens!==320) process.exit(1);
+          if(status.per_ip_limit_10m!==8) process.exit(1);
+          if(status.daily_request_limit!==1000) process.exit(1);
+          if(status.payments_in_chat!==false||status.secrets_in_browser!==false) process.exit(1);
+          if(hub.ok!==true||hub.oneworldz_gpt_guard!=="oneworldz-public-low-cost-v1") process.exit(1);
           NODE
             then
               proved=1
-              printf '%s\n' "$status"
+              printf '%s\n' "$status" > "$RUNNER_TEMP/protected-gpt-status.json"
+              printf '%s\n' "$hub" > "$RUNNER_TEMP/protected-hub-status.json"
               break
             fi
-            sleep 10
+            echo "Protected guarded runtime convergence attempt $attempt/30"
           done
           if [ "$proved" != '1' ]; then
-            echo '::error::Protected CryptoBotz production is not yet serving the exact OneWorldz public GPT low-cost guard.'
+            echo '::error::Protected CryptoBotz production did not prove the exact hard-locked OneWorldz GPT guard.'
             exit 1
           fi
+          echo 'proved=true' >> "$GITHUB_OUTPUT"
           echo 'PROTECTED_ONEWORLDZ_GPT_GUARD=PASS'
+
+      - name: Roll back protected runtime on failed proof
+        if: ${{ failure() && steps.protected_write.outputs.written == 'true' && steps.protected_proof.outputs.proved != 'true' }}
+        shell: bash
+        run: |
+          set -u
+          raw_host="$(cat "$RUNNER_TEMP/protected-host")"
+          touch "$RUNNER_TEMP/restart-rollback.txt"
+          {
+            echo 'set cmd:fail-exit false'
+            echo 'set net:max-retries 2'
+            echo 'set net:timeout 25'
+            echo 'set ftp:ssl-force true'
+            echo 'set ftp:ssl-protect-data true'
+            echo 'set ssl:verify-certificate true'
+            echo 'set ssl:check-hostname false'
+            echo "put $RUNNER_TEMP/original-index.js -o $PROTECTED_NODE_ROOT/index.js"
+            if [ -f "$RUNNER_TEMP/had-hub-central" ]; then
+              echo "put $RUNNER_TEMP/original-hub-central-live.js -o $PROTECTED_NODE_ROOT/hub-central-live.js"
+            else
+              echo "rm -f $PROTECTED_NODE_ROOT/hub-central-live.js"
+            fi
+            echo "mkdir -p $PROTECTED_RESTART_DIR"
+            echo "put $RUNNER_TEMP/restart-rollback.txt -o $PROTECTED_RESTART_DIR/restart.txt"
+            echo 'bye'
+          } > "$RUNNER_TEMP/rollback-protected.lftp"
+          timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/rollback-protected.lftp" "$raw_host" || true
+
+      - name: Preserve guarded production proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: protected-oneworldz-gpt-guard-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/baseline-root.sha256
+            ${{ runner.temp }}/protected-gpt-status.json
+            ${{ runner.temp }}/protected-hub-status.json
+          if-no-files-found: ignore
+          retention-days: 14
