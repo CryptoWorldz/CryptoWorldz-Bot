@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Report protected runtime source-sync deployment
+      - name: Expose protected runtime source-sync run
         env:
           GH_TOKEN: ${{ github.token }}
           TARGET_SHA: '4a370f3cd208fba9a512276bafaf4fafd3df43b7'
@@ -37,21 +37,11 @@ jobs:
           done
           test -n "$run"
           run_id="$(printf '%s' "$run" | jq -r '.id')"
-          for attempt in $(seq 1 180); do
-            run_json="$(curl --fail --silent --show-error -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/$run_id")"
-            status="$(printf '%s' "$run_json" | jq -r '.status')"
-            conclusion="$(printf '%s' "$run_json" | jq -r '.conclusion // "pending"')"
-            jobs="$(curl --fail --silent --show-error -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/$run_id/jobs?per_page=100")"
-            step_summary="$(printf '%s' "$jobs" | jq -r '[.jobs[] | {name,status,conclusion,steps:[.steps[]|{name,status,conclusion}]}] | tostring')"
-            body="PROTECTED_RUNTIME_SYNC_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion\nJOBS=$step_summary"
-            if [ "$status" = completed ]; then
-              jq -n --arg body "$body" '{body:$body}' >/tmp/comment.json
-              curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @/tmp/comment.json >/dev/null
-              exit 0
-            fi
-            sleep 5
-          done
-          exit 1
+          status="$(printf '%s' "$run" | jq -r '.status')"
+          conclusion="$(printf '%s' "$run" | jq -r '.conclusion // "pending"')"
+          body="PROTECTED_RUNTIME_SYNC_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion"
+          jq -n --arg body "$body" '{body:$body}' >/tmp/comment.json
+          curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @/tmp/comment.json >/dev/null
 
   resolve:
     runs-on: ubuntu-latest
