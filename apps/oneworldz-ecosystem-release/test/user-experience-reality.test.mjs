@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createRequire } from "node:module";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
@@ -8,6 +9,8 @@ import { experienceContract } from "../experience-contract.mjs";
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = path.resolve(appRoot, "../..");
 const dist = path.join(appRoot, "dist", "ecosystem");
+const require = createRequire(import.meta.url);
+const { commandsForRole } = require(path.join(repoRoot, "src", "command-registry.js"));
 const read = (file) => readFile(file, "utf8");
 
 test("unique MiniApp SplashBack and complete participant screens are present", async () => {
@@ -50,8 +53,7 @@ test("current impact handler wins before the legacy Telegram module and public H
   assert.doesNotMatch(cors, /Access-Control-Allow-Origin[^\n]*\*/);
 });
 
-test("Command Centre registry exposes Creator, Heroes and human Review Queue by role", async () => {
-  const { commandsForRole } = await import(path.join(repoRoot, "src", "command-registry.js"));
+test("Command Centre registry exposes Creator, Heroes and human Review Queue by role", () => {
   const member = new Set(commandsForRole("member").map((x) => x.command));
   const admin = new Set(commandsForRole("admin").map((x) => x.command));
   assert.ok(member.has("creator"));
