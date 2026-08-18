@@ -24,16 +24,21 @@ jobs:
       - name: Report canonical PREVIEW run id
         env:
           GH_TOKEN: ${{ github.token }}
-          TARGET_SHA: a8659877995d788449264a1ee09f8cca974698e7
+          TARGET_SHA: ${{ github.sha }}
           ISSUE_NUMBER: '86'
         shell: bash
         run: |
           set -euo pipefail
-          response="$(curl --fail --silent --show-error \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H 'Accept: application/vnd.github+json' \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$TARGET_SHA&event=push&per_page=20")"
-          run="$(printf '%s' "$response" | jq -c '.workflow_runs[] | select(.path == ".github/workflows/main.yml")' | head -n1)"
+          run=''
+          for attempt in $(seq 1 30); do
+            response="$(curl --fail --silent --show-error \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$TARGET_SHA&event=push&per_page=20")"
+            run="$(printf '%s' "$response" | jq -c '.workflow_runs[] | select(.path == ".github/workflows/main.yml")' | head -n1)"
+            [ -n "$run" ] && break
+            sleep 2
+          done
           test -n "$run"
           run_id="$(printf '%s' "$run" | jq -r '.id')"
           status="$(printf '%s' "$run" | jq -r '.status')"
