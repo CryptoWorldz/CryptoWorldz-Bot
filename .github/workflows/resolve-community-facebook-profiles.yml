@@ -18,13 +18,13 @@ permissions:
 jobs:
   probe-oneworldz-production:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     environment:
       name: oneworldz-production
     env:
       HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
     steps:
-      - name: Diagnose managed Node deployment
+      - name: Wait, restart and diagnose managed Node deployment
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: '86'
@@ -38,23 +38,32 @@ jobs:
           test -n "$username"
           uenc="$(U="$username" node -p 'encodeURIComponent(process.env.U)')"
           base="https://developers.hostinger.com/api/hosting/v1/accounts/${uenc}/websites/${enc}/nodejs"
-          curl --fail --silent --show-error -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds?per_page=5" -o /tmp/builds.json
-          uuid="$(node -e "const p=require('/tmp/builds.json');process.stdout.write((p.data||[])[0]?.uuid||'')")"
+          for n in $(seq 1 80); do
+            curl --fail --silent --show-error -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds?per_page=5" -o /tmp/builds.json
+            state="$(node -e "const p=require('/tmp/builds.json');process.stdout.write((p.data||[])[0]?.state||'missing')")"
+            uuid="$(node -e "const p=require('/tmp/builds.json');process.stdout.write((p.data||[])[0]?.uuid||'')")"
+            echo "BUILD_WAIT=$n STATE=$state UUID=$uuid"
+            if [ "$state" = completed ]; then break; fi
+            if [ "$state" = failed ]; then break; fi
+            sleep 5
+          done
           test -n "$uuid"
           curl --silent --show-error -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds/$uuid/logs?from_line=0" -o /tmp/logs.json
+          restart_code="$(curl --silent --show-error --location -o /tmp/restart.json -w '%{http_code}' -X POST -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/server/restart" || true)"
+          sleep 12
           live_code="$(curl --silent --show-error --location -o /tmp/live.txt -w '%{http_code}' "https://$DOMAIN/api/oneworldz-gpt/status?diag=$GITHUB_RUN_ID" || true)"
-          summary="$(node - <<'NODE'
+          summary="$(RESTART="$restart_code" LIVE="$live_code" node - <<'NODE'
           const fs=require('fs');
           const b=JSON.parse(fs.readFileSync('/tmp/builds.json','utf8'));
           const x=(b.data||[])[0]||{};
-          const logs=fs.readFileSync('/tmp/logs.json','utf8').slice(-6000).replace(/[`\r]/g,'');
-          const live=fs.readFileSync('/tmp/live.txt','utf8').slice(0,1500).replace(/[`\r]/g,'');
-          console.log(`HOSTINGER_NODE_DIAG uuid=${x.uuid||''} state=${x.state||''} source_type=${x.options?.source_type||''} branch=${x.options?.branch||''} repo=${x.options?.repository||x.options?.repo||''}\nLIVE_BODY=${live}\nBUILD_LOG_TAIL=${logs}`);
+          const logs=fs.readFileSync('/tmp/logs.json','utf8').slice(-9000).replace(/[`\r]/g,'');
+          const live=fs.readFileSync('/tmp/live.txt','utf8').slice(0,2000).replace(/[`\r]/g,'');
+          console.log(`HOSTINGER_NODE_FINAL_DIAG uuid=${x.uuid||''} state=${x.state||''} source_type=${x.options?.source_type||''} branch=${x.options?.branch||''} repo=${x.options?.repository||x.options?.repo||''} restart_http=${process.env.RESTART} live_http=${process.env.LIVE}\nOPTIONS=${JSON.stringify(x.options||{})}\nLIVE_BODY=${live}\nBUILD_LOG_TAIL=${logs}`);
           NODE
           )"
           jq -n --arg body "$summary" '{body:$body}' >/tmp/comment.json
           curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @/tmp/comment.json >/dev/null
-          echo "LIVE_HTTP=$live_code"
+          echo "RESTART_HTTP=$restart_code LIVE_HTTP=$live_code"
 
   resolve:
     runs-on: ubuntu-latest
