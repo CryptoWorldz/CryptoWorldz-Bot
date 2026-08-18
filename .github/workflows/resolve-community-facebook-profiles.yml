@@ -11,42 +11,37 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   actions: read
   issues: write
 
 jobs:
-  patch-protected-runtime-sync:
+  report-protected-runtime:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Make protected FTPS sync idempotent and trigger retry
+      - name: Expose current protected deployment run
         env:
           GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: '3ad92c9b723eaf90d03ceb40b994adf3555cc163'
           ISSUE_NUMBER: '86'
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('.github/workflows/command-centre-v4.yml')
-          s=p.read_text()
-          old='cat > "$RUNNER_TEMP/sync-runtime.lftp" <<EOF\n          set cmd:fail-exit true'
-          new='cat > "$RUNNER_TEMP/sync-runtime.lftp" <<EOF\n          set cmd:fail-exit false'
-          if old not in s:
-              raise SystemExit('protected sync marker not found')
-          p.write_text(s.replace(old,new,1))
-          PY
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .github/workflows/command-centre-v4.yml
-          git commit -m 'Make protected runtime FTPS sync idempotent'
-          git push origin HEAD:main
-          sha="$(git rev-parse HEAD)"
-          body="PROTECTED_SYNC_PATCH_SHA=$sha STATUS=TRIGGERED"
+          run=''
+          for attempt in $(seq 1 60); do
+            response="$(curl --fail --silent --show-error -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$TARGET_SHA&event=push&per_page=20")"
+            run="$(printf '%s' "$response" | jq -c '.workflow_runs[] | select(.path == ".github/workflows/command-centre-v4.yml")' | head -n1)"
+            [ -n "$run" ] && break
+            sleep 2
+          done
+          test -n "$run"
+          run_id="$(printf '%s' "$run" | jq -r '.id')"
+          status="$(printf '%s' "$run" | jq -r '.status')"
+          conclusion="$(printf '%s' "$run" | jq -r '.conclusion // "pending"')"
+          jobs="$(curl --fail --silent --show-error -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/$run_id/jobs?per_page=100")"
+          summary="$(printf '%s' "$jobs" | jq -c '[.jobs[]|{id,name,status,conclusion,steps:[.steps[]|{name,status,conclusion}]}]')"
+          body="PROTECTED_LIVE_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion\nJOBS=$summary"
           jq -n --arg body "$body" '{body:$body}' >/tmp/comment.json
           curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @/tmp/comment.json >/dev/null
 
