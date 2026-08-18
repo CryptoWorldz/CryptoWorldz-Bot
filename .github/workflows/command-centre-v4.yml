@@ -129,12 +129,8 @@ jobs:
           text=text.replace('require("dotenv").config({ path: require("node:path").join(__dirname, ".env") });','require("dotenv").config();');
           const needle='const app = express();';
           if(!text.includes(needle)) throw new Error('unexpected_express_app_structure');
-          if(!text.includes('registerHubCentralLive')) {
-            text=text.replace(needle, needle+'\nconst { registerHubCentralLive } = require("./hub-central-live");\nregisterHubCentralLive(app);');
-          }
-          if(!text.includes('registerCommunitySupportLive')) {
-            text=text.replace(needle, needle+'\nconst { registerCommunitySupportLive } = require("./community-support-live");\nregisterCommunitySupportLive(app);');
-          }
+          if(!text.includes('registerHubCentralLive')) text=text.replace(needle, needle+'\nconst { registerHubCentralLive } = require("./hub-central-live");\nregisterHubCentralLive(app);');
+          if(!text.includes('registerCommunitySupportLive')) text=text.replace(needle, needle+'\nconst { registerCommunitySupportLive } = require("./community-support-live");\nregisterCommunitySupportLive(app);');
           fs.writeFileSync(p,text);
           NODE
           node --check "$RUNNER_TEMP/patched-index.js"
@@ -154,12 +150,11 @@ jobs:
           grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/patched.env" || { echo '::error::Protected OPENAI_API_KEY is unavailable.'; exit 1; }
           grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/patched.env" || printf '\nONEWORLDZ_OPENAI_MODEL=gpt-4o-mini\n' >> "$RUNNER_TEMP/patched.env"
           echo 'PROTECTED_OPENAI_KEY_CONFIGURED=YES'
-
           cp src/hub-central/live-v1.js "$RUNNER_TEMP/hub-central-live.js"
           cp src/community-support/live-v1.js "$RUNNER_TEMP/community-support-live.js"
-          touch "$RUNNER_TEMP/restart.txt"
+          printf 'restart %s %s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/restart.txt"
 
-      - name: Upload guarded services with exact historical restart contract
+      - name: Upload guarded services and force protected restart
         id: write
         shell: bash
         run: |
@@ -177,7 +172,6 @@ jobs:
           put $RUNNER_TEMP/community-support-live.js -o $PROTECTED_NODE_ROOT/community-support-live.js
           put $RUNNER_TEMP/patched-index.js -o $PROTECTED_NODE_ROOT/index.js
           put $RUNNER_TEMP/patched.env -o $PROTECTED_NODE_ROOT/.env
-          mkdir -p $PROTECTED_RESTART_DIR
           put $RUNNER_TEMP/restart.txt -o $PROTECTED_RESTART_DIR/restart.txt
           bye
           EOF
@@ -202,12 +196,14 @@ jobs:
           get $PROTECTED_NODE_ROOT/community-support-live.js -o $RUNNER_TEMP/remote-community.js
           get $PROTECTED_NODE_ROOT/index.js -o $RUNNER_TEMP/remote-index.js
           get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/remote.env
+          get $PROTECTED_RESTART_DIR/restart.txt -o $RUNNER_TEMP/remote-restart.txt
           bye
           EOF
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/prove.lftp" "$raw_host"
           cmp "$RUNNER_TEMP/hub-central-live.js" "$RUNNER_TEMP/remote-hub.js"
           cmp "$RUNNER_TEMP/community-support-live.js" "$RUNNER_TEMP/remote-community.js"
           cmp "$RUNNER_TEMP/patched-index.js" "$RUNNER_TEMP/remote-index.js"
+          cmp "$RUNNER_TEMP/restart.txt" "$RUNNER_TEMP/remote-restart.txt"
           grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/remote.env"
           grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/remote.env"
           sha256sum "$RUNNER_TEMP/remote-hub.js" "$RUNNER_TEMP/remote-community.js" "$RUNNER_TEMP/remote-index.js"
