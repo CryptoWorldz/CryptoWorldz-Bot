@@ -51,25 +51,12 @@ function absoluteRoute(domain, route = "") {
 function applyProductionCorrections(target, route, sourceHtml) {
   let html = sourceHtml;
 
-  // ImpactBased belongs under CryptoWorldz. Replace every legacy OneWorldz URL
-  // before SEO enhancement so canonical, social metadata and page links all agree.
-  html = html.replaceAll(
-    "https://impactbased.oneworldz.com",
-    "https://impactbased.cryptoworldz.xyz"
-  );
-
-  // These destinations are not in the current authorised 13-site production fleet.
-  // Do not present them as live/open cards until a separate verified deployment exists.
-  html = html.replace(/<a class="profile-card[^"]*" href="https:\/\/(?:bitcoinworldz\.xyz|suiworld\.xyz)"[^>]*>[\s\S]*?<\/a>/g, "");
-
   if (target.key === "cryptoworldz" && route === "") {
     html = html.replace(
       "Approved CryptoWorldz headquarters production artwork",
       "Approved ZED Command Centre artwork for CryptoWorldz headquarters"
     );
 
-    // The previous desktop mapping showed G.R.A.C.E. alone while labelling the visual as the ZED/AUTO/G.R.A.C.E. trio.
-    // Use the approved trio artwork consistently rather than mislabelling the production image.
     html = html.replace(
       /<picture class="production-picture[^"]*">\s*<source media="\(max-width: 720px\)" srcset="\/assets\/mobile\/zed-grace-auto\.webp">\s*<img src="\/assets\/desktop\/cryptoworldz\/grace\.png" alt="Approved ZED G\.R\.A\.C\.E\. and AUTO production artwork" loading="eager" decoding="async">\s*<\/picture>/,
       '<img class="production-picture" src="/assets/mobile/zed-grace-auto.webp" alt="Approved ZED, AUTO and G.R.A.C.E. production artwork" loading="eager" decoding="async">'
@@ -297,7 +284,7 @@ for (const target of deploymentTargets) await buildTarget(target);
 const fleetManifest = {
   release: "oneworldz-ecosystem-locked-v1",
   generated_at: generatedAt,
-  protected_unchanged: ["https://oneworldz.com", linksSafe("https://cryptobotz.cryptoworldz.xyz")],
+  protected_unchanged: [linksSafe("https://cryptobotz.cryptoworldz.xyz")],
   targets: deploymentTargets.map((target) => ({
     ...target,
     package: `./${target.key}/`,
