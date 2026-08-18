@@ -13,7 +13,7 @@
     { name: "SolWorld / SolWorldz", handle: "@SolWorldX", url: "https://x.com/SolWorldX", status: "KNOWN" },
     { name: "Robin Hood Law", handle: "@RobinHoodLawX", url: "https://x.com/RobinHoodLawX", status: "KNOWN" },
     { name: "RecoverYourDebt", handle: "@RecoverYourDebt", url: "https://x.com/RecoverYourDebt", status: "KNOWN" },
-    { name: "Uganda Unite", handle: "@UgandaUniteX", url: "https://x.com/UgandaUniteX", status: "KNOWN" },
+    { name: "Uganda Unite", handle: "@UgandaUniteX", url: "https://x.com/UgandaUniteX", status: "SUSPENDED" },
     { name: "Global Impact Alliance", handle: "@gia_token", url: "https://x.com/gia_token", status: "KNOWN" }
   ]);
 
@@ -27,14 +27,15 @@
 
   function directoryMarkup() {
     const confirmed = X_PAGES.filter((page) => page.status === "CONFIRMED").length;
-    const known = X_PAGES.length - confirmed;
+    const suspended = X_PAGES.filter((page) => page.status === "SUSPENDED").length;
+    const known = X_PAGES.filter((page) => page.status === "KNOWN").length;
     return `<section class="panel x-pages-directory" id="x-pages-directory">
       <div class="section-title"><h2>𝕏 OneWorldz X Network</h2></div>
-      <p><strong>${X_PAGES.length} known X pages</strong> • ${confirmed} account-level confirmed • ${known} previously recorded.</p>
+      <p><strong>${X_PAGES.length} known X pages</strong> • ${confirmed} confirmed • ${known} known • ${suspended} suspended.</p>
       <div class="links x-page-links">
         ${X_PAGES.map((page) => `<a class="link x-page-link" href="${escapeHtml(page.url)}" target="_blank" rel="noopener noreferrer"><span><strong>${escapeHtml(page.name)}</strong><small>${escapeHtml(page.handle)}</small></span><b>${escapeHtml(page.status)}</b></a>`).join("")}
       </div>
-      <small>CONFIRMED means the account was directly evidenced from the signed-in X account selector. KNOWN means the handle is already recorded in the OneWorldz/CryptoWorldz project records but was not shown in the latest account-selector evidence. Legacy @CharityBased is represented by the current @ImpactBased identity and is not counted twice.</small>
+      <small>CONFIRMED means directly evidenced from the signed-in X account selector. KNOWN means already recorded in the OneWorldz/CryptoWorldz project records. SUSPENDED means the account is retained for historical/project identity but must not be treated as an active X destination. Legacy @CharityBased is represented by the current @ImpactBased identity and is not counted twice.</small>
     </section>`;
   }
 
