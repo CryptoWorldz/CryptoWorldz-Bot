@@ -34,6 +34,8 @@ permissions:
 
 env:
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
+  PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
+  PROTECTED_WEB_RESTART: /domains/cryptobotz.cryptoworldz.xyz/public_html/tmp/restart.txt
 
 jobs:
   verify:
@@ -62,6 +64,10 @@ jobs:
     environment:
       name: cryptoworldz-production
     env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
     steps:
@@ -71,29 +77,35 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Verify hard-locked guard
+      - name: Verify hard-locked managed entrypoint
+        shell: bash
         run: |
           set -euo pipefail
           npm ci
           node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js
+          node --check index.js
+          grep -Fq 'require("./src/hub-central/preload")' index.js
           grep -Fq 'oneworldz-public-low-cost-v1' src/oneworldz-gpt/http.js
           grep -Fq 'model: "gpt-4o-mini"' src/hub-central/live-v1.js
           test -n "$OPENAI_API_KEY"
           test -n "$HOSTINGER_API_TOKEN"
-          echo "::add-mask::$OPENAI_API_KEY"
-          echo "::add-mask::$HOSTINGER_API_TOKEN"
+          test -n "$FTP_HOST"; test -n "$FTP_USERNAME"; test -n "$FTP_PASSWORD"
+          echo "::add-mask::$OPENAI_API_KEY"; echo "::add-mask::$HOSTINGER_API_TOKEN"
+          echo "::add-mask::$FTP_HOST"; echo "::add-mask::$FTP_USERNAME"; echo "::add-mask::$FTP_PASSWORD"
+          echo 'PROTECTED_MANAGED_SOURCE=PASS'
 
-      - name: Install Hostinger managed-upload client
-        run: npm install --no-save --ignore-scripts tus-js-client@4.3.1
+      - name: Install protected runtime utilities
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
 
-      - name: Resolve Hostinger application
+      - name: Resolve Hostinger managed application
         shell: bash
         run: |
           set -euo pipefail
           domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
           curl --fail --silent --show-error --location \
-            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" \
-            -H 'Accept: application/json' \
+            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
             "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" \
             -o "$RUNNER_TEMP/websites.json"
           username="$(node - <<'NODE'
@@ -108,146 +120,41 @@ jobs:
           test -n "$username"
           echo "::add-mask::$username"
           printf '%s' "$username" > "$RUNNER_TEMP/hostinger-username"
-          echo 'HOSTINGER_PROTECTED_APP_RESOLVED=PASS'
+          echo 'HOSTINGER_MANAGED_APP_RESOLVED=PASS'
 
-      - name: Build guarded managed runtime archive
-        shell: bash
-        run: |
-          set -euo pipefail
-          stage="$RUNNER_TEMP/runtime"
-          rm -rf "$stage"
-          mkdir -p "$stage"
-          cp package.json package-lock.json db.js index.js "$stage/"
-          cp -R src public "$stage/"
-          cat > "$stage/managed-entry.js" <<'NODE'
-          require("dotenv").config({ path: require("node:path").join(__dirname, ".env.oneworldz") });
-          require("./src/hub-central/preload");
-          require("./index");
-          NODE
-          printf 'OPENAI_API_KEY=%s\nONEWORLDZ_OPENAI_MODEL=gpt-4o-mini\n' "$OPENAI_API_KEY" > "$stage/.env.oneworldz"
-          node --check "$stage/managed-entry.js"
-          grep -Eq '^OPENAI_API_KEY=.+$' "$stage/.env.oneworldz"
-          grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$stage/.env.oneworldz"
-          (cd "$stage" && zip -q -r "$RUNNER_TEMP/oneworldz-guarded-runtime.zip" . -x 'node_modules/*')
-          test -s "$RUNNER_TEMP/oneworldz-guarded-runtime.zip"
-          echo 'GUARDED_MANAGED_ARCHIVE=PASS'
-
-      - name: Upload archive and create official Hostinger managed build
-        shell: bash
-        run: |
-          set -euo pipefail
-          node - <<'NODE'
-          const fs = require('fs');
-          const path = require('path');
-          const tus = require('tus-js-client');
-
-          const token = String(process.env.HOSTINGER_API_TOKEN || '').trim();
-          const domain = String(process.env.PROTECTED_DOMAIN || '').trim();
-          const username = fs.readFileSync(process.env.RUNNER_TEMP + '/hostinger-username', 'utf8').trim();
-          const archivePath = process.env.RUNNER_TEMP + '/oneworldz-guarded-runtime.zip';
-          const archiveName = path.basename(archivePath);
-          const api = 'https://developers.hostinger.com';
-          const authHeaders = { Authorization: `Bearer ${token}`, Accept: 'application/json' };
-
-          async function jsonRequest(url, options = {}) {
-            const response = await fetch(url, options);
-            const text = await response.text();
-            let payload = {};
-            try { payload = text ? JSON.parse(text) : {}; } catch { payload = { raw: text.slice(0, 1000) }; }
-            if (!response.ok) throw new Error(`HTTP ${response.status} ${url}: ${JSON.stringify(payload).slice(0, 1500)}`);
-            return payload;
-          }
-
-          async function uploadArchive() {
-            const creds = await jsonRequest(`${api}/api/hosting/v1/files/upload-urls`, {
-              method: 'POST',
-              headers: { ...authHeaders, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ username, domain })
-            });
-            const uploadUrl = String(creds.url || '').replace(/\/$/, '');
-            const authToken = String(creds.auth_key || '');
-            const authRestToken = String(creds.rest_auth_key || '');
-            if (!uploadUrl || !authToken || !authRestToken) throw new Error('invalid_hostinger_upload_credentials');
-            const target = `${uploadUrl}/${archiveName}?override=true`;
-            const size = fs.statSync(archivePath).size;
-            const headers = {
-              'X-Auth': authToken,
-              'X-Auth-Rest': authRestToken,
-              'upload-length': String(size),
-              'upload-offset': '0'
-            };
-            const pre = await fetch(target, { method: 'POST', headers, body: '' });
-            if (pre.status !== 201) throw new Error(`hostinger_preupload_http_${pre.status}`);
-            await new Promise((resolve, reject) => {
-              const upload = new tus.Upload(fs.createReadStream(archivePath), {
-                uploadUrl: target,
-                retryDelays: [1000, 2000, 4000, 8000, 16000, 20000],
-                uploadDataDuringCreation: false,
-                parallelUploads: 1,
-                chunkSize: 10485760,
-                headers,
-                removeFingerprintOnSuccess: true,
-                uploadSize: size,
-                metadata: { filename: archiveName },
-                onError: reject,
-                onSuccess: resolve
-              });
-              upload.start();
-            });
-          }
-
-          async function main() {
-            await uploadArchive();
-            console.log('HOSTINGER_ARCHIVE_UPLOAD=PASS');
-            const encUser = encodeURIComponent(username);
-            const encDomain = encodeURIComponent(domain);
-            const nodeBase = `${api}/api/hosting/v1/accounts/${encUser}/websites/${encDomain}/nodejs`;
-            const settings = await jsonRequest(`${nodeBase}/builds/settings/from-archive?archive_path=${encodeURIComponent(archiveName)}`, { headers: authHeaders });
-            console.log('HOSTINGER_ARCHIVE_SETTINGS=PASS');
-            const buildData = {
-              ...settings,
-              node_version: 22,
-              app_type: 'express',
-              entry_file: 'managed-entry.js',
-              source_type: 'archive',
-              source_options: { archive_path: archiveName }
-            };
-            const build = await jsonRequest(`${nodeBase}/builds`, {
-              method: 'POST',
-              headers: { ...authHeaders, 'Content-Type': 'application/json' },
-              body: JSON.stringify(buildData)
-            });
-            const uuid = String(build.uuid || build.data?.uuid || '');
-            if (!uuid) throw new Error('hostinger_build_uuid_missing');
-            fs.writeFileSync(process.env.RUNNER_TEMP + '/build-uuid', uuid);
-            console.log(`HOSTINGER_MANAGED_BUILD_CREATED=${uuid}`);
-          }
-          main().catch((error) => { console.error(error.message); process.exit(1); });
-          NODE
-
-      - name: Wait for official managed build completion
+      - name: Wait for fresh Hostinger managed Git build
         shell: bash
         run: |
           set -euo pipefail
           username="$(cat "$RUNNER_TEMP/hostinger-username")"
-          uuid="$(cat "$RUNNER_TEMP/build-uuid")"
           domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
           user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
           base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
-          for i in $(seq 1 72); do
+          threshold="$(date -u -d '20 minutes ago' +%s)"
+          for attempt in $(seq 1 72); do
             curl --fail --silent --show-error --location \
               -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
               "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
-            state="$(BUILD_UUID="$uuid" node - <<'NODE'
+            result="$(THRESHOLD="$threshold" node - <<'NODE'
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/builds.json','utf8'));
-          const x=(p.data||[]).find(x=>String(x.uuid)===process.env.BUILD_UUID);
-          process.stdout.write(String(x?.state||'missing'));
+          const threshold=Number(process.env.THRESHOLD||0)*1000;
+          const rows=(p.data||[]).filter(x=>String(x.options?.source_type||'')==='git' && Date.parse(x.created_at||0)>=threshold).sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at));
+          const active=(p.data||[]).filter(x=>!['completed','failed'].includes(String(x.state||'').toLowerCase()));
+          const x=rows[0]||null;
+          process.stdout.write(JSON.stringify({uuid:x?.uuid||'',state:x?.state||'missing',created_at:x?.created_at||'',active:active.length}));
           NODE
           )"
-            echo "Managed build state=$state"
-            if [ "$state" = completed ]; then echo 'HOSTINGER_MANAGED_BUILD=PASS'; exit 0; fi
-            if [ "$state" = failed ]; then
+            echo "Hostinger managed build: $result"
+            state="$(printf '%s' "$result" | jq -r '.state')"
+            uuid="$(printf '%s' "$result" | jq -r '.uuid')"
+            active="$(printf '%s' "$result" | jq -r '.active')"
+            if [ -n "$uuid" ] && [ "$state" = completed ] && [ "$active" = 0 ]; then
+              printf '%s' "$uuid" > "$RUNNER_TEMP/managed-build-uuid"
+              echo "HOSTINGER_MANAGED_GIT_BUILD=PASS UUID=$uuid"
+              exit 0
+            fi
+            if [ -n "$uuid" ] && [ "$state" = failed ]; then
               curl --silent --show-error --location \
                 -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
                 "$base/builds/$uuid/logs?from_line=0" | head -c 5000
@@ -255,8 +162,51 @@ jobs:
             fi
             sleep 5
           done
-          echo '::error::Hostinger managed build timed out.'
+          echo '::error::Fresh Hostinger managed Git build did not reach completed state.'
           exit 1
+
+      - name: Preserve protected env and apply OpenAI guard settings
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          cat > "$RUNNER_TEMP/get-env.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 2
+          set net:timeout 25
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/protected.env
+          bye
+          EOF
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-env.lftp" "$raw_host"
+          test -s "$RUNNER_TEMP/protected.env"
+          OPENAI_API_KEY="$OPENAI_API_KEY" node - <<'NODE'
+          const fs=require('fs');
+          const p=process.env.RUNNER_TEMP+'/protected.env';
+          let rows=fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean);
+          rows=rows.filter(x=>!/^OPENAI_API_KEY=/.test(x)&&!/^ONEWORLDZ_OPENAI_MODEL=/.test(x));
+          rows.push(`OPENAI_API_KEY=${process.env.OPENAI_API_KEY}`,'ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini');
+          fs.writeFileSync(p,rows.join('\n')+'\n');
+          NODE
+          for key in BOT_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY OPENAI_API_KEY; do grep -Eq "^${key}=.+$" "$RUNNER_TEMP/protected.env"; done
+          grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/protected.env"
+          cat > "$RUNNER_TEMP/put-env.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 2
+          set net:timeout 25
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          put $RUNNER_TEMP/protected.env -o $PROTECTED_NODE_ROOT/.env
+          bye
+          EOF
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/put-env.lftp" "$raw_host"
+          echo 'PROTECTED_MANAGED_ENV=PASS'
 
       - name: Official Hostinger managed restart
         shell: bash
