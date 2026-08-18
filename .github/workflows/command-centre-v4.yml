@@ -33,6 +33,7 @@ concurrency:
 env:
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
   PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
+  PROTECTED_RESTART_GUARD: /domains/cryptobotz.cryptoworldz.xyz/public_html/tmp/restart.txt
 
 jobs:
   verify:
