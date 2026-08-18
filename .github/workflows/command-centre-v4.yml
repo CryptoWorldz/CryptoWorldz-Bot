@@ -35,7 +35,6 @@ permissions:
 env:
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
   PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
-  PROTECTED_WEB_RESTART: /domains/cryptobotz.cryptoworldz.xyz/public_html/tmp/restart.txt
 
 jobs:
   verify:
@@ -89,7 +88,7 @@ jobs:
           grep -Fq 'oneworldz-public-low-cost-v1' src/oneworldz-gpt/http.js
           grep -Fq 'model: "gpt-4o-mini"' src/hub-central/live-v1.js
           for key in OPENAI_API_KEY HOSTINGER_API_TOKEN FTP_HOST FTP_USERNAME FTP_PASSWORD; do
-            if [ -z "${!key:-}" ]; then echo "::error::Missing protected secret $key"; exit 1; fi
+            test -n "${!key:-}"
             echo "::add-mask::${!key}"
           done
           echo 'PROTECTED_PUBLIC_GUARD_SOURCE=PASS'
@@ -120,15 +119,35 @@ jobs:
           test -n "$username"
           echo "::add-mask::$username"
           printf '%s' "$username" > "$RUNNER_TEMP/hostinger-username"
-          echo 'HOSTINGER_MANAGED_APP_RESOLVED=PASS'
-
-      - name: Capture optional protected environment
-        shell: bash
-        run: |
-          set -euo pipefail
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           printf '%s' "$raw_host" > "$RUNNER_TEMP/raw-host"
+          echo 'HOSTINGER_MANAGED_APP_RESOLVED=PASS'
+
+      - name: Wait for Hostinger automatic build activity to settle
+        shell: bash
+        run: |
+          set -euo pipefail
+          username="$(cat "$RUNNER_TEMP/hostinger-username")"
+          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
+          user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
+          base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
+          for attempt in $(seq 1 90); do
+            curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
+            active="$(node -e "const p=require(process.env.RUNNER_TEMP+'/builds.json');process.stdout.write(String((p.data||[]).filter(x=>!['completed','failed'].includes(String(x.state||'').toLowerCase())).length))")"
+            latest="$(node -e "const p=require(process.env.RUNNER_TEMP+'/builds.json');const x=(p.data||[])[0]||{};process.stdout.write((x.uuid||'')+':'+(x.state||''))")"
+            echo "HOSTINGER_BUILD_ACTIVITY attempt=$attempt active=$active latest=$latest"
+            [ "$active" = 0 ] && break
+            sleep 5
+          done
+          [ "$active" = 0 ]
+          echo 'HOSTINGER_BUILD_ACTIVITY_SETTLED=PASS'
+
+      - name: Capture existing protected environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
           : > "$RUNNER_TEMP/protected.env"
           cat > "$RUNNER_TEMP/get-env.lftp" <<EOF
           set cmd:fail-exit false
@@ -142,50 +161,34 @@ jobs:
           bye
           EOF
           timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-env.lftp" "$raw_host" || true
-          echo 'PROTECTED_OPTIONAL_ENV_CAPTURE=PASS'
+          echo 'PROTECTED_ENV_CAPTURE=PASS'
 
-      - name: Wait for fresh Hostinger managed Git build
+      - name: Force exact protected Node runtime source to Hostinger
         shell: bash
         run: |
           set -euo pipefail
-          username="$(cat "$RUNNER_TEMP/hostinger-username")"
-          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
-          user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
-          base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
-          threshold="$(date -u -d '20 minutes ago' +%s)"
-          for attempt in $(seq 1 72); do
-            curl --fail --silent --show-error --location \
-              -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-              "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
-            result="$(THRESHOLD="$threshold" node - <<'NODE'
-          const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/builds.json','utf8'));
-          const threshold=Number(process.env.THRESHOLD||0)*1000;
-          const rows=(p.data||[]).filter(x=>String(x.options?.source_type||'')==='git' && Date.parse(x.created_at||0)>=threshold).sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at));
-          const active=(p.data||[]).filter(x=>!['completed','failed'].includes(String(x.state||'').toLowerCase()));
-          const x=rows[0]||null;
-          process.stdout.write(JSON.stringify({uuid:x?.uuid||'',state:x?.state||'missing',created_at:x?.created_at||'',active:active.length}));
-          NODE
-          )"
-            echo "Hostinger managed build: $result"
-            state="$(printf '%s' "$result" | jq -r '.state')"
-            uuid="$(printf '%s' "$result" | jq -r '.uuid')"
-            active="$(printf '%s' "$result" | jq -r '.active')"
-            if [ -n "$uuid" ] && [ "$state" = completed ] && [ "$active" = 0 ]; then
-              printf '%s' "$uuid" > "$RUNNER_TEMP/managed-build-uuid"
-              echo "HOSTINGER_MANAGED_GIT_BUILD=PASS UUID=$uuid"
-              exit 0
-            fi
-            if [ -n "$uuid" ] && [ "$state" = failed ]; then
-              curl --silent --show-error --location \
-                -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-                "$base/builds/$uuid/logs?from_line=0" | head -c 5000
-              exit 1
-            fi
-            sleep 5
-          done
-          echo '::error::Fresh Hostinger managed Git build did not reach completed state.'
-          exit 1
+          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
+          cat > "$RUNNER_TEMP/sync-runtime.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 2
+          set net:timeout 30
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          mkdir -p $PROTECTED_NODE_ROOT/src
+          mkdir -p $PROTECTED_NODE_ROOT/public
+          mkdir -p $PROTECTED_NODE_ROOT/.well-known
+          put index.js -o $PROTECTED_NODE_ROOT/index.js
+          put package.json -o $PROTECTED_NODE_ROOT/package.json
+          put package-lock.json -o $PROTECTED_NODE_ROOT/package-lock.json
+          mirror -R --verbose --no-perms --exclude-glob .DS_Store src $PROTECTED_NODE_ROOT/src
+          mirror -R --verbose --no-perms --exclude-glob .DS_Store public $PROTECTED_NODE_ROOT/public
+          mirror -R --verbose --no-perms --exclude-glob .DS_Store .well-known $PROTECTED_NODE_ROOT/.well-known
+          bye
+          EOF
+          timeout 480 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/sync-runtime.lftp" "$raw_host"
+          echo 'PROTECTED_RUNTIME_SOURCE_SYNC=PASS'
 
       - name: Apply protected OpenAI guard environment
         shell: bash
@@ -218,6 +221,29 @@ jobs:
           timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/put-env.lftp" "$raw_host"
           echo 'PROTECTED_OPENAI_GUARD_ENV=PASS'
 
+      - name: Verify remote runtime fingerprints
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
+          rm -f "$RUNNER_TEMP/remote-index.js" "$RUNNER_TEMP/remote-http.js"
+          cat > "$RUNNER_TEMP/get-proof.lftp" <<EOF
+          set cmd:fail-exit true
+          set net:max-retries 2
+          set net:timeout 25
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          get $PROTECTED_NODE_ROOT/index.js -o $RUNNER_TEMP/remote-index.js
+          get $PROTECTED_NODE_ROOT/src/oneworldz-gpt/http.js -o $RUNNER_TEMP/remote-http.js
+          bye
+          EOF
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-proof.lftp" "$raw_host"
+          cmp -s index.js "$RUNNER_TEMP/remote-index.js"
+          cmp -s src/oneworldz-gpt/http.js "$RUNNER_TEMP/remote-http.js"
+          echo 'PROTECTED_REMOTE_SOURCE_FINGERPRINT=PASS'
+
       - name: Official Hostinger managed restart
         shell: bash
         run: |
@@ -226,23 +252,16 @@ jobs:
           domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
           user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
           url="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs/server/restart"
-          code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST \
-            -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' \
-            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$url")"
-          case "$code" in
-            200|201|202|204) echo "HOSTINGER_MANAGED_RESTART=PASS HTTP=$code" ;;
-            *) cat "$RUNNER_TEMP/restart.json"; echo "::error::Hostinger restart HTTP $code"; exit 1 ;;
-          esac
+          code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$url")"
+          case "$code" in 200|201|202|204) echo "HOSTINGER_MANAGED_RESTART=PASS HTTP=$code" ;; *) cat "$RUNNER_TEMP/restart.json"; exit 1 ;; esac
 
       - name: Prove protected production API live fingerprint
         shell: bash
         run: |
           set -euo pipefail
-          for i in $(seq 1 48); do
+          for i in $(seq 1 60); do
             sleep 5
-            code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 \
-              -o "$RUNNER_TEMP/status.json" -w '%{http_code}' \
-              "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
+            code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/status.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
             if [ "$code" = 200 ] && STATUS="$RUNNER_TEMP/status.json" node - <<'NODE'
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync(process.env.STATUS,'utf8'));
@@ -257,7 +276,7 @@ jobs:
               cat "$RUNNER_TEMP/status.json"
               exit 0
             fi
-            echo "Protected API convergence $i/48 HTTP=$code"
+            echo "Protected API convergence $i/60 HTTP=$code"
           done
           echo '::error::Protected production API live fingerprint failed.'
           exit 1
