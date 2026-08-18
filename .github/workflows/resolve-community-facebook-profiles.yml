@@ -25,7 +25,7 @@ jobs:
       - name: Report protected GPT production deployment run id
         env:
           GH_TOKEN: ${{ github.token }}
-          TARGET_SHA: 'ab1a51f1c0e560fdace88914a883f2192802c357'
+          TARGET_SHA: '7a91dfd1a7432e650cd0e13bc5a107a27f1c3eda'
           ISSUE_NUMBER: '86'
         shell: bash
         run: |
