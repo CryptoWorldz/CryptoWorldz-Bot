@@ -27,6 +27,7 @@ const { createGraceWorker } = require("./src/grace/worker");
 const { configWarnings, loadConfig } = require("./src/config");
 const { createHttpApp } = require("./src/http");
 const { registerLegendV8System } = require("./src/legend-v8");
+const { registerOneWorldzGptRoutes } = require("./src/oneworldz-gpt/http");
 const { registerRoleProfileHandler } = require("./src/profile-role");
 const { registerProjectWalletSystem } = require("./src/project-wallets");
 const { registerReferralTelegramHandlers } = require("./src/referrals");
@@ -39,7 +40,7 @@ const { registerWebsiteTelegramHandlers } = require("./src/websites-telegram");
 const { registerWorkEvidenceHandlers } = require("./src/work-evidence");
 const { registerWorldzCastSystem } = require("./src/worldzcast");
 
-const RUNTIME_BUILD = "2026-08-10-grace-build2-meta-facebook-oauth";
+const RUNTIME_BUILD = "2026-08-18-protected-oneworldz-gpt-guard";
 
 function defaultGraceRedirectUri(webhookUrl) {
   try { return new URL("/grace/oauth/x/callback", webhookUrl).toString(); }
@@ -57,8 +58,52 @@ function missingGraceXSecretError() {
   return error;
 }
 
+function startProtectedPublicFallback(reason) {
+  const express = require("express");
+  const path = require("node:path");
+  const app = express();
+  const miniAppPath = path.join(__dirname, "public", "miniapp");
+  const port = Number(process.env.PORT || 3000);
+
+  app.disable("x-powered-by");
+  app.use(express.json({ limit: "32kb", type: "application/json" }));
+  app.get("/", (req, res) => res.json({
+    ok: true,
+    service: "CryptoWorldz Protected Public Gateway",
+    runtime: "public_guard_fallback",
+    oneWorldzGPT: "available"
+  }));
+  app.get("/health", (req, res) => res.json({ ok: true, runtime: "public_guard_fallback" }));
+  app.use("/miniapp", express.static(miniAppPath, {
+    index: "index.html",
+    etag: false,
+    lastModified: false,
+    maxAge: 0,
+    setHeaders: (res) => res.setHeader("Cache-Control", "no-store, max-age=0")
+  }));
+  registerOneWorldzGptRoutes({ app });
+  app.use("/api/mini", (req, res) => res.status(503).json({
+    ok: false,
+    error: "command_centre_runtime_configuration_required"
+  }));
+
+  app.listen(port, "0.0.0.0", () => {
+    console.warn(`CryptoWorldz protected public fallback listening on ${port} • ${RUNTIME_BUILD} • ${String(reason?.message || "runtime configuration unavailable")}`);
+  });
+}
+
 async function start() {
-  const config = loadConfig();
+  let config;
+  try {
+    config = loadConfig();
+  } catch (error) {
+    if (/^(BOT_TOKEN|SUPABASE_URL|SUPABASE_SERVICE_ROLE_KEY) is required\.$/.test(String(error?.message || ""))) {
+      startProtectedPublicFallback(error);
+      return;
+    }
+    throw error;
+  }
+
   const supabase = createClient(config.supabaseUrl, config.supabaseServiceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false }
   });
