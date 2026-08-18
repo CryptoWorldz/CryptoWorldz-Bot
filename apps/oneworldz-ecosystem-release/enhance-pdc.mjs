@@ -32,7 +32,7 @@ html = html.replace(/<body\s+style="([^"]*)">/, '<body class="pdc-purple-theme" 
 if (!html.includes('class="pdc-purple-theme"')) throw new Error("Purple Diamond Crew theme marker missing");
 const tokenGrid = /<div class="token-grid">[\s\S]*?<\/div><\/section><\/main>/;
 if (!tokenGrid.test(html)) throw new Error("PDC legacy token grid not found");
-html = html.replace(tokenGrid, `<div class="token-grid pdc-token-grid">${cards}</div><p class="pdc-market-note"><strong>Live market view:</strong> DEX Screener data is fetched from its public Solana token API. When an active Solana pair is returned, the card exposes DEX Screener and an external Jupiter Buy / Swap route using the exact legacy mint address. Jupiter performs the wallet connection, quote and transaction confirmation; PurpleDiamondCrew.com never takes custody or signs the trade. If no live pair is found, the purchase route stays hidden and the Solscan legacy record remains available. Prices, liquidity and routes can change quickly.</p><span class="pdc-dex-status" data-state="loading">Preparing DEX Screener market view…</span></section></main>`);
+html = html.replace(tokenGrid, `<div class="token-grid pdc-token-grid">${cards}</div><p class="pdc-market-note"><strong>Live market view:</strong> DEX Screener is read-only market data. When an active Solana pair is returned, the card exposes DEX Screener and an external Jupiter Buy / Swap route using the exact legacy mint address. Jupiter performs wallet connection, quote and transaction confirmation; PurpleDiamondCrew.com never takes custody, signs the trade or executes through DEX Screener. If no live pair is found, the purchase route stays hidden and the Solscan legacy record remains available. Prices, liquidity and routes can change quickly.</p><span class="pdc-dex-status" data-state="loading">Preparing DEX Screener market view…</span></section></main>`);
 html = html.replace('<section class="section" id="legacy">', '<section class="section pdc-legacy-stage" id="legacy">');
 html = html.replace("</head>", '<link rel="stylesheet" href="/assets/css/pdc-market.css"></head>');
 html = html.replace("</body>", '<script src="/assets/js/pdc-market.js" defer></script></body>');
@@ -62,7 +62,8 @@ manifest.pdc_legacy = {
   source: "verified PDC legacy register",
   dexscreener: {
     integration: "https://api.dexscreener.com/tokens/v1/solana/{tokenAddresses}",
-    display: "highest-liquidity returned Solana pair per legacy address"
+    display: "highest-liquidity returned Solana pair per legacy address",
+    execution: false
   },
   swap_route: {
     provider: "Jupiter",
@@ -79,4 +80,4 @@ manifest.pdc_legacy = {
 };
 await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 
-console.log("PurpleDiamondCrew enhanced: full-background purple identity, 10 verified legacy tokens in 5×2 desktop layout, DEX Screener live market data and guarded external Jupiter swap routes.");
+console.log("PurpleDiamondCrew enhanced: full-background purple identity, 10 verified legacy tokens in 5×2 desktop layout, read-only DEX Screener live market data and guarded external Jupiter swap routes.");
