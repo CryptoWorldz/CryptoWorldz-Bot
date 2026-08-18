@@ -169,7 +169,7 @@ jobs:
           set -euo pipefail
           raw_host="$(cat "$RUNNER_TEMP/raw-host")"
           cat > "$RUNNER_TEMP/sync-runtime.lftp" <<EOF
-          set cmd:fail-exit true
+          set cmd:fail-exit false
           set net:max-retries 2
           set net:timeout 30
           set ftp:ssl-force true
@@ -179,6 +179,7 @@ jobs:
           mkdir -p $PROTECTED_NODE_ROOT/src
           mkdir -p $PROTECTED_NODE_ROOT/public
           mkdir -p $PROTECTED_NODE_ROOT/.well-known
+          set cmd:fail-exit true
           put index.js -o $PROTECTED_NODE_ROOT/index.js
           put package.json -o $PROTECTED_NODE_ROOT/package.json
           put package-lock.json -o $PROTECTED_NODE_ROOT/package-lock.json
