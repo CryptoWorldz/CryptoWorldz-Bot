@@ -3,6 +3,14 @@ name: JayJayTeamDev + ChatGPT Canonical Gate
 on:
   push:
     branches: [main]
+    paths:
+      - "apps/oneworldz-ecosystem-release/**"
+      - "deployments/oneworldz-19-total.request"
+      - "governance/JAYJAY-CHATGPT-DEPLOYMENT-GATE.md"
+      - "tools/verify-oneworldz-canonical.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/main.yml"
   workflow_dispatch:
 
 permissions:
@@ -15,6 +23,7 @@ concurrency:
 
 jobs:
   verify:
+    if: ${{ github.event_name != 'push' || github.event.head_commit.message != 'RECORD JAYJAYTEAMDEV CHATGPT TOTAL DEPLOYMENT PASS' }}
     name: Clean source + canonical build verification
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -555,62 +564,83 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Record completed total deployment state
+      - name: Record completed total deployment state without overwriting newer code
         shell: bash
         run: |
           set -euo pipefail
-          state='deployments/oneworldz-19-total.request'
-          static_tree="$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)"
-          set_key() {
-            key="$1"; value="$2"
-            if grep -q "^${key}=" "$state"; then
-              sed -i "s#^${key}=.*#${key}=${value}#" "$state"
-            else
-              printf '%s=%s\n' "$key" "$value" >> "$state"
+          deployed_static_tree="$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)"
+          for record_attempt in 1 2 3; do
+            git fetch origin main --depth=1
+            latest_static_tree="$(git rev-parse FETCH_HEAD:apps/oneworldz-ecosystem-release)"
+            if [ "$latest_static_tree" != "$deployed_static_tree" ]; then
+              echo '::error::A newer static candidate exists. Live deployment proof is valid for this run, but it will not be falsely recorded as the latest complete candidate.'
+              exit 1
             fi
-          }
-          set_key clean_source_lock "PASS_RUN_${GITHUB_RUN_ID}"
-          set_key execution_phase COMPLETE
-          set_key active_executor_run "$GITHUB_RUN_ID"
-          set_key preview_run_id "$GITHUB_RUN_ID"
-          set_key approved_static_tree "$static_tree"
-          set_key build_pass PASS
-          set_key build_pass_static_tree "$static_tree"
-          set_key build_pass_commit "$GITHUB_SHA"
-          set_key chatgpt_preview_visual_pass PASS
-          set_key chatgpt_preview_visual_evidence "PASS_RUN_${GITHUB_RUN_ID}"
-          set_key preview_visual_artifact "oneworldz-preview-visual-${GITHUB_RUN_ID}"
-          set_key preview_candidate_artifact "oneworldz-candidate-${GITHUB_RUN_ID}"
-          set_key preview_technical_anomalies PASS
-          set_key preview_broken_images PASS
-          set_key preview_horizontal_overflow PASS
-          set_key preview_pending_images PASS
-          set_key preview_console_errors PASS
-          set_key preview_page_errors PASS
-          set_key preview_failed_requests PASS
-          set_key preview_manual_review PASS_AUTOMATED_CANONICAL_BROWSER_GATE
-          set_key seo_lighthouse_run "$GITHUB_RUN_ID"
-          set_key seo_lighthouse_job verify
-          set_key seo_lighthouse_score 100
-          set_key seo_lighthouse_pass PASS
-          set_key seo_static_metadata_tests PASS
-          set_key seo_image_references PASS
-          set_key seo_required_before_deploy PASS
-          set_key step6_status PASS
-          set_key step7_approved YES
-          set_key step7_approved_preview_run "$GITHUB_RUN_ID"
-          set_key step7_approved_static_tree "$static_tree"
-          set_key step5_executor_commit "$GITHUB_SHA"
-          set_key step5_production_write PASS
-          set_key live_technical_pass PASS
-          set_key live_visual_pass PASS
-          set_key protected_oneworldz_gpt_production_proof "PASS_RUN_${GITHUB_RUN_ID}"
-          set_key next_action COMPLETE
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add "$state"
-          git commit -m 'RECORD JAYJAYTEAMDEV CHATGPT TOTAL DEPLOYMENT PASS'
-          git push origin HEAD:main
+            git checkout -B deployment-record FETCH_HEAD
+            state='deployments/oneworldz-19-total.request'
+            set_key() {
+              key="$1"; value="$2"
+              if grep -q "^${key}=" "$state"; then
+                sed -i "s#^${key}=.*#${key}=${value}#" "$state"
+              else
+                printf '%s=%s\n' "$key" "$value" >> "$state"
+              fi
+            }
+            set_key final_100_percent_pass YES
+            set_key final_pass_scope FULL_18_SITE_STATIC_PLUS_ZED_MINIAPP_GPT_LIVE_PROOF
+            set_key clean_source_lock "PASS_RUN_${GITHUB_RUN_ID}"
+            set_key execution_phase COMPLETE
+            set_key active_executor_run "$GITHUB_RUN_ID"
+            set_key preview_run_id "$GITHUB_RUN_ID"
+            set_key approved_static_tree "$deployed_static_tree"
+            set_key build_pass PASS
+            set_key build_pass_static_tree "$deployed_static_tree"
+            set_key build_pass_commit "$GITHUB_SHA"
+            set_key chatgpt_preview_visual_pass PASS
+            set_key chatgpt_preview_visual_evidence "PASS_RUN_${GITHUB_RUN_ID}"
+            set_key preview_visual_artifact "oneworldz-preview-visual-${GITHUB_RUN_ID}"
+            set_key preview_candidate_artifact "oneworldz-candidate-${GITHUB_RUN_ID}"
+            set_key preview_technical_anomalies PASS
+            set_key preview_broken_images PASS
+            set_key preview_horizontal_overflow PASS
+            set_key preview_pending_images PASS
+            set_key preview_console_errors PASS
+            set_key preview_page_errors PASS
+            set_key preview_failed_requests PASS
+            set_key preview_manual_review PASS_AUTOMATED_CANONICAL_BROWSER_GATE
+            set_key seo_lighthouse_run "$GITHUB_RUN_ID"
+            set_key seo_lighthouse_job verify
+            set_key seo_lighthouse_score 100
+            set_key seo_lighthouse_pass PASS
+            set_key seo_static_metadata_tests PASS
+            set_key seo_image_references PASS
+            set_key seo_required_before_deploy PASS
+            set_key step6_status PASS
+            set_key step7_approved YES
+            set_key step7_approved_preview_run "$GITHUB_RUN_ID"
+            set_key step7_approved_static_tree "$deployed_static_tree"
+            set_key step5_executor_commit "$GITHUB_SHA"
+            set_key step5_production_write PASS
+            set_key live_technical_pass PASS
+            set_key live_visual_pass PASS
+            set_key protected_oneworldz_gpt_production_proof "PASS_RUN_${GITHUB_RUN_ID}"
+            set_key next_action COMPLETE
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add "$state"
+            if git diff --cached --quiet; then
+              echo 'DEPLOYMENT_STATE_ALREADY_RECORDED=PASS'
+              exit 0
+            fi
+            git commit -m 'RECORD JAYJAYTEAMDEV CHATGPT TOTAL DEPLOYMENT PASS'
+            if git push origin HEAD:main; then
+              echo 'DEPLOYMENT_STATE_RECORDED=PASS'
+              exit 0
+            fi
+            echo "Deployment record push raced with main; retrying $record_attempt/3"
+          done
+          echo '::error::Live deployment passed but completed state could not be safely recorded after three non-destructive retries.'
+          exit 1
 
       - name: Final automated handoff
         if: always()
@@ -620,5 +650,5 @@ jobs:
             echo '- Automated live browser proof completed before this handoff only if this job is green.'
             echo '- Every published sitemap HTML page is included in desktop/mobile proof.'
             echo '- Protected CryptoBotz must be the full Zed runtime with Mini App plus protected OneWorldz GPT.'
-            echo '- A green job records the completed deployment state automatically.'
+            echo '- A green job records the completed deployment state automatically without overwriting newer main code.'
           } >> "$GITHUB_STEP_SUMMARY"
