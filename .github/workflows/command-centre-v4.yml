@@ -121,7 +121,7 @@ jobs:
           const fs=require('fs');
           const p=process.env.RUNNER_TEMP+'/patched-index.js';
           let text=fs.readFileSync(p,'utf8');
-          text=text.replace('require("dotenv").config();','require("dotenv").config({ path: require("node:path").join(__dirname, ".env") });');
+          text=text.replace('require("dotenv").config({ path: require("node:path").join(__dirname, ".env") });','require("dotenv").config();');
           const needle='const app = express();';
           if(!text.includes('registerHubCentralLive')) {
             if(!text.includes(needle)) throw new Error('unexpected_express_app_structure');
@@ -131,10 +131,22 @@ jobs:
           NODE
           node --check "$RUNNER_TEMP/patched-index.js"
 
-          {
-            echo 'require("dotenv").config({ path: require("node:path").join(__dirname, ".env") });'
-            cat src/hub-central/live-v1.js
-          } > "$RUNNER_TEMP/guarded-hub-central-live.js"
+          cat > "$RUNNER_TEMP/openai-key-bootstrap.js" <<'NODE'
+          (() => {
+            if (String(process.env.OPENAI_API_KEY || '').trim()) return;
+            try {
+              const fs = require('node:fs');
+              const path = require('node:path');
+              const text = fs.readFileSync(path.join(__dirname, '.env'), 'utf8');
+              const line = text.split(/\r?\n/).find((row) => /^OPENAI_API_KEY=/.test(row));
+              if (!line) return;
+              let value = line.slice('OPENAI_API_KEY='.length).trim();
+              if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
+              if (value) process.env.OPENAI_API_KEY = value;
+            } catch {}
+          })();
+          NODE
+          cat "$RUNNER_TEMP/openai-key-bootstrap.js" src/hub-central/live-v1.js > "$RUNNER_TEMP/guarded-hub-central-live.js"
           node --check "$RUNNER_TEMP/guarded-hub-central-live.js"
           touch "$RUNNER_TEMP/restart.txt"
 
@@ -216,6 +228,30 @@ jobs:
           done
           echo '::error::Protected runtime did not expose the exact guarded OpenAI fingerprint.'
           exit 1
+
+      - name: Capture sanitized protected startup errors on failure
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+          set +e
+          raw_host="$(cat "$RUNNER_TEMP/protected-host" 2>/dev/null)"
+          [ -z "$raw_host" ] && exit 0
+          cat > "$RUNNER_TEMP/logs.lftp" <<EOF
+          set cmd:fail-exit false
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set ssl:check-hostname false
+          get $PROTECTED_NODE_ROOT/stderr.log -o $RUNNER_TEMP/stderr.log
+          get $PROTECTED_NODE_ROOT/console.log -o $RUNNER_TEMP/console.log
+          bye
+          EOF
+          timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/logs.lftp" "$raw_host" || true
+          for f in "$RUNNER_TEMP/stderr.log" "$RUNNER_TEMP/console.log"; do
+            [ -s "$f" ] || continue
+            echo "Sanitized tail: $(basename "$f")"
+            tail -80 "$f" | sed -E 's/sk-[A-Za-z0-9_-]+/[OPENAI_KEY_MASKED]/g; s/(Bearer )[A-Za-z0-9._-]+/\1[TOKEN_MASKED]/g' | grep -E 'Fatal|Error|error|MODULE|Syntax|TypeError|ReferenceError|ENOENT|EADDR|dotenv|hub-central|listening|startup' | tail -40 || true
+          done
 
       - name: Roll back only on failed byte installation
         if: ${{ failure() && steps.install.outputs.written == 'true' && steps.bytes.outputs.proved != 'true' }}
