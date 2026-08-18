@@ -1,3 +1,5 @@
+const { groupsForRole, normalizeRole } = require("./command-registry");
+
 const BOT_MENU_COMMANDS = [
   { command: "zedstart", description: "Open the Zed Command Centre" },
   { command: "zed", description: "Zed profile, wallet, missions and settings" },
@@ -17,7 +19,7 @@ const MENUS = {
       ["👛 Wallet", "/wallet"],
       ["🚀 Missions", "/missions"],
       ["🏆 Leaderboard", "/leaderboard"],
-      ["⚙️ Settings", "/zedsettings"]
+      ["📚 All Commands", "/commands"]
     ]
   },
   auto: {
@@ -47,7 +49,7 @@ const MENUS = {
       ["➕ Add Scoped Admin", "/addscopedadmin"],
       ["🚫 Disable Admin", "/disableadmin"],
       ["👑 Appoint Executive", "/appointexecutive"],
-      ["⚙️ Settings", "/zedsettings"]
+      ["📚 Full Access Commands", "/commands"]
     ]
   },
   admingrace: {
@@ -67,10 +69,18 @@ const MENUS = {
       ["💎 Auto", "/auto"],
       ["👩‍💼 Grace", "/grace"],
       ["🛡 Admin", "/admin"],
-      ["🛡 Grace Admin", "/admingrace"]
+      ["🌳 Command Tree", "/commandtree"]
     ]
   }
 };
+
+const WEB_ROUTES = Object.freeze({
+  directory: "https://oneworldz.com/directory/",
+  acknowledgements: "https://oneworldz.com/acknowledgements/",
+  supportJay: "https://donateworldz.com/support-jayjayteamdev/",
+  donateReagan: "https://donateworldz.com/reagan-children/",
+  publicCommands: "https://cryptoworldz.xyz/command-centre/commands/"
+});
 
 function menuText(menu) {
   return [
@@ -78,7 +88,7 @@ function menuText(menu) {
     "",
     ...menu.rows.map(([label, command]) => `${label} — ${command}`),
     "",
-    "Use the gateway command whenever you forget the longer command list."
+    "Use /commands for the complete command list available to your access level."
   ].join("\n");
 }
 
@@ -94,32 +104,82 @@ function mainKeyboard() {
           { text: "👩‍💼 GRACE", callback_data: "cc:menu:grace" },
           { text: "🛡 ADMIN", callback_data: "cc:menu:admin" }
         ],
+        [
+          { text: "📚 COMMANDS", callback_data: "cc:commands" },
+          { text: "🌳 STRUCTURE", callback_data: "cc:tree" }
+        ],
         [{ text: "⚙️ SETTINGS", callback_data: "cc:menu:settings" }]
       ]
     }
   };
 }
 
+function groupText(group) {
+  return [
+    group.label,
+    `Access: ${group.minimumRole.toUpperCase()}`,
+    "",
+    ...group.commands.map((item) => `/${item.command} — ${item.description}`)
+  ].join("\n");
+}
+
+function commandTreeText(role) {
+  const groups = groupsForRole(role);
+  return [
+    "🌳 CRYPTOWORLDZ COMMAND STRUCTURAL TREE",
+    "",
+    `Your access: ${normalizeRole(role).toUpperCase()}`,
+    "",
+    ...groups.map((group) => `${group.label} — ${group.commands.length} commands`),
+    "",
+    `Public command webpage: ${WEB_ROUTES.publicCommands}`,
+    "Use /commands to expand every command available to you."
+  ].join("\n");
+}
+
 function registerCommandCentreHandlers({ bot, repository, config }) {
   const send = (msg, text, options) => bot.sendMessage(msg.chat.id, text, options);
   const isOwner = (msg) => String(msg.from?.id || "") === String(config.ownerTelegramId || "");
-  const isAdmin = async (msg) => {
-    if (isOwner(msg)) return true;
-    return repository.isManagedAdmin(
-      msg.from.id,
-      config.adminTelegramIds,
-      config.ownerTelegramId
-    );
-  };
+
+  async function roleFor(msg) {
+    if (isOwner(msg)) return "owner";
+    try {
+      if (typeof repository.getAdminAccess === "function") {
+        const access = await repository.getAdminAccess(
+          msg.from.id,
+          config.adminTelegramIds,
+          config.ownerTelegramId
+        );
+        if (access?.authorized) return normalizeRole(access.role || "admin");
+      }
+      if (typeof repository.isManagedAdmin === "function" && await repository.isManagedAdmin(
+        msg.from.id,
+        config.adminTelegramIds,
+        config.ownerTelegramId
+      )) return "admin";
+    } catch {}
+    return "member";
+  }
+
+  const isAdmin = async (msg) => ["admin", "executive", "owner"].includes(await roleFor(msg));
+
+  async function sendCommandGroups(msg, forcedRole = null) {
+    const role = forcedRole || await roleFor(msg);
+    const groups = groupsForRole(role);
+    await send(msg, `📚 COMMAND CENTRE — ${normalizeRole(role).toUpperCase()} ACCESS\n\n${groups.reduce((sum, group) => sum + group.commands.length, 0)} registered commands across ${groups.length} sections.`);
+    for (const group of groups) await send(msg, groupText(group));
+  }
 
   const openHome = (msg) => send(msg, [
     "🌐 CryptoWorldz Command Centre",
     "",
-    "ONE SIMPLE START POINT",
-    "Choose Zed, Auto, Grace, Admin or Settings below.",
+    "ONE START POINT • FULL STRUCTURAL TREE",
+    "ZED, AUTO, G.R.A.C.E., Admin, websites and role-based commands are connected here.",
     "",
-    "Main gateway commands:",
-    "/zedstart • /zed • /auto • /grace • /admin • /admingrace • /zedsettings • /help"
+    "Gateway commands:",
+    "/zedstart • /commands • /commandtree • /directory • /acknowledgements • /supportjay",
+    "",
+    "You do not need to memorise the full command list."
   ].join("\n"), mainKeyboard());
 
   bot.onText(/^\/zedstart(?:@\w+)?$/, openHome);
@@ -140,33 +200,68 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     if (!(await isAdmin(msg))) return send(msg, "⛔ Command Centre settings require Admin access.");
     return send(msg, menuText(MENUS.settings));
   });
-  bot.onText(/^\/help(?:@\w+)?$/, (msg) => send(msg, [
-    "📘 SIMPLE COMMAND GUIDE",
+
+  bot.onText(/^\/commands(?:@\w+)?$/, (msg) => sendCommandGroups(msg));
+  bot.onText(/^\/ownercommands(?:@\w+)?$/, async (msg) => {
+    if (!isOwner(msg)) return send(msg, "⛔ Owner access required.");
+    return sendCommandGroups(msg, "owner");
+  });
+  bot.onText(/^\/commandtree(?:@\w+)?$/, async (msg) => send(msg, commandTreeText(await roleFor(msg))));
+
+  bot.onText(/^\/directory(?:@\w+)?$/, (msg) => send(msg, `🌐 Directory@OneWorldz\n${WEB_ROUTES.directory}`));
+  bot.onText(/^\/acknowledgements?(?:@\w+)?$/i, (msg) => send(msg, `💜 Acknowledgements@OneWorldz\n${WEB_ROUTES.acknowledgements}`));
+  bot.onText(/^\/supportjay(?:@\w+)?$/i, (msg) => send(msg, `💜 JayJayTeamDev@DonateWorldz\n${WEB_ROUTES.supportJay}`));
+
+  // Current launch route override: the retired GoFundMe route must never be the Command Centre donation destination.
+  bot.onText(/^\/donate(?:@\w+)?$/i, (msg) => send(msg, [
+    "💜 DonateWorldz — Reagan & Children / Action Spread Smiles",
+    WEB_ROUTES.donateReagan,
     "",
-    "/zedstart — everything starts here",
-    "/zed — profile, wallet, missions, leaderboard, settings",
-    "/auto — Auto finance controls",
-    "/grace — Grace Auto Post™",
-    "/admin — Admin controls",
-    "/admingrace — Grace permissions and safety",
-    "/zedsettings — Command Centre settings",
-    "",
-    "Advanced commands still work, but you do not need to memorise them."
+    "For all separated support pathways, open https://donateworldz.com/"
   ].join("\n")));
 
+  bot.onText(/^\/help(?:@\w+)?$/, async (msg) => send(msg, [
+    "📘 COMMAND CENTRE HELP",
+    "",
+    "/zedstart — open the Command Centre",
+    "/commands — every command available to your role",
+    "/commandtree — command sections and structure",
+    "/directory — public OneWorldz site/page directory",
+    "/acknowledgements — exact Acknowledgements page",
+    "/supportjay — exact Support JayJayTeamDev page",
+    isOwner(msg) ? "/ownercommands — full owner inventory" : "",
+    "",
+    `Public command guide: ${WEB_ROUTES.publicCommands}`
+  ].filter(Boolean).join("\n")));
+
   bot.on("callback_query", async (query) => {
-    const match = String(query.data || "").match(/^cc:menu:(zed|auto|grace|admin|settings)$/);
-    if (!match) return;
+    const data = String(query.data || "");
     const msg = query.message;
+    if (!msg || !data.startsWith("cc:")) return;
     const actor = { ...msg, from: query.from };
-    const key = match[1];
-    if (["grace", "admin", "settings"].includes(key) && !(await isAdmin(actor))) {
-      await bot.answerCallbackQuery(query.id, { text: "Admin access required", show_alert: true });
+
+    const menuMatch = data.match(/^cc:menu:(zed|auto|grace|admin|settings)$/);
+    if (menuMatch) {
+      const key = menuMatch[1];
+      if (["grace", "admin", "settings"].includes(key) && !(await isAdmin(actor))) {
+        await bot.answerCallbackQuery(query.id, { text: "Admin access required", show_alert: true });
+        return;
+      }
+      await bot.answerCallbackQuery(query.id);
+      await send(msg, menuText(MENUS[key]));
       return;
     }
-    await bot.answerCallbackQuery(query.id);
-    await send(msg, menuText(MENUS[key]));
+
+    if (data === "cc:commands") {
+      await bot.answerCallbackQuery(query.id);
+      await sendCommandGroups(actor);
+      return;
+    }
+    if (data === "cc:tree") {
+      await bot.answerCallbackQuery(query.id);
+      await send(msg, commandTreeText(await roleFor(actor)));
+    }
   });
 }
 
-module.exports = { BOT_MENU_COMMANDS, MENUS, registerCommandCentreHandlers };
+module.exports = { BOT_MENU_COMMANDS, MENUS, WEB_ROUTES, registerCommandCentreHandlers };
