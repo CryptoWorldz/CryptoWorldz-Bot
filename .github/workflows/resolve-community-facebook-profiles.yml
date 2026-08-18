@@ -21,10 +21,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Report protected Hostinger managed Git fingerprint run
+      - name: Report env-preserving protected Hostinger run
         env:
           GH_TOKEN: ${{ github.token }}
-          TARGET_SHA: '402a4121a54399687f4f869e8486470bac9da445'
+          TARGET_SHA: '4efc28063eaefd19747fa90f8c3037c88bf747f7'
           ISSUE_NUMBER: '86'
         shell: bash
         run: |
@@ -40,7 +40,7 @@ jobs:
           run_id="$(printf '%s' "$run" | jq -r '.id')"
           status="$(printf '%s' "$run" | jq -r '.status')"
           conclusion="$(printf '%s' "$run" | jq -r '.conclusion // "pending"')"
-          body="PROTECTED_GPT_MANAGED_GIT_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion"
+          body="PROTECTED_GPT_ENV_PRESERVE_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion"
           jq -n --arg body "$body" '{body:$body}' > /tmp/comment.json
           curl --fail --silent --show-error -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" --data-binary @/tmp/comment.json >/dev/null
       - uses: actions/setup-node@v4
