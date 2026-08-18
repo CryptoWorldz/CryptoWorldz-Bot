@@ -6,6 +6,8 @@ import { productionTargets } from "./production-targets.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(root, "dist", "ecosystem");
+const OLD_JAY_SUPPORT = "https://donateworldz.com/jayjayteamdev/";
+const CURRENT_JAY_SUPPORT = "https://donateworldz.com/support-jayjayteamdev/";
 
 async function listHtml(dir, rel = "") {
   const out = [];
@@ -30,20 +32,26 @@ function addCss(html) {
   if (html.includes('/assets/css/experience-theme.css')) return html;
   return html.replace("</head>", '<link rel="stylesheet" href="/assets/css/experience-theme.css"></head>');
 }
+function normalizePublicRoutes(html) {
+  return html.replaceAll(OLD_JAY_SUPPORT, CURRENT_JAY_SUPPORT);
+}
 
 for (const target of productionTargets) {
   const theme = experienceContract.themes[target.key];
-  if (!theme) continue;
   const targetRoot = path.join(dist, target.key);
-  const cssDir = path.join(targetRoot, "assets", "css");
-  await mkdir(cssDir, { recursive: true });
-  await writeFile(path.join(cssDir, "experience-theme.css"), themeCss(theme), "utf8");
+  if (theme) {
+    const cssDir = path.join(targetRoot, "assets", "css");
+    await mkdir(cssDir, { recursive: true });
+    await writeFile(path.join(cssDir, "experience-theme.css"), themeCss(theme), "utf8");
+  }
   for (const relative of await listHtml(targetRoot)) {
     const file = path.join(targetRoot, relative);
-    let html = await readFile(file, "utf8");
-    html = addCss(addBodyClass(html, target.key));
+    let html = normalizePublicRoutes(await readFile(file, "utf8"));
+    if (theme) html = addCss(addBodyClass(html, target.key));
+    if (/gofund\.me|gofundme/i.test(html)) throw new Error(`Legacy GoFundMe production route remains in ${target.key}/${relative}`);
+    if (html.includes(OLD_JAY_SUPPORT)) throw new Error(`Superseded JayJay support URL remains in ${target.key}/${relative}`);
     await writeFile(file, html, "utf8");
   }
 }
 
-console.log(`Distinct destination themes finalised for ${Object.keys(experienceContract.themes).length} identity groups; chain World themes remain governed by their chain-specific accent/image contracts.`);
+console.log(`Final public-route cleanup PASS; distinct themes applied to ${Object.keys(experienceContract.themes).length} identity groups and superseded support routes removed.`);
