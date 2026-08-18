@@ -60,7 +60,7 @@ If any participant-experience contract test fails, production deployment is forb
 
 ## One direct deployment path
 
-Only `.github/workflows/main.yml` may execute production deployment.
+Only .github/workflows/main.yml may execute production deployment.
 
 There is no second ZED deployment rail, no domain-specific repair workflow, no PREVIEW/EXECUTE relay, no duplicate deployment workflow and no fallback FTP route.
 
