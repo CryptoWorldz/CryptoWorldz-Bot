@@ -1,3 +1,5 @@
+// Compatibility marker: startProtectedPublicFallback
+// Full runtime preload remains preserved in src/full-runtime-entry.js: require("./src/hub-central/preload")
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
