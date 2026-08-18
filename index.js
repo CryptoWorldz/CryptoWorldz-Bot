@@ -1,4 +1,5 @@
 require("dotenv").config({ path: require("node:path").join(__dirname, ".env") });
+require("./src/hub-central/preload");
 
 const telegramLibrary = require("node-telegram-bot-api");
 const TelegramBot = telegramLibrary.TelegramBot || telegramLibrary.default || telegramLibrary;
