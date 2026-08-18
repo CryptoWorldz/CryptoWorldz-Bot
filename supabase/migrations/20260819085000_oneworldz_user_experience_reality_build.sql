@@ -14,6 +14,7 @@ create table if not exists public.raaiiidd_creator_requests (
 );
 create index if not exists raaiiidd_creator_requests_status_created_idx on public.raaiiidd_creator_requests(status, created_at);
 create index if not exists raaiiidd_creator_requests_creator_idx on public.raaiiidd_creator_requests(creator_telegram_id, created_at desc);
+create index if not exists raaiiidd_creator_requests_mission_idx on public.raaiiidd_creator_requests(mission_id) where mission_id is not null;
 alter table public.raaiiidd_creator_requests enable row level security;
 revoke all on table public.raaiiidd_creator_requests from anon, authenticated;
 grant all on table public.raaiiidd_creator_requests to service_role;
