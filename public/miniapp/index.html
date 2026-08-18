@@ -7,6 +7,7 @@
   <title>CryptoWorldz Command Centre</title>
   <script src="https://telegram.org/js/telegram-web-app.js?63"></script>
   <link rel="stylesheet" href="/miniapp/styles.css?v=3.1.0">
+  <link rel="stylesheet" href="/miniapp/experience.css?v=1.0.0">
   <link rel="stylesheet" href="/miniapp/admin-gateway.css?v=1.0.0">
   <link rel="stylesheet" href="/miniapp/impact.css?v=1.0.0">
   <link rel="stylesheet" href="/miniapp/contributions.css?v=1.0.0">
@@ -28,7 +29,25 @@
     .x-pages-directory{margin-top:16px}.x-page-link{display:flex;align-items:center;justify-content:space-between;gap:12px}.x-page-link span{display:flex;flex-direction:column;min-width:0}.x-page-link small{color:var(--muted);margin-top:3px}.x-page-link b{font-size:11px;white-space:nowrap;color:#e3c7ff}
   </style>
 </head>
-<body>
+<body class="theme-command-centre">
+  <section id="splashback" class="splashback" aria-hidden="false" aria-label="CryptoWorldz Command Centre opening experience">
+    <div class="splash-inner">
+      <div class="splash-zed">Z</div>
+      <p class="splash-kicker">OneWorldz • CryptoWorldz</p>
+      <h1>Command Centre <span>Ultimate™</span></h1>
+      <p class="splash-line">One World • One Mission • Millions of people able to join, act, create, recognise real work and spread the word.</p>
+      <div class="system-orbit" aria-label="Five Command Centre system leaders">
+        <div><b>ZED</b><small>Guide</small></div>
+        <div><b>AUTO</b><small>Finance Control</small></div>
+        <div><b>G.R.A.C.E.</b><small>Coordination</small></div>
+        <div><b>RECAP</b><small>Transparency</small></div>
+        <div><b>BASED.BID</b><small>Launch Path</small></div>
+      </div>
+      <button id="enter-command-centre" class="splash-enter" type="button">Enter Command Centre</button>
+      <small class="splash-note">Human leadership and Admin approval remain separate from the five system roles.</small>
+    </div>
+  </section>
+
   <div class="stars"></div>
   <header class="hero">
     <div class="brand-mark">Z</div>
@@ -53,8 +72,11 @@
         <article><span>📥</span><strong id="pending">0</strong><small>Pending</small></article>
       </section>
 
-      <section id="home" class="screen active"><div id="home-impact"></div><div id="current-mission"></div><div id="home-rewards"></div></section>
+      <section id="home" class="screen active"><div id="experience-launchpad"></div><div id="referral-progress"></div><div id="home-impact"></div><div id="current-mission"></div><div id="home-rewards"></div></section>
       <section id="missions" class="screen"><div class="section-title"><h2>🚀 Active Raaiiidds</h2></div><div id="mission-list"></div></section>
+      <section id="zed-guide" class="screen screen-experience"><div class="section-title"><h2>🤖 Ask ZED</h2></div><div id="zed-guide-root"></div></section>
+      <section id="create" class="screen screen-experience"><div class="section-title"><h2>🎨 Create a Raaiiidd</h2></div><div id="creator-root"></div></section>
+      <section id="heroes" class="screen screen-experience"><div class="section-title"><h2>🦸 Real-World Heroes</h2></div><div id="heroes-root"></div></section>
       <section id="profile" class="screen"><div class="section-title"><h2>🏆 Legend Profile</h2></div><div id="profile-card"></div><div id="profile-legend-v8"></div><div id="profile-impact"></div><div id="profile-contributions"></div></section>
       <section id="leaderboard" class="screen"><div class="section-title"><h2>🏅 Top Legends</h2></div><div id="leaderboard-list"></div></section>
       <section id="rewards" class="screen"><div class="section-title"><h2>🎁 Reward History</h2></div><div id="reward-list"></div></section>
@@ -63,17 +85,18 @@
       <section id="governance" class="screen"><div class="section-title"><h2>🗳️ Governance</h2></div><div id="governance-list"></div></section>
       <section id="impact" class="screen"><div class="section-title"><h2>💜 Real-World Impact</h2></div><div id="impact-list"></div></section>
       <section id="admin" class="screen"><div class="section-title"><h2>🛡️ Admin Centre</h2></div><div id="admin-panel"></div><div id="worldzcast-root"></div></section>
+      <section id="admin-review" class="screen screen-experience"><div class="section-title"><h2>✅ Human Review Queue</h2></div><div id="admin-review-root"></div></section>
     </div>
   </main>
 
   <nav id="nav" class="nav hidden" aria-label="Command Centre navigation">
     <button data-screen="home" class="active"><span>⌂</span>Home</button>
     <button data-screen="missions"><span>🚀</span>Missions</button>
-    <button data-screen="leaderboard"><span>🏆</span>Leaders</button>
-    <button data-screen="profile"><span>👤</span>Profile</button>
+    <button data-screen="zed-guide"><span>🤖</span>ZED</button>
+    <button data-screen="create"><span>🎨</span>Create</button>
     <button data-screen="community"><span>🌍</span>More</button>
   </nav>
-  <script src="/miniapp/app.js?v=3.0.10" defer></script>
+  <script src="/miniapp/app.js?v=3.0.11" defer></script>
   <script src="/miniapp/donation-routes.js?v=1.0.0" defer></script>
   <script src="/miniapp/x-pages.js?v=1.0.0" defer></script>
   <script src="/miniapp/contributions.js?v=1.0.0" defer></script>
@@ -83,5 +106,6 @@
   <script src="/miniapp/based-bid-launch-view.js?v=1.0.0" defer></script>
   <script src="/miniapp/executive-admin.js?v=1.0.0" defer></script>
   <script src="/miniapp/admin-gateway.js?v=1.0.0" defer></script>
+  <script src="/miniapp/experience.js?v=1.0.0" defer></script>
 </body>
 </html>
