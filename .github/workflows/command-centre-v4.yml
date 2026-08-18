@@ -79,12 +79,12 @@ jobs:
           npm run check:structure
           node --check src/hub-central/live-v1.js
 
-      - name: Install protected FTPS client
+      - name: Install protected FTPS and network diagnostic clients
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp
+          sudo apt-get install -y -qq lftp dnsutils
 
-      - name: Backup exact protected Node runtime over FTPS
+      - name: Backup and inspect protected Node runtime safely
         shell: bash
         run: |
           set -euo pipefail
@@ -104,14 +104,20 @@ jobs:
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
+          cls -1 $PROTECTED_NODE_ROOT > $RUNNER_TEMP/protected-files.txt
           get $PROTECTED_NODE_ROOT/index.js -o $RUNNER_TEMP/original-index.js
           get $PROTECTED_NODE_ROOT/package.json -o $RUNNER_TEMP/original-package.json
           get $PROTECTED_NODE_ROOT/hub-central-live.js -o $RUNNER_TEMP/original-hub-central-live.js
+          get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/protected.env
           bye
           EOF
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/download-protected.lftp" "$raw_host"
           test -s "$RUNNER_TEMP/original-index.js"
           test -s "$RUNNER_TEMP/original-package.json"
+          echo 'Protected Node root filenames:'
+          sed 's#/$##' "$RUNNER_TEMP/protected-files.txt" | grep -v '^\.env$' | head -80
+          if [ -s "$RUNNER_TEMP/protected.env" ] && grep -Eq '^OPENAI_API_KEY=.+$' "$RUNNER_TEMP/protected.env"; then echo 'OPENAI_API_KEY_PRESENT=yes'; else echo 'OPENAI_API_KEY_PRESENT=no'; fi
+          if [ -s "$RUNNER_TEMP/protected.env" ] && grep -Eq '^HOSTINGER_API_TOKEN=.+$' "$RUNNER_TEMP/protected.env"; then echo 'HOSTINGER_API_TOKEN_PRESENT=yes'; else echo 'HOSTINGER_API_TOKEN_PRESENT=no'; fi
           node - <<'NODE'
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/original-package.json','utf8'));
@@ -152,7 +158,6 @@ jobs:
           set ssl:check-hostname false
           put $RUNNER_TEMP/guarded-hub-central-live.js -o $PROTECTED_NODE_ROOT/hub-central-live.js
           put $RUNNER_TEMP/patched-index.js -o $PROTECTED_NODE_ROOT/index.js
-          mkdir -p $PROTECTED_RESTART_DIR
           put $RUNNER_TEMP/restart-guard.txt -o $PROTECTED_RESTART_DIR/restart.txt
           bye
           EOF
@@ -184,7 +189,63 @@ jobs:
           echo 'proved=true' >> "$GITHUB_OUTPUT"
           echo 'PROTECTED_GUARDED_BYTES=PASS'
 
-      - name: Roll back protected runtime if exact byte proof fails
+      - name: Diagnose protected hostname and HTTP routing
+        shell: bash
+        run: |
+          set +e
+          echo 'DNS A:'
+          dig +short A "$PROTECTED_DOMAIN"
+          echo 'DNS AAAA:'
+          dig +short AAAA "$PROTECTED_DOMAIN"
+          for path in / /health /api/hub-central/status /api/oneworldz-gpt/status; do
+            safe="$(printf '%s' "$path" | tr '/-' '__')"
+            code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 25 -H 'Cache-Control: no-cache, no-store' -o "$RUNNER_TEMP/http-$safe.body" -w '%{http_code}' "https://$PROTECTED_DOMAIN$path?diag=${GITHUB_SHA}-${GITHUB_RUN_ID}" 2>"$RUNNER_TEMP/http-$safe.err")"
+            echo "HTTP $path code=${code:-000}"
+            if [ -s "$RUNNER_TEMP/http-$safe.err" ]; then sed -n '1,3p' "$RUNNER_TEMP/http-$safe.err"; fi
+            if [ -s "$RUNNER_TEMP/http-$safe.body" ]; then head -c 300 "$RUNNER_TEMP/http-$safe.body" | tr '\n' ' '; echo; fi
+          done
+          exit 0
+
+      - name: Prove exact guarded API build is live
+        id: protected_proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          endpoint="https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status"
+          hub_endpoint="https://$PROTECTED_DOMAIN/api/hub-central/status"
+          proved=0
+          for attempt in $(seq 1 12); do
+            sleep 8
+            status="$(curl --fail --silent --show-error --location --connect-timeout 12 --max-time 25 -H 'Cache-Control: no-cache, no-store' "${endpoint}?guard=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
+            hub="$(curl --fail --silent --show-error --location --connect-timeout 12 --max-time 25 -H 'Cache-Control: no-cache, no-store' "${hub_endpoint}?guard=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
+            if STATUS="$status" HUB="$hub" node <<'NODE'
+          const status=JSON.parse(process.env.STATUS||'{}');
+          const hub=JSON.parse(process.env.HUB||'{}');
+          if(status.ok!==true) process.exit(1);
+          if(status.openai_api_configured!==true) process.exit(1);
+          if(status.guard_profile!=="oneworldz-public-low-cost-v1") process.exit(1);
+          if(status.guard_enforced!==true) process.exit(1);
+          if(status.model!=="gpt-4o-mini") process.exit(1);
+          if(status.max_output_tokens!==320) process.exit(1);
+          if(status.per_ip_limit_10m!==8) process.exit(1);
+          if(status.daily_request_limit!==1000) process.exit(1);
+          if(status.payments_in_chat!==false||status.secrets_in_browser!==false) process.exit(1);
+          if(hub.ok!==true||hub.oneworldz_gpt_guard!=="oneworldz-public-low-cost-v1") process.exit(1);
+          NODE
+            then
+              proved=1
+              echo "PROTECTED_ONEWORLDZ_GPT_GUARD=PASS"
+              break
+            fi
+            echo "Protected API convergence attempt $attempt/12"
+          done
+          if [ "$proved" != '1' ]; then
+            echo '::error::Exact guarded bytes are installed, but protected public API routing is still not returning the guard fingerprint.'
+            exit 1
+          fi
+          echo 'proved=true' >> "$GITHUB_OUTPUT"
+
+      - name: Roll back only if guarded byte installation failed
         if: ${{ failure() && steps.protected_write.outputs.written == 'true' && steps.byte_proof.outputs.proved != 'true' }}
         shell: bash
         run: |
@@ -209,56 +270,3 @@ jobs:
             echo 'bye'
           } > "$RUNNER_TEMP/rollback-protected.lftp"
           timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/rollback-protected.lftp" "$raw_host" || true
-
-      - name: Prove exact guarded API build is live
-        id: protected_proof
-        shell: bash
-        run: |
-          set -euo pipefail
-          endpoint="https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status"
-          hub_endpoint="https://$PROTECTED_DOMAIN/api/hub-central/status"
-          proved=0
-          for attempt in $(seq 1 30); do
-            sleep 6
-            status="$(curl --fail --silent --show-error --location --connect-timeout 12 --max-time 25 -H 'Cache-Control: no-cache, no-store' "${endpoint}?guard=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
-            hub="$(curl --fail --silent --show-error --location --connect-timeout 12 --max-time 25 -H 'Cache-Control: no-cache, no-store' "${hub_endpoint}?guard=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}" || true)"
-            if STATUS="$status" HUB="$hub" node <<'NODE'
-          const status=JSON.parse(process.env.STATUS||'{}');
-          const hub=JSON.parse(process.env.HUB||'{}');
-          if(status.ok!==true) process.exit(1);
-          if(status.openai_api_configured!==true) process.exit(1);
-          if(status.guard_profile!=="oneworldz-public-low-cost-v1") process.exit(1);
-          if(status.guard_enforced!==true) process.exit(1);
-          if(status.model!=="gpt-4o-mini") process.exit(1);
-          if(status.max_output_tokens!==320) process.exit(1);
-          if(status.per_ip_limit_10m!==8) process.exit(1);
-          if(status.daily_request_limit!==1000) process.exit(1);
-          if(status.payments_in_chat!==false||status.secrets_in_browser!==false) process.exit(1);
-          if(hub.ok!==true||hub.oneworldz_gpt_guard!=="oneworldz-public-low-cost-v1") process.exit(1);
-          NODE
-            then
-              proved=1
-              printf '%s\n' "$status" > "$RUNNER_TEMP/protected-gpt-status.json"
-              printf '%s\n' "$hub" > "$RUNNER_TEMP/protected-hub-status.json"
-              break
-            fi
-            echo "Protected API convergence attempt $attempt/30"
-          done
-          if [ "$proved" != '1' ]; then
-            echo '::error::Guarded bytes are installed, but the public protected API endpoint did not answer with the exact guard fingerprint.'
-            exit 1
-          fi
-          echo 'proved=true' >> "$GITHUB_OUTPUT"
-          echo 'PROTECTED_ONEWORLDZ_GPT_GUARD=PASS'
-
-      - name: Preserve guarded production proof
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: protected-oneworldz-gpt-guard-${{ github.run_id }}
-          path: |
-            ${{ runner.temp }}/protected-byte-proof.sha256
-            ${{ runner.temp }}/protected-gpt-status.json
-            ${{ runner.temp }}/protected-hub-status.json
-          if-no-files-found: ignore
-          retention-days: 14
