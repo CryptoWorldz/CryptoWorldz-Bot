@@ -64,7 +64,7 @@ test("every HTML page has responsive, accessible and self-closing-menu foundatio
     assert.match(html, /aria-controls="site-menu"/, file);
     assert.match(html, /class="menu-backdrop"/, file);
     assert.match(html, /<main id="main-content">/, file);
-    assert.match(html, /site\.js/, file);
+    assert.match(html, /src="\/assets\/js\/site\.[0-9a-f]{12}\.js"/, file);
   }
 });
 
