@@ -31,6 +31,7 @@ const siteRuntimeName = `site.${hash(siteRuntime).slice(0, 12)}.js`;
 const oldRuntimeRef = 'src="/assets/js/site.js"';
 const newRuntimeRef = `src="/assets/js/${siteRuntimeName}"`;
 let rewrittenPages = 0;
+let expectedPages = 0;
 
 for (const target of productionTargets) {
   const packageDir = path.join(dist, target.key);
@@ -43,6 +44,7 @@ for (const target of productionTargets) {
     const htmlPath = path.join(packageDir, file);
     const original = await readFile(htmlPath, "utf8");
     if (!original.includes(oldRuntimeRef)) continue;
+    expectedPages += 1;
     const updated = original.replaceAll(oldRuntimeRef, newRuntimeRef);
     if (updated === original) throw new Error(`${target.key}/${file}: site runtime cache-bust rewrite failed`);
     await writeFile(htmlPath, updated, "utf8");
@@ -78,8 +80,8 @@ for (const target of productionTargets) {
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 }
 
-if (rewrittenPages !== 35) {
-  throw new Error(`Expected to cache-bust the shared runtime on 35 published HTML pages, rewrote ${rewrittenPages}`);
+if (expectedPages === 0 || rewrittenPages !== expectedPages) {
+  throw new Error(`Expected to cache-bust the shared runtime on ${expectedPages} published HTML pages, rewrote ${rewrittenPages}`);
 }
 
 console.log(`Approved responsive visual policy preserved. Shared runtime cache-busted as ${siteRuntimeName} across ${rewrittenPages} published HTML pages; release manifests refreshed for all ${productionTargets.length} targets.`);
