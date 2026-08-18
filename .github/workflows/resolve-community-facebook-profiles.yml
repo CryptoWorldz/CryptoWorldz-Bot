@@ -16,6 +16,45 @@ permissions:
   issues: write
 
 jobs:
+  probe-oneworldz-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: oneworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - name: Report protected secret scope without values
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: '86'
+        shell: bash
+        run: |
+          set -euo pipefail
+          present=''
+          missing=''
+          for key in FTP_HOST FTP_USERNAME FTP_PASSWORD OPENAI_API_KEY HOSTINGER_API_TOKEN BOT_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
+            if [ -n "${!key:-}" ]; then
+              present="${present}${present:+,}${key}"
+              echo "::add-mask::${!key}"
+            else
+              missing="${missing}${missing:+,}${key}"
+            fi
+          done
+          body="ONEWORLDZ_PRODUCTION_SECRET_SCOPE PRESENT=${present:-NONE} MISSING=${missing:-NONE}"
+          jq -n --arg body "$body" '{body:$body}' > /tmp/comment.json
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" \
+            --data-binary @/tmp/comment.json >/dev/null
+
   resolve:
     runs-on: ubuntu-latest
     timeout-minutes: 20
