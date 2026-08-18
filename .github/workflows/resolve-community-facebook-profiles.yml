@@ -7,6 +7,7 @@ on:
       - '.github/workflows/resolve-community-facebook-profiles.yml'
       - 'tools/resolve-community-facebook-metadata.mjs'
       - 'governance/community-support-links.json'
+      - 'deployments/oneworldz-19-total.request'
   workflow_dispatch:
 
 permissions:
@@ -21,10 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Report canonical PREVIEW run id
+      - name: Report canonical run id for this exact commit
         env:
           GH_TOKEN: ${{ github.token }}
-          TARGET_SHA: '25cb1cdc2cbd86ec95547b934cd4ef158ae94f12'
+          TARGET_SHA: ${{ github.sha }}
           ISSUE_NUMBER: '86'
         shell: bash
         run: |
@@ -43,7 +44,7 @@ jobs:
           run_id="$(printf '%s' "$run" | jq -r '.id')"
           status="$(printf '%s' "$run" | jq -r '.status')"
           conclusion="$(printf '%s' "$run" | jq -r '.conclusion // "pending"')"
-          body="CANONICAL_PREVIEW_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion"
+          body="CANONICAL_RUN_ID=$run_id TARGET_SHA=$TARGET_SHA STATUS=$status CONCLUSION=$conclusion"
           jq -n --arg body "$body" '{body:$body}' > /tmp/comment.json
           curl --fail --silent --show-error -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
