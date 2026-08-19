@@ -93,6 +93,17 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Install production image rendering tools
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
+          (command -v magick || command -v convert)
+          command -v avifenc
+          command -v avifdec
+
       - name: Build exact canonical candidate
         shell: bash
         run: |
