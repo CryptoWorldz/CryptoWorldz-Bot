@@ -1,21 +1,9 @@
-name: OneWorldz Canonical Total Deployment
+name: OneWorldz Locked Checkpoint Resume
 
 on:
   push:
     branches: [main]
     paths:
-      - "apps/oneworldz-ecosystem-release/**"
-      - "platform/**"
-      - "src/**"
-      - "public/**"
-      - "test/**"
-      - "index.js"
-      - "package.json"
-      - "package-lock.json"
-      - "deployments/oneworldz-19-total.request"
-      - "governance/JAYJAY-CHATGPT-DEPLOYMENT-GATE.md"
-      - "tools/verify-oneworldz-canonical.mjs"
-      - ".github/publish-progress.sh"
       - ".github/workflows/main.yml"
   workflow_dispatch:
 
@@ -28,252 +16,76 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  LOCKED_SOURCE_COMMIT: 3b52c7eae7834a33f1f74e312433644ea239904c
+  LOCKED_SOURCE_RUN: "32219855385"
+  LOCKED_STATIC_TREE: 295e0706bc033b294736d7f87dc6d36f783eaa3a
+  LOCKED_CANDIDATE_FINGERPRINT: 47ceec16e10ff1f8fca8002c52c75b63781dab8cf6b44742d14ec78d1b4afb59
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
   PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
 
 jobs:
-  freshness:
-    if: ${{ github.event_name != 'push' || github.event.head_commit.message != 'RECORD JAYJAYTEAMDEV CHATGPT TOTAL DEPLOYMENT PASS' }}
-    name: Reject superseded deployment generations
+  checkpoint:
+    name: Verify locked BUILD → TESTS → LIGHTHOUSE → DESKTOP checkpoint
     runs-on: ubuntu-latest
     outputs:
-      current: ${{ steps.fresh.outputs.current }}
+      static_tree: ${{ steps.authority.outputs.static_tree }}
+      candidate_fingerprint: ${{ steps.authority.outputs.candidate_fingerprint }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - id: fresh
-        name: Prove this is still the latest main generation
+      - id: authority
+        name: Prove checkpoint identity and recorded passes
+        env:
+          GH_AUTH: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "current=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
           git fetch origin main --depth=1
-          if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
-            echo "current=true" >> "$GITHUB_OUTPUT"
-            echo "LATEST_GENERATION=PASS"
-          else
-            echo "current=false" >> "$GITHUB_OUTPUT"
-            echo "SUPERSEDED_GENERATION=STOP_BEFORE_PRODUCTION"
-          fi
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+          git cat-file -e "$LOCKED_SOURCE_COMMIT^{commit}"
+          test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$LOCKED_STATIC_TREE"
 
-  build:
-    needs: freshness
-    if: ${{ needs.freshness.outputs.current == 'true' }}
-    name: SUCCESS STORY 1 — BUILD
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    outputs:
-      static_tree: ${{ steps.lock.outputs.static_tree }}
-      candidate_fingerprint: ${{ steps.fingerprint.outputs.candidate_fingerprint }}
-    steps:
-      - uses: actions/checkout@v4
+          changed="$(git diff --name-only "$LOCKED_SOURCE_COMMIT" HEAD)"
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            case "$path" in
+              .github/workflows/main.yml|.github/resume-locked-zed.sh|.github/resume-locked-static-deploy.sh|.github/resume-locked-live-proof.sh) ;;
+              *) echo "::error::Checkpoint invalidated by changed path: $path"; exit 1 ;;
+            esac
+          done <<< "$changed"
 
-      - name: Publish authenticated BUILD start
-        run: bash .github/publish-progress.sh BUILD STARTED
-
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-
-      - id: lock
-        name: Lock canonical static tree
-        shell: bash
-        run: |
-          set -euo pipefail
-          static_tree="$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)"
-          echo "static_tree=$static_tree" >> "$GITHUB_OUTPUT"
-          echo "STATIC_TREE=$static_tree"
-
-      - name: Install locked dependencies
-        run: npm ci
-
-      - name: Install production image rendering tools
-        timeout-minutes: 10
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
-          (command -v magick || command -v convert)
-          command -v avifenc
-          command -v avifdec
-
-      - name: Build exact canonical candidate
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm run check:structure
-          npm run check
-          npm run build:ecosystem-release
-          npm run check:web
-          root='apps/oneworldz-ecosystem-release/dist/ecosystem'
-          test "$(find "$root" -mindepth 2 -maxdepth 2 -name index.html | wc -l | tr -d ' ')" = '18'
-          test -s "$root/oneworldz/index.html"
-          test ! -d "$root/cryptobotz"
-          ! grep -Rni --include='*.html' 'solworld\.fun' "$root"
-          ! grep -RIE --include='*.html' 'Created by JayJayTeamDev|Designed by JayJayTeamDev' "$root"
-          grep -RFl --include='*.html' 'Created with the Vision' "$root" >/dev/null
-          ! grep -RIE 'OPENAI_API_KEY|sk-proj-|sk_live_|sk_test_|service_role|FTP_PASSWORD|DATABASE_URL|SUPABASE_SERVICE' "$root"
-
-      - id: fingerprint
-        name: Fingerprint complete BUILD candidate
-        shell: bash
-        run: |
-          set -euo pipefail
-          candidate_fingerprint="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
-          test -n "$candidate_fingerprint"
-          echo "candidate_fingerprint=$candidate_fingerprint" >> "$GITHUB_OUTPUT"
-          echo "CANDIDATE_FINGERPRINT=$candidate_fingerprint"
-
-      - name: Publish authenticated BUILD pass
-        if: success()
-        run: bash .github/publish-progress.sh BUILD PASS
-
-      - name: Publish authenticated BUILD failure
-        if: failure()
-        run: bash .github/publish-progress.sh BUILD FAIL
-
-  tests:
-    needs: build
-    name: SUCCESS STORY 2 — TESTS
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-
-      - name: Install locked dependencies
-        run: npm ci
-
-      - name: Rebuild and match BUILD candidate fingerprint
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
-          npm run build:ecosystem-release
-          got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
-          test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
-          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
-
-      - name: Run complete test and security gates
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm test
-          npm --prefix apps/oneworldz-ecosystem-release test
-          npm run check:auto
-          npm audit --audit-level=high
-          bash .github/publish-progress.sh TESTS PASS
-
-  lighthouse:
-    needs: [build, tests]
-    name: SUCCESS STORY 3 — LIGHTHOUSE 100
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-
-      - name: Install locked dependencies
-        run: npm ci
-
-      - name: Rebuild and match BUILD candidate fingerprint
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
-          npm run build:ecosystem-release
-          got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
-          test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
-          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
-
-      - name: Prove Lighthouse SEO 100
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm run check:lighthouse-seo
-          bash .github/publish-progress.sh LIGHTHOUSE PASS
-
-  preview:
-    needs: [build, lighthouse]
-    name: Desktop + mobile candidate proof
-    runs-on: ubuntu-latest
-    timeout-minutes: 75
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Rebuild and match BUILD candidate fingerprint
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm ci
-          sudo apt-get update -qq
-          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
-          npm run build:ecosystem-release
-          got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
-          test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
-          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
-
-      - name: Install browser proof runtime
-        working-directory: apps/oneworldz-ecosystem-release
-        run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
-
-      - name: SUCCESS STORY 4 — DESKTOP/MOBILE
-        shell: bash
-        run: |
-          set -uo pipefail
-          mkdir -p visual-proof
-          cd apps/oneworldz-ecosystem-release
-          node --input-type=module <<'NODE' > "$RUNNER_TEMP/targets.tsv"
-          import { productionTargets } from './production-targets.mjs';
-          for (const target of productionTargets) {
-            console.log([target.key,target.expectedTitle,target.requiredIdentityText,target.requiredIdentityImage].join('\t'));
+          curl --fail --silent --show-error --location \
+            -H "Authorization: Bearer $GH_AUTH" \
+            -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/$LOCKED_SOURCE_RUN/jobs?per_page=100" \
+            -o "$RUNNER_TEMP/checkpoint-jobs.json"
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/checkpoint-jobs.json','utf8'));
+          const required=[
+            'SUCCESS STORY 1 — BUILD',
+            'SUCCESS STORY 2 — TESTS',
+            'SUCCESS STORY 3 — LIGHTHOUSE 100',
+            'Desktop + mobile candidate proof'
+          ];
+          for(const name of required){
+            const job=(p.jobs||[]).find(x=>x.name===name);
+            if(!job||job.status!=='completed'||job.conclusion!=='success'){
+              console.error(`Checkpoint gate not proven: ${name}`);
+              process.exit(1);
+            }
           }
           NODE
-          test "$(wc -l < "$RUNNER_TEMP/targets.tsv" | tr -d ' ')" = '18' || exit 1
-          failed=0
-          while IFS=$'\t' read -r key title required_text required_image; do
-            node browser-visual-proof.mjs \
-              --name "$key" \
-              --root "dist/ecosystem/$key" \
-              --expected-title "$title" \
-              --required-text "$required_text" \
-              --required-image "$required_image" \
-              --out "$GITHUB_WORKSPACE/visual-proof/$key" || failed=1
-          done < "$RUNNER_TEMP/targets.tsv"
-          test "$(find "$GITHUB_WORKSPACE/visual-proof" -mindepth 2 -maxdepth 2 -name visual-report.json | wc -l | tr -d ' ')" = '18' || failed=1
-          test "$(find "$GITHUB_WORKSPACE/visual-proof" -mindepth 2 -maxdepth 2 -name desktop.png | wc -l | tr -d ' ')" = '18' || failed=1
-          test "$(find "$GITHUB_WORKSPACE/visual-proof" -mindepth 2 -maxdepth 2 -name mobile.png | wc -l | tr -d ' ')" = '18' || failed=1
-          test "$failed" = '0'
-          cd "$GITHUB_WORKSPACE"
-          bash .github/publish-progress.sh DESKTOP_MOBILE PASS
+
+          echo "static_tree=$LOCKED_STATIC_TREE" >> "$GITHUB_OUTPUT"
+          echo "candidate_fingerprint=$LOCKED_CANDIDATE_FINGERPRINT" >> "$GITHUB_OUTPUT"
+          echo "LOCKED_CHECKPOINT=PASS source_run=$LOCKED_SOURCE_RUN static_tree=$LOCKED_STATIC_TREE fingerprint=$LOCKED_CANDIDATE_FINGERPRINT"
 
   zed:
-    needs: [build, lighthouse, preview]
-    name: Deploy + prove ZED, Mini App and guarded GPT
+    needs: checkpoint
+    name: SUCCESS STORY 5 — ZED/MINIAPP checkpoint resume
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment:
@@ -293,275 +105,25 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Refuse stale generation before protected production
+      - name: Refuse stale resume generation
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin main --depth=1
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+          test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$LOCKED_STATIC_TREE"
 
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
 
-      - name: Verify protected runtime source and secrets
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm ci
-          node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js
-          node --check index.js
-          node --check src/full-runtime-entry.js
-          node --check src/http.js
-          node --check src/user-experience.js
-          node --check src/zed-guide.js
-          grep -Fq 'startProtectedPublicFallback' index.js
-          grep -Fq 'require("./src/full-runtime-entry")' index.js
-          grep -Fq 'require("./src/hub-central/preload")' index.js
-          grep -Fq 'oneworldz-public-low-cost-v1' src/oneworldz-gpt/http.js
-          grep -Fq 'app.use("/miniapp"' src/http.js
-          grep -Fq 'service: "CryptoWorldz Zed Bot"' src/http.js
-          grep -Fq 'model: "gpt-4o-mini"' src/hub-central/live-v1.js
-          grep -Fq '/api/mini/zed/chat' src/zed-guide.js
-          grep -Fq '/api/mini/creator/submit' src/user-experience.js
-          grep -Fq '/api/mini/heroes/apply' src/user-experience.js
-          for key in OPENAI_API_KEY HOSTINGER_API_TOKEN FTP_HOST FTP_USERNAME FTP_PASSWORD; do
-            test -n "${!key:-}"
-            echo "::add-mask::${!key}"
-          done
-          for key in BOT_TOKEN_SECRET SUPABASE_URL_SECRET SUPABASE_SERVICE_ROLE_KEY_SECRET; do
-            value="${!key:-}"
-            [ -z "$value" ] || echo "::add-mask::$value"
-          done
-          echo 'PROTECTED_FULL_RUNTIME_SOURCE=PASS'
-
-      - name: Install FTPS utility
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp
-
-      - name: Resolve Hostinger managed application
-        shell: bash
-        run: |
-          set -euo pipefail
-          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
-          curl --fail --silent --show-error --location \
-            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-            "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" \
-            -o "$RUNNER_TEMP/websites.json"
-          username="$(node - <<'NODE'
-          const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/websites.json','utf8'));
-          const d=process.env.PROTECTED_DOMAIN.toLowerCase();
-          const row=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d);
-          if(!row?.username) process.exit(2);
-          process.stdout.write(String(row.username));
-          NODE
-          )"
-          test -n "$username"
-          echo "::add-mask::$username"
-          printf '%s' "$username" > "$RUNNER_TEMP/hostinger-username"
-          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
-          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
-          printf '%s' "$raw_host" > "$RUNNER_TEMP/raw-host"
-          echo 'HOSTINGER_MANAGED_APP_RESOLVED=PASS'
-
-      - name: Wait for Hostinger automatic build activity to settle
-        shell: bash
-        run: |
-          set -euo pipefail
-          username="$(cat "$RUNNER_TEMP/hostinger-username")"
-          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
-          user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
-          base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
-          active=1
-          for attempt in $(seq 1 90); do
-            curl --fail --silent --show-error --location \
-              -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-              "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
-            active="$(node -e "const p=require(process.env.RUNNER_TEMP+'/builds.json');process.stdout.write(String((p.data||[]).filter(x=>!['completed','failed'].includes(String(x.state||'').toLowerCase())).length))")"
-            latest="$(node -e "const p=require(process.env.RUNNER_TEMP+'/builds.json');const x=(p.data||[])[0]||{};process.stdout.write((x.uuid||'')+':'+(x.state||''))")"
-            echo "HOSTINGER_BUILD_ACTIVITY attempt=$attempt active=$active latest=$latest"
-            [ "$active" = 0 ] && break
-            sleep 5
-          done
-          [ "$active" = 0 ]
-
-      - name: Capture and complete protected runtime environment
-        shell: bash
-        run: |
-          set -euo pipefail
-          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
-          : > "$RUNNER_TEMP/protected.env"
-          cat > "$RUNNER_TEMP/get-env.lftp" <<EOF
-          set cmd:fail-exit false
-          set net:max-retries 2
-          set net:timeout 25
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/protected.env
-          bye
-          EOF
-          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-env.lftp" "$raw_host" || true
-
-          node - <<'NODE'
-          const fs=require('fs');
-          const p=process.env.RUNNER_TEMP+'/protected.env';
-          let rows=[];
-          try { rows=fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean); } catch {}
-          const candidates={
-            OPENAI_API_KEY:process.env.OPENAI_API_KEY,
-            ONEWORLDZ_OPENAI_MODEL:'gpt-4o-mini',
-            ONEWORLDZ_IMAGE_MODEL:'gpt-image-2',
-            BOT_TOKEN:process.env.BOT_TOKEN_SECRET,
-            SUPABASE_URL:process.env.SUPABASE_URL_SECRET,
-            SUPABASE_SERVICE_ROLE_KEY:process.env.SUPABASE_SERVICE_ROLE_KEY_SECRET
-          };
-          const overrides=Object.fromEntries(Object.entries(candidates).filter(([,v])=>String(v||'').trim()));
-          rows=rows.filter(row=>!Object.keys(overrides).some(k=>row.startsWith(k+'=')));
-          for(const [k,v] of Object.entries(overrides)) rows.push(`${k}=${String(v).trim()}`);
-          fs.writeFileSync(p,rows.join('\n')+'\n');
-          NODE
-
-          for key in BOT_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY OPENAI_API_KEY; do
-            grep -Eq "^${key}=.+$" "$RUNNER_TEMP/protected.env" || {
-              echo "::error::Required protected runtime value ${key} is absent."
-              exit 1
-            }
-          done
-          grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/protected.env"
-          grep -Eq '^ONEWORLDZ_IMAGE_MODEL=gpt-image-2$' "$RUNNER_TEMP/protected.env"
-
-          cat > "$RUNNER_TEMP/put-env.lftp" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 2
-          set net:timeout 25
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          put $RUNNER_TEMP/protected.env -o $PROTECTED_NODE_ROOT/.env
-          bye
-          EOF
-          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/put-env.lftp" "$raw_host"
-
-      - name: Sync exact protected Node runtime
-        shell: bash
-        run: |
-          set -euo pipefail
-          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
-          cat > "$RUNNER_TEMP/sync-runtime.lftp" <<EOF
-          set cmd:fail-exit false
-          set net:max-retries 2
-          set net:timeout 30
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          mkdir -p $PROTECTED_NODE_ROOT/src
-          mkdir -p $PROTECTED_NODE_ROOT/public
-          mkdir -p $PROTECTED_NODE_ROOT/.well-known
-          set cmd:fail-exit true
-          put index.js -o $PROTECTED_NODE_ROOT/index.js
-          put package.json -o $PROTECTED_NODE_ROOT/package.json
-          put package-lock.json -o $PROTECTED_NODE_ROOT/package-lock.json
-          mirror -R --verbose --delete --no-perms --exclude-glob .DS_Store src $PROTECTED_NODE_ROOT/src
-          mirror -R --verbose --delete --no-perms --exclude-glob .DS_Store public $PROTECTED_NODE_ROOT/public
-          mirror -R --verbose --delete --no-perms --exclude-glob .DS_Store .well-known $PROTECTED_NODE_ROOT/.well-known
-          bye
-          EOF
-          timeout 480 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/sync-runtime.lftp" "$raw_host"
-
-      - name: Verify remote protected runtime fingerprints
-        shell: bash
-        run: |
-          set -euo pipefail
-          raw_host="$(cat "$RUNNER_TEMP/raw-host")"
-          cat > "$RUNNER_TEMP/get-proof.lftp" <<EOF
-          set cmd:fail-exit true
-          set net:max-retries 2
-          set net:timeout 25
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          get $PROTECTED_NODE_ROOT/index.js -o $RUNNER_TEMP/remote-index.js
-          get $PROTECTED_NODE_ROOT/src/oneworldz-gpt/http.js -o $RUNNER_TEMP/remote-gpt-http.js
-          get $PROTECTED_NODE_ROOT/src/full-runtime-entry.js -o $RUNNER_TEMP/remote-full-runtime-entry.js
-          get $PROTECTED_NODE_ROOT/src/http.js -o $RUNNER_TEMP/remote-http.js
-          get $PROTECTED_NODE_ROOT/src/user-experience.js -o $RUNNER_TEMP/remote-user-experience.js
-          get $PROTECTED_NODE_ROOT/src/zed-guide.js -o $RUNNER_TEMP/remote-zed-guide.js
-          get $PROTECTED_NODE_ROOT/public/miniapp/index.html -o $RUNNER_TEMP/remote-miniapp-index.html
-          get $PROTECTED_NODE_ROOT/public/miniapp/experience.js -o $RUNNER_TEMP/remote-miniapp-experience.js
-          bye
-          EOF
-          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-proof.lftp" "$raw_host"
-          cmp -s index.js "$RUNNER_TEMP/remote-index.js"
-          cmp -s src/oneworldz-gpt/http.js "$RUNNER_TEMP/remote-gpt-http.js"
-          cmp -s src/full-runtime-entry.js "$RUNNER_TEMP/remote-full-runtime-entry.js"
-          cmp -s src/http.js "$RUNNER_TEMP/remote-http.js"
-          cmp -s src/user-experience.js "$RUNNER_TEMP/remote-user-experience.js"
-          cmp -s src/zed-guide.js "$RUNNER_TEMP/remote-zed-guide.js"
-          cmp -s public/miniapp/index.html "$RUNNER_TEMP/remote-miniapp-index.html"
-          cmp -s public/miniapp/experience.js "$RUNNER_TEMP/remote-miniapp-experience.js"
-
-      - name: Official Hostinger managed restart
-        shell: bash
-        run: |
-          set -euo pipefail
-          username="$(cat "$RUNNER_TEMP/hostinger-username")"
-          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
-          user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
-          url="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs/server/restart"
-          code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST \
-            -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' \
-            -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$url")"
-          case "$code" in
-            200|201|202|204) echo "HOSTINGER_MANAGED_RESTART=PASS HTTP=$code" ;;
-            *) cat "$RUNNER_TEMP/restart.json"; exit 1 ;;
-          esac
-
-      - name: SUCCESS STORY 5 — ZED/MINIAPP
-        shell: bash
-        run: |
-          set -euo pipefail
-          for i in $(seq 1 60); do
-            sleep 5
-            root_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/root.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
-            health_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/health.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/health?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
-            mini_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/miniapp.html" -w '%{http_code}' "https://$PROTECTED_DOMAIN/miniapp/?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
-            status_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/status.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}" || true)"
-            if [ "$root_code" = 200 ] && [ "$health_code" = 200 ] && [ "$mini_code" = 200 ] && [ "$status_code" = 200 ] \
-              && grep -Fq '"service":"CryptoWorldz Zed Bot"' "$RUNNER_TEMP/root.json" \
-              && grep -Fq '"ok":true' "$RUNNER_TEMP/health.json" \
-              && grep -Fq 'id="splashback"' "$RUNNER_TEMP/miniapp.html" \
-              && grep -Fq 'id="zed-guide"' "$RUNNER_TEMP/miniapp.html" \
-              && grep -Fq 'id="create"' "$RUNNER_TEMP/miniapp.html" \
-              && grep -Fq 'id="heroes"' "$RUNNER_TEMP/miniapp.html" \
-              && STATUS="$RUNNER_TEMP/status.json" node - <<'NODE'
-          const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync(process.env.STATUS,'utf8'));
-          if(p.ok!==true||p.openai_api_configured!==true) process.exit(1);
-          if(p.guard_profile!=="oneworldz-public-low-cost-v1"||p.guard_enforced!==true) process.exit(1);
-          if(p.model!=="gpt-4o-mini"||p.max_output_tokens!==320) process.exit(1);
-          if(p.per_ip_limit_10m!==8||p.daily_request_limit!==1000) process.exit(1);
-          if(p.payments_in_chat!==false||p.secrets_in_browser!==false) process.exit(1);
-          NODE
-            then
-              echo 'PROTECTED_FULL_ZED_MINIAPP_GPT_PRODUCTION=PASS'
-              bash .github/publish-progress.sh ZED_MINIAPP PASS
-              exit 0
-            fi
-            echo "ZED_CONVERGENCE $i/60 root=$root_code health=$health_code mini=$mini_code gpt=$status_code"
-          done
-          exit 1
+      - name: Repair, deploy and prove protected runtime
+        run: bash .github/resume-locked-zed.sh
 
   deploy:
-    needs: [build, lighthouse, preview, zed]
-    name: Exact 18-site Hostinger deployment
+    needs: [checkpoint, zed]
+    name: SUCCESS STORY 6 — HOSTINGER checkpoint resume
     runs-on: ubuntu-latest
     timeout-minutes: 150
     environment:
@@ -579,273 +141,47 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: npm
 
-      - name: Refuse stale generation before static production
+      - name: Refuse stale generation and materialize exact locked candidate
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin main --depth=1
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
-
-      - name: Rebuild and match BUILD candidate fingerprint
-        shell: bash
-        run: |
-          set -euo pipefail
+          test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$LOCKED_STATIC_TREE"
           npm ci
           sudo apt-get update -qq
-          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin lftp
           npm run build:ecosystem-release
           got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
-          test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
-          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
+          test "$got" = "$LOCKED_CANDIDATE_FINGERPRINT"
+          echo "LOCKED_CANDIDATE_REBUILT_FOR_TRANSPORT=PASS $got"
 
-      - name: Install FTPS utility
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp
-
-      - name: Re-authenticate all 18 exact Hostinger destinations
-        shell: bash
-        run: |
-          set -euo pipefail
-          state='deployments/oneworldz-19-total.request'
-          grep -Fq 'hostinger_destination_pass=PASS_AUTHENTICATED_READ_ONLY_18_TARGET_REVALIDATION' "$state"
-          grep -Fq 'impactbased_exact_new_root_authentication=PASS_AUTHENTICATED_FTPS_CD_LIST_GET' "$state"
-          grep -Fq 'impactbased_public_https=PASS_HTTP_200' "$state"
-          test -n "$FTP_HOST"
-          test -n "$FTP_USERNAME"
-          test -n "$FTP_PASSWORD"
-          echo "::add-mask::$FTP_HOST"
-          echo "::add-mask::$FTP_USERNAME"
-          echo "::add-mask::$FTP_PASSWORD"
-
-          node --input-type=module <<'NODE' > "$RUNNER_TEMP/targets.tsv"
-          import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
-          for (const target of productionTargets) {
-            console.log([target.key,target.domain,target.hostingerTransportDir,target.guard,target.expectedTitle].join('\t'));
-          }
-          NODE
-          test "$(wc -l < "$RUNNER_TEMP/targets.tsv" | tr -d ' ')" = '18'
-          grep -F $'impactbased\timpactbased.oneworldz.com\tdomains/oneworldz.com/public_html/impactbased' "$RUNNER_TEMP/targets.tsv"
-          ! grep -F 'domains/cryptoworldz.xyz/public_html/impactbased' "$RUNNER_TEMP/targets.tsv"
-
-          host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"
-          if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
-          proofdir="$RUNNER_TEMP/destination-proof"
-          mkdir -p "$proofdir"
-
-          {
-            echo 'set cmd:fail-exit true'
-            echo 'set net:max-retries 2'
-            echo 'set net:timeout 30'
-            echo 'set ftp:ssl-force true'
-            echo 'set ftp:ssl-protect-data true'
-            echo 'set ssl:verify-certificate true'
-            echo 'set ssl:check-hostname false'
-            while IFS=$'\t' read -r key domain transport guard title; do
-              printf 'cd "%s"\n' "$transport"
-              echo 'pwd'
-              echo 'cls -la'
-              echo 'set cmd:fail-exit false'
-              printf 'get "robots.txt" -o "%s/%s.remote.robots.txt"\n' "$proofdir" "$key"
-              echo 'set cmd:fail-exit true'
-              echo 'cd /'
-            done < "$RUNNER_TEMP/targets.tsv"
-            echo 'bye'
-          } > "$RUNNER_TEMP/prewrite.lftp"
-          timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/prewrite.lftp" "$host"
-
-          while IFS=$'\t' read -r key domain transport guard title; do
-            remote="$proofdir/$key.remote.robots.txt"
-            live="$proofdir/$key.live.robots.txt"
-            if [ "$key" = 'impactbased' ] && [ ! -s "$remote" ]; then
-              curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
-                -H 'Cache-Control: no-cache, no-store' "https://$domain/?destination_proof=${GITHUB_RUN_ID}-${key}" \
-                -o "$proofdir/$key.live.html"
-              echo "DESTINATION_PROVED_COMPOSITE $domain -> $transport"
-              continue
-            fi
-            test -s "$remote"
-            proved=0
-            for attempt in $(seq 1 8); do
-              if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
-                -H 'Cache-Control: no-cache, no-store' -H 'Pragma: no-cache' \
-                "https://$domain/robots.txt?destination_proof=${GITHUB_RUN_ID}-${key}-${attempt}" -o "$live"; then
-                if cmp -s "$remote" "$live"; then proved=1; break; fi
-              fi
-              sleep 5
-            done
-            if [ "$proved" != '1' ]; then
-              echo "::error::Destination proof failed for $domain -> $transport. No production write."
-              exit 1
-            fi
-            echo "DESTINATION_PROVED $domain -> $transport"
-          done < "$RUNNER_TEMP/targets.tsv"
-
-      - name: SUCCESS STORY 6 — HOSTINGER
-        shell: bash
-        run: |
-          set -uo pipefail
-          host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"
-          if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
-          : > "$RUNNER_TEMP/touched.tsv"
-          failure=0
-          failed_key=''
-
-          while IFS=$'\t' read -r key domain transport guard title; do
-            release_root="$GITHUB_WORKSPACE/apps/oneworldz-ecosystem-release/dist/ecosystem/$key"
-            files="$RUNNER_TEMP/$key.files"
-            nonindex="$RUNNER_TEMP/$key.nonindex"
-            dirs="$RUNNER_TEMP/$key.dirs"
-            existing="$RUNNER_TEMP/$key.existing"
-            backup="$RUNNER_TEMP/backups/$key"
-            postwrite="$RUNNER_TEMP/postwrite/$key"
-            mkdir -p "$backup" "$postwrite"
-
-            if ! (
-              set -euo pipefail
-              test -s "$release_root/index.html"
-              test -s "$release_root/release-manifest.json"
-              node -e 'const fs=require("fs"); const [manifestPath,guard]=process.argv.slice(1); const m=JSON.parse(fs.readFileSync(manifestPath,"utf8")); if(m.deploy_guard!==guard||m.ftp_root!=="/"||m.homepage!=="/index.html"||m.assets_root!=="/assets/") throw new Error("release destination contract mismatch"); if((m.protected_services_modified||[]).length) throw new Error("protected-service mutation declared");' "$release_root/release-manifest.json" "$guard"
-              (cd "$release_root" && find . -type f -printf '%P\n' | sort) > "$files"
-              test -s "$files"
-              grep -Fxq 'index.html' "$files"
-              ! grep -Eq '^/|(^|/)\.\.(/|$)' "$files"
-              grep -v '^index\.html$' "$files" > "$nonindex" || true
-              while IFS= read -r rel; do d="$(dirname "$rel")"; [ "$d" = '.' ] || echo "$d"; done < "$files" | sort -u > "$dirs"
-              while IFS= read -r rel; do mkdir -p "$backup/$(dirname "$rel")"; done < "$files"
-
-              {
-                echo 'set cmd:fail-exit false'
-                echo 'set net:max-retries 2'
-                echo 'set net:timeout 30'
-                echo 'set ftp:ssl-force true'
-                echo 'set ftp:ssl-protect-data true'
-                echo 'set ssl:verify-certificate true'
-                echo 'set ssl:check-hostname false'
-                printf 'cd "%s"\n' "$transport"
-                while IFS= read -r rel; do printf 'get "%s" -o "%s"\n' "$rel" "$backup/$rel"; done < "$files"
-                echo 'bye'
-              } > "$RUNNER_TEMP/$key.backup.lftp"
-              timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.backup.lftp" "$host"
-              (cd "$backup" && find . -type f -printf '%P\n' | sort) > "$existing"
-
-              printf '%s\t%s\t%s\t%s\n' "$key" "$domain" "$transport" "$title" >> "$RUNNER_TEMP/touched.tsv"
-
-              {
-                echo 'set cmd:fail-exit false'
-                echo 'set net:max-retries 3'
-                echo 'set net:timeout 30'
-                echo 'set ftp:ssl-force true'
-                echo 'set ftp:ssl-protect-data true'
-                echo 'set ssl:verify-certificate true'
-                echo 'set ssl:check-hostname false'
-                printf 'cd "%s"\n' "$transport"
-                while IFS= read -r rel; do printf 'rm -f "%s"\n' "$rel"; done < "$files"
-                printf 'lcd "%s"\n' "$release_root"
-                while IFS= read -r dir; do [ -n "$dir" ] && printf 'mkdir -p "%s"\n' "$dir"; done < "$dirs"
-                echo 'set cmd:fail-exit true'
-                while IFS= read -r rel; do printf 'put "%s" -o "%s"\n' "$rel" "$rel"; done < "$nonindex"
-                echo 'put "index.html" -o "index.html"'
-                echo 'bye'
-              } > "$RUNNER_TEMP/$key.upload.lftp"
-              timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.upload.lftp" "$host"
-
-              {
-                echo 'set cmd:fail-exit true'
-                echo 'set net:max-retries 2'
-                echo 'set net:timeout 30'
-                echo 'set ftp:ssl-force true'
-                echo 'set ftp:ssl-protect-data true'
-                echo 'set ssl:verify-certificate true'
-                echo 'set ssl:check-hostname false'
-                printf 'cd "%s"\n' "$transport"
-                printf 'get "index.html" -o "%s/index.html"\n' "$postwrite"
-                printf 'get "release-manifest.json" -o "%s/release-manifest.json"\n' "$postwrite"
-                echo 'bye'
-              } > "$RUNNER_TEMP/$key.postwrite.lftp"
-              timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.postwrite.lftp" "$host"
-              cmp -s "$release_root/index.html" "$postwrite/index.html"
-              cmp -s "$release_root/release-manifest.json" "$postwrite/release-manifest.json"
-
-              public_index="$RUNNER_TEMP/$key.public.index.html"
-              public_manifest="$RUNNER_TEMP/$key.public.release-manifest.json"
-              proved=0
-              for attempt in $(seq 1 18); do
-                rm -f "$public_index" "$public_manifest"
-                if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
-                    -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
-                    "https://$domain/?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${key}-${attempt}" -o "$public_index" \
-                  && curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
-                    -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
-                    "https://$domain/release-manifest.json?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${key}-${attempt}" -o "$public_manifest"; then
-                  if cmp -s "$release_root/index.html" "$public_index" && cmp -s "$release_root/release-manifest.json" "$public_manifest"; then
-                    proved=1
-                    break
-                  fi
-                fi
-                sleep 10
-              done
-              test "$proved" = '1'
-              grep -Fq 'Created with the Vision' "$public_index"
-              grep -Fq "Why can't I?" "$public_index"
-              ! grep -Eiq 'Created by JayJayTeamDev|Designed by JayJayTeamDev' "$public_index"
-              echo "DEPLOYED_AND_EXACT_PUBLIC_BYTES_PROVED https://$domain/"
-            ); then
-              failure=1
-              failed_key="$key"
-              break
-            fi
-          done < "$RUNNER_TEMP/targets.tsv"
-
-          if [ "$failure" = '1' ]; then
-            echo "::error::Deployment failed at $failed_key. Rolling back every touched target."
-            rollback_failed=0
-            while IFS=$'\t' read -r key domain transport title; do
-              files="$RUNNER_TEMP/$key.files"
-              dirs="$RUNNER_TEMP/$key.dirs"
-              existing="$RUNNER_TEMP/$key.existing"
-              backup="$RUNNER_TEMP/backups/$key"
-              {
-                echo 'set cmd:fail-exit false'
-                echo 'set net:max-retries 2'
-                echo 'set net:timeout 30'
-                echo 'set ftp:ssl-force true'
-                echo 'set ftp:ssl-protect-data true'
-                echo 'set ssl:verify-certificate true'
-                echo 'set ssl:check-hostname false'
-                printf 'cd "%s"\n' "$transport"
-                while IFS= read -r rel; do printf 'rm -f "%s"\n' "$rel"; done < "$files"
-                while IFS= read -r dir; do [ -n "$dir" ] && printf 'mkdir -p "%s"\n' "$dir"; done < "$dirs"
-                echo 'set cmd:fail-exit true'
-                printf 'lcd "%s"\n' "$backup"
-                while IFS= read -r rel; do [ "$rel" = 'index.html' ] || printf 'put "%s" -o "%s"\n' "$rel" "$rel"; done < "$existing"
-                if grep -Fxq 'index.html' "$existing"; then echo 'put "index.html" -o "index.html"'; fi
-                echo 'bye'
-              } > "$RUNNER_TEMP/$key.rollback.lftp"
-              timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.rollback.lftp" "$host" || rollback_failed=1
-            done < <(tac "$RUNNER_TEMP/touched.tsv")
-            [ "$rollback_failed" = '0' ] || echo '::error::At least one rollback command failed.'
-            exit 1
-          fi
-
-          test "$(wc -l < "$RUNNER_TEMP/touched.tsv" | tr -d ' ')" = '18'
-          mkdir -p deployment-proof
-          cp "$RUNNER_TEMP/touched.tsv" deployment-proof/touched.tsv
-          printf 'run_id=%s\nstatic_tree=%s\nproof=EXACT_FTPS_AND_PUBLIC_INDEX_MANIFEST_BYTES\n' "$GITHUB_RUN_ID" "${{ needs.build.outputs.static_tree }}" > deployment-proof/release.txt
-          bash .github/publish-progress.sh HOSTINGER PASS
+      - name: Deploy and prove exact 18-site Hostinger fleet
+        run: bash .github/resume-locked-static-deploy.sh
 
   live-proof:
-    needs: [build, deploy]
-    name: Live 18-site + full ZED proof
+    needs: deploy
+    name: SUCCESS STORY 7 — LIVE PROOF checkpoint resume
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      - name: Refuse stale live proof generation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+          test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$LOCKED_STATIC_TREE"
 
       - name: Install browser proof runtime
         working-directory: apps/oneworldz-ecosystem-release
@@ -853,75 +189,27 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: SUCCESS STORY 7 — LIVE PROOF — all published pages
-        shell: bash
-        run: |
-          set -uo pipefail
-          mkdir -p live-proof
-          cd apps/oneworldz-ecosystem-release
-          node --input-type=module <<'NODE' > "$RUNNER_TEMP/live-targets.tsv"
-          import { productionTargets } from './production-targets.mjs';
-          for (const target of productionTargets) {
-            console.log([target.key,target.domain,target.expectedTitle,target.requiredIdentityText,target.requiredIdentityImage].join('\t'));
-          }
-          NODE
-          test "$(wc -l < "$RUNNER_TEMP/live-targets.tsv" | tr -d ' ')" = '18' || exit 1
-          failed=0
-          while IFS=$'\t' read -r key domain title required_text required_image; do
-            node browser-visual-proof.mjs \
-              --name "$key" \
-              --url "https://$domain/?live_proof=${GITHUB_RUN_ID}-${key}" \
-              --expected-title "$title" \
-              --required-text "$required_text" \
-              --required-image "$required_image" \
-              --out "$GITHUB_WORKSPACE/live-proof/$key" || failed=1
-          done < "$RUNNER_TEMP/live-targets.tsv"
-          test "$(find "$GITHUB_WORKSPACE/live-proof" -mindepth 2 -maxdepth 2 -name visual-report.json | wc -l | tr -d ' ')" = '18' || failed=1
-          test "$(find "$GITHUB_WORKSPACE/live-proof" -mindepth 2 -maxdepth 2 -name desktop.png | wc -l | tr -d ' ')" = '18' || failed=1
-          test "$(find "$GITHUB_WORKSPACE/live-proof" -mindepth 2 -maxdepth 2 -name mobile.png | wc -l | tr -d ' ')" = '18' || failed=1
-          exit "$failed"
-
-      - name: SUCCESS STORY 7 — LIVE PROOF — ZED remained live
-        shell: bash
-        run: |
-          set -euo pipefail
-          passed=0
-          for attempt in $(seq 1 30); do
-            health="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache' "https://cryptobotz.cryptoworldz.xyz/health?proof=${GITHUB_RUN_ID}-${attempt}" || true)"
-            root="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache' "https://cryptobotz.cryptoworldz.xyz/?proof=${GITHUB_RUN_ID}-${attempt}" || true)"
-            mini_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 30 -o "$RUNNER_TEMP/miniapp.html" -w '%{http_code}' -H 'Cache-Control: no-cache' "https://cryptobotz.cryptoworldz.xyz/miniapp/?proof=${GITHUB_RUN_ID}-${attempt}" || true)"
-            gpt="$(curl --fail --silent --show-error --location --connect-timeout 15 --max-time 30 -H 'Cache-Control: no-cache' "https://cryptobotz.cryptoworldz.xyz/api/oneworldz-gpt/status?proof=${GITHUB_RUN_ID}-${attempt}" || true)"
-            if printf '%s' "$health" | grep -Fq '"ok":true' \
-              && printf '%s' "$root" | grep -Fq '"service":"CryptoWorldz Zed Bot"' \
-              && [ "$mini_code" = '200' ] \
-              && grep -Fq 'id="splashback"' "$RUNNER_TEMP/miniapp.html" \
-              && printf '%s' "$gpt" | grep -Fq '"ok":true' \
-              && printf '%s' "$gpt" | grep -Fq '"openai_api_configured":true'; then
-              passed=1
-              break
-            fi
-            sleep 10
-          done
-          test "$passed" = '1'
-          bash .github/publish-progress.sh LIVE_PROOF PASS
+      - name: Prove all 18 live sites and ZED remain live
+        run: bash .github/resume-locked-live-proof.sh
 
   record:
-    needs: [build, live-proof]
-    name: Record only the proven latest generation
+    needs: [checkpoint, live-proof]
+    name: SUCCESS STORY 8 — FINAL locked checkpoint record
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Refuse to mark an older generation as final
+      - name: Refuse stale final record
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin main --depth=1
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
+          test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$LOCKED_STATIC_TREE"
 
-      - name: SUCCESS STORY 8 — FINAL — Record final 100 percent production pass
+      - name: Record final 100 percent production pass
         shell: bash
         run: |
           set -euo pipefail
@@ -938,11 +226,14 @@ jobs:
           set_key final_pass_scope FULL_18_SITE_STATIC_PLUS_ZED_MINIAPP_AUTHENTICATED_PARTICIPANT_GPT_LIVE_PROOF
           set_key execution_phase COMPLETE
           set_key active_executor_run "$GITHUB_RUN_ID"
-          set_key approved_static_tree "${{ needs.build.outputs.static_tree }}"
+          set_key checkpoint_source_run "$LOCKED_SOURCE_RUN"
+          set_key checkpoint_source_commit "$LOCKED_SOURCE_COMMIT"
+          set_key approved_static_tree "$LOCKED_STATIC_TREE"
+          set_key approved_candidate_fingerprint "$LOCKED_CANDIDATE_FINGERPRINT"
           set_key build_pass PASS
           set_key tests_pass PASS
           set_key chatgpt_preview_visual_pass PASS
-          set_key seo_lighthouse_run "$GITHUB_RUN_ID"
+          set_key seo_lighthouse_run "$LOCKED_SOURCE_RUN"
           set_key seo_lighthouse_score 100
           set_key seo_lighthouse_pass PASS
           set_key seo_required_before_deploy PASS
