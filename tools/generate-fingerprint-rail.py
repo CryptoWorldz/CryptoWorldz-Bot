@@ -4,6 +4,7 @@ import re
 p=Path('.github/workflows/main.yml')
 y=p.read_text()
 expr=lambda s: '$'+'{{ '+s+' }}'
+fingerprint='apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs'
 
 if 'candidate_fingerprint:' in y and 'actions/upload-artifact' not in y and 'actions/download-artifact' not in y:
     raise SystemExit(0)
@@ -15,12 +16,12 @@ y=y.replace(old,new,1)
 
 a=y.index('      - name: Upload immutable BUILD candidate\n')
 b=y.index('      - name: Publish authenticated BUILD pass\n',a)
-fp='''      - id: fingerprint
+fp=f'''      - id: fingerprint
         name: Fingerprint complete BUILD candidate
         shell: bash
         run: |
           set -euo pipefail
-          candidate_fingerprint="$(node tools/fingerprint-oneworldz-candidate.mjs)"
+          candidate_fingerprint="$(node {fingerprint})"
           test -n "$candidate_fingerprint"
           echo "candidate_fingerprint=$candidate_fingerprint" >> "$GITHUB_OUTPUT"
           echo "CANDIDATE_FINGERPRINT=$candidate_fingerprint"
@@ -36,7 +37,7 @@ y=y.replace('  preview:\n    needs: lighthouse\n','  preview:\n    needs: [build
 def block(include_ci):
     rows=['      - name: Rebuild and match BUILD candidate fingerprint','        shell: bash','        run: |','          set -euo pipefail']
     if include_ci: rows.append('          npm ci')
-    rows += ['          sudo apt-get update -qq','          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin','          npm run build:ecosystem-release','          got="$(node tools/fingerprint-oneworldz-candidate.mjs)"','          test "$got" = "'+expr('needs.build.outputs.candidate_fingerprint')+'"','          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"','']
+    rows += ['          sudo apt-get update -qq','          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin','          npm run build:ecosystem-release',f'          got="$(node {fingerprint})"','          test "$got" = "'+expr('needs.build.outputs.candidate_fingerprint')+'"','          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"','']
     return '\n'.join(rows)+'\n'
 
 for label in ('Download exact BUILD candidate','Download exact verified candidate'):
@@ -55,7 +56,9 @@ for name in ('Upload candidate visual evidence','Upload deployment ledger','Uplo
 
 if 'actions/upload-artifact' in y or 'actions/download-artifact' in y:
     raise SystemExit('artifact action survived rewrite')
-for token in ('candidate_fingerprint:','Fingerprint complete BUILD candidate','Rebuild and match BUILD candidate fingerprint','needs: [build, tests]','needs: [build, lighthouse]','CANDIDATE_FINGERPRINT_MATCH=PASS'):
+if 'tools/fingerprint-oneworldz-candidate.mjs' in y:
+    raise SystemExit('retired tools fingerprint path survived')
+for token in ('candidate_fingerprint:','Fingerprint complete BUILD candidate','Rebuild and match BUILD candidate fingerprint','needs: [build, tests]','needs: [build, lighthouse]','CANDIDATE_FINGERPRINT_MATCH=PASS',fingerprint):
     if token not in y: raise SystemExit('missing fingerprint rail token '+token)
 if y.count('Rebuild and match BUILD candidate fingerprint') != 4:
     raise SystemExit('expected four fingerprint rebuild gates')
