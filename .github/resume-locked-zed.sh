@@ -76,9 +76,6 @@ for attempt in $(seq 1 90); do
 done
 [ "$active" = 0 ]
 
-# Critical repair: the old workflow pre-created this file, causing lftp GET to
-# refuse the overwrite with `File exists`. Remove it before downloading the
-# protected remote environment.
 rm -f "$RUNNER_TEMP/protected.env"
 cat > "$RUNNER_TEMP/get-env.lftp" <<EOF
 set cmd:fail-exit false
@@ -97,6 +94,23 @@ if [ -s "$RUNNER_TEMP/protected.env" ]; then
 else
   echo 'PROTECTED_REMOTE_ENV_FETCH=EMPTY_OR_ABSENT'
 fi
+
+# Key-name-only diagnostic. Values are never printed.
+node - <<'NODE'
+const fs=require('fs');
+const p=process.env.RUNNER_TEMP+'/protected.env';
+let text=''; try{text=fs.readFileSync(p,'utf8')}catch{}
+const names=[];
+for(const raw of text.split(/\r?\n/)){
+  const line=raw.trim();
+  if(!line||line.startsWith('#')) continue;
+  const at=line.indexOf('=');
+  if(at<1) continue;
+  const key=line.slice(0,at).trim();
+  if(/BOT|TELEGRAM|SUPABASE/i.test(key)) names.push(key);
+}
+console.log('REMOTE_ENV_RELEVANT_KEYS='+(names.length?names.sort().join(','):'NONE'));
+NODE
 
 node - <<'NODE'
 const fs=require('fs');
