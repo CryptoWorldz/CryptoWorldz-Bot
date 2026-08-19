@@ -117,14 +117,14 @@ async function start() {
   registerWorldzCastSystem({ bot, repository, config, supabase });
   registerLegendV8System({ bot, repository, config, supabase });
   registerExecutiveTelegramHandlers({ bot, repository, config, supabase });
-  registerGraceTelegramHandlers({ bot, repository: graceRepository, config });
-  registerGraceBuild2Handlers({ bot, repository: graceRepository, config });
-  registerGraceXOAuthTelegramHandlers({ bot, oauth: graceOAuth, config });
-  registerGraceFacebookOAuthTelegramHandlers({ bot, oauth: graceFacebookOAuth, config });
-  registerAutoMiniRoutes({ app, config, autoClient });
+  registerGraceTelegramHandlers({ bot, repository, graceRepository, config });
+  registerGraceBuild2Handlers({ bot, repository, graceRepository, supabase, config });
+  registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });
+  registerGraceFacebookOAuthTelegramHandlers({ bot, facebookOAuth: graceFacebookOAuth, config });
+  registerAutoMiniRoutes({ app, config, autoClient, supabase });
   registerExecutiveRoutes({ app, repository, config, supabase });
-  registerGraceRoutes({ app, repository: graceRepository, oauth: graceOAuth, facebookOAuth: graceFacebookOAuth, config });
-  registerCommunityDirectoryHandlers({ bot, repository, config });
+  registerGraceRoutes({ app, graceRepository, graceOAuth, graceFacebookOAuth, apiSecret: process.env.GRACE_API_SECRET || "" });
+  registerCommunityDirectoryHandlers({ bot, supabase, config });
   const port = Number(process.env.PORT || 3000);
   app.listen(port, "0.0.0.0", () => {
     console.log(`CryptoWorldz Bot listening on ${port} • ${RUNTIME_BUILD}`);
