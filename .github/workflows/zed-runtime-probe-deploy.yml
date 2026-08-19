@@ -15,39 +15,73 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PROBE_REVISION: locate-active-build-20260819
+  PROBE_REVISION: hostinger-real-build-20260819
+  PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
+  PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
 
 jobs:
-  locate-runtime:
+  deploy-repaired-zed:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     environment:
       name: cryptoworldz-production
     env:
-      PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
       FTP_HOST: ${{ secrets.FTP_HOST }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      - run: bash .github/publish-progress.sh ZED_ACTIVE_BUILD_LOCATE STARTED
+      - run: bash .github/publish-progress.sh ZED_HOSTINGER_REAL_BUILD STARTED
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: npm
       - run: node .github/install-ci-apt-wrapper.cjs
+      - name: Verify repaired ZED source
+        run: |
+          npm ci
+          node --check index.js
+          node --check src/full-runtime-entry.js
+          node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js
+          grep -Fq 'registerGraceTelegramHandlers({ bot, repository, graceRepository, config });' src/full-runtime-entry.js
+          grep -Fq 'registerGraceBuild2Handlers({ bot, repository, graceRepository, supabase, config });' src/full-runtime-entry.js
+          grep -Fq 'registerGraceXOAuthTelegramHandlers({ bot, graceOAuth, config });' src/full-runtime-entry.js
+          grep -Fq 'registerGraceFacebookOAuthTelegramHandlers({ bot, facebookOAuth: graceFacebookOAuth, config });' src/full-runtime-entry.js
+          grep -Fq 'registerAutoMiniRoutes({ app, config, autoClient, supabase });' src/full-runtime-entry.js
+          grep -Fq 'registerCommunityDirectoryHandlers({ bot, supabase, config });' src/full-runtime-entry.js
+          echo 'ZED_REPAIRED_WIRING=PASS'
+      - name: Build exact Hostinger source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          stage="$RUNNER_TEMP/zed-source"
+          rm -rf "$stage"; mkdir -p "$stage/.github"
+          find . -maxdepth 1 -type f -name '*.js' -exec cp '{}' "$stage/" \;
+          cp package.json package-lock.json "$stage/"
+          cp -R src public .well-known "$stage/"
+          cp .github/install-ci-apt-wrapper.cjs "$stage/.github/"
+          archive="$RUNNER_TEMP/zed-${GITHUB_RUN_ID}.tar.gz"
+          tar -czf "$archive" -C "$stage" .
+          tar -tzf "$archive" | grep -Eq '^\./package\.json$|^package\.json$'
+          tar -tzf "$archive" | grep -Eq '^\./src/full-runtime-entry\.js$|^src/full-runtime-entry\.js$'
+          ! tar -tzf "$archive" | grep -Eq '(^|/)\.env($|\.)|(^|/)node_modules(/|$)'
+          echo "ARCHIVE=$archive" >> "$GITHUB_ENV"
+          echo "ARCHIVE_NAME=$(basename "$archive")" >> "$GITHUB_ENV"
+          echo "ZED_ARCHIVE_SHA=$(sha256sum "$archive" | awk '{print $1}')" >> "$GITHUB_ENV"
       - name: Install bounded FTPS client
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
-      - name: List protected Node runtime tree safely
+      - name: Upload archive to protected Hostinger Node storage
         shell: bash
         run: |
           set -euo pipefail
-          for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD"; do echo "::add-mask::$value"; done
+          for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN"; do echo "::add-mask::$value"; done
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
-          cat > "$RUNNER_TEMP/locate.lftp" <<EOF
+          cat > "$RUNNER_TEMP/upload.lftp" <<EOF
           set cmd:fail-exit true
           set net:max-retries 2
           set net:timeout 20
@@ -55,13 +89,81 @@ jobs:
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
-          cls -la $PROTECTED_NODE_ROOT
-          cls -la $PROTECTED_NODE_ROOT/*
-          cls -la $PROTECTED_NODE_ROOT/*/*
+          put $ARCHIVE -o $PROTECTED_NODE_ROOT/$ARCHIVE_NAME
+          get $PROTECTED_NODE_ROOT/$ARCHIVE_NAME -o $RUNNER_TEMP/remote-$ARCHIVE_NAME
           bye
           EOF
-          timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/locate.lftp" "$raw_host" | sed -E 's/[A-Za-z0-9_-]{40,}/[LONG_VALUE_REDACTED]/g'
+          timeout 150 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/upload.lftp" "$raw_host"
+          cmp -s "$ARCHIVE" "$RUNNER_TEMP/remote-$ARCHIVE_NAME"
+          echo "HOSTINGER_ARCHIVE_UPLOAD=PASS sha256=$ZED_ARCHIVE_SHA"
+      - name: Resolve settings and trigger real Hostinger Node build
+        shell: bash
+        run: |
+          set -euo pipefail
+          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
+          curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" -o "$RUNNER_TEMP/websites.json"
+          username="$(node - <<'NODE'
+          const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/websites.json','utf8'));const d=process.env.PROTECTED_DOMAIN.toLowerCase();const row=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d);if(!row?.username)process.exit(2);process.stdout.write(String(row.username));
+          NODE
+          )"
+          echo "::add-mask::$username"
+          user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
+          base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
+          name_enc="$(node -p 'encodeURIComponent(process.env.ARCHIVE_NAME)')"
+          settings_code="$(curl --silent --show-error --location -o "$RUNNER_TEMP/settings.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds/settings/from-archive?archive_path=${name_enc}")"
+          echo "HOSTINGER_BUILD_SETTINGS_HTTP=$settings_code"
+          test "$settings_code" = 200
+          SETTINGS="$RUNNER_TEMP/settings.json" OUT="$RUNNER_TEMP/build-request.json" node <<'NODE'
+          const fs=require('fs');const s=JSON.parse(fs.readFileSync(process.env.SETTINGS,'utf8'));const body={...s,node_version:22,app_type:'express',root_directory:'.',entry_file:'index.js',package_manager:'npm',source_type:'archive',source_options:{archive_path:process.env.ARCHIVE_NAME}};fs.writeFileSync(process.env.OUT,JSON.stringify(body));
+          NODE
+          build_code="$(curl --silent --show-error --location --request POST -o "$RUNNER_TEMP/build.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' -H 'Content-Type: application/json' --data-binary "@$RUNNER_TEMP/build-request.json" "$base/builds")"
+          echo "HOSTINGER_BUILD_TRIGGER_HTTP=$build_code"
+          test "$build_code" = 200
+          build_uuid="$(BUILD="$RUNNER_TEMP/build.json" node -e "const p=require(process.env.BUILD);process.stdout.write(String(p.uuid||p.data?.uuid||''))")"
+          test -n "$build_uuid"
+          echo "BUILD_UUID=$build_uuid" >> "$GITHUB_ENV"
+          echo "BASE_URL=$base" >> "$GITHUB_ENV"
+          echo "HOSTINGER_REAL_BUILD_TRIGGERED uuid=$build_uuid"
+      - name: Wait for Hostinger build completion
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 120); do
+            sleep 5
+            curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$BASE_URL/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
+            state="$(BUILD_UUID="$BUILD_UUID" BUILDS="$RUNNER_TEMP/builds.json" node - <<'NODE'
+          const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.env.BUILDS,'utf8'));const b=(p.data||[]).find(x=>String(x.uuid)===process.env.BUILD_UUID);process.stdout.write(String(b?.state||''));
+          NODE
+            )"
+            echo "HOSTINGER_BUILD_WAIT attempt=$i state=$state"
+            case "${state,,}" in
+              completed) echo 'HOSTINGER_REAL_BUILD=PASS'; exit 0 ;;
+              failed)
+                curl --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$BASE_URL/builds/$BUILD_UUID/logs" -o "$RUNNER_TEMP/build-logs.json" || true
+                cat "$RUNNER_TEMP/build-logs.json" || true
+                exit 1 ;;
+            esac
+          done
+          exit 1
+      - name: Restart and prove repaired live ZED
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl --silent --show-error --location --request POST -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$BASE_URL/server/restart")"
+          case "$code" in 200|201|202|204) ;; *) cat "$RUNNER_TEMP/restart.json"; exit 1;; esac
+          for i in $(seq 1 40); do
+            sleep 4
+            root="$(curl --silent --show-error --location --connect-timeout 8 --max-time 12 -o "$RUNNER_TEMP/root.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/?build=$GITHUB_RUN_ID-$i" || true)"
+            health="$(curl --silent --show-error --location --connect-timeout 8 --max-time 12 -o "$RUNNER_TEMP/health.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/health?build=$GITHUB_RUN_ID-$i" || true)"
+            echo "ZED_LIVE_CONVERGENCE attempt=$i root=$root health=$health"
+            if [ "$root" = 200 ] && [ "$health" = 200 ] && grep -Fq '"service":"CryptoWorldz Zed Bot"' "$RUNNER_TEMP/root.json" && grep -Fq '"ok":true' "$RUNNER_TEMP/health.json"; then
+              echo "ZED_REPAIRED_LIVE=PASS uuid=$BUILD_UUID"
+              exit 0
+            fi
+            if [ "$health" = 503 ]; then cat "$RUNNER_TEMP/health.json" || true; fi
+          done
+          exit 1
       - if: success()
-        run: bash .github/publish-progress.sh ZED_ACTIVE_BUILD_LOCATE PASS
+        run: bash .github/publish-progress.sh ZED_HOSTINGER_REAL_BUILD PASS
       - if: failure()
-        run: bash .github/publish-progress.sh ZED_ACTIVE_BUILD_LOCATE FAIL
+        run: bash .github/publish-progress.sh ZED_HOSTINGER_REAL_BUILD FAIL
