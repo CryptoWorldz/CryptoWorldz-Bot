@@ -133,7 +133,36 @@ async function start() {
   graceWorker.start();
 }
 
+function sanitizeStartupError(error) {
+  const raw = String(error && error.message || error && error.code || "unknown_startup_error");
+  return raw
+    .replace(/https?:\/\/[^\s]+/gi, "[URL_REDACTED]")
+    .replace(/(?:sk-|eyJ)[A-Za-z0-9._-]{12,}/g, "[SECRET_REDACTED]")
+    .replace(/[A-Za-z0-9_-]{32,}/g, "[VALUE_REDACTED]")
+    .slice(0, 300);
+}
+
+function startFailureProbe(error) {
+  const http = require("node:http");
+  const port = Number(process.env.PORT || 3000);
+  const payload = JSON.stringify({
+    ok: false,
+    service: "CryptoWorldz Zed Bot",
+    runtime: "startup_failure_probe_v1",
+    error: sanitizeStartupError(error)
+  });
+  const server = http.createServer((req, res) => {
+    res.statusCode = 503;
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Cache-Control", "no-store");
+    res.end(payload);
+  });
+  server.listen(port, "0.0.0.0", () => {
+    console.error(`ZED startup failure probe listening on ${port}: ${sanitizeStartupError(error)}`);
+  });
+}
+
 start().catch((error) => {
-  console.error("Fatal startup error", error);
-  process.exit(1);
+  console.error("Fatal startup error", sanitizeStartupError(error));
+  startFailureProbe(error);
 });
