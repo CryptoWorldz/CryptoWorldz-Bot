@@ -80,8 +80,32 @@ console.log('HOSTINGER_BUILD_LOG_END');
 NODE
 }
 
-# Public runtime truth comes first. If ZED is already degraded, inspect the
-# latest Hostinger Node build log and hand control immediately to recovery.
+local_fallback_smoke() {
+  echo 'LOCAL_ZED_FALLBACK_SMOKE=STARTED'
+  npm ci --ignore-scripts >/dev/null
+  local log="$proof/local-zed.log" pid='' ok=0
+  PORT=3999 BOT_TOKEN='' TELEGRAM_TOKEN='' SUPABASE_URL='' SUPABASE_SERVICE_ROLE_KEY='' SUPABASE_ANON_KEY='' \
+    npm start >"$log" 2>&1 & pid=$!
+  cleanup_local(){ [ -n "$pid" ] && kill "$pid" >/dev/null 2>&1 || true; wait "$pid" >/dev/null 2>&1 || true; }
+  trap cleanup_local RETURN
+  for i in $(seq 1 20); do
+    if ! kill -0 "$pid" >/dev/null 2>&1; then break; fi
+    code="$(curl --silent --show-error --connect-timeout 2 --max-time 3 -o "$proof/local-root.json" -w '%{http_code}' 'http://127.0.0.1:3999/' || true)"
+    if [ "$code" = 200 ] && grep -Fq '"service":"CryptoWorldz Zed Bot"' "$proof/local-root.json"; then ok=1; break; fi
+    sleep 0.5
+  done
+  echo 'LOCAL_ZED_FALLBACK_LOG_BEGIN'
+  sed -E 's/((TOKEN|PASSWORD|SECRET|API[_-]?KEY|SERVICE[_-]?ROLE[_-]?KEY)[[:space:]]*[=:][[:space:]]*)[^[:space:]]+/\1[REDACTED]/Ig' "$log" | tail -120
+  echo 'LOCAL_ZED_FALLBACK_LOG_END'
+  if [ "$ok" = 1 ]; then
+    echo 'LOCAL_ZED_FALLBACK_SMOKE=PASS'
+  else
+    echo 'LOCAL_ZED_FALLBACK_SMOKE=FAIL'
+  fi
+  cleanup_local
+  trap - RETURN
+}
+
 probe "https://$PROTECTED_DOMAIN/?preflight=$GITHUB_RUN_ID" "$proof/root.json" "$proof/root.code" & p1=$!
 probe "https://$PROTECTED_DOMAIN/health?preflight=$GITHUB_RUN_ID" "$proof/health.json" "$proof/health.code" & p2=$!
 probe "https://$PROTECTED_DOMAIN/miniapp/?preflight=$GITHUB_RUN_ID" "$proof/miniapp.html" "$proof/mini.code" & p3=$!
@@ -112,12 +136,12 @@ NODE
 ); then
   echo "LIVE_ZED_PREFLIGHT=DEGRADED root=$root_code health=$health_code mini=$mini_code gpt=$status_code"
   publish_latest_hostinger_build_log
+  local_fallback_smoke
   exit 1
 fi
 
 echo 'LIVE_ZED_EXISTING_PROCESS_HTTP=PASS'
 
-# Only a healthy live process earns the optional exact FTPS source check.
 sudo apt-get update -qq
 sudo apt-get install -y -qq lftp
 raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
