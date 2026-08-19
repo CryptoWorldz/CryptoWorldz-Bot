@@ -127,7 +127,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          candidate_fingerprint="$(node tools/fingerprint-oneworldz-candidate.mjs)"
+          candidate_fingerprint="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
           test -n "$candidate_fingerprint"
           echo "candidate_fingerprint=$candidate_fingerprint" >> "$GITHUB_OUTPUT"
           echo "CANDIDATE_FINGERPRINT=$candidate_fingerprint"
@@ -163,7 +163,7 @@ jobs:
           sudo apt-get update -qq
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
           npm run build:ecosystem-release
-          got="$(node tools/fingerprint-oneworldz-candidate.mjs)"
+          got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
           test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
           echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
 
@@ -200,7 +200,7 @@ jobs:
           sudo apt-get update -qq
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
           npm run build:ecosystem-release
-          got="$(node tools/fingerprint-oneworldz-candidate.mjs)"
+          got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
           test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
           echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
 
@@ -231,7 +231,7 @@ jobs:
           sudo apt-get update -qq
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
           npm run build:ecosystem-release
-          got="$(node tools/fingerprint-oneworldz-candidate.mjs)"
+          got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
           test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
           echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
 
@@ -595,7 +595,7 @@ jobs:
           sudo apt-get update -qq
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
           npm run build:ecosystem-release
-          got="$(node tools/fingerprint-oneworldz-candidate.mjs)"
+          got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
           test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
           echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
 
