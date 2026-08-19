@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/main.yml"
+      - ".github/resume-locked-zed.sh"
+      - ".github/resume-locked-static-deploy.sh"
+      - ".github/resume-locked-live-proof.sh"
   workflow_dispatch:
 
 permissions:
@@ -16,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  RESUME_REVISION: env-key-diagnostic-1
+  RESUME_REVISION: managed-env-recovery-1
   LOCKED_SOURCE_COMMIT: 3b52c7eae7834a33f1f74e312433644ea239904c
   LOCKED_SOURCE_RUN: "32219855385"
   LOCKED_STATIC_TREE: 295e0706bc033b294736d7f87dc6d36f783eaa3a
