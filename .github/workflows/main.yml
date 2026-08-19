@@ -10,6 +10,7 @@ on:
       - ".github/resume-locked-static-deploy.sh"
       - ".github/resume-locked-live-proof.sh"
       - ".github/install-ci-apt-wrapper.cjs"
+      - ".github/lftp-compat.py"
       - "apps/oneworldz-ecosystem-release/**"
       - "src/**"
       - "public/**"
@@ -27,7 +28,7 @@ permissions:
 
 concurrency:
   group: jayjay-chatgpt-oneworldz-single-rail
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   MIN_PAGE_ROUTES: "83"
@@ -65,6 +66,21 @@ jobs:
 
       - name: Install bounded package-network guard
         run: node .github/install-ci-apt-wrapper.cjs
+
+      - name: Install repository-owned FTPS transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile .github/lftp-compat.py
+          python3 .github/lftp-compat.py --version
+          mkdir -p "$RUNNER_TEMP/oneworldz-bin"
+          cat > "$RUNNER_TEMP/oneworldz-bin/lftp" <<'SH'
+          #!/usr/bin/env bash
+          exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
+          echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
+          echo 'REPOSITORY_FTPS_TRANSPORT=READY'
 
       - name: Install current runtime dependencies
         run: npm ci
@@ -169,15 +185,12 @@ jobs:
           test -s deployment-proof/current-candidate-browser-summary.json
           echo "FROZEN_CURRENT_CANDIDATE=PASS routes=$PAGE_ROUTE_COUNT"
 
-      - name: Install proven static FTPS transport client
+      - name: Verify repository FTPS transport client
         shell: bash
         run: |
           set -euo pipefail
-          if ! command -v lftp >/dev/null 2>&1; then
-            sudo apt-get update -qq
-            sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq lftp
-          fi
           command -v lftp
+          lftp --version
           echo 'STATIC_FTPS_TRANSPORT_CLIENT=READY'
 
       - name: Deploy current candidate to static transport roots
