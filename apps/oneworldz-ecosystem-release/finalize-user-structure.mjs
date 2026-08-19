@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
@@ -11,6 +11,8 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(root, "dist", "ecosystem");
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const escape = (value = "") => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+const JAYJAY_STRIPE = "https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00";
+const JAYJAY_PAYPAL = "https://www.paypal.me/Jayjay3480";
 
 function canonical(domain, route = "") {
   const clean = String(route).replace(/^\/+|\/+$/g, "");
@@ -88,7 +90,7 @@ function publicCommandsBody() {
 }
 
 function supportJayBody() {
-  return `<section class="section"><div class="section-heading"><p class="eyebrow">JAYJAYTEAMDEV@DONATEWORLDZ</p><h2>Support JayJayTeamDev directly.</h2><p>This is the dedicated official OneWorldz ecosystem page for people specifically searching for Support JayJayTeamDev, JayJayTeamDev support, or ways to support the creator and ongoing ecosystem development.</p></div><div class="info-grid"><article><span>01</span><h3>Exact Purpose</h3><p>This pathway supports JayJayTeamDev and ecosystem development. It is separate from Reagan & Children and Community Impact support purposes.</p></article><article><span>02</span><h3>Full Support Page</h3><p>The detailed support information and currently approved payment pathways remain on the existing DonateWorldz JayJayTeamDev page.</p><a href="/jayjayteamdev/">Open Full JayJayTeamDev Support →</a></article><article><span>03</span><h3>Other Purposes</h3><p>If you want to support children or community causes instead, use the separate DonateWorldz pathways.</p><a href="/">Choose a DonateWorldz Purpose →</a></article></div><div class="button-row"><a class="button primary" href="/jayjayteamdev/">Support JayJayTeamDev</a><a class="button secondary" href="https://oneworldz.com/directory/">OneWorldz Directory</a></div></section>`;
+  return `<section class="section"><div class="section-heading"><p class="eyebrow">JAYJAYTEAMDEV@DONATEWORLDZ</p><h2>Support JayJayTeamDev directly.</h2><p>This is the dedicated official OneWorldz ecosystem page for people specifically searching for Support JayJayTeamDev, JayJayTeamDev support, or ways to support the creator and ongoing ecosystem development.</p></div><div class="info-grid"><article><span>01</span><h3>Exact Purpose</h3><p>This pathway supports JayJayTeamDev and ecosystem development. It is separate from Reagan & Children, Community Impact and Davis Family support purposes.</p></article><article><span>02</span><h3>Stripe</h3><p>Use the dedicated JayJayTeamDev Stripe payment destination. Payment credentials are handled by Stripe and are never stored on OneWorldz public pages.</p><a href="${JAYJAY_STRIPE}" target="_blank" rel="noopener noreferrer">Continue with Stripe →</a></article><article><span>03</span><h3>PayPal</h3><p>Use the approved JayJayTeamDev PayPal support pathway when that payment method suits you better.</p><a href="${JAYJAY_PAYPAL}" target="_blank" rel="noopener noreferrer">Open PayPal →</a></article><article><span>04</span><h3>Other Purposes</h3><p>If you want to support children, community causes or the Davis Family instead, choose that separate DonateWorldz purpose so records stay distinct.</p><a href="/">Choose a DonateWorldz Purpose →</a></article></div><div class="button-row"><a class="button primary" href="${JAYJAY_STRIPE}" target="_blank" rel="noopener noreferrer">Support JayJayTeamDev</a><a class="button secondary" href="https://oneworldz.com/directory/">OneWorldz Directory</a></div></section>`;
 }
 
 async function writePage(target, route, html) {
@@ -145,6 +147,9 @@ async function refreshManifest(target, tree) {
 
 for (const target of productionTargets) {
   const targetRoot = path.join(dist, target.key);
+  if (target.key === "donateworldz") {
+    await rm(path.join(targetRoot, "jayjayteamdev"), { recursive: true, force: true });
+  }
   const currentRoutes = await routesFor(targetRoot);
   const ackRoute = "acknowledgements";
   await writePage(target, ackRoute, pageShell({
@@ -163,16 +168,12 @@ for (const target of productionTargets) {
       target,
       route: "support-jayjayteamdev",
       title: "Support JayJayTeamDev | DonateWorldz",
-      description: "Official Support JayJayTeamDev page on DonateWorldz. Direct support for JayJayTeamDev and OneWorldz ecosystem development, separate from child and community donation purposes.",
+      description: "Official Support JayJayTeamDev page on DonateWorldz. Direct support for JayJayTeamDev and OneWorldz ecosystem development, separate from child, community and family support purposes.",
       label: "JayJayTeamDev@DonateWorldz",
       h1: "Support JayJayTeamDev",
       intro: "The exact official page for people searching for Support JayJayTeamDev.",
       body: supportJayBody()
     }));
-    const legacy = path.join(targetRoot, "jayjayteamdev", "index.html");
-    let legacyHtml = await readFile(legacy, "utf8");
-    legacyHtml = legacyHtml.replace(/<link rel="canonical" href="[^"]+">/, '<link rel="canonical" href="https://donateworldz.com/support-jayjayteamdev/">');
-    await writeFile(legacy, legacyHtml, "utf8");
   }
 
   if (target.key === "cryptoworldz") {
@@ -194,8 +195,8 @@ for (const target of productionTargets) {
   await writePage(target, directoryRoute, pageShell({
     target,
     route: directoryRoute,
-    title: `${target.requiredIdentityText} Directory | Every Page & Direct Link`,
-    description: `Complete ${target.requiredIdentityText} webpage directory with direct canonical links to every currently published page on ${target.domain}.`,
+    title: `${target.requiredIdentityText} Page Directory | Direct Webpage Access`,
+    description: `Complete direct-page directory for ${target.requiredIdentityText}, with every published webpage separately addressable and linked from the sitemap.`,
     label: `Directory@${target.requiredIdentityText}`,
     h1: `${target.requiredIdentityText} Page Directory`,
     intro: `Every published ${target.requiredIdentityText} page has its own direct webpage address.`,
