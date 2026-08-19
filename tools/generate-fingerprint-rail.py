@@ -1,0 +1,63 @@
+from pathlib import Path
+import re
+
+p=Path('.github/workflows/main.yml')
+y=p.read_text()
+expr=lambda s: '$'+'{{ '+s+' }}'
+
+if 'candidate_fingerprint:' in y and 'actions/upload-artifact' not in y and 'actions/download-artifact' not in y:
+    raise SystemExit(0)
+
+old='    outputs:\n      static_tree: '+expr('steps.lock.outputs.static_tree')+'\n'
+new=old+'      candidate_fingerprint: '+expr('steps.fingerprint.outputs.candidate_fingerprint')+'\n'
+if old not in y: raise SystemExit('build outputs anchor missing')
+y=y.replace(old,new,1)
+
+a=y.index('      - name: Upload immutable BUILD candidate\n')
+b=y.index('      - name: Publish authenticated BUILD pass\n',a)
+fp='''      - id: fingerprint
+        name: Fingerprint complete BUILD candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_fingerprint="$(node tools/fingerprint-oneworldz-candidate.mjs)"
+          test -n "$candidate_fingerprint"
+          echo "candidate_fingerprint=$candidate_fingerprint" >> "$GITHUB_OUTPUT"
+          echo "CANDIDATE_FINGERPRINT=$candidate_fingerprint"
+
+'''
+y=y[:a]+fp+y[b:]
+
+if '  lighthouse:\n    needs: tests\n' not in y: raise SystemExit('lighthouse needs anchor missing')
+y=y.replace('  lighthouse:\n    needs: tests\n','  lighthouse:\n    needs: [build, tests]\n',1)
+if '  preview:\n    needs: lighthouse\n' not in y: raise SystemExit('preview needs anchor missing')
+y=y.replace('  preview:\n    needs: lighthouse\n','  preview:\n    needs: [build, lighthouse]\n',1)
+
+def block(include_ci):
+    rows=['      - name: Rebuild and match BUILD candidate fingerprint','        shell: bash','        run: |','          set -euo pipefail']
+    if include_ci: rows.append('          npm ci')
+    rows += ['          sudo apt-get update -qq','          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin','          npm run build:ecosystem-release','          got="$(node tools/fingerprint-oneworldz-candidate.mjs)"','          test "$got" = "'+expr('needs.build.outputs.candidate_fingerprint')+'"','          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"','']
+    return '\n'.join(rows)+'\n'
+
+for label in ('Download exact BUILD candidate','Download exact verified candidate'):
+    while f'      - name: {label}\n' in y:
+        a=y.index(f'      - name: {label}\n')
+        b=y.find('\n      - name:',a+1)
+        if b<0: raise SystemExit('download block terminator missing '+label)
+        positions=[(y.rfind('\n  tests:\n',0,a),'tests'),(y.rfind('\n  lighthouse:\n',0,a),'lighthouse'),(y.rfind('\n  preview:\n',0,a),'preview'),(y.rfind('\n  deploy:\n',0,a),'deploy')]
+        job=max(positions,key=lambda x:x[0])[1]
+        y=y[:a]+block(job in ('preview','deploy'))+y[b+1:]
+
+for name in ('Upload candidate visual evidence','Upload deployment ledger','Upload fresh live visual evidence'):
+    pattern=r'\n      - name: '+re.escape(name)+r'\n.*?(?=\n      - name:|\n  [A-Za-z0-9_-]+:\n|\Z)'
+    y,n=re.subn(pattern,'',y,count=1,flags=re.S)
+    if n!=1: raise SystemExit('upload evidence block missing '+name)
+
+if 'actions/upload-artifact' in y or 'actions/download-artifact' in y:
+    raise SystemExit('artifact action survived rewrite')
+for token in ('candidate_fingerprint:','Fingerprint complete BUILD candidate','Rebuild and match BUILD candidate fingerprint','needs: [build, tests]','needs: [build, lighthouse]','CANDIDATE_FINGERPRINT_MATCH=PASS'):
+    if token not in y: raise SystemExit('missing fingerprint rail token '+token)
+if y.count('Rebuild and match BUILD candidate fingerprint') != 4:
+    raise SystemExit('expected four fingerprint rebuild gates')
+Path('workflow-fingerprint-rail.txt').write_text(y)
+print('ARTIFACT_FREE_FINGERPRINT_RAIL_CANDIDATE=READY')
