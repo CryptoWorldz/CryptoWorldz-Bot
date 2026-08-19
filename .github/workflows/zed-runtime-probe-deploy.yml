@@ -14,6 +14,9 @@ concurrency:
   group: zed-runtime-probe-deploy
   cancel-in-progress: true
 
+env:
+  PROBE_REVISION: force-20260819-1928
+
 jobs:
   deploy-probe:
     runs-on: ubuntu-latest
