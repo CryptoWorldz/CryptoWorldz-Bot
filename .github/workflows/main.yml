@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  RESUME_REVISION: live-zed-preflight-3-bounded-apt
+  RESUME_REVISION: live-zed-build-log-diagnostic-4
   LOCKED_SOURCE_COMMIT: 3b52c7eae7834a33f1f74e312433644ea239904c
   LOCKED_SOURCE_RUN: "32219855385"
   LOCKED_STATIC_TREE: 295e0706bc033b294736d7f87dc6d36f783eaa3a
