@@ -1,0 +1,20 @@
+name: OneWorldz Actions Execution Signal
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  signal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Publish authenticated Actions execution signal
+        run: bash .github/publish-progress.sh ACTIONS_EXECUTION STARTED
