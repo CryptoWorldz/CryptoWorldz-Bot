@@ -9,110 +9,107 @@ set -Eeuo pipefail
 : "${FTP_PORT:?}"
 : "${HOSTINGER_API_TOKEN:?}"
 
-for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN"; do
-  [ -n "$value" ] && echo "::add-mask::$value"
-done
+for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN"; do [ -n "$value" ] && echo "::add-mask::$value"; done
 
-proof="$RUNNER_TEMP/zed-runtime-diagnostic"
-rm -rf "$proof"; mkdir -p "$proof"
-
-echo 'ZED_RUNTIME_DIAGNOSTIC=STARTED'
+npm ci
+node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js
+node --check index.js
 node --check src/full-runtime-entry.js
+node --check src/http.js
+node --check src/user-experience.js
+node --check src/zed-guide.js
+echo 'ZED_LOCAL_RUNTIME_VALIDATION=PASS'
 
-domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
-curl --fail --silent --show-error --location \
-  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-  "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" \
-  -o "$proof/websites.json"
-username="$(PROOF="$proof/websites.json" node - <<'NODE'
-const fs=require('fs'); const p=JSON.parse(fs.readFileSync(process.env.PROOF,'utf8'));
-const d=process.env.PROTECTED_DOMAIN.toLowerCase(); const row=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d);
-if(row?.username) process.stdout.write(String(row.username));
-NODE
-)"
-test -n "$username"
-echo "::add-mask::$username"
-user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
-node_base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
-file_base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/domains/${domain_enc}/files"
-echo 'HOSTINGER_MANAGED_APP_RESOLVED=PASS'
+sudo apt-get update -qq
+sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq lftp
 
-# Capture public 503 bodies; these can reveal gateway state without changing production.
-for item in root health status; do
-  case "$item" in
-    root) url="https://$PROTECTED_DOMAIN/" ;;
-    health) url="https://$PROTECTED_DOMAIN/health" ;;
-    status) url="https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status" ;;
-  esac
-  code="$(curl --silent --show-error --location --connect-timeout 6 --max-time 10 -o "$proof/$item.body" -w '%{http_code}' "$url" || true)"
-  echo "LIVE_${item^^}_HTTP=$code"
-  sed -E 's/((TOKEN|PASSWORD|SECRET|API[_-]?KEY|SERVICE[_-]?ROLE[_-]?KEY)[[:space:]]*[=:][[:space:]]*)[^[:space:]<]+/\1[REDACTED]/Ig' "$proof/$item.body" | head -c 1600 || true
-  echo
-done
-
-# Managed build log (useful when Hostinger reports runtime/bootstrap failures around restart).
-if curl --fail --silent --show-error --location \
-  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-  "$node_base/builds?per_page=25" -o "$proof/builds.json"; then
-  build_uuid="$(BUILDS="$proof/builds.json" node - <<'NODE'
-const p=require(process.env.BUILDS); process.stdout.write(String((p.data||[])[0]?.uuid||''));
-NODE
-)"
-  echo "HOSTINGER_LATEST_BUILD_UUID=$build_uuid"
-  if [ -n "$build_uuid" ]; then
-    curl --silent --show-error --location \
-      -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-      "$node_base/builds/$build_uuid/logs?from_line=0" -o "$proof/build-log.json" || true
-    LOGFILE="$proof/build-log.json" node - <<'NODE'
-const fs=require('fs'); if(!fs.existsSync(process.env.LOGFILE)) process.exit(0);
-let p; try{p=JSON.parse(fs.readFileSync(process.env.LOGFILE,'utf8'))}catch{process.exit(0)}
-const strings=[]; const walk=x=>{if(typeof x==='string')strings.push(x);else if(Array.isArray(x))x.forEach(walk);else if(x&&typeof x==='object')Object.values(x).forEach(walk)}; walk(p);
-const redact=s=>s.replace(/((?:TOKEN|PASSWORD|SECRET|API[_-]?KEY|SERVICE[_-]?ROLE[_-]?KEY)\s*[=:]\s*)\S+/ig,'$1[REDACTED]').replace(/(Bearer\s+)\S+/ig,'$1[REDACTED]');
-console.log('HOSTINGER_BUILD_LOG_BEGIN'); for(const line of strings.join('\n').split(/\r?\n/).filter(Boolean).slice(-180)) console.log(redact(line)); console.log('HOSTINGER_BUILD_LOG_END');
-NODE
-  fi
-fi
-
-# Ask Hostinger's file API for runtime/log candidates.
-list_code="$(curl --silent --show-error --location --connect-timeout 10 --max-time 30 \
-  -o "$proof/files.json" -w '%{http_code}' \
-  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-  "$file_base?directory=&max_depth=4" || true)"
-echo "HOSTINGER_RUNTIME_FILE_LIST_HTTP=$list_code"
-if [ "$list_code" = 200 ]; then
-  FILES="$proof/files.json" node - <<'NODE'
-const fs=require('fs'); let p; try{p=JSON.parse(fs.readFileSync(process.env.FILES,'utf8'))}catch{process.exit(0)}
-const names=[]; function walk(x){if(Array.isArray(x))x.forEach(walk);else if(x&&typeof x==='object'){if(typeof x.path==='string')names.push(x.path);if(typeof x.name==='string')names.push(x.name);Object.values(x).forEach(walk)}} walk(p);
-console.log('HOSTINGER_RUNTIME_FILE_CANDIDATES_BEGIN'); for(const n of [...new Set(names)].filter(x=>/stderr|stdout|error|log|nodejs/i.test(x)).slice(0,160)) console.log(n); console.log('HOSTINGER_RUNTIME_FILE_CANDIDATES_END');
-NODE
-fi
-
-for file in stderr.log stdout.log nodejs/stderr.log nodejs/stdout.log nodejs/logs/stderr.log nodejs/logs/stdout.log logs/stderr.log logs/stdout.log; do
-  path_enc="$(FILE_PATH="$file" node -p 'encodeURIComponent(process.env.FILE_PATH)')"
-  code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 \
-    -o "$proof/runtime-file.json" -w '%{http_code}' \
-    -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-    "$file_base/content?path=${path_enc}&from_line=0" || true)"
-  echo "HOSTINGER_RUNTIME_LOG_CANDIDATE path=$file http=$code"
-  [ "$code" = 200 ] || continue
-  RUNTIME_FILE="$proof/runtime-file.json" node - <<'NODE'
-const fs=require('fs'); let p; try{p=JSON.parse(fs.readFileSync(process.env.RUNTIME_FILE,'utf8'))}catch{process.exit(0)}
-const strings=[]; const walk=x=>{if(typeof x==='string')strings.push(x);else if(Array.isArray(x))x.forEach(walk);else if(x&&typeof x==='object')Object.values(x).forEach(walk)}; walk(p);
-const redact=s=>s.replace(/((?:TOKEN|PASSWORD|SECRET|API[_-]?KEY|SERVICE[_-]?ROLE[_-]?KEY)\s*[=:]\s*)\S+/ig,'$1[REDACTED]').replace(/(Bearer\s+)\S+/ig,'$1[REDACTED]');
-console.log('HOSTINGER_RUNTIME_STDERR_BEGIN'); for(const line of strings.join('\n').split(/\r?\n/).filter(Boolean).slice(-220)) console.log(redact(line)); console.log('HOSTINGER_RUNTIME_STDERR_END');
-NODE
-  break
-done
-
-# FTP directory listing is read-only and often exposes Hostinger's actual log filename.
 raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
 if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
-curl --silent --show-error --ssl-reqd --ftp-ssl-control --connect-timeout 10 --max-time 30 \
-  --user "$FTP_USERNAME:$FTP_PASSWORD" \
-  "ftp://$raw_host:$FTP_PORT$PROTECTED_NODE_ROOT/" -o "$proof/ftp-node-list.txt" || true
-echo 'FTPS_NODE_ROOT_LIST_BEGIN'
-sed -n '1,160p' "$proof/ftp-node-list.txt" 2>/dev/null || true
-echo 'FTPS_NODE_ROOT_LIST_END'
 
-echo '::error::ZED_RUNTIME_DIAGNOSTIC=COMPLETE_REPLAN_FROM_STARTUP_RECORD'
+cat > "$RUNNER_TEMP/zed-upload.lftp" <<EOF
+set cmd:fail-exit true
+set net:max-retries 2
+set net:timeout 30
+set ftp:ssl-force true
+set ftp:ssl-protect-data true
+set ssl:verify-certificate true
+set ssl:check-hostname false
+cd "$PROTECTED_NODE_ROOT"
+lcd "$GITHUB_WORKSPACE"
+put index.js -o index.js
+put package.json -o package.json
+put package-lock.json -o package-lock.json
+mirror -R --verbose=1 --only-newer --exclude-glob .env --exclude-glob '*.log' src src
+mirror -R --verbose=1 --only-newer public public
+mirror -R --verbose=1 --only-newer .well-known .well-known
+bye
+EOF
+
+timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/zed-upload.lftp" "$raw_host"
+echo 'ZED_FULL_RUNTIME_FTPS_UPLOAD=PASS'
+
+proof="$RUNNER_TEMP/zed-ftps-proof"; rm -rf "$proof"; mkdir -p "$proof/src" "$proof/public/miniapp"
+cat > "$RUNNER_TEMP/zed-proof.lftp" <<EOF
+set cmd:fail-exit true
+set net:max-retries 2
+set net:timeout 30
+set ftp:ssl-force true
+set ftp:ssl-protect-data true
+set ssl:verify-certificate true
+set ssl:check-hostname false
+cd "$PROTECTED_NODE_ROOT"
+get index.js -o "$proof/index.js"
+get src/full-runtime-entry.js -o "$proof/src/full-runtime-entry.js"
+get src/http.js -o "$proof/src/http.js"
+get src/user-experience.js -o "$proof/src/user-experience.js"
+get src/zed-guide.js -o "$proof/src/zed-guide.js"
+get public/miniapp/index.html -o "$proof/public/miniapp/index.html"
+get public/miniapp/experience.js -o "$proof/public/miniapp/experience.js"
+bye
+EOF
+
+timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/zed-proof.lftp" "$raw_host"
+cmp -s index.js "$proof/index.js"
+cmp -s src/full-runtime-entry.js "$proof/src/full-runtime-entry.js"
+cmp -s src/http.js "$proof/src/http.js"
+cmp -s src/user-experience.js "$proof/src/user-experience.js"
+cmp -s src/zed-guide.js "$proof/src/zed-guide.js"
+cmp -s public/miniapp/index.html "$proof/public/miniapp/index.html"
+cmp -s public/miniapp/experience.js "$proof/public/miniapp/experience.js"
+echo 'ZED_FULL_RUNTIME_REMOTE_BYTES=PASS'
+
+domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
+curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" -o "$RUNNER_TEMP/websites.json"
+username="$(node - <<'NODE'
+const p=require(process.env.RUNNER_TEMP+'/websites.json'); const d=process.env.PROTECTED_DOMAIN.toLowerCase(); const r=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d); if(!r?.username)process.exit(2); process.stdout.write(String(r.username));
+NODE
+)"
+echo "::add-mask::$username"
+user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
+base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
+code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/server/restart")"
+case "$code" in 200|201|202|204) echo "HOSTINGER_MANAGED_RESTART=PASS HTTP=$code";; *) cat "$RUNNER_TEMP/restart.json" 2>/dev/null || true; echo "::error::Managed restart rejected HTTP=$code"; exit 1;; esac
+
+probe(){ local url="$1" out="$2"; curl --silent --show-error --location --connect-timeout 8 --max-time 12 -o "$out" -w '%{http_code}' "$url" || true; }
+for i in $(seq 1 48); do
+  sleep 5
+  root="$(probe "https://$PROTECTED_DOMAIN/?proof=$GITHUB_RUN_ID-$i" "$RUNNER_TEMP/root.json")"
+  health="$(probe "https://$PROTECTED_DOMAIN/health?proof=$GITHUB_RUN_ID-$i" "$RUNNER_TEMP/health.json")"
+  mini="$(probe "https://$PROTECTED_DOMAIN/miniapp/?proof=$GITHUB_RUN_ID-$i" "$RUNNER_TEMP/mini.html")"
+  gpt="$(probe "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=$GITHUB_RUN_ID-$i" "$RUNNER_TEMP/gpt.json")"
+  if [ "$root" = 200 ] && [ "$health" = 200 ] && [ "$mini" = 200 ] && [ "$gpt" = 200 ] \
+    && grep -Fq '"service":"CryptoWorldz Zed Bot"' "$RUNNER_TEMP/root.json" \
+    && grep -Fq '"ok":true' "$RUNNER_TEMP/health.json" \
+    && grep -Fq 'id="splashback"' "$RUNNER_TEMP/mini.html" \
+    && grep -Fq 'id="zed-guide"' "$RUNNER_TEMP/mini.html" \
+    && grep -Fq 'id="create"' "$RUNNER_TEMP/mini.html" \
+    && grep -Fq 'id="heroes"' "$RUNNER_TEMP/mini.html"; then
+      echo 'ZED_AUTO_GRACE_COMMAND_CENTRE_LIVE=PASS'
+      bash .github/publish-progress.sh ZED_MINIAPP PASS
+      exit 0
+  fi
+  echo "ZED_CONVERGENCE attempt=$i root=$root health=$health mini=$mini gpt=$gpt"
+done
+
+echo '::error::ZED/AUTO/GRACE Command Centre did not converge after verified FTPS runtime upload and managed restart.'
 exit 1
