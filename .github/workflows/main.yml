@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  RESUME_REVISION: live-zed-preflight-2-retry-ftp-truth
+  RESUME_REVISION: live-zed-preflight-3-bounded-apt
   LOCKED_SOURCE_COMMIT: 3b52c7eae7834a33f1f74e312433644ea239904c
   LOCKED_SOURCE_RUN: "32219855385"
   LOCKED_STATIC_TREE: 295e0706bc033b294736d7f87dc6d36f783eaa3a
@@ -115,6 +115,8 @@ jobs:
         with:
           node-version: "22"
           cache: npm
+      - name: Install bounded APT network guard
+        run: node .github/install-ci-apt-wrapper.cjs
       - id: live_preflight
         name: Prove exact existing full ZED before any production write
         continue-on-error: true
@@ -148,6 +150,8 @@ jobs:
         with:
           node-version: "22"
           cache: npm
+      - name: Install bounded APT network guard
+        run: node .github/install-ci-apt-wrapper.cjs
       - name: Refuse stale generation and materialize exact locked candidate
         shell: bash
         run: |
@@ -182,6 +186,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Install bounded APT network guard
+        run: node .github/install-ci-apt-wrapper.cjs
       - name: Refuse stale live proof generation
         shell: bash
         run: |
