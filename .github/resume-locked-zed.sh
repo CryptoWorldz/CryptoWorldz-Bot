@@ -13,96 +13,33 @@ for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN";
 
 npm ci
 node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js
-node --check index.js
 node --check src/full-runtime-entry.js
-node --check src/http.js
-node --check src/user-experience.js
-node --check src/zed-guide.js
-echo 'ZED_LOCAL_RUNTIME_VALIDATION=PASS'
+grep -Fq 'registerProjectWalletSystem({ app, bot, config, supabase });' src/full-runtime-entry.js
+echo 'ZED_PROJECT_WALLET_RUNTIME_FIX=LOCAL_PASS'
 
-# No apt/lftp dependency: use Python stdlib FTPS. Keep CA verification enabled,
-# but disable hostname comparison because Hostinger's FTP endpoint certificate
-# does not name the configured FTP hostname even though its chain is trusted.
 python3 - <<'PY'
-import ftplib, io, os, pathlib, posixpath, ssl, urllib.parse
-
-raw = os.environ['FTP_HOST'].strip()
-if '://' not in raw:
-    raw = 'ftps://' + raw
-u = urllib.parse.urlparse(raw)
-host = u.hostname or os.environ['FTP_HOST'].strip().split('/')[0].split(':')[0]
-port = int(os.environ.get('FTP_PORT') or u.port or 21)
-root = os.environ['PROTECTED_NODE_ROOT']
-ctx = ssl.create_default_context()
-ctx.check_hostname = False
-ftp = ftplib.FTP_TLS(context=ctx, timeout=45)
-ftp.connect(host, port)
-ftp.login(os.environ['FTP_USERNAME'], os.environ['FTP_PASSWORD'])
-ftp.prot_p()
-ftp.cwd(root)
-
-def ensure_dir(rel_dir):
-    ftp.cwd(root)
-    if not rel_dir or rel_dir == '.':
-        return
-    for part in pathlib.PurePosixPath(rel_dir).parts:
-        if part in ('', '.'):
-            continue
-        try:
-            ftp.cwd(part)
-        except ftplib.error_perm:
-            try:
-                ftp.mkd(part)
-            except ftplib.error_perm:
-                pass
-            ftp.cwd(part)
-
-def upload_file(local_path, remote_rel):
-    remote_rel = remote_rel.replace(os.sep, '/')
-    parent = posixpath.dirname(remote_rel)
-    name = posixpath.basename(remote_rel)
-    ensure_dir(parent)
-    tmp = name + '.oneworldz-new'
-    try:
-        ftp.delete(tmp)
-    except ftplib.all_errors:
-        pass
-    with open(local_path, 'rb') as f:
-        ftp.storbinary('STOR ' + tmp, f, blocksize=262144)
-    try:
-        ftp.delete(name)
-    except ftplib.all_errors:
-        pass
-    ftp.rename(tmp, name)
-
-files = []
-for name in ('index.js', 'package.json', 'package-lock.json'):
-    p = pathlib.Path(name)
-    if p.is_file():
-        files.append((p, name))
-for root_name in ('src', 'public', '.well-known'):
-    base = pathlib.Path(root_name)
-    if not base.exists():
-        continue
-    for p in sorted(base.rglob('*')):
-        if not p.is_file():
-            continue
-        rel = p.as_posix()
-        if rel.endswith('.log') or rel.endswith('/.env') or rel == '.env':
-            continue
-        files.append((p, rel))
-for local, rel in files:
-    upload_file(local, rel)
-print(f'ZED_FULL_RUNTIME_PYTHON_FTPS_UPLOAD=PASS files={len(files)}')
-
-for rel in ('index.js','src/full-runtime-entry.js','src/http.js','src/user-experience.js','src/zed-guide.js','public/miniapp/index.html','public/miniapp/experience.js'):
-    local = pathlib.Path(rel).read_bytes()
-    ftp.cwd(root)
-    buf = io.BytesIO()
-    ftp.retrbinary('RETR ' + rel, buf.write, blocksize=262144)
-    if buf.getvalue() != local:
-        raise SystemExit(f'REMOTE_BYTE_MISMATCH:{rel}')
-print('ZED_FULL_RUNTIME_REMOTE_BYTES=PASS')
+import ftplib, io, os, pathlib, ssl, urllib.parse
+raw=os.environ['FTP_HOST'].strip()
+if '://' not in raw: raw='ftps://'+raw
+u=urllib.parse.urlparse(raw)
+host=u.hostname or os.environ['FTP_HOST'].strip().split('/')[0].split(':')[0]
+port=int(os.environ.get('FTP_PORT') or u.port or 21)
+root=os.environ['PROTECTED_NODE_ROOT']
+ctx=ssl.create_default_context(); ctx.check_hostname=False
+ftp=ftplib.FTP_TLS(context=ctx, timeout=45)
+ftp.connect(host,port); ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD']); ftp.prot_p()
+ftp.cwd(root+'/src')
+local=pathlib.Path('src/full-runtime-entry.js').read_bytes()
+tmp='full-runtime-entry.js.oneworldz-new'
+try: ftp.delete(tmp)
+except ftplib.all_errors: pass
+ftp.storbinary('STOR '+tmp, io.BytesIO(local), blocksize=262144)
+try: ftp.delete('full-runtime-entry.js')
+except ftplib.all_errors: pass
+ftp.rename(tmp,'full-runtime-entry.js')
+buf=io.BytesIO(); ftp.retrbinary('RETR full-runtime-entry.js',buf.write,blocksize=262144)
+if buf.getvalue()!=local: raise SystemExit('REMOTE_BYTE_MISMATCH:src/full-runtime-entry.js')
+print('ZED_PROJECT_WALLET_RUNTIME_FIX=REMOTE_BYTES_PASS')
 ftp.quit()
 PY
 
@@ -137,9 +74,9 @@ if(p.payments_in_chat!==false||p.secrets_in_browser!==false) process.exit(1);
 NODE
 }
 
-for i in $(seq 1 20); do
-  sleep 4
-  tag="full_runtime=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}"
+for i in $(seq 1 15); do
+  sleep 3
+  tag="wallet_fix=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}"
   probe_one "https://$PROTECTED_DOMAIN/?$tag" "$RUNNER_TEMP/root.json" "$RUNNER_TEMP/root.code" & p1=$!
   probe_one "https://$PROTECTED_DOMAIN/health?$tag" "$RUNNER_TEMP/health.json" "$RUNNER_TEMP/health.code" & p2=$!
   probe_one "https://$PROTECTED_DOMAIN/miniapp/?$tag" "$RUNNER_TEMP/mini.html" "$RUNNER_TEMP/mini.code" & p3=$!
@@ -152,13 +89,12 @@ for i in $(seq 1 20); do
   fi
   if grep -Fq 'startup_failure_probe_v1' "$RUNNER_TEMP/root.json" 2>/dev/null; then
     echo 'ZED_STARTUP_FAILURE_PROBE=CAPTURED'
-    cat "$RUNNER_TEMP/root.json"
-    echo
+    cat "$RUNNER_TEMP/root.json"; echo
     echo '::error::ZED full runtime reached the startup failure probe; repair the reported stage.'
     exit 1
   fi
   echo "ZED_CONVERGENCE attempt=$i root=$(cat "$RUNNER_TEMP/root.code") health=$(cat "$RUNNER_TEMP/health.code") mini=$(cat "$RUNNER_TEMP/mini.code") gpt=$(cat "$RUNNER_TEMP/gpt.code")"
 done
 
-echo '::error::ZED/AUTO/GRACE did not converge after full Python-FTPS runtime sync and managed restart.'
+echo '::error::ZED did not converge after targeted runtime repair and managed restart.'
 exit 1
