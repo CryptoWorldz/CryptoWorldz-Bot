@@ -22,6 +22,7 @@ jobs:
           set -euo pipefail
           python3 <<'PY'
           from pathlib import Path
+          import re
           p=Path('.github/workflows/main.yml')
           y=p.read_text()
           expr=lambda s: '$'+'{{ '+s+' }}'
@@ -52,22 +53,9 @@ jobs:
           y=y.replace('  preview:\n    needs: lighthouse\n','  preview:\n    needs: [build, lighthouse]\n',1)
 
           def block(include_ci):
-              rows=[
-                '      - name: Rebuild and match BUILD candidate fingerprint',
-                '        shell: bash',
-                '        run: |',
-                '          set -euo pipefail',
-              ]
+              rows=['      - name: Rebuild and match BUILD candidate fingerprint','        shell: bash','        run: |','          set -euo pipefail']
               if include_ci: rows.append('          npm ci')
-              rows += [
-                '          sudo apt-get update -qq',
-                '          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin',
-                '          npm run build:ecosystem-release',
-                '          got="$(node tools/fingerprint-oneworldz-candidate.mjs)"',
-                '          test "$got" = "'+expr('needs.build.outputs.candidate_fingerprint')+'"',
-                '          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"',
-                '',
-              ]
+              rows += ['          sudo apt-get update -qq','          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin','          npm run build:ecosystem-release','          got="$(node tools/fingerprint-oneworldz-candidate.mjs)"','          test "$got" = "'+expr('needs.build.outputs.candidate_fingerprint')+'"','          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"','']
               return '\n'.join(rows)+'\n'
 
           for label in ('Download exact BUILD candidate','Download exact verified candidate'):
@@ -75,25 +63,21 @@ jobs:
                   a=y.index(f'      - name: {label}\n')
                   b=y.find('\n      - name:',a+1)
                   if b<0: raise SystemExit('download block terminator missing '+label)
-                  job_positions=[(y.rfind('\n  tests:',0,a),'tests'),(y.rfind('\n  lighthouse:',0,a),'lighthouse'),(y.rfind('\n  preview:',0,a),'preview'),(y.rfind('\n  deploy:',0,a),'deploy')]
-                  job=max(job_positions)[1]
-                  include_ci=job in ('preview','deploy')
-                  y=y[:a]+block(include_ci)+y[b+1:]
+                  positions=[(y.rfind('\n  tests:\n',0,a),'tests'),(y.rfind('\n  lighthouse:\n',0,a),'lighthouse'),(y.rfind('\n  preview:\n',0,a),'preview'),(y.rfind('\n  deploy:\n',0,a),'deploy')]
+                  job=max(positions,key=lambda x:x[0])[1]
+                  y=y[:a]+block(job in ('preview','deploy'))+y[b+1:]
 
           for name in ('Upload candidate visual evidence','Upload deployment ledger','Upload fresh live visual evidence'):
-              token=f'      - name: {name}\n'
-              if token not in y: continue
-              a=y.index(token)
-              next_step=y.find('\n      - name:',a+1)
-              next_job=y.find('\n  ',a+1)
-              candidates=[v for v in (next_step,next_job) if v!=-1]
-              end=min(candidates) if candidates else len(y)
-              y=y[:a]+y[end+1:]
+              pattern=r'\n      - name: '+re.escape(name)+r'\n.*?(?=\n      - name:|\n  [A-Za-z0-9_-]+:\n|\Z)'
+              y,n=re.subn(pattern,'',y,count=1,flags=re.S)
+              if n!=1: raise SystemExit('upload evidence block missing '+name)
 
           if 'actions/upload-artifact' in y or 'actions/download-artifact' in y:
               raise SystemExit('artifact action survived rewrite')
           for token in ('candidate_fingerprint:','Fingerprint complete BUILD candidate','Rebuild and match BUILD candidate fingerprint','needs: [build, tests]','needs: [build, lighthouse]','CANDIDATE_FINGERPRINT_MATCH=PASS'):
               if token not in y: raise SystemExit('missing fingerprint rail token '+token)
+          if y.count('Rebuild and match BUILD candidate fingerprint') != 4:
+              raise SystemExit('expected four fingerprint rebuild gates')
           Path('workflow-fingerprint-rail.txt').write_text(y)
           PY
 
