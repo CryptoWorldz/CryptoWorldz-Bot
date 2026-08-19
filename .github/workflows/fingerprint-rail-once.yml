@@ -1,0 +1,106 @@
+name: Install Fingerprint Candidate Rail Once
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate artifact-free canonical rail candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/main.yml')
+          y=p.read_text()
+          expr=lambda s: '$'+'{{ '+s+' }}'
+
+          old='''    outputs:\n      static_tree: ${{ steps.lock.outputs.static_tree }}\n'''
+          new='''    outputs:\n      static_tree: ${{ steps.lock.outputs.static_tree }}\n      candidate_fingerprint: ${{ steps.fingerprint.outputs.candidate_fingerprint }}\n'''
+          if old not in y: raise SystemExit('build outputs anchor missing')
+          y=y.replace(old,new,1)
+
+          a=y.index('      - name: Upload immutable BUILD candidate\n')
+          b=y.index('      - name: Publish authenticated BUILD pass\n',a)
+          fp='''      - id: fingerprint\n        name: Fingerprint complete BUILD candidate\n        shell: bash\n        run: |\n          set -euo pipefail\n          candidate_fingerprint="$(node tools/fingerprint-oneworldz-candidate.mjs)"\n          test -n "$candidate_fingerprint"\n          echo "candidate_fingerprint=$candidate_fingerprint" >> "$GITHUB_OUTPUT"\n          echo "CANDIDATE_FINGERPRINT=$candidate_fingerprint"\n\n'''
+          y=y[:a]+fp+y[b:]
+
+          def rebuild(job_anchor, next_anchor, download_names, needs_replace=None, include_npm_ci=False):
+              nonlocal_y=None
+              return
+
+          if '  lighthouse:\n    needs: tests\n' not in y: raise SystemExit('lighthouse needs anchor missing')
+          y=y.replace('  lighthouse:\n    needs: tests\n','  lighthouse:\n    needs: [build, tests]\n',1)
+          if '  preview:\n    needs: lighthouse\n' not in y: raise SystemExit('preview needs anchor missing')
+          y=y.replace('  preview:\n    needs: lighthouse\n','  preview:\n    needs: [build, lighthouse]\n',1)
+
+          rebuild_block=lambda ci: '''      - name: Rebuild and match BUILD candidate fingerprint\n        shell: bash\n        run: |\n          set -euo pipefail\n''' + ('''          npm ci\n''' if ci else '') + '''          sudo apt-get update -qq\n          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin\n          npm run build:ecosystem-release\n          got="$(node tools/fingerprint-oneworldz-candidate.mjs)"\n          test "$got" = "''' + expr('needs.build.outputs.candidate_fingerprint') + '''"\n          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"\n\n'''
+
+          for label, ci in [
+              ('Download exact BUILD candidate',False),
+              ('Download exact verified candidate',True),
+          ]:
+              while f'      - name: {label}\n' in y:
+                  a=y.index(f'      - name: {label}\n')
+                  # action block ends at next step
+                  b=y.find('\n      - name:',a+1)
+                  if b<0: raise SystemExit('download block terminator missing '+label)
+                  # Deploy has no npm ci; preview has no npm ci; determine from job context.
+                  job_start=y.rfind('\n  ',0,a)
+                  segment=y[job_start:a]
+                  needs_ci=('  deploy:' in segment[-3000:] or '  preview:' in segment[-3000:])
+                  y=y[:a]+rebuild_block(needs_ci)+y[b+1:]
+
+          # Tests replacement was included by the generic BUILD label; it already has npm ci.
+          # Lighthouse replacement also included and already has npm ci.
+
+          def remove_step(name):
+              nonlocal y
+              token=f'      - name: {name}\n'
+              if token not in y: return
+              a=y.index(token)
+              b=y.find('\n  ',a)
+              next_step=y.find('\n      - name:',a+1)
+              # Prefer next same-job step; if no step remains, use next job.
+              end=next_step if next_step!=-1 and (b==-1 or next_step<b) else b
+              if end<0: end=len(y)
+              y=y[:a]+y[end+1:]
+
+          remove_step('Upload candidate visual evidence')
+          remove_step('Upload deployment ledger')
+          remove_step('Upload fresh live visual evidence')
+
+          if 'actions/upload-artifact' in y or 'actions/download-artifact' in y:
+              raise SystemExit('artifact action survived rewrite')
+          for token in [
+              'candidate_fingerprint:',
+              'Fingerprint complete BUILD candidate',
+              'Rebuild and match BUILD candidate fingerprint',
+              'needs: [build, tests]',
+              'needs: [build, lighthouse]',
+              'CANDIDATE_FINGERPRINT_MATCH=PASS'
+          ]:
+              if token not in y: raise SystemExit('missing fingerprint rail token '+token)
+          Path('workflow-fingerprint-rail.txt').write_text(y)
+          PY
+
+      - name: Publish candidate as normal repo file
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add workflow-fingerprint-rail.txt
+          git commit -m 'PUBLISH ARTIFACT FREE FINGERPRINT RAIL CANDIDATE'
+          git push origin HEAD:main
