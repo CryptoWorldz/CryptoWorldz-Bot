@@ -74,6 +74,8 @@ forbid(activeCore,/gofundme/i,'canonical release');
 forbid(activeCore,/sk-proj-|sk_live_|sk_test_|OPENAI_API_KEY\s*=|SUPABASE_SERVICE_ROLE_KEY\s*=/i,'canonical public release');
 forbid(activeCore,/Facebook Support Profile\s*0?\d+/i,'canonical public release');
 forbid(activeCore,/solworld\.fun/i,'canonical public release');
+forbid(activeCore,/donateworldz\.com\/jayjayteamdev\//i,'canonical release');
+forbid(activeCore,/href=["']\/jayjayteamdev\//i,'canonical release');
 
 const one=read(`${distRoot}/oneworldz/index.html`);
 requireText(one,'oneworldz-blue-white','OneWorldz blue/white identity');
@@ -86,7 +88,7 @@ requireText(one,'https://cryptoworldz.xyz','OneWorldz CryptoWorldz route');
 for(const route of [
   'https://donateworldz.com/reagan-children/',
   'https://donateworldz.com/community-impact/',
-  'https://donateworldz.com/jayjayteamdev/'
+  'https://donateworldz.com/support-jayjayteamdev/'
 ]) requireText(activeCore,route,'three separated support routes');
 
 const community=read(`${distRoot}/oneworldz/community-support/index.html`);
@@ -101,11 +103,16 @@ forbid(communityJs,/api\/oneworldz-community-support/i,'Community Support cross-
 forbid(community+communityJs,/Facebook Support Profile\s*0?\d+/i,'Community Support public page');
 
 const donate=read(`${distRoot}/donateworldz/index.html`);
-for(const sub of ['reagan-children','community-impact','jayjayteamdev']){
+for(const sub of ['reagan-children','community-impact','support-jayjayteamdev']){
   const rel=`${distRoot}/donateworldz/${sub}/index.html`;
   if(!fs.existsSync(abs(rel))) errors.push(`missing separated DonateWorldz route: /${sub}/`);
   requireText(donate,`/${sub}/`,'DonateWorldz support separation');
 }
+if(fs.existsSync(abs(`${distRoot}/donateworldz/jayjayteamdev`))) errors.push('retired DonateWorldz /jayjayteamdev/ directory survived final build');
+const jaySupport=read(`${distRoot}/donateworldz/support-jayjayteamdev/index.html`);
+requireText(jaySupport,'https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00','JayJayTeamDev Stripe pathway');
+requireText(jaySupport,'https://www.paypal.me/Jayjay3480','JayJayTeamDev PayPal pathway');
+
 const gptOne=read(`${distRoot}/oneworldz/assets/js/oneworldz-gpt.js`);
 const gptDonate=read(`${distRoot}/donateworldz/assets/js/oneworldz-gpt.js`);
 for(const [label,text] of [['OneWorldz GPT',gptOne],['DonateWorldz GPT',gptDonate]]){
@@ -134,12 +141,17 @@ const protectedSource=[
   read('src/hub-central/live-v1.js'),
   read('src/community-support/live-v1.js'),
   read('src/oneworldz-gpt/http.js'),
-  read('src/auto/zed-router.js')
+  read('src/auto/zed-router.js'),
+  read('src/user-experience.js'),
+  read('src/zed-guide.js')
 ].join('\n');
 requireText(protectedSource,'/api/oneworldz-gpt/chat','protected OneWorldz GPT');
 requireText(protectedSource,'oneworldz_support_profiles','protected Community Support registry');
 requireText(protectedSource,'/api/mini/auto/ultimate','AUTO Ultimate owner surface');
 requireText(protectedSource,'/api/mini/auto/emergency-stop','AUTO emergency stop');
+requireText(protectedSource,'/api/mini/creator/submit','Raaiiidd Creator protected submission');
+requireText(protectedSource,'/api/mini/heroes/apply','Real-World Hero protected application');
+requireText(protectedSource,'/api/mini/zed/chat','authenticated ZED participant guide');
 if(!fs.existsSync(abs('src/grace'))) errors.push('G.R.A.C.E. protected source directory missing');
 if(!fs.existsSync(abs('public/miniapp'))) errors.push('ZED Mini App public source directory missing');
 
