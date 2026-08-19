@@ -16,6 +16,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Publish generator start
+        run: bash .github/publish-progress.sh RAIL_GENERATOR STARTED
+
       - name: Generate artifact-free canonical rail candidate
         shell: bash
         run: |
@@ -90,3 +93,11 @@ jobs:
           git add workflow-fingerprint-rail.txt
           git commit -m 'PUBLISH ARTIFACT FREE FINGERPRINT RAIL CANDIDATE'
           git push origin HEAD:main
+
+      - name: Publish generator pass
+        if: success()
+        run: bash .github/publish-progress.sh RAIL_GENERATOR PASS
+
+      - name: Publish generator failure
+        if: failure()
+        run: bash .github/publish-progress.sh RAIL_GENERATOR FAIL
