@@ -33,10 +33,9 @@ grep -Fq '/api/mini/heroes/apply' src/user-experience.js
 echo 'PROTECTED_FULL_RUNTIME_SOURCE=PASS'
 
 # Prefer a no-write proof when the current service is already healthy. If the
-# current service is degraded, continue into exact source recovery. Recovery
-# never rewrites .env or Hostinger-managed process environment variables; it
-# only restores the approved runtime source, proves the remote bytes, performs
-# the managed restart, and requires the full live proof before PASS.
+# current service is degraded, continue into exact source + Hostinger build
+# recovery. Never upload or rewrite .env; Hostinger-managed process environment
+# remains authoritative and the final live proof is mandatory before PASS.
 current_full=0
 for attempt in $(seq 1 6); do
   root_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/current-root.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/?managed_env_probe=${GITHUB_RUN_ID}-${attempt}" || true)"
@@ -57,7 +56,7 @@ done
 if [ "$current_full" = 1 ]; then
   echo 'CURRENT_HOSTINGER_MANAGED_ZED_RUNTIME=PASS'
 else
-  echo 'CURRENT_HOSTINGER_MANAGED_ZED_RUNTIME=DEGRADED_SOURCE_RECOVERY_REQUIRED'
+  echo 'CURRENT_HOSTINGER_MANAGED_ZED_RUNTIME=DEGRADED_BUILD_RECOVERY_REQUIRED'
 fi
 
 sudo apt-get update -qq
@@ -99,9 +98,9 @@ for attempt in $(seq 1 90); do
   sleep 5
 done
 [ "$active" = 0 ]
+pre_build_uuid="$(node -e "const p=require(process.env.RUNNER_TEMP+'/builds.json');process.stdout.write(String((p.data||[])[0]?.uuid||''))")"
 
-# Preserve Hostinger-managed process environment exactly. Do not upload or
-# rewrite .env. Restore only the approved runtime source and static MiniApp.
+# Restore the exact protected source over FTPS first. This does not mutate .env.
 cat > "$RUNNER_TEMP/sync-runtime.lftp" <<EOF
 set cmd:fail-exit false
 set net:max-retries 2
@@ -124,6 +123,93 @@ bye
 EOF
 timeout 480 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/sync-runtime.lftp" "$raw_host"
 
+# A Hostinger restart alone restarts the last build artifact. When the live app
+# is degraded, create a real Node deployment from the exact source archive so
+# Hostinger performs dependency install/build and activates a new artifact.
+if [ "$current_full" != 1 ]; then
+  stage="$RUNNER_TEMP/zed-hostinger-source"
+  archive="$RUNNER_TEMP/cryptoworldz-zed-${GITHUB_RUN_ID}.tar.gz"
+  rm -rf "$stage" "$archive"
+  mkdir -p "$stage/.github"
+  find . -maxdepth 1 -type f -name '*.js' -exec cp '{}' "$stage/" \;
+  cp package.json package-lock.json "$stage/"
+  cp -R src public .well-known "$stage/"
+  cp .github/install-ci-apt-wrapper.cjs "$stage/.github/"
+  tar -czf "$archive" -C "$stage" .
+  test -s "$archive"
+  tar -tzf "$archive" | grep -Eq '^\./package\.json$|^package\.json$'
+  tar -tzf "$archive" | grep -Eq '^\./src/user-experience\.js$|^src/user-experience\.js$'
+  ! tar -tzf "$archive" | grep -Eq '(^|/)\.env($|\.)|(^|/)node_modules(/|$)'
+  echo 'HOSTINGER_NODE_SOURCE_ARCHIVE=PASS'
+
+  npm install --no-save --package-lock=false --ignore-scripts hostinger-api-mcp@1.42.0 @modelcontextprotocol/sdk@1.10.0
+  HOSTINGER_DEPLOY_ARCHIVE="$archive" node --input-type=module <<'NODE'
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+
+const env = Object.fromEntries(Object.entries(process.env).filter(([,v]) => typeof v === 'string'));
+const transport = new StdioClientTransport({
+  command: 'npx',
+  args: ['--no-install', 'hostinger-hosting-mcp'],
+  env
+});
+const client = new Client({ name: 'oneworldz-zed-recovery', version: '1.0.0' }, { capabilities: {} });
+let result;
+try {
+  await client.connect(transport);
+  result = await client.callTool({
+    name: 'hosting_deployJsApplication',
+    arguments: {
+      domain: process.env.PROTECTED_DOMAIN,
+      archivePath: process.env.HOSTINGER_DEPLOY_ARCHIVE,
+      removeArchive: false
+    }
+  });
+} finally {
+  try { await client.close(); } catch {}
+}
+if (!result || result.isError) {
+  console.error('HOSTINGER_NODE_DEPLOY_TOOL=ERROR');
+  process.exit(2);
+}
+let payload = result.structuredContent || null;
+if (!payload) {
+  for (const item of result.content || []) {
+    if (item?.type !== 'text' || !item.text) continue;
+    try { payload = JSON.parse(item.text); break; } catch {}
+  }
+}
+const upload = payload?.upload?.status || 'accepted';
+const settings = payload?.resolveSettings?.status || 'accepted';
+const build = payload?.build?.status || 'accepted';
+console.log(`HOSTINGER_NODE_DEPLOY_TOOL upload=${upload} settings=${settings} build=${build}`);
+if ([upload, settings, build].includes('error')) process.exit(3);
+NODE
+
+  new_build_ok=0
+  new_build_seen=0
+  for attempt in $(seq 1 120); do
+    sleep 5
+    curl --fail --silent --show-error --location \
+      -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+      "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds-after-deploy.json"
+    latest_uuid="$(node -e "const p=require(process.env.RUNNER_TEMP+'/builds-after-deploy.json');process.stdout.write(String((p.data||[])[0]?.uuid||''))")"
+    latest_state="$(node -e "const p=require(process.env.RUNNER_TEMP+'/builds-after-deploy.json');process.stdout.write(String((p.data||[])[0]?.state||''))")"
+    echo "HOSTINGER_NEW_BUILD attempt=$attempt uuid=$latest_uuid state=$latest_state"
+    if [ -n "$latest_uuid" ] && [ "$latest_uuid" != "$pre_build_uuid" ]; then
+      new_build_seen=1
+      case "${latest_state,,}" in
+        completed) new_build_ok=1; break ;;
+        failed) echo "::error::Hostinger Node deployment build failed uuid=$latest_uuid"; exit 1 ;;
+      esac
+    fi
+  done
+  test "$new_build_seen" = 1
+  test "$new_build_ok" = 1
+  echo 'HOSTINGER_NODE_DEPLOY_BUILD=PASS'
+fi
+
+# Prove the source on Hostinger exactly matches the approved repository files.
 rm -f "$RUNNER_TEMP"/remote-*.js "$RUNNER_TEMP"/remote-miniapp-*.html
 cat > "$RUNNER_TEMP/get-proof.lftp" <<EOF
 set cmd:fail-exit true
@@ -193,5 +279,5 @@ NODE
   echo "ZED_CONVERGENCE $i/60 root=$root_code health=$health_code mini=$mini_code gpt=$status_code"
 done
 
-echo '::error::ZED/MiniApp/GPT did not converge after managed restart.'
+echo '::error::ZED/MiniApp/GPT did not converge after Hostinger deployment/restart.'
 exit 1
