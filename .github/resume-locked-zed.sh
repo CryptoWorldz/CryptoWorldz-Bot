@@ -132,62 +132,75 @@ if [ "$current_full" != 1 ]; then
   cp .github/install-ci-apt-wrapper.cjs "$stage/.github/"
   tar -czf "$archive" -C "$stage" .
   test -s "$archive"
+  test "$(stat -c%s "$archive")" -lt 52428800
   tar -tzf "$archive" > "$archive_list"
   grep -Eq '^\./package\.json$|^package\.json$' "$archive_list"
   grep -Eq '^\./src/user-experience\.js$|^src/user-experience\.js$' "$archive_list"
-  ! grep -Eq '(^|/)\.env($|\.)|(^|/)node_modules(/|$)' "$archive_list"
+  ! grep -Eq '(^|/)\.env($|\.)|(^|/)node_modules(/|$)|(^|/)dist(/|$)|(^|/)build(/|$)' "$archive_list"
   archive_sha="$(sha256sum "$archive" | awk '{print $1}')"
   echo "HOSTINGER_NODE_SOURCE_ARCHIVE=PASS sha256=$archive_sha"
 
-  timeout 240 npm install --no-save --package-lock=false --ignore-scripts hostinger-api-mcp@1.42.0 @modelcontextprotocol/sdk@1.10.0
-  HOSTINGER_DEPLOY_ARCHIVE="$archive" node --input-type=module <<'NODE'
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-const env=Object.fromEntries(Object.entries(process.env).filter(([,v])=>typeof v==='string'));
-const transport=new StdioClientTransport({command:'npx',args:['--no-install','hostinger-hosting-mcp'],env});
-const client=new Client({name:'oneworldz-zed-recovery',version:'1.0.0'},{capabilities:{}});
-let result;
-try {
-  await client.connect(transport);
-  result=await client.callTool({name:'hosting_deployJsApplication',arguments:{domain:process.env.PROTECTED_DOMAIN,archivePath:process.env.HOSTINGER_DEPLOY_ARCHIVE,removeArchive:false}});
-} finally {
-  try { await client.close(); } catch {}
-}
-if(!result||result.isError){console.error('HOSTINGER_NODE_DEPLOY_TOOL=ERROR');process.exit(2)}
-let payload=result.structuredContent||null;
-if(!payload){for(const item of result.content||[]){if(item?.type!=='text'||!item.text)continue;try{payload=JSON.parse(item.text);break}catch{}}}
-const upload=payload?.upload?.status||'accepted';
-const settings=payload?.resolveSettings?.status||'accepted';
-const build=payload?.build?.status||'accepted';
-console.log(`HOSTINGER_NODE_DEPLOY_TOOL upload=${upload} settings=${settings} build=${build}`);
-if([upload,settings,build].includes('error'))process.exit(3);
+  # Hostinger's documented NodeJS API accepts the archive in its JSON CreateFromArchiveRequest.
+  # Use the official REST rail directly instead of the MCP wrapper that failed while obtaining upload credentials.
+  archive_b64="$RUNNER_TEMP/archive.b64"
+  base64 -w0 "$archive" > "$archive_b64"
+  ARCHIVE_B64_FILE="$archive_b64" node - <<'NODE' > "$RUNNER_TEMP/node-build-request.json"
+const fs=require('fs');
+const archive=fs.readFileSync(process.env.ARCHIVE_B64_FILE,'utf8');
+process.stdout.write(JSON.stringify({
+  archive,
+  node_version:22,
+  app_type:'express',
+  entry_file:'index.js',
+  package_manager:'npm'
+}));
 NODE
 
-  new_build_seen=0
+  deploy_code="$(curl --silent --show-error --location --connect-timeout 20 --max-time 180 \
+    --request POST \
+    -o "$RUNNER_TEMP/node-build-response.json" -w '%{http_code}' \
+    -H "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    --data-binary "@$RUNNER_TEMP/node-build-request.json" \
+    "$base/builds/from-archive")"
+  case "$deploy_code" in
+    200|201|202)
+      new_build_uuid="$(node -e "const p=require(process.env.RUNNER_TEMP+'/node-build-response.json');process.stdout.write(String(p.uuid||p.data?.uuid||''))")"
+      echo "HOSTINGER_NODE_ARCHIVE_API=ACCEPTED HTTP=$deploy_code uuid=$new_build_uuid"
+      ;;
+    *)
+      cat "$RUNNER_TEMP/node-build-response.json" 2>/dev/null || true
+      echo "::error::Official Hostinger Node archive deployment rejected HTTP=$deploy_code"
+      exit 1
+      ;;
+  esac
+  test -n "$new_build_uuid"
+
   new_build_ok=0
   for attempt in $(seq 1 120); do
     sleep 5
     curl --fail --silent --show-error --location \
       -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
       "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds-after-deploy.json"
-    latest_uuid="$(node -e "const p=require(process.env.RUNNER_TEMP+'/builds-after-deploy.json');process.stdout.write(String((p.data||[])[0]?.uuid||''))")"
-    latest_state="$(node -e "const p=require(process.env.RUNNER_TEMP+'/builds-after-deploy.json');process.stdout.write(String((p.data||[])[0]?.state||''))")"
-    echo "HOSTINGER_NEW_BUILD attempt=$attempt uuid=$latest_uuid state=$latest_state"
-    if [ -n "$latest_uuid" ] && [ "$latest_uuid" != "$pre_build_uuid" ]; then
-      new_build_seen=1
-      new_build_uuid="$latest_uuid"
-      case "${latest_state,,}" in
-        completed) new_build_ok=1; break ;;
-        failed)
-          logs_url="$base/builds/$latest_uuid/logs"
-          curl --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$logs_url" -o "$RUNNER_TEMP/failed-build-logs.json" || true
-          cat "$RUNNER_TEMP/failed-build-logs.json" 2>/dev/null || true
-          echo "::error::Hostinger Node deployment build failed uuid=$latest_uuid"
-          exit 1 ;;
-      esac
-    fi
+    latest_state="$(BUILD_UUID="$new_build_uuid" node - <<'NODE'
+const p=require(process.env.RUNNER_TEMP+'/builds-after-deploy.json');
+const row=(p.data||[]).find(x=>String(x.uuid||'')===process.env.BUILD_UUID);
+process.stdout.write(String(row?.state||''));
+NODE
+)"
+    echo "HOSTINGER_NEW_BUILD attempt=$attempt uuid=$new_build_uuid state=$latest_state"
+    case "${latest_state,,}" in
+      completed) new_build_ok=1; break ;;
+      failed)
+        curl --silent --show-error --location \
+          -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+          "$base/builds/$new_build_uuid/logs" -o "$RUNNER_TEMP/failed-build-logs.json" || true
+        cat "$RUNNER_TEMP/failed-build-logs.json" 2>/dev/null || true
+        echo "::error::Hostinger Node deployment build failed uuid=$new_build_uuid"
+        exit 1 ;;
+    esac
   done
-  test "$new_build_seen" = 1
   test "$new_build_ok" = 1
   echo "HOSTINGER_NODE_DEPLOY_BUILD=PASS uuid=$new_build_uuid archive_sha256=$archive_sha"
 fi
@@ -220,11 +233,11 @@ EOF
 fi
 echo "PROTECTED_RUNTIME_FTPS_PROOF=$ftps_proof"
 
-restart_url="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs/server/restart"
+restart_url="$base/server/restart"
 code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$restart_url")"
 case "$code" in
   200|201|202|204) echo "HOSTINGER_MANAGED_RESTART=PASS HTTP=$code" ;;
-  *) cat "$RUNNER_TEMP/restart.json"; exit 1 ;;
+  *) cat "$RUNNER_TEMP/restart.json" 2>/dev/null || true; exit 1 ;;
 esac
 
 for i in $(seq 1 40); do
