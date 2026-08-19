@@ -7,8 +7,9 @@ set -euo pipefail
 : "${FTP_USERNAME:?}"
 : "${FTP_PASSWORD:?}"
 : "${FTP_PORT:?}"
+: "${HOSTINGER_API_TOKEN:?}"
 
-for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD"; do [ -n "$value" ] && echo "::add-mask::$value"; done
+for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN"; do [ -n "$value" ] && echo "::add-mask::$value"; done
 
 proof="$RUNNER_TEMP/live-zed-preflight"
 rm -rf "$proof"; mkdir -p "$proof"
@@ -20,8 +21,67 @@ probe() {
   printf '%s' "$code" > "$codefile"
 }
 
-# Public runtime truth comes first. If ZED is already degraded, do not waste
-# minutes on FTPS; hand control immediately to the authenticated recovery step.
+publish_latest_hostinger_build_log() {
+  local domain_enc username user_enc build_uuid logs_url
+  domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
+  if ! curl --fail --silent --show-error --location \
+      -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+      "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" \
+      -o "$proof/websites.json"; then
+    echo 'HOSTINGER_BUILD_LOG_PROBE=WEBSITE_LOOKUP_FAILED'
+    return 0
+  fi
+  username="$(node - <<'NODE'
+const fs=require('fs');
+const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/live-zed-preflight/websites.json','utf8'));
+const d=process.env.PROTECTED_DOMAIN.toLowerCase();
+const row=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d);
+if(row?.username) process.stdout.write(String(row.username));
+NODE
+)"
+  if [ -z "$username" ]; then echo 'HOSTINGER_BUILD_LOG_PROBE=USERNAME_NOT_FOUND'; return 0; fi
+  echo "::add-mask::$username"
+  user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
+  if ! curl --fail --silent --show-error --location \
+      -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+      "https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs/builds?per_page=25" \
+      -o "$proof/builds.json"; then
+    echo 'HOSTINGER_BUILD_LOG_PROBE=BUILD_LIST_FAILED'
+    return 0
+  fi
+  build_uuid="$(node -e "const p=require(process.env.RUNNER_TEMP+'/live-zed-preflight/builds.json');process.stdout.write(String((p.data||[])[0]?.uuid||''))")"
+  if [ -z "$build_uuid" ]; then echo 'HOSTINGER_BUILD_LOG_PROBE=NO_BUILD'; return 0; fi
+  echo "HOSTINGER_BUILD_LOG_PROBE uuid=$build_uuid"
+  logs_url="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs/builds/${build_uuid}/logs?from_line=0"
+  if ! curl --fail --silent --show-error --location \
+      -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+      "$logs_url" -o "$proof/build-logs.json"; then
+    echo 'HOSTINGER_BUILD_LOG_PROBE=LOG_FETCH_FAILED'
+    return 0
+  fi
+  LOGFILE="$proof/build-logs.json" node - <<'NODE'
+const fs=require('fs');
+let p;
+try { p=JSON.parse(fs.readFileSync(process.env.LOGFILE,'utf8')); } catch { console.log('HOSTINGER_BUILD_LOG_PROBE=UNPARSEABLE'); process.exit(0); }
+const strings=[];
+function walk(x){
+  if(typeof x==='string') strings.push(x);
+  else if(Array.isArray(x)) x.forEach(walk);
+  else if(x&&typeof x==='object') Object.values(x).forEach(walk);
+}
+walk(p);
+const text=strings.join('\n').split(/\r?\n/).filter(Boolean).slice(-140);
+const redact=s=>s
+  .replace(/((?:TOKEN|PASSWORD|SECRET|API[_-]?KEY|SERVICE[_-]?ROLE[_-]?KEY)\s*[=:]\s*)\S+/ig,'$1[REDACTED]')
+  .replace(/(Bearer\s+)\S+/ig,'$1[REDACTED]');
+console.log('HOSTINGER_BUILD_LOG_BEGIN');
+for(const line of text) console.log(redact(line));
+console.log('HOSTINGER_BUILD_LOG_END');
+NODE
+}
+
+# Public runtime truth comes first. If ZED is already degraded, inspect the
+# latest Hostinger Node build log and hand control immediately to recovery.
 probe "https://$PROTECTED_DOMAIN/?preflight=$GITHUB_RUN_ID" "$proof/root.json" "$proof/root.code" & p1=$!
 probe "https://$PROTECTED_DOMAIN/health?preflight=$GITHUB_RUN_ID" "$proof/health.json" "$proof/health.code" & p2=$!
 probe "https://$PROTECTED_DOMAIN/miniapp/?preflight=$GITHUB_RUN_ID" "$proof/miniapp.html" "$proof/mini.code" & p3=$!
@@ -51,6 +111,7 @@ if(p.payments_in_chat!==false||p.secrets_in_browser!==false) process.exit(1);
 NODE
 ); then
   echo "LIVE_ZED_PREFLIGHT=DEGRADED root=$root_code health=$health_code mini=$mini_code gpt=$status_code"
+  publish_latest_hostinger_build_log
   exit 1
 fi
 
