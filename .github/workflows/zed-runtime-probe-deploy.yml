@@ -15,101 +15,39 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PROBE_REVISION: force-20260819-2024-stage
+  PROBE_REVISION: locate-active-build-20260819
 
 jobs:
-  deploy-probe:
+  locate-runtime:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
       name: cryptoworldz-production
     env:
-      PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
       PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
       FTP_HOST: ${{ secrets.FTP_HOST }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      - run: bash .github/publish-progress.sh ZED_RUNTIME_PROBE_DEPLOY STARTED
+      - run: bash .github/publish-progress.sh ZED_ACTIVE_BUILD_LOCATE STARTED
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
       - run: node .github/install-ci-apt-wrapper.cjs
-      - name: Add deterministic startup stage to temporary probe only
-        shell: bash
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs = require('fs');
-          const path = 'src/full-runtime-entry.js';
-          let source = fs.readFileSync(path, 'utf8');
-          const pairs = [
-            ['async function start() {', 'let startupStage = "enter_start";\n\nasync function start() {'],
-            ['  const config = loadConfig();', '  startupStage = "load_config";\n  const config = loadConfig();'],
-            ['  const supabase = createClient(', '  startupStage = "create_supabase_client";\n  const supabase = createClient('],
-            ['  const bot = new TelegramBot(', '  startupStage = "create_telegram_bot";\n  const bot = new TelegramBot('],
-            ['  const repository = createRepository(', '  startupStage = "create_repository";\n  const repository = createRepository('],
-            ['  const autoClient = createAutoClient(', '  startupStage = "create_auto_client";\n  const autoClient = createAutoClient('],
-            ['  const graceRepository = createGraceRepository(', '  startupStage = "create_grace_repository";\n  const graceRepository = createGraceRepository('],
-            ['  const graceOAuthRepository = createGraceOAuthRepository(', '  startupStage = "create_grace_oauth_repository";\n  const graceOAuthRepository = createGraceOAuthRepository('],
-            ['  const graceOAuthBase = createXOAuthService(', '  startupStage = "create_grace_x_oauth";\n  const graceOAuthBase = createXOAuthService('],
-            ['  const graceFacebookOAuthRepository = createGraceFacebookOAuthRepository(', '  startupStage = "create_grace_facebook_repository";\n  const graceFacebookOAuthRepository = createGraceFacebookOAuthRepository('],
-            ['  const graceFacebookOAuth = createFacebookOAuthService(', '  startupStage = "create_grace_facebook_oauth";\n  const graceFacebookOAuth = createFacebookOAuthService('],
-            ['  const gracePublisher = createGracePublisher({', '  startupStage = "create_grace_publisher";\n  const gracePublisher = createGracePublisher({'],
-            ['  const graceWorker = createGraceWorker(', '  startupStage = "create_grace_worker";\n  const graceWorker = createGraceWorker('],
-            ['  const app = createHttpApp(', '  startupStage = "create_http_app";\n  const app = createHttpApp('],
-            ['  registerOneWorldzPublicCors(app);', '  startupStage = "register_oneworldz_cors";\n  registerOneWorldzPublicCors(app);'],
-            ['  registerCurrentImpactHandlers({ bot });', '  startupStage = "register_current_impact";\n  registerCurrentImpactHandlers({ bot });'],
-            ['  registerUserExperienceSystem({ app, bot, repository, config, supabase });', '  startupStage = "register_user_experience";\n  registerUserExperienceSystem({ app, bot, repository, config, supabase });'],
-            ['  registerZedGuide({ app, repository, config, supabase });', '  startupStage = "register_zed_guide";\n  registerZedGuide({ app, repository, config, supabase });'],
-            ['  registerCommandCentreHandlers({ bot, repository, config });', '  startupStage = "register_command_centre";\n  registerCommandCentreHandlers({ bot, repository, config });'],
-            ['  registerTelegramHandlers({ bot, repository, config });', '  startupStage = "register_telegram";\n  registerTelegramHandlers({ bot, repository, config });'],
-            ['  registerRoleProfileHandler({ bot, repository, config, supabase });', '  startupStage = "register_role_profile";\n  registerRoleProfileHandler({ bot, repository, config, supabase });'],
-            ['  registerScopedBroadcastHandlers({ bot, repository, config });', '  startupStage = "register_scoped_broadcast";\n  registerScopedBroadcastHandlers({ bot, repository, config });'],
-            ['  registerAutoTelegramHandlers({ bot, config, autoClient, supabase });', '  startupStage = "register_auto_telegram";\n  registerAutoTelegramHandlers({ bot, config, autoClient, supabase });'],
-            ['  registerCauseTelegramHandlers({ bot, repository, supabase, config });', '  startupStage = "register_causes";\n  registerCauseTelegramHandlers({ bot, repository, supabase, config });'],
-            ['  registerReferralTelegramHandlers({ bot, repository, supabase, config });', '  startupStage = "register_referrals";\n  registerReferralTelegramHandlers({ bot, repository, supabase, config });'],
-            ['  registerWebsiteTelegramHandlers({ bot, config });', '  startupStage = "register_websites";\n  registerWebsiteTelegramHandlers({ bot, config });'],
-            ['  registerWorkEvidenceHandlers({ bot, repository, config });', '  startupStage = "register_work_evidence";\n  registerWorkEvidenceHandlers({ bot, repository, config });'],
-            ['  registerRewardPolicyHandlers({ bot, config });', '  startupStage = "register_reward_policy";\n  registerRewardPolicyHandlers({ bot, config });'],
-            ['  registerRewardSettlementHandlers({ bot, repository, config, supabase });', '  startupStage = "register_reward_settlement";\n  registerRewardSettlementHandlers({ bot, repository, config, supabase });'],
-            ['  registerProjectWalletSystem({ bot, repository, config, supabase });', '  startupStage = "register_project_wallets";\n  registerProjectWalletSystem({ bot, repository, config, supabase });'],
-            ['  registerWorldzCastSystem({ bot, repository, config, supabase });', '  startupStage = "register_worldzcast";\n  registerWorldzCastSystem({ bot, repository, config, supabase });'],
-            ['  registerLegendV8System({ bot, repository, config, supabase });', '  startupStage = "register_legend_v8";\n  registerLegendV8System({ bot, repository, config, supabase });'],
-            ['  registerExecutiveTelegramHandlers({ bot, repository, config, supabase });', '  startupStage = "register_executive_telegram";\n  registerExecutiveTelegramHandlers({ bot, repository, config, supabase });'],
-            ['  registerGraceTelegramHandlers({ bot, repository: graceRepository, config });', '  startupStage = "register_grace_telegram";\n  registerGraceTelegramHandlers({ bot, repository: graceRepository, config });'],
-            ['  registerGraceBuild2Handlers({ bot, repository: graceRepository, config });', '  startupStage = "register_grace_build2";\n  registerGraceBuild2Handlers({ bot, repository: graceRepository, config });'],
-            ['  registerGraceXOAuthTelegramHandlers({ bot, oauth: graceOAuth, config });', '  startupStage = "register_grace_x_telegram";\n  registerGraceXOAuthTelegramHandlers({ bot, oauth: graceOAuth, config });'],
-            ['  registerGraceFacebookOAuthTelegramHandlers({ bot, oauth: graceFacebookOAuth, config });', '  startupStage = "register_grace_facebook_telegram";\n  registerGraceFacebookOAuthTelegramHandlers({ bot, oauth: graceFacebookOAuth, config });'],
-            ['  registerAutoMiniRoutes({ app, config, autoClient });', '  startupStage = "register_auto_routes";\n  registerAutoMiniRoutes({ app, config, autoClient });'],
-            ['  registerExecutiveRoutes({ app, repository, config, supabase });', '  startupStage = "register_executive_routes";\n  registerExecutiveRoutes({ app, repository, config, supabase });'],
-            ['  registerGraceRoutes({ app, repository: graceRepository, oauth: graceOAuth, facebookOAuth: graceFacebookOAuth, config });', '  startupStage = "register_grace_routes";\n  registerGraceRoutes({ app, repository: graceRepository, oauth: graceOAuth, facebookOAuth: graceFacebookOAuth, config });'],
-            ['  registerCommunityDirectoryHandlers({ bot, repository, config });', '  startupStage = "register_community_directory";\n  registerCommunityDirectoryHandlers({ bot, repository, config });'],
-            ['  app.listen(port, "0.0.0.0", () => {', '  startupStage = "app_listen";\n  app.listen(port, "0.0.0.0", () => {']
-          ];
-          for (const [from, to] of pairs) {
-            if (!source.includes(from)) throw new Error('startup_stage_anchor_missing:' + from.slice(0,60));
-            source = source.replace(from, to);
-          }
-          source = source.replace('  startFailureProbe(error);', '  startFailureProbe(new Error(`${startupStage}: ${sanitizeStartupError(error)}`));');
-          fs.writeFileSync(path, source);
-          NODE
-          node --check src/full-runtime-entry.js
       - name: Install bounded FTPS client
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq lftp
-      - name: Deploy only startup-probe runtime file
+      - name: List protected Node runtime tree safely
         shell: bash
         run: |
           set -euo pipefail
-          for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN"; do echo "::add-mask::$value"; done
+          for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD"; do echo "::add-mask::$value"; done
           raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
           if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
-          cat > "$RUNNER_TEMP/probe-put.lftp" <<EOF
+          cat > "$RUNNER_TEMP/locate.lftp" <<EOF
           set cmd:fail-exit true
           set net:max-retries 2
           set net:timeout 20
@@ -117,49 +55,13 @@ jobs:
           set ftp:ssl-protect-data true
           set ssl:verify-certificate true
           set ssl:check-hostname false
-          put src/full-runtime-entry.js -o $PROTECTED_NODE_ROOT/src/full-runtime-entry.js
-          get $PROTECTED_NODE_ROOT/src/full-runtime-entry.js -o $RUNNER_TEMP/remote-full-runtime-entry.js
+          cls -la $PROTECTED_NODE_ROOT
+          cls -la $PROTECTED_NODE_ROOT/*
+          cls -la $PROTECTED_NODE_ROOT/*/*
           bye
           EOF
-          success=0
-          for attempt in 1 2 3; do
-            echo "ZED_PROBE_FTPS attempt=$attempt"
-            if timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/probe-put.lftp" "$raw_host"; then success=1; break; fi
-            sleep 5
-          done
-          test "$success" = 1
-          cmp -s src/full-runtime-entry.js "$RUNNER_TEMP/remote-full-runtime-entry.js"
-          echo 'ZED_RUNTIME_PROBE_REMOTE_BYTES=PASS'
-      - name: Restart Hostinger Node process
-        shell: bash
-        run: |
-          set -euo pipefail
-          domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
-          curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" -o "$RUNNER_TEMP/websites.json"
-          username="$(node - <<'NODE'
-          const fs=require('fs'); const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/websites.json','utf8')); const d=process.env.PROTECTED_DOMAIN.toLowerCase(); const row=(p.data||[]).find(x=>String(x.domain||'').toLowerCase()===d); if(!row?.username) process.exit(2); process.stdout.write(String(row.username));
-          NODE
-          )"
-          echo "::add-mask::$username"
-          user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
-          url="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs/server/restart"
-          code="$(curl --silent --show-error --location --request POST -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$url")"
-          case "$code" in 200|201|202|204) ;; *) cat "$RUNNER_TEMP/restart.json"; exit 1;; esac
-          echo "HOSTINGER_ZED_RESTART=PASS HTTP=$code"
-      - name: Read startup response
-        shell: bash
-        run: |
-          set -euo pipefail
-          for i in $(seq 1 30); do
-            sleep 4
-            code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 12 -o "$RUNNER_TEMP/live.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/health?probe=$GITHUB_RUN_ID-$i" || true)"
-            echo "ZED_STARTUP_PROBE attempt=$i http=$code"
-            if [ "$code" != 000 ]; then cat "$RUNNER_TEMP/live.json" || true; fi
-            if [ "$code" = 200 ]; then exit 0; fi
-            if [ "$code" = 503 ] && grep -Fq 'startup_failure_probe_v1' "$RUNNER_TEMP/live.json"; then exit 1; fi
-          done
-          exit 1
+          timeout 120 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/locate.lftp" "$raw_host" | sed -E 's/[A-Za-z0-9_-]{40,}/[LONG_VALUE_REDACTED]/g'
       - if: success()
-        run: bash .github/publish-progress.sh ZED_RUNTIME_PROBE_DEPLOY PASS
+        run: bash .github/publish-progress.sh ZED_ACTIVE_BUILD_LOCATE PASS
       - if: failure()
-        run: bash .github/publish-progress.sh ZED_RUNTIME_PROBE_DEPLOY FAIL
+        run: bash .github/publish-progress.sh ZED_ACTIVE_BUILD_LOCATE FAIL
