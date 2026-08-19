@@ -8,6 +8,8 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(root, "dist", "ecosystem");
 const OLD_JAY_SUPPORT = "https://donateworldz.com/jayjayteamdev/";
 const CURRENT_JAY_SUPPORT = "https://donateworldz.com/support-jayjayteamdev/";
+const OLD_JAY_RELATIVE = "/jayjayteamdev/";
+const CURRENT_JAY_RELATIVE = "/support-jayjayteamdev/";
 
 async function listHtml(dir, rel = "") {
   const out = [];
@@ -33,7 +35,9 @@ function addCss(html) {
   return html.replace("</head>", '<link rel="stylesheet" href="/assets/css/experience-theme.css"></head>');
 }
 function normalizePublicRoutes(html) {
-  return html.replaceAll(OLD_JAY_SUPPORT, CURRENT_JAY_SUPPORT);
+  return html
+    .replaceAll(OLD_JAY_SUPPORT, CURRENT_JAY_SUPPORT)
+    .replaceAll(OLD_JAY_RELATIVE, CURRENT_JAY_RELATIVE);
 }
 
 for (const target of productionTargets) {
@@ -49,7 +53,7 @@ for (const target of productionTargets) {
     let html = normalizePublicRoutes(await readFile(file, "utf8"));
     if (theme) html = addCss(addBodyClass(html, target.key));
     if (/gofund\.me|gofundme/i.test(html)) throw new Error(`Legacy GoFundMe production route remains in ${target.key}/${relative}`);
-    if (html.includes(OLD_JAY_SUPPORT)) throw new Error(`Superseded JayJay support URL remains in ${target.key}/${relative}`);
+    if (html.includes(OLD_JAY_SUPPORT) || html.includes(OLD_JAY_RELATIVE)) throw new Error(`Superseded JayJay support route remains in ${target.key}/${relative}`);
     await writeFile(file, html, "utf8");
   }
 }
