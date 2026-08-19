@@ -37,3 +37,4 @@ echo "DEPLOYMENT_PROGRESS_PUBLISHED gate=$gate result=$result run=$run_id"
 
 # Canonical deployment trigger marker: authenticated production rail control.
 # Live observable canonical BUILD trigger: 2026-08-19.
+# Repaired sponsor-shell BUILD trigger: 2026-08-19.
