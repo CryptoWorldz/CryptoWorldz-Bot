@@ -13,7 +13,7 @@ export const links = Object.freeze({
   reaganChildren: "https://donateworldz.com/reagan-children/",
   communityDirectory: "https://oneworldz.com/community-support/",
   communityImpact: "https://donateworldz.com/community-impact/",
-  jayjaySupport: "https://donateworldz.com/jayjayteamdev/",
+  jayjaySupport: "https://donateworldz.com/support-jayjayteamdev/",
   foodWorldz: "https://foodworldz.com",
   zed: "https://t.me/CryptoWorldzBot",
   raaiiidd: "https://t.me/CryptoWorldzRaaiiiddTeam",
@@ -37,7 +37,7 @@ export const officialDirectory = Object.freeze([
   ["ImpactBased", "Purpose-led launch and impact pathway", links.impactBased],
   ["LearnWorldz", "Learning hub", links.learnWorldz],
   ["OneWorldz Law", "Public-interest law and policy ideas", links.oneWorldzLaw],
-  ["DonateWorldz", "Three separated support pathways", links.donateWorldz],
+  ["DonateWorldz", "Four separated support pathways", links.donateWorldz],
   ["FoodWorldz", "Food, water and practical support", links.foodWorldz],
   ["CryptoWorldz Raaiiidd Team", "Official Telegram action team", links.raaiiidd]
 ].map(([name, role, url]) => Object.freeze({ name, role, url })));
