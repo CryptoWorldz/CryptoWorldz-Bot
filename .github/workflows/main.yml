@@ -16,6 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  RESUME_REVISION: env-key-diagnostic-1
   LOCKED_SOURCE_COMMIT: 3b52c7eae7834a33f1f74e312433644ea239904c
   LOCKED_SOURCE_RUN: "32219855385"
   LOCKED_STATIC_TREE: 295e0706bc033b294736d7f87dc6d36f783eaa3a
@@ -34,10 +35,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Publish authenticated checkpoint start
         run: bash .github/publish-progress.sh CHECKPOINT STARTED
-
       - id: authority
         name: Prove checkpoint identity and recorded passes
         env:
@@ -49,7 +48,6 @@ jobs:
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
           git cat-file -e "$LOCKED_SOURCE_COMMIT^{commit}"
           test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$LOCKED_STATIC_TREE"
-
           changed="$(git diff --name-only "$LOCKED_SOURCE_COMMIT" HEAD)"
           while IFS= read -r path; do
             [ -z "$path" ] && continue
@@ -58,7 +56,6 @@ jobs:
               *) echo "::error::Checkpoint invalidated by changed path: $path"; exit 1 ;;
             esac
           done <<< "$changed"
-
           curl --fail --silent --show-error --location \
             -H "Authorization: Bearer $GH_AUTH" \
             -H 'Accept: application/vnd.github+json' \
@@ -67,29 +64,15 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/checkpoint-jobs.json','utf8'));
-          const required=[
-            'SUCCESS STORY 1 — BUILD',
-            'SUCCESS STORY 2 — TESTS',
-            'SUCCESS STORY 3 — LIGHTHOUSE 100',
-            'Desktop + mobile candidate proof'
-          ];
-          for(const name of required){
-            const job=(p.jobs||[]).find(x=>x.name===name);
-            if(!job||job.status!=='completed'||job.conclusion!=='success'){
-              console.error(`Checkpoint gate not proven: ${name}`);
-              process.exit(1);
-            }
-          }
+          const required=['SUCCESS STORY 1 — BUILD','SUCCESS STORY 2 — TESTS','SUCCESS STORY 3 — LIGHTHOUSE 100','Desktop + mobile candidate proof'];
+          for(const name of required){const job=(p.jobs||[]).find(x=>x.name===name);if(!job||job.status!=='completed'||job.conclusion!=='success'){console.error(`Checkpoint gate not proven: ${name}`);process.exit(1)}}
           NODE
-
           echo "static_tree=$LOCKED_STATIC_TREE" >> "$GITHUB_OUTPUT"
           echo "candidate_fingerprint=$LOCKED_CANDIDATE_FINGERPRINT" >> "$GITHUB_OUTPUT"
-          echo "LOCKED_CHECKPOINT=PASS source_run=$LOCKED_SOURCE_RUN static_tree=$LOCKED_STATIC_TREE fingerprint=$LOCKED_CANDIDATE_FINGERPRINT"
-
+          echo "LOCKED_CHECKPOINT=PASS source_run=$LOCKED_SOURCE_RUN"
       - name: Publish authenticated checkpoint pass
         if: success()
         run: bash .github/publish-progress.sh CHECKPOINT PASS
-
       - name: Publish authenticated checkpoint failure
         if: failure()
         run: bash .github/publish-progress.sh CHECKPOINT FAIL
@@ -115,10 +98,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Publish authenticated ZED resume start
         run: bash .github/publish-progress.sh ZED_MINIAPP STARTED
-
       - name: Refuse stale resume generation
         shell: bash
         run: |
@@ -126,15 +107,12 @@ jobs:
           git fetch origin main --depth=1
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
           test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$LOCKED_STATIC_TREE"
-
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
-
       - name: Repair, deploy and prove protected runtime
         run: bash .github/resume-locked-zed.sh
-
       - name: Publish authenticated ZED resume failure
         if: failure()
         run: bash .github/publish-progress.sh ZED_MINIAPP FAIL
@@ -155,15 +133,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Publish authenticated Hostinger resume start
         run: bash .github/publish-progress.sh HOSTINGER STARTED
-
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
-
       - name: Refuse stale generation and materialize exact locked candidate
         shell: bash
         run: |
@@ -178,10 +153,8 @@ jobs:
           got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
           test "$got" = "$LOCKED_CANDIDATE_FINGERPRINT"
           echo "LOCKED_CANDIDATE_REBUILT_FOR_TRANSPORT=PASS $got"
-
       - name: Deploy and prove exact 18-site Hostinger fleet
         run: bash .github/resume-locked-static-deploy.sh
-
       - name: Publish authenticated Hostinger resume failure
         if: failure()
         run: bash .github/publish-progress.sh HOSTINGER FAIL
@@ -195,14 +168,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Publish authenticated live-proof resume start
         run: bash .github/publish-progress.sh LIVE_PROOF STARTED
-
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-
       - name: Refuse stale live proof generation
         shell: bash
         run: |
@@ -210,16 +180,13 @@ jobs:
           git fetch origin main --depth=1
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
           test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$LOCKED_STATIC_TREE"
-
       - name: Install browser proof runtime
         working-directory: apps/oneworldz-ecosystem-release
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
-
       - name: Prove all 18 live sites and ZED remain live
         run: bash .github/resume-locked-live-proof.sh
-
       - name: Publish authenticated live-proof resume failure
         if: failure()
         run: bash .github/publish-progress.sh LIVE_PROOF FAIL
@@ -232,10 +199,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Publish authenticated final-record start
         run: bash .github/publish-progress.sh FINAL STARTED
-
       - name: Refuse stale final record
         shell: bash
         run: |
@@ -243,20 +208,12 @@ jobs:
           git fetch origin main --depth=1
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
           test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$LOCKED_STATIC_TREE"
-
       - name: Record final 100 percent production pass
         shell: bash
         run: |
           set -euo pipefail
           state='deployments/oneworldz-19-total.request'
-          set_key() {
-            key="$1"; value="$2"
-            if grep -q "^${key}=" "$state"; then
-              sed -i "s#^${key}=.*#${key}=${value}#" "$state"
-            else
-              printf '%s=%s\n' "$key" "$value" >> "$state"
-            fi
-          }
+          set_key(){ key="$1"; value="$2"; if grep -q "^${key}=" "$state"; then sed -i "s#^${key}=.*#${key}=${value}#" "$state"; else printf '%s=%s\n' "$key" "$value" >> "$state"; fi; }
           set_key final_100_percent_pass YES
           set_key final_pass_scope FULL_18_SITE_STATIC_PLUS_ZED_MINIAPP_AUTHENTICATED_PARTICIPANT_GPT_LIVE_PROOF
           set_key execution_phase COMPLETE
@@ -291,7 +248,6 @@ jobs:
           git commit -m 'RECORD JAYJAYTEAMDEV CHATGPT TOTAL DEPLOYMENT PASS'
           git push origin HEAD:main
           bash .github/publish-progress.sh FINAL PASS
-
       - name: Publish authenticated final-record failure
         if: failure()
         run: bash .github/publish-progress.sh FINAL FAIL
