@@ -69,6 +69,7 @@ jobs:
     timeout-minutes: 45
     outputs:
       static_tree: ${{ steps.lock.outputs.static_tree }}
+      candidate_fingerprint: ${{ steps.fingerprint.outputs.candidate_fingerprint }}
     steps:
       - uses: actions/checkout@v4
 
@@ -121,13 +122,15 @@ jobs:
           grep -RFl --include='*.html' 'Created with the Vision' "$root" >/dev/null
           ! grep -RIE 'OPENAI_API_KEY|sk-proj-|sk_live_|sk_test_|service_role|FTP_PASSWORD|DATABASE_URL|SUPABASE_SERVICE' "$root"
 
-      - name: Upload immutable BUILD candidate
-        uses: actions/upload-artifact@v4
-        with:
-          name: oneworldz-candidate-${{ github.run_id }}
-          path: apps/oneworldz-ecosystem-release/dist/ecosystem/
-          if-no-files-found: error
-          retention-days: 30
+      - id: fingerprint
+        name: Fingerprint complete BUILD candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_fingerprint="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
+          test -n "$candidate_fingerprint"
+          echo "candidate_fingerprint=$candidate_fingerprint" >> "$GITHUB_OUTPUT"
+          echo "CANDIDATE_FINGERPRINT=$candidate_fingerprint"
 
       - name: Publish authenticated BUILD pass
         if: success()
@@ -153,11 +156,16 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Download exact BUILD candidate
-        uses: actions/download-artifact@v4
-        with:
-          name: oneworldz-candidate-${{ github.run_id }}
-          path: apps/oneworldz-ecosystem-release/dist/ecosystem
+      - name: Rebuild and match BUILD candidate fingerprint
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
+          npm run build:ecosystem-release
+          got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
+          test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
+          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
 
       - name: Run complete test and security gates
         shell: bash
@@ -170,7 +178,7 @@ jobs:
           bash .github/publish-progress.sh TESTS PASS
 
   lighthouse:
-    needs: tests
+    needs: [build, tests]
     name: SUCCESS STORY 3 — LIGHTHOUSE 100
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -185,11 +193,16 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Download exact BUILD candidate
-        uses: actions/download-artifact@v4
-        with:
-          name: oneworldz-candidate-${{ github.run_id }}
-          path: apps/oneworldz-ecosystem-release/dist/ecosystem
+      - name: Rebuild and match BUILD candidate fingerprint
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
+          npm run build:ecosystem-release
+          got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
+          test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
+          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
 
       - name: Prove Lighthouse SEO 100
         shell: bash
@@ -199,7 +212,7 @@ jobs:
           bash .github/publish-progress.sh LIGHTHOUSE PASS
 
   preview:
-    needs: lighthouse
+    needs: [build, lighthouse]
     name: Desktop + mobile candidate proof
     runs-on: ubuntu-latest
     timeout-minutes: 75
@@ -210,11 +223,17 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Download exact verified candidate
-        uses: actions/download-artifact@v4
-        with:
-          name: oneworldz-candidate-${{ github.run_id }}
-          path: apps/oneworldz-ecosystem-release/dist/ecosystem
+      - name: Rebuild and match BUILD candidate fingerprint
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          sudo apt-get update -qq
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
+          npm run build:ecosystem-release
+          got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
+          test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
+          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
 
       - name: Install browser proof runtime
         working-directory: apps/oneworldz-ecosystem-release
@@ -251,15 +270,6 @@ jobs:
           test "$failed" = '0'
           cd "$GITHUB_WORKSPACE"
           bash .github/publish-progress.sh DESKTOP_MOBILE PASS
-
-      - name: Upload candidate visual evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: oneworldz-preview-visual-${{ github.run_id }}
-          path: visual-proof/
-          if-no-files-found: error
-          retention-days: 30
 
   zed:
     needs: [build, lighthouse, preview]
@@ -577,11 +587,17 @@ jobs:
           git fetch origin main --depth=1
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
 
-      - name: Download exact verified candidate
-        uses: actions/download-artifact@v4
-        with:
-          name: oneworldz-candidate-${{ github.run_id }}
-          path: apps/oneworldz-ecosystem-release/dist/ecosystem
+      - name: Rebuild and match BUILD candidate fingerprint
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          sudo apt-get update -qq
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin
+          npm run build:ecosystem-release
+          got="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
+          test "$got" = "${{ needs.build.outputs.candidate_fingerprint }}"
+          echo "CANDIDATE_FINGERPRINT_MATCH=PASS $got"
 
       - name: Install FTPS utility
         run: |
@@ -819,15 +835,6 @@ jobs:
           printf 'run_id=%s\nstatic_tree=%s\nproof=EXACT_FTPS_AND_PUBLIC_INDEX_MANIFEST_BYTES\n' "$GITHUB_RUN_ID" "${{ needs.build.outputs.static_tree }}" > deployment-proof/release.txt
           bash .github/publish-progress.sh HOSTINGER PASS
 
-      - name: Upload deployment ledger
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: oneworldz-deployment-ledger-${{ github.run_id }}
-          path: deployment-proof/
-          if-no-files-found: warn
-          retention-days: 30
-
   live-proof:
     needs: [build, deploy]
     name: Live 18-site + full ZED proof
@@ -897,15 +904,6 @@ jobs:
           done
           test "$passed" = '1'
           bash .github/publish-progress.sh LIVE_PROOF PASS
-
-      - name: Upload fresh live visual evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: oneworldz-live-visual-${{ github.run_id }}
-          path: live-proof/
-          if-no-files-found: error
-          retention-days: 30
 
   record:
     needs: [build, live-proof]
