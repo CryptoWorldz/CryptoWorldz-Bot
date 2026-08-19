@@ -116,11 +116,12 @@ test("OneWorldz, CryptoWorldz and Purple Diamond Crew keep three distinct locked
   const oneworldz = await readFile(path.join(distRoot, "oneworldz", "index.html"), "utf8");
   const cryptoworldz = await readFile(path.join(distRoot, "cryptoworldz", "index.html"), "utf8");
   const pdc = await readFile(path.join(distRoot, "purplediamondcrew", "index.html"), "utf8");
-  assert.match(oneworldz, /class="oneworldz-blue-white"/);
+  assert.match(oneworldz, /class="[^"]*\boneworldz-blue-white\b[^"]*"/);
   assert.match(oneworldz, /--accent:#4da3ff;--accent-2:#ffffff/);
-  assert.match(cryptoworldz, /class="cryptoworldz-visual route-home"/);
+  assert.match(cryptoworldz, /class="[^"]*\bcryptoworldz-visual\b[^"]*"/);
+  assert.match(cryptoworldz, /class="[^"]*\broute-home\b[^"]*"/);
   assert.match(cryptoworldz, /cryptoworldz-visual\.css/);
-  assert.match(pdc, /class="pdc-purple-theme"/);
+  assert.match(pdc, /class="[^"]*\bpdc-purple-theme\b[^"]*"/);
   assert.match(pdc, /pdc-market\.css/);
 });
 

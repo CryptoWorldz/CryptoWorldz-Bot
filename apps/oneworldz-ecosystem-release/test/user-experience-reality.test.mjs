@@ -67,7 +67,11 @@ test("OneWorldz Heroes is a real canonical page inside the sitemap and direct-pa
   const html = await read(path.join(dist, "oneworldz", "heroes", "index.html"));
   assert.ok(html.includes("OneWorldz Heroes | Real-World Action & Recognition"));
   assert.ok(html.includes("Evidence → Human Review → Recognition"));
-  assert.ok(html.includes("https://cryptobotz.cryptoworldz.xyz/api/public/heroes"));
+  assert.ok(html.includes("/assets/js/heroes.js"));
+  const heroesJs = await read(path.join(dist, "oneworldz", "assets", "js", "heroes.js"));
+  assert.ok(heroesJs.includes("https://cryptobotz.cryptoworldz.xyz/api/public/heroes"));
+  assert.ok(heroesJs.includes('location.hostname === "oneworldz.com"'));
+  assert.ok(heroesJs.includes('location.hostname === "www.oneworldz.com"'));
   const sitemap = await read(path.join(dist, "oneworldz", "sitemap.xml"));
   assert.ok(sitemap.includes("https://oneworldz.com/heroes/"));
   const siteTree = JSON.parse(await read(path.join(dist, "oneworldz", "site-tree.json")));

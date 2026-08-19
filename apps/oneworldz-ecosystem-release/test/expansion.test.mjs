@@ -48,9 +48,9 @@ buildTest("expansion build produces all three new root-domain packages", async (
   }
 });
 
-buildTest("DonateWorldz contains three separated support routes and payment boundaries", async () => {
+buildTest("DonateWorldz contains four separated support routes and payment boundaries", async () => {
   const root = path.join(distRoot, "donateworldz");
-  for (const route of ["reagan-children", "community-impact", "jayjayteamdev"]) {
+  for (const route of ["reagan-children", "community-impact", "support-jayjayteamdev", "davis-family"]) {
     await access(path.join(root, route, "index.html"));
   }
   const home = await readFile(path.join(root, "index.html"), "utf8");

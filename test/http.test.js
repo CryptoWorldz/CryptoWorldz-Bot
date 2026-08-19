@@ -51,9 +51,9 @@ test("Mini App page is served while protected data rejects unsigned browser IDs"
   assert.match(miniAppSource, /governance-vote/);
   assert.match(miniAppSource, /\/api\/mini\/governance\/\$\{vote\.dataset\.proposalId\}\/vote/);
   assert.match(miniAppSource, /selected_option/);
-  assert.match(miniAppSource, /Help Reagan Feed 60 Orphaned Children in Uganda/);
-  assert.match(miniAppSource, /https:\/\/gofund\.me\/c2e4fa936/);
-  assert.doesNotMatch(miniAppSource, /https:\/\/gofund\.me\/65129e58a/);
+  assert.match(miniAppSource, /Help Reagan & Children in Uganda/);
+  assert.match(miniAppSource, /https:\/\/donateworldz\.com\/reagan-children\//);
+  assert.doesNotMatch(miniAppSource, /gofund(?:me)?\.com|gofund\.me/i);
   assert.match(miniAppSource, /does not award Legend Points based on donation amounts/);
   assert.doesNotMatch(miniAppSource, /wallet\.href/);
 
