@@ -1,0 +1,61 @@
+name: Generate BUILD Image Tools Workflow Candidate
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.head_commit.message == 'GENERATE BUILD IMAGE TOOLS WORKFLOW CANDIDATE' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate canonical workflow with explicit image tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/main.yml')
+          y=p.read_text()
+          a=y.index('  build:\n')
+          b=y.index('  tests:\n', a)
+          block=y[a:b]
+          target='''      - name: Install locked dependencies\n        run: npm ci\n'''
+          insert='''\n      - name: Install production image rendering tools\n        timeout-minutes: 10\n        shell: bash\n        run: |\n          set -euo pipefail\n          sudo apt-get update -qq\n          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq imagemagick libavif-bin\n          (command -v magick || command -v convert)\n          command -v avifenc\n          command -v avifdec\n'''
+          if target not in block: raise SystemExit('BUILD npm ci target missing')
+          if 'Install production image rendering tools' not in block:
+              block=block.replace(target,target+insert,1)
+          y=y[:a]+block+y[b:]
+          if y.count('Install production image rendering tools') != 1:
+              raise SystemExit('Image tools step count drift')
+          if '  verify:\n' in y: raise SystemExit('Bundled verify returned')
+          Path('workflow-image-tools.txt').write_text(y)
+          PY
+
+      - name: Prove candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'Install production image rendering tools' workflow-image-tools.txt
+          grep -Fq 'libavif-bin' workflow-image-tools.txt
+          grep -Fq 'SUCCESS STORY 1 — BUILD' workflow-image-tools.txt
+          ! grep -Fq '  verify:' workflow-image-tools.txt
+
+      - name: Publish normal candidate file
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add workflow-image-tools.txt
+          git commit -m 'PUBLISH BUILD IMAGE TOOLS WORKFLOW CANDIDATE'
+          git push origin HEAD:main
