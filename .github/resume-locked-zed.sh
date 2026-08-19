@@ -20,63 +20,91 @@ node --check src/user-experience.js
 node --check src/zed-guide.js
 echo 'ZED_LOCAL_RUNTIME_VALIDATION=PASS'
 
-sudo apt-get update -qq
-sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq lftp
+# No apt/lftp dependency: use Python stdlib FTPS. Keep CA verification enabled,
+# but disable hostname comparison because Hostinger's FTP endpoint certificate
+# does not name the configured FTP hostname even though its chain is trusted.
+python3 - <<'PY'
+import ftplib, io, os, pathlib, posixpath, ssl, urllib.parse
 
-raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
-if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+raw = os.environ['FTP_HOST'].strip()
+if '://' not in raw:
+    raw = 'ftps://' + raw
+u = urllib.parse.urlparse(raw)
+host = u.hostname or os.environ['FTP_HOST'].strip().split('/')[0].split(':')[0]
+port = int(os.environ.get('FTP_PORT') or u.port or 21)
+root = os.environ['PROTECTED_NODE_ROOT']
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ftp = ftplib.FTP_TLS(context=ctx, timeout=45)
+ftp.connect(host, port)
+ftp.login(os.environ['FTP_USERNAME'], os.environ['FTP_PASSWORD'])
+ftp.prot_p()
+ftp.cwd(root)
 
-cat > "$RUNNER_TEMP/zed-upload.lftp" <<EOF
-set cmd:fail-exit true
-set net:max-retries 2
-set net:timeout 30
-set ftp:ssl-force true
-set ftp:ssl-protect-data true
-set ssl:verify-certificate true
-set ssl:check-hostname false
-cd "$PROTECTED_NODE_ROOT"
-lcd "$GITHUB_WORKSPACE"
-put index.js -o index.js
-put package.json -o package.json
-put package-lock.json -o package-lock.json
-mirror -R --verbose=1 --only-newer --exclude-glob .env --exclude-glob '*.log' src src
-mirror -R --verbose=1 --only-newer public public
-mirror -R --verbose=1 --only-newer .well-known .well-known
-bye
-EOF
+def ensure_dir(rel_dir):
+    ftp.cwd(root)
+    if not rel_dir or rel_dir == '.':
+        return
+    for part in pathlib.PurePosixPath(rel_dir).parts:
+        if part in ('', '.'):
+            continue
+        try:
+            ftp.cwd(part)
+        except ftplib.error_perm:
+            try:
+                ftp.mkd(part)
+            except ftplib.error_perm:
+                pass
+            ftp.cwd(part)
 
-timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/zed-upload.lftp" "$raw_host"
-echo 'ZED_FULL_RUNTIME_FTPS_UPLOAD=PASS'
+def upload_file(local_path, remote_rel):
+    remote_rel = remote_rel.replace(os.sep, '/')
+    parent = posixpath.dirname(remote_rel)
+    name = posixpath.basename(remote_rel)
+    ensure_dir(parent)
+    tmp = name + '.oneworldz-new'
+    try:
+        ftp.delete(tmp)
+    except ftplib.all_errors:
+        pass
+    with open(local_path, 'rb') as f:
+        ftp.storbinary('STOR ' + tmp, f, blocksize=262144)
+    try:
+        ftp.delete(name)
+    except ftplib.all_errors:
+        pass
+    ftp.rename(tmp, name)
 
-proof="$RUNNER_TEMP/zed-ftps-proof"; rm -rf "$proof"; mkdir -p "$proof/src" "$proof/public/miniapp"
-cat > "$RUNNER_TEMP/zed-proof.lftp" <<EOF
-set cmd:fail-exit true
-set net:max-retries 2
-set net:timeout 30
-set ftp:ssl-force true
-set ftp:ssl-protect-data true
-set ssl:verify-certificate true
-set ssl:check-hostname false
-cd "$PROTECTED_NODE_ROOT"
-get index.js -o "$proof/index.js"
-get src/full-runtime-entry.js -o "$proof/src/full-runtime-entry.js"
-get src/http.js -o "$proof/src/http.js"
-get src/user-experience.js -o "$proof/src/user-experience.js"
-get src/zed-guide.js -o "$proof/src/zed-guide.js"
-get public/miniapp/index.html -o "$proof/public/miniapp/index.html"
-get public/miniapp/experience.js -o "$proof/public/miniapp/experience.js"
-bye
-EOF
+files = []
+for name in ('index.js', 'package.json', 'package-lock.json'):
+    p = pathlib.Path(name)
+    if p.is_file():
+        files.append((p, name))
+for root_name in ('src', 'public', '.well-known'):
+    base = pathlib.Path(root_name)
+    if not base.exists():
+        continue
+    for p in sorted(base.rglob('*')):
+        if not p.is_file():
+            continue
+        rel = p.as_posix()
+        if rel.endswith('.log') or rel.endswith('/.env') or rel == '.env':
+            continue
+        files.append((p, rel))
+for local, rel in files:
+    upload_file(local, rel)
+print(f'ZED_FULL_RUNTIME_PYTHON_FTPS_UPLOAD=PASS files={len(files)}')
 
-timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/zed-proof.lftp" "$raw_host"
-cmp -s index.js "$proof/index.js"
-cmp -s src/full-runtime-entry.js "$proof/src/full-runtime-entry.js"
-cmp -s src/http.js "$proof/src/http.js"
-cmp -s src/user-experience.js "$proof/src/user-experience.js"
-cmp -s src/zed-guide.js "$proof/src/zed-guide.js"
-cmp -s public/miniapp/index.html "$proof/public/miniapp/index.html"
-cmp -s public/miniapp/experience.js "$proof/public/miniapp/experience.js"
-echo 'ZED_FULL_RUNTIME_REMOTE_BYTES=PASS'
+for rel in ('index.js','src/full-runtime-entry.js','src/http.js','src/user-experience.js','src/zed-guide.js','public/miniapp/index.html','public/miniapp/experience.js'):
+    local = pathlib.Path(rel).read_bytes()
+    ftp.cwd(root)
+    buf = io.BytesIO()
+    ftp.retrbinary('RETR ' + rel, buf.write, blocksize=262144)
+    if buf.getvalue() != local:
+        raise SystemExit(f'REMOTE_BYTE_MISMATCH:{rel}')
+print('ZED_FULL_RUNTIME_REMOTE_BYTES=PASS')
+ftp.quit()
+PY
 
 domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
 curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" -o "$RUNNER_TEMP/websites.json"
@@ -87,29 +115,50 @@ NODE
 echo "::add-mask::$username"
 user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
 base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
-code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/server/restart")"
+code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/server/restart" || true)"
 case "$code" in 200|201|202|204) echo "HOSTINGER_MANAGED_RESTART=PASS HTTP=$code";; *) cat "$RUNNER_TEMP/restart.json" 2>/dev/null || true; echo "::error::Managed restart rejected HTTP=$code"; exit 1;; esac
 
-probe(){ local url="$1" out="$2"; curl --silent --show-error --location --connect-timeout 8 --max-time 12 -o "$out" -w '%{http_code}' "$url" || true; }
-for i in $(seq 1 48); do
-  sleep 5
-  root="$(probe "https://$PROTECTED_DOMAIN/?proof=$GITHUB_RUN_ID-$i" "$RUNNER_TEMP/root.json")"
-  health="$(probe "https://$PROTECTED_DOMAIN/health?proof=$GITHUB_RUN_ID-$i" "$RUNNER_TEMP/health.json")"
-  mini="$(probe "https://$PROTECTED_DOMAIN/miniapp/?proof=$GITHUB_RUN_ID-$i" "$RUNNER_TEMP/mini.html")"
-  gpt="$(probe "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=$GITHUB_RUN_ID-$i" "$RUNNER_TEMP/gpt.json")"
-  if [ "$root" = 200 ] && [ "$health" = 200 ] && [ "$mini" = 200 ] && [ "$gpt" = 200 ] \
+probe_one(){ local url="$1" out="$2" codefile="$3" code; code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 9 -o "$out" -w '%{http_code}' "$url" || true)"; printf '%s' "$code" > "$codefile"; }
+full_pass(){
+  [ "$(cat "$RUNNER_TEMP/root.code")" = 200 ] && [ "$(cat "$RUNNER_TEMP/health.code")" = 200 ] && [ "$(cat "$RUNNER_TEMP/mini.code")" = 200 ] && [ "$(cat "$RUNNER_TEMP/gpt.code")" = 200 ] \
     && grep -Fq '"service":"CryptoWorldz Zed Bot"' "$RUNNER_TEMP/root.json" \
     && grep -Fq '"ok":true' "$RUNNER_TEMP/health.json" \
     && grep -Fq 'id="splashback"' "$RUNNER_TEMP/mini.html" \
     && grep -Fq 'id="zed-guide"' "$RUNNER_TEMP/mini.html" \
     && grep -Fq 'id="create"' "$RUNNER_TEMP/mini.html" \
-    && grep -Fq 'id="heroes"' "$RUNNER_TEMP/mini.html"; then
-      echo 'ZED_AUTO_GRACE_COMMAND_CENTRE_LIVE=PASS'
-      bash .github/publish-progress.sh ZED_MINIAPP PASS
-      exit 0
+    && grep -Fq 'id="heroes"' "$RUNNER_TEMP/mini.html" \
+    && STATUS="$RUNNER_TEMP/gpt.json" node - <<'NODE'
+const fs=require('fs'); const p=JSON.parse(fs.readFileSync(process.env.STATUS,'utf8'));
+if(p.ok!==true||p.openai_api_configured!==true) process.exit(1);
+if(p.guard_profile!=="oneworldz-public-low-cost-v1"||p.guard_enforced!==true) process.exit(1);
+if(p.model!=="gpt-4o-mini"||p.max_output_tokens!==320) process.exit(1);
+if(p.per_ip_limit_10m!==8||p.daily_request_limit!==1000) process.exit(1);
+if(p.payments_in_chat!==false||p.secrets_in_browser!==false) process.exit(1);
+NODE
+}
+
+for i in $(seq 1 20); do
+  sleep 4
+  tag="full_runtime=${GITHUB_SHA}-${GITHUB_RUN_ID}-${i}"
+  probe_one "https://$PROTECTED_DOMAIN/?$tag" "$RUNNER_TEMP/root.json" "$RUNNER_TEMP/root.code" & p1=$!
+  probe_one "https://$PROTECTED_DOMAIN/health?$tag" "$RUNNER_TEMP/health.json" "$RUNNER_TEMP/health.code" & p2=$!
+  probe_one "https://$PROTECTED_DOMAIN/miniapp/?$tag" "$RUNNER_TEMP/mini.html" "$RUNNER_TEMP/mini.code" & p3=$!
+  probe_one "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?$tag" "$RUNNER_TEMP/gpt.json" "$RUNNER_TEMP/gpt.code" & p4=$!
+  wait "$p1" "$p2" "$p3" "$p4" || true
+  if full_pass; then
+    echo 'ZED_AUTO_GRACE_COMMAND_CENTRE_LIVE=PASS'
+    bash .github/publish-progress.sh ZED_MINIAPP PASS
+    exit 0
   fi
-  echo "ZED_CONVERGENCE attempt=$i root=$root health=$health mini=$mini gpt=$gpt"
+  if grep -Fq 'startup_failure_probe_v1' "$RUNNER_TEMP/root.json" 2>/dev/null; then
+    echo 'ZED_STARTUP_FAILURE_PROBE=CAPTURED'
+    cat "$RUNNER_TEMP/root.json"
+    echo
+    echo '::error::ZED full runtime reached the startup failure probe; repair the reported stage.'
+    exit 1
+  fi
+  echo "ZED_CONVERGENCE attempt=$i root=$(cat "$RUNNER_TEMP/root.code") health=$(cat "$RUNNER_TEMP/health.code") mini=$(cat "$RUNNER_TEMP/mini.code") gpt=$(cat "$RUNNER_TEMP/gpt.code")"
 done
 
-echo '::error::ZED/AUTO/GRACE Command Centre did not converge after verified FTPS runtime upload and managed restart.'
+echo '::error::ZED/AUTO/GRACE did not converge after full Python-FTPS runtime sync and managed restart.'
 exit 1
