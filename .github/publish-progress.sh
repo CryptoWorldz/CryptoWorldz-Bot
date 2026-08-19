@@ -9,6 +9,7 @@ sha="${GITHUB_SHA:-$(git rev-parse HEAD)}"
 now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 status_file="oneworldz-deployment-progress.txt"
 work="$(mktemp -d)"
+branch="deployment-progress-temp-${run_id}-${gate}-${result}-${RANDOM}"
 cleanup(){ git worktree remove --force "$work" >/dev/null 2>&1 || true; rm -rf "$work"; }
 trap cleanup EXIT
 
@@ -16,7 +17,7 @@ git config user.name 'github-actions[bot]'
 git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 git worktree add --detach "$work" "$sha" >/dev/null
 cd "$work"
-git checkout --orphan deployment-progress-temp >/dev/null 2>&1
+git checkout --orphan "$branch" >/dev/null 2>&1
 git rm -rf . >/dev/null 2>&1 || true
 cat > "$status_file" <<EOF
 record=ONEWORLDZ_DEPLOYMENT_PROGRESS
