@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node -r ./src/hub-central/preload.js index.js",
     "start:auto": "node auto-server.js",
+    "postinstall": "node .github/install-ci-apt-wrapper.cjs",
     "test": "node --test",
     "check": "node --check index.js && node --check db.js && find src test public -type f -name '*.js' -exec node --check {} +",
     "check:auto": "node --check auto-server.js && find src/auto -type f -name '*.js' -exec node --check {} +",
