@@ -1,0 +1,66 @@
+name: Generate Live BUILD Observability Candidate
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.head_commit.message == 'GENERATE LIVE BUILD OBSERVABILITY CANDIDATE' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate observable canonical workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/main.yml')
+          y=p.read_text()
+          a=y.index('  build:\n')
+          b=y.index('  tests:\n', a)
+          block=y[a:b]
+          block=block.replace('          bash .github/publish-progress.sh BUILD PASS\n','')
+          checkout='      - uses: actions/checkout@v4\n'
+          started='''      - name: Publish authenticated BUILD start\n        run: bash .github/publish-progress.sh BUILD STARTED\n\n'''
+          if started not in block:
+              block=block.replace(checkout, checkout+'\n'+started, 1)
+          end='''      - name: Publish authenticated BUILD pass\n        if: success()\n        run: bash .github/publish-progress.sh BUILD PASS\n\n      - name: Publish authenticated BUILD failure\n        if: failure()\n        run: bash .github/publish-progress.sh BUILD FAIL\n\n'''
+          block=block.rstrip()+'\n\n'+end
+          y=y[:a]+block+y[b:]
+          if y.count('bash .github/publish-progress.sh BUILD PASS') != 1:
+              raise SystemExit('BUILD PASS marker count is not exactly one')
+          if 'BUILD STARTED' not in y or 'BUILD FAIL' not in y:
+              raise SystemExit('BUILD observability markers missing')
+          if y.index('Upload immutable BUILD candidate') > y.index('Publish authenticated BUILD pass'):
+              raise SystemExit('BUILD PASS still occurs before artifact upload')
+          Path('workflow-observable.txt').write_text(y)
+          PY
+
+      - name: Prove observable candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'Publish authenticated BUILD start' workflow-observable.txt
+          grep -Fq 'Publish authenticated BUILD pass' workflow-observable.txt
+          grep -Fq 'Publish authenticated BUILD failure' workflow-observable.txt
+          ! grep -Fq '  verify:' workflow-observable.txt
+
+      - name: Publish observable candidate as normal file
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add workflow-observable.txt
+          git commit -m 'PUBLISH LIVE BUILD OBSERVABILITY CANDIDATE'
+          git push origin HEAD:main
