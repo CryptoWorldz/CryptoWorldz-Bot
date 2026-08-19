@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: zed-hostinger-runtime-diagnostic
@@ -34,6 +34,7 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - uses: actions/checkout@v4
+      - run: bash .github/publish-progress.sh ZED_RUNTIME_DIAGNOSTIC STARTED
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -41,3 +42,7 @@ jobs:
       - run: node .github/install-ci-apt-wrapper.cjs
       - name: Read Hostinger runtime truth
         run: bash .github/preflight-live-zed.sh
+      - if: success()
+        run: bash .github/publish-progress.sh ZED_RUNTIME_DIAGNOSTIC PASS
+      - if: failure()
+        run: bash .github/publish-progress.sh ZED_RUNTIME_DIAGNOSTIC FAIL
