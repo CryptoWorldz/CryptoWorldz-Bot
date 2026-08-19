@@ -32,10 +32,11 @@ grep -Fq '/api/mini/creator/submit' src/user-experience.js
 grep -Fq '/api/mini/heroes/apply' src/user-experience.js
 echo 'PROTECTED_FULL_RUNTIME_SOURCE=PASS'
 
-# Safety gate: prove the currently running Hostinger Node app is already the
-# full protected ZED runtime before making any production mutation. This lets
-# Hostinger-managed process environment variables remain authoritative even
-# when they are intentionally absent from the downloadable .env file.
+# Prefer a no-write proof when the current service is already healthy. If the
+# current service is degraded, continue into exact source recovery. Recovery
+# never rewrites .env or Hostinger-managed process environment variables; it
+# only restores the approved runtime source, proves the remote bytes, performs
+# the managed restart, and requires the full live proof before PASS.
 current_full=0
 for attempt in $(seq 1 6); do
   root_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/current-root.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/?managed_env_probe=${GITHUB_RUN_ID}-${attempt}" || true)"
@@ -53,11 +54,11 @@ for attempt in $(seq 1 6); do
   echo "CURRENT_ZED_PROBE attempt=$attempt root=$root_code health=$health_code mini=$mini_code gpt=$status_code"
   sleep 5
 done
-if [ "$current_full" != 1 ]; then
-  echo '::error::Current protected service is not proven full ZED runtime. Refusing production mutation without a recoverable BOT_TOKEN/Supabase credential source.'
-  exit 1
+if [ "$current_full" = 1 ]; then
+  echo 'CURRENT_HOSTINGER_MANAGED_ZED_RUNTIME=PASS'
+else
+  echo 'CURRENT_HOSTINGER_MANAGED_ZED_RUNTIME=DEGRADED_SOURCE_RECOVERY_REQUIRED'
 fi
-echo 'CURRENT_HOSTINGER_MANAGED_ZED_RUNTIME=PASS'
 
 sudo apt-get update -qq
 sudo apt-get install -y -qq lftp
@@ -99,9 +100,8 @@ for attempt in $(seq 1 90); do
 done
 [ "$active" = 0 ]
 
-# Intentionally do not rewrite .env here. The currently proven full runtime
-# demonstrates that Hostinger's managed process environment is supplying the
-# protected credentials. Preserve that source exactly.
+# Preserve Hostinger-managed process environment exactly. Do not upload or
+# rewrite .env. Restore only the approved runtime source and static MiniApp.
 cat > "$RUNNER_TEMP/sync-runtime.lftp" <<EOF
 set cmd:fail-exit false
 set net:max-retries 2
