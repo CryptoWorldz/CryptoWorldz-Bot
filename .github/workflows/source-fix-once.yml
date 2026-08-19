@@ -1,0 +1,55 @@
+name: Patch OneWorldz Sponsor Crypto Shell Leak
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.head_commit.message == 'PATCH ONEWORLDZ SPONSOR CRYPTO SHELL LEAK' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch Sponsor Apply to use non-market shell
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('apps/oneworldz-ecosystem-release/finalize-jayjay-launch.mjs')
+          s=p.read_text()
+          old='function shell({title,description,canonical,brand,accent="#8a63ff",accent2="#56c7ff",body})'
+          new='function shell({title,description,canonical,brand,accent="#8a63ff",accent2="#56c7ff",body,charts=true})'
+          if old not in s: raise SystemExit('shell signature target missing')
+          s=s.replace(old,new,1)
+          if '${chartCss}</head>' not in s: raise SystemExit('chartCss shell target missing')
+          s=s.replace('${chartCss}</head>','${charts?chartCss:""}</head>',1)
+          if '${chartJs}</body></html>' not in s: raise SystemExit('chartJs shell target missing')
+          s=s.replace('${chartJs}</body></html>','${charts?chartJs:""}</body></html>',1)
+          target='brand:"OneWorldz",accent:"#4da3ff",accent2:"#ffffff",body:sponsorBody'
+          if target not in s: raise SystemExit('Sponsor shell call target missing')
+          s=s.replace(target,target+',charts:false',1)
+          if s.count('charts:false') != 1: raise SystemExit('Sponsor charts:false count drift')
+          if 'charts=true' not in s or '${charts?chartCss:""}' not in s or '${charts?chartJs:""}' not in s:
+              raise SystemExit('Optional chart shell not fully installed')
+          p.write_text(s)
+          PY
+          node --check apps/oneworldz-ecosystem-release/finalize-jayjay-launch.mjs
+
+      - name: Commit exact source repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/oneworldz-ecosystem-release/finalize-jayjay-launch.mjs
+          git commit -m 'REMOVE CRYPTO CHART SHELL FROM ONEWORLDZ SPONSOR APPLY'
+          git push origin HEAD:main
