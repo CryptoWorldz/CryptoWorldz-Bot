@@ -49,3 +49,4 @@ test "$passed" = '1'
 echo 'LIVE_ZED_MINIAPP_GPT_PROOF=PASS'
 
 bash .github/publish-progress.sh LIVE_PROOF PASS
+# canonical resume trigger 2026-08-20
