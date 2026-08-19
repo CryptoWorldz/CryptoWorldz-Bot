@@ -145,9 +145,9 @@ async function start() {
   startupStage = "register_project_wallets";
   registerProjectWalletSystem({ app, bot, config, supabase });
   startupStage = "register_worldzcast";
-  registerWorldzCastSystem({ bot, repository, config, supabase });
+  registerWorldzCastSystem({ app, bot, repository, config, supabase });
   startupStage = "register_legend_v8";
-  registerLegendV8System({ bot, repository, config, supabase });
+  registerLegendV8System({ app, bot, repository, config, supabase });
   startupStage = "register_executive_telegram";
   registerExecutiveTelegramHandlers({ bot, repository, config, supabase });
   startupStage = "register_grace_telegram";
