@@ -1,0 +1,43 @@
+name: ZED Hostinger Runtime Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/zed-runtime-diagnostic.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zed-hostinger-runtime-diagnostic
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cryptoworldz-production
+    env:
+      PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
+      PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+      BOT_TOKEN_SECRET: ${{ secrets.BOT_TOKEN }}
+      SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: node .github/install-ci-apt-wrapper.cjs
+      - name: Read Hostinger runtime truth
+        run: bash .github/preflight-live-zed.sh
