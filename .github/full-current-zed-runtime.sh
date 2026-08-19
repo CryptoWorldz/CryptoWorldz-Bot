@@ -27,101 +27,96 @@ for marker in 'id="splashback"' 'id="zed-guide"' 'id="create"' 'id="heroes"'; do
 done
 echo 'ZED_FULL_RUNTIME_LOCAL_VALIDATION=PASS'
 
-python3 - <<'PY'
-import ftplib, io, os, pathlib, posixpath, ssl, urllib.parse
+if ! command -v lftp >/dev/null 2>&1; then
+  sudo apt-get update -qq
+  sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq lftp
+fi
+command -v lftp >/dev/null
 
-raw=os.environ['FTP_HOST'].strip()
-if '://' not in raw:
-    raw='ftps://'+raw
-u=urllib.parse.urlparse(raw)
-host=u.hostname or os.environ['FTP_HOST'].strip().split('/')[0].split(':')[0]
-port=int(os.environ.get('FTP_PORT') or u.port or 21)
-root=os.environ['PROTECTED_NODE_ROOT'].rstrip('/')
-ctx=ssl.create_default_context()
-ctx.check_hostname=False
-ftp=ftplib.FTP_TLS(context=ctx, timeout=60)
-ftp.connect(host,port)
-ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
-ftp.prot_p()
+host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"
+if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
 
-repo=pathlib.Path('.')
-files=[]
-for rel in ['index.js','package.json','package-lock.json']:
-    p=repo/rel
-    if p.is_file(): files.append((rel,p))
-for base in ['src','public','.well-known']:
-    base_path=repo/base
-    if not base_path.exists(): continue
-    for p in sorted(base_path.rglob('*')):
-        if not p.is_file(): continue
-        rel=p.relative_to(repo).as_posix()
-        if rel.endswith('/.env') or rel == '.env' or rel.endswith('.log'):
-            continue
-        files.append((rel,p))
+runtime_files="$RUNNER_TEMP/zed-runtime-files.txt"
+runtime_dirs="$RUNNER_TEMP/zed-runtime-dirs.txt"
+proofdir="$RUNNER_TEMP/zed-runtime-byte-proof"
+mkdir -p "$proofdir"
+{
+  printf '%s\n' index.js package.json package-lock.json
+  find src public .well-known -type f ! -name '.env' ! -name '*.log' -printf '%p\n' | sort
+} > "$runtime_files"
+test -s "$runtime_files"
+while IFS= read -r rel; do
+  d="$(dirname "$rel")"
+  [ "$d" = '.' ] || printf '%s\n' "$d"
+done < "$runtime_files" | sort -u > "$runtime_dirs"
 
-def cwd_root():
-    ftp.cwd(root)
+critical=(
+  index.js
+  package.json
+  package-lock.json
+  src/full-runtime-entry.js
+  src/http.js
+  src/oneworldz-gpt/http.js
+  src/user-experience.js
+  src/zed-guide.js
+  public/miniapp/index.html
+  public/miniapp/app.js
+  public/miniapp/experience.js
+  .well-known/openapi.yaml
+)
+for rel in "${critical[@]}"; do
+  test -s "$rel"
+  mkdir -p "$proofdir/$(dirname "$rel")"
+done
 
-def ensure_dir(parent):
-    cwd_root()
-    if not parent or parent == '.':
-        return
-    for part in pathlib.PurePosixPath(parent).parts:
-        if part in ('','.'):
-            continue
-        try:
-            ftp.cwd(part)
-        except ftplib.all_errors:
-            ftp.mkd(part)
-            ftp.cwd(part)
+{
+  echo 'set cmd:fail-exit true'
+  echo 'set net:max-retries 3'
+  echo 'set net:timeout 30'
+  echo 'set net:reconnect-interval-base 5'
+  echo 'set net:reconnect-interval-max 20'
+  echo 'set ftp:ssl-force true'
+  echo 'set ftp:ssl-protect-data true'
+  echo 'set ssl:verify-certificate true'
+  echo 'set ssl:check-hostname false'
+  echo 'set ftp:passive-mode true'
+  printf 'cd "%s"\n' "$PROTECTED_NODE_ROOT"
+  printf 'lcd "%s"\n' "$GITHUB_WORKSPACE"
+  while IFS= read -r dir; do
+    [ -n "$dir" ] && printf 'mkdir -p "%s"\n' "$dir"
+  done < "$runtime_dirs"
+  while IFS= read -r rel; do
+    printf 'put "%s" -o "%s"\n' "$rel" "$rel"
+  done < "$runtime_files"
+  for rel in "${critical[@]}"; do
+    printf 'get "%s" -o "%s/%s"\n' "$rel" "$proofdir" "$rel"
+  done
+  echo 'bye'
+} > "$RUNNER_TEMP/zed-runtime-sync.lftp"
 
-def upload(rel,path):
-    parent=posixpath.dirname(rel)
-    name=posixpath.basename(rel)
-    ensure_dir(parent)
-    tmp=name+'.oneworldz-new'
-    try: ftp.delete(tmp)
-    except ftplib.all_errors: pass
-    data=path.read_bytes()
-    ftp.storbinary('STOR '+tmp, io.BytesIO(data), blocksize=262144)
-    try: ftp.delete(name)
-    except ftplib.all_errors: pass
-    ftp.rename(tmp,name)
-    return len(data)
+transport_pass=0
+for attempt in $(seq 1 4); do
+  echo "ZED_FTPS_TRANSPORT attempt=$attempt/4"
+  if timeout 1200 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" \
+      -e "source $RUNNER_TEMP/zed-runtime-sync.lftp" "$host"; then
+    transport_pass=1
+    break
+  fi
+  echo "::warning::ZED FTPS transport attempt $attempt failed; retrying the same full protected runtime without deleting remote secrets."
+  sleep $((attempt * 10))
+done
+test "$transport_pass" = '1'
 
-byte_total=0
-for rel,p in files:
-    byte_total += upload(rel,p)
-print(f'ZED_FULL_RUNTIME_FTPS_SYNC=PASS files={len(files)} bytes={byte_total}')
-
-critical=[
-    'index.js',
-    'package.json',
-    'package-lock.json',
-    'src/full-runtime-entry.js',
-    'src/http.js',
-    'src/oneworldz-gpt/http.js',
-    'src/user-experience.js',
-    'src/zed-guide.js',
-    'public/miniapp/index.html',
-    'public/miniapp/app.js',
-    'public/miniapp/experience.js',
-    '.well-known/openapi.yaml'
-]
-for rel in critical:
-    local=(repo/rel)
-    if not local.is_file():
-        raise SystemExit('LOCAL_CRITICAL_FILE_MISSING:'+rel)
-    parent=posixpath.dirname(rel)
-    name=posixpath.basename(rel)
-    ensure_dir(parent)
-    buf=io.BytesIO()
-    ftp.retrbinary('RETR '+name,buf.write,blocksize=262144)
-    if buf.getvalue()!=local.read_bytes():
-        raise SystemExit('REMOTE_BYTE_MISMATCH:'+rel)
-print(f'ZED_CRITICAL_REMOTE_BYTES=PASS files={len(critical)}')
-ftp.quit()
-PY
+for rel in "${critical[@]}"; do
+  cmp -s "$rel" "$proofdir/$rel" || {
+    echo "::error::REMOTE_BYTE_MISMATCH:$rel"
+    exit 1
+  }
+done
+file_count="$(wc -l < "$runtime_files" | tr -d ' ')"
+byte_total="$(while IFS= read -r rel; do stat -c '%s' "$rel"; done < "$runtime_files" | awk '{s+=$1} END{print s+0}')"
+echo "ZED_FULL_RUNTIME_FTPS_SYNC=PASS files=$file_count bytes=$byte_total"
+echo "ZED_CRITICAL_REMOTE_BYTES=PASS files=${#critical[@]}"
 
 domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
 curl --fail --silent --show-error --location \
