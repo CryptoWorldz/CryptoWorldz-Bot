@@ -1,0 +1,185 @@
+name: OneWorldz One-Shot Unbundle Canonical Gates
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  TARGET_WORKFLOW: .github/workflows/main.yml
+
+jobs:
+  unbundle:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.head_commit.message == 'ONE SHOT UNBUNDLE CANONICAL DEPLOYMENT GATES' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Replace bundled verify with literal BUILD TESTS LIGHTHOUSE jobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const path = process.env.TARGET_WORKFLOW;
+          let y = fs.readFileSync(path, 'utf8');
+          const start = y.indexOf('  verify:\n');
+          const end = y.indexOf('  preview:\n', start);
+          if (start < 0 || end < 0) throw new Error('Bundled verify block not found');
+          const split = String.raw`  build:
+    needs: freshness
+    if: ${{ needs.freshness.outputs.current == 'true' }}
+    name: SUCCESS STORY 1 — BUILD
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      static_tree: ${{ steps.lock.outputs.static_tree }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - id: lock
+        name: Lock canonical static tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          static_tree="$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)"
+          echo "static_tree=$static_tree" >> "$GITHUB_OUTPUT"
+          echo "STATIC_TREE=$static_tree"
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build exact canonical candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run check:structure
+          npm run check
+          npm run build:ecosystem-release
+          npm run check:web
+          root='apps/oneworldz-ecosystem-release/dist/ecosystem'
+          test "$(find "$root" -mindepth 2 -maxdepth 2 -name index.html | wc -l | tr -d ' ')" = '18'
+          test -s "$root/oneworldz/index.html"
+          test ! -d "$root/cryptobotz"
+          ! grep -Rni --include='*.html' 'solworld\\.fun' "$root"
+          ! grep -RIE --include='*.html' 'Created by JayJayTeamDev|Designed by JayJayTeamDev' "$root"
+          grep -RFl --include='*.html' 'Created with the Vision' "$root" >/dev/null
+          ! grep -RIE 'OPENAI_API_KEY|sk-proj-|sk_live_|sk_test_|service_role|FTP_PASSWORD|DATABASE_URL|SUPABASE_SERVICE' "$root"
+          bash .github/publish-progress.sh BUILD PASS
+
+      - name: Upload immutable BUILD candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-candidate-${{ github.run_id }}
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem/
+          if-no-files-found: error
+          retention-days: 30
+
+  tests:
+    needs: build
+    name: SUCCESS STORY 2 — TESTS
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Download exact BUILD candidate
+        uses: actions/download-artifact@v4
+        with:
+          name: oneworldz-candidate-${{ github.run_id }}
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem
+
+      - name: Run complete test and security gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test
+          npm --prefix apps/oneworldz-ecosystem-release test
+          npm run check:auto
+          npm audit --audit-level=high
+          bash .github/publish-progress.sh TESTS PASS
+
+  lighthouse:
+    needs: tests
+    name: SUCCESS STORY 3 — LIGHTHOUSE 100
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Download exact BUILD candidate
+        uses: actions/download-artifact@v4
+        with:
+          name: oneworldz-candidate-${{ github.run_id }}
+          path: apps/oneworldz-ecosystem-release/dist/ecosystem
+
+      - name: Prove Lighthouse SEO 100
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run check:lighthouse-seo
+          bash .github/publish-progress.sh LIGHTHOUSE PASS
+
+`;
+          y = y.slice(0, start) + split + y.slice(end);
+          y = y.replace('    needs: verify\n    name: Desktop + mobile candidate proof', '    needs: lighthouse\n    name: Desktop + mobile candidate proof');
+          y = y.replace('    needs: [verify, preview]\n    name: Deploy + prove ZED, Mini App and guarded GPT', '    needs: [build, lighthouse, preview]\n    name: Deploy + prove ZED, Mini App and guarded GPT');
+          y = y.replace('    needs: [verify, preview, zed]\n    name: Exact 18-site Hostinger deployment', '    needs: [build, lighthouse, preview, zed]\n    name: Exact 18-site Hostinger deployment');
+          y = y.replaceAll('needs.verify.outputs.static_tree', 'needs.build.outputs.static_tree');
+          y = y.replace('    needs: [verify, deploy]\n    name: Live 18-site + full ZED proof', '    needs: [build, deploy]\n    name: Live 18-site + full ZED proof');
+          y = y.replace('    needs: [verify, live-proof]\n    name: Record only the proven latest generation', '    needs: [build, live-proof]\n    name: Record only the proven latest generation');
+          if (y.includes('  verify:\n')) throw new Error('verify job survived');
+          for (const token of ['  build:\n','  tests:\n','  lighthouse:\n','needs: lighthouse','needs: [build, lighthouse, preview]','needs.build.outputs.static_tree']) {
+            if (!y.includes(token)) throw new Error('Missing split token: '+token);
+          }
+          fs.writeFileSync(path, y);
+          NODE
+
+      - name: Prove sole production workflow after this commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'name: SUCCESS STORY 1 — BUILD' "$TARGET_WORKFLOW"
+          grep -Fq 'name: SUCCESS STORY 2 — TESTS' "$TARGET_WORKFLOW"
+          grep -Fq 'name: SUCCESS STORY 3 — LIGHTHOUSE 100' "$TARGET_WORKFLOW"
+          ! grep -Fq '  verify:' "$TARGET_WORKFLOW"
+          git rm .github/workflows/unbundle-once.yml
+          test "$(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) | wc -l | tr -d ' ')" = '1'
+          test -f .github/workflows/main.yml
+
+      - name: Commit corrected single straight-line rail
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/main.yml .github/workflows/unbundle-once.yml
+          git commit -m 'UNBUNDLE BUILD TESTS LIGHTHOUSE INTO REAL SUCCESS GATES'
+          git push origin HEAD:main
