@@ -7,14 +7,10 @@ set -euo pipefail
 : "${FTP_USERNAME:?}"
 : "${FTP_PASSWORD:?}"
 : "${FTP_PORT:?}"
-: "${OPENAI_API_KEY:?}"
 : "${HOSTINGER_API_TOKEN:?}"
 
-for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$OPENAI_API_KEY" "$HOSTINGER_API_TOKEN"; do
+for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN"; do
   echo "::add-mask::$value"
-done
-for value in "${BOT_TOKEN_SECRET:-}" "${SUPABASE_URL_SECRET:-}" "${SUPABASE_SERVICE_ROLE_KEY_SECRET:-}"; do
-  [ -z "$value" ] || echo "::add-mask::$value"
 done
 
 npm ci
@@ -35,6 +31,33 @@ grep -Fq '/api/mini/zed/chat' src/zed-guide.js
 grep -Fq '/api/mini/creator/submit' src/user-experience.js
 grep -Fq '/api/mini/heroes/apply' src/user-experience.js
 echo 'PROTECTED_FULL_RUNTIME_SOURCE=PASS'
+
+# Safety gate: prove the currently running Hostinger Node app is already the
+# full protected ZED runtime before making any production mutation. This lets
+# Hostinger-managed process environment variables remain authoritative even
+# when they are intentionally absent from the downloadable .env file.
+current_full=0
+for attempt in $(seq 1 6); do
+  root_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/current-root.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/?managed_env_probe=${GITHUB_RUN_ID}-${attempt}" || true)"
+  health_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/current-health.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/health?managed_env_probe=${GITHUB_RUN_ID}-${attempt}" || true)"
+  mini_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/current-miniapp.html" -w '%{http_code}' "https://$PROTECTED_DOMAIN/miniapp/?managed_env_probe=${GITHUB_RUN_ID}-${attempt}" || true)"
+  status_code="$(curl --silent --show-error --location --connect-timeout 12 --max-time 20 -o "$RUNNER_TEMP/current-status.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?managed_env_probe=${GITHUB_RUN_ID}-${attempt}" || true)"
+  if [ "$root_code" = 200 ] && [ "$health_code" = 200 ] && [ "$mini_code" = 200 ] && [ "$status_code" = 200 ] \
+    && grep -Fq '"service":"CryptoWorldz Zed Bot"' "$RUNNER_TEMP/current-root.json" \
+    && grep -Fq '"ok":true' "$RUNNER_TEMP/current-health.json" \
+    && grep -Fq 'id="splashback"' "$RUNNER_TEMP/current-miniapp.html" \
+    && grep -Fq '"ok":true' "$RUNNER_TEMP/current-status.json"; then
+    current_full=1
+    break
+  fi
+  echo "CURRENT_ZED_PROBE attempt=$attempt root=$root_code health=$health_code mini=$mini_code gpt=$status_code"
+  sleep 5
+done
+if [ "$current_full" != 1 ]; then
+  echo '::error::Current protected service is not proven full ZED runtime. Refusing production mutation without a recoverable BOT_TOKEN/Supabase credential source.'
+  exit 1
+fi
+echo 'CURRENT_HOSTINGER_MANAGED_ZED_RUNTIME=PASS'
 
 sudo apt-get update -qq
 sudo apt-get install -y -qq lftp
@@ -76,84 +99,9 @@ for attempt in $(seq 1 90); do
 done
 [ "$active" = 0 ]
 
-rm -f "$RUNNER_TEMP/protected.env"
-cat > "$RUNNER_TEMP/get-env.lftp" <<EOF
-set cmd:fail-exit false
-set net:max-retries 2
-set net:timeout 25
-set ftp:ssl-force true
-set ftp:ssl-protect-data true
-set ssl:verify-certificate true
-set ssl:check-hostname false
-get $PROTECTED_NODE_ROOT/.env -o $RUNNER_TEMP/protected.env
-bye
-EOF
-timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-env.lftp" "$raw_host" || true
-if [ -s "$RUNNER_TEMP/protected.env" ]; then
-  echo 'PROTECTED_REMOTE_ENV_FETCH=PASS'
-else
-  echo 'PROTECTED_REMOTE_ENV_FETCH=EMPTY_OR_ABSENT'
-fi
-
-# Key-name-only diagnostic. Values are never printed.
-node - <<'NODE'
-const fs=require('fs');
-const p=process.env.RUNNER_TEMP+'/protected.env';
-let text=''; try{text=fs.readFileSync(p,'utf8')}catch{}
-const names=[];
-for(const raw of text.split(/\r?\n/)){
-  const line=raw.trim();
-  if(!line||line.startsWith('#')) continue;
-  const at=line.indexOf('=');
-  if(at<1) continue;
-  const key=line.slice(0,at).trim();
-  if(/BOT|TELEGRAM|SUPABASE/i.test(key)) names.push(key);
-}
-console.log('REMOTE_ENV_RELEVANT_KEYS='+(names.length?names.sort().join(','):'NONE'));
-NODE
-
-node - <<'NODE'
-const fs=require('fs');
-const p=process.env.RUNNER_TEMP+'/protected.env';
-let rows=[];
-try { rows=fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean); } catch {}
-const candidates={
-  OPENAI_API_KEY:process.env.OPENAI_API_KEY,
-  ONEWORLDZ_OPENAI_MODEL:'gpt-4o-mini',
-  ONEWORLDZ_IMAGE_MODEL:'gpt-image-2',
-  BOT_TOKEN:process.env.BOT_TOKEN_SECRET,
-  SUPABASE_URL:process.env.SUPABASE_URL_SECRET,
-  SUPABASE_SERVICE_ROLE_KEY:process.env.SUPABASE_SERVICE_ROLE_KEY_SECRET
-};
-const overrides=Object.fromEntries(Object.entries(candidates).filter(([,v])=>String(v||'').trim()));
-rows=rows.filter(row=>!Object.keys(overrides).some(k=>row.startsWith(k+'=')));
-for(const [k,v] of Object.entries(overrides)) rows.push(`${k}=${String(v).trim()}`);
-fs.writeFileSync(p,rows.join('\n')+'\n');
-NODE
-
-for key in BOT_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY OPENAI_API_KEY; do
-  grep -Eq "^${key}=.+$" "$RUNNER_TEMP/protected.env" || {
-    echo "::error::Required protected runtime value ${key} is absent after remote-env merge."
-    exit 1
-  }
-done
-grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/protected.env"
-grep -Eq '^ONEWORLDZ_IMAGE_MODEL=gpt-image-2$' "$RUNNER_TEMP/protected.env"
-echo 'PROTECTED_RUNTIME_ENV_COMPLETE=PASS'
-
-cat > "$RUNNER_TEMP/put-env.lftp" <<EOF
-set cmd:fail-exit true
-set net:max-retries 2
-set net:timeout 25
-set ftp:ssl-force true
-set ftp:ssl-protect-data true
-set ssl:verify-certificate true
-set ssl:check-hostname false
-put $RUNNER_TEMP/protected.env -o $PROTECTED_NODE_ROOT/.env
-bye
-EOF
-timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/put-env.lftp" "$raw_host"
-
+# Intentionally do not rewrite .env here. The currently proven full runtime
+# demonstrates that Hostinger's managed process environment is supplying the
+# protected credentials. Preserve that source exactly.
 cat > "$RUNNER_TEMP/sync-runtime.lftp" <<EOF
 set cmd:fail-exit false
 set net:max-retries 2
