@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PROBE_REVISION: force-20260819-2016-stack
+  PROBE_REVISION: force-20260819-2021-stack2
 
 jobs:
   deploy-probe:
@@ -38,7 +38,7 @@ jobs:
         with:
           node-version: "22"
       - run: node .github/install-ci-apt-wrapper.cjs
-      - name: Add sanitized stack frames to temporary probe only
+      - name: Add sanitized stack location to temporary probe only
         shell: bash
         run: |
           set -euo pipefail
@@ -46,11 +46,10 @@ jobs:
           const fs = require('fs');
           const path = 'src/full-runtime-entry.js';
           let source = fs.readFileSync(path, 'utf8');
-          const helper = `\nfunction sanitizeStartupStack(error) {\n  return String(error && error.stack || \"\")\n    .split(/\\r?\\n/)\n    .slice(1, 8)\n    .map((line) => line.trim())\n    .filter((line) => /(?:src|node_modules)\\//.test(line))\n    .map((line) => line.replace(/https?:\\/\\/[^\\s)]+/gi, \"[URL_REDACTED]\").replace(/(?:sk-|eyJ)[A-Za-z0-9._-]{12,}/g, \"[SECRET_REDACTED]\"))\n    .join(\" | \")\n    .slice(0, 1000);\n}\n`;
-          if (!source.includes('function sanitizeStartupStack(error)')) {
-            source = source.replace('\nfunction startFailureProbe(error) {', helper + '\nfunction startFailureProbe(error) {');
-          }
-          source = source.replace('error: sanitizeStartupError(error)\n  });', 'error: sanitizeStartupError(error),\n    stack: sanitizeStartupStack(error)\n  });');
+          const oldLine = '  const raw = String(error && error.message || error && error.code || "unknown_startup_error");';
+          const newLine = '  const raw = String(error && error.message || error && error.code || "unknown_startup_error") + " | " + String(error && error.stack || "").split(/\\r?\\n/).slice(1,6).map((line) => line.trim()).join(" | ");';
+          if (!source.includes(oldLine)) throw new Error('startup_probe_patch_anchor_missing');
+          source = source.replace(oldLine, newLine);
           fs.writeFileSync(path, source);
           NODE
           node --check src/full-runtime-entry.js
