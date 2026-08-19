@@ -50,15 +50,19 @@ test("OneWorldz has the exact global acknowledgement and directory canonical URL
   for (const target of productionTargets) assert.ok(directory.includes(`https://${target.domain}/directory/`), `global directory missing ${target.domain}`);
 });
 
-test("Support JayJayTeamDev gets a dedicated search-focused canonical DonateWorldz page", async () => {
+test("Support JayJayTeamDev has one canonical self-contained DonateWorldz page and no legacy route", async () => {
   const support = await read("donateworldz", "support-jayjayteamdev/index.html");
   assert.match(support, /<title>Support JayJayTeamDev \| DonateWorldz<\/title>/);
   assert.ok(support.includes('<link rel="canonical" href="https://donateworldz.com/support-jayjayteamdev/">'));
   assert.ok(support.includes("JayJayTeamDev@DonateWorldz"));
   assert.ok(support.includes("Support JayJayTeamDev"));
-  assert.ok(support.includes('href="/jayjayteamdev/"'));
-  const legacy = await read("donateworldz", "jayjayteamdev/index.html");
-  assert.ok(legacy.includes('<link rel="canonical" href="https://donateworldz.com/support-jayjayteamdev/">'));
+  assert.ok(support.includes("https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00"));
+  assert.ok(support.includes("https://www.paypal.me/Jayjay3480"));
+  assert.equal(support.includes('/jayjayteamdev/'), false);
+  await assert.rejects(stat(path.join(dist, "donateworldz", "jayjayteamdev")));
+  const sitemap = await read("donateworldz", "sitemap.xml");
+  assert.ok(sitemap.includes("https://donateworldz.com/support-jayjayteamdev/"));
+  assert.equal(sitemap.includes("https://donateworldz.com/jayjayteamdev/"), false);
 });
 
 test("CryptoWorldz has a direct public Command Centre command guide while protected controls remain out of the public page", async () => {
