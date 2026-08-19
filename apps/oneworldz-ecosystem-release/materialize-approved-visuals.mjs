@@ -1,12 +1,14 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 
 const run = promisify(execFile);
+const require = createRequire(import.meta.url);
 const appRoot = path.dirname(fileURLToPath(import.meta.url));
 const sourcePartsRoot = path.join(appRoot, "source", "approved-visuals");
 const productionAssetsRoot = path.join(appRoot, "source", "assets");
@@ -57,21 +59,40 @@ function isAvif(bytes) {
     && bytes.subarray(8, 12).toString("ascii") === "avif";
 }
 
-async function validateAvifBytes(avifdec, bytes, label) {
-  if (!isAvif(bytes)) return false;
-  const probe = path.join(tmpdir(), `oneworldz-${label}-${process.pid}-${Date.now()}.avif`);
-  await writeFile(probe, bytes);
+async function resolveRenderer() {
   try {
-    await run(avifdec, ["--info", probe], { timeout: 30000, maxBuffer: 1024 * 1024 * 8 });
-    return true;
-  } catch {
-    return false;
-  } finally {
-    await unlink(probe).catch(() => {});
+    return require("sharp");
+  } catch (initialError) {
+    if (process.env.GITHUB_ACTIONS !== "true") throw initialError;
+    await run("npm", [
+      "install",
+      "--no-save",
+      "--package-lock=false",
+      "--no-audit",
+      "--no-fund",
+      "sharp@0.35.3"
+    ], {
+      cwd: appRoot,
+      timeout: 180000,
+      maxBuffer: 1024 * 1024 * 16
+    });
+    return require("sharp");
   }
 }
 
-async function readApprovedBytes(spec, avifdec) {
+async function validateAvifBytes(sharp, bytes) {
+  if (!isAvif(bytes)) return false;
+  try {
+    const metadata = await sharp(bytes, { failOn: "error" }).metadata();
+    if (!metadata.width || !metadata.height) return false;
+    await sharp(bytes, { failOn: "error" }).resize(1, 1).raw().toBuffer();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function readApprovedBytes(spec, sharp) {
   const names = (await readdir(sourcePartsRoot))
     .filter((name) => new RegExp(`^${spec.key}\\.part\\d+\\.b64$`).test(name))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
@@ -94,7 +115,7 @@ async function readApprovedBytes(spec, avifdec) {
     const digest = sha256(candidate.bytes);
     if (seen.has(digest)) continue;
     seen.add(digest);
-    if (await validateAvifBytes(avifdec, candidate.bytes, `${spec.key}-${candidate.method}`)) {
+    if (await validateAvifBytes(sharp, candidate.bytes)) {
       return { ...candidate, names };
     }
   }
@@ -102,75 +123,63 @@ async function readApprovedBytes(spec, avifdec) {
   throw new Error(`${spec.key}: approved visual parts do not materialize to a complete decodable AVIF`);
 }
 
-async function findCommand(command, args) {
-  try {
-    await run(command, args, { timeout: 15000 });
-    return command;
-  } catch {
-    return null;
-  }
-}
-
-async function resolveRenderTools() {
-  let imageMagick = await findCommand("magick", ["-version"])
-    || await findCommand("convert", ["-version"]);
-  let avifenc = await findCommand("avifenc", ["--version"]);
-  let avifdec = await findCommand("avifdec", ["--version"]);
-
-  if ((!imageMagick || !avifenc || !avifdec) && process.env.GITHUB_ACTIONS === "true") {
-    await run("sudo", ["apt-get", "update", "-qq"], { timeout: 180000, maxBuffer: 1024 * 1024 * 8 });
-    await run("sudo", ["apt-get", "install", "-y", "-qq", "imagemagick", "libavif-bin"], {
-      timeout: 180000,
-      maxBuffer: 1024 * 1024 * 16
-    });
-    imageMagick = imageMagick || await findCommand("magick", ["-version"]) || await findCommand("convert", ["-version"]);
-    avifenc = avifenc || await findCommand("avifenc", ["--version"]);
-    avifdec = avifdec || await findCommand("avifdec", ["--version"]);
-  }
-
-  if (!imageMagick) throw new Error("Responsive production visual rendering requires ImageMagick");
-  if (!avifenc || !avifdec) throw new Error("Responsive production AVIF validation/encoding requires libavif-bin");
-  return Object.freeze({ imageMagick, avifenc, avifdec });
-}
-
-async function renderProductionVariant(tools, input, output, maxWidth, quality) {
-  const png = `${output}.${process.pid}.png`;
-  const quantizer = quality >= 90 ? 12 : 18;
-  try {
-    await run(tools.imageMagick, [input, "-auto-orient", "-resize", `${maxWidth}x${maxWidth}>`, "-strip", png], {
-      timeout: 120000,
-      maxBuffer: 1024 * 1024 * 8
-    });
-    await run(tools.avifenc, ["--jobs", "all", "--min", String(quantizer), "--max", String(quantizer), "-s", "6", png, output], {
-      timeout: 180000,
-      maxBuffer: 1024 * 1024 * 8
-    });
-  } finally {
-    await unlink(png).catch(() => {});
-  }
+async function renderProductionVariant(sharp, input, output, maxWidth, quality) {
+  await sharp(input, { failOn: "error" })
+    .rotate()
+    .resize({
+      width: maxWidth,
+      height: maxWidth,
+      fit: "inside",
+      withoutEnlargement: true
+    })
+    .avif({ quality, effort: 6 })
+    .toFile(output);
 
   const bytes = await readFile(output);
-  if (!await validateAvifBytes(tools.avifdec, bytes, `render-${path.basename(output)}`)) {
+  if (!await validateAvifBytes(sharp, bytes)) {
     throw new Error(`${path.basename(output)}: renderer did not produce a complete decodable AVIF`);
   }
   return bytes;
 }
 
-async function buildSupportComposite(tools, relativeSources, label) {
+async function buildSupportComposite(sharp, relativeSources, label) {
   const sourceFiles = relativeSources.map((rel) => path.join(supportAssetsRoot, rel));
   const sourceBytes = await Promise.all(sourceFiles.map((file) => readFile(file)));
-  const output = path.join(tmpdir(), `oneworldz-${label}-${process.pid}-${Date.now()}.png`);
+  const rendered = [];
 
-  await run(tools.imageMagick, [
-    ...sourceFiles,
-    "-auto-orient",
-    "-thumbnail", "900x900>",
-    "-background", "#0b0718",
-    "-gravity", "center",
-    "+append",
-    "-strip",
-    output
-  ], { timeout: 120000, maxBuffer: 1024 * 1024 * 16 });
+  for (const file of sourceFiles) {
+    const result = await sharp(file, { failOn: "error" })
+      .rotate()
+      .resize({ width: 900, height: 900, fit: "inside", withoutEnlargement: true })
+      .png()
+      .toBuffer({ resolveWithObject: true });
+    rendered.push(result);
+  }
+
+  const width = rendered.reduce((sum, item) => sum + item.info.width, 0);
+  const height = Math.max(...rendered.map((item) => item.info.height));
+  if (!width || !height) throw new Error(`${label}: support composite dimensions are invalid`);
+
+  let left = 0;
+  const composite = rendered.map((item) => {
+    const entry = {
+      input: item.data,
+      left,
+      top: Math.max(0, Math.floor((height - item.info.height) / 2))
+    };
+    left += item.info.width;
+    return entry;
+  });
+
+  const output = path.join(tmpdir(), `oneworldz-${label}-${process.pid}-${Date.now()}.png`);
+  await sharp({
+    create: {
+      width,
+      height,
+      channels: 4,
+      background: { r: 11, g: 7, b: 24, alpha: 1 }
+    }
+  }).composite(composite).png().toFile(output);
 
   const compositeBytes = await readFile(output);
   if (compositeBytes.byteLength < 10_000) throw new Error(`${label}: support composite is unexpectedly small`);
@@ -200,8 +209,8 @@ function replaceHeroMedia(html, spec) {
   if (!/<img\b[^>]*src="[^"]+"[^>]*>/.test(hero)) throw new Error(`${spec.key}: hero desktop image not found`);
 
   hero = hero.replace(/<source\b([^>]*?)srcset="[^"]+"([^>]*)>/, `<source$1srcset="${mobilePath}"$2>`);
-  hero = hero.replace(/<img\b([^>]*?)src="[^"]+"([^>]*)>/, (match, left, right) => {
-    let rebuilt = `<img${left}src="${desktopPath}"${right}>`;
+  hero = hero.replace(/<img\b([^>]*?)src="[^"]+"([^>]*)>/, (match, leftPart, rightPart) => {
+    let rebuilt = `<img${leftPart}src="${desktopPath}"${rightPart}>`;
     rebuilt = rebuilt.replace(/alt="[^"]*"/, `alt="${spec.alt}"`);
     return rebuilt;
   });
@@ -255,7 +264,8 @@ const visualManifest = {
   visuals: []
 };
 
-const renderer = await resolveRenderTools();
+const renderer = await resolveRenderer();
+const rendererVersion = renderer.versions?.sharp || "0.35.3";
 
 for (const spec of approved) {
   const targetRoot = path.join(distRoot, spec.key);
@@ -271,7 +281,7 @@ for (const spec of approved) {
   let sourceRecord;
 
   if (spec.sourceMode === "approved-avif-master") {
-    const { bytes, method, names } = await readApprovedBytes(spec, renderer.avifdec);
+    const { bytes, method, names } = await readApprovedBytes(spec, renderer);
     const sourceFile = path.join(tmpdir(), `oneworldz-${spec.key}-${process.pid}.avif`);
     await writeFile(sourceFile, bytes);
     try {
@@ -341,8 +351,8 @@ for (const spec of approved) {
     key: spec.key,
     domain: spec.domain,
     ...sourceRecord,
-    renderer: `${renderer.imageMagick}+${renderer.avifenc}`,
-    validator: renderer.avifdec,
+    renderer: `sharp@${rendererVersion}`,
+    validator: `sharp@${rendererVersion}`,
     format: "avif",
     desktop: { max_width: 1920, quality: 90, bytes: desktopBytes.byteLength, sha256: desktopSha },
     mobile: { max_width: 960, quality: 86, bytes: mobileBytes.byteLength, sha256: mobileSha },
@@ -353,4 +363,4 @@ for (const spec of approved) {
 }
 
 await writeFile(path.join(distRoot, "approved-visuals-manifest.json"), `${JSON.stringify(visualManifest, null, 2)}\n`, "utf8");
-console.log("Approved FoodWorldz, DonateWorldz and HodlerGalaxy visuals rendered into distinct desktop and mobile production assets.");
+console.log("Approved FoodWorldz, DonateWorldz and HodlerGalaxy visuals rendered into distinct desktop and mobile production assets without apt.");
