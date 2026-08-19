@@ -29,10 +29,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Publish audit start
         run: bash .github/publish-progress.sh HOSTINGER_NODE_ENV_AUDIT STARTED
-      - name: Install lftp
+      - name: Install tools
         run: |
           sudo apt-get update -qq
-          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq lftp
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq lftp jq
       - name: Audit managed Node build records and roots read-only
         shell: bash
         run: |
@@ -40,43 +40,46 @@ jobs:
           for v in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN"; do [ -z "$v" ] || echo "::add-mask::$v"; done
           curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
             'https://developers.hostinger.com/api/hosting/v1/websites?per_page=100' -o "$RUNNER_TEMP/websites.json"
-          node - <<'NODE' > "$RUNNER_TEMP/accounts.tsv"
-          const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/websites.json','utf8'));const rows=p.data||[];
-          for(const d of [process.env.CRYPTO_DOMAIN,process.env.ZED_DOMAIN]){const r=rows.find(x=>String(x.domain||'').toLowerCase()===d.toLowerCase());if(r?.username)console.log(`${d}\t${r.username}`)}
-          NODE
+          : > "$RUNNER_TEMP/accounts.tsv"
+          for domain in "$CRYPTO_DOMAIN" "$ZED_DOMAIN"; do
+            jq -r --arg d "$domain" '.data[] | select((.domain|ascii_downcase)==($d|ascii_downcase)) | [.domain,.username] | @tsv' "$RUNNER_TEMP/websites.json" >> "$RUNNER_TEMP/accounts.tsv"
+          done
           while IFS=$'\t' read -r domain username; do
             [ -n "$domain" ] || continue
             echo "::add-mask::$username"
-            denc="$(DOMAIN="$domain" node -p 'encodeURIComponent(process.env.DOMAIN)')"; uenc="$(USERNAME="$username" node -p 'encodeURIComponent(process.env.USERNAME)')"
+            denc="$(DOMAIN="$domain" node -p 'encodeURIComponent(process.env.DOMAIN)')"
+            uenc="$(USERNAME="$username" node -p 'encodeURIComponent(process.env.USERNAME)')"
             base="https://developers.hostinger.com/api/hosting/v1/accounts/${uenc}/websites/${denc}/nodejs"
-            curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds?per_page=25" -o "$RUNNER_TEMP/${domain}.builds.json"
-            DOMAIN="$domain" FILE="$RUNNER_TEMP/${domain}.builds.json" node - <<'NODE'
-            const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.env.FILE,'utf8'));const rows=p.data||[];console.log(`NODE_BUILD_COUNT ${process.env.DOMAIN}=${rows.length}`);if(rows[0]){console.log(`NODE_LATEST_STATE ${process.env.DOMAIN}=${rows[0].state||'unknown'}`);console.log(`NODE_LATEST_UUID_PRESENT ${process.env.DOMAIN}=${rows[0].uuid?'YES':'NO'}`)}
-            NODE
-            uuid="$(FILE="$RUNNER_TEMP/${domain}.builds.json" node -p "const p=require(process.env.FILE);(p.data&&p.data[0]&&p.data[0].uuid)||''")"
+            curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
+            count="$(jq '.data|length' "$RUNNER_TEMP/builds.json")"
+            state="$(jq -r '.data[0].state // "unknown"' "$RUNNER_TEMP/builds.json")"
+            uuid="$(jq -r '.data[0].uuid // empty' "$RUNNER_TEMP/builds.json")"
+            echo "NODE_BUILD_COUNT $domain=$count"
+            echo "NODE_LATEST_STATE $domain=$state"
+            echo "NODE_LATEST_UUID_PRESENT $domain=$([ -n "$uuid" ] && echo YES || echo NO)"
             if [ -n "$uuid" ]; then
-              curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds/$uuid/logs" -o "$RUNNER_TEMP/${domain}.logs.json" || true
-              DOMAIN="$domain" FILE="$RUNNER_TEMP/${domain}.logs.json" node - <<'NODE'
-              const fs=require('fs');let raw='';try{raw=fs.readFileSync(process.env.FILE,'utf8')}catch{};const u=raw.toUpperCase();
-              const names=['BOT_TOKEN','TELEGRAM_TOKEN','SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','SUPABASE_ANON_KEY','OPENAI_API_KEY','HOSTINGER_API_TOKEN','ADMIN_API_TOKEN','HUB_API_SECRET','.ENV','NODEJS','HBUILDS','CRYPTOWORLDZ.XYZ','CRYPTOBOTZ.CRYPTOWORLDZ.XYZ'];
-              for(const n of names) console.log(`BUILD_LOG_MENTIONS ${process.env.DOMAIN} ${n}=${u.includes(n.toUpperCase())?'YES':'NO'}`);
-              NODE
+              curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds/$uuid/logs" -o "$RUNNER_TEMP/logs.json" || true
+              for needle in BOT_TOKEN TELEGRAM_TOKEN SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY SUPABASE_ANON_KEY OPENAI_API_KEY HOSTINGER_API_TOKEN ADMIN_API_TOKEN HUB_API_SECRET '.env' nodejs hbuilds cryptoworldz.xyz cryptobotz.cryptoworldz.xyz; do
+                if grep -Fqi -- "$needle" "$RUNNER_TEMP/logs.json" 2>/dev/null; then result=YES; else result=NO; fi
+                echo "BUILD_LOG_MENTIONS $domain $needle=$result"
+              done
             fi
           done < "$RUNNER_TEMP/accounts.tsv"
 
-          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"; if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
           cat > "$RUNNER_TEMP/list-hbuilds.lftp" <<'EOF'
-          set cmd:fail-exit false
-          set net:max-retries 2
-          set net:timeout 25
-          set ftp:ssl-force true
-          set ftp:ssl-protect-data true
-          set ssl:verify-certificate true
-          set ssl:check-hostname false
-          cls -la /domains/cryptoworldz.xyz/hbuilds
-          cls -la /domains/cryptobotz.cryptoworldz.xyz/hbuilds
-          bye
-          EOF
+set cmd:fail-exit false
+set net:max-retries 2
+set net:timeout 25
+set ftp:ssl-force true
+set ftp:ssl-protect-data true
+set ssl:verify-certificate true
+set ssl:check-hostname false
+cls -la /domains/cryptoworldz.xyz/hbuilds
+cls -la /domains/cryptobotz.cryptoworldz.xyz/hbuilds
+bye
+EOF
           timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/list-hbuilds.lftp" "$raw_host" || true
           echo 'CRYPTOWORLDZ_HOSTINGER_NODE_ENV_AUDIT=PASS_READ_ONLY'
       - name: Publish audit pass
