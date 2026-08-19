@@ -72,6 +72,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Publish authenticated BUILD start
+        run: bash .github/publish-progress.sh BUILD STARTED
+
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -105,7 +109,6 @@ jobs:
           ! grep -RIE --include='*.html' 'Created by JayJayTeamDev|Designed by JayJayTeamDev' "$root"
           grep -RFl --include='*.html' 'Created with the Vision' "$root" >/dev/null
           ! grep -RIE 'OPENAI_API_KEY|sk-proj-|sk_live_|sk_test_|service_role|FTP_PASSWORD|DATABASE_URL|SUPABASE_SERVICE' "$root"
-          bash .github/publish-progress.sh BUILD PASS
 
       - name: Upload immutable BUILD candidate
         uses: actions/upload-artifact@v4
@@ -114,6 +117,14 @@ jobs:
           path: apps/oneworldz-ecosystem-release/dist/ecosystem/
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish authenticated BUILD pass
+        if: success()
+        run: bash .github/publish-progress.sh BUILD PASS
+
+      - name: Publish authenticated BUILD failure
+        if: failure()
+        run: bash .github/publish-progress.sh BUILD FAIL
 
   tests:
     needs: build
