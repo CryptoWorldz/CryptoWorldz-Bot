@@ -28,7 +28,7 @@ permissions:
 
 concurrency:
   group: jayjay-chatgpt-oneworldz-single-rail
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   MIN_PAGE_ROUTES: "83"
