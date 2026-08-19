@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/zed-runtime-probe-deploy.yml"
+      - "src/full-runtime-entry.js"
   workflow_dispatch:
 
 permissions:
