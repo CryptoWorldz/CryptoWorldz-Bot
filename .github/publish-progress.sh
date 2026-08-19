@@ -35,3 +35,4 @@ git push --force origin HEAD:refs/heads/deployment-progress >/dev/null
 echo "DEPLOYMENT_PROGRESS_PUBLISHED gate=$gate result=$result run=$run_id"
 
 # Canonical deployment trigger marker: authenticated production rail control.
+# Live observable canonical BUILD trigger: 2026-08-19.
