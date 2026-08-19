@@ -8,8 +8,9 @@ set -Eeuo pipefail
 : "${FTP_PASSWORD:?}"
 : "${FTP_PORT:?}"
 : "${HOSTINGER_API_TOKEN:?}"
+: "${OPENAI_API_KEY:?}"
 
-for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN"; do
+for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN" "$OPENAI_API_KEY"; do
   [ -n "$value" ] && echo "::add-mask::$value"
 done
 
@@ -35,6 +36,82 @@ command -v lftp >/dev/null
 
 host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"
 if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
+
+# Preserve the existing protected runtime environment and merge only the
+# server-side OpenAI key supplied by the protected GitHub environment.
+# The local destination MUST NOT exist before lftp get; this specifically
+# prevents the former empty protected.env capture failure.
+protected_env="$RUNNER_TEMP/zed-protected.env"
+rm -f "$protected_env"
+{
+  echo 'set cmd:fail-exit true'
+  echo 'set net:max-retries 3'
+  echo 'set net:timeout 30'
+  echo 'set net:reconnect-interval-base 5'
+  echo 'set net:reconnect-interval-max 20'
+  echo 'set ftp:ssl-force true'
+  echo 'set ftp:ssl-protect-data true'
+  echo 'set ssl:verify-certificate true'
+  echo 'set ssl:check-hostname false'
+  echo 'set ftp:passive-mode true'
+  printf 'cd "%s"\n' "$PROTECTED_NODE_ROOT"
+  printf 'get ".env" -o "%s"\n' "$protected_env"
+  echo 'bye'
+} > "$RUNNER_TEMP/zed-env-fetch.lftp"
+
+env_fetch_pass=0
+for attempt in $(seq 1 4); do
+  echo "ZED_PROTECTED_ENV_FETCH attempt=$attempt/4"
+  rm -f "$protected_env"
+  if timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" \
+      -e "source $RUNNER_TEMP/zed-env-fetch.lftp" "$host"; then
+    env_fetch_pass=1
+    break
+  fi
+  echo "::warning::Protected .env fetch attempt $attempt failed; retrying without changing remote runtime state."
+  sleep $((attempt * 5))
+done
+test "$env_fetch_pass" = '1'
+test -s "$protected_env"
+
+PROTECTED_ENV="$protected_env" python3 - <<'PY'
+import os
+import pathlib
+import re
+
+path = pathlib.Path(os.environ["PROTECTED_ENV"])
+key = os.environ.get("OPENAI_API_KEY", "").strip()
+if not key or "\n" in key or "\r" in key:
+    raise SystemExit("OPENAI_API_KEY_INVALID_FOR_PROTECTED_ENV")
+
+lines = path.read_text(encoding="utf-8").splitlines()
+pattern = re.compile(r"^\s*(?:export\s+)?OPENAI_API_KEY\s*=")
+replacement = f"OPENAI_API_KEY={key}"
+out = []
+replaced = False
+for line in lines:
+    if pattern.match(line):
+        if not replaced:
+            out.append(replacement)
+            replaced = True
+        continue
+    out.append(line)
+if not replaced:
+    out.append(replacement)
+path.write_text("\n".join(out).rstrip("\n") + "\n", encoding="utf-8")
+PY
+chmod 600 "$protected_env"
+PROTECTED_ENV="$protected_env" python3 - <<'PY'
+import os
+import pathlib
+import re
+
+text = pathlib.Path(os.environ["PROTECTED_ENV"]).read_text(encoding="utf-8")
+matches = [line for line in text.splitlines() if re.match(r"^\s*(?:export\s+)?OPENAI_API_KEY\s*=", line)]
+if len(matches) != 1 or not matches[0].split("=", 1)[1].strip():
+    raise SystemExit("OPENAI_API_KEY_MERGE_PROOF_FAILED")
+PY
+echo 'ZED_PROTECTED_ENV_OPENAI_MERGE=READY'
 
 runtime_files="$RUNNER_TEMP/zed-runtime-files.txt"
 runtime_dirs="$RUNNER_TEMP/zed-runtime-dirs.txt"
@@ -88,9 +165,11 @@ done
   while IFS= read -r rel; do
     printf 'put "%s" -o "%s"\n' "$rel" "$rel"
   done < "$runtime_files"
+  printf 'put "%s" -o ".env"\n' "$protected_env"
   for rel in "${critical[@]}"; do
     printf 'get "%s" -o "%s/%s"\n' "$rel" "$proofdir" "$rel"
   done
+  printf 'get ".env" -o "%s/protected.env"\n' "$proofdir"
   echo 'bye'
 } > "$RUNNER_TEMP/zed-runtime-sync.lftp"
 
@@ -106,6 +185,12 @@ for attempt in $(seq 1 4); do
   sleep $((attempt * 10))
 done
 test "$transport_pass" = '1'
+
+cmp -s "$protected_env" "$proofdir/protected.env" || {
+  echo '::error::REMOTE_PROTECTED_ENV_BYTE_MISMATCH'
+  exit 1
+}
+echo 'ZED_PROTECTED_ENV_REMOTE_BYTES=PASS'
 
 for rel in "${critical[@]}"; do
   cmp -s "$rel" "$proofdir/$rel" || {
