@@ -18,20 +18,20 @@ env:
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
 
 jobs:
-  inspect-build-recipe:
+  prove-repaired-zed:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     environment:
       name: cryptoworldz-production
     env:
       HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      - run: bash .github/publish-progress.sh ZED_BUILD_METADATA STARTED
+      - run: bash .github/publish-progress.sh ZED_GIT_BUILD_PROOF STARTED
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Read sanitized Hostinger Node build recipes
+      - name: Wait for newest Hostinger Git build and prove live ZED
         shell: bash
         run: |
           set -euo pipefail
@@ -45,19 +45,49 @@ jobs:
           echo "::add-mask::$username"
           user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
           base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
-          curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
-          BUILDS="$RUNNER_TEMP/builds.json" node <<'NODE'
-          const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync(process.env.BUILDS,'utf8'));
-          const allowed=['node_version','app_type','root_directory','output_directory','build_script','entry_file','package_manager','source_type','source_options'];
-          for(const b of (p.data||[]).slice(0,10)){
-            const o=b._options||b.options||{}; const safe={};
-            for(const k of allowed){ if(o[k]!==undefined) safe[k]=o[k]; }
-            const redact=(v)=>{ if(Array.isArray(v)) return v.map(redact); if(v&&typeof v==='object'){const x={};for(const [k,val] of Object.entries(v)){x[k]=/(token|secret|password|auth|key)/i.test(k)?'[REDACTED]':redact(val)}return x;} return typeof v==='string'?v.replace(/(?:sk-|eyJ)[A-Za-z0-9._-]{12,}/g,'[REDACTED]'):v; };
-            console.log('HOSTINGER_BUILD_RECIPE '+JSON.stringify({uuid:b.uuid,state:b.state,created_at:b.created_at,options:redact(safe)}));
-          }
+          chosen=""
+          for i in $(seq 1 120); do
+            curl --fail --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
+            read -r uuid state source nodever apptype entry <<<"$(BUILDS="$RUNNER_TEMP/builds.json" node - <<'NODE'
+          const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.env.BUILDS,'utf8'));const b=(p.data||[])[0]||{};const o=b._options||b.options||{};process.stdout.write([b.uuid||'',b.state||'',o.source_type||'',o.node_version||'',o.app_type||'',o.entry_file||''].join(' '));
           NODE
+            )"
+            echo "HOSTINGER_GIT_BUILD_WAIT attempt=$i uuid=$uuid state=$state source=$source node=$nodever app=$apptype entry=$entry"
+            test "$source" = git
+            test "$nodever" = 22
+            test "$apptype" = express
+            test "$entry" = index.js
+            if [ "$state" = completed ]; then chosen="$uuid"; break; fi
+            if [ "$state" = failed ]; then
+              curl --silent --show-error --location -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds/$uuid/logs" -o "$RUNNER_TEMP/build-logs.json" || true
+              cat "$RUNNER_TEMP/build-logs.json" || true
+              exit 1
+            fi
+            sleep 5
+          done
+          test -n "$chosen"
+          echo "HOSTINGER_GIT_BUILD=PASS uuid=$chosen"
+          code="$(curl --silent --show-error --location --request POST -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/server/restart")"
+          case "$code" in 200|201|202|204) ;; *) cat "$RUNNER_TEMP/restart.json" || true; exit 1;; esac
+          for i in $(seq 1 50); do
+            sleep 4
+            root="$(curl --silent --show-error --location --connect-timeout 8 --max-time 12 -o "$RUNNER_TEMP/root.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/?proof=$GITHUB_RUN_ID-$i" || true)"
+            health="$(curl --silent --show-error --location --connect-timeout 8 --max-time 12 -o "$RUNNER_TEMP/health.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/health?proof=$GITHUB_RUN_ID-$i" || true)"
+            mini="$(curl --silent --show-error --location --connect-timeout 8 --max-time 12 -o "$RUNNER_TEMP/mini.html" -w '%{http_code}' "https://$PROTECTED_DOMAIN/miniapp/?proof=$GITHUB_RUN_ID-$i" || true)"
+            gpt="$(curl --silent --show-error --location --connect-timeout 8 --max-time 12 -o "$RUNNER_TEMP/gpt.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/status?proof=$GITHUB_RUN_ID-$i" || true)"
+            echo "ZED_LIVE_PROOF attempt=$i root=$root health=$health mini=$mini gpt=$gpt"
+            if [ "$root" = 200 ] && [ "$health" = 200 ] && [ "$mini" = 200 ] && [ "$gpt" = 200 ] \
+              && grep -Fq '"service":"CryptoWorldz Zed Bot"' "$RUNNER_TEMP/root.json" \
+              && grep -Fq '"ok":true' "$RUNNER_TEMP/health.json" \
+              && grep -Fq 'id="zed-guide"' "$RUNNER_TEMP/mini.html" \
+              && grep -Fq '"ok":true' "$RUNNER_TEMP/gpt.json"; then
+              echo "ZED_GIT_BUILD_LIVE=PASS uuid=$chosen"
+              exit 0
+            fi
+            if [ "$health" = 503 ]; then cat "$RUNNER_TEMP/health.json" || true; fi
+          done
+          exit 1
       - if: success()
-        run: bash .github/publish-progress.sh ZED_BUILD_METADATA PASS
+        run: bash .github/publish-progress.sh ZED_GIT_BUILD_PROOF PASS
       - if: failure()
-        run: bash .github/publish-progress.sh ZED_BUILD_METADATA FAIL
+        run: bash .github/publish-progress.sh ZED_GIT_BUILD_PROOF FAIL
