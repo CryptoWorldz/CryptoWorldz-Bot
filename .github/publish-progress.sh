@@ -13,18 +13,23 @@ status_file="oneworldz-deployment-progress.txt"
 # The in-run token never edits a workflow file; the authenticated connector installs
 # this proved candidate atomically afterward.
 if [ "$gate" = "BUILD" ] && [ "$result" = "STARTED" ] \
-  && ! grep -Fq 'candidate_fingerprint:' .github/workflows/main.yml \
-  && [ ! -f workflow-fingerprint-rail.txt ]; then
-  python3 tools/generate-fingerprint-rail.py
-  test -s workflow-fingerprint-rail.txt
-  ! grep -Fq 'actions/upload-artifact' workflow-fingerprint-rail.txt
-  ! grep -Fq 'actions/download-artifact' workflow-fingerprint-rail.txt
-  git config user.name 'github-actions[bot]'
-  git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-  git add workflow-fingerprint-rail.txt
-  git commit -m 'PUBLISH ARTIFACT FREE FINGERPRINT RAIL CANDIDATE'
-  git push origin HEAD:main
-  echo 'ARTIFACT_FREE_FINGERPRINT_RAIL_CANDIDATE=PUBLISHED'
+  && ! grep -Fq 'candidate_fingerprint:' .github/workflows/main.yml; then
+  if [ ! -f workflow-fingerprint-rail.txt ] \
+    || grep -Fq 'tools/fingerprint-oneworldz-candidate.mjs' workflow-fingerprint-rail.txt; then
+    python3 tools/generate-fingerprint-rail.py
+    test -s workflow-fingerprint-rail.txt
+    ! grep -Fq 'actions/upload-artifact' workflow-fingerprint-rail.txt
+    ! grep -Fq 'actions/download-artifact' workflow-fingerprint-rail.txt
+    grep -Fq 'apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs' workflow-fingerprint-rail.txt
+    git config user.name 'github-actions[bot]'
+    git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+    git add workflow-fingerprint-rail.txt
+    if ! git diff --cached --quiet; then
+      git commit -m 'PUBLISH ALLOWED PATH ARTIFACT FREE FINGERPRINT RAIL'
+      git push origin HEAD:main
+      echo 'ARTIFACT_FREE_FINGERPRINT_RAIL_CANDIDATE=PUBLISHED'
+    fi
+  fi
 fi
 
 work="$(mktemp -d)"
