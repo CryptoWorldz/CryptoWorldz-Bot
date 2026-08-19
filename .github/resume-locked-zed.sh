@@ -123,7 +123,8 @@ new_build_uuid="$pre_build_uuid"
 if [ "$current_full" != 1 ]; then
   stage="$RUNNER_TEMP/zed-hostinger-source"
   archive="$RUNNER_TEMP/cryptoworldz-zed-${GITHUB_RUN_ID}.tar.gz"
-  rm -rf "$stage" "$archive"
+  archive_list="$RUNNER_TEMP/cryptoworldz-zed-${GITHUB_RUN_ID}.list"
+  rm -rf "$stage" "$archive" "$archive_list"
   mkdir -p "$stage/.github"
   find . -maxdepth 1 -type f -name '*.js' -exec cp '{}' "$stage/" \;
   cp package.json package-lock.json "$stage/"
@@ -131,9 +132,10 @@ if [ "$current_full" != 1 ]; then
   cp .github/install-ci-apt-wrapper.cjs "$stage/.github/"
   tar -czf "$archive" -C "$stage" .
   test -s "$archive"
-  tar -tzf "$archive" | grep -Eq '^\./package\.json$|^package\.json$'
-  tar -tzf "$archive" | grep -Eq '^\./src/user-experience\.js$|^src/user-experience\.js$'
-  ! tar -tzf "$archive" | grep -Eq '(^|/)\.env($|\.)|(^|/)node_modules(/|$)'
+  tar -tzf "$archive" > "$archive_list"
+  grep -Eq '^\./package\.json$|^package\.json$' "$archive_list"
+  grep -Eq '^\./src/user-experience\.js$|^src/user-experience\.js$' "$archive_list"
+  ! grep -Eq '(^|/)\.env($|\.)|(^|/)node_modules(/|$)' "$archive_list"
   archive_sha="$(sha256sum "$archive" | awk '{print $1}')"
   echo "HOSTINGER_NODE_SOURCE_ARCHIVE=PASS sha256=$archive_sha"
 
@@ -190,8 +192,6 @@ NODE
   echo "HOSTINGER_NODE_DEPLOY_BUILD=PASS uuid=$new_build_uuid archive_sha256=$archive_sha"
 fi
 
-# FTPS is an optional secondary fingerprint transport. A network outage here is
-# recorded truthfully but does not erase an authenticated Hostinger API build.
 ftps_proof='UNAVAILABLE'
 if command -v lftp >/dev/null 2>&1; then
   raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
