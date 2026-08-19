@@ -1,0 +1,44 @@
+name: Hostinger Managed ZED Config Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/hostinger-managed-config-check.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash .github/publish-progress.sh HOSTINGER_MANAGED_CONFIG STARTED
+      - run: |
+          sudo apt-get update -qq
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq lftp
+      - name: Inspect hbuilds config names only
+        shell: bash
+        run: |
+          set -euo pipefail
+          for v in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD"; do [ -z "$v" ] || echo "::add-mask::$v"; done
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp://##' -e 's#^ftps://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          out="$RUNNER_TEMP/config"; mkdir -p "$out"
+          printf '%s\n' 'set cmd:fail-exit false' 'set net:max-retries 2' 'set net:timeout 25' 'set ftp:ssl-force true' 'set ftp:ssl-protect-data true' 'set ssl:verify-certificate true' 'set ssl:check-hostname false' 'cls -la /domains/cryptobotz.cryptoworldz.xyz/hbuilds/config' "mirror /domains/cryptobotz.cryptoworldz.xyz/hbuilds/config $out" 'bye' > "$RUNNER_TEMP/audit.lftp"
+          timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/audit.lftp" "$raw_host" || true
+          ROOT="$out" node -e 'const fs=require("fs"),p=require("path");const r=process.env.ROOT;const wanted=["BOT_TOKEN","TELEGRAM_TOKEN","SUPABASE_URL","SUPABASE_SERVICE_ROLE_KEY","SUPABASE_ANON_KEY","OPENAI_API_KEY","ADMIN_API_TOKEN","HUB_API_SECRET","NODE_ENV","PORT"];function w(d){for(const n of fs.existsSync(d)?fs.readdirSync(d):[]){const f=p.join(d,n),s=fs.statSync(f);if(s.isDirectory())w(f);else{console.log(`CONFIG_FILE ${p.relative(r,f)} size=${s.size}`);if(s.size>1048576)continue;let x="";try{x=fs.readFileSync(f,"utf8")}catch{};const u=x.toUpperCase();for(const k of wanted)console.log(`CONFIG_MENTIONS ${p.relative(r,f)} ${k}=${u.includes(k)?"YES":"NO"}`);const keys=[];for(const line0 of x.split(/\r?\n/)){const line=line0.trim();if(!line||line.startsWith("#"))continue;let m=line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=/);if(m)keys.push(m[1]);else{m=line.match(/^([A-Za-z_][A-Za-z0-9_.-]*)\s*:/);if(m)keys.push(m[1])}}if(keys.length)console.log(`CONFIG_KEYS ${p.relative(r,f)}=${[...new Set(keys)].sort().join(",")}`)}}}w(r);'
+          echo HOSTINGER_MANAGED_CONFIG_CHECK=PASS_READ_ONLY
+      - if: success()
+        run: bash .github/publish-progress.sh HOSTINGER_MANAGED_CONFIG PASS
+      - if: failure()
+        run: bash .github/publish-progress.sh HOSTINGER_MANAGED_CONFIG FAIL
