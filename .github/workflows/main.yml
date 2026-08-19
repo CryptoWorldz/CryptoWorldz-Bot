@@ -15,6 +15,7 @@ on:
       - "deployments/oneworldz-19-total.request"
       - "governance/JAYJAY-CHATGPT-DEPLOYMENT-GATE.md"
       - "tools/verify-oneworldz-canonical.mjs"
+      - ".github/publish-progress.sh"
       - ".github/workflows/main.yml"
   workflow_dispatch:
 
@@ -24,7 +25,7 @@ permissions:
 
 concurrency:
   group: jayjay-chatgpt-oneworldz-single-rail
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
@@ -63,9 +64,9 @@ jobs:
   verify:
     needs: freshness
     if: ${{ needs.freshness.outputs.current == 'true' }}
-    name: Clean source + complete verification
+    name: BUILD → TESTS → LIGHTHOUSE authenticated candidate
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     outputs:
       static_tree: ${{ steps.lock.outputs.static_tree }}
     steps:
@@ -88,19 +89,14 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Run complete canonical verification
-        run: npm run verify
-
-      - name: Run ecosystem release tests
-        run: npm --prefix apps/oneworldz-ecosystem-release test
-
-      - name: Dependency security audit
-        run: npm audit --audit-level=high
-
-      - name: Prove exact candidate boundary
+      - name: SUCCESS STORY 1 — BUILD
         shell: bash
         run: |
           set -euo pipefail
+          npm run check:structure
+          npm run check
+          npm run build:ecosystem-release
+          npm run check:web
           root='apps/oneworldz-ecosystem-release/dist/ecosystem'
           test "$(find "$root" -mindepth 2 -maxdepth 2 -name index.html | wc -l | tr -d ' ')" = '18'
           test -s "$root/oneworldz/index.html"
@@ -109,6 +105,24 @@ jobs:
           ! grep -RIE --include='*.html' 'Created by JayJayTeamDev|Designed by JayJayTeamDev' "$root"
           grep -RFl --include='*.html' 'Created with the Vision' "$root" >/dev/null
           ! grep -RIE 'OPENAI_API_KEY|sk-proj-|sk_live_|sk_test_|service_role|FTP_PASSWORD|DATABASE_URL|SUPABASE_SERVICE' "$root"
+          bash .github/publish-progress.sh BUILD PASS
+
+      - name: SUCCESS STORY 2 — TESTS
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test
+          npm --prefix apps/oneworldz-ecosystem-release test
+          npm run check:auto
+          npm audit --audit-level=high
+          bash .github/publish-progress.sh TESTS PASS
+
+      - name: SUCCESS STORY 3 — LIGHTHOUSE
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run check:lighthouse-seo
+          bash .github/publish-progress.sh LIGHTHOUSE PASS
 
       - name: Upload immutable verified candidate
         uses: actions/upload-artifact@v4
@@ -142,7 +156,7 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Prove all 18 candidate sites and every packaged HTML page
+      - name: SUCCESS STORY 4 — DESKTOP/MOBILE
         shell: bash
         run: |
           set -uo pipefail
@@ -168,7 +182,9 @@ jobs:
           test "$(find "$GITHUB_WORKSPACE/visual-proof" -mindepth 2 -maxdepth 2 -name visual-report.json | wc -l | tr -d ' ')" = '18' || failed=1
           test "$(find "$GITHUB_WORKSPACE/visual-proof" -mindepth 2 -maxdepth 2 -name desktop.png | wc -l | tr -d ' ')" = '18' || failed=1
           test "$(find "$GITHUB_WORKSPACE/visual-proof" -mindepth 2 -maxdepth 2 -name mobile.png | wc -l | tr -d ' ')" = '18' || failed=1
-          exit "$failed"
+          test "$failed" = '0'
+          cd "$GITHUB_WORKSPACE"
+          bash .github/publish-progress.sh DESKTOP_MOBILE PASS
 
       - name: Upload candidate visual evidence
         if: always()
@@ -198,6 +214,15 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Refuse stale generation before protected production
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
 
       - uses: actions/setup-node@v4
         with:
@@ -213,6 +238,8 @@ jobs:
           node --check index.js
           node --check src/full-runtime-entry.js
           node --check src/http.js
+          node --check src/user-experience.js
+          node --check src/zed-guide.js
           grep -Fq 'startProtectedPublicFallback' index.js
           grep -Fq 'require("./src/full-runtime-entry")' index.js
           grep -Fq 'require("./src/hub-central/preload")' index.js
@@ -220,6 +247,9 @@ jobs:
           grep -Fq 'app.use("/miniapp"' src/http.js
           grep -Fq 'service: "CryptoWorldz Zed Bot"' src/http.js
           grep -Fq 'model: "gpt-4o-mini"' src/hub-central/live-v1.js
+          grep -Fq '/api/mini/zed/chat' src/zed-guide.js
+          grep -Fq '/api/mini/creator/submit' src/user-experience.js
+          grep -Fq '/api/mini/heroes/apply' src/user-experience.js
           for key in OPENAI_API_KEY HOSTINGER_API_TOKEN FTP_HOST FTP_USERNAME FTP_PASSWORD; do
             test -n "${!key:-}"
             echo "::add-mask::${!key}"
@@ -309,6 +339,7 @@ jobs:
           const candidates={
             OPENAI_API_KEY:process.env.OPENAI_API_KEY,
             ONEWORLDZ_OPENAI_MODEL:'gpt-4o-mini',
+            ONEWORLDZ_IMAGE_MODEL:'gpt-image-2',
             BOT_TOKEN:process.env.BOT_TOKEN_SECRET,
             SUPABASE_URL:process.env.SUPABASE_URL_SECRET,
             SUPABASE_SERVICE_ROLE_KEY:process.env.SUPABASE_SERVICE_ROLE_KEY_SECRET
@@ -326,6 +357,7 @@ jobs:
             }
           done
           grep -Eq '^ONEWORLDZ_OPENAI_MODEL=gpt-4o-mini$' "$RUNNER_TEMP/protected.env"
+          grep -Eq '^ONEWORLDZ_IMAGE_MODEL=gpt-image-2$' "$RUNNER_TEMP/protected.env"
 
           cat > "$RUNNER_TEMP/put-env.lftp" <<EOF
           set cmd:fail-exit true
@@ -360,9 +392,9 @@ jobs:
           put index.js -o $PROTECTED_NODE_ROOT/index.js
           put package.json -o $PROTECTED_NODE_ROOT/package.json
           put package-lock.json -o $PROTECTED_NODE_ROOT/package-lock.json
-          mirror -R --verbose --no-perms --exclude-glob .DS_Store src $PROTECTED_NODE_ROOT/src
-          mirror -R --verbose --no-perms --exclude-glob .DS_Store public $PROTECTED_NODE_ROOT/public
-          mirror -R --verbose --no-perms --exclude-glob .DS_Store .well-known $PROTECTED_NODE_ROOT/.well-known
+          mirror -R --verbose --delete --no-perms --exclude-glob .DS_Store src $PROTECTED_NODE_ROOT/src
+          mirror -R --verbose --delete --no-perms --exclude-glob .DS_Store public $PROTECTED_NODE_ROOT/public
+          mirror -R --verbose --delete --no-perms --exclude-glob .DS_Store .well-known $PROTECTED_NODE_ROOT/.well-known
           bye
           EOF
           timeout 480 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/sync-runtime.lftp" "$raw_host"
@@ -384,6 +416,10 @@ jobs:
           get $PROTECTED_NODE_ROOT/src/oneworldz-gpt/http.js -o $RUNNER_TEMP/remote-gpt-http.js
           get $PROTECTED_NODE_ROOT/src/full-runtime-entry.js -o $RUNNER_TEMP/remote-full-runtime-entry.js
           get $PROTECTED_NODE_ROOT/src/http.js -o $RUNNER_TEMP/remote-http.js
+          get $PROTECTED_NODE_ROOT/src/user-experience.js -o $RUNNER_TEMP/remote-user-experience.js
+          get $PROTECTED_NODE_ROOT/src/zed-guide.js -o $RUNNER_TEMP/remote-zed-guide.js
+          get $PROTECTED_NODE_ROOT/public/miniapp/index.html -o $RUNNER_TEMP/remote-miniapp-index.html
+          get $PROTECTED_NODE_ROOT/public/miniapp/experience.js -o $RUNNER_TEMP/remote-miniapp-experience.js
           bye
           EOF
           timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/get-proof.lftp" "$raw_host"
@@ -391,6 +427,10 @@ jobs:
           cmp -s src/oneworldz-gpt/http.js "$RUNNER_TEMP/remote-gpt-http.js"
           cmp -s src/full-runtime-entry.js "$RUNNER_TEMP/remote-full-runtime-entry.js"
           cmp -s src/http.js "$RUNNER_TEMP/remote-http.js"
+          cmp -s src/user-experience.js "$RUNNER_TEMP/remote-user-experience.js"
+          cmp -s src/zed-guide.js "$RUNNER_TEMP/remote-zed-guide.js"
+          cmp -s public/miniapp/index.html "$RUNNER_TEMP/remote-miniapp-index.html"
+          cmp -s public/miniapp/experience.js "$RUNNER_TEMP/remote-miniapp-experience.js"
 
       - name: Official Hostinger managed restart
         shell: bash
@@ -408,7 +448,7 @@ jobs:
             *) cat "$RUNNER_TEMP/restart.json"; exit 1 ;;
           esac
 
-      - name: Prove ZED, Mini App and guarded GPT live together
+      - name: SUCCESS STORY 5 — ZED/MINIAPP
         shell: bash
         run: |
           set -euo pipefail
@@ -421,7 +461,10 @@ jobs:
             if [ "$root_code" = 200 ] && [ "$health_code" = 200 ] && [ "$mini_code" = 200 ] && [ "$status_code" = 200 ] \
               && grep -Fq '"service":"CryptoWorldz Zed Bot"' "$RUNNER_TEMP/root.json" \
               && grep -Fq '"ok":true' "$RUNNER_TEMP/health.json" \
-              && grep -Eiq '<!doctype html|<html' "$RUNNER_TEMP/miniapp.html" \
+              && grep -Fq 'id="splashback"' "$RUNNER_TEMP/miniapp.html" \
+              && grep -Fq 'id="zed-guide"' "$RUNNER_TEMP/miniapp.html" \
+              && grep -Fq 'id="create"' "$RUNNER_TEMP/miniapp.html" \
+              && grep -Fq 'id="heroes"' "$RUNNER_TEMP/miniapp.html" \
               && STATUS="$RUNNER_TEMP/status.json" node - <<'NODE'
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync(process.env.STATUS,'utf8'));
@@ -433,6 +476,7 @@ jobs:
           NODE
             then
               echo 'PROTECTED_FULL_ZED_MINIAPP_GPT_PRODUCTION=PASS'
+              bash .github/publish-progress.sh ZED_MINIAPP PASS
               exit 0
             fi
             echo "ZED_CONVERGENCE $i/60 root=$root_code health=$health_code mini=$mini_code gpt=$status_code"
@@ -453,10 +497,19 @@ jobs:
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      - name: Refuse stale generation before static production
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
 
       - name: Download exact verified candidate
         uses: actions/download-artifact@v4
@@ -547,7 +600,7 @@ jobs:
             echo "DESTINATION_PROVED $domain -> $transport"
           done < "$RUNNER_TEMP/targets.tsv"
 
-      - name: Replace exact package files, prove bytes, rollback fleet on failure
+      - name: SUCCESS STORY 6 — HOSTINGER
         shell: bash
         run: |
           set -uo pipefail
@@ -589,9 +642,7 @@ jobs:
                 echo 'set ssl:verify-certificate true'
                 echo 'set ssl:check-hostname false'
                 printf 'cd "%s"\n' "$transport"
-                while IFS= read -r rel; do
-                  printf 'get "%s" -o "%s"\n' "$rel" "$backup/$rel"
-                done < "$files"
+                while IFS= read -r rel; do printf 'get "%s" -o "%s"\n' "$rel" "$backup/$rel"; done < "$files"
                 echo 'bye'
               } > "$RUNNER_TEMP/$key.backup.lftp"
               timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.backup.lftp" "$host"
@@ -646,8 +697,7 @@ jobs:
                   && curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
                     -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
                     "https://$domain/release-manifest.json?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${key}-${attempt}" -o "$public_manifest"; then
-                  if cmp -s "$release_root/index.html" "$public_index" \
-                    && cmp -s "$release_root/release-manifest.json" "$public_manifest"; then
+                  if cmp -s "$release_root/index.html" "$public_index" && cmp -s "$release_root/release-manifest.json" "$public_manifest"; then
                     proved=1
                     break
                   fi
@@ -700,8 +750,8 @@ jobs:
           test "$(wc -l < "$RUNNER_TEMP/touched.tsv" | tr -d ' ')" = '18'
           mkdir -p deployment-proof
           cp "$RUNNER_TEMP/touched.tsv" deployment-proof/touched.tsv
-          printf 'run_id=%s\nstatic_tree=%s\nproof=EXACT_FTPS_AND_PUBLIC_INDEX_MANIFEST_BYTES\n' \
-            "$GITHUB_RUN_ID" "${{ needs.verify.outputs.static_tree }}" > deployment-proof/release.txt
+          printf 'run_id=%s\nstatic_tree=%s\nproof=EXACT_FTPS_AND_PUBLIC_INDEX_MANIFEST_BYTES\n' "$GITHUB_RUN_ID" "${{ needs.verify.outputs.static_tree }}" > deployment-proof/release.txt
+          bash .github/publish-progress.sh HOSTINGER PASS
 
       - name: Upload deployment ledger
         if: always()
@@ -730,7 +780,7 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Prove all 18 live sites and every published sitemap page
+      - name: SUCCESS STORY 7 — LIVE PROOF — all published pages
         shell: bash
         run: |
           set -uo pipefail
@@ -758,7 +808,7 @@ jobs:
           test "$(find "$GITHUB_WORKSPACE/live-proof" -mindepth 2 -maxdepth 2 -name mobile.png | wc -l | tr -d ' ')" = '18' || failed=1
           exit "$failed"
 
-      - name: Prove ZED full runtime remained live
+      - name: SUCCESS STORY 7 — LIVE PROOF — ZED remained live
         shell: bash
         run: |
           set -euo pipefail
@@ -771,7 +821,7 @@ jobs:
             if printf '%s' "$health" | grep -Fq '"ok":true' \
               && printf '%s' "$root" | grep -Fq '"service":"CryptoWorldz Zed Bot"' \
               && [ "$mini_code" = '200' ] \
-              && grep -Eiq '<!doctype html|<html' "$RUNNER_TEMP/miniapp.html" \
+              && grep -Fq 'id="splashback"' "$RUNNER_TEMP/miniapp.html" \
               && printf '%s' "$gpt" | grep -Fq '"ok":true' \
               && printf '%s' "$gpt" | grep -Fq '"openai_api_configured":true'; then
               passed=1
@@ -780,6 +830,7 @@ jobs:
             sleep 10
           done
           test "$passed" = '1'
+          bash .github/publish-progress.sh LIVE_PROOF PASS
 
       - name: Upload fresh live visual evidence
         if: always()
@@ -806,7 +857,7 @@ jobs:
           git fetch origin main --depth=1
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
 
-      - name: Record final 100 percent production pass
+      - name: SUCCESS STORY 8 — FINAL — Record final 100 percent production pass
         shell: bash
         run: |
           set -euo pipefail
@@ -820,11 +871,12 @@ jobs:
             fi
           }
           set_key final_100_percent_pass YES
-          set_key final_pass_scope FULL_18_SITE_STATIC_PLUS_ZED_MINIAPP_GPT_LIVE_PROOF
+          set_key final_pass_scope FULL_18_SITE_STATIC_PLUS_ZED_MINIAPP_AUTHENTICATED_PARTICIPANT_GPT_LIVE_PROOF
           set_key execution_phase COMPLETE
           set_key active_executor_run "$GITHUB_RUN_ID"
           set_key approved_static_tree "${{ needs.verify.outputs.static_tree }}"
           set_key build_pass PASS
+          set_key tests_pass PASS
           set_key chatgpt_preview_visual_pass PASS
           set_key seo_lighthouse_run "$GITHUB_RUN_ID"
           set_key seo_lighthouse_score 100
@@ -834,9 +886,18 @@ jobs:
           set_key live_technical_pass PASS
           set_key live_visual_pass PASS
           set_key protected_oneworldz_gpt_production_proof "PASS_RUN_${GITHUB_RUN_ID}"
+          set_key success_story_1_build PASS
+          set_key success_story_2_tests PASS
+          set_key success_story_3_lighthouse PASS
+          set_key success_story_4_desktop_mobile PASS
+          set_key success_story_5_zed_miniapp PASS
+          set_key success_story_6_hostinger PASS
+          set_key success_story_7_live_proof PASS
+          set_key success_story_8_final PASS
           set_key next_action COMPLETE
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add "$state"
           git commit -m 'RECORD JAYJAYTEAMDEV CHATGPT TOTAL DEPLOYMENT PASS'
           git push origin HEAD:main
+          bash .github/publish-progress.sh FINAL PASS
