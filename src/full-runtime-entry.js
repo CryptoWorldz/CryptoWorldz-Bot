@@ -143,7 +143,7 @@ async function start() {
   startupStage = "register_reward_settlement";
   registerRewardSettlementHandlers({ bot, repository, config, supabase });
   startupStage = "register_project_wallets";
-  registerProjectWalletSystem({ bot, repository, config, supabase });
+  registerProjectWalletSystem({ app, bot, config, supabase });
   startupStage = "register_worldzcast";
   registerWorldzCastSystem({ bot, repository, config, supabase });
   startupStage = "register_legend_v8";
