@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PROBE_REVISION: hostinger-real-build-20260819
+  PROBE_REVISION: hostinger-real-build-20260819-pipefix
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
   PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
 
@@ -63,10 +63,12 @@ jobs:
           cp -R src public .well-known "$stage/"
           cp .github/install-ci-apt-wrapper.cjs "$stage/.github/"
           archive="$RUNNER_TEMP/zed-${GITHUB_RUN_ID}.tar.gz"
+          archive_list="$RUNNER_TEMP/zed-${GITHUB_RUN_ID}.list"
           tar -czf "$archive" -C "$stage" .
-          tar -tzf "$archive" | grep -Eq '^\./package\.json$|^package\.json$'
-          tar -tzf "$archive" | grep -Eq '^\./src/full-runtime-entry\.js$|^src/full-runtime-entry\.js$'
-          ! tar -tzf "$archive" | grep -Eq '(^|/)\.env($|\.)|(^|/)node_modules(/|$)'
+          tar -tzf "$archive" > "$archive_list"
+          grep -Eq '^\./package\.json$|^package\.json$' "$archive_list"
+          grep -Eq '^\./src/full-runtime-entry\.js$|^src/full-runtime-entry\.js$' "$archive_list"
+          ! grep -Eq '(^|/)\.env($|\.)|(^|/)node_modules(/|$)' "$archive_list"
           echo "ARCHIVE=$archive" >> "$GITHUB_ENV"
           echo "ARCHIVE_NAME=$(basename "$archive")" >> "$GITHUB_ENV"
           echo "ZED_ARCHIVE_SHA=$(sha256sum "$archive" | awk '{print $1}')" >> "$GITHUB_ENV"
@@ -112,13 +114,13 @@ jobs:
           name_enc="$(node -p 'encodeURIComponent(process.env.ARCHIVE_NAME)')"
           settings_code="$(curl --silent --show-error --location -o "$RUNNER_TEMP/settings.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' "$base/builds/settings/from-archive?archive_path=${name_enc}")"
           echo "HOSTINGER_BUILD_SETTINGS_HTTP=$settings_code"
-          test "$settings_code" = 200
+          if [ "$settings_code" != 200 ]; then cat "$RUNNER_TEMP/settings.json" || true; exit 1; fi
           SETTINGS="$RUNNER_TEMP/settings.json" OUT="$RUNNER_TEMP/build-request.json" node <<'NODE'
           const fs=require('fs');const s=JSON.parse(fs.readFileSync(process.env.SETTINGS,'utf8'));const body={...s,node_version:22,app_type:'express',root_directory:'.',entry_file:'index.js',package_manager:'npm',source_type:'archive',source_options:{archive_path:process.env.ARCHIVE_NAME}};fs.writeFileSync(process.env.OUT,JSON.stringify(body));
           NODE
           build_code="$(curl --silent --show-error --location --request POST -o "$RUNNER_TEMP/build.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' -H 'Content-Type: application/json' --data-binary "@$RUNNER_TEMP/build-request.json" "$base/builds")"
           echo "HOSTINGER_BUILD_TRIGGER_HTTP=$build_code"
-          test "$build_code" = 200
+          if [ "$build_code" != 200 ]; then cat "$RUNNER_TEMP/build.json" || true; exit 1; fi
           build_uuid="$(BUILD="$RUNNER_TEMP/build.json" node -e "const p=require(process.env.BUILD);process.stdout.write(String(p.uuid||p.data?.uuid||''))")"
           test -n "$build_uuid"
           echo "BUILD_UUID=$build_uuid" >> "$GITHUB_ENV"
