@@ -8,25 +8,6 @@ run_id="${GITHUB_RUN_ID:-unknown}"
 sha="${GITHUB_SHA:-$(git rev-parse HEAD)}"
 now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 status_file="oneworldz-deployment-progress.txt"
-
-# One-shot source contract alignment. This runs only while the breadcrumb finalizer
-# is not yet wired into the canonical build, then pushes the corrected source/tests.
-if [ "$gate" = "BUILD" ] && [ "$result" = "STARTED" ] \
-  && ! grep -Fq 'finalize-breadcrumbs.mjs' apps/oneworldz-ecosystem-release/package.json \
-  && [ -f apps/oneworldz-ecosystem-release/apply-current-test-contracts.py ]; then
-  python3 apps/oneworldz-ecosystem-release/apply-current-test-contracts.py
-  git config user.name 'github-actions[bot]'
-  git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-  git add apps/oneworldz-ecosystem-release/package.json \
-          apps/oneworldz-ecosystem-release/test/expansion.test.mjs \
-          apps/oneworldz-ecosystem-release/test/production-readiness.test.mjs \
-          apps/oneworldz-ecosystem-release/test/user-experience-reality.test.mjs \
-          test/http.test.js
-  git commit -m 'FIX CURRENT TEST CONTRACTS AND STRUCTURAL SEO BUILD ORDER'
-  git push origin HEAD:main
-  echo 'CURRENT_TEST_CONTRACTS_AND_BREADCRUMB_BUILD_ORDER=PUBLISHED'
-fi
-
 work="$(mktemp -d)"
 branch="deployment-progress-temp-${run_id}-${gate}-${result}-${RANDOM}"
 cleanup(){ git worktree remove --force "$work" >/dev/null 2>&1 || true; rm -rf "$work"; }
