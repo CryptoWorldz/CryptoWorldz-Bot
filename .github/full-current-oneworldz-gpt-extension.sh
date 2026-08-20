@@ -80,3 +80,4 @@ echo '::error::OneWorldz GPT extension did not satisfy its independent live cont
 exit 1
 
 # Canonical direct trigger after the standalone ZED Core / extension split.
+# Native merge trigger keeps the single production rail explicit and auditable.
