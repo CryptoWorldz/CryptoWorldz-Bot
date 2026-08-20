@@ -1,3 +1,13 @@
+const path = require("node:path");
+const dotenv = require("dotenv");
+
+const protectedEnvPath = path.join(__dirname, "..", "..", ".env");
+const protectedEnv = dotenv.config({ path: protectedEnvPath }).parsed || {};
+if (!String(process.env.OPENAI_API_KEY || "").trim()) {
+  const protectedOpenAI = String(protectedEnv.OPENAI_API_KEY || "").trim();
+  if (protectedOpenAI) process.env.OPENAI_API_KEY = protectedOpenAI;
+}
+
 const httpModule = require("../http");
 const { registerHubCentralRoutes } = require("./http");
 const { registerOneWorldzGptRoutes } = require("../oneworldz-gpt/http");
