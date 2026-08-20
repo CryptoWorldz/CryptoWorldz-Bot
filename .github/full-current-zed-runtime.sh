@@ -225,18 +225,47 @@ base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websi
 runtime_archive="$RUNNER_TEMP/zed-runtime.tgz"
 tar -czf "$runtime_archive" -T "$runtime_files"
 test -s "$runtime_archive"
-build_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 180 \
+archive_name=".zed-runtime-${GITHUB_RUN_ID}-${GITHUB_SHA:0:12}.tgz"
+
+# Upload the secret-free source archive through the proven FTPS transport.
+# This avoids Cloudflare's challenge on large multipart API requests.
+{
+  echo 'set cmd:fail-exit true'
+  echo 'set net:max-retries 3'
+  echo 'set net:timeout 30'
+  echo 'set ftp:ssl-force true'
+  echo 'set ftp:ssl-protect-data true'
+  echo 'set ssl:verify-certificate true'
+  echo 'set ssl:check-hostname false'
+  echo 'set ftp:passive-mode true'
+  printf 'cd "%s/../public_html"\n' "$PROTECTED_NODE_ROOT"
+  printf 'put "%s" -o "%s"\n' "$runtime_archive" "$archive_name"
+  echo 'bye'
+} > "$RUNNER_TEMP/zed-build-archive-upload.lftp"
+timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" \
+  -e "source $RUNNER_TEMP/zed-build-archive-upload.lftp" "$host"
+echo 'HOSTINGER_BUILD_ARCHIVE_FTPS=PASS'
+
+build_request="$RUNNER_TEMP/zed-build-request.json"
+ARCHIVE_NAME="$archive_name" BUILD_REQUEST="$build_request" node - <<'NODE'
+const fs=require("fs");
+fs.writeFileSync(process.env.BUILD_REQUEST, JSON.stringify({
+  node_version: 22,
+  app_type: "express",
+  root_directory: ".",
+  output_directory: ".",
+  build_script: "npm ci",
+  entry_file: "index.js",
+  package_manager: "npm",
+  source_type: "archive",
+  source_options: { archive_path: process.env.ARCHIVE_NAME }
+}));
+NODE
+build_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 60 \
   --request POST -o "$RUNNER_TEMP/build-create.json" -w '%{http_code}' \
-  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-  --form "archive=@$runtime_archive;type=application/gzip" \
-  --form 'node_version=22' \
-  --form 'app_type=express' \
-  --form 'root_directory=.' \
-  --form 'output_directory=.' \
-  --form 'build_script=npm ci' \
-  --form 'entry_file=index.js' \
-  --form 'package_manager=npm' \
-  "$base/builds/from-archive" || true)"
+  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+  -H 'Accept: application/json' -H 'Content-Type: application/json' \
+  --data-binary "@$build_request" "$base/builds" || true)"
 case "$build_code" in
   200|201|202) ;;
   *) cat "$RUNNER_TEMP/build-create.json" 2>/dev/null || true; echo "::error::Managed full Node build rejected HTTP=$build_code"; exit 1;;
