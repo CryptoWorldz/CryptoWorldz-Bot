@@ -78,3 +78,5 @@ done
 
 echo '::error::OneWorldz GPT extension did not satisfy its independent live contract.'
 exit 1
+
+# Canonical direct trigger after the standalone ZED Core / extension split.
