@@ -225,27 +225,18 @@ base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websi
 runtime_archive="$RUNNER_TEMP/zed-runtime.tgz"
 tar -czf "$runtime_archive" -T "$runtime_files"
 test -s "$runtime_archive"
-build_request="$RUNNER_TEMP/zed-build-request.json"
-ARCHIVE_PATH="$runtime_archive" BUILD_REQUEST="$build_request" node - <<'NODE'
-const fs = require("fs");
-const archive = fs.readFileSync(process.env.ARCHIVE_PATH).toString("base64");
-fs.writeFileSync(process.env.BUILD_REQUEST, JSON.stringify({
-  archive,
-  node_version: 22,
-  app_type: "express",
-  root_directory: ".",
-  output_directory: ".",
-  build_script: "npm ci",
-  entry_file: "index.js",
-  package_manager: "npm"
-}));
-NODE
-
 build_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 180 \
   --request POST -o "$RUNNER_TEMP/build-create.json" -w '%{http_code}' \
-  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" \
-  -H 'Accept: application/json' -H 'Content-Type: application/json' \
-  --data-binary "@$build_request" "$base/builds/from-archive" || true)"
+  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+  --form "archive=@$runtime_archive;type=application/gzip" \
+  --form 'node_version=22' \
+  --form 'app_type=express' \
+  --form 'root_directory=.' \
+  --form 'output_directory=.' \
+  --form 'build_script=npm ci' \
+  --form 'entry_file=index.js' \
+  --form 'package_manager=npm' \
+  "$base/builds/from-archive" || true)"
 case "$build_code" in
   200|201|202) ;;
   *) cat "$RUNNER_TEMP/build-create.json" 2>/dev/null || true; echo "::error::Managed full Node build rejected HTTP=$build_code"; exit 1;;
