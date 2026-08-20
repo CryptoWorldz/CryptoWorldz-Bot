@@ -254,7 +254,6 @@ fs.writeFileSync(process.env.BUILD_REQUEST, JSON.stringify({
   app_type: "express",
   root_directory: ".",
   output_directory: ".",
-  build_script: "npm ci",
   entry_file: "index.js",
   package_manager: "npm",
   source_type: "archive",
