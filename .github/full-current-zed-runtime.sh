@@ -219,6 +219,92 @@ NODE
 echo "::add-mask::$username"
 user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
 base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
+# A process restart alone can leave Hostinger's previous immutable Node release
+# running even though newer files are present in /nodejs. Build a complete,
+# secret-free release through Hostinger's official archive endpoint first.
+runtime_archive="$RUNNER_TEMP/zed-runtime.tgz"
+tar -czf "$runtime_archive" -T "$runtime_files"
+test -s "$runtime_archive"
+build_request="$RUNNER_TEMP/zed-build-request.json"
+ARCHIVE_PATH="$runtime_archive" BUILD_REQUEST="$build_request" node - <<'NODE'
+const fs = require("fs");
+const archive = fs.readFileSync(process.env.ARCHIVE_PATH).toString("base64");
+fs.writeFileSync(process.env.BUILD_REQUEST, JSON.stringify({
+  archive,
+  node_version: 22,
+  app_type: "express",
+  root_directory: ".",
+  output_directory: ".",
+  build_script: "npm ci",
+  entry_file: "index.js",
+  package_manager: "npm"
+}));
+NODE
+
+build_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 180 \
+  --request POST -o "$RUNNER_TEMP/build-create.json" -w '%{http_code}' \
+  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+  -H 'Accept: application/json' -H 'Content-Type: application/json' \
+  --data-binary "@$build_request" "$base/builds/from-archive" || true)"
+case "$build_code" in
+  200|201|202) ;;
+  *) cat "$RUNNER_TEMP/build-create.json" 2>/dev/null || true; echo "::error::Managed full Node build rejected HTTP=$build_code"; exit 1;;
+esac
+build_uuid="$(BUILD_CREATE="$RUNNER_TEMP/build-create.json" node - <<'NODE'
+const p=require(process.env.BUILD_CREATE);
+const value=p.uuid||p.data?.uuid||p.id||p.data?.id;
+if(!value) process.exit(2);
+process.stdout.write(String(value));
+NODE
+)"
+echo "HOSTINGER_MANAGED_BUILD=STARTED uuid=$build_uuid"
+
+build_pass=0
+for attempt in $(seq 1 90); do
+  sleep 10
+  curl --fail --silent --show-error --location \
+    -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+    "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
+  build_state="$(BUILD_LIST="$RUNNER_TEMP/builds.json" BUILD_UUID="$build_uuid" node - <<'NODE'
+const p=require(process.env.BUILD_LIST);
+const rows=Array.isArray(p)?p:(Array.isArray(p.data)?p.data:(Array.isArray(p.items)?p.items:[]));
+const row=rows.find(x=>String(x.uuid||x.id)===process.env.BUILD_UUID);
+process.stdout.write(String(row?.state||row?.status||"pending").toLowerCase());
+NODE
+)"
+  echo "HOSTINGER_MANAGED_BUILD attempt=$attempt/90 state=$build_state"
+  case "$build_state" in
+    completed|complete|success|succeeded|ready) build_pass=1; break;;
+    failed|error|cancelled|canceled)
+      curl --silent --show-error --location \
+        -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+        "$base/builds/$build_uuid/logs" || true
+      echo "::error::Managed full Node build failed state=$build_state"
+      exit 1;;
+  esac
+done
+test "$build_pass" = '1'
+echo 'HOSTINGER_MANAGED_BUILD=PASS'
+
+# The build archive deliberately contains no secrets. Restore the preserved
+# protected environment only after the immutable release has been created.
+{
+  echo 'set cmd:fail-exit true'
+  echo 'set net:max-retries 3'
+  echo 'set net:timeout 30'
+  echo 'set ftp:ssl-force true'
+  echo 'set ftp:ssl-protect-data true'
+  echo 'set ssl:verify-certificate true'
+  echo 'set ssl:check-hostname false'
+  echo 'set ftp:passive-mode true'
+  printf 'cd "%s"\n' "$PROTECTED_NODE_ROOT"
+  printf 'put "%s" -o ".env"\n' "$protected_env"
+  echo 'bye'
+} > "$RUNNER_TEMP/zed-post-build-env.lftp"
+timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" \
+  -e "source $RUNNER_TEMP/zed-post-build-env.lftp" "$host"
+echo 'ZED_PROTECTED_ENV_POST_BUILD=PASS'
+
 code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 --request POST \
   -o "$RUNNER_TEMP/restart.json" -w '%{http_code}' \
   -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
