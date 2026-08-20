@@ -118,7 +118,7 @@ runtime_dirs="$RUNNER_TEMP/zed-runtime-dirs.txt"
 proofdir="$RUNNER_TEMP/zed-runtime-byte-proof"
 mkdir -p "$proofdir"
 {
-  printf '%s\n' index.js package.json package-lock.json
+  printf '%s\n' index.js package.json package-lock.json .github/install-ci-apt-wrapper.cjs
   find src public .well-known -type f ! -name '.env' ! -name '*.log' -printf '%p\n' | sort
 } > "$runtime_files"
 test -s "$runtime_files"
@@ -131,6 +131,7 @@ critical=(
   index.js
   package.json
   package-lock.json
+  .github/install-ci-apt-wrapper.cjs
   src/full-runtime-entry.js
   src/http.js
   src/oneworldz-gpt/http.js
