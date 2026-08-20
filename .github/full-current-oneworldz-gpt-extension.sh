@@ -64,12 +64,29 @@ if (failed.length) {
 NODE
 }
 
+prove_live_chat() {
+  local chat_file chat_code
+  chat_file="$RUNNER_TEMP/oneworldz-gpt-extension-chat.json"
+  chat_code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 45 \
+    --request POST -o "$chat_file" -w '%{http_code}' \
+    -H 'Content-Type: application/json' \
+    --data '{"message":"Reply with READY.","history":[],"page":"deployment-proof"}' \
+    "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/chat" || true)"
+  echo "ONEWORLDZ_GPT_EXTENSION_CANARY http=$chat_code"
+  [ "$chat_code" = 200 ] && CHAT="$chat_file" node - <<'NODE'
+const fs = require('fs');
+let p;
+try { p = JSON.parse(fs.readFileSync(process.env.CHAT, 'utf8')); } catch { process.exit(1); }
+if (p.ok !== true || p.service !== 'OneWorldz GPT' || p.powered_by !== 'OpenAI' || !String(p.text || '').trim()) process.exit(1);
+NODE
+}
+
 for attempt in $(seq 1 8); do
   probe_status
   code="$(cat "$code_file")"
   echo "ONEWORLDZ_GPT_EXTENSION_PROBE attempt=$attempt/8 http=$code"
   print_safe_status
-  if [ "$code" = 200 ] && contract_passes; then
+  if [ "$code" = 200 ] && contract_passes && prove_live_chat; then
     echo 'ONEWORLDZ_GPT_EXTENSION_LIVE=PASS'
     exit 0
   fi

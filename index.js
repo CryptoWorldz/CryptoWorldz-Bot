@@ -1,10 +1,9 @@
 // Compatibility marker: startProtectedPublicFallback
 // Full CryptoWorldz runtime is preserved in src/full-runtime-entry.js: require("./src/hub-central/preload")
 // The full runtime remains primary when configured; the dependency-free protected GPT gateway below is fail-safe fallback only.
-const fs = require("node:fs");
 const http = require("node:http");
-const path = require("node:path");
 const { URL } = require("node:url");
+const { loadProtectedEnvironment } = require("./src/protected-env");
 
 const GUARD = Object.freeze({
   profile: "oneworldz-public-low-cost-v1",
@@ -27,25 +26,7 @@ const ALLOWED_ORIGINS = new Set([
   "https://www.purplediamondcrew.com"
 ]);
 
-function loadEnvFile() {
-  const file = path.join(__dirname, ".env");
-  let text = "";
-  try { text = fs.readFileSync(file, "utf8"); } catch { return; }
-  for (const raw of text.split(/\r?\n/)) {
-    const line = raw.trim();
-    if (!line || line.startsWith("#")) continue;
-    const at = line.indexOf("=");
-    if (at < 1) continue;
-    const key = line.slice(0, at).trim();
-    let value = line.slice(at + 1).trim();
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
-    const missing = !Object.prototype.hasOwnProperty.call(process.env, key);
-    const blankProtectedOpenAi = key === "OPENAI_API_KEY" && !String(process.env[key] || "").trim();
-    if (missing || blankProtectedOpenAi) process.env[key] = value;
-  }
-}
-
-loadEnvFile();
+const protectedEnvironment = loadProtectedEnvironment({ appRoot: __dirname });
 
 const fullRuntimeConfigured = ["BOT_TOKEN", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"].every((key) => String(process.env[key] || "").trim());
 if (fullRuntimeConfigured) {
@@ -202,7 +183,8 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, {
       ok: true,
       service: "CryptoWorldz Protected Public Gateway",
-      runtime: "dependency_free_guard_v2"
+      runtime: "dependency_free_guard_v2",
+      environment_source: protectedEnvironment.source
     }, origin);
   }
 

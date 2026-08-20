@@ -1,4 +1,4 @@
-require("dotenv").config({ path: require("node:path").join(__dirname, "..", ".env") });
+require("./protected-env").loadProtectedEnvironment({ appRoot: require("node:path").join(__dirname, "..") });
 process.env.ONEWORLDZ_IMAGE_MODEL = process.env.ONEWORLDZ_IMAGE_MODEL || "gpt-image-2";
 require("./hub-central/preload");
 
