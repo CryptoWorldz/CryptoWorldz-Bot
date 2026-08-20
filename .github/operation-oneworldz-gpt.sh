@@ -99,7 +99,9 @@ chmod 600 "$release_dir/.env"
 archive="$RUNNER_TEMP/oneworldz-gpt-runtime.tgz"
 tar -C "$release_dir" -czf "$archive" .
 test -s "$archive"
-tar -tzf "$archive" | grep -Fxq './.env'
+archive_manifest="$RUNNER_TEMP/oneworldz-gpt-archive-manifest.txt"
+tar -tzf "$archive" > "$archive_manifest"
+grep -Fxq './.env' "$archive_manifest"
 archive_name=".oneworldz-gpt-${GITHUB_RUN_ID}-$(openssl rand -hex 16).tgz"
 
 cleanup_archive() {
