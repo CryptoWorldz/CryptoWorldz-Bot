@@ -39,7 +39,9 @@ function loadEnvFile() {
     const key = line.slice(0, at).trim();
     let value = line.slice(at + 1).trim();
     if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
-    if (!Object.prototype.hasOwnProperty.call(process.env, key)) process.env[key] = value;
+    const missing = !Object.prototype.hasOwnProperty.call(process.env, key);
+    const blankProtectedOpenAi = key === "OPENAI_API_KEY" && !String(process.env[key] || "").trim();
+    if (missing || blankProtectedOpenAi) process.env[key] = value;
   }
 }
 
