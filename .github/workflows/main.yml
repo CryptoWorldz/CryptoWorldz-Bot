@@ -217,6 +217,8 @@ jobs:
           echo 'CURRENT_STANDALONE_ZED_CORE=PASS'
 
       - name: Prove OneWorldz GPT extension independently
+        id: oneworldz_gpt
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -228,6 +230,8 @@ jobs:
           echo 'CURRENT_ONEWORLDZ_GPT_EXTENSION=PASS'
 
       - name: Re-prove frozen static candidate after protected runtime deployment
+        id: frozen_candidate
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -237,6 +241,8 @@ jobs:
           echo "FROZEN_CURRENT_CANDIDATE=PASS routes=$PAGE_ROUTE_COUNT"
 
       - name: Verify repository FTPS transport client
+        id: static_ftps
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -245,6 +251,8 @@ jobs:
           echo 'STATIC_FTPS_TRANSPORT_CLIENT=READY'
 
       - name: Deploy current candidate to static transport roots
+        id: hostinger_static
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -255,6 +263,8 @@ jobs:
           echo "HOSTINGER_STATIC_TRANSPORTS=PASS roots=18 routes=$PAGE_ROUTE_COUNT"
 
       - name: Reinstall browser proof runtime after ZED npm clean install
+        id: browser_reinstall
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -262,6 +272,8 @@ jobs:
           npx playwright install chromium
 
       - name: LIVE PROOF all generated page routes
+        id: live_proof
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -274,6 +286,14 @@ jobs:
           echo "LIVE_FULL_ECOSYSTEM_PROOF=PASS routes=$live_routes static_transport_roots=18 architecture_destinations=19"
 
       - name: FINAL current candidate record
+        id: final_record
+        if: >-
+          steps.oneworldz_gpt.outcome == 'success' &&
+          steps.frozen_candidate.outcome == 'success' &&
+          steps.static_ftps.outcome == 'success' &&
+          steps.hostinger_static.outcome == 'success' &&
+          steps.browser_reinstall.outcome == 'success' &&
+          steps.live_proof.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
@@ -311,6 +331,41 @@ jobs:
           trap - ERR
           bash .github/publish-progress.sh FINAL PASS
           echo "ONEWORLDZ_CANONICAL_FULL_REBUILD_FINAL=PASS routes=$live_routes fingerprint=$CANDIDATE_FINGERPRINT"
+
+      - name: TOTAL deployment verdict — report every remaining gate together
+        if: always()
+        shell: bash
+        env:
+          ONEWORLDZ_GPT_OUTCOME: ${{ steps.oneworldz_gpt.outcome }}
+          FROZEN_CANDIDATE_OUTCOME: ${{ steps.frozen_candidate.outcome }}
+          STATIC_FTPS_OUTCOME: ${{ steps.static_ftps.outcome }}
+          HOSTINGER_STATIC_OUTCOME: ${{ steps.hostinger_static.outcome }}
+          BROWSER_REINSTALL_OUTCOME: ${{ steps.browser_reinstall.outcome }}
+          LIVE_PROOF_OUTCOME: ${{ steps.live_proof.outcome }}
+          FINAL_RECORD_OUTCOME: ${{ steps.final_record.outcome }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' \
+            "TOTAL_GATE oneworldz_gpt_extension=$ONEWORLDZ_GPT_OUTCOME" \
+            "TOTAL_GATE frozen_candidate=$FROZEN_CANDIDATE_OUTCOME" \
+            "TOTAL_GATE static_ftps=$STATIC_FTPS_OUTCOME" \
+            "TOTAL_GATE hostinger_static=$HOSTINGER_STATIC_OUTCOME" \
+            "TOTAL_GATE browser_reinstall=$BROWSER_REINSTALL_OUTCOME" \
+            "TOTAL_GATE live_proof=$LIVE_PROOF_OUTCOME" \
+            "TOTAL_GATE final_record=$FINAL_RECORD_OUTCOME"
+          failures=0
+          for outcome in \
+            "$ONEWORLDZ_GPT_OUTCOME" "$FROZEN_CANDIDATE_OUTCOME" \
+            "$STATIC_FTPS_OUTCOME" "$HOSTINGER_STATIC_OUTCOME" \
+            "$BROWSER_REINSTALL_OUTCOME" "$LIVE_PROOF_OUTCOME" \
+            "$FINAL_RECORD_OUTCOME"; do
+            [ "$outcome" = success ] || failures=$((failures + 1))
+          done
+          if [ "$failures" -ne 0 ]; then
+            echo "::error::TOTAL_DEPLOYMENT=FAIL remaining_gate_failures=$failures"
+            exit 1
+          fi
+          echo 'TOTAL_DEPLOYMENT=PASS'
 
       - name: Preserve full deployment proof
         if: always()
