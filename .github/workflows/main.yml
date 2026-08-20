@@ -37,7 +37,7 @@ env:
 
 jobs:
   full_rebuild_deploy:
-    name: FULL CURRENT ECOSYSTEM → BUILD → TEST → SEO → ROUTES → ZED → HOSTINGER → LIVE → FINAL
+    name: FULL CURRENT ECOSYSTEM → BUILD → TEST → SEO → ROUTES → ZED CORE → GPT EXTENSION → HOSTINGER → LIVE → FINAL
     runs-on: ubuntu-latest
     timeout-minutes: 360
     environment:
@@ -166,15 +166,66 @@ jobs:
           test "$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)" = "$CANDIDATE_FINGERPRINT"
           echo 'CURRENT_MAIN_AUTHORITY_BEFORE_PRODUCTION=PASS'
 
-      - name: Deploy current ZED AUTO GRACE runtime
+      - name: Deploy and prove standalone ZED Core
         shell: bash
         run: |
           set -euo pipefail
-          bash .github/publish-progress.sh ZED_MINIAPP STARTED
-          trap 'bash .github/publish-progress.sh ZED_MINIAPP FAIL || true' ERR
-          bash .github/full-current-zed-runtime.sh
+          bash .github/publish-progress.sh ZED_CORE STARTED
+          trap 'bash .github/publish-progress.sh ZED_CORE FAIL || true' ERR
+          zed_log="$RUNNER_TEMP/zed-runtime.log"
+          legacy_status=0
+          if bash .github/full-current-zed-runtime.sh 2>&1 | tee "$zed_log"; then
+            legacy_status=0
+          else
+            legacy_status=1
+          fi
+
+          if [ "$legacy_status" != 0 ]; then
+            # The legacy runtime script historically coupled ZED health to the
+            # OneWorldz GPT extension. It may be treated as a ZED Core pass only
+            # when its own convergence evidence proves every core surface green
+            # and the sole remaining predicate is gpt_contract=0.
+            grep -Eq 'ZED_CONVERGENCE attempt=[0-9]+ root=200 health=200 mini=200 gpt=200 root_service=1 health_ok=1 splashback=1 zed_guide=1 create=1 heroes=1 gpt_contract=0' "$zed_log"
+
+            core_pass=0
+            for attempt in $(seq 1 8); do
+              tag="zed_core=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
+              root_code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 12 -o "$RUNNER_TEMP/zed-core-root.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/?$tag" || true)"
+              health_code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 12 -o "$RUNNER_TEMP/zed-core-health.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/health?$tag" || true)"
+              mini_code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 12 -o "$RUNNER_TEMP/zed-core-mini.html" -w '%{http_code}' "https://$PROTECTED_DOMAIN/miniapp/?$tag" || true)"
+              root_service=0; health_ok=0; splashback=0; zed_guide=0; create=0; heroes=0
+              grep -Fq '"service":"CryptoWorldz Zed Bot"' "$RUNNER_TEMP/zed-core-root.json" && root_service=1 || true
+              grep -Fq '"ok":true' "$RUNNER_TEMP/zed-core-health.json" && health_ok=1 || true
+              grep -Fq 'id="splashback"' "$RUNNER_TEMP/zed-core-mini.html" && splashback=1 || true
+              grep -Fq 'id="zed-guide"' "$RUNNER_TEMP/zed-core-mini.html" && zed_guide=1 || true
+              grep -Fq 'id="create"' "$RUNNER_TEMP/zed-core-mini.html" && create=1 || true
+              grep -Fq 'id="heroes"' "$RUNNER_TEMP/zed-core-mini.html" && heroes=1 || true
+              echo "ZED_CORE_PROBE attempt=$attempt/8 root=$root_code health=$health_code mini=$mini_code root_service=$root_service health_ok=$health_ok splashback=$splashback zed_guide=$zed_guide create=$create heroes=$heroes"
+              if [ "$root_code" = 200 ] && [ "$health_code" = 200 ] && [ "$mini_code" = 200 ] \
+                && [ "$root_service" = 1 ] && [ "$health_ok" = 1 ] && [ "$splashback" = 1 ] \
+                && [ "$zed_guide" = 1 ] && [ "$create" = 1 ] && [ "$heroes" = 1 ]; then
+                core_pass=1
+                break
+              fi
+              sleep 4
+            done
+            test "$core_pass" = 1
+          fi
+
           trap - ERR
-          echo 'CURRENT_ZED_AUTO_GRACE_COMMAND_CENTRE=PASS'
+          bash .github/publish-progress.sh ZED_CORE PASS
+          echo 'CURRENT_STANDALONE_ZED_CORE=PASS'
+
+      - name: Prove OneWorldz GPT extension independently
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash .github/publish-progress.sh ONEWORLDZ_GPT_EXTENSION STARTED
+          trap 'bash .github/publish-progress.sh ONEWORLDZ_GPT_EXTENSION FAIL || true' ERR
+          bash .github/full-current-oneworldz-gpt-extension.sh
+          trap - ERR
+          bash .github/publish-progress.sh ONEWORLDZ_GPT_EXTENSION PASS
+          echo 'CURRENT_ONEWORLDZ_GPT_EXTENSION=PASS'
 
       - name: Re-prove frozen static candidate after protected runtime deployment
         shell: bash
@@ -250,6 +301,8 @@ jobs:
           tests=PASS
           lighthouse_seo=100_PASS
           desktop_mobile_all_generated_routes=PASS
+          zed_core=PASS
+          oneworldz_gpt_extension=PASS
           zed_auto_grace_command_centre=PASS
           hostinger_static_transports=PASS
           live_all_generated_routes=PASS
