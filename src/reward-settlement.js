@@ -202,7 +202,7 @@ function registerRewardSettlementHandlers({ bot, repository, supabase, config })
         `✅ USDC reward funding recorded.\n\n💵 AUD allocation: ${formatAud(parsed.audCents)}\n🏦 Deposited: ${formatUsdc(parsed.usdcAmount)}\n📊 Weekly recorded total: ${formatAud(result.weekly_recorded_aud_cents)}\n🎯 Operating-target remaining: ${formatAud(result.weekly_remaining_aud_cents)}\n🛡 Hard-cap remaining: ${formatAud(result.weekly_max_remaining_aud_cents)}\n\nThis records the owner-provided transaction reference; it does not authorize automatic spending.`
       );
     } catch (error) {
-      console.error("Reward funding record failed", {
+      console.error("Protected reward budget update failed", {
         name: error && error.name ? error.name : "Error"
       });
       return send(msg.chat.id, "❌ Zed couldn't record that USDC funding transaction.");
