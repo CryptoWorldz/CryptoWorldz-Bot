@@ -193,12 +193,12 @@ print_build_logs() {
   local logs_file="$RUNNER_TEMP/oneworldz-gpt-build-logs.json"
   curl --silent --show-error --location \
     -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-    "$base/builds/$build_uuid/logs?from_line=0" -o "$logs_file" || return 0
+    "$base/builds/$build_uuid/logs" -o "$logs_file" || return 0
   BUILD_LOGS="$logs_file" node - <<'NODE'
 const fs = require('fs');
 let p;
 try { p = JSON.parse(fs.readFileSync(process.env.BUILD_LOGS, 'utf8')); } catch { process.exit(0); }
-const logs = String(p.logs ?? p.data?.logs ?? '').replace(/\u001b\[[0-9;]*m/g, '');
+const logs = String(p.logs ?? p.data?.logs ?? (typeof p.data === 'string' ? p.data : '')).replace(/\u001b\[[0-9;]*m/g, '');
 if (logs) process.stdout.write(`${logs}\n`);
 NODE
 }
