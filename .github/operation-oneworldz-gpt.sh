@@ -189,6 +189,20 @@ NODE
 )"
 echo 'OPERATION_ONEWORLDZ_GPT_HOSTINGER_BUILD=STARTED'
 
+print_build_logs() {
+  local logs_file="$RUNNER_TEMP/oneworldz-gpt-build-logs.json"
+  curl --silent --show-error --location \
+    -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+    "$base/builds/$build_uuid/logs?from_line=0" -o "$logs_file" || return 0
+  BUILD_LOGS="$logs_file" node - <<'NODE'
+const fs = require('fs');
+let p;
+try { p = JSON.parse(fs.readFileSync(process.env.BUILD_LOGS, 'utf8')); } catch { process.exit(0); }
+const logs = String(p.logs ?? p.data?.logs ?? '').replace(/\u001b\[[0-9;]*m/g, '');
+if (logs) process.stdout.write(`${logs}\n`);
+NODE
+}
+
 build_pass=0
 for attempt in $(seq 1 90); do
   sleep 10
@@ -205,7 +219,7 @@ NODE
   echo "OPERATION_ONEWORLDZ_GPT_BUILD attempt=$attempt/90 state=$build_state"
   case "$build_state" in
     completed|complete|success|succeeded|ready) build_pass=1; break;;
-    failed|error|cancelled|canceled) echo "::error::OPERATION_ONEWORLDZ_GPT_BUILD_FAILED state=$build_state"; exit 1;;
+    failed|error|cancelled|canceled) print_build_logs; echo "::error::OPERATION_ONEWORLDZ_GPT_BUILD_FAILED state=$build_state"; exit 1;;
   esac
 done
 test "$build_pass" = 1
