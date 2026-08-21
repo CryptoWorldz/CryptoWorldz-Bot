@@ -1,6 +1,8 @@
 const { getRank, shortenWallet } = require("./core");
+const { registerAutoKittyRewardSystem } = require("./reward-auto");
 
 const PROFILE_PATTERN = /^\/profile(?:@\w+)?$/;
+let autoRewardSystemRegistered = false;
 
 const ROLE_LABELS = Object.freeze({
   admin: "Admin",
@@ -46,6 +48,11 @@ async function resolveTeamRole({ telegramId, repository, config, supabase }) {
 }
 
 function registerRoleProfileHandler({ bot, repository, config, supabase }) {
+  if (!autoRewardSystemRegistered) {
+    registerAutoKittyRewardSystem({ bot, repository, supabase, config });
+    autoRewardSystemRegistered = true;
+  }
+
   bot.removeTextListener(PROFILE_PATTERN);
   bot.onText(PROFILE_PATTERN, async (msg) => {
     try {
