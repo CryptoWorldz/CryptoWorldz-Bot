@@ -11,6 +11,9 @@ function candidateEnvironmentFiles({ appRoot = path.join(__dirname, ".."), env =
   for (const root of [String(env.HOME || "").trim(), String(home || "").trim()]) {
     if (root) files.push(path.join(root, "domains", PROTECTED_DOMAIN, "nodejs", ".env"));
   }
+  for (const account of [String(env.USER || "").trim(), String(env.LOGNAME || "").trim()]) {
+    if (account && !account.includes(path.sep)) files.push(path.join("/home", account, "domains", PROTECTED_DOMAIN, "nodejs", ".env"));
+  }
   return [...new Set(files)];
 }
 
