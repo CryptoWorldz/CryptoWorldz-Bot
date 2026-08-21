@@ -3,6 +3,10 @@ set -Eeuo pipefail
 
 : "${PROTECTED_DOMAIN:?}"
 
+echo 'ONEWORLDZ_GPT_EXTENSION_DEPLOY=STARTED'
+bash .github/operation-oneworldz-gpt.sh
+echo 'ONEWORLDZ_GPT_EXTENSION_DEPLOY=PASS'
+
 status_file="$RUNNER_TEMP/oneworldz-gpt-extension-status.json"
 code_file="$RUNNER_TEMP/oneworldz-gpt-extension-status.code"
 
@@ -96,5 +100,4 @@ done
 echo '::error::OneWorldz GPT extension did not satisfy its independent live contract.'
 exit 1
 
-# Canonical direct trigger after the standalone ZED Core / extension split.
-# Native merge trigger keeps the single production rail explicit and auditable.
+# Canonical single-rail GPT deploy + independent live proof.
