@@ -228,6 +228,22 @@ cleanup_archive
 trap - EXIT
 echo 'OPERATION_ONEWORLDZ_GPT_HOSTINGER_BUILD=PASS'
 
+release_listing="$RUNNER_TEMP/oneworldz-gpt-release-listing.lftp"
+{
+  echo 'set cmd:fail-exit true'
+  echo 'set ftp:ssl-force true'
+  echo 'set ftp:ssl-protect-data true'
+  echo 'set ssl:verify-certificate true'
+  echo 'set ssl:check-hostname false'
+  printf 'cd "%s"\n' "$PROTECTED_NODE_ROOT"
+  echo 'pwd'
+  echo 'cls -la'
+  echo 'bye'
+} > "$release_listing"
+echo 'OPERATION_ONEWORLDZ_GPT_NODE_ROOT_BEGIN'
+timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $release_listing" "$host"
+echo 'OPERATION_ONEWORLDZ_GPT_NODE_ROOT_END'
+
 post_build_env="$RUNNER_TEMP/oneworldz-gpt-post-build-env.lftp"
 {
   echo 'set cmd:fail-exit true'
