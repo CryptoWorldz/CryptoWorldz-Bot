@@ -93,15 +93,15 @@ while IFS= read -r rel; do
   mkdir -p "$release_dir/$(dirname "$rel")"
   cp "$rel" "$release_dir/$rel"
 done < "$runtime_files"
-cp "$protected_env" "$release_dir/.env"
-chmod 600 "$release_dir/.env"
-
 archive="$RUNNER_TEMP/oneworldz-gpt-runtime.tgz"
 tar -C "$release_dir" -czf "$archive" .
 test -s "$archive"
 archive_manifest="$RUNNER_TEMP/oneworldz-gpt-archive-manifest.txt"
 tar -tzf "$archive" > "$archive_manifest"
-grep -Fxq './.env' "$archive_manifest"
+if grep -Fxq './.env' "$archive_manifest"; then
+  echo '::error::PROTECTED_ENV_MUST_NOT_ENTER_HOSTINGER_BUILD_ARCHIVE'
+  exit 1
+fi
 archive_name=".oneworldz-gpt-${GITHUB_RUN_ID}-$(openssl rand -hex 16).tgz"
 
 cleanup_archive() {
@@ -226,6 +226,23 @@ test "$build_pass" = 1
 cleanup_archive
 trap - EXIT
 echo 'OPERATION_ONEWORLDZ_GPT_HOSTINGER_BUILD=PASS'
+
+post_build_env="$RUNNER_TEMP/oneworldz-gpt-post-build-env.lftp"
+{
+  echo 'set cmd:fail-exit true'
+  echo 'set net:max-retries 3'
+  echo 'set net:timeout 30'
+  echo 'set ftp:ssl-force true'
+  echo 'set ftp:ssl-protect-data true'
+  echo 'set ssl:verify-certificate true'
+  echo 'set ssl:check-hostname false'
+  echo 'set ftp:passive-mode true'
+  printf 'cd "%s"\n' "$PROTECTED_NODE_ROOT"
+  printf 'put "%s" -o ".env"\n' "$protected_env"
+  echo 'bye'
+} > "$post_build_env"
+timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $post_build_env" "$host"
+echo 'OPERATION_ONEWORLDZ_GPT_PROTECTED_ENV=PASS'
 
 restart_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 45 \
   --request POST -o "$RUNNER_TEMP/oneworldz-gpt-restart.json" -w '%{http_code}' \
