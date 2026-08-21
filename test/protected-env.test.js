@@ -11,9 +11,9 @@ test("parses quoted and exported environment values", () => {
 
 test("finds the permanent Hostinger protected environment after an immutable build", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "oneworldz-env-"));
-  const release = path.join(root, "hbuilds", "release", "source");
   const home = path.join(root, "home", "account");
   const protectedDir = path.join(home, "domains", "cryptobotz.cryptoworldz.xyz", "nodejs");
+  const release = path.join(protectedDir, ".builds", "release", "source");
   fs.mkdirSync(release, { recursive: true });
   fs.mkdirSync(protectedDir, { recursive: true });
   fs.writeFileSync(path.join(protectedDir, ".env"), "OPENAI_API_KEY=proof-key\nBOT_TOKEN=proof-bot\n");
@@ -38,10 +38,10 @@ test("does not overwrite a nonblank managed OpenAI key", () => {
 
 test("candidate order prefers an explicit file, then release, then protected home", () => {
   const env = { ONEWORLDZ_ENV_FILE: "/explicit/.env", HOME: "/runtime/home", USER: "account", LOGNAME: "account" };
-  assert.deepEqual(candidateEnvironmentFiles({ appRoot: "/release", env, home: "/home/account" }), [
+  assert.deepEqual(candidateEnvironmentFiles({ appRoot: "/home/account/domains/cryptobotz.cryptoworldz.xyz/nodejs/.builds/release/source", env, home: "/home/account" }), [
     "/explicit/.env",
-    "/release/.env",
-    "/runtime/home/domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",
-    "/home/account/domains/cryptobotz.cryptoworldz.xyz/nodejs/.env"
+    "/home/account/domains/cryptobotz.cryptoworldz.xyz/nodejs/.builds/release/source/.env",
+    "/home/account/domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",
+    "/runtime/home/domains/cryptobotz.cryptoworldz.xyz/nodejs/.env"
   ]);
 });

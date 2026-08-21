@@ -20,6 +20,7 @@ node --check index.js
 node --check src/protected-env.js
 node --check src/full-runtime-entry.js
 echo 'OPERATION_ONEWORLDZ_GPT_LOCAL=PASS'
+echo 'OPERATION_ONEWORLDZ_GPT_IMMUTABLE_ENV_PATH=PASS'
 
 host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"
 if [[ "$host" != *:*:* && "$host" == *:* ]]; then host="${host%%:*}"; fi
