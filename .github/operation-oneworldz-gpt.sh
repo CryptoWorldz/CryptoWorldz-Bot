@@ -81,6 +81,23 @@ if len(matches) != 1:
 PY
 echo 'OPERATION_ONEWORLDZ_GPT_KEY_MERGE=PASS'
 
+domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
+curl --fail --silent --show-error --location \
+  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+  "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" \
+  -o "$RUNNER_TEMP/websites.json"
+username="$(node - <<'NODE'
+const p = require(process.env.RUNNER_TEMP + '/websites.json');
+const domain = process.env.PROTECTED_DOMAIN.toLowerCase();
+const website = (p.data || []).find((row) => String(row.domain || '').toLowerCase() === domain);
+if (!website?.username) process.exit(2);
+process.stdout.write(String(website.username));
+NODE
+)"
+echo "::add-mask::$username"
+user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
+base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
+
 runtime_files="$RUNNER_TEMP/oneworldz-gpt-runtime-files.txt"
 {
   printf '%s\n' index.js package.json package-lock.json .github/install-ci-apt-wrapper.cjs
@@ -94,6 +111,19 @@ while IFS= read -r rel; do
   mkdir -p "$release_dir/$(dirname "$rel")"
   cp "$rel" "$release_dir/$rel"
 done < "$runtime_files"
+mkdir -p "$release_dir/.github"
+PROTECTED_USERNAME="$username" BUILD_HELPER="$release_dir/.github/oneworldz-build-env.cjs" node - <<'NODE'
+const fs = require('fs');
+const path = require('path');
+const source = path.join('/home', process.env.PROTECTED_USERNAME, 'domains', 'cryptobotz.cryptoworldz.xyz', 'nodejs', '.env');
+fs.writeFileSync(process.env.BUILD_HELPER, `const fs=require('node:fs');const source=${JSON.stringify(source)};const target=require('node:path').join(process.cwd(),'.env');fs.copyFileSync(source,target);fs.chmodSync(target,0o600);console.log('ONEWORLDZ_PROTECTED_ENV_STAGED=PASS');\n`);
+NODE
+PACKAGE_FILE="$release_dir/package.json" node - <<'NODE'
+const fs = require('fs');
+const p = JSON.parse(fs.readFileSync(process.env.PACKAGE_FILE, 'utf8'));
+p.scripts = { ...(p.scripts || {}), 'oneworldz:prepare': 'node .github/oneworldz-build-env.cjs' };
+fs.writeFileSync(process.env.PACKAGE_FILE, `${JSON.stringify(p, null, 2)}\n`);
+NODE
 archive="$RUNNER_TEMP/oneworldz-gpt-runtime.tgz"
 tar -C "$release_dir" -czf "$archive" .
 test -s "$archive"
@@ -141,23 +171,6 @@ upload_script="$RUNNER_TEMP/oneworldz-gpt-upload.lftp"
 timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $upload_script" "$host"
 echo 'OPERATION_ONEWORLDZ_GPT_PROTECTED_ARCHIVE=UPLOADED'
 
-domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
-curl --fail --silent --show-error --location \
-  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-  "https://developers.hostinger.com/api/hosting/v1/websites?domain=${domain_enc}&per_page=25" \
-  -o "$RUNNER_TEMP/websites.json"
-username="$(node - <<'NODE'
-const p = require(process.env.RUNNER_TEMP + '/websites.json');
-const domain = process.env.PROTECTED_DOMAIN.toLowerCase();
-const website = (p.data || []).find((row) => String(row.domain || '').toLowerCase() === domain);
-if (!website?.username) process.exit(2);
-process.stdout.write(String(website.username));
-NODE
-)"
-echo "::add-mask::$username"
-user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
-base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
-
 build_request="$RUNNER_TEMP/oneworldz-gpt-build.json"
 ARCHIVE_NAME="$archive_name" BUILD_REQUEST="$build_request" node - <<'NODE'
 const fs = require('fs');
@@ -166,6 +179,7 @@ fs.writeFileSync(process.env.BUILD_REQUEST, JSON.stringify({
   app_type: 'express',
   root_directory: '.',
   output_directory: '.',
+  build_script: 'oneworldz:prepare',
   entry_file: 'index.js',
   package_manager: 'npm',
   source_type: 'archive',
