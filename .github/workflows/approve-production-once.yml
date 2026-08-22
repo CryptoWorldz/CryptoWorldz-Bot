@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      TARGET_SHA: e26990fed529b2609f8db8b0c281710deb839c72
+      TARGET_SHA: 115ecaf23ff0830cc1a2075499d2b7aeab16bebc
       TARGET_WORKFLOW: website-images-direct.yml
     steps:
       - name: Watch exact visual deployment
