@@ -1,4 +1,5 @@
 name: Website Images Direct Deploy
+run-name: JayJay Full-Background Visual Release — ${{ github.sha }}
 
 on:
   push:
