@@ -1,19 +1,19 @@
-name: OneWorldz Production Release
-run-name: OneWorldz Production Release — ${{ github.sha }}
+name: OneWorldz Canonical Production Release
+run-name: Canonical One Run — ${{ github.sha }}
 
 on:
   workflow_dispatch:
     inputs:
       deploy_websites:
-        description: Deploy the 18 static OneWorldz website destinations
+        description: Deploy and byte-prove all 18 static OneWorldz destinations
         required: true
         type: boolean
         default: true
       deploy_zed:
-        description: Deploy the protected ZED / Command Centre Node runtime
+        description: Deploy and live-prove protected ZED / Command Centre runtime
         required: true
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: read
@@ -22,9 +22,9 @@ permissions:
 jobs:
   websites:
     if: ${{ inputs.deploy_websites }}
-    name: WEBSITES — BUILD → 18 STATIC HOSTINGER DESTINATIONS
+    name: WEBSITES — CLEAN → BUILD → 18 STATIC DESTINATIONS → LIVE BYTES
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     environment:
       name: cryptoworldz-production
     env:
@@ -44,7 +44,7 @@ jobs:
           node-version: "22"
           cache: npm
 
-      - name: Install FTPS transport
+      - name: Install protected FTPS transport
         shell: bash
         run: |
           set -euo pipefail
@@ -60,7 +60,7 @@ jobs:
       - name: Install repository dependencies
         run: npm ci
 
-      - name: Build and validate static websites
+      - name: Build and fail-closed validate complete static fleet
         run: npm run build:ecosystem-release
 
       - name: Prove static destination boundary
@@ -76,16 +76,16 @@ jobs:
           }
           NODE
 
-      - name: Deploy static website fleet only
+      - name: Clean owned static trees and deploy exact candidate
         shell: bash
         run: bash .github/full-current-static-deploy.sh
 
       - name: Websites verdict
-        run: echo 'ONEWORLDZ_WEBSITES_RELEASE=PASS'
+        run: echo 'ONEWORLDZ_STATIC_FLEET=PASS'
 
   zed:
     if: ${{ inputs.deploy_zed }}
-    name: ZED — PROTECTED NODE RUNTIME → LIVE TELEGRAM PROOF
+    name: ZED — PROTECTED NODE RUNTIME → TELEGRAM + GRACE LIVE PROOF
     runs-on: ubuntu-latest
     timeout-minutes: 60
     environment:
@@ -112,7 +112,7 @@ jobs:
           node-version: "22"
           cache: npm
 
-      - name: Install FTPS transport
+      - name: Install protected FTPS transport
         shell: bash
         run: |
           set -euo pipefail
@@ -152,11 +152,79 @@ jobs:
           if (payload.ok !== true) throw new Error('Telegram getChatMenuButton failed');
           if (!button || button.type !== 'web_app') throw new Error('Telegram menu button is not web_app');
           if (button.text !== '🌐 OPEN COMMAND CENTRE') throw new Error(`Unexpected menu text: ${button.text || ''}`);
-          if (!button.web_app || button.web_app.url !== 'https://cryptobotz.cryptoworldz.xyz/miniapp/') {
-            throw new Error(`Unexpected Mini App URL: ${button.web_app?.url || ''}`);
-          }
+          if (!button.web_app || button.web_app.url !== 'https://cryptobotz.cryptoworldz.xyz/miniapp/') throw new Error(`Unexpected Mini App URL: ${button.web_app?.url || ''}`);
           console.log('TELEGRAM_COMMAND_CENTRE_BUTTON=PASS');
           NODE
 
+      - name: Prove GRACE social-control configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 20 \
+            'https://cryptobotz.cryptoworldz.xyz/grace/health' -o "$RUNNER_TEMP/grace-health.json"
+          GRACE_FILE="$RUNNER_TEMP/grace-health.json" node <<'NODE'
+          const fs = require('fs');
+          const x = JSON.parse(fs.readFileSync(process.env.GRACE_FILE, 'utf8'));
+          if (x.ok !== true || x.service !== 'grace-social-engine') throw new Error('GRACE health failed');
+          if (x.posting !== 'approval-controlled') throw new Error(`Unexpected GRACE posting mode: ${x.posting}`);
+          if (x.automatic_ad_spend !== false) throw new Error('Automatic ad spend must remain disabled until platform/account authorization is explicit');
+          if (x.x_oauth_configured !== true) throw new Error('GRACE X OAuth app configuration is missing');
+          if (x.facebook_oauth_configured !== true) throw new Error('GRACE Facebook OAuth app configuration is missing');
+          console.log('GRACE_SOCIAL_CONTROL_CONFIGURATION=PASS');
+          NODE
+
       - name: ZED verdict
-        run: echo 'ZED_PROTECTED_RELEASE=PASS'
+        run: echo 'ZED_PROTECTED_RUNTIME=PASS'
+
+  external_public_proof:
+    name: EXTERNAL PUBLIC PROOF — STRIPE + 35 FACEBOOK REGISTRY + GRACE
+    if: ${{ always() && (inputs.deploy_websites || inputs.deploy_zed) }}
+    needs: [websites, zed]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Require selected deployment jobs to succeed
+        shell: bash
+        env:
+          WEBSITE_RESULT: ${{ needs.websites.result }}
+          ZED_RESULT: ${{ needs.zed.result }}
+          WANT_WEBSITES: ${{ inputs.deploy_websites }}
+          WANT_ZED: ${{ inputs.deploy_zed }}
+        run: |
+          set -euo pipefail
+          if [ "$WANT_WEBSITES" = 'true' ] && [ "$WEBSITE_RESULT" != 'success' ]; then echo "Websites job result: $WEBSITE_RESULT" >&2; exit 1; fi
+          if [ "$WANT_ZED" = 'true' ] && [ "$ZED_RESULT" != 'success' ]; then echo "ZED job result: $ZED_RESULT" >&2; exit 1; fi
+
+      - name: Prove four live Stripe destinations are reachable
+        shell: bash
+        run: |
+          set -euo pipefail
+          for url in \
+            'https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01' \
+            'https://donate.stripe.com/9B67sLgWm78R73U35j0kE02' \
+            'https://donate.stripe.com/dRm8wPdKa0Kt2NE7lz0kE03' \
+            'https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00'; do
+            curl --fail --silent --show-error --location --connect-timeout 10 --max-time 30 -o /dev/null "$url"
+            echo "STRIPE_DESTINATION_REACHABLE $url"
+          done
+
+      - name: Prove Supabase-backed 35 Facebook registry through protected runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 30 \
+            'https://cryptobotz.cryptoworldz.xyz/api/oneworldz-community-support' \
+            -o "$RUNNER_TEMP/community.json"
+          COMMUNITY_FILE="$RUNNER_TEMP/community.json" node <<'NODE'
+          const fs = require('fs');
+          const x = JSON.parse(fs.readFileSync(process.env.COMMUNITY_FILE, 'utf8'));
+          if (x.ok !== true || x.count !== 35 || !Array.isArray(x.profiles) || x.profiles.length !== 35) throw new Error('35-record community registry proof failed');
+          if (x.preview_rule !== 'verified_metadata_or_exact_facebook_link_never_invent') throw new Error('Facebook preview safety contract missing');
+          const orders = x.profiles.map(p => Number(p.display_order));
+          if (new Set(orders).size !== 35 || Math.min(...orders) !== 1 || Math.max(...orders) !== 35) throw new Error('Community registry order is not exactly 1-35');
+          for (const p of x.profiles) if (!/^https:\/\/(?:www\.)?facebook\.com\//i.test(String(p.facebook_url || ''))) throw new Error(`Invalid Facebook destination at ${p.display_order}`);
+          console.log(`COMMUNITY_REGISTRY=PASS verified_previews=${Number(x.verified_previews || 0)} exact_links=35`);
+          NODE
+
+      - name: Canonical release verdict
+        run: echo 'ONEWORLDZ_CANONICAL_ONE_RUN=PASS'

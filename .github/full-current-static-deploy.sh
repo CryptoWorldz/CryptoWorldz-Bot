@@ -13,7 +13,9 @@ test -d "$root"
 
 node --input-type=module <<'NODE' > "$RUNNER_TEMP/targets.tsv"
 import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
+if (productionTargets.length !== 18) throw new Error(`Expected 18 static targets, got ${productionTargets.length}`);
 for (const target of productionTargets) {
+  if (/cryptobotz|\/nodejs/.test(target.hostingerTransportDir)) throw new Error(`Protected ZED path leaked into static targets: ${target.key}`);
   console.log([target.key, target.domain, target.hostingerTransportDir].join('\t'));
 }
 NODE
@@ -27,6 +29,7 @@ while IFS=$'\t' read -r key domain transport; do
   release_root="$root/$key"
   test -s "$release_root/index.html"
   test -s "$release_root/release-manifest.json"
+  test -s "$release_root/exact-visual-map.json"
 
   files="$RUNNER_TEMP/$key.files"
   dirs="$RUNNER_TEMP/$key.dirs"
@@ -37,6 +40,14 @@ while IFS=$'\t' read -r key domain transport; do
     [ "$dir" = '.' ] || echo "$dir"
   done < "$files" | sort -u > "$dirs"
 
+  purge_line='purge-contents'
+  # OneWorldz owns the root site, while these sibling subdomain directories are
+  # independent static targets (or a separately managed sibling). Never delete
+  # them as collateral damage during the root cleanup.
+  if [ "$key" = 'oneworldz' ]; then
+    purge_line='purge-contents impactbased law learn nextbigcoin'
+  fi
+
   {
     echo 'set cmd:fail-exit true'
     echo 'set net:max-retries 2'
@@ -46,11 +57,14 @@ while IFS=$'\t' read -r key domain transport; do
     echo 'set ssl:verify-certificate true'
     echo 'set ssl:check-hostname false'
     printf 'cd "%s"\n' "$transport"
+    echo 'pwd'
+    echo "$purge_line"
     printf 'lcd "%s"\n' "$release_root"
     while IFS= read -r dir; do [ -n "$dir" ] && printf 'mkdir -p "%s"\n' "$dir"; done < "$dirs"
     while IFS= read -r rel; do
       [ "$rel" = 'index.html' ] || printf 'put "%s" -o "%s"\n' "$rel" "$rel"
     done < "$files"
+    # index.html goes last so a partially uploaded tree is never advertised as complete.
     echo 'put "index.html" -o "index.html"'
     echo 'bye'
   } > "$RUNNER_TEMP/$key.deploy.lftp"
@@ -62,7 +76,13 @@ while IFS=$'\t' read -r key domain transport; do
     "https://$domain/?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${key}" \
     -o "$RUNNER_TEMP/$key.live.html"
 
-  echo "DEPLOYED https://$domain/"
+  local_sha="$(sha256sum "$release_root/index.html" | awk '{print $1}')"
+  live_sha="$(sha256sum "$RUNNER_TEMP/$key.live.html" | awk '{print $1}')"
+  if [ "$local_sha" != "$live_sha" ]; then
+    echo "LIVE_INDEX_SHA_MISMATCH $key expected=$local_sha actual=$live_sha" >&2
+    exit 1
+  fi
+  echo "DEPLOYED_AND_BYTE_PROVED https://$domain/"
 done < "$RUNNER_TEMP/targets.tsv"
 
-echo 'HOSTINGER_STATIC_DEPLOYMENT=PASS'
+echo 'HOSTINGER_STATIC_CLEAN_DEPLOYMENT=PASS'

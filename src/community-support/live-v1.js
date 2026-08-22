@@ -18,9 +18,16 @@ function setCors(req, res) {
 }
 
 function safePublicLabel(row) {
+  const previewTitle = row?.preview_status === "verified" ? String(row?.preview_title || "").trim() : "";
+  if (previewTitle) return previewTitle.slice(0, 140);
   const raw = String(row?.display_name || "").trim();
   if (raw && !/^Facebook Support Profile\s+\d+$/i.test(raw)) return raw;
   return "Verified Community Support Link";
+}
+
+function safeHttps(value) {
+  const text = String(value || "").trim();
+  return /^https:\/\//i.test(text) ? text : null;
 }
 
 function sanitizeProfile(row) {
@@ -29,13 +36,27 @@ function sanitizeProfile(row) {
   if (!Number.isInteger(order) || order < 1 || order > 35) return null;
   if (!/^https:\/\/(?:www\.)?facebook\.com\//i.test(facebookUrl)) return null;
   const rawName = String(row?.display_name || "").trim();
-  const resolved = Boolean(rawName && !/^Facebook Support Profile\s+\d+$/i.test(rawName));
+  const resolvedName = Boolean(rawName && !/^Facebook Support Profile\s+\d+$/i.test(rawName));
+  const previewStatus = ["pending","verified","restricted","unavailable","error"].includes(String(row?.preview_status || ""))
+    ? String(row.preview_status)
+    : "pending";
+  const verified = previewStatus === "verified" && Boolean(row?.preview_verified_at);
+  const preview = verified ? {
+    object_id: String(row?.facebook_object_id || "").trim() || null,
+    title: String(row?.preview_title || "").trim().slice(0, 140) || null,
+    description: String(row?.preview_description || "").trim().slice(0, 500) || null,
+    image_url: safeHttps(row?.preview_image_url),
+    verified_at: row.preview_verified_at,
+    source: String(row?.preview_source || "").trim().slice(0, 80) || null
+  } : null;
   return {
     display_order: order,
     display_name: safePublicLabel(row),
     facebook_url: facebookUrl,
     category: String(row?.category || "community_support").trim().slice(0, 80),
-    metadata_status: resolved ? "resolved" : "neutral_verified_link"
+    metadata_status: verified ? "verified_facebook_preview" : resolvedName ? "resolved_name_exact_link" : "neutral_verified_link",
+    preview_status: previewStatus,
+    preview
   };
 }
 
@@ -48,7 +69,8 @@ async function fetchProfilesFromSupabase() {
     throw error;
   }
 
-  const url = `${supabaseUrl}/rest/v1/oneworldz_support_profiles?select=display_order,display_name,facebook_url,category,status&status=eq.active&order=display_order.asc`;
+  const fields = "display_order,display_name,facebook_url,category,status,facebook_object_id,preview_title,preview_description,preview_image_url,preview_verified_at,preview_source,preview_status";
+  const url = `${supabaseUrl}/rest/v1/oneworldz_support_profiles?select=${fields}&status=eq.active&order=display_order.asc`;
   const response = await fetch(url, {
     headers: {
       apikey: serviceKey,
@@ -90,6 +112,8 @@ function registerCommunitySupportLive(app) {
         source: "public.oneworldz_support_profiles",
         count: profiles.length,
         display_order: "1-35",
+        verified_previews: profiles.filter((row) => row.preview_status === "verified" && row.preview).length,
+        preview_rule: "verified_metadata_or_exact_facebook_link_never_invent",
         profiles
       });
     } catch (error) {

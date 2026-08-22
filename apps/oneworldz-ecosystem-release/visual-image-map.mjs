@@ -120,7 +120,12 @@ export const exactAltVisual = Object.freeze({
   "OneWorldz partnerships and sponsors preview": "oneworldz-master",
   "2026 to 2030 Help the People movement preview": "humanitarian-action",
   "CryptoWorldz preview": "crypto-zed",
-  "OneWorldz Community Support humanitarian action": "humanitarian-action"
+  "OneWorldz Community Support humanitarian action": "humanitarian-action",
+  "CryptoWorldz headquarters preview": "crypto-zed",
+  "Command Centre Ultimate preview": "command-centre-five",
+  "CryptoWorldz MiniApp preview": "zed-auto",
+  "OneWorldz gateway preview": "oneworldz-master",
+  "OneWorldz humanitarian action and public stewardship vision": "humanitarian-action"
 });
 
 const pathVisual = new Map();
