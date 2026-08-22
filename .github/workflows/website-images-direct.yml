@@ -1,0 +1,103 @@
+name: Website Images Direct Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/oneworldz-ecosystem-release/**"
+      - ".github/workflows/website-images-direct.yml"
+      - ".github/full-current-static-deploy.sh"
+      - ".github/resume-locked-static-deploy.sh"
+      - ".github/lftp-compat.py"
+      - ".github/publish-progress.sh"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: jayjay-chatgpt-oneworldz-single-rail
+  cancel-in-progress: false
+
+jobs:
+  deploy_images:
+    name: BUILD IMAGES → REMOVE GENERIC ART → HOSTINGER → LIVE BYTES
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install repository FTPS transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile .github/lftp-compat.py
+          mkdir -p "$RUNNER_TEMP/oneworldz-bin"
+          cat > "$RUNNER_TEMP/oneworldz-bin/lftp" <<'SH'
+          #!/usr/bin/env bash
+          exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
+          echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
+
+      - name: Install build dependencies
+        run: npm ci
+
+      - name: Build current websites with JayJay image pass
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build:ecosystem-release
+          test -s apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz/index.html
+          echo 'WEBSITE_IMAGE_BUILD=PASS'
+
+      - name: Prove generic image placeholders are gone
+        shell: bash
+        run: |
+          set -euo pipefail
+          root='apps/oneworldz-ecosystem-release/dist/ecosystem'
+          if grep -R -E 'production-picture text-art|brand-profile text-brand|class="directory-profile" aria-hidden="true"' "$root" --include='*.html'; then
+            echo '::error::GENERIC_IMAGE_PLACEHOLDER_REMAINS'
+            exit 1
+          fi
+          grep -R -q 'jayjay-images.css' "$root" --include='*.html'
+          echo 'REAL_ONEWORLDZ_IMAGE_SLOTS=PASS'
+
+      - name: Freeze built image candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_tree="$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)"
+          candidate_fingerprint="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
+          test -n "$candidate_tree"
+          test -n "$candidate_fingerprint"
+          echo "CANDIDATE_TREE=$candidate_tree" >> "$GITHUB_ENV"
+          echo "CANDIDATE_FINGERPRINT=$candidate_fingerprint" >> "$GITHUB_ENV"
+          echo "IMAGE_CANDIDATE_READY tree=$candidate_tree fingerprint=$candidate_fingerprint"
+
+      - name: Deploy image-updated static fleet
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash .github/full-current-static-deploy.sh
+
+      - name: Direct image deployment verdict
+        run: echo 'WEBSITE_IMAGES_DIRECT_DEPLOY=PASS'
