@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   actions: read
 
 concurrency:
@@ -47,6 +47,8 @@ jobs:
     steps:
       - name: Checkout current main
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node 22
         uses: actions/setup-node@v4
