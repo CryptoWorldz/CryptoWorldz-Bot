@@ -1,4 +1,4 @@
-name: JayJay Environment Block Inspector — One Time
+name: JayJay Full-Background Deploy Watch — One Time
 
 on:
   push:
@@ -12,34 +12,56 @@ permissions:
   contents: read
 
 jobs:
-  inspect:
+  watch:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
-      TARGET_SHA: 4f0aebfa4e9e3e5620692db85eedfcacad61ebb1
+      TARGET_SHA: e26990fed529b2609f8db8b0c281710deb839c72
       TARGET_WORKFLOW: website-images-direct.yml
     steps:
-      - name: Publish exact blocked run URL
+      - name: Watch exact visual deployment
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
           python3 <<'PY'
-          import json, os, urllib.request
+          import json, os, time, urllib.request
           repo=os.environ['GITHUB_REPOSITORY']; token=os.environ['GH_TOKEN']; target=os.environ['TARGET_SHA']; wf=os.environ['TARGET_WORKFLOW']
-          headers={'Accept':'application/vnd.github+json','Authorization':f'Bearer {token}','X-GitHub-Api-Version':'2022-11-28','User-Agent':'jayjay-env-inspector'}
+          headers={'Accept':'application/vnd.github+json','Authorization':f'Bearer {token}','X-GitHub-Api-Version':'2022-11-28','User-Agent':'jayjay-full-background-watch'}
           def api(method,path,payload=None):
               data=None if payload is None else json.dumps(payload).encode()
               req=urllib.request.Request('https://api.github.com'+path,data=data,method=method,headers=headers)
               with urllib.request.urlopen(req,timeout=30) as r:
                   raw=r.read(); return json.loads(raw.decode()) if raw else None
-          runs=api('GET',f'/repos/{repo}/actions/workflows/{wf}/runs?branch=main&per_page=50').get('workflow_runs',[])
-          exact=[r for r in runs if r.get('head_sha')==target]
-          exact.sort(key=lambda r:r.get('run_number',0),reverse=True)
-          if not exact:
-              raise SystemExit('NO_EXACT_ENVIRONMENT_RUN')
-          run=exact[0]
-          state='success' if run.get('conclusion')=='success' else 'failure' if run.get('status')=='completed' else 'pending'
-          api('POST',f'/repos/{repo}/statuses/{target}',{'state':state,'context':'jayjay/environment-block','description':f"run {run['id']} status={run.get('status')} conclusion={run.get('conclusion')}",'target_url':run.get('html_url')})
-          print(json.dumps({'id':run['id'],'status':run.get('status'),'conclusion':run.get('conclusion'),'url':run.get('html_url')}))
+          def publish(state,desc,url=None):
+              body={'state':state,'context':'jayjay/full-background-deploy','description':desc[:140]}
+              if url: body['target_url']=url
+              api('POST',f'/repos/{repo}/statuses/{target}',body)
+          run=None
+          for _ in range(30):
+              runs=api('GET',f'/repos/{repo}/actions/workflows/{wf}/runs?branch=main&per_page=50').get('workflow_runs',[])
+              exact=[r for r in runs if r.get('head_sha')==target]
+              exact.sort(key=lambda r:r.get('run_number',0),reverse=True)
+              if exact:
+                  run=exact[0]; break
+              publish('pending',f'Waiting for visual release {target[:10]}')
+              time.sleep(5)
+          if not run:
+              publish('failure',f'No visual workflow run for {target[:10]}'); raise SystemExit(1)
+          run_id=run['id']; url=run.get('html_url')
+          print(f'WATCHING_RUN_ID={run_id}')
+          for _ in range(170):
+              runs=api('GET',f'/repos/{repo}/actions/workflows/{wf}/runs?branch=main&per_page=50').get('workflow_runs',[])
+              matches=[r for r in runs if r.get('id')==run_id]
+              if not matches:
+                  publish('failure',f'Run {run_id} disappeared',url); raise SystemExit(1)
+              run=matches[0]; status=run.get('status'); conclusion=run.get('conclusion')
+              if status=='completed':
+                  if conclusion=='success':
+                      publish('success',f'Full-background deploy PASS run {run_id}',url); print(f'FULL_BACKGROUND_DEPLOY=PASS run_id={run_id}'); raise SystemExit(0)
+                  publish('failure',f'Full-background deploy {conclusion} run {run_id}',url); print(f'FULL_BACKGROUND_DEPLOY={conclusion} run_id={run_id}'); raise SystemExit(1)
+              publish('pending',f'Full-background deploy {status} run {run_id}',url)
+              time.sleep(10)
+          publish('failure',f'Full-background deploy timed out run {run_id}',url); raise SystemExit(1)
           PY
