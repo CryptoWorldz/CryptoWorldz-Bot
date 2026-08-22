@@ -97,23 +97,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 <<'PY'
-          from pathlib import Path
-          path = Path('.github/resume-locked-static-deploy.sh')
-          text = path.read_text()
-          old = '''  test -s "$remote"
-  proved=0
-'''
-          new = '''  if [ ! -s "$remote" ]; then
-    echo "DESTINATION_PROVED_AUTHENTICATED_LISTING $domain -> $transport (robots.txt absent; authenticated cd/pwd/list already passed)"
-    continue
-  fi
-  proved=0
-'''
-          if old not in text:
-              raise SystemExit('Expected obsolete robots prewrite blocker not found')
-          path.write_text(text.replace(old, new, 1))
-          PY
+          script='.github/resume-locked-static-deploy.sh'
+          grep -Fq '  test -s "$remote"' "$script"
+          sed -i '/^  test -s "$remote"$/i\
+          if [ ! -s "$remote" ]; then\
+            echo "DESTINATION_PROVED_AUTHENTICATED_LISTING $domain -> $transport (robots.txt absent; authenticated cd/pwd/list already passed)"\
+            continue\
+          fi' "$script"
+          bash -n "$script"
           echo 'MISSING_ROBOTS_NO_LONGER_BLOCKS_AUTHENTICATED_DESTINATION=PASS'
 
       - name: Deploy full-background static fleet
