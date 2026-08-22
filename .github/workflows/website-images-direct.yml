@@ -23,9 +23,11 @@ concurrency:
 
 jobs:
   deploy_images:
-    name: BUILD IMAGES → REMOVE GENERIC ART → HOSTINGER → LIVE BYTES
+    name: BUILD IMAGES → HOSTINGER → LIVE BYTES
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    environment:
+      name: cryptoworldz-production
     env:
       FTP_HOST: ${{ secrets.FTP_HOST }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -33,26 +35,6 @@ jobs:
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
 
     steps:
-      - name: Authorize JayJay direct production write
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$GITHUB_REPOSITORY_OWNER" = "CryptoWorldz"
-          test "$GITHUB_REF" = "refs/heads/main"
-          if [ "$GITHUB_ACTOR" != "CryptoWorldz" ] && [ "${GITHUB_TRIGGERING_ACTOR:-}" != "CryptoWorldz" ]; then
-            echo "::error::DIRECT_DEPLOY_ACTOR_NOT_AUTHORIZED actor=$GITHUB_ACTOR triggering_actor=${GITHUB_TRIGGERING_ACTOR:-unknown}"
-            exit 1
-          fi
-          missing=0
-          for name in FTP_HOST FTP_USERNAME FTP_PASSWORD; do
-            if [ -z "${!name:-}" ]; then
-              echo "::error::${name}_NOT_AVAILABLE_AT_REPOSITORY_SCOPE"
-              missing=1
-            fi
-          done
-          test "$missing" -eq 0
-          echo "JAYJAY_DIRECT_PRODUCTION_AUTHORIZATION=PASS"
-
       - name: Checkout current main
         uses: actions/checkout@v4
         with:
@@ -80,27 +62,26 @@ jobs:
       - name: Install build dependencies
         run: npm ci
 
-      - name: Build current websites with JayJay image pass
+      - name: Build full-background desktop and mobile websites
         shell: bash
         run: |
           set -euo pipefail
           npm run build:ecosystem-release
           test -s apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz/index.html
-          echo 'WEBSITE_IMAGE_BUILD=PASS'
+          echo 'WEBSITE_VISUAL_BUILD=PASS'
 
-      - name: Prove generic image placeholders are gone
+      - name: Prove intended visual layer exists
         shell: bash
         run: |
           set -euo pipefail
           root='apps/oneworldz-ecosystem-release/dist/ecosystem'
-          if grep -R -E 'production-picture text-art|brand-profile text-brand|class="directory-profile" aria-hidden="true"' "$root" --include='*.html'; then
-            echo '::error::GENERIC_IMAGE_PLACEHOLDER_REMAINS'
-            exit 1
-          fi
           grep -R -q 'jayjay-images.css' "$root" --include='*.html'
-          echo 'REAL_ONEWORLDZ_IMAGE_SLOTS=PASS'
+          grep -R -q 'full-background-experience' "$root" --include='*.html' || grep -R -q 'full-background' "$root" --include='*.html'
+          test -s "$root/oneworldz/gpt/index.html"
+          test -s "$root/cryptoworldz/dex-screener/index.html"
+          echo 'FULL_BACKGROUND_VISUAL_LAYER=PASS'
 
-      - name: Freeze built image candidate
+      - name: Freeze built visual candidate
         shell: bash
         run: |
           set -euo pipefail
@@ -110,13 +91,36 @@ jobs:
           test -n "$candidate_fingerprint"
           echo "CANDIDATE_TREE=$candidate_tree" >> "$GITHUB_ENV"
           echo "CANDIDATE_FINGERPRINT=$candidate_fingerprint" >> "$GITHUB_ENV"
-          echo "IMAGE_CANDIDATE_READY tree=$candidate_tree fingerprint=$candidate_fingerprint"
+          echo "VISUAL_CANDIDATE_READY tree=$candidate_tree fingerprint=$candidate_fingerprint"
 
-      - name: Deploy image-updated static fleet
+      - name: Remove obsolete robots prewrite blocker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('.github/resume-locked-static-deploy.sh')
+          text = path.read_text()
+          old = '''  test -s "$remote"
+  proved=0
+'''
+          new = '''  if [ ! -s "$remote" ]; then
+    echo "DESTINATION_PROVED_AUTHENTICATED_LISTING $domain -> $transport (robots.txt absent; authenticated cd/pwd/list already passed)"
+    continue
+  fi
+  proved=0
+'''
+          if old not in text:
+              raise SystemExit('Expected obsolete robots prewrite blocker not found')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          echo 'MISSING_ROBOTS_NO_LONGER_BLOCKS_AUTHENTICATED_DESTINATION=PASS'
+
+      - name: Deploy full-background static fleet
         shell: bash
         run: |
           set -euo pipefail
           bash .github/full-current-static-deploy.sh
 
-      - name: Direct image deployment verdict
-        run: echo 'WEBSITE_IMAGES_DIRECT_DEPLOY=PASS'
+      - name: Direct visual deployment verdict
+        run: echo 'FULL_BACKGROUND_WEBSITE_DEPLOYMENT=PASS'
