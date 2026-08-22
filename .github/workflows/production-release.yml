@@ -1,0 +1,162 @@
+name: OneWorldz Production Release
+run-name: OneWorldz Production Release — ${{ github.sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_websites:
+        description: Deploy the 18 static OneWorldz website destinations
+        required: true
+        type: boolean
+        default: true
+      deploy_zed:
+        description: Deploy the protected ZED / Command Centre Node runtime
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  websites:
+    if: ${{ inputs.deploy_websites }}
+    name: WEBSITES — BUILD → 18 STATIC HOSTINGER DESTINATIONS
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - name: Checkout selected commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install FTPS transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile .github/lftp-compat.py
+          mkdir -p "$RUNNER_TEMP/oneworldz-bin"
+          cat > "$RUNNER_TEMP/oneworldz-bin/lftp" <<'SH'
+          #!/usr/bin/env bash
+          exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
+          echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
+
+      - name: Install repository dependencies
+        run: npm ci
+
+      - name: Build and validate static websites
+        run: npm run build:ecosystem-release
+
+      - name: Prove static destination boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
+          if (productionTargets.length !== 18) throw new Error(`Expected 18 static targets, got ${productionTargets.length}`);
+          for (const target of productionTargets) {
+            if (/cryptobotz|\/nodejs/.test(target.hostingerTransportDir)) throw new Error(`Protected ZED path leaked into static targets: ${target.key}`);
+            console.log(`${target.key}\t${target.domain}\t${target.hostingerTransportDir}`);
+          }
+          NODE
+
+      - name: Deploy static website fleet only
+        shell: bash
+        run: bash .github/full-current-static-deploy.sh
+
+      - name: Websites verdict
+        run: echo 'ONEWORLDZ_WEBSITES_RELEASE=PASS'
+
+  zed:
+    if: ${{ inputs.deploy_zed }}
+    name: ZED — PROTECTED NODE RUNTIME → LIVE TELEGRAM PROOF
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: cryptoworldz-production
+    env:
+      PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
+      PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+    steps:
+      - name: Checkout selected commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install FTPS transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile .github/lftp-compat.py
+          mkdir -p "$RUNNER_TEMP/oneworldz-bin"
+          cat > "$RUNNER_TEMP/oneworldz-bin/lftp" <<'SH'
+          #!/usr/bin/env bash
+          exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
+          echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
+
+      - name: Prove protected destination boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PROTECTED_DOMAIN" = 'cryptobotz.cryptoworldz.xyz'
+          test "$PROTECTED_NODE_ROOT" = '/domains/cryptobotz.cryptoworldz.xyz/nodejs'
+
+      - name: Deploy and prove ZED runtime only
+        shell: bash
+        run: bash .github/full-current-zed-runtime.sh
+
+      - name: Prove Telegram Command Centre launcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$BOT_TOKEN"
+          echo "::add-mask::$BOT_TOKEN"
+          curl --fail --silent --show-error --max-time 20 \
+            "https://api.telegram.org/bot${BOT_TOKEN}/getChatMenuButton" \
+            -o "$RUNNER_TEMP/menu-button.json"
+          MENU_FILE="$RUNNER_TEMP/menu-button.json" node <<'NODE'
+          const fs = require('fs');
+          const payload = JSON.parse(fs.readFileSync(process.env.MENU_FILE, 'utf8'));
+          const button = payload && payload.result;
+          if (payload.ok !== true) throw new Error('Telegram getChatMenuButton failed');
+          if (!button || button.type !== 'web_app') throw new Error('Telegram menu button is not web_app');
+          if (button.text !== '🌐 OPEN COMMAND CENTRE') throw new Error(`Unexpected menu text: ${button.text || ''}`);
+          if (!button.web_app || button.web_app.url !== 'https://cryptobotz.cryptoworldz.xyz/miniapp/') {
+            throw new Error(`Unexpected Mini App URL: ${button.web_app?.url || ''}`);
+          }
+          console.log('TELEGRAM_COMMAND_CENTRE_BUTTON=PASS');
+          NODE
+
+      - name: ZED verdict
+        run: echo 'ZED_PROTECTED_RELEASE=PASS'

@@ -42,28 +42,7 @@ const requiredIdentityText = Object.freeze({
   donateworldz: "DonateWorldz"
 });
 
-const requiredIdentityImage = Object.freeze({
-  oneworldz: "oneworldz-master|little-legend",
-  cryptoworldz: "zed-command-centre|blockchain-portal",
-  solworldz: "solworldz",
-  ethworldz: "ethworldz",
-  baseworldz: "baseworldz",
-  bnbworldz: "bnbworldz",
-  xrpworldz: "xrpworldz",
-  suiworldz: "suiworldz",
-  hyperworldz: "hyperworldz",
-  robinworldz: "robinworldz",
-  hodlerworldz: "",
-  purplediamondcrew: "banner.png|hope-chest|action-team",
-  impactbased: "impactbased",
-  "law-oneworldz": "robin-hood-law",
-  "learn-oneworldz": "oneworldz-gpt|little-legend",
-  hodlergalaxy: "hodlergalaxy-hero",
-  foodworldz: "foodworldz-hero",
-  donateworldz: "donateworldz-hero"
-});
-
-const hostingerTransportDirs = Object.freeze({
+export const hostingerTransportDirs = Object.freeze({
   oneworldz: "domains/oneworldz.com/public_html",
   cryptoworldz: "domains/cryptoworldz.xyz/public_html",
   solworldz: "domains/solworldz.xyz/public_html",
@@ -87,11 +66,9 @@ const hostingerTransportDirs = Object.freeze({
 export const productionTargets = Object.freeze(deploymentTargets19.map((target) => {
   const expectedTitle = expectedTitles[target.key];
   const identityText = requiredIdentityText[target.key];
-  const identityImage = requiredIdentityImage[target.key];
   const hostingerTransportDir = hostingerTransportDirs[target.key];
   if (!expectedTitle) throw new Error(`Missing production title for ${target.key}`);
   if (!identityText) throw new Error(`Missing production identity for ${target.key}`);
-  if (identityImage === undefined) throw new Error(`Missing image identity for ${target.key}`);
   if (!hostingerTransportDir) throw new Error(`Missing Hostinger destination for ${target.key}`);
   return Object.freeze({
     ...target,
@@ -99,8 +76,8 @@ export const productionTargets = Object.freeze(deploymentTargets19.map((target) 
     hostingerTransportDir,
     expectedTitle,
     requiredIdentityText: identityText,
-    requiredIdentityImage: identityImage,
-    productionWriteAllowed: true
+    productionWriteAllowed: true,
+    deploymentClass: "STATIC_WEBSITE_ONLY"
   });
 }));
 
@@ -109,5 +86,10 @@ export const productionGate = Object.freeze({
   protectedDestinations: protectedDestinations.map(({ domain }) => domain),
   excludedOwnedRootDomains: [...excludedRootDomains],
   productionWriteAllowed: true,
-  canonicalDeploymentRail: ".github/workflows/website-images-direct.yml"
+  canonicalDeploymentRail: ".github/workflows/production-release.yml",
+  trigger: "MANUAL_ONLY",
+  isolation: "STATIC_WEBSITES_SEPARATE_FROM_ZED"
 });
+
+if (productionTargets.length !== 18) throw new Error(`Expected 18 production targets, got ${productionTargets.length}`);
+if (Object.keys(hostingerTransportDirs).length !== 18) throw new Error("Expected 18 Hostinger static destinations");

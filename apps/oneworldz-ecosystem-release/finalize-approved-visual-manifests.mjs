@@ -9,12 +9,6 @@ const dist = path.join(root, "dist", "ecosystem");
 const source = path.join(root, "source");
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
-const sourceModes = Object.freeze({
-  foodworldz: "approved-avif-master",
-  donateworldz: "approved-support-composite",
-  hodlergalaxy: "approved-production-pair"
-});
-
 async function listFiles(dir, rel = "") {
   const entries = await readdir(path.join(dir, rel), { withFileTypes: true });
   const out = [];
@@ -53,16 +47,7 @@ for (const target of productionTargets) {
 
   const manifestPath = path.join(packageDir, "release-manifest.json");
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
-  if (sourceModes[target.key]) {
-    manifest.approved_visual = {
-      ...(manifest.approved_visual || {}),
-      key: target.key,
-      desktop: `/assets/approved/desktop/${target.key}-hero.avif`,
-      mobile: `/assets/approved/mobile/${target.key}-hero.avif`,
-      responsive_policy: "distinct-production-renders",
-      source_mode: sourceModes[target.key]
-    };
-  }
+  delete manifest.approved_visual;
   manifest.runtime = {
     ...(manifest.runtime || {}),
     site_script: `/assets/js/${siteRuntimeName}`,
@@ -81,7 +66,7 @@ for (const target of productionTargets) {
 }
 
 if (expectedPages === 0 || rewrittenPages !== expectedPages) {
-  throw new Error(`Expected to cache-bust the shared runtime on ${expectedPages} published HTML pages, rewrote ${rewrittenPages}`);
+  throw new Error(`Expected to cache-bust ${expectedPages} published HTML pages, rewrote ${rewrittenPages}`);
 }
 
-console.log(`Approved responsive visual policy preserved. Shared runtime cache-busted as ${siteRuntimeName} across ${rewrittenPages} published HTML pages; release manifests refreshed for all ${productionTargets.length} targets.`);
+console.log(`Shared runtime cache-busted as ${siteRuntimeName} across ${rewrittenPages} HTML pages. Image identity is intentionally left to apply-exact-visual-map.mjs.`);
