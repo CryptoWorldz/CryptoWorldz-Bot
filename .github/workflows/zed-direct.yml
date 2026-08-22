@@ -17,12 +17,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   actions: read
-
-concurrency:
-  group: jayjay-chatgpt-oneworldz-single-rail
-  cancel-in-progress: false
 
 env:
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
