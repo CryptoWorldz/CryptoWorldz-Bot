@@ -1,66 +1,13 @@
 import { createHash } from "node:crypto";
-import { cp, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const sourceAssets = path.join(root, "source", "assets");
 const distRoot = path.join(root, "dist", "ecosystem");
+const CSS_HREF = "/assets/css/full-background-experience.css";
+const BODY_CLASS = "full-background-experience";
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
-
-const ART = Object.freeze({
-  oneworldz: { desktop: "desktop/oneworldz/oneworldz-master.png", mobile: "desktop/oneworldz/oneworldz-master.png", position: "center center" },
-  oneworldzGpt: { desktop: "desktop/oneworldz/oneworldz-gpt.png", mobile: "mobile/five-leaders-alliance.webp", position: "center center" },
-  reagan: { desktop: "desktop/humanitarian/action-creates-smiles-banner.png", mobile: "mobile/uganda-unite.webp", position: "center center" },
-  davis: { desktop: "desktop/oneworldz/hope-chest.png", mobile: "mobile/hope-chest.webp", position: "center center" },
-  community: { desktop: "desktop/tokens/global-impact-alliance.png", mobile: "mobile/global-impact-alliance.webp", position: "center center" },
-  pdc: { desktop: "desktop/purple-diamond-crew/action-team.png", mobile: "mobile/hope-chest.webp", position: "center center" },
-  cryptoworldz: { desktop: "desktop/cryptoworldz/zed-command-centre.png", mobile: "mobile/blockchain-portal.webp", position: "center center" },
-  command: { desktop: "desktop/cryptoworldz/command-centre-five.png", mobile: "mobile/zed-grace-auto.webp", position: "center center" },
-  impactbased: { desktop: "desktop/cryptoworldz/impactbased.png", mobile: "mobile/impactbased-square.webp", position: "center center" },
-  law: { desktop: "desktop/tokens/robin-hood-law.png", mobile: "mobile/robin-hood-law.webp", position: "center center" },
-  hodler: { desktop: "desktop/tokens/next-big-coin.png", mobile: "mobile/next-big-coin.webp", position: "center center" },
-  solworldz: { desktop: "desktop/blockchains/solworldz.png", mobile: "mobile/solworldz.webp", position: "center center" },
-  ethworldz: { desktop: "desktop/blockchains/ethworldz.png", mobile: "mobile/ethworldz.webp", position: "center center" },
-  baseworldz: { desktop: "desktop/blockchains/baseworldz.png", mobile: "mobile/baseworldz.webp", position: "center center" },
-  bnbworldz: { desktop: "desktop/blockchains/bnbworldz.png", mobile: "mobile/bnbworldz.webp", position: "center center" },
-  xrpworldz: { desktop: "desktop/blockchains/xrpworldz.png", mobile: "mobile/xrpworldz.webp", position: "center center" },
-  suiworldz: { desktop: "desktop/blockchains/suiworldz.png", mobile: "mobile/suiworldz.webp", position: "center center" },
-  hyperworldz: { desktop: "desktop/blockchains/hyperworldz.png", mobile: "mobile/hyperworldz.webp", position: "center center" },
-  robinworldz: { desktop: "desktop/blockchains/robinworldz.png", mobile: "mobile/robinworldz.webp", position: "center center" }
-});
-
-function chooseArt(target, route) {
-  const r = route.toLowerCase();
-  if (target === "oneworldz") {
-    if (/gpt|ai-guide|ask-oneworldz/.test(r)) return ART.oneworldzGpt;
-    if (/reagan|uganda|children|action-spread|support-children/.test(r)) return ART.reagan;
-    if (/davis/.test(r)) return ART.davis;
-    if (/community-support|community-impact|destinations|support-network/.test(r)) return ART.community;
-    return ART.oneworldz;
-  }
-  if (target === "cryptoworldz") {
-    if (/command-centre|miniapp|zed|auto|grace/.test(r)) return ART.command;
-    if (/support\/reagan|reagan|uganda|children/.test(r)) return ART.reagan;
-    if (/support\/community|community-impact/.test(r)) return ART.community;
-    if (/support\/jayjay/.test(r)) return ART.pdc;
-    return ART.cryptoworldz;
-  }
-  if (target === "donateworldz") {
-    if (/reagan|uganda|children/.test(r)) return ART.reagan;
-    if (/davis/.test(r)) return ART.davis;
-    if (/community/.test(r)) return ART.community;
-    if (/jayjay/.test(r)) return ART.pdc;
-    return ART.community;
-  }
-  if (target === "foodworldz") return ART.reagan;
-  if (target === "purplediamondcrew") return ART.pdc;
-  if (target === "impactbased") return ART.impactbased;
-  if (target === "law-oneworldz") return ART.law;
-  if (target === "learn-oneworldz") return ART.oneworldzGpt;
-  if (target === "hodlergalaxy" || target === "hodlerworldz") return ART.hodler;
-  return ART[target] || ART.oneworldz;
-}
 
 async function walk(dir) {
   const out = [];
@@ -72,89 +19,41 @@ async function walk(dir) {
   return out;
 }
 
-function publicAsset(asset) {
-  return `/assets/${asset}`;
-}
-
 function addBodyClass(html) {
-  if (/<body\b[^>]*class="[^"]*\bfull-background-experience\b/.test(html)) return html;
-  if (/<body\b[^>]*class="/.test(html)) return html.replace(/<body\b([^>]*?)class="([^"]*)"/, '<body$1class="$2 full-background-experience"');
-  return html.replace(/<body\b([^>]*)>/, '<body$1 class="full-background-experience">');
-}
-
-function addPageVars(html, art) {
-  const marker = "data-full-background-art";
-  if (html.includes(marker)) {
-    html = html.replace(/<style data-full-background-art>[\s\S]*?<\/style>/, "");
+  if (new RegExp(`<body\\b[^>]*class="[^"]*\\b${BODY_CLASS}\\b`).test(html)) return html;
+  if (/<body\b[^>]*class="/.test(html)) {
+    return html.replace(/<body\b([^>]*?)class="([^"]*)"/, `<body$1class="$2 ${BODY_CLASS}"`);
   }
-  const style = `<style data-full-background-art>:root{--full-bg-desktop:url('${publicAsset(art.desktop)}');--full-bg-mobile:url('${publicAsset(art.mobile)}');--full-bg-position:${art.position};}</style>`;
-  return html.replace("</head>", `${style}</head>`);
+  return html.replace(/<body\b([^>]*)>/, `<body$1 class="${BODY_CLASS}">`);
 }
 
 function addCssLink(html) {
-  if (html.includes('/assets/css/full-background-experience.css')) return html;
-  return html.replace("</head>", '<link rel="stylesheet" href="/assets/css/full-background-experience.css"></head>');
-}
-
-function heroPicture(art) {
-  const mobile = publicAsset(art.mobile);
-  const desktop = publicAsset(art.desktop);
-  return `<picture class="production-picture hero-art jayjay-hero-art full-background-hero-art"><source media="(max-width: 720px)" srcset="${mobile}"><img src="${desktop}" alt="Approved ecosystem visual" decoding="async" fetchpriority="high"></picture>`;
-}
-
-function enforcePrimaryHero(html, art) {
-  const pictureRx = /<picture class="[^"]*\bhero-art\b[^"]*">[\s\S]*?<\/picture>/;
-  if (pictureRx.test(html)) return html.replace(pictureRx, heroPicture(art));
-  const heroOpen = /<section class="([^"]*\bhero\b[^"]*)"([^>]*)>/;
-  if (heroOpen.test(html)) return html.replace(heroOpen, (whole) => `${whole}${heroPicture(art)}`);
-  return html;
+  if (html.includes(CSS_HREF)) return html;
+  if (!html.includes("</head>")) throw new Error("Generated page has no closing head tag");
+  return html.replace("</head>", `  <link rel="stylesheet" href="${CSS_HREF}">\n</head>`);
 }
 
 const css = `
-/* OneWorldz Full Background Experience — final build layer. */
+/* Layout-only glass/background treatment.
+   This file is forbidden from choosing, replacing, rotating, or guessing image assets. */
 html{background:#02050f}
-body.full-background-experience{position:relative;isolation:isolate;min-height:100svh;background:#02050f!important;color:#f7fbff}
-body.full-background-experience::before,body.full-background-experience::after{content:"";position:fixed;inset:0;pointer-events:none}
-body.full-background-experience::before{z-index:-3;background-image:var(--full-bg-desktop);background-repeat:no-repeat;background-position:var(--full-bg-position,center);background-size:cover;filter:saturate(1.08) contrast(1.04) brightness(.72);transform:translateZ(0)}
-body.full-background-experience::after{z-index:-2;background:linear-gradient(180deg,rgba(2,5,15,.20),rgba(2,5,15,.48) 45%,rgba(2,5,15,.68)),radial-gradient(circle at 50% 12%,rgba(86,52,190,.14),transparent 48%)}
+body.full-background-experience{position:relative;isolation:isolate;min-height:100svh;background:#02050f;color:#f7fbff}
 body.full-background-experience .site-header{background:rgba(3,11,27,.56)!important;border-bottom-color:rgba(117,190,255,.28)!important;backdrop-filter:blur(18px) saturate(1.25);-webkit-backdrop-filter:blur(18px) saturate(1.25)}
 body.full-background-experience .site-menu{background:rgba(3,11,27,.90)!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
 body.full-background-experience main{position:relative;z-index:1;background:transparent!important}
 body.full-background-experience .hero,body.full-background-experience .compact-hero,body.full-background-experience .support-hero,body.full-background-experience .section,body.full-background-experience .section-dark{background:transparent!important}
-body.full-background-experience .hero{min-height:min(900px,calc(100svh - 76px));isolation:isolate}
-body.full-background-experience .hero-art.full-background-hero-art{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:-2!important;border:0!important;border-radius:0!important;margin:0!important;background:transparent!important;overflow:hidden!important}
-body.full-background-experience .hero-art.full-background-hero-art img{width:100%!important;height:100%!important;max-height:none!important;object-fit:cover!important;object-position:var(--full-bg-position,center)!important;filter:saturate(1.08) contrast(1.04) brightness(.78)!important}
-body.full-background-experience .hero::after,body.full-background-experience .compact-hero::after{background:linear-gradient(90deg,rgba(2,7,20,.88),rgba(2,7,20,.44) 48%,rgba(2,7,20,.18)),linear-gradient(0deg,rgba(2,7,20,.76),transparent 56%)!important}
 body.full-background-experience .hero-copy,body.full-background-experience .section-heading{position:relative;z-index:2;text-shadow:0 2px 22px rgba(0,0,0,.72)}
 body.full-background-experience .info-grid article,body.full-background-experience .profile-card,body.full-background-experience .community-support-card,body.full-background-experience .cw-registry-card,body.full-background-experience .cw-project-card,body.full-background-experience .cw-link-preview,body.full-background-experience .launch-grid a,body.full-background-experience .official-directory-grid a,body.full-background-experience .support-card,body.full-background-experience .stat-card{background:linear-gradient(145deg,rgba(5,15,34,.58),rgba(8,9,30,.40))!important;border-color:rgba(126,198,255,.30)!important;box-shadow:0 18px 54px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.05);backdrop-filter:blur(15px) saturate(1.15);-webkit-backdrop-filter:blur(15px) saturate(1.15)}
 body.full-background-experience .button,body.full-background-experience .button-row a,body.full-background-experience a.button,body.full-background-experience button:not(.menu-button){background:linear-gradient(135deg,rgba(74,180,255,.46),rgba(133,86,255,.42))!important;border:1px solid rgba(210,235,255,.62)!important;box-shadow:0 10px 34px rgba(44,118,255,.18),inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff!important}
 body.full-background-experience .button.secondary,body.full-background-experience .button-row a.secondary{background:rgba(5,15,34,.42)!important}
 body.full-background-experience .section{border-top-color:rgba(117,190,255,.18)!important;border-bottom-color:rgba(117,190,255,.18)!important}
 body.full-background-experience .site-footer{position:relative;z-index:2;background:rgba(2,7,20,.68)!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-body.full-background-experience .jayjay-section-art,body.full-background-experience .jayjay-card-art,body.full-background-experience .directory-profile,body.full-background-experience .community-support-art{box-shadow:0 16px 46px rgba(0,0,0,.34)}
 @media(max-width:720px){
-  body.full-background-experience::before{background-image:var(--full-bg-mobile);background-position:center top;filter:saturate(1.05) contrast(1.03) brightness(.64)}
-  body.full-background-experience::after{background:linear-gradient(180deg,rgba(2,5,15,.20),rgba(2,5,15,.55) 42%,rgba(2,5,15,.72))}
-  body.full-background-experience .hero{min-height:calc(100svh - 70px);padding-top:clamp(1rem,4vw,2rem)!important}
-  body.full-background-experience .hero-art.full-background-hero-art img{object-position:center top!important;filter:saturate(1.04) contrast(1.02) brightness(.68)!important}
-  body.full-background-experience .hero::after,body.full-background-experience .compact-hero::after{background:linear-gradient(0deg,rgba(2,7,20,.88) 0%,rgba(2,7,20,.48) 58%,rgba(2,7,20,.18) 100%)!important}
   body.full-background-experience .info-grid article,body.full-background-experience .profile-card,body.full-background-experience .community-support-card,body.full-background-experience .cw-registry-card,body.full-background-experience .cw-project-card,body.full-background-experience .cw-link-preview,body.full-background-experience .launch-grid a,body.full-background-experience .official-directory-grid a{background:linear-gradient(145deg,rgba(4,12,29,.64),rgba(7,9,28,.48))!important;backdrop-filter:blur(12px) saturate(1.12);-webkit-backdrop-filter:blur(12px) saturate(1.12)}
 }
-@media(prefers-reduced-motion:reduce){body.full-background-experience::before{transform:none}}
 `;
 
-async function ensureArt(targetRoot, art) {
-  for (const rel of new Set([art.desktop, art.mobile])) {
-    const source = path.join(sourceAssets, rel);
-    const destination = path.join(targetRoot, "assets", rel);
-    if (!(await stat(source).then(() => true).catch(() => false))) throw new Error(`Full background source missing: ${rel}`);
-    if (await stat(destination).then(() => true).catch(() => false)) continue;
-    await mkdir(path.dirname(destination), { recursive: true });
-    await cp(source, destination);
-  }
-}
-
-async function refreshManifest(targetRoot, record) {
+async function refreshManifest(targetRoot) {
   const manifestPath = path.join(targetRoot, "release-manifest.json");
   if (!(await stat(manifestPath).then(() => true).catch(() => false))) return;
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
@@ -165,63 +64,39 @@ async function refreshManifest(targetRoot, record) {
     const bytes = await readFile(file);
     files.push({ path: `/${rel}`, bytes: bytes.byteLength, sha256: sha256(bytes) });
   }
-  manifest.generated_at = new Date().toISOString();
-  manifest.files = files.sort((a,b) => a.path.localeCompare(b.path));
-  manifest.full_background_experience = record;
+  files.sort((a,b) => a.path.localeCompare(b.path));
+  manifest.files = files;
+  manifest.full_background_experience = {
+    mode: "LAYOUT_ONLY_NO_IMAGE_AUTHORITY",
+    image_selection: "FORBIDDEN"
+  };
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 }
 
-const targetEntries = (await readdir(distRoot, { withFileTypes: true })).filter((entry) => entry.isDirectory());
-let totalPages = 0;
-const results = {};
+const targets = (await readdir(distRoot, { withFileTypes: true })).filter((entry) => entry.isDirectory());
+let pages = 0;
 
-for (const targetEntry of targetEntries) {
-  const target = targetEntry.name;
-  const targetRoot = path.join(distRoot, target);
+for (const target of targets) {
+  const targetRoot = path.join(distRoot, target.name);
   const cssDir = path.join(targetRoot, "assets", "css");
   await mkdir(cssDir, { recursive: true });
   await writeFile(path.join(cssDir, "full-background-experience.css"), css.trimStart(), "utf8");
 
   const htmlFiles = (await walk(targetRoot)).filter((file) => file.endsWith(".html"));
-  const used = new Map();
-  let changed = 0;
-
   for (const file of htmlFiles) {
-    const relative = path.relative(targetRoot, file).split(path.sep).join("/");
-    const route = relative === "index.html" ? "/" : `/${relative.replace(/index\.html$/, "")}`;
-    const art = chooseArt(target, route);
-    used.set(`${art.desktop}|${art.mobile}`, art);
-
     const original = await readFile(file, "utf8");
-    let html = original;
-    html = enforcePrimaryHero(html, art);
-    html = addBodyClass(html);
+    let html = addBodyClass(original);
     html = addCssLink(html);
-    html = addPageVars(html, art);
-
-    if (!html.includes("full-background-experience")) throw new Error(`${target}${route}: full-background class missing`);
-    if (!html.includes("data-full-background-art")) throw new Error(`${target}${route}: background art variables missing`);
-    if (html !== original) {
-      await writeFile(file, html, "utf8");
-      changed += 1;
-    }
+    if (html !== original) await writeFile(file, html, "utf8");
+    pages += 1;
   }
-
-  for (const art of used.values()) await ensureArt(targetRoot, art);
-
-  const record = {
-    pages: htmlFiles.length,
-    pages_changed: changed,
-    desktop_mobile_intentional: true,
-    full_viewport_background: true,
-    floating_glass_controls: true,
-    primary_hero_forced_to_route_art: true,
-    background_pairs: [...used.values()].map((art) => ({ desktop: publicAsset(art.desktop), mobile: publicAsset(art.mobile) }))
-  };
-  await refreshManifest(targetRoot, record);
-  totalPages += htmlFiles.length;
-  results[target] = record;
+  await refreshManifest(targetRoot);
 }
 
-if (!totalPages) throw new Error("No ecosystem HTML pages found for full-background experience");
-console.log(JSON.stringify({ event: "full_background_experience", result: "PASS", targets: targetEntries.length, pages: totalPages, results }, null, 2));
+console.log(JSON.stringify({
+  event: "full_background_experience",
+  result: "PASS",
+  targets: targets.length,
+  pages,
+  mode: "LAYOUT_ONLY_NO_IMAGE_AUTHORITY"
+}, null, 2));
