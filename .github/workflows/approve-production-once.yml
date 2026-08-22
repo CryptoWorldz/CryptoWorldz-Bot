@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      TARGET_SHA: 29afbd77751955bcfd87d186279a238a8096cd5c
+      TARGET_SHA: 4f0aebfa4e9e3e5620692db85eedfcacad61ebb1
       TARGET_WORKFLOW: website-images-direct.yml
       TARGET_ENVIRONMENT: cryptoworldz-production
     steps:
@@ -32,7 +32,6 @@ jobs:
           import json
           import os
           import time
-          import urllib.error
           import urllib.request
 
           repo = os.environ["GITHUB_REPOSITORY"]
@@ -71,7 +70,7 @@ jobs:
 
           try:
               approved = None
-              for attempt in range(10):
+              for attempt in range(15):
                   runs = api("GET", f"/repos/{repo}/actions/workflows/{workflow}/runs?branch=main&per_page=50")
                   exact = [
                       run for run in runs.get("workflow_runs", [])
@@ -105,7 +104,7 @@ jobs:
 
                   if approved:
                       break
-                  print(f"Waiting for exact pending deployment (attempt {attempt + 1}/10)")
+                  print(f"Waiting for exact pending deployment (attempt {attempt + 1}/15)")
                   time.sleep(10)
 
               if not approved:
