@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { cp, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -5,108 +6,184 @@ import { fileURLToPath } from "node:url";
 const root = path.dirname(fileURLToPath(import.meta.url));
 const sourceAssets = path.join(root, "source", "assets");
 const distRoot = path.join(root, "dist", "ecosystem");
+const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
-const WORLD_ART = Object.freeze({
-  SolWorldz: ["blockchains/solworldz.png", "solworldz.webp"],
-  EthWorldz: ["blockchains/ethworldz.png", "ethworldz.webp"],
-  BaseWorldz: ["blockchains/baseworldz.png", "baseworldz.webp"],
-  BNBWorldz: ["blockchains/bnbworldz.png", "bnbworldz.webp"],
-  XRPWorldz: ["blockchains/xrpworldz.png", "xrpworldz.webp"],
-  SuiWorldz: ["blockchains/suiworldz.png", "suiworldz.webp"],
-  HyperWorldz: ["blockchains/hyperworldz.png", "hyperworldz.webp"],
-  RobinWorldz: ["blockchains/robinworldz.png", "robinworldz.webp"],
-  HodlerWorldz: ["tokens/next-big-coin.png", "next-big-coin.webp"]
+// Exact identity map only. No pools. No cursor cycling. No fallback girl.
+const WORLD_SQUARE = Object.freeze({
+  SolWorldz: "solworldz.webp",
+  EthWorldz: "ethworldz.webp",
+  BaseWorldz: "baseworldz.webp",
+  BNBWorldz: "bnbworldz.webp",
+  XRPWorldz: "xrpworldz.webp",
+  SuiWorldz: "suiworldz.webp",
+  HyperWorldz: "hyperworldz.webp",
+  RobinWorldz: "robinworldz.webp",
+  BitWorldz: "bitworldz.webp",
+  HodlerWorldz: "next-big-coin.webp"
 });
 
-const MISSION_ART = Object.freeze([
-  ["purple-diamond-crew/action-team.png", "hope-chest.webp"],
-  ["oneworldz/oneworldz-master.png", "little-legend.webp"],
-  ["tokens/global-impact-alliance.png", "global-impact-alliance.webp"],
-  ["tokens/uganda-unite.png", "uganda-unite.webp"],
-  ["oneworldz/hope-chest.png", "hope-chest.webp"]
-]);
+const TARGET_WORLD = Object.freeze({
+  solworldz: "SolWorldz",
+  ethworldz: "EthWorldz",
+  baseworldz: "BaseWorldz",
+  bnbworldz: "BNBWorldz",
+  xrpworldz: "XRPWorldz",
+  suiworldz: "SuiWorldz",
+  hyperworldz: "HyperWorldz",
+  robinworldz: "RobinWorldz",
+  hodlerworldz: "HodlerWorldz",
+  hodlergalaxy: "HodlerWorldz"
+});
 
-const FALLBACK_ART = Object.freeze(["oneworldz/oneworldz-master.png", "little-legend.webp"]);
-
-const escapeHtml = (value = "") => String(value)
-  .replaceAll("&", "&amp;")
-  .replaceAll("<", "&lt;")
-  .replaceAll(">", "&gt;")
-  .replaceAll('"', "&quot;");
+const CSS_HREF = "/assets/css/exact-image-placement.css";
 
 async function walk(dir) {
   const out = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
-    const child = path.join(dir, entry.name);
-    if (entry.isDirectory()) out.push(...await walk(child));
-    else out.push(child);
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...await walk(full));
+    else out.push(full);
   }
   return out;
 }
 
-function artPicture({ desktop, mobile, alt = "", className = "jayjay-image", decorative = false }) {
-  const hidden = decorative ? ' aria-hidden="true"' : "";
-  const altText = decorative ? "" : escapeHtml(alt);
-  return `<picture class="${className}"${hidden}><source media="(max-width: 720px)" srcset="/assets/mobile/${mobile}"><img src="/assets/desktop/${desktop}" alt="${altText}" loading="lazy" decoding="async"></picture>`;
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 }
 
-function replaceTextArt(html) {
+function exactSquarePicture(worldName, classes = "production-picture profile-art", alt = "") {
+  const mobile = WORLD_SQUARE[worldName];
+  if (!mobile) return null;
+  return `<picture class="${classes} exact-square-art" data-exact-image="${worldName}"><source media="(max-width: 720px)" srcset="/assets/mobile/${mobile}"><img src="/assets/mobile/${mobile}" alt="${escapeHtml(alt || `${worldName} official identity`)}" loading="lazy" decoding="async"></picture>`;
+}
+
+function worldFromMarkup(markup = "") {
+  for (const [name, asset] of Object.entries(WORLD_SQUARE)) {
+    const key = asset.replace(/\.webp$/i, "");
+    if (markup.includes(name) || markup.toLowerCase().includes(key.toLowerCase())) return name;
+  }
+  return null;
+}
+
+function replaceKnownTextWorlds(html) {
   return html.replace(
-    /<div class="production-picture text-art ([^"]*)" role="img" aria-label="([^"]*)"><span>[^<]*<\/span><strong>([^<]+)<\/strong>(?:<small>[^<]*<\/small>)?<\/div>/g,
+    /<div class="production-picture text-art ([^"]*\bprofile-art\b[^"]*)" role="img" aria-label="([^"]*)">[\s\S]*?<strong>([^<]+)<\/strong>[\s\S]*?<\/div>/g,
     (whole, classes, aria, label) => {
-      const art = WORLD_ART[label];
-      if (!art) return artPicture({ desktop: FALLBACK_ART[0], mobile: FALLBACK_ART[1], alt: aria, className: `production-picture ${classes} jayjay-image` });
-      return artPicture({ desktop: art[0], mobile: art[1], alt: aria, className: `production-picture ${classes} jayjay-image jayjay-world-art` });
+      const worldName = WORLD_SQUARE[label] ? label : worldFromMarkup(`${aria} ${label}`);
+      if (!worldName) return whole;
+      return exactSquarePicture(worldName, `production-picture ${classes}`, aria) || whole;
     }
   );
 }
 
-function replaceGenericBrand(html) {
-  const isHodler = /<strong>HodlerWorldz<\/strong><small>Back to Home<\/small>/.test(html);
-  const art = isHodler ? WORLD_ART.HodlerWorldz : FALLBACK_ART;
+function replaceWorldProfilePictures(html) {
   return html.replace(
-    /<span class="brand-profile text-brand"[^>]*><b>[^<]*<\/b><\/span>/g,
-    artPicture({ desktop: art[0], mobile: art[1], className: "brand-profile jayjay-image", decorative: true })
-  );
-}
-
-function replaceDirectoryInitials(html) {
-  let index = 0;
-  return html.replace(
-    /<span class="directory-profile" aria-hidden="true"><b>[^<]*<\/b><small>[^<]*<\/small><\/span>/g,
-    () => {
-      const art = MISSION_ART[index++ % MISSION_ART.length];
-      return artPicture({ desktop: art[0], mobile: art[1], className: "directory-profile jayjay-image", decorative: true });
+    /<picture class="([^"]*\bprofile-art\b[^"]*)">([\s\S]*?)<\/picture>/g,
+    (whole, classes, inside) => {
+      const worldName = worldFromMarkup(inside);
+      if (!worldName) return whole;
+      const alt = inside.match(/alt="([^"]*)"/)?.[1] || `${worldName} official profile identity`;
+      return exactSquarePicture(worldName, classes, alt) || whole;
     }
   );
 }
 
-function addCommunityCardArt(html) {
-  let index = 0;
-  return html.replace(/(<article class="community-support-card"[^>]*>)(?!<picture)/g, (whole, open) => {
-    const art = MISSION_ART[index++ % MISSION_ART.length];
-    return `${open}${artPicture({ desktop: art[0], mobile: art[1], className: "community-support-art jayjay-image", decorative: true })}`;
-  });
+function replaceTargetHeaderIdentity(html, targetKey) {
+  const worldName = TARGET_WORLD[targetKey];
+  if (!worldName) return html;
+  const exact = exactSquarePicture(worldName, "brand-profile exact-square-brand", "");
+  if (!exact) return html;
+
+  if (/<picture class="brand-profile">[\s\S]*?<\/picture>/.test(html)) {
+    return html.replace(/<picture class="brand-profile">[\s\S]*?<\/picture>/, exact);
+  }
+  if (/<span class="brand-profile text-brand"[^>]*>[\s\S]*?<\/span>/.test(html)) {
+    return html.replace(/<span class="brand-profile text-brand"[^>]*>[\s\S]*?<\/span>/, exact);
+  }
+  return html;
 }
 
-function injectImageCss(html) {
-  if (html.includes('/assets/css/jayjay-images.css')) return html;
-  return html.replace("</head>", '<link rel="stylesheet" href="/assets/css/jayjay-images.css"></head>');
+function injectCss(html) {
+  if (html.includes(CSS_HREF)) return html;
+  if (!html.includes("</head>")) throw new Error("Generated page has no closing head tag");
+  return html.replace("</head>", `  <link rel="stylesheet" href="${CSS_HREF}">\n</head>`);
 }
 
 const css = `
-/* JayJayTeamDev image-only visual pass: real ecosystem artwork in every image slot. */
-.jayjay-image{display:block;overflow:hidden}
-.profile-card .jayjay-image,.directory-profile.jayjay-image,.community-support-art.jayjay-image{aspect-ratio:1/1;border-radius:18px;background:radial-gradient(circle at 50% 35%,rgba(142,101,255,.28),rgba(5,12,29,.96))}
-.profile-card .jayjay-image img,.directory-profile.jayjay-image img,.community-support-art.jayjay-image img{width:100%;height:100%;display:block;object-fit:contain;object-position:center}
-.brand-profile.jayjay-image{width:54px;height:54px;border-radius:50%;flex:0 0 54px}
-.brand-profile.jayjay-image img{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
-.directory-profile.jayjay-image{width:76px;min-width:76px;height:76px}
-.community-support-card .community-support-art{width:100%;max-width:240px;margin:0 auto 16px}
-.community-support-card .community-support-art img{object-fit:cover}
+/* Exact image placement guard. Identity and aspect ratio are slot-specific. */
+.exact-square-art,
+.exact-square-brand{
+  aspect-ratio:1 / 1 !important;
+  overflow:hidden !important;
+}
+.exact-square-art img,
+.exact-square-brand img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  object-position:center !important;
+}
+.site-brand .exact-square-brand{
+  width:58px !important;
+  height:58px !important;
+  flex:0 0 58px !important;
+  border-radius:50% !important;
+}
+.world-profile-grid .profile-art{
+  width:100% !important;
+  height:100% !important;
+  min-height:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
+.world-profile-grid .profile-art img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  padding:8px !important;
+}
+.media-row > picture.production-picture:not(.hero-art){
+  width:100% !important;
+  max-width:640px !important;
+  justify-self:center !important;
+}
+.media-row > picture.production-picture:not(.hero-art) img{
+  width:100% !important;
+  height:auto !important;
+  max-height:620px !important;
+  object-fit:contain !important;
+  object-position:center !important;
+}
+.support-profile{
+  aspect-ratio:1 / 1 !important;
+}
+.support-profile img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  object-position:center !important;
+}
+.destination-preview img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  object-position:center !important;
+}
 @media(max-width:720px){
-  .directory-profile.jayjay-image{width:64px;min-width:64px;height:64px}
-  .community-support-card .community-support-art{max-width:190px}
+  .site-brand .exact-square-brand{
+    width:44px !important;
+    height:44px !important;
+    flex-basis:44px !important;
+  }
+  .world-profile-grid .profile-art img{padding:5px !important}
+  .media-row > picture.production-picture:not(.hero-art){max-width:100% !important}
+  .media-row > picture.production-picture:not(.hero-art) img{max-height:none !important}
 }
 `;
 
@@ -114,7 +191,7 @@ async function ensureReferencedAssets(targetRoot, htmlFiles) {
   const refs = new Set();
   for (const file of htmlFiles) {
     const html = await readFile(file, "utf8");
-    for (const match of html.matchAll(/(?:src|srcset)="\/assets\/(desktop|mobile)\/([^"?#]+)"/g)) {
+    for (const match of html.matchAll(/(?:src|srcset)="\/assets\/(desktop|mobile|support)\/([^"?#]+)"/g)) {
       refs.add(`${match[1]}/${match[2]}`);
     }
   }
@@ -122,63 +199,84 @@ async function ensureReferencedAssets(targetRoot, htmlFiles) {
     if (rel.includes("..")) throw new Error(`Unsafe image reference: ${rel}`);
     const source = path.join(sourceAssets, rel);
     const destination = path.join(targetRoot, "assets", rel);
-    const exists = await stat(destination).then(() => true).catch(() => false);
-    if (exists) continue;
-    const sourceExists = await stat(source).then(() => true).catch(() => false);
-    if (!sourceExists) throw new Error(`Approved image source missing: ${rel}`);
+    if (await stat(destination).then(() => true).catch(() => false)) continue;
+    if (!(await stat(source).then(() => true).catch(() => false))) throw new Error(`Approved image source missing: ${rel}`);
     await mkdir(path.dirname(destination), { recursive: true });
     await cp(source, destination);
   }
 }
 
+async function refreshManifest(targetRoot, stats) {
+  const manifestPath = path.join(targetRoot, "release-manifest.json");
+  if (!(await stat(manifestPath).then(() => true).catch(() => false))) return;
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  const files = [];
+  for (const file of await walk(targetRoot)) {
+    const rel = path.relative(targetRoot, file).split(path.sep).join("/");
+    if (rel === "release-manifest.json") continue;
+    const bytes = await readFile(file);
+    files.push({ path: `/${rel}`, bytes: bytes.byteLength, sha256: sha256(bytes) });
+  }
+  files.sort((a, b) => a.path.localeCompare(b.path));
+  manifest.files = files;
+  manifest.exact_image_placement = {
+    ...stats,
+    contract: "NO_ROTATION_NO_RANDOM_FALLBACK_EXACT_IDENTITY_AND_SLOT_SHAPE"
+  };
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
+}
+
 const targets = (await readdir(distRoot, { withFileTypes: true })).filter((entry) => entry.isDirectory());
-let pagesChanged = 0;
-let genericTextArtRemoved = 0;
-let genericBrandsRemoved = 0;
-let directoryImagesAdded = 0;
-let communityCardImagesAdded = 0;
+const fleet = {};
+let totalPages = 0;
+let totalChanged = 0;
 
-for (const targetEntry of targets) {
-  const targetRoot = path.join(distRoot, targetEntry.name);
+for (const target of targets) {
+  const targetRoot = path.join(distRoot, target.name);
   const htmlFiles = (await walk(targetRoot)).filter((file) => file.endsWith(".html"));
-  await mkdir(path.join(targetRoot, "assets", "css"), { recursive: true });
-  await writeFile(path.join(targetRoot, "assets", "css", "jayjay-images.css"), css.trimStart(), "utf8");
+  const cssDir = path.join(targetRoot, "assets", "css");
+  await mkdir(cssDir, { recursive: true });
+  await writeFile(path.join(cssDir, "exact-image-placement.css"), css.trimStart(), "utf8");
 
+  let changed = 0;
+  let squareWorldSlots = 0;
   for (const file of htmlFiles) {
+    totalPages += 1;
     const original = await readFile(file, "utf8");
     let html = original;
-    const textBefore = (html.match(/production-picture text-art/g) || []).length;
-    const brandBefore = (html.match(/brand-profile text-brand/g) || []).length;
-    const directoryBefore = (html.match(/class="directory-profile" aria-hidden="true"/g) || []).length;
-    const communityBefore = (html.match(/class="community-support-card"/g) || []).length;
+    html = replaceKnownTextWorlds(html);
+    html = replaceWorldProfilePictures(html);
+    html = replaceTargetHeaderIdentity(html, target.name);
+    html = injectCss(html);
 
-    html = replaceTextArt(html);
-    html = replaceGenericBrand(html);
-    html = replaceDirectoryInitials(html);
-    html = addCommunityCardArt(html);
-    html = injectImageCss(html);
+    squareWorldSlots += (html.match(/data-exact-image=/g) || []).length;
 
-    genericTextArtRemoved += textBefore - (html.match(/production-picture text-art/g) || []).length;
-    genericBrandsRemoved += brandBefore - (html.match(/brand-profile text-brand/g) || []).length;
-    directoryImagesAdded += directoryBefore;
-    if (communityBefore && !original.includes("community-support-art")) communityCardImagesAdded += communityBefore;
+    if (/class="[^"]*\bprofile-art\b[^"]*"[\s\S]{0,700}src="\/assets\/desktop\/blockchains\//.test(html)) {
+      throw new Error(`Wide blockchain banner still assigned to square profile slot: ${path.relative(distRoot, file)}`);
+    }
+    if (/jayjay-card-art|jayjay-section-art|community-support-art/.test(html)) {
+      throw new Error(`Automatic rotating image slot survived exact-placement build: ${path.relative(distRoot, file)}`);
+    }
 
     if (html !== original) {
       await writeFile(file, html, "utf8");
-      pagesChanged += 1;
+      changed += 1;
+      totalChanged += 1;
     }
   }
 
   await ensureReferencedAssets(targetRoot, htmlFiles);
+  const stats = { pages: htmlFiles.length, pages_changed: changed, exact_square_world_slots: squareWorldSlots };
+  await refreshManifest(targetRoot, stats);
+  fleet[target.name] = stats;
 }
 
 console.log(JSON.stringify({
-  event: "jayjay_image_pass",
+  event: "exact_image_placement",
+  result: "PASS",
   targets: targets.length,
-  pages_changed: pagesChanged,
-  generic_text_art_removed: genericTextArtRemoved,
-  generic_brand_letters_removed: genericBrandsRemoved,
-  directory_images_added: directoryImagesAdded,
-  community_card_images_added: communityCardImagesAdded,
-  rule: "REAL_ONEWORLDZ_ART_ONLY_NO_LAYOUT_REWRITE"
-}));
+  pages_scanned: totalPages,
+  pages_changed: totalChanged,
+  rule: "EXACT_IMAGE_IDENTITY_EXACT_SLOT_SHAPE_NO_POOL_ROTATION",
+  fleet
+}, null, 2));
