@@ -1,5 +1,13 @@
 const crypto = require("node:crypto");
 
+const PUBLISHER_SUPPORT = Object.freeze({
+  x: true,
+  facebook: true,
+  instagram: false,
+  youtube: false,
+  tiktok: false
+});
+
 function safeEqual(left, right) {
   const a = Buffer.from(String(left || ""));
   const b = Buffer.from(String(right || ""));
@@ -28,6 +36,41 @@ function secureOAuthHeaders(res) {
   });
 }
 
+function publicAccountReadiness(account) {
+  const publisherSupported = PUBLISHER_SUPPORT[account.platform] === true;
+  return {
+    id: account.id,
+    platform: account.platform,
+    account_key: account.account_key,
+    display_name: account.display_name,
+    handle: account.handle || null,
+    status: account.status,
+    publisher_supported: publisherSupported,
+    ready: account.status === "active" && publisherSupported
+  };
+}
+
+function summarizeReadiness(accounts) {
+  const publicAccounts = accounts.map(publicAccountReadiness);
+  const byPlatform = {};
+  for (const account of publicAccounts) {
+    const bucket = byPlatform[account.platform] || { total: 0, active: 0, pending: 0, ready: 0, publisher_supported: PUBLISHER_SUPPORT[account.platform] === true };
+    bucket.total += 1;
+    if (account.status === "active") bucket.active += 1;
+    else bucket.pending += 1;
+    if (account.ready) bucket.ready += 1;
+    byPlatform[account.platform] = bucket;
+  }
+  return {
+    total_accounts: publicAccounts.length,
+    ready_accounts: publicAccounts.filter((account) => account.ready).length,
+    pending_accounts: publicAccounts.filter((account) => !account.ready).length,
+    total_ready: publicAccounts.length > 0 && publicAccounts.every((account) => account.ready),
+    by_platform: byPlatform,
+    accounts: publicAccounts
+  };
+}
+
 function registerGraceRoutes({ app, graceRepository, graceOAuth = null, graceFacebookOAuth = null, apiSecret = process.env.GRACE_API_SECRET || "" }) {
   app.get("/grace/health", (req, res) => {
     res.json({
@@ -41,8 +84,25 @@ function registerGraceRoutes({ app, graceRepository, graceOAuth = null, graceFac
       posting: "approval-controlled",
       x_oauth_configured: Boolean(graceOAuth?.configured?.()),
       facebook_oauth_configured: Boolean(graceFacebookOAuth?.configured?.()),
-      facebook_redirect: "/grace/oauth/facebook/callback"
+      facebook_redirect: "/grace/oauth/facebook/callback",
+      publisher_support: PUBLISHER_SUPPORT
     });
+  });
+
+  app.get("/grace/readiness", async (req, res) => {
+    try {
+      const accounts = await graceRepository.listAccounts();
+      return res.json({
+        ok: true,
+        service: "grace-social-readiness",
+        posting: "approval-controlled",
+        automatic_ad_spend: false,
+        publisher_support: PUBLISHER_SUPPORT,
+        ...summarizeReadiness(accounts)
+      });
+    } catch {
+      return res.status(500).json({ ok: false, error: "Grace readiness unavailable" });
+    }
   });
 
   app.get("/grace/oauth/x/callback", async (req, res) => {
@@ -62,7 +122,7 @@ function registerGraceRoutes({ app, graceRepository, graceOAuth = null, graceFac
     if (!graceFacebookOAuth) return res.status(503).send(oauthResultPage({ ok: false, title: "Grace Facebook Connection Unavailable", message: "The Grace Facebook connection service is not configured on this server." }));
     try {
       const result = await graceFacebookOAuth.completeConnection({ state: req.query.state, code: req.query.code, error: req.query.error, errorDescription: req.query.error_description || req.query.error_message });
-      return res.status(200).send(oauthResultPage({ ok: true, title: `${result.page.name} Connected to Grace`, message: "The approved CryptoWorldz Facebook Page was verified. Admin scheduling remains approval-controlled through Grace." }));
+      return res.status(200).send(oauthResultPage({ ok: true, title: `${result.page.name} Connected to Grace`, message: "The approved Facebook Page was verified. Admin scheduling remains approval-controlled through Grace." }));
     } catch (error) {
       console.error("Grace Facebook OAuth callback failed", { code: error?.code || "UNKNOWN" });
       return res.status(400).send(oauthResultPage({ ok: false, title: "Grace Facebook Connection Rejected", message: error?.message || "The Facebook Page could not be connected." }));
@@ -96,4 +156,4 @@ function registerGraceRoutes({ app, graceRepository, graceOAuth = null, graceFac
   });
 }
 
-module.exports = { escapeHtml, oauthResultPage, registerGraceRoutes, safeEqual, secureOAuthHeaders };
+module.exports = { PUBLISHER_SUPPORT, escapeHtml, oauthResultPage, publicAccountReadiness, registerGraceRoutes, safeEqual, secureOAuthHeaders, summarizeReadiness };
