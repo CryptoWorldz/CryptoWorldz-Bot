@@ -7,7 +7,7 @@ on:
     paths: [".github/workflows/main.yml", ".github/full-current-*.sh", ".github/resume-locked-static-deploy.sh", ".github/resume-locked-live-proof.sh", ".github/lftp-compat.py", "apps/oneworldz-ecosystem-release/**", "deployments/oneworldz-19-total.request"]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   actions: read
 concurrency:
   group: jayjay-chatgpt-oneworldz-single-rail
