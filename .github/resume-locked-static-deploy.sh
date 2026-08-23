@@ -93,6 +93,70 @@ while IFS=$'\t' read -r key domain transport guard title; do
     done
   fi
 
+  # If a verified Hostinger root exists but has neither robots.txt nor index.html,
+  # prove the physical root -> public domain routing with one unique reversible
+  # byte probe. This runs only after BUILD/TEST/Lighthouse/browser/map gates pass.
+  if [ "$proved" != '1' ] && [ ! -s "$remote_robots" ] && [ ! -s "$remote_index" ]; then
+    probe_name="oneworldz-destination-proof-${GITHUB_RUN_ID}-${key}.txt"
+    probe_local="$proofdir/$key.route-probe.txt"
+    probe_live="$proofdir/$key.live.route-probe.txt"
+    printf 'ONEWORLDZ_DESTINATION_PROOF\ncommit=%s\nrun=%s\ntarget=%s\ndomain=%s\ntransport=%s\n' \
+      "$GITHUB_SHA" "$GITHUB_RUN_ID" "$key" "$domain" "$transport" > "$probe_local"
+
+    {
+      echo 'set cmd:fail-exit true'
+      echo 'set net:max-retries 2'
+      echo 'set net:timeout 30'
+      echo 'set ftp:ssl-force true'
+      echo 'set ftp:ssl-protect-data true'
+      echo 'set ssl:verify-certificate true'
+      echo 'set ssl:check-hostname false'
+      printf 'cd "%s"\n' "$transport"
+      printf 'lcd "%s"\n' "$proofdir"
+      printf 'put "%s" -o "%s"\n' "$(basename "$probe_local")" "$probe_name"
+      echo 'bye'
+    } > "$RUNNER_TEMP/$key.route-probe-put.lftp"
+
+    probe_uploaded=0
+    if timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" \
+      -e "source $RUNNER_TEMP/$key.route-probe-put.lftp" "$host"; then
+      probe_uploaded=1
+      for attempt in $(seq 1 8); do
+        rm -f "$probe_live"
+        if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
+          -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
+          "https://$domain/$probe_name?destination_proof=${GITHUB_RUN_ID}-${key}-${attempt}" -o "$probe_live"; then
+          if cmp -s "$probe_local" "$probe_live"; then
+            proved=1
+            proof_kind='REVERSIBLE_ROUTE_PROBE_BYTE_MATCH'
+            break
+          fi
+        fi
+        sleep 3
+      done
+    fi
+
+    {
+      echo 'set cmd:fail-exit false'
+      echo 'set net:max-retries 2'
+      echo 'set net:timeout 30'
+      echo 'set ftp:ssl-force true'
+      echo 'set ftp:ssl-protect-data true'
+      echo 'set ssl:verify-certificate true'
+      echo 'set ssl:check-hostname false'
+      printf 'cd "%s"\n' "$transport"
+      printf 'rm -f "%s"\n' "$probe_name"
+      echo 'bye'
+    } > "$RUNNER_TEMP/$key.route-probe-cleanup.lftp"
+    timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" \
+      -e "source $RUNNER_TEMP/$key.route-probe-cleanup.lftp" "$host" \
+      || echo "::warning::Route-probe cleanup command reported failure for $domain"
+
+    if [ "$probe_uploaded" = '1' ] && [ "$proved" = '1' ]; then
+      echo "DESTINATION_ROUTE_PROBE_REMOVED $domain -> $transport"
+    fi
+  fi
+
   if [ "$proved" != '1' ] && [ "$key" = 'impactbased' ]; then
     if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
       -H 'Cache-Control: no-cache, no-store' "https://$domain/?destination_proof=${GITHUB_RUN_ID}-${key}-composite" \
@@ -103,7 +167,7 @@ while IFS=$'\t' read -r key domain transport guard title; do
   fi
 
   if [ "$proved" != '1' ]; then
-    echo "::error::Destination proof failed for $domain -> $transport. No production write."
+    echo "::error::Destination proof failed for $domain -> $transport. No release deployment."
     printf '%s\t%s\t%s\n' "$key" "$domain" "$transport" >> "$RUNNER_TEMP/prewrite-failures.tsv"
     prewrite_failures=$((prewrite_failures + 1))
     continue
@@ -112,7 +176,7 @@ while IFS=$'\t' read -r key domain transport guard title; do
 done < "$RUNNER_TEMP/targets.tsv"
 
 if [ "$prewrite_failures" -ne 0 ]; then
-  echo "::error::Hostinger prewrite proof failed for $prewrite_failures destination(s); all failures were collected before refusing every production write."
+  echo "::error::Hostinger prewrite proof failed for $prewrite_failures destination(s); all failures were collected before refusing release deployment."
   cat "$RUNNER_TEMP/prewrite-failures.tsv"
   exit 1
 fi
