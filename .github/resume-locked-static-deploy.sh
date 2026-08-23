@@ -93,9 +93,6 @@ while IFS=$'\t' read -r key domain transport guard title; do
     done
   fi
 
-  # If a verified Hostinger root exists but has neither robots.txt nor index.html,
-  # prove the physical root -> public domain routing with one unique reversible
-  # byte probe. This runs only after BUILD/TEST/Lighthouse/browser/map gates pass.
   if [ "$proved" != '1' ] && [ ! -s "$remote_robots" ] && [ ! -s "$remote_index" ]; then
     probe_name="oneworldz-destination-proof-${GITHUB_RUN_ID}-${key}.txt"
     probe_local="$proofdir/$key.route-probe.txt"
@@ -183,9 +180,39 @@ fi
 
 echo 'HOSTINGER_18_DESTINATION_PREWRITE_PROOF=PASS'
 
+mkdir -p deployment-proof
 : > "$RUNNER_TEMP/touched.tsv"
-failure=0
-failed_key=''
+: > "$RUNNER_TEMP/deploy-status.tsv"
+
+rollback_target() {
+  local key="$1" domain="$2" transport="$3"
+  local files="$RUNNER_TEMP/$key.files"
+  local dirs="$RUNNER_TEMP/$key.dirs"
+  local existing="$RUNNER_TEMP/$key.existing"
+  local backup="$RUNNER_TEMP/backups/$key"
+
+  echo "::warning::Rolling back failed target only: $domain -> $transport"
+  {
+    echo 'set cmd:fail-exit false'
+    echo 'set net:max-retries 2'
+    echo 'set net:timeout 30'
+    echo 'set ftp:ssl-force true'
+    echo 'set ftp:ssl-protect-data true'
+    echo 'set ssl:verify-certificate true'
+    echo 'set ssl:check-hostname false'
+    printf 'cd "%s"\n' "$transport"
+    while IFS= read -r rel; do printf 'rm -f "%s"\n' "$rel"; done < "$files"
+    while IFS= read -r dir; do [ -n "$dir" ] && printf 'mkdir -p "%s"\n' "$dir"; done < "$dirs"
+    echo 'set cmd:fail-exit true'
+    printf 'lcd "%s"\n' "$backup"
+    while IFS= read -r rel; do [ "$rel" = 'index.html' ] || printf 'put "%s" -o "%s"\n' "$rel" "$rel"; done < "$existing"
+    if grep -Fxq 'index.html' "$existing"; then echo 'put "index.html" -o "index.html"'; fi
+    echo 'bye'
+  } > "$RUNNER_TEMP/$key.rollback.lftp"
+
+  timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" \
+    -e "source $RUNNER_TEMP/$key.rollback.lftp" "$host"
+}
 
 while IFS=$'\t' read -r key domain transport guard title; do
   release_root="$GITHUB_WORKSPACE/apps/oneworldz-ecosystem-release/dist/ecosystem/$key"
@@ -195,139 +222,165 @@ while IFS=$'\t' read -r key domain transport guard title; do
   existing="$RUNNER_TEMP/$key.existing"
   backup="$RUNNER_TEMP/backups/$key"
   postwrite="$RUNNER_TEMP/postwrite/$key"
+  public_index="$RUNNER_TEMP/$key.public.index.html"
+  public_manifest="$RUNNER_TEMP/$key.public.release-manifest.json"
   mkdir -p "$backup" "$postwrite"
 
-  if ! (
-    set -euo pipefail
-    test -s "$release_root/index.html"
-    test -s "$release_root/release-manifest.json"
-    node -e 'const fs=require("fs"); const [manifestPath,guard]=process.argv.slice(1); const m=JSON.parse(fs.readFileSync(manifestPath,"utf8")); if(m.deploy_guard!==guard||m.ftp_root!=="/"||m.homepage!=="/index.html"||m.assets_root!=="/assets/") throw new Error("release destination contract mismatch"); if((m.protected_services_modified||[]).length) throw new Error("protected-service mutation declared");' "$release_root/release-manifest.json" "$guard"
-    (cd "$release_root" && find . -type f -printf '%P\n' | sort) > "$files"
-    test -s "$files"
-    grep -Fxq 'index.html' "$files"
-    ! grep -Eq '^/|(^|/)\.\.(/|$)' "$files"
-    grep -v '^index\.html$' "$files" > "$nonindex" || true
-    while IFS= read -r rel; do d="$(dirname "$rel")"; [ "$d" = '.' ] || echo "$d"; done < "$files" | sort -u > "$dirs"
-    while IFS= read -r rel; do mkdir -p "$backup/$(dirname "$rel")"; done < "$files"
+  test -s "$release_root/index.html"
+  test -s "$release_root/release-manifest.json"
+  node -e 'const fs=require("fs"); const [manifestPath,guard]=process.argv.slice(1); const m=JSON.parse(fs.readFileSync(manifestPath,"utf8")); if(m.deploy_guard!==guard||m.ftp_root!=="/"||m.homepage!=="/index.html"||m.assets_root!=="/assets/") throw new Error("release destination contract mismatch"); if((m.protected_services_modified||[]).length) throw new Error("protected-service mutation declared");' "$release_root/release-manifest.json" "$guard"
+  (cd "$release_root" && find . -type f -printf '%P\n' | sort) > "$files"
+  test -s "$files"
+  grep -Fxq 'index.html' "$files"
+  ! grep -Eq '^/|(^|/)\.\.(/|$)' "$files"
+  grep -v '^index\.html$' "$files" > "$nonindex" || true
+  while IFS= read -r rel; do d="$(dirname "$rel")"; [ "$d" = '.' ] || echo "$d"; done < "$files" | sort -u > "$dirs"
 
-    {
-      echo 'set cmd:fail-exit false'
-      echo 'set net:max-retries 2'
-      echo 'set net:timeout 30'
-      echo 'set ftp:ssl-force true'
-      echo 'set ftp:ssl-protect-data true'
-      echo 'set ssl:verify-certificate true'
-      echo 'set ssl:check-hostname false'
-      printf 'cd "%s"\n' "$transport"
-      while IFS= read -r rel; do printf 'get "%s" -o "%s"\n' "$rel" "$backup/$rel"; done < "$files"
-      echo 'bye'
-    } > "$RUNNER_TEMP/$key.backup.lftp"
-    timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.backup.lftp" "$host"
-    (cd "$backup" && find . -type f -printf '%P\n' | sort) > "$existing"
-
-    printf '%s\t%s\t%s\t%s\n' "$key" "$domain" "$transport" "$title" >> "$RUNNER_TEMP/touched.tsv"
-
-    {
-      echo 'set cmd:fail-exit false'
-      echo 'set net:max-retries 3'
-      echo 'set net:timeout 30'
-      echo 'set ftp:ssl-force true'
-      echo 'set ftp:ssl-protect-data true'
-      echo 'set ssl:verify-certificate true'
-      echo 'set ssl:check-hostname false'
-      printf 'cd "%s"\n' "$transport"
-      while IFS= read -r rel; do printf 'rm -f "%s"\n' "$rel"; done < "$files"
-      printf 'lcd "%s"\n' "$release_root"
-      while IFS= read -r dir; do [ -n "$dir" ] && printf 'mkdir -p "%s"\n' "$dir"; done < "$dirs"
-      echo 'set cmd:fail-exit true'
-      while IFS= read -r rel; do printf 'put "%s" -o "%s"\n' "$rel" "$rel"; done < "$nonindex"
-      echo 'put "index.html" -o "index.html"'
-      echo 'bye'
-    } > "$RUNNER_TEMP/$key.upload.lftp"
-    timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.upload.lftp" "$host"
-
-    rm -f "$postwrite/index.html" "$postwrite/release-manifest.json"
-    {
-      echo 'set cmd:fail-exit true'
-      echo 'set net:max-retries 2'
-      echo 'set net:timeout 30'
-      echo 'set ftp:ssl-force true'
-      echo 'set ftp:ssl-protect-data true'
-      echo 'set ssl:verify-certificate true'
-      echo 'set ssl:check-hostname false'
-      printf 'cd "%s"\n' "$transport"
-      printf 'get "index.html" -o "%s/index.html"\n' "$postwrite"
-      printf 'get "release-manifest.json" -o "%s/release-manifest.json"\n' "$postwrite"
-      echo 'bye'
-    } > "$RUNNER_TEMP/$key.postwrite.lftp"
-    timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.postwrite.lftp" "$host"
-    cmp -s "$release_root/index.html" "$postwrite/index.html"
-    cmp -s "$release_root/release-manifest.json" "$postwrite/release-manifest.json"
-
-    public_index="$RUNNER_TEMP/$key.public.index.html"
-    public_manifest="$RUNNER_TEMP/$key.public.release-manifest.json"
-    proved=0
-    for attempt in $(seq 1 18); do
-      rm -f "$public_index" "$public_manifest"
-      if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
-          -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
-          "https://$domain/?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${key}-${attempt}" -o "$public_index" \
-        && curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
-          -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
-          "https://$domain/release-manifest.json?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${key}-${attempt}" -o "$public_manifest"; then
-        if cmp -s "$release_root/index.html" "$public_index" && cmp -s "$release_root/release-manifest.json" "$public_manifest"; then
-          proved=1
-          break
-        fi
+  # Resume support: if this exact candidate is already public, do not back up,
+  # upload or re-prove it again. Previous successful targets therefore survive
+  # a later target failure and the next run resumes automatically.
+  already_current=0
+  for attempt in 1 2 3; do
+    rm -f "$public_index" "$public_manifest"
+    if curl --fail --silent --show-error --location --connect-timeout 10 --max-time 30 \
+        -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
+        "https://$domain/?resume=${LOCKED_STATIC_TREE}-${key}-${attempt}" -o "$public_index" \
+      && curl --fail --silent --show-error --location --connect-timeout 10 --max-time 30 \
+        -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
+        "https://$domain/release-manifest.json?resume=${LOCKED_STATIC_TREE}-${key}-${attempt}" -o "$public_manifest"; then
+      if cmp -s "$release_root/index.html" "$public_index" \
+        && cmp -s "$release_root/release-manifest.json" "$public_manifest"; then
+        already_current=1
+        break
       fi
-      sleep 10
-    done
-    test "$proved" = '1'
-    grep -Fq 'Created with the Vision' "$public_index"
-    grep -Fq "Why can't I?" "$public_index"
-    ! grep -Eiq 'Created by JayJayTeamDev|Designed by JayJayTeamDev' "$public_index"
-    echo "DEPLOYED_AND_EXACT_PUBLIC_BYTES_PROVED https://$domain/"
-  ); then
-    failure=1
-    failed_key="$key"
-    break
+    fi
+    sleep 2
+  done
+
+  if [ "$already_current" = '1' ]; then
+    printf '%s\t%s\t%s\t%s\n' "$key" "$domain" "$transport" "$title" >> "$RUNNER_TEMP/touched.tsv"
+    printf '%s\t%s\tALREADY_CURRENT\n' "$key" "$domain" >> "$RUNNER_TEMP/deploy-status.tsv"
+    echo "DEPLOY_RESUME_SKIP_ALREADY_CURRENT https://$domain/"
+    continue
   fi
+
+  while IFS= read -r rel; do mkdir -p "$backup/$(dirname "$rel")"; done < "$files"
+  {
+    echo 'set cmd:fail-exit false'
+    echo 'set net:max-retries 2'
+    echo 'set net:timeout 30'
+    echo 'set ftp:ssl-force true'
+    echo 'set ftp:ssl-protect-data true'
+    echo 'set ssl:verify-certificate true'
+    echo 'set ssl:check-hostname false'
+    printf 'cd "%s"\n' "$transport"
+    while IFS= read -r rel; do printf 'get "%s" -o "%s"\n' "$rel" "$backup/$rel"; done < "$files"
+    echo 'bye'
+  } > "$RUNNER_TEMP/$key.backup.lftp"
+
+  if ! timeout 600 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" \
+    -e "source $RUNNER_TEMP/$key.backup.lftp" "$host"; then
+    printf '%s\t%s\tBACKUP_FAILED\n' "$key" "$domain" >> "$RUNNER_TEMP/deploy-status.tsv"
+    cp "$RUNNER_TEMP/deploy-status.tsv" deployment-proof/deploy-status.tsv
+    echo "::error::Backup failed before any write for $domain. Previous successful targets are preserved."
+    exit 1
+  fi
+  (cd "$backup" && find . -type f -printf '%P\n' | sort) > "$existing"
+
+  {
+    echo 'set cmd:fail-exit false'
+    echo 'set net:max-retries 3'
+    echo 'set net:timeout 30'
+    echo 'set ftp:ssl-force true'
+    echo 'set ftp:ssl-protect-data true'
+    echo 'set ssl:verify-certificate true'
+    echo 'set ssl:check-hostname false'
+    printf 'cd "%s"\n' "$transport"
+    while IFS= read -r rel; do printf 'rm -f "%s"\n' "$rel"; done < "$files"
+    printf 'lcd "%s"\n' "$release_root"
+    while IFS= read -r dir; do [ -n "$dir" ] && printf 'mkdir -p "%s"\n' "$dir"; done < "$dirs"
+    echo 'set cmd:fail-exit true'
+    while IFS= read -r rel; do printf 'put "%s" -o "%s"\n' "$rel" "$rel"; done < "$nonindex"
+    echo 'put "index.html" -o "index.html"'
+    echo 'bye'
+  } > "$RUNNER_TEMP/$key.upload.lftp"
+
+  if ! timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" \
+    -e "source $RUNNER_TEMP/$key.upload.lftp" "$host"; then
+    rollback_target "$key" "$domain" "$transport" || true
+    printf '%s\t%s\tUPLOAD_FAILED_ROLLED_BACK\n' "$key" "$domain" >> "$RUNNER_TEMP/deploy-status.tsv"
+    cp "$RUNNER_TEMP/deploy-status.tsv" deployment-proof/deploy-status.tsv
+    echo "::error::Upload failed at $domain. Only that target was rolled back; successful targets remain deployed."
+    exit 1
+  fi
+
+  rm -f "$postwrite/index.html" "$postwrite/release-manifest.json"
+  {
+    echo 'set cmd:fail-exit true'
+    echo 'set net:max-retries 2'
+    echo 'set net:timeout 30'
+    echo 'set ftp:ssl-force true'
+    echo 'set ftp:ssl-protect-data true'
+    echo 'set ssl:verify-certificate true'
+    echo 'set ssl:check-hostname false'
+    printf 'cd "%s"\n' "$transport"
+    printf 'get "index.html" -o "%s/index.html"\n' "$postwrite"
+    printf 'get "release-manifest.json" -o "%s/release-manifest.json"\n' "$postwrite"
+    echo 'bye'
+  } > "$RUNNER_TEMP/$key.postwrite.lftp"
+
+  postwrite_ok=1
+  timeout 300 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" \
+    -e "source $RUNNER_TEMP/$key.postwrite.lftp" "$host" || postwrite_ok=0
+  [ "$postwrite_ok" = '1' ] && cmp -s "$release_root/index.html" "$postwrite/index.html" || postwrite_ok=0
+  [ "$postwrite_ok" = '1' ] && cmp -s "$release_root/release-manifest.json" "$postwrite/release-manifest.json" || postwrite_ok=0
+
+  if [ "$postwrite_ok" != '1' ]; then
+    rollback_target "$key" "$domain" "$transport" || true
+    printf '%s\t%s\tFTPS_BYTE_PROOF_FAILED_ROLLED_BACK\n' "$key" "$domain" >> "$RUNNER_TEMP/deploy-status.tsv"
+    cp "$RUNNER_TEMP/deploy-status.tsv" deployment-proof/deploy-status.tsv
+    echo "::error::FTPS byte proof failed at $domain. Only that target was rolled back."
+    exit 1
+  fi
+
+  proved=0
+  for attempt in $(seq 1 18); do
+    rm -f "$public_index" "$public_manifest"
+    if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
+        -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
+        "https://$domain/?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${key}-${attempt}" -o "$public_index" \
+      && curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
+        -H 'Cache-Control: no-cache, no-store, max-age=0' -H 'Pragma: no-cache' \
+        "https://$domain/release-manifest.json?release=${GITHUB_SHA}-${GITHUB_RUN_ID}-${key}-${attempt}" -o "$public_manifest"; then
+      if cmp -s "$release_root/index.html" "$public_index" \
+        && cmp -s "$release_root/release-manifest.json" "$public_manifest"; then
+        proved=1
+        break
+      fi
+    fi
+    sleep 10
+  done
+
+  if [ "$proved" != '1' ]; then
+    rollback_target "$key" "$domain" "$transport" || true
+    printf '%s\t%s\tPUBLIC_BYTE_PROOF_FAILED_ROLLED_BACK\n' "$key" "$domain" >> "$RUNNER_TEMP/deploy-status.tsv"
+    cp "$RUNNER_TEMP/deploy-status.tsv" deployment-proof/deploy-status.tsv
+    echo "::error::Public byte proof failed at $domain. Only that target was rolled back; successful targets remain deployed and will be skipped next run."
+    exit 1
+  fi
+
+  grep -Fq 'Created with the Vision' "$public_index"
+  grep -Fq "Why can't I?" "$public_index"
+  ! grep -Eiq 'Created by JayJayTeamDev|Designed by JayJayTeamDev' "$public_index"
+  printf '%s\t%s\t%s\t%s\n' "$key" "$domain" "$transport" "$title" >> "$RUNNER_TEMP/touched.tsv"
+  printf '%s\t%s\tDEPLOYED_AND_PROVED\n' "$key" "$domain" >> "$RUNNER_TEMP/deploy-status.tsv"
+  echo "DEPLOYED_AND_EXACT_PUBLIC_BYTES_PROVED https://$domain/"
 done < "$RUNNER_TEMP/targets.tsv"
 
-if [ "$failure" = '1' ]; then
-  echo "::error::Deployment failed at $failed_key. Rolling back every touched target."
-  rollback_failed=0
-  while IFS=$'\t' read -r key domain transport title; do
-    files="$RUNNER_TEMP/$key.files"
-    dirs="$RUNNER_TEMP/$key.dirs"
-    existing="$RUNNER_TEMP/$key.existing"
-    backup="$RUNNER_TEMP/backups/$key"
-    {
-      echo 'set cmd:fail-exit false'
-      echo 'set net:max-retries 2'
-      echo 'set net:timeout 30'
-      echo 'set ftp:ssl-force true'
-      echo 'set ftp:ssl-protect-data true'
-      echo 'set ssl:verify-certificate true'
-      echo 'set ssl:check-hostname false'
-      printf 'cd "%s"\n' "$transport"
-      while IFS= read -r rel; do printf 'rm -f "%s"\n' "$rel"; done < "$files"
-      while IFS= read -r dir; do [ -n "$dir" ] && printf 'mkdir -p "%s"\n' "$dir"; done < "$dirs"
-      echo 'set cmd:fail-exit true'
-      printf 'lcd "%s"\n' "$backup"
-      while IFS= read -r rel; do [ "$rel" = 'index.html' ] || printf 'put "%s" -o "%s"\n' "$rel" "$rel"; done < "$existing"
-      if grep -Fxq 'index.html' "$existing"; then echo 'put "index.html" -o "index.html"'; fi
-      echo 'bye'
-    } > "$RUNNER_TEMP/$key.rollback.lftp"
-    timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/$key.rollback.lftp" "$host" || rollback_failed=1
-  done < <(tac "$RUNNER_TEMP/touched.tsv")
-  [ "$rollback_failed" = '0' ] || echo '::error::At least one rollback command failed.'
-  exit 1
-fi
-
 test "$(wc -l < "$RUNNER_TEMP/touched.tsv" | tr -d ' ')" = '18'
-mkdir -p deployment-proof
 cp "$RUNNER_TEMP/touched.tsv" deployment-proof/touched.tsv
-printf 'run_id=%s\nstatic_tree=%s\nproof=EXACT_FTPS_AND_PUBLIC_INDEX_MANIFEST_BYTES\n' "$GITHUB_RUN_ID" "$LOCKED_STATIC_TREE" > deployment-proof/release.txt
+cp "$RUNNER_TEMP/deploy-status.tsv" deployment-proof/deploy-status.tsv
+printf 'run_id=%s\nstatic_tree=%s\nproof=EXACT_FTPS_AND_PUBLIC_INDEX_MANIFEST_BYTES\nresume_policy=SKIP_ALREADY_CURRENT_ROLLBACK_FAILED_TARGET_ONLY\n' \
+  "$GITHUB_RUN_ID" "$LOCKED_STATIC_TREE" > deployment-proof/release.txt
 bash .github/publish-progress.sh HOSTINGER PASS
 echo 'HOSTINGER_18_SITE_DEPLOYMENT=PASS'
