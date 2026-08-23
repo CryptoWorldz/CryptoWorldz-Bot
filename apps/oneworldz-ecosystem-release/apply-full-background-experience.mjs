@@ -8,26 +8,33 @@ const sourceAssets = path.join(root, "source", "assets");
 const distRoot = path.join(root, "dist", "ecosystem");
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
+const exactMain = (asset, position = "center center") => Object.freeze({
+  desktop: asset,
+  mobile: asset,
+  position
+});
+
+// Fallback art is used only when an approved hero picture is absent.
 const ART = Object.freeze({
-  oneworldz: { desktop: "desktop/oneworldz/oneworldz-master.png", mobile: "desktop/oneworldz/oneworldz-master.png", position: "center center" },
-  oneworldzGpt: { desktop: "desktop/oneworldz/oneworldz-gpt.png", mobile: "mobile/five-leaders-alliance.webp", position: "center center" },
-  reagan: { desktop: "desktop/humanitarian/action-creates-smiles-banner.png", mobile: "mobile/uganda-unite.webp", position: "center center" },
-  davis: { desktop: "support/davis-family/davis-family-hero.jpg", mobile: "support/davis-family/davis-family-hero.webp", position: "center center" },
-  community: { desktop: "desktop/tokens/global-impact-alliance.png", mobile: "mobile/global-impact-alliance.webp", position: "center center" },
-  pdc: { desktop: "desktop/purple-diamond-crew/action-team.png", mobile: "mobile/hope-chest.webp", position: "center center" },
-  cryptoworldz: { desktop: "desktop/cryptoworldz/zed-command-centre.png", mobile: "mobile/blockchain-portal.webp", position: "center center" },
-  command: { desktop: "desktop/cryptoworldz/command-centre-five.png", mobile: "mobile/zed-grace-auto.webp", position: "center center" },
-  impactbased: { desktop: "desktop/cryptoworldz/impactbased.png", mobile: "mobile/impactbased-square.webp", position: "center center" },
-  law: { desktop: "desktop/tokens/robin-hood-law.png", mobile: "mobile/robin-hood-law.webp", position: "center center" },
-  hodler: { desktop: "desktop/tokens/next-big-coin.png", mobile: "mobile/next-big-coin.webp", position: "center center" },
-  solworldz: { desktop: "desktop/blockchains/solworldz.png", mobile: "mobile/solworldz.webp", position: "center center" },
-  ethworldz: { desktop: "desktop/blockchains/ethworldz.png", mobile: "mobile/ethworldz.webp", position: "center center" },
-  baseworldz: { desktop: "desktop/blockchains/baseworldz.png", mobile: "mobile/baseworldz.webp", position: "center center" },
-  bnbworldz: { desktop: "desktop/blockchains/bnbworldz.png", mobile: "mobile/bnbworldz.webp", position: "center center" },
-  xrpworldz: { desktop: "desktop/blockchains/xrpworldz.png", mobile: "mobile/xrpworldz.webp", position: "center center" },
-  suiworldz: { desktop: "desktop/blockchains/suiworldz.png", mobile: "mobile/suiworldz.webp", position: "center center" },
-  hyperworldz: { desktop: "desktop/blockchains/hyperworldz.png", mobile: "mobile/hyperworldz.webp", position: "center center" },
-  robinworldz: { desktop: "desktop/blockchains/robinworldz.png", mobile: "mobile/robinworldz.webp", position: "center center" }
+  oneworldz: exactMain("desktop/oneworldz/oneworldz-master.png"),
+  oneworldzGpt: exactMain("desktop/oneworldz/oneworldz-gpt.png"),
+  reagan: exactMain("desktop/humanitarian/action-creates-smiles-banner.png"),
+  davis: exactMain("support/davis-family/davis-family-hero.jpg"),
+  community: exactMain("desktop/tokens/global-impact-alliance.png"),
+  pdc: exactMain("desktop/purple-diamond-crew/action-team.png"),
+  cryptoworldz: exactMain("desktop/cryptoworldz/zed-command-centre.png"),
+  command: exactMain("desktop/cryptoworldz/command-centre-five.png"),
+  impactbased: exactMain("desktop/cryptoworldz/impactbased.png"),
+  law: exactMain("desktop/tokens/robin-hood-law.png"),
+  hodler: exactMain("desktop/tokens/next-big-coin.png"),
+  solworldz: exactMain("desktop/blockchains/solworldz.png"),
+  ethworldz: exactMain("desktop/blockchains/ethworldz.png"),
+  baseworldz: exactMain("desktop/blockchains/baseworldz.png"),
+  bnbworldz: exactMain("desktop/blockchains/bnbworldz.png"),
+  xrpworldz: exactMain("desktop/blockchains/xrpworldz.png"),
+  suiworldz: exactMain("desktop/blockchains/suiworldz.png"),
+  hyperworldz: exactMain("desktop/blockchains/hyperworldz.png"),
+  robinworldz: exactMain("desktop/blockchains/robinworldz.png")
 });
 
 function chooseArt(target, route) {
@@ -96,18 +103,13 @@ function addCssLink(html) {
   return html.replace("</head>", '<link rel="stylesheet" href="/assets/css/full-background-experience.css"></head>');
 }
 
-function heroPicture(art) {
-  const mobile = publicAsset(art.mobile);
-  const desktop = publicAsset(art.desktop);
-  return `<picture class="production-picture hero-art jayjay-hero-art full-background-hero-art"><source media="(max-width: 720px)" srcset="${mobile}"><img src="${desktop}" alt="Approved ecosystem visual" decoding="async" fetchpriority="high"></picture>`;
-}
-
-function enforcePrimaryHero(html, art) {
-  const pictureRx = /<picture class="[^"]*\bhero-art\b[^"]*">[\s\S]*?<\/picture>/;
-  if (pictureRx.test(html)) return html.replace(pictureRx, heroPicture(art));
-  const heroOpen = /<section class="([^"]*\bhero\b[^"]*)"([^>]*)>/;
-  if (heroOpen.test(html)) return html.replace(heroOpen, (whole) => `${whole}${heroPicture(art)}`);
-  return html;
+function primaryHeroArt(html) {
+  const picture = html.match(/<picture class="[^"]*\b(?:hero-art|support-emblem)\b[^"]*">([\s\S]*?)<\/picture>/)?.[1];
+  if (!picture) return null;
+  const desktop = picture.match(/<img\b[^>]*\bsrc="\/assets\/([^"?#]+)"/)?.[1];
+  const mobile = picture.match(/<source\b[^>]*\bsrcset="\/assets\/([^"?#]+)"/)?.[1];
+  if (!desktop) return null;
+  return { desktop, mobile: mobile || desktop, position: "center center" };
 }
 
 const css = `
@@ -147,8 +149,8 @@ async function ensureArt(targetRoot, art) {
   for (const rel of new Set([art.desktop, art.mobile])) {
     const source = path.join(sourceAssets, rel);
     const destination = path.join(targetRoot, "assets", rel);
-    if (!(await stat(source).then(() => true).catch(() => false))) throw new Error(`Full background source missing: ${rel}`);
     if (await stat(destination).then(() => true).catch(() => false)) continue;
+    if (!(await stat(source).then(() => true).catch(() => false))) throw new Error(`Full background source missing: ${rel}`);
     await mkdir(path.dirname(destination), { recursive: true });
     await cp(source, destination);
   }
@@ -189,12 +191,11 @@ for (const targetEntry of targetEntries) {
   for (const file of htmlFiles) {
     const relative = path.relative(targetRoot, file).split(path.sep).join("/");
     const route = relative === "index.html" ? "/" : `/${relative.replace(/index\.html$/, "")}`;
-    const art = chooseArt(target, route);
+    const original = await readFile(file, "utf8");
+    const art = primaryHeroArt(original) || chooseArt(target, route);
     used.set(`${art.desktop}|${art.mobile}`, art);
 
-    const original = await readFile(file, "utf8");
     let html = original;
-    html = enforcePrimaryHero(html, art);
     html = addBodyClass(html);
     html = addCssLink(html);
     html = addPageVars(html, art);
@@ -212,10 +213,10 @@ for (const targetEntry of targetEntries) {
   const record = {
     pages: htmlFiles.length,
     pages_changed: changed,
-    desktop_mobile_intentional: true,
+    approved_desktop_mobile_pair_preserved: true,
     full_viewport_background: true,
     floating_glass_controls: true,
-    primary_hero_forced_to_route_art: true,
+    primary_hero_preserved_from_approved_build: true,
     background_pairs: [...used.values()].map((art) => ({ desktop: publicAsset(art.desktop), mobile: publicAsset(art.mobile) }))
   };
   await refreshManifest(targetRoot, record);
