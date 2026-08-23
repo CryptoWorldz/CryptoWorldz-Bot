@@ -1,117 +1,25 @@
-name: Website Images Direct Deploy
-run-name: JayJay Full-Background Visual Release — ${{ github.sha }}
+name: Website Deployments STOPPED
 
 on:
   push:
     branches: [main]
     paths:
-      - "apps/oneworldz-ecosystem-release/**"
       - ".github/workflows/website-images-direct.yml"
-      - ".github/full-current-static-deploy.sh"
-      - ".github/resume-locked-static-deploy.sh"
-      - ".github/lftp-compat.py"
-      - ".github/publish-progress.sh"
   workflow_dispatch:
 
 permissions:
-  contents: write
-  actions: read
+  contents: read
 
 concurrency:
   group: jayjay-chatgpt-oneworldz-single-rail
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  deploy_images:
-    name: BUILD IMAGES → HOSTINGER → LIVE BYTES
+  stop:
+    name: STOP ALL WEBSITE DEPLOYMENTS
     runs-on: ubuntu-latest
-    timeout-minutes: 90
-    environment:
-      name: cryptoworldz-production
-    env:
-      FTP_HOST: ${{ secrets.FTP_HOST }}
-      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-
     steps:
-      - name: Checkout current main
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-
-      - name: Install repository FTPS transport
-        shell: bash
+      - name: Confirm deployment stop
         run: |
-          set -euo pipefail
-          python3 -m py_compile .github/lftp-compat.py
-          mkdir -p "$RUNNER_TEMP/oneworldz-bin"
-          cat > "$RUNNER_TEMP/oneworldz-bin/lftp" <<'SH'
-          #!/usr/bin/env bash
-          exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"
-          SH
-          chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
-          echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
-
-      - name: Install build dependencies
-        run: npm ci
-
-      - name: Build full-background desktop and mobile websites
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm run build:ecosystem-release
-          test -s apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz/index.html
-          echo 'WEBSITE_VISUAL_BUILD=PASS'
-
-      - name: Prove intended visual layer exists
-        shell: bash
-        run: |
-          set -euo pipefail
-          root='apps/oneworldz-ecosystem-release/dist/ecosystem'
-          grep -R -qE 'exact-image-placement\.css|jayjay-images\.css' "$root" --include='*.html'
-          grep -R -q 'full-background-experience' "$root" --include='*.html' || grep -R -q 'full-background' "$root" --include='*.html'
-          test -s "$root/oneworldz/gpt/index.html"
-          test -s "$root/cryptoworldz/dex-screener/index.html"
-          echo 'FULL_BACKGROUND_VISUAL_LAYER=PASS'
-
-      - name: Freeze built visual candidate
-        shell: bash
-        run: |
-          set -euo pipefail
-          candidate_tree="$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)"
-          candidate_fingerprint="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
-          test -n "$candidate_tree"
-          test -n "$candidate_fingerprint"
-          echo "CANDIDATE_TREE=$candidate_tree" >> "$GITHUB_ENV"
-          echo "CANDIDATE_FINGERPRINT=$candidate_fingerprint" >> "$GITHUB_ENV"
-          echo "VISUAL_CANDIDATE_READY tree=$candidate_tree fingerprint=$candidate_fingerprint"
-
-      - name: Remove obsolete robots prewrite blocker
-        shell: bash
-        run: |
-          set -euo pipefail
-          script='.github/resume-locked-static-deploy.sh'
-          grep -Fq '  test -s "$remote"' "$script"
-          sed -i '/^  test -s "$remote"$/i\
-          if [ ! -s "$remote" ]; then\
-            echo "DESTINATION_PROVED_AUTHENTICATED_LISTING $domain -> $transport (robots.txt absent; authenticated cd/pwd/list already passed)"\
-            continue\
-          fi' "$script"
-          bash -n "$script"
-          echo 'MISSING_ROBOTS_NO_LONGER_BLOCKS_AUTHENTICATED_DESTINATION=PASS'
-
-      - name: Deploy full-background static fleet
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash .github/full-current-static-deploy.sh
-
-      - name: Direct visual deployment verdict
-        run: echo 'FULL_BACKGROUND_WEBSITE_DEPLOYMENT=PASS'
+          echo 'WEBSITE_DEPLOYMENTS=STOPPED'
+          echo 'No build, Hostinger upload, or live write is permitted by this workflow.'
