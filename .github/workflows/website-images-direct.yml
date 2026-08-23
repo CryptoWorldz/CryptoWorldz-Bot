@@ -75,7 +75,7 @@ jobs:
         run: |
           set -euo pipefail
           root='apps/oneworldz-ecosystem-release/dist/ecosystem'
-          grep -R -q 'jayjay-images.css' "$root" --include='*.html'
+          grep -R -qE 'exact-image-placement\.css|jayjay-images\.css' "$root" --include='*.html'
           grep -R -q 'full-background-experience' "$root" --include='*.html' || grep -R -q 'full-background' "$root" --include='*.html'
           test -s "$root/oneworldz/gpt/index.html"
           test -s "$root/cryptoworldz/dex-screener/index.html"
