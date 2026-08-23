@@ -1,4 +1,5 @@
 name: OneWorldz Safe Static Fleet Deployment
+# Canonical single rail armed after duplicate workflow removal.
 on:
   push:
     branches: [main]
