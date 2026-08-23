@@ -9,16 +9,13 @@ assert.deepEqual(workflowFiles.sort(), ['main.yml'], 'exactly one active deploym
 
 const workflow = await readFile(`${workflowDir}/main.yml`, 'utf8');
 const requiredWorkflowTokens = [
-  'OneWorldz Canonical Full Rebuild Deployment',
-  'BUILD current main candidate',
-  'TEST full Command Centre and ecosystem',
-  'LIGHTHOUSE SEO 100',
-  'DESKTOP + MOBILE all generated page routes',
-  'Deploy and prove standalone ZED Core',
-  'Prove OneWorldz GPT extension independently',
-  'Deploy current candidate to static transport roots',
-  'LIVE PROOF all generated page routes',
-  'FINAL current candidate record',
+  'OneWorldz Safe Static Fleet Deployment',
+  'Build and freeze exact candidate',
+  'Prove links, separation, visuals, destinations and SEO',
+  'Prove every generated desktop and mobile route',
+  'Refuse stale source and compare the exact Hostinger map',
+  'Backup, deploy and byte-prove all Hostinger destinations',
+  'Prove every live desktop and mobile route',
   'CANDIDATE_TREE',
   'CANDIDATE_FINGERPRINT',
   'MIN_PAGE_ROUTES: "83"'
@@ -58,4 +55,4 @@ for (const token of ['discoverCandidateRoutes', 'discoverSitemapRoutes', 'broken
   assert.ok(browserProof.includes(token), `browser proof missing required fleet evidence: ${token}`);
 }
 
-console.log('DEPLOYMENT_STRUCTURE=PASS current-main full rebuild + 18 static transports + 19 destinations + dynamic page-route fleet');
+console.log('DEPLOYMENT_STRUCTURE=PASS one canonical static rail + 18 Hostinger transports + dynamic desktop/mobile live proof');

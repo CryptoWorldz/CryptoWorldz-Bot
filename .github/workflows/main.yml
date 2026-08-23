@@ -1,5 +1,6 @@
 name: OneWorldz Safe Static Fleet Deployment
 # Canonical single rail armed after duplicate workflow removal.
+# Static-only safety contract verified against the repository gate.
 on:
   push:
     branches: [main]
