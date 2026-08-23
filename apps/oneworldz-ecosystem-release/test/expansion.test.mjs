@@ -64,7 +64,7 @@ buildTest("Davis Family uses the approved hero and verified Facebook profile", a
   const html = await readFile(path.join(root, "davis-family", "index.html"), "utf8");
   assert.match(html, /\/assets\/support\/davis-family\/davis-family-hero\.webp/);
   assert.match(html, /\/assets\/support\/davis-family\/davis-family-hero\.jpg/);
-  assert.match(html, /https:\/\/www\.facebook\.com\/share\/18BmqfH7MS\//);
+  assert.match(html, /https:\/\/www\.facebook\.com\/share\/165Ken5f2Bt\//);
   assert.match(html, /Mpagi Davis on Facebook/);
   assert.match(html, /fetchpriority="high"/);
   assert.match(html, /og:image/);
