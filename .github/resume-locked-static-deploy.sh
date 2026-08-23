@@ -43,6 +43,7 @@ mkdir -p "$proofdir"
     echo 'cls -la'
     echo 'set cmd:fail-exit false'
     printf 'get "robots.txt" -o "%s/%s.remote.robots.txt"\n' "$proofdir" "$key"
+    printf 'get "index.html" -o "%s/%s.remote.index.html"\n' "$proofdir" "$key"
     echo 'set cmd:fail-exit true'
     echo 'cd /'
   done < "$RUNNER_TEMP/targets.tsv"
@@ -50,32 +51,71 @@ mkdir -p "$proofdir"
 } > "$RUNNER_TEMP/prewrite.lftp"
 timeout 900 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $RUNNER_TEMP/prewrite.lftp" "$host"
 
+prewrite_failures=0
+: > "$RUNNER_TEMP/prewrite-failures.tsv"
 while IFS=$'\t' read -r key domain transport guard title; do
-  remote="$proofdir/$key.remote.robots.txt"
-  live="$proofdir/$key.live.robots.txt"
-  if [ "$key" = 'impactbased' ] && [ ! -s "$remote" ]; then
-    curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
-      -H 'Cache-Control: no-cache, no-store' "https://$domain/?destination_proof=${GITHUB_RUN_ID}-${key}" \
-      -o "$proofdir/$key.live.html"
-    echo "DESTINATION_PROVED_COMPOSITE $domain -> $transport"
-    continue
-  fi
-  test -s "$remote"
+  remote_robots="$proofdir/$key.remote.robots.txt"
+  remote_index="$proofdir/$key.remote.index.html"
+  live_robots="$proofdir/$key.live.robots.txt"
+  live_index="$proofdir/$key.live.index.html"
   proved=0
-  for attempt in $(seq 1 8); do
+  proof_kind=''
+
+  if [ -s "$remote_robots" ]; then
+    for attempt in $(seq 1 8); do
+      rm -f "$live_robots"
+      if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
+        -H 'Cache-Control: no-cache, no-store' -H 'Pragma: no-cache' \
+        "https://$domain/robots.txt?destination_proof=${GITHUB_RUN_ID}-${key}-${attempt}" -o "$live_robots"; then
+        if cmp -s "$remote_robots" "$live_robots"; then
+          proved=1
+          proof_kind='ROBOTS_BYTE_MATCH'
+          break
+        fi
+      fi
+      sleep 3
+    done
+  fi
+
+  if [ "$proved" != '1' ] && [ -s "$remote_index" ]; then
+    for attempt in $(seq 1 8); do
+      rm -f "$live_index"
+      if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
+        -H 'Cache-Control: no-cache, no-store' -H 'Pragma: no-cache' \
+        "https://$domain/?destination_proof=${GITHUB_RUN_ID}-${key}-${attempt}" -o "$live_index"; then
+        if cmp -s "$remote_index" "$live_index"; then
+          proved=1
+          proof_kind='INDEX_BYTE_MATCH'
+          break
+        fi
+      fi
+      sleep 3
+    done
+  fi
+
+  if [ "$proved" != '1' ] && [ "$key" = 'impactbased' ]; then
     if curl --fail --silent --show-error --location --connect-timeout 15 --max-time 45 \
-      -H 'Cache-Control: no-cache, no-store' -H 'Pragma: no-cache' \
-      "https://$domain/robots.txt?destination_proof=${GITHUB_RUN_ID}-${key}-${attempt}" -o "$live"; then
-      if cmp -s "$remote" "$live"; then proved=1; break; fi
+      -H 'Cache-Control: no-cache, no-store' "https://$domain/?destination_proof=${GITHUB_RUN_ID}-${key}-composite" \
+      -o "$live_index"; then
+      proved=1
+      proof_kind='COMPOSITE_AUTHENTICATED_ROOT_PLUS_PUBLIC_HTTPS'
     fi
-    sleep 5
-  done
+  fi
+
   if [ "$proved" != '1' ]; then
     echo "::error::Destination proof failed for $domain -> $transport. No production write."
-    exit 1
+    printf '%s\t%s\t%s\n' "$key" "$domain" "$transport" >> "$RUNNER_TEMP/prewrite-failures.tsv"
+    prewrite_failures=$((prewrite_failures + 1))
+    continue
   fi
-  echo "DESTINATION_PROVED $domain -> $transport"
+  echo "DESTINATION_PROVED_${proof_kind} $domain -> $transport"
 done < "$RUNNER_TEMP/targets.tsv"
+
+if [ "$prewrite_failures" -ne 0 ]; then
+  echo "::error::Hostinger prewrite proof failed for $prewrite_failures destination(s); all failures were collected before refusing every production write."
+  cat "$RUNNER_TEMP/prewrite-failures.tsv"
+  exit 1
+fi
 
 echo 'HOSTINGER_18_DESTINATION_PREWRITE_PROOF=PASS'
 
