@@ -1,9 +1,17 @@
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const appRoot = path.dirname(fileURLToPath(import.meta.url));
 const distRoot = path.join(appRoot, "dist", "ecosystem");
+const sourceAssetsRoot = path.join(appRoot, "source", "assets");
+const davisFacebook = "https://www.facebook.com/share/18BmqfH7MS/";
+const davisHero = Object.freeze({
+  jpg: "/assets/support/davis-family/davis-family-hero.jpg",
+  webp: "/assets/support/davis-family/davis-family-hero.webp",
+  width: 1536,
+  height: 864
+});
 
 const donation = Object.freeze({
   reagan: {
@@ -41,7 +49,31 @@ const siteShell = ({ title, description, canonical, heading, eyebrow, lead, prim
   <title>${escapeHtml(title)}</title>
   <meta name="description" content="${escapeHtml(description)}">
   <link rel="canonical" href="${canonical}">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${escapeHtml(title)}">
+  <meta property="og:description" content="${escapeHtml(description)}">
+  <meta property="og:url" content="${canonical}">
+  <meta property="og:image" content="https://donateworldz.com${davisHero.jpg}">
+  <meta property="og:image:width" content="${davisHero.width}">
+  <meta property="og:image:height" content="${davisHero.height}">
+  <meta property="og:image:alt" content="Help the Davis Family — OneWorldz One Vision">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escapeHtml(title)}">
+  <meta name="twitter:description" content="${escapeHtml(description)}">
+  <meta name="twitter:image" content="https://donateworldz.com${davisHero.jpg}">
+  <link rel="preload" as="image" href="${davisHero.webp}" type="image/webp" fetchpriority="high">
   <link rel="stylesheet" href="/assets/css/site.css">
+  <script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: title,
+    description,
+    url: canonical,
+    primaryImageOfPage: `https://donateworldz.com${davisHero.jpg}`,
+    mainEntity: { "@type": "Person", name: "Mpagi Davis", sameAs: davisFacebook },
+    isPartOf: { "@type": "WebSite", name: "DonateWorldz", url: "https://donateworldz.com/" }
+  }).replaceAll("<", "\\u003c")}</script>
 </head>
 <body style="--accent:#ff6fae;--accent-2:#ffd36a">
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -59,8 +91,8 @@ const siteShell = ({ title, description, canonical, heading, eyebrow, lead, prim
   <button class="menu-backdrop" type="button" aria-label="Close menu" tabindex="-1"></button>
   <main id="main-content">
     <section class="support-hero section" id="purpose">
-      <div class="support-emblem text-art" role="img" aria-label="Davis Family dedicated support"><span>D</span><strong>DAVIS FAMILY</strong><small>OneWorldz • Dedicated Support</small></div>
-      <div><p class="eyebrow">${escapeHtml(eyebrow)}</p><h1>${escapeHtml(heading)}</h1><p class="lead">${escapeHtml(lead)}</p><div class="button-row"><a class="button primary" href="${primaryHref}" target="_blank" rel="noopener noreferrer">${escapeHtml(primaryLabel)}</a><a class="button secondary" href="${secondaryHref}">${escapeHtml(secondaryLabel)}</a></div><p class="support-note">This is a dedicated Davis Family support stream with its own Stripe payment destination and separate Stripe records. No payment or bank credentials are stored on this website.</p></div>
+      <picture class="support-emblem davis-family-hero"><source srcset="${davisHero.webp}" type="image/webp"><img src="${davisHero.jpg}" width="${davisHero.width}" height="${davisHero.height}" alt="Help the Davis Family — OneWorldz One Vision, Food, School, Shelter and Hope" loading="eager" decoding="async" fetchpriority="high"></picture>
+      <div><p class="eyebrow">${escapeHtml(eyebrow)}</p><h1>${escapeHtml(heading)}</h1><p class="lead">${escapeHtml(lead)}</p><div class="button-row"><a class="button primary" href="${primaryHref}" target="_blank" rel="noopener noreferrer">${escapeHtml(primaryLabel)}</a><a class="button secondary" href="${davisFacebook}" target="_blank" rel="noopener noreferrer">Mpagi Davis on Facebook</a><a class="button secondary" href="${secondaryHref}">${escapeHtml(secondaryLabel)}</a></div><p class="support-note">This is a dedicated Davis Family support stream with its own Stripe payment destination and separate Stripe records. No payment or bank credentials are stored on this website.</p></div>
     </section>
     <section class="section section-dark"><div class="section-heading"><p class="eyebrow">PAYMENT SAFETY</p><h2>One purpose. One dedicated destination.</h2><p>Confirm Davis Family is shown before continuing to Stripe. This page never combines or reallocates donations between support purposes.</p></div><div class="legal-band"><strong>Safety boundary</strong><p>Payment is completed only on Stripe. Verify the destination before paying. OneWorldz public pages never store card details, bank credentials, Stripe secrets, private keys or verification codes.</p></div></section>
   </main>
@@ -77,6 +109,15 @@ async function write(relative, content) {
   const destination = path.join(distRoot, relative);
   await mkdir(path.dirname(destination), { recursive: true });
   await writeFile(destination, content, "utf8");
+}
+
+async function copyDavisHero(target) {
+  for (const filename of ["davis-family-hero.jpg", "davis-family-hero.webp"]) {
+    const source = path.join(sourceAssetsRoot, "support", "davis-family", filename);
+    const destination = path.join(distRoot, target, "assets", "support", "davis-family", filename);
+    await mkdir(path.dirname(destination), { recursive: true });
+    await cp(source, destination);
+  }
 }
 
 function insertOnce(html, marker, insertion, label) {
@@ -115,6 +156,7 @@ const donateDavis = siteShell({
   secondaryHref: "/"
 });
 await write("donateworldz/davis-family/index.html", donateDavis);
+await copyDavisHero("donateworldz");
 
 const cryptoDavis = siteShell({
   title: "Davis Family | CryptoWorldz Support",
@@ -129,6 +171,7 @@ const cryptoDavis = siteShell({
   secondaryHref: "/"
 });
 await write("cryptoworldz/support/davis-family/index.html", cryptoDavis);
+await copyDavisHero("cryptoworldz");
 
 let donateHome = await read("donateworldz/index.html");
 const donateCard = '<a class="profile-card" href="/davis-family/"><span class="profile-copy"><small>DEDICATED FAMILY SUPPORT</small><strong>Davis Family</strong><em>Open dedicated support pathway <b aria-hidden="true">→</b></em></span></a>';

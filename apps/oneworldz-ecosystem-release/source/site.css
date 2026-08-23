@@ -301,6 +301,8 @@ main { display: block; }
 .support-hero h1 { font-size: clamp(3.3rem, 7vw, 7.2rem); }
 .support-emblem { display: grid; place-items: center; aspect-ratio: 1; padding: 1.2rem; border: 1px solid var(--line); border-radius: 1rem; background: rgba(255,255,255,.03); box-shadow: var(--shadow); }
 .support-emblem img { width: 100%; height: 100%; object-fit: contain; }
+.davis-family-hero { overflow: hidden; aspect-ratio: 16 / 9; padding: 0; background: #080510; }
+.davis-family-hero img { width: 100%; height: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
 .support-note { padding: 1rem 1.1rem; border-left: 4px solid var(--accent); color: var(--muted); background: rgba(255,255,255,.035); }
 
 .profile-directory { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }

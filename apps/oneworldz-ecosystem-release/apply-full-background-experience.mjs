@@ -12,7 +12,7 @@ const ART = Object.freeze({
   oneworldz: { desktop: "desktop/oneworldz/oneworldz-master.png", mobile: "desktop/oneworldz/oneworldz-master.png", position: "center center" },
   oneworldzGpt: { desktop: "desktop/oneworldz/oneworldz-gpt.png", mobile: "mobile/five-leaders-alliance.webp", position: "center center" },
   reagan: { desktop: "desktop/humanitarian/action-creates-smiles-banner.png", mobile: "mobile/uganda-unite.webp", position: "center center" },
-  davis: { desktop: "desktop/oneworldz/hope-chest.png", mobile: "mobile/hope-chest.webp", position: "center center" },
+  davis: { desktop: "support/davis-family/davis-family-hero.jpg", mobile: "support/davis-family/davis-family-hero.webp", position: "center center" },
   community: { desktop: "desktop/tokens/global-impact-alliance.png", mobile: "mobile/global-impact-alliance.webp", position: "center center" },
   pdc: { desktop: "desktop/purple-diamond-crew/action-team.png", mobile: "mobile/hope-chest.webp", position: "center center" },
   cryptoworldz: { desktop: "desktop/cryptoworldz/zed-command-centre.png", mobile: "mobile/blockchain-portal.webp", position: "center center" },

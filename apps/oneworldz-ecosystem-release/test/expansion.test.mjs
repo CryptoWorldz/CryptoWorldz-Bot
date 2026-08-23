@@ -59,6 +59,19 @@ buildTest("DonateWorldz contains four separated support routes and payment bound
   assert.doesNotMatch(home, /solworld\.fun/i);
 });
 
+buildTest("Davis Family uses the approved hero and verified Facebook profile", async () => {
+  const root = path.join(distRoot, "donateworldz");
+  const html = await readFile(path.join(root, "davis-family", "index.html"), "utf8");
+  assert.match(html, /\/assets\/support\/davis-family\/davis-family-hero\.webp/);
+  assert.match(html, /\/assets\/support\/davis-family\/davis-family-hero\.jpg/);
+  assert.match(html, /https:\/\/www\.facebook\.com\/share\/18BmqfH7MS\//);
+  assert.match(html, /Mpagi Davis on Facebook/);
+  assert.match(html, /fetchpriority="high"/);
+  assert.match(html, /og:image/);
+  await access(path.join(root, "assets", "support", "davis-family", "davis-family-hero.webp"));
+  await access(path.join(root, "assets", "support", "davis-family", "davis-family-hero.jpg"));
+});
+
 buildTest("FoodWorldz routes support action through DonateWorldz", async () => {
   const html = await readFile(path.join(distRoot, "foodworldz", "index.html"), "utf8");
   assert.match(html, /https:\/\/donateworldz\.com/);
