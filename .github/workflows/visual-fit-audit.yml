@@ -40,11 +40,26 @@ jobs:
           set -euo pipefail
           node --test apps/oneworldz-ecosystem-release/test/one-screen-architecture.test.mjs
 
-      - name: Audit every final built page and every visible image slot
+      - name: Install browser proof runtime
         run: |
           set -euo pipefail
           npm install --no-save --package-lock=false playwright
           npx playwright install chromium
+
+      - name: Prove every route fits one viewport without clipping or normal scrolling
+        run: |
+          set -euo pipefail
+          node apps/oneworldz-ecosystem-release/audit-one-screen-layout.mjs \
+            --root apps/oneworldz-ecosystem-release/dist/ecosystem \
+            --out audit-results
+          cat audit-results/one-screen-layout-summary.txt
+          grep -Fxq 'ONE_SCREEN_ROUTES=93' audit-results/one-screen-layout-summary.txt
+          grep -Fxq 'VIEWPORT_CHECKS=186' audit-results/one-screen-layout-summary.txt
+          grep -Fxq 'ONE_SCREEN_LAYOUT_FAILURES=0' audit-results/one-screen-layout-summary.txt
+
+      - name: Audit every final built page and every visible image slot
+        run: |
+          set -euo pipefail
           node apps/oneworldz-ecosystem-release/audit-image-fit.mjs \
             --root apps/oneworldz-ecosystem-release/dist/ecosystem \
             --out audit-results
@@ -57,7 +72,7 @@ jobs:
           grep -Fxq 'TARGETS=18' audit-results/visual-fit-summary.txt
           grep -Fxq 'ASPECT_MISMATCHES=0' audit-results/visual-fit-summary.txt
           grep -Fxq 'BROKEN_IMAGES=0' audit-results/visual-fit-summary.txt
-          echo 'FINAL_VISUAL_FIT_GATE=PASS pages=93 mismatches=0 broken=0'
+          echo 'FINAL_VISUAL_FIT_GATE=PASS pages=93 mismatches=0 broken=0 no_scroll=PASS'
 
       - name: Preserve audit artifact
         if: always()
