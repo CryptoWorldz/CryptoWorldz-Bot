@@ -1,19 +1,19 @@
-name: OneWorldz First — Single Site Fix & Proof
-# Stage 1 of the 19-destination recovery: perfect and deploy OneWorldz.com only.
-# The static write is locked to domains/oneworldz.com/public_html. The protected
-# OneWorldz GPT extension is only repaired when its live contract is not healthy.
-# Final live browser proof restores Playwright after any GPT repair npm ci.
-# Current-main final proof trigger.
+name: CryptoWorldz Second — Single Site Fix & Proof
+# Stage 2 of the 19-destination recovery: perfect and deploy CryptoWorldz.xyz only.
+# Static writes are locked to domains/cryptoworldz.xyz/public_html.
+# The existing OneWorldz GPT protected backend is reused and updated only to allow
+# the CryptoWorldz web origin; no second AI backend or browser secret is created.
 on:
   push:
     branches: [main]
     paths:
       - ".github/workflows/main.yml"
-      - ".github/oneworldz-only-deploy.sh"
-      - ".github/oneworldz-gpt-proof-or-repair.sh"
+      - ".github/cryptoworldz-only-deploy.sh"
       - ".github/full-current-oneworldz-gpt-extension.sh"
       - ".github/operation-oneworldz-gpt.sh"
       - ".github/lftp-compat.py"
+      - "src/hub-central/preload.js"
+      - "src/oneworldz-gpt/**"
       - "tools/verify-deployment-structure.mjs"
       - "apps/oneworldz-ecosystem-release/**"
   workflow_dispatch:
@@ -23,7 +23,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: oneworldz-first-single-site
+  group: cryptoworldz-second-single-site
   cancel-in-progress: true
 
 env:
@@ -31,8 +31,8 @@ env:
   PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
 
 jobs:
-  oneworldz_only:
-    name: ONEWORLDZ BUILD → MOBILE PROOF → DEPLOY → LIVE PROOF
+  cryptoworldz_only:
+    name: CRYPTOWORLDZ BUILD → VISUAL PROOF → GPT SHARE → DEPLOY → LIVE PROOF
     runs-on: ubuntu-latest
     timeout-minutes: 120
     environment:
@@ -62,70 +62,76 @@ jobs:
           set -euo pipefail
           npm ci
           python3 -m py_compile .github/lftp-compat.py
-          bash -n .github/oneworldz-only-deploy.sh
-          bash -n .github/oneworldz-gpt-proof-or-repair.sh
+          bash -n .github/cryptoworldz-only-deploy.sh
           bash -n .github/full-current-oneworldz-gpt-extension.sh
           bash -n .github/operation-oneworldz-gpt.sh
-          mkdir -p "$RUNNER_TEMP/oneworldz-bin"
-          printf '%s\n' '#!/usr/bin/env bash' 'exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"' > "$RUNNER_TEMP/oneworldz-bin/lftp"
-          chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
-          echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
+          mkdir -p "$RUNNER_TEMP/cryptoworldz-bin"
+          printf '%s\n' '#!/usr/bin/env bash' 'exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"' > "$RUNNER_TEMP/cryptoworldz-bin/lftp"
+          chmod +x "$RUNNER_TEMP/cryptoworldz-bin/lftp"
+          echo "$RUNNER_TEMP/cryptoworldz-bin" >> "$GITHUB_PATH"
 
-      - name: Build exact OneWorldz candidate
+      - name: Build exact CryptoWorldz candidate
         shell: bash
         run: |
           set -euo pipefail
           npm run check:structure
           npm run build:ecosystem-release
-          test -s apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz/index.html
-          test -s apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz/release-manifest.json
+          test -s apps/oneworldz-ecosystem-release/dist/ecosystem/cryptoworldz/index.html
+          test -s apps/oneworldz-ecosystem-release/dist/ecosystem/cryptoworldz/release-manifest.json
+          node apps/oneworldz-ecosystem-release/verify-cryptoworldz-perfect.mjs
           echo "CANDIDATE_TREE=$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" >> "$GITHUB_ENV"
 
-      - name: Prove OneWorldz contract only
+      - name: Prove CryptoWorldz destination contract only
         shell: bash
         run: |
           set -euo pipefail
-          node apps/oneworldz-ecosystem-release/verify-oneworldz-perfect.mjs
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
-          const target = productionTargets.find((item) => item.key === 'oneworldz');
-          if (!target) throw new Error('OneWorldz target missing');
-          if (target.domain !== 'oneworldz.com') throw new Error('OneWorldz domain drift');
-          if (target.hostingerTransportDir !== 'domains/oneworldz.com/public_html') throw new Error('OneWorldz Hostinger destination drift');
-          const root = 'apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz';
-          const required = ['index.html','release-manifest.json','community-support/index.html','sponsor-apply/index.html','heroes/index.html','gpt/index.html','directory/index.html','acknowledgements/index.html'];
-          for (const rel of required) if (!fs.existsSync(`${root}/${rel}`)) throw new Error(`Missing OneWorldz route: ${rel}`);
+          const target = productionTargets.find((item) => item.key === 'cryptoworldz');
+          if (!target) throw new Error('CryptoWorldz target missing');
+          if (target.domain !== 'cryptoworldz.xyz') throw new Error('CryptoWorldz domain drift');
+          if (target.hostingerTransportDir !== 'domains/cryptoworldz.xyz/public_html') throw new Error('CryptoWorldz Hostinger destination drift');
+          const root = 'apps/oneworldz-ecosystem-release/dist/ecosystem/cryptoworldz';
+          const required = ['index.html','release-manifest.json','command-centre/index.html','miniapp/index.html','assets/css/cryptoworldz-perfect.css','assets/js/oneworldz-gpt.js','assets/support/davis-family/davis-family-hero.webp'];
+          for (const rel of required) if (!fs.existsSync(`${root}/${rel}`)) throw new Error(`Missing CryptoWorldz output: ${rel}`);
           const home = fs.readFileSync(`${root}/index.html`, 'utf8');
-          for (const token of ['https://x.com/OneWorldzX','https://t.me/OneWorldzTG','https://donateworldz.com','https://cryptoworldz.xyz']) {
-            if (!home.includes(token)) throw new Error(`Missing OneWorldz destination: ${token}`);
+          for (const token of ['data-visual-contract="cryptoworldz-main-image"','https://donateworldz.com/davis-family/','/assets/js/oneworldz-gpt.js','https://t.me/CryptoWorldzRaaiiiddTeam']) {
+            if (!home.includes(token)) throw new Error(`Missing CryptoWorldz contract token: ${token}`);
           }
-          console.log('ONEWORLDZ_STATIC_CONTRACT=PASS');
+          console.log('CRYPTOWORLDZ_STATIC_CONTRACT=PASS');
           NODE
 
-      - name: Prove every OneWorldz route on desktop and mobile
+      - name: Prove every CryptoWorldz route on desktop and mobile
         shell: bash
         run: |
           set -euo pipefail
           npm install --no-save --package-lock=false playwright
           npx playwright install chromium
           node apps/oneworldz-ecosystem-release/browser-visual-proof.mjs \
-            --name oneworldz-candidate \
-            --root apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz \
-            --out candidate-proof/oneworldz \
-            --expected-title 'OneWorldz | OneWorldz One Vision' \
-            --required-text 'OneWorldz' \
-            --required-image 'oneworldz-master|little-legend'
-          bash .github/publish-progress.sh ONEWORLDZ_CANDIDATE PASS
+            --name cryptoworldz-candidate \
+            --root apps/oneworldz-ecosystem-release/dist/ecosystem/cryptoworldz \
+            --out candidate-proof/cryptoworldz \
+            --expected-title 'CryptoWorldz | One World • One Mission' \
+            --required-text 'CryptoWorldz' \
+            --required-image 'zed-command-centre|blockchain-portal'
+          bash .github/publish-progress.sh CRYPTOWORLDZ_CANDIDATE PASS
 
-      - name: Prove or repair live OneWorldz GPT
+      - name: Deploy shared OneWorldz GPT origin support
         shell: bash
         run: |
           set -euo pipefail
-          bash .github/oneworldz-gpt-proof-or-repair.sh
-          bash .github/publish-progress.sh ONEWORLDZ_GPT PASS
+          bash .github/full-current-oneworldz-gpt-extension.sh
+          headers="$RUNNER_TEMP/cryptoworldz-gpt-cors.txt"
+          curl --silent --show-error --dump-header "$headers" --output /dev/null \
+            --request OPTIONS \
+            -H 'Origin: https://cryptoworldz.xyz' \
+            -H 'Access-Control-Request-Method: POST' \
+            "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/chat"
+          tr -d '\r' < "$headers" | grep -Fqi 'Access-Control-Allow-Origin: https://cryptoworldz.xyz'
+          echo 'CRYPTOWORLDZ_SHARED_GPT_CORS=PASS'
 
-      - name: Refuse stale source and recheck exact OneWorldz destination
+      - name: Refuse stale source and recheck exact CryptoWorldz destination
         shell: bash
         run: |
           set -euo pipefail
@@ -134,52 +140,48 @@ jobs:
           test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$CANDIDATE_TREE"
           node --input-type=module <<'NODE'
           import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
-          const t = productionTargets.find((x) => x.key === 'oneworldz');
-          if (!t || t.domain !== 'oneworldz.com' || t.hostingerTransportDir !== 'domains/oneworldz.com/public_html') process.exit(1);
-          console.log(`ONEWORLDZ_DESTINATION_LOCK=${t.domain}\t${t.hostingerTransportDir}`);
+          const t = productionTargets.find((x) => x.key === 'cryptoworldz');
+          if (!t || t.domain !== 'cryptoworldz.xyz' || t.hostingerTransportDir !== 'domains/cryptoworldz.xyz/public_html') process.exit(1);
+          console.log(`CRYPTOWORLDZ_DESTINATION_LOCK=${t.domain}\t${t.hostingerTransportDir}`);
           NODE
 
-      - name: Backup, deploy and byte-prove OneWorldz only
+      - name: Backup, deploy and byte-prove CryptoWorldz only
         shell: bash
         run: |
           set -euo pipefail
-          bash .github/oneworldz-only-deploy.sh
-          bash .github/publish-progress.sh ONEWORLDZ_HOSTINGER PASS
+          bash .github/cryptoworldz-only-deploy.sh
+          bash .github/publish-progress.sh CRYPTOWORLDZ_HOSTINGER PASS
 
-      - name: Prove live OneWorldz desktop and mobile routes
+      - name: Prove live CryptoWorldz desktop and mobile routes
         shell: bash
         run: |
           set -euo pipefail
-          # The GPT repair rail runs npm ci when it has to repair the protected service.
-          # npm ci correctly removes the no-save Playwright package used by candidate proof,
-          # so restore the proof runtime before the final live browser verification.
           npm install --no-save --package-lock=false playwright
           npx playwright install chromium
           node apps/oneworldz-ecosystem-release/browser-visual-proof.mjs \
-            --name oneworldz-live \
-            --url https://oneworldz.com/ \
-            --out live-proof/oneworldz \
-            --expected-title 'OneWorldz | OneWorldz One Vision' \
-            --required-text 'OneWorldz' \
-            --required-image 'oneworldz-master|little-legend'
-          node apps/oneworldz-ecosystem-release/verify-oneworldz-perfect.mjs
-          bash .github/oneworldz-gpt-proof-or-repair.sh
-          bash .github/publish-progress.sh ONEWORLDZ_FINAL PASS
-          echo 'ONEWORLDZ_FIRST_SITE=PASS VISUAL=PASS LINKS=PASS GPT=PASS FIT=PASS'
+            --name cryptoworldz-live \
+            --url https://cryptoworldz.xyz/ \
+            --out live-proof/cryptoworldz \
+            --expected-title 'CryptoWorldz | One World • One Mission' \
+            --required-text 'CryptoWorldz' \
+            --required-image 'zed-command-centre|blockchain-portal'
+          node apps/oneworldz-ecosystem-release/verify-cryptoworldz-perfect.mjs
+          bash .github/publish-progress.sh CRYPTOWORLDZ_FINAL PASS
+          echo 'CRYPTOWORLDZ_SECOND_SITE=PASS VISUAL=PASS LINKS=PASS DAVIS=PASS GPT=PASS FIT=PASS'
 
       - name: Publish failure state
         if: failure()
         shell: bash
-        run: bash .github/publish-progress.sh ONEWORLDZ_FIRST_SITE FAIL || true
+        run: bash .github/publish-progress.sh CRYPTOWORLDZ_SECOND_SITE FAIL || true
 
-      - name: Preserve OneWorldz proof
+      - name: Preserve CryptoWorldz proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: oneworldz-first-site-${{ github.run_id }}
+          name: cryptoworldz-second-site-${{ github.run_id }}
           path: |
             deployment-proof/
-            candidate-proof/oneworldz/
-            live-proof/oneworldz/
+            candidate-proof/cryptoworldz/
+            live-proof/cryptoworldz/
           if-no-files-found: warn
           retention-days: 30
