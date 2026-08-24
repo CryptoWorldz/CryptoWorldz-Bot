@@ -8,6 +8,7 @@ on:
       - ".github/workflows/main.yml"
       - ".github/oneworldz-only-deploy.sh"
       - ".github/lftp-compat.py"
+      - "tools/verify-deployment-structure.mjs"
       - "apps/oneworldz-ecosystem-release/**"
   workflow_dispatch:
 
