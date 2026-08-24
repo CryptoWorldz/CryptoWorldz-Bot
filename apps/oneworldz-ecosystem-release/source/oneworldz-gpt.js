@@ -1,12 +1,15 @@
 (() => {
   const API = "https://cryptobotz.cryptoworldz.xyz/api/oneworldz-gpt/chat";
-  const page = window.location.hostname.includes("donateworldz") ? "donateworldz" : "oneworldz";
+  const hostname = window.location.hostname.toLowerCase();
+  const page = hostname.includes("cryptoworldz") ? "cryptoworldz" : hostname.includes("donateworldz") ? "donateworldz" : "oneworldz";
+  const cryptoSurface = page === "cryptoworldz";
+  const assistantName = cryptoSurface ? "CryptoWorldz GTP" : "OneWorldz GPT";
   const history = [];
 
   const callout = document.createElement("section");
   callout.className = "oneworldz-gpt-callout";
   callout.id = "oneworldz-gpt";
-  callout.innerHTML = `<div class="oneworldz-gpt-reference"><img src="/assets/oneworldz-gpt/oneworldz-gpt.png" alt="OneWorldz DonateWorldz AI guide reference artwork" loading="lazy" decoding="async"></div><div class="oneworldz-gpt-copy"><small>AI GUIDED SUPPORT • POWERED BY OPENAI</small><h2>Ask OneWorldz GPT</h2><p>Ask where to help, what each OneWorldz destination does, how to volunteer, or which approved support pathway fits. Payments stay on the secure DonateWorldz pages — never inside chat.</p><button type="button" data-gpt-open>Open OneWorldz GPT</button></div>`;
+  callout.innerHTML = `<div class="oneworldz-gpt-reference"><img src="/assets/oneworldz-gpt/oneworldz-gpt.png" alt="${assistantName} reference artwork" loading="lazy" decoding="async"></div><div class="oneworldz-gpt-copy"><small>AI GUIDED SUPPORT • POWERED BY OPENAI</small><h2>${assistantName}</h2><p>${cryptoSurface ? "The same protected OneWorldz GPT system is available inside CryptoWorldz for Worldz navigation, official links, project context and community guidance." : "Ask where to help, what each OneWorldz destination does, how to volunteer, or which approved support pathway fits. Payments stay on the secure DonateWorldz pages — never inside chat."}</p><button type="button" data-gpt-open>Open ${assistantName}</button></div>`;
 
   const footer = document.querySelector(".site-footer");
   if (footer) footer.before(callout);
@@ -15,30 +18,29 @@
   const launcher = document.createElement("button");
   launcher.type = "button";
   launcher.className = "oneworldz-gpt-launcher";
-  launcher.setAttribute("aria-label", "Open OneWorldz GPT");
-  launcher.innerHTML = `<span class="orb" aria-hidden="true">W</span><span class="label">Ask OneWorldz GPT</span>`;
+  launcher.setAttribute("aria-label", `Open ${assistantName}`);
+  launcher.innerHTML = `<span class="orb" aria-hidden="true">W</span><span class="label">Ask ${assistantName}</span>`;
+
+  const quickPrompts = cryptoSurface
+    ? `<button type="button" data-prompt="Show me the official CryptoWorldz and Worldz links.">Official Worldz</button><button type="button" data-prompt="What is Command Centre Ultimate and what do the five protected roles do?">Command Centre</button><button type="button" data-prompt="What is ImpactBased and where is the official page?">ImpactBased</button><button type="button" data-prompt="How does CryptoWorldz connect to OneWorldz and human impact?">Human impact</button>`
+    : `<button type="button" data-prompt="Where can I help?">Where can I help?</button><button type="button" data-prompt="How can I help children in Uganda?">Help in Uganda</button><button type="button" data-prompt="How can I volunteer on the ground?">Volunteer</button><button type="button" data-prompt="What can I learn or research?">Learn & research</button>`;
 
   const panel = document.createElement("aside");
   panel.className = "oneworldz-gpt-panel";
   panel.setAttribute("data-open", "false");
-  panel.setAttribute("aria-label", "OneWorldz GPT assistant");
+  panel.setAttribute("aria-label", `${assistantName} assistant`);
   panel.innerHTML = `
     <div class="oneworldz-gpt-head">
       <span class="orb" aria-hidden="true">W</span>
-      <span><strong>OneWorldz GPT</strong><small>AI-guided support • Powered by OpenAI</small></span>
-      <button class="oneworldz-gpt-close" type="button" aria-label="Close OneWorldz GPT">×</button>
+      <span><strong>${assistantName}</strong><small>${cryptoSurface ? "Shared OneWorldz GPT system • Powered by OpenAI" : "AI-guided support • Powered by OpenAI"}</small></span>
+      <button class="oneworldz-gpt-close" type="button" aria-label="Close ${assistantName}">×</button>
     </div>
     <div class="oneworldz-gpt-messages" aria-live="polite">
-      <div class="oneworldz-gpt-message assistant">I can help you find the right way to support, learn, volunteer or explore OneWorldz. I will never ask for card details, bank details, passwords, API keys or wallet secrets.</div>
-      <div class="oneworldz-gpt-quick">
-        <button type="button" data-prompt="Where can I help?">Where can I help?</button>
-        <button type="button" data-prompt="How can I help children in Uganda?">Help in Uganda</button>
-        <button type="button" data-prompt="How can I volunteer on the ground?">Volunteer</button>
-        <button type="button" data-prompt="What can I learn or research?">Learn & research</button>
-      </div>
+      <div class="oneworldz-gpt-message assistant">${cryptoSurface ? "I can help you navigate CryptoWorldz, the Worldz, Command Centre, ImpactBased and official ecosystem links. I will never ask for wallet secrets, passwords, API keys or payment details." : "I can help you find the right way to support, learn, volunteer or explore OneWorldz. I will never ask for card details, bank details, passwords, API keys or wallet secrets."}</div>
+      <div class="oneworldz-gpt-quick">${quickPrompts}</div>
     </div>
     <form class="oneworldz-gpt-form">
-      <textarea name="message" aria-label="Message OneWorldz GPT" placeholder="Ask OneWorldz GPT…" maxlength="1200" required></textarea>
+      <textarea name="message" aria-label="Message ${assistantName}" placeholder="Ask ${assistantName}…" maxlength="1200" required></textarea>
       <button type="submit">Send</button>
       <p class="oneworldz-gpt-note">Do not enter card, bank, password, API-key, seed-phrase or private-key information.</p>
     </form>`;
@@ -113,25 +115,25 @@
       thinking.remove();
       if (!response.ok || !payload.ok) {
         const text = payload.error === "openai_api_not_configured"
-          ? "OneWorldz GPT is built, but its protected OpenAI API key is not active on the server."
+          ? `${assistantName} is built, but its protected OpenAI API key is not active on the server.`
           : payload.error === "openai_quota_exhausted"
-            ? "OneWorldz GPT is temporarily paused because the OpenAI API credit is exhausted. The normal OneWorldz and DonateWorldz links still work."
+            ? `${assistantName} is temporarily paused because the OpenAI API credit is exhausted. The normal website links still work.`
             : payload.error === "daily_limit_reached"
-              ? "OneWorldz GPT has reached its daily public-use safety limit. The normal OneWorldz and DonateWorldz links still work."
+              ? `${assistantName} has reached its daily public-use safety limit. The normal website links still work.`
               : payload.error === "rate_limited"
                 ? "Too many requests from this connection. Try again shortly."
-                : "OneWorldz GPT could not answer that request right now.";
+                : `${assistantName} could not answer that request right now.`;
         addMessage("assistant", text);
         return;
       }
-      const answer = String(payload.text || "I can help you find the right OneWorldz pathway.");
+      const answer = String(payload.text || `I can help you find the right ${cryptoSurface ? "CryptoWorldz" : "OneWorldz"} pathway.`);
       addMessage("assistant", answer);
       addLinks(payload.suggestions);
       history.push({ role: "assistant", content: answer });
       if (history.length > 6) history.splice(0, history.length - 6);
     } catch {
       thinking.remove();
-      addMessage("assistant", "OneWorldz GPT is temporarily unreachable. The normal OneWorldz and DonateWorldz links still work.");
+      addMessage("assistant", `${assistantName} is temporarily unreachable. The normal website links still work.`);
     } finally {
       input.disabled = false;
       send.disabled = false;
