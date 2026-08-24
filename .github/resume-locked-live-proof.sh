@@ -6,25 +6,23 @@ cd apps/oneworldz-ecosystem-release
 node --input-type=module <<'NODE' > "$RUNNER_TEMP/live-targets.tsv"
 import { productionTargets } from './production-targets.mjs';
 for (const target of productionTargets) {
-  console.log([target.key,target.domain,target.expectedTitle,target.requiredIdentityText,target.requiredIdentityImage].join('\t'));
+  console.log([target.key,target.domain,target.requiredIdentityText].join('\t'));
 }
 NODE
 test "$(wc -l < "$RUNNER_TEMP/live-targets.tsv" | tr -d ' ')" = '18'
 failed=0
-while IFS=$'\t' read -r key domain title required_text required_image; do
-  node browser-visual-proof.mjs \
+while IFS=$'\t' read -r key domain required_text; do
+  node browser-one-screen-proof.mjs \
     --name "$key" \
     --url "https://$domain/?live_proof=${GITHUB_RUN_ID}-${key}" \
-    --expected-title "$title" \
     --required-text "$required_text" \
-    --required-image "$required_image" \
     --out "$GITHUB_WORKSPACE/live-proof/$key" || failed=1
 done < "$RUNNER_TEMP/live-targets.tsv"
 test "$(find "$GITHUB_WORKSPACE/live-proof" -mindepth 2 -maxdepth 2 -name visual-report.json | wc -l | tr -d ' ')" = '18' || failed=1
 test "$(find "$GITHUB_WORKSPACE/live-proof" -mindepth 2 -maxdepth 2 -name desktop.png | wc -l | tr -d ' ')" = '18' || failed=1
 test "$(find "$GITHUB_WORKSPACE/live-proof" -mindepth 2 -maxdepth 2 -name mobile.png | wc -l | tr -d ' ')" = '18' || failed=1
 test "$failed" = '0'
-echo 'LIVE_18_SITE_DESKTOP_MOBILE_PROOF=PASS'
+echo 'LIVE_18_STATIC_TRANSPORT_ONE_SCREEN_PROOF=PASS'
 cd "$GITHUB_WORKSPACE"
 
 passed=0
@@ -49,4 +47,3 @@ test "$passed" = '1'
 echo 'LIVE_ZED_MINIAPP_GPT_PROOF=PASS'
 
 bash .github/publish-progress.sh LIVE_PROOF PASS
-# canonical resume trigger 2026-08-20

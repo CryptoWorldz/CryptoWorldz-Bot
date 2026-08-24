@@ -1,21 +1,20 @@
-name: CryptoWorldz Second — Single Site Fix & Proof
-# Stage 2 of the 19-destination recovery: perfect and deploy CryptoWorldz.xyz only.
-# Static writes are locked to domains/cryptoworldz.xyz/public_html.
-# The existing OneWorldz GPT protected backend is reused and updated only to allow
-# the CryptoWorldz web origin; no second AI backend or browser secret is created.
+name: OneWorldz 18-Site One-Screen Production Deployment
+
 on:
   push:
     branches: [main]
     paths:
       - ".github/workflows/main.yml"
-      - ".github/cryptoworldz-only-deploy.sh"
-      - ".github/full-current-oneworldz-gpt-extension.sh"
-      - ".github/operation-oneworldz-gpt.sh"
+      - ".github/full-current-*.sh"
+      - ".github/resume-locked-static-deploy.sh"
+      - ".github/resume-locked-live-proof.sh"
       - ".github/lftp-compat.py"
-      - "src/hub-central/preload.js"
-      - "src/oneworldz-gpt/**"
-      - "tools/verify-deployment-structure.mjs"
+      - ".github/install-ci-apt-wrapper.cjs"
       - "apps/oneworldz-ecosystem-release/**"
+      - "src/oneworldz-gpt/**"
+      - "src/hub-central/**"
+      - "index.js"
+      - "deployments/oneworldz-19-total.request"
   workflow_dispatch:
 
 permissions:
@@ -23,18 +22,19 @@ permissions:
   actions: read
 
 concurrency:
-  group: cryptoworldz-second-single-site
-  cancel-in-progress: true
+  group: oneworldz-one-screen-full-production
+  cancel-in-progress: false
 
 env:
+  MIN_PAGE_ROUTES: "93"
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
   PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
 
 jobs:
-  cryptoworldz_only:
-    name: CRYPTOWORLDZ BUILD → VISUAL PROOF → GPT SHARE → DEPLOY → LIVE PROOF
+  full_production:
+    name: BUILD → 93 ROUTES → GPT → 18 HOSTINGER ROOTS → LIVE PROOF
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 360
     environment:
       name: cryptoworldz-production
     env:
@@ -44,8 +44,11 @@ jobs:
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      BOT_TOKEN_SECRET: ${{ secrets.BOT_TOKEN }}
+      SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
-      - name: Checkout current main
+      - name: Checkout exact current main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -56,132 +59,152 @@ jobs:
           node-version: "22"
           cache: npm
 
-      - name: Install build and FTPS transport
+      - name: Install dependencies and repository FTPS transport
         shell: bash
         run: |
           set -euo pipefail
           npm ci
           python3 -m py_compile .github/lftp-compat.py
-          bash -n .github/cryptoworldz-only-deploy.sh
-          bash -n .github/full-current-oneworldz-gpt-extension.sh
-          bash -n .github/operation-oneworldz-gpt.sh
-          mkdir -p "$RUNNER_TEMP/cryptoworldz-bin"
-          printf '%s\n' '#!/usr/bin/env bash' 'exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"' > "$RUNNER_TEMP/cryptoworldz-bin/lftp"
-          chmod +x "$RUNNER_TEMP/cryptoworldz-bin/lftp"
-          echo "$RUNNER_TEMP/cryptoworldz-bin" >> "$GITHUB_PATH"
+          mkdir -p "$RUNNER_TEMP/oneworldz-bin"
+          printf '%s\n' '#!/usr/bin/env bash' 'exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"' > "$RUNNER_TEMP/oneworldz-bin/lftp"
+          chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
+          echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
 
-      - name: Build exact CryptoWorldz candidate
+      - name: Build the final 18-site candidate
         shell: bash
         run: |
           set -euo pipefail
           npm run check:structure
+          npm run check
+          npm run check:auto
           npm run build:ecosystem-release
-          test -s apps/oneworldz-ecosystem-release/dist/ecosystem/cryptoworldz/index.html
-          test -s apps/oneworldz-ecosystem-release/dist/ecosystem/cryptoworldz/release-manifest.json
-          node apps/oneworldz-ecosystem-release/verify-cryptoworldz-perfect.mjs
-          echo "CANDIDATE_TREE=$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" >> "$GITHUB_ENV"
+          node --test apps/oneworldz-ecosystem-release/test/one-screen-architecture.test.mjs
+          candidate_tree="$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)"
+          candidate_fingerprint="$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)"
+          test -n "$candidate_tree"
+          test -n "$candidate_fingerprint"
+          echo "CANDIDATE_TREE=$candidate_tree" >> "$GITHUB_ENV"
+          echo "CANDIDATE_FINGERPRINT=$candidate_fingerprint" >> "$GITHUB_ENV"
+          mkdir -p deployment-proof
+          printf 'run_id=%s\ncommit=%s\ncandidate_tree=%s\ncandidate_fingerprint=%s\nstatic_transport_roots=18\narchitecture_destinations=19\n' \
+            "$GITHUB_RUN_ID" "$GITHUB_SHA" "$candidate_tree" "$candidate_fingerprint" > deployment-proof/current-build.txt
+          echo "BUILD_FINAL_ONE_SCREEN=PASS tree=$candidate_tree fingerprint=$candidate_fingerprint"
 
-      - name: Prove CryptoWorldz destination contract only
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
-          const target = productionTargets.find((item) => item.key === 'cryptoworldz');
-          if (!target) throw new Error('CryptoWorldz target missing');
-          if (target.domain !== 'cryptoworldz.xyz') throw new Error('CryptoWorldz domain drift');
-          if (target.hostingerTransportDir !== 'domains/cryptoworldz.xyz/public_html') throw new Error('CryptoWorldz Hostinger destination drift');
-          const root = 'apps/oneworldz-ecosystem-release/dist/ecosystem/cryptoworldz';
-          const required = ['index.html','release-manifest.json','command-centre/index.html','miniapp/index.html','assets/css/cryptoworldz-perfect.css','assets/js/oneworldz-gpt.js','assets/support/davis-family/davis-family-hero.webp'];
-          for (const rel of required) if (!fs.existsSync(`${root}/${rel}`)) throw new Error(`Missing CryptoWorldz output: ${rel}`);
-          const home = fs.readFileSync(`${root}/index.html`, 'utf8');
-          for (const token of ['data-visual-contract="cryptoworldz-main-image"','https://donateworldz.com/davis-family/','/assets/js/oneworldz-gpt.js','https://t.me/CryptoWorldzRaaiiiddTeam']) {
-            if (!home.includes(token)) throw new Error(`Missing CryptoWorldz contract token: ${token}`);
-          }
-          console.log('CRYPTOWORLDZ_STATIC_CONTRACT=PASS');
-          NODE
-
-      - name: Prove every CryptoWorldz route on desktop and mobile
+      - name: Install browser proof runtime
         shell: bash
         run: |
           set -euo pipefail
           npm install --no-save --package-lock=false playwright
           npx playwright install chromium
-          node apps/oneworldz-ecosystem-release/browser-visual-proof.mjs \
-            --name cryptoworldz-candidate \
-            --root apps/oneworldz-ecosystem-release/dist/ecosystem/cryptoworldz \
-            --out candidate-proof/cryptoworldz \
-            --expected-title 'CryptoWorldz | One World • One Mission' \
-            --required-text 'CryptoWorldz' \
-            --required-image 'zed-command-centre|blockchain-portal'
-          bash .github/publish-progress.sh CRYPTOWORLDZ_CANDIDATE PASS
 
-      - name: Deploy shared OneWorldz GPT origin support
+      - name: Prove one-screen layout and image integrity on all 93 routes
         shell: bash
         run: |
           set -euo pipefail
-          bash .github/full-current-oneworldz-gpt-extension.sh
-          headers="$RUNNER_TEMP/cryptoworldz-gpt-cors.txt"
-          curl --silent --show-error --dump-header "$headers" --output /dev/null \
-            --request OPTIONS \
-            -H 'Origin: https://cryptoworldz.xyz' \
-            -H 'Access-Control-Request-Method: POST' \
-            "https://$PROTECTED_DOMAIN/api/oneworldz-gpt/chat"
-          tr -d '\r' < "$headers" | grep -Fqi 'Access-Control-Allow-Origin: https://cryptoworldz.xyz'
-          echo 'CRYPTOWORLDZ_SHARED_GPT_CORS=PASS'
+          node apps/oneworldz-ecosystem-release/audit-one-screen-layout.mjs \
+            --root apps/oneworldz-ecosystem-release/dist/ecosystem \
+            --out audit-results
+          grep -Fxq 'ONE_SCREEN_ROUTES=93' audit-results/one-screen-layout-summary.txt
+          grep -Fxq 'VIEWPORT_CHECKS=186' audit-results/one-screen-layout-summary.txt
+          grep -Fxq 'ONE_SCREEN_LAYOUT_FAILURES=0' audit-results/one-screen-layout-summary.txt
+          node apps/oneworldz-ecosystem-release/audit-image-fit.mjs \
+            --root apps/oneworldz-ecosystem-release/dist/ecosystem \
+            --out audit-results
+          grep -Fxq 'FINAL_BUILT_PAGES=93' audit-results/visual-fit-summary.txt
+          grep -Fxq 'TARGETS=18' audit-results/visual-fit-summary.txt
+          grep -Fxq 'ASPECT_MISMATCHES=0' audit-results/visual-fit-summary.txt
+          grep -Fxq 'BROKEN_IMAGES=0' audit-results/visual-fit-summary.txt
+          echo 'LOCAL_VISUAL_GATE=PASS routes=93 viewports=186 mismatch=0 broken=0'
 
-      - name: Refuse stale source and recheck exact CryptoWorldz destination
+      - name: Prove all 18 candidate sites in real browsers
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash .github/full-current-candidate-proof.sh
+          route_count="$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').generated_page_routes")"
+          test "$route_count" = "93"
+          test "$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').desktop_pages_audited")" = "93"
+          test "$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').mobile_pages_audited")" = "93"
+          echo "PAGE_ROUTE_COUNT=$route_count" >> "$GITHUB_ENV"
+          test "$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)" = "$CANDIDATE_FINGERPRINT"
+          echo 'CANDIDATE_BROWSER_GATE=PASS sites=18 routes=93 desktop=93 mobile=93'
+
+      - name: Refuse stale source before production writes
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin main --depth=1
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
           test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$CANDIDATE_TREE"
-          node --input-type=module <<'NODE'
-          import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
-          const t = productionTargets.find((x) => x.key === 'cryptoworldz');
-          if (!t || t.domain !== 'cryptoworldz.xyz' || t.hostingerTransportDir !== 'domains/cryptoworldz.xyz/public_html') process.exit(1);
-          console.log(`CRYPTOWORLDZ_DESTINATION_LOCK=${t.domain}\t${t.hostingerTransportDir}`);
-          NODE
+          test "$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)" = "$CANDIDATE_FINGERPRINT"
+          echo 'CURRENT_MAIN_AUTHORITY=PASS'
 
-      - name: Backup, deploy and byte-prove CryptoWorldz only
+      - name: Re-prove shared protected OneWorldz GPT
         shell: bash
         run: |
           set -euo pipefail
-          bash .github/cryptoworldz-only-deploy.sh
-          bash .github/publish-progress.sh CRYPTOWORLDZ_HOSTINGER PASS
+          bash .github/full-current-oneworldz-gpt-extension.sh
+          echo 'ONEWORLDZ_GPT_EXTENSION=PASS'
 
-      - name: Prove live CryptoWorldz desktop and mobile routes
+      - name: Deploy exact candidate to all 18 Hostinger static destinations
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)" = "$CANDIDATE_FINGERPRINT"
+          bash .github/full-current-static-deploy.sh
+          echo 'HOSTINGER_18_STATIC_DESTINATIONS=PASS'
+
+      - name: Restore browser proof runtime after protected deployment
         shell: bash
         run: |
           set -euo pipefail
           npm install --no-save --package-lock=false playwright
           npx playwright install chromium
-          node apps/oneworldz-ecosystem-release/browser-visual-proof.mjs \
-            --name cryptoworldz-live \
-            --url https://cryptoworldz.xyz/ \
-            --out live-proof/cryptoworldz \
-            --expected-title 'CryptoWorldz | One World • One Mission' \
-            --required-text 'CryptoWorldz' \
-            --required-image 'zed-command-centre|blockchain-portal'
-          node apps/oneworldz-ecosystem-release/verify-cryptoworldz-perfect.mjs
-          bash .github/publish-progress.sh CRYPTOWORLDZ_FINAL PASS
-          echo 'CRYPTOWORLDZ_SECOND_SITE=PASS VISUAL=PASS LINKS=PASS DAVIS=PASS GPT=PASS FIT=PASS'
 
-      - name: Publish failure state
-        if: failure()
+      - name: Prove all 18 live sites plus protected Command Centre and GPT
         shell: bash
-        run: bash .github/publish-progress.sh CRYPTOWORLDZ_SECOND_SITE FAIL || true
+        run: |
+          set -euo pipefail
+          bash .github/full-current-live-proof.sh
+          live_routes="$(node -p "require('./deployment-proof/live-fleet-summary.json').generated_page_routes")"
+          test "$live_routes" = "93"
+          test "$live_routes" = "$PAGE_ROUTE_COUNT"
+          echo 'LIVE_FLEET_GATE=PASS static_sites=18 routes=93 protected_command_centre=PASS gpt=PASS'
 
-      - name: Preserve CryptoWorldz proof
+      - name: Write final deployment record
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > deployment-proof/final.txt <<EOF
+          record=ONEWORLDZ_ONE_SCREEN_FULL_PRODUCTION
+          run_id=$GITHUB_RUN_ID
+          commit=$GITHUB_SHA
+          candidate_tree=$CANDIDATE_TREE
+          candidate_fingerprint=$CANDIDATE_FINGERPRINT
+          static_sites=18
+          routes=93
+          desktop_routes_proved=93
+          mobile_routes_proved=93
+          aspect_mismatches=0
+          broken_images=0
+          normal_page_scroll_failures=0
+          protected_command_centre=PASS
+          protected_oneworldz_gpt=PASS
+          hostinger_deploy=PASS
+          live_proof=PASS
+          final=PASS
+          EOF
+          echo 'ONEWORLDZ_ONE_SCREEN_FULL_PRODUCTION=PASS'
+
+      - name: Preserve production proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cryptoworldz-second-site-${{ github.run_id }}
+          name: oneworldz-one-screen-production-${{ github.run_id }}
           path: |
             deployment-proof/
-            candidate-proof/cryptoworldz/
-            live-proof/cryptoworldz/
+            audit-results/
+            candidate-proof/
+            live-proof/
           if-no-files-found: warn
           retention-days: 30

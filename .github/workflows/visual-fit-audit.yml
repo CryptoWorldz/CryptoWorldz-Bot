@@ -2,14 +2,16 @@ name: Final Visual Fit Audit
 
 on:
   push:
-    branches: [fix/visual-fit-final-audit]
+    branches: [fix/visual-fit-final-audit, build/one-screen-18]
     paths:
       - ".github/workflows/visual-fit-audit.yml"
+      - ".github/full-current-candidate-proof.sh"
       - "apps/oneworldz-ecosystem-release/**"
   pull_request:
     branches: [main]
     paths:
       - ".github/workflows/visual-fit-audit.yml"
+      - ".github/full-current-candidate-proof.sh"
       - "apps/oneworldz-ecosystem-release/**"
 
 permissions:
@@ -18,7 +20,9 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
+    env:
+      MIN_PAGE_ROUTES: "93"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,11 +39,39 @@ jobs:
           npm ci
           npm run build:ecosystem-release
 
-      - name: Audit every final built page and every visible image slot
+      - name: Verify one-screen route architecture
+        run: |
+          set -euo pipefail
+          node --test apps/oneworldz-ecosystem-release/test/one-screen-architecture.test.mjs
+
+      - name: Install browser proof runtime
         run: |
           set -euo pipefail
           npm install --no-save --package-lock=false playwright
           npx playwright install chromium
+
+      - name: Prove every route fits one viewport without clipping or normal scrolling
+        run: |
+          set -euo pipefail
+          node apps/oneworldz-ecosystem-release/audit-one-screen-layout.mjs \
+            --root apps/oneworldz-ecosystem-release/dist/ecosystem \
+            --out audit-results
+          cat audit-results/one-screen-layout-summary.txt
+          grep -Fxq 'ONE_SCREEN_ROUTES=93' audit-results/one-screen-layout-summary.txt
+          grep -Fxq 'VIEWPORT_CHECKS=186' audit-results/one-screen-layout-summary.txt
+          grep -Fxq 'ONE_SCREEN_LAYOUT_FAILURES=0' audit-results/one-screen-layout-summary.txt
+
+      - name: Prove all 18 candidate sites and all 93 routes in real browsers
+        run: |
+          set -euo pipefail
+          bash .github/full-current-candidate-proof.sh
+          test "$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').generated_page_routes")" = "93"
+          test "$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').desktop_pages_audited")" = "93"
+          test "$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').mobile_pages_audited")" = "93"
+
+      - name: Audit every final built page and every visible image slot
+        run: |
+          set -euo pipefail
           node apps/oneworldz-ecosystem-release/audit-image-fit.mjs \
             --root apps/oneworldz-ecosystem-release/dist/ecosystem \
             --out audit-results
@@ -48,16 +80,19 @@ jobs:
       - name: Enforce zero visual-fit defects
         run: |
           set -euo pipefail
-          grep -Fxq 'FINAL_BUILT_PAGES=89' audit-results/visual-fit-summary.txt
+          grep -Fxq 'FINAL_BUILT_PAGES=93' audit-results/visual-fit-summary.txt
           grep -Fxq 'TARGETS=18' audit-results/visual-fit-summary.txt
           grep -Fxq 'ASPECT_MISMATCHES=0' audit-results/visual-fit-summary.txt
           grep -Fxq 'BROKEN_IMAGES=0' audit-results/visual-fit-summary.txt
-          echo 'FINAL_VISUAL_FIT_GATE=PASS pages=89 mismatches=0 broken=0'
+          echo 'FINAL_BUILD_GATE=PASS sites=18 pages=93 desktop=93 mobile=93 mismatches=0 broken=0 no_scroll=PASS'
 
       - name: Preserve audit artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: final-visual-fit-audit
-          path: audit-results/
+          path: |
+            audit-results/
+            candidate-proof/
+            deployment-proof/current-candidate-browser-summary.json
           if-no-files-found: error
