@@ -1,0 +1,10 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const root=path.dirname(fileURLToPath(import.meta.url)),appRoot=path.join(root,".."),dist=path.join(appRoot,"dist","ecosystem");
+test("18-domain one-screen architecture is authoritative",async()=>{const tree=JSON.parse(await readFile(path.join(dist,"user-structure-tree.json"),"utf8"));assert.equal(tree.architecture,"18-domain-one-screen-v1");assert.equal(tree.static_hosts,18);assert.equal(tree.published_webpages,93);assert.equal(tree.one_screen_no_scroll,true);assert.equal(tree.acknowledgements_last_everywhere,true);for(const host of tree.hosts){assert.equal(host.routes[0].route,"/");assert.equal(host.routes.at(-1).route,"/acknowledgements/");for(const route of host.routes){const rel=route.route==="/"?"index.html":`${route.route.replace(/^\/+|\/+$/g,"")}/index.html`,html=await readFile(path.join(dist,host.key,rel),"utf8");assert.match(html,/data-one-screen="true"/);assert.match(html,/class="screen-brand" href="\/"/);assert.match(html,/id="menu-button"/);assert.match(html,/data-last-page="acknowledgements"/)}}});
+test("one-screen CSS disables normal page scrolling",async()=>{const css=await readFile(path.join(appRoot,"source","visual-fit-final.css"),"utf8");assert.match(css,/overflow:hidden!important/);assert.match(css,/height:100svh/)});
+test("Purple Diamond Crew keeps ten legacy tokens",async()=>{const html=await readFile(path.join(dist,"purplediamondcrew","legacy-tokens","index.html"),"utf8");assert.equal((html.match(/data-token-index=/g)||[]).length,10)});
+test("Community Impact excludes dedicated Davis and Reagan routes",async()=>{for(const f of [path.join(dist,"oneworldz","community-support","index.html"),path.join(dist,"donateworldz","community-impact","index.html")]){const html=await readFile(f,"utf8");assert.doesNotMatch(html,/165Ken5f2Bt/);assert.doesNotMatch(html,/Reagankauja/);assert.doesNotMatch(html,/reagankauja2/)}});
