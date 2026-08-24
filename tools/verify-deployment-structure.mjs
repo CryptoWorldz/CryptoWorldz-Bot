@@ -23,8 +23,9 @@ const workflow = await readFile(`${workflowDir}/main.yml`, 'utf8');
 const oneWorldzOnlyMode = workflow.includes('OneWorldz First — Single Site Fix & Proof');
 const cryptoWorldzOnlyMode = workflow.includes('CryptoWorldz Second — Single Site Fix & Proof');
 const fullFleetMode = workflow.includes('OneWorldz Safe Static Fleet Deployment');
-const activeModes = [oneWorldzOnlyMode, cryptoWorldzOnlyMode, fullFleetMode].filter(Boolean).length;
-assert.ok(activeModes === 1, 'main.yml must arm exactly one staged single-site rail or the canonical static fleet rail');
+const oneScreenFleetMode = workflow.includes('OneWorldz 18-Site One-Screen Production Deployment');
+const activeModes = [oneWorldzOnlyMode, cryptoWorldzOnlyMode, fullFleetMode, oneScreenFleetMode].filter(Boolean).length;
+assert.ok(activeModes === 1, 'main.yml must arm exactly one staged single-site rail or one canonical 18-site fleet rail');
 
 if (oneWorldzOnlyMode) {
   const requiredOneWorldzTokens = [
@@ -91,6 +92,26 @@ if (oneWorldzOnlyMode) {
     'Rolling back CryptoWorldz only. No other Hostinger destination is touched.',
     'CRYPTOWORLDZ_ONLY_HOSTINGER_DEPLOYMENT=PASS'
   ]) assert.ok(deployScript.includes(token), `CryptoWorldz-only deployment script missing safety invariant: ${token}`);
+} else if (oneScreenFleetMode) {
+  const requiredOneScreenFleetTokens = [
+    'OneWorldz 18-Site One-Screen Production Deployment',
+    'BUILD → 93 ROUTES → GPT → 18 HOSTINGER ROOTS → LIVE PROOF',
+    'Build the final 18-site candidate',
+    'Prove one-screen layout and image integrity on all 93 routes',
+    'Prove all 18 candidate sites in real browsers',
+    'Refuse stale source before production writes',
+    'Re-prove shared protected OneWorldz GPT',
+    'Deploy exact candidate to all 18 Hostinger static destinations',
+    'bash .github/full-current-static-deploy.sh',
+    'Prove all 18 live sites plus protected Command Centre and GPT',
+    'Write final deployment record',
+    'MIN_PAGE_ROUTES: "93"',
+    'CANDIDATE_TREE',
+    'CANDIDATE_FINGERPRINT',
+    'ONEWORLDZ_ONE_SCREEN_FULL_PRODUCTION=PASS',
+    'cancel-in-progress: false'
+  ];
+  for (const token of requiredOneScreenFleetTokens) assert.ok(workflow.includes(token), `main.yml missing one-screen fleet invariant: ${token}`);
 } else {
   const requiredFleetTokens = [
     'OneWorldz Safe Static Fleet Deployment',
@@ -144,4 +165,6 @@ console.log(oneWorldzOnlyMode
   ? 'DEPLOYMENT_STRUCTURE=PASS staged OneWorldz-only rail + exact Hostinger root + desktop/mobile proof; other destinations write-disabled'
   : cryptoWorldzOnlyMode
     ? 'DEPLOYMENT_STRUCTURE=PASS staged CryptoWorldz-only rail + exact Hostinger root + shared GPT origin proof + desktop/mobile proof; other destinations write-disabled'
-    : 'DEPLOYMENT_STRUCTURE=PASS one canonical static rail + 18 Hostinger transports + dynamic desktop/mobile live proof');
+    : oneScreenFleetMode
+      ? 'DEPLOYMENT_STRUCTURE=PASS one-screen 93-route rail + 18 Hostinger transports + protected GPT/Command Centre live proof'
+      : 'DEPLOYMENT_STRUCTURE=PASS one canonical static rail + 18 Hostinger transports + dynamic desktop/mobile live proof');
