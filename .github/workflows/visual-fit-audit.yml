@@ -1,0 +1,59 @@
+name: Final Visual Fit Audit
+
+on:
+  push:
+    branches: [fix/visual-fit-final-audit]
+    paths:
+      - ".github/workflows/visual-fit-audit.yml"
+      - "apps/oneworldz-ecosystem-release/**"
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Build final ecosystem exactly as production builds it
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build:ecosystem-release
+
+      - name: Audit every final built page and every visible image slot
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright
+          npx playwright install chromium
+          node apps/oneworldz-ecosystem-release/audit-image-fit.mjs \
+            --root apps/oneworldz-ecosystem-release/dist/ecosystem \
+            --out audit-results
+          cat audit-results/visual-fit-summary.txt
+
+      - name: Publish audit results back to audit branch
+        run: |
+          set -euo pipefail
+          git config user.name "CryptoWorldz Visual Auditor"
+          git config user.email "actions@users.noreply.github.com"
+          git add audit-results/visual-fit-report.json audit-results/visual-fit-report.csv audit-results/visual-fit-summary.txt
+          git diff --cached --quiet && exit 0
+          git commit -m "audit: publish final visual fit inventory [skip ci]"
+          git push origin HEAD:fix/visual-fit-final-audit
+
+      - name: Preserve audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-visual-fit-audit
+          path: audit-results/
+          if-no-files-found: error
