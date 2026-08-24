@@ -42,7 +42,10 @@ configureTelegramMenuButton();
 
 const httpModule = require("../http");
 const { registerHubCentralRoutes } = require("./http");
-const { registerOneWorldzGptRoutes } = require("../oneworldz-gpt/http");
+const oneWorldzGpt = require("../oneworldz-gpt/http");
+oneWorldzGpt.ALLOWED_ORIGINS.add("https://cryptoworldz.xyz");
+oneWorldzGpt.ALLOWED_ORIGINS.add("https://www.cryptoworldz.xyz");
+const { registerOneWorldzGptRoutes } = oneWorldzGpt;
 
 if (!String(process.env.HUB_API_SECRET || "").trim() && String(process.env.ADMIN_API_TOKEN || "").trim()) {
   process.env.HUB_API_SECRET = process.env.ADMIN_API_TOKEN;
