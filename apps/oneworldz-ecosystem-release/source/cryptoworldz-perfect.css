@@ -1,0 +1,137 @@
+/* CryptoWorldz visual master: full hero, zero distortion, concise image-led homepage. */
+body[data-cryptoworldz-perfect="true"]{
+  background:radial-gradient(circle at 50% -10%,rgba(105,49,214,.16),transparent 34rem),#030419!important;
+  color:#fff;
+}
+body[data-cryptoworldz-perfect="true"]::before,
+body[data-cryptoworldz-perfect="true"]::after{display:none!important;background:none!important}
+body[data-cryptoworldz-perfect="true"] main{background:transparent!important}
+body[data-cryptoworldz-perfect="true"] .section{background:#04051a!important}
+body[data-cryptoworldz-perfect="true"] .section-dark{background:linear-gradient(180deg,#070724,#030419)!important}
+
+body[data-cryptoworldz-perfect="true"] .cw-perfect-hero{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:0!important;
+  min-height:0!important;
+  padding:clamp(.8rem,2vw,1.35rem)!important;
+  background:#030419!important;
+  overflow:visible!important;
+}
+body[data-cryptoworldz-perfect="true"] .cw-perfect-hero::after{display:none!important}
+body[data-cryptoworldz-perfect="true"] .cw-perfect-hero .hero-art{
+  position:relative!important;
+  inset:auto!important;
+  display:block!important;
+  width:min(1180px,100%)!important;
+  height:auto!important;
+  margin:0 auto!important;
+  overflow:hidden!important;
+  border:1px solid rgba(130,100,255,.28)!important;
+  border-radius:1rem!important;
+  background:#020315!important;
+  box-shadow:0 24px 80px rgba(0,0,0,.38)!important;
+}
+body[data-cryptoworldz-perfect="true"] .cw-perfect-hero .hero-art img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  filter:none!important;
+}
+body[data-cryptoworldz-perfect="true"] .cw-perfect-hero .hero-copy{
+  position:relative!important;
+  inset:auto!important;
+  z-index:1!important;
+  width:min(920px,100%)!important;
+  max-width:none!important;
+  margin:clamp(.8rem,2vw,1.35rem) auto 0!important;
+  padding:clamp(1rem,2.5vw,1.6rem)!important;
+  border:1px solid rgba(104,150,255,.22)!important;
+  border-radius:1rem!important;
+  background:linear-gradient(145deg,rgba(12,11,42,.98),rgba(4,9,30,.98))!important;
+  text-shadow:none!important;
+}
+body[data-cryptoworldz-perfect="true"] .cw-perfect-hero .hero-copy h1{font-size:clamp(2rem,5vw,4.4rem)!important;line-height:.98!important}
+
+body[data-cryptoworldz-perfect="true"] .media-row .production-picture,
+body[data-cryptoworldz-perfect="true"] .media-row picture.production-picture{
+  overflow:hidden!important;
+  border-radius:1rem!important;
+  background:#030419!important;
+}
+body[data-cryptoworldz-perfect="true"] .media-row .production-picture img,
+body[data-cryptoworldz-perfect="true"] .media-row img.production-picture,
+body[data-cryptoworldz-perfect="true"] [data-fit="contain"] img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-height:720px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+
+body[data-cryptoworldz-perfect="true"] .cw-role-strip{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:.65rem;
+  margin:1rem 0;
+}
+body[data-cryptoworldz-perfect="true"] .cw-role-strip span{
+  display:grid;
+  place-items:center;
+  min-height:62px;
+  padding:.7rem;
+  border:1px solid rgba(141,92,255,.34);
+  border-radius:.8rem;
+  background:linear-gradient(145deg,rgba(42,18,90,.78),rgba(4,8,28,.98));
+  color:#d9c4ff;
+  font-size:.78rem;
+  font-weight:900;
+  text-align:center;
+  letter-spacing:.04em;
+}
+
+body[data-cryptoworldz-perfect="true"] .support-card-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+body[data-cryptoworldz-perfect="true"] .cw-davis-art{
+  display:grid!important;
+  place-items:center;
+  width:100%;
+  min-height:150px;
+  overflow:hidden;
+  background:#020315;
+}
+body[data-cryptoworldz-perfect="true"] .cw-davis-art img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important}
+
+body[data-cryptoworldz-perfect="true"] .cw-link-preview img{object-fit:contain!important;background:#030419!important}
+body[data-cryptoworldz-perfect="true"] .cw-link-preview-image{background:#030419!important}
+
+body[data-cryptoworldz-perfect="true"] .oneworldz-gpt-callout{
+  width:min(1180px,calc(100% - 2rem));
+  margin:1rem auto 2rem;
+  border:1px solid rgba(141,92,255,.34);
+  border-radius:1rem;
+  background:linear-gradient(145deg,#0c0a30,#05051b)!important;
+  overflow:hidden;
+}
+body[data-cryptoworldz-perfect="true"] .oneworldz-gpt-reference{background:#030419!important}
+body[data-cryptoworldz-perfect="true"] .oneworldz-gpt-reference img{width:100%!important;height:auto!important;object-fit:contain!important}
+
+@media(max-width:900px){
+  body[data-cryptoworldz-perfect="true"] .cw-role-strip{grid-template-columns:repeat(3,minmax(0,1fr))}
+  body[data-cryptoworldz-perfect="true"] .support-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:720px){
+  body[data-cryptoworldz-perfect="true"] .cw-perfect-hero{padding:.75rem!important}
+  body[data-cryptoworldz-perfect="true"] .cw-perfect-hero .hero-art{width:100%!important;border-radius:.8rem!important}
+  body[data-cryptoworldz-perfect="true"] .cw-perfect-hero .hero-copy{margin:.75rem 0 0!important;padding:1rem!important}
+  body[data-cryptoworldz-perfect="true"] .cw-perfect-hero .hero-copy h1{font-size:clamp(2rem,10vw,3.2rem)!important}
+  body[data-cryptoworldz-perfect="true"] .cw-role-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body[data-cryptoworldz-perfect="true"] .support-card-grid{grid-template-columns:1fr!important}
+  body[data-cryptoworldz-perfect="true"] .cw-davis-art{min-height:190px}
+  body[data-cryptoworldz-perfect="true"] .media-row .production-picture img,
+  body[data-cryptoworldz-perfect="true"] .media-row img.production-picture{max-height:none!important}
+  body[data-cryptoworldz-perfect="true"] .cw-link-preview{grid-template-columns:132px minmax(0,1fr)!important}
+}
