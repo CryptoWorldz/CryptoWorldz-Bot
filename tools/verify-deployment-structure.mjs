@@ -9,9 +9,10 @@ assert.deepEqual(workflowFiles.sort(), ['main.yml'], 'exactly one active deploym
 
 const workflow = await readFile(`${workflowDir}/main.yml`, 'utf8');
 const oneWorldzOnlyMode = workflow.includes('OneWorldz First — Single Site Fix & Proof');
+const cryptoWorldzOnlyMode = workflow.includes('CryptoWorldz Second — Single Site Fix & Proof');
 const fullFleetMode = workflow.includes('OneWorldz Safe Static Fleet Deployment');
-assert.ok(oneWorldzOnlyMode || fullFleetMode, 'main.yml must be either the staged OneWorldz-only rail or the canonical static fleet rail');
-assert.ok(!(oneWorldzOnlyMode && fullFleetMode), 'main.yml cannot arm OneWorldz-only and full-fleet modes simultaneously');
+const activeModes = [oneWorldzOnlyMode, cryptoWorldzOnlyMode, fullFleetMode].filter(Boolean).length;
+assert.ok(activeModes === 1, 'main.yml must arm exactly one staged single-site rail or the canonical static fleet rail');
 
 if (oneWorldzOnlyMode) {
   const requiredOneWorldzTokens = [
@@ -45,6 +46,39 @@ if (oneWorldzOnlyMode) {
     'Rolling back OneWorldz only. No other Hostinger destination is touched.',
     'ONEWORLDZ_ONLY_HOSTINGER_DEPLOYMENT=PASS'
   ]) assert.ok(deployScript.includes(token), `OneWorldz-only deployment script missing safety invariant: ${token}`);
+} else if (cryptoWorldzOnlyMode) {
+  const requiredCryptoWorldzTokens = [
+    'CRYPTOWORLDZ BUILD → VISUAL PROOF → GPT SHARE → DEPLOY → LIVE PROOF',
+    'Build exact CryptoWorldz candidate',
+    'Prove CryptoWorldz destination contract only',
+    'Prove every CryptoWorldz route on desktop and mobile',
+    'Deploy shared OneWorldz GPT origin support',
+    'Refuse stale source and recheck exact CryptoWorldz destination',
+    'Backup, deploy and byte-prove CryptoWorldz only',
+    'Prove live CryptoWorldz desktop and mobile routes',
+    'bash .github/cryptoworldz-only-deploy.sh',
+    'cryptoworldz.xyz',
+    'domains/cryptoworldz.xyz/public_html',
+    'CRYPTOWORLDZ_FINAL PASS'
+  ];
+  for (const token of requiredCryptoWorldzTokens) assert.ok(workflow.includes(token), `main.yml missing CryptoWorldz-only recovery invariant: ${token}`);
+
+  const forbiddenFleetWrites = [
+    'bash .github/full-current-static-deploy.sh',
+    'bash .github/resume-locked-static-deploy.sh',
+    'Backup, deploy and byte-prove all Hostinger destinations',
+    'Prove every live desktop and mobile route'
+  ];
+  for (const token of forbiddenFleetWrites) assert.ok(!workflow.includes(token), `CryptoWorldz-only recovery rail must not arm fleet write path: ${token}`);
+
+  const deployScript = await readFile('.github/cryptoworldz-only-deploy.sh', 'utf8');
+  for (const token of [
+    "test \"$key\" = 'cryptoworldz'",
+    "test \"$domain\" = 'cryptoworldz.xyz'",
+    "test \"$transport\" = 'domains/cryptoworldz.xyz/public_html'",
+    'Rolling back CryptoWorldz only. No other Hostinger destination is touched.',
+    'CRYPTOWORLDZ_ONLY_HOSTINGER_DEPLOYMENT=PASS'
+  ]) assert.ok(deployScript.includes(token), `CryptoWorldz-only deployment script missing safety invariant: ${token}`);
 } else {
   const requiredFleetTokens = [
     'OneWorldz Safe Static Fleet Deployment',
@@ -96,4 +130,6 @@ for (const token of ['discoverCandidateRoutes', 'discoverSitemapRoutes', 'broken
 
 console.log(oneWorldzOnlyMode
   ? 'DEPLOYMENT_STRUCTURE=PASS staged OneWorldz-only rail + exact Hostinger root + desktop/mobile proof; other destinations write-disabled'
-  : 'DEPLOYMENT_STRUCTURE=PASS one canonical static rail + 18 Hostinger transports + dynamic desktop/mobile live proof');
+  : cryptoWorldzOnlyMode
+    ? 'DEPLOYMENT_STRUCTURE=PASS staged CryptoWorldz-only rail + exact Hostinger root + shared GPT origin proof + desktop/mobile proof; other destinations write-disabled'
+    : 'DEPLOYMENT_STRUCTURE=PASS one canonical static rail + 18 Hostinger transports + dynamic desktop/mobile live proof');
