@@ -4,6 +4,7 @@
 const http = require("node:http");
 const { URL } = require("node:url");
 const { loadProtectedEnvironment } = require("./src/protected-env");
+const { ALLOWED_ORIGINS, guideInstructions, suggestedRoutes } = require("./src/oneworldz-gpt/shared-guide");
 
 const GUARD = Object.freeze({
   profile: "oneworldz-public-low-cost-v1",
@@ -12,19 +13,6 @@ const GUARD = Object.freeze({
   perIpLimit: 8,
   dailyLimit: 1000
 });
-
-const ALLOWED_ORIGINS = new Set([
-  "https://oneworldz.com",
-  "https://www.oneworldz.com",
-  "https://donateworldz.com",
-  "https://www.donateworldz.com",
-  "https://foodworldz.com",
-  "https://www.foodworldz.com",
-  "https://learn.oneworldz.com",
-  "https://law.oneworldz.com",
-  "https://purplediamondcrew.com",
-  "https://www.purplediamondcrew.com"
-]);
 
 const protectedEnvironment = loadProtectedEnvironment({ appRoot: __dirname });
 
@@ -130,14 +118,7 @@ async function callOpenAI(message, history, page) {
       model: GUARD.model,
       store: false,
       max_output_tokens: GUARD.maxOutputTokens,
-      instructions: [
-        "You are OneWorldz GPT, the public AI guide for OneWorldz Full Support.",
-        "Keep responses clear, practical, respectful and concise.",
-        "Never request passwords, API keys, wallet seed phrases, private keys, card numbers or bank credentials.",
-        "Payments happen only on approved DonateWorldz pages, never inside chat.",
-        "Do not claim donations, sponsors, partnerships or deployments are confirmed unless verified.",
-        `Current website surface: ${String(page || "oneworldz").slice(0, 80)}.`
-      ].join(" "),
+      instructions: guideInstructions(page),
       input: [...cleanHistory(history), { role: "user", content: cleanMessage }]
     }),
     signal: AbortSignal.timeout(30000)
@@ -158,8 +139,10 @@ async function callOpenAI(message, history, page) {
       total_tokens: Number(usage.total_tokens || 0)
     }));
   }
+  const text = extractText(payload) || "I can help you find the right OneWorldz support pathway.";
   return {
-    text: extractText(payload) || "I can help you find the right OneWorldz support pathway.",
+    text,
+    suggestions: suggestedRoutes(`${cleanMessage}\n${text}`),
     response_id: payload.id || null
   };
 }
