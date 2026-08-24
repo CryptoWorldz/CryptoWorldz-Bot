@@ -2,7 +2,7 @@ name: Final Visual Fit Audit
 
 on:
   push:
-    branches: [fix/visual-fit-final-audit]
+    branches: [fix/visual-fit-final-audit, build/one-screen-18]
     paths:
       - ".github/workflows/visual-fit-audit.yml"
       - "apps/oneworldz-ecosystem-release/**"
@@ -35,6 +35,11 @@ jobs:
           npm ci
           npm run build:ecosystem-release
 
+      - name: Verify one-screen route architecture
+        run: |
+          set -euo pipefail
+          node --test apps/oneworldz-ecosystem-release/test/one-screen-architecture.test.mjs
+
       - name: Audit every final built page and every visible image slot
         run: |
           set -euo pipefail
@@ -48,11 +53,11 @@ jobs:
       - name: Enforce zero visual-fit defects
         run: |
           set -euo pipefail
-          grep -Fxq 'FINAL_BUILT_PAGES=89' audit-results/visual-fit-summary.txt
+          grep -Fxq 'FINAL_BUILT_PAGES=93' audit-results/visual-fit-summary.txt
           grep -Fxq 'TARGETS=18' audit-results/visual-fit-summary.txt
           grep -Fxq 'ASPECT_MISMATCHES=0' audit-results/visual-fit-summary.txt
           grep -Fxq 'BROKEN_IMAGES=0' audit-results/visual-fit-summary.txt
-          echo 'FINAL_VISUAL_FIT_GATE=PASS pages=89 mismatches=0 broken=0'
+          echo 'FINAL_VISUAL_FIT_GATE=PASS pages=93 mismatches=0 broken=0'
 
       - name: Preserve audit artifact
         if: always()
