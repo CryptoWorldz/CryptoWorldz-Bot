@@ -1,9 +1,12 @@
 const {
-  ONEWORLDZ_GPT_ORIGINS,
   extractOpenAIText,
-  normalizeGuideHistory,
-  suggestedGuideRoutes
+  normalizeGuideHistory
 } = require("./live-v1");
+const {
+  ALLOWED_ORIGINS,
+  guideInstructions,
+  suggestedRoutes
+} = require("../oneworldz-gpt/shared-guide");
 
 const buckets = new Map();
 
@@ -21,7 +24,7 @@ function allowRequest(req) {
 
 function setCors(req, res) {
   const origin = String(req.get("origin") || "").trim();
-  if (origin && ONEWORLDZ_GPT_ORIGINS.has(origin)) {
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
     res.set("Access-Control-Allow-Origin", origin);
     res.set("Vary", "Origin");
     res.set("Access-Control-Allow-Headers", "Content-Type");
@@ -89,18 +92,7 @@ async function askOpenAI({ message, history, page }) {
     body: JSON.stringify({
       model,
       store: false,
-      instructions: [
-        "You are OneWorldz GPT, the public AI guide for OneWorldz Full Support.",
-        "Mission: Helping the People Who Help People. Be clear, practical, respectful and concise.",
-        "OneWorldz is the human/global gateway. CryptoWorldz is the separate crypto and blockchain branch. Do not turn normal OneWorldz questions into crypto promotion.",
-        "Keep the three support pathways separate: Reagan & Children at https://donateworldz.com/reagan-children/ ; Community Impact at https://donateworldz.com/community-impact/ ; Support JayJayTeamDev at https://donateworldz.com/jayjayteamdev/ .",
-        "PurpleDiamondCrew.com is On the Ground action. FoodWorldz.com covers food relief, growing, water and food-system projects. Learn.OneWorldz.com covers practical learning and research. Law.OneWorldz.com is public-interest policy information and not individual legal advice.",
-        "The 2026–2030 Help the People movement is a planned march, concert and participation movement. Never invent a confirmed event, sponsor, partner, donation, deployment status or endorsement.",
-        "Never ask for card numbers, bank details, passwords, API keys, wallet seed phrases or private keys. Payments happen only on approved DonateWorldz/Stripe pages, never in chat.",
-        "Do not claim tax deductibility or completed fund transfers unless explicitly verified. Do not give individual legal, medical or financial advice.",
-        "When useful, finish with one short next action.",
-        `Current website surface: ${String(page || "oneworldz").slice(0, 80)}.`
-      ].join(" "),
+      instructions: guideInstructions(page),
       input: [...normalizeGuideHistory(history), { role: "user", content: cleanMessage }]
     }),
     signal: AbortSignal.timeout(45000)
@@ -116,7 +108,7 @@ async function askOpenAI({ message, history, page }) {
   const text = extractOpenAIText(payload) || "I can help you find the right OneWorldz support pathway.";
   return {
     text,
-    suggestions: suggestedGuideRoutes(`${cleanMessage}\n${text}`),
+    suggestions: suggestedRoutes(`${cleanMessage}\n${text}`),
     response_id: payload.id || null,
     model,
     moderation_mode: moderation.mode
