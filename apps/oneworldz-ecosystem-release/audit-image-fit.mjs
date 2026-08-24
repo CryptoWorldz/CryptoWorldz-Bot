@@ -152,7 +152,7 @@ for (const target of targetEntries) {
           const action = mismatch ? "REPLACE_OR_RECREATE_TO_SLOT_SHAPE" : "KEEP";
           rows.push({
             target, route, viewport: viewport.key, imageIndex: record.index,
-            src: record.src, alt: record.alt, href: record.href,
+            src: record.src, currentSrc: record.currentSrc, alt: record.alt, href: record.href,
             naturalWidth: record.naturalWidth, naturalHeight: record.naturalHeight,
             assetRatio: Number(assetRatio.toFixed(3)), assetShape,
             renderedWidth: record.renderedWidth, renderedHeight: record.renderedHeight,
@@ -189,7 +189,7 @@ const report = {
 };
 await writeFile(path.join(outDir, "visual-fit-report.json"), `${JSON.stringify(report, null, 2)}\n`, "utf8");
 
-const headers = ["target","route","viewport","src","alt","href","naturalWidth","naturalHeight","assetShape","assetRatio","renderedWidth","renderedHeight","slotShape","slotRatio","objectFit","mismatch","action"];
+const headers = ["target","route","viewport","src","currentSrc","alt","href","naturalWidth","naturalHeight","assetShape","assetRatio","renderedWidth","renderedHeight","slotShape","slotRatio","objectFit","mismatch","action"];
 const csv = [headers.join(","), ...rows.map((row) => headers.map((key) => csvCell(row[key])).join(","))].join("\n") + "\n";
 await writeFile(path.join(outDir, "visual-fit-report.csv"), csv, "utf8");
 const summaryLines = [
@@ -202,4 +202,4 @@ const summaryLines = [
 ];
 await writeFile(path.join(outDir, "visual-fit-summary.txt"), `${summaryLines.join("\n")}\n`, "utf8");
 console.log(summaryLines.join("\n"));
-for (const row of mismatches) console.log(`MISMATCH\t${row.target}\t${row.route}\t${row.viewport}\t${row.assetShape}->${row.slotShape}\t${row.src}\t${row.href || "-"}`);
+for (const row of mismatches) console.log(`MISMATCH\t${row.target}\t${row.route}\t${row.viewport}\t${row.assetShape}->${row.slotShape}\t${row.currentSrc || row.src}\t${row.href || "-"}`);
