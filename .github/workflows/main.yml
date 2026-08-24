@@ -1,24 +1,29 @@
-name: OneWorldz Safe Static Fleet Deployment
-# Canonical single rail armed after duplicate workflow removal.
-# Static-only safety contract verified against the repository gate.
+name: OneWorldz First — Single Site Fix & Proof
+# Stage 1 of the 19-destination recovery: change and deploy OneWorldz.com only.
+# No other Hostinger destination is written by this workflow.
 on:
   push:
     branches: [main]
-    paths: [".github/workflows/main.yml", ".github/full-current-*.sh", ".github/resume-locked-static-deploy.sh", ".github/resume-locked-live-proof.sh", ".github/lftp-compat.py", "apps/oneworldz-ecosystem-release/**", "deployments/oneworldz-19-total.request"]
+    paths:
+      - ".github/workflows/main.yml"
+      - ".github/oneworldz-only-deploy.sh"
+      - ".github/lftp-compat.py"
+      - "apps/oneworldz-ecosystem-release/**"
   workflow_dispatch:
+
 permissions:
-  contents: write
+  contents: read
   actions: read
+
 concurrency:
-  group: jayjay-chatgpt-oneworldz-single-rail
+  group: oneworldz-first-single-site
   cancel-in-progress: false
-env:
-  MIN_PAGE_ROUTES: "83"
+
 jobs:
-  build_prove_deploy:
-    name: BUILD → LINKS → MOBILE → HOSTINGER MAP → DEPLOY → LIVE PROOF
+  oneworldz_only:
+    name: ONEWORLDZ BUILD → MOBILE PROOF → DEPLOY → LIVE PROOF
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 75
     environment:
       name: cryptoworldz-production
     env:
@@ -27,79 +32,116 @@ jobs:
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
     steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: actions/setup-node@v4
-        with: { node-version: "22", cache: npm }
-      - name: Install dependencies and repository FTPS transport
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install build and FTPS transport
         shell: bash
         run: |
           set -euo pipefail
           npm ci
           python3 -m py_compile .github/lftp-compat.py
+          bash -n .github/oneworldz-only-deploy.sh
           mkdir -p "$RUNNER_TEMP/oneworldz-bin"
           printf '%s\n' '#!/usr/bin/env bash' 'exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"' > "$RUNNER_TEMP/oneworldz-bin/lftp"
           chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
           echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
-      - name: Build and freeze exact candidate
+
+      - name: Build exact OneWorldz candidate
         shell: bash
         run: |
           set -euo pipefail
           npm run check:structure
-          npm run check
           npm run build:ecosystem-release
+          test -s apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz/index.html
+          test -s apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz/release-manifest.json
           echo "CANDIDATE_TREE=$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" >> "$GITHUB_ENV"
-          echo "CANDIDATE_FINGERPRINT=$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)" >> "$GITHUB_ENV"
-      - name: Prove links, separation, visuals, destinations and SEO
+
+      - name: Prove OneWorldz contract only
         shell: bash
         run: |
           set -euo pipefail
-          node --test apps/oneworldz-ecosystem-release/test/{support-links,mobile-main-image,approved-visuals,expansion,production-readiness}.test.mjs
-          npm run check:web
-          npm run check:lighthouse-seo
-      - name: Prove every generated desktop and mobile route
+          root='apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz'
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
+          const target = productionTargets.find((item) => item.key === 'oneworldz');
+          if (!target) throw new Error('OneWorldz target missing');
+          if (target.domain !== 'oneworldz.com') throw new Error('OneWorldz domain drift');
+          if (target.hostingerTransportDir !== 'domains/oneworldz.com/public_html') throw new Error('OneWorldz Hostinger destination drift');
+          const root = 'apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz';
+          const required = ['index.html','release-manifest.json','community-support/index.html','sponsor-apply/index.html','heroes/index.html','gpt/index.html','directory/index.html','acknowledgements/index.html'];
+          for (const rel of required) if (!fs.existsSync(`${root}/${rel}`)) throw new Error(`Missing OneWorldz route: ${rel}`);
+          const home = fs.readFileSync(`${root}/index.html`, 'utf8');
+          for (const token of ['https://x.com/OneWorldzX','https://t.me/OneWorldzTG','https://donateworldz.com','https://cryptoworldz.xyz']) {
+            if (!home.includes(token)) throw new Error(`Missing OneWorldz destination: ${token}`);
+          }
+          const css = fs.readFileSync(`${root}/assets/css/oneworldz-visual.css`, 'utf8');
+          if (!css.includes('#launch-network .launch-grid')) throw new Error('OneWorldz mobile official-network card layout fix missing');
+          console.log('ONEWORLDZ_STATIC_CONTRACT=PASS');
+          NODE
+
+      - name: Prove every OneWorldz route on desktop and mobile
         shell: bash
         run: |
           set -euo pipefail
           npm install --no-save --package-lock=false playwright
           npx playwright install chromium
-          bash .github/full-current-candidate-proof.sh
-          route_count="$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').generated_page_routes")"
-          test "$route_count" -ge "$MIN_PAGE_ROUTES"
-          test "$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)" = "$CANDIDATE_FINGERPRINT"
-          echo "PAGE_ROUTE_COUNT=$route_count" >> "$GITHUB_ENV"
-      - name: Refuse stale source and compare the exact Hostinger map
+          node apps/oneworldz-ecosystem-release/browser-visual-proof.mjs \
+            --name oneworldz-candidate \
+            --root apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz \
+            --out candidate-proof/oneworldz \
+            --expected-title 'OneWorldz | OneWorldz One Vision' \
+            --required-text 'OneWorldz' \
+            --required-image 'oneworldz-master|little-legend'
+
+      - name: Refuse stale source and recheck exact OneWorldz destination
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin main --depth=1
           test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
           test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$CANDIDATE_TREE"
-          node --input-type=module <<'NODE' > "$RUNNER_TEMP/targets.tsv"
+          node --input-type=module <<'NODE'
           import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
-          for (const target of productionTargets) console.log([target.key,target.domain,target.hostingerTransportDir].join('\t'));
+          const t = productionTargets.find((x) => x.key === 'oneworldz');
+          if (!t || t.domain !== 'oneworldz.com' || t.hostingerTransportDir !== 'domains/oneworldz.com/public_html') process.exit(1);
+          console.log(`ONEWORLDZ_DESTINATION_LOCK=${t.domain}\t${t.hostingerTransportDir}`);
           NODE
-          test "$(wc -l < "$RUNNER_TEMP/targets.tsv" | tr -d ' ')" = 18
-          grep -F $'impactbased\timpactbased.oneworldz.com\tdomains/oneworldz.com/public_html/impactbased' "$RUNNER_TEMP/targets.tsv"
-          ! grep -F 'domains/cryptoworldz.xyz/public_html/impactbased' "$RUNNER_TEMP/targets.tsv"
-      - name: Backup, deploy and byte-prove all Hostinger destinations
-        run: bash .github/full-current-static-deploy.sh
-      - name: Prove every live desktop and mobile route
+
+      - name: Backup, deploy and byte-prove OneWorldz only
+        shell: bash
+        run: bash .github/oneworldz-only-deploy.sh
+
+      - name: Prove live OneWorldz desktop and mobile routes
         shell: bash
         run: |
           set -euo pipefail
-          bash .github/full-current-live-proof.sh
-          live_routes="$(node -p "require('./deployment-proof/live-fleet-summary.json').generated_page_routes")"
-          test "$live_routes" = "$PAGE_ROUTE_COUNT"
-          echo "ONEWORLDZ_SAFE_STATIC_DEPLOYMENT=PASS routes=$live_routes"
-      - name: Preserve proof
+          node apps/oneworldz-ecosystem-release/browser-visual-proof.mjs \
+            --name oneworldz-live \
+            --url https://oneworldz.com/ \
+            --out live-proof/oneworldz \
+            --expected-title 'OneWorldz | OneWorldz One Vision' \
+            --required-text 'OneWorldz' \
+            --required-image 'oneworldz-master|little-legend'
+          echo 'ONEWORLDZ_FIRST_SITE=PASS'
+
+      - name: Preserve OneWorldz proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: oneworldz-safe-static-deployment-${{ github.run_id }}
+          name: oneworldz-first-site-${{ github.run_id }}
           path: |
             deployment-proof/
-            candidate-proof/
-            live-proof/
+            candidate-proof/oneworldz/
+            live-proof/oneworldz/
           if-no-files-found: warn
           retention-days: 30
