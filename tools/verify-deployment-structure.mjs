@@ -4,8 +4,20 @@ import { ecosystemDestinations, ownedRootDomains, protectedDestinations } from '
 import { productionTargets, productionGate } from '../apps/oneworldz-ecosystem-release/production-targets.mjs';
 
 const workflowDir = '.github/workflows';
-const workflowFiles = (await readdir(workflowDir)).filter((name) => /\.ya?ml$/i.test(name));
-assert.deepEqual(workflowFiles.sort(), ['main.yml'], 'exactly one active deployment workflow is allowed');
+const workflowFiles = (await readdir(workflowDir)).filter((name) => /\.ya?ml$/i.test(name)).sort();
+assert.ok(workflowFiles.includes('main.yml'), 'main.yml canonical deployment workflow is required');
+const auxiliaryWorkflows = workflowFiles.filter((name) => name !== 'main.yml');
+assert.deepEqual(auxiliaryWorkflows, ['visual-fit-audit.yml'], 'only the read-only visual-fit audit may exist beside main.yml');
+const visualAuditWorkflow = await readFile(`${workflowDir}/visual-fit-audit.yml`, 'utf8');
+for (const forbidden of [
+  'FTP_HOST', 'FTP_USERNAME', 'FTP_PASSWORD', 'HOSTINGER_API_TOKEN',
+  'full-current-static-deploy.sh', 'resume-locked-static-deploy.sh',
+  'cryptoworldz-only-deploy.sh', 'oneworldz-only-deploy.sh',
+  'operation-oneworldz-gpt.sh', 'lftp'
+]) assert.ok(!visualAuditWorkflow.includes(forbidden), `visual-fit-audit.yml must remain read-only: ${forbidden}`);
+for (const required of ['Final Visual Fit Audit', 'ASPECT_MISMATCHES=0', 'BROKEN_IMAGES=0', 'contents: read']) {
+  assert.ok(visualAuditWorkflow.includes(required), `visual-fit-audit.yml missing read-only audit invariant: ${required}`);
+}
 
 const workflow = await readFile(`${workflowDir}/main.yml`, 'utf8');
 const oneWorldzOnlyMode = workflow.includes('OneWorldz First — Single Site Fix & Proof');
