@@ -152,7 +152,7 @@ for (const token of [
   'static_targets=18',
   'architecture_destinations=19',
   'candidate_policy=BUILD_CURRENT_MAIN_THEN_FREEZE_WITHIN_RUN',
-  'page_route_requirement=COUNT_CURRENT_BUILD_AND_REQUIRE_AT_LEAST_83',
+  'page_route_requirement=EXACT_CURRENT_ONE_SCREEN_ROUTE_COUNT_93',
   'production_writer=GITHUB_ACTIONS_CANONICAL_FULL_REBUILD_RAIL_ONLY'
 ]) assert.ok(state.includes(token), `deployment state missing current policy: ${token}`);
 
