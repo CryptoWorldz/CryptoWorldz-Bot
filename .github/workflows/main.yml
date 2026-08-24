@@ -1,12 +1,16 @@
 name: OneWorldz First — Single Site Fix & Proof
-# Stage 1 of the 19-destination recovery: change and deploy OneWorldz.com only.
-# No other Hostinger destination is written by this workflow.
+# Stage 1 of the 19-destination recovery: perfect and deploy OneWorldz.com only.
+# The static write is locked to domains/oneworldz.com/public_html. The protected
+# OneWorldz GPT extension is only repaired when its live contract is not healthy.
 on:
   push:
     branches: [main]
     paths:
       - ".github/workflows/main.yml"
       - ".github/oneworldz-only-deploy.sh"
+      - ".github/oneworldz-gpt-proof-or-repair.sh"
+      - ".github/full-current-oneworldz-gpt-extension.sh"
+      - ".github/operation-oneworldz-gpt.sh"
       - ".github/lftp-compat.py"
       - "tools/verify-deployment-structure.mjs"
       - "apps/oneworldz-ecosystem-release/**"
@@ -20,11 +24,15 @@ concurrency:
   group: oneworldz-first-single-site
   cancel-in-progress: true
 
+env:
+  PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
+  PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
+
 jobs:
   oneworldz_only:
     name: ONEWORLDZ BUILD → MOBILE PROOF → DEPLOY → LIVE PROOF
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 120
     environment:
       name: cryptoworldz-production
     env:
@@ -32,6 +40,8 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - name: Checkout current main
         uses: actions/checkout@v4
@@ -51,6 +61,9 @@ jobs:
           npm ci
           python3 -m py_compile .github/lftp-compat.py
           bash -n .github/oneworldz-only-deploy.sh
+          bash -n .github/oneworldz-gpt-proof-or-repair.sh
+          bash -n .github/full-current-oneworldz-gpt-extension.sh
+          bash -n .github/operation-oneworldz-gpt.sh
           mkdir -p "$RUNNER_TEMP/oneworldz-bin"
           printf '%s\n' '#!/usr/bin/env bash' 'exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"' > "$RUNNER_TEMP/oneworldz-bin/lftp"
           chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
@@ -70,6 +83,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node apps/oneworldz-ecosystem-release/verify-oneworldz-perfect.mjs
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
@@ -84,8 +98,6 @@ jobs:
           for (const token of ['https://x.com/OneWorldzX','https://t.me/OneWorldzTG','https://donateworldz.com','https://cryptoworldz.xyz']) {
             if (!home.includes(token)) throw new Error(`Missing OneWorldz destination: ${token}`);
           }
-          const css = fs.readFileSync(`${root}/assets/css/oneworldz-visual.css`, 'utf8');
-          if (!css.includes('#launch-network .launch-grid')) throw new Error('OneWorldz mobile official-network card layout fix missing');
           console.log('ONEWORLDZ_STATIC_CONTRACT=PASS');
           NODE
 
@@ -103,6 +115,13 @@ jobs:
             --required-text 'OneWorldz' \
             --required-image 'oneworldz-master|little-legend'
           bash .github/publish-progress.sh ONEWORLDZ_CANDIDATE PASS
+
+      - name: Prove or repair live OneWorldz GPT
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash .github/oneworldz-gpt-proof-or-repair.sh
+          bash .github/publish-progress.sh ONEWORLDZ_GPT PASS
 
       - name: Refuse stale source and recheck exact OneWorldz destination
         shell: bash
@@ -136,8 +155,10 @@ jobs:
             --expected-title 'OneWorldz | OneWorldz One Vision' \
             --required-text 'OneWorldz' \
             --required-image 'oneworldz-master|little-legend'
+          node apps/oneworldz-ecosystem-release/verify-oneworldz-perfect.mjs
+          bash .github/oneworldz-gpt-proof-or-repair.sh
           bash .github/publish-progress.sh ONEWORLDZ_FINAL PASS
-          echo 'ONEWORLDZ_FIRST_SITE=PASS'
+          echo 'ONEWORLDZ_FIRST_SITE=PASS VISUAL=PASS LINKS=PASS GPT=PASS FIT=PASS'
 
       - name: Publish failure state
         if: failure()
