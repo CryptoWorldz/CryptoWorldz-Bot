@@ -2,6 +2,7 @@ name: OneWorldz First — Single Site Fix & Proof
 # Stage 1 of the 19-destination recovery: perfect and deploy OneWorldz.com only.
 # The static write is locked to domains/oneworldz.com/public_html. The protected
 # OneWorldz GPT extension is only repaired when its live contract is not healthy.
+# Final live browser proof restores Playwright after any GPT repair npm ci.
 on:
   push:
     branches: [main]
