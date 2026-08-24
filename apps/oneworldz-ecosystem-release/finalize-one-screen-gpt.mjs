@@ -47,9 +47,11 @@ for (const { target, route } of routes) {
   const dir = path.join(dist, target);
   await mkdir(path.join(dir, "assets", "css"), { recursive: true });
   await mkdir(path.join(dir, "assets", "js"), { recursive: true });
+  await mkdir(path.join(dir, "assets", "oneworldz-gpt"), { recursive: true });
   await cp(path.join(source, "one-screen-gpt.css"), path.join(dir, "assets", "css", "one-screen-gpt.css"));
   await cp(path.join(source, "one-screen-gpt-bridge.js"), path.join(dir, "assets", "js", "one-screen-gpt-bridge.js"));
   await cp(path.join(source, "oneworldz-gpt.js"), path.join(dir, "assets", "js", "oneworldz-gpt.js"));
+  await cp(path.join(source, "assets", "desktop", "oneworldz", "oneworldz-gpt.png"), path.join(dir, "assets", "oneworldz-gpt", "oneworldz-gpt.png"));
   const file = path.join(dir, route, "index.html");
   let html = await readFile(file, "utf8");
   if (!html.includes('data-one-screen="true"') || !html.includes('href="#open-gpt"') || !html.includes('/assets/js/oneworldz-gpt.js')) {
@@ -65,4 +67,4 @@ for (const { target, route } of routes) {
   await refreshManifest(dir);
 }
 
-console.log("ONE_SCREEN_GPT_FINALIZER=PASS routes=3 fixed_overlay=true document_scroll=false");
+console.log("ONE_SCREEN_GPT_FINALIZER=PASS routes=3 fixed_overlay=true document_scroll=false artwork=PASS");
