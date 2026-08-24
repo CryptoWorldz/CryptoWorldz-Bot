@@ -8,19 +8,58 @@ const workflowFiles = (await readdir(workflowDir)).filter((name) => /\.ya?ml$/i.
 assert.deepEqual(workflowFiles.sort(), ['main.yml'], 'exactly one active deployment workflow is allowed');
 
 const workflow = await readFile(`${workflowDir}/main.yml`, 'utf8');
-const requiredWorkflowTokens = [
-  'OneWorldz Safe Static Fleet Deployment',
-  'Build and freeze exact candidate',
-  'Prove links, separation, visuals, destinations and SEO',
-  'Prove every generated desktop and mobile route',
-  'Refuse stale source and compare the exact Hostinger map',
-  'Backup, deploy and byte-prove all Hostinger destinations',
-  'Prove every live desktop and mobile route',
-  'CANDIDATE_TREE',
-  'CANDIDATE_FINGERPRINT',
-  'MIN_PAGE_ROUTES: "83"'
-];
-for (const token of requiredWorkflowTokens) assert.ok(workflow.includes(token), `main.yml missing current full-rebuild invariant: ${token}`);
+const oneWorldzOnlyMode = workflow.includes('OneWorldz First — Single Site Fix & Proof');
+const fullFleetMode = workflow.includes('OneWorldz Safe Static Fleet Deployment');
+assert.ok(oneWorldzOnlyMode || fullFleetMode, 'main.yml must be either the staged OneWorldz-only rail or the canonical static fleet rail');
+assert.ok(!(oneWorldzOnlyMode && fullFleetMode), 'main.yml cannot arm OneWorldz-only and full-fleet modes simultaneously');
+
+if (oneWorldzOnlyMode) {
+  const requiredOneWorldzTokens = [
+    'ONEWORLDZ BUILD → MOBILE PROOF → DEPLOY → LIVE PROOF',
+    'Build exact OneWorldz candidate',
+    'Prove OneWorldz contract only',
+    'Prove every OneWorldz route on desktop and mobile',
+    'Refuse stale source and recheck exact OneWorldz destination',
+    'Backup, deploy and byte-prove OneWorldz only',
+    'Prove live OneWorldz desktop and mobile routes',
+    'bash .github/oneworldz-only-deploy.sh',
+    'oneworldz.com',
+    'domains/oneworldz.com/public_html',
+    'ONEWORLDZ_FINAL PASS'
+  ];
+  for (const token of requiredOneWorldzTokens) assert.ok(workflow.includes(token), `main.yml missing OneWorldz-only recovery invariant: ${token}`);
+
+  const forbiddenFleetWrites = [
+    'bash .github/full-current-static-deploy.sh',
+    'bash .github/resume-locked-static-deploy.sh',
+    'Backup, deploy and byte-prove all Hostinger destinations',
+    'Prove every live desktop and mobile route'
+  ];
+  for (const token of forbiddenFleetWrites) assert.ok(!workflow.includes(token), `OneWorldz-only recovery rail must not arm fleet write path: ${token}`);
+
+  const deployScript = await readFile('.github/oneworldz-only-deploy.sh', 'utf8');
+  for (const token of [
+    "test \"$key\" = 'oneworldz'",
+    "test \"$domain\" = 'oneworldz.com'",
+    "test \"$transport\" = 'domains/oneworldz.com/public_html'",
+    'Rolling back OneWorldz only. No other Hostinger destination is touched.',
+    'ONEWORLDZ_ONLY_HOSTINGER_DEPLOYMENT=PASS'
+  ]) assert.ok(deployScript.includes(token), `OneWorldz-only deployment script missing safety invariant: ${token}`);
+} else {
+  const requiredFleetTokens = [
+    'OneWorldz Safe Static Fleet Deployment',
+    'Build and freeze exact candidate',
+    'Prove links, separation, visuals, destinations and SEO',
+    'Prove every generated desktop and mobile route',
+    'Refuse stale source and compare the exact Hostinger map',
+    'Backup, deploy and byte-prove all Hostinger destinations',
+    'Prove every live desktop and mobile route',
+    'CANDIDATE_TREE',
+    'CANDIDATE_FINGERPRINT',
+    'MIN_PAGE_ROUTES: "83"'
+  ];
+  for (const token of requiredFleetTokens) assert.ok(workflow.includes(token), `main.yml missing current full-rebuild invariant: ${token}`);
+}
 
 const forbiddenHistoricalLocks = [
   'LOCKED_SOURCE_COMMIT',
@@ -52,7 +91,9 @@ for (const token of [
 
 const browserProof = await readFile('apps/oneworldz-ecosystem-release/browser-visual-proof.mjs', 'utf8');
 for (const token of ['discoverCandidateRoutes', 'discoverSitemapRoutes', 'brokenImages', 'consoleErrors', 'failedRequests', 'totalHtmlPagesAudited']) {
-  assert.ok(browserProof.includes(token), `browser proof missing required fleet evidence: ${token}`);
+  assert.ok(browserProof.includes(token), `browser proof missing required evidence: ${token}`);
 }
 
-console.log('DEPLOYMENT_STRUCTURE=PASS one canonical static rail + 18 Hostinger transports + dynamic desktop/mobile live proof');
+console.log(oneWorldzOnlyMode
+  ? 'DEPLOYMENT_STRUCTURE=PASS staged OneWorldz-only rail + exact Hostinger root + desktop/mobile proof; other destinations write-disabled'
+  : 'DEPLOYMENT_STRUCTURE=PASS one canonical static rail + 18 Hostinger transports + dynamic desktop/mobile live proof');
