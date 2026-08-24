@@ -1,0 +1,277 @@
+/* Final visual-fit authority. Loaded last after every legacy finalizer. */
+
+/* Image cards use the artwork's real aspect ratio instead of forcing a crop/letterbox. */
+body[data-visual-fit-target] img.destination-preview,
+body[data-visual-fit-target] img.cw-link-preview-image,
+body[data-visual-fit-target] img.official-card-art,
+body[data-visual-fit-target] img.perfect-section-art,
+body[data-visual-fit-target] img.perfect-route-lead-art {
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+
+/* CryptoWorldz Davis Family uses its 16:9 family artwork in a 16:9 hole. */
+body[data-visual-fit-target="cryptoworldz"] .cw-davis-card {
+  grid-template-columns:1fr!important;
+  height:auto!important;
+}
+body[data-visual-fit-target="cryptoworldz"] .cw-davis-art {
+  display:block!important;
+  width:100%!important;
+  min-height:0!important;
+  height:auto!important;
+  aspect-ratio:16 / 9!important;
+  overflow:hidden!important;
+}
+body[data-visual-fit-target="cryptoworldz"] .cw-davis-art img {
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:16 / 9!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+
+/* Connected-link previews are allowed to be square, 3:2, 5:4, etc. The card grows to the image. */
+body[data-visual-fit-target="cryptoworldz"] .cw-link-preview-image {
+  align-self:center!important;
+}
+
+/* Secondary CryptoWorldz pages previously forced every hero into a viewport-sized crop.
+   Put the artwork in normal flow so its hole is the same shape as the source artwork. */
+body[data-visual-fit-target="cryptoworldz"] .hero:not(.cw-perfect-hero) {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  min-height:0!important;
+  height:auto!important;
+  overflow:visible!important;
+  isolation:isolate!important;
+  background:#030419!important;
+}
+body[data-visual-fit-target="cryptoworldz"] .hero:not(.cw-perfect-hero)::after {
+  display:none!important;
+}
+body[data-visual-fit-target="cryptoworldz"] .hero:not(.cw-perfect-hero) .hero-art {
+  position:relative!important;
+  inset:auto!important;
+  display:block!important;
+  width:min(1180px,100%)!important;
+  height:auto!important;
+  margin:clamp(.75rem,2vw,1.25rem) auto 0!important;
+  overflow:hidden!important;
+  border-radius:1rem!important;
+}
+body[data-visual-fit-target="cryptoworldz"] .hero:not(.cw-perfect-hero) .hero-art img {
+  position:relative!important;
+  inset:auto!important;
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+body[data-visual-fit-target="cryptoworldz"] .hero:not(.cw-perfect-hero) .hero-copy {
+  position:relative!important;
+  inset:auto!important;
+  align-self:auto!important;
+  width:min(960px,calc(100% - 2rem))!important;
+  margin:0 auto clamp(1rem,3vw,2rem)!important;
+  padding:clamp(1.2rem,3vw,2rem)!important;
+  border:1px solid rgba(130,100,255,.25)!important;
+  border-radius:1rem!important;
+  background:linear-gradient(145deg,rgba(12,11,42,.98),rgba(4,9,30,.98))!important;
+  text-shadow:none!important;
+}
+
+/* On phones, every non-OneWorldz static-site hero follows its actual mobile artwork shape.
+   Square chain art gets a square hole; portrait art gets a portrait hole; banners stay banners. */
+@media (max-width:720px) {
+  body[data-visual-fit-target]:not([data-visual-fit-target="oneworldz"]):not([data-visual-fit-target="cryptoworldz"]) .hero {
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    min-height:0!important;
+    height:auto!important;
+    overflow:visible!important;
+  }
+  body[data-visual-fit-target]:not([data-visual-fit-target="oneworldz"]):not([data-visual-fit-target="cryptoworldz"]) .hero::after {
+    display:none!important;
+  }
+  body[data-visual-fit-target]:not([data-visual-fit-target="oneworldz"]):not([data-visual-fit-target="cryptoworldz"]) .hero .hero-art {
+    position:relative!important;
+    inset:auto!important;
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    overflow:hidden!important;
+  }
+  body[data-visual-fit-target]:not([data-visual-fit-target="oneworldz"]):not([data-visual-fit-target="cryptoworldz"]) .hero .hero-art img {
+    position:relative!important;
+    inset:auto!important;
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    max-height:none!important;
+    aspect-ratio:auto!important;
+    object-fit:contain!important;
+    object-position:center!important;
+  }
+  body[data-visual-fit-target]:not([data-visual-fit-target="oneworldz"]):not([data-visual-fit-target="cryptoworldz"]) .hero .hero-copy {
+    position:relative!important;
+    inset:auto!important;
+    align-self:auto!important;
+    width:auto!important;
+    margin:0!important;
+    padding:1.4rem 18px 3rem!important;
+  }
+
+  body[data-visual-fit-target="cryptoworldz"] .hero:not(.cw-perfect-hero) .hero-art {
+    width:100%!important;
+    margin:.75rem 0 0!important;
+    border-radius:.8rem!important;
+  }
+  body[data-visual-fit-target="cryptoworldz"] .hero:not(.cw-perfect-hero) .hero-copy {
+    width:calc(100% - 1.5rem)!important;
+    margin:0 auto .75rem!important;
+    padding:1rem!important;
+  }
+
+  body[data-visual-fit-target="cryptoworldz"] .cw-davis-card {
+    grid-template-columns:1fr!important;
+  }
+}
+
+/* FINAL SLOT AUTHORITY: legacy markup puts the shape class on the wrapper, not the img.
+   These descendant rules are intentionally last and override every fixed row/min-height rule. */
+body[data-visual-fit-target] .destination-preview img,
+body[data-visual-fit-target] .cw-link-preview-image img,
+body[data-visual-fit-target] .official-card-art img,
+body[data-visual-fit-target] .perfect-section-art img,
+body[data-visual-fit-target] .perfect-route-lead-art img,
+body[data-visual-fit-target] .perfect-link-art img {
+  position:relative!important;
+  inset:auto!important;
+  display:block!important;
+  width:auto!important;
+  max-width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  align-self:center!important;
+  justify-self:center!important;
+}
+
+/* Destination cards keep their text layout while the picture itself keeps its real shape. */
+body[data-visual-fit-target="oneworldz"] .destination-preview {
+  min-height:0!important;
+  height:auto!important;
+  aspect-ratio:auto!important;
+  align-self:center!important;
+}
+body[data-visual-fit-target="oneworldz"] .destination-preview img {
+  width:100%!important;
+  min-height:0!important;
+}
+
+/* OneWorldz directory/section/route artwork: no 190/220/600px image holes. */
+body[data-visual-fit-target="oneworldz"] .visual-directory-card {
+  grid-template-rows:auto auto auto auto!important;
+  min-height:0!important;
+}
+body[data-visual-fit-target="oneworldz"] .official-card-art {
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+}
+body[data-visual-fit-target="oneworldz"] .perfect-section-art,
+body[data-visual-fit-target="oneworldz"] .perfect-route-lead-art {
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+}
+body[data-visual-fit-target="oneworldz"] .perfect-section-art img,
+body[data-visual-fit-target="oneworldz"] .perfect-route-lead-art img {
+  width:auto!important;
+  max-width:100%!important;
+  height:auto!important;
+  max-height:min(70vh,720px)!important;
+}
+
+/* CryptoWorldz connected previews: each card's image row is the artwork's own ratio.
+   Square stays square; 3:2 stays 3:2; 5:4 stays 5:4. */
+body[data-visual-fit-target="cryptoworldz"] .cw-link-preview {
+  grid-template-columns:1fr!important;
+  grid-template-rows:auto auto!important;
+  min-height:0!important;
+  height:auto!important;
+}
+body[data-visual-fit-target="cryptoworldz"] .cw-link-preview-image {
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  aspect-ratio:auto!important;
+  align-self:start!important;
+}
+body[data-visual-fit-target="cryptoworldz"] .cw-link-preview-image img {
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+}
+
+/* OneWorldz secondary route heroes use their source artwork in normal flow instead of a viewport-shaped hole. */
+body[data-visual-fit-target="oneworldz"] .hero .hero-art:not(.oneworldz-master-hero):not(.oneworldz-gpt-hero) {
+  position:relative!important;
+  inset:auto!important;
+  grid-column:2!important;
+  grid-row:1!important;
+  display:grid!important;
+  place-items:center!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  overflow:visible!important;
+}
+body[data-visual-fit-target="oneworldz"] .hero .hero-art:not(.oneworldz-master-hero):not(.oneworldz-gpt-hero) img {
+  position:relative!important;
+  inset:auto!important;
+  display:block!important;
+  width:auto!important;
+  max-width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:min(72vh,760px)!important;
+  aspect-ratio:auto!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+
+@media (max-width:720px) {
+  body[data-visual-fit-target="oneworldz"] .destination-preview {
+    aspect-ratio:auto!important;
+    min-height:0!important;
+  }
+  body[data-visual-fit-target="oneworldz"] .official-card-art {
+    height:auto!important;
+  }
+  body[data-visual-fit-target="oneworldz"] .hero .hero-art:not(.oneworldz-master-hero):not(.oneworldz-gpt-hero) {
+    grid-column:1!important;
+    grid-row:1!important;
+  }
+  body[data-visual-fit-target="oneworldz"] .hero .hero-art:not(.oneworldz-master-hero):not(.oneworldz-gpt-hero) img {
+    max-height:70svh!important;
+  }
+  body[data-visual-fit-target="cryptoworldz"] .cw-link-preview {
+    grid-template-columns:1fr!important;
+    grid-template-rows:auto auto!important;
+  }
+}

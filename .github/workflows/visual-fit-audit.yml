@@ -1,0 +1,63 @@
+name: Final Visual Fit Audit
+
+on:
+  push:
+    branches: [fix/visual-fit-final-audit]
+    paths:
+      - ".github/workflows/visual-fit-audit.yml"
+      - "apps/oneworldz-ecosystem-release/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/visual-fit-audit.yml"
+      - "apps/oneworldz-ecosystem-release/**"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Build final ecosystem exactly as production builds it
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build:ecosystem-release
+
+      - name: Audit every final built page and every visible image slot
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright
+          npx playwright install chromium
+          node apps/oneworldz-ecosystem-release/audit-image-fit.mjs \
+            --root apps/oneworldz-ecosystem-release/dist/ecosystem \
+            --out audit-results
+          cat audit-results/visual-fit-summary.txt
+
+      - name: Enforce zero visual-fit defects
+        run: |
+          set -euo pipefail
+          grep -Fxq 'FINAL_BUILT_PAGES=89' audit-results/visual-fit-summary.txt
+          grep -Fxq 'TARGETS=18' audit-results/visual-fit-summary.txt
+          grep -Fxq 'ASPECT_MISMATCHES=0' audit-results/visual-fit-summary.txt
+          grep -Fxq 'BROKEN_IMAGES=0' audit-results/visual-fit-summary.txt
+          echo 'FINAL_VISUAL_FIT_GATE=PASS pages=89 mismatches=0 broken=0'
+
+      - name: Preserve audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-visual-fit-audit
+          path: audit-results/
+          if-no-files-found: error
