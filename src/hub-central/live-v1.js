@@ -27,6 +27,8 @@ const OWNED_DOMAIN_SET = new Set(OWNED_DOMAINS);
 const ONEWORLDZ_GPT_ORIGINS = new Set([
   "https://oneworldz.com",
   "https://www.oneworldz.com",
+  "https://cryptoworldz.xyz",
+  "https://www.cryptoworldz.xyz",
   "https://donateworldz.com",
   "https://www.donateworldz.com",
   "https://foodworldz.com",
@@ -48,6 +50,7 @@ const ONEWORLDZ_PUBLIC_GPT_GUARD = Object.freeze({
 const ONEWORLDZ_GPT_ROUTES = Object.freeze({
   reagan: { label: "Reagan & Children", href: "https://donateworldz.com/reagan-children/" },
   community: { label: "Community Impact", href: "https://donateworldz.com/community-impact/" },
+  davis: { label: "Davis Family", href: "https://donateworldz.com/davis-family/" },
   jayjay: { label: "Support JayJayTeamDev", href: "https://donateworldz.com/jayjayteamdev/" },
   donate: { label: "DonateWorldz", href: "https://donateworldz.com/" },
   food: { label: "FoodWorldz", href: "https://foodworldz.com/" },
@@ -116,6 +119,7 @@ function suggestedGuideRoutes(text = "") {
   const add = (key) => { if (!keys.includes(key)) keys.push(key); };
   if (/reagan|uganda|action spreads smiles|children|orphan/.test(value)) add("reagan");
   if (/community impact|community support|35|cause|causes/.test(value)) add("community");
+  if (/davis family|davis/.test(value)) add("davis");
   if (/jayjay|teamdev|developer support|support the build/.test(value)) add("jayjay");
   if (/food|meal|hunger|garden|gardening|grow|water/.test(value)) add("food");
   if (/volunteer|on the ground|blanket|tent|repair|purple diamond/.test(value)) add("ground");
@@ -203,10 +207,10 @@ async function askOneWorldzGuide({ message, history, page, fetchImpl = globalThi
       store: false,
       max_output_tokens: ONEWORLDZ_PUBLIC_GPT_GUARD.maxOutputTokens,
       instructions: [
-        "You are OneWorldz GPT, the public AI guide for OneWorldz Full Support.",
+        "You are OneWorldz GPT, the shared public AI guide for OneWorldz Full Support and the CryptoWorldz GTP surface.",
         "Mission: Helping the People Who Help People. Be clear, practical, respectful and concise.",
         "OneWorldz is the human/global gateway. CryptoWorldz is the separate crypto and blockchain branch. Do not turn normal OneWorldz questions into crypto promotion.",
-        "Keep the three support pathways separate: Reagan & Children at https://donateworldz.com/reagan-children/ ; Community Impact at https://donateworldz.com/community-impact/ ; Support JayJayTeamDev at https://donateworldz.com/jayjayteamdev/ .",
+        "Keep the four separated support pathways separate: Reagan & Children at https://donateworldz.com/reagan-children/ ; Community Impact at https://donateworldz.com/community-impact/ ; Davis Family at https://donateworldz.com/davis-family/ ; Support JayJayTeamDev at https://donateworldz.com/jayjayteamdev/ .",
         "PurpleDiamondCrew.com is On the Ground action. FoodWorldz.com covers food relief, growing, water and food-system projects. Learn.OneWorldz.com covers practical learning and research. Law.OneWorldz.com is public-interest policy information and not individual legal advice.",
         "The 2026–2030 Help the People movement is a planned march, concert and participation movement. Never invent a confirmed event, sponsor, partner, donation, deployment status or endorsement.",
         "Never ask for card numbers, bank details, passwords, API keys, wallet seed phrases or private keys. Payments happen only on approved DonateWorldz/Stripe pages, never in chat.",
