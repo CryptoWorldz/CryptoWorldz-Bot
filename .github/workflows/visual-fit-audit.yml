@@ -6,6 +6,11 @@ on:
     paths:
       - ".github/workflows/visual-fit-audit.yml"
       - "apps/oneworldz-ecosystem-release/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/visual-fit-audit.yml"
+      - "apps/oneworldz-ecosystem-release/**"
 
 permissions:
   contents: write
@@ -41,6 +46,7 @@ jobs:
           cat audit-results/visual-fit-summary.txt
 
       - name: Publish audit results back to audit branch
+        if: github.event_name == 'push'
         run: |
           set -euo pipefail
           git config user.name "CryptoWorldz Visual Auditor"
