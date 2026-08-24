@@ -1,0 +1,23 @@
+FINAL_BUILT_PAGES=89
+TARGETS=18
+IMAGE_INSTANCES=772
+ASPECT_MISMATCHES=114
+BROKEN_IMAGES=0
+baseworldz: pages=4 images=46 mismatches=2 broken=0
+bnbworldz: pages=4 images=46 mismatches=2 broken=0
+cryptoworldz: pages=21 images=218 mismatches=75 broken=0
+donateworldz: pages=7 images=10 mismatches=1 broken=0
+ethworldz: pages=4 images=46 mismatches=2 broken=0
+foodworldz: pages=3 images=2 mismatches=0 broken=0
+hodlergalaxy: pages=3 images=8 mismatches=0 broken=0
+hodlerworldz: pages=4 images=42 mismatches=0 broken=0
+hyperworldz: pages=4 images=46 mismatches=2 broken=0
+impactbased: pages=3 images=12 mismatches=1 broken=0
+law-oneworldz: pages=3 images=2 mismatches=1 broken=0
+learn-oneworldz: pages=3 images=2 mismatches=1 broken=0
+oneworldz: pages=7 images=106 mismatches=18 broken=0
+purplediamondcrew: pages=3 images=2 mismatches=1 broken=0
+robinworldz: pages=4 images=46 mismatches=2 broken=0
+solworldz: pages=4 images=46 mismatches=2 broken=0
+suiworldz: pages=4 images=46 mismatches=2 broken=0
+xrpworldz: pages=4 images=46 mismatches=2 broken=0
