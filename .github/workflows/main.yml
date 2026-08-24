@@ -148,6 +148,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # The GPT repair rail runs npm ci when it has to repair the protected service.
+          # npm ci correctly removes the no-save Playwright package used by candidate proof,
+          # so restore the proof runtime before the final live browser verification.
+          npm install --no-save --package-lock=false playwright
+          npx playwright install chromium
           node apps/oneworldz-ecosystem-release/browser-visual-proof.mjs \
             --name oneworldz-live \
             --url https://oneworldz.com/ \
