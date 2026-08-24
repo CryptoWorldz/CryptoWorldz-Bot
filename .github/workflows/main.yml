@@ -12,12 +12,12 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   actions: read
 
 concurrency:
   group: oneworldz-first-single-site
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   oneworldz_only:
@@ -69,7 +69,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          root='apps/oneworldz-ecosystem-release/dist/ecosystem/oneworldz'
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           import { productionTargets } from './apps/oneworldz-ecosystem-release/production-targets.mjs';
@@ -102,6 +101,7 @@ jobs:
             --expected-title 'OneWorldz | OneWorldz One Vision' \
             --required-text 'OneWorldz' \
             --required-image 'oneworldz-master|little-legend'
+          bash .github/publish-progress.sh ONEWORLDZ_CANDIDATE PASS
 
       - name: Refuse stale source and recheck exact OneWorldz destination
         shell: bash
@@ -119,7 +119,10 @@ jobs:
 
       - name: Backup, deploy and byte-prove OneWorldz only
         shell: bash
-        run: bash .github/oneworldz-only-deploy.sh
+        run: |
+          set -euo pipefail
+          bash .github/oneworldz-only-deploy.sh
+          bash .github/publish-progress.sh ONEWORLDZ_HOSTINGER PASS
 
       - name: Prove live OneWorldz desktop and mobile routes
         shell: bash
@@ -132,7 +135,13 @@ jobs:
             --expected-title 'OneWorldz | OneWorldz One Vision' \
             --required-text 'OneWorldz' \
             --required-image 'oneworldz-master|little-legend'
+          bash .github/publish-progress.sh ONEWORLDZ_FINAL PASS
           echo 'ONEWORLDZ_FIRST_SITE=PASS'
+
+      - name: Publish failure state
+        if: failure()
+        shell: bash
+        run: bash .github/publish-progress.sh ONEWORLDZ_FIRST_SITE FAIL || true
 
       - name: Preserve OneWorldz proof
         if: always()
