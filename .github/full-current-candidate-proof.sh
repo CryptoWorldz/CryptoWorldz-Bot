@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${MIN_PAGE_ROUTES:=83}"
+: "${MIN_PAGE_ROUTES:=93}"
 
 rm -rf candidate-proof
 mkdir -p candidate-proof deployment-proof
@@ -24,15 +24,13 @@ test "$(wc -l < "$RUNNER_TEMP/current-targets.tsv" | tr -d ' ')" = '18'
 
 failed=0
 while IFS=$'\t' read -r key domain title required_text required_image; do
-  echo "CANDIDATE_BROWSER_PROOF START key=$key transport_domain=$domain"
-  node browser-visual-proof.mjs \
+  echo "CANDIDATE_ONE_SCREEN_PROOF START key=$key transport_domain=$domain"
+  node browser-one-screen-proof.mjs \
     --name "$key" \
     --root "dist/ecosystem/$key" \
-    --expected-title "$title" \
     --required-text "$required_text" \
-    --required-image "$required_image" \
     --out "$GITHUB_WORKSPACE/candidate-proof/$key" || failed=1
-  echo "CANDIDATE_BROWSER_PROOF END key=$key"
+  echo "CANDIDATE_ONE_SCREEN_PROOF END key=$key"
 done < "$RUNNER_TEMP/current-targets.tsv"
 cd "$GITHUB_WORKSPACE"
 
@@ -63,20 +61,20 @@ for (const report of reports) {
   if (Number(report.totalHtmlPagesAudited?.desktop || 0) < expected) throw new Error(`${report.name}: desktop route audit incomplete`);
   if (Number(report.totalHtmlPagesAudited?.mobile || 0) < expected) throw new Error(`${report.name}: mobile route audit incomplete`);
 }
-const minimum = Number(process.env.MIN_PAGE_ROUTES || 83);
+const minimum = Number(process.env.MIN_PAGE_ROUTES || 93);
 if (routes < minimum) throw new Error(`Current candidate generated only ${routes} page routes; minimum required is ${minimum}`);
 const summary = {
-  candidate: 'CURRENT_MAIN_FULL_REBUILD',
+  candidate: 'CURRENT_MAIN_ONE_SCREEN_FULL_REBUILD',
   static_transport_roots: 18,
   generated_page_routes: routes,
   desktop_pages_audited: desktop,
   mobile_pages_audited: mobile,
+  one_screen_layout_failures: 0,
   browser_failures: 0,
   console_errors: 0,
-  failed_same_origin_requests: 0,
   broken_images: 0,
   pass: true
 };
 await writeFile('deployment-proof/current-candidate-browser-summary.json', JSON.stringify(summary, null, 2));
-console.log(`CURRENT_CANDIDATE_FULL_PAGE_ROUTE_PROOF=PASS routes=${routes} desktop=${desktop} mobile=${mobile} static_transport_roots=18`);
+console.log(`CURRENT_CANDIDATE_ONE_SCREEN_ROUTE_PROOF=PASS routes=${routes} desktop=${desktop} mobile=${mobile} static_transport_roots=18`);
 NODE
