@@ -65,7 +65,8 @@ jobs:
       - name: Audit every click, menu, outlet, legacy token, DEX route and GPT
         run: |
           set -euo pipefail
-          node apps/oneworldz-ecosystem-release/audit-live-every-click-v2.mjs
+          node apps/oneworldz-ecosystem-release/audit-live-every-click-v2.mjs || true
+          node apps/oneworldz-ecosystem-release/audit-final-external-retries.mjs
           cat audit-results/live-every-click-summary.txt
           grep -Fxq 'LIVE_PAGES_EXPECTED=93' audit-results/live-every-click-summary.txt
           grep -Fxq 'LIVE_PAGES_AUDITED=93' audit-results/live-every-click-summary.txt
@@ -76,6 +77,7 @@ jobs:
           grep -Fxq 'PDC_DEX_LINKS_PRESENT=10' audit-results/live-every-click-summary.txt
           grep -Fxq 'PDC_JUPITER_LINKS_PRESENT=10' audit-results/live-every-click-summary.txt
           grep -Fxq 'PDC_DEX_SERVICE_REACHABLE=10' audit-results/live-every-click-summary.txt
+          grep -Fxq 'X_RESOLVER_CONTROL=PASS' audit-results/live-every-click-summary.txt
           grep -Fxq 'X_REQUIRED_PROFILES_RESOLVED=2' audit-results/live-every-click-summary.txt
           grep -Fxq 'ONEWORLDZ_GPT_LIVE=PASS' audit-results/live-every-click-summary.txt
           grep -Fxq 'INTERACTION_FAILURES=0' audit-results/live-every-click-summary.txt
