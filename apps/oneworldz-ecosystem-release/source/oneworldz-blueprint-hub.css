@@ -1,0 +1,216 @@
+/* OneWorldz Blueprint Hub — Robin Hood Law is the first flagship blueprint, not a replacement brand. */
+body[data-oneworldz-blueprint-hub="true"]{
+  --ow-hub-blue:#6fc7ff;
+  --ow-hub-violet:#9d7dff;
+  --ow-hub-green:#88ef8f;
+  --ow-hub-glass:rgba(3,13,29,.42);
+  --ow-hub-line:rgba(221,242,255,.34);
+  overflow:hidden!important;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub{
+  position:fixed;
+  inset:0;
+  z-index:60;
+  display:grid;
+  grid-template-rows:1fr auto;
+  min-width:320px;
+  min-height:100svh;
+  overflow:hidden;
+  isolation:isolate;
+  color:#fff;
+  padding:
+    max(102px,calc(env(safe-area-inset-top) + 88px))
+    clamp(18px,4vw,64px)
+    max(24px,calc(env(safe-area-inset-bottom) + 18px));
+  background:#020817;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-3;
+  background:
+    linear-gradient(90deg,rgba(2,8,23,.92) 0%,rgba(2,8,23,.73) 40%,rgba(2,8,23,.32) 72%,rgba(2,8,23,.58) 100%),
+    linear-gradient(0deg,rgba(2,8,23,.80),rgba(2,8,23,.08) 62%),
+    url('/assets/desktop/oneworldz/oneworldz-master.png') center/cover no-repeat;
+  filter:saturate(1.04) contrast(1.03);
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::after{
+  content:"";
+  position:absolute;
+  z-index:-2;
+  width:min(40vw,460px);
+  aspect-ratio:1;
+  right:clamp(10px,5vw,72px);
+  top:50%;
+  transform:translateY(-47%);
+  background:url('/assets/desktop/tokens/robin-hood-law.png') center/contain no-repeat;
+  opacity:.16;
+  filter:drop-shadow(0 0 42px rgba(115,230,87,.20));
+  pointer-events:none;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-content{
+  align-self:center;
+  width:min(760px,92vw);
+  max-height:calc(100svh - 255px);
+  display:grid;
+  align-content:center;
+  gap:clamp(8px,1.2vw,15px);
+  text-shadow:0 3px 26px rgba(0,0,0,.72);
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-kicker{
+  margin:0;
+  color:#cdeeff;
+  font-size:clamp(.70rem,1.2vw,.85rem);
+  font-weight:900;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-title{
+  margin:0;
+  max-width:760px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(2.7rem,6.4vw,6.5rem);
+  font-weight:500;
+  line-height:.88;
+  letter-spacing:-.045em;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-title span{
+  display:block;
+  margin-top:.18em;
+  color:#d8f3ff;
+  font-size:.46em;
+  line-height:1.05;
+  letter-spacing:-.02em;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-lead{
+  margin:0;
+  max-width:660px;
+  color:#e4edf7;
+  font-size:clamp(.94rem,1.5vw,1.16rem);
+  line-height:1.45;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation{
+  display:inline-grid;
+  width:min(620px,100%);
+  gap:3px;
+  margin-top:4px;
+  padding:10px 13px;
+  border:1px solid rgba(136,239,143,.35);
+  border-radius:15px;
+  background:linear-gradient(135deg,rgba(9,38,31,.40),rgba(7,21,41,.34));
+  box-shadow:0 15px 44px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter:blur(14px) saturate(1.15);
+  -webkit-backdrop-filter:blur(14px) saturate(1.15);
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation strong{
+  color:#aef7b3;
+  font-size:.76rem;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation span{
+  color:#e8f5ec;
+  font-size:clamp(.78rem,1.1vw,.92rem);
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathways{
+  align-self:end;
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:clamp(7px,1vw,12px);
+  width:min(1180px,100%);
+  margin:0 auto;
+  padding:0;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{
+  display:flex;
+  min-width:0;
+  min-height:54px;
+  align-items:center;
+  justify-content:center;
+  padding:9px 10px;
+  border:1px solid var(--ow-hub-line);
+  border-radius:16px;
+  background:linear-gradient(145deg,rgba(7,21,43,.48),rgba(5,13,31,.26));
+  color:#fff;
+  text-align:center;
+  text-decoration:none;
+  font-size:clamp(.68rem,.85vw,.82rem);
+  font-weight:850;
+  line-height:1.12;
+  letter-spacing:.02em;
+  box-shadow:0 12px 34px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter:blur(13px) saturate(1.2);
+  -webkit-backdrop-filter:blur(13px) saturate(1.2);
+  opacity:.82;
+  transition:opacity .18s ease,transform .18s ease,border-color .18s ease,background .18s ease;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:hover,
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:focus-visible{
+  opacity:1;
+  transform:translateY(-2px);
+  border-color:rgba(255,255,255,.72);
+  background:linear-gradient(145deg,rgba(64,145,210,.52),rgba(74,56,155,.40));
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway[data-foundation="true"]{
+  border-color:rgba(136,239,143,.48);
+  background:linear-gradient(145deg,rgba(30,98,63,.42),rgba(6,31,38,.30));
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway[data-research="true"]{
+  border-color:rgba(111,199,255,.56);
+}
+
+@media(max-width:900px){
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::after{width:min(52vw,390px);right:-7vw;opacity:.12}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathways{grid-template-columns:repeat(3,minmax(0,1fr))}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-content{max-height:calc(100svh - 290px)}
+}
+
+@media(max-width:600px){
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub{
+    padding:
+      max(88px,calc(env(safe-area-inset-top) + 72px))
+      14px
+      max(14px,calc(env(safe-area-inset-bottom) + 10px));
+  }
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::before{
+    background:
+      linear-gradient(0deg,rgba(2,8,23,.88) 0%,rgba(2,8,23,.55) 51%,rgba(2,8,23,.30) 100%),
+      url('/assets/mobile/little-legend.webp') center top/cover no-repeat;
+  }
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::after{width:66vw;right:-18vw;top:47%;opacity:.10}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-content{align-self:center;width:100%;max-height:calc(100svh - 286px);gap:8px}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-title{font-size:clamp(2.35rem,13vw,4.2rem);line-height:.91}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-lead{font-size:.87rem;line-height:1.35;max-width:94%}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation{padding:8px 10px;border-radius:13px}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation span{font-size:.75rem;line-height:1.25}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathways{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{min-height:47px;padding:6px 5px;border-radius:13px;font-size:.64rem;opacity:.86}
+}
+
+@media(max-width:370px){
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-kicker{font-size:.62rem;letter-spacing:.14em}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-lead{font-size:.81rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation span{font-size:.68rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{font-size:.59rem}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{transition:none}
+}
