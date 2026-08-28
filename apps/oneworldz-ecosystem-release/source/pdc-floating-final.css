@@ -1,0 +1,251 @@
+/* Purple Diamond Crew final visual layer.
+   The artwork is the page: fixed Home/logo top-left + Menu top-right remain authoritative.
+   Home uses six independent floating destinations. Hope Chest uses 10 semi-clear legacy tokens in 5 × 2. */
+
+body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen-position{
+  display:none!important;
+}
+
+body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen-shade{
+  background:
+    radial-gradient(circle at 52% 48%,rgba(28,7,54,.03) 0 30%,rgba(2,2,12,.12) 58%,rgba(2,2,12,.42) 100%),
+    linear-gradient(0deg,rgba(2,2,12,.34),transparent 42%,rgba(2,2,12,.18));
+}
+
+.pdc-visually-hidden{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+
+/* HOME — no shared card/tray. Six separate semi-clear buttons float through the artwork. */
+body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-home{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  pointer-events:none;
+}
+
+body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-actions{
+  position:absolute;
+  left:50%;
+  top:66%;
+  transform:translate(-50%,-50%);
+  width:max-content;
+  max-width:92vw;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(160px,220px));
+  grid-template-rows:repeat(2,minmax(58px,auto));
+  gap:clamp(14px,1.8vw,24px) clamp(16px,2.2vw,30px);
+  padding:0;
+  margin:0;
+  background:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  pointer-events:none;
+}
+
+body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button{
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 16px;
+  border:1px solid rgba(225,196,255,.38);
+  border-radius:999px;
+  background:linear-gradient(145deg,rgba(43,12,72,.31),rgba(7,7,30,.17));
+  box-shadow:0 14px 36px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.10);
+  color:#fff;
+  text-decoration:none;
+  text-align:center;
+  font-size:clamp(.72rem,.95vw,.88rem);
+  font-weight:900;
+  line-height:1.12;
+  letter-spacing:.02em;
+  text-shadow:0 2px 12px rgba(0,0,0,.72);
+  backdrop-filter:blur(9px) saturate(1.16);
+  -webkit-backdrop-filter:blur(9px) saturate(1.16);
+  opacity:.72;
+  pointer-events:auto;
+  transition:opacity .18s ease,transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease;
+}
+
+body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button:nth-child(1){transform:translateY(-8px)}
+body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button:nth-child(2){transform:translateY(5px)}
+body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button:nth-child(3){transform:translateY(-5px)}
+body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button:nth-child(4){transform:translateY(7px)}
+body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button:nth-child(5){transform:translateY(-4px)}
+body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button:nth-child(6){transform:translateY(8px)}
+
+body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button:hover,
+body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button:focus-visible{
+  opacity:1;
+  border-color:rgba(245,224,255,.82);
+  background:linear-gradient(145deg,rgba(112,37,174,.48),rgba(35,13,75,.32));
+  box-shadow:0 16px 42px rgba(0,0,0,.24),0 0 28px rgba(183,98,255,.18),inset 0 1px 0 rgba(255,255,255,.14);
+  outline:3px solid #fff;
+  outline-offset:2px;
+}
+
+/* HOPE CHEST — no content card. Ten legacy-token controls float in exactly 5 columns × 2 rows. */
+body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .screen-panel{
+  left:50%!important;
+  right:auto!important;
+  top:68%!important;
+  bottom:auto!important;
+  transform:translate(-50%,-50%);
+  width:min(1180px,94vw)!important;
+  max-height:none!important;
+  display:block!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  overflow:visible!important;
+}
+
+body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .screen-panel>.screen-eyebrow,
+body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .screen-panel>h1,
+body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .screen-panel>.screen-copy{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+
+body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-grid{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  grid-template-rows:repeat(2,minmax(64px,auto))!important;
+  gap:clamp(12px,1.5vw,20px)!important;
+}
+
+body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control{
+  min-height:64px!important;
+  padding:8px 12px!important;
+  border:1px solid rgba(225,196,255,.36)!important;
+  border-radius:999px!important;
+  background:linear-gradient(145deg,rgba(45,12,74,.30),rgba(6,6,27,.16))!important;
+  box-shadow:0 12px 32px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.09)!important;
+  color:#fff!important;
+  text-align:center!important;
+  align-content:center!important;
+  justify-items:center!important;
+  backdrop-filter:blur(9px) saturate(1.15)!important;
+  -webkit-backdrop-filter:blur(9px) saturate(1.15)!important;
+  opacity:.70;
+  transition:opacity .18s ease,transform .18s ease,border-color .18s ease,background .18s ease;
+}
+
+body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control small{
+  color:rgba(255,255,255,.72)!important;
+  font-size:.52rem!important;
+}
+
+body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control strong{
+  width:100%;
+  color:#fff!important;
+  font-size:clamp(.62rem,.85vw,.78rem)!important;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control span{
+  position:static!important;
+  color:rgba(233,203,255,.72)!important;
+  font-size:.50rem!important;
+}
+
+body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control:hover,
+body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control:focus-visible{
+  opacity:1;
+  border-color:rgba(244,223,255,.82)!important;
+  background:linear-gradient(145deg,rgba(111,34,176,.46),rgba(35,12,75,.30))!important;
+  transform:translateY(-2px);
+}
+
+@media(max-width:720px){
+  body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen-shade{
+    background:linear-gradient(0deg,rgba(3,2,13,.36),rgba(3,2,13,.08) 56%,rgba(3,2,13,.25));
+  }
+
+  body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-actions{
+    top:69%;
+    grid-template-columns:repeat(2,minmax(132px,42vw));
+    grid-template-rows:repeat(3,minmax(46px,auto));
+    gap:10px 12px;
+    max-width:94vw;
+  }
+
+  body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button{
+    min-height:46px;
+    padding:7px 10px;
+    font-size:.61rem;
+    opacity:.76;
+  }
+
+  body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button:nth-child(odd){transform:translateY(-4px)}
+  body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button:nth-child(even){transform:translateY(4px)}
+
+  body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .screen-panel{
+    top:70%!important;
+    width:96vw!important;
+  }
+
+  /* Keep the requested 2 rows × 5 tokens even on mobile; compact text preserves readability and touch size. */
+  body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-grid{
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    grid-template-rows:repeat(2,54px)!important;
+    gap:7px!important;
+  }
+
+  body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control{
+    min-height:54px!important;
+    padding:5px 3px!important;
+    border-radius:16px!important;
+  }
+
+  body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control small{
+    font-size:.38rem!important;
+    letter-spacing:.04em!important;
+  }
+
+  body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control strong{
+    font-size:.46rem!important;
+  }
+
+  body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control span{
+    font-size:.38rem!important;
+  }
+}
+
+@media(max-width:390px){
+  body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-actions{top:70%;gap:8px 9px}
+  body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button{min-height:43px;font-size:.56rem;padding:6px 7px}
+  body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-grid{gap:5px!important}
+  body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control{padding:4px 2px!important}
+  body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control small{display:none}
+  body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][data-pdc-floating="true"] .token-control strong{font-size:.43rem!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .pdc-floating-button,
+  body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .token-control{transition:none!important}
+}
