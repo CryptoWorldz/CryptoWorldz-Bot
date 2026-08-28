@@ -50,6 +50,34 @@ jobs:
           npm install --no-save --package-lock=false playwright
           npx playwright install chromium
 
+      - name: Verify all 34 live Community Facebook destinations
+        run: |
+          set -euo pipefail
+          node apps/oneworldz-ecosystem-release/audit-live-facebook.mjs
+          cat audit-results/live-facebook-summary.txt
+          grep -Fxq 'COMMUNITY_FACEBOOK_EXPECTED=34' audit-results/live-facebook-summary.txt
+          grep -Fxq 'COMMUNITY_FACEBOOK_PASSED=34' audit-results/live-facebook-summary.txt
+          grep -Fxq 'COMMUNITY_FACEBOOK_FAILED=0' audit-results/live-facebook-summary.txt
+          grep -Fxq 'DAVIS_SEPARATE=PASS' audit-results/live-facebook-summary.txt
+          grep -Fxq 'REAGAN_SEPARATE=PASS' audit-results/live-facebook-summary.txt
+          grep -Fxq 'COMMUNITY_FACEBOOK_GATE=PASS' audit-results/live-facebook-summary.txt
+
+      - name: Audit every live click, menu, outlet, legacy token, DEX route and GPT
+        run: |
+          set -euo pipefail
+          node apps/oneworldz-ecosystem-release/audit-live-every-click.mjs
+          cat audit-results/live-every-click-summary.txt
+          grep -Fxq 'LIVE_PAGES_EXPECTED=93' audit-results/live-every-click-summary.txt
+          grep -Fxq 'LIVE_PAGES_AUDITED=93' audit-results/live-every-click-summary.txt
+          grep -Fxq 'HOME_LINKS_AUDITED=93' audit-results/live-every-click-summary.txt
+          grep -Fxq 'MENU_BUTTONS_AUDITED=93' audit-results/live-every-click-summary.txt
+          grep -Fxq 'COMMUNITY_FACEBOOK_PASSED=34' audit-results/live-every-click-summary.txt
+          grep -Fxq 'PDC_LEGACY_TOKENS_AUDITED=10' audit-results/live-every-click-summary.txt
+          grep -Fxq 'PDC_DEX_LINKS_PRESENT=10' audit-results/live-every-click-summary.txt
+          grep -Fxq 'ONEWORLDZ_GPT_LIVE=PASS' audit-results/live-every-click-summary.txt
+          grep -Fxq 'INTERACTION_FAILURES=0' audit-results/live-every-click-summary.txt
+          grep -Fxq 'EVERY_CLICK_GATE=PASS' audit-results/live-every-click-summary.txt
+
       - name: Prove every route fits one viewport without clipping or normal scrolling
         run: |
           set -euo pipefail
