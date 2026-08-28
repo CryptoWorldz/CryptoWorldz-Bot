@@ -1,12 +1,15 @@
 /* OneWorldz ecosystem universal floating shell.
    Applied to every one-screen destination except the bespoke OneWorldz Blueprint Hub and Purple Diamond Crew layouts. */
+body[data-universal-floating="true"] .screen::before{
+  inset:0!important;
+  background:var(--screen-bg) center/cover no-repeat!important;
+  filter:none!important;
+  transform:none!important;
+  opacity:1!important;
+}
+body[data-universal-floating="true"] .screen-art{background:transparent!important}
 body[data-universal-floating="true"] .screen-art img{
-  width:100%!important;
-  height:100%!important;
-  max-width:none!important;
-  max-height:none!important;
-  object-fit:cover!important;
-  object-position:center!important;
+  visibility:hidden!important;
 }
 body[data-universal-floating="true"] .screen-shade{
   background:linear-gradient(180deg,rgba(2,4,16,.38) 0%,rgba(2,4,16,.08) 33%,rgba(2,4,16,.22) 58%,rgba(2,4,16,.62) 100%),linear-gradient(90deg,rgba(1,3,14,.54),transparent 52%,rgba(1,3,14,.16))!important;
@@ -120,8 +123,8 @@ body[data-universal-floating="true"] .screen-position{
   opacity:.62;
 }
 @media(max-width:720px){
-  body[data-universal-floating="true"] .screen-art img{
-    object-position:center top!important;
+  body[data-universal-floating="true"] .screen::before{
+    background:var(--screen-bg-mobile) center top/cover no-repeat!important;
   }
   body[data-universal-floating="true"] .screen-shade{
     background:linear-gradient(180deg,rgba(2,4,16,.28) 0%,rgba(2,4,16,.05) 31%,rgba(2,4,16,.22) 55%,rgba(2,4,16,.64) 100%)!important;
