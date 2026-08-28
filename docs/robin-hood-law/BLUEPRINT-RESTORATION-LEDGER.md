@@ -144,6 +144,28 @@ Problem → Research → Evidence → Compare Systems → Blueprint → Public E
 
 Robin Hood Law becomes the first flagship Blueprint System.
 
+## OneWorldz Mission
+
+ONEWORLDZ MISSION — END WORLD HUNGER FOR GOOD 💜
+
+Build the blueprint, systems, partnerships and real-world action so no child, family or community is left without food, clean water, dignity or hope.
+
+## OneWorldz Visual System — Floating Controls Rule
+
+The approved PurpleDiamondCrew.com concept provides the interaction reference for the OneWorldz Hub:
+
+- One full-page focal background image rather than a separate boxed interface.
+- The background artwork and focal subject remain visibly intact.
+- Transparent or half-invisible controls sit over the composition so the artwork remains visible through them.
+- Controls remain readable and reachable without becoming a bottom menu tray or a box of buttons.
+- On OneWorldz, the main pathway controls form a loose floating cluster just below absolute centre of the screen.
+- Each button is an independent glass-like pill with no shared panel/background and a slight stagger so it feels placed within the scene.
+- Desktop: loose 3 × 2 floating formation for the six main pathways.
+- Mobile: loose 2 × 3 floating formation in the comfortable middle-lower thumb-reach zone.
+- OneWorldzOneVision, the hunger mission, Robin Hood Law Blueprint 001 and OneWorldz GPT research pathway remain clear without introducing document scroll.
+
+This carries forward the Purple Diamond Crew Hope Chest/fireplace interaction principle without copying Purple Diamond Crew branding.
+
 ## Working Definition
 
 Robin Hood Law is a public-interest law and policy blueprint project aimed at designing fairer systems that protect people, expand equal opportunity, strengthen accountability and use evidence to improve laws, policy and public institutions.
