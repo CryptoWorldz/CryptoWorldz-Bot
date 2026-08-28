@@ -3,7 +3,9 @@
    Home uses six independent floating destinations. Hope Chest uses 10 semi-clear legacy tokens in 5 × 2. */
 
 body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen-position{display:none!important}
-body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen-art img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center!important}
+body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen::before{inset:0!important;background:var(--screen-bg) center/cover no-repeat!important;filter:none!important;transform:none!important;opacity:1!important}
+body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen-art{background:transparent!important}
+body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen-art img{visibility:hidden!important}
 body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen-shade{background:radial-gradient(circle at 52% 48%,rgba(28,7,54,.02) 0 30%,rgba(2,2,12,.08) 58%,rgba(2,2,12,.32) 100%),linear-gradient(0deg,rgba(2,2,12,.28),transparent 42%,rgba(2,2,12,.12))}
 .pdc-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 
@@ -32,7 +34,7 @@ body[data-visual-fit-target="purplediamondcrew"][data-route="legacy-tokens"][dat
 .pdc-market-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin-top:.75rem}.pdc-market-actions .glass-button{min-height:2.6rem!important;padding:.5rem .55rem!important;border-radius:.75rem!important;font-size:.65rem!important}.pdc-market-note{margin:.65rem 0 0;color:rgba(255,255,255,.70);font-size:.62rem;line-height:1.35}
 
 @media(max-width:720px){
-  body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen-art img{object-position:center top!important}
+  body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen::before{background:var(--screen-bg-mobile) center top/cover no-repeat!important}
   body[data-visual-fit-target="purplediamondcrew"][data-pdc-floating="true"] .screen-shade{background:linear-gradient(0deg,rgba(3,2,13,.28),rgba(3,2,13,.04) 56%,rgba(3,2,13,.18))}
   body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-actions{top:76%;grid-template-columns:repeat(2,minmax(120px,39vw));grid-template-rows:repeat(3,minmax(39px,auto));gap:8px 10px;max-width:90vw}
   body[data-visual-fit-target="purplediamondcrew"][data-route="home"][data-pdc-floating="true"] .pdc-floating-button{min-height:39px;padding:5px 8px;font-size:.54rem;opacity:.55}
