@@ -1,0 +1,343 @@
+/* OneWorldz Blueprint Hub — Robin Hood Law is the first flagship blueprint, not a replacement brand.
+   Visual rule inherited from the approved Purple Diamond Crew concept: one full-page focal image,
+   artwork remains visible, and each control floats independently through the composition. */
+body[data-oneworldz-blueprint-hub="true"]{
+  --ow-hub-blue:#6fc7ff;
+  --ow-hub-violet:#9d7dff;
+  --ow-hub-green:#88ef8f;
+  --ow-hub-line:rgba(221,242,255,.38);
+  overflow:hidden!important;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub{
+  position:fixed;
+  inset:0;
+  z-index:60;
+  min-width:320px;
+  min-height:100svh;
+  overflow:hidden;
+  isolation:isolate;
+  color:#fff;
+  background:#020817;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-3;
+  background:
+    linear-gradient(90deg,rgba(2,8,23,.90) 0%,rgba(2,8,23,.68) 39%,rgba(2,8,23,.25) 72%,rgba(2,8,23,.48) 100%),
+    linear-gradient(0deg,rgba(2,8,23,.76),rgba(2,8,23,.06) 64%),
+    url('/assets/desktop/oneworldz/oneworldz-master.png') center/cover no-repeat;
+  filter:saturate(1.04) contrast(1.03);
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::after{
+  content:"";
+  position:absolute;
+  z-index:-2;
+  width:min(40vw,460px);
+  aspect-ratio:1;
+  right:clamp(10px,5vw,72px);
+  top:48%;
+  transform:translateY(-50%);
+  background:url('/assets/desktop/tokens/robin-hood-law.png') center/contain no-repeat;
+  opacity:.14;
+  filter:drop-shadow(0 0 42px rgba(115,230,87,.20));
+  pointer-events:none;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-content{
+  position:absolute;
+  z-index:2;
+  top:max(92px,calc(env(safe-area-inset-top) + 76px));
+  left:clamp(18px,5vw,72px);
+  width:min(720px,88vw);
+  max-height:43svh;
+  display:grid;
+  align-content:start;
+  gap:clamp(6px,.8vw,11px);
+  text-shadow:0 3px 26px rgba(0,0,0,.72);
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-kicker{
+  margin:0;
+  color:#cdeeff;
+  font-size:clamp(.68rem,1.1vw,.83rem);
+  font-weight:900;
+  letter-spacing:.20em;
+  text-transform:uppercase;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-title{
+  margin:0;
+  max-width:720px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(2.45rem,5.6vw,5.7rem);
+  font-weight:500;
+  line-height:.89;
+  letter-spacing:-.045em;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-title span{
+  display:block;
+  margin-top:.16em;
+  color:#d8f3ff;
+  font-size:.45em;
+  line-height:1.04;
+  letter-spacing:-.02em;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-lead{
+  margin:0;
+  max-width:650px;
+  color:#e4edf7;
+  font-size:clamp(.86rem,1.25vw,1.03rem);
+  line-height:1.34;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission{
+  display:grid;
+  width:min(680px,100%);
+  gap:2px;
+  padding:8px 11px;
+  border:1px solid rgba(213,174,255,.46);
+  border-radius:14px;
+  background:linear-gradient(135deg,rgba(51,20,76,.38),rgba(10,25,53,.28));
+  box-shadow:0 15px 48px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.09);
+  backdrop-filter:blur(12px) saturate(1.14);
+  -webkit-backdrop-filter:blur(12px) saturate(1.14);
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission small{
+  color:#e4c9ff;
+  font-size:.61rem;
+  font-weight:900;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission strong{
+  color:#fff;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(1.08rem,1.8vw,1.52rem);
+  line-height:1.04;
+  letter-spacing:-.015em;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission span{
+  color:#f2eefa;
+  font-size:clamp(.70rem,.92vw,.83rem);
+  line-height:1.26;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation{
+  display:inline-grid;
+  width:min(610px,100%);
+  gap:2px;
+  padding:7px 10px;
+  border:1px solid rgba(136,239,143,.32);
+  border-radius:13px;
+  background:linear-gradient(135deg,rgba(9,38,31,.30),rgba(7,21,41,.24));
+  box-shadow:0 14px 40px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.07);
+  backdrop-filter:blur(11px) saturate(1.12);
+  -webkit-backdrop-filter:blur(11px) saturate(1.12);
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation strong{
+  color:#aef7b3;
+  font-size:.68rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation span{
+  color:#e8f5ec;
+  font-size:clamp(.70rem,.92vw,.82rem);
+}
+
+/* Floating pathway field: no tray, no footer box, no shared background.
+   It sits just below absolute centre and preserves the full artwork underneath. */
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathways{
+  position:absolute;
+  z-index:4;
+  left:50%;
+  top:65%;
+  transform:translate(-50%,-50%);
+  display:grid;
+  grid-template-columns:repeat(3,minmax(150px,220px));
+  gap:clamp(12px,1.6vw,22px) clamp(14px,2vw,28px);
+  width:max-content;
+  max-width:88vw;
+  margin:0;
+  padding:0;
+  background:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  pointer-events:none;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{
+  display:flex;
+  min-width:0;
+  min-height:58px;
+  align-items:center;
+  justify-content:center;
+  padding:10px 16px;
+  border:1px solid var(--ow-hub-line);
+  border-radius:999px;
+  background:linear-gradient(145deg,rgba(7,21,43,.34),rgba(5,13,31,.18));
+  color:#fff;
+  text-align:center;
+  text-decoration:none;
+  font-size:clamp(.70rem,.9vw,.86rem);
+  font-weight:850;
+  line-height:1.12;
+  letter-spacing:.02em;
+  box-shadow:0 12px 34px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter:blur(10px) saturate(1.18);
+  -webkit-backdrop-filter:blur(10px) saturate(1.18);
+  opacity:.72;
+  pointer-events:auto;
+  transition:opacity .18s ease,transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease;
+}
+
+/* Slight stagger makes the controls feel placed in the scene rather than packed in a panel. */
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:nth-child(1){transform:translateY(-8px)}
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:nth-child(2){transform:translateY(5px)}
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:nth-child(3){transform:translateY(-5px)}
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:nth-child(4){transform:translateY(7px)}
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:nth-child(5){transform:translateY(-4px)}
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:nth-child(6){transform:translateY(8px)}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:hover,
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:focus-visible{
+  opacity:1;
+  border-color:rgba(255,255,255,.76);
+  background:linear-gradient(145deg,rgba(64,145,210,.48),rgba(74,56,155,.34));
+  box-shadow:0 16px 40px rgba(0,0,0,.24),0 0 28px rgba(111,199,255,.12),inset 0 1px 0 rgba(255,255,255,.14);
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway[data-foundation="true"]{
+  border-color:rgba(136,239,143,.48);
+  background:linear-gradient(145deg,rgba(30,98,63,.30),rgba(6,31,38,.18));
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway[data-research="true"]{
+  border-color:rgba(111,199,255,.58);
+}
+
+/* Every OneWorldz route keeps the mission visible without creating document scroll. */
+body[data-oneworldz-mission="true"] .ow-mission-beacon{
+  position:fixed;
+  z-index:52;
+  top:94px;
+  right:clamp(12px,2vw,26px);
+  display:grid;
+  gap:2px;
+  width:min(360px,calc(100vw - 28px));
+  padding:8px 11px;
+  border:1px solid rgba(213,174,255,.42);
+  border-radius:14px;
+  background:linear-gradient(135deg,rgba(45,18,72,.50),rgba(4,17,40,.42));
+  box-shadow:0 14px 38px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.09);
+  color:#fff;
+  text-align:right;
+  text-shadow:0 2px 14px rgba(0,0,0,.66);
+  backdrop-filter:blur(12px) saturate(1.14);
+  -webkit-backdrop-filter:blur(12px) saturate(1.14);
+  pointer-events:none;
+}
+
+body[data-oneworldz-mission="true"] .ow-mission-beacon strong{
+  color:#fff;
+  font-size:.66rem;
+  font-weight:950;
+  letter-spacing:.07em;
+  line-height:1.15;
+}
+
+body[data-oneworldz-mission="true"] .ow-mission-beacon span{
+  color:#eadff4;
+  font-size:.62rem;
+  font-weight:800;
+  letter-spacing:.06em;
+  line-height:1.15;
+}
+
+@media(max-width:900px){
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::after{width:min(50vw,390px);right:-7vw;opacity:.11}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-content{width:min(680px,90vw);max-height:44svh}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathways{top:66%;grid-template-columns:repeat(3,minmax(130px,190px));gap:12px 16px}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{min-height:54px;padding:9px 12px}
+}
+
+@media(max-width:600px){
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::before{
+    background:
+      linear-gradient(0deg,rgba(2,8,23,.82) 0%,rgba(2,8,23,.48) 54%,rgba(2,8,23,.24) 100%),
+      url('/assets/mobile/little-legend.webp') center top/cover no-repeat;
+  }
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::after{width:64vw;right:-20vw;top:47%;opacity:.09}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-content{
+    top:max(82px,calc(env(safe-area-inset-top) + 66px));
+    left:14px;
+    width:calc(100vw - 28px);
+    max-height:45svh;
+    gap:5px;
+  }
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-kicker{font-size:.58rem;letter-spacing:.13em}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-title{font-size:clamp(2rem,11vw,3.55rem);line-height:.91}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-lead{font-size:.74rem;line-height:1.22;max-width:96%}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission{padding:6px 8px;border-radius:12px;gap:1px}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission small{font-size:.51rem;letter-spacing:.14em}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission strong{font-size:.94rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission span{font-size:.60rem;line-height:1.17}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation{padding:6px 8px;border-radius:12px}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation strong{font-size:.56rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation span{font-size:.60rem;line-height:1.17}
+
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathways{
+    top:69%;
+    grid-template-columns:repeat(2,minmax(132px,42vw));
+    gap:10px 12px;
+    max-width:94vw;
+  }
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{
+    min-height:46px;
+    padding:7px 9px;
+    border-radius:999px;
+    font-size:.61rem;
+    opacity:.76;
+  }
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:nth-child(odd){transform:translateY(-4px)}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway:nth-child(even){transform:translateY(4px)}
+
+  body[data-oneworldz-mission="true"] .ow-mission-beacon{
+    top:76px;
+    left:10px;
+    right:10px;
+    width:auto;
+    padding:6px 9px;
+    border-radius:12px;
+    text-align:center;
+  }
+  body[data-oneworldz-mission="true"] .ow-mission-beacon strong{font-size:.61rem}
+  body[data-oneworldz-mission="true"] .ow-mission-beacon span{font-size:.56rem}
+}
+
+@media(max-width:370px){
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-content{top:76px;gap:4px}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-kicker{font-size:.53rem;letter-spacing:.10em}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-title{font-size:1.86rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-lead{font-size:.68rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission span{font-size:.56rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation span{font-size:.56rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathways{top:70%;grid-template-columns:repeat(2,minmax(122px,43vw));gap:8px 9px}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{min-height:43px;font-size:.56rem;padding:6px 7px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{transition:none}
+}
