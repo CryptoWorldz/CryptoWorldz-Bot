@@ -59,7 +59,7 @@ body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-content{
   max-height:calc(100svh - 255px);
   display:grid;
   align-content:center;
-  gap:clamp(8px,1.2vw,15px);
+  gap:clamp(7px,1vw,13px);
   text-shadow:0 3px 26px rgba(0,0,0,.72);
 }
 
@@ -76,7 +76,7 @@ body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-title{
   margin:0;
   max-width:760px;
   font-family:Georgia,"Times New Roman",serif;
-  font-size:clamp(2.7rem,6.4vw,6.5rem);
+  font-size:clamp(2.55rem,6vw,6.1rem);
   font-weight:500;
   line-height:.88;
   letter-spacing:-.045em;
@@ -95,16 +95,50 @@ body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-lead{
   margin:0;
   max-width:660px;
   color:#e4edf7;
-  font-size:clamp(.94rem,1.5vw,1.16rem);
-  line-height:1.45;
+  font-size:clamp(.90rem,1.35vw,1.08rem);
+  line-height:1.4;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission{
+  display:grid;
+  width:min(690px,100%);
+  gap:3px;
+  padding:10px 13px;
+  border:1px solid rgba(213,174,255,.50);
+  border-radius:15px;
+  background:linear-gradient(135deg,rgba(51,20,76,.48),rgba(10,25,53,.40));
+  box-shadow:0 15px 48px rgba(0,0,0,.22),0 0 32px rgba(170,104,255,.08),inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter:blur(15px) saturate(1.18);
+  -webkit-backdrop-filter:blur(15px) saturate(1.18);
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission small{
+  color:#e4c9ff;
+  font-size:.64rem;
+  font-weight:900;
+  letter-spacing:.19em;
+  text-transform:uppercase;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission strong{
+  color:#fff;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(1.18rem,2vw,1.7rem);
+  line-height:1.05;
+  letter-spacing:-.015em;
+}
+
+body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission span{
+  color:#f2eefa;
+  font-size:clamp(.74rem,1vw,.88rem);
+  line-height:1.32;
 }
 
 body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation{
   display:inline-grid;
   width:min(620px,100%);
   gap:3px;
-  margin-top:4px;
-  padding:10px 13px;
+  padding:9px 12px;
   border:1px solid rgba(136,239,143,.35);
   border-radius:15px;
   background:linear-gradient(135deg,rgba(9,38,31,.40),rgba(7,21,41,.34));
@@ -115,14 +149,14 @@ body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation{
 
 body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation strong{
   color:#aef7b3;
-  font-size:.76rem;
+  font-size:.72rem;
   letter-spacing:.13em;
   text-transform:uppercase;
 }
 
 body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation span{
   color:#e8f5ec;
-  font-size:clamp(.78rem,1.1vw,.92rem);
+  font-size:clamp(.74rem,1vw,.86rem);
 }
 
 body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathways{
@@ -176,6 +210,44 @@ body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway[data-research="t
   border-color:rgba(111,199,255,.56);
 }
 
+/* Every OneWorldz route keeps the mission visible without creating document scroll. */
+body[data-oneworldz-mission="true"] .ow-mission-beacon{
+  position:fixed;
+  z-index:52;
+  top:94px;
+  right:clamp(12px,2vw,26px);
+  display:grid;
+  gap:2px;
+  width:min(360px,calc(100vw - 28px));
+  padding:8px 11px;
+  border:1px solid rgba(213,174,255,.42);
+  border-radius:14px;
+  background:linear-gradient(135deg,rgba(45,18,72,.54),rgba(4,17,40,.48));
+  box-shadow:0 14px 38px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.09);
+  color:#fff;
+  text-align:right;
+  text-shadow:0 2px 14px rgba(0,0,0,.66);
+  backdrop-filter:blur(14px) saturate(1.16);
+  -webkit-backdrop-filter:blur(14px) saturate(1.16);
+  pointer-events:none;
+}
+
+body[data-oneworldz-mission="true"] .ow-mission-beacon strong{
+  color:#fff;
+  font-size:.66rem;
+  font-weight:950;
+  letter-spacing:.07em;
+  line-height:1.15;
+}
+
+body[data-oneworldz-mission="true"] .ow-mission-beacon span{
+  color:#eadff4;
+  font-size:.62rem;
+  font-weight:800;
+  letter-spacing:.06em;
+  line-height:1.15;
+}
+
 @media(max-width:900px){
   body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::after{width:min(52vw,390px);right:-7vw;opacity:.12}
   body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathways{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -185,7 +257,7 @@ body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway[data-research="t
 @media(max-width:600px){
   body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub{
     padding:
-      max(88px,calc(env(safe-area-inset-top) + 72px))
+      max(86px,calc(env(safe-area-inset-top) + 70px))
       14px
       max(14px,calc(env(safe-area-inset-bottom) + 10px));
   }
@@ -195,20 +267,39 @@ body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway[data-research="t
       url('/assets/mobile/little-legend.webp') center top/cover no-repeat;
   }
   body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-hub::after{width:66vw;right:-18vw;top:47%;opacity:.10}
-  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-content{align-self:center;width:100%;max-height:calc(100svh - 286px);gap:8px}
-  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-title{font-size:clamp(2.35rem,13vw,4.2rem);line-height:.91}
-  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-lead{font-size:.87rem;line-height:1.35;max-width:94%}
-  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation{padding:8px 10px;border-radius:13px}
-  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation span{font-size:.75rem;line-height:1.25}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-content{align-self:center;width:100%;max-height:calc(100svh - 286px);gap:6px}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-title{font-size:clamp(2.15rem,11.8vw,3.9rem);line-height:.91}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-lead{font-size:.79rem;line-height:1.25;max-width:96%}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission{padding:7px 9px;border-radius:12px;gap:2px}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission small{font-size:.55rem;letter-spacing:.15em}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission strong{font-size:1rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission span{font-size:.66rem;line-height:1.2}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation{padding:7px 9px;border-radius:12px}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation strong{font-size:.61rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation span{font-size:.66rem;line-height:1.2}
   body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathways{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{min-height:47px;padding:6px 5px;border-radius:13px;font-size:.64rem;opacity:.86}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{min-height:45px;padding:5px 4px;border-radius:12px;font-size:.61rem;opacity:.87}
+
+  body[data-oneworldz-mission="true"] .ow-mission-beacon{
+    top:76px;
+    left:10px;
+    right:10px;
+    width:auto;
+    padding:6px 9px;
+    border-radius:12px;
+    text-align:center;
+  }
+  body[data-oneworldz-mission="true"] .ow-mission-beacon strong{font-size:.61rem}
+  body[data-oneworldz-mission="true"] .ow-mission-beacon span{font-size:.56rem}
 }
 
 @media(max-width:370px){
-  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-kicker{font-size:.62rem;letter-spacing:.14em}
-  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-lead{font-size:.81rem}
-  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation span{font-size:.68rem}
-  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{font-size:.59rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-kicker{font-size:.58rem;letter-spacing:.12em}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-title{font-size:2rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-lead{font-size:.73rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-mission span{font-size:.61rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-foundation span{font-size:.61rem}
+  body[data-oneworldz-blueprint-hub="true"] .ow-blueprint-pathway{font-size:.56rem}
 }
 
 @media(prefers-reduced-motion:reduce){
