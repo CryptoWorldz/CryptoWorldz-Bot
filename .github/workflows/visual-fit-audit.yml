@@ -50,6 +50,18 @@ jobs:
           npm install --no-save --package-lock=false playwright
           npx playwright install chromium
 
+      - name: Verify all 34 live Community Facebook destinations
+        run: |
+          set -euo pipefail
+          node apps/oneworldz-ecosystem-release/audit-live-facebook.mjs
+          cat audit-results/live-facebook-summary.txt
+          grep -Fxq 'COMMUNITY_FACEBOOK_EXPECTED=34' audit-results/live-facebook-summary.txt
+          grep -Fxq 'COMMUNITY_FACEBOOK_PASSED=34' audit-results/live-facebook-summary.txt
+          grep -Fxq 'COMMUNITY_FACEBOOK_FAILED=0' audit-results/live-facebook-summary.txt
+          grep -Fxq 'DAVIS_SEPARATE=PASS' audit-results/live-facebook-summary.txt
+          grep -Fxq 'REAGAN_SEPARATE=PASS' audit-results/live-facebook-summary.txt
+          grep -Fxq 'COMMUNITY_FACEBOOK_GATE=PASS' audit-results/live-facebook-summary.txt
+
       - name: Prove every route fits one viewport without clipping or normal scrolling
         run: |
           set -euo pipefail
