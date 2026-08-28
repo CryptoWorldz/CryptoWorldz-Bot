@@ -54,6 +54,24 @@ function floatingHomeMarkup() {
   </section>`;
 }
 
+function injectMarketActions(html) {
+  if (html.includes('id="token-dex"')) return html;
+  const verified = '<a class="glass-button primary" id="token-link" target="_blank" rel="noopener noreferrer">Open verified Solscan record</a>';
+  if (!html.includes(verified)) throw new Error("PDC verified Solscan token link anchor not found");
+  const replacement = `<div class="pdc-market-actions" aria-label="Legacy token market pathways">
+    <a class="glass-button primary" id="token-link" target="_blank" rel="noopener noreferrer">Verified Solscan</a>
+    <a class="glass-button" id="token-dex" target="_blank" rel="noopener noreferrer">DEX Screener</a>
+    <a class="glass-button" id="token-swap" target="_blank" rel="noopener noreferrer">Connect Wallet • Buy / Swap</a>
+  </div><p class="pdc-market-note">External market tools only. Verify the contract address before connecting your own wallet. Purple Diamond Crew / OneWorldz never asks for your seed phrase, never holds your wallet keys and does not promise returns.</p>`;
+  return html.replace(verified, replacement);
+}
+
+function injectMarketScript(html) {
+  if (html.includes('data-pdc-market-links="true"')) return html;
+  const script = `<script data-pdc-market-links="true">(()=>{const dex=document.getElementById("token-dex"),swap=document.getElementById("token-swap");document.querySelectorAll("[data-token-index]").forEach(btn=>btn.addEventListener("click",()=>{const t=window.ONE_SCREEN_DATA?.tokens?.[Number(btn.dataset.tokenIndex)];if(!t)return;const mint=encodeURIComponent(t.address);if(dex)dex.href="https://dexscreener.com/solana/"+mint;if(swap)swap.href="https://jup.ag/swap/SOL-"+mint;}));})();</script>`;
+  return html.replace("</body>", `${script}</body>`);
+}
+
 async function refreshManifest() {
   const manifestPath = path.join(target, "release-manifest.json");
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
@@ -66,12 +84,13 @@ async function refreshManifest() {
   manifest.generated_at = new Date().toISOString();
   manifest.files = files;
   manifest.pdc_floating_experience = {
-    version: "full-background-floating-v1",
+    version: "full-background-floating-v2",
     home: {
       full_background_artwork: true,
       floating_pathways: 6,
       desktop_layout: "3 columns × 2 rows",
       mobile_layout: "2 columns × 3 rows",
+      smaller_lower_more_transparent_controls: true,
       shared_button_tray: false
     },
     hope_chest: {
@@ -81,7 +100,13 @@ async function refreshManifest() {
       legacy_tokens: 10,
       layout: "5 columns × 2 rows",
       semi_visible_controls: true,
-      token_record_dialog_preserved: true
+      token_record_dialog_preserved: true,
+      verified_solscan_per_token: true,
+      dexscreener_per_token: true,
+      external_wallet_swap_path: "Jupiter",
+      site_custody: false,
+      seed_phrase_collection: false,
+      return_promises: false
     },
     header: {
       home_brand_top_left: true,
@@ -121,8 +146,11 @@ legacy = injectCss(legacy, cssVersion);
 const tokenCount = (legacy.match(/class="token-control"/g) || []).length;
 if (tokenCount !== 10) throw new Error(`PDC Hope Chest expected 10 legacy token controls, got ${tokenCount}`);
 if (!legacy.includes('id="token-dialog"')) throw new Error("PDC legacy token detail dialog missing");
+legacy = injectMarketActions(legacy);
+legacy = injectMarketScript(legacy);
+for (const id of ["token-link", "token-dex", "token-swap"]) if (!legacy.includes(`id="${id}"`)) throw new Error(`PDC market action missing ${id}`);
 await writeFile(legacyFile, legacy, "utf8");
 
 await refreshManifest();
 
-console.log("PDC_FLOATING_FINAL=PASS home_pathways=6 home_desktop=3x2 home_mobile=2x3 hope_chest_tokens=10 hope_chest_layout=5x2 full_background=true shared_tray=false header_home_left=true menu_right=true production_write=false");
+console.log("PDC_FLOATING_FINAL=PASS home_pathways=6 home_desktop=3x2 home_mobile=2x3 hope_chest_tokens=10 hope_chest_layout=5x2 dexscreener=true jupiter_wallet_swap=true site_custody=false full_background=true shared_tray=false header_home_left=true menu_right=true production_write=false");
