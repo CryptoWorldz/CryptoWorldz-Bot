@@ -16,8 +16,8 @@ const MISSION_DETAIL = "Build the blueprint, systems, partnerships and real-worl
 const REQUIRED_PATHS = Object.freeze([
   "/gpt/",
   "https://law.oneworldz.com/robin-hood-law/",
-  "/directory/",
-  "/help-the-people-movement/",
+  "/ecosystem/",
+  "/make-the-difference/",
   "https://donateworldz.com/",
   "https://cryptoworldz.xyz/"
 ]);
@@ -98,8 +98,8 @@ function hubMarkup() {
   <nav class="ow-blueprint-pathways" aria-label="OneWorldz next pathways">
     <a class="ow-blueprint-pathway" data-research="true" href="/gpt/">Research + Develop<br>OneWorldz GPT</a>
     <a class="ow-blueprint-pathway" data-foundation="true" href="https://law.oneworldz.com/robin-hood-law/">Robin Hood Law<br>Blueprint 001</a>
-    <a class="ow-blueprint-pathway" href="/directory/">Explore<br>OneWorldz</a>
-    <a class="ow-blueprint-pathway" href="/help-the-people-movement/">Help the People<br>Movement</a>
+    <a class="ow-blueprint-pathway" href="/ecosystem/">Explore<br>OneWorldz</a>
+    <a class="ow-blueprint-pathway" href="/make-the-difference/">Help the People<br>Movement</a>
     <a class="ow-blueprint-pathway" href="https://donateworldz.com/">DonateWorldz<br>Make a Difference</a>
     <a class="ow-blueprint-pathway" href="https://cryptoworldz.xyz/">CryptoWorldz<br>Command Centre</a>
   </nav>
