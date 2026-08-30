@@ -47,6 +47,7 @@ jobs:
       - name: Enforce human-first OneWorldz and populated acknowledgements
         run: |
           set -euo pipefail
+          mkdir -p audit-results
           node apps/oneworldz-ecosystem-release/audit-human-first-oneworldz.mjs | tee audit-results/human-first-summary.txt
           grep -Fxq 'HUMAN_FIRST_ONEWORLDZ_ROUTES=8' audit-results/human-first-summary.txt
           grep -Fxq 'BLUEPRINT_PUBLIC_ROUTES=4' audit-results/human-first-summary.txt
