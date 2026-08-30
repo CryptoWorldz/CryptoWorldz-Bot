@@ -20,7 +20,7 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     env:
       MIN_PAGE_ROUTES: "93"
     steps:
@@ -50,6 +50,28 @@ jobs:
           npm install --no-save --package-lock=false playwright
           npx playwright install chromium
 
+      - name: Prove the right purpose and right artwork on all 93 routes
+        run: |
+          set -euo pipefail
+          node apps/oneworldz-ecosystem-release/audit-semantic-integrity.mjs
+          cat audit-results/semantic-integrity-summary.txt
+          grep -Fxq 'SEMANTIC_ROUTES=93' audit-results/semantic-integrity-summary.txt
+          grep -Fxq 'SEMANTIC_VIEWPORTS=186' audit-results/semantic-integrity-summary.txt
+          grep -Fxq 'SEMANTIC_SCREENSHOTS=186' audit-results/semantic-integrity-summary.txt
+          grep -Fxq 'COMMUNITY_PROFILE_IDENTITIES=34' audit-results/semantic-integrity-summary.txt
+          grep -Fxq 'SEMANTIC_FAILURES=0' audit-results/semantic-integrity-summary.txt
+          grep -Fxq 'SEMANTIC_INTEGRITY_GATE=PASS' audit-results/semantic-integrity-summary.txt
+
+      - name: Prove every rendered control is physically tappable on desktop and mobile
+        run: |
+          set -euo pipefail
+          node apps/oneworldz-ecosystem-release/audit-real-hit-targets.mjs
+          cat audit-results/real-hit-targets-summary.txt
+          grep -Fxq 'REAL_HIT_TARGET_ROUTES=93' audit-results/real-hit-targets-summary.txt
+          grep -Fxq 'REAL_HIT_TARGET_VIEWPORTS=186' audit-results/real-hit-targets-summary.txt
+          grep -Fxq 'REAL_HIT_TARGET_FAILURES=0' audit-results/real-hit-targets-summary.txt
+          grep -Fxq 'REAL_HIT_TARGET_GATE=PASS' audit-results/real-hit-targets-summary.txt
+
       - name: Verify all 34 live Community Facebook destinations
         run: |
           set -euo pipefail
@@ -62,7 +84,7 @@ jobs:
           grep -Fxq 'REAGAN_SEPARATE=PASS' audit-results/live-facebook-summary.txt
           grep -Fxq 'COMMUNITY_FACEBOOK_GATE=PASS' audit-results/live-facebook-summary.txt
 
-      - name: Audit every click, menu, outlet, legacy token, DEX route and GPT
+      - name: Audit every external outlet, legacy token, DEX route and GPT
         run: |
           set -euo pipefail
           node apps/oneworldz-ecosystem-release/audit-live-every-click-v2.mjs || true
@@ -117,7 +139,7 @@ jobs:
           grep -Fxq 'TARGETS=18' audit-results/visual-fit-summary.txt
           grep -Fxq 'ASPECT_MISMATCHES=0' audit-results/visual-fit-summary.txt
           grep -Fxq 'BROKEN_IMAGES=0' audit-results/visual-fit-summary.txt
-          echo 'FINAL_BUILD_GATE=PASS sites=18 pages=93 desktop=93 mobile=93 mismatches=0 broken=0 no_scroll=PASS'
+          echo 'FINAL_BUILD_GATE=PASS sites=18 pages=93 desktop=93 mobile=93 semantic=PASS hit_targets=PASS mismatches=0 broken=0 no_scroll=PASS'
 
       - name: Preserve audit artifact
         if: always()
@@ -126,6 +148,7 @@ jobs:
           name: final-visual-fit-audit
           path: |
             audit-results/
+            semantic-proof/
             candidate-proof/
             deployment-proof/current-candidate-browser-summary.json
           if-no-files-found: error
