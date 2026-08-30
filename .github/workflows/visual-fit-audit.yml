@@ -44,6 +44,16 @@ jobs:
           set -euo pipefail
           node --test apps/oneworldz-ecosystem-release/test/one-screen-architecture.test.mjs
 
+      - name: Enforce human-first OneWorldz and populated acknowledgements
+        run: |
+          set -euo pipefail
+          node apps/oneworldz-ecosystem-release/audit-human-first-oneworldz.mjs | tee audit-results/human-first-summary.txt
+          grep -Fxq 'HUMAN_FIRST_ONEWORLDZ_ROUTES=8' audit-results/human-first-summary.txt
+          grep -Fxq 'BLUEPRINT_PUBLIC_ROUTES=4' audit-results/human-first-summary.txt
+          grep -Fxq 'ACKNOWLEDGEMENTS_POPULATED=18' audit-results/human-first-summary.txt
+          grep -Fxq 'HUMAN_FIRST_FAILURES=0' audit-results/human-first-summary.txt
+          grep -Fxq 'HUMAN_FIRST_GATE=PASS' audit-results/human-first-summary.txt
+
       - name: Install browser proof runtime
         run: |
           set -euo pipefail
@@ -139,7 +149,7 @@ jobs:
           grep -Fxq 'TARGETS=18' audit-results/visual-fit-summary.txt
           grep -Fxq 'ASPECT_MISMATCHES=0' audit-results/visual-fit-summary.txt
           grep -Fxq 'BROKEN_IMAGES=0' audit-results/visual-fit-summary.txt
-          echo 'FINAL_BUILD_GATE=PASS sites=18 pages=93 desktop=93 mobile=93 semantic=PASS hit_targets=PASS mismatches=0 broken=0 no_scroll=PASS'
+          echo 'FINAL_BUILD_GATE=PASS sites=18 pages=93 desktop=93 mobile=93 human_first=PASS semantic=PASS hit_targets=PASS mismatches=0 broken=0 no_scroll=PASS'
 
       - name: Preserve audit artifact
         if: always()
