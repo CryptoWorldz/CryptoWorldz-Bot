@@ -14,7 +14,7 @@ const expectedTitles = Object.freeze({
   hodlerworldz: "HodlerWorldz | One World • One Mission",
   purplediamondcrew: "Purple Diamond Crew | On the Ground",
   impactbased: "ImpactBased | Purpose-Driven Launch Board",
-  "law-oneworldz": "Law.OneWorldz | People-First Public Ideas",
+  "law-oneworldz": "OneWorldz Blueprint Lab | OneWorldz One Vision",
   "learn-oneworldz": "Learn.OneWorldz | Learn • Share • Do",
   hodlergalaxy: "HodlerGalaxy | Explore the OneWorldz Ecosystem",
   foodworldz: "FoodWorldz | See the Need • Support the Mission",
@@ -35,17 +35,13 @@ const requiredIdentityText = Object.freeze({
   hodlerworldz: "HodlerWorldz",
   purplediamondcrew: "Purple Diamond Crew",
   impactbased: "ImpactBased",
-  "law-oneworldz": "Law.OneWorldz",
+  "law-oneworldz": "OneWorldz Blueprint",
   "learn-oneworldz": "Learn.OneWorldz",
   hodlergalaxy: "HodlerGalaxy",
   foodworldz: "FoodWorldz",
   donateworldz: "DonateWorldz"
 });
 
-// Pipe-separated alternatives are intentional responsive identities: at least
-// one approved token must be present in the actual image selected by each
-// desktop/mobile viewport. Empty means the page uses a deliberate CSS identity
-// rather than an image asset.
 const requiredIdentityImage = Object.freeze({
   oneworldz: "oneworldz-master|little-legend",
   cryptoworldz: "zed-command-centre|blockchain-portal",
@@ -60,20 +56,13 @@ const requiredIdentityImage = Object.freeze({
   hodlerworldz: "",
   purplediamondcrew: "banner.png|hope-chest|action-team",
   impactbased: "impactbased",
-  "law-oneworldz": "robin-hood-law",
+  "law-oneworldz": "oneworldz-master|oneworldz-gpt|little-legend",
   "learn-oneworldz": "oneworldz-gpt|little-legend",
   hodlergalaxy: "hodlergalaxy-hero",
   foodworldz: "foodworldz-hero",
   donateworldz: "donateworldz-hero"
 });
 
-// Physical Hostinger transport destinations. Step 4 freshly re-authenticated
-// all 18 exact folders read-only in run 31987973244 / job 95266212497.
-// Seventeen public hosts byte-matched robots.txt to the authenticated folder.
-// ImpactBased used the newly created Hostinger default subdomain root and passed
-// authenticated FTPS cd/list/get plus public HTTPS 200 composite proof.
-// No fallback path exists and the old CryptoWorldz ImpactBased folder remains
-// superseded.
 const verifiedHostingerTransportDirs = Object.freeze({
   oneworldz: "domains/oneworldz.com/public_html",
   cryptoworldz: "domains/cryptoworldz.xyz/public_html",
