@@ -1,7 +1,7 @@
 import { deploymentTargets19, excludedRootDomains, protectedDestinations } from "./ecosystem-topology.mjs";
 
 const expectedTitles = Object.freeze({
-  oneworldz: "OneWorldz | OneWorldz One Vision",
+  oneworldz: "OneWorldz | One World One Vision | End World Hunger for Good",
   cryptoworldz: "CryptoWorldz | One World • One Mission",
   solworldz: "SolWorldz | One World • One Mission",
   ethworldz: "EthWorldz | One World • One Mission",
