@@ -5,34 +5,94 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { supportProfiles } from './site-data.mjs';
 
-const root = path.dirname(fileURLToPath(import.meta.url));
-const dist = path.join(root,'dist','ecosystem');
-const out = path.resolve(root,'../../audit-results');
-const proof = path.resolve(root,'../../semantic-proof');
-const contract = JSON.parse(await readFile(path.join(dist,'semantic-route-contract.json'),'utf8'));
-const fleet = JSON.parse(await readFile(path.join(dist,'user-structure-tree.json'),'utf8'));
+const root=path.dirname(fileURLToPath(import.meta.url));
+const dist=path.join(root,'dist','ecosystem');
+const out=path.resolve(root,'../../audit-results');
+const proof=path.resolve(root,'../../semantic-proof');
+const contract=JSON.parse(await readFile(path.join(dist,'semantic-route-contract.json'),'utf8'));
+const fleet=JSON.parse(await readFile(path.join(dist,'user-structure-tree.json'),'utf8'));
 const failures=[];
 const fail=(kind,detail)=>{failures.push({kind,...detail});console.error(`SEMANTIC_FAIL ${kind} ${JSON.stringify(detail)}`)};
 if(contract.records?.length!==93)fail('contract-count',{expected:93,actual:contract.records?.length||0});
 if(fleet.static_hosts!==18||fleet.published_webpages!==93)fail('fleet-count',{hosts:fleet.static_hosts,pages:fleet.published_webpages});
 const recordMap=new Map((contract.records||[]).map(r=>[`${r.target}:${r.route}`,r]));
 if(recordMap.size!==93)fail('contract-unique',{expected:93,actual:recordMap.size});
-
 const expectedCommunity=supportProfiles.filter(p=>p.id!=='18BmqfH7MS').map((p,i)=>({number:String(i+1).padStart(2,'0'),name:p.name,url:p.url,restricted:Boolean(p.restricted)}));
 if(expectedCommunity.length!==34)fail('community-source-count',{expected:34,actual:expectedCommunity.length});
+const isCommunity=(target,route)=>(target==='oneworldz'&&route==='/community-support/')||(target==='donateworldz'&&route==='/community-impact/');
 
-for(const host of fleet.hosts){for(const route of host.routes){const key=`${host.key}:${route.route}`;const rec=recordMap.get(key);if(!rec){fail('missing-contract',{key});continue}const rel=String(route.route).replace(/^\/+|\/+$/g,'');const file=path.join(dist,host.key,rel,'index.html');const html=await readFile(file,'utf8');for(const [attr,value] of [['data-semantic-desktop',rec.desktop],['data-semantic-mobile',rec.mobile],['data-semantic-purpose',rec.purpose]])if(!html.includes(`${attr}="${value.replaceAll('&','&amp;').replaceAll('"','&quot;')}"`))fail('semantic-attribute',{key,attr,expected:value});if(!html.includes(`--screen-bg:url('${rec.desktop}')`))fail('desktop-background-source',{key,expected:rec.desktop});if(!html.includes(`--screen-bg-mobile:url('${rec.mobile}')`))fail('mobile-background-source',{key,expected:rec.mobile});if(html.includes('Verified Community Support Link')&&((host.key==='oneworldz'&&route.route==='/community-support/')||(host.key==='donateworldz'&&route.route==='/community-impact/')))fail('community-placeholder',{key});
-if((host.key==='oneworldz'&&route.route==='/community-support/')||(host.key==='donateworldz'&&route.route==='/community-impact/')){const m=html.match(/window\.ONE_SCREEN_DATA=(\{.*?\});\(\(\)=>\{/s);if(!m){fail('community-data-missing',{key})}else{const data=JSON.parse(m[1]);const rows=data.community||[];if(rows.length!==34)fail('community-data-count',{key,expected:34,actual:rows.length});for(let i=0;i<Math.min(rows.length,34);i++){const got=rows[i],exp=expectedCommunity[i];if(got.name!==exp.name||got.url!==exp.url||Boolean(got.restricted)!==exp.restricted)fail('community-data-identity',{key,index:i+1,expected:exp,actual:got})}if(rows.some(x=>/Verified Community Support Link/i.test(String(x.name||''))))fail('community-generic-name',{key})}}
-}}
+for(const host of fleet.hosts){
+  for(const route of host.routes){
+    const key=`${host.key}:${route.route}`;
+    const rec=recordMap.get(key);
+    if(!rec){fail('missing-contract',{key});continue}
+    const rel=String(route.route).replace(/^\/+|\/+$/g,'');
+    const file=path.join(dist,host.key,rel,'index.html');
+    const html=await readFile(file,'utf8');
+    for(const [attr,value] of [['data-semantic-desktop',rec.desktop],['data-semantic-mobile',rec.mobile],['data-semantic-purpose',rec.purpose]]){
+      const escaped=String(value).replaceAll('&','&amp;').replaceAll('"','&quot;');
+      if(!html.includes(`${attr}="${escaped}"`))fail('semantic-attribute',{key,attr,expected:value});
+    }
+    if(!html.includes(`--screen-bg:url('${rec.desktop}')`))fail('desktop-background-source',{key,expected:rec.desktop});
+    if(!html.includes(`--screen-bg-mobile:url('${rec.mobile}')`))fail('mobile-background-source',{key,expected:rec.mobile});
+    if(isCommunity(host.key,route.route)){
+      if(!html.includes('data-community-charity="true"'))fail('community-dedicated-presentation',{key});
+      if(!html.includes('data-semantic-presentation="foreground-identity"'))fail('community-presentation-mode',{key});
+      if(html.includes('Verified Community Support Link'))fail('community-placeholder',{key});
+      if(host.key==='donateworldz'&&!html.includes('<h1>Community Charity</h1>'))fail('community-public-title',{key,expected:'Community Charity'});
+      const m=html.match(/window\.ONE_SCREEN_DATA=(\{.*?\});\(\(\)=>\{/s);
+      if(!m){fail('community-data-missing',{key});continue}
+      const data=JSON.parse(m[1]);const rows=data.community||[];
+      if(rows.length!==34)fail('community-data-count',{key,expected:34,actual:rows.length});
+      for(let i=0;i<Math.min(rows.length,34);i++){
+        const got=rows[i],exp=expectedCommunity[i];
+        if(got.name!==exp.name||got.url!==exp.url||Boolean(got.restricted)!==exp.restricted)fail('community-data-identity',{key,index:i+1,expected:exp,actual:got});
+      }
+      if(rows.some(x=>/Verified Community Support Link/i.test(String(x.name||''))))fail('community-generic-name',{key});
+    }
+  }
+}
 
 const mime=new Map([['.html','text/html; charset=utf-8'],['.css','text/css; charset=utf-8'],['.js','text/javascript; charset=utf-8'],['.json','application/json; charset=utf-8'],['.png','image/png'],['.webp','image/webp'],['.avif','image/avif'],['.jpg','image/jpeg'],['.jpeg','image/jpeg'],['.svg','image/svg+xml'],['.xml','application/xml; charset=utf-8'],['.txt','text/plain; charset=utf-8']]);
 let activeRoot=dist;
 const server=createServer(async(req,res)=>{try{const u=new URL(req.url||'/','http://127.0.0.1');let rel=decodeURIComponent(u.pathname).replace(/^\/+/, '');if(!rel||u.pathname.endsWith('/'))rel+='index.html';const file=path.resolve(activeRoot,rel);const base=path.resolve(activeRoot);if(!file.startsWith(base+path.sep)&&file!==path.join(base,'index.html'))throw new Error('escape');const info=await stat(file);if(!info.isFile())throw new Error('not-file');const bytes=await readFile(file);res.writeHead(200,{'content-type':mime.get(path.extname(file).toLowerCase())||'application/octet-stream','cache-control':'no-store'});res.end(bytes)}catch{res.writeHead(404,{'content-type':'text/plain'});res.end('not found')}});
 await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve)});const port=server.address().port;
 const browser=await chromium.launch({headless:true});const page=await browser.newPage();page.setDefaultTimeout(8000);
-const viewports=[{name:'desktop',width:1440,height:900},{name:'mobile',width:390,height:844}];let screenshots=0,viewportChecks=0;
-for(const host of fleet.hosts){activeRoot=path.join(dist,host.key);for(const route of host.routes){const rec=recordMap.get(`${host.key}:${route.route}`);if(!rec)continue;for(const vp of viewports){viewportChecks++;await page.setViewportSize({width:vp.width,height:vp.height});const url=`http://127.0.0.1:${port}${route.route}`;const response=await page.goto(url,{waitUntil:'networkidle'}).catch(e=>{fail('browser-load',{target:host.key,route:route.route,viewport:vp.name,error:String(e?.message||e)});return null});if(!response||response.status()>=400)continue;const state=await page.evaluate(()=>({desktop:document.body.dataset.semanticDesktop||'',mobile:document.body.dataset.semanticMobile||'',purpose:document.body.dataset.semanticPurpose||'',h1:(document.querySelector('h1')?.textContent||'').trim(),bg:getComputedStyle(document.querySelector('.screen'),'::before').backgroundImage,pointer:getComputedStyle(document.querySelector('.screen-panel')).pointerEvents}));const expected=vp.name==='desktop'?rec.desktop:rec.mobile;if(!(state.bg||'').includes(expected))fail('rendered-background',{target:host.key,route:route.route,viewport:vp.name,expected,actual:state.bg});if(!state.h1)fail('missing-h1',{target:host.key,route:route.route,viewport:vp.name});if(!state.purpose)fail('missing-purpose',{target:host.key,route:route.route,viewport:vp.name});const slug=route.route==='/'?'home':route.route.replace(/^\/+|\/+$/g,'').replaceAll('/','__');const dir=path.join(proof,host.key,slug);await mkdir(dir,{recursive:true});await page.screenshot({path:path.join(dir,`${vp.name}.jpg`),type:'jpeg',quality:78,fullPage:false});screenshots++;
-if((host.key==='oneworldz'&&route.route==='/community-support/')||(host.key==='donateworldz'&&route.route==='/community-impact/')){const names=await page.locator('.community-control strong').allTextContents();if(names.length!==6)fail('community-first-page-count',{target:host.key,viewport:vp.name,actual:names.length});if(names.some(n=>/Verified Community Support Link/i.test(n)))fail('community-rendered-placeholder',{target:host.key,viewport:vp.name,names});if(state.pointer==='none')fail('community-panel-pointer',{target:host.key,viewport:vp.name})}
-}}}
+const viewports=[{name:'desktop',width:1440,height:900},{name:'mobile',width:390,height:844}];
+let screenshots=0,viewportChecks=0;
+for(const host of fleet.hosts){
+  activeRoot=path.join(dist,host.key);
+  for(const route of host.routes){
+    const rec=recordMap.get(`${host.key}:${route.route}`);if(!rec)continue;
+    for(const vp of viewports){
+      viewportChecks++;await page.setViewportSize({width:vp.width,height:vp.height});
+      const url=`http://127.0.0.1:${port}${route.route}`;
+      const response=await page.goto(url,{waitUntil:'networkidle'}).catch(e=>{fail('browser-load',{target:host.key,route:route.route,viewport:vp.name,error:String(e?.message||e)});return null});
+      if(!response||response.status()>=400)continue;
+      const state=await page.evaluate(()=>{
+        const screen=document.querySelector('.screen');const panel=document.querySelector('.screen-panel');const identity=document.querySelector('.community-charity-badge img');
+        return {desktop:document.body.dataset.semanticDesktop||'',mobile:document.body.dataset.semanticMobile||'',purpose:document.body.dataset.semanticPurpose||'',presentation:document.body.dataset.semanticPresentation||'',h1:(document.querySelector('h1')?.textContent||'').trim(),bg:screen?getComputedStyle(screen,'::before').backgroundImage:'',bgSize:screen?getComputedStyle(screen,'::before').backgroundSize:'',panelPointer:panel?getComputedStyle(panel).pointerEvents:'n/a',identitySrc:identity?.currentSrc||identity?.src||'',screenExists:Boolean(screen)};
+      });
+      const expected=vp.name==='desktop'?rec.desktop:rec.mobile;
+      if(!state.screenExists)fail('missing-screen',{target:host.key,route:route.route,viewport:vp.name});
+      if(rec.presentation==='foreground-identity'){
+        if((state.bg||'')!=='none')fail('community-background-must-not-be-emblem',{target:host.key,route:route.route,viewport:vp.name,actual:state.bg});
+        if(!(state.identitySrc||'').includes(expected))fail('community-identity-image',{target:host.key,route:route.route,viewport:vp.name,expected,actual:state.identitySrc});
+      }else if(!(state.bg||'').includes(expected))fail('rendered-background',{target:host.key,route:route.route,viewport:vp.name,expected,actual:state.bg});
+      if(!state.h1)fail('missing-h1',{target:host.key,route:route.route,viewport:vp.name});
+      if(!state.purpose)fail('missing-purpose',{target:host.key,route:route.route,viewport:vp.name});
+      const slug=route.route==='/'?'home':route.route.replace(/^\/+|\/+$/g,'').replaceAll('/','__');const dir=path.join(proof,host.key,slug);await mkdir(dir,{recursive:true});await page.screenshot({path:path.join(dir,`${vp.name}.jpg`),type:'jpeg',quality:82,fullPage:false});screenshots++;
+      if(isCommunity(host.key,route.route)){
+        const names=await page.locator('.community-control strong').allTextContents();
+        if(names.length!==6)fail('community-first-page-count',{target:host.key,viewport:vp.name,actual:names.length});
+        if(names.some(n=>/Verified Community Support Link/i.test(n)))fail('community-rendered-placeholder',{target:host.key,viewport:vp.name,names});
+        if(state.panelPointer==='none')fail('community-panel-pointer',{target:host.key,viewport:vp.name});
+        if(host.key==='donateworldz'&&state.h1!=='Community Charity')fail('community-rendered-title',{target:host.key,viewport:vp.name,actual:state.h1});
+      }
+    }
+  }
+}
 await browser.close();await new Promise(resolve=>server.close(resolve));
-await mkdir(out,{recursive:true});const summary=['SEMANTIC_ROUTES=93',`SEMANTIC_VIEWPORTS=${viewportChecks}`,`SEMANTIC_SCREENSHOTS=${screenshots}`,'COMMUNITY_PROFILE_IDENTITIES=34',`SEMANTIC_FAILURES=${failures.length}`,`SEMANTIC_INTEGRITY_GATE=${failures.length===0?'PASS':'FAIL'}`].join('\n')+'\n';await writeFile(path.join(out,'semantic-integrity-summary.txt'),summary);await writeFile(path.join(out,'semantic-integrity.json'),JSON.stringify({contract_version:contract.version,failures},null,2)+'\n');console.log(summary.trim());if(failures.length)process.exit(1);
+await mkdir(out,{recursive:true});
+const summary=['SEMANTIC_ROUTES=93',`SEMANTIC_VIEWPORTS=${viewportChecks}`,`SEMANTIC_SCREENSHOTS=${screenshots}`,'COMMUNITY_PROFILE_IDENTITIES=34',`SEMANTIC_FAILURES=${failures.length}`,`SEMANTIC_INTEGRITY_GATE=${failures.length===0?'PASS':'FAIL'}`].join('\n')+'\n';
+await writeFile(path.join(out,'semantic-integrity-summary.txt'),summary);await writeFile(path.join(out,'semantic-integrity.json'),JSON.stringify({contract_version:contract.version,failures},null,2)+'\n');console.log(summary.trim());if(failures.length)process.exit(1);
