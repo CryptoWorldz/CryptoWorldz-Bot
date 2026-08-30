@@ -41,19 +41,50 @@ const viewports = [
 ];
 const failures = [];
 const checks = [];
+const skips = [];
 const fail = (kind, detail) => { failures.push({kind,...detail}); console.error(`HIT_FAIL ${kind} ${JSON.stringify(detail)}`); };
 
 async function trial(locator, detail) {
   try {
-    const pe = await locator.evaluate((el) => getComputedStyle(el).pointerEvents);
-    if (pe === 'none') throw new Error('computed pointer-events:none');
-    const box = await locator.boundingBox();
-    if (!box || box.width < 1 || box.height < 1) throw new Error('no usable bounding box');
+    const state = await locator.evaluate((el) => {
+      const style = getComputedStyle(el);
+      const box = el.getBoundingClientRect();
+      return {
+        pointerEvents: style.pointerEvents,
+        display: style.display,
+        visibility: style.visibility,
+        opacity: Number(style.opacity || 1),
+        left: box.left, top: box.top, right: box.right, bottom: box.bottom,
+        width: box.width, height: box.height,
+        viewportWidth: innerWidth, viewportHeight: innerHeight
+      };
+    });
+    if (state.pointerEvents === 'none') throw new Error('computed pointer-events:none');
+    if (state.display === 'none' || state.visibility === 'hidden' || state.opacity === 0) throw new Error('not rendered as an active control');
+    if (state.width < 1 || state.height < 1) throw new Error('no usable bounding box');
+    if (state.right <= 0 || state.bottom <= 0 || state.left >= state.viewportWidth || state.top >= state.viewportHeight) throw new Error(`active control outside viewport (${Math.round(state.left)},${Math.round(state.top)} ${Math.round(state.width)}x${Math.round(state.height)})`);
     await locator.click({trial:true, timeout:3500});
     checks.push(detail);
   } catch (error) {
     fail('not-tappable', {...detail, error:String(error?.message || error)});
   }
+}
+
+async function inactiveReason(locator) {
+  return locator.evaluate((node) => {
+    if (node.id === 'menu-backdrop') return 'menu-backdrop-tested-in-open-state';
+    if (node.matches('a[href="#main-content"],.skip-link')) return 'skip-link-tested-after-focus';
+    if (node.disabled) return 'disabled';
+    const dialog = node.closest('dialog');
+    if (dialog && !dialog.open) return 'closed-dialog';
+    const hidden = node.closest('[hidden],[inert],[aria-hidden="true"]');
+    if (hidden) return 'hidden-or-inert-ancestor';
+    const menu = node.closest('#site-menu');
+    if (menu && !menu.classList.contains('open')) return 'closed-menu';
+    const style = getComputedStyle(node);
+    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || 1) === 0) return 'not-rendered';
+    return '';
+  }).catch(() => 'evaluation-failed');
 }
 
 for (const host of tree.hosts) {
@@ -70,6 +101,17 @@ for (const host of tree.hosts) {
       const brand = page.locator('.screen-brand').first();
       if (await brand.count()) await trial(brand,{...context,control:'home-brand'}); else fail('missing-home-brand',context);
 
+      const skipLink = page.locator('a[href="#main-content"],.skip-link').first();
+      if (await skipLink.count()) {
+        try {
+          await skipLink.focus();
+          await trial(skipLink,{...context,control:'skip-link-focused'});
+          await page.locator('body').focus().catch(()=>{});
+        } catch (error) {
+          fail('skip-link-interaction',{...context,error:String(error?.message||error)});
+        }
+      }
+
       const menuButton = page.locator('#menu-button').first();
       if (await menuButton.count()) {
         await trial(menuButton,{...context,control:'menu-button'});
@@ -77,22 +119,39 @@ for (const host of tree.hosts) {
           await menuButton.click();
           const expanded = await menuButton.getAttribute('aria-expanded');
           if (expanded !== 'true') throw new Error(`aria-expanded=${expanded}`);
+          const menu = page.locator('#site-menu').first();
+          if (!(await menu.evaluate((el)=>el.classList.contains('open')).catch(()=>false))) throw new Error('site menu did not enter open state');
           const menuLinks = page.locator('#site-menu a[href]');
           for (let i=0;i<await menuLinks.count();i++) await trial(menuLinks.nth(i),{...context,control:'menu-link',index:i+1});
-          await page.locator('#menu-backdrop').click({trial:true}).catch(()=>{});
-          await page.locator('#menu-backdrop').click().catch(()=>{});
+          const backdrop = page.locator('#menu-backdrop').first();
+          if (await backdrop.count()) {
+            if (!(await backdrop.evaluate((el)=>el.classList.contains('open')).catch(()=>false))) throw new Error('menu backdrop did not enter open state');
+            await trial(backdrop,{...context,control:'menu-backdrop-open'});
+            await backdrop.click();
+            const closed = await menuButton.getAttribute('aria-expanded');
+            if (closed !== 'false') throw new Error(`menu backdrop did not close menu, aria-expanded=${closed}`);
+          } else {
+            await menuButton.click();
+          }
         } catch (error) { fail('menu-interaction',{...context,error:String(error?.message||error)}); }
       } else fail('missing-menu-button',context);
 
-      const generic = page.locator('a[href],button:not([disabled]),[role="button"],input:not([type="hidden"]),select,textarea').filter({visible:true});
+      const generic = page.locator('a[href],button:not([disabled]),[role="button"],input:not([type="hidden"]),select,textarea');
       const count = await generic.count();
       for (let i=0;i<count;i++) {
         const el = generic.nth(i);
-        const inMenu = await el.evaluate((node) => Boolean(node.closest('#site-menu'))).catch(()=>false);
-        const community = await el.evaluate((node) => node.matches('.community-control,[data-community-prev],[data-community-next]')).catch(()=>false);
-        if (inMenu || community) continue;
+        const flags = await el.evaluate((node) => ({
+          inMenu:Boolean(node.closest('#site-menu')),
+          community:node.matches('.community-control,[data-community-prev],[data-community-next]'),
+          token:Boolean(node.matches('[data-token-index],[data-dialog-close],#token-link,#token-dex,#token-swap') || node.closest('#token-dialog')),
+          brand:node.matches('.screen-brand'),
+          menuButton:node.id==='menu-button'
+        })).catch(()=>({}));
+        if (flags.inMenu || flags.community || flags.token || flags.brand || flags.menuButton) continue;
+        const reason = await inactiveReason(el);
+        if (reason) { skips.push({...context,index:i+1,reason}); continue; }
         const tag = await el.evaluate((node) => `${node.tagName.toLowerCase()}${node.id?'#'+node.id:''}${node.className && typeof node.className==='string'?'.'+node.className.trim().replace(/\s+/g,'.'):''}`.slice(0,160)).catch(()=>`control-${i+1}`);
-        await trial(el,{...context,control:'visible-control',tag,index:i+1});
+        await trial(el,{...context,control:'active-control',tag,index:i+1});
       }
 
       if (await page.locator('#community-grid').count()) {
@@ -155,10 +214,11 @@ const summary = [
   'REAL_HIT_TARGET_ROUTES=93',
   'REAL_HIT_TARGET_VIEWPORTS=186',
   `REAL_HIT_TARGET_CHECKS=${checks.length}`,
+  `REAL_HIT_TARGET_INACTIVE_SKIPS=${skips.length}`,
   `REAL_HIT_TARGET_FAILURES=${failures.length}`,
   `REAL_HIT_TARGET_GATE=${failures.length===0?'PASS':'FAIL'}`
 ].join('\n')+'\n';
 await writeFile(path.join(outDir,'real-hit-targets-summary.txt'),summary);
-await writeFile(path.join(outDir,'real-hit-targets.json'),JSON.stringify({checks:checks.length,failures},null,2)+'\n');
+await writeFile(path.join(outDir,'real-hit-targets.json'),JSON.stringify({checks:checks.length,inactiveSkips:skips.length,failures},null,2)+'\n');
 console.log(summary.trim());
 if (failures.length) process.exit(1);
