@@ -9,7 +9,17 @@ const runtime=(community)=>`<script data-oneworldz-human-runtime="true">window.O
 let total=0;
 for(const [target,expected] of [['oneworldz',8],['law-oneworldz',4]]){
  const dir=path.join(dist,target);let changed=0;
- for(const rel of await pages(dir)){const file=path.join(dir,rel);let html=await readFile(file,'utf8');const match=html.match(/<script>window\.ONE_SCREEN_DATA=(\{.*?\});\(\(\)=>\{[\s\S]*?<\/script>/s);if(!match)continue;let data={};try{data=JSON.parse(match[1])}catch{};const community=target==='oneworldz'&&Array.isArray(data.community)?data.community:[];html=html.replace(match[0],runtime(community));if(/data-token-index|token-dialog|ONE_SCREEN_DATA\.tokens|PDC_LEGACY/i.test(html))throw new Error(`${target}: crypto runtime remains in ${rel}`);await writeFile(file,html,'utf8');changed++;total++}
+ for(const rel of await pages(dir)){
+  const file=path.join(dir,rel);let html=await readFile(file,'utf8');
+  const match=html.match(/<script>window\.ONE_SCREEN_DATA=(\{.*?\});\(\(\)=>\{[\s\S]*?<\/script>/s);
+  if(!match)continue;
+  let data={};try{data=JSON.parse(match[1])}catch{}
+  const community=target==='oneworldz'&&Array.isArray(data.community)?data.community:[];
+  html=html.replace(match[0],runtime(community));
+  if(target==='law-oneworldz')html=html.replaceAll('/assets/desktop/tokens/robin-hood-law.png','/assets/desktop/oneworldz/oneworldz-master.png').replaceAll('/assets/mobile/robin-hood-law.webp','/assets/mobile/little-legend.webp');
+  if(/data-token-index|token-dialog|ONE_SCREEN_DATA\.tokens|PDC_LEGACY/i.test(html))throw new Error(`${target}: crypto runtime remains in ${rel}`);
+  await writeFile(file,html,'utf8');changed++;total++;
+ }
  if(changed!==expected)throw new Error(`Expected to strip generic runtime from ${expected} ${target} routes, changed ${changed}`);
 }
-console.log(`ONEWORLDZ_CRYPTO_RUNTIME_STRIP=PASS routes=${total} targets=2 token_runtime=ABSENT community_runtime=PRESERVED menu_runtime=PRESERVED production_write=false`);
+console.log(`ONEWORLDZ_CRYPTO_RUNTIME_STRIP=PASS routes=${total} targets=2 token_runtime=ABSENT old_robin_artwork_refs=ABSENT community_runtime=PRESERVED menu_runtime=PRESERVED production_write=false`);
