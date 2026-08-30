@@ -139,7 +139,7 @@ async function refreshManifest(missionRoutes) {
   manifest.generated_at = new Date().toISOString();
   manifest.files = files;
   manifest.oneworldz_blueprint_hub = {
-    identity: "OneWorldzOneVision",
+    identity: "OneWorldz One Vision",
     mission: MISSION_TITLE,
     mission_detail: MISSION_DETAIL,
     mission_visible_routes: missionRoutes,
@@ -172,7 +172,7 @@ home = injectHub(home);
 const h1After = (home.match(/<h1\b/g) || []).length;
 if (h1After !== 1) throw new Error(`Blueprint Hub must preserve exactly one H1, got ${h1After}`);
 if (!home.includes('data-one-screen="true"')) throw new Error("Blueprint Hub changed the one-screen contract marker");
-if (!home.includes("OneWorldzOneVision")) throw new Error("OneWorldzOneVision identity missing");
+if (!home.includes("ONE WORLD 🌏 ONE VISION")) throw new Error("OneWorldz One World One Vision identity missing");
 if (!home.includes(MISSION_TITLE) || !home.includes("WORLD HUNGER BLUEPRINT")) throw new Error("OneWorldz hunger mission or blueprint missing from hub");
 if (!home.includes("OneWorldz GPT")) throw new Error("OneWorldz GPT research pathway missing");
 if (/Robin Hood Law|RobinWorldz|Command Centre|DEX Screener/i.test(home)) throw new Error("OneWorldz source hub still contains crypto or historical Robin Hood branding");
@@ -194,4 +194,4 @@ for (const rel of routeFiles) {
 }
 if (missionRoutes !== 8) throw new Error(`Expected OneWorldz mission on 8 routes, got ${missionRoutes}`);
 await refreshManifest(missionRoutes);
-console.log(`ONEWORLDZ_BLUEPRINT_HUB=PASS identity=OneWorldzOneVision mission="${MISSION_TITLE}" mission_routes=${missionRoutes} blueprint=World_Hunger research_engine=OneWorldz_GPT pathways=6 crypto_primary=ABSENT production_write=false`);
+console.log(`ONEWORLDZ_BLUEPRINT_HUB=PASS identity=OneWorldz_One_World_One_Vision mission="${MISSION_TITLE}" mission_routes=${missionRoutes} blueprint=World_Hunger research_engine=OneWorldz_GPT pathways=6 crypto_primary=ABSENT production_write=false`);
