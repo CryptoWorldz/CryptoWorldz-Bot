@@ -44,11 +44,14 @@ const checks = [];
 const skips = [];
 const fail = (kind, detail) => { failures.push({kind,...detail}); console.error(`HIT_FAIL ${kind} ${JSON.stringify(detail)}`); };
 
-async function trial(locator, detail) {
+async function probe(locator, detail) {
   try {
     const state = await locator.evaluate((el) => {
       const style = getComputedStyle(el);
       const box = el.getBoundingClientRect();
+      const x = Math.max(0, Math.min(innerWidth - 1, box.left + box.width / 2));
+      const y = Math.max(0, Math.min(innerHeight - 1, box.top + box.height / 2));
+      const hit = document.elementFromPoint(x, y);
       return {
         pointerEvents: style.pointerEvents,
         display: style.display,
@@ -56,17 +59,32 @@ async function trial(locator, detail) {
         opacity: Number(style.opacity || 1),
         left: box.left, top: box.top, right: box.right, bottom: box.bottom,
         width: box.width, height: box.height,
-        viewportWidth: innerWidth, viewportHeight: innerHeight
+        viewportWidth: innerWidth, viewportHeight: innerHeight,
+        hitTarget: hit === el || el.contains(hit),
+        hitTag: hit ? hit.tagName.toLowerCase() : ''
       };
     });
     if (state.pointerEvents === 'none') throw new Error('computed pointer-events:none');
     if (state.display === 'none' || state.visibility === 'hidden' || state.opacity === 0) throw new Error('not rendered as an active control');
     if (state.width < 1 || state.height < 1) throw new Error('no usable bounding box');
     if (state.right <= 0 || state.bottom <= 0 || state.left >= state.viewportWidth || state.top >= state.viewportHeight) throw new Error(`active control outside viewport (${Math.round(state.left)},${Math.round(state.top)} ${Math.round(state.width)}x${Math.round(state.height)})`);
-    await locator.click({trial:true, timeout:3500});
+    if (!state.hitTarget) throw new Error(`covered at centre by ${state.hitTag || 'unknown element'}`);
     checks.push(detail);
   } catch (error) {
     fail('not-tappable', {...detail, error:String(error?.message || error)});
+  }
+}
+
+// A native trial click is deliberately reserved for controls whose behaviour changes
+// page state.  Running it on every ordinary outbound link across 186 views made the
+// audit exceed the CI window before it could produce a useful verdict.  `probe`
+// above still proves the actual rendered hit target for every visible control.
+async function trial(locator, detail) {
+  await probe(locator, detail);
+  try {
+    await locator.click({trial:true, timeout:3500});
+  } catch (error) {
+    fail('trial-click-failed', {...detail, error:String(error?.message || error)});
   }
 }
 
@@ -99,7 +117,7 @@ for (const host of tree.hosts) {
 
       const context = {host:host.key,route:routePath,viewport:vp.name};
       const brand = page.locator('.screen-brand').first();
-      if (await brand.count()) await trial(brand,{...context,control:'home-brand'}); else fail('missing-home-brand',context);
+      if (await brand.count()) await probe(brand,{...context,control:'home-brand'}); else fail('missing-home-brand',context);
 
       const skipLink = page.locator('a[href="#main-content"],.skip-link').first();
       if (await skipLink.count()) {
@@ -122,7 +140,7 @@ for (const host of tree.hosts) {
           const menu = page.locator('#site-menu').first();
           if (!(await menu.evaluate((el)=>el.classList.contains('open')).catch(()=>false))) throw new Error('site menu did not enter open state');
           const menuLinks = page.locator('#site-menu a[href]');
-          for (let i=0;i<await menuLinks.count();i++) await trial(menuLinks.nth(i),{...context,control:'menu-link',index:i+1});
+          for (let i=0;i<await menuLinks.count();i++) await probe(menuLinks.nth(i),{...context,control:'menu-link',index:i+1});
           const backdrop = page.locator('#menu-backdrop').first();
           if (await backdrop.count()) {
             if (!(await backdrop.evaluate((el)=>el.classList.contains('open')).catch(()=>false))) throw new Error('menu backdrop did not enter open state');
@@ -151,7 +169,7 @@ for (const host of tree.hosts) {
         const reason = await inactiveReason(el);
         if (reason) { skips.push({...context,index:i+1,reason}); continue; }
         const tag = await el.evaluate((node) => `${node.tagName.toLowerCase()}${node.id?'#'+node.id:''}${node.className && typeof node.className==='string'?'.'+node.className.trim().replace(/\s+/g,'.'):''}`.slice(0,160)).catch(()=>`control-${i+1}`);
-        await trial(el,{...context,control:'active-control',tag,index:i+1});
+        await probe(el,{...context,control:'active-control',tag,index:i+1});
       }
 
       if (await page.locator('#community-grid').count()) {
@@ -167,7 +185,7 @@ for (const host of tree.hosts) {
             const c = controls.nth(i);
             const href = await c.getAttribute('href') || '';
             if (href) seen.add(href);
-            await trial(c,{...context,control:'community-facebook',page:p+1,index:i+1,href});
+            await probe(c,{...context,control:'community-facebook',page:p+1,index:i+1,href});
           }
           if (p < pageCount-1) {
             const next = page.locator('[data-community-next]').first();
@@ -194,7 +212,7 @@ for (const host of tree.hosts) {
             if (!(await dialog.evaluate((d)=>d.open).catch(()=>false))) throw new Error('dialog did not open');
             for (const id of ['#token-link','#token-dex','#token-swap']) {
               const link = page.locator(id);
-              if (await link.count()) await trial(link,{...context,control:'token-dialog-link',index:i+1,id});
+              if (await link.count()) await probe(link,{...context,control:'token-dialog-link',index:i+1,id});
             }
             const close = page.locator('[data-dialog-close]').first();
             await trial(close,{...context,control:'token-dialog-close',index:i+1});
