@@ -116,6 +116,19 @@ jobs:
           grep -Fxq 'BROKEN_IMAGES=0' audit-results/visual-fit-summary.txt
           echo 'LOCAL_VISUAL_GATE=PASS routes=93 viewports=186 mismatch=0 broken=0'
 
+      - name: Require Lighthouse SEO 100 on all 93 candidate routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CHROME_PATH="$(node -e "process.stdout.write(require('playwright').chromium.executablePath())")"
+          npm run check:lighthouse-seo
+          summary='apps/oneworldz-ecosystem-release/dist/seo-proof/summary.json'
+          test "$(node -p "require('./' + process.argv[1]).pass" "$summary")" = 'true'
+          test "$(node -p "require('./' + process.argv[1]).totalPages" "$summary")" = '93'
+          test "$(node -p "require('./' + process.argv[1]).fullMarksPages" "$summary")" = '93'
+          cp "$summary" deployment-proof/lighthouse-seo-summary.json
+          echo 'LIGHTHOUSE_SEO_GATE=PASS routes=93 score=100'
+
       - name: Prove all 18 candidate sites in real browsers
         shell: bash
         run: |
@@ -188,6 +201,7 @@ jobs:
           aspect_mismatches=0
           broken_images=0
           normal_page_scroll_failures=0
+          lighthouse_seo=PASS
           protected_command_centre=PASS
           protected_oneworldz_gpt=PASS
           hostinger_deploy=PASS
