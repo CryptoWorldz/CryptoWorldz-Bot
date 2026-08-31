@@ -42,6 +42,10 @@ const requirements = Object.freeze([
 async function walk(dir, rel = "") {
   const out = [];
   for (const entry of await readdir(path.join(dir, rel), { withFileTypes: true })) {
+    // Some filesystems expose a short-lived dot-prefixed file while replacing
+    // a page. It is not a release asset and can disappear between readdir and
+    // readFile, which previously made the production build nondeterministic.
+    if (entry.name.startsWith(".") && entry.name !== ".htaccess") continue;
     const child = path.join(rel, entry.name);
     if (entry.isDirectory()) out.push(...await walk(dir, child));
     else out.push(child.split(path.sep).join("/"));
