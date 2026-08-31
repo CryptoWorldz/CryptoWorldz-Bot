@@ -31,7 +31,8 @@ const interactionCss = `
   pointer-events:auto!important;
 }
 #site-menu{
-  z-index:10020!important;
+  position:fixed!important;
+  z-index:2147483647!important;
 }
 #site-menu.open{
   pointer-events:auto!important;
@@ -41,7 +42,7 @@ const interactionCss = `
   pointer-events:auto!important;
 }
 #menu-backdrop{
-  z-index:10010!important;
+  z-index:2147483646!important;
   pointer-events:none!important;
 }
 #menu-backdrop.open{
@@ -49,6 +50,14 @@ const interactionCss = `
 }
 .screen-brand{
   z-index:10025!important;
+  pointer-events:auto!important;
+}
+/* The final visual layer must never turn visible calls-to-action into decoration. */
+.screen-panel,
+.screen-panel .glass-button,
+.screen-panel .token-control,
+.screen-panel .community-control,
+.screen-panel .pager button{
   pointer-events:auto!important;
 }
 `;
