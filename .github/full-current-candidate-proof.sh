@@ -36,6 +36,13 @@ cd "$GITHUB_WORKSPACE"
 
 test "$failed" = '0'
 
+node apps/oneworldz-ecosystem-release/audit-real-hit-targets.mjs
+cat audit-results/real-hit-targets-summary.txt
+grep -Fxq 'REAL_HIT_TARGET_ROUTES=93' audit-results/real-hit-targets-summary.txt
+grep -Fxq 'REAL_HIT_TARGET_VIEWPORTS=186' audit-results/real-hit-targets-summary.txt
+grep -Fxq 'REAL_HIT_TARGET_FAILURES=0' audit-results/real-hit-targets-summary.txt
+grep -Fxq 'REAL_HIT_TARGET_GATE=PASS' audit-results/real-hit-targets-summary.txt
+
 node --input-type=module <<'NODE'
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -69,6 +76,7 @@ const summary = {
   generated_page_routes: routes,
   desktop_pages_audited: desktop,
   mobile_pages_audited: mobile,
+  real_hit_target_gate: 'PASS',
   one_screen_layout_failures: 0,
   browser_failures: 0,
   console_errors: 0,
@@ -76,5 +84,5 @@ const summary = {
   pass: true
 };
 await writeFile('deployment-proof/current-candidate-browser-summary.json', JSON.stringify(summary, null, 2));
-console.log(`CURRENT_CANDIDATE_ONE_SCREEN_ROUTE_PROOF=PASS routes=${routes} desktop=${desktop} mobile=${mobile} static_transport_roots=18`);
+console.log(`CURRENT_CANDIDATE_ONE_SCREEN_ROUTE_PROOF=PASS routes=${routes} desktop=${desktop} mobile=${mobile} hit_targets=PASS static_transport_roots=18`);
 NODE
