@@ -193,15 +193,29 @@ async function buildSupportComposite(sharp, relativeSources, label) {
 }
 
 function replaceHeroMedia(html, spec) {
-  const heroStart = html.indexOf('<section class="hero">');
-  if (heroStart < 0) throw new Error(`${spec.key}: homepage hero section not found`);
-  const heroEnd = html.indexOf("</section>", heroStart);
-  if (heroEnd < 0) throw new Error(`${spec.key}: homepage hero section is not closed`);
+  const heroTag = /<section class="hero(?:\s[^"]*)?"[^>]*>/.exec(html);
+  const heroStart = heroTag?.index ?? -1;
+  const screenArt = /<picture class="screen-art"[\s\S]*?<\/picture>/.exec(html);
+  let before;
+  let hero;
+  let after;
 
-  const before = html.slice(0, heroStart);
-  let hero = html.slice(heroStart, heroEnd + "</section>".length);
-  const after = html.slice(heroEnd + "</section>".length);
-  hero = hero.replace('<section class="hero">', `<section class="hero" data-approved-visual="${spec.key}">`);
+  if (heroStart >= 0) {
+    const heroEnd = html.indexOf("</section>", heroStart);
+    if (heroEnd < 0) throw new Error(`${spec.key}: homepage hero section is not closed`);
+    before = html.slice(0, heroStart);
+    hero = html.slice(heroStart, heroEnd + "</section>".length);
+    after = html.slice(heroEnd + "</section>".length);
+    hero = hero.replace(/<section class="hero(?:\s[^"]*)?"[^>]*>/, `<section class="hero" data-approved-visual="${spec.key}">`);
+  } else if (screenArt) {
+    // The final one-screen renderer has no legacy .hero section.  Replace its
+    // actual visible picture rather than failing after the asset was rendered.
+    before = html.slice(0, screenArt.index);
+    hero = screenArt[0];
+    after = html.slice((screenArt.index || 0) + screenArt[0].length);
+  } else {
+    throw new Error(`${spec.key}: homepage hero picture not found`);
+  }
 
   const mobilePath = `/assets/approved/mobile/${spec.key}-hero.avif`;
   const desktopPath = `/assets/approved/desktop/${spec.key}-hero.avif`;
@@ -254,6 +268,7 @@ async function refreshReleaseManifest(spec, targetRoot) {
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 }
 
+const manifestPath = path.join(distRoot, "approved-visuals-manifest.json");
 const visualManifest = {
   stage: "FINAL_APPROVED_VISUAL_MATERIALIZATION",
   approved_by: "JayJayTeamDev",
@@ -264,10 +279,20 @@ const visualManifest = {
   visuals: []
 };
 
+const selectedKey = process.env.APPROVED_VISUAL_KEY;
+const selectedApproved = selectedKey
+  ? approved.filter((spec) => spec.key === selectedKey)
+  : approved;
+if (!selectedApproved.length) throw new Error(`Unknown approved visual key: ${selectedKey}`);
+
 const renderer = await resolveRenderer();
+// AVIF materialisation is memory-intensive.  Keep it single-threaded so the
+// release build is deterministic on both GitHub runners and constrained hosts.
+renderer.cache(false);
+renderer.concurrency(1);
 const rendererVersion = renderer.versions?.sharp || "0.35.3";
 
-for (const spec of approved) {
+for (const spec of selectedApproved) {
   const targetRoot = path.join(distRoot, spec.key);
   const desktopDir = path.join(targetRoot, "assets", "approved", "desktop");
   const mobileDir = path.join(targetRoot, "assets", "approved", "mobile");
@@ -362,5 +387,11 @@ for (const spec of approved) {
   console.log(`RENDERED ${spec.key} source=${spec.sourceMode} desktop=${desktopBytes.byteLength}/${desktopSha} mobile=${mobileBytes.byteLength}/${mobileSha}`);
 }
 
-await writeFile(path.join(distRoot, "approved-visuals-manifest.json"), `${JSON.stringify(visualManifest, null, 2)}\n`, "utf8");
+if (selectedKey) {
+  const previous = JSON.parse(await readFile(manifestPath, "utf8").catch(() => "null")) || {};
+  const byKey = new Map((previous.visuals || []).map((entry) => [entry.key, entry]));
+  for (const entry of visualManifest.visuals) byKey.set(entry.key, entry);
+  visualManifest.visuals = approved.map((spec) => byKey.get(spec.key)).filter(Boolean);
+}
+await writeFile(manifestPath, `${JSON.stringify(visualManifest, null, 2)}\n`, "utf8");
 console.log("Approved FoodWorldz, DonateWorldz and HodlerGalaxy visuals rendered into distinct desktop and mobile production assets without apt.");
