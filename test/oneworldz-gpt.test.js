@@ -11,7 +11,7 @@ const {
 test("public OneWorldz GPT cost guard is hard locked", () => {
   assert.deepEqual(PUBLIC_GPT_GUARD, {
     profile: "oneworldz-public-low-cost-v1",
-    model: "gpt-4o-mini",
+    model: "gpt-5.6-luna",
     maxOutputTokens: 320,
     perIpLimit: 8,
     dailyLimit: 1000
@@ -66,7 +66,7 @@ test("askOneWorldzGPT moderates then uses Responses API with store false and bou
 
   const result = await askOneWorldzGPT({
     apiKey: "server-only-test-key",
-    model: "gpt-4o-mini",
+    model: "gpt-5.6-luna",
     message: "How do I help Reagan?",
     fetchImpl
   });
@@ -75,7 +75,7 @@ test("askOneWorldzGPT moderates then uses Responses API with store false and bou
   assert.match(requests[0].url, /\/moderations$/);
   assert.match(requests[1].url, /\/responses$/);
   const responseBody = JSON.parse(requests[1].options.body);
-  assert.equal(responseBody.model, "gpt-4o-mini");
+  assert.equal(responseBody.model, "gpt-5.6-luna");
   assert.equal(responseBody.store, false);
   assert.equal(responseBody.max_output_tokens, 320);
   assert.equal(result.response_id, "resp_test");

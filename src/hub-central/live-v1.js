@@ -41,7 +41,7 @@ const ONEWORLDZ_GPT_ORIGINS = new Set([
 
 const ONEWORLDZ_PUBLIC_GPT_GUARD = Object.freeze({
   profile: "oneworldz-public-low-cost-v1",
-  model: "gpt-4o-mini",
+  model: "gpt-5.6-luna",
   maxOutputTokens: 320,
   perIpLimit: 8,
   dailyLimit: 1000

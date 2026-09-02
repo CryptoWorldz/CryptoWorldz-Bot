@@ -24,7 +24,7 @@ test("live compatibility diagnostics reject domains outside the OneWorldz regist
 test("legacy live public GPT is hard locked to the low-cost guard", () => {
   assert.deepEqual(ONEWORLDZ_PUBLIC_GPT_GUARD, {
     profile: "oneworldz-public-low-cost-v1",
-    model: "gpt-4o-mini",
+    model: "gpt-5.6-luna",
     maxOutputTokens: 320,
     perIpLimit: 8,
     dailyLimit: 1000

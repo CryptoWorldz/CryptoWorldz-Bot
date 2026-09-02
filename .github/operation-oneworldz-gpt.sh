@@ -83,6 +83,32 @@ if len(matches) != 1:
 PY
 echo 'OPERATION_ONEWORLDZ_GPT_KEY_MERGE=PASS'
 
+# Make the selected public model explicit in the protected environment. This
+# prevents a historical ONEWORLDZ_OPENAI_MODEL value from silently overriding
+# the runtime default during a Hostinger rebuild.
+PROTECTED_ENV="$protected_env" python3 - <<'PY'
+import os
+import pathlib
+import re
+
+path = pathlib.Path(os.environ["PROTECTED_ENV"])
+pattern = re.compile(r"^\s*(?:export\s+)?ONEWORLDZ_OPENAI_MODEL\s*=")
+lines = [line for line in path.read_text(encoding="utf-8").splitlines() if not pattern.match(line)]
+lines.append("ONEWORLDZ_OPENAI_MODEL=gpt-5.6-luna")
+path.write_text("\n".join(lines).rstrip("\n") + "\n", encoding="utf-8")
+PY
+PROTECTED_ENV="$protected_env" python3 - <<'PY'
+import os
+import pathlib
+import re
+
+text = pathlib.Path(os.environ["PROTECTED_ENV"]).read_text(encoding="utf-8")
+matches = [line for line in text.splitlines() if re.match(r"^\s*(?:export\s+)?ONEWORLDZ_OPENAI_MODEL\s*=\s*gpt-5\.6-luna\s*$", line)]
+if len(matches) != 1:
+    raise SystemExit("ONEWORLDZ_OPENAI_MODEL_MERGE_PROOF_FAILED")
+PY
+echo 'OPERATION_ONEWORLDZ_GPT_MODEL_MERGE=PASS'
+
 # The Hostinger build runs in a fresh workspace. Restore the protected
 # environment before creating that build so its prepare script can stage the
 # same server-side file, rather than attempting to copy a missing old file.
@@ -330,6 +356,7 @@ let p;
 try { p = JSON.parse(fs.readFileSync(process.env.STATUS, 'utf8')); } catch { process.exit(1); }
 if (p.ok !== true || p.service !== 'OneWorldz GPT' || p.openai_api_configured !== true) process.exit(1);
 if (p.guard_profile !== 'oneworldz-public-low-cost-v1' || p.guard_enforced !== true) process.exit(1);
+if (p.model !== 'gpt-5.6-luna') process.exit(1);
 if (p.payments_in_chat !== false || p.secrets_in_browser !== false) process.exit(1);
 NODE
   then

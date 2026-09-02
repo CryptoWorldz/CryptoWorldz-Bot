@@ -30,7 +30,7 @@ function safeMission(mission) {
 
 function registerZedGuide({ app, repository, config, supabase }) {
   const openaiKey = String(process.env.OPENAI_API_KEY || "").trim();
-  const model = String(process.env.ONEWORLDZ_OPENAI_MODEL || "gpt-4o-mini").trim();
+  const model = String(process.env.ONEWORLDZ_OPENAI_MODEL || "gpt-5.6-luna").trim();
   const allow = createRequestLimiter({ maxEvents: 12, intervalMs: 10 * 60 * 1000 });
 
   function authenticate(req, res, next) {

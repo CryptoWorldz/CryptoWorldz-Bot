@@ -52,7 +52,7 @@ const checks = {
   openai_api_configured: p.openai_api_configured === true,
   guard_profile: p.guard_profile === 'oneworldz-public-low-cost-v1',
   guard_enforced: p.guard_enforced === true,
-  model: p.model === 'gpt-4o-mini',
+  model: p.model === 'gpt-5.6-luna',
   max_output_tokens: p.max_output_tokens === 320,
   per_ip_limit_10m: p.per_ip_limit_10m === 8,
   daily_request_limit: p.daily_request_limit === 1000,

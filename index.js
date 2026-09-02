@@ -8,7 +8,7 @@ const { ALLOWED_ORIGINS, guideInstructions, suggestedRoutes } = require("./src/o
 
 const GUARD = Object.freeze({
   profile: "oneworldz-public-low-cost-v1",
-  model: "gpt-4o-mini",
+  model: "gpt-5.6-luna",
   maxOutputTokens: 320,
   perIpLimit: 8,
   dailyLimit: 1000

@@ -56,7 +56,7 @@ async function generatePostCopy(openaiKey, idea) {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${openaiKey}` },
     body: JSON.stringify({
-      model: String(process.env.ONEWORLDZ_OPENAI_MODEL || "gpt-4o-mini"),
+      model: String(process.env.ONEWORLDZ_OPENAI_MODEL || "gpt-5.6-luna"),
       store: false,
       max_output_tokens: 420,
       instructions: [

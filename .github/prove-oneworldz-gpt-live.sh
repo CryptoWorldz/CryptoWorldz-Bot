@@ -14,6 +14,7 @@ const status = JSON.parse(require('fs').readFileSync(process.env.STATUS_FILE, 'u
 const required = {
   ok: status.ok === true,
   configured: status.openai_api_configured === true,
+  model: status.model === 'gpt-5.6-luna',
   guards: status.guard_enforced === true && status.payments_in_chat === false && status.secrets_in_browser === false
 };
 const failed = Object.entries(required).filter(([, pass]) => !pass).map(([name]) => name);
