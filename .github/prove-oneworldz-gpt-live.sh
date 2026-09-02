@@ -30,3 +30,5 @@ const chat = JSON.parse(require('fs').readFileSync(process.env.CHAT_FILE, 'utf8'
 if (chat.ok !== true || chat.service !== 'OneWorldz GPT' || !String(chat.text || '').trim()) throw new Error('OneWorldz GPT chat predeploy health failed');
 NODE
 echo 'ONEWORLDZ_GPT_PREDEPLOY_HEALTH=PASS'
+
+# Static release retrigger after protected runtime repair.
