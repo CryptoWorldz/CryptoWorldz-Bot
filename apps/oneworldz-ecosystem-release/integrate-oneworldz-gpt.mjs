@@ -57,7 +57,10 @@ function injectOfficialChannels(html) {
   const acknowledgement = html.indexOf('<section class="section" id="acknowledgements">');
   const alternateAcknowledgement = html.indexOf('<section class="section section-dark" id="acknowledgements">');
   const pos = acknowledgement >= 0 ? acknowledgement : alternateAcknowledgement;
-  if (pos < 0) throw new Error("OneWorldz acknowledgements insertion point missing for official channels");
+  // Final one-screen writers intentionally replace the page body and do not
+  // preserve the legacy acknowledgement section. Keep the official channels
+  // visible by using the end of the body as the stable insertion point.
+  if (pos < 0) return html.replace("</body>", `${section}</body>`);
   return html.slice(0, pos) + section + html.slice(pos);
 }
 

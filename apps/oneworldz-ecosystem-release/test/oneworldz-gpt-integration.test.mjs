@@ -29,3 +29,11 @@ test("perfect plan locks the two public AI surfaces and protected endpoint", () 
   assert.deepEqual(perfectPlan.openAI.publicGuideSurfaces, ["https://oneworldz.com", "https://donateworldz.com"]);
   assert.equal(perfectPlan.openAI.publicApi, "https://cryptobotz.cryptoworldz.xyz/api/oneworldz-gpt/chat");
 });
+
+test("OneWorldz GPT presents practical action prompts without putting secrets or payments in the browser", async () => {
+  const js = await readFile(path.join(root, "source", "oneworldz-gpt.js"), "utf8");
+  for (const prompt of ["Help children", "Grow food & water", "Partner with us", "Global Law Committee", "Our public money", "Learn crypto safely"]) {
+    assert.match(js, new RegExp(prompt));
+  }
+  assert.doesNotMatch(js, /OPENAI_API_KEY|sk-proj-|Bearer\s+sk-/i);
+});

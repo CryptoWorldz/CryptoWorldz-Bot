@@ -16,7 +16,7 @@ const expectedOrder = [
   "finalize-themes.mjs", "fix-oneworldz-mobile.mjs", "finalize-approved-visual-manifests.mjs", "write-static-cache-policy.mjs", "apply-jayjay-images.mjs",
   "apply-full-background-experience.mjs", "perfect-oneworldz.mjs", "finalize-oneworldz-perfect-layout.mjs", "perfect-cryptoworldz.mjs",
   "finalize-visual-fit.mjs", "finalize-one-screen-gpt.mjs", "finalize-pdc-floating.mjs", "finalize-oneworldz-blueprint-hub.mjs", "finalize-universal-floating.mjs",
-  "finalize-perfect-links.mjs", "fix-reagan-mobile.mjs", "verify-final-build.mjs"
+  "finalize-perfect-links.mjs", "fix-reagan-mobile.mjs", "integrate-oneworldz-gpt.mjs", "verify-final-build.mjs"
 ];
 
 test("staged build preserves the established production order", () => {
@@ -24,8 +24,8 @@ test("staged build preserves the established production order", () => {
   assert.deepEqual(buildStages.map(({ name }) => name), [
     "core-generation", "public-surface", "discovery-and-theme", "visual-experience", "release-integrity"
   ]);
-  assert.equal(buildSteps.length, 37);
-  assert.equal(buildStages.flatMap(({ steps }) => steps).length, 37);
+  assert.equal(buildSteps.length, 38);
+  assert.equal(buildStages.flatMap(({ steps }) => steps).length, 38);
   assert.deepEqual(buildSteps.slice(2, 5).map(({ env }) => env.APPROVED_VISUAL_KEY), ["foodworldz", "donateworldz", "hodlergalaxy"]);
 });
 

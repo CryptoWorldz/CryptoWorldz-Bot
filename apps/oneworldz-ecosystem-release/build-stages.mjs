@@ -22,6 +22,7 @@ export const buildStages = Object.freeze([
     name: "public-surface",
     steps: Object.freeze([
       node("finalize-oneworldz.mjs"),
+      // Supplies the approved GPT artwork to later visual stages.
       node("integrate-oneworldz-gpt.mjs"),
       node("finalize-cryptoworldz.mjs"),
       node("finalize-donation-separation.mjs"),
@@ -65,6 +66,10 @@ export const buildStages = Object.freeze([
     steps: Object.freeze([
       node("finalize-perfect-links.mjs"),
       node("fix-reagan-mobile.mjs"),
+      // The GPT browser integration must be last among page writers. Several
+      // visual finalizers replace root HTML, so injecting it earlier loses the
+      // protected assistant from the final candidate.
+      node("integrate-oneworldz-gpt.mjs"),
       node("verify-final-build.mjs")
     ])
   })

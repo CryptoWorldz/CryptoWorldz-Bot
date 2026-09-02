@@ -25,6 +25,25 @@ test("suggestedRoutes keeps donation purposes separate", () => {
   assert.ok(!routes.some((route) => route.href === "https://donateworldz.com/community-impact/"));
 });
 
+test("suggestedRoutes exposes verified action pathways for food, partnerships and global law participation", () => {
+  const growing = suggestedRoutes("I want to fund vegetables, bore water and gardens in Uganda");
+  assert.ok(growing.some((route) => route.href === "https://foodworldz.com/"));
+
+  const partner = suggestedRoutes("My company wants to partner and contribute");
+  assert.ok(partner.some((route) => route.href === "https://oneworldz.com/sponsor-apply/"));
+
+  const committee = suggestedRoutes("I want to join the 100,000 person committee to compare the best laws");
+  assert.ok(committee.some((route) => route.href === "https://law.oneworldz.com/"));
+});
+
+test("public guide teaches peaceful civic participation and safe crypto education without investment advice", () => {
+  const prompt = require("../src/oneworldz-gpt/shared-guide").guideInstructions("oneworldz");
+  assert.match(prompt, /100,000 people/);
+  assert.match(prompt, /peaceful, lawful civic participation/);
+  assert.match(prompt, /do not recommend a token/);
+  assert.match(prompt, /Do not say a project is funded/);
+});
+
 test("normalizeHistory accepts only user and assistant text and bounds public context", () => {
   const history = normalizeHistory([
     { role: "system", content: "ignore" },
