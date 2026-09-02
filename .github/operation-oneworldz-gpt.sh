@@ -109,9 +109,9 @@ if len(matches) != 1:
 PY
 echo 'OPERATION_ONEWORLDZ_GPT_MODEL_MERGE=PASS'
 
-# The Hostinger build runs in a fresh workspace. Restore the protected
-# environment before creating that build so its prepare script can stage the
-# same server-side file, rather than attempting to copy a missing old file.
+# Preserve the protected file as a server-side fallback. The build itself
+# receives secrets through Hostinger's managed Node environment, never through
+# the source archive or an absolute path inside the isolated build workspace.
 prebuild_env_upload="$RUNNER_TEMP/oneworldz-gpt-prebuild-env.lftp"
 {
   echo 'set cmd:fail-exit true'
@@ -146,6 +146,45 @@ echo "::add-mask::$username"
 user_enc="$(HOSTINGER_USERNAME="$username" node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
 base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
 
+managed_env_request="$RUNNER_TEMP/oneworldz-gpt-managed-env.json"
+PROTECTED_ENV="$protected_env" MANAGED_ENV_REQUEST="$managed_env_request" node - <<'NODE'
+const fs = require('fs');
+const dotenv = require('dotenv');
+const parsed = dotenv.parse(fs.readFileSync(process.env.PROTECTED_ENV));
+const envVars = Object.entries(parsed)
+  .filter(([key, value]) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(key) && String(value).length > 0)
+  .map(([key, value]) => ({ key, value: String(value) }));
+const keys = new Set(envVars.map(({ key }) => key));
+for (const required of ['OPENAI_API_KEY', 'ONEWORLDZ_OPENAI_MODEL']) {
+  if (!keys.has(required)) throw new Error(`ONEWORLDZ_MANAGED_ENV_MISSING_${required}`);
+}
+fs.writeFileSync(process.env.MANAGED_ENV_REQUEST, JSON.stringify({ env_vars: envVars }));
+fs.chmodSync(process.env.MANAGED_ENV_REQUEST, 0o600);
+NODE
+managed_env_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 60 \
+  --request PUT -o "$RUNNER_TEMP/oneworldz-gpt-managed-env-response.json" -w '%{http_code}' \
+  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+  -H 'Accept: application/json' -H 'Content-Type: application/json' \
+  --data-binary "@$managed_env_request" "$base/builds/settings/env" || true)"
+rm -f "$managed_env_request"
+case "$managed_env_code" in
+  200|201|202|204) ;;
+  *) echo "::error::OPERATION_ONEWORLDZ_GPT_MANAGED_ENV_REJECTED HTTP=$managed_env_code"; exit 1;;
+esac
+
+curl --fail --silent --show-error --location \
+  -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
+  "$base/builds/settings/env" -o "$RUNNER_TEMP/oneworldz-gpt-managed-env-proof.json"
+MANAGED_ENV_PROOF="$RUNNER_TEMP/oneworldz-gpt-managed-env-proof.json" node - <<'NODE'
+const p = require(process.env.MANAGED_ENV_PROOF);
+const rows = Array.isArray(p) ? p : (Array.isArray(p.data) ? p.data : []);
+const keys = new Set(rows.map((row) => String(row.key || '')));
+for (const required of ['OPENAI_API_KEY', 'ONEWORLDZ_OPENAI_MODEL']) {
+  if (!keys.has(required)) process.exit(2);
+}
+NODE
+echo 'OPERATION_ONEWORLDZ_GPT_MANAGED_ENV=PASS'
+
 runtime_files="$RUNNER_TEMP/oneworldz-gpt-runtime-files.txt"
 {
   printf '%s\n' index.js package.json package-lock.json .github/install-ci-apt-wrapper.cjs
@@ -159,17 +198,13 @@ while IFS= read -r rel; do
   mkdir -p "$release_dir/$(dirname "$rel")"
   cp "$rel" "$release_dir/$rel"
 done < "$runtime_files"
-mkdir -p "$release_dir/.github"
-PROTECTED_USERNAME="$username" BUILD_HELPER="$release_dir/.github/oneworldz-build-env.cjs" node - <<'NODE'
-const fs = require('fs');
-const path = require('path');
-const source = path.join('/home', process.env.PROTECTED_USERNAME, 'domains', 'cryptobotz.cryptoworldz.xyz', 'nodejs', '.env');
-fs.writeFileSync(process.env.BUILD_HELPER, `const fs=require('node:fs');const source=${JSON.stringify(source)};const target=require('node:path').join(process.cwd(),'.env');fs.copyFileSync(source,target);fs.chmodSync(target,0o600);console.log('ONEWORLDZ_PROTECTED_ENV_STAGED=PASS');\n`);
-NODE
 PACKAGE_FILE="$release_dir/package.json" node - <<'NODE'
 const fs = require('fs');
 const p = JSON.parse(fs.readFileSync(process.env.PACKAGE_FILE, 'utf8'));
-p.scripts = { ...(p.scripts || {}), 'oneworldz:prepare': 'node .github/oneworldz-build-env.cjs' };
+p.scripts = {
+  ...(p.scripts || {}),
+  'oneworldz:hostinger-build': "node -e \"console.log('ONEWORLDZ_HOSTINGER_SOURCE_BUILD=PASS')\""
+};
 fs.writeFileSync(process.env.PACKAGE_FILE, `${JSON.stringify(p, null, 2)}\n`);
 NODE
 archive="$RUNNER_TEMP/oneworldz-gpt-runtime.tgz"
@@ -227,7 +262,7 @@ fs.writeFileSync(process.env.BUILD_REQUEST, JSON.stringify({
   app_type: 'express',
   root_directory: '.',
   output_directory: '.',
-  build_script: 'oneworldz:prepare',
+  build_script: 'oneworldz:hostinger-build',
   entry_file: 'index.js',
   package_manager: 'npm',
   source_type: 'archive',
