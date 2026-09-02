@@ -83,6 +83,26 @@ if len(matches) != 1:
 PY
 echo 'OPERATION_ONEWORLDZ_GPT_KEY_MERGE=PASS'
 
+# The Hostinger build runs in a fresh workspace. Restore the protected
+# environment before creating that build so its prepare script can stage the
+# same server-side file, rather than attempting to copy a missing old file.
+prebuild_env_upload="$RUNNER_TEMP/oneworldz-gpt-prebuild-env.lftp"
+{
+  echo 'set cmd:fail-exit true'
+  echo 'set net:max-retries 3'
+  echo 'set net:timeout 30'
+  echo 'set ftp:ssl-force true'
+  echo 'set ftp:ssl-protect-data true'
+  echo 'set ssl:verify-certificate true'
+  echo 'set ssl:check-hostname false'
+  echo 'set ftp:passive-mode true'
+  printf 'cd "%s"\n' "$PROTECTED_NODE_ROOT"
+  printf 'put "%s" -o ".env"\n' "$protected_env"
+  echo 'bye'
+} > "$prebuild_env_upload"
+timeout 180 lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $prebuild_env_upload" "$host"
+echo 'OPERATION_ONEWORLDZ_GPT_PREBUILD_ENV=PASS'
+
 domain_enc="$(node -p 'encodeURIComponent(process.env.PROTECTED_DOMAIN)')"
 curl --fail --silent --show-error --location \
   -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
@@ -216,7 +236,18 @@ const fs = require('fs');
 let p;
 try { p = JSON.parse(fs.readFileSync(process.env.BUILD_LOGS, 'utf8')); } catch { process.exit(0); }
 const logs = String(p.logs ?? p.data?.logs ?? (typeof p.data === 'string' ? p.data : '')).replace(/\u001b\[[0-9;]*m/g, '');
-if (logs) process.stdout.write(`${logs}\n`);
+if (logs) {
+  process.stdout.write(`${logs}\n`);
+} else {
+  const diagnostic = {
+    state: p.state ?? p.data?.state,
+    status: p.status ?? p.data?.status,
+    message: p.message ?? p.data?.message,
+    error: p.error ?? p.data?.error,
+    details: p.details ?? p.data?.details
+  };
+  process.stdout.write(`OPERATION_ONEWORLDZ_GPT_BUILD_LOGS_EMPTY diagnostic=${JSON.stringify(diagnostic)}\n`);
+}
 NODE
 }
 

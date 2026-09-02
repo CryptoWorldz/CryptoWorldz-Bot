@@ -13,6 +13,8 @@ for (const token of [
   "name: OneWorldz Static Release",
   "Fail fast on Hostinger FTPS certificate",
   "python3 .github/ftps-preflight.py",
+  "Require healthy protected OneWorldz GPT before static writes",
+  "bash .github/prove-oneworldz-gpt-live.sh",
   "Load canonical release contract",
   "bash .github/full-current-static-deploy.sh",
   "bash .github/full-current-live-proof.sh",

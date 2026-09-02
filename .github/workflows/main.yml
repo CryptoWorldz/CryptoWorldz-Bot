@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/main.yml"
       - ".github/ftps-preflight.py"
+      - ".github/prove-oneworldz-gpt-live.sh"
       - ".github/full-current-candidate-proof.sh"
       - ".github/full-current-live-proof.sh"
       - ".github/resume-locked-static-deploy.sh"
@@ -67,6 +68,7 @@ jobs:
           console.log(`MIN_PAGE_ROUTES=${releaseContract.pageRoutes}`);
           console.log(`STATIC_TARGETS=${releaseContract.staticTargets}`);
           console.log(`ARCHITECTURE_DESTINATIONS=${releaseContract.architectureDestinations}`);
+          console.log(`PROTECTED_DOMAIN=${releaseContract.protectedDomain}`);
           NODE
 
       - name: Fail fast on Hostinger FTPS certificate
@@ -148,6 +150,10 @@ jobs:
           test "$(git rev-parse HEAD:apps/oneworldz-ecosystem-release)" = "$CANDIDATE_TREE"
           test "$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)" = "$CANDIDATE_FINGERPRINT"
           echo 'CURRENT_MAIN_AUTHORITY=PASS'
+
+      - name: Require healthy protected OneWorldz GPT before static writes
+        shell: bash
+        run: bash .github/prove-oneworldz-gpt-live.sh
 
       - name: Deploy exact candidate to all 18 Hostinger static destinations
         shell: bash
