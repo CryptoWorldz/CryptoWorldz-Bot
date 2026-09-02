@@ -1,0 +1,68 @@
+name: OneWorldz Protected Runtime Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/protected-runtime.yml"
+      - ".github/ftps-preflight.py"
+      - ".github/full-current-oneworldz-gpt-extension.sh"
+      - ".github/operation-oneworldz-gpt.sh"
+      - ".github/lftp-compat.py"
+      - ".github/install-ci-apt-wrapper.cjs"
+      - "index.js"
+      - "package.json"
+      - "package-lock.json"
+      - "src/oneworldz-gpt/**"
+      - "src/protected-env.js"
+      - "src/full-runtime-entry.js"
+      - "src/hub-central/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-protected-runtime
+  cancel-in-progress: false
+
+jobs:
+  protected_runtime:
+    name: PREFLIGHT → GPT RUNTIME → LIVE GPT PROOF
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
+      PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install runtime dependencies and FTPS transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          python3 -m py_compile .github/lftp-compat.py .github/ftps-preflight.py
+          mkdir -p "$RUNNER_TEMP/oneworldz-bin"
+          printf '%s\n' '#!/usr/bin/env bash' 'exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"' > "$RUNNER_TEMP/oneworldz-bin/lftp"
+          chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
+          echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
+      - name: Fail fast on Hostinger FTPS certificate
+        shell: bash
+        run: python3 .github/ftps-preflight.py
+      - name: Deploy and prove protected OneWorldz GPT runtime
+        shell: bash
+        run: bash .github/full-current-oneworldz-gpt-extension.sh

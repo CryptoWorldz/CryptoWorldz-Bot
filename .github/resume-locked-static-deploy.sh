@@ -382,5 +382,4 @@ cp "$RUNNER_TEMP/touched.tsv" deployment-proof/touched.tsv
 cp "$RUNNER_TEMP/deploy-status.tsv" deployment-proof/deploy-status.tsv
 printf 'run_id=%s\nstatic_tree=%s\nproof=EXACT_FTPS_AND_PUBLIC_INDEX_MANIFEST_BYTES\nresume_policy=SKIP_ALREADY_CURRENT_ROLLBACK_FAILED_TARGET_ONLY\n' \
   "$GITHUB_RUN_ID" "$LOCKED_STATIC_TREE" > deployment-proof/release.txt
-bash .github/publish-progress.sh HOSTINGER PASS
 echo 'HOSTINGER_18_SITE_DEPLOYMENT=PASS'

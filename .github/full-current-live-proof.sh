@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${MIN_PAGE_ROUTES:=83}"
+: "${MIN_PAGE_ROUTES:=93}"
 
 rm -rf live-proof
 mkdir -p live-proof deployment-proof
@@ -41,7 +41,8 @@ for (const report of reports) {
   if (Number(report.totalHtmlPagesAudited?.desktop || 0) < expected) throw new Error(`${report.name}: live desktop route audit incomplete`);
   if (Number(report.totalHtmlPagesAudited?.mobile || 0) < expected) throw new Error(`${report.name}: live mobile route audit incomplete`);
 }
-const minimum = Number(process.env.MIN_PAGE_ROUTES || 83);
+const minimum = Number(process.env.MIN_PAGE_ROUTES);
+if (!Number.isInteger(minimum) || minimum <= 0) throw new Error('MIN_PAGE_ROUTES must come from the canonical release contract');
 if (routes < minimum) throw new Error(`Live fleet exposes only ${routes} page routes; minimum required is ${minimum}`);
 const summary = {
   live: true,

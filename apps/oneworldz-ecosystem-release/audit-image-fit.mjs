@@ -102,7 +102,8 @@ for (const target of targetEntries) {
       for (const viewport of viewports) {
         const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
         const page = await context.newPage();
-        await page.goto(`http://127.0.0.1:${port}${route}`, { waitUntil: "networkidle", timeout: 30000 }).catch(() => null);
+        const response = await page.goto(`http://127.0.0.1:${port}${route}`, { waitUntil: "networkidle", timeout: 30000 });
+        if (!response?.ok()) throw new Error(`${target}${route}: candidate navigation did not return 2xx`);
         await page.evaluate(async () => {
           const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
           for (const img of document.images) img.loading = "eager";

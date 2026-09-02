@@ -3,6 +3,7 @@ import { cp, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { productionTargets } from "./production-targets.mjs";
+import { pageRoutes } from "./release-contract.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(root, "dist", "ecosystem");
@@ -109,6 +110,6 @@ for (const target of productionTargets) {
   await refreshManifest(dir);
 }
 
-if (versionedPages !== 93) throw new Error(`Expected to version 93 one-screen pages, got ${versionedPages}`);
+if (versionedPages !== pageRoutes) throw new Error(`Expected to version ${pageRoutes} one-screen pages, got ${versionedPages}`);
 console.log(`ONE_SCREEN_ASSET_FRESHNESS=PASS pages=${versionedPages} css_versioned=true css_js_no_store=true`);
 console.log("ONE_SCREEN_GPT_FINALIZER=PASS routes=3 fixed_overlay=true document_scroll=false artwork=PASS");

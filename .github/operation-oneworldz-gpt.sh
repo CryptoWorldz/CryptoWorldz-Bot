@@ -14,7 +14,9 @@ for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN" 
   [ -n "$value" ] && echo "::add-mask::$value"
 done
 
-npm ci
+# Dependencies are installed once by the protected-runtime workflow. Keeping
+# this script dependency-neutral prevents a second install in the same run.
+test -d node_modules
 node --test test/protected-env.test.js test/oneworldz-gpt.test.js
 node --check index.js
 node --check src/protected-env.js

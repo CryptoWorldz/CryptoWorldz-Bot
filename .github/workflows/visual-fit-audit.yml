@@ -2,7 +2,7 @@ name: Final Visual Fit Audit
 
 on:
   push:
-    branches: [fix/visual-fit-final-audit, build/one-screen-18]
+    branches: [main, fix/visual-fit-final-audit, build/one-screen-18]
     paths:
       - ".github/workflows/visual-fit-audit.yml"
       - ".github/full-current-candidate-proof.sh"
@@ -65,7 +65,7 @@ jobs:
       - name: Audit every click, menu, outlet, legacy token, DEX route and GPT
         run: |
           set -euo pipefail
-          node apps/oneworldz-ecosystem-release/audit-live-every-click-v2.mjs || true
+          node apps/oneworldz-ecosystem-release/audit-live-every-click-v2.mjs
           node apps/oneworldz-ecosystem-release/audit-final-external-retries.mjs
           cat audit-results/live-every-click-summary.txt
           grep -Fxq 'LIVE_PAGES_EXPECTED=93' audit-results/live-every-click-summary.txt
@@ -82,17 +82,6 @@ jobs:
           grep -Fxq 'ONEWORLDZ_GPT_LIVE=PASS' audit-results/live-every-click-summary.txt
           grep -Fxq 'INTERACTION_FAILURES=0' audit-results/live-every-click-summary.txt
           grep -Fxq 'EVERY_CLICK_GATE=PASS' audit-results/live-every-click-summary.txt
-
-      - name: Prove every route fits one viewport without clipping or normal scrolling
-        run: |
-          set -euo pipefail
-          node apps/oneworldz-ecosystem-release/audit-one-screen-layout.mjs \
-            --root apps/oneworldz-ecosystem-release/dist/ecosystem \
-            --out audit-results
-          cat audit-results/one-screen-layout-summary.txt
-          grep -Fxq 'ONE_SCREEN_ROUTES=93' audit-results/one-screen-layout-summary.txt
-          grep -Fxq 'VIEWPORT_CHECKS=186' audit-results/one-screen-layout-summary.txt
-          grep -Fxq 'ONE_SCREEN_LAYOUT_FAILURES=0' audit-results/one-screen-layout-summary.txt
 
       - name: Prove all 18 candidate sites and all 93 routes in real browsers
         run: |

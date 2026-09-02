@@ -1,170 +1,78 @@
-import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
-import { ecosystemDestinations, ownedRootDomains, protectedDestinations } from '../apps/oneworldz-ecosystem-release/ecosystem-topology.mjs';
-import { productionTargets, productionGate } from '../apps/oneworldz-ecosystem-release/production-targets.mjs';
+import assert from "node:assert/strict";
+import { access, readFile, readdir } from "node:fs/promises";
+import { ecosystemDestinations, ownedRootDomains, protectedDestinations } from "../apps/oneworldz-ecosystem-release/ecosystem-topology.mjs";
+import { productionTargets, productionGate } from "../apps/oneworldz-ecosystem-release/production-targets.mjs";
+import { releaseContract } from "../apps/oneworldz-ecosystem-release/release-contract.mjs";
 
-const workflowDir = '.github/workflows';
-const workflowFiles = (await readdir(workflowDir)).filter((name) => /\.ya?ml$/i.test(name)).sort();
-assert.ok(workflowFiles.includes('main.yml'), 'main.yml canonical deployment workflow is required');
-const auxiliaryWorkflows = workflowFiles.filter((name) => name !== 'main.yml');
-assert.deepEqual(auxiliaryWorkflows, ['visual-fit-audit.yml'], 'only the read-only visual-fit audit may exist beside main.yml');
-const visualAuditWorkflow = await readFile(`${workflowDir}/visual-fit-audit.yml`, 'utf8');
-for (const forbidden of [
-  'FTP_HOST', 'FTP_USERNAME', 'FTP_PASSWORD', 'HOSTINGER_API_TOKEN',
-  'full-current-static-deploy.sh', 'resume-locked-static-deploy.sh',
-  'cryptoworldz-only-deploy.sh', 'oneworldz-only-deploy.sh',
-  'operation-oneworldz-gpt.sh', 'lftp'
-]) assert.ok(!visualAuditWorkflow.includes(forbidden), `visual-fit-audit.yml must remain read-only: ${forbidden}`);
-for (const required of ['Final Visual Fit Audit', 'ASPECT_MISMATCHES=0', 'BROKEN_IMAGES=0', 'contents: read']) {
-  assert.ok(visualAuditWorkflow.includes(required), `visual-fit-audit.yml missing read-only audit invariant: ${required}`);
-}
+const workflowDir = ".github/workflows";
+const workflows = (await readdir(workflowDir)).filter((name) => /\.ya?ml$/i.test(name)).sort();
+assert.deepEqual(workflows, ["main.yml", "protected-runtime.yml", "visual-fit-audit.yml"]);
 
-const workflow = await readFile(`${workflowDir}/main.yml`, 'utf8');
-const oneWorldzOnlyMode = workflow.includes('OneWorldz First — Single Site Fix & Proof');
-const cryptoWorldzOnlyMode = workflow.includes('CryptoWorldz Second — Single Site Fix & Proof');
-const fullFleetMode = workflow.includes('OneWorldz Safe Static Fleet Deployment');
-const oneScreenFleetMode = workflow.includes('OneWorldz 18-Site One-Screen Production Deployment');
-const activeModes = [oneWorldzOnlyMode, cryptoWorldzOnlyMode, fullFleetMode, oneScreenFleetMode].filter(Boolean).length;
-assert.ok(activeModes === 1, 'main.yml must arm exactly one staged single-site rail or one canonical 18-site fleet rail');
-
-if (oneWorldzOnlyMode) {
-  const requiredOneWorldzTokens = [
-    'ONEWORLDZ BUILD → MOBILE PROOF → DEPLOY → LIVE PROOF',
-    'Build exact OneWorldz candidate',
-    'Prove OneWorldz contract only',
-    'Prove every OneWorldz route on desktop and mobile',
-    'Refuse stale source and recheck exact OneWorldz destination',
-    'Backup, deploy and byte-prove OneWorldz only',
-    'Prove live OneWorldz desktop and mobile routes',
-    'bash .github/oneworldz-only-deploy.sh',
-    'oneworldz.com',
-    'domains/oneworldz.com/public_html',
-    'ONEWORLDZ_FINAL PASS'
-  ];
-  for (const token of requiredOneWorldzTokens) assert.ok(workflow.includes(token), `main.yml missing OneWorldz-only recovery invariant: ${token}`);
-
-  const forbiddenFleetWrites = [
-    'bash .github/full-current-static-deploy.sh',
-    'bash .github/resume-locked-static-deploy.sh',
-    'Backup, deploy and byte-prove all Hostinger destinations',
-    'Prove every live desktop and mobile route'
-  ];
-  for (const token of forbiddenFleetWrites) assert.ok(!workflow.includes(token), `OneWorldz-only recovery rail must not arm fleet write path: ${token}`);
-
-  const deployScript = await readFile('.github/oneworldz-only-deploy.sh', 'utf8');
-  for (const token of [
-    "test \"$key\" = 'oneworldz'",
-    "test \"$domain\" = 'oneworldz.com'",
-    "test \"$transport\" = 'domains/oneworldz.com/public_html'",
-    'Rolling back OneWorldz only. No other Hostinger destination is touched.',
-    'ONEWORLDZ_ONLY_HOSTINGER_DEPLOYMENT=PASS'
-  ]) assert.ok(deployScript.includes(token), `OneWorldz-only deployment script missing safety invariant: ${token}`);
-} else if (cryptoWorldzOnlyMode) {
-  const requiredCryptoWorldzTokens = [
-    'CRYPTOWORLDZ BUILD → VISUAL PROOF → GPT SHARE → DEPLOY → LIVE PROOF',
-    'Build exact CryptoWorldz candidate',
-    'Prove CryptoWorldz destination contract only',
-    'Prove every CryptoWorldz route on desktop and mobile',
-    'Deploy shared OneWorldz GPT origin support',
-    'Refuse stale source and recheck exact CryptoWorldz destination',
-    'Backup, deploy and byte-prove CryptoWorldz only',
-    'Prove live CryptoWorldz desktop and mobile routes',
-    'bash .github/cryptoworldz-only-deploy.sh',
-    'cryptoworldz.xyz',
-    'domains/cryptoworldz.xyz/public_html',
-    'CRYPTOWORLDZ_FINAL PASS'
-  ];
-  for (const token of requiredCryptoWorldzTokens) assert.ok(workflow.includes(token), `main.yml missing CryptoWorldz-only recovery invariant: ${token}`);
-
-  const forbiddenFleetWrites = [
-    'bash .github/full-current-static-deploy.sh',
-    'bash .github/resume-locked-static-deploy.sh',
-    'Backup, deploy and byte-prove all Hostinger destinations',
-    'Prove every live desktop and mobile route'
-  ];
-  for (const token of forbiddenFleetWrites) assert.ok(!workflow.includes(token), `CryptoWorldz-only recovery rail must not arm fleet write path: ${token}`);
-
-  const deployScript = await readFile('.github/cryptoworldz-only-deploy.sh', 'utf8');
-  for (const token of [
-    "test \"$key\" = 'cryptoworldz'",
-    "test \"$domain\" = 'cryptoworldz.xyz'",
-    "test \"$transport\" = 'domains/cryptoworldz.xyz/public_html'",
-    'Rolling back CryptoWorldz only. No other Hostinger destination is touched.',
-    'CRYPTOWORLDZ_ONLY_HOSTINGER_DEPLOYMENT=PASS'
-  ]) assert.ok(deployScript.includes(token), `CryptoWorldz-only deployment script missing safety invariant: ${token}`);
-} else if (oneScreenFleetMode) {
-  const requiredOneScreenFleetTokens = [
-    'OneWorldz 18-Site One-Screen Production Deployment',
-    'BUILD → 93 ROUTES → GPT → 18 HOSTINGER ROOTS → LIVE PROOF',
-    'Build the final 18-site candidate',
-    'Prove one-screen layout and image integrity on all 93 routes',
-    'Prove all 18 candidate sites in real browsers',
-    'Refuse stale source before production writes',
-    'Re-prove shared protected OneWorldz GPT',
-    'Deploy exact candidate to all 18 Hostinger static destinations',
-    'bash .github/full-current-static-deploy.sh',
-    'Prove all 18 live sites plus protected Command Centre and GPT',
-    'Write final deployment record',
-    'MIN_PAGE_ROUTES: "93"',
-    'CANDIDATE_TREE',
-    'CANDIDATE_FINGERPRINT',
-    'ONEWORLDZ_ONE_SCREEN_FULL_PRODUCTION=PASS',
-    'cancel-in-progress: false'
-  ];
-  for (const token of requiredOneScreenFleetTokens) assert.ok(workflow.includes(token), `main.yml missing one-screen fleet invariant: ${token}`);
-} else {
-  const requiredFleetTokens = [
-    'OneWorldz Safe Static Fleet Deployment',
-    'Build and freeze exact candidate',
-    'Prove links, separation, visuals, destinations and SEO',
-    'Prove every generated desktop and mobile route',
-    'Refuse stale source and compare the exact Hostinger map',
-    'Backup, deploy and byte-prove all Hostinger destinations',
-    'Prove every live desktop and mobile route',
-    'CANDIDATE_TREE',
-    'CANDIDATE_FINGERPRINT',
-    'MIN_PAGE_ROUTES: "83"'
-  ];
-  for (const token of requiredFleetTokens) assert.ok(workflow.includes(token), `main.yml missing current full-rebuild invariant: ${token}`);
-}
-
-const forbiddenHistoricalLocks = [
-  'LOCKED_SOURCE_COMMIT',
-  'LOCKED_SOURCE_RUN',
-  'LOCKED_CANDIDATE_FINGERPRINT',
-  '3b52c7eae7834a33f1f74e312433644ea239904c',
-  '295e0706bc033b294736d7f87dc6d36f783eaa3a',
-  '47ceec16e10ff1f8fca8002c52c75b63781dab8cf6b44742d14ec78d1b4afb59',
-  '32219855385'
-];
-for (const token of forbiddenHistoricalLocks) assert.ok(!workflow.includes(token), `historical candidate lock must not control current deployment: ${token}`);
-
-assert.equal(ecosystemDestinations.length, 19, 'architecture destination count drift');
-assert.equal(ownedRootDomains.length, 15, 'active owned root-domain count drift');
-assert.equal(productionTargets.length, 18, 'static transport root count drift');
-assert.deepEqual(protectedDestinations.map((x) => x.domain), ['cryptobotz.cryptoworldz.xyz']);
-assert.equal(productionGate.productionWriteAllowed, false, 'modules must never independently authorize production writes');
-
-const state = await readFile('deployments/oneworldz-19-total.request', 'utf8');
+const staticWorkflow = await readFile(`${workflowDir}/main.yml`, "utf8");
 for (const token of [
-  'state=TOTAL_DEPLOYMENT_PLAN_ACTIVE',
-  'owner_authority=PERFORM_TOTAL_DEPLOYMENT_PLAN',
-  'static_targets=18',
-  'architecture_destinations=19',
-  'candidate_policy=BUILD_CURRENT_MAIN_THEN_FREEZE_WITHIN_RUN',
-  'page_route_requirement=EXACT_CURRENT_ONE_SCREEN_ROUTE_COUNT_93',
-  'production_writer=GITHUB_ACTIONS_CANONICAL_FULL_REBUILD_RAIL_ONLY'
-]) assert.ok(state.includes(token), `deployment state missing current policy: ${token}`);
-
-const browserProof = await readFile('apps/oneworldz-ecosystem-release/browser-visual-proof.mjs', 'utf8');
-for (const token of ['discoverCandidateRoutes', 'discoverSitemapRoutes', 'brokenImages', 'consoleErrors', 'failedRequests', 'totalHtmlPagesAudited']) {
-  assert.ok(browserProof.includes(token), `browser proof missing required evidence: ${token}`);
+  "name: OneWorldz Static Release",
+  "Fail fast on Hostinger FTPS certificate",
+  "python3 .github/ftps-preflight.py",
+  "Load canonical release contract",
+  "bash .github/full-current-static-deploy.sh",
+  "bash .github/full-current-live-proof.sh",
+  "contents: read",
+  "cancel-in-progress: false"
+]) assert.ok(staticWorkflow.includes(token), `static workflow missing ${token}`);
+for (const forbidden of ["full-current-oneworldz-gpt-extension.sh", "operation-oneworldz-gpt.sh", "contents: write", "publish-progress.sh"]) {
+  assert.ok(!staticWorkflow.includes(forbidden), `static workflow must not contain ${forbidden}`);
 }
 
-console.log(oneWorldzOnlyMode
-  ? 'DEPLOYMENT_STRUCTURE=PASS staged OneWorldz-only rail + exact Hostinger root + desktop/mobile proof; other destinations write-disabled'
-  : cryptoWorldzOnlyMode
-    ? 'DEPLOYMENT_STRUCTURE=PASS staged CryptoWorldz-only rail + exact Hostinger root + shared GPT origin proof + desktop/mobile proof; other destinations write-disabled'
-    : oneScreenFleetMode
-      ? 'DEPLOYMENT_STRUCTURE=PASS one-screen 93-route rail + 18 Hostinger transports + protected GPT/Command Centre live proof'
-      : 'DEPLOYMENT_STRUCTURE=PASS one canonical static rail + 18 Hostinger transports + dynamic desktop/mobile live proof');
+const protectedWorkflow = await readFile(`${workflowDir}/protected-runtime.yml`, "utf8");
+for (const token of [
+  "name: OneWorldz Protected Runtime Release",
+  "Fail fast on Hostinger FTPS certificate",
+  "bash .github/full-current-oneworldz-gpt-extension.sh",
+  "src/oneworldz-gpt/**",
+  "contents: read"
+]) assert.ok(protectedWorkflow.includes(token), `protected workflow missing ${token}`);
+for (const forbidden of ["full-current-static-deploy.sh", "resume-locked-static-deploy.sh"]) {
+  assert.ok(!protectedWorkflow.includes(forbidden), `protected workflow must not contain ${forbidden}`);
+}
+
+const visualWorkflow = await readFile(`${workflowDir}/visual-fit-audit.yml`, "utf8");
+for (const required of ["branches: [main", "ASPECT_MISMATCHES=0", "BROKEN_IMAGES=0", "contents: read"]) {
+  assert.ok(visualWorkflow.includes(required), `visual audit missing ${required}`);
+}
+assert.ok(!visualWorkflow.includes("audit-live-every-click-v2.mjs || true"), "visual audit must not ignore every-click failures");
+
+assert.deepEqual(releaseContract, {
+  staticTargets: 18,
+  architectureDestinations: 19,
+  pageRoutes: 93,
+  protectedDomain: "cryptobotz.cryptoworldz.xyz"
+});
+assert.equal(ecosystemDestinations.length, releaseContract.architectureDestinations);
+assert.equal(ownedRootDomains.length, 15);
+assert.equal(productionTargets.length, releaseContract.staticTargets);
+assert.deepEqual(protectedDestinations.map(({ domain }) => domain), [releaseContract.protectedDomain]);
+assert.equal(productionGate.productionWriteAllowed, false, "modules must never independently authorize production writes");
+
+for (const retired of [
+  ".github/oneworldz-only-deploy.sh",
+  ".github/cryptoworldz-only-deploy.sh",
+  ".github/full-current-zed-runtime.sh",
+  ".github/oneworldz-gpt-proof-or-repair.sh",
+  ".github/preflight-live-zed.sh",
+  ".github/resume-locked-zed.sh",
+  ".github/publish-progress.sh"
+]) await assert.rejects(access(retired), `retired deployment path still exists: ${retired}`);
+
+const deploymentState = await readFile("deployments/oneworldz-19-total.request", "utf8");
+for (const token of [
+  "state=TOTAL_DEPLOYMENT_PLAN_ACTIVE",
+  "candidate_policy=BUILD_CURRENT_MAIN_THEN_FREEZE_WITHIN_RUN",
+  "production_writer=GITHUB_ACTIONS_CANONICAL_FULL_REBUILD_RAIL_ONLY"
+]) assert.ok(deploymentState.includes(token), `deployment state missing ${token}`);
+
+const browserProof = await readFile("apps/oneworldz-ecosystem-release/browser-visual-proof.mjs", "utf8");
+for (const token of ["discoverCandidateRoutes", "discoverSitemapRoutes", "brokenImages", "consoleErrors", "failedRequests"]) {
+  assert.ok(browserProof.includes(token), `browser proof missing ${token}`);
+}
+
+console.log(`DEPLOYMENT_STRUCTURE=PASS static_targets=${releaseContract.staticTargets} routes=${releaseContract.pageRoutes} protected_runtime=separate ftps_preflight=required`);

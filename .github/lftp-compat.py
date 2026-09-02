@@ -88,6 +88,11 @@ def connect(
 
 
 def is_transient(exc: BaseException) -> bool:
+    # An expired or otherwise invalid certificate cannot recover through retry.
+    # Fail immediately with the original error so the workflow points to the
+    # Hostinger TLS fault instead of wasting time on upload retries.
+    if isinstance(exc, ssl.SSLCertVerificationError):
+        return False
     if isinstance(
         exc,
         (

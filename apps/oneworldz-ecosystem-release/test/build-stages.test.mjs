@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { buildStages, buildSteps } from "../build-stages.mjs";
+import { releaseContract } from "../release-contract.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -33,4 +34,13 @@ test("the package uses the staged orchestrator and retains the legacy command fo
   assert.equal(pkg.scripts.build, "node build-release.mjs");
   assert.ok(pkg.scripts["build:legacy"].includes("node build.mjs"));
   assert.ok(pkg.scripts["build:legacy"].includes("node finalize-perfect-links.mjs"));
+});
+
+test("release cardinality has one authoritative contract", () => {
+  assert.deepEqual(releaseContract, {
+    staticTargets: 18,
+    architectureDestinations: 19,
+    pageRoutes: 93,
+    protectedDomain: "cryptobotz.cryptoworldz.xyz"
+  });
 });

@@ -2,6 +2,7 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { productionTargets } from "./production-targets.mjs";
+import { pageRoutes, staticTargets } from "./release-contract.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(root, "dist", "ecosystem");
@@ -52,5 +53,6 @@ for (const target of productionTargets) {
   pages += routes.length;
 }
 
-if (pages !== 93) throw new Error(`Expected 93 final routes, found ${pages}`);
-console.log(`FINAL_BUILD_CONTRACT=PASS targets=18 routes=${pages} one_screen=true mobile_guard=true`);
+if (pages !== pageRoutes) throw new Error(`Expected ${pageRoutes} final routes, found ${pages}`);
+if (productionTargets.length !== staticTargets) throw new Error(`Expected ${staticTargets} targets, found ${productionTargets.length}`);
+console.log(`FINAL_BUILD_CONTRACT=PASS targets=${staticTargets} routes=${pages} one_screen=true mobile_guard=true`);

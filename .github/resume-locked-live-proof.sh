@@ -45,5 +45,3 @@ for attempt in $(seq 1 30); do
 done
 test "$passed" = '1'
 echo 'LIVE_ZED_MINIAPP_GPT_PROOF=PASS'
-
-bash .github/publish-progress.sh LIVE_PROOF PASS

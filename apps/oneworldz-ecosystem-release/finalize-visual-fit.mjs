@@ -3,6 +3,7 @@ import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promi
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { productionTargets } from "./production-targets.mjs";
+import { pageRoutes, staticTargets } from "./release-contract.mjs";
 import { links, pdcTokens, worldz } from "./site-data.mjs";
 
 const root=path.dirname(fileURLToPath(import.meta.url));
@@ -163,6 +164,6 @@ const trees=[];for(const t of productionTargets)trees.push(await build(t));
 const pages=trees.reduce((n,x)=>n+x.page_count,0),fleet={generated_at:new Date().toISOString(),architecture:"18-domain-one-screen-v1",static_hosts:trees.length,published_webpages:pages,one_screen_no_scroll:true,acknowledgements_last_everywhere:trees.every(x=>x.acknowledgements_last),hosts:trees};
 await writeFile(path.join(dist,"user-structure-tree.json"),JSON.stringify(fleet,null,2)+"\n");
 const fm=path.join(dist,"fleet-manifest.json");if(await exists(fm)){const m=JSON.parse(await readFile(fm,"utf8"));m.generated_at=new Date().toISOString();m.one_screen_architecture={version:"18-domain-one-screen-v1",static_hosts:trees.length,published_webpages:pages,acknowledgements_last_everywhere:true,normal_page_scrolling:false};await writeFile(fm,JSON.stringify(m,null,2)+"\n")}
-if(trees.length!==18||pages!==93)throw Error(`One-screen totals wrong: ${trees.length} hosts / ${pages} pages`);
+if(trees.length!==staticTargets||pages!==pageRoutes)throw Error(`One-screen totals wrong: ${trees.length} hosts / ${pages} pages`);
 console.log(`ONE_SCREEN_ARCHITECTURE=PASS targets=${trees.length} pages=${pages} acknowledgements_last=true scrolling=false`);
 console.log(`VISUAL_FIT_FINALIZER=PASS targets=${trees.length} pages=${pages} authority=LAST`);

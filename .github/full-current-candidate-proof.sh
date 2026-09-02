@@ -61,7 +61,8 @@ for (const report of reports) {
   if (Number(report.totalHtmlPagesAudited?.desktop || 0) < expected) throw new Error(`${report.name}: desktop route audit incomplete`);
   if (Number(report.totalHtmlPagesAudited?.mobile || 0) < expected) throw new Error(`${report.name}: mobile route audit incomplete`);
 }
-const minimum = Number(process.env.MIN_PAGE_ROUTES || 93);
+const minimum = Number(process.env.MIN_PAGE_ROUTES);
+if (!Number.isInteger(minimum) || minimum <= 0) throw new Error('MIN_PAGE_ROUTES must come from the canonical release contract');
 if (routes < minimum) throw new Error(`Current candidate generated only ${routes} page routes; minimum required is ${minimum}`);
 const summary = {
   candidate: 'CURRENT_MAIN_ONE_SCREEN_FULL_REBUILD',

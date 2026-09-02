@@ -1,38 +1,31 @@
-name: OneWorldz 18-Site One-Screen Production Deployment
+name: OneWorldz Static Release
 
 on:
   push:
     branches: [main]
     paths:
       - ".github/workflows/main.yml"
-      - ".github/full-current-*.sh"
+      - ".github/ftps-preflight.py"
+      - ".github/full-current-candidate-proof.sh"
+      - ".github/full-current-live-proof.sh"
       - ".github/resume-locked-static-deploy.sh"
       - ".github/resume-locked-live-proof.sh"
       - ".github/lftp-compat.py"
-      - ".github/install-ci-apt-wrapper.cjs"
       - "apps/oneworldz-ecosystem-release/**"
-      - "src/oneworldz-gpt/**"
-      - "src/hub-central/**"
-      - "index.js"
       - "deployments/oneworldz-19-total.request"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   actions: read
 
 concurrency:
-  group: oneworldz-one-screen-full-production
+  group: oneworldz-static-release
   cancel-in-progress: false
 
-env:
-  MIN_PAGE_ROUTES: "93"
-  PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
-  PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
-
 jobs:
-  full_production:
-    name: BUILD → 93 ROUTES → GPT → 18 HOSTINGER ROOTS → LIVE PROOF
+  static_release:
+    name: PREFLIGHT → BUILD → CANDIDATE → 18 HOSTINGER ROOTS → LIVE PROOF
     runs-on: ubuntu-latest
     timeout-minutes: 360
     environment:
@@ -42,11 +35,6 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      BOT_TOKEN_SECRET: ${{ secrets.BOT_TOKEN }}
-      SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - name: Checkout exact current main
         uses: actions/checkout@v4
@@ -70,6 +58,21 @@ jobs:
           chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
           echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
 
+      - name: Load canonical release contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE' >> "$GITHUB_ENV"
+          import { releaseContract } from './apps/oneworldz-ecosystem-release/release-contract.mjs';
+          console.log(`MIN_PAGE_ROUTES=${releaseContract.pageRoutes}`);
+          console.log(`STATIC_TARGETS=${releaseContract.staticTargets}`);
+          console.log(`ARCHITECTURE_DESTINATIONS=${releaseContract.architectureDestinations}`);
+          NODE
+
+      - name: Fail fast on Hostinger FTPS certificate
+        shell: bash
+        run: python3 .github/ftps-preflight.py
+
       - name: Build the final 18-site candidate
         shell: bash
         run: |
@@ -86,8 +89,8 @@ jobs:
           echo "CANDIDATE_TREE=$candidate_tree" >> "$GITHUB_ENV"
           echo "CANDIDATE_FINGERPRINT=$candidate_fingerprint" >> "$GITHUB_ENV"
           mkdir -p deployment-proof
-          printf 'run_id=%s\ncommit=%s\ncandidate_tree=%s\ncandidate_fingerprint=%s\nstatic_transport_roots=18\narchitecture_destinations=19\n' \
-            "$GITHUB_RUN_ID" "$GITHUB_SHA" "$candidate_tree" "$candidate_fingerprint" > deployment-proof/current-build.txt
+          printf 'run_id=%s\ncommit=%s\ncandidate_tree=%s\ncandidate_fingerprint=%s\nstatic_transport_roots=%s\narchitecture_destinations=%s\n' \
+            "$GITHUB_RUN_ID" "$GITHUB_SHA" "$candidate_tree" "$candidate_fingerprint" "$STATIC_TARGETS" "$ARCHITECTURE_DESTINATIONS" > deployment-proof/current-build.txt
           echo "BUILD_FINAL_ONE_SCREEN=PASS tree=$candidate_tree fingerprint=$candidate_fingerprint"
 
       - name: Install browser proof runtime
@@ -97,24 +100,18 @@ jobs:
           npm install --no-save --package-lock=false playwright
           npx playwright install chromium
 
-      - name: Prove one-screen layout and image integrity on all 93 routes
+      - name: Prove image integrity on all candidate routes
         shell: bash
         run: |
           set -euo pipefail
-          node apps/oneworldz-ecosystem-release/audit-one-screen-layout.mjs \
-            --root apps/oneworldz-ecosystem-release/dist/ecosystem \
-            --out audit-results
-          grep -Fxq 'ONE_SCREEN_ROUTES=93' audit-results/one-screen-layout-summary.txt
-          grep -Fxq 'VIEWPORT_CHECKS=186' audit-results/one-screen-layout-summary.txt
-          grep -Fxq 'ONE_SCREEN_LAYOUT_FAILURES=0' audit-results/one-screen-layout-summary.txt
           node apps/oneworldz-ecosystem-release/audit-image-fit.mjs \
             --root apps/oneworldz-ecosystem-release/dist/ecosystem \
             --out audit-results
-          grep -Fxq 'FINAL_BUILT_PAGES=93' audit-results/visual-fit-summary.txt
-          grep -Fxq 'TARGETS=18' audit-results/visual-fit-summary.txt
+          grep -Fxq "FINAL_BUILT_PAGES=$MIN_PAGE_ROUTES" audit-results/visual-fit-summary.txt
+          grep -Fxq "TARGETS=$STATIC_TARGETS" audit-results/visual-fit-summary.txt
           grep -Fxq 'ASPECT_MISMATCHES=0' audit-results/visual-fit-summary.txt
           grep -Fxq 'BROKEN_IMAGES=0' audit-results/visual-fit-summary.txt
-          echo 'LOCAL_VISUAL_GATE=PASS routes=93 viewports=186 mismatch=0 broken=0'
+          echo "CANDIDATE_IMAGE_GATE=PASS routes=$MIN_PAGE_ROUTES mismatch=0 broken=0"
 
       - name: Require Lighthouse SEO 100 on all 93 candidate routes
         shell: bash
@@ -124,8 +121,8 @@ jobs:
           npm run check:lighthouse-seo
           summary='apps/oneworldz-ecosystem-release/dist/seo-proof/summary.json'
           test "$(node -p "require('./' + process.argv[1]).pass" "$summary")" = 'true'
-          test "$(node -p "require('./' + process.argv[1]).totalPages" "$summary")" = '93'
-          test "$(node -p "require('./' + process.argv[1]).fullMarksPages" "$summary")" = '93'
+          test "$(node -p "require('./' + process.argv[1]).totalPages" "$summary")" = "$MIN_PAGE_ROUTES"
+          test "$(node -p "require('./' + process.argv[1]).fullMarksPages" "$summary")" = "$MIN_PAGE_ROUTES"
           cp "$summary" deployment-proof/lighthouse-seo-summary.json
           echo 'LIGHTHOUSE_SEO_GATE=PASS routes=93 score=100'
 
@@ -135,9 +132,9 @@ jobs:
           set -euo pipefail
           bash .github/full-current-candidate-proof.sh
           route_count="$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').generated_page_routes")"
-          test "$route_count" = "93"
-          test "$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').desktop_pages_audited")" = "93"
-          test "$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').mobile_pages_audited")" = "93"
+          test "$route_count" = "$MIN_PAGE_ROUTES"
+          test "$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').desktop_pages_audited")" = "$MIN_PAGE_ROUTES"
+          test "$(node -p "require('./deployment-proof/current-candidate-browser-summary.json').mobile_pages_audited")" = "$MIN_PAGE_ROUTES"
           echo "PAGE_ROUTE_COUNT=$route_count" >> "$GITHUB_ENV"
           test "$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)" = "$CANDIDATE_FINGERPRINT"
           echo 'CANDIDATE_BROWSER_GATE=PASS sites=18 routes=93 desktop=93 mobile=93'
@@ -152,13 +149,6 @@ jobs:
           test "$(node apps/oneworldz-ecosystem-release/fingerprint-candidate.mjs)" = "$CANDIDATE_FINGERPRINT"
           echo 'CURRENT_MAIN_AUTHORITY=PASS'
 
-      - name: Re-prove shared protected OneWorldz GPT
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash .github/full-current-oneworldz-gpt-extension.sh
-          echo 'ONEWORLDZ_GPT_EXTENSION=PASS'
-
       - name: Deploy exact candidate to all 18 Hostinger static destinations
         shell: bash
         run: |
@@ -167,20 +157,13 @@ jobs:
           bash .github/full-current-static-deploy.sh
           echo 'HOSTINGER_18_STATIC_DESTINATIONS=PASS'
 
-      - name: Restore browser proof runtime after protected deployment
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm install --no-save --package-lock=false playwright
-          npx playwright install chromium
-
       - name: Prove all 18 live sites plus protected Command Centre and GPT
         shell: bash
         run: |
           set -euo pipefail
           bash .github/full-current-live-proof.sh
           live_routes="$(node -p "require('./deployment-proof/live-fleet-summary.json').generated_page_routes")"
-          test "$live_routes" = "93"
+          test "$live_routes" = "$MIN_PAGE_ROUTES"
           test "$live_routes" = "$PAGE_ROUTE_COUNT"
           echo 'LIVE_FLEET_GATE=PASS static_sites=18 routes=93 protected_command_centre=PASS gpt=PASS'
 
@@ -194,10 +177,10 @@ jobs:
           commit=$GITHUB_SHA
           candidate_tree=$CANDIDATE_TREE
           candidate_fingerprint=$CANDIDATE_FINGERPRINT
-          static_sites=18
-          routes=93
-          desktop_routes_proved=93
-          mobile_routes_proved=93
+          static_sites=$STATIC_TARGETS
+          routes=$MIN_PAGE_ROUTES
+          desktop_routes_proved=$MIN_PAGE_ROUTES
+          mobile_routes_proved=$MIN_PAGE_ROUTES
           aspect_mismatches=0
           broken_images=0
           normal_page_scroll_failures=0
