@@ -11,6 +11,7 @@ async function walk(dir, rel = '') {
   const entries = await readdir(dir, { withFileTypes: true });
   const out = [];
   for (const entry of entries) {
+    if (entry.name === '.rsync-tmp') continue;
     const childRel = rel ? `${rel}/${entry.name}` : entry.name;
     const child = path.join(dir, entry.name);
     if (entry.isDirectory()) out.push(...await walk(child, childRel));

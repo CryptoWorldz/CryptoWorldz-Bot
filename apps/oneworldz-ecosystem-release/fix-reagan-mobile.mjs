@@ -234,6 +234,7 @@ const css = `
 async function walk(dir) {
   const out = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
+    if (entry.name === ".rsync-tmp") continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) out.push(...await walk(full));
     else out.push(full);

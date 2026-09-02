@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { buildStages } from "../build-stages.mjs";
 import { experienceContract } from "../experience-contract.mjs";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -93,9 +94,10 @@ test("distinct theme contract is physically applied to the destinations that nee
   }
 });
 
-test("canonical build orders public experience before structural discovery and themes after it", async () => {
+test("canonical staged build orders public experience before structural discovery and themes after it", async () => {
   const pkg = JSON.parse(await read(path.join(appRoot, "package.json")));
-  const build = pkg.scripts.build;
+  assert.equal(pkg.scripts.build, "node build-release.mjs");
+  const build = buildStages.flatMap(({ steps }) => steps).map(({ script }) => script);
   const experienceAt = build.indexOf("build-experience.mjs");
   const structureAt = build.indexOf("finalize-user-structure.mjs");
   const themesAt = build.indexOf("finalize-themes.mjs");

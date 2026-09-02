@@ -12,6 +12,7 @@ const hash = (buffer) => createHash("sha256").update(buffer).digest("hex");
 async function listFiles(dir, rel = "") {
   const out = [];
   for (const entry of await readdir(path.join(dir, rel), { withFileTypes: true })) {
+    if (entry.name === ".rsync-tmp") continue;
     const child = path.join(rel, entry.name);
     if (entry.isDirectory()) out.push(...await listFiles(dir, child));
     else out.push(child.split(path.sep).join("/"));

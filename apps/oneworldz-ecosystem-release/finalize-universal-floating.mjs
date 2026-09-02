@@ -14,6 +14,7 @@ const SPECIAL = new Set(["oneworldz", "purplediamondcrew"]);
 async function walk(dir, rel = "") {
   const out = [];
   for (const entry of await readdir(path.join(dir, rel), { withFileTypes: true })) {
+    if (entry.name === ".rsync-tmp") continue;
     const child = path.join(rel, entry.name);
     if (entry.isDirectory()) out.push(...await walk(dir, child));
     else out.push(child.split(path.sep).join("/"));

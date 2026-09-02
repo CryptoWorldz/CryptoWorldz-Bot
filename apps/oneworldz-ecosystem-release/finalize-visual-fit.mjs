@@ -139,7 +139,7 @@ specs.donateworldz=[
 
 for(const k of productionTargets.map(x=>x.key)){if(!specs[k])throw Error(`Missing spec ${k}`);const r=specs[k].map(x=>x.route);if(r[0]!==""||r.at(-1)!=="acknowledgements"||new Set(r).size!==r.length)throw Error(`Bad route order ${k}`)}
 
-async function files(dir,rel=""){const out=[];for(const e of await readdir(path.join(dir,rel),{withFileTypes:true})){const c=path.join(rel,e.name);e.isDirectory()?out.push(...await files(dir,c)):out.push(c.split(path.sep).join("/"))}return out.sort()}
+async function files(dir,rel=""){const out=[];for(const e of await readdir(path.join(dir,rel),{withFileTypes:true})){if(e.name===".rsync-tmp")continue;const c=path.join(rel,e.name);e.isDirectory()?out.push(...await files(dir,c)):out.push(c.split(path.sep).join("/"))}return out.sort()}
 const exists=async f=>!!(await stat(f).catch(()=>null));
 async function copyAsset(rootDir,rel){const from=path.join(srcAssets,rel);if(!await exists(from))throw Error(`Missing asset ${rel}`);const to=path.join(rootDir,"assets",rel);await mkdir(path.dirname(to),{recursive:true});await cp(from,to)}
 async function removeOld(rootDir,allowed){for(const f of await files(rootDir)){if(!f.endsWith("index.html"))continue;const r=f==="index.html"?"":f.replace(/\/index\.html$/," ").trim();if(r&&!allowed.has(r))await rm(path.join(rootDir,r),{recursive:true,force:true})}}
