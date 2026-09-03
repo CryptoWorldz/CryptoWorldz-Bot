@@ -7,6 +7,7 @@ on:
       - ".github/workflows/deploy.yml"
       - "tools/build_ecosystem.py"
       - "tools/apply_visual_fixes.py"
+      - "tools/apply_facebook_support.py"
       - "oneworldz.com/**"
       - "cryptoworldz.xyz/**"
       - "solworldz.xyz/**"
@@ -48,13 +49,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build the 145-page ecosystem
+      - name: Build ecosystem baseline
         run: python3 tools/build_ecosystem.py
 
       - name: Apply approved visual architecture fixes
         run: python3 tools/apply_visual_fixes.py
 
-      - name: Validate structure and visual contracts
+      - name: Restore verified Facebook support previews
+        run: python3 tools/apply_facebook_support.py
+
+      - name: Validate structure, visuals and Facebook support contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -62,7 +66,7 @@ jobs:
           from pathlib import Path
           from urllib.parse import urlparse
           urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
-          assert len(urls)==145 and len(set(urls))==145
+          assert len(urls)==147 and len(set(urls))==147
           for u in urls:
               p=urlparse(u); rel=p.path.strip('/')
               f=Path(p.netloc)/(rel if rel else '')/'index.html'
@@ -73,7 +77,7 @@ jobs:
               assert 'data-oneworldz-build="2026-09-03-visual-fix"' in t, site
               assert (Path(site)/'visual-fix.css').is_file(), site
           one=Path('oneworldz.com/index.html').read_text(encoding='utf-8')
-          for href in ['/heroes/just-knate/','/heroes/victor-good-boss/','/heroes/sam-weidenhofer/','/heroes/dylan-thiry/','/heroes/bi-phakathi/','/heroes/mdmotivator/','/heroes/bob-roofer/','/heroes/reagan-kauja/']:
+          for href in ['/heroes/just-knate/','/heroes/victor-good-boss/','/heroes/sam-weidenhofer/','/heroes/dylan-thiry/','/heroes/bi-phakathi/','/heroes/mdmotivator/','/heroes/bob-roofer/','/heroes/reagan-kauja/','/community-support/']:
               assert f'href="{href}"' in one, href
           crypto=Path('cryptoworldz.xyz/index.html').read_text(encoding='utf-8')
           for host in ['solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz']:
@@ -81,15 +85,29 @@ jobs:
           law=Path('law.oneworldz.com/index.html').read_text(encoding='utf-8').lower()
           assert 'hero.png' not in law and '$rhl' not in law and 'built on solana' not in law
           donate=Path('donateworldz.com/index.html').read_text(encoding='utf-8').lower()
-          assert 'oneworldz gpt' not in donate and '/reagan.png' in donate
+          assert 'oneworldz gpt' not in donate and '/reagan.png' in donate and '/davis-family/' in donate
           impact=Path('impactbased.oneworldz.com/index.html').read_text(encoding='utf-8').lower()
           assert 'based.bid' not in impact and 'independent oneworldz launchpad' in impact
           pdc=Path('purplediamondcrew.com/index.html').read_text(encoding='utf-8')
           assert 'Hope Chest first' in pdc and 'class="tokens"' in pdc
+          support={
+            'jayjay':('donateworldz.com/jayjay-support/index.html','https://www.facebook.com/share/1FyYhwKP3r/'),
+            'reagan':('donateworldz.com/reagan-children/index.html','https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr'),
+            'davis':('donateworldz.com/davis-family/index.html','https://www.facebook.com/share/165Ken5f2Bt/'),
+          }
+          for name,(path,url) in support.items():
+              t=Path(path).read_text(encoding='utf-8')
+              assert 'facebook.com/plugins/page.php' in t and '<iframe' in t and url in t, name
+              assert 'data-oneworldz-build="2026-09-03-facebook-support"' in t, name
+          community=Path('donateworldz.com/community-impact/index.html').read_text(encoding='utf-8')
+          assert community.count('https://www.facebook.com/share/')==35, community.count('https://www.facebook.com/share/')
+          assert community.count('facebook.com/plugins/page.php')==35
+          community_one=Path('oneworldz.com/community-support/index.html').read_text(encoding='utf-8')
+          assert community_one.count('https://www.facebook.com/share/')==35
           for path in list(Path('.').glob('*/**/*.html'))+list(Path('.').glob('*/**/*.css')):
               text=path.read_text(encoding='utf-8',errors='ignore').lower()
               assert 'based.bid' not in text and 'powered by based' not in text, path
-          print('VISUAL_CONTRACT=PASS pages=145 roots=14 law_crypto_art=false one_clickable=true crypto_art=true pdc_layout=true')
+          print('CONTRACT=PASS pages=147 sites=18 facebook_previews=38 community_links=35')
           PY
 
       - name: Deploy once to 18 Hostinger destinations
@@ -119,7 +137,7 @@ jobs:
           ftp.quit();print(f'HOSTINGER_DEPLOY=PASS sites=18 files={total}')
           PY
 
-      - name: Verify all 145 public pages and corrected roots
+      - name: Verify all 147 public pages and Facebook preview contracts
         shell: bash
         run: |
           set -euo pipefail
@@ -129,17 +147,18 @@ jobs:
           from urllib.parse import urlparse
           urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
           fixed={'oneworldz.com','cryptoworldz.xyz','solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz','donateworldz.com','impactbased.oneworldz.com','law.oneworldz.com','purplediamondcrew.com'}
+          def get(u):
+              req=urllib.request.Request(u,headers={'User-Agent':'OneWorldz-Live-Verify/3.0'})
+              with urllib.request.urlopen(req,timeout=25) as r:return r.status,r.read().decode('utf-8','ignore')
           def check(u):
               p=urlparse(u); root=p.path in ('','/')
               expected='data-oneworldz-build="2026-09-03-visual-fix"' if root and p.netloc in fixed else 'data-oneworldz-build='
               last=''
               for a in range(4):
                   try:
-                      req=urllib.request.Request(u,headers={'User-Agent':'OneWorldz-Live-Verify/2.0'})
-                      with urllib.request.urlopen(req,timeout=25) as r:
-                          body=r.read().decode('utf-8','ignore')
-                          if r.status==200 and expected in body:return u,True
-                          last=f'status={r.status} marker={expected in body}'
+                      status,body=get(u)
+                      if status==200 and expected in body:return u,True
+                      last=f'status={status} marker={expected in body}'
                   except Exception as e:last=repr(e)
                   time.sleep(3+a*2)
               return u,False,last
@@ -149,5 +168,17 @@ jobs:
                   print('LIVE PASS' if r[1] else 'LIVE FAIL',r[0])
                   if not r[1]:fails.append(r)
           if fails:raise SystemExit(f'LIVE_VERIFICATION_FAILED count={len(fails)} {fails[:5]}')
-          print('FINAL=PASS pages=145 sites=18 visual_roots=14')
+          specials={
+            'https://donateworldz.com/jayjay-support/':('https://www.facebook.com/share/1FyYhwKP3r/',1),
+            'https://donateworldz.com/reagan-children/':('https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr',1),
+            'https://donateworldz.com/davis-family/':('https://www.facebook.com/share/165Ken5f2Bt/',1),
+            'https://donateworldz.com/community-impact/':('https://www.facebook.com/share/',35),
+            'https://oneworldz.com/community-support/':('https://www.facebook.com/share/',35),
+          }
+          for u,(needle,count) in specials.items():
+              status,body=get(u)
+              assert status==200 and '<iframe' in body and 'facebook.com/plugins/page.php' in body, u
+              assert body.count(needle)==count, (u,body.count(needle),count)
+              print('FACEBOOK PREVIEW PASS',u,count)
+          print('FINAL=PASS pages=147 sites=18 facebook_previews=73 verified_support_sets=4')
           PY
