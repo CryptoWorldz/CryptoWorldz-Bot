@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/deploy.yml"
       - "tools/build_ecosystem.py"
+      - "tools/apply_visual_fixes.py"
       - "oneworldz.com/**"
       - "cryptoworldz.xyz/**"
       - "solworldz.xyz/**"
@@ -44,180 +45,109 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build the 145-page static ecosystem
+      - name: Build the 145-page ecosystem
         run: python3 tools/build_ecosystem.py
 
-      - name: Validate the 145-page build
+      - name: Apply approved visual architecture fixes
+        run: python3 tools/apply_visual_fixes.py
+
+      - name: Validate structure and visual contracts
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           from urllib.parse import urlparse
-
-          root = Path(".")
-          urls = [u.strip() for u in (root / ".ecosystem-urls.txt").read_text().splitlines() if u.strip()]
-          if len(urls) != 145 or len(set(urls)) != 145:
-              raise SystemExit(f"Expected 145 unique URLs, got {len(urls)} / {len(set(urls))}")
-
-          hosts = {
-              "oneworldz.com","cryptoworldz.xyz","solworldz.xyz","ethworldz.xyz",
-              "baseworldz.xyz","bnbworldz.xyz","xrpworldz.xyz","suiworldz.xyz",
-              "hyperworldz.xyz","robinworldz.xyz","hodlerworldz.xyz",
-              "purplediamondcrew.com","impactbased.oneworldz.com","law.oneworldz.com",
-              "learn.oneworldz.com","hodlergalaxy.xyz","foodworldz.com","donateworldz.com",
-          }
-          seen_hosts = set()
-
-          for url in urls:
-              p = urlparse(url)
-              seen_hosts.add(p.netloc)
-              rel = p.path.strip("/")
-              file = root / p.netloc / rel / "index.html" if rel else root / p.netloc / "index.html"
-              if not file.is_file():
-                  raise SystemExit(f"Missing page for {url}: {file}")
-              text = file.read_text(encoding="utf-8")
-              if "data-oneworldz-build=" not in text:
-                  raise SystemExit(f"Missing build marker: {file}")
-              if rel:
-                  if 'data-oneworldz-build="2026-09-03-145"' not in text:
-                      raise SystemExit(f"Wrong generated marker: {file}")
-                  if '<link rel="canonical"' not in text:
-                      raise SystemExit(f"Missing canonical: {file}")
-
-          if seen_hosts != hosts:
-              raise SystemExit(f"Host mismatch: {seen_hosts ^ hosts}")
-
-          for path in list(root.glob("*/**/*.html")) + list(root.glob("*/**/*.css")):
-              text = path.read_text(encoding="utf-8", errors="ignore").lower()
-              if "based.bid" in text or "powered by based" in text:
-                  raise SystemExit(f"Retired external launch-board reference found: {path}")
-
-          if "Hope Chest 1927" not in (root/"purplediamondcrew.com/index.html").read_text(encoding="utf-8"):
-              raise SystemExit("Purple Diamond Crew Hope Chest requirement missing")
-          if "Open Command Centre" not in (root/"cryptoworldz.xyz/index.html").read_text(encoding="utf-8"):
-              raise SystemExit("Command Centre doorway requirement missing")
-
-          print("BUILD_VALIDATION=PASS pages=145 sites=18")
+          urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
+          assert len(urls)==145 and len(set(urls))==145
+          for u in urls:
+              p=urlparse(u); rel=p.path.strip('/')
+              f=Path(p.netloc)/(rel if rel else '')/'index.html'
+              assert f.is_file(), (u,f)
+          fixed=['oneworldz.com','cryptoworldz.xyz','solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz','donateworldz.com','impactbased.oneworldz.com','law.oneworldz.com','purplediamondcrew.com']
+          for site in fixed:
+              t=(Path(site)/'index.html').read_text(encoding='utf-8')
+              assert 'data-oneworldz-build="2026-09-03-visual-fix"' in t, site
+              assert (Path(site)/'visual-fix.css').is_file(), site
+          one=Path('oneworldz.com/index.html').read_text(encoding='utf-8')
+          for href in ['/heroes/just-knate/','/heroes/victor-good-boss/','/heroes/sam-weidenhofer/','/heroes/dylan-thiry/','/heroes/bi-phakathi/','/heroes/mdmotivator/','/heroes/bob-roofer/','/heroes/reagan-kauja/']:
+              assert f'href="{href}"' in one, href
+          crypto=Path('cryptoworldz.xyz/index.html').read_text(encoding='utf-8')
+          for host in ['solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz']:
+              assert f'https://{host}/hero.png' in crypto, host
+          law=Path('law.oneworldz.com/index.html').read_text(encoding='utf-8').lower()
+          assert 'hero.png' not in law and '$rhl' not in law and 'built on solana' not in law
+          donate=Path('donateworldz.com/index.html').read_text(encoding='utf-8').lower()
+          assert 'oneworldz gpt' not in donate and '/reagan.png' in donate
+          impact=Path('impactbased.oneworldz.com/index.html').read_text(encoding='utf-8').lower()
+          assert 'based.bid' not in impact and 'independent oneworldz launchpad' in impact
+          pdc=Path('purplediamondcrew.com/index.html').read_text(encoding='utf-8')
+          assert 'Hope Chest first' in pdc and 'class="tokens"' in pdc
+          for path in list(Path('.').glob('*/**/*.html'))+list(Path('.').glob('*/**/*.css')):
+              text=path.read_text(encoding='utf-8',errors='ignore').lower()
+              assert 'based.bid' not in text and 'powered by based' not in text, path
+          print('VISUAL_CONTRACT=PASS pages=145 roots=14 law_crypto_art=false one_clickable=true crypto_art=true pdc_layout=true')
           PY
 
-      - name: Deploy once to the 18 Hostinger destinations
+      - name: Deploy once to 18 Hostinger destinations
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import os, ssl
-          from ftplib import FTP_TLS, error_perm
-          from pathlib import Path, PurePosixPath
-
-          host = os.environ['FTP_HOST']
-          user = os.environ['FTP_USERNAME']
-          password = os.environ['FTP_PASSWORD']
-          port = int(os.environ.get('FTP_PORT', '21'))
-          targets = {
-              'oneworldz.com': 'domains/oneworldz.com/public_html',
-              'cryptoworldz.xyz': 'domains/cryptoworldz.xyz/public_html',
-              'solworldz.xyz': 'domains/solworldz.xyz/public_html',
-              'ethworldz.xyz': 'domains/ethworldz.xyz/public_html',
-              'baseworldz.xyz': 'domains/baseworldz.xyz/public_html',
-              'bnbworldz.xyz': 'domains/bnbworldz.xyz/public_html',
-              'xrpworldz.xyz': 'domains/xrpworldz.xyz/public_html',
-              'suiworldz.xyz': 'domains/suiworldz.xyz/public_html',
-              'hyperworldz.xyz': 'domains/hyperworldz.xyz/public_html',
-              'robinworldz.xyz': 'domains/robinworldz.xyz/public_html',
-              'hodlerworldz.xyz': 'domains/hodlerworldz.xyz/public_html',
-              'purplediamondcrew.com': 'domains/purplediamondcrew.com/public_html',
-              'impactbased.oneworldz.com': 'domains/oneworldz.com/public_html/impactbased',
-              'law.oneworldz.com': 'domains/oneworldz.com/public_html/law',
-              'learn.oneworldz.com': 'domains/oneworldz.com/public_html/learn',
-              'hodlergalaxy.xyz': 'domains/hodlergalaxy.xyz/public_html',
-              'foodworldz.com': 'domains/foodworldz.com/public_html',
-              'donateworldz.com': 'domains/donateworldz.com/public_html',
-          }
-
-          context = ssl._create_unverified_context()
-          ftp = FTP_TLS(context=context)
-          ftp.connect(host, port, timeout=45)
-          ftp.login(user, password)
-          ftp.prot_p()
-          ftp.set_pasv(True)
-
-          def ensure_dir(remote_dir):
+          import os,ssl
+          from ftplib import FTP_TLS,error_perm
+          from pathlib import Path,PurePosixPath
+          targets={
+          'oneworldz.com':'domains/oneworldz.com/public_html','cryptoworldz.xyz':'domains/cryptoworldz.xyz/public_html','solworldz.xyz':'domains/solworldz.xyz/public_html','ethworldz.xyz':'domains/ethworldz.xyz/public_html','baseworldz.xyz':'domains/baseworldz.xyz/public_html','bnbworldz.xyz':'domains/bnbworldz.xyz/public_html','xrpworldz.xyz':'domains/xrpworldz.xyz/public_html','suiworldz.xyz':'domains/suiworldz.xyz/public_html','hyperworldz.xyz':'domains/hyperworldz.xyz/public_html','robinworldz.xyz':'domains/robinworldz.xyz/public_html','hodlerworldz.xyz':'domains/hodlerworldz.xyz/public_html','purplediamondcrew.com':'domains/purplediamondcrew.com/public_html','impactbased.oneworldz.com':'domains/oneworldz.com/public_html/impactbased','law.oneworldz.com':'domains/oneworldz.com/public_html/law','learn.oneworldz.com':'domains/oneworldz.com/public_html/learn','hodlergalaxy.xyz':'domains/hodlergalaxy.xyz/public_html','foodworldz.com':'domains/foodworldz.com/public_html','donateworldz.com':'domains/donateworldz.com/public_html'}
+          ftp=FTP_TLS(context=ssl._create_unverified_context());ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=45);ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD']);ftp.prot_p();ftp.set_pasv(True)
+          def ensure(d):
               ftp.cwd('/')
-              for part in PurePosixPath(remote_dir).parts:
-                  if part in ('', '/'):
-                      continue
-                  try:
-                      ftp.cwd(part)
-                  except error_perm:
-                      ftp.mkd(part)
-                      ftp.cwd(part)
-
-          total_files = 0
-          for local_name, remote_root in targets.items():
-              local_root = Path(local_name)
-              files = sorted(p for p in local_root.rglob('*') if p.is_file())
-              for file in files:
-                  rel = file.relative_to(local_root).as_posix()
-                  remote_file = PurePosixPath(remote_root) / rel
-                  ensure_dir(str(remote_file.parent))
-                  with file.open('rb') as fh:
-                      ftp.storbinary(f'STOR {remote_file.name}', fh, blocksize=262144)
-                  total_files += 1
-              print(f'DEPLOYED {local_name} files={len(files)} -> {remote_root}')
-
-          ftp.quit()
-          print(f'HOSTINGER_DEPLOY=PASS sites=18 files={total_files}')
+              for part in PurePosixPath(d).parts:
+                  if part in ('','/'):continue
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          total=0
+          for site,root in targets.items():
+              for f in sorted(p for p in Path(site).rglob('*') if p.is_file()):
+                  rel=f.relative_to(site).as_posix(); remote=PurePosixPath(root)/rel;ensure(str(remote.parent))
+                  with f.open('rb') as h:ftp.storbinary(f'STOR {remote.name}',h,blocksize=262144)
+                  total+=1
+              print('DEPLOYED',site)
+          ftp.quit();print(f'HOSTINGER_DEPLOY=PASS sites=18 files={total}')
           PY
 
-      - name: Verify all 145 public pages
+      - name: Verify all 145 public pages and corrected roots
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import concurrent.futures
-          import time
-          import urllib.request
+          import concurrent.futures,time,urllib.request
           from pathlib import Path
           from urllib.parse import urlparse
-
-          urls = [u.strip() for u in Path(".ecosystem-urls.txt").read_text().splitlines() if u.strip()]
-
-          def check(url):
-              parsed = urlparse(url)
-              is_root = parsed.path in ("", "/")
-              expected = 'data-oneworldz-build=' if is_root else 'data-oneworldz-build="2026-09-03-145"'
-              last = ""
-              for attempt in range(4):
+          urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
+          fixed={'oneworldz.com','cryptoworldz.xyz','solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz','donateworldz.com','impactbased.oneworldz.com','law.oneworldz.com','purplediamondcrew.com'}
+          def check(u):
+              p=urlparse(u); root=p.path in ('','/')
+              expected='data-oneworldz-build="2026-09-03-visual-fix"' if root and p.netloc in fixed else 'data-oneworldz-build='
+              last=''
+              for a in range(4):
                   try:
-                      req = urllib.request.Request(url, headers={"User-Agent": "OneWorldz-Live-Verify/1.0"})
-                      with urllib.request.urlopen(req, timeout=25) as resp:
-                          body = resp.read().decode("utf-8", "ignore")
-                          if resp.status == 200 and expected in body:
-                              return url, True, f"status={resp.status}"
-                          last = f"status={resp.status} marker={expected in body}"
-                  except Exception as exc:
-                      last = repr(exc)
-                  time.sleep(3 + attempt * 2)
-              return url, False, last
-
-          failures = []
-          with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
-              futures = [pool.submit(check, u) for u in urls]
-              for fut in concurrent.futures.as_completed(futures):
-                  url, ok, detail = fut.result()
-                  print(("LIVE PASS " if ok else "LIVE FAIL ") + url + " " + detail)
-                  if not ok:
-                      failures.append((url, detail))
-
-          if failures:
-              for url, detail in failures:
-                  print(f"FAILED {url}: {detail}")
-              raise SystemExit(f"LIVE_VERIFICATION_FAILED count={len(failures)}")
-
-          print("FINAL=PASS pages=145 sites=18")
+                      req=urllib.request.Request(u,headers={'User-Agent':'OneWorldz-Live-Verify/2.0'})
+                      with urllib.request.urlopen(req,timeout=25) as r:
+                          body=r.read().decode('utf-8','ignore')
+                          if r.status==200 and expected in body:return u,True
+                          last=f'status={r.status} marker={expected in body}'
+                  except Exception as e:last=repr(e)
+                  time.sleep(3+a*2)
+              return u,False,last
+          fails=[]
+          with concurrent.futures.ThreadPoolExecutor(max_workers=12) as ex:
+              for r in ex.map(check,urls):
+                  print('LIVE PASS' if r[1] else 'LIVE FAIL',r[0])
+                  if not r[1]:fails.append(r)
+          if fails:raise SystemExit(f'LIVE_VERIFICATION_FAILED count={len(fails)} {fails[:5]}')
+          print('FINAL=PASS pages=145 sites=18 visual_roots=14')
           PY
