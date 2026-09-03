@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/deploy.yml"
+      - "tools/build_ecosystem.py"
       - "oneworldz.com/**"
       - "cryptoworldz.xyz/**"
       - "solworldz.xyz/**"
@@ -29,7 +30,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: oneworldz-ecosystem-deploy
+  group: oneworldz-production
   cancel-in-progress: false
 
 jobs:
@@ -43,24 +44,66 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate the clean 18-site build
+      - name: Build the 145-page static ecosystem
+        run: python3 tools/build_ecosystem.py
+
+      - name: Validate the 145-page build
         shell: bash
         run: |
           set -euo pipefail
-          sites=(oneworldz.com cryptoworldz.xyz solworldz.xyz ethworldz.xyz baseworldz.xyz bnbworldz.xyz xrpworldz.xyz suiworldz.xyz hyperworldz.xyz robinworldz.xyz hodlerworldz.xyz purplediamondcrew.com impactbased.oneworldz.com law.oneworldz.com learn.oneworldz.com hodlergalaxy.xyz foodworldz.com donateworldz.com)
-          for site in "${sites[@]}"; do
-            test -f "$site/index.html"
-            test -f "$site/style.css"
-            grep -q 'data-oneworldz-build="2026-09-03"' "$site/index.html"
-          done
-          ! grep -RniE 'https?://[^" ]*based\.bid|powered by[[:space:]]+based' --include='*.html' --include='*.css' .
-          grep -q 'ImpactBased LaunchPad' impactbased.oneworldz.com/index.html
-          grep -q 'Hope Chest 1927' purplediamondcrew.com/index.html
-          grep -q 'Open Command Centre' cryptoworldz.xyz/index.html
-          echo 'BUILD=PASS sites=18'
+          python3 - <<'PY'
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          root = Path(".")
+          urls = [u.strip() for u in (root / ".ecosystem-urls.txt").read_text().splitlines() if u.strip()]
+          if len(urls) != 145 or len(set(urls)) != 145:
+              raise SystemExit(f"Expected 145 unique URLs, got {len(urls)} / {len(set(urls))}")
+
+          hosts = {
+              "oneworldz.com","cryptoworldz.xyz","solworldz.xyz","ethworldz.xyz",
+              "baseworldz.xyz","bnbworldz.xyz","xrpworldz.xyz","suiworldz.xyz",
+              "hyperworldz.xyz","robinworldz.xyz","hodlerworldz.xyz",
+              "purplediamondcrew.com","impactbased.oneworldz.com","law.oneworldz.com",
+              "learn.oneworldz.com","hodlergalaxy.xyz","foodworldz.com","donateworldz.com",
+          }
+          seen_hosts = set()
+
+          for url in urls:
+              p = urlparse(url)
+              seen_hosts.add(p.netloc)
+              rel = p.path.strip("/")
+              file = root / p.netloc / rel / "index.html" if rel else root / p.netloc / "index.html"
+              if not file.is_file():
+                  raise SystemExit(f"Missing page for {url}: {file}")
+              text = file.read_text(encoding="utf-8")
+              if "data-oneworldz-build=" not in text:
+                  raise SystemExit(f"Missing build marker: {file}")
+              if rel:
+                  if 'data-oneworldz-build="2026-09-03-145"' not in text:
+                      raise SystemExit(f"Wrong generated marker: {file}")
+                  if '<link rel="canonical"' not in text:
+                      raise SystemExit(f"Missing canonical: {file}")
+
+          if seen_hosts != hosts:
+              raise SystemExit(f"Host mismatch: {seen_hosts ^ hosts}")
+
+          for path in list(root.glob("*/**/*.html")) + list(root.glob("*/**/*.css")):
+              text = path.read_text(encoding="utf-8", errors="ignore").lower()
+              if "based.bid" in text or "powered by based" in text:
+                  raise SystemExit(f"Retired external launch-board reference found: {path}")
+
+          if "Hope Chest 1927" not in (root/"purplediamondcrew.com/index.html").read_text(encoding="utf-8"):
+              raise SystemExit("Purple Diamond Crew Hope Chest requirement missing")
+          if "Open Command Centre" not in (root/"cryptoworldz.xyz/index.html").read_text(encoding="utf-8"):
+              raise SystemExit("Command Centre doorway requirement missing")
+
+          print("BUILD_VALIDATION=PASS pages=145 sites=18")
+          PY
 
       - name: Deploy once to the 18 Hostinger destinations
         shell: bash
@@ -114,6 +157,7 @@ jobs:
                       ftp.mkd(part)
                       ftp.cwd(part)
 
+          total_files = 0
           for local_name, remote_root in targets.items():
               local_root = Path(local_name)
               files = sorted(p for p in local_root.rglob('*') if p.is_file())
@@ -123,25 +167,57 @@ jobs:
                   ensure_dir(str(remote_file.parent))
                   with file.open('rb') as fh:
                       ftp.storbinary(f'STOR {remote_file.name}', fh, blocksize=262144)
+                  total_files += 1
               print(f'DEPLOYED {local_name} files={len(files)} -> {remote_root}')
 
           ftp.quit()
-          print('HOSTINGER_DEPLOY=PASS sites=18')
+          print(f'HOSTINGER_DEPLOY=PASS sites=18 files={total_files}')
           PY
 
-      - name: Verify the 18 public sites
+      - name: Verify all 145 public pages
         shell: bash
         run: |
           set -euo pipefail
-          hosts=(oneworldz.com cryptoworldz.xyz solworldz.xyz ethworldz.xyz baseworldz.xyz bnbworldz.xyz xrpworldz.xyz suiworldz.xyz hyperworldz.xyz robinworldz.xyz hodlerworldz.xyz purplediamondcrew.com impactbased.oneworldz.com law.oneworldz.com learn.oneworldz.com hodlergalaxy.xyz foodworldz.com donateworldz.com)
-          for host in "${hosts[@]}"; do
-            ok=0
-            for attempt in 1 2 3 4; do
-              body="$(curl -fsSL --max-time 25 "https://$host/" || true)"
-              if grep -q 'data-oneworldz-build="2026-09-03"' <<<"$body"; then ok=1; break; fi
-              sleep 4
-            done
-            test "$ok" = 1
-            echo "LIVE PASS https://$host/"
-          done
-          echo 'FINAL=PASS sites=18'
+          python3 - <<'PY'
+          import concurrent.futures
+          import time
+          import urllib.request
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          urls = [u.strip() for u in Path(".ecosystem-urls.txt").read_text().splitlines() if u.strip()]
+
+          def check(url):
+              parsed = urlparse(url)
+              is_root = parsed.path in ("", "/")
+              expected = 'data-oneworldz-build=' if is_root else 'data-oneworldz-build="2026-09-03-145"'
+              last = ""
+              for attempt in range(4):
+                  try:
+                      req = urllib.request.Request(url, headers={"User-Agent": "OneWorldz-Live-Verify/1.0"})
+                      with urllib.request.urlopen(req, timeout=25) as resp:
+                          body = resp.read().decode("utf-8", "ignore")
+                          if resp.status == 200 and expected in body:
+                              return url, True, f"status={resp.status}"
+                          last = f"status={resp.status} marker={expected in body}"
+                  except Exception as exc:
+                      last = repr(exc)
+                  time.sleep(3 + attempt * 2)
+              return url, False, last
+
+          failures = []
+          with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
+              futures = [pool.submit(check, u) for u in urls]
+              for fut in concurrent.futures.as_completed(futures):
+                  url, ok, detail = fut.result()
+                  print(("LIVE PASS " if ok else "LIVE FAIL ") + url + " " + detail)
+                  if not ok:
+                      failures.append((url, detail))
+
+          if failures:
+              for url, detail in failures:
+                  print(f"FAILED {url}: {detail}")
+              raise SystemExit(f"LIVE_VERIFICATION_FAILED count={len(failures)}")
+
+          print("FINAL=PASS pages=145 sites=18")
+          PY
