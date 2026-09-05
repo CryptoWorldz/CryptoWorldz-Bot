@@ -60,7 +60,6 @@ for rel in ['oneworldz.com/community-support/index.html','donateworldz.com/commu
     if text.count('https://www.facebook.com/share/')!=35: raise SystemExit(f'COMMUNITY_LINK_COUNT_FAILED={rel}')
 
 stripe_contract={
- 'donateworldz.com/reagan-children/index.html':'https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01',
  'donateworldz.com/davis-family/index.html':'https://donate.stripe.com/dRm8wPdKa0Kt2NE7lz0kE03',
  'donateworldz.com/community-impact/index.html':'https://donate.stripe.com/9B67sLgWm78R73U35j0kE02',
  'donateworldz.com/jayjay-support/index.html':'https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00',
@@ -70,8 +69,12 @@ for rel,url in stripe_contract.items():
     if url not in text: raise SystemExit(f'STRIPE_DESTINATION_MISSING={rel}')
     if 'class="ow-home-button"' not in text: raise SystemExit(f'HOME_BUTTON_MISSING={rel}')
 
+reserved='https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01'
 for path in html_files:
-    if 'class="ow-home-button"' not in path.read_text(encoding='utf-8'):
+    text=path.read_text(encoding='utf-8')
+    if 'class="ow-home-button"' not in text:
         raise SystemExit(f'HOME_BUTTON_MISSING={path.relative_to(ROOT)}')
+    if reserved in text:
+        raise SystemExit(f'RESERVED_FUTURE_STRIPE_MUST_NOT_BE_PUBLIC={path.relative_to(ROOT)}')
 
-print(f'MOBILE_SAFETY=PASS sites={len(DOMAINS)} pages={len(html_files)} home_button=all hero_placeholders=0 dedicated_images=7 stripe_streams=4')
+print(f'MOBILE_SAFETY=PASS sites={len(DOMAINS)} pages={len(html_files)} home_button=all hero_placeholders=0 dedicated_images=7 active_stripe_streams=3 reserved_future_stripe_hidden=1')
