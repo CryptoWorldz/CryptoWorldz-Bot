@@ -26,9 +26,9 @@ neutral = ROOT / 'oneworldz.com/ecosystem-art.png'
 food_hero = food_root / 'hero.png'
 if neutral.is_file(): shutil.copy2(neutral, food_hero)
 
-def route_title(p: Path) -> str:
-    rel = p.parent.relative_to(food_root).as_posix()
-    if rel == '.': return 'FoodWorldz'
+def route_title(p: Path, root: Path) -> str:
+    rel = p.parent.relative_to(root).as_posix()
+    if rel == '.': return root.name.split('.')[0].replace('worldz','Worldz').title()
     return ' '.join(part.replace('-', ' ').title() for part in rel.split('/'))
 
 def neutral_food_page(title: str) -> str:
@@ -37,7 +37,7 @@ def neutral_food_page(title: str) -> str:
 
 food_html = list(food_root.rglob('index.html'))
 for p in food_html:
-    p.write_text(neutral_food_page(route_title(p)), encoding='utf-8')
+    p.write_text(neutral_food_page(route_title(p, food_root)), encoding='utf-8')
 
 RETIRED_PARTS = ('/heroes/reagan-kauja/', '/reagan-children/')
 manifest = ROOT / '.ecosystem-urls.txt'
@@ -67,8 +67,34 @@ for domain in DOMAINS:
     )
     sitemap.write_text(text, encoding='utf-8')
 
-# Nothing deployable may retain the retired identity, campaign names, image paths or direct link.
+# Scrub residual references from deployable text while preserving the surrounding pages.
+# Old public routes are redirected to safe local destinations; the old recipient name,
+# campaign labels, artwork path and social-link identifier cannot survive.
 TEXT_SUFFIXES = {'.html', '.css', '.js', '.json', '.txt', '.xml', '.md', '.svg'}
+SUBSTITUTIONS = [
+    (r'(?i)/heroes/reagan-kauja/', '/heroes/'),
+    (r'(?i)/reagan-children/', '/'),
+    (r'(?i)/reagan\.png', '/hero.png'),
+    (r'(?i)https://www\.facebook\.com/share/196prufjjq/\?mibextid=wwXIfr', '#'),
+    (r'(?i)action\s+spreads?\s+smiles(?:\s*[—-]\s*uganda)?', 'Future Support'),
+    (r'(?i)action\s+creates\s+smiles', 'Future Support'),
+    (r'(?i)reagan\s*&(?:amp;)?\s*children', 'Future Support Partner'),
+    (r'(?i)reagan\s+kauja', 'Future Support Partner'),
+    (r'(?i)reagan', 'Future Support Partner'),
+    (r'(?i)196prufjjq', 'retired-link'),
+]
+for domain in DOMAINS:
+    root = ROOT / domain
+    if not root.exists(): continue
+    for p in root.rglob('*'):
+        if not p.is_file() or p.suffix.lower() not in TEXT_SUFFIXES: continue
+        text = p.read_text(encoding='utf-8', errors='ignore')
+        if any(token in text.lower() for token in FORBIDDEN):
+            for pattern, replacement in SUBSTITUTIONS:
+                text = re.sub(pattern, replacement, text)
+            p.write_text(text, encoding='utf-8')
+
+# Hard final gate: nothing that will be deployed may retain any retired identifier.
 for domain in DOMAINS:
     root = ROOT / domain
     if not root.exists(): continue
@@ -82,4 +108,4 @@ for path in REMOVE_PATHS:
     assert not path.exists(), path
 assert food_hero.is_file(), food_hero
 assert food_html, 'FoodWorldz routes missing'
-print(f'RETIRED_UGANDA_SUPPORT=PASS routes_removed=2 public_assets_removed=3 foodworldz_routes_rebuilt={len(food_html)} sitemaps_scrubbed=1 future_stripe_preserved=1')
+print(f'RETIRED_UGANDA_SUPPORT=PASS routes_removed=2 public_assets_removed=3 foodworldz_routes_rebuilt={len(food_html)} all_sites_scrubbed=1 sitemaps_scrubbed=1 future_stripe_preserved=1')
