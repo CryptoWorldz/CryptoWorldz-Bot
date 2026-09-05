@@ -57,7 +57,9 @@ for name,slug,desc,img in HEROES:
  if img.startswith('/assets/heroes/'):
   p=ROOT/'oneworldz.com'/img.lstrip('/')
   assert p.is_file() and p.stat().st_size>20000,p
+  raw=p.read_bytes()
+  assert raw[:4] == b'RIFF' and raw[8:12] == b'WEBP', (p,'invalid WebP signature')
 for old in ['💜','🤝','🫶','🏠','🌍','✨','🔨']:
  assert old not in hero_html,old
 assert 'OneWorldz GPT System' in (ROOT/'oneworldz.com/index.html').read_text(encoding='utf-8')
-print('DEDICATED_VISUALS=PASS hero_images=7 emoji_placeholders=0 oneworldz_gpt=1')
+print('DEDICATED_VISUALS=PASS hero_images=7 webp_signatures=7 emoji_placeholders=0 oneworldz_gpt=1')
