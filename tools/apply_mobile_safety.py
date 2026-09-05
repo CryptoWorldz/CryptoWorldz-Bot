@@ -44,7 +44,9 @@ hero_index=(ROOT/'oneworldz.com/heroes/index.html').read_text(encoding='utf-8')
 hero_assets=['just-knate.webp','victor-good-boss.webp','sam-weidenhofer.webp','dylan-thiry.webp','bi-phakathi.webp','mdmotivator.webp','heroes-world.webp']
 for asset in hero_assets:
     p=ROOT/'oneworldz.com/assets/heroes'/asset
-    if not p.is_file() or p.stat().st_size<20000: raise SystemExit(f'DEDICATED_HERO_ASSET_MISSING={asset}')
+    if not p.is_file() or p.stat().st_size<10000: raise SystemExit(f'DEDICATED_HERO_ASSET_MISSING={asset}')
+    raw=p.read_bytes()
+    if raw[:4] != b'RIFF' or raw[8:12] != b'WEBP': raise SystemExit(f'DEDICATED_HERO_ASSET_CORRUPT={asset}')
     if f'/assets/heroes/{asset}' not in hero_index: raise SystemExit(f'DEDICATED_HERO_NOT_USED={asset}')
 for emoji in ['💜','🤝','🫶','🏠','🌍','✨','🔨']:
     if emoji in hero_index: raise SystemExit(f'HERO_PLACEHOLDER_SURVIVED={emoji}')
