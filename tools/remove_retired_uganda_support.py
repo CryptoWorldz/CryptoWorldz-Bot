@@ -17,11 +17,13 @@ for path in REMOVE_PATHS:
     if path.is_dir(): shutil.rmtree(path)
     elif path.exists(): path.unlink()
 
-# FoodWorldz previously used campaign artwork that is now retired.
-# Use neutral ecosystem artwork until a new dedicated FoodWorldz visual is approved.
+# FoodWorldz previously inherited campaign-specific content. Replace both the image and
+# the public landing page with neutral FoodWorldz material so no retired recipient is retained.
 neutral = ROOT / 'oneworldz.com/ecosystem-art.png'
 food_hero = ROOT / 'foodworldz.com/hero.png'
 if neutral.is_file(): shutil.copy2(neutral, food_hero)
+food_page = '''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>FoodWorldz | Food, Water & Practical Support</title><link rel="stylesheet" href="/visual-fix.css"></head><body data-oneworldz-build="2026-09-05-retired-content-clean"><nav class="nav"><a class="brand" href="/">FoodWorldz</a><a href="https://oneworldz.com">OneWorldz</a><a href="https://donateworldz.com">DonateWorldz</a></nav><main class="shell"><section class="hero"><img src="/hero.png" alt="FoodWorldz community support artwork"><div class="copy"><p class="ey">Food • Water • Practical Support</p><h1>FoodWorldz</h1><p>FoodWorldz is a people-first pathway for practical food, clean-water and community support projects. Future recipients are added only after they are separately approved.</p><div class="btns"><a class="btn" href="https://oneworldz.com">OneWorldz</a><a class="btn" href="https://donateworldz.com">DonateWorldz</a></div></div></section></main><div class="foot">OneWorldz 🌐 One Vision • Helping the People Who Help People</div></body></html>'''
+(ROOT / 'foodworldz.com/index.html').write_text(food_page, encoding='utf-8')
 
 RETIRED_PARTS = ('/heroes/reagan-kauja/', '/reagan-children/')
 manifest = ROOT / '.ecosystem-urls.txt'
@@ -39,7 +41,6 @@ FORBIDDEN = (
 )
 
 # Generated sitemaps can still contain retired routes even after the pages are removed.
-# Remove complete <url> blocks containing any retired marker, including minified one-line XML.
 for domain in DOMAINS:
     sitemap = ROOT / domain / 'sitemap.xml'
     if not sitemap.is_file():
@@ -67,4 +68,5 @@ for domain in DOMAINS:
 for path in REMOVE_PATHS:
     assert not path.exists(), path
 assert food_hero.is_file(), food_hero
-print('RETIRED_UGANDA_SUPPORT=PASS routes_removed=2 public_assets_removed=3 sitemaps_scrubbed=1 future_stripe_preserved=1')
+assert not any(token in food_page.lower() for token in FORBIDDEN)
+print('RETIRED_UGANDA_SUPPORT=PASS routes_removed=2 public_assets_removed=3 foodworldz_rebuilt=1 sitemaps_scrubbed=1 future_stripe_preserved=1')
