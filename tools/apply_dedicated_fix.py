@@ -3,7 +3,7 @@ from pathlib import Path
 from html import escape
 
 ROOT=Path(__file__).resolve().parents[1]
-BUILD='2026-09-05-dedicated-v2'
+BUILD='2026-09-05-dedicated-v3'
 HEROES=[
  ('Just Knate','just-knate','Direct help and dignity','/assets/heroes/just-knate.webp'),
  ('Victor — The Good Boss','victor-good-boss','Recovery, hope and second chances','/assets/heroes/victor-good-boss.webp'),
@@ -12,7 +12,6 @@ HEROES=[
  ('Bi Phakathi','bi-phakathi','Compassion in action','/assets/heroes/bi-phakathi.webp'),
  ('MDMotivator','mdmotivator','Global kindness and encouragement','/assets/heroes/mdmotivator.webp'),
  ('Bob — The Giving Roofer','bob-roofer','Practical community generosity','/assets/heroes/heroes-world.webp'),
- ('Reagan Kauja','reagan-kauja','Action Spreads Smiles — Uganda','/reagan.png'),
 ]
 
 def write(rel,text):
@@ -42,7 +41,7 @@ home=f'''<section class="hero"><div class="copy"><p class="ey">OneWorldz 🌐 On
 <section class="section"><h2>Mission</h2><div class="mission">{mission}</div></section>
 <section class="section" id="heroes"><p class="ey">Dedicated artwork — no placeholders</p><h2>Real heroes</h2><div class="hero-grid">{cards}</div></section>
 <section class="section"><h2>Community Charity</h2><p>Open the 35 preserved Facebook destinations directly.</p><div class="btns"><a class="btn" href="/community-support/">Open Community Charity</a></div></section>
-<section class="section"><h2>Enter the ecosystem</h2><div class="grid2"><a class="card" href="https://donateworldz.com"><img src="https://donateworldz.com/hero.png" alt="DonateWorldz artwork"><b>DonateWorldz</b><span>Four direct support pathways.</span><i>ENTER →</i></a><a class="card" href="https://cryptoworldz.xyz"><img src="https://cryptoworldz.xyz/hero.png" alt="CryptoWorldz artwork"><b>CryptoWorldz</b><span>Blockchain Worldz headquarters.</span><i>ENTER →</i></a><a class="card" href="https://foodworldz.com"><img src="https://foodworldz.com/hero.png" alt="FoodWorldz artwork"><b>FoodWorldz</b><span>Food, water and practical support.</span><i>ENTER →</i></a><a class="card" href="https://purplediamondcrew.com"><img src="https://purplediamondcrew.com/action-team.png" alt="Purple Diamond Crew artwork"><b>Purple Diamond Crew</b><span>Real people. Real help. Real impact.</span><i>ENTER →</i></a></div></section>'''
+<section class="section"><h2>Enter the ecosystem</h2><div class="grid2"><a class="card" href="https://donateworldz.com"><img src="https://donateworldz.com/hero.png" alt="DonateWorldz artwork"><b>DonateWorldz</b><span>Direct support pathways.</span><i>ENTER →</i></a><a class="card" href="https://cryptoworldz.xyz"><img src="https://cryptoworldz.xyz/hero.png" alt="CryptoWorldz artwork"><b>CryptoWorldz</b><span>Blockchain Worldz headquarters.</span><i>ENTER →</i></a><a class="card" href="https://foodworldz.com"><img src="https://foodworldz.com/hero.png" alt="FoodWorldz artwork"><b>FoodWorldz</b><span>Food, water and practical support.</span><i>ENTER →</i></a><a class="card" href="https://purplediamondcrew.com"><img src="https://purplediamondcrew.com/action-team.png" alt="Purple Diamond Crew artwork"><b>Purple Diamond Crew</b><span>Real people. Real help. Real impact.</span><i>ENTER →</i></a></div></section>'''
 write('oneworldz.com/index.html',shell('OneWorldz | One Vision',home,[('OneWorldz','/'),('OneWorldz GPT','#oneworldz-gpt'),('Heroes','/heroes/'),('DonateWorldz','https://donateworldz.com'),('CryptoWorldz','https://cryptoworldz.xyz'),('Purple Diamond Crew','https://purplediamondcrew.com')]))
 write('oneworldz.com/heroes/index.html',shell('Real Heroes | OneWorldz',f'<section class="section"><p class="ey">Dedicated OneWorldz artwork</p><h1>Real heroes</h1><p>No emoji placeholders. The dedicated artwork is the card.</p><div class="hero-grid">{cards}</div></section>',[('OneWorldz','/'),('Heroes','/heroes/')]))
 for name,slug,desc,img in HEROES:
@@ -57,7 +56,9 @@ for name,slug,desc,img in HEROES:
   assert p.is_file() and p.stat().st_size>10000,p
   raw=p.read_bytes()
   assert raw[:4] == b'RIFF' and raw[8:12] == b'WEBP', (p,'invalid WebP signature')
+for retired in ['reagan','action spreads smiles','action creates smiles']:
+ assert retired not in hero_html.lower(), retired
 for old in ['💜','🤝','🫶','🏠','🌍','✨','🔨']:
  assert old not in hero_html,old
 assert 'OneWorldz GPT System' in (ROOT/'oneworldz.com/index.html').read_text(encoding='utf-8')
-print('DEDICATED_VISUALS=PASS hero_images=7 webp_signatures=7 emoji_placeholders=0 oneworldz_gpt=1')
+print('DEDICATED_VISUALS=PASS hero_images=7 retired_uganda=0 emoji_placeholders=0 oneworldz_gpt=1')
