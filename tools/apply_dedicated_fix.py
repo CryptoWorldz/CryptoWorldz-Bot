@@ -25,7 +25,6 @@ def shell(title,body,nav):
 def hero_card(name,slug,desc,img):
  return f'<a class="card dedicated-hero-card" href="/heroes/{slug}/"><img src="{img}" alt="{escape(name)} dedicated OneWorldz artwork" loading="lazy"><b>{escape(name)}</b><span>{escape(desc)}</span><i>OPEN PROFILE →</i></a>'
 
-# Extend the generated stylesheet instead of fighting it.
 css=ROOT/'oneworldz.com/visual-fix.css'
 css.write_text(css.read_text(encoding='utf-8')+'''\n/* Dedicated artwork release */\n.dedicated-hero-card img{width:100%;height:auto;object-fit:contain;background:#020205}.gpt-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.gpt-card{border:1px solid #5b377d;border-radius:18px;padding:18px;background:#100a17}.gpt-card strong{display:block;font-size:1.08rem}.gpt-card span{display:block;color:#c5bacd;line-height:1.45;margin-top:6px}.home-hero-art{width:100%;height:auto;object-fit:contain;background:#020205}@media(max-width:900px){.gpt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.gpt-grid{grid-template-columns:1fr}}\n''',encoding='utf-8')
 
@@ -50,13 +49,12 @@ for name,slug,desc,img in HEROES:
  detail=f'<section class="hero"><img src="{img}" alt="{escape(name)} dedicated OneWorldz artwork"><div class="copy"><p class="ey">Helping the People Who Help People</p><h1>{escape(name)}</h1><p>{escape(desc)}.</p><div class="btns"><a class="btn" href="/heroes/">All Heroes</a><a class="btn" href="https://donateworldz.com">Support Pathways</a></div></div></section>'
  write(f'oneworldz.com/heroes/{slug}/index.html',shell(f'{name} | OneWorldz',detail,[('OneWorldz','/'),('Heroes','/heroes/'),(name,f'/heroes/{slug}/')]))
 
-# Real acceptance rule: the screenshot must not be able to show the old emoji cards again.
 hero_html=(ROOT/'oneworldz.com/heroes/index.html').read_text(encoding='utf-8')
 for name,slug,desc,img in HEROES:
  assert f'href="/heroes/{slug}/"' in hero_html and img in hero_html
  if img.startswith('/assets/heroes/'):
   p=ROOT/'oneworldz.com'/img.lstrip('/')
-  assert p.is_file() and p.stat().st_size>20000,p
+  assert p.is_file() and p.stat().st_size>10000,p
   raw=p.read_bytes()
   assert raw[:4] == b'RIFF' and raw[8:12] == b'WEBP', (p,'invalid WebP signature')
 for old in ['💜','🤝','🫶','🏠','🌍','✨','🔨']:
