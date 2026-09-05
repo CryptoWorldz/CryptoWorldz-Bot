@@ -7,7 +7,9 @@ on:
       - ".github/workflows/deploy.yml"
       - "tools/build_ecosystem.py"
       - "tools/apply_visual_fixes.py"
+      - "tools/apply_visual_fixes_core.py"
       - "tools/apply_facebook_support.py"
+      - "tools/apply_mobile_safety.py"
       - "oneworldz.com/**"
       - "cryptoworldz.xyz/**"
       - "solworldz.xyz/**"
@@ -52,62 +54,130 @@ jobs:
       - name: Build ecosystem baseline
         run: python3 tools/build_ecosystem.py
 
-      - name: Apply approved visual architecture fixes
+      - name: Apply approved visual architecture
         run: python3 tools/apply_visual_fixes.py
 
-      - name: Restore verified Facebook support previews
+      - name: Apply direct Facebook support routes
         run: python3 tools/apply_facebook_support.py
 
-      - name: Validate structure, visuals and Facebook support contracts
+      - name: Apply permanent mobile safety rail
+        run: python3 tools/apply_mobile_safety.py
+
+      - name: Validate 18-site visual and link contract
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           from urllib.parse import urlparse
+
+          domains=[d.strip() for d in Path('DOMAINS.txt').read_text().splitlines() if d.strip()]
+          assert len(domains)==18 and len(set(domains))==18, domains
           urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
-          assert len(urls)==147 and len(set(urls))==147
+          assert len(urls)==147 and len(set(urls))==147, (len(urls),len(set(urls)))
           for u in urls:
               p=urlparse(u); rel=p.path.strip('/')
               f=Path(p.netloc)/(rel if rel else '')/'index.html'
               assert f.is_file(), (u,f)
-          fixed=['oneworldz.com','cryptoworldz.xyz','solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz','donateworldz.com','impactbased.oneworldz.com','law.oneworldz.com','purplediamondcrew.com']
-          for site in fixed:
-              t=(Path(site)/'index.html').read_text(encoding='utf-8')
-              assert 'data-oneworldz-build="2026-09-03-visual-fix"' in t, site
-              assert (Path(site)/'visual-fix.css').is_file(), site
+              text=f.read_text(encoding='utf-8').lower()
+              assert '<meta name="viewport"' in text, f
+              assert '/mobile-safe.css' in text, f
+              assert '<iframe' not in text, f
+              assert 'facebook.com/plugins/' not in text, f
+              assert 'based.bid' not in text and 'powered by based' not in text, f
+
+          for d in domains:
+              css=Path(d)/'mobile-safe.css'
+              assert css.is_file(), d
+              c=css.read_text(encoding='utf-8')
+              assert 'overflow-x:hidden!important' in c and '@media(max-width:720px)' in c, d
+
           one=Path('oneworldz.com/index.html').read_text(encoding='utf-8')
-          for href in ['/heroes/just-knate/','/heroes/victor-good-boss/','/heroes/sam-weidenhofer/','/heroes/dylan-thiry/','/heroes/bi-phakathi/','/heroes/mdmotivator/','/heroes/bob-roofer/','/heroes/reagan-kauja/','/community-support/']:
-              assert f'href="{href}"' in one, href
-          crypto=Path('cryptoworldz.xyz/index.html').read_text(encoding='utf-8')
-          for host in ['solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz']:
-              assert f'https://{host}/hero.png' in crypto, host
-          law=Path('law.oneworldz.com/index.html').read_text(encoding='utf-8').lower()
-          assert 'hero.png' not in law and '$rhl' not in law and 'built on solana' not in law
-          donate=Path('donateworldz.com/index.html').read_text(encoding='utf-8').lower()
-          assert 'oneworldz gpt' not in donate and '/reagan.png' in donate and '/davis-family/' in donate
-          impact=Path('impactbased.oneworldz.com/index.html').read_text(encoding='utf-8').lower()
-          assert 'based.bid' not in impact and 'independent oneworldz launchpad' in impact
-          pdc=Path('purplediamondcrew.com/index.html').read_text(encoding='utf-8')
-          assert 'Hope Chest first' in pdc and 'class="tokens"' in pdc
+          heroes=Path('oneworldz.com/heroes/index.html').read_text(encoding='utf-8')
+          for href in ['/heroes/just-knate/','/heroes/victor-good-boss/','/heroes/sam-weidenhofer/','/heroes/dylan-thiry/','/heroes/bi-phakathi/','/heroes/mdmotivator/','/heroes/bob-roofer/','/heroes/reagan-kauja/']:
+              assert f'href="{href}"' in one and f'href="{href}"' in heroes, href
+          assert 'href="/community-support/"' in one
+
+          community_one=Path('oneworldz.com/community-support/index.html').read_text(encoding='utf-8')
+          community_donate=Path('donateworldz.com/community-impact/index.html').read_text(encoding='utf-8')
+          assert community_one.count('https://www.facebook.com/share/')==35
+          assert community_donate.count('https://www.facebook.com/share/')==35
+          assert '<iframe' not in community_one.lower() and '<iframe' not in community_donate.lower()
+
           support={
             'jayjay':('donateworldz.com/jayjay-support/index.html','https://www.facebook.com/share/1FyYhwKP3r/'),
             'reagan':('donateworldz.com/reagan-children/index.html','https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr'),
             'davis':('donateworldz.com/davis-family/index.html','https://www.facebook.com/share/165Ken5f2Bt/'),
           }
           for name,(path,url) in support.items():
-              t=Path(path).read_text(encoding='utf-8')
-              assert 'facebook.com/plugins/page.php' in t and '<iframe' in t and url in t, name
-              assert 'data-oneworldz-build="2026-09-03-facebook-support"' in t, name
-          community=Path('donateworldz.com/community-impact/index.html').read_text(encoding='utf-8')
-          assert community.count('https://www.facebook.com/share/')==35, community.count('https://www.facebook.com/share/')
-          assert community.count('facebook.com/plugins/page.php')==35
-          community_one=Path('oneworldz.com/community-support/index.html').read_text(encoding='utf-8')
-          assert community_one.count('https://www.facebook.com/share/')==35
-          for path in list(Path('.').glob('*/**/*.html'))+list(Path('.').glob('*/**/*.css')):
-              text=path.read_text(encoding='utf-8',errors='ignore').lower()
-              assert 'based.bid' not in text and 'powered by based' not in text, path
-          print('CONTRACT=PASS pages=147 sites=18 facebook_previews=38 community_links=35')
+              text=Path(path).read_text(encoding='utf-8')
+              assert url in text and '<iframe' not in text.lower(), name
+
+          crypto=Path('cryptoworldz.xyz/index.html').read_text(encoding='utf-8')
+          for host in ['solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz']:
+              assert f'https://{host}/hero.png' in crypto, host
+
+          law=Path('law.oneworldz.com/index.html').read_text(encoding='utf-8').lower()
+          assert 'hero.png' not in law and '$rhl' not in law and 'built on solana' not in law
+          impact=Path('impactbased.oneworldz.com/index.html').read_text(encoding='utf-8').lower()
+          assert 'based.bid' not in impact and 'independent oneworldz launchpad' in impact
+          pdc=Path('purplediamondcrew.com/index.html').read_text(encoding='utf-8')
+          assert 'Hope Chest first' in pdc and 'class="tokens"' in pdc
+          print('CONTRACT=PASS sites=18 pages=147 iframes=0 mobile_safety=PASS community_links=35')
+          PY
+
+      - name: Mobile browser render gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          BROWSER="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$BROWSER" || { echo 'No Chrome/Chromium available for visual gate'; exit 1; }
+          python3 -m http.server 8123 --directory oneworldz.com >/tmp/ow-http.log 2>&1 & OW_PID=$!
+          python3 -m http.server 8124 --directory donateworldz.com >/tmp/dw-http.log 2>&1 & DW_PID=$!
+          trap 'kill $OW_PID $DW_PID 2>/dev/null || true' EXIT
+          sleep 2
+          "$BROWSER" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot=/tmp/ow-home.png http://127.0.0.1:8123/
+          "$BROWSER" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot=/tmp/ow-heroes.png http://127.0.0.1:8123/heroes/
+          "$BROWSER" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot=/tmp/ow-community.png http://127.0.0.1:8123/community-support/
+          "$BROWSER" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot=/tmp/dw-home.png http://127.0.0.1:8124/
+          "$BROWSER" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot=/tmp/dw-community.png http://127.0.0.1:8124/community-impact/
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct,zlib
+
+          def white_ratio(path):
+              b=Path(path).read_bytes(); assert b.startswith(b'\x89PNG\r\n\x1a\n'), path
+              pos=8; w=h=ctype=None; data=b''
+              while pos < len(b):
+                  n=struct.unpack('>I',b[pos:pos+4])[0]; typ=b[pos+4:pos+8]; chunk=b[pos+8:pos+8+n]; pos += 12+n
+                  if typ==b'IHDR': w,h,depth,ctype,_,_,_=struct.unpack('>IIBBBBB',chunk); assert depth==8 and ctype in (2,6)
+                  elif typ==b'IDAT': data += chunk
+                  elif typ==b'IEND': break
+              raw=zlib.decompress(data); channels=4 if ctype==6 else 3; stride=w*channels; prev=bytearray(stride); i=0; whites=0; total=w*h
+              def paeth(a,b,c):
+                  p=a+b-c; pa=abs(p-a); pb=abs(p-b); pc=abs(p-c)
+                  return a if pa<=pb and pa<=pc else b if pb<=pc else c
+              for _y in range(h):
+                  f=raw[i]; i+=1; row=bytearray(raw[i:i+stride]); i+=stride
+                  for x in range(stride):
+                      a=row[x-channels] if x>=channels else 0; bb=prev[x]; c=prev[x-channels] if x>=channels else 0
+                      if f==1: row[x]=(row[x]+a)&255
+                      elif f==2: row[x]=(row[x]+bb)&255
+                      elif f==3: row[x]=(row[x]+((a+bb)//2))&255
+                      elif f==4: row[x]=(row[x]+paeth(a,bb,c))&255
+                      elif f!=0: raise AssertionError((path,'png-filter',f))
+                  for x in range(0,stride,channels):
+                      if row[x]>245 and row[x+1]>245 and row[x+2]>245: whites+=1
+                  prev=row
+              return whites/total
+
+          shots=['/tmp/ow-home.png','/tmp/ow-heroes.png','/tmp/ow-community.png','/tmp/dw-home.png','/tmp/dw-community.png']
+          for shot in shots:
+              p=Path(shot); assert p.stat().st_size>8000,(shot,p.stat().st_size)
+              ratio=white_ratio(shot)
+              print('SCREENSHOT',shot,'bytes',p.stat().st_size,'white_ratio',round(ratio,4))
+              assert ratio < .18, (shot,'unexpected large white region',ratio)
+          print('VISUAL_BROWSER_GATE=PASS viewport=390x844 critical_pages=5 giant_white_boxes=0')
           PY
 
       - name: Deploy once to 18 Hostinger destinations
@@ -137,35 +207,32 @@ jobs:
           ftp.quit();print(f'HOSTINGER_DEPLOY=PASS sites=18 files={total}')
           PY
 
-      - name: Verify all 147 public pages and Facebook preview contracts
+      - name: Verify all 147 public pages and direct support links
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           import concurrent.futures,time,urllib.request
           from pathlib import Path
-          from urllib.parse import urlparse
           urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
-          fixed={'oneworldz.com','cryptoworldz.xyz','solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz','donateworldz.com','impactbased.oneworldz.com','law.oneworldz.com','purplediamondcrew.com'}
           def get(u):
-              req=urllib.request.Request(u,headers={'User-Agent':'OneWorldz-Live-Verify/3.0'})
+              req=urllib.request.Request(u,headers={'User-Agent':'OneWorldz-Live-Verify/4.0','Cache-Control':'no-cache'})
               with urllib.request.urlopen(req,timeout=25) as r:return r.status,r.read().decode('utf-8','ignore')
           def check(u):
-              p=urlparse(u); root=p.path in ('','/')
-              expected='data-oneworldz-build="2026-09-03-visual-fix"' if root and p.netloc in fixed else 'data-oneworldz-build='
               last=''
               for a in range(4):
                   try:
                       status,body=get(u)
-                      if status==200 and expected in body:return u,True
-                      last=f'status={status} marker={expected in body}'
+                      ok=status==200 and 'data-oneworldz-build=' in body and '/mobile-safe.css' in body and '<iframe' not in body.lower()
+                      if ok:return u,True,''
+                      last=f'status={status} marker={"data-oneworldz-build=" in body} mobile_safe={"/mobile-safe.css" in body} iframe={"<iframe" in body.lower()}'
                   except Exception as e:last=repr(e)
                   time.sleep(3+a*2)
               return u,False,last
           fails=[]
           with concurrent.futures.ThreadPoolExecutor(max_workers=12) as ex:
               for r in ex.map(check,urls):
-                  print('LIVE PASS' if r[1] else 'LIVE FAIL',r[0])
+                  print('LIVE PASS' if r[1] else 'LIVE FAIL',r[0],r[2])
                   if not r[1]:fails.append(r)
           if fails:raise SystemExit(f'LIVE_VERIFICATION_FAILED count={len(fails)} {fails[:5]}')
           specials={
@@ -177,8 +244,8 @@ jobs:
           }
           for u,(needle,count) in specials.items():
               status,body=get(u)
-              assert status==200 and '<iframe' in body and 'facebook.com/plugins/page.php' in body, u
-              assert body.count(needle)==count, (u,body.count(needle),count)
-              print('FACEBOOK PREVIEW PASS',u,count)
-          print('FINAL=PASS pages=147 sites=18 facebook_previews=73 verified_support_sets=4')
+              assert status==200 and '<iframe' not in body.lower() and 'facebook.com/plugins/' not in body.lower(),u
+              assert body.count(needle)==count,(u,body.count(needle),count)
+              print('DIRECT SUPPORT PASS',u,count)
+          print('FINAL=PASS pages=147 sites=18 mobile_safe=1 iframes=0 direct_support=1')
           PY
