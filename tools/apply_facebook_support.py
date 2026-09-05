@@ -3,11 +3,32 @@ from pathlib import Path
 from html import escape
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = '2026-09-05-facebook-safe'
+BUILD = '2026-09-05-dedicated-v1'
 
-JAYJAY = ('JayJayTeamDev / OneWorldz', 'https://www.facebook.com/share/1FyYhwKP3r/')
-REAGAN = ('Reagan & Children — Action Spreads Smiles', 'https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr')
-DAVIS = ('Davis Family', 'https://www.facebook.com/share/165Ken5f2Bt/')
+STREAMS = {
+    'reagan-children': {
+        'title':'Reagan & Children — Action Spreads Smiles',
+        'intro':'Dedicated support for Reagan and the children in Uganda.',
+        'facebook':'https://www.facebook.com/share/196pruFjJq/?mibextid=wwXIfr',
+        'stripe':'https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01',
+        'image':'/reagan.png',
+    },
+    'davis-family': {
+        'title':'Davis Family',
+        'intro':'Dedicated Davis Family support pathway.',
+        'facebook':'https://www.facebook.com/share/165Ken5f2Bt/',
+        'stripe':'https://donate.stripe.com/dRm8wPdKa0Kt2NE7lz0kE03',
+        'image':None,
+    },
+    'jayjay-support': {
+        'title':'Support JayJayTeamDev',
+        'intro':'Voluntary support for the work behind the OneWorldz ecosystem.',
+        'facebook':'https://www.facebook.com/share/1FyYhwKP3r/',
+        'stripe':'https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00',
+        'image':None,
+    },
+}
+COMMUNITY_STRIPE='https://donate.stripe.com/9B67sLgWm78R73U35j0kE02'
 COMMUNITY = [
 ('Sakina Charity','https://www.facebook.com/share/1BmTRrfQo7/'),
 ('Isabirye Donah','https://www.facebook.com/share/193tUYStL4/'),
@@ -43,68 +64,46 @@ COMMUNITY = [
 ('Kintu Shahidu','https://www.facebook.com/share/1EpHr25wKE/'),
 ('Mutesi Florence','https://www.facebook.com/share/186v7cwFZ7/'),
 ('Emmanuel Care','https://www.facebook.com/share/1R3Y6CKi1Q/'),
-('Mpagi Davis','https://www.facebook.com/share/18BmqfH7MS/')
+('Mpagi Davis','https://www.facebook.com/share/18BmqfH7MS/'),
 ]
 
-def fb_card(name, url, note='Verified Facebook destination'):
-    return f'''<article class="fb-card">
-      <h3>{escape(name)}</h3>
-      <p>{escape(note)}. Opens directly in Facebook instead of relying on an embedded preview that can render as a blank white box in Messenger or other in-app browsers.</p>
-      <a class="btn" href="{escape(url)}" target="_blank" rel="noopener noreferrer">Open Facebook →</a>
-    </article>'''
+def write(rel,text):
+    p=ROOT/rel; p.parent.mkdir(parents=True,exist_ok=True); p.write_text(text,encoding='utf-8')
 
-def shell(title, eyebrow, heading, intro, body, nav_extra=''):
-    return f'''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>{escape(title)}</title><link rel="stylesheet" href="/visual-fix.css"></head>
-<body data-oneworldz-build="{BUILD}"><nav class="nav"><a class="brand" href="https://oneworldz.com">OneWorldz</a><a href="https://donateworldz.com">DonateWorldz</a>{nav_extra}</nav><main class="shell">
-<section class="section"><p class="ey">{escape(eyebrow)}</p><h1>{escape(heading)}</h1><p>{escape(intro)}</p></section>{body}</main><div class="foot">OneWorldz 🌐 One Vision • Helping the People Who Help People</div></body></html>'''
+def shell(title, heading, intro, body, nav_extra=''):
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>{escape(title)}</title><link rel="stylesheet" href="/visual-fix.css"></head><body data-oneworldz-build="{BUILD}"><nav class="nav"><a class="brand" href="/">DonateWorldz</a><a href="https://oneworldz.com">OneWorldz</a>{nav_extra}</nav><main class="shell"><section class="section"><p class="ey">Direct support pathway</p><h1>{escape(heading)}</h1><p>{escape(intro)}</p></section>{body}</main><div class="foot">OneWorldz 🌐 One Vision • Helping the People Who Help People</div></body></html>'''
 
-def write(rel, text):
-    p = ROOT / rel
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(text, encoding='utf-8')
+def fb_card(name,url,note='Facebook destination'):
+    return f'<article class="support-card"><h3>{escape(name)}</h3><p>{escape(note)}. Opens directly in Facebook.</p><div class="btns"><a class="btn secondary" href="{escape(url)}" target="_blank" rel="noopener noreferrer">Open Facebook</a></div></article>'
 
-write('donateworldz.com/reagan-children/index.html', shell(
-    'Reagan & Children | DonateWorldz','Direct Support','Reagan & Children — Action Spreads Smiles',
-    'Dedicated support for Reagan and the children. The verified Facebook destination opens directly and no embedded Facebook iframe is used.',
-    '<section class="section"><img src="/reagan.png" alt="Reagan and children approved artwork" style="width:100%;height:auto;object-fit:contain;background:#020205;border-radius:18px"></section><section class="section"><h2>Verified destination</h2>'+fb_card(*REAGAN)+'</section>',
-    '<a href="/reagan-children/">Reagan & Children</a>'))
+for slug,cfg in STREAMS.items():
+    visual = f'<section class="section"><img src="{cfg["image"]}" alt="{escape(cfg["title"])} artwork" style="display:block;width:100%;height:auto;object-fit:contain;border-radius:18px;background:#020205"></section>' if cfg['image'] else ''
+    body = visual + f'''<section class="section"><h2>Support directly</h2><p>This page keeps its payment destination separate from the other DonateWorldz purposes.</p><div class="btns"><a class="btn" href="{cfg['stripe']}" target="_blank" rel="noopener noreferrer">Donate securely with Stripe</a><a class="btn secondary" href="{cfg['facebook']}" target="_blank" rel="noopener noreferrer">Open Facebook</a><a class="btn secondary" href="/">All 4 Donation Pages</a></div><p><small>Payment is completed on Stripe. No card details, bank credentials or Stripe secrets are stored on this website.</small></p></section>'''
+    write(f'donateworldz.com/{slug}/index.html', shell(f'{cfg["title"]} | DonateWorldz',cfg['title'],cfg['intro'],body,f'<a href="/{slug}/">{escape(cfg["title"])}</a>'))
 
-write('donateworldz.com/davis-family/index.html', shell(
-    'Davis Family | DonateWorldz','Direct Support','Davis Family',
-    'Dedicated Davis Family support page with the repository-verified Facebook destination.',
-    '<section class="section"><h2>Verified destination</h2>'+fb_card(*DAVIS)+'</section>',
-    '<a href="/davis-family/">Davis Family</a>'))
+community_cards=''.join(fb_card(name,url,f'Community destination {i:02d} of 35') for i,(name,url) in enumerate(COMMUNITY,1))
+community_body=f'''<section class="section"><h2>Donate to Community Impact</h2><p>A separate Community Impact Stripe destination plus 35 preserved Facebook community destinations.</p><div class="btns"><a class="btn" href="{COMMUNITY_STRIPE}" target="_blank" rel="noopener noreferrer">Donate securely with Stripe</a><a class="btn secondary" href="/">All 4 Donation Pages</a></div></section><section class="section"><h2>35 community destinations</h2><div class="support-grid">{community_cards}</div></section>'''
+community_page=shell('Community Impact | DonateWorldz','Community Impact','Thirty-five direct Facebook destinations preserved in their original display order.',community_body,'<a href="/community-impact/">Community Impact</a>')
+write('donateworldz.com/community-impact/index.html',community_page)
+write('oneworldz.com/community-support/index.html',community_page.replace('href="/"','href="https://donateworldz.com/"',1).replace('<a class="brand" href="/">DonateWorldz</a>','<a class="brand" href="/">OneWorldz</a>',1))
 
-write('donateworldz.com/jayjay-support/index.html', shell(
-    'JayJayTeamDev Support | DonateWorldz','Direct Support','Support JayJayTeamDev',
-    'Voluntary support for the Helping the People Who Help People mission, with the current OneWorldz/JayJayTeamDev Facebook destination.',
-    '<section class="section"><h2>Verified destination</h2>'+fb_card(*JAYJAY)+'</section>',
-    '<a href="/jayjay-support/">JayJayTeamDev</a>'))
-
-community_cards = ''.join(fb_card(name, url, f'Community destination {i:02d} of 35') for i,(name,url) in enumerate(COMMUNITY,1))
-community_body = f'''<section class="section"><h2>35 community destinations</h2><p>These are the exact 35 Facebook destinations preserved in the repository registry. They open directly, so Messenger cannot replace them with empty white iframe boxes.</p><div class="fb-grid">{community_cards}</div></section>'''
-community_page = shell('Community Charity | OneWorldz','Community Charity','Community Charity Support','Thirty-five verified Facebook destinations preserved in their original display order.',community_body,'<a href="/community-impact/">Community Charity</a>')
-write('donateworldz.com/community-impact/index.html', community_page)
-write('oneworldz.com/community-support/index.html', community_page.replace('href="/community-impact/"','href="https://donateworldz.com/community-impact/"'))
-
-root = ROOT / 'donateworldz.com/index.html'
-text = root.read_text(encoding='utf-8')
-if '/davis-family/' not in text:
-    text = text.replace('</div></section>', '<a class="hero-card" href="/davis-family/"><span class="symbol">💜</span><span><strong>Davis Family</strong><span>Dedicated family support</span></span></a></div></section>', 1)
-root.write_text(text, encoding='utf-8')
-
-one = ROOT / 'oneworldz.com/index.html'
-one_text = one.read_text(encoding='utf-8')
-if 'href="/community-support/"' not in one_text:
-    one_text = one_text.replace('<section class="section"><h2>Enter the ecosystem</h2>', '<section class="section"><h2>Community Charity</h2><p>Open the verified community destinations directly — no blank embedded Facebook boxes.</p><div class="btns"><a class="btn" href="/community-support/">Open Community Charity →</a></div></section><section class="section"><h2>Enter the ecosystem</h2>')
-one.write_text(one_text, encoding='utf-8')
-
-urls_file = ROOT / '.ecosystem-urls.txt'
-urls = [u.strip() for u in urls_file.read_text(encoding='utf-8').splitlines() if u.strip()]
+urls_file=ROOT/'.ecosystem-urls.txt'
+urls=[u.strip() for u in urls_file.read_text(encoding='utf-8').splitlines() if u.strip()]
 for u in ['https://donateworldz.com/davis-family/','https://oneworldz.com/community-support/']:
-    if u not in urls:
-        urls.append(u)
-urls_file.write_text('\n'.join(urls)+'\n', encoding='utf-8')
+    if u not in urls: urls.append(u)
+urls_file.write_text('\n'.join(urls)+'\n',encoding='utf-8')
 
-assert len(COMMUNITY) == 35
-print(f'FACEBOOK_SUPPORT=PASS direct_links_only=1 iframes=0 community={len(COMMUNITY)} pages={len(urls)}')
+assert len(COMMUNITY)==35
+required={
+ 'donateworldz.com/reagan-children/index.html':STREAMS['reagan-children']['stripe'],
+ 'donateworldz.com/davis-family/index.html':STREAMS['davis-family']['stripe'],
+ 'donateworldz.com/community-impact/index.html':COMMUNITY_STRIPE,
+ 'donateworldz.com/jayjay-support/index.html':STREAMS['jayjay-support']['stripe'],
+}
+for rel,stripe in required.items():
+    text=(ROOT/rel).read_text(encoding='utf-8')
+    assert stripe in text, (rel,'stripe')
+    assert '<iframe' not in text.lower(), rel
+assert (ROOT/'donateworldz.com/community-impact/index.html').read_text(encoding='utf-8').count('https://www.facebook.com/share/')==35
+assert (ROOT/'oneworldz.com/community-support/index.html').read_text(encoding='utf-8').count('https://www.facebook.com/share/')==35
+print('FACEBOOK_SUPPORT=PASS direct_links=35 stripe_streams=4 iframes=0')
