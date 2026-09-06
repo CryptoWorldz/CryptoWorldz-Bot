@@ -1,64 +1,89 @@
-# WORLDZ $WLDZ — 10% People Distribution
+# WORLDZ $WLDZ — Legends + Worldz Boost
 
 ## Fixed supply
-- Total supply: 100,000,000 WLDZ.
-- This plan does not mint above 100M.
-- Allocations come from the Dev genesis supply.
+- Total supply remains 100,000,000 WLDZ.
+- No allocation mints above 100M.
+- Legend and Boost allocations come from the Dev genesis supply.
 - Initial Flash Direct LP remains separate: 1,000,000 WLDZ / 1% plus Dev-funded quote liquidity.
 
-## Core Team — 6%
-- 6 seats.
-- 1,000,000 WLDZ per seat.
-- 1.00% of total supply per person.
-- 6,000,000 WLDZ total.
-- JayJayTeamDev is the sole deployer and is excluded from these six seats.
-- Selection is the top six verified active TEAM profiles at the allocation snapshot.
-- Historical project evidence repeatedly identifies Stepper, Remediy/Remedy and Solmusic/SolMussic as human leadership participants; the remaining seats must be selected from actual verified Command Centre activity rather than invented names.
+## Leadership order — locked
+1. JayJayTeamDev — Sole Deployer — multisig signer — outside the Legend 1% grant pool.
+2. Remedy / Remediy — Multisig Core — guaranteed 1% / 1,000,000 WLDZ.
+3. Stepper — Multisig Core — guaranteed 1% / 1,000,000 WLDZ.
+4. Sxvage / Savage — Executive Leader — guaranteed 1% / 1,000,000 WLDZ — NOT a multisig signer.
+5. SolMussic / Solmusic — Core Legend — guaranteed 1% / 1,000,000 WLDZ.
+6. Mahammad — Core Legend — guaranteed 1% / 1,000,000 WLDZ.
 
-## Worldz Boost — 4%
+Savage/Sxvage is an Executive Leader and one of the core people in CryptoWorldz. His absence from the three-wallet multisig is not a reduction in team rank or importance.
+
+## Multisig — separate from leadership rank
+The three multisig signers remain:
+- JayJayTeamDev
+- Remedy
+- Stepper
+
+Sxvage/Savage is deliberately not a multisig signer while remaining #4 Executive Leader.
+
+## Approved 1% Legends — activity required
+Each of the following is approved for 1,000,000 WLDZ / 1% when active under verified Command Centre activity:
+- SolPaul
+- SolMark — @MARKW30
+- Lungu Boy — @KLAUS606
+- Loki — @LOKII23456
+- SolDanHero
+- SolPercent
+- SolChez
+- SolViv
+- DTBWEB3SOLCAT — alias SolDBTCAT
+
+There is no six-person or 6% cap on the Legend tier.
+
+Current named allocation range:
+- Guaranteed Legends: 5% / 5,000,000 WLDZ.
+- If all nine approved activity-conditioned Legends qualify: another 9% / 9,000,000 WLDZ.
+- Maximum current named Legend allocation: 14% / 14,000,000 WLDZ.
+
+## Worldz Boost — separate 4%
 - 16 seats.
-- 250,000 WLDZ per seat.
-- 0.25% of total supply per person.
-- 4,000,000 WLDZ total.
-- Core Team six are excluded from Boost selection.
-- No profile can receive more than one Boost seat in the founding cohort.
-- Eligible contribution labels: SUPPORTER, SHILLER, RAAIIIDDER, INVESTOR, ADVERTISER.
+- 250,000 WLDZ / 0.25% each.
+- 4,000,000 WLDZ / 4% total.
+- Every recipient of a 1% Legend allocation is excluded from the Worldz Boost pool.
+- JayJayTeamDev is excluded from the Boost pool.
+- One Boost seat per profile.
+- Labels: SUPPORTER, SHILLER, RAAIIIDDER, INVESTOR, ADVERTISER.
 
-## Activity ranking
-Worldz Boost starts at rank #7 after the six Core Team seats have been selected.
+The total people allocation therefore is not hard-coded to 10% anymore:
+- Minimum with five guaranteed Legends + all sixteen Boost seats: 9%.
+- Maximum with every currently named 1% Legend active + all sixteen Boost seats: 18%.
 
-Worldz Activity Score weighting:
+## Worldz Activity Score
+For activity-conditioned Legend grants and Worldz Boost ranking:
 - 35% verified Raaiiidd mission completions.
 - 25% Legend Points.
 - 20% verified promotion contribution.
 - 10% active-day consistency.
 - 10% verified supporter / investor / advertiser contribution.
 
-Buying WLDZ or spending money alone does not guarantee selection. Manual claims of likes, reposts or promotion do not count unless the Command Centre can verify the accepted evidence under its mission rules.
-
-Tie-break order:
-1. verified mission completions;
-2. Legend Points;
-3. active-day consistency;
-4. stable profile ID ordering.
+Buying WLDZ or spending money alone does not guarantee a grant. Promotion/activity must use accepted Command Centre evidence.
 
 ## G.R.A.C.E. vesting
-Applies to Core Team and Worldz Boost allocations:
+Applies to 1% Legend grants and 0.25% Worldz Boost grants:
 - 20% initially unlocked.
 - 80% linear vesting over 12 months.
 - Locked WLDZ is not eligible for SOL holder rewards.
-- Vested/unlocked WLDZ can become reward eligible under the normal WLDZ rules.
+- Vested/unlocked WLDZ can become reward eligible under normal WLDZ rules.
 
 ## Command Centre profiles
-DEV / TEAM / BOOST profiles can expose:
-- allocation WLDZ;
-- allocation % of 100M supply;
+Profiles can expose:
+- leadership rank and role;
+- multisig status;
+- allocated WLDZ and allocation %;
 - verified current wallet balance;
 - live ownership %;
 - locked / unlocked WLDZ;
 - reward-eligible WLDZ;
-- Worldz activity rank;
-- applicable Supporter / Shiller / Raaiiidder / Investor / Advertiser labels.
+- activity rank;
+- Worldz Boost labels.
 
-## Data-integrity rule
-Recipient names must be selected from a verified activity snapshot. If the Command Centre/Supabase activity source cannot be read, selection remains pending rather than fabricating a ranking.
+## Transparency
+Anyone who receives a WLDZ allocation and promotes WLDZ should have that allocation/ownership visible through the Command Centre profile system so the community can distinguish team/Legend holdings from ordinary public holdings.
