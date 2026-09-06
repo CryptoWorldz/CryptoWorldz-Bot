@@ -1,111 +1,110 @@
-# WorldzPad™ Foundation v1
+# WorldzPad™ — Flash Direct Launch Contract
 
-WorldzPad™ is the OneWorldz / CryptoWorldz launch, revival, fee-routing and impact infrastructure layer. It is Solana-first and designed for later chain-specific Worldz expansion.
+WorldzPad™ is the OneWorldz / CryptoWorldz launch, revival, fee-routing and Real Value™ infrastructure layer. Solana is the first execution network.
 
-## Operating model
+## Command architecture
 
-- **ZED commands it** — launch registry, approvals, health, alerts and operator workflow.
-- **AUTO runs the money engine** — fee accounting, reward settlement, liquidity instructions, buyback/burn instructions and treasury accounting.
-- **G.R.A.C.E. runs vesting and team systems** — dev/team locks, vesting, beneficiary records, permissions and scheduled allocations.
-- **Multisig protects it** — sensitive treasury/authority actions stay behind established multisignature governance. Wallet addresses and secrets are not stored in this public specification.
-- **ImpactBased gives every launch purpose** — fee-enabled launches require a visible impact/charity route.
-- **WorldzPad launches it** — public configuration, disclosures, launch mode, locks, fee routes and post-launch monitoring.
+- **ZED commands it** — launch registry, operator workflow, status, alerts and launch contracts.
+- **AUTO runs the money engine** — fee accounting, SOL holder rewards, LP routing and treasury accounting.
+- **G.R.A.C.E. runs vesting and team systems** — locks, schedules, beneficiary records and permissions.
+- **Multisig protects sensitive treasury/authority actions** where configured.
+- **ImpactBased is available** for optional transparent charity/impact routing; it is not mandatory for a token launch.
+- **WorldzPad launches it** through a machine-readable launch contract consumed by the execution runtime.
+
+## Sole deployer rule
+
+The sole authorised deployer under WorldzPad is **JayJayTeamDev**. WorldzPad is not configured in this release as an open public token-creation service for third-party deployers.
+
+The public GitHub repository contains no private signing material. Mainnet signing is an explicit action performed by the authorised operator through the separate Command Centre/runtime and supported DEX adapter.
+
+## Flash Direct™ launch technology
+
+WorldzPad's launch profile is **not a bonding curve**.
+
+The locked model is:
+
+- instant/direct DEX market architecture;
+- virtual liquidity permitted for pricing/market-depth mechanics;
+- real Dev-funded liquidity accounted separately;
+- no bonding-curve graduation requirement;
+- virtual liquidity must never be represented as real withdrawable liquidity;
+- Real Value™ must separate spot/display value from actual realisable liquidity value.
 
 ## Protocol fee rules
 
-1. Token fee choices are exactly 0.50%, 0.75%, 1.00% ... 3.75%, 4.00%.
-2. 4.00% is the hard maximum for WorldzPad v1.
-3. WorldzPad receives **10% of collected fee revenue**, not 10% of token supply and not a 10% transaction fee.
-4. Example: a 2.00% token fee makes the WorldzPad protocol share effectively 0.20% of taxable volume.
-5. SOL holder rewards are a mandatory route for fee-enabled WorldzPad launches.
-6. At least one Charity / Impact route is mandatory.
-7. The project's remaining distribution bucket must balance to exactly 100% before launch configuration can pass.
-8. Optional routes include LP addition, buyback, burn, treasury, dev, team, marketing, community, named wallets and additional charities.
-9. Reward cadence options: hourly, every 6 hours, daily, weekly, monthly, yearly.
+1. WorldzPad token fee choices are exactly 0.50%, 0.75%, 1.00% ... 3.75%, 4.00%.
+2. **4.00% is the WorldzPad hard maximum.**
+3. WorldzPad receives **10% of collected token fee revenue**.
+4. WorldzPad does **not** receive 10% of token supply.
+5. WorldzPad's 10% share is **not** a 10% transaction tax. Example: a 2% token fee makes the WorldzPad protocol share effectively 0.20% of taxable volume.
+6. **SOL holder rewards** are the mandatory fee-routing category.
+7. Charity / Impact is optional.
+8. The remaining project distribution bucket must total exactly 100%.
+9. Optional routes can include Charity / Impact, LP addition, buyback, burn, treasury, dev, team, marketing, community and named wallets.
+10. Reward cadence options: hourly, every 6 hours, daily, weekly, monthly, yearly.
+11. No guaranteed return, APY or token price is represented by the protocol.
+
+## #001 — WORLDZ `$WLDZ`
+
+Locked Flash Direct launch contract:
+
+- Network: Solana
+- Token: WORLDZ
+- Ticker: `$WLDZ`
+- Vanity mint-prefix target: `WLDZ…`
+- Fixed genesis supply: **100,000,000 WLDZ**
+- Initial genesis ownership: **100% Dev**
+- Initial LP token allocation: **1% = 1,000,000 WLDZ**
+- Initial real quote-side liquidity target: **approximately A$200 equivalent in Dev-funded SOL**, converted at execution time
+- Virtual liquidity: enabled by the selected supported Flash Direct DEX/runtime mechanism
+- Bonding curve: **NO**
+- Graduation requirement: **NO**
+- Presale: **NO**
+- Customer custody by the public WorldzPad site: **NO**
+- SOL holder rewards: **YES**, from configured collected token fee revenue
+- Charity / impact wallet: optional
+- Buyer risk disclosure: required
+- Real Value™ disclosure: required
+
+## Locked launch registry
+
+- **#001 WORLDZ `$WLDZ`** — Flash Direct command contract ready.
+- **#002 REVIVE `$RVIV`** — identity locked; vanity mint-prefix target `RVIV…`.
+- **#003 PHENIX `$PNEX`** — identity locked; vanity mint-prefix target `PNEX…`.
+
+## ZED machine contract
+
+The build publishes the same machine-readable contract to:
+
+- `impactbased.oneworldz.com/worldzpad.launch-contract.json`
+- `cryptoworldz.xyz/worldzpad/worldzpad.launch-contract.json`
+
+The operator-facing configuration is published at:
+
+- `impactbased.oneworldz.com/launch-console/`
+- `cryptoworldz.xyz/worldzpad/`
+
+The launch contract is **ready for runtime integration**. This repository does not contain the separate `cryptobotz.cryptoworldz.xyz` runtime source or private signer, so this release does not falsely claim to have performed a mainnet mint.
 
 ## Real Value™ rule
 
-WorldzPad must not present a spot-price wallet valuation alone where liquidity depth materially changes what could be realised.
+WorldzPad must display separately:
 
-The UI separates:
-
-- **Spot Value** — balance multiplied by current quoted spot price.
-- **Realisable Value** — estimated output after AMM depth, curve and slippage.
-- **Locked Value** — current market value of balances that are subject to locks/vesting.
-
-The production version may use live routing/liquidity data only after the data source and calculation are verified.
+- **Spot Value** — token balance × current quoted spot price.
+- **Realisable Value** — estimated proceeds based on actual real liquidity, AMM/DEX mechanics, fees and slippage.
+- **Locked Value** — market value of balances subject to genuine locks/vesting.
+- **Virtual Liquidity** — explicitly labelled as virtual/pricing liquidity and never presented as withdrawable reserves.
 
 ## Legacy Revival™
 
-WorldzPad revives genuine legacy tokens by preserving original mints where technically and legally viable.
+WorldzPad retains the Legacy Revival path for genuine existing tokens such as Limited Edition `$LMTD`. Existing mint identity should be preserved where technically viable, with current authority, holder, LP and wallet data re-verified before any value is committed.
 
-Required sequence:
+Known historical `$LMTD` mint recorded for verification:
 
-1. Identity and authority audit.
-2. Dev/distribution/treasury wallet census.
-3. Holder and liquidity snapshot.
-4. Current legal/classification review.
-5. Recovery budget with personal/project/charity funds separated.
-6. Liquidity design and Real Value simulation.
-7. Published dev/team/beneficiary locks and vesting.
-8. Staged revival rather than an undisclosed instant relaunch.
-9. ZED monitoring after revival.
+`Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY`
 
-Known legacy record carried into v1:
+## Release boundary
 
-- Limited Edition (`$LMTD`)
-- Known mint: `Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY`
-- Historical maximum supply: 10,000,000
+The connected repository controls the public CryptoWorldz / ImpactBased / WorldzPad surfaces and their existing production deployment pipeline. The separate Command Centre runtime at `cryptobotz.cryptoworldz.xyz` is linked but its internal source is not present in this repository.
 
-All balances, authorities, LP positions and holder data must be re-verified on-chain before funds are committed.
-
-## Launch registry
-
-- **#001 Worldz `$WLDZ`** — flagship Solana-first WorldzPad launch; design/compliance stage.
-- **#002 Reserved** — identity deliberately not locked yet.
-- **#003 Phenix `$PHENIX`** — future finance/currency infrastructure concept.
-
-A registry number does not mean a token is live or approved.
-
-## Execution gates
-
-Public information, simulation and architecture may be deployed before regulated execution.
-
-The following remain disabled until resolved:
-
-- token minting through WorldzPad;
-- swaps/exchange execution;
-- custodial or transfer instructions;
-- fee-withdraw authority automation;
-- automated reward/charity settlement;
-- live treasury execution.
-
-Production execution requires, at minimum:
-
-1. entity/operator responsibility documented;
-2. AUSTRAC position resolved for all planned designated virtual-asset services;
-3. ASIC / financial-product and financial-service classification resolved;
-4. token-specific disclosures and risk statements;
-5. multisig and authority review;
-6. smart-contract/integration security review;
-7. testnet acceptance evidence;
-8. accounting, tax, recordkeeping and incident controls.
-
-## Lock and vesting integration
-
-WorldzPad is designed to orchestrate audited external lock/vesting protocols such as Jupiter Lock where appropriate, while preserving a clear distinction between:
-
-- **vesting/locking** — controls when tokens can move; and
-- **rewards/staking** — a separately funded economic program.
-
-No yield is represented as being created merely because tokens are locked.
-
-## Funding-first principle
-
-Before relying on founder personal funds for liquidity, WorldzPad should pursue suitable non-token funding and support channels: ecosystem grants, hackathons, competitions, responsible venture investment, bank innovation programs, cloud credits and startup support.
-
-Personal financially managed funds, DSP-related personal assets/income, project funds, protocol treasury funds, charity funds and third-party investment must remain separately identifiable and must not be assumed interchangeable.
-
-## v1 release boundary
-
-This repository controls the public CryptoWorldz / ImpactBased / WorldzPad surfaces and Hostinger deployment. The linked Command Centre runtime at `cryptobotz.cryptoworldz.xyz` is separate from this connected repository; v1 creates the public ZED → WorldzPad bridge without claiming that runtime internals were modified.
+Accordingly this release can make the launch profile, ZED bridge, validation contract and operator console production-ready, but it cannot legitimately claim a mainnet token was signed or minted until the external runtime/signer performs that action.
