@@ -26,8 +26,24 @@ const MASTER = {
   ecosystem: 25_000_000n,
 };
 const RPC = process.env.SOLANA_RPC_URL || clusterApiUrl('devnet');
+const NETWORK_LABEL = process.env.WORLDZPAD_NETWORK_LABEL || 'devnet';
 const connection = new Connection(RPC, 'confirmed');
-const payer = Keypair.generate();
+
+function payerFromEnvironment() {
+  const raw = process.env.DEVNET_PAYER_SECRET_JSON?.trim();
+  if (!raw) return { keypair: Keypair.generate(), source: 'ephemeral_generated' };
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error('DEVNET_PAYER_SECRET_JSON must be a JSON array stored as a GitHub Actions secret');
+  }
+  if (!Array.isArray(parsed) || parsed.length !== 64) throw new Error('DEVNET_PAYER_SECRET_JSON must contain exactly 64 secret-key bytes');
+  return { keypair: Keypair.fromSecretKey(Uint8Array.from(parsed)), source: 'prefunded_actions_secret' };
+}
+
+const payerConfig = payerFromEnvironment();
+const payer = payerConfig.keypair;
 const mintKeypair = Keypair.generate();
 const vaultOwners = Object.fromEntries(Object.keys(MASTER).map((name) => [name, Keypair.generate()]));
 const runtimeDir = path.resolve('.runtime');
@@ -38,25 +54,31 @@ fs.mkdirSync(artifactDir, { recursive: true });
 function secret(kp) { return Array.from(kp.secretKey); }
 async function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
 
-async function fundPayer() {
-  const attempts = [2, 1, 0.5, 0.25];
+async function ensurePayerFunded() {
+  const minimumLamports = 50_000_000; // 0.05 SOL is comfortably above this Phase-1 rent/fee requirement.
+  let balance = await connection.getBalance(payer.publicKey, 'confirmed');
+  if (balance >= minimumLamports) {
+    return { mode: payerConfig.source, airdropSignature: null, balanceLamports: balance };
+  }
+
+  const attempts = NETWORK_LABEL === 'localnet' ? [2] : [0.25, 0.1, 0.05];
   let lastError;
   for (const sol of attempts) {
     try {
       const sig = await connection.requestAirdrop(payer.publicKey, Math.floor(sol * LAMPORTS_PER_SOL));
       const latest = await connection.getLatestBlockhash('confirmed');
       await connection.confirmTransaction({ signature: sig, ...latest }, 'confirmed');
-      const balance = await connection.getBalance(payer.publicKey, 'confirmed');
-      if (balance > 0) return { sig, solRequested: sol, balanceLamports: balance };
+      balance = await connection.getBalance(payer.publicKey, 'confirmed');
+      if (balance >= minimumLamports) return { mode: 'rpc_airdrop', airdropSignature: sig, balanceLamports: balance };
     } catch (err) {
       lastError = err;
-      await sleep(3500);
+      await sleep(2500);
     }
   }
-  throw new Error(`Devnet airdrop failed after retries: ${lastError?.message || lastError}`);
+  throw new Error(`${NETWORK_LABEL} payer funding unavailable: ${lastError?.message || lastError || `balance=${balance}`}`);
 }
 
-const airdrop = await fundPayer();
+const funding = await ensurePayerFunded();
 
 // Token-2022 mint: freeze authority deliberately unset. No TransferFeeConfig or TransferHook extensions.
 const mint = await createMint(
@@ -117,10 +139,13 @@ if (mintInfo.supply !== TOTAL_TOKENS * UNIT) throw new Error(`supply mismatch: $
 if (mintInfo.mintAuthority !== null) throw new Error('mint authority was not revoked');
 if (mintInfo.freezeAuthority !== null) throw new Error('freeze authority unexpectedly set');
 
+const artifactName = NETWORK_LABEL === 'localnet' ? 'wldz-localnet-phase1-public.json' : 'wldz-devnet-phase1-public.json';
 const publicReport = {
-  phase: 'WLDZ_DEVNET_PHASE1',
-  network: 'devnet',
-  rpc: RPC,
+  phase: NETWORK_LABEL === 'localnet' ? 'WLDZ_LOCALNET_PHASE1' : 'WLDZ_DEVNET_PHASE1',
+  network: NETWORK_LABEL,
+  rpcEndpointPublished: false,
+  fundingMode: funding.mode,
+  payer: payer.publicKey.toBase58(),
   tokenProgram: TOKEN_2022_PROGRAM_ID.toBase58(),
   mint: mint.toBase58(),
   decimals: DECIMALS,
@@ -130,19 +155,19 @@ const publicReport = {
   transferFeeExtension: false,
   transferHook: false,
   masterVaults: vaults,
-  signatures: { airdrop: airdrop.sig, mintAllocations: mintSignatures, revokeMintAuthority: revokeSig },
+  signatures: { funding: funding.airdropSignature, mintAllocations: mintSignatures, revokeMintAuthority: revokeSig },
 };
-fs.writeFileSync(path.join(artifactDir, 'wldz-devnet-phase1-public.json'), JSON.stringify(publicReport, null, 2) + '\n');
+fs.writeFileSync(path.join(artifactDir, artifactName), JSON.stringify(publicReport, null, 2) + '\n');
 
-// Ephemeral DEVNET keys only. Never upload this file as an artifact and never commit it.
+// Ephemeral TEST-NET keys only. Never upload this file as an artifact and never commit it.
 const runtimeState = {
   ...publicReport,
-  ephemeralDevnetSecrets: {
+  ephemeralTestSecrets: {
     payer: secret(payer),
     mint: secret(mintKeypair),
     vaultOwners: Object.fromEntries(Object.entries(vaultOwners).map(([n, kp]) => [n, secret(kp)])),
   },
 };
-fs.writeFileSync(path.join(runtimeDir, 'wldz-devnet-state.json'), JSON.stringify(runtimeState));
+fs.writeFileSync(path.join(runtimeDir, 'wldz-test-state.json'), JSON.stringify(runtimeState));
 
-console.log(`WLDZ_DEVNET_PHASE1=PASS mint=${mint.toBase58()} supply=100000000 vaults=25/25/25/25 mint_authority=revoked freeze_authority=none`);
+console.log(`WLDZ_${NETWORK_LABEL.toUpperCase()}_PHASE1=PASS mint=${mint.toBase58()} supply=100000000 vaults=25/25/25/25 mint_authority=revoked freeze_authority=none funding=${funding.mode}`);
