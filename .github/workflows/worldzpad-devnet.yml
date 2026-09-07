@@ -1,0 +1,55 @@
+name: WorldzPad WLDZ Devnet Phase 1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'worldzpad-devnet/**'
+      - '.github/workflows/worldzpad-devnet.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldzpad-wldz-devnet-phase1
+  cancel-in-progress: false
+
+jobs:
+  devnet-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: worldzpad-devnet
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pinned Solana and Meteora SDKs
+        run: npm install --no-audit --no-fund
+
+      - name: Static WorldzPad contract check
+        run: npm run static-check
+
+      - name: Meteora DAMM v2 devnet preflight
+        run: npm run meteora-preflight
+
+      - name: Mint disposable 100M DEVNET WLDZ and allocate four master vaults
+        run: npm run phase1
+
+      - name: Independently verify supply, vault balances and revoked authority
+        run: npm run verify
+
+      - name: Publish public devnet proof only
+        uses: actions/upload-artifact@v4
+        with:
+          name: wldz-devnet-phase1-public-proof
+          path: worldzpad-devnet/artifacts/wldz-devnet-phase1-public.json
+          if-no-files-found: error
+          retention-days: 30
