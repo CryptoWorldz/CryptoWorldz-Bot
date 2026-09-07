@@ -4,7 +4,6 @@ import BN from 'bn.js';
 import {
   Connection,
   Keypair,
-  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   Transaction,
@@ -51,7 +50,6 @@ const INITIAL_WLDZ_RAW = INITIAL_WLDZ_TOKENS * 1_000_000_000n;
 const INITIAL_WSOL_LAMPORTS = 200_000_000n; // 0.2 SOL test quote amount; NOT the mainnet A$200 target.
 const BASE_FEE_BPS = 200;
 
-// Move exactly the launch allocation from the 25M Liquidity master vault to the pool creator.
 const payerWldz = await getOrCreateAssociatedTokenAccount(
   connection, payer, mint, payer.publicKey, false, 'confirmed', { commitment: 'confirmed' }, TOKEN_2022_PROGRAM_ID,
 );
@@ -69,7 +67,6 @@ await transferChecked(
   TOKEN_2022_PROGRAM_ID,
 );
 
-// Create/fund the payer's native-mint ATA so Meteora receives real wrapped SOL as token B.
 const payerWsol = await getOrCreateAssociatedTokenAccount(
   connection, payer, NATIVE_MINT, payer.publicKey, false, 'confirmed', { commitment: 'confirmed' }, TOKEN_PROGRAM_ID,
 );
@@ -86,7 +83,7 @@ const epochInfo = await connection.getEpochInfo('confirmed');
 const tokenAInfo = { mint: mintInfo, currentEpoch: epochInfo.epoch };
 const tokenAAmount = new BN(INITIAL_WLDZ_RAW.toString());
 const tokenBAmount = new BN(INITIAL_WSOL_LAMPORTS.toString());
-const initSqrtPrice = getSqrtPriceFromPrice('0.0000002', 9, 9); // 0.2 SOL / 1M WLDZ
+const initSqrtPrice = getSqrtPriceFromPrice('0.0000002', 9, 9);
 const liquidityDelta = cpAmm.getLiquidityDelta({
   maxAmountTokenA: tokenAAmount,
   maxAmountTokenB: tokenBAmount,
@@ -146,8 +143,31 @@ await connection.confirmTransaction(signature, 'confirmed');
 
 const poolState = await cpAmm.fetchPoolState(pool);
 if (Number(poolState.collectFeeMode) !== CollectFeeMode.OnlyB) throw new Error(`collect fee mode != OnlyB: ${poolState.collectFeeMode}`);
-const decodedBaseFee = decodePodAlignedFeeTimeScheduler(Buffer.from(poolState.poolFees.baseFee.data));
-const decodedBps = feeNumeratorToBps(decodedBaseFee.cliffFeeNumerator);
+
+// cp-amm-sdk releases have exposed baseFee as either {data}, a raw byte array,
+// or an already-decoded object. Accept each representation but require the same
+// on-chain 200-bps result. This is verification compatibility, not a weaker gate.
+const baseFeeState = poolState.poolFees?.baseFee;
+let decodedBps;
+let baseFeeShape;
+if (baseFeeState?.data !== undefined) {
+  const decoded = decodePodAlignedFeeTimeScheduler(Buffer.from(baseFeeState.data));
+  decodedBps = feeNumeratorToBps(decoded.cliffFeeNumerator);
+  baseFeeShape = 'data';
+} else if (Array.isArray(baseFeeState) || Buffer.isBuffer(baseFeeState) || baseFeeState instanceof Uint8Array) {
+  const decoded = decodePodAlignedFeeTimeScheduler(Buffer.from(baseFeeState));
+  decodedBps = feeNumeratorToBps(decoded.cliffFeeNumerator);
+  baseFeeShape = 'bytes';
+} else if (baseFeeState?.cliffFeeNumerator !== undefined) {
+  decodedBps = feeNumeratorToBps(baseFeeState.cliffFeeNumerator);
+  baseFeeShape = 'decoded';
+} else if (baseFeeState?.cliff_fee_numerator !== undefined) {
+  decodedBps = feeNumeratorToBps(baseFeeState.cliff_fee_numerator);
+  baseFeeShape = 'decoded_snake';
+} else {
+  throw new Error(`Unsupported DAMM v2 baseFee state shape: ${JSON.stringify({poolFeeKeys:Object.keys(poolState.poolFees || {}),baseFeeKeys:baseFeeState && typeof baseFeeState === 'object' ? Object.keys(baseFeeState) : [],baseFeeType:typeof baseFeeState})}`);
+}
+
 if (decodedBps !== BASE_FEE_BPS) throw new Error(`base fee != 200 bps: ${decodedBps}`);
 if (!poolState.tokenAMint.equals(mint)) throw new Error('pool token A != WLDZ');
 if (!poolState.tokenBMint.equals(NATIVE_MINT)) throw new Error('pool token B != wSOL');
@@ -167,6 +187,7 @@ const report = {
   collectFeeModeValue: Number(poolState.collectFeeMode),
   baseTradingFeeBps: decodedBps,
   baseTradingFeePercent: decodedBps / 100,
+  baseFeeStateShape: baseFeeShape,
   liquidityLockedAtCreation: true,
   simulationPassed: true,
   note: 'Local protocol proof only. 0.2 SOL is test liquidity and is not the mainnet A$200 target.',
@@ -178,4 +199,4 @@ const runtime = JSON.parse(fs.readFileSync(runtimePath, 'utf8'));
 runtime.meteoraPhase2 = { ...report, positionNftSecret: Array.from(positionNft.secretKey) };
 fs.writeFileSync(runtimePath, JSON.stringify(runtime));
 
-console.log(`WLDZ_METEORA_LOCAL_PHASE2=PASS pool=${pool.toBase58()} onlyB=1 fee_bps=200 initial_wldz=1000000 initial_wsol=0.2 simulation=pass`);
+console.log(`WLDZ_METEORA_LOCAL_PHASE2=PASS pool=${pool.toBase58()} onlyB=1 fee_bps=200 initial_wldz=1000000 initial_wsol=0.2 fee_shape=${baseFeeShape} simulation=pass`);
