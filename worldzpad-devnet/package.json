@@ -1,13 +1,14 @@
 {
   "name": "worldzpad-wldz-devnet",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "static-check": "node scripts/00_static_check.mjs",
     "phase1": "node scripts/01_mint_allocate.mjs",
     "verify": "node scripts/02_verify_phase1.mjs",
-    "meteora-preflight": "node scripts/03_meteora_preflight.mjs"
+    "meteora-preflight": "node scripts/03_meteora_preflight.mjs",
+    "auto-check": "node scripts/04_auto_accounting_check.mjs"
   },
   "dependencies": {
     "@meteora-ag/cp-amm-sdk": "1.4.7",
