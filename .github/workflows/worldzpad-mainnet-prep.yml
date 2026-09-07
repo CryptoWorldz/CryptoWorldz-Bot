@@ -1,0 +1,56 @@
+name: WLDZ Mainnet Preparation Gate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'worldzpad-mainnet/**'
+      - '.github/workflows/worldzpad-mainnet-prep.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worldzpad-mainnet/**'
+      - '.github/workflows/worldzpad-mainnet-prep.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wldz-mainnet-preparation
+  cancel-in-progress: false
+
+jobs:
+  mainnet-preparation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Prove preparation manifest and accepted execution evidence
+        run: node worldzpad-mainnet/scripts/preflight.mjs
+
+      - name: Confirm execution remains disabled
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const plan = JSON.parse(fs.readFileSync('worldzpad-mainnet/mainnet-plan.json', 'utf8'));
+          if (plan.executionEnabled !== false || plan.launchAuthorization !== false) {
+            throw new Error('Mainnet preparation package attempted to enable execution or authorize launch');
+          }
+          console.log('WLDZ_MAINNET_EXECUTION_LOCK=PASS execution_enabled=0 launch_authorized=0');
+          NODE
+
+      - name: Publish preparation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: wldz-mainnet-preparation-report
+          path: worldzpad-mainnet/artifacts/wldz-mainnet-preparation-report.json
+          if-no-files-found: error
+          retention-days: 30

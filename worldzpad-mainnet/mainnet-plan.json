@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "project": "WORLDZ",
+  "ticker": "WLDZ",
+  "network": "mainnet-beta",
+  "status": "PREPARATION_ONLY",
+  "executionEnabled": false,
+  "launchAuthorization": false,
+  "preMainnetProof": {
+    "repository": "CryptoWorldz/CryptoWorldz-Bot",
+    "workflowRunId": 34155419579,
+    "headSha": "9e7f41f7998b78be43d240f12812bc825b1e57f3",
+    "expectedConclusion": "success",
+    "artifactName": "wldz-localnet-execution-proofs",
+    "artifactSha256": "317f354ff125fe44df2d370a8f6ca893da5f7ce4cede965a8a0441fef5db70ec"
+  },
+  "token": {
+    "program": "Token-2022",
+    "name": "WORLDZ",
+    "symbol": "WLDZ",
+    "vanityMintPrefix": "WLDZ",
+    "decimals": 9,
+    "supplyTokens": 100000000,
+    "mintAuthorityAfterInitialMint": "REVOKED",
+    "freezeAuthority": "NONE"
+  },
+  "masterAllocationsTokens": {
+    "founder": 25000000,
+    "liquidity": 25000000,
+    "peopleCharity": 25000000,
+    "ecosystem": 25000000
+  },
+  "peopleCharitySplitTokens": {
+    "legends": 14000000,
+    "boost": 4000000,
+    "charityEndowment": 7000000
+  },
+  "founderPolicyTokens": {
+    "timeEnforcedLockedTarget": 20000000,
+    "operationalMaximumBeforeLaunchCosts": 5000000
+  },
+  "meteora": {
+    "venue": "Meteora DAMM v2",
+    "pair": "WLDZ/wSOL",
+    "collectFeeMode": "OnlyB",
+    "baseFeeBps": 200,
+    "bondingCurve": false,
+    "liquidityLockRequired": true,
+    "simulateBeforeSend": true
+  },
+  "autoRoutesPercent": {
+    "board": 10,
+    "holderRewards": 40,
+    "lpGrowth": 20,
+    "buybackBurn": 15,
+    "charity": 10,
+    "raaiiiddGrowth": 5
+  },
+  "holderRewards": {
+    "cadenceHours": 6,
+    "proportionalPercent": 70,
+    "equalizerPercent": 30,
+    "excludeSystemAndLockedAccounts": true
+  },
+  "mainnetPublicAddresses": {
+    "wldzMint": null,
+    "squadsMultisig": null,
+    "founderVault": null,
+    "liquidityVault": null,
+    "peopleCharityVault": null,
+    "ecosystemVault": null,
+    "charityDestination": null,
+    "boardDestination": null,
+    "raaiiiddGrowthDestination": null
+  },
+  "addressVerification": {
+    "independentHumanChecksRequired": 2,
+    "allAddressesVerified": false
+  },
+  "readiness": {
+    "preMainnetExecutionProofPassed": true,
+    "onlyBFeeClaimProofPassed": true,
+    "autoRouteProofPassed": true,
+    "holderNativeSolProofPassed": true,
+    "lpGrowthProofPassed": true,
+    "buybackBurnProofPassed": true,
+    "charityNativeSolProofPassed": true,
+    "atomicRollbackProofPassed": true,
+    "vanityMintPublicAddressFinal": false,
+    "multisigAndDestinationsVerified": false,
+    "graceTimeEnforcedVestingVerified": false,
+    "productionRpcAndClusterVerified": false,
+    "mainnetLiquidityFundingApproved": false,
+    "austracPositionResolved": false,
+    "asicPositionResolved": false,
+    "tokenDisclosuresReviewed": false,
+    "independentSecurityReviewComplete": false,
+    "accountingRecordkeepingRunbookApproved": false,
+    "incidentRecoveryRunbookApproved": false,
+    "finalLaunchHumanAuthorizationRecorded": false
+  }
+}
