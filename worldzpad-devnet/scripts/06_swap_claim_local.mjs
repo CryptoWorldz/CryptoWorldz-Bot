@@ -10,8 +10,6 @@ import {
 import {
   NATIVE_MINT,
   TOKEN_2022_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-  getAccount,
   getOrCreateAssociatedTokenAccount,
   transferChecked,
 } from '@solana/spl-token';
@@ -19,6 +17,7 @@ import {
   CpAmm,
   derivePositionNftAccount,
   getTokenProgram,
+  getUnClaimLpFee,
 } from '@meteora-ag/cp-amm-sdk';
 
 const RPC = process.env.SOLANA_RPC_URL || 'http://127.0.0.1:8899';
@@ -46,12 +45,8 @@ if (!poolStateBefore.tokenBMint.equals(NATIVE_MINT)) throw new Error('Phase-3 po
 const payerWldz = await getOrCreateAssociatedTokenAccount(
   connection, payer, mint, payer.publicKey, false, 'confirmed', { commitment: 'confirmed' }, TOKEN_2022_PROGRAM_ID,
 );
-const payerWsol = await getOrCreateAssociatedTokenAccount(
-  connection, payer, NATIVE_MINT, payer.publicKey, false, 'confirmed', { commitment: 'confirmed' }, TOKEN_PROGRAM_ID,
-);
 
-// Use Founder TEST inventory only to create controlled test trading volume.
-// This is disposable localnet value and is not a mainnet founder transfer.
+// Use Founder TEST inventory only to create controlled local trading volume.
 const SWAP_WLDZ_TOKENS = 100_000n;
 const SWAP_WLDZ_RAW = SWAP_WLDZ_TOKENS * 1_000_000_000n;
 await transferChecked(
@@ -67,10 +62,6 @@ await transferChecked(
   { commitment: 'confirmed' },
   TOKEN_2022_PROGRAM_ID,
 );
-
-const preSwapWldz = (await getAccount(connection, payerWldz.address, 'confirmed', TOKEN_2022_PROGRAM_ID)).amount;
-const preSwapWsol = (await getAccount(connection, payerWsol.address, 'confirmed', TOKEN_PROGRAM_ID)).amount;
-if (preSwapWldz < SWAP_WLDZ_RAW) throw new Error('Controlled trader WLDZ funding failed');
 
 const swapTx = await cpAmm.swap({
   payer: payer.publicKey,
@@ -96,12 +87,11 @@ if (swapSimulation.value.err) {
 }
 const swapSignature = await sendAndConfirmTransaction(connection, swapTx, [payer], { commitment: 'confirmed' });
 
-const postSwapWldz = (await getAccount(connection, payerWldz.address, 'confirmed', TOKEN_2022_PROGRAM_ID)).amount;
-const postSwapWsol = (await getAccount(connection, payerWsol.address, 'confirmed', TOKEN_PROGRAM_ID)).amount;
-if (postSwapWldz >= preSwapWldz) throw new Error('Controlled WLDZ sell did not consume WLDZ');
-if (postSwapWsol <= preSwapWsol) throw new Error('Controlled WLDZ sell did not produce wSOL');
+const poolStateAfterSwap = await cpAmm.fetchPoolState(pool);
+if (!poolStateAfterSwap.tokenAAmount.gt(poolStateBefore.tokenAAmount)) throw new Error('Controlled WLDZ sell did not increase pool Token A');
+if (!poolStateAfterSwap.tokenBAmount.lt(poolStateBefore.tokenBAmount)) throw new Error('Controlled WLDZ sell did not decrease pool Token B');
 
-// Resolve the initial LP position. Permanent liquidity locking must not prevent fee ownership/claim proof.
+// Resolve the initial LP position. The original position was permanently locked at pool creation.
 const userPositions = await cpAmm.getUserPositionByPool(pool, payer.publicKey);
 let position = storedPosition;
 let positionNftAccount = storedPositionNftAccount;
@@ -113,22 +103,28 @@ if (userPositions.length > 0) {
   positionResolution = exact.position.equals(storedPosition) ? 'user-exact' : 'user-first';
 }
 
-const poolStateClaim = await cpAmm.fetchPoolState(pool);
-const wldzBeforeClaim = (await getAccount(connection, payerWldz.address, 'confirmed', TOKEN_2022_PROGRAM_ID)).amount;
-const wsolBeforeClaim = (await getAccount(connection, payerWsol.address, 'confirmed', TOKEN_PROGRAM_ID)).amount;
+const positionStateBeforeClaim = await cpAmm.fetchPositionState(position);
+const claimableBefore = getUnClaimLpFee(poolStateAfterSwap, positionStateBeforeClaim);
+if (!claimableBefore.feeTokenA.isZero()) {
+  throw new Error(`OnlyB invariant failed before claim: WLDZ fee=${claimableBefore.feeTokenA.toString()}`);
+}
+if (claimableBefore.feeTokenB.lte(new BN(0))) {
+  throw new Error(`No real Token B trading fee generated: ${claimableBefore.feeTokenB.toString()}`);
+}
 
+const nativeSolBeforeClaim = await connection.getBalance(payer.publicKey, 'confirmed');
 const claimTx = await cpAmm.claimPositionFee({
   receiver: payer.publicKey,
   owner: payer.publicKey,
   pool,
   position,
   positionNftAccount,
-  tokenAVault: poolStateClaim.tokenAVault,
-  tokenBVault: poolStateClaim.tokenBVault,
-  tokenAMint: poolStateClaim.tokenAMint,
-  tokenBMint: poolStateClaim.tokenBMint,
-  tokenAProgram: getTokenProgram(poolStateClaim.tokenAFlag),
-  tokenBProgram: getTokenProgram(poolStateClaim.tokenBFlag),
+  tokenAVault: poolStateAfterSwap.tokenAVault,
+  tokenBVault: poolStateAfterSwap.tokenBVault,
+  tokenAMint: poolStateAfterSwap.tokenAMint,
+  tokenBMint: poolStateAfterSwap.tokenBMint,
+  tokenAProgram: getTokenProgram(poolStateAfterSwap.tokenAFlag),
+  tokenBProgram: getTokenProgram(poolStateAfterSwap.tokenBFlag),
 });
 claimTx.feePayer = payer.publicKey;
 claimTx.recentBlockhash = (await connection.getLatestBlockhash('confirmed')).blockhash;
@@ -137,14 +133,14 @@ if (claimSimulation.value.err) {
   throw new Error(`Fee claim simulation failed: ${JSON.stringify(claimSimulation.value.err)} logs=${JSON.stringify(claimSimulation.value.logs)}`);
 }
 const claimSignature = await sendAndConfirmTransaction(connection, claimTx, [payer], { commitment: 'confirmed' });
+const nativeSolAfterClaim = await connection.getBalance(payer.publicKey, 'confirmed');
 
-const wldzAfterClaim = (await getAccount(connection, payerWldz.address, 'confirmed', TOKEN_2022_PROGRAM_ID)).amount;
-const wsolAfterClaim = (await getAccount(connection, payerWsol.address, 'confirmed', TOKEN_PROGRAM_ID)).amount;
-const claimedWldzRaw = wldzAfterClaim - wldzBeforeClaim;
-const claimedWsolLamports = wsolAfterClaim - wsolBeforeClaim;
-
-if (claimedWsolLamports <= 0n) throw new Error(`No claimable wSOL fee observed after controlled swap: ${claimedWsolLamports}`);
-if (claimedWldzRaw !== 0n) throw new Error(`OnlyB invariant failed: claim returned ${claimedWldzRaw} raw WLDZ`);
+const poolStateAfterClaim = await cpAmm.fetchPoolState(pool);
+const positionStateAfterClaim = await cpAmm.fetchPositionState(position);
+const claimableAfter = getUnClaimLpFee(poolStateAfterClaim, positionStateAfterClaim);
+if (!claimableAfter.feeTokenA.isZero() || !claimableAfter.feeTokenB.isZero()) {
+  throw new Error(`Fee claim did not clear position fees: A=${claimableAfter.feeTokenA.toString()} B=${claimableAfter.feeTokenB.toString()}`);
+}
 
 const report = {
   phase: 'WLDZ_LOCALNET_SWAP_FEE_CLAIM',
@@ -154,19 +150,28 @@ const report = {
   inputWldzTokens: SWAP_WLDZ_TOKENS.toString(),
   swapSignature,
   swapSimulationPassed: true,
-  swapWsolOutputLamports: (postSwapWsol - preSwapWsol).toString(),
+  poolTokenARawBeforeSwap: poolStateBefore.tokenAAmount.toString(),
+  poolTokenARawAfterSwap: poolStateAfterSwap.tokenAAmount.toString(),
+  poolTokenBRawBeforeSwap: poolStateBefore.tokenBAmount.toString(),
+  poolTokenBRawAfterSwap: poolStateAfterSwap.tokenBAmount.toString(),
+  generatedFeeTokenA_WLDZRaw: claimableBefore.feeTokenA.toString(),
+  generatedFeeTokenB_wSOLLamports: claimableBefore.feeTokenB.toString(),
   claimSignature,
   claimSimulationPassed: true,
-  claimedTokenA_WLDZRaw: claimedWldzRaw.toString(),
-  claimedTokenB_wSOLLamports: claimedWsolLamports.toString(),
-  onlyBClaimProven: claimedWldzRaw === 0n && claimedWsolLamports > 0n,
-  note: 'Isolated local-validator proof using TEST WLDZ and TEST SOL only.',
+  postClaimFeeTokenA: claimableAfter.feeTokenA.toString(),
+  postClaimFeeTokenB: claimableAfter.feeTokenB.toString(),
+  receiverNativeSolDeltaLamports: String(nativeSolAfterClaim - nativeSolBeforeClaim),
+  onlyBClaimProven: claimableBefore.feeTokenA.isZero() && claimableBefore.feeTokenB.gt(new BN(0)) && claimableAfter.feeTokenA.isZero() && claimableAfter.feeTokenB.isZero(),
+  note: 'Meteora uses temporary wrapped-SOL accounts and unwraps native-mint output. OnlyB is therefore proven from pool/position fee state, not persistence of a temporary wSOL ATA.',
 };
 fs.mkdirSync('artifacts', { recursive: true });
 fs.writeFileSync('artifacts/wldz-localnet-swap-fee-claim-public.json', JSON.stringify(report, null, 2) + '\n');
 
 const runtime = JSON.parse(fs.readFileSync(runtimePath, 'utf8'));
-runtime.phase3 = report;
+runtime.phase3 = {
+  ...report,
+  claimedWsolLamports: claimableBefore.feeTokenB.toString(),
+};
 fs.writeFileSync(runtimePath, JSON.stringify(runtime));
 
-console.log(`WLDZ_SWAP_FEE_CLAIM=PASS pool=${pool.toBase58()} swap_wldz=${SWAP_WLDZ_TOKENS} claimed_wsol_lamports=${claimedWsolLamports} claimed_wldz_raw=0 onlyB_claim=1`);
+console.log(`WLDZ_SWAP_FEE_CLAIM=PASS pool=${pool.toBase58()} swap_wldz=${SWAP_WLDZ_TOKENS} feeA_wldz_raw=0 feeB_wsol_lamports=${claimableBefore.feeTokenB.toString()} claim_cleared=1 onlyB_claim=1`);
