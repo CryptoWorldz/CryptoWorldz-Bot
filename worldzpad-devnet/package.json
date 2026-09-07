@@ -1,6 +1,6 @@
 {
   "name": "worldzpad-wldz-devnet",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "auto-check": "node scripts/04_auto_accounting_check.mjs",
     "meteora-phase2": "node scripts/05_create_meteora_pool_local.mjs",
     "phase3": "node scripts/06_swap_claim_local.mjs",
-    "final-test": "node scripts/07_final_pre_mainnet_local.mjs"
+    "final-test": "node scripts/00_patch_final_position_liquidity.mjs && node scripts/07_final_pre_mainnet_local.mjs"
   },
   "dependencies": {
     "@meteora-ag/cp-amm-sdk": "1.4.7",
