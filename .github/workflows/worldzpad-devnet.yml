@@ -40,7 +40,7 @@ jobs:
 
   localnet-token-proof:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: worldzpad-devnet
@@ -119,6 +119,12 @@ jobs:
           WORLDZPAD_NETWORK_LABEL: localnet
         run: npm run phase3
 
+      - name: Final pre-mainnet AUTO execution and fail-closed proof
+        env:
+          SOLANA_RPC_URL: http://127.0.0.1:8899
+          WORLDZPAD_NETWORK_LABEL: localnet
+        run: npm run final-test
+
       - name: Publish public local execution proofs
         uses: actions/upload-artifact@v4
         with:
@@ -127,6 +133,7 @@ jobs:
             worldzpad-devnet/artifacts/wldz-localnet-phase1-public.json
             worldzpad-devnet/artifacts/wldz-localnet-meteora-phase2-public.json
             worldzpad-devnet/artifacts/wldz-localnet-swap-fee-claim-public.json
+            worldzpad-devnet/artifacts/wldz-final-pre-mainnet-local-test-public.json
           if-no-files-found: error
           retention-days: 30
 
