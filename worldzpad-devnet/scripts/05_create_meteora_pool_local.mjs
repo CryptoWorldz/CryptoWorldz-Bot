@@ -47,7 +47,7 @@ if (mintInfo.decimals !== 9) throw new Error('WLDZ test mint decimals drifted');
 
 const INITIAL_WLDZ_TOKENS = 1_000_000n;
 const INITIAL_WLDZ_RAW = INITIAL_WLDZ_TOKENS * 1_000_000_000n;
-const INITIAL_WSOL_LAMPORTS = 200_000_000n; // 0.2 SOL test quote amount; NOT the mainnet A$200 target.
+const INITIAL_WSOL_LAMPORTS = 200_000_000n;
 const BASE_FEE_BPS = 200;
 
 const payerWldz = await getOrCreateAssociatedTokenAccount(
@@ -144,13 +144,14 @@ await connection.confirmTransaction(signature, 'confirmed');
 const poolState = await cpAmm.fetchPoolState(pool);
 if (Number(poolState.collectFeeMode) !== CollectFeeMode.OnlyB) throw new Error(`collect fee mode != OnlyB: ${poolState.collectFeeMode}`);
 
-// cp-amm-sdk releases have exposed baseFee as either {data}, a raw byte array,
-// or an already-decoded object. Accept each representation but require the same
-// on-chain 200-bps result. This is verification compatibility, not a weaker gate.
 const baseFeeState = poolState.poolFees?.baseFee;
 let decodedBps;
 let baseFeeShape;
-if (baseFeeState?.data !== undefined) {
+if (baseFeeState?.baseFeeInfo?.data !== undefined) {
+  const decoded = decodePodAlignedFeeTimeScheduler(Buffer.from(baseFeeState.baseFeeInfo.data));
+  decodedBps = feeNumeratorToBps(decoded.cliffFeeNumerator);
+  baseFeeShape = 'baseFeeInfo.data';
+} else if (baseFeeState?.data !== undefined) {
   const decoded = decodePodAlignedFeeTimeScheduler(Buffer.from(baseFeeState.data));
   decodedBps = feeNumeratorToBps(decoded.cliffFeeNumerator);
   baseFeeShape = 'data';
@@ -165,7 +166,7 @@ if (baseFeeState?.data !== undefined) {
   decodedBps = feeNumeratorToBps(baseFeeState.cliff_fee_numerator);
   baseFeeShape = 'decoded_snake';
 } else {
-  throw new Error(`Unsupported DAMM v2 baseFee state shape: ${JSON.stringify({poolFeeKeys:Object.keys(poolState.poolFees || {}),baseFeeKeys:baseFeeState && typeof baseFeeState === 'object' ? Object.keys(baseFeeState) : [],baseFeeType:typeof baseFeeState})}`);
+  throw new Error(`Unsupported DAMM v2 baseFee state shape: ${JSON.stringify({poolFeeKeys:Object.keys(poolState.poolFees || {}),baseFeeKeys:baseFeeState && typeof baseFeeState === 'object' ? Object.keys(baseFeeState) : [],baseFeeInfoKeys:baseFeeState?.baseFeeInfo && typeof baseFeeState.baseFeeInfo === 'object' ? Object.keys(baseFeeState.baseFeeInfo) : [],baseFeeType:typeof baseFeeState})}`);
 }
 
 if (decodedBps !== BASE_FEE_BPS) throw new Error(`base fee != 200 bps: ${decodedBps}`);
