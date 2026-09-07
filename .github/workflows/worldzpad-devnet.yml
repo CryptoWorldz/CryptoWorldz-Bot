@@ -1,4 +1,4 @@
-name: WorldzPad WLDZ Devnet Phase 1
+name: WorldzPad WLDZ Execution Proof
 
 on:
   workflow_dispatch:
@@ -12,41 +12,123 @@ permissions:
   contents: read
 
 concurrency:
-  group: worldzpad-wldz-devnet-phase1
+  group: worldzpad-wldz-execution-proof
   cancel-in-progress: false
 
 jobs:
-  devnet-proof:
+  protocol-preflight:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: worldzpad-devnet
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Node 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-
       - name: Install pinned Solana and Meteora SDKs
         run: npm install --no-audit --no-fund
-
       - name: Static WorldzPad contract check
         run: npm run static-check
-
-      - name: Meteora DAMM v2 devnet preflight
+      - name: AUTO deterministic accounting proof
+        run: npm run auto-check
+      - name: Meteora DAMM v2 live devnet preflight
         run: npm run meteora-preflight
 
-      - name: Mint disposable 100M DEVNET WLDZ and allocate four master vaults
+  localnet-token-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: worldzpad-devnet
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Node dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install current Solana/Agave CLI
+        shell: bash
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+      - name: Start isolated Solana local validator
+        shell: bash
+        run: |
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          solana-test-validator --reset --quiet --ledger /tmp/wldz-ledger > /tmp/wldz-validator.log 2>&1 &
+          for i in $(seq 1 45); do
+            if curl -s -X POST -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' http://127.0.0.1:8899 | grep -q 'ok'; then
+              echo "LOCAL_VALIDATOR=READY"
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/wldz-validator.log
+          exit 1
+      - name: Mint 100M TEST WLDZ and allocate four real local-validator vaults
+        env:
+          SOLANA_RPC_URL: http://127.0.0.1:8899
+          WORLDZPAD_NETWORK_LABEL: localnet
         run: npm run phase1
-
-      - name: Independently verify supply, vault balances and revoked authority
+      - name: Independently verify local-validator supply, vaults and revoked authority
+        env:
+          SOLANA_RPC_URL: http://127.0.0.1:8899
+          WORLDZPAD_NETWORK_LABEL: localnet
         run: npm run verify
+      - name: Publish public local-validator proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: wldz-localnet-phase1-public-proof
+          path: worldzpad-devnet/artifacts/wldz-localnet-phase1-public.json
+          if-no-files-found: error
+          retention-days: 30
 
+  real-devnet-token-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DEVNET_PAYER_SECRET_JSON: ${{ secrets.DEVNET_PAYER_SECRET_JSON }}
+      SOLANA_RPC_URL: ${{ secrets.DEVNET_SOLANA_RPC_URL }}
+      WORLDZPAD_NETWORK_LABEL: devnet
+    defaults:
+      run:
+        working-directory: worldzpad-devnet
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Detect disposable pre-funded DEVNET payer
+        id: devnet_gate
+        shell: bash
+        run: |
+          if [ -n "$DEVNET_PAYER_SECRET_JSON" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "REAL_DEVNET_PAYER=AVAILABLE"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "REAL_DEVNET_PAYER=NOT_CONFIGURED — live devnet mint skipped; local-validator proof still runs"
+          fi
+      - name: Install Node dependencies
+        if: steps.devnet_gate.outputs.ready == 'true'
+        run: npm install --no-audit --no-fund
+      - name: Mint disposable 100M DEVNET WLDZ and allocate four master vaults
+        if: steps.devnet_gate.outputs.ready == 'true'
+        run: npm run phase1
+      - name: Independently verify DEVNET supply, vault balances and revoked authority
+        if: steps.devnet_gate.outputs.ready == 'true'
+        run: npm run verify
       - name: Publish public devnet proof only
+        if: steps.devnet_gate.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: wldz-devnet-phase1-public-proof
