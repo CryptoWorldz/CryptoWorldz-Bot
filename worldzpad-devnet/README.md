@@ -1,36 +1,65 @@
-# WorldzPad WLDZ Devnet Execution
+# WorldzPad WLDZ Execution Harness
 
-This harness is the first real on-chain execution stage for #001 WORLDZ / WLDZ.
+This harness turns the #001 WORLDZ / WLDZ design into progressively stronger execution proofs without touching the final mainnet signer or real launch funds.
 
-## Phase 1 — real devnet proof
+## Phase 1 — Token-2022 supply / vault / authority proof
 
-The GitHub workflow uses a disposable, ephemeral DEVNET wallet only. It:
+The workflow now always runs an isolated Solana local validator and:
 
 1. checks the locked 100M / 25-25-25-25 / AUTO rules;
-2. confirms the Meteora DAMM v2 program exists and is executable on Solana devnet;
-3. creates a Token-2022 DEVNET mint;
-4. mints exactly 100,000,000 test WLDZ;
-5. allocates 25M each to Founder, Liquidity, People+Charity and Ecosystem master vault token accounts;
-6. revokes mint authority;
-7. verifies freeze authority is unset;
-8. independently reads the on-chain supply and all four vault balances;
-9. publishes public addresses/signatures as a workflow artifact.
+2. creates a Token-2022 test mint;
+3. mints exactly 100,000,000 TEST WLDZ;
+4. allocates 25M each to Founder, Liquidity, People+Charity and Ecosystem master vault token accounts;
+5. revokes mint authority;
+6. verifies freeze authority is unset;
+7. independently reads the on-chain supply and all four vault balances;
+8. publishes only public proof data.
 
-Ephemeral devnet private keys are written only to `.runtime/` for same-job follow-up work. `.runtime/` is gitignored and is never uploaded as an artifact.
+The same workflow separately confirms that the real Meteora DAMM v2 program is executable on Solana devnet and that the pinned SDK exposes `CollectFeeMode.OnlyB`.
 
-## Not mainnet
+A real public DEVNET mint can also run when a disposable pre-funded test payer is supplied through GitHub Actions secret `DEVNET_PAYER_SECRET_JSON`. The mainnet signer must never be used for that purpose.
 
-This test WLDZ is disposable and has no monetary value. It does not use JayJayTeamDev's mainnet signer or funds.
+## Phase 2 — real DAMM v2 program execution locally
 
-The canonical mainnet target remains a vanity mint beginning `WLDZ...`, explicit operator signing, the four-quarter vault layout, and the security gates defined in `WORLDZPAD-WLDZ-TOTAL-DESIGN.md`.
+The local validator is started with official program binaries and fixture accounts pinned from `MeteoraAg/meteora-invent` commit `648871eb1daaf0acd72351e16394e68562ebaac0`.
 
-## Next phase
+After Phase 1 succeeds in the same isolated run, Phase 2:
 
-After Phase 1 passes:
+- transfers exactly 1,000,000 TEST WLDZ from the Liquidity master vault;
+- wraps 0.2 TEST SOL as the quote asset (test value only; not the mainnet A$200 target);
+- creates a real WLDZ/wSOL Meteora DAMM v2 customizable pool;
+- uses `CollectFeeMode.OnlyB` with wSOL as token B;
+- uses a fixed 200 bps / 2.00% base trading fee;
+- uses no bonding curve or graduation phase;
+- requests locked liquidity at pool creation;
+- simulates before sending;
+- fetches the resulting on-chain pool state and fails unless token A=WLDZ, token B=wSOL, `OnlyB=1`, and the decoded base fee is exactly 200 bps.
 
-- fund a small devnet WLDZ/wSOL test position;
-- construct and simulate a Meteora DAMM v2 customizable pool with `CollectFeeMode.OnlyB` and 200 bps base fee;
-- create the pool if simulation passes;
-- execute controlled swaps;
-- claim quote-side fees and prove they are wSOL-only;
-- reconcile AUTO routing and test reward, LP-growth, buyback/burn and charity accounting.
+## AUTO accounting proof
+
+A deterministic test reconciles one SOL of net Worldz-side claimable fee revenue through:
+
+- 10% Board;
+- 40% HODLer rewards;
+- 20% LP growth;
+- 15% buyback/burn;
+- 10% Charity;
+- 5% Raaiiidd/Growth.
+
+The 40% HODLer route is further proven as 70% proportional + 30% square-root Equalizer: larger holders still receive more in absolute terms while smaller eligible holders receive a higher reward per token.
+
+## Security boundary
+
+Ephemeral test private keys exist only inside `.runtime/` during a workflow job. `.runtime/` is gitignored and is never uploaded as an artifact.
+
+This harness does **not**:
+
+- create the final `WLDZ...` vanity mainnet mint;
+- use JayJayTeamDev's mainnet private signer;
+- spend the intended A$200 mainnet liquidity;
+- connect the separate Command Centre private runtime;
+- claim that a local-validator address is a public devnet/mainnet address.
+
+## Next after Phase 2
+
+Once pool creation passes, Phase 2B will execute controlled WLDZ↔wSOL swaps, inspect/claim the resulting position fees, and prove quote-side `OnlyB` fee collection before AUTO routes real test proceeds. Then come LP-addition, buyback/burn, reward-claim and Charity-route protocol tests before any mainnet launch decision.
