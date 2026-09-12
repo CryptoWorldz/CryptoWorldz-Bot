@@ -40,4 +40,5 @@ hero_page=f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta n
 for forbidden in ('object-fit:cover','height:100%!important'):
     if forbidden in CSS.replace('min-height:100vh',''): raise SystemExit(f'IMAGE_CONTRACT_FAILED forbidden={forbidden}')
 print(f'IMAGE_FIT=PASS sites={len(DOMAINS)} pages={len(html_files)} dedicated_heroes={len(heroes)} source_fixes={source_fix_count} crop=0 stretch=0 mobile_stack=1')
-runpy.run_path(str(ROOT/'AUDIT_100_V3.py'),run_name='__main__')
+runpy.run_path(str(ROOT/'tools/apply_100_fixes.py'),run_name='__main__')
+runpy.run_path(str(ROOT/'VERIFY_FIRST_100_FIXED.py'),run_name='__main__')
