@@ -71,12 +71,11 @@ cards=''.join(f'<a class="hero-card" href="/heroes/{slug}/"><img src="/assets/he
 hero_page=f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Real Heroes | OneWorldz</title><link rel="stylesheet" href="/style.css">{LINK}<style>:root{{--accent:#8b5cf6;--accent2:#38bdf8}}</style></head><body data-oneworldz-build="2026-09-12-image-fit">{HOME}<nav class="nav"><a class="brand" href="/">OneWorldz</a><a href="/heroes/">Real Heroes</a><a href="/community-support/">Community Support</a><a href="https://donateworldz.com">DonateWorldz</a></nav><main class="shell"><section class="section"><p class="eyebrow">People helping people</p><h1 class="big-title">Real Heroes</h1><p>Real people. Real help. Real impact.</p><div class="hero-list">{cards}</div></section></main><footer class="footer"><strong>Created with the Vision</strong><br>Make the Difference • OneWorldz 🌏 One Vision</footer></body></html>'''
 (ROOT/'oneworldz.com/heroes/index.html').write_text(hero_page,encoding='utf-8')
 
-# Final hard check: the safety rail itself must never crop or distort content images.
 for forbidden in ('object-fit:cover','height:100%!important'):
     if forbidden in CSS.replace('min-height:100vh',''):
         raise SystemExit(f'IMAGE_CONTRACT_FAILED forbidden={forbidden}')
 
 print(f'IMAGE_FIT=PASS sites={len(DOMAINS)} pages={len(html_files)} dedicated_heroes={len(heroes)} source_fixes={source_fix_count} crop=0 stretch=0 mobile_stack=1')
 
-# Requested hard stop: audit the generated 145-page build and stop once 100 distinct problems are evidenced.
+# AUDIT PASS V2 — stop the workflow once 100 distinct evidenced defects are found.
 runpy.run_path(str(ROOT/'AUDIT_100.py'),run_name='__main__')
