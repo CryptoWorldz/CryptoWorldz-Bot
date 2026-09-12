@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import re
+import runpy
 
 ROOT=Path(__file__).resolve().parents[1]
 DOMAINS=[d.strip() for d in (ROOT/'DOMAINS.txt').read_text(encoding='utf-8').splitlines() if d.strip()]
@@ -76,3 +77,6 @@ for forbidden in ('object-fit:cover','height:100%!important'):
         raise SystemExit(f'IMAGE_CONTRACT_FAILED forbidden={forbidden}')
 
 print(f'IMAGE_FIT=PASS sites={len(DOMAINS)} pages={len(html_files)} dedicated_heroes={len(heroes)} source_fixes={source_fix_count} crop=0 stretch=0 mobile_stack=1')
+
+# Requested hard stop: audit the generated 145-page build and stop once 100 distinct problems are evidenced.
+runpy.run_path(str(ROOT/'AUDIT_100.py'),run_name='__main__')
