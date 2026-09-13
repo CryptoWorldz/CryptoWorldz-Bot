@@ -62,6 +62,9 @@ jobs:
       - name: Apply permanent mobile safety rail
         run: python3 tools/apply_mobile_safety.py
 
+      - name: Apply JayJayTeamDev vision and 57-item repair layer
+        run: python3 tools/apply_jayjay_vision_57.py
+
       - name: Validate 18-site contract and retired-content removal
         shell: bash
         run: |
