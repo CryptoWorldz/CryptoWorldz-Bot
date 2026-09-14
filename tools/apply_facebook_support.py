@@ -4,10 +4,12 @@ from html import escape
 import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = '2026-09-05-dedicated-v2'
+BUILD = '2026-09-14-support-visual-v3'
 
 # Preserved for future reassignment only. This destination is deliberately not rendered publicly.
 RESERVED_FUTURE_SUPPORT_STRIPE = 'https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01'
+DAVIS_HERO_JPG = '/assets/support/davis-family/davis-family-hero.jpg'
+DAVIS_HERO_WEBP = '/assets/support/davis-family/davis-family-hero.webp'
 
 STREAMS = {
     'davis-family': {
@@ -65,15 +67,32 @@ COMMUNITY = [
 def write(rel,text):
     p=ROOT/rel; p.parent.mkdir(parents=True,exist_ok=True); p.write_text(text,encoding='utf-8')
 
-def shell(title, heading, intro, body, nav_extra=''):
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>{escape(title)}</title><link rel="stylesheet" href="/visual-fix.css"></head><body data-oneworldz-build="{BUILD}"><nav class="nav"><a class="brand" href="/">DonateWorldz</a><a href="https://oneworldz.com">OneWorldz</a>{nav_extra}</nav><main class="shell"><section class="section"><p class="ey">Direct support pathway</p><h1>{escape(heading)}</h1><p>{escape(intro)}</p></section>{body}</main><div class="foot">OneWorldz 🌐 One Vision • Helping the People Who Help People</div></body></html>'''
+def shell(title, heading, intro, body, nav_extra='', hero_jpg=None, hero_webp=None):
+    hero = ''
+    social = ''
+    if hero_jpg:
+        webp = f'<source srcset="{escape(hero_webp)}" type="image/webp">' if hero_webp else ''
+        hero = f'''<section class="hero"><div class="hero-grid"><picture>{webp}<img class="hero-art" src="{escape(hero_jpg)}" alt="Help the Davis Family — OneWorldz One Vision" width="1536" height="864" loading="eager" decoding="async" fetchpriority="high"></picture><div class="hero-copy"><p class="eyebrow">Direct support pathway</p><h1>{escape(heading)}</h1><p>{escape(intro)}</p></div></div></section>'''
+        social = f'''<meta property="og:image" content="https://donateworldz.com{escape(hero_jpg)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://donateworldz.com{escape(hero_jpg)}">'''
+    else:
+        hero = f'''<section class="section"><p class="eyebrow">Direct support pathway</p><h1 class="big-title">{escape(heading)}</h1><p>{escape(intro)}</p></section>'''
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>{escape(title)}</title><meta name="description" content="{escape(intro)}"><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/visual-fix.css"><style>:root{{--accent:#a855f7;--accent2:#38bdf8}}</style>{social}</head><body data-oneworldz-build="{BUILD}"><nav class="nav"><a class="brand" href="/">DonateWorldz</a><a href="https://oneworldz.com">OneWorldz</a>{nav_extra}</nav><main class="shell">{hero}{body}</main><footer class="footer"><strong>Created with the Vision</strong><br>When Someone say’s You can’t Change the World 🌐 just say “Why can’t I?”<br>Make the Difference • OneWorldz 🌏 One Vision</footer></body></html>'''
 
 def fb_card(name,url,note='Facebook destination'):
     return f'<article class="support-card"><h3>{escape(name)}</h3><p>{escape(note)}. Opens directly in Facebook.</p><div class="btns"><a class="btn secondary" href="{escape(url)}" target="_blank" rel="noopener noreferrer">Open Facebook</a></div></article>'
 
 for slug,cfg in STREAMS.items():
     body = f'''<section class="section"><h2>Support directly</h2><p>This page keeps its payment destination separate from the other DonateWorldz purposes.</p><div class="btns"><a class="btn" href="{cfg['stripe']}" target="_blank" rel="noopener noreferrer">Donate securely with Stripe</a><a class="btn secondary" href="{cfg['facebook']}" target="_blank" rel="noopener noreferrer">Open Facebook</a><a class="btn secondary" href="/">All Donation Pages</a></div><p><small>Payment is completed on Stripe. No card details, bank credentials or Stripe secrets are stored on this website.</small></p></section>'''
-    write(f'donateworldz.com/{slug}/index.html', shell(f'{cfg["title"]} | DonateWorldz',cfg['title'],cfg['intro'],body,f'<a href="/{slug}/">{escape(cfg["title"])}</a>'))
+    is_davis = slug == 'davis-family'
+    write(
+        f'donateworldz.com/{slug}/index.html',
+        shell(
+            f'{cfg["title"]} | DonateWorldz', cfg['title'], cfg['intro'], body,
+            f'<a href="/{slug}/">{escape(cfg["title"])}</a>',
+            DAVIS_HERO_JPG if is_davis else None,
+            DAVIS_HERO_WEBP if is_davis else None,
+        )
+    )
 
 community_cards=''.join(fb_card(name,url,f'Community destination {i:02d} of 35') for i,(name,url) in enumerate(COMMUNITY,1))
 community_body=f'''<section class="section"><h2>Donate to Community Impact</h2><p>A separate Community Impact Stripe destination plus 35 preserved Facebook community destinations.</p><div class="btns"><a class="btn" href="{COMMUNITY_STRIPE}" target="_blank" rel="noopener noreferrer">Donate securely with Stripe</a><a class="btn secondary" href="/">All Donation Pages</a></div></section><section class="section"><h2>35 community destinations</h2><div class="support-grid">{community_cards}</div></section>'''
@@ -104,7 +123,16 @@ for rel,stripe in required.items():
     text=(ROOT/rel).read_text(encoding='utf-8')
     assert stripe in text, (rel,'stripe')
     assert '<iframe' not in text.lower(), rel
+    assert 'href="/style.css"' in text and 'href="/visual-fix.css"' in text, (rel,'styles')
+    assert 'class="footer"' in text and 'class="eyebrow"' in text, (rel,'visual-shell')
+for asset in [
+    ROOT/'donateworldz.com/assets/support/davis-family/davis-family-hero.jpg',
+    ROOT/'donateworldz.com/assets/support/davis-family/davis-family-hero.webp',
+]:
+    assert asset.is_file() and asset.stat().st_size > 10000, (asset,'approved-davis-hero')
+davis=(ROOT/'donateworldz.com/davis-family/index.html').read_text(encoding='utf-8')
+assert DAVIS_HERO_JPG in davis and DAVIS_HERO_WEBP in davis and STREAMS['davis-family']['facebook'] in davis
 assert RESERVED_FUTURE_SUPPORT_STRIPE not in (ROOT/'donateworldz.com/index.html').read_text(encoding='utf-8')
 assert (ROOT/'donateworldz.com/community-impact/index.html').read_text(encoding='utf-8').count('https://www.facebook.com/share/')==35
 assert (ROOT/'oneworldz.com/community-support/index.html').read_text(encoding='utf-8').count('https://www.facebook.com/share/')==35
-print('FACEBOOK_SUPPORT=PASS direct_links=35 active_stripe_streams=3 reserved_future_stripe=1 retired_uganda=0 iframes=0')
+print('FACEBOOK_SUPPORT=PASS direct_links=35 active_stripe_streams=3 reserved_future_stripe=1 retired_uganda=0 iframes=0 styled_support=1 davis_visual=1')
