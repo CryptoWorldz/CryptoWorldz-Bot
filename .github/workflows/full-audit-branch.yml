@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: full-visual-audit-branch
+  cancel-in-progress: true
+
 jobs:
   audit:
     runs-on: ubuntu-latest
