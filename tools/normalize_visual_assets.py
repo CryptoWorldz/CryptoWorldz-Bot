@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 """Final visual normalization pass for all public OneWorldz sites.
 
-Runs after all page generators. It fixes two classes of production defects:
-1. HTML written late in the pipeline without the shared /style.css.
-2. Legacy image files whose extension does not match their real binary format.
+Runs after all page generators. It fixes production defects that can otherwise
+pass HTML-only checks: late pages missing the real shared stylesheet, legacy
+image filenames whose extension does not match their bytes, and dead local CSS
+asset references.
 """
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 DOMAINS = [d.strip() for d in (ROOT / 'DOMAINS.txt').read_text(encoding='utf-8').splitlines() if d.strip()]
 assert len(DOMAINS) == 18 and len(set(DOMAINS)) == 18
 IMAGE_EXTS = {'.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.ico'}
 TEXT_EXTS = {'.html', '.css', '.js', '.json', '.xml', '.txt'}
+CSS_URL_RE = re.compile(r"url\(\s*(['\"]?)([^)'\"]+)\1\s*\)", re.I)
 
 
 def actual_ext(data: bytes):
@@ -55,7 +58,7 @@ def normalize_site(host: str):
         replacements[old_rel] = new_rel
         renamed += 1
 
-    # Update every built text asset after all renames.
+    # Update every built text asset after all image renames.
     changed_refs = 0
     if replacements:
         for p in site.rglob('*'):
@@ -72,6 +75,26 @@ def normalize_site(host: str):
                 p.write_text(text, encoding='utf-8')
                 changed_refs += 1
 
+    # Remove dead local CSS resource requests. Shared CSS contains a few legacy
+    # selectors used only on particular sites; a missing optional background
+    # must not create a broken network request if that selector is ever used.
+    dead_css = 0
+    for css in site.rglob('*.css'):
+        text = css.read_text(encoding='utf-8')
+        def replace_dead(match):
+            nonlocal dead_css
+            ref = match.group(2).strip()
+            if not ref or ref.startswith(('data:', 'http://', 'https://', '#')):
+                return match.group(0)
+            target = (site / ref.lstrip('/')) if ref.startswith('/') else (css.parent / ref)
+            if target.resolve().is_file():
+                return match.group(0)
+            dead_css += 1
+            return 'none'
+        fixed = CSS_URL_RE.sub(replace_dead, text)
+        if fixed != text:
+            css.write_text(fixed, encoding='utf-8')
+
     # Every public page gets the real shared visual stylesheet, even if a late
     # support/retirement generator rewrote that page after the visual pass.
     styled = 0
@@ -84,15 +107,16 @@ def normalize_site(host: str):
             text = text.replace('</head>', link + '</head>', 1)
             p.write_text(text, encoding='utf-8')
             styled += 1
-    return renamed, changed_refs, styled
+    return renamed, changed_refs, styled, dead_css
 
 
-total_renamed = total_refs = total_styled = 0
+total_renamed = total_refs = total_styled = total_dead_css = 0
 for host in DOMAINS:
-    r, c, s = normalize_site(host)
+    r, c, s, d = normalize_site(host)
     total_renamed += r
     total_refs += c
     total_styled += s
+    total_dead_css += d
 
 # Final hard contract across every public HTML file.
 pages = 0
@@ -103,4 +127,4 @@ for host in DOMAINS:
         assert '/mobile-safe.css' in t, p
         pages += 1
 
-print(f'VISUAL_NORMALIZE=PASS sites=18 pages={pages} renamed_images={total_renamed} updated_text_files={total_refs} restored_core_style_pages={total_styled}')
+print(f'VISUAL_NORMALIZE=PASS sites=18 pages={pages} renamed_images={total_renamed} updated_text_files={total_refs} restored_core_style_pages={total_styled} dead_css_assets_removed={total_dead_css}')
