@@ -5,7 +5,6 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import concurrent.futures
 import functools
 import hashlib
-import re
 import shutil
 import struct
 import subprocess
@@ -62,16 +61,18 @@ try:
             local = f'http://127.0.0.1:{ports[p.netloc]}{p.path or "/"}'
             key = hashlib.sha1(original.encode()).hexdigest()[:12]
             for label,size in (('mobile','390,844'),('desktop','1440,900')):
-                tasks.append((original,local,label,size,shots/f'{key}-{label}.png'))
+                tasks.append((original,local,label,size,key,shots/f'{key}-{label}.png'))
 
         def render(task):
-            original, local, label, size, out = task
+            original, local, label, size, key, out = task
+            profile = shots / f'profile-{key}-{label}'
             cmd = [browser,'--headless=new','--no-sandbox','--disable-gpu','--disable-dev-shm-usage',
                    '--hide-scrollbars','--disable-background-networking','--disable-extensions',
+                   '--no-first-run','--no-default-browser-check',
                    '--run-all-compositor-stages-before-draw','--virtual-time-budget=350',
-                   f'--window-size={size}',f'--screenshot={out}',local]
+                   f'--user-data-dir={profile}',f'--window-size={size}',f'--screenshot={out}',local]
             try:
-                cp = subprocess.run(cmd,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,timeout=25,check=False)
+                cp = subprocess.run(cmd,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,timeout=20,check=False)
             except subprocess.TimeoutExpired:
                 return f'RENDER TIMEOUT {original} {label}'
             if cp.returncode != 0 or not out.is_file():
@@ -79,6 +80,7 @@ try:
             w,h = png_dimensions(out)
             if out.stat().st_size < 5000 or w < 300 or h < 500:
                 return f'RENDER INVALID {original} {label} bytes={out.stat().st_size} size={w}x{h}'
+            shutil.rmtree(profile, ignore_errors=True)
             return None
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:
@@ -96,4 +98,4 @@ finally:
 if errors:
     raise SystemExit(f'RENDER_AUDIT_FAILED errors={len(errors)} completed={completed}')
 assert completed == 290, completed
-print('RENDER_AUDIT=PASS pages=145 mobile=145 desktop=145 screenshots=290 parallel_workers=6')
+print('RENDER_AUDIT=PASS pages=145 mobile=145 desktop=145 screenshots=290 parallel_workers=6 isolated_profiles=1')
