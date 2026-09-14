@@ -1,0 +1,32 @@
+name: Full Visual Audit Branch
+
+on:
+  push:
+    branches:
+      - fix/full-visual-audit-2026-09-14
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ecosystem baseline
+        run: python3 tools/build_ecosystem.py
+      - name: Apply approved visual architecture
+        run: python3 tools/apply_visual_fixes.py
+      - name: Apply direct Facebook support routes
+        run: python3 tools/apply_facebook_support.py
+      - name: Permanently remove retired Uganda support content
+        run: python3 tools/remove_retired_uganda_support.py
+      - name: Apply permanent mobile safety rail
+        run: python3 tools/apply_mobile_safety.py
+      - name: Apply JayJayTeamDev vision and 57-item repair layer
+        run: python3 tools/apply_jayjay_vision_57.py
+      - name: Audit every page, stylesheet and image
+        run: python3 tools/full_site_audit.py --static
+      - name: Render all 145 pages at mobile and desktop sizes
+        run: python3 tools/full_site_audit.py --render
