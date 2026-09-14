@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / 'donateworldz.com/davis-family/index.html'
-STYLE = ROOT / 'donateworldz.com/style.css'
 
 MAIN = '/assets/support/davis-family/one-kind-act.jpg'
 PROFILE = '/assets/support/davis-family/donateworldz-profile.jpg'
 FACEBOOK = 'https://www.facebook.com/share/165Ken5f2Bt/'
 STRIPE = 'https://donate.stripe.com/dRm8wPdKa0Kt2NE7lz0kE03'
-BUILD = '2026-09-14-davis-family-final-v1'
+BUILD = '2026-09-14-davis-family-final-v2'
+
+source_dir = ROOT / 'assets-source/davis-family'
+public_dir = ROOT / 'donateworldz.com/assets/support/davis-family'
+public_dir.mkdir(parents=True, exist_ok=True)
+for name in ['one-kind-act.jpg','donateworldz-profile.jpg']:
+    src = source_dir / name
+    dst = public_dir / name
+    assert src.is_file() and src.stat().st_size > 50000, src
+    shutil.copy2(src, dst)
 
 copy = '''
 <p>Life can change in a moment, and sometimes we all need a helping hand to get through difficult times. This campaign was created to bring together kind-hearted people who believe in hope, compassion, and making a difference.</p>
@@ -91,9 +100,6 @@ for phrase in [
     'Thank you for your generosity, compassion, support',
 ]:
     assert phrase in text, phrase
-for asset in [
-    ROOT / 'donateworldz.com/assets/support/davis-family/one-kind-act.jpg',
-    ROOT / 'donateworldz.com/assets/support/davis-family/donateworldz-profile.jpg',
-]:
+for asset in [public_dir / 'one-kind-act.jpg', public_dir / 'donateworldz-profile.jpg']:
     assert asset.is_file() and asset.stat().st_size > 50000, asset
 print('DAVIS_PAGE=PASS image=1 profile_home=1 copy=1 stripe=1 facebook=1 mobile=1')
