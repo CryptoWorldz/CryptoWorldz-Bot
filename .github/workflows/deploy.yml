@@ -36,7 +36,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     environment:
       name: cryptoworldz-production
     env:
@@ -85,6 +85,7 @@ jobs:
               assert f.is_file(), (u,f)
               text=f.read_text(encoding='utf-8').lower()
               assert '<meta name="viewport"' in text, f
+              assert '/style.css' in text, f
               assert '/mobile-safe.css' in text, f
               assert '<iframe' not in text, f
               assert 'facebook.com/plugins/' not in text, f
@@ -130,54 +131,14 @@ jobs:
               text=Path(path).read_text(encoding='utf-8')
               assert url in text and '<iframe' not in text.lower(), name
 
-          print('CONTRACT=PASS sites=18 pages=145 retired_uganda=0 reserved_future_stripe=1 community_links=35')
+          print('CONTRACT=PASS sites=18 pages=145 retired_uganda=0 reserved_future_stripe=1 community_links=35 core_style=1')
           PY
 
-      - name: Mobile browser render gate
-        shell: bash
-        run: |
-          set -euo pipefail
-          BROWSER="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
-          test -n "$BROWSER" || { echo 'No Chrome/Chromium available for visual gate'; exit 1; }
-          python3 -m http.server 8123 --directory oneworldz.com >/tmp/ow-http.log 2>&1 & OW_PID=$!
-          python3 -m http.server 8124 --directory donateworldz.com >/tmp/dw-http.log 2>&1 & DW_PID=$!
-          trap 'kill $OW_PID $DW_PID 2>/dev/null || true' EXIT
-          sleep 2
-          "$BROWSER" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot=/tmp/ow-home.png http://127.0.0.1:8123/
-          "$BROWSER" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot=/tmp/ow-heroes.png http://127.0.0.1:8123/heroes/
-          "$BROWSER" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=390,844 --screenshot=/tmp/dw-home.png http://127.0.0.1:8124/
-          python3 - <<'PY'
-          from pathlib import Path
-          import struct,zlib
-          def white_ratio(path):
-              b=Path(path).read_bytes(); assert b.startswith(b'\x89PNG\r\n\x1a\n'), path
-              pos=8; data=b''; w=h=ctype=None
-              while pos < len(b):
-                  n=struct.unpack('>I',b[pos:pos+4])[0]; typ=b[pos+4:pos+8]; chunk=b[pos+8:pos+8+n]; pos += 12+n
-                  if typ==b'IHDR': w,h,depth,ctype,_,_,_=struct.unpack('>IIBBBBB',chunk); assert depth==8 and ctype in (2,6)
-                  elif typ==b'IDAT': data += chunk
-                  elif typ==b'IEND': break
-              raw=zlib.decompress(data); channels=4 if ctype==6 else 3; stride=w*channels; prev=bytearray(stride); i=0; whites=0
-              def paeth(a,b,c):
-                  p=a+b-c; pa=abs(p-a); pb=abs(p-b); pc=abs(p-c); return a if pa<=pb and pa<=pc else b if pb<=pc else c
-              for _ in range(h):
-                  f=raw[i]; i+=1; row=bytearray(raw[i:i+stride]); i+=stride
-                  for x in range(stride):
-                      a=row[x-channels] if x>=channels else 0; bb=prev[x]; c=prev[x-channels] if x>=channels else 0
-                      if f==1: row[x]=(row[x]+a)&255
-                      elif f==2: row[x]=(row[x]+bb)&255
-                      elif f==3: row[x]=(row[x]+((a+bb)//2))&255
-                      elif f==4: row[x]=(row[x]+paeth(a,bb,c))&255
-                      elif f!=0: raise AssertionError((path,'png-filter',f))
-                  for x in range(0,stride,channels):
-                      if row[x]>245 and row[x+1]>245 and row[x+2]>245: whites+=1
-                  prev=row
-              return whites/(w*h)
-          for shot in ['/tmp/ow-home.png','/tmp/ow-heroes.png','/tmp/dw-home.png']:
-              p=Path(shot); assert p.stat().st_size>8000,(shot,p.stat().st_size)
-              ratio=white_ratio(shot); print('SCREENSHOT',shot,'white_ratio',round(ratio,4)); assert ratio < .18
-          print('VISUAL_BROWSER_GATE=PASS viewport=390x844 critical_pages=3')
-          PY
+      - name: Audit every page, stylesheet and image before deployment
+        run: python3 tools/full_site_audit.py --static
+
+      - name: Render every page on mobile and desktop before deployment
+        run: python3 tools/full_site_audit.py --render
 
       - name: Deploy once to 18 Hostinger destinations and purge retired files
         shell: bash
@@ -245,7 +206,7 @@ jobs:
               for a in range(4):
                   try:
                       status,body=get(u); low=body.lower()
-                      ok=status==200 and 'data-oneworldz-build=' in body and '/mobile-safe.css' in body and '<iframe' not in low and not any(x in low for x in forbidden)
+                      ok=status==200 and 'data-oneworldz-build=' in body and '/style.css' in body and '/mobile-safe.css' in body and '<iframe' not in low and not any(x in low for x in forbidden)
                       if ok:return u,True,''
                       last=f'status={status} retired={any(x in low for x in forbidden)}'
                   except Exception as e:last=repr(e)
@@ -272,5 +233,8 @@ jobs:
           }
           for u,(needle,count) in specials.items():
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)
-          print('FINAL=PASS pages=145 sites=18 retired_uganda=0 reserved_future_stripe=1')
+          print('FINAL=PASS pages=145 sites=18 retired_uganda=0 reserved_future_stripe=1 core_style=1')
           PY
+
+      - name: Verify every deployed stylesheet and image
+        run: python3 tools/full_site_audit.py --live
