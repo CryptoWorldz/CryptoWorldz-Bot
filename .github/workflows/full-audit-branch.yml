@@ -30,6 +30,8 @@ jobs:
         run: python3 tools/apply_mobile_safety.py
       - name: Apply JayJayTeamDev vision and 57-item repair layer
         run: python3 tools/apply_jayjay_vision_57.py
+      - name: Build final Davis Family page
+        run: python3 tools/apply_davis_page.py
       - name: Audit every page, stylesheet and image
         run: python3 tools/full_site_audit.py --static
       - name: Render all 145 pages at mobile and desktop sizes
