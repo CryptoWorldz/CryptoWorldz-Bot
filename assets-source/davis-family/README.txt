@@ -1,0 +1,1 @@
+Davis Family source assets are uploaded from the user-approved images in ChatGPT. The build script reconstructs the approved main image and DonateWorldz profile image into the public site.
