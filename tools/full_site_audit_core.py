@@ -121,6 +121,16 @@ def static_audit() -> None:
             errors.append(f'MISSING CORE STYLE {f.relative_to(ROOT)}')
         if '/mobile-safe.css' not in text:
             errors.append(f'MISSING MOBILE STYLE {f.relative_to(ROOT)}')
+        if '/global-image-overrides.css' not in text:
+            errors.append(f'MISSING GLOBAL IMAGE STYLE {f.relative_to(ROOT)}')
+        else:
+            head = re.search(r'<head\\b[^>]*>([\\s\\S]*?)</head>', text, re.I)
+            if not head:
+                errors.append(f'MISSING HEAD {f.relative_to(ROOT)}')
+            else:
+                styles = re.findall(r'<link\\b[^>]*rel=["\\']stylesheet["\\'][^>]*>', head.group(1), re.I)
+                if not styles or '/global-image-overrides.css' not in styles[-1]:
+                    errors.append(f'GLOBAL IMAGE STYLE NOT LAST {f.relative_to(ROOT)}')
         if 'data-oneworldz-build=' not in text:
             errors.append(f'MISSING BUILD MARKER {f.relative_to(ROOT)}')
 
@@ -331,8 +341,19 @@ def live_audit() -> None:
                 return f'LIVE INVALID CSS {url} bytes={len(data)}'
         elif ext == '.html':
             text = data.decode('utf-8', 'ignore')
-            if 'data-oneworldz-build=' not in text or '/style.css' not in text or '/mobile-safe.css' not in text:
+            if (
+                'data-oneworldz-build=' not in text
+                or '/style.css' not in text
+                or '/mobile-safe.css' not in text
+                or '/global-image-overrides.css' not in text
+            ):
                 return f'LIVE PAGE VISUAL CONTRACT FAILED {url}'
+            head = re.search(r'<head\\b[^>]*>([\\s\\S]*?)</head>', text, re.I)
+            if not head:
+                return f'LIVE PAGE HEAD MISSING {url}'
+            styles = re.findall(r'<link\\b[^>]*rel=["\\']stylesheet["\\'][^>]*>', head.group(1), re.I)
+            if not styles or '/global-image-overrides.css' not in styles[-1]:
+                return f'LIVE GLOBAL IMAGE STYLE NOT LAST {url}'
         return None
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=16) as ex:
