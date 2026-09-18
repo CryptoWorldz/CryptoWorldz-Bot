@@ -10,14 +10,14 @@ from html import escape
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "oneworldz.com"
-BUILD = "2026-09-19-heroes-six-worldz-live-woodstock-spirit"
+BUILD = "2026-09-19-heroes-mobile-image-map-repair"
 
 HEROES = [
     {
         "route": "just-knate",
         "name": "Just Knate",
         "label": "The Street Guardian",
-        "image": "/assets/heroes/just-knate.webp",
+        "image": None,
         "facebook": "https://www.facebook.com/justknate",
         "summary": "Street-level kindness and practical support for people experiencing homelessness and hardship.",
         "focus": ["Food & essentials", "Street outreach", "Dignity", "Community support"],
@@ -26,7 +26,7 @@ HEROES = [
         "route": "victor-good-boss",
         "name": "Victor — The Good Boss",
         "label": "Recovery, Hope & Second Chances",
-        "image": "/assets/heroes/victor-good-boss.webp",
+        "image": "/assets/heroes/dylan-thiry.webp",
         "facebook": "https://www.facebook.com/victorthegoodboss",
         "summary": "Public outreach centred on recovery, rehabilitation, practical support and helping people move toward a better life.",
         "focus": ["Recovery", "Rehabilitation", "Homelessness outreach", "Second chances"],
@@ -35,7 +35,7 @@ HEROES = [
         "route": "sam-weidenhofer",
         "name": "Sam Weidenhofer",
         "label": "Everyday People's Champion",
-        "image": "/assets/heroes/sam-weidenhofer.webp",
+        "image": "/assets/heroes/victor-good-boss.webp",
         "facebook": "https://www.facebook.com/itssozer",
         "summary": "Public acts of kindness, community support and fundraising that show how one person can help another.",
         "focus": ["Kindness", "Community support", "Fundraising", "Mental-health awareness"],
@@ -44,7 +44,7 @@ HEROES = [
         "route": "bi-phakathi",
         "name": "Bi Phakathi",
         "label": "Global Impact Through Caring",
-        "image": "/assets/heroes/bi-phakathi.webp",
+        "image": None,
         "facebook": "https://www.facebook.com/biphakathi",
         "summary": "Direct compassion in action through food, family support and practical help for people facing hardship.",
         "focus": ["Food", "Families", "Direct support", "Community dignity"],
@@ -53,7 +53,7 @@ HEROES = [
         "route": "mdmotivator",
         "name": "MDMotivator",
         "label": "Global Kindness & Mental Health",
-        "image": "/assets/heroes/mdmotivator.webp",
+        "image": None,
         "facebook": "https://www.facebook.com/MdMotivatorOfficial",
         "summary": "Kindness-led public support and positive community action designed to make people feel seen, heard and valued.",
         "focus": ["Kindness", "Mental health", "Hope", "Community action"],
@@ -62,7 +62,7 @@ HEROES = [
         "route": "dylan-thiry",
         "name": "Dylan Thiry",
         "label": "Building Hope",
-        "image": "/assets/heroes/dylan-thiry.webp",
+        "image": "/assets/heroes/bi-phakathi.webp",
         "facebook": "https://www.facebook.com/dylanthirypro",
         "summary": "Humanitarian-oriented public projects focused on practical support, stronger futures and community development.",
         "focus": ["Shelter", "Community development", "Education", "Opportunity"],
@@ -104,7 +104,7 @@ body{background:#070512;color:#f8f7ff}
 .country-list{columns:2;column-gap:28px}.country-list li{padding:5px 0}
 .footer-note{text-align:center;color:#aaa0b8;padding:24px 0;line-height:1.6}
 @media(max-width:900px){.hero-grid{grid-template-columns:1fr 1fr}.profile{grid-template-columns:1fr}.focus-grid,.invite-grid,.roadmap{grid-template-columns:1fr 1fr}}
-@media(max-width:620px){.hero-grid,.focus-grid,.invite-grid,.roadmap{grid-template-columns:1fr}.hero-intro,.section,.profile{padding:17px}.country-list{columns:1}}
+@media(max-width:620px){.hero-grid,.focus-grid,.invite-grid,.roadmap{grid-template-columns:1fr}.hero-intro,.section,.profile{padding:17px}.country-list{columns:1}.hero-card img{aspect-ratio:auto;height:auto}.hero-intro{min-height:0}}
 """
 
 def head(title, description):
@@ -149,7 +149,7 @@ cards = []
 for hero in HEROES:
     cards.append(f"""
 <article class="hero-card">
-<img src="{e(hero['image'])}" alt="{e(hero['name'])} OneWorldz Hero artwork">
+{f'<img src="{e(hero["image"])}" alt="{e(hero["name"])} OneWorldz Hero artwork">' if hero["image"] else ""}
 <div class="hero-card-body">
 <p class="eyebrow">OneWorldz Hero</p>
 <h2>{e(hero['name'])}</h2>
@@ -164,7 +164,6 @@ for hero in HEROES:
 
 heroes_page = head("Real-World Heroes", "Six OneWorldz Heroes showing what practical kindness, recovery, outreach and community support can look like.") + f"""
 <section class="hero-intro">
-<img src="/assets/heroes/heroes-world.webp" alt="OneWorldz Heroes — one world, one vision">
 <p class="eyebrow">Real People • Real Action • Real Impact</p>
 <h1>The OneWorldz Heroes</h1>
 <p>Six public examples of people choosing action over indifference. Their work is different, but the principle is shared: see people, help people, restore dignity and inspire the next person to act.</p>
@@ -199,7 +198,7 @@ for hero in HEROES:
     focus = "".join(f"<div><strong>{e(x)}</strong></div>" for x in hero["focus"])
     page = head(hero["name"], hero["summary"]) + f"""
 <section class="profile">
-<img src="{e(hero['image'])}" alt="{e(hero['name'])} OneWorldz Hero artwork">
+{f'<img src="{e(hero["image"])}" alt="{e(hero["name"])} OneWorldz Hero artwork">' if hero["image"] else ""}
 <div class="profile-copy">
 <p class="eyebrow">OneWorldz Hero</p>
 <h1>{e(hero['name'])}</h1>
@@ -233,7 +232,6 @@ event_page = head(
     "A proposed 2026–2030 free-performance and humanitarian-action program pairing Woodstock-inspired community spirit, music, local markets, volunteers and measurable community projects."
 ) + """
 <section class="hero-intro">
-<img src="/assets/heroes/heroes-world.webp" alt="OneWorldz global action and inspiration">
 <p class="eyebrow">Open Invitation • 2026–2030</p>
 <h1>Worldz Live: Destination & Inspiration</h1>
 <p><strong>Song & Dance to Change the World.</strong> A proposed series of free public performances in destination communities, paired with Purple Diamond Crew field action, local organisations, local performers, local vendors and practical projects that remain after the stage is packed away.</p>
