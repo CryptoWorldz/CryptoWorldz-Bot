@@ -1,0 +1,194 @@
+name: Deploy Mission Priority
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/deploy-mission-priority.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-mission-priority
+  cancel-in-progress: true
+
+jobs:
+  deploy-priority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile mission builders
+        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/prune_public_bloat.py
+
+      - name: Build current mission package
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/build_ecosystem.py
+          python3 tools/apply_visual_fixes.py
+          python3 tools/apply_facebook_support.py
+          python3 tools/remove_retired_uganda_support.py
+          python3 tools/apply_mobile_safety.py
+          python3 tools/apply_jayjay_vision_57.py
+          python3 tools/apply_mission_worldz.py
+          python3 tools/apply_specialist_worldz.py
+          python3 tools/apply_mobile_safety.py
+          python3 tools/repair_stage_1_writing.py
+          python3 tools/repair_stage_2_images.py
+          python3 tools/repair_stage_3_other.py
+          python3 tools/apply_global_image_overrides.py
+          python3 tools/prune_public_bloat.py
+          python3 tools/full_site_audit.py --static
+
+      - name: Deploy OneWorldz FoodWorldz DonateWorldz first
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, ssl, time
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path, PurePosixPath
+
+          targets = {
+              "oneworldz.com": "domains/oneworldz.com/public_html",
+              "foodworldz.com": "domains/foodworldz.com/public_html",
+              "donateworldz.com": "domains/donateworldz.com/public_html",
+          }
+
+          host=os.environ["FTP_HOST"]
+          user=os.environ["FTP_USERNAME"]
+          password=os.environ["FTP_PASSWORD"]
+          port=int(os.environ.get("FTP_PORT","21"))
+
+          retired={site:[] for site in targets}
+          manifest=Path(".retired-generated-routes.txt")
+          if manifest.is_file():
+              for line in manifest.read_text(encoding="utf-8").splitlines():
+                  if not line.strip(): continue
+                  site,route=line.split("|",1)
+                  if site in retired and route:
+                      retired[site].append(route)
+
+          explicit = {
+              "oneworldz.com":["heroes/reagan-kauja","reagan.png"],
+              "foodworldz.com":["reagan.png"],
+              "donateworldz.com":["reagan-children","reagan.png"],
+          }
+
+          def connect():
+              ftp=FTP_TLS(context=ssl._create_unverified_context())
+              ftp.connect(host,port,timeout=45)
+              ftp.login(user,password)
+              ftp.prot_p()
+              ftp.set_pasv(True)
+              return ftp
+
+          def ensure(ftp,d):
+              ftp.cwd("/")
+              for part in PurePosixPath(d).parts:
+                  if part in ("","/"): continue
+                  try: ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part)
+                      ftp.cwd(part)
+
+          def remove_tree(ftp,path):
+              try: names=ftp.nlst(path)
+              except Exception:
+                  try: ftp.delete(path)
+                  except Exception: pass
+                  return
+              for name in names:
+                  if name.rstrip("/").split("/")[-1] in (".",".."): continue
+                  try: ftp.delete(name)
+                  except Exception: remove_tree(ftp,name)
+              try: ftp.rmd(path)
+              except Exception: pass
+
+          total=0
+          for site,root in targets.items():
+              files=sorted(p for p in Path(site).rglob("*") if p.is_file())
+              last=None
+              for attempt in range(1,4):
+                  ftp=None
+                  try:
+                      ftp=connect()
+                      for route in retired[site]:
+                          remove_tree(ftp,str(PurePosixPath(root)/route))
+                      for rel in explicit[site]:
+                          remove_tree(ftp,str(PurePosixPath(root)/rel))
+                      count=0
+                      for f in files:
+                          rel=f.relative_to(site).as_posix()
+                          remote=PurePosixPath(root)/rel
+                          ensure(ftp,str(remote.parent))
+                          with f.open("rb") as h:
+                              ftp.storbinary(f"STOR {remote.name}",h,blocksize=262144)
+                          count+=1
+                      try: ftp.quit()
+                      except Exception:
+                          try: ftp.close()
+                          except Exception: pass
+                      total+=count
+                      print(f"PRIORITY_DEPLOYED {site} files={count} attempt={attempt}")
+                      break
+                  except Exception as exc:
+                      last=exc
+                      print(f"PRIORITY_RETRY {site} attempt={attempt} {type(exc).__name__}: {exc}")
+                      if ftp:
+                          try: ftp.close()
+                          except Exception: pass
+                      if attempt<3: time.sleep(attempt*2)
+              else:
+                  raise SystemExit(f"PRIORITY_DEPLOY_FAILED site={site} error={last!r}")
+
+          print(f"MISSION_PRIORITY_DEPLOY=PASS sites=3 files={total}")
+          PY
+
+      - name: Verify mission-critical live routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import time, urllib.request
+          checks = {
+              "https://oneworldz.com/": ["End World Hunger","Specialist departments"],
+              "https://oneworldz.com/specialist-worldz/": ["WaterWorldz","IntegrityWorldz"],
+              "https://oneworldz.com/waterworldz/": ["Groundwater assessment","LawWorldz"],
+              "https://foodworldz.com/": ["Food Rescue","Food Law"],
+              "https://donateworldz.com/": ["Fresh Water Mission","Donate to JayJayTeamDev"],
+              "https://donateworldz.com/fresh-water-mission/": ["Fresh Water First","Offer equipment or expertise"],
+              "https://donateworldz.com/grow-food-mission/": ["Tools, Water, Seeds, Trees and Skills","Offer tools, seed, trees or expertise"],
+              "https://donateworldz.com/jayjay-support/": ["Donate to JayJayTeamDev","https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00"],
+          }
+          def fetch(url):
+              req=urllib.request.Request(url+"?priority=1",headers={"User-Agent":"OneWorldz-Priority-Verify/1.0","Cache-Control":"no-cache"})
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  return r.status,r.read().decode("utf-8","ignore")
+          for url,needles in checks.items():
+              last=""
+              for attempt in range(5):
+                  try:
+                      status,body=fetch(url)
+                      if status==200 and all(x in body for x in needles):
+                          print("PRIORITY_LIVE_PASS",url)
+                          break
+                      last=f"status={status} missing={[x for x in needles if x not in body]}"
+                  except Exception as e:
+                      last=repr(e)
+                  time.sleep(2+attempt*2)
+              else:
+                  raise SystemExit(f"PRIORITY_LIVE_FAIL {url} {last}")
+          print(f"MISSION_PRIORITY_VERIFY=PASS routes={len(checks)}")
+          PY
