@@ -30,7 +30,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: oneworldz-production
+  group: oneworldz-production-v2
   cancel-in-progress: true
 
 jobs:
