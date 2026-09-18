@@ -121,7 +121,7 @@ urls = sorted(set(urls))
 # Final fallback cleanup for any homepage link left outside the removed sections.
 one_text = one.read_text(encoding="utf-8")
 one_text = re.sub(
-    r'<a\\b[^>]*href=["\\']/heroes/[^"\\']*["\\'][^>]*>[\\s\\S]*?</a>',
+    r"<a\\b[^>]*href=['\"]/heroes/[^'\"]*['\"][^>]*>[\\s\\S]*?</a>",
     "",
     one_text,
     flags=re.I,
@@ -130,7 +130,7 @@ one.write_text(one_text, encoding="utf-8")
 
 crypto_text = crypto.read_text(encoding="utf-8")
 crypto_text = re.sub(
-    r'<a\\b[^>]*href=["\\']/(?:zed|auto|grace|worldzpad|wldz)/["\\'][^>]*>[\\s\\S]*?</a>',
+    r"<a\\b[^>]*href=['\"]/(?:zed|auto|grace|worldzpad|wldz)/['\"][^>]*>[\\s\\S]*?</a>",
     "",
     crypto_text,
     flags=re.I,
