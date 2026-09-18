@@ -74,6 +74,9 @@ jobs:
       - name: "Repair Stage 3/3 — Structure, metadata and other defects"
         run: python3 tools/repair_stage_3_other.py
 
+      - name: "Apply screenshot-driven visual repairs from 146-page proof"
+        run: python3 tools/apply_real_visual_repairs.py
+
       - name: Validate 18-site contract and retired-content removal
         shell: bash
         run: |
