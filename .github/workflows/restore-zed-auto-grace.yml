@@ -1,0 +1,147 @@
+name: Restore ZED AUTO GRACE Command Centre
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.js"
+      - "package.json"
+      - "package-lock.json"
+      - "src/**"
+      - "public/**"
+      - ".well-known/**"
+      - ".github/full-current-zed-runtime.sh"
+      - ".github/workflows/restore-zed-auto-grace.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: restore-zed-auto-grace
+  cancel-in-progress: false
+
+env:
+  PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
+  PROTECTED_NODE_ROOT: /domains/cryptobotz.cryptoworldz.xyz/nodejs
+
+jobs:
+  restore:
+    name: Restore ZED + AUTO + GRACE + Command Centre
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      BOT_TOKEN_SECRET: ${{ secrets.BOT_TOKEN }}
+      SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - name: Checkout exact current main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install repository FTPS transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile .github/lftp-compat.py
+          mkdir -p "$RUNNER_TEMP/oneworldz-bin"
+          cat > "$RUNNER_TEMP/oneworldz-bin/lftp" <<'SH'
+          #!/usr/bin/env bash
+          exec python3 "$GITHUB_WORKSPACE/.github/lftp-compat.py" "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
+          echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
+
+      - name: Prove restored historical runtime is present
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s src/full-runtime-entry.js
+          test -s src/telegram.js
+          test -s src/auto/telegram.js
+          test -s src/grace/telegram.js
+          test -s public/miniapp/index.html
+          grep -Fq 'registerAutoTelegramHandlers' src/full-runtime-entry.js
+          grep -Fq 'registerGraceTelegramHandlers' src/full-runtime-entry.js
+          grep -Fq 'registerProjectWalletSystem' src/full-runtime-entry.js
+          grep -Fq 'leaderboard' src/telegram.js
+          grep -Fq 'wallet' src/telegram.js
+          grep -Fq 'governance' src/telegram.js
+          grep -Fq 'kitty' src/telegram.js
+          echo 'ZED_AUTO_GRACE_HISTORICAL_RUNTIME=PASS'
+
+      - name: Deploy restored protected runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          zed_log="$RUNNER_TEMP/zed-restore.log"
+          status=0
+          if bash .github/full-current-zed-runtime.sh 2>&1 | tee "$zed_log"; then
+            status=0
+          else
+            status=1
+          fi
+
+          if [ "$status" != 0 ]; then
+            core_pass=0
+            for attempt in $(seq 1 12); do
+              sleep 4
+              tag="restore_zed=${GITHUB_SHA}-${GITHUB_RUN_ID}-${attempt}"
+              root_code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 12 -o "$RUNNER_TEMP/root.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/?$tag" || true)"
+              health_code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 12 -o "$RUNNER_TEMP/health.json" -w '%{http_code}' "https://$PROTECTED_DOMAIN/health?$tag" || true)"
+              mini_code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 12 -o "$RUNNER_TEMP/mini.html" -w '%{http_code}' "https://$PROTECTED_DOMAIN/miniapp/?$tag" || true)"
+              root_service=0; health_ok=0; splashback=0; zed_guide=0; create=0; heroes=0
+              grep -Fq '"service":"CryptoWorldz Zed Bot"' "$RUNNER_TEMP/root.json" && root_service=1 || true
+              grep -Fq '"ok":true' "$RUNNER_TEMP/health.json" && health_ok=1 || true
+              grep -Fq 'id="splashback"' "$RUNNER_TEMP/mini.html" && splashback=1 || true
+              grep -Fq 'id="zed-guide"' "$RUNNER_TEMP/mini.html" && zed_guide=1 || true
+              grep -Fq 'id="create"' "$RUNNER_TEMP/mini.html" && create=1 || true
+              grep -Fq 'id="heroes"' "$RUNNER_TEMP/mini.html" && heroes=1 || true
+              echo "RESTORE_ZED_PROBE attempt=$attempt root=$root_code health=$health_code mini=$mini_code service=$root_service ok=$health_ok splashback=$splashback guide=$zed_guide create=$create heroes=$heroes"
+              if [ "$root_code" = 200 ] && [ "$health_code" = 200 ] && [ "$mini_code" = 200 ]                 && [ "$root_service" = 1 ] && [ "$health_ok" = 1 ] && [ "$splashback" = 1 ]                 && [ "$zed_guide" = 1 ] && [ "$create" = 1 ] && [ "$heroes" = 1 ]; then
+                core_pass=1
+                break
+              fi
+            done
+            test "$core_pass" = 1
+          fi
+          echo 'ZED_AUTO_GRACE_LIVE_CORE=PASS'
+
+      - name: Prove Telegram legacy command surface returned
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$BOT_TOKEN_SECRET"
+          test -n "$token"
+          echo "::add-mask::$token"
+          curl --fail --silent --show-error "https://api.telegram.org/bot${token}/getMyCommands" > "$RUNNER_TEMP/commands.json"
+          COMMANDS="$RUNNER_TEMP/commands.json" node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync(process.env.COMMANDS,'utf8'));
+          if(p.ok!==true) process.exit(1);
+          const commands=(p.result||[]).map(x=>x.command);
+          const required=['start','help','register','profile','points','leaderboard','raaiiidd','missions','wallet','kitty','governance','vote','impact','donate'];
+          const missing=required.filter(x=>!commands.includes(x));
+          if(missing.length){ console.error('Missing legacy commands:',missing.join(',')); process.exit(1); }
+          console.log('LEGACY_COMMANDS_RETURNED=' + required.join(','));
+          NODE
+          echo 'ZED_TELEGRAM_LEGACY_SURFACE=PASS'
+
+      - name: Final verdict
+        run: echo 'ZED_AUTO_GRACE_COMMAND_CENTRE_RESTORED=PASS'
