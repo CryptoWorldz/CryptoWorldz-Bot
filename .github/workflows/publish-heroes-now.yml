@@ -72,6 +72,27 @@ jobs:
               assert name in home, name
           for banned in ("Reagan Kauja","Bob — The Giving Roofer","SolMotivator"):
               assert banned not in home, banned
+          import hashlib
+          expected_assets={"exact-just-knate.webp":"34b18d7a7b6cb2758c0d72add3c6c01a4082228772b52b74f55fd231f309f633","exact-victor-good-boss.webp":"7c3fff6894b2338d8ad773a40885c48623848bb019f31f8b4ce7b92490bb53fc","exact-sam-weidenhofer.webp":"7f311358707db8c46e5bc5b7f86f72f62a269171b77c44d67f48e85005e30b3d","exact-bi-phakathi.webp":"cd760066f91deb9aac199a0bf4f0680f639c39dc8f2668dd1b8434d21a8b2d5d","exact-mdmotivator.webp":"a6e8b9837b9baecfaacef9c3d7ccdddb95651261c3232824fc4b7c6bc81998e4","exact-dylan-thiry.webp":"235becfe9a5a47cf0bec21c0c8a117edbb91c94f4a51b7168050e7f02263077d","exact-purple-diamond-crew.webp":"b5e03f867b81fc18877e5a3025577f3089c8b7742198b9e4476725225d000ae2","exact-sounds-grounds.webp":"0a4cc8fd4b500e064d776c052e3cfe87a60db6b0f0b5235b7eab941d5c35a3a0","exact-uganda-on-ground.webp":"367e80535b6371e61e0d0a7a7683bd709f6fabc83a01ae81c59790fecbaa8925","exact-uganda-global-support.webp":"055afbda011435d481baf675203f6381d0dca90bfd6a5f679ef54ab516566b90"}
+          asset_root=Path("oneworldz.com/assets/heroes")
+          for filename,want in expected_assets.items():
+              p=asset_root/filename
+              assert p.is_file(), ("missing-hero-asset",filename)
+              got=hashlib.sha256(p.read_bytes()).hexdigest()
+              assert got==want, ("wrong-hero-asset",filename,got,want)
+          mapping_checks={
+              "Just Knate":"exact-just-knate.webp",
+              "Victor — The Good Boss":"exact-victor-good-boss.webp",
+              "Sam Weidenhofer":"exact-sam-weidenhofer.webp",
+              "Bi Phakathi":"exact-bi-phakathi.webp",
+              "MDMotivator":"exact-mdmotivator.webp",
+              "Dylan Thiry":"exact-dylan-thiry.webp",
+          }
+          for name,filename in mapping_checks.items():
+              assert name in home and filename in home, ("hero-map",name,filename)
+          assert "exact-purple-diamond-crew.webp" in home
+          assert "exact-sounds-grounds.webp" in home
+          print("HERO_ASSET_HASH_PASS exact_assets=10 mapping=6")
           print("HERO_PACKAGE=PASS routes=8 approved_heroes=6")
           PY
 
@@ -156,5 +177,26 @@ jobs:
                   time.sleep(2+attempt)
               else:
                   raise SystemExit(f"HERO_LIVE_FAIL {url} {last}")
+          import hashlib
+          expected_assets={"exact-just-knate.webp":"34b18d7a7b6cb2758c0d72add3c6c01a4082228772b52b74f55fd231f309f633","exact-victor-good-boss.webp":"7c3fff6894b2338d8ad773a40885c48623848bb019f31f8b4ce7b92490bb53fc","exact-sam-weidenhofer.webp":"7f311358707db8c46e5bc5b7f86f72f62a269171b77c44d67f48e85005e30b3d","exact-bi-phakathi.webp":"cd760066f91deb9aac199a0bf4f0680f639c39dc8f2668dd1b8434d21a8b2d5d","exact-mdmotivator.webp":"a6e8b9837b9baecfaacef9c3d7ccdddb95651261c3232824fc4b7c6bc81998e4","exact-dylan-thiry.webp":"235becfe9a5a47cf0bec21c0c8a117edbb91c94f4a51b7168050e7f02263077d","exact-purple-diamond-crew.webp":"b5e03f867b81fc18877e5a3025577f3089c8b7742198b9e4476725225d000ae2","exact-sounds-grounds.webp":"0a4cc8fd4b500e064d776c052e3cfe87a60db6b0f0b5235b7eab941d5c35a3a0","exact-uganda-on-ground.webp":"367e80535b6371e61e0d0a7a7683bd709f6fabc83a01ae81c59790fecbaa8925","exact-uganda-global-support.webp":"055afbda011435d481baf675203f6381d0dca90bfd6a5f679ef54ab516566b90"}
+          for filename,want in expected_assets.items():
+              url="https://oneworldz.com/assets/heroes/"+filename
+              last=""
+              for attempt in range(8):
+                  try:
+                      req=urllib.request.Request(url+"?exactheroes=1",headers={"User-Agent":"OneWorldz-Hero-Asset-Verify/1.0","Cache-Control":"no-cache"})
+                      with urllib.request.urlopen(req,timeout=25) as r:
+                          data=r.read()
+                          got=hashlib.sha256(data).hexdigest()
+                          if r.status==200 and got==want:
+                              print("HERO_ASSET_LIVE_PASS",filename)
+                              break
+                          last=f"status={r.status} sha256={got} want={want} bytes={len(data)}"
+                  except Exception as e:
+                      last=repr(e)
+                  time.sleep(2+attempt)
+              else:
+                  raise SystemExit(f"HERO_ASSET_LIVE_FAIL {filename} {last}")
+          print("HERO_LIVE_ASSET_HASH_PASS exact_assets=10")
           print("HEROES_LIVE=PASS routes=8")
           PY

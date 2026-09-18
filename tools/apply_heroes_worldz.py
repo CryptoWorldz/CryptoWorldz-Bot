@@ -10,14 +10,14 @@ from html import escape
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "oneworldz.com"
-BUILD = "2026-09-19-heroes-mobile-image-map-repair"
+BUILD = "2026-09-19-exact-user-hero-artwork-v1"
 
 HEROES = [
     {
         "route": "just-knate",
         "name": "Just Knate",
         "label": "The Street Guardian",
-        "image": None,
+        "image": "/assets/heroes/exact-just-knate.webp",
         "facebook": "https://www.facebook.com/justknate",
         "summary": "Street-level kindness and practical support for people experiencing homelessness and hardship.",
         "focus": ["Food & essentials", "Street outreach", "Dignity", "Community support"],
@@ -26,7 +26,7 @@ HEROES = [
         "route": "victor-good-boss",
         "name": "Victor — The Good Boss",
         "label": "Recovery, Hope & Second Chances",
-        "image": "/assets/heroes/dylan-thiry.webp",
+        "image": "/assets/heroes/exact-victor-good-boss.webp",
         "facebook": "https://www.facebook.com/victorthegoodboss",
         "summary": "Public outreach centred on recovery, rehabilitation, practical support and helping people move toward a better life.",
         "focus": ["Recovery", "Rehabilitation", "Homelessness outreach", "Second chances"],
@@ -35,7 +35,7 @@ HEROES = [
         "route": "sam-weidenhofer",
         "name": "Sam Weidenhofer",
         "label": "Everyday People's Champion",
-        "image": "/assets/heroes/victor-good-boss.webp",
+        "image": "/assets/heroes/exact-sam-weidenhofer.webp",
         "facebook": "https://www.facebook.com/itssozer",
         "summary": "Public acts of kindness, community support and fundraising that show how one person can help another.",
         "focus": ["Kindness", "Community support", "Fundraising", "Mental-health awareness"],
@@ -44,7 +44,7 @@ HEROES = [
         "route": "bi-phakathi",
         "name": "Bi Phakathi",
         "label": "Global Impact Through Caring",
-        "image": None,
+        "image": "/assets/heroes/exact-bi-phakathi.webp",
         "facebook": "https://www.facebook.com/biphakathi",
         "summary": "Direct compassion in action through food, family support and practical help for people facing hardship.",
         "focus": ["Food", "Families", "Direct support", "Community dignity"],
@@ -53,7 +53,7 @@ HEROES = [
         "route": "mdmotivator",
         "name": "MDMotivator",
         "label": "Global Kindness & Mental Health",
-        "image": None,
+        "image": "/assets/heroes/exact-mdmotivator.webp",
         "facebook": "https://www.facebook.com/MdMotivatorOfficial",
         "summary": "Kindness-led public support and positive community action designed to make people feel seen, heard and valued.",
         "focus": ["Kindness", "Mental health", "Hope", "Community action"],
@@ -62,7 +62,7 @@ HEROES = [
         "route": "dylan-thiry",
         "name": "Dylan Thiry",
         "label": "Building Hope",
-        "image": "/assets/heroes/bi-phakathi.webp",
+        "image": "/assets/heroes/exact-dylan-thiry.webp",
         "facebook": "https://www.facebook.com/dylanthirypro",
         "summary": "Humanitarian-oriented public projects focused on practical support, stronger futures and community development.",
         "focus": ["Shelter", "Community development", "Education", "Opportunity"],
@@ -87,13 +87,13 @@ body{background:#070512;color:#f8f7ff}
 .hero-intro p{max-width:850px;margin:12px auto;line-height:1.65;color:#e9e3f6}
 .hero-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:20px 0 34px}
 .hero-card{overflow:hidden;border:1px solid rgba(168,85,247,.4);border-radius:22px;background:rgba(255,255,255,.035);box-shadow:0 18px 45px rgba(0,0,0,.22)}
-.hero-card img{width:100%;aspect-ratio:4/5;object-fit:contain;background:#080511;display:block}
+.hero-card img{width:100%;height:auto;max-height:none;object-fit:contain;background:#080511;display:block}
 .hero-card-body{padding:18px}.hero-card h2{margin:0 0 6px;font-size:1.35rem}.hero-card .label{color:#f6c453;font-weight:800}.hero-card p{color:#d9d3e7;line-height:1.55}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
 .section{padding:25px;margin:22px 0;border:1px solid rgba(255,255,255,.09);border-radius:24px;background:rgba(255,255,255,.025)}
 .section h2{font-size:clamp(1.5rem,4vw,2.45rem);margin:.2em 0 .55em}.section p{line-height:1.65;color:#ddd7e8}
 .profile{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(0,1.15fr);gap:28px;align-items:center;padding:24px;border:1px solid rgba(168,85,247,.42);border-radius:28px;background:radial-gradient(circle at 30% 20%,rgba(91,33,182,.35),rgba(8,6,20,.97))}
-.profile img{width:100%;max-height:760px;object-fit:contain;border-radius:20px;background:#080511}
+.profile img{width:100%;height:auto;max-height:none;object-fit:contain;border-radius:20px;background:#080511;display:block}
 .profile-copy .tag{color:#f6c453;font-weight:900;font-size:1.05rem}.profile-copy p{line-height:1.7;color:#e2ddec}
 .focus-grid,.invite-grid,.roadmap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
 .focus-grid div,.invite-grid div,.roadmap div{padding:16px;border:1px solid rgba(168,85,247,.3);border-radius:16px;background:rgba(168,85,247,.06);line-height:1.45}
@@ -102,9 +102,12 @@ body{background:#070512;color:#f8f7ff}
 .big-call{font-size:clamp(1.25rem,4vw,2.2rem);font-weight:900;color:#fff}
 .small{font-size:.9rem;color:#bdb5ca!important}
 .country-list{columns:2;column-gap:28px}.country-list li{padding:5px 0}
-.footer-note{text-align:center;color:#aaa0b8;padding:24px 0;line-height:1.6}
+.section-art{width:100%;height:auto;max-height:none;object-fit:contain;display:block;border-radius:18px;margin:0 0 18px;background:#080511}
+.visual-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.visual-pair img{width:100%;height:auto;object-fit:contain;border-radius:18px;background:#080511;display:block}
+.footer-note{text-align:center;color:#aaa0b8;padding:18px 0;line-height:1.45;font-size:.82rem}
 @media(max-width:900px){.hero-grid{grid-template-columns:1fr 1fr}.profile{grid-template-columns:1fr}.focus-grid,.invite-grid,.roadmap{grid-template-columns:1fr 1fr}}
-@media(max-width:620px){.hero-grid,.focus-grid,.invite-grid,.roadmap{grid-template-columns:1fr}.hero-intro,.section,.profile{padding:17px}.country-list{columns:1}.hero-card img{aspect-ratio:auto;height:auto}.hero-intro{min-height:0}}
+@media(max-width:620px){.hero-grid,.focus-grid,.invite-grid,.roadmap,.visual-pair{grid-template-columns:1fr}.hero-intro,.section,.profile{padding:17px}.country-list{columns:1}.hero-card img{aspect-ratio:auto;height:auto}.hero-intro{min-height:0}}
 """
 
 def head(title, description):
@@ -176,6 +179,7 @@ heroes_page = head("Real-World Heroes", "Six OneWorldz Heroes showing what pract
 {''.join(cards)}
 </section>
 <section class="section pdc">
+<img class="section-art" src="/assets/heroes/exact-purple-diamond-crew.webp" alt="Purple Diamond Crew On The Ground — real people, real action, real impact">
 <p class="eyebrow">Purple Diamond Crew • On The Ground</p>
 <h2>The Crew stands beside the mission.</h2>
 <p>Purple Diamond Crew is the action network for people who want to do more than watch. The goal is to work with legitimate local organisations and communities on practical support — food, clean water, shelter, clothing, care packages, education, gardens, equipment, logistics and volunteer effort — in the same spirit of direct action represented by the Heroes above.</p>
@@ -186,6 +190,7 @@ heroes_page = head("Real-World Heroes", "Six OneWorldz Heroes showing what pract
 </div>
 </section>
 <section class="section">
+<img class="section-art" src="/assets/heroes/exact-sounds-grounds.webp" alt="OneWorldz Destination and Inspiration — 2026 to 2030 global performance and community action">
 <p class="eyebrow">The Next Stage</p>
 <h2>Worldz Live — Destination & Inspiration 2026–2030</h2>
 <p>OneWorldz is putting forward an open-invitation concept: free public performances paired with real field missions, local markets and community action. Entertainment should bring attention and resources to the destination — not take resources away from it.</p>
@@ -212,6 +217,7 @@ for hero in HEROES:
 </div>
 </section>
 <section class="section pdc">
+<img class="section-art" src="/assets/heroes/exact-purple-diamond-crew.webp" alt="Purple Diamond Crew volunteers on the ground">
 <p class="eyebrow">From Inspiration to Participation</p>
 <h2>Purple Diamond Crew — on the ground providing support.</h2>
 <p>OneWorldz wants the lesson from every Hero profile to be practical: kindness becomes stronger when people organise. Purple Diamond Crew is the volunteer action network intended to work alongside local communities and established organisations — helping with food, clean water, shelter, clothing, education, equipment, gardens, care packages, transport and community support.</p>
@@ -232,6 +238,7 @@ event_page = head(
     "A proposed 2026–2030 free-performance and humanitarian-action program pairing Woodstock-inspired community spirit, music, local markets, volunteers and measurable community projects."
 ) + """
 <section class="hero-intro">
+<img class="section-art" src="/assets/heroes/exact-sounds-grounds.webp" alt="OneWorldz 2026 to 2030 Destination and Inspiration festival vision">
 <p class="eyebrow">Open Invitation • 2026–2030</p>
 <h1>Worldz Live: Destination & Inspiration</h1>
 <p><strong>Song & Dance to Change the World.</strong> A proposed series of free public performances in destination communities, paired with Purple Diamond Crew field action, local organisations, local performers, local vendors and practical projects that remain after the stage is packed away.</p>
@@ -241,6 +248,11 @@ event_page = head(
 <a class="action-btn primary" href="https://purplediamondcrew.com/">Volunteers — Join the Crew</a>
 <a class="action-btn" href="mailto:hello@oneworldz.com?subject=Worldz%20Live%20Production%20or%20Sponsor%20Partner">Production & Sponsors</a>
 </div>
+</section>
+
+<section class="section visual-pair" aria-label="OneWorldz on the ground and global support">
+<img src="/assets/heroes/exact-uganda-on-ground.webp" alt="OneWorldz On The Ground — community action in Uganda">
+<img src="/assets/heroes/exact-uganda-global-support.webp" alt="OneWorldz Global Support — donate, share and spread the word">
 </section>
 
 <section class="section woodstock">
