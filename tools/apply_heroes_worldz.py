@@ -126,6 +126,7 @@ def head(title, description):
 <a href="https://purplediamondcrew.com/">💎 Purple Diamond Crew</a>
 <a href="/heroes/destination-inspiration/">🎤 Worldz Live 2026–2030</a>
 </nav>
+<main class="hero-main">
 """
 
 def foot():
@@ -135,6 +136,7 @@ def foot():
 Helping the People who Help the People.<br>
 OneWorldz independently recognises public humanitarian and kindness work. A profile does not claim endorsement, partnership or affiliation unless separately confirmed and documented.
 </div>
+</main>
 </div></body></html>
 """
 
