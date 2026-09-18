@@ -65,7 +65,7 @@ for route,(asset_slug,title,subtitle,a1,a2,symbol) in food_pages.items():
 
     # Target the actual hero section, never a nav/logo image.
     hero=re.search(
-        r'(<section\\b[^>]*class=["\\'][^"\\']*\\bhero\\b[^"\\']*["\\'][^>]*>)([\\s\\S]*?)(</section>)',
+        r'(<section[^>]*class="[^"]*\bhero\b[^"]*"[^>]*>)([\s\S]*?)(</section>)',
         text,
         re.I,
     )
