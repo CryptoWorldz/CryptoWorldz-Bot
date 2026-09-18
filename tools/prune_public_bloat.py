@@ -55,6 +55,7 @@ KEEP["law.oneworldz.com"] |= {
     "civic-pathways",
     "research-handoff",
 }
+KEEP["purplediamondcrew.com"] |= {"hope-chest"}
 KEEP["learn.oneworldz.com"] |= {
     "country-research",
     "best-practice",
@@ -144,7 +145,7 @@ for host in DOMAINS:
     (site / "sitemap.xml").write_text("\n".join(xml) + "\n", encoding="utf-8")
 
 urls = sorted(set(urls))
-assert len(urls) == 54, len(urls)
+assert len(urls) == 55, len(urls)
 (ROOT / ".ecosystem-urls.txt").write_text("\n".join(urls) + "\n", encoding="utf-8")
 (ROOT / ".retired-generated-routes.txt").write_text(
     "\n".join(f"{host}|{route}" for host, route in sorted(set(retired))) + "\n",
