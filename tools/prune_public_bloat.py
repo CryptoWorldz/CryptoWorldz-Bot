@@ -29,6 +29,14 @@ KEEP["oneworldz.com"] |= {
     "transportworldz",
     "moneyworldz",
     "integrityworldz",
+    "heroes",
+    "heroes/just-knate",
+    "heroes/victor-good-boss",
+    "heroes/sam-weidenhofer",
+    "heroes/bi-phakathi",
+    "heroes/mdmotivator",
+    "heroes/dylan-thiry",
+    "heroes/destination-inspiration",
 }
 KEEP["donateworldz.com"] |= {
     "slice-of-hope-australia",
@@ -148,7 +156,7 @@ for host in DOMAINS:
     (site / "sitemap.xml").write_text("\n".join(xml) + "\n", encoding="utf-8")
 
 urls = sorted(set(urls))
-assert len(urls) == 56, len(urls)
+assert len(urls) == 64, len(urls)
 (ROOT / ".ecosystem-urls.txt").write_text("\n".join(urls) + "\n", encoding="utf-8")
 (ROOT / ".retired-generated-routes.txt").write_text(
     "\n".join(f"{host}|{route}" for host, route in sorted(set(retired))) + "\n",

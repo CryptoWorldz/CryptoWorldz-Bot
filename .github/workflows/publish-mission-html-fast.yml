@@ -41,6 +41,7 @@ jobs:
           python3 tools/apply_jayjay_vision_57.py
           python3 tools/apply_mission_worldz.py
           python3 tools/apply_specialist_worldz.py
+          python3 tools/apply_heroes_worldz.py
           python3 tools/apply_slice_of_hope_visual.py
           python3 tools/apply_mobile_safety.py
           python3 tools/repair_stage_1_writing.py
@@ -79,6 +80,14 @@ jobs:
                   "moneyworldz",
                   "integrityworldz",
                   "community-support",
+                  "heroes",
+                  "heroes/just-knate",
+                  "heroes/victor-good-boss",
+                  "heroes/sam-weidenhofer",
+                  "heroes/bi-phakathi",
+                  "heroes/mdmotivator",
+                  "heroes/dylan-thiry",
+                  "heroes/destination-inspiration",
               ],
               "foodworldz.com": [
                   "",
@@ -162,6 +171,8 @@ jobs:
               "https://oneworldz.com/": ["End World Hunger","Specialist departments"],
               "https://oneworldz.com/specialist-worldz/": ["WaterWorldz","IntegrityWorldz"],
               "https://oneworldz.com/waterworldz/": ["Groundwater assessment","LawWorldz"],
+              "https://oneworldz.com/heroes/": ["Just Knate","Purple Diamond Crew"],
+              "https://oneworldz.com/heroes/destination-inspiration/": ["Open invitation to P!NK","Uganda Pilot"],
               "https://oneworldz.com/growworldz/": ["GrowWorldz / FarmWorldz","Harvest volumes"],
               "https://oneworldz.com/healthworldz/": ["HealthWorldz","Maternal"],
               "https://oneworldz.com/moneyworldz/": ["MoneyWorldz / TaxWorldz","public budgets"],

@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Compile mission builders
-        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/apply_slice_of_hope_visual.py tools/deploy_hostinger_robust.py tools/prune_public_bloat.py tools/apply_pdc_five_page.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py
+        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/apply_heroes_worldz.py tools/apply_slice_of_hope_visual.py tools/deploy_hostinger_robust.py tools/prune_public_bloat.py tools/apply_pdc_five_page.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py
 
       - name: Build ecosystem baseline
         run: python3 tools/build_ecosystem.py
@@ -75,6 +75,9 @@ jobs:
 
       - name: Build the specialist Worldz departments
         run: python3 tools/apply_specialist_worldz.py
+
+      - name: Build the six approved OneWorldz Heroes and Worldz Live plan
+        run: python3 tools/apply_heroes_worldz.py
 
       - name: Build Slice of Hope visual and floating actions
         run: python3 tools/apply_slice_of_hope_visual.py
@@ -121,7 +124,7 @@ jobs:
           domains=[d.strip() for d in Path('DOMAINS.txt').read_text().splitlines() if d.strip()]
           assert len(domains)==18 and len(set(domains))==18, domains
           urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
-          assert len(urls)==59 and len(urls)==len(set(urls)), (len(urls),len(set(urls)))
+          assert len(urls)==67 and len(urls)==len(set(urls)), (len(urls),len(set(urls)))
 
           forbidden=('reagan','action spreads smiles','action spread smiles','action creates smiles','196prufjjq')
           for u in urls:
@@ -219,6 +222,31 @@ jobs:
               'https://www.dubbobaptist.org.au/',
           ):
               assert required in dubbo, ('links-in-dubbo',required)
+
+
+          hero_routes = [
+              'heroes',
+              'heroes/just-knate',
+              'heroes/victor-good-boss',
+              'heroes/sam-weidenhofer',
+              'heroes/bi-phakathi',
+              'heroes/mdmotivator',
+              'heroes/dylan-thiry',
+              'heroes/destination-inspiration',
+          ]
+          for route in hero_routes:
+              p=Path('oneworldz.com')/route/'index.html'
+              assert p.is_file(), ('hero-route',route)
+              body=p.read_text(encoding='utf-8')
+              assert 'data-oneworldz-heroes=' in body, route
+          heroes_home=Path('oneworldz.com/heroes/index.html').read_text(encoding='utf-8')
+          for required in ('Just Knate','Victor — The Good Boss','Sam Weidenhofer','Bi Phakathi','MDMotivator','Dylan Thiry','Purple Diamond Crew','Worldz Live'):
+              assert required in heroes_home, ('heroes',required)
+          for retired_hero in ('heroes/reagan-kauja','heroes/bob-roofer','heroes/solmotivator'):
+              assert not (Path('oneworldz.com')/retired_hero/'index.html').exists(), ('retired-hero',retired_hero)
+          event=Path('oneworldz.com/heroes/destination-inspiration/index.html').read_text(encoding='utf-8')
+          for required in ('Open invitation to P!NK','Uganda Pilot','direct humanitarian funds','UNDP 2025 MPI Data'):
+              assert required in event, ('worldz-live',required)
 
           support={
             'davis':('donateworldz.com/davis-family/index.html','https://www.facebook.com/share/165Ken5f2Bt/'),

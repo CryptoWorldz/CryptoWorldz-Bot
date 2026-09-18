@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Compile mission builders
-        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/prune_public_bloat.py
+        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/apply_heroes_worldz.py tools/prune_public_bloat.py
 
       - name: Build current mission package
         shell: bash
@@ -44,6 +44,7 @@ jobs:
           python3 tools/apply_jayjay_vision_57.py
           python3 tools/apply_mission_worldz.py
           python3 tools/apply_specialist_worldz.py
+          python3 tools/apply_heroes_worldz.py
           python3 tools/apply_mobile_safety.py
           python3 tools/repair_stage_1_writing.py
           python3 tools/repair_stage_2_images.py
@@ -167,6 +168,8 @@ jobs:
               "https://oneworldz.com/": ["End World Hunger","Specialist departments"],
               "https://oneworldz.com/specialist-worldz/": ["WaterWorldz","IntegrityWorldz"],
               "https://oneworldz.com/waterworldz/": ["Groundwater assessment","LawWorldz"],
+              "https://oneworldz.com/heroes/": ["Just Knate","Purple Diamond Crew"],
+              "https://oneworldz.com/heroes/destination-inspiration/": ["Open invitation to P!NK","Uganda Pilot"],
               "https://foodworldz.com/": ["Food Rescue","Food Law"],
               "https://donateworldz.com/": ["Fresh Water Mission","Donate to JayJayTeamDev"],
               "https://donateworldz.com/fresh-water-mission/": ["Fresh Water First","Offer equipment or expertise"],
