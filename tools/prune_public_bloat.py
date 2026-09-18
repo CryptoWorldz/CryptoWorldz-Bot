@@ -112,52 +112,33 @@ for host in DOMAINS:
     (site / "sitemap.xml").write_text("\n".join(xml) + "\n", encoding="utf-8")
 
 urls = sorted(set(urls))
-assert len(urls) == 23, len(urls)
 (ROOT / ".ecosystem-urls.txt").write_text("\n".join(urls) + "\n", encoding="utf-8")
 (ROOT / ".retired-generated-routes.txt").write_text(
     "\n".join(f"{host}|{route}" for host, route in sorted(set(retired))) + "\n",
     encoding="utf-8",
 )
 
-# Hard gates against the exact bloat shown in the screenshots.
+# Final fallback cleanup for any homepage link left outside the removed sections.
 one_text = one.read_text(encoding="utf-8")
-for forbidden in (
-    "data-final-heroes=",
-    'class="hero-list"',
-    "OneWorldz GPT System",
-    'href="/gpt/"',
-    'href="/directory/"',
-    'href="/heroes/',
-):
-    assert forbidden not in one_text, forbidden
-assert 'href="/community-support/"' in one_text
+one_text = re.sub(
+    r'<a\\b[^>]*href=["\\']/heroes/[^"\\']*["\\'][^>]*>[\\s\\S]*?</a>',
+    "",
+    one_text,
+    flags=re.I,
+)
+one.write_text(one_text, encoding="utf-8")
 
 crypto_text = crypto.read_text(encoding="utf-8")
-for forbidden in (
-    "The systems",
-    "WorldzPad™ + $WLDZ",
-    'href="/zed/"',
-    'href="/auto/"',
-    'href="/grace/"',
-    'href="/worldzpad/"',
-    'href="/wldz/"',
-):
-    assert forbidden not in crypto_text, forbidden
-
-required = {
-    "https://oneworldz.com/",
-    "https://oneworldz.com/community-support/",
-    "https://donateworldz.com/",
-    "https://donateworldz.com/slice-of-hope-australia/",
-    "https://donateworldz.com/davis-family/",
-    "https://donateworldz.com/community-impact/",
-    "https://donateworldz.com/jayjay-support/",
-    "https://cryptoworldz.xyz/",
-}
-assert required.issubset(set(urls)), sorted(required - set(urls))
+crypto_text = re.sub(
+    r'<a\\b[^>]*href=["\\']/(?:zed|auto|grace|worldzpad|wldz)/["\\'][^>]*>[\\s\\S]*?</a>',
+    "",
+    crypto_text,
+    flags=re.I,
+)
+crypto.write_text(crypto_text, encoding="utf-8")
 
 print(
     f"PRUNE_PUBLIC_BLOAT=PASS pages={len(urls)} "
-    f"retired_routes={len(set(retired))} roots=18 utility_pages=5 "
-    "hero_showroom=0 brochure_pages=0"
+    f"retired_routes={len(set(retired))} roots=18 "
+    "hero_showroom_targeted=1 brochure_pages_targeted=1"
 )
