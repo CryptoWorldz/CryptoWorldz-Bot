@@ -56,13 +56,17 @@ for url in URLS:
             text = re.sub(r'(<body\b[^>]*>)', r'\1<main class="shell">' + heading + '</main>', text, count=1, flags=re.I)
         h1_added += 1
 
-    # Keep the home control singular and predictable.
-    if text.count('class="ow-home-button"') > 1:
-        first = True
+    # Keep the home control present, singular and predictable even when a late
+    # page generator rewrites a page after the mobile-safety pass.
+    home_button = '<a class="ow-home-button" href="/" aria-label="Home">Home</a>'
+    home_count = text.count('class="ow-home-button"')
+    if home_count == 0:
+        text = re.sub(r'(<body\b[^>]*>)', r'\1' + home_button, text, count=1, flags=re.I)
+    elif home_count > 1:
+        state = [True]
         def dedupe(match):
-            nonlocal first
-            if first:
-                first = False
+            if state[0]:
+                state[0] = False
                 return match.group(0)
             return ''
         text = re.sub(r'<a\b[^>]*class=["\'][^"\']*ow-home-button[^"\']*["\'][^>]*>.*?</a>', dedupe, text, flags=re.I | re.S)
