@@ -48,7 +48,7 @@ jobs:
       - name: Final visual overhaul — every generated page
         run: python3 tools/final_visual_overhaul.py
 
-      - name: Repair screenshot-confirmed visual QA defects v6
+      - name: Repair screenshot-confirmed visual QA defects v7
         run: python3 tools/repair_visual_qa_findings.py
 
       - name: Install global image override LAST on all 18 domains
