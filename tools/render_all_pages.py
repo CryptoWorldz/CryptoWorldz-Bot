@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOMAINS = [d.strip() for d in (ROOT/'DOMAINS.txt').read_text(encoding='utf-8').splitlines() if d.strip()]
 URLS = [u.strip() for u in (ROOT/'.ecosystem-urls.txt').read_text(encoding='utf-8').splitlines() if u.strip()]
 assert len(DOMAINS) == 18 and len(set(DOMAINS)) == 18
-assert len(URLS) == len(set(URLS)) and 18 <= len(URLS) <= 60
+assert len(URLS) == len(set(URLS)) and 18 <= len(URLS) <= 80
 
 
 def browser_path():
