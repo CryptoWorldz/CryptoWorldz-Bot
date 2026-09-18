@@ -54,12 +54,17 @@ for slug,(title,subtitle,a1,a2,symbol) in food.items():
     assert path.is_file(),path
     text=path.read_text(encoding='utf-8')
     src=write_art('foodworldz.com',slug,title,subtitle,a1,a2,symbol)
-    pat=r'<img\b[^>]*class=["\'][^"\']*\broute-art\b[^"\']*["\'][^>]*>'
-    m=re.search(pat,text,re.I)
-    assert m,(path,'route-art missing')
+    # FoodWorldz is rebuilt by remove_retired_uganda_support.py, so the
+    # page has a plain hero <img> rather than the route-art class.
+    m=re.search(r'<img\\b[^>]*>',text,re.I)
+    assert m,(path,'hero image missing')
     tag=m.group(0)
-    tag=re.sub(r'\bsrc=["\'][^"\']+["\']',f'src="{src}"',tag,count=1,flags=re.I)
-    tag=re.sub(r'\balt=["\'][^"\']*["\']',f'alt="{escape(title,quote=True)} artwork"',tag,count=1,flags=re.I)
+    assert re.search(r'\\bsrc=["\\'][^"\\']+["\\']',tag,re.I),(path,'hero src missing')
+    tag=re.sub(r'\\bsrc=["\\'][^"\\']+["\\']',f'src="{src}"',tag,count=1,flags=re.I)
+    if re.search(r'\\balt=["\\'][^"\\']*["\\']',tag,re.I):
+        tag=re.sub(r'\\balt=["\\'][^"\\']*["\\']',f'alt="{escape(title,quote=True)} artwork"',tag,count=1,flags=re.I)
+    else:
+        tag=tag[:-1]+f' alt="{escape(title,quote=True)} artwork">'
     text=text.replace(m.group(0),tag,1)
     path.write_text(text,encoding='utf-8')
     food_changed+=1
