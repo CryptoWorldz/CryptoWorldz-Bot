@@ -78,7 +78,16 @@ jobs:
         run: python3 tools/apply_global_image_overrides.py
 
       - name: "Remove brochure-page bloat and hero showroom"
-        run: python3 tools/prune_public_bloat.py
+        shell: bash
+        run: |
+          set +e
+          python3 tools/prune_public_bloat.py >prune.out 2>prune.err
+          code=$?
+          cat prune.out
+          if [ "$code" -ne 0 ]; then
+            while IFS= read -r line; do echo "::error::$line"; done < prune.err
+            exit "$code"
+          fi
 
       - name: Validate 18-site contract and retired-content removal
         shell: bash
