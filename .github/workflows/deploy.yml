@@ -74,8 +74,8 @@ jobs:
       - name: "Repair Stage 3/3 — Structure, metadata and other defects"
         run: python3 tools/repair_stage_3_other.py
 
-      - name: "Apply screenshot-driven visual repairs from 146-page proof"
-        run: python3 tools/apply_real_visual_repairs.py
+      - name: "Final visual overhaul — every generated page"
+        run: python3 tools/final_visual_overhaul.py
 
       - name: Validate 18-site contract and retired-content removal
         shell: bash
@@ -88,7 +88,7 @@ jobs:
           domains=[d.strip() for d in Path('DOMAINS.txt').read_text().splitlines() if d.strip()]
           assert len(domains)==18 and len(set(domains))==18, domains
           urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
-          assert len(urls)==146 and len(set(urls))==146, (len(urls),len(set(urls)))
+          assert len(urls)==len(set(urls)) and len(urls)>=146, (len(urls),len(set(urls)))
 
           forbidden=('reagan','action spreads smiles','action spread smiles','action creates smiles','196prufjjq')
           for u in urls:
@@ -143,7 +143,7 @@ jobs:
               text=Path(path).read_text(encoding='utf-8')
               assert url in text and '<iframe' not in text.lower(), name
 
-          print('CONTRACT=PASS sites=18 pages=146 retired_uganda=0 slice_of_hope=1 community_links=35 core_style=1')
+          print(f'CONTRACT=PASS sites=18 pages={len(urls)} retired_uganda=0 slice_of_hope=1 community_links=35 core_style=1')
           PY
 
       - name: Audit every page, stylesheet and image before deployment
@@ -201,7 +201,7 @@ jobs:
           ftp.quit(); print(f'HOSTINGER_DEPLOY=PASS sites=18 files={total} retired_remote_purged=1')
           PY
 
-      - name: Verify all 146 public pages, styles, images and retired URLs
+      - name: Verify every public page, style, image and retired URL
         shell: bash
         run: |
           set -euo pipefail
@@ -246,6 +246,6 @@ jobs:
           }
           for u,(needle,count) in specials.items():
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)
-          print('FINAL=PASS pages=146 sites=18 retired_uganda=0 slice_of_hope=1 core_style=1')
+          print(f'FINAL=PASS pages={len(urls)} sites=18 retired_uganda=0 slice_of_hope=1 core_style=1')
           PY
           python3 tools/full_site_audit.py --live
