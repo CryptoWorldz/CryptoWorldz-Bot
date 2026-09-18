@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Compile mission builders
-        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/prune_public_bloat.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py
+        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/deploy_hostinger_robust.py tools/prune_public_bloat.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py
 
       - name: Build ecosystem baseline
         run: python3 tools/build_ecosystem.py
@@ -219,62 +219,11 @@ jobs:
       - name: Render every page on mobile and desktop before deployment
         run: python3 tools/full_site_audit.py --render
 
-      - name: Deploy once to 18 Hostinger destinations and purge retired files
+      - name: Deploy all 18 Hostinger destinations with per-site reconnect and retry
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import os,ssl
-          from ftplib import FTP_TLS,error_perm
-          from pathlib import Path,PurePosixPath
-          targets={
-          'oneworldz.com':'domains/oneworldz.com/public_html','cryptoworldz.xyz':'domains/cryptoworldz.xyz/public_html','solworldz.xyz':'domains/solworldz.xyz/public_html','ethworldz.xyz':'domains/ethworldz.xyz/public_html','baseworldz.xyz':'domains/baseworldz.xyz/public_html','bnbworldz.xyz':'domains/bnbworldz.xyz/public_html','xrpworldz.xyz':'domains/xrpworldz.xyz/public_html','suiworldz.xyz':'domains/suiworldz.xyz/public_html','hyperworldz.xyz':'domains/hyperworldz.xyz/public_html','robinworldz.xyz':'domains/robinworldz.xyz/public_html','hodlerworldz.xyz':'domains/hodlerworldz.xyz/public_html','purplediamondcrew.com':'domains/purplediamondcrew.com/public_html','impactbased.oneworldz.com':'domains/oneworldz.com/public_html/impactbased','law.oneworldz.com':'domains/oneworldz.com/public_html/law','learn.oneworldz.com':'domains/oneworldz.com/public_html/learn','hodlergalaxy.xyz':'domains/hodlergalaxy.xyz/public_html','foodworldz.com':'domains/foodworldz.com/public_html','donateworldz.com':'domains/donateworldz.com/public_html'}
-          ftp=FTP_TLS(context=ssl._create_unverified_context());ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=45);ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD']);ftp.prot_p();ftp.set_pasv(True)
-          def ensure(d):
-              ftp.cwd('/')
-              for part in PurePosixPath(d).parts:
-                  if part in ('','/'): continue
-                  try: ftp.cwd(part)
-                  except error_perm: ftp.mkd(part); ftp.cwd(part)
-          def remove_tree(path):
-              try:
-                  names=ftp.nlst(path)
-              except Exception:
-                  return
-              for name in names:
-                  if name.rstrip('/').split('/')[-1] in ('.','..'): continue
-                  try: ftp.delete(name)
-                  except Exception: remove_tree(name)
-              try: ftp.rmd(path)
-              except Exception: pass
-          # Purge every brochure-only route removed by the lean public-set pass.
-          retired_manifest=Path('.retired-generated-routes.txt')
-          if retired_manifest.is_file():
-              for line in retired_manifest.read_text(encoding='utf-8').splitlines():
-                  if not line.strip(): continue
-                  host,route=line.split('|',1)
-                  if host in targets and route:
-                      remove_tree(str(PurePosixPath(targets[host]) / route))
-          for path in [
-              'domains/oneworldz.com/public_html/heroes/reagan-kauja',
-              'domains/donateworldz.com/public_html/reagan-children',
-          ]: remove_tree(path)
-          for path in [
-              'domains/oneworldz.com/public_html/reagan.png',
-              'domains/donateworldz.com/public_html/reagan.png',
-              'domains/foodworldz.com/public_html/reagan.png',
-          ]:
-              try: ftp.delete(path)
-              except Exception: pass
-          total=0
-          for site,root in targets.items():
-              for f in sorted(p for p in Path(site).rglob('*') if p.is_file()):
-                  rel=f.relative_to(site).as_posix(); remote=PurePosixPath(root)/rel; ensure(str(remote.parent))
-                  with f.open('rb') as h: ftp.storbinary(f'STOR {remote.name}',h,blocksize=262144)
-                  total+=1
-              print('DEPLOYED',site)
-          ftp.quit(); print(f'HOSTINGER_DEPLOY=PASS sites=18 files={total} retired_remote_purged=1')
-          PY
+          python3 tools/deploy_hostinger_robust.py
 
       - name: Verify every public page, style, image and retired URL
         shell: bash
