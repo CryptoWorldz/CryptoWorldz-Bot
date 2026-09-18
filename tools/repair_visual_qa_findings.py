@@ -48,17 +48,32 @@ food={
  'meals':('Meals','Practical food pathways for communities','#22c55e','#38bdf8','MEALS'),
  'shelter':('Shelter','Food security works with safety and shelter','#22c55e','#38bdf8','HOME'),
 }
+food_pages={
+ '':('home','FoodWorldz','Food • Water • Practical Support','#22c55e','#38bdf8','FOOD'),
+ 'clean-water':('clean-water','Clean Water','Safe water supports health and dignity','#22c55e','#38bdf8','H₂O'),
+ 'community':('community','Community','Back local helpers and practical action','#22c55e','#38bdf8','COMMUNITY'),
+ 'education':('education','Education','Nutrition and learning strengthen futures','#22c55e','#38bdf8','LEARN'),
+ 'meals':('meals','Meals','Practical food pathways for communities','#22c55e','#38bdf8','MEALS'),
+ 'shelter':('shelter','Shelter','Food security works with safety and shelter','#22c55e','#38bdf8','HOME'),
+}
 food_changed=0
-for slug,(title,subtitle,a1,a2,symbol) in food.items():
-    path=ROOT/'foodworldz.com'/slug/'index.html'
+for route,(asset_slug,title,subtitle,a1,a2,symbol) in food_pages.items():
+    path=(ROOT/'foodworldz.com'/'index.html') if route=='' else (ROOT/'foodworldz.com'/route/'index.html')
     assert path.is_file(),path
     text=path.read_text(encoding='utf-8')
-    src=write_art('foodworldz.com',slug,title,subtitle,a1,a2,symbol)
-    # FoodWorldz is rebuilt by remove_retired_uganda_support.py, so the
-    # page has a plain hero <img> rather than the route-art class.
-    m=re.search(r'<img[^>]*>',text,re.I)
-    assert m,(path,'hero image missing')
-    tag=m.group(0)
+    src=write_art('foodworldz.com',asset_slug,title,subtitle,a1,a2,symbol)
+
+    # Target the actual hero section, never a nav/logo image.
+    hero=re.search(
+        r'(<section\\b[^>]*class=["\\'][^"\\']*\\bhero\\b[^"\\']*["\\'][^>]*>)([\\s\\S]*?)(</section>)',
+        text,
+        re.I,
+    )
+    assert hero,(path,'hero section missing')
+    hero_body=hero.group(2)
+    img=re.search(r'<img[^>]*>',hero_body,re.I)
+    assert img,(path,'hero image missing')
+    tag=img.group(0)
     src_re=r'src="[^"]+"'
     alt_re=r'alt="[^"]*"'
     assert re.search(src_re,tag,re.I),(path,'hero src missing')
@@ -67,10 +82,13 @@ for slug,(title,subtitle,a1,a2,symbol) in food.items():
         tag=re.sub(alt_re,f'alt="{escape(title,quote=True)} artwork"',tag,count=1,flags=re.I)
     else:
         tag=tag[:-1]+f' alt="{escape(title,quote=True)} artwork">'
-    text=text.replace(m.group(0),tag,1)
+
+    fixed_body=hero_body.replace(img.group(0),tag,1)
+    text=text[:hero.start(2)] + fixed_body + text[hero.end(2):]
     path.write_text(text,encoding='utf-8')
     food_changed+=1
-    assert src in path.read_text(encoding='utf-8'),path
+    final=path.read_text(encoding='utf-8')
+    assert src in final,(path,src)
 
 # ---------- ImpactBased root ----------
 impact=ROOT/'impactbased.oneworldz.com'/'index.html'
@@ -146,4 +164,4 @@ impact_text=impact.read_text(encoding='utf-8')
 assert impact_src in impact_text
 assert '<div class="hero-art"' not in impact_text
 
-print(f'VISUAL_QA_REPAIRS=PASS food_routes={food_changed} impact_root=1 oneworldz_home_heroes=1 pdc_blank_gap=1')
+print(f'VISUAL_QA_REPAIRS=PASS food_pages={food_changed} impact_root=1 oneworldz_home_heroes=1 pdc_blank_gap=1')
