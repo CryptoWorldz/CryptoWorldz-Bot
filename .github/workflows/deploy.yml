@@ -2,7 +2,7 @@ name: Deploy OneWorldz Ecosystem
 
 on:
   push:
-    branches: [main]
+    branches: [main, build/mission-worldz-20260919]
     paths:
       - ".github/workflows/deploy.yml"
       - "tools/**"
@@ -35,6 +35,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 75
     environment:
@@ -46,6 +47,9 @@ jobs:
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Compile mission build scripts
+        run: python3 -m py_compile tools/apply_mission_worldz.py tools/prune_public_bloat.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py
 
       - name: Build ecosystem baseline
         run: python3 tools/build_ecosystem.py
@@ -319,3 +323,43 @@ jobs:
           print(f'FINAL=PASS pages={len(urls)} sites=18 mission_system=1 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 self_promo=0 core_style=1')
           PY
           python3 tools/full_site_audit.py --live
+
+
+  mission-check:
+    if: github.ref == 'refs/heads/build/mission-worldz-20260919'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile mission build scripts
+        run: python3 -m py_compile tools/apply_mission_worldz.py tools/prune_public_bloat.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py
+      - name: Build ecosystem baseline
+        run: python3 tools/build_ecosystem.py
+      - name: Apply approved visual architecture
+        run: python3 tools/apply_visual_fixes.py
+      - name: Apply direct Facebook support routes
+        run: python3 tools/apply_facebook_support.py
+      - name: Permanently remove retired Uganda support content
+        run: python3 tools/remove_retired_uganda_support.py
+      - name: Apply permanent mobile safety rail
+        run: python3 tools/apply_mobile_safety.py
+      - name: Apply legacy vision layer
+        run: python3 tools/apply_jayjay_vision_57.py
+      - name: Build mission departments
+        run: python3 tools/apply_mission_worldz.py
+      - name: Re-apply mobile safety
+        run: python3 tools/apply_mobile_safety.py
+      - name: Repair writing
+        run: python3 tools/repair_stage_1_writing.py
+      - name: Repair images
+        run: python3 tools/repair_stage_2_images.py
+      - name: Repair structure
+        run: python3 tools/repair_stage_3_other.py
+      - name: Install image override
+        run: python3 tools/apply_global_image_overrides.py
+      - name: Prune to mission public set
+        run: python3 tools/prune_public_bloat.py
+      - name: Static mission audit
+        run: python3 tools/full_site_audit.py --static
+      - name: Render mission pages mobile and desktop
+        run: python3 tools/full_site_audit.py --render
