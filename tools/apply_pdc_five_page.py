@@ -63,7 +63,7 @@ home = shell(
     "Purple Diamond Crew — real people, real action, real impact.",
     "/",
     '''<section class="visual-page home-visual">
-<img src="/action-team.png" alt="Purple Diamond Crew on the ground">
+<img src="https://cdn.jsdelivr.net/gh/CryptoWorldz/CryptoWorldz-Bot@main/purplediamondcrew.com/action-team.png" alt="Purple Diamond Crew on the ground">
 <div class="visual-shade"></div>
 <div class="home-mark">
 <p>REAL PEOPLE • REAL ACTION • REAL IMPACT</p>
@@ -87,7 +87,7 @@ chest = shell(
     "The Purple Diamond Crew Hope Chest and the ten genuine legacy token records.",
     "/hope-chest/",
     f'''<section class="visual-page chest-visual">
-<img src="/hero.png" alt="OneWorldz Hope Chest 1927">
+<img src="https://cdn.jsdelivr.net/gh/CryptoWorldz/CryptoWorldz-Bot@main/purplediamondcrew.com/hero.png" alt="OneWorldz Hope Chest 1927">
 <div class="visual-shade"></div>
 <div class="chest-mark"><p>THE ORIGINAL HISTORY STAYS.</p><h1>OneWorldz Hope Chest</h1><span>1927 • Purple Diamond Crew Legacy</span></div>
 </section>
