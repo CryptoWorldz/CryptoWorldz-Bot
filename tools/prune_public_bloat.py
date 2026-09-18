@@ -15,7 +15,20 @@ DOMAINS = [d.strip() for d in (ROOT / "DOMAINS.txt").read_text(encoding="utf-8")
 assert len(DOMAINS) == 18 and len(set(DOMAINS)) == 18
 
 KEEP = {d: {""} for d in DOMAINS}
-KEEP["oneworldz.com"] |= {"community-support"}
+KEEP["oneworldz.com"] |= {
+    "community-support",
+    "specialist-worldz",
+    "waterworldz",
+    "growworldz",
+    "healthworldz",
+    "shelterworldz",
+    "educationworldz",
+    "energyworldz",
+    "wasteworldz",
+    "transportworldz",
+    "moneyworldz",
+    "integrityworldz",
+}
 KEEP["donateworldz.com"] |= {
     "slice-of-hope-australia",
     "davis-family",
@@ -131,7 +144,7 @@ for host in DOMAINS:
     (site / "sitemap.xml").write_text("\n".join(xml) + "\n", encoding="utf-8")
 
 urls = sorted(set(urls))
-assert len(urls) == 43, len(urls)
+assert len(urls) == 54, len(urls)
 (ROOT / ".ecosystem-urls.txt").write_text("\n".join(urls) + "\n", encoding="utf-8")
 (ROOT / ".retired-generated-routes.txt").write_text(
     "\n".join(f"{host}|{route}" for host, route in sorted(set(retired))) + "\n",
@@ -159,4 +172,12 @@ research = (ROOT / "learn.oneworldz.com" / "index.html").read_text(encoding="utf
 for required in ("researchworldz", "country research", "best practice", "send to lawworldz"):
     assert required in research, required
 
-print(f"PRUNE_PUBLIC_BLOAT=PASS pages={len(urls)} roots=18 mission_pages=25 retired_routes={len(set(retired))} jayjay_vision_support=1")
+specialists = ["specialist-worldz","waterworldz","growworldz","healthworldz","shelterworldz","educationworldz","energyworldz","wasteworldz","transportworldz","moneyworldz","integrityworldz"]
+for route in specialists:
+    assert (ROOT / "oneworldz.com" / route / "index.html").is_file(), route
+home = (ROOT / "oneworldz.com" / "index.html").read_text(encoding="utf-8").lower()
+assert 'data-specialist-worldz="1"' in home
+for token in ("waterworldz","growworldz","healthworldz","shelterworldz","educationworldz","energyworldz","wasteworldz","transportworldz","moneyworldz","integrityworldz"):
+    assert token in home, token
+
+print(f"PRUNE_PUBLIC_BLOAT=PASS pages={len(urls)} roots=18 mission_pages=36 specialist_worldz=10 retired_routes={len(set(retired))} jayjay_vision_support=1")
