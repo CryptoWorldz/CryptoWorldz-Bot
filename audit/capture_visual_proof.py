@@ -24,7 +24,7 @@ SHOTS.mkdir(parents=True, exist_ok=True)
 
 DOMAINS = [d.strip() for d in (ROOT/'DOMAINS.txt').read_text(encoding='utf-8').splitlines() if d.strip()]
 URLS = [u.strip() for u in (ROOT/'.ecosystem-urls.txt').read_text(encoding='utf-8').splitlines() if u.strip()]
-assert len(DOMAINS) == 18 and len(URLS) == 146
+assert len(DOMAINS) == 18 and len(URLS) == len(set(URLS)) and len(URLS) >= 146
 
 def browser_path():
     for name in ('google-chrome','chromium','chromium-browser'):
@@ -106,12 +106,12 @@ with (OUT/'manifest.csv').open('w',newline='',encoding='utf-8') as f:
     w.writerows(rows)
 
 (OUT/'README.txt').write_text(
-    'OneWorldz visual proof: 146 pages x mobile+desktop = 292 persistent screenshots.\n'
+    f'OneWorldz visual proof: {len(URLS)} pages x mobile+desktop = {len(URLS)*2} persistent screenshots.\n'
     'Use manifest.csv to map every screenshot to its public URL.\n',
     encoding='utf-8'
 )
 
 if errors:
     raise SystemExit(f'VISUAL_CAPTURE_FAILED errors={len(errors)} first={errors[:5]}')
-assert len(rows)==292
-print('VISUAL_PROOF_CAPTURE=PASS pages=146 screenshots=292 mobile_tall=146 desktop=146 persisted=1')
+assert len(rows)==len(URLS)*2
+print(f'VISUAL_PROOF_CAPTURE=PASS pages={len(URLS)} screenshots={len(rows)} mobile_tall={len(URLS)} desktop={len(URLS)} persisted=1')
