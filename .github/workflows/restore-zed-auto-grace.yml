@@ -68,6 +68,133 @@ jobs:
           chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
           echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
 
+      - name: Recover protected ZED environment from Hostinger backups
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import io, os, posixpath, re
+          from ftplib import FTP_TLS
+
+          domain_root = "/domains/cryptobotz.cryptoworldz.xyz"
+          node_root = domain_root + "/nodejs"
+          public_root = domain_root + "/public_html"
+          required = ("BOT_TOKEN", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY")
+
+          host = os.environ["FTP_HOST"].replace("ftps://","").replace("ftp://","").split("/")[0]
+          if host.count(":") == 1:
+              host = host.split(":",1)[0]
+          port = int(os.environ.get("FTP_PORT","21"))
+          ftp = FTP_TLS()
+          ftp.connect(host, port, timeout=45)
+          ftp.login(os.environ["FTP_USERNAME"], os.environ["FTP_PASSWORD"])
+          ftp.prot_p()
+
+          def read_file(path):
+              buf = io.BytesIO()
+              try:
+                  ftp.retrbinary("RETR " + path, buf.write)
+              except Exception:
+                  return None
+              data = buf.getvalue()
+              if not data or len(data) > 262144:
+                  return None
+              try:
+                  return data.decode("utf-8")
+              except UnicodeDecodeError:
+                  return None
+
+          def parse(text):
+              out = {}
+              for raw in (text or "").splitlines():
+                  line = raw.strip()
+                  if not line or line.startswith("#") or "=" not in line:
+                      continue
+                  key, value = line.split("=", 1)
+                  key = re.sub(r"^export\s+", "", key).strip()
+                  value = value.strip()
+                  if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+                      value = value[1:-1]
+                  if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", key) and value:
+                      out[key] = value
+              return out
+
+          candidates = {
+              node_root + "/.env",
+              node_root + "/.env.production",
+              node_root + "/.env.backup",
+              node_root + "/.env.bak",
+              node_root + "/protected.env",
+              domain_root + "/.env",
+              public_root + "/.env",
+          }
+
+          def safe_list(path):
+              try:
+                  return ftp.nlst(path)
+              except Exception:
+                  return []
+
+          for base in (node_root, domain_root, public_root):
+              for entry in safe_list(base):
+                  name = posixpath.basename(str(entry).rstrip("/"))
+                  low = name.lower()
+                  if "env" in low or "protected" in low:
+                      candidates.add(entry if str(entry).startswith("/") else posixpath.join(base, name))
+
+          for container in (node_root + "/releases", node_root + "/backups", node_root + "/builds"):
+              for entry in safe_list(container):
+                  full = entry if str(entry).startswith("/") else posixpath.join(container, posixpath.basename(str(entry).rstrip("/")))
+                  candidates.add(full + "/.env")
+                  candidates.add(full + "/protected.env")
+
+          found = []
+          current_text = read_file(node_root + "/.env") or ""
+          current = parse(current_text)
+          for path in sorted(candidates):
+              text = read_file(path)
+              if text is None:
+                  continue
+              values = parse(text)
+              present = tuple(k for k in required if values.get(k))
+              if present:
+                  found.append((len(present), len(values), path, values))
+
+          complete = [row for row in found if row[0] == len(required)]
+          if complete:
+              complete.sort(key=lambda row: (row[1], row[2] != node_root + "/.env"), reverse=True)
+              _, _, source, recovered = complete[0]
+          elif all(current.get(k) for k in required):
+              source, recovered = node_root + "/.env", current
+          else:
+              print("ZED_ENV_RECOVERY=FAIL")
+              for score, _, path, _ in found:
+                  print("ENV_CANDIDATE", posixpath.basename(path), "required_keys", score, "of", len(required))
+              raise SystemExit("No protected environment copy contains BOT_TOKEN + SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY")
+
+          merged = dict(recovered)
+          for key, value in current.items():
+              if value:
+                  merged[key] = value
+          for key in required:
+              if not merged.get(key):
+                  raise SystemExit("Recovered environment incomplete: " + key)
+
+          # Prefer current protected OpenAI key supplied by GitHub without logging it.
+          openai = os.environ.get("OPENAI_API_KEY", "").strip()
+          if openai:
+              merged["OPENAI_API_KEY"] = openai
+
+          payload = "".join(f"{k}={v}\n" for k, v in sorted(merged.items()))
+          bio = io.BytesIO(payload.encode("utf-8"))
+          ftp.storbinary("STOR " + node_root + "/.env", bio)
+          ftp.quit()
+
+          print("ZED_ENV_RECOVERY=PASS")
+          print("ZED_ENV_SOURCE=" + posixpath.basename(source))
+          print("ZED_ENV_REQUIRED_KEYS=BOT_TOKEN,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY")
+          PY
+
       - name: Prove restored historical runtime is present
         shell: bash
         run: |
@@ -123,25 +250,102 @@ jobs:
           fi
           echo 'ZED_AUTO_GRACE_LIVE_CORE=PASS'
 
-      - name: Prove Telegram legacy command surface returned
+      - name: Configure and prove Telegram legacy Command Centre
         shell: bash
         run: |
           set -euo pipefail
-          token="$BOT_TOKEN_SECRET"
-          test -n "$token"
-          echo "::add-mask::$token"
-          curl --fail --silent --show-error "https://api.telegram.org/bot${token}/getMyCommands" > "$RUNNER_TEMP/commands.json"
-          COMMANDS="$RUNNER_TEMP/commands.json" node - <<'NODE'
-          const fs=require('fs');
-          const p=JSON.parse(fs.readFileSync(process.env.COMMANDS,'utf8'));
-          if(p.ok!==true) process.exit(1);
-          const commands=(p.result||[]).map(x=>x.command);
-          const required=['start','help','register','profile','points','leaderboard','raaiiidd','missions','wallet','kitty','governance','vote','impact','donate'];
-          const missing=required.filter(x=>!commands.includes(x));
-          if(missing.length){ console.error('Missing legacy commands:',missing.join(',')); process.exit(1); }
-          console.log('LEGACY_COMMANDS_RETURNED=' + required.join(','));
-          NODE
-          echo 'ZED_TELEGRAM_LEGACY_SURFACE=PASS'
+          python3 - <<'PY'
+          import hashlib, io, json, os, re, urllib.request
+          from ftplib import FTP_TLS
+
+          root="/domains/cryptobotz.cryptoworldz.xyz/nodejs"
+          host=os.environ["FTP_HOST"].replace("ftps://","").replace("ftp://","").split("/")[0]
+          if host.count(":")==1: host=host.split(":",1)[0]
+          ftp=FTP_TLS(); ftp.connect(host,int(os.environ.get("FTP_PORT","21")),timeout=45)
+          ftp.login(os.environ["FTP_USERNAME"],os.environ["FTP_PASSWORD"]); ftp.prot_p()
+          buf=io.BytesIO(); ftp.retrbinary("RETR "+root+"/.env",buf.write); ftp.quit()
+          env={}
+          for raw in buf.getvalue().decode("utf-8").splitlines():
+              line=raw.strip()
+              if not line or line.startswith("#") or "=" not in line: continue
+              k,v=line.split("=",1); k=re.sub(r"^export\s+","",k).strip(); v=v.strip().strip('"').strip("'")
+              if v: env[k]=v
+          token=env.get("BOT_TOKEN","")
+          if not token: raise SystemExit("BOT_TOKEN missing after protected recovery")
+          print("::add-mask::"+token)
+
+          api="https://api.telegram.org/bot"+token+"/"
+          def call(method,payload=None):
+              data=None
+              headers={}
+              if payload is not None:
+                  data=json.dumps(payload).encode("utf-8")
+                  headers["content-type"]="application/json"
+              with urllib.request.urlopen(urllib.request.Request(api+method,data=data,headers=headers),timeout=30) as r:
+                  out=json.loads(r.read().decode("utf-8"))
+              if out.get("ok") is not True: raise SystemExit("Telegram "+method+" failed")
+              return out.get("result")
+
+          commands=[
+            {"command":"start","description":"Open the Zed Command Centre"},
+            {"command":"help","description":"View the public command menu"},
+            {"command":"register","description":"Register your Legend Profile"},
+            {"command":"profile","description":"View your Legend Profile"},
+            {"command":"rewards","description":"View reward history"},
+            {"command":"points","description":"View your Legend Points"},
+            {"command":"leaderboard","description":"View the Top 25 Legends"},
+            {"command":"raaiiidd","description":"View the newest active Raaiiidd"},
+            {"command":"missions","description":"View every active Raaiiidd"},
+            {"command":"wallet","description":"Connect a public Solana wallet"},
+            {"command":"kitty","description":"View the community SOL/USDC kitty"},
+            {"command":"governance","description":"View active community votes"},
+            {"command":"vote","description":"Vote on a governance proposal"},
+            {"command":"impact","description":"Open the featured impact mission"},
+            {"command":"donate","description":"Open the featured donation route"},
+            {"command":"cancel","description":"Cancel wallet registration"},
+            {"command":"community","description":"Open CryptoWorldz community links"},
+            {"command":"website","description":"Open CryptoWorldz.xyz"}
+          ]
+          call("setMyCommands",{"commands":commands})
+          call("setChatMenuButton",{"menu_button":{"type":"web_app","text":"🌐 OPEN COMMAND CENTRE","web_app":{"url":"https://cryptobotz.cryptoworldz.xyz/miniapp/"}}})
+          secret=hashlib.sha256(token.encode()).hexdigest()
+          call("setWebhook",{
+            "url":"https://cryptobotz.cryptoworldz.xyz/telegram-webhook",
+            "secret_token":secret,
+            "allowed_updates":["message","callback_query"],
+            "drop_pending_updates":False
+          })
+          bot=call("getMe")
+          actual=call("getMyCommands")
+          hook=call("getWebhookInfo")
+          got=[x.get("command") for x in actual]
+          expected=[x["command"] for x in commands]
+          if got != expected: raise SystemExit("Telegram command list mismatch")
+          if hook.get("url") != "https://cryptobotz.cryptoworldz.xyz/telegram-webhook": raise SystemExit("Telegram webhook URL mismatch")
+          if hook.get("last_error_message"): raise SystemExit("Telegram webhook reports an error: "+str(hook.get("last_error_message"))[:160])
+          print("ZED_TELEGRAM_BOT=PASS")
+          print("ZED_TELEGRAM_COMMANDS=18")
+          print("ZED_TELEGRAM_WEBHOOK=PASS")
+          print("ZED_TELEGRAM_MENU_BUTTON=PASS")
+          PY
+
+      - name: Prove live AUTO, GRACE and protected surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="https://$PROTECTED_DOMAIN"
+          test "$(curl --silent --show-error --location -o "$RUNNER_TEMP/grace.json" -w '%{http_code}' "$root/grace/health")" = 200
+          grep -Fq '"ok":true' "$RUNNER_TEMP/grace.json"
+          auto_code="$(curl --silent --show-error --location -o "$RUNNER_TEMP/auto.json" -w '%{http_code}' "$root/api/mini/auto/status" || true)"
+          case "$auto_code" in 200|401|403) ;; *) echo "AUTO route missing HTTP=$auto_code"; exit 1;; esac
+          wallet_code="$(curl --silent --show-error --location -o "$RUNNER_TEMP/wallet.json" -w '%{http_code}' "$root/api/mini/project-wallets" || true)"
+          case "$wallet_code" in 200|401|403) ;; *) echo "Project-wallet route missing HTTP=$wallet_code"; exit 1;; esac
+          gpt_code="$(curl --silent --show-error --location -o "$RUNNER_TEMP/gpt.json" -w '%{http_code}' "$root/api/oneworldz-gpt/status" || true)"
+          test "$gpt_code" = 200
+          echo 'ZED_AUTO_ROUTE=PASS'
+          echo 'ZED_GRACE_ROUTE=PASS'
+          echo 'ZED_PROJECT_WALLETS_ROUTE=PASS'
+          echo 'ONEWORLDZ_GPT_ROUTE=PASS'
 
       - name: Final verdict
         run: echo 'ZED_AUTO_GRACE_COMMAND_CENTRE_RESTORED=PASS'
