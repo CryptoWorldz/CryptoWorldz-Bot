@@ -165,7 +165,16 @@ jobs:
           PY
 
       - name: Audit every page, stylesheet and image before deployment
-        run: python3 tools/full_site_audit.py --static
+        shell: bash
+        run: |
+          set +e
+          python3 tools/full_site_audit.py --static >audit.out 2>&1
+          code=$?
+          cat audit.out
+          if [ "$code" -ne 0 ]; then
+            head -n 120 audit.out | while IFS= read -r line; do echo "::error::$line"; done
+            exit "$code"
+          fi
 
       - name: Render every page on mobile and desktop before deployment
         run: python3 tools/full_site_audit.py --render
