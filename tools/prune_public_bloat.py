@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Remove public-page bloat and keep only pages that perform a real job."""
+"""Keep only public pages that perform a real job.
+
+Mission departments are intentionally preserved:
+ResearchWorldz, LawWorldz, FoodWorldz and DonateWorldz field missions.
+Generic brochure routes and self-promotion routes are removed.
+"""
 from pathlib import Path
 import re
 import shutil
@@ -9,14 +14,38 @@ ROOT = Path(__file__).resolve().parents[1]
 DOMAINS = [d.strip() for d in (ROOT / "DOMAINS.txt").read_text(encoding="utf-8").splitlines() if d.strip()]
 assert len(DOMAINS) == 18 and len(set(DOMAINS)) == 18
 
-# 18 useful front doors + 5 pages that perform a specific support/community job.
 KEEP = {d: {""} for d in DOMAINS}
 KEEP["oneworldz.com"] |= {"community-support"}
 KEEP["donateworldz.com"] |= {
     "slice-of-hope-australia",
     "davis-family",
     "community-impact",
-    "jayjay-support",
+    "fresh-water-mission",
+    "grow-food-mission",
+}
+KEEP["foodworldz.com"] |= {
+    "food-rescue",
+    "food-safety",
+    "storage-cold-chain",
+    "food-preparation",
+    "shipping-logistics",
+    "food-waste",
+    "growing-food",
+    "food-law",
+}
+KEEP["law.oneworldz.com"] |= {
+    "change-the-law",
+    "public-money",
+    "integrity",
+    "model-laws",
+    "civic-pathways",
+    "research-handoff",
+}
+KEEP["learn.oneworldz.com"] |= {
+    "country-research",
+    "best-practice",
+    "evidence-brief",
+    "send-to-lawworldz",
 }
 
 def route_for(path: Path, host: str) -> str:
@@ -24,7 +53,6 @@ def route_for(path: Path, host: str) -> str:
     return "" if rel == "." else rel.strip("/")
 
 def drop_section(text: str, needle: str) -> str:
-    """Remove only the first complete section containing needle."""
     wanted = needle.lower()
     for match in re.finditer(r'<section\b[^>]*>[\s\S]*?</section>', text, re.I):
         if wanted in match.group(0).lower():
@@ -34,13 +62,7 @@ def drop_section(text: str, needle: str) -> str:
 retired = []
 for host in DOMAINS:
     site = ROOT / host
-    # Delete deepest routes first. Removing /heroes/ before /heroes/person/
-    # would otherwise erase child paths that are still in the discovered list.
-    pages = sorted(
-        site.rglob("index.html"),
-        key=lambda p: len(p.relative_to(site).parts),
-        reverse=True,
-    )
+    pages = sorted(site.rglob("index.html"), key=lambda p: len(p.relative_to(site).parts), reverse=True)
     for page in pages:
         if not page.exists():
             continue
@@ -50,7 +72,7 @@ for host in DOMAINS:
         retired.append((host, route))
         shutil.rmtree(page.parent)
 
-# OneWorldz: remove the repeated hero showroom and the dead GPT/directory promo.
+# OneWorldz remains humanitarian/system-change only. Remove legacy showroom fragments if present.
 one = ROOT / "oneworldz.com" / "index.html"
 text = one.read_text(encoding="utf-8")
 text = re.sub(r'<a\b[^>]*href=["\']#heroes["\'][^>]*>.*?</a>', "", text, flags=re.I|re.S)
@@ -61,15 +83,13 @@ if 'href="/community-support/"' not in text:
     text = text.replace("</nav>", '<a href="/community-support/">Community Support</a></nav>', 1)
 one.write_text(text, encoding="utf-8")
 
-# CryptoWorldz: keep the front door, Worldz links and real Command Centre doorway.
-# Remove brochure-only blocks whose buttons only created more pages.
+# CryptoWorldz keeps crypto material; generic brochure-only subroutes are still removed.
 crypto = ROOT / "cryptoworldz.xyz" / "index.html"
 text = crypto.read_text(encoding="utf-8")
 text = drop_section(text, "The systems")
 text = drop_section(text, "WorldzPad™ + $WLDZ")
 crypto.write_text(text, encoding="utf-8")
 
-# Chain roots: remove Learn / Community / Builders brochure cards.
 for host in [
     "solworldz.xyz","ethworldz.xyz","baseworldz.xyz","bnbworldz.xyz","xrpworldz.xyz",
     "suiworldz.xyz","hyperworldz.xyz","robinworldz.xyz","hodlerworldz.xyz","hodlergalaxy.xyz"
@@ -79,7 +99,6 @@ for host in [
     text = drop_section(text, 'href="/learn/"')
     p.write_text(text, encoding="utf-8")
 
-# PDC legacy information already lives on the home page.
 pdc = ROOT / "purplediamondcrew.com" / "index.html"
 text = pdc.read_text(encoding="utf-8")
 text = text.replace('href="/legacy/"', 'href="#legacy"')
@@ -91,7 +110,6 @@ if 'id="legacy"' not in text:
     )
 pdc.write_text(text, encoding="utf-8")
 
-# Rebuild sitemaps and deployment manifest from the lean set only.
 urls = []
 for host in DOMAINS:
     site = ROOT / host
@@ -112,33 +130,32 @@ for host in DOMAINS:
     (site / "sitemap.xml").write_text("\n".join(xml) + "\n", encoding="utf-8")
 
 urls = sorted(set(urls))
+assert len(urls) == 42, len(urls)
 (ROOT / ".ecosystem-urls.txt").write_text("\n".join(urls) + "\n", encoding="utf-8")
 (ROOT / ".retired-generated-routes.txt").write_text(
     "\n".join(f"{host}|{route}" for host, route in sorted(set(retired))) + "\n",
     encoding="utf-8",
 )
 
-# Final fallback cleanup for any homepage link left outside the removed sections.
-one_text = one.read_text(encoding="utf-8")
-one_text = re.sub(
-    r"<a\\b[^>]*href=['\"]/heroes/[^'\"]*['\"][^>]*>[\\s\\S]*?</a>",
-    "",
-    one_text,
-    flags=re.I,
-)
-one.write_text(one_text, encoding="utf-8")
+# Hard mission gates.
+one_text = one.read_text(encoding="utf-8").lower()
+for forbidden in ("cryptoworldz", "hodlerworldz", "solworldz", "ethworldz", "baseworldz", "jayjayteamdev"):
+    assert forbidden not in one_text, forbidden
 
-crypto_text = crypto.read_text(encoding="utf-8")
-crypto_text = re.sub(
-    r"<a\\b[^>]*href=['\"]/(?:zed|auto|grace|worldzpad|wldz)/['\"][^>]*>[\\s\\S]*?</a>",
-    "",
-    crypto_text,
-    flags=re.I,
-)
-crypto.write_text(crypto_text, encoding="utf-8")
+donate = (ROOT / "donateworldz.com" / "index.html").read_text(encoding="utf-8").lower()
+assert "fresh-water-mission" in donate and "grow-food-mission" in donate
+assert "jayjayteamdev" not in donate and "jayjay-support" not in donate
 
-print(
-    f"PRUNE_PUBLIC_BLOAT=PASS pages={len(urls)} "
-    f"retired_routes={len(set(retired))} roots=18 "
-    "hero_showroom_targeted=1 brochure_pages_targeted=1"
-)
+food = (ROOT / "foodworldz.com" / "index.html").read_text(encoding="utf-8").lower()
+for required in ("food rescue", "food safety", "cold chain", "shipping", "food waste", "food law"):
+    assert required in food, required
+
+law = (ROOT / "law.oneworldz.com" / "index.html").read_text(encoding="utf-8").lower()
+for required in ("lawworldz", "public money", "integrity", "model laws"):
+    assert required in law, required
+
+research = (ROOT / "learn.oneworldz.com" / "index.html").read_text(encoding="utf-8").lower()
+for required in ("researchworldz", "country research", "best practice", "send to lawworldz"):
+    assert required in research, required
+
+print(f"PRUNE_PUBLIC_BLOAT=PASS pages={len(urls)} roots=18 mission_pages=24 retired_routes={len(set(retired))} self_promo=0")
