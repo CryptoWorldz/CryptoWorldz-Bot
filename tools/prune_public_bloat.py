@@ -17,6 +17,7 @@ assert len(DOMAINS) == 18 and len(set(DOMAINS)) == 18
 KEEP = {d: {""} for d in DOMAINS}
 KEEP["oneworldz.com"] |= {
     "community-support",
+    "links-in-dubbo",
     "specialist-worldz",
     "waterworldz",
     "growworldz",
@@ -96,6 +97,8 @@ text = drop_section(text, 'data-final-heroes="1"')
 text = drop_section(text, "OneWorldz GPT System")
 if 'href="/community-support/"' not in text:
     text = text.replace("</nav>", '<a href="/community-support/">Community Support</a></nav>', 1)
+if 'href="/links-in-dubbo/"' not in text:
+    text = text.replace("</nav>", '<a href="/links-in-dubbo/">Links in Dubbo</a></nav>', 1)
 one.write_text(text, encoding="utf-8")
 
 # CryptoWorldz keeps crypto material; generic brochure-only subroutes are still removed.
@@ -145,7 +148,7 @@ for host in DOMAINS:
     (site / "sitemap.xml").write_text("\n".join(xml) + "\n", encoding="utf-8")
 
 urls = sorted(set(urls))
-assert len(urls) == 55, len(urls)
+assert len(urls) == 56, len(urls)
 (ROOT / ".ecosystem-urls.txt").write_text("\n".join(urls) + "\n", encoding="utf-8")
 (ROOT / ".retired-generated-routes.txt").write_text(
     "\n".join(f"{host}|{route}" for host, route in sorted(set(retired))) + "\n",
