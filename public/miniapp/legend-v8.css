@@ -1,0 +1,9 @@
+.legend-v8-heading{margin-top:24px}
+.legend-v8-panel{border-color:rgba(255,199,77,.42);background:linear-gradient(145deg,rgba(104,62,8,.26),rgba(18,7,33,.94))}
+.legend-v8-badge{display:inline-block;padding:5px 10px;border:1px solid rgba(255,199,77,.5);border-radius:999px;color:#ffd984;font-size:11px;font-weight:900;letter-spacing:.09em}
+.legend-v8-grid{display:grid;gap:10px;margin-top:12px}
+.legend-v8-item{padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:rgba(8,3,14,.38)}
+.legend-v8-item strong{display:block;margin-bottom:4px}
+.legend-v8-item small{color:var(--muted)}
+.legend-v8-planned{opacity:.88;border-style:dashed}
+.legend-v8-budget{margin-top:12px;padding:11px 13px;border-left:3px solid #ffd984;background:rgba(8,3,14,.42)}
