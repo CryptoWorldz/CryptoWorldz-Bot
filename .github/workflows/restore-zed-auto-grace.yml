@@ -160,17 +160,55 @@ jobs:
               if present:
                   found.append((len(present), len(values), path, values))
 
+          # Hostinger managed Node environment can retain values even when the
+          # filesystem .env was replaced. Read it server-side without logging values.
+          managed = {}
+          try:
+              import json, urllib.parse, urllib.request
+              domain = "cryptobotz.cryptoworldz.xyz"
+              token = os.environ.get("HOSTINGER_API_TOKEN", "").strip()
+              req = urllib.request.Request(
+                  "https://developers.hostinger.com/api/hosting/v1/websites?domain=" + urllib.parse.quote(domain) + "&per_page=25",
+                  headers={"Authorization":"Bearer "+token,"Accept":"application/json"}
+              )
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  websites = json.loads(response.read().decode("utf-8"))
+              row = next((x for x in websites.get("data",[]) if str(x.get("domain","")).lower()==domain), None)
+              if row and row.get("username"):
+                  username = urllib.parse.quote(str(row["username"]), safe="")
+                  denv = urllib.parse.quote(domain, safe="")
+                  env_url = f"https://developers.hostinger.com/api/hosting/v1/accounts/{username}/websites/{denv}/nodejs/builds/settings/env"
+                  req = urllib.request.Request(env_url, headers={"Authorization":"Bearer "+token,"Accept":"application/json"})
+                  with urllib.request.urlopen(req, timeout=30) as response:
+                      payload = json.loads(response.read().decode("utf-8"))
+                  def collect(obj):
+                      if isinstance(obj, dict):
+                          k = obj.get("key") or obj.get("name")
+                          v = obj.get("value")
+                          if isinstance(k,str) and isinstance(v,(str,int,float,bool)) and str(v).strip() and str(v).strip() not in ("***","********"):
+                              managed[k] = str(v)
+                          for value in obj.values():
+                              collect(value)
+                      elif isinstance(obj, list):
+                          for value in obj: collect(value)
+                  collect(payload)
+          except Exception:
+              managed = {}
+
           complete = [row for row in found if row[0] == len(required)]
-          if complete:
+          if all(managed.get(k) for k in required):
+              source, recovered = "hostinger-managed-env", managed
+          elif complete:
               complete.sort(key=lambda row: (row[1], row[2] != node_root + "/.env"), reverse=True)
               _, _, source, recovered = complete[0]
           elif all(current.get(k) for k in required):
               source, recovered = node_root + "/.env", current
           else:
               print("ZED_ENV_RECOVERY=FAIL")
+              print("HOSTINGER_MANAGED_ENV_REQUIRED_KEYS=" + str(sum(1 for k in required if managed.get(k))) + "_OF_3")
               for score, _, path, _ in found:
                   print("ENV_CANDIDATE", posixpath.basename(path), "required_keys", score, "of", len(required))
-              raise SystemExit("No protected environment copy contains BOT_TOKEN + SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY")
+              raise SystemExit("No protected environment source contains BOT_TOKEN + SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY")
 
           merged = dict(recovered)
           for key, value in current.items():
