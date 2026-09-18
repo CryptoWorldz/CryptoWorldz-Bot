@@ -27,7 +27,7 @@ img,svg,video,canvas{max-width:100%;height:auto}
 .hero,.section{border-radius:18px!important}
 .hero-grid{gap:0!important}
 .hero-copy{padding:clamp(20px,5vw,48px)!important}
-.hero-copy h1,.big-title,.route-copy h1,.section h2{overflow-wrap:anywhere!important;word-break:normal!important;text-wrap:balance}
+.hero-copy h1,.big-title,.route-copy h1,.section h2{overflow-wrap:normal!important;word-break:normal!important;hyphens:none!important;text-wrap:balance}
 .hero-copy p,.section p,.copy span,.info-card span{line-height:1.5!important}
 .actions,.btns{gap:10px!important}
 .btn{min-height:46px!important;padding:11px 15px!important}
@@ -47,6 +47,9 @@ img,svg,video,canvas{max-width:100%;height:auto}
 .final-hero-card b{color:#38bdf8;font-size:.82rem;letter-spacing:.09em}
 @media(max-width:760px){
   .nav{position:relative!important;top:auto!important}
+  .section-head{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important}
+  .section-head>.btn{width:100%!important}
+
   .shell{padding:8px!important}
   .hero-grid,.grid,.system-grid,.support-grid,.split,.portal,.mission,.token-grid,.final-hero-grid{grid-template-columns:1fr!important}
   .hero-list{grid-template-columns:1fr!important}
@@ -200,6 +203,12 @@ for path in all_pages:
     text=remove_filler(text)
 
     if host=='oneworldz.com' and route=='heroes':
+        text=rebuild_heroes_listing(text)
+
+    # The OneWorldz homepage contains a second Real Heroes grid. Rebuild that
+    # grid with the exact same verified mapping so the homepage cannot regress
+    # even when apply_visual_fixes.py still carries legacy filenames.
+    if host=='oneworldz.com' and route=='' and 'class="hero-list"' in text:
         text=rebuild_heroes_listing(text)
 
     if host=='oneworldz.com' and route.startswith('heroes/'):
