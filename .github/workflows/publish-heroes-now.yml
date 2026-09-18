@@ -1,0 +1,158 @@
+name: Publish OneWorldz Heroes Now
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/publish-heroes-now.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-heroes-now
+  cancel-in-progress: true
+
+jobs:
+  publish-heroes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build approved Heroes package
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/build_ecosystem.py
+          python3 tools/apply_visual_fixes.py
+          python3 tools/apply_facebook_support.py
+          python3 tools/remove_retired_uganda_support.py
+          python3 tools/apply_mobile_safety.py
+          python3 tools/apply_jayjay_vision_57.py
+          python3 tools/apply_mission_worldz.py
+          python3 tools/apply_specialist_worldz.py
+          python3 tools/apply_heroes_worldz.py
+          python3 tools/apply_mobile_safety.py
+          python3 tools/repair_stage_1_writing.py
+          python3 tools/repair_stage_2_images.py
+          python3 tools/repair_stage_3_other.py
+          python3 tools/apply_global_image_overrides.py
+          python3 tools/prune_public_bloat.py
+          python3 - <<'PY'
+          from pathlib import Path
+          routes=[
+              "heroes",
+              "heroes/just-knate",
+              "heroes/victor-good-boss",
+              "heroes/sam-weidenhofer",
+              "heroes/bi-phakathi",
+              "heroes/mdmotivator",
+              "heroes/dylan-thiry",
+              "heroes/destination-inspiration",
+          ]
+          for route in routes:
+              p=Path("oneworldz.com")/route/"index.html"
+              assert p.is_file(), p
+              text=p.read_text(encoding="utf-8")
+              assert 'data-oneworldz-build=' in text
+              assert 'data-oneworldz-heroes=' in text
+          home=Path("oneworldz.com/heroes/index.html").read_text(encoding="utf-8")
+          for name in ("Just Knate","Victor — The Good Boss","Sam Weidenhofer","Bi Phakathi","MDMotivator","Dylan Thiry"):
+              assert name in home, name
+          for banned in ("Reagan Kauja","Bob — The Giving Roofer","SolMotivator"):
+              assert banned not in home, banned
+          print("HERO_PACKAGE=PASS routes=8 approved_heroes=6")
+          PY
+
+      - name: Publish Heroes files only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path, PurePosixPath
+
+          root=Path("oneworldz.com")
+          remote_root=PurePosixPath("domains/oneworldz.com/public_html")
+          files=[]
+          files += sorted(p for p in (root/"heroes").rglob("*") if p.is_file())
+          files += sorted(p for p in (root/"assets"/"heroes").rglob("*") if p.is_file())
+          for rel in ("style.css","mobile-safe.css","global-image-overrides.css"):
+              p=root/rel
+              if p.is_file(): files.append(p)
+
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ["FTP_HOST"],int(os.environ.get("FTP_PORT","21")),timeout=45)
+          ftp.login(os.environ["FTP_USERNAME"],os.environ["FTP_PASSWORD"])
+          ftp.prot_p(); ftp.set_pasv(True)
+
+          def ensure(directory):
+              ftp.cwd("/")
+              for part in PurePosixPath(directory).parts:
+                  if part in ("","/"): continue
+                  try: ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part); ftp.cwd(part)
+
+          count=0
+          try:
+              for f in files:
+                  rel=f.relative_to(root).as_posix()
+                  remote=remote_root/rel
+                  ensure(str(remote.parent))
+                  with f.open("rb") as h:
+                      ftp.storbinary("STOR "+remote.name,h,blocksize=262144)
+                  count+=1
+          finally:
+              try: ftp.quit()
+              except Exception:
+                  try: ftp.close()
+                  except Exception: pass
+          print(f"HERO_PUBLISH=PASS files={count}")
+          PY
+
+      - name: Verify Heroes live
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import time, urllib.request
+          checks={
+            "https://oneworldz.com/heroes/":["Just Knate","Victor — The Good Boss","Sam Weidenhofer","Bi Phakathi","MDMotivator","Dylan Thiry","Purple Diamond Crew"],
+            "https://oneworldz.com/heroes/just-knate/":["Just Knate","facebook.com/justknate","Purple Diamond Crew"],
+            "https://oneworldz.com/heroes/victor-good-boss/":["Victor — The Good Boss","facebook.com/victorthegoodboss","Purple Diamond Crew"],
+            "https://oneworldz.com/heroes/sam-weidenhofer/":["Sam Weidenhofer","facebook.com/itssozer","Purple Diamond Crew"],
+            "https://oneworldz.com/heroes/bi-phakathi/":["Bi Phakathi","facebook.com/biphakathi","Purple Diamond Crew"],
+            "https://oneworldz.com/heroes/mdmotivator/":["MDMotivator","facebook.com/MdMotivatorOfficial","Purple Diamond Crew"],
+            "https://oneworldz.com/heroes/dylan-thiry/":["Dylan Thiry","facebook.com/dylanthirypro","Purple Diamond Crew"],
+            "https://oneworldz.com/heroes/destination-inspiration/":["Worldz Live","Open invitation to P!NK","Uganda Pilot","UNDP 2025 MPI Data"],
+          }
+          for url,needles in checks.items():
+              last=""
+              for attempt in range(8):
+                  try:
+                      req=urllib.request.Request(url+"?heroesnow=1",headers={"User-Agent":"OneWorldz-Heroes-Verify/1.0","Cache-Control":"no-cache"})
+                      with urllib.request.urlopen(req,timeout=25) as r:
+                          body=r.read().decode("utf-8","ignore")
+                          missing=[n for n in needles if n not in body]
+                          if r.status==200 and not missing:
+                              print("HERO_LIVE_PASS",url)
+                              break
+                          last=f"status={r.status} missing={missing}"
+                  except Exception as e:
+                      last=repr(e)
+                  time.sleep(2+attempt)
+              else:
+                  raise SystemExit(f"HERO_LIVE_FAIL {url} {last}")
+          print("HEROES_LIVE=PASS routes=8")
+          PY
