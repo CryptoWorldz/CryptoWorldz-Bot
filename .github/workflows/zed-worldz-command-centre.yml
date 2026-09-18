@@ -246,13 +246,11 @@ jobs:
             echo "ZED_LIVE_PROBE attempt=$attempt http=$code"
             if [ "$code" = 200 ] && HEALTH="$RUNNER_TEMP/zed-health.json" node - <<'NODE'
           const p=require(process.env.HEALTH);
-          process.env.HOSTINGER_MANAGED_ENV_OK='1';
           if(p.ok!==true) process.exit(1);
           if(p.service!=='Zed OneWorldz Command Centre') process.exit(1);
           if(p.build!=='worldz-problem-solving-v1') process.exit(1);
           if(Number(p.commands)!==18) process.exit(1);
           if(p.telegram_configured!==true) process.exit(1);
-          if(p.environment_loaded!==true && !process.env.HOSTINGER_MANAGED_ENV_OK) process.exit(1);
           NODE
             then pass=1; break; fi
           done
@@ -303,11 +301,17 @@ jobs:
           NODE
           curl --fail --silent --show-error -X POST "$api/setWebhook" -H 'Content-Type: application/json' --data-binary "@$RUNNER_TEMP/zed-webhook-request.json" > "$RUNNER_TEMP/zed-set-webhook.json"
           curl --fail --silent --show-error "$api/getWebhookInfo" > "$RUNNER_TEMP/zed-webhook-info.json"
-          FILES="$RUNNER_TEMP/zed-set-commands.json:$RUNNER_TEMP/zed-set-menu.json:$RUNNER_TEMP/zed-set-webhook.json:$RUNNER_TEMP/zed-webhook-info.json" node - <<'NODE'
+          curl --fail --silent --show-error "$api/getMyCommands" > "$RUNNER_TEMP/zed-get-commands.json"
+          FILES="$RUNNER_TEMP/zed-set-commands.json:$RUNNER_TEMP/zed-set-menu.json:$RUNNER_TEMP/zed-set-webhook.json:$RUNNER_TEMP/zed-webhook-info.json:$RUNNER_TEMP/zed-get-commands.json" node - <<'NODE'
           const fs=require('fs');
           const p=process.env.FILES.split(':').map(function(file){return JSON.parse(fs.readFileSync(file,'utf8'));});
           for(const x of p) if(x.ok!==true) process.exit(1);
           if(p[3].result.url!=='https://cryptobotz.cryptoworldz.xyz/telegram/webhook') process.exit(1);
+          const commands=(p[4].result||[]).map(function(x){return x.command;});
+          const expected=['start','help','system','research','food','water','grow','health','shelter','education','energy','waste','transport','money','integrity','law','oneworldz','donate'];
+          if(JSON.stringify(commands)!==JSON.stringify(expected)) process.exit(1);
+          const retired=['profile','register','rewards','points','leaderboard','raid','raaiiidd','missions','wallet','kitty','governance','vote','impact','airdrop','airdrops','events','treasury'];
+          if(retired.some(function(x){return commands.includes(x);})) process.exit(1);
           NODE
           echo 'ZED_TELEGRAM_COMMANDS=PASS'
           echo 'ZED_TELEGRAM_WEBHOOK=PASS'
