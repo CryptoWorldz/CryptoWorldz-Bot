@@ -187,7 +187,7 @@ for route,(title,h1,intro,cards_) in food_pages.items():
 
 # ------------------------------ DonateWorldz ------------------------------
 donate_sections = [
-    {"eyebrow":"Fund the solution","title":"Equipment, infrastructure and direct community missions.","text":"DonateWorldz exists to move verified resources into practical work. It is not a page for promoting the people building the website.",
+    {"eyebrow":"Fund the solution","title":"Equipment, infrastructure and direct community missions.","text":"DonateWorldz exists to move verified resources into practical work. Field-mission funds stay clearly separated, while the JayJayTeamDev pathway separately supports the work required to build and coordinate the OneWorldz vision.",
      "cards":[
         ("Fresh Water Mission","Bore assessment, drilling, testing, filtration, tanks, serviceable pumps, solar power, backup, spares, training and maintenance.","/fresh-water-mission/"),
         ("Grow Food Mission","Gardening tools, seeds, fruit trees, irrigation, composting, soil improvement, storage and local training.","/grow-food-mission/"),
