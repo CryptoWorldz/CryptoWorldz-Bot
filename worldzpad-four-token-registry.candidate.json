@@ -1,0 +1,124 @@
+{
+  "version": "2026-09-19-four-token-candidate-v1",
+  "network": "Solana",
+  "launchpad": "WorldzPad Flash Direct",
+  "status": "candidate-mainnet-disabled",
+  "shared": {
+    "trade_fee_bps": 200,
+    "legacy_loyalty_percent": 1,
+    "private_presale": false,
+    "bonding_curve": false,
+    "guaranteed_returns": false,
+    "mainnet_authorized": false,
+    "anti_whale": "reward/governance influence caps; no private whale terms"
+  },
+  "tokens": [
+    {
+      "number": 1,
+      "name": "WORLDZ",
+      "ticker": "WLDZ",
+      "fixed_supply": 100000000,
+      "allocations": {
+        "development": 25,
+        "liquidity": 25,
+        "people_charity": 25,
+        "ecosystem": 25
+      },
+      "legacy_loyalty_amount": 1000000,
+      "fee_split_percent": {
+        "holder_rewards": 40,
+        "lp_growth": 20,
+        "buyback_burn": 15,
+        "board_treasury": 10,
+        "charity_impact": 10,
+        "raaiiidd_growth": 5
+      },
+      "reward_weighting_percent": {
+        "proportional": 70,
+        "equalizer": 30
+      }
+    },
+    {
+      "number": 2,
+      "name": "REVIVE",
+      "ticker": "RVIV",
+      "fixed_supply": 200000000,
+      "allocations": {
+        "development_revival": 25,
+        "liquidity": 25,
+        "legacy_people": 25,
+        "ecosystem": 25
+      },
+      "legacy_loyalty_amount": 2000000,
+      "fee_split_percent": {
+        "small_holder_rewards": 35,
+        "legacy_revival": 25,
+        "lp_growth": 15,
+        "buyback_burn": 10,
+        "charity_impact": 10,
+        "worldzpad_ops": 5
+      },
+      "reward_weighting_percent": {
+        "proportional": 50,
+        "equalizer": 50
+      },
+      "reward_weight_cap_percent_supply": 0.5
+    },
+    {
+      "number": 3,
+      "name": "PHENIX",
+      "ticker": "PNEX",
+      "fixed_supply": 250000000,
+      "allocations": {
+        "development": 25,
+        "liquidity": 25,
+        "people_rebirth": 25,
+        "ecosystem": 25
+      },
+      "legacy_loyalty_amount": 2500000,
+      "fee_split_percent": {
+        "small_holder_rewards": 30,
+        "buyback_burn": 25,
+        "lp_growth": 20,
+        "rebirth_grants": 10,
+        "hunger_impact": 10,
+        "worldzpad_ops": 5
+      },
+      "reward_weighting_percent": {
+        "proportional": 40,
+        "equalizer": 60
+      },
+      "reward_weight_cap_percent_supply": 0.4
+    },
+    {
+      "number": 4,
+      "name": "MIRACLE",
+      "ticker": "MRCL",
+      "fixed_supply": 348000000,
+      "allocations": {
+        "development": 25,
+        "liquidity": 25,
+        "miracle_people": 25,
+        "mission_ecosystem": 25
+      },
+      "legacy_loyalty_amount": 3480000,
+      "fee_split_percent": {
+        "hunger_impact": 40,
+        "small_holder_rewards": 20,
+        "lp_growth": 15,
+        "miracle_participation": 10,
+        "buyback_lock_burn": 10,
+        "worldzpad_ops": 5
+      },
+      "reward_weighting_percent": {
+        "proportional": 30,
+        "equalizer": 70
+      },
+      "reward_weight_cap_percent_supply": 0.25,
+      "planned_claim_date": "2027-11-08",
+      "miracle_people_pool": 87000000,
+      "maximum_claimants": 1000,
+      "claim_amount_if_full_pool": 87000
+    }
+  ]
+}
