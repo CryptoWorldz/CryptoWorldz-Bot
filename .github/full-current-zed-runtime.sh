@@ -9,8 +9,11 @@ set -Eeuo pipefail
 : "${FTP_PORT:?}"
 : "${HOSTINGER_API_TOKEN:?}"
 : "${OPENAI_API_KEY:?}"
+: "${BOT_TOKEN_SECRET:?}"
+: "${SUPABASE_URL_SECRET:?}"
+: "${SUPABASE_SERVICE_ROLE_KEY_SECRET:?}"
 
-for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN" "$OPENAI_API_KEY"; do
+for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN" "$OPENAI_API_KEY" "$BOT_TOKEN_SECRET" "$SUPABASE_URL_SECRET" "$SUPABASE_SERVICE_ROLE_KEY_SECRET"; do
   [ -n "$value" ] && echo "::add-mask::$value"
 done
 
@@ -80,25 +83,22 @@ import pathlib
 import re
 
 path = pathlib.Path(os.environ["PROTECTED_ENV"])
-key = os.environ.get("OPENAI_API_KEY", "").strip()
-if not key or "\n" in key or "\r" in key:
-    raise SystemExit("OPENAI_API_KEY_INVALID_FOR_PROTECTED_ENV")
+required = {
+    "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", "").strip(),
+    "BOT_TOKEN": os.environ.get("BOT_TOKEN_SECRET", "").strip(),
+    "SUPABASE_URL": os.environ.get("SUPABASE_URL_SECRET", "").strip(),
+    "SUPABASE_SERVICE_ROLE_KEY": os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET", "").strip(),
+}
+for key, value in required.items():
+    if not value or "\n" in value or "\r" in value:
+        raise SystemExit(f"{key}_INVALID_FOR_PROTECTED_ENV")
 
 lines = path.read_text(encoding="utf-8").splitlines()
-pattern = re.compile(r"^\s*(?:export\s+)?OPENAI_API_KEY\s*=")
-replacement = f"OPENAI_API_KEY={key}"
-out = []
-replaced = False
-for line in lines:
-    if pattern.match(line):
-        if not replaced:
-            out.append(replacement)
-            replaced = True
-        continue
-    out.append(line)
-if not replaced:
-    out.append(replacement)
-path.write_text("\n".join(out).rstrip("\n") + "\n", encoding="utf-8")
+for key, value in required.items():
+    pattern = re.compile(rf"^\s*(?:export\s+)?{re.escape(key)}\s*=")
+    lines = [line for line in lines if not pattern.match(line)]
+    lines.append(f"{key}={value}")
+path.write_text("\n".join(lines).rstrip("\n") + "\n", encoding="utf-8")
 PY
 chmod 600 "$protected_env"
 PROTECTED_ENV="$protected_env" python3 - <<'PY'
@@ -107,11 +107,12 @@ import pathlib
 import re
 
 text = pathlib.Path(os.environ["PROTECTED_ENV"]).read_text(encoding="utf-8")
-matches = [line for line in text.splitlines() if re.match(r"^\s*(?:export\s+)?OPENAI_API_KEY\s*=", line)]
-if len(matches) != 1 or not matches[0].split("=", 1)[1].strip():
-    raise SystemExit("OPENAI_API_KEY_MERGE_PROOF_FAILED")
+for key in ["OPENAI_API_KEY", "BOT_TOKEN", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]:
+    matches = [line for line in text.splitlines() if re.match(rf"^\s*(?:export\s+)?{re.escape(key)}\s*=\S+", line)]
+    if len(matches) != 1:
+        raise SystemExit(f"{key}_MERGE_PROOF_FAILED")
 PY
-echo 'ZED_PROTECTED_ENV_OPENAI_MERGE=READY'
+echo 'ZED_PROTECTED_ENV_CORE_SECRETS_MERGE=READY'
 
 runtime_files="$RUNNER_TEMP/zed-runtime-files.txt"
 runtime_dirs="$RUNNER_TEMP/zed-runtime-dirs.txt"
