@@ -34,7 +34,16 @@ def drop_section(text: str, needle: str) -> str:
 retired = []
 for host in DOMAINS:
     site = ROOT / host
-    for page in sorted(site.rglob("index.html")):
+    # Delete deepest routes first. Removing /heroes/ before /heroes/person/
+    # would otherwise erase child paths that are still in the discovered list.
+    pages = sorted(
+        site.rglob("index.html"),
+        key=lambda p: len(p.relative_to(site).parts),
+        reverse=True,
+    )
+    for page in pages:
+        if not page.exists():
+            continue
         route = route_for(page, host)
         if route in KEEP[host]:
             continue
