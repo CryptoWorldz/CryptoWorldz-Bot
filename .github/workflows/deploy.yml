@@ -76,7 +76,7 @@ jobs:
           domains=[d.strip() for d in Path('DOMAINS.txt').read_text().splitlines() if d.strip()]
           assert len(domains)==18 and len(set(domains))==18, domains
           urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
-          assert len(urls)==145 and len(set(urls))==145, (len(urls),len(set(urls)))
+          assert len(urls)==146 and len(set(urls))==146, (len(urls),len(set(urls)))
 
           forbidden=('reagan','action spreads smiles','action spread smiles','action creates smiles','196prufjjq')
           for u in urls:
@@ -114,8 +114,8 @@ jobs:
           assert 'href="/community-support/"' in one
 
           donate=Path('donateworldz.com/index.html').read_text(encoding='utf-8')
-          assert 'Future Support Partner' in donate and 'RESERVED • NOT ACTIVE' in donate
-          for href in ['/davis-family/','/community-impact/','/jayjay-support/']:
+          assert 'Slice of Hope Australia' in donate and 'href="/slice-of-hope-australia/"' in donate
+          for href in ['/slice-of-hope-australia/','/davis-family/','/community-impact/','/jayjay-support/']:
               assert f'href="{href}"' in donate, href
 
           community_one=Path('oneworldz.com/community-support/index.html').read_text(encoding='utf-8')
@@ -131,7 +131,7 @@ jobs:
               text=Path(path).read_text(encoding='utf-8')
               assert url in text and '<iframe' not in text.lower(), name
 
-          print('CONTRACT=PASS sites=18 pages=145 retired_uganda=0 reserved_future_stripe=1 community_links=35 core_style=1')
+          print('CONTRACT=PASS sites=18 pages=146 retired_uganda=0 slice_of_hope=1 community_links=35 core_style=1')
           PY
 
       - name: Audit every page, stylesheet and image before deployment
@@ -226,6 +226,7 @@ jobs:
                   assert e.code in (404,410), (u,e.code)
                   print('RETIRED URL GONE',u,e.code)
           specials={
+            'https://donateworldz.com/slice-of-hope-australia/':('https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01',1),
             'https://donateworldz.com/jayjay-support/':('https://www.facebook.com/share/1FyYhwKP3r/',1),
             'https://donateworldz.com/davis-family/':('https://www.facebook.com/share/165Ken5f2Bt/',1),
             'https://donateworldz.com/community-impact/':('https://www.facebook.com/share/',35),
@@ -233,7 +234,7 @@ jobs:
           }
           for u,(needle,count) in specials.items():
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)
-          print('FINAL=PASS pages=145 sites=18 retired_uganda=0 reserved_future_stripe=1 core_style=1')
+          print('FINAL=PASS pages=146 sites=18 retired_uganda=0 slice_of_hope=1 core_style=1')
           PY
 
       - name: Verify every deployed stylesheet and image

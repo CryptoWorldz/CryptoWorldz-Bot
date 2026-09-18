@@ -41,7 +41,7 @@ def ecosystem_urls() -> list[str]:
     p = ROOT / '.ecosystem-urls.txt'
     assert p.is_file(), '.ecosystem-urls.txt missing; run build pipeline first'
     items = [x.strip() for x in p.read_text(encoding='utf-8').splitlines() if x.strip()]
-    assert len(items) == 145 and len(set(items)) == 145, f'expected 145 unique URLs, got {len(items)}'
+    assert len(items) == 146 and len(set(items)) == 146, f'expected 146 unique URLs, got {len(items)}'
     return items
 
 
