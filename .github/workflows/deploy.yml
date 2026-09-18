@@ -62,8 +62,14 @@ jobs:
       - name: Apply permanent mobile safety rail
         run: python3 tools/apply_mobile_safety.py
 
-      - name: Apply JayJayTeamDev vision and 57-item repair layer
+      - name: Apply legacy vision layer
         run: python3 tools/apply_jayjay_vision_57.py
+
+      - name: Build the OneWorldz mission departments
+        run: python3 tools/apply_mission_worldz.py
+
+      - name: Re-apply mobile safety to newly built mission pages
+        run: python3 tools/apply_mobile_safety.py
 
       - name: "Repair Stage 1/3 — Writing, spacing and clean buttons"
         run: python3 tools/repair_stage_1_writing.py
@@ -100,7 +106,7 @@ jobs:
           domains=[d.strip() for d in Path('DOMAINS.txt').read_text().splitlines() if d.strip()]
           assert len(domains)==18 and len(set(domains))==18, domains
           urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
-          assert len(urls)==23 and len(urls)==len(set(urls)), (len(urls),len(set(urls)))
+          assert len(urls)==42 and len(urls)==len(set(urls)), (len(urls),len(set(urls)))
 
           forbidden=('reagan','action spreads smiles','action spread smiles','action creates smiles','196prufjjq')
           for u in urls:
@@ -132,9 +138,12 @@ jobs:
               assert not retired.exists(), retired
 
           one=Path('oneworldz.com/index.html').read_text(encoding='utf-8')
-          for forbidden in ('data-final-heroes=', 'class="hero-list"', 'OneWorldz GPT System', 'href="/gpt/"', 'href="/directory/"'):
-              assert forbidden not in one, forbidden
+          one_low=one.lower()
+          for forbidden in ('data-final-heroes=', 'class="hero-list"', 'OneWorldz GPT System', 'href="/gpt/"', 'href="/directory/"', 'cryptoworldz', 'hodlerworldz', 'solworldz', 'ethworldz', 'baseworldz', 'jayjayteamdev'):
+              assert forbidden.lower() not in one_low, forbidden
           assert 'href="/community-support/"' in one
+          for required in ('End World Hunger', 'ResearchWorldz', 'LawWorldz', 'FoodWorldz', 'DonateWorldz'):
+              assert required in one, required
 
           retired_manifest=Path('.retired-generated-routes.txt')
           assert retired_manifest.is_file()
@@ -144,9 +153,23 @@ jobs:
               assert route and not (Path(host)/route/'index.html').exists(), (host,route)
 
           donate=Path('donateworldz.com/index.html').read_text(encoding='utf-8')
+          donate_low=donate.lower()
           assert 'Slice of Hope Australia' in donate and 'href="/slice-of-hope-australia/"' in donate
-          for href in ['/slice-of-hope-australia/','/davis-family/','/community-impact/','/jayjay-support/']:
+          assert 'jayjayteamdev' not in donate_low and 'jayjay-support' not in donate_low
+          for href in ['/slice-of-hope-australia/','/davis-family/','/community-impact/','/fresh-water-mission/','/grow-food-mission/']:
               assert f'href="{href}"' in donate, href
+
+          food=Path('foodworldz.com/index.html').read_text(encoding='utf-8')
+          for required in ('Food Rescue','Food Safety','Storage & Cold Chain','Shipping & Logistics','Food Waste','Food Law'):
+              assert required in food, required
+
+          law=Path('law.oneworldz.com/index.html').read_text(encoding='utf-8')
+          for required in ('LawWorldz','Change the Law','Public Money','Integrity','Model Laws'):
+              assert required in law, required
+
+          research=Path('learn.oneworldz.com/index.html').read_text(encoding='utf-8')
+          for required in ('ResearchWorldz','Country Research','Best Practice','Evidence Brief','Send to LawWorldz'):
+              assert required in research, required
 
           community_one=Path('oneworldz.com/community-support/index.html').read_text(encoding='utf-8')
           community_donate=Path('donateworldz.com/community-impact/index.html').read_text(encoding='utf-8')
@@ -154,14 +177,13 @@ jobs:
           assert community_donate.count('https://www.facebook.com/share/')==35
 
           support={
-            'jayjay':('donateworldz.com/jayjay-support/index.html','https://www.facebook.com/share/1FyYhwKP3r/'),
             'davis':('donateworldz.com/davis-family/index.html','https://www.facebook.com/share/165Ken5f2Bt/'),
           }
           for name,(path,url) in support.items():
               text=Path(path).read_text(encoding='utf-8')
               assert url in text and '<iframe' not in text.lower(), name
 
-          print(f'CONTRACT=PASS sites=18 pages={len(urls)} lean_public_set=1 hero_showroom=0 retired_uganda=0 slice_of_hope=1 community_links=35 core_style=1')
+          print(f'CONTRACT=PASS sites=18 pages={len(urls)} mission_system=1 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 self_promo=0 community_links=35 core_style=1')
           PY
 
       - name: Audit every page, stylesheet and image before deployment
@@ -265,7 +287,7 @@ jobs:
                   print('LIVE PASS' if r[1] else 'LIVE FAIL',r[0],r[2])
                   if not r[1]: fails.append(r)
           if fails: raise SystemExit(f'LIVE_VERIFICATION_FAILED count={len(fails)} {fails[:5]}')
-          for u in ['https://oneworldz.com/heroes/reagan-kauja/','https://donateworldz.com/reagan-children/','https://oneworldz.com/reagan.png','https://donateworldz.com/reagan.png','https://foodworldz.com/reagan.png']:
+          for u in ['https://oneworldz.com/heroes/reagan-kauja/','https://donateworldz.com/reagan-children/','https://oneworldz.com/reagan.png','https://donateworldz.com/reagan.png','https://foodworldz.com/reagan.png','https://donateworldz.com/jayjay-support/']:
               try:
                   status,body=get(u)
                   raise SystemExit(f'RETIRED_URL_STILL_LIVE {u} status={status}')
@@ -286,13 +308,14 @@ jobs:
                   assert e.code in (404,410), (u,e.code)
           specials={
             'https://donateworldz.com/slice-of-hope-australia/':('https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01',1),
-            'https://donateworldz.com/jayjay-support/':('https://www.facebook.com/share/1FyYhwKP3r/',1),
             'https://donateworldz.com/davis-family/':('https://www.facebook.com/share/165Ken5f2Bt/',1),
+            'https://donateworldz.com/fresh-water-mission/':('Offer equipment or expertise',1),
+            'https://donateworldz.com/grow-food-mission/':('Offer tools, seed, trees or expertise',1),
             'https://donateworldz.com/community-impact/':('https://www.facebook.com/share/',35),
             'https://oneworldz.com/community-support/':('https://www.facebook.com/share/',35),
           }
           for u,(needle,count) in specials.items():
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)
-          print(f'FINAL=PASS pages={len(urls)} sites=18 lean_public_set=1 hero_showroom=0 retired_uganda=0 slice_of_hope=1 core_style=1')
+          print(f'FINAL=PASS pages={len(urls)} sites=18 mission_system=1 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 self_promo=0 core_style=1')
           PY
           python3 tools/full_site_audit.py --live
