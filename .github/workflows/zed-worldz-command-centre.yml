@@ -129,7 +129,7 @@ jobs:
           const fs=require('fs');
           const text=fs.readFileSync(process.env.ENV_FILE,'utf8');
           const env_vars=[];
-          for(const raw of text.split(/\\r?\\n/)){
+          for(const raw of text.split(/\r?\n/)){
             const line=raw.trim();
             if(!line || line.startsWith('#')) continue;
             const at=line.indexOf('=');
