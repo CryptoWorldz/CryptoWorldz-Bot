@@ -1,0 +1,57 @@
+name: Visual Proof 146 Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "audit/**"
+      - ".github/workflows/visual-proof-146.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ecosystem baseline
+        run: python3 tools/build_ecosystem.py
+
+      - name: Apply approved visual architecture
+        run: python3 tools/apply_visual_fixes.py
+
+      - name: Apply direct Facebook support routes
+        run: python3 tools/apply_facebook_support.py
+
+      - name: Permanently remove retired Uganda support content
+        run: python3 tools/remove_retired_uganda_support.py
+
+      - name: Apply permanent mobile safety rail
+        run: python3 tools/apply_mobile_safety.py
+
+      - name: Apply JayJayTeamDev vision layer
+        run: python3 tools/apply_jayjay_vision_57.py
+
+      - name: Repair 1 of 3 writing
+        run: python3 tools/repair_stage_1_writing.py
+
+      - name: Repair 2 of 3 images
+        run: python3 tools/repair_stage_2_images.py
+
+      - name: Repair 3 of 3 other
+        run: python3 tools/repair_stage_3_other.py
+
+      - name: Capture all 146 pages for human inspection
+        run: python3 audit/capture_visual_proof.py
+
+      - name: Upload 292 screenshots and manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneworldz-146-page-visual-proof
+          path: visual-proof/
+          compression-level: 3
+          if-no-files-found: error
