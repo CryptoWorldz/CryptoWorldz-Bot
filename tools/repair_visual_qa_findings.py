@@ -56,11 +56,11 @@ for slug,(title,subtitle,a1,a2,symbol) in food.items():
     src=write_art('foodworldz.com',slug,title,subtitle,a1,a2,symbol)
     # FoodWorldz is rebuilt by remove_retired_uganda_support.py, so the
     # page has a plain hero <img> rather than the route-art class.
-    m=re.search(r"<img\\b[^>]*>",text,re.I)
+    m=re.search(r'<img\\b[^>]*>',text,re.I)
     assert m,(path,'hero image missing')
     tag=m.group(0)
-    src_re=r"\\bsrc=['\\\"][^'\\\"]+['\\\"]"
-    alt_re=r"\\balt=['\\\"][^'\\\"]*['\\\"]"
+    src_re=r'src="[^"]+"'
+    alt_re=r'alt="[^"]*"'
     assert re.search(src_re,tag,re.I),(path,'hero src missing')
     tag=re.sub(src_re,f'src="{src}"',tag,count=1,flags=re.I)
     if re.search(alt_re,tag,re.I):
