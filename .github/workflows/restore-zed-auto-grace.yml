@@ -195,28 +195,35 @@ jobs:
           except Exception:
               managed = {}
 
-          complete = [row for row in found if row[0] == len(required)]
-          if all(managed.get(k) for k in required):
-              source, recovered = "hostinger-managed-env", managed
-          elif complete:
-              complete.sort(key=lambda row: (row[1], row[2] != node_root + "/.env"), reverse=True)
-              _, _, source, recovered = complete[0]
-          elif all(current.get(k) for k in required):
-              source, recovered = node_root + "/.env", current
-          else:
-              print("ZED_ENV_RECOVERY=FAIL")
-              print("HOSTINGER_MANAGED_ENV_REQUIRED_KEYS=" + str(sum(1 for k in required if managed.get(k))) + "_OF_3")
-              for score, _, path, _ in found:
-                  print("ENV_CANDIDATE", posixpath.basename(path), "required_keys", score, "of", len(required))
-              raise SystemExit("No protected environment source contains BOT_TOKEN + SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY")
-
-          merged = dict(recovered)
-          for key, value in current.items():
+          # Merge every legitimate protected source rather than requiring all
+          # credentials to exist in one old copy. SUPABASE_URL is public and
+          # pinned to the connected CryptoWorldz-Bot project.
+          merged = {}
+          merged.update({k:v for k,v in current.items() if v})
+          merged["SUPABASE_URL"] = "https://hknymhhyqldtzmplzuzh.supabase.co"
+          for _, _, _, values in sorted(found, key=lambda row: row[0]):
+              for key, value in values.items():
+                  if value and key not in merged:
+                      merged[key] = value
+          for key, value in managed.items():
+              if value and key not in merged:
+                  merged[key] = value
+          github_core = {
+              "BOT_TOKEN": os.environ.get("BOT_TOKEN_SECRET", "").strip(),
+              "SUPABASE_SERVICE_ROLE_KEY": os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET", "").strip(),
+          }
+          for key, value in github_core.items():
               if value:
                   merged[key] = value
-          for key in required:
-              if not merged.get(key):
-                  raise SystemExit("Recovered environment incomplete: " + key)
+
+          missing = [key for key in required if not merged.get(key)]
+          if missing:
+              print("ZED_ENV_RECOVERY=FAIL")
+              print("ZED_ENV_MISSING_KEYS=" + ",".join(missing))
+              print("HOSTINGER_MANAGED_ENV_REQUIRED_KEYS=" + str(sum(1 for k in required if managed.get(k))) + "_OF_3")
+              raise SystemExit("Protected credentials still missing")
+
+          source = "merged-protected-sources"
 
           # Prefer current protected OpenAI key supplied by GitHub without logging it.
           openai = os.environ.get("OPENAI_API_KEY", "").strip()
