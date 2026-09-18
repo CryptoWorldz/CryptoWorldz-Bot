@@ -9,9 +9,6 @@ set -Eeuo pipefail
 : "${FTP_PORT:?}"
 : "${HOSTINGER_API_TOKEN:?}"
 : "${OPENAI_API_KEY:?}"
-: "${BOT_TOKEN_SECRET:?}"
-: "${SUPABASE_URL_SECRET:?}"
-: "${SUPABASE_SERVICE_ROLE_KEY_SECRET:?}"
 
 for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN" "$OPENAI_API_KEY" "$BOT_TOKEN_SECRET" "$SUPABASE_URL_SECRET" "$SUPABASE_SERVICE_ROLE_KEY_SECRET"; do
   [ -n "$value" ] && echo "::add-mask::$value"
@@ -83,17 +80,27 @@ import pathlib
 import re
 
 path = pathlib.Path(os.environ["PROTECTED_ENV"])
+lines = path.read_text(encoding="utf-8").splitlines()
+existing = {}
+for raw in lines:
+    line = raw.strip()
+    if not line or line.startswith("#") or "=" not in line:
+        continue
+    key, value = line.split("=", 1)
+    key = re.sub(r"^export\\s+", "", key).strip()
+    value = value.strip().strip('"').strip("'")
+    existing[key] = value
+
 required = {
-    "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", "").strip(),
-    "BOT_TOKEN": os.environ.get("BOT_TOKEN_SECRET", "").strip(),
-    "SUPABASE_URL": os.environ.get("SUPABASE_URL_SECRET", "").strip(),
-    "SUPABASE_SERVICE_ROLE_KEY": os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET", "").strip(),
+    "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", "").strip() or existing.get("OPENAI_API_KEY", ""),
+    "BOT_TOKEN": os.environ.get("BOT_TOKEN_SECRET", "").strip() or existing.get("BOT_TOKEN", ""),
+    "SUPABASE_URL": os.environ.get("SUPABASE_URL_SECRET", "").strip() or existing.get("SUPABASE_URL", ""),
+    "SUPABASE_SERVICE_ROLE_KEY": os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET", "").strip() or existing.get("SUPABASE_SERVICE_ROLE_KEY", ""),
 }
 for key, value in required.items():
     if not value or "\n" in value or "\r" in value:
-        raise SystemExit(f"{key}_INVALID_FOR_PROTECTED_ENV")
+        raise SystemExit(f"{key}_MISSING_FROM_GITHUB_AND_PROTECTED_ENV")
 
-lines = path.read_text(encoding="utf-8").splitlines()
 for key, value in required.items():
     pattern = re.compile(rf"^\s*(?:export\s+)?{re.escape(key)}\s*=")
     lines = [line for line in lines if not pattern.match(line)]
