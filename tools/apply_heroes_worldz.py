@@ -10,7 +10,7 @@ from html import escape
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "oneworldz.com"
-BUILD = "2026-09-19-heroes-six-worldz-live"
+BUILD = "2026-09-19-heroes-six-worldz-live-woodstock-spirit"
 
 HEROES = [
     {
@@ -230,18 +230,37 @@ for hero in HEROES:
 
 event_page = head(
     "Worldz Live — Destination & Inspiration 2026–2030",
-    "A proposed 2026–2030 free-performance and humanitarian-action program pairing music, local markets, volunteers and measurable community projects."
+    "A proposed 2026–2030 free-performance and humanitarian-action program pairing Woodstock-inspired community spirit, music, local markets, volunteers and measurable community projects."
 ) + """
 <section class="hero-intro">
 <img src="/assets/heroes/heroes-world.webp" alt="OneWorldz global action and inspiration">
 <p class="eyebrow">Open Invitation • 2026–2030</p>
 <h1>Worldz Live: Destination & Inspiration</h1>
 <p><strong>Song & Dance to Change the World.</strong> A proposed series of free public performances in destination communities, paired with Purple Diamond Crew field action, local organisations, local performers, local vendors and practical projects that remain after the stage is packed away.</p>
+<p><strong>Sounds & Grounds:</strong> bringing the community spirit associated with Woodstock into the 21st century — music on the stage, action on the ground, and something useful left behind.</p>
 <div class="actions" style="justify-content:center">
 <a class="action-btn gold" href="mailto:hello@oneworldz.com?subject=Worldz%20Live%20Performer%20Invitation">Performers — Join the Invitation</a>
 <a class="action-btn primary" href="https://purplediamondcrew.com/">Volunteers — Join the Crew</a>
 <a class="action-btn" href="mailto:hello@oneworldz.com?subject=Worldz%20Live%20Production%20or%20Sponsor%20Partner">Production & Sponsors</a>
 </div>
+</section>
+
+<section class="section woodstock">
+<p class="eyebrow">The Woodstock Spirit — Reimagined for the 21st Century</p>
+<h2>🎸 Sounds & Grounds — Music on the Stage. Action on the Ground.</h2>
+<p class="big-call">WOODSTOCK SPIRIT. WORLDZ ACTION.</p>
+<p>OneWorldz is not trying to recreate 1969. We are bringing forward the part that still matters: people gathering around music, peace, community and the belief that strangers can stand together for something bigger than themselves.</p>
+<p><strong>Destination & Inspiration</strong> brings that energy into the 21st century. Free public performances, local musicians, global guests, food and market stalls, volunteers and community-led humanitarian projects can come together at the same destination.</p>
+<p class="big-call">Turn Up the Music. Turn Up Humanity.</p>
+<p>Performers are invited to create their own <strong>Song & Dance to Enhance the World</strong> — a song, dance, collaboration, choir, jam, cultural performance or once-only set created for that destination and its people.</p>
+<p>When the lights go down and the stage moves on, the goal is that something useful remains: clean water, food production, equipment, shelter, education, health support, opportunity or stronger local organisations.</p>
+<div class="focus-grid">
+<div><strong>☮ Peace</strong><br>Bring people together without division.</div>
+<div><strong>🎸 Music</strong><br>World-class and local performance on one stage.</div>
+<div><strong>💜 Community</strong><br>Visitors, volunteers and local people sharing the grounds.</div>
+<div><strong>💎 Action</strong><br>Purple Diamond Crew and partners turning attention into practical support.</div>
+</div>
+<p class="notice"><strong>Inspired by history, independent in identity.</strong> The OneWorldz program draws inspiration from the community spirit commonly associated with the 1969 Woodstock era. It is not affiliated with, endorsed by, or presented as an official Woodstock event or brand.</p>
 </section>
 
 <section class="section">
