@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/publish-heroes-now.yml"
+      - "tools/apply_heroes_worldz.py"
+      - "oneworldz.com/assets/heroes/**"
   workflow_dispatch:
 
 permissions:
@@ -135,7 +137,7 @@ jobs:
             "https://oneworldz.com/heroes/bi-phakathi/":["Bi Phakathi","facebook.com/biphakathi","Purple Diamond Crew"],
             "https://oneworldz.com/heroes/mdmotivator/":["MDMotivator","facebook.com/MdMotivatorOfficial","Purple Diamond Crew"],
             "https://oneworldz.com/heroes/dylan-thiry/":["Dylan Thiry","facebook.com/dylanthirypro","Purple Diamond Crew"],
-            "https://oneworldz.com/heroes/destination-inspiration/":["Worldz Live","Open invitation to P!NK","Uganda Pilot","UNDP 2025 MPI Data"],
+            "https://oneworldz.com/heroes/destination-inspiration/":["Worldz Live","Sounds & Grounds","WOODSTOCK SPIRIT. WORLDZ ACTION.","Open invitation to P!NK","Uganda Pilot","UNDP 2025 MPI Data"],
           }
           for url,needles in checks.items():
               last=""
