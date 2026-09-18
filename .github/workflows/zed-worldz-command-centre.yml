@@ -125,6 +125,30 @@ jobs:
           base="https://developers.hostinger.com/api/hosting/v1/accounts/${user_enc}/websites/${domain_enc}/nodejs"
           echo "ZED_NODE_API_BASE=$base" >> "$GITHUB_ENV"
 
+          ENV_FILE="$RUNNER_TEMP/zed-protected.env" node - <<'NODE' > "$RUNNER_TEMP/zed-managed-env.json"
+          const fs=require('fs');
+          const text=fs.readFileSync(process.env.ENV_FILE,'utf8');
+          const env_vars=[];
+          for(const raw of text.split(/\r?\n/)){
+            const line=raw.trim();
+            if(!line || line.startsWith('#')) continue;
+            const at=line.indexOf('=');
+            if(at<1) continue;
+            const key=line.slice(0,at).replace(/^export\\s+/,'').trim();
+            if(!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
+            let value=line.slice(at+1).trim();
+            if((value.startsWith('"')&&value.endsWith('"'))||(value.startsWith("'")&&value.endsWith("'"))) value=value.slice(1,-1);
+            if(!value) continue;
+            env_vars.push({key,value});
+          }
+          if(!env_vars.some(function(x){return x.key==='BOT_TOKEN';})) process.exit(2);
+          process.stdout.write(JSON.stringify({env_vars}));
+          NODE
+          env_code="$(curl --silent --show-error --location --connect-timeout 15 --max-time 60 --request PUT -o "$RUNNER_TEMP/zed-managed-env-response.json" -w '%{http_code}' -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' -H 'Content-Type: application/json' --data-binary "@$RUNNER_TEMP/zed-managed-env.json" "$base/builds/settings/env" || true)"
+          rm -f "$RUNNER_TEMP/zed-managed-env.json"
+          case "$env_code" in 200|201|202|204) ;; *) cat "$RUNNER_TEMP/zed-managed-env-response.json" || true; echo "Managed environment rejected: HTTP $env_code"; exit 1;; esac
+          echo 'ZED_MANAGED_ENV=PASS'
+
           ARCHIVE_NAME="$ZED_ARCHIVE_NAME" node - <<'NODE' > "$RUNNER_TEMP/zed-build-request.json"
           process.stdout.write(JSON.stringify({
             node_version:22,
@@ -226,6 +250,7 @@ jobs:
           if(p.service!=='Zed OneWorldz Command Centre') process.exit(1);
           if(p.build!=='worldz-problem-solving-v1') process.exit(1);
           if(Number(p.commands)!==18) process.exit(1);
+          if(p.telegram_configured!==true) process.exit(1);
           NODE
             then pass=1; break; fi
           done
@@ -276,11 +301,17 @@ jobs:
           NODE
           curl --fail --silent --show-error -X POST "$api/setWebhook" -H 'Content-Type: application/json' --data-binary "@$RUNNER_TEMP/zed-webhook-request.json" > "$RUNNER_TEMP/zed-set-webhook.json"
           curl --fail --silent --show-error "$api/getWebhookInfo" > "$RUNNER_TEMP/zed-webhook-info.json"
-          FILES="$RUNNER_TEMP/zed-set-commands.json:$RUNNER_TEMP/zed-set-menu.json:$RUNNER_TEMP/zed-set-webhook.json:$RUNNER_TEMP/zed-webhook-info.json" node - <<'NODE'
+          curl --fail --silent --show-error "$api/getMyCommands" > "$RUNNER_TEMP/zed-get-commands.json"
+          FILES="$RUNNER_TEMP/zed-set-commands.json:$RUNNER_TEMP/zed-set-menu.json:$RUNNER_TEMP/zed-set-webhook.json:$RUNNER_TEMP/zed-webhook-info.json:$RUNNER_TEMP/zed-get-commands.json" node - <<'NODE'
           const fs=require('fs');
           const p=process.env.FILES.split(':').map(function(file){return JSON.parse(fs.readFileSync(file,'utf8'));});
           for(const x of p) if(x.ok!==true) process.exit(1);
           if(p[3].result.url!=='https://cryptobotz.cryptoworldz.xyz/telegram/webhook') process.exit(1);
+          const commands=(p[4].result||[]).map(function(x){return x.command;});
+          const expected=['start','help','system','research','food','water','grow','health','shelter','education','energy','waste','transport','money','integrity','law','oneworldz','donate'];
+          if(JSON.stringify(commands)!==JSON.stringify(expected)) process.exit(1);
+          const retired=['profile','register','rewards','points','leaderboard','raid','raaiiidd','missions','wallet','kitty','governance','vote','impact','airdrop','airdrops','events','treasury'];
+          if(retired.some(function(x){return commands.includes(x);})) process.exit(1);
           NODE
           echo 'ZED_TELEGRAM_COMMANDS=PASS'
           echo 'ZED_TELEGRAM_WEBHOOK=PASS'
