@@ -1,5 +1,5 @@
 name: Deploy OneWorldz Ecosystem
-# mission-production-trigger: 2026-09-19-0051
+# mission-production-trigger: 2026-09-19-links-in-dubbo
 
 on:
   push:
@@ -121,7 +121,7 @@ jobs:
           domains=[d.strip() for d in Path('DOMAINS.txt').read_text().splitlines() if d.strip()]
           assert len(domains)==18 and len(set(domains))==18, domains
           urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
-          assert len(urls)==58 and len(urls)==len(set(urls)), (len(urls),len(set(urls)))
+          assert len(urls)==59 and len(urls)==len(set(urls)), (len(urls),len(set(urls)))
 
           forbidden=('reagan','action spreads smiles','action spread smiles','action creates smiles','196prufjjq')
           for u in urls:
@@ -157,6 +157,7 @@ jobs:
           for forbidden in ('data-final-heroes=', 'class="hero-list"', 'OneWorldz GPT System', 'href="/gpt/"', 'href="/directory/"', 'cryptoworldz', 'hodlerworldz', 'solworldz', 'ethworldz', 'baseworldz', 'jayjayteamdev'):
               assert forbidden.lower() not in one_low, forbidden
           assert 'href="/community-support/"' in one
+          assert 'href="/links-in-dubbo/"' in one
           for required in ('End World Hunger', 'ResearchWorldz', 'LawWorldz', 'FoodWorldz', 'DonateWorldz'):
               assert required in one, required
           assert 'data-specialist-worldz="1"' in one
@@ -204,6 +205,20 @@ jobs:
           community_donate=Path('donateworldz.com/community-impact/index.html').read_text(encoding='utf-8')
           assert community_one.count('https://www.facebook.com/share/')==35
           assert community_donate.count('https://www.facebook.com/share/')==35
+
+          dubbo=Path('oneworldz.com/links-in-dubbo/index.html').read_text(encoding='utf-8')
+          for required in (
+              'https://stride.com.au/services/dubbo-medicare-mental-health-centre/',
+              'https://www.oranasupport.com.au',
+              'https://www.emmanuelcarecentre.com.au/',
+              'https://ccsd.org.au/',
+              'https://baptistcare.org.au/hopestreet/locations/dubbo/',
+              'https://bunmabunmarra.com.au',
+              'https://www.miraclechurch.com.au',
+              'https://www.salvationarmy.org.au/orana/',
+              'https://www.dubbobaptist.org.au/',
+          ):
+              assert required in dubbo, ('links-in-dubbo',required)
 
           support={
             'davis':('donateworldz.com/davis-family/index.html','https://www.facebook.com/share/165Ken5f2Bt/'),
@@ -296,6 +311,20 @@ jobs:
           }
           for u,(needle,count) in specials.items():
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)
+          status,dubbo_body=get('https://oneworldz.com/links-in-dubbo/')
+          assert status==200, ('links-in-dubbo',status)
+          for required in (
+              'https://stride.com.au/services/dubbo-medicare-mental-health-centre/',
+              'https://www.oranasupport.com.au',
+              'https://www.emmanuelcarecentre.com.au/',
+              'https://ccsd.org.au/',
+              'https://baptistcare.org.au/hopestreet/locations/dubbo/',
+              'https://bunmabunmarra.com.au',
+              'https://www.miraclechurch.com.au',
+              'https://www.salvationarmy.org.au/orana/',
+              'https://www.dubbobaptist.org.au/',
+          ):
+              assert required in dubbo_body, ('links-in-dubbo-live',required)
           status,body=get('https://donateworldz.com/slice-of-hope-australia/')
           for needle in ('https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01','Volunteer','Partner With Us','Fresh Water Mission','Grow Food Mission','Pizza Hut Australia has not yet approved'):
               assert needle in body, ('slice-of-hope',needle)
