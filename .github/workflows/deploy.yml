@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Compile mission builders
-        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/deploy_hostinger_robust.py tools/prune_public_bloat.py tools/apply_pdc_five_page.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py
+        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/apply_slice_of_hope_visual.py tools/deploy_hostinger_robust.py tools/prune_public_bloat.py tools/apply_pdc_five_page.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py
 
       - name: Build ecosystem baseline
         run: python3 tools/build_ecosystem.py
@@ -75,6 +75,9 @@ jobs:
 
       - name: Build the specialist Worldz departments
         run: python3 tools/apply_specialist_worldz.py
+
+      - name: Build Slice of Hope visual and floating actions
+        run: python3 tools/apply_slice_of_hope_visual.py
 
       - name: Re-apply mobile safety to newly built mission pages
         run: python3 tools/apply_mobile_safety.py
@@ -181,6 +184,10 @@ jobs:
           for href in ['/slice-of-hope-australia/','/davis-family/','/community-impact/','/fresh-water-mission/','/grow-food-mission/','/jayjay-support/']:
               assert f'href="{href}"' in donate, href
 
+          slice_page=Path('donateworldz.com/slice-of-hope-australia/index.html').read_text(encoding='utf-8')
+          for required in ('data-slice-hope-visual="1"','Donate Now','Volunteer','Partner With Us','/fresh-water-mission/','/grow-food-mission/','Pizza Hut Australia has not yet approved'):
+              assert required in slice_page, required
+
           food=unescape(Path('foodworldz.com/index.html').read_text(encoding='utf-8'))
           for required in ('Food Rescue','Food Safety','Storage & Cold Chain','Shipping & Logistics','Food Waste','Food Law'):
               assert required in food, required
@@ -279,7 +286,7 @@ jobs:
               except urllib.error.HTTPError as e:
                   assert e.code in (404,410), (u,e.code)
           specials={
-            'https://donateworldz.com/slice-of-hope-australia/':('https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01',1),
+            'https://donateworldz.com/slice-of-hope-australia/':('data-slice-hope-visual="1"',1),
             'https://donateworldz.com/davis-family/':('https://www.facebook.com/share/165Ken5f2Bt/',1),
             'https://donateworldz.com/fresh-water-mission/':('Offer equipment or expertise',1),
             'https://donateworldz.com/grow-food-mission/':('Offer tools, seed, trees or expertise',1),
@@ -289,6 +296,9 @@ jobs:
           }
           for u,(needle,count) in specials.items():
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)
+          status,body=get('https://donateworldz.com/slice-of-hope-australia/')
+          for needle in ('https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01','Volunteer','Partner With Us','Fresh Water Mission','Grow Food Mission','Pizza Hut Australia has not yet approved'):
+              assert needle in body, ('slice-of-hope',needle)
           print(f'FINAL=PASS pages={len(urls)} sites=18 mission_system=1 specialist_worldz=10 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 jayjay_vision_support=1 core_style=1')
           PY
           python3 tools/full_site_audit.py --live
