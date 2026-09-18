@@ -48,6 +48,9 @@ jobs:
       - name: Final visual overhaul — every generated page
         run: python3 tools/final_visual_overhaul.py
 
+      - name: Install global image override LAST on all 18 domains
+        run: python3 tools/apply_global_image_overrides.py
+
       - name: Capture every generated page for human inspection
         run: python3 audit/capture_visual_proof.py
 
