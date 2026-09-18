@@ -187,13 +187,14 @@ for route,(title,h1,intro,cards_) in food_pages.items():
 
 # ------------------------------ DonateWorldz ------------------------------
 donate_sections = [
-    {"eyebrow":"Fund the solution","title":"Equipment, infrastructure and direct community missions.","text":"DonateWorldz exists to move verified resources into practical work. It is not a page for promoting the people building the website.",
+    {"eyebrow":"Fund the solution","title":"Equipment, infrastructure and direct community missions.","text":"DonateWorldz exists to move verified resources into practical work. One separate pathway can support JayJayTeamDev's work building and coordinating the OneWorldz vision, while field missions remain clearly separated.",
      "cards":[
         ("Fresh Water Mission","Bore assessment, drilling, testing, filtration, tanks, serviceable pumps, solar power, backup, spares, training and maintenance.","https://donateworldz.com/fresh-water-mission/"),
         ("Grow Food Mission","Gardening tools, seeds, fruit trees, irrigation, composting, soil improvement, storage and local training.","https://donateworldz.com/grow-food-mission/"),
         ("Slice of Hope Australia","Community meal pathway beginning in Australia.","https://donateworldz.com/slice-of-hope-australia/"),
         ("Community Impact","Support verified community organisations and people delivering practical help.","https://donateworldz.com/community-impact/"),
         ("Davis Family","Direct family support pathway.","https://donateworldz.com/davis-family/"),
+        ("Support JayJayTeamDev","Support the OneWorldz vision, research, coordination and mission-building work.","https://donateworldz.com/jayjay-support/"),
      ]},
     {"eyebrow":"Business development partnerships","title":"Companies can donate capability, not only money.","extra":'''<div class="mission-grid">
 <a class="mission-card" href="mailto:hello@oneworldz.com?subject=Fresh%20Water%20Equipment%20Partnership"><strong>Water equipment partners</strong><span>Pump, drilling, solar, filtration, tank, pipe and testing companies can offer equipment, engineering, installation, training or spares.</span><b>OFFER EQUIPMENT →</b></a>
