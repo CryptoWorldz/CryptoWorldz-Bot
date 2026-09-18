@@ -22,6 +22,7 @@ KEEP["donateworldz.com"] |= {
     "community-impact",
     "fresh-water-mission",
     "grow-food-mission",
+    "jayjay-support",
 }
 KEEP["foodworldz.com"] |= {
     "food-rescue",
@@ -130,7 +131,7 @@ for host in DOMAINS:
     (site / "sitemap.xml").write_text("\n".join(xml) + "\n", encoding="utf-8")
 
 urls = sorted(set(urls))
-assert len(urls) == 42, len(urls)
+assert len(urls) == 43, len(urls)
 (ROOT / ".ecosystem-urls.txt").write_text("\n".join(urls) + "\n", encoding="utf-8")
 (ROOT / ".retired-generated-routes.txt").write_text(
     "\n".join(f"{host}|{route}" for host, route in sorted(set(retired))) + "\n",
@@ -144,7 +145,7 @@ for forbidden in ("cryptoworldz", "hodlerworldz", "solworldz", "ethworldz", "bas
 
 donate = (ROOT / "donateworldz.com" / "index.html").read_text(encoding="utf-8").lower()
 assert "fresh-water-mission" in donate and "grow-food-mission" in donate
-assert "jayjayteamdev" not in donate and "jayjay-support" not in donate
+assert "jayjayteamdev" in donate and "jayjay-support" in donate
 
 food = (ROOT / "foodworldz.com" / "index.html").read_text(encoding="utf-8").lower()
 for required in ("food rescue", "food safety", "cold chain", "shipping", "food waste", "food law"):
@@ -158,4 +159,4 @@ research = (ROOT / "learn.oneworldz.com" / "index.html").read_text(encoding="utf
 for required in ("researchworldz", "country research", "best practice", "send to lawworldz"):
     assert required in research, required
 
-print(f"PRUNE_PUBLIC_BLOAT=PASS pages={len(urls)} roots=18 mission_pages=24 retired_routes={len(set(retired))} self_promo=0")
+print(f"PRUNE_PUBLIC_BLOAT=PASS pages={len(urls)} roots=18 mission_pages=25 retired_routes={len(set(retired))} jayjay_vision_support=1")

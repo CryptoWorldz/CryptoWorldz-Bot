@@ -107,7 +107,7 @@ jobs:
           domains=[d.strip() for d in Path('DOMAINS.txt').read_text().splitlines() if d.strip()]
           assert len(domains)==18 and len(set(domains))==18, domains
           urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
-          assert len(urls)==42 and len(urls)==len(set(urls)), (len(urls),len(set(urls)))
+          assert len(urls)==43 and len(urls)==len(set(urls)), (len(urls),len(set(urls)))
 
           forbidden=('reagan','action spreads smiles','action spread smiles','action creates smiles','196prufjjq')
           for u in urls:
@@ -156,8 +156,8 @@ jobs:
           donate=Path('donateworldz.com/index.html').read_text(encoding='utf-8')
           donate_low=donate.lower()
           assert 'Slice of Hope Australia' in donate and 'href="/slice-of-hope-australia/"' in donate
-          assert 'jayjayteamdev' not in donate_low and 'jayjay-support' not in donate_low
-          for href in ['/slice-of-hope-australia/','/davis-family/','/community-impact/','/fresh-water-mission/','/grow-food-mission/']:
+          assert 'donate to jayjayteamdev' in donate_low and 'jayjay-support' in donate_low
+          for href in ['/slice-of-hope-australia/','/davis-family/','/community-impact/','/fresh-water-mission/','/grow-food-mission/','/jayjay-support/']:
               assert f'href="{href}"' in donate, href
 
           food=unescape(Path('foodworldz.com/index.html').read_text(encoding='utf-8'))
@@ -179,12 +179,13 @@ jobs:
 
           support={
             'davis':('donateworldz.com/davis-family/index.html','https://www.facebook.com/share/165Ken5f2Bt/'),
+            'jayjay':('donateworldz.com/jayjay-support/index.html','https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00'),
           }
           for name,(path,url) in support.items():
               text=Path(path).read_text(encoding='utf-8')
               assert url in text and '<iframe' not in text.lower(), name
 
-          print(f'CONTRACT=PASS sites=18 pages={len(urls)} mission_system=1 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 self_promo=0 community_links=35 core_style=1')
+          print(f'CONTRACT=PASS sites=18 pages={len(urls)} mission_system=1 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 jayjay_vision_support=1 community_links=35 core_style=1')
           PY
 
       - name: Audit every page, stylesheet and image before deployment
@@ -288,7 +289,7 @@ jobs:
                   print('LIVE PASS' if r[1] else 'LIVE FAIL',r[0],r[2])
                   if not r[1]: fails.append(r)
           if fails: raise SystemExit(f'LIVE_VERIFICATION_FAILED count={len(fails)} {fails[:5]}')
-          for u in ['https://oneworldz.com/heroes/reagan-kauja/','https://donateworldz.com/reagan-children/','https://oneworldz.com/reagan.png','https://donateworldz.com/reagan.png','https://foodworldz.com/reagan.png','https://donateworldz.com/jayjay-support/']:
+          for u in ['https://oneworldz.com/heroes/reagan-kauja/','https://donateworldz.com/reagan-children/','https://oneworldz.com/reagan.png','https://donateworldz.com/reagan.png','https://foodworldz.com/reagan.png']:
               try:
                   status,body=get(u)
                   raise SystemExit(f'RETIRED_URL_STILL_LIVE {u} status={status}')
@@ -312,11 +313,12 @@ jobs:
             'https://donateworldz.com/davis-family/':('https://www.facebook.com/share/165Ken5f2Bt/',1),
             'https://donateworldz.com/fresh-water-mission/':('Offer equipment or expertise',1),
             'https://donateworldz.com/grow-food-mission/':('Offer tools, seed, trees or expertise',1),
+            'https://donateworldz.com/jayjay-support/':('https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00',1),
             'https://donateworldz.com/community-impact/':('https://www.facebook.com/share/',35),
             'https://oneworldz.com/community-support/':('https://www.facebook.com/share/',35),
           }
           for u,(needle,count) in specials.items():
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)
-          print(f'FINAL=PASS pages={len(urls)} sites=18 mission_system=1 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 self_promo=0 core_style=1')
+          print(f'FINAL=PASS pages={len(urls)} sites=18 mission_system=1 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 jayjay_vision_support=1 core_style=1')
           PY
           python3 tools/full_site_audit.py --live

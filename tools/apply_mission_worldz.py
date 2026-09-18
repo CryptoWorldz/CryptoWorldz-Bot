@@ -194,6 +194,7 @@ donate_sections = [
         ("Slice of Hope Australia","Community meal pathway beginning in Australia.","/slice-of-hope-australia/"),
         ("Community Impact","Support verified community organisations and people delivering practical help.","/community-impact/"),
         ("Davis Family","Direct family support pathway.","/davis-family/"),
+        ("Donate to JayJayTeamDev","Support the creator's time, tools, hosting, research, outreach and coordination required to keep the OneWorldz vision moving.","/jayjay-support/"),
      ]},
     {"eyebrow":"Business development partnerships","title":"Companies can donate capability, not only money.","extra":'''<div class="mission-grid">
 <a class="mission-card" href="mailto:hello@oneworldz.com?subject=Fresh%20Water%20Equipment%20Partnership"><strong>Water equipment partners</strong><span>Pump, drilling, solar, filtration, tank, pipe and testing companies can offer equipment, engineering, installation, training or spares.</span><b>OFFER EQUIPMENT →</b></a>
@@ -202,6 +203,12 @@ donate_sections = [
 </div>'''},
 ]
 write("donateworldz.com","",page("donateworldz.com","DonateWorldz","Water • Food • Equipment • Community Delivery","Put Resources Where They Change Lives.","DonateWorldz connects money, donated equipment, professional expertise and verified community delivery to practical missions in water, food production and direct support.",donate_sections,"DonateWorldz practical mission artwork","DonateWorldz • Practical missions • Transparent pathways • OneWorldz"))
+
+jayjay_sections = [
+    {"eyebrow":"Support the Vision","title":"Donate to JayJayTeamDev","text":"This pathway supports the time, tools, hosting, research, outreach and coordination used to build and advance the OneWorldz vision. It stays separate from donations for water, food, families and community missions.",
+     "extra":'''<div class="actions"><a class="btn" href="https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00" target="_blank" rel="noopener">Donate to JayJayTeamDev</a><a class="btn secondary" href="https://www.paypal.me/Jayjay3480" target="_blank" rel="noopener">PayPal Support</a></div><p class="callout">Purpose: support the work behind the vision — website operations, research, communication, outreach, planning and coordination. This is not the same fund as a specific field mission.</p>'''},
+]
+write("donateworldz.com","jayjay-support",page("donateworldz.com","DonateWorldz","JayJayTeamDev • Vision Support","Support the Person Building the Vision.","A clearly separated pathway for people who want to support JayJayTeamDev's work building, researching, coordinating and advancing the OneWorldz mission.",jayjay_sections,"DonateWorldz JayJayTeamDev vision support artwork","DonateWorldz • Support JayJayTeamDev's Vision • OneWorldz"))
 
 water_sections = [
     {"eyebrow":"Fresh Water Mission","title":"Design for reliability, maintenance and local ownership.","text":"A water mission begins with hydrogeology and water quality — not with buying a pump first.",
@@ -231,4 +238,4 @@ grow_sections = [
 ]
 write("donateworldz.com","grow-food-mission",page("donateworldz.com","DonateWorldz","Grow Food Mission","Tools, Water, Seeds, Trees and Skills.","Build local food production with the equipment, water, planting material, training and storage communities need to keep producing.",grow_sections,"Community food growing mission artwork","DonateWorldz Grow Food Mission • Build local food security"))
 
-print("MISSION_WORLDZ=PASS one=1 research=5 law=7 food=9 donate_new=3 self_promo=0")
+print("MISSION_WORLDZ=PASS one=1 research=5 law=7 food=9 donate_new=4 jayjay_vision_support=1")
