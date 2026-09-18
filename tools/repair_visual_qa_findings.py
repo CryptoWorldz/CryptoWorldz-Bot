@@ -115,6 +115,21 @@ cur=css.read_text(encoding='utf-8')
 if 'screenshot-QA: ImpactBased root' not in cur:
     css.write_text(cur+extra,encoding='utf-8')
 
+# ---------- Purple Diamond Crew root ----------
+# Screenshot QA found a 3,600px interior blank gap because .pdc-stage used
+# min-height:72vh while the proof viewport is intentionally very tall.
+# This also wastes space on real tall/mobile displays. Preserve the artwork and
+# overlay positioning, but let content determine the section height.
+pdc_css=ROOT/'purplediamondcrew.com'/'final-overhaul.css'
+assert pdc_css.is_file(),pdc_css
+pdc_cur=pdc_css.read_text(encoding='utf-8')
+pdc_patch='''
+/* screenshot-QA: PDC root blank-gap removal */
+.pdc-stage{min-height:0!important;height:auto!important}
+'''
+if 'screenshot-QA: PDC root blank-gap removal' not in pdc_cur:
+    pdc_css.write_text(pdc_cur+pdc_patch,encoding='utf-8')
+
 # ---------- Assertions from the visual inspection ----------
 one=ROOT/'oneworldz.com'/'index.html'
 onet=one.read_text(encoding='utf-8')
@@ -131,4 +146,4 @@ impact_text=impact.read_text(encoding='utf-8')
 assert impact_src in impact_text
 assert '<div class="hero-art"' not in impact_text
 
-print(f'VISUAL_QA_REPAIRS=PASS food_routes={food_changed} impact_root=1 oneworldz_home_heroes=1')
+print(f'VISUAL_QA_REPAIRS=PASS food_routes={food_changed} impact_root=1 oneworldz_home_heroes=1 pdc_blank_gap=1')
