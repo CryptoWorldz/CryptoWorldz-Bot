@@ -30,7 +30,7 @@ def cards(items):
     return "".join(out)
 
 def page(host, title, eyebrow, h1, intro, sections, hero_alt, footer, description=None):
-    nav = "".join(f'<a{" class=\"brand\"" if label == title else ""} href="{e(url)}">{e(label)}</a>' for label, url in MISSION_NAV)
+    nav = "".join((f'<a class="brand" href="{e(url)}">{e(label)}</a>' if label == title else f'<a href="{e(url)}">{e(label)}</a>') for label, url in MISSION_NAV)
     section_html = []
     for s in sections:
         body = f'<p>{s.get("text","")}</p>' if s.get("text") else ""
