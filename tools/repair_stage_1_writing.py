@@ -62,11 +62,14 @@ for path in PAGES:
         assert 'Support must stay separated and understandable.' not in text
         assert 'Truth over pressure' not in text
         assert 'OPEN DONATION PAGE' not in text
+        assert 'jayjayteamdev' not in text.lower()
+        assert 'jayjay-support' not in text.lower()
         for href in (
             '/slice-of-hope-australia/',
             '/davis-family/',
             '/community-impact/',
-            '/jayjay-support/',
+            '/fresh-water-mission/',
+            '/grow-food-mission/',
         ):
             assert f'href="{href}"' in text, href
 
