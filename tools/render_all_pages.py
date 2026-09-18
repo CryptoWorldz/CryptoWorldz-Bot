@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render all 145 public pages at mobile and desktop sizes in parallel."""
+"""Render all 146 public pages at mobile and desktop sizes in parallel."""
 from pathlib import Path
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import concurrent.futures
@@ -97,5 +97,5 @@ finally:
 
 if errors:
     raise SystemExit(f'RENDER_AUDIT_FAILED errors={len(errors)} completed={completed}')
-assert completed == 290, completed
-print('RENDER_AUDIT=PASS pages=145 mobile=145 desktop=145 screenshots=290 parallel_workers=6 isolated_profiles=1')
+assert completed == 292, completed
+print('RENDER_AUDIT=PASS pages=146 mobile=146 desktop=146 screenshots=292 parallel_workers=6 isolated_profiles=1')
