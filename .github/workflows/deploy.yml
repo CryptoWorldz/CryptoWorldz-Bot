@@ -102,6 +102,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           from urllib.parse import urlparse
+          from html import unescape
 
           domains=[d.strip() for d in Path('DOMAINS.txt').read_text().splitlines() if d.strip()]
           assert len(domains)==18 and len(set(domains))==18, domains
@@ -159,7 +160,7 @@ jobs:
           for href in ['/slice-of-hope-australia/','/davis-family/','/community-impact/','/fresh-water-mission/','/grow-food-mission/']:
               assert f'href="{href}"' in donate, href
 
-          food=Path('foodworldz.com/index.html').read_text(encoding='utf-8')
+          food=unescape(Path('foodworldz.com/index.html').read_text(encoding='utf-8'))
           for required in ('Food Rescue','Food Safety','Storage & Cold Chain','Shipping & Logistics','Food Waste','Food Law'):
               assert required in food, required
 
