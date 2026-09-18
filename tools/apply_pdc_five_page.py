@@ -45,6 +45,7 @@ def head(title, desc):
 <link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="/mobile-safe.css">
 <link rel="stylesheet" href="/pdc-five.css">
+<link rel="stylesheet" href="/global-image-overrides.css">
 </head>'''
 
 def shell(title, desc, active, body, extra=""):
