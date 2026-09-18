@@ -9,8 +9,34 @@ const WEBHOOK_PATH = '/telegram/webhook';
 const WEBHOOK_URL = 'https://' + DOMAIN + WEBHOOK_PATH;
 
 function loadEnv() {
-  try {
-    const text = fs.readFileSync(path.join(__dirname, '.env'), 'utf8');
+  const candidates = [];
+  const explicit = String(process.env.ONEWORLDZ_ENV_FILE || '').trim();
+  if (explicit) candidates.push(path.resolve(explicit));
+  candidates.push(path.join(__dirname, '.env'));
+
+  for (let current = path.resolve(__dirname); current !== path.dirname(current); current = path.dirname(current)) {
+    if (path.basename(current) === 'nodejs') {
+      candidates.push(path.join(current, '.env'));
+      break;
+    }
+  }
+
+  const homes = [String(process.env.HOME || '').trim()];
+  try { homes.push(require('node:os').homedir()); } catch {}
+  for (const home of homes) {
+    if (home) candidates.push(path.join(home, 'domains', DOMAIN, 'nodejs', '.env'));
+  }
+
+  for (const account of [String(process.env.USER || '').trim(), String(process.env.LOGNAME || '').trim()]) {
+    if (account && !account.includes(path.sep)) {
+      candidates.push(path.join('/home', account, 'domains', DOMAIN, 'nodejs', '.env'));
+    }
+  }
+
+  for (const file of [...new Set(candidates)]) {
+    let text;
+    try { text = fs.readFileSync(file, 'utf8'); } catch { continue; }
+    let loaded = 0;
     for (const raw of text.split(/\r?\n/)) {
       const line = raw.trim();
       if (!line || line.startsWith('#')) continue;
@@ -21,16 +47,24 @@ function loadEnv() {
       if (String(process.env[key] || '').trim()) continue;
       let value = line.slice(at + 1).trim();
       if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
+      if (!value) continue;
       process.env[key] = value;
+      loaded += 1;
     }
-  } catch {}
+    if (loaded > 0) {
+      console.log('ZED_PROTECTED_ENV=LOADED');
+      return true;
+    }
+  }
+  console.warn('ZED_PROTECTED_ENV=NOT_FOUND');
+  return false;
 }
-loadEnv();
+const ENV_LOADED = loadEnv();
 
 const BOT_TOKEN = String(process.env.BOT_TOKEN || '').trim();
-if (!BOT_TOKEN) throw new Error('BOT_TOKEN is required');
-const API = 'https://api.telegram.org/bot' + BOT_TOKEN;
-const WEBHOOK_SECRET = crypto.createHash('sha256').update(BOT_TOKEN).digest('hex').slice(0, 64);
+if (!BOT_TOKEN) console.error('ZED_BOT_TOKEN=MISSING');
+const API = BOT_TOKEN ? 'https://api.telegram.org/bot' + BOT_TOKEN : '';
+const WEBHOOK_SECRET = BOT_TOKEN ? crypto.createHash('sha256').update(BOT_TOKEN).digest('hex').slice(0, 64) : '';
 
 const COMMANDS = [
   { command: 'start', description: 'Open the OneWorldz problem-solving system' },
@@ -167,7 +201,7 @@ function json(res, status, payload) {
 
 const server = http.createServer(async function(req,res){
   const pathname = String(req.url || '').split('?')[0];
-  if (req.method === 'GET' && (pathname === '/' || pathname === '/health')) return json(res,200,{ok:true,service:'Zed OneWorldz Command Centre',build:BUILD,commands:COMMANDS.length,webhook:WEBHOOK_PATH});
+  if (req.method === 'GET' && (pathname === '/' || pathname === '/health')) return json(res,BOT_TOKEN?200:503,{ok:Boolean(BOT_TOKEN),service:'Zed OneWorldz Command Centre',build:BUILD,commands:COMMANDS.length,webhook:WEBHOOK_PATH,telegram_configured:Boolean(BOT_TOKEN),environment_loaded:Boolean(ENV_LOADED)});
   if (req.method === 'GET' && pathname === '/commands') return json(res,200,{ok:true,commands:COMMANDS});
   if (req.method === 'POST' && pathname === WEBHOOK_PATH) {
     const supplied = String(req.headers['x-telegram-bot-api-secret-token'] || '');
@@ -185,6 +219,7 @@ const server = http.createServer(async function(req,res){
 });
 
 async function configure() {
+  if (!BOT_TOKEN) throw new Error('BOT_TOKEN is required');
   await telegram('setMyCommands',{commands:COMMANDS});
   await telegram('setChatMenuButton',{menu_button:{type:'commands'}});
   await telegram('setWebhook',{url:WEBHOOK_URL,secret_token:WEBHOOK_SECRET,allowed_updates:['message','callback_query'],drop_pending_updates:false});
