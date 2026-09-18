@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOMAINS = [d.strip() for d in (ROOT/'DOMAINS.txt').read_text(encoding='utf-8').splitlines() if d.strip()]
 URLS = [u.strip() for u in (ROOT/'.ecosystem-urls.txt').read_text(encoding='utf-8').splitlines() if u.strip()]
 assert len(DOMAINS) == 18 and len(set(DOMAINS)) == 18
-assert len(URLS) == 146 and len(set(URLS)) == 146
+assert len(URLS) == len(set(URLS)) and len(URLS) >= 146
 
 
 def browser_path():
@@ -97,5 +97,5 @@ finally:
 
 if errors:
     raise SystemExit(f'RENDER_AUDIT_FAILED errors={len(errors)} completed={completed}')
-assert completed == 292, completed
-print('RENDER_AUDIT=PASS pages=146 mobile=146 desktop=146 screenshots=292 parallel_workers=6 isolated_profiles=1')
+assert completed == len(URLS) * 2, (completed, len(URLS) * 2)
+print(f'RENDER_AUDIT=PASS pages={len(URLS)} mobile={len(URLS)} desktop={len(URLS)} screenshots={completed} parallel_workers=6 isolated_profiles=1')
