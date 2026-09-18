@@ -118,7 +118,7 @@ def head(title, description):
 <link rel="stylesheet" href="/style.css">
 <style>{CSS}</style>
 </head>
-<body data-oneworldz-heroes="{BUILD}">
+<body data-oneworldz-build="{BUILD}" data-oneworldz-heroes="{BUILD}">
 <div class="hero-shell">
 <nav class="hero-nav">
 <a href="/">🌏 OneWorldz</a>
