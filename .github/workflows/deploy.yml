@@ -65,6 +65,15 @@ jobs:
       - name: Apply JayJayTeamDev vision and 57-item repair layer
         run: python3 tools/apply_jayjay_vision_57.py
 
+      - name: "Repair Stage 1/3 — Writing, spacing and clean buttons"
+        run: python3 tools/repair_stage_1_writing.py
+
+      - name: "Repair Stage 2/3 — Images and visual integrity"
+        run: python3 tools/repair_stage_2_images.py
+
+      - name: "Repair Stage 3/3 — Structure, metadata and other defects"
+        run: python3 tools/repair_stage_3_other.py
+
       - name: Validate 18-site contract and retired-content removal
         shell: bash
         run: |
@@ -189,7 +198,7 @@ jobs:
           ftp.quit(); print(f'HOSTINGER_DEPLOY=PASS sites=18 files={total} retired_remote_purged=1')
           PY
 
-      - name: Verify all 145 public pages and retired URLs
+      - name: Verify all 146 public pages, styles, images and retired URLs
         shell: bash
         run: |
           set -euo pipefail
@@ -236,6 +245,4 @@ jobs:
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)
           print('FINAL=PASS pages=146 sites=18 retired_uganda=0 slice_of_hope=1 core_style=1')
           PY
-
-      - name: Verify every deployed stylesheet and image
-        run: python3 tools/full_site_audit.py --live
+          python3 tools/full_site_audit.py --live
