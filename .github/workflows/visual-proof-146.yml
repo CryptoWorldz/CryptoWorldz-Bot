@@ -45,6 +45,9 @@ jobs:
       - name: Repair 3 of 3 other
         run: python3 tools/repair_stage_3_other.py
 
+      - name: Apply screenshot-driven visual repairs
+        run: python3 tools/apply_real_visual_repairs.py
+
       - name: Capture all 146 pages for human inspection
         run: python3 audit/capture_visual_proof.py
 
