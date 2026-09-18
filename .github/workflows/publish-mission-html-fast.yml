@@ -1,0 +1,198 @@
+name: Publish Mission HTML Fast
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/publish-mission-html-fast.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oneworldz-mission-html-fast
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build verified mission HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/build_ecosystem.py
+          python3 tools/apply_visual_fixes.py
+          python3 tools/apply_facebook_support.py
+          python3 tools/remove_retired_uganda_support.py
+          python3 tools/apply_mobile_safety.py
+          python3 tools/apply_jayjay_vision_57.py
+          python3 tools/apply_mission_worldz.py
+          python3 tools/apply_specialist_worldz.py
+          python3 tools/apply_mobile_safety.py
+          python3 tools/repair_stage_1_writing.py
+          python3 tools/repair_stage_2_images.py
+          python3 tools/repair_stage_3_other.py
+          python3 tools/apply_global_image_overrides.py
+          python3 tools/prune_public_bloat.py
+
+      - name: Publish mission HTML only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path, PurePosixPath
+
+          targets = {
+              "oneworldz.com": "domains/oneworldz.com/public_html",
+              "foodworldz.com": "domains/foodworldz.com/public_html",
+              "donateworldz.com": "domains/donateworldz.com/public_html",
+          }
+
+          routes = {
+              "oneworldz.com": [
+                  "",
+                  "specialist-worldz",
+                  "waterworldz",
+                  "growworldz",
+                  "healthworldz",
+                  "shelterworldz",
+                  "educationworldz",
+                  "energyworldz",
+                  "wasteworldz",
+                  "transportworldz",
+                  "moneyworldz",
+                  "integrityworldz",
+                  "community-support",
+              ],
+              "foodworldz.com": [
+                  "",
+                  "food-rescue",
+                  "food-safety",
+                  "storage-cold-chain",
+                  "food-preparation",
+                  "shipping-logistics",
+                  "food-waste",
+                  "growing-food",
+                  "food-law",
+              ],
+              "donateworldz.com": [
+                  "",
+                  "fresh-water-mission",
+                  "grow-food-mission",
+                  "jayjay-support",
+                  "slice-of-hope-australia",
+                  "davis-family",
+                  "community-impact",
+              ],
+          }
+
+          host=os.environ["FTP_HOST"]
+          user=os.environ["FTP_USERNAME"]
+          password=os.environ["FTP_PASSWORD"]
+          port=int(os.environ.get("FTP_PORT","21"))
+
+          def connect():
+              ftp=FTP_TLS(context=ssl._create_unverified_context())
+              ftp.connect(host,port,timeout=45)
+              ftp.login(user,password)
+              ftp.prot_p()
+              ftp.set_pasv(True)
+              return ftp
+
+          def ensure(ftp,d):
+              ftp.cwd("/")
+              for part in PurePosixPath(d).parts:
+                  if part in ("","/"): continue
+                  try: ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part)
+                      ftp.cwd(part)
+
+          total=0
+          for site,remote_root in targets.items():
+              ftp=connect()
+              try:
+                  for route in routes[site]:
+                      local=Path(site)/(route if route else "")/"index.html"
+                      assert local.is_file(), local
+                      remote=PurePosixPath(remote_root)/(route if route else "")/"index.html"
+                      ensure(ftp,str(remote.parent))
+                      with local.open("rb") as h:
+                          ftp.storbinary("STOR index.html",h,blocksize=262144)
+                      total+=1
+                      print("PUBLISHED",site,route or "/")
+                  # sitemap is small and should match the current mission set.
+                  sitemap=Path(site)/"sitemap.xml"
+                  if sitemap.is_file():
+                      ensure(ftp,remote_root)
+                      with sitemap.open("rb") as h:
+                          ftp.storbinary("STOR sitemap.xml",h,blocksize=262144)
+              finally:
+                  try: ftp.quit()
+                  except Exception:
+                      try: ftp.close()
+                      except Exception: pass
+
+          print(f"MISSION_HTML_FAST=PASS files={total}")
+          PY
+
+      - name: Verify mission HTML live
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import time, urllib.request
+          checks = {
+              "https://oneworldz.com/": ["End World Hunger","Specialist departments"],
+              "https://oneworldz.com/specialist-worldz/": ["WaterWorldz","IntegrityWorldz"],
+              "https://oneworldz.com/waterworldz/": ["Groundwater assessment","LawWorldz"],
+              "https://oneworldz.com/growworldz/": ["GrowWorldz / FarmWorldz","Harvest volumes"],
+              "https://oneworldz.com/healthworldz/": ["HealthWorldz","Maternal"],
+              "https://oneworldz.com/moneyworldz/": ["MoneyWorldz / TaxWorldz","public budgets"],
+              "https://foodworldz.com/": ["Food Rescue","Food Law"],
+              "https://donateworldz.com/": ["Fresh Water Mission","Donate to JayJayTeamDev"],
+              "https://donateworldz.com/fresh-water-mission/": ["Fresh Water First","Offer equipment or expertise"],
+              "https://donateworldz.com/grow-food-mission/": ["Tools, Water, Seeds, Trees and Skills","Offer tools, seed, trees or expertise"],
+              "https://donateworldz.com/jayjay-support/": ["Donate to JayJayTeamDev","https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00"],
+          }
+
+          def get(url):
+              req=urllib.request.Request(
+                  url+"?missionfast=1",
+                  headers={"User-Agent":"OneWorldz-Mission-Fast/1.0","Cache-Control":"no-cache","Pragma":"no-cache"},
+              )
+              with urllib.request.urlopen(req,timeout=25) as r:
+                  return r.status,r.read().decode("utf-8","ignore")
+
+          for url,needles in checks.items():
+              last=""
+              for attempt in range(5):
+                  try:
+                      status,body=get(url)
+                      missing=[x for x in needles if x not in body]
+                      if status==200 and not missing:
+                          print("MISSION_HTML_LIVE_PASS",url)
+                          break
+                      last=f"status={status} missing={missing}"
+                  except Exception as exc:
+                      last=repr(exc)
+                  time.sleep(2+attempt*2)
+              else:
+                  raise SystemExit(f"MISSION_HTML_LIVE_FAIL {url} {last}")
+
+          print(f"MISSION_HTML_VERIFY=PASS routes={len(checks)}")
+          PY
