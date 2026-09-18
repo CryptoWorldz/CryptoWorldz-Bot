@@ -1,5 +1,5 @@
 name: Publish Mission HTML Fast
-# mission-fast-trigger: 2026-09-19-clarify-donateworldz
+# mission-fast-trigger: 2026-09-19-slice-floating
 
 on:
   push:
@@ -41,6 +41,7 @@ jobs:
           python3 tools/apply_jayjay_vision_57.py
           python3 tools/apply_mission_worldz.py
           python3 tools/apply_specialist_worldz.py
+          python3 tools/apply_slice_of_hope_visual.py
           python3 tools/apply_mobile_safety.py
           python3 tools/repair_stage_1_writing.py
           python3 tools/repair_stage_2_images.py
@@ -169,6 +170,7 @@ jobs:
               "https://donateworldz.com/fresh-water-mission/": ["Fresh Water First","Offer equipment or expertise"],
               "https://donateworldz.com/grow-food-mission/": ["Tools, Water, Seeds, Trees and Skills","Offer tools, seed, trees or expertise"],
               "https://donateworldz.com/jayjay-support/": ["Donate to JayJayTeamDev","https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00"],
+              "https://donateworldz.com/slice-of-hope-australia/": ["data-slice-hope-visual=\"1\"","Donate Now","Volunteer","Partner With Us","Fresh Water Mission","Grow Food Mission","Pizza Hut Australia has not yet approved"],
           }
 
           def get(url):
