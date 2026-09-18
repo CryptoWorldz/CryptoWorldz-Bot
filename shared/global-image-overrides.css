@@ -1,0 +1,179 @@
+/* =========================================================
+   ONEWORLDZ ECOSYSTEM — GLOBAL IMAGE SAFETY OVERRIDE
+   Canonical file. Copied identically to all 18 domains.
+   MUST load last on every public page.
+   ========================================================= */
+
+/* 1. GLOBAL RESPONSIVE IMAGE PROTECTION */
+img,
+picture img,
+.wp-post-image,
+.gallery-item img,
+.entry-content img,
+.post-content img,
+.page-content img,
+.content img,
+.hero img,
+.hero-art,
+.feature-img,
+.card img,
+.hero-card img,
+.visual-card img,
+.world-card img,
+.route-art {
+  box-sizing: border-box !important;
+
+  /* Physical + logical safeguards */
+  max-width: 100% !important;
+  max-inline-size: 100% !important;
+
+  /* Preserve intrinsic/native aspect ratio */
+  height: auto !important;
+  block-size: auto !important;
+
+  /* Default to intrinsic width; dedicated fill rules below may opt into 100% */
+  width: auto !important;
+
+  object-fit: contain !important;
+  object-position: center center !important;
+
+  vertical-align: middle !important;
+}
+
+/* Parent/wrapper containment */
+picture,
+figure,
+.wp-caption,
+.gallery,
+.gallery-item,
+.image-wrapper,
+.img-wrapper,
+.media-wrapper {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  max-inline-size: 100% !important;
+  min-width: 0 !important;
+}
+
+figure,
+.wp-caption,
+.gallery,
+.gallery-item,
+.image-wrapper,
+.img-wrapper,
+.media-wrapper {
+  overflow: hidden !important;
+}
+
+/* Existing ecosystem card/hero artwork is meant to fill its card,
+   while remaining fully contained and undistorted. */
+.hero img,
+.hero-art,
+.feature-img,
+.card img,
+.hero-card img,
+.visual-card img,
+.world-card img,
+.route-art,
+.img-fill-global {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
+/* 2. FOOLPROOF GLOBAL CENTERING UTILITY */
+.align-center-global {
+  display: block !important;
+  width: auto !important;
+  max-width: 100% !important;
+  max-inline-size: 100% !important;
+  height: auto !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-inline: auto !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
+/* 3. FLEX IMAGE + TEXT WRAPPER */
+.img-flex-container {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  gap: clamp(16px, 3vw, 32px) !important;
+
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+
+  margin: 0 auto !important;
+}
+
+.img-flex-container > * {
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.img-flex-container > img,
+.img-flex-container > picture,
+.img-flex-container > figure,
+.img-flex-container > .image-wrapper {
+  flex: 0 1 auto !important;
+  max-width: min(100%, 480px) !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+
+.img-flex-container > .img-flex-content,
+.img-flex-container > .text-content,
+.img-flex-container > div:not(.image-wrapper) {
+  flex: 1 1 280px !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+
+.img-flex-container.img-right {
+  flex-direction: row-reverse !important;
+}
+
+/* 4. HARD NETWORK-WIDE MOBILE OVERFLOW PROTECTION */
+html,
+body {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+main,
+section,
+article,
+header,
+footer,
+nav,
+div {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .img-flex-container,
+  .img-flex-container.img-right {
+    flex-direction: column !important;
+  }
+
+  .img-flex-container > img,
+  .img-flex-container > picture,
+  .img-flex-container > figure,
+  .img-flex-container > .image-wrapper {
+    width: auto !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-inline: auto !important;
+  }
+}
