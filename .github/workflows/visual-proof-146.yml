@@ -45,16 +45,16 @@ jobs:
       - name: Repair 3 of 3 other
         run: python3 tools/repair_stage_3_other.py
 
-      - name: Apply screenshot-driven visual repairs
-        run: python3 tools/apply_real_visual_repairs.py
+      - name: Final visual overhaul — every generated page
+        run: python3 tools/final_visual_overhaul.py
 
-      - name: Capture all 146 pages for human inspection
+      - name: Capture every generated page for human inspection
         run: python3 audit/capture_visual_proof.py
 
-      - name: Upload 292 screenshots and manifest
+      - name: Upload all screenshots and manifest
         uses: actions/upload-artifact@v4
         with:
-          name: oneworldz-146-page-visual-proof
+          name: oneworldz-full-visual-proof
           path: visual-proof/
           compression-level: 3
           if-no-files-found: error
