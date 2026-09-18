@@ -47,6 +47,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Compile mission builders
+        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/prune_public_bloat.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py
+
       - name: Build ecosystem baseline
         run: python3 tools/build_ecosystem.py
 
@@ -67,6 +70,9 @@ jobs:
 
       - name: Build the OneWorldz mission departments
         run: python3 tools/apply_mission_worldz.py
+
+      - name: Build the specialist Worldz departments
+        run: python3 tools/apply_specialist_worldz.py
 
       - name: Re-apply mobile safety to newly built mission pages
         run: python3 tools/apply_mobile_safety.py
@@ -107,7 +113,7 @@ jobs:
           domains=[d.strip() for d in Path('DOMAINS.txt').read_text().splitlines() if d.strip()]
           assert len(domains)==18 and len(set(domains))==18, domains
           urls=[u.strip() for u in Path('.ecosystem-urls.txt').read_text().splitlines() if u.strip()]
-          assert len(urls)==43 and len(urls)==len(set(urls)), (len(urls),len(set(urls)))
+          assert len(urls)==54 and len(urls)==len(set(urls)), (len(urls),len(set(urls)))
 
           forbidden=('reagan','action spreads smiles','action spread smiles','action creates smiles','196prufjjq')
           for u in urls:
@@ -145,6 +151,16 @@ jobs:
           assert 'href="/community-support/"' in one
           for required in ('End World Hunger', 'ResearchWorldz', 'LawWorldz', 'FoodWorldz', 'DonateWorldz'):
               assert required in one, required
+          assert 'data-specialist-worldz="1"' in one
+          specialist_routes = [
+              'specialist-worldz','waterworldz','growworldz','healthworldz','shelterworldz',
+              'educationworldz','energyworldz','wasteworldz','transportworldz','moneyworldz','integrityworldz'
+          ]
+          for route in specialist_routes:
+              p=Path('oneworldz.com')/route/'index.html'
+              assert p.is_file(), p
+              body=p.read_text(encoding='utf-8')
+              assert 'ResearchWorldz' in body and 'LawWorldz' in body and 'data-oneworldz-build=' in body, route
 
           retired_manifest=Path('.retired-generated-routes.txt')
           assert retired_manifest.is_file()
@@ -185,7 +201,7 @@ jobs:
               text=Path(path).read_text(encoding='utf-8')
               assert url in text and '<iframe' not in text.lower(), name
 
-          print(f'CONTRACT=PASS sites=18 pages={len(urls)} mission_system=1 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 jayjay_vision_support=1 community_links=35 core_style=1')
+          print(f'CONTRACT=PASS sites=18 pages={len(urls)} mission_system=1 specialist_worldz=10 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 jayjay_vision_support=1 community_links=35 core_style=1')
           PY
 
       - name: Audit every page, stylesheet and image before deployment
@@ -319,6 +335,6 @@ jobs:
           }
           for u,(needle,count) in specials.items():
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)
-          print(f'FINAL=PASS pages={len(urls)} sites=18 mission_system=1 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 jayjay_vision_support=1 core_style=1')
+          print(f'FINAL=PASS pages={len(urls)} sites=18 mission_system=1 specialist_worldz=10 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 jayjay_vision_support=1 core_style=1')
           PY
           python3 tools/full_site_audit.py --live
