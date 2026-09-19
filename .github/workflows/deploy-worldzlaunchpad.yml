@@ -1,0 +1,114 @@
+name: Deploy WorldzLaunchPad
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'launchpad.cryptoworldz.xyz/**'
+      - '.github/workflows/deploy-worldzlaunchpad.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldzlaunchpad-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate WorldzLaunchPad package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f launchpad.cryptoworldz.xyz/index.html
+          test -f launchpad.cryptoworldz.xyz/style.css
+          test -f launchpad.cryptoworldz.xyz/app.js
+          test -f launchpad.cryptoworldz.xyz/tokens.json
+          grep -q 'WorldzLaunchPad' launchpad.cryptoworldz.xyz/index.html
+          grep -q 'candidate-mainnet-disabled' launchpad.cryptoworldz.xyz/tokens.json
+          grep -q '100000000' launchpad.cryptoworldz.xyz/tokens.json
+          grep -q '200000000' launchpad.cryptoworldz.xyz/tokens.json
+          grep -q '250000000' launchpad.cryptoworldz.xyz/tokens.json
+          grep -q '348000000' launchpad.cryptoworldz.xyz/tokens.json
+          echo "WORLDZLAUNCHPAD_PACKAGE=PASS"
+
+      - name: Deploy only WorldzLaunchPad to verified Hostinger document root
+        shell: python
+        run: |
+          import os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path, PurePosixPath
+
+          local_root=Path("launchpad.cryptoworldz.xyz")
+          remote_root="domains/cryptoworldz.xyz/public_html/launchpad"
+
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ["FTP_HOST"],int(os.environ.get("FTP_PORT","21")),timeout=40)
+          ftp.login(os.environ["FTP_USERNAME"],os.environ["FTP_PASSWORD"])
+          ftp.prot_p(); ftp.set_pasv(True)
+
+          def ensure_dir(directory):
+              ftp.cwd("/")
+              for part in PurePosixPath(directory).parts:
+                  if part in ("","/"): continue
+                  try: ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part); ftp.cwd(part)
+
+          count=0
+          for f in sorted(p for p in local_root.rglob("*") if p.is_file()):
+              rel=f.relative_to(local_root).as_posix()
+              remote=PurePosixPath(remote_root)/rel
+              ensure_dir(str(remote.parent))
+              with f.open("rb") as handle:
+                  ftp.storbinary(f"STOR {remote.name}",handle,blocksize=262144)
+              count+=1
+
+          # Remove Hostinger's new-site placeholder only inside this isolated subdomain.
+          placeholder=str(PurePosixPath(remote_root)/"default.php")
+          try:
+              ftp.delete(placeholder)
+              print("REMOVED_PLACEHOLDER=default.php")
+          except Exception:
+              print("PLACEHOLDER_ALREADY_ABSENT=1")
+
+          try: ftp.quit()
+          except Exception: ftp.close()
+          print(f"WORLDZLAUNCHPAD_DEPLOY=PASS files={count} target={remote_root}")
+
+      - name: Verify live WorldzLaunchPad
+        shell: python
+        run: |
+          import time, urllib.request
+          url="https://launchpad.cryptoworldz.xyz/?verify=worldzlaunchpad-v1"
+          last=""
+          for attempt in range(1,7):
+              try:
+                  req=urllib.request.Request(url,headers={"User-Agent":"WorldzLaunchPad-Live-Verify/1.0","Cache-Control":"no-cache"})
+                  with urllib.request.urlopen(req,timeout=25) as r:
+                      body=r.read().decode("utf-8","ignore")
+                      if r.status==200 and "WorldzLaunchPad" in body and "WORLDZ" in body and "REVIVE" not in body:
+                          # Token cards are JS-rendered; source must still contain the app script.
+                          if '/app.js' in body and '/style.css' in body:
+                              print("WORLDZLAUNCHPAD_LIVE=PASS status=200")
+                              raise SystemExit(0)
+                      last=f"status={r.status} bytes={len(body)}"
+              except Exception as e:
+                  if isinstance(e,SystemExit): raise
+                  last=repr(e)
+              print(f"LIVE_RETRY attempt={attempt} {last}")
+              time.sleep(attempt*3)
+          raise SystemExit("WORLDZLAUNCHPAD_LIVE=FAIL "+last)
