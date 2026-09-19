@@ -39,9 +39,10 @@ jobs:
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      BOT_TOKEN_SECRET: ${{ secrets.BOT_TOKEN }}
+      BOT_TOKEN_SECRET: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
       SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_SECRET_KEY }}
+      SUPABASE_PUBLISHABLE_KEY_SECRET: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY || secrets.SUPABASE_KEY }}
 
     steps:
       - name: Checkout exact current main
@@ -257,8 +258,12 @@ jobs:
 
           merged = {}
           merged.update({k:v for k,v in current.items() if v and k != "BOT_TOKEN"})
-          merged["SUPABASE_URL"] = "https://hknymhhyqldtzmplzuzh.supabase.co"
-          merged["SUPABASE_PUBLISHABLE_KEY"] = "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+          merged["SUPABASE_URL"] = os.environ.get("SUPABASE_URL_SECRET", "").strip() or "https://hknymhhyqldtzmplzuzh.supabase.co"
+          service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET", "").strip()
+          publishable_key = os.environ.get("SUPABASE_PUBLISHABLE_KEY_SECRET", "").strip()
+          if service_key:
+              merged["SUPABASE_SERVICE_ROLE_KEY"] = service_key
+          merged["SUPABASE_PUBLISHABLE_KEY"] = publishable_key or merged.get("SUPABASE_PUBLISHABLE_KEY", "") or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
           for _, _, _, values in sorted(found, key=lambda row: row[0]):
               for key, value in values.items():
                   if value and key not in merged and key != "BOT_TOKEN":
