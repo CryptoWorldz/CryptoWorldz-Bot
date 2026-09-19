@@ -91,20 +91,26 @@ for raw in lines:
     value = value.strip().strip('"').strip("'")
     existing[key] = value
 
+managed_bot = os.environ.get("HOSTINGER_MANAGED_BOT_TOKEN", "").strip() == "1"
 required = {
     "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", "").strip() or existing.get("OPENAI_API_KEY", ""),
-    "BOT_TOKEN": os.environ.get("BOT_TOKEN_SECRET", "").strip() or existing.get("BOT_TOKEN", ""),
+    "BOT_TOKEN": "" if managed_bot else (os.environ.get("BOT_TOKEN_SECRET", "").strip() or existing.get("BOT_TOKEN", "")),
     "SUPABASE_URL": os.environ.get("SUPABASE_URL_SECRET", "").strip() or existing.get("SUPABASE_URL", "") or "https://hknymhhyqldtzmplzuzh.supabase.co",
-    "SUPABASE_PUBLISHABLE_KEY": existing.get("SUPABASE_PUBLISHABLE_KEY", "") or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV",
+    "SUPABASE_PUBLISHABLE_KEY": os.environ.get("SUPABASE_PUBLISHABLE_KEY_SECRET", "").strip() or existing.get("SUPABASE_PUBLISHABLE_KEY", "") or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV",
 }
 for key, value in required.items():
+    if key == "BOT_TOKEN" and managed_bot:
+        continue
     if not value or "\n" in value or "\r" in value:
         raise SystemExit(f"{key}_MISSING_FROM_GITHUB_AND_PROTECTED_ENV")
 
 for key, value in required.items():
     pattern = re.compile(rf"^\s*(?:export\s+)?{re.escape(key)}\s*=")
     lines = [line for line in lines if not pattern.match(line)]
-    lines.append(f"{key}={value}")
+    if value:
+        lines.append(f"{key}={value}")
+if managed_bot:
+    print("ZED_MANAGED_BOT_TOKEN_RUNTIME=READY")
 path.write_text("\n".join(lines).rstrip("\n") + "\n", encoding="utf-8")
 PY
 chmod 600 "$protected_env"
@@ -114,7 +120,10 @@ import pathlib
 import re
 
 text = pathlib.Path(os.environ["PROTECTED_ENV"]).read_text(encoding="utf-8")
-for key in ["OPENAI_API_KEY", "BOT_TOKEN", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"]:
+keys = ["OPENAI_API_KEY", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"]
+if os.environ.get("HOSTINGER_MANAGED_BOT_TOKEN", "").strip() != "1":
+    keys.append("BOT_TOKEN")
+for key in keys:
     matches = [line for line in text.splitlines() if re.match(rf"^\s*(?:export\s+)?{re.escape(key)}\s*=\S+", line)]
     if len(matches) != 1:
         raise SystemExit(f"{key}_MERGE_PROOF_FAILED")
