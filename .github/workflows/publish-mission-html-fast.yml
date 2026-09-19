@@ -1,5 +1,5 @@
 name: Publish Mission HTML Fast
-# mission-fast-trigger: 2026-09-19-donateworldz-masterpiece
+# mission-fast-trigger: 2026-09-19-donateworldz-masterpiece-v2
 
 on:
   push:
