@@ -110,7 +110,7 @@ async function verifyOrCreatePlatform(){
       status('#platform-status','WORLDZ PLATFORMCONFIG CREATED + VERIFIED ON-CHAIN ✅\nTransaction: '+sig,'good');
     }
     $('#platform-id').textContent=platformId.toBase58();$('#global-config').textContent=global.key.pubKey;$('#cp-config').textContent=cpConfigId.toBase58();$('#platform-result').classList.add('show');
-    $('#check-btn').disabled=false;renderProof();
+    $('#check-btn').disabled=false;loadQuery();renderProof();
   }catch(e){console.error(e);status('#platform-status','PLATFORM STAGE FAILED\n'+(e?.message||e),'bad');platformReady=false;}
   finally{$('#platform-btn').disabled=false;}
 }
@@ -238,6 +238,19 @@ function renderProof(){
     ['Public mainnet launch',false,'LOCKED']
   ];
   $('#proof-grid').innerHTML=items.map(([a,ok,b])=>'<div class="'+(ok?'pass':'wait')+'"><b>'+(ok?'✓ ':'! ')+a+'</b><span>'+b+'</span></div>').join('');
+}
+function loadQuery(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('name'))$('#name').value=q.get('name');
+  if(q.get('symbol'))$('#symbol').value=q.get('symbol');
+  if(q.get('description'))$('#description').value=q.get('description');
+  const notes=[];
+  if(q.get('intent'))notes.push('Manifest: '+q.get('intent').slice(0,16)+'…');
+  if(q.get('supply')&&q.get('supply')!==FIXED_SUPPLY)notes.push('Raydium Curve beta uses reviewed GlobalConfig supply '+FIXED_SUPPLY+' instead of requested '+q.get('supply'));
+  if(q.get('decimals')&&q.get('decimals')!=='6')notes.push('Raydium Curve beta uses 6 decimals.');
+  if(q.get('fee')&&Number(q.get('fee'))!==2)notes.push('Raydium Curve beta uses fixed 2.00% Worldz PlatformConfig fee.');
+  if(q.get('quote')&&q.get('quote')!=='SOL')notes.push('Raydium Curve beta currently executes SOL quote only.');
+  if(notes.length)status('#launch-status','MANIFEST LOADED\n'+notes.join('\n'),'warn');
 }
 $('#wallet').addEventListener('click',connect);
 $('#platform-btn').addEventListener('click',verifyOrCreatePlatform);
