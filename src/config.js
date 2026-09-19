@@ -8,13 +8,23 @@ function required(name, env) {
 }
 
 function loadConfig(env = process.env) {
-  const botToken = required("BOT_TOKEN", env);
-  const supabaseUrl = required("SUPABASE_URL", env).replace(/\/$/, "");
+  const botToken = String(
+    env.BOT_TOKEN ||
+    env.TELEGRAM_BOT_TOKEN ||
+    env.TELEGRAM_TOKEN ||
+    env.ZED_BOT_TOKEN ||
+    env.CRYPTOWORLDZ_BOT_TOKEN ||
+    ""
+  ).trim();
+  if (!botToken) throw new Error("BOT_TOKEN is required.");
+  const supabaseUrl = String(
+    env.SUPABASE_URL || "https://hknymhhyqldtzmplzuzh.supabase.co"
+  ).trim().replace(/\/$/, "");
   const supabaseApiKey = String(
     env.SUPABASE_SERVICE_ROLE_KEY ||
     env.SUPABASE_PUBLISHABLE_KEY ||
     env.SUPABASE_ANON_KEY ||
-    ""
+    "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
   ).trim();
   if (!supabaseApiKey) throw new Error("A Supabase server or publishable API key is required.");
   const usingServiceRole = Boolean(String(env.SUPABASE_SERVICE_ROLE_KEY || "").trim());
