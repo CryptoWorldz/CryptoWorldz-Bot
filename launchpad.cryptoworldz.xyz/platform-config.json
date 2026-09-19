@@ -1,7 +1,7 @@
 {
-  "version": "2026-09-20-worldzlaunchpad-platform-v1",
+  "version": "2026-09-20-worldzlaunchpad-flash-pipeline-v2",
   "product": "WorldzLaunchPad™",
-  "status": "build-and-devnet",
+  "status": "flash-devnet-pipeline",
   "publicMainnetCreatorLaunchesEnabled": false,
   "devnetTokenCreationEnabled": true,
   "principles": {
@@ -16,7 +16,7 @@
   },
   "feePolicy": {
     "projectTradingFeeMinPercent": 0.5,
-    "projectTradingFeeMaxPercent": 4.0,
+    "projectTradingFeeMaxPercent": 4,
     "stepPercent": 0.25,
     "worldzLaunchPadShareOfCollectedProjectFeePercent": 10,
     "worldzLaunchPadShareOfTokenSupplyPercent": 0,
@@ -24,56 +24,131 @@
     "description": "WorldzLaunchPad receives 10% of the configured project trading-fee revenue collected through the supported launch route. It is not a 10% token-supply fee, liquidity fee, or ordinary wallet-transfer tax."
   },
   "launchEngines": [
-    {"id":"flash","name":"Worldz Flash™","status":"GENESIS_TESTING","description":"Direct-liquidity launch. No bonding curve required."},
-    {"id":"curve","name":"Worldz Curve™","status":"RESEARCH_INTEGRATION","underlay":"Raydium LaunchLab","description":"Curated bonding-curve launch with graduation to AMM."},
-    {"id":"curve-pro","name":"Worldz Curve Pro™","status":"RESEARCH_INTEGRATION","underlay":"Meteora DBC","description":"Advanced dynamic bonding-curve configuration."},
-    {"id":"liquidity","name":"Worldz Liquidity™","status":"PLANNED","description":"Traditional fixed-supply token plus creator-funded liquidity."},
-    {"id":"board","name":"Worldz Board™","status":"PLANNED","description":"Branded launch surface for a creator, community or team."}
+    {
+      "id": "flash",
+      "name": "Worldz Flash™",
+      "status": "GENESIS_TESTING",
+      "description": "Direct-liquidity launch. No bonding curve required."
+    },
+    {
+      "id": "curve",
+      "name": "Worldz Curve™",
+      "status": "RESEARCH_INTEGRATION",
+      "underlay": "Raydium LaunchLab",
+      "description": "Curated bonding-curve launch with graduation to AMM."
+    },
+    {
+      "id": "curve-pro",
+      "name": "Worldz Curve Pro™",
+      "status": "RESEARCH_INTEGRATION",
+      "underlay": "Meteora DBC",
+      "description": "Advanced dynamic bonding-curve configuration."
+    },
+    {
+      "id": "liquidity",
+      "name": "Worldz Liquidity™",
+      "status": "PLANNED",
+      "description": "Traditional fixed-supply token plus creator-funded liquidity."
+    },
+    {
+      "id": "board",
+      "name": "Worldz Board™",
+      "status": "PLANNED",
+      "description": "Branded launch surface for a creator, community or team."
+    }
   ],
   "chainAdapters": [
-    {"id":"solana","name":"Solana","world":"SolWorldz","status":"BUILDING","creatorLaunch":"DEVNET"},
-    {"id":"ethereum","name":"Ethereum","world":"EthWorldz","status":"PLANNED","creatorLaunch":"OFF"},
-    {"id":"base","name":"Base","world":"BaseWorldz","status":"PLANNED","creatorLaunch":"OFF"},
-    {"id":"bnb","name":"BNB Chain","world":"BNBWorldz","status":"PLANNED","creatorLaunch":"OFF"},
-    {"id":"robinhood","name":"Robinhood Chain","world":"RobinWorldz","status":"PLANNED","creatorLaunch":"OFF"},
-    {"id":"hyper","name":"HyperEVM","world":"HyperWorldz","status":"PLANNED","creatorLaunch":"OFF"},
-    {"id":"xrpl","name":"XRP Ledger","world":"XRPWorldz","status":"NATIVE_ADAPTER_RESEARCH","creatorLaunch":"OFF"},
-    {"id":"sui","name":"Sui","world":"SuiWorldz","status":"NATIVE_ADAPTER_RESEARCH","creatorLaunch":"OFF"}
+    {
+      "id": "solana",
+      "name": "Solana",
+      "world": "SolWorldz",
+      "status": "BUILDING",
+      "creatorLaunch": "DEVNET"
+    },
+    {
+      "id": "ethereum",
+      "name": "Ethereum",
+      "world": "EthWorldz",
+      "status": "PLANNED",
+      "creatorLaunch": "OFF"
+    },
+    {
+      "id": "base",
+      "name": "Base",
+      "world": "BaseWorldz",
+      "status": "PLANNED",
+      "creatorLaunch": "OFF"
+    },
+    {
+      "id": "bnb",
+      "name": "BNB Chain",
+      "world": "BNBWorldz",
+      "status": "PLANNED",
+      "creatorLaunch": "OFF"
+    },
+    {
+      "id": "robinhood",
+      "name": "Robinhood Chain",
+      "world": "RobinWorldz",
+      "status": "PLANNED",
+      "creatorLaunch": "OFF"
+    },
+    {
+      "id": "hyper",
+      "name": "HyperEVM",
+      "world": "HyperWorldz",
+      "status": "PLANNED",
+      "creatorLaunch": "OFF"
+    },
+    {
+      "id": "xrpl",
+      "name": "XRP Ledger",
+      "world": "XRPWorldz",
+      "status": "NATIVE_ADAPTER_RESEARCH",
+      "creatorLaunch": "OFF"
+    },
+    {
+      "id": "sui",
+      "name": "Sui",
+      "world": "SuiWorldz",
+      "status": "NATIVE_ADAPTER_RESEARCH",
+      "creatorLaunch": "OFF"
+    }
   ],
   "verifiedQuoteAssets": [
     {
-      "id":"SOL",
-      "name":"Solana",
-      "network":"Solana",
-      "type":"native",
-      "status":"VERIFIED_NATIVE"
+      "id": "SOL",
+      "name": "Solana",
+      "network": "Solana",
+      "type": "native",
+      "status": "VERIFIED_NATIVE"
     },
     {
-      "id":"wXRP",
-      "name":"Hex Trust wrapped XRP",
-      "network":"Solana",
-      "originAsset":"XRP",
-      "type":"wrapped-quote",
-      "status":"VERIFIED",
-      "backing":"1:1 XRP held in custody by Hex Trust, subject to issuer terms and redemption controls",
-      "solanaMint":"6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2",
-      "issuer":"Hex Trust",
-      "interoperability":"LayerZero",
-      "proofUrl":"https://www.hextrust.com/services/wrapping/wxrp",
-      "explorerUrl":"https://solscan.io/token/6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2"
+      "id": "wXRP",
+      "name": "Hex Trust wrapped XRP",
+      "network": "Solana",
+      "originAsset": "XRP",
+      "type": "wrapped-quote",
+      "status": "VERIFIED",
+      "backing": "1:1 XRP held in custody by Hex Trust, subject to issuer terms and redemption controls",
+      "solanaMint": "6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2",
+      "issuer": "Hex Trust",
+      "interoperability": "LayerZero",
+      "proofUrl": "https://www.hextrust.com/services/wrapping/wxrp",
+      "explorerUrl": "https://solscan.io/token/6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2"
     }
   ],
   "crossPair": {
-    "name":"Worldz CrossPair™",
-    "status":"BUILDING",
-    "firstCandidate":"SolSavewXRP $SAVE / wXRP",
-    "rule":"Pairing a project token against wXRP does not mean the project token is backed 1:1 by XRP. The verified wXRP quote asset itself carries the issuer's 1:1 backing claim."
+    "name": "Worldz CrossPair™",
+    "status": "BUILDING",
+    "firstCandidate": "SolSavewXRP $SAVE / wXRP",
+    "rule": "Pairing a project token against wXRP does not mean the project token is backed 1:1 by XRP. The verified wXRP quote asset itself carries the issuer's 1:1 backing claim."
   },
   "omnichain": {
-    "name":"Worldz Omnichain™",
-    "status":"ARCHITECTURE_RESEARCH",
-    "goal":"Allow supported WorldzLaunchPad assets to operate across multiple chains while preserving a disclosed global supply model.",
-    "initialResearchRail":"LayerZero OFT"
+    "name": "Worldz Omnichain™",
+    "status": "ARCHITECTURE_RESEARCH",
+    "goal": "Allow supported WorldzLaunchPad assets to operate across multiple chains while preserving a disclosed global supply model.",
+    "initialResearchRail": "LayerZero OFT"
   },
   "releaseGate": {
     "mainnetCreatorLaunch": [
@@ -85,5 +160,57 @@
       "Australian regulatory and legal position for the exact service",
       "human launch authorization"
     ]
+  },
+  "worldzFlash": {
+    "status": "DEVNET_BETA",
+    "stages": {
+      "token": {
+        "status": "EXECUTABLE",
+        "network": "solana-devnet"
+      },
+      "metadata": {
+        "status": "EXECUTABLE",
+        "standard": "Metaplex Token Metadata",
+        "publicMetadataProxy": "/metadata.php?mint=<MINT>"
+      },
+      "pair": {
+        "SOL": {
+          "status": "EXECUTABLE_DEVNET",
+          "venue": "Raydium CPMM"
+        },
+        "wXRP": {
+          "status": "VERIFIED_MAINNET_TARGET_ONLY",
+          "reason": "No official verified wXRP Devnet mint is used; WorldzLaunchPad does not fabricate one."
+        }
+      },
+      "feeRouter": {
+        "status": "CONFIG_SNAPSHOT_ONLY",
+        "executing": false
+      },
+      "lpLock": {
+        "status": "PLAN_ONLY",
+        "enforced": false
+      },
+      "vesting": {
+        "status": "PLAN_ONLY",
+        "enforced": false
+      },
+      "proof": {
+        "status": "PARTIAL_VERIFICATION"
+      },
+      "commandCentreRegistry": {
+        "status": "LIVE_SHARED_REGISTRY",
+        "surfaces": [
+          "ZED",
+          "AUTO",
+          "G.R.A.C.E."
+        ]
+      }
+    }
+  },
+  "libraries": {
+    "raydiumSdkPinnedForFlashDevnet": "0.2.64-alpha",
+    "metaplexTokenMetadata": "3.4.0",
+    "umiBundleDefaults": "1.6.0"
   }
 }
