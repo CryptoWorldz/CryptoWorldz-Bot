@@ -195,26 +195,53 @@ jobs:
           except Exception:
               managed = {}
 
-          # Merge every legitimate protected source rather than requiring all
-          # credentials to exist in one old copy. SUPABASE_URL is public and
-          # pinned to the connected CryptoWorldz-Bot project.
+          # Merge legitimate protected sources, but do NOT blindly trust the
+          # current BOT_TOKEN. Test every recovered candidate against Telegram
+          # and choose a token Telegram itself confirms is valid.
+          import json, urllib.request
+          bot_candidates = []
+          def add_bot(value):
+              value = str(value or "").strip()
+              if value and value not in bot_candidates:
+                  bot_candidates.append(value)
+
+          add_bot(os.environ.get("BOT_TOKEN_SECRET", ""))
+          add_bot(current.get("BOT_TOKEN", ""))
+          for _, _, _, values in found:
+              add_bot(values.get("BOT_TOKEN", ""))
+          add_bot(managed.get("BOT_TOKEN", ""))
+
+          valid_bot_token = ""
+          for candidate in bot_candidates:
+              try:
+                  req = urllib.request.Request(
+                      "https://api.telegram.org/bot" + candidate + "/getMe",
+                      headers={"Accept":"application/json"}
+                  )
+                  with urllib.request.urlopen(req, timeout=15) as response:
+                      result = json.loads(response.read().decode("utf-8"))
+                  if result.get("ok") is True and result.get("result", {}).get("id"):
+                      valid_bot_token = candidate
+                      break
+              except Exception:
+                  continue
+
           merged = {}
-          merged.update({k:v for k,v in current.items() if v})
+          merged.update({k:v for k,v in current.items() if v and k != "BOT_TOKEN"})
           merged["SUPABASE_URL"] = "https://hknymhhyqldtzmplzuzh.supabase.co"
           merged["SUPABASE_PUBLISHABLE_KEY"] = "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
           for _, _, _, values in sorted(found, key=lambda row: row[0]):
               for key, value in values.items():
-                  if value and key not in merged:
+                  if value and key not in merged and key != "BOT_TOKEN":
                       merged[key] = value
           for key, value in managed.items():
-              if value and key not in merged:
+              if value and key not in merged and key != "BOT_TOKEN":
                   merged[key] = value
-          github_core = {
-              "BOT_TOKEN": os.environ.get("BOT_TOKEN_SECRET", "").strip(),
-          }
-          for key, value in github_core.items():
-              if value:
-                  merged[key] = value
+          if valid_bot_token:
+              merged["BOT_TOKEN"] = valid_bot_token
+
+          print("ZED_TELEGRAM_TOKEN_CANDIDATES_CHECKED=" + str(len(bot_candidates)))
+          print("ZED_TELEGRAM_VALID_TOKEN_FOUND=" + ("YES" if valid_bot_token else "NO"))
 
           missing = [key for key in required if not merged.get(key)]
           if missing:
