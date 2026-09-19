@@ -211,6 +211,20 @@ function renderProof(){
   ];
   $('#proof-grid').innerHTML=items.map(([a,ok,b])=>'<div class="'+(ok?'pass':'wait')+'"><b>'+(ok?'✓ ':'! ')+a+'</b><span>'+b+'</span></div>').join('');
 }
+function loadQuery(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('name'))$('#name').value=q.get('name');
+  if(q.get('symbol'))$('#symbol').value=q.get('symbol');
+  if(q.get('supply'))$('#supply').value=q.get('supply');
+  if(q.get('description'))$('#description').value=q.get('description');
+  if(q.get('fee'))$('#fee').value=q.get('fee');
+  const notes=[];
+  if(q.get('intent'))notes.push('Manifest: '+q.get('intent').slice(0,16)+'…');
+  if(q.get('decimals')&&q.get('decimals')!=='6')notes.push('Curve Pro Devnet beta currently executes 6-decimal DBC launches.');
+  if(q.get('quote')&&q.get('quote')!=='SOL')notes.push('Curve Pro Devnet beta currently executes SOL quote only.');
+  if(notes.length)setStatus('#status','MANIFEST LOADED\n'+notes.join('\n'),'warn');
+}
+loadQuery();
 $('#wallet').addEventListener('click',connect);
 $('#check-btn').addEventListener('click',buildAndValidate);
 $('#launch-btn').addEventListener('click',launch);
