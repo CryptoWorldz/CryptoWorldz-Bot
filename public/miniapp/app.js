@@ -17,7 +17,12 @@ const IMPACT_CAMPAIGN = {
 async function api(path, options = {}) {
   const response = await fetch(path, { ...options, headers: { "Content-Type": "application/json", "X-Telegram-Init-Data": tg ? tg.initData : "", ...(options.headers || {}) } });
   const payload = await response.json().catch(() => ({ ok: false, error: "invalid_response" }));
-  if (!response.ok) throw new Error(payload.error || "request_failed");
+  if (!response.ok) {
+    const error = new Error(payload.error || "request_failed");
+    error.code = payload.error || "request_failed";
+    error.status = response.status;
+    throw error;
+  }
   return payload;
 }
 
@@ -120,16 +125,37 @@ document.addEventListener("click", async (event) => {
   if (target) showScreen(target.dataset.screen || target.dataset.open);
 });
 
+function secureLaunchMessage(error) {
+  const code = error && (error.code || error.message);
+  if (code === "telegram_required") return "Open the Command Centre using Zed's Telegram Mini App button.";
+  if (code === "expired_init_data") return "Your Telegram secure session expired. Close this screen and reopen Command Centre from Zed.";
+  if (code === "invalid_signature") return "Telegram could not verify this secure session. Close this screen and reopen Command Centre from Zed.";
+  if (code === "rate_limited") return "Too many secure requests were received. Wait a moment, then reopen Command Centre.";
+  if (code === "invalid_response") return "The Command Centre server returned an unreadable response. Please reopen it from Zed.";
+  return `Zed could not securely open the Command Centre. Error: ${code || "request_failed"}`;
+}
+
 async function start() {
   try {
-    if (!tg || !tg.initData) throw new Error("telegram_required");
+    if (!tg || !tg.initData) throw Object.assign(new Error("telegram_required"), { code: "telegram_required" });
     tg.ready(); tg.expand(); tg.setHeaderColor("#09040f"); tg.setBackgroundColor("#07030d");
-    const [bootstrap, config] = await Promise.all([api("/api/mini/bootstrap"), fetch("/api/public/mini-config").then((response) => response.json())]);
+    const [bootstrap, config] = await Promise.all([
+      api("/api/mini/bootstrap"),
+      fetch("/api/public/mini-config", { cache: "no-store" }).then((response) => response.json())
+    ]);
     state.data = bootstrap; state.community = config.community; render();
-    byId("loading").classList.add("hidden"); byId("content").classList.remove("hidden"); byId("nav").classList.remove("hidden"); byId("status").textContent = "Secure"; byId("status").classList.add("online");
+    if (Array.isArray(bootstrap.degraded) && bootstrap.degraded.length) {
+      byId("home")?.insertAdjacentHTML(
+        "afterbegin",
+        `<div class="panel security"><b>✅ Secure Command Centre Open</b><p>Some non-critical modules are temporarily unavailable: ${escapeHtml(bootstrap.degraded.join(", "))}. ZED kept the rest of Command Centre online.</p></div>`
+      );
+    }
+    byId("loading").classList.add("hidden"); byId("content").classList.remove("hidden"); byId("nav").classList.remove("hidden");
+    byId("status").textContent = bootstrap.degraded?.length ? "Secure • Partial" : "Secure";
+    byId("status").classList.add("online");
   } catch (error) {
     byId("loading").classList.add("hidden"); byId("error").classList.remove("hidden");
-    byId("error-text").textContent = error.message === "telegram_required" ? "Open the Command Centre through Zed in Telegram." : "Zed could not securely open the Command Centre. Please try again.";
+    byId("error-text").textContent = secureLaunchMessage(error);
     byId("status").textContent = "Locked";
   }
 }
