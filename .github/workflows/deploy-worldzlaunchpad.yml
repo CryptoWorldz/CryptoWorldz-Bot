@@ -89,7 +89,7 @@ jobs:
           devnet=(root/'devnet/index.html').read_text()
           assert 'Create a Launch' in home
           assert 'WORLDZ CROSSPAIR' in home
-          assert 'Worldz Omnichain' in home
+          assert 'WORLDZ OMNICHAIN' in home
           assert 'MAINNET LAUNCH LOCKED' in home
           assert 'Create Devnet Token' in devnet
           assert 'Solana Devnet only' in devnet
