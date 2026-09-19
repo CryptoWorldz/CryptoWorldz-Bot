@@ -21,7 +21,7 @@ function validateTelegramInitData(initData, botToken, options = {}) {
   }
 
   const nowSeconds = Math.floor((options.nowMs || Date.now()) / 1000);
-  const maxAgeSeconds = options.maxAgeSeconds || 3600;
+  const maxAgeSeconds = Number.isFinite(Number(options.maxAgeSeconds)) ? Number(options.maxAgeSeconds) : 86400;
   const authDate = Number(params.get("auth_date"));
   if (!Number.isSafeInteger(authDate) || authDate > nowSeconds + 30 || nowSeconds - authDate > maxAgeSeconds) {
     return { ok: false, error: "expired_init_data" };
