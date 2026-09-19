@@ -94,8 +94,8 @@ for raw in lines:
 required = {
     "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", "").strip() or existing.get("OPENAI_API_KEY", ""),
     "BOT_TOKEN": os.environ.get("BOT_TOKEN_SECRET", "").strip() or existing.get("BOT_TOKEN", ""),
-    "SUPABASE_URL": os.environ.get("SUPABASE_URL_SECRET", "").strip() or existing.get("SUPABASE_URL", ""),
-    "SUPABASE_SERVICE_ROLE_KEY": os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET", "").strip() or existing.get("SUPABASE_SERVICE_ROLE_KEY", ""),
+    "SUPABASE_URL": os.environ.get("SUPABASE_URL_SECRET", "").strip() or existing.get("SUPABASE_URL", "") or "https://hknymhhyqldtzmplzuzh.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": existing.get("SUPABASE_PUBLISHABLE_KEY", "") or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV",
 }
 for key, value in required.items():
     if not value or "\n" in value or "\r" in value:
@@ -114,12 +114,12 @@ import pathlib
 import re
 
 text = pathlib.Path(os.environ["PROTECTED_ENV"]).read_text(encoding="utf-8")
-for key in ["OPENAI_API_KEY", "BOT_TOKEN", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]:
+for key in ["OPENAI_API_KEY", "BOT_TOKEN", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"]:
     matches = [line for line in text.splitlines() if re.match(rf"^\s*(?:export\s+)?{re.escape(key)}\s*=\S+", line)]
     if len(matches) != 1:
         raise SystemExit(f"{key}_MERGE_PROOF_FAILED")
 PY
-echo 'ZED_PROTECTED_ENV_CORE_SECRETS_MERGE=READY'
+echo 'ZED_PROTECTED_ENV_RUNTIME_MERGE=READY'
 
 runtime_files="$RUNNER_TEMP/zed-runtime-files.txt"
 runtime_dirs="$RUNNER_TEMP/zed-runtime-dirs.txt"
