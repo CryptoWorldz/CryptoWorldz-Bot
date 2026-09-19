@@ -2,202 +2,292 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0d0617">
-  <meta name="description" content="WorldzLaunchPad™ interactive launch console for WORLDZ, REVIVE, PHENIX and MIRACLE. Transparent allocations, vesting, execution proof and fail-closed mainnet gates.">
-  <title>WorldzLaunchPad™ | Launch Console</title>
-  <link rel="stylesheet" href="/style.css?v=20260920-interactive-v2">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05020b">
+  <meta name="description" content="WorldzLaunchPad™ — build, simulate, test and prepare token launches with transparent fees, locks, vesting, CrossPair and multi-chain architecture.">
+  <title>WorldzLaunchPad™ | Build • Prove • Launch</title>
+  <link rel="stylesheet" href="/style.css?v=20260920-platform-v3">
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#top" aria-label="WorldzLaunchPad home"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a>
-    <nav aria-label="Primary">
-      <a href="#console">Console</a><a href="#vesting">G.R.A.C.E.</a><a href="#runtime">ZED / AUTO</a><a href="#proof">Proof</a><a href="#gate">Gate</a>
-    </nav>
-    <button class="wallet-mini" id="wallet-mini" type="button">Connect Wallet</button>
-  </header>
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="WorldzLaunchPad home"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a>
+  <nav aria-label="Primary">
+    <a href="#explore">Explore</a>
+    <a href="#create">Create</a>
+    <a href="#genesis">Genesis Four</a>
+    <a href="#crosspair">CrossPair</a>
+    <a href="#omnichain">Omnichain</a>
+    <a href="#command">Command Centre</a>
+    <a href="#proof">Proof</a>
+  </nav>
+  <button class="wallet-mini" id="wallet-mini" type="button">Connect Wallet</button>
+</header>
 
-  <main id="top">
-    <section class="hero">
-      <div class="hero-copy">
-        <div class="kicker">CRYPTOWORLDZ COMMUNITY • SOLANA FIRST • MAINNET FAIL-CLOSED</div>
-        <h1>WORLDZ<br><span>LAUNCHPAD</span></h1>
-        <p class="lead">Connect a wallet, inspect every planned launch, see exactly where tokens and fees go, and follow the proof gates before any mainnet signing can happen.</p>
-        <p class="motto">Helping the People Who Help the People 💜</p>
-        <div class="hero-actions">
-          <a class="btn primary" href="#console">Open Launch Console</a>
-          <a class="btn secondary" href="https://github.com/CryptoWorldz/CryptoWorldz-Bot/blob/main/WORLDZPAD-FOUR-TOKEN-LAUNCH-MASTER.md" target="_blank" rel="noopener">Read Master Spec</a>
-        </div>
-        <div class="truth-strip">
-          <span><b>4</b> fixed-supply candidates</span>
-          <span><b>2.00%</b> quote-side DEX fee target</span>
-          <span><b>1%</b> Legacy Loyalty every launch</span>
-          <span><b>0</b> mainnet launches authorised</span>
-        </div>
+<main id="top">
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="kicker">SOLANA FIRST • MULTI-CHAIN BY DESIGN • MAINNET FAIL-CLOSED</div>
+      <h1>LAUNCH<br><span>YOUR WORLD.</span></h1>
+      <p class="lead">Choose the chain. Choose the launch engine. Build the economics. Lock the allocations. Simulate before signing. Then launch through a Worldz adapter when that route is verified and enabled.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#create">Create a Launch</a>
+        <a class="btn secondary" href="#explore">Explore Launches</a>
+        <a class="btn ghost" href="/devnet/">Open Solana Devnet Lab</a>
       </div>
-      <div class="hero-visual" aria-label="WorldzLaunchPad community mascot illustration">
-        <div class="halo h1"></div><div class="halo h2"></div>
-        <div class="mascot">
-          <div class="ears"></div><div class="face"></div><div class="glasses"><i></i><i></i></div><div class="smile"></div>
-          <div class="body"><b>W</b></div><div class="thumb">👍</div>
-        </div>
-        <div class="hero-badge">BUILD WITH PROOF • LAUNCH WITH PERMISSION</div>
+      <div class="truth-strip">
+        <span><b>0.50–4.00%</b> project trading-fee range</span>
+        <span><b>10%</b> Worldz share of collected project fee revenue</span>
+        <span><b>2</b> verified Solana quote assets in registry</span>
+        <span><b>0</b> public mainnet creator launches enabled</span>
       </div>
-    </section>
+    </div>
+    <div class="hero-core" aria-label="WorldzLaunchPad system">
+      <div class="core-ring r1"></div><div class="core-ring r2"></div><div class="core-ring r3"></div>
+      <div class="core"><b>W</b><span>LAUNCH</span></div>
+      <div class="orbit-label o1">ZED</div><div class="orbit-label o2">AUTO</div><div class="orbit-label o3">G.R.A.C.E.</div><div class="orbit-label o4">PROOF</div>
+    </div>
+  </section>
 
-    <section class="wallet-panel section" aria-labelledby="wallet-title">
-      <div>
-        <div class="section-kicker">WALLET CONNECTION</div>
-        <h2 id="wallet-title">Public wallet connection — no custody</h2>
-        <p>WorldzLaunchPad only requests your public wallet connection here. Never enter a seed phrase or private key into this site. No transaction is built or signed by this console while mainnet execution is locked.</p>
-      </div>
-      <div class="wallet-box">
-        <div class="wallet-state"><span class="state-dot idle" id="wallet-dot"></span><span id="wallet-status">Not connected</span></div>
-        <div class="wallet-address" id="wallet-address">Public address will appear here</div>
-        <div class="wallet-actions">
-          <button class="btn primary" id="connect-wallet" type="button">Connect Solana Wallet</button>
-          <button class="btn secondary" id="disconnect-wallet" type="button" disabled>Disconnect</button>
-        </div>
-        <p class="micro" id="wallet-help">Works with an injected Solana wallet such as Phantom or Solflare. On mobile, open this page inside your wallet's browser if no provider is detected.</p>
-      </div>
-    </section>
+  <section class="network-strip" aria-label="WorldzLaunchPad chains">
+    <span class="network active">◎ Solana <b>BUILDING</b></span>
+    <span class="network">◆ Ethereum <b>PLANNED</b></span>
+    <span class="network">◉ Base <b>PLANNED</b></span>
+    <span class="network">⬡ BNB <b>PLANNED</b></span>
+    <span class="network">R Robinhood <b>PLANNED</b></span>
+    <span class="network">X XRP Ledger <b>NATIVE ADAPTER</b></span>
+    <span class="network">S Sui <b>NATIVE ADAPTER</b></span>
+  </section>
 
-    <section id="console" class="section console-section">
-      <div class="section-heading">
-        <div class="section-kicker">LAUNCH CONSOLE</div>
-        <h2>Four launches. One transparent control surface.</h2>
-        <p>The console reads the candidate registry and keeps mainnet actions disabled until the release gates are genuinely complete.</p>
-      </div>
-      <div class="token-switcher" id="token-switcher" role="tablist" aria-label="Select token"></div>
-      <div class="console-grid">
-        <article class="panel token-overview">
-          <div class="panel-top"><span class="serial" id="token-number">#001</span><span class="pill locked" id="token-state">MAINNET LOCKED</span></div>
-          <h3><span id="token-name">WORLDZ</span> <em id="token-ticker">$WLDZ</em></h3>
-          <div class="supply" id="token-supply">100,000,000</div>
-          <div class="label">FIXED SUPPLY</div>
-          <p id="token-mission"></p>
-          <div class="facts" id="token-facts"></div>
-        </article>
+  <section id="explore" class="section">
+    <div class="section-heading with-action">
+      <div><div class="section-kicker">EXPLORE</div><h2>Genesis launches become the proving ground.</h2><p>WORLDZ, REVIVE, PHENIX and MIRACLE are still design/testing candidates. They are now presented as the first four projects using the WorldzLaunchPad architecture rather than as the whole product.</p></div>
+      <span class="live-chip"><i></i> PLATFORM BUILD ACTIVE</span>
+    </div>
+    <div class="launch-market" id="launch-market"></div>
+  </section>
 
-        <article class="panel launch-control">
-          <div class="panel-top"><span>Operator Control</span><span class="pill safe">FAIL-CLOSED</span></div>
-          <div class="control-line"><span>Authorised deployer</span><b>JayJayTeamDev</b></div>
-          <div class="control-line"><span>Public presale</span><b>No</b></div>
-          <div class="control-line"><span>Bonding curve</span><b>No</b></div>
-          <div class="control-line"><span>Customer custody</span><b>No</b></div>
-          <div class="control-line"><span>Network</span><b>Solana first</b></div>
-          <button class="launch-button" type="button" disabled id="launch-button">MAINNET LAUNCH LOCKED</button>
-          <div class="micro center" id="launch-reason">Release gates are not complete.</div>
-        </article>
-      </div>
+  <section id="create" class="section create-section">
+    <div class="section-heading">
+      <div class="section-kicker">CREATE</div>
+      <h2>Build a launch before you ever sign one.</h2>
+      <p>The wizard creates a launch manifest and checks the economics locally in your browser. Solana Devnet token creation is the first executable public test route. Mainnet stays locked.</p>
+    </div>
 
-      <div class="detail-grid">
-        <article class="panel">
-          <div class="panel-top"><span>25 / 25 / 25 / 25 Allocation</span><span class="pill">100%</span></div>
-          <div class="allocation-master" id="allocation-master"></div>
-          <div class="suballocations" id="suballocations"></div>
-        </article>
-        <article class="panel">
-          <div class="panel-top"><span>2% Fee Routing</span><span class="pill">100% routed</span></div>
-          <div class="fee-bar" id="fee-bar"></div>
-          <div class="fee-legend" id="fee-legend"></div>
-          <p class="micro">WorldzLaunchPad master rule: this is a quote-side DEX trading-fee target. Ordinary wallet transfers are not described as carrying a Worldz transfer tax.</p>
-        </article>
-      </div>
-    </section>
+    <div class="builder">
+      <aside class="builder-rail">
+        <button class="step-tab active" data-step="1"><b>01</b><span>World</span></button>
+        <button class="step-tab" data-step="2"><b>02</b><span>Engine</span></button>
+        <button class="step-tab" data-step="3"><b>03</b><span>Token</span></button>
+        <button class="step-tab" data-step="4"><b>04</b><span>Pair</span></button>
+        <button class="step-tab" data-step="5"><b>05</b><span>Economics</span></button>
+        <button class="step-tab" data-step="6"><b>06</b><span>Proof</span></button>
+      </aside>
 
-    <section id="vesting" class="section">
-      <div class="section-heading">
-        <div class="section-kicker">G.R.A.C.E. VESTING</div>
-        <h2>Design the lock first. Verify the mechanism before launch.</h2>
-      </div>
-      <div class="grace-grid">
-        <article class="panel">
-          <div class="panel-top"><span id="grace-title">WORLDZ Development</span><span class="pill pending" id="grace-verify">PRODUCTION VERIFY REQUIRED</span></div>
-          <div class="vesting-stack" id="vesting-stack"></div>
-          <div class="timeline" id="vesting-timeline"></div>
-        </article>
-        <article class="panel">
-          <h3>G.R.A.C.E. responsibilities</h3>
-          <div class="checklist compact">
-            <div><span class="check plan">✓</span><span>Vesting schedules and beneficiary records</span></div>
-            <div><span class="check plan">✓</span><span>Permissions and human-approved publishing</span></div>
-            <div><span class="check wait">!</span><span>Production time-enforced vesting proof still required for WLDZ mainnet</span></div>
-            <div><span class="check lock">×</span><span>No private keys or seed phrases in GitHub or the public LaunchPad</span></div>
+      <div class="builder-main">
+        <section class="wizard-step active" data-panel="1">
+          <div class="step-head"><span>01 / WORLD</span><h3>Where do you want to launch?</h3></div>
+          <div class="choice-grid chain-grid" id="chain-grid">
+            <button class="choice selected" data-chain="solana"><strong>◎ Solana</strong><small>Devnet creator launch enabled</small><em>SolWorldz</em></button>
+            <button class="choice" data-chain="ethereum"><strong>◆ Ethereum</strong><small>EVM adapter planned</small><em>EthWorldz</em></button>
+            <button class="choice" data-chain="base"><strong>◉ Base</strong><small>EVM adapter planned</small><em>BaseWorldz</em></button>
+            <button class="choice" data-chain="bnb"><strong>⬡ BNB Chain</strong><small>EVM adapter planned</small><em>BNBWorldz</em></button>
+            <button class="choice" data-chain="robinhood"><strong>R Robinhood</strong><small>EVM adapter planned</small><em>RobinWorldz</em></button>
+            <button class="choice" data-chain="xrpl"><strong>X XRP Ledger</strong><small>XRPL-native adapter research</small><em>XRPWorldz</em></button>
+            <button class="choice" data-chain="sui"><strong>S Sui</strong><small>Move-native adapter research</small><em>SuiWorldz</em></button>
           </div>
-          <div class="notice">A planned 36-month schedule is not the same thing as a verified production lock. The gate stays red until the exact production-compatible vesting mechanism is proven.</div>
-        </article>
-      </div>
-    </section>
+          <div class="step-actions"><button class="btn primary next-step" data-next="2">Choose Launch Engine →</button></div>
+        </section>
 
-    <section id="runtime" class="section">
-      <div class="section-heading with-action">
-        <div><div class="section-kicker">ZED + AUTO + G.R.A.C.E.</div><h2>Live runtime status</h2><p>This panel probes public, read-only health surfaces only. It never sends operator credentials or secrets from the browser.</p></div>
-        <button class="btn secondary" id="refresh-runtime" type="button">Refresh Status</button>
-      </div>
-      <div class="runtime-grid">
-        <article class="status-card"><div class="status-head"><span>ZED Gateway</span><span class="state-dot idle" id="zed-dot"></span></div><strong id="zed-state">Checking…</strong><small id="zed-detail">Public health probe</small></article>
-        <article class="status-card"><div class="status-head"><span>AUTO Route</span><span class="state-dot idle" id="auto-dot"></span></div><strong id="auto-state">Checking…</strong><small id="auto-detail">Protected route probe</small></article>
-        <article class="status-card"><div class="status-head"><span>G.R.A.C.E. Health</span><span class="state-dot idle" id="grace-dot"></span></div><strong id="grace-state">Checking…</strong><small id="grace-detail">Public health probe</small></article>
-      </div>
-      <div class="notice" id="runtime-notice">Loading live status…</div>
-    </section>
-
-    <section id="proof" class="section">
-      <div class="section-heading">
-        <div class="section-kicker">EXECUTION PROOF</div>
-        <h2>WLDZ proves the reference implementation first.</h2>
-        <p>REVIVE follows only after WLDZ accounting is stable; PHENIX follows the Equalizer proof; MIRACLE claim infrastructure is built well before its planned community event.</p>
-      </div>
-      <div class="proof-layout">
-        <article class="panel proof-summary">
-          <div class="panel-top"><span>Accepted WLDZ Pre-Mainnet Baseline</span><span class="pill safe">PASS</span></div>
-          <div class="proof-id">GitHub Actions Run <a href="https://github.com/CryptoWorldz/CryptoWorldz-Bot/actions/runs/34155419579" target="_blank" rel="noopener">#34155419579 ↗</a></div>
-          <div class="proof-list" id="proof-list"></div>
-          <p class="micro">This accepted baseline is an isolated execution proof. It does not claim a final WLDZ mainnet mint or a public devnet mint unless separately proven.</p>
-        </article>
-        <article class="panel">
-          <div class="panel-top"><span>Liquidity / Fee Model</span><span class="pill">WLDZ</span></div>
-          <div class="liquidity-spec">
-            <div><span>Venue</span><b>Meteora DAMM v2</b></div>
-            <div><span>Pair</span><b>WLDZ / wSOL</b></div>
-            <div><span>Fee collection</span><b>OnlyB (quote side)</b></div>
-            <div><span>Base fee</span><b>200 bps / 2.00%</b></div>
-            <div><span>Bonding curve</span><b>Disabled</b></div>
-            <div><span>Liquidity lock</span><b>Required</b></div>
-            <div><span>Simulate before send</span><b>Required</b></div>
+        <section class="wizard-step" data-panel="2">
+          <div class="step-head"><span>02 / ENGINE</span><h3>How should the market begin?</h3></div>
+          <div class="choice-grid engine-grid" id="engine-grid">
+            <button class="choice selected" data-engine="flash"><strong>⚡ Worldz Flash™</strong><small>Direct liquidity. No bonding curve required.</small><em>GENESIS TESTING</em></button>
+            <button class="choice" data-engine="curve"><strong>↗ Worldz Curve™</strong><small>Curated bonding curve → AMM graduation.</small><em>RAYDIUM RESEARCH</em></button>
+            <button class="choice" data-engine="curve-pro"><strong>⌁ Worldz Curve Pro™</strong><small>Advanced dynamic curve configuration.</small><em>METEORA DBC RESEARCH</em></button>
+            <button class="choice" data-engine="liquidity"><strong>◫ Worldz Liquidity™</strong><small>Traditional fixed-supply + creator-funded LP.</small><em>PLANNED</em></button>
+            <button class="choice" data-engine="board"><strong>▦ Worldz Board™</strong><small>Branded launch surface for a creator/community.</small><em>PLANNED</em></button>
           </div>
-        </article>
+          <div class="step-actions"><button class="btn secondary prev-step" data-prev="1">← Back</button><button class="btn primary next-step" data-next="3">Build Token →</button></div>
+        </section>
+
+        <section class="wizard-step" data-panel="3">
+          <div class="step-head"><span>03 / TOKEN</span><h3>Give the project its identity.</h3></div>
+          <div class="form-grid">
+            <label><span>Token name</span><input id="build-name" maxlength="32" placeholder="e.g. SolSavewXRP"></label>
+            <label><span>Ticker</span><input id="build-symbol" maxlength="10" placeholder="SAVE"></label>
+            <label><span>Fixed supply</span><input id="build-supply" type="number" min="1" step="1" value="100000000"></label>
+            <label><span>Decimals</span><input id="build-decimals" type="number" min="0" max="9" step="1" value="9"></label>
+            <label class="wide"><span>Description</span><textarea id="build-description" maxlength="280" placeholder="What is this project for?"></textarea></label>
+          </div>
+          <div class="toggle-row"><label><input id="fixed-supply" type="checkbox" checked> Revoke mint authority after initial supply is minted</label><label><input id="freeze-off" type="checkbox" checked disabled> Freeze authority disabled at creation</label></div>
+          <div class="step-actions"><button class="btn secondary prev-step" data-prev="2">← Back</button><button class="btn primary next-step" data-next="4">Choose Pair →</button></div>
+        </section>
+
+        <section class="wizard-step" data-panel="4">
+          <div class="step-head"><span>04 / CROSSPAIR</span><h3>What should your token trade against?</h3></div>
+          <div class="quote-grid">
+            <button class="quote selected" data-quote="SOL"><span class="quote-icon">◎</span><strong>SOL</strong><small>Native Solana quote</small><em>VERIFIED NATIVE</em></button>
+            <button class="quote" data-quote="wXRP"><span class="quote-icon">X</span><strong>wXRP</strong><small>Hex Trust wrapped XRP on Solana</small><em>VERIFIED • 1:1 XRP BACKING CLAIM</em></button>
+          </div>
+          <article class="verified-asset" id="wxrp-proof">
+            <div class="proof-seal">✓</div>
+            <div><span>WORLDZ VERIFIED QUOTE ASSET #001</span><h4>wXRP • Solana</h4><p>Mint: <code>6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2</code></p><p>Issuer: Hex Trust • Cross-chain infrastructure: LayerZero • Pairing a project against wXRP does not mean the project token itself is backed by XRP.</p></div>
+            <a href="https://solscan.io/token/6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2" target="_blank" rel="noopener">Solscan ↗</a>
+          </article>
+          <div class="step-actions"><button class="btn secondary prev-step" data-prev="3">← Back</button><button class="btn primary next-step" data-next="5">Set Economics →</button></div>
+        </section>
+
+        <section class="wizard-step" data-panel="5">
+          <div class="step-head"><span>05 / FAIR FEE</span><h3>Make every percentage visible.</h3></div>
+          <div class="economics-grid">
+            <div class="fee-control">
+              <label for="project-fee">Project trading fee</label>
+              <input id="project-fee" type="range" min="0.5" max="4" step="0.25" value="2">
+              <div class="fee-number"><b id="project-fee-value">2.00%</b><span>MAX 4.00%</span></div>
+              <div class="worldz-rule"><strong>WorldzLaunchPad</strong><b>10%</b><span>of the collected project trading-fee revenue</span></div>
+              <p class="micro">Not 10% of supply. Not 10% of liquidity. Not an ordinary wallet-transfer tax.</p>
+            </div>
+            <div class="fee-example">
+              <label>Example trading volume</label>
+              <div class="input-suffix"><input id="example-volume" type="number" min="0" value="100000"><span>quote units</span></div>
+              <div class="math-row"><span>Gross configured project fee</span><b id="gross-fee">2,000</b></div>
+              <div class="math-row worldz"><span>WorldzLaunchPad share</span><b id="worldz-fee">200</b></div>
+              <div class="math-row"><span>Project distribution pool</span><b id="project-pool">1,800</b></div>
+            </div>
+          </div>
+          <div class="route-builder">
+            <div class="route-head"><h4>Project distribution pool</h4><span id="route-total" class="pill safe">100%</span></div>
+            <div class="route-inputs">
+              <label>Creator / Build <input class="route-input" data-route="creator" type="number" min="0" max="100" step="1" value="30"></label>
+              <label>Holder Rewards <input class="route-input" data-route="holders" type="number" min="0" max="100" step="1" value="25"></label>
+              <label>LP Growth <input class="route-input" data-route="lp" type="number" min="0" max="100" step="1" value="20"></label>
+              <label>Treasury <input class="route-input" data-route="treasury" type="number" min="0" max="100" step="1" value="15"></label>
+              <label>Community / Impact <input class="route-input" data-route="community" type="number" min="0" max="100" step="1" value="10"></label>
+            </div>
+          </div>
+          <div class="step-actions"><button class="btn secondary prev-step" data-prev="4">← Back</button><button class="btn primary next-step" data-next="6">Run Proof Check →</button></div>
+        </section>
+
+        <section class="wizard-step" data-panel="6">
+          <div class="step-head"><span>06 / PRE-SIGN PROOF</span><h3>Nothing signs until the manifest adds up.</h3></div>
+          <div class="preflight-grid" id="preflight-grid"></div>
+          <div class="manifest-box">
+            <div class="manifest-head"><span>LAUNCH MANIFEST</span><b id="manifest-id">NOT GENERATED</b></div>
+            <pre id="manifest-preview">Complete the builder and run the pre-sign check.</pre>
+          </div>
+          <div class="step-actions">
+            <button class="btn secondary prev-step" data-prev="5">← Back</button>
+            <button class="btn secondary" id="run-preflight" type="button">Run Pre-Sign Check</button>
+            <button class="btn secondary" id="download-manifest" type="button" disabled>Download Manifest</button>
+            <a class="btn primary disabled-link" id="devnet-launch-link" href="/devnet/" aria-disabled="true">Open Devnet Launch →</a>
+          </div>
+          <div class="notice">MAINNET LAUNCH LOCKED. The public creator-launch gate remains fail-closed until the exact launch route has passed security, operational and Australian regulatory/legal checks and human authorization.</div>
+        </section>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section id="gate" class="section">
-      <div class="section-heading">
-        <div class="section-kicker">MAINNET RELEASE GATE</div>
-        <h2 id="gate-title">WLDZ — 8 of 20 readiness controls green</h2>
-        <p id="gate-copy">Preparation proof is strong; production addresses, vesting, funding, legal/disclosure, security and final human authorization remain unresolved.</p>
-      </div>
-      <div class="gate-meter"><div id="gate-meter-fill"></div></div>
-      <div class="gate-counts"><span><b id="green-count">8</b> green</span><span><b id="blocked-count">12</b> still required</span></div>
-      <div class="gate-grid" id="gate-grid"></div>
-      <div class="final-lock">
-        <div><span class="lock-icon">🔒</span><div><b>Explicit JayJayTeamDev mainnet signing remains mandatory.</b><p>No UI button, workflow or connected wallet on this public page can bypass that final human authorization.</p></div></div>
-        <button type="button" disabled>LAUNCH AUTHORIZATION = FALSE</button>
-      </div>
-    </section>
+  <section id="crosspair" class="section feature-section">
+    <div class="section-heading">
+      <div class="section-kicker">WORLDZ CROSSPAIR™</div>
+      <h2>Don't force every launch into SOL or USDC.</h2>
+      <p>CrossPair is the verified quote-asset layer. A project can eventually choose a supported cross-chain asset as its market quote where the chain adapter and liquidity venue support it.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="feature-card hero-card"><span class="serial">QUOTE #001</span><h3>Project / wXRP</h3><p>Verified Solana mint from Hex Trust. wXRP is described separately from the project token so backing claims cannot be confused.</p><code>6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2</code></article>
+      <article class="feature-card"><span>FIRST CANDIDATE</span><h3>SolSavewXRP $SAVE</h3><p>Never-launched research concept reserved as a future CrossPair proof candidate — not part of the Genesis Four deployment order.</p></article>
+      <article class="feature-card"><span>WORLDZ QUOTE HUB™</span><h3>Verified assets only.</h3><p>Origin, network, issuer/custodian where applicable, contract/mint, proof source and redemption model are disclosed before an asset can be labelled verified.</p></article>
+    </div>
+  </section>
 
-    <section class="section wisdom">
-      <blockquote>Research first. Build with proof. Keep the rules visible. Let the community verify the work.</blockquote>
-      <p>WorldzLaunchPad™ • One World • One Vision • One Fam</p>
-    </section>
-  </main>
+  <section id="omnichain" class="section feature-section">
+    <div class="section-heading">
+      <div class="section-kicker">WORLDZ OMNICHAIN™</div>
+      <h2>One project. Multiple Worldz. One disclosed supply model.</h2>
+      <p>Omnichain is an architecture track, not a promise that every token should exist everywhere. The first research rail is LayerZero OFT; each chain still gets native adapters and chain-specific checks.</p>
+    </div>
+    <div class="omni-map">
+      <div class="omni-center"><b>WORLDZ</b><span>OMNICHAIN</span></div>
+      <div class="omni-node n1">SOL</div><div class="omni-node n2">ETH</div><div class="omni-node n3">BASE</div><div class="omni-node n4">ROBIN</div><div class="omni-node n5">HYPER</div><div class="omni-node n6">SUI</div><div class="omni-node n7">XRPL*</div>
+      <p>*XRPL requires its own native architecture; interoperability is researched rather than assumed.</p>
+    </div>
+  </section>
 
-  <footer>
-    <div><b>WorldzLaunchPad™</b> • CryptoWorldz Community</div>
-    <div><a href="https://cryptoworldz.xyz">CryptoWorldz.xyz</a> • <a href="https://x.com/WorldzLaunchPad">@WorldzLaunchPad</a></div>
-    <p>Crypto assets are high risk. No guaranteed return, APY, price target, future value or recovery of historical losses is promised.</p>
-  </footer>
+  <section id="genesis" class="section">
+    <div class="section-heading">
+      <div class="section-kicker">GENESIS FOUR</div>
+      <h2>Four tokens. Four increasingly difficult system proofs.</h2>
+    </div>
+    <div class="token-switcher" id="token-switcher" role="tablist" aria-label="Select Genesis token"></div>
+    <div class="console-grid">
+      <article class="panel token-overview">
+        <div class="panel-top"><span class="serial" id="token-number">#001</span><span class="pill locked" id="token-state">MAINNET LOCKED</span></div>
+        <h3><span id="token-name">WORLDZ</span> <em id="token-ticker">$WLDZ</em></h3>
+        <div class="supply" id="token-supply">100,000,000</div><div class="label">FIXED SUPPLY</div>
+        <p id="token-mission"></p><div class="facts" id="token-facts"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-top"><span>25 / 25 / 25 / 25</span><span class="pill">100%</span></div>
+        <div class="allocation-master" id="allocation-master"></div>
+        <div class="suballocations" id="suballocations"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-top"><span>Genesis Fee Routing</span><span class="pill">100% routed</span></div>
+        <div class="fee-bar" id="fee-bar"></div><div class="fee-legend" id="fee-legend"></div>
+        <p class="micro">The Genesis Four currently target ~2% quote-side DEX trading fees. That token-specific design is separate from the public LaunchPad's configurable 0.50–4.00% fee range.</p>
+      </article>
+    </div>
+    <div class="legacy-line"><strong>1% Legacy Loyalty = ONE SHARED POOL PER TOKEN.</strong><span>WLDZ 1,000,000 • RVIV 2,000,000 • PNEX 2,500,000 • MRCL 3,480,000</span></div>
+  </section>
 
-  <script src="/app.js?v=20260920-interactive-v2" defer></script>
+  <section id="command" class="section">
+    <div class="section-heading with-action">
+      <div><div class="section-kicker">COMMAND CENTRE ULTIMATE™</div><h2>Minting isn't the end of a launch. It's the beginning.</h2><p>Every Worldz launch is designed to become a living project record that can plug into ZED, AUTO and G.R.A.C.E.</p></div>
+      <button class="btn secondary" id="refresh-runtime" type="button">Refresh Runtime</button>
+    </div>
+    <div class="runtime-grid">
+      <article class="status-card"><div class="status-head"><span>ZED</span><span class="state-dot idle" id="zed-dot"></span></div><strong id="zed-state">Checking…</strong><small id="zed-detail">Community, launches, Telegram, missions, wallet/profile systems.</small></article>
+      <article class="status-card"><div class="status-head"><span>AUTO</span><span class="state-dot idle" id="auto-dot"></span></div><strong id="auto-state">Checking…</strong><small id="auto-detail">Fees, treasury, LP, vesting, rewards and accounting.</small></article>
+      <article class="status-card"><div class="status-head"><span>G.R.A.C.E.</span><span class="state-dot idle" id="grace-dot"></span></div><strong id="grace-state">Checking…</strong><small id="grace-detail">Distribution, communications, launch and milestone publishing.</small></article>
+    </div>
+    <div class="notice" id="runtime-notice">Loading read-only runtime status…</div>
+  </section>
+
+  <section id="proof" class="section">
+    <div class="section-heading">
+      <div class="section-kicker">WORLDZ PROOF™</div>
+      <h2>Facts before badges.</h2>
+      <p>WorldzLaunchPad should never label a project “safe”. It should expose what can actually be verified: supply, authorities, allocations, locks, vesting, liquidity, fee routes and launch configuration.</p>
+    </div>
+    <div class="proof-layout">
+      <article class="panel">
+        <div class="panel-top"><span>WLDZ Accepted Pre-Mainnet Baseline</span><span class="pill safe">ENGINEERING PASS</span></div>
+        <div class="proof-id">GitHub Actions Run <a href="https://github.com/CryptoWorldz/CryptoWorldz-Bot/actions/runs/34155419579" target="_blank" rel="noopener">#34155419579 ↗</a></div>
+        <div class="proof-list" id="proof-list"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-top"><span>Mainnet Release Gate</span><span class="pill locked">FAIL-CLOSED</span></div>
+        <h3 id="gate-title">Loading controls…</h3>
+        <p id="gate-copy"></p>
+        <div class="gate-meter"><div id="gate-meter-fill"></div></div>
+        <div class="gate-counts"><span><b id="green-count">0</b> green</span><span><b id="blocked-count">—</b> remaining</span></div>
+        <div class="gate-grid" id="gate-grid"></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section wisdom">
+    <blockquote>Build it. Document it. Lock it. Simulate it. Verify it. Then launch it.</blockquote>
+    <p>WorldzLaunchPad™ • CryptoWorldz • One World • One Vision • One Fam</p>
+  </section>
+</main>
+
+<footer>
+  <div><b>WorldzLaunchPad™</b> • CryptoWorldz</div>
+  <div><a href="https://cryptoworldz.xyz">CryptoWorldz.xyz</a> • <a href="https://x.com/WorldzLaunchPad">@WorldzLaunchPad</a></div>
+  <p>Public mainnet creator launches are currently disabled. Devnet tools are for testing. No guaranteed return, APY, price target or future value is promised.</p>
+</footer>
+
+<script src="/app.js?v=20260920-platform-v3" defer></script>
 </body>
 </html>
