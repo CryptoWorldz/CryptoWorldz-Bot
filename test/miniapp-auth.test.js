@@ -36,8 +36,13 @@ test("Mini App validation rejects altered, expired and browser-supplied identiti
     user: JSON.stringify({ id: 123, first_name: "Legend" })
   });
   assert.equal(validateTelegramInitData(current.replace("Legend", "Admin"), token, { nowMs }).ok, false);
+  const freshLongSession = signedInitData(token, {
+    auth_date: String(Math.floor(nowMs / 1000) - 23 * 60 * 60),
+    user: JSON.stringify({ id: 123, first_name: "Legend" })
+  });
+  assert.equal(validateTelegramInitData(freshLongSession, token, { nowMs }).ok, true);
   const expired = signedInitData(token, {
-    auth_date: String(Math.floor(nowMs / 1000) - 7200),
+    auth_date: String(Math.floor(nowMs / 1000) - 25 * 60 * 60),
     user: JSON.stringify({ id: 123, first_name: "Legend" })
   });
   assert.deepEqual(validateTelegramInitData(expired, token, { nowMs }), { ok: false, error: "expired_init_data" });
