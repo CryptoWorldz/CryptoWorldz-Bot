@@ -1,5 +1,5 @@
 name: Deploy OneWorldz Ecosystem
-# mission-production-trigger: 2026-09-19-links-in-dubbo
+# mission-production-trigger: 2026-09-19-donateworldz-masterpiece-global
 
 on:
   push:
