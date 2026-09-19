@@ -99,7 +99,8 @@ jobs:
             root/'platform-config.json',root/'metadata.php',
             root/'devnet/index.html',root/'devnet/app.js',
             root/'curve/index.html',root/'curve/app.js',
-            root/'curve-pro/index.html',root/'curve-pro/app.js'
+            root/'curve-pro/index.html',root/'curve-pro/app.js',
+            root/'omnichain/index.html'
           ]
           for p in required:
               assert p.is_file() and p.stat().st_size>500, p
@@ -110,6 +111,7 @@ jobs:
           curve_js=(root/'curve/app.js').read_text()
           curve_pro=(root/'curve-pro/index.html').read_text()
           curve_pro_js=(root/'curve-pro/app.js').read_text()
+          omnichain=(root/'omnichain/index.html').read_text()
           assert 'Create a Launch' in home
           assert 'WORLDZ CROSSPAIR' in home
           assert 'WORLDZ OMNICHAIN' in home
@@ -130,7 +132,12 @@ jobs:
           assert 'creatorTradingFeePercentage:90' in curve_pro_js
           assert 'partnerPermanentLockedLiquidityPercentage:10' in curve_pro_js
           assert 'creatorPermanentLockedLiquidityPercentage:90' in curve_pro_js
-          print('WORLDZLAUNCHPAD_PLATFORM_CONTRACT=PASS genesis=4 flash=1 curve=1 curve_pro=1 mainnet_public=0')
+          assert 'WORLDZ OMNICHAIN™' in omnichain
+          assert 'Every world is clickable.' in omnichain
+          for url in ['https://solworldz.xyz/','https://ethworldz.xyz/','https://baseworldz.xyz/','https://xrpworldz.xyz/','https://suiworldz.xyz/','https://hyperworldz.xyz/','https://robinworldz.xyz/','https://bnbworldz.xyz/','https://hodlerworldz.xyz/']:
+              assert url in omnichain
+          assert '/omnichain/' in home
+          print('WORLDZLAUNCHPAD_PLATFORM_CONTRACT=PASS genesis=4 flash=1 curve=1 curve_pro=1 omnichain=1 mainnet_public=0')
 
       - name: Deploy only WorldzLaunchPad to verified Hostinger document root
         shell: python
@@ -183,6 +190,7 @@ jobs:
                   dev_code,dev_body=get('/devnet/?verify=platform-v3')
                   curve_code,curve_body=get('/curve/?verify=platform-v3')
                   curve_pro_code,curve_pro_body=get('/curve-pro/?verify=platform-v3')
+                  omni_code,omni_body=get('/omnichain/?verify=platform-v3')
                   _,registry_body=get('/tokens.json?verify=platform-v3')
                   _,plan_body=get('/wldz-mainnet-plan.json?verify=platform-v3')
                   _,platform_body=get('/platform-config.json?verify=platform-v3')
@@ -192,6 +200,7 @@ jobs:
                   assert dev_code==200 and 'Create Devnet Token' in dev_body and 'Register + Write Metadata' in dev_body and 'Raydium Devnet Pool' in dev_body
                   assert curve_code==200 and 'Worldz Curve™' in curve_body and 'Raydium LaunchLab' in curve_body and 'Create Raydium LaunchLab Devnet Launch' in curve_body
                   assert curve_pro_code==200 and 'Worldz Curve Pro™' in curve_pro_body and 'Meteora DBC' in curve_pro_body and 'Create Meteora DBC Devnet Launch' in curve_pro_body
+                  assert omni_code==200 and 'WORLDZ OMNICHAIN™' in omni_body and 'Every world is clickable.' in omni_body and 'SolWorldz' in omni_body and 'XRPWorldz' in omni_body
                   assert registry['status']=='candidate-mainnet-disabled' and registry['shared']['mainnet_authorized'] is False
                   assert plan['executionEnabled'] is False and plan['launchAuthorization'] is False
                   assert platform['publicMainnetCreatorLaunchesEnabled'] is False and platform['devnetTokenCreationEnabled'] is True
@@ -199,7 +208,7 @@ jobs:
                   assert platform['feePolicy']['worldzLaunchPadShareOfCollectedProjectFeePercent']==10
                   assert status_code==200 and live['ok'] is True
                   assert platform['worldzCurve']['status']=='DEVNET_BETA' and platform['worldzCurvePro']['status']=='DEVNET_BETA'
-                  print('WORLDZLAUNCHPAD_LIVE=PASS app=1 flash=1 curve=1 curve_pro=1 crosspair=1 mainnet_locked=1 runtime_probe=1')
+                  print('WORLDZLAUNCHPAD_LIVE=PASS app=1 flash=1 curve=1 curve_pro=1 omnichain=1 crosspair=1 mainnet_locked=1 runtime_probe=1')
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:
