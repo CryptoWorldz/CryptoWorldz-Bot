@@ -72,10 +72,22 @@ function createHttpApp({ bot, config, repository }) {
     }
   }));
 
+  const miniInitDataMaxAgeSeconds = Math.min(
+    86400,
+    Math.max(300, Number(process.env.MINIAPP_INIT_DATA_MAX_AGE_SECONDS) || 86400)
+  );
+
   const authenticateMiniApp = (req, res, next) => {
     if (!allowMiniAuthAttempt(req.ip)) return res.status(429).json({ ok: false, error: "rate_limited" });
-    const result = validateTelegramInitData(req.get("x-telegram-init-data") || "", config.botToken);
-    if (!result.ok) return res.status(401).json({ ok: false, error: result.error });
+    const result = validateTelegramInitData(
+      req.get("x-telegram-init-data") || "",
+      config.botToken,
+      { maxAgeSeconds: miniInitDataMaxAgeSeconds }
+    );
+    if (!result.ok) {
+      audit("mini_app_auth_rejected", { error: result.error, ip: req.ip });
+      return res.status(401).json({ ok: false, error: result.error });
+    }
     const rateKey = `${result.user.id}:${req.ip}`;
     if (!allowMiniRequest(rateKey)) return res.status(429).json({ ok: false, error: "rate_limited" });
     req.telegramUser = result.user;
@@ -83,50 +95,66 @@ function createHttpApp({ bot, config, repository }) {
   };
 
   app.get("/api/mini/bootstrap", authenticateMiniApp, async (req, res) => {
-    try {
-      const telegramId = req.telegramUser.id;
-      const [profile, missions, leaderboard, rewards, history, governance, adminAccess, treasury] = await Promise.all([
-        repository.getMemberDetails(telegramId),
-        repository.listActiveMissions(),
-        repository.getLeaderboard(),
-        repository.getRewards(telegramId, 10),
-        repository.getMissionHistory(telegramId, 25),
-        repository.listGovernanceProposals(20, telegramId),
-        repository.getAdminAccess(telegramId, config.adminTelegramIds, config.ownerTelegramId),
-        repository.listTreasuryAccounts()
-      ]);
-      const user = profile && profile.user;
-      const points = Number(user && user.points) || 0;
-      return res.json({
-        ok: true,
-        telegram_user: req.telegramUser,
-        registered: Boolean(profile),
-        profile: profile ? {
-          telegram_id: user.telegram_id,
-          username: user.username || "",
-          first_name: user.first_name || req.telegramUser.first_name || "Legend",
-          points,
-          rank: getRank(points),
-          missions_completed: Math.max(Number(user.raids) || 0, Number(user.raids_completed) || 0),
-          pending_submissions: profile.pending,
-          rewards_earned: profile.rewardsEarned,
-          member_since: user.registered_at || user.created_at,
-          wallet_connected: Boolean(user.wallet),
-          wallet: shortenWallet(user.wallet)
-        } : null,
-        missions,
-        leaderboard,
-        rewards,
-        mission_history: history,
-        governance,
-        admin: adminAccess.authorized,
-        admin_access: adminAccess,
-        treasury
-      });
-    } catch (error) {
-      console.error("Mini App bootstrap failed", { name: error && error.name ? error.name : "Error" });
-      return res.status(500).json({ ok: false, error: "mini_app_load_failed" });
-    }
+    const telegramId = req.telegramUser.id;
+    const degraded = [];
+    const safe = async (name, task, fallback) => {
+      try {
+        return await task;
+      } catch (error) {
+        degraded.push(name);
+        console.error("Mini App subsystem degraded", {
+          subsystem: name,
+          name: error && error.name ? error.name : "Error"
+        });
+        return fallback;
+      }
+    };
+
+    const [profile, missions, leaderboard, rewards, history, governance, adminAccess, treasury] = await Promise.all([
+      safe("profile", repository.getMemberDetails(telegramId), null),
+      safe("missions", repository.listActiveMissions(), []),
+      safe("leaderboard", repository.getLeaderboard(), []),
+      safe("rewards", repository.getRewards(telegramId, 10), []),
+      safe("mission_history", repository.getMissionHistory(telegramId, 25), []),
+      safe("governance", repository.listGovernanceProposals(20, telegramId), []),
+      safe("admin_access", repository.getAdminAccess(telegramId, config.adminTelegramIds, config.ownerTelegramId), {
+        authorized: String(telegramId) === String(config.ownerTelegramId),
+        role: String(telegramId) === String(config.ownerTelegramId) ? "owner" : "public",
+        permissions: []
+      }),
+      safe("treasury", repository.listTreasuryAccounts(), [])
+    ]);
+
+    const user = profile && profile.user;
+    const points = Number(user && user.points) || 0;
+    return res.json({
+      ok: true,
+      secure: true,
+      degraded,
+      telegram_user: req.telegramUser,
+      registered: Boolean(profile),
+      profile: profile ? {
+        telegram_id: user.telegram_id,
+        username: user.username || "",
+        first_name: user.first_name || req.telegramUser.first_name || "Legend",
+        points,
+        rank: getRank(points),
+        missions_completed: Math.max(Number(user.raids) || 0, Number(user.raids_completed) || 0),
+        pending_submissions: profile.pending,
+        rewards_earned: profile.rewardsEarned,
+        member_since: user.registered_at || user.created_at,
+        wallet_connected: Boolean(user.wallet),
+        wallet: shortenWallet(user.wallet)
+      } : null,
+      missions,
+      leaderboard,
+      rewards,
+      mission_history: history,
+      governance,
+      admin: Boolean(adminAccess && adminAccess.authorized),
+      admin_access: adminAccess,
+      treasury
+    });
   });
 
   app.get("/api/mini/admin/submissions", authenticateMiniApp, async (req, res) => {
