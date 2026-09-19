@@ -14,10 +14,36 @@ const IMPACT_CAMPAIGN = {
   youtube: "https://youtube.com/@action_spread_smiles"
 };
 
+const MINIAPP_RESCUE_BOOTSTRAP = "https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/zed-miniapp-rescue";
+
+async function rescueBootstrap() {
+  const response = await fetch(MINIAPP_RESCUE_BOOTSTRAP, {
+    method: "POST",
+    cache: "no-store",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ initData: tg ? tg.initData : "" })
+  });
+  const payload = await response.json().catch(() => ({ ok: false, error: "rescue_invalid_response" }));
+  if (!response.ok || !payload.ok) {
+    const error = new Error(payload.error || "rescue_request_failed");
+    error.code = payload.error || "rescue_request_failed";
+    error.status = response.status;
+    throw error;
+  }
+  return payload;
+}
+
 async function api(path, options = {}) {
   const response = await fetch(path, { ...options, headers: { "Content-Type": "application/json", "X-Telegram-Init-Data": tg ? tg.initData : "", ...(options.headers || {}) } });
   const payload = await response.json().catch(() => ({ ok: false, error: "invalid_response" }));
   if (!response.ok) {
+    if (path === "/api/mini/bootstrap" && response.status !== 429) {
+      try { return await rescueBootstrap(); }
+      catch (rescueError) {
+        rescueError.primaryCode = payload.error || "request_failed";
+        throw rescueError;
+      }
+    }
     const error = new Error(payload.error || "request_failed");
     error.code = payload.error || "request_failed";
     error.status = response.status;
@@ -141,7 +167,9 @@ async function start() {
     tg.ready(); tg.expand(); tg.setHeaderColor("#09040f"); tg.setBackgroundColor("#07030d");
     const [bootstrap, config] = await Promise.all([
       api("/api/mini/bootstrap"),
-      fetch("/api/public/mini-config", { cache: "no-store" }).then((response) => response.json())
+      fetch("/api/public/mini-config", { cache: "no-store" })
+        .then((response) => response.ok ? response.json() : ({ community: {} }))
+        .catch(() => ({ community: {} }))
     ]);
     state.data = bootstrap; state.community = config.community; render();
     if (Array.isArray(bootstrap.degraded) && bootstrap.degraded.length) {
