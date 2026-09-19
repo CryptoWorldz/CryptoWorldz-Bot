@@ -23,14 +23,15 @@ assert len(parts) == 4, f"expected 4 approved DonateWorldz master parts, got {le
 def is_avif(b: bytes) -> bool:
     return len(b) > 16 and b[4:8] == b"ftyp" and b[8:12] == b"avif"
 
-# Historical source supported both a continuous base64 stream and separately
-# encoded binary segments. Preserve that compatibility.
-try:
-    master = base64.b64decode("".join(parts), validate=False)
-except Exception:
-    master = b""
-if not is_avif(master):
-    master = b"".join(base64.b64decode(x, validate=False) for x in parts)
+# The approved source is one continuous base64 AVIF stream split across files.
+# The original Node materializer tolerated a dangling final base64 character;
+# mirror that behavior without changing any decoded image bytes.
+joined = "".join(parts)
+if len(joined) % 4 == 1:
+    joined = joined[:-1]
+if len(joined) % 4:
+    joined += "=" * (4 - (len(joined) % 4))
+master = base64.b64decode(joined, validate=False)
 assert is_avif(master), "DonateWorldz approved master does not materialize to AVIF"
 
 # One exact approved visual, exposed through semantic paths for different UI roles.
