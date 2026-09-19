@@ -1,0 +1,120 @@
+name: Deploy Command Centre MiniApp
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/miniapp/**'
+      - '.github/workflows/deploy-command-centre-miniapp.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: command-centre-miniapp-static
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Command Centre rescue + WorldzLaunchPad UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s public/miniapp/index.html
+          test -s public/miniapp/app.js
+          test -s public/miniapp/auto-owner.js
+          grep -Fq 'WORLDZLAUNCHPAD™' public/miniapp/index.html
+          grep -Fq 'WorldzLaunchPad™' public/miniapp/auto-owner.js
+          grep -Fq 'zed-miniapp-rescue' public/miniapp/app.js
+          if grep -Fiq 'BASED.BID' public/miniapp/index.html; then
+            echo 'OBSOLETE_BASED_BID_REFERENCE=FAIL'
+            exit 1
+          fi
+          test ! -e public/miniapp/based-bid-launch-view.js
+          echo 'COMMAND_CENTRE_STATIC_CONTRACT=PASS'
+
+      - name: Deploy only MiniApp static files to protected Node root
+        shell: python
+        run: |
+          import os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path, PurePosixPath
+
+          local_root=Path('public/miniapp')
+          remote_root='domains/cryptobotz.cryptoworldz.xyz/nodejs/public/miniapp'
+          host=os.environ['FTP_HOST'].replace('ftps://','').replace('ftp://','').split('/')[0]
+          if host.count(':')==1:
+              host=host.split(':',1)[0]
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(host,int(os.environ.get('FTP_PORT','21')),timeout=40)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p(); ftp.set_pasv(True)
+
+          def ensure_dir(directory):
+              ftp.cwd('/')
+              for part in PurePosixPath(directory).parts:
+                  if part in ('','/'): continue
+                  try: ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part); ftp.cwd(part)
+
+          count=0
+          for f in sorted(p for p in local_root.rglob('*') if p.is_file()):
+              rel=f.relative_to(local_root).as_posix()
+              remote=PurePosixPath(remote_root)/rel
+              ensure_dir(str(remote.parent))
+              with f.open('rb') as handle:
+                  ftp.storbinary(f'STOR {remote.name}',handle,blocksize=262144)
+              count+=1
+
+          obsolete=PurePosixPath(remote_root)/'based-bid-launch-view.js'
+          try:
+              ftp.cwd('/'+str(obsolete.parent))
+              ftp.delete(obsolete.name)
+          except Exception:
+              pass
+          try: ftp.quit()
+          except Exception: ftp.close()
+          print(f'COMMAND_CENTRE_STATIC_DEPLOY=PASS files={count}')
+
+      - name: Verify live MiniApp rescue and WorldzLaunchPad replacement
+        shell: python
+        run: |
+          import time, urllib.request
+          base='https://cryptobotz.cryptoworldz.xyz'
+          last=''
+          for attempt in range(1,8):
+              try:
+                  def get(path):
+                      req=urllib.request.Request(base+path,headers={'User-Agent':'Worldz-Command-Centre-Verify/1.0','Cache-Control':'no-cache'})
+                      with urllib.request.urlopen(req,timeout=20) as r:
+                          return r.status,r.read().decode('utf-8','ignore')
+                  hcode,html=get('/miniapp/?verify=worldzlaunchpad-rescue')
+                  jcode,js=get('/miniapp/app.js?verify=worldzlaunchpad-rescue')
+                  acode,auto=get('/miniapp/auto-owner.js?verify=worldzlaunchpad-rescue')
+                  assert hcode==200 and 'WORLDZLAUNCHPAD™' in html
+                  assert 'BASED.BID' not in html.upper()
+                  assert jcode==200 and 'zed-miniapp-rescue' in js
+                  assert acode==200 and 'WorldzLaunchPad™' in auto
+                  print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 worldzlaunchpad=1 basedbid=0')
+                  raise SystemExit(0)
+              except SystemExit:
+                  raise
+              except Exception as e:
+                  last=repr(e)
+                  print(f'LIVE_RETRY attempt={attempt} {last}')
+                  time.sleep(attempt*2)
+          raise SystemExit('COMMAND_CENTRE_STATIC_LIVE=FAIL '+last)
