@@ -32,21 +32,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Sync canonical launch sources into public console
+      - name: Sync canonical launch sources into public application
         shell: bash
         run: |
           set -euo pipefail
           cp worldzpad-four-token-registry.candidate.json launchpad.cryptoworldz.xyz/tokens.json
           cp worldzpad-mainnet/mainnet-plan.json launchpad.cryptoworldz.xyz/wldz-mainnet-plan.json
 
-      - name: Validate canonical four-token and fail-closed contracts
+      - name: Validate Genesis Four, Fair Fee, CrossPair and fail-closed contracts
         shell: python
         run: |
           import json
           from pathlib import Path
-          registry=json.loads(Path('launchpad.cryptoworldz.xyz/tokens.json').read_text())
-          plan=json.loads(Path('launchpad.cryptoworldz.xyz/wldz-mainnet-plan.json').read_text())
-          ui=json.loads(Path('launchpad.cryptoworldz.xyz/console-data.json').read_text())
+          root=Path('launchpad.cryptoworldz.xyz')
+          registry=json.loads((root/'tokens.json').read_text())
+          plan=json.loads((root/'wldz-mainnet-plan.json').read_text())
+          ui=json.loads((root/'console-data.json').read_text())
+          platform=json.loads((root/'platform-config.json').read_text())
+
           expected=[('WORLDZ','WLDZ',100_000_000),('REVIVE','RVIV',200_000_000),('PHENIX','PNEX',250_000_000),('MIRACLE','MRCL',348_000_000)]
           assert registry['status']=='candidate-mainnet-disabled'
           assert registry['shared']['mainnet_authorized'] is False
@@ -58,13 +61,39 @@ jobs:
               assert sum(token['allocations'].values())==100
               assert sum(token['fee_split_percent'].values())==100
               assert ticker in ui['tokens']
+
           assert plan['executionEnabled'] is False and plan['launchAuthorization'] is False
           assert plan['preMainnetProof']['workflowRunId']==34155419579
-          assert Path('launchpad.cryptoworldz.xyz/index.html').is_file()
-          assert Path('launchpad.cryptoworldz.xyz/app.js').is_file()
-          assert Path('launchpad.cryptoworldz.xyz/style.css').is_file()
-          assert Path('launchpad.cryptoworldz.xyz/status.php').is_file()
-          print('WORLDZLAUNCHPAD_INTERACTIVE_CONTRACT=PASS mainnet_authorized=0 execution_enabled=0')
+
+          fee=platform['feePolicy']
+          assert fee['projectTradingFeeMinPercent']==0.5
+          assert fee['projectTradingFeeMaxPercent']==4.0
+          assert fee['worldzLaunchPadShareOfCollectedProjectFeePercent']==10
+          assert fee['worldzLaunchPadShareOfTokenSupplyPercent']==0
+          assert fee['worldzLaunchPadShareOfInitialLiquidityPercent']==0
+          assert platform['publicMainnetCreatorLaunchesEnabled'] is False
+          assert platform['devnetTokenCreationEnabled'] is True
+
+          wxrp=next(x for x in platform['verifiedQuoteAssets'] if x['id']=='wXRP')
+          assert wxrp['solanaMint']=='6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2'
+          assert platform['crossPair']['status']=='BUILDING'
+
+          required=[
+            root/'index.html',root/'app.js',root/'style.css',root/'status.php',
+            root/'platform-config.json',root/'devnet/index.html',root/'devnet/app.js'
+          ]
+          for p in required:
+              assert p.is_file() and p.stat().st_size>500, p
+
+          home=(root/'index.html').read_text()
+          devnet=(root/'devnet/index.html').read_text()
+          assert 'Create a Launch' in home
+          assert 'WORLDZ CROSSPAIR' in home
+          assert 'Worldz Omnichain' in home
+          assert 'MAINNET LAUNCH LOCKED' in home
+          assert 'Create Devnet Token' in devnet
+          assert 'Solana Devnet only' in devnet
+          print('WORLDZLAUNCHPAD_PLATFORM_CONTRACT=PASS genesis=4 fair_fee_max=4 platform_share=10 crosspair=1 devnet_launch=1 mainnet_public=0')
 
       - name: Deploy only WorldzLaunchPad to verified Hostinger document root
         shell: python
@@ -102,27 +131,33 @@ jobs:
           except Exception: ftp.close()
           print(f'WORLDZLAUNCHPAD_DEPLOY=PASS files={count} target={remote_root}')
 
-      - name: Verify live HTML, registry, gate and status endpoint
+      - name: Verify live application, Devnet Lab, registry and fail-closed gate
         shell: python
         run: |
           import json,time,urllib.request
           base='https://launchpad.cryptoworldz.xyz'
           def get(path):
-              req=urllib.request.Request(base+path,headers={'User-Agent':'WorldzLaunchPad-Live-Verify/2.0','Cache-Control':'no-cache'})
+              req=urllib.request.Request(base+path,headers={'User-Agent':'WorldzLaunchPad-Live-Verify/3.0','Cache-Control':'no-cache'})
               with urllib.request.urlopen(req,timeout=25) as r:return r.status,r.read().decode('utf-8','ignore')
           last=''
           for attempt in range(1,7):
               try:
-                  status,body=get('/?verify=interactive-v2')
-                  _,registry_body=get('/tokens.json?verify=interactive-v2')
-                  _,plan_body=get('/wldz-mainnet-plan.json?verify=interactive-v2')
-                  status_code,status_body=get('/status.php?verify=interactive-v2')
-                  registry=json.loads(registry_body); plan=json.loads(plan_body); live=json.loads(status_body)
-                  assert status==200 and 'Connect Solana Wallet' in body and 'MAINNET LAUNCH LOCKED' in body
+                  status,body=get('/?verify=platform-v3')
+                  dev_code,dev_body=get('/devnet/?verify=platform-v3')
+                  _,registry_body=get('/tokens.json?verify=platform-v3')
+                  _,plan_body=get('/wldz-mainnet-plan.json?verify=platform-v3')
+                  _,platform_body=get('/platform-config.json?verify=platform-v3')
+                  status_code,status_body=get('/status.php?verify=platform-v3')
+                  registry=json.loads(registry_body); plan=json.loads(plan_body); platform=json.loads(platform_body); live=json.loads(status_body)
+                  assert status==200 and 'Create a Launch' in body and 'WORLDZ CROSSPAIR' in body and 'MAINNET LAUNCH LOCKED' in body
+                  assert dev_code==200 and 'Create Devnet Token' in dev_body and 'Solana Devnet only' in dev_body
                   assert registry['status']=='candidate-mainnet-disabled' and registry['shared']['mainnet_authorized'] is False
                   assert plan['executionEnabled'] is False and plan['launchAuthorization'] is False
+                  assert platform['publicMainnetCreatorLaunchesEnabled'] is False and platform['devnetTokenCreationEnabled'] is True
+                  assert platform['feePolicy']['projectTradingFeeMaxPercent']==4.0
+                  assert platform['feePolicy']['worldzLaunchPadShareOfCollectedProjectFeePercent']==10
                   assert status_code==200 and live['ok'] is True
-                  print('WORLDZLAUNCHPAD_LIVE=PASS interactive=1 wallet_connect=1 canonical_registry=1 mainnet_locked=1 runtime_probe=1')
+                  print('WORLDZLAUNCHPAD_LIVE=PASS app=1 builder=1 crosspair=1 devnet_token_creation=1 mainnet_locked=1 runtime_probe=1')
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:
