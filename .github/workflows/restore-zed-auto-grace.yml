@@ -68,6 +68,35 @@ jobs:
           chmod +x "$RUNNER_TEMP/oneworldz-bin/lftp"
           echo "$RUNNER_TEMP/oneworldz-bin" >> "$GITHUB_PATH"
 
+      - name: Diagnose protected secret names without exposing values
+        shell: bash
+        env:
+          HAS_BOT_TOKEN: ${{ secrets.BOT_TOKEN != '' }}
+          HAS_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN != '' }}
+          HAS_TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN != '' }}
+          HAS_ZED_BOT_TOKEN: ${{ secrets.ZED_BOT_TOKEN != '' }}
+          HAS_CRYPTOWORLDZ_BOT_TOKEN: ${{ secrets.CRYPTOWORLDZ_BOT_TOKEN != '' }}
+          HAS_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
+          HAS_SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY != '' }}
+          HAS_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY != '' }}
+          HAS_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY != '' }}
+          HAS_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY != '' }}
+          HAS_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY != '' }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' \
+            "BOT_TOKEN=$HAS_BOT_TOKEN" \
+            "TELEGRAM_BOT_TOKEN=$HAS_TELEGRAM_BOT_TOKEN" \
+            "TELEGRAM_TOKEN=$HAS_TELEGRAM_TOKEN" \
+            "ZED_BOT_TOKEN=$HAS_ZED_BOT_TOKEN" \
+            "CRYPTOWORLDZ_BOT_TOKEN=$HAS_CRYPTOWORLDZ_BOT_TOKEN" \
+            "SUPABASE_SERVICE_ROLE_KEY=$HAS_SUPABASE_SERVICE_ROLE_KEY" \
+            "SUPABASE_SERVICE_KEY=$HAS_SUPABASE_SERVICE_KEY" \
+            "SUPABASE_SECRET_KEY=$HAS_SUPABASE_SECRET_KEY" \
+            "SUPABASE_KEY=$HAS_SUPABASE_KEY" \
+            "SUPABASE_ANON_KEY=$HAS_SUPABASE_ANON_KEY" \
+            "SUPABASE_PUBLISHABLE_KEY=$HAS_SUPABASE_PUBLISHABLE_KEY"
+
       - name: Recover protected ZED environment from Hostinger backups
         shell: bash
         run: |
