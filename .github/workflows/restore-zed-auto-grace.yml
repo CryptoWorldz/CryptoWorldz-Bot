@@ -79,7 +79,7 @@ jobs:
           domain_root = "/domains/cryptobotz.cryptoworldz.xyz"
           node_root = domain_root + "/nodejs"
           public_root = domain_root + "/public_html"
-          required = ("BOT_TOKEN", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY")
+          required = ("BOT_TOKEN",)
 
           host = os.environ["FTP_HOST"].replace("ftps://","").replace("ftp://","").split("/")[0]
           if host.count(":") == 1:
@@ -201,6 +201,7 @@ jobs:
           merged = {}
           merged.update({k:v for k,v in current.items() if v})
           merged["SUPABASE_URL"] = "https://hknymhhyqldtzmplzuzh.supabase.co"
+          merged["SUPABASE_PUBLISHABLE_KEY"] = "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
           for _, _, _, values in sorted(found, key=lambda row: row[0]):
               for key, value in values.items():
                   if value and key not in merged:
@@ -210,7 +211,6 @@ jobs:
                   merged[key] = value
           github_core = {
               "BOT_TOKEN": os.environ.get("BOT_TOKEN_SECRET", "").strip(),
-              "SUPABASE_SERVICE_ROLE_KEY": os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET", "").strip(),
           }
           for key, value in github_core.items():
               if value:
@@ -220,8 +220,8 @@ jobs:
           if missing:
               print("ZED_ENV_RECOVERY=FAIL")
               print("ZED_ENV_MISSING_KEYS=" + ",".join(missing))
-              print("HOSTINGER_MANAGED_ENV_REQUIRED_KEYS=" + str(sum(1 for k in required if managed.get(k))) + "_OF_3")
-              raise SystemExit("Protected credentials still missing")
+              print("HOSTINGER_MANAGED_ENV_REQUIRED_KEYS=" + str(sum(1 for k in required if managed.get(k))) + "_OF_1")
+              raise SystemExit("Protected BOT_TOKEN is still missing")
 
           source = "merged-protected-sources"
 
@@ -230,14 +230,34 @@ jobs:
           if openai:
               merged["OPENAI_API_KEY"] = openai
 
+          # Bootstrap the database bridge from the already-protected Telegram
+          # bot token. Telegram validates the token; Supabase stores only a
+          # one-way derived runtime key, never the bot token itself.
+          import json, urllib.request
+          bootstrap_url = merged["SUPABASE_URL"] + "/rest/v1/rpc/zed_runtime_bootstrap"
+          request = urllib.request.Request(
+              bootstrap_url,
+              data=json.dumps({"p_bot_token": merged["BOT_TOKEN"]}).encode("utf-8"),
+              headers={
+                  "apikey": merged["SUPABASE_PUBLISHABLE_KEY"],
+                  "content-type": "application/json"
+              },
+              method="POST"
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              bootstrap_result = json.loads(response.read().decode("utf-8"))
+          if bootstrap_result is not True:
+              raise SystemExit("ZED_SUPABASE_BRIDGE_BOOTSTRAP_FAILED")
+
           payload = "".join(f"{k}={v}\n" for k, v in sorted(merged.items()))
           bio = io.BytesIO(payload.encode("utf-8"))
           ftp.storbinary("STOR " + node_root + "/.env", bio)
           ftp.quit()
 
           print("ZED_ENV_RECOVERY=PASS")
+          print("ZED_SUPABASE_BRIDGE=PASS")
           print("ZED_ENV_SOURCE=" + posixpath.basename(source))
-          print("ZED_ENV_REQUIRED_KEYS=BOT_TOKEN,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY")
+          print("ZED_ENV_REQUIRED_KEYS=BOT_TOKEN,SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY")
           PY
 
       - name: Prove restored historical runtime is present
