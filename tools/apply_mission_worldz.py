@@ -54,6 +54,9 @@ def page(host, title, eyebrow, h1, intro, sections, hero_alt, footer, descriptio
 .flow{{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:18px}} .flow div{{padding:14px;border-radius:14px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);font-weight:800;text-align:center}}
 .callout{{padding:18px;border-left:4px solid var(--accent2);background:rgba(56,189,248,.07);border-radius:12px;line-height:1.6}}
 .hero-copy p{{max-width:780px}}
+.mission-hero{{min-height:0;background:radial-gradient(circle at 18% 10%,rgba(143,69,255,.22),transparent 38%),radial-gradient(circle at 88% 20%,rgba(56,189,248,.15),transparent 34%),linear-gradient(145deg,#120822,#05030a 72%)}}
+.mission-hero .hero-copy{{padding:clamp(28px,6vw,76px);min-height:0}}
+.mission-hero h1{{max-width:980px;font-size:clamp(2.6rem,7vw,6.7rem);line-height:.92;letter-spacing:-.04em}}
 @media(max-width:980px){{.mission-grid{{grid-template-columns:1fr 1fr}}.flow{{grid-template-columns:1fr 1fr 1fr}}}}
 @media(max-width:620px){{.mission-grid,.flow{{grid-template-columns:1fr}}}}
 </style>
@@ -61,8 +64,7 @@ def page(host, title, eyebrow, h1, intro, sections, hero_alt, footer, descriptio
 <body data-oneworldz-build="{BUILD}">
 <nav class="nav">{nav}</nav>
 <main class="shell">
-<section class="hero">
-<img class="hero-art" src="/hero.png" alt="{e(hero_alt)}">
+<section class="hero mission-hero" data-verified-identity="text-first">
 <div class="hero-copy"><p class="eyebrow">{e(eyebrow)}</p><h1>{e(h1)}</h1><p>{e(intro)}</p></div>
 </section>
 {"".join(section_html)}
