@@ -103,7 +103,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import io, os, posixpath, re
+          import io, os, posixpath, re, tarfile, time, zipfile
           from ftplib import FTP_TLS
 
           domain_root = "/domains/cryptobotz.cryptoworldz.xyz"
@@ -115,10 +115,27 @@ jobs:
           if host.count(":") == 1:
               host = host.split(":",1)[0]
           port = int(os.environ.get("FTP_PORT","21"))
-          ftp = FTP_TLS()
-          ftp.connect(host, port, timeout=45)
-          ftp.login(os.environ["FTP_USERNAME"], os.environ["FTP_PASSWORD"])
-          ftp.prot_p()
+          ftp = None
+          last_connect_error = None
+          for attempt in range(1, 5):
+              try:
+                  candidate = FTP_TLS()
+                  candidate.connect(host, port, timeout=45)
+                  candidate.login(os.environ["FTP_USERNAME"], os.environ["FTP_PASSWORD"])
+                  candidate.prot_p()
+                  ftp = candidate
+                  print(f"ZED_FTPS_RECOVERY_CONNECT=PASS attempt={attempt}")
+                  break
+              except Exception as exc:
+                  last_connect_error = exc
+                  try:
+                      candidate.close()
+                  except Exception:
+                      pass
+                  print(f"ZED_FTPS_RECOVERY_CONNECT=RETRY attempt={attempt}")
+                  time.sleep(attempt * 4)
+          if ftp is None:
+              raise SystemExit("ZED_FTPS_RECOVERY_CONNECT_FAILED")
 
           def read_file(path):
               buf = io.BytesIO()
@@ -159,24 +176,50 @@ jobs:
               public_root + "/.env",
           }
 
-          def safe_list(path):
+          def safe_mlsd(path):
               try:
-                  return ftp.nlst(path)
+                  return list(ftp.mlsd(path))
               except Exception:
                   return []
 
-          for base in (node_root, domain_root, public_root):
-              for entry in safe_list(base):
-                  name = posixpath.basename(str(entry).rstrip("/"))
+          archive_candidates = set()
+          stack = [(domain_root, 0)]
+          seen_dirs = set()
+          scanned_entries = 0
+          while stack and scanned_entries < 3500:
+              base, depth = stack.pop()
+              if base in seen_dirs:
+                  continue
+              seen_dirs.add(base)
+              for name, facts in safe_mlsd(base):
+                  if name in (".", ".."):
+                      continue
+                  scanned_entries += 1
+                  full = posixpath.join(base.rstrip("/"), name)
+                  kind = str((facts or {}).get("type", "")).lower()
                   low = name.lower()
-                  if "env" in low or "protected" in low:
-                      candidates.add(entry if str(entry).startswith("/") else posixpath.join(base, name))
+                  if kind == "dir":
+                      if depth < 6 and not full.startswith(public_root + "/"):
+                          stack.append((full, depth + 1))
+                      continue
+                  if low.startswith(".env") or "protected.env" in low or low in ("env", "environment"):
+                      candidates.add(full)
+                  elif ("env" in low or "protected" in low) and not any(low.endswith(ext) for ext in (".png",".jpg",".jpeg",".webp",".svg",".gif",".mp4",".mp3")):
+                      candidates.add(full)
+                  if (
+                      low.endswith((".zip",".tgz",".tar.gz",".tar"))
+                      and any(tag in low for tag in ("zed","node","runtime","backup","release","deploy","cryptobot"))
+                  ):
+                      try:
+                          size = int((facts or {}).get("size") or 0)
+                      except Exception:
+                          size = 0
+                      if not size or size <= 25 * 1024 * 1024:
+                          archive_candidates.add(full)
 
-          for container in (node_root + "/releases", node_root + "/backups", node_root + "/builds"):
-              for entry in safe_list(container):
-                  full = entry if str(entry).startswith("/") else posixpath.join(container, posixpath.basename(str(entry).rstrip("/")))
-                  candidates.add(full + "/.env")
-                  candidates.add(full + "/protected.env")
+          print("ZED_ENV_FILE_CANDIDATES=" + str(len(candidates)))
+          print("ZED_ENV_ARCHIVE_CANDIDATES=" + str(len(archive_candidates)))
+          print("ZED_ENV_SCAN_ENTRIES=" + str(scanned_entries))
 
           found = []
           current_text = read_file(node_root + "/.env") or ""
@@ -189,6 +232,56 @@ jobs:
               present = tuple(k for k in required if values.get(k))
               if present:
                   found.append((len(present), len(values), path, values))
+
+          def read_binary(path, limit=25 * 1024 * 1024):
+              buf = io.BytesIO()
+              total = 0
+              def sink(chunk):
+                  nonlocal total
+                  total += len(chunk)
+                  if total > limit:
+                      raise ValueError("archive too large")
+                  buf.write(chunk)
+              try:
+                  ftp.retrbinary("RETR " + path, sink)
+              except Exception:
+                  return None
+              return buf.getvalue()
+
+          def add_archive_envs(archive_path, data):
+              if not data:
+                  return
+              try:
+                  if archive_path.lower().endswith(".zip"):
+                      z = zipfile.ZipFile(io.BytesIO(data))
+                      members = [(n, lambda n=n: z.read(n)) for n in z.namelist()]
+                  else:
+                      t = tarfile.open(fileobj=io.BytesIO(data), mode="r:*")
+                      members = []
+                      for member in t.getmembers():
+                          if member.isfile():
+                              members.append((member.name, lambda member=member: (t.extractfile(member).read() if t.extractfile(member) else b"")))
+                  for member_name, loader in members:
+                      base = posixpath.basename(member_name).lower()
+                      if not (base.startswith(".env") or base == "protected.env" or "protected.env" in base):
+                          continue
+                      try:
+                          raw = loader()
+                          if not raw or len(raw) > 262144:
+                              continue
+                          values = parse(raw.decode("utf-8"))
+                      except Exception:
+                          continue
+                      present = tuple(k for k in required if values.get(k))
+                      if present:
+                          found.append((len(present), len(values), archive_path + "::" + member_name, values))
+              except Exception:
+                  return
+
+          for archive_path in sorted(archive_candidates):
+              add_archive_envs(archive_path, read_binary(archive_path))
+
+          print("ZED_ENV_PROTECTED_SOURCES_FOUND=" + str(len(found)))
 
           # Hostinger managed Node environment can retain values even when the
           # filesystem .env was replaced. Read it server-side without logging values.
