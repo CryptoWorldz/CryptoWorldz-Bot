@@ -132,7 +132,8 @@ async function runPreflight(){
   const m=manifestBase(),routes=Object.values(m.feePolicy.projectDistributionPercent).reduce((a,b)=>a+b,0);
   const checks=[
     ['Chain selected',!!m.network,m.network],
-    ['Executable public test adapter',m.network==='solana',m.network==='solana'?'Solana Devnet':'Adapter not enabled yet'],
+    ['Executable public test adapter',m.network==='solana'&&['flash','curve','curve-pro'].includes(m.launchEngine),m.network==='solana'&&['flash','curve','curve-pro'].includes(m.launchEngine)?'Solana Devnet • '+m.launchEngine:'Adapter not enabled yet'],
+    ['Quote supported by selected Devnet engine',m.launchEngine==='flash'||m.quoteAsset==='SOL',m.launchEngine==='flash'?m.quoteAsset+' • Flash disclosure rules':m.quoteAsset==='SOL'?'SOL supported':'Curve / Curve Pro Devnet currently require SOL'],
     ['Launch engine selected',!!m.launchEngine,m.launchEngine],
     ['Token name',m.token.name.length>=2,m.token.name||'Missing'],
     ['Ticker',/^[A-Z0-9_$]{2,10}$/.test(m.token.symbol),m.token.symbol||'Missing'],
@@ -154,8 +155,10 @@ async function runPreflight(){
   const link=$('#devnet-launch-link');
   if(all&&m.network==='solana'){
     const route=m.feePolicy.projectDistributionPercent;\n    const q=new URLSearchParams({name:m.token.name,symbol:m.token.symbol,supply:String(m.token.fixedSupply),decimals:String(m.token.decimals),fixed:m.token.revokeMintAuthorityAfterInitialMint?'1':'0',description:m.token.description||'',engine:m.launchEngine,quote:m.quoteAsset,fee:String(m.feePolicy.projectTradingFeePercent),intent:hash,route_creator:String(route.creator||0),route_holders:String(route.holders||0),route_lp:String(route.lp||0),route_treasury:String(route.treasury||0),route_community:String(route.community||0)});
-    link.href='/devnet/?'+q.toString();link.classList.remove('disabled-link');link.setAttribute('aria-disabled','false');
-  }else{link.href='/devnet/';link.classList.add('disabled-link');link.setAttribute('aria-disabled','true');}
+    const routeBase=m.launchEngine==='curve'?'/curve/':m.launchEngine==='curve-pro'?'/curve-pro/':'/devnet/';
+    link.href=routeBase+'?'+q.toString();link.classList.remove('disabled-link');link.setAttribute('aria-disabled','false');
+    link.textContent=m.launchEngine==='curve'?'Open Worldz Curve Devnet →':m.launchEngine==='curve-pro'?'Open Curve Pro Devnet →':'Open Flash Devnet Launch →';
+  }else{link.href='/devnet/';link.classList.add('disabled-link');link.setAttribute('aria-disabled','true');link.textContent='Open Devnet Launch →';}
   return all;
 }
 function downloadManifest(){
