@@ -215,16 +215,19 @@ async function writeOnChainMetadata(){
   const uri='https://launchpad.cryptoworldz.xyz/metadata.php?mint='+encodeURIComponent(mintAddress);
   setStatus('#metadata-status','WORLDZ REGISTRY READY ✅\nBuilding Metaplex Token Metadata transaction…','good');
 
-  const [{createUmi},{walletAdapterIdentity},{mplTokenMetadata,createV1,TokenStandard},{publicKey,percentAmount}]=await Promise.all([
+  const [{createUmi},{walletAdapterIdentity},{mplTokenMetadata,createV1,TokenStandard},{mplToolbox},{publicKey,percentAmount}]=await Promise.all([
     import('https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.6.0?bundle'),
     import('https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.6.0?bundle'),
     import('https://esm.sh/@metaplex-foundation/mpl-token-metadata@3.4.0?bundle'),
+    import('https://esm.sh/@metaplex-foundation/mpl-toolbox@0.10.0?bundle'),
     import('https://esm.sh/@metaplex-foundation/umi@1.6.0?bundle')
   ]);
-  const umi=createUmi(clusterApiUrl('devnet')).use(walletAdapterIdentity(wallet)).use(mplTokenMetadata());
+  const umi=createUmi(clusterApiUrl('devnet')).use(walletAdapterIdentity(wallet)).use(mplTokenMetadata()).use(mplToolbox());
   const result=await createV1(umi,{
     mint:publicKey(mintAddress),
     authority:umi.identity,
+    payer:umi.identity,
+    updateAuthority:umi.identity,
     name:p.name,
     symbol:p.symbol,
     uri,
