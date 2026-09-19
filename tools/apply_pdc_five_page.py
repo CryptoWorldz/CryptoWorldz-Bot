@@ -131,7 +131,7 @@ hodlerz = shell(
 <p class="kicker">THE HODLERZ SPECIAL</p>
 <h1>We Remember The People Who Were There.</h1>
 <p>Legacy wallet addresses are public on-chain. The person behind a wallet stays private unless they choose otherwise.</p>
-<div class="bonus-banner"><strong>1% LEGACY HODLER BONUS</strong><span>Once JayJayTeamDev + Stepper verify the person behind a qualifying legacy-holder wallet, that verified person is designated for a 1% allocation of each newly created ecosystem token — additional to any other allocation, bonus or reward they may separately qualify for.</span><small>1% means token-supply allocation, not a promise of price, profit or monetary return.</small></div>
+<div class="bonus-banner"><strong>1% LEGACY LOYALTY POOL</strong><span>Each new WorldzLaunchPad token reserves 1% of its total fixed supply as one shared Legacy Loyalty pool for all verified qualifying Purple Diamond Handz. It is not 1% per person. JayJayTeamDev + Stepper verify eligible legacy-wallet claims; the pool is then distributed under the published Equalizer and claim rules. This legacy allocation is additional to any other approved allocation, bonus or reward a person may separately qualify for.</span><small>Genesis Four pools: WLDZ 1,000,000 • RVIV 2,000,000 • PNEX 2,500,000 • MRCL 3,480,000. No extra minting. No promise of price, profit or monetary return.</small></div>
 </section>
 <section class="pdc-section">
 <div class="registry-head">
