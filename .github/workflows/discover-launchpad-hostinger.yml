@@ -1,0 +1,67 @@
+name: Discover WorldzLaunchPad Hostinger Path
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/discover-launchpad-hostinger.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - name: Discover launchpad document root safely
+        shell: python
+        run: |
+          import os, ssl
+          from ftplib import FTP_TLS
+
+          ftp = FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ['FTP_HOST'], int(os.environ.get('FTP_PORT','21')), timeout=30)
+          ftp.login(os.environ['FTP_USERNAME'], os.environ['FTP_PASSWORD'])
+          ftp.prot_p()
+          ftp.set_pasv(True)
+
+          candidates = [
+              'domains/cryptoworldz.xyz/public_html/launchpad',
+              'domains/launchpad.cryptoworldz.xyz/public_html',
+              'domains/cryptoworldz.xyz/launchpad',
+              'launchpad',
+          ]
+
+          for path in candidates:
+              try:
+                  ftp.cwd('/')
+                  ftp.cwd(path)
+                  print(f'FOUND_CANDIDATE={path}')
+                  try:
+                      names = [x.rstrip('/').split('/')[-1] for x in ftp.nlst()]
+                      print('CONTENTS=' + ','.join(sorted(set(names))[:30]))
+                  except Exception as e:
+                      print('CONTENTS_UNAVAILABLE=' + type(e).__name__)
+              except Exception:
+                  print(f'NOT_FOUND={path}')
+
+          try:
+              ftp.cwd('/')
+              ftp.cwd('domains/cryptoworldz.xyz/public_html')
+              names = [x.rstrip('/').split('/')[-1] for x in ftp.nlst()]
+              print('CRYPTOWORLDZ_PUBLIC_HTML=' + ','.join(sorted(set(names))[:80]))
+          except Exception as e:
+              print('CRYPTOWORLDZ_LIST_FAILED=' + type(e).__name__)
+
+          try:
+              ftp.quit()
+          except Exception:
+              ftp.close()
