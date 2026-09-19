@@ -224,8 +224,9 @@ jobs:
               assert 'data-verified-identity="text-first"' in body, (label,'verified-text-first-identity')
               assert '<img class="hero-art" src="/hero.png"' not in body, (label,'stale-generic-root-hero')
           crypto_root=Path('cryptoworldz.xyz/index.html').read_text(encoding='utf-8')
-          assert 'data-verified-identity="cryptoworldz-command-centre"' in crypto_root
-          assert 'src="/command-centre-five.png"' in crypto_root
+          assert 'data-verified-identity="cryptoworldz-text-first"' in crypto_root
+          assert '<img class="hero-art" src="/hero.png"' not in crypto_root
+          assert '<img class="hero-art" src="/command-centre-five.png"' not in crypto_root
           mobile_css=Path('cryptoworldz.xyz/mobile-safe.css').read_text(encoding='utf-8')
           assert 'overflow-x:auto!important' in mobile_css and 'flex-wrap:nowrap!important' in mobile_css
           assert '@media(max-width:360px){.nav{grid-template-columns:1fr!important}}' not in mobile_css
