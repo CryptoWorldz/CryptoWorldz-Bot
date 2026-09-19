@@ -4,8 +4,17 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
   const allowRequest = createRequestLimiter({ maxEvents: 30, intervalMs: 60000 });
   let ultimateModulesPromise = null;
 
+  const miniInitDataMaxAgeSeconds = Math.min(
+    86400,
+    Math.max(300, Number(process.env.MINIAPP_INIT_DATA_MAX_AGE_SECONDS) || 86400)
+  );
+
   async function authenticateSafety(req, res, next) {
-    const result = validateTelegramInitData(req.get("x-telegram-init-data") || "", config.botToken);
+    const result = validateTelegramInitData(
+      req.get("x-telegram-init-data") || "",
+      config.botToken,
+      { maxAgeSeconds: miniInitDataMaxAgeSeconds }
+    );
     if (!result.ok) return res.status(401).json({ ok: false, error: result.error });
     const owner = String(result.user.id) === String(config.ownerTelegramId);
     let executive = false;
@@ -41,20 +50,39 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
     if (!ultimateModulesPromise) {
       ultimateModulesPromise = Promise.all([
         import("../../platform/src/ultimate.mjs"),
-        import("../../platform/src/ultimate-adapters.mjs"),
-        import("../../platform/src/based-bid-launch-policy.mjs")
+        import("../../platform/src/ultimate-adapters.mjs")
       ]);
     }
-    const [ultimate, adapters, basedBid] = await ultimateModulesPromise;
+    const [ultimate, adapters] = await ultimateModulesPromise;
     const blueprint = ultimate.ultimatePublicBlueprint();
     const nextFunding = ultimate.nextFundingWindow(new Date());
-    const launchPolicy = basedBid.buildBasedBidLaunchPacket();
     const providers = Object.fromEntries(Object.entries(adapters.ULTIMATE_PROVIDER_CAPABILITIES).map(([name, provider]) => [name, {
       role: provider.role,
       mode: provider.mode,
       external_authorization_required: provider.canAutoAuthorize === false,
       secret_custody: provider.canHoldSecrets ? "provider" : "prohibited"
     }]));
+    const launchPolicy = {
+      platform: {
+        name: "WorldzLaunchPad™",
+        url: "https://launchpad.cryptoworldz.xyz/",
+        omnichainUrl: "https://launchpad.cryptoworldz.xyz/omnichain/",
+        status: "DEVNET_BETA"
+      },
+      engines: [
+        { id: "flash", name: "Worldz Flash™", url: "https://launchpad.cryptoworldz.xyz/devnet/" },
+        { id: "curve", name: "Worldz Curve™", url: "https://launchpad.cryptoworldz.xyz/curve/" },
+        { id: "curve-pro", name: "Worldz Curve Pro™", url: "https://launchpad.cryptoworldz.xyz/curve-pro/" }
+      ],
+      feePolicy: {
+        projectTradingFeeMinPercent: 0.5,
+        projectTradingFeeMaxPercent: 4,
+        worldzLaunchPadShareOfCollectedProjectFeePercent: 10,
+        worldzLaunchPadShareOfTokenSupplyPercent: 0,
+        worldzLaunchPadShareOfInitialLiquidityPercent: 0
+      },
+      publicMainnetCreatorLaunchesEnabled: false
+    };
     return {
       ok: true,
       ultimate: {
@@ -63,12 +91,12 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
         signers: ultimate.ULTIMATE_SIGNERS.map(({ handle, role, immutable }) => ({ handle, role, immutable })),
         providers,
         launch: {
-          concept: basedBid.ULTIMATE_FIRST_TOKEN_DRAFT.name,
-          ticker: basedBid.ULTIMATE_FIRST_TOKEN_DRAFT.displaySymbol,
-          status: basedBid.ULTIMATE_FIRST_TOKEN_DRAFT.status
+          concept: "WORLDZ",
+          ticker: "$WLDZ",
+          status: "candidate-mainnet-disabled"
         },
         launchPolicy,
-        publicUrl: "https://cryptoworldz.xyz/command-centre-ultimate-20260811.html"
+        publicUrl: "https://launchpad.cryptoworldz.xyz/"
       }
     };
   }
