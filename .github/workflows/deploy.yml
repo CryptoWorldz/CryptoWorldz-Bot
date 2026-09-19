@@ -49,9 +49,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install verified image codecs
-        run: python3 -m pip install --disable-pip-version-check --quiet pillow pillow-avif-plugin
-
       - name: Compile mission builders
         run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/apply_heroes_worldz.py tools/apply_slice_of_hope_visual.py tools/apply_donateworldz_brand.py tools/deploy_hostinger_robust.py tools/prune_public_bloat.py tools/apply_pdc_five_page.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py
 
@@ -190,10 +187,10 @@ jobs:
           donate=Path('donateworldz.com/index.html').read_text(encoding='utf-8')
           donate_low=donate.lower()
           assert 'data-donateworldz-brand="masterpiece-v1"' in donate, 'donateworldz-brand-marker'
-          assert 'https://donateworldz.com/assets/brand/donateworldz/donateworldz-master.webp' in donate or 'https://donateworldz.com/assets/brand/donateworldz/icon-256.webp' in donate
-          assert Path('donateworldz.com/assets/brand/donateworldz/donateworldz-master.webp').is_file()
+          assert 'https://donateworldz.com/assets/brand/donateworldz/donateworldz-mark.svg' in donate
+          assert Path('donateworldz.com/assets/brand/donateworldz/donateworldz-mark.svg').is_file()
           assert Path('donateworldz.com/site-icon.svg').is_file()
-          assert 'data:image/webp;base64,' in Path('donateworldz.com/site-icon.svg').read_text(encoding='utf-8')
+          assert '<svg' in Path('donateworldz.com/site-icon.svg').read_text(encoding='utf-8')
           assert 'Slice of Hope Australia' in donate and 'href="/slice-of-hope-australia/"' in donate
           assert 'donate to jayjayteamdev' in donate_low and 'jayjay-support' in donate_low
           for href in ['/slice-of-hope-australia/','/davis-family/','/community-impact/','/fresh-water-mission/','/grow-food-mission/','/jayjay-support/']:
@@ -388,11 +385,11 @@ jobs:
           req=urllib.request.Request('https://donateworldz.com/site-icon.svg?brand=1',headers={'User-Agent':'OneWorldz-Live-Verify/5.0','Cache-Control':'no-cache'})
           with urllib.request.urlopen(req,timeout=25) as r:
               icon_svg=r.read().decode('utf-8','ignore')
-              assert r.status==200 and 'data:image/webp;base64,' in icon_svg
-          req=urllib.request.Request('https://donateworldz.com/assets/brand/donateworldz/donateworldz-master.webp?brand=1',headers={'User-Agent':'OneWorldz-Live-Verify/5.0','Cache-Control':'no-cache'})
+              assert r.status==200 and '<svg' in icon_svg and 'DonateWorldz' in icon_svg
+          req=urllib.request.Request('https://donateworldz.com/assets/brand/donateworldz/donateworldz-mark.svg?brand=1',headers={'User-Agent':'OneWorldz-Live-Verify/5.0','Cache-Control':'no-cache'})
           with urllib.request.urlopen(req,timeout=25) as r:
-              brand_bytes=r.read()
-              assert r.status==200 and len(brand_bytes)>2000 and brand_bytes[:4]==b'RIFF' and brand_bytes[8:12]==b'WEBP'
+              brand_svg=r.read().decode('utf-8','ignore')
+              assert r.status==200 and '<svg' in brand_svg and 'DonateWorldz' in brand_svg
           status,body=get('https://donateworldz.com/slice-of-hope-australia/')
           for needle in ('https://donate.stripe.com/14A6oHcG61Ox87Y0Xb0kE01','Volunteer','Partner With Us','Fresh Water Mission','Grow Food Mission','Pizza Hut Australia has not yet approved'):
               assert needle in body, ('slice-of-hope',needle)
