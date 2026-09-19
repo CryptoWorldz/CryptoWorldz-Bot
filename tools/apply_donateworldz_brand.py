@@ -98,7 +98,12 @@ def replace_donateworldz_imgs(text: str, host: str) -> str:
             else:
                 tag = tag[:-1] + f' src="{src}">'
             if "donateworldz-brand-mark" not in tag:
-                tag = tag.replace("<img", '<img class="donateworldz-brand-mark"', 1)
+                cm = re.search(r'class\\s*=\\s*["\\']([^"\\']*)["\\']', tag, re.I)
+                if cm:
+                    current = cm.group(1)
+                    tag = tag[:cm.start()] + f'class="{current} donateworldz-brand-mark"' + tag[cm.end():]
+                else:
+                    tag = tag.replace("<img", '<img class="donateworldz-brand-mark"', 1)
             return tag
         return tag
     text = re.sub(r'<img\b[^>]*>', repl, text, flags=re.I)
