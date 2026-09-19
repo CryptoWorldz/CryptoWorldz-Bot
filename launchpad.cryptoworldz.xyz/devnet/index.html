@@ -4,69 +4,134 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#05020b">
-  <title>WorldzLaunchPad™ | Solana Devnet Lab</title>
+  <title>WorldzLaunchPad™ | Worldz Flash Devnet</title>
   <link rel="stylesheet" href="/style.css?v=20260920-platform-v3">
   <style>
-    .lab-shell{max-width:1080px;margin:auto;padding:70px 18px 100px}.lab-hero{padding:30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#a64cff12,#55c7ff08);margin-bottom:14px}
-    .lab-hero h1{font-size:clamp(2.6rem,7vw,5.6rem);line-height:.9;letter-spacing:-.055em;margin:8px 0 15px}.lab-hero h1 span{color:#c47cff}.lab-grid{display:grid;grid-template-columns:1fr .9fr;gap:12px}.lab-card{border:1px solid var(--line);border-radius:19px;padding:20px;background:#ffffff035}.lab-card h2{margin:0 0 15px}.lab-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.lab-form label{display:grid;gap:5px;color:#9584a0;font-size:.72rem}.lab-form input{width:100%;border:1px solid #ffffff12;border-radius:11px;background:#07030d;color:#fff;padding:11px}.lab-form .wide{grid-column:1/-1}.lab-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.lab-status{margin-top:14px;border:1px solid #ffffff0d;border-radius:13px;padding:13px;color:#9c8ca7;font-size:.75rem;white-space:pre-wrap;word-break:break-word}.lab-status.good{border-color:#55e6a533;color:#7cebbb}.lab-status.bad{border-color:#ff6d8a33;color:#ff9bb0}.lab-rules{display:grid;gap:8px}.lab-rule{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid #ffffff09;color:#8f8099;font-size:.75rem}.lab-rule b{color:#e6dcec;text-align:right}.warning-box{padding:13px;border-left:3px solid #ffd166;background:#ffd16608;color:#a49376;font-size:.72rem;margin-top:14px}.tx-result{display:none;margin-top:14px;padding:14px;border:1px solid #55e6a533;border-radius:14px;background:#55e6a508}.tx-result.show{display:block}.tx-result a{color:#83ecc2}.tx-result code{word-break:break-all;color:#d4c7db}
-    @media(max-width:760px){.lab-grid,.lab-form{grid-template-columns:1fr}.lab-form .wide{grid-column:auto}.lab-shell{padding-top:35px}}
+    .lab-shell{max-width:1180px;margin:auto;padding:58px 18px 100px}.lab-hero{padding:32px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#a64cff14,#55c7ff09);margin-bottom:14px}
+    .lab-hero h1{font-size:clamp(2.8rem,7vw,6rem);line-height:.88;letter-spacing:-.06em;margin:8px 0 15px}.lab-hero h1 span{color:#c47cff}.pipeline{display:grid;gap:11px}.stage{border:1px solid var(--line);border-radius:20px;background:#ffffff035;overflow:hidden}.stage-head{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;padding:16px 18px;border-bottom:1px solid #ffffff09}.stage-num{width:39px;height:39px;border-radius:50%;display:grid;place-items:center;background:#a64cff10;border:1px solid #a64cff33;color:#c67eff;font-weight:950}.stage-head h2{margin:0;font-size:1.08rem}.stage-head p{margin:2px 0 0;color:#786a82;font-size:.68rem}.stage-state{border:1px solid #ffffff12;border-radius:999px;padding:5px 8px;color:#7d7086;font-size:.59rem;font-weight:950;white-space:nowrap}.stage-state.pass{border-color:#55e6a53d;color:#77ebbb}.stage-state.wait{border-color:#ffd16633;color:#d6bd7f}.stage-state.block{border-color:#ff6d8a33;color:#ef94a6}.stage-body{padding:18px}.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.lab-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.lab-form label{display:grid;gap:5px;color:#9584a0;font-size:.72rem}.lab-form input,.lab-form textarea,.lab-form select{width:100%;border:1px solid #ffffff12;border-radius:11px;background:#07030d;color:#fff;padding:11px}.lab-form textarea{min-height:88px;resize:vertical}.lab-form .wide{grid-column:1/-1}.lab-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.lab-status{margin-top:13px;border:1px solid #ffffff0d;border-radius:13px;padding:12px;color:#9c8ca7;font-size:.72rem;white-space:pre-wrap;word-break:break-word}.lab-status.good{border-color:#55e6a533;color:#7cebbb}.lab-status.bad{border-color:#ff6d8a33;color:#ff9bb0}.lab-status.warn{border-color:#ffd16633;color:#d6bd7f}.result-box{display:none;margin-top:12px;padding:13px;border:1px solid #55e6a533;border-radius:13px;background:#55e6a508}.result-box.show{display:block}.result-box p{margin:5px 0;color:#8f8098;font-size:.71rem}.result-box code{word-break:break-all;color:#d5c8dc}.result-box a{color:#83ecc2}.truth-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.truth{border:1px solid #ffffff0c;border-radius:12px;padding:11px}.truth span{display:block;color:#6e6278;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em}.truth b{font-size:.83rem}.route-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}.route-grid label{font-size:.63rem;color:#796c82}.route-grid input{margin-top:5px;width:100%;padding:8px;border:1px solid #ffffff11;border-radius:9px;background:#07030d;color:#fff}.proof-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.proof-item{display:grid;grid-template-columns:22px 1fr;gap:7px;padding:10px;border:1px solid #ffffff0c;border-radius:11px;color:#82748c;font-size:.68rem}.proof-item .mark{font-weight:950}.proof-item.pass .mark{color:#55e6a5}.proof-item.wait .mark{color:#ffd166}.proof-item.block .mark{color:#ff6d8a}.warning-box{padding:13px;border-left:3px solid #ffd166;background:#ffd16608;color:#a49376;font-size:.72rem;margin-top:12px}.mono{word-break:break-all;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.quote-choice{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quote-btn{padding:12px;border:1px solid #ffffff10;border-radius:13px;background:#ffffff04;color:#c9bbd2;text-align:left;cursor:pointer}.quote-btn.selected{border-color:#a64cff66;background:#a64cff0d}.quote-btn strong{display:block}.quote-btn small{color:#776a80}.command-badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.command-badges span{border:1px solid #ffffff10;border-radius:999px;padding:6px 9px;color:#746879;font-size:.64rem}.command-badges span.pass{border-color:#55e6a53b;color:#72e9b7}.lock-banner{padding:12px;border:1px solid #ff6d8a29;border-radius:12px;background:#ff6d8a06;color:#b28b94;font-size:.7rem}
+    @media(max-width:780px){.lab-grid,.lab-form,.truth-grid,.proof-grid{grid-template-columns:1fr}.lab-form .wide{grid-column:auto}.route-grid{grid-template-columns:1fr 1fr}.stage-head{grid-template-columns:42px 1fr}.stage-state{grid-column:2}.quote-choice{grid-template-columns:1fr}.lab-shell{padding-top:32px}}
   </style>
 </head>
 <body>
 <header class="topbar">
   <a class="brand" href="/"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a>
-  <nav><a href="/">LaunchPad</a><a href="/#create">Builder</a><a href="/#proof">Proof</a></nav>
+  <nav><a href="/">LaunchPad</a><a href="/#create">Builder</a><a href="/#crosspair">CrossPair</a><a href="/#proof">Proof</a></nav>
   <button class="wallet-mini" id="wallet-button" type="button">Connect Wallet</button>
 </header>
 
 <main class="lab-shell">
   <section class="lab-hero">
-    <div class="kicker">SOLANA DEVNET • REAL ON-CHAIN TOKEN CREATION • NO MAINNET</div>
-    <h1>DEVNET <span>LAUNCH LAB.</span></h1>
-    <p class="lead">This is the first executable public WorldzLaunchPad route: create a real SPL mint on Solana Devnet, mint the initial fixed supply to your own wallet, optionally revoke mint authority, simulate the signed transaction, then broadcast it to Devnet.</p>
+    <div class="kicker">WORLDZ FLASH™ • SOLANA DEVNET • BUILD THE WHOLE LAUNCH</div>
+    <h1>NOT JUST A MINT.<br><span>A LAUNCH.</span></h1>
+    <p class="lead">Token → Metadata → Pair/Pool → Fee Router → LP Lock → Vesting → Worldz Proof → Command Centre Registry. Every stage shows what is actually on-chain, what is only configured, and what is still blocked.</p>
+    <div class="truth-grid">
+      <div class="truth"><span>Execution</span><b>Solana Devnet only</b></div>
+      <div class="truth"><span>Mainnet</span><b>Public creator launch OFF</b></div>
+      <div class="truth"><span>Custody</span><b>Your wallet signs</b></div>
+    </div>
   </section>
 
-  <div class="lab-grid">
-    <section class="lab-card">
-      <h2>Token deployment</h2>
-      <div class="lab-form">
-        <label>Token name<input id="name" maxlength="32" placeholder="SolSavewXRP"></label>
-        <label>Ticker<input id="symbol" maxlength="10" placeholder="SAVE"></label>
-        <label>Fixed supply<input id="supply" inputmode="numeric" value="100000000"></label>
-        <label>Decimals<input id="decimals" type="number" min="0" max="9" value="9"></label>
-        <label class="wide"><span><input id="fixed" type="checkbox" checked> Revoke mint authority after initial supply</span></label>
-      </div>
-      <div class="lab-actions">
-        <button class="btn secondary" id="check" type="button">Run Local Checks</button>
-        <button class="btn primary" id="launch" type="button" disabled>Create Devnet Token</button>
-      </div>
-      <div class="lab-status" id="status">Load a WorldzLaunchPad manifest from the Builder or enter test values here.</div>
-      <div class="tx-result" id="result">
-        <b>DEVNET TOKEN CREATED ✅</b>
-        <p>Mint: <code id="mint"></code></p>
-        <p>Transaction: <code id="signature"></code></p>
-        <a id="explorer" target="_blank" rel="noopener">Open in Solana Explorer ↗</a>
+  <div class="pipeline">
+    <section class="stage" id="stage-token">
+      <div class="stage-head"><div class="stage-num">1</div><div><h2>Create Token</h2><p>Real SPL mint + fixed supply to your wallet. Freeze authority = none.</p></div><span class="stage-state" id="state-token">READY</span></div>
+      <div class="stage-body">
+        <div class="lab-form">
+          <label>Token name<input id="name" maxlength="32" placeholder="SolSavewXRP"></label>
+          <label>Ticker<input id="symbol" maxlength="10" placeholder="SAVE"></label>
+          <label>Fixed supply<input id="supply" inputmode="numeric" value="100000000"></label>
+          <label>Decimals<input id="decimals" type="number" min="0" max="9" value="9"></label>
+          <label class="wide"><span><input id="fixed" type="checkbox" checked> Fixed supply: revoke mint authority after metadata is written</span></label>
+        </div>
+        <div class="lab-actions"><button class="btn secondary" id="check" type="button">Run Local Checks</button><button class="btn primary" id="launch" type="button" disabled>Create Devnet Token</button></div>
+        <div class="lab-status" id="status">Load a WorldzLaunchPad manifest from the Builder or enter test values here.</div>
+        <div class="result-box" id="token-result"><b>DEVNET TOKEN CREATED ✅</b><p>Mint: <code id="mint"></code></p><p>Transaction: <code id="signature"></code></p><a id="explorer" target="_blank" rel="noopener">Open mint in Solana Explorer ↗</a></div>
       </div>
     </section>
 
-    <aside class="lab-card">
-      <h2>Execution contract</h2>
-      <div class="lab-rules">
-        <div class="lab-rule"><span>Network</span><b>Solana Devnet only</b></div>
-        <div class="lab-rule"><span>Wallet custody</span><b>Self-custody</b></div>
-        <div class="lab-rule"><span>Freeze authority</span><b>None</b></div>
-        <div class="lab-rule"><span>Mint authority</span><b id="mint-rule">Revoked after mint</b></div>
-        <div class="lab-rule"><span>Simulation</span><b>Signed simulation before send</b></div>
-        <div class="lab-rule"><span>Metadata</span><b>Not yet written on-chain</b></div>
-        <div class="lab-rule"><span>DEX / pool</span><b>Not created by this Devnet step</b></div>
-        <div class="lab-rule"><span>Mainnet</span><b>DISABLED</b></div>
+    <section class="stage" id="stage-metadata">
+      <div class="stage-head"><div class="stage-num">2</div><div><h2>Metadata + Identity</h2><p>Register the launch, publish its Worldz metadata JSON, write Metaplex metadata on-chain, then finalize fixed supply.</p></div><span class="stage-state wait" id="state-metadata">WAITING FOR TOKEN</span></div>
+      <div class="stage-body">
+        <div class="lab-form">
+          <label class="wide">Description<textarea id="description" maxlength="500" placeholder="What is this project for?"></textarea></label>
+          <label>Image URL<input id="image-url" type="url" placeholder="https://.../token.png"></label>
+          <label>Website<input id="website-url" type="url" placeholder="https://..."></label>
+          <label>X / Twitter<input id="x-url" type="url" placeholder="https://x.com/..."></label>
+          <label>Telegram<input id="telegram-url" type="url" placeholder="https://t.me/..."></label>
+        </div>
+        <div class="lab-actions"><button class="btn primary" id="metadata-button" type="button" disabled>Register + Write Metadata</button></div>
+        <div class="lab-status" id="metadata-status">A mint must exist first. Metadata will point to WorldzLaunchPad's public metadata endpoint for that mint.</div>
+        <div class="result-box" id="metadata-result"><b>METADATA CREATED ✅</b><p>URI: <code id="metadata-uri"></code></p><p>Metadata transaction: <code id="metadata-signature"></code></p><p>Mint authority: <b id="authority-final">—</b></p></div>
       </div>
-      <div class="warning-box">This Devnet Lab proves token deployment, supply creation and authority control. It does not pretend a token mint alone is a completed market launch. Pool creation, quote pairing, locks, vesting, fee routing and mainnet release remain separate verified stages.</div>
-    </aside>
+    </section>
+
+    <section class="stage" id="stage-pair">
+      <div class="stage-head"><div class="stage-num">3</div><div><h2>Choose Pair + Create Real Pool</h2><p>Worldz CrossPair™ selection. Real Devnet pool execution is enabled only where a real verified Devnet quote exists.</p></div><span class="stage-state wait" id="state-pool">WAITING FOR TOKEN</span></div>
+      <div class="stage-body">
+        <div class="quote-choice">
+          <button class="quote-btn selected" data-quote="SOL" type="button"><strong>◎ SOL</strong><small>Real Raydium CPMM Devnet pool adapter</small></button>
+          <button class="quote-btn" data-quote="wXRP" type="button"><strong>X wXRP</strong><small>Verified mainnet CrossPair target — no fake Devnet wXRP</small></button>
+        </div>
+        <div class="warning-box" id="quote-note">SOL Devnet uses native SOL/wSOL as the real quote side. Pool creation uses Raydium's Devnet CPMM program and is a separate venue fee from the Worldz project-fee configuration.</div>
+        <div class="lab-form" style="margin-top:12px">
+          <label>Project tokens for initial LP<input id="pool-token-amount" inputmode="decimal" value="1000000"></label>
+          <label>SOL for initial LP<input id="pool-quote-amount" inputmode="decimal" value="0.1"></label>
+        </div>
+        <div class="lab-actions"><button class="btn primary" id="pool-button" type="button" disabled>Simulate + Create Raydium Devnet Pool</button></div>
+        <div class="lab-status" id="pool-status">Token + metadata must be complete before the real Devnet pool button is enabled.</div>
+        <div class="result-box" id="pool-result"><b>REAL DEVNET POOL CREATED ✅</b><p>Pool: <code id="pool-id"></code></p><p>LP mint: <code id="lp-mint"></code></p><p>Transaction: <code id="pool-signature"></code></p></div>
+      </div>
+    </section>
+
+    <section class="stage" id="stage-fees">
+      <div class="stage-head"><div class="stage-num">4</div><div><h2>Configure Fee Router</h2><p>Worldz project economics snapshot. This is not the Raydium CPMM venue fee.</p></div><span class="stage-state wait" id="state-fees">CONFIGURATION</span></div>
+      <div class="stage-body">
+        <div class="lab-grid">
+          <div>
+            <div class="lab-form">
+              <label>Project trading fee %<input id="project-fee" type="number" min="0.5" max="4" step="0.25" value="2"></label>
+              <label>WorldzLaunchPad share<input value="10% of collected project fee revenue" disabled></label>
+            </div>
+            <div class="route-grid">
+              <label>Creator<input class="route-input" data-route="creator" type="number" min="0" max="100" value="30"></label>
+              <label>Holders<input class="route-input" data-route="holders" type="number" min="0" max="100" value="25"></label>
+              <label>LP Growth<input class="route-input" data-route="lp" type="number" min="0" max="100" value="20"></label>
+              <label>Treasury<input class="route-input" data-route="treasury" type="number" min="0" max="100" value="15"></label>
+              <label>Community/Impact<input class="route-input" data-route="community" type="number" min="0" max="100" value="10"></label>
+            </div>
+          </div>
+          <div class="lock-banner"><b>ROUTER EXECUTION NOT YET LIVE</b><br>The exact Worldz fee distribution is recorded in the launch registry now. The direct CPMM adapter does not pretend Raydium's venue fee is our configurable Worldz project-fee router. This stage stays amber until the real routing adapter is proven.</div>
+        </div>
+        <div class="lab-actions"><button class="btn secondary" id="save-fees" type="button" disabled>Save Fee Snapshot</button><span class="stage-state" id="route-total">100%</span></div>
+      </div>
+    </section>
+
+    <section class="stage" id="stage-locks">
+      <div class="stage-head"><div class="stage-num">5</div><div><h2>LP Lock + Vesting</h2><p>Define the lock first. Never display a declared schedule as an enforced on-chain lock.</p></div><span class="stage-state block" id="state-locks">ENFORCEMENT ADAPTER PENDING</span></div>
+      <div class="stage-body">
+        <div class="lab-form">
+          <label>LP lock target (months)<input id="lp-lock-months" type="number" min="0" max="120" value="12"></label>
+          <label>Founder cliff (days)<input id="vesting-cliff-days" type="number" min="0" max="3650" value="90"></label>
+          <label>Founder vesting (months)<input id="vesting-months" type="number" min="0" max="120" value="24"></label>
+          <label>Founder allocation %<input id="vesting-percent" type="number" min="0" max="100" step="0.01" value="25"></label>
+        </div>
+        <div class="lab-actions"><button class="btn secondary" id="save-locks" type="button" disabled>Save Lock / Vesting Plan</button></div>
+        <div class="warning-box">Saving this plan records intent only. It does NOT create an on-chain LP lock or time-enforced vesting account. Worldz Proof will keep both controls amber/red until an enforcement adapter has been executed and verified.</div>
+      </div>
+    </section>
+
+    <section class="stage" id="stage-proof">
+      <div class="stage-head"><div class="stage-num">6</div><div><h2>Worldz Proof™ + Command Centre Registry</h2><p>One record for what is verified, configured or still pending.</p></div><span class="stage-state wait" id="state-proof">BUILDING PROOF</span></div>
+      <div class="stage-body">
+        <div class="proof-grid" id="proof-grid"></div>
+        <div class="lab-actions"><button class="btn primary" id="register-button" type="button" disabled>Refresh Command Centre Registry</button></div>
+        <div class="command-badges"><span id="zed-badge">ZED • NOT REGISTERED</span><span id="auto-badge">AUTO • NOT REGISTERED</span><span id="grace-badge">G.R.A.C.E. • NOT REGISTERED</span></div>
+        <div class="lab-status" id="registry-status">After token creation, your wallet can sign a plain registration message. No seed phrase or private key is sent anywhere.</div>
+      </div>
+    </section>
   </div>
 </main>
 
-<footer><div><b>WorldzLaunchPad™ Devnet Lab</b></div><p>No seed phrase or private key is requested. The temporary mint keypair is generated in browser memory; the wallet remains the authority unless mint authority is revoked.</p></footer>
-<script type="module" src="/devnet/app.js?v=20260920-devnet-v1"></script>
+<footer><div><b>WorldzLaunchPad™ • Worldz Flash™ Devnet</b></div><p>Real Devnet execution is separated from declared configuration. Mainnet creator execution remains disabled.</p></footer>
+<script type="module" src="/devnet/app.js?v=20260920-flash-pipeline-v1"></script>
 </body>
 </html>
