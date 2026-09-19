@@ -153,7 +153,7 @@ async function runPreflight(){
   $('#download-manifest').disabled=!all;
   const link=$('#devnet-launch-link');
   if(all&&m.network==='solana'){
-    const q=new URLSearchParams({name:m.token.name,symbol:m.token.symbol,supply:String(m.token.fixedSupply),decimals:String(m.token.decimals),fixed:m.token.revokeMintAuthorityAfterInitialMint?'1':'0',engine:m.launchEngine,quote:m.quoteAsset,fee:String(m.feePolicy.projectTradingFeePercent),intent:hash});
+    const route=m.feePolicy.projectDistributionPercent;\n    const q=new URLSearchParams({name:m.token.name,symbol:m.token.symbol,supply:String(m.token.fixedSupply),decimals:String(m.token.decimals),fixed:m.token.revokeMintAuthorityAfterInitialMint?'1':'0',description:m.token.description||'',engine:m.launchEngine,quote:m.quoteAsset,fee:String(m.feePolicy.projectTradingFeePercent),intent:hash,route_creator:String(route.creator||0),route_holders:String(route.holders||0),route_lp:String(route.lp||0),route_treasury:String(route.treasury||0),route_community:String(route.community||0)});
     link.href='/devnet/?'+q.toString();link.classList.remove('disabled-link');link.setAttribute('aria-disabled','false');
   }else{link.href='/devnet/';link.classList.add('disabled-link');link.setAttribute('aria-disabled','true');}
   return all;
