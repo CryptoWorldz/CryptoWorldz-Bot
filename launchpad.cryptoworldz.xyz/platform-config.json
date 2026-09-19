@@ -1,7 +1,7 @@
 {
-  "version": "2026-09-20-worldzlaunchpad-flash-pipeline-v2",
+  "version": "2026-09-20-worldzlaunchpad-three-engine-devnet-v1",
   "product": "WorldzLaunchPad™",
-  "status": "flash-devnet-pipeline",
+  "status": "three-engine-devnet-beta",
   "publicMainnetCreatorLaunchesEnabled": false,
   "devnetTokenCreationEnabled": true,
   "principles": {
@@ -27,22 +27,23 @@
     {
       "id": "flash",
       "name": "Worldz Flash™",
-      "status": "GENESIS_TESTING",
-      "description": "Direct-liquidity launch. No bonding curve required."
+      "status": "DEVNET_BETA",
+      "description": "Direct-liquidity Devnet launch with SPL token, Metaplex metadata, real CPMM pool and Worldz Proof registry.",
+      "underlay": "Raydium CPMM"
     },
     {
       "id": "curve",
       "name": "Worldz Curve™",
-      "status": "RESEARCH_INTEGRATION",
+      "status": "DEVNET_BETA",
       "underlay": "Raydium LaunchLab",
-      "description": "Curated bonding-curve launch with graduation to AMM."
+      "description": "Raydium LaunchLab Devnet route with Worldz PlatformConfig, bonding curve, CPMM graduation path and native vesting records."
     },
     {
       "id": "curve-pro",
       "name": "Worldz Curve Pro™",
-      "status": "RESEARCH_INTEGRATION",
+      "status": "DEVNET_BETA",
       "underlay": "Meteora DBC",
-      "description": "Advanced dynamic bonding-curve configuration."
+      "description": "Meteora DBC Devnet route with per-launch fee configuration, native 90/10 partner/creator split, DAMM V2 graduation, permanent LP locking and optional locked vesting."
     },
     {
       "id": "liquidity",
@@ -211,6 +212,46 @@
   "libraries": {
     "raydiumSdkPinnedForFlashDevnet": "0.2.64-alpha",
     "metaplexTokenMetadata": "3.4.0",
-    "umiBundleDefaults": "1.6.0"
+    "umiBundleDefaults": "1.6.0",
+    "raydiumLaunchLabSdk": "0.2.64-alpha",
+    "meteoraDynamicBondingCurveSdk": "1.5.12"
+  },
+  "worldzCurve": {
+    "status": "DEVNET_BETA",
+    "underlay": "Raydium LaunchLab",
+    "devnetProgram": "DRay6fNdQ5J82H7xV6uq2aV3mNrUZ1J4PgSKsWgptcm6",
+    "solGlobalConfig": "7ZR4zD7PYfY2XxoG1Gxcy2EgEeGYrpxrwzPuwdUBssEt",
+    "devnetQuote": "SOL",
+    "launchSupply": 1000000000,
+    "decimals": 6,
+    "platformFeePercent": 2,
+    "protocolTradeFeePercent": 0.25,
+    "downstreamWorldzSharePercent": 10,
+    "downstreamProjectSharePercent": 90,
+    "downstreamAutoRouterExecuting": false,
+    "postGraduationLp": "100% platform locked share",
+    "nativeVesting": true,
+    "publicMainnetExecution": false
+  },
+  "worldzCurvePro": {
+    "status": "DEVNET_BETA",
+    "underlay": "Meteora Dynamic Bonding Curve",
+    "sdkVersion": "1.5.12",
+    "devnetProgram": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "devnetQuote": "SOL",
+    "projectTradingFeeRangePercent": [
+      0.5,
+      4
+    ],
+    "creatorTradingFeeSharePercent": 90,
+    "worldzPartnerTradingFeeSharePercent": 10,
+    "migration": "DAMM V2",
+    "graduatedLiquidity": {
+      "partnerPermanentLockedPercent": 10,
+      "creatorPermanentLockedPercent": 90,
+      "totalPermanentLockedPercent": 100
+    },
+    "lockedTokenVesting": "optional per launch",
+    "publicMainnetExecution": false
   }
 }
