@@ -259,4 +259,4 @@ $('#launch-btn').addEventListener('click',createLaunch);
 $('#vesting-btn').addEventListener('click',createVesting);
 $('#register-btn').addEventListener('click',register);
 ['#name','#symbol','#vesting-tokens'].forEach(id=>$(id).addEventListener('input',()=>{$('#launch-btn').disabled=true;preflight=false;}));
-renderProof();
+loadQuery();renderProof();
