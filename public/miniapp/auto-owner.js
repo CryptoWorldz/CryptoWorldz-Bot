@@ -177,21 +177,25 @@
   }
 
   function renderLaunch(model) {
-    const ultimate = model.ultimate;
-    const fee = ultimate.tokenFeePolicy || {};
-    const proceeds = fee.proceedsAllocationBps || {};
-    const launch = ultimate.launch || {};
+    const policy = model.ultimate.launchPolicy || {};
+    const platform = policy.platform || {};
+    const fee = policy.feePolicy || {};
+    const engines = Array.isArray(policy.engines) ? policy.engines : [];
     return `<section class="panel">
-      <h3>🚀 Ultimate Launch Engine</h3>
+      <h3>🚀 WorldzLaunchPad™</h3>
       <div class="ultimate-grid">
-        <div class="ultimate-card"><small>First Concept</small><strong>${escapeHtml(launch.concept || 'OneWorldz Kindness')} • ${escapeHtml(launch.ticker || '$KIND')}</strong></div>
-        <div class="ultimate-card"><small>Status</small><strong>${escapeHtml(String(launch.status || 'legal_review').replaceAll('_', ' ').toUpperCase())}</strong></div>
-        <div class="ultimate-card"><small>Creator Fee</small><strong>${formatBps(fee.initialCreatorFeeBps)} → ${formatBps(fee.matureCreatorFeeBps)}</strong></div>
-        <div class="ultimate-card"><small>Hard Fee Cap</small><strong>${formatBps(fee.hardCreatorFeeCapBps)}</strong></div>
+        <div class="ultimate-card"><small>Platform</small><strong>WorldzLaunchPad™</strong></div>
+        <div class="ultimate-card"><small>Status</small><strong>${escapeHtml(String(platform.status || 'DEVNET_BETA').replaceAll('_', ' '))}</strong></div>
+        <div class="ultimate-card"><small>Project Fee Range</small><strong>${Number(fee.projectTradingFeeMinPercent ?? 0.5).toFixed(2)}% → ${Number(fee.projectTradingFeeMaxPercent ?? 4).toFixed(2)}%</strong></div>
+        <div class="ultimate-card"><small>Worldz Share</small><strong>${Number(fee.worldzLaunchPadShareOfCollectedProjectFeePercent ?? 10)}% OF COLLECTED PROJECT FEE</strong></div>
       </div>
-      <p><strong>Fee proceeds:</strong> Charity ${formatBps(proceeds.charity)} • Liquidity ${formatBps(proceeds.liquidity)} • Dev ${formatBps(proceeds.dev)} • Team ${formatBps(proceeds.team)} • Buyback/Burn Reserve ${formatBps(proceeds.buyback_burn_reserve)}.</p>
-      <div class="ultimate-note ultimate-danger">Based.bid launch execution is not enabled yet. Legal review, disclosures, wallet registration and 2-of-3 approval remain mandatory. Buyback/burn cannot be price- or volume-triggered automatically.</div>
-      <a class="button secondary" href="${escapeHtml(ultimate.publicUrl)}" target="_blank" rel="noopener">Open Ultimate Public Blueprint</a>
+      <p><strong>Launch engines:</strong> ${engines.length ? engines.map((engine) => escapeHtml(engine.name)).join(' • ') : 'Worldz Flash™ • Worldz Curve™ • Worldz Curve Pro™'}.</p>
+      <p><strong>Platform cut:</strong> 0% token supply • 0% initial liquidity • 10% of collected project fee revenue.</p>
+      <div class="ultimate-note ultimate-danger">Public mainnet creator launches remain fail-closed. Devnet launch, proof, wallet signing and release gates remain visible before anything reaches mainnet.</div>
+      <div class="ultimate-safety-actions">
+        <a class="button" href="https://launchpad.cryptoworldz.xyz/" target="_blank" rel="noopener">Open WorldzLaunchPad™</a>
+        <a class="button secondary" href="https://launchpad.cryptoworldz.xyz/omnichain/" target="_blank" rel="noopener">Open OmniChain™</a>
+      </div>
     </section>`;
   }
 
