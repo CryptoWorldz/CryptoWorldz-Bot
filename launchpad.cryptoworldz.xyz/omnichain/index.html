@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#06020d">
+  <meta name="description" content="Worldz OmniChain™ — one project, multiple Worldz, chain-native adapters, transparent supply accounting, proof and CrossPair.">
+  <title>Worldz OmniChain™ | WorldzLaunchPad™</title>
+  <link rel="stylesheet" href="/style.css?v=20260920-platform-v3">
+  <style>
+    :root{--omni:#bb63ff;--cyan:#61d8ff;--green:#69e8b5;--glass:rgba(14,6,25,.78)}
+    body{background:
+      radial-gradient(circle at 50% 14%,rgba(133,42,255,.25),transparent 24%),
+      radial-gradient(circle at 15% 42%,rgba(73,126,255,.13),transparent 26%),
+      radial-gradient(circle at 88% 65%,rgba(184,65,255,.14),transparent 23%),
+      #05020b}
+    .omni-shell{max-width:1320px;margin:auto;padding:72px 18px 100px}
+    .omni-hero{text-align:center;max-width:980px;margin:0 auto 38px}
+    .omni-hero .eyebrow{color:#c06dff;letter-spacing:.22em;font-size:.73rem;font-weight:950}
+    .omni-hero h1{font-size:clamp(3rem,7.8vw,7.5rem);line-height:.92;letter-spacing:-.06em;margin:14px 0 20px}
+    .omni-hero h1 span{background:linear-gradient(90deg,#fff,#d89cff 55%,#70d9ff);-webkit-background-clip:text;color:transparent}
+    .omni-hero p{max-width:840px;margin:auto;color:#ac9ab8;font-size:clamp(.98rem,1.6vw,1.22rem)}
+    .hero-actions{justify-content:center}
+    .galaxy{position:relative;min-height:770px;margin:30px auto 22px;display:grid;place-items:center;overflow:hidden}
+    .galaxy:before,.galaxy:after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(189,91,255,.22);box-shadow:0 0 48px rgba(154,58,255,.08)}
+    .galaxy:before{width:min(78vw,890px);height:min(55vw,620px);transform:rotate(11deg)}
+    .galaxy:after{width:min(65vw,750px);height:min(43vw,500px);transform:rotate(-18deg)}
+    .starfield{position:absolute;inset:0;background-image:
+      radial-gradient(circle,#fff 0 1px,transparent 1.6px),
+      radial-gradient(circle,#b97dff 0 1px,transparent 1.8px);
+      background-size:78px 78px,123px 123px;background-position:0 0,22px 31px;opacity:.17;mask-image:radial-gradient(circle,#000 20%,transparent 78%)}
+    .core{position:relative;z-index:6;width:235px;height:235px;border-radius:50%;display:grid;place-items:center;align-content:center;
+      background:radial-gradient(circle at 36% 28%,#e4c3ff,#a23efa 28%,#42125b 65%,#16051f);
+      border:1px solid #efcfff55;box-shadow:0 0 40px #b34dff99,0 0 150px #7b28c766;text-decoration:none;color:#fff;transition:.25s}
+    .core:hover{transform:scale(1.04);box-shadow:0 0 55px #cb73ffbb,0 0 180px #8f30d988}
+    .core b{font-size:5rem;line-height:.85;color:#13031b}.core strong{font-size:1.45rem;letter-spacing:.08em}.core small{letter-spacing:.25em;color:#e4c1f4;font-size:.62rem}
+    .beam{position:absolute;z-index:2;width:3px;height:360px;background:linear-gradient(transparent,#d57cff,#78d8ff,transparent);filter:blur(.2px);box-shadow:0 0 25px #a955ff}
+    .orbit{position:absolute;z-index:5;width:126px;height:126px;border-radius:50%;display:grid;place-items:center;align-content:center;text-decoration:none;color:#fff;text-align:center;
+      background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.18),rgba(27,11,42,.94) 45%,#0a0410);
+      border:1px solid rgba(213,153,255,.23);box-shadow:0 16px 44px rgba(0,0,0,.38),0 0 24px rgba(160,70,255,.12);transition:.2s}
+    .orbit:hover{transform:scale(1.08);border-color:#c274ff88;box-shadow:0 0 34px #a844ff55}.orbit b{font-size:1.25rem}.orbit small{font-size:.55rem;color:#887795;letter-spacing:.08em}
+    .sol{top:5%;left:45%}.eth{top:18%;right:15%}.base{top:44%;right:6%}.bnb{bottom:14%;right:18%}.robin{bottom:3%;left:48%}.hyper{bottom:14%;left:18%}.xrpl{top:44%;left:6%}.sui{top:18%;left:15%}.hodler{bottom:34%;right:2%}
+    .connector{position:absolute;z-index:3;height:1px;background:linear-gradient(90deg,transparent,#c26cff66,transparent);transform-origin:left center}
+    .legend{max-width:1050px;margin:0 auto 50px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .legend a,.legend article{display:block;text-decoration:none;color:#fff;border:1px solid rgba(255,255,255,.09);background:var(--glass);backdrop-filter:blur(16px);border-radius:18px;padding:18px;min-height:150px}
+    .legend a:hover{border-color:#b95cff66;background:rgba(115,42,169,.14)}
+    .legend .n{font-size:.62rem;color:#b86af2;letter-spacing:.13em}.legend h3{margin:8px 0 6px;font-size:1.15rem}.legend p{color:#8f7f99;font-size:.76rem;margin:0}
+    .flow{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:stretch;margin:30px 0 60px}
+    .flow a,.flow div{border:1px solid rgba(255,255,255,.08);background:#ffffff04;border-radius:14px;padding:12px;text-align:center;text-decoration:none;color:#d9cde0;font-size:.69rem}
+    .flow b{display:block;color:#fff;font-size:.76rem;margin-bottom:3px}.flow .arrow{border:0;background:transparent;color:#a85aff;display:grid;place-items:center;font-size:1.4rem;padding:0}
+    .world-links{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .world-card{display:flex;align-items:center;gap:14px;text-decoration:none;color:#fff;border:1px solid rgba(255,255,255,.09);background:linear-gradient(135deg,#ffffff05,#ffffff02);border-radius:16px;padding:14px}
+    .world-card:hover{border-color:#b858ff66;background:#a84cff0b}.world-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#a84cff14;border:1px solid #a84cff33;font-weight:950}
+    .world-card strong{display:block}.world-card small{color:#7f7189}
+    .section-title{text-align:center;margin:64px auto 22px;max-width:900px}.section-title .k{color:#bd67ff;letter-spacing:.18em;font-size:.67rem;font-weight:950}.section-title h2{font-size:clamp(2rem,4.8vw,4.6rem);letter-spacing:-.05em;line-height:.98;margin:8px 0}.section-title p{color:#93849c}
+    .route-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.route-card{border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px;background:var(--glass);text-decoration:none;color:#fff}.route-card:hover{border-color:#ad54ff66}.route-card span{font-size:.62rem;color:#b868f2;letter-spacing:.12em}.route-card h3{margin:6px 0}.route-card p{color:#84758e;font-size:.75rem}
+    .footnote{margin:28px auto 0;max-width:900px;border-left:3px solid #a84cff;padding:13px 16px;background:#a84cff08;color:#8d7c96;font-size:.73rem}
+    @media(max-width:900px){
+      .galaxy{min-height:650px}.core{width:185px;height:185px}.core b{font-size:3.8rem}.orbit{width:100px;height:100px}.orbit b{font-size:1rem}
+      .legend,.route-grid{grid-template-columns:1fr 1fr}.flow{grid-template-columns:1fr}.flow .arrow{transform:rotate(90deg)}.world-links{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:620px){
+      .omni-shell{padding:44px 14px 80px}.galaxy{min-height:610px;margin-top:12px}.core{width:150px;height:150px}.core b{font-size:3.1rem}.core strong{font-size:1rem}
+      .orbit{width:82px;height:82px}.orbit b{font-size:.84rem}.orbit small{font-size:.46rem}.sol{top:5%;left:39%}.eth{top:18%;right:4%}.base{top:43%;right:0}.bnb{bottom:12%;right:7%}.robin{bottom:1%;left:39%}.hyper{bottom:12%;left:7%}.xrpl{top:43%;left:0}.sui{top:18%;left:4%}.hodler{display:none}
+      .legend,.route-grid,.world-links{grid-template-columns:1fr}.legend{gap:8px}.topbar nav{display:none}
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a>
+  <nav aria-label="OmniChain navigation">
+    <a href="#how">How it works</a>
+    <a href="#worlds">Worldz</a>
+    <a href="#launch">Launch</a>
+    <a href="/#crosspair">CrossPair</a>
+    <a href="/#proof">Proof</a>
+  </nav>
+  <a class="wallet-mini" href="/#create" style="text-decoration:none">Create Launch</a>
+</header>
+
+<main class="omni-shell">
+  <section class="omni-hero">
+    <div class="eyebrow">WORLDZ OMNICHAIN™</div>
+    <h1><span>One project. Multiple Worldz.</span><br>One disclosed supply model.</h1>
+    <p>Worldz OmniChain™ is the architecture layer connecting chain-native launch adapters, one canonical project record, proof-backed supply accounting, verified interoperability rails and Worldz CrossPair™ liquidity.</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="/#create">Build a Launch</a>
+      <a class="btn secondary" href="#how">See How OmniChain Works</a>
+      <a class="btn ghost" href="https://cryptoworldz.xyz/">Open CryptoWorldz</a>
+    </div>
+  </section>
+
+  <section class="galaxy" aria-label="Clickable Worldz OmniChain galaxy">
+    <div class="starfield"></div><div class="beam"></div>
+    <a class="core" href="https://cryptoworldz.xyz/" aria-label="Open CryptoWorldz"><b>W</b><strong>WORLDZ</strong><small>OMNICHAIN</small></a>
+
+    <a class="orbit sol" href="https://solworldz.xyz/"><b>SOL</b><small>SOLWORLDZ ↗</small></a>
+    <a class="orbit eth" href="https://ethworldz.xyz/"><b>ETH</b><small>ETHWORLDZ ↗</small></a>
+    <a class="orbit base" href="https://baseworldz.xyz/"><b>BASE</b><small>BASEWORLDZ ↗</small></a>
+    <a class="orbit bnb" href="https://bnbworldz.xyz/"><b>BNB</b><small>BNBWORLDZ ↗</small></a>
+    <a class="orbit robin" href="https://robinworldz.xyz/"><b>ROBIN</b><small>ROBINWORLDZ ↗</small></a>
+    <a class="orbit hyper" href="https://hyperworldz.xyz/"><b>HYPER</b><small>HYPERWORLDZ ↗</small></a>
+    <a class="orbit xrpl" href="https://xrpworldz.xyz/"><b>XRPL*</b><small>XRPWORLDZ ↗</small></a>
+    <a class="orbit sui" href="https://suiworldz.xyz/"><b>SUI</b><small>SUIWORLDZ ↗</small></a>
+    <a class="orbit hodler" href="https://hodlerworldz.xyz/"><b>HODLER</b><small>HODLERWORLDZ ↗</small></a>
+  </section>
+
+  <section id="how">
+    <div class="legend">
+      <a href="/#proof"><span class="n">01</span><h3>Canonical Supply Ledger</h3><p>One disclosed project-level supply truth. Chain balances, locks, burns and movements are reconciled back to the canonical record.</p></a>
+      <a href="#worlds"><span class="n">02</span><h3>Chain-Native Adapters</h3><p>Solana, EVM, XRPL and Sui use their own native launch and liquidity rails rather than being forced into one technical model.</p></a>
+      <a href="#sync"><span class="n">03</span><h3>Messaging + Supply Sync</h3><p>Verified interoperability rails carry authorized state or token movement. LayerZero OFT is our first research rail, not the only possible rail.</p></a>
+      <a href="/#crosspair"><span class="n">04</span><h3>Proof + CrossPair™</h3><p>Every bridge, mint/burn path, quote asset, launch and paired-liquidity route is designed to expose verifiable proof.</p></a>
+    </div>
+
+    <div class="section-title" id="sync">
+      <div class="k">HOW A WORLD MOVES</div>
+      <h2>Native where it launches. Canonical where it counts.</h2>
+      <p>Worldz OmniChain is not “copy the same token everywhere.” The goal is one canonical project record with explicit chain adapters and auditable movement between supported worlds.</p>
+    </div>
+    <div class="flow">
+      <a href="/#create"><b>1 • CREATE</b>Define supply, economics and launch intent</a><div class="arrow">→</div>
+      <a href="#worlds"><b>2 • LAUNCH NATIVE</b>Use the selected chain's verified adapter</a><div class="arrow">→</div>
+      <a href="/#proof"><b>3 • REGISTER</b>Worldz Proof records mint, pool and supply state</a><div class="arrow">→</div>
+      <a href="#sync"><b>4 • MOVE WITH PROOF</b>Authorized bridge / OFT / native interoperability rail</a>
+    </div>
+  </section>
+
+  <section id="worlds">
+    <div class="section-title"><div class="k">CHOOSE YOUR WORLD</div><h2>Every world is clickable.</h2><p>Open the chain community now; as adapters graduate from research to verified execution, the same Worldz becomes selectable inside the Launch Builder.</p></div>
+    <div class="world-links">
+      <a class="world-card" href="https://solworldz.xyz/"><span class="world-icon">◎</span><span><strong>SolWorldz</strong><small>Solana • Flash / Curve / Curve Pro Devnet live</small></span></a>
+      <a class="world-card" href="https://ethworldz.xyz/"><span class="world-icon">◆</span><span><strong>EthWorldz</strong><small>Ethereum • EVM adapter planned</small></span></a>
+      <a class="world-card" href="https://baseworldz.xyz/"><span class="world-icon">◉</span><span><strong>BaseWorldz</strong><small>Base • EVM adapter planned</small></span></a>
+      <a class="world-card" href="https://bnbworldz.xyz/"><span class="world-icon">⬡</span><span><strong>BNBWorldz</strong><small>BNB Chain • EVM adapter planned</small></span></a>
+      <a class="world-card" href="https://robinworldz.xyz/"><span class="world-icon">R</span><span><strong>RobinWorldz</strong><small>Robinhood Chain • EVM adapter planned</small></span></a>
+      <a class="world-card" href="https://hyperworldz.xyz/"><span class="world-icon">H</span><span><strong>HyperWorldz</strong><small>Hyperliquid / HyperEVM research</small></span></a>
+      <a class="world-card" href="https://xrpworldz.xyz/"><span class="world-icon">X</span><span><strong>XRPWorldz</strong><small>XRPL • native adapter + CrossPair research</small></span></a>
+      <a class="world-card" href="https://suiworldz.xyz/"><span class="world-icon">S</span><span><strong>SuiWorldz</strong><small>Sui • Move-native adapter research</small></span></a>
+      <a class="world-card" href="https://hodlerworldz.xyz/"><span class="world-icon">★</span><span><strong>HodlerWorldz</strong><small>Wallet safety, learning and participation</small></span></a>
+    </div>
+  </section>
+
+  <section id="launch">
+    <div class="section-title"><div class="k">LAUNCH ROUTES</div><h2>From the galaxy straight into the machine.</h2><p>The OmniChain page is navigation plus architecture: every operational button leads into the real WorldzLaunchPad surface.</p></div>
+    <div class="route-grid">
+      <a class="route-card" href="/#create"><span>BUILD</span><h3>Launch Builder</h3><p>Choose chain, engine, token, quote, economics and proof.</p></a>
+      <a class="route-card" href="/devnet/"><span>SOLANA</span><h3>Worldz Flash™</h3><p>Direct-liquidity Devnet launch pipeline.</p></a>
+      <a class="route-card" href="/curve/"><span>RAYDIUM</span><h3>Worldz Curve™</h3><p>LaunchLab bonding curve + graduation.</p></a>
+      <a class="route-card" href="/curve-pro/"><span>METEORA</span><h3>Curve Pro™</h3><p>DBC, native 90/10 economics, lock and vesting configuration.</p></a>
+      <a class="route-card" href="/#crosspair"><span>LIQUIDITY</span><h3>Worldz CrossPair™</h3><p>Verified quote assets such as wXRP.</p></a>
+      <a class="route-card" href="/#proof"><span>VERIFY</span><h3>Worldz Proof™</h3><p>Supply, mint, pool, fee and execution truth.</p></a>
+      <a class="route-card" href="https://cryptobotz.cryptoworldz.xyz/miniapp/"><span>OPERATE</span><h3>Command Centre Ultimate™</h3><p>ZED, AUTO and G.R.A.C.E. operational layer.</p></a>
+      <a class="route-card" href="https://cryptoworldz.xyz/"><span>ECOSYSTEM</span><h3>CryptoWorldz</h3><p>Return to the wider Worldz network.</p></a>
+    </div>
+    <div class="footnote"><b>*XRPL:</b> Worldz OmniChain does not assume XRPL behaves like Solana or EVM. XRPWorldz gets an XRPL-native adapter. Cross-chain interoperability is added only through a separately verified route.</div>
+  </section>
+</main>
+
+<footer>
+  <div><b>Worldz OmniChain™</b> • WorldzLaunchPad™</div>
+  <div><a href="/">LaunchPad Home</a> • <a href="https://cryptoworldz.xyz/">CryptoWorldz</a></div>
+  <p>Architecture and Devnet testing surface. Public mainnet creator launches remain disabled until the relevant release gates are satisfied.</p>
+</footer>
+</body>
+</html>
