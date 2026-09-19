@@ -56,8 +56,8 @@ def normalize_existing_brand_marks(text: str) -> str:
         tag = m.group(0)
         if "donateworldz-brand-mark" not in tag.lower():
             return tag
-        if re.search(r'\\bsrc\\s*=\\s*["\\'][^"\\']*["\\']', tag, re.I):
-            return re.sub(r'\\bsrc\\s*=\\s*["\\'][^"\\']*["\\']', f'src="{ICON_ABS}"', tag, count=1, flags=re.I)
+        if re.search(r'src="[^"]*"', tag, re.I):
+            return re.sub(r'src="[^"]*"', f'src="{ICON_ABS}"', tag, count=1, flags=re.I)
         return tag[:-1] + f' src="{ICON_ABS}">'
     return re.sub(r'<img\\b[^>]*>', repl, text, flags=re.I)
 
@@ -69,7 +69,7 @@ def inject_anchor_icons(text: str, host: str) -> str:
         plain = re.sub(r"<[^>]+>", "", body)
         if "donateworldz" not in plain.lower() or "donateworldz-brand-mark" in body.lower():
             return m.group(0)
-        href_match = re.search(r'href\\s*=\\s*["\\']([^"\\']+)["\\']', attrs, re.I)
+        href_match = re.search(r'href="([^"]+)"', attrs, re.I)
         href = href_match.group(1) if href_match else ""
         is_target = "donateworldz.com" in href.lower() or (host == "donateworldz.com" and href.startswith("/")) or href == "/"
         if not is_target:
@@ -96,11 +96,11 @@ for host in domains:
 
         # Keep campaign/page imagery untouched. Only the small identity mark is global.
         if host == "donateworldz.com" and "slice-of-hope-australia" not in str(page).lower():
-            if re.search(r'<meta\\s+property=["\\']og:image["\\'][^>]*>', text, re.I):
-                text = re.sub(r'<meta\\s+property=["\\']og:image["\\'][^>]*>', f'<meta property="og:image" content="{MASTER_ABS}">', text, count=1, flags=re.I)
+            if re.search(r'<meta\\s+property="og:image"[^>]*>', text, re.I):
+                text = re.sub(r'<meta\\s+property="og:image"[^>]*>', f'<meta property="og:image" content="{MASTER_ABS}">', text, count=1, flags=re.I)
             elif "</head>" in text:
                 text = text.replace("</head>", f'<meta property="og:image" content="{MASTER_ABS}"><meta name="twitter:image" content="{MASTER_ABS}">\n</head>', 1)
-            text = re.sub(r'<meta\\s+name=["\\']twitter:image["\\'][^>]*>', f'<meta name="twitter:image" content="{MASTER_ABS}">', text, count=1, flags=re.I)
+            text = re.sub(r'<meta\\s+name="twitter:image"[^>]*>', f'<meta name="twitter:image" content="{MASTER_ABS}">', text, count=1, flags=re.I)
 
         if host == "donateworldz.com" and "<body" in text and 'data-donateworldz-brand=' not in text:
             text = text.replace("<body", '<body data-donateworldz-brand="masterpiece-v1"', 1)
