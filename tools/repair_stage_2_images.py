@@ -41,12 +41,6 @@ SRC_RE = re.compile(r'\bsrc=["\']([^"\']+)["\']', re.I)
 ALT_RE = re.compile(r'\balt=["\']([^"\']*)["\']', re.I)
 TITLE_RE = re.compile(r'<title>(.*?)</title>', re.I | re.S)
 
-def fallback_for(site: Path) -> str:
-    for ref in ('/hero.jpg', '/hero.png', '/site-icon.svg'):
-        if (site / ref.lstrip('/')).is_file():
-            return ref
-    raise SystemExit(f'NO_IMAGE_FALLBACK {site.name}')
-
 changed_pages = 0
 repaired_src = 0
 repaired_alt = 0
@@ -76,9 +70,10 @@ for path in PAGES:
 
         broken = bool(local_ref is not None and not local_ref.resolve().is_file())
         if bad_retired or broken:
-            replacement = fallback_for(site)
-            tag = SRC_RE.sub(f'src="{replacement}"', tag, count=1)
+            # Never hide an image defect by swapping in an unrelated site hero.
+            # Remove the bad image; the surrounding content remains usable and truthful.
             repair_img.repaired_src += 1
+            return ""
 
         alt_match = ALT_RE.search(tag)
         if alt_match is None:
@@ -114,4 +109,4 @@ for path in PAGES:
         if src.startswith('/'):
             assert (site / src.lstrip('/')).is_file(), (url, src)
 
-print(f'REPAIR_STAGE_2_IMAGES=PASS pages={len(PAGES)} changed_pages={changed_pages} repaired_src={repaired_src} repaired_alt={repaired_alt} local_images_verified=1 crop=0')
+print(f'REPAIR_STAGE_2_IMAGES=PASS pages={len(PAGES)} changed_pages={changed_pages} removed_bad_images={repaired_src} repaired_alt={repaired_alt} local_images_verified=1 crop=0')

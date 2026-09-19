@@ -7,7 +7,10 @@ cannot return during a rebuild.
 """
 from pathlib import Path
 import base64
+import io
 import re
+from PIL import Image
+import pillow_avif  # registers AVIF decoding with Pillow
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "tools" / "assets" / "donateworldz"
@@ -34,25 +37,46 @@ if len(joined) % 4:
 master = base64.b64decode(joined, validate=False)
 assert is_avif(master), "DonateWorldz approved master does not materialize to AVIF"
 
-# One exact approved visual, exposed through semantic paths for different UI roles.
-for name in (
-    "donateworldz-master.avif",
-    "hero-1024.avif",
-    "card-768.avif",
-    "thumb-512.avif",
-    "icon-256.avif",
-):
-    (ASSET_DIR / name).write_bytes(master)
+# Decode the approved source for real. A header check alone can allow a broken AVIF
+# to pass CI and appear as a blank panel in a browser.
+try:
+    with Image.open(io.BytesIO(master)) as source_image:
+        source_image.load()
+        mode = "RGBA" if "A" in source_image.getbands() else "RGB"
+        approved = source_image.convert(mode)
+except Exception as exc:
+    raise AssertionError(f"DonateWorldz approved AVIF failed full decode: {exc}") from exc
 
-master_b64 = base64.b64encode(master).decode("ascii")
-site_icon = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="DonateWorldz">
-<image href="data:image/avif;base64,{master_b64}" x="0" y="0" width="1024" height="1024" preserveAspectRatio="xMidYMid meet"/>
+
+def render_webp(name: str, max_px: int | None = None) -> Path:
+    image = approved.copy()
+    if max_px is not None:
+        image.thumbnail((max_px, max_px), Image.Resampling.LANCZOS)
+    target = ASSET_DIR / name
+    image.save(target, format="WEBP", lossless=True, method=6)
+    with Image.open(target) as check:
+        check.load()
+        assert check.width > 0 and check.height > 0, name
+    return target
+
+
+# Browser-safe files. The master preserves the approved source pixels; smaller
+# derivatives are genuine resized images, not the same bytes under different names.
+master_path = render_webp("donateworldz-master.webp")
+render_webp("hero-1024.webp", 1024)
+card_path = render_webp("card-768.webp", 768)
+render_webp("thumb-512.webp", 512)
+icon_path = render_webp("icon-256.webp", 256)
+
+icon_b64 = base64.b64encode(icon_path.read_bytes()).decode("ascii")
+site_icon = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="DonateWorldz">
+<image href="data:image/webp;base64,{icon_b64}" x="0" y="0" width="256" height="256" preserveAspectRatio="xMidYMid meet"/>
 </svg>'''
 (SITE / "site-icon.svg").write_text(site_icon, encoding="utf-8")
 
-MASTER_ABS = "https://donateworldz.com/assets/brand/donateworldz/donateworldz-master.avif"
-ICON_ABS = "https://donateworldz.com/assets/brand/donateworldz/icon-256.avif"
-CARD_ABS = "https://donateworldz.com/assets/brand/donateworldz/card-768.avif"
+MASTER_ABS = "https://donateworldz.com/assets/brand/donateworldz/donateworldz-master.webp"
+ICON_ABS = "https://donateworldz.com/assets/brand/donateworldz/icon-256.webp"
+CARD_ABS = "https://donateworldz.com/assets/brand/donateworldz/card-768.webp"
 
 BRAND_CSS = """<style id="donateworldz-masterpiece-brand">
 .donateworldz-brand-mark{display:inline-block;width:32px;height:32px;object-fit:contain;vertical-align:middle;margin-right:8px;border-radius:10px}
@@ -147,7 +171,7 @@ home = (SITE / "index.html").read_text(encoding="utf-8")
 assert "data-donateworldz-brand=\"masterpiece-v1\"" in home
 assert MASTER_ABS in home or ICON_ABS in home
 assert (SITE / "site-icon.svg").is_file()
-assert (ASSET_DIR / "donateworldz-master.avif").is_file()
-assert (ASSET_DIR / "donateworldz-master.avif").stat().st_size > 2000
+assert (ASSET_DIR / "donateworldz-master.webp").is_file()
+assert (ASSET_DIR / "donateworldz-master.webp").stat().st_size > 2000
 
-print(f"DONATEWORLDZ_BRAND=PASS bytes={len(master)} html_changed={changed} inline_mentions={injected} site_icon=masterpiece og_image=masterpiece")
+print(f"DONATEWORLDZ_BRAND=PASS source_bytes={len(master)} webp_bytes={master_path.stat().st_size} html_changed={changed} inline_mentions={injected} site_icon=webp og_image=webp")
