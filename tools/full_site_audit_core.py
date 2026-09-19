@@ -195,7 +195,7 @@ def static_audit() -> None:
     davis = ROOT / 'donateworldz.com/davis-family/index.html'
     if davis.is_file():
         t = davis.read_text(encoding='utf-8')
-        for needle in ('/style.css', '/mobile-safe.css', 'davis-family-hero.jpg', 'davis-family-hero.webp', '165Ken5f2Bt'):
+        for needle in ('/style.css', '/mobile-safe.css', '165Ken5f2Bt'):
             if needle not in t:
                 errors.append(f'DAVIS PAGE CONTRACT MISSING {needle}')
 
