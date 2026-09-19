@@ -1,0 +1,151 @@
+name: Publish DonateWorldz Masterpiece
+# masterpiece-trigger: 2026-09-19-v1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/publish-donateworldz-masterpiece.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: donateworldz-masterpiece-now
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build current DonateWorldz page and locked masterpiece
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/apply_donateworldz_brand.py
+          python3 tools/build_ecosystem.py
+          python3 tools/apply_visual_fixes.py
+          python3 tools/apply_facebook_support.py
+          python3 tools/remove_retired_uganda_support.py
+          python3 tools/apply_mobile_safety.py
+          python3 tools/apply_jayjay_vision_57.py
+          python3 tools/apply_mission_worldz.py
+          python3 tools/apply_specialist_worldz.py
+          python3 tools/apply_heroes_worldz.py
+          python3 tools/apply_slice_of_hope_visual.py
+          python3 tools/apply_mobile_safety.py
+          python3 tools/repair_stage_1_writing.py
+          python3 tools/repair_stage_2_images.py
+          python3 tools/repair_stage_3_other.py
+          python3 tools/apply_global_image_overrides.py
+          python3 tools/prune_public_bloat.py
+          python3 tools/apply_donateworldz_brand.py
+          test -s donateworldz.com/assets/brand/donateworldz/donateworldz-master.avif
+          grep -q 'data-donateworldz-brand="masterpiece-v1"' donateworldz.com/index.html
+          grep -q 'data:image/avif;base64,' donateworldz.com/site-icon.svg
+
+      - name: Upload DonateWorldz masterpiece only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, ssl, time
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path, PurePosixPath
+
+          root=PurePosixPath("domains/donateworldz.com/public_html")
+          files=[
+              Path("donateworldz.com/index.html"),
+              Path("donateworldz.com/site-icon.svg"),
+              Path("donateworldz.com/assets/brand/donateworldz/donateworldz-master.avif"),
+              Path("donateworldz.com/assets/brand/donateworldz/hero-1024.avif"),
+              Path("donateworldz.com/assets/brand/donateworldz/card-768.avif"),
+              Path("donateworldz.com/assets/brand/donateworldz/thumb-512.avif"),
+              Path("donateworldz.com/assets/brand/donateworldz/icon-256.avif"),
+          ]
+
+          def connect():
+              ftp=FTP_TLS(context=ssl._create_unverified_context())
+              ftp.connect(os.environ["FTP_HOST"],int(os.environ.get("FTP_PORT","21")),timeout=45)
+              ftp.login(os.environ["FTP_USERNAME"],os.environ["FTP_PASSWORD"])
+              ftp.prot_p(); ftp.set_pasv(True)
+              return ftp
+
+          def ensure(ftp,d):
+              ftp.cwd("/")
+              for part in PurePosixPath(d).parts:
+                  if part in ("","/"): continue
+                  try: ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part); ftp.cwd(part)
+
+          last=None
+          for attempt in range(1,4):
+              ftp=None
+              try:
+                  ftp=connect()
+                  for local in files:
+                      assert local.is_file(), local
+                      rel=local.relative_to("donateworldz.com")
+                      remote=root/rel.as_posix()
+                      ensure(ftp,str(remote.parent))
+                      with local.open("rb") as h:
+                          ftp.storbinary(f"STOR {remote.name}",h,blocksize=262144)
+                      print("MASTERPIECE_PUBLISHED",rel.as_posix(),local.stat().st_size)
+                  try: ftp.quit()
+                  except Exception: ftp.close()
+                  break
+              except Exception as exc:
+                  last=exc
+                  print("MASTERPIECE_RETRY",attempt,type(exc).__name__,exc)
+                  if ftp:
+                      try: ftp.close()
+                      except Exception: pass
+                  if attempt<3: time.sleep(attempt*2)
+          else:
+              raise SystemExit(f"MASTERPIECE_UPLOAD_FAILED {last!r}")
+          print("DONATEWORLDZ_MASTERPIECE_UPLOAD=PASS files=7")
+          PY
+
+      - name: Verify masterpiece live
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import time, urllib.request
+
+          def read(url,binary=False):
+              req=urllib.request.Request(url,headers={"User-Agent":"DonateWorldz-Masterpiece/1.0","Cache-Control":"no-cache","Pragma":"no-cache"})
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  data=r.read()
+                  return r.status, data if binary else data.decode("utf-8","ignore")
+
+          for attempt in range(6):
+              try:
+                  status,home=read("https://donateworldz.com/?masterpiece=1")
+                  s2,icon=read("https://donateworldz.com/site-icon.svg?masterpiece=1")
+                  s3,asset=read("https://donateworldz.com/assets/brand/donateworldz/donateworldz-master.avif?masterpiece=1",True)
+                  ok=(status==200 and s2==200 and s3==200
+                      and 'data-donateworldz-brand="masterpiece-v1"' in home
+                      and "data:image/avif;base64," in icon
+                      and len(asset)>2000 and asset[4:12]==b"ftypavif")
+                  if ok:
+                      print("DONATEWORLDZ_MASTERPIECE_LIVE=PASS bytes",len(asset))
+                      break
+              except Exception as exc:
+                  print("VERIFY_RETRY",attempt+1,repr(exc))
+              time.sleep(3+attempt*2)
+          else:
+              raise SystemExit("DONATEWORLDZ_MASTERPIECE_LIVE=FAIL")
+          PY
