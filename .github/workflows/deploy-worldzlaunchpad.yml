@@ -73,6 +73,13 @@ jobs:
           assert fee['worldzLaunchPadShareOfInitialLiquidityPercent']==0
           assert platform['publicMainnetCreatorLaunchesEnabled'] is False
           assert platform['devnetTokenCreationEnabled'] is True
+          assert platform['worldzFlash']['status']=='DEVNET_BETA'
+          assert platform['worldzFlash']['stages']['metadata']['status']=='EXECUTABLE'
+          assert platform['worldzFlash']['stages']['pair']['SOL']['status']=='EXECUTABLE_DEVNET'
+          assert platform['worldzFlash']['stages']['pair']['wXRP']['status']=='VERIFIED_MAINNET_TARGET_ONLY'
+          assert platform['worldzFlash']['stages']['feeRouter']['executing'] is False
+          assert platform['worldzFlash']['stages']['lpLock']['enforced'] is False
+          assert platform['worldzFlash']['stages']['vesting']['enforced'] is False
 
           wxrp=next(x for x in platform['verifiedQuoteAssets'] if x['id']=='wXRP')
           assert wxrp['solanaMint']=='6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2'
@@ -80,7 +87,7 @@ jobs:
 
           required=[
             root/'index.html',root/'app.js',root/'style.css',root/'status.php',
-            root/'platform-config.json',root/'devnet/index.html',root/'devnet/app.js'
+            root/'platform-config.json',root/'metadata.php',root/'devnet/index.html',root/'devnet/app.js'
           ]
           for p in required:
               assert p.is_file() and p.stat().st_size>500, p
@@ -92,7 +99,13 @@ jobs:
           assert 'WORLDZ OMNICHAIN' in home
           assert 'MAINNET LAUNCH LOCKED' in home
           assert 'Create Devnet Token' in devnet
-          assert 'Solana Devnet only' in devnet
+          assert 'Register + Write Metadata' in devnet
+          assert 'Simulate + Create Raydium Devnet Pool' in devnet
+          assert 'ROUTER EXECUTION NOT YET LIVE' in devnet
+          assert 'ENFORCEMENT ADAPTER PENDING' in devnet
+          assert 'Solana Devnet' in devnet
+          assert 'worldz-launch-register' in (root/'devnet/app.js').read_text()
+          assert 'DEVNET_PROGRAM_ID.CREATE_CPMM_POOL_PROGRAM' in (root/'devnet/app.js').read_text()
           print('WORLDZLAUNCHPAD_PLATFORM_CONTRACT=PASS genesis=4 fair_fee_max=4 platform_share=10 crosspair=1 devnet_launch=1 mainnet_public=0')
 
       - name: Deploy only WorldzLaunchPad to verified Hostinger document root
@@ -150,7 +163,7 @@ jobs:
                   status_code,status_body=get('/status.php?verify=platform-v3')
                   registry=json.loads(registry_body); plan=json.loads(plan_body); platform=json.loads(platform_body); live=json.loads(status_body)
                   assert status==200 and 'Create a Launch' in body and 'WORLDZ CROSSPAIR' in body and 'MAINNET LAUNCH LOCKED' in body
-                  assert dev_code==200 and 'Create Devnet Token' in dev_body and 'Solana Devnet only' in dev_body
+                  assert dev_code==200 and 'Create Devnet Token' in dev_body and 'Register + Write Metadata' in dev_body and 'Raydium Devnet Pool' in dev_body
                   assert registry['status']=='candidate-mainnet-disabled' and registry['shared']['mainnet_authorized'] is False
                   assert plan['executionEnabled'] is False and plan['launchAuthorization'] is False
                   assert platform['publicMainnetCreatorLaunchesEnabled'] is False and platform['devnetTokenCreationEnabled'] is True
