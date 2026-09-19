@@ -80,6 +80,15 @@ jobs:
           assert platform['worldzFlash']['stages']['feeRouter']['executing'] is False
           assert platform['worldzFlash']['stages']['lpLock']['enforced'] is False
           assert platform['worldzFlash']['stages']['vesting']['enforced'] is False
+          assert platform['worldzCurve']['status']=='DEVNET_BETA'
+          assert platform['worldzCurve']['devnetProgram']=='DRay6fNdQ5J82H7xV6uq2aV3mNrUZ1J4PgSKsWgptcm6'
+          assert platform['worldzCurve']['solGlobalConfig']=='7ZR4zD7PYfY2XxoG1Gxcy2EgEeGYrpxrwzPuwdUBssEt'
+          assert platform['worldzCurve']['downstreamAutoRouterExecuting'] is False
+          assert platform['worldzCurvePro']['status']=='DEVNET_BETA'
+          assert platform['worldzCurvePro']['devnetProgram']=='dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'
+          assert platform['worldzCurvePro']['creatorTradingFeeSharePercent']==90
+          assert platform['worldzCurvePro']['worldzPartnerTradingFeeSharePercent']==10
+          assert platform['worldzCurvePro']['graduatedLiquidity']['totalPermanentLockedPercent']==100
 
           wxrp=next(x for x in platform['verifiedQuoteAssets'] if x['id']=='wXRP')
           assert wxrp['solanaMint']=='6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2'
@@ -87,13 +96,20 @@ jobs:
 
           required=[
             root/'index.html',root/'app.js',root/'style.css',root/'status.php',
-            root/'platform-config.json',root/'metadata.php',root/'devnet/index.html',root/'devnet/app.js'
+            root/'platform-config.json',root/'metadata.php',
+            root/'devnet/index.html',root/'devnet/app.js',
+            root/'curve/index.html',root/'curve/app.js',
+            root/'curve-pro/index.html',root/'curve-pro/app.js'
           ]
           for p in required:
               assert p.is_file() and p.stat().st_size>500, p
 
           home=(root/'index.html').read_text()
           devnet=(root/'devnet/index.html').read_text()
+          curve=(root/'curve/index.html').read_text()
+          curve_js=(root/'curve/app.js').read_text()
+          curve_pro=(root/'curve-pro/index.html').read_text()
+          curve_pro_js=(root/'curve-pro/app.js').read_text()
           assert 'Create a Launch' in home
           assert 'WORLDZ CROSSPAIR' in home
           assert 'WORLDZ OMNICHAIN' in home
@@ -106,7 +122,15 @@ jobs:
           assert 'Solana Devnet' in devnet
           assert 'worldz-launch-register' in (root/'devnet/app.js').read_text()
           assert 'DEVNET_PROGRAM_ID.CREATE_CPMM_POOL_PROGRAM' in (root/'devnet/app.js').read_text()
-          print('WORLDZLAUNCHPAD_PLATFORM_CONTRACT=PASS genesis=4 fair_fee_max=4 platform_share=10 crosspair=1 devnet_launch=1 mainnet_public=0')
+          assert 'RAYDIUM LAUNCHLAB DEVNET LAUNCH CREATED' in curve
+          assert 'createPlatformConfig' in curve_js and 'createLaunchpad' in curve_js
+          assert 'DRay6fNdQ5J82H7xV6uq2aV3mNrUZ1J4PgSKsWgptcm6' in curve_js
+          assert 'METEORA DBC DEVNET LAUNCH CREATED' in curve_pro
+          assert 'createConfigAndPool' in curve_pro_js and 'buildCurve' in curve_pro_js
+          assert 'creatorTradingFeePercentage:90' in curve_pro_js
+          assert 'partnerPermanentLockedLiquidityPercentage:10' in curve_pro_js
+          assert 'creatorPermanentLockedLiquidityPercentage:90' in curve_pro_js
+          print('WORLDZLAUNCHPAD_PLATFORM_CONTRACT=PASS genesis=4 flash=1 curve=1 curve_pro=1 mainnet_public=0')
 
       - name: Deploy only WorldzLaunchPad to verified Hostinger document root
         shell: python
@@ -157,6 +181,8 @@ jobs:
               try:
                   status,body=get('/?verify=platform-v3')
                   dev_code,dev_body=get('/devnet/?verify=platform-v3')
+                  curve_code,curve_body=get('/curve/?verify=platform-v3')
+                  curve_pro_code,curve_pro_body=get('/curve-pro/?verify=platform-v3')
                   _,registry_body=get('/tokens.json?verify=platform-v3')
                   _,plan_body=get('/wldz-mainnet-plan.json?verify=platform-v3')
                   _,platform_body=get('/platform-config.json?verify=platform-v3')
@@ -164,13 +190,16 @@ jobs:
                   registry=json.loads(registry_body); plan=json.loads(plan_body); platform=json.loads(platform_body); live=json.loads(status_body)
                   assert status==200 and 'Create a Launch' in body and 'WORLDZ CROSSPAIR' in body and 'MAINNET LAUNCH LOCKED' in body
                   assert dev_code==200 and 'Create Devnet Token' in dev_body and 'Register + Write Metadata' in dev_body and 'Raydium Devnet Pool' in dev_body
+                  assert curve_code==200 and 'Worldz Curve™' in curve_body and 'Raydium LaunchLab' in curve_body and 'Create Raydium LaunchLab Devnet Launch' in curve_body
+                  assert curve_pro_code==200 and 'Worldz Curve Pro™' in curve_pro_body and 'Meteora DBC' in curve_pro_body and 'Create Meteora DBC Devnet Launch' in curve_pro_body
                   assert registry['status']=='candidate-mainnet-disabled' and registry['shared']['mainnet_authorized'] is False
                   assert plan['executionEnabled'] is False and plan['launchAuthorization'] is False
                   assert platform['publicMainnetCreatorLaunchesEnabled'] is False and platform['devnetTokenCreationEnabled'] is True
                   assert platform['feePolicy']['projectTradingFeeMaxPercent']==4.0
                   assert platform['feePolicy']['worldzLaunchPadShareOfCollectedProjectFeePercent']==10
                   assert status_code==200 and live['ok'] is True
-                  print('WORLDZLAUNCHPAD_LIVE=PASS app=1 builder=1 crosspair=1 devnet_token_creation=1 mainnet_locked=1 runtime_probe=1')
+                  assert platform['worldzCurve']['status']=='DEVNET_BETA' and platform['worldzCurvePro']['status']=='DEVNET_BETA'
+                  print('WORLDZLAUNCHPAD_LIVE=PASS app=1 flash=1 curve=1 curve_pro=1 crosspair=1 mainnet_locked=1 runtime_probe=1')
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:
