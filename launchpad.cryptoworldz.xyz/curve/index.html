@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05020b">
+  <title>Worldz Curve™ | Raydium LaunchLab Devnet</title>
+  <link rel="stylesheet" href="/style.css?v=20260920-platform-v3">
+  <style>
+    .lab{max-width:1120px;margin:auto;padding:58px 18px 100px}.hero2{padding:30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#a64cff12,#55c7ff08);margin-bottom:14px}
+    .hero2 h1{font-size:clamp(2.7rem,7vw,5.8rem);line-height:.9;letter-spacing:-.055em;margin:8px 0 14px}.hero2 h1 span{color:#c47cff}.truth{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}.truth div,.card{border:1px solid #ffffff0d;border-radius:14px;padding:13px;background:#ffffff03}.truth small{display:block;color:#75677f;text-transform:uppercase;font-size:.58rem;letter-spacing:.08em}.truth b{font-size:.8rem}.stack{display:grid;gap:12px}.card h2{margin:0 0 5px}.card p{color:#8b7b95;font-size:.76rem}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form label{display:grid;gap:5px;color:#9584a0;font-size:.7rem}.form input,.form textarea{width:100%;border:1px solid #ffffff12;border-radius:11px;background:#07030d;color:#fff;padding:11px}.form textarea{min-height:80px}.wide{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.status{margin-top:12px;border:1px solid #ffffff0d;border-radius:12px;padding:12px;color:#9686a0;font-size:.7rem;white-space:pre-wrap;word-break:break-word}.status.good{border-color:#55e6a533;color:#76e8b7}.status.bad{border-color:#ff6d8a33;color:#ff9caf}.status.warn{border-color:#ffd16633;color:#d9bf83}.proof{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.proof div{border:1px solid #ffffff0c;border-radius:11px;padding:10px;font-size:.68rem;color:#88798f}.proof b{display:block;color:#d2c5d9}.proof .pass{border-color:#55e6a52d}.proof .wait{border-color:#ffd1662d}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}.warnbox{border-left:3px solid #ffd166;background:#ffd16608;padding:12px;color:#a99370;font-size:.7rem;margin-top:12px}.result{display:none;margin-top:12px;border:1px solid #55e6a533;border-radius:12px;padding:12px}.result.show{display:block}.result p{margin:6px 0;color:#94869d;font-size:.7rem}
+    @media(max-width:760px){.truth,.form,.proof{grid-template-columns:1fr}.wide{grid-column:auto}.lab{padding-top:32px}}
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a>
+  <nav><a href="/">LaunchPad</a><a href="/devnet/">Flash</a><a href="/curve-pro/">Curve Pro</a></nav>
+  <button class="wallet-mini" id="wallet" type="button">Connect Wallet</button>
+</header>
+<main class="lab">
+  <section class="hero2">
+    <div class="kicker">WORLDZ CURVE™ • RAYDIUM LAUNCHLAB • SOLANA DEVNET</div>
+    <h1>CURVE.<br><span>GRADUATE.</span></h1>
+    <p class="lead">A real Raydium LaunchLab route with a Worldz PlatformConfig, on-chain launch metadata, LaunchLab bonding curve, CPMM graduation path and native vesting records. Mainnet stays locked.</p>
+    <div class="truth">
+      <div><small>Quote</small><b>SOL / wSOL Devnet</b></div>
+      <div><small>Worldz Curve fee</small><b>2.00% platform fee</b></div>
+      <div><small>Raydium protocol fee</small><b>0.25% GlobalConfig</b></div>
+      <div><small>Post-grad LP</small><b>100% platform locked share</b></div>
+    </div>
+  </section>
+
+  <div class="stack">
+    <section class="card">
+      <h2>1. Worldz PlatformConfig</h2>
+      <p>LaunchLab gives each launch platform its own on-chain configuration. This Devnet adapter uses the connected wallet as the test platform admin/fee wallet and refuses to silently rewrite an existing incompatible PlatformConfig.</p>
+      <div class="actions"><button class="btn primary" id="platform-btn" type="button">Create / Verify Worldz PlatformConfig</button></div>
+      <div class="status" id="platform-status">Connect a wallet. The adapter will verify Raydium's live Devnet SOL GlobalConfig and CPMM config before building anything.</div>
+      <div class="result" id="platform-result"><b>WORLDZ PLATFORM CONFIG VERIFIED ✅</b><p>Platform: <span class="mono" id="platform-id"></span></p><p>GlobalConfig: <span class="mono" id="global-config"></span></p><p>CPMM Config: <span class="mono" id="cp-config"></span></p></div>
+    </section>
+
+    <section class="card">
+      <h2>2. Create LaunchLab token + bonding curve</h2>
+      <p>The first Worldz Curve Devnet proof deliberately uses Raydium's published SOL Constant Product GlobalConfig and its canonical 1,000,000,000-token / 6-decimal launch preset. Custom GlobalConfigs come later; this page will not pretend protocol-admin parameters are ours to invent.</p>
+      <div class="form">
+        <label>Token name<input id="name" maxlength="32" placeholder="Worldz Curve Test"></label>
+        <label>Ticker<input id="symbol" maxlength="10" placeholder="WCT"></label>
+        <label class="wide">Description<textarea id="description" maxlength="500" placeholder="What is this Devnet project proving?"></textarea></label>
+        <label>Image URL<input id="image" type="url" placeholder="https://.../token.png"></label>
+        <label>Website<input id="website" type="url" value="https://launchpad.cryptoworldz.xyz"></label>
+        <label>Vesting tokens<input id="vesting-tokens" inputmode="numeric" value="0"></label>
+        <label>Vesting beneficiary<input id="beneficiary" placeholder="Defaults to connected wallet"></label>
+      </div>
+      <div class="warnbox">The 2.00% LaunchLab PlatformConfig fee accrues to the platform fee vault. WorldzLaunchPad records the intended downstream 90% project / 10% Worldz routing, but that downstream AUTO router is not falsely labelled on-chain-enforced yet. Raydium's separate GlobalConfig trade fee is disclosed independently.</div>
+      <div class="actions"><button class="btn secondary" id="check-btn" type="button">Run Pre-Sign Proof</button><button class="btn primary" id="launch-btn" type="button" disabled>Create Raydium LaunchLab Devnet Launch</button></div>
+      <div class="status" id="launch-status">PlatformConfig must be verified first.</div>
+      <div class="result" id="launch-result"><b>RAYDIUM LAUNCHLAB DEVNET LAUNCH CREATED ✅</b><p>Mint: <span class="mono" id="mint"></span></p><p>Pool: <span class="mono" id="pool"></span></p><p>Transaction: <span class="mono" id="tx"></span></p></div>
+    </section>
+
+    <section class="card">
+      <h2>3. Native vesting + Worldz Proof™</h2>
+      <p>If a vesting amount was reserved in the launch, Worldz Curve creates the beneficiary vesting record through LaunchLab after the pool exists. Every completed launch is then signed into the shared ZED / AUTO / G.R.A.C.E. registry.</p>
+      <div class="actions"><button class="btn secondary" id="vesting-btn" type="button" disabled>Create Native Vesting Record</button><button class="btn primary" id="register-btn" type="button" disabled>Register Worldz Proof</button></div>
+      <div class="status" id="proof-status">No launch proof yet.</div>
+      <div class="proof" id="proof-grid"></div>
+    </section>
+  </div>
+</main>
+<footer><div><b>Worldz Curve™</b> • Raydium LaunchLab Devnet adapter</div><p>Devnet testing only. Public mainnet creator execution remains disabled.</p></footer>
+<script type="module" src="/curve/app.js?v=20260920-curve-v1"></script>
+</body>
+</html>
