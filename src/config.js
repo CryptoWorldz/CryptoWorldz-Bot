@@ -10,7 +10,14 @@ function required(name, env) {
 function loadConfig(env = process.env) {
   const botToken = required("BOT_TOKEN", env);
   const supabaseUrl = required("SUPABASE_URL", env).replace(/\/$/, "");
-  const supabaseServiceRoleKey = required("SUPABASE_SERVICE_ROLE_KEY", env);
+  const supabaseApiKey = String(
+    env.SUPABASE_SERVICE_ROLE_KEY ||
+    env.SUPABASE_PUBLISHABLE_KEY ||
+    env.SUPABASE_ANON_KEY ||
+    ""
+  ).trim();
+  if (!supabaseApiKey) throw new Error("A Supabase server or publishable API key is required.");
+  const usingServiceRole = Boolean(String(env.SUPABASE_SERVICE_ROLE_KEY || "").trim());
   const webhookUrl = String(
     env.TELEGRAM_WEBHOOK_URL ||
       "https://cryptobotz.cryptoworldz.xyz/telegram-webhook"
@@ -33,12 +40,13 @@ function loadConfig(env = process.env) {
   }
 
   const autoInternalToken = String(env.AUTO_INTERNAL_TOKEN || "").trim();
-  const autoAuthToken = autoInternalToken || supabaseServiceRoleKey;
+  const autoAuthToken = autoInternalToken || (usingServiceRole ? supabaseApiKey : "");
 
   return {
     botToken,
     supabaseUrl,
-    supabaseServiceRoleKey,
+    supabaseApiKey,
+    usingServiceRole,
     adminApiToken: String(env.ADMIN_API_TOKEN || ""),
     allowedChatIds: parseIdSet(env.ALLOWED_CHAT_IDS),
     adminTelegramIds: parseIdSet(env.ADMIN_TELEGRAM_IDS),

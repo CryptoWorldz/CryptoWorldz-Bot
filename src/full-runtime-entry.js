@@ -2,6 +2,7 @@ require("./protected-env").loadProtectedEnvironment({ appRoot: require("node:pat
 process.env.ONEWORLDZ_IMAGE_MODEL = process.env.ONEWORLDZ_IMAGE_MODEL || "gpt-image-2";
 require("./hub-central/preload");
 
+const crypto = require("node:crypto");
 const telegramLibrary = require("node-telegram-bot-api");
 const TelegramBot = telegramLibrary.TelegramBot || telegramLibrary.default || telegramLibrary;
 const { createClient } = require("@supabase/supabase-js");
@@ -65,7 +66,15 @@ async function start() {
   startupStage = "load_config";
   const config = loadConfig();
   startupStage = "create_supabase_client";
-  const supabase = createClient(config.supabaseUrl, config.supabaseServiceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  const supabaseOptions = { auth: { persistSession: false, autoRefreshToken: false } };
+  if (!config.usingServiceRole) {
+    supabaseOptions.global = {
+      headers: {
+        "x-zed-runtime-key": crypto.createHash("sha256").update(`zed-runtime-v1:${config.botToken}`).digest("hex")
+      }
+    };
+  }
+  const supabase = createClient(config.supabaseUrl, config.supabaseApiKey, supabaseOptions);
   startupStage = "create_telegram_bot";
   const bot = new TelegramBot(config.botToken, { onlyFirstMatch: true });
   startupStage = "create_repository";

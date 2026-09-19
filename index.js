@@ -28,7 +28,9 @@ const ALLOWED_ORIGINS = new Set([
 
 const protectedEnvironment = loadProtectedEnvironment({ appRoot: __dirname });
 
-const fullRuntimeConfigured = ["BOT_TOKEN", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"].every((key) => String(process.env[key] || "").trim());
+const fullRuntimeConfigured =
+  ["BOT_TOKEN", "SUPABASE_URL"].every((key) => String(process.env[key] || "").trim()) &&
+  Boolean(String(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || "").trim());
 if (fullRuntimeConfigured) {
   try {
     require("./src/full-runtime-entry");
