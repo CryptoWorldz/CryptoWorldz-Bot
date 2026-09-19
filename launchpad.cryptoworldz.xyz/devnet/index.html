@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05020b">
+  <title>WorldzLaunchPad™ | Solana Devnet Lab</title>
+  <link rel="stylesheet" href="/style.css?v=20260920-platform-v3">
+  <style>
+    .lab-shell{max-width:1080px;margin:auto;padding:70px 18px 100px}.lab-hero{padding:30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#a64cff12,#55c7ff08);margin-bottom:14px}
+    .lab-hero h1{font-size:clamp(2.6rem,7vw,5.6rem);line-height:.9;letter-spacing:-.055em;margin:8px 0 15px}.lab-hero h1 span{color:#c47cff}.lab-grid{display:grid;grid-template-columns:1fr .9fr;gap:12px}.lab-card{border:1px solid var(--line);border-radius:19px;padding:20px;background:#ffffff035}.lab-card h2{margin:0 0 15px}.lab-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.lab-form label{display:grid;gap:5px;color:#9584a0;font-size:.72rem}.lab-form input{width:100%;border:1px solid #ffffff12;border-radius:11px;background:#07030d;color:#fff;padding:11px}.lab-form .wide{grid-column:1/-1}.lab-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.lab-status{margin-top:14px;border:1px solid #ffffff0d;border-radius:13px;padding:13px;color:#9c8ca7;font-size:.75rem;white-space:pre-wrap;word-break:break-word}.lab-status.good{border-color:#55e6a533;color:#7cebbb}.lab-status.bad{border-color:#ff6d8a33;color:#ff9bb0}.lab-rules{display:grid;gap:8px}.lab-rule{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid #ffffff09;color:#8f8099;font-size:.75rem}.lab-rule b{color:#e6dcec;text-align:right}.warning-box{padding:13px;border-left:3px solid #ffd166;background:#ffd16608;color:#a49376;font-size:.72rem;margin-top:14px}.tx-result{display:none;margin-top:14px;padding:14px;border:1px solid #55e6a533;border-radius:14px;background:#55e6a508}.tx-result.show{display:block}.tx-result a{color:#83ecc2}.tx-result code{word-break:break-all;color:#d4c7db}
+    @media(max-width:760px){.lab-grid,.lab-form{grid-template-columns:1fr}.lab-form .wide{grid-column:auto}.lab-shell{padding-top:35px}}
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a>
+  <nav><a href="/">LaunchPad</a><a href="/#create">Builder</a><a href="/#proof">Proof</a></nav>
+  <button class="wallet-mini" id="wallet-button" type="button">Connect Wallet</button>
+</header>
+
+<main class="lab-shell">
+  <section class="lab-hero">
+    <div class="kicker">SOLANA DEVNET • REAL ON-CHAIN TOKEN CREATION • NO MAINNET</div>
+    <h1>DEVNET <span>LAUNCH LAB.</span></h1>
+    <p class="lead">This is the first executable public WorldzLaunchPad route: create a real SPL mint on Solana Devnet, mint the initial fixed supply to your own wallet, optionally revoke mint authority, simulate the signed transaction, then broadcast it to Devnet.</p>
+  </section>
+
+  <div class="lab-grid">
+    <section class="lab-card">
+      <h2>Token deployment</h2>
+      <div class="lab-form">
+        <label>Token name<input id="name" maxlength="32" placeholder="SolSavewXRP"></label>
+        <label>Ticker<input id="symbol" maxlength="10" placeholder="SAVE"></label>
+        <label>Fixed supply<input id="supply" inputmode="numeric" value="100000000"></label>
+        <label>Decimals<input id="decimals" type="number" min="0" max="9" value="9"></label>
+        <label class="wide"><span><input id="fixed" type="checkbox" checked> Revoke mint authority after initial supply</span></label>
+      </div>
+      <div class="lab-actions">
+        <button class="btn secondary" id="check" type="button">Run Local Checks</button>
+        <button class="btn primary" id="launch" type="button" disabled>Create Devnet Token</button>
+      </div>
+      <div class="lab-status" id="status">Load a WorldzLaunchPad manifest from the Builder or enter test values here.</div>
+      <div class="tx-result" id="result">
+        <b>DEVNET TOKEN CREATED ✅</b>
+        <p>Mint: <code id="mint"></code></p>
+        <p>Transaction: <code id="signature"></code></p>
+        <a id="explorer" target="_blank" rel="noopener">Open in Solana Explorer ↗</a>
+      </div>
+    </section>
+
+    <aside class="lab-card">
+      <h2>Execution contract</h2>
+      <div class="lab-rules">
+        <div class="lab-rule"><span>Network</span><b>Solana Devnet only</b></div>
+        <div class="lab-rule"><span>Wallet custody</span><b>Self-custody</b></div>
+        <div class="lab-rule"><span>Freeze authority</span><b>None</b></div>
+        <div class="lab-rule"><span>Mint authority</span><b id="mint-rule">Revoked after mint</b></div>
+        <div class="lab-rule"><span>Simulation</span><b>Signed simulation before send</b></div>
+        <div class="lab-rule"><span>Metadata</span><b>Not yet written on-chain</b></div>
+        <div class="lab-rule"><span>DEX / pool</span><b>Not created by this Devnet step</b></div>
+        <div class="lab-rule"><span>Mainnet</span><b>DISABLED</b></div>
+      </div>
+      <div class="warning-box">This Devnet Lab proves token deployment, supply creation and authority control. It does not pretend a token mint alone is a completed market launch. Pool creation, quote pairing, locks, vesting, fee routing and mainnet release remain separate verified stages.</div>
+    </aside>
+  </div>
+</main>
+
+<footer><div><b>WorldzLaunchPad™ Devnet Lab</b></div><p>No seed phrase or private key is requested. The temporary mint keypair is generated in browser memory; the wallet remains the authority unless mint authority is revoked.</p></footer>
+<script type="module" src="/devnet/app.js?v=20260920-devnet-v1"></script>
+</body>
+</html>
