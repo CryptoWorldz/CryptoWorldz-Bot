@@ -133,7 +133,7 @@ async function refreshRuntime(){
 async function boot(){
  try{
    const [r1,r2,r3]=await Promise.all([
-     fetch('/tokens.json',{cache:'no-store'}),fetch('/console-data.json',{cache:'no-store'}),fetch('/wldz-mainnet-plan.json',{cache:'no-store'})
+     fetch('/tokens.json?v=20260920-interactive-v2',{cache:'no-store'}),fetch('/console-data.json?v=20260920-interactive-v2',{cache:'no-store'}),fetch('/wldz-mainnet-plan.json?v=20260920-interactive-v2',{cache:'no-store'})
    ]);
    if(!r1.ok||!r2.ok||!r3.ok)throw new Error('Launch data unavailable');
    registry=await r1.json(); details=await r2.json(); mainnet=await r3.json();
