@@ -124,7 +124,7 @@ jobs:
           assert 'DEVNET_PROGRAM_ID.CREATE_CPMM_POOL_PROGRAM' in (root/'devnet/app.js').read_text()
           assert 'RAYDIUM LAUNCHLAB DEVNET LAUNCH CREATED' in curve
           assert 'createPlatformConfig' in curve_js and 'createLaunchpad' in curve_js
-          assert 'DRay6fNdQ5J82H7xV6uq2aV3mNrUZ1J4PgSKsWgptcm6' in curve_js
+          assert 'DEVNET_PROGRAM_ID.LAUNCHPAD_PROGRAM' in curve_js
           assert 'METEORA DBC DEVNET LAUNCH CREATED' in curve_pro
           assert 'createConfigAndPool' in curve_pro_js and 'buildCurve' in curve_pro_js
           assert 'creatorTradingFeePercentage:90' in curve_pro_js
