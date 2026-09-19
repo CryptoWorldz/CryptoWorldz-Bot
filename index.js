@@ -2,6 +2,8 @@
 // Full CryptoWorldz runtime is preserved in src/full-runtime-entry.js: require("./src/hub-central/preload")
 // The full runtime remains primary when configured; the dependency-free protected GPT gateway below is fail-safe fallback only.
 const http = require("node:http");
+const fs = require("node:fs");
+const path = require("node:path");
 const { URL } = require("node:url");
 const { loadProtectedEnvironment } = require("./src/protected-env");
 
@@ -28,9 +30,30 @@ const ALLOWED_ORIGINS = new Set([
 
 const protectedEnvironment = loadProtectedEnvironment({ appRoot: __dirname });
 
+// Hostinger masks managed Node environment values when they are read through its API.
+// Normalise the supported server-side aliases at runtime instead of trying to copy
+// masked values into .env. Supabase URL and publishable key are public project config.
+process.env.BOT_TOKEN = String(
+  process.env.BOT_TOKEN ||
+  process.env.TELEGRAM_BOT_TOKEN ||
+  process.env.TELEGRAM_TOKEN ||
+  process.env.ZED_BOT_TOKEN ||
+  process.env.CRYPTOWORLDZ_BOT_TOKEN ||
+  ""
+).trim();
+process.env.SUPABASE_URL = String(
+  process.env.SUPABASE_URL || "https://hknymhhyqldtzmplzuzh.supabase.co"
+).trim();
+process.env.SUPABASE_PUBLISHABLE_KEY = String(
+  process.env.SUPABASE_PUBLISHABLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+).trim();
+
 const fullRuntimeConfigured =
-  ["BOT_TOKEN", "SUPABASE_URL"].every((key) => String(process.env[key] || "").trim()) &&
-  Boolean(String(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || "").trim());
+  Boolean(process.env.BOT_TOKEN) &&
+  Boolean(process.env.SUPABASE_URL) &&
+  Boolean(String(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || "").trim());
 if (fullRuntimeConfigured) {
   try {
     require("./src/full-runtime-entry");
@@ -44,6 +67,50 @@ const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
 const buckets = new Map();
 let dailyDay = new Date().toISOString().slice(0, 10);
 let dailyCount = 0;
+
+const MINIAPP_ROOT = path.join(__dirname, "public", "miniapp");
+const MINIAPP_TYPES = Object.freeze({
+  ".html": "text/html; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".ico": "image/x-icon"
+});
+
+function serveFallbackMiniapp(req, res, pathname) {
+  if (!["GET", "HEAD"].includes(req.method || "")) return false;
+  if (pathname !== "/miniapp" && !pathname.startsWith("/miniapp/")) return false;
+
+  const relative = pathname === "/miniapp" || pathname === "/miniapp/"
+    ? "index.html"
+    : decodeURIComponent(pathname.slice("/miniapp/".length));
+  const resolved = path.resolve(MINIAPP_ROOT, relative);
+  if (resolved !== MINIAPP_ROOT && !resolved.startsWith(MINIAPP_ROOT + path.sep)) {
+    sendJson(res, 400, { ok: false, error: "invalid_path" });
+    return true;
+  }
+
+  let stat;
+  try { stat = fs.statSync(resolved); } catch { stat = null; }
+  const file = stat && stat.isDirectory() ? path.join(resolved, "index.html") : resolved;
+  if (!fs.existsSync(file) || !fs.statSync(file).isFile()) {
+    sendJson(res, 404, { ok: false, error: "not_found" });
+    return true;
+  }
+
+  res.statusCode = 200;
+  res.setHeader("Content-Type", MINIAPP_TYPES[path.extname(file).toLowerCase()] || "application/octet-stream");
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  if (req.method === "HEAD") return void res.end(), true;
+  fs.createReadStream(file).pipe(res);
+  return true;
+}
 
 function sendJson(res, status, payload, origin = "") {
   res.statusCode = status;
@@ -169,6 +236,8 @@ async function callOpenAI(message, history, page) {
 const server = http.createServer(async (req, res) => {
   const origin = String(req.headers.origin || "").trim();
   const url = new URL(req.url || "/", "http://localhost");
+
+  if (serveFallbackMiniapp(req, res, url.pathname)) return;
 
   if (req.method === "OPTIONS" && url.pathname.startsWith("/api/oneworldz-gpt")) {
     res.statusCode = 204;

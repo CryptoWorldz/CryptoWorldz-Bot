@@ -62,9 +62,28 @@ function missingGraceXSecretError() {
   return error;
 }
 
+async function bootstrapSupabaseRuntime(config) {
+  if (config.usingServiceRole) return;
+  const response = await fetch(config.supabaseUrl + "/rest/v1/rpc/zed_runtime_bootstrap", {
+    method: "POST",
+    headers: {
+      apikey: config.supabaseApiKey,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({ p_bot_token: config.botToken }),
+    signal: AbortSignal.timeout(30000)
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok || payload !== true) {
+    throw new Error("Supabase runtime bridge bootstrap failed.");
+  }
+}
+
 async function start() {
   startupStage = "load_config";
   const config = loadConfig();
+  startupStage = "bootstrap_supabase_runtime";
+  await bootstrapSupabaseRuntime(config);
   startupStage = "create_supabase_client";
   const supabaseOptions = { auth: { persistSession: false, autoRefreshToken: false } };
   if (!config.usingServiceRole) {

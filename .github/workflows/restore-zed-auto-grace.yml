@@ -193,6 +193,7 @@ jobs:
           # Hostinger managed Node environment can retain values even when the
           # filesystem .env was replaced. Read it server-side without logging values.
           managed = {}
+          managed_keys = set()
           try:
               import json, urllib.parse, urllib.request
               domain = "cryptobotz.cryptoworldz.xyz"
@@ -215,8 +216,10 @@ jobs:
                       if isinstance(obj, dict):
                           k = obj.get("key") or obj.get("name")
                           v = obj.get("value")
-                          if isinstance(k,str) and isinstance(v,(str,int,float,bool)) and str(v).strip() and str(v).strip() not in ("***","********"):
-                              managed[k] = str(v)
+                          if isinstance(k, str) and re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", k):
+                              managed_keys.add(k)
+                              if isinstance(v,(str,int,float,bool)) and str(v).strip() and str(v).strip() not in ("***","********"):
+                                  managed[k] = str(v)
                           for value in obj.values():
                               collect(value)
                       elif isinstance(obj, list):
@@ -224,6 +227,14 @@ jobs:
                   collect(payload)
           except Exception:
               managed = {}
+              managed_keys = set()
+
+          managed_bot_aliases = {"BOT_TOKEN","TELEGRAM_BOT_TOKEN","TELEGRAM_TOKEN","ZED_BOT_TOKEN","CRYPTOWORLDZ_BOT_TOKEN"}
+          managed_bot_present = bool(managed_keys & managed_bot_aliases)
+          print("HOSTINGER_MANAGED_BOT_TOKEN_KEY=" + ("YES" if managed_bot_present else "NO"))
+          if managed_bot_present:
+              with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as github_env:
+                  github_env.write("HOSTINGER_MANAGED_BOT_TOKEN=1\n")
 
           # Merge legitimate protected sources, but do NOT blindly trust the
           # current BOT_TOKEN. Test every recovered candidate against Telegram
@@ -278,11 +289,14 @@ jobs:
           print("ZED_TELEGRAM_VALID_TOKEN_FOUND=" + ("YES" if valid_bot_token else "NO"))
 
           missing = [key for key in required if not merged.get(key)]
-          if missing:
+          if missing and not managed_bot_present:
               print("ZED_ENV_RECOVERY=FAIL")
               print("ZED_ENV_MISSING_KEYS=" + ",".join(missing))
-              print("HOSTINGER_MANAGED_ENV_REQUIRED_KEYS=" + str(sum(1 for k in required if managed.get(k))) + "_OF_1")
+              print("HOSTINGER_MANAGED_ENV_REQUIRED_KEYS=0_OF_1")
               raise SystemExit("Protected BOT_TOKEN is still missing")
+          if missing and managed_bot_present:
+              print("ZED_ENV_RECOVERY=HOSTINGER_MANAGED_BOT_TOKEN")
+              print("ZED_ENV_MISSING_KEYS=NONE_RUNTIME_MANAGED")
 
           source = "merged-protected-sources"
 
@@ -291,24 +305,28 @@ jobs:
           if openai:
               merged["OPENAI_API_KEY"] = openai
 
-          # Bootstrap the database bridge from the already-protected Telegram
-          # bot token. Telegram validates the token; Supabase stores only a
-          # one-way derived runtime key, never the bot token itself.
-          import json, urllib.request
-          bootstrap_url = merged["SUPABASE_URL"] + "/rest/v1/rpc/zed_runtime_bootstrap"
-          request = urllib.request.Request(
-              bootstrap_url,
-              data=json.dumps({"p_bot_token": merged["BOT_TOKEN"]}).encode("utf-8"),
-              headers={
-                  "apikey": merged["SUPABASE_PUBLISHABLE_KEY"],
-                  "content-type": "application/json"
-              },
-              method="POST"
-          )
-          with urllib.request.urlopen(request, timeout=30) as response:
-              bootstrap_result = json.loads(response.read().decode("utf-8"))
-          if bootstrap_result is not True:
-              raise SystemExit("ZED_SUPABASE_BRIDGE_BOOTSTRAP_FAILED")
+          # Bootstrap immediately when a readable validated token exists.
+          # If Hostinger owns the token as a masked managed variable, the live
+          # runtime performs the same bootstrap after Hostinger injects it.
+          if valid_bot_token:
+              import json, urllib.request
+              bootstrap_url = merged["SUPABASE_URL"] + "/rest/v1/rpc/zed_runtime_bootstrap"
+              request = urllib.request.Request(
+                  bootstrap_url,
+                  data=json.dumps({"p_bot_token": merged["BOT_TOKEN"]}).encode("utf-8"),
+                  headers={
+                      "apikey": merged["SUPABASE_PUBLISHABLE_KEY"],
+                      "content-type": "application/json"
+                  },
+                  method="POST"
+              )
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  bootstrap_result = json.loads(response.read().decode("utf-8"))
+              if bootstrap_result is not True:
+                  raise SystemExit("ZED_SUPABASE_BRIDGE_BOOTSTRAP_FAILED")
+              print("ZED_SUPABASE_BRIDGE=PASS")
+          else:
+              print("ZED_SUPABASE_BRIDGE=DEFERRED_TO_MANAGED_RUNTIME")
 
           payload = "".join(f"{k}={v}\n" for k, v in sorted(merged.items()))
           bio = io.BytesIO(payload.encode("utf-8"))
@@ -316,9 +334,8 @@ jobs:
           ftp.quit()
 
           print("ZED_ENV_RECOVERY=PASS")
-          print("ZED_SUPABASE_BRIDGE=PASS")
           print("ZED_ENV_SOURCE=" + posixpath.basename(source))
-          print("ZED_ENV_REQUIRED_KEYS=BOT_TOKEN,SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY")
+          print("ZED_ENV_REQUIRED_KEYS=" + ("HOSTINGER_MANAGED_BOT_TOKEN,SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY" if managed_bot_present and not valid_bot_token else "BOT_TOKEN,SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY"))
           PY
 
       - name: Prove restored historical runtime is present
@@ -397,6 +414,9 @@ jobs:
               k,v=line.split("=",1); k=re.sub(r"^export\s+","",k).strip(); v=v.strip().strip('"').strip("'")
               if v: env[k]=v
           token=env.get("BOT_TOKEN","")
+          if not token and os.environ.get("HOSTINGER_MANAGED_BOT_TOKEN","").strip()=="1":
+              print("ZED_TELEGRAM_DIRECT_CONFIG=DEFERRED_TO_HOSTINGER_MANAGED_RUNTIME")
+              raise SystemExit(0)
           if not token: raise SystemExit("BOT_TOKEN missing after protected recovery")
           print("::add-mask::"+token)
 
