@@ -9,7 +9,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["directory", "Open Directory@OneWorldz"], ["acknowledgements", "Open Acknowledgements@OneWorldz"],
     ["supportjay", "Open JayJayTeamDev@DonateWorldz"], ["donate", "Open the current DonateWorldz support choices"]
   ]),
-  group("legend", "🤖 ZED • Legend Profile", "member", [
+  group("max", "🧠 Command Centre MAX™ • Learn, Research, Interact & Teach", "member", [\n    ["max", "Open Command Centre MAX learning and research hub"]\n  ]),\n  group("legend", "🤖 ZED • Legend Profile", "member", [
     ["zed", "Open ZED profile, wallet and mission controls"], ["start", "Start or reopen ZED"],
     ["register", "Register as a CryptoWorldz Legend"], ["profile", "View your Legend profile"],
     ["points", "View Legend Points"], ["rewards", "View reward activity"], ["leaderboard", "View the leaderboard"],
