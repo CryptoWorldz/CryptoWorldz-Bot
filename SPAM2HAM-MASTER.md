@@ -3,6 +3,7 @@
 Status: PILOT BUILD — 20 September 2026
 Owner: CryptoWorldz
 Campaign: Australia-first
+Canonical website: https://spam2ham.cryptoworldz.xyz/
 
 ## Locked campaign identity
 - National Spam2Ham Day™ — 1 December each year.
