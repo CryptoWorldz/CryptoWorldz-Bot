@@ -46,7 +46,10 @@
         const title = typeof s === 'string' ? s : (s.title || s.url);
         return url ? `<a class="max-source" href="${esc(url)}" target="_blank" rel="noopener">${esc(title || url)} ↗</a>` : '';
       }).join('')}
-      <button class="button max-complete" type="button" data-knowledge-id="${esc(item.id)}" ${item.completed?'disabled':''}>${item.completed ? 'Lesson Completed ✅' : 'Mark Lesson Complete'}</button>
+      <div class="max-actions">
+        <button class="button max-complete" type="button" data-knowledge-id="${esc(item.id)}" ${item.completed?'disabled':''}>${item.completed ? 'Lesson Completed ✅' : 'Mark Lesson Complete'}</button>
+        <a class="button secondary" href="https://t.me/share/url?url=${encodeURIComponent('https://cryptoworldz.xyz/')}&text=${encodeURIComponent(item.title+' — '+item.summary+' • Learn with Command Centre MAX™')}" target="_blank" rel="noopener">Teach / Share ↗</a>
+      </div>
     </details>`;
   }
 
@@ -115,6 +118,24 @@
       <div class="max-progress"><span style="width:${pct}%"></span></div>
       <div id="max-lessons">${lessons.map(lessonMarkup).join('') || '<div class="empty">No approved MAX lessons yet.</div>'}</div>
 
+      <div class="section-title"><h2>💎 AUTO Ability Lab</h2></div>
+      <article class="panel">
+        <p>AUTO teaches the numbers before anybody mistakes a calculation for cash in a pool. These are educational estimates only — no funds move from this screen.</p>
+        <div class="form-row">
+          <label>Token Supply<input id="max-auto-supply" inputmode="decimal" value="100000000"></label>
+          <label>Token Price<input id="max-auto-price" inputmode="decimal" value="0.01"></label>
+        </div>
+        <div class="profile-row"><span>Implied Market Cap</span><b id="max-auto-marketcap">—</b></div>
+        <div class="form-row">
+          <label>Trading Volume<input id="max-auto-volume" inputmode="decimal" value="10000"></label>
+          <label>Project Fee %<input id="max-auto-fee" type="number" min="0.5" max="4" step="0.25" value="2"></label>
+        </div>
+        <div class="profile-row"><span>Collected Project Fee</span><b id="max-auto-collected">—</b></div>
+        <div class="profile-row"><span>WorldzLaunchPad 10%</span><b id="max-auto-worldz">—</b></div>
+        <div class="profile-row"><span>Project Distribution 90%</span><b id="max-auto-project">—</b></div>
+        <div class="ultimate-note max-truth">Market cap = price × supply. It is not the same thing as liquidity. Fee examples depend on actual eligible trading volume and the launch engine's real on-chain rules.</div>
+      </article>
+
       <div class="section-title"><h2>🔎 MAX Research Desk</h2></div>
       <article class="panel">
         <p>Ask about CryptoWorldz, chains, launch technology, token mechanics, wallets, security, food security or anything MAX should investigate. A queued question is <b>not</b> treated as fact.</p>
@@ -158,7 +179,7 @@
       </article>
 
       ${isAdmin ? `
-      <div class="section-title"><h2>🛡 MAX Admin Publisher</h2></div>
+      <div class="section-title"><h2>🛡 G.R.A.C.E. Admin Publisher</h2></div>
       <article class="panel max-admin">
         <p>Admin-reviewed material can be published into MAX Academy and the RECAP feed. Add sources whenever a factual claim comes from outside the ecosystem.</p>
         <form id="max-publish-form">
@@ -176,6 +197,7 @@
         </form>
       </article>` : ''}
     `;
+    updateAutoAbility();
   }
 
   async function loadDashboard() {
@@ -191,6 +213,29 @@
       renderHomeCard();
     } finally { maxState.loading=false; }
   }
+
+  function money(value){
+    const n=Number(value);
+    if(!Number.isFinite(n)) return '—';
+    return new Intl.NumberFormat(undefined,{maximumFractionDigits:6}).format(n);
+  }
+  function updateAutoAbility(){
+    const supply=Number($('#max-auto-supply')?.value||0);
+    const price=Number($('#max-auto-price')?.value||0);
+    const volume=Number($('#max-auto-volume')?.value||0);
+    const fee=Math.max(0,Number($('#max-auto-fee')?.value||0));
+    const collected=volume*(fee/100);
+    const worldz=collected*.10;
+    const project=collected*.90;
+    if($('#max-auto-marketcap')) $('#max-auto-marketcap').textContent=money(supply*price);
+    if($('#max-auto-collected')) $('#max-auto-collected').textContent=money(collected);
+    if($('#max-auto-worldz')) $('#max-auto-worldz').textContent=money(worldz);
+    if($('#max-auto-project')) $('#max-auto-project').textContent=money(project);
+  }
+
+  document.addEventListener('input',(event)=>{
+    if(event.target && /^max-auto-/.test(event.target.id||'')) updateAutoAbility();
+  });
 
   document.addEventListener('click', async (event) => {
     const complete=event.target.closest('.max-complete');
