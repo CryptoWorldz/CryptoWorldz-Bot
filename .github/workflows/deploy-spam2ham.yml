@@ -41,7 +41,7 @@ jobs:
           grep -q 'Start 60 Minutes' spam2ham.cryptoworldz.xyz/index.html
           grep -q 'ACMA — Dealing with Spam' spam2ham.cryptoworldz.xyz/index.html
           grep -q 'Pilot only — no cash or crypto value' spam2ham.cryptoworldz.xyz/index.html
-          grep -q 'Spam Coin Rescue' spam2ham.cryptoworldz.xyz/index.html
+          grep -q 'SPAM COIN RESCUE' spam2ham.cryptoworldz.xyz/index.html
           grep -q 'HAM Node Mesh' spam2ham.cryptoworldz.xyz/index.html
           grep -q 'READ ONLY • NO SIGNATURE' spam2ham.cryptoworldz.xyz/index.html
           grep -q 'spam2ham-solana-scan' spam2ham.cryptoworldz.xyz/coin-rescue.js
@@ -92,7 +92,7 @@ jobs:
           body="$(curl --fail --silent --show-error --location --retry 6 --retry-delay 5 --max-time 20 https://spam2ham.cryptoworldz.xyz/)"
           printf '%s' "$body" | grep -q '2026-09-20-spam2ham-coin-rescue-v2'
           printf '%s' "$body" | grep -q 'Kill Spam. Earn HAM. Turn Bytes into Bites.'
-          printf '%s' "$body" | grep -q 'Spam Coin Rescue'
+          printf '%s' "$body" | grep -q 'SPAM COIN RESCUE'
           printf '%s' "$body" | grep -q 'HAM Node Mesh'
           js="$(curl --fail --silent --show-error --location --retry 4 --retry-delay 3 --max-time 20 https://spam2ham.cryptoworldz.xyz/coin-rescue.js)"
           printf '%s' "$js" | grep -q 'spam2ham-solana-scan'
