@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Compile mission builders
-        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/apply_heroes_worldz.py tools/apply_slice_of_hope_visual.py tools/apply_davis_page.py tools/apply_donateworldz_brand.py tools/deploy_hostinger_robust.py tools/prune_public_bloat.py tools/apply_pdc_five_page.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py
+        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/apply_heroes_worldz.py tools/apply_slice_of_hope_visual.py tools/apply_davis_page.py tools/apply_donateworldz_brand.py tools/deploy_hostinger_robust.py tools/prune_public_bloat.py tools/apply_pdc_five_page.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py tools/apply_verified_insights.py
 
       - name: Build ecosystem baseline
         run: python3 tools/build_ecosystem.py
@@ -117,6 +117,9 @@ jobs:
 
       - name: "Lock DonateWorldz masterpiece across the ecosystem LAST"
         run: python3 tools/apply_donateworldz_brand.py
+
+      - name: "Apply verified insight tooling LAST"
+        run: python3 tools/apply_verified_insights.py
 
       - name: Validate 18-site contract and retired-content removal
         shell: bash
@@ -233,6 +236,15 @@ jobs:
           mobile_css=Path('cryptoworldz.xyz/mobile-safe.css').read_text(encoding='utf-8')
           assert 'overflow-x:auto!important' in mobile_css and 'flex-wrap:nowrap!important' in mobile_css
           assert '@media(max-width:360px){.nav{grid-template-columns:1fr!important}}' not in mobile_css
+
+          assert 'data-verified-insight-standard="1"' in one
+          assert 'data-donation-transparency-standard="1"' in donate
+          assert 'data-crypto-verified-insight="1"' in crypto_root
+          xrp_root=Path('xrpworldz.xyz/index.html').read_text(encoding='utf-8')
+          assert 'data-xrp-verified-insight="1"' in xrp_root
+          clarity=Path('cryptoworldz.xyz/clarity-watch.html').read_text(encoding='utf-8')
+          for required in ('data-verified-insight-page="1"','/mobile-safe.css','49–50','motion to reconsider','digital commodity','US$125,035,150','data-rulemaking-watch="1"','Regulation Crypto Assets'):
+              assert required in clarity, ('verified-insight',required)
 
           community_one=Path('oneworldz.com/community-support/index.html').read_text(encoding='utf-8')
           community_donate=Path('donateworldz.com/community-impact/index.html').read_text(encoding='utf-8')
@@ -366,6 +378,7 @@ jobs:
             'https://donateworldz.com/jayjay-support/':('https://buy.stripe.com/6oUeVd9tU0Ktewm0Xb0kE00',1),
             'https://donateworldz.com/community-impact/':('https://www.facebook.com/share/',35),
             'https://oneworldz.com/community-support/':('https://www.facebook.com/share/',35),
+            'https://cryptoworldz.xyz/clarity-watch.html':('data-verified-insight-page="1"',1),
           }
           for u,(needle,count) in specials.items():
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)
