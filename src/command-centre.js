@@ -1,7 +1,8 @@
 const { groupsForRole, normalizeRole } = require("./command-registry");
 
 const BOT_MENU_COMMANDS = [
-  { command: "zedstart", description: "Open the Zed Command Centre" },
+  { command: "zedstart", description: "Open Command Centre MAX" },
+  { command: "max", description: "Learn, research, interact and teach with MAX" },
   { command: "zed", description: "Zed profile, wallet, missions and settings" },
   { command: "auto", description: "Open Auto finance controls" },
   { command: "grace", description: "Open Grace Auto Post controls" },
@@ -75,6 +76,7 @@ const MENUS = {
 };
 
 const WEB_ROUTES = Object.freeze({
+  miniApp: "https://cryptobotz.cryptoworldz.xyz/miniapp/",
   directory: "https://oneworldz.com/directory/",
   acknowledgements: "https://oneworldz.com/acknowledgements/",
   supportJay: "https://donateworldz.com/support-jayjayteamdev/",
@@ -96,6 +98,7 @@ function mainKeyboard() {
   return {
     reply_markup: {
       inline_keyboard: [
+        [{ text: "🧠 OPEN COMMAND CENTRE MAX™", web_app: { url: WEB_ROUTES.miniApp } }],
         [
           { text: "🤖 ZED", callback_data: "cc:menu:zed" },
           { text: "💎 AUTO", callback_data: "cc:menu:auto" }
@@ -171,10 +174,10 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
   }
 
   const openHome = (msg) => send(msg, [
-    "🌐 CryptoWorldz Command Centre",
+    "🧠 CryptoWorldz Command Centre MAX™",
     "",
-    "ONE START POINT • FULL STRUCTURAL TREE",
-    "ZED, AUTO, G.R.A.C.E., Admin, websites and role-based commands are connected here.",
+    "LEARN • RESEARCH • INTERACT • TEACH • BUILD • PROVE",
+    "ZED guides. AUTO explains the numbers. G.R.A.C.E. coordinates approved communication. RECAP explains verified activity. WorldzLaunchPad builds and proves launches.",
     "",
     "Gateway commands:",
     "/zedstart • /commands • /commandtree • /directory • /acknowledgements • /supportjay",
@@ -184,6 +187,17 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
 
   bot.onText(/^\/zedstart(?:@\w+)?$/, openHome);
   bot.onText(/^\/zed(?:@\w+)?$/, (msg) => send(msg, menuText(MENUS.zed)));
+  bot.onText(/^\/max(?:@\w+)?$/, (msg) => send(msg, [
+    "🧠 COMMAND CENTRE MAX™",
+    "",
+    "Learn • Research • Interact • Teach",
+    "",
+    "MAX is source-first: new research is queued separately from approved knowledge, and human review stays above automation.",
+    "",
+    "Open the Mini App and tap MAX™."
+  ].join("\n"), {
+    reply_markup: { inline_keyboard: [[{ text: "🧠 OPEN MAX™", web_app: { url: WEB_ROUTES.miniApp } }]] }
+  }));
   bot.onText(/^\/grace(?:@\w+)?$/, async (msg) => {
     if (!(await isAdmin(msg))) return send(msg, "⛔ Grace requires Command Centre access.");
     return send(msg, menuText(MENUS.grace));
@@ -223,7 +237,8 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
   bot.onText(/^\/help(?:@\w+)?$/, async (msg) => send(msg, [
     "📘 COMMAND CENTRE HELP",
     "",
-    "/zedstart — open the Command Centre",
+    "/zedstart — open Command Centre MAX™",
+    "/max — open the MAX learning and research hub",
     "/commands — every command available to your role",
     "/commandtree — command sections and structure",
     "/directory — public OneWorldz site/page directory",
