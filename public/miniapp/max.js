@@ -137,6 +137,7 @@
       <article class="panel">
         <div class="max-actions">
           <button class="button" type="button" data-open="zed-guide">Ask ZED</button>
+          <button class="button secondary" type="button" data-open="create">Create a Raaiiidd</button>
           <button class="button secondary" type="button" data-open="missions">Open Missions</button>
           <a class="button secondary" href="https://launchpad.cryptoworldz.xyz/" target="_blank" rel="noopener">WorldzLaunchPad™</a>
           <a class="button secondary" href="https://launchpad.cryptoworldz.xyz/omnichain/" target="_blank" rel="noopener">Worldz OmniChain™</a>
