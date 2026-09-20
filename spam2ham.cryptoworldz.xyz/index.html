@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spam2Ham | CryptoWorldz</title><link rel="canonical" href="https://spam2ham.cryptoworldz.xyz/">
+<meta name="description" content="Spam2Ham by CryptoWorldz — Sunday digital Spring Clean sessions building toward National Spam2Ham Day on 1 December. Kill Spam. Earn HAM. Turn Bytes into Bites.">
+<link rel="stylesheet" href="/style.css">
+<style>
+:root{--accent:#9b5cff;--accent2:#69ffe3;--ham:#79ff7d;--warn:#ffd55c}
+.s2h-hero{min-height:70vh;display:grid;place-items:center;text-align:center;padding:clamp(28px,7vw,90px) 18px;border-radius:22px;border:1px solid #79ff7d;background:radial-gradient(circle at 50% 12%,rgba(105,255,227,.18),transparent 28%),radial-gradient(circle at 18% 70%,rgba(155,92,255,.22),transparent 34%),radial-gradient(circle at 82% 72%,rgba(121,255,125,.12),transparent 30%),#030607;overflow:hidden}
+.s2h-hero h1{font-size:clamp(3.2rem,12vw,10rem);line-height:.78;margin:.15em 0;background:linear-gradient(180deg,#fff 8%,#79ff7d 52%,#69ffe3 100%);-webkit-background-clip:text;color:transparent;letter-spacing:-.06em}
+.s2h-hero .tagline{font-size:clamp(1.15rem,3vw,2rem);font-weight:900;margin:.6rem auto;color:#fff}
+.s2h-hero .sub{max-width:900px;margin:0 auto;color:#d7efe1;font-size:clamp(.98rem,1.7vw,1.18rem);line-height:1.55}
+.s2h-status{display:inline-flex;gap:8px;align-items:center;padding:9px 13px;border:1px solid #79ff7d;border-radius:999px;color:#a8ffab;font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:.75rem}
+.countdown-grid,.metric-grid,.how-grid,.roadmap-grid{display:grid;gap:10px}
+.countdown-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:800px;margin:22px auto 0}
+.metric-grid{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:12px}
+.how-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.roadmap-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+.s2h-card{padding:16px;border-radius:15px;border:1px solid rgba(121,255,125,.28);background:linear-gradient(180deg,rgba(14,34,24,.72),rgba(7,8,11,.96));min-height:112px}
+.s2h-card strong{display:block;font-size:1.05rem;color:#fff}
+.s2h-card span,.s2h-card p{display:block;color:#cfd9d3;line-height:1.45;font-size:.9rem}
+.big-number{font-size:clamp(1.45rem,4vw,2.5rem);font-weight:1000;color:#79ff7d;margin-top:6px}
+.newton{font-size:clamp(1.4rem,3vw,2.5rem);font-weight:900;line-height:1.12;margin:0;max-width:1000px}
+.reaction{color:#79ff7d}
+.dashboard{display:grid;grid-template-columns:1fr 1.25fr;gap:12px}
+.timer-box{display:grid;place-items:center;text-align:center;padding:18px;border:1px solid rgba(105,255,227,.35);border-radius:18px;background:#05090a;min-height:320px}
+.timer{font-variant-numeric:tabular-nums;font-size:clamp(3.2rem,8vw,6rem);font-weight:1000;letter-spacing:-.05em;color:#69ffe3}
+.dash-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:12px}
+.counter{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:13px;border-bottom:1px solid rgba(255,255,255,.09)}
+.counter:last-child{border-bottom:0}
+.counter-controls{display:flex;gap:6px;align-items:center}
+.counter button,.choice button{width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#11131a;color:#fff;font-weight:900;cursor:pointer}
+.counter output{min-width:44px;text-align:center;font-weight:1000;color:#79ff7d}
+.score{margin-top:12px;padding:15px;border:1px solid rgba(121,255,125,.35);border-radius:14px;background:rgba(121,255,125,.06)}
+.score strong{font-size:clamp(1.4rem,4vw,2.2rem);color:#79ff7d}
+.small-note{font-size:.82rem;color:#aeb8b1;line-height:1.45}
+.safety{border-left:4px solid var(--warn);padding:14px 15px;border-radius:10px;background:rgba(255,213,92,.08);color:#eee4c1;line-height:1.5}
+.reward-choice{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.choice{padding:13px;text-align:center;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:#09070e}
+.choice b{display:block;margin-bottom:5px}
+.pilot{color:#ffd55c;font-weight:900}
+@media(max-width:1050px){.how-grid{grid-template-columns:repeat(2,1fr)}.roadmap-grid{grid-template-columns:repeat(2,1fr)}.dashboard{grid-template-columns:1fr}.metric-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.countdown-grid,.how-grid,.metric-grid,.roadmap-grid,.reward-choice{grid-template-columns:1fr}.s2h-hero{border-radius:14px}.timer-box{min-height:250px}}
+</style>
+</head>
+<body data-oneworldz-build="2026-09-20-spam2ham-subdomain-v1">
+<nav class="nav">
+<a href="https://oneworldz.com">OneWorldz</a>
+<a class="brand" href="https://cryptoworldz.xyz/">CryptoWorldz</a>
+<a href="/" aria-current="page">Spam2Ham</a>
+<a href="https://cryptobotz.cryptoworldz.xyz">Command Centre</a>
+<a href="https://donateworldz.com">DonateWorldz</a>
+</nav>
+
+<main class="shell">
+<section class="s2h-hero">
+<div>
+<div class="s2h-status">Pilot Build • Australia</div>
+<h1>SPAM2HAM</h1>
+<p class="tagline">Kill Spam. Earn HAM. Turn Bytes into Bites.™</p>
+<p class="sub"><strong>HAM = Helpful Action Mining™.</strong> One hour every Sunday becomes our digital Spring Clean. We test it, improve it and build toward <strong>National Spam2Ham Day™ — 1 December</strong>.</p>
+<div class="countdown-grid">
+<div class="s2h-card"><strong>Next Sunday Spring Clean</strong><div class="big-number" id="nextSunday">—</div><span>1 hour • every Sunday</span></div>
+<div class="s2h-card"><strong>National Spam2Ham Day</strong><div class="big-number" id="nationalCountdown">—</div><span>1 December • 3–4 hour national clean-up</span></div>
+</div>
+<div class="actions" style="justify-content:center">
+<a class="btn" href="#dashboard">Start the 1-Hour Pilot</a>
+<a class="btn secondary" href="#how">See How HAM Works</a>
+</div>
+</div>
+</section>
+
+<section class="section center">
+<p class="eyebrow">The reaction</p>
+<p class="newton">“For every action, there is an equal and opposite reaction.”<br><span class="reaction">Spam is the action. Spam2Ham is our useful reaction.</span></p>
+<p>Inspired by Newton’s Third Law: take an unwanted digital problem and organise a useful, measurable response.</p>
+</section>
+
+<section class="section" id="how">
+<p class="eyebrow">Spring Clean the Digital World™</p>
+<h2>How the pilot works</h2>
+<div class="how-grid">
+<div class="s2h-card"><strong>1. Give One Hour</strong><p>Join the Sunday Spam2Ham Spring Clean and run the local 60-minute session timer.</p></div>
+<div class="s2h-card"><strong>2. Clean Safely</strong><p>Delete unwanted spam, block repeat senders and unsubscribe only from legitimate senders you can verify.</p></div>
+<div class="s2h-card"><strong>3. Earn Pilot HAM</strong><p>Helpful cleanup actions create test HAM Points. These points currently have <strong>no cash or crypto value</strong>.</p></div>
+<div class="s2h-card"><strong>4. Build the Reward Engine</strong><p>Future verified participation can connect to a transparently funded reward pool and optional useful-compute HAM Nodes.</p></div>
+</div>
+</section>
+
+<section class="section" id="dashboard">
+<p class="eyebrow">Sunday Spam2Ham Spring Clean™</p>
+<h2>1-Hour Pilot Dashboard</h2>
+<p class="pilot">PILOT: HAM Points below are testing points only. No cash or crypto payout is live.</p>
+<div class="dashboard">
+<div class="timer-box">
+<div>
+<div class="small-note" id="sessionState">Ready for your next clean-up.</div>
+<div class="timer" id="timer">60:00</div>
+<div class="dash-actions">
+<button class="btn" type="button" id="startBtn">Start 60 Minutes</button>
+<button class="btn secondary" type="button" id="resetBtn">Reset Session</button>
+</div>
+<p class="small-note">The timer and counters are stored only in this browser for the pilot.</p>
+</div>
+</div>
+<div class="s2h-card">
+<div class="counter"><div><strong>Spam cleaned</strong><span class="small-note">+1 HAM each</span></div><div class="counter-controls"><button data-key="cleaned" data-delta="-1">−</button><output id="cleaned">0</output><button data-key="cleaned" data-delta="1">+</button></div></div>
+<div class="counter"><div><strong>Repeat senders blocked</strong><span class="small-note">+2 HAM each</span></div><div class="counter-controls"><button data-key="blocked" data-delta="-1">−</button><output id="blocked">0</output><button data-key="blocked" data-delta="1">+</button></div></div>
+<div class="counter"><div><strong>Legitimate subscriptions removed</strong><span class="small-note">+1 HAM each • verified senders only</span></div><div class="counter-controls"><button data-key="unsubscribed" data-delta="-1">−</button><output id="unsubscribed">0</output><button data-key="unsubscribed" data-delta="1">+</button></div></div>
+<div class="counter"><div><strong>Official spam/scam reports</strong><span class="small-note">+0 HAM • reports are never financially incentivised</span></div><div class="counter-controls"><button data-key="reported" data-delta="-1">−</button><output id="reported">0</output><button data-key="reported" data-delta="1">+</button></div></div>
+<div class="score"><span class="small-note">Pilot Helpful Action Mining total</span><br><strong><span id="hamScore">0</span> HAM</strong><div class="small-note" id="completionBonus">60-minute completion bonus: locked (+100 HAM)</div></div>
+<div class="dash-actions">
+<button class="btn secondary" type="button" id="copyReceipt">Copy Pilot Receipt</button>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section">
+<p class="eyebrow">Safety first</p>
+<h2>Clean it. Don’t engage with it.</h2>
+<div class="safety"><strong>Never click an unknown link or open a suspicious attachment just to “clean” it.</strong> ACMA advises using unsubscribe facilities for organisations you recognise, but not clicking message links when you cannot verify the sender. Suspected commercial spam and scams have different reporting pathways.</div>
+<div class="actions">
+<a class="btn" href="https://www.acma.gov.au/dealing-with-spam" target="_blank" rel="noopener">ACMA — Dealing with Spam</a>
+<a class="btn secondary" href="https://www.scamwatch.gov.au/report-a-scam" target="_blank" rel="noopener">Scamwatch — Report a Scam</a>
+</div>
+<p class="small-note">Official reporting is for genuine concerns. Spam2Ham does not award HAM Points for the number of reports or complaints made.</p>
+</section>
+
+<section class="section">
+<p class="eyebrow">The money question</p>
+<h2>Where future rewards would actually come from</h2>
+<div class="metric-grid">
+<div class="s2h-card"><strong>CryptoWorldz Allocation</strong><span>A disclosed treasury/community allocation if formally approved.</span></div>
+<div class="s2h-card"><strong>Sponsors</strong><span>Cybersecurity, technology and participating business sponsorship.</span></div>
+<div class="s2h-card"><strong>Useful Compute</strong><span>Future privacy-safe HAM Node services that perform legitimate useful computational work.</span></div>
+<div class="s2h-card"><strong>Campaign Funding</strong><span>Transparent donations or other disclosed campaign revenue.</span></div>
+</div>
+<p><strong>Deleted spam does not magically create money.</strong> Any live reward pool must have a disclosed funding source, anti-abuse controls and public rules.</p>
+<div class="reward-choice">
+<div class="choice"><b>KEEP 💵</b><span class="small-note">Participant keeps an eligible future reward.</span></div>
+<div class="choice"><b>DONATE 🍽️</b><span class="small-note">Direct an eligible future reward toward approved impact.</span></div>
+<div class="choice"><b>50:50 💜</b><span class="small-note">Split an eligible future reward between participant and impact.</span></div>
+</div>
+</section>
+
+<section class="section">
+<p class="eyebrow">Build path</p>
+<h2>From Sunday test to National Day</h2>
+<div class="roadmap-grid">
+<div class="s2h-card"><strong>01 • Spring Clean</strong><span>Local timer, counters and pilot HAM points.</span></div>
+<div class="s2h-card"><strong>02 • Proof</strong><span>Privacy-safe participation receipts and verification.</span></div>
+<div class="s2h-card"><strong>03 • HAM Nodes</strong><span>Optional useful-compute architecture with strict privacy boundaries.</span></div>
+<div class="s2h-card"><strong>04 • Rewards</strong><span>Audited funding pool, legal review and transparent distribution.</span></div>
+<div class="s2h-card"><strong>05 • 1 December</strong><span>National Spam2Ham Day™ — then evaluate global expansion.</span></div>
+</div>
+</section>
+</main>
+
+<footer class="footer">CryptoWorldz • Spam2Ham™ • Kill Spam. Earn HAM. Turn Bytes into Bites.™</footer>
+
+<script>
+(function(){
+  const KEY='cryptoworldz_spam2ham_v1';
+  const defaults={cleaned:0,blocked:0,unsubscribed:0,reported:0,endAt:0,completed:false};
+  let state=Object.assign({},defaults,JSON.parse(localStorage.getItem(KEY)||'{}'));
+  let ticker=null;
+  const $=id=>document.getElementById(id);
+  function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+  function score(){return state.cleaned+(state.blocked*2)+state.unsubscribed+(state.completed?100:0)}
+  function render(){
+    ['cleaned','blocked','unsubscribed','reported'].forEach(k=>$(k).textContent=state[k]||0);
+    $('hamScore').textContent=score();
+    $('completionBonus').textContent=state.completed?'60-minute completion bonus: unlocked (+100 HAM)':'60-minute completion bonus: locked (+100 HAM)';
+  }
+  function remaining(){
+    if(!state.endAt)return 3600;
+    return Math.max(0,Math.ceil((state.endAt-Date.now())/1000));
+  }
+  function renderTimer(){
+    const left=remaining();
+    const m=String(Math.floor(left/60)).padStart(2,'0');
+    const s=String(left%60).padStart(2,'0');
+    $('timer').textContent=m+':'+s;
+    if(state.endAt && left>0){
+      $('sessionState').textContent='Spring Clean session running.';
+      $('startBtn').disabled=true;
+    }else if(state.endAt && left===0){
+      if(!state.completed){state.completed=true;save();render()}
+      $('sessionState').textContent='One-hour Spring Clean complete ✅';
+      $('startBtn').disabled=false;
+      clearInterval(ticker);ticker=null;
+    }else{
+      $('sessionState').textContent='Ready for your next clean-up.';
+      $('startBtn').disabled=false;
+    }
+  }
+  document.querySelectorAll('.counter button').forEach(btn=>btn.addEventListener('click',()=>{
+    const k=btn.dataset.key,d=Number(btn.dataset.delta);
+    state[k]=Math.max(0,(state[k]||0)+d);save();render();
+  }));
+  $('startBtn').addEventListener('click',()=>{
+    state.endAt=Date.now()+3600000;state.completed=false;save();renderTimer();
+    if(!ticker)ticker=setInterval(renderTimer,1000);
+  });
+  $('resetBtn').addEventListener('click',()=>{
+    state=Object.assign({},defaults);save();render();renderTimer();clearInterval(ticker);ticker=null;
+  });
+  $('copyReceipt').addEventListener('click',async()=>{
+    const text='CryptoWorldz Spam2Ham Pilot Receipt\n'+
+      'Date: '+new Date().toLocaleString()+ '\n'+
+      'Spam cleaned: '+state.cleaned+'\n'+
+      'Repeat senders blocked: '+state.blocked+'\n'+
+      'Legitimate subscriptions removed: '+state.unsubscribed+'\n'+
+      'Official reports made (no points): '+state.reported+'\n'+
+      '60-minute session completed: '+(state.completed?'Yes':'No')+'\n'+
+      'Pilot HAM Points: '+score()+'\n'+
+      'Pilot only — no cash or crypto value.';
+    try{await navigator.clipboard.writeText(text);$('copyReceipt').textContent='Copied ✅';setTimeout(()=>$('copyReceipt').textContent='Copy Pilot Receipt',1800)}
+    catch(e){alert(text)}
+  });
+  function nextSunday(){
+    const now=new Date(), d=new Date(now);
+    let add=(7-now.getDay())%7;if(add===0)add=7;
+    d.setDate(now.getDate()+add);d.setHours(0,0,0,0);
+    $('nextSunday').textContent=d.toLocaleDateString(undefined,{day:'numeric',month:'short'});
+  }
+  function national(){
+    const now=new Date();
+    let y=now.getFullYear();
+    let target=new Date(y,11,1,0,0,0,0);
+    if(now>target)target=new Date(++y,11,1,0,0,0,0);
+    const days=Math.max(0,Math.ceil((target-now)/86400000));
+    $('nationalCountdown').textContent=days+' days';
+  }
+  nextSunday();national();render();renderTimer();
+  if(state.endAt && remaining()>0)ticker=setInterval(renderTimer,1000);
+})();
+</script>
+</body>
+</html>
