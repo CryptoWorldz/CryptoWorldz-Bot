@@ -36,6 +36,11 @@ jobs:
           test -s public/miniapp/index.html
           test -s public/miniapp/app.js
           test -s public/miniapp/auto-owner.js
+          test -s public/miniapp/max.js
+          test -s public/miniapp/max.css
+          grep -Fq 'Command Centre <span>MAX™</span>' public/miniapp/index.html
+          grep -Fq 'command-centre-max' public/miniapp/max.js
+          grep -Fq 'max-public-feed' public/miniapp/max.js
           grep -Fq 'WORLDZLAUNCHPAD™' public/miniapp/index.html
           grep -Fq 'WorldzLaunchPad™' public/miniapp/auto-owner.js
           grep -Fq 'zed-miniapp-rescue' public/miniapp/app.js
@@ -105,11 +110,15 @@ jobs:
                   hcode,html=get('/miniapp/?verify=worldzlaunchpad-rescue')
                   jcode,js=get('/miniapp/app.js?verify=worldzlaunchpad-rescue')
                   acode,auto=get('/miniapp/auto-owner.js?verify=worldzlaunchpad-rescue')
-                  assert hcode==200 and 'WORLDZLAUNCHPAD™' in html
+                  mcode,maxjs=get('/miniapp/max.js?verify=command-centre-max')
+                  xcode,maxcss=get('/miniapp/max.css?verify=command-centre-max')
+                  assert hcode==200 and 'WORLDZLAUNCHPAD™' in html and 'Command Centre <span>MAX™</span>' in html
                   assert 'BASED.BID' not in html.upper()
                   assert jcode==200 and 'zed-miniapp-rescue' in js
-                  assert acode==200 and 'WorldzLaunchPad™' in auto
-                  print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 worldzlaunchpad=1 basedbid=0')
+                  assert acode==200 and 'WorldzLaunchPad™' in auto and 'Command Centre MAX™' in auto
+                  assert mcode==200 and 'command-centre-max' in maxjs and 'LEARN' in maxjs and 'RESEARCH' in maxjs
+                  assert xcode==200 and '.max-home-card' in maxcss
+                  print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 max=1 worldzlaunchpad=1 basedbid=0')
                   raise SystemExit(0)
               except SystemExit:
                   raise
