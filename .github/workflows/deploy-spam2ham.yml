@@ -86,14 +86,20 @@ jobs:
           print(f"SPAM2HAM_UPLOAD=PASS files={uploaded}")
           PY
 
-      - name: Verify public subdomain
+      - name: Verify public Spam2Ham build
         run: |
           set -euo pipefail
-          body="$(curl --fail --silent --show-error --location --retry 6 --retry-delay 5 --max-time 20 https://spam2ham.cryptoworldz.xyz/)"
+          live="https://cryptoworldz.xyz/spam2ham/"
+          body="$(curl --fail --silent --show-error --location --retry 6 --retry-delay 5 --max-time 20 "$live")"
           printf '%s' "$body" | grep -q '2026-09-20-spam2ham-coin-rescue-v2'
           printf '%s' "$body" | grep -q 'Kill Spam. Earn HAM. Turn Bytes into Bites.'
           printf '%s' "$body" | grep -q 'SPAM COIN RESCUE'
           printf '%s' "$body" | grep -q 'HAM Node Mesh'
-          js="$(curl --fail --silent --show-error --location --retry 4 --retry-delay 3 --max-time 20 https://spam2ham.cryptoworldz.xyz/coin-rescue.js)"
+          js="$(curl --fail --silent --show-error --location --retry 4 --retry-delay 3 --max-time 20 "${live}coin-rescue.js")"
           printf '%s' "$js" | grep -q 'spam2ham-solana-scan'
-          echo "SPAM2HAM_PUBLIC_VERIFY=PASS coin_rescue=1 ham_nodes=1 read_only=1"
+          if curl --fail --silent --head --max-time 10 https://spam2ham.cryptoworldz.xyz/ >/dev/null 2>&1; then
+            echo "SPAM2HAM_SUBDOMAIN_DNS=LIVE"
+          else
+            echo "::warning::spam2ham.cryptoworldz.xyz DNS is not resolving yet; canonical subdomain remains pending DNS mapping."
+          fi
+          echo "SPAM2HAM_PUBLIC_VERIFY=PASS path_live=1 coin_rescue=1 ham_nodes=1 read_only=1"
