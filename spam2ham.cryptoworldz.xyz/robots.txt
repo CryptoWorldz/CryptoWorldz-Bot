@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://spam2ham.cryptoworldz.xyz/sitemap.xml
