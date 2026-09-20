@@ -114,6 +114,16 @@
         <div class="max-truth ultimate-note"><b>MAX learns by building a reviewed knowledge registry — not by silently rewriting itself.</b><br>Research becomes knowledge only after it is sourced and approved. Human leadership stays above automation.</div>
       </article>
 
+      <div class="section-title"><h2>🤖 Ask ZED + MAX</h2></div>
+      <article class="panel">
+        <p>Ask from the approved MAX knowledge registry first. If MAX does not know yet, send the question to the Research Desk instead of inventing an answer.</p>
+        <form id="max-ask-form" class="max-search">
+          <input name="question" minlength="2" maxlength="240" required placeholder="Ask about liquidity, wallets, WorldzLaunchPad, OmniChain…">
+          <button class="button" type="submit">Ask</button>
+        </form>
+        <div id="max-answer"></div>
+      </article>
+
       <div class="section-title"><h2>📚 MAX Academy</h2><span class="max-chip done">${complete}/${lessons.length} complete</span></div>
       <div class="max-progress"><span style="width:${pct}%"></span></div>
       <div id="max-lessons">${lessons.map(lessonMarkup).join('') || '<div class="empty">No approved MAX lessons yet.</div>'}</div>
@@ -252,6 +262,25 @@
   });
 
   document.addEventListener('submit', async (event) => {
+    if(event.target.id==='max-ask-form'){
+      event.preventDefault();
+      const fd=new FormData(event.target);
+      const q=String(fd.get('question')||'').trim().toLowerCase();
+      const terms=q.split(/\s+/).filter(x=>x.length>2);
+      const lessons=maxState.dashboard?.lessons||[];
+      const ranked=lessons.map(item=>{
+        const hay=[item.title,item.summary,item.body_md,(item.tags||[]).join(' '),item.category].join(' ').toLowerCase();
+        const score=terms.reduce((sum,t)=>sum+(hay.includes(t)?1:0),0);
+        return {item,score};
+      }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
+      const holder=$('#max-answer');
+      if(!ranked.length){
+        holder.innerHTML='<div class="ultimate-note ultimate-danger"><b>MAX does not have an approved answer for that yet.</b><br>Use the Research Desk below so the question is investigated and reviewed instead of guessed.</div>';
+      }else{
+        holder.innerHTML=ranked.map(({item})=>`<div class="panel max-research-row"><b>${esc(item.title)}</b><p>${esc(item.summary)}</p><small>Approved MAX knowledge • ${esc(item.category)} • confidence ${Number(item.confidence)||0}%</small></div>`).join('');
+      }
+      return;
+    }
     if(event.target.id==='max-research-form'){
       event.preventDefault();
       const fd=new FormData(event.target);
