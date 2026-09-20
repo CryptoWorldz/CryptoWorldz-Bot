@@ -38,6 +38,9 @@ jobs:
           test -s public/miniapp/auto-owner.js
           test -s public/miniapp/max.js
           test -s public/miniapp/max.css
+          node --check public/miniapp/app.js
+          node --check public/miniapp/max.js
+          node --check public/miniapp/auto-owner.js
           grep -Fq 'Command Centre <span>MAX™</span>' public/miniapp/index.html
           grep -Fq 'command-centre-max' public/miniapp/max.js
           grep -Fq 'max-public-feed' public/miniapp/max.js
