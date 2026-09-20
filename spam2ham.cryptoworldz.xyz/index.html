@@ -45,11 +45,11 @@
 @media(max-width:620px){.countdown-grid,.how-grid,.metric-grid,.roadmap-grid,.reward-choice{grid-template-columns:1fr}.s2h-hero{border-radius:14px}.timer-box{min-height:250px}}
 </style>
 </head>
-<body data-oneworldz-build="2026-09-20-spam2ham-subdomain-v1">
+<body data-oneworldz-build="2026-09-20-spam2ham-coin-rescue-v2">
 <nav class="nav">
 <a href="https://oneworldz.com">OneWorldz</a>
 <a class="brand" href="https://cryptoworldz.xyz/">CryptoWorldz</a>
-<a href="/" aria-current="page">Spam2Ham</a>
+<a href="/" aria-current="page">Spam2Ham</a>\n<a href="#spamcoins">Spam Coins</a>
 <a href="https://cryptobotz.cryptoworldz.xyz">Command Centre</a>
 <a href="https://donateworldz.com">DonateWorldz</a>
 </nav>
@@ -115,6 +115,70 @@
 <button class="btn secondary" type="button" id="copyReceipt">Copy Pilot Receipt</button>
 </div>
 </div>
+</div>
+</section>
+
+<section class="section coin-lab" id="spamcoins">
+<div class="coin-kicker">SPAM COIN RESCUE™ • SOLANA READ-ONLY PILOT</div>
+<h2>Turn wallet clutter into <span>useful choices.</span></h2>
+<p class="coin-lead">Spam2Ham is now researching the wallet side too. The rule is simple: <strong>we never pretend a worthless token magically becomes money.</strong> We first find out what the wallet actually owns, what is safe to leave alone, what may have a real market route, and what token accounts may be eligible for safe cleanup.</p>
+
+<div class="truth-strip"><strong>Important:</strong> receiving an unknown token does not by itself compromise your wallet. If we cannot establish a safe action, the default answer is <strong>IGNORE / HIDE</strong> — not “click it and hope.” The scanner below reads public blockchain data only. It does not connect your wallet, sign anything, open token links, burn anything or move funds.</div>
+
+<div class="coin-flow">
+<div><b>1 • FIND</b><small>Read SPL Token + Token-2022 accounts from the public Solana chain.</small></div>
+<div><b>2 • CHECK</b><small>Resolve by mint address and compare verification, market and token-program signals.</small></div>
+<div><b>3 • CHOOSE</b><small>KEEP / REVIEW, market-route review, close candidate, or IGNORE FIRST.</small></div>
+<div><b>4 • CLEAN</b><small>Future execution: allow-listed instructions only, simulated before wallet signature.</small></div>
+<div><b>5 • USE IT</b><small>After confirmed recovery: KEEP, WORLDZ, DONATE, SHARE or CHRISTMAS GIFT.</small></div>
+</div>
+
+<div class="coin-scanner">
+<div class="coin-scanner-head">
+<div><h3>🔎 Read-Only Spam Coin Scanner</h3><p class="small-note">Paste a <strong>public Solana wallet address</strong>. No seed phrase. No private key. No wallet connection.</p></div>
+<span class="coin-readonly">READ ONLY • NO SIGNATURE</span>
+</div>
+<form id="coinScanForm" class="coin-form">
+<input id="coinWallet" name="wallet" autocomplete="off" spellcheck="false" inputmode="text" maxlength="44" placeholder="Solana public wallet address" required>
+<button class="btn" type="submit">Scan Public Wallet</button>
+</form>
+<div id="coinScanStatus" class="coin-status">Ready. Public-chain inventory only.</div>
+<div id="coinScanSummary" class="coin-summary" hidden></div>
+<div id="coinScanResults" class="coin-results"></div>
+<p class="small-note">*Account lamports shown by the scanner are an on-chain balance estimate, not a promised refund. A token account is only called recovered after an eligible close transaction confirms. Token-2022 requires extension-specific checks before any cleanup transaction.</p>
+</div>
+
+<div style="margin-top:22px">
+<p class="eyebrow">Two brains are better than one</p>
+<h2>HAM Node Mesh™</h2>
+<p>The safest version is not one giant bot with permission to do everything. Each node gets one job, a narrow permission boundary and proof before handing work to the next.</p>
+<div class="ham-node-grid">
+<article class="ham-node"><span class="node-no">NODE 01</span><h3>Inventory Node</h3><p>Solana RPC discovers token accounts, balances, program type and account lamports. Public wallet data only.</p></article>
+<article class="ham-node"><span class="node-no">NODE 02</span><h3>Trust + Market Node</h3><p>Jupiter verification, organic score, holders, liquidity and audit signals add context. No single score gets to decide “safe.”</p></article>
+<article class="ham-node"><span class="node-no">NODE 03</span><h3>Route + Value Node</h3><p>A displayed price is not enough. Future salvage requires a fresh executable quote, minimum output, slippage and fees.</p></article>
+<article class="ham-node"><span class="node-no">NODE 04</span><h3>Safe Execution Node</h3><p>Inspect Token-2022 extensions, allow-list instructions, simulate the transaction, display every destination, then ask the wallet to sign.</p></article>
+<article class="ham-node"><span class="node-no">NODE 05</span><h3>Worldz Choice Router</h3><p>Cleanup finishes first. Only then can the user separately choose KEEP, WORLDZ, DONATE, SHARE or CHRISTMAS.</p></article>
+<article class="ham-node"><span class="node-no">NODE 06</span><h3>Proof Node</h3><p>Confirm the transaction and produce a plain-English receipt showing what was burned, closed, swapped, kept or redirected.</p></article>
+</div>
+</div>
+
+<div style="margin-top:22px">
+<p class="eyebrow">The useful reaction</p>
+<h2>Clean first. Then choose where real recovered value goes.</h2>
+<div class="value-router">
+<div class="value-choice"><b>KEEP 💵</b><small>Keep confirmed SOL/USDC or other supported output.</small></div>
+<div class="value-choice locked"><b>WORLDZ 🌐 🔒</b><small>Unlock only after a verified mainnet Worldz mint, real liquidity and executable route exist.</small></div>
+<div class="value-choice"><b>DONATE 🍽️</b><small>Explicitly choose an approved DonateWorldz destination after cleanup.</small></div>
+<div class="value-choice"><b>SHARE 💜</b><small>Send a user-chosen amount to another wallet in a separate transaction.</small></div>
+<div class="value-choice"><b>CHRISTMAS 🎄🎁</b><small>Turn confirmed recovered value into a transparent gift allocation or transfer.</small></div>
+</div>
+<div class="truth-strip"><strong>No hidden second action.</strong> A “clean wallet” signature must never secretly buy a token, donate, grant a delegate, transfer to somebody else or approve future spending. Cleanup and value-routing remain separate user-approved transactions.</div>
+</div>
+
+<div class="actions">
+<a class="btn secondary" href="https://solana.com/docs/tokens/basics/burn-tokens" target="_blank" rel="noopener">Solana — Burn Tokens</a>
+<a class="btn secondary" href="https://solana.com/docs/tokens/basics/close-account" target="_blank" rel="noopener">Solana — Close Accounts</a>
+<a class="btn secondary" href="https://developers.jup.ag/docs/tokens/token-information" target="_blank" rel="noopener">Jupiter — Token Signals</a>
 </div>
 </section>
 
