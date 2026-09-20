@@ -38,8 +38,8 @@
     const wrapper = document.createElement('section');
     wrapper.id = 'auto-owner-panel';
     wrapper.className = 'panel ultimate-owner';
-    wrapper.innerHTML = `<div class="ultimate-owner-head"><p class="eyebrow">OWNER CONTROL • UPDATE ULTIMATE™ 🥏</p><h2>Command Centre Ultimate™</h2><p>Auto, Treasury, approvals and launch planning in one clean control surface.</p></div>
-      <div id="auto-owner-status" class="panel loading"><div class="orb"></div><p>Opening Ultimate controls…</p></div>`;
+    wrapper.innerHTML = `<div class="ultimate-owner-head"><p class="eyebrow">OWNER CONTROL • COMMAND CENTRE MAX™</p><h2>Command Centre MAX™</h2><p>Auto, Treasury, approvals and launch planning in one clean control surface.</p></div>
+      <div id="auto-owner-status" class="panel loading"><div class="orb"></div><p>Opening MAX controls…</p></div>`;
     return wrapper;
   }
 
@@ -253,7 +253,7 @@
 
     if (!ultimateResult.response.ok) {
       statusHolder.className = 'panel security';
-      statusHolder.innerHTML = `<b>ULTIMATE STATUS BRIDGE NOT READY</b><p>${escapeHtml(ultimateResult.payload.error || 'Ultimate controls are not available yet.')}</p>`;
+      statusHolder.innerHTML = `<b>MAX STATUS BRIDGE NOT READY</b><p>${escapeHtml(ultimateResult.payload.error || 'MAX controls are not available yet.')}</p>`;
       return;
     }
 
@@ -274,9 +274,9 @@
         <div><small>Owner</small><strong>JayJayTeamDev • PERMANENT</strong></div>
         <div><small>Next Funding</small><strong>${escapeHtml(localDateTime(ultimate.nextFunding?.scheduledAt))}</strong></div>
         <div><small>Approval</small><strong>2 OF 3</strong></div>
-        <div><small>Ultimate Execution</small><strong>${ultimate.executionEnabled ? 'ENABLED' : 'LOCKED'}</strong></div>
+        <div><small>MAX Execution</small><strong>${ultimate.executionEnabled ? 'ENABLED' : 'LOCKED'}</strong></div>
       </div>
-      <nav class="ultimate-gateway" aria-label="Ultimate owner controls">
+      <nav class="ultimate-gateway" aria-label="MAX owner controls">
         <button class="button active" type="button" data-ultimate-view="plan">📅 PLAN</button>
         <button class="button secondary" type="button" data-ultimate-view="treasury">🏦 TREASURY</button>
         <button class="button secondary" type="button" data-ultimate-view="diamond">💎 DIAMOND BUY</button>
@@ -336,7 +336,7 @@
   function refresh() {
     const panel = document.querySelector('#auto-owner-panel');
     if (!panel) return;
-    panel.innerHTML = `<div class="ultimate-owner-head"><p class="eyebrow">OWNER CONTROL • UPDATE ULTIMATE™ 🥏</p><h2>Command Centre Ultimate™</h2><p>Auto, Treasury, approvals and launch planning in one clean control surface.</p></div><div id="auto-owner-status" class="panel loading"><div class="orb"></div><p>Refreshing Ultimate…</p></div>`;
+    panel.innerHTML = `<div class="ultimate-owner-head"><p class="eyebrow">OWNER CONTROL • COMMAND CENTRE MAX™</p><h2>Command Centre MAX™</h2><p>Auto, Treasury, approvals and launch planning in one clean control surface.</p></div><div id="auto-owner-status" class="panel loading"><div class="orb"></div><p>Refreshing MAX…</p></div>`;
     loadPanel(panel);
   }
 
