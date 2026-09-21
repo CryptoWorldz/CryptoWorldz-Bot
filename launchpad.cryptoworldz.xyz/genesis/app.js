@@ -13,7 +13,8 @@ const $=s=>document.querySelector(s);
 const ENDPOINT='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-genesis-console';
 const DEV_WALLET='Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u';
 const METADATA_PROGRAM=new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
-const connection=new Connection(clusterApiUrl('mainnet-beta'),'confirmed');
+const WORLDZ_RPC='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';
+const connection=new Connection(WORLDZ_RPC,'confirmed');
 
 let wallet=null;
 let walletName='';
@@ -106,10 +107,16 @@ async function connect(){
       throw new Error(name+' connected the wrong wallet: '+address);
     }
     wallet=candidate;walletName=name;
-    const balance=await connection.getBalance(new PublicKey(address),'confirmed');
+    let balanceText='Balance check unavailable';
+    try{
+      const balance=await connection.getBalance(new PublicKey(address),'confirmed');
+      balanceText='Balance: '+(balance/LAMPORTS_PER_SOL).toFixed(5)+' SOL';
+    }catch(e){
+      console.warn('Non-blocking balance check failed',e);
+    }
     $('#wallet').textContent=short(address);$('#wallet').classList.add('connected');
     $('#auth').disabled=false;
-    setStatus('JUPITER CONNECTED ✅\n'+address+'\nBalance: '+(balance/LAMPORTS_PER_SOL).toFixed(5)+' SOL\n\nNow tap Authenticate Genesis Console. No transaction has been sent.','good');
+    setStatus('JUPITER CONNECTED ✅\n'+address+'\n'+balanceText+'\n\nNow tap Authenticate Genesis Console. No transaction has been sent.','good');
     return true;
   };
 
@@ -277,9 +284,15 @@ async function signAndSend(tx,signers=[]){
   // skipPreflight:false performs RPC preflight on the exact signed wire bytes.
   const wire=signed.serialize();
   const sig=await connection.sendRawTransaction(wire,{skipPreflight:false,maxRetries:3,preflightCommitment:'confirmed'});
-  const conf=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');
-  if(conf.value.err)throw new Error('Confirmation failed: '+JSON.stringify(conf.value.err));
-  return sig;
+  const deadline=Date.now()+90000;
+  while(Date.now()<deadline){
+    const st=await connection.getSignatureStatuses([sig],{searchTransactionHistory:true});
+    const s=st.value?.[0]||null;
+    if(s?.err)throw new Error('Confirmation failed: '+JSON.stringify(s.err));
+    if(s&&(s.confirmationStatus==='confirmed'||s.confirmationStatus==='finalized'))return sig;
+    await new Promise(r=>setTimeout(r,1500));
+  }
+  throw new Error('Transaction was sent but confirmation timed out. Signature: '+sig);
 }
 async function mintGenesis(symbol){
   const t=token(symbol);
