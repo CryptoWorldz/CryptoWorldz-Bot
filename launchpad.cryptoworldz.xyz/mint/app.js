@@ -323,10 +323,13 @@ async function signTransaction(tx,partialSigners=[]){
   let signed;
   if(walletCtx.kind==='standard'){
     const wire=tx.serialize({requireAllSignatures:false,verifySignatures:false});
-    const input={transaction:new Uint8Array(wire),account:walletCtx.account};
-    const accountChains=Array.isArray(walletCtx.account?.chains)?walletCtx.account.chains.map(String):[];
-    if(accountChains.includes(chain()))input.chain=chain();
-    const out=await walletCtx.wallet.features['solana:signTransaction'].signTransaction(input);
+    // Wallet Standard's direct signTransaction path takes account + serialized
+    // transaction. Do not pass a chain hint here; the official adapter omits it
+    // for signTransaction and some mobile wallets reject the extra argument.
+    const out=await walletCtx.wallet.features['solana:signTransaction'].signTransaction({
+      account:walletCtx.account,
+      transaction:new Uint8Array(wire)
+    });
     const bytes=out?.[0]?.signedTransaction;if(!bytes)throw new Error('Wallet returned no signed transaction.');
     signed=Transaction.from(bytes);
   }else signed=await walletCtx.provider.signTransaction(tx);
