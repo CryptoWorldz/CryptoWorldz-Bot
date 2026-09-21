@@ -1,0 +1,200 @@
+{
+  "version": "2026-09-21-worldz-treasury-v1",
+  "product": "WorldzLaunchPad™",
+  "status": "APPROVED_CONFIGURATION__SIGNER_AND_ONCHAIN_ROLLOUT_PENDING",
+  "feeCollection": {
+    "worldzSharePercentOfCollectedSupportedProjectTradingFee": 10,
+    "projectRetainedPercentOfCollectedSupportedProjectTradingFee": 90,
+    "worldzTokenSupplyTakePercent": 0,
+    "worldzInitialLiquidityTakePercent": 0,
+    "walletTransferTaxPercent": 0
+  },
+  "governance": {
+    "operations": {
+      "signers": 10,
+      "threshold": 5,
+      "display": "5-of-10"
+    },
+    "reserve": {
+      "signers": 9,
+      "threshold": 6,
+      "display": "6-of-9",
+      "maximumThreshold": 6
+    },
+    "maximumApprovalsRequiredByWorldzPolicy": 6
+  },
+  "signerSlots": [
+    {
+      "slot": "SIGNER_01",
+      "operationsMember": true,
+      "reserveCandidate": true,
+      "solanaPublicKey": null,
+      "evmAddress": null,
+      "xrplAddress": null,
+      "suiPublicKey": null,
+      "status": "UNASSIGNED"
+    },
+    {
+      "slot": "SIGNER_02",
+      "operationsMember": true,
+      "reserveCandidate": true,
+      "solanaPublicKey": null,
+      "evmAddress": null,
+      "xrplAddress": null,
+      "suiPublicKey": null,
+      "status": "UNASSIGNED"
+    },
+    {
+      "slot": "SIGNER_03",
+      "operationsMember": true,
+      "reserveCandidate": true,
+      "solanaPublicKey": null,
+      "evmAddress": null,
+      "xrplAddress": null,
+      "suiPublicKey": null,
+      "status": "UNASSIGNED"
+    },
+    {
+      "slot": "SIGNER_04",
+      "operationsMember": true,
+      "reserveCandidate": true,
+      "solanaPublicKey": null,
+      "evmAddress": null,
+      "xrplAddress": null,
+      "suiPublicKey": null,
+      "status": "UNASSIGNED"
+    },
+    {
+      "slot": "SIGNER_05",
+      "operationsMember": true,
+      "reserveCandidate": true,
+      "solanaPublicKey": null,
+      "evmAddress": null,
+      "xrplAddress": null,
+      "suiPublicKey": null,
+      "status": "UNASSIGNED"
+    },
+    {
+      "slot": "SIGNER_06",
+      "operationsMember": true,
+      "reserveCandidate": true,
+      "solanaPublicKey": null,
+      "evmAddress": null,
+      "xrplAddress": null,
+      "suiPublicKey": null,
+      "status": "UNASSIGNED"
+    },
+    {
+      "slot": "SIGNER_07",
+      "operationsMember": true,
+      "reserveCandidate": true,
+      "solanaPublicKey": null,
+      "evmAddress": null,
+      "xrplAddress": null,
+      "suiPublicKey": null,
+      "status": "UNASSIGNED"
+    },
+    {
+      "slot": "SIGNER_08",
+      "operationsMember": true,
+      "reserveCandidate": true,
+      "solanaPublicKey": null,
+      "evmAddress": null,
+      "xrplAddress": null,
+      "suiPublicKey": null,
+      "status": "UNASSIGNED"
+    },
+    {
+      "slot": "SIGNER_09",
+      "operationsMember": true,
+      "reserveCandidate": true,
+      "solanaPublicKey": null,
+      "evmAddress": null,
+      "xrplAddress": null,
+      "suiPublicKey": null,
+      "status": "UNASSIGNED"
+    },
+    {
+      "slot": "SIGNER_10",
+      "operationsMember": true,
+      "reserveCandidate": false,
+      "solanaPublicKey": null,
+      "evmAddress": null,
+      "xrplAddress": null,
+      "suiPublicKey": null,
+      "status": "UNASSIGNED"
+    }
+  ],
+  "chains": {
+    "solana": {
+      "provider": "Squads v4",
+      "operations": {
+        "multisigConfigAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+        "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+        "vaultIndex": 0,
+        "currentGovernance": "2-of-3",
+        "targetGovernance": "5-of-10",
+        "status": "CURRENT_VAULT_VERIFIED__MEMBER_AND_THRESHOLD_UPGRADE_REQUIRED"
+      },
+      "reserve": {
+        "targetGovernance": "6-of-9",
+        "multisigConfigAddress": null,
+        "vaultAddress": null,
+        "status": "NOT_DEPLOYED"
+      }
+    },
+    "evm": {
+      "provider": "Safe Smart Account",
+      "networks": [
+        "Ethereum",
+        "Base",
+        "BNB Chain",
+        "HyperEVM",
+        "future supported EVM chains"
+      ],
+      "operations": {
+        "targetGovernance": "5-of-10",
+        "safeAddress": null,
+        "status": "NOT_DEPLOYED"
+      },
+      "reserve": {
+        "targetGovernance": "6-of-9",
+        "safeAddress": null,
+        "status": "NOT_DEPLOYED"
+      }
+    },
+    "xrpl": {
+      "provider": "XRPL native SignerList multisigning",
+      "operations": {
+        "targetGovernance": "5-of-10",
+        "account": null,
+        "signerQuorum": 5,
+        "status": "NOT_DEPLOYED"
+      },
+      "reserve": {
+        "targetGovernance": "6-of-9",
+        "account": null,
+        "signerQuorum": 6,
+        "status": "NOT_DEPLOYED"
+      }
+    },
+    "sui": {
+      "provider": "Sui native multisig",
+      "operations": {
+        "targetGovernance": "5-of-10",
+        "multisigAddress": null,
+        "status": "NOT_DEPLOYED"
+      },
+      "reserve": {
+        "targetGovernance": "6-of-9",
+        "multisigAddress": null,
+        "status": "NOT_DEPLOYED"
+      }
+    }
+  },
+  "activation": {
+    "mainnetFeeRoutingEnabled": false,
+    "rule": "A chain may activate fee routing only after signer addresses, chain-native multisig configuration, destination address and an end-to-end 10% fee-only route are independently verified.",
+    "noPrivateKeysInRepository": true
+  }
+}
