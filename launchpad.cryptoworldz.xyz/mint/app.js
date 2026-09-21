@@ -100,23 +100,23 @@ function legacyProvider(){
 }
 function renderWallets(){
   const select=$('#wallet-choice'),list=walletStandardCandidates(),jupInjected=jupiterInjectedProvider();
+  const previous=select.value;
   select.innerHTML='';
-  if(jupInjected){
-    const inApp=document.createElement('option');
-    inApp.value='jupiter-inapp';
-    inApp.textContent='Jupiter In-App Wallet ⭐';
-    select.appendChild(inApp);
-  }
-  const mobile=document.createElement('option');
-  mobile.value='jupiter-mobile';
-  mobile.textContent='Jupiter Mobile via WalletConnect';
-  select.appendChild(mobile);
+
   list.forEach((w,i)=>{
     const o=document.createElement('option');
     o.value='standard:'+String(i);
     o.textContent=w.name+(/jupiter/i.test(w.name)?' ⭐':'');
     select.appendChild(o);
   });
+
+  if(jupInjected){
+    const inApp=document.createElement('option');
+    inApp.value='jupiter-inapp';
+    inApp.textContent='Jupiter In-App Wallet ⭐';
+    select.appendChild(inApp);
+  }
+
   const generic=legacyProvider();
   if(generic&&generic!==jupInjected){
     const o=document.createElement('option');
@@ -124,7 +124,20 @@ function renderWallets(){
     o.textContent='Injected Solana wallet';
     select.appendChild(o);
   }
-  select.value=jupInjected?'jupiter-inapp':'jupiter-mobile';
+
+  const mobile=document.createElement('option');
+  mobile.value='jupiter-mobile';
+  mobile.textContent='Jupiter Mobile via WalletConnect';
+  select.appendChild(mobile);
+
+  const jupiterStandardIndex=list.findIndex(w=>/jupiter/i.test(String(w.name||'')));
+  if(jupiterStandardIndex>=0)select.value='standard:'+String(jupiterStandardIndex);
+  else if(jupInjected)select.value='jupiter-inapp';
+  else if(list.length)select.value='standard:0';
+  else if(generic)select.value='legacy';
+  else select.value='jupiter-mobile';
+
+  if(previous&&[...select.options].some(o=>o.value===previous)&&previous!=='jupiter-mobile')select.value=previous;
 }
 async function connectWallet(){
   if(busy)return;
@@ -133,7 +146,23 @@ async function connectWallet(){
   button.disabled=true;
   button.textContent='Opening Jupiter…';
   try{
-    const list=walletStandardCandidates(),choice=$('#wallet-choice').value;
+    const list=walletStandardCandidates();
+    let choice=$('#wallet-choice').value;
+    const jupiterStandardIndex=list.findIndex(w=>/jupiter/i.test(String(w.name||'')));
+
+    // Jupiter's in-app browser can register its wallet via Wallet Standard after page load.
+    // Prefer that native registration over the Reown/WalletConnect fallback every time.
+    if(choice==='jupiter-mobile'&&jupiterStandardIndex>=0){
+      choice='standard:'+String(jupiterStandardIndex);
+      $('#wallet-choice').value=choice;
+    }else if(choice==='jupiter-mobile'&&jupiterInjectedProvider()){
+      choice='jupiter-inapp';
+      $('#wallet-choice').value=choice;
+    }else if(choice==='jupiter-mobile'&&list.length){
+      choice='standard:0';
+      $('#wallet-choice').value=choice;
+    }
+
     if(choice==='jupiter-inapp'){
       const p=jupiterInjectedProvider();
       if(!p)throw new Error('Jupiter in-app provider disappeared. Reload the page inside Jupiter Wallet.');
@@ -327,5 +356,14 @@ $('#preflight').addEventListener('click',runPreflight);
 $('#mint-btn').addEventListener('click',mintFlow);
 $('#network').addEventListener('change',()=>{refreshConnection();preflightOk=false;$('#mint-btn').disabled=true;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
 $$('input,textarea,select').forEach(x=>{if(!['wallet-choice','network'].includes(x.id))x.addEventListener('input',()=>{allocationMath();});});
-renderWallets();getWallets().on('register',renderWallets);restorePending();allocationMath();renderProof();loadRegistry();
+renderWallets();
+getWallets().on('register',()=>{
+  const before=$('#wallet-choice').value;
+  renderWallets();
+  const after=$('#wallet-choice').value;
+  if(!walletCtx&&after!==before&&after!=='jupiter-mobile'){
+    setStatus('JUPITER / SOLANA WALLET DETECTED ✅\n'+($('#wallet-choice').selectedOptions[0]?.textContent||after)+'\nTap Connect Wallet.','good');
+  }
+});
+restorePending();allocationMath();renderProof();loadRegistry();
 import('/mint/jupiter-mobile.js?v=20260921-reown-v3').catch(error=>console.warn('Jupiter Mobile bridge preload failed',error));
