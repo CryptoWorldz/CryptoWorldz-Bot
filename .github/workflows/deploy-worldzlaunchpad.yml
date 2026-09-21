@@ -40,6 +40,8 @@ jobs:
           fee=platform['feePolicy']
           safe=platform['safeLaunchPolicy']
           treasury=platform['treasuryRouting']
+          founding=platform['founding100']
+          base_adapter=platform['baseEvmFair']
 
           assert platform['publicLaunchPad'] is True
           assert platform['publicLaunchIntakeEnabled'] is True
@@ -60,6 +62,18 @@ jobs:
           assert treasury['requiredThreshold']=='2-of-3'
           assert treasury['vaultAddress'] is None
           assert treasury['mainnetRoutingEnabled'] is False
+          assert founding['totalPositions']==100
+          assert founding['futureWorldzPoolPercent']==10
+          assert founding['equalAllocationPerQualifiedPositionPercent']==0.1
+          assert founding['devnetEligible'] is False
+          assert founding['priceOrVolumeRankingUsed'] is False
+          assert base_adapter['status']=='BASE_SEPOLIA_BETA'
+          assert base_adapter['chainId']==84532
+          assert base_adapter['mainnetChainId']==8453
+          assert base_adapter['mainnetExecution'] is False
+          assert base_adapter['tokenDeployment'] is True
+          assert base_adapter['liquidityPoolCreation'] is False
+          assert base_adapter['feeRouterExecuting'] is False
 
           assert safe['version']=='WORLDZ-SAFE-LAUNCH-1'
           assert safe['compulsory']['fixedSupply'] is True
@@ -87,6 +101,7 @@ jobs:
             root/'curve/index.html',root/'curve/app.js',
             root/'curve-pro/index.html',root/'curve-pro/app.js',
             root/'mainnet/index.html',root/'mainnet/app.js',
+            root/'base/index.html',root/'base/app.js',
             root/'omnichain/index.html'
           ]
           for p in required:
@@ -102,6 +117,8 @@ jobs:
           curve_pro_js=(root/'curve-pro/app.js').read_text()
           mainnet=(root/'mainnet/index.html').read_text()
           mainnet_js=(root/'mainnet/app.js').read_text()
+          base_html=(root/'base/index.html').read_text()
+          base_js=(root/'base/app.js').read_text()
 
           assert 'PUBLIC TOKEN LAUNCHPAD' in home
           assert 'Who will be first?' in home
@@ -110,6 +127,9 @@ jobs:
           assert 'of your token supply taken by WorldzLaunchPad' in home
           assert 'WORLDZ SAFE LAUNCH STANDARD' in home
           assert 'FIRST PUBLIC LAUNCH SLOT OPEN' in app
+          assert 'WORLDZLAUNCHPAD FOUNDING 100' in home
+          assert '10% of the future WORLDZ supply' in home
+          assert 'Founding 100 contract mismatch' in app
           assert 'platformShareCapPercentOfCollectedProjectFee' in app
 
           banned=[
@@ -143,8 +163,13 @@ jobs:
           assert "client.state.getPoolConfig(configKey.publicKey)" in mainnet_js
           assert "String(configInfo.feeClaimer)!==treasuryVault.toBase58()" in mainnet_js
           assert "Number(configInfo.creatorTradingFeePercentage)!==90" in mainnet_js
+          assert 'WORLDZ EVM FAIR' in base_html
+          assert 'Base Sepolia' in base_html
+          assert 'WORLDZ_SAFE_LAUNCH_VERSION = 1' in base_js
+          assert 'creator >5%' in base_js
+          assert 'duplicate recipient' in base_js
 
-          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_share=10 project_share=90 supply_take=0 liquidity_take=0 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
+          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_share=10 project_share=90 supply_take=0 liquidity_take=0 founding100=1 base_sepolia=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
 
       - name: Run 100+ anti-cheat tokenomics scenarios
         shell: python
@@ -303,14 +328,15 @@ jobs:
           banned=['REVIVE','RVIV','PHENIX','PNEX','MIRACLE','MRCL','WLDZ','GENESIS FOUR','Genesis Four','Legacy Loyalty','SolSavewXRP']
           for attempt in range(1,7):
               try:
-                  status,body=get(base+'/?verify=public-v5')
-                  _,platform_body=get(base+'/platform-config.json?verify=public-v5')
-                  dev_code,dev_body=get(base+'/devnet/?verify=public-v5')
-                  curve_code,curve_body=get(base+'/curve/?verify=public-v5')
-                  pro_code,pro_body=get(base+'/curve-pro/?verify=public-v5')
-                  mainnet_code,mainnet_body=get(base+'/mainnet/?verify=public-v5')
-                  status_code,status_body=get(base+'/status.php?verify=public-v5')
-                  reg_code,reg_body=get(registry+'?verify=public-v5')
+                  status,body=get(base+'/?verify=public-v6')
+                  _,platform_body=get(base+'/platform-config.json?verify=public-v6')
+                  dev_code,dev_body=get(base+'/devnet/?verify=public-v6')
+                  curve_code,curve_body=get(base+'/curve/?verify=public-v6')
+                  pro_code,pro_body=get(base+'/curve-pro/?verify=public-v6')
+                  mainnet_code,mainnet_body=get(base+'/mainnet/?verify=public-v6')
+                  base_code,base_body=get(base+'/base/?verify=public-v6')
+                  status_code,status_body=get(base+'/status.php?verify=public-v6')
+                  reg_code,reg_body=get(registry+'?verify=public-v6')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
 
                   assert status==200
@@ -326,16 +352,24 @@ jobs:
                   assert platform['feePolicy']['worldzLaunchPadShareOfTokenSupplyPercent']==0
                   assert platform['feePolicy']['worldzLaunchPadShareOfInitialLiquidityPercent']==0
                   assert platform['publicMainnetCreatorLaunchesEnabled'] is False
+                  assert platform['founding100']['totalPositions']==100
+                  assert platform['founding100']['futureWorldzPoolPercent']==10
+                  assert platform['baseEvmFair']['status']=='BASE_SEPOLIA_BETA'
+                  assert platform['baseEvmFair']['mainnetExecution'] is False
 
                   assert dev_code==200 and 'Create Devnet Token' in dev_body
                   assert curve_code==200 and 'Worldz Curve™' in curve_body
                   assert pro_code==200 and 'Worldz Curve Pro™' in pro_body
                   assert mainnet_code==200 and 'PUBLIC MAINNET ROUTE' in mainnet_body and 'Gate Locked' in mainnet_body and '10% ONLY' in mainnet_body
+                  assert base_code==200 and 'WORLDZ EVM FAIR™' in base_body and 'BASE SEPOLIA' in base_body
                   assert status_code==200 and live['ok'] is True
                   assert reg_code==200 and public_registry['ok'] is True
                   assert public_registry['platformSharePercentOfCollectedTokenFee']==10
+                  assert public_registry['founding100']['totalPositions']==100
+                  assert public_registry['founding100']['futureWorldzPoolPercent']==10
+                  assert public_registry['founding100']['equalAllocationPerQualifiedPositionPercent']==0.1
 
-                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 registry=1 fee_only_10=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
+                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 registry=1 fee_only_10=1 founding100=1 base_sepolia=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:
