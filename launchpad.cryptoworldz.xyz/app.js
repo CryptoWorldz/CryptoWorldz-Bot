@@ -88,11 +88,20 @@ function feeMath(){
   const gross=vol*(fee/100),worldz=gross*(platform.feePolicy.worldzLaunchPadShareOfCollectedProjectFeePercent/100),project=gross-worldz;
   $('#project-fee-value').textContent=fee.toFixed(2)+'%';
   $('#gross-fee').textContent=fmt(gross);$('#worldz-fee').textContent=fmt(worldz);$('#project-pool').textContent=fmt(project);
-  const total=$$('.route-input').reduce((s,x)=>s+(Number(x.value)||0),0);
+  const total=$('.route-input').reduce((s,x)=>s+(Number(x.value)||0),0);
   $('#route-total').textContent=total.toFixed(0)+'%';$('#route-total').className='pill '+(Math.abs(total-100)<.001?'safe':'locked');
+  const at=allocationTotal();
+  $('#allocation-total').textContent=at.toFixed(0)+'%';$('#allocation-total').className='pill '+(Math.abs(at-100)<.001?'safe':'locked');
 }
 function currentRoutes(){
-  const out={};$$('.route-input').forEach(x=>out[x.dataset.route]=Number(x.value)||0);return out;
+  const out={};$('.route-input').forEach(x=>out[x.dataset.route]=Number(x.value)||0);return out;
+}
+function currentAllocations(){
+  const out={};$('.allocation-input').forEach(x=>out[x.dataset.allocation]=Number(x.value)||0);return out;
+}
+function allocationTotal(){return Object.values(currentAllocations()).reduce((a,b)=>a+b,0);}
+function publicBenefitRouteTotal(){
+  const r=currentRoutes();return (r.holders||0)+(r.lp||0)+(r.community||0);
 }
 function manifestBase(){
   return {
@@ -116,6 +125,21 @@ function manifestBase(){
       projectDistributionPercent:currentRoutes(),
       walletTransferTax:false
     },
+    supplyAllocationPercent:currentAllocations(),
+    safetyPolicy:{
+      standard:platform.safeLaunchPolicy.version,
+      creatorUnlockedAtGenesisPercent:Number($('#creator-unlocked').value),
+      founderCliffDays:Number($('#founder-cliff').value),
+      founderVestingMonths:Number($('#founder-vesting').value),
+      creatorControlledLpLockPercent:100,
+      lpLockDays:Number($('#lp-lock-days').value),
+      treasuryProgramMultisigAddress:$('#multisig-address').value.trim(),
+      mintAuthorityRevocationMandatory:true,
+      freezeAuthorityRevocationMandatory:true,
+      walletTransferTaxPercent:0,
+      hiddenPrivateAllocationsAllowed:false,
+      blacklistOrSellRestrictionAllowed:false
+    },
     execution:{
       requestedEnvironment:'devnet',
       custody:'self-custody',
@@ -130,6 +154,7 @@ async function sha256(text){
 }
 async function runPreflight(){
   const m=manifestBase(),routes=Object.values(m.feePolicy.projectDistributionPercent).reduce((a,b)=>a+b,0);
+  const alloc=m.supplyAllocationPercent,allocTotal=Object.values(alloc).reduce((a,b)=>a+b,0),r=m.feePolicy.projectDistributionPercent,p=platform.safeLaunchPolicy;
   const checks=[
     ['Chain selected',!!m.network,m.network],
     ['Executable public test adapter',m.network==='solana'&&['flash','curve','curve-pro'].includes(m.launchEngine),m.network==='solana'&&['flash','curve','curve-pro'].includes(m.launchEngine)?'Solana Devnet • '+m.launchEngine:'Adapter not enabled yet'],
@@ -140,13 +165,28 @@ async function runPreflight(){
     ['Launch engine selected',!!m.launchEngine,m.launchEngine],
     ['Token name',m.token.name.length>=2,m.token.name||'Missing'],
     ['Ticker',/^[A-Z0-9_$]{2,10}$/.test(m.token.symbol),m.token.symbol||'Missing'],
-    ['Fixed supply',Number.isInteger(m.token.fixedSupply)&&m.token.fixedSupply>0,fmt(m.token.fixedSupply)],
-    ['Decimals',Number.isInteger(m.token.decimals)&&m.token.decimals>=0&&m.token.decimals<=9,String(m.token.decimals)],
-    ['Project trading fee',m.feePolicy.projectTradingFeePercent>=.5&&m.feePolicy.projectTradingFeePercent<=4,m.feePolicy.projectTradingFeePercent.toFixed(2)+'%'],
+    ['Fixed supply range',Number.isInteger(m.token.fixedSupply)&&m.token.fixedSupply>=p.token.supplyMin&&m.token.fixedSupply<=p.token.supplyMax,fmt(m.token.fixedSupply)],
+    ['Mint authority revocation',m.token.revokeMintAuthorityAfterInitialMint===true,'COMPULSORY AFTER GENESIS'],
+    ['Freeze authority revocation',m.token.freezeAuthority===false,'COMPULSORY'],
+    ['Decimals',Number.isInteger(m.token.decimals)&&m.token.decimals>=p.token.decimalsMin&&m.token.decimals<=p.token.decimalsMax,String(m.token.decimals)],
+    ['Genesis allocations = 100%',Math.abs(allocTotal-100)<.001,allocTotal.toFixed(0)+'%'],
+    ['Creator/team allocation cap',alloc.creatorTeam<=p.allocations.creatorTeamMaxPercent,alloc.creatorTeam.toFixed(1)+'% / max '+p.allocations.creatorTeamMaxPercent+'%'],
+    ['Creator liquid-at-genesis cap',m.safetyPolicy.creatorUnlockedAtGenesisPercent<=p.allocations.creatorTeamUnlockedAtGenesisMaxPercent,m.safetyPolicy.creatorUnlockedAtGenesisPercent.toFixed(1)+'% / max '+p.allocations.creatorTeamUnlockedAtGenesisMaxPercent+'%'],
+    ['Liquidity allocation range',alloc.liquidity>=p.allocations.liquidityMinPercent&&alloc.liquidity<=p.allocations.liquidityMaxPercent,alloc.liquidity.toFixed(1)+'%'],
+    ['Community/public minimum',alloc.communityPublic>=p.allocations.communityPublicMinPercent,alloc.communityPublic.toFixed(1)+'% / min '+p.allocations.communityPublicMinPercent+'%'],
+    ['Treasury/reserve cap',alloc.treasuryReserve<=p.allocations.treasuryReserveMaxPercent,alloc.treasuryReserve.toFixed(1)+'% / max '+p.allocations.treasuryReserveMaxPercent+'%'],
+    ['Founder cliff',m.safetyPolicy.founderCliffDays>=p.allocations.founderCliffMinDays,m.safetyPolicy.founderCliffDays+' days'],
+    ['Founder vesting',m.safetyPolicy.founderVestingMonths>=p.allocations.founderVestingMinMonths,m.safetyPolicy.founderVestingMonths+' months'],
+    ['Creator-controlled LP lock',m.safetyPolicy.creatorControlledLpLockPercent===100&&m.safetyPolicy.lpLockDays>=p.allocations.lpLockMinDays,'100% • '+m.safetyPolicy.lpLockDays+' days'],
+    ['Project trading fee',m.feePolicy.projectTradingFeePercent>=platform.feePolicy.projectTradingFeeMinPercent&&m.feePolicy.projectTradingFeePercent<=platform.feePolicy.projectTradingFeeMaxPercent,m.feePolicy.projectTradingFeePercent.toFixed(2)+'%'],
     ['Distribution routes = 100%',Math.abs(routes-100)<.001,routes.toFixed(0)+'%'],
+    ['Creator fee-route cap',r.creator<=p.feeRoutes.creatorMaxPercent,r.creator.toFixed(0)+'% / max '+p.feeRoutes.creatorMaxPercent+'%'],
+    ['Treasury fee-route cap',r.treasury<=p.feeRoutes.treasuryMaxPercent,r.treasury.toFixed(0)+'% / max '+p.feeRoutes.treasuryMaxPercent+'%'],
+    ['LP-growth fee-route minimum',r.lp>=p.feeRoutes.lpGrowthMinPercent,r.lp.toFixed(0)+'% / min '+p.feeRoutes.lpGrowthMinPercent+'%'],
+    ['Holders + LP + community minimum',publicBenefitRouteTotal()>=p.feeRoutes.holdersLpCommunityCombinedMinPercent,publicBenefitRouteTotal().toFixed(0)+'% / min '+p.feeRoutes.holdersLpCommunityCombinedMinPercent+'%'],
     ['Worldz platform rule',m.feePolicy.worldzLaunchPadShareOfCollectedProjectFeePercent===10,'10% of collected project fee revenue'],
-    ['Wallet transfer tax',m.feePolicy.walletTransferTax===false,'OFF'],
-    ['Mainnet creator execution',m.execution.publicMainnetCreatorLaunch===false,'LOCKED']
+    ['Wallet transfer tax',m.feePolicy.walletTransferTax===false,'0% • HARD LOCK'],
+    ['Mainnet enforcement',m.execution.publicMainnetCreatorLaunch===false,'FAIL-CLOSED UNTIL ON-CHAIN PROOF']
   ];
   $('#preflight-grid').innerHTML=checks.map(([label,ok,detail])=>`<div class="preflight ${ok?'pass':'fail'}"><span>${ok?'✓':'×'}</span><div><b>${label}</b><small>${detail}</small></div></div>`).join('');
   const all=checks.every(x=>x[1]);
@@ -157,7 +197,7 @@ async function runPreflight(){
   $('#download-manifest').disabled=!all;
   const link=$('#devnet-launch-link');
   if(all&&m.network==='solana'){
-    const route=m.feePolicy.projectDistributionPercent;\n    const q=new URLSearchParams({name:m.token.name,symbol:m.token.symbol,supply:String(m.token.fixedSupply),decimals:String(m.token.decimals),fixed:m.token.revokeMintAuthorityAfterInitialMint?'1':'0',description:m.token.description||'',engine:m.launchEngine,quote:m.quoteAsset,fee:String(m.feePolicy.projectTradingFeePercent),intent:hash,route_creator:String(route.creator||0),route_holders:String(route.holders||0),route_lp:String(route.lp||0),route_treasury:String(route.treasury||0),route_community:String(route.community||0)});
+    const route=m.feePolicy.projectDistributionPercent,alloc=m.supplyAllocationPercent,sp=m.safetyPolicy;\n    const q=new URLSearchParams({name:m.token.name,symbol:m.token.symbol,supply:String(m.token.fixedSupply),decimals:String(m.token.decimals),fixed:'1',description:m.token.description||'',engine:m.launchEngine,quote:m.quoteAsset,fee:String(m.feePolicy.projectTradingFeePercent),intent:hash,route_creator:String(route.creator||0),route_holders:String(route.holders||0),route_lp:String(route.lp||0),route_treasury:String(route.treasury||0),route_community:String(route.community||0),alloc_creatorTeam:String(alloc.creatorTeam||0),alloc_liquidity:String(alloc.liquidity||0),alloc_communityPublic:String(alloc.communityPublic||0),alloc_treasuryReserve:String(alloc.treasuryReserve||0),alloc_growthEcosystem:String(alloc.growthEcosystem||0),creator_unlocked:String(sp.creatorUnlockedAtGenesisPercent),founder_cliff:String(sp.founderCliffDays),founder_vesting:String(sp.founderVestingMonths),lp_lock_days:String(sp.lpLockDays),multisig:sp.treasuryProgramMultisigAddress});
     const routeBase=m.launchEngine==='curve'?'/curve/':m.launchEngine==='curve-pro'?'/curve-pro/':'/devnet/';
     link.href=routeBase+'?'+q.toString();link.classList.remove('disabled-link');link.setAttribute('aria-disabled','false');
     link.textContent=m.launchEngine==='curve'?'Open Worldz Curve Devnet →':m.launchEngine==='curve-pro'?'Open Curve Pro Devnet →':'Open Flash Devnet Launch →';
@@ -202,7 +242,7 @@ function bind(){
   $$('#chain-grid .choice').forEach(b=>b.addEventListener('click',()=>selectChoice('#chain-grid',b,'chain',b.dataset.chain)));
   $$('#engine-grid .choice').forEach(b=>b.addEventListener('click',()=>selectChoice('#engine-grid',b,'engine',b.dataset.engine)));
   $$('.quote').forEach(b=>b.addEventListener('click',()=>{$$('.quote').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');build.quote=b.dataset.quote;$('#wxrp-proof').classList.toggle('show',build.quote==='wXRP');}));
-  $('#project-fee').addEventListener('input',feeMath);$('#example-volume').addEventListener('input',feeMath);$$('.route-input').forEach(x=>x.addEventListener('input',feeMath));
+  $('#project-fee').addEventListener('input',feeMath);$('#example-volume').addEventListener('input',feeMath);$('.route-input').forEach(x=>x.addEventListener('input',feeMath));$('.allocation-input').forEach(x=>x.addEventListener('input',feeMath));
   $('#run-preflight').addEventListener('click',runPreflight);$('#download-manifest').addEventListener('click',downloadManifest);
   $('#wallet-mini').addEventListener('click',connectWallet);$('#refresh-runtime').addEventListener('click',refreshRuntime);
   $('#devnet-launch-link').addEventListener('click',e=>{if(e.currentTarget.getAttribute('aria-disabled')==='true')e.preventDefault();});
@@ -210,15 +250,17 @@ function bind(){
 async function boot(){
   try{
     const [a,b,c,d]=await Promise.all([
-      fetch('/tokens.json?v=20260920-platform-v3',{cache:'no-store'}),
-      fetch('/console-data.json?v=20260920-platform-v3',{cache:'no-store'}),
-      fetch('/wldz-mainnet-plan.json?v=20260920-platform-v3',{cache:'no-store'}),
-      fetch('/platform-config.json?v=20260920-platform-v3',{cache:'no-store'})
+      fetch('/tokens.json?v=20260921-safe-v4',{cache:'no-store'}),
+      fetch('/console-data.json?v=20260921-safe-v4',{cache:'no-store'}),
+      fetch('/wldz-mainnet-plan.json?v=20260921-safe-v4',{cache:'no-store'}),
+      fetch('/platform-config.json?v=20260921-safe-v4',{cache:'no-store'})
     ]);
     if(!a.ok||!b.ok||!c.ok||!d.ok)throw new Error('Launch data unavailable');
     registry=await a.json();details=await b.json();mainnet=await c.json();platform=await d.json();
     if(registry.status!=='candidate-mainnet-disabled'||registry.shared.mainnet_authorized!==false||mainnet.executionEnabled!==false||mainnet.launchAuthorization!==false||platform.publicMainnetCreatorLaunchesEnabled!==false)throw new Error('Fail-closed contract mismatch');
-    if(platform.feePolicy.projectTradingFeeMaxPercent!==4||platform.feePolicy.worldzLaunchPadShareOfCollectedProjectFeePercent!==10)throw new Error('Fair Fee contract mismatch');
+    if(platform.feePolicy.projectTradingFeeMaxPercent!==3||platform.feePolicy.worldzLaunchPadShareOfCollectedProjectFeePercent!==10)throw new Error('Fair Fee contract mismatch');
+    const p=platform.safeLaunchPolicy;
+    if(!p||p.version!=='WORLDZ-SAFE-LAUNCH-1'||p.compulsory.fixedSupply!==true||p.compulsory.revokeMintAuthorityAfterGenesis!==true||p.compulsory.revokeFreezeAuthorityAfterGenesis!==true||p.compulsory.walletTransferTaxPercent!==0||p.compulsory.treasuryProgramAuthorityMultisig!==true||p.allocations.creatorTeamMaxPercent!==15||p.allocations.creatorTeamUnlockedAtGenesisMaxPercent!==5||p.allocations.liquidityMinPercent!==25||p.allocations.creatorControlledLpLockPercent!==100||p.allocations.lpLockMinDays!==365)throw new Error('Safe Launch Standard contract mismatch');
     renderMarket();renderToken();renderProof();bind();feeMath();refreshRuntime();
   }catch(e){console.error(e);document.body.dataset.boot='failed';alert('WorldzLaunchPad refused to initialize because its verified configuration did not pass fail-closed checks.');}
 }
