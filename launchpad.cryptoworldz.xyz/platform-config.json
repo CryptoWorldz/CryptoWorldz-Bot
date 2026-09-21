@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-22-public-launchpad-v12-unsigned-image-upload",
+  "version": "2026-09-22-public-launchpad-v13-jupiter-three-approval-flow",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -521,7 +521,11 @@
       "rule": "Security is bound to the signing wallet address and cryptographic proof. Jupiter Wallet is presented first when Wallet Standard exposes it.",
       "jupiterMobileReownEnabled": true,
       "reownProjectIdConfigured": true,
-      "metadataOrigin": "https://launchpad.cryptoworldz.xyz"
+      "metadataOrigin": "https://launchpad.cryptoworldz.xyz",
+      "transactionSigning": {
+        "omitUnsupportedChainHint": true,
+        "reason": "Wallet Standard chain is optional. Only pass the selected chain when the connected account explicitly advertises it."
+      }
     },
     "marketRule": "WorldzMINT creates and proves a fixed-supply mint only. It does not create liquidity, assign a market cap, promise exchange listing, or imply investment performance.",
     "imageUpload": {
@@ -539,6 +543,18 @@
       "note": "Public token artwork upload/re-upload is separate from wallet authentication and blockchain signing. Wallet signatures remain required for mint lifecycle actions.",
       "walletConnectionRequired": false,
       "reuploadEnabled": true
+    },
+    "authentication": {
+      "mode": "ONCHAIN_TRANSACTION_SIGNATURES",
+      "walletMessageSignaturesRequired": false,
+      "transactionApprovalsRequired": 3,
+      "stages": [
+        "create fixed-supply mint",
+        "distribute exact genesis supply",
+        "create metadata and revoke Mint + Freeze authority"
+      ],
+      "prepareVerification": "Backend verifies creator-signed create-mint transaction, mint account, mint authority, freeze authority, zero initial supply and decimals before registry preparation.",
+      "finalVerification": "Backend independently verifies all three creator-signed transaction signatures, exact supply distribution, and revoked authorities."
     }
   },
   "confidenceCurve": {
