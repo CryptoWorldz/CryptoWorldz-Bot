@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#05020b">
   <title>Worldz Curve Pro™ | Meteora DBC Devnet</title>
-  <link rel="stylesheet" href="/style.css?v=20260920-platform-v3">
+  <link rel="stylesheet" href="/style.css?v=20260921-safe-v4">
   <style>
     .lab{max-width:1120px;margin:auto;padding:58px 18px 100px}.hero2{padding:30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#6a5cff14,#d64cff0a);margin-bottom:14px}
     .hero2 h1{font-size:clamp(2.7rem,7vw,5.8rem);line-height:.9;letter-spacing:-.055em;margin:8px 0 14px}.hero2 h1 span{color:#c47cff}.truth{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}.truth div,.card{border:1px solid #ffffff0d;border-radius:14px;padding:13px;background:#ffffff03}.truth small{display:block;color:#75677f;text-transform:uppercase;font-size:.58rem;letter-spacing:.08em}.truth b{font-size:.8rem}.stack{display:grid;gap:12px}.card h2{margin:0 0 5px}.card p{color:#8b7b95;font-size:.76rem}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form label{display:grid;gap:5px;color:#9584a0;font-size:.7rem}.form input,.form textarea{width:100%;border:1px solid #ffffff12;border-radius:11px;background:#07030d;color:#fff;padding:11px}.form textarea{min-height:80px}.wide{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.status{margin-top:12px;border:1px solid #ffffff0d;border-radius:12px;padding:12px;color:#9686a0;font-size:.7rem;white-space:pre-wrap;word-break:break-word}.status.good{border-color:#55e6a533;color:#76e8b7}.status.bad{border-color:#ff6d8a33;color:#ff9caf}.status.warn{border-color:#ffd16633;color:#d9bf83}.proof{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.proof div{border:1px solid #ffffff0c;border-radius:11px;padding:10px;font-size:.68rem;color:#88798f}.proof b{display:block;color:#d2c5d9}.proof .pass{border-color:#55e6a52d}.proof .wait{border-color:#ffd1662d}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}.warnbox{border-left:3px solid #ffd166;background:#ffd16608;padding:12px;color:#a99370;font-size:.7rem;margin-top:12px}.result{display:none;margin-top:12px;border:1px solid #55e6a533;border-radius:12px;padding:12px}.result.show{display:block}.result p{margin:6px 0;color:#94869d;font-size:.7rem}
@@ -38,19 +38,19 @@
       <div class="form">
         <label>Token name<input id="name" maxlength="32" placeholder="Worldz Curve Pro Test"></label>
         <label>Ticker<input id="symbol" maxlength="10" placeholder="WCP"></label>
-        <label>Fixed supply<input id="supply" inputmode="numeric" value="100000000"></label>
+        <label>Fixed supply<input id="supply" inputmode="numeric" placeholder="1,000 to 1,000,000,000,000"></label>
         <label>Decimals<input value="6" disabled></label>
-        <label>Project trading fee %<input id="fee" type="number" min="0.5" max="4" step="0.25" value="2"></label>
+        <label>Project trading fee %<input id="fee" type="number" min="0.5" max="3" step="0.25" value="1"></label>
         <label>Migration threshold (SOL)<input id="threshold" type="number" min="1" step="1" value="10"></label>
         <label>Supply migrating to DAMM V2 %<input id="migration-percent" type="number" min="10" max="90" step="1" value="25"></label>
-        <label>Locked token vesting %<input id="vesting-percent" type="number" min="0" max="50" step="1" value="0"></label>
-        <label>Vesting cliff (days)<input id="cliff-days" type="number" min="0" max="3650" value="90"></label>
-        <label>Vesting duration (months)<input id="vesting-months" type="number" min="1" max="120" value="24"></label>
+        <label>Creator/team locked vesting % (max 15)<input id="vesting-percent" type="number" min="0" max="15" step="1" value="0"></label>
+        <label>Vesting cliff (days, min 90)<input id="cliff-days" type="number" min="90" max="3650" value="90"></label>
+        <label>Vesting duration (months, min 18)<input id="vesting-months" type="number" min="18" max="120" value="24"></label>
         <label class="wide">Description<textarea id="description" maxlength="500" placeholder="What is this Devnet project proving?"></textarea></label>
         <label>Image URL<input id="image" type="url" placeholder="https://.../token.png"></label>
         <label>Website<input id="website" type="url" value="https://launchpad.cryptoworldz.xyz"></label>
       </div>
-      <div class="warnbox">DBC's pre-graduation trading fee is configured per launch. 90% of that fee is allocated to the creator side and 10% to the Worldz partner side. After graduation, DAMM V2 uses its own pool-fee mechanics, which Worldz Proof reports separately rather than pretending the pre-graduation split continues unchanged.</div>
+      <div class="warnbox"><b>DEVNET ENGINE NOTICE</b><br>Meteora DBC's native partner/creator fee split is not the same as the configurable Worldz Safe Launch fee-router model. Curve Pro is therefore DEVNET-ONLY until its mainnet adapter can enforce the full Safe Launch Standard. Project trading fee is capped at 3%; creator/team locked vesting is capped at 15% with a minimum 90-day cliff and 18-month duration. Graduated liquidity remains 100% permanently locked.</div>
       <div class="actions"><button class="btn secondary" id="check-btn" type="button">Build + Validate Curve</button><button class="btn primary" id="launch-btn" type="button" disabled>Create Meteora DBC Devnet Launch</button></div>
       <div class="status" id="status">Connect a wallet and validate the curve before signing.</div>
     </section>
@@ -66,6 +66,6 @@
   </div>
 </main>
 <footer><div><b>Worldz Curve Pro™</b> • Meteora DBC Devnet adapter</div><p>Devnet testing only. Public mainnet creator execution remains disabled.</p></footer>
-<script type="module" src="/curve-pro/app.js?v=20260920-curve-pro-v1"></script>
+<script type="module" src="/curve-pro/app.js?v=20260921-curve-pro-safe-v4"></script>
 </body>
 </html>
