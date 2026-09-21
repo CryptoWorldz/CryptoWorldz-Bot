@@ -1,5 +1,6 @@
 import {Connection,Keypair,PublicKey,clusterApiUrl} from 'https://esm.sh/@solana/web3.js@1.98.4?bundle';
 import {NATIVE_MINT} from 'https://esm.sh/@solana/spl-token@0.4.14?bundle';
+import {getWallets} from 'https://esm.sh/@wallet-standard/app@1.1.0?bundle';
 import {
   DynamicBondingCurveClient,deriveDbcPoolAddress,buildCurve,
   TokenType,TokenDecimal,TokenAuthorityOption,BaseFeeMode,CollectFeeMode,
@@ -13,7 +14,29 @@ const DBC_PROGRAM=new PublicKey('dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN');
 const REGISTER_URL='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register';
 let wallet=null,client=null,platform=null,treasuryVault=null,serverGate=false,curveConfig=null,preflight=false,baseMint=null,configKey=null,poolId='',launchTx='',registered=false;
 
-function provider(){return [window.phantom&&window.phantom.solana,window.solflare,window.solana].filter(Boolean).find(p=>typeof p.connect==='function'&&typeof p.signTransaction==='function')||null;}
+function walletStandardCandidate(){
+  try{return getWallets().get().filter(w=>w?.features?.['standard:connect']&&w?.features?.['solana:signTransaction']&&w?.features?.['solana:signMessage']&&w.chains?.includes('solana:mainnet')).sort((a,b)=>Number(!/jupiter/i.test(a.name))-Number(!/jupiter/i.test(b.name)))[0]||null;}catch{return null}
+}
+function legacyProvider(){return [window.jupiter&&window.jupiter.solana,window.phantom&&window.phantom.solana,window.solflare,window.solana].filter(Boolean).find(p=>typeof p.connect==='function'&&typeof p.signTransaction==='function'&&typeof p.signMessage==='function')||null;}
+async function connectProvider(){
+  const standard=walletStandardCandidate();
+  if(standard){
+    const out=await standard.features['standard:connect'].connect();
+    const account=(out?.accounts||standard.accounts||[])[0];if(!account)throw new Error('Wallet returned no Solana account.');
+    return {
+      name:standard.name,publicKey:new PublicKey(account.address),
+      async signTransaction(tx){
+        const wire=tx.serialize({requireAllSignatures:false,verifySignatures:false});
+        const out=await standard.features['solana:signTransaction'].signTransaction({transaction:new Uint8Array(wire),account,chain:'solana:mainnet'});
+        const bytes=out?.[0]?.signedTransaction;if(!bytes)throw new Error('Wallet returned no signed transaction.');return (await import('https://esm.sh/@solana/web3.js@1.98.4?bundle')).Transaction.from(bytes);
+      },
+      async signMessage(bytes){const out=await standard.features['solana:signMessage'].signMessage({message:bytes,account});const sig=out?.[0]?.signature;if(!sig)throw new Error('Wallet returned no message signature.');return {signature:new Uint8Array(sig)};}
+    };
+  }
+  const p=legacyProvider();if(!p)return null;
+  const out=await p.connect(),pk=(out&&out.publicKey)||p.publicKey;if(!pk)throw new Error('Wallet returned no public key.');
+  return {name:'Injected Solana Wallet',publicKey:pk,signTransaction:tx=>p.signTransaction(tx),signMessage:(bytes)=>p.signMessage(bytes,'utf8')};
+}
 function setStatus(id,text,type=''){const el=$(id);if(!el)return;el.textContent=text;el.className='status'+(type?' '+type:'');}
 function meta(){return {description:$('#description').value.trim(),image:$('#image').value.trim(),website:$('#website').value.trim()};}
 async function sha256(text){const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('');}
@@ -24,7 +47,7 @@ function values(){return {name:$('#name').value.trim(),symbol:$('#symbol').value
 async function loadGate(){
   try{
     const [a,b]=await Promise.all([
-      fetch('/platform-config.json?v=20260921-public-v5',{cache:'no-store'}),
+      fetch('/platform-config.json?v=20260921-public-v9',{cache:'no-store'}),
       fetch(REGISTER_URL,{method:'GET',headers:{Accept:'application/json'},cache:'no-store'})
     ]);
     if(!a.ok||!b.ok)throw new Error('Gate data unavailable');
@@ -58,8 +81,10 @@ function renderGate(){
 }
 async function connect(){
   if(!gateOpen())return setStatus('#status','MAINNET GATE CLOSED. Wallet execution remains disabled.','bad');
-  wallet=provider();if(!wallet)return setStatus('#status','No compatible Solana wallet found. Open in Phantom/Solflare or enable a compatible desktop wallet.','bad');
-  try{const r=await wallet.connect(),pk=(r&&r.publicKey)||wallet.publicKey;if(!pk)throw new Error('No public key');$('#wallet').textContent=pk.toString().slice(0,4)+'…'+pk.toString().slice(-4);client=new DynamicBondingCurveClient(connection,'confirmed');return true;}catch(e){setStatus('#status','Wallet connection failed: '+(e?.message||e),'bad');return false;}
+  try{
+    wallet=await connectProvider();if(!wallet)return setStatus('#status','No compatible Solana wallet found. Jupiter Wallet is preferred when available; Wallet Standard, Phantom and Solflare-compatible wallets are supported.','bad');
+    const pk=wallet.publicKey;$('#wallet').textContent=(/jupiter/i.test(wallet.name)?'JUP ':'')+pk.toString().slice(0,4)+'…'+pk.toString().slice(-4);client=new DynamicBondingCurveClient(connection,'confirmed');return true;
+  }catch(e){setStatus('#status','Wallet connection failed: '+(e?.message||e),'bad');return false;}
 }
 function buildAndValidate(){
   const v=values(),errors=[];
