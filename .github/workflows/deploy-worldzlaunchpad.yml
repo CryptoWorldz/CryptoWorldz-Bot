@@ -221,11 +221,12 @@ jobs:
           assert 'worldz-trust-orbit' in trust_js
           assert all(term not in trust_html and term not in trust_js for term in banned)
 
+          import re
           assert app.count('})();')==1
-          assert "$('.route-input')" not in app
-          assert "$('.allocation-input')" not in app
-          assert "$('.route-input')" in app
-          assert "$('.allocation-input')" in app
+          assert not re.search(r"(?<!\$)\$\('\.route-input'\)",app)
+          assert not re.search(r"(?<!\$)\$\('\.allocation-input'\)",app)
+          assert "$$('.route-input')" in app
+          assert "$$('.allocation-input')" in app
 
           print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_share=10 project_share=90 treasury_ops=5of10 treasury_reserve=6of9 max_approvals=6 supply_take=0 liquidity_take=0 founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
 
