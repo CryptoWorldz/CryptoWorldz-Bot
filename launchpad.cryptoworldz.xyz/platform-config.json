@@ -1,7 +1,7 @@
 {
-  "version": "2026-09-21-worldzlaunchpad-safe-launch-v4",
+  "version": "2026-09-21-public-launchpad-v5",
   "product": "WorldzLaunchPad™",
-  "status": "safe-launch-devnet-public-mainnet-fail-closed",
+  "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
   "devnetTokenCreationEnabled": true,
   "principles": {
@@ -28,7 +28,11 @@
     "worldzLaunchPadShareOfCollectedProjectFeePercent": 10,
     "worldzLaunchPadShareOfTokenSupplyPercent": 0,
     "worldzLaunchPadShareOfInitialLiquidityPercent": 0,
-    "description": "WorldzLaunchPad permits a 0.50%–3.00% project trading-fee configuration only through supported launch routes. Ordinary wallet transfers carry 0% WorldzLaunchPad transfer tax. WorldzLaunchPad receives 10% of collected project trading-fee revenue, never token supply or initial liquidity."
+    "description": "WorldzLaunchPad permits a 0.50%–3.00% project trading-fee configuration only through supported launch routes. Ordinary wallet transfers carry 0% WorldzLaunchPad transfer tax. WorldzLaunchPad receives 10% of collected project trading-fee revenue, never token supply or initial liquidity.",
+    "platformShareCapPercentOfCollectedProjectFee": 10,
+    "projectRetainedShareOfCollectedProjectFeePercent": 90,
+    "walletTransferTaxPercent": 0,
+    "publicPromise": "WorldzLaunchPad takes 10% of the token's supported configured trading-fee revenue only — never 10% of token supply and never 10% of initial liquidity."
   },
   "launchEngines": [
     {
@@ -149,8 +153,7 @@
   "crossPair": {
     "name": "Worldz CrossPair™",
     "status": "BUILDING",
-    "firstCandidate": "SolSavewXRP $SAVE / wXRP",
-    "rule": "Pairing a project token against wXRP does not mean the project token is backed 1:1 by XRP. The verified wXRP quote asset itself carries the issuer's 1:1 backing claim."
+    "rule": "Public creators may select only verified quote assets supported by the selected launch engine. Pairing against a wrapped asset does not imply the creator token is backed by that asset."
   },
   "omnichain": {
     "name": "Worldz Omnichain™",
@@ -160,14 +163,14 @@
   },
   "releaseGate": {
     "mainnetCreatorLaunch": [
+      "verified Worldz Treasury Multisig vault address registered",
+      "10% platform fee-share route proven end-to-end",
       "Worldz Safe Launch Standard v1 hard-limit proof",
       "atomic genesis distribution to tagged destinations",
       "100% creator-controlled LP lock proof for at least 365 days",
       "founder vesting proof: at least 90-day cliff and 18-month vesting",
       "2-of-3 or stronger treasury/program multisig proof",
       "chain adapter security review",
-      "fee and routing proof",
-      "lock and vesting proof",
       "incident and recovery runbook",
       "accounting and recordkeeping runbook",
       "Australian regulatory and legal position for the exact service",
@@ -324,5 +327,24 @@
       "manifestHashRequired": true,
       "walletTagsRequired": true
     }
+  },
+  "publicLaunchPad": true,
+  "publicLaunchIntakeEnabled": true,
+  "publicLaunchRegistryEnabled": true,
+  "publicPositioning": {
+    "headline": "Public WorldzLaunchPad™",
+    "rule": "WorldzLaunchPad takes exactly 10% of the collected trading-fee revenue configured for a supported token launch route. The project keeps/routs the other 90%.",
+    "privateProjectPlansPublished": false,
+    "genesisTokensUsedAsPublicTestTokens": false
+  },
+  "treasuryRouting": {
+    "destination": "Worldz Treasury Multisig",
+    "provider": "Squads",
+    "network": "solana",
+    "requiredThreshold": "2-of-3",
+    "vaultAddress": null,
+    "status": "AWAITING_VERIFIED_VAULT_ADDRESS",
+    "mainnetRoutingEnabled": false,
+    "rule": "Public mainnet fee routing must not activate until the verified Treasury Multisig vault address is registered."
   }
 }
