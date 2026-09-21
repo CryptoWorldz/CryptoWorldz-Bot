@@ -174,13 +174,16 @@ function renderWallets(){
   select.appendChild(mobile);
 
   const jupiterStandardIndex=list.findIndex(w=>/jupiter/i.test(String(w.name||'')));
-  if(jupiterStandardIndex>=0)select.value='standard:'+String(jupiterStandardIndex);
-  else if(jupInjected)select.value='jupiter-inapp';
+  if(jupiterStandardIndex>=0){
+    // In Jupiter's in-app browser, Wallet Standard is authoritative.
+    // Never let a stale legacy selection override a detected Jupiter wallet.
+    select.value='standard:'+String(jupiterStandardIndex);
+  }else if(jupInjected)select.value='jupiter-inapp';
   else if(list.length)select.value='standard:0';
   else if(generic)select.value='legacy';
   else select.value='jupiter-mobile';
 
-  if(previous&&[...select.options].some(o=>o.value===previous)&&previous!=='jupiter-mobile')select.value=previous;
+  if(jupiterStandardIndex<0&&previous&&[...select.options].some(o=>o.value===previous)&&previous!=='jupiter-mobile')select.value=previous;
 }
 async function connectWallet(){
   if(busy)return;
@@ -193,9 +196,9 @@ async function connectWallet(){
     let choice=$('#wallet-choice').value;
     const jupiterStandardIndex=list.findIndex(w=>/jupiter/i.test(String(w.name||'')));
 
-    // Jupiter's in-app browser can register its wallet via Wallet Standard after page load.
-    // Prefer that native registration over the Reown/WalletConnect fallback every time.
-    if(choice==='jupiter-mobile'&&jupiterStandardIndex>=0){
+    // If Jupiter Wallet Standard is present, always use it. This prevents a stale
+    // "legacy/injected" selector value from sending Jupiter into the wrong branch.
+    if(jupiterStandardIndex>=0){
       choice='standard:'+String(jupiterStandardIndex);
       $('#wallet-choice').value=choice;
     }else if(choice==='jupiter-mobile'&&jupiterInjectedProvider()){
@@ -225,6 +228,7 @@ async function connectWallet(){
     }else if(choice.startsWith('standard:')){
       const idx=Number(choice.split(':')[1]),w=list[idx];
       if(!w)throw new Error('Selected Wallet Standard wallet is no longer available.');
+      setStatus('CONNECTING '+(/jupiter/i.test(String(w.name||''))?'JUPITER':'SOLANA')+' WALLET…\nUsing Wallet Standard. No blockchain transaction is being sent.','warn');
       const out=await w.features['standard:connect'].connect();
       const account=(out?.accounts||w.accounts||[])[0];if(!account)throw new Error('Wallet returned no Solana account.');
       walletCtx={kind:'standard',wallet:w,account,address:account.address,name:w.name};
