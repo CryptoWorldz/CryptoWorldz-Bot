@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05020b">
+  <title>WorldzLaunchPad™ | Public Mainnet Gate</title>
+  <link rel="stylesheet" href="/style.css?v=20260921-public-v5">
+  <style>
+    .lab{max-width:1120px;margin:auto;padding:58px 18px 100px}.hero2,.card{border:1px solid var(--line);border-radius:20px;background:#ffffff03}.hero2{padding:30px;margin-bottom:14px}.hero2 h1{font-size:clamp(2.7rem,7vw,5.8rem);line-height:.9;letter-spacing:-.055em;margin:8px 0 14px}.hero2 h1 span{color:#c47cff}.truth{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}.truth div{border:1px solid #ffffff0d;border-radius:14px;padding:13px}.truth small{display:block;color:#75677f;text-transform:uppercase;font-size:.58rem;letter-spacing:.08em}.truth b{font-size:.8rem}.stack{display:grid;gap:12px}.card{padding:18px}.card h2{margin:0 0 5px}.card p{color:#8b7b95;font-size:.76rem}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form label{display:grid;gap:5px;color:#9584a0;font-size:.7rem}.form input,.form textarea{width:100%;border:1px solid #ffffff12;border-radius:11px;background:#07030d;color:#fff;padding:11px}.form textarea{min-height:80px}.wide{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.status{margin-top:12px;border:1px solid #ffffff0d;border-radius:12px;padding:12px;color:#9686a0;font-size:.7rem;white-space:pre-wrap;word-break:break-word}.status.good{border-color:#55e6a533;color:#76e8b7}.status.bad{border-color:#ff6d8a33;color:#ff9caf}.status.warn{border-color:#ffd16633;color:#d9bf83}.proof{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.proof div{border:1px solid #ffffff0c;border-radius:11px;padding:10px;font-size:.68rem;color:#88798f}.proof b{display:block;color:#d2c5d9}.proof .pass{border-color:#55e6a52d}.proof .wait{border-color:#ffd1662d}.proof .block{border-color:#ff6d8a2d}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}.gate{border-left:3px solid #ff6d8a;background:#ff6d8a07;padding:13px;color:#b39098;font-size:.73rem}.gate.ready{border-left-color:#55e6a5;background:#55e6a507;color:#8cebc4}.result{display:none;margin-top:12px;border:1px solid #55e6a533;border-radius:12px;padding:12px}.result.show{display:block}
+    @media(max-width:760px){.truth,.form,.proof{grid-template-columns:1fr}.wide{grid-column:auto}.lab{padding-top:32px}}
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a>
+  <nav><a href="/">Public LaunchPad</a><a href="/devnet/">Flash Devnet</a><a href="/curve-pro/">Curve Pro Devnet</a></nav>
+  <button class="wallet-mini" id="wallet" type="button" disabled>Gate Locked</button>
+</header>
+<main class="lab">
+  <section class="hero2">
+    <div class="kicker">PUBLIC MAINNET ROUTE • METEORA DBC • FAIL-CLOSED</div>
+    <h1>READY TO LAUNCH.<br><span>ONLY WHEN VERIFIED.</span></h1>
+    <p class="lead">This is the production adapter for public creator launches. WorldzLaunchPad takes exactly 10% of the token's configured supported trading-fee revenue. The project side receives 90%. WorldzLaunchPad takes 0% of token supply and 0% of initial liquidity.</p>
+    <div class="truth">
+      <div><small>Project fee share</small><b>90%</b></div>
+      <div><small>Worldz fee share</small><b>10% ONLY</b></div>
+      <div><small>Worldz supply take</small><b>0%</b></div>
+      <div><small>Worldz initial LP take</small><b>0%</b></div>
+    </div>
+  </section>
+  <div class="stack">
+    <section class="card">
+      <h2>Production release gate</h2>
+      <div class="gate" id="gate">Checking the server-side mainnet gate and Treasury Multisig status…</div>
+      <div class="proof" id="gate-proof"></div>
+    </section>
+    <section class="card">
+      <h2>Creator launch configuration</h2>
+      <p>The form is production-ready but cannot sign or broadcast while the release gate is closed.</p>
+      <div class="form">
+        <label>Token name<input id="name" maxlength="32" placeholder="My Project Token"></label>
+        <label>Ticker<input id="symbol" maxlength="10" placeholder="TOKEN"></label>
+        <label>Fixed supply<input id="supply" inputmode="numeric" placeholder="1,000 to 1,000,000,000,000"></label>
+        <label>Decimals<input value="6" disabled></label>
+        <label>Project trading fee %<input id="fee" type="number" min="0.5" max="3" step="0.25" value="1"></label>
+        <label>Migration threshold (SOL)<input id="threshold" type="number" min="1" step="1" value="10"></label>
+        <label>Supply migrating to DAMM V2 %<input id="migration-percent" type="number" min="10" max="90" step="1" value="25"></label>
+        <label>Creator/team locked vesting % (max 15)<input id="vesting-percent" type="number" min="0" max="15" step="1" value="0"></label>
+        <label>Vesting cliff (days, min 90)<input id="cliff-days" type="number" min="90" max="3650" value="90"></label>
+        <label>Vesting duration (months, min 18)<input id="vesting-months" type="number" min="18" max="120" value="24"></label>
+        <label class="wide">Description<textarea id="description" maxlength="500" placeholder="Describe your public token project"></textarea></label>
+        <label>Image URL<input id="image" type="url" placeholder="https://.../token.png"></label>
+        <label>Website<input id="website" type="url" placeholder="https://..."></label>
+      </div>
+      <div class="actions"><button class="btn secondary" id="check-btn" type="button">Run Mainnet Preflight</button><button class="btn primary" id="launch-btn" type="button" disabled>Create Public Mainnet Launch</button></div>
+      <div class="status" id="status">Mainnet broadcasts are fail-closed until the Worldz Treasury Multisig and server gate both pass.</div>
+    </section>
+    <section class="card">
+      <h2>Worldz Proof</h2>
+      <div class="proof" id="proof-grid"></div>
+      <div class="result" id="result"><b>PUBLIC MAINNET LAUNCH CREATED ✅</b><p>Mint: <span class="mono" id="mint"></span></p><p>Config: <span class="mono" id="config"></span></p><p>Pool: <span class="mono" id="pool"></span></p><p>Transaction: <span class="mono" id="tx"></span></p></div>
+      <div class="actions"><button class="btn primary" id="register-btn" type="button" disabled>Register Worldz Proof</button></div>
+      <div class="status" id="proof-status">No mainnet launch has been executed.</div>
+    </section>
+  </div>
+</main>
+<footer><div><b>WorldzLaunchPad™</b> • Public Mainnet Adapter</div><p>Production transactions remain disabled until the published gate is green.</p></footer>
+<script type="module" src="/mainnet/app.js?v=20260921-mainnet-gated-v1"></script>
+</body>
+</html>
