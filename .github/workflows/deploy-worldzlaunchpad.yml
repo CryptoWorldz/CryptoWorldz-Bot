@@ -220,6 +220,7 @@ jobs:
           assert platform['worldzMint']['walletTransferTaxPercent']==0
           assert platform['worldzMint']['compulsory']['revokeMintAuthorityAfterGenesis'] is True
           assert platform['worldzMint']['compulsory']['revokeFreezeAuthorityAfterGenesis'] is True
+          assert platform['worldzMint']['compulsory']['metadataImmutableAfterGenesis'] is True
           assert platform['confidenceCurve']['version']=='WORLDZ-CONFIDENCE-CURVE-1'
           assert platform['confidenceCurve']['mainnetExecutionEnabled'] is False
           assert platform['confidenceCurve']['feePolicy']['projectSharePercentOfCollectedSupportedProjectTradingFee']==90
@@ -233,6 +234,7 @@ jobs:
           assert 'worldz-mint-register' in mint_js
           assert 'AuthorityType.MintTokens,null' in mint_js
           assert 'AuthorityType.FreezeAccount,null' in mint_js
+          assert 'isMutable:false' in mint_js
           assert 'getWallets' in mint_js
           assert 'jupiter' in mint_js.lower()
           assert 'getWallets' in mainnet_js
