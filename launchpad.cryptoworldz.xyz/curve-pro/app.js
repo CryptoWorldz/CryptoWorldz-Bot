@@ -40,13 +40,13 @@ function buildAndValidate(){
   const v=values(),errors=[];
   if(v.name.length<2||v.name.length>32)errors.push('Token name must be 2–32 characters.');
   if(!/^[A-Z0-9_$]{2,10}$/.test(v.symbol))errors.push('Ticker must be 2–10 letters/numbers/$/_.');
-  if(!Number.isSafeInteger(v.supply)||v.supply<=0||v.supply>1_000_000_000_000)errors.push('Supply must be a positive safe whole number up to 1 trillion.');
-  if(!Number.isFinite(v.fee)||v.fee<0.5||v.fee>4)errors.push('Project trading fee must be 0.50%–4.00%.');
+  if(!Number.isSafeInteger(v.supply)||v.supply<1_000||v.supply>1_000_000_000_000)errors.push('Supply must be a whole number from 1,000 to 1 trillion.');
+  if(!Number.isFinite(v.fee)||v.fee<0.5||v.fee>3)errors.push('Project trading fee must be 0.50%–3.00%.');
   if(!Number.isFinite(v.threshold)||v.threshold<1)errors.push('Migration threshold must be at least 1 SOL for this Devnet adapter.');
   if(!Number.isInteger(v.migrationPercent)||v.migrationPercent<10||v.migrationPercent>90)errors.push('Migration supply percentage must be 10–90%.');
-  if(!Number.isInteger(v.vestingPercent)||v.vestingPercent<0||v.vestingPercent>50)errors.push('Locked vesting must be 0–50%.');
-  if(!Number.isInteger(v.cliffDays)||v.cliffDays<0||v.cliffDays>3650)errors.push('Vesting cliff is invalid.');
-  if(!Number.isInteger(v.vestingMonths)||v.vestingMonths<1||v.vestingMonths>120)errors.push('Vesting duration is invalid.');
+  if(!Number.isInteger(v.vestingPercent)||v.vestingPercent<0||v.vestingPercent>15)errors.push('Creator/team locked vesting must be 0–15%.');
+  if(!Number.isInteger(v.cliffDays)||v.cliffDays<90||v.cliffDays>3650)errors.push('Vesting cliff must be 90–3650 days.');
+  if(!Number.isInteger(v.vestingMonths)||v.vestingMonths<18||v.vestingMonths>120)errors.push('Vesting duration must be 18–120 months.');
   if(errors.length){curveConfig=null;preflight=false;$('#launch-btn').disabled=true;setStatus('#status','CURVE VALIDATION FAILED\n• '+errors.join('\n• '),'bad');renderProof();return false;}
 
   try{
@@ -107,7 +107,8 @@ function buildAndValidate(){
       '\nFee allocation: 90% creator / 10% Worldz partner'+
       '\nMigration: DAMM V2 at '+v.threshold+' SOL threshold'+
       '\nGraduated liquidity: 10% Worldz partner locked + 90% creator locked = 100% permanent lock'+
-      '\nLocked token vesting: '+v.vestingPercent+'%'+
+      '\nCreator/team locked vesting: '+v.vestingPercent+'% • cliff '+v.cliffDays+' days • '+v.vestingMonths+' months'+
+      '\nWorldz Safe Launch mainnet compatibility: NOT YET — native DBC fee split still requires a compliant mainnet routing adapter'+
       '\nPublic mainnet execution: OFF','good');
     renderProof();return true;
   }catch(e){console.error(e);curveConfig=null;preflight=false;$('#launch-btn').disabled=true;setStatus('#status','METEORA SDK REJECTED THIS CURVE\n'+(e?.message||e),'bad');renderProof();return false;}
