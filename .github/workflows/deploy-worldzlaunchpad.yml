@@ -225,11 +225,15 @@ jobs:
           assert platform['worldzMint']['authentication']['mode']=='ONCHAIN_TRANSACTION_SIGNATURES'
           assert platform['worldzMint']['authentication']['walletMessageSignaturesRequired'] is False
           assert platform['worldzMint']['authentication']['transactionApprovalsRequired']==3
-          assert platform['worldzMint']['walletStandard']['transactionSigning']['omitUnsupportedChainHint'] is True
+          assert platform['worldzMint']['walletStandard']['transactionSigning']['mode']=='DIRECT_SIGN_TRANSACTION'
+          assert platform['worldzMint']['walletStandard']['transactionSigning']['arguments']==['account','transaction']
+          assert platform['worldzMint']['walletStandard']['transactionSigning']['chainHintPassed'] is False
           assert "prepareRegistryStage" in mint_js
           assert "authBody('PREPARE'" not in mint_js
           assert "authBody('FINALIZE'" not in mint_js
-          assert "accountChains.includes(chain())" in mint_js
+          assert "accountChains.includes(chain())" not in mint_js
+          assert "transaction:new Uint8Array(wire)" in mint_js
+          assert "chain:chain()" not in mint_js
           assert "Wallet approval 1/3" in mint_js
           assert "Wallet approval 2/3" in mint_js
           assert "Wallet approval 3/3" in mint_js
