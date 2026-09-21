@@ -222,6 +222,17 @@ jobs:
           assert platform['worldzMint']['compulsory']['revokeMintAuthorityAfterGenesis'] is True
           assert platform['worldzMint']['compulsory']['revokeFreezeAuthorityAfterGenesis'] is True
           assert platform['worldzMint']['compulsory']['metadataImmutableAfterGenesis'] is True
+          assert platform['worldzMint']['authentication']['mode']=='ONCHAIN_TRANSACTION_SIGNATURES'
+          assert platform['worldzMint']['authentication']['walletMessageSignaturesRequired'] is False
+          assert platform['worldzMint']['authentication']['transactionApprovalsRequired']==3
+          assert platform['worldzMint']['walletStandard']['transactionSigning']['omitUnsupportedChainHint'] is True
+          assert "prepareRegistryStage" in mint_js
+          assert "authBody('PREPARE'" not in mint_js
+          assert "authBody('FINALIZE'" not in mint_js
+          assert "accountChains.includes(chain())" in mint_js
+          assert "Wallet approval 1/3" in mint_js
+          assert "Wallet approval 2/3" in mint_js
+          assert "Wallet approval 3/3" in mint_js
           assert platform['worldzMint']['imageUpload']['enabled'] is True
           assert platform['worldzMint']['imageUpload']['bucket']=='worldz-mint-art'
           assert platform['worldzMint']['imageUpload']['walletSignatureRequired'] is False
