@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-22-public-launchpad-v13-jupiter-three-approval-flow",
+  "version": "2026-09-22-public-launchpad-v14-jupiter-wallet-standard-exact",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -523,8 +523,13 @@
       "reownProjectIdConfigured": true,
       "metadataOrigin": "https://launchpad.cryptoworldz.xyz",
       "transactionSigning": {
-        "omitUnsupportedChainHint": true,
-        "reason": "Wallet Standard chain is optional. Only pass the selected chain when the connected account explicitly advertises it."
+        "mode": "DIRECT_SIGN_TRANSACTION",
+        "arguments": [
+          "account",
+          "transaction"
+        ],
+        "chainHintPassed": false,
+        "reason": "Matches the official Wallet Standard adapter direct signTransaction path; chain is not supplied to signTransaction."
       }
     },
     "marketRule": "WorldzMINT creates and proves a fixed-supply mint only. It does not create liquidity, assign a market cap, promise exchange listing, or imply investment performance.",
