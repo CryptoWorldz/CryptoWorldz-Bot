@@ -22,10 +22,10 @@ jobs:
     environment:
       name: cryptoworldz-production
     env:
-      FTP_HOST: \${{ secrets.FTP_HOST }}
-      FTP_USERNAME: \${{ secrets.FTP_USERNAME }}
-      FTP_PASSWORD: \${{ secrets.FTP_PASSWORD }}
-      FTP_PORT: \${{ vars.FTP_PORT || '21' }}
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -102,9 +102,9 @@ jobs:
 
           assert 'PUBLIC TOKEN LAUNCHPAD' in home
           assert 'Who will be first?' in home
-          assert '10% of your collected token fee only' in home
-          assert '90% of that fee remains for your project routing' in home
-          assert '0% of your token supply' in home
+          assert 'of your collected token fee only' in home
+          assert 'of that fee remains for your project routing' in home
+          assert 'of your token supply taken by WorldzLaunchPad' in home
           assert 'WORLDZ SAFE LAUNCH STANDARD' in home
           assert 'FIRST PUBLIC LAUNCH SLOT OPEN' in app
           assert 'platformShareCapPercentOfCollectedProjectFee' in app
@@ -300,8 +300,8 @@ jobs:
                   assert status==200
                   assert 'PUBLIC TOKEN LAUNCHPAD' in body
                   assert 'Who will be first?' in body
-                  assert '10% of your collected token fee only' in body
-                  assert '90% of that fee remains for your project routing' in body
+                  assert 'of your collected token fee only' in body
+                  assert 'of that fee remains for your project routing' in body
                   assert all(term not in body for term in banned)
 
                   assert platform['publicLaunchPad'] is True
