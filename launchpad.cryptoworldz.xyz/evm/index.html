@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05020b">
+<title>Worldz EVM Mint™ | Ethereum • Base • BNB • Robinhood • HyperEVM</title>
+<link rel="stylesheet" href="/style.css?v=20260922-evm-v1">
+<style>
+.lab{max-width:1120px;margin:auto;padding:54px 18px 100px}.card{border:1px solid #ffffff0d;border-radius:18px;padding:18px;background:#ffffff03;margin-bottom:12px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form label{display:grid;gap:5px;color:#9584a0;font-size:.72rem}.form input,.form select{width:100%;padding:11px;border:1px solid #ffffff12;border-radius:11px;background:#07030d;color:#fff}.wide{grid-column:1/-1}
+.alloc{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.alloc input{width:100%;padding:9px;border:1px solid #ffffff12;border-radius:9px;background:#07030d;color:#fff}.alloc label{font-size:.65rem;color:#9584a0}
+.status{white-space:pre-wrap;word-break:break-word;border:1px solid #ffffff0d;border-radius:12px;padding:12px;color:#9586a0;margin-top:12px}.status.good{border-color:#55e6a544;color:#7ce9ba}.status.bad{border-color:#ff668844;color:#ffa0b2}.status.warn{border-color:#ffd16644;color:#d9be7e}
+.truth{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.truth div{border:1px solid #ffffff0c;border-radius:12px;padding:11px}.truth small{display:block;color:#75667f;font-size:.58rem;text-transform:uppercase}.truth b{font-size:.78rem}
+@media(max-width:760px){.form,.truth{grid-template-columns:1fr}.alloc{grid-template-columns:1fr 1fr}.wide{grid-column:auto}}
+</style>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="/"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a><nav><a href="/">LaunchPad</a><a href="/omnichain/">OmniChain</a><a href="/xrpl/">XRPWorldz</a></nav><button class="wallet-mini" id="wallet">Connect EVM Wallet</button></header>
+<main class="lab">
+<section class="card">
+<div class="kicker">WORLDZ EVM MINT™ • CHAIN-NATIVE DEPLOYMENT</div>
+<h1>ONE SAFE TOKEN TEMPLATE.<br><span>MULTIPLE EVM WORLDS.</span></h1>
+<p>Deploy the same fixed-supply, no-post-genesis-mint ERC-20 template on supported EVM networks. A token deployment is not automatically a Worldz Verified market launch: liquidity, fee routing, LP lock and chain-specific proof remain separate gates.</p>
+<div class="truth"><div><small>Supply</small><b>Fixed at deploy</b></div><div><small>Mint function</small><b>None</b></div><div><small>Freeze switch</small><b>None</b></div><div><small>Wallet tax</small><b>0%</b></div></div>
+</section>
+<section class="card">
+<h2>1 • Choose EVM World</h2>
+<div class="form">
+<label>Network<select id="network">
+<option value="ethereum-sepolia">Ethereum Sepolia • 11155111</option>
+<option value="base-sepolia">Base Sepolia • 84532</option>
+<option value="robinhood-testnet">Robinhood Chain Testnet • 46630</option>
+<option value="bsc-testnet">BNB Smart Chain Testnet • 97</option>
+<option value="hyperevm-testnet">HyperEVM Testnet • 998</option>
+</select></label>
+<label>Mode<input value="PUBLIC TESTNET EXECUTION" disabled></label>
+</div>
+<div class="actions"><button class="btn secondary" id="compile">Compile Fixed-Supply Template</button></div>
+<div class="status" id="compile-status">Compile before deployment.</div>
+</section>
+<section class="card">
+<h2>2 • Configure Token</h2>
+<div class="form">
+<label>Token name<input id="name" maxlength="32" placeholder="Your Token"></label>
+<label>Ticker<input id="symbol" maxlength="10" placeholder="TOKEN"></label>
+<label>Fixed supply<input id="supply" inputmode="numeric" placeholder="100000000"></label>
+<label>Decimals<input value="18" disabled></label>
+<label>Supported project trading fee %<input id="fee" type="number" min=".5" max="3" step=".25" value="1"></label>
+<label>Worldz fee share<input value="10% of collected supported fee only" disabled></label>
+</div>
+<h3>Genesis allocation</h3>
+<div class="alloc">
+<label>Creator ≤5%<input class="allocation" data-key="creator" type="number" value="5" min="0" max="5"></label>
+<label>Liquidity 25–60%<input class="allocation" data-key="liquidity" type="number" value="35" min="25" max="60"></label>
+<label>Community ≥20%<input class="allocation" data-key="community" type="number" value="30" min="20"></label>
+<label>Treasury ≤15%<input class="allocation" data-key="treasury" type="number" value="10" min="0" max="15"></label>
+<label>Growth<input class="allocation" data-key="growth" type="number" value="20" min="0"></label>
+</div>
+<div class="form" style="margin-top:12px">
+<label>Creator wallet<input id="creator-wallet" readonly placeholder="Connected wallet"></label>
+<label>Liquidity reserve<input id="liquidity-wallet" placeholder="0x..."></label>
+<label>Community wallet<input id="community-wallet" placeholder="0x..."></label>
+<label>Project treasury / Safe<input id="treasury-wallet" placeholder="0x..."></label>
+<label class="wide">Growth / ecosystem<input id="growth-wallet" placeholder="0x..."></label>
+</div>
+<div class="actions"><button class="btn secondary" id="check">Run EVM Preflight</button><button class="btn primary" id="deploy" disabled>Deploy Fixed-Supply Token</button></div>
+<div class="status" id="status">Connect an EVM wallet, compile, and pass preflight.</div>
+</section>
+<section class="card">
+<h2>3 • Proof</h2>
+<div class="status" id="proof">No deployment yet.</div>
+</section>
+<section class="card">
+<h2>Market-launch adapters</h2>
+<p><b>Solana:</b> Flash / Curve / Curve Pro test routes are separate. <b>EVM:</b> token deployment is executable here; chain-specific liquidity + 90/10 fee router + LP lock modules remain fail-closed until independently verified. Mainnet switches are not exposed by this public test page.</p>
+</section>
+</main>
+<footer><div><b>Worldz EVM Mint™</b> • WorldzLaunchPad™</div><p>Ethereum • Base • BNB • Robinhood Chain • HyperEVM test adapters.</p></footer>
+<script type="module" src="/evm/app.js?v=20260922-evm-v1"></script>
+</body></html>
