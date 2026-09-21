@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#05020b">
   <meta name="description" content="WorldzLaunchPad™ — build, simulate, test and prepare token launches with transparent fees, locks, vesting, CrossPair and multi-chain architecture.">
   <title>WorldzLaunchPad™ | Build • Prove • Launch</title>
-  <link rel="stylesheet" href="/style.css?v=20260920-platform-v3">
+  <link rel="stylesheet" href="/style.css?v=20260921-safe-v4">
 </head>
 <body>
 <header class="topbar">
@@ -26,7 +26,7 @@
 <main id="top">
   <section class="hero">
     <div class="hero-copy">
-      <div class="kicker">SOLANA FIRST • MULTI-CHAIN BY DESIGN • MAINNET FAIL-CLOSED</div>
+      <div class="kicker">PUBLIC BUILDER • SOLANA DEVNET LIVE • MAINNET FAIL-CLOSED</div>
       <h1>LAUNCH<br><span>YOUR WORLD.</span></h1>
       <p class="lead">Choose the chain. Choose the launch engine. Build the economics. Lock the allocations. Simulate before signing. Then launch through a Worldz adapter when that route is verified and enabled.</p>
       <div class="hero-actions">
@@ -37,10 +37,10 @@
         <a class="btn ghost" href="/curve-pro/">Curve Pro Devnet</a>
       </div>
       <div class="truth-strip">
-        <span><b>0.50–4.00%</b> project trading-fee range</span>
+        <span><b>0.50–3.00%</b> maximum project trading-fee range</span>
         <span><b>10%</b> Worldz share of collected project fee revenue</span>
         <span><b>2</b> verified Solana quote assets in registry</span>
-        <span><b>0</b> public mainnet creator launches enabled</span>
+        <span><b>6</b> compulsory anti-rug controls before mainnet</span>
       </div>
     </div>
     <div class="hero-core" aria-label="WorldzLaunchPad system">
@@ -66,6 +66,22 @@
       <span class="live-chip"><i></i> PLATFORM BUILD ACTIVE</span>
     </div>
     <div class="launch-market" id="launch-market"></div>
+  </section>
+
+  <section id="safe-standard" class="section feature-section">
+    <div class="section-heading">
+      <div class="section-kicker">WORLDZ SAFE LAUNCH STANDARD™</div>
+      <h2>Creators can build. Nobody gets to switch the safety rules off.</h2>
+      <p>These are platform limits, not suggested tokenomics. A creator may choose values inside the box; WorldzLaunchPad rejects manifests outside it. Mainnet remains fail-closed until the same rules are enforced on-chain.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="feature-card hero-card"><span>HARD RULE 01</span><h3>Fixed supply.</h3><p>Mint authority revoked after genesis. Freeze authority revoked/absent. No later inflation switch.</p></article>
+      <article class="feature-card"><span>HARD RULE 02</span><h3>Founder cap.</h3><p>Creator/team ≤15% total; ≤5% liquid at genesis; ≥90-day cliff and ≥18-month vesting on the remainder.</p></article>
+      <article class="feature-card"><span>HARD RULE 03</span><h3>Liquidity cannot vanish.</h3><p>25–60% supply allocation to liquidity. 100% of creator-controlled LP must be locked ≥365 days for a verified mainnet launch.</p></article>
+      <article class="feature-card"><span>HARD RULE 04</span><h3>No tax trap.</h3><p>0% wallet-transfer tax. Supported project trading fee 0.50–3.00%. Creator fee route ≤20%; LP-growth route ≥20%.</p></article>
+      <article class="feature-card"><span>HARD RULE 05</span><h3>Multisig control.</h3><p>Treasury and any program authority must be 2-of-3 or stronger multisig before mainnet verification.</p></article>
+      <article class="feature-card"><span>HARD RULE 06</span><h3>Everything disclosed.</h3><p>Tagged genesis wallets, public allocation manifest + hash, no hidden private allocations, no blacklist/sell restriction and no undisclosed private discount.</p></article>
+    </div>
   </section>
 
   <section id="create" class="section create-section">
@@ -117,11 +133,11 @@
           <div class="form-grid">
             <label><span>Token name</span><input id="build-name" maxlength="32" placeholder="e.g. SolSavewXRP"></label>
             <label><span>Ticker</span><input id="build-symbol" maxlength="10" placeholder="SAVE"></label>
-            <label><span>Fixed supply</span><input id="build-supply" type="number" min="1" step="1" value="100000000"></label>
+            <label><span>Fixed supply</span><input id="build-supply" type="number" min="1000" max="1000000000000" step="1" placeholder="Enter supply"></label>
             <label><span>Decimals</span><input id="build-decimals" type="number" min="0" max="9" step="1" value="9"></label>
             <label class="wide"><span>Description</span><textarea id="build-description" maxlength="280" placeholder="What is this project for?"></textarea></label>
           </div>
-          <div class="toggle-row"><label><input id="fixed-supply" type="checkbox" checked> Revoke mint authority after initial supply is minted</label><label><input id="freeze-off" type="checkbox" checked disabled> Freeze authority disabled at creation</label></div>
+          <div class="toggle-row"><label><input id="fixed-supply" type="checkbox" checked disabled> COMPULSORY — revoke mint authority after genesis</label><label><input id="freeze-off" type="checkbox" checked disabled> COMPULSORY — freeze authority revoked/absent</label></div>
           <div class="step-actions"><button class="btn secondary prev-step" data-prev="2">← Back</button><button class="btn primary next-step" data-next="4">Choose Pair →</button></div>
         </section>
 
@@ -140,12 +156,30 @@
         </section>
 
         <section class="wizard-step" data-panel="5">
-          <div class="step-head"><span>05 / FAIR FEE</span><h3>Make every percentage visible.</h3></div>
+          <div class="step-head"><span>05 / SAFE TOKENOMICS</span><h3>Choose inside the limits. The limits cannot be switched off.</h3></div>
+          <div class="route-builder">
+            <div class="route-head"><h4>Genesis supply allocation</h4><span id="allocation-total" class="pill safe">100%</span></div>
+            <div class="route-inputs">
+              <label>Creator / Team ≤15% <input class="allocation-input" data-allocation="creatorTeam" type="number" min="0" max="15" step="1" value="15"></label>
+              <label>Liquidity 25–60% <input class="allocation-input" data-allocation="liquidity" type="number" min="25" max="60" step="1" value="30"></label>
+              <label>Community / Public ≥20% <input class="allocation-input" data-allocation="communityPublic" type="number" min="20" max="75" step="1" value="30"></label>
+              <label>Treasury / Reserve ≤15% <input class="allocation-input" data-allocation="treasuryReserve" type="number" min="0" max="15" step="1" value="10"></label>
+              <label>Growth / Ecosystem <input class="allocation-input" data-allocation="growthEcosystem" type="number" min="0" max="55" step="1" value="15"></label>
+            </div>
+          </div>
+          <div class="form-grid" style="margin-top:12px">
+            <label><span>Creator liquid at genesis ≤5%</span><input id="creator-unlocked" type="number" min="0" max="5" step="0.5" value="5"></label>
+            <label><span>Founder cliff ≥90 days</span><input id="founder-cliff" type="number" min="90" max="3650" step="1" value="90"></label>
+            <label><span>Founder vesting ≥18 months</span><input id="founder-vesting" type="number" min="18" max="120" step="1" value="24"></label>
+            <label><span>Creator-controlled LP lock</span><input id="lp-lock-percent" value="100%" disabled></label>
+            <label><span>LP lock ≥365 days</span><input id="lp-lock-days" type="number" min="365" max="3650" step="1" value="365"></label>
+            <label><span>Treasury / program multisig</span><input id="multisig-address" maxlength="64" placeholder="Required for mainnet verification"></label>
+          </div>
           <div class="economics-grid">
             <div class="fee-control">
               <label for="project-fee">Project trading fee</label>
-              <input id="project-fee" type="range" min="0.5" max="4" step="0.25" value="2">
-              <div class="fee-number"><b id="project-fee-value">2.00%</b><span>MAX 4.00%</span></div>
+              <input id="project-fee" type="range" min="0.5" max="3" step="0.25" value="1">
+              <div class="fee-number"><b id="project-fee-value">1.00%</b><span>MAX 3.00%</span></div>
               <div class="worldz-rule"><strong>WorldzLaunchPad</strong><b>10%</b><span>of the collected project trading-fee revenue</span></div>
               <p class="micro">Not 10% of supply. Not 10% of liquidity. Not an ordinary wallet-transfer tax.</p>
             </div>
@@ -160,11 +194,11 @@
           <div class="route-builder">
             <div class="route-head"><h4>Project distribution pool</h4><span id="route-total" class="pill safe">100%</span></div>
             <div class="route-inputs">
-              <label>Creator / Build <input class="route-input" data-route="creator" type="number" min="0" max="100" step="1" value="30"></label>
-              <label>Holder Rewards <input class="route-input" data-route="holders" type="number" min="0" max="100" step="1" value="25"></label>
-              <label>LP Growth <input class="route-input" data-route="lp" type="number" min="0" max="100" step="1" value="20"></label>
-              <label>Treasury <input class="route-input" data-route="treasury" type="number" min="0" max="100" step="1" value="15"></label>
-              <label>Community / Impact <input class="route-input" data-route="community" type="number" min="0" max="100" step="1" value="10"></label>
+              <label>Creator / Build ≤20% <input class="route-input" data-route="creator" type="number" min="0" max="20" step="1" value="20"></label>
+              <label>Holder Rewards <input class="route-input" data-route="holders" type="number" min="0" max="70" step="1" value="30"></label>
+              <label>LP Growth ≥20% <input class="route-input" data-route="lp" type="number" min="20" max="100" step="1" value="25"></label>
+              <label>Treasury ≤20% <input class="route-input" data-route="treasury" type="number" min="0" max="20" step="1" value="15"></label>
+              <label>Community / Impact <input class="route-input" data-route="community" type="number" min="0" max="70" step="1" value="10"></label>
             </div>
           </div>
           <div class="step-actions"><button class="btn secondary prev-step" data-prev="4">← Back</button><button class="btn primary next-step" data-next="6">Run Proof Check →</button></div>
@@ -183,7 +217,7 @@
             <button class="btn secondary" id="download-manifest" type="button" disabled>Download Manifest</button>
             <a class="btn primary disabled-link" id="devnet-launch-link" href="/devnet/" aria-disabled="true">Open Devnet Launch →</a>
           </div>
-          <div class="notice">MAINNET LAUNCH LOCKED. The public creator-launch gate remains fail-closed until the exact launch route has passed security, operational and Australian regulatory/legal checks and human authorization.</div>
+          <div class="notice">MAINNET LAUNCH LOCKED UNTIL ENFORCED — not merely declared. Worldz requires atomic tagged allocations, 100% creator-controlled LP lock ≥365 days, founder vesting, multisig proof, revoked mint/freeze authority, simulation, disclosure and the remaining security/operational/legal release gates.</div>
         </section>
       </div>
     </div>
@@ -291,6 +325,6 @@
   <p>Public mainnet creator launches are currently disabled. Devnet tools are for testing. No guaranteed return, APY, price target or future value is promised.</p>
 </footer>
 
-<script src="/app.js?v=20260920-platform-v3" defer></script>
+<script src="/app.js?v=20260921-safe-v4" defer></script>
 </body>
 </html>
