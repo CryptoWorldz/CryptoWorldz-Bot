@@ -131,7 +131,7 @@ jobs:
             root/'mainnet/index.html',root/'mainnet/app.js',
             root/'base/index.html',root/'base/app.js',
             root/'genesis/index.html',root/'genesis/app.js',
-            root/'mint/index.html',root/'mint/app.js',
+            root/'mint/index.html',root/'mint/app.js',root/'mint/jupiter-mobile.js',
             root/'trust/index.html',root/'trust/app.js',
             root/'omnichain/index.html'
           ]
@@ -154,6 +154,7 @@ jobs:
           genesis_js=(root/'genesis/app.js').read_text()
           mint_html=(root/'mint/index.html').read_text()
           mint_js=(root/'mint/app.js').read_text()
+          jupiter_mobile_js=(root/'mint/jupiter-mobile.js').read_text()
           trust_html=(root/'trust/index.html').read_text()
           trust_js=(root/'trust/app.js').read_text()
 
@@ -221,6 +222,18 @@ jobs:
           assert platform['worldzMint']['compulsory']['revokeMintAuthorityAfterGenesis'] is True
           assert platform['worldzMint']['compulsory']['revokeFreezeAuthorityAfterGenesis'] is True
           assert platform['worldzMint']['compulsory']['metadataImmutableAfterGenesis'] is True
+          assert platform['walletConnectivity']['version']=='WORLDZ-WALLET-BRIDGE-1'
+          assert platform['walletConnectivity']['status']=='JUPITER_MOBILE_REOWN_ENABLED'
+          assert platform['walletConnectivity']['jupiterMobile']['enabled'] is True
+          assert platform['walletConnectivity']['jupiterMobile']['adapterPackage']=='@jup-ag/jup-mobile-adapter@0.0.2'
+          assert platform['walletConnectivity']['reown']['metadataOrigin']=='https://launchpad.cryptoworldz.xyz'
+          assert len(platform['walletConnectivity']['reown']['projectId'])==32
+          assert '@jup-ag/jup-mobile-adapter@0.0.2' in jupiter_mobile_js
+          assert platform['walletConnectivity']['reown']['projectId'] in jupiter_mobile_js
+          assert "url:WORLDZ_ORIGIN" in jupiter_mobile_js
+          assert "connectReown" not in mint_js
+          assert "getJupiterMobileAdapter" in mint_js
+          assert 'Jupiter Mobile' in mint_html
           assert platform['confidenceCurve']['version']=='WORLDZ-CONFIDENCE-CURVE-1'
           assert platform['confidenceCurve']['mainnetExecutionEnabled'] is False
           assert platform['confidenceCurve']['feePolicy']['projectSharePercentOfCollectedSupportedProjectTradingFee']==90
@@ -266,6 +279,7 @@ jobs:
           node --check launchpad.cryptoworldz.xyz/app.js
           node --check launchpad.cryptoworldz.xyz/trust/app.js
           node --check launchpad.cryptoworldz.xyz/mint/app.js
+          node --check launchpad.cryptoworldz.xyz/mint/jupiter-mobile.js
           node --check launchpad.cryptoworldz.xyz/genesis/app.js
           node --check launchpad.cryptoworldz.xyz/devnet/app.js
           node --check launchpad.cryptoworldz.xyz/base/app.js
@@ -438,7 +452,8 @@ jobs:
                   mainnet_code,mainnet_body=get(base+'/mainnet/?verify=public-v6')
                   base_code,base_body=get(base+'/base/?verify=public-v6')
                   genesis_code,genesis_body=get(base+'/genesis/?verify=public-v9')
-                  mint_code,mint_body=get(base+'/mint/?verify=public-v9')
+                  mint_code,mint_body=get(base+'/mint/?verify=public-v10')
+                  jup_bridge_code,jup_bridge_body=get(base+'/mint/jupiter-mobile.js?verify=public-v10')
                   trust_code,trust_body=get(base+'/trust/?verify=trust-v2')
                   status_code,status_body=get(base+'/status.php?verify=public-v6')
                   reg_code,reg_body=get(registry+'?verify=public-v6')
@@ -478,8 +493,12 @@ jobs:
                   assert base_code==200 and 'WORLDZ EVM FAIR™' in base_body and 'BASE SEPOLIA' in base_body
                   assert genesis_code==200 and 'PRIVATE GENESIS CONSOLE' in genesis_body
                   assert all(term not in genesis_body for term in banned)
-                  assert mint_code==200 and 'WORLDZMINT' in mint_body.upper() and 'FIXED SUPPLY' in mint_body.upper()
+                  assert mint_code==200 and 'WORLDZMINT' in mint_body.upper() and 'FIXED SUPPLY' in mint_body.upper() and 'Jupiter Mobile' in mint_body
                   assert all(term not in mint_body for term in banned)
+                  assert jup_bridge_code==200 and '@jup-ag/jup-mobile-adapter@0.0.2' in jup_bridge_body
+                  assert platform['walletConnectivity']['reown']['projectId'] in jup_bridge_body
+                  assert 'https://launchpad.cryptoworldz.xyz' in jup_bridge_body
+                  assert all(term not in jup_bridge_body for term in banned)
                   assert trust_code==200 and 'WORLDZ TRUST ORBIT' in trust_body and 'PROOF' in trust_body
                   assert all(term not in trust_body for term in banned)
                   assert platform['trustOrbit']['version']=='WORLDZ-TRUST-ORBIT-1'
@@ -490,7 +509,7 @@ jobs:
                   assert public_registry['founding100']['futureWorldzPoolPercent']==10
                   assert public_registry['founding100']['equalAllocationPerQualifiedPositionPercent']==0.1
 
-                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 worldzmint=1 confidence_stack=1 registry=1 fee_only_10=1 founding100=1 base_sepolia=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
+                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 worldzmint=1 jupiter_mobile_reown=1 confidence_stack=1 registry=1 fee_only_10=1 founding100=1 base_sepolia=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:
