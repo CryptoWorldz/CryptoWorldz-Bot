@@ -13,6 +13,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const API='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-mint-register';
 const METADATA_PROGRAM=new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
 const STANDARD_VERSION='WORLDZMINT-1';
+const WORLDZ_MAINNET_RPC='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';
 let connection=new Connection(clusterApiUrl('devnet'),'confirmed');
 let walletCtx=null,preflightOk=false,busy=false,pending=null;
 const DRAFT_KEY='worldzmint-draft-v1';
@@ -23,7 +24,7 @@ function short(v){const s=String(v||'');return s.length>15?s.slice(0,7)+'…'+s.
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function network(){return $('#network').value;}
 function chain(){return network()==='mainnet-beta'?'solana:mainnet':'solana:devnet';}
-function refreshConnection(){connection=new Connection(clusterApiUrl(network()),'confirmed');}
+function refreshConnection(){connection=new Connection(network()==='mainnet-beta'?WORLDZ_MAINNET_RPC:clusterApiUrl('devnet'),'confirmed');}
 function allocations(){const o={};$$('.allocation').forEach(x=>o[x.dataset.key]=Number(x.value));return o;}
 function recipients(){return {
   creator:$('#creator-wallet').value.trim(),liquidity:$('#liquidity-wallet').value.trim(),
