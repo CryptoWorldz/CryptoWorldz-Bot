@@ -60,7 +60,7 @@ async function lookup(mint){
 function render(out){
   const j=out.jupiter||{},w=out.worldz||{},o=out.onChain||{},pulse=out.confidencePulse||{};
   $('#token-name').textContent=j.name||w.mint?.tokenName||w.launch?.tokenName||'Solana Token';
-  $('#token-symbol').textContent=j.symbol?'
+  $('#token-symbol').textContent=j.symbol?String.fromCharCode(36)+j.symbol:(w.mint?.symbol?String.fromCharCode(36)+w.mint.symbol:'SOLANA TOKEN');
   $('#mint').textContent=out.mint;
   const icon=$('#token-icon');
   if(j.icon){icon.src=j.icon;icon.style.display='block';}else{icon.removeAttribute('src');icon.style.display='none';}
