@@ -263,7 +263,12 @@
       "creatorPermanentLockedPercent": 90,
       "totalPermanentLockedPercent": 100
     },
-    "lockedTokenVesting": "optional per launch",
+    "lockedTokenVesting": {
+      "maxPercent": 15,
+      "minimumCliffDays": 90,
+      "minimumVestingMonths": 18,
+      "rule": "When creator/team tokens are vested through Curve Pro, Worldz Safe Launch Standard v1 caps the allocation at 15% and requires at least a 90-day cliff and 18-month vesting period."
+    },
     "publicMainnetExecution": false
   },
   "safeLaunchPolicy": {
