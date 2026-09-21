@@ -82,7 +82,7 @@ function allocationMath(){
   const a=allocations(),total=Object.values(a).reduce((n,v)=>n+(Number.isFinite(v)?v:0),0);
   $('#allocation-total').textContent=total.toFixed(1).replace('.0','')+'%';
   $('#allocation-total').style.color=Math.abs(total-100)<.001?'#7be8b8':'#ff9caf';
-  preflightOk=false;if(!busy)$('#mint-btn').disabled=true;
+  preflightOk=false;if(!busy&& !pending?.registered)$('#mint-btn').disabled=false;
 }
 function isPk(s){try{new PublicKey(s);return true}catch{return false}}
 function validate(){
@@ -241,7 +241,7 @@ async function connectWallet(){
     saveDraft();
     $('#wallet-btn').textContent=short(walletCtx.address);$('#wallet-btn').classList.add('connected');
     setStatus((/jupiter/i.test(walletCtx.name)?'JUPITER WALLET':'SOLANA WALLET')+' CONNECTED ✅\n'+walletCtx.address+'\nNetwork selection: '+network()+'\nNo transaction has been requested.','good');
-    preflightOk=false;$('#mint-btn').disabled=true;renderProof();
+    preflightOk=false;if(!pending?.registered)$('#mint-btn').disabled=false;renderProof();
   }catch(e){
     console.error('WorldzMINT wallet connection failed',e);
     button.textContent='Connect Wallet';
@@ -305,7 +305,7 @@ async function uploadTokenImage(file){
   $('#image').value=out.imageUrl;
   const preview=$('#image-preview');if(preview){preview.src=out.imageUrl;preview.hidden=false;}
   saveDraft();
-  preflightOk=false;$('#mint-btn').disabled=true;
+  preflightOk=false;if(!pending?.registered)$('#mint-btn').disabled=false;
   setStatus('TOKEN IMAGE READY ✅\n'+out.imageUrl+'\n\nNo wallet signature and no blockchain transaction were used.','good');
   return out.imageUrl;
 }
@@ -313,7 +313,7 @@ function removeTokenImage(){
   $('#image').value='';
   const preview=$('#image-preview');if(preview){preview.removeAttribute('src');preview.hidden=true;}
   const file=$('#image-file');if(file)file.value='';
-  saveDraft();preflightOk=false;$('#mint-btn').disabled=true;
+  saveDraft();preflightOk=false;if(!pending?.registered)$('#mint-btn').disabled=false;
   setStatus('TOKEN IMAGE REMOVED. Upload another image whenever you want — no signing required.','good');
 }
 async function signTransaction(tx,partialSigners=[]){
@@ -363,7 +363,7 @@ function restorePending(){
 }
 async function runPreflight(){
   refreshConnection();const check=validate();preflightOk=check.ok;
-  if(!check.ok){$('#mint-btn').disabled=true;setStatus('WORLDZMINT PREFLIGHT BLOCKED\n• '+check.errors.join('\n• '),'bad');renderProof();return false;}
+  if(!check.ok){$('#mint-btn').disabled=false;setStatus('WORLDZMINT PREFLIGHT BLOCKED\n• '+check.errors.join('\n• '),'bad');renderProof();return false;}
   if(network()==='mainnet-beta'){
     setStatus('WORLDZMINT MAINNET PREFLIGHT PASS ✅\nFixed supply: '+Number(check.v.fixed_supply).toLocaleString()+'\nCreator liquid: '+check.v.allocations.creator+'%\nLiquidity reserve: '+check.v.allocations.liquidity+'%\nCommunity: '+check.v.allocations.community+'%\nTreasury: '+check.v.allocations.treasury+'%\nWorldz supply take: 0%\nWallet-transfer tax: 0%\n\nMAINNET is real and irreversible. No transaction has been signed yet.','good');
   }else setStatus('WORLDZMINT DEVNET PREFLIGHT PASS ✅\nRehearsal network only. No transaction has been signed yet.','good');
@@ -450,7 +450,13 @@ async function finalizeStage(){
 }
 function tokenBusy(text){setStatus(text,'warn');}
 async function mintFlow(){
-  if(busy)return;if(!await runPreflight())return;
+  if(busy)return;
+  // One-button flow: connect wallet if needed, then run preflight automatically.
+  if(!walletCtx){
+    await connectWallet();
+    if(!walletCtx)return;
+  }
+  if(!await runPreflight())return;
   if(network()==='mainnet-beta'&&!pending){
     const ok=confirm('REAL SOLANA MAINNET\n\nWorldzMINT will create a permanent fixed-supply token and send its full genesis supply directly to the disclosed wallets. Mint and Freeze authority will be permanently revoked after metadata.\n\nContinue?');
     if(!ok)return;
@@ -465,7 +471,7 @@ async function mintFlow(){
     else if(!pending.registered)await registerFinalProof();
   }catch(e){
     console.error(e);setStatus('WORLDZMINT ACTION STOPPED\n'+(e?.message||String(e))+'\n\nNo hidden retry was attempted. If an earlier transaction succeeded, this page keeps the pending mint locally so you can reconnect and continue.','bad');
-  }finally{busy=false;if(!pending?.registered)$('#mint-btn').disabled=!preflightOk;}
+  }finally{busy=false;if(!pending?.registered)$('#mint-btn').disabled=false;}
 }
 async function loadRegistry(){
   try{
@@ -490,7 +496,7 @@ $('#image-file').addEventListener('change',async e=>{
 $('#image-remove')?.addEventListener('click',removeTokenImage);
 $('#preflight').addEventListener('click',runPreflight);
 $('#mint-btn').addEventListener('click',mintFlow);
-$('#network').addEventListener('change',()=>{refreshConnection();saveDraft();preflightOk=false;$('#mint-btn').disabled=true;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
+$('#network').addEventListener('change',()=>{refreshConnection();saveDraft();preflightOk=false;if(!pending?.registered)$('#mint-btn').disabled=false;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
 $('input,textarea,select').forEach(x=>{
   if(x.id==='image-file')return;
   const persist=()=>{if(!['wallet-choice'].includes(x.id))saveDraft();if(!['wallet-choice','network'].includes(x.id))allocationMath();};
