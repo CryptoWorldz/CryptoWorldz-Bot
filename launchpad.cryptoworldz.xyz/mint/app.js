@@ -110,13 +110,18 @@ function renderWallets(){
 }
 async function connectWallet(){
   if(busy)return;
+  const button=$('#wallet-btn');
+  const originalButtonText=button.textContent;
+  button.disabled=true;
+  button.textContent='Opening Jupiter…';
   try{
     const list=walletStandardCandidates(),choice=$('#wallet-choice').value;
     if(choice==='jupiter-mobile'){
-      setStatus('OPENING JUPITER MOBILE…\nApprove the WorldzLaunchPad connection in Jupiter Wallet.','warn');
-      const mod=await import('/mint/jupiter-mobile.js?v=20260921-reown-v1');
+      setStatus('OPENING JUPITER MOBILE…\nA Jupiter/Reown connection window should appear now. Approve only the connection — no mint transaction is being requested.','warn');
+      const mod=await import('/mint/jupiter-mobile.js?v=20260921-reown-v2');
       const adapter=await mod.getJupiterMobileAdapter();
-      await adapter.connect();
+      const connectTimeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Jupiter Mobile did not open within 20 seconds. Reload this page and try once more.')),20000));
+      await Promise.race([adapter.connect(),connectTimeout]);
       const pk=adapter.publicKey;if(!pk)throw new Error('Jupiter Mobile connected but returned no public key.');
       walletCtx={kind:'adapter',provider:adapter,address:pk.toString(),name:'Jupiter Mobile'};
     }else if(choice.startsWith('standard:')){
@@ -134,7 +139,15 @@ async function connectWallet(){
     $('#wallet-btn').textContent=short(walletCtx.address);$('#wallet-btn').classList.add('connected');
     setStatus((/jupiter/i.test(walletCtx.name)?'JUPITER WALLET':'SOLANA WALLET')+' CONNECTED ✅\n'+walletCtx.address+'\nNetwork selection: '+network()+'\nNo transaction has been requested.','good');
     preflightOk=false;$('#mint-btn').disabled=true;renderProof();
-  }catch(e){setStatus('WALLET CONNECTION FAILED\n'+(e?.message||String(e))+'\n\nIf Jupiter Wallet opened, return here after approving the connection.','bad');}
+  }catch(e){
+    console.error('WorldzMINT wallet connection failed',e);
+    button.textContent='Connect Wallet';
+    setStatus('WALLET CONNECTION FAILED\n'+(e?.message||String(e))+'\n\nNo transaction was sent.','bad');
+    alert('WorldzMINT wallet connection failed: '+(e?.message||String(e)));
+  }finally{
+    button.disabled=false;
+    if(!walletCtx&&button.textContent==='Opening Jupiter…')button.textContent=originalButtonText||'Connect Wallet';
+  }
 }
 async function signMessage(message){
   const bytes=new TextEncoder().encode(message);
@@ -289,4 +302,4 @@ $('#mint-btn').addEventListener('click',mintFlow);
 $('#network').addEventListener('change',()=>{refreshConnection();preflightOk=false;$('#mint-btn').disabled=true;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
 $$('input,textarea,select').forEach(x=>{if(!['wallet-choice','network'].includes(x.id))x.addEventListener('input',()=>{allocationMath();});});
 renderWallets();getWallets().on('register',renderWallets);restorePending();allocationMath();renderProof();loadRegistry();
-import('/mint/jupiter-mobile.js?v=20260921-reown-v1').catch(error=>console.warn('Jupiter Mobile bridge preload failed',error));
+import('/mint/jupiter-mobile.js?v=20260921-reown-v2').catch(error=>console.warn('Jupiter Mobile bridge preload failed',error));
