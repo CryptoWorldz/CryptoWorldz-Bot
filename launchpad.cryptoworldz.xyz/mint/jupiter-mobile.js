@@ -1,6 +1,6 @@
-import React,{useEffect} from 'https://esm.sh/react@18.3.1?bundle';
-import {createRoot} from 'https://esm.sh/react-dom@18.3.1/client?bundle&deps=react@18.3.1';
-import {useWrappedReownAdapter} from 'https://esm.sh/@jup-ag/jup-mobile-adapter@0.0.2?bundle&deps=react@18.3.1,react-dom@18.3.1,@reown/appkit@1.8.11,@reown/appkit-adapter-solana@1.8.11,@reown/appkit-wallet-button@1.8.11,@solana/wallet-adapter-base@0.9.24,@solana/web3.js@1.98.4';
+import React,{useEffect} from 'https://cdn.jsdelivr.net/npm/react@19.1.0/+esm';
+import {createRoot} from 'https://cdn.jsdelivr.net/npm/react-dom@19.1.0/client/+esm';
+import {useWrappedReownAdapter} from 'https://cdn.jsdelivr.net/npm/@jup-ag/jup-mobile-adapter@0.0.2/+esm';
 
 const REOWN_PROJECT_ID='e3d5fc46a07eb8ecb162ee048625348e';
 const WORLDZ_ORIGIN='https://launchpad.cryptoworldz.xyz';
@@ -73,5 +73,7 @@ export const worldzJupiterMobileConfig=Object.freeze({
   provider:'Jupiter Mobile via Reown AppKit',
   projectId:REOWN_PROJECT_ID,
   origin:WORLDZ_ORIGIN,
-  adapterPackage:'@jup-ag/jup-mobile-adapter@0.0.2'
+  adapterPackage:'@jup-ag/jup-mobile-adapter@0.0.2',
+  browserModuleProvider:'jsDelivr +esm',
+  reactVersion:'19.1.0'
 });
