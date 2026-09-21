@@ -233,6 +233,11 @@ jobs:
           assert "url:WORLDZ_ORIGIN" in jupiter_mobile_js
           assert "connectReown" not in mint_js
           assert "getJupiterMobileAdapter" in mint_js
+          assert "jupiterInjectedProvider" in mint_js
+          assert "jupiter-inapp" in mint_js
+          assert "resetJupiterMobileConnectionState" in mint_js
+          assert "resetJupiterMobileConnectionState" in jupiter_mobile_js
+          assert "@appkit/connection_status" in jupiter_mobile_js
           assert 'Jupiter Mobile' in mint_html
           assert platform['confidenceCurve']['version']=='WORLDZ-CONFIDENCE-CURVE-1'
           assert platform['confidenceCurve']['mainnetExecutionEnabled'] is False
