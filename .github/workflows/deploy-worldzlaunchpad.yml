@@ -225,6 +225,14 @@ jobs:
           assert platform['worldzMint']['authentication']['mode']=='ONCHAIN_TRANSACTION_SIGNATURES'
           assert platform['worldzMint']['authentication']['walletMessageSignaturesRequired'] is False
           assert platform['worldzMint']['authentication']['transactionApprovalsRequired']==3
+          assert platform['worldzMint']['oneButtonFlow']['enabled'] is True
+          assert platform['worldzMint']['oneButtonFlow']['primaryAction']=='START WORLDZMINT™'
+          assert platform['worldzMint']['oneButtonFlow']['transactionApprovalsRequired']==3
+          assert "if(!walletCtx)" in mint_js
+          assert "await connectWallet()" in mint_js
+          assert "if(!await runPreflight())return" in mint_js
+          assert "START WORLDZMINT™" in mint_html
+          assert "Optional: Check Preflight Only" in mint_html
           assert platform['worldzMint']['walletStandard']['transactionSigning']['mode']=='DIRECT_SIGN_TRANSACTION'
           assert platform['worldzMint']['walletStandard']['transactionSigning']['arguments']==['account','transaction']
           assert platform['worldzMint']['walletStandard']['transactionSigning']['chainHintPassed'] is False
