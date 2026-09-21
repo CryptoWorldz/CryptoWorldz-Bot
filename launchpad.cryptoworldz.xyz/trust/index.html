@@ -14,14 +14,14 @@
     .searchbox{max-width:850px;margin:22px auto 0;display:flex;gap:8px}.searchbox input{flex:1;min-width:0;padding:14px 15px;border-radius:13px;border:1px solid #ffffff14;background:#06030b;color:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.searchbox button{white-space:nowrap}
     .truth-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}.truth-strip div{border:1px solid #ffffff0c;background:#ffffff03;border-radius:12px;padding:11px}.truth-strip small{display:block;color:#75667f;text-transform:uppercase;font-size:.55rem;letter-spacing:.08em}.truth-strip b{font-size:.72rem}
     .panel{margin-top:14px;border:1px solid #ffffff0d;border-radius:18px;padding:18px;background:#ffffff025}.panel h2{margin:0 0 6px}.panel p{color:#8f8099;font-size:.74rem;line-height:1.55}.hidden{display:none!important}.token-head{display:flex;gap:14px;align-items:center}.token-icon{width:68px;height:68px;border-radius:16px;border:1px solid #ffffff12;background:#09050f;object-fit:cover}.token-head h2{margin:0}.symbol{color:#bd82ff;font-weight:800}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all;font-size:.68rem;color:#82748b}
-    .ring-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.ring{border:1px solid #ffffff0e;border-radius:16px;padding:14px;background:#08040f;min-height:150px}.ring-top{display:flex;justify-content:space-between;gap:8px}.ring h3{margin:0;font-size:.92rem}.ring .state{font-size:.57rem;border:1px solid #ffffff14;border-radius:999px;padding:4px 7px;height:max-content}.ring.good{border-color:#57dfa52c}.ring.good .state{color:#71e4b2;border-color:#57dfa544}.ring.warn{border-color:#ffd16622}.ring.warn .state{color:#d9be7e}.ring.bad{border-color:#ff668822}.ring.bad .state{color:#ff98ae}.ring p{font-size:.67rem}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.metric{border:1px solid #ffffff0c;border-radius:11px;padding:10px;background:#0002}.metric small{display:block;color:#776a80;font-size:.55rem;text-transform:uppercase}.metric b{font-size:.79rem}.notice{border-left:3px solid #a76dff;background:#a76dff08;padding:12px;margin-top:14px;color:#9e8aa9;font-size:.7rem}.status{white-space:pre-wrap;word-break:break-word;border:1px solid #ffffff0d;border-radius:12px;padding:12px;color:#9586a0;margin-top:12px}.status.bad{border-color:#ff668844;color:#ffa0b2}.status.good{border-color:#55e6a544;color:#7ce9ba}
-    @media(max-width:780px){.truth-strip,.metrics{grid-template-columns:1fr 1fr}.ring-grid{grid-template-columns:1fr}.searchbox{flex-direction:column}.trust{padding-top:28px}}
+    .ring-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.constellation{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.star{border:1px solid #ffffff0d;border-radius:13px;padding:11px;background:#06030c;min-height:112px}.star b{display:block;font-size:.78rem}.star span{display:inline-block;margin-top:6px;font-size:.55rem;text-transform:uppercase;border:1px solid #ffffff15;border-radius:999px;padding:3px 6px;color:#bca7c7}.star p{font-size:.62rem!important;margin:7px 0 0}.star.good{border-color:#55e6a52d}.star.good span{color:#7ce8b9;border-color:#55e6a544}.star.warn span{color:#d5ba7c}.pulse-title{margin-top:18px!important}.ring{border:1px solid #ffffff0e;border-radius:16px;padding:14px;background:#08040f;min-height:150px}.ring-top{display:flex;justify-content:space-between;gap:8px}.ring h3{margin:0;font-size:.92rem}.ring .state{font-size:.57rem;border:1px solid #ffffff14;border-radius:999px;padding:4px 7px;height:max-content}.ring.good{border-color:#57dfa52c}.ring.good .state{color:#71e4b2;border-color:#57dfa544}.ring.warn{border-color:#ffd16622}.ring.warn .state{color:#d9be7e}.ring.bad{border-color:#ff668822}.ring.bad .state{color:#ff98ae}.ring p{font-size:.67rem}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.metric{border:1px solid #ffffff0c;border-radius:11px;padding:10px;background:#0002}.metric small{display:block;color:#776a80;font-size:.55rem;text-transform:uppercase}.metric b{font-size:.79rem}.notice{border-left:3px solid #a76dff;background:#a76dff08;padding:12px;margin-top:14px;color:#9e8aa9;font-size:.7rem}.status{white-space:pre-wrap;word-break:break-word;border:1px solid #ffffff0d;border-radius:12px;padding:12px;color:#9586a0;margin-top:12px}.status.bad{border-color:#ff668844;color:#ffa0b2}.status.good{border-color:#55e6a544;color:#7ce9ba}
+    @media(max-width:780px){.truth-strip,.metrics{grid-template-columns:1fr 1fr}.constellation{grid-template-columns:1fr 1fr}.ring-grid{grid-template-columns:1fr}.searchbox{flex-direction:column}.trust{padding-top:28px}}
   </style>
 </head>
 <body>
 <header class="topbar">
   <a class="brand" href="/"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a>
-  <nav><a href="/">LaunchPad</a><a href="/#safe-standard">Safe Launch</a><a href="/omnichain/">OmniChain</a></nav>
+  <nav><a href="/">LaunchPad</a><a href="/mint/">WorldzMINT</a><a href="/#safe-standard">Safe Launch</a><a href="/omnichain/">OmniChain</a></nav>
   <a class="wallet-mini" href="/trust/">Trust Orbit</a>
 </header>
 
@@ -55,6 +55,13 @@
       <div><div class="symbol" id="token-symbol">TOKEN</div><h2 id="token-name">Token</h2><div id="mint" class="mono"></div></div>
     </div>
     <div class="metrics" id="metrics"></div>
+    <h2 class="pulse-title">Worldz Confidence Pulse™</h2>
+    <p>Market telemetry is evidence, not a price target. Worldz-controlled system activity does not count toward Worldz confidence claims.</p>
+    <div class="metrics" id="pulse-metrics"></div>
+    <h2 class="pulse-title">Worldz Confidence Constellation™</h2>
+    <p>Independent evidence stars. One green marker can never hide a red or unknown marker somewhere else.</p>
+    <div class="constellation" id="constellation"></div>
+    <h2 class="pulse-title">Trust Orbit → Six Proof Rings™</h2>
     <div class="ring-grid" id="rings"></div>
     <div class="notice" id="passport-note"></div>
   </section>
@@ -63,6 +70,6 @@
 </main>
 
 <footer><div><b>Worldz Trust Orbit™</b> • WorldzLaunchPad™</div><p>On-chain evidence + Worldz Proof + Jupiter signals. Proofs can change as markets and external verification change; immutable authority facts remain on-chain.</p></footer>
-<script type="module" src="/trust/app.js?v=20260921-trust-v1"></script>
+<script type="module" src="/trust/app.js?v=20260921-trust-v2"></script>
 </body>
 </html>
