@@ -60,7 +60,10 @@ jobs:
 
           assert treasury['destination']=='Worldz Treasury Multisig'
           assert treasury['requiredThreshold']=='2-of-3'
-          assert treasury['vaultAddress'] is None
+          assert treasury['vaultAddress']=='n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB'
+          assert treasury['status']=='VAULT_REGISTERED__MAINNET_ROUTE_PROOF_PENDING'
+          assert treasury['verifiedEvidence']['memberCount']==3
+          assert treasury['verifiedEvidence']['threshold']=='2-of-3'
           assert treasury['mainnetRoutingEnabled'] is False
           assert founding['totalPositions']==100
           assert founding['futureWorldzPoolPercent']==10
