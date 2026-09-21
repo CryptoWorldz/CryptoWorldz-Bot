@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-22-public-launchpad-v11-worldzmint-image-upload",
+  "version": "2026-09-22-public-launchpad-v12-unsigned-image-upload",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -535,8 +535,10 @@
       ],
       "clientMaxDimensionPx": 768,
       "storedFormat": "image/jpeg",
-      "walletSignatureRequired": true,
-      "note": "Token artwork is public by design and is hosted before mint metadata is prepared."
+      "walletSignatureRequired": false,
+      "note": "Public token artwork upload/re-upload is separate from wallet authentication and blockchain signing. Wallet signatures remain required for mint lifecycle actions.",
+      "walletConnectionRequired": false,
+      "reuploadEnabled": true
     }
   },
   "confidenceCurve": {
