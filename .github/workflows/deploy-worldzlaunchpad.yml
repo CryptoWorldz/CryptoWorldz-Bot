@@ -106,9 +106,13 @@ jobs:
           assert platform['worldzCurve']['downstreamAutoRouterExecuting'] is False
           assert platform['worldzCurvePro']['status']=='DEVNET_BETA'
           assert platform['worldzCurvePro']['devnetProgram']=='dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'
+          assert platform['worldzCurvePro']['projectTradingFeeRangePercent']==[0.5,3]
           assert platform['worldzCurvePro']['creatorTradingFeeSharePercent']==90
           assert platform['worldzCurvePro']['worldzPartnerTradingFeeSharePercent']==10
           assert platform['worldzCurvePro']['graduatedLiquidity']['totalPermanentLockedPercent']==100
+          assert platform['worldzCurvePro']['lockedTokenVesting']['maxPercent']==15
+          assert platform['worldzCurvePro']['lockedTokenVesting']['minimumCliffDays']==90
+          assert platform['worldzCurvePro']['lockedTokenVesting']['minimumVestingMonths']==18
 
           wxrp=next(x for x in platform['verifiedQuoteAssets'] if x['id']=='wXRP')
           assert wxrp['solanaMint']=='6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2'
@@ -152,6 +156,9 @@ jobs:
           assert 'DEVNET_PROGRAM_ID.LAUNCHPAD_PROGRAM' in curve_js
           assert 'METEORA DBC DEVNET LAUNCH CREATED' in curve_pro
           assert 'createConfigAndPool' in curve_pro_js and 'buildCurve' in curve_pro_js
+          assert 'Project trading fee must be 0.50%–3.00%.' in curve_pro_js
+          assert 'Creator/team locked vesting must be 0–15%.' in curve_pro_js
+          assert 'DEVNET ENGINE NOTICE' in curve_pro
           assert 'creatorTradingFeePercentage:90' in curve_pro_js
           assert 'partnerPermanentLockedLiquidityPercentage:10' in curve_pro_js
           assert 'creatorPermanentLockedLiquidityPercentage:90' in curve_pro_js
