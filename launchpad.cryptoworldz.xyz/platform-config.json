@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-21-public-launchpad-v7-treasury-standard",
+  "version": "2026-09-21-public-launchpad-v8-trust-orbit",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -453,5 +453,34 @@
       "sui": "Sui native multisig"
     },
     "routingRule": "Supported launch fee route -> same-chain Worldz Operations Treasury (5-of-10) -> approved reserve sweep -> same-chain Worldz Reserve Treasury (6-of-9). No cross-chain address is treated as universal custody."
+  },
+  "trustOrbit": {
+    "name": "Worldz Trust Orbit™",
+    "version": "WORLDZ-TRUST-ORBIT-1",
+    "status": "PUBLIC_BETA_LIVE",
+    "tagline": "Proof, not promises.",
+    "publicPath": "/trust/",
+    "evidenceApi": "worldz-trust-orbit",
+    "jupiterIntegration": {
+      "role": "external evidence signal",
+      "officialJupiterProduct": false,
+      "officialJupiterEndorsement": false,
+      "tokensApiV2": true,
+      "vrfdStatus": true,
+      "organicScore": true,
+      "holderAndLiquiditySignals": true,
+      "jupiterLockProgram": "LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn",
+      "tokenSpecificLockDecoderStatus": "PENDING"
+    },
+    "proofRings": [
+      "Authority Ring",
+      "Distribution Ring",
+      "Worldz Proof Ring",
+      "Jupiter Identity Ring",
+      "Organic Market Ring",
+      "Locks & Control Ring"
+    ],
+    "scoringRule": "No opaque Worldz safety score. Each evidence ring is shown separately; positive-proof count is informational only.",
+    "disclaimer": "Evidence passport only. Not investment advice, not a security audit, not a guarantee of token value or safety, and not an endorsement by Jupiter."
   }
 }
