@@ -107,16 +107,9 @@ async function connect(){
       throw new Error(name+' connected the wrong wallet: '+address);
     }
     wallet=candidate;walletName=name;
-    let balanceText='Balance check unavailable';
-    try{
-      const balance=await connection.getBalance(new PublicKey(address),'confirmed');
-      balanceText='Balance: '+(balance/LAMPORTS_PER_SOL).toFixed(5)+' SOL';
-    }catch(e){
-      console.warn('Non-blocking balance check failed',e);
-    }
     $('#wallet').textContent=short(address);$('#wallet').classList.add('connected');
     $('#auth').disabled=false;
-    setStatus('JUPITER CONNECTED ✅\n'+address+'\n'+balanceText+'\n\nNow tap Authenticate Genesis Console. No transaction has been sent.','good');
+    setStatus('JUPITER CONNECTED ✅\n'+address+'\n\nNow tap Authenticate Genesis Console. No transaction has been sent.','good');
     return true;
   };
 
@@ -273,26 +266,23 @@ async function uploadImage(symbol){
   tokenStatus(symbol,'PROFILE IMAGE READY ✅\n'+out.imageUrl,'good');
   await refreshPrivate();
 }
-async function signAndSend(tx,signers=[]){
-  const latest=await connection.getLatestBlockhash('confirmed');
-  tx.recentBlockhash=latest.blockhash;tx.lastValidBlockHeight=latest.lastValidBlockHeight;tx.feePayer=wallet.publicKey;
+function bytesToBase64(bytes){
+  let binary='';const step=0x8000;
+  for(let i=0;i<bytes.length;i+=step)binary+=String.fromCharCode(...bytes.subarray(i,i+step));
+  return btoa(binary);
+}
+async function chainContext(){return api('chain_context');}
+async function signAndSend(tx,signers=[],ctx=null){
+  const latest=ctx||await chainContext();
+  tx.recentBlockhash=latest.blockhash;
+  tx.lastValidBlockHeight=latest.lastValidBlockHeight;
+  tx.feePayer=wallet.publicKey;
   if(signers.length)tx.partialSign(...signers);
   const signed=await wallet.signTransaction(tx);
-  // signed is a legacy Transaction. web3.js v1.98.x does not accept a
-  // SimulateTransactionConfig object for legacy transactions; doing so throws
-  // "Invalid arguments" after the wallet signs. sendRawTransaction with
-  // skipPreflight:false performs RPC preflight on the exact signed wire bytes.
   const wire=signed.serialize();
-  const sig=await connection.sendRawTransaction(wire,{skipPreflight:false,maxRetries:3,preflightCommitment:'confirmed'});
-  const deadline=Date.now()+90000;
-  while(Date.now()<deadline){
-    const st=await connection.getSignatureStatuses([sig],{searchTransactionHistory:true});
-    const s=st.value?.[0]||null;
-    if(s?.err)throw new Error('Confirmation failed: '+JSON.stringify(s.err));
-    if(s&&(s.confirmationStatus==='confirmed'||s.confirmationStatus==='finalized'))return sig;
-    await new Promise(r=>setTimeout(r,1500));
-  }
-  throw new Error('Transaction was sent but confirmation timed out. Signature: '+sig);
+  const out=await api('broadcast_transaction',{wire:bytesToBase64(wire)});
+  if(!out?.signature)throw new Error('Backend returned no transaction signature.');
+  return out.signature;
 }
 async function mintGenesis(symbol){
   const t=token(symbol);
@@ -302,7 +292,9 @@ async function mintGenesis(symbol){
   if(!ok)return;
   tokenStatus(symbol,'Building MAINNET genesis transaction…\nNo transaction has been signed yet.','warn');
   const owner=wallet.publicKey,mintKeypair=Keypair.generate(),vault=new PublicKey(privateConfig.treasuryVault);
-  const rent=await connection.getMinimumBalanceForRentExemption(MINT_SIZE);
+  const ctx=await chainContext();
+  const rent=Number(ctx.mintRent);
+  if(!Number.isFinite(rent)||rent<=0)throw new Error('Backend did not return valid mint rent.');
   const ata=await getAssociatedTokenAddress(mintKeypair.publicKey,vault,true,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID);
   const amount=BigInt(String(t.fixed_supply).split('.')[0])*(10n**BigInt(t.decimals));
   const tx=new Transaction().add(
@@ -312,7 +304,7 @@ async function mintGenesis(symbol){
     createMintToInstruction(mintKeypair.publicKey,ata,owner,amount,[],TOKEN_PROGRAM_ID)
   );
   tokenStatus(symbol,'Wallet signature 1/3: CREATE MINT + issue exact fixed supply directly to Team Zed Treasury.\nSolana RPC preflight checks the exact signed transaction before broadcast.','warn');
-  const sig=await signAndSend(tx,[mintKeypair]);
+  const sig=await signAndSend(tx,[mintKeypair],ctx);
   const pending={mint_address:mintKeypair.publicKey.toBase58(),treasury_token_account:ata.toBase58(),mint_tx_signature:sig};
   localStorage.setItem('worldz-genesis-pending-'+symbol,JSON.stringify(pending));
   tokenStatus(symbol,'GENESIS MINT ON-CHAIN ✅\nRegistering exact supply + Treasury ownership before metadata…','good');
