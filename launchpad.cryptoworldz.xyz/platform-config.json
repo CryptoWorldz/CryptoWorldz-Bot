@@ -503,7 +503,8 @@
       "fixedSupply": true,
       "revokeMintAuthorityAfterGenesis": true,
       "revokeFreezeAuthorityAfterGenesis": true,
-      "exactGenesisDistributionProof": true
+      "exactGenesisDistributionProof": true,
+      "metadataImmutableAfterGenesis": true
     },
     "allocations": {
       "creatorLiquidMaxPercent": 5,
