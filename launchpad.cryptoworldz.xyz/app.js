@@ -312,7 +312,7 @@ function bind(){
 }
 async function boot(){
   try{
-    const r=await fetch('/platform-config.json?v=20260921-public-v8',{cache:'no-store'});
+    const r=await fetch('/platform-config.json?v=20260921-public-v9',{cache:'no-store'});
     if(!r.ok)throw new Error('Platform configuration unavailable');
     platform=await r.json();
     if(platform.publicLaunchPad!==true||platform.publicLaunchIntakeEnabled!==true)throw new Error('Public LaunchPad contract mismatch');
@@ -323,6 +323,10 @@ async function boot(){
     if(platform.baseEvmFair?.status!=='BASE_SEPOLIA_BETA'||platform.baseEvmFair?.mainnetExecution!==false)throw new Error('Base testnet adapter contract mismatch');
     if(platform.founding100?.totalPositions!==100||platform.founding100?.futureWorldzPoolPercent!==10||platform.founding100?.equalAllocationPerQualifiedPositionPercent!==0.1)throw new Error('Founding 100 contract mismatch');
     if(platform.trustOrbit?.version!=='WORLDZ-TRUST-ORBIT-1'||platform.trustOrbit?.status!=='PUBLIC_BETA_LIVE'||platform.trustOrbit?.jupiterIntegration?.officialJupiterEndorsement!==false)throw new Error('Trust Orbit contract mismatch');
+    if(platform.worldzMint?.version!=='WORLDZMINT-1'||platform.worldzMint?.platformTokenSupplyTakePercent!==0||platform.worldzMint?.compulsory?.revokeMintAuthorityAfterGenesis!==true||platform.worldzMint?.compulsory?.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('WorldzMINT contract mismatch');
+    if(platform.confidenceCurve?.version!=='WORLDZ-CONFIDENCE-CURVE-1'||platform.confidenceCurve?.mainnetExecutionEnabled!==false||platform.confidenceCurve?.feePolicy?.worldzSharePercentOfCollectedSupportedProjectTradingFee!==10)throw new Error('Confidence Curve contract mismatch');
+    if(platform.confidencePulse?.version!=='WORLDZ-CONFIDENCE-PULSE-1'||platform.confidencePulse?.systemTradesCountTowardConfidence!==false)throw new Error('Confidence Pulse contract mismatch');
+    if(platform.confidenceConstellation?.version!=='WORLDZ-CONFIDENCE-CONSTELLATION-1'||platform.confidenceConstellation?.opaqueSafetyScore!==false)throw new Error('Confidence Constellation contract mismatch');
     bind();feeMath();renderProof();renderMarket();refreshRuntime();
   }catch(e){
     console.error(e);document.body.dataset.boot='failed';
