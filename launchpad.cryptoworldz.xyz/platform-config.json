@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-22-public-launchpad-v14-jupiter-wallet-standard-exact",
+  "version": "2026-09-22-public-launchpad-v15-one-button-worldzmint",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -560,6 +560,18 @@
       ],
       "prepareVerification": "Backend verifies creator-signed create-mint transaction, mint account, mint authority, freeze authority, zero initial supply and decimals before registry preparation.",
       "finalVerification": "Backend independently verifies all three creator-signed transaction signatures, exact supply distribution, and revoked authorities."
+    },
+    "oneButtonFlow": {
+      "enabled": true,
+      "primaryAction": "START WORLDZMINT™",
+      "automaticSteps": [
+        "connect wallet if needed",
+        "run preflight",
+        "start/resume mint lifecycle"
+      ],
+      "userApprovalsRequired": "Wallet approval prompts remain explicit and cannot be bypassed.",
+      "transactionApprovalsRequired": 3,
+      "preflightButtonOptional": true
     }
   },
   "confidenceCurve": {
