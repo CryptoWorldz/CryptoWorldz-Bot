@@ -33,9 +33,16 @@ async function connectProvider(){
       async signMessage(bytes){const out=await standard.features['solana:signMessage'].signMessage({message:bytes,account});const sig=out?.[0]?.signature;if(!sig)throw new Error('Wallet returned no message signature.');return {signature:new Uint8Array(sig)};}
     };
   }
-  const p=legacyProvider();if(!p)return null;
-  const out=await p.connect(),pk=(out&&out.publicKey)||p.publicKey;if(!pk)throw new Error('Wallet returned no public key.');
-  return {name:'Injected Solana Wallet',publicKey:pk,signTransaction:tx=>p.signTransaction(tx),signMessage:(bytes)=>p.signMessage(bytes,'utf8')};
+  const p=legacyProvider();
+  if(p){
+    const out=await p.connect(),pk=(out&&out.publicKey)||p.publicKey;if(!pk)throw new Error('Wallet returned no public key.');
+    return {name:'Injected Solana Wallet',publicKey:pk,signTransaction:tx=>p.signTransaction(tx),signMessage:(bytes)=>p.signMessage(bytes,'utf8')};
+  }
+  const mod=await import('/mint/jupiter-mobile.js?v=20260921-reown-v1');
+  const adapter=await mod.getJupiterMobileAdapter();
+  await adapter.connect();
+  if(!adapter.publicKey)throw new Error('Jupiter Mobile connected but returned no public key.');
+  return {name:'Jupiter Mobile',publicKey:adapter.publicKey,signTransaction:tx=>adapter.signTransaction(tx),signMessage:async(bytes)=>({signature:await adapter.signMessage(bytes)})};
 }
 function setStatus(id,text,type=''){const el=$(id);if(!el)return;el.textContent=text;el.className='status'+(type?' '+type:'');}
 function meta(){return {description:$('#description').value.trim(),image:$('#image').value.trim(),website:$('#website').value.trim()};}
