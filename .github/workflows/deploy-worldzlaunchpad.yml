@@ -216,7 +216,7 @@ jobs:
           assert platform['trustOrbit']['jupiterIntegration']['officialJupiterEndorsement'] is False
           assert len(platform['trustOrbit']['proofRings'])==6
           assert 'WORLDZ TRUST ORBIT' in trust_html
-          assert 'Proof, not promises' in trust_html
+          assert 'PROOF, NOT PROMISES' in trust_html.upper()
           assert 'Jupiter Signals Integrated'.upper() in trust_html.upper()
           assert 'worldz-trust-orbit' in trust_js
           assert all(term not in trust_html and term not in trust_js for term in banned)
