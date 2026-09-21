@@ -270,9 +270,12 @@ async function signAndSend(tx,signers=[]){
   tx.recentBlockhash=latest.blockhash;tx.lastValidBlockHeight=latest.lastValidBlockHeight;tx.feePayer=wallet.publicKey;
   if(signers.length)tx.partialSign(...signers);
   const signed=await wallet.signTransaction(tx);
-  const sim=await connection.simulateTransaction(signed,{sigVerify:true,commitment:'confirmed'});
-  if(sim.value.err)throw new Error('Simulation failed: '+JSON.stringify(sim.value.err)+(sim.value.logs?'\n'+sim.value.logs.slice(-8).join('\n'):''));
-  const sig=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false,maxRetries:3,preflightCommitment:'confirmed'});
+  // signed is a legacy Transaction. web3.js v1.98.x does not accept a
+  // SimulateTransactionConfig object for legacy transactions; doing so throws
+  // "Invalid arguments" after the wallet signs. sendRawTransaction with
+  // skipPreflight:false performs RPC preflight on the exact signed wire bytes.
+  const wire=signed.serialize();
+  const sig=await connection.sendRawTransaction(wire,{skipPreflight:false,maxRetries:3,preflightCommitment:'confirmed'});
   const conf=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');
   if(conf.value.err)throw new Error('Confirmation failed: '+JSON.stringify(conf.value.err));
   return sig;
@@ -294,7 +297,7 @@ async function mintGenesis(symbol){
     createAssociatedTokenAccountInstruction(owner,ata,vault,mintKeypair.publicKey,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID),
     createMintToInstruction(mintKeypair.publicKey,ata,owner,amount,[],TOKEN_PROGRAM_ID)
   );
-  tokenStatus(symbol,'Wallet signature 1/3: CREATE MINT + issue exact fixed supply directly to Team Zed Treasury.\nA simulation runs before broadcast.','warn');
+  tokenStatus(symbol,'Wallet signature 1/3: CREATE MINT + issue exact fixed supply directly to Team Zed Treasury.\nSolana RPC preflight checks the exact signed transaction before broadcast.','warn');
   const sig=await signAndSend(tx,[mintKeypair]);
   const pending={mint_address:mintKeypair.publicKey.toBase58(),treasury_token_account:ata.toBase58(),mint_tx_signature:sig};
   localStorage.setItem('worldz-genesis-pending-'+symbol,JSON.stringify(pending));
@@ -342,7 +345,7 @@ async function revokeAuthorities(symbol){
     createSetAuthorityInstruction(mint,wallet.publicKey,AuthorityType.MintTokens,null,[],TOKEN_PROGRAM_ID),
     createSetAuthorityInstruction(mint,wallet.publicKey,AuthorityType.FreezeAccount,null,[],TOKEN_PROGRAM_ID)
   );
-  tokenStatus(symbol,'Wallet signature 3/3: FINAL authority revocation.\nSimulation must pass before broadcast.','warn');
+  tokenStatus(symbol,'Wallet signature 3/3: FINAL authority revocation.\nSolana RPC preflight checks the exact signed transaction before broadcast.','warn');
   const sig=await signAndSend(tx);
   tokenStatus(symbol,'AUTHORITIES REVOKED ON-CHAIN ✅\nRunning independent server verification of supply, Treasury balance, mint authority and freeze authority…','good');
   const out=await api('verify_final',{symbol,authority_revoke_tx_signature:sig});
