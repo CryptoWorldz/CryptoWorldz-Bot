@@ -1,0 +1,232 @@
+name: WorldSpeaker Treasury Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/worldspeaker-treasury-test.yml'
+      - '.github/worldspeaker-treasury-image.b64'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldspeaker-treasury-proof
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Recover active ZED bot token from protected runtime
+        shell: python
+        run: |
+          import io, os, re, ssl, json, urllib.request
+          from ftplib import FTP_TLS
+
+          host=os.environ['FTP_HOST'].replace('ftps://','').replace('ftp://','').split('/')[0]
+          if host.count(':')==1:
+              host=host.split(':',1)[0]
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(host,int(os.environ.get('FTP_PORT','21')),timeout=45)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p()
+          buf=io.BytesIO()
+          ftp.retrbinary('RETR /domains/cryptobotz.cryptoworldz.xyz/nodejs/.env',buf.write)
+          ftp.quit()
+
+          env={}
+          for raw in buf.getvalue().decode('utf-8','ignore').splitlines():
+              line=raw.strip()
+              if not line or line.startswith('#') or '=' not in line:
+                  continue
+              k,v=line.split('=',1)
+              k=re.sub(r'^export\\s+','',k).strip()
+              v=v.strip().strip('"').strip("'")
+              if v:
+                  env[k]=v
+
+          candidates=[
+              env.get('BOT_TOKEN',''),
+              env.get('TELEGRAM_BOT_TOKEN',''),
+              env.get('TELEGRAM_TOKEN',''),
+              env.get('ZED_BOT_TOKEN',''),
+              env.get('CRYPTOWORLDZ_BOT_TOKEN','')
+          ]
+          token=''
+          bot_username=''
+          for candidate in candidates:
+              candidate=str(candidate or '').strip()
+              if not candidate:
+                  continue
+              try:
+                  with urllib.request.urlopen(
+                      urllib.request.Request('https://api.telegram.org/bot'+candidate+'/getMe',headers={'User-Agent':'WorldSpeaker-Proof/1.0'}),
+                      timeout=20
+                  ) as r:
+                      data=json.loads(r.read().decode())
+                  if data.get('ok') is True:
+                      token=candidate
+                      bot_username=data.get('result',{}).get('username','')
+                      break
+              except Exception:
+                  pass
+          if not token:
+              raise SystemExit('WORLD_SPEAKER_BOT_TOKEN=FAIL no valid active Telegram bot token')
+
+          print('::add-mask::'+token)
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('BOT_TOKEN='+token+'\n')
+          print('WORLD_SPEAKER_BOT_TOKEN=PASS')
+          print('WORLD_SPEAKER_BOT_USERNAME='+bot_username)
+
+      - name: Prepare treasury image and Telegram message
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d .github/worldspeaker-treasury-image.b64 > /tmp/worldz-treasury.jpg
+          test -s /tmp/worldz-treasury.jpg
+          file /tmp/worldz-treasury.jpg
+
+          cat > /tmp/worldz-treasury-message.txt <<'EOF'
+TEAM — WORLDZ TREASURY UPDATE 🔐🌍
+
+We’ve now locked in the new WorldzLaunchPad™ Treasury structure.
+
+Operations Treasury
+• 10 authorised signers
+• 5-of-10 approvals required
+
+Reserve Treasury
+• 9 authorised signers
+• 6-of-9 approvals required
+• We will never require more than 6 signatures
+
+This structure will be used across:
+• Solana — Squads
+• Ethereum / Base / BNB / HyperEVM — Safe
+• XRP Ledger — native XRPL multisig
+• Sui — native Sui multisig
+
+The Operations Treasury will receive the WorldzLaunchPad™ 10% share of collected supported trading-fee revenue.
+
+IMPORTANT:
+
+I now need each Treasury team member to send me their PUBLIC wallet addresses only.
+
+Please send:
+
+SOL:
+"Your Solana public address"
+
+EVM:
+"Your Ethereum / Base / BNB public address"
+
+XRPL:
+"Your XRP Ledger public address"
+
+SUI:
+"Your Sui public address"
+
+🚨 NEVER send your seed phrase, recovery phrase, private key or password.
+
+Public wallet addresses ONLY.
+
+Our current Solana Team Zed Treasury is already verified as a 2-of-3 Squads multisig.
+
+The next step is upgrading it toward the new 5-of-10 Worldz Treasury standard through proper on-chain approvals.
+
+Once the signer addresses are registered, we can build and verify the Treasury wallets chain by chain.
+
+WorldzLaunchPad™
+5-of-10 Operations
+6-of-9 Reserve
+
+One World • One Mission 💜🌍
+EOF
+
+      - name: Send WorldSpeaker proof to CryptoWorldz team chats
+        shell: bash
+        run: |
+          set -euo pipefail
+          API="https://api.telegram.org/bot${BOT_TOKEN}"
+
+          send_one() {
+            local chat="$1"
+            local label="$2"
+
+            photo_json="$(curl --fail --silent --show-error --max-time 45               -F "chat_id=${chat}"               -F "photo=@/tmp/worldz-treasury.jpg"               -F "caption=WorldzLaunchPad™ Treasury — WorldSpeaker 📡"               "${API}/sendPhoto")"
+
+            PHOTO_JSON="$photo_json" python3 - <<'PY'
+          import json,os
+          d=json.loads(os.environ['PHOTO_JSON'])
+          assert d.get('ok') is True, d
+          print('WORLD_SPEAKER_PHOTO_MESSAGE_ID='+str(d['result']['message_id']))
+          PY
+
+            msg_json="$(curl --fail --silent --show-error --max-time 45               --data-urlencode "chat_id=${chat}"               --data-urlencode "text@/tmp/worldz-treasury-message.txt"               --data-urlencode "disable_web_page_preview=true"               "${API}/sendMessage")"
+
+            MSG_JSON="$msg_json" LABEL="$label" python3 - <<'PY'
+          import json,os
+          d=json.loads(os.environ['MSG_JSON'])
+          assert d.get('ok') is True, d
+          print('WORLD_SPEAKER_DELIVERY=PASS target='+os.environ['LABEL']+' message_id='+str(d['result']['message_id']))
+          PY
+          }
+
+          send_one "-1003732353996" "CryptoWorldz HQ"
+          send_one "-1004404927235" "CryptoWorldz Command Centre"
+
+          echo 'WORLD_SPEAKER_TEAM_SEND=PASS targets=2'
+
+      - name: Probe Telegram webhook and Command Centre MAX runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          API="https://api.telegram.org/bot${BOT_TOKEN}"
+
+          hook="$(curl --fail --silent --show-error --max-time 25 "${API}/getWebhookInfo")"
+          HOOK_JSON="$hook" python3 - <<'PY'
+          import json,os
+          d=json.loads(os.environ['HOOK_JSON'])
+          assert d.get('ok') is True
+          r=d.get('result',{})
+          print('ZED_TELEGRAM_WEBHOOK_URL='+str(r.get('url','')))
+          print('ZED_TELEGRAM_WEBHOOK_PENDING='+str(r.get('pending_update_count',0)))
+          print('ZED_TELEGRAM_WEBHOOK_LAST_ERROR='+('YES' if r.get('last_error_message') else 'NO'))
+          PY
+
+          root_code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 15 -o /tmp/root.json -w '%{http_code}' 'https://cryptobotz.cryptoworldz.xyz/' || true)"
+          health_code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 15 -o /tmp/health.json -w '%{http_code}' 'https://cryptobotz.cryptoworldz.xyz/health' || true)"
+          mini_code="$(curl --silent --show-error --location --connect-timeout 5 --max-time 15 -o /tmp/mini.html -w '%{http_code}' 'https://cryptobotz.cryptoworldz.xyz/miniapp/' || true)"
+
+          root_service=0
+          health_ok=0
+          max_ui=0
+          grep -Fq '"service":"CryptoWorldz Zed Bot"' /tmp/root.json && root_service=1 || true
+          grep -Fq '"ok":true' /tmp/health.json && health_ok=1 || true
+          grep -Fq 'Command Centre <span>MAX™</span>' /tmp/mini.html && max_ui=1 || true
+
+          echo "ZED_RUNTIME_PROBE root_http=${root_code} health_http=${health_code} mini_http=${mini_code} service_identity=${root_service} health_ok=${health_ok} max_ui=${max_ui}"
+
+          test "${health_code}" = "200"
+          test "${health_ok}" = "1"
+          test "${mini_code}" = "200"
+          test "${max_ui}" = "1"
+
+          if [ "${root_service}" = "1" ]; then
+            echo 'ZED_COMMAND_CENTRE_MAX_RUNTIME=PASS'
+          else
+            echo 'ZED_COMMAND_CENTRE_MAX_RUNTIME=PARTIAL service_identity_mismatch=1'
+          fi
