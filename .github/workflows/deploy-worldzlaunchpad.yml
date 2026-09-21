@@ -224,11 +224,16 @@ jobs:
           assert platform['worldzMint']['compulsory']['metadataImmutableAfterGenesis'] is True
           assert platform['worldzMint']['imageUpload']['enabled'] is True
           assert platform['worldzMint']['imageUpload']['bucket']=='worldz-mint-art'
-          assert platform['worldzMint']['imageUpload']['walletSignatureRequired'] is True
+          assert platform['worldzMint']['imageUpload']['walletSignatureRequired'] is False
+          assert platform['worldzMint']['imageUpload']['walletConnectionRequired'] is False
+          assert platform['worldzMint']['imageUpload']['reuploadEnabled'] is True
           assert 'id="image-file"' in mint_html
           assert "UPLOAD_IMAGE" in mint_js
           assert "resizeTokenImage" in mint_js
-          assert "WORLDZMINT_UPLOAD_IMAGE_V1" in mint_js
+          assert "WORLDZMINT_UPLOAD_IMAGE_V1" not in mint_js
+          assert "No wallet connection or signature is required." in mint_js
+          assert 'id="image-remove"' in mint_html
+          assert 'NO SIGNING REQUIRED' in mint_html
           assert "worldzmint-draft-v1" in mint_js
           assert "saveDraft" in mint_js
           assert "restoreDraft" in mint_js
