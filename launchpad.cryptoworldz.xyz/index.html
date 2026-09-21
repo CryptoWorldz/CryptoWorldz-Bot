@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#05020b">
   <meta name="description" content="WorldzLaunchPad™ — build, simulate, test and prepare token launches with transparent fees, locks, vesting, CrossPair and multi-chain architecture.">
   <title>WorldzLaunchPad™ | Build • Prove • Launch</title>
-  <link rel="stylesheet" href="/style.css?v=20260921-public-v5">
+  <link rel="stylesheet" href="/style.css?v=20260921-public-v6">
 </head>
 <body>
 <header class="topbar">
@@ -14,7 +14,7 @@
   <nav aria-label="Primary">
     <a href="#explore">Explore</a>
     <a href="#create">Create</a>
-    <a href="#safe-standard">Safe Launch Rules</a>
+    <a href="#founding100">Founding 100</a><a href="#safe-standard">Safe Launch Rules</a>
     <a href="#crosspair">CrossPair</a>
     <a href="/omnichain/">OmniChain</a>
     <a href="#command">Command Centre</a>
@@ -26,7 +26,7 @@
 <main id="top">
   <section class="hero">
     <div class="hero-copy">
-      <div class="kicker">PUBLIC TOKEN LAUNCHPAD • SOLANA FIRST • OPEN TO EVERYONE</div>
+      <div class="kicker">PUBLIC TOKEN LAUNCHPAD • MULTI-CHAIN BY VERIFIED ADAPTER • OPEN TO EVERYONE</div>
       <h1>LAUNCH<br><span>YOUR WORLD.</span></h1>
       <p class="lead">Create your token. Set your supported trading fee. Build transparent tokenomics. Run the proof checks. WorldzLaunchPad™ is built for public creators — your project, your token, your community.</p>
       <div class="hero-actions">
@@ -34,7 +34,7 @@
         <a class="btn secondary" href="#explore">Public Launches</a>
         <a class="btn ghost" href="/devnet/">Worldz Flash Devnet</a>
         <a class="btn ghost" href="/curve/">Worldz Curve Devnet</a>
-        <a class="btn ghost" href="/curve-pro/">Curve Pro Devnet</a>
+        <a class="btn ghost" href="/curve-pro/">Curve Pro Devnet</a><a class="btn ghost" href="/base/">Base Sepolia Lab</a>
       </div>
       <div class="truth-strip">
         <span><b>10%</b> of your collected token fee only → WorldzLaunchPad</span>
@@ -53,7 +53,7 @@
   <section class="network-strip" aria-label="WorldzLaunchPad chains">
     <span class="network active">◎ Solana <b>BUILDING</b></span>
     <span class="network">◆ Ethereum <b>PLANNED</b></span>
-    <span class="network">◉ Base <b>PLANNED</b></span>
+    <span class="network active">◉ Base <b>SEPOLIA BETA</b></span>
     <span class="network">⬡ BNB <b>PLANNED</b></span>
     <span class="network">R Robinhood <b>PLANNED</b></span>
     <span class="network">X XRP Ledger <b>NATIVE ADAPTER</b></span>
@@ -66,6 +66,23 @@
       <span class="live-chip"><i></i> PUBLIC LAUNCHPAD LIVE</span>
     </div>
     <div class="launch-market" id="launch-market"></div>
+  </section>
+
+  <section id="founding100" class="section feature-section">
+    <div class="section-heading with-action">
+      <div>
+        <div class="section-kicker">WORLDZLAUNCHPAD FOUNDING 100™</div>
+        <h2>The first 100 verified teams become part of WorldzLaunchPad history.</h2>
+        <p>A permanent Founding 100 registry is now in place. A total pool equal to <b>10% of the future WORLDZ supply</b> is reserved for the 100 qualified Founding positions — intended as <b>0.10% per position</b>. Devnet launches do not qualify.</p>
+      </div>
+      <span class="live-chip"><i></i> 100 POSITIONS</span>
+    </div>
+    <div class="feature-grid">
+      <article class="feature-card hero-card"><span>QUALIFY</span><h3>Verified mainnet launch.</h3><p>The launch must pass the applicable Worldz Safe Launch rules, on-chain proof and the published mainnet release gate. Price and trading volume are not qualification tests.</p></article>
+      <article class="feature-card"><span>ANTI-SYBIL</span><h3>One verified team. One position.</h3><p>Creating extra wallets or spam tokens does not create extra Founding positions. Team identity is reviewed before a position is awarded.</p></article>
+      <article class="feature-card"><span>PERMANENT RECORD</span><h3>Documented for good.</h3><p>Candidate time, launch proof and qualified position are preserved. A fraud finding can forfeit an allocation, but the historical record is not silently erased.</p></article>
+      <article class="feature-card"><span>WORLDZ POOL</span><h3>10% total • 100 equal positions.</h3><p>The Founding 100 pool is separate from WorldzLaunchPad's platform fee. The LaunchPad still takes only 10% of each project's collected supported trading-fee revenue.</p></article>
+    </div>
   </section>
 
   <section id="safe-standard" class="section feature-section">
@@ -88,7 +105,7 @@
     <div class="section-heading">
       <div class="section-kicker">CREATE</div>
       <h2>Build your token. Worldz enforces the platform limits.</h2>
-      <p>The wizard creates a public launch manifest, validates the tokenomics and carries the same rules into the executable launch route. Solana is first. Every percentage is visible before a wallet signs.</p>
+      <p>The wizard creates a public launch manifest, validates the tokenomics and carries the same rules into each executable chain adapter. Solana Devnet and Base Sepolia are the first public test routes. Every percentage is visible before a wallet signs.</p>
     </div>
 
     <div class="builder">
@@ -107,7 +124,7 @@
           <div class="choice-grid chain-grid" id="chain-grid">
             <button class="choice selected" data-chain="solana"><strong>◎ Solana</strong><small>Devnet creator launch enabled</small><em>SolWorldz</em></button>
             <button class="choice" data-chain="ethereum"><strong>◆ Ethereum</strong><small>EVM adapter planned</small><em>EthWorldz</em></button>
-            <button class="choice" data-chain="base"><strong>◉ Base</strong><small>EVM adapter planned</small><em>BaseWorldz</em></button>
+            <button class="choice" data-chain="base"><strong>◉ Base</strong><small>Base Sepolia token adapter live</small><em>BaseWorldz • TESTNET</em></button>
             <button class="choice" data-chain="bnb"><strong>⬡ BNB Chain</strong><small>EVM adapter planned</small><em>BNBWorldz</em></button>
             <button class="choice" data-chain="robinhood"><strong>R Robinhood</strong><small>EVM adapter planned</small><em>RobinWorldz</em></button>
             <button class="choice" data-chain="xrpl"><strong>X XRP Ledger</strong><small>XRPL-native adapter research</small><em>XRPWorldz</em></button>
@@ -121,7 +138,7 @@
           <div class="choice-grid engine-grid" id="engine-grid">
             <button class="choice selected" data-engine="flash"><strong>⚡ Worldz Flash™</strong><small>Direct liquidity. No bonding curve required.</small><em>DEVNET BETA • RAYDIUM CPMM</em></button>
             <button class="choice" data-engine="curve"><strong>↗ Worldz Curve™</strong><small>Curated bonding curve → AMM graduation.</small><em>DEVNET BETA • RAYDIUM LAUNCHLAB</em></button>
-            <button class="choice" data-engine="curve-pro"><strong>⌁ Worldz Curve Pro™</strong><small>Advanced dynamic curve configuration.</small><em>DEVNET BETA • METEORA DBC</em></button>
+            <button class="choice" data-engine="curve-pro"><strong>⌁ Worldz Curve Pro™</strong><small>Advanced dynamic curve configuration.</small><em>DEVNET BETA • METEORA DBC</em></button><button class="choice" data-engine="evm-fixed"><strong>◉ Worldz EVM Fair™</strong><small>Fixed-supply EVM token with direct disclosed genesis allocation.</small><em>BASE SEPOLIA BETA</em></button>
             <button class="choice" data-engine="liquidity"><strong>◫ Worldz Liquidity™</strong><small>Traditional fixed-supply + creator-funded LP.</small><em>PLANNED</em></button>
             <button class="choice" data-engine="board"><strong>▦ Worldz Board™</strong><small>Branded launch surface for a creator/community.</small><em>PLANNED</em></button>
           </div>
@@ -145,7 +162,7 @@
           <div class="step-head"><span>04 / CROSSPAIR</span><h3>What should your token trade against?</h3></div>
           <div class="quote-grid">
             <button class="quote selected" data-quote="SOL"><span class="quote-icon">◎</span><strong>SOL</strong><small>Native Solana quote</small><em>VERIFIED NATIVE</em></button>
-            <button class="quote" data-quote="wXRP"><span class="quote-icon">X</span><strong>wXRP</strong><small>Hex Trust wrapped XRP on Solana</small><em>VERIFIED • 1:1 XRP BACKING CLAIM</em></button>
+            <button class="quote" data-quote="wXRP"><span class="quote-icon">X</span><strong>wXRP</strong><small>Hex Trust wrapped XRP on Solana</small><em>VERIFIED • 1:1 XRP BACKING CLAIM</em></button><button class="quote" data-quote="ETH"><span class="quote-icon">◆</span><strong>ETH</strong><small>Native Base quote asset</small><em>BASE SEPOLIA NATIVE</em></button>
           </div>
           <article class="verified-asset" id="wxrp-proof">
             <div class="proof-seal">✓</div>
@@ -215,7 +232,7 @@
             <button class="btn secondary prev-step" data-prev="5">← Back</button>
             <button class="btn secondary" id="run-preflight" type="button">Run Pre-Sign Check</button>
             <button class="btn secondary" id="download-manifest" type="button" disabled>Download Manifest</button>
-            <a class="btn primary disabled-link" id="devnet-launch-link" href="/devnet/" aria-disabled="true">Open Devnet Launch →</a>
+            <a class="btn primary disabled-link" id="devnet-launch-link" href="/devnet/" aria-disabled="true">Open Executable Test Route →</a>
           </div>
           <div class="notice">MAINNET LAUNCH LOCKED UNTIL ENFORCED — not merely declared. Worldz requires atomic tagged allocations, 100% creator-controlled LP lock ≥365 days, founder vesting, multisig proof, revoked mint/freeze authority, simulation, disclosure and the remaining security/operational/legal release gates.</div>
         </section>
@@ -240,7 +257,7 @@
     <div class="section-heading">
       <div class="section-kicker">WORLDZ OMNICHAIN™</div>
       <h2>One project. Multiple Worldz. One disclosed supply model.</h2>
-      <p>Omnichain is an architecture track, not a promise that every token should exist everywhere. The first research rail is LayerZero OFT; each chain still gets native adapters and chain-specific checks.</p>
+      <p>OmniChain is the shared project/proof architecture. Execution remains chain-native: Solana Devnet is live, Base Sepolia token deployment is now executable, while cross-chain movement and additional mainnet adapters remain separately gated.</p>
       <div class="hero-actions"><a class="btn primary" href="/omnichain/">Open Interactive OmniChain Galaxy →</a><a class="btn secondary" href="/omnichain/#worlds">Explore Every World</a></div>
     </div>
     <div class="omni-map">
@@ -278,7 +295,7 @@
           <div class="proof-row"><span class="ok">✓</span><span>WorldzLaunchPad initial-liquidity share = <b>0%</b></span></div>
           <div class="proof-row"><span class="ok">✓</span><span>Wallet-transfer tax = <b>0%</b></span></div>
           <div class="proof-row"><span class="ok">✓</span><span>Creator/team, liquidity, vesting and fee-route limits checked before execution</span></div>
-          <div class="proof-row"><span class="ok">✓</span><span>Public launches registered with on-chain mint / pool / transaction proof where supported</span></div>
+          <div class="proof-row"><span class="ok">✓</span><span>Public launches registered with on-chain mint / pool / transaction proof where supported</span></div><div class="proof-row"><span class="ok">✓</span><span>Founding 100 candidates are created only from qualifying mainnet proof — never from devnet or price/volume hype</span></div>
         </div>
       </article>
       <article class="panel">
@@ -302,6 +319,6 @@
   <p>WorldzLaunchPad™ is a public creator platform. Mainnet execution is enabled only after the selected route passes its published proof gate. WorldzLaunchPad takes 10% of collected supported token-fee revenue only — never token supply or initial liquidity.</p>
 </footer>
 
-<script src="/app.js?v=20260921-public-v5" defer></script>
+<script src="/app.js?v=20260921-public-v6" defer></script>
 </body>
 </html>
