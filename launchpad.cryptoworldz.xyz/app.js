@@ -44,8 +44,12 @@ function escapeHtml(value){
 }
 function shortAddress(v){const x=String(v||'');return x.length>12?x.slice(0,6)+'…'+x.slice(-6):x;}
 function renderFounding100(founding){
-  const target=$('#founding-market'),badge=$('#founding-count');if(!target||!badge)return;
-  const f=founding||{},positions=Array.isArray(f.positions)?f.positions:[],qualified=Number(f.qualifiedCount)||0,pending=Number(f.pendingReviewCount)||0;
+  const target=$('#founding-market'),badge=$('#founding-count');
+  if(!target||!badge)return;
+  const f=founding||{};
+  const positions=Array.isArray(f.positions)?f.positions:[];
+  const qualified=Number(f.qualifiedCount)||0;
+  const pending=Number(f.pendingReviewCount)||0;
   badge.innerHTML='<i></i> '+Math.max(0,100-qualified)+' OF 100 POSITIONS REMAIN';
   if(!positions.length){
     target.innerHTML='<article class="market-card"><span class="market-num">#001?</span><div><strong>FOUNDING 100 POSITION #001 IS OPEN</strong><em>Verified mainnet launches only</em><small>No devnet launch can claim a Founding position.</small></div><div class="market-stat"><span>WORLDZ allocation</span><b>0.10% per qualified position</b></div><span class="arrow">→</span></article>';
@@ -54,7 +58,17 @@ function renderFounding100(founding){
   target.innerHTML=positions.slice(0,12).map(x=>{
     const pos=x.founding_position?'#'+String(x.founding_position).padStart(3,'0'):'CANDIDATE '+String(x.candidate_order);
     const state=String(x.status||'pending_review').replaceAll('_',' ').toUpperCase();
-    return '<article class="market-card"><span class="market-num">'+escapeHtml(pos)+'</span><div><strong>'+escapeHtml(x.token_name||'Unnamed')+'</strong><em>
+    const name=escapeHtml(x.token_name||'Unnamed');
+    const symbol=escapeHtml(x.symbol||'TOKEN');
+    const team=escapeHtml(x.team_label||'Identity review pending');
+    const allocation=Number(x.worldz_allocation_percent);
+    const allocationText=Number.isFinite(allocation)?allocation.toFixed(2)+'%':'0.10%';
+    const inner='<span class="market-num">'+escapeHtml(pos)+'</span><div><strong>'+name+'</strong><em>$'+symbol+'</em><small>'+escapeHtml(state)+' • '+escapeHtml(String(x.network||'').toUpperCase())+'</small></div><div class="market-stat"><span>Team</span><b>'+team+'</b></div><div class="market-stat"><span>WORLDZ allocation</span><b>'+allocationText+'</b></div><span class="arrow">'+(x.status==='qualified'?'TRUST →':'…')+'</span>';
+    return x.mint?'<a class="market-card" href="/trust/?mint='+encodeURIComponent(x.mint)+'">'+inner+'</a>':'<article class="market-card">'+inner+'</article>';
+  }).join('')+(pending?'<article class="market-card"><div><strong>'+pending+' candidate'+(pending===1?'':'s')+' awaiting review</strong><small>Candidate status is not an award.</small></div></article>':'');
+}
+
+async function renderMarket(){
   const target=$('#launch-market');if(!target)return;
   target.innerHTML='<article class="market-card"><div><strong>Loading public launches…</strong><small>Worldz Proof registry</small></div></article>';
   try{
@@ -73,10 +87,11 @@ function renderFounding100(founding){
       const symbol=escapeHtml(x.symbol||'TOKEN');
       const engine=escapeHtml(x.engine||'');
       const stage=escapeHtml(String(x.stage||'registered').replaceAll('_',' ').toUpperCase());
-      const mint=escapeHtml(shortAddress(x.mint));
+      const mintShort=escapeHtml(shortAddress(x.mint));
       const fee=Number(x.project_fee_percent);
       const feeText=Number.isFinite(fee)?fee.toFixed(2)+'%':'—';
-      return '<a class="market-card" href="/trust/?mint='+encodeURIComponent(x.mint||'')+'" aria-label="Open Trust Passport for '+name+'"><span class="market-num">#'+String(i+1).padStart(3,'0')+'</span><div><strong>'+name+'</strong><em>
+      const content='<span class="market-num">#'+String(i+1).padStart(3,'0')+'</span><div><strong>'+name+'</strong><em>$'+symbol+'</em><small>'+stage+' • '+env+'</small></div><div class="market-stat"><span>Engine</span><b>'+engine+'</b></div><div class="market-stat"><span>Token fee</span><b>'+feeText+'</b></div><div class="market-stat"><span>Mint</span><b>'+mintShort+'</b></div><span class="arrow">TRUST →</span>';
+      return x.mint?'<a class="market-card" href="/trust/?mint='+encodeURIComponent(x.mint)+'" aria-label="Open Trust Passport for '+name+'">'+content+'</a>':'<article class="market-card">'+content+'</article>';
     }).join('');
   }catch(e){
     target.innerHTML='<article class="market-card"><div><strong>Public registry temporarily unavailable</strong><small>Launch building remains available. Registry failures are shown as unknown, never silently green.</small></div></article>';
