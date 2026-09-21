@@ -7,6 +7,7 @@ import ssl
 import sys
 import urllib.parse
 import urllib.request
+import urllib.error
 import uuid
 from ftplib import FTP_TLS
 
@@ -158,8 +159,12 @@ def post_photo(url, chat_id, image_bytes, caption):
         },
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.loads(r.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode("utf-8", "ignore")
+        raise RuntimeError(f"Telegram sendPhoto HTTP {e.code}: {detail}") from e
 
 
 def probe_text(path):
