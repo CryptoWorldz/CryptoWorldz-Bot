@@ -18,22 +18,6 @@ let walletCtx=null,preflightOk=false,busy=false,pending=null;
 const DRAFT_KEY='worldzmint-draft-v1';
 let restoringDraft=false;
 
-const WORLDZ_QUICKSTART={
-  token_name:'WORLDZ',
-  symbol:'WLDZ',
-  fixed_supply:'100000000',
-  description:'WORLDZ is the foundation token of the Worldz ecosystem — connecting people, communities and transparent technology around one shared mission: helping the people who help the people, expanding opportunity, and building a stronger, kinder and fairer world.',
-  image_url:'https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-mint-art/public/2026-09-21/269fc0e5-e95a-44cf-925b-00d734fc069b.jpg',
-  website:'https://cryptoworldz.xyz/',
-  allocations:{creator:5,liquidity:35,community:30,treasury:10,growth:20},
-  recipients:{
-    liquidity:'9TWCEJDqHszNYmAsL74LRbNCy138QeMYZuijv5VsH98o',
-    community:'5Xenxsr9xmmqqLrgWuyAGq9SjG7gYhS4WEufo8KWrU4u',
-    treasury:'n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB',
-    growth:'5iLFbFNGi8D4XCgNFKiT39HAGBUgmTCgKSKjCymcs2cA'
-  }
-};
-
 function setStatus(text,type=''){const el=$('#status');el.textContent=text;el.className='status'+(type?' '+type:'');}
 function short(v){const s=String(v||'');return s.length>15?s.slice(0,7)+'…'+s.slice(-7):s;}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -93,24 +77,42 @@ function restoreDraft(){
   finally{restoringDraft=false;}
   return restored;
 }
-function loadWorldzQuickstart(){
+function applyPrivatePreset(v){
+  if(!v||typeof v!=='object')throw new Error('Invalid private launch preset.');
   restoringDraft=true;
-  $('#name').value=WORLDZ_QUICKSTART.token_name;
-  $('#symbol').value=WORLDZ_QUICKSTART.symbol;
-  $('#supply').value=WORLDZ_QUICKSTART.fixed_supply;
-  $('#description').value=WORLDZ_QUICKSTART.description;
-  $('#image').value=WORLDZ_QUICKSTART.image_url;
-  const preview=$('#image-preview');if(preview){preview.src=WORLDZ_QUICKSTART.image_url;preview.hidden=false;}
-  $('#website').value=WORLDZ_QUICKSTART.website;
-  for(const [k,val] of Object.entries(WORLDZ_QUICKSTART.allocations)){const el=$('[data-key="'+k+'"]');if(el)el.value=String(val);}
-  $('#liquidity-wallet').value=WORLDZ_QUICKSTART.recipients.liquidity;
-  $('#community-wallet').value=WORLDZ_QUICKSTART.recipients.community;
-  $('#treasury-wallet').value=WORLDZ_QUICKSTART.recipients.treasury;
-  $('#growth-wallet').value=WORLDZ_QUICKSTART.recipients.growth;
-  if(walletCtx)$('#creator-wallet').value=walletCtx.address;
-  restoringDraft=false;
+  try{
+    if(['devnet','mainnet-beta'].includes(v.environment))$('#network').value=v.environment;
+    refreshConnection();
+    $('#name').value=String(v.token_name||'');
+    $('#symbol').value=String(v.symbol||'');
+    $('#supply').value=String(v.fixed_supply||'');
+    $('#description').value=String(v.description||'');
+    $('#image').value=String(v.image_url||'');
+    $('#website').value=String(v.website||'');
+    const preview=$('#image-preview');
+    if(preview&&v.image_url){preview.src=String(v.image_url);preview.hidden=false;}
+    for(const [k,val] of Object.entries(v.allocations||{})){
+      const el=$('[data-key="'+k+'"]');if(el)el.value=String(val);
+    }
+    for(const [k,id] of Object.entries({creator:'#creator-wallet',liquidity:'#liquidity-wallet',community:'#community-wallet',treasury:'#treasury-wallet',growth:'#growth-wallet'})){
+      if(v.recipients?.[k])$(id).value=String(v.recipients[k]);
+    }
+  }finally{restoringDraft=false;}
   allocationMath();saveDraft();
-  setStatus('WORLDZ READY — press START WORLDZ NOW. Jupiter will ask only for the required transaction approvals.','good');
+}
+async function loadPrivatePreset(){
+  const params=new URLSearchParams(location.search),code=params.get('launch');
+  if(!code)return false;
+  setStatus('LOADING PRIVATE WORLDZMINT PRESET…\nNo wallet action is being requested.','warn');
+  const r=await fetch(API+'?preset='+encodeURIComponent(code),{cache:'no-store'});
+  const out=await r.json().catch(()=>({}));
+  if(!r.ok||!out.ok||!out.config)throw new Error(out.error||'Private launch preset could not be loaded.');
+  applyPrivatePreset(out.config);
+  const clean=new URL(location.href);
+  clean.searchParams.delete('launch');clean.searchParams.set('ready','1');
+  history.replaceState({},'',clean.pathname+clean.search+clean.hash);
+  setStatus('WORLDZMINT READY ✅\nAll launch details are loaded. Press START WORLDZMINT™.','good');
+  return true;
 }
 function bpsMap(a){const out={};for(const [k,v] of Object.entries(a))out[k]=Math.round(Number(v)*100);return out;}
 function allocationMath(){
@@ -529,7 +531,6 @@ $('#image-file').addEventListener('change',async e=>{
   }
 });
 $('#image-remove')?.addEventListener('click',removeTokenImage);
-$('#worldz-ready').addEventListener('click',loadWorldzQuickstart);
 $('#preflight').addEventListener('click',runPreflight);
 $('#mint-btn').addEventListener('click',mintFlow);
 $('#network').addEventListener('change',()=>{refreshConnection();saveDraft();preflightOk=false;if(!pending?.registered)$('#mint-btn').disabled=false;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
@@ -550,11 +551,17 @@ getWallets().on('register',()=>{
     setStatus('JUPITER / SOLANA WALLET DETECTED ✅\n'+($('#wallet-choice').selectedOptions[0]?.textContent||after)+'\nTap Connect Wallet.','good');
   }
 });
-const draftRestored=restoreDraft();
-if(!$('#name').value.trim())loadWorldzQuickstart();
+const privatePresetCode=new URLSearchParams(location.search).get('launch');
+let draftRestored=false;
+if(privatePresetCode){
+  try{await loadPrivatePreset();draftRestored=true;}
+  catch(error){setStatus('PRIVATE WORLDZMINT PRESET FAILED\n'+(error?.message||String(error)),'bad');}
+}else{
+  draftRestored=restoreDraft();
+}
 restorePending();
 allocationMath();renderProof();loadRegistry();
-if(draftRestored&&!pending){
+if(draftRestored&&!pending&&!privatePresetCode){
   setStatus('WORLDZMINT DRAFT RESTORED ✅\nYour token details were saved on this device. Reconnect the wallet and continue where you left off.','good');
 }
 // Reown is lazy-loaded only if no native/Wallet Standard Solana wallet is available.
