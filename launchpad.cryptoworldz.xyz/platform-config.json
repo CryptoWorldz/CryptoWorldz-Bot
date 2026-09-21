@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-21-public-launchpad-v5",
+  "version": "2026-09-21-public-launchpad-v6",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -67,6 +67,13 @@
       "name": "Worldz Board™",
       "status": "PLANNED",
       "description": "Branded launch surface for a creator, community or team."
+    },
+    {
+      "id": "evm-fixed",
+      "name": "Worldz EVM Fair™",
+      "status": "BASE_SEPOLIA_BETA",
+      "underlay": "Worldz fixed-supply ERC-20 template",
+      "description": "Base Sepolia fixed-supply token deployment with direct disclosed genesis allocation. Mainnet liquidity, fee-routing and LP-lock adapters remain fail-closed."
     }
   ],
   "chainAdapters": [
@@ -88,8 +95,10 @@
       "id": "base",
       "name": "Base",
       "world": "BaseWorldz",
-      "status": "PLANNED",
-      "creatorLaunch": "OFF"
+      "status": "TESTNET_BETA",
+      "creatorLaunch": "BASE_SEPOLIA",
+      "mainnetCreatorLaunch": "OFF",
+      "engine": "evm-fixed"
     },
     {
       "id": "bnb",
@@ -157,9 +166,15 @@
   },
   "omnichain": {
     "name": "Worldz Omnichain™",
-    "status": "ARCHITECTURE_RESEARCH",
+    "status": "PUBLIC_ARCHITECTURE_WITH_TESTNET_ADAPTERS",
     "goal": "Allow supported WorldzLaunchPad assets to operate across multiple chains while preserving a disclosed global supply model.",
-    "initialResearchRail": "LayerZero OFT"
+    "initialResearchRail": "LayerZero OFT",
+    "executableAdapters": [
+      "solana-devnet",
+      "base-sepolia-token"
+    ],
+    "mainnetAdaptersEnabled": [],
+    "rule": "OmniChain is a common project/proof architecture. Each chain is executable only when its chain-native adapter is independently verified; a visual World does not imply a live launch adapter."
   },
   "releaseGate": {
     "mainnetCreatorLaunch": [
@@ -346,5 +361,35 @@
     "status": "AWAITING_VERIFIED_VAULT_ADDRESS",
     "mainnetRoutingEnabled": false,
     "rule": "Public mainnet fee routing must not activate until the verified Treasury Multisig vault address is registered."
+  },
+  "baseEvmFair": {
+    "status": "BASE_SEPOLIA_BETA",
+    "chainId": 84532,
+    "environment": "base-sepolia",
+    "mainnetChainId": 8453,
+    "mainnetExecution": false,
+    "tokenDeployment": true,
+    "liquidityPoolCreation": false,
+    "feeRouterExecuting": false,
+    "lpLockEnforced": false,
+    "vestingEnforced": false,
+    "decimals": 18,
+    "creatorLiquidMaxPercent": 5,
+    "templateVersion": 1,
+    "rule": "Base Sepolia may deploy the Worldz fixed-supply template for public testing. It is not a complete Worldz mainnet launch until pool creation, LP lock, fee routing and server-side proof are implemented and verified."
+  },
+  "founding100": {
+    "name": "WorldzLaunchPad Founding 100™",
+    "status": "REGISTRY_LIVE_AWARDS_BEGIN_WITH_QUALIFYING_MAINNET_LAUNCHES",
+    "totalPositions": 100,
+    "futureWorldzPoolPercent": 10,
+    "equalAllocationPerQualifiedPositionPercent": 0.1,
+    "devnetEligible": false,
+    "priceOrVolumeRankingUsed": false,
+    "qualificationRule": "A position is available only to a verified mainnet WorldzLaunchPad launch that passes the applicable Safe Launch Standard, on-chain proof, team identity/anti-sybil review and human/multisig qualification.",
+    "orderingRule": "Mainnet proof completion creates a permanent candidate timestamp. Qualified positions are then assigned in order of verified qualification. Disqualified candidates remain documented and do not receive a position.",
+    "antiSybilRule": "One qualified Founding 100 position per verified team identity. Multiple wallets do not create multiple team positions.",
+    "permanenceRule": "Qualified positions are permanent historical records. A later fraud finding may mark a position disqualified/forfeited but the historical record is not deleted or silently reassigned.",
+    "allocationRule": "10% total future WORLDZ allocation pool is reserved for the 100 qualified Founding 100 positions, intended as 0.10% of total WORLDZ supply per position."
   }
 }
