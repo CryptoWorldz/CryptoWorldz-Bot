@@ -1,0 +1,67 @@
+const $=s=>document.querySelector(s);
+const API='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-trust-orbit';
+
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmtNum(v,dec=2){
+  const n=Number(v);if(!Number.isFinite(n))return '—';
+  if(Math.abs(n)>=1e9)return (n/1e9).toFixed(dec)+'B';
+  if(Math.abs(n)>=1e6)return (n/1e6).toFixed(dec)+'M';
+  if(Math.abs(n)>=1e3)return (n/1e3).toFixed(dec)+'K';
+  return n.toLocaleString(undefined,{maximumFractionDigits:dec});
+}
+function usd(v){const n=Number(v);if(!Number.isFinite(n))return '—';return '$'+(n<0.01?n.toPrecision(3):n.toLocaleString(undefined,{maximumFractionDigits:4}));}
+function ringClass(status){
+  if(['VERIFIED','VRFD_VERIFIED','PROOF_PRESENT','HIGH'].includes(status))return 'good';
+  if(['OPEN_AUTHORITY'].includes(status))return 'bad';
+  return 'warn';
+}
+function ringCopy(r){
+  const e=r.evidence||{};
+  if(r.id==='authority')return e.mintAuthority===null&&e.freezeAuthority===null?'Mint and freeze authorities are both permanently absent.':'Mint authority: '+(e.mintAuthority?'OPEN':'NONE')+' • Freeze authority: '+(e.freezeAuthority?'OPEN':'NONE');
+  if(r.id==='distribution')return e.top10Percentage!=null?'Largest 10 token accounts hold '+fmtNum(e.top10Percentage,2)+'% of current supply.':e.jupiterTopHoldersPercentage!=null?'Jupiter reports top-holder concentration of '+fmtNum(e.jupiterTopHoldersPercentage,2)+'%.':'Distribution concentration data is not currently available.';
+  if(r.id==='worldz')return r.status==='NOT_WORLDZ_REGISTERED'?'No public WorldzLaunchPad launch proof is registered for this mint.':r.status==='VERIFIED'?'Worldz mainnet release-gate proof is registered and verified.':'A WorldzLaunchPad record exists, but the mainnet release gate is not marked fully verified.';
+  if(r.id==='jupiter_identity')return r.status==='VRFD_VERIFIED'?'Jupiter currently reports this token as verified.':r.status==='JUPITER_UNVERIFIED'?'Jupiter has token data but does not currently report VRFD verification.':'No matching Jupiter token record was returned.';
+  if(r.id==='organic_market')return e.organicScore!=null?'Jupiter Organic Score: '+fmtNum(e.organicScore,1)+' / 100 • '+String(e.organicScoreLabel||'').toUpperCase()+'.':'Jupiter has not returned enough organic-market data yet.';
+  if(r.id==='locks_control')return e.worldzLockEnforced||e.worldzVestingEnforced?'Enforceable Worldz lock/vesting evidence is recorded for this launch.':'No token-specific enforceable lock/vesting proof is currently recorded in Worldz Trust Orbit.';
+  return '';
+}
+function metric(label,value){return '<div class="metric"><small>'+esc(label)+'</small><b>'+esc(value)+'</b></div>';}
+
+async function lookup(mint){
+  $('#status').className='status';$('#status').textContent='Reading Solana + Worldz Proof + Jupiter signals…';
+  $('#result').classList.add('hidden');
+  try{
+    const r=await fetch(API+'?mint='+encodeURIComponent(mint),{cache:'no-store'});
+    const out=await r.json().catch(()=>({}));
+    if(!r.ok||!out.ok)throw new Error(out.detail||out.error||('HTTP '+r.status));
+    render(out);
+    const u=new URL(location.href);u.searchParams.set('mint',mint);history.replaceState(null,'',u);
+    $('#status').className='status good';$('#status').textContent='TRUST PASSPORT UPDATED ✅\nEvidence checked: '+new Date(out.checkedAt).toLocaleString();
+  }catch(e){
+    $('#status').className='status bad';$('#status').textContent='TRUST PASSPORT CHECK FAILED\n'+(e?.message||String(e));
+  }
+}
+function render(out){
+  const j=out.jupiter||{},w=out.worldz||{},o=out.onChain||{};
+  $('#token-name').textContent=j.name||w.launch?.tokenName||'Solana Token';
+  $('#token-symbol').textContent=j.symbol?'$'+j.symbol:'SOLANA TOKEN';
+  $('#mint').textContent=out.mint;
+  const icon=$('#token-icon');
+  if(j.icon){icon.src=j.icon;icon.style.display='block';}else{icon.removeAttribute('src');icon.style.display='none';}
+  $('#metrics').innerHTML=[
+    metric('Supply',o.rawSupply?fmtNum(Number(o.rawSupply)/(10**Number(o.decimals||0)),2):'—'),
+    metric('Jupiter VRFD',j.isVerified===true?'VERIFIED':'Not verified'),
+    metric('Organic Score',j.organicScore!=null?fmtNum(j.organicScore,1)+'/100':'—'),
+    metric('Organic Label',j.organicScoreLabel?String(j.organicScoreLabel).toUpperCase():'—'),
+    metric('Holders',j.holderCount!=null?fmtNum(j.holderCount,0):'—'),
+    metric('Liquidity',j.liquidity!=null?usd(j.liquidity):'—'),
+    metric('Price',j.usdPrice!=null?usd(j.usdPrice):'—'),
+    metric('Worldz Launch',w.launchRegistered?'REGISTERED':'External / none')
+  ].join('');
+  $('#rings').innerHTML=(out.rings||[]).map(r=>'<article class="ring '+ringClass(r.status)+'"><div class="ring-top"><h3>'+esc(r.name)+'</h3><span class="state">'+esc(String(r.status).replaceAll('_',' '))+'</span></div><p>'+esc(ringCopy(r))+'</p></article>').join('');
+  const count=out.proofSummary?.verifiedEvidenceRings??0,total=out.proofSummary?.totalRings??6;
+  $('#passport-note').innerHTML='<b>'+esc(count)+' of '+esc(total)+' rings currently contain a positive verified/proof-present state.</b> This is an evidence count, <b>not</b> a safety score. A token can still carry risks that these rings do not measure.';
+  $('#result').classList.remove('hidden');
+}
+$('#lookup-form').addEventListener('submit',e=>{e.preventDefault();const mint=$('#mint-input').value.trim();if(mint)lookup(mint);});
+const initial=new URLSearchParams(location.search).get('mint');if(initial){$('#mint-input').value=initial;lookup(initial);}
