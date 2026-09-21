@@ -1,0 +1,30 @@
+name: ZED Public Runtime Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/zed-public-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe live ZED public surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://cryptobotz.cryptoworldz.xyz'
+          for route in '/' '/health' '/miniapp/' '/api/oneworldz-gpt/status'; do
+            echo "===== ROUTE $route ====="
+            code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 -o /tmp/body -w '%{http_code}' "$base$route?diag=$GITHUB_RUN_ID" || true)"
+            type="$(file -b --mime-type /tmp/body 2>/dev/null || true)"
+            bytes="$(wc -c </tmp/body 2>/dev/null || echo 0)"
+            echo "HTTP=$code MIME=$type BYTES=$bytes"
+            head -c 3000 /tmp/body 2>/dev/null || true
+            echo
+          done
