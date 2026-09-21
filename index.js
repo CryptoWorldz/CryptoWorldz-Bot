@@ -255,7 +255,10 @@ const server = http.createServer(async (req, res) => {
       ok: true,
       service: "CryptoWorldz Protected Public Gateway",
       runtime: "dependency_free_guard_v2",
-      environment_source: protectedEnvironment.source
+      environment_source: protectedEnvironment.source,
+      full_runtime_configured: fullRuntimeConfigured,
+      bot_token_configured: Boolean(process.env.BOT_TOKEN),
+      supabase_runtime_key_configured: Boolean(String(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || "").trim())
     }, origin);
   }
 
