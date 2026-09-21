@@ -19,7 +19,7 @@ permissions:
 
 concurrency:
   group: restore-zed-auto-grace
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   PROTECTED_DOMAIN: cryptobotz.cryptoworldz.xyz
