@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#05020b">
   <meta name="description" content="WorldzLaunchPad™ — build, simulate, test and prepare token launches with transparent fees, locks, vesting, CrossPair and multi-chain architecture.">
   <title>WorldzLaunchPad™ | Build • Prove • Launch</title>
-  <link rel="stylesheet" href="/style.css?v=20260921-safe-v4">
+  <link rel="stylesheet" href="/style.css?v=20260921-public-v5">
 </head>
 <body>
 <header class="topbar">
@@ -14,7 +14,7 @@
   <nav aria-label="Primary">
     <a href="#explore">Explore</a>
     <a href="#create">Create</a>
-    <a href="#genesis">Genesis Four</a>
+    <a href="#safe-standard">Safe Launch Rules</a>
     <a href="#crosspair">CrossPair</a>
     <a href="/omnichain/">OmniChain</a>
     <a href="#command">Command Centre</a>
@@ -26,21 +26,21 @@
 <main id="top">
   <section class="hero">
     <div class="hero-copy">
-      <div class="kicker">PUBLIC BUILDER • SOLANA DEVNET LIVE • MAINNET FAIL-CLOSED</div>
+      <div class="kicker">PUBLIC TOKEN LAUNCHPAD • SOLANA FIRST • OPEN TO EVERYONE</div>
       <h1>LAUNCH<br><span>YOUR WORLD.</span></h1>
-      <p class="lead">Choose the chain. Choose the launch engine. Build the economics. Lock the allocations. Simulate before signing. Then launch through a Worldz adapter when that route is verified and enabled.</p>
+      <p class="lead">Create your token. Set your supported trading fee. Build transparent tokenomics. Run the proof checks. WorldzLaunchPad™ is built for public creators — your project, your token, your community.</p>
       <div class="hero-actions">
-        <a class="btn primary" href="#create">Create a Launch</a>
-        <a class="btn secondary" href="#explore">Explore Launches</a>
+        <a class="btn primary" href="#create">Launch a Token</a>
+        <a class="btn secondary" href="#explore">Public Launches</a>
         <a class="btn ghost" href="/devnet/">Worldz Flash Devnet</a>
         <a class="btn ghost" href="/curve/">Worldz Curve Devnet</a>
         <a class="btn ghost" href="/curve-pro/">Curve Pro Devnet</a>
       </div>
       <div class="truth-strip">
-        <span><b>0.50–3.00%</b> maximum project trading-fee range</span>
-        <span><b>10%</b> Worldz share of collected project fee revenue</span>
-        <span><b>2</b> verified Solana quote assets in registry</span>
-        <span><b>6</b> compulsory anti-rug controls before mainnet</span>
+        <span><b>10%</b> of your collected token fee only → WorldzLaunchPad</span>
+        <span><b>90%</b> of that fee remains for your project routing</span>
+        <span><b>0%</b> of your token supply taken by WorldzLaunchPad</span>
+        <span><b>0%</b> of your initial liquidity taken by WorldzLaunchPad</span>
       </div>
     </div>
     <div class="hero-core" aria-label="WorldzLaunchPad system">
@@ -62,8 +62,8 @@
 
   <section id="explore" class="section">
     <div class="section-heading with-action">
-      <div><div class="section-kicker">EXPLORE</div><h2>Genesis launches become the proving ground.</h2><p>WORLDZ, REVIVE, PHENIX and MIRACLE are still design/testing candidates. They are now presented as the first four projects using the WorldzLaunchPad architecture rather than as the whole product.</p></div>
-      <span class="live-chip"><i></i> PLATFORM BUILD ACTIVE</span>
+      <div><div class="section-kicker">PUBLIC LAUNCHES</div><h2>Who will be first?</h2><p>Every public creator launch that reaches Worldz Proof appears here with its token, mint, engine, fee and verification state.</p></div>
+      <span class="live-chip"><i></i> PUBLIC LAUNCHPAD LIVE</span>
     </div>
     <div class="launch-market" id="launch-market"></div>
   </section>
@@ -87,8 +87,8 @@
   <section id="create" class="section create-section">
     <div class="section-heading">
       <div class="section-kicker">CREATE</div>
-      <h2>Build a launch before you ever sign one.</h2>
-      <p>The wizard creates a launch manifest and checks the economics locally in your browser. Solana Devnet token creation is the first executable public test route. Mainnet stays locked.</p>
+      <h2>Build your token. Worldz enforces the platform limits.</h2>
+      <p>The wizard creates a public launch manifest, validates the tokenomics and carries the same rules into the executable launch route. Solana is first. Every percentage is visible before a wallet signs.</p>
     </div>
 
     <div class="builder">
@@ -131,7 +131,7 @@
         <section class="wizard-step" data-panel="3">
           <div class="step-head"><span>03 / TOKEN</span><h3>Give the project its identity.</h3></div>
           <div class="form-grid">
-            <label><span>Token name</span><input id="build-name" maxlength="32" placeholder="e.g. SolSavewXRP"></label>
+            <label><span>Token name</span><input id="build-name" maxlength="32" placeholder="e.g. My Project Token"></label>
             <label><span>Ticker</span><input id="build-symbol" maxlength="10" placeholder="SAVE"></label>
             <label><span>Fixed supply</span><input id="build-supply" type="number" min="1000" max="1000000000000" step="1" placeholder="Enter supply"></label>
             <label><span>Decimals</span><input id="build-decimals" type="number" min="0" max="9" step="1" value="9"></label>
@@ -180,8 +180,8 @@
               <label for="project-fee">Project trading fee</label>
               <input id="project-fee" type="range" min="0.5" max="3" step="0.25" value="1">
               <div class="fee-number"><b id="project-fee-value">1.00%</b><span>MAX 3.00%</span></div>
-              <div class="worldz-rule"><strong>WorldzLaunchPad</strong><b>10%</b><span>of the collected project trading-fee revenue</span></div>
-              <p class="micro">Not 10% of supply. Not 10% of liquidity. Not an ordinary wallet-transfer tax.</p>
+              <div class="worldz-rule"><strong>WorldzLaunchPad</strong><b>10%</b><span>of the token's collected supported trading-fee revenue — fixed platform share</span></div>
+              <p class="micro">The other 90% remains in the project's disclosed fee routing. WorldzLaunchPad takes 0% of token supply and 0% of initial liquidity.</p>
             </div>
             <div class="fee-example">
               <label>Example trading volume</label>
@@ -231,7 +231,7 @@
     </div>
     <div class="feature-grid">
       <article class="feature-card hero-card"><span class="serial">QUOTE #001</span><h3>Project / wXRP</h3><p>Verified Solana mint from Hex Trust. wXRP is described separately from the project token so backing claims cannot be confused.</p><code>6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2</code></article>
-      <article class="feature-card"><span>FIRST CANDIDATE</span><h3>SolSavewXRP $SAVE</h3><p>Never-launched research concept reserved as a future CrossPair proof candidate — not part of the Genesis Four deployment order.</p></article>
+      <article class="feature-card"><span>PUBLIC CREATOR CHOICE</span><h3>Your token / verified quote</h3><p>Creators choose from quote assets that the selected Worldz launch engine has actually verified. Unsupported or unverified pairs remain unavailable rather than being faked.</p></article>
       <article class="feature-card"><span>WORLDZ QUOTE HUB™</span><h3>Verified assets only.</h3><p>Origin, network, issuer/custodian where applicable, contract/mint, proof source and redemption model are disclosed before an asset can be labelled verified.</p></article>
     </div>
   </section>
@@ -250,33 +250,6 @@
     </div>
   </section>
 
-  <section id="genesis" class="section">
-    <div class="section-heading">
-      <div class="section-kicker">GENESIS FOUR</div>
-      <h2>Four tokens. Four increasingly difficult system proofs.</h2>
-    </div>
-    <div class="token-switcher" id="token-switcher" role="tablist" aria-label="Select Genesis token"></div>
-    <div class="console-grid">
-      <article class="panel token-overview">
-        <div class="panel-top"><span class="serial" id="token-number">#001</span><span class="pill locked" id="token-state">MAINNET LOCKED</span></div>
-        <h3><span id="token-name">WORLDZ</span> <em id="token-ticker">$WLDZ</em></h3>
-        <div class="supply" id="token-supply">100,000,000</div><div class="label">FIXED SUPPLY</div>
-        <p id="token-mission"></p><div class="facts" id="token-facts"></div>
-      </article>
-      <article class="panel">
-        <div class="panel-top"><span>25 / 25 / 25 / 25</span><span class="pill">100%</span></div>
-        <div class="allocation-master" id="allocation-master"></div>
-        <div class="suballocations" id="suballocations"></div>
-      </article>
-      <article class="panel">
-        <div class="panel-top"><span>Genesis Fee Routing</span><span class="pill">100% routed</span></div>
-        <div class="fee-bar" id="fee-bar"></div><div class="fee-legend" id="fee-legend"></div>
-        <p class="micro">The Genesis Four currently target ~2% quote-side DEX trading fees. That token-specific design is separate from the public LaunchPad's configurable 0.50–3.00% fee range.</p>
-      </article>
-    </div>
-    <div class="legacy-line"><strong>1% Legacy Loyalty = ONE SHARED POOL PER TOKEN.</strong><span>WLDZ 1,000,000 • RVIV 2,000,000 • PNEX 2,500,000 • MRCL 3,480,000</span></div>
-  </section>
-
   <section id="command" class="section">
     <div class="section-heading with-action">
       <div><div class="section-kicker">COMMAND CENTRE ULTIMATE™</div><h2>Minting isn't the end of a launch. It's the beginning.</h2><p>Every Worldz launch is designed to become a living project record that can plug into ZED, AUTO and G.R.A.C.E.</p></div>
@@ -293,22 +266,26 @@
   <section id="proof" class="section">
     <div class="section-heading">
       <div class="section-kicker">WORLDZ PROOF™</div>
-      <h2>Facts before badges.</h2>
-      <p>WorldzLaunchPad should never label a project “safe”. It should expose what can actually be verified: supply, authorities, allocations, locks, vesting, liquidity, fee routes and launch configuration.</p>
+      <h2>Every public launch shows its receipts.</h2>
+      <p>Worldz Proof publishes verifiable launch facts rather than hiding them behind a badge: supply, authorities, fee settings, allocations, liquidity, locks, vesting, launch transaction and registry state.</p>
     </div>
     <div class="proof-layout">
       <article class="panel">
-        <div class="panel-top"><span>WLDZ Accepted Pre-Mainnet Baseline</span><span class="pill safe">ENGINEERING PASS</span></div>
-        <div class="proof-id">GitHub Actions Run <a href="https://github.com/CryptoWorldz/CryptoWorldz-Bot/actions/runs/34155419579" target="_blank" rel="noopener">#34155419579 ↗</a></div>
-        <div class="proof-list" id="proof-list"></div>
+        <div class="panel-top"><span>Public Launch Standard</span><span class="pill safe">MANDATORY</span></div>
+        <div class="proof-list">
+          <div class="proof-row"><span class="ok">✓</span><span>WorldzLaunchPad platform share = <b>exactly 10% of collected token fee revenue</b></span></div>
+          <div class="proof-row"><span class="ok">✓</span><span>WorldzLaunchPad token-supply share = <b>0%</b></span></div>
+          <div class="proof-row"><span class="ok">✓</span><span>WorldzLaunchPad initial-liquidity share = <b>0%</b></span></div>
+          <div class="proof-row"><span class="ok">✓</span><span>Wallet-transfer tax = <b>0%</b></span></div>
+          <div class="proof-row"><span class="ok">✓</span><span>Creator/team, liquidity, vesting and fee-route limits checked before execution</span></div>
+          <div class="proof-row"><span class="ok">✓</span><span>Public launches registered with on-chain mint / pool / transaction proof where supported</span></div>
+        </div>
       </article>
       <article class="panel">
-        <div class="panel-top"><span>Mainnet Release Gate</span><span class="pill locked">FAIL-CLOSED</span></div>
-        <h3 id="gate-title">Loading controls…</h3>
-        <p id="gate-copy"></p>
-        <div class="gate-meter"><div id="gate-meter-fill"></div></div>
-        <div class="gate-counts"><span><b id="green-count">0</b> green</span><span><b id="blocked-count">—</b> remaining</span></div>
-        <div class="gate-grid" id="gate-grid"></div>
+        <div class="panel-top"><span>Production Mainnet Route</span><span class="pill locked" id="mainnet-gate-pill">FINAL GATE</span></div>
+        <h3 id="mainnet-gate-title">Treasury Multisig + end-to-end routing proof required</h3>
+        <p id="mainnet-gate-copy">The public platform is live now. Mainnet execution will only be switched on after the verified Worldz Treasury Multisig vault address and the exact 10% fee-only route are proven end-to-end.</p>
+        <div class="gate-grid" id="public-gate-grid"></div>
       </article>
     </div>
   </section>
@@ -322,9 +299,9 @@
 <footer>
   <div><b>WorldzLaunchPad™</b> • CryptoWorldz</div>
   <div><a href="https://cryptoworldz.xyz">CryptoWorldz.xyz</a> • <a href="https://x.com/WorldzLaunchPad">@WorldzLaunchPad</a></div>
-  <p>Public mainnet creator launches are currently disabled. Devnet tools are for testing. No guaranteed return, APY, price target or future value is promised.</p>
+  <p>WorldzLaunchPad™ is a public creator platform. Mainnet execution is enabled only after the selected route passes its published proof gate. WorldzLaunchPad takes 10% of collected supported token-fee revenue only — never token supply or initial liquidity.</p>
 </footer>
 
-<script src="/app.js?v=20260921-safe-v4" defer></script>
+<script src="/app.js?v=20260921-public-v5" defer></script>
 </body>
 </html>
