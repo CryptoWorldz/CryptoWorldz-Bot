@@ -69,6 +69,7 @@ const SAFE={
 function feePolicyErrors(){
   const r=routes(),fee=Number($('#project-fee').value),errors=[];
   if(!Number.isFinite(fee)||fee<SAFE.feeMin||fee>SAFE.feeMax)errors.push('Trading fee must be 0.50%–3.00%.');
+  if(!Object.values(r).every(v=>Number.isFinite(v)&&v>=0&&v<=100))errors.push('Fee routes must each be between 0% and 100%.');
   if(Math.abs(routeTotal()-100)>.001)errors.push('Fee routes must total exactly 100%.');
   if((r.creator||0)>SAFE.creatorFeeMax)errors.push('Creator fee route cannot exceed 20%.');
   if((r.treasury||0)>SAFE.treasuryFeeMax)errors.push('Treasury fee route cannot exceed 20%.');
