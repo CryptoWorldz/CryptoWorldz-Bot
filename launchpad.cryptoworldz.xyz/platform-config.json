@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-21-public-launchpad-v10-jupiter-mobile",
+  "version": "2026-09-22-public-launchpad-v11-worldzmint-image-upload",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -523,7 +523,21 @@
       "reownProjectIdConfigured": true,
       "metadataOrigin": "https://launchpad.cryptoworldz.xyz"
     },
-    "marketRule": "WorldzMINT creates and proves a fixed-supply mint only. It does not create liquidity, assign a market cap, promise exchange listing, or imply investment performance."
+    "marketRule": "WorldzMINT creates and proves a fixed-supply mint only. It does not create liquidity, assign a market cap, promise exchange listing, or imply investment performance.",
+    "imageUpload": {
+      "enabled": true,
+      "bucket": "worldz-mint-art",
+      "publicArtwork": true,
+      "acceptedMimeTypes": [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ],
+      "clientMaxDimensionPx": 768,
+      "storedFormat": "image/jpeg",
+      "walletSignatureRequired": true,
+      "note": "Token artwork is public by design and is hosted before mint metadata is prepared."
+    }
   },
   "confidenceCurve": {
     "name": "Worldz Confidence Curve™",
