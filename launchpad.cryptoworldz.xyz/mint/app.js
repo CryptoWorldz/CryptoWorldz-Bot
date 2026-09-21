@@ -62,7 +62,7 @@ function validate(){
   if(Object.values(r).filter(isPk).length===5&&new Set(Object.values(r)).size!==5)e.push('All five genesis destination wallets must be distinct.');
   if(walletCtx&&r.creator!==walletCtx.address)e.push('Creator wallet must equal the connected wallet.');
   const bp=bpsMap(a);if(Object.values(bp).reduce((n,x)=>n+x,0)!==10000)e.push('Allocations must resolve to exactly 10,000 basis points.');
-  if(pending&&pending.environment!==v.environment)e.push('Pending mint network does not match the selected network.');
+  if(pending&&pending.config?.environment!==v.environment)e.push('Pending mint network does not match the selected network.');
   return {ok:!e.length,errors:e,v};
 }
 function renderProof(extra={}){
@@ -78,7 +78,9 @@ function renderProof(extra={}){
 }
 function walletStandardCandidates(){
   try{
-    return getWallets().get().filter(w=>w?.features?.['standard:connect']&&w?.features?.['solana:signTransaction']&&w?.features?.['solana:signMessage']&&Array.isArray(w.chains)&&w.chains.some(c=>String(c).startsWith('solana:')));
+    return getWallets().get()
+      .filter(w=>w?.features?.['standard:connect']&&w?.features?.['solana:signTransaction']&&w?.features?.['solana:signMessage']&&Array.isArray(w.chains)&&w.chains.some(c=>String(c).startsWith('solana:')))
+      .sort((a,b)=>Number(!/jupiter/i.test(a.name))-Number(!/jupiter/i.test(b.name))||String(a.name).localeCompare(String(b.name)));
   }catch{return []}
 }
 function legacyProvider(){
@@ -89,7 +91,6 @@ function renderWallets(){
   const select=$('#wallet-choice'),list=walletStandardCandidates();
   select.innerHTML='';
   if(list.length){
-    list.sort((a,b)=>(/jupiter/i.test(a.name)?-1:0)-(/jupiter/i.test(b.name)?-1:0));
     list.forEach((w,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=w.name+(/jupiter/i.test(w.name)?' ⭐':'');select.appendChild(o);});
     const j=list.findIndex(w=>/jupiter/i.test(w.name));if(j>=0)select.value=String(j);
   }else{
@@ -205,6 +206,17 @@ async function distributeStage(){
   tokenBusy('Wallet approval 2/3 — DISTRIBUTE EXACT GENESIS SUPPLY\nSupply goes directly to the five disclosed destination wallets. A simulation runs first.');
   pending.distributeSig=await signTransaction(tx);pending.atas=atas;savePending();renderProof();
 }
+async function registerFinalProof(){
+  tokenBusy('On-chain finalisation confirmed. Sign one harmless WorldzMINT proof message while the server independently verifies supply, allocations and revoked authorities…');
+  const auth=await authBody('FINALIZE',pending.mint);
+  const out=await api({action:'FINALIZE',...auth,
+    create_mint_tx_signature:pending.createSig,distribute_tx_signature:pending.distributeSig,finalize_tx_signature:pending.finalizeSig
+  });
+  pending.registered=true;savePending();renderProof({registered:true});
+  setStatus('WORLDZMINT VERIFIED ✅\nMint: '+pending.mint+'\nExact fixed supply verified.\nGenesis allocations verified.\nMint authority: NONE.\nFreeze authority: NONE.\n\nTrust Passport: '+out.trustPassport,'good');
+  $('#mint-btn').disabled=true;$('#mint-btn').textContent='WorldzMINT Verified ✅';
+  loadRegistry();
+}
 async function finalizeStage(){
   const v=pending.config,mint=new PublicKey(pending.mint),owner=new PublicKey(walletCtx.address);
   const [metadata]=PublicKey.findProgramAddressSync([new TextEncoder().encode('metadata'),METADATA_PROGRAM.toBytes(),mint.toBytes()],METADATA_PROGRAM);
@@ -223,15 +235,7 @@ async function finalizeStage(){
   );
   tokenBusy('Wallet approval 3/3 — METADATA + PERMANENT AUTHORITY REVOCATION\nAfter this succeeds, no additional supply can ever be minted and the freeze authority is gone.');
   pending.finalizeSig=await signTransaction(tx);savePending();renderProof();
-  tokenBusy('On-chain finalisation confirmed. Sign one harmless WorldzMINT proof message while the server independently verifies supply, allocations and revoked authorities…');
-  const auth=await authBody('FINALIZE',pending.mint);
-  const out=await api({action:'FINALIZE',...auth,
-    create_mint_tx_signature:pending.createSig,distribute_tx_signature:pending.distributeSig,finalize_tx_signature:pending.finalizeSig
-  });
-  pending.registered=true;savePending();renderProof({registered:true});
-  setStatus('WORLDZMINT VERIFIED ✅\nMint: '+pending.mint+'\nExact fixed supply verified.\nGenesis allocations verified.\nMint authority: NONE.\nFreeze authority: NONE.\n\nTrust Passport: '+out.trustPassport,'good');
-  $('#mint-btn').disabled=true;$('#mint-btn').textContent='WorldzMINT Verified ✅';
-  loadRegistry();
+  await registerFinalProof();
 }
 function tokenBusy(text){setStatus(text,'warn');}
 async function mintFlow(){
@@ -246,7 +250,7 @@ async function mintFlow(){
     if(!pending)await createMintStage(v);
     if(!pending.distributeSig)await distributeStage();
     if(!pending.finalizeSig)await finalizeStage();
-    else if(!pending.registered)await finalizeStage();
+    else if(!pending.registered)await registerFinalProof();
   }catch(e){
     console.error(e);setStatus('WORLDZMINT ACTION STOPPED\n'+(e?.message||String(e))+'\n\nNo hidden retry was attempted. If an earlier transaction succeeded, this page keeps the pending mint locally so you can reconnect and continue.','bad');
   }finally{busy=false;if(!pending?.registered)$('#mint-btn').disabled=!preflightOk;}
@@ -262,6 +266,6 @@ async function loadRegistry(){
 $('#wallet-btn').addEventListener('click',connectWallet);
 $('#preflight').addEventListener('click',runPreflight);
 $('#mint-btn').addEventListener('click',mintFlow);
-$('#network').addEventListener('change',()=>{refreshConnection();preflightOk=false;$('#mint-btn').disabled=true;if(pending&&pending.environment!==network())setStatus('Pending mint exists on '+pending.environment+'. Switch back to that network to continue.','warn');});
+$('#network').addEventListener('change',()=>{refreshConnection();preflightOk=false;$('#mint-btn').disabled=true;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
 $$('input,textarea,select').forEach(x=>{if(!['wallet-choice','network'].includes(x.id))x.addEventListener('input',()=>{allocationMath();});});
 renderWallets();getWallets().on('register',renderWallets);restorePending();allocationMath();renderProof();loadRegistry();
