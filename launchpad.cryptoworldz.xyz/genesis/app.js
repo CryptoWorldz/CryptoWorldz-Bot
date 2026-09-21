@@ -94,76 +94,75 @@ async function bs58encode(bytes){
   const mod=await import('https://esm.sh/bs58@6.0.0?bundle');const bs58=mod.default||mod;return bs58.encode(bytes);
 }
 async function connect(){
-  try{
-    wallet=null;walletName='';
-    setStatus('CONNECTING TO JUPITER…\nNo blockchain transaction is being sent.','warn');
+  wallet=null;walletName='';
+  const failures=[];
+  setStatus('CONNECTING TO JUPITER…\nNo blockchain transaction is being sent.','warn');
 
-    // Jupiter can register a fraction after page load in its in-app browser.
-    await new Promise(resolve=>setTimeout(resolve,250));
-    let standard=walletStandardCandidates();
-    let ws=standard.find(w=>/jupiter/i.test(String(w.name||'')))||null;
-    let pk=null;
-
-    if(ws){
-      const out=await ws.features['standard:connect'].connect();
-      const account=(out?.accounts||ws.accounts||[])[0];
-      if(!account)throw new Error('Jupiter Wallet returned no Solana account.');
-      wallet=walletStandardAdapter(ws,account);
-      walletName=ws.name||'Jupiter Wallet';
-      pk=wallet.publicKey;
-    }else{
-      const jup=jupiterInjectedProvider();
-      if(jup){
-        const out=await jup.connect();
-        pk=(out&&out.publicKey)||jup.publicKey;
-        wallet=jup;walletName='Jupiter In-App Wallet';
-      }else{
-        standard=walletStandardCandidates();
-        ws=standard[0]||null;
-        if(ws){
-          const out=await ws.features['standard:connect'].connect();
-          const account=(out?.accounts||ws.accounts||[])[0];
-          if(!account)throw new Error('Solana wallet returned no account.');
-          wallet=walletStandardAdapter(ws,account);
-          walletName=ws.name||'Solana Wallet';
-          pk=wallet.publicKey;
-        }else{
-          const injected=injectedProvider();
-          if(injected){
-            const out=await injected.connect();
-            pk=(out&&out.publicKey)||injected.publicKey;
-            wallet=injected;
-            walletName=injected.isPhantom?'Phantom':(injected.isSolflare?'Solflare':'Injected Solana Wallet');
-          }else{
-            // Final mobile fallback: the same Jupiter/Reown bridge already used by WorldzMINT.
-            const mod=await import('/mint/jupiter-mobile.js?v=20260922-genesis-v1');
-            mod.resetJupiterMobileConnectionState?.();
-            const adapter=await mod.getJupiterMobileAdapter();
-            const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Jupiter Mobile connection timed out. Tap Connect Dev Wallet once more.')),25000));
-            await Promise.race([adapter.connect(),timeout]);
-            pk=adapter.publicKey;
-            if(!pk)throw new Error('Jupiter Mobile connected but returned no public key.');
-            wallet=adapter;walletName='Jupiter Mobile';
-          }
-        }
-      }
-    }
-
-    if(!pk)throw new Error('No public key returned.');
-    const address=pk.toString();
+  const accept=async(candidate,name)=>{
+    if(!candidate||!candidate.publicKey)throw new Error(name+' returned no public key.');
+    const address=candidate.publicKey.toString();
     if(address!==DEV_WALLET){
-      setStatus('WRONG WALLET\nConnected: '+address+'\nWallet: '+walletName+'\nSwitch Jupiter to the authorised Worldz Dev Wallet and tap Connect Dev Wallet again.','bad');
-      $('#auth').disabled=true;return false;
+      try{await candidate.disconnect?.();}catch{}
+      throw new Error(name+' connected the wrong wallet: '+address);
     }
+    wallet=candidate;walletName=name;
     const balance=await connection.getBalance(new PublicKey(address),'confirmed');
     $('#wallet').textContent=short(address);$('#wallet').classList.add('connected');
     $('#auth').disabled=false;
-    setStatus('AUTHORISED DEV WALLET CONNECTED ✅\nWallet: '+walletName+'\n'+address+'\nBalance: '+(balance/LAMPORTS_PER_SOL).toFixed(5)+' SOL\nNext: approve the harmless Genesis authentication message.','good');
+    setStatus('JUPITER CONNECTED ✅\n'+address+'\nBalance: '+(balance/LAMPORTS_PER_SOL).toFixed(5)+' SOL\n\nNow tap Authenticate Genesis Console. No transaction has been sent.','good');
     return true;
-  }catch(e){
-    setStatus('JUPITER CONNECTION FAILED\n'+(e?.message||String(e))+'\nNo transaction was sent.','bad');
-    return false;
+  };
+
+  // 1) Jupiter Wallet Standard — same direct path that already connected in WorldzMINT.
+  for(const ws of walletStandardCandidates()){
+    try{
+      const out=await ws.features['standard:connect'].connect();
+      const account=(out?.accounts||ws.accounts||[])[0];
+      if(!account)throw new Error('no Solana account');
+      await accept(walletStandardAdapter(ws,account),ws.name||'Jupiter Wallet');
+      return true;
+    }catch(e){failures.push((ws.name||'Wallet Standard')+': '+(e?.message||String(e)));}
   }
+
+  // 2) Jupiter's in-app injected provider.
+  try{
+    const jup=jupiterInjectedProvider();
+    if(jup){
+      const out=await jup.connect();
+      const pk=(out&&out.publicKey)||jup.publicKey;
+      if(!pk)throw new Error('no public key');
+      jup.publicKey=pk;
+      await accept(jup,'Jupiter In-App Wallet');
+      return true;
+    }
+  }catch(e){failures.push('Jupiter In-App: '+(e?.message||String(e)));}
+
+  // 3) Official Jupiter Mobile/Reown adapter used by WorldzMINT.
+  try{
+    const mod=await import('/mint/jupiter-mobile.js?v=20260922-genesis-reown-v2');
+    mod.resetJupiterMobileConnectionState?.();
+    const adapter=await mod.getJupiterMobileAdapter();
+    const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('connection timed out')),25000));
+    await Promise.race([adapter.connect(),timeout]);
+    await accept(adapter,'Jupiter Mobile');
+    return true;
+  }catch(e){failures.push('Jupiter Mobile: '+(e?.message||String(e)));}
+
+  // 4) Phantom/Solflare remain fallback only.
+  try{
+    const injected=injectedProvider();
+    if(injected){
+      const out=await injected.connect();
+      const pk=(out&&out.publicKey)||injected.publicKey;
+      if(!pk)throw new Error('no public key');
+      injected.publicKey=pk;
+      await accept(injected,injected.isPhantom?'Phantom':(injected.isSolflare?'Solflare':'Injected Solana Wallet'));
+      return true;
+    }
+  }catch(e){failures.push('Fallback wallet: '+(e?.message||String(e)));}
+
+  setStatus('JUPITER CONNECTION FAILED\n'+failures.join('\n')+'\n\nNo transaction was sent.','bad');
+  return false;
 }
 async function authenticate(){
   if(!wallet||!wallet.publicKey){if(!await connect())return;}
@@ -374,9 +373,7 @@ async function handleAction(action,symbol){
   finally{const b=document.querySelector('[data-action="'+action+'"][data-symbol="'+symbol+'"]');if(b)b.disabled=false;}
 }
 
-$('#wallet').addEventListener('click',async()=>{
-  if(await connect())await authenticate();
-});
+$('#wallet').addEventListener('click',connect);
 $('#auth').addEventListener('click',authenticate);
 $('#refresh').addEventListener('click',refreshPrivate);
 walletRegistry.on('register',()=>{
