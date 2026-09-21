@@ -107,6 +107,7 @@ function renderProof(){
     ['0% platform initial-liquidity share',platform.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent===0,'HARD RULE'],
     ['Base Sepolia token adapter',platform.baseEvmFair?.status==='BASE_SEPOLIA_BETA','TESTNET'],
     ['Founding 100 registry',platform.founding100?.totalPositions===100,'100 POSITIONS'],
+    ['Worldz Trust Orbit',platform.trustOrbit?.status==='PUBLIC_BETA_LIVE','PROOF PASSPORT'],
     ['Treasury Multisig vault registered',!!treasury.vaultAddress,treasury.vaultAddress?shortAddress(treasury.vaultAddress):'PENDING'],
     ['Public mainnet execution',platform.publicMainnetCreatorLaunchesEnabled===true,platform.publicMainnetCreatorLaunchesEnabled?'ENABLED':'FINAL GATE']
   ];
@@ -311,7 +312,7 @@ function bind(){
 }
 async function boot(){
   try{
-    const r=await fetch('/platform-config.json?v=20260921-public-v6',{cache:'no-store'});
+    const r=await fetch('/platform-config.json?v=20260921-public-v8',{cache:'no-store'});
     if(!r.ok)throw new Error('Platform configuration unavailable');
     platform=await r.json();
     if(platform.publicLaunchPad!==true||platform.publicLaunchIntakeEnabled!==true)throw new Error('Public LaunchPad contract mismatch');
@@ -321,6 +322,7 @@ async function boot(){
     if(!p||p.version!=='WORLDZ-SAFE-LAUNCH-1'||p.compulsory.fixedSupply!==true||p.compulsory.revokeMintAuthorityAfterGenesis!==true||p.compulsory.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('Safe Launch Standard contract mismatch');
     if(platform.baseEvmFair?.status!=='BASE_SEPOLIA_BETA'||platform.baseEvmFair?.mainnetExecution!==false)throw new Error('Base testnet adapter contract mismatch');
     if(platform.founding100?.totalPositions!==100||platform.founding100?.futureWorldzPoolPercent!==10||platform.founding100?.equalAllocationPerQualifiedPositionPercent!==0.1)throw new Error('Founding 100 contract mismatch');
+    if(platform.trustOrbit?.version!=='WORLDZ-TRUST-ORBIT-1'||platform.trustOrbit?.status!=='PUBLIC_BETA_LIVE'||platform.trustOrbit?.jupiterIntegration?.officialJupiterEndorsement!==false)throw new Error('Trust Orbit contract mismatch');
     bind();feeMath();renderProof();renderMarket();refreshRuntime();
   }catch(e){
     console.error(e);document.body.dataset.boot='failed';
