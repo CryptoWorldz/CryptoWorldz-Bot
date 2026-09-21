@@ -226,6 +226,19 @@ jobs:
           assert platform['worldzMint']['authentication']['walletMessageSignaturesRequired'] is False
           assert platform['worldzMint']['authentication']['transactionApprovalsRequired']==3
           assert platform['worldzMint']['oneButtonFlow']['enabled'] is True
+          assert platform['evmMultiChain']['status']=='PUBLIC_TESTNET_BETA'
+          assert platform['evmMultiChain']['marketLaunchVerification'] is False
+          assert len(platform['evmMultiChain']['networks'])>=5
+          assert platform['xrplNative']['status']=='PUBLIC_TESTNET_BETA'
+          assert platform['xrplNative']['testnetExecution'] is True
+          assert platform['xrplNative']['mainnetExecution'] is False
+          assert platform['founding100']['launchTypeNeutral'] is True
+          assert platform['founding100']['chainNeutralWithinSupportedMainnetAdapters'] is True
+          assert Path('launchpad.cryptoworldz.xyz/evm/index.html').exists()
+          assert Path('launchpad.cryptoworldz.xyz/evm/app.js').exists()
+          assert Path('launchpad.cryptoworldz.xyz/xrpl/index.html').exists()
+          assert Path('launchpad.cryptoworldz.xyz/xrpl/app.js').exists()
+          assert Path('launchpad.cryptoworldz.xyz/economics/index.html').exists()
           assert platform['worldzMint']['oneButtonFlow']['primaryAction']=='START WORLDZMINT™'
           assert platform['worldzMint']['oneButtonFlow']['transactionApprovalsRequired']==3
           assert "if(!walletCtx)" in mint_js
@@ -343,6 +356,8 @@ jobs:
           node --check launchpad.cryptoworldz.xyz/genesis/app.js
           node --check launchpad.cryptoworldz.xyz/devnet/app.js
           node --check launchpad.cryptoworldz.xyz/base/app.js
+          node --check launchpad.cryptoworldz.xyz/evm/app.js
+          node --check launchpad.cryptoworldz.xyz/xrpl/app.js
           node --check launchpad.cryptoworldz.xyz/mainnet/app.js
           node --check launchpad.cryptoworldz.xyz/curve/app.js
           node --check launchpad.cryptoworldz.xyz/curve-pro/app.js
