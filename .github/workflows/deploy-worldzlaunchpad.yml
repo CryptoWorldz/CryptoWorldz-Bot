@@ -67,12 +67,32 @@ jobs:
 
           fee=platform['feePolicy']
           assert fee['projectTradingFeeMinPercent']==0.5
-          assert fee['projectTradingFeeMaxPercent']==4.0
+          assert fee['projectTradingFeeMaxPercent']==3.0
           assert fee['worldzLaunchPadShareOfCollectedProjectFeePercent']==10
           assert fee['worldzLaunchPadShareOfTokenSupplyPercent']==0
           assert fee['worldzLaunchPadShareOfInitialLiquidityPercent']==0
           assert platform['publicMainnetCreatorLaunchesEnabled'] is False
           assert platform['devnetTokenCreationEnabled'] is True
+          safe=platform['safeLaunchPolicy']
+          assert safe['version']=='WORLDZ-SAFE-LAUNCH-1'
+          assert safe['compulsory']['fixedSupply'] is True
+          assert safe['compulsory']['revokeMintAuthorityAfterGenesis'] is True
+          assert safe['compulsory']['revokeFreezeAuthorityAfterGenesis'] is True
+          assert safe['compulsory']['walletTransferTaxPercent']==0
+          assert safe['compulsory']['treasuryProgramAuthorityMultisig'] is True
+          assert safe['compulsory']['minimumMultisigThreshold']>=2
+          assert safe['allocations']['creatorTeamMaxPercent']==15
+          assert safe['allocations']['creatorTeamUnlockedAtGenesisMaxPercent']==5
+          assert safe['allocations']['liquidityMinPercent']==25
+          assert safe['allocations']['communityPublicMinPercent']==20
+          assert safe['allocations']['treasuryReserveMaxPercent']==15
+          assert safe['allocations']['founderCliffMinDays']==90
+          assert safe['allocations']['founderVestingMinMonths']==18
+          assert safe['allocations']['creatorControlledLpLockPercent']==100
+          assert safe['allocations']['lpLockMinDays']==365
+          assert safe['feeRoutes']['creatorMaxPercent']==20
+          assert safe['feeRoutes']['treasuryMaxPercent']==20
+          assert safe['feeRoutes']['lpGrowthMinPercent']==20
           assert platform['worldzFlash']['status']=='DEVNET_BETA'
           assert platform['worldzFlash']['stages']['metadata']['status']=='EXECUTABLE'
           assert platform['worldzFlash']['stages']['pair']['SOL']['status']=='EXECUTABLE_DEVNET'
@@ -113,6 +133,9 @@ jobs:
           curve_pro_js=(root/'curve-pro/app.js').read_text()
           omnichain=(root/'omnichain/index.html').read_text()
           assert 'Create a Launch' in home
+          assert 'WORLDZ SAFE LAUNCH STANDARD' in home
+          assert 'Creator/team ≤15%' in home
+          assert 'COMPULSORY — revoke mint authority after genesis' in home
           assert 'WORLDZ CROSSPAIR' in home
           assert 'WORLDZ OMNICHAIN' in home
           assert 'MAINNET LAUNCH LOCKED' in home
@@ -137,7 +160,7 @@ jobs:
           for url in ['https://solworldz.xyz/','https://ethworldz.xyz/','https://baseworldz.xyz/','https://xrpworldz.xyz/','https://suiworldz.xyz/','https://hyperworldz.xyz/','https://robinworldz.xyz/','https://bnbworldz.xyz/','https://hodlerworldz.xyz/']:
               assert url in omnichain
           assert '/omnichain/' in home
-          print('WORLDZLAUNCHPAD_PLATFORM_CONTRACT=PASS genesis=4 flash=1 curve=1 curve_pro=1 omnichain=1 mainnet_public=0')
+          print('WORLDZLAUNCHPAD_PLATFORM_CONTRACT=PASS safe_launch_v1=1 founder_cap=15 fee_max=3 lp_lock_days=365 multisig=1 flash=1 curve=1 curve_pro=1 omnichain=1 mainnet_public=0')
 
       - name: Deploy only WorldzLaunchPad to verified Hostinger document root
         shell: python
@@ -204,7 +227,7 @@ jobs:
                   assert registry['status']=='candidate-mainnet-disabled' and registry['shared']['mainnet_authorized'] is False
                   assert plan['executionEnabled'] is False and plan['launchAuthorization'] is False
                   assert platform['publicMainnetCreatorLaunchesEnabled'] is False and platform['devnetTokenCreationEnabled'] is True
-                  assert platform['feePolicy']['projectTradingFeeMaxPercent']==4.0
+                  assert platform['feePolicy']['projectTradingFeeMaxPercent']==3.0
                   assert platform['feePolicy']['worldzLaunchPadShareOfCollectedProjectFeePercent']==10
                   assert status_code==200 and live['ok'] is True
                   assert platform['worldzCurve']['status']=='DEVNET_BETA' and platform['worldzCurvePro']['status']=='DEVNET_BETA'
