@@ -4,34 +4,12 @@ const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 const fmt=n=>new Intl.NumberFormat('en-AU',{maximumFractionDigits:4}).format(Number(n)||0);
 const feeColors=['#a74cff','#5d8bff','#38e3b0','#ffd166','#ff759c','#b66cff'];
-let registry=null,details=null,mainnet=null,platform=null,selected='WLDZ',walletProvider=null,lastManifest=null;
+let platform=null,walletProvider=null,lastManifest=null;
 const build={chain:'solana',engine:'flash',quote:'SOL'};
+const PUBLIC_REGISTRY_URL='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register';
 
-const gateLabels={
- preMainnetExecutionProofPassed:'Pre-mainnet execution proof',
- onlyBFeeClaimProofPassed:'Quote-side fee-claim proof',
- autoRouteProofPassed:'AUTO route accounting proof',
- holderNativeSolProofPassed:'Native-SOL holder reward proof',
- lpGrowthProofPassed:'LP-growth proof',
- buybackBurnProofPassed:'Buyback / burn proof',
- charityNativeSolProofPassed:'Impact route proof',
- atomicRollbackProofPassed:'Atomic rollback / fail-closed proof',
- vanityMintPublicAddressFinal:'Final WLDZ mint public address',
- multisigAndDestinationsVerified:'Multisig + destination addresses verified',
- graceTimeEnforcedVestingVerified:'Time-enforced vesting verified',
- productionRpcAndClusterVerified:'Production RPC + cluster verified',
- mainnetLiquidityFundingApproved:'Mainnet liquidity funding approved',
- austracPositionResolved:'AUSTRAC position resolved',
- asicPositionResolved:'ASIC position resolved',
- tokenDisclosuresReviewed:'Token / service disclosures reviewed',
- independentSecurityReviewComplete:'Independent security review complete',
- accountingRecordkeepingRunbookApproved:'Accounting / recordkeeping runbook approved',
- incidentRecoveryRunbookApproved:'Incident / recovery runbook approved',
- finalLaunchHumanAuthorizationRecorded:'Final human launch authorization recorded'
-};
 
 function humanKey(k){return String(k).replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());}
-function tokenByTicker(t){return registry.tokens.find(x=>x.ticker===t);}
 function setDot(id,state){const el=$(id);if(!el)return;el.className='state-dot '+(state==='healthy'?'good':state==='gateway'||state==='protected'?'warn':state==='missing'||state==='degraded'?'bad':'idle');}
 function step(n){
   $$('.wizard-step').forEach(x=>x.classList.toggle('active',x.dataset.panel===String(n)));
@@ -41,47 +19,61 @@ function step(n){
 function selectChoice(group,el,key,value){
   $$(group+' .choice').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');build[key]=value;
 }
-function renderMarket(){
-  $('#launch-market').innerHTML=registry.tokens.map(t=>{
-    const d=details.tokens[t.ticker];
-    return `<button class="market-card" data-market="${t.ticker}">
-      <span class="market-num">#${String(t.number).padStart(3,'0')}</span>
-      <div><strong>${t.name}</strong><em>$${t.ticker}</em><small>${d.launchStatus.replaceAll('-',' ').toUpperCase()}</small></div>
-      <div class="market-stat"><span>Supply</span><b>${fmt(t.fixed_supply)}</b></div>
-      <div class="market-stat"><span>Legacy</span><b>1%</b></div>
-      <span class="arrow">→</span>
-    </button>`;
-  }).join('');
-  $$('[data-market]').forEach(b=>b.addEventListener('click',()=>{selected=b.dataset.market;renderToken();location.hash='genesis';}));
+function escapeHtml(value){
+  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
-function renderSwitcher(){
-  $('#token-switcher').innerHTML=registry.tokens.map(t=>`<button class="token-tab ${t.ticker===selected?'active':''}" type="button" data-token="${t.ticker}"><b>#${String(t.number).padStart(3,'0')} ${t.name}</b><span>$${t.ticker} • ${fmt(t.fixed_supply)}</span></button>`).join('');
-  $$('#token-switcher .token-tab').forEach(b=>b.addEventListener('click',()=>{selected=b.dataset.token;renderToken();}));
-}
-function renderToken(){
-  const t=tokenByTicker(selected),d=details.tokens[selected]; if(!t||!d)return;
-  renderSwitcher();
-  $('#token-number').textContent='#'+String(t.number).padStart(3,'0');
-  $('#token-name').textContent=t.name;$('#token-ticker').textContent='$'+t.ticker;$('#token-supply').textContent=fmt(t.fixed_supply);
-  $('#token-mission').textContent=d.mission;
-  $('#token-facts').innerHTML=d.facts.map(x=>'<span>'+x+'</span>').join('');
-  const alloc=Object.entries(t.allocations);
-  $('#allocation-master').innerHTML=alloc.map(([k,v])=>`<div class="alloc-quarter"><strong>${v}%</strong><span>${d.allocationLabels[k]||humanKey(k)}</span></div>`).join('');
-  $('#suballocations').innerHTML=alloc.map(([k])=>`<div class="sub-group"><h4>${d.allocationLabels[k]||humanKey(k)}</h4>${(d.suballocations[k]||[]).map(x=>`<div class="sub-row"><span>${x[0]}</span><b>${x[1]}%</b></div>`).join('')}</div>`).join('');
-  const fees=Object.entries(t.fee_split_percent);
-  $('#fee-bar').innerHTML=fees.map(([k,v],i)=>`<span class="fee-segment" title="${humanKey(k)} ${v}%" style="width:${v}%;background:${feeColors[i%feeColors.length]}"></span>`).join('');
-  $('#fee-legend').innerHTML=fees.map(([k,v],i)=>`<div class="fee-item"><span class="fee-swatch" style="background:${feeColors[i%feeColors.length]}"></span><span>${humanKey(k)}</span><b>${v}%</b></div>`).join('');
-  $('#token-state').textContent=selected==='WLDZ'?'MAINNET LOCKED':'SEQUENCED / LOCKED';
+function shortAddress(v){const x=String(v||'');return x.length>12?x.slice(0,6)+'…'+x.slice(-6):x;}
+async function renderMarket(){
+  const target=$('#launch-market');if(!target)return;
+  target.innerHTML='<article class="market-card"><div><strong>Loading public launches…</strong><small>Worldz Proof registry</small></div></article>';
+  try{
+    const r=await fetch(PUBLIC_REGISTRY_URL,{method:'GET',headers:{Accept:'application/json'},cache:'no-store'});
+    if(!r.ok)throw new Error('registry_http_'+r.status);
+    const out=await r.json();
+    const launches=Array.isArray(out.launches)?out.launches:[];
+    if(!launches.length){
+      target.innerHTML='<article class="market-card"><span class="market-num">#001?</span><div><strong>FIRST PUBLIC LAUNCH SLOT OPEN</strong><em>Who will be first?</em><small>Build + prove your token through WorldzLaunchPad™</small></div><div class="market-stat"><span>Platform share</span><b>10% of token fee only</b></div><span class="arrow">→</span></article>';
+      return;
+    }
+    target.innerHTML=launches.map((x,i)=>{
+      const env=escapeHtml(String(x.environment||'').toUpperCase());
+      const name=escapeHtml(x.token_name||'Unnamed');
+      const symbol=escapeHtml(x.symbol||'TOKEN');
+      const engine=escapeHtml(x.engine||'');
+      const stage=escapeHtml(String(x.stage||'registered').replaceAll('_',' ').toUpperCase());
+      const mint=escapeHtml(shortAddress(x.mint));
+      const fee=Number(x.project_fee_percent);
+      const feeText=Number.isFinite(fee)?fee.toFixed(2)+'%':'—';
+      return '<article class="market-card"><span class="market-num">#'+String(i+1).padStart(3,'0')+'</span><div><strong>'+name+'</strong><em>$'+symbol+'</em><small>'+stage+' • '+env+'</small></div><div class="market-stat"><span>Engine</span><b>'+engine+'</b></div><div class="market-stat"><span>Token fee</span><b>'+feeText+'</b></div><div class="market-stat"><span>Mint</span><b>'+mint+'</b></div><span class="arrow">✓</span></article>';
+    }).join('');
+  }catch(e){
+    target.innerHTML='<article class="market-card"><div><strong>Public registry temporarily unavailable</strong><small>Launch building remains available. Registry failures are shown as unknown, never silently green.</small></div></article>';
+  }
 }
 function renderProof(){
-  const r=mainnet.readiness;
-  const keys=['preMainnetExecutionProofPassed','onlyBFeeClaimProofPassed','autoRouteProofPassed','holderNativeSolProofPassed','lpGrowthProofPassed','buybackBurnProofPassed','charityNativeSolProofPassed','atomicRollbackProofPassed'];
-  $('#proof-list').innerHTML=keys.map(k=>`<div class="proof-row"><span class="ok">${r[k]?'✓':'×'}</span><span>${gateLabels[k]} — <b>${r[k]?'PASS':'NOT PROVEN'}</b></span></div>`).join('');
-  const entries=Object.entries(r),green=entries.filter(([,v])=>v===true).length,blocked=entries.length-green;
-  $('#gate-title').textContent='WLDZ — '+green+' of '+entries.length+' readiness controls green';
-  $('#gate-copy').textContent='Engineering proof and public mainnet authorization are separate. Any unresolved production control remains red.';
-  $('#green-count').textContent=green;$('#blocked-count').textContent=blocked;$('#gate-meter-fill').style.width=((green/entries.length)*100).toFixed(1)+'%';
-  $('#gate-grid').innerHTML=entries.map(([k,v])=>`<div class="gate-item ${v?'pass':'block'}"><span class="mark">${v?'✓':'×'}</span><span>${gateLabels[k]||humanKey(k)}</span></div>`).join('');
+  const gate=$('#public-gate-grid');if(!gate||!platform)return;
+  const treasury=platform.treasuryRouting||{};
+  const checks=[
+    ['Public creator platform',platform.publicLaunchPad===true,'LIVE'],
+    ['10% platform fee-only cap',platform.feePolicy?.platformShareCapPercentOfCollectedProjectFee===10,'HARD RULE'],
+    ['0% platform token-supply share',platform.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent===0,'HARD RULE'],
+    ['0% platform initial-liquidity share',platform.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent===0,'HARD RULE'],
+    ['Treasury Multisig vault registered',!!treasury.vaultAddress,treasury.vaultAddress?shortAddress(treasury.vaultAddress):'PENDING'],
+    ['Public mainnet execution',platform.publicMainnetCreatorLaunchesEnabled===true,platform.publicMainnetCreatorLaunchesEnabled?'ENABLED':'FINAL GATE']
+  ];
+  gate.innerHTML=checks.map(([label,ok,detail])=>'<div class="gate-item '+(ok?'pass':'block')+'"><span class="mark">'+(ok?'✓':'×')+'</span><span>'+escapeHtml(label)+' — <b>'+escapeHtml(detail)+'</b></span></div>').join('');
+  const pill=$('#mainnet-gate-pill'),title=$('#mainnet-gate-title'),copy=$('#mainnet-gate-copy');
+  if(platform.publicMainnetCreatorLaunchesEnabled){
+    pill.textContent='LIVE';pill.className='pill safe';
+    title.textContent='Public mainnet creator launches enabled';
+    copy.textContent='This route passed the published Worldz proof gate.';
+  }else{
+    pill.textContent='FINAL GATE';pill.className='pill locked';
+    title.textContent='Treasury Multisig + end-to-end routing proof required';
+    copy.textContent=treasury.vaultAddress
+      ?'Treasury vault is registered. Mainnet remains locked until the exact 10% fee-only route and remaining release checks are proven.'
+      :'The public platform is live now. Mainnet execution remains locked until the verified Worldz Treasury Multisig vault address and exact 10% fee-only route are proven end-to-end.';
+  }
 }
 function feeMath(){
   const fee=Number($('#project-fee').value)||0,vol=Math.max(0,Number($('#example-volume').value)||0);
@@ -121,7 +113,10 @@ function manifestBase(){
     quoteAsset:build.quote,
     feePolicy:{
       projectTradingFeePercent:Number($('#project-fee').value),
-      worldzLaunchPadShareOfCollectedProjectFeePercent:platform.feePolicy.worldzLaunchPadShareOfCollectedProjectFeePercent,
+      worldzLaunchPadShareOfCollectedProjectFeePercent:10,
+      projectRetainedShareOfCollectedProjectFeePercent:90,
+      worldzLaunchPadShareOfTokenSupplyPercent:0,
+      worldzLaunchPadShareOfInitialLiquidityPercent:0,
       projectDistributionPercent:currentRoutes(),
       walletTransferTax:false
     },
@@ -186,7 +181,7 @@ async function runPreflight(){
     ['Treasury fee-route cap',r.treasury<=p.feeRoutes.treasuryMaxPercent,r.treasury.toFixed(0)+'% / max '+p.feeRoutes.treasuryMaxPercent+'%'],
     ['LP-growth fee-route minimum',r.lp>=p.feeRoutes.lpGrowthMinPercent,r.lp.toFixed(0)+'% / min '+p.feeRoutes.lpGrowthMinPercent+'%'],
     ['Holders + LP + community minimum',publicBenefitRouteTotal()>=p.feeRoutes.holdersLpCommunityCombinedMinPercent,publicBenefitRouteTotal().toFixed(0)+'% / min '+p.feeRoutes.holdersLpCommunityCombinedMinPercent+'%'],
-    ['Worldz platform rule',m.feePolicy.worldzLaunchPadShareOfCollectedProjectFeePercent===10,'10% of collected project fee revenue'],
+    ['Worldz fee-only rule',m.feePolicy.worldzLaunchPadShareOfCollectedProjectFeePercent===10&&m.feePolicy.projectRetainedShareOfCollectedProjectFeePercent===90&&m.feePolicy.worldzLaunchPadShareOfTokenSupplyPercent===0&&m.feePolicy.worldzLaunchPadShareOfInitialLiquidityPercent===0,'10% platform / 90% project • 0% supply • 0% initial liquidity'],
     ['Wallet transfer tax',m.feePolicy.walletTransferTax===false,'0% • HARD LOCK'],
     ['Mainnet enforcement',m.execution.publicMainnetCreatorLaunch===false,'FAIL-CLOSED UNTIL ON-CHAIN PROOF']
   ];
@@ -210,7 +205,7 @@ async function runPreflight(){
 function downloadManifest(){
   if(!lastManifest)return;
   const blob=new Blob([JSON.stringify(lastManifest,null,2)+'\n'],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(lastManifest.token.symbol||'WORLDZ')+'-worldzlaunchpad-manifest.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(lastManifest.token.symbol||'TOKEN')+'-worldzlaunchpad-manifest.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 function getWalletProvider(){return [window.phantom&&window.phantom.solana,window.solflare,window.solana].filter(Boolean).find(p=>typeof p.connect==='function')||null;}
 async function connectWallet(){
@@ -252,20 +247,20 @@ function bind(){
 }
 async function boot(){
   try{
-    const [a,b,c,d]=await Promise.all([
-      fetch('/tokens.json?v=20260921-safe-v4',{cache:'no-store'}),
-      fetch('/console-data.json?v=20260921-safe-v4',{cache:'no-store'}),
-      fetch('/wldz-mainnet-plan.json?v=20260921-safe-v4',{cache:'no-store'}),
-      fetch('/platform-config.json?v=20260921-safe-v4',{cache:'no-store'})
-    ]);
-    if(!a.ok||!b.ok||!c.ok||!d.ok)throw new Error('Launch data unavailable');
-    registry=await a.json();details=await b.json();mainnet=await c.json();platform=await d.json();
-    if(registry.status!=='candidate-mainnet-disabled'||registry.shared.mainnet_authorized!==false||mainnet.executionEnabled!==false||mainnet.launchAuthorization!==false||platform.publicMainnetCreatorLaunchesEnabled!==false)throw new Error('Fail-closed contract mismatch');
-    if(platform.feePolicy.projectTradingFeeMaxPercent!==3||platform.feePolicy.worldzLaunchPadShareOfCollectedProjectFeePercent!==10)throw new Error('Fair Fee contract mismatch');
+    const r=await fetch('/platform-config.json?v=20260921-public-v5',{cache:'no-store'});
+    if(!r.ok)throw new Error('Platform configuration unavailable');
+    platform=await r.json();
+    if(platform.publicLaunchPad!==true||platform.publicLaunchIntakeEnabled!==true)throw new Error('Public LaunchPad contract mismatch');
+    if(platform.feePolicy?.projectTradingFeeMaxPercent!==3||platform.feePolicy?.worldzLaunchPadShareOfCollectedProjectFeePercent!==10||platform.feePolicy?.platformShareCapPercentOfCollectedProjectFee!==10)throw new Error('10% fee-only contract mismatch');
+    if(platform.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent!==0||platform.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent!==0||platform.feePolicy?.walletTransferTaxPercent!==0)throw new Error('Worldz zero-supply/liquidity/transfer-tax contract mismatch');
     const p=platform.safeLaunchPolicy;
-    if(!p||p.version!=='WORLDZ-SAFE-LAUNCH-1'||p.compulsory.fixedSupply!==true||p.compulsory.revokeMintAuthorityAfterGenesis!==true||p.compulsory.revokeFreezeAuthorityAfterGenesis!==true||p.compulsory.walletTransferTaxPercent!==0||p.compulsory.treasuryProgramAuthorityMultisig!==true||p.allocations.creatorTeamMaxPercent!==15||p.allocations.creatorTeamUnlockedAtGenesisMaxPercent!==5||p.allocations.liquidityMinPercent!==25||p.allocations.creatorControlledLpLockPercent!==100||p.allocations.lpLockMinDays!==365)throw new Error('Safe Launch Standard contract mismatch');
-    renderMarket();renderToken();renderProof();bind();feeMath();refreshRuntime();
-  }catch(e){console.error(e);document.body.dataset.boot='failed';alert('WorldzLaunchPad refused to initialize because its verified configuration did not pass fail-closed checks.');}
+    if(!p||p.version!=='WORLDZ-SAFE-LAUNCH-1'||p.compulsory.fixedSupply!==true||p.compulsory.revokeMintAuthorityAfterGenesis!==true||p.compulsory.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('Safe Launch Standard contract mismatch');
+    bind();feeMath();renderProof();renderMarket();refreshRuntime();
+  }catch(e){
+    console.error(e);document.body.dataset.boot='failed';
+    alert('WorldzLaunchPad refused to initialize because its public launch configuration did not pass fail-closed checks.');
+  }
 }
 boot();
+
 })();
