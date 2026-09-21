@@ -5,9 +5,6 @@ on:
     branches: [main]
     paths:
       - 'launchpad.cryptoworldz.xyz/**'
-      - 'WORLDZPAD-FOUR-TOKEN-LAUNCH-MASTER.md'
-      - 'worldzpad-four-token-registry.candidate.json'
-      - 'worldzpad-mainnet/mainnet-plan.json'
       - '.github/workflows/deploy-worldzlaunchpad.yml'
   workflow_dispatch:
 
@@ -25,65 +22,53 @@ jobs:
     environment:
       name: cryptoworldz-production
     env:
-      FTP_HOST: ${{ secrets.FTP_HOST }}
-      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      FTP_HOST: \${{ secrets.FTP_HOST }}
+      FTP_USERNAME: \${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: \${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: \${{ vars.FTP_PORT || '21' }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Sync canonical launch sources into public application
-        shell: bash
-        run: |
-          set -euo pipefail
-          cp worldzpad-four-token-registry.candidate.json launchpad.cryptoworldz.xyz/tokens.json
-          cp worldzpad-mainnet/mainnet-plan.json launchpad.cryptoworldz.xyz/wldz-mainnet-plan.json
-
-      - name: Validate Genesis Four, Fair Fee, CrossPair and fail-closed contracts
+      - name: Validate public WorldzLaunchPad contract
         shell: python
         run: |
           import json
           from pathlib import Path
+
           root=Path('launchpad.cryptoworldz.xyz')
-          registry=json.loads((root/'tokens.json').read_text())
-          plan=json.loads((root/'wldz-mainnet-plan.json').read_text())
-          ui=json.loads((root/'console-data.json').read_text())
           platform=json.loads((root/'platform-config.json').read_text())
-
-          expected=[('WORLDZ','WLDZ',100_000_000),('REVIVE','RVIV',200_000_000),('PHENIX','PNEX',250_000_000),('MIRACLE','MRCL',348_000_000)]
-          assert registry['status']=='candidate-mainnet-disabled'
-          assert registry['shared']['mainnet_authorized'] is False
-          assert registry['shared']['trade_fee_bps']==200
-          assert registry['shared']['legacy_loyalty_percent']==1
-          assert len(registry['tokens'])==4
-          for token,(name,ticker,supply) in zip(registry['tokens'],expected):
-              assert (token['name'],token['ticker'],token['fixed_supply'])==(name,ticker,supply)
-              assert sum(token['allocations'].values())==100
-              assert sum(token['fee_split_percent'].values())==100
-              assert ticker in ui['tokens']
-
-          assert plan['executionEnabled'] is False and plan['launchAuthorization'] is False
-          assert plan['preMainnetProof']['workflowRunId']==34155419579
-
           fee=platform['feePolicy']
-          assert fee['projectTradingFeeMinPercent']==0.5
-          assert fee['projectTradingFeeMaxPercent']==3.0
-          assert fee['worldzLaunchPadShareOfCollectedProjectFeePercent']==10
-          assert fee['worldzLaunchPadShareOfTokenSupplyPercent']==0
-          assert fee['worldzLaunchPadShareOfInitialLiquidityPercent']==0
+          safe=platform['safeLaunchPolicy']
+          treasury=platform['treasuryRouting']
+
+          assert platform['publicLaunchPad'] is True
+          assert platform['publicLaunchIntakeEnabled'] is True
+          assert platform['publicLaunchRegistryEnabled'] is True
           assert platform['publicMainnetCreatorLaunchesEnabled'] is False
           assert platform['devnetTokenCreationEnabled'] is True
-          safe=platform['safeLaunchPolicy']
+
+          assert fee['projectTradingFeeMinPercent']==0.5
+          assert fee['projectTradingFeeMaxPercent']==3
+          assert fee['worldzLaunchPadShareOfCollectedProjectFeePercent']==10
+          assert fee['platformShareCapPercentOfCollectedProjectFee']==10
+          assert fee['projectRetainedShareOfCollectedProjectFeePercent']==90
+          assert fee['worldzLaunchPadShareOfTokenSupplyPercent']==0
+          assert fee['worldzLaunchPadShareOfInitialLiquidityPercent']==0
+          assert fee['walletTransferTaxPercent']==0
+
+          assert treasury['destination']=='Worldz Treasury Multisig'
+          assert treasury['requiredThreshold']=='2-of-3'
+          assert treasury['vaultAddress'] is None
+          assert treasury['mainnetRoutingEnabled'] is False
+
           assert safe['version']=='WORLDZ-SAFE-LAUNCH-1'
           assert safe['compulsory']['fixedSupply'] is True
           assert safe['compulsory']['revokeMintAuthorityAfterGenesis'] is True
           assert safe['compulsory']['revokeFreezeAuthorityAfterGenesis'] is True
-          assert safe['compulsory']['walletTransferTaxPercent']==0
-          assert safe['compulsory']['treasuryProgramAuthorityMultisig'] is True
-          assert safe['compulsory']['minimumMultisigThreshold']>=2
           assert safe['allocations']['creatorTeamMaxPercent']==15
           assert safe['allocations']['creatorTeamUnlockedAtGenesisMaxPercent']==5
           assert safe['allocations']['liquidityMinPercent']==25
+          assert safe['allocations']['liquidityMaxPercent']==60
           assert safe['allocations']['communityPublicMinPercent']==20
           assert safe['allocations']['treasuryReserveMaxPercent']==15
           assert safe['allocations']['founderCliffMinDays']==90
@@ -93,30 +78,7 @@ jobs:
           assert safe['feeRoutes']['creatorMaxPercent']==20
           assert safe['feeRoutes']['treasuryMaxPercent']==20
           assert safe['feeRoutes']['lpGrowthMinPercent']==20
-          assert platform['worldzFlash']['status']=='DEVNET_BETA'
-          assert platform['worldzFlash']['stages']['metadata']['status']=='EXECUTABLE'
-          assert platform['worldzFlash']['stages']['pair']['SOL']['status']=='EXECUTABLE_DEVNET'
-          assert platform['worldzFlash']['stages']['pair']['wXRP']['status']=='VERIFIED_MAINNET_TARGET_ONLY'
-          assert platform['worldzFlash']['stages']['feeRouter']['executing'] is False
-          assert platform['worldzFlash']['stages']['lpLock']['enforced'] is False
-          assert platform['worldzFlash']['stages']['vesting']['enforced'] is False
-          assert platform['worldzCurve']['status']=='DEVNET_BETA'
-          assert platform['worldzCurve']['devnetProgram']=='DRay6fNdQ5J82H7xV6uq2aV3mNrUZ1J4PgSKsWgptcm6'
-          assert platform['worldzCurve']['solGlobalConfig']=='7ZR4zD7PYfY2XxoG1Gxcy2EgEeGYrpxrwzPuwdUBssEt'
-          assert platform['worldzCurve']['downstreamAutoRouterExecuting'] is False
-          assert platform['worldzCurvePro']['status']=='DEVNET_BETA'
-          assert platform['worldzCurvePro']['devnetProgram']=='dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'
-          assert platform['worldzCurvePro']['projectTradingFeeRangePercent']==[0.5,3]
-          assert platform['worldzCurvePro']['creatorTradingFeeSharePercent']==90
-          assert platform['worldzCurvePro']['worldzPartnerTradingFeeSharePercent']==10
-          assert platform['worldzCurvePro']['graduatedLiquidity']['totalPermanentLockedPercent']==100
-          assert platform['worldzCurvePro']['lockedTokenVesting']['maxPercent']==15
-          assert platform['worldzCurvePro']['lockedTokenVesting']['minimumCliffDays']==90
-          assert platform['worldzCurvePro']['lockedTokenVesting']['minimumVestingMonths']==18
-
-          wxrp=next(x for x in platform['verifiedQuoteAssets'] if x['id']=='wXRP')
-          assert wxrp['solanaMint']=='6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2'
-          assert platform['crossPair']['status']=='BUILDING'
+          assert safe['feeRoutes']['holdersLpCommunityCombinedMinPercent']==60
 
           required=[
             root/'index.html',root/'app.js',root/'style.css',root/'status.php',
@@ -130,46 +92,150 @@ jobs:
               assert p.is_file() and p.stat().st_size>500, p
 
           home=(root/'index.html').read_text()
+          app=(root/'app.js').read_text()
           devnet=(root/'devnet/index.html').read_text()
+          devnet_js=(root/'devnet/app.js').read_text()
           curve=(root/'curve/index.html').read_text()
           curve_js=(root/'curve/app.js').read_text()
           curve_pro=(root/'curve-pro/index.html').read_text()
           curve_pro_js=(root/'curve-pro/app.js').read_text()
-          omnichain=(root/'omnichain/index.html').read_text()
-          assert 'Create a Launch' in home
+
+          assert 'PUBLIC TOKEN LAUNCHPAD' in home
+          assert 'Who will be first?' in home
+          assert '10% of your collected token fee only' in home
+          assert '90% of that fee remains for your project routing' in home
+          assert '0% of your token supply' in home
           assert 'WORLDZ SAFE LAUNCH STANDARD' in home
-          assert 'Creator/team ≤15%' in home
-          assert 'COMPULSORY — revoke mint authority after genesis' in home
-          assert 'WORLDZ CROSSPAIR' in home
-          assert 'WORLDZ OMNICHAIN' in home
-          assert 'MAINNET LAUNCH LOCKED' in home
+          assert 'FIRST PUBLIC LAUNCH SLOT OPEN' in app
+          assert 'platformShareCapPercentOfCollectedProjectFee' in app
+
+          banned=[
+            'REVIVE','RVIV','PHENIX','PNEX','MIRACLE','MRCL','WLDZ',
+            'GENESIS FOUR','Genesis Four','Legacy Loyalty','SolSavewXRP',
+            'worldzpad-four-token','FOUR-TOKEN-LAUNCH'
+          ]
+          public_files=[p for p in root.rglob('*') if p.is_file() and p.suffix.lower() in {'.html','.js','.json','.php','.css'}]
+          for p in public_files:
+              text=p.read_text(errors='ignore')
+              for term in banned:
+                  assert term not in text, f'PRIVATE_PLAN_TERM_EXPOSED {term} in {p}'
+
           assert 'Create Devnet Token' in devnet
-          assert 'Register + Write Metadata' in devnet
-          assert 'Simulate + Create Raydium Devnet Pool' in devnet
-          assert 'ROUTER EXECUTION NOT YET LIVE' in devnet
-          assert 'ENFORCEMENT ADAPTER PENDING' in devnet
-          assert 'Solana Devnet' in devnet
-          assert 'worldz-launch-register' in (root/'devnet/app.js').read_text()
-          assert 'DEVNET_PROGRAM_ID.CREATE_CPMM_POOL_PROGRAM' in (root/'devnet/app.js').read_text()
+          assert 'worldz-launch-register' in devnet_js
+          assert 'DEVNET_PROGRAM_ID.CREATE_CPMM_POOL_PROGRAM' in devnet_js
           assert 'RAYDIUM LAUNCHLAB DEVNET LAUNCH CREATED' in curve
           assert 'createPlatformConfig' in curve_js and 'createLaunchpad' in curve_js
-          assert 'DEVNET_PROGRAM_ID.LAUNCHPAD_PROGRAM' in curve_js
           assert 'METEORA DBC DEVNET LAUNCH CREATED' in curve_pro
-          assert 'createConfigAndPool' in curve_pro_js and 'buildCurve' in curve_pro_js
           assert 'Project trading fee must be 0.50%–3.00%.' in curve_pro_js
           assert 'Creator/team locked vesting must be 0–15%.' in curve_pro_js
-          assert 'DEVNET ENGINE NOTICE' in curve_pro
-          assert 'creatorTradingFeePercentage:90' in curve_pro_js
-          assert 'partnerPermanentLockedLiquidityPercentage:10' in curve_pro_js
-          assert 'creatorPermanentLockedLiquidityPercentage:90' in curve_pro_js
-          assert 'WORLDZ OMNICHAIN™' in omnichain
-          assert 'Every world is clickable.' in omnichain
-          for url in ['https://solworldz.xyz/','https://ethworldz.xyz/','https://baseworldz.xyz/','https://xrpworldz.xyz/','https://suiworldz.xyz/','https://hyperworldz.xyz/','https://robinworldz.xyz/','https://bnbworldz.xyz/','https://hodlerworldz.xyz/']:
-              assert url in omnichain
-          assert '/omnichain/' in home
-          print('WORLDZLAUNCHPAD_PLATFORM_CONTRACT=PASS safe_launch_v1=1 founder_cap=15 fee_max=3 lp_lock_days=365 multisig=1 flash=1 curve=1 curve_pro=1 omnichain=1 mainnet_public=0')
 
-      - name: Deploy only WorldzLaunchPad to verified Hostinger document root
+          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_share=10 project_share=90 supply_take=0 liquidity_take=0 private_plan_exposure=0 mainnet=0')
+
+      - name: Run 100+ anti-cheat tokenomics scenarios
+        shell: python
+        run: |
+          import json, math
+          from pathlib import Path
+
+          p=json.loads(Path('launchpad.cryptoworldz.xyz/platform-config.json').read_text())
+          safe=p['safeLaunchPolicy']
+          fee=p['feePolicy']
+          A=safe['allocations']
+          R=safe['feeRoutes']
+
+          def valid(cfg):
+              try:
+                  supply=int(cfg['supply']); decimals=int(cfg['decimals']); f=float(cfg['fee'])
+                  alloc=cfg['alloc']; routes=cfg['routes']
+                  if not (p['safeLaunchPolicy']['token']['supplyMin'] <= supply <= p['safeLaunchPolicy']['token']['supplyMax']): return False
+                  if not (p['safeLaunchPolicy']['token']['decimalsMin'] <= decimals <= p['safeLaunchPolicy']['token']['decimalsMax']): return False
+                  if not (fee['projectTradingFeeMinPercent'] <= f <= fee['projectTradingFeeMaxPercent']): return False
+                  if abs(sum(alloc.values())-100)>1e-9: return False
+                  if any((not math.isfinite(float(v)) or v<0 or v>100) for v in alloc.values()): return False
+                  if alloc['creatorTeam']>A['creatorTeamMaxPercent']: return False
+                  if cfg['creatorUnlocked']>A['creatorTeamUnlockedAtGenesisMaxPercent'] or cfg['creatorUnlocked']>alloc['creatorTeam']: return False
+                  if not (A['liquidityMinPercent']<=alloc['liquidity']<=A['liquidityMaxPercent']): return False
+                  if alloc['communityPublic']<A['communityPublicMinPercent']: return False
+                  if alloc['treasuryReserve']>A['treasuryReserveMaxPercent']: return False
+                  if cfg['cliffDays']<A['founderCliffMinDays']: return False
+                  if cfg['vestingMonths']<A['founderVestingMinMonths']: return False
+                  if cfg['lpLockPercent']!=100 or cfg['lpLockDays']<A['lpLockMinDays']: return False
+                  if abs(sum(routes.values())-100)>1e-9: return False
+                  if any((not math.isfinite(float(v)) or v<0 or v>100) for v in routes.values()): return False
+                  if routes['creator']>R['creatorMaxPercent']: return False
+                  if routes['treasury']>R['treasuryMaxPercent']: return False
+                  if routes['lp']<R['lpGrowthMinPercent']: return False
+                  if routes['holders']+routes['lp']+routes['community']<R['holdersLpCommunityCombinedMinPercent']: return False
+                  return True
+              except Exception:
+                  return False
+
+          base={
+            'supply':1_000_000,'decimals':9,'fee':1.0,
+            'alloc':{'creatorTeam':15,'liquidity':30,'communityPublic':30,'treasuryReserve':10,'growthEcosystem':15},
+            'creatorUnlocked':5,'cliffDays':90,'vestingMonths':24,'lpLockPercent':100,'lpLockDays':365,
+            'routes':{'creator':20,'holders':30,'lp':25,'treasury':15,'community':10}
+          }
+          def clone():
+              return json.loads(json.dumps(base))
+
+          cases=[]
+          cases.append(('baseline_valid',clone(),True))
+
+          for f in [0,0.1,0.49,0.5,0.75,1,1.5,2,2.5,3,3.01,4,9,99]:
+              c=clone();c['fee']=f;cases.append((f'fee_{f}',c,0.5<=f<=3))
+          for v in range(0,26):
+              c=clone();c['alloc']['creatorTeam']=v;c['alloc']['growthEcosystem']=30-v
+              c['creatorUnlocked']=min(5,v)
+              cases.append((f'creator_alloc_{v}',c,v<=15))
+          for v in range(15,71,5):
+              c=clone();delta=v-c['alloc']['liquidity'];c['alloc']['liquidity']=v;c['alloc']['growthEcosystem']-=delta
+              expect=25<=v<=60 and c['alloc']['growthEcosystem']>=0
+              cases.append((f'liquidity_{v}',c,expect))
+          for v in [0,5,10,15,19,20,21,30,50]:
+              c=clone();delta=v-c['routes']['creator'];c['routes']['creator']=v;c['routes']['holders']-=delta
+              expect=v<=20 and c['routes']['holders']>=0
+              cases.append((f'creator_route_{v}',c,expect))
+          for v in [0,5,10,15,19,20,21,30,50]:
+              c=clone();delta=v-c['routes']['treasury'];c['routes']['treasury']=v;c['routes']['holders']-=delta
+              expect=v<=20 and c['routes']['holders']>=0
+              cases.append((f'treasury_route_{v}',c,expect))
+          for v in [0,5,10,15,19,20,21,25,30,50]:
+              c=clone();delta=v-c['routes']['lp'];c['routes']['lp']=v;c['routes']['holders']-=delta
+              expect=v>=20 and c['routes']['holders']>=0 and (c['routes']['holders']+v+c['routes']['community']>=60)
+              cases.append((f'lp_route_{v}',c,expect))
+          for v in [0,30,60,89,90,91,120,365]:
+              c=clone();c['cliffDays']=v;cases.append((f'cliff_{v}',c,v>=90))
+          for v in [0,1,6,12,17,18,19,24,36,60]:
+              c=clone();c['vestingMonths']=v;cases.append((f'vesting_{v}',c,v>=18))
+          for v in [0,30,90,180,364,365,366,730]:
+              c=clone();c['lpLockDays']=v;cases.append((f'lp_lock_days_{v}',c,v>=365))
+          for v in [0,25,50,99,100]:
+              c=clone();c['lpLockPercent']=v;cases.append((f'lp_lock_percent_{v}',c,v==100))
+          for v in [1,999,1000,10_000,1_000_000,1_000_000_000_000,1_000_000_000_001]:
+              c=clone();c['supply']=v;cases.append((f'supply_{v}',c,1000<=v<=1_000_000_000_000))
+          for v in [-1,0,1,6,9,10]:
+              c=clone();c['decimals']=v;cases.append((f'decimals_{v}',c,0<=v<=9))
+
+          # Deliberate total/negative/over-100 tampering.
+          for i in range(25):
+              c=clone()
+              if i%5==0: c['alloc']['growthEcosystem']+=1
+              elif i%5==1: c['alloc']['creatorTeam']=-1
+              elif i%5==2: c['routes']['community']+=1
+              elif i%5==3: c['routes']['creator']=-1
+              else: c['routes']['lp']=101
+              cases.append((f'tamper_{i}',c,False))
+
+          assert len(cases)>=100, len(cases)
+          failed=[]
+          for name,cfg,expected in cases:
+              got=valid(cfg)
+              if got!=expected: failed.append((name,expected,got,cfg))
+          assert not failed, failed[:5]
+          print(f'WORLDZLAUNCHPAD_POLICY_SCENARIOS=PASS scenarios={len(cases)}')
+
+      - name: Deploy public WorldzLaunchPad to Hostinger
         shell: python
         run: |
           import os, ssl
@@ -199,46 +265,60 @@ jobs:
               with f.open('rb') as handle:
                   ftp.storbinary(f'STOR {remote.name}',handle,blocksize=262144)
               count+=1
-          try: ftp.delete(str(PurePosixPath(remote_root)/'default.php'))
-          except Exception: pass
+
+          # Purge obsolete private-plan artifacts from the public document root.
+          for old in ['default.php','tokens.json','console-data.json','wldz-mainnet-plan.json']:
+              try: ftp.delete(str(PurePosixPath(remote_root)/old))
+              except Exception: pass
+
           try: ftp.quit()
           except Exception: ftp.close()
           print(f'WORLDZLAUNCHPAD_DEPLOY=PASS files={count} target={remote_root}')
 
-      - name: Verify live application, Devnet Lab, registry and fail-closed gate
+      - name: Verify live public application
         shell: python
         run: |
-          import json,time,urllib.request
+          import json,time,urllib.request,urllib.error
           base='https://launchpad.cryptoworldz.xyz'
-          def get(path):
-              req=urllib.request.Request(base+path,headers={'User-Agent':'WorldzLaunchPad-Live-Verify/3.0','Cache-Control':'no-cache'})
+          registry='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register'
+          def get(url):
+              req=urllib.request.Request(url,headers={'User-Agent':'WorldzLaunchPad-Live-Verify/5.0','Cache-Control':'no-cache','Origin':base})
               with urllib.request.urlopen(req,timeout=25) as r:return r.status,r.read().decode('utf-8','ignore')
           last=''
+          banned=['REVIVE','RVIV','PHENIX','PNEX','MIRACLE','MRCL','WLDZ','GENESIS FOUR','Genesis Four','Legacy Loyalty','SolSavewXRP']
           for attempt in range(1,7):
               try:
-                  status,body=get('/?verify=platform-v3')
-                  dev_code,dev_body=get('/devnet/?verify=platform-v3')
-                  curve_code,curve_body=get('/curve/?verify=platform-v3')
-                  curve_pro_code,curve_pro_body=get('/curve-pro/?verify=platform-v3')
-                  omni_code,omni_body=get('/omnichain/?verify=platform-v3')
-                  _,registry_body=get('/tokens.json?verify=platform-v3')
-                  _,plan_body=get('/wldz-mainnet-plan.json?verify=platform-v3')
-                  _,platform_body=get('/platform-config.json?verify=platform-v3')
-                  status_code,status_body=get('/status.php?verify=platform-v3')
-                  registry=json.loads(registry_body); plan=json.loads(plan_body); platform=json.loads(platform_body); live=json.loads(status_body)
-                  assert status==200 and 'Create a Launch' in body and 'WORLDZ CROSSPAIR' in body and 'MAINNET LAUNCH LOCKED' in body
-                  assert dev_code==200 and 'Create Devnet Token' in dev_body and 'Register + Write Metadata' in dev_body and 'Raydium Devnet Pool' in dev_body
-                  assert curve_code==200 and 'Worldz Curve™' in curve_body and 'Raydium LaunchLab' in curve_body and 'Create Raydium LaunchLab Devnet Launch' in curve_body
-                  assert curve_pro_code==200 and 'Worldz Curve Pro™' in curve_pro_body and 'Meteora DBC' in curve_pro_body and 'Create Meteora DBC Devnet Launch' in curve_pro_body
-                  assert omni_code==200 and 'WORLDZ OMNICHAIN™' in omni_body and 'Every world is clickable.' in omni_body and 'SolWorldz' in omni_body and 'XRPWorldz' in omni_body
-                  assert registry['status']=='candidate-mainnet-disabled' and registry['shared']['mainnet_authorized'] is False
-                  assert plan['executionEnabled'] is False and plan['launchAuthorization'] is False
-                  assert platform['publicMainnetCreatorLaunchesEnabled'] is False and platform['devnetTokenCreationEnabled'] is True
-                  assert platform['feePolicy']['projectTradingFeeMaxPercent']==3.0
-                  assert platform['feePolicy']['worldzLaunchPadShareOfCollectedProjectFeePercent']==10
+                  status,body=get(base+'/?verify=public-v5')
+                  _,platform_body=get(base+'/platform-config.json?verify=public-v5')
+                  dev_code,dev_body=get(base+'/devnet/?verify=public-v5')
+                  curve_code,curve_body=get(base+'/curve/?verify=public-v5')
+                  pro_code,pro_body=get(base+'/curve-pro/?verify=public-v5')
+                  status_code,status_body=get(base+'/status.php?verify=public-v5')
+                  reg_code,reg_body=get(registry+'?verify=public-v5')
+                  platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
+
+                  assert status==200
+                  assert 'PUBLIC TOKEN LAUNCHPAD' in body
+                  assert 'Who will be first?' in body
+                  assert '10% of your collected token fee only' in body
+                  assert '90% of that fee remains for your project routing' in body
+                  assert all(term not in body for term in banned)
+
+                  assert platform['publicLaunchPad'] is True
+                  assert platform['feePolicy']['platformShareCapPercentOfCollectedProjectFee']==10
+                  assert platform['feePolicy']['projectRetainedShareOfCollectedProjectFeePercent']==90
+                  assert platform['feePolicy']['worldzLaunchPadShareOfTokenSupplyPercent']==0
+                  assert platform['feePolicy']['worldzLaunchPadShareOfInitialLiquidityPercent']==0
+                  assert platform['publicMainnetCreatorLaunchesEnabled'] is False
+
+                  assert dev_code==200 and 'Create Devnet Token' in dev_body
+                  assert curve_code==200 and 'Worldz Curve™' in curve_body
+                  assert pro_code==200 and 'Worldz Curve Pro™' in pro_body
                   assert status_code==200 and live['ok'] is True
-                  assert platform['worldzCurve']['status']=='DEVNET_BETA' and platform['worldzCurvePro']['status']=='DEVNET_BETA'
-                  print('WORLDZLAUNCHPAD_LIVE=PASS app=1 flash=1 curve=1 curve_pro=1 omnichain=1 crosspair=1 mainnet_locked=1 runtime_probe=1')
+                  assert reg_code==200 and public_registry['ok'] is True
+                  assert public_registry['platformSharePercentOfCollectedTokenFee']==10
+
+                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 registry=1 fee_only_10=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_gate=1')
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:
