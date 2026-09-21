@@ -100,6 +100,18 @@ function applyPrivatePreset(v){
   }finally{restoringDraft=false;}
   allocationMath();saveDraft();
 }
+async function loadWalletPreset(){
+  if(!walletCtx?.address)return false;
+  const r=await fetch(API+'?walletPreset='+encodeURIComponent(walletCtx.address),{cache:'no-store'});
+  if(r.status===404)return false;
+  const out=await r.json().catch(()=>({}));
+  if(!r.ok||!out.ok||!out.config)throw new Error(out.error||'Saved WorldzMINT launch could not be loaded.');
+  applyPrivatePreset(out.config);
+  $('#creator-wallet').value=walletCtx.address;
+  saveDraft();
+  setStatus('WORLDZ READY ✅\nAll saved launch details loaded automatically. Press START WORLDZMINT™.','good');
+  return true;
+}
 async function loadPrivatePreset(){
   const params=new URLSearchParams(location.search),code=params.get('launch');
   if(!code)return false;
@@ -277,6 +289,7 @@ async function connectWallet(){
     $('#creator-wallet').value=walletCtx.address;
     saveDraft();
     $('#wallet-btn').textContent=short(walletCtx.address);$('#wallet-btn').classList.add('connected');
+    try{await loadWalletPreset();}catch(error){console.warn('Saved WorldzMINT preset load failed',error);}
     setStatus((/jupiter/i.test(walletCtx.name)?'JUPITER WALLET':'SOLANA WALLET')+' CONNECTED ✅\n'+walletCtx.address+'\nNetwork selection: '+network()+'\nNo transaction has been requested.','good');
     preflightOk=false;if(!pending?.registered)$('#mint-btn').disabled=false;renderProof();
   }catch(e){
@@ -488,10 +501,19 @@ async function finalizeStage(){
 function tokenBusy(text){setStatus(text,'warn');}
 async function mintFlow(){
   if(busy)return;
-  // One-button flow: connect wallet if needed, then run preflight automatically.
+  // One-button flow: connect wallet if needed, restore the saved owner preset if
+  // the form is incomplete, then run preflight automatically.
   if(!walletCtx){
     await connectWallet();
     if(!walletCtx)return;
+  }
+  const current=values();
+  const missing=current.token_name.length<2||current.symbol.length<2||!/^\d+$/.test(current.fixed_supply)||!/^https:\/\//i.test(current.image_url)||
+    ['liquidity','community','treasury','growth'].some(k=>!isPk(current.recipients[k]));
+  if(missing){
+    try{await loadWalletPreset();}catch(error){
+      setStatus('WORLDZMINT SETUP COULD NOT LOAD\n'+(error?.message||String(error)),'bad');return;
+    }
   }
   if(!await runPreflight())return;
   if(network()==='mainnet-beta'&&!pending){
