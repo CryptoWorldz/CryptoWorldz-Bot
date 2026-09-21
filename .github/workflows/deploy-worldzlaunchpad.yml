@@ -229,6 +229,11 @@ jobs:
           assert "UPLOAD_IMAGE" in mint_js
           assert "resizeTokenImage" in mint_js
           assert "WORLDZMINT_UPLOAD_IMAGE_V1" in mint_js
+          assert "worldzmint-draft-v1" in mint_js
+          assert "saveDraft" in mint_js
+          assert "restoreDraft" in mint_js
+          assert "pagehide" in mint_js
+          assert "visibilitychange" in mint_js
           assert platform['walletConnectivity']['version']=='WORLDZ-WALLET-BRIDGE-1'
           assert platform['walletConnectivity']['status']=='JUPITER_MOBILE_REOWN_ENABLED'
           assert platform['walletConnectivity']['jupiterMobile']['enabled'] is True
