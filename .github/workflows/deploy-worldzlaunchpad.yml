@@ -232,6 +232,11 @@ jobs:
           assert "await connectWallet()" in mint_js
           assert "if(!await runPreflight())return" in mint_js
           assert "START WORLDZMINT™" in mint_html
+          assert "LOAD WORLDZ $WLDZ — READY TO MINT" in mint_html
+          assert "START WORLDZ NOW" in mint_html
+          assert "const WORLDZ_QUICKSTART" in mint_js
+          assert "100000000" in mint_js
+          assert "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB" in mint_js
           assert "Optional: Check Preflight Only" in mint_html
           assert platform['worldzMint']['walletStandard']['transactionSigning']['mode']=='DIRECT_SIGN_TRANSACTION'
           assert platform['worldzMint']['walletStandard']['transactionSigning']['arguments']==['account','transaction']
