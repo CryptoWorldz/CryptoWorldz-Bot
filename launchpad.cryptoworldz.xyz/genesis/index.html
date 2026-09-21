@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05020b">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>WorldzLaunchPad™ | Private Genesis Console</title>
+  <link rel="stylesheet" href="/style.css?v=20260921-public-v6">
+  <style>
+    .genesis{max-width:1080px;margin:auto;padding:52px 18px 100px}.lockhero{padding:26px;border:1px solid #8d4cff33;border-radius:24px;background:radial-gradient(circle at 50% 0,#8d4cff1c,transparent 58%),#08040e;margin-bottom:14px}
+    .lockhero h1{margin:8px 0;font-size:clamp(2.2rem,7vw,5rem);letter-spacing:-.05em;line-height:.93}.lockhero h1 span{color:#bd7cff}.lead2{color:#9d8ba7;max-width:800px}.truth{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+    .truth div,.panel,.token-card{border:1px solid #ffffff0d;border-radius:15px;background:#ffffff03;padding:13px}.truth small{display:block;color:#796a83;font-size:.59rem;text-transform:uppercase;letter-spacing:.08em}.truth b{font-size:.78rem}
+    .panel{margin-top:12px;padding:17px}.panel h2,.token-card h2{margin:0 0 5px}.status{white-space:pre-wrap;word-break:break-word;padding:12px;border-radius:12px;border:1px solid #ffffff10;color:#9586a0;margin-top:10px;font-size:.72rem}.status.good{border-color:#55e6a544;color:#7ce9ba}.status.bad{border-color:#ff668844;color:#ffa0b2}.status.warn{border-color:#ffd16644;color:#e7cb8c}
+    .token-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.token-card{padding:16px;position:relative;overflow:hidden}.token-top{display:flex;gap:13px;align-items:center}.token-art{width:76px;height:76px;border-radius:17px;border:1px solid #ffffff14;object-fit:cover;background:#0b0612}.token-symbol{color:#c792ff;font-weight:800;letter-spacing:.06em}.token-desc{color:#8f8098;font-size:.72rem;line-height:1.5;margin:10px 0}.facts{display:grid;grid-template-columns:1fr 1fr;gap:6px}.facts div{background:#0003;border:1px solid #ffffff0a;border-radius:9px;padding:8px}.facts small{display:block;color:#6f6377;font-size:.57rem;text-transform:uppercase}.facts b{font-size:.69rem}
+    .file{margin-top:10px;display:grid;gap:6px;color:#94849e;font-size:.68rem}.file input{width:100%;padding:9px;border:1px solid #ffffff12;border-radius:10px;background:#06030b;color:#aaa}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions button{flex:1;min-width:130px}.proof{display:grid;gap:6px;margin-top:9px}.proof div{padding:8px 9px;border-radius:9px;border:1px solid #ffffff0c;font-size:.65rem;color:#8d8094}.proof .pass{border-color:#55e6a52d;color:#89e8bf}.proof .wait{border-color:#ffd1662d;color:#cbb88e}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}.danger{border-left:3px solid #ff6688;padding:11px 13px;background:#ff668807;color:#b4959d;font-size:.72rem;margin-top:11px}.hidden{display:none!important}
+    @media(max-width:760px){.truth,.token-grid{grid-template-columns:1fr}.facts{grid-template-columns:1fr 1fr}.genesis{padding-top:28px}}
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a>
+  <nav><span style="color:#8d7b97;font-size:.7rem">PRIVATE • NOINDEX</span></nav>
+  <button class="wallet-mini" id="wallet" type="button">Connect Dev Wallet</button>
+</header>
+
+<main class="genesis">
+  <section class="lockhero">
+    <div class="kicker">PRIVATE GENESIS CONSOLE • SOLANA MAINNET • WALLET-GATED</div>
+    <h1>GENESIS.<br><span>FIXED FOREVER.</span></h1>
+    <p class="lead2">This console contains no public token plan in its page source. The private genesis configuration is released only after the authorised dev wallet signs a short authentication message.</p>
+    <div class="truth">
+      <div><small>Genesis signer</small><b>Authorised Dev Wallet</b></div>
+      <div><small>Supply destination</small><b>Team Zed Treasury</b></div>
+      <div><small>Mint authority</small><b>REVOKED after metadata</b></div>
+      <div><small>Freeze authority</small><b>REVOKED after metadata</b></div>
+    </div>
+    <div class="danger"><b>MAINNET / IRREVERSIBLE:</b> each successful finalisation permanently fixes that token's supply. Full supply is minted directly into the verified Squads Treasury vault token account. The dev wallet pays/signs genesis but does not receive the supply.</div>
+  </section>
+
+  <section class="panel">
+    <h2>Authorisation</h2>
+    <p class="lead2">Connect the authorised Solana wallet. The console will ask for one harmless message signature before revealing the private genesis set.</p>
+    <div class="actions"><button class="btn primary" id="auth" type="button" disabled>Authenticate Genesis Console</button><button class="btn secondary" id="refresh" type="button" disabled>Refresh Private State</button></div>
+    <div class="status" id="auth-status">Wallet not connected.</div>
+  </section>
+
+  <section id="private-area" class="hidden">
+    <div id="token-grid" class="token-grid"></div>
+  </section>
+</main>
+
+<footer><div><b>WorldzLaunchPad™ Private Genesis Console</b></div><p>Not linked from the public LaunchPad. No seed phrase or private key is ever requested.</p></footer>
+<script type="module" src="/genesis/app.js?v=20260921-genesis-v1"></script>
+</body>
+</html>
