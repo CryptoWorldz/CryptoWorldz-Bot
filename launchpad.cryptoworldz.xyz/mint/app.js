@@ -323,9 +323,10 @@ async function signTransaction(tx,partialSigners=[]){
   let signed;
   if(walletCtx.kind==='standard'){
     const wire=tx.serialize({requireAllSignatures:false,verifySignatures:false});
-    const out=await walletCtx.wallet.features['solana:signTransaction'].signTransaction({
-      transaction:new Uint8Array(wire),account:walletCtx.account,chain:chain()
-    });
+    const input={transaction:new Uint8Array(wire),account:walletCtx.account};
+    const accountChains=Array.isArray(walletCtx.account?.chains)?walletCtx.account.chains.map(String):[];
+    if(accountChains.includes(chain()))input.chain=chain();
+    const out=await walletCtx.wallet.features['solana:signTransaction'].signTransaction(input);
     const bytes=out?.[0]?.signedTransaction;if(!bytes)throw new Error('Wallet returned no signed transaction.');
     signed=Transaction.from(bytes);
   }else signed=await walletCtx.provider.signTransaction(tx);
@@ -365,11 +366,23 @@ async function runPreflight(){
   }else setStatus('WORLDZMINT DEVNET PREFLIGHT PASS ✅\nRehearsal network only. No transaction has been signed yet.','good');
   $('#mint-btn').disabled=false;renderProof();return true;
 }
+async function prepareRegistryStage(){
+  if(!pending?.mint||!pending?.createSig)throw new Error('Created mint proof is missing.');
+  tokenBusy('VERIFYING CREATED MINT…\nWorldzMINT is checking the on-chain creator signature and mint authorities. No extra wallet signature is required.');
+  const prep=await api({
+    action:'PREPARE',
+    wallet:walletCtx.address,
+    mint:pending.mint,
+    environment:network(),
+    create_mint_tx_signature:pending.createSig,
+    ...pending.config
+  });
+  pending.metadataUri=prep.metadataUri;
+  pending.prepared=true;
+  savePending();renderProof();
+}
 async function createMintStage(v){
   const mintKp=Keypair.generate(),mint=mintKp.publicKey.toBase58();
-  tokenBusy('Preparing WorldzMINT metadata record. Sign the harmless proof message first…');
-  const auth=await authBody('PREPARE',mint);
-  const prep=await api({action:'PREPARE',...auth,...v,mint});
   const rent=await connection.getMinimumBalanceForRentExemption(MINT_SIZE),owner=new PublicKey(walletCtx.address);
   const tx=new Transaction().add(
     SystemProgram.createAccount({fromPubkey:owner,newAccountPubkey:mintKp.publicKey,space:MINT_SIZE,lamports:rent,programId:TOKEN_PROGRAM_ID}),
@@ -377,8 +390,9 @@ async function createMintStage(v){
   );
   tokenBusy('Wallet approval 1/3 — CREATE FIXED-SUPPLY MINT\nA simulation runs before broadcast.');
   const createSig=await signTransaction(tx,[mintKp]);
-  pending={standard:STANDARD_VERSION,mint,metadataUri:prep.metadataUri,createSig,distributeSig:null,finalizeSig:null,registered:false,config:v};
+  pending={standard:STANDARD_VERSION,mint,metadataUri:null,createSig,prepared:false,distributeSig:null,finalizeSig:null,registered:false,config:v};
   savePending();renderProof();
+  await prepareRegistryStage();
 }
 async function distributeStage(){
   const v=pending.config,mint=new PublicKey(pending.mint),owner=new PublicKey(walletCtx.address),a=v.allocations,r=v.recipients,bps=bpsMap(a);
@@ -396,10 +410,15 @@ async function distributeStage(){
   pending.distributeSig=await signTransaction(tx);pending.atas=atas;savePending();renderProof();
 }
 async function registerFinalProof(){
-  tokenBusy('On-chain finalisation confirmed. Sign one harmless WorldzMINT proof message while the server independently verifies supply, allocations and revoked authorities…');
-  const auth=await authBody('FINALIZE',pending.mint);
-  const out=await api({action:'FINALIZE',...auth,
-    create_mint_tx_signature:pending.createSig,distribute_tx_signature:pending.distributeSig,finalize_tx_signature:pending.finalizeSig
+  tokenBusy('ON-CHAIN FINALISATION CONFIRMED.\nWorldzMINT is independently verifying supply, allocations and revoked authorities. No extra wallet signature is required.');
+  const out=await api({
+    action:'FINALIZE',
+    wallet:walletCtx.address,
+    mint:pending.mint,
+    environment:network(),
+    create_mint_tx_signature:pending.createSig,
+    distribute_tx_signature:pending.distributeSig,
+    finalize_tx_signature:pending.finalizeSig
   });
   pending.registered=true;savePending();renderProof({registered:true});
   setStatus('WORLDZMINT VERIFIED ✅\nMint: '+pending.mint+'\nExact fixed supply verified.\nGenesis allocations verified.\nMint authority: NONE.\nFreeze authority: NONE.\n\nTrust Passport: '+out.trustPassport,'good');
@@ -437,6 +456,7 @@ async function mintFlow(){
   try{
     const v=values();
     if(!pending)await createMintStage(v);
+    if(!pending.prepared)await prepareRegistryStage();
     if(!pending.distributeSig)await distributeStage();
     if(!pending.finalizeSig)await finalizeStage();
     else if(!pending.registered)await registerFinalProof();
