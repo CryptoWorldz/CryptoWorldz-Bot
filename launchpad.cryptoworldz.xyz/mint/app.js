@@ -83,16 +83,33 @@ function walletStandardCandidates(){
       .sort((a,b)=>Number(!/jupiter/i.test(a.name))-Number(!/jupiter/i.test(b.name))||String(a.name).localeCompare(String(b.name)));
   }catch{return []}
 }
+function usableInjectedProvider(p){
+  return !!p&&typeof p.connect==='function'&&typeof p.signTransaction==='function'&&typeof p.signMessage==='function';
+}
+function jupiterInjectedProvider(){
+  const candidates=[
+    window?.jupiter?.solana,
+    usableInjectedProvider(window?.jupiter)?window.jupiter:null,
+    window?.solana?.isJupiter?window.solana:null
+  ];
+  return candidates.find(usableInjectedProvider)||null;
+}
 function legacyProvider(){
-  return [window?.jupiter?.solana,window?.phantom?.solana,window?.solflare,window?.solana]
-    .filter(Boolean).find(p=>typeof p.connect==='function'&&typeof p.signTransaction==='function'&&typeof p.signMessage==='function')||null;
+  return [jupiterInjectedProvider(),window?.phantom?.solana,window?.solflare,window?.solana]
+    .filter(Boolean).find(usableInjectedProvider)||null;
 }
 function renderWallets(){
-  const select=$('#wallet-choice'),list=walletStandardCandidates();
+  const select=$('#wallet-choice'),list=walletStandardCandidates(),jupInjected=jupiterInjectedProvider();
   select.innerHTML='';
+  if(jupInjected){
+    const inApp=document.createElement('option');
+    inApp.value='jupiter-inapp';
+    inApp.textContent='Jupiter In-App Wallet ⭐';
+    select.appendChild(inApp);
+  }
   const mobile=document.createElement('option');
   mobile.value='jupiter-mobile';
-  mobile.textContent='Jupiter Mobile ⭐';
+  mobile.textContent='Jupiter Mobile via WalletConnect';
   select.appendChild(mobile);
   list.forEach((w,i)=>{
     const o=document.createElement('option');
@@ -100,13 +117,14 @@ function renderWallets(){
     o.textContent=w.name+(/jupiter/i.test(w.name)?' ⭐':'');
     select.appendChild(o);
   });
-  if(legacyProvider()){
+  const generic=legacyProvider();
+  if(generic&&generic!==jupInjected){
     const o=document.createElement('option');
     o.value='legacy';
     o.textContent='Injected Solana wallet';
     select.appendChild(o);
   }
-  select.value='jupiter-mobile';
+  select.value=jupInjected?'jupiter-inapp':'jupiter-mobile';
 }
 async function connectWallet(){
   if(busy)return;
@@ -116,11 +134,19 @@ async function connectWallet(){
   button.textContent='Opening Jupiter…';
   try{
     const list=walletStandardCandidates(),choice=$('#wallet-choice').value;
-    if(choice==='jupiter-mobile'){
-      setStatus('OPENING JUPITER MOBILE…\nA Jupiter/Reown connection window should appear now. Approve only the connection — no mint transaction is being requested.','warn');
-      const mod=await import('/mint/jupiter-mobile.js?v=20260921-reown-v2');
+    if(choice==='jupiter-inapp'){
+      const p=jupiterInjectedProvider();
+      if(!p)throw new Error('Jupiter in-app provider disappeared. Reload the page inside Jupiter Wallet.');
+      setStatus('CONNECTING DIRECTLY TO JUPITER WALLET…\nUsing Jupiter\'s in-app injected wallet — no WalletConnect hand-off is required.','warn');
+      const out=await p.connect(),pk=(out&&out.publicKey)||p.publicKey;
+      if(!pk)throw new Error('Jupiter connected but returned no public key.');
+      walletCtx={kind:'legacy',provider:p,address:pk.toString(),name:'Jupiter In-App Wallet'};
+    }else if(choice==='jupiter-mobile'){
+      setStatus('OPENING JUPITER MOBILE…\nUsing the Jupiter/Reown WalletConnect bridge. Approve only the connection — no mint transaction is being requested.','warn');
+      const mod=await import('/mint/jupiter-mobile.js?v=20260921-reown-v3');
+      mod.resetJupiterMobileConnectionState?.();
       const adapter=await mod.getJupiterMobileAdapter();
-      const connectTimeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Jupiter Mobile did not open within 20 seconds. Reload this page and try once more.')),20000));
+      const connectTimeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Jupiter Mobile did not finish connecting within 20 seconds. The stale WalletConnect state has been cleared; reload once if this message appears.')),20000));
       await Promise.race([adapter.connect(),connectTimeout]);
       const pk=adapter.publicKey;if(!pk)throw new Error('Jupiter Mobile connected but returned no public key.');
       walletCtx={kind:'adapter',provider:adapter,address:pk.toString(),name:'Jupiter Mobile'};
@@ -302,4 +328,4 @@ $('#mint-btn').addEventListener('click',mintFlow);
 $('#network').addEventListener('change',()=>{refreshConnection();preflightOk=false;$('#mint-btn').disabled=true;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
 $$('input,textarea,select').forEach(x=>{if(!['wallet-choice','network'].includes(x.id))x.addEventListener('input',()=>{allocationMath();});});
 renderWallets();getWallets().on('register',renderWallets);restorePending();allocationMath();renderProof();loadRegistry();
-import('/mint/jupiter-mobile.js?v=20260921-reown-v2').catch(error=>console.warn('Jupiter Mobile bridge preload failed',error));
+import('/mint/jupiter-mobile.js?v=20260921-reown-v3').catch(error=>console.warn('Jupiter Mobile bridge preload failed',error));
