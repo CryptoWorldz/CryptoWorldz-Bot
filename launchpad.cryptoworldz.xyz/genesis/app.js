@@ -6,6 +6,7 @@ import {
   createInitializeMintInstruction,createAssociatedTokenAccountInstruction,
   createMintToInstruction,createSetAuthorityInstruction,getAssociatedTokenAddress
 } from 'https://esm.sh/@solana/spl-token@0.4.14?bundle';
+import {getWallets} from 'https://esm.sh/@wallet-standard/app@1.1.0?bundle';
 
 const $=s=>document.querySelector(s);
 const ENDPOINT='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-genesis-console';
@@ -13,13 +14,62 @@ const DEV_WALLET='Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u';
 const connection=new Connection(clusterApiUrl('mainnet-beta'),'confirmed');
 
 let wallet=null;
+let walletName='';
 let authSession=null;
 let privateConfig=null;
 let tokens=[];
 
-function provider(){
+const walletRegistry=getWallets();
+const SOLANA_MAINNET_CHAIN='solana:mainnet';
+
+function injectedProvider(){
   return [window.phantom&&window.phantom.solana,window.solflare,window.solana]
     .filter(Boolean).find(p=>typeof p.connect==='function'&&typeof p.signTransaction==='function')||null;
+}
+function walletStandardCandidates(){
+  return walletRegistry.get().filter(w=>
+    w.chains?.some(c=>String(c).startsWith('solana:')) &&
+    w.features?.['standard:connect'] &&
+    w.features?.['solana:signMessage'] &&
+    w.features?.['solana:signTransaction']
+  );
+}
+function walletStandardAdapter(ws,account){
+  const publicKey=new PublicKey(account.address);
+  const encodeTx=tx=>new Uint8Array(tx.serialize({requireAllSignatures:false,verifySignatures:false}));
+  const decodeSigned=out=>{
+    const bytes=out?.signedTransaction;
+    if(!bytes)throw new Error('Wallet returned no signed transaction.');
+    return Transaction.from(bytes);
+  };
+  return {
+    publicKey,
+    connected:true,
+    connecting:false,
+    name:ws.name||'Solana Wallet',
+    connect:async()=>({publicKey}),
+    disconnect:async()=>{try{await ws.features?.['standard:disconnect']?.disconnect?.();}catch{}},
+    signMessage:async message=>{
+      const out=await ws.features['solana:signMessage'].signMessage({account,message});
+      const signed=out?.[0];
+      if(!signed?.signature)throw new Error('Wallet returned no message signature.');
+      return {signature:signed.signature,publicKey};
+    },
+    signTransaction:async tx=>{
+      const out=await ws.features['solana:signTransaction'].signTransaction({
+        account,transaction:encodeTx(tx),chain:SOLANA_MAINNET_CHAIN
+      });
+      return decodeSigned(out?.[0]);
+    },
+    signAllTransactions:async txs=>{
+      const inputs=txs.map(tx=>({
+        account,transaction:encodeTx(tx),chain:SOLANA_MAINNET_CHAIN
+      }));
+      const out=await ws.features['solana:signTransaction'].signTransaction(...inputs);
+      if(!out||out.length!==txs.length)throw new Error('Wallet returned an incomplete transaction batch.');
+      return out.map(decodeSigned);
+    }
+  };
 }
 function setStatus(text,type=''){
   const el=$('#auth-status');el.textContent=text;el.className='status'+(type?' '+type:'');
@@ -32,26 +82,45 @@ async function bs58encode(bytes){
   const mod=await import('https://esm.sh/bs58@6.0.0?bundle');const bs58=mod.default||mod;return bs58.encode(bytes);
 }
 async function connect(){
-  wallet=provider();
-  if(!wallet){setStatus('No compatible Solana wallet detected. Open this exact page inside Phantom or Solflare.','bad');return false;}
   try{
-    const r=await wallet.connect(),pk=(r&&r.publicKey)||wallet.publicKey;
+    wallet=null;walletName='';
+    const standard=walletStandardCandidates();
+    const ws=standard.find(w=>/jupiter/i.test(w.name))||standard.find(w=>/phantom/i.test(w.name))||standard.find(w=>/solflare/i.test(w.name))||standard[0];
+    let pk=null;
+    if(ws){
+      const out=await ws.features['standard:connect'].connect();
+      const account=(out?.accounts||ws.accounts||[])[0];
+      if(!account)throw new Error('Wallet returned no Solana account.');
+      wallet=walletStandardAdapter(ws,account);
+      walletName=ws.name||'Solana Wallet';
+      pk=wallet.publicKey;
+    }else{
+      const injected=injectedProvider();
+      if(!injected){
+        setStatus('No compatible Solana wallet detected. In Jupiter Mobile, open this page in the Jupiter dApp browser and tap Connect Dev Wallet. Phantom and Solflare are also supported.','bad');
+        return false;
+      }
+      wallet=injected;
+      walletName=injected.isPhantom?'Phantom':(injected.isSolflare?'Solflare':'Injected Solana Wallet');
+      const r=await wallet.connect();
+      pk=(r&&r.publicKey)||wallet.publicKey;
+    }
     if(!pk)throw new Error('No public key returned');
     const address=pk.toString();
     if(address!==DEV_WALLET){
-      setStatus('WRONG WALLET\nConnected: '+address+'\nThis private console only accepts the authorised genesis dev wallet.','bad');
+      setStatus('WRONG WALLET\nConnected: '+address+'\nWallet: '+walletName+'\nThis private console only accepts the authorised genesis dev wallet.','bad');
       $('#auth').disabled=true;return false;
     }
     const balance=await connection.getBalance(pk,'confirmed');
     $('#wallet').textContent=short(address);$('#wallet').classList.add('connected');
     $('#auth').disabled=false;
-    setStatus('AUTHORISED DEV WALLET CONNECTED ✅\n'+address+'\nBalance: '+(balance/LAMPORTS_PER_SOL).toFixed(5)+' SOL\nNo transaction has been requested.','good');
+    setStatus('AUTHORISED DEV WALLET CONNECTED ✅\nWallet: '+walletName+'\n'+address+'\nBalance: '+(balance/LAMPORTS_PER_SOL).toFixed(5)+' SOL\nNo transaction has been requested.','good');
     return true;
   }catch(e){setStatus('Wallet connection failed: '+(e?.message||String(e)),'bad');return false;}
 }
 async function authenticate(){
   if(!wallet||!wallet.publicKey){if(!await connect())return;}
-  if(typeof wallet.signMessage!=='function')return setStatus('This wallet does not expose message signing. Use Phantom or Solflare with signMessage support.','bad');
+  if(typeof wallet.signMessage!=='function')return setStatus('This wallet does not expose Solana message signing. Use Jupiter Wallet, Phantom or Solflare with signing support.','bad');
   $('#auth').disabled=true;
   try{
     const issued_at=new Date().toISOString();
@@ -255,4 +324,7 @@ async function handleAction(action,symbol){
 $('#wallet').addEventListener('click',connect);
 $('#auth').addEventListener('click',authenticate);
 $('#refresh').addEventListener('click',refreshPrivate);
+walletRegistry.on('register',()=>{
+  if(!wallet)setStatus('Solana wallet detected ✅\nTap Connect Dev Wallet.','good');
+});
 connect();
