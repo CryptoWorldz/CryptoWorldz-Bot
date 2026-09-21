@@ -357,10 +357,18 @@
     "provider": "Squads",
     "network": "solana",
     "requiredThreshold": "2-of-3",
-    "vaultAddress": null,
-    "status": "AWAITING_VERIFIED_VAULT_ADDRESS",
+    "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+    "status": "VAULT_REGISTERED__MAINNET_ROUTE_PROOF_PENDING",
     "mainnetRoutingEnabled": false,
-    "rule": "Public mainnet fee routing must not activate until the verified Treasury Multisig vault address is registered."
+    "rule": "Public mainnet fee routing must not activate until the verified Treasury Multisig vault address is registered.",
+    "verifiedEvidence": {
+      "squadLabel": "Team Zed Treasury",
+      "memberCount": 3,
+      "threshold": "2-of-3",
+      "source": "Owner-supplied Squads UI + independent Solana mainnet account read",
+      "onChainLamportsAtVerification": 2000000,
+      "note": "Address is the Account 1 receive/vault address. Mainnet fee routing remains disabled until end-to-end route verification."
+    }
   },
   "baseEvmFair": {
     "status": "BASE_SEPOLIA_BETA",
