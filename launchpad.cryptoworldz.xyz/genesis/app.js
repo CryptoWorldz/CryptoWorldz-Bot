@@ -104,12 +104,13 @@ function cardHtml(t){
   else if(t.status==='metadata_created') primary='<button class="btn primary" data-action="revoke" data-symbol="'+esc(t.symbol)+'">REVOKE MINT + FREEZE</button>';
   else if(done) primary='<a class="btn secondary" target="_blank" rel="noopener" href="https://solscan.io/token/'+esc(t.mint_address)+'">OPEN MINT ↗</a>';
   const recovery=(local&&t.status==='image_ready')?'<button class="btn secondary" data-action="recover" data-symbol="'+esc(t.symbol)+'">RECOVER PENDING MINT</button>':'';
+  const external=t.launch_order===1?'<button class="btn secondary" data-action="copy-pack" data-symbol="'+esc(t.symbol)+'">COPY JUPITER LAUNCH PACK</button><a class="btn secondary" href="https://studio.jup.ag/launch" target="_blank" rel="noopener">OPEN JUPITER STUDIO ↗</a>':'';
   return '<article class="token-card" id="card-'+esc(t.symbol)+'">'+
     '<div class="token-top">'+img+'<div><div class="token-symbol">$'+esc(t.symbol)+'</div><h2>'+esc(t.token_name)+'</h2><div style="font-size:.64rem;color:'+(done?'#72e6b4':'#ae94bb')+'">'+esc(stateLabel(t))+'</div></div></div>'+
     '<p class="token-desc">'+esc(t.description)+'</p>'+
     '<div class="facts"><div><small>Fixed supply</small><b>'+Number(t.fixed_supply).toLocaleString()+'</b></div><div><small>Decimals</small><b>'+esc(t.decimals)+'</b></div><div><small>Genesis signer</small><b>'+short(t.dev_wallet)+'</b></div><div><small>Supply vault</small><b>'+short(t.treasury_vault)+'</b></div></div>'+
     (!done?'<label class="file">Allocated profile image (JPG/PNG/WebP ≤5 MB)<input type="file" accept="image/jpeg,image/png,image/webp" data-file="'+esc(t.symbol)+'"></label>':'')+
-    '<div class="actions">'+(!done?'<button class="btn secondary" data-action="upload" data-symbol="'+esc(t.symbol)+'">UPLOAD / REPLACE IMAGE</button>':'')+primary+recovery+'</div>'+
+    '<div class="actions">'+(!done?'<button class="btn secondary" data-action="upload" data-symbol="'+esc(t.symbol)+'">UPLOAD / REPLACE IMAGE</button>':'')+primary+recovery+external+'</div>'+
     '<div class="proof">'+
       '<div class="'+(t.image_url?'pass':'wait')+'">'+(t.image_url?'✓':'!')+' Profile image '+(t.image_url?'stored':'required')+'</div>'+
       '<div class="'+(t.mint_address?'pass':'wait')+'">'+(t.mint_address?'✓ Mint '+short(t.mint_address):'! Mint not created')+'</div>'+
@@ -241,6 +242,12 @@ async function handleAction(action,symbol){
     else if(action==='recover')await recoverMint(symbol);
     else if(action==='metadata')await createMetadata(symbol);
     else if(action==='revoke')await revokeAuthorities(symbol);
+    else if(action==='copy-pack'){
+      const t=token(symbol);
+      const pack=['Name: '+t.token_name,'Symbol: '+t.symbol,'Fixed supply target: '+Number(t.fixed_supply).toLocaleString(),'Decimals target: '+t.decimals,'Creator / dev wallet: '+t.dev_wallet,'Treasury vault: '+t.treasury_vault,'Description: '+t.description,'Image: use the allocated profile image shown on this card','IMPORTANT: before signing in Jupiter Studio, confirm its preview exactly matches the intended fixed supply and authority settings.'].join('\n');
+      await navigator.clipboard.writeText(pack);
+      tokenStatus(symbol,'JUPITER LAUNCH PACK COPIED ✅\nOpen Jupiter Studio inside Jupiter Wallet and verify every field before signing.','good');
+    }
   }catch(e){console.error(e);tokenStatus(symbol,'ACTION FAILED\n'+(e?.message||String(e)),'bad');}
   finally{const b=document.querySelector('[data-action="'+action+'"][data-symbol="'+symbol+'"]');if(b)b.disabled=false;}
 }
