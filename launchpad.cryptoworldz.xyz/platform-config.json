@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-22-public-launchpad-v15-one-button-worldzmint",
+  "version": "2026-09-22-public-launchpad-v16-private-preset",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -572,6 +572,15 @@
       "userApprovalsRequired": "Wallet approval prompts remain explicit and cannot be bypassed.",
       "transactionApprovalsRequired": 3,
       "preflightButtonOptional": true
+    },
+    "privatePreset": {
+      "enabled": true,
+      "serverSide": true,
+      "staticPrivateTerms": false,
+      "access": "unguessable bearer launch code",
+      "queryParameter": "launch",
+      "codeRemovedFromVisibleUrlAfterLoad": true,
+      "note": "Private launch details are returned only by the Edge function for a valid unexpired preset code. Public static files do not contain the private token plan."
     }
   },
   "confidenceCurve": {
