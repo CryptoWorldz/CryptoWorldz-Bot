@@ -15,6 +15,8 @@ const METADATA_PROGRAM=new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1
 const STANDARD_VERSION='WORLDZMINT-1';
 let connection=new Connection(clusterApiUrl('devnet'),'confirmed');
 let walletCtx=null,preflightOk=false,busy=false,pending=null;
+const DRAFT_KEY='worldzmint-draft-v1';
+let restoringDraft=false;
 
 function setStatus(text,type=''){const el=$('#status');el.textContent=text;el.className='status'+(type?' '+type:'');}
 function short(v){const s=String(v||'');return s.length>15?s.slice(0,7)+'…'+s.slice(-7):s;}
@@ -34,6 +36,46 @@ function values(){return {
   image_url:$('#image').value.trim(),website:$('#website').value.trim(),
   allocations:allocations(),recipients:recipients()
 };}
+function draftSnapshot(){
+  return {
+    version:1,saved_at:new Date().toISOString(),
+    environment:network(),
+    token_name:$('#name').value,
+    symbol:$('#symbol').value,
+    fixed_supply:$('#supply').value,
+    description:$('#description').value,
+    image_url:$('#image').value,
+    website:$('#website').value,
+    allocations:allocations(),
+    recipients:recipients()
+  };
+}
+function saveDraft(){
+  if(restoringDraft)return;
+  try{localStorage.setItem(DRAFT_KEY,JSON.stringify(draftSnapshot()));}catch(error){console.warn('WorldzMINT draft save failed',error);}
+}
+function restoreDraft(){
+  let restored=false;
+  try{
+    const raw=localStorage.getItem(DRAFT_KEY);if(!raw)return false;
+    const d=JSON.parse(raw);if(!d||d.version!==1)return false;
+    restoringDraft=true;
+    if(['devnet','mainnet-beta'].includes(d.environment))$('#network').value=d.environment;
+    $('#name').value=d.token_name||'';
+    $('#symbol').value=d.symbol||'';
+    $('#supply').value=d.fixed_supply||'';
+    $('#description').value=d.description||'';
+    $('#image').value=d.image_url||'';
+    $('#website').value=d.website||'';
+    for(const [k,val] of Object.entries(d.allocations||{})){const el=$('[data-key="'+k+'"]');if(el&&val!==null&&val!==undefined)el.value=String(val);}
+    for(const [k,id] of Object.entries({creator:'#creator-wallet',liquidity:'#liquidity-wallet',community:'#community-wallet',treasury:'#treasury-wallet',growth:'#growth-wallet'})){
+      if(d.recipients?.[k])$(id).value=String(d.recipients[k]);
+    }
+    refreshConnection();restored=true;
+  }catch(error){console.warn('WorldzMINT draft restore failed',error);}
+  finally{restoringDraft=false;}
+  return restored;
+}
 function bpsMap(a){const out={};for(const [k,v] of Object.entries(a))out[k]=Math.round(Number(v)*100);return out;}
 function allocationMath(){
   const a=allocations(),total=Object.values(a).reduce((n,v)=>n+(Number.isFinite(v)?v:0),0);
@@ -191,6 +233,7 @@ async function connectWallet(){
       walletCtx={kind:'legacy',provider:p,address:pk.toString(),name:'Injected Solana Wallet'};
     }
     $('#creator-wallet').value=walletCtx.address;
+    saveDraft();
     $('#wallet-btn').textContent=short(walletCtx.address);$('#wallet-btn').classList.add('connected');
     setStatus((/jupiter/i.test(walletCtx.name)?'JUPITER WALLET':'SOLANA WALLET')+' CONNECTED ✅\n'+walletCtx.address+'\nNetwork selection: '+network()+'\nNo transaction has been requested.','good');
     preflightOk=false;$('#mint-btn').disabled=true;renderProof();
@@ -259,6 +302,7 @@ async function uploadTokenImage(file){
   setStatus('UPLOADING TOKEN IMAGE…\nThis only uploads the public token artwork. No transaction is being sent.','warn');
   const out=await api({action:'UPLOAD_IMAGE',wallet:walletCtx.address,issued_at,signature,...image});
   $('#image').value=out.imageUrl;
+  saveDraft();
   preflightOk=false;$('#mint-btn').disabled=true;
   setStatus('TOKEN IMAGE READY ✅\n'+out.imageUrl+'\n\nNo blockchain transaction was sent.','good');
   return out.imageUrl;
@@ -410,8 +454,15 @@ $('#image-file').addEventListener('change',async e=>{
 });
 $('#preflight').addEventListener('click',runPreflight);
 $('#mint-btn').addEventListener('click',mintFlow);
-$('#network').addEventListener('change',()=>{refreshConnection();preflightOk=false;$('#mint-btn').disabled=true;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
-$$('input,textarea,select').forEach(x=>{if(!['wallet-choice','network'].includes(x.id))x.addEventListener('input',()=>{allocationMath();});});
+$('#network').addEventListener('change',()=>{refreshConnection();saveDraft();preflightOk=false;$('#mint-btn').disabled=true;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
+$('input,textarea,select').forEach(x=>{
+  if(x.id==='image-file')return;
+  const persist=()=>{if(!['wallet-choice'].includes(x.id))saveDraft();if(!['wallet-choice','network'].includes(x.id))allocationMath();};
+  x.addEventListener('input',persist);
+  x.addEventListener('change',persist);
+});
+window.addEventListener('pagehide',saveDraft);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveDraft();});
 renderWallets();
 getWallets().on('register',()=>{
   const before=$('#wallet-choice').value;
@@ -421,5 +472,10 @@ getWallets().on('register',()=>{
     setStatus('JUPITER / SOLANA WALLET DETECTED ✅\n'+($('#wallet-choice').selectedOptions[0]?.textContent||after)+'\nTap Connect Wallet.','good');
   }
 });
-restorePending();allocationMath();renderProof();loadRegistry();
+const draftRestored=restoreDraft();
+restorePending();
+allocationMath();renderProof();loadRegistry();
+if(draftRestored&&!pending){
+  setStatus('WORLDZMINT DRAFT RESTORED ✅\nYour token details were saved on this device. Reconnect the wallet and continue where you left off.','good');
+}
 // Reown is lazy-loaded only if no native/Wallet Standard Solana wallet is available.
