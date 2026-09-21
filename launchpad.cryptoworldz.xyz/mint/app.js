@@ -197,8 +197,10 @@ async function connectWallet(){
   }catch(e){
     console.error('WorldzMINT wallet connection failed',e);
     button.textContent='Connect Wallet';
-    setStatus('WALLET CONNECTION FAILED\n'+(e?.message||String(e))+'\n\nNo transaction was sent.','bad');
-    alert('WorldzMINT wallet connection failed: '+(e?.message||String(e)));
+    const detected=walletStandardCandidates().map(w=>String(w.name||'Unnamed')).join(', ')||'none';
+    const injected=jupiterInjectedProvider()?'yes':'no';
+    setStatus('WALLET CONNECTION FAILED\n'+(e?.message||String(e))+'\n\nDetected Wallet Standard: '+detected+'\nDirect Jupiter provider: '+injected+'\n\nNo transaction was sent.','bad');
+    alert('WorldzMINT wallet connection failed: '+(e?.message||String(e))+'\n\nDetected wallets: '+detected+'\nDirect Jupiter: '+injected);
   }finally{
     button.disabled=false;
     if(!walletCtx&&button.textContent==='Opening Jupiter…')button.textContent=originalButtonText||'Connect Wallet';
@@ -366,4 +368,4 @@ getWallets().on('register',()=>{
   }
 });
 restorePending();allocationMath();renderProof();loadRegistry();
-import('/mint/jupiter-mobile.js?v=20260921-reown-v3').catch(error=>console.warn('Jupiter Mobile bridge preload failed',error));
+// Reown is lazy-loaded only if no native/Wallet Standard Solana wallet is available.
