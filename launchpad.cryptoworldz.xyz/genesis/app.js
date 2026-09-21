@@ -20,11 +20,21 @@ let privateConfig=null;
 let tokens=[];
 
 const walletRegistry=getWallets();
-const SOLANA_MAINNET_CHAIN='solana:mainnet';
 
+function usableInjectedProvider(p){
+  return !!p&&typeof p.connect==='function'&&typeof p.signTransaction==='function'&&typeof p.signMessage==='function';
+}
+function jupiterInjectedProvider(){
+  const candidates=[
+    window?.jupiter?.solana,
+    usableInjectedProvider(window?.jupiter)?window.jupiter:null,
+    window?.solana?.isJupiter?window.solana:null
+  ];
+  return candidates.find(usableInjectedProvider)||null;
+}
 function injectedProvider(){
-  return [window.phantom&&window.phantom.solana,window.solflare,window.solana]
-    .filter(Boolean).find(p=>typeof p.connect==='function'&&typeof p.signTransaction==='function')||null;
+  return [jupiterInjectedProvider(),window?.phantom?.solana,window?.solflare,window?.solana]
+    .filter(Boolean).find(usableInjectedProvider)||null;
 }
 function walletStandardCandidates(){
   return walletRegistry.get().filter(w=>
@@ -32,7 +42,7 @@ function walletStandardCandidates(){
     w.features?.['standard:connect'] &&
     w.features?.['solana:signMessage'] &&
     w.features?.['solana:signTransaction']
-  );
+  ).sort((a,b)=>Number(!/jupiter/i.test(String(a.name||'')))-Number(!/jupiter/i.test(String(b.name||''))));
 }
 function walletStandardAdapter(ws,account){
   const publicKey=new PublicKey(account.address);
@@ -57,13 +67,13 @@ function walletStandardAdapter(ws,account){
     },
     signTransaction:async tx=>{
       const out=await ws.features['solana:signTransaction'].signTransaction({
-        account,transaction:encodeTx(tx),chain:SOLANA_MAINNET_CHAIN
+        account,transaction:encodeTx(tx)
       });
       return decodeSigned(out?.[0]);
     },
     signAllTransactions:async txs=>{
       const inputs=txs.map(tx=>({
-        account,transaction:encodeTx(tx),chain:SOLANA_MAINNET_CHAIN
+        account,transaction:encodeTx(tx)
       }));
       const out=await ws.features['solana:signTransaction'].signTransaction(...inputs);
       if(!out||out.length!==txs.length)throw new Error('Wallet returned an incomplete transaction batch.');
@@ -84,39 +94,74 @@ async function bs58encode(bytes){
 async function connect(){
   try{
     wallet=null;walletName='';
-    const standard=walletStandardCandidates();
-    const ws=standard.find(w=>/jupiter/i.test(w.name))||standard.find(w=>/phantom/i.test(w.name))||standard.find(w=>/solflare/i.test(w.name))||standard[0];
+    setStatus('CONNECTING TO JUPITER…\nNo blockchain transaction is being sent.','warn');
+
+    // Jupiter can register a fraction after page load in its in-app browser.
+    await new Promise(resolve=>setTimeout(resolve,250));
+    let standard=walletStandardCandidates();
+    let ws=standard.find(w=>/jupiter/i.test(String(w.name||'')))||null;
     let pk=null;
+
     if(ws){
       const out=await ws.features['standard:connect'].connect();
       const account=(out?.accounts||ws.accounts||[])[0];
-      if(!account)throw new Error('Wallet returned no Solana account.');
+      if(!account)throw new Error('Jupiter Wallet returned no Solana account.');
       wallet=walletStandardAdapter(ws,account);
-      walletName=ws.name||'Solana Wallet';
+      walletName=ws.name||'Jupiter Wallet';
       pk=wallet.publicKey;
     }else{
-      const injected=injectedProvider();
-      if(!injected){
-        setStatus('No compatible Solana wallet detected. In Jupiter Mobile, open this page in the Jupiter dApp browser and tap Connect Dev Wallet. Phantom and Solflare are also supported.','bad');
-        return false;
+      const jup=jupiterInjectedProvider();
+      if(jup){
+        const out=await jup.connect();
+        pk=(out&&out.publicKey)||jup.publicKey;
+        wallet=jup;walletName='Jupiter In-App Wallet';
+      }else{
+        standard=walletStandardCandidates();
+        ws=standard[0]||null;
+        if(ws){
+          const out=await ws.features['standard:connect'].connect();
+          const account=(out?.accounts||ws.accounts||[])[0];
+          if(!account)throw new Error('Solana wallet returned no account.');
+          wallet=walletStandardAdapter(ws,account);
+          walletName=ws.name||'Solana Wallet';
+          pk=wallet.publicKey;
+        }else{
+          const injected=injectedProvider();
+          if(injected){
+            const out=await injected.connect();
+            pk=(out&&out.publicKey)||injected.publicKey;
+            wallet=injected;
+            walletName=injected.isPhantom?'Phantom':(injected.isSolflare?'Solflare':'Injected Solana Wallet');
+          }else{
+            // Final mobile fallback: the same Jupiter/Reown bridge already used by WorldzMINT.
+            const mod=await import('/mint/jupiter-mobile.js?v=20260922-genesis-v1');
+            mod.resetJupiterMobileConnectionState?.();
+            const adapter=await mod.getJupiterMobileAdapter();
+            const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Jupiter Mobile connection timed out. Tap Connect Dev Wallet once more.')),25000));
+            await Promise.race([adapter.connect(),timeout]);
+            pk=adapter.publicKey;
+            if(!pk)throw new Error('Jupiter Mobile connected but returned no public key.');
+            wallet=adapter;walletName='Jupiter Mobile';
+          }
+        }
       }
-      wallet=injected;
-      walletName=injected.isPhantom?'Phantom':(injected.isSolflare?'Solflare':'Injected Solana Wallet');
-      const r=await wallet.connect();
-      pk=(r&&r.publicKey)||wallet.publicKey;
     }
-    if(!pk)throw new Error('No public key returned');
+
+    if(!pk)throw new Error('No public key returned.');
     const address=pk.toString();
     if(address!==DEV_WALLET){
-      setStatus('WRONG WALLET\nConnected: '+address+'\nWallet: '+walletName+'\nThis private console only accepts the authorised genesis dev wallet.','bad');
+      setStatus('WRONG WALLET\nConnected: '+address+'\nWallet: '+walletName+'\nSwitch Jupiter to the authorised Worldz Dev Wallet and tap Connect Dev Wallet again.','bad');
       $('#auth').disabled=true;return false;
     }
-    const balance=await connection.getBalance(pk,'confirmed');
+    const balance=await connection.getBalance(new PublicKey(address),'confirmed');
     $('#wallet').textContent=short(address);$('#wallet').classList.add('connected');
     $('#auth').disabled=false;
-    setStatus('AUTHORISED DEV WALLET CONNECTED ✅\nWallet: '+walletName+'\n'+address+'\nBalance: '+(balance/LAMPORTS_PER_SOL).toFixed(5)+' SOL\nNo transaction has been requested.','good');
+    setStatus('AUTHORISED DEV WALLET CONNECTED ✅\nWallet: '+walletName+'\n'+address+'\nBalance: '+(balance/LAMPORTS_PER_SOL).toFixed(5)+' SOL\nNext: approve the harmless Genesis authentication message.','good');
     return true;
-  }catch(e){setStatus('Wallet connection failed: '+(e?.message||String(e)),'bad');return false;}
+  }catch(e){
+    setStatus('JUPITER CONNECTION FAILED\n'+(e?.message||String(e))+'\nNo transaction was sent.','bad');
+    return false;
+  }
 }
 async function authenticate(){
   if(!wallet||!wallet.publicKey){if(!await connect())return;}
@@ -131,6 +176,7 @@ async function authenticate(){
     const signature=await bs58encode(sigBytes);
     authSession={wallet:DEV_WALLET,issued_at,signature};
     await refreshPrivate();
+    setTimeout(()=>$('#private-area')?.scrollIntoView({behavior:'smooth',block:'start'}),150);
   }catch(e){setStatus('Genesis authentication failed: '+(e?.message||String(e)),'bad');}
   finally{$('#auth').disabled=false;}
 }
@@ -321,10 +367,15 @@ async function handleAction(action,symbol){
   finally{const b=document.querySelector('[data-action="'+action+'"][data-symbol="'+symbol+'"]');if(b)b.disabled=false;}
 }
 
-$('#wallet').addEventListener('click',connect);
+$('#wallet').addEventListener('click',async()=>{
+  if(await connect())await authenticate();
+});
 $('#auth').addEventListener('click',authenticate);
 $('#refresh').addEventListener('click',refreshPrivate);
 walletRegistry.on('register',()=>{
-  if(!wallet)setStatus('Solana wallet detected ✅\nTap Connect Dev Wallet.','good');
+  if(!wallet){
+    const names=walletStandardCandidates().map(w=>w.name).filter(Boolean);
+    setStatus((names.length?names.join(', ')+' detected ✅':'Solana wallet detected ✅')+'\nTap Connect Dev Wallet — connection + Genesis authentication will run in one flow.','good');
+  }
 });
-connect();
+setStatus('READY ✅\nTap Connect Dev Wallet. Jupiter Mobile, Jupiter in-app, Phantom and Solflare are supported.','good');
