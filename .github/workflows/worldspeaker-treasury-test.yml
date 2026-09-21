@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/worldspeaker-treasury-test.yml'
+      - '.github/worldspeaker-treasury-test.py'
   workflow_dispatch:
 
 permissions:
