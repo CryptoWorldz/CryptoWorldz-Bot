@@ -60,8 +60,22 @@ function mount(){
   }
 }
 
+try{
+  if(window.localStorage.getItem('@appkit/connection_status')==='connecting'){
+    window.localStorage.removeItem('@appkit/connection_status');
+  }
+}catch{}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});
 else mount();
+
+export function resetJupiterMobileConnectionState(){
+  try{
+    const state=window.localStorage.getItem('@appkit/connection_status');
+    if(state==='connecting'||state==='connected'){
+      window.localStorage.removeItem('@appkit/connection_status');
+    }
+  }catch{}
+}
 
 export async function getJupiterMobileAdapter(){
   if(window.__WORLDZ_JUPITER_MOBILE_ADAPTER__)return window.__WORLDZ_JUPITER_MOBILE_ADAPTER__;
