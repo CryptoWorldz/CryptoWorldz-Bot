@@ -38,7 +38,7 @@
         <a class="btn secondary" href="/trust/">Trust Passport</a>
         <a class="btn ghost" href="/devnet/">Worldz Flash Devnet</a>
         <a class="btn ghost" href="/curve/">Worldz Curve Devnet</a>
-        <a class="btn ghost" href="/curve-pro/">Curve Pro Devnet</a><a class="btn ghost" href="/base/">Base Sepolia Lab</a>
+        <a class="btn ghost" href="/curve-pro/">Curve Pro Devnet</a><a class="btn ghost" href="/evm/">EVM Testnet Mint</a><a class="btn ghost" href="/xrpl/">XRPL Testnet Launch</a><a class="btn ghost" href="/economics/">Worldz Fee Flow</a>
       </div>
       <div class="truth-strip">
         <span><b>10%</b> of your collected token fee only → WorldzLaunchPad</span>
@@ -56,11 +56,11 @@
 
   <section class="network-strip" aria-label="WorldzLaunchPad chains">
     <span class="network active">◎ Solana <b>BUILDING</b></span>
-    <span class="network">◆ Ethereum <b>PLANNED</b></span>
+    <span class="network active">◆ Ethereum <b>SEPOLIA BETA</b></span>
     <span class="network active">◉ Base <b>SEPOLIA BETA</b></span>
-    <span class="network">⬡ BNB <b>PLANNED</b></span>
-    <span class="network">R Robinhood <b>PLANNED</b></span>
-    <span class="network">X XRP Ledger <b>NATIVE ADAPTER</b></span>
+    <span class="network active">⬡ BNB <b>TESTNET BETA</b></span>
+    <span class="network active">R Robinhood <b>TESTNET BETA</b></span>
+    <span class="network active">X XRP Ledger <b>TESTNET BETA</b></span>
     <span class="network">S Sui <b>NATIVE ADAPTER</b></span>
   </section>
 
@@ -124,7 +124,7 @@
     <div class="section-heading">
       <div class="section-kicker">CREATE</div>
       <h2>Build your token. Worldz enforces the platform limits.</h2>
-      <p>The wizard creates a public launch manifest, validates the tokenomics and carries the same rules into each executable chain adapter. Solana Devnet and Base Sepolia are the first public test routes. Every percentage is visible before a wallet signs.</p>
+      <p>The wizard creates a public launch manifest, validates tokenomics and carries the same rules into each executable chain adapter. Solana Devnet, five EVM testnets and XRPL Testnet now have executable routes. Mainnet remains chain-by-chain fail-closed until each release gate passes.</p>
     </div>
 
     <div class="builder">
@@ -142,11 +142,11 @@
           <div class="step-head"><span>01 / WORLD</span><h3>Where do you want to launch?</h3></div>
           <div class="choice-grid chain-grid" id="chain-grid">
             <button class="choice selected" data-chain="solana"><strong>◎ Solana</strong><small>Devnet creator launch enabled</small><em>SolWorldz</em></button>
-            <button class="choice" data-chain="ethereum"><strong>◆ Ethereum</strong><small>EVM adapter planned</small><em>EthWorldz</em></button>
+            <button class="choice" data-chain="ethereum"><strong>◆ Ethereum</strong><small>Sepolia fixed-supply mint live</small><em>EthWorldz • TESTNET</em></button>
             <button class="choice" data-chain="base"><strong>◉ Base</strong><small>Base Sepolia token adapter live</small><em>BaseWorldz • TESTNET</em></button>
-            <button class="choice" data-chain="bnb"><strong>⬡ BNB Chain</strong><small>EVM adapter planned</small><em>BNBWorldz</em></button>
-            <button class="choice" data-chain="robinhood"><strong>R Robinhood</strong><small>EVM adapter planned</small><em>RobinWorldz</em></button>
-            <button class="choice" data-chain="xrpl"><strong>X XRP Ledger</strong><small>XRPL-native adapter research</small><em>XRPWorldz</em></button>
+            <button class="choice" data-chain="bnb"><strong>⬡ BNB Chain</strong><small>Testnet fixed-supply mint live</small><em>BNBWorldz • TESTNET</em></button>
+            <button class="choice" data-chain="robinhood"><strong>R Robinhood</strong><small>Chain Testnet fixed-supply mint live</small><em>RobinWorldz • TESTNET</em></button>
+            <button class="choice" data-chain="xrpl"><strong>X XRP Ledger</strong><small>Testnet native issue + AMM live</small><em>XRPWorldz • TESTNET</em></button>
             <button class="choice" data-chain="sui"><strong>S Sui</strong><small>Move-native adapter research</small><em>SuiWorldz</em></button>
           </div>
           <div class="step-actions"><button class="btn primary next-step" data-next="2">Choose Launch Engine →</button></div>
@@ -157,7 +157,7 @@
           <div class="choice-grid engine-grid" id="engine-grid">
             <button class="choice selected" data-engine="flash"><strong>⚡ Worldz Flash™</strong><small>Direct liquidity. No bonding curve required.</small><em>DEVNET BETA • RAYDIUM CPMM</em></button>
             <button class="choice" data-engine="curve"><strong>↗ Worldz Curve™</strong><small>Curated bonding curve → AMM graduation.</small><em>DEVNET BETA • RAYDIUM LAUNCHLAB</em></button>
-            <button class="choice" data-engine="curve-pro"><strong>⌁ Worldz Curve Pro™</strong><small>Advanced dynamic curve configuration.</small><em>DEVNET BETA • METEORA DBC</em></button><button class="choice" data-engine="evm-fixed"><strong>◉ Worldz EVM Fair™</strong><small>Fixed-supply EVM token with direct disclosed genesis allocation.</small><em>BASE SEPOLIA BETA</em></button>
+            <button class="choice" data-engine="curve-pro"><strong>⌁ Worldz Curve Pro™</strong><small>Advanced dynamic curve configuration.</small><em>DEVNET BETA • METEORA DBC</em></button><button class="choice" data-engine="evm-fixed"><strong>◉ Worldz EVM Mint™</strong><small>Fixed-supply EVM token with direct disclosed genesis allocation.</small><em>ETH • BASE • BNB • ROBINHOOD • HYPEREVM TESTNET</em></button>
             <button class="choice" data-engine="liquidity"><strong>◫ Worldz Liquidity™</strong><small>Traditional fixed-supply + creator-funded LP.</small><em>PLANNED</em></button>
             <button class="choice" data-engine="board"><strong>▦ Worldz Board™</strong><small>Branded launch surface for a creator/community.</small><em>PLANNED</em></button>
           </div>
