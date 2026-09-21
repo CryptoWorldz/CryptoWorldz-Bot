@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-21-public-launchpad-v9-worldzmint-confidence",
+  "version": "2026-09-21-public-launchpad-v10-jupiter-mobile",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -518,7 +518,10 @@
       "supported": true,
       "jupiterPreferredWhenDetected": true,
       "jupiterRequired": false,
-      "rule": "Security is bound to the signing wallet address and cryptographic proof. Jupiter Wallet is presented first when Wallet Standard exposes it."
+      "rule": "Security is bound to the signing wallet address and cryptographic proof. Jupiter Wallet is presented first when Wallet Standard exposes it.",
+      "jupiterMobileReownEnabled": true,
+      "reownProjectIdConfigured": true,
+      "metadataOrigin": "https://launchpad.cryptoworldz.xyz"
     },
     "marketRule": "WorldzMINT creates and proves a fixed-supply mint only. It does not create liquidity, assign a market cap, promise exchange listing, or imply investment performance."
   },
@@ -603,5 +606,29 @@
       "unlockedTeamAtGenesisMaxPercent": 5
     },
     "rule": "Each marker stands independently. A positive market signal cannot hide failed authority, concentration, vesting, treasury or liquidity evidence."
+  },
+  "walletConnectivity": {
+    "name": "Worldz Wallet Bridge",
+    "version": "WORLDZ-WALLET-BRIDGE-1",
+    "status": "JUPITER_MOBILE_REOWN_ENABLED",
+    "reown": {
+      "projectId": "e3d5fc46a07eb8ecb162ee048625348e",
+      "metadataOrigin": "https://launchpad.cryptoworldz.xyz",
+      "provider": "Reown AppKit / WalletConnect",
+      "analytics": false
+    },
+    "jupiterMobile": {
+      "enabled": true,
+      "preferredForMobile": true,
+      "adapterPackage": "@jup-ag/jup-mobile-adapter@0.0.2",
+      "connectionMethod": "Official Jupiter Mobile adapter wrapping Reown AppKit",
+      "publicPaths": [
+        "/mint/",
+        "/mainnet/"
+      ]
+    },
+    "walletStandardFallback": true,
+    "injectedWalletFallback": true,
+    "securityRule": "No seed phrase or private key is ever requested. Users approve connections, messages and transactions in their own wallet."
   }
 }
