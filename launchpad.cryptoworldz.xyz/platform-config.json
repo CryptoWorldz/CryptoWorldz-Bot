@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-21-public-launchpad-v8-trust-orbit",
+  "version": "2026-09-21-public-launchpad-v9-worldzmint-confidence",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -482,5 +482,125 @@
     ],
     "scoringRule": "No opaque Worldz safety score. Each evidence ring is shown separately; positive-proof count is informational only.",
     "disclaimer": "Evidence passport only. Not investment advice, not a security audit, not a guarantee of token value or safety, and not an endorsement by Jupiter."
+  },
+  "worldzMint": {
+    "name": "WorldzMINT™",
+    "version": "WORLDZMINT-1",
+    "status": "PUBLIC_MAINNET_MINT_BETA",
+    "publicPath": "/mint/",
+    "network": "solana",
+    "environments": [
+      "devnet",
+      "mainnet-beta"
+    ],
+    "decimals": 6,
+    "mintOnly": true,
+    "createsTradingMarket": false,
+    "platformTokenSupplyTakePercent": 0,
+    "platformInitialLiquidityTakePercent": 0,
+    "walletTransferTaxPercent": 0,
+    "compulsory": {
+      "fixedSupply": true,
+      "revokeMintAuthorityAfterGenesis": true,
+      "revokeFreezeAuthorityAfterGenesis": true,
+      "exactGenesisDistributionProof": true
+    },
+    "allocations": {
+      "creatorLiquidMaxPercent": 5,
+      "liquidityReserveMinPercent": 25,
+      "liquidityReserveMaxPercent": 60,
+      "communityMinPercent": 20,
+      "treasuryMaxPercent": 15,
+      "totalPercent": 100
+    },
+    "walletStandard": {
+      "supported": true,
+      "jupiterPreferredWhenDetected": true,
+      "jupiterRequired": false,
+      "rule": "Security is bound to the signing wallet address and cryptographic proof. Jupiter Wallet is presented first when Wallet Standard exposes it."
+    },
+    "marketRule": "WorldzMINT creates and proves a fixed-supply mint only. It does not create liquidity, assign a market cap, promise exchange listing, or imply investment performance."
+  },
+  "confidenceCurve": {
+    "name": "Worldz Confidence Curve™",
+    "version": "WORLDZ-CONFIDENCE-CURVE-1",
+    "status": "PUBLIC_BUILDER__MAINNET_TRADING_GATE_CLOSED",
+    "publicPath": "/mainnet/",
+    "chain": "solana",
+    "engine": "Meteora Dynamic Bonding Curve",
+    "engineVersion": "1.5.12",
+    "virtualPriceDiscovery": true,
+    "realQuoteAccountingRequired": true,
+    "marketLaunch": true,
+    "feePolicy": {
+      "projectSharePercentOfCollectedSupportedProjectTradingFee": 90,
+      "worldzSharePercentOfCollectedSupportedProjectTradingFee": 10,
+      "worldzTokenSupplyTakePercent": 0,
+      "worldzInitialLiquidityTakePercent": 0,
+      "walletTransferTaxPercent": 0
+    },
+    "treasury": {
+      "provider": "Squads v4",
+      "configAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+      "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "threshold": "2-of-3",
+      "onChainVerified": true
+    },
+    "antiManipulation": {
+      "manufacturedVolumeAllowed": false,
+      "washTradingAllowed": false,
+      "systemTradesCountTowardConfidence": false,
+      "guaranteedPriceRise": false
+    },
+    "mainnetExecutionEnabled": false,
+    "releaseRule": "Fail closed until the complete DBC fee route, graduation, real-liquidity accounting, lock proof, Treasury fee route and Worldz release gate are verified end-to-end."
+  },
+  "confidencePulse": {
+    "name": "Worldz Confidence Pulse™",
+    "version": "WORLDZ-CONFIDENCE-PULSE-1",
+    "status": "LIVE",
+    "evidenceApi": "worldz-trust-orbit",
+    "fields": [
+      "rawMarketCap",
+      "liquidity",
+      "matchedOrganicVolume24h",
+      "matchedOrganicTurnover24h",
+      "organicBuyVolume24h",
+      "organicSellVolume24h",
+      "organicTwoSidedBalance",
+      "organicBuyerCount24h",
+      "organicShareOfVolume24h",
+      "jupiterOrganicScore",
+      "jupiterOrganicScoreLabel",
+      "liquidityToMarketCap",
+      "topHoldersPercentage",
+      "devBalancePercentage"
+    ],
+    "matchedOrganicVolumeFormula": "2 × min(organic buy volume, organic sell volume)",
+    "systemTradesCountTowardConfidence": false,
+    "disclaimer": "Evidence telemetry only. It does not target or guarantee price appreciation."
+  },
+  "confidenceConstellation": {
+    "name": "Worldz Confidence Constellation™",
+    "version": "WORLDZ-CONFIDENCE-CONSTELLATION-1",
+    "status": "LIVE_BETA",
+    "source": "Worldz Trust Orbit™",
+    "opaqueSafetyScore": false,
+    "markers": [
+      "Authority Confidence",
+      "Holder Confidence",
+      "Dev Confidence",
+      "Team Confidence",
+      "Treasury Confidence",
+      "Liquidity Confidence",
+      "Market Confidence",
+      "Market Identity Confidence"
+    ],
+    "targets": {
+      "largestObservedOrdinaryHolderMaxPercent": 5,
+      "devPersonalLiquidMaxPercent": 2,
+      "unlockedTeamAtGenesisMaxPercent": 5
+    },
+    "rule": "Each marker stands independently. A positive market signal cannot hide failed authority, concentration, vesting, treasury or liquidity evidence."
   }
 }
