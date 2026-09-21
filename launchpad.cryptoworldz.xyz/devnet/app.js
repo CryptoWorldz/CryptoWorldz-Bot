@@ -62,6 +62,28 @@ function routes(){
   const out={};$$('.route-input').forEach(x=>out[x.dataset.route]=Number(x.value)||0);return out;
 }
 function routeTotal(){return Object.values(routes()).reduce((a,b)=>a+b,0);}
+const SAFE={
+  feeMin:.5,feeMax:3,creatorFeeMax:20,treasuryFeeMax:20,lpFeeMin:20,publicBenefitFeeMin:60,
+  supplyMin:1000n,supplyMax:1000000000000n,founderMax:15,founderCliffMinDays:90,founderVestingMinMonths:18,lpLockMinMonths:12
+};
+function feePolicyErrors(){
+  const r=routes(),fee=Number($('#project-fee').value),errors=[];
+  if(!Number.isFinite(fee)||fee<SAFE.feeMin||fee>SAFE.feeMax)errors.push('Trading fee must be 0.50%–3.00%.');
+  if(Math.abs(routeTotal()-100)>.001)errors.push('Fee routes must total exactly 100%.');
+  if((r.creator||0)>SAFE.creatorFeeMax)errors.push('Creator fee route cannot exceed 20%.');
+  if((r.treasury||0)>SAFE.treasuryFeeMax)errors.push('Treasury fee route cannot exceed 20%.');
+  if((r.lp||0)<SAFE.lpFeeMin)errors.push('LP Growth fee route must be at least 20%.');
+  if((r.holders||0)+(r.lp||0)+(r.community||0)<SAFE.publicBenefitFeeMin)errors.push('Holders + LP + Community must receive at least 60% of project fee routing.');
+  return errors;
+}
+function lockPolicyErrors(){
+  const l=lockPlan(),v=vestingPlan(),errors=[];
+  if(l.lpLockTargetMonths<SAFE.lpLockMinMonths)errors.push('LP lock target must be at least 12 months.');
+  if(v.founderCliffDays<SAFE.founderCliffMinDays)errors.push('Founder cliff must be at least 90 days.');
+  if(v.founderVestingMonths<SAFE.founderVestingMinMonths)errors.push('Founder vesting must be at least 18 months.');
+  if(v.founderAllocationPercent>SAFE.founderMax)errors.push('Founder/team allocation cannot exceed 15%.');
+  return errors;
+}
 function lockPlan(){
   return {
     lpLockTargetMonths:Number($('#lp-lock-months').value)||0,
@@ -82,7 +104,8 @@ function validate(){
   const p=params(),errors=[];
   if(p.name.length<2||p.name.length>32)errors.push('Token name must be 2–32 characters.');
   if(!/^[A-Z0-9_$]{2,10}$/.test(p.symbol))errors.push('Ticker must be 2–10 letters/numbers/$/_.');
-  if(!/^\d+$/.test(p.supply)||BigInt(p.supply)<=0n)errors.push('Supply must be a positive whole number.');
+  if(!/^\d+$/.test(p.supply)||BigInt(p.supply)<SAFE.supplyMin||BigInt(p.supply)>SAFE.supplyMax)errors.push('Supply must be a whole number from 1,000 to 1,000,000,000,000.');
+  if(!p.fixed)errors.push('Fixed supply is compulsory on WorldzLaunchPad.');
   if(!Number.isInteger(p.decimals)||p.decimals<0||p.decimals>9)errors.push('Decimals must be 0–9.');
   if(!errors.length){
     const amount=BigInt(p.supply)*(10n**BigInt(p.decimals));
@@ -92,8 +115,7 @@ function validate(){
   $('#launch').disabled=!checked||!!mintAddress;
   setStatus('#status',errors.length?'CHECK FAILED\n• '+errors.join('\n• '):
     'LOCAL CHECKS PASS ✅\nNetwork: Solana Devnet\nToken: '+p.name+' ($'+p.symbol+')\nSupply: '+p.supply+
-    '\nDecimals: '+p.decimals+'\nFreeze authority: NONE\nMint authority: retained only until metadata is written'+
-    (p.fixed?' then revoked':' and retained by the connected wallet'),'');
+    '\nDecimals: '+p.decimals+'\nFreeze authority: NONE\nMint authority: TEMPORARY ONLY — compulsory revoke after metadata\nWallet-transfer tax: 0%','');
   return checked;
 }
 async function connect(){
@@ -180,7 +202,7 @@ async function registerLaunch(stage='registered',extra={}){
   const signed=await wallet.signMessage(new TextEncoder().encode(message),'utf8');
   const sigBytes=signed&&signed.signature?signed.signature:signed;
   const signature=await encodeSignature(sigBytes);
-  const fee=Number($('#project-fee').value)||2;
+  const fee=Number($('#project-fee').value)||1;
   const body={
     intent_hash:hash,mint:mintAddress,wallet:walletAddress,issued_at:issuedAt,signature,
     environment:'devnet',network:'solana',engine:'flash',quote_asset:selectedQuote,
@@ -189,6 +211,7 @@ async function registerLaunch(stage='registered',extra={}){
     metadata_uri:mintAddress?'https://launchpad.cryptoworldz.xyz/metadata.php?mint='+encodeURIComponent(mintAddress):null,
     mint_tx_signature:mintTxSignature||null,pool_id:poolId||null,lp_mint:lpMint||null,pool_tx_signature:poolTxSignature||null,
     vesting_config:vestingPlan(),lock_config:lockPlan(),
+    safe_launch_policy:{version:'WORLDZ-SAFE-LAUNCH-1',fixedSupplyMandatory:true,mintAuthorityRevocationMandatory:true,freezeAuthorityNone:true,walletTransferTaxPercent:0,feePolicyErrors:feePolicyErrors(),lockPolicyErrors:lockPolicyErrors()},
     proof:{
       tokenCreated:!!mintTxSignature,metadataCreated:!!metadataTxSignature,mintAuthorityFinalized:!!authorityTxSignature||!p.fixed,
       poolCreated:!!poolTxSignature,feeRouterConfigured:feeSaved,feeRouterExecuting:false,
@@ -237,7 +260,8 @@ async function writeOnChainMetadata(){
   }).sendAndConfirm(umi,{confirm:{commitment:'confirmed'}});
   metadataTxSignature=await encodeSignature(result.signature);
 
-  if(p.fixed){
+  if(!p.fixed)throw new Error('Safe Launch Standard requires fixed supply and mint-authority revocation.');
+  {
     setStatus('#metadata-status','METADATA ON-CHAIN ✅\nFinalizing fixed supply by revoking mint authority…','good');
     const tx=new Transaction().add(createSetAuthorityInstruction(new PublicKey(mintAddress),wallet.publicKey,AuthorityType.MintTokens,null,[],TOKEN_PROGRAM_ID));
     const latest=await connection.getLatestBlockhash('confirmed');tx.recentBlockhash=latest.blockhash;tx.feePayer=wallet.publicKey;
@@ -249,11 +273,11 @@ async function writeOnChainMetadata(){
   }
 
   $('#metadata-uri').textContent=uri;$('#metadata-signature').textContent=metadataTxSignature;
-  $('#authority-final').textContent=p.fixed?'REVOKED ✅':'RETAINED BY CREATOR';
+  $('#authority-final').textContent='REVOKED ✅';
   $('#metadata-result').classList.add('show');
   setStage('#state-metadata','ON-CHAIN','pass');setStage('#state-pool',selectedQuote==='SOL'?'READY':'CROSSPAIR MAINNET ONLY','wait');
   $('#pool-button').disabled=selectedQuote!=='SOL';
-  setStatus('#metadata-status','METADATA STAGE COMPLETE ✅\nMetaplex metadata: ON-CHAIN\nWorldz metadata URI: '+uri+'\nMint authority: '+(p.fixed?'REVOKED':'retained by creator'),'good');
+  setStatus('#metadata-status','METADATA STAGE COMPLETE ✅\nMetaplex metadata: ON-CHAIN\nWorldz metadata URI: '+uri+'\nMint authority: REVOKED ✅\nFreeze authority: NONE ✅','good');
   await registerLaunch('metadata_created',{proof:{metadataUriVerified:true}});
   renderProof();
 }
@@ -350,10 +374,9 @@ function updateRoutes(){
   renderProof();
 }
 async function saveFees(){
-  const fee=Number($('#project-fee').value),total=routeTotal();
   if(!mintAddress)return setStatus('#registry-status','Create the token first.','bad');
-  if(!Number.isFinite(fee)||fee<.5||fee>4)return setStatus('#registry-status','Worldz project fee must be between 0.50% and 4.00%.','bad');
-  if(Math.abs(total-100)>.001)return setStatus('#registry-status','Project fee routes must total exactly 100%.','bad');
+  const errors=feePolicyErrors();
+  if(errors.length)return setStatus('#registry-status','SAFE FEE CHECK FAILED\n• '+errors.join('\n• '),'bad');
   feeSaved=true;setStage('#state-fees','SNAPSHOT SAVED','pass');
   try{await registerLaunch(poolTxSignature?'pool_created':metadataTxSignature?'metadata_created':'token_created',{proof:{feeRouterConfigured:true,feeRouterExecuting:false}});}
   catch(e){feeSaved=false;setStage('#state-fees','REGISTRY SAVE FAILED','block');setStatus('#registry-status','Fee snapshot failed: '+e.message,'bad');}
@@ -361,7 +384,9 @@ async function saveFees(){
 }
 async function saveLocks(){
   if(!mintAddress)return;
-  lockPlanSaved=true;setStage('#state-locks','PLAN SAVED • NOT ENFORCED','wait');
+  const errors=lockPolicyErrors();
+  if(errors.length){lockPlanSaved=false;setStage('#state-locks','SAFE LIMITS FAILED','block');return setStatus('#registry-status','SAFE LOCK / VESTING CHECK FAILED\n• '+errors.join('\n• '),'bad');}
+  lockPlanSaved=true;setStage('#state-locks','POLICY PASS • NOT YET ON-CHAIN ENFORCED','wait');
   try{await registerLaunch(poolTxSignature?'pool_created':metadataTxSignature?'metadata_created':'token_created',{proof:{lockPlanRecorded:true,vestingPlanRecorded:true,lpLockEnforced:false,vestingEnforced:false}});}
   catch(e){lockPlanSaved=false;setStatus('#registry-status','Lock/vesting plan save failed: '+e.message,'bad');}
   renderProof();
@@ -384,7 +409,9 @@ function renderProof(){
   const items=[
     ['Token mint exists on Solana Devnet',!!mintTxSignature,!!mintTxSignature?'VERIFIED ON-CHAIN':'PENDING','pass'],
     ['Metadata exists on-chain',!!metadataTxSignature,!!metadataTxSignature?'METAPLEX VERIFIED STAGE':'PENDING','pass'],
-    ['Fixed supply authority finalized',!p.fixed||!!authorityTxSignature,!p.fixed?'CREATOR RETAINS AUTHORITY':authorityTxSignature?'MINT AUTHORITY REVOKED':'PENDING','pass'],
+    ['Mint authority revoked after genesis',!!authorityTxSignature,authorityTxSignature?'REVOKED ✅':'PENDING','pass'],
+    ['Freeze authority',true,'NONE / REVOKED BY DESIGN','pass'],
+    ['Wallet-transfer tax',true,'0% • HARD LOCK','pass'],
     ['Selected quote disclosed',true,selectedQuote==='SOL'?'SOL DEVNET':'wXRP VERIFIED MAINNET TARGET','pass'],
     ['Real Devnet liquidity pool',!!poolTxSignature,poolTxSignature?'RAYDIUM CPMM VERIFIED':'PENDING','pass'],
     ['Worldz fee configuration',feeSaved,feeSaved?'SNAPSHOT RECORDED':'PENDING','pass'],
@@ -411,12 +438,16 @@ function loadQuery(){
   if(q.get('symbol'))$('#symbol').value=q.get('symbol');
   if(q.get('supply'))$('#supply').value=q.get('supply');
   if(q.get('decimals'))$('#decimals').value=q.get('decimals');
-  if(q.has('fixed'))$('#fixed').checked=q.get('fixed')==='1';
+  $('#fixed').checked=true;
   if(q.get('description'))$('#description').value=q.get('description');
   if(q.get('intent')&&/^[0-9a-f]{64}$/.test(q.get('intent')))intentHash=q.get('intent');
   if(q.get('quote')&&['SOL','wXRP'].includes(q.get('quote')))chooseQuote(q.get('quote'));
-  if(q.get('fee'))$('#project-fee').value=q.get('fee');
+  if(q.get('fee'))$('#project-fee').value=Math.min(SAFE.feeMax,Math.max(SAFE.feeMin,Number(q.get('fee'))||1));
   ['creator','holders','lp','treasury','community'].forEach(k=>{if(q.get('route_'+k))$('[data-route="'+k+'"]').value=q.get('route_'+k);});
+  if(q.get('founder_cliff'))$('#vesting-cliff-days').value=Math.max(SAFE.founderCliffMinDays,Number(q.get('founder_cliff'))||SAFE.founderCliffMinDays);
+  if(q.get('founder_vesting'))$('#vesting-months').value=Math.max(SAFE.founderVestingMinMonths,Number(q.get('founder_vesting'))||24);
+  if(q.get('lp_lock_days'))$('#lp-lock-months').value=Math.max(SAFE.lpLockMinMonths,Math.ceil((Number(q.get('lp_lock_days'))||365)/30.4375));
+  if(q.get('alloc_creatorTeam'))$('#vesting-percent').value=Math.min(SAFE.founderMax,Number(q.get('alloc_creatorTeam'))||0);
   const meta=[];
   if(intentHash)meta.push('Intent: '+intentHash.slice(0,16)+'…');
   if(q.get('engine'))meta.push('Engine: '+q.get('engine'));
