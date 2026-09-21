@@ -383,9 +383,12 @@ async function signTransaction(tx,partialSigners=[]){
     const bytes=out?.[0]?.signedTransaction;if(!bytes)throw new Error('Wallet returned no signed transaction.');
     signed=Transaction.from(bytes);
   }else signed=await walletCtx.provider.signTransaction(tx);
-  const sim=await connection.simulateTransaction(signed,{sigVerify:true,commitment:'confirmed'});
-  if(sim.value.err)throw new Error('Simulation failed: '+JSON.stringify(sim.value.err)+(sim.value.logs?'\n'+sim.value.logs.slice(-7).join('\n'):''));
-  const sig=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false,maxRetries:3,preflightCommitment:'confirmed'});
+  // IMPORTANT: signed is a legacy Transaction. web3.js v1.98.x rejects a
+  // SimulateTransactionConfig object for legacy Transaction and throws
+  // "Invalid arguments". sendRawTransaction(skipPreflight:false) already runs
+  // Solana RPC preflight against the exact signed wire transaction.
+  const wire=signed.serialize();
+  const sig=await connection.sendRawTransaction(wire,{skipPreflight:false,maxRetries:3,preflightCommitment:'confirmed'});
   const conf=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');
   if(conf.value.err)throw new Error('Transaction confirmation failed: '+JSON.stringify(conf.value.err));
   return sig;
@@ -441,7 +444,7 @@ async function createMintStage(v){
     SystemProgram.createAccount({fromPubkey:owner,newAccountPubkey:mintKp.publicKey,space:MINT_SIZE,lamports:rent,programId:TOKEN_PROGRAM_ID}),
     createInitializeMintInstruction(mintKp.publicKey,6,owner,owner,TOKEN_PROGRAM_ID)
   );
-  tokenBusy('Wallet approval 1/3 — CREATE FIXED-SUPPLY MINT\nA simulation runs before broadcast.');
+  tokenBusy('Wallet approval 1/3 — CREATE FIXED-SUPPLY MINT\nSolana RPC preflight checks the exact signed transaction before broadcast.');
   const createSig=await signTransaction(tx,[mintKp]);
   pending={standard:STANDARD_VERSION,mint,metadataUri:null,createSig,prepared:false,distributeSig:null,finalizeSig:null,registered:false,config:v};
   savePending();renderProof();
@@ -459,7 +462,7 @@ async function distributeStage(){
     tx.add(createAssociatedTokenAccountIdempotentInstruction(owner,ata,recipient,mint,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID));
     tx.add(createMintToInstruction(mint,ata,owner,amounts[k],[],TOKEN_PROGRAM_ID));
   }
-  tokenBusy('Wallet approval 2/3 — DISTRIBUTE EXACT GENESIS SUPPLY\nSupply goes directly to the five disclosed destination wallets. A simulation runs first.');
+  tokenBusy('Wallet approval 2/3 — DISTRIBUTE EXACT GENESIS SUPPLY\nSupply goes directly to the five disclosed destination wallets. Solana RPC preflight checks the exact signed transaction before broadcast.');
   pending.distributeSig=await signTransaction(tx);pending.atas=atas;savePending();renderProof();
 }
 async function registerFinalProof(){
