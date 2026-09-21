@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/worldspeaker-treasury-test.yml'
       - '.github/worldspeaker-treasury-test.py'
+      - '.github/worldspeaker-treasury-image.b64'
   workflow_dispatch:
 
 permissions:
