@@ -225,7 +225,7 @@ async function finalizeStage(){
   },{
     createMetadataAccountArgsV3:{
       data:{name:v.token_name,symbol:v.symbol,uri:pending.metadataUri,sellerFeeBasisPoints:0,creators:null,collection:null,uses:null},
-      isMutable:true,collectionDetails:null
+      isMutable:false,collectionDetails:null
     }
   },METADATA_PROGRAM);
   const tx=new Transaction().add(
