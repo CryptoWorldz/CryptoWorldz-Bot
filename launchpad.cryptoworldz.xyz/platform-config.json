@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-22-public-launchpad-v16-private-preset",
+  "version": "2026-09-22-public-launchpad-v17-multichain-adapters",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -88,8 +88,10 @@
       "id": "ethereum",
       "name": "Ethereum",
       "world": "EthWorldz",
-      "status": "PLANNED",
-      "creatorLaunch": "OFF"
+      "status": "TESTNET_BETA",
+      "creatorLaunch": "SEPOLIA_TOKEN",
+      "mainnetCreatorLaunch": "OFF",
+      "engine": "evm-fixed"
     },
     {
       "id": "base",
@@ -104,29 +106,37 @@
       "id": "bnb",
       "name": "BNB Chain",
       "world": "BNBWorldz",
-      "status": "PLANNED",
-      "creatorLaunch": "OFF"
+      "status": "TESTNET_BETA",
+      "creatorLaunch": "BSC_TESTNET_TOKEN",
+      "mainnetCreatorLaunch": "OFF",
+      "engine": "evm-fixed"
     },
     {
       "id": "robinhood",
       "name": "Robinhood Chain",
       "world": "RobinWorldz",
-      "status": "PLANNED",
-      "creatorLaunch": "OFF"
+      "status": "TESTNET_BETA",
+      "creatorLaunch": "ROBINHOOD_TESTNET_TOKEN",
+      "mainnetCreatorLaunch": "OFF",
+      "engine": "evm-fixed"
     },
     {
       "id": "hyper",
       "name": "HyperEVM",
       "world": "HyperWorldz",
-      "status": "PLANNED",
-      "creatorLaunch": "OFF"
+      "status": "TESTNET_BETA",
+      "creatorLaunch": "HYPEREVM_TESTNET_TOKEN",
+      "mainnetCreatorLaunch": "OFF",
+      "engine": "evm-fixed"
     },
     {
       "id": "xrpl",
       "name": "XRP Ledger",
       "world": "XRPWorldz",
-      "status": "NATIVE_ADAPTER_RESEARCH",
-      "creatorLaunch": "OFF"
+      "status": "TESTNET_BETA",
+      "creatorLaunch": "XRPL_TESTNET_TRUSTLINE_AMM",
+      "mainnetCreatorLaunch": "OFF",
+      "engine": "xrpl-trustline-amm"
     },
     {
       "id": "sui",
@@ -171,7 +181,12 @@
     "initialResearchRail": "LayerZero OFT",
     "executableAdapters": [
       "solana-devnet",
-      "base-sepolia-token"
+      "base-sepolia-token",
+      "ethereum-sepolia-token",
+      "robinhood-testnet-token",
+      "bsc-testnet-token",
+      "hyperevm-testnet-token",
+      "xrpl-testnet-trustline-amm"
     ],
     "mainnetAdaptersEnabled": [],
     "rule": "OmniChain is a common project/proof architecture. Each chain is executable only when its chain-native adapter is independently verified; a visual World does not imply a live launch adapter."
@@ -409,11 +424,13 @@
     "equalAllocationPerQualifiedPositionPercent": 0.1,
     "devnetEligible": false,
     "priceOrVolumeRankingUsed": false,
-    "qualificationRule": "A position is available only to a verified mainnet WorldzLaunchPad launch that passes the applicable Safe Launch Standard, on-chain proof, team identity/anti-sybil review and human/multisig qualification.",
+    "qualificationRule": "Any supported WorldzLaunchPad mainnet launch type or supported chain can qualify if it passes the applicable Safe Launch Standard, chain-native on-chain proof, team identity/anti-sybil review and human/multisig qualification. Devnet/testnet activity does not qualify.",
     "orderingRule": "Mainnet proof completion creates a permanent candidate timestamp. Qualified positions are then assigned in order of verified qualification. Disqualified candidates remain documented and do not receive a position.",
     "antiSybilRule": "One qualified Founding 100 position per verified team identity. Multiple wallets do not create multiple team positions.",
     "permanenceRule": "Qualified positions are permanent historical records. A later fraud finding may mark a position disqualified/forfeited but the historical record is not deleted or silently reassigned.",
-    "allocationRule": "10% total future WORLDZ allocation pool is reserved for the 100 qualified Founding 100 positions, intended as 0.10% of total WORLDZ supply per position."
+    "allocationRule": "10% total future WORLDZ allocation pool is reserved for the 100 qualified Founding 100 positions, intended as 0.10% of total WORLDZ supply per position.",
+    "launchTypeNeutral": true,
+    "chainNeutralWithinSupportedMainnetAdapters": true
   },
   "treasuryStandard": {
     "version": "WORLDZ-TREASURY-1",
@@ -688,5 +705,58 @@
     "walletStandardFallback": true,
     "injectedWalletFallback": true,
     "securityRule": "No seed phrase or private key is ever requested. Users approve connections, messages and transactions in their own wallet."
+  },
+  "evmMultiChain": {
+    "status": "PUBLIC_TESTNET_BETA",
+    "path": "/evm/",
+    "template": "WorldzFixedSupplyToken",
+    "tokenDeployment": true,
+    "marketLaunchVerification": false,
+    "networks": [
+      {
+        "id": "ethereum-sepolia",
+        "chainId": 11155111,
+        "status": "EXECUTABLE_TOKEN_TESTNET"
+      },
+      {
+        "id": "base-sepolia",
+        "chainId": 84532,
+        "status": "EXECUTABLE_TOKEN_TESTNET"
+      },
+      {
+        "id": "robinhood-testnet",
+        "chainId": 46630,
+        "status": "EXECUTABLE_TOKEN_TESTNET"
+      },
+      {
+        "id": "bsc-testnet",
+        "chainId": 97,
+        "status": "EXECUTABLE_TOKEN_TESTNET"
+      },
+      {
+        "id": "hyperevm-testnet",
+        "chainId": 998,
+        "status": "EXECUTABLE_TOKEN_TESTNET"
+      }
+    ],
+    "rule": "Fixed-supply token deployment is executable on listed testnets. Chain-specific liquidity, 90/10 fee routing, LP lock and Worldz mainnet launch verification remain fail-closed."
+  },
+  "xrplNative": {
+    "status": "PUBLIC_TESTNET_BETA",
+    "path": "/xrpl/",
+    "tokenStandard": "XRPL trust-line token",
+    "reason": "Trust-line tokens are used for the launch adapter because they currently support XRPL DEX and AMM execution.",
+    "wallet": "GemWallet",
+    "testnetExecution": true,
+    "mainnetExecution": false,
+    "stages": [
+      "issuer Default Ripple",
+      "issuer No Freeze",
+      "hot-wallet TrustSet",
+      "issuer Payment supply",
+      "hot-wallet AMMCreate"
+    ],
+    "secretKeysCollected": false,
+    "rule": "WorldzLaunchPad never asks for XRPL seeds. Mainnet remains gated until issuer/hot-wallet governance, treasury fee routing, manifest, accounting/legal and proof checks pass."
   }
 }
