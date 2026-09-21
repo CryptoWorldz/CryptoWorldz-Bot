@@ -235,6 +235,8 @@ jobs:
           assert "getJupiterMobileAdapter" in mint_js
           assert "jupiterInjectedProvider" in mint_js
           assert "jupiter-inapp" in mint_js
+          assert "jupiterStandardIndex" in mint_js
+          assert "Wallet Standard" in mint_js
           assert "resetJupiterMobileConnectionState" in mint_js
           assert "resetJupiterMobileConnectionState" in jupiter_mobile_js
           assert "@appkit/connection_status" in jupiter_mobile_js
