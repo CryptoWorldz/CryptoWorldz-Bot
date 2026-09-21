@@ -44,7 +44,7 @@
           <label>Network
             <select id="network"><option value="devnet">Solana Devnet — rehearse first</option><option value="mainnet-beta">Solana Mainnet — real mint</option></select>
           </label>
-          <label>Wallet Standard wallet<select id="wallet-choice"><option value="">Detecting wallets…</option></select></label>
+          <label>Wallet connection<select id="wallet-choice"><option value="">Detecting wallets…</option></select></label>
           <label>Token name<input id="name" maxlength="32" placeholder="Your Project Token"></label>
           <label>Ticker<input id="symbol" maxlength="10" placeholder="TOKEN"></label>
           <label>Fixed supply<input id="supply" inputmode="numeric" placeholder="e.g. 100000000"></label>
@@ -78,7 +78,7 @@
           <button class="btn secondary" id="preflight" type="button">Run WorldzMINT Preflight</button>
           <button class="btn primary" id="mint-btn" type="button" disabled>Create Fixed-Supply Mint</button>
         </div>
-        <div class="status" id="status">Connect a compatible Solana wallet. Jupiter Wallet is preferred when available; Wallet Standard-compatible wallets are also supported.</div>
+        <div class="status" id="status">Choose Jupiter Mobile ⭐ and tap Connect Wallet. WorldzMINT uses the official Jupiter Mobile → Reown/WalletConnect bridge; Wallet Standard and injected Solana wallets remain supported.</div>
         <div class="proofs" id="proofs"></div>
       </article>
     </div>
@@ -103,6 +103,6 @@
 </main>
 
 <footer><div><b>WorldzMINT™</b> • WorldzLaunchPad™</div><p>Minting is not a guarantee of price, liquidity, verification, exchange listing or investment performance.</p></footer>
-<script type="module" src="/mint/app.js?v=20260921-worldzmint-v1"></script>
+<script type="module" src="/mint/app.js?v=20260921-worldzmint-reown-v2"></script>
 </body>
 </html>
