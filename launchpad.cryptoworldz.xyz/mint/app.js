@@ -66,6 +66,7 @@ function restoreDraft(){
     $('#supply').value=d.fixed_supply||'';
     $('#description').value=d.description||'';
     $('#image').value=d.image_url||'';
+    const preview=$('#image-preview');if(preview&&d.image_url){preview.src=d.image_url;preview.hidden=false;}
     $('#website').value=d.website||'';
     for(const [k,val] of Object.entries(d.allocations||{})){const el=$('[data-key="'+k+'"]');if(el&&val!==null&&val!==undefined)el.value=String(val);}
     for(const [k,id] of Object.entries({creator:'#creator-wallet',liquidity:'#liquidity-wallet',community:'#community-wallet',treasury:'#treasury-wallet',growth:'#growth-wallet'})){
@@ -293,19 +294,23 @@ async function resizeTokenImage(file){
   return {image_base64:base64,mime_type:'image/jpeg',width,height};
 }
 async function uploadTokenImage(file){
-  if(!walletCtx)throw new Error('Connect your wallet before uploading the token image.');
-  setStatus('PREPARING TOKEN IMAGE…\nWorldzMINT is resizing the image for public token metadata.','warn');
+  setStatus('PREPARING TOKEN IMAGE…\nNo wallet connection or signature is required.','warn');
   const image=await resizeTokenImage(file);
-  const issued_at=new Date().toISOString();
-  const msg=['WORLDZMINT_UPLOAD_IMAGE_V1','wallet='+walletCtx.address,'issued_at='+issued_at].join('\n');
-  const signature=await bs58encode(await signMessage(msg));
-  setStatus('UPLOADING TOKEN IMAGE…\nThis only uploads the public token artwork. No transaction is being sent.','warn');
-  const out=await api({action:'UPLOAD_IMAGE',wallet:walletCtx.address,issued_at,signature,...image});
+  setStatus('UPLOADING TOKEN IMAGE…\nNo signing. No blockchain transaction.','warn');
+  const out=await api({action:'UPLOAD_IMAGE',...image});
   $('#image').value=out.imageUrl;
+  const preview=$('#image-preview');if(preview){preview.src=out.imageUrl;preview.hidden=false;}
   saveDraft();
   preflightOk=false;$('#mint-btn').disabled=true;
-  setStatus('TOKEN IMAGE READY ✅\n'+out.imageUrl+'\n\nNo blockchain transaction was sent.','good');
+  setStatus('TOKEN IMAGE READY ✅\n'+out.imageUrl+'\n\nNo wallet signature and no blockchain transaction were used.','good');
   return out.imageUrl;
+}
+function removeTokenImage(){
+  $('#image').value='';
+  const preview=$('#image-preview');if(preview){preview.removeAttribute('src');preview.hidden=true;}
+  const file=$('#image-file');if(file)file.value='';
+  saveDraft();preflightOk=false;$('#mint-btn').disabled=true;
+  setStatus('TOKEN IMAGE REMOVED. Upload another image whenever you want — no signing required.','good');
 }
 async function signTransaction(tx,partialSigners=[]){
   const latest=await connection.getLatestBlockhash('confirmed');
@@ -342,7 +347,7 @@ function restorePending(){
   try{
     const raw=localStorage.getItem('worldzmint-pending-v1');if(!raw)return;
     const p=JSON.parse(raw);if(!p?.mint||!p?.config)return;pending=p;
-    const v=p.config;$('#network').value=v.environment;refreshConnection();$('#name').value=v.token_name;$('#symbol').value=v.symbol;$('#supply').value=v.fixed_supply;$('#description').value=v.description||'';$('#image').value=v.image_url||'';$('#website').value=v.website||'';
+    const v=p.config;$('#network').value=v.environment;refreshConnection();$('#name').value=v.token_name;$('#symbol').value=v.symbol;$('#supply').value=v.fixed_supply;$('#description').value=v.description||'';$('#image').value=v.image_url||'';const preview=$('#image-preview');if(preview&&v.image_url){preview.src=v.image_url;preview.hidden=false;}$('#website').value=v.website||'';
     for(const [k,val] of Object.entries(v.allocations||{})){const el=$('[data-key="'+k+'"]');if(el)el.value=String(val);}
     for(const [k,id] of Object.entries({creator:'#creator-wallet',liquidity:'#liquidity-wallet',community:'#community-wallet',treasury:'#treasury-wallet',growth:'#growth-wallet'}))$(id).value=v.recipients?.[k]||'';
     allocationMath();$('#mint-btn').textContent=p.distributeSig?'Finish Metadata + Revoke':'Continue Pending Mint';setStatus('PENDING WORLDZMINT RECOVERED\nMint: '+p.mint+'\nReconnect the same creator wallet, run preflight and continue.','warn');renderProof();
@@ -446,12 +451,16 @@ async function loadRegistry(){
 $('#wallet-btn').addEventListener('click',connectWallet);
 $('#image-file').addEventListener('change',async e=>{
   const file=e.target.files?.[0];if(!file)return;
-  try{await uploadTokenImage(file);}catch(err){
+  try{
+    await uploadTokenImage(file);
+    e.target.value='';
+  }catch(err){
     console.error(err);
-    setStatus('TOKEN IMAGE UPLOAD FAILED\n'+(err?.message||String(err))+'\n\nNo transaction was sent.','bad');
+    setStatus('TOKEN IMAGE UPLOAD FAILED\n'+(err?.message||String(err))+'\n\nNo signature and no transaction were used.','bad');
     e.target.value='';
   }
 });
+$('#image-remove')?.addEventListener('click',removeTokenImage);
 $('#preflight').addEventListener('click',runPreflight);
 $('#mint-btn').addEventListener('click',mintFlow);
 $('#network').addEventListener('change',()=>{refreshConnection();saveDraft();preflightOk=false;$('#mint-btn').disabled=true;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
