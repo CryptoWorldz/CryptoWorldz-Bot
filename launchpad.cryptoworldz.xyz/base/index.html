@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05020b">
+  <meta name="description" content="WorldzLaunchPad™ Base Lab — fixed-supply fair-token deployment on Base Sepolia with Worldz Safe Launch limits.">
+  <title>WorldzLaunchPad™ | Base Sepolia Lab</title>
+  <link rel="stylesheet" href="/style.css?v=20260921-public-v6">
+  <style>
+    .lab{max-width:1120px;margin:auto;padding:58px 18px 100px}.hero2{padding:30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#3156ff18,#a84cff0c);margin-bottom:14px}
+    .hero2 h1{font-size:clamp(2.7rem,7vw,5.8rem);line-height:.9;letter-spacing:-.055em;margin:8px 0 14px}.hero2 h1 span{color:#7898ff}.truth{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
+    .truth div,.card{border:1px solid #ffffff0d;border-radius:14px;padding:13px;background:#ffffff03}.truth small{display:block;color:#75677f;text-transform:uppercase;font-size:.58rem;letter-spacing:.08em}.truth b{font-size:.8rem}
+    .stack{display:grid;gap:12px}.card h2{margin:0 0 5px}.card p{color:#8b7b95;font-size:.76rem}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form label{display:grid;gap:5px;color:#9584a0;font-size:.7rem}
+    .form input,.form textarea{width:100%;border:1px solid #ffffff12;border-radius:11px;background:#07030d;color:#fff;padding:11px}.wide{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .status{margin-top:12px;border:1px solid #ffffff0d;border-radius:12px;padding:12px;color:#9686a0;font-size:.7rem;white-space:pre-wrap;word-break:break-word}.status.good{border-color:#55e6a533;color:#76e8b7}.status.bad{border-color:#ff6d8a33;color:#ff9caf}.status.warn{border-color:#ffd16633;color:#d9bf83}
+    .alloc{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.alloc label{font-size:.64rem;color:#9584a0}.alloc input{margin-top:5px;width:100%;padding:9px;border:1px solid #ffffff12;border-radius:9px;background:#07030d;color:#fff}
+    .warn{border-left:3px solid #ffd166;background:#ffd16608;padding:12px;color:#aa9673;font-size:.71rem;margin-top:12px}.result{display:none;margin-top:12px;border:1px solid #55e6a533;border-radius:12px;padding:12px}.result.show{display:block}.result code{word-break:break-all}
+    @media(max-width:760px){.truth,.form{grid-template-columns:1fr}.alloc{grid-template-columns:1fr 1fr}.wide{grid-column:auto}.lab{padding-top:32px}}
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a>
+  <nav><a href="/">LaunchPad</a><a href="/#safe-standard">Rules</a><a href="/omnichain/">OmniChain</a></nav>
+  <button class="wallet-mini" id="wallet" type="button">Connect EVM Wallet</button>
+</header>
+
+<main class="lab">
+  <section class="hero2">
+    <div class="kicker">WORLDZ EVM FAIR™ • BASE SEPOLIA • PUBLIC TESTNET</div>
+    <h1>BASE.<br><span>NOW EXECUTABLE.</span></h1>
+    <p class="lead">Deploy a real fixed-supply ERC-20 test token on Base Sepolia from your own wallet. The token template has no mint function, no freeze switch and distributes genesis supply directly to disclosed destination wallets.</p>
+    <div class="truth">
+      <div><small>Network</small><b>Base Sepolia • 84532</b></div>
+      <div><small>Creator liquid</small><b>Maximum 5%</b></div>
+      <div><small>Liquidity allocation</small><b>25–60%</b></div>
+      <div><small>Mainnet</small><b>Still fail-closed</b></div>
+    </div>
+  </section>
+
+  <div class="stack">
+    <section class="card">
+      <h2>1. Compile the Worldz fixed-supply template</h2>
+      <p>The exact source is compiled in your browser. This Base test route is intentionally stricter than the full platform standard: creator/team liquid allocation is capped at 5% because Base vesting and LP-lock adapters are not yet enabled.</p>
+      <div class="actions"><button class="btn secondary" id="compile" type="button">Compile Safe Token Template</button></div>
+      <div class="status" id="compile-status">Template not compiled yet.</div>
+    </section>
+
+    <section class="card">
+      <h2>2. Configure the token</h2>
+      <div class="form">
+        <label>Token name<input id="name" maxlength="32" placeholder="Your Token"></label>
+        <label>Ticker<input id="symbol" maxlength="10" placeholder="TOKEN"></label>
+        <label>Fixed supply<input id="supply" inputmode="numeric" placeholder="100000000"></label>
+        <label>Decimals<input value="18" disabled></label>
+        <label>Configured project trading fee %<input id="fee" type="number" min="0.5" max="3" step="0.25" value="1"></label>
+        <label>Worldz platform share<input value="10% of collected project fee only" disabled></label>
+      </div>
+      <div class="alloc" style="margin-top:12px">
+        <label>Creator ≤5%<input class="allocation" data-key="creator" type="number" min="0" max="5" step="1" value="5"></label>
+        <label>Liquidity 25–60%<input class="allocation" data-key="liquidity" type="number" min="25" max="60" step="1" value="35"></label>
+        <label>Community ≥20%<input class="allocation" data-key="community" type="number" min="20" max="75" step="1" value="30"></label>
+        <label>Treasury ≤15%<input class="allocation" data-key="treasury" type="number" min="0" max="15" step="1" value="10"></label>
+        <label>Growth<input class="allocation" data-key="growth" type="number" min="0" max="55" step="1" value="20"></label>
+      </div>
+      <div class="form" style="margin-top:12px">
+        <label>Creator wallet<input id="creator-wallet" placeholder="Connected wallet"></label>
+        <label>Liquidity vault / test wallet<input id="liquidity-wallet" placeholder="0x..."></label>
+        <label>Community wallet<input id="community-wallet" placeholder="0x..."></label>
+        <label>Project treasury multisig<input id="treasury-wallet" placeholder="0x..."></label>
+        <label class="wide">Growth / ecosystem wallet<input id="growth-wallet" placeholder="0x..."></label>
+      </div>
+      <div class="warn"><b>TESTNET TRUTH:</b> this route deploys the token contract only. It does not yet create a Base liquidity pool, enforce an LP lock, or collect the configured project trading fee. Therefore it cannot receive a Worldz mainnet Policy Pass or a Founding 100 position yet.</div>
+      <div class="actions"><button class="btn secondary" id="check" type="button">Run Base Preflight</button><button class="btn primary" id="deploy" type="button" disabled>Deploy on Base Sepolia</button></div>
+      <div class="status" id="status">Connect an EVM wallet, compile the template and pass preflight.</div>
+    </section>
+
+    <section class="card">
+      <h2>3. On-chain proof</h2>
+      <div class="result" id="result">
+        <b>BASE SEPOLIA TOKEN DEPLOYED ✅</b>
+        <p>Contract: <code id="contract"></code></p>
+        <p>Transaction: <code id="tx"></code></p>
+        <p><a id="explorer" target="_blank" rel="noopener">Open on BaseScan ↗</a></p>
+      </div>
+      <div class="status" id="proof-status">No Base deployment yet.</div>
+    </section>
+  </div>
+</main>
+
+<footer><div><b>Worldz EVM Fair™</b> • Base Sepolia adapter</div><p>Real testnet execution. Base mainnet liquidity, fee routing and Worldz Policy Pass remain disabled until the full adapter is proven.</p></footer>
+<script type="module" src="/base/app.js?v=20260921-base-v1"></script>
+</body>
+</html>
