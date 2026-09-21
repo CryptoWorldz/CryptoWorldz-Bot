@@ -260,7 +260,14 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/health") {
-    return sendJson(res, 200, { ok: true, runtime: "dependency_free_guard_v2" }, origin);
+    return sendJson(res, 503, {
+      ok: false,
+      ready: false,
+      degraded: true,
+      service: "CryptoWorldz Protected Public Gateway",
+      runtime: "dependency_free_guard_v2",
+      reason: "full_zed_runtime_unavailable"
+    }, origin);
   }
 
   if (req.method === "GET" && url.pathname === "/api/oneworldz-gpt/status") {
