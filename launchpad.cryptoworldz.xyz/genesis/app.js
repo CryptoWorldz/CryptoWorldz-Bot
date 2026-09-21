@@ -6,11 +6,13 @@ import {
   createInitializeMintInstruction,createAssociatedTokenAccountInstruction,
   createMintToInstruction,createSetAuthorityInstruction,getAssociatedTokenAddress
 } from 'https://esm.sh/@solana/spl-token@0.4.14?bundle';
+import {createCreateMetadataAccountV3Instruction} from 'https://esm.sh/@metaplex-foundation/mpl-token-metadata@2.13.0?bundle';
 import {getWallets} from 'https://esm.sh/@wallet-standard/app@1.1.0?bundle';
 
 const $=s=>document.querySelector(s);
 const ENDPOINT='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-genesis-console';
 const DEV_WALLET='Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u';
+const METADATA_PROGRAM=new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
 const connection=new Connection(clusterApiUrl('mainnet-beta'),'confirmed');
 
 let wallet=null;
@@ -317,23 +319,25 @@ async function recoverMint(symbol){
 }
 async function createMetadata(symbol){
   const t=token(symbol);if(t.status!=='minted'||!t.mint_address)throw new Error('Mint stage is not ready for metadata.');
-  tokenStatus(symbol,'Wallet signature 2/3: creating on-chain Metaplex metadata using the allocated profile image…','warn');
-  const [{createUmi},{walletAdapterIdentity},{mplTokenMetadata,createV1,TokenStandard},{mplToolbox},{publicKey,percentAmount}]=await Promise.all([
-    import('https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.6.0?bundle'),
-    import('https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.6.0?bundle'),
-    import('https://esm.sh/@metaplex-foundation/mpl-token-metadata@3.4.0?bundle'),
-    import('https://esm.sh/@metaplex-foundation/mpl-toolbox@0.10.0?bundle'),
-    import('https://esm.sh/@metaplex-foundation/umi@1.6.0?bundle')
-  ]);
-  const umi=createUmi(clusterApiUrl('mainnet-beta')).use(walletAdapterIdentity(wallet)).use(mplTokenMetadata()).use(mplToolbox());
+  const mint=new PublicKey(t.mint_address),owner=wallet.publicKey;
+  const [metadata]=PublicKey.findProgramAddressSync(
+    [new TextEncoder().encode('metadata'),METADATA_PROGRAM.toBytes(),mint.toBytes()],
+    METADATA_PROGRAM
+  );
   const uri=privateConfig.metadataBase+encodeURIComponent(t.mint_address);
-  const result=await createV1(umi,{
-    mint:publicKey(t.mint_address),authority:umi.identity,payer:umi.identity,updateAuthority:umi.identity,
-    name:t.token_name,symbol:t.symbol,uri,sellerFeeBasisPoints:percentAmount(0),tokenStandard:TokenStandard.Fungible,isMutable:true
-  }).sendAndConfirm(umi,{confirm:{commitment:'confirmed'}});
-  const sig=await bs58encode(result.signature);
+  const metadataIx=createCreateMetadataAccountV3Instruction({
+    metadata,mint,mintAuthority:owner,payer:owner,updateAuthority:owner
+  },{
+    createMetadataAccountArgsV3:{
+      data:{name:t.token_name,symbol:t.symbol,uri,sellerFeeBasisPoints:0,creators:null,collection:null,uses:null},
+      isMutable:true,collectionDetails:null
+    }
+  },METADATA_PROGRAM);
+  const tx=new Transaction().add(metadataIx);
+  tokenStatus(symbol,'Wallet signature 2/3: CREATE VERIFIED METADATA\nSolana RPC preflight checks the exact signed transaction before broadcast.','warn');
+  const sig=await signAndSend(tx);
   await api('register_metadata',{symbol,metadata_tx_signature:sig});
-  tokenStatus(symbol,'METADATA ON-CHAIN ✅\nProfile image + mission description attached.\nNext and final signature permanently revokes Mint + Freeze authority.','good');
+  tokenStatus(symbol,'METADATA VERIFIED ON-CHAIN ✅\nMetadata account exists and transaction confirmation is recorded.\nNext: permanently revoke Mint + Freeze authority.','good');
   await refreshPrivate();
 }
 async function revokeAuthorities(symbol){
