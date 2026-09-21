@@ -86,6 +86,7 @@ jobs:
             root/'devnet/index.html',root/'devnet/app.js',
             root/'curve/index.html',root/'curve/app.js',
             root/'curve-pro/index.html',root/'curve-pro/app.js',
+            root/'mainnet/index.html',root/'mainnet/app.js',
             root/'omnichain/index.html'
           ]
           for p in required:
@@ -99,6 +100,8 @@ jobs:
           curve_js=(root/'curve/app.js').read_text()
           curve_pro=(root/'curve-pro/index.html').read_text()
           curve_pro_js=(root/'curve-pro/app.js').read_text()
+          mainnet=(root/'mainnet/index.html').read_text()
+          mainnet_js=(root/'mainnet/app.js').read_text()
 
           assert 'PUBLIC TOKEN LAUNCHPAD' in home
           assert 'Who will be first?' in home
@@ -128,8 +131,20 @@ jobs:
           assert 'METEORA DBC DEVNET LAUNCH CREATED' in curve_pro
           assert 'Project trading fee must be 0.50%–3.00%.' in curve_pro_js
           assert 'Creator/team locked vesting must be 0–15%.' in curve_pro_js
+          assert 'PUBLIC MAINNET ROUTE' in mainnet
+          assert '10% ONLY' in mainnet
+          assert 'Gate Locked' in mainnet
+          assert "clusterApiUrl('mainnet-beta')" in mainnet_js
+          assert 'feeClaimer:treasuryVault' in mainnet_js
+          assert 'creatorTradingFeePercentage:90' in mainnet_js
+          assert 'partnerPermanentLockedLiquidityPercentage:10' in mainnet_js
+          assert 'creatorPermanentLockedLiquidityPercentage:90' in mainnet_js
+          assert 'if(!gateOpen())' in mainnet_js
+          assert "client.state.getPoolConfig(configKey.publicKey)" in mainnet_js
+          assert "String(configInfo.feeClaimer)!==treasuryVault.toBase58()" in mainnet_js
+          assert "Number(configInfo.creatorTradingFeePercentage)!==90" in mainnet_js
 
-          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_share=10 project_share=90 supply_take=0 liquidity_take=0 private_plan_exposure=0 mainnet=0')
+          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_share=10 project_share=90 supply_take=0 liquidity_take=0 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
 
       - name: Run 100+ anti-cheat tokenomics scenarios
         shell: python
@@ -293,6 +308,7 @@ jobs:
                   dev_code,dev_body=get(base+'/devnet/?verify=public-v5')
                   curve_code,curve_body=get(base+'/curve/?verify=public-v5')
                   pro_code,pro_body=get(base+'/curve-pro/?verify=public-v5')
+                  mainnet_code,mainnet_body=get(base+'/mainnet/?verify=public-v5')
                   status_code,status_body=get(base+'/status.php?verify=public-v5')
                   reg_code,reg_body=get(registry+'?verify=public-v5')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
@@ -314,11 +330,12 @@ jobs:
                   assert dev_code==200 and 'Create Devnet Token' in dev_body
                   assert curve_code==200 and 'Worldz Curve™' in curve_body
                   assert pro_code==200 and 'Worldz Curve Pro™' in pro_body
+                  assert mainnet_code==200 and 'PUBLIC MAINNET ROUTE' in mainnet_body and 'Gate Locked' in mainnet_body and '10% ONLY' in mainnet_body
                   assert status_code==200 and live['ok'] is True
                   assert reg_code==200 and public_registry['ok'] is True
                   assert public_registry['platformSharePercentOfCollectedTokenFee']==10
 
-                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 registry=1 fee_only_10=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_gate=1')
+                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 registry=1 fee_only_10=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:
