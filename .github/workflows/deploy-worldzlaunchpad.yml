@@ -189,6 +189,7 @@ jobs:
           assert 'Project trading fee must be 0.50%–3.00%.' in curve_pro_js
           assert 'Creator/team locked vesting must be 0–15%.' in curve_pro_js
           assert 'PUBLIC MAINNET ROUTE' in mainnet
+          assert 'WORLDZ CONFIDENCE CURVE' in mainnet.upper()
           assert '10% ONLY' in mainnet
           assert 'Gate Locked' in mainnet
           assert "clusterApiUrl('mainnet-beta')" in mainnet_js
@@ -234,6 +235,8 @@ jobs:
           assert 'AuthorityType.FreezeAccount,null' in mint_js
           assert 'getWallets' in mint_js
           assert 'jupiter' in mint_js.lower()
+          assert 'getWallets' in mainnet_js
+          assert 'jupiter' in mainnet_js.lower()
           assert all(term not in mint_html and term not in mint_js for term in banned)
           assert platform['trustOrbit']['version']=='WORLDZ-TRUST-ORBIT-1'
           assert platform['trustOrbit']['status']=='PUBLIC_BETA_LIVE'
@@ -264,6 +267,9 @@ jobs:
           node --check launchpad.cryptoworldz.xyz/genesis/app.js
           node --check launchpad.cryptoworldz.xyz/devnet/app.js
           node --check launchpad.cryptoworldz.xyz/base/app.js
+          node --check launchpad.cryptoworldz.xyz/mainnet/app.js
+          node --check launchpad.cryptoworldz.xyz/curve/app.js
+          node --check launchpad.cryptoworldz.xyz/curve-pro/app.js
 
       - name: Run 100+ anti-cheat tokenomics scenarios
         shell: python
