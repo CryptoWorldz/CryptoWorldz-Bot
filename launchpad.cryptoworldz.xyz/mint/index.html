@@ -50,9 +50,14 @@
           <label>Fixed supply<input id="supply" inputmode="numeric" placeholder="e.g. 100000000"></label>
           <label>Decimals<input value="6" disabled></label>
           <label class="wide">Description<textarea id="description" maxlength="700" placeholder="What does this token exist to do?"></textarea></label>
-          <label>Token image<input id="image-file" type="file" accept="image/png,image/jpeg,image/webp"><small>Choose JPG, PNG or WebP. WorldzMINT will resize and host it securely.</small></label>
+          <label class="wide">Token image — NO SIGNING REQUIRED
+            <input id="image-file" type="file" accept="image/png,image/jpeg,image/webp">
+            <small>Upload or re-upload JPG, PNG or WebP. WorldzMINT resizes and hosts it automatically. No wallet connection, signature or transaction.</small>
+            <img id="image-preview" alt="Token image preview" hidden style="display:block;max-width:160px;max-height:160px;border-radius:18px;margin-top:10px">
+            <button class="btn secondary" id="image-remove" type="button" style="margin-top:10px">Remove / Upload Again</button>
+          </label>
           <label>Hosted image URL<input id="image" type="url" readonly placeholder="Created automatically after image upload"></label>
-          <label class="wide">Website<input id="website" type="url" placeholder="https://..."></label>
+          <label>Website<input id="website" type="url" placeholder="https://..."></label>
         </div>
 
         <h3 style="margin:15px 0 5px">Genesis allocation</h3>
@@ -104,6 +109,6 @@
 </main>
 
 <footer><div><b>WorldzMINT™</b> • WorldzLaunchPad™</div><p>Minting is not a guarantee of price, liquidity, verification, exchange listing or investment performance.</p></footer>
-<script type="module" src="/mint/app.js?v=20260922-worldzmint-draft-v2"></script>
+<script type="module" src="/mint/app.js?v=20260922-worldzmint-unsigned-image-v3"></script>
 </body>
 </html>
