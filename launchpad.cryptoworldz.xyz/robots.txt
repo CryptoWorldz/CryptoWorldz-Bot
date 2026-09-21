@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /genesis/
+
+Sitemap: https://launchpad.cryptoworldz.xyz/sitemap.xml
