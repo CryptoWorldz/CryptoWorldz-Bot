@@ -222,6 +222,13 @@ jobs:
           assert platform['worldzMint']['compulsory']['revokeMintAuthorityAfterGenesis'] is True
           assert platform['worldzMint']['compulsory']['revokeFreezeAuthorityAfterGenesis'] is True
           assert platform['worldzMint']['compulsory']['metadataImmutableAfterGenesis'] is True
+          assert platform['worldzMint']['imageUpload']['enabled'] is True
+          assert platform['worldzMint']['imageUpload']['bucket']=='worldz-mint-art'
+          assert platform['worldzMint']['imageUpload']['walletSignatureRequired'] is True
+          assert 'id="image-file"' in mint_html
+          assert "UPLOAD_IMAGE" in mint_js
+          assert "resizeTokenImage" in mint_js
+          assert "WORLDZMINT_UPLOAD_IMAGE_V1" in mint_js
           assert platform['walletConnectivity']['version']=='WORLDZ-WALLET-BRIDGE-1'
           assert platform['walletConnectivity']['status']=='JUPITER_MOBILE_REOWN_ENABLED'
           assert platform['walletConnectivity']['jupiterMobile']['enabled'] is True
@@ -481,6 +488,7 @@ jobs:
                   assert platform['publicMainnetCreatorLaunchesEnabled'] is False
                   assert platform['worldzMint']['version']=='WORLDZMINT-1'
                   assert platform['worldzMint']['status']=='PUBLIC_MAINNET_MINT_BETA'
+                  assert platform['worldzMint']['imageUpload']['enabled'] is True
                   assert platform['confidenceCurve']['mainnetExecutionEnabled'] is False
                   assert platform['confidencePulse']['version']=='WORLDZ-CONFIDENCE-PULSE-1'
                   assert platform['confidenceConstellation']['opaqueSafetyScore'] is False
