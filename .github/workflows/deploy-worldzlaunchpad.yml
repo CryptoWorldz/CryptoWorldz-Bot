@@ -130,6 +130,7 @@ jobs:
             root/'curve-pro/index.html',root/'curve-pro/app.js',
             root/'mainnet/index.html',root/'mainnet/app.js',
             root/'base/index.html',root/'base/app.js',
+            root/'genesis/index.html',root/'genesis/app.js',
             root/'omnichain/index.html'
           ]
           for p in required:
@@ -147,6 +148,8 @@ jobs:
           mainnet_js=(root/'mainnet/app.js').read_text()
           base_html=(root/'base/index.html').read_text()
           base_js=(root/'base/app.js').read_text()
+          genesis_html=(root/'genesis/index.html').read_text()
+          genesis_js=(root/'genesis/app.js').read_text()
 
           assert 'PUBLIC TOKEN LAUNCHPAD' in home
           assert 'Who will be first?' in home
@@ -196,6 +199,14 @@ jobs:
           assert 'WORLDZ_SAFE_LAUNCH_VERSION = 1' in base_js
           assert 'creator >5%' in base_js
           assert 'duplicate recipient' in base_js
+          assert 'PRIVATE GENESIS CONSOLE' in genesis_html
+          assert 'noindex,nofollow,noarchive' in genesis_html
+          assert 'WORLDZ_GENESIS_AUTH_V1' in genesis_js
+          assert 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' in genesis_js
+          assert 'AuthorityType.MintTokens,null' in genesis_js
+          assert 'AuthorityType.FreezeAccount,null' in genesis_js
+          assert 'createAssociatedTokenAccountInstruction(owner,ata,vault' in genesis_js
+          assert all(term not in genesis_html and term not in genesis_js for term in banned)
 
           print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_share=10 project_share=90 treasury_ops=5of10 treasury_reserve=6of9 max_approvals=6 supply_take=0 liquidity_take=0 founding100=1 base_sepolia=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
 
@@ -363,6 +374,7 @@ jobs:
                   pro_code,pro_body=get(base+'/curve-pro/?verify=public-v6')
                   mainnet_code,mainnet_body=get(base+'/mainnet/?verify=public-v6')
                   base_code,base_body=get(base+'/base/?verify=public-v6')
+                  genesis_code,genesis_body=get(base+'/genesis/?verify=public-v6')
                   status_code,status_body=get(base+'/status.php?verify=public-v6')
                   reg_code,reg_body=get(registry+'?verify=public-v6')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
@@ -394,6 +406,8 @@ jobs:
                   assert pro_code==200 and 'Worldz Curve Pro™' in pro_body
                   assert mainnet_code==200 and 'PUBLIC MAINNET ROUTE' in mainnet_body and 'Gate Locked' in mainnet_body and '10% ONLY' in mainnet_body
                   assert base_code==200 and 'WORLDZ EVM FAIR™' in base_body and 'BASE SEPOLIA' in base_body
+                  assert genesis_code==200 and 'PRIVATE GENESIS CONSOLE' in genesis_body
+                  assert all(term not in genesis_body for term in banned)
                   assert status_code==200 and live['ok'] is True
                   assert reg_code==200 and public_registry['ok'] is True
                   assert public_registry['platformSharePercentOfCollectedTokenFee']==10
