@@ -358,17 +358,24 @@
     "network": "solana",
     "requiredThreshold": "2-of-3",
     "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-    "status": "VAULT_REGISTERED__MAINNET_ROUTE_PROOF_PENDING",
+    "status": "MULTISIG_AND_VAULT_ONCHAIN_VERIFIED__ROUTE_PROOF_PENDING",
     "mainnetRoutingEnabled": false,
     "rule": "Public mainnet fee routing must not activate until the verified Treasury Multisig vault address is registered.",
     "verifiedEvidence": {
       "squadLabel": "Team Zed Treasury",
+      "providerProgram": "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf",
       "memberCount": 3,
       "threshold": "2-of-3",
-      "source": "Owner-supplied Squads UI + independent Solana mainnet account read",
-      "onChainLamportsAtVerification": 2000000,
-      "note": "Address is the Account 1 receive/vault address. Mainnet fee routing remains disabled until end-to-end route verification."
-    }
+      "multisigConfigAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+      "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "vaultIndex": 0,
+      "vaultDerivationVerified": true,
+      "squadsProgramOwnerVerified": true,
+      "verification": "Independent Solana mainnet Squads v4 account decode and vault derivation",
+      "note": "Multisig configuration and vault relationship are verified on-chain. Mainnet launch routing remains disabled until the exact 10% fee-only route and remaining release gates pass."
+    },
+    "multisigConfigAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+    "vaultIndex": 0
   },
   "baseEvmFair": {
     "status": "BASE_SEPOLIA_BETA",
