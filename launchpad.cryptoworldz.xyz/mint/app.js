@@ -217,6 +217,52 @@ async function signMessage(message){
   return new Uint8Array(out?.signature||out);
 }
 async function bs58encode(bytes){const mod=await import('https://esm.sh/bs58@6.0.0?bundle');const bs58=mod.default||mod;return bs58.encode(bytes);}
+function fileDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(String(reader.result||''));
+    reader.onerror=()=>reject(reader.error||new Error('Could not read image file.'));
+    reader.readAsDataURL(file);
+  });
+}
+function loadImage(src){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>resolve(img);
+    img.onerror=()=>reject(new Error('Could not decode image.'));
+    img.src=src;
+  });
+}
+async function resizeTokenImage(file){
+  if(!file)throw new Error('Choose an image first.');
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('Use JPG, PNG or WebP.');
+  if(file.size>12*1024*1024)throw new Error('Source image is too large.');
+  const src=await fileDataUrl(file),img=await loadImage(src);
+  const max=768,scale=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
+  const width=Math.max(1,Math.round((img.naturalWidth||img.width)*scale));
+  const height=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));
+  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+  const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Image processing is unavailable in this browser.');
+  ctx.drawImage(img,0,0,width,height);
+  const dataUrl=canvas.toDataURL('image/jpeg',0.9);
+  const base64=dataUrl.split(',')[1]||'';
+  if(!base64)throw new Error('Image conversion failed.');
+  return {image_base64:base64,mime_type:'image/jpeg',width,height};
+}
+async function uploadTokenImage(file){
+  if(!walletCtx)throw new Error('Connect your wallet before uploading the token image.');
+  setStatus('PREPARING TOKEN IMAGE…\nWorldzMINT is resizing the image for public token metadata.','warn');
+  const image=await resizeTokenImage(file);
+  const issued_at=new Date().toISOString();
+  const msg=['WORLDZMINT_UPLOAD_IMAGE_V1','wallet='+walletCtx.address,'issued_at='+issued_at].join('\n');
+  const signature=await bs58encode(await signMessage(msg));
+  setStatus('UPLOADING TOKEN IMAGE…\nThis only uploads the public token artwork. No transaction is being sent.','warn');
+  const out=await api({action:'UPLOAD_IMAGE',wallet:walletCtx.address,issued_at,signature,...image});
+  $('#image').value=out.imageUrl;
+  preflightOk=false;$('#mint-btn').disabled=true;
+  setStatus('TOKEN IMAGE READY ✅\n'+out.imageUrl+'\n\nNo blockchain transaction was sent.','good');
+  return out.imageUrl;
+}
 async function signTransaction(tx,partialSigners=[]){
   const latest=await connection.getLatestBlockhash('confirmed');
   tx.feePayer=new PublicKey(walletCtx.address);tx.recentBlockhash=latest.blockhash;tx.lastValidBlockHeight=latest.lastValidBlockHeight;
@@ -354,6 +400,14 @@ async function loadRegistry(){
   }catch{$('#registry').innerHTML='<div class="mint-row"><div>!</div><div><b>Mint registry unavailable</b><small>Treated as unknown — never silently green.</small></div></div>';}
 }
 $('#wallet-btn').addEventListener('click',connectWallet);
+$('#image-file').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  try{await uploadTokenImage(file);}catch(err){
+    console.error(err);
+    setStatus('TOKEN IMAGE UPLOAD FAILED\n'+(err?.message||String(err))+'\n\nNo transaction was sent.','bad');
+    e.target.value='';
+  }
+});
 $('#preflight').addEventListener('click',runPreflight);
 $('#mint-btn').addEventListener('click',mintFlow);
 $('#network').addEventListener('change',()=>{refreshConnection();preflightOk=false;$('#mint-btn').disabled=true;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
