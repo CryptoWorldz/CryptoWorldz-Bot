@@ -238,7 +238,7 @@ jobs:
           assert "resetJupiterMobileConnectionState" in mint_js
           assert "resetJupiterMobileConnectionState" in jupiter_mobile_js
           assert "@appkit/connection_status" in jupiter_mobile_js
-          assert 'Jupiter Mobile' in mint_html
+          assert 'Jupiter Wallet' in mint_html
           assert platform['confidenceCurve']['version']=='WORLDZ-CONFIDENCE-CURVE-1'
           assert platform['confidenceCurve']['mainnetExecutionEnabled'] is False
           assert platform['confidenceCurve']['feePolicy']['projectSharePercentOfCollectedSupportedProjectTradingFee']==90
@@ -498,7 +498,7 @@ jobs:
                   assert base_code==200 and 'WORLDZ EVM FAIR™' in base_body and 'BASE SEPOLIA' in base_body
                   assert genesis_code==200 and 'PRIVATE GENESIS CONSOLE' in genesis_body
                   assert all(term not in genesis_body for term in banned)
-                  assert mint_code==200 and 'WORLDZMINT' in mint_body.upper() and 'FIXED SUPPLY' in mint_body.upper() and 'Jupiter Mobile' in mint_body
+                  assert mint_code==200 and 'WORLDZMINT' in mint_body.upper() and 'FIXED SUPPLY' in mint_body.upper() and 'Jupiter Wallet' in mint_body
                   assert all(term not in mint_body for term in banned)
                   assert jup_bridge_code==200 and '@jup-ag/jup-mobile-adapter@0.0.2' in jup_bridge_body
                   assert platform['walletConnectivity']['reown']['projectId'] in jup_bridge_body
