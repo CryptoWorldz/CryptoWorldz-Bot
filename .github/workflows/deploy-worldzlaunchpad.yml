@@ -69,6 +69,26 @@ jobs:
           assert treasury['verifiedEvidence']['threshold']=='2-of-3'
           assert treasury['verifiedEvidence']['vaultDerivationVerified'] is True
           assert treasury['verifiedEvidence']['squadsProgramOwnerVerified'] is True
+          assert treasury['targetGovernance']=='5-of-10'
+          assert treasury['targetMemberCount']==10
+          assert treasury['targetThreshold']==5
+          assert treasury['upgradeRequiredBeforeMainnetFeeRouting'] is True
+          assert treasury['reserveTargetGovernance']=='6-of-9'
+          assert treasury['reserveMaximumRequiredApprovals']==6
+          standard=platform['treasuryStandard']
+          assert standard['version']=='WORLDZ-TREASURY-1'
+          assert standard['operationsTreasury']['signerCount']==10
+          assert standard['operationsTreasury']['approvalThreshold']==5
+          assert standard['reserveTreasury']['signerCount']==9
+          assert standard['reserveTreasury']['approvalThreshold']==6
+          assert standard['reserveTreasury']['maximumRequiredApprovals']==6
+          assert standard['signerRules']['privateKeysInRepository'] is False
+          treasury_policy=json.loads((root/'treasury-policy.json').read_text())
+          assert treasury_policy['governance']['operations']['display']=='5-of-10'
+          assert treasury_policy['governance']['reserve']['display']=='6-of-9'
+          assert treasury_policy['governance']['maximumApprovalsRequiredByWorldzPolicy']==6
+          assert treasury_policy['activation']['mainnetFeeRoutingEnabled'] is False
+          assert treasury_policy['chains']['solana']['operations']['vaultAddress']==treasury['vaultAddress']
           assert treasury['mainnetRoutingEnabled'] is False
           assert founding['totalPositions']==100
           assert founding['futureWorldzPoolPercent']==10
@@ -104,7 +124,7 @@ jobs:
 
           required=[
             root/'index.html',root/'app.js',root/'style.css',root/'status.php',
-            root/'platform-config.json',root/'metadata.php',
+            root/'platform-config.json',root/'treasury-policy.json',root/'metadata.php',
             root/'devnet/index.html',root/'devnet/app.js',
             root/'curve/index.html',root/'curve/app.js',
             root/'curve-pro/index.html',root/'curve-pro/app.js',
@@ -177,7 +197,7 @@ jobs:
           assert 'creator >5%' in base_js
           assert 'duplicate recipient' in base_js
 
-          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_share=10 project_share=90 supply_take=0 liquidity_take=0 founding100=1 base_sepolia=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
+          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_share=10 project_share=90 treasury_ops=5of10 treasury_reserve=6of9 max_approvals=6 supply_take=0 liquidity_take=0 founding100=1 base_sepolia=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
 
       - name: Run 100+ anti-cheat tokenomics scenarios
         shell: python
@@ -364,6 +384,10 @@ jobs:
                   assert platform['founding100']['futureWorldzPoolPercent']==10
                   assert platform['baseEvmFair']['status']=='BASE_SEPOLIA_BETA'
                   assert platform['baseEvmFair']['mainnetExecution'] is False
+                  assert platform['treasuryStandard']['operationsTreasury']['policy']=='5-of-10'
+                  assert platform['treasuryStandard']['reserveTreasury']['policy']=='6-of-9'
+                  assert platform['treasuryStandard']['reserveTreasury']['maximumRequiredApprovals']==6
+                  assert platform['treasuryRouting']['upgradeRequiredBeforeMainnetFeeRouting'] is True
 
                   assert dev_code==200 and 'Create Devnet Token' in dev_body
                   assert curve_code==200 and 'Worldz Curve™' in curve_body
