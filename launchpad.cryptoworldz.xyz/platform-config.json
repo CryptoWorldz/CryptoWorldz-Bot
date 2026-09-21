@@ -1,7 +1,7 @@
 {
-  "version": "2026-09-20-worldzlaunchpad-three-engine-devnet-v1",
+  "version": "2026-09-21-worldzlaunchpad-safe-launch-v4",
   "product": "WorldzLaunchPad™",
-  "status": "three-engine-devnet-beta",
+  "status": "safe-launch-devnet-public-mainnet-fail-closed",
   "publicMainnetCreatorLaunchesEnabled": false,
   "devnetTokenCreationEnabled": true,
   "principles": {
@@ -12,16 +12,23 @@
     "simulateBeforeSign": true,
     "noCustodyByDefault": true,
     "noWalletTransferTaxByDefault": true,
-    "economicsSnapshotAtLaunch": true
+    "economicsSnapshotAtLaunch": true,
+    "fixedSupplyMandatory": true,
+    "revokeMintAuthorityAfterGenesis": true,
+    "revokeFreezeAuthorityAfterGenesis": true,
+    "treasuryProgramAuthorityMultisig": true,
+    "noHiddenGenesisWallets": true,
+    "noBlacklistOrSellRestriction": true,
+    "atomicGenesisDistributionForMainnet": true
   },
   "feePolicy": {
     "projectTradingFeeMinPercent": 0.5,
-    "projectTradingFeeMaxPercent": 4,
+    "projectTradingFeeMaxPercent": 3,
     "stepPercent": 0.25,
     "worldzLaunchPadShareOfCollectedProjectFeePercent": 10,
     "worldzLaunchPadShareOfTokenSupplyPercent": 0,
     "worldzLaunchPadShareOfInitialLiquidityPercent": 0,
-    "description": "WorldzLaunchPad receives 10% of the configured project trading-fee revenue collected through the supported launch route. It is not a 10% token-supply fee, liquidity fee, or ordinary wallet-transfer tax."
+    "description": "WorldzLaunchPad permits a 0.50%–3.00% project trading-fee configuration only through supported launch routes. Ordinary wallet transfers carry 0% WorldzLaunchPad transfer tax. WorldzLaunchPad receives 10% of collected project trading-fee revenue, never token supply or initial liquidity."
   },
   "launchEngines": [
     {
@@ -153,6 +160,11 @@
   },
   "releaseGate": {
     "mainnetCreatorLaunch": [
+      "Worldz Safe Launch Standard v1 hard-limit proof",
+      "atomic genesis distribution to tagged destinations",
+      "100% creator-controlled LP lock proof for at least 365 days",
+      "founder vesting proof: at least 90-day cliff and 18-month vesting",
+      "2-of-3 or stronger treasury/program multisig proof",
       "chain adapter security review",
       "fee and routing proof",
       "lock and vesting proof",
@@ -241,7 +253,7 @@
     "devnetQuote": "SOL",
     "projectTradingFeeRangePercent": [
       0.5,
-      4
+      3
     ],
     "creatorTradingFeeSharePercent": 90,
     "worldzPartnerTradingFeeSharePercent": 10,
@@ -253,5 +265,59 @@
     },
     "lockedTokenVesting": "optional per launch",
     "publicMainnetExecution": false
+  },
+  "safeLaunchPolicy": {
+    "version": "WORLDZ-SAFE-LAUNCH-1",
+    "status": "ENFORCED_IN_BUILDER_AND_DEVNET_PREFLIGHT__MAINNET_REQUIRES_ONCHAIN_ENFORCEMENT",
+    "compulsory": {
+      "fixedSupply": true,
+      "revokeMintAuthorityAfterGenesis": true,
+      "revokeFreezeAuthorityAfterGenesis": true,
+      "walletTransferTaxPercent": 0,
+      "treasuryProgramAuthorityMultisig": true,
+      "minimumMultisigSigners": 3,
+      "minimumMultisigThreshold": 2,
+      "simulateBeforeSign": true,
+      "taggedGenesisWallets": true,
+      "publicAllocationManifest": true,
+      "hiddenPrivateAllocationsAllowed": false,
+      "blacklistOrSellRestrictionAllowed": false,
+      "undisclosedPrivateDiscountAllowed": false
+    },
+    "token": {
+      "supplyMin": 1000,
+      "supplyMax": 1000000000000,
+      "decimalsMin": 0,
+      "decimalsMax": 9
+    },
+    "allocations": {
+      "creatorTeamMaxPercent": 15,
+      "creatorTeamUnlockedAtGenesisMaxPercent": 5,
+      "liquidityMinPercent": 25,
+      "liquidityMaxPercent": 60,
+      "communityPublicMinPercent": 20,
+      "treasuryReserveMaxPercent": 15,
+      "singleNonSystemGenesisWalletMaxPercent": 5,
+      "founderCliffMinDays": 90,
+      "founderVestingMinMonths": 18,
+      "creatorControlledLpLockPercent": 100,
+      "lpLockMinDays": 365
+    },
+    "feeRoutes": {
+      "creatorMaxPercent": 20,
+      "treasuryMaxPercent": 20,
+      "lpGrowthMinPercent": 20,
+      "holdersLpCommunityCombinedMinPercent": 60
+    },
+    "mainnetEnforcement": {
+      "atomicGenesisDistributionRequired": true,
+      "mintDirectlyToTaggedDestinations": true,
+      "creatorCannotReceiveFullSupplyAtGenesis": true,
+      "lpLockProofRequiredBeforeLaunchPadVerifiedLabel": true,
+      "vestingProofRequiredBeforeLaunchPadVerifiedLabel": true,
+      "multisigProofRequiredBeforeLaunchPadVerifiedLabel": true,
+      "manifestHashRequired": true,
+      "walletTagsRequired": true
+    }
   }
 }
