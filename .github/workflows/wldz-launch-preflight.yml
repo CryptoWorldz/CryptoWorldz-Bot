@@ -1,0 +1,41 @@
+name: WLDZ Mainnet Launch Preflight
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "worldzpad-mainnet/launch-builder/**"
+      - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
+      - ".github/workflows/wldz-launch-preflight.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wldz-mainnet-launch-preflight
+  cancel-in-progress: true
+
+jobs:
+  build-and-simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: worldzpad-mainnet/launch-builder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: worldzpad-mainnet/launch-builder/package-lock.json
+      - name: Install pinned launch SDKs
+        run: npm ci
+      - name: Build and simulate canonical WLDZ launch
+        run: npm run preflight
+      - name: Upload launch proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: wldz-mainnet-launch-preflight
+          path: worldzpad-mainnet/artifacts/wldz-launch-preflight.json
+          if-no-files-found: error
