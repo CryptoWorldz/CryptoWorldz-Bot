@@ -22,7 +22,8 @@ This file supersedes older WLDZ genesis/allocation percentages wherever they con
 | OneWorldz / Charity Impact Pool | 10% | 10,000,000 |
 | Worldz Treasury | 10% | 10,000,000 |
 | General Reserve | 5% | 5,000,000 |
-| Community / Ecosystem / Growth | 7% | 7,000,000 |
+| Team Reserve | 5% | 5,000,000 |
+| Community / Ecosystem / Growth | 2% | 2,000,000 |
 | Operations / Security / Infrastructure | 5% | 5,000,000 |
 | **TOTAL** | **100%** | **100,000,000** |
 
@@ -103,8 +104,20 @@ Exactly **5,000,000 WLDZ** remains reserved.
 
 It is not automatically committed to LP. It may later support liquidity, emergency treasury needs, ecosystem support or another approved use. If later assigned to LP, total designated LP capacity can rise from 35% to a maximum of 40%.
 
-### Community / Ecosystem / Growth — 7%
-Exactly **7,000,000 WLDZ** is reserved for community growth, ecosystem support, campaigns, verified rewards and strategic development.
+### Team Reserve — 5%
+Exactly **5,000,000 WLDZ** is reserved for verified Team contributors.
+
+No team distribution is automatic. Release requires:
+- a verified Solana wallet recorded for that team member;
+- an active/verified Command Centre or approved project role;
+- evidence of ongoing contribution;
+- the applicable treasury approval;
+- vesting/release terms recorded before transfer.
+
+A working vesting default is 20% unlocked and 80% linear over 12 months, unless a later approved team policy replaces it.
+
+### Community / Ecosystem / Growth — 2%
+Exactly **2,000,000 WLDZ** is reserved for community growth, ecosystem support, campaigns, verified rewards and strategic development.
 
 ### Operations / Security / Infrastructure — 5%
 Exactly **5,000,000 WLDZ** is reserved for operational continuity, security, infrastructure, tooling and platform costs.
