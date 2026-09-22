@@ -1,0 +1,48 @@
+name: ZED Full Runtime Load Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/zed-load-diagnostic.yml"
+      - "src/**"
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Require full runtime and expose synchronous load failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          process.env.BOT_TOKEN = "123456789:DIAGNOSTIC_ONLY_NOT_A_REAL_TOKEN";
+          process.env.SUPABASE_URL = "https://hknymhhyqldtzmplzuzh.supabase.co";
+          process.env.SUPABASE_PUBLISHABLE_KEY = "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV";
+          let thrown = null;
+          try {
+            require("./src/full-runtime-entry");
+          } catch (error) {
+            thrown = error;
+          }
+          if (thrown) {
+            console.error("ZED_FULL_RUNTIME_REQUIRE=FAIL");
+            console.error(thrown && thrown.stack ? thrown.stack : String(thrown));
+            process.exit(1);
+          }
+          console.log("ZED_FULL_RUNTIME_REQUIRE=PASS");
+          setTimeout(() => process.exit(0), 750);
+          NODE
