@@ -1,6 +1,7 @@
 (()=>{
 const REQUIRED='Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u';
 const RPC='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';
+const PUBLIC_RPC='https://api.mainnet-beta.solana.com';
 const MINT='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U';
 const MULTISIG='B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN';
 const VAULT='n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB';
@@ -148,35 +149,90 @@ async function manifest(){
  return c;
 }
 
-async function signatureOutcome(connection,signature){
+async function signatureOutcome(connections,signature){
+ const list=Array.isArray(connections)?connections:[connections];
  for(let i=0;i<4;i++){
-  const out=await connection.getSignatureStatuses([signature],{searchTransactionHistory:true});
-  const status=out?.value?.[0]||null;
-  if(status?.err)return {state:'failed',err:status.err};
-  if(status&&(status.confirmationStatus==='confirmed'||status.confirmationStatus==='finalized'))return {state:'confirmed'};
-  if(i<3)await new Promise(resolve=>setTimeout(resolve,1200));
+  for(const connection of list){
+   try{
+    const out=await connection.getSignatureStatuses([signature],{searchTransactionHistory:true});
+    const status=out?.value?.[0]||null;
+    if(status?.err)return {state:'failed',err:status.err};
+    if(status&&(status.confirmationStatus==='confirmed'||status.confirmationStatus==='finalized'))return {state:'confirmed'};
+   }catch{}
+  }
+  if(i<3)await new Promise(resolve=>setTimeout(resolve,1000));
  }
  return {state:'unknown'};
+}
+
+async function freshestTransactionConnection(primary,web3){
+ const publicConnection=new web3.Connection(PUBLIC_RPC,'confirmed');
+ const candidates=[publicConnection,primary];
+ const samples=await Promise.all(candidates.map(async connection=>{
+  try{
+   const height=await connection.getBlockHeight('processed');
+   return {connection,height};
+  }catch{return null}
+ }));
+ const live=samples.filter(Boolean).sort((a,b)=>b.height-a.height);
+ if(!live.length)fail('Solana mainnet RPC is unavailable. No transaction was built or sent.');
+ return {connection:live[0].connection,all:candidates};
+}
+
+async function freshBlockhash(connection){
+ for(let i=0;i<3;i++){
+  const [latest,height]=await Promise.all([
+   connection.getLatestBlockhash('processed'),
+   connection.getBlockHeight('processed')
+  ]);
+  if(latest.lastValidBlockHeight-height>=100)return latest;
+ }
+ fail('Solana returned a stale blockhash. Nothing was sent. Try again when RPC is current.');
 }
 
 async function sendInstructions(ctx,connection,web3,payer,instructions,label){
  let lastExpiredSignature=null;
  for(let attempt=1;attempt<=2;attempt++){
-  const latest=await connection.getLatestBlockhash('confirmed');
+  const route=await freshestTransactionConnection(connection,web3);
+  const txConnection=route.connection;
+  const latest=await freshBlockhash(txConnection);
   const tx=new web3.VersionedTransaction(new web3.TransactionMessage({
    payerKey:payer,
    recentBlockhash:latest.blockhash,
    instructions
   }).compileToV0Message());
-  set(label+(attempt===1?' — approve in your wallet…':' — previous blockhash expired. Approve the refreshed transaction…'),'warn');
+
+  set(label+(attempt===1?' — approve in your wallet…':' — fresh blockhash ready. Approve the replacement transaction…'),'warn');
   const signed=await signVersionedTransaction(ctx,web3,tx);
-  const signature=await connection.sendRawTransaction(signed.serialize(),{
-   skipPreflight:false,
-   maxRetries:8,
-   preflightCommitment:'confirmed'
-  });
+
+  const heightAfterSigning=await txConnection.getBlockHeight('processed');
+  if(latest.lastValidBlockHeight-heightAfterSigning<35){
+   if(attempt===1){
+    set(label+' — blockhash became too old while the wallet was open. Nothing was broadcast. Refreshing it now…','warn');
+    continue;
+   }
+   fail(label+' stopped before broadcast because the blockhash was too old. No stale transaction was sent.');
+  }
+
+  let signature;
   try{
-   const confirmation=await connection.confirmTransaction({
+   signature=await txConnection.sendRawTransaction(signed.serialize(),{
+    skipPreflight:false,
+    maxRetries:10,
+    preflightCommitment:'processed'
+   });
+  }catch(error){
+   const expired=/expired|block height exceeded|blockheight exceeded|blockhash not found/i.test(textErr(error));
+   if(!expired)throw error;
+   if(attempt===1){
+    set(label+' — RPC rejected the stale blockhash before broadcast. Refreshing it now…','warn');
+    continue;
+   }
+   fail(label+' stopped because Solana rejected two stale blockhashes before confirmation. No further transaction will be attempted.');
+  }
+
+  try{
+   const confirmation=await txConnection.confirmTransaction({
     signature,
     blockhash:latest.blockhash,
     lastValidBlockHeight:latest.lastValidBlockHeight
@@ -186,19 +242,19 @@ async function sendInstructions(ctx,connection,web3,payer,instructions,label){
    }
    return signature;
   }catch(error){
-   const outcome=await signatureOutcome(connection,signature);
+   const outcome=await signatureOutcome(route.all,signature);
    if(outcome.state==='confirmed')return signature;
    if(outcome.state==='failed')fail(label+' failed on-chain: '+JSON.stringify(outcome.err));
-   const expired=/expired|block height exceeded|blockheight exceeded/i.test(textErr(error));
+   const expired=/expired|block height exceeded|blockheight exceeded|blockhash not found/i.test(textErr(error));
    if(!expired)throw error;
    lastExpiredSignature=signature;
    if(attempt===1){
-    set(label+' — the first wallet approval expired before confirmation. Building a fresh transaction now…','warn');
+    set(label+' — confirmation window expired and the signature did not land. Building one fresh replacement…','warn');
     continue;
    }
   }
  }
- fail(label+' stopped after two expired wallet approvals. Last signature: '+lastExpiredSignature+'. Tap the action again and approve promptly.');
+ fail(label+' stopped after two expiry-safe attempts. Last unconfirmed signature: '+(lastExpiredSignature||'none')+'. No automatic third attempt will be made.');
 }
 
 async function readCustody(connection,sqds,spl,web3,member){
