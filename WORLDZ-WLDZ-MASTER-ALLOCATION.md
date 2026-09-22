@@ -82,9 +82,10 @@ Equal launch allocation:
 ### OneWorldz / Charity Impact Pool — 10%
 Exactly **10,000,000 WLDZ** is ring-fenced for humanitarian/charity impact.
 
-Destination wallet/vault: **PENDING VERIFIED SELECTION**.
+Custody wallet/vault: **CryptoWorldz Treasury Multisig**
+`n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB`
 
-Do not send this bucket to a personal/dev wallet. The destination must be a verified OneWorldz/DonateWorldz/Command Centre impact wallet or dedicated charity vault.
+This is one of the four active Command Centre wallets and is used only as secure multisig custody for the ring-fenced charity balance. The Dev, Investment and Rewards wallets retain their separate purposes. A dedicated OneWorldz/DonateWorldz charity wallet can replace this custody destination later without changing the 10,000,000 WLDZ charity allocation.
 
 ### Worldz Treasury — 10%
 Exactly **10,000,000 WLDZ** is reserved for Worldz Treasury operations.
