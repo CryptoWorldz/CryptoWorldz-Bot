@@ -294,11 +294,17 @@ NODE
 echo "HOSTINGER_MANAGED_BUILD=STARTED uuid=$build_uuid"
 
 build_pass=0
+build_last_poll_error="none"
 for attempt in $(seq 1 90); do
   sleep 10
-  curl --fail --silent --show-error --location \
+  if ! curl --fail --silent --show-error --location \
+    --connect-timeout 15 --max-time 60 --retry 2 --retry-all-errors --retry-delay 2 \
     -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-    "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
+    "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"; then
+    build_last_poll_error="curl_failed_attempt_${attempt}"
+    echo "::warning::HOSTINGER_MANAGED_BUILD_POLL_FAILED attempt=${attempt}/90; retrying within the bounded build wait."
+    continue
+  fi
   build_state="$(BUILD_LIST="$RUNNER_TEMP/builds.json" BUILD_UUID="$build_uuid" node - <<'NODE'
 const p=require(process.env.BUILD_LIST);
 const rows=Array.isArray(p)?p:(Array.isArray(p.data)?p.data:(Array.isArray(p.items)?p.items:[]));
@@ -317,7 +323,10 @@ NODE
       exit 1;;
   esac
 done
-test "$build_pass" = '1'
+if [ "$build_pass" != '1' ]; then
+  echo "::error::Managed Hostinger build did not complete within 90 bounded polls (last_poll_error=$build_last_poll_error)."
+  exit 1
+fi
 echo 'HOSTINGER_MANAGED_BUILD=PASS'
 
 # The build archive deliberately contains no secrets. Restore the preserved
