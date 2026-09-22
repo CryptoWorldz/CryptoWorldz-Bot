@@ -50,6 +50,16 @@ process.env.SUPABASE_PUBLISHABLE_KEY = String(
   "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
 ).trim();
 
+let fullRuntimeLoadError = "";
+
+function sanitizeRuntimeLoadError(error) {
+  return String(error && (error.code || error.message) || "unknown_full_runtime_load_error")
+    .replace(/https?:\/\/[^\s]+/gi, "[URL_REDACTED]")
+    .replace(/(?:sk-|eyJ)[A-Za-z0-9._-]{12,}/g, "[SECRET_REDACTED]")
+    .replace(/[A-Za-z0-9_-]{48,}/g, "[VALUE_REDACTED]")
+    .slice(0, 300);
+}
+
 const fullRuntimeConfigured =
   Boolean(process.env.BOT_TOKEN) &&
   Boolean(process.env.SUPABASE_URL) &&
@@ -59,7 +69,8 @@ if (fullRuntimeConfigured) {
     require("./src/full-runtime-entry");
     return;
   } catch (error) {
-    console.error("Full runtime unavailable; starting protected public gateway", error && error.message ? error.message : error);
+    fullRuntimeLoadError = sanitizeRuntimeLoadError(error);
+    console.error("Full runtime unavailable; starting protected public gateway", fullRuntimeLoadError);
   }
 }
 
@@ -258,7 +269,8 @@ const server = http.createServer(async (req, res) => {
       environment_source: protectedEnvironment.source,
       full_runtime_configured: fullRuntimeConfigured,
       bot_token_configured: Boolean(process.env.BOT_TOKEN),
-      supabase_runtime_key_configured: Boolean(String(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || "").trim())
+      supabase_runtime_key_configured: Boolean(String(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || "").trim()),
+      full_runtime_load_error: fullRuntimeLoadError || null
     }, origin);
   }
 
@@ -269,7 +281,8 @@ const server = http.createServer(async (req, res) => {
       degraded: true,
       service: "CryptoWorldz Protected Public Gateway",
       runtime: "dependency_free_guard_v2",
-      reason: "full_zed_runtime_unavailable"
+      reason: "full_zed_runtime_unavailable",
+      full_runtime_load_error: fullRuntimeLoadError || null
     }, origin);
   }
 
