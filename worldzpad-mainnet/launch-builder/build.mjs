@@ -131,7 +131,7 @@ assert(threshold === 2, "current Squads threshold is no longer 2");
 const creatorMember = multisigAccount.members.find((member) => member.key.equals(creatorPk));
 assert(Boolean(creatorMember), "configured creator is not a Squads member");
 assert(
-  multisig.Permissions.has(creatorMember.permissions, multisig.Permission.Initiate),
+  (Number(creatorMember.permissions.mask) & 1) === 1,
   "configured creator lacks Squads Initiate permission"
 );
 
