@@ -55,3 +55,13 @@ test('WLDZ route exposes an explicit mobile-capable wallet connect path',()=>{
   assert.match(source,/signVersionedTransaction/);
   assert.doesNotMatch(source,/Wallet unavailable\. Open this page in the same wallet browser/);
 });
+
+
+test('WLDZ proposal route recovers safely from an expired blockhash',()=>{
+  assert.match(source,/getSignatureStatuses/);
+  assert.match(source,/searchTransactionHistory:true/);
+  assert.match(source,/attempt<=2/);
+  assert.match(source,/previous blockhash expired/);
+  assert.match(source,/maxRetries:8/);
+  assert.match(source,/approve the refreshed transaction/);
+});
