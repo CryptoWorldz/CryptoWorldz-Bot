@@ -174,7 +174,7 @@ const files={
 };
 for(const [k,f] of Object.entries(files)){const tx={setup,addPool:add1,addLock:add2,activate:act,pool:poolV0,lock:lockV0}[k];fs.writeFileSync(path.join('artifacts',f),ser(tx)+'\n');}
 const report={
- status:poolSim.value.err===null?'BUILT_AND_SIMULATED_POOL_AND_PROPOSAL_SETUP':('BUILT_NEEDS_VAULT_SOL_'+(minTopup??'UNKNOWN')),broadcast:false,valueMoved:false,network:'mainnet-beta',
+ status:poolSim.value.err===null?'BUILT_AND_SIMULATED_POOL_AND_PROPOSAL_SETUP':(syntheticFunding?.passed?'BUILT_NEEDS_VAULT_SOL_'+syntheticFunding.minimumTopupLamportsWithin100k+'_LAMPORTS':('BUILT_NEEDS_VAULT_SOL_'+(minTopup??'UNKNOWN'))),broadcast:false,valueMoved:false,network:'mainnet-beta',
  canonicalMint:mint.toBase58(),token:{supply:100000000,decimals:6,mintAuthority:null,freezeAuthority:null,treasuryAta:ata.toBase58(),treasuryBalanceRaw:ta.amount.toString()},
  squads:{multisig:ms.toBase58(),threshold:2,vault:vault.toBase58(),vaultSolLamports:vaultSol,creator:creator.toBase58(),creatorSolLamports:creatorSol,batchIndex:batchIndex.toString(),batchPda:batchPda.toBase58(),proposalPda:proposalPda.toBase58(),poolLegPda:leg1Pda.toBase58(),lockLegPda:leg2Pda.toBase58(),positionNftEphemeralSigner:posNft.toBase58()},
  meteora:{program:config.launch.program,pool:pool.toBase58(),position:position.toBase58(),activeWldz:15000000,configuredStartingQuoteSol:0,priceSolPerWldz:config.launch.initPriceSolPerWldz,collectFeeMode:'OnlyB',baseFeeBps:200,liquidityDelta:liq.toString(),permanentLockLegIncluded:true},
