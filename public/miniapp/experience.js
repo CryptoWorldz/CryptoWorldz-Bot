@@ -183,8 +183,6 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     $("enter-command-centre")?.addEventListener("click", () => $("splashback")?.setAttribute("aria-hidden", "true"));
-    const observer = new MutationObserver(() => { if (!$("content")?.classList.contains("hidden")) { patchImpact(); observer.disconnect(); } });
-    if ($("content")) observer.observe($("content"), { attributes: true, attributeFilter: ["class"] });
     const wait = setInterval(() => {
       if (telegram?.initData && !$("content")?.classList.contains("hidden")) { clearInterval(wait); bootstrapExperience(); }
     }, 150);
