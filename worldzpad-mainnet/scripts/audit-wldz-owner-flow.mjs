@@ -99,6 +99,16 @@ const report={currentTransactionIndex:ma.transactionIndex.toString(),existing,ne
 for(const [k,ixs] of Object.entries(combos)){
   try{report.packetSizes[k]=size(ixs,bh)}catch(e){report.packetSizes[k]='BUILD_ERROR '+e.message}
 }
+// Prove the current empty Draft (created by the user's earlier expired UI attempt) can be resumed safely.
+const resumable=existing.slice().reverse().find(x=>x.batch?.creator===DEV.toBase58()&&x.batch?.vaultIndex===0&&x.batch?.size===0&&x.proposal?.status==='Draft');
+if(resumable){
+  const idx=BigInt(resumable.index);
+  const resumeDev=multisig.instructions.batchAddTransaction({vaultIndex:0,multisigPda:MS,member:DEV,rentPayer:DEV,batchIndex:idx,transactionIndex:1,ephemeralSigners:0,transactionMessage:devMsg});
+  const resumeTx=new VersionedTransaction(new TransactionMessage({payerKey:DEV,recentBlockhash:bh,instructions:[resumeDev]}).compileToV0Message());
+  report.resumeCandidate={index:resumable.index,proposalPda:resumable.proposalPda,packetBytes:Buffer.from(resumeTx.serialize()).length};
+  const sim=await C.simulateTransaction(resumeTx,{sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed'});
+  report.resumeCandidate.sim={err:sim.value.err,units:sim.value.unitsConsumed??null};
+}
 for(const key of ['setup','setup_addDev','activate_approve']){
   const ixs=combos[key]; let tx;
   try{tx=new VersionedTransaction(new TransactionMessage({payerKey:DEV,recentBlockhash:bh,instructions:ixs}).compileToV0Message())}catch{continue}
