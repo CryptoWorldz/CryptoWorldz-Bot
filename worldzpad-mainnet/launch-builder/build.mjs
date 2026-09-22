@@ -7,6 +7,7 @@ import {
   Connection,
   PublicKey,
   Transaction,
+  TransactionInstruction,
   TransactionMessage,
   SystemProgram,
   VersionedTransaction,
@@ -245,12 +246,36 @@ const launchInstructions = meteoraTx.instructions.filter((ix) => {
 assert(removedTreasuryAta === 1, "expected exactly one redundant WLDZ Treasury ATA instruction to be removed");
 console.log("WLDZ_REDUNDANT_TREASURY_ATA_IX_REMOVED=1");
 
+// Both WLDZ and wSOL are classic SPL Token mints. Meteora's on-chain
+// validate_mint() returns early for classic SPL mints, so token-badge remaining
+// accounts are not required. The SDK appends two badge PDAs unconditionally;
+// remove only those two remaining metas from InitializeCustomizablePool.
+let removedBadgeMetas = 0;
+const compactLaunchInstructions = launchInstructions.map((ix) => {
+  const discriminator = Buffer.from(ix.data).subarray(0, 8).toString("hex");
+  if (
+    ix.programId.toBase58() === candidate.launch.program &&
+    discriminator === "14a1f118bdddb402" &&
+    ix.keys.length >= 21
+  ) {
+    removedBadgeMetas = 2;
+    return new TransactionInstruction({
+      programId: ix.programId,
+      keys: ix.keys.slice(0, -2),
+      data: ix.data,
+    });
+  }
+  return ix;
+});
+assert(removedBadgeMetas === 2, "expected two optional classic-SPL token badge metas to be removed");
+console.log("WLDZ_OPTIONAL_TOKEN_BADGE_METAS_REMOVED=2");
+
 const sharedAltAddress = new PublicKey("7CaMLcAuSskoeN7HoRwZjsSthU8sMwKqxtXkyMiMjuc");
 const sharedAlt = (await connection.getAddressLookupTable(sharedAltAddress, "confirmed")).value;
 assert(sharedAlt, "shared mainnet address lookup table unavailable");
 const altSet = new Set(sharedAlt.state.addresses.map((k) => k.toBase58()));
 const launchKeys = new Set();
-for (const ix of launchInstructions) {
+for (const ix of compactLaunchInstructions) {
   launchKeys.add(ix.programId.toBase58());
   for (const k of ix.keys) launchKeys.add(k.pubkey.toBase58());
 }
@@ -262,7 +287,7 @@ const latest = await connection.getLatestBlockhash("confirmed");
 const innerTransactionMessage = new TransactionMessage({
   payerKey: vaultPk,
   recentBlockhash: latest.blockhash,
-  instructions: launchInstructions,
+  instructions: compactLaunchInstructions,
 });
 
 const innerVersioned = new VersionedTransaction(
@@ -307,7 +332,7 @@ if (innerSimulation.value.err !== null) {
           toPubkey: vaultPk,
           lamports: topupLamports,
         }),
-        ...launchInstructions,
+        ...compactLaunchInstructions,
       ],
     });
     const fundedTx = new VersionedTransaction(fundedMessage.compileToV0Message());
@@ -380,7 +405,7 @@ if (!fundingSimulation?.passed) {
           toPubkey: vaultPk,
           lamports: topupLamports,
         }),
-        ...launchInstructions,
+        ...compactLaunchInstructions,
       ],
     });
     const fundedTx = new VersionedTransaction(fundedMessage.compileToV0Message());
@@ -515,7 +540,7 @@ const report = {
     dynamicFeeEnabled: false,
     permanentLockIncludedAtomically: true,
     liquidityDelta: liquidityDelta.toString(),
-    instructionCount: launchInstructions.length,
+    instructionCount: compactLaunchInstructions.length,
     addressLookupTable: sharedAltAddress.toBase58(),
     addressLookupTableHits: altHits.length,
     requiredSigners: signerKeys,
