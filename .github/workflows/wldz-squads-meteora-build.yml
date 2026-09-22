@@ -8,12 +8,18 @@ on:
       - "worldzpad-mainnet/package.json"
       - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
       - ".github/workflows/wldz-squads-meteora-build.yml"
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/scripts/build-wldz-squads-meteora.mjs"
+      - "worldzpad-mainnet/package.json"
+      - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
+      - ".github/workflows/wldz-squads-meteora-build.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: wldz-squads-meteora-build
+  group: wldz-squads-meteora-build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
