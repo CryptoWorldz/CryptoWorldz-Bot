@@ -47,7 +47,7 @@ test('WLDZ launch invariants remain locked in the browser route',()=>{
 });
 
 test('WLDZ route exposes an explicit mobile-capable wallet connect path',()=>{
-  assert.match(html,/id="connect-wallet"/);
+  assert.match(html,/<button class="wallet-mini" id="connect-wallet"[^>]*>Connect Wallet<\/button>/);
   assert.match(html,/Connect Wallet/);
   assert.match(source,/@wallet-standard\/app@1\.1\.0/);
   assert.match(source,/jupiter-mobile\.js/);
