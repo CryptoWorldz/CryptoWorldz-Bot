@@ -536,6 +536,7 @@ jobs:
                   mint_code,mint_body=get(base+'/mint/?verify=public-v10')
                   jup_bridge_code,jup_bridge_body=get(base+'/mint/jupiter-mobile.js?verify=public-v10')
                   trust_code,trust_body=get(base+'/trust/?verify=trust-v2')
+                  tech_code,tech_body=get(base+'/technology/?verify=tech-v1')
                   status_code,status_body=get(base+'/status.php?verify=public-v6')
                   reg_code,reg_body=get(registry+'?verify=public-v6')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
@@ -583,6 +584,8 @@ jobs:
                   assert all(term not in jup_bridge_body for term in banned)
                   assert trust_code==200 and 'WORLDZ TRUST ORBIT' in trust_body and 'PROOF' in trust_body
                   assert all(term not in trust_body for term in banned)
+                  assert tech_code==200 and 'WORLDZ TECHNOLOGY & MEANINGS' in tech_body and 'Swap API V2' in tech_body and 'WorldzMINT' in tech_body
+                  assert all(term not in tech_body for term in banned)
                   assert platform['trustOrbit']['version']=='WORLDZ-TRUST-ORBIT-1'
                   assert status_code==200 and live['ok'] is True
                   assert reg_code==200 and public_registry['ok'] is True
@@ -591,7 +594,7 @@ jobs:
                   assert public_registry['founding100']['futureWorldzPoolPercent']==10
                   assert public_registry['founding100']['equalAllocationPerQualifiedPositionPercent']==0.1
 
-                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 worldzmint=1 jupiter_mobile_reown=1 confidence_stack=1 registry=1 fee_only_10=1 founding100=1 base_sepolia=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
+                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 worldzmint=1 technology_guide=1 jupiter_mobile_reown=1 confidence_stack=1 registry=1 fee_only_10=1 founding100=1 base_sepolia=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:
