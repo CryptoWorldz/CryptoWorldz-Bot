@@ -619,7 +619,10 @@ jobs:
                   assert wldz_js_code==200 and 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' in wldz_js_body
                   assert wldz_cfg_code==200 and wldz_cfg['token']['mint']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
                   assert wldz_cfg['launch']['baseAmountTokens']==15000000 and wldz_cfg['launch']['permanentLock'] is True
-                  assert wldz_cfg['publicCreatorLaunchesEnabled'] is False
+                  assert wldz_cfg['execution']['publicCreatorGate'] is False
+                  assert 'RESUME_KEY' in wldz_js_body
+                  assert 'confirmation.value.err!==null' in wldz_js_body
+                  assert 'getTransactionPda' in wldz_js_body
                   assert all(term not in tech_body for term in banned)
                   assert platform['trustOrbit']['version']=='WORLDZ-TRUST-ORBIT-1'
                   assert status_code==200 and live['ok'] is True
