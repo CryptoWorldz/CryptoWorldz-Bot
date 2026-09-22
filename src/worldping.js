@@ -83,7 +83,7 @@ function registerWorldPingHandlers({ bot, config, supabase, env = process.env })
       ].join("\n"));
     } catch (error) {
       console.error("WorldPing failed", { code: error?.code || "UNKNOWN" });
-      return send(message, "❌ WorldPing could not be sent. Confirm ZED has group-admin access and try again.");
+      return send(message, "❌ WorldPing could not be sent. Please try again.");
     }
   });
 
