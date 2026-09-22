@@ -63,5 +63,5 @@ test('WLDZ proposal route recovers safely from an expired blockhash',()=>{
   assert.match(source,/attempt<=2/);
   assert.match(source,/previous blockhash expired/);
   assert.match(source,/maxRetries:8/);
-  assert.match(source,/approve the refreshed transaction/);
+  assert.match(source,/Approve the refreshed transaction/);
 });
