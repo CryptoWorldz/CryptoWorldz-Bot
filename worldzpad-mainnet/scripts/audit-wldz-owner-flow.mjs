@@ -80,7 +80,22 @@ const combos={
   all_setup_legs:[...setup,addDev,addPool,addLock],
   all:[...setup,addDev,addPool,addLock,activate,approve]
 };
-const report={nextIndex:next.toString(),batchPda:batchPda.toBase58(),proposalPda:proposalPda.toBase58(),pool:pool.toBase58(),vaultSol:vaultBal/1e9,sourceWldz:Number(source.amount/1000000n),packetSizes:{}};
+const existing=[];
+for(let i=1n;i<=multisig.utils.toBigInt(ma.transactionIndex);i++){
+  const [bp]=multisig.getTransactionPda({multisigPda:MS,index:i});
+  const [pp]=multisig.getProposalPda({multisigPda:MS,transactionIndex:i});
+  const row={index:i.toString(),batchPda:bp.toBase58(),proposalPda:pp.toBase58(),batch:null,proposal:null,legs:[]};
+  try{const b=await multisig.accounts.Batch.fromAccountAddress(C,bp,'confirmed');row.batch=b.pretty();}catch{}
+  try{const p=await multisig.accounts.Proposal.fromAccountAddress(C,pp,'confirmed');row.proposal=p.pretty();}catch{}
+  for(let leg=1;leg<=4;leg++){
+    const [lp]=multisig.getBatchTransactionPda({multisigPda:MS,batchIndex:i,transactionIndex:leg});
+    let exists=false;
+    try{await multisig.accounts.VaultBatchTransaction.fromAccountAddress(C,lp,'confirmed');exists=true;}catch{}
+    row.legs.push({leg,pda:lp.toBase58(),exists});
+  }
+  existing.push(row);
+}
+const report={currentTransactionIndex:ma.transactionIndex.toString(),existing,nextIndex:next.toString(),batchPda:batchPda.toBase58(),proposalPda:proposalPda.toBase58(),pool:pool.toBase58(),vaultSol:vaultBal/1e9,sourceWldz:Number(source.amount/1000000n),packetSizes:{}};
 for(const [k,ixs] of Object.entries(combos)){
   try{report.packetSizes[k]=size(ixs,bh)}catch(e){report.packetSizes[k]='BUILD_ERROR '+e.message}
 }
