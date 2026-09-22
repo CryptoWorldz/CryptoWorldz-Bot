@@ -249,7 +249,6 @@ const innerSimulation = await connection.simulateTransaction(innerVersioned, {
 });
 if (innerSimulation.value.err !== null) {
   console.error("WLDZ_METEORA_SIMULATION_LOGS=" + JSON.stringify(innerSimulation.value.logs ?? []));
-  fail("Meteora execution simulation failed: " + JSON.stringify(innerSimulation.value.err));
 }
 
 const createVaultTransactionIx = multisig.instructions.vaultTransactionCreate({
@@ -288,16 +287,15 @@ const proposalSimulation = await simulateSerialized(
 );
 if (proposalSimulation.err !== null) {
   console.error("WLDZ_SQUADS_PROPOSAL_SIMULATION_LOGS=" + JSON.stringify(proposalSimulation.logs ?? []));
-  fail("Squads proposal creation simulation failed: " + JSON.stringify(proposalSimulation.err));
 }
 
 const simulatedTransactionAccount = proposalSimulation.accounts?.[0] ?? null;
 const simulatedProposalAccount = proposalSimulation.accounts?.[1] ?? null;
-assert(simulatedTransactionAccount !== null, "simulation did not produce Squads transaction account");
-assert(simulatedProposalAccount !== null, "simulation did not produce Squads proposal account");
+const proposalPassed = proposalSimulation.err === null && simulatedTransactionAccount !== null && simulatedProposalAccount !== null;
+const meteoraPassed = innerSimulation.value.err === null;
 
 const report = {
-  status: "PASS",
+  status: proposalPassed && meteoraPassed ? "PASS" : "BLOCKED",
   mode: "BUILD_AND_SIMULATE_ONLY",
   transactionBroadcast: false,
   launchAuthorized: false,
@@ -355,8 +353,8 @@ const report = {
     note: "Blockhash is intentionally short-lived; rebuild immediately before the creator signs/submits.",
   },
   proposalCreationSimulation: {
-    passed: true,
-    err: null,
+    passed: proposalPassed,
+    err: proposalSimulation.err,
     unitsConsumed: proposalSimulation.unitsConsumed ?? null,
     replacementBlockhash: proposalSimulation.replacementBlockhash ?? null,
     transactionAccount: summarizeAccount(simulatedTransactionAccount),
@@ -364,8 +362,8 @@ const report = {
     logs: proposalSimulation.logs ?? [],
   },
   meteoraExecutionSimulation: {
-    passed: true,
-    err: null,
+    passed: meteoraPassed,
+    err: innerSimulation.value.err,
     unitsConsumed: innerSimulation.value.unitsConsumed ?? null,
     logs: innerSimulation.value.logs ?? [],
   },
@@ -383,10 +381,16 @@ fs.writeFileSync(
   JSON.stringify(report, null, 2) + "\n"
 );
 
-console.log("WLDZ_LAUNCH_PREFLIGHT=PASS broadcast=0 authorized=0");
+console.log("WLDZ_CREATOR_SOL_LAMPORTS=" + creatorBalanceLamports);
+console.log("WLDZ_VAULT_SOL_LAMPORTS=" + vaultBalanceLamports);
+console.log("WLDZ_LAUNCH_PREFLIGHT=" + report.status + " broadcast=0 authorized=0");
 console.log("WLDZ_PROPOSAL_PDA=" + proposalPda.toBase58());
 console.log("WLDZ_SQUADS_TRANSACTION_PDA=" + transactionPda.toBase58());
 console.log("WLDZ_POOL=" + pool.toBase58());
 console.log("WLDZ_POSITION=" + position.toBase58());
 console.log("WLDZ_PROPOSAL_PAYLOAD_SHA256=" + report.executableProposalPayload.sha256);
 console.log("WLDZ_PROPOSAL_BYTES=" + serializedProposalBuild.length);
+
+if (!proposalPassed || !meteoraPassed) {
+  process.exitCode = 1;
+}
