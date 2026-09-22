@@ -228,14 +228,7 @@ assert(existingPool === null, "deterministic WLDZ/wSOL customizable pool already
 // emits an idempotent ATA-create instruction for it. Omitting that redundant
 // instruction shrinks the Squads stored transaction and therefore its rent,
 // without changing the pool operation.
-const vaultWsolAta = await getAssociatedTokenAddress(
-  NATIVE_MINT,
-  vaultPk,
-  true,
-  TOKEN_PROGRAM_ID
-);
 let removedTreasuryAta = 0;
-let removedZeroWrap = 0;
 const launchInstructions = meteoraTx.instructions.filter((ix) => {
   const touchesVaultWldzAta = ix.keys.some((k) => k.pubkey.equals(vaultAta));
   const touchesWldzMint = ix.keys.some((k) => k.pubkey.equals(mintPk));
@@ -247,35 +240,23 @@ const launchInstructions = meteoraTx.instructions.filter((ix) => {
     removedTreasuryAta++;
     return false;
   }
-
-  const touchesVaultWsolAta = ix.keys.some((k) => k.pubkey.equals(vaultWsolAta));
-  const isZeroSystemTransfer =
-    ix.programId.equals(SystemProgram.programId) &&
-    touchesVaultWsolAta &&
-    ix.keys.some((k) => k.pubkey.equals(vaultPk)) &&
-    ix.data.length === 12 &&
-    ix.data.readUInt32LE(0) === 2 &&
-    ix.data.readBigUInt64LE(4) === 0n;
-  const isZeroSyncNative =
-    ix.programId.equals(TOKEN_PROGRAM_ID) &&
-    touchesVaultWsolAta &&
-    ix.data.length === 1 &&
-    ix.data[0] === 17;
-  if (isZeroSystemTransfer || isZeroSyncNative) {
-    removedZeroWrap++;
-    return false;
-  }
   return true;
 });
 assert(removedTreasuryAta === 1, "expected exactly one redundant WLDZ Treasury ATA instruction to be removed");
-console.log("WLDZ_INSTRUCTION_DEBUG="+JSON.stringify(meteoraTx.instructions.map((ix,i)=>({
-  i,
-  program:ix.programId.toBase58(),
-  data:Buffer.from(ix.data).toString("hex"),
-  keys:ix.keys.map(k=>k.pubkey.toBase58())
-}))));
 console.log("WLDZ_REDUNDANT_TREASURY_ATA_IX_REMOVED=1");
-console.log("WLDZ_ZERO_WSOL_WRAP_IX_REMOVED="+removedZeroWrap);
+
+const sharedAltAddress = new PublicKey("7CaMLcAuSskoeN7HoRwZjsSthU8sMwKqxtXkyMiMjuc");
+const sharedAlt = (await connection.getAddressLookupTable(sharedAltAddress, "confirmed")).value;
+assert(sharedAlt, "shared mainnet address lookup table unavailable");
+const altSet = new Set(sharedAlt.state.addresses.map((k) => k.toBase58()));
+const launchKeys = new Set();
+for (const ix of launchInstructions) {
+  launchKeys.add(ix.programId.toBase58());
+  for (const k of ix.keys) launchKeys.add(k.pubkey.toBase58());
+}
+const altHits = [...launchKeys].filter((k) => altSet.has(k));
+assert(altHits.length >= 5, "shared ALT no longer covers enough launch accounts");
+console.log("WLDZ_SHARED_ALT="+sharedAltAddress.toBase58()+" hits="+altHits.length);
 
 const latest = await connection.getLatestBlockhash("confirmed");
 const innerTransactionMessage = new TransactionMessage({
@@ -285,7 +266,7 @@ const innerTransactionMessage = new TransactionMessage({
 });
 
 const innerVersioned = new VersionedTransaction(
-  innerTransactionMessage.compileToV0Message()
+  innerTransactionMessage.compileToV0Message([sharedAlt])
 );
 const signerKeys = innerVersioned.message.staticAccountKeys
   .slice(0, innerVersioned.message.header.numRequiredSignatures)
@@ -451,6 +432,7 @@ const createVaultTransactionIx = multisig.instructions.vaultTransactionCreate({
   vaultIndex: Number(candidate.treasury.vaultIndex),
   ephemeralSigners: 1,
   transactionMessage: innerTransactionMessage,
+  addressLookupTableAccounts: [sharedAlt],
   memo: undefined,
 });
 const createProposalIx = multisig.instructions.proposalCreate({
@@ -534,6 +516,8 @@ const report = {
     permanentLockIncludedAtomically: true,
     liquidityDelta: liquidityDelta.toString(),
     instructionCount: launchInstructions.length,
+    addressLookupTable: sharedAltAddress.toBase58(),
+    addressLookupTableHits: altHits.length,
     requiredSigners: signerKeys,
   },
   executableProposalPayload: {
