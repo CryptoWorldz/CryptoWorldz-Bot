@@ -34,6 +34,10 @@ const COMMAND_GROUPS = Object.freeze([
     ["tg", "Open this project's Telegram link"], ["tglinks", "View official Telegram links"],
     ["x", "Open this project's X page"], ["xlinks", "View official X pages"]
   ]),
+  group("worldping", "🌐 WorldPing™ • Licensed Group Alerts", "member", [
+    ["worldping", "Send a visible group WorldPing"], ["worldpingmode", "Group admin: AdminsOnlyPing or FullMemberPing"],
+    ["zedmaxprice", "View ZED MAX SOL licence prices"], ["zedmaxreceipt", "Submit a SOL payment receipt"]
+  ]),
   group("admin-missions", "🛡 Admin • Missions, Reviews, Members & Settings", "admin", [
     ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"],
     ["reviewqueue", "Open mission, Creator and Hero human-review queues"],

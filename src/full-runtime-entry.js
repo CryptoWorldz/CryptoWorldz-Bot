@@ -43,6 +43,7 @@ const { registerUserExperienceSystem } = require("./user-experience");
 const { registerWebsiteTelegramHandlers } = require("./websites-telegram");
 const { registerWorkEvidenceHandlers } = require("./work-evidence");
 const { registerWorldzCastSystem } = require("./worldzcast");
+const { registerWorldPingHandlers } = require("./worldping");
 const { registerZedGuide } = require("./zed-guide");
 
 const RUNTIME_BUILD = "2026-08-19-oneworldz-participant-experience";
@@ -174,6 +175,8 @@ async function start() {
   registerProjectWalletSystem({ app, bot, config, supabase });
   startupStage = "register_worldzcast";
   registerWorldzCastSystem({ app, bot, repository, config, supabase });
+  startupStage = "register_worldping";
+  registerWorldPingHandlers({ bot, config, supabase });
   startupStage = "register_legend_v8";
   registerLegendV8System({ app, bot, repository, config, supabase });
   startupStage = "register_executive_telegram";
