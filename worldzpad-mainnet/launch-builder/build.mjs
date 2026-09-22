@@ -310,12 +310,28 @@ if (innerSimulation.value.err !== null) {
 
 let syntheticFundingSimulation = null;
 if (!fundingSimulation?.passed) {
-  const syntheticFunder = new PublicKey("1nc1nerator11111111111111111111111111111111");
-  const syntheticFunderBalance = await connection.getBalance(syntheticFunder, "confirmed");
-  const syntheticCandidates = [
+  const clusterNodes = await connection.getClusterNodes();
+  let syntheticFunder = null;
+  let syntheticFunderBalance = 0;
+  for (const node of clusterNodes.slice(0, 40)) {
+    try {
+      const candidateKey = new PublicKey(node.pubkey);
+      const info = await connection.getAccountInfo(candidateKey, "confirmed");
+      if (!info || !info.owner.equals(SystemProgram.programId)) continue;
+      if (info.lamports > 50_000_000) {
+        syntheticFunder = candidateKey;
+        syntheticFunderBalance = info.lamports;
+        break;
+      }
+    } catch {}
+  }
+  if (!syntheticFunder) {
+    console.log("WLDZ_SYNTHETIC_FUNDER=NONE");
+  }
+  const syntheticCandidates = syntheticFunder ? [
     10000000, 12000000, 14000000, 15000000, 16000000,
     17000000, 18000000, 20000000, 22000000, 25000000,
-  ].filter((lamports) => lamports + 10000 < syntheticFunderBalance);
+  ].filter((lamports) => lamports + 10000 < syntheticFunderBalance) : [];
 
   for (const topupLamports of syntheticCandidates) {
     const fundedMessage = new TransactionMessage({
