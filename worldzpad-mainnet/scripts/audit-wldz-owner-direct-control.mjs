@@ -51,3 +51,6 @@ console.log("WLDZ_OWNER_WLDZ=" + report.ownerWldz);
 console.log("WLDZ_VAULT_WLDZ=" + report.vaultWldz);
 console.log("WLDZ_VAULT_DELEGATE=" + (report.vaultDelegate || "NONE"));
 console.log("WLDZ_VAULT_DELEGATED_WLDZ=" + report.vaultDelegatedWldz);
+
+console.log("WLDZ_SPENDING_LIMIT_CLASS_METHODS=" + JSON.stringify(Object.getOwnPropertyNames(multisig.accounts.SpendingLimit || {})));
+console.log("WLDZ_RPC_EXPORTS=" + JSON.stringify(Object.keys(multisig.rpc || {})));
