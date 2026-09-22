@@ -228,17 +228,49 @@ assert(existingPool === null, "deterministic WLDZ/wSOL customizable pool already
 // emits an idempotent ATA-create instruction for it. Omitting that redundant
 // instruction shrinks the Squads stored transaction and therefore its rent,
 // without changing the pool operation.
+const vaultWsolAta = await getAssociatedTokenAddress(
+  NATIVE_MINT,
+  vaultPk,
+  true,
+  TOKEN_PROGRAM_ID
+);
+let removedTreasuryAta = 0;
+let removedZeroWrap = 0;
 const launchInstructions = meteoraTx.instructions.filter((ix) => {
-  if (!ix.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID)) return true;
   const touchesVaultWldzAta = ix.keys.some((k) => k.pubkey.equals(vaultAta));
   const touchesWldzMint = ix.keys.some((k) => k.pubkey.equals(mintPk));
-  return !(touchesVaultWldzAta && touchesWldzMint);
+  if (
+    ix.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID) &&
+    touchesVaultWldzAta &&
+    touchesWldzMint
+  ) {
+    removedTreasuryAta++;
+    return false;
+  }
+
+  const touchesVaultWsolAta = ix.keys.some((k) => k.pubkey.equals(vaultWsolAta));
+  const isZeroSystemTransfer =
+    ix.programId.equals(SystemProgram.programId) &&
+    touchesVaultWsolAta &&
+    ix.keys.some((k) => k.pubkey.equals(vaultPk)) &&
+    ix.data.length === 12 &&
+    ix.data.readUInt32LE(0) === 2 &&
+    ix.data.readBigUInt64LE(4) === 0n;
+  const isZeroSyncNative =
+    ix.programId.equals(TOKEN_PROGRAM_ID) &&
+    touchesVaultWsolAta &&
+    ix.data.length === 1 &&
+    ix.data[0] === 17;
+  if (isZeroSystemTransfer || isZeroSyncNative) {
+    removedZeroWrap++;
+    return false;
+  }
+  return true;
 });
-assert(
-  launchInstructions.length === meteoraTx.instructions.length - 1,
-  "expected exactly one redundant WLDZ Treasury ATA instruction to be removed"
-);
+assert(removedTreasuryAta === 1, "expected exactly one redundant WLDZ Treasury ATA instruction to be removed");
+assert(removedZeroWrap === 2, "expected zero-amount wSOL transfer + sync instructions to be removed");
 console.log("WLDZ_REDUNDANT_TREASURY_ATA_IX_REMOVED=1");
+console.log("WLDZ_ZERO_WS0L_WRAP_IX_REMOVED=2");
 
 const latest = await connection.getLatestBlockhash("confirmed");
 const innerTransactionMessage = new TransactionMessage({
