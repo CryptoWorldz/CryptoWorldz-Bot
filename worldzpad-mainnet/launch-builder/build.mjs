@@ -308,6 +308,69 @@ if (innerSimulation.value.err !== null) {
   }
 }
 
+let syntheticFundingSimulation = null;
+if (!fundingSimulation?.passed) {
+  const syntheticFunder = new PublicKey("1nc1nerator11111111111111111111111111111111");
+  const syntheticFunderBalance = await connection.getBalance(syntheticFunder, "confirmed");
+  const syntheticCandidates = [
+    10000000, 12000000, 14000000, 15000000, 16000000,
+    17000000, 18000000, 20000000, 22000000, 25000000,
+  ].filter((lamports) => lamports + 10000 < syntheticFunderBalance);
+
+  for (const topupLamports of syntheticCandidates) {
+    const fundedMessage = new TransactionMessage({
+      payerKey: syntheticFunder,
+      recentBlockhash: latest.blockhash,
+      instructions: [
+        SystemProgram.transfer({
+          fromPubkey: syntheticFunder,
+          toPubkey: vaultPk,
+          lamports: topupLamports,
+        }),
+        ...meteoraTx.instructions,
+      ],
+    });
+    const fundedTx = new VersionedTransaction(fundedMessage.compileToV0Message());
+    const fundedBytes = fundedTx.serialize();
+    if (fundedBytes.length > 1232) {
+      syntheticFundingSimulation = {
+        passed: false,
+        simulationOnly: true,
+        syntheticFunder: syntheticFunder.toBase58(),
+        syntheticFunderBalance,
+        topupLamports,
+        packetBytes: fundedBytes.length,
+        err: "SYNTHETIC_FUNDED_SIMULATION_PACKET_TOO_LARGE",
+      };
+      break;
+    }
+    const sim = await connection.simulateTransaction(fundedTx, {
+      sigVerify: false,
+      replaceRecentBlockhash: true,
+      commitment: "confirmed",
+    });
+    syntheticFundingSimulation = {
+      passed: sim.value.err === null,
+      simulationOnly: true,
+      syntheticFunder: syntheticFunder.toBase58(),
+      syntheticFunderBalance,
+      topupLamports,
+      resultingVaultLamportsBeforeFees: vaultBalanceLamports + topupLamports,
+      packetBytes: fundedBytes.length,
+      err: sim.value.err,
+      unitsConsumed: sim.value.unitsConsumed ?? null,
+      logsTail: (sim.value.logs ?? []).slice(-24),
+      note: "Synthetic signer is used only to model a funded vault under sigVerify=false. It is not an executable funding source and is never broadcast.",
+    };
+    console.log(
+      "WLDZ_SYNTHETIC_FUNDING_SIM topup=" + topupLamports +
+      " totalVault=" + (vaultBalanceLamports + topupLamports) +
+      " passed=" + (sim.value.err === null)
+    );
+    if (sim.value.err === null) break;
+  }
+}
+
 const createVaultTransactionIx = multisig.instructions.vaultTransactionCreate({
   multisigPda: multisigPk,
   transactionIndex,
@@ -425,6 +488,7 @@ const report = {
     logs: innerSimulation.value.logs ?? [],
   },
   fundingSimulation,
+  syntheticFundingSimulation,
   signature: {
     realOnChainSignature: null,
     simulationProofSha256: sha256(serializedProposalBuild),
