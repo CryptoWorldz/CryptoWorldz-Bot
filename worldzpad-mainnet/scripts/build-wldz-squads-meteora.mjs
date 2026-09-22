@@ -37,6 +37,32 @@ if(process.env.SQUADS_CREATOR){const p=new PublicKey(process.env.SQUADS_CREATOR)
 if(!creator){const bb=await Promise.all(initiators.map(async m=>({k:m.key,b:await connection.getBalance(m.key,'confirmed')})));bb.sort((a,b)=>b.b-a.b);creator=bb[0].k;}
 const creatorSol=await connection.getBalance(creator,'confirmed');
 
+const diagIndex=14n;
+const [diagBatchPda]=multisig.getTransactionPda({multisigPda:ms,index:diagIndex});
+const [diagProposalPda]=multisig.getProposalPda({multisigPda:ms,transactionIndex:diagIndex});
+const [diagLeg1Pda]=multisig.getBatchTransactionPda({multisigPda:ms,batchIndex:diagIndex,transactionIndex:1});
+const [diagLeg2Pda]=multisig.getBatchTransactionPda({multisigPda:ms,batchIndex:diagIndex,transactionIndex:2});
+const [diagBatchInfo,diagProposalInfo,diagLeg1Info,diagLeg2Info]=await Promise.all([
+ connection.getAccountInfo(diagBatchPda,'confirmed'),
+ connection.getAccountInfo(diagProposalPda,'confirmed'),
+ connection.getAccountInfo(diagLeg1Pda,'confirmed'),
+ connection.getAccountInfo(diagLeg2Pda,'confirmed')
+]);
+let diagProposalStatus='missing';
+if(diagProposalInfo){
+ const p=await multisig.accounts.Proposal.fromAccountAddress(connection,diagProposalPda,'confirmed');
+ diagProposalStatus=String(p?.status?.__kind||'unknown');
+}
+console.log('WLDZ_DIAG_MULTISIG_TRANSACTION_INDEX='+multisig.utils.toBigInt(ma.transactionIndex));
+console.log('WLDZ_DIAG_CREATOR_SOL_LAMPORTS='+creatorSol);
+console.log('WLDZ_DIAG_BATCH14_EXISTS='+Boolean(diagBatchInfo));
+console.log('WLDZ_DIAG_PROPOSAL14_EXISTS='+Boolean(diagProposalInfo));
+console.log('WLDZ_DIAG_PROPOSAL14_STATUS='+diagProposalStatus);
+console.log('WLDZ_DIAG_LEG1_EXISTS='+Boolean(diagLeg1Info));
+console.log('WLDZ_DIAG_LEG2_EXISTS='+Boolean(diagLeg2Info));
+console.log('WLDZ_DIAG_BATCH14_PDA='+diagBatchPda.toBase58());
+console.log('WLDZ_DIAG_PROPOSAL14_PDA='+diagProposalPda.toBase58());
+
 const batchIndex=multisig.utils.toBigInt(ma.transactionIndex)+1n;
 const [batchPda]=multisig.getTransactionPda({multisigPda:ms,index:batchIndex});
 const [proposalPda]=multisig.getProposalPda({multisigPda:ms,transactionIndex:batchIndex});
