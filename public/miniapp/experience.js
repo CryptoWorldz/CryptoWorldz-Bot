@@ -3,7 +3,6 @@
   const $ = (id) => document.getElementById(id);
   const escape = (value) => String(value ?? "").replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[c]);
   const experience = { bootstrap: null, referral: null, draft: { title: "", body: "", image_path: "", image_url: "" }, chat: [] };
-  const REAGAN = "https://donateworldz.com/reagan-children/";
   const HEROES = "https://oneworldz.com/heroes/";
   const LEARN = "https://learn.oneworldz.com/";
   const PDC = "https://purplediamondcrew.com/";
@@ -24,13 +23,6 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function setHash(id) { history.replaceState(null, "", `#${id}`); openScreen(id); }
-  function patchImpact() {
-    const full = $("impact-list");
-    if (full) full.innerHTML = `<article class="panel impact-card"><div class="impact-visual" aria-hidden="true"><span>💜</span><b>FEATURED IMPACT MISSION</b></div><div class="impact-body"><div class="impact-badge">DIRECT ONEWORLDZ PATHWAY</div><h3>Help Reagan & Children in Uganda</h3><p class="impact-organization">Action Spreads Smiles • Mayuge, Uganda</p><p>Food, medical care, rent, hygiene, education, mattresses and safer support are kept on the dedicated DonateWorldz purpose page.</p><div class="impact-needs"><span>🍲 Food</span><span>🩺 Medical</span><span>🏠 Shelter</span><span>📚 Education</span></div><a class="button impact-donate" href="${REAGAN}" target="_blank" rel="noopener">Open Reagan & Children on DonateWorldz</a><small>ZED never requests payment credentials and Legend Points are not purchased by donations.</small></div></article>`;
-    const home = $("home-impact");
-    if (home) home.innerHTML = `<div class="section-title"><h2>💜 Featured Impact</h2></div><article class="panel impact-card"><div class="impact-body"><div class="impact-badge">HELP ON THE GROUND</div><h3>Reagan & Children</h3><p>Open the dedicated DonateWorldz pathway for current support information.</p><a class="button" href="${REAGAN}" target="_blank" rel="noopener">Open DonateWorldz</a></div></article>`;
-  }
-
   function launchpad() {
     const root = $("experience-launchpad");
     if (!root) return;
@@ -128,7 +120,6 @@
     try {
       experience.bootstrap = await request("/api/mini/bootstrap");
       launchpad();
-      patchImpact();
       renderZed();
       renderCreator();
       renderHeroes();
