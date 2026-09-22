@@ -166,6 +166,60 @@ jobs:
                       out[key] = value
               return out
 
+          # Fast path: the protected GitHub environment already contains the
+          # Telegram token. Validate it with Telegram, preserve the existing
+          # protected runtime values, bootstrap the Supabase bridge and skip
+          # the expensive recursive backup scan.
+          direct_bot = os.environ.get("BOT_TOKEN_SECRET", "").strip()
+          if direct_bot:
+              import json, urllib.request
+              try:
+                  req = urllib.request.Request(
+                      "https://api.telegram.org/bot" + direct_bot + "/getMe",
+                      headers={"Accept":"application/json"}
+                  )
+                  with urllib.request.urlopen(req, timeout=15) as response:
+                      result = json.loads(response.read().decode("utf-8"))
+                  direct_valid = result.get("ok") is True and bool(result.get("result", {}).get("id"))
+              except Exception:
+                  direct_valid = False
+
+              if direct_valid:
+                  current = parse(read_file(node_root + "/.env") or "")
+                  merged = {k:v for k,v in current.items() if v and k != "BOT_TOKEN"}
+                  merged["BOT_TOKEN"] = direct_bot
+                  merged["SUPABASE_URL"] = os.environ.get("SUPABASE_URL_SECRET", "").strip() or merged.get("SUPABASE_URL", "") or "https://hknymhhyqldtzmplzuzh.supabase.co"
+                  publishable = os.environ.get("SUPABASE_PUBLISHABLE_KEY_SECRET", "").strip() or merged.get("SUPABASE_PUBLISHABLE_KEY", "") or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+                  merged["SUPABASE_PUBLISHABLE_KEY"] = publishable
+                  service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET", "").strip()
+                  if service_key:
+                      merged["SUPABASE_SERVICE_ROLE_KEY"] = service_key
+                  openai = os.environ.get("OPENAI_API_KEY", "").strip()
+                  if openai:
+                      merged["OPENAI_API_KEY"] = openai
+
+                  bootstrap_url = merged["SUPABASE_URL"] + "/rest/v1/rpc/zed_runtime_bootstrap"
+                  request = urllib.request.Request(
+                      bootstrap_url,
+                      data=json.dumps({"p_bot_token": direct_bot}).encode("utf-8"),
+                      headers={"apikey":publishable,"content-type":"application/json"},
+                      method="POST"
+                  )
+                  with urllib.request.urlopen(request, timeout=30) as response:
+                      bootstrap_result = json.loads(response.read().decode("utf-8"))
+                  if bootstrap_result is not True:
+                      raise SystemExit("ZED_SUPABASE_BRIDGE_BOOTSTRAP_FAILED")
+
+                  payload = "".join(f"{k}={v}\n" for k,v in sorted(merged.items()))
+                  ftp.storbinary("STOR " + node_root + "/.env", io.BytesIO(payload.encode("utf-8")))
+                  ftp.quit()
+                  print("ZED_TELEGRAM_VALID_TOKEN_FOUND=YES")
+                  print("ZED_SUPABASE_BRIDGE=PASS")
+                  print("ZED_ENV_RECOVERY=PASS")
+                  print("ZED_ENV_SOURCE=GITHUB_PROTECTED_SECRET_FAST_PATH")
+                  print("ZED_ENV_REQUIRED_KEYS=BOT_TOKEN,SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY")
+                  raise SystemExit(0)
+
           candidates = {
               node_root + "/.env",
               node_root + "/.env.production",
