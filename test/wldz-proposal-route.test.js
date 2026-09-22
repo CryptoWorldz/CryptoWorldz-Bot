@@ -6,6 +6,7 @@ const {spawnSync}=require('node:child_process');
 
 const file=path.join(__dirname,'..','launchpad.cryptoworldz.xyz','wldz','proposal.js');
 const source=fs.readFileSync(file,'utf8');
+const html=fs.readFileSync(path.join(__dirname,'..','launchpad.cryptoworldz.xyz','wldz','index.html'),'utf8');
 
 test('WLDZ proposal route has valid JavaScript syntax',()=>{
   const result=spawnSync(process.execPath,['--check',file],{encoding:'utf8'});
@@ -43,4 +44,14 @@ test('WLDZ launch invariants remain locked in the browser route',()=>{
   assert.match(source,/quoteAmountSol===0/);
   assert.match(source,/permanentLock===true/);
   assert.match(source,/mintAuthority===null&&mintInfo\.freezeAuthority===null/);
+});
+
+test('WLDZ route exposes an explicit mobile-capable wallet connect path',()=>{
+  assert.match(html,/id="connect-wallet"/);
+  assert.match(html,/Connect Wallet/);
+  assert.match(source,/@wallet-standard\/app@1\.1\.0/);
+  assert.match(source,/jupiter-mobile\.js/);
+  assert.match(source,/Jupiter Mobile/);
+  assert.match(source,/signVersionedTransaction/);
+  assert.doesNotMatch(source,/Wallet unavailable\. Open this page in the same wallet browser/);
 });
