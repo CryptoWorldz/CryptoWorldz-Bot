@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:launch": "node scripts/build-wldz-squads-meteora.mjs"
+    "build:launch": "node scripts/build-wldz-squads-meteora.mjs",
+    "build:proposal": "node scripts/build-wldz-squads-proposal.mjs"
   },
   "dependencies": {
     "@meteora-ag/cp-amm-sdk": "1.4.7",
