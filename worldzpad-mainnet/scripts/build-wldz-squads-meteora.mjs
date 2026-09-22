@@ -150,6 +150,8 @@ if(poolSim.value.err!==null && minTopup===null){
   }
 }
 
+console.log('WLDZ_CURRENT_CREATOR_BALANCE_DIAGNOSTIC='+creatorSol);
+
 const batchCreate=multisig.instructions.batchCreate({multisigPda:ms,creator,rentPayer:creator,batchIndex,vaultIndex:Number(config.treasury.vaultIndex),memo:'WORLDZ WLDZ 15M Meteora launch + permanent lock'});
 const propCreate=multisig.instructions.proposalCreate({multisigPda:ms,transactionIndex:batchIndex,creator,rentPayer:creator,isDraft:true});
 const addPool=multisig.instructions.batchAddTransaction({vaultIndex:Number(config.treasury.vaultIndex),multisigPda:ms,member:creator,rentPayer:creator,batchIndex,transactionIndex:1,ephemeralSigners:1,transactionMessage:poolMsg});
