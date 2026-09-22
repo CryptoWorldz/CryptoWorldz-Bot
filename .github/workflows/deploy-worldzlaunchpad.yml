@@ -187,7 +187,7 @@ jobs:
               p for p in root.rglob('*')
               if p.is_file()
               and p.suffix.lower() in {'.html','.js','.json','.php','.css'}
-              and not p.relative_to(root).parts[0].startswith('worldz-now')
+              and not p.relative_to(root).parts[0].startswith(('worldz-now','wldz'))
           ]
           for p in public_files:
               text=p.read_text(errors='ignore')
@@ -381,6 +381,8 @@ jobs:
           node --check launchpad.cryptoworldz.xyz/curve/app.js
           node --check launchpad.cryptoworldz.xyz/curve-pro/app.js
           node --check launchpad.cryptoworldz.xyz/worldz-now-v6/app-v6.js
+          node --check launchpad.cryptoworldz.xyz/wldz/app.js
+          node --check launchpad.cryptoworldz.xyz/wldz/proposal.js
 
       - name: Run 100+ anti-cheat tokenomics scenarios
         shell: python
