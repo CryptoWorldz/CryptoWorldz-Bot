@@ -10,6 +10,17 @@ const set=(text,type='warn')=>{const e=$('#status');e.textContent=text;e.classNa
 const msPk=()=>new PublicKey(MULTISIG);
 let wallet=null,member=null,target=null,busy=false;
 
+function showMobileHandoff(){
+  const targetUrl=new URL(location.href);
+  targetUrl.searchParams.set('v','20260922-stepper-mobile-3');
+  const target=encodeURIComponent(targetUrl.toString());
+  const ref=encodeURIComponent(location.origin);
+  $('#open-phantom').href='https://phantom.app/ul/browse/'+target+'?ref='+ref;
+  $('#open-solflare').href='https://solflare.com/ul/v1/browse/'+target+'?ref='+ref;
+  $('#mobile-handoff').style.display='block';
+}
+function hideMobileHandoff(){$('#mobile-handoff').style.display='none';}
+
 function injected(){
   return [window.jupiter?.solana,window.phantom?.solana,window.solflare,window.solana]
     .filter(Boolean)
@@ -33,14 +44,11 @@ async function connect(){
         if(!key)throw new Error('Wallet did not return a public key.');
         wallet={kind:'injected',adapter:provider,publicKey:new PublicKey(key.toString()),name:'Solana Wallet'};
       }else{
-        set('Opening mobile wallet connection…');
-        const mobile=await import('/mint/jupiter-mobile.js?v=20260922-stepper-bridge-1');
-        const adapter=await mobile.getJupiterMobileAdapter();
-        await adapter.connect();
-        if(!adapter.publicKey)throw new Error('Mobile wallet connection did not return a public key.');
-        wallet={kind:'jupiter-mobile',adapter,publicKey:new PublicKey(adapter.publicKey.toString()),name:'Mobile Solana Wallet'};
+        showMobileHandoff();
+        throw new Error('Choose PHANTOM or SOLFLARE below. It will reopen this exact approval page inside the wallet that holds the current WORLDZ Treasury signer.');
       }
     }
+    hideMobileHandoff();
     member=wallet.publicKey;
     const ma=await multisig.accounts.Multisig.fromAccountAddress(connection,msPk(),'confirmed');
     if(!ma.members.some(m=>m.key.equals(member)))throw new Error('This wallet is not one of the current WORLDZ Treasury signers.');
