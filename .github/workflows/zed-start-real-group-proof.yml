@@ -1,0 +1,178 @@
+name: ZED Real Group Start Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/telegram.js"
+      - "src/telegram-proof.js"
+      - "src/http.js"
+      - ".github/workflows/zed-start-real-group-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zed-real-group-start-proof
+  cancel-in-progress: true
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cryptoworldz-production
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+
+    steps:
+      - name: Wait for deployed proof endpoint then execute real-group /start
+        shell: python
+        run: |
+          import hashlib, io, json, os, re, time, urllib.error, urllib.request
+          from ftplib import FTP_TLS
+
+          domain="cryptobotz.cryptoworldz.xyz"
+          target_chat=-1004404927235
+          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          if not token:
+              raise SystemExit("BOT_TOKEN missing")
+          print("::add-mask::"+token)
+
+          # Read the existing protected owner ID without logging it.
+          host=os.environ["FTP_HOST"].replace("ftps://","").replace("ftp://","").split("/")[0]
+          if host.count(":")==1:
+              host=host.split(":",1)[0]
+          ftp=FTP_TLS()
+          ftp.connect(host,int(os.environ.get("FTP_PORT","21")),timeout=45)
+          ftp.login(os.environ["FTP_USERNAME"],os.environ["FTP_PASSWORD"])
+          ftp.prot_p()
+          buf=io.BytesIO()
+          ftp.retrbinary("RETR /domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",buf.write)
+          ftp.quit()
+          protected={}
+          for raw in buf.getvalue().decode("utf-8","ignore").splitlines():
+              line=raw.strip()
+              if not line or line.startswith("#") or "=" not in line:
+                  continue
+              key,value=line.split("=",1)
+              key=re.sub(r"^export\s+","",key).strip()
+              value=value.strip().strip('"').strip("'")
+              if value:
+                  protected[key]=value
+          owner=str(protected.get("OWNER_TELEGRAM_ID","")).strip()
+          if not owner.isdigit():
+              raise SystemExit("OWNER_TELEGRAM_ID missing from protected runtime")
+          print("::add-mask::"+owner)
+
+          runtime_key=hashlib.sha256(("zed-runtime-v1:"+token).encode()).hexdigest()
+          webhook_secret=hashlib.sha256(token.encode()).hexdigest()
+          api="https://api.telegram.org/bot"+token+"/"
+
+          def tg(method,payload=None):
+              data=None
+              headers={}
+              if payload is not None:
+                  data=json.dumps(payload).encode("utf-8")
+                  headers["content-type"]="application/json"
+              with urllib.request.urlopen(urllib.request.Request(api+method,data=data,headers=headers),timeout=30) as response:
+                  result=json.loads(response.read().decode("utf-8"))
+              if result.get("ok") is not True:
+                  raise SystemExit("Telegram "+method+" failed")
+              return result.get("result")
+
+          bot=tg("getMe")
+          chat=tg("getChat",{"chat_id":target_chat})
+          member=tg("getChatMember",{"chat_id":target_chat,"user_id":int(owner)})
+          user=member.get("user") or {}
+          if str(user.get("id","")) != owner:
+              raise SystemExit("Configured owner is not available in target Telegram group")
+          if user.get("is_bot"):
+              raise SystemExit("Owner identity unexpectedly resolves to a bot")
+          bot_username=str(bot.get("username") or "")
+          if not bot_username:
+              raise SystemExit("Telegram bot username missing")
+
+          def read_proof():
+              req=urllib.request.Request(
+                  "https://"+domain+"/api/diagnostics/telegram-start?proof="+str(int(time.time())),
+                  headers={
+                      "x-zed-runtime-key":runtime_key,
+                      "cache-control":"no-cache",
+                      "user-agent":"ZED-Real-Group-Proof/1.0"
+                  }
+              )
+              try:
+                  with urllib.request.urlopen(req,timeout=20) as response:
+                      if response.status != 200:
+                          return None
+                      return json.loads(response.read().decode("utf-8"))
+              except urllib.error.HTTPError:
+                  return None
+              except Exception:
+                  return None
+
+          # This workflow starts with the source commit; the runtime deployment
+          # runs separately. Wait until the new authenticated proof route exists.
+          ready=False
+          for attempt in range(1,121):
+              data=read_proof()
+              if data and data.get("ok") is True:
+                  ready=True
+                  print("ZED_START_PROOF_ENDPOINT=PASS attempt="+str(attempt))
+                  break
+              time.sleep(5)
+          if not ready:
+              raise SystemExit("Deployed ZED start proof endpoint did not become ready")
+
+          input_message_id=int(time.time()) % 2000000000
+          update_id=input_message_id+100000
+          update={
+              "update_id":update_id,
+              "message":{
+                  "message_id":input_message_id,
+                  "from":user,
+                  "chat":chat,
+                  "date":int(time.time()),
+                  "text":"/start@"+bot_username
+              }
+          }
+          request=urllib.request.Request(
+              "https://"+domain+"/telegram-webhook",
+              data=json.dumps(update,separators=(",",":")).encode("utf-8"),
+              headers={
+                  "content-type":"application/json",
+                  "x-telegram-bot-api-secret-token":webhook_secret,
+                  "user-agent":"ZED-Real-Group-Proof/1.0"
+              },
+              method="POST"
+          )
+          with urllib.request.urlopen(request,timeout=20) as response:
+              body=response.read().decode("utf-8","ignore")
+              if response.status != 200:
+                  raise SystemExit("Synthetic real-group /start webhook was rejected")
+          print("ZED_REAL_GROUP_START_INPUT=PASS")
+
+          final=None
+          for attempt in range(1,31):
+              time.sleep(1)
+              data=read_proof()
+              proof=(data or {}).get("proof") or {}
+              if (
+                  str(proof.get("chat_id","")) == str(target_chat)
+                  and int(proof.get("input_message_id") or 0) == input_message_id
+                  and int(proof.get("reply_message_id") or 0) > 0
+              ):
+                  final=proof
+                  break
+          if not final:
+              raise SystemExit("ZED /start handler did not prove a Telegram reply in the real target group")
+
+          print("ZED_REAL_GROUP_START_HANDLER=PASS")
+          print("ZED_REAL_GROUP_START_REPLY=PASS message_id="+str(final["reply_message_id"]))
+          print("ZED_COMMAND_CENTRE_MAX_TELEGRAM_E2E=PASS")

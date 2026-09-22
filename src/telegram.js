@@ -19,6 +19,7 @@ const {
   shortenWallet,
   splitTelegramMessage
 } = require("./core");
+const { recordStartReply } = require("./telegram-proof");
 
 const PUBLIC_COMMANDS = [
   { command: "start", description: "Open the Zed Command Centre" },
@@ -67,7 +68,7 @@ function registerTelegramHandlers({ bot, repository, config }) {
   bot.onText(/^\/start(?:@\w+)?$/, async (msg) => {
     try {
       await repository.registerUser(msg);
-      await send(
+      const reply = await send(
         msg.chat.id,
         `🤖💜 Hello ${msg.from.first_name || "Legend"}!
 
@@ -85,6 +86,12 @@ Use /help to open the Command Menu.
 
 🌍 One World • One Mission • One CryptoWorldz`
       );
+      recordStartReply({
+        inputMessageId: msg.message_id,
+        chatId: msg.chat.id,
+        chatType: msg.chat.type,
+        replyMessageId: reply && reply.message_id
+      });
     } catch (error) {
       safeError("Start command", error);
       await send(msg.chat.id, "❌ I couldn't create your Legend Profile. Please try again shortly.");

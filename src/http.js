@@ -7,6 +7,7 @@ const { getRank, parseSimpleRaid, shortenWallet } = require("./core");
 const { createRequestLimiter, validateTelegramInitData } = require("./miniapp-auth");
 const { solanaPayUri, verifySolanaContribution } = require("./solana");
 const { registerPdcHost } = require("./pdc-host");
+const { getLastStartReply } = require("./telegram-proof");
 
 function safeTokenMatch(received, expected) {
   if (typeof received !== "string" || typeof expected !== "string") return false;
@@ -46,6 +47,19 @@ function createHttpApp({ bot, config, repository }) {
 
   app.get("/health", (req, res) => {
     res.json({ ok: true });
+  });
+
+  app.get("/api/diagnostics/telegram-start", (req, res) => {
+    const expected = crypto
+      .createHash("sha256")
+      .update(`zed-runtime-v1:${config.botToken}`)
+      .digest("hex");
+    const supplied = req.get("x-zed-runtime-key") || "";
+    if (!safeTokenMatch(supplied, expected)) {
+      return res.status(401).json({ ok: false, error: "unauthorized" });
+    }
+    const proof = getLastStartReply();
+    return res.json({ ok: true, seen: Boolean(proof), proof });
   });
 
   const serveOpenApi = (req, res) => {
