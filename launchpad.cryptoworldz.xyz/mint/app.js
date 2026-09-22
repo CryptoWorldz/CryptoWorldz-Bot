@@ -14,6 +14,7 @@ const API='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-mint-reg
 const METADATA_PROGRAM=new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
 const STANDARD_VERSION='WORLDZMINT-1';
 const WORLDZ_MAINNET_RPC='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';
+const PUBLIC_MAINNET_RPC='https://api.mainnet-beta.solana.com';
 let connection=new Connection(clusterApiUrl('devnet'),'confirmed');
 let walletCtx=null,preflightOk=false,busy=false,pending=null;
 const DRAFT_KEY='worldzmint-draft-v1';
@@ -25,6 +26,15 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function network(){return $('#network').value;}
 function chain(){return network()==='mainnet-beta'?'solana:mainnet':'solana:devnet';}
 function refreshConnection(){connection=new Connection(network()==='mainnet-beta'?WORLDZ_MAINNET_RPC:clusterApiUrl('devnet'),'confirmed');}
+async function ensureRpcReady(){
+  try{await connection.getLatestBlockhash('confirmed');}
+  catch(primaryError){
+    if(network()!=='mainnet-beta')throw primaryError;
+    connection=new Connection(PUBLIC_MAINNET_RPC,'confirmed');
+    try{await connection.getLatestBlockhash('confirmed');}
+    catch(fallbackError){throw new Error('Mainnet RPC is unavailable. Please try again shortly. '+(fallbackError?.message||String(fallbackError)));}
+  }
+}
 function allocations(){const o={};$$('.allocation').forEach(x=>o[x.dataset.key]=Number(x.value));return o;}
 function recipients(){return {
   creator:$('#creator-wallet').value.trim(),liquidity:$('#liquidity-wallet').value.trim(),
@@ -418,6 +428,7 @@ function restorePending(){
 async function runPreflight(){
   refreshConnection();const check=validate();preflightOk=check.ok;
   if(!check.ok){$('#mint-btn').disabled=false;setStatus('WORLDZMINT PREFLIGHT BLOCKED\n• '+check.errors.join('\n• '),'bad');renderProof();return false;}
+  try{await ensureRpcReady();}catch(error){preflightOk=false;$('#mint-btn').disabled=false;setStatus('WORLDZMINT RPC PREFLIGHT BLOCKED\n'+(error?.message||String(error))+'\n\nNo wallet signature or transaction was requested.','bad');renderProof();return false;}
   if(network()==='mainnet-beta'){
     setStatus('WORLDZMINT MAINNET PREFLIGHT PASS ✅\nFixed supply: '+Number(check.v.fixed_supply).toLocaleString()+'\nCreator liquid: '+check.v.allocations.creator+'%\nLiquidity reserve: '+check.v.allocations.liquidity+'%\nCommunity: '+check.v.allocations.community+'%\nTreasury: '+check.v.allocations.treasury+'%\nWorldz supply take: 0%\nWallet-transfer tax: 0%\n\nMAINNET is real and irreversible. No transaction has been signed yet.','good');
   }else setStatus('WORLDZMINT DEVNET PREFLIGHT PASS ✅\nRehearsal network only. No transaction has been signed yet.','good');
