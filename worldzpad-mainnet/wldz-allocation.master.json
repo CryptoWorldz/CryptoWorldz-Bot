@@ -1,0 +1,120 @@
+{
+  "version": "WLDZ-ALLOCATION-2026-09-22-A",
+  "status": "LOCKED_WORKING_MASTER__ONCHAIN_DISTRIBUTION_PENDING",
+  "network": "mainnet-beta",
+  "token": {
+    "name": "WORLDZ",
+    "symbol": "WLDZ",
+    "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "fixedSupplyTokens": 100000000,
+    "decimals": 6,
+    "mintAuthority": "REVOKED",
+    "freezeAuthority": "REVOKED"
+  },
+  "sourceControl": {
+    "squadsMultisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+    "vaultIndex": 0,
+    "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+    "currentGovernance": "2-of-3"
+  },
+  "allocation": [
+    {
+      "id": "jayjayteamdev",
+      "percent": 8,
+      "tokens": 8000000,
+      "destination": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+    },
+    {
+      "id": "initial_launch_lp",
+      "percent": 15,
+      "tokens": 15000000,
+      "destinationRole": "METEORA_DAMM_V2_WLDZ_WSOL_POSITION",
+      "state": "KEEP_IN_SOURCE_VAULT_UNTIL_LAUNCH"
+    },
+    {
+      "id": "staged_lp_reserve",
+      "percent": 20,
+      "tokens": 20000000,
+      "destinationRole": "STAGED_LIQUIDITY_RESERVE",
+      "state": "RESERVED_IN_SOURCE_VAULT"
+    },
+    {
+      "id": "legacy_snapshot_holders",
+      "percent": 10,
+      "tokens": 10000000,
+      "destinationRole": "LEGACY_CLAIM_POOL",
+      "state": "RESERVED_PENDING_ENTITLEMENT_RELEASE",
+      "snapshot": {
+        "batchId": "4b7faa3f-c6cd-435f-9840-43a04cd090a0",
+        "root": "b0a58be30c8323bf22d57939cd989be6b1631f5dd17a682cd829d0cc6a85e548",
+        "legacyAssets": 10,
+        "positiveTokenAccountRows": 239,
+        "uniqueEligibleWallets": 216,
+        "formula": {
+          "equalPercent": 50,
+          "sqrtWeightedPercent": 50
+        }
+      }
+    },
+    {
+      "id": "first_100_worldzlaunchpad",
+      "percent": 10,
+      "tokens": 10000000,
+      "destinationRole": "WORLDZLAUNCHPAD_FIRST_100_REWARD_POOL",
+      "perVerifiedLaunchTokens": 100000,
+      "maxLaunches": 100,
+      "state": "RESERVED_IN_SOURCE_VAULT"
+    },
+    {
+      "id": "oneworldz_charity_impact",
+      "percent": 10,
+      "tokens": 10000000,
+      "destination": null,
+      "destinationRole": "VERIFIED_CHARITY_OR_IMPACT_VAULT",
+      "state": "DESTINATION_SELECTION_REQUIRED"
+    },
+    {
+      "id": "worldz_treasury",
+      "percent": 10,
+      "tokens": 10000000,
+      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "state": "RESERVED_IN_CURRENT_TREASURY_VAULT"
+    },
+    {
+      "id": "general_reserve",
+      "percent": 5,
+      "tokens": 5000000,
+      "destinationRole": "GENERAL_RESERVE",
+      "state": "RESERVED_IN_SOURCE_VAULT"
+    },
+    {
+      "id": "community_ecosystem_growth",
+      "percent": 7,
+      "tokens": 7000000,
+      "destinationRole": "COMMUNITY_ECOSYSTEM_GROWTH",
+      "state": "RESERVED_IN_SOURCE_VAULT"
+    },
+    {
+      "id": "operations_security_infrastructure",
+      "percent": 5,
+      "tokens": 5000000,
+      "destinationRole": "OPERATIONS_SECURITY_INFRASTRUCTURE",
+      "state": "RESERVED_IN_SOURCE_VAULT"
+    }
+  ],
+  "liquidity": {
+    "initialActivePercent": 15,
+    "stagedReservePercent": 20,
+    "plannedCapacityPercent": 35,
+    "generalReserveOptionalPercent": 5,
+    "maximumIfReserveReassignedPercent": 40
+  },
+  "invariants": {
+    "allocationPercentTotal": 100,
+    "allocationTokenTotal": 100000000,
+    "noSecondWldzMint": true,
+    "walletTransferTaxPercent": 0,
+    "ordinaryWalletTransfersUntaxed": true
+  }
+}
