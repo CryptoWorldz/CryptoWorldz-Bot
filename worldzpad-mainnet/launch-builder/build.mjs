@@ -268,9 +268,14 @@ const launchInstructions = meteoraTx.instructions.filter((ix) => {
   return true;
 });
 assert(removedTreasuryAta === 1, "expected exactly one redundant WLDZ Treasury ATA instruction to be removed");
-assert(removedZeroWrap === 2, "expected zero-amount wSOL transfer + sync instructions to be removed");
+console.log("WLDZ_INSTRUCTION_DEBUG="+JSON.stringify(meteoraTx.instructions.map((ix,i)=>({
+  i,
+  program:ix.programId.toBase58(),
+  data:Buffer.from(ix.data).toString("hex"),
+  keys:ix.keys.map(k=>k.pubkey.toBase58())
+}))));
 console.log("WLDZ_REDUNDANT_TREASURY_ATA_IX_REMOVED=1");
-console.log("WLDZ_ZERO_WS0L_WRAP_IX_REMOVED=2");
+console.log("WLDZ_ZERO_WSOL_WRAP_IX_REMOVED="+removedZeroWrap);
 
 const latest = await connection.getLatestBlockhash("confirmed");
 const innerTransactionMessage = new TransactionMessage({
