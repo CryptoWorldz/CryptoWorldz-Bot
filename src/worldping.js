@@ -68,7 +68,9 @@ function registerWorldPingHandlers({ bot, config, supabase, env = process.env })
       if (!isOwner(message, config) && !(await activeLicence(supabase, message.chat.id))) {
         return send(message, "🔒 This group needs an active ZED MAX licence. Use /zedmaxprice, pay SOL, then submit /zedmaxreceipt SIGNATURE for owner review.");
       }
-      const mode = await worldPingMode(supabase, message.chat.id);
+      // JayJayTeamDev can send a WorldPing even if the optional group-settings
+      // table is unavailable. Everyone else retains the configured mode checks.
+      const mode = isOwner(message, config) ? "full_member" : await worldPingMode(supabase, message.chat.id);
       if (mode === "admins_only" && !isOwner(message, config) && !(await admin(message))) {
         return send(message, "⛔ This group is on AdminsOnlyPing. A group admin can send it or change mode with /worldpingmode full.");
       }
