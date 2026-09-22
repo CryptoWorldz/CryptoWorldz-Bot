@@ -38,23 +38,19 @@ test("Mini App page is served while protected data rejects unsigned browser IDs"
   assert.equal(page.headers.get("cache-control"), "no-store, max-age=0");
   const miniAppPage = await page.text();
   assert.match(miniAppPage, /CryptoWorldz Command Centre/);
-  assert.match(miniAppPage, /Real-World Impact/);
-  assert.match(miniAppPage, /home-impact/);
+  assert.doesNotMatch(miniAppPage, /Reagan|Action Spreads? Smiles|reagan-children/i, "retired Uganda campaign must not appear in Mini App HTML");
   assert.match(miniAppPage, /\.payment-qr\[hidden\]\{display:none\}/);
 
   const miniAppScript = await fetch(`http://127.0.0.1:${port}/miniapp/app.js`);
   assert.equal(miniAppScript.status, 200);
   const miniAppSource = await miniAppScript.text();
+  assert.doesNotMatch(miniAppSource, /Reagan|Action Spreads? Smiles|reagan-children/i, "retired Uganda campaign must not appear in Mini App JS");
   assert.match(miniAppSource, /Copy.*Address/);
   assert.match(miniAppSource, /Copy Payment Request/);
   assert.match(miniAppSource, /navigator\.clipboard\.writeText/);
   assert.match(miniAppSource, /governance-vote/);
   assert.match(miniAppSource, /\/api\/mini\/governance\/\$\{vote\.dataset\.proposalId\}\/vote/);
   assert.match(miniAppSource, /selected_option/);
-  assert.match(miniAppSource, /Help Reagan & Children in Uganda/);
-  assert.match(miniAppSource, /https:\/\/donateworldz\.com\/reagan-children\//);
-  assert.doesNotMatch(miniAppSource, /gofund(?:me)?\.com|gofund\.me/i);
-  assert.match(miniAppSource, /does not award Legend Points based on donation amounts/);
   assert.doesNotMatch(miniAppSource, /wallet\.href/);
 
   const protectedResponse = await fetch(`http://127.0.0.1:${port}/api/mini/bootstrap`, {
