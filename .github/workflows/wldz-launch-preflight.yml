@@ -7,6 +7,11 @@ on:
       - "worldzpad-mainnet/launch-builder/**"
       - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
       - ".github/workflows/wldz-launch-preflight.yml"
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/launch-builder/**"
+      - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
+      - ".github/workflows/wldz-launch-preflight.yml"
 
 permissions:
   contents: read
@@ -30,6 +35,8 @@ jobs:
       - name: Install pinned launch SDKs
         run: npm install --no-audit --no-fund
       - name: Build and simulate canonical WLDZ launch
+        env:
+          SQUADS_CREATOR: Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u
         run: npm run preflight
       - name: Upload launch proof
         uses: actions/upload-artifact@v4
@@ -37,3 +44,4 @@ jobs:
           name: wldz-mainnet-launch-preflight
           path: worldzpad-mainnet/artifacts/wldz-launch-preflight.json
           if-no-files-found: error
+          retention-days: 30
