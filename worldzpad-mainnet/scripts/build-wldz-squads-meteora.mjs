@@ -69,6 +69,7 @@ A(poolBytes.length<=1232,'pool leg remains above Solana packet limit: '+poolByte
 A(lockBytes.length<=1232,'lock leg above Solana packet limit: '+lockBytes.length);
 
 const poolSim=await connection.simulateTransaction(poolV0,{sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed',accounts:{encoding:'base64',addresses:[pool.toBase58(),position.toBase58()]}});
+if(poolSim.value.err!==null){console.log('WLDZ_POOL_SIM_LOGS='+JSON.stringify(poolSim.value.logs??[]));console.log('WLDZ_POOL_PACKET_BYTES='+poolBytes.length);}
 A(poolSim.value.err===null,'pool-create simulation failed: '+JSON.stringify(poolSim.value.err));
 
 const batchCreate=multisig.instructions.batchCreate({multisigPda:ms,creator,rentPayer:creator,batchIndex,vaultIndex:Number(config.treasury.vaultIndex),memo:'WORLDZ WLDZ 15M Meteora launch + permanent lock'});
