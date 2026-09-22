@@ -6,7 +6,8 @@
   "scripts": {
     "build:launch": "node scripts/build-wldz-squads-meteora.mjs",
     "build:proposal": "node scripts/build-wldz-squads-proposal.mjs",
-    "build:allocation": "node scripts/build-wldz-allocation-step1.mjs"
+    "build:allocation": "node scripts/build-wldz-allocation-step1.mjs",
+    "build:owner-launch": "node scripts/build-wldz-owner-authorized-batch.mjs"
   },
   "dependencies": {
     "@meteora-ag/cp-amm-sdk": "1.4.7",
