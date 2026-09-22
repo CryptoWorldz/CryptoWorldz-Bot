@@ -182,7 +182,10 @@ const simulation = await connection.simulateTransaction(versioned, {
   replaceRecentBlockhash: true,
   commitment: "confirmed",
 });
-if (simulation.value.err !== null) {\n  console.error("WLDZ_SIMULATION_LOGS=" + JSON.stringify(simulation.value.logs ?? []));\n  fail("mainnet simulation failed: " + JSON.stringify(simulation.value.err));\n}
+if (simulation.value.err !== null) {
+  console.error("WLDZ_SIMULATION_LOGS=" + JSON.stringify(simulation.value.logs ?? []));
+  fail("mainnet simulation failed: " + JSON.stringify(simulation.value.err));
+}
 
 const report = {
   status: "PASS",
