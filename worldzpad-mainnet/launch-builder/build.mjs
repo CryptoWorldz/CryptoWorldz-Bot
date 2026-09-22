@@ -8,6 +8,7 @@ import {
   PublicKey,
   Transaction,
   TransactionMessage,
+  SystemProgram,
   VersionedTransaction,
 } from "@solana/web3.js";
 import {
@@ -254,6 +255,59 @@ if (innerSimulation.value.err !== null) {
   console.error("WLDZ_METEORA_SIMULATION_LOGS=" + JSON.stringify(innerSimulation.value.logs ?? []));
 }
 
+let fundingSimulation = null;
+if (innerSimulation.value.err !== null) {
+  const candidates = [
+    1000000, 2000000, 3000000, 4000000, 5000000,
+    6000000, 7000000, 8000000, 9000000,
+  ].filter((lamports) => lamports + 10000 < creatorBalanceLamports);
+
+  for (const topupLamports of candidates) {
+    const fundedMessage = new TransactionMessage({
+      payerKey: creatorPk,
+      recentBlockhash: latest.blockhash,
+      instructions: [
+        SystemProgram.transfer({
+          fromPubkey: creatorPk,
+          toPubkey: vaultPk,
+          lamports: topupLamports,
+        }),
+        ...meteoraTx.instructions,
+      ],
+    });
+    const fundedTx = new VersionedTransaction(fundedMessage.compileToV0Message());
+    const fundedBytes = fundedTx.serialize();
+    if (fundedBytes.length > 1232) {
+      fundingSimulation = {
+        passed: false,
+        topupLamports,
+        packetBytes: fundedBytes.length,
+        err: "FUNDED_SIMULATION_PACKET_TOO_LARGE",
+      };
+      break;
+    }
+    const sim = await connection.simulateTransaction(fundedTx, {
+      sigVerify: false,
+      replaceRecentBlockhash: true,
+      commitment: "confirmed",
+    });
+    fundingSimulation = {
+      passed: sim.value.err === null,
+      topupLamports,
+      packetBytes: fundedBytes.length,
+      err: sim.value.err,
+      unitsConsumed: sim.value.unitsConsumed ?? null,
+      logsTail: (sim.value.logs ?? []).slice(-18),
+    };
+    console.log(
+      "WLDZ_FUNDING_SIM topup=" + topupLamports +
+      " bytes=" + fundedBytes.length +
+      " passed=" + (sim.value.err === null)
+    );
+    if (sim.value.err === null) break;
+  }
+}
+
 const createVaultTransactionIx = multisig.instructions.vaultTransactionCreate({
   multisigPda: multisigPk,
   transactionIndex,
@@ -370,6 +424,7 @@ const report = {
     unitsConsumed: innerSimulation.value.unitsConsumed ?? null,
     logs: innerSimulation.value.logs ?? [],
   },
+  fundingSimulation,
   signature: {
     realOnChainSignature: null,
     simulationProofSha256: sha256(serializedProposalBuild),
