@@ -96,32 +96,6 @@ async function readCustody(connection,sqds,spl,web3,member){
  return {account,multisigPda,vault,mint};
 }
 
-async function loadSavedBatch(connection,sqds,member){
- const saved=loadResume();
- if(!saved)return null;
- try{
-  const index=BigInt(saved.batchIndex);
-  const transactionPda=sqds.getTransactionPda({multisigPda:new (await deps()).web3.PublicKey(MULTISIG),index})[0];
-  const proposalPda=sqds.getProposalPda({multisigPda:new (await deps()).web3.PublicKey(MULTISIG),transactionIndex:index})[0];
-  const [batchInfo,proposalInfo]=await Promise.all([
-   accountExists(connection,transactionPda),
-   accountExists(connection,proposalPda)
-  ]);
-  if(!batchInfo||!proposalInfo){clearResume();return null}
-  const [batch,proposal]=await Promise.all([
-   sqds.accounts.Batch.fromAccountAddress(connection,transactionPda,'confirmed'),
-   sqds.accounts.Proposal.fromAccountAddress(connection,proposalPda,'confirmed')
-  ]);
-  if(!batch.creator.equals(member)||!batch.multisig.equals(new (await deps()).web3.PublicKey(MULTISIG))||Number(batch.vaultIndex)!==VAULT_INDEX){
-   clearResume();return null;
-  }
-  return {index,transactionPda,proposalPda,batch,proposal,saved};
- }catch{
-  clearResume();
-  return null;
- }
-}
-
 function proposalStatus(sqds,proposal){
  if(!proposal)return 'missing';
  if(sqds.types.isProposalStatusDraft(proposal.status))return 'draft';
