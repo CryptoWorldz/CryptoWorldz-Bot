@@ -560,7 +560,7 @@ $('#image-remove')?.addEventListener('click',removeTokenImage);
 $('#preflight').addEventListener('click',runPreflight);
 $('#mint-btn').addEventListener('click',mintFlow);
 $('#network').addEventListener('change',()=>{refreshConnection();saveDraft();preflightOk=false;if(!pending?.registered)$('#mint-btn').disabled=false;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
-$('input,textarea,select').forEach(x=>{
+$$('input,textarea,select').forEach(x=>{
   if(x.id==='image-file')return;
   const persist=()=>{if(!['wallet-choice'].includes(x.id))saveDraft();if(!['wallet-choice','network'].includes(x.id))allocationMath();};
   x.addEventListener('input',persist);
