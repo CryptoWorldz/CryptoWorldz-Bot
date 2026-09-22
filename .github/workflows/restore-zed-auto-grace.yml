@@ -548,11 +548,15 @@ jobs:
           call("setMyCommands",{"commands":commands})
           call("setChatMenuButton",{"menu_button":{"type":"web_app","text":"🌐 OPEN COMMAND CENTRE","web_app":{"url":"https://cryptobotz.cryptoworldz.xyz/miniapp/"}}})
           secret=hashlib.sha256(token.encode()).hexdigest()
+          before=call("getWebhookInfo")
+          pending_before=int(before.get("pending_update_count") or 0)
+          print("ZED_TELEGRAM_BACKLOG_BEFORE="+str(pending_before))
           call("setWebhook",{
             "url":"https://cryptobotz.cryptoworldz.xyz/telegram-webhook",
             "secret_token":secret,
             "allowed_updates":["message","callback_query"],
-            "drop_pending_updates":False
+            "drop_pending_updates":False,
+            "max_connections":5
           })
           bot=call("getMe")
           actual=call("getMyCommands")
@@ -561,9 +565,25 @@ jobs:
           expected=[x["command"] for x in commands]
           if got != expected: raise SystemExit("Telegram command list mismatch")
           if hook.get("url") != "https://cryptobotz.cryptoworldz.xyz/telegram-webhook": raise SystemExit("Telegram webhook URL mismatch")
-          if hook.get("last_error_message"): raise SystemExit("Telegram webhook reports an error: "+str(hook.get("last_error_message"))[:160])
+
+          pending_after=int(hook.get("pending_update_count") or 0)
+          for attempt in range(1,13):
+              if pending_after == 0 or pending_after < pending_before:
+                  break
+              import time
+              time.sleep(5)
+              hook=call("getWebhookInfo")
+              pending_after=int(hook.get("pending_update_count") or 0)
+              print("ZED_TELEGRAM_BACKLOG_CHECK attempt="+str(attempt)+" pending="+str(pending_after))
+
+          print("ZED_TELEGRAM_BACKLOG_AFTER="+str(pending_after))
+          if pending_before and pending_after >= pending_before:
+              raise SystemExit("Telegram backlog is not draining through repaired webhook")
+          if hook.get("last_error_message") and pending_after:
+              raise SystemExit("Telegram webhook still reports an active delivery error: "+str(hook.get("last_error_message"))[:160])
           print("ZED_TELEGRAM_BOT=PASS")
           print("ZED_TELEGRAM_COMMANDS=18")
+          print("ZED_TELEGRAM_BACKLOG_CONTROL=PASS")
           print("ZED_TELEGRAM_WEBHOOK=PASS")
           print("ZED_TELEGRAM_MENU_BUTTON=PASS")
           PY
