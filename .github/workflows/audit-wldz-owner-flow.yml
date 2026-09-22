@@ -1,0 +1,25 @@
+name: Audit WORLDZ Owner Signing Flow
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "worldzpad-mainnet/scripts/audit-wldz-owner-flow.mjs"
+      - ".github/workflows/audit-wldz-owner-flow.yml"
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: worldzpad-mainnet
+    env:
+      SOLANA_RPC_URL: https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+      - run: node scripts/audit-wldz-owner-flow.mjs
