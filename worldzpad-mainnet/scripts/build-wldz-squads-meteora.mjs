@@ -55,6 +55,9 @@ if(diagProposalInfo){
 }
 console.log('WLDZ_DIAG_MULTISIG_TRANSACTION_INDEX='+multisig.utils.toBigInt(ma.transactionIndex));
 console.log('WLDZ_DIAG_CREATOR_SOL_LAMPORTS='+creatorSol);
+for(const member of ma.members){
+ console.log('WLDZ_DIAG_MEMBER='+member.key.toBase58()+':MASK='+Number(member.permissions.mask));
+}
 console.log('WLDZ_DIAG_BATCH14_EXISTS='+Boolean(diagBatchInfo));
 console.log('WLDZ_DIAG_PROPOSAL14_EXISTS='+Boolean(diagProposalInfo));
 console.log('WLDZ_DIAG_PROPOSAL14_STATUS='+diagProposalStatus);
