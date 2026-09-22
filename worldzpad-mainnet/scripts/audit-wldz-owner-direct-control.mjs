@@ -102,3 +102,22 @@ for (let i = 1n; i <= multisig.utils.toBigInt(ms.transactionIndex); i++) {
   historical.push(row);
 }
 console.log("WLDZ_MULTISIG_TRANSACTION_HISTORY=" + JSON.stringify(historical));
+
+const proposalHistory = [];
+for (let i = 1n; i <= multisig.utils.toBigInt(ms.transactionIndex); i++) {
+  const [proposalPda] = multisig.getProposalPda({ multisigPda: MULTISIG, transactionIndex: i });
+  try {
+    const proposal = await multisig.accounts.Proposal.fromAccountAddress(connection, proposalPda, "confirmed");
+    proposalHistory.push({
+      index: i.toString(),
+      proposalPda: proposalPda.toBase58(),
+      status: proposal.pretty().status,
+      approved: (proposal.approved || []).map(k => k.toBase58()),
+      rejected: (proposal.rejected || []).map(k => k.toBase58()),
+      cancelled: (proposal.cancelled || []).map(k => k.toBase58())
+    });
+  } catch (error) {
+    proposalHistory.push({ index: i.toString(), proposalPda: proposalPda.toBase58(), missing: true });
+  }
+}
+console.log("WLDZ_PROPOSAL_STATUS_HISTORY=" + JSON.stringify(proposalHistory));
