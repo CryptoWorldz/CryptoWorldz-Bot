@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-22-public-launchpad-v17-multichain-adapters",
+  "version": "2026-09-23-public-launchpad-v18-temporary-wldz-1of2",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -372,23 +372,23 @@
     "destination": "Worldz Treasury Multisig",
     "provider": "Squads",
     "network": "solana",
-    "requiredThreshold": "2-of-3",
+    "requiredThreshold": "1-of-2 temporary",
     "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-    "status": "MULTISIG_AND_VAULT_ONCHAIN_VERIFIED__ROUTE_PROOF_PENDING",
+    "status": "TEMPORARY_1_OF_2_CUSTODY__PUBLIC_CREATOR_ROUTE_PROOF_PENDING",
     "mainnetRoutingEnabled": false,
-    "rule": "Public mainnet fee routing must remain disabled until the chain-specific Operations Treasury is verified at 5-of-10 governance, the exact 10% fee-only route is proven end-to-end, and the applicable release gates pass.",
+    "rule": "Temporary 1-of-2 custody applies only to the current core WLDZ operational vault while a replacement signer is verified. Public creator mainnet routing remains disabled until its separate fee-route and release evidence is complete.",
     "verifiedEvidence": {
       "squadLabel": "Team Zed Treasury",
       "providerProgram": "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf",
-      "memberCount": 3,
-      "threshold": "2-of-3",
+      "memberCount": 2,
+      "threshold": "1-of-2 temporary",
       "multisigConfigAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
       "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
       "vaultIndex": 0,
       "vaultDerivationVerified": true,
       "squadsProgramOwnerVerified": true,
       "verification": "Independent Solana mainnet Squads v4 account decode and vault derivation",
-      "note": "Multisig configuration and vault relationship are verified on-chain. Mainnet launch routing remains disabled until the exact 10% fee-only route and remaining release gates pass."
+      "note": "The recorded temporary operational configuration is 1-of-2. It does not satisfy the published public-creator governance target and does not itself enable public creator mainnet launches."
     },
     "multisigConfigAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
     "vaultIndex": 0,
@@ -622,7 +622,7 @@
       "provider": "Squads v4",
       "configAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
       "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-      "threshold": "2-of-3",
+      "threshold": "1-of-2 temporary",
       "onChainVerified": true
     },
     "antiManipulation": {
@@ -758,5 +758,12 @@
     ],
     "secretKeysCollected": false,
     "rule": "WorldzLaunchPad never asks for XRPL seeds. Mainnet remains gated until issuer/hot-wallet governance, treasury fee routing, manifest, accounting/legal and proof checks pass."
+  },
+  "temporaryCoreWldzCustody": {
+    "active": true,
+    "policy": "1-of-2 temporary",
+    "scope": "Core WLDZ operational vault only",
+    "publicCreatorMainnetLaunchesEnabled": false,
+    "conditionToEnd": "Independent replacement signer is verified and an approved governance configuration is executed."
   }
 }

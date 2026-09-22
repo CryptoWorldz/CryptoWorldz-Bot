@@ -1,6 +1,6 @@
 {
-  "version": "WLDZ-ALLOCATION-2026-09-22-A",
-  "status": "LOCKED_WORKING_MASTER__ONCHAIN_DISTRIBUTION_PENDING",
+  "version": "WLDZ-ALLOCATION-2026-09-23-B",
+  "status": "WORKING_REVISION__TEMPORARY_1_OF_2_CUSTODY__ONCHAIN_DISTRIBUTION_PENDING",
   "network": "mainnet-beta",
   "token": {
     "name": "WORLDZ",
@@ -15,7 +15,7 @@
     "squadsMultisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
     "vaultIndex": 0,
     "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-    "currentGovernance": "2-of-3"
+    "currentGovernance": "1-of-2 temporary"
   },
   "allocation": [
     {
@@ -41,10 +41,10 @@
     },
     {
       "id": "legacy_snapshot_holders",
-      "percent": 10,
-      "tokens": 10000000,
+      "percent": 5,
+      "tokens": 5000000,
       "destinationRole": "LEGACY_CLAIM_POOL",
-      "state": "RESERVED_PENDING_ENTITLEMENT_RELEASE",
+      "state": "RESERVED_PENDING_ENTITLEMENT_RELEASE__TEMPORARY_1_OF_2_CUSTODY",
       "snapshot": {
         "batchId": "4b7faa3f-c6cd-435f-9840-43a04cd090a0",
         "root": "b0a58be30c8323bf22d57939cd989be6b1631f5dd17a682cd829d0cc6a85e548",
@@ -97,10 +97,20 @@
       "state": "RESERVED_PENDING_VERIFIED_WALLET_AND_ACTIVE_ROLE"
     },
     {
+      "id": "dev_city_verified_wallets",
+      "percent": 5.4,
+      "tokens": 5400000,
+      "destinationRole": "DEV_CITY_VERIFIED_WALLET_POOL",
+      "recipients": 54,
+      "tokensPerVerifiedWallet": 100000,
+      "percentPerVerifiedWallet": 0.1,
+      "state": "PENDING_WALLET_ASSOCIATION_VERIFICATION_AND_MULTISIG_DISTRIBUTION_PROPOSAL"
+    },
+    {
       "id": "community_ecosystem_growth",
-      "percent": 2,
-      "tokens": 2000000,
-      "destinationRole": "COMMUNITY_ECOSYSTEM_GROWTH",
+      "percent": 1.6,
+      "tokens": 1600000,
+      "destinationRole": "COMMUNITY_ECOSYSTEM_GROWTH__COMMAND_CENTRE_REWARDS",
       "state": "RESERVED_IN_SOURCE_VAULT"
     },
     {
