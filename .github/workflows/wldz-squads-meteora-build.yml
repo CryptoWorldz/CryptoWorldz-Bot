@@ -2,37 +2,46 @@ name: WLDZ Squads Meteora Build Proof
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "worldzpad-mainnet/scripts/build-wldz-squads-meteora.mjs"
+      - "worldzpad-mainnet/package.json"
+      - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
+      - ".github/workflows/wldz-squads-meteora-build.yml"
 
 permissions:
   contents: read
 
+concurrency:
+  group: wldz-squads-meteora-build
+  cancel-in-progress: true
+
 jobs:
   build-proof:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: worldzpad-mainnet
     env:
-      SOLANA_RPC_URL: ${{ secrets.MAINNET_SOLANA_RPC_URL }}
-      SQUADS_CREATOR: ${{ secrets.WLDZ_SQUADS_CREATOR_PUBLIC_KEY }}
+      SOLANA_RPC_URL: https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Require read-only mainnet RPC and creator public key
-        run: |
-          test -n "$SOLANA_RPC_URL"
-          test -n "$SQUADS_CREATOR"
       - name: Install pinned SDKs
         run: npm install --no-audit --no-fund
-      - name: Build exact Squads → Meteora launch message without sending
+      - name: Build and simulate exact Squads → Meteora proposal payload
         run: npm run build:launch
-      - name: Upload build proof
+      - name: Upload serialized payload and simulation proof
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wldz-squads-meteora-build-proof
-          path: worldzpad-mainnet/artifacts/wldz-squads-meteora-build-proof.json
-          if-no-files-found: error
+          path: |
+            worldzpad-mainnet/artifacts/wldz-squads-meteora-build-proof.json
+            worldzpad-mainnet/artifacts/wldz-meteora-inner-unsigned.v0.base64.txt
+            worldzpad-mainnet/artifacts/wldz-squads-proposal-create-unsigned.v0.base64.txt
+          if-no-files-found: warn
           retention-days: 30
