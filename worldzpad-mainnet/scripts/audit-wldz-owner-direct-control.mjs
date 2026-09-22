@@ -54,3 +54,33 @@ console.log("WLDZ_VAULT_DELEGATED_WLDZ=" + report.vaultDelegatedWldz);
 
 console.log("WLDZ_SPENDING_LIMIT_CLASS_METHODS=" + JSON.stringify(Object.getOwnPropertyNames(multisig.accounts.SpendingLimit || {})));
 console.log("WLDZ_RPC_EXPORTS=" + JSON.stringify(Object.keys(multisig.rpc || {})));
+
+try {
+  const builder = multisig.accounts.SpendingLimit.gpaBuilder();
+  const rows = await builder.addFilter("multisig", MULTISIG).run(connection);
+  const decoded = [];
+  for (const row of rows) {
+    const address = row.pubkey || row.publicKey || row[0];
+    const accountInfo = row.account || row.accountInfo || row[1];
+    let account = null;
+    try {
+      account = accountInfo?.data
+        ? multisig.accounts.SpendingLimit.fromAccountInfo(accountInfo)[0]
+        : await multisig.accounts.SpendingLimit.fromAccountAddress(connection, address, "confirmed");
+    } catch {}
+    if (!account) continue;
+    decoded.push({
+      address: address?.toBase58?.() || String(address || ""),
+      multisig: account.multisig?.toBase58?.() || String(account.multisig || ""),
+      vaultIndex: Number(account.vaultIndex || 0),
+      mint: account.mint?.toBase58?.() || String(account.mint || ""),
+      amount: String(account.amount || 0),
+      remainingAmount: String(account.remainingAmount || 0),
+      members: (account.members || []).map(x => x.toBase58?.() || String(x)),
+      destinations: (account.destinations || []).map(x => x.toBase58?.() || String(x))
+    });
+  }
+  console.log("WLDZ_SPENDING_LIMITS=" + JSON.stringify(decoded));
+} catch (error) {
+  console.log("WLDZ_SPENDING_LIMIT_AUDIT_ERROR=" + String(error?.message || error));
+}
