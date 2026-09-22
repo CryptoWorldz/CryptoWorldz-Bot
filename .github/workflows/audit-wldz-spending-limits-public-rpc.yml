@@ -1,0 +1,30 @@
+name: Audit WLDZ Spending Limits Public RPC
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/audit-wldz-spending-limits-public-rpc.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: worldzpad-mainnet
+    env:
+      SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned SDKs
+        run: npm install --no-audit --no-fund
+      - name: Audit existing spending limits
+        run: node scripts/audit-wldz-owner-direct-control.mjs
