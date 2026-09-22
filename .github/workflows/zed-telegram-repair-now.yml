@@ -80,13 +80,13 @@ jobs:
 
           if hook is None:
               hook=call("getWebhookInfo")
+          print("ZED_TELEGRAM_BACKLOG_AFTER="+str(pending_after))
+          print("ZED_TELEGRAM_LAST_ERROR="+("YES" if hook.get("last_error_message") else "NO"))
+          print("ZED_TELEGRAM_LAST_ERROR_MESSAGE="+str(hook.get("last_error_message") or "NONE")[:180])
+          print("ZED_TELEGRAM_LAST_ERROR_DATE="+str(hook.get("last_error_date") or "NONE"))
           if hook.get("url") != webhook:
               raise SystemExit("Webhook URL mismatch")
           if pending_before and pending_after >= pending_before:
               raise SystemExit("Backlog has not begun draining")
-
-          print("ZED_TELEGRAM_BACKLOG_AFTER="+str(pending_after))
-          print("ZED_TELEGRAM_LAST_ERROR="+("YES" if hook.get("last_error_message") else "NO"))
-          print("ZED_TELEGRAM_LAST_ERROR_MESSAGE="+str(hook.get("last_error_message") or "NONE")[:180])
           print("ZED_TELEGRAM_BACKLOG_CONTROL=PASS")
           print("ZED_TELEGRAM_INBOUND_ROUTE=READY")
