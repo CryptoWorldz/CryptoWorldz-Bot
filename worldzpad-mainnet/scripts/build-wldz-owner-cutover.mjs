@@ -21,13 +21,19 @@ const index = multisig.utils.toBigInt(ma.transactionIndex)+1n;
 const [txPda] = multisig.getTransactionPda({ multisigPda:MS, index });
 const [proposalPda] = multisig.getProposalPda({ multisigPda:MS, transactionIndex:index });
 
+const otherMembers = ma.members.filter(m=>!m.key.equals(OWNER)).map(m=>m.key);
+A(otherMembers.length===2, "expected exactly two non-owner members");
+const cutoverActions = [
+  { __kind:"ChangeThreshold", newThreshold:1 },
+  ...otherMembers.map(oldMember=>({ __kind:"RemoveMember", oldMember }))
+];
 const create = multisig.instructions.configTransactionCreate({
   multisigPda:MS,
   transactionIndex:index,
   creator:OWNER,
   rentPayer:OWNER,
-  actions:[{ __kind:"ChangeThreshold", newThreshold:1 }],
-  memo:"WORLDZ owner cutover: change Squads threshold 2-of-3 to 1-of-3"
+  actions:cutoverActions,
+  memo:"WORLDZ owner cutover: JayJayTeamDev becomes sole 1-of-1 treasury member"
 });
 const proposal = multisig.instructions.proposalCreate({
   multisigPda:MS, transactionIndex:index, creator:OWNER, rentPayer:OWNER, isDraft:true
@@ -68,6 +74,8 @@ const proof={
   multisig:MS.toBase58(),
   currentThreshold:Number(ma.threshold),
   targetThreshold:1,
+  targetMemberCount:1,
+  removedMembers:otherMembers.map(k=>k.toBase58()),
   owner:OWNER.toBase58(),
   transactionIndex:index.toString(),
   transactionPda:txPda.toBase58(),
@@ -76,7 +84,7 @@ const proof={
   executePacketBytes:Buffer.from(executeTx.serialize()).length,
   createApproveSimulation:{passed:true,err:null,unitsConsumed:sim.value.unitsConsumed??null},
   fingerprints:{createApprove:H(Buffer.from(tx.message.serialize())),execute:H(Buffer.from(executeTx.message.serialize()))},
-  executionRule:"The config change itself follows the current on-chain threshold. Once executed, future Squads proposals require one approval."
+  executionRule:"The cutover itself follows the current on-chain threshold. Once executed, JayJayTeamDev is the sole 1-of-1 member and future Squads proposals require only the owner approval."
 };
 fs.writeFileSync("artifacts/wldz-owner-cutover-proof.json",JSON.stringify(proof,null,2)+"\n");
 console.log("WLDZ_OWNER_CUTOVER="+proof.status);
