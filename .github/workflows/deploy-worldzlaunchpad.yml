@@ -59,14 +59,14 @@ jobs:
           assert fee['walletTransferTaxPercent']==0
 
           assert treasury['destination']=='Worldz Treasury Multisig'
-          assert treasury['requiredThreshold']=='2-of-3'
+          assert treasury['requiredThreshold']=='1-of-2 temporary'
           assert treasury['vaultAddress']=='n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB'
           assert treasury['multisigConfigAddress']=='B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN'
           assert treasury['vaultIndex']==0
-          assert treasury['status']=='MULTISIG_AND_VAULT_ONCHAIN_VERIFIED__ROUTE_PROOF_PENDING'
+          assert treasury['status']=='TEMPORARY_1_OF_2_CUSTODY__PUBLIC_CREATOR_ROUTE_PROOF_PENDING'
           assert treasury['verifiedEvidence']['providerProgram']=='SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf'
-          assert treasury['verifiedEvidence']['memberCount']==3
-          assert treasury['verifiedEvidence']['threshold']=='2-of-3'
+          assert treasury['verifiedEvidence']['memberCount']==2
+          assert treasury['verifiedEvidence']['threshold']=='1-of-2 temporary'
           assert treasury['verifiedEvidence']['vaultDerivationVerified'] is True
           assert treasury['verifiedEvidence']['squadsProgramOwnerVerified'] is True
           assert treasury['targetGovernance']=='5-of-10'
