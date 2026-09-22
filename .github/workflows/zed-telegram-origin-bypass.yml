@@ -1,0 +1,120 @@
+name: ZED Telegram Origin Bypass
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/zed-telegram-origin-bypass.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+
+    steps:
+      - name: Bypass CDN for Telegram webhook using verified Hostinger origin
+        shell: python
+        run: |
+          import hashlib, json, os, socket, subprocess, time, urllib.request
+
+          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          ftp_host=str(os.environ.get("FTP_HOST","")).strip()
+          if not token or not ftp_host:
+              raise SystemExit("Protected Telegram or Hostinger origin credential missing")
+          print("::add-mask::"+token)
+
+          raw=ftp_host.replace("ftps://","").replace("ftp://","").split("/")[0]
+          if raw.count(":")==1:
+              raw=raw.split(":",1)[0]
+          print("::add-mask::"+raw)
+
+          ips=[]
+          for row in socket.getaddrinfo(raw,None,socket.AF_INET,socket.SOCK_STREAM):
+              ip=row[4][0]
+              if ip not in ips:
+                  ips.append(ip)
+                  print("::add-mask::"+ip)
+          if not ips:
+              raise SystemExit("No Hostinger origin IPv4 candidate resolved")
+
+          domain="cryptobotz.cryptoworldz.xyz"
+          origin=None
+          for ip in ips:
+              result=subprocess.run(
+                  ["curl","--silent","--show-error","--connect-timeout","8","--max-time","20",
+                   "--resolve",f"{domain}:443:{ip}",f"https://{domain}/health?telegram_origin_probe=1"],
+                  capture_output=True,text=True
+              )
+              if result.returncode==0 and '"ok":true' in result.stdout.replace(" ",""):
+                  origin=ip
+                  break
+          if not origin:
+              raise SystemExit("No verified Hostinger origin served ZED health")
+          print("ZED_TELEGRAM_ORIGIN_HTTPS=PASS")
+
+          api="https://api.telegram.org/bot"+token+"/"
+          webhook="https://"+domain+"/telegram-webhook"
+          secret=hashlib.sha256(token.encode()).hexdigest()
+
+          def call(method,payload=None):
+              data=None
+              headers={}
+              if payload is not None:
+                  data=json.dumps(payload).encode("utf-8")
+                  headers["content-type"]="application/json"
+              request=urllib.request.Request(api+method,data=data,headers=headers)
+              with urllib.request.urlopen(request,timeout=30) as response:
+                  result=json.loads(response.read().decode("utf-8"))
+              if result.get("ok") is not True:
+                  raise SystemExit("Telegram "+method+" failed")
+              return result.get("result")
+
+          before=call("getWebhookInfo")
+          pending_before=int(before.get("pending_update_count") or 0)
+          print("ZED_TELEGRAM_BACKLOG_BEFORE="+str(pending_before))
+
+          call("setWebhook",{
+              "url":webhook,
+              "ip_address":origin,
+              "secret_token":secret,
+              "allowed_updates":["message","callback_query"],
+              "drop_pending_updates":False,
+              "max_connections":5
+          })
+          print("ZED_TELEGRAM_WEBHOOK_ORIGIN_PIN=PASS")
+
+          pending_after=pending_before
+          hook=None
+          for attempt in range(1,19):
+              time.sleep(5)
+              hook=call("getWebhookInfo")
+              pending_after=int(hook.get("pending_update_count") or 0)
+              message=str(hook.get("last_error_message") or "")
+              print("ZED_TELEGRAM_ORIGIN_CHECK="+str(attempt)+" PENDING="+str(pending_after)+" ERROR="+("YES" if message else "NO"))
+              if (pending_after == 0 or pending_after < pending_before) and "403" not in message:
+                  break
+
+          if hook is None:
+              hook=call("getWebhookInfo")
+          message=str(hook.get("last_error_message") or "")
+          print("ZED_TELEGRAM_BACKLOG_AFTER="+str(pending_after))
+          print("ZED_TELEGRAM_LAST_ERROR_MESSAGE="+(message[:180] if message else "NONE"))
+          if hook.get("url") != webhook:
+              raise SystemExit("Telegram webhook URL mismatch")
+          if pending_before and pending_after >= pending_before:
+              raise SystemExit("Telegram backlog did not begin draining through origin")
+          if "403" in message:
+              raise SystemExit("Telegram still receives HTTP 403 from pinned origin")
+
+          print("ZED_TELEGRAM_CDN_BYPASS=PASS")
+          print("ZED_TELEGRAM_BACKLOG_CONTROL=PASS")
+          print("ZED_TELEGRAM_INBOUND_ROUTE=READY")
