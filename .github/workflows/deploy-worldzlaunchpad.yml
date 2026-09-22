@@ -181,11 +181,24 @@ jobs:
             'GENESIS FOUR','Genesis Four','Legacy Loyalty','SolSavewXRP',
             'worldzpad-four-token','FOUR-TOKEN-LAUNCH'
           ]
-          public_files=[p for p in root.rglob('*') if p.is_file() and p.suffix.lower() in {'.html','.js','.json','.php','.css'}]
+          # Public-plan secrecy applies to the public LaunchPad surface. Explicit noindex owner consoles
+          # are private operational routes and are checked separately below.
+          public_files=[
+              p for p in root.rglob('*')
+              if p.is_file()
+              and p.suffix.lower() in {'.html','.js','.json','.php','.css'}
+              and not p.relative_to(root).parts[0].startswith('worldz-now')
+          ]
           for p in public_files:
               text=p.read_text(errors='ignore')
               for term in banned:
                   assert term not in text, f'PRIVATE_PLAN_TERM_EXPOSED {term} in {p}'
+          owner_v6=root/'worldz-now-v6'/'index.html'
+          owner_v6_js=root/'worldz-now-v6'/'app-v6.js'
+          assert owner_v6.is_file() and owner_v6_js.is_file()
+          assert 'noindex,nofollow,noarchive' in owner_v6.read_text()
+          assert 'PRIVATE OWNER CONSOLE' in owner_v6.read_text()
+          assert 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' in owner_v6_js.read_text()
 
           assert 'Create Devnet Token' in devnet
           assert 'worldz-launch-register' in devnet_js
@@ -367,6 +380,7 @@ jobs:
           node --check launchpad.cryptoworldz.xyz/mainnet/app.js
           node --check launchpad.cryptoworldz.xyz/curve/app.js
           node --check launchpad.cryptoworldz.xyz/curve-pro/app.js
+          node --check launchpad.cryptoworldz.xyz/worldz-now-v6/app-v6.js
 
       - name: Run 100+ anti-cheat tokenomics scenarios
         shell: python
