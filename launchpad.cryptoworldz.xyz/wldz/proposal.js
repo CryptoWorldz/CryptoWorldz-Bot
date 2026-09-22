@@ -12,6 +12,99 @@ const fail=m=>{throw new Error(m)};
 const assert=(v,m)=>{if(!v)fail(m)};
 const textErr=e=>e?.message||String(e);
 const accountExists=async(connection,key)=>Boolean(await connection.getAccountInfo(key,'confirmed'));
+let walletCtx=null,walletRegistry=null;
+const short=v=>{const s=String(v||'');return s.length>16?s.slice(0,6)+'…'+s.slice(-6):s};
+
+async function getWalletRegistry(){
+ if(walletRegistry)return walletRegistry;
+ const mod=await import('https://esm.sh/@wallet-standard/app@1.1.0?bundle');
+ walletRegistry=mod.getWallets();
+ return walletRegistry;
+}
+function usableInjectedProvider(p){return !!p&&typeof p.connect==='function'&&typeof p.signTransaction==='function'}
+function jupiterInjectedProvider(){
+ const candidates=[window?.jupiter?.solana,usableInjectedProvider(window?.jupiter)?window.jupiter:null,window?.solana?.isJupiter?window.solana:null];
+ return candidates.find(usableInjectedProvider)||null;
+}
+function legacyProvider(){
+ return [jupiterInjectedProvider(),window?.phantom?.solana,window?.solflare,window?.solana].filter(Boolean).find(usableInjectedProvider)||null;
+}
+async function walletStandardCandidates(){
+ try{
+  const reg=await getWalletRegistry();
+  return reg.get().filter(w=>w?.features?.['standard:connect']&&w?.features?.['solana:signTransaction']&&Array.isArray(w.chains)&&w.chains.some(c=>String(c).startsWith('solana:')))
+   .sort((a,b)=>Number(!/jupiter/i.test(String(a.name||'')))-Number(!/jupiter/i.test(String(b.name||'')))||String(a.name||'').localeCompare(String(b.name||'')));
+ }catch{return []}
+}
+async function connectWallet(){
+ if(walletCtx)return walletCtx;
+ const button=$('#connect-wallet');
+ if(button){button.disabled=true;button.textContent='Connecting…'}
+ try{
+  const list=await walletStandardCandidates();
+  const jupIndex=list.findIndex(w=>/jupiter/i.test(String(w.name||'')));
+  const jupInjected=jupiterInjectedProvider();
+  if(jupIndex>=0){
+   const w=list[jupIndex];
+   set('Connecting Jupiter Wallet… No transaction is being sent.','warn');
+   const out=await w.features['standard:connect'].connect();
+   const account=(out?.accounts||w.accounts||[])[0];
+   if(!account)fail('Wallet connected but returned no Solana account.');
+   walletCtx={kind:'standard',wallet:w,account,address:account.address,name:w.name};
+  }else if(jupInjected){
+   set('Connecting Jupiter in-app wallet… No transaction is being sent.','warn');
+   const out=await jupInjected.connect(),pk=(out&&out.publicKey)||jupInjected.publicKey;
+   if(!pk)fail('Jupiter connected but returned no public key.');
+   walletCtx={kind:'legacy',provider:jupInjected,address:pk.toString(),name:'Jupiter In-App Wallet'};
+  }else if(list.length){
+   const w=list[0];
+   set('Connecting '+String(w.name||'Solana Wallet')+'… No transaction is being sent.','warn');
+   const out=await w.features['standard:connect'].connect();
+   const account=(out?.accounts||w.accounts||[])[0];
+   if(!account)fail('Wallet connected but returned no Solana account.');
+   walletCtx={kind:'standard',wallet:w,account,address:account.address,name:w.name};
+  }else if(legacyProvider()){
+   const p=legacyProvider();
+   set('Connecting Solana wallet… No transaction is being sent.','warn');
+   const out=await p.connect(),pk=(out&&out.publicKey)||p.publicKey;
+   if(!pk)fail('Wallet connected but returned no public key.');
+   walletCtx={kind:'legacy',provider:p,address:pk.toString(),name:'Injected Solana Wallet'};
+  }else{
+   set('Opening Jupiter Mobile wallet connection… Approve the connection only; no transaction is being sent.','warn');
+   const mod=await import('/mint/jupiter-mobile.js?v=20260921-reown-v3');
+   mod.resetJupiterMobileConnectionState?.();
+   const adapter=await mod.getJupiterMobileAdapter();
+   const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Jupiter Mobile did not finish connecting within 20 seconds. Reload once and try Connect Wallet again.')),20000));
+   await Promise.race([adapter.connect(),timeout]);
+   if(!adapter.publicKey)fail('Jupiter Mobile connected but returned no public key.');
+   walletCtx={kind:'adapter',provider:adapter,address:adapter.publicKey.toString(),name:'Jupiter Mobile'};
+  }
+  if(walletCtx.address!==REQUIRED){
+   const wrong=walletCtx.address;
+   walletCtx=null;
+   fail('Wrong wallet connected: '+short(wrong)+'. Connect the authorised '+short(REQUIRED)+' wallet.');
+  }
+  if(button){button.textContent=short(walletCtx.address);button.classList.add('connected')}
+  set('WLDZ authorised wallet connected ✅\n'+walletCtx.address+'\nNo transaction has been sent.','good');
+  return walletCtx;
+ }catch(e){
+  walletCtx=null;
+  if(button)button.textContent='Connect Wallet';
+  set('Wallet connection stopped: '+textErr(e),'warn');
+  throw e;
+ }finally{if(button)button.disabled=false}
+}
+async function signVersionedTransaction(ctx,web3,tx){
+ if(ctx.kind==='standard'){
+  const out=await ctx.wallet.features['solana:signTransaction'].signTransaction({account:ctx.account,transaction:new Uint8Array(tx.serialize())});
+  const bytes=out?.[0]?.signedTransaction;
+  if(!bytes)fail('Wallet returned no signed transaction.');
+  return web3.VersionedTransaction.deserialize(new Uint8Array(bytes));
+ }
+ const signed=await ctx.provider.signTransaction(tx);
+ if(!signed)fail('Wallet returned no signed transaction.');
+ return signed;
+}
 
 function loadResume(){
  try{
@@ -55,7 +148,7 @@ async function manifest(){
  return c;
 }
 
-async function sendInstructions(provider,connection,web3,payer,instructions,label){
+async function sendInstructions(ctx,connection,web3,payer,instructions,label){
  const latest=await connection.getLatestBlockhash('confirmed');
  const tx=new web3.VersionedTransaction(new web3.TransactionMessage({
   payerKey:payer,
@@ -63,7 +156,7 @@ async function sendInstructions(provider,connection,web3,payer,instructions,labe
   instructions
  }).compileToV0Message());
  set(label+' — approve in your wallet…','warn');
- const signed=await provider.signTransaction(tx);
+ const signed=await signVersionedTransaction(ctx,web3,tx);
  const signature=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false,maxRetries:3});
  const confirmation=await connection.confirmTransaction({
   signature,
@@ -204,24 +297,17 @@ async function buildPlan(connection,d,custody,member,batchIndex){
  return {transactionPda,proposalPda,poolLegPda,lockLegPda,pool:created.pool,position:created.position,setup,addPool,addLock,activate};
 }
 
+$('#connect-wallet')?.addEventListener('click',()=>connectWallet().catch(()=>{}));
+
 $('#create-proposal')?.addEventListener('click',async()=>{
  const button=$('#create-proposal');
- const provider=window.phantom?.solana||window.solana;
- if(!provider?.connect||!provider?.signTransaction){
-  set('Wallet unavailable. Open this page in the same wallet browser that is connected to Squads.','warn');
-  return;
- }
  if(button)button.disabled=true;
  try{
-  set('Connecting the authorised WLDZ initiator wallet…','warn');
-  const result=await provider.connect();
-  const member=result.publicKey||provider.publicKey;
-  if(!member||member.toBase58()!==REQUIRED){
-   fail('Connect '+REQUIRED.slice(0,4)+'…'+REQUIRED.slice(-4)+' only. This wallet is not the authorised WLDZ initiator.');
-  }
+  const ctx=walletCtx||await connectWallet();
   await manifest();
   set('Reading live Squads state and WLDZ custody…','warn');
   const d=await deps();
+  const member=new d.web3.PublicKey(ctx.address);
   const connection=new d.web3.Connection(RPC,'confirmed');
   const custody=await readCustody(connection,d.sqds,d.spl,d.web3,member);
 
@@ -267,21 +353,21 @@ $('#create-proposal')?.addEventListener('click',async()=>{
    const fresh=await d.sqds.accounts.Multisig.fromAccountAddress(connection,custody.multisigPda,'confirmed');
    const expected=d.sqds.utils.toBigInt(fresh.transactionIndex)+1n;
    assert(expected===batchIndex,'Squads changed while the WLDZ proposal was being prepared. Nothing was sent. Press Create WLDZ Squads Proposal again.');
-   sigs.push(await sendInstructions(provider,connection,d.web3,member,plan.setup,'1/4 Creating the live WLDZ batch proposal'));
+   sigs.push(await sendInstructions(ctx,connection,d.web3,member,plan.setup,'1/4 Creating the live WLDZ batch proposal'));
    saveResume(batchIndex,'draft');
   }
 
   if(!(await accountExists(connection,plan.poolLegPda))){
-   sigs.push(await sendInstructions(provider,connection,d.web3,member,plan.addPool,'2/4 Adding the 15M WLDZ DAMM V2 pool leg'));
+   sigs.push(await sendInstructions(ctx,connection,d.web3,member,plan.addPool,'2/4 Adding the 15M WLDZ DAMM V2 pool leg'));
   }
   if(!(await accountExists(connection,plan.lockLegPda))){
-   sigs.push(await sendInstructions(provider,connection,d.web3,member,plan.addLock,'3/4 Adding the permanent LP lock leg'));
+   sigs.push(await sendInstructions(ctx,connection,d.web3,member,plan.addLock,'3/4 Adding the permanent LP lock leg'));
   }
 
   const proposal=await d.sqds.accounts.Proposal.fromAccountAddress(connection,plan.proposalPda,'confirmed');
   const state=proposalStatus(d.sqds,proposal);
   if(state==='draft'){
-   sigs.push(await sendInstructions(provider,connection,d.web3,member,plan.activate,'4/4 Activating the proposal'));
+   sigs.push(await sendInstructions(ctx,connection,d.web3,member,plan.activate,'4/4 Activating the proposal'));
   }else if(state!=='active'&&state!=='approved'&&state!=='executed'){
    fail('WLDZ proposal entered unexpected state '+state+'. Activation was not attempted.');
   }
