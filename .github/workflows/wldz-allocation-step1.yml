@@ -1,0 +1,45 @@
+name: WLDZ Allocation Step 1 Proof
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "WORLDZ-WLDZ-MASTER-ALLOCATION.md"
+      - "worldzpad-mainnet/wldz-allocation.master.json"
+      - "worldzpad-mainnet/scripts/build-wldz-allocation-step1.mjs"
+      - "worldzpad-mainnet/package.json"
+      - ".github/workflows/wldz-allocation-step1.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wldz-allocation-step1
+  cancel-in-progress: true
+
+jobs:
+  audit-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: worldzpad-mainnet
+    env:
+      SOLANA_RPC_URL: https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc
+      SQUADS_CREATOR: Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned SDKs
+        run: npm install --no-audit --no-fund
+      - name: Verify 100M allocation and simulate 8M dev transfer proposal
+        run: npm run build:allocation
+      - name: Upload Step 1 proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: wldz-allocation-step1-proof
+          path: worldzpad-mainnet/artifacts/wldz-allocation-step1-proof.json
+          if-no-files-found: error
+          retention-days: 30
