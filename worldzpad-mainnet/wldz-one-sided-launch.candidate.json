@@ -1,0 +1,55 @@
+{
+  "version": "2026-09-22-WLDZ-FLASH-1",
+  "status": "PREPARED_NOT_SIGNED",
+  "launchAuthorized": false,
+  "executionEnabled": false,
+  "network": "mainnet-beta",
+  "token": {
+    "name": "WORLDZ",
+    "symbol": "WLDZ",
+    "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "supplyTokens": 100000000,
+    "decimals": 6,
+    "tokenProgram": "SPL_TOKEN",
+    "mintAuthority": "REVOKED",
+    "freezeAuthority": "REVOKED"
+  },
+  "treasury": {
+    "multisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+    "vaultIndex": 0,
+    "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+    "currentThreshold": "2-of-3"
+  },
+  "launch": {
+    "engine": "METEORA_DAMM_V2_ONE_SIDED",
+    "program": "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG",
+    "quoteMint": "So11111111111111111111111111111111111111112",
+    "baseAmountTokens": 15000000,
+    "liquidityCeilingPercent": 15,
+    "quoteAmountSol": 0,
+    "initPriceSolPerWldz": 0.000001,
+    "candidateOpeningFdvSol": 100,
+    "collectFeeMode": "ONLY_B_QUOTE",
+    "baseFeeBps": 200,
+    "dynamicFeeEnabled": false,
+    "alphaVault": false,
+    "activationType": "TIMESTAMP",
+    "activationPoint": null,
+    "maxPrice": null,
+    "permanentLockAfterCreate": true
+  },
+  "stagedLiquidityReservePercent": 20,
+  "worldzFeeFlowPercent": {
+    "worldzLaunchPadTreasury": 10,
+    "lpGrowth": 30,
+    "holdersLegacy": 20,
+    "communityGrowthMarketing": 20,
+    "oneWorldzImpact": 10,
+    "operations": 5,
+    "reserve": 5
+  },
+  "dbcCompatibility": {
+    "useForCanonicalWldz": false,
+    "reason": "Current Meteora DBC SPL initializer creates a new base mint account; canonical WLDZ already exists with revoked mint authority. Do not create a second WLDZ mint."
+  }
+}
