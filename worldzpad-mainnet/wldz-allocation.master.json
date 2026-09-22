@@ -70,9 +70,10 @@
       "id": "oneworldz_charity_impact",
       "percent": 10,
       "tokens": 10000000,
-      "destination": null,
-      "destinationRole": "VERIFIED_CHARITY_OR_IMPACT_VAULT",
-      "state": "DESTINATION_SELECTION_REQUIRED"
+      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "destinationRole": "DEDICATED_CHARITY_LEDGER_IN_CURRENT_SQUADS_TREASURY_VAULT",
+      "state": "RING_FENCED_IN_CURRENT_TREASURY_VAULT__DEDICATED_CHARITY_WALLET_OPTIONAL_LATER",
+      "custodyNote": "Selected from the four active Command Centre wallets: Treasury Multisig is used for custody because Dev, Investment and Rewards wallets have separate purposes. A dedicated charity wallet can replace this later without changing the 10M allocation."
     },
     {
       "id": "worldz_treasury",
