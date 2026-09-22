@@ -1,0 +1,15 @@
+{
+  "name": "wldz-mainnet-launch-preflight",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preflight": "node build.mjs"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "0.31.1",
+    "@meteora-ag/cp-amm-sdk": "1.4.5",
+    "@solana/spl-token": "0.4.15",
+    "@solana/web3.js": "1.98.4",
+    "@sqds/multisig": "2.1.4"
+  }
+}
