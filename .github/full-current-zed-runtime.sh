@@ -295,10 +295,19 @@ echo "HOSTINGER_MANAGED_BUILD=STARTED uuid=$build_uuid"
 
 build_pass=0
 build_last_poll_error="none"
+# Keep the full polling section below the shortest caller's workflow timeout.
+# Individual retries are useful for a transient Hostinger API failure, but may
+# never consume the whole job and prevent its failure diagnostics from running.
+build_poll_deadline=$((SECONDS + 1500))
 for attempt in $(seq 1 90); do
+  if [ "$SECONDS" -ge "$build_poll_deadline" ]; then
+    build_last_poll_error="overall_poll_deadline_exceeded"
+    echo "::warning::HOSTINGER_MANAGED_BUILD_POLL_DEADLINE=EXCEEDED after 25 minutes."
+    break
+  fi
   sleep 10
   if ! curl --fail --silent --show-error --location \
-    --connect-timeout 15 --max-time 60 --retry 2 --retry-all-errors --retry-delay 2 \
+    --connect-timeout 15 --max-time 15 --retry 1 --retry-all-errors --retry-delay 2 --retry-max-time 20 \
     -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
     "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"; then
     build_last_poll_error="curl_failed_attempt_${attempt}"
