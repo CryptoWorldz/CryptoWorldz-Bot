@@ -180,7 +180,7 @@ jobs:
           assert wldz_cfg['token']['mint']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
           assert wldz_cfg['launch']['baseAmountTokens']==15000000
           assert wldz_cfg['launch']['permanentLock'] is True
-          assert wldz_cfg['publicCreatorLaunchesEnabled'] is False
+          assert wldz_cfg['execution']['publicCreatorGate'] is False
           assert 'Swap API V2' in technology_html
           assert 'Worldz Confidence Pulse' in technology_html
           assert 'Worldz Fee Flow' in technology_html
