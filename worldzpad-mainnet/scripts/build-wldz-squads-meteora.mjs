@@ -133,3 +133,28 @@ console.log('WLDZ_POOL_SIM_SLOT='+poolSim.context.slot);
 console.log('WLDZ_SETUP_SIM_SLOT='+setupSim.context.slot);
 console.log('WLDZ_PROOF_FINGERPRINT='+report.fingerprints.setupMessage);
 console.log('WLDZ_PACKET_SIZES='+JSON.stringify(report.packetSizes));
+console.log('WLDZ_SERIALIZED_SETUP_BASE64='+ser(setup));
+console.log('WLDZ_SERIALIZED_ADD_POOL_BASE64='+ser(add1));
+console.log('WLDZ_SERIALIZED_ADD_LOCK_BASE64='+ser(add2));
+console.log('WLDZ_SERIALIZED_ACTIVATE_BASE64='+ser(act));
+
+const fundingCandidates=[
+ ['jayjayteamdev','Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u'],
+ ['auto_diamond_buy','8VZZ7j63E2ARRNho4SwqFthUjWnWK8S5BHPfmJCb4UHK'],
+ ['pdcrew','DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j'],
+ ['next_big_coin_dev','3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt'],
+ ['purple_pdc','G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3'],
+ ['purple_diamond_crew','ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U'],
+ ['limited_edition','5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9'],
+ ['solsavewxrp','5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9'],
+ ['black_bud','5zy8uPj8cwsaFw2gdzzBhtwaSmjmZsQHxGoPWKMJaoSR'],
+ ['account_c','fa35y2GdDKhdZ6uyS5mouEPQSFiHGyRuMSWp3Vz5Cob'],
+ ['community_kitty','CFzJU62m9obkMKAMjSnQPVkwYrVmHJqQhySURj5MeSy']
+];
+const fundingBalances=[];
+for(const [name,address] of fundingCandidates){
+  const lamports=await connection.getBalance(new PublicKey(address),'confirmed');
+  fundingBalances.push({name,address,lamports,sol:lamports/1e9});
+}
+fundingBalances.sort((a,b)=>b.lamports-a.lamports);
+console.log('WLDZ_OWNER_CONTROLLED_FUNDING_CANDIDATES='+JSON.stringify(fundingBalances));
