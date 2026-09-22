@@ -1,0 +1,46 @@
+name: WLDZ Owner-Authorized Dev + Launch Batch
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "worldzpad-mainnet/scripts/build-wldz-owner-authorized-batch.mjs"
+      - "worldzpad-mainnet/wldz-allocation.master.json"
+      - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
+      - "worldzpad-mainnet/package.json"
+      - ".github/workflows/wldz-owner-authorized-batch.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wldz-owner-authorized-batch
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: worldzpad-mainnet
+    env:
+      SOLANA_RPC_URL: https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc
+      SQUADS_CREATOR: Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned SDKs
+        run: npm install --no-audit --no-fund
+      - name: Build combined 8M Dev + 15M launch + lock batch
+        run: npm run build:owner-launch
+      - name: Upload proof and unsigned payloads
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wldz-owner-authorized-launch-batch
+          path: worldzpad-mainnet/artifacts/wldz-owner-launch-*
+          if-no-files-found: warn
+          retention-days: 30
