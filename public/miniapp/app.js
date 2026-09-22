@@ -5,15 +5,6 @@ const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character
 const empty = (message) => `<div class="panel empty">${escapeHtml(message)}</div>`;
 const formatDate = (value) => value ? new Date(value).toLocaleDateString() : "—";
 const shortenAddress = (value) => value && value.length > 20 ? `${value.slice(0, 8)}…${value.slice(-8)}` : value;
-const IMPACT_CAMPAIGN = {
-  title: "Help Reagan & Children in Uganda",
-  organization: "Action Spreads Smiles • Mayuge, Uganda",
-  description: "Food, medical care, rent, hygiene, education, mattresses and safer support are kept on the dedicated DonateWorldz purpose page.",
-  fundraiser: "https://donateworldz.com/reagan-children/",
-  tiktok: "https://www.tiktok.com/@actionspreadsmilesorg",
-  youtube: "https://youtube.com/@action_spread_smiles"
-};
-
 const MINIAPP_RESCUE_BOOTSTRAP = "https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/zed-miniapp-rescue";
 
 async function rescueBootstrap() {
@@ -56,11 +47,6 @@ function missionCard(mission, current = false) {
   return `<article class="panel mission"><div class="mission-meta">${current ? "CURRENT RAAIIIDD • " : ""}MISSION #${escapeHtml(mission.id)}</div><h3>🎯 ${escapeHtml(mission.title)}</h3><div class="mission-meta">🌐 ${escapeHtml(mission.platform || "Community")} • ⭐ ${Number(mission.reward_points) || 0} Legend Points</div><p>${escapeHtml(mission.description || "Support this CryptoWorldz mission.")}</p><p class="instructions">${escapeHtml(mission.instructions || "Complete the mission and submit DONE.")}</p>${mission.expires_at ? `<small>Ends ${formatDate(mission.expires_at)}</small>` : ""}${mission.link || mission.target_url ? `<a class="button" href="${escapeHtml(mission.link || mission.target_url)}" target="_blank" rel="noopener">Open Mission</a>` : ""}<div class="mission-submit"><input type="url" placeholder="Optional HTTPS proof link" aria-label="Proof link"><button class="button submit-mission" data-mission-id="${escapeHtml(mission.id)}" type="button">Submit DONE</button></div></article>`;
 }
 
-function impactCard(compact = false) {
-  const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(IMPACT_CAMPAIGN.fundraiser)}&text=${encodeURIComponent(IMPACT_CAMPAIGN.title)}`;
-  return `<article class="panel impact-card"><div class="impact-visual" aria-hidden="true"><span>💜</span><b>FEATURED IMPACT MISSION</b></div><div class="impact-body"><div class="impact-badge">DIRECT ONEWORLDZ PATHWAY</div><h3>${escapeHtml(IMPACT_CAMPAIGN.title)}</h3><p class="impact-organization">${escapeHtml(IMPACT_CAMPAIGN.organization)}</p><p>${escapeHtml(IMPACT_CAMPAIGN.description)}</p><div class="impact-needs"><span>🍲 Food</span><span>🩺 Medical</span><span>🏠 Shelter</span><span>📚 Education</span></div>${compact ? `<button class="button" data-open="impact" type="button">Open Impact Mission</button>` : `<a class="button impact-donate" href="${escapeHtml(IMPACT_CAMPAIGN.fundraiser)}" target="_blank" rel="noopener">Open Reagan & Children on DonateWorldz</a><a class="button secondary" href="${escapeHtml(shareUrl)}" target="_blank" rel="noopener">Share Support Page</a><div class="impact-socials"><a href="${escapeHtml(IMPACT_CAMPAIGN.tiktok)}" target="_blank" rel="noopener">TikTok</a><a href="${escapeHtml(IMPACT_CAMPAIGN.youtube)}" target="_blank" rel="noopener">YouTube</a></div><small>ZED never sees payment credentials and does not award Legend Points based on donation amounts.</small>`}</div></article>`;
-}
-
 function render() {
   const data = state.data;
   const profile = data.profile;
@@ -69,8 +55,6 @@ function render() {
   byId("rank").textContent = profile ? profile.rank : "Register First";
   byId("completed").textContent = profile ? profile.missions_completed : "—";
   byId("pending").textContent = profile ? profile.pending_submissions : "—";
-  byId("home-impact").innerHTML = `<div class="section-title"><h2>💜 Featured Impact</h2></div>${impactCard(true)}`;
-  byId("impact-list").innerHTML = impactCard(false);
   byId("current-mission").innerHTML = data.missions.length ? `<div class="section-title"><h2>🔥 Current Raaiiidd</h2></div>${missionCard(data.missions[0], true)}` : empty("No active Raaiiidd right now.");
   byId("mission-list").innerHTML = data.missions.length ? data.missions.map((mission) => missionCard(mission)).join("") : empty("No active Raaiiidds right now.");
   byId("home-rewards").innerHTML = `<div class="section-title"><h2>🎁 Recent Rewards</h2><button class="button secondary" data-open="rewards">View All</button></div>${renderRewards(data.rewards.slice(0, 3))}`;
@@ -92,7 +76,7 @@ function renderRewards(rewards) {
 function renderCommunity() {
   const links = state.community || {};
   const labels = { telegram:"Telegram Community", x:"CryptoWorldz on X", announcements:"Announcements", support:"Support", website:"CryptoWorldz Website" };
-  byId("community-links").innerHTML = `<div class="links">${Object.entries(labels).filter(([key]) => links[key]).map(([key,label]) => `<a class="link" href="${escapeHtml(links[key])}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`).join("")}</div><button class="button secondary" data-open="impact">Open Real-World Impact</button><button class="button secondary" data-open="heroes">Open Real-World Heroes</button><button class="button secondary" data-open="kitty">Open Community Kitty</button><button class="button secondary" data-open="governance">Open Governance</button>${state.data.admin ? '<button class="button secondary" data-open="admin">Open Admin Centre</button>' : ""}`;
+  byId("community-links").innerHTML = `<div class="links">${Object.entries(labels).filter(([key]) => links[key]).map(([key,label]) => `<a class="link" href="${escapeHtml(links[key])}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`).join("")}</div><button class="button secondary" data-open="heroes">Open Real-World Heroes</button><button class="button secondary" data-open="kitty">Open Community Kitty</button><button class="button secondary" data-open="governance">Open Governance</button>${state.data.admin ? '<button class="button secondary" data-open="admin">Open Admin Centre</button>' : ""}`;
 }
 async function renderAdmin() {
   const access = state.data.admin_access || {};
