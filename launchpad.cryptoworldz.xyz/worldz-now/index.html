@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>WORLDZ Owner Launch</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,sans-serif;background:#09070f;color:#f7f4ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#24103f 0,#09070f 42%);min-height:100vh}
+main{width:min(760px,100%);margin:auto;padding:22px 16px 64px}
+.badge{display:inline-block;border:1px solid #7b5bb0;border-radius:999px;padding:7px 11px;font-size:12px;color:#d8c9ff}
+h1{font-size:clamp(30px,8vw,54px);line-height:1;margin:18px 0 8px}.sub{color:#bfb5cc;line-height:1.45}
+.card{background:#12101a;border:1px solid #31273f;border-radius:18px;padding:18px;margin-top:16px;box-shadow:0 16px 50px #0006}
+.row{display:flex;justify-content:space-between;gap:18px;padding:10px 0;border-bottom:1px solid #292232}.row:last-child{border:0}
+.row b{font-weight:800}.muted{color:#a79bb7}.ok{color:#62e39a}.warn{color:#ffd36a}.bad{color:#ff7b91}
+button{width:100%;border:0;border-radius:14px;padding:16px 18px;margin-top:12px;font-size:17px;font-weight:900;background:#fff;color:#130c1d}
+button.primary{background:linear-gradient(135deg,#9c61ff,#6030c6);color:white}button:disabled{opacity:.45}
+code{word-break:break-all;color:#ddd0ff;font-size:12px}.status{white-space:pre-wrap;line-height:1.45;padding:14px;border-radius:14px;background:#0b0910;border:1px solid #2f2740;margin-top:12px}
+.step{padding:10px 0;border-bottom:1px solid #28202f}.step:last-child{border:0}.small{font-size:12px;color:#9e93aa}
+a{color:#cfb4ff}.hidden{display:none}
+</style>
+</head>
+<body>
+<main>
+<span class="badge">PRIVATE OWNER CONSOLE • SOLANA MAINNET</span>
+<h1>WORLDZ Launch</h1>
+<p class="sub">One controlled batch: creator allocation, one-sided Meteora DAMM v2 launch, permanent LP lock, then your Squads approval. Nothing executes unless your wallet signs.</p>
+
+<section class="card">
+  <div class="row"><span>Canonical mint</span><code>AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U</code></div>
+  <div class="row"><span>Creator allocation</span><b>8,000,000</b></div>
+  <div class="row"><span>Launch liquidity</span><b>15,000,000</b></div>
+  <div class="row"><span>Starting quote</span><b>0 SOL</b></div>
+  <div class="row"><span>Trading fee</span><b>2.00% quote-side</b></div>
+  <div class="row"><span>LP</span><b>Permanent lock</b></div>
+  <div class="row"><span>Current Squads policy</span><b>2 of 3</b></div>
+</section>
+
+<section class="card">
+  <h2>1. Connect JayJayTeamDev</h2>
+  <div id="wallet-label" class="muted">Not connected</div>
+  <button id="connect">Connect Wallet</button>
+  <div id="connect-status" class="status">No wallet action yet.</div>
+</section>
+
+<section class="card">
+  <h2>2. Verify + Build</h2>
+  <button id="verify" disabled>Verify Mainnet State</button>
+  <div id="verify-status" class="status">Waiting for the authorised wallet.</div>
+  <div id="proof" class="hidden">
+    <div class="step"><b>✓ Fixed 100M supply</b><div class="small">Mint and freeze authorities revoked</div></div>
+    <div class="step"><b>✓ Treasury vault</b><div class="small">Live Squads vault and current threshold verified</div></div>
+    <div class="step"><b>✓ Creator transfer</b><div class="small">8M WORLDZ to JayJayTeamDev</div></div>
+    <div class="step"><b>✓ Launch position</b><div class="small">15M WORLDZ / 0 SOL one-sided DAMM v2</div></div>
+    <div class="step"><b>✓ Permanent lock leg</b><div class="small">Added to the same Squads batch</div></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>3. Create + Approve Proposal</h2>
+  <p class="sub">This needs several wallet confirmations because Squads stores the batch setup and each controlled leg separately. Your final confirmation records your approval. It does not bypass the second signer.</p>
+  <button id="create" class="primary" disabled>CREATE WORLDZ PROPOSAL</button>
+  <div id="launch-status" class="status">Not started. No transaction broadcast.</div>
+</section>
+
+<section id="done" class="card hidden">
+  <h2>JayJay approval recorded ✅</h2>
+  <div class="row"><span>Proposal</span><code id="proposal"></code></div>
+  <div class="row"><span>Meteora pool</span><code id="pool"></code></div>
+  <p class="sub">The proposal now needs one additional approval from Stepper or Remedy under the live 2-of-3 Squads rule.</p>
+  <a href="https://app.squads.so/" target="_blank" rel="noopener"><button>Open Squads for Second Approval</button></a>
+</section>
+
+<script type="module" src="./app.js?v=20260922-owner-launch-1"></script>
+</main>
+</body>
+</html>
