@@ -376,7 +376,7 @@
     "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
     "status": "TEMPORARY_1_OF_2_CUSTODY__PUBLIC_CREATOR_ROUTE_PROOF_PENDING",
     "mainnetRoutingEnabled": false,
-    "rule": "Temporary 1-of-2 custody applies only to the current core WLDZ operational vault while a replacement signer is verified. Public creator mainnet routing remains disabled until its separate fee-route and release evidence is complete.",
+    "rule": "Temporary 1-of-2 custody applies only to the current core operational vault while a replacement signer is verified. Public creator mainnet routing remains disabled until its separate fee-route and release evidence is complete.",
     "verifiedEvidence": {
       "squadLabel": "Team Zed Treasury",
       "providerProgram": "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf",
@@ -762,7 +762,7 @@
   "temporaryCoreWldzCustody": {
     "active": true,
     "policy": "1-of-2 temporary",
-    "scope": "Core WLDZ operational vault only",
+    "scope": "Current core operational vault only",
     "publicCreatorMainnetLaunchesEnabled": false,
     "conditionToEnd": "Independent replacement signer is verified and an approved governance configuration is executed."
   }
