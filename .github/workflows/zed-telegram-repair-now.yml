@@ -87,5 +87,6 @@ jobs:
 
           print("ZED_TELEGRAM_BACKLOG_AFTER="+str(pending_after))
           print("ZED_TELEGRAM_LAST_ERROR="+("YES" if hook.get("last_error_message") else "NO"))
+          print("ZED_TELEGRAM_LAST_ERROR_MESSAGE="+str(hook.get("last_error_message") or "NONE")[:180])
           print("ZED_TELEGRAM_BACKLOG_CONTROL=PASS")
           print("ZED_TELEGRAM_INBOUND_ROUTE=READY")
