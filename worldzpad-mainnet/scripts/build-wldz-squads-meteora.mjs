@@ -63,6 +63,27 @@ console.log('WLDZ_DIAG_LEG2_EXISTS='+Boolean(diagLeg2Info));
 console.log('WLDZ_DIAG_BATCH14_PDA='+diagBatchPda.toBase58());
 console.log('WLDZ_DIAG_PROPOSAL14_PDA='+diagProposalPda.toBase58());
 
+if(diagProposalInfo && diagProposalStatus==='Draft'){
+ const diagBh=(await connection.getLatestBlockhash('confirmed')).blockhash;
+ const activate14=multisig.instructions.proposalActivate({
+  multisigPda:ms,
+  transactionIndex:diagIndex,
+  member:creator
+ });
+ const activateTx=new VersionedTransaction(new TransactionMessage({
+  payerKey:creator,
+  recentBlockhash:diagBh,
+  instructions:[activate14]
+ }).compileToV0Message());
+ const [activateSim,activateFee]=await Promise.all([
+  connection.simulateTransaction(activateTx,{sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed'}),
+  connection.getFeeForMessage(activateTx.message,'confirmed')
+ ]);
+ console.log('WLDZ_DIAG_ACTIVATE14_SIM_ERR='+JSON.stringify(activateSim.value.err));
+ console.log('WLDZ_DIAG_ACTIVATE14_FEE_LAMPORTS='+(activateFee.value??'UNKNOWN'));
+ console.log('WLDZ_DIAG_ACTIVATE14_PACKET_BYTES='+Buffer.from(activateTx.serialize()).length);
+}
+
 const batchIndex=multisig.utils.toBigInt(ma.transactionIndex)+1n;
 const [batchPda]=multisig.getTransactionPda({multisigPda:ms,index:batchIndex});
 const [proposalPda]=multisig.getProposalPda({multisigPda:ms,transactionIndex:batchIndex});
