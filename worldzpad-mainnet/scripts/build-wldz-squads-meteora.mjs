@@ -163,19 +163,22 @@ const setup=mk([batchCreate,propCreate]), add1=mk([addPool]), add2=mk([addLock])
 
 const poolStoredBytes=multisig.utils.transactionMessageToMultisigTransactionMessageBytes({message:poolMsg,vaultPda:vault});
 const lockStoredBytes=multisig.utils.transactionMessageToMultisigTransactionMessageBytes({message:lockMsg,vaultPda:vault});
-const [poolStoredMessage]=multisig.generated.vaultTransactionMessageBeet.deserialize(Buffer.from(poolStoredBytes));
-const [lockStoredMessage]=multisig.generated.vaultTransactionMessageBeet.deserialize(Buffer.from(lockStoredBytes));
-const poolBatchAccountBytes=multisig.generated.VaultBatchTransaction.byteSize({bump:255,ephemeralSignerBumps:Uint8Array.from([255]),message:poolStoredMessage});
-const lockBatchAccountBytes=multisig.generated.VaultBatchTransaction.byteSize({bump:255,ephemeralSignerBumps:new Uint8Array(),message:lockStoredMessage});
+// VaultBatchTransaction = 8 discriminator + 1 bump + 4-byte ephemeral-bump vector length
+// + N ephemeral bump bytes + the already-serialized VaultTransactionMessage bytes.
+const poolBatchAccountBytes=13+1+poolStoredBytes.length;
+const lockBatchAccountBytes=13+0+lockStoredBytes.length;
 const [poolBatchRent,lockBatchRent]=await Promise.all([
  connection.getMinimumBalanceForRentExemption(poolBatchAccountBytes,'confirmed'),
  connection.getMinimumBalanceForRentExemption(lockBatchAccountBytes,'confirmed')
 ]);
+console.log('WLDZ_DIAG_POOL_MESSAGE_BYTES='+poolStoredBytes.length);
+console.log('WLDZ_DIAG_LOCK_MESSAGE_BYTES='+lockStoredBytes.length);
 console.log('WLDZ_DIAG_POOL_BATCH_ACCOUNT_BYTES='+poolBatchAccountBytes);
 console.log('WLDZ_DIAG_LOCK_BATCH_ACCOUNT_BYTES='+lockBatchAccountBytes);
 console.log('WLDZ_DIAG_POOL_BATCH_RENT_LAMPORTS='+poolBatchRent);
 console.log('WLDZ_DIAG_LOCK_BATCH_RENT_LAMPORTS='+lockBatchRent);
 console.log('WLDZ_DIAG_POOL_LOCK_RENT_SOL='+((poolBatchRent+lockBatchRent)/1e9));
+
 for(const [n,t] of [['setup',setup],['addPool',add1],['addLock',add2],['activate',act]])A(Buffer.from(t.serialize()).length<=1232,n+' proposal setup tx too large');
 
 const setupSim=await connection.simulateTransaction(setup,{sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed',accounts:{encoding:'base64',addresses:[batchPda.toBase58(),proposalPda.toBase58()]}});
