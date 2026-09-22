@@ -1,0 +1,53 @@
+name: ZED Webhook Direct Probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/zed-webhook-direct-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    environment:
+      name: cryptoworldz-production
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+    steps:
+      - name: Probe authenticated Telegram webhook directly
+        shell: python
+        run: |
+          import hashlib, json, os, urllib.error, urllib.request
+
+          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          if not token:
+              raise SystemExit("BOT_TOKEN missing")
+          print("::add-mask::"+token)
+          secret=hashlib.sha256(token.encode()).hexdigest()
+          body=json.dumps({"update_id":-900000001}).encode("utf-8")
+          request=urllib.request.Request(
+              "https://cryptobotz.cryptoworldz.xyz/telegram-webhook",
+              data=body,
+              headers={
+                  "content-type":"application/json",
+                  "x-telegram-bot-api-secret-token":secret,
+                  "user-agent":"ZED-Webhook-Direct-Probe/1.0"
+              },
+              method="POST"
+          )
+          try:
+              with urllib.request.urlopen(request,timeout=20) as response:
+                  payload=response.read().decode("utf-8","ignore")
+                  print("ZED_DIRECT_WEBHOOK_HTTP="+str(response.status))
+                  print("ZED_DIRECT_WEBHOOK_BODY="+payload[:160].replace("\n"," "))
+                  if response.status != 200:
+                      raise SystemExit("Direct webhook probe failed")
+          except urllib.error.HTTPError as error:
+              payload=error.read().decode("utf-8","ignore")
+              print("ZED_DIRECT_WEBHOOK_HTTP="+str(error.code))
+              print("ZED_DIRECT_WEBHOOK_BODY="+payload[:160].replace("\n"," "))
+              raise
