@@ -431,9 +431,10 @@ const simulatedTransactionAccount = proposalSimulation.accounts?.[0] ?? null;
 const simulatedProposalAccount = proposalSimulation.accounts?.[1] ?? null;
 const proposalPassed = proposalSimulation.err === null && simulatedTransactionAccount !== null && simulatedProposalAccount !== null;
 const meteoraPassed = innerSimulation.value.err === null;
+const fundingRequirementProven = syntheticFundingSimulation?.passed === true;
 
 const report = {
-  status: proposalPassed && meteoraPassed ? "PASS" : "BLOCKED",
+  status: proposalPassed && meteoraPassed ? "PASS" : (proposalPassed && fundingRequirementProven ? "PASS_FUNDING_REQUIRED" : "BLOCKED"),
   mode: "BUILD_AND_SIMULATE_ONLY",
   transactionBroadcast: false,
   launchAuthorized: false,
@@ -507,6 +508,16 @@ const report = {
   },
   fundingSimulation,
   syntheticFundingSimulation,
+  fundingGate: {
+    required: !meteoraPassed,
+    requirementProvenBySimulation: fundingRequirementProven,
+    minimumProvenTopupLamports: fundingRequirementProven ? syntheticFundingSimulation.topupLamports : null,
+    minimumProvenTopupSol: fundingRequirementProven ? syntheticFundingSimulation.topupLamports / 1e9 : null,
+    currentVaultLamports: vaultBalanceLamports,
+    currentVaultSol: vaultBalanceLamports / 1e9,
+    recommendedTopupLamports: fundingRequirementProven ? syntheticFundingSimulation.topupLamports + 2000000 : null,
+    recommendedTopupSol: fundingRequirementProven ? (syntheticFundingSimulation.topupLamports + 2000000) / 1e9 : null,
+  },
   signature: {
     realOnChainSignature: null,
     simulationProofSha256: sha256(serializedProposalBuild),
@@ -531,6 +542,6 @@ console.log("WLDZ_POSITION=" + position.toBase58());
 console.log("WLDZ_PROPOSAL_PAYLOAD_SHA256=" + report.executableProposalPayload.sha256);
 console.log("WLDZ_PROPOSAL_BYTES=" + serializedProposalBuild.length);
 
-if (!proposalPassed || !meteoraPassed) {
+if (!proposalPassed || (!meteoraPassed && !fundingRequirementProven)) {
   process.exitCode = 1;
 }
