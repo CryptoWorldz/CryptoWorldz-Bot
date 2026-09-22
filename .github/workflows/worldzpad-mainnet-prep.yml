@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Prove preparation manifest and accepted execution evidence
+      - name: Prove canonical WLDZ preparation gate
         run: node worldzpad-mainnet/scripts/preflight.mjs
 
       - name: Confirm execution remains disabled
@@ -40,9 +40,9 @@ jobs:
         run: |
           node - <<'NODE'
           const fs = require('fs');
-          const plan = JSON.parse(fs.readFileSync('worldzpad-mainnet/mainnet-plan.json', 'utf8'));
-          if (plan.executionEnabled !== false || plan.launchAuthorization !== false) {
-            throw new Error('Mainnet preparation package attempted to enable execution or authorize launch');
+          const plan = JSON.parse(fs.readFileSync('worldzpad-mainnet/wldz-one-sided-launch.candidate.json', 'utf8'));
+          if (plan.executionEnabled !== false || plan.launchAuthorized !== false) {
+            throw new Error('WLDZ candidate attempted to enable execution or authorize launch');
           }
           console.log('WLDZ_MAINNET_EXECUTION_LOCK=PASS execution_enabled=0 launch_authorized=0');
           NODE
