@@ -330,7 +330,9 @@ if (!fundingSimulation?.passed) {
   }
   const syntheticCandidates = syntheticFunder ? [
     10000000, 12000000, 14000000, 15000000, 16000000,
-    17000000, 18000000, 20000000, 22000000, 25000000,
+    16100000, 16200000, 16300000, 16400000, 16500000,
+    16600000, 16700000, 16800000, 16900000, 17000000,
+    18000000, 20000000, 22000000, 25000000,
   ].filter((lamports) => lamports + 10000 < syntheticFunderBalance) : [];
 
   for (const topupLamports of syntheticCandidates) {
