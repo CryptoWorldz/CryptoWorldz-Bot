@@ -16,8 +16,11 @@ test("Hostinger build polling is bounded and reports timeout failures", () => {
 
   const poll = script.slice(pollStart, pollEnd);
   assert.match(poll, /--connect-timeout 15/);
-  assert.match(poll, /--max-time 60/);
-  assert.match(poll, /--retry 2/);
+  assert.match(poll, /--max-time 15/);
+  assert.match(poll, /--retry 1/);
+  assert.match(poll, /--retry-max-time 20/);
+  assert.match(poll, /build_poll_deadline=\$\(\(SECONDS \+ 1500\)\)/);
+  assert.match(poll, /HOSTINGER_MANAGED_BUILD_POLL_DEADLINE=EXCEEDED/);
   assert.match(poll, /HOSTINGER_MANAGED_BUILD_POLL_FAILED/);
   assert.match(poll, /Managed Hostinger build did not complete within 90 bounded polls/);
 });
