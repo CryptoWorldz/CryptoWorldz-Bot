@@ -90,9 +90,16 @@
       "state": "RESERVED_IN_SOURCE_VAULT"
     },
     {
+      "id": "team_reserve",
+      "percent": 5,
+      "tokens": 5000000,
+      "destinationRole": "VERIFIED_TEAM_RESERVE",
+      "state": "RESERVED_PENDING_VERIFIED_WALLET_AND_ACTIVE_ROLE"
+    },
+    {
       "id": "community_ecosystem_growth",
-      "percent": 7,
-      "tokens": 7000000,
+      "percent": 2,
+      "tokens": 2000000,
       "destinationRole": "COMMUNITY_ECOSYSTEM_GROWTH",
       "state": "RESERVED_IN_SOURCE_VAULT"
     },
