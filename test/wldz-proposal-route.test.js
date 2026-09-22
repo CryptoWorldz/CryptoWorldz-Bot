@@ -27,8 +27,8 @@ test('WLDZ proposal route resumes only the recorded batch and refuses duplicates
   assert.match(source,/RESUME_KEY/);
   assert.match(source,/Batch\.fromAccountAddress/);
   assert.match(source,/Proposal\.fromAccountAddress/);
-  assert.match(source,/isProposalStatusDraft/);
-  assert.match(source,/isProposalStatusActive/);
+  assert.match(source,/status\?\.__kind/);
+  assert.match(source,/kind==='active'/);
   assert.match(source,/No duplicate proposal was created/);
 });
 
@@ -68,5 +68,14 @@ test('WLDZ proposal route recovers safely from stale or expired blockhashes',()=
   assert.match(source,/blockhash not found/);
   assert.match(source,/maxRetries:10/);
   assert.match(source,/No automatic third attempt/);
-  assert.match(html,/proposal\.js\?v=20260923-wldz-one-shot-v3/);
+  assert.match(html,/proposal\.js\?v=20260923-wldz-resume14-v4/);
+});
+
+
+test('WLDZ proposal status uses the generated status __kind and can resume a funded draft',()=>{
+  assert.match(source,/proposal\?\.status\?\.__kind/);
+  assert.match(source,/kind==='draft'/);
+  assert.match(source,/kind==='active'/);
+  assert.doesNotMatch(source,/sqds\.types\.isProposalStatusDraft/);
+  assert.match(html,/proposal\.js\?v=20260923-wldz-resume14-v4/);
 });
