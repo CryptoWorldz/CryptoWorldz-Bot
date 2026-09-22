@@ -1,3 +1,5 @@
+> **SUPERSEDED FOR WLDZ ALLOCATION (2026-09-22):** The current authoritative 100M WLDZ supply allocation is `WORLDZ-WLDZ-MASTER-ALLOCATION.md` / `worldzpad-mainnet/wldz-allocation.master.json`. Historical percentages below are retained for provenance only and must not drive new WLDZ distribution transactions.
+
 # WORLDZ $WLDZ — Total Design v1
 
 ## Objective
