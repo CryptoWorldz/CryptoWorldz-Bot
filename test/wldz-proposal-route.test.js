@@ -57,11 +57,16 @@ test('WLDZ route exposes an explicit mobile-capable wallet connect path',()=>{
 });
 
 
-test('WLDZ proposal route recovers safely from an expired blockhash',()=>{
+test('WLDZ proposal route recovers safely from stale or expired blockhashes',()=>{
+  assert.match(source,/PUBLIC_RPC='https:\/\/api\.mainnet-beta\.solana\.com'/);
   assert.match(source,/getSignatureStatuses/);
   assert.match(source,/searchTransactionHistory:true/);
-  assert.match(source,/attempt<=2/);
-  assert.match(source,/previous blockhash expired/);
-  assert.match(source,/maxRetries:8/);
-  assert.match(source,/Approve the refreshed transaction/);
+  assert.match(source,/freshestTransactionConnection/);
+  assert.match(source,/freshBlockhash/);
+  assert.match(source,/lastValidBlockHeight-height>=100/);
+  assert.match(source,/heightAfterSigning<35/);
+  assert.match(source,/blockhash not found/);
+  assert.match(source,/maxRetries:10/);
+  assert.match(source,/No automatic third attempt/);
+  assert.match(html,/proposal\.js\?v=20260923-wldz-one-shot-v3/);
 });
