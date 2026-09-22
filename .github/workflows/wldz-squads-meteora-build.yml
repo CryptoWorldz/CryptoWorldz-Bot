@@ -8,12 +8,16 @@ on:
       - "worldzpad-mainnet/package.json"
       - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
       - ".github/workflows/wldz-squads-meteora-build.yml"
+      - "launchpad.cryptoworldz.xyz/wldz/proposal.js"
+      - "test/wldz-proposal-route.test.js"
   pull_request:
     paths:
       - "worldzpad-mainnet/scripts/build-wldz-squads-meteora.mjs"
       - "worldzpad-mainnet/package.json"
       - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
       - ".github/workflows/wldz-squads-meteora-build.yml"
+      - "launchpad.cryptoworldz.xyz/wldz/proposal.js"
+      - "test/wldz-proposal-route.test.js"
 
 permissions:
   contents: read
@@ -37,6 +41,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify browser WLDZ proposal route
+        run: |
+          node --check ../launchpad.cryptoworldz.xyz/wldz/proposal.js
+          node --test ../test/wldz-proposal-route.test.js
       - name: Install pinned SDKs
         run: npm install --no-audit --no-fund
       - name: Build and simulate exact Squads → Meteora proposal payload
