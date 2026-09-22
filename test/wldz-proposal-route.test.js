@@ -68,7 +68,7 @@ test('WLDZ proposal route recovers safely from stale or expired blockhashes',()=
   assert.match(source,/blockhash not found/);
   assert.match(source,/maxRetries:10/);
   assert.match(source,/No automatic third attempt/);
-  assert.match(html,/proposal\.js\?v=20260923-wldz-one-shot-v3/);
+  assert.match(html,/proposal\.js\?v=20260923-wldz-resume14-v4/);
 });
 
 
