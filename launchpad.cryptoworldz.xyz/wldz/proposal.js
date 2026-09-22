@@ -277,15 +277,17 @@ async function readCustody(connection,sqds,spl,web3,member){
  return {account,multisigPda,vault,mint};
 }
 
-function proposalStatus(sqds,proposal){
+function proposalStatus(_sqds,proposal){
  if(!proposal)return 'missing';
- if(sqds.types.isProposalStatusDraft(proposal.status))return 'draft';
- if(sqds.types.isProposalStatusActive(proposal.status))return 'active';
- if(sqds.types.isProposalStatusApproved(proposal.status))return 'approved';
- if(sqds.types.isProposalStatusExecuted(proposal.status))return 'executed';
- if(sqds.types.isProposalStatusRejected?.(proposal.status))return 'rejected';
- if(sqds.types.isProposalStatusCancelled?.(proposal.status))return 'cancelled';
- return 'other';
+ const kind=String(proposal?.status?.__kind||'').trim().toLowerCase();
+ if(kind==='draft')return 'draft';
+ if(kind==='active')return 'active';
+ if(kind==='approved')return 'approved';
+ if(kind==='executing')return 'executing';
+ if(kind==='executed')return 'executed';
+ if(kind==='rejected')return 'rejected';
+ if(kind==='cancelled')return 'cancelled';
+ return kind||'other';
 }
 
 async function buildPlan(connection,d,custody,member,batchIndex){
