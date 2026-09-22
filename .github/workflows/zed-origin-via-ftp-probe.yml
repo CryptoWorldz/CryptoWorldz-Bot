@@ -1,0 +1,55 @@
+name: ZED Origin Via FTP Probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/zed-origin-via-ftp-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+    steps:
+      - name: Resolve hosting origin candidates and probe HTTPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw_host="$(printf '%s' "$FTP_HOST" | sed -e 's#^ftp[s]*://##' -e 's#/.*$##')"
+          if [[ "$raw_host" != *:*:* && "$raw_host" == *:* ]]; then raw_host="${raw_host%%:*}"; fi
+          echo "::add-mask::$raw_host"
+          mapfile -t ips < <(RAW_HOST="$raw_host" python3 - <<'PY'
+          import os,socket
+          host=os.environ["RAW_HOST"]
+          values=[]
+          for row in socket.getaddrinfo(host,None,socket.AF_INET,socket.SOCK_STREAM):
+              ip=row[4][0]
+              if ip not in values: values.append(ip)
+          for ip in values: print(ip)
+          PY
+          )
+          if [ "${#ips[@]}" -eq 0 ]; then
+            echo "ZED_ORIGIN_CANDIDATES=0"
+            exit 1
+          fi
+          echo "ZED_ORIGIN_CANDIDATES=${#ips[@]}"
+          pass=0
+          for ip in "${ips[@]}"; do
+            code="$(curl --silent --show-error --connect-timeout 8 --max-time 20               --resolve "cryptobotz.cryptoworldz.xyz:443:$ip"               -o "$RUNNER_TEMP/body" -w '%{http_code}'               "https://cryptobotz.cryptoworldz.xyz/health?origin_probe=$GITHUB_RUN_ID" || true)"
+            body="$(cat "$RUNNER_TEMP/body" 2>/dev/null || true)"
+            echo "ZED_ORIGIN_PROBE ip=$ip http=$code body=$(printf '%s' "$body" | tr '\n' ' ' | head -c 160)"
+            if [ "$code" = "200" ] && printf '%s' "$body" | grep -Fq '"ok":true'; then
+              echo "ZED_ORIGIN_IP_VERIFIED=$ip"
+              pass=1
+              break
+            fi
+          done
+          test "$pass" = 1
