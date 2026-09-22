@@ -68,7 +68,7 @@ test('WLDZ proposal route recovers safely from stale or expired blockhashes',()=
   assert.match(source,/blockhash not found/);
   assert.match(source,/maxRetries:10/);
   assert.match(source,/No automatic third attempt/);
-  assert.match(html,/proposal\.js\?v=20260923-wldz-resume14-v5/);
+  assert.match(html,/proposal\.js\?v=20260923-wldz-onchain-resume-v6/);
 });
 
 
@@ -77,5 +77,17 @@ test('WLDZ proposal status uses the generated status __kind and can resume a fun
   assert.match(source,/kind==='draft'/);
   assert.match(source,/kind==='active'/);
   assert.doesNotMatch(source,/sqds\.types\.isProposalStatusDraft/);
-  assert.match(html,/proposal\.js\?v=20260923-wldz-resume14-v5/);
+  assert.match(html,/proposal\.js\?v=20260923-wldz-onchain-resume-v6/);
+});
+
+
+test('WLDZ route resumes the latest fully-funded on-chain batch even if browser storage is empty',()=>{
+  assert.match(source,/latestOnChainResume/);
+  assert.match(source,/custody\.account\.transactionIndex/);
+  assert.match(source,/poolLegPda/);
+  assert.match(source,/lockLegPda/);
+  assert.match(source,/exists\.every\(Boolean\)/);
+  assert.match(source,/Found existing funded WLDZ proposal/);
+  assert.match(source,/no new proposal will be created/);
+  assert.match(html,/proposal\.js\?v=20260923-wldz-onchain-resume-v6/);
 });

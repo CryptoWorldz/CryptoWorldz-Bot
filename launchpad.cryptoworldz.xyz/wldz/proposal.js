@@ -277,6 +277,28 @@ async function readCustody(connection,sqds,spl,web3,member){
  return {account,multisigPda,vault,mint};
 }
 
+async function latestOnChainResume(connection,d,custody,member){
+ const index=d.sqds.utils.toBigInt(custody.account.transactionIndex);
+ if(index<1n)return null;
+ const transactionPda=d.sqds.getTransactionPda({multisigPda:custody.multisigPda,index})[0];
+ const proposalPda=d.sqds.getProposalPda({multisigPda:custody.multisigPda,transactionIndex:index})[0];
+ const poolLegPda=d.sqds.getBatchTransactionPda({multisigPda:custody.multisigPda,batchIndex:index,transactionIndex:1})[0];
+ const lockLegPda=d.sqds.getBatchTransactionPda({multisigPda:custody.multisigPda,batchIndex:index,transactionIndex:2})[0];
+ const exists=await Promise.all([
+  accountExists(connection,transactionPda),
+  accountExists(connection,proposalPda),
+  accountExists(connection,poolLegPda),
+  accountExists(connection,lockLegPda)
+ ]);
+ if(!exists.every(Boolean))return null;
+ const [batch,proposal]=await Promise.all([
+  d.sqds.accounts.Batch.fromAccountAddress(connection,transactionPda,'confirmed'),
+  d.sqds.accounts.Proposal.fromAccountAddress(connection,proposalPda,'confirmed')
+ ]);
+ if(!batch.creator.equals(member)||!batch.multisig.equals(custody.multisigPda)||Number(batch.vaultIndex)!==VAULT_INDEX)return null;
+ return {index,transactionPda,proposalPda,poolLegPda,lockLegPda,batch,proposal,onChainDetected:true};
+}
+
 function proposalStatus(_sqds,proposal){
  if(!proposal)return 'missing';
  const kind=String(proposal?.status?.__kind||'').trim().toLowerCase();
@@ -419,6 +441,14 @@ $('#create-proposal')?.addEventListener('click',async()=>{
     }
    }else{
     clearResume();
+   }
+  }
+
+  if(!resumed){
+   resumed=await latestOnChainResume(connection,d,custody,member);
+   if(resumed){
+    saveResume(resumed.index,proposalStatus(d.sqds,resumed.proposal));
+    set('Found existing funded WLDZ proposal #'+resumed.index+' on-chain. Resuming it — no new proposal will be created.','good');
    }
   }
 
