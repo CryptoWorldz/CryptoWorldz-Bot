@@ -133,7 +133,7 @@ jobs:
             root/'genesis/index.html',root/'genesis/app.js',
             root/'mint/index.html',root/'mint/app.js',root/'mint/jupiter-mobile.js',
             root/'trust/index.html',root/'trust/app.js',
-            root/'omnichain/index.html',root/'technology/index.html'
+            root/'omnichain/index.html',root/'technology/index.html',root/'technology.html'
           ]
           for p in required:
               assert p.is_file() and p.stat().st_size>500, p
@@ -157,7 +157,7 @@ jobs:
           jupiter_mobile_js=(root/'mint/jupiter-mobile.js').read_text()
           trust_html=(root/'trust/index.html').read_text()
           trust_js=(root/'trust/app.js').read_text()
-          technology_html=(root/'technology/index.html').read_text()
+          technology_html=(root/'technology.html').read_text()
 
           assert 'PUBLIC TOKEN LAUNCHPAD' in home
           assert 'Who will be first?' in home
@@ -536,7 +536,7 @@ jobs:
                   mint_code,mint_body=get(base+'/mint/?verify=public-v10')
                   jup_bridge_code,jup_bridge_body=get(base+'/mint/jupiter-mobile.js?verify=public-v10')
                   trust_code,trust_body=get(base+'/trust/?verify=trust-v2')
-                  tech_code,tech_body=get(base+'/technology/?verify=tech-v1')
+                  tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
                   status_code,status_body=get(base+'/status.php?verify=public-v6')
                   reg_code,reg_body=get(registry+'?verify=public-v6')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
