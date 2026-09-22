@@ -47,11 +47,17 @@
   </section>
 
   <section id="private-area" class="hidden">
+    <section class="panel" id="launch-proposal-panel">
+      <h2>Squads Launch Proposal</h2>
+      <p class="lead2">Builds a fresh, simulated 2-of-3 Squads proposal from the verified Treasury route. Creating the proposal does not execute the launch.</p>
+      <div class="actions"><button class="btn primary" id="launch-proposal" type="button">CHECK + CREATE SQUADS PROPOSAL</button></div>
+      <div class="status" id="launch-proposal-status">Authenticate the private console to check the live Treasury gate.</div>
+    </section>
     <div id="token-grid" class="token-grid"></div>
   </section>
 </main>
 
 <footer><div><b>WorldzLaunchPad™ Private Genesis Console</b></div><p>Not linked from the public LaunchPad. No seed phrase or private key is ever requested.</p></footer>
-<script type="module" src="/genesis/app.js?v=20260922-backend-rpc-v7"></script>
+<script type="module" src="/genesis/app.js?v=20260922-squads-proposal-v8"></script>
 </body>
 </html>
