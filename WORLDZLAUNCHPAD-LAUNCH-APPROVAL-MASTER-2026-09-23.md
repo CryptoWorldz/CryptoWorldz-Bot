@@ -75,8 +75,9 @@ The 5% Kitty is for verifiable community contribution, including onboarding, tra
 
 ## External WorldzLaunchPad launches
 
-- The platform’s planned 10% launch share applies to qualifying external WorldMint / WorldzLaunchPad launches only, never retroactively to the four core tokens.
-- The platform share, vesting and fee-claimer destination must be visible before a creator launches.
+- WorldzLaunchPad takes 10% of each external project's collected supported trading-fee revenue only; 90% remains for that project's disclosed fee routing.
+- WorldzLaunchPad takes 0% of creator token supply and 0% of initial liquidity.
+- The platform fee-claimer destination and every project's fee routing must be visible before a creator launches.
 - The 2% DBC trading-fee configuration and its complete 100% fee-router destination table must be finalized before any mainnet configuration is approved.
 
 ## Four-wave release order
