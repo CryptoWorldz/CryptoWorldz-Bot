@@ -1,0 +1,16 @@
+{
+  "name": "worldzpad-wldz-mainnet-builder",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:launch": "node scripts/build-wldz-squads-meteora.mjs"
+  },
+  "dependencies": {
+    "@meteora-ag/cp-amm-sdk": "1.4.7",
+    "@solana/spl-token": "0.4.15",
+    "@solana/web3.js": "1.98.4",
+    "@sqds/multisig": "2.1.4",
+    "bn.js": "5.2.2"
+  }
+}
