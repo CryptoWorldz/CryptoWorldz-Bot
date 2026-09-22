@@ -60,6 +60,7 @@ async function connectWallet(){
     account=wallet.publicKey;
     $('#wallet-label').textContent=wallet.name+' • '+short(account.toBase58());
     status('#connect-status','AUTHORISED WALLET CONNECTED ✅\n'+account.toBase58()+'\n\nNo transaction has been sent.','ok');
+    status('#verify-status','Authorised wallet connected ✅\nPress VERIFY MAINNET STATE.\n\nThis check does not sign or send anything.','ok');
     $('#verify').disabled=false;
   }catch(e){
     wallet=null;account=null;$('#verify').disabled=true;$('#create').disabled=true;
@@ -169,7 +170,11 @@ async function verify(){
     $('#create').disabled=false;
   }catch(e){
     ctx=null;$('#create').disabled=true;
-    status('#verify-status','VERIFICATION STOPPED\n'+(e?.message||String(e))+'\n\nNothing was sent.','bad');
+    const raw=(e?.message||String(e));
+    const friendly=/Failed to fetch|failed to get info about account|network request/i.test(raw)
+      ? 'RPC CONNECTION ERROR\nThe browser could not reach the Solana RPC bridge. Reload this page once, reconnect the same wallet, then press VERIFY MAINNET STATE again.\n\nNothing was signed. Nothing was sent.'
+      : 'VERIFICATION STOPPED\n'+raw+'\n\nNothing was sent.';
+    status('#verify-status',friendly,'bad');
   }finally{$('#verify').disabled=false;}
 }
 
