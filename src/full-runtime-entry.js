@@ -115,6 +115,10 @@ async function start() {
       throw new Error("Permanent owner registry is ambiguous.");
     }
   }
+  if (config.ownerTelegramId) {
+    config.adminTelegramIds.add(String(config.ownerTelegramId));
+    console.log("Permanent owner internal access override active.");
+  }
   startupStage = "create_auto_client";
   const autoClient = createAutoClient(config);
   const graceWorkspaceSlug = String(process.env.GRACE_WORKSPACE_SLUG || "cryptoworldz").trim().toLowerCase();
