@@ -133,7 +133,8 @@ jobs:
             root/'genesis/index.html',root/'genesis/app.js',
             root/'mint/index.html',root/'mint/app.js',root/'mint/jupiter-mobile.js',
             root/'trust/index.html',root/'trust/app.js',
-            root/'omnichain/index.html',root/'technology/index.html',root/'technology.html'
+            root/'omnichain/index.html',root/'technology/index.html',root/'technology.html',
+            root/'wldz/index.html',root/'wldz/app.js',root/'wldz/proposal.js',root/'wldz/launch-config.json'
           ]
           for p in required:
               assert p.is_file() and p.stat().st_size>500, p
@@ -158,6 +159,9 @@ jobs:
           trust_html=(root/'trust/index.html').read_text()
           trust_js=(root/'trust/app.js').read_text()
           technology_html=(root/'technology.html').read_text()
+          wldz_html=(root/'wldz'/'index.html').read_text()
+          wldz_js=(root/'wldz'/'proposal.js').read_text()
+          wldz_cfg=json.loads((root/'wldz'/'launch-config.json').read_text())
 
           assert 'PUBLIC TOKEN LAUNCHPAD' in home
           assert 'Who will be first?' in home
@@ -171,6 +175,12 @@ jobs:
           assert 'Founding 100 contract mismatch' in app
           assert 'platformShareCapPercentOfCollectedProjectFee' in app
           assert 'WORLDZ TECHNOLOGY & MEANINGS' in technology_html
+          assert 'Create WLDZ Squads Proposal' in wldz_html
+          assert 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' in wldz_js
+          assert wldz_cfg['token']['mint']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
+          assert wldz_cfg['launch']['baseAmountTokens']==15000000
+          assert wldz_cfg['launch']['permanentLock'] is True
+          assert wldz_cfg['publicCreatorLaunchesEnabled'] is False
           assert 'Swap API V2' in technology_html
           assert 'Worldz Confidence Pulse' in technology_html
           assert 'Worldz Fee Flow' in technology_html
@@ -553,6 +563,9 @@ jobs:
                   jup_bridge_code,jup_bridge_body=get(base+'/mint/jupiter-mobile.js?verify=public-v10')
                   trust_code,trust_body=get(base+'/trust/?verify=trust-v2')
                   tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
+                  wldz_code,wldz_body=get(base+'/wldz/?verify=wldz-v1')
+                  wldz_js_code,wldz_js_body=get(base+'/wldz/proposal.js?verify=wldz-v1')
+                  wldz_cfg_code,wldz_cfg_body=get(base+'/wldz/launch-config.json?verify=wldz-v1')
                   status_code,status_body=get(base+'/status.php?verify=public-v6')
                   reg_code,reg_body=get(registry+'?verify=public-v6')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
@@ -601,6 +614,12 @@ jobs:
                   assert trust_code==200 and 'WORLDZ TRUST ORBIT' in trust_body and 'PROOF' in trust_body
                   assert all(term not in trust_body for term in banned)
                   assert tech_code==200 and 'WORLDZ TECHNOLOGY & MEANINGS' in tech_body and 'Swap API V2' in tech_body and 'WorldzMINT' in tech_body
+                  wldz_cfg=json.loads(wldz_cfg_body)
+                  assert wldz_code==200 and 'Create WLDZ Squads Proposal' in wldz_body
+                  assert wldz_js_code==200 and 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' in wldz_js_body
+                  assert wldz_cfg_code==200 and wldz_cfg['token']['mint']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
+                  assert wldz_cfg['launch']['baseAmountTokens']==15000000 and wldz_cfg['launch']['permanentLock'] is True
+                  assert wldz_cfg['publicCreatorLaunchesEnabled'] is False
                   assert all(term not in tech_body for term in banned)
                   assert platform['trustOrbit']['version']=='WORLDZ-TRUST-ORBIT-1'
                   assert status_code==200 and live['ok'] is True
