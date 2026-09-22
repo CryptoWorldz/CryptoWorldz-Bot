@@ -148,25 +148,57 @@ async function manifest(){
  return c;
 }
 
-async function sendInstructions(ctx,connection,web3,payer,instructions,label){
- const latest=await connection.getLatestBlockhash('confirmed');
- const tx=new web3.VersionedTransaction(new web3.TransactionMessage({
-  payerKey:payer,
-  recentBlockhash:latest.blockhash,
-  instructions
- }).compileToV0Message());
- set(label+' — approve in your wallet…','warn');
- const signed=await signVersionedTransaction(ctx,web3,tx);
- const signature=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false,maxRetries:3});
- const confirmation=await connection.confirmTransaction({
-  signature,
-  blockhash:latest.blockhash,
-  lastValidBlockHeight:latest.lastValidBlockHeight
- },'confirmed');
- if(confirmation.value.err!==null){
-  fail(label+' failed on-chain: '+JSON.stringify(confirmation.value.err));
+async function signatureOutcome(connection,signature){
+ for(let i=0;i<4;i++){
+  const out=await connection.getSignatureStatuses([signature],{searchTransactionHistory:true});
+  const status=out?.value?.[0]||null;
+  if(status?.err)return {state:'failed',err:status.err};
+  if(status&&(status.confirmationStatus==='confirmed'||status.confirmationStatus==='finalized'))return {state:'confirmed'};
+  if(i<3)await new Promise(resolve=>setTimeout(resolve,1200));
  }
- return signature;
+ return {state:'unknown'};
+}
+
+async function sendInstructions(ctx,connection,web3,payer,instructions,label){
+ let lastExpiredSignature=null;
+ for(let attempt=1;attempt<=2;attempt++){
+  const latest=await connection.getLatestBlockhash('confirmed');
+  const tx=new web3.VersionedTransaction(new web3.TransactionMessage({
+   payerKey:payer,
+   recentBlockhash:latest.blockhash,
+   instructions
+  }).compileToV0Message());
+  set(label+(attempt===1?' — approve in your wallet…':' — previous blockhash expired. Approve the refreshed transaction…'),'warn');
+  const signed=await signVersionedTransaction(ctx,web3,tx);
+  const signature=await connection.sendRawTransaction(signed.serialize(),{
+   skipPreflight:false,
+   maxRetries:8,
+   preflightCommitment:'confirmed'
+  });
+  try{
+   const confirmation=await connection.confirmTransaction({
+    signature,
+    blockhash:latest.blockhash,
+    lastValidBlockHeight:latest.lastValidBlockHeight
+   },'confirmed');
+   if(confirmation.value.err!==null){
+    fail(label+' failed on-chain: '+JSON.stringify(confirmation.value.err));
+   }
+   return signature;
+  }catch(error){
+   const outcome=await signatureOutcome(connection,signature);
+   if(outcome.state==='confirmed')return signature;
+   if(outcome.state==='failed')fail(label+' failed on-chain: '+JSON.stringify(outcome.err));
+   const expired=/expired|block height exceeded|blockheight exceeded/i.test(textErr(error));
+   if(!expired)throw error;
+   lastExpiredSignature=signature;
+   if(attempt===1){
+    set(label+' — the first wallet approval expired before confirmation. Building a fresh transaction now…','warn');
+    continue;
+   }
+  }
+ }
+ fail(label+' stopped after two expired wallet approvals. Last signature: '+lastExpiredSignature+'. Tap the action again and approve promptly.');
 }
 
 async function readCustody(connection,sqds,spl,web3,member){
