@@ -17,11 +17,8 @@ done
 npm ci
 node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js
 node --check index.js
-node --check src/full-runtime-entry.js
-node --check src/http.js
+find src -type f -name '*.js' -exec node --check {} +
 node --check src/oneworldz-gpt/http.js
-node --check src/user-experience.js
-node --check src/zed-guide.js
 grep -Fq 'registerProjectWalletSystem({ app, bot, config, supabase });' src/full-runtime-entry.js
 for marker in 'id="splashback"' 'id="zed-guide"' 'id="create"' 'id="heroes"'; do
   grep -Fq "$marker" public/miniapp/index.html
