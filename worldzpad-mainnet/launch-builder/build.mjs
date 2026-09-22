@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { BN } from "@coral-xyz/anchor";
+import anchor from "@coral-xyz/anchor";
+const { BN } = anchor;
 import {
   Connection,
   PublicKey,
