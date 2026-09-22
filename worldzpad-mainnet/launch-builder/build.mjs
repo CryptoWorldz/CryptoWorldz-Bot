@@ -17,6 +17,7 @@ import {
   getMint,
   NATIVE_MINT,
   TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
   ActivationType,
@@ -223,11 +224,27 @@ const { tx: meteoraTx, pool, position } = await cpAmm.createCustomPool({
 const existingPool = await connection.getAccountInfo(pool, "confirmed");
 assert(existingPool === null, "deterministic WLDZ/wSOL customizable pool already exists");
 
+// The canonical WLDZ Treasury ATA already exists on-chain. Meteora's helper still
+// emits an idempotent ATA-create instruction for it. Omitting that redundant
+// instruction shrinks the Squads stored transaction and therefore its rent,
+// without changing the pool operation.
+const launchInstructions = meteoraTx.instructions.filter((ix) => {
+  if (!ix.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID)) return true;
+  const touchesVaultWldzAta = ix.keys.some((k) => k.pubkey.equals(vaultAta));
+  const touchesWldzMint = ix.keys.some((k) => k.pubkey.equals(mintPk));
+  return !(touchesVaultWldzAta && touchesWldzMint);
+});
+assert(
+  launchInstructions.length === meteoraTx.instructions.length - 1,
+  "expected exactly one redundant WLDZ Treasury ATA instruction to be removed"
+);
+console.log("WLDZ_REDUNDANT_TREASURY_ATA_IX_REMOVED=1");
+
 const latest = await connection.getLatestBlockhash("confirmed");
 const innerTransactionMessage = new TransactionMessage({
   payerKey: vaultPk,
   recentBlockhash: latest.blockhash,
-  instructions: meteoraTx.instructions,
+  instructions: launchInstructions,
 });
 
 const innerVersioned = new VersionedTransaction(
@@ -272,7 +289,7 @@ if (innerSimulation.value.err !== null) {
           toPubkey: vaultPk,
           lamports: topupLamports,
         }),
-        ...meteoraTx.instructions,
+        ...launchInstructions,
       ],
     });
     const fundedTx = new VersionedTransaction(fundedMessage.compileToV0Message());
@@ -345,7 +362,7 @@ if (!fundingSimulation?.passed) {
           toPubkey: vaultPk,
           lamports: topupLamports,
         }),
-        ...meteoraTx.instructions,
+        ...launchInstructions,
       ],
     });
     const fundedTx = new VersionedTransaction(fundedMessage.compileToV0Message());
@@ -479,7 +496,7 @@ const report = {
     dynamicFeeEnabled: false,
     permanentLockIncludedAtomically: true,
     liquidityDelta: liquidityDelta.toString(),
-    instructionCount: meteoraTx.instructions.length,
+    instructionCount: launchInstructions.length,
     requiredSigners: signerKeys,
   },
   executableProposalPayload: {
