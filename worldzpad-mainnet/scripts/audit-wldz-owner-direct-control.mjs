@@ -84,3 +84,21 @@ try {
 } catch (error) {
   console.log("WLDZ_SPENDING_LIMIT_AUDIT_ERROR=" + String(error?.message || error));
 }
+
+const historical = [];
+for (let i = 1n; i <= multisig.utils.toBigInt(ms.transactionIndex); i++) {
+  const [txPda] = multisig.getTransactionPda({ multisigPda: MULTISIG, index: i });
+  const row = { index: i.toString(), transactionPda: txPda.toBase58(), types: [] };
+  for (const [name, Klass] of [
+    ["Batch", multisig.accounts.Batch],
+    ["ConfigTransaction", multisig.accounts.ConfigTransaction],
+    ["VaultTransaction", multisig.accounts.VaultTransaction]
+  ]) {
+    try {
+      const a = await Klass.fromAccountAddress(connection, txPda, "confirmed");
+      row.types.push({ name, pretty: typeof a.pretty === "function" ? a.pretty() : null });
+    } catch {}
+  }
+  historical.push(row);
+}
+console.log("WLDZ_MULTISIG_TRANSACTION_HISTORY=" + JSON.stringify(historical));
