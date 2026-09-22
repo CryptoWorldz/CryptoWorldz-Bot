@@ -8,6 +8,8 @@ on:
       - "worldzpad-mainnet/package.json"
       - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
       - ".github/workflows/wldz-squads-meteora-build.yml"
+      - "launchpad.cryptoworldz.xyz/wldz/index.html"
+      - "launchpad.cryptoworldz.xyz/wldz/index.html"
       - "launchpad.cryptoworldz.xyz/wldz/proposal.js"
       - "test/wldz-proposal-route.test.js"
   pull_request:
