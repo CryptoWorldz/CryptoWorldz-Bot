@@ -198,6 +198,7 @@ async function refreshPrivate(){
     $('#private-area').classList.remove('hidden');$('#refresh').disabled=false;
     setStatus('PRIVATE GENESIS CONFIG UNLOCKED ✅\nNetwork: Solana mainnet-beta\nSupply destination: Team Zed Treasury '+short(out.treasuryVault)+'\nFull token details are now visible only in this authenticated session.','good');
     render();
+    await checkLaunchProposal();
   }catch(e){
     if(String(e?.message||e).includes('authorization_expired')){
       authSession=null;$('#private-area').classList.add('hidden');$('#refresh').disabled=true;
@@ -270,6 +271,64 @@ function bytesToBase64(bytes){
   let binary='';const step=0x8000;
   for(let i=0;i<bytes.length;i+=step)binary+=String.fromCharCode(...bytes.subarray(i,i+step));
   return btoa(binary);
+}
+function base64ToBytes(s){
+  const raw=atob(String(s||''));
+  const out=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
+  return out;
+}
+function launchProposalStatus(text,type=''){
+  const el=$('#launch-proposal-status');if(!el)return;
+  el.textContent=text;el.className='status'+(type?' '+type:'');
+}
+async function checkLaunchProposal(){
+  if(!authSession)return;
+  try{
+    const out=await api('launch_proposal_payload');
+    if(out.fundingReady){
+      launchProposalStatus(
+        'PROPOSAL PAYLOAD VERIFIED ✅\nTreasury: '+Number(out.vaultSol).toFixed(6)+' SOL\nProposal: '+short(out.proposalAddress)+'\nPayload: '+out.byteLength+' bytes\n2-of-3 approvals remain required.',
+        'good'
+      );
+    }else{
+      launchProposalStatus(
+        'TREASURY FUNDING REQUIRED\nCurrent: '+Number(out.vaultSol).toFixed(6)+' SOL\nMinimum proven total: '+Number(out.minimumVaultSol).toFixed(4)+' SOL\nRecommended top-up now: '+Number(out.recommendedTopupSol).toFixed(4)+' SOL\nVault: '+out.treasuryVault,
+        'warn'
+      );
+    }
+    return out;
+  }catch(e){
+    const msg=e?.message||String(e);
+    if(msg.includes('launch_proposal_already_exists')){
+      launchProposalStatus('SQUADS PROPOSAL ALREADY EXISTS ✅\nOpen Squads for the remaining approvals.','good');
+      return null;
+    }
+    launchProposalStatus('Proposal check failed: '+msg,'bad');
+    return null;
+  }
+}
+async function createLaunchProposal(){
+  if(!wallet||wallet.publicKey?.toString()!==DEV_WALLET)throw new Error('Authorised dev wallet is not connected.');
+  const out=await api('launch_proposal_payload');
+  if(!out.fundingReady){
+    launchProposalStatus(
+      'TREASURY FUNDING REQUIRED BEFORE PROPOSAL CREATION\nRecommended top-up: '+Number(out.recommendedTopupSol).toFixed(4)+' SOL\nVault: '+out.treasuryVault,
+      'warn'
+    );
+    return;
+  }
+  const ok=confirm('CREATE SQUADS PROPOSAL\n\nThis signs and creates the governance proposal only. It does NOT execute the launch. The existing 2-of-3 Squads approval threshold remains required.');
+  if(!ok)return;
+  const tx=Transaction.from(base64ToBytes(out.wire));
+  tx.lastValidBlockHeight=out.lastValidBlockHeight;
+  launchProposalStatus('Wallet approval: CREATE SQUADS PROPOSAL\nNo launch execution occurs in this transaction.','warn');
+  const signed=await wallet.signTransaction(tx);
+  const sent=await api('broadcast_transaction',{wire:bytesToBase64(signed.serialize())});
+  launchProposalStatus(
+    'SQUADS PROPOSAL CREATED ON-CHAIN ✅\nProposal: '+out.proposalAddress+'\nTransaction: '+sent.signature+'\nNext gate: 2-of-3 Squads approvals.',
+    'good'
+  );
 }
 async function chainContext(){return api('chain_context');}
 async function signAndSend(tx,signers=[],ctx=null){
@@ -381,6 +440,11 @@ async function handleAction(action,symbol){
 $('#wallet').addEventListener('click',connect);
 $('#auth').addEventListener('click',authenticate);
 $('#refresh').addEventListener('click',refreshPrivate);
+$('#launch-proposal').addEventListener('click',async()=>{
+  const b=$('#launch-proposal');if(b)b.disabled=true;
+  try{await createLaunchProposal();}catch(e){launchProposalStatus('Proposal action failed: '+(e?.message||String(e)),'bad');}
+  finally{if(b)b.disabled=false;}
+});
 walletRegistry.on('register',()=>{
   if(!wallet){
     const names=walletStandardCandidates().map(w=>w.name).filter(Boolean);
