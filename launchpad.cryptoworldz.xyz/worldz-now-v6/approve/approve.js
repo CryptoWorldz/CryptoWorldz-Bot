@@ -27,11 +27,19 @@ async function connect(){
       wallet={kind:'standard',adapter:standard,account:a,publicKey:new PublicKey(a.address),name:standard.name};
     }else{
       const provider=injected();
-      if(!provider)throw new Error('No compatible Solana wallet was found. Open this link inside the wallet browser, or install/open Phantom, Solflare, or Jupiter Wallet.');
-      const out=await provider.connect();
-      const key=(out&&out.publicKey)||provider.publicKey;
-      if(!key)throw new Error('Wallet did not return a public key.');
-      wallet={kind:'injected',adapter:provider,publicKey:new PublicKey(key.toString()),name:'Solana Wallet'};
+      if(provider){
+        const out=await provider.connect();
+        const key=(out&&out.publicKey)||provider.publicKey;
+        if(!key)throw new Error('Wallet did not return a public key.');
+        wallet={kind:'injected',adapter:provider,publicKey:new PublicKey(key.toString()),name:'Solana Wallet'};
+      }else{
+        set('Opening mobile wallet connection…');
+        const mobile=await import('/mint/jupiter-mobile.js?v=20260922-stepper-bridge-1');
+        const adapter=await mobile.getJupiterMobileAdapter();
+        await adapter.connect();
+        if(!adapter.publicKey)throw new Error('Mobile wallet connection did not return a public key.');
+        wallet={kind:'jupiter-mobile',adapter,publicKey:new PublicKey(adapter.publicKey.toString()),name:'Mobile Solana Wallet'};
+      }
     }
     member=wallet.publicKey;
     const ma=await multisig.accounts.Multisig.fromAccountAddress(connection,msPk(),'confirmed');
