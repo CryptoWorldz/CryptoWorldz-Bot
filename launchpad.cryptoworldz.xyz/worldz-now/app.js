@@ -81,22 +81,68 @@ async function signTx(tx){
   return wallet.provider.signTransaction(tx);
 }
 async function send(ixs,label){
-  const latest=await connection.getLatestBlockhash('confirmed');
-  const tx=new VersionedTransaction(new TransactionMessage({
-    payerKey:account,recentBlockhash:latest.blockhash,instructions:ixs
-  }).compileToV0Message());
-  status('#launch-status',label+'\n\nReview the wallet request carefully.','warn');
-  const signed=await signTx(tx);
-  const sim=await connection.simulateTransaction(signed,{sigVerify:true,commitment:'confirmed'});
-  if(sim.value.err)throw new Error(label+' simulation failed: '+JSON.stringify(sim.value.err));
-  const sig=await connection.sendRawTransaction(signed.serialize(),{
-    skipPreflight:false,maxRetries:3,preflightCommitment:'confirmed'
-  });
-  const conf=await connection.confirmTransaction({
-    signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight
-  },'confirmed');
-  if(conf.value.err)throw new Error(label+' confirmation failed: '+JSON.stringify(conf.value.err));
-  return sig;
+  if(!wallet||!account)throw new Error('Wallet not connected.');
+  let attempt=0;
+  while(attempt<3){
+    attempt++;
+    const latest=await connection.getLatestBlockhash('confirmed');
+    const tx=new VersionedTransaction(new TransactionMessage({
+      payerKey:account,recentBlockhash:latest.blockhash,instructions:ixs
+    }).compileToV0Message());
+
+    status('#launch-status',
+      label+'\n\nWallet approval '+attempt+'/3 attempt.\nReview and approve promptly — Solana blockhashes expire.','warn');
+
+    const signed=await signTx(tx);
+
+    // Wallet approval can take long enough for a Solana blockhash to expire.
+    // Check freshness AFTER the user signs, before broadcast.
+    const currentHeight=await connection.getBlockHeight('confirmed');
+    if(currentHeight>=latest.lastValidBlockHeight-20){
+      status('#launch-status',
+        label+'\n\nThat approval took long enough for the Solana blockhash to become stale.\nNothing was broadcast. Re-opening the same approval with a fresh blockhash…','warn');
+      continue;
+    }
+
+    const sim=await connection.simulateTransaction(signed,{sigVerify:true,commitment:'confirmed'});
+    if(sim.value.err)throw new Error(label+' simulation failed: '+JSON.stringify(sim.value.err));
+
+    try{
+      const sig=await connection.sendRawTransaction(signed.serialize(),{
+        skipPreflight:false,maxRetries:5,preflightCommitment:'confirmed'
+      });
+
+      // Poll signature status instead of relying only on confirmTransaction's blockheight timeout.
+      for(let i=0;i<35;i++){
+        const st=await connection.getSignatureStatuses([sig],{searchTransactionHistory:true});
+        const v=st?.value?.[0];
+        if(v?.err)throw new Error(label+' on-chain error: '+JSON.stringify(v.err));
+        if(v&&(v.confirmationStatus==='confirmed'||v.confirmationStatus==='finalized'))return sig;
+
+        const h=await connection.getBlockHeight('confirmed');
+        if(h>latest.lastValidBlockHeight)break;
+        await new Promise(res=>setTimeout(res,1200));
+      }
+
+      // One last historical lookup: transaction may have landed just as blockhash window closed.
+      const final=await connection.getSignatureStatuses([sig],{searchTransactionHistory:true});
+      const fv=final?.value?.[0];
+      if(fv?.err)throw new Error(label+' on-chain error: '+JSON.stringify(fv.err));
+      if(fv&&(fv.confirmationStatus==='confirmed'||fv.confirmationStatus==='finalized'))return sig;
+
+      status('#launch-status',
+        label+'\n\nSolana blockhash expired before confirmation.\nNo confirmed transaction was found. Re-opening this same step with a fresh blockhash…','warn');
+    }catch(e){
+      const msg=e?.message||String(e);
+      if(/expired|block height exceeded|blockhash not found|TransactionExpired/i.test(msg)){
+        status('#launch-status',
+          label+'\n\nSolana blockhash expired.\nRe-opening this same step with a fresh blockhash…','warn');
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw new Error(label+' could not confirm after 3 fresh-blockhash attempts. Stop here; nothing further will be submitted.');
 }
 async function verify(){
   try{
@@ -227,7 +273,7 @@ async function createProposal(){
     $('#done').classList.remove('hidden');
     status('#launch-status','WORLDZ PROPOSAL CREATED ✅\nJayJayTeamDev approval: RECORDED\nRequired threshold: 2 of 3\nStill needed: ONE approval from Stepper OR Remedy\nProposal: '+proposalPda.toBase58()+'\n\nThe 8M transfer and 15M launch have NOT executed yet. They execute only after threshold approval and Squads execution.','ok');
   }catch(e){
-    status('#launch-status','PROCESS STOPPED\n'+(e?.message||String(e))+'\n\nAny earlier confirmed setup transactions remain on-chain. Re-run Verify before continuing so the page reads the latest Squads state.','bad');
+    status('#launch-status','PROCESS STOPPED\n'+(e?.message||String(e))+'\n\nDo NOT keep pressing the proposal button. Re-run VERIFY MAINNET STATE first. Any transaction already confirmed on-chain remains intact; expired/unconfirmed signatures moved nothing.','bad');
     $('#verify').disabled=false;
   }finally{busy=false;$('#create').disabled=false;$('#verify').disabled=false;}
 }
