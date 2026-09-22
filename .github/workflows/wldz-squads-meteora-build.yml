@@ -31,6 +31,7 @@ jobs:
         working-directory: worldzpad-mainnet
     env:
       SOLANA_RPC_URL: https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc
+      SQUADS_CREATOR: Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
