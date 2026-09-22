@@ -242,6 +242,9 @@ for (const signer of signerKeys) {
 assert(signerKeys.includes(vaultPk.toBase58()), "Squads vault is not a required inner signer");
 assert(signerKeys.includes(positionNftPda.toBase58()), "Squads ephemeral position NFT signer missing");
 
+console.log("WLDZ_CREATOR_SOL_LAMPORTS_PRE=" + creatorBalanceLamports);
+console.log("WLDZ_VAULT_SOL_LAMPORTS_PRE=" + vaultBalanceLamports);
+
 const innerSimulation = await connection.simulateTransaction(innerVersioned, {
   sigVerify: false,
   replaceRecentBlockhash: true,
@@ -259,7 +262,7 @@ const createVaultTransactionIx = multisig.instructions.vaultTransactionCreate({
   vaultIndex: Number(candidate.treasury.vaultIndex),
   ephemeralSigners: 1,
   transactionMessage: innerTransactionMessage,
-  memo: "WORLDZ WLDZ 15M one-sided Meteora launch",
+  memo: undefined,
 });
 const createProposalIx = multisig.instructions.proposalCreate({
   multisigPda: multisigPk,
