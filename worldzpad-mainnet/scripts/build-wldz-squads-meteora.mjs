@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import BN from 'bn.js';
-import { Connection, PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { Connection, PublicKey, TransactionMessage, VersionedTransaction, SystemProgram } from '@solana/web3.js';
 import { NATIVE_MINT, TOKEN_PROGRAM_ID, getMint, getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import {
   ActivationType, BaseFeeMode, CollectFeeMode, CpAmm, derivePositionNftAccount,
@@ -69,7 +69,25 @@ A(poolBytes.length<=1232,'pool leg remains above Solana packet limit: '+poolByte
 A(lockBytes.length<=1232,'lock leg above Solana packet limit: '+lockBytes.length);
 
 const poolSim=await connection.simulateTransaction(poolV0,{sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed',accounts:{encoding:'base64',addresses:[pool.toBase58(),position.toBase58()]}});
-if(poolSim.value.err!==null){console.log('WLDZ_POOL_SIM_LOGS='+JSON.stringify(poolSim.value.logs??[]));console.log('WLDZ_POOL_PACKET_BYTES='+poolBytes.length);}
+if(poolSim.value.err!==null){
+ console.log('WLDZ_POOL_SIM_LOGS='+JSON.stringify(poolSim.value.logs??[]));
+ console.log('WLDZ_POOL_PACKET_BYTES='+poolBytes.length);
+ console.log('WLDZ_VAULT_SOL_LAMPORTS='+vaultSol);
+ console.log('WLDZ_CREATOR='+creator.toBase58());
+ console.log('WLDZ_CREATOR_SOL_LAMPORTS='+creatorSol);
+ let pass=null;
+ for(let add=2000000;add<=30000000;add+=1000000){
+   if(creatorSol<add+1000000) break;
+   const funded=new VersionedTransaction(new TransactionMessage({payerKey:creator,recentBlockhash:bh,instructions:[
+     SystemProgram.transfer({fromPubkey:creator,toPubkey:vault,lamports:add}),
+     ...createPoolTx.instructions
+   ]}).compileToV0Message());
+   if(Buffer.from(funded.serialize()).length>1232) break;
+   const sim=await connection.simulateTransaction(funded,{sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed'});
+   if(sim.value.err===null){pass=add;break;}
+ }
+ console.log('WLDZ_MIN_TESTED_VAULT_TOPUP_LAMPORTS='+(pass??'NOT_FOUND_WITH_CREATOR_BALANCE'));
+}
 A(poolSim.value.err===null,'pool-create simulation failed: '+JSON.stringify(poolSim.value.err));
 
 const batchCreate=multisig.instructions.batchCreate({multisigPda:ms,creator,rentPayer:creator,batchIndex,vaultIndex:Number(config.treasury.vaultIndex),memo:'WORLDZ WLDZ 15M Meteora launch + permanent lock'});
