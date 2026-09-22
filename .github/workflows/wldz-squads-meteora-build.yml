@@ -1,0 +1,38 @@
+name: WLDZ Squads Meteora Build Proof
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: worldzpad-mainnet
+    env:
+      SOLANA_RPC_URL: ${{ secrets.MAINNET_SOLANA_RPC_URL }}
+      SQUADS_CREATOR: ${{ secrets.WLDZ_SQUADS_CREATOR_PUBLIC_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require read-only mainnet RPC and creator public key
+        run: |
+          test -n "$SOLANA_RPC_URL"
+          test -n "$SQUADS_CREATOR"
+      - name: Install pinned SDKs
+        run: npm install --no-audit --no-fund
+      - name: Build exact Squads → Meteora launch message without sending
+        run: npm run build:launch
+      - name: Upload build proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: wldz-squads-meteora-build-proof
+          path: worldzpad-mainnet/artifacts/wldz-squads-meteora-build-proof.json
+          if-no-files-found: error
+          retention-days: 30
