@@ -167,7 +167,7 @@ async function signatureOutcome(connections,signature){
 
 async function freshestTransactionConnection(primary,web3){
  const publicConnection=new web3.Connection(PUBLIC_RPC,'confirmed');
- const candidates=[primary,publicConnection];
+ const candidates=[publicConnection,primary];
  const samples=await Promise.all(candidates.map(async connection=>{
   try{
    const height=await connection.getBlockHeight('processed');
