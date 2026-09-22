@@ -1,7 +1,7 @@
 {
   "version": "2026-09-22-WLDZ-FLASH-1",
-  "status": "PREPARED_NOT_SIGNED",
-  "launchAuthorized": false,
+  "status": "OWNER_AUTHORIZED__AWAITING_LIVE_SQUADS_THRESHOLD",
+  "launchAuthorized": true,
   "executionEnabled": false,
   "network": "mainnet-beta",
   "token": {
@@ -51,5 +51,15 @@
   "dbcCompatibility": {
     "useForCanonicalWldz": false,
     "reason": "Current Meteora DBC SPL initializer creates a new base mint account; canonical WLDZ already exists with revoked mint authority. Do not create a second WLDZ mint."
+  },
+  "ownerAuthorization": {
+    "authorizedBy": "JayJayTeamDev",
+    "authorizedDate": "2026-09-22",
+    "scope": [
+      "TRANSFER_8M_WLDZ_TO_JAYJAYTEAMDEV",
+      "LAUNCH_15M_WLDZ_ONE_SIDED_METEORA_DAMM_V2",
+      "PERMANENTLY_LOCK_LP_POSITION"
+    ],
+    "note": "Execution still must satisfy the live on-chain Squads threshold. No threshold bypass is claimed."
   }
 }
