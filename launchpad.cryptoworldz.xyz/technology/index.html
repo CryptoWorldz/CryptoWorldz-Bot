@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05020b">
+  <meta name="description" content="Worldz Technology & Meanings — a plain-English guide to WorldzMINT, launch engines, Jupiter, Meteora, Raydium, Worldz Proof, Trust Orbit, fee flow and Command Centre technology.">
+  <title>Worldz Technology & Meanings™ | WorldzLaunchPad</title>
+  <link rel="stylesheet" href="/style.css?v=20260922-tech-v1">
+  <style>
+    :root{--tech-purple:#b96cff;--tech-cyan:#62dfff;--tech-green:#64e5ad;--tech-amber:#ffd166}
+    body{background:
+      radial-gradient(circle at 50% 2%,rgba(133,53,255,.2),transparent 24%),
+      radial-gradient(circle at 7% 42%,rgba(56,152,255,.08),transparent 22%),
+      radial-gradient(circle at 94% 67%,rgba(184,77,255,.09),transparent 22%),
+      #05020b}
+    .tech{max-width:1180px;margin:auto;padding:54px 18px 110px}
+    .hero-tech{padding:34px;border:1px solid #a965ff35;border-radius:28px;background:linear-gradient(145deg,#0a0413,#08030e 55%,#0d0717);overflow:hidden;position:relative}
+    .hero-tech:after{content:"";position:absolute;width:420px;height:420px;border-radius:50%;right:-190px;top:-230px;border:1px solid #a861ff2b;box-shadow:0 0 90px #8f45ff18}
+    .hero-tech h1{font-size:clamp(3rem,8vw,7rem);line-height:.84;letter-spacing:-.065em;margin:8px 0 18px;max-width:980px}
+    .hero-tech h1 span{color:#c786ff}
+    .hero-tech .lead{max-width:920px;color:#aa99b5;font-size:clamp(.94rem,1.5vw,1.15rem)}
+    .status-strip{display:flex;gap:7px;flex-wrap:wrap;margin-top:18px}.status-chip{border:1px solid #ffffff13;border-radius:999px;padding:6px 10px;font-size:.6rem;font-weight:900;letter-spacing:.06em}
+    .live{color:#7be8b9;border-color:#55e6a544}.beta{color:#83dfff;border-color:#62dfff44}.gate{color:#e0c27d;border-color:#ffd16644}.external{color:#cda2ff;border-color:#a965ff44}
+    .sectionx{margin-top:18px;border:1px solid #ffffff0d;border-radius:22px;background:#ffffff025;padding:22px}
+    .sectionx h2{font-size:clamp(1.55rem,3.3vw,3rem);letter-spacing:-.04em;margin:0 0 8px}.sectionx>p,.sectionx .intro{color:#93839d;line-height:1.62}
+    .grid2,.grid3,.grid4{display:grid;gap:10px;margin-top:14px}.grid2{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:repeat(3,1fr)}.grid4{grid-template-columns:repeat(4,1fr)}
+    .cardx{border:1px solid #ffffff0d;border-radius:16px;padding:16px;background:#07030d;min-height:150px}.cardx.hero{border-color:#a965ff35;background:linear-gradient(135deg,#a965ff0d,#62dfff06)}
+    .cardx .tag{display:inline-block;border:1px solid #ffffff13;border-radius:999px;padding:4px 7px;color:#b69dc5;font-size:.54rem;font-weight:900;letter-spacing:.08em;margin-bottom:8px}
+    .cardx h3{margin:0 0 6px;font-size:1.02rem}.cardx p{margin:0;color:#897990;font-size:.73rem;line-height:1.55}.cardx b{color:#e5dbea}
+    .flowx{display:grid;grid-template-columns:repeat(8,1fr);gap:7px;margin-top:16px}.flowx div{border:1px solid #ffffff0d;border-radius:13px;padding:12px 8px;text-align:center;background:#06030b;color:#8e8096;font-size:.63rem}.flowx b{display:block;color:#fff;font-size:.75rem;margin-bottom:3px}.flowx .arrow{border:0;background:transparent;display:grid;place-items:center;color:#a965ff;font-size:1.25rem}
+    .plain{border-left:3px solid #a965ff;background:#a965ff08;padding:14px 15px;border-radius:0 12px 12px 0;color:#aa98b4;font-size:.77rem;line-height:1.58;margin-top:14px}
+    .plain strong{color:#fff}
+    .feegrid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:12px}.feegrid div{border:1px solid #ffffff0d;border-radius:13px;padding:12px;text-align:center;background:#06030b;font-size:.65rem}.feegrid b{display:block;color:#c987ff;font-size:1.1rem;margin-bottom:3px}
+    .terms{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.term{border:1px solid #ffffff0d;border-radius:13px;padding:12px;background:#06030b}.term b{display:block;color:#d9cce1;font-size:.75rem}.term span{display:block;color:#807188;font-size:.65rem;line-height:1.5;margin-top:4px}
+    .tablewrap{overflow-x:auto;margin-top:12px}.status-table{width:100%;border-collapse:collapse;min-width:760px}.status-table th,.status-table td{text-align:left;padding:10px;border-bottom:1px solid #ffffff0d;font-size:.69rem;vertical-align:top}.status-table th{color:#a992b7;font-size:.58rem;text-transform:uppercase;letter-spacing:.08em}.status-table td:first-child{color:#ded3e5;font-weight:800}
+    .sources{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.sources a{display:block;text-decoration:none;color:#d9cce2;border:1px solid #ffffff0d;border-radius:13px;padding:12px;background:#06030b}.sources a:hover{border-color:#a965ff55}.sources small{display:block;color:#7e6e87;margin-top:4px}
+    .bigline{font-size:clamp(1.3rem,3vw,2.6rem);font-weight:950;letter-spacing:-.035em;margin:0}.muted{color:#8d7d96}
+    details{border:1px solid #ffffff0d;border-radius:13px;background:#06030b;padding:11px 13px}details+details{margin-top:7px}summary{cursor:pointer;font-weight:850;color:#d6c7df}details p{color:#887991;font-size:.72rem;line-height:1.55}
+    @media(max-width:900px){.grid4,.grid3{grid-template-columns:1fr 1fr}.flowx{grid-template-columns:1fr}.flowx .arrow{transform:rotate(90deg)}.feegrid{grid-template-columns:1fr 1fr}.terms,.sources{grid-template-columns:1fr 1fr}}
+    @media(max-width:620px){.tech{padding-top:30px}.grid2,.grid3,.grid4,.terms,.sources{grid-template-columns:1fr}.feegrid{grid-template-columns:1fr 1fr}.topbar nav{display:none}.hero-tech{padding:25px 18px}}
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-orb">W</span><span>WorldzLaunchPad™</span></a>
+  <nav aria-label="Technology guide navigation">
+    <a href="#stack">Stack</a>
+    <a href="#jupiter">Jupiter</a>
+    <a href="#liquidity">Liquidity</a>
+    <a href="#proof">Proof</a>
+    <a href="#fees">Fees</a>
+    <a href="#glossary">Glossary</a>
+  </nav>
+  <a class="wallet-mini" href="/mint/" style="text-decoration:none">WorldzMINT</a>
+</header>
+
+<main class="tech">
+  <section class="hero-tech">
+    <div class="kicker">WORLDZ TECHNOLOGY & MEANINGS™ • PLAIN-ENGLISH SYSTEM MAP</div>
+    <h1>WHAT EVERYTHING<br><span>ACTUALLY MEANS.</span></h1>
+    <p class="lead">One public guide to the technology behind WorldzLaunchPad™: minting, launch engines, liquidity, Jupiter infrastructure, market evidence, fee routing, multisig control, proof systems, automation and chain-native expansion.</p>
+    <div class="status-strip">
+      <span class="status-chip live">LIVE = PUBLICLY OPERATING</span>
+      <span class="status-chip beta">BETA = REAL TEST / LIMITED RELEASE</span>
+      <span class="status-chip gate">GATED = BUILT BUT EXECUTION LOCKED</span>
+      <span class="status-chip external">EXTERNAL = THIRD-PARTY TECHNOLOGY / SIGNAL</span>
+    </div>
+  </section>
+
+  <section class="sectionx">
+    <h2>Read this first: the token is not the whole machine.</h2>
+    <p class="intro">Worldz deliberately separates the <b>token mint</b> from the <b>market</b>, <b>routing</b>, <b>automation</b> and <b>proof</b> layers. That keeps the canonical token simple while allowing newer technology to surround it without creating another token or silently changing its supply.</p>
+    <div class="grid4">
+      <article class="cardx hero"><span class="tag">TOKEN LAYER</span><h3>WorldzMINT™</h3><p>Creates the canonical fixed-supply Solana mint, writes metadata, distributes disclosed genesis allocations, then permanently removes Mint and Freeze authority.</p></article>
+      <article class="cardx"><span class="tag">MARKET LAYER</span><h3>Pool / Curve</h3><p>Creates the place where a token trades: direct AMM liquidity, a bonding curve that later graduates, or another verified chain-native market route.</p></article>
+      <article class="cardx"><span class="tag">ROUTING + DATA</span><h3>Jupiter layer</h3><p>Wallet connectivity, swap routing, token discovery, price data and optional order automation sit around the token. They do not need to be embedded inside the mint.</p></article>
+      <article class="cardx"><span class="tag">PROOF + CONTROL</span><h3>Worldz systems</h3><p>Trust Orbit, Confidence Pulse, Worldz Proof, multisig controls and Command Centre show what is verified, what is changing and what remains locked.</p></article>
+    </div>
+    <div class="plain"><strong>Simple version:</strong> keep one canonical token. Add better trading, routing, analytics and automation around that same token. Do not create a second mint just to gain access to another product's launch interface.</div>
+  </section>
+
+  <section id="stack" class="sectionx">
+    <h2>The Worldz technology stack</h2>
+    <p class="intro">These products are related, but they do different jobs.</p>
+    <div class="flowx">
+      <div><b>1 • MINT</b>WorldzMINT™</div><div class="arrow">→</div>
+      <div><b>2 • LAUNCH</b>Flash / Curve / Curve Pro / Confidence Curve</div><div class="arrow">→</div>
+      <div><b>3 • TRADE</b>Raydium / Meteora + Jupiter routing</div><div class="arrow">→</div>
+      <div><b>4 • PROVE</b>Pulse / Constellation / Trust Orbit / Command Centre</div>
+    </div>
+    <div class="grid3">
+      <article class="cardx hero"><span class="tag live">LIVE BETA</span><h3>WorldzMINT™</h3><p>Public Solana fixed-supply minting. Current flow uses three explicit wallet transaction approvals: create mint → distribute exact genesis supply → create metadata and permanently revoke Mint + Freeze authority. Worldz takes <b>0% token supply</b> and applies <b>0% wallet-transfer tax</b>.</p></article>
+      <article class="cardx"><span class="tag beta">DEVNET BETA</span><h3>Worldz Flash™</h3><p>Direct-liquidity Solana Devnet pipeline using Raydium CPMM. It proves token → metadata → pool → fee snapshot → lock/vesting plan → Worldz Proof without pretending unfinished enforcement is live.</p></article>
+      <article class="cardx"><span class="tag beta">DEVNET BETA</span><h3>Worldz Curve™</h3><p>Raydium LaunchLab route. A bonding curve bootstraps trading and can graduate into a Raydium CPMM market. PlatformConfig and native vesting are tested on Devnet.</p></article>
+      <article class="cardx"><span class="tag beta">DEVNET BETA</span><h3>Worldz Curve Pro™</h3><p>Meteora Dynamic Bonding Curve route. Per-launch configuration, virtual price discovery, real quote collection, DAMM v2 graduation, fee allocation, permanent-liquidity policy and vesting are tested on Devnet.</p></article>
+      <article class="cardx"><span class="tag gate">MAINNET GATED</span><h3>Worldz Confidence Curve™</h3><p>The production-oriented public creator market-launch route. It combines a chain-native launch primitive with real quote accounting, graduation proof and Confidence telemetry. Mainnet remains fail-closed until every release gate is proven.</p></article>
+      <article class="cardx"><span class="tag live">LIVE / LIVE BETA</span><h3>Confidence Pulse™ + Constellation™</h3><p>Pulse measures market evidence. Constellation displays independent evidence markers. They do not manufacture volume, target a price or collapse every risk into one opaque score.</p></article>
+    </div>
+  </section>
+
+  <section id="jupiter" class="sectionx">
+    <h2>Jupiter technology: where it fits</h2>
+    <p class="intro">Jupiter is most useful as infrastructure around a canonical token: wallet access, execution routing, market data and automated orders. Worldz can adopt each capability independently rather than forcing token creation through one external launch product.</p>
+    <div class="grid3">
+      <article class="cardx hero"><span class="tag live">INTEGRATED</span><h3>Jupiter Wallet + Solana Wallet Standard</h3><p>WorldzMINT prioritises Jupiter-compatible Wallet Standard signing when available and supports the Jupiter Mobile/Reown path. The wallet remains the signer; Worldz does not request a seed phrase or private key.</p></article>
+      <article class="cardx"><span class="tag external">CURRENT JUPITER API</span><h3>Swap API V2 • Meta-Aggregator</h3><p>Jupiter's current <b>/order + /execute</b> path lets Metis, JupiterZ RFQ, Dflow and OKX compete for execution. Jupiter can handle transaction landing and applies its real-time slippage estimation on the managed path.</p></article>
+      <article class="cardx"><span class="tag external">CURRENT JUPITER API</span><h3>Swap API V2 • Router</h3><p>The <b>/build</b> route exposes raw swap instructions with Metis routing for integrations that need custom transactions, CPI or composability. This is the flexible path when Worldz needs to add its own instructions.</p></article>
+      <article class="cardx"><span class="tag live">EXTERNAL SIGNALS</span><h3>Tokens V2 + Jupiter Verify signals</h3><p>Token search/discovery and verification signals help identify the correct mint. Trust Orbit treats Jupiter identity and organic-market data as independent external evidence — never as a Worldz or Jupiter endorsement.</p></article>
+      <article class="cardx"><span class="tag external">CURRENT JUPITER API</span><h3>Price V3</h3><p>Jupiter's current price endpoint provides market price data by mint. Worldz can use price as one market input while keeping liquidity, concentration, authority and organic activity as separate evidence.</p></article>
+      <article class="cardx"><span class="tag gate">OPTIONAL FUTURE INTEGRATION</span><h3>Trigger V2 • Limit Orders + DCA</h3><p>Jupiter Trigger V2 supports vault-based price orders and DCA, including single limit orders, OCO / TP-SL structures, OTOCO chains and recurring time- or price-conditional swaps. This is an automation layer, not part of the token mint.</p></article>
+    </div>
+    <details><summary>What about Jupiter Studio?</summary><p>Jupiter Studio is an external token-launch product. It can be useful for creators who want Studio's own token/launch path. WorldzMINT exists so a Worldz token can keep one canonical mint and then use compatible Jupiter infrastructure around that mint. Creating another token in Studio merely to gain other Jupiter features would create a second mint, which is not required.</p></details>
+    <details><summary>Why not put “all Jupiter tech” inside the token itself?</summary><p>Because routing, market data, order automation and wallet connectivity are services/protocol layers that change over time. Keeping them outside the immutable mint lets Worldz upgrade integrations without changing supply rules or replacing the token.</p></details>
+  </section>
+
+  <section id="liquidity" class="sectionx">
+    <h2>Raydium + Meteora: the market engines</h2>
+    <div class="grid2">
+      <article class="cardx"><span class="tag external">RAYDIUM</span><h3>CPMM + LaunchLab</h3><p><b>CPMM</b> is a constant-product AMM for direct token/quote liquidity. <b>LaunchLab</b> is Raydium's bonding-curve launch system with configurable platform settings and graduation into an AMM market. Worldz Flash tests CPMM; Worldz Curve tests LaunchLab.</p></article>
+      <article class="cardx hero"><span class="tag external">METEORA</span><h3>DBC + DAMM v2</h3><p><b>Dynamic Bonding Curve</b> is a configurable virtual pricing curve that can graduate into DAMM v1/v2 after a real quote threshold is reached. <b>DAMM v2</b> is Meteora's newer AMM with flexible liquidity management and position-based liquidity features. Worldz Curve Pro tests DBC → DAMM v2, while direct DAMM v2 architectures can work with an already-existing canonical mint.</p></article>
+    </div>
+    <div class="plain"><strong>Critical distinction:</strong> virtual curve liquidity is a pricing mechanism. It is not the same thing as withdrawable real SOL/quote liquidity. Worldz displays virtual curve state, real quote collected and graduated real LP separately.</div>
+  </section>
+
+  <section class="sectionx">
+    <h2>Worldz CrossPair™ + OmniChain™</h2>
+    <div class="grid2">
+      <article class="cardx"><span class="tag">CROSSPAIR</span><h3>Choose a verified quote asset.</h3><p>CrossPair is the quote-asset layer. It separates the project token from the asset it trades against. A verified wrapped asset can be a quote without implying that the project token itself is backed by that asset.</p></article>
+      <article class="cardx"><span class="tag">OMNICHAIN</span><h3>Chain-native first.</h3><p>OmniChain is the shared project/proof architecture across Solana, EVM, XRPL and future chain adapters. It does not pretend every blockchain works the same way. Execution remains chain-native and each mainnet adapter is independently gated.</p></article>
+    </div>
+  </section>
+
+  <section id="proof" class="sectionx">
+    <h2>Confidence + Proof: the part Worldz created around the market</h2>
+    <div class="grid3">
+      <article class="cardx hero"><span class="tag live">LIVE</span><h3>Worldz Trust Orbit™</h3><p>A public evidence passport. It combines on-chain facts, Worldz launch records and external Jupiter market signals while keeping each fact visible instead of hiding everything behind one “safe” score.</p></article>
+      <article class="cardx"><span class="tag live">LIVE</span><h3>Worldz Confidence Pulse™</h3><p>Tracks available evidence such as market cap, real liquidity, organic buy/sell volume, matched organic volume, organic buyers, Jupiter Organic Score, holder concentration and dev balance.</p></article>
+      <article class="cardx"><span class="tag beta">LIVE BETA</span><h3>Worldz Confidence Constellation™</h3><p>Independent stars for Authority, Holder, Dev, Team, Treasury, Liquidity, Market and Market Identity evidence. A positive star cannot hide a failed or unknown one.</p></article>
+    </div>
+    <div class="grid2">
+      <article class="cardx"><h3>Matched Organic Volume</h3><p><b>2 × min(organic buy volume, organic sell volume)</b>. It deliberately rewards genuine two-sided participation rather than treating one-sided bursts or system-generated activity as market confidence.</p></article>
+      <article class="cardx"><h3>Worldz Proof™</h3><p>Records what was actually created and verified: supply, authorities, allocations, fee settings, mint/pool addresses, locks, vesting, transactions and release-gate state.</p></article>
+    </div>
+    <div class="plain"><strong>No manufactured confidence:</strong> wash trades, self-trading, treasury loops, fake holder activity and system trades performed only to make a chart look healthy are excluded from Worldz confidence claims where possible.</div>
+  </section>
+
+  <section id="fees" class="sectionx">
+    <h2>Fees: there are different kinds</h2>
+    <div class="grid3">
+      <article class="cardx"><h3>Wallet-transfer tax</h3><p><b>0% under the Worldz standard.</b> Moving a token from one ordinary wallet to another is not the same thing as trading it in a pool.</p></article>
+      <article class="cardx"><h3>Venue / protocol fee</h3><p>A DEX or routing venue can charge its own protocol fee. That fee is external and must be shown separately rather than pretending Worldz controls money it never receives.</p></article>
+      <article class="cardx"><h3>Supported project trading fee</h3><p>A fee collected through a supported market route. Public creator launches operate inside the Worldz Safe Launch range. Specific Worldz-owned/test architectures can use a configured 2.00% trading-fee target without turning ordinary wallet transfers into taxable events.</p></article>
+    </div>
+    <h3 style="margin-top:18px">Worldz-owned collected fee revenue — current public default</h3>
+    <div class="feegrid">
+      <div><b>10%</b>LaunchPad Treasury</div>
+      <div><b>30%</b>LP Growth</div>
+      <div><b>20%</b>Holders + Legacy</div>
+      <div><b>20%</b>Community / Growth / Marketing</div>
+      <div><b>10%</b>OneWorldz Impact</div>
+      <div><b>5%</b>Operations</div>
+      <div><b>5%</b>Reserve</div>
+    </div>
+    <div class="plain"><strong>Public creator rule is separate:</strong> WorldzLaunchPad takes exactly <b>10% of collected supported project trading-fee revenue</b>; 90% remains on the project side. WorldzLaunchPad takes 0% of a creator's token supply and 0% of initial liquidity.</div>
+  </section>
+
+  <section class="sectionx">
+    <h2>Command Centre Ultimate™</h2>
+    <div class="grid3">
+      <article class="cardx hero"><span class="tag">ZED</span><h3>Community + command layer</h3><p>Launch records, Telegram/community functions, missions, wallet/profile systems and shared project state.</p></article>
+      <article class="cardx"><span class="tag">AUTO</span><h3>Automation + accounting layer</h3><p>Fee reconciliation, treasury routes, LP growth, vesting/reward accounting and controlled automated actions. AUTO must not manufacture market activity for a confidence score.</p></article>
+      <article class="cardx"><span class="tag">G.R.A.C.E.</span><h3>Governed coordination layer</h3><p>Distribution, communications, launch/milestone publishing and governed operational workflows. It complements, rather than replaces, on-chain authority and multisig controls.</p></article>
+    </div>
+  </section>
+
+  <section class="sectionx">
+    <h2>Security + governance technology</h2>
+    <div class="grid3">
+      <article class="cardx"><span class="tag external">SQUADS V4</span><h3>Multisig treasury control</h3><p>A multisig requires multiple authorised wallets to approve treasury or administrative actions. Worldz uses multisig proof so one hot wallet is not silently treated as the whole treasury governance model.</p></article>
+      <article class="cardx"><span class="tag external">METAPLEX</span><h3>Token Metadata</h3><p>Solana metadata stores/discloses token identity such as name, symbol and metadata URI. WorldzMINT finalises metadata before permanently revoking token authorities.</p></article>
+      <article class="cardx"><span class="tag">FAIL-CLOSED</span><h3>Release gates</h3><p>If an execution adapter, fee route, lock, authority state, treasury route or proof cannot be verified, Worldz keeps the applicable mainnet action disabled instead of silently assuming it works.</p></article>
+    </div>
+  </section>
+
+  <section class="sectionx">
+    <h2>Worldz Safe Launch Standard™</h2>
+    <div class="grid4">
+      <article class="cardx"><h3>Fixed supply</h3><p>Mint authority revoked after genesis. Freeze authority revoked/absent.</p></article>
+      <article class="cardx"><h3>Founder limits</h3><p>Public creator/team allocation ≤15% total, ≤5% liquid at genesis, with minimum cliff and vesting controls on the remainder.</p></article>
+      <article class="cardx"><h3>Liquidity controls</h3><p>Public creator liquidity allocation and lock requirements are checked before mainnet verification. Declared liquidity is not called real until the market account proves it.</p></article>
+      <article class="cardx"><h3>No tax trap</h3><p>0% wallet-transfer tax. Supported creator trading fees are constrained by the published platform limits and disclosed before execution.</p></article>
+    </div>
+  </section>
+
+  <section class="sectionx">
+    <h2>Current public status map</h2>
+    <div class="tablewrap"><table class="status-table">
+      <thead><tr><th>Technology</th><th>Status</th><th>What that means</th></tr></thead>
+      <tbody>
+        <tr><td>WorldzMINT™</td><td><span class="status-chip live">PUBLIC MAINNET MINT BETA</span></td><td>Real Solana mint path with explicit wallet approvals and authority finalisation.</td></tr>
+        <tr><td>Worldz Flash™</td><td><span class="status-chip beta">DEVNET BETA</span></td><td>Executable Raydium CPMM test route.</td></tr>
+        <tr><td>Worldz Curve™</td><td><span class="status-chip beta">DEVNET BETA</span></td><td>Executable Raydium LaunchLab test route.</td></tr>
+        <tr><td>Worldz Curve Pro™</td><td><span class="status-chip beta">DEVNET BETA</span></td><td>Executable Meteora DBC test route; public mainnet creator execution remains disabled.</td></tr>
+        <tr><td>Worldz Confidence Curve™</td><td><span class="status-chip gate">MAINNET GATE CLOSED</span></td><td>Production-prepared route remains fail-closed until all release proof passes.</td></tr>
+        <tr><td>Trust Orbit™</td><td><span class="status-chip live">LIVE</span></td><td>Public Solana evidence passport with external Jupiter signals where available.</td></tr>
+        <tr><td>Confidence Pulse™</td><td><span class="status-chip live">LIVE</span></td><td>Evidence telemetry, not a price target.</td></tr>
+        <tr><td>Confidence Constellation™</td><td><span class="status-chip beta">LIVE BETA</span></td><td>Independent evidence markers.</td></tr>
+        <tr><td>EVM + XRPL adapters</td><td><span class="status-chip beta">TESTNET BETA</span></td><td>Chain-native testnet execution exists; mainnet verification remains separately gated.</td></tr>
+        <tr><td>Jupiter Trigger V2 automation</td><td><span class="status-chip gate">OPTIONAL / NOT WORLDZ-LIVE</span></td><td>External capability available for future limit-order and DCA integrations.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="glossary" class="sectionx">
+    <h2>Crypto words in normal English</h2>
+    <div class="terms">
+      <div class="term"><b>CA / Mint Address</b><span>The unique on-chain address identifying a Solana token mint. It is not the pool address.</span></div>
+      <div class="term"><b>SPL Token</b><span>A Solana token created under a Solana token program.</span></div>
+      <div class="term"><b>ATA</b><span>Associated Token Account — the standard token-holding account for a wallet + mint pair.</span></div>
+      <div class="term"><b>SOL / wSOL</b><span>SOL is Solana's native asset. wSOL is SOL represented as an SPL token so token programs and AMMs can use it.</span></div>
+      <div class="term"><b>Quote Asset</b><span>The asset used to price/trade another token, such as SOL, wSOL or another verified asset.</span></div>
+      <div class="term"><b>LP / Liquidity Pool</b><span>Token reserves that allow people to trade. LP value is real only when the assets actually exist in the pool.</span></div>
+      <div class="term"><b>AMM</b><span>Automated Market Maker — an on-chain market that uses a mathematical pricing rule instead of a traditional order book.</span></div>
+      <div class="term"><b>CPMM</b><span>Constant Product Market Maker — a common AMM model where the pool balances determine price.</span></div>
+      <div class="term"><b>Bonding Curve</b><span>A programmed price path used during launch before or instead of a normal liquidity pool.</span></div>
+      <div class="term"><b>DBC</b><span>Dynamic Bonding Curve — Meteora's configurable virtual launch curve that can migrate into an AMM.</span></div>
+      <div class="term"><b>DAMM v2</b><span>Meteora's newer Dynamic AMM program for post-launch/direct liquidity, with flexible position and liquidity features.</span></div>
+      <div class="term"><b>Graduation</b><span>The move from a launch curve into its post-launch AMM/liquidity market after configured conditions are met.</span></div>
+      <div class="term"><b>Virtual Liquidity</b><span>Mathematical curve state used for pricing. It must not be confused with withdrawable real assets.</span></div>
+      <div class="term"><b>Slippage</b><span>The difference between the expected trade price and the actual execution price caused by liquidity and market movement.</span></div>
+      <div class="term"><b>Basis Point / bps</b><span>1 basis point = 0.01%. Therefore 200 bps = 2.00%.</span></div>
+      <div class="term"><b>RPC</b><span>The network endpoint an app uses to read Solana and submit transactions.</span></div>
+      <div class="term"><b>Mint Authority</b><span>The key allowed to create additional token supply. Revoking it makes a fixed supply permanent.</span></div>
+      <div class="term"><b>Freeze Authority</b><span>The key allowed to freeze token accounts. Worldz Safe Launch requires it removed/absent.</span></div>
+      <div class="term"><b>Metadata</b><span>Public identity data such as token name, symbol, image/URI and related information.</span></div>
+      <div class="term"><b>Multisig</b><span>A wallet/control account that needs multiple authorised approvals instead of one key deciding alone.</span></div>
+      <div class="term"><b>Vesting</b><span>A schedule controlling when allocated tokens become available.</span></div>
+      <div class="term"><b>LP Lock</b><span>A restriction preventing controlled liquidity from being withdrawn before the declared conditions are met.</span></div>
+      <div class="term"><b>Protocol Fee</b><span>A fee charged by an external protocol/venue. It is separate from Worldz project economics.</span></div>
+      <div class="term"><b>Wallet-Transfer Tax</b><span>A fee on ordinary token transfers. The Worldz standard sets this to 0%.</span></div>
+      <div class="term"><b>Mainnet</b><span>The real blockchain using real assets and irreversible transactions.</span></div>
+      <div class="term"><b>Devnet / Testnet</b><span>Testing networks used to prove code and flows without calling them production mainnet launches.</span></div>
+      <div class="term"><b>Fail-Closed</b><span>If proof is missing or a check fails, execution stays blocked instead of assuming success.</span></div>
+    </div>
+  </section>
+
+  <section class="sectionx">
+    <p class="bigline">One mint. Best available infrastructure around it. Every important claim separated into proof.</p>
+    <p class="muted">That is the design idea behind the Worldz stack.</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="/mint/">Open WorldzMINT™</a>
+      <a class="btn secondary" href="/trust/">Open Trust Orbit™</a>
+      <a class="btn secondary" href="/economics/">Open Worldz Fee Flow™</a>
+      <a class="btn secondary" href="/omnichain/">Open OmniChain™</a>
+    </div>
+  </section>
+
+  <section class="sectionx">
+    <h2>External technology references</h2>
+    <p class="intro">These external projects are independent of Worldz. Linking or integrating them does not imply partnership, endorsement or control by Worldz.</p>
+    <div class="sources">
+      <a href="https://developers.jup.ag/docs/swap/" target="_blank" rel="noopener"><b>Jupiter Developer Platform</b><small>Swap API V2, Tokens, Price and trading infrastructure.</small></a>
+      <a href="https://developers.jup.ag/docs/trigger/" target="_blank" rel="noopener"><b>Jupiter Trigger V2</b><small>Limit orders, OCO / OTOCO and DCA documentation.</small></a>
+      <a href="https://docs.meteora.ag/" target="_blank" rel="noopener"><b>Meteora</b><small>DBC and DAMM liquidity documentation.</small></a>
+      <a href="https://docs.raydium.io/" target="_blank" rel="noopener"><b>Raydium</b><small>CPMM, LaunchLab and Solana liquidity infrastructure.</small></a>
+      <a href="https://docs.squads.so/" target="_blank" rel="noopener"><b>Squads</b><small>Solana multisig and smart-account documentation.</small></a>
+      <a href="https://developers.metaplex.com/" target="_blank" rel="noopener"><b>Metaplex</b><small>Solana Token Metadata and related developer tooling.</small></a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div><b>Worldz Technology & Meanings™</b> • WorldzLaunchPad™ • CryptoWorldz</div>
+  <div><a href="/">LaunchPad Home</a> • <a href="/mint/">WorldzMINT</a> • <a href="/trust/">Trust Orbit</a> • <a href="/economics/">Fee Flow</a></div>
+  <p>Technology changes. Worldz separates live proof from beta, gated and external capabilities so a future feature is never presented as already executed on-chain.</p>
+</footer>
+</body>
+</html>
