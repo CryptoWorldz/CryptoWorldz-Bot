@@ -65,3 +65,25 @@ jobs:
           else:
               for path,value in unique[:20]:
                   print("HOSTINGER_ORIGIN_IPV4_CANDIDATE path="+path+" value="+value)
+
+          zone_url="https://developers.hostinger.com/api/dns/v1/zones/cryptoworldz.xyz"
+          zone_request=urllib.request.Request(
+              zone_url,
+              headers={"Authorization":"Bearer "+token,"Accept":"application/json","User-Agent":"ZED-Origin-Diagnostic/1.0"}
+          )
+          with urllib.request.urlopen(zone_request,timeout=30) as response:
+              zone=json.loads(response.read().decode("utf-8"))
+
+          records=zone if isinstance(zone,list) else zone.get("data",zone.get("zone",zone.get("records",[])))
+          if isinstance(records,dict):
+              records=records.get("records",[])
+          print("HOSTINGER_DNS_RECORDS_TOTAL="+str(len(records) if isinstance(records,list) else 0))
+          if isinstance(records,list):
+              for record in records:
+                  name=str(record.get("name","")).lower()
+                  if "cryptobotz" not in name:
+                      continue
+                  rtype=str(record.get("type",""))
+                  ttl=record.get("ttl")
+                  values=record.get("records",record.get("content",record.get("value","")))
+                  print("HOSTINGER_CRYPTOBOTZ_DNS name="+name+" type="+rtype+" ttl="+str(ttl)+" values="+json.dumps(values,separators=(",",":"))[:500])
