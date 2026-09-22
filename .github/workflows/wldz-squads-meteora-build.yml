@@ -39,9 +39,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wldz-squads-meteora-build-proof
-          path: |
-            worldzpad-mainnet/artifacts/wldz-squads-meteora-build-proof.json
-            worldzpad-mainnet/artifacts/wldz-meteora-inner-unsigned.v0.base64.txt
-            worldzpad-mainnet/artifacts/wldz-squads-proposal-create-unsigned.v0.base64.txt
+          path: worldzpad-mainnet/artifacts/*
           if-no-files-found: warn
           retention-days: 30
