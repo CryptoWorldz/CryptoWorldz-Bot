@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<title>WORLDZ Owner Launch • V6</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,sans-serif;background:#09070f;color:#f7f4ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#301055 0,#09070f 44%);min-height:100vh}
+main{width:min(780px,100%);margin:auto;padding:22px 16px 64px}.badge{display:inline-block;border:1px solid #845bc0;border-radius:999px;padding:7px 11px;font-size:12px;color:#e0d0ff}
+h1{font-size:clamp(32px,8vw,56px);line-height:1;margin:18px 0 8px}.sub{color:#c5bbd0;line-height:1.48}
+.card{background:#12101a;border:1px solid #382848;border-radius:18px;padding:18px;margin-top:16px;box-shadow:0 16px 50px #0007}
+.row{display:flex;justify-content:space-between;gap:18px;padding:10px 0;border-bottom:1px solid #292232}.row:last-child{border:0}.row b{font-weight:850}
+button{width:100%;border:0;border-radius:14px;padding:16px 18px;margin-top:12px;font-size:17px;font-weight:900;background:#fff;color:#130c1d}
+button.primary{background:linear-gradient(135deg,#a86cff,#5d27c2);color:white}button:disabled{opacity:.42}
+code{word-break:break-all;color:#ddd0ff;font-size:12px}.status{white-space:pre-wrap;line-height:1.48;padding:14px;border-radius:14px;background:#0b0910;border:1px solid #302641;margin-top:12px}
+.ok{color:#69e69c}.warn{color:#ffd36a}.bad{color:#ff8196}.muted{color:#a99db8}.hidden{display:none}.small{font-size:12px;color:#a99db8}
+</style>
+</head>
+<body>
+<main>
+<span class="badge">PRIVATE OWNER CONSOLE • SOLANA MAINNET • OWNER MODE V6</span>
+<h1>WORLDZ Owner Launch</h1>
+<p class="sub">Target state: JayJayTeamDev is the sole 1-of-1 treasury member. After that cutover is on-chain, WORLDZ launch, 8M creator allocation and permanent LP lock can be completed with the owner wallet only.</p>
+
+<section class="card">
+<div class="row"><span>Canonical WORLDZ mint</span><code>AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U</code></div>
+<div class="row"><span>Fixed supply</span><b>100,000,000 WLDZ</b></div>
+<div class="row"><span>Owner</span><b>JayJayTeamDev</b></div>
+<div class="row"><span>Owner wallet</span><code>Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u</code></div>
+<div class="row"><span>Launch</span><b>15M WLDZ / 0 SOL</b></div>
+<div class="row"><span>Venue</span><b>Meteora DAMM v2</b></div>
+<div class="row"><span>LP</span><b>Permanent lock</b></div>
+</section>
+
+<section class="card">
+<h2>1. Connect Owner Wallet</h2>
+<div id="wallet-label" class="muted">Not connected</div>
+<button id="connect">CONNECT JAYJAYTEAMDEV</button>
+<div id="connect-status" class="status">No wallet action yet.</div>
+</section>
+
+<section class="card">
+<h2>2. Verify Mainnet</h2>
+<button id="verify" disabled>VERIFY LIVE MAINNET STATE</button>
+<div id="verify-status" class="status">Waiting for owner wallet.</div>
+</section>
+
+<section class="card">
+<h2>3. Owner Action</h2>
+<button id="action" class="primary" disabled>VERIFY FIRST</button>
+<div id="action-status" class="status">No transaction broadcast.</div>
+<p class="small">Every value-moving or governance transaction is shown to your wallet for approval. No private key or seed phrase is requested by this page.</p>
+</section>
+
+<section id="done" class="card hidden">
+<h2>WORLDZ LIVE ✅</h2>
+<div class="row"><span>Meteora pool</span><code id="pool"></code></div>
+<div class="row"><span>Owner mode</span><b>1-of-1</b></div>
+<div class="row"><span>Launch liquidity</span><b>15,000,000 WLDZ</b></div>
+<div class="row"><span>LP</span><b>Permanent lock submitted</b></div>
+</section>
+
+<script type="module" src="./app-v6.js?v=20260922-owner-cutover-launch-1"></script>
+</main>
+</body>
+</html>
