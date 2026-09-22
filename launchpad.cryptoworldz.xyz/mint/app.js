@@ -148,6 +148,7 @@ function isPk(s){try{new PublicKey(s);return true}catch{return false}}
 function validate(){
   const v=values(),e=[],a=v.allocations,r=v.recipients;
   if(!walletCtx)e.push('Connect a wallet first.');
+  if(v.token_name.toUpperCase()==='WORLDZ'||v.symbol==='WLDZ')e.push('WORLDZ / WLDZ is already minted on Solana mainnet. Use canonical mint AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U — a second WORLDZ mint is blocked.');
   if(v.token_name.length<2||v.token_name.length>32)e.push('Token name must be 2–32 characters.');
   if(!/^[A-Z0-9_$]{2,10}$/.test(v.symbol))e.push('Ticker must be 2–10 letters/numbers/$/_.');
   if(!/^\d+$/.test(v.fixed_supply)||BigInt(v.fixed_supply)<1000n||BigInt(v.fixed_supply)>1000000000000n)e.push('Supply must be a whole number from 1,000 to 1,000,000,000,000.');
