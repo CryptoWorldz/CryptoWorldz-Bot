@@ -39,6 +39,7 @@ jobs:
           SQUADS_CREATOR: Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u
         run: npm run preflight
       - name: Upload launch proof
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wldz-mainnet-launch-preflight
