@@ -99,6 +99,22 @@ async function start() {
   const bot = new TelegramBot(config.botToken, { onlyFirstMatch: true });
   startupStage = "create_repository";
   const repository = createRepository(supabase);
+  if (!config.ownerTelegramId) {
+    startupStage = "resolve_permanent_owner";
+    const { data: ownerRows, error: ownerError } = await supabase
+      .from("bot_admins")
+      .select("telegram_id")
+      .eq("role", "owner")
+      .eq("status", "active")
+      .limit(2);
+    if (ownerError) throw ownerError;
+    if ((ownerRows || []).length === 1) {
+      config.ownerTelegramId = String(ownerRows[0].telegram_id || "").trim();
+      console.log("Permanent Telegram owner restored from protected bot_admins registry.");
+    } else if ((ownerRows || []).length > 1) {
+      throw new Error("Permanent owner registry is ambiguous.");
+    }
+  }
   startupStage = "create_auto_client";
   const autoClient = createAutoClient(config);
   const graceWorkspaceSlug = String(process.env.GRACE_WORKSPACE_SLUG || "cryptoworldz").trim().toLowerCase();
