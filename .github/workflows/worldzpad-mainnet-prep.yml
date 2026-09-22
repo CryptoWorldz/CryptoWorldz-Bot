@@ -41,10 +41,13 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const plan = JSON.parse(fs.readFileSync('worldzpad-mainnet/wldz-one-sided-launch.candidate.json', 'utf8'));
-          if (plan.executionEnabled !== false || plan.launchAuthorized !== false) {
-            throw new Error('WLDZ candidate attempted to enable execution or authorize launch');
+          if (plan.executionEnabled !== false) {
+            throw new Error('WLDZ candidate attempted to enable execution before live Squads threshold approval');
           }
-          console.log('WLDZ_MAINNET_EXECUTION_LOCK=PASS execution_enabled=0 launch_authorized=0');
+          if (plan.launchAuthorized !== true || plan.status !== 'OWNER_AUTHORIZED__AWAITING_LIVE_SQUADS_THRESHOLD') {
+            throw new Error('WLDZ owner authorization state is missing or inconsistent');
+          }
+          console.log('WLDZ_MAINNET_EXECUTION_LOCK=PASS execution_enabled=0 launch_authorized=1 awaiting_squads_threshold=1');
           NODE
 
       - name: Publish preparation report
