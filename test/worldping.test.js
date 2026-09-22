@@ -44,20 +44,7 @@ test("Permanent Owner bypasses WorldPing licence and Telegram admin checks", asy
         licenceLookups += 1;
         throw new Error("owner must not be forced through licence verification");
       }
-      assert.equal(table, "zed_group_worldping_settings");
-      return {
-        select() {
-          return {
-            eq() {
-              return {
-                async maybeSingle() {
-                  return { data: { mode: "admins_only" }, error: null };
-                }
-              };
-            }
-          };
-        }
-      };
+      throw new Error("owner must not be forced through optional WorldPing settings lookup");
     }
   };
 
