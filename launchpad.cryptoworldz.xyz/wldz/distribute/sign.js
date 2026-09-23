@@ -131,6 +131,12 @@ async function preflight(){
  const desiredTopup=Math.max(0,Math.min(maxTopup,target-have));
  const vaultNeed=BigInt(rent)*BigInt(missingAtas)+BigInt(Math.ceil((safety+desiredTopup)*d.web3.LAMPORTS_PER_SOL));
  if(BigInt(s.vaultSol)<vaultNeed)fail('Squads vault SOL is below the safe amount needed for recipient token-account rent and the fee bootstrap.');
+ if(missingAtas===0){
+  const prep=document.querySelector('#prepare-accounts');
+  if(prep){prep.disabled=true;prep.textContent='1. Recipient Accounts Ready ✅';}
+  const ps=document.querySelector('#prepare-status');
+  if(ps){ps.textContent='RECIPIENT ACCOUNTS READY ✅\nAll destination token accounts are confirmed on-chain.';ps.className='status good';}
+ }
  if(have<minimum){
   $('#sign').disabled=true;
   status('ADD A LITTLE MORE SOL\n\nJayJay signer: '+have.toFixed(6)+' SOL\nBootstrap minimum: '+minimum.toFixed(2)+' SOL\n\nThen tap Check Balance again.','bad');
