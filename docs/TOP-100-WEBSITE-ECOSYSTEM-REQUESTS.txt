@@ -1,0 +1,141 @@
+======================================================================
+16. TOP 100 WEBSITE ECOSYSTEM REQUESTS — JAYJAYTEAMDEV
+======================================================================
+
+Status: CANONICAL PROJECT MEMORY
+Rule: These are the highest-priority recurring/explicit website-ecosystem requests recovered from the approved build specification, project history, and current Websites Project record. Later direct JayJayTeamDev instructions supersede any conflicting older item.
+
+ECOSYSTEM ARCHITECTURE
+1. Make OneWorldz.com the global human-facing gateway for the entire ecosystem.
+2. Make CryptoWorldz.xyz the crypto/blockchain headquarters beneath OneWorldz.
+3. Make DonateWorldz.com the dedicated donation/support and real-world delivery pathway.
+4. Keep PurpleDiamondCrew.com as the legacy-token history plus on-the-ground action platform.
+5. Make WorldzLaunchPad™ the real launch engine and integration bridge for the CryptoWorldz ecosystem.
+6. Keep ZED / AUTO / G.R.A.C.E. / Command Centre as the operational layer, not a replacement for the public websites.
+7. Keep humanitarian OneWorldz activity and crypto/investment activity clearly distinguishable in public messaging.
+8. Always describe CryptoWorldz as the technology/funding engine supporting the wider OneWorldz mission where appropriate.
+9. Cross-link the official OneWorldz, DonateWorldz, CryptoWorldz, Purple Diamond Crew and WorldzLaunchPad destinations throughout the ecosystem.
+10. Use one coherent reusable design system while keeping every site’s purpose, copy, routes and approved imagery distinct.
+11. Never send users to parked/dead domains as if they are live; inactive portals must show a controlled Coming Soon state.
+12. Maintain a complete associated Worldz directory covering core, blockchain and mission/creative Worldz.
+
+VISUAL IDENTITY / UX / RESPONSIVE DESIGN
+13. Use the locked deep-purple galaxy, chrome/silver, blue-purple neon and purple-diamond visual language.
+14. Keep the approved One–emblem–Worldz identity with the supplied emblem centred between “One” and “Worldz.”
+15. Keep the official crowned CryptoWorldz header clean; do not add unwanted subtitles such as “ZED BOT.”
+16. Use simple square or rectangular image shells; no arch-window layouts.
+17. Preserve natural image proportions; no stretching, squashing or accidental cropping.
+18. Treat the approved Master Use Library / canonical asset set as immutable source imagery unless JayJayTeamDev replaces an asset.
+19. Use each Blockchain Worldz identity’s explicitly designated profile image everywhere it represents that Worldz.
+20. Use high-resolution, professional, website-specific assets rather than blurry, substitute or improvised artwork.
+21. Every important card/section must have complete visual treatment; no unexplained text-only dead space or missing imagery.
+22. Support the requested full-screen/background-led page style with floating or semi-visible navigation where suitable.
+23. On desktop, Floating Worldz may use constellation/orbit presentation; on mobile use stable accessible cards without overlapping motion.
+24. Keep navigation simple and obvious: fixed/clear header plus Home, Back, Menu, next-page/site actions where appropriate.
+25. Desktop and mobile must both be fully usable, with readable text, contrast, keyboard focus, reduced-motion support and safe touch targets.
+
+ONEWORLDZ / HUMANITARIAN / COMMUNITY FEATURES
+26. Preserve the OneWorldz blueprint: Vision, Mission and Core Principles.
+27. Feature the Four Pillars: People, Planet, Technology and Leadership.
+28. Feature the OneWorldz method: Research → Compare → Verify → Recommend → Implement → Measure Results → Improve Again.
+29. Cover practical impact areas including food, children, clean water, medical care, education, safety, dignity and equal opportunity.
+30. Maintain a dedicated Reagan & Children page using the real approved Reagan-and-children imagery only.
+31. Maintain Action Spread Smiles / Uganda content with the real story, needs, images/videos, updates and support pathways.
+32. Maintain a dedicated Davis Family impact/support page.
+33. Maintain a dedicated Community Impact page for broader verified community support.
+34. Maintain a separate voluntary Support JayJayTeamDev page for the “Helping the People who Help the People” mission.
+35. Reagan & Children must use its own dedicated bank/Stripe support flow.
+36. Community Impact must use its own dedicated bank/Stripe support flow.
+37. Support JayJayTeamDev should use the separate PayPal/Stripe coffee-style support flow.
+38. Keep donation destinations, records and reporting strictly separated from one another and from investment activity.
+39. Use DonateWorldz / support QR codes on relevant website, card, flyer and outreach material.
+40. Maintain the dedicated 35-profile Facebook community-support page from the verified registry, with one real card/link per profile.
+41. Feature the “Heroes” concept: real profiles/stories, cause links, verified contributions, milestones, acknowledgements and before/after outcomes.
+42. Feature “Grow the World” measurable agriculture pilots: water, irrigation, seeds, tools, soil restoration, training and transparent results.
+43. Feature Uganda Unite and the wider community-impact / march direction as the mission develops.
+44. Feature Jay’s Safe Place as a welcoming local support/referral concept working alongside established services.
+45. Maintain the Dubbo support-services page/flyer with practical referral information, food/community connections and established-service links.
+46. Feature Slice of Hope Australia / Pizza Hut outreach as a dedicated DonateWorldz community-impact initiative.
+47. Feature OneVision Day — 8 November — as a worldwide OneWorldz campaign.
+48. Feature the “One World • One Vision • One Fam” / “One Vision” song, remaster and video/social rollout in the ecosystem.
+49. Feature Spam2Ham, including the annual 1 December Spam2Ham Day and the lead-up Sunday clean-up / Spring Clean direction.
+
+PURPLE DIAMOND CREW
+50. PurpleDiamondCrew.com Home must show the requested on-the-ground identity.
+51. Keep the Hope Chest / chest experience beside the lit-fireplace visual as a flagship Purple Diamond Crew page.
+52. Maintain a dedicated “Make a Difference” page.
+53. Maintain a dedicated “The Hodlerz Special” page.
+54. Maintain a dedicated Acknowledgements page.
+55. Show exactly TEN genuine verified legacy-token positions; do not replace them with invented people or fake tokens.
+56. Use the locked desktop two-rows-of-five layout, responsive to two columns and then one column on narrow mobile screens.
+57. Keep token artwork visible through transparent or semi-transparent buttons/cards.
+58. Label individual token cards “Legacy Token”; the Hope Chest is the page concept, not the card label.
+59. A token detail reveal may show only verified history, ticker, full contract address, chain, official links and ownership/provenance evidence.
+60. Maintain a legacy-holder wallet registry for verified Purple Diamond Handz / legacy holders.
+61. Provide the requested private/secret claim-verification path for genuine legacy holders, with trusted verification controls.
+62. Preserve the rule that verified legacy holders receive the designated 1% pool from newly created tokens where that launch allocation applies.
+
+CRYPTOWORLDZ / WORLDZ PORTALS
+63. Use CryptoWorldz.xyz as the reusable crypto-site master while keeping each portal’s content and identity unique.
+64. Provide World discovery with clear verified status, imagery and official destinations.
+65. Provide beginner-friendly crypto education, scam warnings, safety guidance and official contact routes.
+66. Maintain verified-links / scam-register style protection pages so users can distinguish official destinations from impostors.
+67. Maintain a projects/builder directory and discovery layer across the CryptoWorldz ecosystem.
+68. Keep ImpactBased as the purpose-driven impact/charity launch board, distinct from investment-performance claims.
+69. Keep Based.bid / launch-partner context clearly labelled with risk/legal clarity and no guaranteed-return language.
+70. Maintain the Blockchain Worldz family: SolWorldz, EthWorldz, BaseWorldz, XRPWorldz, BNBWorldz, SuiWorld/SuiWorldz identity mapping, HyperWorldz, RobinWorldz and HodlerWorldz.
+71. Maintain the wider mission/creative Worldz direction including VisionWorldz, AIWorldz, MusicWorldz, MovieWorldz, ArtWorldz, LearnWorldz, BusinessWorldz and LawWorldz.
+72. Keep RobinWorldz / Robin Hood Chain / RecoverYourDebt clearly separated from Solana when presenting chain identity.
+73. Treat every Worldz as a serious problem-solving department: research proven systems, operationalise specialist knowledge, pursue lawful reform where relevant, coordinate participation and connect real-world delivery.
+
+WORLDZLAUNCHPAD / WLDZ
+74. Build WorldzLaunchPad as a real functioning multi-chain launch platform, not a brochure-only website.
+75. Use future-proof chain-native adapters for Solana, XRP/wXRP, EVM networks and Sui rather than pretending one chain implementation fits all.
+76. Provide the Worldz launch pipeline: Create Token → Metadata → choose pair/network → create pool/curve → fee routing → LP lock → vesting → proof/register.
+77. Keep Worldz Flash™ as the controlled devnet-to-mainnet launch/proof pipeline with a clear release gate.
+78. Keep Worldz Curve™ as the Raydium LaunchLab-style curve/launch adapter direction.
+79. Keep Worldz Curve Pro™ as the Meteora DBC / DAMM V2 direction with Worldz economics, liquidity-lock and graduation proof.
+80. Keep Worldz CrossPair™ and Worldz Omnichain™ as the cross-chain/pairing architecture layer.
+81. Preserve Founding 100™: the first 100 qualified verified mainnet launch teams receive the locked WLDZ allocation of 100,000 WLDZ each.
+82. Preserve canonical WORLDZ / WLDZ identity: 100,000,000 maximum supply, canonical Solana mint, mint/freeze authorities revoked.
+83. Publish and maintain machine-readable token identity, token list, metadata, supply/proof endpoints and Jupiter-ready public information.
+84. Keep launch/project fees transparent and fair, including the recorded platform-share direction and project-fee caps where the applicable launch model uses them.
+85. Public LaunchPad errors must be written in plain English, and the Connect Wallet / Launch Console must show allocations, vesting, liquidity/fee routing and Worldz Proof status clearly.
+
+COMMAND CENTRE / TELEGRAM / SOCIAL
+86. Preserve ZED as the Telegram Commander for registration, profiles, wallets, missions, Raaiiidds, points, rewards, leaderboards, referrals, governance and community operations.
+87. Preserve AUTO as the protected Finance Controller with owner-only source configuration, budgets, limits, pause/stop, simulation, audit history and confirmation gates; no live signing/movement without separate approval.
+88. Preserve G.R.A.C.E. as the organiser/social engine for drafts, approvals, calendars, scheduling, campaigns, account connections, publishing, analytics and emergency stop controls.
+89. Preserve RECAP / RecapThisBot as the community-management, recap, transparency and learning layer.
+90. Preserve WorldPing so approved groups/channels can receive the intended everyone-notification workflow.
+91. Preserve WorldzCast for controlled multi-destination Telegram/ecosystem broadcasting.
+92. Keep Command Centre MAX™ education/academy/research/Impact Lab capability so new members can learn the ecosystem and its tools.
+93. Provide direct Telegram Bot / Mini App / Command Centre access from the websites while keeping owner/admin surfaces protected.
+94. Keep the Command Centre commercial model visible where appropriate: Rent, Rent-to-Own and one-time Own/perpetual group licensing options.
+95. Connect official ecosystem social identities and campaigns across X, Facebook, Instagram, YouTube, TikTok and Telegram while keeping posting approval-controlled.
+
+DEPLOYMENT / SECURITY / ZERO-DRIFT QUALITY
+96. Keep each static site on its correct domain/document root and keep CryptoBotz/Command Centre Node runtime separate from static website packages.
+97. Follow the deployment sequence: build → lock approved assets → prove canonical root → backup/checkpoint → deploy → verify desktop/mobile/live URLs, with rollback available.
+98. No production placeholders, invented names, fake links, unverified ownership claims or parked-domain destinations; use controlled Coming Soon states instead.
+99. Never expose service-role keys, Telegram tokens, OAuth secrets, seed phrases, private keys or financial credentials in browser code, public source, screenshots or public files.
+100. Use proof-first release gates: tests, route/link verification, desktop/mobile screenshots, health checks, secret scan, backup/rollback proof and post-deployment live verification before claiming the ecosystem is complete or fixed.
+
+======================================================================
+TOP 100 CONTROL RULE
+======================================================================
+These 100 requests are part of the canonical Websites Project source of truth.
+Future design/build/deployment work should check this list before removing, renaming, redesigning or omitting a requested feature.
+Latest direct JayJayTeamDev instruction always takes priority when it explicitly changes one of these items.
+======================================================================
+
+======================================================================
+MANDATORY DUAL RELEASE CONTROL — 2026-09-24
+======================================================================
+
+Every future deployment must pass BOTH:
+1. the complete Top 100 Website Ecosystem Requests check; and
+2. JayJayTeamDev's Continuous Request for Perfect Fitting Vibrant Worldz Style & Colour for Every Unique Image Creation Request Specifications.
+
+A deployment is not finished until both checks pass.
+======================================================================
