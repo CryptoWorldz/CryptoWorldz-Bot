@@ -15,6 +15,7 @@ DOMAINS = [d.strip() for d in (ROOT / "DOMAINS.txt").read_text(encoding="utf-8")
 assert len(DOMAINS) == 18 and len(set(DOMAINS)) == 18
 
 KEEP = {d: {""} for d in DOMAINS}
+KEEP["cryptoworldz.xyz"] |= {"command-centre-max"}
 KEEP["oneworldz.com"] |= {
     "community-support",
     "links-in-dubbo",
@@ -114,6 +115,8 @@ crypto = ROOT / "cryptoworldz.xyz" / "index.html"
 text = crypto.read_text(encoding="utf-8")
 text = drop_section(text, "The systems")
 text = drop_section(text, "WorldzPad™ + $WLDZ")
+if 'href="/command-centre-max/"' not in text:
+    text = text.replace("</nav>", '<a href="/command-centre-max/">Command Centre MAX™</a></nav>', 1)
 crypto.write_text(text, encoding="utf-8")
 
 for host in [
@@ -156,7 +159,7 @@ for host in DOMAINS:
     (site / "sitemap.xml").write_text("\n".join(xml) + "\n", encoding="utf-8")
 
 urls = sorted(set(urls))
-assert len(urls) == 64, len(urls)
+assert len(urls) == 65, len(urls)
 (ROOT / ".ecosystem-urls.txt").write_text("\n".join(urls) + "\n", encoding="utf-8")
 (ROOT / ".retired-generated-routes.txt").write_text(
     "\n".join(f"{host}|{route}" for host, route in sorted(set(retired))) + "\n",
