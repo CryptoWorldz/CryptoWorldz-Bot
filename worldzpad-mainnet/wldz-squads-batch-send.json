@@ -1,0 +1,31 @@
+{
+  "version": "WLDZ-SQUADS-BATCH-SEND-2026-09-23-A",
+  "network": "mainnet-beta",
+  "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+  "decimals": 6,
+  "multisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+  "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+  "feeMode": "SQUADS_FEE_RELAYER",
+  "feeSource": "SQUAD_TREASURY_SOL",
+  "totalWldz": 55000000,
+  "recipients": [
+    {"role":"JayJayTeamDev","address":"Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u","wldz":8000000},
+    {"role":"Purple Diamond Handz distribution pool","address":"ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U","wldz":5000000},
+    {"role":"First 100 WorldzLaunchPad rewards","address":"3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt","wldz":10000000},
+    {"role":"OneWorldz charity impact","address":"5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW","wldz":10000000},
+    {"role":"General reserve","address":"5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9","wldz":5000000},
+    {"role":"Stepper","address":"DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ","wldz":1000000},
+    {"role":"Future verified team reserve","address":"DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j","wldz":4000000},
+    {"role":"Dev City 50-wallet distribution pool","address":"2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m","wldz":5000000},
+    {"role":"Command Centre rewards","address":"fa35y2GdDKhdZ6uyS5mouEPQSFiHGyRuMSWp3Vz5Cob","wldz":2000000},
+    {"role":"Operations security infrastructure","address":"5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9","wldz":5000000}
+  ],
+  "remainInVault": {
+    "stagedLiquidityReserveWldz": 20000000,
+    "worldzTreasuryWldz": 10000000,
+    "totalWldz": 30000000
+  },
+  "alreadyLive": {
+    "initialLiquidityWldz": 15000000
+  }
+}
