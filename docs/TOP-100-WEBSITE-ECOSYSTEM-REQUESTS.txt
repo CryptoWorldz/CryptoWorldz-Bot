@@ -25,7 +25,7 @@ VISUAL IDENTITY / UX / RESPONSIVE DESIGN
 15. Keep the official crowned CryptoWorldz header clean; do not add unwanted subtitles such as “ZED BOT.”
 16. Use simple square or rectangular image shells; no arch-window layouts.
 17. Preserve natural image proportions; no stretching, squashing or accidental cropping.
-18. Treat the approved Master Use Library / canonical asset set as immutable source imagery unless JayJayTeamDev replaces an asset.
+18. Always use the approved official logo or canonical brand mark wherever a logo/header/corner identity spot exists; never use a generic letter, placeholder orb, stock mark or substitute. Treat the approved Master Use Library / canonical asset set as immutable unless JayJayTeamDev replaces an asset.
 19. Use each Blockchain Worldz identity’s explicitly designated profile image everywhere it represents that Worldz.
 20. Use high-resolution, professional, website-specific assets rather than blurry, substitute or improvised artwork.
 21. Every important card/section must have complete visual treatment; no unexplained text-only dead space or missing imagery.
