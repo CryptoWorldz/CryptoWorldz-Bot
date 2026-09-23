@@ -296,9 +296,13 @@ echo "HOSTINGER_MANAGED_BUILD=STARTED uuid=$build_uuid"
 build_pass=0
 for attempt in $(seq 1 90); do
   sleep 10
-  curl --fail --silent --show-error --location \
+  poll_code="$(curl --silent --show-error --location --connect-timeout 10 --max-time 30 \
     -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
-    "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json"
+    "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json" -w '%{http_code}' || true)"
+  if [ "$poll_code" != "200" ]; then
+    echo "HOSTINGER_MANAGED_BUILD poll=$attempt/90 http=$poll_code retrying"
+    continue
+  fi
   build_state="$(BUILD_LIST="$RUNNER_TEMP/builds.json" BUILD_UUID="$build_uuid" node - <<'NODE'
 const p=require(process.env.BUILD_LIST);
 const rows=Array.isArray(p)?p:(Array.isArray(p.data)?p.data:(Array.isArray(p.items)?p.items:[]));
@@ -310,7 +314,7 @@ NODE
   case "$build_state" in
     completed|complete|success|succeeded|ready) build_pass=1; break;;
     failed|error|cancelled|canceled)
-      curl --silent --show-error --location \
+      curl --silent --show-error --location --connect-timeout 10 --max-time 30 \
         -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
         "$base/builds/$build_uuid/logs" || true
       echo "::error::Managed full Node build failed state=$build_state"
