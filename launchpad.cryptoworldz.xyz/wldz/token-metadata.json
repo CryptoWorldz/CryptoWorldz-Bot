@@ -1,0 +1,27 @@
+{
+  "name": "WORLDZ",
+  "symbol": "WLDZ",
+  "address": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+  "chain": "Solana",
+  "chainId": 101,
+  "decimals": 6,
+  "description": "WORLDZ (WLDZ) is the canonical WorldzLaunchPad token on Solana, powering the CryptoWorldz ecosystem, community rewards, liquidity, development, charity impact, and future WorldzLaunchPad launches.",
+  "image": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
+  "logoURI": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
+  "website": "https://launchpad.cryptoworldz.xyz/wldz/",
+  "telegram": "https://t.me/CryptoWLDZ",
+  "explorer": "https://solscan.io/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+  "trading": {
+    "dex": "Meteora",
+    "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "quote": "SOL"
+  },
+  "supply": {
+    "maximum": 100000000,
+    "currentOnChain": 99999951.002722,
+    "mintAuthority": "REVOKED",
+    "freezeAuthority": "REVOKED"
+  },
+  "official": true,
+  "lastUpdated": "2026-09-23T15:00:00+10:00"
+}
