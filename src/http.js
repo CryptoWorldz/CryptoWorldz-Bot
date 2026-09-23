@@ -41,12 +41,21 @@ function createHttpApp({ bot, config, repository }) {
 
   registerPdcHost(app);
 
+  const releaseId = () => {
+    try {
+      const release = JSON.parse(fs.readFileSync(path.join(miniAppPath, "release.json"), "utf8"));
+      return String(release.release || "unknown");
+    } catch {
+      return "unknown";
+    }
+  };
+
   app.get("/", (req, res) => {
-    res.json({ ok: true, service: "CryptoWorldz Zed Bot" });
+    res.json({ ok: true, service: "CryptoWorldz Zed Bot", release: releaseId() });
   });
 
   app.get("/health", (req, res) => {
-    res.json({ ok: true });
+    res.json({ ok: true, ready: true, service: "CryptoWorldz Zed Bot", release: releaseId() });
   });
 
   app.get("/api/diagnostics/telegram-start", (req, res) => {
