@@ -20,6 +20,8 @@ jobs:
           npm --silent install playwright@1.55.0
           npx playwright install --with-deps chromium
       - name: Submit canonical WORLDZ token information
+        env:
+          NODE_PATH: ${{ github.workspace }}/node_modules
         shell: node {0}
         run: |
           const { chromium } = require('playwright');
