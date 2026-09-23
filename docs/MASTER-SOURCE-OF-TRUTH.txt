@@ -1,5 +1,5 @@
 MASTER SOURCE OF TRUTH — WEBSITES / ONEWORLDZ / CRYPTOWORLDZ
-Version: 2026-09-24-A
+Version: 2026-09-24-C
 Owner / Project Lead: JayJayTeamDev
 Purpose: Canonical reference for this ChatGPT Websites Project. Use this file before relying on conversational memory.
 
@@ -40,6 +40,34 @@ Mission-critical publishing standard:
 - no placeholders or unrequested pages;
 - desktop/mobile visual inspection;
 - live URL verification.
+
+7) TOP 100 ECOSYSTEM COMPLETION GATE
+Every future ecosystem build, redesign, repair and deployment must be checked against the canonical Top 100 Website Ecosystem Requests before it can be called finished.
+
+8) CONTINUOUS WORLDZ VISUAL FIT + VIBRANCY GATE
+Every future deployment and every unique image creation request must be checked against JayJayTeamDev's continuous request for:
+“Perfect Fitting Vibrant Worldz Style & Colour for Every Unique Image Creation Request Specifications.”
+
+This means:
+- every image must fit its intended section, card, hero, page and device without distortion;
+- every unique image must look intentionally created for that exact Worldz/site purpose, not like a generic substitute;
+- use vibrant Worldz colour, galaxy depth, chrome/silver/blue-purple/neon accents and strong visual contrast where appropriate to the site identity;
+- preserve natural aspect ratio and focal point;
+- no stretching, squashing, accidental cropping, blur, clipping, unreadable embedded text or low-quality scaling;
+- desktop and mobile must both preserve the intended composition;
+- use contain versus cover deliberately;
+- maintain a strong visual relationship between image, surrounding copy and the unique identity of the page/site;
+- approved/canonical artwork must not be casually redesigned or replaced;
+- newly created artwork must be reviewed for visual fit, vibrancy, identity and responsive presentation before release.
+
+9) DUAL RELEASE GATE — BOTH MUST PASS
+A deployment is NOT complete until BOTH are satisfied:
+A. the canonical Top 100 Website Ecosystem Requests check; and
+B. the Continuous Perfect-Fitting Vibrant Worldz Style & Colour image/visual specification check.
+
+10) ECOSYSTEM BUILD COMMITMENT
+The Websites Project is authorised to use the accumulated project history, approved specifications, current live state and these canonical controls to build the cohesive ecosystem JayJayTeamDev has continually requested since the project began.
+Do not reduce the ecosystem to isolated one-off pages when the requested feature belongs to the wider connected architecture.
 
 ======================================================================
 2. CORE PROJECT STRUCTURE
@@ -410,6 +438,24 @@ When new information supersedes old information:
 - retain the new version/date;
 - clearly identify the superseded value where useful;
 - never silently combine incompatible versions.
+
+
+======================================================================
+17. 100% ECOSYSTEM COMMITMENT — MANDATORY DUAL RELEASE CONTROL
+======================================================================
+
+MANDATORY CHECK 1 — TOP 100
+Every future deployment must be checked against the same canonical 100-point Website Ecosystem specification before being called finished.
+
+MANDATORY CHECK 2 — CONTINUOUS PERFECT-FITTING VIBRANT WORLDZ VISUAL SPECIFICATION
+Every future deployment and every unique image creation request must be checked against:
+“Perfect Fitting Vibrant Worldz Style & Colour for Every Unique Image Creation Request Specifications.”
+
+COMPLETION RULE
+No ecosystem deployment may be described as complete, finished, fixed or fully released until BOTH mandatory checks pass.
+
+BUILD INTENT
+Use these controls to progressively realise the cohesive OneWorldz / DonateWorldz / CryptoWorldz / Purple Diamond Crew / WorldzLaunchPad / Worldz / Command Centre ecosystem JayJayTeamDev has repeatedly requested throughout the project.
 
 ======================================================================
 END OF MASTER SOURCE OF TRUTH
