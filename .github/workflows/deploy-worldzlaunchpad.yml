@@ -188,6 +188,12 @@ jobs:
           assert wldz_cfg['launch']['baseAmountTokens']==15000000
           assert wldz_cfg['launch']['permanentLock'] is True
           assert wldz_cfg['execution']['publicCreatorGate'] is False
+        campaign_json=json.loads(campaign_json_body)
+        assert campaign_code==200 and 'WORLDZLAUNCHPAD™ + COMMAND CENTRE MAX™' in campaign_body
+        assert '100,000 WLDZ' in campaign_body and '139' in campaign_body
+        assert campaign_json_code==200 and campaign_json['status']=='PUBLIC'
+        assert campaign_json['wldz']['symbol']=='WLDZ'
+        assert campaign_json['wldz']['founding100']['wldzPerQualifiedPosition']==100000
           assert 'Swap API V2' in technology_html
           assert 'Worldz Confidence Pulse' in technology_html
           assert 'Worldz Fee Flow' in technology_html
@@ -555,7 +561,7 @@ jobs:
               req=urllib.request.Request(url,headers={'User-Agent':'WorldzLaunchPad-Live-Verify/5.0','Cache-Control':'no-cache','Origin':base})
               with urllib.request.urlopen(req,timeout=25) as r:return r.status,r.read().decode('utf-8','ignore')
           last=''
-          banned=['REVIVE','RVIV','PHENIX','PNEX','MIRACLE','MRCL','WLDZ','GENESIS FOUR','Genesis Four','Legacy Loyalty','SolSavewXRP']
+          banned=['REVIVE','RVIV','PHENIX','PNEX','MIRACLE','MRCL','GENESIS FOUR','Genesis Four','Legacy Loyalty','SolSavewXRP']
           for attempt in range(1,7):
               try:
                   status,body=get(base+'/?verify=public-v6')
@@ -573,6 +579,8 @@ jobs:
                   wldz_code,wldz_body=get(base+'/wldz/?verify=wldz-v1')
                   wldz_js_code,wldz_js_body=get(base+'/wldz/proposal.js?verify=wldz-v1')
                   wldz_cfg_code,wldz_cfg_body=get(base+'/wldz/launch-config.json?verify=wldz-v1')
+        campaign_code,campaign_body=get(base+'/worldz-launch/?verify=worldz-launch-v1')
+        campaign_json_code,campaign_json_body=get(base+'/worldz-launch/campaign.json?verify=worldz-launch-v1')
                   status_code,status_body=get(base+'/status.php?verify=public-v6')
                   reg_code,reg_body=get(registry+'?verify=public-v6')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
@@ -598,6 +606,9 @@ jobs:
                   assert platform['confidenceConstellation']['opaqueSafetyScore'] is False
                   assert platform['founding100']['totalPositions']==100
                   assert platform['founding100']['futureWorldzPoolPercent']==10
+        assert platform['founding100']['canonicalTokenSymbol']=='WLDZ'
+        assert platform['founding100']['wldzAllocationPoolTokens']==10000000
+        assert platform['founding100']['wldzPerQualifiedPositionTokens']==100000
                   assert platform['baseEvmFair']['status']=='BASE_SEPOLIA_BETA'
                   assert platform['baseEvmFair']['mainnetExecution'] is False
                   assert platform['treasuryStandard']['operationsTreasury']['policy']=='5-of-10'
