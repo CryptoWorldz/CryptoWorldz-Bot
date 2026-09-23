@@ -93,6 +93,11 @@ jobs:
           assert founding['totalPositions']==100
           assert founding['futureWorldzPoolPercent']==10
           assert founding['equalAllocationPerQualifiedPositionPercent']==0.1
+          assert founding['canonicalTokenSymbol']=='WLDZ'
+          assert founding['canonicalWldzMint']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
+          assert founding['canonicalWldzMaxSupplyTokens']==100000000
+          assert founding['wldzAllocationPoolTokens']==10000000
+          assert founding['wldzPerQualifiedPositionTokens']==100000
           assert founding['devnetEligible'] is False
           assert founding['priceOrVolumeRankingUsed'] is False
           assert base_adapter['status']=='BASE_SEPOLIA_BETA'
@@ -171,7 +176,9 @@ jobs:
           assert 'WORLDZ SAFE LAUNCH STANDARD' in home
           assert 'FIRST PUBLIC LAUNCH SLOT OPEN' in app
           assert 'WORLDZLAUNCHPAD FOUNDING 100' in home
-          assert '10% of the future WORLDZ supply' in home
+          assert '10,000,000 WLDZ' in home
+          assert '100,000 WLDZ per qualified position' in home
+          assert 'WORLDZLAUNCHPAD™ GLOBAL LAUNCH PACK' in home
           assert 'Founding 100 contract mismatch' in app
           assert 'platformShareCapPercentOfCollectedProjectFee' in app
           assert 'WORLDZ TECHNOLOGY & MEANINGS' in technology_html
