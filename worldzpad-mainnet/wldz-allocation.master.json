@@ -1,6 +1,6 @@
 {
-  "version": "WLDZ-ALLOCATION-2026-09-23-B",
-  "status": "WORKING_REVISION__TEMPORARY_1_OF_2_CUSTODY__ONCHAIN_DISTRIBUTION_PENDING",
+  "version": "WLDZ-ALLOCATION-2026-09-23-C",
+  "status": "OWNER_DIRECTED_DISTRIBUTION_PLAN__ONCHAIN_EXECUTION_PENDING",
   "network": "mainnet-beta",
   "token": {
     "name": "WORLDZ",
@@ -23,6 +23,7 @@
       "percent": 8,
       "tokens": 8000000,
       "destination": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+      "destinationRole": "COMMAND_CENTRE_DEV_AND_LAUNCH_WALLET",
       "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
     },
     {
@@ -30,21 +31,23 @@
       "percent": 15,
       "tokens": 15000000,
       "destinationRole": "METEORA_DAMM_V2_WLDZ_WSOL_POSITION",
-      "state": "KEEP_IN_SOURCE_VAULT_UNTIL_LAUNCH"
+      "state": "LIVE"
     },
     {
       "id": "staged_lp_reserve",
       "percent": 20,
       "tokens": 20000000,
+      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
       "destinationRole": "STAGED_LIQUIDITY_RESERVE",
       "state": "RESERVED_IN_SOURCE_VAULT"
     },
     {
-      "id": "legacy_snapshot_holders",
+      "id": "legacy_purple_diamond_handz",
       "percent": 5,
       "tokens": 5000000,
-      "destinationRole": "LEGACY_CLAIM_POOL",
-      "state": "RESERVED_PENDING_ENTITLEMENT_RELEASE__TEMPORARY_1_OF_2_CUSTODY",
+      "destination": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U",
+      "destinationRole": "PURPLE_DIAMOND_HANDZ_DISTRIBUTION_POOL",
+      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL",
       "snapshot": {
         "batchId": "4b7faa3f-c6cd-435f-9840-43a04cd090a0",
         "root": "b0a58be30c8323bf22d57939cd989be6b1631f5dd17a682cd829d0cc6a85e548",
@@ -61,66 +64,92 @@
       "id": "first_100_worldzlaunchpad",
       "percent": 10,
       "tokens": 10000000,
+      "destination": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt",
       "destinationRole": "WORLDZLAUNCHPAD_FIRST_100_REWARD_POOL",
       "perVerifiedLaunchTokens": 100000,
       "maxLaunches": 100,
-      "state": "RESERVED_IN_SOURCE_VAULT"
+      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
     },
     {
       "id": "oneworldz_charity_impact",
       "percent": 10,
       "tokens": 10000000,
-      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-      "destinationRole": "DEDICATED_CHARITY_LEDGER_IN_CURRENT_SQUADS_TREASURY_VAULT",
-      "state": "RING_FENCED_IN_CURRENT_TREASURY_VAULT__DEDICATED_CHARITY_WALLET_OPTIONAL_LATER",
-      "custodyNote": "Selected from the four active Command Centre wallets: Treasury Multisig is used for custody because Dev, Investment and Rewards wallets have separate purposes. A dedicated charity wallet can replace this later without changing the 10M allocation."
+      "destination": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+      "destinationRole": "ONEWORLDZ_CHARITY_IMPACT_DISTRIBUTION",
+      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
     },
     {
       "id": "worldz_treasury",
       "percent": 10,
       "tokens": 10000000,
       "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "destinationRole": "COMMAND_CENTRE_TREASURY_MULTISIG",
       "state": "RESERVED_IN_CURRENT_TREASURY_VAULT"
     },
     {
       "id": "general_reserve",
       "percent": 5,
       "tokens": 5000000,
-      "destinationRole": "GENERAL_RESERVE",
-      "state": "RESERVED_IN_SOURCE_VAULT"
+      "destination": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9",
+      "destinationRole": "GENERAL_RESERVE_DISTRIBUTION",
+      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
     },
     {
-      "id": "team_reserve",
-      "percent": 5,
-      "tokens": 5000000,
-      "destinationRole": "VERIFIED_TEAM_RESERVE",
-      "state": "RESERVED_PENDING_VERIFIED_WALLET_AND_ACTIVE_ROLE"
+      "id": "stepper",
+      "percent": 1,
+      "tokens": 1000000,
+      "destination": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
+      "destinationRole": "TEAM_STEPPER",
+      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+    },
+    {
+      "id": "future_team_reserve",
+      "percent": 4,
+      "tokens": 4000000,
+      "destination": "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j",
+      "destinationRole": "VERIFIED_FUTURE_TEAM_RESERVE",
+      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
     },
     {
       "id": "dev_city_verified_wallets",
-      "percent": 5.4,
-      "tokens": 5400000,
-      "destinationRole": "DEV_CITY_VERIFIED_WALLET_POOL",
-      "recipients": 54,
+      "percent": 5,
+      "tokens": 5000000,
+      "destination": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
+      "destinationRole": "DEV_CITY_50_WALLET_DISTRIBUTION_POOL",
+      "recipients": 50,
       "tokensPerVerifiedWallet": 100000,
       "percentPerVerifiedWallet": 0.1,
-      "state": "PENDING_WALLET_ASSOCIATION_VERIFICATION_AND_MULTISIG_DISTRIBUTION_PROPOSAL"
+      "state": "READY_FOR_POOL_TRANSFER__RECIPIENT_ASSOCIATION_REQUIRED_BEFORE_FANOUT"
     },
     {
       "id": "community_ecosystem_growth",
-      "percent": 1.6,
-      "tokens": 1600000,
-      "destinationRole": "COMMUNITY_ECOSYSTEM_GROWTH__COMMAND_CENTRE_REWARDS",
-      "state": "RESERVED_IN_SOURCE_VAULT"
+      "percent": 2,
+      "tokens": 2000000,
+      "destination": "fa35y2GdDKhdZ6uyS5mouEPQSFiHGyRuMSWp3Vz5Cob",
+      "destinationRole": "COMMAND_CENTRE_REWARD_WALLET",
+      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
     },
     {
       "id": "operations_security_infrastructure",
       "percent": 5,
       "tokens": 5000000,
-      "destinationRole": "OPERATIONS_SECURITY_INFRASTRUCTURE",
-      "state": "RESERVED_IN_SOURCE_VAULT"
+      "destination": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
+      "destinationRole": "OPERATIONS_SECURITY_INFRASTRUCTURE_DISTRIBUTION",
+      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
     }
   ],
+  "distributionWallets": {
+    "inputEntries": 10,
+    "uniqueAddresses": 9,
+    "duplicateAddress": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+    "preservedCommandCentreWallets": {
+      "dev": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+      "investment": "8VZZ7j63E2ARRNho4SwqFthUjWnWK8S5BHPfmJCb4UHK",
+      "treasury": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "rewards": "fa35y2GdDKhdZ6uyS5mouEPQSFiHGyRuMSWp3Vz5Cob"
+    },
+    "futureFourTokenRevivalReserveWallet": "G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3"
+  },
   "liquidity": {
     "initialActivePercent": 15,
     "stagedReservePercent": 20,
