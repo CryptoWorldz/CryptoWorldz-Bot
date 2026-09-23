@@ -65,5 +65,7 @@ def main():
     assert set(domains)==set(TARGETS), sorted(set(domains)^set(TARGETS))
     total=0
     for site,remote in TARGETS.items(): total+=deploy_site(site,remote)
-    print(f"WORLDZ_NEXTGEN_HOSTINGER_DEPLOY=PASS sites={len(TARGETS)} files={total}")
+    launchpad_remote="domains/cryptoworldz.xyz/public_html/launchpad"
+    total+=deploy_site("launchpad.cryptoworldz.xyz",launchpad_remote)
+    print(f"WORLDZ_NEXTGEN_HOSTINGER_DEPLOY=PASS sites={len(TARGETS)} launchpad=1 files={total}")
 if __name__=="__main__": main()
