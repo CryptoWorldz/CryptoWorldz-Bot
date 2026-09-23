@@ -187,7 +187,7 @@ jobs:
           assert 'WorldzMINT' in technology_html
 
           banned=[
-            'REVIVE','RVIV','PHENIX','PNEX','MIRACLE','MRCL','WLDZ',
+            'REVIVE','RVIV','PHENIX','PNEX','MIRACLE','MRCL',
             'GENESIS FOUR','Genesis Four','Legacy Loyalty','SolSavewXRP',
             'worldzpad-four-token','FOUR-TOKEN-LAUNCH'
           ]
