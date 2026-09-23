@@ -64,21 +64,31 @@ async function signTx(tx,d){
  if(!signed)fail('Wallet returned no signed transaction.');
  return signed;
 }
-async function sendVersioned(connection,d,tx,label){
+async function sendVersioned(connection,d,tx,label,latest){
  status(label+' — approve in Jupiter Wallet…','warn');
  const signed=await signTx(tx,d);
  const sig=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false,maxRetries:10,preflightCommitment:'processed'});
- const latest=await connection.getLatestBlockhash('processed');
- const conf=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed').catch(()=>null);
- if(conf?.value?.err)fail(label+' failed: '+JSON.stringify(conf.value.err));
- return sig;
+ try{
+  const conf=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');
+  if(conf.value.err)fail(label+' failed on-chain: '+JSON.stringify(conf.value.err));
+  return sig;
+ }catch(e){
+  for(let i=0;i<12;i++){
+   const out=await connection.getSignatureStatuses([sig],{searchTransactionHistory:true});
+   const st=out?.value?.[0];
+   if(st?.err)fail(label+' failed on-chain: '+JSON.stringify(st.err));
+   if(st&&(st.confirmationStatus==='confirmed'||st.confirmationStatus==='finalized'))return sig;
+   await sleep(750);
+  }
+  throw e;
+ }
 }
 async function sendInstructions(connection,d,instructions,label,lookups=[]){
  const latest=await connection.getLatestBlockhash('processed');
  const tx=new d.web3.VersionedTransaction(new d.web3.TransactionMessage({
   payerKey:new d.web3.PublicKey(ctx.address),recentBlockhash:latest.blockhash,instructions
  }).compileToV0Message(lookups));
- return sendVersioned(connection,d,tx,label);
+ return sendVersioned(connection,d,tx,label,latest);
 }
 function pdaExists(connection,key){return connection.getAccountInfo(key,'confirmed').then(Boolean)}
 async function readState(connection,d){
@@ -91,12 +101,16 @@ async function readState(connection,d){
  const derived=d.sqds.getVaultPda({multisigPda:ms,index:Number(cfg.vaultIndex)})[0];
  if(!derived.equals(vault))fail('Squads vault mismatch.');
  const mintInfo=await d.spl.getMint(connection,mint,'confirmed',d.spl.TOKEN_PROGRAM_ID);
- if(mintInfo.decimals!==6||mintInfo.supply!==100000000000000n||mintInfo.mintAuthority!==null||mintInfo.freezeAuthority!==null)fail('Canonical WLDZ invariant failed.');
+ if(mintInfo.decimals!==6)fail('WLDZ decimals changed. Distribution stopped.');
+ if(mintInfo.mintAuthority!==null||mintInfo.freezeAuthority!==null)fail('WLDZ mint/freeze authority is not revoked. Distribution stopped.');
+ const lockedCap=100000000n*1000000n;
+ if(mintInfo.supply>lockedCap)fail('WLDZ supply is above the locked 100M cap. Distribution stopped.');
+ if(mintInfo.supply<BigInt(cfg.totalWldz)*1000000n)fail('WLDZ current supply is below this distribution amount. Distribution stopped.');
  const sourceAta=await d.spl.getAssociatedTokenAddress(mint,vault,true,d.spl.TOKEN_PROGRAM_ID);
  const source=await d.spl.getAccount(connection,sourceAta,'confirmed',d.spl.TOKEN_PROGRAM_ID);
  const memberSol=await connection.getBalance(member,'confirmed');
  const vaultSol=await connection.getBalance(vault,'confirmed');
- return {member,ms,vault,mint,ma,sourceAta,sourceWldz:source.amount,memberSol,vaultSol};
+ return {member,ms,vault,mint,ma,sourceAta,sourceWldz:source.amount,memberSol,vaultSol,mintSupply:mintInfo.supply};
 }
 async function preflight(){
  await connect(); const d=await deps(); const connection=new d.web3.Connection(RPC,'confirmed'); const s=await readState(connection,d);
