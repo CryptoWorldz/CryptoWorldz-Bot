@@ -58,9 +58,20 @@ async function prepSend(connection,d,ixs,label){
  prepStatus(label+' — approve in Jupiter Wallet…','warn');
  const signed=await prepSign(tx,d);
  const sig=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false,maxRetries:12,preflightCommitment:'processed'});
- const conf=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');
- if(conf.value.err)throw new Error(label+' failed: '+JSON.stringify(conf.value.err));
- return sig;
+ try{
+  const conf=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');
+  if(conf.value.err)throw new Error(label+' failed: '+JSON.stringify(conf.value.err));
+  return sig;
+ }catch(e){
+  for(let i=0;i<12;i++){
+   const out=await connection.getSignatureStatuses([sig],{searchTransactionHistory:true});
+   const st=out?.value?.[0];
+   if(st?.err)throw new Error(label+' failed: '+JSON.stringify(st.err));
+   if(st&&(st.confirmationStatus==='confirmed'||st.confirmationStatus==='finalized'))return sig;
+   await new Promise(r=>setTimeout(r,750));
+  }
+  throw e;
+ }
 }
 async function missingRecipientAccounts(connection,d,cfg){
  const mint=new d.web3.PublicKey(cfg.mint),out=[];
