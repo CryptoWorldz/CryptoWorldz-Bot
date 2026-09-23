@@ -1,0 +1,61 @@
+name: Index WORLDZ Public Identity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/index-worldz-public-identity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Submit WORLDZ URLs to IndexNow
+        shell: python
+        run: |
+          import json, urllib.request
+          key="e45e541aea075565b38ff963903cc0219c0e87f5"
+          groups={
+            "launchpad.cryptoworldz.xyz":[
+              "https://launchpad.cryptoworldz.xyz/wldz/",
+              "https://launchpad.cryptoworldz.xyz/wldz/verify/",
+              "https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json",
+              "https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json",
+              "https://launchpad.cryptoworldz.xyz/wldz/distribution.json",
+              "https://launchpad.cryptoworldz.xyz/wldz/fees.json",
+              "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php",
+              "https://launchpad.cryptoworldz.xyz/tokenlist.json"
+            ],
+            "cryptoworldz.xyz":["https://cryptoworldz.xyz/","https://cryptoworldz.xyz/worldz-token/"],
+            "oneworldz.com":["https://oneworldz.com/","https://oneworldz.com/worldz-token/"],
+            "donateworldz.com":["https://donateworldz.com/","https://donateworldz.com/worldz-token/"]
+          }
+          for host,urls in groups.items():
+              body=json.dumps({
+                "host":host,
+                "key":key,
+                "keyLocation":f"https://{host}/{key}.txt",
+                "urlList":urls
+              }).encode("utf-8")
+              req=urllib.request.Request(
+                "https://api.indexnow.org/IndexNow",
+                data=body,
+                headers={"Content-Type":"application/json; charset=utf-8","User-Agent":"WorldzLaunchPad-Indexer/1.0"},
+                method="POST"
+              )
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as r:
+                      code=r.status
+                      r.read()
+              except urllib.error.HTTPError as e:
+                  code=e.code
+                  if code not in (200,202):
+                      raise
+              if code not in (200,202):
+                  raise SystemExit(f"IndexNow {host} HTTP {code}")
+              print(f"INDEXNOW_{host}=PASS HTTP={code} URLS={len(urls)}")
