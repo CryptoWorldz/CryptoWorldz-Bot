@@ -1,5 +1,6 @@
 (() => {
   const X_PAGES = Object.freeze([
+    { name: "WorldzLaunchPad", handle: "@WorldzLaunchPad", url: "https://x.com/WorldzLaunchPad", status: "CONFIRMED" },
     { name: "Purple Diamond Crew", handle: "@PDCrew", url: "https://x.com/PDCrew", status: "CONFIRMED" },
     { name: "Limited Edition", handle: "@LimitedTo10M", url: "https://x.com/LimitedTo10M", status: "CONFIRMED" },
     { name: "The Next Big Coin!", handle: "@BigCoinNext", url: "https://x.com/BigCoinNext", status: "CONFIRMED" },
