@@ -180,6 +180,8 @@ def inject_all_html():
     for domain in DOMAINS + ["launchpad.cryptoworldz.xyz"]:
         for p in (ROOT/domain).rglob("*.html"):
             text=p.read_text(encoding="utf-8",errors="ignore")
+            if "/mobile-safe.css" not in text:
+                text=re.sub(r"</head>",'<link rel="stylesheet" href="/mobile-safe.css"></head>',text,count=1,flags=re.I)
             if "worldz-nextgen.css" not in text:
                 link='<link rel="stylesheet" href="/worldz-nextgen.css">'
                 text=re.sub(r"</head>",link+"</head>",text,count=1,flags=re.I)
