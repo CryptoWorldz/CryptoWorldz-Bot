@@ -92,6 +92,13 @@ jobs:
           assert manifest["approvedBy"]=="JayJayTeamDev"
           print(f"NEXTGEN_RELEASE_GATE=PASS sites={len(domains)} urls={len(urls)}")
 
+      - name: Render desktop and mobile before deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/full_site_audit.py --render
+          echo "NEXTGEN_DESKTOP_MOBILE_RENDER=PASS"
+
       - name: Security scan public build
         shell: bash
         run: |
