@@ -9,7 +9,7 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
     Math.max(300, Number(process.env.MINIAPP_INIT_DATA_MAX_AGE_SECONDS) || 86400)
   );
 
-  async function authenticateSafety(req, res, next) {
+  async function authenticateAuto(req, res, next) {
     const result = validateTelegramInitData(
       req.get("x-telegram-init-data") || "",
       config.botToken,
@@ -101,67 +101,67 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
     };
   }
 
-  app.get("/api/mini/auto/status", authenticateSafety, async (req, res) => {
+  app.get("/api/mini/auto/status", authenticateAuto, async (req, res) => {
     try { return res.json({ ...(await autoClient.status()), access: req.autoAuthority }); }
     catch (error) { return res.status(502).json({ ok: false, error: error.code || "auto_status_failed" }); }
   });
 
-  app.get("/api/mini/auto/ultimate", authenticateSafety, ownerOnly, async (req, res) => {
+  app.get("/api/mini/auto/ultimate", authenticateAuto, ownerOnly, async (req, res) => {
     try { return res.json(await ultimateStatusPayload()); }
     catch (error) { return res.status(500).json({ ok: false, error: error.code || "ultimate_status_failed" }); }
   });
 
-  app.post("/api/mini/auto/simulate", authenticateSafety, ownerOnly, async (req, res) => {
+  app.post("/api/mini/auto/simulate", authenticateAuto, ownerOnly, async (req, res) => {
     try { return res.json(await autoClient.simulate(req.body || {})); }
     catch (error) { return proxyError(res, error, "auto_simulation_failed", 400); }
   });
 
-  app.post("/api/mini/auto/pause", authenticateSafety, async (req, res) => {
+  app.post("/api/mini/auto/pause", authenticateAuto, async (req, res) => {
     try { return res.json(await autoClient.pause()); }
     catch (error) { return res.status(502).json({ ok: false, error: error.code || "auto_pause_failed" }); }
   });
 
-  app.post("/api/mini/auto/resume", authenticateSafety, ownerOnly, async (req, res) => {
+  app.post("/api/mini/auto/resume", authenticateAuto, ownerOnly, async (req, res) => {
     try { return res.json(await autoClient.resumeSimulation()); }
     catch (error) { return res.status(502).json({ ok: false, error: error.code || "auto_resume_failed" }); }
   });
 
-  app.post("/api/mini/auto/emergency-stop", authenticateSafety, async (req, res) => {
+  app.post("/api/mini/auto/emergency-stop", authenticateAuto, async (req, res) => {
     try { return res.json(await autoClient.emergencyStop()); }
     catch (error) { return res.status(502).json({ ok: false, error: error.code || "auto_emergency_stop_failed" }); }
   });
 
-  app.get("/api/mini/auto/dca", authenticateSafety, ownerOnly, async (req, res) => {
+  app.get("/api/mini/auto/dca", authenticateAuto, ownerOnly, async (req, res) => {
     try { return res.json(await autoClient.dcaStatus()); }
     catch (error) { return res.status(502).json({ ok: false, error: error.code || "dca_status_failed" }); }
   });
 
-  app.post("/api/mini/auto/dca/wallet", authenticateSafety, ownerOnly, async (req, res) => {
+  app.post("/api/mini/auto/dca/wallet", authenticateAuto, ownerOnly, async (req, res) => {
     try { return res.json(await autoClient.dcaSetWallet(req.body?.wallet_address)); }
     catch (error) { return proxyError(res, error, "dca_wallet_update_failed", 400); }
   });
 
-  app.post("/api/mini/auto/dca/limits", authenticateSafety, ownerOnly, async (req, res) => {
+  app.post("/api/mini/auto/dca/limits", authenticateAuto, ownerOnly, async (req, res) => {
     try { return res.json(await autoClient.dcaSetLimits(req.body || {})); }
     catch (error) { return proxyError(res, error, "dca_limits_update_failed", 400); }
   });
 
-  app.post("/api/mini/auto/dca/schedules", authenticateSafety, ownerOnly, async (req, res) => {
+  app.post("/api/mini/auto/dca/schedules", authenticateAuto, ownerOnly, async (req, res) => {
     try { return res.status(201).json(await autoClient.dcaCreate(req.body || {})); }
     catch (error) { return proxyError(res, error, "dca_schedule_creation_failed", 400); }
   });
 
-  app.post("/api/mini/auto/dca/schedules/:id/:action", authenticateSafety, ownerOnly, async (req, res) => {
+  app.post("/api/mini/auto/dca/schedules/:id/:action", authenticateAuto, ownerOnly, async (req, res) => {
     try { return res.json(await autoClient.dcaAction(req.params.id, req.params.action)); }
     catch (error) { return proxyError(res, error, "dca_schedule_update_failed", 409); }
   });
 
-  app.post("/api/mini/auto/dca/enable", authenticateSafety, ownerOnly, async (req, res) => {
+  app.post("/api/mini/auto/dca/enable", authenticateAuto, ownerOnly, async (req, res) => {
     try { return res.json(await autoClient.dcaEnable()); }
     catch (error) { return proxyError(res, error, "dca_enable_failed", 409); }
   });
 
-  app.post("/api/mini/auto/dca/disable", authenticateSafety, ownerOnly, async (req, res) => {
+  app.post("/api/mini/auto/dca/disable", authenticateAuto, ownerOnly, async (req, res) => {
     try { return res.json(await autoClient.dcaDisable()); }
     catch (error) { return res.status(502).json({ ok: false, error: error.code || "dca_disable_failed" }); }
   });
