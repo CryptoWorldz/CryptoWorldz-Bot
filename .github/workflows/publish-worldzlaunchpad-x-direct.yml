@@ -38,7 +38,7 @@ jobs:
           ftp.quit()
           data=buf.getvalue()
           if not data.strip(): raise SystemExit("Protected runtime .env is empty")
-          open("$RUNNER_TEMP/worldz-social.env","wb").write(data)
+          open(os.path.join(os.environ["RUNNER_TEMP"],"worldz-social.env"),"wb").write(data)
           print("WORLDZ_X_PROTECTED_ENV=READY")
 
       - name: Publish approved launch pack to configured official X accounts
