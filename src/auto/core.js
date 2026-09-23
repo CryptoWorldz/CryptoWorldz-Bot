@@ -1,4 +1,5 @@
-const SAFE_MODE = "safe_locked";
+const AUTO_MODE = "owner_dca";
+const SAFE_MODE = AUTO_MODE; // Backward-compatible export for older imports.
 const SUPPORTED_NETWORKS = Object.freeze(["solana"]);
 const SUPPORTED_CURRENCIES = Object.freeze(["SOL", "USDC"]);
 
@@ -104,7 +105,7 @@ function validateSimulationRequest(input = {}, context = {}) {
       price_impact_bps: priceImpactBps,
       liquidity_usd: liquidityUsd
     },
-    disclaimer: "Simulation only. No transaction will be built, signed, submitted or scheduled for execution."
+    disclaimer: "Planning mode only. Live DCA execution uses the dedicated owner-controlled executor."
   };
 }
 
@@ -127,6 +128,7 @@ function publicStatus(settings = {}, counts = {}) {
 }
 
 module.exports = {
+  AUTO_MODE,
   SAFE_MODE,
   SUPPORTED_CURRENCIES,
   SUPPORTED_NETWORKS,
