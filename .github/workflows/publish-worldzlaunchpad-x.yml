@@ -1,0 +1,145 @@
+name: Publish WorldzLaunchPad X Campaign
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/publish-worldzlaunchpad-x.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Retrieve protected runtime environment
+        shell: python
+        run: |
+          import io, os
+          from ftplib import FTP_TLS
+
+          host=os.environ["FTP_HOST"].replace("ftps://","").replace("ftp://","").split("/")[0]
+          if host.count(":")==1: host=host.split(":",1)[0]
+          ftp=FTP_TLS()
+          ftp.connect(host,int(os.environ.get("FTP_PORT","21")),timeout=45)
+          ftp.login(os.environ["FTP_USERNAME"],os.environ["FTP_PASSWORD"])
+          ftp.prot_p()
+          buf=io.BytesIO()
+          ftp.retrbinary("RETR /domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",buf.write)
+          ftp.quit()
+          data=buf.getvalue()
+          if not data.strip():
+              raise SystemExit("Protected runtime .env is empty")
+          open(".env","wb").write(data)
+          print("PROTECTED_RUNTIME_ENV=READY")
+
+      - name: Install runtime dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Publish approved WorldzLaunchPad Grace targets now
+        shell: node
+        run: |
+          const crypto = require("node:crypto");
+          const { loadProtectedEnvironment } = require("./src/protected-env");
+          loadProtectedEnvironment({ appRoot: process.cwd() });
+
+          const { createClient } = require("@supabase/supabase-js");
+          const { loadConfig } = require("./src/config");
+          const { createGraceRepository } = require("./src/grace/repository");
+          const { createGraceOAuthRepository } = require("./src/grace/oauth-repository");
+          const { createXOAuthService } = require("./src/grace/oauth");
+          const { createGracePublisher } = require("./src/grace/adapters");
+          const { createGraceWorker } = require("./src/grace/worker");
+
+          async function bootstrap(config) {
+            if (config.usingServiceRole) return;
+            const response = await fetch(config.supabaseUrl + "/rest/v1/rpc/zed_runtime_bootstrap", {
+              method: "POST",
+              headers: { apikey: config.supabaseApiKey, "content-type": "application/json" },
+              body: JSON.stringify({ p_bot_token: config.botToken }),
+              signal: AbortSignal.timeout(30000)
+            });
+            const payload = await response.json().catch(() => null);
+            if (!response.ok || payload !== true) throw new Error("supabase_runtime_bootstrap_failed");
+          }
+
+          (async () => {
+            const config = loadConfig();
+            await bootstrap(config);
+
+            const options = { auth: { persistSession: false, autoRefreshToken: false } };
+            if (!config.usingServiceRole) {
+              options.global = { headers: {
+                "x-zed-runtime-key": crypto.createHash("sha256").update("zed-runtime-v1:" + config.botToken).digest("hex")
+              }};
+            }
+            const supabase = createClient(config.supabaseUrl, config.supabaseApiKey, options);
+            const workspaceSlug = String(process.env.GRACE_WORKSPACE_SLUG || "cryptoworldz").trim().toLowerCase();
+            const encryptionSecret = String(process.env.GRACE_TOKEN_ENCRYPTION_KEY || process.env.GRACE_API_SECRET || config.webhookSecret || "").trim();
+            const clientId = String(process.env.GRACE_X_CLIENT_ID || process.env.X_CLIENT_ID || process.env.TWITTER_CLIENT_ID || "").trim();
+            const clientSecret = String(process.env.GRACE_X_CLIENT_SECRET || process.env.X_CLIENT_SECRET || process.env.TWITTER_CLIENT_SECRET || "").trim();
+            const redirectUri = String(process.env.GRACE_X_REDIRECT_URI || "https://cryptobotz.cryptoworldz.xyz/grace/oauth/x/callback").trim();
+
+            const graceRepository = createGraceRepository(supabase, { workspaceSlug });
+            const oauthRepository = createGraceOAuthRepository(supabase, { workspaceSlug });
+            const oauth = createXOAuthService({
+              repository: oauthRepository,
+              clientId,
+              clientSecret,
+              redirectUri,
+              encryptionSecret
+            });
+            if (!clientSecret || !oauth.configured()) throw new Error("grace_x_oauth_not_configured");
+
+            const publisher = createGracePublisher({
+              tokenProvider: async (target) => {
+                if (target.platform !== "x") return null;
+                return oauth.getAccessToken(target.account_id);
+              }
+            });
+            const worker = createGraceWorker({ repository: graceRepository, publisher, intervalMs: 60000 });
+            const result = await worker.runOnce();
+            console.log("GRACE_WORLDZ_CAMPAIGN_RUN=" + JSON.stringify(result));
+
+            const { data, error } = await supabase
+              .from("grace_posts")
+              .select("id,title,status,grace_post_targets(status,attempt_count,external_post_id,error_message,published_at)")
+              .eq("campaign","worldzlaunchpad_global_launch_20260923")
+              .order("created_at",{ascending:true});
+            if (error) throw error;
+            for (const post of data || []) {
+              const target=(post.grace_post_targets||[])[0]||{};
+              console.log([
+                "WORLDZ_X_RESULT",
+                "title="+JSON.stringify(post.title),
+                "post_status="+post.status,
+                "target_status="+String(target.status||""),
+                "attempts="+String(target.attempt_count||0),
+                "external_post_id="+String(target.external_post_id||""),
+                "error="+JSON.stringify(String(target.error_message||"").slice(0,180))
+              ].join(" "));
+            }
+
+            const failures=(data||[]).flatMap(p=>p.grace_post_targets||[]).filter(t=>["failed","blocked"].includes(t.status));
+            if (failures.length) process.exitCode=2;
+          })().catch(error => {
+            console.error("GRACE_WORLDZ_CAMPAIGN_ERROR="+String(error.code||error.message||error).slice(0,220));
+            process.exitCode=1;
+          });
