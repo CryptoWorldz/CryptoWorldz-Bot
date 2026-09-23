@@ -1,0 +1,30 @@
+{
+  "name": "WorldzLaunchPad Token List",
+  "logoURI": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
+  "tags": {
+    "worldz": {
+      "name": "WorldzLaunchPad",
+      "description": "Official WorldzLaunchPad ecosystem token"
+    }
+  },
+  "timestamp": "2026-09-23T05:00:00Z",
+  "tokens": [
+    {
+      "chainId": 101,
+      "address": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "symbol": "WLDZ",
+      "name": "WORLDZ",
+      "decimals": 6,
+      "logoURI": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
+      "tags": [
+        "worldz"
+      ],
+      "extensions": {
+        "website": "https://launchpad.cryptoworldz.xyz/wldz/",
+        "telegram": "https://t.me/CryptoWLDZ",
+        "description": "WORLDZ (WLDZ) is the canonical WorldzLaunchPad token on Solana, powering the CryptoWorldz ecosystem, community rewards, liquidity, development, charity impact, and future WorldzLaunchPad launches.",
+        "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ"
+      }
+    }
+  ]
+}
