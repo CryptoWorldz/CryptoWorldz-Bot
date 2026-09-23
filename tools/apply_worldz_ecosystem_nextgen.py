@@ -77,6 +77,62 @@ body[data-worldz-nextgen]{min-height:100vh}
 .wx-footer{margin-top:18px;padding:28px 18px;text-align:center;color:#aa9eb8;border-top:1px solid rgba(255,255,255,.09)}
 body[data-worldz-nextgen] img{max-width:100%!important;height:auto!important}
 body[data-worldz-nextgen] .hero-art,body[data-worldz-nextgen] .feature-img{object-fit:contain!important}
+
+/* Upgrade legacy/generated pages too — every public page, not only rebuilt roots */
+body[data-worldz-nextgen] .hero{
+  border:1px solid rgba(190,110,255,.28)!important;border-radius:24px!important;
+  background:linear-gradient(150deg,rgba(20,8,34,.96),rgba(5,2,11,.99))!important;
+  box-shadow:0 0 40px rgba(139,52,228,.15)!important;overflow:hidden!important
+}
+body[data-worldz-nextgen] .hero-copy{
+  background:linear-gradient(180deg,rgba(5,2,11,.28),rgba(5,2,11,.96))!important;
+  padding:clamp(18px,3vw,34px)!important
+}
+body[data-worldz-nextgen] .hero-copy h1,
+body[data-worldz-nextgen] .section h1,
+body[data-worldz-nextgen] .section h2{
+  letter-spacing:-.035em!important;line-height:1!important
+}
+body[data-worldz-nextgen] .section{
+  border:1px solid rgba(255,255,255,.11)!important;border-radius:22px!important;
+  background:linear-gradient(180deg,rgba(20,9,35,.92),rgba(6,3,12,.98))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 20px 60px rgba(0,0,0,.16)!important;
+  padding:clamp(18px,3vw,32px)!important
+}
+body[data-worldz-nextgen] .info-card,
+body[data-worldz-nextgen] .world-card,
+body[data-worldz-nextgen] .token-card{
+  border-radius:18px!important;border:1px solid rgba(190,110,255,.24)!important;
+  background:linear-gradient(145deg,rgba(28,12,46,.85),rgba(7,3,13,.96))!important;
+  box-shadow:inset 0 0 28px rgba(142,55,242,.07)!important;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease!important
+}
+body[data-worldz-nextgen] .world-card:hover,
+body[data-worldz-nextgen] .info-card:hover{
+  transform:translateY(-2px)!important;border-color:rgba(203,132,255,.48)!important;
+  box-shadow:0 12px 34px rgba(111,35,190,.17)!important
+}
+body[data-worldz-nextgen] .btn{
+  min-height:48px!important;border-radius:14px!important;font-weight:950!important;
+  border-color:rgba(191,111,255,.48)!important;
+  background:linear-gradient(135deg,rgba(168,76,255,.34),rgba(82,29,139,.58))!important
+}
+body[data-worldz-nextgen] .btn.secondary{
+  background:rgba(255,255,255,.045)!important;border-color:rgba(255,255,255,.15)!important
+}
+body[data-worldz-nextgen] .eyebrow{
+  color:#d58cff!important;letter-spacing:.18em!important;font-weight:950!important
+}
+body[data-worldz-nextgen] .feature-img,
+body[data-worldz-nextgen] .hero-art{
+  border-radius:18px!important;background:#020104!important;
+  border:1px solid rgba(190,110,255,.18)!important
+}
+body[data-worldz-nextgen] .pdc-panel{
+  border:1px solid rgba(196,113,255,.42)!important;
+  background:rgba(7,3,14,.88)!important;box-shadow:0 24px 60px rgba(0,0,0,.26)!important
+}
+body[data-worldz-nextgen] code{overflow-wrap:anywhere}
 @media(max-width:980px){.wx-hero{grid-template-columns:1fr}.wx-visual{order:-1}.wx-grid,.wx-portal{grid-template-columns:repeat(2,1fr)}.wx-strip{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.wx-hero{padding:18px;border-radius:18px}.wx-hero h1{font-size:clamp(2.6rem,14vw,4.6rem)}.wx-grid,.wx-portal{grid-template-columns:1fr}.wx-section{padding:18px}.wx-strip{grid-template-columns:1fr 1fr}.wx-btn{width:100%}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
