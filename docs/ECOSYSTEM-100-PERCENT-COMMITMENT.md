@@ -47,3 +47,8 @@ Do not reduce a requested ecosystem feature to an isolated one-off page when it 
 5. Current repository state.
 6. Approved project assets and records.
 7. Conversation memory only as supporting context.
+
+
+## Official Logo Gate
+
+Every branded identity position must use the approved official logo or canonical brand mark. Generic letters, placeholder orbs, stock icons and substitute logos are prohibited whenever an official logo exists. If no official logo is verified, keep the approved text identity until JayJayTeamDev approves a mark. This gate is mandatory alongside the Top 100 and Perfect-Fitting Vibrant Worldz visual checks.
