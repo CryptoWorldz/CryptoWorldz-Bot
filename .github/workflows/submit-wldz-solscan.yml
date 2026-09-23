@@ -23,6 +23,7 @@ jobs:
         shell: node {0}
         run: |
           const { chromium } = require('playwright');
+          (async()=>{
           const mint='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U';
           const browser=await chromium.launch({headless:true});
           const page=await browser.newPage({viewport:{width:1440,height:1100}});
@@ -75,3 +76,4 @@ jobs:
           } finally {
             await browser.close();
           }
+          })().catch(e=>{console.error(e);process.exit(1)});
