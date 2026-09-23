@@ -1,12 +1,11 @@
 const RPC='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';
-const PUBLIC_RPC='https://api.mainnet-beta.solana.com';
-const RESUME_KEY='worldz:wldz:distribution:20260923-a';
+const RESUME_KEY='worldz:wldz:distribution:vault-v1';
 const $=s=>document.querySelector(s);
 const status=(m,c='warn')=>{const e=$('#status');e.textContent=m;e.className='status '+c};
 const fail=m=>{throw new Error(m)};
-let ctx=null, cfg=null, depsCache=null;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const short=s=>String(s).slice(0,6)+'…'+String(s).slice(-6);
+let cfg=null,ctx=null,depsCache=null;
 
 async function deps(){
  if(depsCache)return depsCache;
@@ -18,265 +17,203 @@ async function deps(){
   import('https://esm.sh/@solana/spl-token@0.4.15?bundle&deps=@solana/web3.js@1.98.4'),
   import('https://esm.sh/@wallet-standard/app@1.1.0?bundle')
  ]);
- depsCache={web3,sqds,spl,walletApp}; return depsCache;
+ depsCache={web3,sqds,spl,walletApp};return depsCache;
 }
+
 async function load(){
- const r=await fetch('/wldz/distribute/config.json',{cache:'no-store'});
+ const r=await fetch('/wldz/distribute/config.json?v=20260923-vault-v1',{cache:'no-store'});
  if(!r.ok)fail('Distribution configuration unavailable.');
  cfg=await r.json();
- const rows=cfg.legs.flat().map(x=>`<div class="row"><span>${x.role}<br><span class="mono">${short(x.address)}</span></span><b>${Number(x.wldz).toLocaleString()} WLDZ</b></div>`).join('');
- $('#rows').innerHTML=rows;
+ $('#rows').innerHTML=cfg.legs.flat().map(x=>`<div class="row"><span>${x.role}<br><span class="mono">${short(x.address)}</span></span><b>${Number(x.wldz).toLocaleString()} WLDZ</b></div>`).join('');
 }
+
 function injected(){
- const candidates=[window?.jupiter?.solana,window?.jupiter,window?.phantom?.solana,window?.solflare,window?.solana];
- return candidates.find(p=>p&&typeof p.connect==='function'&&typeof p.signTransaction==='function')||null;
+ return [window?.jupiter?.solana,window?.jupiter,window?.phantom?.solana,window?.solflare,window?.solana]
+  .find(p=>p&&typeof p.connect==='function'&&typeof p.signTransaction==='function')||null;
 }
+
 async function connect(){
  if(ctx)return ctx;
  const d=await deps();
- const wallets=d.walletApp.getWallets().get().filter(w=>w?.features?.['standard:connect']&&w?.features?.['solana:signTransaction']&&Array.isArray(w.chains)&&w.chains.some(c=>String(c).startsWith('solana:')));
- const jup=wallets.find(w=>/jupiter/i.test(String(w.name||'')))||wallets[0];
- if(jup){
-  const out=await jup.features['standard:connect'].connect();
-  const account=(out?.accounts||jup.accounts||[])[0];
-  if(!account)fail('Wallet connected but returned no Solana account.');
-  ctx={kind:'standard',wallet:jup,account,address:account.address};
+ const wallets=d.walletApp.getWallets().get().filter(w=>w?.features?.['standard:connect']&&w?.features?.['solana:signTransaction']);
+ const wallet=wallets.find(w=>/jupiter/i.test(String(w.name||'')))||wallets[0];
+ if(wallet){
+  const out=await wallet.features['standard:connect'].connect();
+  const account=(out?.accounts||wallet.accounts||[])[0];
+  if(!account)fail('Wallet returned no Solana account.');
+  ctx={kind:'standard',wallet,account,address:account.address};
  }else{
-  const p=injected();
-  if(!p)fail('No Solana wallet was detected. Open this page inside Jupiter Wallet.');
-  const out=await p.connect();
-  const pk=(out&&out.publicKey)||p.publicKey;
-  if(!pk)fail('Wallet connected but returned no public key.');
+  const p=injected();if(!p)fail('Open this page inside Jupiter Wallet.');
+  const out=await p.connect();const pk=out?.publicKey||p.publicKey;
+  if(!pk)fail('Wallet returned no public key.');
   ctx={kind:'legacy',provider:p,address:pk.toString()};
  }
- if(ctx.address!==cfg.authorisedMember){const wrong=ctx.address;ctx=null;fail('Wrong wallet: '+short(wrong)+'. Connect '+short(cfg.authorisedMember)+'.')}
- $('#connect').textContent=short(ctx.address);
- return ctx;
+ if(ctx.address!==cfg.authorisedMember){const bad=ctx.address;ctx=null;fail('Wrong wallet: '+short(bad));}
+ $('#connect').textContent=short(ctx.address);return ctx;
 }
-async function signTx(tx,d){
+
+async function sign(tx,d){
  if(ctx.kind==='standard'){
   const out=await ctx.wallet.features['solana:signTransaction'].signTransaction({account:ctx.account,transaction:new Uint8Array(tx.serialize())});
-  const bytes=out?.[0]?.signedTransaction;
-  if(!bytes)fail('Wallet returned no signed transaction.');
+  const bytes=out?.[0]?.signedTransaction;if(!bytes)fail('Wallet returned no signed transaction.');
   return d.web3.VersionedTransaction.deserialize(new Uint8Array(bytes));
  }
- const signed=await ctx.provider.signTransaction(tx);
- if(!signed)fail('Wallet returned no signed transaction.');
- return signed;
+ const signed=await ctx.provider.signTransaction(tx);if(!signed)fail('Wallet returned no signed transaction.');return signed;
 }
-async function sendVersioned(connection,d,tx,label,latest){
- status(label+' — approve in Jupiter Wallet…','warn');
- const signed=await signTx(tx,d);
- const sig=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false,maxRetries:10,preflightCommitment:'processed'});
- try{
-  const conf=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');
-  if(conf.value.err)fail(label+' failed on-chain: '+JSON.stringify(conf.value.err));
-  return sig;
- }catch(e){
-  for(let i=0;i<12;i++){
-   const out=await connection.getSignatureStatuses([sig],{searchTransactionHistory:true});
-   const st=out?.value?.[0];
-   if(st?.err)fail(label+' failed on-chain: '+JSON.stringify(st.err));
-   if(st&&(st.confirmationStatus==='confirmed'||st.confirmationStatus==='finalized'))return sig;
-   await sleep(750);
-  }
-  throw e;
+
+async function simulate(connection,tx,label){
+ const sim=await connection.simulateTransaction(tx,{sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed'});
+ if(sim.value.err){
+  const logs=(sim.value.logs||[]).slice(-8).join('\n');
+  fail(label+' dry-run failed.\n'+JSON.stringify(sim.value.err)+(logs?'\n'+logs:''));
  }
+ return sim.value;
 }
+
 async function sendInstructions(connection,d,instructions,label,lookups=[]){
  const latest=await connection.getLatestBlockhash('processed');
  const tx=new d.web3.VersionedTransaction(new d.web3.TransactionMessage({
   payerKey:new d.web3.PublicKey(ctx.address),recentBlockhash:latest.blockhash,instructions
  }).compileToV0Message(lookups));
- return sendVersioned(connection,d,tx,label,latest);
+ await simulate(connection,tx,label);
+ status(label+' — dry-run passed ✅\nApprove in Jupiter Wallet…','good');
+ const signed=await sign(tx,d);
+ const sig=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false,maxRetries:12,preflightCommitment:'processed'});
+ try{
+  const c=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');
+  if(c.value.err)fail(label+' failed on-chain: '+JSON.stringify(c.value.err));
+ }catch(e){
+  for(let i=0;i<16;i++){
+   const s=(await connection.getSignatureStatuses([sig],{searchTransactionHistory:true}))?.value?.[0];
+   if(s?.err)fail(label+' failed on-chain: '+JSON.stringify(s.err));
+   if(s&&(s.confirmationStatus==='confirmed'||s.confirmationStatus==='finalized'))return sig;
+   await sleep(750);
+  }
+  throw e;
+ }
+ return sig;
 }
-function pdaExists(connection,key){return connection.getAccountInfo(key,'confirmed').then(Boolean)}
-async function readState(connection,d){
- const member=new d.web3.PublicKey(ctx.address), ms=new d.web3.PublicKey(cfg.multisig), vault=new d.web3.PublicKey(cfg.vault), mint=new d.web3.PublicKey(cfg.mint);
+
+const exists=(connection,key)=>connection.getAccountInfo(key,'confirmed').then(Boolean);
+
+async function state(connection,d){
+ const member=new d.web3.PublicKey(ctx.address),ms=new d.web3.PublicKey(cfg.multisig),vault=new d.web3.PublicKey(cfg.vault),mint=new d.web3.PublicKey(cfg.mint);
  const ma=await d.sqds.accounts.Multisig.fromAccountAddress(connection,ms,'confirmed');
- if(Number(ma.threshold)!==1)fail('Squads threshold is not 1. Distribution stopped.');
- const mm=ma.members.find(x=>x.key.equals(member));
- if(!mm)fail('Connected wallet is not a member of this Squad.');
- if((Number(mm.permissions.mask)&1)!==1)fail('Connected wallet cannot initiate this Squad transaction.');
- const derived=d.sqds.getVaultPda({multisigPda:ms,index:Number(cfg.vaultIndex)})[0];
- if(!derived.equals(vault))fail('Squads vault mismatch.');
- const mintInfo=await d.spl.getMint(connection,mint,'confirmed',d.spl.TOKEN_PROGRAM_ID);
- if(mintInfo.decimals!==6)fail('WLDZ decimals changed. Distribution stopped.');
- if(mintInfo.mintAuthority!==null||mintInfo.freezeAuthority!==null)fail('WLDZ mint/freeze authority is not revoked. Distribution stopped.');
- const lockedCap=100000000n*1000000n;
- if(mintInfo.supply>lockedCap)fail('WLDZ supply is above the locked 100M cap. Distribution stopped.');
- if(mintInfo.supply<BigInt(cfg.totalWldz)*1000000n)fail('WLDZ current supply is below this distribution amount. Distribution stopped.');
- const sourceAta=await d.spl.getAssociatedTokenAddress(mint,vault,true,d.spl.TOKEN_PROGRAM_ID);
+ if(Number(ma.threshold)!==1)fail('Squads threshold is not 1.');
+ const mm=ma.members.find(x=>x.key.equals(member));if(!mm)fail('JayJayTeamDev is not a live Squad member.');
+ if((Number(mm.permissions.mask)&1)!==1)fail('JayJayTeamDev cannot initiate this Squad transaction.');
+ if(!d.sqds.getVaultPda({multisigPda:ms,index:Number(cfg.vaultIndex)})[0].equals(vault))fail('Squads vault mismatch.');
+ const mi=await d.spl.getMint(connection,mint,'confirmed',d.spl.TOKEN_PROGRAM_ID);
+ if(mi.decimals!==6||mi.mintAuthority!==null||mi.freezeAuthority!==null)fail('Canonical WLDZ authority/decimals check failed.');
+ if(mi.supply>100000000n*1000000n)fail('WLDZ supply exceeds the locked 100M cap.');
+ const sourceAta=d.spl.getAssociatedTokenAddressSync(mint,vault,true,d.spl.TOKEN_PROGRAM_ID);
  const source=await d.spl.getAccount(connection,sourceAta,'confirmed',d.spl.TOKEN_PROGRAM_ID);
  const memberSol=await connection.getBalance(member,'confirmed');
- const vaultSol=await connection.getBalance(vault,'confirmed');
- return {member,ms,vault,mint,ma,sourceAta,sourceWldz:source.amount,memberSol,vaultSol,mintSupply:mintInfo.supply};
+ return {member,ms,vault,mint,ma,sourceAta,sourceWldz:source.amount,memberSol,mintSupply:mi.supply};
 }
-async function preflight(){
- await connect(); const d=await deps(); const connection=new d.web3.Connection(RPC,'confirmed'); const s=await readState(connection,d);
- const have=s.memberSol/d.web3.LAMPORTS_PER_SOL;
- const minimum=Number(cfg.feeBootstrap.minimumSignerSol);
- const target=Number(cfg.feeBootstrap.targetSignerSol);
- const maxTopup=Number(cfg.feeBootstrap.maximumTreasuryTopupSol);
- const safety=Number(cfg.feeBootstrap.vaultSafetyReserveSol);
- const required=BigInt(cfg.totalWldz)*1000000n;
- if(s.sourceWldz<required)fail('Squads vault WLDZ is below the 55,000,000 WLDZ distribution amount.');
- let missingAtas=0;
+
+async function recipientCheck(connection,d,s){
+ let missing=0;
  for(const x of cfg.legs.flat()){
   const owner=new d.web3.PublicKey(x.address);
-  const ata=await d.spl.getAssociatedTokenAddress(s.mint,owner,true,d.spl.TOKEN_PROGRAM_ID);
-  if(!(await pdaExists(connection,ata)))missingAtas++;
+  const ata=d.spl.getAssociatedTokenAddressSync(s.mint,owner,true,d.spl.TOKEN_PROGRAM_ID);
+  if(!(await exists(connection,ata)))missing++;
  }
- const rent=await connection.getMinimumBalanceForRentExemption(165);
- const desiredTopup=Math.max(0,Math.min(maxTopup,target-have));
- const vaultNeed=BigInt(rent)*BigInt(missingAtas)+BigInt(Math.ceil((safety+desiredTopup)*d.web3.LAMPORTS_PER_SOL));
- if(BigInt(s.vaultSol)<vaultNeed)fail('Squads vault SOL is below the safe amount needed for recipient token-account rent and the fee bootstrap.');
- if(missingAtas===0){
-  const prep=document.querySelector('#prepare-accounts');
-  if(prep){prep.disabled=true;prep.textContent='1. Recipient Accounts Ready ✅';}
-  const ps=document.querySelector('#prepare-status');
-  if(ps){ps.textContent='RECIPIENT ACCOUNTS READY ✅\nAll destination token accounts are confirmed on-chain.';ps.className='status good';}
- }
- if(have<minimum){
-  $('#sign').disabled=true;
-  status('ADD A LITTLE MORE SOL\n\nJayJay signer: '+have.toFixed(6)+' SOL\nBootstrap minimum: '+minimum.toFixed(2)+' SOL\n\nThen tap Check Balance again.','bad');
-  return false;
- }
- $('#sign').disabled=false;
- if(desiredTopup>0){
-  status('READY ✅\nJayJay signer: '+have.toFixed(6)+' SOL\nTreasury fee bootstrap: +'+desiredTopup.toFixed(6)+' SOL\nTarget signer balance: '+target.toFixed(2)+' SOL\nSquads vault WLDZ: '+Number(s.sourceWldz/1000000n).toLocaleString()+'\nRecipient token accounts missing: '+missingAtas+'\n\nSign & Execute will bootstrap fees first.','good');
- }else{
-  status('READY ✅\nJayJay signer: '+have.toFixed(6)+' SOL\nSquads vault WLDZ: '+Number(s.sourceWldz/1000000n).toLocaleString()+'\nRecipient token accounts missing: '+missingAtas+'\n\nSign & Execute is armed.','good');
- }
- return true;
+ return missing;
 }
-async function bootstrapSignerFromTreasury(connection,d,s){
- const have=s.memberSol/d.web3.LAMPORTS_PER_SOL;
- const target=Number(cfg.feeBootstrap.targetSignerSol);
- const maxTopup=Number(cfg.feeBootstrap.maximumTreasuryTopupSol);
- const topup=Math.max(0,Math.min(maxTopup,target-have));
- if(topup<=0)return s;
- const lamports=Math.ceil(topup*d.web3.LAMPORTS_PER_SOL);
- const bootstrapKey=RESUME_KEY+':fee-bootstrap';
- let stored=null; try{stored=JSON.parse(localStorage.getItem(bootstrapKey)||'null')}catch{}
- const index=stored?.batchIndex?BigInt(stored.batchIndex):d.sqds.utils.toBigInt(s.ma.transactionIndex)+1n;
- const batchPda=d.sqds.getTransactionPda({multisigPda:s.ms,index})[0];
- const proposalPda=d.sqds.getProposalPda({multisigPda:s.ms,transactionIndex:index})[0];
- if(!(await pdaExists(connection,batchPda))){
-  const setup=[
-   d.sqds.instructions.batchCreate({multisigPda:s.ms,creator:s.member,rentPayer:s.member,batchIndex:index,vaultIndex:Number(cfg.vaultIndex),memo:'WORLDZ signer fee bootstrap from treasury'}),
-   d.sqds.instructions.proposalCreate({multisigPda:s.ms,transactionIndex:index,creator:s.member,rentPayer:s.member,isDraft:true})
-  ];
-  await sendInstructions(connection,d,setup,'Fee bootstrap 1/4 — create treasury batch');
-  localStorage.setItem(bootstrapKey,JSON.stringify({batchIndex:String(index)}));
- }
- const txPda=d.sqds.getBatchTransactionPda({multisigPda:s.ms,batchIndex:index,transactionIndex:1})[0];
- if(!(await pdaExists(connection,txPda))){
-  const bh=(await connection.getLatestBlockhash('confirmed')).blockhash;
-  const transfer=d.web3.SystemProgram.transfer({fromPubkey:s.vault,toPubkey:s.member,lamports});
-  const msg=new d.web3.TransactionMessage({payerKey:s.vault,recentBlockhash:bh,instructions:[transfer]});
-  const add=d.sqds.instructions.batchAddTransaction({
-   vaultIndex:Number(cfg.vaultIndex),multisigPda:s.ms,member:s.member,rentPayer:s.member,batchIndex:index,transactionIndex:1,ephemeralSigners:0,transactionMessage:msg
-  });
-  await sendInstructions(connection,d,[add],'Fee bootstrap 2/4 — add treasury SOL transfer');
- }
- let proposal=await d.sqds.accounts.Proposal.fromAccountAddress(connection,proposalPda,'confirmed');
- let kind=String(proposal.status?.__kind||'').toLowerCase();
- if(kind==='draft'){
-  await sendInstructions(connection,d,[
-   d.sqds.instructions.proposalActivate({multisigPda:s.ms,transactionIndex:index,member:s.member}),
-   d.sqds.instructions.proposalApprove({multisigPda:s.ms,transactionIndex:index,member:s.member,memo:'JayJayTeamDev fee bootstrap'})
-  ],'Fee bootstrap 3/4 — approve');
- }else if(kind==='active'){
-  await sendInstructions(connection,d,[d.sqds.instructions.proposalApprove({multisigPda:s.ms,transactionIndex:index,member:s.member,memo:'JayJayTeamDev fee bootstrap'})],'Fee bootstrap 3/4 — approve');
- }
- proposal=await d.sqds.accounts.Proposal.fromAccountAddress(connection,proposalPda,'confirmed');
- kind=String(proposal.status?.__kind||'').toLowerCase();
- if(!['approved','executing','executed'].includes(kind))fail('Fee bootstrap proposal is '+kind+'.');
- if(kind!=='executed' && await pdaExists(connection,txPda)){
-  const built=await d.sqds.instructions.batchExecuteTransaction({connection,multisigPda:s.ms,member:s.member,batchIndex:index,transactionIndex:1});
-  await sendInstructions(connection,d,[built.instruction],'Fee bootstrap 4/4 — move treasury SOL',built.lookupTableAccounts);
- }
- localStorage.removeItem(bootstrapKey);
- await sleep(700);
- const refreshed=await readState(connection,d);
- const now=refreshed.memberSol/d.web3.LAMPORTS_PER_SOL;
- if(now<Number(cfg.feeBootstrap.minimumSignerSol))fail('Fee bootstrap did not leave enough signer SOL.');
- status('FEE BOOTSTRAP COMPLETE ✅\nJayJay signer: '+now.toFixed(6)+' SOL\nContinuing to WLDZ distribution…','good');
- return refreshed;
-}
-function legMessage(d,s,leg,bh){
- const ixs=[];
- for(const x of leg){
+
+function transferInstructions(d,s){
+ return cfg.legs.flat().map(x=>{
   const owner=new d.web3.PublicKey(x.address);
   const ata=d.spl.getAssociatedTokenAddressSync(s.mint,owner,true,d.spl.TOKEN_PROGRAM_ID);
-  ixs.push(d.spl.createAssociatedTokenAccountIdempotentInstruction(s.vault,ata,owner,s.mint,d.spl.TOKEN_PROGRAM_ID,d.spl.ASSOCIATED_TOKEN_PROGRAM_ID));
-  ixs.push(d.spl.createTransferCheckedInstruction(s.sourceAta,s.mint,ata,s.vault,BigInt(x.wldz)*1000000n,6,[],d.spl.TOKEN_PROGRAM_ID));
- }
- return new d.web3.TransactionMessage({payerKey:s.vault,recentBlockhash:bh,instructions:ixs});
+  return d.spl.createTransferCheckedInstruction(s.sourceAta,s.mint,ata,s.vault,BigInt(x.wldz)*1000000n,6,[],d.spl.TOKEN_PROGRAM_ID);
+ });
 }
-function saved(){try{return JSON.parse(localStorage.getItem(RESUME_KEY)||'null')}catch{return null}}
-function save(v){localStorage.setItem(RESUME_KEY,JSON.stringify(v))}
+
+async function preflight(){
+ await connect();
+ const d=await deps(),connection=new d.web3.Connection(RPC,'confirmed'),s=await state(connection,d);
+ if(s.sourceWldz<BigInt(cfg.totalWldz)*1000000n)fail('Squads vault does not contain the full 55,000,000 WLDZ.');
+ const missing=await recipientCheck(connection,d,s);
+ if(missing){
+  $('#sign').disabled=true;
+  status('Recipient token accounts still missing: '+missing+'\nTap 1. Prepare Recipient Accounts.','bad');
+  return false;
+ }
+ const prep=$('#prepare-accounts');if(prep){prep.disabled=true;prep.textContent='1. Recipient Accounts Ready ✅';}
+ const ps=$('#prepare-status');if(ps){ps.textContent='RECIPIENT ACCOUNTS READY ✅\nAll 10 destination token accounts are confirmed on-chain.';ps.className='status good';}
+
+ const bh=(await connection.getLatestBlockhash('confirmed')).blockhash;
+ const inner=new d.web3.VersionedTransaction(new d.web3.TransactionMessage({payerKey:s.vault,recentBlockhash:bh,instructions:transferInstructions(d,s)}).compileToV0Message());
+ await simulate(connection,inner,'55M WLDZ transfer');
+ const have=s.memberSol/d.web3.LAMPORTS_PER_SOL;
+ $('#sign').disabled=false;
+ status('READY ✅\nJayJay signer: '+have.toFixed(6)+' SOL\nSquads vault WLDZ: '+Number(s.sourceWldz/1000000n).toLocaleString()+'\nRecipient token accounts missing: 0\n55M WLDZ transfer dry-run: PASSED ✅\n\nSign & Execute is armed.','good');
+ return true;
+}
+
 async function run(){
  $('#sign').disabled=true;
  try{
   if(!(await preflight()))return;
-  const d=await deps(), connection=new d.web3.Connection(RPC,'confirmed');
-  let s=await readState(connection,d);
-  s=await bootstrapSignerFromTreasury(connection,d,s);
-  const stored=saved();
-  let batchIndex=stored?.batchIndex?BigInt(stored.batchIndex):d.sqds.utils.toBigInt(s.ma.transactionIndex)+1n;
-  let batchPda=d.sqds.getTransactionPda({multisigPda:s.ms,index:batchIndex})[0];
-  let proposalPda=d.sqds.getProposalPda({multisigPda:s.ms,transactionIndex:batchIndex})[0];
-  if(!(await pdaExists(connection,batchPda))){
-   const setup=[
-    d.sqds.instructions.batchCreate({multisigPda:s.ms,creator:s.member,rentPayer:s.member,batchIndex,vaultIndex:Number(cfg.vaultIndex),memo:'WORLDZ WLDZ 55M owner distribution 2026-09-23'}),
-    d.sqds.instructions.proposalCreate({multisigPda:s.ms,transactionIndex:batchIndex,creator:s.member,rentPayer:s.member,isDraft:true})
-   ];
-   await sendInstructions(connection,d,setup,'1/12 Create distribution batch');
-   save({batchIndex:String(batchIndex)});
+  const d=await deps(),connection=new d.web3.Connection(RPC,'confirmed');
+  let s=await state(connection,d);
+  let stored=null;try{stored=JSON.parse(localStorage.getItem(RESUME_KEY)||'null')}catch{}
+  let index=stored?.index?BigInt(stored.index):BigInt(s.ma.transactionIndex.toString())+1n;
+  let txPda=d.sqds.getTransactionPda({multisigPda:s.ms,index})[0];
+  let proposalPda=d.sqds.getProposalPda({multisigPda:s.ms,transactionIndex:index})[0];
+
+  if(stored?.index && !(await exists(connection,txPda))){
+   localStorage.removeItem(RESUME_KEY);
+   index=BigInt(s.ma.transactionIndex.toString())+1n;
+   txPda=d.sqds.getTransactionPda({multisigPda:s.ms,index})[0];
+   proposalPda=d.sqds.getProposalPda({multisigPda:s.ms,transactionIndex:index})[0];
   }
-  let batch=await d.sqds.accounts.Batch.fromAccountAddress(connection,batchPda,'confirmed');
-  const bh=(await connection.getLatestBlockhash('confirmed')).blockhash;
-  for(let i=0;i<cfg.legs.length;i++){
-   const txPda=d.sqds.getBatchTransactionPda({multisigPda:s.ms,batchIndex,transactionIndex:i+1})[0];
-   if(await pdaExists(connection,txPda))continue;
-   const msg=legMessage(d,s,cfg.legs[i],bh);
-   const ix=d.sqds.instructions.batchAddTransaction({
-    vaultIndex:Number(cfg.vaultIndex),multisigPda:s.ms,member:s.member,rentPayer:s.member,batchIndex,transactionIndex:i+1,ephemeralSigners:0,transactionMessage:msg
+
+  if(!(await exists(connection,txPda))){
+   const bh=(await connection.getLatestBlockhash('confirmed')).blockhash;
+   const vaultMessage=new d.web3.TransactionMessage({payerKey:s.vault,recentBlockhash:bh,instructions:transferInstructions(d,s)});
+   const create=d.sqds.instructions.vaultTransactionCreate({
+    multisigPda:s.ms,transactionIndex:index,creator:s.member,rentPayer:s.member,vaultIndex:Number(cfg.vaultIndex),
+    ephemeralSigners:0,transactionMessage:vaultMessage,memo:'WORLDZ WLDZ 55M owner distribution'
    });
-   await sendInstructions(connection,d,[ix],(i+2)+'/12 Add distribution leg '+(i+1));
+   const proposal=d.sqds.instructions.proposalCreate({multisigPda:s.ms,transactionIndex:index,creator:s.member,rentPayer:s.member,isDraft:true});
+   await sendInstructions(connection,d,[create,proposal],'1/3 Create WLDZ proposal');
+   localStorage.setItem(RESUME_KEY,JSON.stringify({index:String(index)}));
   }
+
   let proposal=await d.sqds.accounts.Proposal.fromAccountAddress(connection,proposalPda,'confirmed');
   let kind=String(proposal.status?.__kind||'').toLowerCase();
   if(kind==='draft'){
    await sendInstructions(connection,d,[
-    d.sqds.instructions.proposalActivate({multisigPda:s.ms,transactionIndex:batchIndex,member:s.member}),
-    d.sqds.instructions.proposalApprove({multisigPda:s.ms,transactionIndex:batchIndex,member:s.member,memo:'JayJayTeamDev approved WLDZ distribution'})
-   ],'7/12 Activate + approve');
+    d.sqds.instructions.proposalActivate({multisigPda:s.ms,transactionIndex:index,member:s.member}),
+    d.sqds.instructions.proposalApprove({multisigPda:s.ms,transactionIndex:index,member:s.member,memo:'JayJayTeamDev approved WLDZ distribution'})
+   ],'2/3 Approve WLDZ proposal');
   }else if(kind==='active'){
-   await sendInstructions(connection,d,[d.sqds.instructions.proposalApprove({multisigPda:s.ms,transactionIndex:batchIndex,member:s.member,memo:'JayJayTeamDev approved WLDZ distribution'})],'7/12 Approve');
+   await sendInstructions(connection,d,[d.sqds.instructions.proposalApprove({multisigPda:s.ms,transactionIndex:index,member:s.member,memo:'JayJayTeamDev approved WLDZ distribution'})],'2/3 Approve WLDZ proposal');
   }
+
   proposal=await d.sqds.accounts.Proposal.fromAccountAddress(connection,proposalPda,'confirmed');
   kind=String(proposal.status?.__kind||'').toLowerCase();
-  if(!['approved','executing','executed'].includes(kind))fail('Proposal is '+kind+'; execution stopped.');
+  if(!['approved','executing','executed'].includes(kind))fail('Proposal status is '+kind+'.');
+
   if(kind!=='executed'){
-   for(let i=0;i<cfg.legs.length;i++){
-    const txPda=d.sqds.getBatchTransactionPda({multisigPda:s.ms,batchIndex,transactionIndex:i+1})[0];
-    if(!(await pdaExists(connection,txPda)))continue;
-    const built=await d.sqds.instructions.batchExecuteTransaction({connection,multisigPda:s.ms,member:s.member,batchIndex,transactionIndex:i+1});
-    await sendInstructions(connection,d,[built.instruction],(i+8)+'/12 Execute distribution leg '+(i+1),built.lookupTableAccounts);
-   }
+   const built=await d.sqds.instructions.vaultTransactionExecute({connection,multisigPda:s.ms,transactionIndex:index,member:s.member});
+   await sendInstructions(connection,d,[built.instruction],'3/3 Execute 55M WLDZ distribution',built.lookupTableAccounts);
   }
-  s=await readState(connection,d);
-  const left=Number(s.sourceWldz/1000000n);
-  status('WLDZ DISTRIBUTION EXECUTED ✅\n\nBatch #'+batchIndex+'\nVault WLDZ remaining: '+left.toLocaleString()+'\n\nOn-chain execution completed.','good');
+
+  await sleep(800);
+  s=await state(connection,d);
   localStorage.removeItem(RESUME_KEY);
+  status('WLDZ DISTRIBUTION EXECUTED ✅\n\nDistributed: 55,000,000 WLDZ\nVault remaining: '+Number(s.sourceWldz/1000000n).toLocaleString()+' WLDZ','good');
  }catch(e){
-  status('STOPPED\n\n'+(e?.message||String(e))+'\n\nNothing else will run until you tap the button again.','bad');
- }finally{$('#sign').disabled=false}
+  status('STOPPED\n\n'+(e?.message||String(e))+'\n\nNo next transaction will be signed until its dry-run passes.','bad');
+ }finally{
+  try{await preflight()}catch{}
+ }
 }
-$('#connect').addEventListener('click',()=>connect().then(()=>preflight()).catch(e=>status(e.message,'bad')));
+
+$('#connect').addEventListener('click',()=>connect().then(preflight).catch(e=>status(e.message,'bad')));
 $('#preflight').addEventListener('click',()=>preflight().catch(e=>status(e.message,'bad')));
 $('#sign').addEventListener('click',run);
 await load();
