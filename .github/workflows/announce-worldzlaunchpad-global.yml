@@ -1,0 +1,105 @@
+name: Announce WorldzLaunchPad Global Launch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/announce-worldzlaunchpad-global.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment:
+      name: cryptoworldz-production
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+    steps:
+      - name: WorldzCast global launch to approved Telegram destinations
+        shell: python
+        run: |
+          import json, os, urllib.request, urllib.error, time
+
+          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          if not token:
+              raise SystemExit("BOT_TOKEN missing")
+          print("::add-mask::"+token)
+
+          photo="https://cryptoworldz.xyz/command-centre-five.png"
+          caption="\n".join([
+              "🚀 WORLDZLAUNCHPAD™ + ZED LED COMMAND CENTRE MAX™",
+              "",
+              "Build • Prove • Launch.",
+              "",
+              "WorldzMINT™ • Flash™ • Curve™ • Curve Pro™ • CrossPair™ • OmniChain™ • Safe Launch Standard™ • Worldz Proof™ • Trust Orbit™",
+              "",
+              "🤖 ZED • 💎 AUTO • 👩‍💼 G.R.A.C.E. • 🧠 MAX • 🧾 RECAP • 🌐 WorldPing™ • 📡 WorldzCast™",
+              "139 registered Command Centre entries across missions, wallets, rewards, research, socials, governance, community tools and more.",
+              "",
+              "🔥 FOUNDING 100™",
+              "10,000,000 WLDZ reserved across 100 qualified verified mainnet positions = 100,000 WLDZ per qualified team position.",
+              "Token allocation — not company equity.",
+              "",
+              "🌐 https://launchpad.cryptoworldz.xyz/worldz-launch/",
+              "🤖 https://cryptoworldz.xyz/command-centre-max/",
+              "💬 WLDZ: https://t.me/CryptoWLDZ",
+              "💬 Command Centre: https://t.me/CryptoWorldzRaaiiiddTeam",
+              "",
+              "𝕏 @WorldzLaunchPad • @CryptoWorldzX • @OneWorldzX • @JayJayTeamDev",
+              "",
+              "CryptoWorldz builds the technology. OneWorldz + DonateWorldz carry the separate humanitarian mission.",
+              "Helping the People who Help the People. 🌏"
+          ])
+
+          destinations=[
+              ("CryptoWLDZ","@CryptoWLDZ"),
+              ("CryptoWorldz Command Centre","-1004404927235"),
+              ("CryptoWorldz HQ","-1003732353996"),
+              ("ImpactBased","-1003953423357"),
+              ("Robin Hood Law Chat","-1004457941804"),
+              ("GIA Token","-1003984616907"),
+              ("Next Big Coin","-1003927687613"),
+              ("OneWorldzTG","-1003946543189"),
+              ("Purple Diamond Crew","-1002542649132"),
+              ("RecoverYourDebt Chat","-1003983518313"),
+              ("SolWorld","-1004352901672"),
+              ("SolWorld Central Elite","-1004352980019"),
+              ("Uganda Unite","-1004341432938"),
+          ]
+
+          api="https://api.telegram.org/bot"+token+"/sendPhoto"
+          sent=0
+          failed=[]
+          for label,chat_id in destinations:
+              payload=json.dumps({
+                  "chat_id":chat_id,
+                  "photo":photo,
+                  "caption":caption
+              }).encode("utf-8")
+              req=urllib.request.Request(api,data=payload,headers={"Content-Type":"application/json"})
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as response:
+                      result=json.loads(response.read().decode("utf-8"))
+                  if result.get("ok") is not True:
+                      raise RuntimeError(str(result)[:500])
+                  msg=result.get("result",{})
+                  print(f"WORLDZCAST_PASS label={label!r} chat={chat_id} message_id={msg.get('message_id','')}")
+                  sent+=1
+              except Exception as exc:
+                  detail=str(exc)
+                  if isinstance(exc, urllib.error.HTTPError):
+                      try:
+                          detail=exc.read().decode("utf-8","ignore")[:700]
+                      except Exception:
+                          pass
+                  print(f"WORLDZCAST_FAIL label={label!r} chat={chat_id} error={detail}")
+                  failed.append((label,chat_id,detail))
+              time.sleep(0.12)
+
+          print(f"WORLDZCAST_SUMMARY sent={sent} failed={len(failed)} total={len(destinations)}")
+          if sent == 0:
+              raise SystemExit("No Telegram destination accepted the WorldzLaunchPad launch")
