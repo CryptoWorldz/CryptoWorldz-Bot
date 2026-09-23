@@ -115,13 +115,13 @@ def card(title: str, copy: str, href: str|None=None, image: str|None=None) -> st
     return f'<a class="wx-card" href="{href}" style="color:inherit;text-decoration:none">{content}</a>' if href else f'<article class="wx-card">{content}</article>'
 
 def ensure_css():
-    for domain in DOMAINS:
+    for domain in DOMAINS + ["launchpad.cryptoworldz.xyz"]:
         d=ROOT/domain
         d.mkdir(parents=True,exist_ok=True)
         (d/"worldz-nextgen.css").write_text(CSS,encoding="utf-8")
 
 def inject_all_html():
-    for domain in DOMAINS:
+    for domain in DOMAINS + ["launchpad.cryptoworldz.xyz"]:
         for p in (ROOT/domain).rglob("*.html"):
             text=p.read_text(encoding="utf-8",errors="ignore")
             if "worldz-nextgen.css" not in text:
