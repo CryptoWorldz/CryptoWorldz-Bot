@@ -21,6 +21,9 @@ jobs:
           import json, urllib.request, urllib.error
           mint="AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U"
           urls={
+            "CANONICAL_METADATA":f"https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-genesis-console?metadata={mint}",
+            "PUBLIC_MANIFEST":"https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json",
+            "PUBLIC_METADATA":"https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json",
             "JUPITER":f"https://lite-api.jup.ag/tokens/v2/search?query={mint}",
             "DEXSCREENER":f"https://api.dexscreener.com/tokens/v1/solana/{mint}",
             "GECKOTERMINAL":f"https://api.geckoterminal.com/api/v2/networks/solana/tokens/{mint}",
