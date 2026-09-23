@@ -214,7 +214,19 @@ async function start() {
   startupStage = "register_executive_routes";
   registerExecutiveRoutes({ app, repository, config, supabase });
   startupStage = "register_grace_routes";
-  registerGraceRoutes({ app, graceRepository, graceOAuth, graceFacebookOAuth, apiSecret: process.env.GRACE_API_SECRET || "" });
+  registerGraceRoutes({
+    app,
+    graceRepository,
+    graceOAuth,
+    graceFacebookOAuth,
+    graceXDiagnostics: {
+      clientId: Boolean(graceXClientId),
+      clientSecret: Boolean(graceXClientSecret),
+      redirectUri: Boolean(graceXRedirectUri),
+      encryption: encryptionSecret.length >= 32
+    },
+    apiSecret: process.env.GRACE_API_SECRET || ""
+  });
   startupStage = "register_community_directory";
   registerCommunityDirectoryHandlers({ bot, supabase, config });
   startupStage = "app_listen";
