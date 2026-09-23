@@ -59,37 +59,42 @@ jobs:
           if not cid or not secret: raise SystemExit("X client credentials missing")
           print("::add-mask::"+cid); print("::add-mask::"+secret)
 
-          body=urllib.parse.urlencode({
+          common={
               "code":"INTENTIONAL_DIAGNOSTIC_INVALID_CODE",
               "grant_type":"authorization_code",
               "redirect_uri":redirect,
               "code_verifier":"diagnostic-verifier-not-a-real-oauth-attempt"
-          }).encode()
-          basic=base64.b64encode((cid+":"+secret).encode()).decode()
-          req=urllib.request.Request(
-              "https://api.x.com/2/oauth2/token",
-              data=body,
-              headers={"Authorization":"Basic "+basic,"Content-Type":"application/x-www-form-urlencoded"},
-              method="POST"
-          )
-          try:
-              with urllib.request.urlopen(req,timeout=30) as resp:
-                  code=resp.status; payload=json.loads(resp.read().decode())
-          except urllib.error.HTTPError as exc:
-              code=exc.code
-              try: payload=json.loads(exc.read().decode())
-              except Exception: payload={"error":"non_json_response"}
-
-          safe={
-              "http":code,
-              "error":payload.get("error"),
-              "error_description":payload.get("error_description"),
-              "title":payload.get("title"),
-              "detail":payload.get("detail")
           }
-          print("X_TOKEN_AUTH_PROBE="+json.dumps(safe,separators=(",",":")))
-          text=" ".join(str(v or "") for v in safe.values()).lower()
-          if "missing valid authorization header" in text or "invalid_client" in text or "client authentication" in text:
-              raise SystemExit("X_CLIENT_AUTHENTICATION_REJECTED")
-          if code in (400,401,403):
-              print("X_CLIENT_AUTHENTICATION_REACHED_TOKEN_VALIDATION=YES")
+
+          def probe(label,body_map,headers):
+              body=urllib.parse.urlencode(body_map).encode()
+              req=urllib.request.Request("https://api.x.com/2/oauth2/token",data=body,headers=headers,method="POST")
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as resp:
+                      code=resp.status; payload=json.loads(resp.read().decode())
+              except urllib.error.HTTPError as exc:
+                  code=exc.code
+                  try: payload=json.loads(exc.read().decode())
+                  except Exception: payload={"error":"non_json_response"}
+              safe={"http":code,"error":payload.get("error"),"error_description":payload.get("error_description"),"title":payload.get("title"),"detail":payload.get("detail")}
+              print(label+"="+json.dumps(safe,separators=(",",":")))
+              return safe
+
+          raw_basic=base64.b64encode((cid+":"+secret).encode()).decode()
+          raw=probe("X_AUTH_RAW_BASIC",common,{"Authorization":"Basic "+raw_basic,"Content-Type":"application/x-www-form-urlencoded"})
+
+          encoded_pair=urllib.parse.quote_plus(cid,safe="")+":"+urllib.parse.quote_plus(secret,safe="")
+          encoded_basic=base64.b64encode(encoded_pair.encode()).decode()
+          enc=probe("X_AUTH_ENCODED_BASIC",common,{"Authorization":"Basic "+encoded_basic,"Content-Type":"application/x-www-form-urlencoded"})
+
+          post=probe("X_AUTH_CLIENT_SECRET_POST",{**common,"client_id":cid,"client_secret":secret},{"Content-Type":"application/x-www-form-urlencoded"})
+
+          def rejected(safe):
+              text=" ".join(str(v or "") for v in safe.values()).lower()
+              return "missing valid authorization header" in text or "invalid_client" in text or "unauthorized_client" in text
+
+          print("X_AUTH_RAW_BASIC_ACCEPTED="+("NO" if rejected(raw) else "YES"))
+          print("X_AUTH_ENCODED_BASIC_ACCEPTED="+("NO" if rejected(enc) else "YES"))
+          print("X_AUTH_CLIENT_SECRET_POST_ACCEPTED="+("NO" if rejected(post) else "YES"))
+          if rejected(raw) and rejected(enc) and rejected(post):
+              raise SystemExit("ALL_X_CLIENT_AUTH_METHODS_REJECTED")
