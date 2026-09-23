@@ -139,7 +139,8 @@ jobs:
             root/'mint/index.html',root/'mint/app.js',root/'mint/jupiter-mobile.js',
             root/'trust/index.html',root/'trust/app.js',
             root/'omnichain/index.html',root/'technology/index.html',root/'technology.html',
-            root/'wldz/index.html',root/'wldz/app.js',root/'wldz/proposal.js',root/'wldz/launch-config.json'
+            root/'wldz/index.html',root/'wldz/app.js',root/'wldz/proposal.js',root/'wldz/launch-config.json',
+            root/'worldz-launch/index.html',root/'worldz-launch/campaign.json',root/'worldz-launch/social-pack.json'
           ]
           for p in required:
               assert p.is_file() and p.stat().st_size>500, p
@@ -188,12 +189,15 @@ jobs:
           assert wldz_cfg['launch']['baseAmountTokens']==15000000
           assert wldz_cfg['launch']['permanentLock'] is True
           assert wldz_cfg['execution']['publicCreatorGate'] is False
-        campaign_json=json.loads(campaign_json_body)
-        assert campaign_code==200 and 'WORLDZLAUNCHPAD™ + COMMAND CENTRE MAX™' in campaign_body
-        assert '100,000 WLDZ' in campaign_body and '139' in campaign_body
-        assert campaign_json_code==200 and campaign_json['status']=='PUBLIC'
-        assert campaign_json['wldz']['symbol']=='WLDZ'
-        assert campaign_json['wldz']['founding100']['wldzPerQualifiedPosition']==100000
+          campaign_html=(root/'worldz-launch'/'index.html').read_text()
+          campaign_json=json.loads((root/'worldz-launch'/'campaign.json').read_text())
+          social_pack=json.loads((root/'worldz-launch'/'social-pack.json').read_text())
+          assert 'WORLDZLAUNCHPAD™ + COMMAND CENTRE MAX™' in campaign_html
+          assert '100,000 WLDZ' in campaign_html and '139' in campaign_html
+          assert campaign_json['status']=='PUBLIC'
+          assert campaign_json['wldz']['symbol']=='WLDZ'
+          assert campaign_json['wldz']['founding100']['wldzPerQualifiedPosition']==100000
+          assert social_pack['approvedBy']=='JayJayTeamDev'
           assert 'Swap API V2' in technology_html
           assert 'Worldz Confidence Pulse' in technology_html
           assert 'Worldz Fee Flow' in technology_html
@@ -579,8 +583,8 @@ jobs:
                   wldz_code,wldz_body=get(base+'/wldz/?verify=wldz-v1')
                   wldz_js_code,wldz_js_body=get(base+'/wldz/proposal.js?verify=wldz-v1')
                   wldz_cfg_code,wldz_cfg_body=get(base+'/wldz/launch-config.json?verify=wldz-v1')
-        campaign_code,campaign_body=get(base+'/worldz-launch/?verify=worldz-launch-v1')
-        campaign_json_code,campaign_json_body=get(base+'/worldz-launch/campaign.json?verify=worldz-launch-v1')
+                  campaign_code,campaign_body=get(base+'/worldz-launch/?verify=worldz-launch-v1')
+                  campaign_json_code,campaign_json_body=get(base+'/worldz-launch/campaign.json?verify=worldz-launch-v1')
                   status_code,status_body=get(base+'/status.php?verify=public-v6')
                   reg_code,reg_body=get(registry+'?verify=public-v6')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
@@ -606,9 +610,9 @@ jobs:
                   assert platform['confidenceConstellation']['opaqueSafetyScore'] is False
                   assert platform['founding100']['totalPositions']==100
                   assert platform['founding100']['futureWorldzPoolPercent']==10
-        assert platform['founding100']['canonicalTokenSymbol']=='WLDZ'
-        assert platform['founding100']['wldzAllocationPoolTokens']==10000000
-        assert platform['founding100']['wldzPerQualifiedPositionTokens']==100000
+                  assert platform['founding100']['canonicalTokenSymbol']=='WLDZ'
+                  assert platform['founding100']['wldzAllocationPoolTokens']==10000000
+                  assert platform['founding100']['wldzPerQualifiedPositionTokens']==100000
                   assert platform['baseEvmFair']['status']=='BASE_SEPOLIA_BETA'
                   assert platform['baseEvmFair']['mainnetExecution'] is False
                   assert platform['treasuryStandard']['operationsTreasury']['policy']=='5-of-10'
@@ -638,6 +642,12 @@ jobs:
                   assert wldz_cfg_code==200 and wldz_cfg['token']['mint']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
                   assert wldz_cfg['launch']['baseAmountTokens']==15000000 and wldz_cfg['launch']['permanentLock'] is True
                   assert wldz_cfg['execution']['publicCreatorGate'] is False
+                  campaign_json=json.loads(campaign_json_body)
+                  assert campaign_code==200 and 'WORLDZLAUNCHPAD™ + COMMAND CENTRE MAX™' in campaign_body
+                  assert '100,000 WLDZ' in campaign_body and '139' in campaign_body
+                  assert campaign_json_code==200 and campaign_json['status']=='PUBLIC'
+                  assert campaign_json['wldz']['symbol']=='WLDZ'
+                  assert campaign_json['wldz']['founding100']['wldzPerQualifiedPosition']==100000
                   assert 'RESUME_KEY' in wldz_js_body
                   assert 'confirmation.value.err!==null' in wldz_js_body
                   assert 'getTransactionPda' in wldz_js_body
