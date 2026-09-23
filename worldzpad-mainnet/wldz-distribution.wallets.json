@@ -1,0 +1,130 @@
+{
+  "version": "WLDZ-DISTRIBUTION-WALLETS-2026-09-23-A",
+  "network": "solana-mainnet-beta",
+  "tokenMint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+  "sourceVault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+  "ownerSigner": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+  "input": {
+    "entries": [
+      "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+      "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+      "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9",
+      "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
+      "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j",
+      "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt",
+      "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
+      "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U",
+      "8VZZ7j63E2ARRNho4SwqFthUjWnWK8S5BHPfmJCb4UHK",
+      "G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3"
+    ],
+    "uniqueAddressCount": 9,
+    "duplicateInputAddress": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW"
+  },
+  "commandCentreFourWallets": [
+    {
+      "purpose": "dev",
+      "label": "CryptoWorldz Dev & Launch Wallet",
+      "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+      "status": "active"
+    },
+    {
+      "purpose": "investment",
+      "label": "AUTO / Diamond Buy Wallet",
+      "address": "8VZZ7j63E2ARRNho4SwqFthUjWnWK8S5BHPfmJCb4UHK",
+      "status": "active",
+      "preservePurpose": true
+    },
+    {
+      "purpose": "treasury",
+      "label": "Treasury Multisig Wallet",
+      "address": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "status": "active"
+    },
+    {
+      "purpose": "rewards",
+      "label": "CryptoWorldz Reward Wallet",
+      "address": "fa35y2GdDKhdZ6uyS5mouEPQSFiHGyRuMSWp3Vz5Cob",
+      "status": "active"
+    }
+  ],
+  "knownLegacyWallets": [
+    {
+      "address": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9",
+      "label": "SolSavewXRP",
+      "walletRole": "legacy_dev",
+      "wldzRole": "GENERAL_RESERVE_DISTRIBUTION",
+      "wldzTokens": 5000000
+    },
+    {
+      "address": "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j",
+      "label": "PdCrew",
+      "walletRole": "legacy_dev",
+      "wldzRole": "VERIFIED_FUTURE_TEAM_RESERVE",
+      "wldzTokens": 4000000
+    },
+    {
+      "address": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt",
+      "label": "Next Big Coin Dev",
+      "walletRole": "legacy_dev",
+      "wldzRole": "WORLDZLAUNCHPAD_FIRST_100_REWARD_POOL",
+      "wldzTokens": 10000000
+    },
+    {
+      "address": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
+      "label": "Limited Edition",
+      "walletRole": "legacy_dev",
+      "wldzRole": "OPERATIONS_SECURITY_INFRASTRUCTURE_DISTRIBUTION",
+      "wldzTokens": 5000000
+    },
+    {
+      "address": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U",
+      "label": "Purple Diamond Crew",
+      "walletRole": "legacy_dev",
+      "wldzRole": "PURPLE_DIAMOND_HANDZ_DISTRIBUTION_POOL",
+      "wldzTokens": 5000000
+    },
+    {
+      "address": "G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3",
+      "label": "Purple PDC",
+      "walletRole": "legacy_dev",
+      "fourTokenRole": "REVIVAL_DISTRIBUTION_RESERVE"
+    }
+  ],
+  "newDistributionWallets": [
+    {
+      "address": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+      "wldzRole": "ONEWORLDZ_CHARITY_IMPACT_DISTRIBUTION",
+      "wldzTokens": 10000000
+    },
+    {
+      "address": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
+      "wldzRole": "DEV_CITY_50_WALLET_DISTRIBUTION_POOL",
+      "wldzTokens": 5000000,
+      "fanout": {
+        "recipients": 50,
+        "tokensEach": 100000
+      }
+    }
+  ],
+  "directTeamTransfers": [
+    {
+      "name": "JayJayTeamDev",
+      "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+      "wldzTokens": 8000000
+    },
+    {
+      "name": "Stepper",
+      "address": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
+      "wldzTokens": 1000000
+    }
+  ],
+  "commandCentreRewardAllocation": {
+    "address": "fa35y2GdDKhdZ6uyS5mouEPQSFiHGyRuMSWp3Vz5Cob",
+    "wldzTokens": 2000000
+  },
+  "remainingInTreasuryAfterPlannedWldzDistribution": {
+    "stagedLiquidityReserveTokens": 20000000,
+    "worldzTreasuryTokens": 10000000,
+    "totalTokens": 30000000
+  }
+}
