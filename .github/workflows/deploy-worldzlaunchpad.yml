@@ -515,6 +515,28 @@ jobs:
           assert not failed, failed[:5]
           print(f'WORLDZLAUNCHPAD_POLICY_SCENARIOS=PASS scenarios={len(cases)}')
 
+      - name: Enforce official WorldzLaunchPad logo
+        shell: python
+        run: |
+          from pathlib import Path
+
+          root=Path('launchpad.cryptoworldz.xyz')
+          css=(root/'style.css').read_text(encoding='utf-8')
+          assert '.brand-logo-official{' in css, 'official-logo-style-missing'
+          assert 'data:image/webp;base64,' in css, 'official-logo-asset-missing'
+
+          branded=0
+          for p in root.rglob('*.html'):
+              text=p.read_text(encoding='utf-8',errors='ignore')
+              if 'class="brand"' not in text:
+                  continue
+              branded += 1
+              assert 'brand-orb' not in text, f'GENERIC_BRAND_ORB_FORBIDDEN {p}'
+              assert 'brand-logo-official' in text, f'OFFICIAL_LOGO_REQUIRED {p}'
+
+          assert branded >= 15, branded
+          print(f'WORLDZLAUNCHPAD_OFFICIAL_LOGO_GATE=PASS pages={branded}')
+
       - name: Deploy public WorldzLaunchPad to Hostinger
         shell: python
         run: |
