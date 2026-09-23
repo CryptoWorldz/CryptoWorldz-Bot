@@ -1,5 +1,5 @@
 {
-  "version": "WLDZ-DISTRIBUTION-SIGN-2026-09-23-C",
+  "version": "WLDZ-DISTRIBUTION-SIGN-2026-09-23-D",
   "network": "mainnet-beta",
   "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
   "decimals": 6,
@@ -71,11 +71,17 @@
     ]
   ],
   "feePolicy": {
-    "mode": "JAYJAY_SIGNER_PAYS_ALL_SOL_FEES_AND_RENT",
+    "mode": "JAYJAY_SIGNER_PAYS_SOL_FEES_AND_RECIPIENT_ACCOUNT_RENT",
     "payer": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
     "vaultSolRequiredForDistribution": false,
     "treasuryBootstrap": false,
-    "safetyBufferSol": 0.02,
-    "note": "Recipient WLDZ associated token accounts are created by the JayJayTeamDev signer before the Squads transfer. The Squads vault supplies WLDZ only."
+    "note": "Create recipient WLDZ associated token accounts from JayJayTeamDev before running the Squads distribution. The Squads vault supplies WLDZ only."
+  },
+  "feeBootstrap": {
+    "minimumSignerSol": 0.02,
+    "targetSignerSol": 0,
+    "maximumTreasuryTopupSol": 0,
+    "vaultSafetyReserveSol": 0,
+    "source": "JAYJAY_SIGNER_ONLY"
   }
 }
