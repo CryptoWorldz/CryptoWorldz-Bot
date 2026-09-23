@@ -107,7 +107,7 @@ jobs:
               redirectUri,
               encryptionSecret
             });
-            if (!clientSecret || !oauth.configured()) throw new Error("grace_x_oauth_not_configured");
+            if (!oauth.configured()) throw new Error("grace_x_oauth_not_configured");
 
             const publisher = createGracePublisher({
               tokenProvider: async (target) => {
