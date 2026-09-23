@@ -54,8 +54,9 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Publish approved WorldzLaunchPad Grace targets now
-        shell: node
+        shell: bash
         run: |
+          node <<'NODE'
           const crypto = require("node:crypto");
           const { loadProtectedEnvironment } = require("./src/protected-env");
           loadProtectedEnvironment({ appRoot: process.cwd() });
@@ -143,3 +144,4 @@ jobs:
             console.error("GRACE_WORLDZ_CAMPAIGN_ERROR="+String(error.code||error.message||error).slice(0,220));
             process.exitCode=1;
           });
+          NODE
