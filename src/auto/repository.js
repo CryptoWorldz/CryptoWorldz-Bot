@@ -25,7 +25,7 @@ function createAutoRepository(supabase) {
       action,
       actor_telegram_id: actorTelegramId,
       details,
-      service_mode: "safe_locked"
+      service_mode: "owner_dca"
     });
     if (error) throw error;
   }
