@@ -7,13 +7,13 @@ const PROTECTED_DOMAIN = "cryptobotz.cryptoworldz.xyz";
 function candidateEnvironmentFiles({ appRoot = path.join(__dirname, ".."), env = process.env, home = os.homedir() } = {}) {
   const files = [];
   if (String(env.ONEWORLDZ_ENV_FILE || "").trim()) files.push(path.resolve(String(env.ONEWORLDZ_ENV_FILE).trim()));
-  files.push(path.join(appRoot, ".env"));
   for (let current = path.resolve(appRoot); current !== path.dirname(current); current = path.dirname(current)) {
     if (path.basename(current) === "nodejs") {
       files.push(path.join(current, ".env"));
       break;
     }
   }
+  files.push(path.join(appRoot, ".env"));
   for (const root of [String(env.HOME || "").trim(), String(home || "").trim()]) {
     if (root) files.push(path.join(root, "domains", PROTECTED_DOMAIN, "nodejs", ".env"));
   }
