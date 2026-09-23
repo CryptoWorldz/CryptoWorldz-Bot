@@ -1,0 +1,43 @@
+# WorldzLaunchPad / WORLDZ (WLDZ)
+
+Official canonical token: WORLDZ
+Ticker: WLDZ
+Network: Solana mainnet-beta
+Mint: AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U
+Decimals: 6
+Maximum supply: 100,000,000 WLDZ
+Mint authority: revoked
+Freeze authority: revoked
+Wallet transfer tax: 0%
+
+WORLDZ (WLDZ) is the canonical WorldzLaunchPad token on Solana, powering the CryptoWorldz ecosystem, community rewards, liquidity, development, charity impact, and future WorldzLaunchPad launches.
+
+## Official sites
+- WORLDZ token: https://launchpad.cryptoworldz.xyz/wldz/
+- Token identity / verification: https://launchpad.cryptoworldz.xyz/wldz/verify/
+- CryptoWorldz: https://cryptoworldz.xyz/
+- OneWorldz: https://oneworldz.com/
+- DonateWorldz: https://donateworldz.com/
+- WorldzLaunchPad: https://launchpad.cryptoworldz.xyz/
+- Telegram: https://t.me/CryptoWLDZ
+
+## Trading
+- DEX: Meteora DAMM v2
+- Pair: WLDZ / wSOL
+- Pool: GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ
+- Base trading fee: 2% / 200 bps
+- Initial live liquidity allocation: 15,000,000 WLDZ
+- Staged liquidity reserve: 20,000,000 WLDZ
+- LP position: permanently locked
+
+## Machine-readable endpoints
+- https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json
+- https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json
+- https://launchpad.cryptoworldz.xyz/tokenlist.json
+- https://launchpad.cryptoworldz.xyz/wldz/distribution.json
+- https://launchpad.cryptoworldz.xyz/wldz/fees.json
+- https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php
+- https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php?format=plain
+- https://launchpad.cryptoworldz.xyz/wldz/platform-submission-pack.json
+
+Always resolve WORLDZ / WLDZ to the exact canonical mint above.
