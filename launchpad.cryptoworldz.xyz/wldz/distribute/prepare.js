@@ -73,6 +73,7 @@ async function missingRecipientAccounts(connection,d,cfg){
 }
 async function prepareRecipients(){
  const btn=document.querySelector('#prepare-accounts');if(btn)btn.disabled=true;
+ const main=document.querySelector('#status');if(main){main.textContent='Preparing recipient WLDZ accounts from JayJayTeamDev. Squads vault SOL required: 0.';main.className='status warn';}
  try{
   const [d,cfg]=await Promise.all([getPrepDeps(),getPrepCfg()]);
   await prepConnect();
@@ -80,6 +81,7 @@ async function prepareRecipients(){
   let missing=await missingRecipientAccounts(connection,d,cfg);
   if(!missing.length){
    prepStatus('RECIPIENT ACCOUNTS READY ✅\nAll 10 WLDZ recipient accounts already exist. Squads vault SOL is not needed.','good');
+   const main=document.querySelector('#status');if(main){main.textContent='Recipient accounts ready ✅ — checking balance now…';main.className='status good';}
    document.querySelector('#preflight')?.click();return;
   }
   const mint=new d.web3.PublicKey(cfg.mint);
@@ -92,7 +94,8 @@ async function prepareRecipients(){
   }
   missing=await missingRecipientAccounts(connection,d,cfg);
   if(missing.length)throw new Error(missing.length+' recipient account(s) did not confirm.');
-  prepStatus('RECIPIENT ACCOUNTS READY ✅\nJayJayTeamDev paid the account rent. Squads vault SOL required: 0.\n\nNow tap Check Balance.','good');
+  prepStatus('RECIPIENT ACCOUNTS READY ✅\nJayJayTeamDev paid the account rent. Squads vault SOL required: 0.\n\nChecking balance now…','good');
+  const main=document.querySelector('#status');if(main){main.textContent='Recipient accounts ready ✅ — checking balance now…';main.className='status good';}
   document.querySelector('#preflight')?.click();
  }catch(e){
   prepStatus('PREPARATION STOPPED\n'+(e?.message||String(e)),'bad');
