@@ -1,4 +1,5 @@
 name: WORLDZ Registry Watch
+# Canonical WORLDZ propagation watch
 
 on:
   push:
