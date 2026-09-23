@@ -1,0 +1,176 @@
+name: Sync Grace X Hostinger Runtime Env
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/sync-grace-x-hostinger-env.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      DOMAIN: cryptobotz.cryptoworldz.xyz
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+    steps:
+      - name: Fetch protected runtime environment
+        shell: python
+        run: |
+          import io, os
+          from ftplib import FTP_TLS
+
+          host=os.environ["FTP_HOST"].replace("ftps://","").replace("ftp://","").split("/")[0]
+          if host.count(":")==1:
+              host=host.split(":",1)[0]
+
+          ftp=FTP_TLS()
+          ftp.connect(host,int(os.environ.get("FTP_PORT","21")),timeout=45)
+          ftp.login(os.environ["FTP_USERNAME"],os.environ["FTP_PASSWORD"])
+          ftp.prot_p()
+          buf=io.BytesIO()
+          ftp.retrbinary("RETR /domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",buf.write)
+          ftp.quit()
+
+          data=buf.getvalue()
+          if not data.strip():
+              raise SystemExit("Protected runtime .env is empty")
+
+          path=os.path.join(os.environ["RUNNER_TEMP"],"protected.env")
+          open(path,"wb").write(data)
+          print("PROTECTED_ENV_FETCH=PASS")
+
+      - name: Build complete Hostinger environment payload safely
+        shell: python
+        run: |
+          import json, os, re
+
+          src=os.path.join(os.environ["RUNNER_TEMP"],"protected.env")
+          env={}
+          for raw in open(src,encoding="utf-8").read().splitlines():
+              line=raw.strip()
+              if not line or line.startswith("#") or "=" not in line:
+                  continue
+              key,value=line.split("=",1)
+              key=re.sub(r"^export\s+","",key).strip()
+              value=value.strip()
+              if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
+                  value=value[1:-1]
+              if not re.fullmatch(r"[A-Z_][A-Z0-9_]*",key):
+                  continue
+              if value:
+                  env[key]=value
+
+          env.setdefault("GRACE_X_REDIRECT_URI","https://cryptobotz.cryptoworldz.xyz/grace/oauth/x/callback")
+
+          required=["GRACE_X_CLIENT_ID","GRACE_X_CLIENT_SECRET","GRACE_X_REDIRECT_URI"]
+          missing=[k for k in required if not env.get(k)]
+          if missing:
+              raise SystemExit("Missing required protected variables: "+",".join(missing))
+
+          for value in env.values():
+              print("::add-mask::"+value)
+
+          payload={"env_vars":[{"key":k,"value":v} for k,v in sorted(env.items())]}
+          out=os.path.join(os.environ["RUNNER_TEMP"],"hostinger-env.json")
+          with open(out,"w",encoding="utf-8") as fh:
+              json.dump(payload,fh,separators=(",",":"))
+
+          print("HOSTINGER_ENV_PAYLOAD=READY")
+          print("HOSTINGER_ENV_KEYS="+str(len(payload["env_vars"])))
+          print("GRACE_X_CLIENT_ID_SOURCE=READY")
+          print("GRACE_X_CLIENT_SECRET_SOURCE=READY")
+          print("GRACE_X_REDIRECT_SOURCE=READY")
+
+      - name: Resolve Hostinger Node website
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location             -H "Authorization: Bearer $HOSTINGER_API_TOKEN"             -H "Accept: application/json"             "https://developers.hostinger.com/api/hosting/v1/websites?domain=$DOMAIN&per_page=25"             -o "$RUNNER_TEMP/websites.json"
+
+          HOSTINGER_USERNAME="$(node - <<'NODE'
+          const fs=require("fs");
+          const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/websites.json","utf8"));
+          const d=String(process.env.DOMAIN).toLowerCase();
+          const rows=Array.isArray(p)?p:(p.data||[]);
+          const row=rows.find(x=>String(x.domain||"").toLowerCase()===d);
+          if(!row?.username) process.exit(2);
+          process.stdout.write(String(row.username));
+          NODE
+          )"
+          echo "::add-mask::$HOSTINGER_USERNAME"
+          echo "HOSTINGER_USERNAME=$HOSTINGER_USERNAME" >> "$GITHUB_ENV"
+          echo "HOSTINGER_NODE_SITE=FOUND"
+
+      - name: Replace Hostinger Node environment variables
+        shell: bash
+        run: |
+          set -euo pipefail
+          user_enc="$(node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
+          domain_enc="$(node -p 'encodeURIComponent(process.env.DOMAIN)')"
+          endpoint="https://developers.hostinger.com/api/hosting/v1/accounts/$user_enc/websites/$domain_enc/nodejs/builds/settings/env"
+
+          code="$(curl --silent --show-error --location             --request PUT             -o "$RUNNER_TEMP/env-response.json"             -w '%{http_code}'             -H "Authorization: Bearer $HOSTINGER_API_TOKEN"             -H "Accept: application/json"             -H "Content-Type: application/json"             --data-binary "@$RUNNER_TEMP/hostinger-env.json"             "$endpoint" || true)"
+
+          case "$code" in
+            200|201|202|204) echo "HOSTINGER_NODE_ENV_SYNC=PASS HTTP=$code";;
+            *) echo "HOSTINGER_NODE_ENV_SYNC=FAIL HTTP=$code"; exit 1;;
+          esac
+
+      - name: Verify configured keys are registered in Hostinger
+        shell: bash
+        run: |
+          set -euo pipefail
+          user_enc="$(node -p 'encodeURIComponent(process.env.HOSTINGER_USERNAME)')"
+          domain_enc="$(node -p 'encodeURIComponent(process.env.DOMAIN)')"
+          endpoint="https://developers.hostinger.com/api/hosting/v1/accounts/$user_enc/websites/$domain_enc/nodejs/builds/settings/env"
+
+          curl --fail --silent --show-error --location             -H "Authorization: Bearer $HOSTINGER_API_TOKEN"             -H "Accept: application/json"             "$endpoint" -o "$RUNNER_TEMP/env-list.json"
+
+          node - <<'NODE'
+          const fs=require("fs");
+          const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/env-list.json","utf8"));
+          const rows=Array.isArray(p)?p:(p.data||p.items||[]);
+          const keys=new Set(rows.map(x=>String(x.key||x.name||"")));
+          for(const k of ["GRACE_X_CLIENT_ID","GRACE_X_CLIENT_SECRET","GRACE_X_REDIRECT_URI"]){
+            if(!keys.has(k)) throw new Error(k+"_NOT_REGISTERED");
+            console.log(k+"_REGISTERED=YES");
+          }
+          NODE
+
+      - name: Verify live Grace X OAuth
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 18); do
+            sleep 5
+            if curl --fail --silent --show-error --location               "https://cryptobotz.cryptoworldz.xyz/grace/health?envsync=$GITHUB_RUN_ID-$i"               -o "$RUNNER_TEMP/grace.json"; then
+              if node - <<'NODE'
+          const fs=require("fs");
+          const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/grace.json","utf8"));
+          if(p.ok!==true) process.exit(1);
+          if(p.x_client_id_configured!==true) process.exit(1);
+          if(p.x_client_secret_configured!==true) process.exit(1);
+          if(p.x_redirect_configured!==true) process.exit(1);
+          if(p.x_encryption_configured!==true) process.exit(1);
+          if(p.x_oauth_configured!==true) process.exit(1);
+          console.log("GRACE_X_LIVE=PASS");
+          NODE
+              then
+                exit 0
+              fi
+            fi
+            echo "GRACE_X_LIVE_WAIT attempt=$i/18"
+          done
+          echo "GRACE_X_LIVE=FAIL"
+          exit 1
