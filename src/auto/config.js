@@ -7,12 +7,9 @@ function required(name, env) {
 }
 
 function loadAutoConfig(env = process.env) {
-  const mode = String(env.AUTO_MODE || "safe_locked").trim().toLowerCase();
+  const mode = String(env.AUTO_MODE || "owner_dca").trim().toLowerCase();
   if (!new Set(["safe_locked", "owner_dca"]).has(mode)) {
     throw new Error("AUTO_MODE must be safe_locked or owner_dca.");
-  }
-  if (parseBoolean(env.AUTO_EXECUTION_ENABLED, false)) {
-    throw new Error("AUTO_EXECUTION_ENABLED must remain false. Use the separate Auto DCA gate.");
   }
   if (env.AUTO_WALLET_PRIVATE_KEY || env.AUTO_WALLET_SEED || env.AUTO_SIGNER_SECRET) {
     throw new Error("Wallet signing secrets are forbidden in the Auto control service. The separate executor owns signing.");
