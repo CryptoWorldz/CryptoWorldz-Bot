@@ -2,7 +2,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
   const isOwner = (msg) => String(msg.from?.id || "") === String(config.ownerTelegramId || "");
   const send = (msg, text) => bot.sendMessage(msg.chat.id, text);
 
-  async function isSafetyExecutive(msg) {
+  async function isAutoExecutive(msg) {
     if (isOwner(msg)) return true;
     if (!supabase || !msg.from?.id) return false;
     const { data, error } = await supabase
@@ -19,7 +19,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
   }
 
   function executiveRequired(msg) {
-    return send(msg, "⛔ Permanent Owner or Executive Leader safety access required.");
+    return send(msg, "⛔ Permanent Owner or Executive Leader access required.");
   }
 
   function formatStatus(payload) {
@@ -30,8 +30,8 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
     return [
       "💎 Diamond Buy™ Auto",
       "",
-      `Legacy safety mode: ${String(status.mode || "unknown").toUpperCase()}`,
-      `Legacy execution: ${status.execution_enabled ? "ENABLED" : "LOCKED"}`,
+      `AUTO mode: ${String(dca.mode || status.mode || "owner_dca").toUpperCase()}`,
+      `DCA execution: ${dca.execution_enabled ? "ENABLED" : "READY WHEN OWNER ENABLES"}`,
       `Paused: ${status.paused ? "YES" : "NO"}`,
       `Emergency stop: ${status.emergency_stop ? "ACTIVE" : "CLEAR"}`,
       `Allowlisted tokens: ${status.allowlisted_tokens || 0}`,
@@ -86,7 +86,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
 
   bot.onText(/^\/auto(?:@\w+)?$/, async (msg) => {
     try {
-      if (!(await isSafetyExecutive(msg))) return executiveRequired(msg);
+      if (!(await isAutoExecutive(msg))) return executiveRequired(msg);
       return send(msg, formatStatus(await autoClient.status()));
     } catch (error) {
       if (error.code === "AUTO_NOT_CONFIGURED") return send(msg, "💎 Auto is prepared but not connected to its separate service yet.");
@@ -128,7 +128,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
       return send(msg, `✅ Auto Simulation Accepted\n\nToken: ${proposal.token_mint}\nOrders: ${proposal.order_count}\nAmount: ${proposal.amount_per_order} ${proposal.currency}\nTotal: ${proposal.total_amount} ${proposal.currency}\nInterval: ${proposal.interval_minutes} minutes\n\nNo transaction was attempted.`);
     } catch (error) {
       const errors = error.payload?.result?.errors;
-      return send(msg, `⚠️ Auto Simulation Rejected\n\n${Array.isArray(errors) && errors.length ? errors.join("\n") : "The proposed settings did not pass the safety rules."}\n\nNo transaction was attempted.`);
+      return send(msg, `⚠️ Auto Simulation Rejected\n\n${Array.isArray(errors) && errors.length ? errors.join("\n") : "The proposed settings did not pass the AUTO rules."}\n\nNo transaction was attempted.`);
     }
   });
 
@@ -206,7 +206,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
 
   bot.onText(/^\/autopause(?:@\w+)?$/, async (msg) => {
     try {
-      if (!(await isSafetyExecutive(msg))) return executiveRequired(msg);
+      if (!(await isAutoExecutive(msg))) return executiveRequired(msg);
       await autoClient.pause();
       return send(msg, "⏸ Auto paused. DCA execution is disabled until the owner re-enables it.");
     } catch {
@@ -226,7 +226,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
 
   bot.onText(/^\/autoemergency(?:@\w+)?$/, async (msg) => {
     try {
-      if (!(await isSafetyExecutive(msg))) return executiveRequired(msg);
+      if (!(await isAutoExecutive(msg))) return executiveRequired(msg);
       await autoClient.emergencyStop();
       return send(msg, "🛑 Auto emergency stop confirmed. Simulations and DCA execution are paused.");
     } catch {
