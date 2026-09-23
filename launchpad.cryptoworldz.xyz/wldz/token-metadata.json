@@ -14,7 +14,10 @@
   "trading": {
     "dex": "Meteora",
     "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
-    "quote": "SOL"
+    "quote": "SOL",
+    "feePercent": 2,
+    "feeBps": 200,
+    "lpLock": "permanent"
   },
   "supply": {
     "maximum": 100000000,
@@ -23,5 +26,22 @@
     "freezeAuthority": "REVOKED"
   },
   "official": true,
-  "lastUpdated": "2026-09-23T15:00:00+10:00"
+  "lastUpdated": "2026-09-23T15:45:00+10:00",
+  "links": {
+    "officialToken": "https://launchpad.cryptoworldz.xyz/wldz/",
+    "verification": "https://launchpad.cryptoworldz.xyz/wldz/verify/",
+    "CryptoWorldz": "https://cryptoworldz.xyz/",
+    "OneWorldz": "https://oneworldz.com/",
+    "DonateWorldz": "https://donateworldz.com/",
+    "WorldzLaunchPad": "https://launchpad.cryptoworldz.xyz/",
+    "telegram": "https://t.me/CryptoWLDZ"
+  },
+  "resources": {
+    "manifest": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json",
+    "distribution": "https://launchpad.cryptoworldz.xyz/wldz/distribution.json",
+    "fees": "https://launchpad.cryptoworldz.xyz/wldz/fees.json",
+    "tokenList": "https://launchpad.cryptoworldz.xyz/tokenlist.json",
+    "liveSupply": "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php",
+    "platformPack": "https://launchpad.cryptoworldz.xyz/wldz/platform-submission-pack.json"
+  }
 }
