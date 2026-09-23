@@ -1,0 +1,81 @@
+{
+  "version": "2026-09-23-A",
+  "canonicalIdentity": {
+    "name": "WORLDZ",
+    "symbol": "WLDZ",
+    "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "network": "Solana",
+    "decimals": 6,
+    "maxSupply": 100000000,
+    "image": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg"
+  },
+  "description": "WORLDZ (WLDZ) is the canonical WorldzLaunchPad token on Solana, powering the CryptoWorldz ecosystem, community rewards, liquidity, development, charity impact, and future WorldzLaunchPad launches.",
+  "websites": {
+    "officialToken": "https://launchpad.cryptoworldz.xyz/wldz/",
+    "verification": "https://launchpad.cryptoworldz.xyz/wldz/verify/",
+    "CryptoWorldz": "https://cryptoworldz.xyz/",
+    "OneWorldz": "https://oneworldz.com/",
+    "DonateWorldz": "https://donateworldz.com/",
+    "WorldzLaunchPad": "https://launchpad.cryptoworldz.xyz/"
+  },
+  "social": {
+    "telegram": "https://t.me/CryptoWLDZ"
+  },
+  "machineReadable": {
+    "manifest": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json",
+    "metadata": "https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json",
+    "tokenList": "https://launchpad.cryptoworldz.xyz/tokenlist.json",
+    "distribution": "https://launchpad.cryptoworldz.xyz/wldz/distribution.json",
+    "fees": "https://launchpad.cryptoworldz.xyz/wldz/fees.json",
+    "circulatingSupply": "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php",
+    "circulatingSupplyPlain": "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php?format=plain"
+  },
+  "market": {
+    "dex": "Meteora",
+    "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "pair": "WLDZ/wSOL",
+    "tradingFeePercent": 2,
+    "lpLock": "permanent"
+  },
+  "platformTargets": {
+    "Jupiter": {
+      "submission": "https://verified.jup.ag/tokens/submit?token=AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "mode": "Standard/free",
+      "status": "manual account/wallet submission required"
+    },
+    "Solscan": {
+      "submission": "https://solscan.io/token-update",
+      "status": "manual form + project email required"
+    },
+    "CoinGecko": {
+      "submission": "https://partner.coingecko.com/request-form/new",
+      "status": "account + public verification post required"
+    },
+    "GeckoTerminal": {
+      "submission": "https://www.geckoterminal.com/update-token-info",
+      "mode": "Regular Pass/free available",
+      "status": "email OTP/form required"
+    },
+    "CoinMarketCap": {
+      "submission": "https://coinmarketcap.com/request/",
+      "status": "manual form required"
+    },
+    "Coinbase": {
+      "submission": "https://www.coinbase.com/listings/apply",
+      "status": "issuer intake + legal/team information required"
+    },
+    "DexScreener": {
+      "listing": "automatic after liquidity pool + transaction",
+      "metadata": "inherits external token lists or paid Enhanced Token Info"
+    },
+    "Phantom": {
+      "listing": "data-provider driven; Jupiter/CoinGecko recognition recommended"
+    },
+    "Solflare": {
+      "listing": "Jupiter-powered discovery / independent verification signals"
+    },
+    "GMGN": {
+      "listing": "on-chain new-pair indexing; no public issuer metadata API identified"
+    }
+  }
+}
