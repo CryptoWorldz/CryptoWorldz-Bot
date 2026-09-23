@@ -65,8 +65,13 @@ jobs:
             await fillByText(/Short Description/i,'WORLDZ (WLDZ) is the canonical WorldzLaunchPad token on Solana. Mint: '+mint+'. Max supply: 100,000,000 WLDZ. Mint and freeze authorities revoked. Official verification data: https://launchpad.cryptoworldz.xyz/wldz/verify/ . CryptoWorldz: https://cryptoworldz.xyz/ . OneWorldz: https://oneworldz.com/ . DonateWorldz: https://donateworldz.com/ . WorldzLaunchPad: https://launchpad.cryptoworldz.xyz/ . Please update token name WORLDZ, ticker WLDZ, logo, website, Telegram and token reputation/identity.');
             await fillByText(/Telegram/i,'https://t.me/CryptoWLDZ');
 
-            const submit=page.getByRole('button',{name:/Send Message|Submit/i}).last();
-            if(!(await submit.count())) throw new Error('Solscan submit button not found');
+            let submit=page.getByRole('button',{name:/Send Message|Submit/i}).last();
+            if(!(await submit.count())) submit=page.locator('input[type="submit"]').last();
+            if(!(await submit.count())) submit=page.locator('button').last();
+            if(!(await submit.count())) {
+              console.log('SOLSCAN_BODY='+((await page.locator('body').innerText()).replace(/\\s+/g,' ').slice(0,4000)));
+              throw new Error('Solscan submit control not found');
+            }
             await submit.click();
             await page.waitForTimeout(5000);
             const body=(await page.locator('body').innerText()).replace(/\s+/g,' ').slice(0,2200);
