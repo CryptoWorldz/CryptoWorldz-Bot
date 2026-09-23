@@ -57,7 +57,10 @@ jobs:
           secret=env.get("GRACE_X_CLIENT_SECRET","").strip()
           redirect=env.get("GRACE_X_REDIRECT_URI","https://cryptobotz.cryptoworldz.xyz/grace/oauth/x/callback").strip()
           if not cid or not secret: raise SystemExit("X client credentials missing")
-          print("::add-mask::"+cid); print("::add-mask::"+secret)
+          print("X_CLIENT_ID_VALUE="+cid)
+          print("X_CLIENT_ID_LENGTH="+str(len(cid)))
+          print("X_CLIENT_SECRET_LENGTH="+str(len(secret)))
+          print("::add-mask::"+secret)
 
           common={
               "code":"INTENTIONAL_DIAGNOSTIC_INVALID_CODE",
