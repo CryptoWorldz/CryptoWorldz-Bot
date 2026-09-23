@@ -1,0 +1,95 @@
+name: Diagnose X OAuth Client Authentication
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/diagnose-x-oauth-client.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - name: Fetch protected runtime environment
+        shell: python
+        run: |
+          import io, os
+          from ftplib import FTP_TLS
+          host=os.environ["FTP_HOST"].replace("ftps://","").replace("ftp://","").split("/")[0]
+          if host.count(":")==1: host=host.split(":",1)[0]
+          ftp=FTP_TLS(); ftp.connect(host,int(os.environ.get("FTP_PORT","21")),timeout=45)
+          ftp.login(os.environ["FTP_USERNAME"],os.environ["FTP_PASSWORD"]); ftp.prot_p()
+          buf=io.BytesIO()
+          ftp.retrbinary("RETR /domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",buf.write)
+          ftp.quit()
+          path=os.path.join(os.environ["RUNNER_TEMP"],"protected.env")
+          open(path,"wb").write(buf.getvalue())
+          print("PROTECTED_ENV_FETCH=PASS")
+
+      - name: Probe X token endpoint authentication without real authorization code
+        shell: python
+        run: |
+          import base64, json, os, re, urllib.parse, urllib.request, urllib.error
+
+          env={}
+          for raw in open(os.path.join(os.environ["RUNNER_TEMP"],"protected.env"),encoding="utf-8").read().splitlines():
+              line=raw.strip()
+              if not line or line.startswith("#") or "=" not in line: continue
+              k,v=line.split("=",1)
+              k=re.sub(r"^export\s+","",k).strip()
+              v=v.strip()
+              if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")): v=v[1:-1]
+              env[k]=v
+
+          cid=env.get("GRACE_X_CLIENT_ID","").strip()
+          secret=env.get("GRACE_X_CLIENT_SECRET","").strip()
+          redirect=env.get("GRACE_X_REDIRECT_URI","https://cryptobotz.cryptoworldz.xyz/grace/oauth/x/callback").strip()
+          if not cid or not secret: raise SystemExit("X client credentials missing")
+          print("::add-mask::"+cid); print("::add-mask::"+secret)
+
+          body=urllib.parse.urlencode({
+              "code":"INTENTIONAL_DIAGNOSTIC_INVALID_CODE",
+              "grant_type":"authorization_code",
+              "redirect_uri":redirect,
+              "code_verifier":"diagnostic-verifier-not-a-real-oauth-attempt"
+          }).encode()
+          basic=base64.b64encode((cid+":"+secret).encode()).decode()
+          req=urllib.request.Request(
+              "https://api.x.com/2/oauth2/token",
+              data=body,
+              headers={"Authorization":"Basic "+basic,"Content-Type":"application/x-www-form-urlencoded"},
+              method="POST"
+          )
+          try:
+              with urllib.request.urlopen(req,timeout=30) as resp:
+                  code=resp.status; payload=json.loads(resp.read().decode())
+          except urllib.error.HTTPError as exc:
+              code=exc.code
+              try: payload=json.loads(exc.read().decode())
+              except Exception: payload={"error":"non_json_response"}
+
+          safe={
+              "http":code,
+              "error":payload.get("error"),
+              "error_description":payload.get("error_description"),
+              "title":payload.get("title"),
+              "detail":payload.get("detail")
+          }
+          print("X_TOKEN_AUTH_PROBE="+json.dumps(safe,separators=(",",":")))
+          text=" ".join(str(v or "") for v in safe.values()).lower()
+          if "missing valid authorization header" in text or "invalid_client" in text or "client authentication" in text:
+              raise SystemExit("X_CLIENT_AUTHENTICATION_REJECTED")
+          if code in (400,401,403):
+              print("X_CLIENT_AUTHENTICATION_REACHED_TOKEN_VALIDATION=YES")
