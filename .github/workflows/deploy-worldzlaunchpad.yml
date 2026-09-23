@@ -192,7 +192,7 @@ jobs:
           campaign_html=(root/'worldz-launch'/'index.html').read_text()
           campaign_json=json.loads((root/'worldz-launch'/'campaign.json').read_text())
           social_pack=json.loads((root/'worldz-launch'/'social-pack.json').read_text())
-          assert 'WORLDZLAUNCHPAD™ + COMMAND CENTRE MAX™' in campaign_html
+          assert 'WorldzLaunchPad™ + Command Centre MAX™' in campaign_html
           assert '100,000 WLDZ' in campaign_html and '139' in campaign_html
           assert campaign_json['status']=='PUBLIC'
           assert campaign_json['wldz']['symbol']=='WLDZ'
@@ -643,7 +643,7 @@ jobs:
                   assert wldz_cfg['launch']['baseAmountTokens']==15000000 and wldz_cfg['launch']['permanentLock'] is True
                   assert wldz_cfg['execution']['publicCreatorGate'] is False
                   campaign_json=json.loads(campaign_json_body)
-                  assert campaign_code==200 and 'WORLDZLAUNCHPAD™ + COMMAND CENTRE MAX™' in campaign_body
+                  assert campaign_code==200 and 'WorldzLaunchPad™ + Command Centre MAX™' in campaign_body
                   assert '100,000 WLDZ' in campaign_body and '139' in campaign_body
                   assert campaign_json_code==200 and campaign_json['status']=='PUBLIC'
                   assert campaign_json['wldz']['symbol']=='WLDZ'
