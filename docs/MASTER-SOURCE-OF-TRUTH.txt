@@ -1,0 +1,416 @@
+MASTER SOURCE OF TRUTH — WEBSITES / ONEWORLDZ / CRYPTOWORLDZ
+Version: 2026-09-24-A
+Owner / Project Lead: JayJayTeamDev
+Purpose: Canonical reference for this ChatGPT Websites Project. Use this file before relying on conversational memory.
+
+======================================================================
+1. STANDING OPERATING RULES
+======================================================================
+
+1) DIRECT LINK RULE
+Whenever ChatGPT tells JayJayTeamDev to go to a website, dashboard, console, portal, repository, form, file manager, or tool, include the direct clickable link in the same reply.
+
+2) ONE STEP AT A TIME FOR TROUBLESHOOTING
+For live setup, deployment, wallet, OAuth, hosting, or configuration problems:
+- give the next required action only unless JayJayTeamDev asks for the full sequence;
+- check the actual system state first where tools permit;
+- do not make JayJayTeamDev repeat steps already completed.
+
+3) MASTER SOURCE UPDATE RULE
+When JayJayTeamDev says:
+“Update the Master Source of Truth with this and use the new version from now on.”
+the new information becomes the current project reference and should replace superseded information.
+
+4) NO SECRET STORAGE
+Never place passwords, seed phrases, private keys, OAuth Client Secrets, API tokens, bearer tokens, or other credentials in this file.
+Store only the name/location/status of protected credentials.
+
+5) PUBLIC MESSAGING SEPARATION
+OneWorldz humanitarian work and CryptoWorldz crypto/technology activity must be clearly distinguishable in public messaging.
+CryptoWorldz is the funding/technology engine supporting the wider OneWorldz vision.
+
+6) RELEASE STANDARD
+Mission-critical publishing standard:
+- master specification;
+- asset registry;
+- content registry;
+- shared components;
+- domain separation;
+- zero-known-defect release target;
+- no placeholders or unrequested pages;
+- desktop/mobile visual inspection;
+- live URL verification.
+
+======================================================================
+2. CORE PROJECT STRUCTURE
+======================================================================
+
+Umbrella:
+- OneWorldz.com
+Mission line:
+- “Helping the People who Help the People.”
+
+Purpose:
+- food;
+- clean water;
+- medical care;
+- safety;
+- education;
+- dignity;
+- equal opportunity.
+
+Crypto / technology engine:
+- CryptoWorldz.xyz
+
+Launch platform:
+- WorldzLaunchPad™
+- https://launchpad.cryptoworldz.xyz/
+
+Humanitarian / donation pathways:
+- OneWorldz.com
+- DonateWorldz.com
+
+Primary visual direction:
+- deep purple galaxy;
+- metallic silver/blue;
+- neon accents;
+- crowned Earth emblem with purple orbital rings and compass-heart.
+
+======================================================================
+3. IMPORTANT DOMAINS / PROPERTIES
+======================================================================
+
+Core:
+- https://oneworldz.com/
+- https://donateworldz.com/
+- https://cryptoworldz.xyz/
+- https://purplediamondcrew.com/
+- https://launchpad.cryptoworldz.xyz/
+
+Chain / ecosystem domains:
+- SolWorldz.xyz
+- EthWorldz.xyz
+- BaseWorldz.xyz
+- XRPWorldz.xyz
+- BNBWorldz.xyz
+- SuiWorldz.xyz
+- HyperWorldz.xyz
+- RobinWorldz.xyz
+- HodlerWorldz.xyz
+- HodLerGalaxy.xyz
+- CryptoWorldzUniverse.com
+
+Standing public-site direction:
+- BitcoinWorldz and crypto blockchains should not be promoted on the OneWorldz.com front page.
+- OneWorldz public front-end messaging should remain humanitarian-first.
+
+======================================================================
+4. WEBSITE DEPLOYMENT STATUS / STANDARD
+======================================================================
+
+Recorded deployment milestone:
+- 18 Hostinger sites deployed.
+- Current verified public-page count recorded after Command Centre MAX integration: 68 pages.
+- Earlier milestone: 145 pages passed live verification before later pruning/restructure.
+
+Global responsive image standard:
+- max-width: 100%;
+- preserve aspect ratio;
+- utilities include .align-center-global and .img-flex-container.
+
+WorldzLaunchPad global launch page:
+- https://launchpad.cryptoworldz.xyz/worldz-launch/
+
+Command Centre MAX showcase:
+- https://cryptoworldz.xyz/command-centre-max/
+
+======================================================================
+5. WORLDZ / WLDZ — CANONICAL TOKEN IDENTITY
+======================================================================
+
+Token:
+- WORLDZ
+- Symbol: WLDZ
+- Network: Solana Mainnet
+- Decimals: 6
+- Maximum supply: 100,000,000 WLDZ
+
+Canonical mint / CA:
+AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U
+
+Mint authority:
+- revoked
+
+Freeze authority:
+- revoked
+
+Meteora pool:
+GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ
+
+Official WLDZ page:
+- https://launchpad.cryptoworldz.xyz/wldz/
+
+Official Telegram:
+- https://t.me/CryptoWLDZ
+
+Published machine-readable identity files:
+- https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json
+- https://launchpad.cryptoworldz.xyz/tokenlist.json
+- https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.json
+
+Supply caution:
+- total on-chain mint supply and true circulating supply are not automatically the same;
+- treasury/reserve holdings may not count as circulating.
+
+======================================================================
+6. CURRENT WLDZ ALLOCATION MASTER
+======================================================================
+
+Version:
+WLDZ-ALLOCATION-2026-09-23-B
+
+Total:
+100,000,000 WLDZ
+
+Allocation:
+- JayJayTeamDev: 8,000,000 — 8%
+- Initial Launch LP: 15,000,000 — 15%
+- Staged LP Reserve: 20,000,000 — 20%
+- Legacy Snapshot / Purple Diamond Handz: 5,000,000 — 5%
+- First 100 WorldzLaunchPad Launches: 10,000,000 — 10%
+- OneWorldz / Charity Impact: 10,000,000 — 10%
+- Worldz Treasury: 10,000,000 — 10%
+- General Reserve: 5,000,000 — 5%
+- Team Reserve: 5,000,000 — 5%
+- Dev City Verified Wallets: 5,400,000 — 5.4%
+- Community / Ecosystem / Growth: 1,600,000 — 1.6%
+- Operations / Security / Infrastructure: 5,000,000 — 5%
+
+Founding 100 rule:
+- first 100 qualified verified Mainnet launch teams;
+- 100,000 WLDZ per qualified position;
+- token allocation only;
+- not equity.
+
+======================================================================
+7. WORLDZLAUNCHPAD / WORLDZ ARCHITECTURE
+======================================================================
+
+Primary architecture direction:
+WORLDZMINT™
+→ one canonical 100M WLDZ Mainnet mint
+→ mint + freeze authority revoked
+→ Meteora DAMM v2 liquidity architecture
+→ permanent LP-lock direction
+→ Worldz Fee Flow™
+→ Jupiter routing / token identity / price integrations
+→ Worldz Proof™
+→ ZED / AUTO / G.R.A.C.E.
+
+Platform components:
+- WorldzMINT™
+- Worldz Flash™
+- Worldz Curve™
+- Worldz Curve Pro™
+- Worldz CrossPair™
+- Worldz Omnichain™
+- Worldz Proof™
+- Worldz Safe Launch Standard™
+- Worldz Trust Orbit™
+- Founding 100™
+
+Cross-chain direction:
+- Solana
+- XRP / wXRP
+- EVM
+- Sui
+with chain-native plumbing rather than pretending one chain implementation is universal.
+
+======================================================================
+8. COMMAND CENTRE MAX / AUTOMATION
+======================================================================
+
+Current showcase:
+- ZED
+- AUTO
+- G.R.A.C.E.
+- MAX
+- RECAP
+- WorldPing
+- WorldzCast
+- WorldzLaunchPad
+
+Recorded Command Centre registry:
+- 139 registered command entries
+
+Licensing shown:
+- Rent: 0.3 SOL / group / 31 days
+- Rent-to-own: 0.5 SOL / group / month × 12
+- Own: 4.5 SOL one-time perpetual group licence
+
+Human approval / control remains required for sensitive publishing and wallet actions.
+
+======================================================================
+9. G.R.A.C.E. X / OAUTH — CURRENT STATUS
+======================================================================
+
+Official X accounts recorded:
+- Account ID 1 — @CryptoWorldzX
+- Account ID 15 — @WorldzLaunchPad
+- Account ID 16 — @OneWorldzX
+- Account ID 6 — @JayJayTeamDev
+
+Connection commands:
+- /connectx 1
+- /connectx 15
+- /connectx 16
+- /connectx 6
+
+OAuth callback:
+- https://cryptobotz.cryptoworldz.xyz/grace/oauth/x/callback
+
+X Developer Console:
+- https://console.x.com/
+
+Hostinger hPanel:
+- https://hpanel.hostinger.com/
+
+Protected Hostinger environment file:
+- /domains/cryptobotz.cryptoworldz.xyz/nodejs/.env
+
+Required X environment keys:
+- GRACE_X_CLIENT_ID
+- GRACE_X_CLIENT_SECRET
+- GRACE_X_REDIRECT_URI
+
+Important:
+- actual secret values are intentionally NOT stored here.
+
+Current diagnosis as of this version:
+- live G.R.A.C.E. detects X OAuth configuration;
+- Hostinger Node environment registration passed;
+- callback state consumption permission issue was repaired;
+- X then rejected token exchange because the stored Client Secret was only 6 characters;
+- the correct fix is to regenerate the OAuth 2.0 Client Secret in X Developer Console and replace the complete GRACE_X_CLIENT_SECRET value in Hostinger;
+- do not rely on the masked/partial displayed secret;
+- after saving the regenerated full secret, resync/restart only as required by the live diagnostic.
+
+======================================================================
+10. G.R.A.C.E. CAMPAIGN STATUS
+======================================================================
+
+Campaign:
+worldzlaunchpad_global_launch_20260923
+
+Approved posts recorded:
+- WorldzLaunchPad Global Launch
+- Command Centre MAX Showcase
+- Worldz Mission and Community
+
+These were blocked before publishing because X authentication was not yet usable.
+No external X post ID had been recorded for those blocked targets at the time of diagnosis.
+
+After OAuth is confirmed:
+- verify no duplicate post exists;
+- reset blocked campaign targets to queued;
+- allow G.R.A.C.E. worker to publish under approval controls.
+
+======================================================================
+11. TELEGRAM / WORLDZCAST
+======================================================================
+
+WorldzLaunchPad global announcement workflow was successfully broadcast through approved Telegram destinations.
+
+Dedicated WLDZ channel:
+- https://t.me/CryptoWLDZ
+
+======================================================================
+12. SQUADS / WLDZ DISTRIBUTION SAFETY
+======================================================================
+
+Known multisig:
+B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN
+
+Known vault:
+n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB
+
+JayJayTeamDev wallet:
+Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u
+
+Stepper wallet:
+DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ
+
+Important distribution rule:
+- JayJayTeamDev already received 8,000,000 WLDZ;
+- do not send that allocation again;
+- before any future distribution, query live balances;
+- use a fresh proposal where necessary;
+- dry-run / validate before execution.
+
+Wallet signing:
+- ChatGPT cannot sign wallet transactions;
+- an authorized human signer must approve/sign wallet actions.
+
+======================================================================
+13. HUMANITARIAN PROJECT REFERENCE
+======================================================================
+
+Uganda partner:
+Action Spread Smiles — Mayuge District
+
+Recorded needs:
+- food;
+- medicine;
+- school fees;
+- rent;
+- hygiene;
+- mattresses;
+- borehole;
+- farming;
+- safe home.
+
+Core OneWorldz public message:
+“Helping the People who Help the People.”
+
+OneVision Day:
+- 8 November
+
+Spam2Ham Day:
+- 1 December each year
+
+======================================================================
+14. REPOSITORY / SOURCE CONTROL
+======================================================================
+
+Primary bot / command-centre repository used in recent live work:
+- https://github.com/CryptoWorldz/CryptoWorldz-Bot
+
+Important deployment principle:
+- repository code may be source-of-truth for code;
+- this Master Source of Truth file is the canonical human/project reference for current identity, allocation, standing instructions, links, and status;
+- when code and this file conflict, verify the live state and update this file deliberately rather than silently guessing.
+
+======================================================================
+15. MEMORY / PROJECT CONTINUITY RULE
+======================================================================
+
+Use this order when answering future Websites Project questions:
+
+1. Current user message.
+2. This Master Source of Truth.
+3. Current live system state from connected tools.
+4. Current repository state.
+5. Project files / records.
+6. Conversational memory only as supporting context.
+
+Do not force JayJayTeamDev to reconstruct project history that is already recorded here.
+
+When new information supersedes old information:
+- update this file;
+- retain the new version/date;
+- clearly identify the superseded value where useful;
+- never silently combine incompatible versions.
+
+======================================================================
+END OF MASTER SOURCE OF TRUTH
+======================================================================
