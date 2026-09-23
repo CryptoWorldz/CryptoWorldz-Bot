@@ -1,0 +1,166 @@
+name: Publish WorldzLaunchPad X Direct
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/publish-worldzlaunchpad-x-direct.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Retrieve protected social credentials
+        shell: python
+        run: |
+          import io, os
+          from ftplib import FTP_TLS
+          host=os.environ["FTP_HOST"].replace("ftps://","").replace("ftp://","").split("/")[0]
+          if host.count(":")==1: host=host.split(":",1)[0]
+          ftp=FTP_TLS(); ftp.connect(host,int(os.environ.get("FTP_PORT","21")),timeout=45)
+          ftp.login(os.environ["FTP_USERNAME"],os.environ["FTP_PASSWORD"]); ftp.prot_p()
+          buf=io.BytesIO()
+          ftp.retrbinary("RETR /domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",buf.write)
+          ftp.quit()
+          data=buf.getvalue()
+          if not data.strip(): raise SystemExit("Protected runtime .env is empty")
+          open("$RUNNER_TEMP/worldz-social.env","wb").write(data)
+          print("WORLDZ_X_PROTECTED_ENV=READY")
+
+      - name: Publish approved launch pack to configured official X accounts
+        shell: python
+        run: |
+          import json, os, re, time, urllib.request, urllib.error
+
+          path=os.path.expandvars("$RUNNER_TEMP/worldz-social.env")
+          env={}
+          for raw in open(path,encoding="utf-8").read().splitlines():
+              line=raw.strip()
+              if not line or line.startswith("#") or "=" not in line: continue
+              k,v=line.split("=",1)
+              k=re.sub(r"^export\s+","",k).strip()
+              v=v.strip().strip('"').strip("'")
+              if v: env[k]=v
+
+          accounts=[
+              {
+                "expected":"WorldzLaunchPad",
+                "keys":["GRACE_X_TOKEN_WORLDZLAUNCHPAD"],
+                "posts":[
+                    "🚀 WorldzLaunchPad™ is live. Build • Prove • Launch. WorldzMINT, Safe Launch, CrossPair, OmniChain, Worldz Proof + ZED LED Command Centre MAX™. First 100 qualified mainnet teams: 100,000 WLDZ each. 🌐 https://launchpad.cryptoworldz.xyz/worldz-launch/",
+                    "🤖 ZED • 💎 AUTO • 👩‍💼 G.R.A.C.E. • 🧠 MAX • 🧾 RECAP • 🌐 WorldPing • 📡 WorldzCast. 139 registered commands for missions, wallets, rewards, research, socials, governance & more. https://cryptoworldz.xyz/command-centre-max/"
+                ]
+              },
+              {
+                "expected":"CryptoWorldzX",
+                "keys":["GRACE_X_TOKEN_CRYPTOWORLDZX","GRACE_X_TOKEN_CRYPTOWORLDZ"],
+                "posts":[
+                    "🚀 WorldzLaunchPad™ is live. Build • Prove • Launch. WorldzMINT, Safe Launch, CrossPair, OmniChain, Worldz Proof + ZED LED Command Centre MAX™. First 100 qualified mainnet teams: 100,000 WLDZ each. 🌐 https://launchpad.cryptoworldz.xyz/worldz-launch/",
+                    "🤖 ZED • 💎 AUTO • 👩‍💼 G.R.A.C.E. • 🧠 MAX • 🧾 RECAP • 🌐 WorldPing • 📡 WorldzCast. 139 registered commands for missions, wallets, rewards, research, socials, governance & more. https://cryptoworldz.xyz/command-centre-max/",
+                    "🌍 CryptoWorldz builds the tech. OneWorldz + DonateWorldz carry the humanitarian mission. @WorldzLaunchPad @CryptoWorldzX @OneWorldzX @JayJayTeamDev • WLDZ: https://t.me/CryptoWLDZ"
+                ]
+              },
+              {
+                "expected":"OneWorldzX",
+                "keys":["GRACE_X_TOKEN_ONEWORLDZX","GRACE_X_TOKEN_ONEWORLDZ"],
+                "posts":[
+                    "🌍 OneWorldz is the humanitarian mission. CryptoWorldz + WorldzLaunchPad™ are the separate technology and funding-engine side. Helping the People who Help the People. 🌐 https://oneworldz.com • Launch: https://launchpad.cryptoworldz.xyz/worldz-launch/"
+                ]
+              },
+              {
+                "expected":"JayJayTeamDev",
+                "keys":["GRACE_X_TOKEN_JAYJAYTEAMDEV"],
+                "posts":[
+                    "🌐 WORLDZ™ launch pack is out: WorldzLaunchPad™ + WLDZ Founding 100 + ZED LED Command Centre MAX™. Build • Prove • Launch. https://launchpad.cryptoworldz.xyz/worldz-launch/"
+                ]
+              }
+          ]
+
+          def request(url,token,method="GET",payload=None):
+              headers={"Authorization":"Bearer "+token,"Accept":"application/json","User-Agent":"WorldzLaunchPad-X-Publisher/1.0"}
+              data=None
+              if payload is not None:
+                  headers["Content-Type"]="application/json"
+                  data=json.dumps(payload).encode("utf-8")
+              req=urllib.request.Request(url,data=data,headers=headers,method=method)
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as r:
+                      return r.status,json.loads(r.read().decode("utf-8"))
+              except urllib.error.HTTPError as e:
+                  try: body=json.loads(e.read().decode("utf-8"))
+                  except Exception: body={"error":"HTTP "+str(e.code)}
+                  return e.code,body
+
+          configured=0
+          published=0
+          duplicates=0
+          failures=[]
+
+          for account in accounts:
+              token=""
+              token_key=""
+              for key in account["keys"]:
+                  if env.get(key,"").strip():
+                      token=env[key].strip(); token_key=key; break
+              if not token:
+                  print("WORLDZ_X_ACCOUNT_SKIP expected=@"+account["expected"]+" reason=credential_not_configured")
+                  continue
+              configured+=1
+              print("::add-mask::"+token)
+
+              code,me=request("https://api.x.com/2/users/me",token)
+              actual=str((me.get("data") or {}).get("username") or "")
+              uid=str((me.get("data") or {}).get("id") or "")
+              if code!=200 or not actual or not uid:
+                  failures.append(account["expected"]+":verify_http_"+str(code))
+                  print("WORLDZ_X_VERIFY_FAIL expected=@"+account["expected"]+" http="+str(code))
+                  continue
+              if actual.lower()!=account["expected"].lower():
+                  failures.append(account["expected"]+":wrong_account_"+actual)
+                  print("WORLDZ_X_VERIFY_FAIL expected=@"+account["expected"]+" actual=@"+actual)
+                  continue
+              print("WORLDZ_X_ACCOUNT_VERIFIED expected=@"+account["expected"]+" actual=@"+actual+" credential="+token_key)
+
+              rcode,recent=request("https://api.x.com/2/users/"+uid+"/tweets?max_results=20&tweet.fields=created_at",token)
+              recent_texts={str(row.get("text") or "").strip() for row in (recent.get("data") or [])} if rcode==200 else set()
+
+              for post in account["posts"]:
+                  if len(post)>280:
+                      failures.append(account["expected"]+":post_over_280")
+                      print("WORLDZ_X_POST_FAIL account=@"+actual+" reason=over_280")
+                      continue
+                  if post in recent_texts:
+                      duplicates+=1
+                      print("WORLDZ_X_POST_SKIP account=@"+actual+" reason=already_present")
+                      continue
+                  pcode,payload=request("https://api.x.com/2/tweets",token,"POST",{"text":post})
+                  post_id=str((payload.get("data") or {}).get("id") or "")
+                  if pcode in (200,201) and post_id:
+                      published+=1
+                      recent_texts.add(post)
+                      print("WORLDZ_X_POST_PASS account=@"+actual+" post_id="+post_id)
+                  else:
+                      detail=str(payload.get("detail") or payload.get("title") or payload.get("error") or payload)[:240]
+                      failures.append(account["expected"]+":post_http_"+str(pcode))
+                      print("WORLDZ_X_POST_FAIL account=@"+actual+" http="+str(pcode)+" detail="+json.dumps(detail))
+                  time.sleep(1.0)
+
+          print("WORLDZ_X_SUMMARY configured="+str(configured)+" published="+str(published)+" already_present="+str(duplicates)+" failures="+str(len(failures)))
+          if configured==0:
+              raise SystemExit("No official X credential is configured in protected runtime.")
+          if failures and published==0 and duplicates==0:
+              raise SystemExit("Configured X accounts could not publish the approved campaign.")
