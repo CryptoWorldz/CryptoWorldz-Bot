@@ -143,7 +143,7 @@
       <button class="button secondary" type="submit">Save Public Wallet</button>
       <small>Never enter a seed phrase or private key.</small>
     </form></details>
-    <details class="ultimate-detail"><summary>Safety Limits</summary><form id="auto-dca-limits-form">
+    <details class="ultimate-detail"><summary>AUTO Limits</summary><form id="auto-dca-limits-form">
       <div class="form-row"><input name="max_order_amount" type="number" min="0" step="any" value="${Number(limits.maxOrderAmount) || 0}" placeholder="Maximum each buy"><input name="max_daily_amount" type="number" min="0" step="any" value="${Number(limits.maxDailyAmount) || 0}" placeholder="Daily cap"></div>
       <div class="form-row"><input name="max_weekly_amount" type="number" min="0" step="any" value="${Number(limits.maxWeeklyAmount) || 0}" placeholder="Weekly cap"><input name="max_monthly_amount" type="number" min="0" step="any" value="${Number(limits.maxMonthlyAmount) || 0}" placeholder="Monthly cap"></div>
       <div class="form-row"><input name="min_interval_minutes" type="number" min="15" value="${Number(limits.minIntervalMinutes) || 60}" placeholder="Minimum interval"><input name="max_slippage_bps" type="number" min="1" value="${Number(limits.maxSlippageBps) || 300}" placeholder="Max slippage bps"></div>
@@ -239,7 +239,7 @@
     const owner = Boolean(payload.access && payload.access.owner);
     if (!owner) {
       statusHolder.className = 'panel';
-      statusHolder.innerHTML = `${autoSafetyMarkup(payload)}<div class="ultimate-note">Executive safety view. Treasury, Diamond Buy™, multisig and launch controls remain Owner-only.</div><div class="ultimate-safety-actions"><button id="auto-pause" class="button secondary" type="button">Pause Auto</button><button id="auto-emergency" class="button" type="button">Emergency Stop</button></div>`;
+      statusHolder.innerHTML = `${autoSafetyMarkup(payload)}<div class="ultimate-note">Executive control view. Treasury, Diamond Buy™, multisig and launch controls remain Owner-only.</div><div class="ultimate-safety-actions"><button id="auto-pause" class="button secondary" type="button">Pause Auto</button><button id="auto-emergency" class="button" type="button">Emergency Stop</button></div>`;
       panel.querySelector('#auto-pause').addEventListener('click', () => control('/api/mini/auto/pause', 'Auto paused.'));
       panel.querySelector('#auto-emergency').addEventListener('click', () => control('/api/mini/auto/emergency-stop', 'Auto emergency stop confirmed.'));
       return;
@@ -313,7 +313,7 @@
     const body = Object.fromEntries(new FormData(event.currentTarget).entries());
     const { response, payload } = await autoApi('/api/mini/auto/dca/limits', { method: 'POST', body: JSON.stringify(body) });
     if (!response.ok) return notice(payload.error || 'DCA limits were not saved.');
-    notice('Diamond Buy safety limits saved. Execution remains locked until activation checks pass.');
+    notice('Diamond Buy limits saved. Execution is available when the owner enables it and the executor is connected.');
     refresh();
   }
 
