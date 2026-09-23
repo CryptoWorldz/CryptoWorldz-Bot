@@ -101,6 +101,10 @@ for key, value in required.items():
     if not value or "\n" in value or "\r" in value:
         raise SystemExit(f"{key}_MISSING_FROM_GITHUB_AND_PROTECTED_ENV")
 
+print("GRACE_X_CLIENT_ID_PRESENT="+("YES" if existing.get("GRACE_X_CLIENT_ID","").strip() else "NO"))
+print("GRACE_X_CLIENT_SECRET_PRESENT="+("YES" if existing.get("GRACE_X_CLIENT_SECRET","").strip() else "NO"))
+print("GRACE_X_REDIRECT_PRESENT="+("YES" if existing.get("GRACE_X_REDIRECT_URI","").strip() else "NO"))
+
 for key, value in required.items():
     pattern = re.compile(rf"^\s*(?:export\s+)?{re.escape(key)}\s*=")
     lines = [line for line in lines if not pattern.match(line)]
