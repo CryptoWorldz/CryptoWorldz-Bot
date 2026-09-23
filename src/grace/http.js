@@ -28,7 +28,7 @@ function secureOAuthHeaders(res) {
   });
 }
 
-function registerGraceRoutes({ app, graceRepository, graceOAuth = null, graceFacebookOAuth = null, apiSecret = process.env.GRACE_API_SECRET || "" }) {
+function registerGraceRoutes({ app, graceRepository, graceOAuth = null, graceFacebookOAuth = null, graceXDiagnostics = {}, apiSecret = process.env.GRACE_API_SECRET || "" }) {
   app.get("/grace/health", (req, res) => {
     res.json({
       ok: true,
@@ -40,6 +40,10 @@ function registerGraceRoutes({ app, graceRepository, graceOAuth = null, graceFac
       automatic_ad_spend: false,
       posting: "approval-controlled",
       x_oauth_configured: Boolean(graceOAuth?.configured?.()),
+      x_client_id_configured: Boolean(graceXDiagnostics.clientId),
+      x_client_secret_configured: Boolean(graceXDiagnostics.clientSecret),
+      x_redirect_configured: Boolean(graceXDiagnostics.redirectUri),
+      x_encryption_configured: Boolean(graceXDiagnostics.encryption),
       facebook_oauth_configured: Boolean(graceFacebookOAuth?.configured?.()),
       facebook_redirect: "/grace/oauth/facebook/callback"
     });
