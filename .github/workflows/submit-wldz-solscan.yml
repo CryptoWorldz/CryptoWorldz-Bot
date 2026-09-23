@@ -1,0 +1,77 @@
+name: Submit WORLDZ to Solscan
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/submit-wldz-solscan.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Install Playwright
+        run: |
+          npm --silent install playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Submit canonical WORLDZ token information
+        shell: node {0}
+        run: |
+          const { chromium } = require('playwright');
+          const mint='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U';
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1440,height:1100}});
+          try {
+            await page.goto('https://solscan.io/token-update',{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(3500);
+
+            const select=page.locator('select').first();
+            if(await select.count()){
+              const options=await select.locator('option').allTextContents();
+              const social=options.find(x=>/Social Links.*Logo/i.test(x));
+              const rep=options.find(x=>/Reputation Update/i.test(x));
+              if(social) await select.selectOption({label:social});
+              else if(rep) await select.selectOption({label:rep});
+            }
+
+            async function fillByText(labelRegex,value){
+              const byLabel=page.getByLabel(labelRegex,{exact:false});
+              if(await byLabel.count()){await byLabel.first().fill(value);return true;}
+              const labels=page.locator('label');
+              const n=await labels.count();
+              for(let i=0;i<n;i++){
+                const t=(await labels.nth(i).innerText()).trim();
+                if(labelRegex.test(t)){
+                  const forId=await labels.nth(i).getAttribute('for');
+                  if(forId){const el=page.locator('#'+forId);if(await el.count()){await el.fill(value);return true;}}
+                }
+              }
+              return false;
+            }
+
+            await fillByText(/Token Contract Address/i,mint);
+            await fillByText(/Requester Name/i,'WorldzLaunchPad Team');
+            await fillByText(/Requester Email Address/i,'hello@oneworldz.com');
+            await fillByText(/Official Project Website/i,'https://launchpad.cryptoworldz.xyz/wldz/');
+            await fillByText(/Link to Token Image/i,'https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg');
+            await fillByText(/Short Description/i,'WORLDZ (WLDZ) is the canonical WorldzLaunchPad token on Solana. Mint: '+mint+'. Max supply: 100,000,000 WLDZ. Mint and freeze authorities revoked. Official verification data: https://launchpad.cryptoworldz.xyz/wldz/verify/ . CryptoWorldz: https://cryptoworldz.xyz/ . OneWorldz: https://oneworldz.com/ . DonateWorldz: https://donateworldz.com/ . WorldzLaunchPad: https://launchpad.cryptoworldz.xyz/ . Please update token name WORLDZ, ticker WLDZ, logo, website, Telegram and token reputation/identity.');
+            await fillByText(/Telegram/i,'https://t.me/CryptoWLDZ');
+
+            const submit=page.getByRole('button',{name:/Send Message|Submit/i}).last();
+            if(!(await submit.count())) throw new Error('Solscan submit button not found');
+            await submit.click();
+            await page.waitForTimeout(5000);
+            const body=(await page.locator('body').innerText()).replace(/\s+/g,' ').slice(0,2200);
+            console.log('SOLSCAN_RESPONSE_TEXT='+body);
+            if(/required|invalid|error/i.test(body) && !/success|thank|received|submitted/i.test(body)){
+              throw new Error('Solscan form did not report success');
+            }
+            console.log('WLDZ_SOLSCAN_SUBMISSION=PASS');
+          } finally {
+            await browser.close();
+          }
