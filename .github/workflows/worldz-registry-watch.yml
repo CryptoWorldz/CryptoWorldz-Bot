@@ -1,0 +1,43 @@
+name: WORLDZ Registry Watch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/worldz-registry-watch.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check public token indexes
+        shell: python
+        run: |
+          import json, urllib.request, urllib.error
+          mint="AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U"
+          urls={
+            "JUPITER":f"https://lite-api.jup.ag/tokens/v2/search?query={mint}",
+            "DEXSCREENER":f"https://api.dexscreener.com/tokens/v1/solana/{mint}",
+            "GECKOTERMINAL":f"https://api.geckoterminal.com/api/v2/networks/solana/tokens/{mint}",
+            "RUGCHECK":f"https://api.rugcheck.xyz/v1/tokens/{mint}/report"
+          }
+          for name,url in urls.items():
+              req=urllib.request.Request(url,headers={"Accept":"application/json","User-Agent":"WorldzLaunchPad-Registry-Watch/1.0"})
+              try:
+                  with urllib.request.urlopen(req,timeout=25) as r:
+                      body=r.read().decode("utf-8","ignore")
+                      code=r.status
+                  print(f"{name}_HTTP={code}")
+                  try:
+                      obj=json.loads(body)
+                      compact=json.dumps(obj,separators=(",",":"))
+                      print(f"{name}_DATA="+compact[:3500])
+                  except Exception:
+                      print(f"{name}_DATA="+body[:2000])
+              except Exception as e:
+                  print(f"{name}_ERROR={type(e).__name__}:{e}")
