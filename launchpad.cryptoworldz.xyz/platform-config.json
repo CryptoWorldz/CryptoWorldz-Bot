@@ -428,9 +428,15 @@
     "orderingRule": "Mainnet proof completion creates a permanent candidate timestamp. Qualified positions are then assigned in order of verified qualification. Disqualified candidates remain documented and do not receive a position.",
     "antiSybilRule": "One qualified Founding 100 position per verified team identity. Multiple wallets do not create multiple team positions.",
     "permanenceRule": "Qualified positions are permanent historical records. A later fraud finding may mark a position disqualified/forfeited but the historical record is not deleted or silently reassigned.",
-    "allocationRule": "10% total future WORLDZ allocation pool is reserved for the 100 qualified Founding 100 positions, intended as 0.10% of total WORLDZ supply per position.",
+    "allocationRule": "10,000,000 WLDZ is reserved for 100 qualified Founding 100 positions: 100,000 WLDZ per qualified verified mainnet team position. This is a token allocation, not company equity.",
     "launchTypeNeutral": true,
-    "chainNeutralWithinSupportedMainnetAdapters": true
+    "chainNeutralWithinSupportedMainnetAdapters": true,
+    "canonicalTokenName": "WORLDZ",
+    "canonicalTokenSymbol": "WLDZ",
+    "canonicalWldzMint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "canonicalWldzMaxSupplyTokens": 100000000,
+    "wldzAllocationPoolTokens": 10000000,
+    "wldzPerQualifiedPositionTokens": 100000
   },
   "treasuryStandard": {
     "version": "WORLDZ-TREASURY-1",
