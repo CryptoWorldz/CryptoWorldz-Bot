@@ -29,9 +29,12 @@ jobs:
               "https://launchpad.cryptoworldz.xyz/wldz/distribution.json",
               "https://launchpad.cryptoworldz.xyz/wldz/fees.json",
               "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php",
-              "https://launchpad.cryptoworldz.xyz/tokenlist.json"
+              "https://launchpad.cryptoworldz.xyz/tokenlist.json",
+              "https://launchpad.cryptoworldz.xyz/worldz-launch/",
+              "https://launchpad.cryptoworldz.xyz/worldz-launch/campaign.json",
+              "https://launchpad.cryptoworldz.xyz/worldz-launch/social-pack.json"
             ],
-            "cryptoworldz.xyz":["https://cryptoworldz.xyz/","https://cryptoworldz.xyz/worldz-token/"],
+            "cryptoworldz.xyz":["https://cryptoworldz.xyz/","https://cryptoworldz.xyz/worldz-token/","https://cryptoworldz.xyz/command-centre-max/"],
             "oneworldz.com":["https://oneworldz.com/","https://oneworldz.com/worldz-token/"],
             "donateworldz.com":["https://donateworldz.com/","https://donateworldz.com/worldz-token/"]
           }
