@@ -25,6 +25,10 @@ jobs:
           p=json.load(open(os.path.join(os.environ["RUNNER_TEMP"],"grace-health.json")))
           print("GRACE_OK="+str(bool(p.get("ok"))).upper())
           print("X_OAUTH_CONFIGURED="+str(bool(p.get("x_oauth_configured"))).upper())
+          print("X_CLIENT_ID_CONFIGURED="+str(bool(p.get("x_client_id_configured"))).upper())
+          print("X_CLIENT_SECRET_CONFIGURED="+str(bool(p.get("x_client_secret_configured"))).upper())
+          print("X_REDIRECT_CONFIGURED="+str(bool(p.get("x_redirect_configured"))).upper())
+          print("X_ENCRYPTION_CONFIGURED="+str(bool(p.get("x_encryption_configured"))).upper())
           print("FACEBOOK_OAUTH_CONFIGURED="+str(bool(p.get("facebook_oauth_configured"))).upper())
           print("X_REDIRECT="+str(p.get("x_redirect") or "/grace/oauth/x/callback"))
           PY
