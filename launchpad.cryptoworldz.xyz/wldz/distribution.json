@@ -1,0 +1,91 @@
+{
+  "version": "WLDZ-ALLOCATION-2026-09-23-C",
+  "name": "WORLDZ",
+  "symbol": "WLDZ",
+  "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+  "fixedSupply": 100000000,
+  "decimals": 6,
+  "status": "allocation-plan; on-chain distribution in progress",
+  "allocations": [
+    {
+      "name": "JayJayTeamDev",
+      "percent": 8,
+      "tokens": 8000000
+    },
+    {
+      "name": "Initial live liquidity",
+      "percent": 15,
+      "tokens": 15000000
+    },
+    {
+      "name": "Staged liquidity reserve",
+      "percent": 20,
+      "tokens": 20000000
+    },
+    {
+      "name": "Legacy Purple Diamond Handz",
+      "percent": 5,
+      "tokens": 5000000
+    },
+    {
+      "name": "First 100 WorldzLaunchPad verified launches",
+      "percent": 10,
+      "tokens": 10000000
+    },
+    {
+      "name": "OneWorldz charity impact",
+      "percent": 10,
+      "tokens": 10000000
+    },
+    {
+      "name": "Worldz Treasury",
+      "percent": 10,
+      "tokens": 10000000
+    },
+    {
+      "name": "General reserve",
+      "percent": 5,
+      "tokens": 5000000
+    },
+    {
+      "name": "Stepper",
+      "percent": 1,
+      "tokens": 1000000
+    },
+    {
+      "name": "Future team reserve",
+      "percent": 4,
+      "tokens": 4000000
+    },
+    {
+      "name": "Dev City — 50 wallets × 100,000 WLDZ",
+      "percent": 5,
+      "tokens": 5000000
+    },
+    {
+      "name": "Community / Command Centre rewards",
+      "percent": 2,
+      "tokens": 2000000
+    },
+    {
+      "name": "Operations / security / infrastructure",
+      "percent": 5,
+      "tokens": 5000000
+    }
+  ],
+  "invariants": {
+    "allocationPercentTotal": 100,
+    "allocationTokenTotal": 100000000,
+    "walletTransferTaxPercent": 0,
+    "mintAuthority": "REVOKED",
+    "freezeAuthority": "REVOKED"
+  },
+  "officialLinks": {
+    "official": "https://launchpad.cryptoworldz.xyz/wldz/",
+    "cryptoworldz": "https://cryptoworldz.xyz/",
+    "oneworldz": "https://oneworldz.com/",
+    "donateworldz": "https://donateworldz.com/",
+    "launchpad": "https://launchpad.cryptoworldz.xyz/",
+    "telegram": "https://t.me/CryptoWLDZ"
+  }
+}
