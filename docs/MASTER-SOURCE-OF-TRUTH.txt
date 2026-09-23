@@ -1,5 +1,5 @@
 MASTER SOURCE OF TRUTH — WEBSITES / ONEWORLDZ / CRYPTOWORLDZ
-Version: 2026-09-24-C
+Version: 2026-09-24-D
 Owner / Project Lead: JayJayTeamDev
 Purpose: Canonical reference for this ChatGPT Websites Project. Use this file before relying on conversational memory.
 
@@ -68,6 +68,14 @@ B. the Continuous Perfect-Fitting Vibrant Worldz Style & Colour image/visual spe
 10) ECOSYSTEM BUILD COMMITMENT
 The Websites Project is authorised to use the accumulated project history, approved specifications, current live state and these canonical controls to build the cohesive ecosystem JayJayTeamDev has continually requested since the project began.
 Do not reduce the ecosystem to isolated one-off pages when the requested feature belongs to the wider connected architecture.
+
+11) ALWAYS USE OFFICIAL LOGO
+Every website, product, portal, tool, launch route and branded corner/header image position must use its approved official logo or canonical brand mark.
+- Never begin with a generic letter, generic icon, placeholder orb, stock mark or substitute logo.
+- If an official logo exists, use it.
+- If no official logo is verified, do not invent one or substitute generic artwork; use the approved text identity until JayJayTeamDev supplies/approves the official logo.
+- Official logos must preserve aspect ratio, remain sharp, fit desktop/mobile correctly and follow the Perfect Fitting Vibrant Worldz visual gate.
+- The WorldzLaunchPad official logo supplied by JayJayTeamDev on 24 September 2026 supersedes the generic “W” corner mark.
 
 ======================================================================
 2. CORE PROJECT STRUCTURE
