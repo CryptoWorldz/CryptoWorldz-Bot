@@ -1,0 +1,134 @@
+name: Next Generation WorldzEcoSystem
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nextgen-worldzecosystem.yml"
+      - "tools/apply_worldz_ecosystem_nextgen.py"
+      - "tools/deploy_hostinger_nextgen.py"
+      - "docs/NEXTGEN-WORLDZECOSYSTEM-PLAN.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldz-nextgen-production
+  cancel-in-progress: true
+
+jobs:
+  build-deploy-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile NextGen build and deployment tools
+        run: |
+          python3 -m py_compile tools/apply_worldz_ecosystem_nextgen.py tools/deploy_hostinger_nextgen.py
+          python3 -m py_compile tools/build_ecosystem.py tools/apply_visual_fixes.py tools/apply_facebook_support.py tools/apply_mobile_safety.py
+          python3 -m py_compile tools/apply_jayjay_vision_57.py tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/apply_heroes_worldz.py
+          python3 -m py_compile tools/apply_slice_of_hope_visual.py tools/apply_davis_page.py tools/apply_pdc_five_page.py tools/apply_donateworldz_brand.py
+          python3 -m py_compile tools/repair_stage_1_writing.py tools/repair_stage_2_images.py tools/repair_stage_3_other.py tools/apply_global_image_overrides.py tools/apply_verified_insights.py
+
+      - name: Build existing ecosystem content foundation
+        run: |
+          python3 tools/build_ecosystem.py
+          python3 tools/apply_visual_fixes.py
+          python3 tools/apply_facebook_support.py
+          python3 tools/apply_mobile_safety.py
+          python3 tools/apply_jayjay_vision_57.py
+          python3 tools/apply_mission_worldz.py
+          python3 tools/apply_specialist_worldz.py
+          python3 tools/apply_heroes_worldz.py
+          python3 tools/apply_slice_of_hope_visual.py
+          python3 tools/apply_davis_page.py
+          python3 tools/repair_stage_1_writing.py
+          python3 tools/repair_stage_2_images.py
+          python3 tools/repair_stage_3_other.py
+          python3 tools/apply_pdc_five_page.py
+          python3 tools/apply_donateworldz_brand.py
+          python3 tools/apply_verified_insights.py
+          python3 tools/apply_global_image_overrides.py
+
+      - name: Apply Next Generation WorldzEcoSystem build LAST
+        run: python3 tools/apply_worldz_ecosystem_nextgen.py
+
+      - name: Enforce NextGen release gates
+        shell: python
+        run: |
+          from pathlib import Path
+          import json,re
+          domains=[x.strip() for x in Path("DOMAINS.txt").read_text().splitlines() if x.strip()]
+          assert len(domains)==18 and len(set(domains))==18
+          banned="always use official logo"
+          for d in domains:
+              root=Path(d)
+              assert (root/"index.html").is_file(), d
+              assert (root/"worldz-nextgen.css").is_file(), d
+              for p in root.rglob("*.html"):
+                  s=p.read_text(encoding="utf-8",errors="ignore")
+                  assert "data-worldz-nextgen=" in s, p
+                  assert "worldz-nextgen.css" in s, p
+                  assert banned not in s.lower(), p
+                  assert "<iframe" not in s.lower(), p
+          lp=Path("launchpad.cryptoworldz.xyz")
+          assert (lp/"index.html").is_file()
+          assert (lp/"worldz-nextgen.css").is_file()
+          index=(lp/"index.html").read_text(encoding="utf-8")
+          assert "brand-logo-official" in index
+          assert "brand-orb" not in index
+          assert banned not in index.lower()
+          assert Path(".nextgen-urls.txt").is_file()
+          urls=[u for u in Path(".nextgen-urls.txt").read_text().splitlines() if u.strip()]
+          assert len(urls)>=27, len(urls)
+          manifest=json.loads(Path("worldz-ecosystem.nextgen.json").read_text())
+          assert manifest["approvedBy"]=="JayJayTeamDev"
+          print(f"NEXTGEN_RELEASE_GATE=PASS sites={len(domains)} urls={len(urls)}")
+
+      - name: Security scan public build
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RIE --include='*.html' --include='*.js' --include='*.css' '(sk-proj-|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|SUPABASE_SERVICE_ROLE_KEY\s*=|TELEGRAM_BOT_TOKEN\s*=|GRACE_X_CLIENT_SECRET\s*=)'             oneworldz.com cryptoworldz.xyz donateworldz.com purplediamondcrew.com launchpad.cryptoworldz.xyz             solworldz.xyz ethworldz.xyz baseworldz.xyz bnbworldz.xyz xrpworldz.xyz suiworldz.xyz hyperworldz.xyz robinworldz.xyz hodlerworldz.xyz             impactbased.oneworldz.com law.oneworldz.com learn.oneworldz.com hodlergalaxy.xyz foodworldz.com
+          echo "NEXTGEN_SECRET_SCAN=PASS"
+
+      - name: Deploy 18-site ecosystem plus WorldzLaunchPad
+        run: python3 tools/deploy_hostinger_nextgen.py
+
+      - name: Verify live NextGen pages
+        shell: python
+        run: |
+          import time, urllib.request, urllib.error
+          from pathlib import Path
+
+          urls=[u.strip() for u in Path(".nextgen-urls.txt").read_text().splitlines() if u.strip()]
+          failures=[]
+          for url in urls:
+              ok=False; last=""
+              for attempt in range(1,6):
+                  try:
+                      req=urllib.request.Request(url+"?worldz_nextgen=20260924" if "?" not in url else url+"&worldz_nextgen=20260924",
+                          headers={"User-Agent":"WorldzEcoSystem-NextGen-Verify/1.0","Cache-Control":"no-cache"})
+                      with urllib.request.urlopen(req,timeout=30) as r:
+                          body=r.read().decode("utf-8","ignore")
+                          last=f"HTTP {r.status}"
+                          if r.status==200 and "worldz-nextgen.css" in body and "data-worldz-nextgen=" in body and "always use official logo" not in body.lower():
+                              ok=True; break
+                  except Exception as e:
+                      last=repr(e)
+                  time.sleep(attempt*2)
+              print(("LIVE_NEXTGEN_PASS" if ok else "LIVE_NEXTGEN_FAIL"),url,last)
+              if not ok: failures.append((url,last))
+          if failures:
+              raise SystemExit(f"NEXTGEN_LIVE_VERIFY_FAILED count={len(failures)} sample={failures[:5]}")
+          print(f"WORLDZ_NEXTGEN_LIVE=PASS urls={len(urls)}")
