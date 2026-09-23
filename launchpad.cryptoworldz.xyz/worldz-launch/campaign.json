@@ -1,0 +1,78 @@
+{
+  "campaign": "WORLDZLAUNCHPAD_WORLDZ_LAUNCH_2026_09_23",
+  "status": "PUBLIC",
+  "title": "WorldzLaunchPad™ + ZED LED Command Centre MAX™",
+  "urls": {
+    "campaign": "https://launchpad.cryptoworldz.xyz/worldz-launch/",
+    "launchpad": "https://launchpad.cryptoworldz.xyz/",
+    "commandCentre": "https://cryptoworldz.xyz/command-centre-max/",
+    "cryptoWorldz": "https://cryptoworldz.xyz/",
+    "oneWorldz": "https://oneworldz.com/",
+    "donateWorldz": "https://donateworldz.com/"
+  },
+  "wldz": {
+    "name": "WORLDZ",
+    "symbol": "WLDZ",
+    "chain": "Solana",
+    "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "decimals": 6,
+    "maxSupply": 100000000,
+    "authorities": {
+      "mint": "REVOKED",
+      "freeze": "REVOKED"
+    },
+    "founding100": {
+      "totalPool": 10000000,
+      "positions": 100,
+      "wldzPerQualifiedPosition": 100000,
+      "qualification": "qualified verified mainnet launch team"
+    }
+  },
+  "launchpadFeatures": [
+    "WorldzMINT™",
+    "Worldz Flash™",
+    "Worldz Curve™",
+    "Worldz Curve Pro™",
+    "Worldz CrossPair™",
+    "Worldz OmniChain™",
+    "Worldz Safe Launch Standard™",
+    "Worldz Proof™",
+    "Worldz Trust Orbit™"
+  ],
+  "commandCentre": {
+    "registeredCommandEntries": 139,
+    "modules": [
+      "ZED",
+      "AUTO",
+      "G.R.A.C.E.",
+      "MAX",
+      "RECAP",
+      "WorldPing™",
+      "WorldzCast™",
+      "WorldzLaunchPad™"
+    ],
+    "licensing": {
+      "rent": "0.3 SOL / group / 31 days",
+      "rentToOwn": "0.5 SOL / group / month for 12 months",
+      "own": "4.5 SOL one-time perpetual group licence"
+    }
+  },
+  "socials": {
+    "x": [
+      "https://x.com/WorldzLaunchPad",
+      "https://x.com/CryptoWorldzX",
+      "https://x.com/OneWorldzX",
+      "https://x.com/JayJayTeamDev"
+    ],
+    "telegram": [
+      "https://t.me/CryptoWLDZ",
+      "https://t.me/CryptoWorldzHQ",
+      "https://t.me/CryptoWorldzRaaiiiddTeam"
+    ]
+  },
+  "images": {
+    "commandCentre": "https://cryptoworldz.xyz/command-centre-five.png",
+    "wldz": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg"
+  },
+  "separationNotice": "CryptoWorldz and WorldzLaunchPad are crypto/technology activities. OneWorldz and DonateWorldz remain distinct humanitarian and donation pathways."
+}
