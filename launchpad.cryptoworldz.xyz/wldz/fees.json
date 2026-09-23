@@ -1,0 +1,35 @@
+{
+  "name": "WORLDZ",
+  "symbol": "WLDZ",
+  "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+  "pool": {
+    "dex": "Meteora",
+    "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "pair": "WLDZ/wSOL",
+    "baseTradingFeePercent": 2,
+    "baseTradingFeeBps": 200,
+    "collectionAsset": "quote/wSOL",
+    "dynamicFee": false,
+    "lpPosition": "2P24ZX45c4QLRmxDnAfHWAxXzWn4t3RAABaE7rweZC94",
+    "lpLock": "permanent"
+  },
+  "walletTransferTaxPercent": 0,
+  "feeFlowPercent": {
+    "worldzLaunchPadTreasury": 10,
+    "lpGrowth": 30,
+    "holdersAndLegacy": 20,
+    "communityGrowthMarketing": 20,
+    "oneWorldzImpact": 10,
+    "operations": 5,
+    "reserve": 5
+  },
+  "note": "Fee-flow percentages apply to supported trading-fee revenue collected by the Worldz fee-routing design; they are separate from token-supply allocations.",
+  "officialLinks": {
+    "official": "https://launchpad.cryptoworldz.xyz/wldz/",
+    "cryptoworldz": "https://cryptoworldz.xyz/",
+    "oneworldz": "https://oneworldz.com/",
+    "donateworldz": "https://donateworldz.com/",
+    "launchpad": "https://launchpad.cryptoworldz.xyz/",
+    "telegram": "https://t.me/CryptoWLDZ"
+  }
+}
