@@ -1,0 +1,75 @@
+name: Announce Canonical WORLDZ WLDZ
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/announce-wldz-canonical.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: cryptoworldz-production
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+    steps:
+      - name: Publish WORLDZ identity to CryptoWLDZ
+        shell: python
+        run: |
+          import json, os, urllib.request
+          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          if not token:
+              raise SystemExit("BOT_TOKEN missing")
+          print("::add-mask::"+token)
+          api="https://api.telegram.org/bot"+token+"/sendPhoto"
+          caption="""🌍 WORLDZ • WLDZ — OFFICIAL TOKEN IDENTITY
+
+Name: WORLDZ
+Ticker: WLDZ
+Network: Solana
+Mint: AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U
+Max supply: 100,000,000 WLDZ
+Mint authority: REVOKED
+Freeze authority: REVOKED
+Wallet transfer tax: 0%
+
+DEX: Meteora DAMM v2
+Pair: WLDZ / wSOL
+Base trading fee: 2%
+LP: permanently locked
+
+Official:
+https://launchpad.cryptoworldz.xyz/wldz/
+Verification data:
+https://launchpad.cryptoworldz.xyz/wldz/verify/
+
+CryptoWorldz:
+https://cryptoworldz.xyz/
+OneWorldz:
+https://oneworldz.com/
+DonateWorldz:
+https://donateworldz.com/
+WorldzLaunchPad:
+https://launchpad.cryptoworldz.xyz/
+
+Developers / indexers:
+https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json"""
+          payload=json.dumps({
+            "chat_id":"@CryptoWLDZ",
+            "photo":"https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
+            "caption":caption
+          }).encode("utf-8")
+          req=urllib.request.Request(api,data=payload,headers={"Content-Type":"application/json"})
+          with urllib.request.urlopen(req,timeout=30) as r:
+              result=json.loads(r.read().decode("utf-8"))
+          if result.get("ok") is not True:
+              raise SystemExit("Telegram announcement failed")
+          msg=result.get("result",{})
+          print("WLDZ_TELEGRAM_ANNOUNCEMENT=PASS")
+          print("WLDZ_TELEGRAM_MESSAGE_ID="+str(msg.get("message_id","")))
