@@ -52,9 +52,6 @@ jobs:
           python3 tools/apply_heroes_worldz.py
           python3 tools/apply_slice_of_hope_visual.py
           python3 tools/apply_davis_page.py
-          python3 tools/repair_stage_1_writing.py
-          python3 tools/repair_stage_2_images.py
-          python3 tools/repair_stage_3_other.py
           python3 tools/apply_pdc_five_page.py
           python3 tools/apply_donateworldz_brand.py
           python3 tools/apply_verified_insights.py
