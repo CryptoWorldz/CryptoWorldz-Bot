@@ -16,12 +16,6 @@ async function startAuto() {
   const repository = createAutoRepository(supabase);
   const dcaRepository = createAutoDcaRepository(supabase);
   const trader = createExternalDcaTrader(config);
-  const settings = await repository.getSettings();
-
-  if (settings.mode !== "safe_locked" || settings.execution_enabled) {
-    throw new Error("Auto refused startup because the legacy service is not in SAFE LOCKED MODE.");
-  }
-
   const dcaWorker = createAutoDcaWorker({
     repository: dcaRepository,
     trader,
@@ -30,7 +24,7 @@ async function startAuto() {
   const app = createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorker });
   const server = app.listen(config.port, () => {
     console.log(`Diamond Buy Auto service listening on port ${config.port}`);
-    console.log(`Auto DCA runtime prepared: ${trader.runtimeStatus().signerReady ? "executor connected" : "executor activation pending"}`);
+    console.log(`Auto owner-DCA runtime: ${trader.runtimeStatus().signerReady ? "executor connected" : "executor activation pending"}`);
     dcaWorker.start();
   });
 
