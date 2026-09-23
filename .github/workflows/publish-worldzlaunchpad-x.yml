@@ -107,11 +107,11 @@ jobs:
               redirectUri,
               encryptionSecret
             });
-            if (!oauth.configured()) throw new Error("grace_x_oauth_not_configured");
-
             const publisher = createGracePublisher({
+              env: process.env,
               tokenProvider: async (target) => {
                 if (target.platform !== "x") return null;
+                if (!oauth.configured()) return null;
                 return oauth.getAccessToken(target.account_id);
               }
             });
