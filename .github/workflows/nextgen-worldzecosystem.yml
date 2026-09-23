@@ -7,6 +7,7 @@ on:
       - ".github/workflows/nextgen-worldzecosystem.yml"
       - "tools/apply_worldz_ecosystem_nextgen.py"
       - "tools/deploy_hostinger_nextgen.py"
+      - "tools/render_all_pages.py"
       - "docs/NEXTGEN-WORLDZECOSYSTEM-PLAN.md"
   workflow_dispatch:
 
