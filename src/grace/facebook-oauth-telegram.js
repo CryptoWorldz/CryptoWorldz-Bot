@@ -1,5 +1,5 @@
 const GRACE_FACEBOOK_OAUTH_COMMANDS = [
-  { command: "connectfacebook", description: "Connect the approved CryptoWorldz Facebook Page" },
+  { command: "connectfacebook", description: "Connect an approved Facebook Page to Grace" },
   { command: "gracefacebook", description: "Alias for Grace Facebook connection" },
   { command: "metacheck", description: "Owner: check Meta OAuth configuration" }
 ];
@@ -54,13 +54,13 @@ function registerGraceFacebookOAuthTelegramHandlers({ bot, facebookOAuth, config
         `Page: ${connection.account.display_name}`,
         `Grace ID: #${connection.account.id}`,
         "",
-        "Press the button below and approve the CryptoWorldz Facebook Page inside Meta.",
+        "Press the button below and approve this Facebook Page inside Meta.",
         "Grace will only activate the Page after Meta returns it in the authorised Page list.",
         "",
         "This link expires in 10 minutes."
       ].join("\n"), {
         reply_markup: {
-          inline_keyboard: [[{ text: "Connect CryptoWorldz Facebook", url: connection.authorizationUrl }]]
+          inline_keyboard: [[{ text: `Connect ${connection.account.display_name}`, url: connection.authorizationUrl }]]
         }
       });
     } catch (error) {
