@@ -13,7 +13,8 @@
     "stage-b-static": "node scripts/03_stage_b_static.mjs",
     "legacy-epoch-proof": "node scripts/03_legacy_epoch_proof.mjs",
     "legacy-live-snapshot": "node scripts/04_legacy_live_scanner.mjs",
-    "router-static": "node scripts/04_router_program_static.mjs"
+    "router-static": "node scripts/04_router_program_static.mjs",
+    "legacy-authority-audit": "node scripts/05_legacy_authority_audit.mjs"
   },
   "dependencies": {
     "@meteora-ag/dynamic-bonding-curve-sdk": "1.5.12",
