@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install pinned SDKs
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Static MagicFee proof
         run: npm run static-proof
       - name: Static router and HODLer accounting proof
