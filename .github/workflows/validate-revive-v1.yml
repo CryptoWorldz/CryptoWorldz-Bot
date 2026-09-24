@@ -49,6 +49,9 @@ jobs:
   devnet-stage-a:
     needs: validate
     runs-on: ubuntu-latest
+    env:
+      DEVNET_PAYER_SECRET_JSON: ${{ secrets.DEVNET_PAYER_SECRET_JSON }}
+      SOLANA_RPC_URL: ${{ secrets.DEVNET_SOLANA_RPC_URL }}
     timeout-minutes: 15
     defaults:
       run:
