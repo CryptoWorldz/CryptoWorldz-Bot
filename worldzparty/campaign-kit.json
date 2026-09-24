@@ -1,0 +1,56 @@
+{
+  "version": "WORLDZPARTY-CAMPAIGN-2026-09-25-A",
+  "status": "STAGING_COPY__NOT_A_PUBLIC_EVENT_ANNOUNCEMENT",
+  "identity": {
+    "headline": "WorldzParTyPlatform™ — Hold. Learn. Build. Participate. Prove. Help.",
+    "travelHeadline": "WorldzTravelParTy™ 2026–2030 — Woodstock spirit. Worldz purpose. 21st-century proof.",
+    "dubboHeadline": "Dubbo WorldzParTy Week™ — a proposed week of music, learning, local spending and people helping people."
+  },
+  "publicCopy": {
+    "long": "WorldzParTyPlatform™ is becoming the digital home for Hodlerz Paradise™, DevCity™, InvestmentCity™, Worldz Launch Rooms™, Worldz Passport™, Worldz Academy / RECAP and Worldz Impact™. The next layer is WorldzTravelParTy™ 2026–2030: a proposed travelling community program combining music, builders, education, local business and practical action. Dubbo is the flagship homecoming concept. Artist invitations, visitor wallet packs and local-spend support remain proposals until accepted, approved and funded.",
+    "short": "🏝️ WorldzParTyPlatform™ is growing. Hodlerz Paradise + DevCity + InvestmentCity + Founding 100 + WorldzTravelParTy™ 2026–2030. Dubbo flagship concept. Build it. Prove it. Help people. 💜🌍",
+    "callToAction": "Follow the staging build. Builders, artists, local businesses, services and community partners can register interest as the release gates are completed."
+  },
+  "inviteCampaign": {
+    "target": 3000,
+    "rule": "Personal invitation target only; never publish invitees as attending without consent.",
+    "segments": [
+      "people Jay has met",
+      "Dubbo community",
+      "service workers",
+      "local businesses",
+      "builders and developers",
+      "artists and performers",
+      "clubs and community organisations",
+      "OneWorldz supporters"
+    ]
+  },
+  "artistOutreach": {
+    "PINK": {
+      "status": "PLANNED_NOT_CONTACTED_OR_CONFIRMED",
+      "publicWording": "P!NK is a dream invitation target — not a confirmed performer."
+    },
+    "JimmyBarnes": {
+      "status": "PLANNED_NOT_CONTACTED_OR_CONFIRMED",
+      "publicWording": "Jimmy Barnes is an invitation target — not a confirmed performer."
+    }
+  },
+  "welcomePack": {
+    "publicWording": "Proposed Worldz Welcome Wallet Pack: co-branded hardware wallet, education and eligible ecosystem allocations. Final contents depend on partner, legal, technical and funding approvals.",
+    "prohibitedWording": [
+      "guaranteed investment",
+      "guaranteed $1,000",
+      "free money",
+      "P!NK performing",
+      "Jimmy Barnes performing"
+    ]
+  },
+  "localAction": [
+    "Jay's Safe Place cards and QR",
+    "DonateWorldz A4 Dubbo service/outreach flyer",
+    "approved busking and public-space presence",
+    "worker and business hand-outs",
+    "local business visitor-spend concept",
+    "OneWorldz practical-help pathways"
+  ]
+}

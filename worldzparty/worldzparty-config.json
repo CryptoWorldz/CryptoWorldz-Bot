@@ -1,0 +1,99 @@
+{
+  "version": "WORLDZPARTY-STAGING-2026-09-25-B",
+  "publicTarget": "staging.hodlergalaxy.xyz",
+  "productionDomainUntouched": "hodlergalaxy.xyz",
+  "product": "WorldzParTyPlatform™",
+  "districts": [
+    "Hodlerz Paradise™",
+    "DevCity™",
+    "InvestmentCity™",
+    "Worldz Launch Rooms™",
+    "Worldz Passport™",
+    "Worldz Academy / RECAP",
+    "Worldz Impact™"
+  ],
+  "operatingLayer": [
+    "ZED",
+    "AUTO",
+    "G.R.A.C.E.",
+    "MAX",
+    "WorldPing",
+    "WorldzCast",
+    "WorldzLaunchPad",
+    "Trust Orbit",
+    "Founding 100"
+  ],
+  "communityRule": "Contribution, learning and proof outrank wallet size.",
+  "economicsRule": "No promise of token value or investment return. Protocol, creator, referrer, platform and impact economics must be disclosed separately where applicable.",
+  "founding100": {
+    "positions": 100,
+    "wldzPoolTokens": 10000000,
+    "wldzPerQualifiedMainnetTeam": 100000,
+    "testnetEligible": false
+  },
+  "imageryRule": "Original Worldz-built visual environment only. No generic stock hero imagery.",
+  "deployment": {
+    "enabled": true,
+    "stagingOnly": true,
+    "productionOverwriteAllowed": false,
+    "host": "staging.hodlergalaxy.xyz",
+    "branch": "worldz-production-suite",
+    "path": "/worldzparty/"
+  },
+  "travelParty": {
+    "name": "WorldzTravelParTy™",
+    "horizon": "2026-2030",
+    "flagship": {
+      "name": "Dubbo WorldzParTy Week™",
+      "date": "TBA",
+      "status": "PLANNING_NOT_ANNOUNCED",
+      "personalInvitationTarget": 3000
+    },
+    "musicConcept": "1970s Woodstock revival spirit rebuilt as a safe 21st-century Worldz community event",
+    "artistInvitationTargets": [
+      {
+        "name": "P!NK",
+        "status": "INVITATION_PLANNED_NOT_CONFIRMED"
+      },
+      {
+        "name": "Jimmy Barnes",
+        "status": "INVITATION_PLANNED_NOT_CONFIRMED"
+      }
+    ],
+    "visitorWelcomePack": {
+      "status": "PROPOSED_CONDITIONAL",
+      "hardware": "custom co-branded Tangem three-card wallet set",
+      "worldzLaunchPadTokenGoal": "10+ eligible ecosystem tokens",
+      "legacyShareConcept": true,
+      "conditions": [
+        "Tangem partner approval",
+        "funding",
+        "inventory",
+        "legal review",
+        "technical eligibility",
+        "recipient onboarding"
+      ]
+    },
+    "dubboVisitorSpendSupport": {
+      "status": "PROPOSED_CONDITIONAL",
+      "targetAud": "event visitors",
+      "amountAud": 1000,
+      "rule": "Do not advertise as guaranteed until fully funded and legally structured."
+    }
+  },
+  "localActionStack": [
+    "Jay's Safe Place",
+    "DonateWorldz A4 Dubbo flyer",
+    "approved busking and public-space outreach",
+    "worker and local-business hand-outs",
+    "OneWorldz practical-help pathways",
+    "Worldz Academy / RECAP education"
+  ],
+  "advertisingRules": {
+    "artistNamesRequireConfirmationBeforeBilling": true,
+    "noGuaranteedTokenValue": true,
+    "noGuaranteedCashGiftBeforeFunding": true,
+    "noManufacturedMarketInterest": true,
+    "humanitarianAndInvestmentMessagingSeparated": true
+  }
+}

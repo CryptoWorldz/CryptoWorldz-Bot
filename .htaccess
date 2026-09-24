@@ -1,5 +1,9 @@
 RewriteEngine On
 
+# WorldzParTyPlatform staging — isolated to staging.hodlergalaxy.xyz.
+RewriteCond %{HTTP_HOST} ^staging\.hodlergalaxy\.xyz$ [NC]
+RewriteRule ^$ /worldzparty/index.html [L]
+
 # Use HodlerGalaxy.xyz as the isolated HodlerWorldz production-suite test domain.
 RewriteCond %{HTTP_HOST} ^(www\.)?hodlergalaxy\.xyz$ [NC]
 RewriteCond %{QUERY_STRING} !(^|&)site= [NC]
