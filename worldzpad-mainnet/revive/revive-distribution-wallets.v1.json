@@ -1,0 +1,71 @@
+{
+  "version": "REVIVE-DISTRIBUTION-WALLETS-2026-09-24-A",
+  "tokenMint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+  "sourceVault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+  "verifiedLegacyDevWallets": [
+    {
+      "label": "Limited Edition",
+      "address": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9"
+    },
+    {
+      "label": "Next Big Coin Dev",
+      "address": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt"
+    },
+    {
+      "label": "PdCrew",
+      "address": "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j"
+    },
+    {
+      "label": "Purple Diamond Crew",
+      "address": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U"
+    },
+    {
+      "label": "Purple PDC",
+      "address": "G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3"
+    },
+    {
+      "label": "SolSavewXRP",
+      "address": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9"
+    }
+  ],
+  "watchOnlyDistributionWallets": [
+    {
+      "label": "INVEST Distribution",
+      "address": "Hd3cMfHMHQe4j8xfpnbDkWEgDo4gbrH2eimh6vpxjC37",
+      "autoFund": false
+    },
+    {
+      "label": "NBC Distribution",
+      "address": "PdABvvq4F7YjwsVRq2CCQeBNZTBq5WfkQvn8VmhRY34",
+      "autoFund": false
+    },
+    {
+      "label": "PDC1 Distribution",
+      "address": "4DpR79PKKQXHVZipkvb1fMAfvZNJo7ktfKdkjwrjjqAA",
+      "autoFund": false
+    },
+    {
+      "label": "Limited Distribution",
+      "address": "2turuerVWbeDPRZfK2iixzRnrC6zjbAzHo9NZfww6rFn",
+      "autoFund": false
+    }
+  ],
+  "programPools": [
+    {
+      "role": "DEV_CITY_100",
+      "address": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
+      "rvivTokens": 20000000
+    },
+    {
+      "role": "ONEWORLDZ_CHARITY",
+      "address": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+      "rvivTokens": 20000000
+    },
+    {
+      "role": "LEGACY_CLAIM_SOURCE",
+      "address": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "rvivTokens": 20000000
+    }
+  ],
+  "rule": "Token allocation and SOL transaction funding are separate. Watch-only wallets are never automatically funded merely because they are in the registry."
+}
