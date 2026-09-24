@@ -17,24 +17,36 @@ const RPC=process.env.SOLANA_RPC_URL||clusterApiUrl('devnet');
 if(/mainnet/i.test(RPC))throw new Error('MAINNET RPC FORBIDDEN');
 const connection=new Connection(RPC,'confirmed');
 const client=new DynamicBondingCurveClient(connection,'confirmed');
-const payer=Keypair.generate();
+function payerFromEnvironment(){
+  const raw=process.env.DEVNET_PAYER_SECRET_JSON?.trim();
+  if(!raw)return {keypair:Keypair.generate(),source:'ephemeral_generated'};
+  let parsed;
+  try{parsed=JSON.parse(raw);}catch{throw new Error('DEVNET_PAYER_SECRET_JSON must be a JSON byte array');}
+  if(!Array.isArray(parsed)||parsed.length!==64)throw new Error('DEVNET_PAYER_SECRET_JSON must contain 64 secret-key bytes');
+  return {keypair:Keypair.fromSecretKey(Uint8Array.from(parsed)),source:'prefunded_actions_secret'};
+}
+const payerConfig=payerFromEnvironment();
+const payer=payerConfig.keypair;
 const config=Keypair.generate();
 const baseMint=Keypair.generate();
 const DBC_PROGRAM=new PublicKey('dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN');
 
 async function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 async function fund(){
+  const minimumLamports=50_000_000;
+  let bal=await connection.getBalance(payer.publicKey,'confirmed');
+  if(bal>=minimumLamports)return {mode:payerConfig.source,sig:null,requestedSol:0,balance:bal};
   let err;
-  for(const sol of [2,1,0.5,0.25]){
+  for(const sol of [0.25,0.1,0.05]){
     try{
       const sig=await connection.requestAirdrop(payer.publicKey,Math.floor(sol*LAMPORTS_PER_SOL));
       const bh=await connection.getLatestBlockhash('confirmed');
       await connection.confirmTransaction({signature:sig,...bh},'confirmed');
-      const bal=await connection.getBalance(payer.publicKey,'confirmed');
-      if(bal>0)return {sig,requestedSol:sol,balance:bal};
-    }catch(e){err=e;await sleep(3500);}
+      bal=await connection.getBalance(payer.publicKey,'confirmed');
+      if(bal>=minimumLamports)return {mode:'rpc_airdrop',sig,requestedSol:sol,balance:bal};
+    }catch(e){err=e;await sleep(2500);}
   }
-  throw new Error('devnet airdrop failed: '+(err?.message||err));
+  throw new Error('devnet payer funding unavailable source='+payerConfig.source+' balance='+bal+' error='+(err?.message||err));
 }
 const airdrop=await fund();
 
@@ -128,7 +140,7 @@ const report={
   baseMint:baseMint.publicKey.toBase58(),
   pool:pool.toBase58(),
   transaction:sig,
-  airdrop,
+  funding:airdrop,
   fee:{grossBps:75,dynamic:false,creatorControlledPercent:51,partnerControlledPercent:49},
   migratedPool:{feeBps:75,dynamic:false,creatorPermanentLockedPercent:60,partnerPermanentLockedPercent:40,totalPermanentLockedPercent:100},
   router:{devnetNamespaceProgramId:devnetRouterProgramId().toBase58(),weights:MAGIC.routerWeights,legacyVaultPdas:deriveLegacyVaults()},
