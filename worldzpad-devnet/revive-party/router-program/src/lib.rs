@@ -7,9 +7,8 @@ use solana_program::{
     program::invoke_signed,
     program_error::ProgramError,
     pubkey::Pubkey,
-    system_instruction,
-    system_program,
 };
+use solana_system_interface::{instruction as system_instruction, program as system_program};
 
 entrypoint!(process_instruction);
 
@@ -55,7 +54,7 @@ pub fn process_instruction(
     if !authority.is_signer {
         return Err(ProgramError::MissingRequiredSignature);
     }
-    if *system_program_info.key != system_program::id() {
+    if !system_program::check_id(system_program_info.key) {
         return Err(ProgramError::IncorrectProgramId);
     }
 
