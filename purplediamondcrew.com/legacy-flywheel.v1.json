@@ -1,12 +1,12 @@
 {
-  "version": "WORLDZ-LEGACY-FLYWHEEL-2026-09-24-A",
+  "version": "WORLDZ-LEGACY-FLYWHEEL-2026-09-25-C",
   "status": "PRIVATE_BUILD__DEVNET_REQUIRED__MAINNET_DISABLED",
   "sourceFeeRule": {
     "basis": "NET_WORLDZ_CONTROLLED_CLAIMABLE_FEE_REVENUE_AFTER_EXTERNAL_PROTOCOL_DEDUCTIONS",
     "allSupportedWorldzLaunchPadTokens": true,
     "legacyFlywheelPercent": 15,
     "traderFeeIncreaseRequired": false,
-    "rule": "No fee may be routed to the Legacy Flywheel unless Worldz actually controls/receives that fee revenue."
+    "rule": "Legacy Flywheel is part of the disclosed MagicFeeNumber™ allocation. No additional hidden fee is layered on top."
   },
   "controlledFeeSplitPercent": {
     "creator": 51,
@@ -234,5 +234,18 @@
         "flywheelBucketSharePercent": 10
       }
     }
-  ]
+  ],
+  "magicFeeStandard": {
+    "policyPath": "worldzpad-mainnet/fairfee/worldz-magic-fee.v1.json",
+    "targetGrossTraderFeeBps": 75,
+    "targetGrossTraderFeePercent": 0.75,
+    "modeledWorldzControlledPercentOfTrade": 0.6,
+    "effectiveLegacyFlywheelPercentOfTrade": 0.09,
+    "effectivePerLegacyVaultPercentOfTrade": 0.009
+  },
+  "projectWalletExclusion": {
+    "enabled": true,
+    "publicRule": "Worldz-controlled Dev, treasury, program, distribution, liquidity and reward-vault wallets are excluded from Legacy Flywheel HODLer rewards.",
+    "addressesPublishedHere": false
+  }
 }
