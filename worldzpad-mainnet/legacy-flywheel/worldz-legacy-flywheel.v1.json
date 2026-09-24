@@ -1,0 +1,286 @@
+{
+  "version": "WORLDZ-LEGACY-FLYWHEEL-2026-09-24-A",
+  "status": "PRIVATE_BUILD__DEVNET_REQUIRED__MAINNET_DISABLED",
+  "name": "Legacy Flywheel™",
+  "purpose": "Use fee revenue from new WorldzLaunchPad launches to create recurring SOL rewards for qualifying holders of the 10 verified PurpleDiamondCrew legacy mints.",
+  "sourceFeeRule": {
+    "basis": "NET_WORLDZ_CONTROLLED_CLAIMABLE_FEE_REVENUE_AFTER_EXTERNAL_PROTOCOL_DEDUCTIONS",
+    "allSupportedWorldzLaunchPadTokens": true,
+    "legacyFlywheelPercent": 15,
+    "traderFeeIncreaseRequired": false,
+    "rule": "No fee may be routed to the Legacy Flywheel unless Worldz actually controls/receives that fee revenue."
+  },
+  "controlledFeeSplitPercent": {
+    "creator": 51,
+    "referrer": 17,
+    "legacyFlywheel": 15,
+    "worldzLaunchPad": 8.5,
+    "oneWorldzImpact": 8.5,
+    "total": 100,
+    "derivation": "Legacy Flywheel takes 15% first. The remaining 85% preserves the prior 60/20/10/10 creator/referrer/Worldz/Impact proportions."
+  },
+  "legacyVaultFunding": {
+    "asset": "SOL",
+    "inputAsset": "native quote asset or collected fee asset",
+    "solanaSource": "wSOL may be unwrapped to SOL before vault credit",
+    "nonSolanaSource": "Accrue the 15% payable on the source chain until an approved, audited conversion/bridge route can deliver SOL. No unsupported auto-bridge.",
+    "vaultCount": 10,
+    "splitMode": "EQUAL_ACROSS_10_VERIFIED_LEGACY_MINTS",
+    "percentOfFlywheelBucketPerVault": 10,
+    "percentOfWorldzControlledFeeRevenuePerVault": 1.5
+  },
+  "epoch": {
+    "seconds": 21600,
+    "hours": 6,
+    "fundingCadence": "every_6_hours",
+    "eligibilitySnapshot": "START_AND_END_OF_EPOCH",
+    "qualifyingBalance": "MIN(start_balance,end_balance)",
+    "rollForwardRule": "If an epoch or individual payout is uneconomic, accrue it to the next claimable balance rather than waste SOL on fees."
+  },
+  "eligibility": {
+    "thresholdVersion": "PDC-LEGACY-MINIMUMS-2026-09-24-A",
+    "thresholdBasisPercentOfVerifiedSupply": 0.01,
+    "thresholdLockedFromSnapshotDate": "2026-09-21",
+    "walletMustHoldAtBothEpochBoundaries": true,
+    "systemWalletsExcluded": true,
+    "fundingVaultsExcluded": true,
+    "liquidityAndProgramVaultsExcluded": true,
+    "knownProjectDistributionWalletsExcludedUntilHumanClassification": true,
+    "newBuyerEligibility": "A wallet that later acquires at least the published minimum may qualify once live acquisition/liquidity exists and the scanner verifies both epoch boundaries."
+  },
+  "rewardWeighting": {
+    "equalEligibleWalletPoolPercent": 50,
+    "sqrtHoldingPoolPercent": 50,
+    "formula": "50% equal among eligible wallets + 50% proportional to sqrt(qualifying legacy-token balance)",
+    "linkedVerifiedWalletsAggregated": true,
+    "reason": "Preserves meaningful small-holder rewards without letting one historical whale absorb the entire legacy vault."
+  },
+  "settlement": {
+    "accounting": "Every 6 hours each eligible wallet receives a ledger entitlement.",
+    "directPushRequired": false,
+    "claimModel": "cumulative_claimable_SOL",
+    "automaticPayout": "Only when current execution cost and minimum-payout rules make the transfer economical.",
+    "noGuaranteedReturn": true,
+    "noGuaranteedApy": true
+  },
+  "assets": [
+    {
+      "order": 1,
+      "name": "Purple Diamond Crew",
+      "symbol": "PDC",
+      "mint": "F82HFwxDLKFAbQWq7BmniWWxMgUerQsVu8jS357epump",
+      "decimals": 6,
+      "supplyRaw": "999299046845880",
+      "minimumRaw": "99929904685",
+      "minimumTokens": "99929.904685",
+      "snapshotEligibleOwners": 7,
+      "snapshotOwners": 19,
+      "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
+      "rewardVault": {
+        "type": "PROGRAM_DERIVED_SOL_VAULT",
+        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
+        "worldzControlledFeeSharePercent": 1.5,
+        "flywheelBucketSharePercent": 10
+      }
+    },
+    {
+      "order": 2,
+      "name": "The Purple Diamond Crew",
+      "symbol": "PDC1",
+      "mint": "PDC1K9aG6vAg5jFYkLin2tdTgwqZypsdvVHhHN2WnWw",
+      "decimals": 6,
+      "supplyRaw": "484849000000000",
+      "minimumRaw": "48484900000",
+      "minimumTokens": "48484.9",
+      "snapshotEligibleOwners": 106,
+      "snapshotOwners": 106,
+      "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
+      "rewardVault": {
+        "type": "PROGRAM_DERIVED_SOL_VAULT",
+        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
+        "worldzControlledFeeSharePercent": 1.5,
+        "flywheelBucketSharePercent": 10
+      }
+    },
+    {
+      "order": 3,
+      "name": "Purple Diamond Crew",
+      "symbol": "PDC1",
+      "mint": "PDC1NgvtvLZwnopTfQdzXT5iAqBeGyLdFXEcqnvsR52",
+      "decimals": 9,
+      "supplyRaw": "982137054962582945",
+      "minimumRaw": "98213705496259",
+      "minimumTokens": "98213.705496259",
+      "snapshotEligibleOwners": 16,
+      "snapshotOwners": 26,
+      "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
+      "rewardVault": {
+        "type": "PROGRAM_DERIVED_SOL_VAULT",
+        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
+        "worldzControlledFeeSharePercent": 1.5,
+        "flywheelBucketSharePercent": 10
+      }
+    },
+    {
+      "order": 4,
+      "name": "Purple Diamond Crew – MAGA Edition",
+      "symbol": "PDCMAGA",
+      "mint": "7mwWRQeNpwWrnNhRpC48k7xQCdjCXDWfLLuYsphupump",
+      "decimals": 6,
+      "supplyRaw": "999999999997462",
+      "minimumRaw": "100000000000",
+      "minimumTokens": "100000",
+      "snapshotEligibleOwners": 2,
+      "snapshotOwners": 3,
+      "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
+      "rewardVault": {
+        "type": "PROGRAM_DERIVED_SOL_VAULT",
+        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
+        "worldzControlledFeeSharePercent": 1.5,
+        "flywheelBucketSharePercent": 10
+      }
+    },
+    {
+      "order": 5,
+      "name": "PurpleDiamondCrewShares",
+      "symbol": "PDCshare",
+      "mint": "PDCLsBaTM3MxCzTWNoRvQejZ4kkhAWZiSc3ipCsoFuE",
+      "decimals": 9,
+      "supplyRaw": "639573379212413287",
+      "minimumRaw": "63957337921242",
+      "minimumTokens": "63957.337921242",
+      "snapshotEligibleOwners": 3,
+      "snapshotOwners": 6,
+      "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
+      "rewardVault": {
+        "type": "PROGRAM_DERIVED_SOL_VAULT",
+        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
+        "worldzControlledFeeSharePercent": 1.5,
+        "flywheelBucketSharePercent": 10
+      }
+    },
+    {
+      "order": 6,
+      "name": "Purple Diamond Crew",
+      "symbol": "PurpleDC",
+      "mint": "9Jd67VEgqWA2K5mck7yiYGxfLrQnmrTnXXzDYE3b7MLf",
+      "decimals": 2,
+      "supplyRaw": "5200765300",
+      "minimumRaw": "520077",
+      "minimumTokens": "5200.77",
+      "snapshotEligibleOwners": 2,
+      "snapshotOwners": 3,
+      "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
+      "rewardVault": {
+        "type": "PROGRAM_DERIVED_SOL_VAULT",
+        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
+        "worldzControlledFeeSharePercent": 1.5,
+        "flywheelBucketSharePercent": 10
+      }
+    },
+    {
+      "order": 7,
+      "name": "OG Purple Diamond",
+      "symbol": "PurpleOg",
+      "mint": "DyZP9zn6vRu8J8XCQLNCREgCc12YN4JndnrmE5Upump",
+      "decimals": 6,
+      "supplyRaw": "999999999984427",
+      "minimumRaw": "99999999999",
+      "minimumTokens": "99999.999999",
+      "snapshotEligibleOwners": 1,
+      "snapshotOwners": 1,
+      "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
+      "rewardVault": {
+        "type": "PROGRAM_DERIVED_SOL_VAULT",
+        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
+        "worldzControlledFeeSharePercent": 1.5,
+        "flywheelBucketSharePercent": 10
+      }
+    },
+    {
+      "order": 8,
+      "name": "Purple Diamond Crew – PCC1 Legacy",
+      "symbol": "PDC1",
+      "mint": "DcekG6rLbQ3K5LtZfSMLgecfqnFAZgJUSpoY7tBgmuGv",
+      "decimals": 6,
+      "supplyRaw": "41856623592",
+      "minimumRaw": "4185663",
+      "minimumTokens": "4.185663",
+      "snapshotEligibleOwners": 1,
+      "snapshotOwners": 3,
+      "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
+      "rewardVault": {
+        "type": "PROGRAM_DERIVED_SOL_VAULT",
+        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
+        "worldzControlledFeeSharePercent": 1.5,
+        "flywheelBucketSharePercent": 10
+      }
+    },
+    {
+      "order": 9,
+      "name": "INVEST",
+      "symbol": "INVEST",
+      "mint": "VeSt6vaWE5JsT36sVCzL21daiY7nNNs73TJcJMHgnjC",
+      "decimals": 9,
+      "supplyRaw": "340740712594720856",
+      "minimumRaw": "34074071259473",
+      "minimumTokens": "34074.071259473",
+      "snapshotEligibleOwners": 21,
+      "snapshotOwners": 26,
+      "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
+      "rewardVault": {
+        "type": "PROGRAM_DERIVED_SOL_VAULT",
+        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
+        "worldzControlledFeeSharePercent": 1.5,
+        "flywheelBucketSharePercent": 10
+      }
+    },
+    {
+      "order": 10,
+      "name": "Limited Edition",
+      "symbol": "LMTD",
+      "mint": "Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY",
+      "decimals": 9,
+      "supplyRaw": "9828310533036117",
+      "minimumRaw": "982831053304",
+      "minimumTokens": "982.831053304",
+      "snapshotEligibleOwners": 34,
+      "snapshotOwners": 46,
+      "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
+      "rewardVault": {
+        "type": "PROGRAM_DERIVED_SOL_VAULT",
+        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
+        "worldzControlledFeeSharePercent": 1.5,
+        "flywheelBucketSharePercent": 10
+      }
+    }
+  ],
+  "historicalDistributionWallets": {
+    "rule": "These are historical/watch-only distribution addresses. They are not the new Legacy Flywheel reward vaults and must not be auto-funded merely because they exist in the registry.",
+    "wallets": [
+      {
+        "label": "INVEST Distribution",
+        "address": "Hd3cMfHMHQe4j8xfpnbDkWEgDo4gbrH2eimh6vpxjC37"
+      },
+      {
+        "label": "PDC1 Distribution",
+        "address": "4DpR79PKKQXHVZipkvb1fMAfvZNJo7ktfKdkjwrjjqAA"
+      },
+      {
+        "label": "Limited Distribution",
+        "address": "2turuerVWbeDPRZfK2iixzRnrC6zjbAzHo9NZfww6rFn"
+      }
+    ]
+  },
+  "executionGates": [
+    "Derive and verify 10 dedicated Solana reward-vault PDAs on devnet.",
+    "Prove live holder scanning for all 10 mints and both epoch boundaries.",
+    "Verify threshold calculations against raw integer balances and token decimals.",
+    "Exclude project/system/distribution/liquidity wallets before rewards are finalized.",
+    "Prove exact fee contribution accounting from each source WorldzLaunchPad token.",
+    "Prove 50/50 equal + sqrt reward math reconciles to each vault's funded epoch amount.",
+    "Prove roll-forward and cumulative-claim accounting.",
+    "Security review the payout/claim adapter.",
+    "Mainnet remains disabled until explicit owner approval."
+  ]
+}
