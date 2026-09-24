@@ -29,6 +29,19 @@ function createGraceOAuthRepository(supabase, options = {}) {
     return data;
   }
 
+  async function listXAccounts() {
+    const workspace = await getWorkspace();
+    const { data, error } = await supabase
+      .from("grace_social_accounts")
+      .select("id,workspace_id,platform,account_key,display_name,handle,external_account_id,status")
+      .eq("workspace_id", workspace.id)
+      .eq("platform", "x")
+      .neq("status", "disabled")
+      .order("id", { ascending: true });
+    if (error) throw error;
+    return data || [];
+  }
+
   async function createOAuthState({ accountId, stateHash, verifierCiphertext, expectedHandle, requestedBy, expiresAt }) {
     const workspace = await getWorkspace();
     const { data, error } = await supabase
@@ -161,6 +174,7 @@ function createGraceOAuthRepository(supabase, options = {}) {
     getConnection,
     getWorkspace,
     getXAccount,
+    listXAccounts,
     markConnectionError,
     recordAudit,
     saveConnection
