@@ -1,0 +1,97 @@
+name: Validate SuiWorldz native adapter
+
+on:
+  push:
+    branches:
+      - suiworldz-native-testnet-2026-09-25
+    paths:
+      - 'worldzpad-sui-testnet/**'
+      - 'launchpad.cryptoworldz.xyz/sui/**'
+      - 'suiworldz.xyz/**'
+      - '.github/workflows/validate-suiworldz-native.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-sui-testnet/**'
+      - 'launchpad.cryptoworldz.xyz/sui/**'
+      - 'suiworldz.xyz/**'
+      - '.github/workflows/validate-suiworldz-native.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: suiworldz-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: worldzpad-sui-testnet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned TypeScript SDK
+        run: npm install --no-audit --no-fund
+      - name: Static Worldz Safe Launch proof
+        run: npm run static-proof
+      - name: Install Sui Testnet CLI with official suiup
+        shell: bash
+        run: |
+          cargo install --git https://github.com/MystenLabs/suiup.git --locked
+          suiup install sui@testnet
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/sui" --version
+      - name: Compile Move template
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          "$HOME/.local/bin/sui" move build --path template
+          "$HOME/.local/bin/sui" move build --path template --dump-bytecode-as-base64 > artifacts/template-bytecode.json
+          node -e 'const x=require("./artifacts/template-bytecode.json"); if(!Array.isArray(x.modules)||!x.modules.length||!Array.isArray(x.dependencies)||!x.dependencies.length) process.exit(1); console.log("SUI_BYTECODE_COMPILE=PASS modules="+x.modules.length+" dependencies="+x.dependencies.length)'
+      - name: Emit exact tested browser bytecode
+        shell: bash
+        run: |
+          printf 'SUI_TEMPLATE_BYTECODE_B64='
+          base64 -w0 artifacts/template-bytecode.json
+          printf '\n'
+          printf 'SUI_PACKAGE_LOCK_B64='
+          base64 -w0 package-lock.json
+          printf '\n'
+
+  testnet-onchain:
+    if: github.event_name == 'push'
+    needs: compile
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: worldzpad-sui-testnet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install SDK
+        run: npm install --no-audit --no-fund
+      - name: Install Sui Testnet CLI and compile exact template
+        shell: bash
+        run: |
+          cargo install --git https://github.com/MystenLabs/suiup.git --locked
+          suiup install sui@testnet
+          mkdir -p artifacts
+          "$HOME/.local/bin/sui" move build --path template --dump-bytecode-as-base64 > artifacts/template-bytecode.json
+      - name: Publish immutable package and create fixed-supply proof currency
+        run: npm run publish-proof
+      - name: Print on-chain proof
+        shell: bash
+        run: |
+          cat artifacts/sui-testnet-onchain-proof.json
+          sha256sum artifacts/sui-testnet-onchain-proof.json artifacts/template-bytecode.json
+          printf 'SUI_TESTNET_PROOF_B64='
+          base64 -w0 artifacts/sui-testnet-onchain-proof.json
+          printf '\n'
