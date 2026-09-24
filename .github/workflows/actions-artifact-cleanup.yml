@@ -15,7 +15,7 @@ permissions:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Delete Actions artifacts older than 7 days
         env:
@@ -26,15 +26,13 @@ jobs:
           set -u
 
           cutoff_epoch="$(date -u -d '7 days ago' +%s)"
-          deleted=0
-          kept=0
-          failed=0
-          list_file="$(mktemp)"
+          inventory="$(mktemp)"
+          old_ids="$(mktemp)"
 
           list_ok=0
           for attempt in 1 2 3 4 5; do
             if gh api --paginate "repos/$REPOSITORY/actions/artifacts?per_page=100" \
-              --jq '.artifacts[] | [.id, .created_at, .name] | @tsv' > "$list_file"; then
+              --jq '.artifacts[] | [.id, .created_at, .name] | @tsv' > "$inventory"; then
               list_ok=1
               break
             fi
@@ -47,53 +45,71 @@ jobs:
             exit 1
           fi
 
+          total=0
+          recent=0
           while IFS=$'\t' read -r artifact_id created_at artifact_name; do
             [ -z "${artifact_id:-}" ] && continue
+            total=$((total + 1))
             created_epoch="$(date -u -d "$created_at" +%s)"
-
             if [ "$created_epoch" -lt "$cutoff_epoch" ]; then
-              echo "Deleting artifact: $artifact_name (id=$artifact_id, created=$created_at)"
-              deleted_ok=0
+              printf '%s\n' "$artifact_id" >> "$old_ids"
+            else
+              recent=$((recent + 1))
+            fi
+          done < "$inventory"
+
+          old_count="$(wc -l < "$old_ids" | tr -d ' ')"
+          echo "Inventory: $total total; $old_count older than 7 days; $recent recent."
+
+          export GH_TOKEN REPOSITORY
+          if [ "$old_count" -gt 0 ]; then
+            cat "$old_ids" | xargs -r -n 1 -P 8 bash -c '
+              id="$1"
               for attempt in 1 2 3 4 5; do
-                if gh api --method DELETE "repos/$REPOSITORY/actions/artifacts/$artifact_id"; then
-                  deleted_ok=1
-                  deleted=$((deleted + 1))
-                  break
+                if gh api --method DELETE "repos/$REPOSITORY/actions/artifacts/$id" >/dev/null 2>&1; then
+                  echo "Deleted artifact id=$id"
+                  exit 0
                 fi
-                echo "Delete failed for artifact $artifact_id (attempt $attempt/5); retrying..."
                 sleep $((attempt * 2))
               done
+              echo "::warning::Deferred artifact id=$id after 5 failed delete attempts."
+              exit 0
+            ' _
+          fi
 
-              if [ "$deleted_ok" -ne 1 ]; then
-                echo "::warning::Could not delete artifact $artifact_id after 5 attempts; a future scheduled run will retry it."
-                failed=$((failed + 1))
-              fi
+          rm -f "$inventory" "$old_ids"
 
-              sleep 1
-            else
-              kept=$((kept + 1))
-            fi
-          done < "$list_file"
-
-          rm -f "$list_file"
-
-          echo "Deleted $deleted artifact(s) older than 7 days."
-          echo "Kept $kept recent artifact(s)."
-          echo "Deferred $failed artifact(s) after repeated GitHub API errors."
-
-      - name: Confirm remaining artifact inventory
+      - name: Confirm old-artifact backlog
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
         shell: bash
         run: |
           set -u
+          cutoff_epoch="$(date -u -d '7 days ago' +%s)"
+          remaining_old=0
+          inventory="$(mktemp)"
+
           for attempt in 1 2 3 4 5; do
-            if gh api "repos/$REPOSITORY/actions/artifacts?per_page=1" --jq '"Remaining artifacts: \(.total_count)"'; then
+            if gh api --paginate "repos/$REPOSITORY/actions/artifacts?per_page=100" \
+              --jq '.artifacts[] | [.id, .created_at] | @tsv' > "$inventory"; then
+              while IFS=$'\t' read -r artifact_id created_at; do
+                [ -z "${artifact_id:-}" ] && continue
+                created_epoch="$(date -u -d "$created_at" +%s)"
+                if [ "$created_epoch" -lt "$cutoff_epoch" ]; then
+                  remaining_old=$((remaining_old + 1))
+                fi
+              done < "$inventory"
+              rm -f "$inventory"
+              echo "Remaining artifacts older than 7 days: $remaining_old"
+              if [ "$remaining_old" -gt 0 ]; then
+                echo "::warning::$remaining_old old artifact(s) remain and will be retried on the next run."
+              fi
               exit 0
             fi
-            echo "Inventory confirmation failed (attempt $attempt/5); retrying..."
             sleep $((attempt * 2))
           done
+
+          rm -f "$inventory"
           echo "::warning::Could not confirm remaining artifact count after retries."
           exit 0
