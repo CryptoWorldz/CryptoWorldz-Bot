@@ -57,7 +57,7 @@ jobs:
           node-version: '22'
       - name: Install pinned REVIVE proof SDKs
         working-directory: worldzpad-devnet/revive-party
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Syntax-check network proof scripts
         working-directory: worldzpad-devnet/revive-party
         run: |
@@ -74,19 +74,14 @@ jobs:
           npm run router-static
       - name: Compile-check Legacy router Rust program
         working-directory: worldzpad-devnet/revive-party
-        run: cargo check --manifest-path router-program/Cargo.toml
-      - name: Emit tested dependency lockfiles for source-control capture
+        run: cargo check --locked --manifest-path router-program/Cargo.toml
+      - name: Prove dependency lockfiles are reproducible
         working-directory: worldzpad-devnet/revive-party
         shell: bash
         run: |
           test -s package-lock.json
           test -s router-program/Cargo.lock
-          printf 'REVIVE_PACKAGE_LOCK_B64='
-          base64 -w0 package-lock.json
-          printf '\n'
-          printf 'REVIVE_CARGO_LOCK_B64='
-          base64 -w0 router-program/Cargo.lock
-          printf '\n'
+          git diff --exit-code -- package-lock.json router-program/Cargo.lock
 
   devnet-stage-a:
     if: github.event_name == 'push'
@@ -107,7 +102,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install pinned Solana + Meteora SDKs
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Static 75-bps MagicFee + 10 Legacy PDA proof
         run: npm run static-proof
       - name: Static partner router + six-hour HODLer settlement proof
@@ -117,7 +112,7 @@ jobs:
       - name: Static Legacy router program contract proof
         run: npm run router-static
       - name: Compile-check Legacy router Rust program
-        run: cargo check --manifest-path router-program/Cargo.toml
+        run: cargo check --locked --manifest-path router-program/Cargo.toml
       - name: Generate disposable devnet payer
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         run: npm run prepare-payer
@@ -155,7 +150,13 @@ jobs:
         run: npm run dbc-proof
       - name: Independently verify devnet transaction and accounts
         run: npm run verify-proof
-      - name: Publish Stage A evidence
+      - name: Print Stage A evidence identifiers
+        shell: bash
+        run: |
+          node -e 'const fs=require("fs"); for (const p of ["artifacts/revive-dbc-devnet-proof.json","artifacts/revive-dbc-devnet-verified.json"]) { const x=JSON.parse(fs.readFileSync(p)); console.log("REVIVE_EVIDENCE file="+p+" proof="+x.proof+" tx="+(x.transaction||"")+" config="+(x.config||"")+" pool="+(x.pool||"")); }'
+          sha256sum artifacts/revive-static-proof.json artifacts/revive-stage-b-static-proof.json artifacts/revive-router-program-static-proof.json artifacts/revive-dbc-devnet-proof.json artifacts/revive-dbc-devnet-verified.json
+      - name: Publish Stage A evidence (best effort — GitHub artifact quota may be full)
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: revive-worldzparty-stage-a
@@ -185,10 +186,16 @@ jobs:
         with:
           node-version: '22'
       - name: Install pinned SDKs
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Capture one read-only mainnet Legacy holder boundary
         run: npm run legacy-live-snapshot
-      - name: Publish holder-boundary evidence
+      - name: Print holder-boundary evidence summary
+        shell: bash
+        run: |
+          node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync("artifacts/legacy-live-boundary-snapshot.json")); console.log("LEGACY_BOUNDARY_EVIDENCE capturedAt="+x.capturedAt+" boundary="+x.boundary+" assets="+x.assets.length+" exclusions="+x.exclusionRegistryCount);'
+          sha256sum artifacts/legacy-live-boundary-snapshot.json
+      - name: Publish holder-boundary evidence (best effort — GitHub artifact quota may be full)
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: revive-legacy-live-boundary
