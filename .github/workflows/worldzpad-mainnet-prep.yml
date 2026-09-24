@@ -59,7 +59,15 @@ jobs:
           console.log('WLDZ_POST_LAUNCH_SAFETY=PASS historical_candidate_execution=0 canonical_mint=1 launch_15m=1 permanent_lock_intent=1');
           NODE
 
-      - name: Publish preparation report
+      - name: Print preparation evidence digest
+        shell: bash
+        run: |
+          test -s worldzpad-mainnet/artifacts/wldz-mainnet-preparation-report.json
+          sha256sum worldzpad-mainnet/artifacts/wldz-mainnet-preparation-report.json
+          node -e 'const x=require("./worldzpad-mainnet/artifacts/wldz-mainnet-preparation-report.json"); console.log("WLDZ_PREPARATION_EVIDENCE "+JSON.stringify(x));'
+
+      - name: Publish preparation report (best effort — GitHub artifact quota may be full)
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: wldz-mainnet-preparation-report
