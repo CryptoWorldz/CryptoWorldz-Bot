@@ -1,4 +1,4 @@
-name: WLDZ Mainnet Preparation Gate
+name: WLDZ Canonical Post-Launch Safety Gate
 
 on:
   workflow_dispatch:
@@ -35,19 +35,28 @@ jobs:
       - name: Prove canonical WLDZ preparation gate
         run: node worldzpad-mainnet/scripts/preflight.mjs
 
-      - name: Confirm execution remains disabled
+      - name: Confirm historical candidate remains non-executable
         shell: bash
         run: |
           node - <<'NODE'
           const fs = require('fs');
           const plan = JSON.parse(fs.readFileSync('worldzpad-mainnet/wldz-one-sided-launch.candidate.json', 'utf8'));
           if (plan.executionEnabled !== false) {
-            throw new Error('WLDZ candidate attempted to enable execution before live Squads threshold approval');
+            throw new Error('Historical WLDZ launch candidate must remain non-executable after canonical launch');
           }
-          if (plan.launchAuthorized !== true || plan.status !== 'OWNER_AUTHORIZED__AWAITING_LIVE_SQUADS_THRESHOLD') {
-            throw new Error('WLDZ owner authorization state is missing or inconsistent');
+          if (plan.launchAuthorized !== true) {
+            throw new Error('Historical WLDZ owner authorization record is missing');
           }
-          console.log('WLDZ_MAINNET_EXECUTION_LOCK=PASS execution_enabled=0 launch_authorized=1 awaiting_squads_threshold=1');
+          if (plan.token?.mint !== 'AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U') {
+            throw new Error('Canonical WLDZ mint drift');
+          }
+          if (plan.launch?.baseAmountTokens !== 15000000 || plan.launch?.liquidityCeilingPercent !== 15) {
+            throw new Error('Canonical 15M / 15% launch record drift');
+          }
+          if (plan.launch?.permanentLockAfterCreate !== true) {
+            throw new Error('Canonical permanent-lock launch intent drift');
+          }
+          console.log('WLDZ_POST_LAUNCH_SAFETY=PASS historical_candidate_execution=0 canonical_mint=1 launch_15m=1 permanent_lock_intent=1');
           NODE
 
       - name: Publish preparation report
