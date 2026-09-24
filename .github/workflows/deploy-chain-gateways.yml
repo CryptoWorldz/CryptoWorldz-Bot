@@ -92,6 +92,65 @@ jobs:
 
           print('CHAIN_GATEWAY_DEPLOY=PASS count=8')
 
+      - name: Probe Hostinger document roots directly
+        shell: python
+        run: |
+          import os,ssl,time,urllib.request,hashlib
+          from ftplib import FTP_TLS
+          from pathlib import Path, PurePosixPath
+
+          targets={
+            'solworldz.xyz':'domains/solworldz.xyz/public_html',
+            'ethworldz.xyz':'domains/ethworldz.xyz/public_html',
+            'baseworldz.xyz':'domains/baseworldz.xyz/public_html',
+            'bnbworldz.xyz':'domains/bnbworldz.xyz/public_html',
+            'xrpworldz.xyz':'domains/xrpworldz.xyz/public_html',
+            'suiworldz.xyz':'domains/suiworldz.xyz/public_html',
+            'hyperworldz.xyz':'domains/hyperworldz.xyz/public_html',
+            'robinworldz.xyz':'domains/robinworldz.xyz/public_html',
+          }
+          stamp=str(int(time.time()*1000))
+          probe='__worldz_gateway_probe_'+stamp+'.html'
+          marker='WORLDZ_GATEWAY_PROBE_'+stamp
+
+          def connect():
+              ftp=FTP_TLS(context=ssl._create_unverified_context())
+              ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=40)
+              ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+              ftp.prot_p(); ftp.set_pasv(True)
+              return ftp
+
+          def cwd_path(ftp,path):
+              ftp.cwd('/')
+              for part in PurePosixPath(path).parts:
+                  if part in ('','/'): continue
+                  ftp.cwd(part)
+
+          for host,remote in targets.items():
+              ftp=connect(); cwd_path(ftp,remote)
+
+              chunks=[]
+              ftp.retrbinary('RETR index.html',chunks.append)
+              remote_index=b''.join(chunks)
+              assert b'data-build="2026-09-24-chain-launch-gateway-v1"' in remote_index,(host,'FTP index is not new gateway')
+
+              payload=(f'<!doctype html><meta charset="utf-8"><title>{marker}</title><p>{marker}</p>').encode()
+              from io import BytesIO
+              ftp.storbinary('STOR '+probe,BytesIO(payload))
+              try: ftp.quit()
+              except Exception: ftp.close()
+
+              url=f'https://{host}/{probe}?v={stamp}'
+              req=urllib.request.Request(url,headers={'User-Agent':'Worldz-Gateway-Probe/1.0','Cache-Control':'no-cache, no-store','Pragma':'no-cache'})
+              try:
+                  with urllib.request.urlopen(req,timeout=25) as r:
+                      body=r.read().decode('utf-8','ignore')
+                      print('CHAIN_ROOT_PROBE',host,'status',r.status,'marker',marker in body)
+              except Exception as e:
+                  print('CHAIN_ROOT_PROBE',host,'ERROR',repr(e))
+
+          print('CHAIN_GATEWAY_FTP_READBACK=PASS count=8')
+
       - name: Verify eight live blockchain gateways
         shell: python
         run: |
