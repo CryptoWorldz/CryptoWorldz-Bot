@@ -9,9 +9,9 @@
     {
       "id": "platform",
       "name": "WorldzParTyPlatform staging",
-      "status": "BUILT_AWAITING_HOSTINGER_REDEPLOY",
+      "status": "LIVE_ON_STAGING",
       "owner": "JayJayTeamDev + Worldz build",
-      "next": "Hostinger redeploy of worldz-production-suite commit 817f494e8a55566671865ed1c6b0b902b01b4c4a"
+      "next": "Review mobile/desktop staging and continue feature build; production HodlerGalaxy remains untouched."
     },
     {
       "id": "council",
@@ -79,9 +79,9 @@
     {
       "id": "flyer",
       "name": "DonateWorldz Dubbo A4 flyer",
-      "status": "DESIGN_NEXT",
+      "status": "LIVE_STAGING_PRINT_READY",
       "owner": "Local action",
-      "next": "Create print-ready A4 with verified service links, Jay's Safe Place, OneWorldz/DonateWorldz pathways and event-interest QR."
+      "next": "Review print output and add final event-interest QR only after the destination is locked."
     },
     {
       "id": "busking",
@@ -104,5 +104,11 @@
     "Do not describe gifted crypto as guaranteed wealth, income or return.",
     "Do not manufacture trading volume, scarcity or apparent public demand.",
     "Keep OneWorldz/DonateWorldz humanitarian funding and CryptoWorldz/Worldz token activity separately described and accounted."
-  ]
+  ],
+  "liveStaging": {
+    "url": "https://staging.hodlergalaxy.xyz",
+    "hq": "https://staging.hodlergalaxy.xyz/worldzparty/hq.html",
+    "dubboFlyer": "https://staging.hodlergalaxy.xyz/worldzparty/dubbo-flyer.html",
+    "verifiedLive": true
+  }
 }
