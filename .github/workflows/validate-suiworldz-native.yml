@@ -50,7 +50,7 @@ jobs:
           tar -xzf /tmp/suiup.tar.gz -C /tmp/suiup-unpack
           install -m 0755 /tmp/suiup-unpack/suiup "$HOME/.local/bin/suiup"
           export PATH="$HOME/.local/bin:$PATH"
-          suiup install sui@testnet
+          suiup install sui@testnet --yes
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           sui --version
       - name: Compile Move template
@@ -96,7 +96,7 @@ jobs:
           tar -xzf /tmp/suiup.tar.gz -C /tmp/suiup-unpack
           install -m 0755 /tmp/suiup-unpack/suiup "$HOME/.local/bin/suiup"
           export PATH="$HOME/.local/bin:$PATH"
-          suiup install sui@testnet
+          suiup install sui@testnet --yes
           mkdir -p artifacts
           sui move build --path template --dump-bytecode-as-base64 > artifacts/template-bytecode.json
       - name: Publish immutable package and create fixed-supply proof currency
