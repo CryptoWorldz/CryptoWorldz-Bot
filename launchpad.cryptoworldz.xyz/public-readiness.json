@@ -1,0 +1,113 @@
+{
+  "version": "WORLDZ-PUBLIC-READINESS-2026-09-25-A",
+  "generatedFor": "WorldzLaunchPad public readiness",
+  "rule": "A live website is not the same thing as a live mainnet launch adapter. Each chain publishes the strongest capability actually implemented and keeps stronger execution fail-closed.",
+  "founding100": {
+    "totalPositions": 100,
+    "canonicalWldzMint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "poolTokens": 10000000,
+    "tokensPerQualifiedPosition": 100000,
+    "devnetOrTestnetEligible": false,
+    "qualification": "verified supported mainnet launch after the applicable proof and release gates pass"
+  },
+  "chains": [
+    {
+      "id": "solana",
+      "world": "SolWorldz",
+      "publicGateway": "https://solworldz.xyz",
+      "currentPublicExecution": "SOLANA_DEVNET",
+      "engines": [
+        "Worldz Flash",
+        "Worldz Curve",
+        "Worldz Curve Pro"
+      ],
+      "mainnetCreatorLaunch": false,
+      "nextGate": "complete chain-specific mainnet fee routing, liquidity/lock, governance and release proof"
+    },
+    {
+      "id": "ethereum",
+      "world": "EthWorldz",
+      "publicGateway": "https://ethworldz.xyz",
+      "currentPublicExecution": "ETHEREUM_SEPOLIA_TOKEN",
+      "engines": [
+        "Worldz EVM Mint"
+      ],
+      "mainnetCreatorLaunch": false,
+      "nextGate": "mainnet liquidity, fee routing, LP lock and release proof"
+    },
+    {
+      "id": "base",
+      "world": "BaseWorldz",
+      "publicGateway": "https://baseworldz.xyz",
+      "currentPublicExecution": "BASE_SEPOLIA_TOKEN",
+      "engines": [
+        "Worldz EVM Fair",
+        "Worldz EVM Mint"
+      ],
+      "mainnetCreatorLaunch": false,
+      "nextGate": "mainnet liquidity, fee routing, LP lock and release proof"
+    },
+    {
+      "id": "bnb",
+      "world": "BNBWorldz",
+      "publicGateway": "https://bnbworldz.xyz",
+      "currentPublicExecution": "BSC_TESTNET_TOKEN",
+      "engines": [
+        "Worldz EVM Mint"
+      ],
+      "mainnetCreatorLaunch": false,
+      "nextGate": "mainnet liquidity, fee routing, LP lock and release proof"
+    },
+    {
+      "id": "xrpl",
+      "world": "XRPWorldz",
+      "publicGateway": "https://xrpworldz.xyz",
+      "currentPublicExecution": "XRPL_TESTNET_NATIVE_ISSUE_AND_AMM",
+      "engines": [
+        "XRPL Native Issue + AMM",
+        "Worldz X-SAVE research/bridge layer"
+      ],
+      "mainnetCreatorLaunch": false,
+      "nextGate": "issuer/hot-wallet governance, treasury routing, accounting/legal and release proof"
+    },
+    {
+      "id": "hyperevm",
+      "world": "HyperWorldz",
+      "publicGateway": "https://hyperworldz.xyz",
+      "currentPublicExecution": "HYPEREVM_TESTNET_TOKEN",
+      "engines": [
+        "Worldz EVM Mint"
+      ],
+      "mainnetCreatorLaunch": false,
+      "nextGate": "mainnet liquidity, fee routing, LP lock and release proof"
+    },
+    {
+      "id": "robinhood",
+      "world": "RobinWorldz",
+      "publicGateway": "https://robinworldz.xyz",
+      "currentPublicExecution": "ROBINHOOD_CHAIN_TESTNET_TOKEN",
+      "engines": [
+        "Worldz EVM Mint"
+      ],
+      "mainnetCreatorLaunch": false,
+      "nextGate": "mainnet liquidity, fee routing, LP lock and release proof"
+    },
+    {
+      "id": "sui",
+      "world": "SuiWorldz",
+      "publicGateway": "https://suiworldz.xyz",
+      "currentPublicExecution": "NONE_RESEARCH_ONLY",
+      "engines": [
+        "Sui Move native adapter research"
+      ],
+      "mainnetCreatorLaunch": false,
+      "nextGate": "build and prove a native Sui testnet adapter before any public execution claim"
+    }
+  ],
+  "publicUX": {
+    "browsingMustRemainAvailableWhenExecutionConfigFails": true,
+    "executionMustFailClosedOnCriticalContractFailure": true,
+    "nonCriticalFeatureDriftMustNotCrashEntireSite": true,
+    "runtimeProbeTimeoutSeconds": 12
+  }
+}
