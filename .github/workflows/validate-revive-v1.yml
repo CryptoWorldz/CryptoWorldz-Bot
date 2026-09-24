@@ -122,13 +122,13 @@ jobs:
           echo "REVIVE_BOOTSTRAP_HELPER_HTTP=$STATUS"
           # The authenticated helper is best-effort because public devnet faucets are rate-limited.
           # The next step independently tries provider fallbacks and must prove the actual balance.
+      - name: Prove tiny PoW transaction-gas bootstrap
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        run: npm run bootstrap-payer
       - name: Install Solana devnet Proof-of-Work faucet client
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
         run: cargo install devnet-pow
-      - name: Bootstrap PoW transaction gas
-        if: env.DEVNET_PAYER_SECRET_JSON == ''
-        run: npm run bootstrap-payer
       - name: Mine disposable devnet SOL with the PoW faucet
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
