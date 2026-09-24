@@ -63,13 +63,14 @@ The mathematical target would be **62.5 bps gross**, leaving exactly 0.50% after
 At 63 bps gross, the modeled split is:
 
 - Meteora protocol: **0.126% of trade**
-- Creator: **0.3024%**
-- Worldz referrer: **0.1008%**
-- WorldzLaunchPad: **0.0504%**
-- OneWorldz Impact: **0.0504%**
+- Creator: **0.25704%**
+- Worldz referrer: **0.08568%**
+- Legacy Flywheel™: **0.0756%**
+- WorldzLaunchPad: **0.04284%**
+- OneWorldz Impact: **0.04284%**
 - Worldz-controlled total: **0.504%**
 
-The Worldz-controlled portion is split **60 / 20 / 10 / 10**. A Meteora swap-host referral is separate and must be disclosed separately.
+The Legacy Flywheel takes **15% of Worldz-controlled fee revenue first**. The remaining 85% preserves the earlier 60 / 20 / 10 / 10 Creator / Referrer / Worldz / Impact proportions, producing the final controlled split **51 / 17 / 15 / 8.5 / 8.5**. The Legacy share funds 10 dedicated SOL reward vaults equally and settles holder entitlements every six hours.
 
 Devnet must prove the actual 63-bps behavior in both DBC and migrated DAMM v2 before mainnet approval. No silent rounding is permitted.
 
