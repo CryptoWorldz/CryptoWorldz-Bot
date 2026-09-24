@@ -18,6 +18,10 @@ magic = load("worldzpad-mainnet/fairfee/worldz-magic-fee.v1.json")
 legacy = load("worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json")
 launch_schema = load("worldzpad-omnichain/schemas/launch-intent.schema.json")
 proof_schema = load("worldzpad-omnichain/schemas/worldz-proof.schema.json")
+solana_adapter = load("worldzpad-omnichain/adapters/solana/solana.v1.json")
+evm_adapter = load("worldzpad-omnichain/adapters/evm/shared-evm.v1.json")
+xrpl_adapter = load("worldzpad-omnichain/adapters/xrpl/xrpl.v1.json")
+sui_adapter = load("worldzpad-omnichain/adapters/sui/sui.v1.json")
 
 expected_chains = {
     "solana", "xrpl", "base", "ethereum", "bnb", "sui", "hyperevm", "robinhood"
@@ -167,5 +171,39 @@ if api["x-worldz-safety"]["noPrivateKeysAccepted"] is not True:
 if api["x-worldz-safety"]["noHiddenFees"] is not True:
     raise SystemExit("API hidden-fee protection missing")
 
+
+# Chain-native adapter contracts are mandatory and independently mainnet-gated.
+for name, adapter in (
+    ("solana", solana_adapter),
+    ("evm", evm_adapter),
+    ("xrpl", xrpl_adapter),
+    ("sui", sui_adapter),
+):
+    if adapter["mainnetExecutionEnabled"] is not False:
+        raise SystemExit(f"{name}: adapter mainnet unexpectedly enabled")
+
+if solana_adapter["fee"]["targetGrossTraderFeeBps"] != 75:
+    raise SystemExit("Solana adapter MagicFee target drifted")
+if solana_adapter["legacyFlywheel"]["vaultCount"] != 10 or solana_adapter["legacyFlywheel"]["epochHours"] != 6:
+    raise SystemExit("Solana Legacy Flywheel adapter drifted")
+if set(evm_adapter["chainKeys"]) != {"ethereum","base","bnb","hyperevm","robinhood"}:
+    raise SystemExit("shared EVM adapter must cover exactly five EVM chains")
+for key, (mainnet_id, testnet_id) in expected_evm_ids.items():
+    n = evm_adapter["networks"][key]
+    if n["mainnetChainId"] != mainnet_id or n["testnetChainId"] != testnet_id:
+        raise SystemExit(f"EVM adapter network mismatch: {key}")
+if evm_adapter["token"]["transferTaxDefault"] is not False:
+    raise SystemExit("EVM adapter may not default to a transfer tax")
+if evm_adapter["legacyFlywheel"]["automaticBridgeEnabled"] is not False:
+    raise SystemExit("EVM Legacy Flywheel auto-bridge must remain disabled")
+if xrpl_adapter["token"]["hiddenTransferTax"] is not False:
+    raise SystemExit("XRPL adapter may not hide a transfer tax")
+if xrpl_adapter["legacyFlywheel"]["automaticBridgeEnabled"] is not False:
+    raise SystemExit("XRPL Legacy Flywheel auto-bridge must remain disabled")
+if sui_adapter["transactionModel"]["programmableTransactionBlocks"] is not True:
+    raise SystemExit("Sui adapter must retain PTB support")
+if sui_adapter["legacyFlywheel"]["automaticBridgeEnabled"] is not False:
+    raise SystemExit("Sui Legacy Flywheel auto-bridge must remain disabled")
+
 print("WORLDZ_OMNICHAIN_VALIDATION=PASS")
-print("chains=8 fee_bps=75 split=51/17/15/8.5/8.5 legacy_vaults=10 epoch_hours=6 api=LOCKED product=LOCKED analytics=LOCKED mainnet=OFF")
+print("chains=8 adapters=4/native+sharedEVM fee_bps=75 split=51/17/15/8.5/8.5 legacy_vaults=10 epoch_hours=6 api=LOCKED product=LOCKED analytics=LOCKED mainnet=OFF")
