@@ -35,8 +35,8 @@ assert len(candidates["candidates"]) == 50
 assert len({x["github"] for x in candidates["candidates"]}) == 50
 assert all(x["status"] == "UNCONTACTED_RESEARCH_LEAD" for x in candidates["candidates"])
 
-assert fee["dbc"]["targetGrossTraderFeeBps"] == 63
-assert fee["theoreticalTarget"]["representableInDocumentedWholeBpsFields"] is False
+assert fee["dbc"]["targetGrossTraderFeeBps"] == 75
+assert fee["magicFee"]["grossTraderFeeBps"] == 75\nassert fee["magicFee"]["dynamicFee"] is False\nassert fee["dbc"]["creatorTradingFeePercentageOfControlledTradingFee"] == 51\nassert fee["dbc"]["partnerTradingFeePercentageOfControlledTradingFee"] == 49\nassert fee["partnerRouterWeights"] == {"referrer":170,"legacyFlywheel":150,"worldzLaunchPad":85,"oneWorldzImpact":85,"total":490}
 assert fee["partnerRouterSplitPercent"]["total"] == 100
 assert fee["permanentLiquidity"]["totalPermanentLockedPercentage"] == 100
 assert fee["permanentLiquidity"]["partnerLiquidityPercentage"] == 0
@@ -52,10 +52,10 @@ assert abs(
         "oneWorldzImpact",
     )) - effective["grossTotal"]
 ) < 1e-12
-assert abs(effective["worldzControlledTotal"] - 0.504) < 1e-12
+assert abs(effective["worldzControlledTotal"] - 0.60) < 1e-12
 assert fee["controlledFeeSplitPercent"]["legacyFlywheel"] == 15
 assert fee["controlledFeeSplitPercent"]["total"] == 100
-assert abs(effective["legacyFlywheel"] - 0.0756) < 1e-12
+assert abs(effective["legacyFlywheel"] - 0.09) < 1e-12\nassert abs(effective["creator"] - 0.306) < 1e-12\nassert abs(effective["worldzReferrer"] - 0.102) < 1e-12
 
 assert abs(
     sum(x["initialCeilingSol"] for x in funding["targets"])
@@ -67,6 +67,6 @@ assert contract["gates"]["finalOwnerWalletApprovalRequired"] is True
 
 print(
     "REVIVE_V1=PASS supply=200000000 allocation=100 devcity=100 "
-    "new_dev_leads=50 legacy=20000000 gross_fee_bps=63 "
+    "new_dev_leads=50 legacy=20000000 gross_fee_bps=75 "
     "permanent_lp_lock_target=100 mainnet=LOCKED"
 )
