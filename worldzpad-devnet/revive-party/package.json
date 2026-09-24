@@ -8,7 +8,8 @@
     "dbc-proof": "node scripts/01_dbc_devnet.mjs",
     "verify-proof": "node scripts/02_verify_devnet.mjs",
     "prepare-payer": "node scripts/prepare_devnet_payer.mjs",
-    "verify-payer": "node scripts/verify_devnet_payer.mjs"
+    "verify-payer": "node scripts/verify_devnet_payer.mjs",
+    "bootstrap-payer": "node scripts/bootstrap_devnet_payer.mjs"
   },
   "dependencies": {
     "@meteora-ag/dynamic-bonding-curve-sdk": "1.5.12",
