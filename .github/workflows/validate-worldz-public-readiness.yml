@@ -25,7 +25,10 @@ jobs:
         with:
           node-version: '22'
       - name: JavaScript syntax
-        run: node --check launchpad.cryptoworldz.xyz/app.js
+        run: |
+          node --check launchpad.cryptoworldz.xyz/app.js
+          node --check launchpad.cryptoworldz.xyz/evm/app.js
+          node --check launchpad.cryptoworldz.xyz/xrpl/app.js
       - name: Validate fail-closed public contract
         shell: python
         run: |
@@ -36,6 +39,7 @@ jobs:
           r=json.loads((root/'public-readiness.json').read_text())
           html=(root/'index.html').read_text()
           js=(root/'app.js').read_text()
+          evm=(root/'evm'/'app.js').read_text()
 
           assert p['publicLaunchPad'] is True
           assert p['publicLaunchIntakeEnabled'] is True
@@ -61,4 +65,14 @@ jobs:
           assert "Public browsing, technology pages and proof information remain available." in js
           assert "setTimeout(()=>controller.abort(),12000)" in js
           assert "alert('WorldzLaunchPad refused to initialize" not in js
+
+          # Central builder must route all currently supported EVM testnets.
+          for key in ("ethereum:'ethereum-sepolia'","base:'base-sepolia'","bnb:'bsc-testnet'","robinhood:'robinhood-testnet'","hyper:'hyperevm-testnet'"):
+              assert key in js
+          assert 'data-chain="hyper"' in html
+          assert "'/evm/?network='" in js
+          assert "const baseAdapter=" not in js
+          assert "build.engine==='evm-fixed'?null:build.quote" in js
+          assert "allocationPrefills" in evm
+          assert "requestedNetwork=query.get('network')" in evm
           print('WORLDZ_PUBLIC_READINESS=PASS chains=8 mainnet=LOCKED browsing=AVAILABLE critical_fail_closed=ON runtime_timeout=12s')
