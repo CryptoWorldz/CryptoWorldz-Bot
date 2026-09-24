@@ -14,12 +14,14 @@
     "legacy-epoch-proof": "node scripts/03_legacy_epoch_proof.mjs",
     "legacy-live-snapshot": "node scripts/04_legacy_live_scanner.mjs",
     "router-static": "node scripts/04_router_program_static.mjs",
-    "legacy-authority-audit": "node scripts/05_legacy_authority_audit.mjs"
+    "legacy-authority-audit": "node scripts/05_legacy_authority_audit.mjs",
+    "direct-damm-static": "node scripts/06_direct_damm_v2_static.mjs"
   },
   "dependencies": {
     "@meteora-ag/dynamic-bonding-curve-sdk": "1.5.12",
     "@solana/spl-token": "0.4.15",
     "@solana/web3.js": "1.98.4",
-    "bn.js": "5.2.2"
+    "bn.js": "5.2.2",
+    "@meteora-ag/cp-amm-sdk": "1.4.10"
   }
 }
