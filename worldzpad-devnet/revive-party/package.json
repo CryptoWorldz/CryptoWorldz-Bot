@@ -6,7 +6,8 @@
   "scripts": {
     "static-proof": "node scripts/00_static_proof.mjs",
     "dbc-proof": "node scripts/01_dbc_devnet.mjs",
-    "verify-proof": "node scripts/02_verify_devnet.mjs"
+    "verify-proof": "node scripts/02_verify_devnet.mjs",
+    "prepare-payer": "node scripts/prepare_devnet_payer.mjs"
   },
   "dependencies": {
     "@meteora-ag/dynamic-bonding-curve-sdk": "1.5.12",
