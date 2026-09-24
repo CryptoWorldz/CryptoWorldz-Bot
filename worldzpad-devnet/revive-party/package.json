@@ -10,7 +10,9 @@
     "prepare-payer": "node scripts/prepare_devnet_payer.mjs",
     "verify-payer": "node scripts/verify_devnet_payer.mjs",
     "bootstrap-payer": "node scripts/bootstrap_devnet_payer.mjs",
-    "stage-b-static": "node scripts/03_stage_b_static.mjs"
+    "stage-b-static": "node scripts/03_stage_b_static.mjs",
+    "legacy-epoch-proof": "node scripts/03_legacy_epoch_proof.mjs",
+    "legacy-live-snapshot": "node scripts/04_legacy_live_scanner.mjs"
   },
   "dependencies": {
     "@meteora-ag/dynamic-bonding-curve-sdk": "1.5.12",
