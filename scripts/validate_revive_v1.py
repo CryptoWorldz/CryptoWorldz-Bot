@@ -6,7 +6,7 @@ root = Path(__file__).resolve().parents[1] / "worldzpad-mainnet" / "revive"
 contract = json.loads((root / "revive-launch-contract.v1.json").read_text())
 fee = json.loads((root / "revive-dbc-fairfee.v1.json").read_text())
 devcity = json.loads((root / "revive-devcity-100.v1.json").read_text())
-funding = json.loads((root / "revive-launch-funding.v1.json").read_text())
+funding = json.loads((root / "revive-launch-funding.v1.json").read_text())\ncandidates = json.loads((root / "revive-devcity-50-candidates.v1.json").read_text())\nlegacy_generator = (Path(__file__).resolve().parents[1] / "supabase" / "functions" / "worldz-legacy-proof" / "index.ts").read_text()
 
 assert contract["token"]["canonicalMint"] == "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R"
 assert contract["token"]["fixedSupplyTokens"] == 200_000_000
@@ -20,7 +20,7 @@ assert contract["legacyRevival"]["poolTokens"] == 20_000_000
 assert contract["legacyRevival"]["eligibleWallets"] == 216
 assert contract["legacyRevival"]["regenerationLockedUntilGeneratorFixVerified"] is True
 assert devcity["seats"] == 100
-assert devcity["tokensPerSeat"] * devcity["seats"] == 20_000_000
+assert devcity["tokensPerSeat"] * devcity["seats"] == 20_000_000\nassert candidates["targetNewSeats"] == 50\nassert len(candidates["candidates"]) == 50\nassert len({x["github"] for x in candidates["candidates"]}) == 50\nassert all(x["status"] == "UNCONTACTED_RESEARCH_LEAD" for x in candidates["candidates"])\nassert "REVIVE_POOL_PERCENT=10n" in legacy_generator\nassert "revive_pool_invariant_failed" in legacy_generator\nassert "200000000n*1000000n/100n" not in legacy_generator
 assert fee["partnerRouterSplitPercent"]["total"] == 100
 assert fee["permanentLiquidity"]["totalPermanentLockedPercentage"] == 100
 assert fee["permanentLiquidity"]["partnerLiquidityPercentage"] == 0
