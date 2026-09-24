@@ -3,12 +3,14 @@ import { Connection, Keypair, clusterApiUrl } from '@solana/web3.js';
 
 const file=process.env.DEVNET_PAYER_KEYPAIR_FILE || '/tmp/revive-devnet-payer.json';
 const kp=Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(file,'utf8'))));
-const verify=new Connection(clusterApiUrl('devnet'),'confirmed');
+const publicRpc=clusterApiUrl('devnet');
+const verify=new Connection(publicRpc,'confirmed');
+const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
 
 async function rpcAirdrop(url,lamports){
   const r=await fetch(url,{
     method:'POST',
-    headers:{'content-type':'application/json'},
+    headers:{'content-type':'application/json','user-agent':'Worldz-REVIVE-Devnet-Bootstrap/3.0'},
     body:JSON.stringify({jsonrpc:'2.0',id:1,method:'requestAirdrop',params:[kp.publicKey.toBase58(),lamports,{commitment:'confirmed'}]})
   });
   const x=await r.json().catch(()=>({}));
@@ -16,37 +18,46 @@ async function rpcAirdrop(url,lamports){
   return x.result;
 }
 async function confirm(sig){
-  for(let i=0;i<30;i++){
-    const s=await verify.getSignatureStatus(sig,{searchTransactionHistory:true});
+  for(let i=0;i<40;i++){
+    const s=await verify.getSignatureStatus(sig,{searchTransactionHistory:true}).catch(()=>null);
     if(s?.value?.err)throw new Error('bootstrap transaction failed '+JSON.stringify(s.value.err));
     if(s?.value?.confirmationStatus==='confirmed'||s?.value?.confirmationStatus==='finalized')return;
-    await new Promise(r=>setTimeout(r,500));
+    await sleep(500);
   }
   throw new Error('bootstrap confirmation timeout');
 }
-let balance=await verify.getBalance(kp.publicKey,'confirmed');
-if(balance>=10_000){
-  console.log('REVIVE_POW_BOOTSTRAP=PASS already_funded balance='+balance);
+async function balance(){
+  return verify.getBalance(kp.publicKey,'confirmed').catch(()=>0);
+}
+
+let current=await balance();
+if(current>=10_000){
+  console.log('REVIVE_POW_BOOTSTRAP=PASS already_funded balance='+current);
   process.exit(0);
 }
 
-const attempts=[
-  ['helius_demo','https://demo.helius.dev/api/rpc?network=devnet',20_000],
-  ['solana_public',clusterApiUrl('devnet'),20_000],
+const sources=[
+  {name:'helius_demo',url:'https://demo.helius.dev/api/rpc?network=devnet',attempts:4},
+  {name:'solana_public',url:publicRpc,attempts:6},
 ];
-let last='';
-for(const [name,url,lamports] of attempts){
-  try{
-    const sig=await rpcAirdrop(url,lamports);
-    await confirm(sig);
-    balance=await verify.getBalance(kp.publicKey,'confirmed');
-    if(balance>=5_000){
-      console.log('REVIVE_POW_BOOTSTRAP=PASS source='+name+' balance='+balance+' signature='+sig);
-      process.exit(0);
+let failures=[];
+for(const source of sources){
+  for(let attempt=1;attempt<=source.attempts;attempt++){
+    try{
+      const sig=await rpcAirdrop(source.url,20_000);
+      await confirm(sig);
+      current=await balance();
+      if(current>=5_000){
+        console.log('REVIVE_POW_BOOTSTRAP=PASS source='+source.name+' attempt='+attempt+' balance='+current+' signature='+sig);
+        process.exit(0);
+      }
+      failures.push(source.name+'#'+attempt+':confirmed_but_balance_'+current);
+    }catch(e){
+      const msg=e?.message||String(e);
+      failures.push(source.name+'#'+attempt+':'+msg);
+      console.log('REVIVE_POW_BOOTSTRAP_SOURCE_FAILED source='+source.name+' attempt='+attempt+' error='+msg);
+      await sleep(Math.min(5000,500*attempt));
     }
-  }catch(e){
-    last=name+':'+(e?.message||e);
-    console.log('REVIVE_POW_BOOTSTRAP_SOURCE_FAILED '+last);
   }
 }
-throw new Error('REVIVE_POW_BOOTSTRAP_FAILED '+last);
+throw new Error('REVIVE_POW_BOOTSTRAP_FAILED '+failures.slice(-5).join(' | '));
