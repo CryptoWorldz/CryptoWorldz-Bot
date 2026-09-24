@@ -56,7 +56,10 @@ jobs:
           mkdir -p /tmp/worldz-chain-gateways
           for host in solworldz.xyz ethworldz.xyz baseworldz.xyz bnbworldz.xyz xrpworldz.xyz suiworldz.xyz hyperworldz.xyz robinworldz.xyz; do
             grep -q 'data-build="2026-09-24-chain-launch-gateway-v1"' "$host/index.html"
+            test -f "$host/hero.jpg"
             cp "$host/index.html" "/tmp/worldz-chain-gateways/$host.index.html"
+            # Compatibility only for legacy builders that still look for hero.png.
+            cp "$host/hero.jpg" "$host/hero.png"
           done
           echo "CHAIN_GATEWAY_PROTECT=PASS count=8"
 
@@ -138,7 +141,9 @@ jobs:
           set -euo pipefail
           for host in solworldz.xyz ethworldz.xyz baseworldz.xyz bnbworldz.xyz xrpworldz.xyz suiworldz.xyz hyperworldz.xyz robinworldz.xyz; do
             cp "/tmp/worldz-chain-gateways/$host.index.html" "$host/index.html"
-            rm -f "$host/style.css" "$host/mobile-safe.css" "$host/global-image-overrides.css"
+            rm -f "$host/style.css" "$host/mobile-safe.css" "$host/global-image-overrides.css" "$host/hero.png"
+            test -f "$host/hero.jpg"
+            grep -q 'src="/hero.jpg"' "$host/index.html"
             grep -q 'data-build="2026-09-24-chain-launch-gateway-v1"' "$host/index.html"
           done
           echo "CHAIN_GATEWAY_RESTORE=PASS count=8 legacy_css_removed=1"
