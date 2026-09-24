@@ -5,7 +5,7 @@ import {
   DammV2DynamicFeeMode, MigratedCollectFeeMode, MigrationFeeOption,
   MigrationOption, TokenAuthorityOption, TokenDecimal, TokenType, buildCurve
 } from '@meteora-ag/dynamic-bonding-curve-sdk';
-import { MAGIC, deriveLegacyVaults, devnetRouterProgramId } from './common.mjs';
+import { MAGIC, deriveLegacyVaults, staticRouterProgramId, staticRouterAuthority } from './common.mjs';
 
 const curve=buildCurve({
   token:{
@@ -68,8 +68,13 @@ fs.writeFileSync(path.join('artifacts','revive-static-proof.json'),JSON.stringif
   proof:'REVIVE_MAGICFEE_STATIC',
   sdk:'@meteora-ag/dynamic-bonding-curve-sdk@1.5.12',
   magicFee:MAGIC,
-  routerProgramDevnetNamespace:devnetRouterProgramId().toBase58(),
-  legacyVaultPdas:vaults,
+  routerStaticFixture:{
+    programId:staticRouterProgramId().toBase58(),
+    authority:staticRouterAuthority().toBase58(),
+    seedContract:'legacy-vault + authority + legacy_mint',
+    vaultPdas:vaults,
+    deployStatus:'NOT_DEPLOYED',
+  },
   curveBuildAccepted:true,
   mainnetExecution:false
 },null,2)+'\n');
