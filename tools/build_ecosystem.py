@@ -197,7 +197,13 @@ def main():
         if not (site_dir/"index.html").exists():
             raise SystemExit(f"Missing root page: {host}/index.html")
         if not (site_dir/"style.css").exists():
-            raise SystemExit(f"Missing stylesheet: {host}/style.css")
+            chain_gateways = {
+                "solworldz.xyz","ethworldz.xyz","baseworldz.xyz","xrpworldz.xyz",
+                "bnbworldz.xyz","suiworldz.xyz","hyperworldz.xyz","robinworldz.xyz"
+            }
+            root_html = (site_dir/"index.html").read_text(encoding="utf-8", errors="ignore")
+            if host not in chain_gateways or 'data-build="2026-09-24-chain-launch-gateway-v1"' not in root_html:
+                raise SystemExit(f"Missing stylesheet: {host}/style.css")
         for route, title, summary in cfg["routes"]:
             write_page(host, route, title, summary)
         urls.extend(write_sitemap(host))
