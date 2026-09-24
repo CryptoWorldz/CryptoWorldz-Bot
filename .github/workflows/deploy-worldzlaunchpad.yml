@@ -580,11 +580,13 @@ jobs:
       - name: Verify live public application
         shell: python
         run: |
-          import json,time,urllib.request,urllib.error
+          import json,time,urllib.request,urllib.error,traceback
           base='https://launchpad.cryptoworldz.xyz'
           registry='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register'
           def get(url):
-              req=urllib.request.Request(url,headers={'User-Agent':'WorldzLaunchPad-Live-Verify/5.0','Cache-Control':'no-cache','Origin':base})
+              sep='&' if '?' in url else '?'
+              url=f"{url}{sep}_live={int(time.time()*1000)}"
+              req=urllib.request.Request(url,headers={'User-Agent':'WorldzLaunchPad-Live-Verify/5.0','Cache-Control':'no-cache, no-store','Pragma':'no-cache','Origin':base})
               with urllib.request.urlopen(req,timeout=25) as r:return r.status,r.read().decode('utf-8','ignore')
           last=''
           banned=['REVIVE','RVIV','PHENIX','PNEX','MIRACLE','MRCL','GENESIS FOUR','Genesis Four','Legacy Loyalty','SolSavewXRP']
