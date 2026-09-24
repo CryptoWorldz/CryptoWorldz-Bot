@@ -200,8 +200,16 @@ for(const x of rows){
   const tf=x.extensions.transferFeeConfig;
   console.log(
     'LEGACY_AUTHORITY symbol='+x.symbol+
+    ' mint='+x.mint+
     ' program='+x.tokenProgram+
+    ' extensions='+(x.extensionTypes.join(',')||'none')+
+    ' mint_auth='+(x.authorities.mint.address||'none')+
+    ' freeze_auth='+(x.authorities.freeze.address||'none')+
     ' transfer_fee_bps='+(tf?tf.newer.basisPoints:'none')+
-    ' control='+x.controlRecovery.state
+    ' fee_config_auth='+(tf?.transferFeeConfigAuthority.address||'none')+
+    ' withdraw_auth='+(tf?.withdrawWithheldAuthority.address||'none')+
+    ' permanent_delegate='+(x.extensions.permanentDelegate?.address||'none')+
+    ' hook_program='+(x.extensions.transferHook?.programId||'none')+
+    ' recovery='+x.controlRecovery.state
   );
 }
