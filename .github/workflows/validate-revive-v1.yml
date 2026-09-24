@@ -87,7 +87,7 @@ jobs:
           git diff --exit-code -- package-lock.json router-program/Cargo.lock
 
   devnet-stage-a:
-    if: github.event_name == 'push'
+    if: false # OBSOLETE DBC TOKEN-CREATION PATH — disabled for canonical RVIV
     needs: validate
     runs-on: ubuntu-latest
     env:
