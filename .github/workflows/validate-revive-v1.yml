@@ -74,6 +74,10 @@ jobs:
         run: npm run static-proof
       - name: Static partner router + six-hour HODLer settlement proof
         run: npm run stage-b-static
+      - name: Static Legacy router program contract proof
+        run: npm run router-static
+      - name: Compile-check Legacy router Rust program
+        run: cargo check --manifest-path router-program/Cargo.toml
       - name: Generate disposable devnet payer
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         run: npm run prepare-payer
@@ -114,6 +118,7 @@ jobs:
           path: |
             worldzpad-devnet/revive-party/artifacts/revive-static-proof.json
             worldzpad-devnet/revive-party/artifacts/revive-stage-b-static-proof.json
+            worldzpad-devnet/revive-party/artifacts/revive-router-program-static-proof.json
             worldzpad-devnet/revive-party/artifacts/revive-dbc-devnet-proof.json
           if-no-files-found: error
           retention-days: 30
