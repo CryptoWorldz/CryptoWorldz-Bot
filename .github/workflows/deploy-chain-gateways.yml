@@ -5,6 +5,14 @@ on:
   push:
     paths:
       - ".github/workflows/deploy-chain-gateways.yml"
+      - "solworldz.xyz/**"
+      - "ethworldz.xyz/**"
+      - "baseworldz.xyz/**"
+      - "bnbworldz.xyz/**"
+      - "xrpworldz.xyz/**"
+      - "suiworldz.xyz/**"
+      - "hyperworldz.xyz/**"
+      - "robinworldz.xyz/**"
 
 permissions:
   contents: read
