@@ -6,14 +6,22 @@ on:
       - revive-v1-build
     paths:
       - 'worldzpad-mainnet/revive/**'
+      - 'worldzpad-mainnet/fairfee/**'
+      - 'worldzpad-mainnet/legacy-flywheel/**'
+      - 'worldzpad-devnet/revive-party/**'
       - 'scripts/validate_revive_v1.py'
       - 'supabase/functions/revive-claim/**'
+      - 'supabase/functions/worldz-legacy-proof/**'
       - '.github/workflows/validate-revive-v1.yml'
   pull_request:
     paths:
       - 'worldzpad-mainnet/revive/**'
+      - 'worldzpad-mainnet/fairfee/**'
+      - 'worldzpad-mainnet/legacy-flywheel/**'
+      - 'worldzpad-devnet/revive-party/**'
       - 'scripts/validate_revive_v1.py'
       - 'supabase/functions/revive-claim/**'
+      - 'supabase/functions/worldz-legacy-proof/**'
 
 permissions:
   contents: read
@@ -37,3 +45,34 @@ jobs:
         run: |
           grep -q 'const CLAIM_EXECUTION_ENABLED = false' supabase/functions/revive-claim/index.ts
           ! grep -q 'claim_signature.*update' supabase/functions/revive-claim/index.ts
+
+  devnet-stage-a:
+    if: github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/revive-party
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Solana + Meteora SDKs
+        run: npm install --no-audit --no-fund
+      - name: Static 75-bps MagicFee + 10 Legacy PDA proof
+        run: npm run static-proof
+      - name: Create disposable REVIVE-style Meteora DBC pool on Solana devnet
+        run: npm run dbc-proof
+      - name: Independently verify devnet transaction and accounts
+        run: npm run verify-proof
+      - name: Publish Stage A evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: revive-worldzparty-stage-a
+          path: |
+            worldzpad-devnet/revive-party/artifacts/revive-static-proof.json
+            worldzpad-devnet/revive-party/artifacts/revive-dbc-devnet-proof.json
+          if-no-files-found: error
+          retention-days: 30
