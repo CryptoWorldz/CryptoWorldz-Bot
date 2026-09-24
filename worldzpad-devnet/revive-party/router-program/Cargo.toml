@@ -9,6 +9,7 @@ crate-type = ["cdylib", "lib"]
 
 [dependencies]
 solana-program = "=2.3.0"
+solana-system-interface = { version = "=1.0.0", features = ["bincode"] }
 
 [profile.release]
 overflow-checks = true
