@@ -206,21 +206,3 @@ jobs:
           },indent=2))
           print("DEEP_HYGIENE_JSON_END")
           PY
-
-      - name: Report blockchain hero true formats
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          hosts=['solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz']
-          def kind(data):
-              if data.startswith(b'\x89PNG\r\n\x1a\n'): return 'png'
-              if data.startswith(b'\xff\xd8\xff'): return 'jpg'
-              if len(data)>=12 and data[:4]==b'RIFF' and data[8:12]==b'WEBP': return 'webp'
-              if data.startswith((b'GIF87a',b'GIF89a')): return 'gif'
-              return 'unknown'
-          for host in hosts:
-              p=Path(host)/'hero.png'
-              data=p.read_bytes()
-              print(f'CHAIN_HERO_FORMAT host={host} current=hero.png true={kind(data)} bytes={len(data)}')
-          PY
