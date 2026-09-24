@@ -1,0 +1,50 @@
+name: REVIVE WorldzParTy Devnet Proof
+
+on:
+  push:
+    branches:
+      - revive-v1-build
+    paths:
+      - 'worldzpad-devnet/revive-party/**'
+      - '.github/workflows/revive-party-devnet.yml'
+      - 'worldzpad-mainnet/revive/revive-dbc-fairfee.v1.json'
+      - 'worldzpad-mainnet/fairfee/worldz-magic-fee.v1.json'
+      - 'worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revive-worldzparty-devnet
+  cancel-in-progress: false
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/revive-party
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned SDKs
+        run: npm install --no-audit --no-fund
+      - name: Static MagicFee + Legacy PDA proof
+        run: npm run static-proof
+      - name: Create disposable REVIVE-style Meteora DBC pool on Solana devnet
+        run: npm run dbc-proof
+      - name: Independently verify devnet accounts and transaction
+        run: npm run verify-proof
+      - name: Publish public devnet evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: revive-worldzparty-devnet-proof
+          path: |
+            worldzpad-devnet/revive-party/artifacts/revive-static-proof.json
+            worldzpad-devnet/revive-party/artifacts/revive-dbc-devnet-proof.json
+          if-no-files-found: error
+          retention-days: 30
