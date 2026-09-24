@@ -32,6 +32,10 @@ assert sum(Decimal(str(split[k])) for k in (
     "creator","referrer","legacyFlywheel","worldzLaunchPad","oneWorldzImpact"
 )) == Decimal("100")
 assert split["legacyFlywheel"] == 15
+assert any(
+    x["address"] == "PdABvvq4F7YjwsVRq2CCQeBNZTBq5WfkQvn8VmhRY34"
+    for x in policy["historicalDistributionWallets"]["wallets"]
+), "NBC Distribution must remain in the project-wallet exclusion registry"
 assert policy["magicFeeStandard"]["targetGrossTraderFeeBps"] == 75
 assert Decimal(str(policy["magicFeeStandard"]["effectiveLegacyFlywheelPercentOfTrade"])) == Decimal("0.09")
 assert policy["sourceFeeRule"]["traderFeeIncreaseRequired"] is False
@@ -65,6 +69,14 @@ assert Decimal(str(eff["worldzControlledTotal"])) == Decimal("0.60")
 assert Decimal(str(eff["grossTotal"])) == Decimal("0.75")
 
 # PurpleDiamondCrew preview.
+assert pdc_data["version"] == policy["version"]
+assert pdc_data["status"] == policy["status"]
+assert pdc_data["sourceFeeRule"] == policy["sourceFeeRule"]
+assert pdc_data["controlledFeeSplitPercent"] == policy["controlledFeeSplitPercent"]
+assert pdc_data["magicFeeStandard"] == policy["magicFeeStandard"]
+assert pdc_data["projectWalletExclusion"]["enabled"] is True
+assert pdc_data["projectWalletExclusion"]["addressesPublishedHere"] is False
+assert "verifiedLegacyDevWallets" not in pdc_data
 assert pdc_data["sourceFeeRule"]["legacyFlywheelPercent"] == 15
 assert pdc_data["epoch"]["seconds"] == 21600
 assert len(pdc_data["assets"]) == 10
