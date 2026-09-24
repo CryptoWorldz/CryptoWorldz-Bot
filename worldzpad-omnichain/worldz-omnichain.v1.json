@@ -1,0 +1,122 @@
+{
+  "version": "WORLDZ-OMNICHAIN-2026-09-24-A",
+  "status": "PRIVATE_BUILD__TESTNET_PROOF_REQUIRED__MAINNET_DISABLED",
+  "name": "Worldz Omnichain™",
+  "mainnetExecutionEnabled": false,
+  "mission": "One launch contract and disclosure standard across supported chains, with chain-native execution behind audited adapters.",
+  "products": {
+    "publicLaunchPad": true,
+    "api": true,
+    "sdk": true,
+    "whiteLabelLaunchPads": true,
+    "affiliateAndReferral": true,
+    "feeRouter": true,
+    "launchEngine": true,
+    "liquidityEngine": true,
+    "analytics": true,
+    "worldzProof": true
+  },
+  "supportedChainKeys": [
+    "solana",
+    "xrpl",
+    "base",
+    "ethereum",
+    "bnb",
+    "sui",
+    "hyperevm",
+    "robinhood"
+  ],
+  "policyPaths": {
+    "magicFee": "worldzpad-mainnet/fairfee/worldz-magic-fee.v1.json",
+    "legacyFlywheel": "worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json",
+    "chainRegistry": "worldzpad-omnichain/chain-registry.v1.json",
+    "feePolicy": "worldzpad-omnichain/fee-policy.v1.json",
+    "launchIntentSchema": "worldzpad-omnichain/schemas/launch-intent.schema.json",
+    "worldzProofSchema": "worldzpad-omnichain/schemas/worldz-proof.schema.json"
+  },
+  "pipeline": [
+    "CREATE_PROJECT",
+    "SELECT_CHAINS",
+    "NORMALIZE_TOKEN_METADATA",
+    "BUILD_CHAIN_NATIVE_TOKEN",
+    "BUILD_CHAIN_NATIVE_MARKET_OR_LIQUIDITY",
+    "CALCULATE_ACTUAL_FEE_DISCLOSURE",
+    "ATTRIBUTE_CREATOR_AND_REFERRER",
+    "SIMULATE_OR_TESTNET_PROVE",
+    "BUILD_WORLDZ_PROOF",
+    "REQUEST_OWNER_RELEASE_APPROVAL",
+    "MAINNET_EXECUTION"
+  ],
+  "requiredPreSignatureDisclosure": [
+    "gross_trader_fee",
+    "network_gas_estimate",
+    "external_protocol_or_dex_deduction",
+    "creator_receipt",
+    "referrer_receipt",
+    "legacy_flywheel_receipt",
+    "worldz_launchpad_receipt",
+    "oneworldz_impact_receipt",
+    "liquidity_destination",
+    "liquidity_lock_or_equivalent_protection",
+    "token_authority_state"
+  ],
+  "referrerTypes": [
+    "WALLET",
+    "LAUNCHPAD",
+    "INFLUENCER",
+    "TELEGRAM_COMMUNITY",
+    "X_COMMUNITY",
+    "WEBSITE",
+    "DEVELOPER",
+    "API_PARTNER",
+    "WHITE_LABEL_OPERATOR"
+  ],
+  "principles": [
+    "No hidden fee may be added beneath MagicFeeNumber.",
+    "Do not force one AMM design onto chains with different native market structures.",
+    "Creator and referrer economics are first-class product features.",
+    "Legacy Flywheel is funded from Worldz-controlled collected revenue and does not add a second trader fee.",
+    "No unsupported automatic bridge may move Legacy Flywheel funds cross-chain.",
+    "Permanent liquidity locking is the default target where the venue supports it; equivalent non-custodial protection requires explicit proof elsewhere.",
+    "A mainnet adapter cannot activate merely because another chain adapter passed.",
+    "Every mainnet launch requires chain-specific simulation/testnet evidence and explicit release approval."
+  ],
+  "buildPhases": [
+    {
+      "phase": 1,
+      "name": "Omnichain Contract",
+      "status": "IN_BUILD",
+      "deliverables": ["chain registry", "launch intent", "fee disclosure", "Worldz Proof schema", "CI validator"]
+    },
+    {
+      "phase": 2,
+      "name": "Solana Reference Adapter",
+      "status": "IN_PROGRESS",
+      "deliverables": ["Meteora DBC devnet", "75 bps proof", "Fee Router", "Legacy PDAs", "DAMM v2 migration", "100% lock proof"]
+    },
+    {
+      "phase": 3,
+      "name": "Shared EVM Adapter",
+      "status": "PLANNED",
+      "deliverables": ["Ethereum", "Base", "BNB", "HyperEVM", "Robinhood testnet deployments", "deterministic token factory", "fee router", "referral attribution", "liquidity adapters"]
+    },
+    {
+      "phase": 4,
+      "name": "XRPL Adapter",
+      "status": "PLANNED",
+      "deliverables": ["issued-token testnet path", "CLOB/AMM market path", "fee disclosure", "Worldz Proof"]
+    },
+    {
+      "phase": 5,
+      "name": "Sui Adapter",
+      "status": "PLANNED",
+      "deliverables": ["Move fungible-token package", "PTB launch path", "market/liquidity adapter", "fee router", "Worldz Proof"]
+    },
+    {
+      "phase": 6,
+      "name": "LaunchPad-as-a-Service",
+      "status": "PLANNED",
+      "deliverables": ["API", "SDK", "white label", "launchpad-to-launchpad referrals", "partner analytics"]
+    }
+  ]
+}
