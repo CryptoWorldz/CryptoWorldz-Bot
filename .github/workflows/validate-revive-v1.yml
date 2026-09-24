@@ -73,11 +73,14 @@ jobs:
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
         run: cargo install devnet-pow
+      - name: Bootstrap PoW transaction gas
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        run: npm run bootstrap-payer
       - name: Mine disposable devnet SOL with the PoW faucet
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
         run: |
-          devnet-pow -k "$DEVNET_PAYER_KEYPAIR_FILE" -u dev -c confirmed mine --target-lamports 100000000
+          devnet-pow -k "$DEVNET_PAYER_KEYPAIR_FILE" -u dev -c confirmed mine -d 3 --reward 0.02 --no-infer --target-lamports 100000000
       - name: Prove disposable payer actually received devnet SOL
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         run: npm run verify-payer
