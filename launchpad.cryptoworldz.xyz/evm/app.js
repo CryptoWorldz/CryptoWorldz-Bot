@@ -26,7 +26,7 @@ contract WorldzFixedSupplyToken {
  function transferFrom(address f,address to,uint256 a) external returns(bool){uint256 x=allowance[f][msg.sender];require(x>=a,"allowance");if(x!=type(uint256).max){allowance[f][msg.sender]=x-a;emit Approval(f,msg.sender,x-a);}_t(f,to,a);return true;}
  function _t(address f,address to,uint256 a) internal{require(to!=address(0),"zero");uint256 b=balanceOf[f];require(b>=a,"balance");unchecked{balanceOf[f]=b-a;}balanceOf[to]+=a;emit Transfer(f,to,a);}
 }`;
-let abi,bytecode,provider,signer,wallet='',compiled=false,checked=false;
+let abi,bytecode,provider,signer,wallet='',compiled=false,checked=false;\nconst requestedNetwork=new URLSearchParams(location.search).get('network');\nif(requestedNetwork&&NETWORKS[requestedNetwork]) $('#network').value=requestedNetwork;
 function status(id,t,c=''){const e=$(id);e.textContent=t;e.className='status'+(c?' '+c:'');}
 function net(){return NETWORKS[$('#network').value];}
 function alloc(){const o={};$$('.allocation').forEach(x=>o[x.dataset.key]=Number(x.value));return o;}
