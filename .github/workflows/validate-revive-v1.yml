@@ -75,15 +75,18 @@ jobs:
       - name: Compile-check Legacy router Rust program
         working-directory: worldzpad-devnet/revive-party
         run: cargo check --manifest-path router-program/Cargo.toml
-      - name: Publish tested dependency lockfiles
-        uses: actions/upload-artifact@v4
-        with:
-          name: revive-tested-lockfiles
-          path: |
-            worldzpad-devnet/revive-party/package-lock.json
-            worldzpad-devnet/revive-party/router-program/Cargo.lock
-          if-no-files-found: error
-          retention-days: 7
+      - name: Emit tested dependency lockfiles for source-control capture
+        working-directory: worldzpad-devnet/revive-party
+        shell: bash
+        run: |
+          test -s package-lock.json
+          test -s router-program/Cargo.lock
+          printf 'REVIVE_PACKAGE_LOCK_B64='
+          base64 -w0 package-lock.json
+          printf '\n'
+          printf 'REVIVE_CARGO_LOCK_B64='
+          base64 -w0 router-program/Cargo.lock
+          printf '\n'
 
   devnet-stage-a:
     if: github.event_name == 'push'
