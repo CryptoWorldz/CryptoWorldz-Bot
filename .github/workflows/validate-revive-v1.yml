@@ -25,6 +25,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   validate:
@@ -53,6 +54,7 @@ jobs:
       DEVNET_PAYER_SECRET_JSON: ${{ secrets.DEVNET_PAYER_SECRET_JSON }}
       SOLANA_RPC_URL: ${{ secrets.DEVNET_SOLANA_RPC_URL }}
       DEVNET_PAYER_KEYPAIR_FILE: /tmp/revive-devnet-payer.json
+      DEVNET_PAYER_PUBKEY_FILE: /tmp/revive-devnet-payer.pubkey
     timeout-minutes: 30
     defaults:
       run:
@@ -71,6 +73,17 @@ jobs:
       - name: Generate disposable devnet payer
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         run: npm run prepare-payer
+      - name: Bootstrap disposable payer from authenticated Worldz devnet helper
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        shell: bash
+        run: |
+          OIDC_JSON=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=worldz-revive-devnet-bootstrap")
+          OIDC=$(python -c 'import json,sys; print(json.load(sys.stdin)["value"])' <<< "$OIDC_JSON")
+          PUBKEY=$(tr -d '\n' < "$DEVNET_PAYER_PUBKEY_FILE")
+          curl -sSf -X POST "https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/revive-devnet-bootstrap" \
+            -H "Authorization: Bearer $OIDC" \
+            -H "Content-Type: application/json" \
+            --data "{\"address\":\"$PUBKEY\"}"
       - name: Install Solana devnet Proof-of-Work faucet client
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
