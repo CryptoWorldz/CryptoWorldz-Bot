@@ -8,6 +8,7 @@ policy = json.loads((repo / "worldzpad-mainnet" / "legacy-flywheel" / "worldz-le
 magic = json.loads((repo / "worldzpad-mainnet" / "fairfee" / "worldz-magic-fee.v1.json").read_text())
 revive = json.loads((repo / "worldzpad-mainnet" / "revive" / "revive-dbc-fairfee.v1.json").read_text())
 pdc_data = json.loads((repo / "purplediamondcrew.com" / "legacy-flywheel.v1.json").read_text())
+recovery = json.loads((repo / "worldzpad-mainnet" / "legacy-flywheel" / "legacy-control-recovery.v1.json").read_text())
 pdc_page = (repo / "purplediamondcrew.com" / "hodlerz-special" / "index.html").read_text()
 
 # Platform fee standard.
@@ -68,6 +69,25 @@ assert Decimal(str(eff["legacyFlywheel"])) == Decimal("0.09")
 assert Decimal(str(eff["worldzControlledTotal"])) == Decimal("0.60")
 assert Decimal(str(eff["grossTotal"])) == Decimal("0.75")
 
+# Recovery / no-double-handling contract.
+assert recovery["invariants"]["automaticAuthorityTakeover"] is False
+assert recovery["invariants"]["automaticLegacyFeeHarvesting"] is False
+assert recovery["invariants"]["externalPlatformRewardsCountAsWorldzRevenue"] is False
+assert recovery["invariants"]["exactlyOnceSettlementRequired"] is True
+assert recovery["invariants"]["failedRecipientShareRedistributed"] is False
+assert recovery["invariants"]["roundingDustRedistributedToArbitraryWallet"] is False
+assert recovery["invariants"]["nextEpochCannotSettleUntilPriorEpochReconciled"] is True
+assert recovery["accounting"]["epochSeconds"] == 21600
+assert len(recovery["auditedLegacyAssets"]) == 10
+assert len({x["mint"] for x in recovery["auditedLegacyAssets"]}) == 10
+pdc12 = next(x for x in recovery["auditedLegacyAssets"] if x["symbol"] == "PDC1-2")
+assert pdc12["transferFeeBps"] == 300
+assert pdc12["platformProvenance"] == "TAXSPLIT_PUBLIC_PROVENANCE_CONFIRMED"
+pdcshare = next(x for x in recovery["auditedLegacyAssets"] if x["symbol"] == "PDCSHARE")
+assert pdcshare["transferFeeBps"] is None
+assert pdcshare["platformProvenance"] == "REVSHARE_PUBLIC_PROVENANCE_CONFIRMED"
+assert recovery["proofSources"]["liveMutationPerformed"] is False
+
 # PurpleDiamondCrew preview.
 assert pdc_data["version"] == policy["version"]
 assert pdc_data["status"] == policy["status"]
@@ -93,5 +113,5 @@ assert "DORMANT → ALIVE" in pdc_page
 print(
     "LEGACY_FLYWHEEL=PASS magic_fee_bps=75 fee_share=15 vaults=10 "
     "per_vault_controlled_share=1.5 effective_total=0.09 effective_per_vault=0.009 "
-    "epoch_hours=6 minimum=0.01pct weighting=50_equal_50_sqrt mainnet=LOCKED"
+    "epoch_hours=6 minimum=0.01pct weighting=50_equal_50_sqrt exactly_once=ON external_double_count=OFF takeover=OFF mainnet=LOCKED"
 )
