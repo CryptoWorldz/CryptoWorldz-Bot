@@ -1,5 +1,5 @@
 {
-  "version": "REVIVE-LAUNCH-2026-09-24-A",
+  "version": "REVIVE-LAUNCH-2026-09-25-B",
   "status": "BUILD_ONLY__MAINNET_LAUNCH_LOCKED",
   "network": "solana-mainnet-beta",
   "token": {
@@ -172,6 +172,48 @@
     "teamVestingExecutionProofRequired": true,
     "distributionWalletFundingPreflightRequired": true,
     "permanentLockProofRequired": true,
-    "finalOwnerWalletApprovalRequired": true
+    "finalOwnerWalletApprovalRequired": true,
+    "worldzDependencyGateRequired": true,
+    "wldzPostLaunchCriticalSafetyProofRequired": true,
+    "worldzLaunchPadPublicBootProofRequired": true,
+    "legacyTenMintAuthorityAuditRequired": true,
+    "noAutomaticLegacyAuthorityTakeover": true,
+    "noAutomaticLegacyFeeHarvesting": true,
+    "noReviveIsolationLaunch": true
+  },
+  "worldzDependencyGate": {
+    "required": true,
+    "rule": "REVIVE may not be released as an isolated token launch. Its public mainnet execution remains locked until the canonical WORLDZ/WLDZ post-launch safety track, WorldzLaunchPad public boot/readiness checks, Legacy authority audit, fee-router proof, liquidity-lock proof and final owner approval are all evidenced.",
+    "canonicalWorldz": {
+      "name": "WORLDZ",
+      "symbol": "WLDZ",
+      "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "expectedMaxSupplyTokens": 100000000,
+      "livePool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ"
+    },
+    "requiredEvidence": {
+      "wldzPostLaunchCriticalSafetyGate": "REQUIRED_NOT_SATISFIED_BY_THIS_REVIVE_PR",
+      "worldzLaunchPadPublicBoot": "REQUIRED",
+      "legacyTenMintAuthorityAudit": "REQUIRED",
+      "worldzFeeRouterReceipts": "REQUIRED",
+      "permanentMigratedLiquidityLock": "REQUIRED",
+      "finalOwnerApproval": "REQUIRED"
+    },
+    "prohibitedUntilAllPass": [
+      "enable REVIVE public mainnet execution",
+      "advertise REVIVE as publicly launched",
+      "move launch liquidity into an executable mainnet market route",
+      "open Legacy RVIV claims as part of launch execution"
+    ],
+    "publicMainnetExecutionMustRemainFalse": true
+  },
+  "legacyControlPolicy": {
+    "authorityAuditArtifact": "worldzpad-devnet/revive-party/artifacts/legacy-authority-audit.json",
+    "auditReadOnly": true,
+    "automaticAuthorityTakeover": false,
+    "automaticLegacyFeeHarvesting": false,
+    "antiDoubleHandling": true,
+    "sourceSeparationRule": "Existing TaxSplit, RevShare or other legacy-platform rewards are not Worldz Flywheel revenue. The Worldz six-hour Flywheel distributes only fee revenue explicitly routed into the Worldz-controlled Legacy vaults.",
+    "recoveryRule": "Verified owner-controlled authority may be migrated only by a later explicit signed owner action. Null/revoked authority is immutable. Third-party or unverified authority is never bypassed."
   }
 }
