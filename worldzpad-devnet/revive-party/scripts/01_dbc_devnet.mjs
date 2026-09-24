@@ -11,7 +11,7 @@ import {
   MigrationFeeOption, MigrationOption, TokenAuthorityOption, TokenDecimal,
   TokenType, buildCurve, deriveDbcPoolAddress
 } from '@meteora-ag/dynamic-bonding-curve-sdk';
-import { MAGIC, deriveLegacyVaults, devnetRouterProgramId } from './common.mjs';
+import { MAGIC, deriveLegacyVaults, staticRouterProgramId, staticRouterAuthority } from './common.mjs';
 
 const RPC=process.env.SOLANA_RPC_URL||clusterApiUrl('devnet');
 if(/mainnet/i.test(RPC))throw new Error('MAINNET RPC FORBIDDEN');
@@ -151,7 +151,16 @@ const report={
   funding:airdrop,
   fee:{grossBps:75,dynamic:false,creatorControlledPercent:51,partnerControlledPercent:49},
   migratedPool:{feeBps:75,dynamic:false,creatorPermanentLockedPercent:60,partnerPermanentLockedPercent:40,totalPermanentLockedPercent:100},
-  router:{devnetNamespaceProgramId:devnetRouterProgramId().toBase58(),weights:MAGIC.routerWeights,legacyVaultPdas:deriveLegacyVaults()},
+  router:{
+    weights:MAGIC.routerWeights,
+    staticFixture:{
+      programId:staticRouterProgramId().toBase58(),
+      authority:staticRouterAuthority().toBase58(),
+      seedContract:'legacy-vault + authority + legacy_mint',
+      vaultPdas:deriveLegacyVaults(),
+      deployStatus:'NOT_DEPLOYED',
+    }
+  },
   mainnetExecution:false
 };
 fs.writeFileSync(path.join('artifacts','revive-dbc-devnet-proof.json'),JSON.stringify(report,null,2)+'\n');
