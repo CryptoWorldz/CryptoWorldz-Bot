@@ -1,0 +1,12 @@
+{
+  "name": "worldz-sui-testnet-proof",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "static-proof": "node scripts/00_static_proof.mjs",
+    "publish-proof": "node scripts/01_publish_testnet_proof.mjs"
+  },
+  "dependencies": {
+    "@mysten/sui": "2.31.3"
+  }
+}
