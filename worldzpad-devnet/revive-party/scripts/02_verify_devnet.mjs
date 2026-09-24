@@ -75,7 +75,9 @@ if(Number(configState.migratedPoolBaseFeeMode)!==Number(DammV2BaseFeeMode.FeeTim
 if(!poolState.poolState.config.equals(configKey))throw new Error('pool/config relationship mismatch');
 if(!poolState.poolState.baseMint.equals(new PublicKey(report.baseMint)))throw new Error('pool/base mint relationship mismatch');
 
-if(report.router.legacyVaultPdas.length!==10||new Set(report.router.legacyVaultPdas.map(x=>x.pda)).size!==10)throw new Error('PDA proof mismatch');
+if(report.router.staticFixture?.deployStatus!=='NOT_DEPLOYED')throw new Error('router fixture must not pretend to be deployed');
+if(report.router.staticFixture.vaultPdas.length!==10||new Set(report.router.staticFixture.vaultPdas.map(x=>x.pda)).size!==10)throw new Error('static router PDA proof mismatch');
+if(report.router.staticFixture.seedContract!=='legacy-vault + authority + legacy_mint')throw new Error('router seed contract mismatch');
 if(JSON.stringify(report.router.weights)!==JSON.stringify(MAGIC.routerWeights))throw new Error('router weights mismatch');
 
 const decoded={
