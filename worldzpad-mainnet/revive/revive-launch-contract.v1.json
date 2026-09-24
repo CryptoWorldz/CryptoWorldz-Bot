@@ -1,5 +1,5 @@
 {
-  "version": "REVIVE-LAUNCH-2026-09-25-B",
+  "version": "REVIVE-LAUNCH-2026-09-25-C",
   "status": "BUILD_ONLY__MAINNET_LAUNCH_LOCKED",
   "network": "solana-mainnet-beta",
   "token": {
@@ -31,7 +31,7 @@
       "id": "initial_active_liquidity",
       "percent": 15,
       "tokens": 30000000,
-      "state": "KEEP_IN_TREASURY_UNTIL_DEVNET_DBC_PROOF"
+      "state": "KEEP_IN_TREASURY_UNTIL_DIRECT_DAMM_V2_EXISTING_MINT_DEVNET_PROOF"
     },
     {
       "id": "staged_liquidity_reserve",
@@ -149,17 +149,19 @@
     "rule": "Ring-fenced for OneWorldz humanitarian/community impact; not liquidity, team or operating inventory."
   },
   "launch": {
-    "engineCandidate": "METEORA_DBC_TO_DAMM_V2",
+    "engineCandidate": "METEORA_DAMM_V2_DIRECT_EXISTING_MINT",
+    "routeConfig": "worldzpad-mainnet/revive/revive-direct-damm-v2-existing-mint.v1.json",
+    "dbcTokenCreationPathAllowed": false,
+    "canonicalMintReuseRequired": true,
     "publicMainnetExecutionEnabled": false,
     "devnetRequired": true,
+    "devnetOpeningPriceSolPerRviv": 0.000045,
+    "mainnetOpeningPriceSolPerRviv": null,
+    "mainnetOpeningPriceStatus": "UNSET__OWNER_DECISION_REQUIRED",
+    "initialBaseLiquidityTokens": 30000000,
+    "initialQuoteLiquiditySol": 0,
     "permanentLiquidityProtectionRequired": true,
-    "migratedLiquidityTarget": {
-      "creatorClaimablePercent": 0,
-      "partnerClaimablePercent": 0,
-      "creatorPermanentLockedPercent": 60,
-      "partnerPermanentLockedPercent": 40,
-      "totalPermanentLockedPercent": 100
-    }
+    "permanentLockAtPoolCreationTargetPercent": 100
   },
   "gates": {
     "noSecondReviveMint": true,
@@ -179,7 +181,12 @@
     "legacyTenMintAuthorityAuditRequired": true,
     "noAutomaticLegacyAuthorityTakeover": true,
     "noAutomaticLegacyFeeHarvesting": true,
-    "noReviveIsolationLaunch": true
+    "noReviveIsolationLaunch": true,
+    "noDbcTokenCreationForCanonicalRviv": true,
+    "directExistingMintDammV2ProofRequired": true,
+    "mainnetOpeningPriceFinalized": false,
+    "actualDammV2ProtocolDeductionProofRequired": true,
+    "lockedPositionFeeClaimProofRequired": true
   },
   "worldzDependencyGate": {
     "required": true,
