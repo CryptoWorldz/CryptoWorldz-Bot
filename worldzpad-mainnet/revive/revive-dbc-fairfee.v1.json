@@ -1,0 +1,51 @@
+{
+  "version": "WORLDZ-FAIRFEE-RVIV-2026-09-24-A",
+  "status": "DEVNET_CANDIDATE__MAINNET_LOCKED",
+  "venue": "Meteora Dynamic Bonding Curve -> DAMM v2",
+  "dbc": {
+    "collectFeeMode": "QUOTE_TOKEN",
+    "dynamicFee": false,
+    "targetGrossTraderFeePercent": 0.625,
+    "targetGrossTraderFeeBps": 62.5,
+    "protocolFeePercentOfGrossFee": 20,
+    "controlledTradingFeePercentOfGrossFee": 80,
+    "creatorTradingFeePercentageOfControlledTradingFee": 60,
+    "partnerTradingFeePercentageOfControlledTradingFee": 40,
+    "feeClaimer": "PENDING_WORLDZ_FEE_ROUTER_PDA",
+    "creator": "PENDING_REVIVE_CREATOR_FEE_RECEIVER"
+  },
+  "effectivePercentOfTradeAtTarget": {
+    "meteoraProtocol": 0.125,
+    "creator": 0.3,
+    "worldzReferrer": 0.1,
+    "worldzLaunchPad": 0.05,
+    "oneWorldzImpact": 0.05,
+    "grossTotal": 0.625
+  },
+  "partnerRouterSplitPercent": {
+    "referrer": 50,
+    "worldzLaunchPad": 25,
+    "oneWorldzImpact": 25,
+    "total": 100
+  },
+  "meteoraReferral": {
+    "distinctFromWorldzReferral": true,
+    "hostReferralPercentOfProtocolFeeWhenUsed": 20,
+    "disclosureRequired": true
+  },
+  "migration": {
+    "option": "DAMM_V2",
+    "customizableMigratedPoolFeeRequired": true,
+    "targetGrossTraderFeeBps": 62.5,
+    "exactFractionalBpsSupportMustBeProvenOnDevnet": true,
+    "noSilentRounding": true
+  },
+  "permanentLiquidity": {
+    "partnerLiquidityPercentage": 0,
+    "creatorLiquidityPercentage": 0,
+    "partnerPermanentLockedLiquidityPercentage": 40,
+    "creatorPermanentLockedLiquidityPercentage": 60,
+    "totalPermanentLockedPercentage": 100
+  },
+  "executionGate": "If 62.5 bps cannot be represented exactly in both phases, mainnet stays locked until an explicitly approved transparent alternative is selected."
+}
