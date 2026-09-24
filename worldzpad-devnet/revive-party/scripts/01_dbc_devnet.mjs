@@ -19,11 +19,19 @@ const connection=new Connection(RPC,'confirmed');
 const client=new DynamicBondingCurveClient(connection,'confirmed');
 function payerFromEnvironment(){
   const raw=process.env.DEVNET_PAYER_SECRET_JSON?.trim();
-  if(!raw)return {keypair:Keypair.generate(),source:'ephemeral_generated'};
-  let parsed;
-  try{parsed=JSON.parse(raw);}catch{throw new Error('DEVNET_PAYER_SECRET_JSON must be a JSON byte array');}
-  if(!Array.isArray(parsed)||parsed.length!==64)throw new Error('DEVNET_PAYER_SECRET_JSON must contain 64 secret-key bytes');
-  return {keypair:Keypair.fromSecretKey(Uint8Array.from(parsed)),source:'prefunded_actions_secret'};
+  if(raw){
+    let parsed;
+    try{parsed=JSON.parse(raw);}catch{throw new Error('DEVNET_PAYER_SECRET_JSON must be a JSON byte array');}
+    if(!Array.isArray(parsed)||parsed.length!==64)throw new Error('DEVNET_PAYER_SECRET_JSON must contain 64 secret-key bytes');
+    return {keypair:Keypair.fromSecretKey(Uint8Array.from(parsed)),source:'prefunded_actions_secret'};
+  }
+  const file=process.env.DEVNET_PAYER_KEYPAIR_FILE?.trim();
+  if(file && fs.existsSync(file)){
+    const parsed=JSON.parse(fs.readFileSync(file,'utf8'));
+    if(!Array.isArray(parsed)||parsed.length!==64)throw new Error('DEVNET_PAYER_KEYPAIR_FILE must contain 64 secret-key bytes');
+    return {keypair:Keypair.fromSecretKey(Uint8Array.from(parsed)),source:'pow_funded_ephemeral_file'};
+  }
+  return {keypair:Keypair.generate(),source:'ephemeral_generated'};
 }
 const payerConfig=payerFromEnvironment();
 const payer=payerConfig.keypair;
