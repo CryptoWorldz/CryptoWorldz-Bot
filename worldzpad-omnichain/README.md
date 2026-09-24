@@ -61,6 +61,28 @@ The current v1 referrer share is **17% of Worldz-controlled revenue**. If a refe
 
 This makes Worldz infrastructure useful even to a platform that keeps its own brand.
 
+## Best-of-best product standard
+
+The private build now locks the product-level features that make the chain infrastructure useful:
+
+- Simple launch + Pro launch
+- Creator recurring revenue
+- LaunchPad-to-LaunchPad and affiliate referrals
+- Venue-specific anti-sniper/fair-launch controls
+- Automatic market/liquidity creation
+- Graduation where the venue supports it
+- Permanent-lock target or explicit chain-native alternative
+- Vesting and airdrop support
+- New / Trending / Graduating / Verified discovery
+- Worldz Terminal™ including external-market discovery
+- API + SDK + webhooks
+- Create Your Own LaunchPad / white label
+- AI/social launch entry points
+- plain-English errors
+- fee and authority disclosure before signing
+- Worldz Proof™
+- analytics funnels for creators, referrers and chain conversion
+
 ## Chain-native design
 
 Worldz does **not** force Solana mechanics onto every chain.
@@ -101,8 +123,11 @@ Then, and only then, an explicit owner release may enable mainnet execution.
 - `worldz-omnichain.v1.json` — platform contract and release phases.
 - `chain-registry.v1.json` — eight chain-native adapters.
 - `fee-policy.v1.json` — fee, referral and cross-chain Legacy rules.
+- `product-standard.v1.json` — best-of-best LaunchPad product standard.
 - `schemas/launch-intent.schema.json` — common launch request.
 - `schemas/worldz-proof.schema.json` — common proof receipt.
 - `sdk/omnichain-core.mjs` — integer fee math and pre-sign disclosure.
 - `sdk/self-test.mjs` — deterministic MagicFee/referral test.
+- `analytics/events.v1.json` — PostHog-ready event taxonomy (not written to the wrong PostHog workspace).
+- `api/openapi.v1.json` — quote/simulate/prepare/execute/referral/proof/white-label API contract.
 - `scripts/validate_worldz_omnichain.py` — repository safety validator.
