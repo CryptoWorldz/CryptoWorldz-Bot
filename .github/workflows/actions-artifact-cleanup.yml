@@ -1,0 +1,58 @@
+name: Actions Artifact Cleanup
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/actions-artifact-cleanup.yml"
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Delete Actions artifacts older than 7 days
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cutoff_epoch="$(date -u -d '7 days ago' +%s)"
+          deleted=0
+          kept=0
+
+          while IFS=$'\t' read -r artifact_id created_at artifact_name; do
+            [ -z "${artifact_id:-}" ] && continue
+            created_epoch="$(date -u -d "$created_at" +%s)"
+
+            if [ "$created_epoch" -lt "$cutoff_epoch" ]; then
+              echo "Deleting artifact: $artifact_name (id=$artifact_id, created=$created_at)"
+              gh api --method DELETE "repos/$REPOSITORY/actions/artifacts/$artifact_id"
+              deleted=$((deleted + 1))
+            else
+              kept=$((kept + 1))
+            fi
+          done < <(
+            gh api --paginate "repos/$REPOSITORY/actions/artifacts?per_page=100" \
+              --jq '.artifacts[] | [.id, .created_at, .name] | @tsv'
+          )
+
+          echo "Deleted $deleted artifact(s) older than 7 days."
+          echo "Kept $kept recent artifact(s)."
+
+      - name: Confirm remaining artifact inventory
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$REPOSITORY/actions/artifacts?per_page=1" --jq '"Remaining artifacts: \(.total_count)"'
