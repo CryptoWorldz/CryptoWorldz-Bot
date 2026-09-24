@@ -1,0 +1,138 @@
+name: Deploy Blockchain Worldz Gateways
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/deploy-chain-gateways.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blockchain-worldz-gateways
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate chain gateway source
+        shell: python
+        run: |
+          from pathlib import Path
+          hosts=[
+            'solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz',
+            'xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz'
+          ]
+          for host in hosts:
+              root=Path(host)
+              html=(root/'index.html').read_text(encoding='utf-8')
+              assert 'data-build="2026-09-24-chain-launch-gateway-v1"' in html, host
+              assert 'src="/hero.jpg"' in html, host
+              assert '<style>' in html, host
+              assert '/style.css' not in html, host
+              assert (root/'hero.jpg').is_file(), host
+              assert not (root/'hero.png').exists(), host
+          print('CHAIN_GATEWAY_SOURCE=PASS count=8')
+
+      - name: Deploy eight blockchain gateways
+        shell: python
+        run: |
+          import os, ssl
+          from ftplib import FTP_TLS
+          from pathlib import Path, PurePosixPath
+
+          targets={
+            'solworldz.xyz':'domains/solworldz.xyz/public_html',
+            'ethworldz.xyz':'domains/ethworldz.xyz/public_html',
+            'baseworldz.xyz':'domains/baseworldz.xyz/public_html',
+            'bnbworldz.xyz':'domains/bnbworldz.xyz/public_html',
+            'xrpworldz.xyz':'domains/xrpworldz.xyz/public_html',
+            'suiworldz.xyz':'domains/suiworldz.xyz/public_html',
+            'hyperworldz.xyz':'domains/hyperworldz.xyz/public_html',
+            'robinworldz.xyz':'domains/robinworldz.xyz/public_html',
+          }
+
+          def connect():
+              ftp=FTP_TLS(context=ssl._create_unverified_context())
+              ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=40)
+              ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+              ftp.prot_p(); ftp.set_pasv(True)
+              return ftp
+
+          def cwd_path(ftp,path):
+              ftp.cwd('/')
+              for part in PurePosixPath(path).parts:
+                  if part in ('','/'): continue
+                  ftp.cwd(part)
+
+          for host,remote in targets.items():
+              ftp=connect()
+              cwd_path(ftp,remote)
+              for name in ('index.html','hero.jpg'):
+                  with (Path(host)/name).open('rb') as fh:
+                      ftp.storbinary('STOR '+name,fh,blocksize=262144)
+              for old in ('hero.png','style.css','mobile-safe.css','global-image-overrides.css'):
+                  try: ftp.delete(old)
+                  except Exception: pass
+              try: ftp.quit()
+              except Exception: ftp.close()
+              print('CHAIN_GATEWAY_DEPLOYED',host)
+
+          print('CHAIN_GATEWAY_DEPLOY=PASS count=8')
+
+      - name: Verify eight live blockchain gateways
+        shell: python
+        run: |
+          import concurrent.futures,time,urllib.request
+          expected={
+            'https://solworldz.xyz/':('SolWorldz','SOLANA, BUILT THE WORLDZ WAY.'),
+            'https://ethworldz.xyz/':('EthWorldz','ETHEREUM LAUNCHES, WITHOUT THE FOG.'),
+            'https://baseworldz.xyz/':('BaseWorldz','BUILD ON BASE. PROVE IT FIRST.'),
+            'https://bnbworldz.xyz/':('BNBWorldz','BNB CHAIN, MEET WORLDZLAUNCHPAD™.'),
+            'https://xrpworldz.xyz/':('XRPWorldz','XRP NATIVE. WORLDZ CONNECTED.'),
+            'https://suiworldz.xyz/':('SuiWorldz','SUI DESERVES A NATIVE ADAPTER.'),
+            'https://hyperworldz.xyz/':('HyperWorldz','HYPEREVM SPEED. WORLDZ DISCIPLINE.'),
+            'https://robinworldz.xyz/':('RobinWorldz','ROBINHOOD CHAIN, OPEN THE WORLDZ GATE.'),
+          }
+          def check(item):
+              url,(name,headline)=item
+              last=''
+              for attempt in range(1,6):
+                  try:
+                      stamp=int(time.time()*1000)
+                      req=urllib.request.Request(url+f'?gateway={stamp}',headers={
+                        'User-Agent':'Worldz-Chain-Gateway-Verify/1.0',
+                        'Cache-Control':'no-cache, no-store','Pragma':'no-cache'
+                      })
+                      with urllib.request.urlopen(req,timeout=25) as r:
+                          body=r.read().decode('utf-8','ignore')
+                          ok=(r.status==200 and
+                              'data-build="2026-09-24-chain-launch-gateway-v1"' in body and
+                              name in body and headline in body and
+                              'src="/hero.jpg"' in body and
+                              '/style.css' not in body)
+                          if ok:return url,True,''
+                          last=f'contract mismatch status={r.status}'
+                  except Exception as e:last=repr(e)
+                  time.sleep(attempt*2)
+              return url,False,last
+
+          failures=[]
+          with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
+              for url,ok,err in ex.map(check,expected.items()):
+                  print('CHAIN LIVE PASS' if ok else 'CHAIN LIVE FAIL',url,err)
+                  if not ok:failures.append((url,err))
+          if failures: raise SystemExit('CHAIN_GATEWAY_LIVE_FAIL '+repr(failures))
+          print('CHAIN_GATEWAY_LIVE=PASS count=8')
