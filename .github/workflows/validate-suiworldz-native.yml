@@ -98,6 +98,8 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"
           suiup install sui@testnet --yes
           mkdir -p artifacts
+          # First normal build initializes Sui's local client config outside redirected JSON.
+          sui move build --path template
           sui move build --path template --dump-bytecode-as-base64 --no-tree-shaking > artifacts/template-bytecode.json
       - name: Publish immutable package and create fixed-supply proof currency
         run: npm run publish-proof
