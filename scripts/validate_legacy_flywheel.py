@@ -37,9 +37,9 @@ rs = revive["controlledFeeSplitPercent"]
 assert rs["legacyFlywheel"] == 15
 assert rs["total"] == 100
 eff = revive["effectivePercentOfTradeAtTarget"]
-assert Decimal(str(eff["legacyFlywheel"])) == Decimal("0.0756")
-assert Decimal(str(eff["worldzControlledTotal"])) == Decimal("0.504")
-assert Decimal(str(eff["grossTotal"])) == Decimal("0.63")
+assert Decimal(str(eff["legacyFlywheel"])) == Decimal("0.09")
+assert Decimal(str(eff["worldzControlledTotal"])) == Decimal("0.60")
+assert Decimal(str(eff["grossTotal"])) == Decimal("0.75")\nassert revive["magicFee"]["grossTraderFeeBps"] == 75\nassert revive["partnerRouterWeights"]["total"] == 490
 
 assert pdc_data["sourceFeeRule"]["legacyFlywheelPercent"] == 15
 assert pdc_data["epoch"]["seconds"] == 21600
