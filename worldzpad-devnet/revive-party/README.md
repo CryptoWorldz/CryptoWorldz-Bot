@@ -1,75 +1,81 @@
 # REVIVE WorldzParTy Devnet Proof
 
-Disposable Solana devnet proof harness for REVIVE's MagicFeeNumber™ + Legacy Flywheel™ architecture.
+REVIVE's proof harness now uses the **existing-token launch architecture**.
 
-**Safety boundary:** this harness never uses the canonical mainnet RVIV mint. Network-executing scripts reject a mainnet RPC URL. Nothing in this directory authorizes mainnet execution.
+Canonical RVIV already exists on Solana mainnet:
 
-## Proof levels
+- Mint: `DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R`
+- Fixed supply: 200,000,000 RVIV
+- Decimals: 6
+- Mint authority: revoked
+- Freeze authority: revoked
 
-### Level 1 — deterministic / compile proof
+## Critical architecture correction
 
-Runs on every PR and push without moving tokens or SOL:
+The earlier DBC proof path is **not valid for canonical RVIV execution**. Meteora DBC pool initialization includes base-mint creation/signing, while canonical RVIV already exists with its mint authority revoked.
 
-- Meteora DBC SDK 1.5.12 accepts the fixed **75-bps** curve definition with dynamic fee OFF.
-- Creator / partner DBC split encodes **51 / 49**.
-- Partner router reconciles exactly as **170 Referrer / 150 Legacy / 85 Worldz / 85 Impact = 490**.
-- The Legacy bucket expands to **10 × weight 15**, one route per verified legacy mint.
-- Six-hour accounting is exactly **21,600 seconds**.
-- HODLer entitlement math is **50% equal + 50% integer-square-root weighting** using the minimum of the start/end balances.
-- Project/system/distribution/reward/liquidity wallets are excluded from the live-holder scan input.
-- The minimal Rust Legacy payout program compile-checks and requires the matching router authority signature.
-- Ten Legacy vault PDAs derive uniquely for the devnet namespace.
+Therefore:
 
-Level 1 is **not** proof that a devnet transaction happened.
+**canonical RVIV → direct one-sided Meteora DAMM v2 existing-mint pool → permanent-lock position → fee-claim reconciliation → Worldz fee router**
 
-### Level 2 — DBC on-chain devnet proof
+No second REVIVE mint is permitted.
 
-The push-only Stage A job must create a disposable Meteora DBC config, mint and pool on Solana devnet. The verifier then independently decodes the on-chain `PoolConfig` and pool through Meteora's state service and checks:
+The old DBC FairFee file is retained only as historical/reference economics for future token-creation launches. It is not REVIVE's execution route.
 
-- actual DBC base-fee numerator = **75 bps**;
-- dynamic fee = **OFF**;
-- quote-fee collection mode;
-- creator trading-fee percentage = **51%**;
-- migration option = **DAMM v2**;
-- migrated-pool target fee = **75 bps** with dynamic fee OFF;
-- claimable migrated liquidity = **0%**;
-- configured permanent-lock split = **60% Creator + 40% Partner = 100%**;
-- pool → config and pool → base-mint relationships;
-- confirmed clean creation transaction.
+## Price rule
 
-Evidence:
-- `artifacts/revive-dbc-devnet-proof.json`
-- `artifacts/revive-dbc-devnet-verified.json`
+### Devnet fixture
 
-Level 2 proves the **stored DBC configuration**, not a completed DAMM v2 migration.
+**1 RVIV = 0.000045 SOL**
 
-### Level 3 — live Legacy boundary proof
+This number is approved only for the disposable devnet simulation. It exists to test:
 
-The read-only Legacy scanner queries all ten canonical legacy mints, aggregates token accounts by owner, applies the published minimums and removes known Worldz project/distribution wallets.
+- one-sided existing-mint pool creation;
+- first-buy behaviour;
+- 75-bps MagicFeeNumber™;
+- dynamic fee OFF;
+- permanent liquidity locking;
+- locked-position fee claims;
+- actual protocol/referral deductions;
+- Worldz fee-router reconciliation.
 
-A single snapshot is only **one boundary**. A completed six-hour HODLer epoch requires another independently captured boundary at least 21,600 seconds later.
+### Mainnet
 
-Evidence:
-- `artifacts/legacy-live-boundary-snapshot.json`
+**UNSET.**
 
-### Level 4 — router execution + DAMM v2 migration proof
+The mainnet opening price may not automatically inherit the devnet fixture. It requires a later explicit owner decision after simulation evidence is reviewed.
 
-Still required before mainnet approval:
+## Direct DAMM v2 devnet proof
 
-- deploy the Legacy payout program to devnet and record its real program ID;
-- fund all ten program-controlled SOL vaults;
-- execute test Creator / Referrer / Legacy / Worldz / Impact routing and reconcile receipts;
-- complete a DBC → DAMM v2 graduation;
-- inspect the migrated DAMM v2 pool;
-- prove the actual post-migration permanent-lock accounts / positions;
-- prove **0% claimable migrated LP and 100% permanently locked migrated LP** on-chain.
+The disposable proof must:
 
-Only Level 4 can close the permanent-liquidity execution gate.
+1. Create a mock REVIVE mint on devnet with 200M supply and 6 decimals.
+2. Revoke its mint and freeze authorities **before** pool creation.
+3. Retain exactly 30M mock RVIV for the one-sided launch position.
+4. Create a direct customizable DAMM v2 RVIV/wSOL pool at the 0.000045 SOL fixture price.
+5. Use 75-bps static base fee with dynamic fee OFF.
+6. Start with 30M base tokens and zero quote SOL.
+7. Permanently lock the position at creation.
+8. Execute a disposable first-buy test.
+9. Independently decode the pool/position/lock state from devnet.
+10. Claim test position fees and measure the actual protocol/referral deductions.
+11. Reconcile only the fee revenue Worldz actually controls into the 51/17/15/8.5/8.5 router.
+12. Record transaction signatures and account addresses.
 
-## Secrets and artifacts
+## Legacy Flywheel proof
 
-Disposable payer/config/base-mint secret material is written only under `.runtime/`, which is gitignored and never uploaded as an artifact. Public proof artifacts contain addresses, configuration and transaction evidence only.
+The separate Legacy engine remains:
 
-## Current release rule
+- 10 verified Legacy mints;
+- six-hour / 21,600-second epochs;
+- minimum holding at both start and end boundary;
+- 50% equal + 50% integer-square-root weighting;
+- project/system/distribution/reward/liquidity wallets excluded;
+- exactly-once settlement;
+- rounding dust remains in the vault for roll-forward.
 
-**Static green ≠ devnet green. Devnet config green ≠ migration green. No mainnet execution until all required proof levels pass and the owner explicitly approves the final transaction.**
+## Mainnet release rule
+
+Mainnet remains locked until the existing-mint DAMM v2 proof, mainnet funding preflight, canonical RVIV balance proof, 75-bps on-chain fee proof, actual fee-claim/router receipts, permanent-lock evidence, team vesting execution proof, Worldz dependency gates and final owner wallet approval all pass.
+
+**Devnet price ≠ mainnet price. Static config ≠ on-chain proof. Configured lock ≠ locked position proof.**
