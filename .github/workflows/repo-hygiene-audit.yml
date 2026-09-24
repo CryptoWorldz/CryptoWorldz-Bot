@@ -1,4 +1,5 @@
 name: Repository Hygiene Audit
+# Triggered after Actions artifact backlog cleanup
 
 on:
   workflow_dispatch:
