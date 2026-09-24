@@ -15,3 +15,5 @@ It proves:
 The first on-chain stage creates a disposable DBC config, mint and pool using an ephemeral devnet keypair. No private key file is uploaded.
 
 Later stages build on the resulting proof to execute holder accounting, fee claims/router payouts and migration evidence.
+
+Workflow trigger marker: `WORLDZPARTY_STAGE_A_V1`.
