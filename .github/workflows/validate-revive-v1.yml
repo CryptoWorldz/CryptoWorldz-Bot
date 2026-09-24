@@ -66,6 +66,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Static 75-bps MagicFee + 10 Legacy PDA proof
         run: npm run static-proof
+      - name: Static partner router + six-hour HODLer settlement proof
+        run: npm run stage-b-static
       - name: Generate disposable devnet payer
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         run: npm run prepare-payer
@@ -94,6 +96,7 @@ jobs:
           name: revive-worldzparty-stage-a
           path: |
             worldzpad-devnet/revive-party/artifacts/revive-static-proof.json
+            worldzpad-devnet/revive-party/artifacts/revive-stage-b-static-proof.json
             worldzpad-devnet/revive-party/artifacts/revive-dbc-devnet-proof.json
           if-no-files-found: error
           retention-days: 30
