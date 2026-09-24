@@ -49,6 +49,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Protect blockchain WorldzLaunchPad gateways
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/worldz-chain-gateways
+          for host in solworldz.xyz ethworldz.xyz baseworldz.xyz bnbworldz.xyz xrpworldz.xyz suiworldz.xyz hyperworldz.xyz robinworldz.xyz; do
+            grep -q 'data-build="2026-09-24-chain-launch-gateway-v1"' "$host/index.html"
+            cp "$host/index.html" "/tmp/worldz-chain-gateways/$host.index.html"
+          done
+          echo "CHAIN_GATEWAY_PROTECT=PASS count=8"
+
       - name: Compile mission builders
         run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/apply_heroes_worldz.py tools/apply_slice_of_hope_visual.py tools/apply_davis_page.py tools/apply_donateworldz_brand.py tools/deploy_hostinger_robust.py tools/prune_public_bloat.py tools/apply_pdc_five_page.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py tools/apply_verified_insights.py
 
@@ -121,6 +132,17 @@ jobs:
       - name: "Apply verified insight tooling LAST"
         run: python3 tools/apply_verified_insights.py
 
+      - name: Restore blockchain WorldzLaunchPad gateways LAST
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in solworldz.xyz ethworldz.xyz baseworldz.xyz bnbworldz.xyz xrpworldz.xyz suiworldz.xyz hyperworldz.xyz robinworldz.xyz; do
+            cp "/tmp/worldz-chain-gateways/$host.index.html" "$host/index.html"
+            rm -f "$host/style.css" "$host/mobile-safe.css" "$host/global-image-overrides.css"
+            grep -q 'data-build="2026-09-24-chain-launch-gateway-v1"' "$host/index.html"
+          done
+          echo "CHAIN_GATEWAY_RESTORE=PASS count=8 legacy_css_removed=1"
+
       - name: Validate 18-site contract and retired-content removal
         shell: bash
         run: |
@@ -142,14 +164,24 @@ jobs:
               assert f.is_file(), (u,f)
               text=f.read_text(encoding='utf-8').lower()
               assert '<meta name="viewport"' in text, f
-              assert '/style.css' in text, f
-              assert '/mobile-safe.css' in text, f
+              chain_gateway='data-build="2026-09-24-chain-launch-gateway-v1"' in text
+              if chain_gateway:
+                  assert '<style>' in text, (f,'chain-gateway-inline-style')
+                  assert '/style.css' not in text, (f,'legacy-chain-style-link')
+              else:
+                  assert '/style.css' in text, f
+                  assert '/mobile-safe.css' in text, f
               assert '<iframe' not in text, f
               assert 'facebook.com/plugins/' not in text, f
               assert 'based.bid' not in text and 'powered by based' not in text, f
               assert not any(token in text for token in forbidden), (f,'retired-content')
 
+          chain_gateways={'solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz','xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz'}
           for d in domains:
+              if d in chain_gateways:
+                  body=(Path(d)/'index.html').read_text(encoding='utf-8')
+                  assert 'data-build="2026-09-24-chain-launch-gateway-v1"' in body, d
+                  continue
               css=Path(d)/'mobile-safe.css'
               assert css.is_file(), d
               c=css.read_text(encoding='utf-8')
@@ -339,7 +371,9 @@ jobs:
               for a in range(4):
                   try:
                       status,body=get(u); low=body.lower()
-                      ok=status==200 and 'data-oneworldz-build=' in body and '/style.css' in body and '/mobile-safe.css' in body and '<iframe' not in low and not any(x in low for x in forbidden)
+                      chain_gateway='data-build="2026-09-24-chain-launch-gateway-v1"' in body
+                      visual_contract=(chain_gateway and '<style>' in body and '/style.css' not in body) or (not chain_gateway and 'data-oneworldz-build=' in body and '/style.css' in body and '/mobile-safe.css' in body)
+                      ok=status==200 and visual_contract and '<iframe' not in low and not any(x in low for x in forbidden)
                       if ok:return u,True,''
                       last=f'status={status} retired={any(x in low for x in forbidden)}'
                   except Exception as e:last=repr(e)
