@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { Keypair, PublicKey } from '@solana/web3.js';
+import { deriveProgramLegacyVault } from './router_program_client.mjs';
 
 export const LEGACY_MINTS = [
   ['PDC','F82HFwxDLKFAbQWq7BmniWWxMgUerQsVu8jS357epump'],
@@ -24,18 +25,27 @@ export const MAGIC = {
   permanentLock:{creator:60,partner:40,total:100},
 };
 
-export function devnetRouterProgramId(){
-  // Deterministic DEVNET NAMESPACE ONLY. This is not a deployed/mainnet program key.
-  const seed=crypto.createHash('sha256').update('WORLDZ_LEGACY_FLYWHEEL_ROUTER_DEVNET_V1').digest().subarray(0,32);
-  return Keypair.fromSeed(seed).publicKey;
+function staticRole(label){
+  const seed=crypto.createHash('sha256').update('WORLDZ_DEVNET_'+label).digest().subarray(0,32);
+  return Keypair.fromSeed(seed);
 }
-export function deriveLegacyVaults(){
-  const programId=devnetRouterProgramId();
+
+// Static fixtures only. These are NOT deployed Solana program/authority keys.
+export function staticRouterProgramId(){
+  return staticRole('ROUTER_PROGRAM_STATIC_NAMESPACE').publicKey;
+}
+export function staticRouterAuthority(){
+  return staticRole('ROUTER_AUTHORITY').publicKey;
+}
+
+export function deriveLegacyVaults({
+  programId=staticRouterProgramId(),
+  authority=staticRouterAuthority(),
+}={}){
+  const pid=new PublicKey(programId);
+  const auth=new PublicKey(authority);
   return LEGACY_MINTS.map(([symbol,mint])=>{
-    const [pda,bump]=PublicKey.findProgramAddressSync(
-      [Buffer.from('legacy-vault'),new PublicKey(mint).toBuffer()],
-      programId
-    );
+    const {pda,bump}=deriveProgramLegacyVault(pid,auth,new PublicKey(mint));
     return {symbol,mint,pda:pda.toBase58(),bump};
   });
 }
