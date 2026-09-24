@@ -77,7 +77,10 @@ jobs:
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
         run: |
-          devnet-pow -k "$DEVNET_PAYER_KEYPAIR_FILE" -u dev mine --target-lamports 100000000
+          devnet-pow -k "$DEVNET_PAYER_KEYPAIR_FILE" -u dev -c confirmed mine --target-lamports 100000000
+      - name: Prove disposable payer actually received devnet SOL
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        run: npm run verify-payer
       - name: Create disposable REVIVE-style Meteora DBC pool on Solana devnet
         run: npm run dbc-proof
       - name: Independently verify devnet transaction and accounts
