@@ -1,0 +1,39 @@
+name: Validate REVIVE v1 private build
+
+on:
+  push:
+    branches:
+      - revive-v1-build
+    paths:
+      - 'worldzpad-mainnet/revive/**'
+      - 'scripts/validate_revive_v1.py'
+      - 'supabase/functions/revive-claim/**'
+      - '.github/workflows/validate-revive-v1.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-mainnet/revive/**'
+      - 'scripts/validate_revive_v1.py'
+      - 'supabase/functions/revive-claim/**'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate REVIVE allocation and launch gates
+        run: python scripts/validate_revive_v1.py
+      - name: Ensure REVIVE remains outside public LaunchPad deployment root
+        shell: bash
+        run: |
+          test ! -e launchpad.cryptoworldz.xyz/revive
+          grep -q '"publicMainnetExecutionEnabled": false' worldzpad-mainnet/revive/revive-launch-contract.v1.json
+          grep -q '"regenerationLockedUntilGeneratorFixVerified": true' worldzpad-mainnet/revive/revive-launch-contract.v1.json
+      - name: Validate claim verifier is non-executing
+        shell: bash
+        run: |
+          grep -q 'const CLAIM_EXECUTION_ENABLED = false' supabase/functions/revive-claim/index.ts
+          ! grep -q 'claim_signature.*update' supabase/functions/revive-claim/index.ts
