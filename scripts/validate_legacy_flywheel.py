@@ -7,11 +7,11 @@ repo = Path(__file__).resolve().parents[1]
 policy = json.loads((repo / "worldzpad-mainnet" / "legacy-flywheel" / "worldz-legacy-flywheel.v1.json").read_text())
 revive = json.loads((repo / "worldzpad-mainnet" / "revive" / "revive-dbc-fairfee.v1.json").read_text())
 pdc_data = json.loads((repo / "purplediamondcrew.com" / "legacy-flywheel.v1.json").read_text())
-pdc_page = (repo / "purplediamondcrew.com" / "hodlerz-special" / "index.html").read_text()
+pdc_page = (repo / "purplediamondcrew.com" / "hodlerz-special" / "index.html").read_text()\nmagic = json.loads((repo / "worldzpad-mainnet" / "fairfee" / "worldz-magic-fee.v1.json").read_text())
 
 split = policy["controlledFeeSplitPercent"]
 assert Decimal(str(sum(Decimal(str(split[k])) for k in ("creator","referrer","legacyFlywheel","worldzLaunchPad","oneWorldzImpact")))) == Decimal("100")
-assert split["legacyFlywheel"] == 15
+assert split["legacyFlywheel"] == 15\nassert magic["target"]["grossTraderFeeBps"] == 75\nassert magic["meteoraDbcModel"]["creatorTradingFeePercentage"] == 51\nassert magic["meteoraDbcModel"]["partnerTradingFeePercentage"] == 49\nassert magic["partnerRouter"]["weights"] == {"referrer":170,"legacyFlywheel":150,"worldzLaunchPad":85,"oneWorldzImpact":85,"total":490}\nassert Decimal(str(magic["legacyFlywheel"]["effectivePercentOfTradeTotal"])) == Decimal("0.09")\nassert Decimal(str(magic["legacyFlywheel"]["effectivePercentOfTradePerVault"])) == Decimal("0.009")
 assert policy["sourceFeeRule"]["traderFeeIncreaseRequired"] is False
 assert policy["epoch"]["seconds"] == 21600
 assert policy["epoch"]["hours"] == 6
