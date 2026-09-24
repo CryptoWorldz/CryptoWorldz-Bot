@@ -1,0 +1,177 @@
+{
+  "version": "REVIVE-LAUNCH-2026-09-24-A",
+  "status": "BUILD_ONLY__MAINNET_LAUNCH_LOCKED",
+  "network": "solana-mainnet-beta",
+  "token": {
+    "launchOrder": 2,
+    "name": "REVIVE",
+    "symbol": "RVIV",
+    "canonicalMint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+    "fixedSupplyTokens": 200000000,
+    "decimals": 6,
+    "mintAuthority": "REVOKED",
+    "freezeAuthority": "REVOKED",
+    "treasuryVault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+    "treasuryTokenAccount": "28CwdVt2y997WZqTzEuBpuwoyVYAj6JcaD4qDMzyCdtn"
+  },
+  "allocations": [
+    {
+      "id": "dev_legacy_wallets",
+      "percent": 15,
+      "tokens": 30000000,
+      "state": "RESERVED_FOR_VERIFIED_OWNER_CONTROLLED_LEGACY_DEV_WALLETS"
+    },
+    {
+      "id": "team_vested",
+      "percent": 15,
+      "tokens": 30000000,
+      "state": "VESTING_POLICY_LOCKED__BENEFICIARY_WEIGHTS_PENDING"
+    },
+    {
+      "id": "initial_active_liquidity",
+      "percent": 15,
+      "tokens": 30000000,
+      "state": "KEEP_IN_TREASURY_UNTIL_DEVNET_DBC_PROOF"
+    },
+    {
+      "id": "staged_liquidity_reserve",
+      "percent": 20,
+      "tokens": 40000000,
+      "state": "TREASURY_RESERVED__CONTROLLED_ADDITIONS_ONLY"
+    },
+    {
+      "id": "legacy_revival_claim_pool",
+      "percent": 10,
+      "tokens": 20000000,
+      "state": "ENTITLEMENT_LEDGER_COMPLETE__CLAIMS_NOT_OPEN"
+    },
+    {
+      "id": "devcity_100",
+      "percent": 10,
+      "tokens": 20000000,
+      "state": "50_EXISTING_SEATS_GRANDFATHERED__50_NEW_VERIFIED_SLOTS"
+    },
+    {
+      "id": "oneworldz_charity_impact",
+      "percent": 10,
+      "tokens": 20000000,
+      "state": "RING_FENCED_FOR_IMPACT"
+    },
+    {
+      "id": "worldz_treasury_operations_reserve",
+      "percent": 5,
+      "tokens": 10000000,
+      "state": "TREASURY_RESERVED"
+    }
+  ],
+  "allocationPercentTotal": 100,
+  "allocationTokenTotal": 200000000,
+  "devAllocation": {
+    "mode": "EQUAL_ACROSS_VERIFIED_OWNER_CONTROLLED_LEGACY_DEV_WALLETS",
+    "tokensPerWallet": 5000000,
+    "percentPerWallet": 2.5,
+    "wallets": [
+      {
+        "label": "Limited Edition",
+        "address": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9"
+      },
+      {
+        "label": "Next Big Coin Dev",
+        "address": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt"
+      },
+      {
+        "label": "PdCrew",
+        "address": "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j"
+      },
+      {
+        "label": "Purple Diamond Crew",
+        "address": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U"
+      },
+      {
+        "label": "Purple PDC",
+        "address": "G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3"
+      },
+      {
+        "label": "SolSavewXRP",
+        "address": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9"
+      }
+    ],
+    "rule": "Only registry wallets marked owner_controlled + legacy_dev are eligible. Watch-only distribution wallets are excluded."
+  },
+  "teamVesting": {
+    "poolTokens": 30000000,
+    "cliffDays": 90,
+    "linearVestingMonths": 24,
+    "cadence": "monthly",
+    "immediateUnlockPercent": 0,
+    "knownTeamWallets": [
+      {
+        "label": "Stepper",
+        "address": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ"
+      },
+      {
+        "label": "Remedy",
+        "address": "5fFVkQuo4pnCpWhD8hx2uiFEtkBcnW3QdDUt1w2BzB71"
+      },
+      {
+        "label": "Remedy Save",
+        "address": "43T8jncT5pJFo1TNenHdt6NSaPieic3iuHLQnYLLgeWy"
+      }
+    ],
+    "beneficiaryWeightsFinalized": false,
+    "executionGate": "NO_TEAM_TRANSFER_UNTIL_VESTING_ADAPTER_AND_WEIGHTS_ARE_VERIFIED"
+  },
+  "legacyRevival": {
+    "snapshotBatch": "4b7faa3f-c6cd-435f-9840-43a04cd090a0",
+    "snapshotRoot": "b0a58be30c8323bf22d57939cd989be6b1631f5dd17a682cd829d0cc6a85e548",
+    "eligibleWallets": 216,
+    "positiveTokenAccounts": 239,
+    "poolTokens": 20000000,
+    "distributionModel": "50% equal unique-wallet share + 50% square-root normalized historical holdings",
+    "currentLedgerTotalTokens": 20000000,
+    "currentClaims": 0,
+    "regenerationLockedUntilGeneratorFixVerified": true
+  },
+  "devCity": {
+    "seats": 100,
+    "poolTokens": 20000000,
+    "tokensPerSeat": 200000,
+    "percentPerSeat": 0.1,
+    "grandfatheredSeats": 50,
+    "newVerifiedDeveloperSlots": 50,
+    "stagingWallet": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
+    "rule": "Existing 50 seats are preserved. New seats require a verified developer identity, accepted participation and a verified Solana wallet before fan-out."
+  },
+  "charityImpact": {
+    "tokens": 20000000,
+    "percent": 10,
+    "stagingWallet": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+    "rule": "Ring-fenced for OneWorldz humanitarian/community impact; not liquidity, team or operating inventory."
+  },
+  "launch": {
+    "engineCandidate": "METEORA_DBC_TO_DAMM_V2",
+    "publicMainnetExecutionEnabled": false,
+    "devnetRequired": true,
+    "permanentLiquidityProtectionRequired": true,
+    "migratedLiquidityTarget": {
+      "creatorClaimablePercent": 0,
+      "partnerClaimablePercent": 0,
+      "creatorPermanentLockedPercent": 60,
+      "partnerPermanentLockedPercent": 40,
+      "totalPermanentLockedPercent": 100
+    }
+  },
+  "gates": {
+    "noSecondReviveMint": true,
+    "canonicalMintMustMatch": true,
+    "allocationMustEqual100Percent": true,
+    "devnetCurveProofRequired": true,
+    "exactFeeMathProofRequired": true,
+    "legacyClaimReadOnlyProofRequired": true,
+    "legacyGeneratorRepairRequiredBeforeResnapshot": true,
+    "teamVestingExecutionProofRequired": true,
+    "distributionWalletFundingPreflightRequired": true,
+    "permanentLockProofRequired": true,
+    "finalOwnerWalletApprovalRequired": true
+  }
+}
