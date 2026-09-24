@@ -1,5 +1,5 @@
 {
-  "version": "WORLDZ-LEGACY-FLYWHEEL-2026-09-24-A",
+  "version": "WORLDZ-LEGACY-FLYWHEEL-2026-09-24-B",
   "status": "PRIVATE_BUILD__DEVNET_REQUIRED__MAINNET_DISABLED",
   "name": "Legacy Flywheel™",
   "purpose": "Use fee revenue from new WorldzLaunchPad launches to create recurring SOL rewards for qualifying holders of the 10 verified PurpleDiamondCrew legacy mints.",
@@ -8,7 +8,7 @@
     "allSupportedWorldzLaunchPadTokens": true,
     "legacyFlywheelPercent": 15,
     "traderFeeIncreaseRequired": false,
-    "rule": "No fee may be routed to the Legacy Flywheel unless Worldz actually controls/receives that fee revenue."
+    "rule": "Legacy Flywheel is part of the disclosed MagicFeeNumber™ allocation. No additional hidden fee is layered on top."
   },
   "controlledFeeSplitPercent": {
     "creator": 51,
@@ -282,5 +282,13 @@
     "Prove roll-forward and cumulative-claim accounting.",
     "Security review the payout/claim adapter.",
     "Mainnet remains disabled until explicit owner approval."
-  ]
+  ],
+  "magicFeeStandard": {
+    "policyPath": "worldzpad-mainnet/fairfee/worldz-magic-fee.v1.json",
+    "targetGrossTraderFeeBps": 75,
+    "targetGrossTraderFeePercent": 0.75,
+    "modeledWorldzControlledPercentOfTrade": 0.6,
+    "effectiveLegacyFlywheelPercentOfTrade": 0.09,
+    "effectivePerLegacyVaultPercentOfTrade": 0.009
+  }
 }
