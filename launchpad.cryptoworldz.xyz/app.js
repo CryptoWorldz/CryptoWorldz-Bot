@@ -7,6 +7,30 @@ const feeColors=['#a74cff','#5d8bff','#38e3b0','#ffd166','#ff759c','#b66cff'];
 let platform=null,walletProvider=null,lastManifest=null;
 const build={chain:'solana',engine:'flash',quote:'SOL'};
 const PUBLIC_REGISTRY_URL='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register';
+const PUBLIC_ASSET_VERSION='20260925-public-readiness-v1';
+
+function showBootDiagnostic(level,title,detail){
+  let box=document.querySelector('#worldz-boot-diagnostic');
+  if(!box){
+    box=document.createElement('section');
+    box.id='worldz-boot-diagnostic';
+    box.setAttribute('role','status');
+    box.style.cssText='margin:16px auto;padding:16px 18px;max-width:1180px;border:1px solid rgba(167,76,255,.55);border-radius:18px;background:#0d0715;color:#f5efff;font:600 14px/1.45 system-ui,sans-serif;position:relative;z-index:20';
+    const main=document.querySelector('main');
+    if(main)main.prepend(box);else document.body.prepend(box);
+  }
+  box.dataset.level=level;
+  box.innerHTML='<strong>'+escapeHtml(title)+'</strong><div style="margin-top:6px;opacity:.82;font-weight:500">'+escapeHtml(detail)+'</div>';
+}
+function lockExecutionUi(reason){
+  document.body.dataset.execution='locked';
+  document.querySelectorAll('#run-preflight,#devnet-launch-link').forEach(el=>{
+    el.setAttribute('aria-disabled','true');
+    if('disabled' in el)el.disabled=true;
+  });
+  showBootDiagnostic('locked','Launch execution safely locked',reason+' Public browsing, technology pages and proof information remain available.');
+}
+
 
 
 function humanKey(k){return String(k).replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());}
@@ -293,10 +317,24 @@ function renderRuntimeStatus(data){
   $('#runtime-notice').textContent='Read-only runtime probe updated '+new Date().toLocaleTimeString()+'. Unknown or protected is never silently treated as green.';
 }
 async function refreshRuntime(){
-  const b=$('#refresh-runtime');b.disabled=true;b.textContent='Checking…';
-  try{const r=await fetch('/status.php?ts='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error();renderRuntimeStatus(await r.json());}
-  catch{['#zed-dot','#auto-dot','#grace-dot'].forEach(x=>setDot(x,'degraded'));$('#runtime-notice').textContent='Runtime status unavailable. Treated as unknown, not green.';}
-  finally{b.disabled=false;b.textContent='Refresh Runtime';}
+  const b=$('#refresh-runtime');
+  if(!b)return;
+  b.disabled=true;b.textContent='Checking live status…';
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),12000);
+  try{
+    const r=await fetch('/status.php?ts='+Date.now(),{cache:'no-store',signal:controller.signal});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    renderRuntimeStatus(await r.json());
+  }catch(e){
+    ['#zed-dot','#auto-dot','#grace-dot'].forEach(x=>setDot(x,'degraded'));
+    const notice=$('#runtime-notice');
+    if(notice)notice.textContent=(e&&e.name==='AbortError')
+      ?'Runtime probe timed out after 12 seconds. Status is unknown, never silently green.'
+      :'Runtime status unavailable. Treated as unknown, not green.';
+  }finally{
+    clearTimeout(timer);b.disabled=false;b.textContent='Refresh Runtime';
+  }
 }
 function bind(){
   $$('.next-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.next)));
@@ -312,25 +350,53 @@ function bind(){
 }
 async function boot(){
   try{
-    const r=await fetch('/platform-config.json?v=20260921-public-v9',{cache:'no-store'});
-    if(!r.ok)throw new Error('Platform configuration unavailable');
+    const r=await fetch('/platform-config.json?v='+PUBLIC_ASSET_VERSION,{cache:'no-store'});
+    if(!r.ok)throw new Error('Platform configuration unavailable • HTTP '+r.status);
     platform=await r.json();
-    if(platform.publicLaunchPad!==true||platform.publicLaunchIntakeEnabled!==true)throw new Error('Public LaunchPad contract mismatch');
-    if(platform.feePolicy?.projectTradingFeeMaxPercent!==3||platform.feePolicy?.worldzLaunchPadShareOfCollectedProjectFeePercent!==10||platform.feePolicy?.platformShareCapPercentOfCollectedProjectFee!==10)throw new Error('10% fee-only contract mismatch');
-    if(platform.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent!==0||platform.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent!==0||platform.feePolicy?.walletTransferTaxPercent!==0)throw new Error('Worldz zero-supply/liquidity/transfer-tax contract mismatch');
+
     const p=platform.safeLaunchPolicy;
-    if(!p||p.version!=='WORLDZ-SAFE-LAUNCH-1'||p.compulsory.fixedSupply!==true||p.compulsory.revokeMintAuthorityAfterGenesis!==true||p.compulsory.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('Safe Launch Standard contract mismatch');
-    if(platform.baseEvmFair?.status!=='BASE_SEPOLIA_BETA'||platform.baseEvmFair?.mainnetExecution!==false)throw new Error('Base testnet adapter contract mismatch');
-    if(platform.founding100?.totalPositions!==100||platform.founding100?.futureWorldzPoolPercent!==10||platform.founding100?.equalAllocationPerQualifiedPositionPercent!==0.1)throw new Error('Founding 100 contract mismatch');
-    if(platform.trustOrbit?.version!=='WORLDZ-TRUST-ORBIT-1'||platform.trustOrbit?.status!=='PUBLIC_BETA_LIVE'||platform.trustOrbit?.jupiterIntegration?.officialJupiterEndorsement!==false)throw new Error('Trust Orbit contract mismatch');
-    if(platform.worldzMint?.version!=='WORLDZMINT-1'||platform.worldzMint?.platformTokenSupplyTakePercent!==0||platform.worldzMint?.compulsory?.revokeMintAuthorityAfterGenesis!==true||platform.worldzMint?.compulsory?.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('WorldzMINT contract mismatch');
-    if(platform.confidenceCurve?.version!=='WORLDZ-CONFIDENCE-CURVE-1'||platform.confidenceCurve?.mainnetExecutionEnabled!==false||platform.confidenceCurve?.feePolicy?.worldzSharePercentOfCollectedSupportedProjectTradingFee!==10)throw new Error('Confidence Curve contract mismatch');
-    if(platform.confidencePulse?.version!=='WORLDZ-CONFIDENCE-PULSE-1'||platform.confidencePulse?.systemTradesCountTowardConfidence!==false)throw new Error('Confidence Pulse contract mismatch');
-    if(platform.confidenceConstellation?.version!=='WORLDZ-CONFIDENCE-CONSTELLATION-1'||platform.confidenceConstellation?.opaqueSafetyScore!==false)throw new Error('Confidence Constellation contract mismatch');
+    const critical=[
+      ['Public LaunchPad',platform.publicLaunchPad===true&&platform.publicLaunchIntakeEnabled===true],
+      ['Fee-only contract',
+        platform.feePolicy?.projectTradingFeeMaxPercent===3&&
+        platform.feePolicy?.worldzLaunchPadShareOfCollectedProjectFeePercent===10&&
+        platform.feePolicy?.platformShareCapPercentOfCollectedProjectFee===10&&
+        platform.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent===0&&
+        platform.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent===0&&
+        platform.feePolicy?.walletTransferTaxPercent===0
+      ],
+      ['Safe Launch core',
+        p?.version==='WORLDZ-SAFE-LAUNCH-1'&&
+        p?.compulsory?.fixedSupply===true&&
+        p?.compulsory?.revokeMintAuthorityAfterGenesis===true&&
+        p?.compulsory?.revokeFreezeAuthorityAfterGenesis===true
+      ],
+    ];
+    const criticalFailures=critical.filter(([,ok])=>!ok).map(([name])=>name);
+    if(criticalFailures.length){
+      throw new Error('Critical execution contract failed: '+criticalFailures.join(', '));
+    }
+
+    const optional=[
+      ['Base Sepolia adapter',platform.baseEvmFair?.status==='BASE_SEPOLIA_BETA'&&platform.baseEvmFair?.mainnetExecution===false],
+      ['Founding 100',platform.founding100?.totalPositions===100&&platform.founding100?.futureWorldzPoolPercent===10&&platform.founding100?.equalAllocationPerQualifiedPositionPercent===0.1],
+      ['Trust Orbit',platform.trustOrbit?.version==='WORLDZ-TRUST-ORBIT-1'&&platform.trustOrbit?.jupiterIntegration?.officialJupiterEndorsement===false],
+      ['WorldzMINT',platform.worldzMint?.version==='WORLDZMINT-1'&&platform.worldzMint?.platformTokenSupplyTakePercent===0],
+      ['Confidence Curve',platform.confidenceCurve?.version==='WORLDZ-CONFIDENCE-CURVE-1'&&platform.confidenceCurve?.mainnetExecutionEnabled===false],
+      ['Confidence Pulse',platform.confidencePulse?.version==='WORLDZ-CONFIDENCE-PULSE-1'&&platform.confidencePulse?.systemTradesCountTowardConfidence===false],
+      ['Confidence Constellation',platform.confidenceConstellation?.version==='WORLDZ-CONFIDENCE-CONSTELLATION-1'&&platform.confidenceConstellation?.opaqueSafetyScore===false],
+    ];
+    const warnings=optional.filter(([,ok])=>!ok).map(([name])=>name);
+
     bind();feeMath();renderProof();renderMarket();refreshRuntime();
+    document.body.dataset.boot='ready';
+    if(warnings.length){
+      showBootDiagnostic('warning','LaunchPad loaded with non-execution warnings','Needs review: '+warnings.join(', ')+'. Execution safety rules remain enforced.');
+    }
   }catch(e){
-    console.error(e);document.body.dataset.boot='failed';
-    alert('WorldzLaunchPad refused to initialize because its public launch configuration did not pass fail-closed checks.');
+    console.error(e);
+    document.body.dataset.boot='restricted';
+    lockExecutionUi(e?.message||'Public launch configuration did not pass critical checks.');
   }
 }
 boot();
