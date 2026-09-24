@@ -58,7 +58,7 @@ jobs:
         run: |
           mkdir -p artifacts
           "$HOME/.local/bin/sui" move build --path template
-          "$HOME/.local/bin/sui" move build --path template --dump-bytecode-as-base64 > artifacts/template-bytecode.json
+          "$HOME/.local/bin/sui" move build --path template --dump-bytecode-as-base64 --no-tree-shaking > artifacts/template-bytecode.json
           node -e 'const x=require("./artifacts/template-bytecode.json"); if(!Array.isArray(x.modules)||!x.modules.length||!Array.isArray(x.dependencies)||!x.dependencies.length) process.exit(1); console.log("SUI_BYTECODE_COMPILE=PASS modules="+x.modules.length+" dependencies="+x.dependencies.length)'
       - name: Emit exact tested browser bytecode
         shell: bash
@@ -98,7 +98,7 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"
           suiup install sui@testnet --yes
           mkdir -p artifacts
-          sui move build --path template --dump-bytecode-as-base64 > artifacts/template-bytecode.json
+          sui move build --path template --dump-bytecode-as-base64 --no-tree-shaking > artifacts/template-bytecode.json
       - name: Publish immutable package and create fixed-supply proof currency
         run: npm run publish-proof
       - name: Print on-chain proof
