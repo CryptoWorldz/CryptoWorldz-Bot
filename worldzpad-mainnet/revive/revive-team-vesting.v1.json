@@ -1,0 +1,30 @@
+{
+  "version": "REVIVE-TEAM-VESTING-2026-09-24-A",
+  "totalTokens": 30000000,
+  "totalPercent": 15,
+  "immediateUnlockPercent": 0,
+  "cliffDays": 90,
+  "linearVestingMonths": 24,
+  "cadence": "monthly",
+  "rosterStatus": "BENEFICIARY_WEIGHTS_PENDING",
+  "knownTeam": [
+    {
+      "name": "Stepper",
+      "wallet": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ"
+    },
+    {
+      "name": "Remedy",
+      "wallet": "5fFVkQuo4pnCpWhD8hx2uiFEtkBcnW3QdDUt1w2BzB71"
+    },
+    {
+      "name": "Remedy Save",
+      "wallet": "43T8jncT5pJFo1TNenHdt6NSaPieic3iuHLQnYLLgeWy"
+    }
+  ],
+  "rules": [
+    "All beneficiary weights must sum to 100% of the 30M team pool before execution.",
+    "No unvested team allocation may be transferred to a liquid personal wallet.",
+    "Vesting adapter/program must be verified on devnet before mainnet.",
+    "Unassigned team tokens remain in the treasury-controlled team pool."
+  ]
+}
