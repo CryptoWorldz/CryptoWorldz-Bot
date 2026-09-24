@@ -6,6 +6,21 @@ const fmt=n=>new Intl.NumberFormat('en-AU',{maximumFractionDigits:4}).format(Num
 const feeColors=['#a74cff','#5d8bff','#38e3b0','#ffd166','#ff759c','#b66cff'];
 let platform=null,walletProvider=null,lastManifest=null;
 const build={chain:'solana',engine:'flash',quote:'SOL'};
+const EVM_TESTNETS={
+  ethereum:'ethereum-sepolia',
+  base:'base-sepolia',
+  bnb:'bsc-testnet',
+  robinhood:'robinhood-testnet',
+  hyper:'hyperevm-testnet'
+};
+const EVM_LABELS={
+  ethereum:'Ethereum Sepolia',
+  base:'Base Sepolia',
+  bnb:'BNB Smart Chain Testnet',
+  robinhood:'Robinhood Chain Testnet',
+  hyper:'HyperEVM Testnet'
+};
+const EVM_NATIVE_QUOTES={ethereum:'ETH',base:'ETH',bnb:'tBNB',robinhood:'ETH',hyper:'HYPE'};
 const PUBLIC_REGISTRY_URL='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register';
 const PUBLIC_ASSET_VERSION='20260925-public-readiness-v1';
 
@@ -48,17 +63,17 @@ function markChoice(selector,dataKey,value){
 }
 function selectChain(el,chain){
   selectChoice('#chain-grid',el,'chain',chain);
-  if(chain==='base'){
-    build.engine='evm-fixed';build.quote='ETH';
+  if(EVM_TESTNETS[chain]){
+    build.engine='evm-fixed';build.quote=EVM_NATIVE_QUOTES[chain];
     markChoice('#engine-grid .choice','engine','evm-fixed');
-    markChoice('.quote','quote','ETH');
+    $('.quote').forEach(x=>x.classList.toggle('selected',x.dataset.quote===build.quote));
     $('#wxrp-proof').classList.remove('show');
     $('#build-decimals').value='18';
     const creator=$('[data-allocation="creatorTeam"]'),growth=$('[data-allocation="growthEcosystem"]');
     if(Number(creator.value)>5){const delta=Number(creator.value)-5;creator.value='5';growth.value=String((Number(growth.value)||0)+delta);}
   }else if(chain==='solana'){
     if(build.engine==='evm-fixed'){build.engine='flash';markChoice('#engine-grid .choice','engine','flash');}
-    if(build.quote==='ETH'){build.quote='SOL';markChoice('.quote','quote','SOL');}
+    build.quote='SOL';markChoice('.quote','quote','SOL');
     if(Number($('#build-decimals').value)===18)$('#build-decimals').value='9';
   }
   feeMath();
@@ -210,7 +225,7 @@ function manifestBase(){
       blacklistOrSellRestrictionAllowed:false
     },
     execution:{
-      requestedEnvironment:build.chain==='base'?'base-sepolia':'devnet',
+      requestedEnvironment:EVM_TESTNETS[build.chain]||'devnet',
       custody:'self-custody',
       simulateBeforeSign:true,
       publicMainnetCreatorLaunch:false
@@ -225,17 +240,18 @@ async function runPreflight(){
   const m=manifestBase(),routes=Object.values(m.feePolicy.projectDistributionPercent).reduce((a,b)=>a+b,0);
   const alloc=m.supplyAllocationPercent,allocTotal=Object.values(alloc).reduce((a,b)=>a+b,0),r=m.feePolicy.projectDistributionPercent,p=platform.safeLaunchPolicy;
   const solanaAdapter=m.network==='solana'&&['flash','curve','curve-pro'].includes(m.launchEngine);
-  const baseAdapter=m.network==='base'&&m.launchEngine==='evm-fixed';
-  const adapterReady=solanaAdapter||baseAdapter;
-  const quoteReady=baseAdapter?m.quoteAsset==='ETH':(m.launchEngine==='flash'||m.quoteAsset==='SOL');
-  const decimalsReady=baseAdapter?m.token.decimals===18:(m.launchEngine==='flash'||m.token.decimals===6);
-  const creatorCap=baseAdapter?5:p.allocations.creatorTeamMaxPercent;
+  const evmTarget=EVM_TESTNETS[m.network]||null;
+  const evmAdapter=!!evmTarget&&m.launchEngine==='evm-fixed';
+  const adapterReady=solanaAdapter||evmAdapter;
+  const quoteReady=evmAdapter?true:(m.launchEngine==='flash'||m.quoteAsset==='SOL');
+  const decimalsReady=evmAdapter?m.token.decimals===18:(m.launchEngine==='flash'||m.token.decimals===6);
+  const creatorCap=evmAdapter?5:p.allocations.creatorTeamMaxPercent;
   const checks=[
     ['Chain selected',!!m.network,m.network],
-    ['Executable public test adapter',adapterReady,baseAdapter?'Base Sepolia • Worldz EVM Fair':solanaAdapter?'Solana Devnet • '+m.launchEngine:'Adapter not enabled yet'],
-    ['Quote supported by selected test engine',quoteReady,baseAdapter?'ETH required on Base Sepolia':m.launchEngine==='flash'?m.quoteAsset+' • Flash disclosure rules':m.quoteAsset==='SOL'?'SOL supported':'Curve / Curve Pro Devnet currently require SOL'],
+    ['Executable public test adapter',adapterReady,evmAdapter?(EVM_LABELS[m.network]+' • Worldz EVM Mint'):solanaAdapter?'Solana Devnet • '+m.launchEngine:'Adapter not enabled yet'],
+    ['Quote supported by selected test engine',quoteReady,evmAdapter?'Fixed-supply EVM test mint does not create a market pair':m.launchEngine==='flash'?m.quoteAsset+' • Flash disclosure rules':m.quoteAsset==='SOL'?'SOL supported':'Curve / Curve Pro Devnet currently require SOL'],
     ['Engine fee contract',m.launchEngine!=='curve'||m.feePolicy.projectTradingFeePercent===2,m.launchEngine==='curve'?'Worldz Curve Devnet beta requires 2.00%':'0.50–3.00% configured project fee'],
-    ['Engine decimals contract',decimalsReady,baseAdapter?'Base EVM Fair v1 requires 18 decimals':m.launchEngine==='flash'?String(m.token.decimals):'Curve / Curve Pro Devnet beta require 6 decimals'],
+    ['Engine decimals contract',decimalsReady,evmAdapter?'EVM fixed-supply template requires 18 decimals':m.launchEngine==='flash'?String(m.token.decimals):'Curve / Curve Pro Devnet beta require 6 decimals'],
     ['Raydium Curve preset supply',m.launchEngine!=='curve'||m.token.fixedSupply===1000000000,m.launchEngine==='curve'?'1,000,000,000 required by current reviewed GlobalConfig':'Not applicable'],
     ['Launch engine selected',!!m.launchEngine,m.launchEngine],
     ['Token name',m.token.name.length>=2,m.token.name||'Missing'],
@@ -246,7 +262,7 @@ async function runPreflight(){
     ['Decimals',Number.isInteger(m.token.decimals)&&m.token.decimals>=p.token.decimalsMin&&m.token.decimals<=p.token.decimalsMax,String(m.token.decimals)],
     ['Genesis allocations = 100%',Math.abs(allocTotal-100)<.001,allocTotal.toFixed(0)+'%'],
     ['Allocation values valid',Object.values(alloc).every(v=>Number.isFinite(v)&&v>=0&&v<=100),'No negative or >100% allocation'],
-    ['Creator/team allocation cap',alloc.creatorTeam>=0&&alloc.creatorTeam<=creatorCap,alloc.creatorTeam.toFixed(1)+'% / max '+creatorCap+'%'+(baseAdapter?' (Base v1 has no vesting adapter yet)':'')],
+    ['Creator/team allocation cap',alloc.creatorTeam>=0&&alloc.creatorTeam<=creatorCap,alloc.creatorTeam.toFixed(1)+'% / max '+creatorCap+'%'+(evmAdapter?' (EVM testnet template has no vesting adapter yet)':'')],
     ['Creator liquid-at-genesis cap',m.safetyPolicy.creatorUnlockedAtGenesisPercent>=0&&m.safetyPolicy.creatorUnlockedAtGenesisPercent<=p.allocations.creatorTeamUnlockedAtGenesisMaxPercent&&m.safetyPolicy.creatorUnlockedAtGenesisPercent<=alloc.creatorTeam,m.safetyPolicy.creatorUnlockedAtGenesisPercent.toFixed(1)+'% / max '+Math.min(p.allocations.creatorTeamUnlockedAtGenesisMaxPercent,alloc.creatorTeam)+'%'],
     ['Liquidity allocation range',alloc.liquidity>=p.allocations.liquidityMinPercent&&alloc.liquidity<=p.allocations.liquidityMaxPercent,alloc.liquidity.toFixed(1)+'%'],
     ['Community/public minimum',alloc.communityPublic>=p.allocations.communityPublicMinPercent,alloc.communityPublic.toFixed(1)+'% / min '+p.allocations.communityPublicMinPercent+'%'],
@@ -276,9 +292,15 @@ async function runPreflight(){
   if(all&&adapterReady){
     const route=m.feePolicy.projectDistributionPercent,alloc=m.supplyAllocationPercent,sp=m.safetyPolicy;
     const q=new URLSearchParams({name:m.token.name,symbol:m.token.symbol,supply:String(m.token.fixedSupply),decimals:String(m.token.decimals),fixed:'1',description:m.token.description||'',engine:m.launchEngine,quote:m.quoteAsset,fee:String(m.feePolicy.projectTradingFeePercent),intent:hash,route_creator:String(route.creator||0),route_holders:String(route.holders||0),route_lp:String(route.lp||0),route_treasury:String(route.treasury||0),route_community:String(route.community||0),alloc_creatorTeam:String(alloc.creatorTeam||0),alloc_liquidity:String(alloc.liquidity||0),alloc_communityPublic:String(alloc.communityPublic||0),alloc_treasuryReserve:String(alloc.treasuryReserve||0),alloc_growthEcosystem:String(alloc.growthEcosystem||0),creator_unlocked:String(sp.creatorUnlockedAtGenesisPercent),founder_cliff:String(sp.founderCliffDays),founder_vesting:String(sp.founderVestingMonths),lp_lock_days:String(sp.lpLockDays),multisig:sp.treasuryProgramMultisigAddress});
-    const routeBase=baseAdapter?'/base/':m.launchEngine==='curve'?'/curve/':m.launchEngine==='curve-pro'?'/curve-pro/':'/devnet/';
-    link.href=routeBase+'?'+q.toString();link.classList.remove('disabled-link');link.setAttribute('aria-disabled','false');
-    link.textContent=baseAdapter?'Open Base Sepolia Lab →':m.launchEngine==='curve'?'Open Worldz Curve Devnet →':m.launchEngine==='curve-pro'?'Open Curve Pro Devnet →':'Open Flash Devnet Launch →';
+    if(evmAdapter){
+      link.href='/evm/?network='+encodeURIComponent(evmTarget)+'&'+q.toString();
+      link.textContent='Open '+EVM_LABELS[m.network]+' Launch Lab →';
+    }else{
+      const routeBase=m.launchEngine==='curve'?'/curve/':m.launchEngine==='curve-pro'?'/curve-pro/':'/devnet/';
+      link.href=routeBase+'?'+q.toString();
+      link.textContent=m.launchEngine==='curve'?'Open Worldz Curve Devnet →':m.launchEngine==='curve-pro'?'Open Curve Pro Devnet →':'Open Flash Devnet Launch →';
+    }
+    link.classList.remove('disabled-link');link.setAttribute('aria-disabled','false');
   }else{link.href='#';link.classList.add('disabled-link');link.setAttribute('aria-disabled','true');link.textContent='Executable Adapter Not Ready';}
   return all;
 }
@@ -289,7 +311,7 @@ function downloadManifest(){
 }
 function getWalletProvider(){return [window.phantom&&window.phantom.solana,window.solflare,window.solana].filter(Boolean).find(p=>typeof p.connect==='function')||null;}
 async function connectWallet(){
-  if(build.chain==='base'){
+  if(EVM_TESTNETS[build.chain]){
     if(!window.ethereum){alert('No EVM wallet detected. Open in Coinbase Wallet / MetaMask or another EIP-1193 wallet.');return;}
     try{
       const accounts=await window.ethereum.request({method:'eth_requestAccounts'});
