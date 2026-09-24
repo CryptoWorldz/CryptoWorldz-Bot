@@ -1,6 +1,9 @@
 import fs from 'node:fs';
 
 const move=fs.readFileSync('template/sources/worldz_token.move','utf8');
+const executableMove=move
+  .replace(/\/\/.*$/gm,'')
+  .replace(/\/\*[\s\S]*?\*\//g,'');
 const required=[
   'coin_registry::new_currency<WorldzToken>',
   'currency.make_supply_fixed(treasury_cap)',
@@ -20,7 +23,7 @@ for(const forbidden of [
   'blacklist',
   'pause',
 ]){
-  if(move.toLowerCase().includes(forbidden.toLowerCase()))throw new Error('forbidden token control: '+forbidden);
+  if(executableMove.toLowerCase().includes(forbidden.toLowerCase()))throw new Error('forbidden token control: '+forbidden);
 }
 const proof={
   proof:'WORLDZ_SUI_NATIVE_TEMPLATE_STATIC',
