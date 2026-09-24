@@ -75,6 +75,8 @@ jobs:
         run: npm run static-proof
       - name: Static partner router + six-hour HODLer settlement proof
         run: npm run stage-b-static
+      - name: Deterministic six-hour Legacy epoch proof
+        run: npm run legacy-epoch-proof
       - name: Static Legacy router program contract proof
         run: npm run router-static
       - name: Compile-check Legacy router Rust program
@@ -125,5 +127,34 @@ jobs:
             worldzpad-devnet/revive-party/artifacts/revive-stage-b-static-proof.json
             worldzpad-devnet/revive-party/artifacts/revive-router-program-static-proof.json
             worldzpad-devnet/revive-party/artifacts/revive-dbc-devnet-proof.json
+            worldzpad-devnet/revive-party/artifacts/revive-dbc-devnet-verified.json
+          if-no-files-found: error
+          retention-days: 30
+
+
+  legacy-live-boundary:
+    if: github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    env:
+      LEGACY_READ_RPC_URL: ${{ secrets.LEGACY_READ_RPC_URL }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/revive-party
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned SDKs
+        run: npm install --no-audit --no-fund
+      - name: Capture one read-only mainnet Legacy holder boundary
+        run: npm run legacy-live-snapshot
+      - name: Publish holder-boundary evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: revive-legacy-live-boundary
+          path: worldzpad-devnet/revive-party/artifacts/legacy-live-boundary-snapshot.json
           if-no-files-found: error
           retention-days: 30
