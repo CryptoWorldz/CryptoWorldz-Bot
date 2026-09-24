@@ -97,17 +97,17 @@ jobs:
         run: |
           import concurrent.futures,time,urllib.request
           expected={
-            'https://solworldz.xyz/':('SolWorldz','SOLANA, BUILT THE WORLDZ WAY.'),
-            'https://ethworldz.xyz/':('EthWorldz','ETHEREUM LAUNCHES, WITHOUT THE FOG.'),
-            'https://baseworldz.xyz/':('BaseWorldz','BUILD ON BASE. PROVE IT FIRST.'),
-            'https://bnbworldz.xyz/':('BNBWorldz','BNB CHAIN, MEET WORLDZLAUNCHPAD™.'),
-            'https://xrpworldz.xyz/':('XRPWorldz','XRP NATIVE. WORLDZ CONNECTED.'),
-            'https://suiworldz.xyz/':('SuiWorldz','SUI DESERVES A NATIVE ADAPTER.'),
-            'https://hyperworldz.xyz/':('HyperWorldz','HYPEREVM SPEED. WORLDZ DISCIPLINE.'),
-            'https://robinworldz.xyz/':('RobinWorldz','ROBINHOOD CHAIN, OPEN THE WORLDZ GATE.'),
+            'https://solworldz.xyz/':('SolWorldz','https://launchpad.cryptoworldz.xyz/devnet/'),
+            'https://ethworldz.xyz/':('EthWorldz','network=ethereum-sepolia'),
+            'https://baseworldz.xyz/':('BaseWorldz','https://launchpad.cryptoworldz.xyz/base/'),
+            'https://bnbworldz.xyz/':('BNBWorldz','network=bsc-testnet'),
+            'https://xrpworldz.xyz/':('XRPWorldz','https://launchpad.cryptoworldz.xyz/xrpl/'),
+            'https://suiworldz.xyz/':('SuiWorldz','https://launchpad.cryptoworldz.xyz/omnichain/'),
+            'https://hyperworldz.xyz/':('HyperWorldz','network=hyperevm-testnet'),
+            'https://robinworldz.xyz/':('RobinWorldz','network=robinhood-testnet'),
           }
           def check(item):
-              url,(name,headline)=item
+              url,(name,route)=item
               last=''
               for attempt in range(1,6):
                   try:
@@ -120,7 +120,7 @@ jobs:
                           body=r.read().decode('utf-8','ignore')
                           ok=(r.status==200 and
                               'data-build="2026-09-24-chain-launch-gateway-v1"' in body and
-                              name in body and headline in body and
+                              name in body and route in body and
                               'src="/hero.jpg"' in body and
                               '/style.css' not in body)
                           if ok:return url,True,''
