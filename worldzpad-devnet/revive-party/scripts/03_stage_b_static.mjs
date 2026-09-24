@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import { Keypair } from '@solana/web3.js';
 import { LEGACY_MINTS } from './common.mjs';
 import { cumulativePartnerEntitlements, deltaPartnerEntitlements, modelGrossFee } from './router_math.mjs';
-import { EPOCH_SECONDS, settleLegacyEpoch } from './holder_epoch.mjs';
+import { EPOCH_SECONDS, calculateEpoch } from './legacy_epoch_engine.mjs';
 
 const policyPath=path.resolve('../../worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json');
 const policy=JSON.parse(fs.readFileSync(policyPath,'utf8'));
@@ -35,44 +35,59 @@ function wallet(label){
   const seed=crypto.createHash('sha256').update('WORLDZ_HOLDER_FIXTURE_'+label).digest().subarray(0,32);
   return Keypair.fromSeed(seed).publicKey.toBase58();
 }
-const start=1_800_000_000;
+
+const startsAtUnix=1_800_000_000;
 const epochReports=[];
 policy.assets.forEach((asset,index)=>{
   const min=BigInt(asset.minimumRaw);
   const a=wallet(asset.symbol+'_'+index+'_A');
   const b=wallet(asset.symbol+'_'+index+'_B');
-  const c=wallet(asset.symbol+'_'+index+'_DROP');
+  const drop=wallet(asset.symbol+'_'+index+'_DROP');
   const system=wallet(asset.symbol+'_'+index+'_SYSTEM');
-  const report=settleLegacyEpoch({
-    startsAtUnix:start,
-    endsAtUnix:start+EPOCH_SECONDS,
-    fundedLamports:90_000n,
-    minimumBalanceRaw:min,
+
+  const report=calculateEpoch({
+    startsAtUnix,
+    endsAtUnix:startsAtUnix+EPOCH_SECONDS,
+    fundedLamports:90_001n, // deliberately creates rounding dust in many fixtures
+    minimumRaw:min,
     excludedWallets:[system],
-    holders:[
-      {wallet:a,startBalanceRaw:min,endBalanceRaw:min},
-      {wallet:b,startBalanceRaw:min*9n,endBalanceRaw:min*9n},
-      {wallet:c,startBalanceRaw:min*2n,endBalanceRaw:min-1n},
-      {wallet:system,startBalanceRaw:min*100n,endBalanceRaw:min*100n,system:true},
-    ]
+    startBalances:{
+      [a]:min.toString(),
+      [b]:(min*9n).toString(),
+      [drop]:(min*2n).toString(),
+      [system]:(min*100n).toString(),
+    },
+    endBalances:{
+      [a]:min.toString(),
+      [b]:(min*9n).toString(),
+      [drop]:(min-1n).toString(),
+      [system]:(min*100n).toString(),
+    },
   });
-  if(report.eligible.length!==2)throw new Error(asset.symbol+' eligibility mismatch');
-  if(report.rewards[b].amountLamports<=report.rewards[a].amountLamports)throw new Error(asset.symbol+' sqrt Equalizer mismatch');
-  const paid=Object.values(report.rewards).reduce((s,r)=>s+r.amountLamports,0n);
-  if(paid+report.carryLamports!==90_000n)throw new Error(asset.symbol+' epoch reconciliation failed');
+
+  if(report.eligibleWallets!==2)throw new Error(asset.symbol+' eligibility mismatch');
+  if(report.entitlements.some(x=>x.wallet===drop||x.wallet===system))throw new Error(asset.symbol+' excluded/ineligible wallet leaked');
+  const aReward=report.entitlements.find(x=>x.wallet===a);
+  const bReward=report.entitlements.find(x=>x.wallet===b);
+  if(!aReward||!bReward)throw new Error(asset.symbol+' eligible wallet missing');
+  if(BigInt(bReward.rewardLamports)<=BigInt(aReward.rewardLamports))throw new Error(asset.symbol+' sqrt Equalizer mismatch');
+
+  const funded=BigInt(report.fundedLamports);
+  const allocated=BigInt(report.allocatedLamports);
+  const carry=BigInt(report.roundingCarryLamports);
+  if(allocated+carry!==funded)throw new Error(asset.symbol+' epoch reconciliation failed');
+  if(carry<0n)throw new Error(asset.symbol+' negative rounding carry');
+
   epochReports.push({
-    order:asset.order,symbol:asset.symbol,mint:asset.mint,
+    order:asset.order,
+    symbol:asset.symbol,
+    mint:asset.mint,
     minimumRaw:asset.minimumRaw,
-    fundedLamports:'90000',
-    eligibleWallets:report.eligible,
-    rewards:Object.fromEntries(Object.entries(report.rewards).map(([k,v])=>[k,{
-      amountLamports:v.amountLamports.toString(),
-      equalLamports:v.equalLamports.toString(),
-      sqrtLamports:v.sqrtLamports.toString(),
-      qualifyingBalanceRaw:v.qualifyingBalanceRaw.toString(),
-      sqrtWeight:v.sqrtWeight.toString(),
-    }])),
-    carryLamports:report.carryLamports.toString(),
+    fundedLamports:report.fundedLamports,
+    eligibleWallets:report.eligibleWallets,
+    entitlements:report.entitlements,
+    allocatedLamports:report.allocatedLamports,
+    roundingCarryLamports:report.roundingCarryLamports,
   });
 });
 
@@ -84,16 +99,18 @@ const out={
     denominator:'490',
     exact490k:Object.fromEntries(Object.entries(exact.entitlements).map(([k,v])=>[k,v.toString()])),
     carryLamports:exact.carryLamports.toString(),
-    rule:'cumulative entitlement deltas prevent long-run rounding drift; remainder stays in router carry',
+    rule:'cumulative entitlement deltas prevent long-run router rounding drift; remainder stays in router carry',
   },
   holderEpoch:{
+    engine:'legacy_epoch_engine.mjs',
     seconds:EPOCH_SECONDS,
     split:'50% equal + 50% integer-sqrt weight',
-    boundaryRule:'qualifying balance = min(start,end)',
+    boundaryRule:'qualifying balance = min(start,end), and both boundaries must meet the minimum',
+    roundingRule:'floor wallet entitlements to lamports; rounding dust remains in the legacy vault and rolls forward',
     reports:epochReports,
   },
   mainnetExecution:false,
 };
 fs.mkdirSync('artifacts',{recursive:true});
 fs.writeFileSync('artifacts/revive-stage-b-static-proof.json',JSON.stringify(out,null,2)+'\n');
-console.log('REVIVE_STAGE_B_STATIC=PASS partner_weights=170/15x10/85/85 epoch=21600 holder_weight=50_equal_50_sqrt assets=10');
+console.log('REVIVE_STAGE_B_STATIC=PASS partner_weights=170/15x10/85/85 epoch=21600 holder_weight=50_equal_50_sqrt assets=10 unbiased_rounding_carry=ON');
