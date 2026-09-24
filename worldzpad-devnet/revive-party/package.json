@@ -15,7 +15,9 @@
     "legacy-live-snapshot": "node scripts/04_legacy_live_scanner.mjs",
     "router-static": "node scripts/04_router_program_static.mjs",
     "legacy-authority-audit": "node scripts/05_legacy_authority_audit.mjs",
-    "direct-damm-static": "node scripts/06_direct_damm_v2_static.mjs"
+    "direct-damm-static": "node scripts/06_direct_damm_v2_static.mjs",
+    "direct-damm-devnet": "node scripts/07_direct_damm_v2_devnet.mjs",
+    "verify-direct-damm": "node scripts/08_verify_direct_damm_v2.mjs"
   },
   "dependencies": {
     "@meteora-ag/dynamic-bonding-curve-sdk": "1.5.12",
