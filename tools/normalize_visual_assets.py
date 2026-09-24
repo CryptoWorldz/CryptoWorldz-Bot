@@ -100,6 +100,9 @@ def normalize_site(host: str):
     styled = 0
     for p in site.rglob('*.html'):
         text = p.read_text(encoding='utf-8')
+        chain_gateway = p == site/'index.html' and 'data-build="2026-09-24-chain-launch-gateway-v1"' in text
+        if chain_gateway:
+            continue
         if '/style.css' not in text:
             link = '<link rel="stylesheet" href="/style.css">'
             if '</head>' not in text:
@@ -121,10 +124,16 @@ for host in DOMAINS:
 # Final hard contract across every public HTML file.
 pages = 0
 for host in DOMAINS:
-    for p in (ROOT / host).rglob('*.html'):
+    site = ROOT / host
+    for p in site.rglob('*.html'):
         t = p.read_text(encoding='utf-8')
-        assert '/style.css' in t, p
-        assert '/mobile-safe.css' in t, p
+        chain_gateway = p == site/'index.html' and 'data-build="2026-09-24-chain-launch-gateway-v1"' in t
+        if chain_gateway:
+            assert '<style>' in t, p
+            assert '/style.css' not in t, p
+        else:
+            assert '/style.css' in t, p
+            assert '/mobile-safe.css' in t, p
         pages += 1
 
 print(f'VISUAL_NORMALIZE=PASS sites=18 pages={pages} renamed_images={total_renamed} updated_text_files={total_refs} restored_core_style_pages={total_styled} dead_css_assets_removed={total_dead_css}')
