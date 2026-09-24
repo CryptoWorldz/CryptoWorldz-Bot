@@ -1,17 +1,39 @@
 #!/usr/bin/env python3
 import json
+from decimal import Decimal, ROUND_CEILING
 from pathlib import Path
-from decimal import Decimal
 
 repo = Path(__file__).resolve().parents[1]
 policy = json.loads((repo / "worldzpad-mainnet" / "legacy-flywheel" / "worldz-legacy-flywheel.v1.json").read_text())
+magic = json.loads((repo / "worldzpad-mainnet" / "fairfee" / "worldz-magic-fee.v1.json").read_text())
 revive = json.loads((repo / "worldzpad-mainnet" / "revive" / "revive-dbc-fairfee.v1.json").read_text())
 pdc_data = json.loads((repo / "purplediamondcrew.com" / "legacy-flywheel.v1.json").read_text())
-pdc_page = (repo / "purplediamondcrew.com" / "hodlerz-special" / "index.html").read_text()\nmagic = json.loads((repo / "worldzpad-mainnet" / "fairfee" / "worldz-magic-fee.v1.json").read_text())
+pdc_page = (repo / "purplediamondcrew.com" / "hodlerz-special" / "index.html").read_text()
 
+# Platform fee standard.
+assert magic["target"]["grossTraderFeeBps"] == 75
+assert Decimal(str(magic["target"]["grossTraderFeePercent"])) == Decimal("0.75")
+assert magic["target"]["dynamicFeeDefault"] is False
+assert magic["meteoraDbcModel"]["creatorTradingFeePercentage"] == 51
+assert magic["meteoraDbcModel"]["partnerTradingFeePercentage"] == 49
+assert magic["partnerRouter"]["weights"] == {
+    "referrer": 170,
+    "legacyFlywheel": 150,
+    "worldzLaunchPad": 85,
+    "oneWorldzImpact": 85,
+    "total": 490,
+}
+assert Decimal(str(magic["legacyFlywheel"]["effectivePercentOfTradeTotal"])) == Decimal("0.09")
+assert Decimal(str(magic["legacyFlywheel"]["effectivePercentOfTradePerVault"])) == Decimal("0.009")
+
+# Flywheel policy.
 split = policy["controlledFeeSplitPercent"]
-assert Decimal(str(sum(Decimal(str(split[k])) for k in ("creator","referrer","legacyFlywheel","worldzLaunchPad","oneWorldzImpact")))) == Decimal("100")
-assert split["legacyFlywheel"] == 15\nassert magic["target"]["grossTraderFeeBps"] == 75\nassert magic["meteoraDbcModel"]["creatorTradingFeePercentage"] == 51\nassert magic["meteoraDbcModel"]["partnerTradingFeePercentage"] == 49\nassert magic["partnerRouter"]["weights"] == {"referrer":170,"legacyFlywheel":150,"worldzLaunchPad":85,"oneWorldzImpact":85,"total":490}\nassert Decimal(str(magic["legacyFlywheel"]["effectivePercentOfTradeTotal"])) == Decimal("0.09")\nassert Decimal(str(magic["legacyFlywheel"]["effectivePercentOfTradePerVault"])) == Decimal("0.009")
+assert sum(Decimal(str(split[k])) for k in (
+    "creator","referrer","legacyFlywheel","worldzLaunchPad","oneWorldzImpact"
+)) == Decimal("100")
+assert split["legacyFlywheel"] == 15
+assert policy["magicFeeStandard"]["targetGrossTraderFeeBps"] == 75
+assert Decimal(str(policy["magicFeeStandard"]["effectiveLegacyFlywheelPercentOfTrade"])) == Decimal("0.09")
 assert policy["sourceFeeRule"]["traderFeeIncreaseRequired"] is False
 assert policy["epoch"]["seconds"] == 21600
 assert policy["epoch"]["hours"] == 6
@@ -27,20 +49,22 @@ assert all(x["rewardVault"]["worldzControlledFeeSharePercent"] == 1.5 for x in p
 assert all(Decimal(x["minimumRaw"]) > 0 for x in policy["assets"])
 assert all(x["snapshotEligibleOwners"] <= x["snapshotOwners"] for x in policy["assets"])
 
-# Verify each locked minimum is ceil(0.01% of the recorded raw supply).
 for x in policy["assets"]:
     supply = Decimal(x["supplyRaw"])
-    expected = (supply * Decimal("0.0001")).to_integral_value(rounding="ROUND_CEILING")
+    expected = (supply * Decimal("0.0001")).to_integral_value(rounding=ROUND_CEILING)
     assert Decimal(x["minimumRaw"]) == expected, x["symbol"]
 
-rs = revive["controlledFeeSplitPercent"]
-assert rs["legacyFlywheel"] == 15
-assert rs["total"] == 100
+# REVIVE integration.
+assert revive["magicFee"]["grossTraderFeeBps"] == 75
+assert revive["controlledFeeSplitPercent"]["legacyFlywheel"] == 15
+assert revive["controlledFeeSplitPercent"]["total"] == 100
+assert revive["partnerRouterWeights"]["total"] == 490
 eff = revive["effectivePercentOfTradeAtTarget"]
 assert Decimal(str(eff["legacyFlywheel"])) == Decimal("0.09")
 assert Decimal(str(eff["worldzControlledTotal"])) == Decimal("0.60")
-assert Decimal(str(eff["grossTotal"])) == Decimal("0.75")\nassert revive["magicFee"]["grossTraderFeeBps"] == 75\nassert revive["partnerRouterWeights"]["total"] == 490
+assert Decimal(str(eff["grossTotal"])) == Decimal("0.75")
 
+# PurpleDiamondCrew preview.
 assert pdc_data["sourceFeeRule"]["legacyFlywheelPercent"] == 15
 assert pdc_data["epoch"]["seconds"] == 21600
 assert len(pdc_data["assets"]) == 10
@@ -49,8 +73,13 @@ for x in policy["assets"]:
     assert x["minimumTokens"] in pdc_page
 
 assert "Private-build preview" in pdc_page
+assert "MagicFeeNumber™ candidate: 0.75% gross." in pdc_page
 assert "15% Legacy Flywheel" in pdc_page
 assert "Every 6 hours" in pdc_page
 assert "DORMANT → ALIVE" in pdc_page
 
-print("LEGACY_FLYWHEEL=PASS fee_share=15 vaults=10 per_vault=1.5 epoch_hours=6 minimum=0.01pct weighting=50_equal_50_sqrt mainnet=LOCKED")
+print(
+    "LEGACY_FLYWHEEL=PASS magic_fee_bps=75 fee_share=15 vaults=10 "
+    "per_vault_controlled_share=1.5 effective_total=0.09 effective_per_vault=0.009 "
+    "epoch_hours=6 minimum=0.01pct weighting=50_equal_50_sqrt mainnet=LOCKED"
+)
