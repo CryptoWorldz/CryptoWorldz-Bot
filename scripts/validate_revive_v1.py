@@ -47,11 +47,15 @@ assert abs(
         "meteoraProtocol",
         "creator",
         "worldzReferrer",
+        "legacyFlywheel",
         "worldzLaunchPad",
         "oneWorldzImpact",
     )) - effective["grossTotal"]
 ) < 1e-12
 assert abs(effective["worldzControlledTotal"] - 0.504) < 1e-12
+assert fee["controlledFeeSplitPercent"]["legacyFlywheel"] == 15
+assert fee["controlledFeeSplitPercent"]["total"] == 100
+assert abs(effective["legacyFlywheel"] - 0.0756) < 1e-12
 
 assert abs(
     sum(x["initialCeilingSol"] for x in funding["targets"])
