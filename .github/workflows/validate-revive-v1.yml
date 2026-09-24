@@ -61,8 +61,8 @@ jobs:
       - name: Syntax-check network proof scripts
         working-directory: worldzpad-devnet/revive-party
         run: |
-          node --check scripts/01_dbc_devnet.mjs
-          node --check scripts/02_verify_devnet.mjs
+          node --check scripts/07_direct_damm_v2_devnet.mjs
+          node --check scripts/08_verify_direct_damm_v2.mjs
           node --check scripts/04_legacy_live_scanner.mjs
           node --check scripts/05_legacy_authority_audit.mjs
           node --check scripts/06_direct_damm_v2_static.mjs
@@ -70,11 +70,10 @@ jobs:
       - name: Run deterministic REVIVE proofs
         working-directory: worldzpad-devnet/revive-party
         run: |
-          npm run static-proof
+          npm run direct-damm-static
           npm run stage-b-static
           npm run legacy-epoch-proof
           npm run router-static
-          npm run direct-damm-static
       - name: Compile-check Legacy router Rust program
         working-directory: worldzpad-devnet/revive-party
         run: cargo check --locked --manifest-path router-program/Cargo.toml
@@ -86,8 +85,8 @@ jobs:
           test -s router-program/Cargo.lock
           git diff --exit-code -- package-lock.json router-program/Cargo.lock
 
-  devnet-stage-a:
-    if: false # OBSOLETE DBC TOKEN-CREATION PATH — disabled for canonical RVIV
+  devnet-direct-damm-v2:
+    if: github.event_name == 'push'
     needs: validate
     runs-on: ubuntu-latest
     env:
@@ -104,21 +103,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install pinned Solana + Meteora SDKs
+      - name: Install locked Solana + Meteora DAMM v2 SDKs
         run: npm ci --no-audit --no-fund
-      - name: Static 75-bps MagicFee + 10 Legacy PDA proof
-        run: npm run static-proof
-      - name: Static partner router + six-hour HODLer settlement proof
-        run: npm run stage-b-static
-      - name: Deterministic six-hour Legacy epoch proof
-        run: npm run legacy-epoch-proof
-      - name: Static Legacy router program contract proof
-        run: npm run router-static
-      - name: Compile-check Legacy router Rust program
-        run: cargo check --locked --manifest-path router-program/Cargo.toml
+      - name: Prove direct DAMM v2 static contract
+        run: npm run direct-damm-static
       - name: Generate disposable devnet payer
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         run: npm run prepare-payer
+      - name: Load configured disposable devnet payer
+        if: env.DEVNET_PAYER_SECRET_JSON != ''
+        shell: bash
+        run: |
+          printf '%s' "$DEVNET_PAYER_SECRET_JSON" > "$DEVNET_PAYER_KEYPAIR_FILE"
+          node -e 'const fs=require("fs"); const {Keypair}=require("@solana/web3.js"); const p=process.env.DEVNET_PAYER_KEYPAIR_FILE; const k=Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(p,"utf8")))); fs.writeFileSync(process.env.DEVNET_PAYER_PUBKEY_FILE,k.publicKey.toBase58()+"\n"); console.log("REVIVE_CONFIGURED_DEVNET_PAYER="+k.publicKey.toBase58());'
       - name: Bootstrap disposable payer from authenticated Worldz devnet helper
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
@@ -132,8 +129,6 @@ jobs:
             --data "{\"address\":\"$PUBKEY\"}")
           cat /tmp/revive-bootstrap-response.json || true
           echo "REVIVE_BOOTSTRAP_HELPER_HTTP=$STATUS"
-          # The authenticated helper is best-effort because public devnet faucets are rate-limited.
-          # The next step independently tries provider fallbacks and must prove the actual balance.
       - name: Prove tiny PoW transaction-gas bootstrap
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         run: npm run bootstrap-payer
@@ -141,34 +136,30 @@ jobs:
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
         run: cargo install devnet-pow
-      - name: Mine disposable devnet SOL with the PoW faucet
+      - name: Mine disposable devnet SOL with PoW faucet
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
         run: |
           devnet-pow -k "$DEVNET_PAYER_KEYPAIR_FILE" -u dev -c confirmed mine -d 3 --reward 0.02 --no-infer --target-lamports 100000000
-      - name: Prove disposable payer actually received devnet SOL
-        if: env.DEVNET_PAYER_SECRET_JSON == ''
+      - name: Prove disposable payer funding
         run: npm run verify-payer
-      - name: Create disposable REVIVE-style Meteora DBC pool on Solana devnet
-        run: npm run dbc-proof
-      - name: Independently verify devnet transaction and accounts
-        run: npm run verify-proof
-      - name: Print Stage A evidence identifiers
+      - name: Create existing-mint one-sided DAMM v2 pool, first buy, permanent lock and fee claim
+        run: npm run direct-damm-devnet
+      - name: Independently verify DAMM v2 pool and locked position
+        run: npm run verify-direct-damm
+      - name: Print direct DAMM v2 evidence
         shell: bash
         run: |
-          node -e 'const fs=require("fs"); for (const p of ["artifacts/revive-dbc-devnet-proof.json","artifacts/revive-dbc-devnet-verified.json"]) { const x=JSON.parse(fs.readFileSync(p)); console.log("REVIVE_EVIDENCE file="+p+" proof="+x.proof+" tx="+(x.transaction||"")+" config="+(x.config||"")+" pool="+(x.pool||"")); }'
-          sha256sum artifacts/revive-static-proof.json artifacts/revive-stage-b-static-proof.json artifacts/revive-router-program-static-proof.json artifacts/revive-dbc-devnet-proof.json artifacts/revive-dbc-devnet-verified.json
-      - name: Publish Stage A evidence (best effort — GitHub artifact quota may be full)
+          node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync("artifacts/revive-direct-damm-v2-verified.json")); console.log("REVIVE_DIRECT_DAMM_EVIDENCE pool="+x.pool+" mockMint="+x.mockExistingMint+" create="+x.createSignature+" buy="+x.firstBuy.signature+" claim="+x.feeClaim.signature+" price="+x.devnetPriceSolPerRviv+" mainnetPrice="+x.mainnetPrice);'
+          sha256sum artifacts/revive-direct-damm-v2-devnet.json artifacts/revive-direct-damm-v2-verified.json
+      - name: Publish direct DAMM v2 evidence (best effort — artifact quota may be full)
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: revive-worldzparty-stage-a
+          name: revive-direct-damm-v2-devnet
           path: |
-            worldzpad-devnet/revive-party/artifacts/revive-static-proof.json
-            worldzpad-devnet/revive-party/artifacts/revive-stage-b-static-proof.json
-            worldzpad-devnet/revive-party/artifacts/revive-router-program-static-proof.json
-            worldzpad-devnet/revive-party/artifacts/revive-dbc-devnet-proof.json
-            worldzpad-devnet/revive-party/artifacts/revive-dbc-devnet-verified.json
+            worldzpad-devnet/revive-party/artifacts/revive-direct-damm-v2-devnet.json
+            worldzpad-devnet/revive-party/artifacts/revive-direct-damm-v2-verified.json
           if-no-files-found: error
           retention-days: 30
 
