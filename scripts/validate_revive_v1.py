@@ -93,9 +93,32 @@ assert abs(
 assert contract["launch"]["publicMainnetExecutionEnabled"] is False
 assert contract["gates"]["finalOwnerWalletApprovalRequired"] is True
 
+# REVIVE must not launch in isolation from the Worldz/WLDZ safety stack.
+worldz_gate = contract["worldzDependencyGate"]
+assert worldz_gate["required"] is True
+assert worldz_gate["canonicalWorldz"]["mint"] == "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U"
+assert worldz_gate["canonicalWorldz"]["expectedMaxSupplyTokens"] == 100_000_000
+assert worldz_gate["canonicalWorldz"]["livePool"] == "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ"
+assert worldz_gate["publicMainnetExecutionMustRemainFalse"] is True
+assert worldz_gate["requiredEvidence"]["wldzPostLaunchCriticalSafetyGate"] == "REQUIRED_NOT_SATISFIED_BY_THIS_REVIVE_PR"
+assert contract["gates"]["worldzDependencyGateRequired"] is True
+assert contract["gates"]["wldzPostLaunchCriticalSafetyProofRequired"] is True
+assert contract["gates"]["worldzLaunchPadPublicBootProofRequired"] is True
+assert contract["gates"]["legacyTenMintAuthorityAuditRequired"] is True
+assert contract["gates"]["noAutomaticLegacyAuthorityTakeover"] is True
+assert contract["gates"]["noAutomaticLegacyFeeHarvesting"] is True
+assert contract["gates"]["noReviveIsolationLaunch"] is True
+
+legacy_control = contract["legacyControlPolicy"]
+assert legacy_control["auditReadOnly"] is True
+assert legacy_control["automaticAuthorityTakeover"] is False
+assert legacy_control["automaticLegacyFeeHarvesting"] is False
+assert legacy_control["antiDoubleHandling"] is True
+assert "distributes only fee revenue explicitly routed" in legacy_control["sourceSeparationRule"]
+
 print(
     "REVIVE_V1=PASS supply=200000000 allocation=100 devcity=100 "
     "new_dev_leads=50 legacy=20000000 magic_fee_bps=75 "
     "creator_effective=0.306 referrer_effective=0.102 legacy_effective=0.09 "
-    "permanent_lp_lock_target=100 mainnet=LOCKED"
+    "permanent_lp_lock_target=100 worldz_dependency_gate=ON legacy_takeover=OFF mainnet=LOCKED"
 )
