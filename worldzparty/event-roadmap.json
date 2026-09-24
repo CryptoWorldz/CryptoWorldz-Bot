@@ -1,0 +1,108 @@
+{
+  "version": "WORLDZPARTY-HQ-2026-09-25-A",
+  "publicStatus": "STAGING_PLANNING_BOARD",
+  "lastUpdated": "2026-09-25",
+  "program": "WorldzTravelParTy™ 2026–2030",
+  "flagship": "Dubbo WorldzParTy Week™ / Jay's 50th-year homecoming concept",
+  "headlineRule": "Nothing is confirmed until the relevant acceptance, permit, funding or technical proof exists.",
+  "workstreams": [
+    {
+      "id": "platform",
+      "name": "WorldzParTyPlatform staging",
+      "status": "BUILT_AWAITING_HOSTINGER_REDEPLOY",
+      "owner": "JayJayTeamDev + Worldz build",
+      "next": "Hostinger redeploy of worldz-production-suite commit 817f494e8a55566671865ed1c6b0b902b01b4c4a"
+    },
+    {
+      "id": "council",
+      "name": "Dubbo significant-event pathway",
+      "status": "NOT_FILED",
+      "owner": "Event team",
+      "next": "Select date/venue, then contact Dubbo Events Unit. 2,000+ public-event concept requires significant-event lead time."
+    },
+    {
+      "id": "venue",
+      "name": "Dubbo venue + event dates",
+      "status": "TBA",
+      "owner": "Event team",
+      "next": "Shortlist public/private venue options and capacity before artist booking."
+    },
+    {
+      "id": "pink",
+      "name": "P!NK invitation",
+      "status": "PLANNED_NOT_CONTACTED_NOT_CONFIRMED",
+      "owner": "Artist outreach",
+      "next": "Prepare purpose-first invitation and approach only through official management/booking channels."
+    },
+    {
+      "id": "barnes",
+      "name": "Jimmy Barnes invitation",
+      "status": "PLANNED_NOT_CONTACTED_NOT_CONFIRMED",
+      "owner": "Artist outreach",
+      "next": "Use official Jimmy Barnes booking channel after date/venue/budget are credible."
+    },
+    {
+      "id": "tangem",
+      "name": "Worldz co-branded Tangem 3-card Welcome Pack",
+      "status": "CONCEPT_PARTNER_NOT_APPROVED",
+      "owner": "Partnerships",
+      "next": "Request co-brand quote, MOQ, 4–8 week production window, supported-network/token onboarding and fulfilment plan."
+    },
+    {
+      "id": "token-gifts",
+      "name": "10+ WorldzLaunchPad token + Legacy allocation concept",
+      "status": "LEGAL_TECHNICAL_REVIEW_REQUIRED",
+      "owner": "Worldz treasury/compliance",
+      "next": "Define eligible assets, wallet-control proof, tax/legal treatment, disclosures, source wallets and exactly-once distribution."
+    },
+    {
+      "id": "spend",
+      "name": "Proposed AUD $1,000 Dubbo visitor-spend support",
+      "status": "CONCEPT_NOT_FUNDED_NOT_PROMISED",
+      "owner": "OneWorldz/event finance",
+      "next": "Only proceed after funding source, eligibility, tax/legal structure, fraud controls and local-business redemption model are approved."
+    },
+    {
+      "id": "invites",
+      "name": "3,000 personal invitations",
+      "status": "TARGET_SET",
+      "owner": "Jay + outreach team",
+      "next": "Build private invite CRM; do not publish invitees or attendance without consent."
+    },
+    {
+      "id": "safe-place",
+      "name": "Jay's Safe Place",
+      "status": "ACTIVE_CONCEPT_TO_INTEGRATE",
+      "owner": "Local action",
+      "next": "Connect cards/QR to verified Dubbo support and WorldzParTy help desk."
+    },
+    {
+      "id": "flyer",
+      "name": "DonateWorldz Dubbo A4 flyer",
+      "status": "DESIGN_NEXT",
+      "owner": "Local action",
+      "next": "Create print-ready A4 with verified service links, Jay's Safe Place, OneWorldz/DonateWorldz pathways and event-interest QR."
+    },
+    {
+      "id": "busking",
+      "name": "Dubbo busking/public-space outreach",
+      "status": "APPLICATION_REQUIRED",
+      "owner": "Local action",
+      "next": "Use Dubbo Footpaths, Public Space and Busking application before scheduled activity."
+    },
+    {
+      "id": "workers",
+      "name": "Worker/local-business hand-outs",
+      "status": "PLANNING",
+      "owner": "Local action",
+      "next": "Create respectful one-page invitation for staff, businesses, clubs, churches and community services."
+    }
+  ],
+  "publicAdvertisingGates": [
+    "Do not bill P!NK, Jimmy Barnes or any artist as appearing until written confirmation exists.",
+    "Do not advertise a guaranteed AUD $1,000 payment before funding and legal structure are complete.",
+    "Do not describe gifted crypto as guaranteed wealth, income or return.",
+    "Do not manufacture trading volume, scarcity or apparent public demand.",
+    "Keep OneWorldz/DonateWorldz humanitarian funding and CryptoWorldz/Worldz token activity separately described and accounted."
+  ]
+}
