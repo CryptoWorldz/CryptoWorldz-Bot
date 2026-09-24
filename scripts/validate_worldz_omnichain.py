@@ -11,6 +11,9 @@ def load(rel):
 omni = load("worldzpad-omnichain/worldz-omnichain.v1.json")
 registry = load("worldzpad-omnichain/chain-registry.v1.json")
 fee = load("worldzpad-omnichain/fee-policy.v1.json")
+product = load("worldzpad-omnichain/product-standard.v1.json")
+analytics = load("worldzpad-omnichain/analytics/events.v1.json")
+api = load("worldzpad-omnichain/api/openapi.v1.json")
 magic = load("worldzpad-mainnet/fairfee/worldz-magic-fee.v1.json")
 legacy = load("worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json")
 launch_schema = load("worldzpad-omnichain/schemas/launch-intent.schema.json")
@@ -107,5 +110,62 @@ if "hidden_fee" not in fee["prohibited"]:
 if registry["chains"]["xrpl"]["feeCapability"] != "CHAIN_NATIVE_MARKET_RULES__NO_HIDDEN_TRANSFER_TAX":
     raise SystemExit("XRPL must not emulate MagicFee with a hidden transfer tax")
 
+# Best-of-best product features must not silently disappear.
+if product["creatorEconomics"]["defaultWorldzControlledSharePercent"] != 51:
+    raise SystemExit("creator product share drifted")
+if product["referralEconomics"]["defaultWorldzControlledSharePercent"] != 17:
+    raise SystemExit("referrer product share drifted")
+for flag_path, value in (
+    ("launchpad-to-launchpad", product["referralEconomics"]["launchpadToLaunchpad"]),
+    ("white-label", product["builderPlatform"]["whiteLabel"]),
+    ("public API", product["builderPlatform"]["publicApi"]),
+    ("SDK", product["builderPlatform"]["sdk"]),
+    ("Worldz Terminal", product["discovery"]["worldzTerminal"]),
+    ("plain-English errors", product["experience"]["plainEnglishErrors"]),
+    ("fee disclosure", product["trust"]["preSignatureFeeDisclosure"]),
+    ("no hidden fees", product["trust"]["noHiddenFees"]),
+):
+    if value is not True:
+        raise SystemExit(f"required product feature disabled: {flag_path}")
+
+# Analytics contract must cover the core creator/referral/proof funnel and never capture secrets.
+analytics_names = {e["name"] for e in analytics["events"]}
+for name in (
+    "worldz_launch_started",
+    "worldz_fee_preview_seen",
+    "worldz_launch_simulated",
+    "worldz_token_created",
+    "worldz_first_trade",
+    "worldz_referral_attributed",
+    "worldz_creator_fee_accrued",
+    "worldz_referrer_fee_accrued",
+    "worldz_legacy_fee_accrued",
+    "worldz_proof_created",
+):
+    if name not in analytics_names:
+        raise SystemExit(f"analytics event missing: {name}")
+if analytics["identityRules"]["neverSendPrivateKeysOrSeedPhrases"] is not True:
+    raise SystemExit("analytics secret-safety rule missing")
+
+# API contract must expose the non-custodial build flow and keep mainnet disabled.
+required_paths = {
+    "/v1/chains",
+    "/v1/launch/quote",
+    "/v1/launch/simulate",
+    "/v1/launch/prepare",
+    "/v1/launch/execute",
+    "/v1/referrals/resolve",
+    "/v1/proofs/{proofId}",
+    "/v1/white-label/operators/{operatorId}",
+}
+if not required_paths.issubset(set(api["paths"])):
+    raise SystemExit("Omnichain API contract missing required route(s)")
+if api["x-worldz-safety"]["mainnetExecutionEnabled"] is not False:
+    raise SystemExit("API mainnet execution must remain disabled")
+if api["x-worldz-safety"]["noPrivateKeysAccepted"] is not True:
+    raise SystemExit("API must never accept private keys")
+if api["x-worldz-safety"]["noHiddenFees"] is not True:
+    raise SystemExit("API hidden-fee protection missing")
+
 print("WORLDZ_OMNICHAIN_VALIDATION=PASS")
-print("chains=8 fee_bps=75 split=51/17/15/8.5/8.5 legacy_vaults=10 epoch_hours=6 mainnet=OFF")
+print("chains=8 fee_bps=75 split=51/17/15/8.5/8.5 legacy_vaults=10 epoch_hours=6 api=LOCKED product=LOCKED analytics=LOCKED mainnet=OFF")
