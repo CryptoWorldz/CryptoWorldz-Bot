@@ -1,5 +1,5 @@
 {
-  "version": "WORLDZ-FAIRFEE-RVIV-2026-09-24-B",
+  "version": "WORLDZ-FAIRFEE-RVIV-2026-09-24-C",
   "status": "DEVNET_CANDIDATE_63_BPS__MAINNET_LOCKED",
   "venue": "Meteora Dynamic Bonding Curve -> DAMM v2",
   "dbc": {
@@ -16,17 +16,20 @@
   },
   "effectivePercentOfTradeAtTarget": {
     "meteoraProtocol": 0.126,
-    "creator": 0.3024,
-    "worldzReferrer": 0.1008,
-    "worldzLaunchPad": 0.0504,
-    "oneWorldzImpact": 0.0504,
+    "creator": 0.25704,
+    "worldzReferrer": 0.08568,
+    "legacyFlywheel": 0.0756,
+    "worldzLaunchPad": 0.04284,
+    "oneWorldzImpact": 0.04284,
     "worldzControlledTotal": 0.504,
     "grossTotal": 0.63
   },
   "partnerRouterSplitPercent": {
-    "referrer": 50,
-    "worldzLaunchPad": 25,
-    "oneWorldzImpact": 25,
+    "creator": 51,
+    "referrer": 17,
+    "legacyFlywheel": 15,
+    "worldzLaunchPad": 8.5,
+    "oneWorldzImpact": 8.5,
     "total": 100
   },
   "meteoraReferral": {
@@ -41,7 +44,7 @@
     "exactFractionalBpsSupportMustBeProvenOnDevnet": false,
     "noSilentRounding": true,
     "wholeBpsCompatibilityRequired": true,
-    "publicDisclosure": "Trader pays 0.63% gross at the selected devnet candidate. The modeled 20% Meteora protocol share is 0.126% of trade; the remaining 0.504% is routed 60/20/10/10 across creator/referrer/Worldz/Impact."
+    "publicDisclosure": "Trader pays 0.63% gross at the selected devnet candidate. The modeled 20% Meteora protocol share is 0.126% of trade; the remaining 0.504% Worldz-controlled fee is split 51% Creator / 17% Referrer / 15% Legacy Flywheel / 8.5% WorldzLaunchPad / 8.5% OneWorldz Impact."
   },
   "permanentLiquidity": {
     "partnerLiquidityPercentage": 0,
@@ -56,5 +59,21 @@
     "worldzControlledFeePercentOfTrade": 0.5,
     "representableInDocumentedWholeBpsFields": false,
     "rule": "Never silently round a public fee claim."
+  },
+  "controlledFeeSplitPercent": {
+    "creator": 51,
+    "referrer": 17,
+    "legacyFlywheel": 15,
+    "worldzLaunchPad": 8.5,
+    "oneWorldzImpact": 8.5,
+    "total": 100,
+    "derivation": "15% Legacy Flywheel first; remaining 85% preserves prior 60/20/10/10 proportions."
+  },
+  "legacyFlywheel": {
+    "policyPath": "worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json",
+    "percentOfWorldzControlledFeeRevenue": 15,
+    "legacyVaults": 10,
+    "equalVaultSharePercentOfFlywheel": 10,
+    "settlementHours": 6
   }
 }
