@@ -1,0 +1,35 @@
+name: Validate Legacy Flywheel
+
+on:
+  push:
+    branches:
+      - revive-v1-build
+    paths:
+      - 'worldzpad-mainnet/legacy-flywheel/**'
+      - 'worldzpad-mainnet/revive/revive-dbc-fairfee.v1.json'
+      - 'purplediamondcrew.com/**'
+      - 'scripts/validate_legacy_flywheel.py'
+      - '.github/workflows/validate-legacy-flywheel.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-mainnet/legacy-flywheel/**'
+      - 'worldzpad-mainnet/revive/revive-dbc-fairfee.v1.json'
+      - 'purplediamondcrew.com/**'
+      - 'scripts/validate_legacy_flywheel.py'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Legacy Flywheel economics and holder rules
+        run: python scripts/validate_legacy_flywheel.py
+      - name: Confirm no reward vault is pretending to be mainnet-ready
+        shell: bash
+        run: |
+          grep -q '"status": "PRIVATE_BUILD__DEVNET_REQUIRED__MAINNET_DISABLED"' worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json
+          test "$(grep -o 'PENDING_PDA_DERIVATION_AND_DEVNET_PROOF' worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json | wc -l)" -eq 10
