@@ -56,23 +56,35 @@ The existing snapshot remains canonical:
 
 The current database ledger is correct. The live snapshot-regeneration function contains a stale 1%-pool calculation path, so resnapshot/regeneration stays locked until that source is repaired and re-verified.
 
-## Worldz FairFee™ candidate
+## Worldz FairFee™ / MagicFeeNumber™
 
-The mathematical target would be **62.5 bps gross**, leaving exactly 0.50% after a modeled 20% Meteora protocol share. Current documented DBC and DAMM v2 fee fields use whole basis points, so the devnet candidate is **63 bps gross (0.63%)** rather than hiding a half-basis-point rounding assumption.
+The selected devnet candidate is **75 bps gross (0.75%)**, with dynamic fees OFF.
 
-At 63 bps gross, the modeled split is:
+Meteora DBC currently documents a 20% protocol share of trading fees. Under that model:
 
-- Meteora protocol: **0.126% of trade**
-- Creator: **0.25704%**
-- Worldz referrer: **0.08568%**
-- Legacy Flywheel™: **0.0756%**
-- WorldzLaunchPad: **0.04284%**
-- OneWorldz Impact: **0.04284%**
-- Worldz-controlled total: **0.504%**
+- Meteora protocol: **0.15% of trade**
+- Creator: **0.306%**
+- Worldz referrer: **0.102%**
+- Legacy Flywheel™: **0.09%**
+- WorldzLaunchPad: **0.051%**
+- OneWorldz Impact: **0.051%**
+- Worldz-controlled total: **0.60%**
 
-The Legacy Flywheel takes **15% of Worldz-controlled fee revenue first**. The remaining 85% preserves the earlier 60 / 20 / 10 / 10 Creator / Referrer / Worldz / Impact proportions, producing the final controlled split **51 / 17 / 15 / 8.5 / 8.5**. The Legacy share funds 10 dedicated SOL reward vaults equally and settles holder entitlements every six hours.
+The Worldz-controlled 0.60% is split **51 / 17 / 15 / 8.5 / 8.5**.
 
-Devnet must prove the actual 63-bps behavior in both DBC and migrated DAMM v2 before mainnet approval. No silent rounding is permitted.
+DBC native fee ownership is configured **51% Creator / 49% Worldz partner**. The 49% partner side is then routed with exact integer weights:
+
+- Referrer: **170**
+- Legacy Flywheel: **150**
+- WorldzLaunchPad: **85**
+- OneWorldz Impact: **85**
+- Total: **490**
+
+The Legacy Flywheel therefore receives **0.09% of trade**. With ten equal legacy vaults, each vault receives the equivalent of **0.009% of trading volume** from collected fees under the modeled configuration.
+
+Example at $1,000,000 equivalent trading volume: $7,500 gross fees → $1,500 protocol → $3,060 Creator → $1,020 Referrer → $900 Legacy Flywheel ($90 per legacy vault) → $510 Worldz → $510 Impact.
+
+The exact venue deductions and receipts must be proven on devnet. No mainnet pool may advertise MagicFeeNumber™ unless its live fee path reproduces and discloses the promised economics.
 
 ## Liquidity protection
 
