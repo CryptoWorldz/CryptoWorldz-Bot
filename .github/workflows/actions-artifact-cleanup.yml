@@ -15,7 +15,7 @@ permissions:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Delete Actions artifacts older than 7 days
         env:
@@ -23,11 +23,29 @@ jobs:
           REPOSITORY: ${{ github.repository }}
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
 
           cutoff_epoch="$(date -u -d '7 days ago' +%s)"
           deleted=0
           kept=0
+          failed=0
+          list_file="$(mktemp)"
+
+          list_ok=0
+          for attempt in 1 2 3 4 5; do
+            if gh api --paginate "repos/$REPOSITORY/actions/artifacts?per_page=100" \
+              --jq '.artifacts[] | [.id, .created_at, .name] | @tsv' > "$list_file"; then
+              list_ok=1
+              break
+            fi
+            echo "Artifact inventory request failed (attempt $attempt/5); retrying..."
+            sleep $((attempt * 2))
+          done
+
+          if [ "$list_ok" -ne 1 ]; then
+            echo "::error::Unable to list Actions artifacts after 5 attempts."
+            exit 1
+          fi
 
           while IFS=$'\t' read -r artifact_id created_at artifact_name; do
             [ -z "${artifact_id:-}" ] && continue
@@ -35,18 +53,33 @@ jobs:
 
             if [ "$created_epoch" -lt "$cutoff_epoch" ]; then
               echo "Deleting artifact: $artifact_name (id=$artifact_id, created=$created_at)"
-              gh api --method DELETE "repos/$REPOSITORY/actions/artifacts/$artifact_id"
-              deleted=$((deleted + 1))
+              deleted_ok=0
+              for attempt in 1 2 3 4 5; do
+                if gh api --method DELETE "repos/$REPOSITORY/actions/artifacts/$artifact_id"; then
+                  deleted_ok=1
+                  deleted=$((deleted + 1))
+                  break
+                fi
+                echo "Delete failed for artifact $artifact_id (attempt $attempt/5); retrying..."
+                sleep $((attempt * 2))
+              done
+
+              if [ "$deleted_ok" -ne 1 ]; then
+                echo "::warning::Could not delete artifact $artifact_id after 5 attempts; a future scheduled run will retry it."
+                failed=$((failed + 1))
+              fi
+
+              sleep 1
             else
               kept=$((kept + 1))
             fi
-          done < <(
-            gh api --paginate "repos/$REPOSITORY/actions/artifacts?per_page=100" \
-              --jq '.artifacts[] | [.id, .created_at, .name] | @tsv'
-          )
+          done < "$list_file"
+
+          rm -f "$list_file"
 
           echo "Deleted $deleted artifact(s) older than 7 days."
           echo "Kept $kept recent artifact(s)."
+          echo "Deferred $failed artifact(s) after repeated GitHub API errors."
 
       - name: Confirm remaining artifact inventory
         env:
@@ -54,5 +87,13 @@ jobs:
           REPOSITORY: ${{ github.repository }}
         shell: bash
         run: |
-          set -euo pipefail
-          gh api "repos/$REPOSITORY/actions/artifacts?per_page=1" --jq '"Remaining artifacts: \(.total_count)"'
+          set -u
+          for attempt in 1 2 3 4 5; do
+            if gh api "repos/$REPOSITORY/actions/artifacts?per_page=1" --jq '"Remaining artifacts: \(.total_count)"'; then
+              exit 0
+            fi
+            echo "Inventory confirmation failed (attempt $attempt/5); retrying..."
+            sleep $((attempt * 2))
+          done
+          echo "::warning::Could not confirm remaining artifact count after retries."
+          exit 0
