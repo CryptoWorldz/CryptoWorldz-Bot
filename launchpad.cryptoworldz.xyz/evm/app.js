@@ -26,7 +26,29 @@ contract WorldzFixedSupplyToken {
  function transferFrom(address f,address to,uint256 a) external returns(bool){uint256 x=allowance[f][msg.sender];require(x>=a,"allowance");if(x!=type(uint256).max){allowance[f][msg.sender]=x-a;emit Approval(f,msg.sender,x-a);}_t(f,to,a);return true;}
  function _t(address f,address to,uint256 a) internal{require(to!=address(0),"zero");uint256 b=balanceOf[f];require(b>=a,"balance");unchecked{balanceOf[f]=b-a;}balanceOf[to]+=a;emit Transfer(f,to,a);}
 }`;
-let abi,bytecode,provider,signer,wallet='',compiled=false,checked=false;\nconst requestedNetwork=new URLSearchParams(location.search).get('network');\nif(requestedNetwork&&NETWORKS[requestedNetwork]) $('#network').value=requestedNetwork;
+let abi,bytecode,provider,signer,wallet='',compiled=false,checked=false;
+const query=new URLSearchParams(location.search);
+const requestedNetwork=query.get('network');
+if(requestedNetwork&&NETWORKS[requestedNetwork]) $('#network').value=requestedNetwork;
+const prefills=[
+  ['#name','name'],['#symbol','symbol'],['#supply','supply'],['#fee','fee']
+];
+for(const [selector,param] of prefills){
+  const value=query.get(param);
+  if(value!==null&&value!=='')$(selector).value=value;
+}
+const allocationPrefills={
+  creator:'alloc_creatorTeam',
+  liquidity:'alloc_liquidity',
+  community:'alloc_communityPublic',
+  treasury:'alloc_treasuryReserve',
+  growth:'alloc_growthEcosystem'
+};
+for(const [key,param] of Object.entries(allocationPrefills)){
+  const value=query.get(param);
+  const input=document.querySelector('.allocation[data-key="'+key+'"]');
+  if(input&&value!==null&&value!=='')input.value=value;
+}
 function status(id,t,c=''){const e=$(id);e.textContent=t;e.className='status'+(c?' '+c:'');}
 function net(){return NETWORKS[$('#network').value];}
 function alloc(){const o={};$$('.allocation').forEach(x=>o[x.dataset.key]=Number(x.value));return o;}
