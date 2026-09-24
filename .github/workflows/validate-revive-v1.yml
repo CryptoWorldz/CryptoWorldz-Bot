@@ -50,6 +50,29 @@ jobs:
         run: |
           grep -q 'const CLAIM_EXECUTION_ENABLED = false' supabase/functions/revive-claim/index.ts
           ! grep -q 'claim_signature.*update' supabase/functions/revive-claim/index.ts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned REVIVE proof SDKs
+        working-directory: worldzpad-devnet/revive-party
+        run: npm install --no-audit --no-fund
+      - name: Syntax-check network proof scripts
+        working-directory: worldzpad-devnet/revive-party
+        run: |
+          node --check scripts/01_dbc_devnet.mjs
+          node --check scripts/02_verify_devnet.mjs
+          node --check scripts/04_legacy_live_scanner.mjs
+          node --check scripts/router_program_client.mjs
+      - name: Run deterministic REVIVE proofs
+        working-directory: worldzpad-devnet/revive-party
+        run: |
+          npm run static-proof
+          npm run stage-b-static
+          npm run legacy-epoch-proof
+          npm run router-static
+      - name: Compile-check Legacy router Rust program
+        working-directory: worldzpad-devnet/revive-party
+        run: cargo check --manifest-path router-program/Cargo.toml
 
   devnet-stage-a:
     if: github.event_name == 'push'
