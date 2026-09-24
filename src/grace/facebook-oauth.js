@@ -171,8 +171,8 @@ function createFacebookOAuthService(options = {}) {
     const pages = await listManagedPages(userToken);
     const page = selectPage(account, pages);
     if (!page || !page.access_token) {
-      await repository.markConnectionError(account.id, `CryptoWorldz Page not found among ${pages.length} authorised Page(s).`);
-      throw new GraceFacebookOAuthError("Meta login succeeded, but the CryptoWorldz Facebook Page was not available in the authorised Page list.", { code: "META_PAGE_NOT_FOUND" });
+      await repository.markConnectionError(account.id, `${account.display_name} not found among ${pages.length} authorised Page(s).`);
+      throw new GraceFacebookOAuthError(`Meta login succeeded, but ${account.display_name} was not available in the authorised Page list.`, { code: "META_PAGE_NOT_FOUND" });
     }
 
     const connection = await repository.saveConnection({
