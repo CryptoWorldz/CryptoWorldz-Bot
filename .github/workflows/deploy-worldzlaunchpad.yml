@@ -218,8 +218,19 @@ jobs:
           ]
           for p in public_files:
               text=p.read_text(errors='ignore')
+              rel=p.relative_to(root).as_posix()
               for term in banned:
+                  # JayJayTeamDev explicitly approved the public validation label
+                  # "REVIVE v1 VALIDATION — SUCCESS" on the dedicated X-SAVE page only.
+                  if rel=='x-save/index.html' and term=='REVIVE':
+                      continue
                   assert term not in text, f'PRIVATE_PLAN_TERM_EXPOSED {term} in {p}'
+          xsave_html=(root/'x-save'/'index.html').read_text(errors='ignore')
+          assert 'data-worldz-x-save="1"' in xsave_html
+          assert 'REVIVE v1 VALIDATION — SUCCESS' in xsave_html
+          assert 'X-SAVE MAINNET — OFF UNTIL PROOF' in xsave_html
+          assert '6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2' in xsave_html
+          assert 'Read the GitHub Validation' in xsave_html
           owner_v6=root/'worldz-now-v6'/'index.html'
           owner_v6_js=root/'worldz-now-v6'/'app-v6.js'
           assert owner_v6.is_file() and owner_v6_js.is_file()
@@ -594,6 +605,7 @@ jobs:
               try:
                   status,body=get(base+'/?verify=public-v6')
                   _,platform_body=get(base+'/platform-config.json?verify=public-v6')
+                  xsave_code,xsave_body=get(base+'/x-save/?verify=xsave-v1')
                   dev_code,dev_body=get(base+'/devnet/?verify=public-v6')
                   curve_code,curve_body=get(base+'/curve/?verify=public-v6')
                   pro_code,pro_body=get(base+'/curve-pro/?verify=public-v6')
@@ -615,6 +627,16 @@ jobs:
 
                   assert status==200
                   assert 'PUBLIC TOKEN LAUNCHPAD' in body
+                  assert 'href="/x-save/"' in body
+                  assert xsave_code==200
+                  assert 'data-worldz-x-save="1"' in xsave_body
+                  assert 'Worldz X-SAVE' in xsave_body
+                  assert 'REVIVE v1 VALIDATION — SUCCESS' in xsave_body
+                  assert 'X-SAVE MAINNET — OFF UNTIL PROOF' in xsave_body
+                  assert 'Open X-SAVE' in xsave_body
+                  assert 'Explore WorldzLaunchPad™' in xsave_body
+                  assert 'Build with Worldz' in xsave_body
+                  assert 'Read the GitHub Validation' in xsave_body
                   assert 'Who will be first?' in body
                   assert 'of your collected token fee only' in body
                   assert 'of that fee remains for your project routing' in body
