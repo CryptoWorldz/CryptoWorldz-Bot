@@ -1,12 +1,12 @@
 {
-  "version": "WORLDZ-FAIRFEE-RVIV-2026-09-24-A",
-  "status": "DEVNET_CANDIDATE__MAINNET_LOCKED",
+  "version": "WORLDZ-FAIRFEE-RVIV-2026-09-24-B",
+  "status": "DEVNET_CANDIDATE_63_BPS__MAINNET_LOCKED",
   "venue": "Meteora Dynamic Bonding Curve -> DAMM v2",
   "dbc": {
     "collectFeeMode": "QUOTE_TOKEN",
     "dynamicFee": false,
-    "targetGrossTraderFeePercent": 0.625,
-    "targetGrossTraderFeeBps": 62.5,
+    "targetGrossTraderFeePercent": 0.63,
+    "targetGrossTraderFeeBps": 63,
     "protocolFeePercentOfGrossFee": 20,
     "controlledTradingFeePercentOfGrossFee": 80,
     "creatorTradingFeePercentageOfControlledTradingFee": 60,
@@ -15,12 +15,13 @@
     "creator": "PENDING_REVIVE_CREATOR_FEE_RECEIVER"
   },
   "effectivePercentOfTradeAtTarget": {
-    "meteoraProtocol": 0.125,
-    "creator": 0.3,
-    "worldzReferrer": 0.1,
-    "worldzLaunchPad": 0.05,
-    "oneWorldzImpact": 0.05,
-    "grossTotal": 0.625
+    "meteoraProtocol": 0.126,
+    "creator": 0.3024,
+    "worldzReferrer": 0.1008,
+    "worldzLaunchPad": 0.0504,
+    "oneWorldzImpact": 0.0504,
+    "worldzControlledTotal": 0.504,
+    "grossTotal": 0.63
   },
   "partnerRouterSplitPercent": {
     "referrer": 50,
@@ -36,9 +37,11 @@
   "migration": {
     "option": "DAMM_V2",
     "customizableMigratedPoolFeeRequired": true,
-    "targetGrossTraderFeeBps": 62.5,
-    "exactFractionalBpsSupportMustBeProvenOnDevnet": true,
-    "noSilentRounding": true
+    "targetGrossTraderFeeBps": 63,
+    "exactFractionalBpsSupportMustBeProvenOnDevnet": false,
+    "noSilentRounding": true,
+    "wholeBpsCompatibilityRequired": true,
+    "publicDisclosure": "Trader pays 0.63% gross at the selected devnet candidate. The modeled 20% Meteora protocol share is 0.126% of trade; the remaining 0.504% is routed 60/20/10/10 across creator/referrer/Worldz/Impact."
   },
   "permanentLiquidity": {
     "partnerLiquidityPercentage": 0,
@@ -47,5 +50,11 @@
     "creatorPermanentLockedLiquidityPercentage": 60,
     "totalPermanentLockedPercentage": 100
   },
-  "executionGate": "If 62.5 bps cannot be represented exactly in both phases, mainnet stays locked until an explicitly approved transparent alternative is selected."
+  "executionGate": "Mainnet remains locked until devnet proves 63 bps in both DBC and migrated DAMM v2, verifies actual protocol deductions and fee-claimer receipts, and proves the 100% permanent migrated-liquidity lock.",
+  "theoreticalTarget": {
+    "grossTraderFeeBps": 62.5,
+    "worldzControlledFeePercentOfTrade": 0.5,
+    "representableInDocumentedWholeBpsFields": false,
+    "rule": "Never silently round a public fee claim."
+  }
 }
