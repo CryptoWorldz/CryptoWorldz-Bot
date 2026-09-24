@@ -58,19 +58,20 @@ The current database ledger is correct. The live snapshot-regeneration function 
 
 ## Worldz FairFee™ candidate
 
-DBC target gross trader fee: **0.625%**.
+The mathematical target would be **62.5 bps gross**, leaving exactly 0.50% after a modeled 20% Meteora protocol share. Current documented DBC and DAMM v2 fee fields use whole basis points, so the devnet candidate is **63 bps gross (0.63%)** rather than hiding a half-basis-point rounding assumption.
 
-At Meteora's documented 20% protocol share, the target becomes:
+At 63 bps gross, the modeled split is:
 
-- Meteora protocol: **0.125% of trade**
-- Creator: **0.30%**
-- Worldz referrer: **0.10%**
-- WorldzLaunchPad: **0.05%**
-- OneWorldz Impact: **0.05%**
+- Meteora protocol: **0.126% of trade**
+- Creator: **0.3024%**
+- Worldz referrer: **0.1008%**
+- WorldzLaunchPad: **0.0504%**
+- OneWorldz Impact: **0.0504%**
+- Worldz-controlled total: **0.504%**
 
-The Worldz-controlled 0.50% is split **60 / 20 / 10 / 10**. A Meteora swap-host referral is separate and must be disclosed separately.
+The Worldz-controlled portion is split **60 / 20 / 10 / 10**. A Meteora swap-host referral is separate and must be disclosed separately.
 
-No silent fee rounding is permitted. Exact representation must pass devnet for both DBC and migrated DAMM v2.
+Devnet must prove the actual 63-bps behavior in both DBC and migrated DAMM v2 before mainnet approval. No silent rounding is permitted.
 
 ## Liquidity protection
 
