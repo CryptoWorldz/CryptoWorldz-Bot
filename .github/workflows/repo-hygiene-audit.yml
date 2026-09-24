@@ -135,3 +135,74 @@ jobs:
           print(json.dumps(report, indent=2))
           print("REPO_HYGIENE_JSON_END")
           PY
+
+      - name: Deep clutter classification
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re, json
+          from pathlib import Path
+
+          text_ext={".html",".css",".js",".mjs",".cjs",".ts",".tsx",".jsx",".json",".md",".yml",".yaml",".py",".sh",".txt",".xml",".php",".sql"}
+          texts={}
+          for p in Path(".").rglob("*"):
+              if p.is_file() and ".git" not in p.parts and p.suffix.lower() in text_ext:
+                  try: texts[p.as_posix()]=p.read_text(encoding="utf-8",errors="ignore")
+                  except: pass
+
+          workflows=[]
+          wfdir=Path(".github/workflows")
+          for p in sorted(list(wfdir.glob("*.yml"))+list(wfdir.glob("*.yaml"))):
+              txt=texts.get(p.as_posix(),"")
+              triggers={
+                  "dispatch":"workflow_dispatch:" in txt,
+                  "schedule":bool(re.search(r"(?m)^\s*schedule\s*:",txt)),
+                  "push":bool(re.search(r"(?m)^\s*push\s*:",txt)),
+                  "pull_request":bool(re.search(r"(?m)^\s*pull_request\s*:",txt)),
+              }
+              manual_only=triggers["dispatch"] and not any(triggers[k] for k in ("schedule","push","pull_request"))
+              oneoff_name=bool(re.search(r"(diagnos|repair|restore|probe|proof|audit|emergency)",p.name,re.I))
+              workflows.append({
+                  "path":p.as_posix(),
+                  "bytes":p.stat().st_size,
+                  "triggers":triggers,
+                  "manual_only":manual_only,
+                  "oneoff_name":oneoff_name,
+                  "cleanup_candidate":manual_only and oneoff_name and p.name not in {"repo-hygiene-audit.yml"}
+              })
+
+          root_candidates=[]
+          for p in Path(".").iterdir():
+              if not p.is_file(): continue
+              if not re.search(r"(AUDIT|VERIFY|FIX|REPAIR|V\d+|FINAL|OLD|BACKUP)",p.name,re.I): continue
+              rel=p.as_posix()
+              base=p.name
+              refs=[]
+              for tpath,txt in texts.items():
+                  if tpath==rel: continue
+                  if rel in txt or base in txt:
+                      refs.append(tpath)
+              root_candidates.append({"path":rel,"bytes":p.stat().st_size,"reference_count":len(refs),"references":refs[:12]})
+
+          versioned=[]
+          lp=Path("launchpad.cryptoworldz.xyz")
+          if lp.exists():
+              for d in sorted([x for x in lp.iterdir() if x.is_dir() and re.search(r"v\d+$",x.name,re.I)]):
+                  rel=d.as_posix()
+                  refs=[]
+                  for tpath,txt in texts.items():
+                      if tpath.startswith(rel+"/"): continue
+                      if rel in txt or d.name in txt:
+                          refs.append(tpath)
+                  size=sum(x.stat().st_size for x in d.rglob("*") if x.is_file())
+                  versioned.append({"path":rel,"bytes":size,"reference_count":len(refs),"references":refs[:12]})
+
+          print("DEEP_HYGIENE_JSON_BEGIN")
+          print(json.dumps({
+              "workflow_count":len(workflows),
+              "manual_oneoff_candidates":[x for x in workflows if x["cleanup_candidate"]],
+              "root_candidates":root_candidates,
+              "versioned_launchpad_dirs":versioned
+          },indent=2))
+          print("DEEP_HYGIENE_JSON_END")
+          PY
