@@ -686,5 +686,5 @@ jobs:
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:
-                  last=repr(e); print(f'LIVE_RETRY attempt={attempt} {last}'); time.sleep(attempt*3)
+                  last=traceback.format_exc(); print(f'LIVE_RETRY attempt={attempt}\n{last}'); time.sleep(attempt*3)
           raise SystemExit('WORLDZLAUNCHPAD_LIVE=FAIL '+last)
