@@ -64,6 +64,7 @@ jobs:
           node --check scripts/01_dbc_devnet.mjs
           node --check scripts/02_verify_devnet.mjs
           node --check scripts/04_legacy_live_scanner.mjs
+          node --check scripts/05_legacy_authority_audit.mjs
           node --check scripts/router_program_client.mjs
       - name: Run deterministic REVIVE proofs
         working-directory: worldzpad-devnet/revive-party
@@ -202,3 +203,29 @@ jobs:
           path: worldzpad-devnet/revive-party/artifacts/legacy-live-boundary-snapshot.json
           if-no-files-found: error
           retention-days: 30
+
+
+  legacy-authority-audit:
+    if: github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    env:
+      LEGACY_READ_RPC_URL: ${{ secrets.LEGACY_READ_RPC_URL }}
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/revive-party
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked proof dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Audit all ten Legacy mint authorities read-only
+        run: npm run legacy-authority-audit
+      - name: Print Legacy authority evidence digest
+        shell: bash
+        run: |
+          node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync("artifacts/legacy-authority-audit.json")); console.log("LEGACY_AUTHORITY_EVIDENCE "+JSON.stringify(x.summary)); for(const a of x.legacyAssets){const t=a.extensions.transferFeeConfig; console.log(a.symbol+" "+a.tokenProgram+" feeBps="+(t?t.newer.basisPoints:"none")+" recovery="+a.controlRecovery.state);}'
+          sha256sum artifacts/legacy-authority-audit.json
