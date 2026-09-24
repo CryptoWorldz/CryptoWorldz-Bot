@@ -7,6 +7,7 @@ root = repo_root / "worldzpad-mainnet" / "revive"
 
 contract = json.loads((root / "revive-launch-contract.v1.json").read_text())
 fee = json.loads((root / "revive-dbc-fairfee.v1.json").read_text())
+direct = json.loads((root / "revive-direct-damm-v2-existing-mint.v1.json").read_text())
 devcity = json.loads((root / "revive-devcity-100.v1.json").read_text())
 funding = json.loads((root / "revive-launch-funding.v1.json").read_text())
 candidates = json.loads((root / "revive-devcity-50-candidates.v1.json").read_text())
@@ -36,6 +37,33 @@ assert candidates["targetNewSeats"] == 50
 assert len(candidates["candidates"]) == 50
 assert len({x["github"] for x in candidates["candidates"]}) == 50
 assert all(x["status"] == "UNCONTACTED_RESEARCH_LEAD" for x in candidates["candidates"])
+
+# Correct existing-mint launch route.
+assert direct["canonicalToken"]["mint"] == contract["token"]["canonicalMint"]
+assert direct["canonicalToken"]["noSecondMint"] is True
+assert direct["route"]["venue"] == "Meteora DAMM v2"
+assert direct["route"]["mode"] == "DIRECT_CUSTOMIZABLE_POOL__EXISTING_MINT__ONE_SIDED"
+assert direct["route"]["initialBaseLiquidityTokens"] == 30_000_000
+assert direct["route"]["initialQuoteLiquiditySol"] == 0
+assert direct["route"]["isLockLiquidity"] is True
+assert direct["route"]["permanentLockTargetPercent"] == 100
+assert abs(direct["pricing"]["devnetFixture"]["priceSolPerRviv"] - 0.000045) < 1e-15
+assert direct["pricing"]["mainnet"]["priceSolPerRviv"] is None
+assert direct["pricing"]["mainnet"]["mayInheritDevnetFixtureAutomatically"] is False
+assert direct["mainnetGates"]["enabled"] is False
+assert direct["mainnetGates"]["openingPriceSelected"] is False
+assert contract["launch"]["engineCandidate"] == "METEORA_DAMM_V2_DIRECT_EXISTING_MINT"
+assert contract["launch"]["dbcTokenCreationPathAllowed"] is False
+assert contract["launch"]["canonicalMintReuseRequired"] is True
+assert abs(contract["launch"]["devnetOpeningPriceSolPerRviv"] - 0.000045) < 1e-15
+assert contract["launch"]["mainnetOpeningPriceSolPerRviv"] is None
+assert contract["gates"]["noDbcTokenCreationForCanonicalRviv"] is True
+assert contract["gates"]["directExistingMintDammV2ProofRequired"] is True
+assert contract["gates"]["mainnetOpeningPriceFinalized"] is False
+assert contract["gates"]["actualDammV2ProtocolDeductionProofRequired"] is True
+assert contract["gates"]["lockedPositionFeeClaimProofRequired"] is True
+assert fee["executionApplicability"] == "NOT_USED_FOR_CANONICAL_RVIV_POOL_CREATION"
+assert fee["supersededForReviveBy"] == "worldzpad-mainnet/revive/revive-direct-damm-v2-existing-mint.v1.json"
 
 # MagicFeeNumber.
 assert magic["target"]["grossTraderFeeBps"] == 75
@@ -120,5 +148,5 @@ print(
     "REVIVE_V1=PASS supply=200000000 allocation=100 devcity=100 "
     "new_dev_leads=50 legacy=20000000 magic_fee_bps=75 "
     "creator_effective=0.306 referrer_effective=0.102 legacy_effective=0.09 "
-    "permanent_lp_lock_target=100 worldz_dependency_gate=ON legacy_takeover=OFF mainnet=LOCKED"
+    "direct_damm_v2=ON devnet_price_sol=0.000045 mainnet_price=UNSET permanent_lp_lock_target=100 worldz_dependency_gate=ON legacy_takeover=OFF mainnet=LOCKED"
 )
