@@ -16,8 +16,13 @@ async function rpcAirdrop(url,lamports){
   return x.result;
 }
 async function confirm(sig){
-  const bh=await verify.getLatestBlockhash('confirmed');
-  await verify.confirmTransaction({signature:sig,...bh},'confirmed');
+  for(let i=0;i<30;i++){
+    const s=await verify.getSignatureStatus(sig,{searchTransactionHistory:true});
+    if(s?.value?.err)throw new Error('bootstrap transaction failed '+JSON.stringify(s.value.err));
+    if(s?.value?.confirmationStatus==='confirmed'||s?.value?.confirmationStatus==='finalized')return;
+    await new Promise(r=>setTimeout(r,500));
+  }
+  throw new Error('bootstrap confirmation timeout');
 }
 let balance=await verify.getBalance(kp.publicKey,'confirmed');
 if(balance>=10_000){
