@@ -7,7 +7,6 @@ on:
     paths:
       - 'worldzpad-mainnet/legacy-flywheel/**'
       - 'worldzpad-mainnet/fairfee/**'
-      - 'worldzpad-mainnet/fairfee/**'
       - 'worldzpad-mainnet/revive/revive-dbc-fairfee.v1.json'
       - 'purplediamondcrew.com/**'
       - 'scripts/validate_legacy_flywheel.py'
@@ -15,9 +14,11 @@ on:
   pull_request:
     paths:
       - 'worldzpad-mainnet/legacy-flywheel/**'
+      - 'worldzpad-mainnet/fairfee/**'
       - 'worldzpad-mainnet/revive/revive-dbc-fairfee.v1.json'
       - 'purplediamondcrew.com/**'
       - 'scripts/validate_legacy_flywheel.py'
+      - '.github/workflows/validate-legacy-flywheel.yml'
 
 permissions:
   contents: read
