@@ -1,0 +1,64 @@
+name: Validate Worldz public readiness
+
+on:
+  push:
+    branches:
+      - worldz-public-readiness-2026-09-25
+    paths:
+      - 'launchpad.cryptoworldz.xyz/**'
+      - '.github/workflows/validate-worldz-public-readiness.yml'
+  pull_request:
+    paths:
+      - 'launchpad.cryptoworldz.xyz/**'
+      - '.github/workflows/validate-worldz-public-readiness.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: node --check launchpad.cryptoworldz.xyz/app.js
+      - name: Validate fail-closed public contract
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          root=Path('launchpad.cryptoworldz.xyz')
+          p=json.loads((root/'platform-config.json').read_text())
+          r=json.loads((root/'public-readiness.json').read_text())
+          html=(root/'index.html').read_text()
+          js=(root/'app.js').read_text()
+
+          assert p['publicLaunchPad'] is True
+          assert p['publicLaunchIntakeEnabled'] is True
+          assert p['publicMainnetCreatorLaunchesEnabled'] is False
+          assert p['feePolicy']['worldzLaunchPadShareOfCollectedProjectFeePercent']==10
+          assert p['feePolicy']['worldzLaunchPadShareOfTokenSupplyPercent']==0
+          assert p['feePolicy']['worldzLaunchPadShareOfInitialLiquidityPercent']==0
+          assert p['feePolicy']['walletTransferTaxPercent']==0
+
+          assert r['founding100']['totalPositions']==100
+          assert r['founding100']['poolTokens']==10_000_000
+          assert r['founding100']['tokensPerQualifiedPosition']==100_000
+          assert r['founding100']['devnetOrTestnetEligible'] is False
+          assert len(r['chains'])==8
+          assert all(x['mainnetCreatorLaunch'] is False for x in r['chains'])
+          sui=next(x for x in r['chains'] if x['id']=='sui')
+          assert sui['currentPublicExecution']=='NONE_RESEARCH_ONLY'
+
+          assert '20260925-public-readiness-v1' in html
+          assert "PUBLIC_ASSET_VERSION='20260925-public-readiness-v1'" in js
+          assert "document.body.dataset.boot='restricted'" in js
+          assert "lockExecutionUi" in js
+          assert "Public browsing, technology pages and proof information remain available." in js
+          assert "setTimeout(()=>controller.abort(),12000)" in js
+          assert "alert('WorldzLaunchPad refused to initialize" not in js
+          print('WORLDZ_PUBLIC_READINESS=PASS chains=8 mainnet=LOCKED browsing=AVAILABLE critical_fail_closed=ON runtime_timeout=12s')
