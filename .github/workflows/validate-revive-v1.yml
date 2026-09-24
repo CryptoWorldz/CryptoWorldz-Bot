@@ -52,7 +52,8 @@ jobs:
     env:
       DEVNET_PAYER_SECRET_JSON: ${{ secrets.DEVNET_PAYER_SECRET_JSON }}
       SOLANA_RPC_URL: ${{ secrets.DEVNET_SOLANA_RPC_URL }}
-    timeout-minutes: 15
+      DEVNET_PAYER_KEYPAIR_FILE: /tmp/revive-devnet-payer.json
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: worldzpad-devnet/revive-party
@@ -65,6 +66,18 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Static 75-bps MagicFee + 10 Legacy PDA proof
         run: npm run static-proof
+      - name: Generate disposable devnet payer
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        run: npm run prepare-payer
+      - name: Install Solana devnet Proof-of-Work faucet client
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        shell: bash
+        run: cargo install devnet-pow --locked
+      - name: Mine disposable devnet SOL with the PoW faucet
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        shell: bash
+        run: |
+          devnet-pow -k "$DEVNET_PAYER_KEYPAIR_FILE" -u dev mine --target-lamports 100000000
       - name: Create disposable REVIVE-style Meteora DBC pool on Solana devnet
         run: npm run dbc-proof
       - name: Independently verify devnet transaction and accounts
