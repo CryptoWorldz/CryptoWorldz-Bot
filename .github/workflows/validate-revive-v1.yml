@@ -72,7 +72,7 @@ jobs:
       - name: Install Solana devnet Proof-of-Work faucet client
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
-        run: cargo install devnet-pow --locked
+        run: cargo install devnet-pow
       - name: Mine disposable devnet SOL with the PoW faucet
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
