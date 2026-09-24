@@ -1,0 +1,163 @@
+{
+  "version": "WORLDZ-LEGACY-CONTROL-RECOVERY-2026-09-25-A",
+  "status": "PRIVATE_BUILD__READ_ONLY_AUTHORITY_AUDIT_COMPLETE__NO_TAKEOVER_AUTHORIZED",
+  "purpose": "Preserve the ten genuine Legacy tokens while separating existing platform reward systems from the Worldz Legacy Flywheel and preventing duplicate fee handling or duplicate payouts.",
+  "invariants": {
+    "automaticAuthorityTakeover": false,
+    "automaticLegacyFeeHarvesting": false,
+    "externalPlatformRewardsCountAsWorldzRevenue": false,
+    "worldzFlywheelSource": "ONLY_REVENUE_EXPLICITLY_ROUTED_INTO_WORLDZ_LEGACY_VAULTS",
+    "exactlyOnceSettlementRequired": true,
+    "failedRecipientShareRedistributed": false,
+    "roundingDustRedistributedToArbitraryWallet": false,
+    "nextEpochCannotSettleUntilPriorEpochReconciled": true
+  },
+  "settlementStateMachine": [
+    "BOUNDARY_START_CAPTURED",
+    "BOUNDARY_END_CAPTURED",
+    "ELIGIBILITY_FROZEN",
+    "ENTITLEMENTS_HASHED",
+    "PAYOUT_PREPARED",
+    "PAYOUT_SIGNED",
+    "PAYOUT_BROADCAST",
+    "PAYOUT_CONFIRMED",
+    "RECONCILED"
+  ],
+  "idempotency": {
+    "key": "legacy_mint + epoch_start_unix + epoch_end_unix + recipient_wallet + source_vault",
+    "rule": "A confirmed idempotency key can never be paid again. A broadcast-but-unconfirmed key is investigated before retry. Retrying creates no new entitlement."
+  },
+  "accounting": {
+    "epochSeconds": 21600,
+    "boundaryRule": "qualifying balance = min(start,end), and both boundaries must meet the published minimum",
+    "weighting": "50% equal eligible-wallet pool + 50% integer-square-root qualifying holdings",
+    "rounding": "floor to whole lamports; dust remains in the same Legacy vault and rolls forward",
+    "sourceDelta": "Only new Worldz-controlled receipts into the designated Legacy vault after the previous reconciled boundary are eligible for that epoch.",
+    "externalSources": [
+      "RevShare distributions",
+      "TaxSplit distributions",
+      "Token-2022 withheld transfer fees not explicitly migrated into Worldz by an owner-approved process",
+      "manual donations not explicitly tagged for the Worldz Legacy vault"
+    ],
+    "externalSourceRule": "External-source value is never swept into, inferred as, or re-labelled as Worldz Flywheel revenue."
+  },
+  "failureRecovery": {
+    "missingOrInvalidRecipient": "Keep that entitlement pending/unclaimed. Do not redistribute it to other holders.",
+    "rpcOrBroadcastUncertainty": "Check transaction/signature and vault delta before any retry.",
+    "partialBatch": "Reconcile each confirmed transfer against its idempotency key; resume only unpaid keys.",
+    "sourceVaultMismatch": "Stop the epoch and require review; never make the ledger balance by inventing or reallocating value."
+  },
+  "authorityRecoveryRules": [
+    {
+      "state": "VERIFIED_OWNER_CONTROLLED",
+      "action": "May become eligible for a later explicit signed migration to a Worldz multisig or Worldz-operated distributor after independent proof and owner approval."
+    },
+    {
+      "state": "WATCH_ONLY_DISTRIBUTION",
+      "action": "Do not assume control. Require a wallet-signature challenge or other cryptographic proof before any authority or fee-withdrawal action."
+    },
+    {
+      "state": "NONE_OR_REVOKED",
+      "action": "Treat as immutable/revoked. Do not attempt a technical takeover."
+    },
+    {
+      "state": "THIRD_PARTY_OR_UNVERIFIED",
+      "action": "Do not bypass. Preserve evidence and pursue cooperation, platform support, legal advice or an explicitly approved successor/migration design."
+    }
+  ],
+  "auditedLegacyAssets": [
+    {
+      "symbol": "PDC",
+      "mint": "F82HFwxDLKFAbQWq7BmniWWxMgUerQsVu8jS357epump",
+      "program": "SPL_TOKEN",
+      "transferFeeBps": null,
+      "authorityState": "NO_TOKEN2022_TRANSFER_FEE_CONTROL",
+      "platformProvenance": "PUMP_FUN_ORIGINAL_RECORD"
+    },
+    {
+      "symbol": "PDC1",
+      "mint": "PDC1K9aG6vAg5jFYkLin2tdTgwqZypsdvVHhHN2WnWw",
+      "program": "SPL_TOKEN",
+      "transferFeeBps": null,
+      "authorityState": "NO_TOKEN2022_TRANSFER_FEE_CONTROL",
+      "platformProvenance": "NOT_ASSERTED_BY_THIS_AUDIT"
+    },
+    {
+      "symbol": "PDC1-2",
+      "mint": "PDC1NgvtvLZwnopTfQdzXT5iAqBeGyLdFXEcqnvsR52",
+      "program": "TOKEN_2022",
+      "transferFeeBps": 300,
+      "feeConfigAuthority": null,
+      "withdrawWithheldAuthority": "4DpR79PKKQXHVZipkvb1fMAfvZNJo7ktfKdkjwrjjqAA",
+      "withdrawClassification": "WATCH_ONLY_DISTRIBUTION__CONTROL_PROOF_REQUIRED",
+      "platformProvenance": "TAXSPLIT_PUBLIC_PROVENANCE_CONFIRMED"
+    },
+    {
+      "symbol": "PDCMAGA",
+      "mint": "7mwWRQeNpwWrnNhRpC48k7xQCdjCXDWfLLuYsphupump",
+      "program": "SPL_TOKEN",
+      "transferFeeBps": null,
+      "authorityState": "NO_TOKEN2022_TRANSFER_FEE_CONTROL",
+      "platformProvenance": "NOT_ASSERTED_BY_THIS_AUDIT"
+    },
+    {
+      "symbol": "PDCSHARE",
+      "mint": "PDCLsBaTM3MxCzTWNoRvQejZ4kkhAWZiSc3ipCsoFuE",
+      "program": "TOKEN_2022",
+      "transferFeeBps": null,
+      "authorityState": "NO_TOKEN2022_TRANSFER_FEE_CONTROL",
+      "platformProvenance": "REVSHARE_PUBLIC_PROVENANCE_CONFIRMED"
+    },
+    {
+      "symbol": "PURPLEDC",
+      "mint": "9Jd67VEgqWA2K5mck7yiYGxfLrQnmrTnXXzDYE3b7MLf",
+      "program": "TOKEN_2022",
+      "transferFeeBps": 500,
+      "feeConfigAuthority": "9njAyHeC8xLVwFjiT2bwEJyAxvdh16arsE7RJ5jXFNWv",
+      "withdrawWithheldAuthority": "9njAyHeC8xLVwFjiT2bwEJyAxvdh16arsE7RJ5jXFNWv",
+      "withdrawClassification": "EXTERNAL_OR_UNCLASSIFIED__CONTROL_PROOF_REQUIRED",
+      "platformProvenance": "NOT_ASSERTED_BY_THIS_AUDIT"
+    },
+    {
+      "symbol": "PURPLEOG",
+      "mint": "DyZP9zn6vRu8J8XCQLNCREgCc12YN4JndnrmE5Upump",
+      "program": "SPL_TOKEN",
+      "transferFeeBps": null,
+      "authorityState": "NO_TOKEN2022_TRANSFER_FEE_CONTROL",
+      "platformProvenance": "NOT_ASSERTED_BY_THIS_AUDIT"
+    },
+    {
+      "symbol": "PCC1",
+      "mint": "DcekG6rLbQ3K5LtZfSMLgecfqnFAZgJUSpoY7tBgmuGv",
+      "program": "SPL_TOKEN",
+      "transferFeeBps": null,
+      "authorityState": "NO_TOKEN2022_TRANSFER_FEE_CONTROL",
+      "platformProvenance": "NOT_ASSERTED_BY_THIS_AUDIT"
+    },
+    {
+      "symbol": "INVEST",
+      "mint": "VeSt6vaWE5JsT36sVCzL21daiY7nNNs73TJcJMHgnjC",
+      "program": "TOKEN_2022",
+      "transferFeeBps": 200,
+      "feeConfigAuthority": null,
+      "withdrawWithheldAuthority": "Hd3cMfHMHQe4j8xfpnbDkWEgDo4gbrH2eimh6vpxjC37",
+      "withdrawClassification": "WATCH_ONLY_DISTRIBUTION__CONTROL_PROOF_REQUIRED",
+      "platformProvenance": "TAX_REWARD_MODEL_PUBLIC__LAUNCH_PLATFORM_NOT_YET_PROVEN"
+    },
+    {
+      "symbol": "LMTD",
+      "mint": "Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY",
+      "program": "TOKEN_2022",
+      "transferFeeBps": 500,
+      "feeConfigAuthority": null,
+      "withdrawWithheldAuthority": "5CuzpfiXz5hCEgbeLa2rzNmxtZELRm7N5JSafoqm9aok",
+      "withdrawClassification": "EXTERNAL_OR_UNCLASSIFIED__CONTROL_PROOF_REQUIRED",
+      "platformProvenance": "TAX_REWARD_MODEL_PUBLIC__LAUNCH_PLATFORM_NOT_YET_PROVEN"
+    }
+  ],
+  "proofSources": {
+    "onchainAuthorityAudit": "worldzpad-devnet/revive-party/scripts/05_legacy_authority_audit.mjs",
+    "generatedArtifact": "worldzpad-devnet/revive-party/artifacts/legacy-authority-audit.json",
+    "liveMutationPerformed": false
+  }
+}
