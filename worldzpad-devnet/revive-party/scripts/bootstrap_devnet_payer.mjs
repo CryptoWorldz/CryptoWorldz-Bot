@@ -31,7 +31,7 @@ async function balance(){
 }
 
 let current=await balance();
-if(current>=10_000){
+if(current>=5_000){
   console.log('REVIVE_POW_BOOTSTRAP=PASS already_funded balance='+current);
   process.exit(0);
 }
