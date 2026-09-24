@@ -57,7 +57,7 @@ jobs:
           node-version: '22'
       - name: Install pinned REVIVE proof SDKs
         working-directory: worldzpad-devnet/revive-party
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Syntax-check network proof scripts
         working-directory: worldzpad-devnet/revive-party
         run: |
@@ -78,15 +78,13 @@ jobs:
       - name: Compile-check Legacy router Rust program
         working-directory: worldzpad-devnet/revive-party
         run: cargo check --locked --manifest-path router-program/Cargo.toml
-      - name: Emit updated npm lockfile for capture
+      - name: Prove dependency lockfiles are reproducible
         working-directory: worldzpad-devnet/revive-party
         shell: bash
         run: |
           test -s package-lock.json
-          printf 'REVIVE_PACKAGE_LOCK_B64='
-          base64 -w0 package-lock.json
-          printf '\n'
           test -s router-program/Cargo.lock
+          git diff --exit-code -- package-lock.json router-program/Cargo.lock
 
   devnet-stage-a:
     if: github.event_name == 'push'
@@ -107,7 +105,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install pinned Solana + Meteora SDKs
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Static 75-bps MagicFee + 10 Legacy PDA proof
         run: npm run static-proof
       - name: Static partner router + six-hour HODLer settlement proof
@@ -191,7 +189,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install pinned SDKs
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Capture one read-only mainnet Legacy holder boundary
         run: npm run legacy-live-snapshot
       - name: Print holder-boundary evidence summary
@@ -224,7 +222,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install locked proof dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Audit all ten Legacy mint authorities read-only
         run: npm run legacy-authority-audit
       - name: Print Legacy authority evidence digest
