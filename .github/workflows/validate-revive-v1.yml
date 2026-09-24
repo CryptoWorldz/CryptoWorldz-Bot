@@ -47,7 +47,6 @@ jobs:
           ! grep -q 'claim_signature.*update' supabase/functions/revive-claim/index.ts
 
   devnet-stage-a:
-    if: github.event_name == 'push'
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 15
