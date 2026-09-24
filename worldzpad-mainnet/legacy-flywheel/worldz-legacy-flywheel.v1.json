@@ -1,5 +1,5 @@
 {
-  "version": "WORLDZ-LEGACY-FLYWHEEL-2026-09-24-B",
+  "version": "WORLDZ-LEGACY-FLYWHEEL-2026-09-25-C",
   "status": "PRIVATE_BUILD__DEVNET_REQUIRED__MAINNET_DISABLED",
   "name": "Legacy Flywheel™",
   "purpose": "Use fee revenue from new WorldzLaunchPad launches to create recurring SOL rewards for qualifying holders of the 10 verified PurpleDiamondCrew legacy mints.",
@@ -261,6 +261,10 @@
       {
         "label": "INVEST Distribution",
         "address": "Hd3cMfHMHQe4j8xfpnbDkWEgDo4gbrH2eimh6vpxjC37"
+      },
+      {
+        "label": "NBC Distribution",
+        "address": "PdABvvq4F7YjwsVRq2CCQeBNZTBq5WfkQvn8VmhRY34"
       },
       {
         "label": "PDC1 Distribution",
