@@ -39,13 +39,20 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Static Worldz Safe Launch proof
         run: npm run static-proof
-      - name: Install Sui Testnet CLI with official suiup
+      - name: Install pinned official suiup + Sui Testnet CLI
         shell: bash
         run: |
-          cargo install --git https://github.com/MystenLabs/suiup.git --locked
+          SUIUP_VERSION=v0.0.14
+          SUIUP_SHA256=c0b9fea95d52c4c5855478c3ee56e58e446614f32300dbd41fcc637a2e09878a
+          curl -fsSL "https://github.com/MystenLabs/suiup/releases/download/$SUIUP_VERSION/suiup-Linux-musl-x86_64.tar.gz" -o /tmp/suiup.tar.gz
+          echo "$SUIUP_SHA256  /tmp/suiup.tar.gz" | sha256sum -c -
+          mkdir -p "$HOME/.local/bin" /tmp/suiup-unpack
+          tar -xzf /tmp/suiup.tar.gz -C /tmp/suiup-unpack
+          install -m 0755 /tmp/suiup-unpack/suiup "$HOME/.local/bin/suiup"
+          export PATH="$HOME/.local/bin:$PATH"
           suiup install sui@testnet
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          "$HOME/.local/bin/sui" --version
+          sui --version
       - name: Compile Move template
         shell: bash
         run: |
@@ -78,13 +85,20 @@ jobs:
           node-version: '22'
       - name: Install SDK
         run: npm install --no-audit --no-fund
-      - name: Install Sui Testnet CLI and compile exact template
+      - name: Install pinned Sui CLI and compile exact template
         shell: bash
         run: |
-          cargo install --git https://github.com/MystenLabs/suiup.git --locked
+          SUIUP_VERSION=v0.0.14
+          SUIUP_SHA256=c0b9fea95d52c4c5855478c3ee56e58e446614f32300dbd41fcc637a2e09878a
+          curl -fsSL "https://github.com/MystenLabs/suiup/releases/download/$SUIUP_VERSION/suiup-Linux-musl-x86_64.tar.gz" -o /tmp/suiup.tar.gz
+          echo "$SUIUP_SHA256  /tmp/suiup.tar.gz" | sha256sum -c -
+          mkdir -p "$HOME/.local/bin" /tmp/suiup-unpack
+          tar -xzf /tmp/suiup.tar.gz -C /tmp/suiup-unpack
+          install -m 0755 /tmp/suiup-unpack/suiup "$HOME/.local/bin/suiup"
+          export PATH="$HOME/.local/bin:$PATH"
           suiup install sui@testnet
           mkdir -p artifacts
-          "$HOME/.local/bin/sui" move build --path template --dump-bytecode-as-base64 > artifacts/template-bytecode.json
+          sui move build --path template --dump-bytecode-as-base64 > artifacts/template-bytecode.json
       - name: Publish immutable package and create fixed-supply proof currency
         run: npm run publish-proof
       - name: Print on-chain proof
