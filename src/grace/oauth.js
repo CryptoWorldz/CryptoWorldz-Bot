@@ -122,6 +122,10 @@ function createXOAuthService(options = {}) {
     encryptionKey(encryptionSecret);
   }
 
+  async function listAccounts() {
+    return repository.listXAccounts();
+  }
+
   async function beginConnection(accountId, actorTelegramId) {
     requireConfigured();
     const account = await repository.getXAccount(accountId);
@@ -324,7 +328,8 @@ function createXOAuthService(options = {}) {
     beginConnection,
     completeConnection,
     configured,
-    getAccessToken
+    getAccessToken,
+    listAccounts
   };
 }
 
