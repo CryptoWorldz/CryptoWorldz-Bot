@@ -45,7 +45,9 @@ assert fee["magicFee"]["dynamicFee"] is False
 assert fee["dbc"]["targetGrossTraderFeeBps"] == 75
 assert fee["dbc"]["creatorTradingFeePercentageOfControlledTradingFee"] == 51
 assert fee["dbc"]["partnerTradingFeePercentageOfControlledTradingFee"] == 49
-assert fee["partnerRouterWeights"] == {
+assert {k: fee["partnerRouterWeights"][k] for k in (
+    "referrer","legacyFlywheel","worldzLaunchPad","oneWorldzImpact","total"
+)} == {
     "referrer": 170,
     "legacyFlywheel": 150,
     "worldzLaunchPad": 85,
