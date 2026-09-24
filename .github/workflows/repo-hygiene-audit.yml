@@ -1,0 +1,136 @@
+name: Repository Hygiene Audit
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/repo-hygiene-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit tracked repository files
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, re, json, hashlib
+          from pathlib import Path
+          from collections import defaultdict, Counter
+
+          root = Path(".")
+          skip_dirs = {".git", "node_modules", ".next", "dist", "build"}
+          media_ext = {".png",".jpg",".jpeg",".webp",".gif",".svg",".ico",".avif",".mp3",".m4a",".wav",".mp4",".mov"}
+          text_ext = {
+              ".html",".css",".js",".mjs",".cjs",".ts",".tsx",".jsx",".json",".md",".yml",".yaml",
+              ".py",".sh",".txt",".xml",".php",".sql",".example",".gitignore",".marker",".b64"
+          }
+
+          files=[]
+          for p in root.rglob("*"):
+              if not p.is_file():
+                  continue
+              if any(part in skip_dirs for part in p.parts):
+                  continue
+              rel=p.as_posix().lstrip("./")
+              try: size=p.stat().st_size
+              except: size=0
+              files.append((p,rel,size))
+
+          text_cache={}
+          for p,rel,size in files:
+              if p.suffix.lower() in text_ext or p.name in {".gitignore",".env.example"}:
+                  try:
+                      text_cache[rel]=p.read_text(encoding="utf-8", errors="ignore")
+                  except Exception:
+                      pass
+
+          def top_scope(rel):
+              return rel.split("/",1)[0] if "/" in rel else ""
+
+          def referenced(rel):
+              p=Path(rel)
+              base=p.name
+              scope=top_scope(rel)
+              scoped_rel=rel.split("/",1)[1] if "/" in rel else rel
+              needles={rel, scoped_rel, base, "./"+base, "/"+base}
+              for tpath,txt in text_cache.items():
+                  if tpath == rel:
+                      continue
+                  # Prefer same-site/domain references for generic basenames such as hero.png.
+                  same_scope = top_scope(tpath)==scope
+                  for n in needles:
+                      if not n:
+                          continue
+                      if n in {base,"./"+base,"/"+base} and base.lower()=="hero.png" and not same_scope:
+                          continue
+                      if n in txt:
+                          return True, tpath, n
+              return False, None, None
+
+          media=[]
+          for p,rel,size in files:
+              if p.suffix.lower() in media_ext:
+                  ref,by,needle=referenced(rel)
+                  media.append({"path":rel,"size":size,"referenced":ref,"reference_file":by,"needle":needle})
+
+          # Exact duplicate file content.
+          sha_groups=defaultdict(list)
+          for p,rel,size in files:
+              try:
+                  h=hashlib.sha256(p.read_bytes()).hexdigest()
+                  sha_groups[(h,size)].append(rel)
+              except Exception:
+                  pass
+          duplicates=[]
+          for (h,size),paths in sha_groups.items():
+              if len(paths)>1:
+                  duplicates.append({"size":size,"count":len(paths),"wasted_bytes":size*(len(paths)-1),"paths":paths})
+          duplicates.sort(key=lambda x:x["wasted_bytes"], reverse=True)
+
+          suspicious_patterns = re.compile(r"(\.b64$|(^|/)(tmp|temp|backup|backups|archive|archives|generated|artifacts?|screenshots?|test-output|results?)(/|$)|\.bak$|\.old$|~$)", re.I)
+          suspicious=[]
+          for p,rel,size in files:
+              if suspicious_patterns.search(rel):
+                  ref,by,needle=referenced(rel)
+                  suspicious.append({"path":rel,"size":size,"referenced":ref,"reference_file":by})
+
+          # Large tracked blobs.
+          largest=sorted(
+              [{"path":rel,"size":size} for p,rel,size in files],
+              key=lambda x:x["size"], reverse=True
+          )[:80]
+
+          # Site/domain roots and file counts.
+          roots=Counter()
+          root_bytes=Counter()
+          for p,rel,size in files:
+              key=top_scope(rel) or "(root)"
+              roots[key]+=1
+              root_bytes[key]+=size
+
+          report={
+              "summary":{
+                  "tracked_files":len(files),
+                  "tracked_bytes":sum(s for _,_,s in files),
+                  "media_files":len(media),
+                  "unreferenced_media":sum(1 for x in media if not x["referenced"]),
+                  "duplicate_groups":len(duplicates),
+                  "suspicious_files":len(suspicious),
+              },
+              "unreferenced_media":[x for x in media if not x["referenced"]],
+              "referenced_media":[x for x in media if x["referenced"]],
+              "duplicates":duplicates[:100],
+              "suspicious":suspicious,
+              "largest":largest,
+              "roots":[{"root":k,"files":roots[k],"bytes":root_bytes[k]} for k in sorted(roots)],
+          }
+          print("REPO_HYGIENE_JSON_BEGIN")
+          print(json.dumps(report, indent=2))
+          print("REPO_HYGIENE_JSON_END")
+          PY
