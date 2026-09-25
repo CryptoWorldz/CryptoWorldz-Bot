@@ -39,7 +39,7 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Static Worldz Safe Launch proof
         run: npm run static-proof
-      - name: Install pinned official suiup + Sui Testnet CLI
+      - name: Install pinned official suiup + Sui Devnet CLI
         shell: bash
         run: |
           SUIUP_VERSION=v0.0.14
@@ -50,7 +50,7 @@ jobs:
           tar -xzf /tmp/suiup.tar.gz -C /tmp/suiup-unpack
           install -m 0755 /tmp/suiup-unpack/suiup "$HOME/.local/bin/suiup"
           export PATH="$HOME/.local/bin:$PATH"
-          suiup install sui@testnet --yes
+          suiup install sui@devnet --yes
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           sui --version
       - name: Compile Move template
@@ -70,7 +70,7 @@ jobs:
           base64 -w0 package-lock.json
           printf '\n'
 
-  testnet-onchain:
+  devnet-onchain:
     if: github.event_name == 'push'
     needs: compile
     runs-on: ubuntu-latest
@@ -96,7 +96,7 @@ jobs:
           tar -xzf /tmp/suiup.tar.gz -C /tmp/suiup-unpack
           install -m 0755 /tmp/suiup-unpack/suiup "$HOME/.local/bin/suiup"
           export PATH="$HOME/.local/bin:$PATH"
-          suiup install sui@testnet --yes
+          suiup install sui@devnet --yes
           mkdir -p artifacts
           # First normal build initializes Sui's local client config outside redirected JSON.
           sui move build --path template
@@ -106,8 +106,8 @@ jobs:
       - name: Print on-chain proof
         shell: bash
         run: |
-          cat artifacts/sui-testnet-onchain-proof.json
-          sha256sum artifacts/sui-testnet-onchain-proof.json artifacts/template-bytecode.json
-          printf 'SUI_TESTNET_PROOF_B64='
-          base64 -w0 artifacts/sui-testnet-onchain-proof.json
+          cat artifacts/sui-devnet-onchain-proof.json
+          sha256sum artifacts/sui-devnet-onchain-proof.json artifacts/template-bytecode.json
+          printf 'SUI_DEVNET_PROOF_B64='
+          base64 -w0 artifacts/sui-devnet-onchain-proof.json
           printf '\n'
