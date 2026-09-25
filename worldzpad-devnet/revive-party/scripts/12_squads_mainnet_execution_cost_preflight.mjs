@@ -286,6 +286,7 @@ const createOnly=compileCandidate('vault_transaction_create',[vaultCreateIx]);
 const executeOnly=compileCandidate('execute',[executeIx],lookupTableAccounts);
 
 const candidates=[atomic,setup,proposalApprove,createOnly,executeOnly];
+console.log('REVIVE_SQUADS_TX_SIZE_DIAGNOSTIC='+JSON.stringify(candidates.map(x=>({name:x.name,bytes:x.bytes,fits:x.fits,error:x.error}))));
 for(const x of candidates){
   if(x.message&&x.fits){
     const fee=await connection.getFeeForMessage(x.message,'confirmed');
