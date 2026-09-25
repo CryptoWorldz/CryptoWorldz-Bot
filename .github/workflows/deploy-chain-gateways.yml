@@ -43,14 +43,23 @@ jobs:
             'solworldz.xyz','ethworldz.xyz','baseworldz.xyz','bnbworldz.xyz',
             'xrpworldz.xyz','suiworldz.xyz','hyperworldz.xyz','robinworldz.xyz'
           ]
+          logos={
+            'solworldz.xyz':'solworldz.webp','ethworldz.xyz':'ethworldz.webp',
+            'baseworldz.xyz':'baseworldz.webp','bnbworldz.xyz':'bnbworldz.webp',
+            'xrpworldz.xyz':'xrpworldz.webp','suiworldz.xyz':'suiworldz.webp',
+            'hyperworldz.xyz':'hyperworldz.webp','robinworldz.xyz':'robinworldz.webp',
+          }
           for host in hosts:
               root=Path(host)
+              logo=logos[host]
               html=(root/'index.html').read_text(encoding='utf-8')
               assert 'data-build="2026-09-24-chain-launch-gateway-v1"' in html, host
               assert 'src="/hero.jpg"' in html, host
+              assert f'src="/assets/mobile/{logo}"' in html, host
               assert '<style>' in html, host
               assert '/style.css' not in html, host
               assert (root/'hero.jpg').is_file(), host
+              assert (root/'assets'/'mobile'/logo).is_file(), host
               assert not (root/'hero.png').exists(), host
           print('CHAIN_GATEWAY_SOURCE=PASS count=8')
 
@@ -70,6 +79,12 @@ jobs:
             'suiworldz.xyz':'domains/suiworldz.xyz/public_html',
             'hyperworldz.xyz':'domains/hyperworldz.xyz/public_html',
             'robinworldz.xyz':'domains/robinworldz.xyz/public_html',
+          }
+          logos={
+            'solworldz.xyz':'solworldz.webp','ethworldz.xyz':'ethworldz.webp',
+            'baseworldz.xyz':'baseworldz.webp','bnbworldz.xyz':'bnbworldz.webp',
+            'xrpworldz.xyz':'xrpworldz.webp','suiworldz.xyz':'suiworldz.webp',
+            'hyperworldz.xyz':'hyperworldz.webp','robinworldz.xyz':'robinworldz.webp',
           }
 
           def connect():
@@ -94,6 +109,13 @@ jobs:
               for old in ('hero.png','style.css','mobile-safe.css','global-image-overrides.css'):
                   try: ftp.delete(old)
                   except Exception: pass
+              for dirname in ('assets','mobile'):
+                  try: ftp.mkd(dirname)
+                  except Exception: pass
+                  ftp.cwd(dirname)
+              logo=logos[host]
+              with (Path(host)/'assets'/'mobile'/logo).open('rb') as fh:
+                  ftp.storbinary('STOR '+logo,fh,blocksize=262144)
               try: ftp.quit()
               except Exception: ftp.close()
               print('CHAIN_GATEWAY_DEPLOYED',host)
@@ -105,17 +127,17 @@ jobs:
         run: |
           import concurrent.futures,time,urllib.request
           expected={
-            'https://solworldz.xyz/':('SolWorldz','https://launchpad.cryptoworldz.xyz/devnet/'),
-            'https://ethworldz.xyz/':('EthWorldz','network=ethereum-sepolia'),
-            'https://baseworldz.xyz/':('BaseWorldz','https://launchpad.cryptoworldz.xyz/base/'),
-            'https://bnbworldz.xyz/':('BNBWorldz','network=bsc-testnet'),
-            'https://xrpworldz.xyz/':('XRPWorldz','https://launchpad.cryptoworldz.xyz/xrpl/'),
-            'https://suiworldz.xyz/':('SuiWorldz','https://launchpad.cryptoworldz.xyz/omnichain/'),
-            'https://hyperworldz.xyz/':('HyperWorldz','network=hyperevm-testnet'),
-            'https://robinworldz.xyz/':('RobinWorldz','network=robinhood-testnet'),
+            'https://solworldz.xyz/':('SolWorldz','https://launchpad.cryptoworldz.xyz/devnet/','solworldz.webp'),
+            'https://ethworldz.xyz/':('EthWorldz','network=ethereum-sepolia','ethworldz.webp'),
+            'https://baseworldz.xyz/':('BaseWorldz','https://launchpad.cryptoworldz.xyz/base/','baseworldz.webp'),
+            'https://bnbworldz.xyz/':('BNBWorldz','network=bsc-testnet','bnbworldz.webp'),
+            'https://xrpworldz.xyz/':('XRPWorldz','https://launchpad.cryptoworldz.xyz/xrpl/','xrpworldz.webp'),
+            'https://suiworldz.xyz/':('SuiWorldz','https://launchpad.cryptoworldz.xyz/omnichain/','suiworldz.webp'),
+            'https://hyperworldz.xyz/':('HyperWorldz','network=hyperevm-testnet','hyperworldz.webp'),
+            'https://robinworldz.xyz/':('RobinWorldz','network=robinhood-testnet','robinworldz.webp'),
           }
           def check(item):
-              url,(name,route)=item
+              url,(name,route,logo)=item
               last=''
               for attempt in range(1,6):
                   try:
@@ -130,8 +152,20 @@ jobs:
                               'data-build="2026-09-24-chain-launch-gateway-v1"' in body and
                               name in body and route in body and
                               'src="/hero.jpg"' in body and
+                              f'src="/assets/mobile/{logo}"' in body and
                               '/style.css' not in body)
-                          if ok:return url,True,''
+                          if ok:
+                              asset_url=url.rstrip('/')+'/assets/mobile/'+logo+f'?gateway={stamp}'
+                              asset_req=urllib.request.Request(asset_url,headers={
+                                'User-Agent':'Worldz-Chain-Gateway-Verify/1.0',
+                                'Cache-Control':'no-cache, no-store','Pragma':'no-cache'
+                              })
+                              with urllib.request.urlopen(asset_req,timeout=25) as asset_r:
+                                  asset=asset_r.read()
+                                  if asset_r.status==200 and len(asset)>4000 and asset[:4]==b'RIFF' and asset[8:12]==b'WEBP':
+                                      return url,True,''
+                              last='logo asset mismatch'
+                              continue
                           last=f'contract mismatch status={r.status}'
                   except Exception as e:last=repr(e)
                   time.sleep(attempt*2)
