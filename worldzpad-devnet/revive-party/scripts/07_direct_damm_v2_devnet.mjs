@@ -24,6 +24,7 @@ import {
   getBaseFeeParams,
   getCurrentPoint,
   getSqrtPriceFromPrice,
+  getUnClaimLpFee,
 } from '@meteora-ag/cp-amm-sdk';
 import BN from 'bn.js';
 
@@ -141,10 +142,14 @@ const swapTx=await cpAmm.swap2({
 const swapSig=await sendAndConfirmTransaction(connection,swapTx,[payer],{commitment:'confirmed'});
 
 // Claim LP-position fees from the permanently locked position.
+// Native-SOL claims unwrap wSOL, so verify the actual claim through the position's
+// on-chain cumulative claimed-fee metric instead of an ATA balance that gets closed.
 poolState=await cpAmm.fetchPoolState(pool);
 positionState=await cpAmm.fetchPositionState(position);
-const wsolAta=await getOrCreateAssociatedTokenAccount(connection,payer,NATIVE_MINT,payer.publicKey);
-const beforeClaim=wsolAta.amount;
+const unclaimedBefore=getUnClaimLpFee(poolState,positionState);
+const claimableQuoteRaw=BigInt(unclaimedBefore.feeTokenB.toString());
+if(claimableQuoteRaw<=0n)throw new Error('locked position has no quote fee available to claim');
+const claimedBeforeRaw=BigInt(positionState.metrics.totalClaimedBFee.toString());
 const positionNftAccount=derivePositionNftAccount(positionNft.publicKey);
 const claimTx=await cpAmm.claimPositionFee({
   receiver:null,
@@ -160,11 +165,11 @@ const claimTx=await cpAmm.claimPositionFee({
   tokenBProgram:TOKEN_PROGRAM_ID,
 });
 const claimSig=await sendAndConfirmTransaction(connection,claimTx,[payer],{commitment:'confirmed'});
-const afterClaim=(await getOrCreateAssociatedTokenAccount(connection,payer,NATIVE_MINT,payer.publicKey)).amount;
-const claimedQuoteRaw=afterClaim-beforeClaim;
-if(claimedQuoteRaw<=0n)throw new Error('locked position fee claim produced no quote-token receipt');
-
 const finalPosition=await cpAmm.fetchPositionState(position);
+const claimedAfterRaw=BigInt(finalPosition.metrics.totalClaimedBFee.toString());
+const claimedQuoteRaw=claimedAfterRaw-claimedBeforeRaw;
+if(claimedQuoteRaw<=0n)throw new Error('locked position fee claim did not increase on-chain claimed quote fees');
+if(claimedQuoteRaw>claimableQuoteRaw)throw new Error('claimed quote fee exceeded pre-claim entitlement');
 if(finalPosition.permanentLockedLiquidity.lte(new BN(0)))throw new Error('permanent lock disappeared after fee claim');
 if(!finalPosition.unlockedLiquidity.isZero())throw new Error('locked position became removable');
 
