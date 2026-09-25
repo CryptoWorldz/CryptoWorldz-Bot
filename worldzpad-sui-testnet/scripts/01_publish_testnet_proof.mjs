@@ -9,8 +9,8 @@ if(!Array.isArray(bytecode.modules)||bytecode.modules.length<1)throw new Error('
 if(!Array.isArray(bytecode.dependencies)||bytecode.dependencies.length<1)throw new Error('compiled dependencies missing');
 
 const client=new SuiGrpcClient({
-  network:'testnet',
-  baseUrl:'https://fullnode.testnet.sui.io:443',
+  network:'devnet',
+  baseUrl:'https://fullnode.devnet.sui.io:443',
 });
 const keypair=new Ed25519Keypair();
 const address=keypair.toSuiAddress();
@@ -18,7 +18,7 @@ const address=keypair.toSuiAddress();
 let faucetError=null;
 for(let attempt=1;attempt<=4;attempt++){
   try{
-    await requestSuiFromFaucetV2({host:getFaucetHost('testnet'),recipient:address});
+    await requestSuiFromFaucetV2({host:getFaucetHost('devnet'),recipient:address});
     faucetError=null;
     break;
   }catch(e){
@@ -26,7 +26,7 @@ for(let attempt=1;attempt<=4;attempt++){
     await new Promise(r=>setTimeout(r,attempt*5000));
   }
 }
-if(faucetError)throw new Error('Sui testnet faucet unavailable after retries: '+faucetError.message);
+if(faucetError)throw new Error('Sui devnet faucet unavailable after retries: '+faucetError.message);
 
 let balance=0n;
 for(let i=0;i<12;i++){
@@ -120,8 +120,8 @@ for(let i=0;i<10;i++){
 if(observedRaw!==rawSupply)throw new Error('fixed supply balance mismatch expected='+rawSupply+' observed='+observedRaw);
 
 const proof={
-  proof:'WORLDZ_SUI_NATIVE_TESTNET_ONCHAIN',
-  network:'sui-testnet',
+  proof:'WORLDZ_SUI_NATIVE_DEVNET_ONCHAIN',
+  network:'sui-devnet',
   sdk:'@mysten/sui@2.31.3',
   packageId,
   coinType,
@@ -138,8 +138,8 @@ const proof={
   regulated:false,
   walletTransferTax:false,
   mainnetExecution:false,
-  note:'Disposable proof package and coin. The ephemeral proof key is not persisted.',
+  note:'Disposable Devnet proof package and coin. The ephemeral proof key is not persisted. Testnet and mainnet remain separate release gates.',
 };
 fs.mkdirSync('artifacts',{recursive:true});
-fs.writeFileSync('artifacts/sui-testnet-onchain-proof.json',JSON.stringify(proof,null,2)+'\n');
-console.log('WORLDZ_SUI_TESTNET=PASS package='+packageId+' coinType='+coinType+' publish='+pub.digest+' initialize='+initResult.Transaction.digest+' supply='+rawSupply+' immutable=YES mainnet=LOCKED');
+fs.writeFileSync('artifacts/sui-devnet-onchain-proof.json',JSON.stringify(proof,null,2)+'\n');
+console.log('WORLDZ_SUI_DEVNET=PASS package='+packageId+' coinType='+coinType+' publish='+pub.digest+' initialize='+initResult.Transaction.digest+' supply='+rawSupply+' immutable=YES mainnet=LOCKED');
