@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-25-A",
+  "version": "2026-09-25-B",
   "canonicalIdentity": {
     "name": "WORLDZ",
     "symbol": "WLDZ",
@@ -29,7 +29,8 @@
     "distribution": "https://launchpad.cryptoworldz.xyz/wldz/distribution.json",
     "fees": "https://launchpad.cryptoworldz.xyz/wldz/fees.json",
     "circulatingSupply": "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php",
-    "circulatingSupplyPlain": "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php?format=plain"
+    "circulatingSupplyPlain": "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php?format=plain",
+    "listingVerification": "https://launchpad.cryptoworldz.xyz/wldz/listing-verification.json"
   },
   "market": {
     "dex": "Meteora",
@@ -45,15 +46,20 @@
     "Jupiter": {
       "page": "https://jup.ag/tokens/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
       "verification": "https://verified.jup.ag/dashboard/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
-      "status": "recognized; verification/metadata review pending; price currently withheld"
+      "status": "recognized by Jupiter token API; name/symbol and price remain incomplete until upstream verification/metadata review improves",
+      "freeAction": "Use VRFD Verify / Update Metadata with a connected wallet; VRFD submissions are human/community reviewed."
     },
     "Solscan": {
       "submission": "https://solscan.io/token-update",
-      "status": "public token profile still pending"
+      "status": "official Token Update route ready; submission requires requester details and email",
+      "freeAction": "Use the free official Token Update form. Solscan prefers a project-domain email; otherwise the requester email should be listed on the official website."
     },
     "CoinGecko": {
       "submission": "https://partner.coingecko.com/request-form/new",
-      "status": "issuer submission not yet confirmed"
+      "status": "0 CoinGecko search results for the canonical WLDZ mint as of 2026-09-25",
+      "freeAction": "Regular Pass listing is available after account login. Publish the required verification post from an official social account linked from the project website and submit the Meteora DAMM V2 market.",
+      "marketEligibilityEvidence": "CoinGecko tracks Meteora and Meteora DAMM V2 as Solana DEX venues.",
+      "verificationPack": "https://launchpad.cryptoworldz.xyz/wldz/listing-verification.json"
     },
     "GeckoTerminal": {
       "page": "https://www.geckoterminal.com/solana/pools/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
@@ -66,11 +72,13 @@
     "DexScreener": {
       "page": "https://dexscreener.com/solana/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
       "listing": "automatic after supported liquidity pool + transaction",
-      "status": "pair API indexing pending"
+      "status": "canonical token and exact pool currently return no pair from DEX Screener API; listing is automatic once DEX Screener indexes the supported pool and transaction activity",
+      "freeAction": "No separate free listing form is documented; keep canonical pool active and metadata consistent. DEX Screener can later inherit token information from external token lists such as CoinGecko."
     },
     "Phantom": {
       "page": "https://phantom.com/tokens/solana/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
-      "status": "WORLDZ/WLDZ metadata recognized; unverified; price pending"
+      "status": "WORLDZ / WLDZ recognized; currently shown as unverified",
+      "freeAction": "Phantom has no direct verification form; improve trusted upstream recognition such as Jupiter VRFD and CoinGecko."
     },
     "Birdeye": {
       "page": "https://birdeye.so/solana/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
