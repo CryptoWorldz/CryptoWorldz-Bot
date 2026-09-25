@@ -1,0 +1,32 @@
+name: Diagnose REVIVE Recent Signatures
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-revive-recent-signatures.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect recent member signatures
+        shell: python
+        run: |
+          import json, urllib.request
+          RPC='https://api.mainnet-beta.solana.com'
+          MEMBER='Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u'
+          def rpc(method,params):
+              b=json.dumps({'jsonrpc':'2.0','id':1,'method':method,'params':params}).encode()
+              req=urllib.request.Request(RPC,data=b,headers={'Content-Type':'application/json'},method='POST')
+              with urllib.request.urlopen(req,timeout=30) as r: j=json.loads(r.read().decode())
+              if 'error' in j: raise RuntimeError(j['error'])
+              return j['result']
+          rows=rpc('getSignaturesForAddress',[MEMBER,{'limit':25,'commitment':'confirmed'}])
+          for x in rows:
+              print(json.dumps({k:x.get(k) for k in ['signature','slot','blockTime','confirmationStatus','err','memo']}))
