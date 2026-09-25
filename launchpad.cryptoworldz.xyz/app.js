@@ -106,6 +106,7 @@ function renderProof(){
     ['0% platform token-supply share',platform.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent===0,'HARD RULE'],
     ['0% platform initial-liquidity share',platform.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent===0,'HARD RULE'],
     ['Base Sepolia token adapter',platform.baseEvmFair?.status==='BASE_SEPOLIA_BETA','TESTNET'],
+    ['Sui native fixed-supply adapter',platform.suiNative?.status==='DEVNET_BETA','DEVNET'],
     ['Founding 100 registry',platform.founding100?.totalPositions===100,'100 POSITIONS'],
     ['Worldz Trust Orbit',platform.trustOrbit?.status==='PUBLIC_BETA_LIVE','PROOF PASSPORT'],
     ['Treasury Multisig vault registered',!!treasury.vaultAddress,treasury.vaultAddress?shortAddress(treasury.vaultAddress):'PENDING'],

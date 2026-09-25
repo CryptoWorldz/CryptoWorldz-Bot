@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-23-public-launchpad-v18-temporary-wldz-1of2",
+  "version": "2026-09-25-public-launchpad-v19-sui-devnet",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -74,6 +74,13 @@
       "status": "BASE_SEPOLIA_BETA",
       "underlay": "Worldz fixed-supply ERC-20 template",
       "description": "Base Sepolia fixed-supply token deployment with direct disclosed genesis allocation. Mainnet liquidity, fee-routing and LP-lock adapters remain fail-closed."
+    },
+    {
+      "id": "sui-fixed",
+      "name": "Worldz Sui Native™",
+      "status": "DEVNET_BETA",
+      "underlay": "Sui Currency Standard / CoinRegistry",
+      "description": "Creator-wallet publication of the audited immutable Worldz Move package followed by fixed-supply Currency initialization. TreasuryCap and MetadataCap do not survive the supported preset; mainnet and market execution remain separately gated."
     }
   ],
   "chainAdapters": [
@@ -142,8 +149,13 @@
       "id": "sui",
       "name": "Sui",
       "world": "SuiWorldz",
-      "status": "NATIVE_ADAPTER_RESEARCH",
-      "creatorLaunch": "OFF"
+      "status": "DEVNET_BETA",
+      "creatorLaunch": "SUI_DEVNET_FIXED_SUPPLY",
+      "mainnetCreatorLaunch": "OFF",
+      "engine": "sui-fixed",
+      "proofPackage": "0x7837fa37bd36dbf51968c156b6042ae74630e7c6a75a27d6e7b9ff4fb75e662b",
+      "proofPublishDigest": "3zDRqXgoDJwvaWaNFLESffVof5WaThgAPVN1F1pVprzR",
+      "proofInitializeDigest": "AuHszu6fsK3zC1RW9FevTG8rTYv2BMjvMiFN3NUW9HCv"
     }
   ],
   "verifiedQuoteAssets": [
@@ -186,7 +198,8 @@
       "robinhood-testnet-token",
       "bsc-testnet-token",
       "hyperevm-testnet-token",
-      "xrpl-testnet-trustline-amm"
+      "xrpl-testnet-trustline-amm",
+      "sui-devnet-fixed-supply"
     ],
     "mainnetAdaptersEnabled": [],
     "rule": "OmniChain is a common project/proof architecture. Each chain is executable only when its chain-native adapter is independently verified; a visual World does not imply a live launch adapter."
@@ -771,5 +784,45 @@
     "scope": "Current core operational vault only",
     "publicCreatorMainnetLaunchesEnabled": false,
     "conditionToEnd": "Independent replacement signer is verified and an approved governance configuration is executed."
+  },
+  "suiNative": {
+    "status": "DEVNET_BETA",
+    "environment": "sui-devnet",
+    "engine": "sui-fixed",
+    "standard": "Sui Currency Standard / CoinRegistry",
+    "sdkVersion": "2.31.3",
+    "tokenDeployment": true,
+    "marketLaunch": false,
+    "mainnetExecution": false,
+    "packagePublication": "creator-wallet signed",
+    "currencyInitialization": "creator-wallet signed",
+    "packageImmutable": true,
+    "treasuryCapSurvives": false,
+    "metadataCapSurvives": false,
+    "regulatedCurrency": false,
+    "denyList": false,
+    "globalPause": false,
+    "walletTransferTaxPercent": 0,
+    "proof": {
+      "proof": "WORLDZ_SUI_NATIVE_DEVNET_ONCHAIN",
+      "network": "sui-devnet",
+      "sdk": "@mysten/sui@2.31.3",
+      "packageId": "0x7837fa37bd36dbf51968c156b6042ae74630e7c6a75a27d6e7b9ff4fb75e662b",
+      "coinType": "0x7837fa37bd36dbf51968c156b6042ae74630e7c6a75a27d6e7b9ff4fb75e662b::worldz_token::WorldzToken",
+      "publisherAddress": "0x564484d2b1cd3b98e638129268c8be3afe7f14fa580f3d72a51d3b92466d7286",
+      "publishDigest": "3zDRqXgoDJwvaWaNFLESffVof5WaThgAPVN1F1pVprzR",
+      "initializeDigest": "AuHszu6fsK3zC1RW9FevTG8rTYv2BMjvMiFN3NUW9HCv",
+      "decimals": 6,
+      "supplyTokens": "100000000",
+      "rawSupply": "100000000000000",
+      "observedPublisherBalanceRaw": "100000000000000",
+      "packageImmutable": true,
+      "treasuryCapSurvives": false,
+      "metadataCapSurvives": false,
+      "regulated": false,
+      "walletTransferTax": false,
+      "mainnetExecution": false,
+      "note": "Disposable Sui Devnet proof. Testnet market/release and mainnet remain separately gated."
+    }
   }
 }
