@@ -14,8 +14,10 @@ import {
 import { MAGIC, deriveLegacyVaults, staticRouterProgramId, staticRouterAuthority } from './common.mjs';
 
 const RPC=process.env.SOLANA_RPC_URL||clusterApiUrl('devnet');
-if(/mainnet/i.test(RPC))throw new Error('MAINNET RPC FORBIDDEN');
+const DEVNET_GENESIS_HASH='EtWTRABZaYq6iMfeYKouRu166VU2xqa1';
 const connection=new Connection(RPC,'confirmed');
+const genesisHash=await connection.getGenesisHash();
+if(genesisHash!==DEVNET_GENESIS_HASH)throw new Error('DEVNET RPC REQUIRED genesis='+genesisHash);
 const client=new DynamicBondingCurveClient(connection,'confirmed');
 function payerFromEnvironment(){
   const raw=process.env.DEVNET_PAYER_SECRET_JSON?.trim();
@@ -140,7 +142,8 @@ fs.mkdirSync('.runtime',{recursive:true});
 const report={
   proof:'REVIVE_DBC_DEVNET_ONCHAIN',
   network:'devnet',
-  rpc:RPC,
+  rpcHost:new URL(RPC).host,
+  rpcGenesisHash:genesisHash,
   sdk:'@meteora-ag/dynamic-bonding-curve-sdk@1.5.12',
   dbcProgram:DBC_PROGRAM.toBase58(),
   payer:payer.publicKey.toBase58(),
