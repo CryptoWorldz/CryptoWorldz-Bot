@@ -14,6 +14,8 @@ funding = json.loads((root / "revive-launch-funding.v1.json").read_text())
 candidates = json.loads((root / "revive-devcity-50-candidates.v1.json").read_text())
 magic = json.loads((repo_root / "worldzpad-mainnet" / "fairfee" / "worldz-magic-fee.v1.json").read_text())
 legacy_generator = (repo_root / "supabase" / "functions" / "worldz-legacy-proof" / "index.ts").read_text()
+direct_devnet = (repo_root / "worldzpad-devnet" / "revive-party" / "scripts" / "07_direct_damm_v2_devnet.mjs").read_text()
+direct_verify = (repo_root / "worldzpad-devnet" / "revive-party" / "scripts" / "08_verify_direct_damm_v2.mjs").read_text()
 
 # Canonical REVIVE.
 assert contract["token"]["canonicalMint"] == "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R"
@@ -32,6 +34,13 @@ assert contract["legacyRevival"]["regenerationLockedUntilGeneratorFixVerified"] 
 assert "REVIVE_POOL_PERCENT=10n" in legacy_generator
 assert "revive_pool_invariant_failed" in legacy_generator
 assert "200000000n*1000000n/100n" not in legacy_generator
+assert "all_ten_snapshots_required_for_batch" in legacy_generator
+assert "perOwnerMint" in legacy_generator
+assert "x.historic+=Number(r.sqrt_weight)" not in legacy_generator
+assert "DEVNET_GENESIS_HASH" in direct_devnet
+assert "getGenesisHash()" in direct_devnet
+assert "DEVNET_GENESIS_HASH" in direct_verify
+assert "getGenesisHash()" in direct_verify
 assert devcity["seats"] == 100
 assert devcity["tokensPerSeat"] * devcity["seats"] == 20_000_000
 assert candidates["targetNewSeats"] == 50
