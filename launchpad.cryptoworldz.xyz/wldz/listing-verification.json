@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-09-25",
+  "project": "WORLDZ",
+  "symbol": "WLDZ",
+  "chain": "Solana",
+  "network": "mainnet-beta",
+  "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+  "decimals": 6,
+  "maximumSupply": 100000000,
+  "currentIndexedSupply": 99999951.002722,
+  "mintAuthority": "REVOKED",
+  "freezeAuthority": "REVOKED",
+  "walletTransferTaxPercent": 0,
+  "website": "https://launchpad.cryptoworldz.xyz/wldz/",
+  "verificationPage": "https://launchpad.cryptoworldz.xyz/wldz/verify/",
+  "canonicalManifest": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json",
+  "logo": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
+  "description": "WORLDZ (WLDZ) is the canonical WorldzLaunchPad token on Solana, powering the CryptoWorldz ecosystem, community rewards, liquidity, development, charity impact, and future WorldzLaunchPad launches.",
+  "social": {
+    "x": "https://x.com/CryptoWorldzX",
+    "telegram": "https://t.me/CryptoWLDZ"
+  },
+  "market": {
+    "dex": "Meteora DAMM V2",
+    "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "pair": "WLDZ/wSOL",
+    "baseFeeBps": 200,
+    "dynamicFee": false,
+    "initialActiveWldz": 15000000,
+    "lpLock": "100% permanent"
+  },
+  "platformEvidence": {
+    "jupiter": "https://jup.ag/tokens/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "jupiterVrfd": "https://verified.jup.ag/dashboard/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "phantom": "https://phantom.com/tokens/solana/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "solscan": "https://solscan.io/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "geckoTerminal": "https://www.geckoterminal.com/solana/pools/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "birdeye": "https://birdeye.so/solana/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "dexScreener": "https://dexscreener.com/solana/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ"
+  },
+  "coinGeckoPublicVerificationPostTemplate": "WORLDZ (WLDZ) is submitting an official CoinGecko listing request. Canonical Solana mint: AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U. Official token page: https://launchpad.cryptoworldz.xyz/wldz/ . Verification record: https://launchpad.cryptoworldz.xyz/wldz/verify/ .",
+  "neutralShortDescription": "WORLDZ (WLDZ) is the canonical Solana token for the WorldzLaunchPad and CryptoWorldz ecosystem. It supports ecosystem liquidity, community programs, development and future WorldzLaunchPad launches.",
+  "submissionNotes": {
+    "jupiter": "VRFD requires wallet-connected submission or metadata contribution and human/community review.",
+    "dexScreener": "Token listing is automatic when a supported pool is indexed and has transactions; token metadata can later inherit from external token lists such as CoinGecko.",
+    "phantom": "Phantom has no direct token-verification form; recognition by trusted data providers such as Jupiter or CoinGecko is a useful upstream signal.",
+    "solscan": "Use the official Token Update form. A project-domain email is preferred; otherwise the requester email should be visibly listed on the official website.",
+    "coinGecko": "New listing requires a CoinGecko account and a public verification post from an official project social account linked from the project website."
+  }
+}
