@@ -29,7 +29,11 @@ jobs:
           grep -q 'SIGN & LAUNCH REVIVE' launchpad.cryptoworldz.xyz/wldz/revive-launch/index.html
           grep -q 'noindex,nofollow,noarchive' launchpad.cryptoworldz.xyz/wldz/revive-launch/index.html
           grep -q 'worldz-solana-rpc' launchpad.cryptoworldz.xyz/wldz/revive-launch/index.html
-          ! grep -q '\\n<meta' launchpad.cryptoworldz.xyz/wldz/revive-launch/index.html
+          python - <<'PY'
+          from pathlib import Path
+          text=Path('launchpad.cryptoworldz.xyz/wldz/revive-launch/index.html').read_text()
+          assert '\\n<meta' not in text
+          PY
       - name: Upload console
         shell: python
         run: |
