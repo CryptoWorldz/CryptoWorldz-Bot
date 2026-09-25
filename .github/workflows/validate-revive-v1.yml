@@ -129,8 +129,9 @@ jobs:
             --data "{\"address\":\"$PUBKEY\"}")
           cat /tmp/revive-bootstrap-response.json || true
           echo "REVIVE_BOOTSTRAP_HELPER_HTTP=$STATUS"
-      - name: Prove tiny PoW transaction-gas bootstrap
+      - name: Try ordinary devnet bootstrap before PoW fallback
         if: env.DEVNET_PAYER_SECRET_JSON == ''
+        continue-on-error: true
         run: npm run bootstrap-payer
       - name: Install Solana devnet Proof-of-Work faucet client
         if: env.DEVNET_PAYER_SECRET_JSON == ''
