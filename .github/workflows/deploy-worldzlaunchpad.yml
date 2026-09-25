@@ -139,7 +139,7 @@ jobs:
             root/'mint/index.html',root/'mint/app.js',root/'mint/jupiter-mobile.js',
             root/'trust/index.html',root/'trust/app.js',
             root/'omnichain/index.html',root/'technology/index.html',root/'technology.html',
-            root/'wldz/index.html',root/'wldz/app.js',root/'wldz/proposal.js',root/'wldz/launch-config.json',
+            root/'wldz/index.html',root/'wldz/app.js',root/'wldz/launch-config.json',
             root/'worldz-launch/index.html',root/'worldz-launch/campaign.json',root/'worldz-launch/social-pack.json'
           ]
           for p in required:
@@ -166,7 +166,6 @@ jobs:
           trust_js=(root/'trust/app.js').read_text()
           technology_html=(root/'technology.html').read_text()
           wldz_html=(root/'wldz'/'index.html').read_text()
-          wldz_js=(root/'wldz'/'proposal.js').read_text()
           wldz_cfg=json.loads((root/'wldz'/'launch-config.json').read_text())
 
           assert 'PUBLIC TOKEN LAUNCHPAD' in home
@@ -187,8 +186,7 @@ jobs:
           assert 'Canonical WORLDZ (WLDZ) is live on Solana.' in wldz_html
           assert 'GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ' in wldz_html
           assert 'proposal.js' not in wldz_html
-          # Retain the old proposal implementation as a non-public recovery/audit artifact.
-          assert 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' in wldz_js
+          assert not (root/'wldz'/'proposal.js').exists(), 'retired WLDZ proposal route must stay absent'
           assert wldz_cfg['token']['mint']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
           assert wldz_cfg['status'].startswith('LIVE__')
           assert wldz_cfg['launch']['poolAddress']=='GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ'
@@ -241,12 +239,8 @@ jobs:
           assert 'X-SAVE MAINNET — OFF UNTIL PROOF' in xsave_html
           assert '6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2' in xsave_html
           assert 'Read the GitHub Validation' in xsave_html
-          owner_v6=root/'worldz-now-v6'/'index.html'
-          owner_v6_js=root/'worldz-now-v6'/'app-v6.js'
-          assert owner_v6.is_file() and owner_v6_js.is_file()
-          assert 'noindex,nofollow,noarchive' in owner_v6.read_text()
-          assert 'PRIVATE OWNER CONSOLE' in owner_v6.read_text()
-          assert 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' in owner_v6_js.read_text()
+          for retired in ['worldz-now','worldz-now-v4','worldz-now-v5','worldz-now-v6']:
+              assert not (root/retired).exists(), f'retired owner launch console restored: {retired}'
 
           assert 'Create Devnet Token' in devnet
           assert 'worldz-launch-register' in devnet_js
@@ -428,9 +422,7 @@ jobs:
           node --check launchpad.cryptoworldz.xyz/mainnet/app.js
           node --check launchpad.cryptoworldz.xyz/curve/app.js
           node --check launchpad.cryptoworldz.xyz/curve-pro/app.js
-          node --check launchpad.cryptoworldz.xyz/worldz-now-v6/app-v6.js
           node --check launchpad.cryptoworldz.xyz/wldz/app.js
-          node --check launchpad.cryptoworldz.xyz/wldz/proposal.js
 
       - name: Run 100+ anti-cheat tokenomics scenarios
         shell: python
@@ -627,7 +619,6 @@ jobs:
                   trust_code,trust_body=get(base+'/trust/?verify=trust-v2')
                   tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
                   wldz_code,wldz_body=get(base+'/wldz/?verify=wldz-v1')
-                  wldz_js_code,wldz_js_body=get(base+'/wldz/proposal.js?verify=wldz-v1')
                   wldz_cfg_code,wldz_cfg_body=get(base+'/wldz/launch-config.json?verify=wldz-v1')
                   campaign_code,campaign_body=get(base+'/worldz-launch/?verify=worldz-launch-v1')
                   campaign_json_code,campaign_json_body=get(base+'/worldz-launch/campaign.json?verify=worldz-launch-v1')
@@ -697,7 +688,6 @@ jobs:
                   assert 'Canonical WORLDZ (WLDZ) is live on Solana.' in wldz_body
                   assert 'GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ' in wldz_body
                   assert 'proposal.js' not in wldz_body
-                  assert wldz_js_code==200 and 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' in wldz_js_body
                   assert wldz_cfg_code==200 and wldz_cfg['token']['mint']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
                   assert wldz_cfg['status'].startswith('LIVE__')
                   assert wldz_cfg['launch']['poolAddress']=='GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ'
@@ -713,9 +703,6 @@ jobs:
                   assert campaign_json_code==200 and campaign_json['status']=='PUBLIC'
                   assert campaign_json['wldz']['symbol']=='WLDZ'
                   assert campaign_json['wldz']['founding100']['wldzPerQualifiedPosition']==100000
-                  assert 'RESUME_KEY' in wldz_js_body
-                  assert 'confirmation.value.err!==null' in wldz_js_body
-                  assert 'getTransactionPda' in wldz_js_body
                   assert all(term not in tech_body for term in banned)
                   assert platform['trustOrbit']['version']=='WORLDZ-TRUST-ORBIT-1'
                   assert status_code==200 and live['ok'] is True
