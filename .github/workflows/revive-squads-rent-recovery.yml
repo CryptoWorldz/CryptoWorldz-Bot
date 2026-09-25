@@ -1,0 +1,51 @@
+name: REVIVE Squads Rent Recovery Read-Only
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - revive-v1-build
+    paths:
+      - 'worldzpad-devnet/revive-party/scripts/13_squads_rent_recovery_readonly.mjs'
+      - '.github/workflows/revive-squads-rent-recovery.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-devnet/revive-party/scripts/13_squads_rent_recovery_readonly.mjs'
+      - '.github/workflows/revive-squads-rent-recovery.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revive-squads-rent-recovery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SOLANA_MAINNET_RPC_URL: ${{ secrets.LEGACY_READ_RPC_URL }}
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/revive-party
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned project dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install pinned Squads v4 SDK
+        run: npm install --no-save --no-package-lock --no-audit --no-fund @sqds/multisig@2.1.4
+      - name: Audit reclaimable historical Squads rent — READ ONLY
+        run: node scripts/13_squads_rent_recovery_readonly.mjs
+      - name: Publish evidence
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: revive-squads-rent-recovery-readonly
+          path: worldzpad-devnet/revive-party/artifacts/revive-squads-rent-recovery-readonly.json
+          if-no-files-found: warn
+          retention-days: 7
