@@ -183,11 +183,21 @@ jobs:
           assert 'Founding 100 contract mismatch' in app
           assert 'platformShareCapPercentOfCollectedProjectFee' in app
           assert 'WORLDZ TECHNOLOGY & MEANINGS' in technology_html
-          assert 'Create WLDZ Squads Proposal' in wldz_html
+          assert 'SOLANA MAINNET • LIVE' in wldz_html
+          assert 'Canonical WORLDZ (WLDZ) is live on Solana.' in wldz_html
+          assert 'GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ' in wldz_html
+          assert 'proposal.js' not in wldz_html
+          # Retain the old proposal implementation as a non-public recovery/audit artifact.
           assert 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' in wldz_js
           assert wldz_cfg['token']['mint']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
+          assert wldz_cfg['status'].startswith('LIVE__')
+          assert wldz_cfg['launch']['poolAddress']=='GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ'
           assert wldz_cfg['launch']['baseAmountTokens']==15000000
           assert wldz_cfg['launch']['permanentLock'] is True
+          assert wldz_cfg['launch']['permanentLockPercent']==100
+          assert wldz_cfg['execution']['launchExecuted'] is True
+          assert wldz_cfg['execution']['broadcasted'] is True
+          assert wldz_cfg['execution']['duplicateExecutionDisabled'] is True
           assert wldz_cfg['execution']['publicCreatorGate'] is False
           campaign_html=(root/'worldz-launch'/'index.html').read_text()
           campaign_json=json.loads((root/'worldz-launch'/'campaign.json').read_text())
@@ -683,10 +693,19 @@ jobs:
                   assert all(term not in trust_body for term in banned)
                   assert tech_code==200 and 'WORLDZ TECHNOLOGY & MEANINGS' in tech_body and 'Swap API V2' in tech_body and 'WorldzMINT' in tech_body
                   wldz_cfg=json.loads(wldz_cfg_body)
-                  assert wldz_code==200 and 'Create WLDZ Squads Proposal' in wldz_body
+                  assert wldz_code==200 and 'SOLANA MAINNET • LIVE' in wldz_body
+                  assert 'Canonical WORLDZ (WLDZ) is live on Solana.' in wldz_body
+                  assert 'GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ' in wldz_body
+                  assert 'proposal.js' not in wldz_body
                   assert wldz_js_code==200 and 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' in wldz_js_body
                   assert wldz_cfg_code==200 and wldz_cfg['token']['mint']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
+                  assert wldz_cfg['status'].startswith('LIVE__')
+                  assert wldz_cfg['launch']['poolAddress']=='GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ'
                   assert wldz_cfg['launch']['baseAmountTokens']==15000000 and wldz_cfg['launch']['permanentLock'] is True
+                  assert wldz_cfg['launch']['permanentLockPercent']==100
+                  assert wldz_cfg['execution']['launchExecuted'] is True
+                  assert wldz_cfg['execution']['broadcasted'] is True
+                  assert wldz_cfg['execution']['duplicateExecutionDisabled'] is True
                   assert wldz_cfg['execution']['publicCreatorGate'] is False
                   campaign_json=json.loads(campaign_json_body)
                   assert campaign_code==200 and 'WorldzLaunchPad™ + Command Centre MAX™' in campaign_body
