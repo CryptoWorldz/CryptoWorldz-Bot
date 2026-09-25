@@ -26,12 +26,52 @@
     .kitty-card label,.toggle{display:block;color:var(--muted);font-size:13px;margin-top:13px}.review-card{overflow-wrap:anywhere}
     .governance-options{display:grid;gap:8px;margin:14px 0}.governance-vote{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left}.governance-vote span{min-width:0}.governance-vote strong{white-space:nowrap;color:#e3c7ff}.governance-vote.selected{border-color:var(--green);box-shadow:0 0 14px rgba(83,230,165,.25)}.governance-vote:disabled{opacity:1}
     .x-pages-directory{margin-top:16px}.x-page-link{display:flex;align-items:center;justify-content:space-between;gap:12px}.x-page-link span{display:flex;flex-direction:column;min-width:0}.x-page-link small{color:var(--muted);margin-top:3px}.x-page-link b{font-size:11px;white-space:nowrap;color:#e3c7ff}
+
+    /* ZED LED brand lock — replace generic letter/badge marks with the real Command Centre artwork */
+    .brand-mark,.splash-zed,.max-home-card .max-mark{
+      background-image:url('https://cryptoworldz.xyz/assets/desktop/cryptoworldz/zed-command-centre.png')!important;
+      background-repeat:no-repeat!important;
+      background-size:220% auto!important;
+      background-position:50% 44%!important;
+      overflow:hidden;
+    }
+    .brand-mark,.splash-zed{
+      color:transparent!important;
+      text-indent:-9999px;
+      border-color:rgba(245,244,255,.92)!important;
+      box-shadow:0 0 22px rgba(156,77,255,.9),0 0 34px rgba(73,230,255,.22)!important;
+    }
+    .max-home-card .max-mark{
+      position:relative;
+      display:block;
+      color:transparent!important;
+      font-size:0!important;
+      border-color:rgba(245,244,255,.92)!important;
+      box-shadow:0 0 28px rgba(156,77,255,.7),0 0 34px rgba(73,230,255,.18)!important;
+    }
+    .max-home-card .max-mark::after{
+      content:"MAX™";
+      position:absolute;
+      left:50%;
+      bottom:4px;
+      transform:translateX(-50%);
+      padding:2px 6px;
+      border:1px solid rgba(255,255,255,.65);
+      border-radius:999px;
+      background:rgba(7,3,13,.88);
+      color:#fff;
+      font:900 8px/1 system-ui,-apple-system,sans-serif;
+      letter-spacing:.08em;
+      text-indent:0;
+      white-space:nowrap;
+      box-shadow:0 0 10px rgba(156,77,255,.65);
+    }
   </style>
 </head>
 <body class="theme-command-centre">
   <section id="splashback" class="splashback" aria-hidden="false" aria-label="CryptoWorldz Command Centre opening experience">
     <div class="splash-inner">
-      <div class="splash-zed">Z</div>
+      <div class="splash-zed" role="img" aria-label="ZED Command Centre"></div>
       <p class="splash-kicker">OneWorldz • CryptoWorldz</p>
       <h1>Command Centre <span>MAX™</span></h1>
       <p class="splash-line">Learn • Research • Interact • Teach • Build • Prove — one source-first Command Centre for CryptoWorldz.</p>
@@ -49,7 +89,7 @@
 
   <div class="stars"></div>
   <header class="hero">
-    <div class="brand-mark">Z</div>
+    <div class="brand-mark" role="img" aria-label="ZED Command Centre"></div>
     <div><p>CryptoWorldz</p><h1>Command Centre MAX™</h1></div>
     <span id="status" class="status">Connecting</span>
   </header>
