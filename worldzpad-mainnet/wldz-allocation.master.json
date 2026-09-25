@@ -1,6 +1,6 @@
 {
-  "version": "WLDZ-ALLOCATION-2026-09-23-C",
-  "status": "OWNER_DIRECTED_DISTRIBUTION_PLAN__MEMBER_FEE_PAYER__ONCHAIN_EXECUTION_PENDING",
+  "version": "WLDZ-ALLOCATION-2026-09-25-D",
+  "status": "PARTIALLY_EXECUTED__8M_OWNER_AND_15M_LP_LIVE__REMAINDER_PENDING",
   "network": "mainnet-beta",
   "token": {
     "name": "WORLDZ",
@@ -24,14 +24,16 @@
       "tokens": 8000000,
       "destination": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
       "destinationRole": "COMMAND_CENTRE_DEV_AND_LAUNCH_WALLET",
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+      "state": "LIVE_IN_JAYJAYTEAMDEV_WALLET",
+      "executionEvidence": "Jupiter token data reports dev balance ~8%; owner wallet UI shows 8,000,000 WLDZ."
     },
     {
       "id": "initial_launch_lp",
       "percent": 15,
       "tokens": 15000000,
       "destinationRole": "METEORA_DAMM_V2_WLDZ_WSOL_POSITION",
-      "state": "LIVE"
+      "state": "LIVE__METEORA_DAMM_V2__100_PERCENT_PERMANENT_LOCK",
+      "destination": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ"
     },
     {
       "id": "staged_lp_reserve",
@@ -155,7 +157,9 @@
     "stagedReservePercent": 20,
     "plannedCapacityPercent": 35,
     "generalReserveOptionalPercent": 5,
-    "maximumIfReserveReassignedPercent": 40
+    "maximumIfReserveReassignedPercent": 40,
+    "livePool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "permanentLockPercent": 100
   },
   "invariants": {
     "allocationPercentTotal": 100,
