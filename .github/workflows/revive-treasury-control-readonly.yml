@@ -1,0 +1,55 @@
+name: REVIVE Treasury Control Read-Only
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - revive-v1-build
+    paths:
+      - 'worldzpad-devnet/revive-party/scripts/10_treasury_control_readonly.mjs'
+      - 'worldzpad-mainnet/revive/revive-launch-contract.v1.json'
+      - '.github/workflows/revive-treasury-control-readonly.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-devnet/revive-party/scripts/10_treasury_control_readonly.mjs'
+      - 'worldzpad-mainnet/revive/revive-launch-contract.v1.json'
+      - '.github/workflows/revive-treasury-control-readonly.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revive-treasury-control-readonly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SOLANA_MAINNET_RPC_URL: ${{ secrets.LEGACY_READ_RPC_URL }}
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/revive-party
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Solana SDKs
+        run: npm ci --no-audit --no-fund
+      - name: Trace canonical RVIV treasury control path — READ ONLY
+        run: node scripts/10_treasury_control_readonly.mjs
+      - name: Print evidence digest
+        shell: bash
+        run: |
+          node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync("artifacts/revive-treasury-control-readonly.json")); console.log("REVIVE_CONTROL_EVIDENCE treasury="+x.treasury.address+" onCurve="+x.treasury.isOnCurve+" accountOwnerProgram="+x.treasury.accountOwnerProgram+" rviv="+x.rviv.amountTokens+" authority="+x.rviv.parsedOwnerAuthority+" delegate="+(x.rviv.delegate||"NONE")+" programs="+x.history.programIdsSeen.join(","));'
+          sha256sum artifacts/revive-treasury-control-readonly.json
+      - name: Publish control evidence (best effort)
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: revive-treasury-control-readonly
+          path: worldzpad-devnet/revive-party/artifacts/revive-treasury-control-readonly.json
+          if-no-files-found: error
+          retention-days: 7
