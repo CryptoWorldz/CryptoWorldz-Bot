@@ -6,6 +6,9 @@ header('X-Content-Type-Options: nosniff');
 
 $mint = 'AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U';
 $rpc = 'https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';
+$circulating = '15000000';
+$maxSupply = '100000000';
+
 $payload = json_encode([
   'jsonrpc' => '2.0',
   'id' => 1,
@@ -23,7 +26,7 @@ if (function_exists('curl_init')) {
     CURLOPT_CONNECTTIMEOUT => 5,
     CURLOPT_TIMEOUT => 10,
     CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'Accept: application/json'],
-    CURLOPT_USERAGENT => 'WorldzLaunchPad-WLDZ-Supply/1.0'
+    CURLOPT_USERAGENT => 'WorldzLaunchPad-WLDZ-Supply/2.0'
   ]);
   $body = curl_exec($ch);
   curl_close($ch);
@@ -53,10 +56,23 @@ if (!is_array($value) || !isset($value['uiAmountString'])) {
   exit;
 }
 
-$current = (string)$value['uiAmountString'];
+$total = (string)$value['uiAmountString'];
+
+if (isset($_GET['metric']) && $_GET['metric'] === 'circulating') {
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode(['circulatingSupply' => (float)$circulating], JSON_UNESCAPED_SLASHES);
+  exit;
+}
+
+if (isset($_GET['metric']) && $_GET['metric'] === 'total') {
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode(['totalSupply' => (float)$total], JSON_UNESCAPED_SLASHES);
+  exit;
+}
+
 if (isset($_GET['format']) && $_GET['format'] === 'plain') {
   header('Content-Type: text/plain; charset=utf-8');
-  echo $current;
+  echo $circulating;
   exit;
 }
 
@@ -65,11 +81,34 @@ echo json_encode([
   'name' => 'WORLDZ',
   'symbol' => 'WLDZ',
   'mint' => $mint,
-  'circulatingSupply' => $current,
-  'totalSupply' => $current,
-  'maxSupply' => '100000000',
+  'circulatingSupply' => (float)$circulating,
+  'totalSupply' => (float)$total,
+  'maxSupply' => (float)$maxSupply,
   'decimals' => 6,
   'mintAuthority' => 'REVOKED',
   'freezeAuthority' => 'REVOKED',
-  'source' => 'Solana getTokenSupply confirmed'
+  'methodology' => [
+    'circulating' => '15,000,000 WLDZ executed as the public Meteora DAMM V2 launch-liquidity tranche. Founder/team and project-controlled treasury/reserve allocations are excluded.',
+    'total' => 'Live Solana getTokenSupply result.',
+    'coinGeckoMethodology' => 'Project-controlled founder, treasury, reserve, future ecosystem and other uncirculated allocations are excluded from circulating supply.'
+  ],
+  'excludedProjectWallets' => [
+    [
+      'address' => 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u',
+      'role' => 'FOUNDER_PROJECT_WALLET',
+      'documentedAllocationWLDZ' => 8000000
+    ],
+    [
+      'address' => 'n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB',
+      'role' => 'TREASURY_SOURCE_VAULT',
+      'note' => 'Holds the remaining undistributed project-controlled WLDZ supply; distribution legs remain pending.'
+    ]
+  ],
+  'publicLiquidity' => [
+    'dex' => 'Meteora DAMM V2',
+    'pool' => 'GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ',
+    'executedLaunchTrancheWLDZ' => 15000000,
+    'lpPosition' => '100% permanently locked'
+  ],
+  'source' => 'Solana total supply + canonical executed WLDZ allocation state'
 ], JSON_UNESCAPED_SLASHES);
