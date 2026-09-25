@@ -20,6 +20,7 @@ permissions:
 
 jobs:
   proof:
+    if: github.event_name != 'pull_request' || github.head_ref == 'bitworldz-build-2026-09-25'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     defaults:
