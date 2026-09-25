@@ -50,9 +50,7 @@ jobs:
           # framework-agnostic AppKit + Solana adapter.
           t=t.replace(
               "import {getWallets} from 'https://esm.sh/@wallet-standard/app@1.1.0?bundle';",
-              "import {createAppKit} from 'https://esm.sh/@reown/appkit@1.8.24?bundle';\n"
-              "import {SolanaAdapter} from 'https://esm.sh/@reown/appkit-adapter-solana@1.8.24?bundle';\n"
-              "import {solana} from 'https://esm.sh/@reown/appkit@1.8.24/networks?bundle';"
+              "import {createAppKit,SolanaAdapter,networks} from 'https://cdn.jsdelivr.net/npm/@reown/appkit-cdn@1.8.24/dist/appkit.js';"
           )
 
           init_marker="const connection=new Connection(RPC,'confirmed');"
@@ -61,7 +59,7 @@ jobs:
           const worldzSolanaAdapter=new SolanaAdapter({});
           const worldzAppKit=createAppKit({
             adapters:[worldzSolanaAdapter],
-            networks:[solana],
+            networks:[networks.solana],
             projectId:REOWN_PROJECT_ID,
             metadata:{
               name:'WorldzLaunchPad',
@@ -134,7 +132,7 @@ jobs:
 
           out.write_text(t)
           assert "WORLDZ_APPKIT_DIRECT_V1" in t
-          assert "@reown/appkit@1.8.24" in t
+          assert "@reown/appkit-cdn@1.8.24/dist/appkit.js" in t
           assert "worldzAppKit.open()" in t
           assert "/mint/jupiter-mobile.js" not in t
           assert "70,000,000 RVIV" in t
@@ -192,7 +190,7 @@ jobs:
                       body=r.read().decode('utf-8','ignore')
                   assert 'WORLDZLAUNCHPAD' in body
                   assert 'WORLDZ_APPKIT_DIRECT_V1' in body
-                  assert '@reown/appkit@1.8.24' in body
+                  assert '@reown/appkit-cdn@1.8.24/dist/appkit.js' in body
                   assert '/mint/jupiter-mobile.js' not in body
                   assert 'Connect JayJayTeamDev Wallet' in body
                   assert '70,000,000 RVIV' in body
