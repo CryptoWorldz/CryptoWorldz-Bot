@@ -50,6 +50,106 @@ jobs:
           assert "if(raw!==EXPECTED_AFTER)" in t
           PY
 
+      - name: Patch Jupiter wallet connection to proven launch flow
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+          p=Path('cryptoworldz.xyz/revive-distribution/index.html')
+          t=p.read_text()
+          replacement=r"""async function connectWallet(){
+            let list=[],p=null,lastErr=null;
+            for(let i=0;i<30;i++){
+              list=standardCandidates();
+              p=injected();
+              if(list.length||p)break;
+              await sleep(200);
+            }
+
+            for(const w of list){
+              try{
+                const out=await w.features['standard:connect'].connect();
+                const account=(out?.accounts||w.accounts||[])[0];
+                if(!account)continue;
+                const feature=w.features['solana:signTransaction'];
+                wallet={
+                  name:w.name||'Wallet Standard',
+                  publicKey:new PublicKey(account.address),
+                  async signAllTransactions(txs){
+                    const reqs=txs.map(tx=>({
+                      transaction:new Uint8Array(tx.serialize({requireAllSignatures:false,verifySignatures:false})),
+                      account,
+                      chain:'solana:mainnet'
+                    }));
+                    const outs=await feature.signTransaction(...reqs);
+                    if(!Array.isArray(outs)||outs.length!==txs.length)throw new Error('Wallet did not return the complete signed batch.');
+                    return outs.map(x=>{
+                      if(!x?.signedTransaction)throw new Error('Wallet returned an unsigned batch item.');
+                      return Transaction.from(new Uint8Array(x.signedTransaction));
+                    });
+                  }
+                };
+                break;
+              }catch(e){lastErr=e}
+            }
+
+            if(!wallet&&p){
+              try{
+                const out=await p.connect();
+                const pk=out?.publicKey||p.publicKey;
+                if(!pk)throw new Error('Wallet returned no public key.');
+                wallet={
+                  name:'Injected Solana Wallet',
+                  publicKey:new PublicKey(pk.toString()),
+                  async signAllTransactions(txs){
+                    if(typeof p.signAllTransactions==='function')return p.signAllTransactions(txs);
+                    const out=[];
+                    for(const tx of txs)out.push(await p.signTransaction(tx));
+                    return out;
+                  }
+                };
+              }catch(e){lastErr=e}
+            }
+
+            if(!wallet){
+              try{
+                setStatus('OPENING JUPITER MOBILE…\\nApprove wallet connection only. No transaction is being sent yet.','warn');
+                const mod=await import('/revive-launch/jupiter-mobile.js?v=20260926-rviv-distribution-v4');
+                mod.resetJupiterMobileConnectionState?.();
+                const adapter=await mod.getJupiterMobileAdapter();
+                const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Jupiter Mobile did not connect within 25 seconds.')),25000));
+                await Promise.race([adapter.connect(),timeout]);
+                if(!adapter.publicKey)throw new Error('Jupiter Mobile connected but returned no public key.');
+                wallet={
+                  name:'Jupiter Mobile',
+                  publicKey:new PublicKey(adapter.publicKey.toString()),
+                  async signAllTransactions(txs){
+                    if(typeof adapter.signAllTransactions==='function')return adapter.signAllTransactions(txs);
+                    const out=[];
+                    for(const tx of txs)out.push(await adapter.signTransaction(tx));
+                    return out;
+                  }
+                };
+              }catch(e){lastErr=e}
+            }
+
+            if(!wallet)throw new Error('Wallet connection failed: '+(lastErr?.message||lastErr||'No Jupiter wallet provider detected.'));
+            if(!wallet.publicKey.equals(MEMBER)){
+              const bad=wallet.publicKey.toBase58();
+              wallet=null;
+              throw new Error('Wrong wallet connected: '+bad);
+            }
+            $('#connect').textContent='Connected '+short(MEMBER.toBase58());
+            $('#connect').disabled=true;
+            $('#preflight').disabled=false;
+            window.__REVIVE_DISTRIBUTION_WALLET_FIX__='JUPITER_MOBILE_CONNECT_V4';
+          }"""
+          pattern=r"async function connectWallet\(\)\{.*?\n\}\nasync function buildPlan\(\)\{"
+          new, n=re.subn(pattern,replacement+"\nasync function buildPlan(){",t,count=1,flags=re.S)
+          assert n==1, 'connectWallet patch target not found exactly once'
+          p.write_text(new)
+          print('REVIVE_DISTRIBUTION_WALLET_PATCH=PASS')
+
       - name: Upload owner-only distribution console
         shell: python
         run: |
@@ -84,6 +184,7 @@ jobs:
                   assert '70,000,000 RVIV' in body
                   assert '100,000,000 RVIV' in body
                   assert 'DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R' in body
+                  assert 'JUPITER_MOBILE_CONNECT_V4' in body
                   print('REVIVE_DISTRIBUTION_CONSOLE_LIVE=PASS')
                   raise SystemExit(0)
               except SystemExit: raise
