@@ -10,7 +10,7 @@ const ACCOUNTS = [
   { key: 'meteora_position', bytes: 408, required: true },
   { key: 'rviv_pool_vault', bytes: 165, required: true },
   { key: 'wsol_pool_vault', bytes: 165, required: true },
-  { key: 'position_nft_mint_token2022', bytes: 270, required: true },
+  { key: 'position_nft_mint_token2022_with_meteora_metadata', bytes: 465, required: true },
   { key: 'position_nft_account_token2022', bytes: 165, required: true },
   { key: 'payer_wsol_ata_if_missing', bytes: 165, required: false },
 ];
@@ -40,6 +40,7 @@ const optionalWsolAtaRent = BigInt(ACCOUNTS.find(x=>x.key==='payer_wsol_ata_if_m
 
 // createCustomPool uses payer + fresh position NFT mint as the two transaction signers.
 const baseSignatureFeeLamports = 2n * 5000n;
+// Meteora initializes Token-2022 metadata on the position NFT mint, expanding it to 465 bytes.
 // Meteora's customizable-pool path forces at least 1 raw unit of native SOL/wSOL on the quote side.
 const mandatoryQuoteLamports = 1n;
 
