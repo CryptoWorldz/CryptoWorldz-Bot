@@ -1,0 +1,206 @@
+name: Deploy REVIVE Distribution on WorldzLaunchPad
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cryptoworldz.xyz/revive-distribution/index.html'
+      - 'launchpad.cryptoworldz.xyz/mint/jupiter-mobile.js'
+      - '.github/workflows/deploy-revive-distribution-launchpad.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revive-distribution-launchpad
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build LaunchPad-hosted owner console
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+
+          src=Path('cryptoworldz.xyz/revive-distribution/index.html')
+          out=Path('launchpad.cryptoworldz.xyz/revive-distribution/index.html')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          t=src.read_text()
+
+          # Run from the WorldzLaunchPad origin and use the LaunchPad's proven
+          # Jupiter Mobile/Reown bridge and shared Solana RPC.
+          t=t.replace("const RPC='/revive-launch/rpc.php';",
+                      "const RPC='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';")
+          t=t.replace("'/revive-launch/jupiter-mobile.js?v=20260926-rviv-distribution-v2'",
+                      "'/mint/jupiter-mobile.js?v=20260926-rviv-distribution-launchpad-v1'")
+
+          # Replace only wallet connection plumbing. Distribution amounts,
+          # destinations and safety gates remain unchanged.
+          replacement=r"""async function connectWallet(){
+            let list=[],jup=null,lastErr=null;
+            for(let i=0;i<30;i++){
+              list=standardCandidates();
+              jup=[window?.jupiter?.solana,window?.jupiter,window?.solana?.isJupiter?window.solana:null]
+                .find(p=>p&&typeof p.connect==='function'&&typeof p.signTransaction==='function')||null;
+              if(list.length||jup)break;
+              await sleep(200);
+            }
+
+            const ordered=[
+              ...list.filter(w=>/jupiter/i.test(String(w.name||''))),
+              ...list.filter(w=>!/jupiter/i.test(String(w.name||'')))
+            ];
+            for(const w of ordered){
+              try{
+                const out=await w.features['standard:connect'].connect();
+                const account=(out?.accounts||w.accounts||[])[0];
+                if(!account)continue;
+                const feature=w.features['solana:signTransaction'];
+                wallet={
+                  name:w.name||'Wallet Standard',
+                  publicKey:new PublicKey(account.address),
+                  async signAllTransactions(txs){
+                    const reqs=txs.map(tx=>({
+                      transaction:new Uint8Array(tx.serialize({requireAllSignatures:false,verifySignatures:false})),
+                      account,chain:'solana:mainnet'
+                    }));
+                    const signed=await feature.signTransaction(...reqs);
+                    if(!Array.isArray(signed)||signed.length!==txs.length)throw new Error('Wallet did not return the complete signed batch.');
+                    return signed.map(x=>{
+                      if(!x?.signedTransaction)throw new Error('Wallet returned an unsigned batch item.');
+                      return Transaction.from(new Uint8Array(x.signedTransaction));
+                    });
+                  }
+                };
+                break;
+              }catch(e){lastErr=e}
+            }
+
+            if(!wallet&&jup){
+              try{
+                const out=await jup.connect();
+                const pk=out?.publicKey||jup.publicKey;
+                if(!pk)throw new Error('Jupiter connected but returned no public key.');
+                wallet={
+                  name:'Jupiter In-App Wallet',
+                  publicKey:new PublicKey(pk.toString()),
+                  async signAllTransactions(txs){
+                    if(typeof jup.signAllTransactions==='function')return jup.signAllTransactions(txs);
+                    const signed=[];
+                    for(const tx of txs)signed.push(await jup.signTransaction(tx));
+                    return signed;
+                  }
+                };
+              }catch(e){lastErr=e}
+            }
+
+            if(!wallet){
+              try{
+                setStatus('OPENING JUPITER MOBILE…\\nApprove wallet connection only. No transaction is being sent yet.','warn');
+                const mod=await import('/mint/jupiter-mobile.js?v=20260926-rviv-distribution-launchpad-v1');
+                mod.resetJupiterMobileConnectionState?.();
+                const adapter=await mod.getJupiterMobileAdapter();
+                const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Jupiter Mobile did not connect within 25 seconds.')),25000));
+                await Promise.race([adapter.connect(),timeout]);
+                if(!adapter.publicKey)throw new Error('Jupiter Mobile connected but returned no public key.');
+                wallet={
+                  name:'Jupiter Mobile',
+                  publicKey:new PublicKey(adapter.publicKey.toString()),
+                  async signAllTransactions(txs){
+                    if(typeof adapter.signAllTransactions==='function')return adapter.signAllTransactions(txs);
+                    const signed=[];
+                    for(const tx of txs)signed.push(await adapter.signTransaction(tx));
+                    return signed;
+                  }
+                };
+              }catch(e){lastErr=e}
+            }
+
+            if(!wallet)throw new Error('Wallet connection failed: '+(lastErr?.message||lastErr||'No compatible wallet detected.'));
+            if(!wallet.publicKey.equals(MEMBER)){
+              const bad=wallet.publicKey.toBase58();
+              wallet=null;
+              throw new Error('Wrong wallet connected: '+bad);
+            }
+            $('#connect').textContent='Connected '+short(MEMBER.toBase58());
+            $('#connect').disabled=true;
+            $('#preflight').disabled=false;
+            window.__REVIVE_DISTRIBUTION_ORIGIN__='WORLDZLAUNCHPAD';
+          }"""
+
+          pattern=r"async function connectWallet\(\)\{.*?\n\}\nasync function buildPlan\(\)\{"
+          t,n=re.subn(pattern,replacement+"\nasync function buildPlan(){",t,count=1,flags=re.S)
+          assert n==1, 'connectWallet replacement failed'
+
+          # Make it unmistakable that this is the LaunchPad-hosted owner console.
+          t=t.replace('<p class="sub">Approved post-launch distribution — exact 200M model reconciliation</p>',
+                      '<p class="sub">WorldzLaunchPad™ owner console • Approved post-launch distribution • exact 200M reconciliation</p>')
+
+          out.write_text(t)
+          assert "WORLDZLAUNCHPAD" in t
+          assert "/mint/jupiter-mobile.js" in t
+          assert "70,000,000 RVIV" in t
+          assert "100,000,000 RVIV" in t
+          print('REVIVE_DISTRIBUTION_LAUNCHPAD_BUILD=PASS')
+
+      - name: Upload to WorldzLaunchPad
+        shell: python
+        run: |
+          import os,ssl
+          from ftplib import FTP_TLS,error_perm
+          from pathlib import Path
+
+          local=Path('launchpad.cryptoworldz.xyz/revive-distribution/index.html')
+          remote='domains/cryptoworldz.xyz/public_html/launchpad/revive-distribution'
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=40)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True);ftp.cwd('/')
+          for part in remote.split('/'):
+              if not part: continue
+              try: ftp.cwd(part)
+              except error_perm: ftp.mkd(part);ftp.cwd(part)
+          with local.open('rb') as h:
+              ftp.storbinary('STOR index.html',h,blocksize=262144)
+          ftp.quit()
+          print('REVIVE_DISTRIBUTION_LAUNCHPAD_DEPLOY=PASS')
+
+      - name: Verify live LaunchPad console
+        shell: python
+        run: |
+          import urllib.request,time
+          url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v='+str(int(time.time()))
+          last=''
+          for _ in range(8):
+              try:
+                  req=urllib.request.Request(url,headers={'User-Agent':'WorldzLaunchPad-REVIVE-Verify/1.0','Cache-Control':'no-cache'})
+                  with urllib.request.urlopen(req,timeout=20) as r:
+                      body=r.read().decode('utf-8','ignore')
+                  assert 'WORLDZLAUNCHPAD' in body
+                  assert '/mint/jupiter-mobile.js' in body
+                  assert 'Connect JayJayTeamDev Wallet' in body
+                  assert '70,000,000 RVIV' in body
+                  assert '100,000,000 RVIV' in body
+                  print('REVIVE_DISTRIBUTION_LAUNCHPAD_LIVE=PASS')
+                  raise SystemExit(0)
+              except SystemExit:
+                  raise
+              except Exception as e:
+                  last=str(e)
+                  time.sleep(5)
+          raise SystemExit('LaunchPad live verification failed: '+last)
