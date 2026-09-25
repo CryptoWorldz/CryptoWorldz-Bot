@@ -27,7 +27,7 @@ async function rpc(method, params=[]) {
 }
 
 const genesis = await rpc('getGenesisHash');
-if (genesis !== '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp') {
+if (genesis !== '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d') {
   throw new Error('MAINNET RPC REQUIRED; unexpected genesis hash '+genesis);
 }
 
