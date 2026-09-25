@@ -41,6 +41,38 @@ const transactionIndex=d.readBigUInt64LE(78);
 const staleTransactionIndex=d.readBigUInt64LE(86);
 const nextTransactionIndex=transactionIndex+1n;
 
+// Decode the live Squads v4 member registry using the canonical account layout:
+// discriminator(8) + createKey(32) + configAuthority(32) + threshold(2) +
+// timeLock(4) + transactionIndex(8) + staleTransactionIndex(8) +
+// rentCollector Option<Pubkey> + bump(1) + members Vec<Member>.
+let memberOffset=94;
+const rentCollectorTag=d.readUInt8(memberOffset++);
+if(rentCollectorTag===1){
+  memberOffset+=32;
+}else if(rentCollectorTag!==0){
+  throw new Error('Unexpected Squads rentCollector option tag='+rentCollectorTag);
+}
+const multisigBump=d.readUInt8(memberOffset++);
+const memberCount=d.readUInt32LE(memberOffset); memberOffset+=4;
+if(d.length<memberOffset+(memberCount*33))throw new Error('Squads member registry truncated');
+const members=[];
+for(let i=0;i<memberCount;i++){
+  const key=new PublicKey(d.subarray(memberOffset,memberOffset+32));
+  const mask=d.readUInt8(memberOffset+32);
+  members.push({
+    key:key.toBase58(),
+    mask,
+    initiate:Boolean(mask&1),
+    vote:Boolean(mask&2),
+    execute:Boolean(mask&4),
+  });
+  memberOffset+=33;
+}
+const jayMember=members.find(m=>m.key===FEE_PAYER.toBase58())||null;
+const jayCanSingleMemberFlow=Boolean(jayMember?.initiate&&jayMember?.vote&&jayMember?.execute);
+if(!jayMember)throw new Error('JAYJAY_MEMBER_GATE: fee payer is not a current Squads member');
+if(!jayCanSingleMemberFlow)throw new Error('JAYJAY_PERMISSION_GATE: member lacks Initiate/Vote/Execute permissions mask='+jayMember.mask);
+
 const [transactionPda,transactionBump]=PublicKey.findProgramAddressSync(
   [Buffer.from('multisig'),MULTISIG.toBuffer(),Buffer.from('transaction'),u64le(nextTransactionIndex)],
   SQUADS_PROGRAM
@@ -65,6 +97,11 @@ const report={
    multisig:MULTISIG.toBase58(),
    multisigAccountOwner:multisigInfo.owner.toBase58(),
    threshold,
+   multisigBump,
+   memberCount,
+   members,
+   jayJayMember:jayMember,
+   jayJayCanSingleMemberFlow,
    timeLockSeconds:timeLock,
    transactionIndex:transactionIndex.toString(),
    staleTransactionIndex:staleTransactionIndex.toString(),
@@ -95,3 +132,4 @@ fs.mkdirSync('artifacts',{recursive:true});
 fs.writeFileSync('artifacts/revive-squads-vault-readonly.json',JSON.stringify(report,null,2)+'\n');
 console.log('REVIVE_SQUADS_VAULT=PASS vault='+report.squads.vault+' threshold='+threshold+' tx_index='+transactionIndex+' next='+nextTransactionIndex+' rviv='+report.balances.rvivTokens+' vault_sol='+report.balances.vaultSol+' jay_sol='+report.balances.jayJaySol+' wsol_ata='+(report.balances.wsolAtaExists?'EXISTS':'MISSING'));
 console.log('REVIVE_SQUADS_EPHEMERAL_POSITION_SIGNER='+report.squads.ephemeralPositionNftSignerPda);
+console.log('REVIVE_SQUADS_MEMBERS='+memberCount+' JAY_MEMBER='+jayMember.key+' MASK='+jayMember.mask+' INITIATE='+jayMember.initiate+' VOTE='+jayMember.vote+' EXECUTE='+jayMember.execute+' SINGLE_MEMBER_FLOW='+jayCanSingleMemberFlow);
