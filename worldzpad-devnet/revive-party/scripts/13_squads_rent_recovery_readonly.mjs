@@ -31,9 +31,9 @@ if(ms.rentCollector){
   else if(Array.isArray(ms.rentCollector) && ms.rentCollector[0] instanceof PublicKey) rentCollector=ms.rentCollector[0];
   else if(ms.rentCollector?.toBase58) rentCollector=ms.rentCollector;
 }
+const rentCollectorConfigured=Boolean(rentCollector);
 if(!rentCollector){
-  console.log('REVIVE_RENT_RECOVERY_DISABLED multisig_rent_collector=NONE');
-  process.exit(0);
+  console.log('REVIVE_RENT_RECOVERY_CURRENTLY_DISABLED multisig_rent_collector=NONE; continuing read-only historical rent scan');
 }
 
 const rows=[];
@@ -61,7 +61,7 @@ for(let i=1n;i<=currentIndex;i++){
   );
 
   let sim=null, simulationPass=false, closeFeeLamports=null;
-  if(closeByRule){
+  if(closeByRule && rentCollectorConfigured){
     const ix=squads.instructions.vaultTransactionAccountsClose({
       multisigPda:MULTISIG,
       rentCollector,
@@ -152,6 +152,8 @@ for(const batch of batches){
   });
 }
 
+const staticCloseableRows=rows.filter(x=>x.closeByStaticRule);
+const potentialGross=staticCloseableRows.reduce((a,x)=>a+BigInt(x.totalRentLamports),0n);
 const gross=closeableIxs.reduce((a,x)=>a+BigInt(x.lamports),0n);
 const fees=batchPlans.reduce((a,x)=>a+BigInt(x.feeLamports),0n);
 const net=gross-fees;
@@ -164,10 +166,16 @@ const report={
   multisig:MULTISIG.toBase58(),
   currentTransactionIndex:currentIndex.toString(),
   staleTransactionIndex:staleIndex.toString(),
-  rentCollector:rentCollector.toBase58(),
-  rentCollectorIsJayJayTeamDev:rentCollector.equals(MEMBER),
+  rentCollector:rentCollector?.toBase58()??null,
+  rentCollectorConfigured,
+  rentCollectorIsJayJayTeamDev:Boolean(rentCollector?.equals(MEMBER)),
   historical:rows,
   recovery:{
+    staticCloseableCount:staticCloseableRows.length,
+    staticCloseableIndices:staticCloseableRows.map(x=>x.index),
+    potentialGrossIfRentCollectorConfiguredLamports:potentialGross.toString(),
+    potentialGrossIfRentCollectorConfiguredSol:Number(potentialGross)/1e9,
+    potentialCoversReviveShortfall:potentialGross>=shortfall,
     closeableCount:closeableIxs.length,
     closeableIndices:closeableIxs.map(x=>x.index.toString()),
     grossRecoveredLamports:gross.toString(),
@@ -185,8 +193,9 @@ const report={
 fs.mkdirSync('artifacts',{recursive:true});
 fs.writeFileSync('artifacts/revive-squads-rent-recovery-readonly.json',JSON.stringify(report,null,2)+'\n');
 
-console.log('REVIVE_RENT_COLLECTOR='+report.rentCollector+' is_jay='+report.rentCollectorIsJayJayTeamDev);
-console.log('REVIVE_OLD_TX current='+currentIndex+' stale='+staleIndex+' closeable='+report.recovery.closeableCount+' indices='+report.recovery.closeableIndices.join(','));
+console.log('REVIVE_RENT_COLLECTOR='+(report.rentCollector??'NONE')+' configured='+report.rentCollectorConfigured+' is_jay='+report.rentCollectorIsJayJayTeamDev);
+console.log('REVIVE_OLD_TX current='+currentIndex+' stale='+staleIndex+' static_closeable='+report.recovery.staticCloseableCount+' indices='+report.recovery.staticCloseableIndices.join(','));
+console.log('REVIVE_RENT_POTENTIAL if_collector_configured_sol='+report.recovery.potentialGrossIfRentCollectorConfiguredSol+' covers_shortfall='+report.recovery.potentialCoversReviveShortfall);
 for(const row of rows){
  if(row.transactionExists||row.proposalExists) console.log('REVIVE_OLD_ACCOUNT index='+row.index+' type='+row.transactionType+' status='+row.proposalStatus+' rent_sol='+((row.totalRentLamports)/1e9).toFixed(9)+' close_sim='+row.closeSimulationPass);
 }
