@@ -1,0 +1,127 @@
+{
+  "version": "BITWORLDZ-CHAIN-MATRIX-2026-09-25-A",
+  "mainnetExecutionEnabled": false,
+  "policy": "A chain becomes BitPair-capable only after one exact BTC asset plus one exact venue pass independent proof.",
+  "chains": {
+    "solana": {
+      "family": "SVM",
+      "priority": 1,
+      "btcAssetCandidates": [
+        "WBTC",
+        "cbBTC",
+        "tBTC"
+      ],
+      "launchVenueCandidates": [
+        "METEORA_DBC_DAMM_V2",
+        "RAYDIUM_ADAPTER"
+      ],
+      "status": "DEVNET_MOCK_BTC_QUOTE_NEXT",
+      "mainnetApproved": false
+    },
+    "xrpl": {
+      "family": "XRPL",
+      "priority": 3,
+      "btcAssetCandidates": [
+        "VERIFIED_ISSUED_OR_BRIDGED_BTC_REQUIRED"
+      ],
+      "launchVenueCandidates": [
+        "XRPL_CLOB",
+        "XRPL_AMM"
+      ],
+      "status": "RESEARCH",
+      "mainnetApproved": false
+    },
+    "base": {
+      "family": "EVM",
+      "priority": 2,
+      "btcAssetCandidates": [
+        "VERIFIED_BASE_BTC_REPRESENTATION_REQUIRED"
+      ],
+      "launchVenueCandidates": [
+        "EVM_AMM_OR_CURVE_ADAPTER"
+      ],
+      "status": "TESTNET_ADAPTER_RESEARCH",
+      "mainnetApproved": false
+    },
+    "ethereum": {
+      "family": "EVM",
+      "priority": 2,
+      "btcAssetCandidates": [
+        "VERIFIED_ERC20_BTC_REPRESENTATION_REQUIRED"
+      ],
+      "launchVenueCandidates": [
+        "EVM_AMM_OR_CURVE_ADAPTER"
+      ],
+      "status": "TESTNET_ADAPTER_RESEARCH",
+      "mainnetApproved": false
+    },
+    "bnb": {
+      "family": "EVM",
+      "priority": 2,
+      "btcAssetCandidates": [
+        "VERIFIED_BSC_BTC_REPRESENTATION_REQUIRED"
+      ],
+      "launchVenueCandidates": [
+        "EVM_AMM_OR_CURVE_ADAPTER"
+      ],
+      "status": "TESTNET_ADAPTER_RESEARCH",
+      "mainnetApproved": false
+    },
+    "sui": {
+      "family": "MOVE",
+      "priority": 3,
+      "btcAssetCandidates": [
+        "VERIFIED_SUI_BTC_REPRESENTATION_REQUIRED"
+      ],
+      "launchVenueCandidates": [
+        "SUI_AMM_OR_CLOB_ADAPTER"
+      ],
+      "status": "RESEARCH",
+      "mainnetApproved": false
+    },
+    "hyperevm": {
+      "family": "EVM",
+      "priority": 3,
+      "btcAssetCandidates": [
+        "VERIFIED_HYPEREVM_BTC_REPRESENTATION_REQUIRED"
+      ],
+      "launchVenueCandidates": [
+        "HYPEREVM_AMM_ADAPTER"
+      ],
+      "status": "RESEARCH",
+      "mainnetApproved": false
+    },
+    "robinhood": {
+      "family": "EVM",
+      "priority": 3,
+      "btcAssetCandidates": [
+        "VERIFIED_ROBINHOOD_BTC_REPRESENTATION_REQUIRED"
+      ],
+      "launchVenueCandidates": [
+        "EVM_AMM_OR_CURVE_ADAPTER"
+      ],
+      "status": "RESEARCH",
+      "mainnetApproved": false
+    }
+  },
+  "futureBitcoinExecutionLanes": {
+    "stacks": {
+      "assetCandidate": "sBTC",
+      "runtime": "Clarity",
+      "status": "RESEARCH",
+      "mainnetApproved": false
+    },
+    "rootstock": {
+      "assetCandidate": "rBTC",
+      "runtime": "EVM",
+      "status": "RESEARCH",
+      "mainnetApproved": false
+    },
+    "bitcoinL1": {
+      "assetCandidate": "BTC",
+      "runtime": "Bitcoin Script",
+      "status": "SETTLEMENT_FIRST__DIRECT_LAUNCH_NOT_ASSUMED",
+      "mainnetApproved": false
+    }
+  }
+}
