@@ -104,7 +104,7 @@ const report={
    memberCount,
    members,
    jayJayMember:jayMember,
-   jayJayCanSingleMemberFlow,
+   jayJayCanSingleMemberFlow:jayCanSingleMemberFlow,
    timeLockSeconds:timeLock,
    transactionIndex:transactionIndex.toString(),
    staleTransactionIndex:staleTransactionIndex.toString(),
