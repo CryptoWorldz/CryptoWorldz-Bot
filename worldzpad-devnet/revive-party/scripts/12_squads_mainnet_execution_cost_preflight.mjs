@@ -178,13 +178,12 @@ const {tx:createPoolTx,pool,position}=await cpAmm.createCustomPool({
   isLockLiquidity:true,
 });
 
-if(vaultTopUpLamports>0n){
-  createPoolTx.instructions.unshift(SystemProgram.transfer({
-    fromPubkey:JAY,
-    toPubkey:vaultPda,
-    lamports:Number(vaultTopUpLamports),
-  }));
-}
+const topUpIx=SystemProgram.transfer({
+  fromPubkey:JAY,
+  toPubkey:vaultPda,
+  lamports:Number(vaultTopUpLamports),
+});
+const outerExecuteInstructions=vaultTopUpLamports>0n?[topUpIx]:[];
 
 const latest=await connection.getLatestBlockhash('confirmed');
 const innerTransactionMessage=new TransactionMessage({
@@ -274,7 +273,7 @@ function compileCandidate(name,instructions,alts=[]){
 }
 
 const atomic=compileCandidate('atomic_create_propose_approve_execute',[
-  vaultCreateIx,proposalCreateIx,approveIx,executeIx,
+  ...outerExecuteInstructions,vaultCreateIx,proposalCreateIx,approveIx,executeIx,
 ],lookupTableAccounts);
 const setup=compileCandidate('setup_create_propose_approve',[
   vaultCreateIx,proposalCreateIx,approveIx,
@@ -283,7 +282,7 @@ const proposalApprove=compileCandidate('proposal_create_approve',[
   proposalCreateIx,approveIx,
 ]);
 const createOnly=compileCandidate('vault_transaction_create',[vaultCreateIx]);
-const executeOnly=compileCandidate('execute',[executeIx],lookupTableAccounts);
+const executeOnly=compileCandidate('execute',[...outerExecuteInstructions,executeIx],lookupTableAccounts);
 
 const candidates=[atomic,setup,proposalApprove,createOnly,executeOnly];
 console.log('REVIVE_SQUADS_TX_SIZE_DIAGNOSTIC='+JSON.stringify(candidates.map(x=>({name:x.name,bytes:x.bytes,fits:x.fits,error:x.error}))));
