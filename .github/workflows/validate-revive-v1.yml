@@ -133,10 +133,17 @@ jobs:
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         continue-on-error: true
         run: npm run bootstrap-payer
-      - name: Install Solana devnet Proof-of-Work faucet client
+      - name: Cache Solana devnet Proof-of-Work faucet client
         if: env.DEVNET_PAYER_SECRET_JSON == ''
+        id: cache-devnet-pow
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/devnet-pow
+          key: devnet-pow-v0.1.4-${{ runner.os }}-${{ runner.arch }}
+      - name: Install Solana devnet Proof-of-Work faucet client
+        if: env.DEVNET_PAYER_SECRET_JSON == '' && steps.cache-devnet-pow.outputs.cache-hit != 'true'
         shell: bash
-        run: cargo install devnet-pow
+        run: cargo install devnet-pow --version 0.1.4
       - name: Mine disposable devnet SOL with PoW faucet
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
