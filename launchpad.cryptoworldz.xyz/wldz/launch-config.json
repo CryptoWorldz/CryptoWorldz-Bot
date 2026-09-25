@@ -1,6 +1,6 @@
 {
-  "version": "2026-09-23-WLDZ-DAMM-V2-1",
-  "status": "OWNER_AUTHORIZED__TEMPORARY_1_OF_2_CUSTODY__ONCHAIN_EXECUTION_PENDING",
+  "version": "2026-09-25-WLDZ-LIVE-1",
+  "status": "LIVE__POOL_CREATED__LP_PERMANENTLY_LOCKED__INDEXING_IN_PROGRESS",
   "executionEnabled": false,
   "network": "mainnet-beta",
   "token": {
@@ -19,20 +19,33 @@
   },
   "launch": {
     "engine": "METEORA_DAMM_V2_ONE_SIDED",
+    "poolAddress": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
     "baseAmountTokens": 15000000,
     "quote": "wSOL",
-    "quoteAmountSol": 0,
+    "initialQuoteAmountSol": 0,
     "openingPriceSolPerWldz": 0.000001,
     "openingFdvSol": 100,
     "baseFeeBps": 200,
     "feeCollection": "ONLY_B_QUOTE",
     "dynamicFee": false,
-    "permanentLock": true
+    "permanentLock": true,
+    "permanentLockPercent": 100
   },
   "execution": {
-    "onchainProposalRequired": true,
-    "broadcasted": false,
+    "launchExecuted": true,
+    "broadcasted": true,
+    "duplicateExecutionDisabled": true,
     "publicCreatorGate": false
+  },
+  "market": {
+    "state": "LIVE__EARLY_MARKET_DATA",
+    "meteora": "LIVE",
+    "geckoTerminal": "INDEXED",
+    "birdeye": "INDEXED",
+    "phantom": "RECOGNIZED__UNVERIFIED__PRICE_PENDING",
+    "jupiter": "RECOGNIZED__METADATA_AND_PRICE_PENDING",
+    "dexScreener": "PAIR_INDEX_PENDING",
+    "solscan": "TOKEN_PROFILE_PENDING"
   },
   "feeFlow": {
     "worldzLaunchPadTreasury": 10,
