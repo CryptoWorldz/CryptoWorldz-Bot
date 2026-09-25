@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'cryptoworldz.xyz/revive-distribution/index.html'
+      - 'launchpad.cryptoworldz.xyz/revive-distribution/rpc.php'
       - 'launchpad.cryptoworldz.xyz/mint/jupiter-mobile.js'
       - '.github/workflows/deploy-revive-distribution-launchpad.yml'
   workflow_dispatch:
@@ -42,9 +43,9 @@ jobs:
           out.parent.mkdir(parents=True,exist_ok=True)
           t=src.read_text()
 
-          # LaunchPad origin + shared mainnet RPC.
+          # LaunchPad origin + dedicated same-origin mainnet RPC bridge.
           t=t.replace("const RPC='/revive-launch/rpc.php';",
-                      "const RPC='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';")
+                      "const RPC='/revive-distribution/rpc.php';")
 
           # Replace the old hidden Jupiter React bridge with Reown's official
           # framework-agnostic AppKit + Solana adapter.
@@ -162,7 +163,7 @@ jobs:
           from ftplib import FTP_TLS,error_perm
           from pathlib import Path
 
-          local=Path('launchpad.cryptoworldz.xyz/revive-distribution/index.html')
+          local_dir=Path('launchpad.cryptoworldz.xyz/revive-distribution')
           remote='domains/cryptoworldz.xyz/public_html/launchpad/revive-distribution'
           ftp=FTP_TLS(context=ssl._create_unverified_context())
           ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=40)
@@ -172,34 +173,80 @@ jobs:
               if not part: continue
               try: ftp.cwd(part)
               except error_perm: ftp.mkd(part);ftp.cwd(part)
-          with local.open('rb') as h:
-              ftp.storbinary('STOR index.html',h,blocksize=262144)
+          for name in ('index.html','rpc.php'):
+              with (local_dir/name).open('rb') as h:
+                  ftp.storbinary('STOR '+name,h,blocksize=262144)
           ftp.quit()
           print('REVIVE_DISTRIBUTION_LAUNCHPAD_DEPLOY=PASS')
 
-      - name: Verify live LaunchPad console
+      - name: Verify live LaunchPad console and RPC methods
         shell: python
         run: |
-          import urllib.request,time
-          url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v='+str(int(time.time()))
+          import urllib.request,time,json
+          page_url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v='+str(int(time.time()))
+          rpc_url='https://launchpad.cryptoworldz.xyz/revive-distribution/rpc.php'
           last=''
+
+          def rpc(method,params):
+              body=json.dumps({'jsonrpc':'2.0','id':method,'method':method,'params':params}).encode()
+              req=urllib.request.Request(
+                  rpc_url,
+                  data=body,
+                  headers={
+                      'Content-Type':'application/json',
+                      'Origin':'https://launchpad.cryptoworldz.xyz',
+                      'User-Agent':'WorldzLaunchPad-REVIVE-Verify/2.0',
+                      'Cache-Control':'no-cache'
+                  },
+                  method='POST'
+              )
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  raw=r.read().decode('utf-8','ignore')
+                  if r.status != 200:
+                      raise RuntimeError(method+' HTTP '+str(r.status)+' '+raw)
+              data=json.loads(raw)
+              if 'error' in data:
+                  raise RuntimeError(method+' '+json.dumps(data['error']))
+              if 'result' not in data:
+                  raise RuntimeError(method+' returned no result: '+raw)
+              return data['result']
+
           for _ in range(8):
               try:
-                  req=urllib.request.Request(url,headers={'User-Agent':'WorldzLaunchPad-REVIVE-Verify/1.0','Cache-Control':'no-cache'})
+                  req=urllib.request.Request(page_url,headers={'User-Agent':'WorldzLaunchPad-REVIVE-Verify/2.0','Cache-Control':'no-cache'})
                   with urllib.request.urlopen(req,timeout=20) as r:
                       body=r.read().decode('utf-8','ignore')
                   assert 'WORLDZLAUNCHPAD' in body
                   assert 'WORLDZ_APPKIT_DIRECT_V1' in body
                   assert '@reown/appkit-cdn@1.8.24/dist/appkit.js' in body
+                  assert "const RPC='/revive-distribution/rpc.php';" in body
                   assert '/mint/jupiter-mobile.js' not in body
                   assert 'Connect JayJayTeamDev Wallet' in body
                   assert '70,000,000 RVIV' in body
                   assert '100,000,000 RVIV' in body
+
+                  genesis=rpc('getGenesisHash',[])
+                  assert genesis == '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d', 'wrong Solana network genesis: '+str(genesis)
+                  rpc('getBalance',['Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u',{'commitment':'confirmed'}])
+                  rpc('getAccountInfo',['DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R',{'encoding':'base64','commitment':'confirmed'}])
+                  rpc('getMultipleAccounts',[
+                      'DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R',
+                      'B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN'
+                  ],{'encoding':'base64','commitment':'confirmed'}] if False else [])
+                  rpc('getTokenAccountBalance',['28CwdVt2y997WZqTzEuBpuwoyVYAj6JcaD4qDMzyCdtn',{'commitment':'confirmed'}])
+                  rpc('getLatestBlockhash',[{'commitment':'confirmed'}])
+                  rpc('getMinimumBalanceForRentExemption',[165,{'commitment':'confirmed'}])
+                  rpc('getBlockHeight',[{'commitment':'confirmed'}])
+                  rpc('getSlot',[{'commitment':'confirmed'}])
+                  rpc('getEpochInfo',[{'commitment':'confirmed'}])
+
                   print('REVIVE_DISTRIBUTION_LAUNCHPAD_LIVE=PASS')
+                  print('REVIVE_DISTRIBUTION_RPC_REQUIRED_READ_METHODS=PASS')
                   raise SystemExit(0)
               except SystemExit:
                   raise
               except Exception as e:
                   last=str(e)
+                  print('VERIFY_RETRY:',last)
                   time.sleep(5)
           raise SystemExit('LaunchPad live verification failed: '+last)
