@@ -3,7 +3,7 @@ name: BitWorldz Solana BTC-paired devnet rail
 on:
   push:
     branches:
-      - bitworldz-omnibtc-2026-09-25
+      - bitworldz-build-2026-09-25
     paths:
       - 'worldzpad-devnet/bitworldz/**'
       - 'worldzpad-omnichain/bitworldz/**'
