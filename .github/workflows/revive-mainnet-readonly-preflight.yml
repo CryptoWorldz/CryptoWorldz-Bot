@@ -11,12 +11,19 @@ on:
       - 'worldzpad-mainnet/revive/revive-direct-damm-v2-existing-mint.v1.json'
       - 'worldzpad-mainnet/revive/scripts/estimate-mainnet-sol-floor.mjs'
       - '.github/workflows/revive-mainnet-readonly-preflight.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-devnet/revive-party/scripts/09_mainnet_launch_simulation_readonly.mjs'
+      - 'worldzpad-mainnet/revive/revive-launch-contract.v1.json'
+      - 'worldzpad-mainnet/revive/revive-direct-damm-v2-existing-mint.v1.json'
+      - 'worldzpad-mainnet/revive/scripts/estimate-mainnet-sol-floor.mjs'
+      - '.github/workflows/revive-mainnet-readonly-preflight.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: revive-mainnet-readonly-preflight
+  group: revive-mainnet-readonly-preflight-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
