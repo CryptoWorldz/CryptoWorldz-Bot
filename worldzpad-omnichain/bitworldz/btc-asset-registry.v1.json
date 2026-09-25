@@ -1,0 +1,59 @@
+{
+  "version": "BITWORLDZ-BTC-ASSET-REGISTRY-2026-09-25-A",
+  "mainnetExecutionEnabled": false,
+  "policy": {
+    "defaultStatus": "UNAPPROVED_UNTIL_PROVEN",
+    "wrappedMustNotBeLabeledNative": true,
+    "exactContractMintOrAssetIdRequiredBeforeExecution": true,
+    "assetVerificationMustBeFreshBeforeMainnet": true,
+    "issuerCustodyBridgeAndRedemptionDisclosureRequired": true
+  },
+  "entries": [
+    {
+      "key": "solana-wbtc-wormhole-reference",
+      "chain": "solana",
+      "symbol": "WBTC",
+      "assetClass": "WRAPPED_BTC",
+      "referenceOnly": true,
+      "evidenceNote": "Pump supported-pair documentation currently lists Wormhole Portal WBTC on Solana as a supported pair asset.",
+      "executionStatus": "READ_ONLY_COMPATIBILITY_RESEARCH",
+      "mainnetApproved": false
+    },
+    {
+      "key": "solana-cbbtc-candidate",
+      "chain": "solana",
+      "symbol": "cbBTC",
+      "assetClass": "WRAPPED_BTC",
+      "referenceOnly": true,
+      "executionStatus": "RESEARCH",
+      "mainnetApproved": false
+    },
+    {
+      "key": "solana-tbtc-candidate",
+      "chain": "solana",
+      "symbol": "tBTC",
+      "assetClass": "BITCOIN_LAYER_BTC",
+      "referenceOnly": true,
+      "executionStatus": "RESEARCH",
+      "mainnetApproved": false
+    },
+    {
+      "key": "stacks-sbtc-candidate",
+      "chain": "stacks",
+      "symbol": "sBTC",
+      "assetClass": "BITCOIN_LAYER_BTC",
+      "referenceOnly": true,
+      "executionStatus": "RESEARCH__TESTNET_ADAPTER_REQUIRED",
+      "mainnetApproved": false
+    },
+    {
+      "key": "rootstock-rbtc-candidate",
+      "chain": "rootstock",
+      "symbol": "rBTC",
+      "assetClass": "BITCOIN_LAYER_BTC",
+      "referenceOnly": true,
+      "executionStatus": "RESEARCH__TESTNET_ADAPTER_REQUIRED",
+      "mainnetApproved": false
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+name: BitWorldz Solana BTC-paired devnet rail
+
+on:
+  push:
+    branches:
+      - bitworldz-build-2026-09-25
+    paths:
+      - 'worldzpad-devnet/bitworldz/**'
+      - 'worldzpad-omnichain/bitworldz/**'
+      - '.github/workflows/bitworldz-solana-btc-devnet.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-devnet/bitworldz/**'
+      - 'worldzpad-omnichain/bitworldz/**'
+      - '.github/workflows/bitworldz-solana-btc-devnet.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/bitworldz
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: worldzpad-devnet/bitworldz/package.json
+
+      - name: Install pinned BitWorldz dependencies
+        run: npm install --ignore-scripts
+
+      - name: Static BTC-pair safety proof
+        run: npm run static-proof
+
+      - name: Solana devnet mock-BTC BitPair live probe
+        id: live_probe
+        continue-on-error: true
+        env:
+          SOLANA_RPC_URL: https://api.devnet.solana.com
+        run: npm run live-bitpair
+
+      - name: Real WBTC mainnet identity / DBC compatibility read-only probe
+        id: real_btc
+        continue-on-error: true
+        env:
+          SOLANA_MAINNET_RPC_URL: https://api.mainnet-beta.solana.com
+        run: npm run real-btc-compat
+
+      - name: Build BitProof receipt
+        if: always()
+        run: npm run bitproof
+
+      - name: Summarize probe outcomes
+        if: always()
+        run: |
+          echo "static=required"
+          echo "live_probe=${{ steps.live_probe.outcome }}"
+          echo "real_btc_readonly=${{ steps.real_btc.outcome }}"
+          test -f artifacts/bitworldz-bitproof.json
+
+      - name: Publish BitWorldz proof artifact when quota permits
+        uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: bitworldz-solana-btc-proof
+          path: worldzpad-devnet/bitworldz/artifacts/
+          if-no-files-found: error
+          retention-days: 14
