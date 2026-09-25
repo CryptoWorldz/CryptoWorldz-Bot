@@ -66,8 +66,10 @@ jobs:
           echo "real_btc_readonly=${{ steps.real_btc.outcome }}"
           test -f artifacts/bitworldz-bitproof.json
 
-      - uses: actions/upload-artifact@v4
+      - name: Publish BitWorldz proof artifact when quota permits
+        uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: bitworldz-solana-btc-proof
           path: worldzpad-devnet/bitworldz/artifacts/
