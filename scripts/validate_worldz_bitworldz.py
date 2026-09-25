@@ -13,6 +13,13 @@ schema = json.loads((ROOT / "worldzpad-omnichain/bitworldz/bitpair-intent.schema
 launch_page = (ROOT / "launchpad.cryptoworldz.xyz/bitworldz/index.html").read_text()
 subdomain_page = (ROOT / "bitworldz.cryptoworldz.xyz/index.html").read_text()
 sdk = (ROOT / "worldzpad-omnichain/bitworldz/sdk/bitworldz-core.mjs").read_text()
+devnet_readme = (ROOT / "worldzpad-devnet/bitworldz/README.md").read_text()
+devnet_package = load("worldzpad-devnet/bitworldz/package.json")
+devnet_common = (ROOT / "worldzpad-devnet/bitworldz/scripts/common.mjs").read_text()
+devnet_live = (ROOT / "worldzpad-devnet/bitworldz/scripts/01_mock_btc_quote_devnet.mjs").read_text()
+devnet_real = (ROOT / "worldzpad-devnet/bitworldz/scripts/02_real_btc_compatibility.mjs").read_text()
+devnet_bitproof = (ROOT / "worldzpad-devnet/bitworldz/scripts/03_build_bitproof.mjs").read_text()
+devnet_workflow = (ROOT / ".github/workflows/bitworldz-solana-btc-devnet.yml").read_text()
 
 if spec["name"] != "BitWorldz OmniBTC™":
     raise SystemExit("BitWorldz identity drifted")
@@ -49,6 +56,27 @@ if "MAINNET_EXECUTION_ENABLED = false" not in sdk:
     raise SystemExit("BitWorldz SDK mainnet gate missing")
 if 'TARGET_GROSS_TRADER_FEE_BPS = 75n' not in sdk:
     raise SystemExit("BitWorldz SDK fee target drifted")
+if devnet_package["dependencies"].get("@meteora-ag/dynamic-bonding-curve-sdk") != "1.5.12":
+    raise SystemExit("BitWorldz devnet Meteora SDK must stay pinned to 1.5.12")
+if "MAINNET RPC FORBIDDEN FOR LIVE BITWORLDZ HARNESS" not in devnet_common:
+    raise SystemExit("BitWorldz live devnet mainnet RPC guard missing")
+if "tokenQuoteDecimal:8" not in devnet_live:
+    raise SystemExit("BitWorldz mock-BTC quote must use 8 decimals")
+if "startingFeeBps:75" not in devnet_live or "endingFeeBps:75" not in devnet_live:
+    raise SystemExit("BitWorldz live DBC 75-bps fee target missing")
+if "partnerPermanentLockedLiquidityPercentage:40" not in devnet_live or "creatorPermanentLockedLiquidityPercentage:60" not in devnet_live:
+    raise SystemExit("BitWorldz 100% permanent-lock config target drifted")
+if "READ_ONLY__NO_SIGNER__NO_TRANSACTION" not in devnet_real:
+    raise SystemExit("real WBTC compatibility probe must remain read-only")
+if "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh" not in devnet_common:
+    raise SystemExit("pinned Solana WBTC reference missing")
+if "releaseGate" not in devnet_bitproof or "approved:false" not in devnet_bitproof:
+    raise SystemExit("BitProof release gate must remain unapproved")
+if "continue-on-error: true" not in devnet_workflow:
+    raise SystemExit("external live/read-only probes must not masquerade as required deterministic CI")
+if "Mock mBTC has no Bitcoin backing" not in devnet_readme:
+    raise SystemExit("mock-BTC backing disclosure missing")
+
 if "Research build" not in subdomain_page:
     raise SystemExit("BitWorldz subdomain must identify itself as a research build")
 if "Mainnet execution disabled" not in launch_page:
@@ -92,4 +120,4 @@ if "DIRECT_LAUNCH_PRIMITIVE_NOT_ASSUMED" not in research["bitcoin-l1"]["status"]
     raise SystemExit("Bitcoin L1 must not inherit a fake general-purpose launch primitive")
 
 print("WORLDZ_BITWORLDZ_VALIDATION=PASS")
-print("product=BitWorldz_OmniBTC asset_classes=4 worldz_targets=8 fee_bps=75 split=51/17/15/8.5/8.5 pages=2 sdk=LOCKED schema=LOCKED mainnet=OFF")
+print("product=BitWorldz_OmniBTC asset_classes=4 worldz_targets=8 fee_bps=75 split=51/17/15/8.5/8.5 pages=2 sdk=LOCKED schema=LOCKED devnet_rail=LOCKED real_wbtc=READ_ONLY mainnet=OFF")
