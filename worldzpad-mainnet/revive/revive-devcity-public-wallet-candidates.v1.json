@@ -562,8 +562,129 @@
       "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
       "chainValidation": "PENDING",
       "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "74r2HrSgm5AcWj9SSF7cjRKHF4tyBMEx6twyRh3F2ozm",
+      "source": "github_public",
+      "sourceRepo": "zv09/pyTelegramDialogsMirror",
+      "sourceUrl": "https://github.com/zv09/pyTelegramDialogsMirror/blob/a68bfdb620406c05ecbd284aa52878de4b029756/docs/usdt_solana.md",
+      "discoveryQuery": "donations Solana wallet",
+      "evidence": "**Network:** Solana **Address:** `74r2HrSgm5AcWj9SSF7cjRKHF4tyBMEx6twyRh3F2ozm` <img src=\"20250720202310_TrustWalletAcc1_USDT(SOLANA)_qr.png\" width=\"400\"> [Back to Donations Page](donations.md)",
+      "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "B2mgZ4ddUcu7bimLThBahpizPysVJ7xTd2woScmWtPYr",
+      "source": "github_public",
+      "sourceRepo": "DePayFi/documentation",
+      "sourceUrl": "https://github.com/DePayFi/documentation/blob/d242b9c1f0f355c33fd95c48b7257b468888b1fe/docs/payments/donations/button.md",
+      "discoveryQuery": "donations Solana wallet",
+      "evidence": " label={'Donate'} blockchains='[\"ethereum\",\"bsc\",\"polygon\",\"solana\",\"gnosis\",\"avalanche\",\"arbitrum\",\"optimism\",\"base\"]' configuration={ {\"title\": \"Donation\",\"accept\":[{\"blockchain\":\"ethereum\",\"token\":\"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48\",\"receiver\":\"0x4e260bB2b25EC6F3A59B478fCDe5eD5B8D783B02\"},{\"blockchain\":\"bsc\",\"token\":\"0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d\",\"receiver\":\"0x4e260bB2b25EC6F3A59B478fCDe5eD5B8D783B02\"},{\"blockchain\":\"polygon\",\"token\":\"0x2791bca1f2de4661ed88a30c99a7a9449aa84174\",\"receiver\":",
+      "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "hgof84NNrXzQzxPTKhixokrkPtreMFs4gXzXeFgUK5j",
+      "source": "github_public",
+      "sourceRepo": "corvuslatimer/horus",
+      "sourceUrl": "https://github.com/corvuslatimer/horus/blob/ccccb77225c38c9b9379f315445737d740e19bd2/README.md",
+      "discoveryQuery": "donations Solana wallet",
+      "evidence": " It is designed to integrate directly with your OpenClaw agent, so you can text it from anywhere on the go with prompts like: \"how are things in iran\" or \"what's the markets looking like\". Horus is opensource to empower the people. All donations should be sent to my Solana wallet `hgof84NNrXzQzxPTKhixokrkPtreMFs4gXzXeFgUK5j`. Fully optional. You can also buy this token to support me: `DGeGM3JXY1wkLnrBNf7Y1Hve3Dnq2MjWTrR9ySzUpump`. ![Horus dashboard](https://corvuslatimer.com/images/horus-dashboard-latest.jpg) ",
+      "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "DGeGM3JXY1wkLnrBNf7Y1Hve3Dnq2MjWTrR9ySzUpump",
+      "source": "github_public",
+      "sourceRepo": "corvuslatimer/horus",
+      "sourceUrl": "https://github.com/corvuslatimer/horus/blob/ccccb77225c38c9b9379f315445737d740e19bd2/README.md",
+      "discoveryQuery": "donations Solana wallet",
+      "evidence": " It is designed to integrate directly with your OpenClaw agent, so you can text it from anywhere on the go with prompts like: \"how are things in iran\" or \"what's the markets looking like\". Horus is opensource to empower the people. All donations should be sent to my Solana wallet `hgof84NNrXzQzxPTKhixokrkPtreMFs4gXzXeFgUK5j`. Fully optional. You can also buy this token to support me: `DGeGM3JXY1wkLnrBNf7Y1Hve3Dnq2MjWTrR9ySzUpump`. ![Horus dashboard](https://corvuslatimer.com/images/horus-dashboard-latest.jpg) ",
+      "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "2oAoK4D4hq5nGE2JVSknuWY4YDxaF5u7uB1arf1s2TNY",
+      "source": "github_public",
+      "sourceRepo": "yuqiaowu/whale-watcher",
+      "sourceUrl": "https://github.com/yuqiaowu/whale-watcher/blob/885e2cab188222b332cb1d55ca72ee07fd1eaae4/README.md",
+      "discoveryQuery": "donations Solana wallet",
+      "evidence": "| `newjowu@gmail.com` | `2oAoK4D4hq5nGE2JVSknuWY4YDxaF5u7uB1arf1s2TNY` | ### 🚀 Solana Blink (One-Click Payment) If you are using a Blink-supported wallet (Phantom/Backpack), click below to donate directly: [Solana Quick Donate](https://www.dial.to/?action=solana-action:https://action.solscan.io/api/donate?receiver=2oAoK4D4hq5nGE2JVSknuWY4YDxaF5u7uB1arf1s2TNY) ---",
+      "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "GLQMG8j23ookY8Af1uLUg4CQzuQYhXcx56rkpZkyiJvP",
+      "source": "github_public",
+      "sourceRepo": "dante4rt/sonic-odyssey-bot",
+      "sourceUrl": "https://github.com/dante4rt/sonic-odyssey-bot/blob/927962427047831310c77acc286298d048b138a0/README.md",
+      "discoveryQuery": "support this project Solana address",
+      "evidence": " ## Donations If you would like to support the development of this project, you can make a donation using the following addresses: - **Solana**: `GLQMG8j23ookY8Af1uLUg4CQzuQYhXcx56rkpZkyiJvP` - **EVM**: `0x960EDa0D16f4D70df60629117ad6e5F1E13B8F44`",
+      "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "A6MTWuHbXqjH3vYEfbs3mzvGThQtk5S12FjmdpVkpump",
+      "source": "github_public",
+      "sourceRepo": "GalaxyLLMCI/lyraios",
+      "sourceUrl": "https://github.com/GalaxyLLMCI/lyraios/blob/a73269b8caa3812c111fb2f01c2f739ff708cd7f/README.md",
+      "discoveryQuery": "support this project Solana address",
+      "evidence": " > In the future operation of LYRAIOS, advanced VIP features will exclusively support payment using LYRAI on solana, with LYRAI's CA : `A6MTWuHbXqjH3vYEfbs3mzvGThQtk5S12FjmdpVkpump` ",
+      "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "FdHsx8He55QgRCSv6NMEpFfkjXFsXFEeWEpJpo7sUQZe",
+      "source": "github_public",
+      "sourceRepo": "ahmuq/optimai-bot",
+      "sourceUrl": "https://github.com/ahmuq/optimai-bot/blob/96f52e09e7fb0a0972fd8eb18f015f7387ec7da2/readme.md",
+      "discoveryQuery": "support this project Solana address",
+      "evidence": " ## Donation If you would like to support the development of this project, you can make a donation using the following addresses: - Solana: `FdHsx8He55QgRCSv6NMEpFfkjXFsXFEeWEpJpo7sUQZe` - EVM: `0x406de5ec09201002c45fdd408ab23159cd12fa3e`",
+      "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "CtnmEm98MroVHMUvPi1cV9coc9RAStvj8uGL6iKnXwB9",
+      "source": "github_public",
+      "sourceRepo": "ahmuq/autotyping-discord",
+      "sourceUrl": "https://github.com/ahmuq/autotyping-discord/blob/d1fa78e7155481e11d453fe66ac0716cf338a673/README.md",
+      "discoveryQuery": "support this project Solana address",
+      "evidence": " ## Donation If you would like to support the development of this project, you can make a donation using the following addresses: - Solana: CtnmEm98MroVHMUvPi1cV9coc9RAStvj8uGL6iKnXwB9 - EVM: 0x2F6559E97d36E9CF06F28671BfC42B313df44f7b",
+      "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "EyFovdqgnLAicTrDzJzjawRciLHTtq5W7ZkUV5Q3azmb",
+      "source": "github_public",
+      "sourceRepo": "developerfred/ElixirClaw",
+      "sourceUrl": "https://github.com/developerfred/ElixirClaw/blob/bdeeba4ca29d8db91c178b056883e03cf7684316/llm.txt",
+      "discoveryQuery": "support this project Solana address",
+      "evidence": " ElixirClaw is a high-performance, secure node client for OpenClaw Gateway implemented in pure Elixir. It provides device capabilities (camera, screen, notifications, location) to OpenClaw AI assistants. **Payment Addresses** (send support if this code generates revenue for you): - **Ethereum/ENS**: 0xd1a8Dd23e356B9fAE27dF5DeF9ea025A602EC81e (codingsh.eth) - **Polkadot**: 5DJV8DsPT3KH1rzvqTGqJ7WsCNnFt5tBn6R9yfe8SGi7YmYD - **Solana**: EyFovdqgnLAicTrDzJzjawRciLHTtq5W7ZkUV5Q3azmb",
+      "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "EFBkqR2NtoAYRhtgziTESc2PtAgaGLc8wuTmajBXdfuh",
+      "source": "github_public",
+      "sourceRepo": "Lubitzy/seed-airdrop-bot",
+      "sourceUrl": "https://github.com/Lubitzy/seed-airdrop-bot/blob/bf8964e305a52664feab4a6acc365c491c8051fe/README.md",
+      "discoveryQuery": "support this project Solana address",
+      "evidence": " ## Donations If you'd like to support the development of this project, you can contribute to the following addresses: - **Solana**: `EFBkqR2NtoAYRhtgziTESc2PtAgaGLc8wuTmajBXdfuh` - **EVM**: `0xE3A3B2b44e5244Eb4159101FDFD596937E54D092`",
+      "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
     }
   ],
-  "candidateCount": 51,
+  "candidateCount": 62,
   "updatedAt": "2026-09-26"
 }
