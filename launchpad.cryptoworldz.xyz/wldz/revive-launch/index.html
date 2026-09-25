@@ -64,6 +64,9 @@ const RVIV_MINT=new PublicKey('DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R');
 const RVIV_ATA_EXPECTED='28CwdVt2y997WZqTzEuBpuwoyVYAj6JcaD4qDMzyCdtn';
 const PRICE='0.000045';
 const LAUNCH_TOKENS=30_000_000;
+const RECOVERY_INDEX=19n;
+const RECOVERY_TX=new PublicKey('LUENuY1NdsGGKq4dTJE6JSEDRPsnyRiMT6VXKwGvhBD');
+const RECOVERY_PROPOSAL=new PublicKey('GPJZaRRSftvV2gkFgpbmscbD38u7aR2sDZMbaaYyAmfm');
 const RPC_URL='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';
 const connection=new Connection(RPC_URL,'confirmed');
 const $=s=>document.querySelector(s);
@@ -161,11 +164,31 @@ async function connectProvider(){
 async function sendSigned(tx,label){
   const signed=await wallet.signTransaction(tx);
   status(label+' signed. Broadcasting to Solana mainnet…','warn');
-  const sig=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false,maxRetries:5,preflightCommitment:'confirmed'});
-  const latest={blockhash:tx.recentBlockhash,lastValidBlockHeight:(await connection.getLatestBlockhash('confirmed')).lastValidBlockHeight};
-  const conf=await connection.confirmTransaction(sig,'confirmed');
-  if(conf.value.err)throw new Error(label+' confirmation failed: '+JSON.stringify(conf.value.err));
-  return sig;
+  const sig=await connection.sendRawTransaction(signed.serialize(),{
+    skipPreflight:false,maxRetries:8,preflightCommitment:'confirmed'
+  });
+  status(label+' broadcast ✅\n'+sig+'\nWaiting for on-chain confirmation…','warn');
+
+  for(let i=0;i<60;i++){
+    try{
+      const r=await fetch(RPC_URL,{
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({
+          jsonrpc:'2.0',id:1,method:'getSignatureStatuses',
+          params:[[sig],{searchTransactionHistory:true}]
+        })
+      });
+      const j=await r.json();
+      const s=j?.result?.value?.[0]||null;
+      if(s?.err)throw new Error(label+' failed on-chain: '+JSON.stringify(s.err)+'\nSignature: '+sig);
+      if(s&&(s.confirmationStatus==='confirmed'||s.confirmationStatus==='finalized'))return sig;
+    }catch(e){
+      if(String(e?.message||e).includes('failed on-chain'))throw e;
+    }
+    await new Promise(resolve=>setTimeout(resolve,2000));
+  }
+  throw new Error(label+' was broadcast but confirmation polling timed out. DO NOT RETRY. Signature: '+sig);
 }
 async function rpcSim(tx){
   const wire=tx.serialize({requireAllSignatures:false,verifySignatures:false}).toString('base64');
@@ -174,6 +197,117 @@ async function rpcSim(tx){
   })});
   const j=await r.json(); if(j.error)throw new Error('Simulation RPC failed: '+JSON.stringify(j.error)); return j.result?.value;
 }
+async function buildRecoveryPlan(){
+  if(!wallet)throw new Error('Connect wallet first.');
+  if(!wallet.publicKey.equals(MEMBER))throw new Error('Wrong wallet. Required: '+MEMBER.toBase58());
+
+  const ms=await squads.accounts.Multisig.fromAccountAddress(connection,MULTISIG,'confirmed');
+  if(Number(ms.threshold)!==1)throw new Error('Squads threshold changed. Expected 1.');
+  const member=ms.members.find(m=>m.key.equals(MEMBER));
+  if(!member)throw new Error('JayJayTeamDev is not a live Squads member.');
+  const canExec=squads.types.Permissions.has(member.permissions,squads.types.Permission.Execute);
+  if(!canExec)throw new Error('JayJayTeamDev no longer has Execute permission.');
+
+  const [vaultPda]=squads.getVaultPda({multisigPda:MULTISIG,index:0});
+  if(!vaultPda.equals(VAULT_EXPECTED))throw new Error('Vault #0 mismatch.');
+
+  const [derivedTx]=squads.getTransactionPda({multisigPda:MULTISIG,index:RECOVERY_INDEX});
+  const [derivedProposal]=squads.getProposalPda({multisigPda:MULTISIG,transactionIndex:RECOVERY_INDEX});
+  if(!derivedTx.equals(RECOVERY_TX)||!derivedProposal.equals(RECOVERY_PROPOSAL)){
+    throw new Error('Recovery PDA mismatch. Stopping.');
+  }
+
+  const [vaultTx,proposal]=await Promise.all([
+    squads.accounts.VaultTransaction.fromAccountAddress(connection,RECOVERY_TX,'confirmed'),
+    squads.accounts.Proposal.fromAccountAddress(connection,RECOVERY_PROPOSAL,'confirmed')
+  ]);
+  if(!vaultTx.multisig.equals(MULTISIG))throw new Error('Recovered transaction belongs to a different multisig.');
+  if(!vaultTx.creator.equals(MEMBER))throw new Error('Recovered transaction creator mismatch.');
+  if(Number(vaultTx.vaultIndex)!==0)throw new Error('Recovered transaction is not Vault #0.');
+  if(BigInt(vaultTx.index.toString())!==RECOVERY_INDEX)throw new Error('Recovered transaction index mismatch.');
+
+  const [positionNftPda]=squads.getEphemeralSignerPda({
+    transactionPda:RECOVERY_TX,ephemeralSignerIndex:0
+  });
+
+  const rvivAta=getAssociatedTokenAddressSync(RVIV_MINT,vaultPda,true,TOKEN_PROGRAM_ID);
+  if(rvivAta.toBase58()!==RVIV_ATA_EXPECTED)throw new Error('Canonical RVIV treasury token account mismatch.');
+  const wsolAta=getAssociatedTokenAddressSync(NATIVE_MINT,vaultPda,true);
+  const [walletBalance,vaultBalance,rvivBalance,wsolInfo]=await Promise.all([
+    connection.getBalance(MEMBER,'confirmed'),
+    connection.getBalance(vaultPda,'confirmed'),
+    connection.getTokenAccountBalance(rvivAta,'confirmed'),
+    connection.getAccountInfo(wsolAta,'confirmed')
+  ]);
+  if(walletBalance<10_000_000)throw new Error('Wallet SOL is below the 0.010 SOL execution safety floor.');
+  const launchRaw=30_000_000n*1_000_000n;
+  if(BigInt(rvivBalance.value.amount)<launchRaw)throw new Error('Squads vault has less than 30,000,000 RVIV.');
+  if(!wsolInfo)throw new Error('Squads vault wSOL token account is missing.');
+
+  const cpAmm=new CpAmm(connection);
+  const initSqrtPrice=getSqrtPriceFromPrice(PRICE,6,9);
+  const tokenAAmount=new BN(launchRaw.toString());
+  const tokenBAmount=new BN(0);
+  const liquidityDelta=cpAmm.preparePoolCreationSingleSide({
+    tokenAAmount,minSqrtPrice:initSqrtPrice,maxSqrtPrice:MAX_SQRT_PRICE,
+    initSqrtPrice,collectFeeMode:CollectFeeMode.OnlyB
+  });
+  const baseFee=getBaseFeeParams({
+    baseFeeMode:BaseFeeMode.FeeTimeSchedulerLinear,
+    feeTimeSchedulerParam:{startingFeeBps:75,endingFeeBps:75,numberOfPeriod:0,totalDuration:0}
+  });
+  if(!baseFee||liquidityDelta.lte(new BN(0)))throw new Error('Meteora launch parameters failed validation.');
+
+  const {pool,position}=await cpAmm.createCustomPool({
+    payer:vaultPda,creator:vaultPda,positionNft:positionNftPda,
+    tokenAMint:RVIV_MINT,tokenBMint:NATIVE_MINT,
+    tokenAAmount,tokenBAmount,
+    sqrtMinPrice:initSqrtPrice,sqrtMaxPrice:MAX_SQRT_PRICE,liquidityDelta,initSqrtPrice,
+    poolFees:{baseFee,compoundingFeeBps:0,padding:0,dynamicFee:null},
+    hasAlphaVault:false,activationType:ActivationType.Timestamp,collectFeeMode:CollectFeeMode.OnlyB,
+    activationPoint:null,tokenAProgram:TOKEN_PROGRAM_ID,tokenBProgram:TOKEN_PROGRAM_ID,isLockLiquidity:true
+  });
+
+  const rentSpecs=[1112,408,165,165,465,165];
+  let poolRent=0n;
+  for(const bytes of rentSpecs)poolRent+=BigInt(await connection.getMinimumBalanceForRentExemption(bytes,'confirmed'));
+  const vaultNeed=poolRent+1n;
+  const topUp=vaultNeed>BigInt(vaultBalance)?vaultNeed-BigInt(vaultBalance):0n;
+
+  const {accountMetas}=await squads.utils.accountsForTransactionExecute({
+    connection,
+    transactionPda:RECOVERY_TX,
+    vaultPda,
+    message:vaultTx.message,
+    ephemeralSignerBumps:Array.from(vaultTx.ephemeralSignerBumps),
+    programId:squads.PROGRAM_ID
+  });
+  const executeIx=squads.generated.createVaultTransactionExecuteInstruction({
+    multisig:MULTISIG,
+    proposal:RECOVERY_PROPOSAL,
+    transaction:RECOVERY_TX,
+    member:MEMBER,
+    anchorRemainingAccounts:accountMetas
+  },squads.PROGRAM_ID);
+
+  const latest=await connection.getLatestBlockhash('confirmed');
+  const executeTx=new Transaction({feePayer:MEMBER,recentBlockhash:latest.blockhash});
+  if(topUp>0n)executeTx.add(SystemProgram.transfer({fromPubkey:MEMBER,toPubkey:vaultPda,lamports:Number(topUp)}));
+  executeTx.add(executeIx);
+  const bytes=executeTx.serialize({requireAllSignatures:false,verifySignatures:false}).length;
+  if(bytes>1232)throw new Error('Recovered execute transaction exceeds Solana packet limit: '+bytes);
+
+  const sim=await rpcSim(executeTx);
+  if(sim?.err)throw new Error('Existing approved REVIVE proposal #19 is not executable: '+JSON.stringify(sim.err));
+
+  return {
+    recovery:true,cpAmm,ms,threshold:1,transactionIndex:RECOVERY_INDEX,
+    transactionPda:RECOVERY_TX,proposalPda:RECOVERY_PROPOSAL,
+    vaultPda,rvivAta,wsolAta,walletBalance,vaultBalance,rvivBalance,
+    poolRent,topUp,pool,position,executeIx,setupBytes:0
+  };
+}
+
 async function buildPlan(){
   if(!wallet)throw new Error('Connect wallet first.');
   if(!wallet.publicKey.equals(MEMBER))throw new Error('Wrong wallet. Required: '+MEMBER.toBase58());
@@ -301,7 +435,7 @@ $('#preflight').addEventListener('click',async()=>{
   try{
     $('#preflight').disabled=true;$('#launch').disabled=true;
     status('Running live Squads + Meteora mainnet preflight…','warn');
-    plan=await buildPlan();
+    plan=await buildRecoveryPlan();
     status(
       'FINAL MAINNET PREFLIGHT PASS ✅\n'+
       'Squads threshold: 1\n'+
@@ -309,12 +443,12 @@ $('#preflight').addEventListener('click',async()=>{
       'Wallet balance: '+(plan.walletBalance/1e9).toFixed(9)+' SOL\n'+
       'Vault RVIV: '+plan.rvivBalance.value.uiAmountString+'\n'+
       'Required vault top-up: '+(Number(plan.topUp)/1e9).toFixed(9)+' SOL\n'+
-      'Setup transaction: '+plan.setupBytes+' bytes\n'+
+      'Existing Squads setup: #19 — ALREADY FINALIZED ✅\n'+
       'Meteora pool: '+plan.pool.toBase58()+'\n'+
       'Price: 0.000045 SOL / RVIV\n'+
       'Fee: 75 bps, dynamic OFF\n'+
       'Permanent liquidity lock: 100%\n\n'+
-      'Ready for the two wallet signatures.','good'
+      'Ready for ONE final wallet signature: execute proposal #19.','good'
     );
     $('#launch').disabled=false;
   }catch(e){status('PREFLIGHT BLOCKED\n'+(e?.message||e),'bad');$('#preflight').disabled=false}
@@ -323,10 +457,7 @@ $('#launch').addEventListener('click',async()=>{
   if(!plan||!wallet)return;
   $('#launch').disabled=true;$('#preflight').disabled=true;
   try{
-    status('SIGNATURE 1 OF 2\nApprove the Squads Create + Propose + Approve transaction in your wallet.','warn');
-    const setupSig=await sendSigned(plan.setupTx,'Squads launch setup');
-    localStorage.setItem('rviv_launch_index',plan.transactionIndex.toString());
-    status('Setup confirmed ✅\nSignature: '+setupSig+'\n\nSIGNATURE 2 OF 2\nApprove the final execution transaction. This creates the real Meteora pool and moves 30,000,000 RVIV into permanently locked liquidity.','warn');
+    status('FINAL SIGNATURE — 1 OF 1\nApprove execution of the already-created Squads proposal #19.\nThis creates the real Meteora pool and moves 30,000,000 RVIV into permanently locked liquidity.','warn');
     const executeTx=await refreshExecuteTx();
     const executeSig=await sendSigned(executeTx,'REVIVE mainnet execution');
 
@@ -339,15 +470,13 @@ $('#launch').addEventListener('click',async()=>{
     if(positionState.permanentLockedLiquidity.lte(new BN(0)))throw new Error('Pool exists but permanent locked liquidity proof failed.');
     if(!positionState.unlockedLiquidity.isZero())throw new Error('Pool exists but unlocked liquidity is not zero.');
 
-    localStorage.removeItem('rviv_launch_index');
     $('#result').innerHTML='<div class="live">🚀 REVIVE IS LIVE ON MAINNET</div>'+
       '<div class="status good">Pool: <span class="mono">'+plan.pool.toBase58()+'</span>\n'+
-      'Setup signature: <span class="mono">'+setupSig+'</span>\n'+
       'Launch signature: <span class="mono">'+executeSig+'</span>\n'+
       '30,000,000 RVIV liquidity confirmed.\n100% permanent lock proof confirmed.</div>';
     status('REVIVE MAINNET LAUNCH CONFIRMED ✅','good');
   }catch(e){
-    status('LAUNCH STOPPED\n'+(e?.message||e)+'\n\nDo not retry blindly. The page has not marked REVIVE live unless the pool and permanent lock were verified.','bad');
+    status('LAUNCH STOPPED\n'+(e?.message||e)+'\n\nDO NOT RETRY. Run Final Live Preflight again so the page checks the existing on-chain state first.','bad');
     $('#preflight').disabled=false;
   }
 });
