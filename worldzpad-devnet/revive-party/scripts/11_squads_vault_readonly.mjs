@@ -35,6 +35,7 @@ if(!vaultPda.equals(EXPECTED_VAULT))throw new Error('Vault #0 derivation does no
 
 const d=multisigInfo.data;
 if(d.length<94)throw new Error('Squads multisig account too short');
+const configAuthority=new PublicKey(d.subarray(40,72));
 const threshold=d.readUInt16LE(72);
 const timeLock=d.readUInt32LE(74);
 const transactionIndex=d.readBigUInt64LE(78);
@@ -96,6 +97,8 @@ const report={
    program:SQUADS_PROGRAM.toBase58(),
    multisig:MULTISIG.toBase58(),
    multisigAccountOwner:multisigInfo.owner.toBase58(),
+   configAuthority:configAuthority.toBase58(),
+   configAuthorityIsJayJayTeamDev:configAuthority.equals(FEE_PAYER),
    threshold,
    multisigBump,
    memberCount,
@@ -130,6 +133,6 @@ const report={
 };
 fs.mkdirSync('artifacts',{recursive:true});
 fs.writeFileSync('artifacts/revive-squads-vault-readonly.json',JSON.stringify(report,null,2)+'\n');
-console.log('REVIVE_SQUADS_VAULT=PASS vault='+report.squads.vault+' threshold='+threshold+' tx_index='+transactionIndex+' next='+nextTransactionIndex+' rviv='+report.balances.rvivTokens+' vault_sol='+report.balances.vaultSol+' jay_sol='+report.balances.jayJaySol+' wsol_ata='+(report.balances.wsolAtaExists?'EXISTS':'MISSING'));
+console.log('REVIVE_SQUADS_VAULT=PASS vault='+report.squads.vault+' threshold='+threshold+' config_authority='+report.squads.configAuthority+' config_authority_is_jay='+report.squads.configAuthorityIsJayJayTeamDev+' tx_index='+transactionIndex+' next='+nextTransactionIndex+' rviv='+report.balances.rvivTokens+' vault_sol='+report.balances.vaultSol+' jay_sol='+report.balances.jayJaySol+' wsol_ata='+(report.balances.wsolAtaExists?'EXISTS':'MISSING'));
 console.log('REVIVE_SQUADS_EPHEMERAL_POSITION_SIGNER='+report.squads.ephemeralPositionNftSignerPda);
 console.log('REVIVE_SQUADS_MEMBERS='+memberCount+' JAY_MEMBER='+jayMember.key+' MASK='+jayMember.mask+' INITIATE='+jayMember.initiate+' VOTE='+jayMember.vote+' EXECUTE='+jayMember.execute+' SINGLE_MEMBER_FLOW='+jayCanSingleMemberFlow);
