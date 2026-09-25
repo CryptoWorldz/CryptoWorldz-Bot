@@ -1,0 +1,42 @@
+name: REVIVE Bulk Send Capacity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/revive-bulk-send-capacity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check payer and vault SOL
+        shell: python
+        run: |
+          import json, urllib.request
+          RPC='https://api.mainnet-beta.solana.com'
+          addresses={
+            'member':'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u',
+            'vault':'n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB'
+          }
+          def rpc(method,params):
+              body=json.dumps({'jsonrpc':'2.0','id':1,'method':method,'params':params}).encode()
+              req=urllib.request.Request(RPC,data=body,headers={'Content-Type':'application/json'},method='POST')
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  j=json.loads(r.read().decode())
+              if 'error' in j: raise RuntimeError(j['error'])
+              return j['result']
+          for label,address in addresses.items():
+              out=rpc('getBalance',[address,{'commitment':'confirmed'}])
+              print(label.upper()+'_LAMPORTS='+str(out['value']))
+              print(label.upper()+'_SOL='+str(out['value']/1_000_000_000))
+          rent=rpc('getMinimumBalanceForRentExemption',[165,{'commitment':'confirmed'}])
+          print('ATA_RENT_LAMPORTS='+str(rent))
+          print('ATA_RENT_SOL='+str(rent/1_000_000_000))
+          print('100_ATA_RENT_SOL='+str((rent*100)/1_000_000_000))
+          print('216_ATA_RENT_SOL='+str((rent*216)/1_000_000_000))
