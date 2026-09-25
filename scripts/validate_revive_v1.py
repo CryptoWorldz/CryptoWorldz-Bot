@@ -58,18 +58,18 @@ assert direct["route"]["initialQuoteLiquiditySol"] == 0
 assert direct["route"]["isLockLiquidity"] is True
 assert direct["route"]["permanentLockTargetPercent"] == 100
 assert abs(direct["pricing"]["devnetFixture"]["priceSolPerRviv"] - 0.000045) < 1e-15
-assert direct["pricing"]["mainnet"]["priceSolPerRviv"] is None
+assert abs(direct["pricing"]["mainnet"]["priceSolPerRviv"] - 0.000045) < 1e-15
 assert direct["pricing"]["mainnet"]["mayInheritDevnetFixtureAutomatically"] is False
 assert direct["mainnetGates"]["enabled"] is False
-assert direct["mainnetGates"]["openingPriceSelected"] is False
+assert direct["mainnetGates"]["openingPriceSelected"] is True
 assert contract["launch"]["engineCandidate"] == "METEORA_DAMM_V2_DIRECT_EXISTING_MINT"
 assert contract["launch"]["dbcTokenCreationPathAllowed"] is False
 assert contract["launch"]["canonicalMintReuseRequired"] is True
 assert abs(contract["launch"]["devnetOpeningPriceSolPerRviv"] - 0.000045) < 1e-15
-assert contract["launch"]["mainnetOpeningPriceSolPerRviv"] is None
+assert abs(contract["launch"]["mainnetOpeningPriceSolPerRviv"] - 0.000045) < 1e-15
 assert contract["gates"]["noDbcTokenCreationForCanonicalRviv"] is True
 assert contract["gates"]["directExistingMintDammV2ProofRequired"] is True
-assert contract["gates"]["mainnetOpeningPriceFinalized"] is False
+assert contract["gates"]["mainnetOpeningPriceFinalized"] is True
 assert contract["gates"]["actualDammV2ProtocolDeductionProofRequired"] is True
 assert contract["gates"]["lockedPositionFeeClaimProofRequired"] is True
 assert fee["executionApplicability"] == "NOT_USED_FOR_CANONICAL_RVIV_POOL_CREATION"
