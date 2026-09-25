@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'cryptoworldz.xyz/revive-launch/index.html'
+      - 'cryptoworldz.xyz/revive-launch/rpc.php'
       - '.github/workflows/deploy-revive-launch.yml'
   workflow_dispatch:
 
@@ -36,6 +37,8 @@ jobs:
           grep -q 'DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R' cryptoworldz.xyz/revive-launch/index.html
           grep -q 'SIGN & LAUNCH REVIVE' cryptoworldz.xyz/revive-launch/index.html
           grep -q '100% permanent lock' cryptoworldz.xyz/revive-launch/index.html
+          grep -q "api.mainnet-beta.solana.com" cryptoworldz.xyz/revive-launch/rpc.php
+          grep -q "sendTransaction" cryptoworldz.xyz/revive-launch/rpc.php
 
       - name: Upload launch console only
         shell: python
@@ -43,7 +46,7 @@ jobs:
           import os,ssl
           from ftplib import FTP_TLS,error_perm
           from pathlib import Path
-          local=Path('cryptoworldz.xyz/revive-launch/index.html')
+          local_dir=Path('cryptoworldz.xyz/revive-launch')
           remote_dir='domains/cryptoworldz.xyz/public_html/revive-launch'
           ftp=FTP_TLS(context=ssl._create_unverified_context())
           ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=40)
@@ -55,15 +58,16 @@ jobs:
               try: ftp.cwd(part)
               except error_perm:
                   ftp.mkd(part); ftp.cwd(part)
-          with local.open('rb') as f:
-              ftp.storbinary('STOR index.html',f,blocksize=262144)
+          for name in ('index.html','rpc.php'):
+              with (local_dir/name).open('rb') as f:
+                  ftp.storbinary('STOR '+name,f,blocksize=262144)
           ftp.quit()
           print('REVIVE_LAUNCH_CONSOLE_DEPLOY=PASS')
 
       - name: Verify live console
         shell: python
         run: |
-          import time,urllib.request
+          import time,urllib.request,json
           url='https://cryptoworldz.xyz/revive-launch/'
           last=''
           for _ in range(8):
@@ -72,7 +76,12 @@ jobs:
                   with urllib.request.urlopen(req,timeout=20) as r:
                       text=r.read().decode('utf-8','ignore')
                   if 'SIGN & LAUNCH REVIVE' in text and 'DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R' in text:
-                      print('REVIVE_LAUNCH_CONSOLE_LIVE=PASS')
+                      body=json.dumps({'jsonrpc':'2.0','id':1,'method':'getBalance','params':['Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u']}).encode()
+                      rpc_req=urllib.request.Request('https://cryptoworldz.xyz/revive-launch/rpc.php',data=body,headers={'Content-Type':'application/json','Origin':'https://cryptoworldz.xyz','User-Agent':'REVIVE-Live-Verify/1.0'},method='POST')
+                      with urllib.request.urlopen(rpc_req,timeout=20) as rr:
+                          rpc=json.loads(rr.read().decode())
+                      if 'result' not in rpc: raise RuntimeError('RPC bridge returned no result: '+str(rpc))
+                      print('REVIVE_LAUNCH_CONSOLE_LIVE=PASS RPC=PASS')
                       raise SystemExit(0)
                   last='expected marker missing'
               except Exception as e:
