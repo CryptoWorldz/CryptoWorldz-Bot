@@ -107,7 +107,16 @@ function standardWalletAdapter(w,account){
   };
 }
 async function connectProvider(){
-  const list=walletStandardCandidates();
+  // Jupiter's in-app provider can register a moment after page load.
+  // Wait briefly instead of failing on the first browser tick.
+  let list=[];
+  let jup=null;
+  for(let i=0;i<25;i++){
+    list=walletStandardCandidates();
+    jup=jupiterInjectedProvider();
+    if(list.length||jup)break;
+    await new Promise(resolve=>setTimeout(resolve,200));
+  }
   const jupiterStandard=list.find(w=>/jupiter/i.test(String(w.name||'')))||null;
 
   if(jupiterStandard){
@@ -117,7 +126,6 @@ async function connectProvider(){
     return standardWalletAdapter(jupiterStandard,account);
   }
 
-  const jup=jupiterInjectedProvider();
   if(jup){
     const out=await jup.connect();
     const pk=(out&&out.publicKey)||jup.publicKey;
@@ -280,7 +288,12 @@ $('#connect').addEventListener('click',async()=>{
     $('#connect').textContent='Connected: '+wallet.publicKey.toBase58().slice(0,4)+'…'+wallet.publicKey.toBase58().slice(-4);
     $('#connect').disabled=true;$('#preflight').disabled=false;
     status('Authorized JayJayTeamDev wallet connected. Run final live preflight.','good');
-  }catch(e){wallet=null;status('CONNECT FAILED\n'+(e?.message||e),'bad')}
+  }catch(e){
+    wallet=null;
+    const detected=walletStandardCandidates().map(w=>String(w.name||'Unnamed')).join(', ')||'none';
+    const direct=jupiterInjectedProvider()?'yes':'no';
+    status('CONNECT FAILED\n'+(e?.message||e)+'\nDetected Wallet Standard: '+detected+'\nDirect Jupiter provider: '+direct,'bad');
+  }
 });
 $('#preflight').addEventListener('click',async()=>{
   try{
