@@ -1,0 +1,86 @@
+name: Diagnose REVIVE Distribution Runtime
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-revive-distribution-runtime.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Test live wallet-login UI
+        shell: node {0}
+        run: |
+          const { chromium } = require('playwright');
+          const url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v=runtime-diagnostic-1';
+
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:412,height:915}});
+          const messages=[];
+          page.on('console',m=>messages.push('CONSOLE '+m.type()+': '+m.text()));
+          page.on('pageerror',e=>messages.push('PAGEERROR: '+e.stack));
+          page.on('requestfailed',r=>messages.push('REQUESTFAILED: '+r.url()+' :: '+r.failure()?.errorText));
+
+          const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
+          console.log('HTTP_STATUS='+response?.status());
+          console.log('TITLE='+await page.title());
+          await page.waitForTimeout(12000);
+
+          console.log('MARKER='+await page.evaluate(()=>window.__REVIVE_DISTRIBUTION_WALLET__||'MISSING'));
+          console.log('CONNECT_TEXT='+await page.locator('#connect').textContent().catch(()=>'<missing>'));
+          console.log('STATUS_BEFORE='+await page.locator('#status').textContent().catch(()=>'<missing>'));
+
+          await page.locator('#connect').click({timeout:10000});
+          await page.waitForTimeout(6000);
+
+          const state=await page.evaluate(()=>{
+            const els=[...document.querySelectorAll('*')];
+            const interesting=els.filter(el=>{
+              const tag=(el.tagName||'').toLowerCase();
+              const txt=(el.textContent||'').trim();
+              return tag.includes('appkit')||tag.includes('w3m')||/connect wallet|walletconnect|all wallets|scan/i.test(txt);
+            }).slice(0,30).map(el=>({
+              tag:(el.tagName||'').toLowerCase(),
+              id:el.id||'',
+              cls:typeof el.className==='string'?el.className:'',
+              text:(el.textContent||'').trim().slice(0,160)
+            }));
+            return {
+              status:document.querySelector('#status')?.textContent||'',
+              bodyText:document.body?.innerText?.slice(0,2500)||'',
+              interesting
+            };
+          });
+          console.log('STATE='+JSON.stringify(state));
+          console.log(messages.join('\n'));
+          await page.screenshot({path:'revive-runtime.png',fullPage:true});
+
+          const hasModal=state.interesting.some(x=>/appkit|w3m/.test(x.tag)||/connect wallet|walletconnect|all wallets|scan/i.test(x.text));
+          if(!hasModal){
+            console.error('RUNTIME_DIAGNOSIS=FAIL_NO_WALLET_MODAL');
+            process.exitCode=1;
+          }else{
+            console.log('RUNTIME_DIAGNOSIS=PASS_WALLET_MODAL_VISIBLE');
+          }
+          await browser.close();
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: revive-runtime-diagnostic
+          path: revive-runtime.png
