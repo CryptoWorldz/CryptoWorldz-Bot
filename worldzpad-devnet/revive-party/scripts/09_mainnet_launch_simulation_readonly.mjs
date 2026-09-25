@@ -34,7 +34,7 @@ import {
 import BN from 'bn.js';
 
 const RPC = process.env.SOLANA_MAINNET_RPC_URL?.trim() || clusterApiUrl('mainnet-beta');
-const MAINNET_GENESIS = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp';
+const MAINNET_GENESIS = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
 const FEE_SPONSOR = new PublicKey(
   process.env.REVIVE_FEE_SPONSOR || 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u',
 );
