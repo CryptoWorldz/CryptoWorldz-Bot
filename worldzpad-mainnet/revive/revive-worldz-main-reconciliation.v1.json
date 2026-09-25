@@ -1,0 +1,48 @@
+{
+  "version": "REVIVE-WORLDZ-MAIN-RECONCILIATION-2026-09-25-A",
+  "status": "RECONCILED__NO_FINANCIAL_EXECUTION",
+  "source": {
+    "branch": "main",
+    "observedHeadCommit": "e3eafa3a58c55385b1987a84aabc03729024640e",
+    "observedDate": "2026-09-25"
+  },
+  "canonicalWorldz": {
+    "name": "WORLDZ",
+    "symbol": "WLDZ",
+    "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "allocationDesignCeilingTokens": 100000000,
+    "currentOnChainSupplyTokens": 99999951.002722,
+    "circulatingSupplyTokens": 15000000,
+    "mintAuthority": "REVOKED",
+    "freezeAuthority": "REVOKED"
+  },
+  "liveLaunch": {
+    "status": "LIVE_EXECUTED__DO_NOT_REEXECUTE",
+    "venue": "Meteora DAMM V2",
+    "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "initialWldzLiquidityTokens": 15000000,
+    "initialQuoteSol": 0,
+    "baseFeeBps": 200,
+    "dynamicFee": false,
+    "permanentLockPercent": 100,
+    "duplicateExecutionDisabled": true,
+    "publicCreatorGate": false
+  },
+  "reviveDependencyEvidence": {
+    "wldzPostLaunchCriticalSafetyGate": "PASS",
+    "worldzLaunchPadPublicBoot": "PASS",
+    "permanentMigratedLiquidityLock": "PASS",
+    "worldzFeeRouterReceipts": "STILL_REQUIRED_FOR_REVIVE",
+    "legacyTenMintAuthorityAudit": "STILL_REQUIRED_LIVE_READ_ONLY_PROOF",
+    "finalOwnerApproval": "REQUIRED_AFTER_ALL_TECHNICAL_GATES"
+  },
+  "safety": {
+    "mainnetExecutionEnabled": false,
+    "movesWldz": false,
+    "movesRviv": false,
+    "movesSol": false,
+    "createsPool": false,
+    "signsTransaction": false,
+    "rule": "This artifact reconciles the REVIVE dependency gate with canonical WLDZ live-state evidence only. It does not authorize or execute REVIVE mainnet."
+  }
+}

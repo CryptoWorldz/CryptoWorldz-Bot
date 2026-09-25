@@ -1,0 +1,33 @@
+name: Validate Worldz X-SAVE private build
+
+on:
+  push:
+    branches:
+      - revive-v1-build
+    paths:
+      - 'worldzpad-omnichain/x-save/**'
+      - 'worldzpad-omnichain/fee-policy.v1.json'
+      - 'scripts/validate_worldz_x_save.py'
+      - '.github/workflows/validate-worldz-x-save.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-omnichain/x-save/**'
+      - 'worldzpad-omnichain/fee-policy.v1.json'
+      - 'scripts/validate_worldz_x_save.py'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate X-SAVE identity, wXRP quote and safety gates
+        run: python scripts/validate_worldz_x_save.py
+      - name: Prove X-SAVE mainnet remains disabled
+        shell: bash
+        run: |
+          grep -q '"mainnetExecutionEnabled": false' worldzpad-omnichain/x-save/x-save.v1.json
+          ! grep -R '"mainnetExecutionEnabled": true' worldzpad-omnichain/x-save

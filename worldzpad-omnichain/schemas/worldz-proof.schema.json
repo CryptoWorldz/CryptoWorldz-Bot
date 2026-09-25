@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cryptoworldz.xyz/schemas/worldz-proof.v1.json",
+  "title": "Worldz Proof v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "projectId",
+    "chain",
+    "network",
+    "tokenId",
+    "launchConfigHash",
+    "feeConfigHash",
+    "transactions",
+    "feeProof",
+    "liquidityProof",
+    "authorityProof",
+    "verifiedAt"
+  ],
+  "properties": {
+    "version": {"const": "WORLDZ-PROOF-V1"},
+    "projectId": {"type": "string", "minLength": 1},
+    "chain": {"enum": ["solana", "xrpl", "base", "ethereum", "bnb", "sui", "hyperevm", "robinhood"]},
+    "network": {"type": "string", "minLength": 1},
+    "tokenId": {"type": "string", "minLength": 1},
+    "marketOrPoolId": {"type": ["string", "null"]},
+    "launchConfigHash": {"type": "string", "minLength": 16},
+    "feeConfigHash": {"type": "string", "minLength": 16},
+    "transactions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["purpose", "txId"],
+        "properties": {
+          "purpose": {"type": "string", "minLength": 1},
+          "txId": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "feeProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["grossTraderFeeBps", "externalDeductionsDisclosed", "receiptReconciled"],
+      "properties": {
+        "grossTraderFeeBps": {"type": "number", "minimum": 0},
+        "externalDeductionsDisclosed": {"type": "boolean"},
+        "receiptReconciled": {"type": "boolean"},
+        "creatorRecipient": {"type": ["string", "null"]},
+        "referrerRecipient": {"type": ["string", "null"]},
+        "legacyFlywheelReference": {"type": ["string", "null"]}
+      }
+    },
+    "liquidityProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protectionType", "verified"],
+      "properties": {
+        "protectionType": {"enum": ["PERMANENT_LOCK", "NON_CUSTODIAL_EQUIVALENT", "NATIVE_MARKET_STRUCTURE"]},
+        "lockedPercent": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "proofReference": {"type": ["string", "null"]},
+        "verified": {"type": "boolean"}
+      }
+    },
+    "authorityProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verified"],
+      "properties": {
+        "verified": {"type": "boolean"},
+        "details": {"type": ["string", "null"]}
+      }
+    },
+    "verifiedAt": {"type": "string", "format": "date-time"}
+  }
+}

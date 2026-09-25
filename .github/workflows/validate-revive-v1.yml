@@ -1,0 +1,231 @@
+name: Validate REVIVE v1 private build
+
+on:
+  push:
+    branches:
+      - revive-v1-build
+    paths:
+      - 'worldzpad-mainnet/revive/**'
+      - 'worldzpad-mainnet/fairfee/**'
+      - 'worldzpad-mainnet/legacy-flywheel/**'
+      - 'worldzpad-devnet/revive-party/**'
+      - 'scripts/validate_revive_v1.py'
+      - 'supabase/functions/revive-claim/**'
+      - 'supabase/functions/revive-devnet-bootstrap/**'
+      - 'supabase/functions/worldz-legacy-proof/**'
+      - '.github/workflows/validate-revive-v1.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-mainnet/revive/**'
+      - 'worldzpad-mainnet/fairfee/**'
+      - 'worldzpad-mainnet/legacy-flywheel/**'
+      - 'worldzpad-devnet/revive-party/**'
+      - 'scripts/validate_revive_v1.py'
+      - 'supabase/functions/revive-claim/**'
+      - 'supabase/functions/revive-devnet-bootstrap/**'
+      - 'supabase/functions/worldz-legacy-proof/**'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: revive-v1-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate REVIVE allocation and launch gates
+        run: python scripts/validate_revive_v1.py
+      - name: Ensure REVIVE remains outside public LaunchPad deployment root
+        shell: bash
+        run: |
+          test ! -e launchpad.cryptoworldz.xyz/revive
+          grep -q '"publicMainnetExecutionEnabled": false' worldzpad-mainnet/revive/revive-launch-contract.v1.json
+          grep -q '"regenerationLockedUntilGeneratorFixVerified": true' worldzpad-mainnet/revive/revive-launch-contract.v1.json
+      - name: Validate claim verifier is non-executing
+        shell: bash
+        run: |
+          grep -q 'const CLAIM_EXECUTION_ENABLED = false' supabase/functions/revive-claim/index.ts
+          ! grep -q 'claim_signature.*update' supabase/functions/revive-claim/index.ts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned REVIVE proof SDKs
+        working-directory: worldzpad-devnet/revive-party
+        run: npm ci --no-audit --no-fund
+      - name: Syntax-check network proof scripts
+        working-directory: worldzpad-devnet/revive-party
+        run: |
+          node --check scripts/07_direct_damm_v2_devnet.mjs
+          node --check scripts/08_verify_direct_damm_v2.mjs
+          node --check scripts/04_legacy_live_scanner.mjs
+          node --check scripts/05_legacy_authority_audit.mjs
+          node --check scripts/06_direct_damm_v2_static.mjs
+          node --check scripts/router_program_client.mjs
+      - name: Run deterministic REVIVE proofs
+        working-directory: worldzpad-devnet/revive-party
+        run: |
+          npm run direct-damm-static
+          npm run stage-b-static
+          npm run legacy-epoch-proof
+          npm run router-static
+      - name: Compile-check Legacy router Rust program
+        working-directory: worldzpad-devnet/revive-party
+        run: cargo check --locked --manifest-path router-program/Cargo.toml
+      - name: Prove dependency lockfiles are reproducible
+        working-directory: worldzpad-devnet/revive-party
+        shell: bash
+        run: |
+          test -s package-lock.json
+          test -s router-program/Cargo.lock
+          git diff --exit-code -- package-lock.json router-program/Cargo.lock
+
+  devnet-direct-damm-v2:
+    if: github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    env:
+      DEVNET_PAYER_SECRET_JSON: ${{ secrets.DEVNET_PAYER_SECRET_JSON }}
+      SOLANA_RPC_URL: ${{ secrets.DEVNET_SOLANA_RPC_URL }}
+      DEVNET_PAYER_KEYPAIR_FILE: /tmp/revive-devnet-payer.json
+      DEVNET_PAYER_PUBKEY_FILE: /tmp/revive-devnet-payer.pubkey
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/revive-party
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked Solana + Meteora DAMM v2 SDKs
+        run: npm ci --no-audit --no-fund
+      - name: Prove direct DAMM v2 static contract
+        run: npm run direct-damm-static
+      - name: Generate disposable devnet payer
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        run: npm run prepare-payer
+      - name: Load configured disposable devnet payer
+        if: env.DEVNET_PAYER_SECRET_JSON != ''
+        shell: bash
+        run: |
+          printf '%s' "$DEVNET_PAYER_SECRET_JSON" > "$DEVNET_PAYER_KEYPAIR_FILE"
+          node -e 'const fs=require("fs"); const {Keypair}=require("@solana/web3.js"); const p=process.env.DEVNET_PAYER_KEYPAIR_FILE; const k=Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(p,"utf8")))); fs.writeFileSync(process.env.DEVNET_PAYER_PUBKEY_FILE,k.publicKey.toBase58()+"\n"); console.log("REVIVE_CONFIGURED_DEVNET_PAYER="+k.publicKey.toBase58());'
+      - name: Bootstrap disposable payer from authenticated Worldz devnet helper
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        shell: bash
+        run: |
+          OIDC_JSON=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=worldz-revive-devnet-bootstrap")
+          OIDC=$(python -c 'import json,sys; print(json.load(sys.stdin)["value"])' <<< "$OIDC_JSON")
+          PUBKEY=$(tr -d '\n' < "$DEVNET_PAYER_PUBKEY_FILE")
+          STATUS=$(curl -sS -o /tmp/revive-bootstrap-response.json -w "%{http_code}" -X POST "https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/revive-devnet-bootstrap" \
+            -H "Authorization: Bearer $OIDC" \
+            -H "Content-Type: application/json" \
+            --data "{\"address\":\"$PUBKEY\"}")
+          cat /tmp/revive-bootstrap-response.json || true
+          echo "REVIVE_BOOTSTRAP_HELPER_HTTP=$STATUS"
+      - name: Try ordinary devnet bootstrap before PoW fallback
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        continue-on-error: true
+        run: npm run bootstrap-payer
+      - name: Cache Solana devnet Proof-of-Work faucet client
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        id: cache-devnet-pow
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/devnet-pow
+          key: devnet-pow-v0.1.4-${{ runner.os }}-${{ runner.arch }}
+      - name: Install Solana devnet Proof-of-Work faucet client
+        if: env.DEVNET_PAYER_SECRET_JSON == '' && steps.cache-devnet-pow.outputs.cache-hit != 'true'
+        shell: bash
+        run: cargo install devnet-pow --version 0.1.4
+      - name: Mine disposable devnet SOL with PoW faucet
+        if: env.DEVNET_PAYER_SECRET_JSON == ''
+        shell: bash
+        run: |
+          devnet-pow -k "$DEVNET_PAYER_KEYPAIR_FILE" -u dev -c confirmed mine -d 3 --reward 0.02 --no-infer --target-lamports 100000000
+      - name: Prove disposable payer funding
+        run: npm run verify-payer
+      - name: Create existing-mint one-sided DAMM v2 pool, first buy, permanent lock and fee claim
+        run: npm run direct-damm-devnet
+      - name: Independently verify DAMM v2 pool and locked position
+        run: npm run verify-direct-damm
+      - name: Print direct DAMM v2 evidence
+        shell: bash
+        run: |
+          node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync("artifacts/revive-direct-damm-v2-verified.json")); console.log("REVIVE_DIRECT_DAMM_EVIDENCE pool="+x.pool+" mockMint="+x.mockExistingMint+" create="+x.createSignature+" buy="+x.firstBuy.signature+" claim="+x.feeClaim.signature+" price="+x.devnetPriceSolPerRviv+" mainnetPrice="+x.mainnetPrice);'
+          sha256sum artifacts/revive-direct-damm-v2-devnet.json artifacts/revive-direct-damm-v2-verified.json
+      - name: Publish direct DAMM v2 evidence (best effort — artifact quota may be full)
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: revive-direct-damm-v2-devnet
+          path: |
+            worldzpad-devnet/revive-party/artifacts/revive-direct-damm-v2-devnet.json
+            worldzpad-devnet/revive-party/artifacts/revive-direct-damm-v2-verified.json
+          if-no-files-found: error
+          retention-days: 30
+
+
+  legacy-live-boundary:
+    if: github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    env:
+      LEGACY_READ_RPC_URL: ${{ secrets.LEGACY_READ_RPC_URL }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/revive-party
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned SDKs
+        run: npm ci --no-audit --no-fund
+      - name: Capture one read-only mainnet Legacy holder boundary
+        run: npm run legacy-live-snapshot
+      - name: Print holder-boundary evidence summary
+        shell: bash
+        run: |
+          node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync("artifacts/legacy-live-boundary-snapshot.json")); console.log("LEGACY_BOUNDARY_EVIDENCE capturedAt="+x.capturedAt+" boundary="+x.boundary+" assets="+x.assets.length+" exclusions="+x.exclusionRegistryCount);'
+          sha256sum artifacts/legacy-live-boundary-snapshot.json
+      - name: Publish holder-boundary evidence (best effort — GitHub artifact quota may be full)
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: revive-legacy-live-boundary
+          path: worldzpad-devnet/revive-party/artifacts/legacy-live-boundary-snapshot.json
+          if-no-files-found: error
+          retention-days: 30
+
+
+  legacy-authority-audit:
+    needs: validate
+    runs-on: ubuntu-latest
+    env:
+      LEGACY_READ_RPC_URL: ${{ secrets.LEGACY_READ_RPC_URL }}
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/revive-party
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked proof dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Audit all ten Legacy mint authorities read-only
+        run: npm run legacy-authority-audit
+      - name: Print Legacy authority evidence digest
+        shell: bash
+        run: |
+          node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync("artifacts/legacy-authority-audit.json")); console.log("LEGACY_AUTHORITY_EVIDENCE "+JSON.stringify(x.summary)); for(const a of x.legacyAssets){const t=a.extensions.transferFeeConfig; console.log(a.symbol+" "+a.tokenProgram+" feeBps="+(t?t.newer.basisPoints:"none")+" recovery="+a.controlRecovery.state);}'
+          sha256sum artifacts/legacy-authority-audit.json

@@ -1,0 +1,32 @@
+{
+  "version": "DEVCITY-RVIV-100-2026-09-24-A",
+  "token": "RVIV",
+  "poolTokens": 20000000,
+  "poolPercent": 10,
+  "seats": 100,
+  "tokensPerSeat": 200000,
+  "percentPerSeat": 0.1,
+  "worldzReference": {
+    "seats": 50,
+    "tokensPerSeat": 100000,
+    "poolTokens": 5000000,
+    "poolPercent": 5
+  },
+  "existingSeats": {
+    "count": 50,
+    "status": "GRANDFATHERED__WALLET_ASSOCIATION_MUST_REMAIN_VERIFIED"
+  },
+  "expansion": {
+    "count": 50,
+    "status": "OPEN_FOR_VERIFIED_DEVELOPER_RECRUITMENT"
+  },
+  "eligibility": [
+    "Public evidence of real software development or technical contribution",
+    "Accepted participation in DevCity",
+    "Verified Solana wallet association",
+    "No duplicate identity or duplicate reward slot",
+    "No purchase requirement",
+    "No price-promotion requirement"
+  ],
+  "stagingWallet": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m"
+}

@@ -1,0 +1,106 @@
+{
+  "version": "WORLDZ-X-SAVE-2026-09-24-A",
+  "status": "PRIVATE_BUILD__DEVNET_AND_INTEGRATION_PROOF_REQUIRED__MAINNET_DISABLED",
+  "name": "Worldz X-SAVE™",
+  "expandedName": "XRP–Solana Alliance Value Engine",
+  "tagline": "Launch with XRP. Build on Solana. Prove across Worldz.",
+  "mainnetExecutionEnabled": false,
+  "purpose": "A dedicated XRP-to-Solana launch rail where Solana launch tokens use canonical wXRP as the quote asset while XRP-native builders retain a clear path to XRPL-native issuance and markets.",
+  "canonicalQuoteAsset": {
+    "chain": "solana",
+    "asset": "wXRP",
+    "mint": "6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2",
+    "decimals": 6,
+    "issuerCustodyModel": "Hex Trust 1:1-backed wrapped XRP",
+    "interoperability": "LayerZero OFT",
+    "mustReverifyBeforeMainnet": true
+  },
+  "positioning": {
+    "notClaimedAsFirstWXrpPairLaunchpad": true,
+    "differentiator": "Dedicated XRP-Solana launch economy: wXRP-native price discovery, dual-wallet onboarding, creator/referrer fee receipts in the XRP-linked quote asset, XRPL project passporting, Worldz Proof, white-label integrations and transparent MagicFee economics.",
+    "audience": ["XRPL developers", "Solana developers", "XRP communities", "Solana communities", "launchpads", "wallets", "API partners"]
+  },
+  "solanaLaunchRail": {
+    "venueCandidate": "Meteora DBC -> DAMM v2",
+    "quoteMint": "6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2",
+    "quoteOnlyFeeCollection": true,
+    "targetGrossTraderFeeBps": 75,
+    "dynamicFee": false,
+    "worldzControlledSplitPercent": {
+      "creator": 51,
+      "referrer": 17,
+      "legacyFlywheel": 15,
+      "worldzLaunchPad": 8.5,
+      "oneWorldzImpact": 8.5
+    },
+    "graduationTarget": "DAMM_V2",
+    "permanentMigratedLiquidityLockTargetPercent": 100,
+    "jupiterRoutingTarget": true,
+    "allExternalProtocolDeductionsMustBeShownBeforeSigning": true
+  },
+  "xrpBuilderExperience": [
+    "Connect XRPL wallet plus Solana wallet under one X-SAVE identity.",
+    "Choose an XRP-denominated starting price and migration threshold.",
+    "Launch a Solana token whose primary quote asset is canonical wXRP.",
+    "Receive creator fee revenue in the collected wXRP quote asset where the venue supports the modeled route.",
+    "Optionally register a native XRPL token/issuer and market under the same Worldz project identity.",
+    "Use Worldz Proof to show exactly which chain, mint/issuer, pool/AMM and fee rules belong to the project."
+  ],
+  "solanaBuilderExperience": [
+    "Reach XRP liquidity and XRP communities without pretending the project is native XRPL.",
+    "Price and graduate in wXRP rather than requiring SOL as the primary quote asset.",
+    "Use Jupiter/Meteora compatible Solana market infrastructure.",
+    "Gain access to X-SAVE referral partners, XRP communities and XRPL-native project discovery."
+  ],
+  "features": {
+    "xSavePair": "TOKEN/wXRP launch and graduated liquidity pair on Solana.",
+    "xSavePassport": "One Worldz project identity linking verified Solana mint, XRPL issuer/token identity, domains, socials and proof records without claiming cross-chain fungibility.",
+    "xSaveTwinRail": "Optional separate native XRPL market plus Solana wXRP market under one project dashboard. Assets are not represented as fungible across chains unless a separately audited bridge/mint-burn controller proves that property.",
+    "xSaveBridgePort": "Discovery/integration surface for approved external XRP<->wXRP wrapping/bridge providers. Worldz does not custody XRP or mint wXRP.",
+    "xSavePartnerRail": "API/SDK/white-label launch integration. A partner launchpad can be the 17% Worldz referrer rather than being displaced by Worldz.",
+    "xSaveProof": "Worldz Proof receipt covering canonical wXRP mint, token mint/issuer, venue, fees, liquidity protection and transaction IDs.",
+    "xSaveFeed": "Dedicated New / Trending / Graduating / Verified XRP-paired launch discovery.",
+    "xSaveTerminal": "One dashboard for wXRP balance, XRP-linked launch markets, creator receipts, referral receipts and project proof."
+  },
+  "xrplNativeRail": {
+    "preserveNativeArchitecture": true,
+    "tokenModels": ["XRPL_FUNGIBLE_TOKEN", "MPT_AFTER_SEPARATE_PROOF"],
+    "marketModels": ["XRPL_CLOB", "XRPL_AMM"],
+    "ammTradingFeeRangePercent": {"min": 0, "max": 1},
+    "target75BpsIsTechnicallyRepresentable": true,
+    "warning": "XRPL AMM trading fees accrue to AMM liquidity and can be changed by LP-weighted fee voting. They are not equivalent to the Solana DBC creator/partner fee router.",
+    "issuerTransferFeeUsedToFakeMagicFee": false,
+    "hiddenTransferTaxProhibited": true,
+    "separateWorldzRoutedEconomicsRequired": true
+  },
+  "bridgeSafety": {
+    "worldzCustodiesNativeXrp": false,
+    "worldzMintsCanonicalWXrp": false,
+    "approvedExternalProviderRequired": true,
+    "reserveAndMintProofRequired": true,
+    "noAutomaticUnsupportedBridge": true,
+    "bridgeRiskDisclosureRequired": true
+  },
+  "builderReasons": [
+    "XRP-denominated token launches on Solana instead of forcing builders to acquire SOL as their market quote asset.",
+    "Creator revenue can accrue in wXRP, keeping economics connected to the XRP ecosystem.",
+    "Referrers and partner launchpads can earn 17% of Worldz-controlled revenue.",
+    "One integration can expose a project to XRP and Solana communities.",
+    "Worldz handles launch configuration, liquidity migration, proof and disclosure instead of making each XRP developer rebuild Solana launch infrastructure.",
+    "XRPL developers keep an XRPL-native CLOB/AMM path rather than being told to abandon their native ledger.",
+    "Solana developers receive a dedicated XRP-liquidity discovery lane rather than a generic custom-pair checkbox.",
+    "Worldz Proof makes cross-chain identity explicit and prevents fake copycat mints/issuers from being silently treated as canonical."
+  ],
+  "mainnetGates": [
+    "Reverify canonical wXRP Solana mint and decimals from multiple authoritative/major ecosystem sources.",
+    "Prove Meteora DBC accepts the selected wXRP quote mint and required TokenBadge/permission configuration.",
+    "Prove 75-bps launch and migrated-pool fee behavior with quote-only fee collection.",
+    "Prove creator/partner receipts and Worldz 17/15/8.5/8.5 partner routing.",
+    "Prove 100% permanent migrated-liquidity lock.",
+    "Prove Jupiter buy and sell routing after graduation.",
+    "Prove dual-wallet attribution without custodial access to either wallet.",
+    "Prove XRPL Passport registration does not imply fungibility or bridging.",
+    "Complete bridge/custodian risk disclosure and integration review.",
+    "Explicit owner release approval."
+  ]
+}

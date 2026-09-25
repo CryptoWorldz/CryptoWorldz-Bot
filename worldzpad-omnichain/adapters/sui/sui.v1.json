@@ -1,0 +1,61 @@
+{
+  "version": "WORLDZ-ADAPTER-SUI-2026-09-24-A",
+  "chainKey": "sui",
+  "status": "TESTNET_IMPLEMENTATION_REQUIRED",
+  "mainnetExecutionEnabled": false,
+  "token": {
+    "standard": "MOVE_FUNGIBLE_TOKEN",
+    "packageModel": "WORLDZ_SUI_MOVE_PACKAGE",
+    "authorityAndCapabilityState": "DISCLOSE_AND_PROVE_PER_LAUNCH"
+  },
+  "transactionModel": {
+    "programmableTransactionBlocks": true,
+    "composeLaunchIntoPTBWhereSafe": true
+  },
+  "market": {
+    "deepBookCandidate": true,
+    "ammAdapterRequired": true,
+    "venueSelection": "TESTNET_BENCHMARK_AND_LIQUIDITY_PROOF"
+  },
+  "fee": {
+    "targetGrossTraderFeeBps": 75,
+    "dynamicFeeDefault": false,
+    "worldzControlledSplitBps": {
+      "creator": 5100,
+      "referrer": 1700,
+      "legacyFlywheel": 1500,
+      "worldzLaunchPad": 850,
+      "oneWorldzImpact": 850
+    },
+    "externalMarketFeeRule": "DISCLOSE_BEFORE_SIGNING"
+  },
+  "referral": {
+    "launchpadToLaunchpad": true,
+    "implementation": "WORLDZ_MOVE_REFERRAL_ROUTER_REQUIRED"
+  },
+  "legacyFlywheel": {
+    "sourceChainAccrualAsset": "SUI_OR_ACTUAL_COLLECTED_QUOTE_ASSET",
+    "automaticBridgeEnabled": false,
+    "destination": "SOLANA_AFTER_APPROVED_CONVERSION_BRIDGE_PROOF"
+  },
+  "liquidity": {
+    "permanentLockOrChainNativeEquivalentRequired": true,
+    "proofRequired": true
+  },
+  "releaseGates": [
+    "MOVE_PACKAGE_TESTS",
+    "TESTNET_PUBLISH_PROOF",
+    "PTB_LAUNCH_PROOF",
+    "MARKET_BUY_AND_SELL_PROOF",
+    "FEE_ROUTER_PROOF",
+    "REFERRAL_PROOF",
+    "LEGACY_ACCRUAL_PROOF",
+    "LIQUIDITY_PROTECTION_PROOF",
+    "WORLDZ_PROOF_RECORD",
+    "EXPLICIT_MAINNET_RELEASE"
+  ],
+  "sourceOfTruth": [
+    "https://docs.sui.io/",
+    "https://docs.sui.io/develop/write-move/sui-move-concepts"
+  ]
+}

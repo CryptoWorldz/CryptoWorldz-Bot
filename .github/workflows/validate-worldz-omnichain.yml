@@ -1,0 +1,41 @@
+name: Validate Worldz Omnichain private build
+
+on:
+  push:
+    branches:
+      - revive-v1-build
+    paths:
+      - 'worldzpad-omnichain/**'
+      - 'worldzpad-mainnet/fairfee/**'
+      - 'worldzpad-mainnet/legacy-flywheel/**'
+      - 'scripts/validate_worldz_omnichain.py'
+      - '.github/workflows/validate-worldz-omnichain.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-omnichain/**'
+      - 'worldzpad-mainnet/fairfee/**'
+      - 'worldzpad-mainnet/legacy-flywheel/**'
+      - 'scripts/validate_worldz_omnichain.py'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate eight-chain registry and locked economics
+        run: python scripts/validate_worldz_omnichain.py
+      - name: Run integer MagicFee and disclosure self-test
+        run: node worldzpad-omnichain/sdk/self-test.mjs
+      - name: Prove mainnet remains globally disabled
+        shell: bash
+        run: |
+          grep -q '"mainnetExecutionEnabled": false' worldzpad-omnichain/worldz-omnichain.v1.json
+          grep -q '"mainnetExecutionEnabled": false' worldzpad-omnichain/chain-registry.v1.json
+          ! grep -R '"mainnetExecutionEnabled": true' worldzpad-omnichain

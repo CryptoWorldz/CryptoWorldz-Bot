@@ -1,0 +1,81 @@
+{
+  "version": "WORLDZ-ADAPTER-EVM-SHARED-2026-09-24-A",
+  "status": "TESTNET_IMPLEMENTATION_NEXT",
+  "mainnetExecutionEnabled": false,
+  "chainKeys": ["ethereum", "base", "bnb", "hyperevm", "robinhood"],
+  "networks": {
+    "ethereum": {"mainnetChainId": 1, "testnetChainId": 11155111, "gas": "ETH"},
+    "base": {"mainnetChainId": 8453, "testnetChainId": 84532, "gas": "ETH"},
+    "bnb": {"mainnetChainId": 56, "testnetChainId": 97, "gas": "BNB"},
+    "hyperevm": {"mainnetChainId": 999, "testnetChainId": 998, "gas": "HYPE"},
+    "robinhood": {"mainnetChainId": 4663, "testnetChainId": 46630, "gas": "ETH"}
+  },
+  "token": {
+    "standard": "ERC20",
+    "deterministicFactoryTarget": "CREATE2",
+    "upgradeableTokenDefault": false,
+    "mintAuthorityPolicy": "FIXED_SUPPLY_OR_EXPLICITLY_DISCLOSED",
+    "transferTaxDefault": false
+  },
+  "modules": [
+    "WorldzTokenFactory",
+    "WorldzFeeRouter",
+    "WorldzReferralRegistry",
+    "WorldzLiquidityAdapter",
+    "WorldzProofEmitter"
+  ],
+  "fee": {
+    "targetGrossTraderFeeBps": 75,
+    "dynamicFeeDefault": false,
+    "worldzControlledSplitBps": {
+      "creator": 5100,
+      "referrer": 1700,
+      "legacyFlywheel": 1500,
+      "worldzLaunchPad": 850,
+      "oneWorldzImpact": 850
+    },
+    "externalDexFeeRule": "DISCOVER_AND_DISCLOSE_BEFORE_SIGNING",
+    "gasRule": "DISPLAY_SEPARATELY",
+    "hiddenTransferTax": false
+  },
+  "referral": {
+    "signedAttributionTarget": "EIP712_OR_EQUIVALENT",
+    "onePrimaryReferrer": true,
+    "launchpadToLaunchpad": true,
+    "whiteLabelOperator": true
+  },
+  "legacyFlywheel": {
+    "sourceChainAccrual": true,
+    "automaticBridgeEnabled": false,
+    "destination": "10_SOLANA_LEGACY_VAULTS_AFTER_APPROVED_CONVERSION_BRIDGE_PROOF"
+  },
+  "liquidity": {
+    "oneUniversalDexAssumption": false,
+    "venueSelection": "PER_CHAIN_TESTNET_BENCHMARK",
+    "permanentLockOrNonCustodialEquivalentRequired": true
+  },
+  "simulation": {
+    "required": true,
+    "nativeMethods": ["eth_call", "eth_estimateGas"],
+    "externalSimulatorCandidate": "Tenderly"
+  },
+  "releaseGates": [
+    "CONTRACT_TESTS",
+    "TESTNET_DEPLOYMENT",
+    "FEE_RECEIPT_RECONCILIATION",
+    "REFERRAL_PROOF",
+    "LEGACY_ACCRUAL_PROOF",
+    "LIQUIDITY_PROTECTION_PROOF",
+    "BUY_AND_SELL_PATH_PROOF",
+    "WORLDZ_PROOF_RECORD",
+    "SECURITY_REVIEW",
+    "EXPLICIT_MAINNET_RELEASE"
+  ],
+  "sourceOfTruth": {
+    "ethereum": "https://ethereum.org/developers/docs/",
+    "base": "https://docs.base.org/get-started/connect-to-base",
+    "bnb": "https://docs.bnbchain.org/bnb-smart-chain/developers/json_rpc/json-rpc-endpoint/",
+    "hyperevm": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm",
+    "robinhood": "https://docs.robinhood.com/chain/connecting/"
+  }
+}

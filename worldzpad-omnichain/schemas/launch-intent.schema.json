@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cryptoworldz.xyz/schemas/worldz-launch-intent.v1.json",
+  "title": "Worldz Omnichain Launch Intent v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "projectId", "chain", "environment", "token", "creator", "economics", "liquidity", "execution"],
+  "properties": {
+    "version": {"const": "WORLDZ-LAUNCH-INTENT-V1"},
+    "projectId": {"type": "string", "minLength": 1, "maxLength": 128},
+    "chain": {"enum": ["solana", "xrpl", "base", "ethereum", "bnb", "sui", "hyperevm", "robinhood"]},
+    "environment": {"enum": ["devnet", "testnet", "mainnet"]},
+    "token": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "symbol", "decimals", "totalSupply"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 64},
+        "symbol": {"type": "string", "minLength": 1, "maxLength": 16},
+        "decimals": {"type": "integer", "minimum": 0, "maximum": 18},
+        "totalSupply": {"type": "string", "pattern": "^[0-9]+$"},
+        "existingTokenId": {"type": ["string", "null"]},
+        "metadataUri": {"type": ["string", "null"]}
+      }
+    },
+    "creator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recipient"],
+      "properties": {
+        "recipient": {"type": "string", "minLength": 1},
+        "displayName": {"type": ["string", "null"]}
+      }
+    },
+    "referral": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["type", "recipient"],
+      "properties": {
+        "type": {"enum": ["WALLET", "LAUNCHPAD", "INFLUENCER", "TELEGRAM_COMMUNITY", "X_COMMUNITY", "WEBSITE", "DEVELOPER", "API_PARTNER", "WHITE_LABEL_OPERATOR"]},
+        "recipient": {"type": "string", "minLength": 1},
+        "attributionId": {"type": ["string", "null"]}
+      }
+    },
+    "economics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["targetGrossTraderFeeBps", "dynamicFeeRequested"],
+      "properties": {
+        "targetGrossTraderFeeBps": {"const": 75},
+        "dynamicFeeRequested": {"const": false},
+        "externalProtocolShareBpsOfGrossFee": {"type": ["integer", "null"], "minimum": 0, "maximum": 10000},
+        "venue": {"type": ["string", "null"]},
+        "quoteAsset": {"type": ["string", "null"]}
+      }
+    },
+    "liquidity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protectionTarget"],
+      "properties": {
+        "mode": {"type": ["string", "null"]},
+        "quoteAsset": {"type": ["string", "null"]},
+        "protectionTarget": {"enum": ["PERMANENT_LOCK", "NON_CUSTODIAL_EQUIVALENT", "NATIVE_MARKET_STRUCTURE"]},
+        "targetLockedPercent": {"type": ["number", "null"], "minimum": 0, "maximum": 100}
+      }
+    },
+    "whiteLabel": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "operatorId": {"type": ["string", "null"]},
+        "brand": {"type": ["string", "null"]},
+        "referrerRecipient": {"type": ["string", "null"]}
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["simulateFirst", "mainnetReleaseApproved"],
+      "properties": {
+        "simulateFirst": {"const": true},
+        "mainnetReleaseApproved": {"type": "boolean"},
+        "ownerApprovalReference": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "version": "WORLDZ-FAIRFEE-RVIV-2026-09-24-D",
+  "status": "REFERENCE_ONLY__DBC_MODEL_NOT_REVIVE_EXECUTION_PATH",
+  "venue": "Meteora Dynamic Bonding Curve -> DAMM v2",
+  "dbc": {
+    "collectFeeMode": "QUOTE_TOKEN",
+    "dynamicFee": false,
+    "targetGrossTraderFeePercent": 0.75,
+    "targetGrossTraderFeeBps": 75,
+    "protocolFeePercentOfGrossFee": 20,
+    "controlledTradingFeePercentOfGrossFee": 80,
+    "creatorTradingFeePercentageOfControlledTradingFee": 51,
+    "partnerTradingFeePercentageOfControlledTradingFee": 49,
+    "feeClaimer": "PENDING_WORLDZ_FEE_ROUTER_PDA",
+    "creator": "PENDING_REVIVE_CREATOR_FEE_RECEIVER"
+  },
+  "effectivePercentOfTradeAtTarget": {
+    "meteoraProtocol": 0.15,
+    "creator": 0.306,
+    "worldzReferrer": 0.102,
+    "legacyFlywheel": 0.09,
+    "worldzLaunchPad": 0.051,
+    "oneWorldzImpact": 0.051,
+    "worldzControlledTotal": 0.6,
+    "grossTotal": 0.75
+  },
+  "meteoraReferral": {
+    "distinctFromWorldzReferral": true,
+    "hostReferralPercentOfProtocolFeeWhenUsed": 20,
+    "disclosureRequired": true
+  },
+  "migration": {
+    "option": "DAMM_V2",
+    "customizableMigratedPoolFeeRequired": true,
+    "targetGrossTraderFeeBps": 75,
+    "exactFractionalBpsSupportMustBeProvenOnDevnet": false,
+    "noSilentRounding": true,
+    "wholeBpsCompatibilityRequired": true,
+    "publicDisclosure": "MagicFeeNumber™ candidate: trader pays 0.75% gross. At Meteora DBC's documented 20% protocol share, 0.15% of trade is protocol fee and 0.60% remains Worldz-controlled: 0.306% Creator / 0.102% Referrer / 0.09% Legacy Flywheel / 0.051% WorldzLaunchPad / 0.051% OneWorldz Impact."
+  },
+  "permanentLiquidity": {
+    "partnerLiquidityPercentage": 0,
+    "creatorLiquidityPercentage": 0,
+    "partnerPermanentLockedLiquidityPercentage": 40,
+    "creatorPermanentLockedLiquidityPercentage": 60,
+    "totalPermanentLockedPercentage": 100
+  },
+  "executionGate": "Mainnet remains locked until devnet proves 75 bps in DBC and migrated DAMM v2, proves actual protocol/referral deductions, proves the exact 51/49 creator-partner split, proves partner-router weights 170/150/85/85, verifies fee-claimer receipts, and proves 100% permanent migrated-liquidity lock.",
+  "theoreticalTarget": {
+    "previousBreakEvenGrossFeeBps": 73.52941176470588,
+    "selectedMagicFeeBps": 75,
+    "selectedReason": "75 bps slightly exceeds the original 0.30% Creator and 0.10% Referrer effective targets while remaining simple, whole-bps and transparent.",
+    "noSilentRounding": true
+  },
+  "controlledFeeSplitPercent": {
+    "creator": 51,
+    "referrer": 17,
+    "legacyFlywheel": 15,
+    "worldzLaunchPad": 8.5,
+    "oneWorldzImpact": 8.5,
+    "total": 100,
+    "derivation": "Legacy Flywheel takes 15% of Worldz-controlled revenue. The other routes preserve the prior 60/20/10/10 proportions inside the remaining 85%."
+  },
+  "legacyFlywheel": {
+    "policyPath": "worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json",
+    "percentOfWorldzControlledFeeRevenue": 15,
+    "legacyVaults": 10,
+    "equalVaultSharePercentOfFlywheel": 10,
+    "settlementHours": 6,
+    "effectivePercentOfTradeAtMagicFee": 0.09,
+    "effectivePercentOfTradePerLegacyVault": 0.009
+  },
+  "magicFee": {
+    "name": "MagicFeeNumber™",
+    "grossTraderFeeBps": 75,
+    "grossTraderFeePercent": 0.75,
+    "dynamicFee": false,
+    "principle": "Keep the trader-facing fee simple while restoring strong Creator and Referrer economics after funding the Legacy Flywheel."
+  },
+  "partnerRouterWeights": {
+    "referrer": 170,
+    "legacyFlywheel": 150,
+    "worldzLaunchPad": 85,
+    "oneWorldzImpact": 85,
+    "total": 490,
+    "meaning": "Exact integer weights over the 49% partner-controlled DBC fee share. 170/490=17/49, 150/490=15/49, 85/490=8.5/49."
+  },
+  "executionApplicability": "NOT_USED_FOR_CANONICAL_RVIV_POOL_CREATION",
+  "supersededForReviveBy": "worldzpad-mainnet/revive/revive-direct-damm-v2-existing-mint.v1.json",
+  "warning": "Canonical RVIV already exists with mint authority revoked. Do not use this DBC token-creation model to launch RVIV."
+}
