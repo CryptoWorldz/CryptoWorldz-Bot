@@ -120,7 +120,7 @@ jobs:
           }"""
 
           pattern=r"async function connectWallet\(\)\{.*?\n\}\nasync function buildPlan\(\)\{"
-          t,n=re.subn(pattern,replacement+"\nasync function buildPlan(){",t,count=1,flags=re.S)
+          t,n=re.subn(pattern,lambda m: replacement+"\nasync function buildPlan(){",t,count=1,flags=re.S)
           assert n==1, 'connectWallet replacement failed'
 
           t=t.replace(
@@ -140,6 +140,22 @@ jobs:
           assert "70,000,000 RVIV" in t
           assert "100,000,000 RVIV" in t
           print('REVIVE_DISTRIBUTION_LAUNCHPAD_BUILD=PASS')
+
+      - name: Validate generated browser module syntax
+        shell: python
+        run: |
+          import re,subprocess
+          from pathlib import Path
+          html=Path('launchpad.cryptoworldz.xyz/revive-distribution/index.html').read_text()
+          m=re.search(r'<script type="module">(.*?)</script>',html,re.S)
+          assert m, 'module script not found'
+          p=Path('/tmp/revive-distribution-module.mjs')
+          p.write_text(m.group(1))
+          r=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
+          print(r.stdout)
+          print(r.stderr)
+          assert r.returncode==0, 'generated browser module has JavaScript syntax errors'
+          print('REVIVE_DISTRIBUTION_JS_SYNTAX=PASS')
 
       - name: Upload to WorldzLaunchPad
         shell: python
