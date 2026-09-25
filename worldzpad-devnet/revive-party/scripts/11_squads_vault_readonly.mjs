@@ -76,7 +76,7 @@ const report={
    nextTransactionPda:transactionPda.toBase58(),
    nextTransactionBump:transactionBump,
    ephemeralPositionNftSignerPda:ephemeralSignerPda.toBase58(),
-   ephemeralSignerBump,
+   ephemeralSignerBump:ephemeralBump,
  },
  balances:{
    jayJayTeamDev:FEE_PAYER.toBase58(),
