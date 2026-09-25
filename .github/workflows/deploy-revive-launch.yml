@@ -1,0 +1,81 @@
+name: Deploy REVIVE Launch Console
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cryptoworldz.xyz/revive-launch/index.html'
+      - '.github/workflows/deploy-revive-launch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revive-launch-console
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate owner-only launch console
+        run: |
+          grep -q 'noindex,nofollow,noarchive' cryptoworldz.xyz/revive-launch/index.html
+          grep -q 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' cryptoworldz.xyz/revive-launch/index.html
+          grep -q 'DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R' cryptoworldz.xyz/revive-launch/index.html
+          grep -q 'SIGN & LAUNCH REVIVE' cryptoworldz.xyz/revive-launch/index.html
+          grep -q '100% permanent lock' cryptoworldz.xyz/revive-launch/index.html
+
+      - name: Upload launch console only
+        shell: python
+        run: |
+          import os,ssl
+          from ftplib import FTP_TLS,error_perm
+          from pathlib import Path
+          local=Path('cryptoworldz.xyz/revive-launch/index.html')
+          remote_dir='domains/cryptoworldz.xyz/public_html/revive-launch'
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=40)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p(); ftp.set_pasv(True)
+          ftp.cwd('/')
+          for part in remote_dir.split('/'):
+              if not part: continue
+              try: ftp.cwd(part)
+              except error_perm:
+                  ftp.mkd(part); ftp.cwd(part)
+          with local.open('rb') as f:
+              ftp.storbinary('STOR index.html',f,blocksize=262144)
+          ftp.quit()
+          print('REVIVE_LAUNCH_CONSOLE_DEPLOY=PASS')
+
+      - name: Verify live console
+        shell: python
+        run: |
+          import time,urllib.request
+          url='https://cryptoworldz.xyz/revive-launch/'
+          last=''
+          for _ in range(8):
+              try:
+                  req=urllib.request.Request(url,headers={'User-Agent':'REVIVE-Live-Verify/1.0','Cache-Control':'no-cache'})
+                  with urllib.request.urlopen(req,timeout=20) as r:
+                      text=r.read().decode('utf-8','ignore')
+                  if 'SIGN & LAUNCH REVIVE' in text and 'DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R' in text:
+                      print('REVIVE_LAUNCH_CONSOLE_LIVE=PASS')
+                      raise SystemExit(0)
+                  last='expected marker missing'
+              except Exception as e:
+                  last=str(e)
+              time.sleep(5)
+          raise SystemExit('Live verification failed: '+last)
