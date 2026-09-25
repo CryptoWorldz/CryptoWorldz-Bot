@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-23-A",
+  "version": "2026-09-25-A",
   "canonicalIdentity": {
     "name": "WORLDZ",
     "symbol": "WLDZ",
@@ -19,6 +19,7 @@
     "WorldzLaunchPad": "https://launchpad.cryptoworldz.xyz/"
   },
   "social": {
+    "x": "https://x.com/CryptoWorldzX",
     "telegram": "https://t.me/CryptoWLDZ"
   },
   "machineReadable": {
@@ -34,48 +35,50 @@
     "dex": "Meteora",
     "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
     "pair": "WLDZ/wSOL",
+    "initialActiveLiquidityTokens": 15000000,
     "tradingFeePercent": 2,
-    "lpLock": "permanent"
+    "dynamicFee": false,
+    "lpLock": "100% permanent",
+    "status": "LIVE"
   },
   "platformTargets": {
     "Jupiter": {
-      "submission": "https://verified.jup.ag/tokens/submit?token=AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
-      "mode": "Standard/free",
-      "status": "manual account/wallet submission required"
+      "page": "https://jup.ag/tokens/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "verification": "https://verified.jup.ag/dashboard/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "status": "recognized; verification/metadata review pending; price currently withheld"
     },
     "Solscan": {
       "submission": "https://solscan.io/token-update",
-      "status": "manual form + project email required"
+      "status": "public token profile still pending"
     },
     "CoinGecko": {
       "submission": "https://partner.coingecko.com/request-form/new",
-      "status": "account + public verification post required"
+      "status": "issuer submission not yet confirmed"
     },
     "GeckoTerminal": {
-      "submission": "https://www.geckoterminal.com/update-token-info",
-      "mode": "Regular Pass/free available",
-      "status": "email OTP/form required"
+      "page": "https://www.geckoterminal.com/solana/pools/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+      "status": "indexed"
     },
     "CoinMarketCap": {
       "submission": "https://coinmarketcap.com/request/",
-      "status": "manual form required"
-    },
-    "Coinbase": {
-      "submission": "https://www.coinbase.com/listings/apply",
-      "status": "issuer intake + legal/team information required"
+      "status": "issuer submission not yet confirmed"
     },
     "DexScreener": {
-      "listing": "automatic after liquidity pool + transaction",
-      "metadata": "inherits external token lists or paid Enhanced Token Info"
+      "page": "https://dexscreener.com/solana/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+      "listing": "automatic after supported liquidity pool + transaction",
+      "status": "pair API indexing pending"
     },
     "Phantom": {
-      "listing": "data-provider driven; Jupiter/CoinGecko recognition recommended"
+      "page": "https://phantom.com/tokens/solana/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "status": "WORLDZ/WLDZ metadata recognized; unverified; price pending"
     },
-    "Solflare": {
-      "listing": "Jupiter-powered discovery / independent verification signals"
+    "Birdeye": {
+      "page": "https://birdeye.so/solana/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "status": "indexed"
     },
     "GMGN": {
-      "listing": "on-chain new-pair indexing; no public issuer metadata API identified"
+      "page": "https://gmgn.ai/sol/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "status": "onchain discovery route available"
     }
   }
 }
