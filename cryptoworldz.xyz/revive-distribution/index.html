@@ -30,7 +30,7 @@ button{width:100%;border:0;border-radius:14px;padding:15px 18px;font-weight:850;
   <button class="secondary" id="connect">Connect JayJayTeamDev Wallet</button>
   <button class="secondary" id="preflight" disabled>1. FINAL LIVE PREFLIGHT</button>
   <button class="go" id="execute" disabled>2. ONE WALLET APPROVAL — DISTRIBUTE 70M RVIV</button>
-  <div id="status" class="status warn">No transaction will be built until the authorized wallet is connected and the live 170,000,000 RVIV treasury balance is verified.</div>
+  <div id="status" class="status warn">Connect JayJayTeamDev using Jupiter Mobile / Wallet Standard. No transaction will be built until the live 170,000,000 RVIV treasury balance is verified.</div>
   <p class="note"><b>One approval means one wallet approval screen.</b> Solana still records a separate cryptographic signature for each transaction in the signed batch. If the connected wallet cannot batch-sign in one approval, this console stops before moving RVIV.</p>
 </section>
 
@@ -127,29 +127,56 @@ function injected(){
     .find(p=>p&&typeof p.connect==='function'&&typeof p.signTransaction==='function')||null;
 }
 async function connectWallet(){
-  const list=standardCandidates();
+  let list=[],p=null;
+  for(let i=0;i<30;i++){
+    list=standardCandidates();
+    p=injected();
+    if(list.length||p)break;
+    await sleep(200);
+  }
+
   if(list.length){
-    const w=list[0],out=await w.features['standard:connect'].connect(),account=(out?.accounts||w.accounts||[])[0];
+    const w=list.find(x=>/jupiter/i.test(String(x.name||'')))||list[0];
+    const out=await w.features['standard:connect'].connect();
+    const account=(out?.accounts||w.accounts||[])[0];
     if(!account)throw new Error('Wallet returned no Solana account.');
     wallet={
-      name:w.name||'Wallet Standard',publicKey:new PublicKey(account.address),
+      name:w.name||'Wallet Standard',
+      publicKey:new PublicKey(account.address),
       async signAllTransactions(txs){
         const f=w.features['solana:signTransaction'];
         const reqs=txs.map(tx=>({transaction:new Uint8Array(tx.serialize({requireAllSignatures:false,verifySignatures:false})),account,chain:'solana:mainnet'}));
         const outs=await f.signTransaction(...reqs);
-        if(!Array.isArray(outs)||outs.length!==txs.length)throw new Error('Wallet did not return the complete batch.');
+        if(!Array.isArray(outs)||outs.length!==txs.length)throw new Error('Wallet did not return the complete signed batch.');
         return outs.map(x=>{if(!x?.signedTransaction)throw new Error('Wallet returned an unsigned batch item.');return Transaction.from(new Uint8Array(x.signedTransaction))});
       }
     };
-  }else{
-    const p=injected(); if(!p)throw new Error('Open this page inside a Solana wallet that supports batch signing.');
-    const out=await p.connect(),pk=out?.publicKey||p.publicKey;
+  }else if(p){
+    const out=await p.connect();
+    const pk=out?.publicKey||p.publicKey;
     if(!pk)throw new Error('Wallet returned no public key.');
-    if(typeof p.signAllTransactions!=='function')throw new Error('This wallet connection does not support one-prompt batch signing.');
+    if(typeof p.signAllTransactions!=='function')throw new Error('Connected wallet cannot batch-sign this distribution.');
     wallet={name:'Injected Solana Wallet',publicKey:new PublicKey(pk.toString()),signAllTransactions:txs=>p.signAllTransactions(txs)};
+  }else{
+    setStatus('OPENING JUPITER MOBILE…\nApprove wallet connection only. No transaction is being sent yet.','warn');
+    const mod=await import('/revive-launch/jupiter-mobile.js?v=20260926-rviv-distribution-v2');
+    mod.resetJupiterMobileConnectionState?.();
+    const adapter=await mod.getJupiterMobileAdapter();
+    const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Jupiter Mobile did not connect within 25 seconds.')),25000));
+    await Promise.race([adapter.connect(),timeout]);
+    if(!adapter.publicKey)throw new Error('Jupiter Mobile connected but returned no public key.');
+    if(typeof adapter.signAllTransactions!=='function')throw new Error('Jupiter Mobile connected, but this wallet adapter does not expose batch signing.');
+    wallet={
+      name:'Jupiter Mobile',
+      publicKey:new PublicKey(adapter.publicKey.toString()),
+      signAllTransactions:txs=>adapter.signAllTransactions(txs)
+    };
   }
+
   if(!wallet.publicKey.equals(MEMBER)){const bad=wallet.publicKey.toBase58();wallet=null;throw new Error('Wrong wallet connected: '+bad)}
-  $('#connect').textContent='Connected '+short(MEMBER.toBase58());$('#connect').disabled=true;$('#preflight').disabled=false;
+  $('#connect').textContent='Connected '+short(MEMBER.toBase58());
+  $('#connect').disabled=true;
+  $('#preflight').disabled=false;
 }
 async function buildPlan(){
   const genesis=await connection.getGenesisHash(); if(genesis!==MAINNET_GENESIS)throw new Error('Mainnet-beta RPC check failed.');
