@@ -5,12 +5,14 @@ import {CollectFeeMode,CpAmm} from '@meteora-ag/cp-amm-sdk';
 import BN from 'bn.js';
 
 const RPC=process.env.SOLANA_RPC_URL?.trim()||clusterApiUrl('devnet');
-if(/mainnet/i.test(RPC))throw new Error('MAINNET RPC FORBIDDEN');
+const DEVNET_GENESIS_HASH='EtWTRABZaYq6iMfeYKouRu166VU2xqa1';
 const e=JSON.parse(fs.readFileSync('artifacts/revive-direct-damm-v2-devnet.json','utf8'));
 if(e.mainnetExecution!==false||e.canonicalMainnetRvivTouched!==false)throw new Error('network safety evidence failed');
 if(e.devnetPriceSolPerRviv!==0.000045||e.mainnetPrice!==null)throw new Error('price evidence drift');
 
 const connection=new Connection(RPC,'confirmed');
+const genesisHash=await connection.getGenesisHash();
+if(genesisHash!==DEVNET_GENESIS_HASH)throw new Error('DEVNET RPC REQUIRED genesis='+genesisHash);
 const cpAmm=new CpAmm(connection);
 const mintKey=new PublicKey(e.mockExistingMint);
 const poolKey=new PublicKey(e.pool);
