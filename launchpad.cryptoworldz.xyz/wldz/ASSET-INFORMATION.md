@@ -5,12 +5,14 @@
 **Ticker:** WLDZ  
 **Decimals:** 6  
 **Maximum supply:** 100,000,000 WLDZ  
-**Current on-chain supply (2026-09-23):** 99,999,951.002722 WLDZ  
+**Current indexed supply (2026-09-25):** 99,999,951.002722 WLDZ  
 **Mint authority:** Revoked  
 **Freeze authority:** Revoked  
 **DEX liquidity:** Meteora DAMM V2  
 **Canonical pool:** `GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ`  
-**Pool fee:** 2% quote-side trading fee.
+**Pool fee:** 2% quote-side trading fee  
+**Dynamic fee:** Disabled  
+**Launch LP position:** 100% permanently locked
 
 ## Official identity
 
@@ -18,37 +20,51 @@ WORLDZ (WLDZ) is the canonical WorldzLaunchPad token on Solana, powering the Cry
 
 ## Official links
 
-- WorldzLaunchPad: https://launchpad.cryptoworldz.xyz/
 - WORLDZ token page: https://launchpad.cryptoworldz.xyz/wldz/
+- Verification page: https://launchpad.cryptoworldz.xyz/wldz/verify/
+- WorldzLaunchPad: https://launchpad.cryptoworldz.xyz/
 - CryptoWorldz: https://cryptoworldz.xyz/
 - OneWorldz: https://oneworldz.com/
 - DonateWorldz: https://donateworldz.com/
+- X: https://x.com/CryptoWorldzX
 - Telegram: https://t.me/CryptoWLDZ
-- Solscan: https://solscan.io/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U
+- Meteora pool: https://www.meteora.ag/dammv2/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ
 - Jupiter: https://jup.ag/tokens/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U
+- Jupiter VRFD: https://verified.jup.ag/dashboard/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U
+- Phantom: https://phantom.com/tokens/solana/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U
+- Solscan: https://solscan.io/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U
+- GeckoTerminal: https://www.geckoterminal.com/solana/pools/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ
+- Birdeye: https://birdeye.so/solana/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U
 
 ## Machine-readable data
 
+- Canonical manifest: https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json
 - Canonical metadata: https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json
+- Platform submission pack: https://launchpad.cryptoworldz.xyz/wldz/platform-submission-pack.json
 - Solana token list: https://launchpad.cryptoworldz.xyz/tokenlist.json
-- Circulating/total/max supply: https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.json
+- Distribution: https://launchpad.cryptoworldz.xyz/wldz/distribution.json
+- Fees: https://launchpad.cryptoworldz.xyz/wldz/fees.json
+- Live supply JSON: https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php
+- Live supply plain text: https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php?format=plain
 - Logo: https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg
 
-## Allocation master
+## Canonical 100M allocation
 
-100,000,000 WLDZ allocation:
-- JayJayTeamDev — 8%
-- Initial launch LP — 15%
-- Staged LP reserve — 20%
-- Legacy / Purple Diamond Handz snapshot pool — 5%
-- First 100 WorldzLaunchPad public launches — 10%
-- OneWorldz / Charity Impact — 10%
-- Worldz Treasury — 10%
-- General Reserve — 5%
-- Team Reserve — 5%
-- Dev City verified wallets — 5.4%
-- Community / Ecosystem / Growth — 1.6%
-- Operations / Security / Infrastructure — 5%
+- JayJayTeamDev — 8% — 8,000,000 WLDZ
+- Initial live liquidity — 15% — 15,000,000 WLDZ
+- Staged liquidity reserve — 20% — 20,000,000 WLDZ
+- Legacy Purple Diamond Handz — 5% — 5,000,000 WLDZ
+- First 100 verified WorldzLaunchPad launches — 10% — 10,000,000 WLDZ
+- OneWorldz charity impact — 10% — 10,000,000 WLDZ
+- Worldz Treasury — 10% — 10,000,000 WLDZ
+- General Reserve — 5% — 5,000,000 WLDZ
+- Stepper — 1% — 1,000,000 WLDZ
+- Future team reserve — 4% — 4,000,000 WLDZ
+- Dev City verified wallets — 5% — 5,000,000 WLDZ
+- Community / Ecosystem / Growth — 2% — 2,000,000 WLDZ
+- Operations / Security / Infrastructure — 5% — 5,000,000 WLDZ
+
+**Total: 100% — 100,000,000 WLDZ.**
 
 ## Ecosystem relationship
 
@@ -71,14 +87,19 @@ Use the following identity for token directories, DEX interfaces, wallets, explo
   "symbol": "WLDZ",
   "decimals": 6,
   "maxSupply": 100000000,
-  "currentSupply": 99999951.002722,
+  "currentIndexedSupply": 99999951.002722,
   "website": "https://launchpad.cryptoworldz.xyz/wldz/",
+  "verification": "https://launchpad.cryptoworldz.xyz/wldz/verify/",
   "logo": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
+  "x": "https://x.com/CryptoWorldzX",
   "telegram": "https://t.me/CryptoWLDZ",
   "ecosystem": "CryptoWorldz",
   "launchpad": "WorldzLaunchPad",
+  "dex": "Meteora DAMM V2",
   "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
-  "poolFee": "2%"
+  "poolFee": "2%",
+  "dynamicFee": false,
+  "lpLock": "100% permanent"
 }
 ```
 
