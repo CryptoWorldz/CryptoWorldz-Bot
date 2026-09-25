@@ -161,10 +161,29 @@ async function buildPlan(){
  if(feeReply.value==null)fail('Could not calculate Solana fee.');
  const fee=BigInt(feeReply.value);
  const before=BigInt(await connection.getBalance(memberKey,'confirmed'));
- const sim=await connection.simulateTransaction(tx,{sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed'});
- if(sim.value.err){
-  const logs=(sim.value.logs||[]).slice(-8).join('\n');
-  fail('STOP: live dry-run failed. Nothing signed.\n'+JSON.stringify(sim.value.err)+(logs?'\n'+logs:''));
+ const wire=tx.serialize({requireAllSignatures:false,verifySignatures:false}).toString('base64');
+ const simResp=await fetch(RPC,{
+  method:'POST',
+  headers:{'content-type':'application/json'},
+  body:JSON.stringify({
+   jsonrpc:'2.0',
+   id:1,
+   method:'simulateTransaction',
+   params:[wire,{
+    encoding:'base64',
+    sigVerify:false,
+    replaceRecentBlockhash:true,
+    commitment:'confirmed'
+   }]
+  })
+ });
+ const simEnv=await simResp.json();
+ if(!simResp.ok||simEnv.error)fail('STOP: live dry-run RPC failed. Nothing signed.\n'+JSON.stringify(simEnv.error||simResp.status));
+ const sim=simEnv.result?.value;
+ if(!sim)fail('STOP: live dry-run returned no result. Nothing signed.');
+ if(sim.err){
+  const logs=(sim.logs||[]).slice(-8).join('\n');
+  fail('STOP: live dry-run failed. Nothing signed.\n'+JSON.stringify(sim.err)+(logs?'\n'+logs:''));
  }
  const net=gross-fee;
  lastPlan={d,connection,tx,latest,rows,gross,fee,net,before,msKey,memberKey,currentCollector,newTxPda,newProposalPda,bytes};
