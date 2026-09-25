@@ -1,0 +1,54 @@
+name: WLDZ Live State Safety Guard
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "launchpad.cryptoworldz.xyz/wldz/**"
+      - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
+      - ".github/workflows/wldz-live-state-guard.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify canonical live WLDZ state
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const cfg=JSON.parse(fs.readFileSync('launchpad.cryptoworldz.xyz/wldz/launch-config.json','utf8'));
+          const supply=JSON.parse(fs.readFileSync('launchpad.cryptoworldz.xyz/wldz/circulating-supply.json','utf8'));
+          const plan=JSON.parse(fs.readFileSync('worldzpad-mainnet/wldz-one-sided-launch.candidate.json','utf8'));
+          const A=(x,m)=>{if(!x)throw new Error(m)};
+          A(cfg.token.mint==='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U','canonical mint drift');
+          A(cfg.launch.poolAddress==='GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ','live pool drift');
+          A(cfg.launch.baseAmountTokens===15000000,'live launch amount drift');
+          A(cfg.launch.permanentLock===true&&cfg.launch.permanentLockPercent===100,'permanent lock drift');
+          A(cfg.execution.launchExecuted===true&&cfg.execution.broadcasted===true,'live execution state missing');
+          A(cfg.execution.duplicateExecutionDisabled===true,'duplicate execution guard disabled');
+          A(cfg.execution.publicCreatorGate===false,'public creator gate unexpectedly open');
+          A(Number(supply.circulatingSupply)===15000000,'circulating supply disclosure drift');
+          A(Number(supply.totalSupply)===99999951.002722,'on-chain total supply disclosure drift');
+          A(plan.status==='LIVE_EXECUTED__DO_NOT_REEXECUTE','historical launch plan not fail-closed');
+          A(plan.executionEnabled===false&&plan.duplicateExecutionProhibited===true,'historical launch execution guard drift');
+          console.log('WLDZ_LIVE_STATE_GUARD=PASS launch=EXECUTED duplicate_execution=DISABLED lp_lock=100%');
+          NODE
+      - name: Prove obsolete launch builders stay retired
+        run: |
+          test ! -e worldzpad-mainnet/scripts/build-wldz-owner-authorized-batch.mjs
+          test ! -e worldzpad-mainnet/scripts/build-wldz-squads-meteora.mjs
+          test ! -e worldzpad-mainnet/scripts/build-wldz-squads-proposal.mjs
+          test ! -e launchpad.cryptoworldz.xyz/wldz/proposal.js
+          test ! -d launchpad.cryptoworldz.xyz/worldz-now
+          test ! -d launchpad.cryptoworldz.xyz/worldz-now-v4
+          test ! -d launchpad.cryptoworldz.xyz/worldz-now-v5
+          test ! -d launchpad.cryptoworldz.xyz/worldz-now-v6
