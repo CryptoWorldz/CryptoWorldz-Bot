@@ -29,7 +29,7 @@ jobs:
           cat > runtime-diagnostic.cjs <<'NODE'
           const { chromium } = require('playwright');
           (async()=>{
-            const url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v=runtime-diagnostic-10';
+            const url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v=runtime-diagnostic-11';
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:412,height:915}});
             const messages=[];
@@ -47,6 +47,8 @@ jobs:
             if(!liveHtml.includes('waitForSignature')) throw new Error('signature-status recovery patch is not live');
             if(!liveHtml.includes('getSignatureStatuses')) throw new Error('signature-status polling is not live');
             if(!liveHtml.includes('rviv-signed-batch')) throw new Error('signed-batch recovery marker is not live');
+            if(!liveHtml.includes('ONE WALLET APPROVAL — FINISH 70M RVIV DISTRIBUTION')) throw new Error('one-approval resume UI is not live');
+            if(!liveHtml.includes("$('#preflight').click()")) throw new Error('automatic preflight is not live');
             console.log('LIVE_SIGNATURE_RECOVERY_PATCH=PASS');
             await page.waitForTimeout(12000);
 
