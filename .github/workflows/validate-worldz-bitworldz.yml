@@ -3,7 +3,7 @@ name: Validate BitWorldz OmniBTC
 on:
   push:
     branches:
-      - bitworldz-omnibtc-2026-09-25
+      - bitworldz-build-2026-09-25
     paths:
       - 'worldzpad-omnichain/bitworldz/**'
       - 'scripts/validate_worldz_bitworldz.py'
