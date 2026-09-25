@@ -29,7 +29,7 @@ jobs:
           cat > runtime-diagnostic.cjs <<'NODE'
           const { chromium } = require('playwright');
           (async()=>{
-            const url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v=runtime-diagnostic-9';
+            const url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v=runtime-diagnostic-10';
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:412,height:915}});
             const messages=[];
@@ -44,8 +44,10 @@ jobs:
             const liveHtml=await page.content();
             if(!liveHtml.includes('prepareFreshSigningBatch')) throw new Error('fresh-signing-batch patch is not live');
             if(!liveHtml.includes('plan=await prepareFreshSigningBatch(plan)')) throw new Error('execute path is not using fresh-signing-batch patch');
-            if(!liveHtml.includes('Do not burn blockhash lifetime on a second signed simulation here.')) throw new Error('stale signed-simulation removal is not live');
-            console.log('LIVE_BLOCKHASH_PATCH=PASS');
+            if(!liveHtml.includes('waitForSignature')) throw new Error('signature-status recovery patch is not live');
+            if(!liveHtml.includes('getSignatureStatuses')) throw new Error('signature-status polling is not live');
+            if(!liveHtml.includes('rviv-signed-batch')) throw new Error('signed-batch recovery marker is not live');
+            console.log('LIVE_SIGNATURE_RECOVERY_PATCH=PASS');
             await page.waitForTimeout(12000);
 
             console.log('MARKER='+await page.evaluate(()=>window.__REVIVE_DISTRIBUTION_WALLET__||'MISSING'));
