@@ -207,7 +207,7 @@ const vaultCreateIx=squads.instructions.vaultTransactionCreate({
   vaultIndex:VAULT_INDEX,
   ephemeralSigners:1,
   transactionMessage:innerTransactionMessage,
-  memo:'REVIVE direct DAMM v2 existing-mint launch',
+  // No memo: keep the VaultTransactionCreate outer transaction below Solana's 1232-byte limit.
 });
 const proposalCreateIx=squads.instructions.proposalCreate({
   multisigPda:MULTISIG,
@@ -220,7 +220,7 @@ const approveIx=squads.instructions.proposalApprove({
   multisigPda:MULTISIG,
   transactionIndex,
   member:JAY,
-  memo:'JayJayTeamDev owner approval',
+  // No memo: minimum-size approval path.
 });
 const {accountMetas,lookupTableAccounts}=await squads.utils.accountsForTransactionExecute({
   connection,
