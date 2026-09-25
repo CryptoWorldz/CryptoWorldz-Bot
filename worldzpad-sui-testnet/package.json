@@ -1,5 +1,5 @@
 {
-  "name": "worldz-sui-testnet-proof",
+  "name": "worldz-sui-native-proof",
   "private": true,
   "type": "module",
   "scripts": {
@@ -7,6 +7,6 @@
     "publish-proof": "node scripts/01_publish_testnet_proof.mjs"
   },
   "dependencies": {
-    "@mysten/sui": "2.31.3"
+    "@mysten/sui": "2.32.0"
   }
 }

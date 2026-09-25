@@ -1,7 +1,7 @@
 import { createDAppKit } from 'https://esm.sh/@mysten/dapp-kit-core@1.6.31?bundle';
 import 'https://esm.sh/@mysten/dapp-kit-core@1.6.31/web?bundle';
-import { SuiGrpcClient } from 'https://esm.sh/@mysten/sui@2.31.3/grpc?bundle';
-import { Transaction } from 'https://esm.sh/@mysten/sui@2.31.3/transactions?bundle';
+import { SuiGrpcClient } from 'https://esm.sh/@mysten/sui@2.32.0/grpc?bundle';
+import { Transaction } from 'https://esm.sh/@mysten/sui@2.32.0/transactions?bundle';
 
 const DEVNET_GRPC='https://fullnode.devnet.sui.io:443';
 const COIN_REGISTRY='0xc';

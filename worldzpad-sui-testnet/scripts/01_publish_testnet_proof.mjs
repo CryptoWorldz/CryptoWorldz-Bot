@@ -35,7 +35,7 @@ for(let i=0;i<12;i++){
   if(balance>0n)break;
   await new Promise(r=>setTimeout(r,3000));
 }
-if(balance<=0n)throw new Error('testnet faucet request did not produce spendable SUI');
+if(balance<=0n)throw new Error('devnet faucet request did not produce spendable SUI');
 
 const publishTx=new Transaction();
 const [upgradeCap]=publishTx.publish({modules:bytecode.modules,dependencies:bytecode.dependencies});
@@ -94,7 +94,7 @@ const [fullSupply]=initTx.moveCall({
     initTx.object('0xc'),
     initTx.pure.u8(decimals),
     initTx.pure.string('WZSUI'),
-    initTx.pure.string('Worldz Sui Testnet Proof'),
+    initTx.pure.string('Worldz Sui Devnet Proof'),
     initTx.pure.string('Disposable fixed-supply Worldz Sui native adapter proof'),
     initTx.pure.string('https://suiworldz.xyz/hero.jpg'),
     initTx.pure.u64(rawSupply),
@@ -122,7 +122,7 @@ if(observedRaw!==rawSupply)throw new Error('fixed supply balance mismatch expect
 const proof={
   proof:'WORLDZ_SUI_NATIVE_DEVNET_ONCHAIN',
   network:'sui-devnet',
-  sdk:'@mysten/sui@2.31.3',
+  sdk:'@mysten/sui@2.32.0',
   packageId,
   coinType,
   publisherAddress:address,
