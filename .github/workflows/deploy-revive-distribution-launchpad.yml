@@ -42,118 +42,101 @@ jobs:
           out.parent.mkdir(parents=True,exist_ok=True)
           t=src.read_text()
 
-          # Run from the WorldzLaunchPad origin and use the LaunchPad's proven
-          # Jupiter Mobile/Reown bridge and shared Solana RPC.
+          # LaunchPad origin + shared mainnet RPC.
           t=t.replace("const RPC='/revive-launch/rpc.php';",
                       "const RPC='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';")
-          t=t.replace("'/revive-launch/jupiter-mobile.js?v=20260926-rviv-distribution-v2'",
-                      "'/mint/jupiter-mobile.js?v=20260926-rviv-distribution-launchpad-v1'")
 
-          # Replace only wallet connection plumbing. Distribution amounts,
-          # destinations and safety gates remain unchanged.
+          # Replace the old hidden Jupiter React bridge with Reown's official
+          # framework-agnostic AppKit + Solana adapter.
+          t=t.replace(
+              "import {getWallets} from 'https://esm.sh/@wallet-standard/app@1.1.0?bundle';",
+              "import {createAppKit} from 'https://esm.sh/@reown/appkit@1.8.24?bundle';\n"
+              "import {SolanaAdapter} from 'https://esm.sh/@reown/appkit-adapter-solana@1.8.24?bundle';\n"
+              "import {solana} from 'https://esm.sh/@reown/appkit@1.8.24/networks?bundle';"
+          )
+
+          init_marker="const connection=new Connection(RPC,'confirmed');"
+          init_code=r"""const connection=new Connection(RPC,'confirmed');
+          const REOWN_PROJECT_ID='e3d5fc46a07eb8ecb162ee048625348e';
+          const worldzSolanaAdapter=new SolanaAdapter({});
+          const worldzAppKit=createAppKit({
+            adapters:[worldzSolanaAdapter],
+            networks:[solana],
+            projectId:REOWN_PROJECT_ID,
+            metadata:{
+              name:'WorldzLaunchPad',
+              description:'WorldzLaunchPad™ • REVIVE $RVIV owner distribution',
+              url:'https://launchpad.cryptoworldz.xyz',
+              icons:[]
+            },
+            themeMode:'dark',
+            features:{analytics:false,email:false,socials:[]}
+          });
+          let worldzAccount={};
+          let worldzProvider=null;
+          worldzAppKit.subscribeAccount(state=>{worldzAccount=state||{};});
+          worldzAppKit.subscribeProviders(state=>{worldzProvider=state?.solana||null;});
+          window.__REVIVE_DISTRIBUTION_WALLET__='WORLDZ_APPKIT_DIRECT_V1';"""
+          assert init_marker in t
+          t=t.replace(init_marker,init_code,1)
+
           replacement=r"""async function connectWallet(){
-            let list=[],jup=null,lastErr=null;
-            for(let i=0;i<30;i++){
-              list=standardCandidates();
-              jup=[window?.jupiter?.solana,window?.jupiter,window?.solana?.isJupiter?window.solana:null]
-                .find(p=>p&&typeof p.connect==='function'&&typeof p.signTransaction==='function')||null;
-              if(list.length||jup)break;
-              await sleep(200);
+            setStatus('WORLDZLAUNCHPAD WALLET LOGIN…\nChoose your Solana wallet in the WorldzLaunchPad connection window. No transaction is being sent.','warn');
+
+            if(!(worldzAccount?.isConnected&&worldzAccount?.address)){
+              await worldzAppKit.open();
+              for(let i=0;i<240;i++){
+                if(worldzAccount?.isConnected&&worldzAccount?.address)break;
+                await sleep(500);
+              }
             }
 
-            const ordered=[
-              ...list.filter(w=>/jupiter/i.test(String(w.name||''))),
-              ...list.filter(w=>!/jupiter/i.test(String(w.name||'')))
-            ];
-            for(const w of ordered){
-              try{
-                const out=await w.features['standard:connect'].connect();
-                const account=(out?.accounts||w.accounts||[])[0];
-                if(!account)continue;
-                const feature=w.features['solana:signTransaction'];
-                wallet={
-                  name:w.name||'Wallet Standard',
-                  publicKey:new PublicKey(account.address),
-                  async signAllTransactions(txs){
-                    const reqs=txs.map(tx=>({
-                      transaction:new Uint8Array(tx.serialize({requireAllSignatures:false,verifySignatures:false})),
-                      account,chain:'solana:mainnet'
-                    }));
-                    const signed=await feature.signTransaction(...reqs);
-                    if(!Array.isArray(signed)||signed.length!==txs.length)throw new Error('Wallet did not return the complete signed batch.');
-                    return signed.map(x=>{
-                      if(!x?.signedTransaction)throw new Error('Wallet returned an unsigned batch item.');
-                      return Transaction.from(new Uint8Array(x.signedTransaction));
-                    });
-                  }
-                };
-                break;
-              }catch(e){lastErr=e}
+            if(!(worldzAccount?.isConnected&&worldzAccount?.address)){
+              throw new Error('WorldzLaunchPad wallet login was not completed.');
             }
 
-            if(!wallet&&jup){
-              try{
-                const out=await jup.connect();
-                const pk=out?.publicKey||jup.publicKey;
-                if(!pk)throw new Error('Jupiter connected but returned no public key.');
-                wallet={
-                  name:'Jupiter In-App Wallet',
-                  publicKey:new PublicKey(pk.toString()),
-                  async signAllTransactions(txs){
-                    if(typeof jup.signAllTransactions==='function')return jup.signAllTransactions(txs);
-                    const signed=[];
-                    for(const tx of txs)signed.push(await jup.signTransaction(tx));
-                    return signed;
-                  }
-                };
-              }catch(e){lastErr=e}
+            const address=String(worldzAccount.address);
+            if(address!==MEMBER.toBase58()){
+              try{await worldzAppKit.disconnect();}catch{}
+              throw new Error('Wrong wallet connected: '+address);
             }
 
-            if(!wallet){
-              try{
-                setStatus('OPENING JUPITER MOBILE…\\nApprove wallet connection only. No transaction is being sent yet.','warn');
-                const mod=await import('/mint/jupiter-mobile.js?v=20260926-rviv-distribution-launchpad-v1');
-                mod.resetJupiterMobileConnectionState?.();
-                const adapter=await mod.getJupiterMobileAdapter();
-                const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Jupiter Mobile did not connect within 25 seconds.')),25000));
-                await Promise.race([adapter.connect(),timeout]);
-                if(!adapter.publicKey)throw new Error('Jupiter Mobile connected but returned no public key.');
-                wallet={
-                  name:'Jupiter Mobile',
-                  publicKey:new PublicKey(adapter.publicKey.toString()),
-                  async signAllTransactions(txs){
-                    if(typeof adapter.signAllTransactions==='function')return adapter.signAllTransactions(txs);
-                    const signed=[];
-                    for(const tx of txs)signed.push(await adapter.signTransaction(tx));
-                    return signed;
-                  }
-                };
-              }catch(e){lastErr=e}
+            const provider=worldzProvider||worldzAppKit.getWalletProvider?.();
+            if(!provider)throw new Error('WorldzLaunchPad connected the wallet but no Solana signing provider was returned.');
+            if(typeof provider.signAllTransactions!=='function'){
+              throw new Error('Connected Solana provider does not support transaction batch signing.');
             }
 
-            if(!wallet)throw new Error('Wallet connection failed: '+(lastErr?.message||lastErr||'No compatible wallet detected.'));
-            if(!wallet.publicKey.equals(MEMBER)){
-              const bad=wallet.publicKey.toBase58();
-              wallet=null;
-              throw new Error('Wrong wallet connected: '+bad);
-            }
-            $('#connect').textContent='Connected '+short(MEMBER.toBase58());
+            wallet={
+              name:'WorldzLaunchPad AppKit',
+              publicKey:new PublicKey(address),
+              signAllTransactions:txs=>provider.signAllTransactions(txs)
+            };
+
+            $('#connect').textContent='Connected '+short(address);
             $('#connect').disabled=true;
             $('#preflight').disabled=false;
-            window.__REVIVE_DISTRIBUTION_ORIGIN__='WORLDZLAUNCHPAD';
+            setStatus('WORLDZLAUNCHPAD WALLET CONNECTED ✅\n'+short(address)+'\nRun FINAL LIVE PREFLIGHT.','good');
           }"""
 
           pattern=r"async function connectWallet\(\)\{.*?\n\}\nasync function buildPlan\(\)\{"
           t,n=re.subn(pattern,replacement+"\nasync function buildPlan(){",t,count=1,flags=re.S)
           assert n==1, 'connectWallet replacement failed'
 
-          # Make it unmistakable that this is the LaunchPad-hosted owner console.
-          t=t.replace('<p class="sub">Approved post-launch distribution — exact 200M model reconciliation</p>',
-                      '<p class="sub">WorldzLaunchPad™ owner console • Approved post-launch distribution • exact 200M reconciliation</p>')
+          t=t.replace(
+              '<p class="sub">Approved post-launch distribution — exact 200M model reconciliation</p>',
+              '<p class="sub">WorldzLaunchPad™ owner console • Approved post-launch distribution • exact 200M reconciliation</p>'
+          )
+          t=t.replace(
+              'Connect JayJayTeamDev using Jupiter Mobile / Wallet Standard. No transaction will be built until the live 170,000,000 RVIV treasury balance is verified.',
+              'Connect JayJayTeamDev directly through WorldzLaunchPad. No transaction will be built until the live 170,000,000 RVIV treasury balance is verified.'
+          )
 
           out.write_text(t)
-          assert "WORLDZLAUNCHPAD" in t
-          assert "/mint/jupiter-mobile.js" in t
+          assert "WORLDZ_APPKIT_DIRECT_V1" in t
+          assert "@reown/appkit@1.8.24" in t
+          assert "worldzAppKit.open()" in t
+          assert "/mint/jupiter-mobile.js" not in t
           assert "70,000,000 RVIV" in t
           assert "100,000,000 RVIV" in t
           print('REVIVE_DISTRIBUTION_LAUNCHPAD_BUILD=PASS')
@@ -192,7 +175,9 @@ jobs:
                   with urllib.request.urlopen(req,timeout=20) as r:
                       body=r.read().decode('utf-8','ignore')
                   assert 'WORLDZLAUNCHPAD' in body
-                  assert '/mint/jupiter-mobile.js' in body
+                  assert 'WORLDZ_APPKIT_DIRECT_V1' in body
+                  assert '@reown/appkit@1.8.24' in body
+                  assert '/mint/jupiter-mobile.js' not in body
                   assert 'Connect JayJayTeamDev Wallet' in body
                   assert '70,000,000 RVIV' in body
                   assert '100,000,000 RVIV' in body
