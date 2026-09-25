@@ -5,6 +5,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+def load(rel):
+    return json.loads((ROOT / rel).read_text())
+
 spec = json.loads((ROOT / "worldzpad-omnichain/bitworldz/bitworldz.v1.json").read_text())
 registry = json.loads((ROOT / "worldzpad-omnichain/bitworldz/btc-asset-registry.v1.json").read_text())
 fee = json.loads((ROOT / "worldzpad-omnichain/fee-policy.v1.json").read_text())
