@@ -62,14 +62,15 @@ if (genesis !== MAINNET_GENESIS) throw new Error('MAINNET RPC REQUIRED genesis='
 
 const treasury = new PublicKey(cfg.token.treasuryVault);
 const rvivMint = new PublicKey(cfg.token.canonicalMint);
-const treasuryRvivAta = getAssociatedTokenAddressSync(rvivMint, treasury, false, TOKEN_PROGRAM_ID);
+// The REVIVE treasury is Squads vault index 0, an off-curve PDA controlled by the multisig.
+const treasuryRvivAta = getAssociatedTokenAddressSync(rvivMint, treasury, true, TOKEN_PROGRAM_ID);
 if (treasuryRvivAta.toBase58() !== cfg.token.treasuryTokenAccount) {
   throw new Error(
     'TREASURY ATA DRIFT expected=' + cfg.token.treasuryTokenAccount +
     ' derived=' + treasuryRvivAta.toBase58(),
   );
 }
-const treasuryWsolAta = getAssociatedTokenAddressSync(NATIVE_MINT, treasury);
+const treasuryWsolAta = getAssociatedTokenAddressSync(NATIVE_MINT, treasury, true);
 
 const [sponsorBalance, treasuryBalance, treasuryRvivBalance, treasuryWsolInfo] = await Promise.all([
   connection.getBalance(FEE_SPONSOR, 'confirmed'),
