@@ -263,14 +263,53 @@ async function prepareFreshSigningBatch(p){
   p.latest=latest;
   return p;
 }
+async function waitForSignature(sig,label,latest){
+  // Solana's blockheight-expiry exception can race with a transaction that has
+  // actually landed. The previous REVIVE run proved that: the UI said expired
+  // while the signature was already finalized successfully. Trust chain status,
+  // not the local expiry exception.
+  const query=async()=>{
+    const out=await rpc('getSignatureStatuses',[[sig],{searchTransactionHistory:true}]);
+    return out?.value?.[0]||null;
+  };
+  const deadline=Date.now()+65_000;
+  let expiredSeen=false;
+  while(Date.now()<deadline){
+    const st=await query();
+    if(st){
+      if(st.err)throw new Error(label+' failed on-chain: '+JSON.stringify(st.err)+' Signature: '+sig);
+      if(st.confirmationStatus==='confirmed'||st.confirmationStatus==='finalized')return sig;
+    }
+    const height=await connection.getBlockHeight('confirmed').catch(()=>null);
+    if(height!==null&&height>latest.lastValidBlockHeight){
+      expiredSeen=true;
+      // Give RPC history a short grace period before declaring a genuinely
+      // expired transaction. A finalized/confirmed status always wins.
+      for(let i=0;i<20;i++){
+        await sleep(500);
+        const late=await query();
+        if(late){
+          if(late.err)throw new Error(label+' failed on-chain: '+JSON.stringify(late.err)+' Signature: '+sig);
+          if(late.confirmationStatus==='confirmed'||late.confirmationStatus==='finalized')return sig;
+        }
+      }
+      break;
+    }
+    await sleep(500);
+  }
+  throw new Error(
+    label+(expiredSeen?' was not found on-chain after the blockhash validity window.':' confirmation timed out.')+
+    ' Signature: '+sig
+  );
+}
 async function sendSigned(tx,label,latest){
-  // Do not burn blockhash lifetime on a second signed simulation here.
-  // The exact instructions were already simulated during FINAL LIVE PREFLIGHT;
-  // sendRawTransaction performs Solana preflight again on the fresh signed tx.
-  const sig=await connection.sendRawTransaction(tx.serialize(),{skipPreflight:false,maxRetries:8,preflightCommitment:'confirmed'});
-  const conf=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');
-  if(conf.value.err)throw new Error(label+' failed on-chain: '+JSON.stringify(conf.value.err)+' Signature: '+sig);
-  return sig;
+  // The exact instructions were simulated during FINAL LIVE PREFLIGHT.
+  // Broadcast once, then poll the actual signature status. Do not let a local
+  // blockheight race falsely report failure for a transaction that finalized.
+  const sig=await connection.sendRawTransaction(tx.serialize(),{
+    skipPreflight:false,maxRetries:12,preflightCommitment:'confirmed'
+  });
+  return await waitForSignature(sig,label,latest);
 }
 async function finalVerify(){
   const sourceAta=getAssociatedTokenAddressSync(MINT,VAULT,true,TOKEN_PROGRAM_ID);
@@ -316,17 +355,37 @@ $('#execute').addEventListener('click',async()=>{
     const approvalSeconds=(Date.now()-approvalStarted)/1000;
     if(approvalSeconds>55)throw new Error('Wallet approval took '+approvalSeconds.toFixed(1)+' seconds. Fresh blockhash safety window exceeded; nothing was broadcast. Run FINAL LIVE PREFLIGHT again.');
     if(!Array.isArray(signed)||signed.length!==plan.allTxs.length)throw new Error('Incomplete signed batch returned by wallet.');
+    // Keep a recoverable copy of the already-approved signed batch for this
+    // browser session. Never ask for a fresh approval merely because an RPC
+    // confirmation call races or times out.
+    try{
+      sessionStorage.setItem('rviv-signed-batch',JSON.stringify({
+        blockhash:plan.latest.blockhash,
+        lastValidBlockHeight:plan.latest.lastValidBlockHeight,
+        txs:signed.map(tx=>Buffer.from(tx.serialize()).toString('base64'))
+      }));
+    }catch{}
+
     const sigs=[];let n=0;
-    for(let i=0;i<plan.prepTxs.length;i++){
-      n++;setStatus('Approved ✅\nExecuting '+n+'/'+signed.length+': recipient account preparation…');
-      sigs.push(await sendSigned(signed[i],'Recipient accounts '+(i+1),plan.latest));
-    }
     const setupPos=plan.prepTxs.length;
-    n++;setStatus('Approved ✅\nExecuting '+n+'/'+signed.length+': Squads create + propose + approve…');
-    sigs.push(await sendSigned(signed[setupPos],'Squads distribution approval',plan.latest));
-    n++;setStatus('Approved ✅\nExecuting '+n+'/'+signed.length+': atomic 70M RVIV vault distribution…');
-    sigs.push(await sendSigned(signed[setupPos+1],'RVIV 70M distribution',plan.latest));
+
+    // Recipient account prep transactions are independent, so broadcast them
+    // together and wait for their real chain statuses concurrently.
+    if(plan.prepTxs.length){
+      setStatus('Approved ✅\nBroadcasting '+plan.prepTxs.length+' recipient-account transaction'+(plan.prepTxs.length===1?'':'s')+'…');
+      const prepSigs=await Promise.all(
+        plan.prepTxs.map((_,i)=>sendSigned(signed[i],'Recipient accounts '+(i+1),plan.latest))
+      );
+      sigs.push(...prepSigs); n+=prepSigs.length;
+    }
+
+    setStatus('Approved ✅\nExecuting Squads create + propose + approve…');
+    sigs.push(await sendSigned(signed[setupPos],'Squads distribution approval',plan.latest)); n++;
+
+    setStatus('Approved ✅\nExecuting atomic 70M RVIV vault distribution…');
+    sigs.push(await sendSigned(signed[setupPos+1],'RVIV 70M distribution',plan.latest)); n++;
     const remaining=await finalVerify();
+    try{sessionStorage.removeItem('rviv-signed-batch')}catch{}
     $('#proof').textContent='DISTRIBUTION COMPLETE ✅\nMoved: 70,000,000 RVIV\nTreasury remaining: '+remaining+' RVIV\n\nSignatures:\n'+sigs.join('\n');
     setStatus('REVIVE DISTRIBUTION COMPLETE ✅\n70,000,000 RVIV moved to the approved 8 destinations.\n100,000,000 RVIV remains reserved in treasury exactly as approved.','good');
   }catch(e){
