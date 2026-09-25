@@ -1,5 +1,5 @@
 {
-  "version": "REVIVE-LAUNCH-2026-09-25-C",
+  "version": "REVIVE-LAUNCH-2026-09-25-D",
   "status": "BUILD_ONLY__MAINNET_LAUNCH_LOCKED",
   "network": "solana-mainnet-beta",
   "token": {
@@ -195,16 +195,26 @@
       "name": "WORLDZ",
       "symbol": "WLDZ",
       "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
-      "expectedMaxSupplyTokens": 100000000,
-      "livePool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ"
+      "allocationDesignCeilingTokens": 100000000,
+      "currentOnChainSupplyTokens": 99999951.002722,
+      "circulatingSupplyTokens": 15000000,
+      "supplyDisclosure": "100M allocation design ceiling; authoritative current on-chain supply 99,999,951.002722 after mint authority revocation",
+      "livePool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+      "livePoolVenue": "METEORA_DAMM_V2",
+      "livePoolInitialWldzTokens": 15000000,
+      "permanentLockPercent": 100,
+      "mintAuthority": "REVOKED",
+      "freezeAuthority": "REVOKED",
+      "duplicateExecutionDisabled": true,
+      "publicCreatorGate": false
     },
     "requiredEvidence": {
-      "wldzPostLaunchCriticalSafetyGate": "REQUIRED_NOT_SATISFIED_BY_THIS_REVIVE_PR",
-      "worldzLaunchPadPublicBoot": "REQUIRED",
-      "legacyTenMintAuthorityAudit": "REQUIRED",
-      "worldzFeeRouterReceipts": "REQUIRED",
-      "permanentMigratedLiquidityLock": "REQUIRED",
-      "finalOwnerApproval": "REQUIRED"
+      "wldzPostLaunchCriticalSafetyGate": "SATISFIED_BY_RECONCILED_WLDZ_LIVE_STATE",
+      "worldzLaunchPadPublicBoot": "SATISFIED_BY_RECONCILED_PUBLIC_DEPLOYMENT",
+      "legacyTenMintAuthorityAudit": "STILL_REQUIRED_LIVE_READ_ONLY_PROOF",
+      "worldzFeeRouterReceipts": "STILL_REQUIRED_FOR_REVIVE",
+      "permanentMigratedLiquidityLock": "SATISFIED__WLDZ_LIVE_POOL_100_PERCENT_PERMANENT_LOCK",
+      "finalOwnerApproval": "REQUIRED_AFTER_ALL_TECHNICAL_GATES"
     },
     "prohibitedUntilAllPass": [
       "enable REVIVE public mainnet execution",
@@ -212,7 +222,9 @@
       "move launch liquidity into an executable mainnet market route",
       "open Legacy RVIV claims as part of launch execution"
     ],
-    "publicMainnetExecutionMustRemainFalse": true
+    "publicMainnetExecutionMustRemainFalse": true,
+    "reconciliationArtifact": "worldzpad-mainnet/revive/revive-worldz-main-reconciliation.v1.json",
+    "reconciledMainStateDate": "2026-09-25"
   },
   "legacyControlPolicy": {
     "authorityAuditArtifact": "worldzpad-devnet/revive-party/artifacts/legacy-authority-audit.json",
