@@ -1,0 +1,140 @@
+{
+  "version": "BITWORLDZ-OMNIBTC-2026-09-25-A",
+  "status": "PRIVATE_BUILD__RESEARCH_AND_TESTNET_PROOF_REQUIRED__MAINNET_DISABLED",
+  "name": "BitWorldz OmniBTC™",
+  "family": "BitWorldz™",
+  "components": {
+    "omniBtc": "OmniBTC™",
+    "routing": "BTCMesh™",
+    "market": "BitPair™",
+    "identity": "BTC Passport™",
+    "proof": "BitProof™"
+  },
+  "tagline": "Launch across Worldz. Price in Bitcoin. Prove exactly what Bitcoin means.",
+  "mainnetExecutionEnabled": false,
+  "purpose": "Make Bitcoin a first-class quote/settlement family across WorldzLaunchPad while preserving exact chain-local asset identity, bridge/custody disclosure and independent mainnet gates.",
+  "assetClasses": [
+    "NATIVE_BTC",
+    "BITCOIN_LAYER_BTC",
+    "WRAPPED_BTC",
+    "BRIDGED_BTC"
+  ],
+  "prohibitedClaims": [
+    "WRAPPED_OR_BRIDGED_BTC_AS_NATIVE_BTC",
+    "ONE_POOL_ACROSS_CHAINS_WITHOUT_PROVEN_INTEROPERABILITY",
+    "UNVERIFIED_1_TO_1_BACKING",
+    "HIDDEN_BRIDGE_OR_WRAP_FEE",
+    "MAINNET_READY_FROM_ANOTHER_CHAINS_PROOF"
+  ],
+  "launchModel": {
+    "type": "CHAIN_LOCAL_BITPAIR_MATRIX",
+    "rule": "Each chain/asset/venue combination is independently tested, disclosed and released.",
+    "commonSteps": [
+      "SELECT_TARGET_CHAIN",
+      "SELECT_APPROVED_BTC_ASSET",
+      "VERIFY_ASSET_PASSPORT",
+      "PREPARE_CHAIN_NATIVE_TOKEN",
+      "PREPARE_TOKEN_BTC_ASSET_MARKET",
+      "DISCLOSE_NETWORK_BRIDGE_PROTOCOL_AND_WORLDZ_FEES",
+      "SIMULATE_OR_TESTNET_PROVE",
+      "CREATE_BITPROOF",
+      "REQUEST_CHAIN_ASSET_VENUE_RELEASE",
+      "MAINNET_EXECUTION"
+    ]
+  },
+  "supportedWorldzChainTargets": [
+    "solana",
+    "xrpl",
+    "base",
+    "ethereum",
+    "bnb",
+    "sui",
+    "hyperevm",
+    "robinhood"
+  ],
+  "bitcoinExecutionResearch": [
+    {
+      "key": "stacks",
+      "assetCandidate": "sBTC",
+      "runtime": "Clarity",
+      "status": "RESEARCH__TESTNET_ADAPTER_REQUIRED",
+      "mainnetExecutionEnabled": false
+    },
+    {
+      "key": "rootstock",
+      "assetCandidate": "rBTC",
+      "runtime": "EVM",
+      "status": "RESEARCH__TESTNET_ADAPTER_REQUIRED",
+      "mainnetExecutionEnabled": false
+    },
+    {
+      "key": "bitcoin-l1",
+      "assetCandidate": "BTC",
+      "runtime": "Bitcoin Script",
+      "status": "SETTLEMENT_ONLY_BY_DEFAULT__DIRECT_LAUNCH_PRIMITIVE_NOT_ASSUMED",
+      "mainnetExecutionEnabled": false
+    }
+  ],
+  "solanaReference": {
+    "rationale": "Pump custom-pair documentation currently lists WBTC as a supported Solana pair asset, establishing a public reference for BTC-representation quote launches on Solana.",
+    "firstWorldzMilestone": "DEVNET_MOCK_BTC_QUOTE_THEN_READ_ONLY_REAL_ASSET_COMPATIBILITY",
+    "venueCandidates": [
+      "METEORA_DBC_DAMM_V2",
+      "RAYDIUM_LAUNCHLAB_OR_POOL_ADAPTER"
+    ],
+    "routeCandidate": "JUPITER_AFTER_MARKET_EXISTS",
+    "mainnetExecutionEnabled": false
+  },
+  "feePolicy": {
+    "targetGrossTraderFeeBps": 75,
+    "dynamicFee": false,
+    "worldzControlledSplitPercent": {
+      "creator": 51,
+      "referrer": 17,
+      "legacyFlywheel": 15,
+      "worldzLaunchPad": 8.5,
+      "oneWorldzImpact": 8.5
+    },
+    "externalBridgeDexAndNetworkFeesSeparate": true,
+    "hiddenBitcoinPremiumProhibited": true
+  },
+  "btcMeshSafety": {
+    "worldzCustodiesNativeBitcoin": false,
+    "worldzAcceptsPrivateKeysOrSeedPhrases": false,
+    "automaticCrossChainMovementEnabled": false,
+    "exactAssetIdentityRequired": true,
+    "redemptionPathDisclosureRequired": true,
+    "reserveOrPegModelDisclosureRequired": true,
+    "bridgeProviderDisclosureRequired": true,
+    "independentChainAssetVenueGateRequired": true
+  },
+  "requiredBitProofFields": [
+    "target_chain",
+    "launch_token_id",
+    "btc_asset_symbol",
+    "btc_asset_id",
+    "btc_asset_class",
+    "issuer_or_custody_model",
+    "bridge_or_interop_provider",
+    "redemption_route",
+    "venue",
+    "pool_or_market_id",
+    "gross_worldz_fee",
+    "external_fees",
+    "liquidity_protection",
+    "testnet_or_simulation_tx_ids",
+    "mainnet_release_id"
+  ],
+  "mainnetGates": [
+    "Verify exact BTC asset identity and decimals/precision from authoritative sources.",
+    "Verify peg/reserve/custody/signer model and redemption path.",
+    "Prove the selected launch venue accepts the BTC asset as quote asset.",
+    "Prove buy and sell execution.",
+    "Prove all fee deductions and Worldz receipts.",
+    "Prove liquidity lock or chain-native protection.",
+    "Prove bridge route separately when cross-chain onboarding is offered.",
+    "Create BitProof with transaction evidence.",
+    "Complete security review.",
+    "Receive explicit owner release for this exact chain/asset/venue combination."
+  ]
+}
