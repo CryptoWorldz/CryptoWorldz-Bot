@@ -59,7 +59,7 @@ if(pub.effects?.changedObjects){
   for(const entry of pub.effects.changedObjects){
     const objectId=Array.isArray(entry)?entry[0]:entry.objectId;
     const change=Array.isArray(entry)?entry[1]:entry;
-    const kind=change?.outputState?.$kind||change?.outputState?.kind;
+    const kind=change?.outputState;
     if(kind==='PackageWrite')packageId=objectId;
     const type=objectTypes[objectId];
     if(type?.endsWith('::worldz_token::PublisherCap'))publisherCapId=objectId;
@@ -71,11 +71,11 @@ if(!publisherCapId){
   }
 }
 if(!packageId){
-  // Package writes are the only changed entry without a Move object type.
+  // Defensive fallback for future SDK response changes: package writes have no Move object type.
   const candidates=(pub.effects?.changedObjects||[])
-    .map(x=>Array.isArray(x)?x[0]:x.objectId)
-    .filter(Boolean)
-    .filter(id=>!objectTypes[id]);
+    .filter(x=>x?.outputState==='PackageWrite')
+    .map(x=>x.objectId)
+    .filter(Boolean);
   if(candidates.length===1)packageId=candidates[0];
 }
 if(!packageId)throw new Error('published package id not found in transaction effects');
