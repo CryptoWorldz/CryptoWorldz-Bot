@@ -149,7 +149,16 @@ jobs:
         if: env.DEVNET_PAYER_SECRET_JSON == ''
         shell: bash
         run: |
-          devnet-pow -k "$DEVNET_PAYER_KEYPAIR_FILE" -u dev -c confirmed mine -d 3 --reward 0.02 --no-infer --target-lamports 100000000
+          # Devnet faucets are rate-limited. Retry instead of treating a transient faucet refusal as a REVIVE failure.
+          for attempt in 1 2 3 4 5; do
+            echo "REVIVE_DEVNET_POW_ATTEMPT=$attempt"
+            if devnet-pow -k "$DEVNET_PAYER_KEYPAIR_FILE" -u dev -c confirmed mine -d 3 --reward 0.02 --no-infer --target-lamports 100000000; then
+              exit 0
+            fi
+            sleep $((attempt * 20))
+          done
+          echo "::error::Solana devnet faucet remained rate-limited after 5 attempts."
+          exit 1
       - name: Prove disposable payer funding
         run: npm run verify-payer
       - name: Create existing-mint one-sided DAMM v2 pool, first buy, permanent lock and fee claim
