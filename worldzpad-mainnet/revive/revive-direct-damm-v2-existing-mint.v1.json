@@ -1,6 +1,6 @@
 {
-  "version": "REVIVE-DIRECT-DAMM-V2-EXISTING-MINT-2026-09-25-A",
-  "status": "DEVNET_FIXTURE_LOCKED__MAINNET_PRICE_UNSET__EXECUTION_DISABLED",
+  "version": "REVIVE-DIRECT-DAMM-V2-EXISTING-MINT-2026-09-26-B",
+  "status": "MAINNET_PRICE_OWNER_APPROVED__EXECUTION_STILL_GATED",
   "reason": "Canonical RVIV already exists with mint authority revoked. Meteora DBC pool initialization creates/signs a base mint, so REVIVE must not use the DBC token-creation path.",
   "canonicalToken": {
     "name": "REVIVE",
@@ -29,8 +29,8 @@
       "purpose": "Prove existing-mint one-sided pool mechanics, first-swap behaviour, 75-bps fee behaviour and permanent-lock evidence only."
     },
     "mainnet": {
-      "priceSolPerRviv": null,
-      "status": "UNSET__OWNER_DECISION_REQUIRED_AFTER_DEVNET_SIMULATION",
+      "priceSolPerRviv": 0.000045,
+      "status": "OWNER_APPROVED_2026-09-26__FINAL_PREFLIGHT_AND_WALLET_SIGNATURE_REQUIRED",
       "mayInheritDevnetFixtureAutomatically": false
     }
   },
@@ -73,7 +73,7 @@
   },
   "mainnetGates": {
     "enabled": false,
-    "openingPriceSelected": false,
+    "openingPriceSelected": true,
     "currentFundingPreflightRequired": true,
     "canonicalRvivBalanceProofRequired": true,
     "exactTransactionSimulationRequired": true,
