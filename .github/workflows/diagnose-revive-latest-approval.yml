@@ -1,0 +1,53 @@
+name: Diagnose REVIVE Latest Approval
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-revive-latest-approval.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect latest approval and treasury state
+        shell: python
+        run: |
+          import json, urllib.request, time
+
+          RPC='https://api.mainnet-beta.solana.com'
+          SIG='3mCuiYFGvj5S38DJ8bGj1wswpKKM3aoU8Yt3YY46fPCYkQh7wDXNMhwE2k4FdLEZiPRJSbQkH3xhCakqamgSi4u1'
+          MEMBER='Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u'
+          TREASURY_ATA='28CwdVt2y997WZqTzEuBpuwoyVYAj6JcaD4qDMzyCdtn'
+          MINT='DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R'
+
+          def rpc(method, params):
+              body=json.dumps({'jsonrpc':'2.0','id':method,'method':method,'params':params}).encode()
+              req=urllib.request.Request(RPC,data=body,headers={'Content-Type':'application/json','User-Agent':'Worldz-REVIVE-Diagnose/1.0'},method='POST')
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  raw=r.read().decode()
+              j=json.loads(raw)
+              if 'error' in j:
+                  raise RuntimeError(method+': '+json.dumps(j['error']))
+              return j.get('result')
+
+          status=rpc('getSignatureStatuses',[[SIG],{'searchTransactionHistory':True}])
+          print('LATEST_SIGNATURE_STATUS='+json.dumps(status,indent=2))
+
+          bal=rpc('getTokenAccountBalance',[TREASURY_ATA,{'commitment':'confirmed'}])
+          print('TREASURY_BALANCE='+json.dumps(bal,indent=2))
+
+          sigs=rpc('getSignaturesForAddress',[MEMBER,{'limit':20},'confirmed'])
+          print('MEMBER_RECENT_SIGNATURES='+json.dumps(sigs,indent=2))
+
+          vault='n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB'
+          vsigs=rpc('getSignaturesForAddress',[vault,{'limit':20},'confirmed'])
+          print('VAULT_RECENT_SIGNATURES='+json.dumps(vsigs,indent=2))
+
+          print('DIAGNOSE_REVIVE_LATEST_APPROVAL=PASS')
