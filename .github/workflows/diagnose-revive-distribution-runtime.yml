@@ -29,7 +29,7 @@ jobs:
           cat > runtime-diagnostic.cjs <<'NODE'
           const { chromium } = require('playwright');
           (async()=>{
-            const url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v=runtime-diagnostic-6';
+            const url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v=runtime-diagnostic-7';
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:412,height:915}});
             const messages=[];
@@ -70,14 +70,41 @@ jobs:
             });
             console.log('STATE='+JSON.stringify(state));
             console.log(messages.join('\n'));
-            await page.screenshot({path:'revive-runtime.png',fullPage:true});
 
             const hasModal=state.interesting.some(x=>/appkit|w3m/.test(x.tag)||/connect wallet|walletconnect|all wallets|scan/i.test(x.text));
-            if(!hasModal){
+            if(hasModal){
+              await page.keyboard.press('Escape').catch(()=>{});
+              await page.waitForTimeout(500);
+            }
+
+            // Run the exact production FINAL LIVE PREFLIGHT without signing.
+            // buildPlan itself does not require a wallet signature and cannot move RVIV.
+            await page.evaluate(()=>{
+              const b=document.querySelector('#preflight');
+              if(!b) throw new Error('preflight button missing');
+              b.disabled=false;
+            });
+            await page.locator('#preflight').click({timeout:10000});
+            await page.waitForFunction(()=>{
+              const s=document.querySelector('#status')?.textContent||'';
+              return s.includes('READY ✅') || s.includes('PREFLIGHT BLOCKED');
+            },{timeout:120000});
+            const preflightStatus=await page.locator('#status').textContent();
+            const proof=await page.locator('#proof').textContent();
+            console.log('PREFLIGHT_STATUS='+preflightStatus);
+            console.log('PREFLIGHT_PROOF='+proof);
+            await page.screenshot({path:'revive-runtime.png',fullPage:true});
+
+            const hasModalAgain=hasModal;
+            if(!hasModalAgain){
               console.error('RUNTIME_DIAGNOSIS=FAIL_NO_WALLET_MODAL');
+              process.exitCode=1;
+            }else if(!String(preflightStatus).includes('READY ✅')){
+              console.error('RUNTIME_DIAGNOSIS=FAIL_PREFLIGHT');
               process.exitCode=1;
             }else{
               console.log('RUNTIME_DIAGNOSIS=PASS_WALLET_MODAL_VISIBLE');
+              console.log('RUNTIME_DIAGNOSIS=PASS_EXACT_LIVE_PREFLIGHT');
             }
             await browser.close();
           })().catch(err=>{console.error(err);process.exit(1)});
