@@ -18,7 +18,7 @@ const config=JSON.parse(fs.readFileSync(path.join(root,'revive-direct-damm-v2-ex
 if(config.route.venue!=='Meteora DAMM v2')throw new Error('wrong venue');
 if(config.route.mode!=='DIRECT_CUSTOMIZABLE_POOL__EXISTING_MINT__ONE_SIDED')throw new Error('wrong route');
 if(config.pricing.devnetFixture.priceSolPerRviv!==0.000045)throw new Error('devnet fixture drift');
-if(config.pricing.mainnet.priceSolPerRviv!==null)throw new Error('mainnet price must stay unset');
+if(Number(config.pricing.mainnet.priceSolPerRviv)!==0.000045)throw new Error('owner-approved mainnet price must be 0.000045 SOL/RVIV');
 if(config.pricing.mainnet.mayInheritDevnetFixtureAutomatically!==false)throw new Error('devnet price inheritance forbidden');
 if(config.route.initialBaseLiquidityTokens!==30_000_000||config.route.initialQuoteLiquiditySol!==0)throw new Error('one-sided liquidity drift');
 if(config.route.isLockLiquidity!==true||config.route.permanentLockTargetPercent!==100)throw new Error('permanent lock target drift');
@@ -45,7 +45,7 @@ const proof={
   canonicalMint:config.canonicalToken.mint,
   devnetMockRequired:true,
   devnetPriceSolPerRviv:0.000045,
-  mainnetPrice:null,
+  mainnetPrice:0.000045,
   initialBaseTokens:30_000_000,
   initialQuoteSol:0,
   baseFeeBps:75,
@@ -62,9 +62,9 @@ const proof={
   maxSqrtPrice:MAX_SQRT_PRICE.toString(),
   isLockLiquidity:true,
   permanentLockTargetPercent:100,
-  warning:'Static SDK compatibility only. No mainnet price or execution authorization.',
+  warning:'Static SDK compatibility only. Mainnet price is owner-approved; execution still requires live preflight and wallet signature.',
   mainnetExecution:false,
 };
 fs.mkdirSync('artifacts',{recursive:true});
 fs.writeFileSync('artifacts/revive-direct-damm-v2-static.json',JSON.stringify(proof,null,2)+'\n');
-console.log('REVIVE_DIRECT_DAMM_STATIC=PASS price=0.000045 fee_bps=75 one_sided=YES permanent_lock=100 mainnet_price=UNSET');
+console.log('REVIVE_DIRECT_DAMM_STATIC=PASS price=0.000045 fee_bps=75 one_sided=YES permanent_lock=100 mainnet_price=OWNER_APPROVED execution=LOCKED_PENDING_SIGNATURE');
