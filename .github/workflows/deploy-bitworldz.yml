@@ -1,0 +1,149 @@
+name: Deploy BitWorldz
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bitworldz-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate BitWorldz contracts and public surfaces
+        run: python scripts/validate_worldz_bitworldz.py
+
+      - name: Run BitWorldz SDK self-test
+        run: node worldzpad-omnichain/bitworldz/sdk/self-test.mjs
+
+      - name: Prove mainnet remains disabled
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          spec=json.loads(Path('worldzpad-omnichain/bitworldz/bitworldz.v1.json').read_text())
+          matrix=json.loads(Path('worldzpad-omnichain/bitworldz/chain-matrix.v1.json').read_text())
+          registry=json.loads(Path('worldzpad-omnichain/bitworldz/btc-asset-registry.v1.json').read_text())
+          sub=Path('bitworldz.cryptoworldz.xyz/index.html').read_text()
+          lab=Path('launchpad.cryptoworldz.xyz/bitworldz/index.html').read_text()
+
+          assert spec['mainnetExecutionEnabled'] is False
+          assert matrix['mainnetExecutionEnabled'] is False
+          assert registry['mainnetExecutionEnabled'] is False
+          assert 'Research build' in sub
+          assert 'Mainnet execution disabled' in lab
+          assert 'wrapped or bridged BTC is never labelled native BTC' in lab
+          print('BITWORLDZ_DEPLOY_GATE=PASS mainnet=OFF')
+
+      - name: Upload BitWorldz public surfaces only
+        shell: python
+        run: |
+          import os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path, PurePosixPath
+
+          targets={
+            Path('bitworldz.cryptoworldz.xyz'): PurePosixPath('domains/bitworldz.cryptoworldz.xyz/public_html'),
+            Path('launchpad.cryptoworldz.xyz/bitworldz'): PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/bitworldz'),
+          }
+
+          def connect():
+              ftp=FTP_TLS(context=ssl._create_unverified_context())
+              ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=45)
+              ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+              ftp.prot_p()
+              ftp.set_pasv(True)
+              return ftp
+
+          def ensure(ftp, remote):
+              ftp.cwd('/')
+              for part in PurePosixPath(remote).parts:
+                  if part in ('','/'):
+                      continue
+                  try:
+                      ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part)
+                      ftp.cwd(part)
+
+          ftp=connect()
+          try:
+              for local_root, remote_root in targets.items():
+                  for local in sorted(p for p in local_root.rglob('*') if p.is_file()):
+                      rel=local.relative_to(local_root)
+                      remote=remote_root/PurePosixPath(rel.as_posix())
+                      ensure(ftp,remote.parent)
+                      with local.open('rb') as fh:
+                          ftp.storbinary('STOR '+remote.name,fh,blocksize=262144)
+                      print('BITWORLDZ_PUBLISHED',local.as_posix(),'->',remote.as_posix())
+          finally:
+              try:
+                  ftp.quit()
+              except Exception:
+                  ftp.close()
+
+          print('BITWORLDZ_UPLOAD=PASS surfaces=2')
+
+      - name: Verify BitWorldz live
+        shell: python
+        run: |
+          import time, urllib.request
+
+          expected={
+            'https://bitworldz.cryptoworldz.xyz/':[
+              'BITWORLDZ','Research build','Bitcoin gateway'
+            ],
+            'https://launchpad.cryptoworldz.xyz/bitworldz/':[
+              'PRICE THE WORLD','Mainnet execution disabled','BitPair'
+            ],
+            'https://launchpad.cryptoworldz.xyz/bitworldz/app.js':[
+              'BITWORLDZ-BITPAIR-INTENT-V1','mainnetExecutionEnabled'
+            ],
+          }
+
+          failures=[]
+          for url, needles in expected.items():
+              last=''
+              for attempt in range(1,6):
+                  try:
+                      stamp=int(time.time()*1000)
+                      sep='&' if '?' in url else '?'
+                      req=urllib.request.Request(
+                        url+sep+'bitworldz_verify='+str(stamp),
+                        headers={
+                          'User-Agent':'Worldz-BitWorldz-Verify/1.0',
+                          'Cache-Control':'no-cache, no-store',
+                          'Pragma':'no-cache'
+                        }
+                      )
+                      with urllib.request.urlopen(req,timeout=30) as r:
+                          body=r.read().decode('utf-8','ignore')
+                          if r.status==200 and all(x in body for x in needles):
+                              print('BITWORLDZ_LIVE_PASS',url)
+                              break
+                          last='contract mismatch status='+str(r.status)
+                  except Exception as exc:
+                      last=repr(exc)
+                  time.sleep(attempt*2)
+              else:
+                  failures.append((url,last))
+
+          if failures:
+              raise SystemExit('BITWORLDZ_LIVE_FAIL '+repr(failures))
+          print('BITWORLDZ_LIVE=PASS surfaces=3 mainnet=OFF')
