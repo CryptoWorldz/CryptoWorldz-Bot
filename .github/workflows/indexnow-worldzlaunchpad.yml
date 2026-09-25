@@ -1,0 +1,44 @@
+name: IndexNow WorldzLaunchPad
+
+on:
+  workflow_run:
+    workflows: ["Deploy WorldzLaunchPad"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  notify-indexnow:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Submit canonical WORLDZ URLs to IndexNow
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/indexnow.json <<'JSON'
+          {
+            "host": "launchpad.cryptoworldz.xyz",
+            "key": "f4c9f22dd0ca59f43c28cf48b6d473d7",
+            "keyLocation": "https://launchpad.cryptoworldz.xyz/f4c9f22dd0ca59f43c28cf48b6d473d7.txt",
+            "urlList": [
+              "https://launchpad.cryptoworldz.xyz/wldz/",
+              "https://launchpad.cryptoworldz.xyz/wldz/verify/",
+              "https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json",
+              "https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json",
+              "https://launchpad.cryptoworldz.xyz/wldz/listing-verification.json",
+              "https://launchpad.cryptoworldz.xyz/wldz/platform-submission-pack.json",
+              "https://launchpad.cryptoworldz.xyz/tokenlist.json",
+              "https://launchpad.cryptoworldz.xyz/sitemap.xml"
+            ]
+          }
+          JSON
+          code=$(curl -sS -o /tmp/indexnow-response.txt -w "%{http_code}"             -X POST "https://api.indexnow.org/indexnow"             -H "Content-Type: application/json; charset=utf-8"             --data-binary @/tmp/indexnow.json)
+          cat /tmp/indexnow-response.txt || true
+          echo "INDEXNOW_HTTP=$code"
+          case "$code" in
+            200|202) echo "INDEXNOW_WORLDZ=PASS" ;;
+            *) echo "INDEXNOW_WORLDZ=FAIL http=$code"; exit 1 ;;
+          esac
