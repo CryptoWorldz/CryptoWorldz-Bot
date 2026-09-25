@@ -37,7 +37,11 @@ if(current>=5_000){
 }
 
 const sources=[
-  {name:'helius_demo',url:'https://demo.helius.dev/api/rpc?network=devnet',attempts:4},
+  // Independent devnet RPCs first: we only need 5,000 lamports to unlock the
+  // upstream PoW faucet. These are testnet lamports and have no mainnet value.
+  {name:'alchemy_docs_demo',url:'https://solana-devnet.g.alchemy.com/v2/docs-demo',attempts:3},
+  {name:'ankr_public',url:'https://rpc.ankr.com/solana_devnet',attempts:3},
+  {name:'helius_demo',url:'https://demo.helius.dev/api/rpc?network=devnet',attempts:3},
   {name:'solana_public',url:publicRpc,attempts:6},
 ];
 let failures=[];
