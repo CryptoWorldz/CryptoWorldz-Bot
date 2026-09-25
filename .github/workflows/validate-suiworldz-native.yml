@@ -1,0 +1,179 @@
+name: Validate SuiWorldz native adapter
+
+on:
+  push:
+    branches:
+      - suiworldz-native-testnet-2026-09-25
+    paths:
+      - 'worldzpad-sui-testnet/**'
+      - 'launchpad.cryptoworldz.xyz/sui/**'
+      - 'launchpad.cryptoworldz.xyz/platform-config.json'
+      - 'launchpad.cryptoworldz.xyz/index.html'
+      - 'launchpad.cryptoworldz.xyz/app.js'
+      - 'suiworldz.xyz/**'
+      - '.github/workflows/validate-suiworldz-native.yml'
+  workflow_dispatch:
+
+  pull_request:
+    paths:
+      - 'worldzpad-sui-testnet/**'
+      - 'launchpad.cryptoworldz.xyz/sui/**'
+      - 'launchpad.cryptoworldz.xyz/platform-config.json'
+      - 'launchpad.cryptoworldz.xyz/index.html'
+      - 'launchpad.cryptoworldz.xyz/app.js'
+      - 'suiworldz.xyz/**'
+      - '.github/workflows/validate-suiworldz-native.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: suiworldz-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: worldzpad-sui-testnet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned TypeScript SDK
+        run: npm install --no-audit --no-fund
+      - name: Static Worldz Safe Launch proof
+        run: npm run static-proof
+      - name: Install pinned official suiup + Sui Devnet CLI
+        shell: bash
+        run: |
+          SUIUP_VERSION=v0.0.14
+          SUIUP_SHA256=c0b9fea95d52c4c5855478c3ee56e58e446614f32300dbd41fcc637a2e09878a
+          curl -fsSL "https://github.com/MystenLabs/suiup/releases/download/$SUIUP_VERSION/suiup-Linux-musl-x86_64.tar.gz" -o /tmp/suiup.tar.gz
+          echo "$SUIUP_SHA256  /tmp/suiup.tar.gz" | sha256sum -c -
+          mkdir -p "$HOME/.local/bin" /tmp/suiup-unpack
+          tar -xzf /tmp/suiup.tar.gz -C /tmp/suiup-unpack
+          install -m 0755 /tmp/suiup-unpack/suiup "$HOME/.local/bin/suiup"
+          export PATH="$HOME/.local/bin:$PATH"
+          suiup install sui@devnet --yes
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          sui --version
+      - name: Compile Move template
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          "$HOME/.local/bin/sui" move build --path template
+          "$HOME/.local/bin/sui" move build --path template --dump-bytecode-as-base64 --no-tree-shaking > artifacts/template-bytecode.json
+          node -e 'const x=require("./artifacts/template-bytecode.json"); if(!Array.isArray(x.modules)||!x.modules.length||!Array.isArray(x.dependencies)||!x.dependencies.length) process.exit(1); console.log("SUI_BYTECODE_COMPILE=PASS modules="+x.modules.length+" dependencies="+x.dependencies.length)'
+      - name: Validate public Sui creator console against compiled proof
+        shell: bash
+        run: |
+          node --check ../launchpad.cryptoworldz.xyz/sui/app.mjs
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          generated=json.loads(Path('artifacts/template-bytecode.json').read_text())
+          public=json.loads(Path('../launchpad.cryptoworldz.xyz/sui/template-bytecode.json').read_text())
+          assert generated['modules']==public['modules'], 'public module bytecode differs from compiled template'
+          assert generated['dependencies']==public['dependencies'], 'public dependencies differ from compiled template'
+          assert generated['digest']==public['digest'], 'public bytecode digest differs from compiled template'
+          assert public['network']=='sui-devnet' and public['mainnet'] is False
+
+          proof=json.loads(Path('../launchpad.cryptoworldz.xyz/sui/devnet-proof.json').read_text())
+          archived=json.loads(Path('proofs/sui-devnet-onchain-proof.json').read_text())
+          assert proof==archived, 'public proof != archived proof'
+          assert proof['proof']=='WORLDZ_SUI_NATIVE_DEVNET_ONCHAIN'
+          assert proof['packageImmutable'] is True
+          assert proof['treasuryCapSurvives'] is False
+          assert proof['metadataCapSurvives'] is False
+          assert proof['regulated'] is False
+          assert proof['walletTransferTax'] is False
+          assert proof['mainnetExecution'] is False
+          assert proof['rawSupply']==proof['observedPublisherBalanceRaw']
+
+          cfg=json.loads(Path('../launchpad.cryptoworldz.xyz/sui/config.json').read_text())
+          assert cfg['status']=='DEVNET_BETA'
+          assert cfg['network']=='sui-devnet'
+          assert cfg['marketLaunch'] is False
+          assert cfg['testnetRelease'] is False
+          assert cfg['mainnetExecution'] is False
+          assert cfg['founding100Eligible'] is False
+          assert cfg['provenReference']['packageId']==proof['packageId']
+
+          platform=json.loads(Path('../launchpad.cryptoworldz.xyz/platform-config.json').read_text())
+          adapter=next(x for x in platform['chainAdapters'] if x['id']=='sui')
+          assert adapter['status']=='DEVNET_BETA'
+          assert adapter['creatorLaunch']=='SUI_DEVNET_FIXED_SUPPLY'
+          assert adapter['mainnetCreatorLaunch']=='OFF'
+          assert platform['suiNative']['marketLaunch'] is False
+          assert platform['suiNative']['mainnetExecution'] is False
+          assert platform['publicMainnetCreatorLaunchesEnabled'] is False
+          assert 'sui-devnet-fixed-supply' in platform['omnichain']['executableAdapters']
+
+          lp=Path('../launchpad.cryptoworldz.xyz/index.html').read_text()
+          sui=Path('../suiworldz.xyz/index.html').read_text()
+          console=Path('../launchpad.cryptoworldz.xyz/sui/index.html').read_text()
+          assert 'Native fixed-supply Devnet creator console live' in lp
+          assert 'WORLDZ PROOF™ • SUI DEVNET' in sui
+          assert 'data-build="2026-09-24-chain-launch-gateway-v1"' in sui
+          assert 'WORLDZ-SUI-DEVNET-CONSOLE-2026-09-25-A' in console
+          assert 'MAINNET LOCKED' in console
+          print('SUI_PUBLIC_CONSOLE=PASS exact_bytecode=1 proof_match=1 devnet=EXECUTABLE market=LOCKED mainnet=LOCKED')
+          PY
+
+      - name: Emit exact tested browser bytecode
+        shell: bash
+        run: |
+          printf 'SUI_TEMPLATE_BYTECODE_B64='
+          base64 -w0 artifacts/template-bytecode.json
+          printf '\n'
+          printf 'SUI_PACKAGE_LOCK_B64='
+          base64 -w0 package-lock.json
+          printf '\n'
+
+  devnet-onchain:
+    # Network writes are deliberate: run manually, or tag an execution commit with [sui-onchain].
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[sui-onchain]'))
+    needs: compile
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: worldzpad-sui-testnet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install SDK
+        run: npm install --no-audit --no-fund
+      - name: Install pinned Sui CLI and compile exact template
+        shell: bash
+        run: |
+          SUIUP_VERSION=v0.0.14
+          SUIUP_SHA256=c0b9fea95d52c4c5855478c3ee56e58e446614f32300dbd41fcc637a2e09878a
+          curl -fsSL "https://github.com/MystenLabs/suiup/releases/download/$SUIUP_VERSION/suiup-Linux-musl-x86_64.tar.gz" -o /tmp/suiup.tar.gz
+          echo "$SUIUP_SHA256  /tmp/suiup.tar.gz" | sha256sum -c -
+          mkdir -p "$HOME/.local/bin" /tmp/suiup-unpack
+          tar -xzf /tmp/suiup.tar.gz -C /tmp/suiup-unpack
+          install -m 0755 /tmp/suiup-unpack/suiup "$HOME/.local/bin/suiup"
+          export PATH="$HOME/.local/bin:$PATH"
+          suiup install sui@devnet --yes
+          mkdir -p artifacts
+          # First normal build initializes Sui's local client config outside redirected JSON.
+          sui move build --path template
+          sui move build --path template --dump-bytecode-as-base64 --no-tree-shaking > artifacts/template-bytecode.json
+      - name: Publish immutable package and create fixed-supply proof currency
+        run: npm run publish-proof
+      - name: Print on-chain proof
+        shell: bash
+        run: |
+          cat artifacts/sui-devnet-onchain-proof.json
+          sha256sum artifacts/sui-devnet-onchain-proof.json artifacts/template-bytecode.json
+          printf 'SUI_DEVNET_PROOF_B64='
+          base64 -w0 artifacts/sui-devnet-onchain-proof.json
+          printf '\n'

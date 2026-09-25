@@ -1,0 +1,58 @@
+{
+  "version": "WORLDZ-SUI-NATIVE-2026-09-25-A",
+  "status": "DEVNET_EXECUTION_BUILD__TESTNET_AND_MAINNET_LOCKED",
+  "network": "sui",
+  "tokenStandard": "Sui Currency Standard / CoinRegistry",
+  "architecture": {
+    "publish": "creator publishes audited reusable Move bytecode as a unique package instance",
+    "initialize": "creator consumes one-use PublisherCap to initialize runtime metadata and total supply",
+    "fixedSupply": "TreasuryCap is consumed by Currency.make_supply_fixed",
+    "immutableMetadata": "CurrencyInitializer.finalize_and_delete_metadata_cap",
+    "immutablePackage": "0x2::package::make_immutable consumes UpgradeCap in publish transaction",
+    "noRegulatedCurrency": true,
+    "noDenyList": true,
+    "noGlobalPause": true,
+    "walletTransferTaxPercent": 0
+  },
+  "userFlow": [
+    "Connect Sui wallet on Devnet",
+    "Review Worldz Safe Launch manifest",
+    "Publish immutable audited Worldz token package",
+    "Initialize fixed-supply currency using Coin Registry",
+    "Transfer full genesis supply to creator wallet",
+    "Verify package, coin type, fixed supply and transaction digests",
+    "Register Worldz Proof"
+  ],
+  "marketLayer": {
+    "tokenCreation": "EXECUTABLE_DEVNET_TARGET",
+    "marketLaunch": "SEPARATE_GATE",
+    "preferredResearchVenue": "Cetus CLMM",
+    "nativeOrderbookAlternative": "DeepBook",
+    "rule": "A Sui token deployment is not represented as a liquid market until pool/orderbook execution and liquidity proof are independently verified."
+  },
+  "sdk": {
+    "mystenSui": "2.31.3",
+    "transport": "SuiGrpcClient",
+    "deprecatedJsonRpcUsed": false
+  },
+  "mainnet": {
+    "creatorLaunchEnabled": false,
+    "required": [
+      "devnet package publication proof",
+      "devnet fixed-supply Currency proof",
+      "wallet flow proof",
+      "fee-route design and proof",
+      "market venue adapter proof",
+      "liquidity/position custody and lock policy",
+      "Worldz Treasury governance",
+      "security review",
+      "Australian legal/regulatory position for exact mainnet service",
+      "human launch authorization"
+    ]
+  },
+  "executionRail": {
+    "devnet": "AUTOMATED_EXECUTABLE_PROOF",
+    "testnet": "RELEASE_GATE_AFTER_DEVNET",
+    "mainnet": "LOCKED"
+  }
+}
