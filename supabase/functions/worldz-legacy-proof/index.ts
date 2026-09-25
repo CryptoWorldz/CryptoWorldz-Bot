@@ -80,21 +80,46 @@ Deno.serve(async req=>{
    await supabase.from("worldz_legacy_holder_snapshot").delete().eq("snapshot_batch",batch).eq("mint",a.mint);
    if(rows.length){const {error:ie}=await supabase.from("worldz_legacy_holder_snapshot").insert(rows);if(ie)throw new Error("snapshot_insert_failed:"+ie.message);}
    await supabase.from("worldz_legacy_proof_assets").update({snapshot_status:"SNAPSHOT_COMPLETE",snapshot_slot:Number(slot),snapshot_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("legacy_order",order);
-   const {count}=await supabase.from("worldz_legacy_proof_assets").select("*",{count:"exact",head:true}).eq("snapshot_status","SNAPSHOT_COMPLETE");
-   await supabase.from("worldz_legacy_snapshot_batches").update({completed_assets:count||0}).eq("batch_id",batch);
+   const {data:batchRows,error:batchRowsError}=await supabase.from("worldz_legacy_holder_snapshot").select("mint").eq("snapshot_batch",batch);
+   if(batchRowsError)throw new Error("batch_completion_count_failed:"+batchRowsError.message);
+   const completedMints=new Set((batchRows||[]).map((r:any)=>String(r.mint)));
+   await supabase.from("worldz_legacy_snapshot_batches").update({completed_assets:completedMints.size}).eq("batch_id",batch);
    return json({ok:true,batchId:batch,legacyOrder:order,mint:a.mint,holders:rows.length,slot:Number(slot),tokenProgram:program});
   }
 
   if(action==="FINALIZE_BATCH"){
    const batch=String(body.batch_id||"");if(!/^[0-9a-f-]{36}$/i.test(batch))throw new Error("invalid_batch_id");
-   const {data:assets}=await supabase.from("worldz_legacy_proof_assets").select("legacy_order,snapshot_status").order("legacy_order");
-   if((assets||[]).length!==10||(assets||[]).some((a:any)=>a.snapshot_status!=="SNAPSHOT_COMPLETE"))throw new Error("all_ten_snapshots_required");
-   const {data:rows,error}=await supabase.from("worldz_legacy_holder_snapshot").select("owner_wallet,mint,sqrt_weight,snapshot_slot").eq("snapshot_batch",batch);
+   const {data:assets,error:assetsError}=await supabase.from("worldz_legacy_proof_assets").select("legacy_order,mint").order("legacy_order");
+   if(assetsError||(assets||[]).length!==10)throw new Error("registered_ten_assets_required");
+   const {data:rows,error}=await supabase.from("worldz_legacy_holder_snapshot").select("owner_wallet,mint,balance_raw,supply_raw,snapshot_slot").eq("snapshot_batch",batch);
    if(error||!rows?.length)throw new Error("snapshot_rows_missing");
+   const expectedMints=new Set((assets||[]).map((a:any)=>String(a.mint)));
+   const batchMints=new Set(rows.map((r:any)=>String(r.mint)));
+   if(batchMints.size!==10||[...expectedMints].some(m=>!batchMints.has(m)))throw new Error("all_ten_snapshots_required_for_batch");
+
+   const perOwnerMint=new Map<string,{owner:string,mint:string,balance:bigint,supply:bigint}>();
+   for(const r of rows){
+    const owner=String(r.owner_wallet||""),mint=String(r.mint||""),raw=BigInt(String(r.balance_raw||"0")),supply=BigInt(String(r.supply_raw||"0"));
+    if(!owner||!mint||raw<=0n||supply<=0n)continue;
+    const key=owner+"|"+mint,prev=perOwnerMint.get(key);
+    if(prev){
+     if(prev.supply!==supply)throw new Error("snapshot_supply_mismatch:"+mint);
+     prev.balance+=raw;
+    }else perOwnerMint.set(key,{owner,mint,balance:raw,supply});
+   }
+
    const map=new Map<string,{assets:Set<string>,historic:number}>();
-   for(const r of rows){const x=map.get(r.owner_wallet)||{assets:new Set<string>(),historic:0};x.assets.add(r.mint);x.historic+=Number(r.sqrt_weight);map.set(r.owner_wallet,x);}
-   const owners=[...map.keys()].sort(),n=owners.length,totalHistoric=owners.reduce((s,w)=>s+(map.get(w)?.historic||0),0);
-   const REVIVE_SUPPLY_TOKENS=200000000n, TOKEN_SCALE=1000000n, REVIVE_POOL_PERCENT=10n;\n   const totalRaw=REVIVE_SUPPLY_TOKENS*TOKEN_SCALE*REVIVE_POOL_PERCENT/100n;\n   if(totalRaw!==20000000n*TOKEN_SCALE)throw new Error("revive_pool_invariant_failed");
+   for(const x of perOwnerMint.values()){
+    const normalized=Number(x.balance)/Number(x.supply);
+    const owner=map.get(x.owner)||{assets:new Set<string>(),historic:0};
+    owner.assets.add(x.mint);
+    owner.historic+=Math.sqrt(normalized);
+    map.set(x.owner,owner);
+   }
+   const owners=[...map.keys()].sort(),n=owners.length,totalHistoric=owners.reduce((sum,w)=>sum+(map.get(w)?.historic||0),0);
+   const REVIVE_SUPPLY_TOKENS=200000000n, TOKEN_SCALE=1000000n, REVIVE_POOL_PERCENT=10n;
+   const totalRaw=REVIVE_SUPPLY_TOKENS*TOKEN_SCALE*REVIVE_POOL_PERCENT/100n;
+   if(totalRaw!==20000000n*TOKEN_SCALE)throw new Error("revive_pool_invariant_failed");
    let allocated=0n;const ents:any[]=[];
    for(let i=0;i<owners.length;i++){const w=owners[i],x=map.get(w)!;const eq=1/n,hist=totalHistoric?x.historic/totalHistoric:0,combined=.5*eq+.5*hist;let amount=i===owners.length-1?totalRaw-allocated:BigInt(Math.floor(Number(totalRaw)*combined));allocated+=amount;ents.push({snapshot_batch:batch,owner_wallet:w,legacy_assets_held:x.assets.size,equal_weight:eq,historic_weight:hist,combined_weight:combined,revive_pool_percent:combined,revive_amount_raw:amount.toString(),proof:{model:"50% equal + 50% sqrt normalized legacy weight",revivePoolPercentOfRVIV:Number(REVIVE_POOL_PERCENT)}});}
    await supabase.from("worldz_legacy_revive_entitlements").delete().eq("snapshot_batch",batch);
