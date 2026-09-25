@@ -50,7 +50,8 @@ const route=JSON.parse(fs.readFileSync('../../worldzpad-mainnet/revive/revive-di
 
 if(cfg.launch.publicMainnetExecutionEnabled!==false)throw new Error('SAFETY_GATE: public mainnet execution must remain false');
 if(route.mainnetGates.enabled!==false)throw new Error('SAFETY_GATE: route mainnet execution must remain false');
-if(route.pricing.mainnet.priceSolPerRviv!==null)throw new Error('SAFETY_GATE: mainnet opening price must remain unset');
+if(Number(route.pricing.mainnet.priceSolPerRviv)!==0.000045)throw new Error('PRICE_GATE: expected owner-approved mainnet price 0.000045 SOL/RVIV');
+if(Number(cfg.launch.mainnetOpeningPriceSolPerRviv)!==0.000045)throw new Error('PRICE_GATE: launch contract and route price disagree');
 
 const connection=new Connection(RPC,'confirmed');
 const genesis=await connection.getGenesisHash();
@@ -126,9 +127,9 @@ const vaultTopUpLamports=vaultNativeNeed>BigInt(vaultBalance)
   : 0n;
 
 const cpAmm=new CpAmm(connection);
-// Cost-only fixture. It is NOT a mainnet opening-price decision.
-const costOnlyPrice='0.000045';
-const initSqrtPrice=getSqrtPriceFromPrice(costOnlyPrice,6,9);
+// Owner-approved REVIVE mainnet opening price.
+const approvedMainnetPrice=String(route.pricing.mainnet.priceSolPerRviv);
+const initSqrtPrice=getSqrtPriceFromPrice(approvedMainnetPrice,6,9);
 const tokenAAmount=new BN(launchRaw.toString());
 const tokenBAmount=new BN(0);
 const liquidityDelta=cpAmm.preparePoolCreationSingleSide({
@@ -369,9 +370,8 @@ const report={
     launchRvivTokens:30_000_000,
   },
   pricing:{
-    costOnlyFixtureSolPerRviv:Number(costOnlyPrice),
-    mainnetOpeningPrice:null,
-    fixtureIsNotMainnetApproval:true,
+    mainnetOpeningPriceSolPerRviv:Number(approvedMainnetPrice),
+    ownerApproved:true,
   },
   squads:{
     program:squads.PROGRAM_ID.toBase58(),
@@ -444,7 +444,7 @@ const report={
     noSignaturesCreated:true,
     noBroadcast:true,
     noTokenMovement:true,
-    mainnetPriceStillUnset:true,
+    mainnetPriceOwnerApproved:true,
     executionRemainsDisabled:true,
   },
 };
@@ -463,6 +463,6 @@ console.log(
   ' balance_sol='+report.funding.jayBalanceSol+
   ' headroom_sol='+report.funding.totalJayHeadroomSol+
   ' setup_sim='+(setupSimulation?.success?'PASS':setupSimulation?'FAIL':'NOT_RUN')+
-  ' broadcast=NO mainnet_price=UNSET'
+  ' broadcast=NO mainnet_price=0.000045_OWNER_APPROVED'
 );
 if(setupSimulation&&!setupSimulation.success)process.exitCode=2;
