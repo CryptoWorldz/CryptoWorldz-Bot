@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "canonical": true,
   "project": "WorldzLaunchPad / CryptoWorldz",
   "token": {
@@ -21,7 +21,10 @@
     "cryptoworldz": "https://cryptoworldz.xyz/",
     "oneworldz": "https://oneworldz.com/",
     "donateworldz": "https://donateworldz.com/",
-    "launchpad": "https://launchpad.cryptoworldz.xyz/",
+    "launchpad": "https://launchpad.cryptoworldz.xyz/"
+  },
+  "social": {
+    "x": "https://x.com/CryptoWorldzX",
     "telegram": "https://t.me/CryptoWLDZ"
   },
   "metadata": {
@@ -30,20 +33,28 @@
     "distribution": "https://launchpad.cryptoworldz.xyz/wldz/distribution.json",
     "fees": "https://launchpad.cryptoworldz.xyz/wldz/fees.json",
     "liveSupply": "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php",
-    "liveSupplyPlain": "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php?format=plain"
+    "liveSupplyPlain": "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php?format=plain",
+    "platformPack": "https://launchpad.cryptoworldz.xyz/wldz/platform-submission-pack.json"
   },
   "market": {
+    "status": "LIVE",
     "dex": "Meteora",
     "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
     "pair": "WLDZ/wSOL",
     "tradingFeePercent": 2,
+    "dynamicFee": false,
     "initialActiveLiquidityTokens": 15000000,
     "stagedLiquidityReserveTokens": 20000000,
-    "lpLock": "permanent"
+    "lpLock": "100% permanent"
   },
   "explorers": {
-    "solscan": "https://solscan.io/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
-    "jupiter": "https://jup.ag/tokens/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U"
+    "meteora": "https://www.meteora.ag/dammv2/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "jupiter": "https://jup.ag/tokens/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "phantom": "https://phantom.com/tokens/solana/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "geckoTerminal": "https://www.geckoterminal.com/solana/pools/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "birdeye": "https://birdeye.so/solana/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "dexScreener": "https://dexscreener.com/solana/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "solscan": "https://solscan.io/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U"
   },
-  "updatedAt": "2026-09-23T15:30:00+10:00"
+  "updatedAt": "2026-09-25T11:55:00+10:00"
 }
