@@ -87,7 +87,7 @@ jobs:
           git diff --exit-code -- package-lock.json router-program/Cargo.lock
 
   devnet-direct-damm-v2:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/revive-v1-build')
+    if: github.event_name == 'workflow_dispatch'
     needs: validate
     runs-on: ubuntu-latest
     env:
@@ -174,7 +174,7 @@ jobs:
 
 
   legacy-live-boundary:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/revive-v1-build')
+    if: github.event_name == 'workflow_dispatch'
     needs: validate
     runs-on: ubuntu-latest
     env:
@@ -208,7 +208,7 @@ jobs:
 
 
   legacy-authority-audit:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/revive-v1-build')
+    if: github.event_name == 'workflow_dispatch'
     needs: validate
     runs-on: ubuntu-latest
     env:
