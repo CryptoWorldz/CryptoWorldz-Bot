@@ -242,8 +242,31 @@ async function buildPlan(){
 
   return {latest,sourceAta,sourceRaw,recipients,prepTxs,setupTx,executeTx,index,transactionPda,proposalPda,setupBytes,executeBytes,signerSol,missing:prepIxs.length,allTxs:[...prepTxs,setupTx,executeTx]};
 }
+async function prepareFreshSigningBatch(p){
+  // Preflight already validated the full plan. Recheck only the state that can
+  // invalidate the prepared Squads transaction, then stamp a brand-new blockhash
+  // immediately before the wallet approval screen.
+  const sourceAta=getAssociatedTokenAddressSync(MINT,VAULT,true,TOKEN_PROGRAM_ID);
+  const [bal,ms,latest]=await Promise.all([
+    connection.getTokenAccountBalance(sourceAta,'confirmed'),
+    squads.accounts.Multisig.fromAccountAddress(connection,MULTISIG,'confirmed'),
+    connection.getLatestBlockhash('confirmed')
+  ]);
+  if(BigInt(bal.value.amount)!==EXPECTED_BEFORE)throw new Error('STOP: treasury changed after preflight. Live balance='+bal.value.uiAmountString+' RVIV.');
+  if(Number(ms.threshold)!==1)throw new Error('STOP: Squads threshold changed after preflight.');
+  const nextIndex=BigInt(ms.transactionIndex.toString())+1n;
+  if(nextIndex!==p.index)throw new Error('STOP: Squads transaction index changed after preflight. Run FINAL LIVE PREFLIGHT again.');
+  for(const tx of p.allTxs){
+    tx.recentBlockhash=latest.blockhash;
+    tx.lastValidBlockHeight=latest.lastValidBlockHeight;
+  }
+  p.latest=latest;
+  return p;
+}
 async function sendSigned(tx,label,latest){
-  const sim=await simSigned(tx); if(sim?.err)throw new Error(label+' signed simulation failed: '+JSON.stringify(sim.err));
+  // Do not burn blockhash lifetime on a second signed simulation here.
+  // The exact instructions were already simulated during FINAL LIVE PREFLIGHT;
+  // sendRawTransaction performs Solana preflight again on the fresh signed tx.
   const sig=await connection.sendRawTransaction(tx.serialize(),{skipPreflight:false,maxRetries:8,preflightCommitment:'confirmed'});
   const conf=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');
   if(conf.value.err)throw new Error(label+' failed on-chain: '+JSON.stringify(conf.value.err)+' Signature: '+sig);
@@ -284,10 +307,14 @@ $('#preflight').addEventListener('click',async()=>{
 $('#execute').addEventListener('click',async()=>{
   $('#execute').disabled=true;$('#preflight').disabled=true;
   try{
-    setStatus('Rechecking live state before the one wallet approval…');
-    plan=await buildPlan();
-    setStatus('ONE WALLET APPROVAL\nReview and approve the batch of '+plan.allTxs.length+' Solana transactions.\nNo RVIV moves until the signed batch is returned.');
+    setStatus('Refreshing live state and fresh Solana blockhash for wallet approval…');
+    if(!plan)throw new Error('FINAL LIVE PREFLIGHT must pass immediately before distribution.');
+    plan=await prepareFreshSigningBatch(plan);
+    setStatus('ONE WALLET APPROVAL\nFresh blockhash loaded. Review and approve the batch of '+plan.allTxs.length+' Solana transactions.\nNo RVIV moves until the signed batch is returned.');
+    const approvalStarted=Date.now();
     const signed=await wallet.signAllTransactions(plan.allTxs);
+    const approvalSeconds=(Date.now()-approvalStarted)/1000;
+    if(approvalSeconds>55)throw new Error('Wallet approval took '+approvalSeconds.toFixed(1)+' seconds. Fresh blockhash safety window exceeded; nothing was broadcast. Run FINAL LIVE PREFLIGHT again.');
     if(!Array.isArray(signed)||signed.length!==plan.allTxs.length)throw new Error('Incomplete signed batch returned by wallet.');
     const sigs=[];let n=0;
     for(let i=0;i<plan.prepTxs.length;i++){
