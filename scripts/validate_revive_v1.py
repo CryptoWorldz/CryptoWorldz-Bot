@@ -6,6 +6,7 @@ repo_root = Path(__file__).resolve().parents[1]
 root = repo_root / "worldzpad-mainnet" / "revive"
 
 contract = json.loads((root / "revive-launch-contract.v1.json").read_text())
+worldz_reconcile = json.loads((root / "revive-worldz-main-reconciliation.v1.json").read_text())
 fee = json.loads((root / "revive-dbc-fairfee.v1.json").read_text())
 direct = json.loads((root / "revive-direct-damm-v2-existing-mint.v1.json").read_text())
 devcity = json.loads((root / "revive-devcity-100.v1.json").read_text())
@@ -125,10 +126,27 @@ assert contract["gates"]["finalOwnerWalletApprovalRequired"] is True
 worldz_gate = contract["worldzDependencyGate"]
 assert worldz_gate["required"] is True
 assert worldz_gate["canonicalWorldz"]["mint"] == "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U"
-assert worldz_gate["canonicalWorldz"]["expectedMaxSupplyTokens"] == 100_000_000
+assert worldz_gate["canonicalWorldz"]["allocationDesignCeilingTokens"] == 100_000_000
+assert abs(worldz_gate["canonicalWorldz"]["currentOnChainSupplyTokens"] - 99_999_951.002722) < 1e-9
+assert worldz_gate["canonicalWorldz"]["circulatingSupplyTokens"] == 15_000_000
 assert worldz_gate["canonicalWorldz"]["livePool"] == "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ"
+assert worldz_gate["canonicalWorldz"]["permanentLockPercent"] == 100
+assert worldz_gate["canonicalWorldz"]["duplicateExecutionDisabled"] is True
+assert worldz_gate["canonicalWorldz"]["publicCreatorGate"] is False
 assert worldz_gate["publicMainnetExecutionMustRemainFalse"] is True
-assert worldz_gate["requiredEvidence"]["wldzPostLaunchCriticalSafetyGate"] == "REQUIRED_NOT_SATISFIED_BY_THIS_REVIVE_PR"
+assert worldz_gate["requiredEvidence"]["wldzPostLaunchCriticalSafetyGate"] == "SATISFIED_BY_RECONCILED_WLDZ_LIVE_STATE"
+assert worldz_gate["requiredEvidence"]["worldzFeeRouterReceipts"] == "STILL_REQUIRED_FOR_REVIVE"
+assert worldz_gate["requiredEvidence"]["legacyTenMintAuthorityAudit"] == "STILL_REQUIRED_LIVE_READ_ONLY_PROOF"
+assert worldz_reconcile["status"] == "RECONCILED__NO_FINANCIAL_EXECUTION"
+assert worldz_reconcile["canonicalWorldz"]["mint"] == worldz_gate["canonicalWorldz"]["mint"]
+assert abs(worldz_reconcile["canonicalWorldz"]["currentOnChainSupplyTokens"] - 99_999_951.002722) < 1e-9
+assert worldz_reconcile["liveLaunch"]["pool"] == worldz_gate["canonicalWorldz"]["livePool"]
+assert worldz_reconcile["liveLaunch"]["permanentLockPercent"] == 100
+assert worldz_reconcile["liveLaunch"]["duplicateExecutionDisabled"] is True
+assert worldz_reconcile["safety"]["mainnetExecutionEnabled"] is False
+assert worldz_reconcile["safety"]["movesWldz"] is False
+assert worldz_reconcile["safety"]["movesRviv"] is False
+assert worldz_reconcile["safety"]["movesSol"] is False
 assert contract["gates"]["worldzDependencyGateRequired"] is True
 assert contract["gates"]["wldzPostLaunchCriticalSafetyProofRequired"] is True
 assert contract["gates"]["worldzLaunchPadPublicBootProofRequired"] is True
@@ -148,5 +166,5 @@ print(
     "REVIVE_V1=PASS supply=200000000 allocation=100 devcity=100 "
     "new_dev_leads=50 legacy=20000000 magic_fee_bps=75 "
     "creator_effective=0.306 referrer_effective=0.102 legacy_effective=0.09 "
-    "direct_damm_v2=ON devnet_price_sol=0.000045 mainnet_price=UNSET permanent_lp_lock_target=100 worldz_dependency_gate=ON legacy_takeover=OFF mainnet=LOCKED"
+    "direct_damm_v2=ON devnet_price_sol=0.000045 mainnet_price=UNSET permanent_lp_lock_target=100 worldz_dependency_gate=RECONCILED legacy_takeover=OFF mainnet=LOCKED"
 )
