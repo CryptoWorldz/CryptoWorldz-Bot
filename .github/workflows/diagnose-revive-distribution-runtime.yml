@@ -29,7 +29,7 @@ jobs:
           cat > runtime-diagnostic.cjs <<'NODE'
           const { chromium } = require('playwright');
           (async()=>{
-            const url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v=runtime-diagnostic-4';
+            const url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v=runtime-diagnostic-5';
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:412,height:915}});
             const messages=[];
