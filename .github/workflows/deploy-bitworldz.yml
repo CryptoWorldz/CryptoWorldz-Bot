@@ -2,6 +2,11 @@ name: Deploy BitWorldz
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - revive-v1-build
+    paths:
+      - '.github/workflows/deploy-bitworldz.yml'
 
 permissions:
   contents: read
@@ -12,7 +17,7 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     environment:
       name: cryptoworldz-production
