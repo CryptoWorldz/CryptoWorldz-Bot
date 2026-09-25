@@ -1,45 +1,55 @@
-name: WLDZ Allocation Step 1 Proof
+name: WLDZ Allocation State Audit
 
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
-      - "WORLDZ-WLDZ-MASTER-ALLOCATION.md"
       - "worldzpad-mainnet/wldz-allocation.master.json"
-      - "worldzpad-mainnet/scripts/build-wldz-allocation-step1.mjs"
-      - "worldzpad-mainnet/package.json"
       - ".github/workflows/wldz-allocation-step1.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: wldz-allocation-step1
+  group: wldz-allocation-state-audit
   cancel-in-progress: true
 
 jobs:
-  audit-and-build:
+  audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: worldzpad-mainnet
-    env:
-      SOLANA_RPC_URL: https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc
-      SQUADS_CREATOR: Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Install pinned SDKs
-        run: npm install --no-audit --no-fund
-      - name: Verify 100M allocation and simulate 8M dev transfer proposal
-        run: npm run build:allocation
-      - name: Upload Step 1 proof
-        uses: actions/upload-artifact@v4
-        with:
-          name: wldz-allocation-step1-proof
-          path: worldzpad-mainnet/artifacts/wldz-allocation-step1-proof.json
-          if-no-files-found: error
-          retention-days: 30
+      - name: Verify current 100M WLDZ allocation without building transactions
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const a=JSON.parse(fs.readFileSync('worldzpad-mainnet/wldz-allocation.master.json','utf8'));
+          const by=new Map(a.allocation.map(x=>[x.id,x]));
+          const pct=a.allocation.reduce((n,x)=>n+Number(x.percent||0),0);
+          const tok=a.allocation.reduce((n,x)=>n+Number(x.tokens||0),0);
+          const A=(x,m)=>{if(!x)throw new Error(m)};
+          A(a.token.mint==='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U','canonical mint drift');
+          A(pct===100 && tok===100000000,'allocation total drift');
+          A(by.get('jayjayteamdev')?.tokens===8000000,'JayJayTeamDev allocation drift');
+          A(by.get('jayjayteamdev')?.state==='LIVE_IN_JAYJAYTEAMDEV_WALLET','8M owner execution state missing');
+          A(by.get('initial_launch_lp')?.tokens===15000000,'initial LP allocation drift');
+          A(String(by.get('initial_launch_lp')?.state||'').includes('100_PERCENT_PERMANENT_LOCK'),'live LP lock state missing');
+          A(by.get('staged_lp_reserve')?.tokens===20000000,'staged LP reserve drift');
+          A(by.get('legacy_purple_diamond_handz')?.tokens===5000000,'Legacy Purple Diamond Handz allocation drift');
+          A(by.get('first_100_worldzlaunchpad')?.tokens===10000000,'Founding 100 allocation drift');
+          A(by.get('oneworldz_charity_impact')?.tokens===10000000,'OneWorldz impact allocation drift');
+          A(by.get('worldz_treasury')?.tokens===10000000,'Worldz treasury allocation drift');
+          A(by.get('general_reserve')?.tokens===5000000,'general reserve drift');
+          A(by.get('stepper')?.tokens===1000000 && by.get('future_team_reserve')?.tokens===4000000,'team allocation drift');
+          A(by.get('dev_city_verified_wallets')?.tokens===5000000,'Dev City allocation drift');
+          A(by.get('community_ecosystem_growth')?.tokens===2000000,'community allocation drift');
+          A(by.get('operations_security_infrastructure')?.tokens===5000000,'operations allocation drift');
+          A(a.liquidity?.livePool==='GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ','live pool drift');
+          A(a.liquidity?.permanentLockPercent===100,'permanent lock percentage drift');
+          console.log('WLDZ_ALLOCATION_STATE=PASS total=100M owner=8M lp=15M lock=100 legacy=5M devcity=5M no_transaction_builder=1');
+          NODE
