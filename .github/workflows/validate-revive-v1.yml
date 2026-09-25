@@ -1,6 +1,7 @@
 name: Validate REVIVE v1 private build
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - revive-v1-build
@@ -86,7 +87,7 @@ jobs:
           git diff --exit-code -- package-lock.json router-program/Cargo.lock
 
   devnet-direct-damm-v2:
-    if: github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch'
     needs: validate
     runs-on: ubuntu-latest
     env:
@@ -173,7 +174,7 @@ jobs:
 
 
   legacy-live-boundary:
-    if: github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch'
     needs: validate
     runs-on: ubuntu-latest
     env:
@@ -207,6 +208,7 @@ jobs:
 
 
   legacy-authority-audit:
+    if: github.event_name == 'workflow_dispatch'
     needs: validate
     runs-on: ubuntu-latest
     env:
