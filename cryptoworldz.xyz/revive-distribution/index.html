@@ -320,8 +320,14 @@ async function finalVerify(){
 }
 
 $('#connect').addEventListener('click',async()=>{
-  try{setStatus('Connecting authorized wallet…');await connectWallet();setStatus('JayJayTeamDev connected ✅\nRun FINAL LIVE PREFLIGHT.','good')}
-  catch(e){setStatus('CONNECT BLOCKED\n'+(e?.message||e),'bad')}
+  try{
+    setStatus('Connecting authorized wallet…');
+    await connectWallet();
+    setStatus('JayJayTeamDev connected ✅\nRunning FINAL LIVE PREFLIGHT automatically…','good');
+    $('#preflight').click();
+  }catch(e){
+    setStatus('CONNECT BLOCKED\n'+(e?.message||e),'bad');
+  }
 });
 $('#preflight').addEventListener('click',async()=>{
   $('#preflight').disabled=true;$('#execute').disabled=true;
@@ -339,8 +345,23 @@ $('#preflight').addEventListener('click',async()=>{
       'Execute size: '+plan.executeBytes+' / 1232 bytes\n'+
       'Batch transactions requiring signatures: '+plan.allTxs.length+'\n'+
       'Fee payer: '+(plan.signerSol/1e9).toFixed(6)+' SOL';
-    setStatus('READY ✅\nThe exact approved 70M move is built. The other 100M remains reserved exactly as approved.\n\nNext press requests ONE batch approval from your wallet.','good');
-    $('#execute').disabled=false;$('#preflight').disabled=false;
+    const alreadyCreated=LEGS.length-plan.missing;
+    const resumeLine=alreadyCreated>0
+      ? '\nPrevious approval already created '+alreadyCreated+' of '+LEGS.length+' recipient token accounts on-chain. No RVIV moved in that step.'
+      : '';
+    setStatus(
+      'READY ✅'+resumeLine+
+      '\nTreasury is still exactly 170,000,000 RVIV.'+
+      '\nRemaining signed batch: '+plan.allTxs.length+' transactions.'+
+      '\n\nONE wallet transaction approval finishes the approved 70M distribution.',
+      'good'
+    );
+    $('#execute').textContent=alreadyCreated>0
+      ? 'ONE WALLET APPROVAL — FINISH 70M RVIV DISTRIBUTION'
+      : 'ONE WALLET APPROVAL — DISTRIBUTE 70M RVIV';
+    $('#execute').disabled=false;
+    $('#preflight').disabled=true;
+    $('#preflight').style.display='none';
   }catch(e){plan=null;setStatus('PREFLIGHT BLOCKED — NOTHING MOVED\n'+(e?.message||e),'bad');$('#preflight').disabled=false}
 });
 $('#execute').addEventListener('click',async()=>{
@@ -389,8 +410,25 @@ $('#execute').addEventListener('click',async()=>{
     $('#proof').textContent='DISTRIBUTION COMPLETE ✅\nMoved: 70,000,000 RVIV\nTreasury remaining: '+remaining+' RVIV\n\nSignatures:\n'+sigs.join('\n');
     setStatus('REVIVE DISTRIBUTION COMPLETE ✅\n70,000,000 RVIV moved to the approved 8 destinations.\n100,000,000 RVIV remains reserved in treasury exactly as approved.','good');
   }catch(e){
-    setStatus('STOPPED\n'+(e?.message||e)+'\n\nDo not retry blindly. Check the proof panel / confirmed signatures first.','bad');
-    $('#preflight').disabled=false;
+    let live='unknown';
+    try{
+      const sourceAta=getAssociatedTokenAddressSync(MINT,VAULT,true,TOKEN_PROGRAM_ID);
+      const b=await connection.getTokenAccountBalance(sourceAta,'confirmed');
+      live=b.value.uiAmountString;
+      const raw=BigInt(b.value.amount);
+      if(raw===EXPECTED_AFTER){
+        $('#proof').textContent='DISTRIBUTION COMPLETE ✅\nTreasury remaining: '+live+' RVIV';
+        setStatus('REVIVE DISTRIBUTION COMPLETE ✅\nThe chain shows exactly 100,000,000 RVIV remaining in treasury.','good');
+        return;
+      }
+    }catch{}
+    setStatus(
+      'EXECUTION STOPPED\n'+(e?.message||e)+
+      '\n\nLive RVIV treasury: '+live+
+      (live==='170000000'?' RVIV — no RVIV moved.':' RVIV.'),
+      'bad'
+    );
+    $('#execute').disabled=false;
   }
 });
 </script>
