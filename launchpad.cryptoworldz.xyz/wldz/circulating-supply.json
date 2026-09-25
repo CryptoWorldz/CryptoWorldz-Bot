@@ -1,8 +1,14 @@
 {
-  "circulatingSupply": 99999951.002722,
+  "circulatingSupply": 15000000,
   "totalSupply": 99999951.002722,
   "maxSupply": 100000000,
   "symbol": "WLDZ",
   "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
-  "updatedAt": "2026-09-23T05:00:00Z"
+  "methodology": "Circulating supply is the executed 15,000,000 WLDZ public Meteora launch-liquidity tranche. Founder/team and project-controlled treasury/reserve allocations are excluded under CoinGecko circulating-supply methodology.",
+  "excludedProjectWallets": [
+    "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+    "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB"
+  ],
+  "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+  "updatedAt": "2026-09-25T02:52:00Z"
 }
