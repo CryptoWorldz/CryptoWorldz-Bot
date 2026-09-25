@@ -1,4 +1,4 @@
-name: WLDZ Mainnet Preparation Gate
+name: WLDZ Canonical State Gate
 
 on:
   workflow_dispatch:
@@ -35,25 +35,35 @@ jobs:
       - name: Prove canonical WLDZ preparation gate
         run: node worldzpad-mainnet/scripts/preflight.mjs
 
-      - name: Confirm execution remains disabled
+      - name: Confirm execution is fail-closed
         shell: bash
         run: |
           node - <<'NODE'
           const fs = require('fs');
           const plan = JSON.parse(fs.readFileSync('worldzpad-mainnet/wldz-one-sided-launch.candidate.json', 'utf8'));
           if (plan.executionEnabled !== false) {
-            throw new Error('WLDZ candidate attempted to enable execution before live Squads threshold approval');
+            throw new Error('WLDZ execution flag must remain false');
           }
-          if (plan.launchAuthorized !== true || plan.status !== 'OWNER_AUTHORIZED__AWAITING_LIVE_SQUADS_THRESHOLD') {
-            throw new Error('WLDZ owner authorization state is missing or inconsistent');
+          if (plan.status === 'LIVE_EXECUTED__DO_NOT_REEXECUTE') {
+            if (plan.launchCompleted !== true || plan.duplicateExecutionProhibited !== true) {
+              throw new Error('Completed WLDZ launch is missing duplicate-execution protection');
+            }
+            if (plan.livePool !== 'GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ') {
+              throw new Error('Canonical WLDZ live pool drift');
+            }
+            console.log('WLDZ_LIVE_EXECUTION_GUARD=PASS execution_enabled=0 duplicate_execution=PROHIBITED');
+          } else {
+            if (plan.launchAuthorized !== true || !String(plan.status).startsWith('OWNER_AUTHORIZED__')) {
+              throw new Error('WLDZ owner authorization state is missing or inconsistent');
+            }
+            console.log('WLDZ_PRELAUNCH_EXECUTION_GUARD=PASS execution_enabled=0');
           }
-          console.log('WLDZ_MAINNET_EXECUTION_LOCK=PASS execution_enabled=0 launch_authorized=1 awaiting_squads_threshold=1');
           NODE
 
       - name: Publish preparation report
         uses: actions/upload-artifact@v4
         with:
-          name: wldz-mainnet-preparation-report
+          name: wldz-canonical-state-report
           path: worldzpad-mainnet/artifacts/wldz-mainnet-preparation-report.json
           if-no-files-found: error
           retention-days: 30
