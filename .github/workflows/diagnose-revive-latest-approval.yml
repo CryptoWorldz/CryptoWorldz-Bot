@@ -43,11 +43,14 @@ jobs:
           bal=rpc('getTokenAccountBalance',[TREASURY_ATA,{'commitment':'confirmed'}])
           print('TREASURY_BALANCE='+json.dumps(bal,indent=2))
 
-          sigs=rpc('getSignaturesForAddress',[MEMBER,{'limit':20},'confirmed'])
+          tx=rpc('getTransaction',[SIG,{'encoding':'jsonParsed','commitment':'confirmed','maxSupportedTransactionVersion':0}])
+          print('LATEST_TRANSACTION='+json.dumps(tx,indent=2))
+
+          sigs=rpc('getSignaturesForAddress',[MEMBER,{'limit':20,'commitment':'confirmed'}])
           print('MEMBER_RECENT_SIGNATURES='+json.dumps(sigs,indent=2))
 
           vault='n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB'
-          vsigs=rpc('getSignaturesForAddress',[vault,{'limit':20},'confirmed'])
+          vsigs=rpc('getSignaturesForAddress',[vault,{'limit':20,'commitment':'confirmed'}])
           print('VAULT_RECENT_SIGNATURES='+json.dumps(vsigs,indent=2))
 
           print('DIAGNOSE_REVIVE_LATEST_APPROVAL=PASS')
