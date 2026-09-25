@@ -22,6 +22,8 @@ solana_adapter = load("worldzpad-omnichain/adapters/solana/solana.v1.json")
 evm_adapter = load("worldzpad-omnichain/adapters/evm/shared-evm.v1.json")
 xrpl_adapter = load("worldzpad-omnichain/adapters/xrpl/xrpl.v1.json")
 sui_adapter = load("worldzpad-omnichain/adapters/sui/sui.v1.json")
+bitworldz = load("worldzpad-omnichain/bitworldz/bitworldz.v1.json")
+bitworldz_matrix = load("worldzpad-omnichain/bitworldz/chain-matrix.v1.json")
 
 expected_chains = {
     "solana", "xrpl", "base", "ethereum", "bnb", "sui", "hyperevm", "robinhood"
@@ -113,6 +115,18 @@ if "hidden_fee" not in fee["prohibited"]:
     raise SystemExit("hidden fees must remain explicitly prohibited")
 if registry["chains"]["xrpl"]["feeCapability"] != "CHAIN_NATIVE_MARKET_RULES__NO_HIDDEN_TRANSFER_TAX":
     raise SystemExit("XRPL must not emulate MagicFee with a hidden transfer tax")
+
+# Bitcoin-facing OmniBTC rail is a first-class Worldz Omnichain product.
+if omni["products"].get("bitWorldzOmniBtc") is not True:
+    raise SystemExit("BitWorldz OmniBTC product registration missing")
+if omni["policyPaths"].get("bitWorldz") != "worldzpad-omnichain/bitworldz/bitworldz.v1.json":
+    raise SystemExit("BitWorldz policy path drifted")
+if bitworldz["mainnetExecutionEnabled"] is not False or bitworldz_matrix["mainnetExecutionEnabled"] is not False:
+    raise SystemExit("BitWorldz mainnet must remain disabled")
+if set(bitworldz["supportedWorldzChainTargets"]) != expected_chains:
+    raise SystemExit("BitWorldz must target the eight Worldz chains")
+if set(bitworldz_matrix["chains"]) != expected_chains:
+    raise SystemExit("BitWorldz chain matrix must cover the eight Worldz chains")
 
 # Best-of-best product features must not silently disappear.
 if product["creatorEconomics"]["defaultWorldzControlledSharePercent"] != 51:
@@ -206,4 +220,4 @@ if sui_adapter["legacyFlywheel"]["automaticBridgeEnabled"] is not False:
     raise SystemExit("Sui Legacy Flywheel auto-bridge must remain disabled")
 
 print("WORLDZ_OMNICHAIN_VALIDATION=PASS")
-print("chains=8 adapters=4/native+sharedEVM fee_bps=75 split=51/17/15/8.5/8.5 legacy_vaults=10 epoch_hours=6 api=LOCKED product=LOCKED analytics=LOCKED mainnet=OFF")
+print("chains=8 adapters=4/native+sharedEVM bitworldz=LOCKED fee_bps=75 split=51/17/15/8.5/8.5 legacy_vaults=10 epoch_hours=6 api=LOCKED product=LOCKED analytics=LOCKED mainnet=OFF")
