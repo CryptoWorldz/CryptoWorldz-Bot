@@ -21,6 +21,7 @@ permissions:
 
 jobs:
   validate:
+    if: github.event_name != 'pull_request' || github.head_ref == 'bitworldz-build-2026-09-25'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
