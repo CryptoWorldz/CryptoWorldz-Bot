@@ -1,6 +1,6 @@
 {
-  "version": "2026-09-23-WLDZ-DAMM-V2-1",
-  "status": "OWNER_AUTHORIZED__TEMPORARY_1_OF_2_CUSTODY__ONCHAIN_EXECUTION_PENDING",
+  "version": "2026-09-25-WLDZ-DAMM-V2-LIVE-1",
+  "status": "LIVE_EXECUTED__DO_NOT_REEXECUTE",
   "launchAuthorized": true,
   "executionEnabled": false,
   "network": "mainnet-beta",
@@ -67,5 +67,23 @@
     "purpose": "WLDZ core deployment preparation until an independent replacement signer is verified",
     "publicCreatorLaunchesEnabled": false,
     "requiresExplicitOnchainProposal": true
+  },
+  "launchCompleted": true,
+  "duplicateExecutionProhibited": true,
+  "livePool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+  "liveProof": {
+    "venue": "Meteora DAMM V2",
+    "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "permanentLockPercent": 100,
+    "mintAuthority": "REVOKED",
+    "freezeAuthority": "REVOKED",
+    "baseFeeBps": 200,
+    "dynamicFeeEnabled": false,
+    "note": "Live-state record only. No transaction is built or broadcast from this file."
+  },
+  "executionGuard": {
+    "duplicateLaunch": false,
+    "createSecondWldzPoolFromThisCandidate": false,
+    "requireExplicitNewOwnerDecisionForAnyFutureLiquidityAction": true
   }
 }
