@@ -4,41 +4,35 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {spawnSync}=require('node:child_process');
 
-const file=path.join(__dirname,'..','launchpad.cryptoworldz.xyz','wldz','proposal.js');
-const source=fs.readFileSync(file,'utf8');
-const html=fs.readFileSync(path.join(__dirname,'..','launchpad.cryptoworldz.xyz','wldz','index.html'),'utf8');
+const root=path.join(__dirname,'..');
+const proposalFile=path.join(root,'launchpad.cryptoworldz.xyz','wldz','proposal.js');
+const source=fs.readFileSync(proposalFile,'utf8');
+const html=fs.readFileSync(path.join(root,'launchpad.cryptoworldz.xyz','wldz','index.html'),'utf8');
+const live=JSON.parse(fs.readFileSync(path.join(root,'launchpad.cryptoworldz.xyz','wldz','launch-config.json'),'utf8'));
 
-test('WLDZ proposal route has valid JavaScript syntax',()=>{
-  const result=spawnSync(process.execPath,['--check',file],{encoding:'utf8'});
+test('archived WLDZ proposal route retains valid JavaScript syntax',()=>{
+  const result=spawnSync(process.execPath,['--check',proposalFile],{encoding:'utf8'});
   assert.equal(result.status,0,result.stderr||result.stdout);
 });
 
-test('WLDZ proposal route derives proposal state live instead of shipping a fixed batch payload',()=>{
+test('archived proposal route derives state live instead of shipping a fixed batch payload',()=>{
   assert.match(source,/Multisig\.fromAccountAddress/);
   assert.match(source,/transactionIndex\)\+1n/);
   assert.match(source,/getTransactionPda/);
   assert.match(source,/getProposalPda/);
-  assert.match(source,/getEphemeralSignerPda/);
   assert.doesNotMatch(source,/const\s+PAYLOAD\s*=/);
-  assert.doesNotMatch(source,/batchIndex\s*:\s*11/);
 });
 
-test('WLDZ proposal route resumes only the recorded batch and refuses duplicates',()=>{
+test('archived proposal route retains duplicate and on-chain failure guards',()=>{
   assert.match(source,/RESUME_KEY/);
-  assert.match(source,/Batch\.fromAccountAddress/);
-  assert.match(source,/Proposal\.fromAccountAddress/);
-  assert.match(source,/status\?\.__kind/);
-  assert.match(source,/kind==='active'/);
   assert.match(source,/No duplicate proposal was created/);
-});
-
-test('WLDZ proposal route stops after any confirmed on-chain failure',()=>{
   assert.match(source,/confirmation\.value\.err!==null/);
-  assert.match(source,/failed on-chain/);
   assert.match(source,/WLDZ proposal stopped safely/);
+  assert.match(source,/getSignatureStatuses/);
+  assert.match(source,/searchTransactionHistory:true/);
 });
 
-test('WLDZ launch invariants remain locked in the browser route',()=>{
+test('archived route retains the locked launch invariants',()=>{
   assert.match(source,/15000000/);
   assert.match(source,/baseFeeBps===200/);
   assert.match(source,/quoteAmountSol===0/);
@@ -46,48 +40,37 @@ test('WLDZ launch invariants remain locked in the browser route',()=>{
   assert.match(source,/mintAuthority===null&&mintInfo\.freezeAuthority===null/);
 });
 
-test('WLDZ route exposes an explicit mobile-capable wallet connect path',()=>{
-  assert.match(html,/<button class="wallet-mini" id="connect-wallet"[^>]*>Connect Wallet<\/button>/);
-  assert.match(html,/Connect Wallet/);
+test('archived route retains mobile wallet compatibility but is no longer public execution UI',()=>{
   assert.match(source,/@wallet-standard\/app@1\.1\.0/);
   assert.match(source,/jupiter-mobile\.js/);
   assert.match(source,/Jupiter Mobile/);
   assert.match(source,/signVersionedTransaction/);
-  assert.doesNotMatch(source,/Wallet unavailable\. Open this page in the same wallet browser/);
+  assert.doesNotMatch(html,/id="create-proposal"/);
+  assert.doesNotMatch(html,/proposal\.js/);
+  assert.doesNotMatch(html,/Connect WLDZ Squads Proposal/);
 });
 
-
-test('WLDZ proposal route recovers safely from stale or expired blockhashes',()=>{
-  assert.match(source,/PUBLIC_RPC='https:\/\/api\.mainnet-beta\.solana\.com'/);
-  assert.match(source,/getSignatureStatuses/);
-  assert.match(source,/searchTransactionHistory:true/);
-  assert.match(source,/freshestTransactionConnection/);
-  assert.match(source,/freshBlockhash/);
-  assert.match(source,/lastValidBlockHeight-height>=100/);
-  assert.match(source,/heightAfterSigning<35/);
-  assert.match(source,/blockhash not found/);
-  assert.match(source,/maxRetries:10/);
-  assert.match(source,/No automatic third attempt/);
-  assert.match(html,/proposal\.js\?v=20260923-wldz-onchain-resume-v6/);
+test('public WLDZ page exposes the executed canonical pool state',()=>{
+  assert.match(html,/SOLANA MAINNET • LIVE/);
+  assert.match(html,/Canonical WORLDZ \(WLDZ\) is live on Solana/);
+  assert.match(html,/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ/);
+  assert.match(html,/100% of the launch LP position is permanently locked/);
+  assert.equal(live.status.startsWith('LIVE__'),true);
+  assert.equal(live.token.mint,'AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U');
+  assert.equal(live.launch.poolAddress,'GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ');
+  assert.equal(live.launch.baseAmountTokens,15000000);
+  assert.equal(live.launch.permanentLock,true);
+  assert.equal(live.launch.permanentLockPercent,100);
+  assert.equal(live.execution.launchExecuted,true);
+  assert.equal(live.execution.broadcasted,true);
+  assert.equal(live.execution.duplicateExecutionDisabled,true);
+  assert.equal(live.execution.publicCreatorGate,false);
 });
 
-
-test('WLDZ proposal status uses the generated status __kind and can resume a funded draft',()=>{
-  assert.match(source,/proposal\?\.status\?\.__kind/);
-  assert.match(source,/kind==='draft'/);
-  assert.match(source,/kind==='active'/);
-  assert.doesNotMatch(source,/sqds\.types\.isProposalStatusDraft/);
-  assert.match(html,/proposal\.js\?v=20260923-wldz-onchain-resume-v6/);
-});
-
-
-test('WLDZ route resumes the latest fully-funded on-chain batch even if browser storage is empty',()=>{
-  assert.match(source,/latestOnChainResume/);
-  assert.match(source,/custody\.account\.transactionIndex/);
-  assert.match(source,/poolLegPda/);
-  assert.match(source,/lockLegPda/);
-  assert.match(source,/exists\.every\(Boolean\)/);
-  assert.match(source,/Found existing funded WLDZ proposal/);
-  assert.match(source,/no new proposal will be created/);
-  assert.match(html,/proposal\.js\?v=20260923-wldz-onchain-resume-v6/);
+test('public WLDZ page links the current market discovery surfaces',()=>{
+  assert.match(html,/jup\.ag\/tokens\/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U/);
+  assert.match(html,/phantom\.com\/tokens\/solana\/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U/);
+  assert.match(html,/geckoterminal\.com\/solana\/pools\/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ/);
+  assert.match(html,/birdeye\.so\/solana\/token\/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U/);
+  assert.match(html,/dexscreener\.com\/solana\/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ/);
 });
