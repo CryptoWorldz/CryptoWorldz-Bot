@@ -1,6 +1,6 @@
 {
-  "version": "REVIVE-LAUNCH-2026-09-25-D",
-  "status": "BUILD_ONLY__MAINNET_LAUNCH_LOCKED",
+  "version": "REVIVE-LAUNCH-2026-09-26-E",
+  "status": "MAINNET_PRICE_APPROVED__FINAL_EXECUTION_GATES_PENDING",
   "network": "solana-mainnet-beta",
   "token": {
     "launchOrder": 2,
@@ -156,8 +156,8 @@
     "publicMainnetExecutionEnabled": false,
     "devnetRequired": true,
     "devnetOpeningPriceSolPerRviv": 0.000045,
-    "mainnetOpeningPriceSolPerRviv": null,
-    "mainnetOpeningPriceStatus": "UNSET__OWNER_DECISION_REQUIRED",
+    "mainnetOpeningPriceSolPerRviv": 0.000045,
+    "mainnetOpeningPriceStatus": "OWNER_APPROVED_2026-09-26",
     "initialBaseLiquidityTokens": 30000000,
     "initialQuoteLiquiditySol": 0,
     "permanentLiquidityProtectionRequired": true,
@@ -184,7 +184,7 @@
     "noReviveIsolationLaunch": true,
     "noDbcTokenCreationForCanonicalRviv": true,
     "directExistingMintDammV2ProofRequired": true,
-    "mainnetOpeningPriceFinalized": false,
+    "mainnetOpeningPriceFinalized": true,
     "actualDammV2ProtocolDeductionProofRequired": true,
     "lockedPositionFeeClaimProofRequired": true
   },
