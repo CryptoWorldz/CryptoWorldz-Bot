@@ -1,46 +1,29 @@
-name: WLDZ Owner-Authorized Dev + Launch Batch
+name: WLDZ Historical Owner Launch Guard
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "worldzpad-mainnet/scripts/build-wldz-owner-authorized-batch.mjs"
-      - "worldzpad-mainnet/wldz-allocation.master.json"
-      - "worldzpad-mainnet/wldz-one-sided-launch.candidate.json"
-      - "worldzpad-mainnet/package.json"
-      - ".github/workflows/wldz-owner-authorized-batch.yml"
 
 permissions:
   contents: read
 
-concurrency:
-  group: wldz-owner-authorized-batch
-  cancel-in-progress: true
-
 jobs:
-  build:
+  guard:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: worldzpad-mainnet
-    env:
-      SOLANA_RPC_URL: https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc
-      SQUADS_CREATOR: Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Install pinned SDKs
-        run: npm install --no-audit --no-fund
-      - name: Build combined 8M Dev + 15M launch + lock batch
-        run: npm run build:owner-launch
-      - name: Upload proof and unsigned payloads
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: wldz-owner-authorized-launch-batch
-          path: worldzpad-mainnet/artifacts/wldz-owner-launch-*
-          if-no-files-found: warn
-          retention-days: 30
+      - name: Verify completed owner launch cannot be rebuilt automatically
+        run: |
+          node --check worldzpad-mainnet/scripts/build-wldz-owner-authorized-batch.mjs
+          node - <<'NODE'
+          const fs=require('fs');
+          const plan=JSON.parse(fs.readFileSync('worldzpad-mainnet/wldz-one-sided-launch.candidate.json','utf8'));
+          if(plan.status!=='LIVE_EXECUTED__DO_NOT_REEXECUTE') throw new Error('WLDZ live status missing');
+          if(plan.launchCompleted!==true || plan.duplicateExecutionProhibited!==true) throw new Error('duplicate launch guard missing');
+          if(plan.executionEnabled!==false) throw new Error('execution flag must remain false');
+          if(plan.livePool!=='GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ') throw new Error('canonical live pool drift');
+          console.log('WLDZ_HISTORICAL_OWNER_LAUNCH_GUARD=PASS duplicate_execution=PROHIBITED');
+          NODE
