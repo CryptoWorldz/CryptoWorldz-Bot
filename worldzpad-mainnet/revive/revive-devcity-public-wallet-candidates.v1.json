@@ -683,8 +683,338 @@
       "qualification": "PUBLIC_SELF_PUBLISHED_SUPPORT_OR_WALLET_ADDRESS",
       "chainValidation": "PENDING",
       "devCityStatus": "CANDIDATE_PENDING_CHAIN_AND_SOURCE_REVIEW"
+    },
+    {
+      "address": "9FYChsnVGR934SKBJKuHAAa4ZLQn7mNEnSFQU2JMHx6c",
+      "source": "github_public",
+      "sourceRepo": "double-k-3033/Blockchain-AI-Agent",
+      "sourceUrl": "https://github.com/double-k-3033/Blockchain-AI-Agent/blob/f17d36e79bdb2aa0f13a64b620c083ecbed047c1/Solana/README.md",
+      "evidenceSummary": "Solana Agent Kit community treasury",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "HzmV6FyozZkmrocaKosNBTW69kKkC4cZt3vR6ybUEbH1",
+      "source": "github_public",
+      "sourceRepo": "lamports-dev/solfees",
+      "sourceUrl": "https://github.com/lamports-dev/solfees/blob/d97c05b9bd752a6bce42eade823df673772b78fb/README.md",
+      "evidenceSummary": "Solana tooling nonprofit development wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "6yNHzh6e3LLbYrJZg7ayhNZyCKazQZTTYWnfz9i87Zeo",
+      "source": "github_public",
+      "sourceRepo": "jlcodes99/vscode-antigravity-cockpit",
+      "sourceUrl": "https://github.com/jlcodes99/vscode-antigravity-cockpit/blob/58d51e3074def47513cb1de6338f76e95b3a638e/docs/DONATE.en.md",
+      "evidenceSummary": "Developer SOL donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "CPeKEKhitSeZt21Hir5vfvSnKbH3XCJpAUUfneL3WgZV",
+      "source": "github_public",
+      "sourceRepo": "andreaskasper/docker-solana",
+      "sourceUrl": "https://github.com/andreaskasper/docker-solana/blob/62fb94164ab9b624d468e335148fe716f2055e05/README.md",
+      "evidenceSummary": "Solana infrastructure developer donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "6TUFirgxGnijusqo3K3b4BUdkqz3HXFJC8527LJofbU9",
+      "source": "github_public",
+      "sourceRepo": "chmerev/candy-machine-v2-mint-solana-ui",
+      "sourceUrl": "https://github.com/chmerev/candy-machine-v2-mint-solana-ui/blob/f44da7a3389c8ed303ad76419dfccf0a47156f58/README.md",
+      "evidenceSummary": "Solana NFT developer support wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "GURgJGXeFfbV9S4Kr1xgxCrS367w3gkCuuS8up7xiDEG",
+      "source": "github_public",
+      "sourceRepo": "trantung95/SSHLite",
+      "sourceUrl": "https://github.com/trantung95/SSHLite/blob/8df5d264d9a0ef5a64c6c53c82119bdcff49ab49/README.md",
+      "evidenceSummary": "Open-source developer Solana donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "2KHGRvqjmrjQ852BF9DeScNFtJtB8e9CgPKtgrTcshvh",
+      "source": "github_public",
+      "sourceRepo": "pnck/foo_out_avfoundation",
+      "sourceUrl": "https://github.com/pnck/foo_out_avfoundation/blob/9faa15a9bf949cf6069a2211fb4cc4d8d3f5f506/README.md",
+      "evidenceSummary": "Developer SOL donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "5pEwP9JN8tRCXL5Vc9gQrxRyHHyn7J6P2DCC8cSQKDKT",
+      "source": "github_public",
+      "sourceRepo": "yashab-cyber/sentinelsec",
+      "sourceUrl": "https://github.com/yashab-cyber/sentinelsec/blob/91a4042f1cde4c6ad448686794ac16231f9ab000/PROJECT_SUMMARY.md",
+      "evidenceSummary": "Security developer Solana donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "H2k5pM1xq6N7YjSfTEyhpdezcN5UX8y4mnB9yn9nDFAG",
+      "source": "github_public",
+      "sourceRepo": "AJSPRO/GTE-Auto-Bot",
+      "sourceUrl": "https://github.com/AJSPRO/GTE-Auto-Bot/blob/acc24779d6aa497feec1b02bf3c8c130d5f18f52/README.md",
+      "evidenceSummary": "Developer Solana support wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "CiW6tXBaqtStvuPfV2aYgMe6FjnzGSQcXwfiHEEG4iiX",
+      "source": "github_public",
+      "sourceRepo": "JulienCouzinie/Grafolana",
+      "sourceUrl": "https://github.com/JulienCouzinie/Grafolana/blob/16c9dc96dc958543a2dc4595d24be1a770fe808e/README.md",
+      "evidenceSummary": "Developer donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "9SqcZjiUAz9SYBBLwuA9uJG4UzwqC5HNWV2cvXPk3Kro",
+      "source": "github_public",
+      "sourceRepo": "FakerPK/NewGrassBot",
+      "sourceUrl": "https://github.com/FakerPK/NewGrassBot/blob/6593d48077a44e2eb916871cd0e2c588ede5c7c1/README.md",
+      "evidenceSummary": "Developer Solana donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "54YAAqshj8BD5WJCsfy9vSCpgK8pC9NqW2cuKPrbUZqp",
+      "source": "github_public",
+      "sourceRepo": "WSOL12/Pumpfun-Sniper-Bot",
+      "sourceUrl": "https://github.com/WSOL12/Pumpfun-Sniper-Bot/blob/40130163cc095551fec85c81f32aa1bc535b65df/README.md",
+      "evidenceSummary": "Pump.fun developer tip wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "CcBPMkpMbZ4TWE8HeUWyv9CkEVqPLJ5gYe163g5SR4Vf",
+      "source": "github_public",
+      "sourceRepo": "getcakedieyoungx/poopzter-claim",
+      "sourceUrl": "https://github.com/getcakedieyoungx/poopzter-claim/blob/a46a1558c4ed2d0f337a0a180ffcd0b1285fa7d9/README.md",
+      "evidenceSummary": "Web3 developer SOL donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "6oW7AXz1yRb57pYSxysuXnMs2aR1ha5rzGzReZ1MjPV8",
+      "source": "github_public",
+      "sourceRepo": "0xfnzero/fnzero-examples",
+      "sourceUrl": "https://github.com/0xfnzero/fnzero-examples/blob/fbca1201deabee51f67b291c59dd76642ce7a499/README.md",
+      "evidenceSummary": "Developer donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "A7gEhi6kDzieGKjn3a3G5QZgbM3WyAfM9psKBhAbs3Yt",
+      "source": "github_public",
+      "sourceRepo": "stream-protocol/woocommerce-payment-gateway",
+      "sourceUrl": "https://github.com/stream-protocol/woocommerce-payment-gateway/blob/440f52fe7cf9bf7af4754f04a2f19e7f32793066/README.txt",
+      "evidenceSummary": "Solana payment developer support wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "DoDaGKZt5So1LUjWXGV1tTCWFs5c3JD4MsRJuvZWKFaE",
+      "source": "github_public",
+      "sourceRepo": "0xsouravm/solpm",
+      "sourceUrl": "https://github.com/0xsouravm/solpm/blob/e82c84fb1d0c714e81da8db30f03c120c97bd125/README.md",
+      "evidenceSummary": "Solana package manager developer donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "pG9TZUjpmtbbvMU8MjKpjbdvBcXLcHWQsyM2Qqq4BpB",
+      "source": "github_public",
+      "sourceRepo": "rostislavnagimov/language-handler",
+      "sourceUrl": "https://github.com/rostislavnagimov/language-handler/blob/1bb8a87b275082dab88655c000f58f1794f68822/README.md",
+      "evidenceSummary": "Developer Solana donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "894Rm4kKN3RmoPyumLqHCsEXStRnkAyZYTtw9QQHmxrS",
+      "source": "github_public",
+      "sourceRepo": "frankysfries/collectasave",
+      "sourceUrl": "https://github.com/frankysfries/collectasave/blob/ca60ad010556da410042634ecb4627c4bbf9d9e2/README.md",
+      "evidenceSummary": "Developer Solana donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "9qjvN4GZf78M2JsLUxXUNQWnDo96s12Zzzkzoo8cFpqw",
+      "source": "github_public",
+      "sourceRepo": "hexarc-software/hexarc-borsh",
+      "sourceUrl": "https://github.com/hexarc-software/hexarc-borsh/blob/d2828a724764c11d58e50fd592340186acbfd37b/README.md",
+      "evidenceSummary": "Borsh developer donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "4pb8p2cTHdQb9WmU68n6AtQ3rrEHEzkQoESAXADzwKSF",
+      "source": "github_public",
+      "sourceRepo": "cawa0505/cawa0505.github.io",
+      "sourceUrl": "https://github.com/cawa0505/cawa0505.github.io/blob/917ec9821da38912e9c2396aa361d0aceb72ce75/content/_pages/donate.md",
+      "evidenceSummary": "Developer Solana donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "ApRceuVJjm19nQKX6d7e15FVLzzVuCoG8nEFY68XGSqL",
+      "source": "github_public",
+      "sourceRepo": "solanacraft/laravel-phantom-wallet",
+      "sourceUrl": "https://github.com/solanacraft/laravel-phantom-wallet/blob/9741feb72918ed952c628dd24b49090735080b3d/README.md",
+      "evidenceSummary": "Solana/Phantom developer donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "2stFvNdELDQ56C6vD71Lt3jKN9Th4r7cfkpJchwyxJ6x",
+      "source": "github_public",
+      "sourceRepo": "vainia/stepn-enhanced-filter",
+      "sourceUrl": "https://github.com/vainia/stepn-enhanced-filter/blob/b99f284f64125d08cae3ef4b0c6fdc17dcfc72f7/README.md",
+      "evidenceSummary": "Developer support Solana wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "7b3SLgiVPb8qQUvERSPGRWoFoiGEDvkFuY98M1GEngug",
+      "source": "github_public",
+      "sourceRepo": "Flow-Tube/Flow-Desktop",
+      "sourceUrl": "https://github.com/Flow-Tube/Flow-Desktop/blob/a866067021df889a560c04e295a28a5299585319/README.md",
+      "evidenceSummary": "Flow development Solana donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "6vT7nrqtbXDWVc8cRUtifxgfDZi19aW7qhcZg2hSepwb",
+      "source": "github_public",
+      "sourceRepo": "whisdev/rust-copy-trading",
+      "sourceUrl": "https://github.com/whisdev/rust-copy-trading/blob/7c0bf460497c2cfd8ceedb8dd9f1e68a4f2a9a30/ReadMe.md",
+      "evidenceSummary": "Rust/Solana developer support wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "GkEAGdnGz7w9KVw1ysd4XyGwMaqGVzoR6yeHhGHD4x7V",
+      "source": "github_public",
+      "sourceRepo": "edson98lg/LCD_Pic18f45k22",
+      "sourceUrl": "https://github.com/edson98lg/LCD_Pic18f45k22/blob/9204885e5547bbbd8e786d2f9be13df433f710d3/README.md",
+      "evidenceSummary": "Developer SOL donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "DTufFBV5q6bTuBfieKrbSMrzUgZEpsQcnNWpa44PAkBR",
+      "source": "github_public",
+      "sourceRepo": "pechavarriaa/CrossPlatformAudioToggle",
+      "sourceUrl": "https://github.com/pechavarriaa/CrossPlatformAudioToggle/blob/4f631fbd0d1983ee65856363aa02af9eaaaa83da/DONATE.md",
+      "evidenceSummary": "Developer Solana donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "FPDcn6KfFrZm3nNwvrwJqq5jzRwqfKbGZ3TxmJNsWrh9",
+      "source": "github_public",
+      "sourceRepo": "ahmuq/naoris-autoref",
+      "sourceUrl": "https://github.com/ahmuq/naoris-autoref/blob/2fbf291302fcf386f0f95c2e23347c1bcf07cb20/readme.md",
+      "evidenceSummary": "Web3 developer Solana donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "8tTwBazKr2ST1b2kNrM7JMXwixRTvZicn7eRBihThymm",
+      "source": "github_public",
+      "sourceRepo": "matigumma/go-sol",
+      "sourceUrl": "https://github.com/matigumma/go-sol/blob/2a901ebe28437e64db099be8a87e16ea30a1acc5/rpc-solana.md",
+      "evidenceSummary": "Solana infrastructure developer donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "GKunRFVcfMem7oS5Yd3WV1Tm48jZoCFME8fbMMdprWS4",
+      "source": "github_public",
+      "sourceRepo": "ccall48/chirpstack-hpr",
+      "sourceUrl": "https://github.com/ccall48/chirpstack-hpr/blob/210fc237b051cb54f03694e294f10b4aefcc980c/README.md",
+      "evidenceSummary": "Developer Solana tip wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "DnqW4j7ZVtfqR1D3ZmNfHFatoLjYCpici1pzFaJmkmBd",
+      "source": "github_public",
+      "sourceRepo": "ideacco/solana-swap-parser",
+      "sourceUrl": "https://github.com/ideacco/solana-swap-parser/blob/1d6c423fc8df1c2c29e40ffb7483869682df4d99/README.md",
+      "evidenceSummary": "Solana swap tooling developer address",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "9ci7R1GYBa25FP2J13XmEnNVXmvqHD96T14NXyqqbiQx",
+      "source": "github_public",
+      "sourceRepo": "dododbobovo-commits/wdp",
+      "sourceUrl": "https://github.com/dododbobovo-commits/wdp/blob/b0fc63ae954820a139a93ab9589c2487a6e3bd27/DONATE.md",
+      "evidenceSummary": "Developer Solana donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "J1Q418tYAPR2ymCEWraWTmvVuVYtwHxFidzvfWpu11WB",
+      "source": "github_public",
+      "sourceRepo": "SolanaSwapBots/solana-sniper-tokens-bot",
+      "sourceUrl": "https://github.com/SolanaSwapBots/solana-sniper-tokens-bot/blob/86bba8d8388f990434e3bc929167cc40beba18b8/README.md",
+      "evidenceSummary": "Solana developer support wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "EzQveUMk45NmuftUSGLqRH8DUBmxzCpS3HuEchFc5t1X",
+      "source": "github_public",
+      "sourceRepo": "tyler-pruitt/robinhood_crypto_trader",
+      "sourceUrl": "https://github.com/tyler-pruitt/robinhood_crypto_trader/blob/741e962fe7d885899254900e2f7045cfd130e923/README.md",
+      "evidenceSummary": "Developer published Solana wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
     }
   ],
-  "candidateCount": 62,
+  "candidateCount": 95,
   "updatedAt": "2026-09-26"
 }
