@@ -145,22 +145,31 @@ jobs:
           const c=new Connection(process.env.SOLANA_RPC_URL||clusterApiUrl('devnet'),'confirmed');
           const balance=await c.getBalance(new PublicKey(address),'confirmed');
           const needs=balance<50_000_000;
-          console.log('REVIVE_DEVNET_PAYER='+address+' balance_lamports='+balance+' pow_needed='+(needs?'YES':'NO'));
+          const hasSeed=balance>=5_000;
+          console.log('REVIVE_DEVNET_PAYER='+address+' balance_lamports='+balance+' pow_needed='+(needs?'YES':'NO')+' pow_seed='+(hasSeed?'YES':'NO'));
           fs.appendFileSync(process.env.GITHUB_OUTPUT,'needs_pow='+(needs?'true':'false')+'\n');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'has_seed='+(hasSeed?'true':'false')+'\n');
           NODE
+      - name: Require seed test-SOL before PoW fallback
+        if: env.DEVNET_PAYER_SECRET_JSON == '' && steps.pow-needed.outputs.needs_pow == 'true' && steps.pow-needed.outputs.has_seed != 'true'
+        shell: bash
+        run: |
+          PAYER="$(tr -d '\n' < "$DEVNET_PAYER_PUBKEY_FILE")"
+          echo "::error::DEVNET funding gate only: send free test-SOL to $PAYER using a Solana Devnet web faucet, then rerun. This requires NO real SOL."
+          exit 1
       - name: Cache Solana devnet Proof-of-Work faucet client
-        if: env.DEVNET_PAYER_SECRET_JSON == '' && steps.pow-needed.outputs.needs_pow == 'true'
+        if: env.DEVNET_PAYER_SECRET_JSON == '' && steps.pow-needed.outputs.needs_pow == 'true' && steps.pow-needed.outputs.has_seed == 'true'
         id: cache-devnet-pow
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/devnet-pow
           key: devnet-pow-v0.1.4-${{ runner.os }}-${{ runner.arch }}
       - name: Install Solana devnet Proof-of-Work faucet client
-        if: env.DEVNET_PAYER_SECRET_JSON == '' && steps.pow-needed.outputs.needs_pow == 'true' && steps.cache-devnet-pow.outputs.cache-hit != 'true'
+        if: env.DEVNET_PAYER_SECRET_JSON == '' && steps.pow-needed.outputs.needs_pow == 'true' && steps.pow-needed.outputs.has_seed == 'true' && steps.cache-devnet-pow.outputs.cache-hit != 'true'
         shell: bash
         run: cargo install devnet-pow --version 0.1.4
       - name: Mine disposable devnet SOL with PoW faucet
-        if: env.DEVNET_PAYER_SECRET_JSON == '' && steps.pow-needed.outputs.needs_pow == 'true'
+        if: env.DEVNET_PAYER_SECRET_JSON == '' && steps.pow-needed.outputs.needs_pow == 'true' && steps.pow-needed.outputs.has_seed == 'true'
         shell: bash
         run: |
           PAYER="$(tr -d '\n' < "$DEVNET_PAYER_PUBKEY_FILE")"
