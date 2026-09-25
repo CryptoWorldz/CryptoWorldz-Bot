@@ -8,6 +8,11 @@ ROOT = Path(__file__).resolve().parents[1]
 spec = json.loads((ROOT / "worldzpad-omnichain/bitworldz/bitworldz.v1.json").read_text())
 registry = json.loads((ROOT / "worldzpad-omnichain/bitworldz/btc-asset-registry.v1.json").read_text())
 fee = json.loads((ROOT / "worldzpad-omnichain/fee-policy.v1.json").read_text())
+matrix = json.loads((ROOT / "worldzpad-omnichain/bitworldz/chain-matrix.v1.json").read_text())
+schema = json.loads((ROOT / "worldzpad-omnichain/bitworldz/bitpair-intent.schema.json").read_text())
+launch_page = (ROOT / "launchpad.cryptoworldz.xyz/bitworldz/index.html").read_text()
+subdomain_page = (ROOT / "bitworldz.cryptoworldz.xyz/index.html").read_text()
+sdk = (ROOT / "worldzpad-omnichain/bitworldz/sdk/bitworldz-core.mjs").read_text()
 
 if spec["name"] != "BitWorldz OmniBTC™":
     raise SystemExit("BitWorldz identity drifted")
@@ -24,6 +29,31 @@ if registry["policy"]["wrappedMustNotBeLabeledNative"] is not True:
     raise SystemExit("BTC asset registry may not label wrapped BTC as native")
 
 targets = {"solana","xrpl","base","ethereum","bnb","sui","hyperevm","robinhood"}
+if matrix["mainnetExecutionEnabled"] is not False:
+    raise SystemExit("BitWorldz chain matrix mainnet must remain OFF")
+if set(matrix["chains"]) != targets:
+    raise SystemExit("BitWorldz chain matrix must cover all eight Worldz chain targets")
+for key, row in matrix["chains"].items():
+    if row["mainnetApproved"] is not False:
+        raise SystemExit(f"{key}: BitWorldz chain unexpectedly mainnet approved")
+if schema["properties"]["version"].get("const") != "BITWORLDZ-BITPAIR-INTENT-V1":
+    raise SystemExit("BitPair intent schema version drifted")
+if schema["properties"]["mode"].get("const") != "RESEARCH_ONLY":
+    raise SystemExit("BitPair intent schema must remain research-only")
+if schema["properties"]["economics"]["properties"]["targetGrossTraderFeeBps"].get("const") != 75:
+    raise SystemExit("BitPair schema fee target drifted")
+if schema["properties"]["safety"]["properties"]["mainnetExecutionEnabled"].get("const") is not False:
+    raise SystemExit("BitPair schema mainnet gate missing")
+
+if "MAINNET_EXECUTION_ENABLED = false" not in sdk:
+    raise SystemExit("BitWorldz SDK mainnet gate missing")
+if 'TARGET_GROSS_TRADER_FEE_BPS = 75n' not in sdk:
+    raise SystemExit("BitWorldz SDK fee target drifted")
+if "Research build" not in subdomain_page:
+    raise SystemExit("BitWorldz subdomain must identify itself as a research build")
+if "Mainnet execution disabled" not in launch_page:
+    raise SystemExit("BitWorldz LaunchPad page mainnet disclosure missing")
+
 if set(spec["supportedWorldzChainTargets"]) != targets:
     raise SystemExit("BitWorldz must target the eight Worldz chain adapters")
 
@@ -62,4 +92,4 @@ if "DIRECT_LAUNCH_PRIMITIVE_NOT_ASSUMED" not in research["bitcoin-l1"]["status"]
     raise SystemExit("Bitcoin L1 must not inherit a fake general-purpose launch primitive")
 
 print("WORLDZ_BITWORLDZ_VALIDATION=PASS")
-print("product=BitWorldz_OmniBTC asset_classes=4 worldz_targets=8 fee_bps=75 split=51/17/15/8.5/8.5 mainnet=OFF")
+print("product=BitWorldz_OmniBTC asset_classes=4 worldz_targets=8 fee_bps=75 split=51/17/15/8.5/8.5 pages=2 sdk=LOCKED schema=LOCKED mainnet=OFF")
