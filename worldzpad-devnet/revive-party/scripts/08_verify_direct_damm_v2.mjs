@@ -34,11 +34,13 @@ const decoded=await cpAmm.fetchPoolFees(poolKey);
 if(BigInt(decoded.cliffFeeNumerator.toString())!==7_500_000n||Number(decoded.numberOfPeriod)!==0)throw new Error('75-bps fixed fee not stored');
 if(position.permanentLockedLiquidity.lte(new BN(0)))throw new Error('permanent lock absent');
 if(!position.unlockedLiquidity.isZero()||!position.vestedLiquidity.isZero())throw new Error('position not fully permanent-locked');
+const evidenceClaimedQuoteRaw=BigInt(e.feeClaim.claimedQuoteRaw);
+const onchainClaimedQuoteRaw=BigInt(position.metrics.totalClaimedBFee.toString());
+if(evidenceClaimedQuoteRaw<=0n)throw new Error('no claimed quote fee evidence');
+if(onchainClaimedQuoteRaw<evidenceClaimedQuoteRaw)throw new Error('on-chain claimed quote-fee metric does not support evidence');
 for(const [name,status] of [['create',createStatus],['swap',swapStatus],['claim',claimStatus]]){
   if(!status?.value||status.value.err)throw new Error(name+' transaction not cleanly confirmed');
 }
-if(BigInt(e.feeClaim.claimedQuoteRaw)<=0n)throw new Error('no claimed quote fee evidence');
-
 const verified={...e,independentVerification:{
   mockMintAuthoritiesRevoked:true,
   fixedSupplyRaw:mint.supply.toString(),
@@ -48,6 +50,7 @@ const verified={...e,independentVerification:{
   permanentLockedLiquidity:position.permanentLockedLiquidity.toString(),
   unlockedLiquidity:position.unlockedLiquidity.toString(),
   allTransactionsConfirmed:true,
+  onchainClaimedQuoteRaw:onchainClaimedQuoteRaw.toString(),
 }};
 fs.writeFileSync('artifacts/revive-direct-damm-v2-verified.json',JSON.stringify(verified,null,2)+'\n');
 console.log('REVIVE_DIRECT_DAMM_VERIFY=PASS pool='+e.pool+' mint='+e.mockExistingMint+' fee_bps=75 permanent_lock=YES fee_claim_raw='+e.feeClaim.claimedQuoteRaw);
