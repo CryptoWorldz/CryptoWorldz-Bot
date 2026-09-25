@@ -28,11 +28,13 @@ import {
 import BN from 'bn.js';
 
 const RPC=process.env.SOLANA_RPC_URL?.trim()||clusterApiUrl('devnet');
-if(/mainnet/i.test(RPC))throw new Error('MAINNET RPC FORBIDDEN');
+const DEVNET_GENESIS_HASH='EtWTRABZaYq6iMfeYKouRu166VU2xqa1';
 const payerFile=process.env.DEVNET_PAYER_KEYPAIR_FILE||'/tmp/revive-devnet-payer.json';
 if(!fs.existsSync(payerFile))throw new Error('devnet payer file missing');
 const payer=Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(payerFile,'utf8'))));
 const connection=new Connection(RPC,'confirmed');
+const genesisHash=await connection.getGenesisHash();
+if(genesisHash!==DEVNET_GENESIS_HASH)throw new Error('DEVNET RPC REQUIRED genesis='+genesisHash);
 const balance=await connection.getBalance(payer.publicKey,'confirmed');
 if(balance<50_000_000)throw new Error('DEVNET_PAYER_NOT_FUNDED balance='+balance);
 
