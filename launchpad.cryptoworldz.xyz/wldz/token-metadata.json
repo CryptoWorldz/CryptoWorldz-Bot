@@ -9,6 +9,7 @@
   "image": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
   "logoURI": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
   "website": "https://launchpad.cryptoworldz.xyz/wldz/",
+  "x": "https://x.com/CryptoWorldzX",
   "telegram": "https://t.me/CryptoWLDZ",
   "explorer": "https://solscan.io/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
   "trading": {
@@ -17,7 +18,8 @@
     "quote": "SOL",
     "feePercent": 2,
     "feeBps": 200,
-    "lpLock": "permanent"
+    "dynamicFee": false,
+    "lpLock": "100% permanent"
   },
   "supply": {
     "maximum": 100000000,
@@ -25,8 +27,17 @@
     "mintAuthority": "REVOKED",
     "freezeAuthority": "REVOKED"
   },
+  "marketStatus": {
+    "meteora": "LIVE",
+    "geckoTerminal": "INDEXED",
+    "birdeye": "INDEXED",
+    "phantom": "RECOGNIZED_UNVERIFIED",
+    "jupiter": "RECOGNIZED_METADATA_PRICE_PENDING",
+    "dexScreener": "PAIR_INDEX_PENDING",
+    "solscan": "TOKEN_PROFILE_PENDING"
+  },
   "official": true,
-  "lastUpdated": "2026-09-23T15:45:00+10:00",
+  "lastUpdated": "2026-09-25T11:55:00+10:00",
   "links": {
     "officialToken": "https://launchpad.cryptoworldz.xyz/wldz/",
     "verification": "https://launchpad.cryptoworldz.xyz/wldz/verify/",
@@ -34,7 +45,13 @@
     "OneWorldz": "https://oneworldz.com/",
     "DonateWorldz": "https://donateworldz.com/",
     "WorldzLaunchPad": "https://launchpad.cryptoworldz.xyz/",
-    "telegram": "https://t.me/CryptoWLDZ"
+    "x": "https://x.com/CryptoWorldzX",
+    "telegram": "https://t.me/CryptoWLDZ",
+    "meteora": "https://www.meteora.ag/dammv2/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "jupiter": "https://jup.ag/tokens/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "phantom": "https://phantom.com/tokens/solana/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "geckoTerminal": "https://www.geckoterminal.com/solana/pools/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+    "birdeye": "https://birdeye.so/solana/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U"
   },
   "resources": {
     "manifest": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json",
