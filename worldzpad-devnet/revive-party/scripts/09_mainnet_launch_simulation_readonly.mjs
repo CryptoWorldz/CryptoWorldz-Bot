@@ -4,10 +4,10 @@
 // Solana mainnet state and calls simulateTransaction with signature verification OFF.
 // It NEVER signs, NEVER sends, NEVER broadcasts and NEVER moves SOL/RVIV.
 //
-// Cost-only pricing note:
-// The devnet fixture 0.000045 SOL/RVIV is used ONLY so the SDK can build the
-// exact pool instruction shape for rent/fee/state simulation. This does NOT set,
-// approve, or authorize the REVIVE mainnet opening price.
+// Owner-approved mainnet opening price:
+// 0.000045 SOL/RVIV was explicitly approved for REVIVE mainnet on 2026-09-26.
+// This script remains read-only: it simulates the exact launch path but never signs,
+// sends, broadcasts, or moves SOL/RVIV.
 
 import fs from 'node:fs';
 import {
@@ -52,8 +52,11 @@ if (cfg.launch.publicMainnetExecutionEnabled !== false) {
 if (route.mainnetGates.enabled !== false) {
   throw new Error('SAFETY_GATE: route mainnet execution must remain false');
 }
-if (route.pricing.mainnet.priceSolPerRviv !== null) {
-  throw new Error('SAFETY_GATE: mainnet opening price must remain unset');
+if (Number(route.pricing.mainnet.priceSolPerRviv) !== 0.000045) {
+  throw new Error('PRICE_GATE: expected owner-approved mainnet price 0.000045 SOL/RVIV');
+}
+if (Number(cfg.launch.mainnetOpeningPriceSolPerRviv) !== 0.000045) {
+  throw new Error('PRICE_GATE: launch contract and route price must agree at 0.000045 SOL/RVIV');
 }
 
 const connection = new Connection(RPC, 'confirmed');
@@ -119,8 +122,8 @@ const treasuryTopUpLamports =
     : 0n;
 
 const cpAmm = new CpAmm(connection);
-const costOnlyPrice = '0.000045';
-const initSqrtPrice = getSqrtPriceFromPrice(costOnlyPrice, 6, 9);
+const approvedMainnetPrice = String(route.pricing.mainnet.priceSolPerRviv);
+const initSqrtPrice = getSqrtPriceFromPrice(approvedMainnetPrice, 6, 9);
 const tokenAAmount = new BN(launchRaw.toString());
 const tokenBAmount = new BN(0);
 const liquidityDelta = cpAmm.preparePoolCreationSingleSide({
@@ -237,9 +240,9 @@ const report = {
   signed: false,
   mainnetExecutionEnabled: false,
   price: {
-    valueSolPerRviv: Number(costOnlyPrice),
-    usage: 'COST_ONLY_SIMULATION_FIXTURE_NOT_MAINNET_PRICE_APPROVAL',
-    mainnetOpeningPriceStillUnset: true,
+    valueSolPerRviv: Number(approvedMainnetPrice),
+    usage: 'OWNER_APPROVED_MAINNET_OPENING_PRICE__READ_ONLY_SIMULATION',
+    mainnetOpeningPriceApproved: true,
   },
   token: {
     mint: rvivMint.toBase58(),
@@ -301,7 +304,7 @@ const report = {
     noSignatureVerification: true,
     noBroadcast: true,
     noTokenMovement: true,
-    exactBroadcastStillBlockedByMainnetPriceDecision: true,
+    exactBroadcastStillBlockedByHumanWalletSignatureAndRemainingTechnicalGates: true,
     exactBroadcastStillRequiresHumanWalletSignatures: true,
   },
 };
@@ -321,6 +324,6 @@ if (sim.err != null) {
     'REVIVE_MAINNET_READONLY_SIMULATION=PASS sponsor_required_sol=' +
     report.sol.sponsorRequiredSol +
     ' sponsor_headroom_sol=' + report.sol.sponsorHeadroomSol +
-    ' broadcast=NO mainnet_price=UNSET',
+    ' broadcast=NO mainnet_price=0.000045_OWNER_APPROVED',
   );
 }
