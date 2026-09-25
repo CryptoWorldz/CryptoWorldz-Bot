@@ -176,7 +176,7 @@ const createIx=squads.instructions.vaultTransactionCreate({
   vaultIndex:0,
   ephemeralSigners:1,
   transactionMessage:innerMessage,
-  memo:'REVIVE mainnet direct DAMM v2 — 30M RVIV — 75 bps — 100% permanent lock',
+  // No memo: minimum-byte / minimum-fee launch path.
 });
 const proposalCreateIx=squads.instructions.proposalCreate({
   multisigPda:MULTISIG,
@@ -189,7 +189,7 @@ const approveIx=squads.instructions.proposalApprove({
   multisigPda:MULTISIG,
   transactionIndex:nextIndex,
   member:MEMBER,
-  memo:'JayJayTeamDev approval — threshold 1',
+  // No memo: minimum-byte / minimum-fee launch path.
 });
 const executeIx=squads.generated.createVaultTransactionExecuteInstruction({
   multisig:MULTISIG,
@@ -237,8 +237,8 @@ async function simulate(tx,addresses=[]){
 }
 
 const atomicTx=legacyTx([topUpIx,createIx,proposalCreateIx,approveIx,executeIx]);
-const setupTx=legacyTx([topUpIx,createIx,proposalCreateIx,approveIx]);
-const executeTx=legacyTx([executeIx]);
+const setupTx=legacyTx([createIx,proposalCreateIx,approveIx]);
+const executeTx=legacyTx([topUpIx,executeIx]);
 
 const atomicSize=serializedSize(atomicTx);
 const setupSize=serializedSize(setupTx);
