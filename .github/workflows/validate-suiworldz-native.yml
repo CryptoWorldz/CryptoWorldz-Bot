@@ -12,6 +12,8 @@ on:
       - 'launchpad.cryptoworldz.xyz/app.js'
       - 'suiworldz.xyz/**'
       - '.github/workflows/validate-suiworldz-native.yml'
+  workflow_dispatch:
+
   pull_request:
     paths:
       - 'worldzpad-sui-testnet/**'
@@ -134,7 +136,8 @@ jobs:
           printf '\n'
 
   devnet-onchain:
-    if: github.event_name == 'push'
+    # Network writes are deliberate: run manually, or tag an execution commit with [sui-onchain].
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[sui-onchain]'))
     needs: compile
     runs-on: ubuntu-latest
     timeout-minutes: 15

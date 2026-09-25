@@ -1,12 +1,12 @@
 {
   "proof": "WORLDZ_SUI_NATIVE_DEVNET_ONCHAIN",
   "network": "sui-devnet",
-  "sdk": "@mysten/sui@2.31.3",
-  "packageId": "0x7837fa37bd36dbf51968c156b6042ae74630e7c6a75a27d6e7b9ff4fb75e662b",
-  "coinType": "0x7837fa37bd36dbf51968c156b6042ae74630e7c6a75a27d6e7b9ff4fb75e662b::worldz_token::WorldzToken",
-  "publisherAddress": "0x564484d2b1cd3b98e638129268c8be3afe7f14fa580f3d72a51d3b92466d7286",
-  "publishDigest": "3zDRqXgoDJwvaWaNFLESffVof5WaThgAPVN1F1pVprzR",
-  "initializeDigest": "AuHszu6fsK3zC1RW9FevTG8rTYv2BMjvMiFN3NUW9HCv",
+  "sdk": "@mysten/sui@2.32.0",
+  "packageId": "0x9f3f75256822e95ccafa4b03b8d33cf27f0673174bafd51f4214f076c2aa1a27",
+  "coinType": "0x9f3f75256822e95ccafa4b03b8d33cf27f0673174bafd51f4214f076c2aa1a27::worldz_token::WorldzToken",
+  "publisherAddress": "0xb5483fdbee6b1ccc84efe5484f5f6119ce43bfce009eabc6b4c63113c2eecb1b",
+  "publishDigest": "HAP8ka8x919hMNN5LUsFN7PwC55sjtTczTuoTFDG8NHq",
+  "initializeDigest": "z6FxA4Ad23vsxqRyX8wrfFUcQbcSWaAiLypddPnPBFq",
   "decimals": 6,
   "supplyTokens": "100000000",
   "rawSupply": "100000000000000",
@@ -17,5 +17,5 @@
   "regulated": false,
   "walletTransferTax": false,
   "mainnetExecution": false,
-  "note": "Disposable Sui Devnet proof. Testnet market/release and mainnet remain separately gated."
+  "note": "Disposable Sui Devnet proof executed with @mysten/sui 2.32.0. The ephemeral proof key is not persisted. Testnet, market execution and mainnet remain separate release gates."
 }
