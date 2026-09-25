@@ -58,10 +58,10 @@ Deno.serve(async (req) => {
     if (String(payload.repository_id || "") !== REPOSITORY_ID) {
       return json({ ok: false, error: "repository id not allowed" }, 403);
     }
-    if (String(payload.repository_visibility || "") !== "private") {
+    if (String(payload.repository_visibility || "") !== "public") {
       return json({ ok: false, error: "repository visibility not allowed" }, 403);
     }
-    if (String(payload.event_name || "") !== "push") {
+    if (!["push", "workflow_dispatch"].includes(String(payload.event_name || ""))) {
       return json({ ok: false, error: "event not allowed" }, 403);
     }
     if (String(payload.ref || "") !== REQUIRED_REF) {
