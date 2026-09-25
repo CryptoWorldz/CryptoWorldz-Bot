@@ -43,9 +43,10 @@ jobs:
           out.parent.mkdir(parents=True,exist_ok=True)
           t=src.read_text()
 
-          # LaunchPad origin + dedicated same-origin mainnet RPC bridge.
+          # LaunchPad origin + dedicated mainnet RPC bridge.
+          # @solana/web3.js Connection requires an absolute http(s) endpoint.
           t=t.replace("const RPC='/revive-launch/rpc.php';",
-                      "const RPC='/revive-distribution/rpc.php';")
+                      "const RPC='https://launchpad.cryptoworldz.xyz/revive-distribution/rpc.php';")
 
           # Replace the old hidden Jupiter React bridge with Reown's official
           # framework-agnostic AppKit + Solana adapter.
@@ -219,7 +220,7 @@ jobs:
                   assert 'WORLDZLAUNCHPAD' in body
                   assert 'WORLDZ_APPKIT_DIRECT_V1' in body
                   assert '@reown/appkit-cdn@1.8.24/dist/appkit.js' in body
-                  assert "const RPC='/revive-distribution/rpc.php';" in body
+                  assert "const RPC='https://launchpad.cryptoworldz.xyz/revive-distribution/rpc.php';" in body
                   assert '/mint/jupiter-mobile.js' not in body
                   assert 'Connect JayJayTeamDev Wallet' in body
                   assert '70,000,000 RVIV' in body
