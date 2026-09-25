@@ -43,26 +43,30 @@ for(let i=1n;i<=currentIndex;i++){
   const [proposalPda]=squads.getProposalPda({multisigPda:MULTISIG,transactionIndex:i});
   const [txInfo,propInfo]=await connection.getMultipleAccountsInfo([txPda,proposalPda],'confirmed');
 
-  let txDecoded=null, propDecoded=null;
+  let vaultDecoded=null, configDecoded=null, propDecoded=null;
   if(txInfo){
-    try{txDecoded=squads.accounts.VaultTransaction.fromAccountInfo(txInfo)[0];}catch{}
+    try{vaultDecoded=squads.accounts.VaultTransaction.fromAccountInfo(txInfo)[0];}catch{}
+    if(!vaultDecoded){
+      try{configDecoded=squads.accounts.ConfigTransaction.fromAccountInfo(txInfo)[0];}catch{}
+    }
   }
   if(propInfo){
     try{propDecoded=squads.accounts.Proposal.fromAccountInfo(propInfo)[0];}catch{}
   }
 
-  const txIsVault=Boolean(txDecoded);
+  const txType=vaultDecoded?'VaultTransaction':configDecoded?'ConfigTransaction':(txInfo?'OTHER_OR_UNDECODED':'MISSING');
+  const txIsCloseableType=Boolean(vaultDecoded||configDecoded);
   const status=propDecoded?.status?.__kind??(propInfo?'UNDECODED':'MISSING');
   const isStale=i<=staleIndex;
   const terminal=['Executed','Rejected','Cancelled'].includes(status);
-  const closeByRule=txIsVault && (
+  const closeByRule=txIsCloseableType && (
     terminal ||
     ((!propInfo || ['Draft','Active'].includes(status)) && isStale)
   );
 
   let sim=null, simulationPass=false, closeFeeLamports=null;
   if(closeByRule && rentCollectorConfigured){
-    const ix=squads.instructions.vaultTransactionAccountsClose({
+    const ix=(vaultDecoded?squads.instructions.vaultTransactionAccountsClose:squads.instructions.configTransactionAccountsClose)({
       multisigPda:MULTISIG,
       rentCollector,
       transactionIndex:i,
@@ -88,7 +92,7 @@ for(let i=1n;i<=currentIndex;i++){
     index:i.toString(),
     transactionPda:txPda.toBase58(),
     transactionExists:Boolean(txInfo),
-    transactionType:txIsVault?'VaultTransaction':(txInfo?'OTHER_OR_UNDECODED':'MISSING'),
+    transactionType:txType,
     transactionLamports:txInfo?.lamports??0,
     proposalPda:proposalPda.toBase58(),
     proposalExists:Boolean(propInfo),
