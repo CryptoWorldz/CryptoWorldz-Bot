@@ -1,0 +1,62 @@
+name: Deploy REVIVE Wallet Bridge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cryptoworldz.xyz/revive-launch/jupiter-mobile.js'
+      - '.github/workflows/deploy-revive-wallet-bridge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate bridge
+        run: |
+          grep -q '@jup-ag/jup-mobile-adapter@0.0.2' cryptoworldz.xyz/revive-launch/jupiter-mobile.js
+          grep -q 'https://cryptoworldz.xyz' cryptoworldz.xyz/revive-launch/jupiter-mobile.js
+      - name: Upload bridge
+        shell: python
+        run: |
+          import os,ssl
+          from ftplib import FTP_TLS,error_perm
+          from pathlib import Path
+          local=Path('cryptoworldz.xyz/revive-launch/jupiter-mobile.js')
+          remote_dir='domains/cryptoworldz.xyz/public_html/revive-launch'
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=40)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p(); ftp.set_pasv(True); ftp.cwd('/')
+          for part in remote_dir.split('/'):
+              if not part: continue
+              try: ftp.cwd(part)
+              except error_perm:
+                  ftp.mkd(part); ftp.cwd(part)
+          with local.open('rb') as handle:
+              ftp.storbinary('STOR jupiter-mobile.js',handle,blocksize=262144)
+          ftp.quit()
+          print('REVIVE_WALLET_BRIDGE_DEPLOY=PASS')
+      - name: Verify live bridge
+        shell: python
+        run: |
+          import urllib.request
+          url='https://cryptoworldz.xyz/revive-launch/jupiter-mobile.js'
+          req=urllib.request.Request(url,headers={'User-Agent':'REVIVE-Bridge-Verify/1.0','Cache-Control':'no-cache'})
+          with urllib.request.urlopen(req,timeout=20) as r:
+              text=r.read().decode('utf-8','ignore')
+          assert '@jup-ag/jup-mobile-adapter@0.0.2' in text
+          assert 'https://cryptoworldz.xyz' in text
+          print('REVIVE_WALLET_BRIDGE_LIVE=PASS')
