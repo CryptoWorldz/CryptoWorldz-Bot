@@ -1013,8 +1013,108 @@
       "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
       "chainValidation": "PENDING",
       "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "8yjHdsCgx3bp2zEwGiWSMgwpFaCSzfYAHT1vk7KJBqhN",
+      "source": "github_public",
+      "sourceRepo": "pointgroup-labs/sv-manager",
+      "sourceUrl": "https://github.com/pointgroup-labs/sv-manager/blob/3d788415308e1276efac97ce15437019b6a91eaf/README.md",
+      "evidenceSummary": "Solana validator/project donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "H3NfaRZD8sPtcPRNLymjkPFT9onuFqdKiQ3XST2tZBbg",
+      "source": "github_public",
+      "sourceRepo": "Grow-Dojo/GrowDojo",
+      "sourceUrl": "https://github.com/Grow-Dojo/GrowDojo/blob/be388f6a54d2398e69c2d17a3d1ebc89fa35fbd5/TIPJAR.md",
+      "evidenceSummary": "Developer/project SOL tip jar",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "9irdHFdeWVb6cnu8HTdKAs3Lg1PD8HiQQLhVHLSAQq6X",
+      "source": "github_public",
+      "sourceRepo": "Arianlavi/Telegram-API-Getter",
+      "sourceUrl": "https://github.com/Arianlavi/Telegram-API-Getter/blob/f63f2bb1a9d369611fa0a49df0fe80f784b01e41/README.md",
+      "evidenceSummary": "Developer published Solana support address",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "3hwQaAUVsA1fviC2cDD7cpMCzoj1P8kuhnZNA4FKuS2g",
+      "source": "github_public",
+      "sourceRepo": "kzeedev/MTWireGuard",
+      "sourceUrl": "https://github.com/kzeedev/MTWireGuard/blob/6577a48888950641781834b297b9af6898acb119/README.md",
+      "evidenceSummary": "Developer SOL donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "GNJWgRmgRd7S9VrhCcJnVNTtAiQGTWrya9gcGb985x2m",
+      "source": "github_public",
+      "sourceRepo": "prp-e/minillm",
+      "sourceUrl": "https://github.com/prp-e/minillm/blob/3199914237352f52ae3c319811ee5d8d23aa644b/model.md",
+      "evidenceSummary": "Open-source project Solana donation wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "6SBQGqhfnazaEQQycvk2MSbNtgjwhTK8TgrujNxBgsW",
+      "source": "github_public",
+      "sourceRepo": "thor314/uncloak",
+      "sourceUrl": "https://github.com/thor314/uncloak/blob/759fceadf293fce2a925bc95e19b94595cee7bfb/README.md",
+      "evidenceSummary": "Developer published Solana support address",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "4nyNbPDTG7qAcfGpcTSuD7i9gD6L4URarkh5RcPfw1mW",
+      "source": "github_public",
+      "sourceRepo": "moscatogelato/raydium-liquidity-remover",
+      "sourceUrl": "https://github.com/moscatogelato/raydium-liquidity-remover/blob/856626cab344a8ec333340755775641cd8771b7f/README.md",
+      "evidenceSummary": "Raydium tooling developer Solana address",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "4izNYzN7uQac8jBDcD7NmuCpS8PqvYiHVSLXF5bY9Zrg",
+      "source": "github_public",
+      "sourceRepo": "jopanel/solana-php-sdk",
+      "sourceUrl": "https://github.com/jopanel/solana-php-sdk/blob/7d8b2ba889db241d415a850bb4cd189b2b2bcc25/README.md",
+      "evidenceSummary": "Solana SDK developer wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "tipRJZ4AKbWV6WFN9sVaJtDsrfQKg2bF3YfPrLUxSVi",
+      "source": "github_public",
+      "sourceRepo": "zrsm/fourmeme-abi",
+      "sourceUrl": "https://github.com/zrsm/fourmeme-abi/blob/f52b5c0f79f5b7343125346786a885d195c4dd8f/README.md",
+      "evidenceSummary": "Developer SOL tip wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
+    },
+    {
+      "address": "7gm6BPQrSBaTAYaJheuRevBNXcmKsgbkfBCVSjBnt9aP",
+      "source": "github_public",
+      "sourceRepo": "shinyapes/Solana-Trading-Bot",
+      "sourceUrl": "https://github.com/shinyapes/Solana-Trading-Bot/blob/900b7230cc6a1e93823de816bf6c09c2fb9d77dd/README.md",
+      "evidenceSummary": "Solana trading developer tip wallet",
+      "qualification": "PUBLIC_SELF_PUBLISHED_DEVELOPER_OR_PROJECT_WALLET",
+      "chainValidation": "PENDING",
+      "devCityStatus": "CANDIDATE_PENDING_CHAIN_REVIEW"
     }
   ],
-  "candidateCount": 95,
+  "candidateCount": 105,
   "updatedAt": "2026-09-26"
 }
