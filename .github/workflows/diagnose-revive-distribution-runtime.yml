@@ -29,13 +29,14 @@ jobs:
           cat > runtime-diagnostic.cjs <<'NODE'
           const { chromium } = require('playwright');
           (async()=>{
-            const url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v=runtime-diagnostic-3';
+            const url='https://launchpad.cryptoworldz.xyz/revive-distribution/?v=runtime-diagnostic-4';
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:412,height:915}});
             const messages=[];
             page.on('console',m=>messages.push('CONSOLE '+m.type()+': '+m.text()));
-            page.on('pageerror',e=>messages.push('PAGEERROR: '+e.stack));
+            page.on('pageerror',e=>messages.push('PAGEERROR: name='+e?.name+' message='+e?.message+' stack='+e?.stack+' raw='+String(e)));
             page.on('requestfailed',r=>messages.push('REQUESTFAILED: '+r.url()+' :: '+r.failure()?.errorText));
+            page.on('response',r=>{if(/esm\.sh|reown|wallet-standard|solana\/web3|sqds|spl-token/.test(r.url()))messages.push('RESPONSE '+r.status()+': '+r.url())});
 
             const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
             console.log('HTTP_STATUS='+response?.status());
