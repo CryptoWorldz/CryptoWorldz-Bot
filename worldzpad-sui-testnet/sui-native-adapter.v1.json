@@ -1,6 +1,6 @@
 {
   "version": "WORLDZ-SUI-NATIVE-2026-09-25-A",
-  "status": "TESTNET_BUILD__MAINNET_LOCKED",
+  "status": "DEVNET_EXECUTION_BUILD__TESTNET_AND_MAINNET_LOCKED",
   "network": "sui",
   "tokenStandard": "Sui Currency Standard / CoinRegistry",
   "architecture": {
@@ -15,7 +15,7 @@
     "walletTransferTaxPercent": 0
   },
   "userFlow": [
-    "Connect Sui wallet on Testnet",
+    "Connect Sui wallet on Devnet",
     "Review Worldz Safe Launch manifest",
     "Publish immutable audited Worldz token package",
     "Initialize fixed-supply currency using Coin Registry",
@@ -24,7 +24,7 @@
     "Register Worldz Proof"
   ],
   "marketLayer": {
-    "tokenCreation": "EXECUTABLE_TESTNET_TARGET",
+    "tokenCreation": "EXECUTABLE_DEVNET_TARGET",
     "marketLaunch": "SEPARATE_GATE",
     "preferredResearchVenue": "Cetus CLMM",
     "nativeOrderbookAlternative": "DeepBook",
@@ -38,8 +38,8 @@
   "mainnet": {
     "creatorLaunchEnabled": false,
     "required": [
-      "testnet package publication proof",
-      "testnet fixed-supply Currency proof",
+      "devnet package publication proof",
+      "devnet fixed-supply Currency proof",
       "wallet flow proof",
       "fee-route design and proof",
       "market venue adapter proof",
@@ -49,5 +49,10 @@
       "Australian legal/regulatory position for exact mainnet service",
       "human launch authorization"
     ]
+  },
+  "executionRail": {
+    "devnet": "AUTOMATED_EXECUTABLE_PROOF",
+    "testnet": "RELEASE_GATE_AFTER_DEVNET",
+    "mainnet": "LOCKED"
   }
 }
