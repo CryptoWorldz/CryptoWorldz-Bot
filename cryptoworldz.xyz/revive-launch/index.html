@@ -63,7 +63,8 @@ const RVIV_MINT=new PublicKey('DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R');
 const RVIV_ATA_EXPECTED='28CwdVt2y997WZqTzEuBpuwoyVYAj6JcaD4qDMzyCdtn';
 const PRICE='0.000045';
 const LAUNCH_TOKENS=30_000_000;
-const connection=new Connection(clusterApiUrl('mainnet-beta'),'confirmed');
+const RPC_URL='/revive-launch/rpc.php';
+const connection=new Connection(RPC_URL,'confirmed');
 const $=s=>document.querySelector(s);
 let wallet=null,plan=null;
 
@@ -110,7 +111,7 @@ async function sendSigned(tx,label){
 }
 async function rpcSim(tx){
   const wire=tx.serialize({requireAllSignatures:false,verifySignatures:false}).toString('base64');
-  const r=await fetch(clusterApiUrl('mainnet-beta'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
+  const r=await fetch(RPC_URL,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
     jsonrpc:'2.0',id:1,method:'simulateTransaction',params:[wire,{encoding:'base64',sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed'}]
   })});
   const j=await r.json(); if(j.error)throw new Error('Simulation RPC failed: '+JSON.stringify(j.error)); return j.result?.value;
