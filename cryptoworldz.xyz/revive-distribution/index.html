@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>REVIVE $RVIV — Approved Distribution</title>
+<style>
+:root{color-scheme:dark;--bg:#07030d;--card:#160a27;--line:#7447c5;--text:#faf6ff;--muted:#bcaed0;--ok:#50e5a1;--bad:#ff7280;--gold:#ffd66b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#32105b 0,#07030d 48%);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text)}
+main{max-width:860px;margin:auto;padding:24px 15px 70px}.card{background:rgba(22,10,39,.95);border:1px solid rgba(162,111,255,.34);border-radius:20px;padding:19px;margin-bottom:13px}
+h1{font-size:clamp(30px,7vw,48px);margin:0 0 5px}.sub{margin:0;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0}.box{background:#0d0716;border:1px solid #34204d;border-radius:14px;padding:12px}.box small{display:block;color:var(--muted);font-size:11px}.box b{display:block;margin-top:4px}.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #ffffff12}.row span{color:var(--muted)}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}
+button{width:100%;border:0;border-radius:14px;padding:15px 18px;font-weight:850;font-size:16px;margin-top:10px;cursor:pointer}.secondary{background:#25163d;color:white;border:1px solid #7043bd}.go{background:linear-gradient(90deg,#8e54ff,#bf6cff);color:white}.go:disabled,.secondary:disabled{opacity:.43;cursor:not-allowed}
+.status{white-space:pre-wrap;word-break:break-word;background:#0d0716;border:1px solid #35204b;border-radius:14px;padding:14px;margin-top:14px;color:var(--muted);line-height:1.45}.good{border-color:#50e5a177;color:#caffea}.bad{border-color:#ff728077;color:#ffdadd}.warn{border-color:#ffd66b66;color:#fff0bc}
+.tag{display:inline-block;padding:5px 9px;border-radius:999px;background:#ffffff0c;border:1px solid #ffffff15;font-size:11px;margin:4px 4px 0 0}.note{font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.row{flex-direction:column;gap:3px}}
+</style>
+</head>
+<body>
+<main>
+<section class="card">
+  <div class="tag">OWNER ONLY</div><div class="tag">SOLANA MAINNET</div><div class="tag">SQUADS VAULT #0</div>
+  <h1>REVIVE <span style="color:#c47cff">$RVIV</span></h1>
+  <p class="sub">Approved post-launch distribution — exact 200M model reconciliation</p>
+  <div class="grid">
+    <div class="box"><small>Already in launch liquidity</small><b>30,000,000 RVIV</b></div>
+    <div class="box"><small>Move in this approval</small><b>70,000,000 RVIV</b></div>
+    <div class="box"><small>Remain reserved in treasury</small><b>100,000,000 RVIV</b></div>
+  </div>
+  <button class="secondary" id="connect">Connect JayJayTeamDev Wallet</button>
+  <button class="secondary" id="preflight" disabled>1. FINAL LIVE PREFLIGHT</button>
+  <button class="go" id="execute" disabled>2. ONE WALLET APPROVAL — DISTRIBUTE 70M RVIV</button>
+  <div id="status" class="status warn">No transaction will be built until the authorized wallet is connected and the live 170,000,000 RVIV treasury balance is verified.</div>
+  <p class="note"><b>One approval means one wallet approval screen.</b> Solana still records a separate cryptographic signature for each transaction in the signed batch. If the connected wallet cannot batch-sign in one approval, this console stops before moving RVIV.</p>
+</section>
+
+<section class="card">
+<h2>Moves now — approved destinations</h2>
+<div class="row"><span>Limited Edition — verified Legacy Dev</span><b>5,000,000</b></div>
+<div class="row"><span>Next Big Coin Dev — verified Legacy Dev</span><b>5,000,000</b></div>
+<div class="row"><span>PdCrew — verified Legacy Dev</span><b>5,000,000</b></div>
+<div class="row"><span>Purple Diamond Crew — verified Legacy Dev</span><b>5,000,000</b></div>
+<div class="row"><span>Purple PDC — verified Legacy Dev</span><b>5,000,000</b></div>
+<div class="row"><span>SolSavewXRP — verified Legacy Dev</span><b>5,000,000</b></div>
+<div class="row"><span>DevCity™ 100 staging</span><b>20,000,000</b></div>
+<div class="row"><span>OneWorldz Charity Impact staging</span><b>20,000,000</b></div>
+<div class="row"><span><b>Total moved in this run</b></span><b>70,000,000 RVIV</b></div>
+</section>
+
+<section class="card">
+<h2>Stays reserved — exactly as approved</h2>
+<div class="row"><span>Team vesting — 0% immediate, 90-day cliff, 24-month linear; beneficiary weights pending</span><b>30,000,000</b></div>
+<div class="row"><span>Staged liquidity reserve</span><b>40,000,000</b></div>
+<div class="row"><span>Legacy Revival claim pool — 216 eligible wallets; claims not open</span><b>20,000,000</b></div>
+<div class="row"><span>Treasury / operations reserve</span><b>10,000,000</b></div>
+<div class="row"><span><b>Treasury after distribution</b></span><b>100,000,000 RVIV</b></div>
+</section>
+
+<section class="card">
+<h2>Hard locks</h2>
+<div class="row"><span>Canonical mint</span><b class="mono">DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R</b></div>
+<div class="row"><span>Squads multisig</span><b class="mono">B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN</b></div>
+<div class="row"><span>Squads vault #0</span><b class="mono">n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB</b></div>
+<div class="row"><span>Fee payer / authorized member</span><b class="mono">Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u</b></div>
+<div id="proof" class="status">Waiting for live preflight.</div>
+</section>
+</main>
+
+<script type="module">
+import {Connection,PublicKey,Transaction,TransactionMessage} from 'https://esm.sh/@solana/web3.js@1.98.4?bundle';
+import {
+  TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID,getAssociatedTokenAddressSync,
+  createAssociatedTokenAccountIdempotentInstruction,createTransferCheckedInstruction,getMint
+} from 'https://esm.sh/@solana/spl-token@0.4.15?bundle&deps=@solana/web3.js@1.98.4';
+import * as squads from 'https://esm.sh/@sqds/multisig@2.1.4?bundle&deps=@solana/web3.js@1.98.4';
+import {getWallets} from 'https://esm.sh/@wallet-standard/app@1.1.0?bundle';
+import {Buffer} from 'https://esm.sh/buffer@6.0.3?bundle';
+if(!globalThis.Buffer)globalThis.Buffer=Buffer;
+
+const RPC='/revive-launch/rpc.php';
+const MAINNET_GENESIS='5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
+const MEMBER=new PublicKey('Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u');
+const MULTISIG=new PublicKey('B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN');
+const VAULT=new PublicKey('n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB');
+const MINT=new PublicKey('DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R');
+const DECIMALS=6;
+const UNIT=1_000_000n;
+const EXPECTED_BEFORE=170_000_000n*UNIT;
+const MOVE_TOTAL=70_000_000n*UNIT;
+const EXPECTED_AFTER=100_000_000n*UNIT;
+const LEGS=[
+  ['Limited Edition','5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9',5_000_000n],
+  ['Next Big Coin Dev','3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt',5_000_000n],
+  ['PdCrew','DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j',5_000_000n],
+  ['Purple Diamond Crew','ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U',5_000_000n],
+  ['Purple PDC','G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3',5_000_000n],
+  ['SolSavewXRP','5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9',5_000_000n],
+  ['DevCity 100','2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m',20_000_000n],
+  ['OneWorldz Charity Impact','5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW',20_000_000n]
+];
+const connection=new Connection(RPC,'confirmed');
+const $=s=>document.querySelector(s);
+let wallet=null,plan=null;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function setStatus(msg,type='warn'){const e=$('#status');e.textContent=msg;e.className='status '+type}
+function short(s){s=String(s);return s.slice(0,5)+'…'+s.slice(-5)}
+function txSize(tx){return tx.serialize({requireAllSignatures:false,verifySignatures:false}).length}
+async function rpc(method,params=[]){
+  const r=await fetch(RPC,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});
+  const j=await r.json(); if(!r.ok||j.error)throw new Error(method+': '+JSON.stringify(j.error||r.status)); return j.result;
+}
+async function simUnsigned(tx){
+  const wire=tx.serialize({requireAllSignatures:false,verifySignatures:false}).toString('base64');
+  const out=await rpc('simulateTransaction',[wire,{encoding:'base64',sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed'}]);
+  return out?.value||out;
+}
+async function simSigned(tx){
+  const wire=tx.serialize().toString('base64');
+  const out=await rpc('simulateTransaction',[wire,{encoding:'base64',sigVerify:true,replaceRecentBlockhash:false,commitment:'confirmed'}]);
+  return out?.value||out;
+}
+function standardCandidates(){
+  try{return getWallets().get().filter(w=>w?.features?.['standard:connect']&&w?.features?.['solana:signTransaction']&&w.chains?.some(ch=>String(ch).startsWith('solana:'))).sort((a,b)=>Number(!/jupiter/i.test(String(a.name||'')))-Number(!/jupiter/i.test(String(b.name||''))))}catch{return[]}
+}
+function injected(){
+  return [window?.jupiter?.solana,window?.jupiter,window?.phantom?.solana,window?.solflare,window?.solana]
+    .find(p=>p&&typeof p.connect==='function'&&typeof p.signTransaction==='function')||null;
+}
+async function connectWallet(){
+  const list=standardCandidates();
+  if(list.length){
+    const w=list[0],out=await w.features['standard:connect'].connect(),account=(out?.accounts||w.accounts||[])[0];
+    if(!account)throw new Error('Wallet returned no Solana account.');
+    wallet={
+      name:w.name||'Wallet Standard',publicKey:new PublicKey(account.address),
+      async signAllTransactions(txs){
+        const f=w.features['solana:signTransaction'];
+        const reqs=txs.map(tx=>({transaction:new Uint8Array(tx.serialize({requireAllSignatures:false,verifySignatures:false})),account,chain:'solana:mainnet'}));
+        const outs=await f.signTransaction(...reqs);
+        if(!Array.isArray(outs)||outs.length!==txs.length)throw new Error('Wallet did not return the complete batch.');
+        return outs.map(x=>{if(!x?.signedTransaction)throw new Error('Wallet returned an unsigned batch item.');return Transaction.from(new Uint8Array(x.signedTransaction))});
+      }
+    };
+  }else{
+    const p=injected(); if(!p)throw new Error('Open this page inside a Solana wallet that supports batch signing.');
+    const out=await p.connect(),pk=out?.publicKey||p.publicKey;
+    if(!pk)throw new Error('Wallet returned no public key.');
+    if(typeof p.signAllTransactions!=='function')throw new Error('This wallet connection does not support one-prompt batch signing.');
+    wallet={name:'Injected Solana Wallet',publicKey:new PublicKey(pk.toString()),signAllTransactions:txs=>p.signAllTransactions(txs)};
+  }
+  if(!wallet.publicKey.equals(MEMBER)){const bad=wallet.publicKey.toBase58();wallet=null;throw new Error('Wrong wallet connected: '+bad)}
+  $('#connect').textContent='Connected '+short(MEMBER.toBase58());$('#connect').disabled=true;$('#preflight').disabled=false;
+}
+async function buildPlan(){
+  const genesis=await connection.getGenesisHash(); if(genesis!==MAINNET_GENESIS)throw new Error('Mainnet-beta RPC check failed.');
+  const ms=await squads.accounts.Multisig.fromAccountAddress(connection,MULTISIG,'confirmed');
+  if(Number(ms.threshold)!==1)throw new Error('Squads threshold changed. Live threshold='+ms.threshold);
+  const member=ms.members.find(m=>m.key.equals(MEMBER)); if(!member)throw new Error('JayJayTeamDev is not a live Squads member.');
+  const perms=['Initiate','Vote','Execute'].every(k=>squads.types.Permissions.has(member.permissions,squads.types.Permission[k]));
+  if(!perms)throw new Error('JayJayTeamDev lacks Initiate/Vote/Execute permission.');
+  const [derivedVault]=squads.getVaultPda({multisigPda:MULTISIG,index:0}); if(!derivedVault.equals(VAULT))throw new Error('Squads vault #0 mismatch.');
+  const mintInfo=await getMint(connection,MINT,'confirmed',TOKEN_PROGRAM_ID);
+  if(mintInfo.decimals!==6||mintInfo.mintAuthority!==null||mintInfo.freezeAuthority!==null)throw new Error('RVIV mint authority/decimals safety check failed.');
+  if(mintInfo.supply!==200_000_000n*UNIT)throw new Error('RVIV total supply is not exactly 200,000,000.');
+  const sourceAta=getAssociatedTokenAddressSync(MINT,VAULT,true,TOKEN_PROGRAM_ID);
+  const bal=await connection.getTokenAccountBalance(sourceAta,'confirmed');
+  const sourceRaw=BigInt(bal.value.amount);
+  if(sourceRaw!==EXPECTED_BEFORE)throw new Error('STOP: treasury must be exactly 170,000,000 RVIV before this one-time run. Live balance='+bal.value.uiAmountString+' RVIV.');
+  if(LEGS.reduce((s,x)=>s+x[2],0n)*UNIT!==MOVE_TOTAL)throw new Error('Internal distribution total mismatch.');
+
+  const latest=await connection.getLatestBlockhash('confirmed');
+  const recipients=[];
+  for(const [label,address,tokens] of LEGS){
+    const owner=new PublicKey(address),ata=getAssociatedTokenAddressSync(MINT,owner,true,TOKEN_PROGRAM_ID);
+    const exists=Boolean(await connection.getAccountInfo(ata,'confirmed'));
+    recipients.push({label,owner,ata,tokens,exists});
+    const test=new Transaction({feePayer:MEMBER,recentBlockhash:latest.blockhash});
+    if(!exists)test.add(createAssociatedTokenAccountIdempotentInstruction(MEMBER,ata,owner,MINT,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID));
+    test.add(createTransferCheckedInstruction(sourceAta,MINT,ata,VAULT,tokens*UNIT,DECIMALS,[],TOKEN_PROGRAM_ID));
+    const s=await simUnsigned(test); if(s?.err)throw new Error('Transfer dry-run failed for '+label+': '+JSON.stringify(s.err));
+  }
+
+  const prepIxs=recipients.filter(x=>!x.exists).map(x=>createAssociatedTokenAccountIdempotentInstruction(MEMBER,x.ata,x.owner,MINT,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID));
+  const prepTxs=[];
+  for(let i=0;i<prepIxs.length;i+=4){
+    const tx=new Transaction({feePayer:MEMBER,recentBlockhash:latest.blockhash}).add(...prepIxs.slice(i,i+4));
+    if(txSize(tx)>1232)throw new Error('Recipient-account preparation transaction too large.');
+    const s=await simUnsigned(tx); if(s?.err)throw new Error('Recipient-account preparation dry-run failed: '+JSON.stringify(s.err));
+    prepTxs.push(tx);
+  }
+
+  const transferIxs=recipients.map(x=>createTransferCheckedInstruction(sourceAta,MINT,x.ata,VAULT,x.tokens*UNIT,DECIMALS,[],TOKEN_PROGRAM_ID));
+  const index=BigInt(ms.transactionIndex.toString())+1n;
+  const [transactionPda]=squads.getTransactionPda({multisigPda:MULTISIG,index});
+  const [proposalPda]=squads.getProposalPda({multisigPda:MULTISIG,transactionIndex:index});
+  const inner=new TransactionMessage({payerKey:VAULT,recentBlockhash:latest.blockhash,instructions:transferIxs});
+  const messageBytes=squads.utils.transactionMessageToMultisigTransactionMessageBytes({message:inner,vaultPda:VAULT});
+  const [wrappedMessage]=squads.types.transactionMessageBeet.deserialize(Buffer.from(messageBytes));
+  const {accountMetas}=await squads.utils.accountsForTransactionExecute({connection,transactionPda,vaultPda:VAULT,message:wrappedMessage,ephemeralSignerBumps:[],programId:squads.PROGRAM_ID});
+  const createIx=squads.instructions.vaultTransactionCreate({multisigPda:MULTISIG,transactionIndex:index,creator:MEMBER,rentPayer:MEMBER,vaultIndex:0,ephemeralSigners:0,transactionMessage:inner});
+  const proposalIx=squads.instructions.proposalCreate({multisigPda:MULTISIG,creator:MEMBER,rentPayer:MEMBER,transactionIndex:index,isDraft:false});
+  const approveIx=squads.instructions.proposalApprove({multisigPda:MULTISIG,transactionIndex:index,member:MEMBER});
+  const executeIx=squads.generated.createVaultTransactionExecuteInstruction({multisig:MULTISIG,proposal:proposalPda,transaction:transactionPda,member:MEMBER,anchorRemainingAccounts:accountMetas},squads.PROGRAM_ID);
+  const setupTx=new Transaction({feePayer:MEMBER,recentBlockhash:latest.blockhash}).add(createIx,proposalIx,approveIx);
+  const executeTx=new Transaction({feePayer:MEMBER,recentBlockhash:latest.blockhash}).add(executeIx);
+  const setupBytes=txSize(setupTx),executeBytes=txSize(executeTx);
+  if(setupBytes>1232)throw new Error('Squads setup is '+setupBytes+' bytes — one-batch route blocked before signing.');
+  if(executeBytes>1232)throw new Error('Squads execute is '+executeBytes+' bytes — one-batch route blocked before signing.');
+  const ss=await simUnsigned(setupTx); if(ss?.err)throw new Error('Squads setup dry-run failed: '+JSON.stringify(ss.err));
+
+  const signerSol=await connection.getBalance(MEMBER,'confirmed');
+  const ataRent=BigInt(await connection.getMinimumBalanceForRentExemption(165,'confirmed'));
+  const roughFloor=BigInt(recipients.filter(x=>!x.exists).length)*ataRent+12_000_000n;
+  if(BigInt(signerSol)<roughFloor)throw new Error('Fee payer SOL is below the calculated safety floor. Live '+(signerSol/1e9).toFixed(6)+' SOL; floor '+(Number(roughFloor)/1e9).toFixed(6)+' SOL.');
+
+  return {latest,sourceAta,sourceRaw,recipients,prepTxs,setupTx,executeTx,index,transactionPda,proposalPda,setupBytes,executeBytes,signerSol,missing:prepIxs.length,allTxs:[...prepTxs,setupTx,executeTx]};
+}
+async function sendSigned(tx,label,latest){
+  const sim=await simSigned(tx); if(sim?.err)throw new Error(label+' signed simulation failed: '+JSON.stringify(sim.err));
+  const sig=await connection.sendRawTransaction(tx.serialize(),{skipPreflight:false,maxRetries:8,preflightCommitment:'confirmed'});
+  const conf=await connection.confirmTransaction({signature:sig,blockhash:latest.blockhash,lastValidBlockHeight:latest.lastValidBlockHeight},'confirmed');
+  if(conf.value.err)throw new Error(label+' failed on-chain: '+JSON.stringify(conf.value.err)+' Signature: '+sig);
+  return sig;
+}
+async function finalVerify(){
+  const sourceAta=getAssociatedTokenAddressSync(MINT,VAULT,true,TOKEN_PROGRAM_ID);
+  const bal=await connection.getTokenAccountBalance(sourceAta,'confirmed');
+  const raw=BigInt(bal.value.amount);
+  if(raw!==EXPECTED_AFTER)throw new Error('Distribution transactions confirmed but treasury reconciliation is not 100,000,000 RVIV. Live='+bal.value.uiAmountString);
+  return bal.value.uiAmountString;
+}
+
+$('#connect').addEventListener('click',async()=>{
+  try{setStatus('Connecting authorized wallet…');await connectWallet();setStatus('JayJayTeamDev connected ✅\nRun FINAL LIVE PREFLIGHT.','good')}
+  catch(e){setStatus('CONNECT BLOCKED\n'+(e?.message||e),'bad')}
+});
+$('#preflight').addEventListener('click',async()=>{
+  $('#preflight').disabled=true;$('#execute').disabled=true;
+  try{
+    setStatus('Checking live mainnet mint, 170M treasury balance, Squads threshold, all 8 destinations and transaction sizes…');
+    plan=await buildPlan();
+    $('#proof').textContent=
+      'LIVE PREFLIGHT PASS ✅\n'+
+      'Treasury before: 170,000,000 RVIV\n'+
+      'Move: 70,000,000 RVIV\n'+
+      'Treasury after: 100,000,000 RVIV\n'+
+      'Missing recipient token accounts: '+plan.missing+'\n'+
+      'Squads transaction index: '+plan.index+'\n'+
+      'Setup size: '+plan.setupBytes+' / 1232 bytes\n'+
+      'Execute size: '+plan.executeBytes+' / 1232 bytes\n'+
+      'Batch transactions requiring signatures: '+plan.allTxs.length+'\n'+
+      'Fee payer: '+(plan.signerSol/1e9).toFixed(6)+' SOL';
+    setStatus('READY ✅\nThe exact approved 70M move is built. The other 100M remains reserved exactly as approved.\n\nNext press requests ONE batch approval from your wallet.','good');
+    $('#execute').disabled=false;$('#preflight').disabled=false;
+  }catch(e){plan=null;setStatus('PREFLIGHT BLOCKED — NOTHING MOVED\n'+(e?.message||e),'bad');$('#preflight').disabled=false}
+});
+$('#execute').addEventListener('click',async()=>{
+  $('#execute').disabled=true;$('#preflight').disabled=true;
+  try{
+    setStatus('Rechecking live state before the one wallet approval…');
+    plan=await buildPlan();
+    setStatus('ONE WALLET APPROVAL\nReview and approve the batch of '+plan.allTxs.length+' Solana transactions.\nNo RVIV moves until the signed batch is returned.');
+    const signed=await wallet.signAllTransactions(plan.allTxs);
+    if(!Array.isArray(signed)||signed.length!==plan.allTxs.length)throw new Error('Incomplete signed batch returned by wallet.');
+    const sigs=[];let n=0;
+    for(let i=0;i<plan.prepTxs.length;i++){
+      n++;setStatus('Approved ✅\nExecuting '+n+'/'+signed.length+': recipient account preparation…');
+      sigs.push(await sendSigned(signed[i],'Recipient accounts '+(i+1),plan.latest));
+    }
+    const setupPos=plan.prepTxs.length;
+    n++;setStatus('Approved ✅\nExecuting '+n+'/'+signed.length+': Squads create + propose + approve…');
+    sigs.push(await sendSigned(signed[setupPos],'Squads distribution approval',plan.latest));
+    n++;setStatus('Approved ✅\nExecuting '+n+'/'+signed.length+': atomic 70M RVIV vault distribution…');
+    sigs.push(await sendSigned(signed[setupPos+1],'RVIV 70M distribution',plan.latest));
+    const remaining=await finalVerify();
+    $('#proof').textContent='DISTRIBUTION COMPLETE ✅\nMoved: 70,000,000 RVIV\nTreasury remaining: '+remaining+' RVIV\n\nSignatures:\n'+sigs.join('\n');
+    setStatus('REVIVE DISTRIBUTION COMPLETE ✅\n70,000,000 RVIV moved to the approved 8 destinations.\n100,000,000 RVIV remains reserved in treasury exactly as approved.','good');
+  }catch(e){
+    setStatus('STOPPED\n'+(e?.message||e)+'\n\nDo not retry blindly. Check the proof panel / confirmed signatures first.','bad');
+    $('#preflight').disabled=false;
+  }
+});
+</script>
+</body>
+</html>

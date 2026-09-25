@@ -1,0 +1,91 @@
+name: Deploy REVIVE Distribution Console
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cryptoworldz.xyz/revive-distribution/index.html'
+      - '.github/workflows/deploy-revive-distribution.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revive-distribution-console
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate exact approved distribution console
+        run: |
+          grep -q 'noindex,nofollow,noarchive' cryptoworldz.xyz/revive-distribution/index.html
+          grep -q 'ONE WALLET APPROVAL' cryptoworldz.xyz/revive-distribution/index.html
+          grep -q '70,000,000 RVIV' cryptoworldz.xyz/revive-distribution/index.html
+          grep -q '100,000,000 RVIV' cryptoworldz.xyz/revive-distribution/index.html
+          grep -q 'DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R' cryptoworldz.xyz/revive-distribution/index.html
+          grep -q 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' cryptoworldz.xyz/revive-distribution/index.html
+          grep -q 'signAllTransactions' cryptoworldz.xyz/revive-distribution/index.html
+          python - <<'PY'
+          from pathlib import Path
+          t=Path('cryptoworldz.xyz/revive-distribution/index.html').read_text()
+          assert "EXPECTED_BEFORE=170_000_000n*UNIT" in t
+          assert "MOVE_TOTAL=70_000_000n*UNIT" in t
+          assert "EXPECTED_AFTER=100_000_000n*UNIT" in t
+          assert t.count("5_000_000n]")==6
+          assert t.count("20_000_000n]")==2
+          assert "if(sourceRaw!==EXPECTED_BEFORE)" in t
+          assert "if(raw!==EXPECTED_AFTER)" in t
+          PY
+
+      - name: Upload owner-only distribution console
+        shell: python
+        run: |
+          import os,ssl
+          from ftplib import FTP_TLS,error_perm
+          from pathlib import Path
+          local=Path('cryptoworldz.xyz/revive-distribution/index.html')
+          remote='domains/cryptoworldz.xyz/public_html/revive-distribution'
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=40)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True);ftp.cwd('/')
+          for part in remote.split('/'):
+              if not part: continue
+              try: ftp.cwd(part)
+              except error_perm: ftp.mkd(part);ftp.cwd(part)
+          with local.open('rb') as h: ftp.storbinary('STOR index.html',h,blocksize=262144)
+          ftp.quit()
+          print('REVIVE_DISTRIBUTION_CONSOLE_DEPLOY=PASS')
+
+      - name: Verify live
+        shell: python
+        run: |
+          import urllib.request,time
+          url='https://cryptoworldz.xyz/revive-distribution/?v='+str(int(time.time()))
+          last=''
+          for _ in range(8):
+              try:
+                  req=urllib.request.Request(url,headers={'User-Agent':'REVIVE-Distribution-Verify/1.0','Cache-Control':'no-cache'})
+                  with urllib.request.urlopen(req,timeout=20) as r: body=r.read().decode('utf-8','ignore')
+                  assert 'ONE WALLET APPROVAL' in body
+                  assert '70,000,000 RVIV' in body
+                  assert '100,000,000 RVIV' in body
+                  assert 'DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R' in body
+                  print('REVIVE_DISTRIBUTION_CONSOLE_LIVE=PASS')
+                  raise SystemExit(0)
+              except SystemExit: raise
+              except Exception as e: last=str(e);time.sleep(5)
+          raise SystemExit('Live verification failed: '+last)
