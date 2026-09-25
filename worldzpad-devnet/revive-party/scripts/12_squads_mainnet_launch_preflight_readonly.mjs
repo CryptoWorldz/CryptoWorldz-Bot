@@ -3,8 +3,9 @@
 // Builds the real Squads v4 + Meteora DAMM v2 instruction path against live
 // mainnet state. Simulates only. NEVER signs, sends or broadcasts.
 //
-// 0.000045 SOL/RVIV is retained only as the existing cost/simulation fixture.
-// Mainnet opening price remains UNSET and this script cannot authorize it.
+// 0.000045 SOL/RVIV is the owner-approved REVIVE mainnet opening price.
+// This preflight validates that exact price while remaining read-only; it cannot sign,
+// send, broadcast, or move SOL/RVIV.
 
 import fs from 'node:fs';
 import {
@@ -42,7 +43,8 @@ const cfg=JSON.parse(fs.readFileSync('../../worldzpad-mainnet/revive/revive-laun
 const route=JSON.parse(fs.readFileSync('../../worldzpad-mainnet/revive/revive-direct-damm-v2-existing-mint.v1.json','utf8'));
 if(cfg.launch.publicMainnetExecutionEnabled!==false)throw new Error('SAFETY_GATE mainnet execution must remain OFF');
 if(route.mainnetGates.enabled!==false)throw new Error('SAFETY_GATE route mainnet gate must remain OFF');
-if(route.pricing.mainnet.priceSolPerRviv!==null)throw new Error('SAFETY_GATE mainnet price must remain UNSET');
+if(Number(route.pricing.mainnet.priceSolPerRviv)!==0.000045)throw new Error('PRICE_GATE expected owner-approved mainnet price 0.000045 SOL/RVIV');
+if(Number(cfg.launch.mainnetOpeningPriceSolPerRviv)!==0.000045)throw new Error('PRICE_GATE launch contract and route price disagree');
 
 const connection=new Connection(RPC,'confirmed');
 const genesis=await connection.getGenesisHash();
@@ -87,8 +89,8 @@ if(BigInt(rvivBalance.value.amount)<launchRaw)throw new Error('Vault lacks 30M R
 if(!wsolInfo)throw new Error('Canonical Squads vault wSOL ATA unexpectedly missing');
 
 const cpAmm=new CpAmm(connection);
-const costOnlyPrice='0.000045';
-const initSqrtPrice=getSqrtPriceFromPrice(costOnlyPrice,6,9);
+const approvedMainnetPrice=String(route.pricing.mainnet.priceSolPerRviv);
+const initSqrtPrice=getSqrtPriceFromPrice(approvedMainnetPrice,6,9);
 const tokenAAmount=new BN(launchRaw.toString());
 const tokenBAmount=new BN(0);
 const liquidityDelta=cpAmm.preparePoolCreationSingleSide({
@@ -285,8 +287,8 @@ const report={
   network:'solana-mainnet-beta',
   mainnetExecutionEnabled:false,
   openingPrice:{
-    mainnetStillUnset:true,
-    costOnlySimulationFixtureSolPerRviv:Number(costOnlyPrice),
+    mainnetPriceApproved:true,
+    mainnetOpeningPriceSolPerRviv:Number(approvedMainnetPrice),
   },
   squads:{
     program:squads.PROGRAM_ID.toBase58(),
@@ -356,7 +358,7 @@ const report={
     noBroadcast:true,
     noSolMoved:true,
     noRvivMoved:true,
-    mainnetPriceNotAuthorized:true,
+    mainnetPriceOwnerApproved:true,
   },
 };
 fs.mkdirSync('artifacts',{recursive:true});
