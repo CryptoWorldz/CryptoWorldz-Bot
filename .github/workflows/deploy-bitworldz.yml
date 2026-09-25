@@ -2,11 +2,6 @@ name: Deploy BitWorldz
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - revive-v1-build
-    paths:
-      - '.github/workflows/deploy-bitworldz.yml'
 
 permissions:
   contents: read
