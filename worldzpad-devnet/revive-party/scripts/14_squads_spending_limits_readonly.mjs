@@ -19,7 +19,10 @@ if(genesis!==MAINNET_GENESIS)throw new Error('MAINNET RPC REQUIRED');
 
 const programAccounts=await c.getProgramAccounts(squads.PROGRAM_ID,{
   commitment:'confirmed',
-  filters:[{memcmp:{offset:8,bytes:MULTISIG.toBase58()}}],
+  filters:[
+    {memcmp:{offset:0,bytes:'2odkUytTTsV'}},
+    {memcmp:{offset:8,bytes:MULTISIG.toBase58()}},
+  ],
 });
 const limits=[];
 for(const item of programAccounts){
