@@ -572,42 +572,66 @@ jobs:
       - name: Deploy public WorldzLaunchPad to Hostinger
         shell: python
         run: |
-          import os, ssl
+          import os, ssl, time
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path, PurePosixPath
 
           local_root=Path('launchpad.cryptoworldz.xyz')
           remote_root='domains/cryptoworldz.xyz/public_html/launchpad'
-          ftp=FTP_TLS(context=ssl._create_unverified_context())
-          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=40)
-          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
-          ftp.prot_p(); ftp.set_pasv(True)
+          files=sorted(p for p in local_root.rglob('*') if p.is_file())
 
-          def ensure_dir(directory):
+          def connect():
+              ftp=FTP_TLS(context=ssl._create_unverified_context())
+              ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=45)
+              ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+              ftp.prot_p()
+              ftp.set_pasv(True)
+              return ftp
+
+          def ensure_dir(ftp,directory):
               ftp.cwd('/')
               for part in PurePosixPath(directory).parts:
                   if part in ('','/'): continue
                   try: ftp.cwd(part)
                   except error_perm:
-                      ftp.mkd(part); ftp.cwd(part)
+                      try: ftp.mkd(part)
+                      except error_perm: pass
+                      ftp.cwd(part)
 
-          count=0
-          for f in sorted(p for p in local_root.rglob('*') if p.is_file()):
-              rel=f.relative_to(local_root).as_posix()
-              remote=PurePosixPath(remote_root)/rel
-              ensure_dir(str(remote.parent))
-              with f.open('rb') as handle:
-                  ftp.storbinary(f'STOR {remote.name}',handle,blocksize=262144)
-              count+=1
+          last=None
+          for attempt in range(1,5):
+              ftp=None
+              try:
+                  print(f'WORLDZLAUNCHPAD_FTPS attempt={attempt}/4')
+                  ftp=connect()
+                  count=0
+                  for local in files:
+                      rel=local.relative_to(local_root).as_posix()
+                      remote=PurePosixPath(remote_root)/rel
+                      ensure_dir(ftp,str(remote.parent))
+                      with local.open('rb') as handle:
+                          ftp.storbinary(f'STOR {remote.name}',handle,blocksize=262144)
+                      count+=1
 
-          # Purge obsolete private-plan artifacts from the public document root.
-          for old in ['default.php','tokens.json','console-data.json','wldz-mainnet-plan.json']:
-              try: ftp.delete(str(PurePosixPath(remote_root)/old))
-              except Exception: pass
+                  for old in ['default.php','tokens.json','console-data.json','wldz-mainnet-plan.json']:
+                      try: ftp.delete(str(PurePosixPath(remote_root)/old))
+                      except Exception: pass
 
-          try: ftp.quit()
-          except Exception: ftp.close()
-          print(f'WORLDZLAUNCHPAD_DEPLOY=PASS files={count} target={remote_root}')
+                  try: ftp.quit()
+                  except Exception: ftp.close()
+                  print(f'WORLDZLAUNCHPAD_DEPLOY=PASS files={count} target={remote_root} attempt={attempt}')
+                  break
+              except Exception as exc:
+                  last=exc
+                  print(f'WORLDZLAUNCHPAD_FTPS_RETRY attempt={attempt} error={type(exc).__name__}: {exc}')
+                  if ftp is not None:
+                      try: ftp.close()
+                      except Exception: pass
+                  if attempt==4:
+                      raise
+                  time.sleep(attempt*8)
+          else:
+              raise last or RuntimeError('WorldzLaunchPad FTPS deployment failed')
 
       - name: Verify live public application
         shell: python
