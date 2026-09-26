@@ -56,5 +56,13 @@
     "rentLamportsEach": 1488440,
     "threeMissingRentLamports": 4465320,
     "otherSquadsFeesNotIncluded": true
+  },
+  "ownerApprovalForDevAtas": {
+    "approvedAtAustraliaSydney": "2026-09-26T15:29:42+10:00",
+    "scope": "Creation of the three missing canonical RVIV associated token accounts for the seven approved owner Dev wallets",
+    "rentCeilingLamports": 4465320,
+    "additionalNetworkOrSquadsFeesIncluded": false,
+    "authorizesSignatureByAssistant": false,
+    "requiresExactWalletTransactionApproval": true
   }
 }
