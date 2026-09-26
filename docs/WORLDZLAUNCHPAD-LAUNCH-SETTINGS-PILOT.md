@@ -37,3 +37,15 @@ Every launch gets its own reviewed, versioned profile with:
 ## Reuse gate
 
 Promote a feature from this pilot to the default launch template only after its signed and confirmed REVIVE transaction is audited, a different token's test profile is independently simulated, and exact message review still works. Parameterize mint and recipients; never copy REVIVE addresses into a future token by default.
+
+## WLDZ launch lessons to enforce
+
+These are grounded in JayJayTeamDev's WLDZ launch feedback and the subsequent dedicated WLDZ signing/recovery routes. They are release gates, not claims that a specific transaction failed on-chain.
+
+- Wallet connection was repeatedly reported broken on JayJayTeamDev's Android wallet browser. A real target-device test with the owner wallet must connect, show the exact wallet address, survive reload or recover safely, and sign a harmless test message or approved test transaction before a live launch is called ready. Unsupported wallets get an explicit next action, not an enabled signing button.
+- Past launch links contained literal `/n` and were not easy to tap or copy. Publish one verified HTTPS URL per action on its own line; test that it opens the intended live page on mobile, the script loads, and Copy produces the same exact URL.
+- A proposal page that exists is not proof of a ready Squads proposal. Verify live multisig, vault PDA, threshold, member permissions, next transaction index, rent, fee and transaction size; simulate create, approval and execution. If interrupted after create, resume only after matching the on-chain proposal's message against the frozen plan.
+- A prior WLDZ launch led to separate distribution and rent-recovery tools. Account creation, custody funding, launch liquidity, token distributions, vesting and rent recovery must have explicit budgets and independent proofs. Quote SOL rent and fee before signing; do not assume one funded wallet can pay every step.
+- Separate the status labels: page deployed, wallet connected, preflight passed, owner signed, transaction confirmed, pool live, LP locked and distribution complete. A live token or pool never implies that allocations have been delivered.
+- Show the canonical mint, exact wallet destinations, raw unit totals, rounding remainder and confirmation signatures in copyable human-readable form. Reconcile every confirmed transfer against the approved manifest and never silently substitute a wallet.
+- Test from the actual production URL after deployment. A passing repository check does not prove the hosted page or mobile wallet flow works.
