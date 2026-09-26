@@ -1,5 +1,5 @@
 {
-  "version": "REVIVE-TEAM-VESTING-2026-09-26-B",
+  "version": "REVIVE-TEAM-VESTING-2026-09-27-C",
   "totalTokens": 30000000,
   "totalPercent": 15,
   "immediateUnlockPercent": 0,
@@ -9,15 +9,32 @@
   "releaseRule": "12 equal monthly releases; rounding remainder in final release",
   "provider": "Jupiter Lock/Vesting",
   "cadence": "monthly",
-  "rosterStatus": "OPEN_EARNED_ONLY_NO_APPROVED_BENEFICIARIES",
-  "knownTeam": [],
-  "rules": [
-    "Each beneficiary must document accepted work and sign a fresh Solana wallet ownership challenge.",
-    "No team member has a free or automatic allocation; unassigned 30M remains reserved.",
-    "Approved shares vest with 0 immediate unlock, no cliff, and 12 monthly releases after verified Jupiter Lock execution.",
-    "Beneficiary amounts, claim rights and any revocation power require exact transaction preview and human approval."
+  "rosterStatus": "OWNER_DIRECTED_PARTIAL_WEIGHTS__FINAL_WALLETS_AND_REMAINING_WEIGHTS_PENDING",
+  "knownTeam": [
+    {
+      "name": "Stepper",
+      "percentOfTeamPool": 40,
+      "tokens": 12000000,
+      "historicalWallet": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
+      "walletStatus": "REVERIFY_BEFORE_JUPITER_LOCK"
+    },
+    {
+      "name": "Savage",
+      "percentOfTeamPool": 15,
+      "tokens": 4500000,
+      "walletStatus": "WALLET_REQUIRED"
+    }
   ],
-  "candidateNote": "Stepper may apply; past role and historical wallet do not imply entitlement.",
+  "rules": [
+    "Stepper receives 40% of the 30M team pool (12M RVIV) after fresh wallet verification.",
+    "Savage receives 15% of the 30M team pool (4.5M RVIV) after a verified Solana wallet is recorded.",
+    "The remaining 45% / 13.5M team pool is reserved for Music / SolMusic, Mohammed, HeroDaniel and other active contributors only after owner-approved weights and verified wallets.",
+    "All executable team allocations use Jupiter Lock/Vesting with 0% immediate unlock, no cliff, and 12 equal monthly releases across 12 months.",
+    "The proposed Recapthisbot / Edison 8% of total supply equals 16M RVIV and remains non-executable until JayJayTeamDev identifies the source bucket and verified recipient wallet.",
+    "No excluded person or group is added without a later explicit owner reversal.",
+    "Unassigned team tokens remain in the owner-controlled treasury/Squads vault."
+  ],
+  "candidateNote": "Owner-directed names are candidates or fixed weights exactly as listed above. No additional person receives an allocation until JayJayTeamDev approves the amount and verified wallet.",
   "custodyRule": "Reserved in owner Squads vault until verified Jupiter Lock schedule and beneficiaries are approved. No AI wallet, no third-party holding account.",
   "recruitment": {
     "openTo": "DevCity participants and any other person contributing verifiable work or support to WorldzLaunchPad",
@@ -27,5 +44,29 @@
     "individualTokenAmounts": "PENDING_OWNER_REVIEW",
     "recipientWalletProof": "Fresh signed challenge verified server-side before an approved grant.",
     "claimStart": "PENDING_APPROVED_JUPITER_LOCK_SCHEDULE"
-  }
+  },
+  "remainingTeamPool": {
+    "percentOfTeamPool": 45,
+    "tokens": 13500000,
+    "namedCandidates": [
+      "Music / SolMusic",
+      "Mohammed",
+      "HeroDaniel",
+      "other active contributors approved by JayJayTeamDev"
+    ],
+    "allocationStatus": "PENDING_OWNER_FINAL_WEIGHTS_AND_VERIFIED_WALLETS"
+  },
+  "recapEdisonProposal": {
+    "requestedPercentOfTotalSupply": 8,
+    "requestedTokens": 16000000,
+    "concept": "Recapthisbot / Edison team-managed allocation",
+    "status": "PENDING_SOURCE_BUCKET_AND_VERIFIED_WALLET",
+    "arithmeticConflict": "The current team pool has only 13.5M RVIV remaining after Stepper and Savage, so a 16M grant cannot be added to the team bucket without changing another approved allocation."
+  },
+  "exclusions": [
+    {
+      "label": "Michael / BasedBid-associated team allocation",
+      "status": "EXCLUDED_BY_OWNER_FROM_REVIVE_TEAM_ALLOCATION"
+    }
+  ]
 }
