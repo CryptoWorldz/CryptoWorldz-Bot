@@ -382,7 +382,14 @@
       ]
     },
     "sourceLedger": "docs/WORLDZFULLBUILD-PROJECT-SOURCE-OF-TRUTH.md",
-    "updateRule": "Future project-relevant decisions and corrections are continuing WorldzFullBuild inputs. Newest explicit owner instruction supersedes older conflicting decisions; factual build status remains evidence-driven; superseded decisions are not silently revived."
+    "updateRule": "Future project-relevant decisions and corrections are continuing WorldzFullBuild inputs. Newest explicit owner instruction supersedes older conflicting decisions; factual build status remains evidence-driven; superseded decisions are not silently revived.",
+    "currentDirectiveState": "WHOLE_PROJECT_AND_PROJECT_CHAT_INHERITANCE_ACTIVE",
+    "latestOwnerDirective": {
+      "date": "2026-09-27",
+      "directive": "Incorporate this whole Project and all of its project-relevant chats into Our WorldzFullBuild™.",
+      "state": "INCORPORATED"
+    },
+    "publicBuildBoundary": "Inherit project-relevant decisions and approved operational data only. Do not publish unrelated private personal, medical, legal, credential, seed-phrase, private-key or secret material from project chats."
   },
   "projectContinuity": {
     "status": "INCORPORATED",
@@ -463,12 +470,21 @@
       "BitWorldz_BTC_REPRESENTATION_PAIR_RAIL",
       "XRP_wXRP_CROSSPAIR",
       "DEX_AND_LISTING_INTEGRATIONS",
-      "ANSEM_ASSET_PARTNER_MODULE_CONCEPT",
-      "WORLDZ_LINKS_QR_ALL_DOMAIN_DIRECTORY"
+      "ANSEM_ASSET_PARTNER_MODULE_CONCEPT"
     ],
     "legacyMappingItems": [
       "VERIFY_EXACT_STREAMFLOW_MAPPING_FOR_LMTD_1M_LOCK_UNLOCK_2036_02_22",
       "VERIFY_OWNER_REPORTED_SEPARATE_5_YEAR_COMMUNITY_LOCK_TOKEN_POSITION_AND_ON_CHAIN_REFERENCE"
+    ],
+    "latestOwnerDirective": {
+      "date": "2026-09-27",
+      "directive": "Incorporate this whole Project and all of its project-relevant chats into Our WorldzFullBuild™.",
+      "state": "INCORPORATED"
+    },
+    "carriedForward": [
+      "WORLDZLINKZ_QR_ALL_DOMAIN_DIRECTORY",
+      "WORLDZ_TOKEN_IDENTITY_ENGINE",
+      "WORLDZ_ONEDROP_AND_ANDROID_WALLET_PREFLIGHT_LESSONS"
     ]
   },
   "architecture": {
@@ -533,7 +549,8 @@
     "master": "/worldzfullbuild",
     "fullScope": "/fullscope",
     "popularity": "/worldzvotes",
-    "governance": "/worldzgovern"
+    "governance": "/worldzgovern",
+    "worldzLinks": "/worldzlinks"
   },
   "executionIntegration": {
     "fullScopeMainnetDefault": false,
