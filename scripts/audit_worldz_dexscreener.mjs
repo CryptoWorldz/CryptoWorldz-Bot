@@ -50,6 +50,7 @@ for(const token of canonical.tokens){
   const pairs=rawPairs.filter(p=>p?.baseToken?.address===token.mint||p?.quoteToken?.address===token.mint);
 
   let state='PENDING_NOT_INDEXED';
+  let tokenFail=false;
   let identityMatch=false;
   let expectedPairSeen=false;
   let priceSeen=false;
@@ -57,9 +58,11 @@ for(const token of canonical.tokens){
 
   if(!pairResponse.ok){
     state='FAIL_PROVIDER_UNAVAILABLE';
+    tokenFail=true;
     hardFail=true;
   }else if(!Array.isArray(pairResponse.body)&&!Array.isArray(pairResponse.body?.pairs)){
     state='FAIL_PROVIDER_PAYLOAD_INVALID';
+    tokenFail=true;
     hardFail=true;
   }else if(pairs.length){
     for(const p of pairs){
@@ -69,13 +72,14 @@ for(const token of canonical.tokens){
       if(name===token.name&&symbol===token.symbol) identityMatch=true;
       else if(name||symbol){
         state='FAIL_WRONG_NONBLANK_IDENTITY';
+        tokenFail=true;
         hardFail=true;
       }
       if(p.pairAddress===token.expectedMarket.pairAddress) expectedPairSeen=true;
       if(p.priceUsd!=null) priceSeen=true;
       activeBoosts=Math.max(activeBoosts,Number(p.boosts?.active||0));
     }
-    if(!hardFail || state!=='FAIL_WRONG_NONBLANK_IDENTITY'){
+    if(!tokenFail){
       if(!identityMatch) state='PENDING_IDENTITY';
       else if(!expectedPairSeen) state='PENDING_EXPECTED_PAIR';
       else if(!priceSeen) state='PENDING_PRICE';
@@ -86,6 +90,7 @@ for(const token of canonical.tokens){
   const ordersUrl=canonical.provider.ordersApi.replace('{CHAIN}',token.chain).replace('{TOKEN}',token.mint);
   const orders=await getJson(ordersUrl);
   if(!orders.ok){
+    tokenFail=true;
     hardFail=true;
     if(!state.startsWith('FAIL_')) state='FAIL_ORDERS_STATUS_UNAVAILABLE';
   }
