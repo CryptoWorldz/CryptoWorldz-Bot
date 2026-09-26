@@ -1,0 +1,16 @@
+{
+  "name": "worldz-phenix-devnet-proof",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "proof": "node scripts/01_pnex_full_devnet_proof.mjs",
+    "verify": "node scripts/02_verify_pnex_devnet_proof.mjs"
+  },
+  "dependencies": {
+    "@meteora-ag/cp-amm-sdk": "1.4.10",
+    "@solana/spl-token": "0.4.15",
+    "@solana/web3.js": "1.98.4",
+    "bn.js": "5.2.2"
+  }
+}

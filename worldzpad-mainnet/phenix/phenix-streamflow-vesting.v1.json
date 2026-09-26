@@ -1,0 +1,82 @@
+{
+  "schema": "PNEX-STREAMFLOW-VESTING-V1",
+  "version": "PNEX-STREAMFLOW-VESTING-2026-09-26-A",
+  "status": "TRANSACTION_PREPARATION_SPEC__MAINNET_MINT_PENDING",
+  "provider": {
+    "name": "Streamflow",
+    "sdk": "@streamflow/stream",
+    "sdkVersion": "13.4.0",
+    "programAddressReference": "strmRqUCoQUgGUan5YhzUZa6KqdzwX5L6FpUxfmKg5m",
+    "documentation": "https://developers.streamflow.finance/"
+  },
+  "token": {
+    "symbol": "PNEX",
+    "decimals": 6,
+    "mainnetMint": null,
+    "fixedSupplyTokens": 250000000
+  },
+  "securityDefaults": {
+    "canTopup": false,
+    "cancelableBySender": false,
+    "cancelableByRecipient": false,
+    "transferableBySender": false,
+    "transferableByRecipient": false,
+    "automaticWithdrawal": false,
+    "earlyUnlock": false,
+    "recipientChangeAllowed": false,
+    "walletOrMultisigSignatureRequired": true,
+    "worldzNeverStoresPrivateKey": true
+  },
+  "schedules": {
+    "developer": {
+      "totalTokens": 25000000,
+      "startRule": "LAUNCH_PLUS_90_DAYS",
+      "cliffDays": 90,
+      "cliffAmountTokens": 0,
+      "periodSeconds": 2592000,
+      "periodDays": 30,
+      "releaseCount": 24,
+      "releaseMode": "EQUAL_RAW_UNITS_WITH_RECONCILIATION_REMAINDER",
+      "genesisLiquidTokens": 0
+    },
+    "phenixChanceVested": {
+      "totalTokens": 37500000,
+      "startRule": "LAUNCH_PLUS_30_DAYS",
+      "cliffDays": 30,
+      "cliffAmountTokens": 0,
+      "periodSeconds": 2592000,
+      "periodDays": 30,
+      "releaseCount": 12,
+      "releaseMode": "EQUAL_RAW_UNITS",
+      "tokensPerRelease": 3125000
+    },
+    "flyWheelBuilderTeamGrantDefault": {
+      "amount": "PER_APPROVED_GRANT",
+      "startRule": "GRANT_APPROVAL_PLUS_90_DAYS",
+      "cliffDays": 90,
+      "cliffAmountTokens": 0,
+      "periodSeconds": 2592000,
+      "periodDays": 30,
+      "releaseCount": 24,
+      "releaseMode": "EQUAL_RAW_UNITS_WITH_RECONCILIATION_REMAINDER"
+    }
+  },
+  "transactionBoundary": {
+    "prepareInstructionsOnly": true,
+    "signInWorldzBackend": false,
+    "signInUserWalletOrMultisig": true,
+    "simulateBeforeBroadcast": true,
+    "autoBroadcast": false,
+    "mainnetExecutionEnabled": false
+  },
+  "releaseGate": [
+    "canonical PNEX mint exists and fixed-supply authority finalization is proven",
+    "funding source and recipient wallet are verified",
+    "prepared Streamflow instruction program IDs and token mint are independently checked",
+    "schedule raw units exactly reconcile to the approved allocation",
+    "contract is non-cancellable and non-transferable",
+    "wallet/multisig signature is explicit",
+    "simulation succeeds before broadcast",
+    "confirmed Streamflow contract address is published in Worldz Proof"
+  ]
+}

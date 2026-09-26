@@ -1,0 +1,136 @@
+{
+  "schema": "WORLDZ-LINKED-ASSET-V1",
+  "version": "WORLDZ-LINKED-ASSET-2026-09-26-A",
+  "name": "Worldz LinkedAsset™",
+  "status": "POLICY_AND_BUILDER_SPEC__MAINNET_EXECUTION_DISABLED",
+  "availability": "ALL_WORLDZLAUNCHPAD_DEVELOPERS",
+  "purpose": "Let any WorldzLaunchPad project voluntarily connect its token to one or more verified external or Worldz ecosystem assets for user-directed swaps, disclosed pair/liquidity construction, cross-chain development and mutually approved ecosystem support.",
+  "principles": {
+    "permissionlessDiscovery": true,
+    "activationRequiresProjectOptIn": true,
+    "externalAssetIdentityMustBeVerified": true,
+    "noAffiliationClaimWithoutEvidence": true,
+    "noAutomaticMarketBuy": true,
+    "noForcedSwap": true,
+    "noHiddenFee": true,
+    "noCustodyByDefault": true,
+    "userWalletSignatureRequired": true,
+    "simulateBeforeSign": true,
+    "worldzProofRequired": true
+  },
+  "capabilities": [
+    {
+      "id": "swap",
+      "name": "Linked Swap",
+      "description": "Expose user-initiated swap routes between the project token and a verified linked asset where a supported venue/aggregator route exists."
+    },
+    {
+      "id": "pair",
+      "name": "Linked Pair",
+      "description": "Build a disclosed project-token / linked-asset liquidity pair when the chain-native venue supports it."
+    },
+    {
+      "id": "omni_pair",
+      "name": "Omni Pair",
+      "description": "Use an approved wrapped/native representation and verified bridge/adaptor to construct a cross-chain liquidity route without pretending the same token contract exists on every chain."
+    },
+    {
+      "id": "build",
+      "name": "Linked Buildz",
+      "description": "Share approved infrastructure, integrations, launch tooling, proofs, developer grants or co-marketing surfaces between opted-in projects."
+    },
+    {
+      "id": "support",
+      "name": "Linked Support",
+      "description": "Allow a project to route a disclosed portion of its own approved ecosystem/treasury budget to a linked project or shared build objective. This is not an automatic market purchase."
+    },
+    {
+      "id": "proof",
+      "name": "Linked Proof",
+      "description": "Publish asset identity, approvals, pair addresses, bridge/wrapper identity, transactions and current activation state."
+    }
+  ],
+  "linkHandshake": {
+    "proposalFields": [
+      "sourceProjectId",
+      "sourceTokenId",
+      "linkedAssetId",
+      "requestedCapabilities",
+      "requestedChains",
+      "feeOrBudgetCommitmentIfAny",
+      "expiryOrReviewDate"
+    ],
+    "requiredChecks": [
+      "source project is registered and verified",
+      "linked asset contract/mint and chain are verified",
+      "official links and provenance are recorded",
+      "source project explicitly opts in",
+      "linked project or asset controller approval is recorded when an affiliation/co-build claim is requested",
+      "chain-specific swap/liquidity adapter is supported",
+      "all fees/budgets/LP ownership and lock rules are disclosed",
+      "simulation and wallet/multisig signature boundary are preserved"
+    ],
+    "states": [
+      "proposed",
+      "identity_verified",
+      "awaiting_counterparty_opt_in",
+      "approved",
+      "active",
+      "paused",
+      "revoked"
+    ],
+    "oneSidedPublicLinkAllowed": "A Worldz project may link to a verified public asset for ordinary user-directed swap/pair functionality without claiming partnership, provided the integration is technically valid and the UI clearly says no affiliation is implied.",
+    "mutualBrandingRule": "Partnership, official integration, co-build or branded profile language requires evidence of counterparty opt-in."
+  },
+  "developerBuilder": {
+    "fields": [
+      "Linked asset",
+      "Chain",
+      "Capabilities: Swap / Pair / Omni Pair / Buildz / Support",
+      "Liquidity contribution",
+      "LP lock",
+      "Support budget if any",
+      "Counterparty approval / no-affiliation mode",
+      "Review and Worldz Proof"
+    ],
+    "defaultMode": "NO_AFFILIATION_USER_DIRECTED_SWAP_ONLY",
+    "multipleLinkedAssetsAllowed": true
+  },
+  "ansemExample": {
+    "profileName": "AnsemAsset™",
+    "status": "PUBLIC_ASSET_PRESET__NO_PARTNERSHIP_CLAIM",
+    "asset": {
+      "name": "ANSEM",
+      "symbol": "ANSEM",
+      "chain": "solana",
+      "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+      "identitySource": "https://ansem.io/ansem"
+    },
+    "allowedBeforeCounterpartyOptIn": [
+      "display as a verified public Solana asset",
+      "offer user-directed swap routing when supported",
+      "propose an ANSEM-paired launch/liquidity configuration",
+      "prepare an opt-in request for Ansem/asset controllers"
+    ],
+    "blockedBeforeCounterpartyOptIn": [
+      "claiming Ansem partnership or endorsement",
+      "using official/co-branded relationship language",
+      "routing project treasury or fees to an Ansem-controlled destination without verified destination and approval",
+      "automatic ANSEM market purchases"
+    ]
+  },
+  "blackBullExample": {
+    "profileName": "BlackBull LinkedAsset candidate",
+    "status": "NO_SEPARATE_TOKEN_IDENTITY_VERIFIED",
+    "publicProjectSource": "https://blackbull.ltd/",
+    "relationshipNote": "The referenced Black Bull site states it is community-built and not affiliated with Ansem.",
+    "activationRule": "Do not create or advertise a BlackBull token preset until a specific asset mint/contract and provenance are verified. The generic LinkedAsset handshake remains available."
+  },
+  "execution": {
+    "mainnetExecutionEnabled": false,
+    "autoBroadcast": false,
+    "autoMarketBuy": false,
+    "walletOrMultisigSignatureRequired": true,
+    "simulationRequired": true
+  }
+}

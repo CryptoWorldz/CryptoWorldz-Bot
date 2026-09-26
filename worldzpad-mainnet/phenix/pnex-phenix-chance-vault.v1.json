@@ -1,0 +1,54 @@
+{
+  "schema": "PNEX-PHENIX-CHANCE-VAULT-V1",
+  "version": "PNEX-CHANCE-VAULT-2026-09-26-A",
+  "status": "GENESIS_CLAIM_VAULT_POLICY__ADDRESS_PENDING_CANONICAL_MINT",
+  "purpose": "Reserve the complete PHENIX Chance allocation at genesis without inventing recipients. Approved people claim one verified seat after evidence and wallet-ownership checks.",
+  "vault": {
+    "totalTokens": 62500000,
+    "percentOfSupply": 25,
+    "raw": "62500000000000",
+    "address": null,
+    "maximumSeats": 500,
+    "tokensPerSeat": 125000,
+    "unclaimedSeatsRemainLocked": true,
+    "automaticExpiry": false,
+    "automaticReallocation": false
+  },
+  "seat": {
+    "immediateTokens": 50000,
+    "vestedTokens": 75000,
+    "totalTokens": 125000,
+    "vesting": {
+      "releaseCount": 12,
+      "periodDays": 30,
+      "tokensPerRelease": 6250,
+      "providerPolicyReference": "phenix-streamflow-vesting.v1.json",
+      "nonCancelable": true,
+      "nonTransferableSchedule": true
+    }
+  },
+  "approvalRequirements": [
+    "source evidence showing a genuine request, contribution or qualifying PHENIX Chance purpose",
+    "recipient claim or consent is recorded",
+    "fresh Solana wallet ownership proof",
+    "duplicate account and linked-wallet review passes",
+    "recipient has not already consumed a PHENIX Chance seat",
+    "human approval or approved evidence policy passes"
+  ],
+  "antiAbuse": {
+    "oneSeatPerVerifiedPerson": true,
+    "duplicateWalletsForbidden": true,
+    "linkedWalletsDoNotCreateExtraSeats": true,
+    "projectSystemVaultsExcluded": true,
+    "publicWalletPostAloneIsNotProofOfOwnershipOrNeed": true
+  },
+  "claimExecution": {
+    "immediateTransferRequiresApproval": true,
+    "vestedGrantRequiresStreamflowContract": true,
+    "combinedSeatMustReconcileRawUnits": true,
+    "autoTransfer": false,
+    "mainnetExecutionEnabled": false,
+    "worldzProofRequired": true
+  },
+  "launchRule": "PNEX may launch before all 500 recipients are known because the entire 62.5M PHENIX Chance allocation remains classified and locked in the dedicated Chance Vault. No unknown person receives PNEX at genesis."
+}

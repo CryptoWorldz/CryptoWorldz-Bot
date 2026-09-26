@@ -1,0 +1,34 @@
+{
+  "schema": "PNEX-TOKEN-IDENTITY-V1",
+  "version": "PNEX-IDENTITY-2026-09-26-A",
+  "status": "PRE_MINT_IDENTITY_RESERVED",
+  "name": "PHENIX",
+  "symbol": "PNEX",
+  "chain": "Solana",
+  "network": "mainnet-beta",
+  "decimals": 6,
+  "fixedSupplyTokens": 250000000,
+  "mint": null,
+  "image": null,
+  "metadataUri": null,
+  "website": "https://launchpad.cryptoworldz.xyz/phenix/",
+  "description": "PHENIX (PNEX) is WorldzLaunchPad launch #003, built around verified community opportunity, locked liquidity, transparent vesting, the PHENIX Total Supply FlyWheel, Worldz Universal FlyWheel, OmniBuildz and Worldz Proof.",
+  "authoritiesRequiredAfterGenesis": {
+    "mintAuthority": null,
+    "freezeAuthority": null
+  },
+  "market": {
+    "pool": null,
+    "venue": "Meteora DAMM v2",
+    "quote": "SOL",
+    "baseFeeBps": 75,
+    "dynamicFee": false,
+    "creatorControlledLpLock": "100% permanent target"
+  },
+  "truthRules": [
+    "Do not publish a contract address before the canonical mainnet mint exists.",
+    "Do not publish an image URI until an approved PHENIX asset is hosted at a stable public URL.",
+    "Do not claim live trading before the pool transaction is confirmed.",
+    "Do not claim mint/freeze authority revoked until on-chain verification proves both states."
+  ]
+}
