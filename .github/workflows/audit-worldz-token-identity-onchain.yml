@@ -1,6 +1,14 @@
 name: Audit Worldz token identity on-chain
 
 on:
+  push:
+    paths:
+      - "worldzpad-mainnet/token-identity/**"
+      - "launchpad.cryptoworldz.xyz/tokenlist.json"
+      - "launchpad.cryptoworldz.xyz/wldz/token-metadata.json"
+      - "launchpad.cryptoworldz.xyz/rviv/**"
+      - "scripts/audit_worldz_token_identity_onchain.mjs"
+      - ".github/workflows/audit-worldz-token-identity-onchain.yml"
   pull_request:
     paths:
       - "worldzpad-mainnet/token-identity/**"
