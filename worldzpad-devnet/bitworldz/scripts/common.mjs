@@ -33,10 +33,15 @@ export function routePartnerQuoteAtomic(totalAtomic){
   });
 }
 
-export function devnetConnection(){
+export async function devnetConnection(){
   const rpc=process.env.SOLANA_RPC_URL?.trim()||clusterApiUrl('devnet');
-  if(/mainnet/i.test(rpc)) throw new Error('MAINNET RPC FORBIDDEN FOR LIVE BITWORLDZ HARNESS');
-  return {rpc,connection:new Connection(rpc,'confirmed')};
+  const connection=new Connection(rpc,'confirmed');
+  const genesisHash=await connection.getGenesisHash();
+  const SOLANA_DEVNET_GENESIS='EtWTRABZaYq6iMfeYKouRu166VU2xqa1';
+  if(genesisHash!==SOLANA_DEVNET_GENESIS){
+    throw new Error('BITWORLDZ DEVNET HARNESS REFUSED NON-DEVNET CLUSTER genesis='+genesisHash);
+  }
+  return {rpc,connection,genesisHash};
 }
 
 export function payerFromEnvironment(){
