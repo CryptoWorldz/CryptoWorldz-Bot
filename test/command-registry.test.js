@@ -5,7 +5,7 @@ const { allRegisteredCommandNames, groupsForRole } = require("../src/command-reg
 const REQUIRED_RUNTIME_COMMANDS = [
   "zedstart","zed","help","commands","commandtree","directory","acknowledgements","supportjay",
   "start","register","profile","rewards","leaderboard","raaiiidd","missions","wallet","cancel","kitty","impact","donate","points",
-  "fullscope","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
+  "fullscope","worldzfullbuild","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
   "worldzvotes","tokenvote","worldztrending","worldzrankings",
   "worldzgovern","governproposals","governvote","governdelegate",
   "raid","admin","admingrace","zedsettings","newmission","editmission","endmission","pending","approve","reject","member","admins","permissions","setkitty","setrole","setpermission","setpartner","broadcast","stats","activity",
