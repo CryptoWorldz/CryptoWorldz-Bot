@@ -12,8 +12,10 @@ Read-only SDK audit in GitHub Actions run `36218039679`, repeated with a local b
 - One position, `AcRzukwgfUSfHoi3ZPaP5QiRK9M2A3b9eBup1FcMfXBe`, recorded zero unlocked and zero vested liquidity. Its permanent locked liquidity equalled the pool's total liquidity: `117394360433793354711886389008843` units.
 - Fixed-fee numerator decoded as `7,500,000` against the SDK denominator `1,000,000,000`, equal to **75 bps / 0.75%**. Collection mode is token B (WSOL).
 - A local SDK quote for **0.001 SOL** estimated **22.055539 RVIV** before actual execution, with a quoted minimum **22.053333 RVIV** at the script's slippage input. This is a calculation, **not** a successful on-chain swap or evidence that Jupiter routes to the pool.
+- At 04:34 UTC, the pool address had exactly one recorded transaction, signature `5VPjnawgCqomqP3ktUpWU55K5iUB9f83HKXTktRxDZDJGtaJN9tS8FFi34NDffVqRLUi8BYjZBP3iVKV6nnxDLF1`, at the activation timestamp. No subsequent pool transaction was returned at that time.
+- In GitHub Actions run `36218296419`, an unsigned 0.001 SOL buy transaction simulated against the existing pool with `simulationError: null` and 41,383 compute units. This proves that hypothetical buy path succeeds against the observed mainnet state; no transaction was signed or sent.
 
-Next: verify live swap simulation, actual trade history, on-chain fee recipient/claim rules, owner-controlled position NFT, Jupiter discovery and exact transaction receipts. Check that the planned price and liquidity behavior are acceptable. The pool's existence invalidates the old create-pool execution route.
+Next: verify actual trade history, fee recipient/claim rules, owner-controlled position NFT, Jupiter discovery and exact transaction receipts. Check that the planned price and liquidity behavior are acceptable. The pool's existence invalidates the old create-pool execution route. Any real buy needs its own exact transaction preview and human wallet signature.
 
 ## Confirmed in GitHub Actions
 
