@@ -26,6 +26,10 @@ const safe = value => JSON.parse(JSON.stringify(value, (_, v) =>
   typeof v === 'bigint' ? v.toString() : v?.toBase58?.() || (v?.constructor?.name === 'BN' ? v.toString() : v)
 ));
 const mintsMatch = pool.tokenAMint.toBase58() === rvivMint && pool.tokenBMint.equals(NATIVE_MINT);
+const fixedFeeNumerator = new BN(fees.cliffFeeNumerator.toString('hex'), 16);
+const expectedFeeNumerator = new BN(7_500_000); // 75 bps of SDK's 1e9 denominator.
+const fullPoolLock = pool.permanentLockLiquidity.eq(pool.liquidity) &&
+  positions.length > 0 && positions.every(x => x.account.unlockedLiquidity.isZero());
 let sampleBuyQuote;
 try {
   const quote = swapQuoteExactInput(pool, new BN(Math.floor(Date.now() / 1000)),
@@ -44,6 +48,8 @@ const report = {
   pool: poolAddress.toBase58(),
   tokenAMint: pool.tokenAMint.toBase58(), tokenBMint: pool.tokenBMint.toBase58(),
   rvivWsolPairMatches: mintsMatch,
+  fixedFeeNumerator: fixedFeeNumerator.toString(), fixed75BpsMatches: fixedFeeNumerator.eq(expectedFeeNumerator),
+  fullPoolLock,
   creator: asText(pool.creator),
   tokenAVault: pool.tokenAVault.toBase58(), tokenBVault: pool.tokenBVault.toBase58(),
   vaultABalanceRaw: vaultA.value.amount, vaultBBalanceRaw: vaultB.value.amount,
@@ -66,4 +72,4 @@ const report = {
   safety: { signed: false, broadcast: false, keysRead: false },
 };
 console.log(JSON.stringify(report, null, 2));
-if (!mintsMatch) process.exitCode = 2;
+if (!mintsMatch || !fixedFeeNumerator.eq(expectedFeeNumerator) || !fullPoolLock) process.exitCode = 2;
