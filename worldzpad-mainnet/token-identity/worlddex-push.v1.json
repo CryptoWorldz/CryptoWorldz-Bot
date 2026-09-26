@@ -1,0 +1,40 @@
+{
+  "version": "WORLDDEXPUSH-2026-09-27-A",
+  "name": "WorldDexPush™",
+  "status": "FOUNDATION",
+  "purpose": "Prepare and track post-launch market-data identity operations without fabricating external-provider approval.",
+  "providers": {
+    "jupiter": {
+      "mode": "submission_package_and_status",
+      "external": true
+    },
+    "birdeye": {
+      "mode": "submission_package_and_status",
+      "external": true
+    },
+    "solscan": {
+      "mode": "submission_package_and_status",
+      "external": true
+    },
+    "dexscreener": {
+      "mode": "profile_links_ads_boosts_status",
+      "external": true,
+      "payment": "HUMAN_APPROVAL_REQUIRED",
+      "specialWorldzBadge": {
+        "status": "NOT_EXTERNAL_PROVIDER_APPROVED",
+        "fallback": "WORLDZ_OWNED_BADGE_ONLY"
+      }
+    }
+  },
+  "requiredIdentityFields": [
+    "chain",
+    "name",
+    "symbol",
+    "mint",
+    "decimals",
+    "image",
+    "website"
+  ],
+  "proofRule": "External indexed/verified/paid/boosted states are PASS only when independently observed or supported by provider evidence.",
+  "unknownState": "PENDING"
+}
