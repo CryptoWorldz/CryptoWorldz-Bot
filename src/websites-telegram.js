@@ -1,6 +1,7 @@
 const WEBSITE_COMMANDS = Object.freeze([
   { command: "websites", description: "Explore the CryptoWorldz website network" },
   { command: "worldzlive", description: "Open the verified live Worldz directory" },
+  { command: "worldzlinks", description: "Open WorldzLinkz™ — every Worldz in one place" },
   { command: "solworldz", description: "Open SolWorldz.xyz" }
 ]);
 
@@ -28,6 +29,7 @@ const CONNECTING_WORLDZ = Object.freeze([
 ]);
 
 const HQ_URL = "https://t.me/CryptoWorldzHQ";
+const WORLDZLINKZ_URL = "https://cryptoworldz.xyz/worldzlinkz/";
 
 function buildWebsiteMessage(config = {}) {
   const url = String(config.websiteUrl || "https://CryptoWorldz.xyz").trim();
@@ -55,7 +57,10 @@ function buildWebsiteDirectoryMessage() {
     "🚧 Custom Domains Being Connected",
     CONNECTING_WORLDZ.join(" • "),
     "",
-    "Use the live directory whenever a custom domain is still updating."
+    "Use the live directory whenever a custom domain is still updating.",
+    "",
+    "🔗 WorldzLinkz™ — Every Worldz. One Link.",
+    WORLDZLINKZ_URL
   ].join("\n");
 }
 
@@ -71,6 +76,28 @@ function buildLiveDirectoryMessage() {
     "",
     "This public fallback never requests seed phrases, private keys or wallet-signing credentials."
   ].join("\n");
+}
+
+function buildWorldzLinkzMessage() {
+  return [
+    "🔗 WorldzLinkz™",
+    "",
+    "Every Worldz. One Link.",
+    "",
+    "Scan the QR or browse the full domain + subdomain network:",
+    WORLDZLINKZ_URL
+  ].join("\n");
+}
+
+function worldzLinkzKeyboard() {
+  return {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "🔗 Open WorldzLinkz™", url: WORLDZLINKZ_URL }],
+        [{ text: "🌍 Explore All Websites", callback_data: "worldz_websites_directory" }]
+      ]
+    }
+  };
 }
 
 function buildSolWorldzMessage() {
@@ -162,6 +189,10 @@ function registerWebsiteTelegramHandlers({ bot, config }) {
     bot.sendMessage(msg.chat.id, buildLiveDirectoryMessage(), liveDirectoryKeyboard())
   );
 
+  bot.onText(/^\/worldzlinks(?:@\w+)?$/, (msg) =>
+    bot.sendMessage(msg.chat.id, buildWorldzLinkzMessage(), worldzLinkzKeyboard())
+  );
+
   bot.onText(/^\/solworldz(?:@\w+)?$/, (msg) =>
     bot.sendMessage(msg.chat.id, buildSolWorldzMessage(), solWorldzKeyboard())
   );
@@ -182,16 +213,19 @@ function registerWebsiteTelegramHandlers({ bot, config }) {
 module.exports = {
   CONNECTING_WORLDZ,
   LIVE_DIRECTORY_URL,
+  WORLDZLINKZ_URL,
   PRIMARY_WEBSITES,
   RELEASE_BUILD,
   WEBSITE_COMMANDS,
   buildLiveDirectoryMessage,
+  buildWorldzLinkzMessage,
   buildSolWorldzMessage,
   buildWebsiteDirectoryMessage,
   buildWebsiteMessage,
   directoryKeyboard,
   liveDirectoryKeyboard,
   registerWebsiteTelegramHandlers,
+  worldzLinkzKeyboard,
   solWorldzKeyboard,
   websiteKeyboard
 };
