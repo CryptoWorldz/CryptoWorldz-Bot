@@ -1,4 +1,4 @@
-name: REVIVE Mainnet Read-Only Preflight
+name: REVIVE Existing-Pool Read-Only Market Preflight
 
 on:
   workflow_dispatch:
@@ -48,19 +48,6 @@ jobs:
       - name: Re-prove direct DAMM v2 static contract
         run: npm run direct-damm-static
       - name: Audit occupied Meteora pool — READ ONLY
-        continue-on-error: true
         run: node scripts/15_existing_pool_readonly_audit.mjs
       - name: Simulate hypothetical 0.001 SOL RVIV buy — READ ONLY
-        continue-on-error: true
         run: node scripts/16_existing_pool_buy_simulation_readonly.mjs
-      - name: Simulate canonical REVIVE mainnet pool creation — READ ONLY
-        run: node scripts/09_mainnet_launch_simulation_readonly.mjs
-      - name: Publish read-only simulation evidence (best effort)
-        if: always()
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: revive-mainnet-readonly-preflight
-          path: worldzpad-devnet/revive-party/artifacts/revive-mainnet-create-pool-readonly-simulation.json
-          if-no-files-found: warn
-          retention-days: 7
