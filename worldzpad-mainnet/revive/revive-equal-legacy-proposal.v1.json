@@ -1,0 +1,875 @@
+{
+  "version": "REVIVE-EQUAL-LEGACY-2026-09-26-A",
+  "status": "PROPOSED_NOT_APPROVED_NOT_SIGNABLE",
+  "sourceSnapshotBatch": "4b7faa3f-c6cd-435f-9840-43a04cd090a0",
+  "historicalLedgerFile": "revive-legacy-216-distribution.v1.json",
+  "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+  "poolRaw": "20000000000000",
+  "historicalCount": 216,
+  "excludedWallets": [
+    "43T8jncT5pJFo1TNenHdt6NSaPieic3iuHLQnYLLgeWy",
+    "5fFVkQuo4pnCpWhD8hx2uiFEtkBcnW3QdDUt1w2BzB71"
+  ],
+  "eligibleCount": 214,
+  "shareRaw": "93457943925",
+  "reservedRemainderRaw": "50",
+  "eligibilityRule": "Historical snapshot membership excluding the explicitly removed wallets; no assessment of colour, condition, health, look, role or prior token holdings. Verify wallet control before claim.",
+  "recipients": [
+    {
+      "wallet": "1VR3KWgd9FffgHtw1q4Bxs8jLwp3wPPcVkhBTuVGGAs",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "25BnHNEVERmXYKGw4tMMZCu5n58gD8LEYhpUZg71sMyw",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "278W2ufnraaRxxqevE5E3NJiZcq6Z4ghGAmj84JZupQQ",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "27mBaJibXAnRetq3Pfnk5CfqaKcd8cXrQKWpVUywXQJX",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2AJai2nzNd6pMF5gj4DGRLgbFuSQt9Pga8LjEPhGhRM5",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2F17i7q6pXG29F8QYVFsS24abAJUHFWWN4DFDE38kZV3",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2NJpdkr3ULAHwwNXspCdoUhE1pZePYJZnLd1gPqu94B6",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2SwCAqJrsZCGsVDXjm5mc8TTZ8c6utf4vzSKFXoxnwoT",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2ZkY72mjUsrFaa1xJG7TmcqPoJ1Ygmt6jULcoRAw61r3",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2hFZmVejanwtbLLH6UZCog27iQYy8ReTEYEMSW4bG8YD",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2m81UFeqfzRqNNYVQPKg9WZzFEZtYvjyy98EZ5PAzuED",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2nkwNVS5Dui4TuoqzSdv4BKzRxm97gcCNiJvPTtE16W8",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2rbMgYvzAb3xDk6vXrzKkY3VwsmyDZsJTkvB3JJYsRzA",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2turuerVWbeDPRZfK2iixzRnrC6zjbAzHo9NZfww6rFn",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2urNYHbGQvjVTiNH9CvpDpwsK6StnWiV7whF85wSVeER",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "2vWuheuLvVUvSQkdzMXYVP86qtaPffCTPoFBC395vyE1",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "3257xXQihxNgP5qJh2bUrRzrL8ohDkRBo9WqhqHrZ6WC",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "35o1Wm6nKNozjQHWNUDQ5FrEJpvnXCg18DDj9rDzPUMX",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "38bkZa2EBfSQo2ANkRKBLFZaH5Wx7Bo2SF9dcE9K6S6v",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "3MwGB36XUPnZUhL6dS4wpJhpDLM4JjE9LbvqW3Uod2iE",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "3cGJYhNn7jkYv3Rn7Q276dpnvF4ntpqj7tVVUM71e8yd",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "3d6ExZNyX9SoL6ae9Z1ZvgzfMqHf7qwiz2ruM69FznbJ",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "3fUXuaTUyFjGnCStr3pYnaSX4KkBmfnwNA6vBrkvM4H3",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "3fz4tAsiwZfPZLgim5aFBstQ1Q2j9FJFN4WUae7iRJge",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "3mzkMybHrn6MPGgvs4PePHa61Wq932iAeLHc61MHZGtR",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "3rJ7RUZdXUeqLTktV7r3xqGyZdg3q7TdR29PT55DQHCf",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "3tt29AyLo82LAZSkx8i1fBNRTx2jyoHUNUe5uf3DrRRV",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "3ueDi8kfbVvemD2znRjbzmicErXM2viBVxbv4ySZAY9K",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "3xGaPMTsx4BfL7Juwfqqaog2yAbBqA5qXGZpnPxNDDyp",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "42G8w6zzBNN4bndwZdXS6ZKBiPfSPD6zBXYKbMBfVNpi",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "43Q1ZWFMUZogmoRUaGHvzqgXEx6mNrRx4stJYgCyWLMf",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "44URgZpyU9j9xbuF7ueVtB1MRQfovgzmb6s4DgmbX9bJ",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "45ruCyfdRkWpRNGEqWzjCiXRHkZs8WXCLQ67Pnpye7Hp",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4ANM5nMDnnS8DX5Bt6ZCeRHabZdymVw4FcWDqfnNjUw2",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4CLq2XrJoYkQmVFNwYxWkwR5MCLaifRxEFsGvECaMDmD",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4DpR79PKKQXHVZipkvb1fMAfvZNJo7ktfKdkjwrjjqAA",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4HoofWLrzV4Dr3SZQMzZUFFfVbsQxkb3PeU2fJJpqqbD",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4KdTEGRkL94xwL2JiAY6Vm2T9uT67qBs2fyajGPuLcND",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4MiBygcbZ4sRe3HCx6rsgsQnZLakTU3kbGW59AsWNyTx",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4qKxw6YZkzH6cCJkhRrgoT2HL58EkssbtvnGhrxN6oc2",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4tx6d4ekQ6kf1LyYqYGBmHNvykAc1YuFEWos8jAiHcp6",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4uBvABeCWp5r7zpm3rBeijUsZHZUrxsx4yGf53i5CJpy",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4vczd3hbXadmR52UqhrT4fDsmQod3aVywzBSDGMDNFBY",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4vuk8LhafYXfHMRNKhFACkFR6aQjUr8Aad4CGJZk9sMu",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4wKwh2UFWfFwdeG1dWoA6FSEeD2RiKgQtJn4XMWr1M6f",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "4z69Fwc6vKi3XdQBmnhmxh3yYxfeRuqbLBksYnW4n5q9",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "51pcHZeDYS9x6Vx6m9iGsP88Nw8u8cw6zij3xDAHBvUC",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "52HkRMabDV938yFA3Z64M5whwG8oMeEgC7yaN9cxiJGV",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "53oNH8PhbjoEMssk6aCaX4fzj62zsLv7hhoQtyWQ2hC3",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "54Ka9zXW7K1PAZpycXZAGefETeb95yMjuUeJ3Ass1n2p",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "587PRBJPuaJEajJQVfYcyKW4fjTiMavtV81beFGNCz9Y",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5AvomStRa1t3kJ1mJuMvu8S8yrNUrfQyz3jr2iwrj9Uv",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5DUHeZHgMvWMvZzmcHPhPj4GjcsuqsquwkuvmKKS1Pgs",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5L1CdbpT51oaZjkFQcqQGQ7LhPSKAb2Wj9r4R7tUEcBC",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5Qbp5gdxq9Ad6ennxmQJBJtUCQHS4wrAYJ9VEj5NaGVt",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5SEpbdjFK5FxwTvfsGMXVQTD2v4M2c5tyRTxhdsPkgDw",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5XGiQ1aWpuXAFHPiZqNj2NH8V1bV1Byt1FKzXWGELqbs",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5Yyxuig5icB4h2zeGwDfy2Au9vxC3PFNMznih5kpqa9t",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5Zr8o7XAEXPmbpEym8Ca4XawCWZCR9czKoFLwLDUAzip",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5mz9mfxuFfsc79PBR84obyEUFmSwNHt6iHRvnzw4SVsa",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5ra5DFZGW6TX4LBr4r7pENLJ6Qh27WXzcQpHk2mn37wY",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5u8Ydu8H8mFddyMbjNCgYoCSJ7j2GRh25tq8WiMYVBtG",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "5x2DYtWmhT4SV2jkpTa561DVdkX8mrUi9y5AxkCCjaxN",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "65pqah6GX3kQvdbm3QFDGtUy79Dpmx4Rstsfq51y4PRX",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "66CX3NcSq2Gma76nuSNn58q2VE7192KJTrN2Fxmp2A5Z",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "67tNddxuhS8WXaxm6i38jHCTd73VY5xAckaTmi1X7a2c",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "6HtVpNj1cJCogAnqi6TAtyPhnvF4PeXPfRw69zuXiPx",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "6S8ZUSopbgVLPskn7C823X14YmmvLaqdV5Xt7LY637q7",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "6Uo93ZPC15VXoSKWT9x7meXztXLwqLajQBMByXJ3vTcy",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "6V9pAKDh6aF2v7juwoBXPAPSDzqhLi7vH2Qb1WvoP5MS",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "6VTzZhtZS8FxWkTdWmsW1Xq25iujF5m8J9owAmMzZL9S",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "6aexbwGzqbxRx6PwdDB7NnLzu3Hg985MYscjYDUp9sBJ",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "6bAt2MX6rzoZtgB8cgkDus5jpBs2wLqaFo5zuY3xvRXi",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "6ezK3TNuUGnL9emygSGrdGwZJNucpWEKNPLfa7x5jA6",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "6wNcPfW6YmPo7SUGULXWDVuKTgRvCvSg9szssJUqyeaC",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "7KNq73QTMei5sbLW5KL5zpmrYnHYRAfL5s1FtrDJGEFW",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "7PKUF7aD8n7rcRph2upD7HbkP9qePrWUriB9FcJhVnRW",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "7Ssohm6UdpsyuDLi1mU9rYuFNGQ6rRCZG74c6Ua3pt9V",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "7c4QLBkFvwGVHzfZtWgbuEwYmFgDtkzCzkeqn2cpGp9V",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "7dLofsHcpZZHGJAht94cfEv6VR4w1wJqQWWq3b97GD9N",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "7jx8iYinZfTkcPtpuewrMZyNMB25a8Q9HhJjrsybZkpY",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "7mX8TQwbvTeyEwQrcKw2rozsi84JxkuEUSGoHFHFRkq1",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "7o5Vqg9v7FJePZgXKgEYGhq8n5FrtTRy68wLb1DXA3fg",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "7sKkehMwEEDbP8qwfAUupACo744naD3jK6udf6RriXaZ",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "81r3bX2ZEw4coM57kgpKPxNx4JU9zAaWEHKJzBTFeSqG",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "87EeAzqQdEFmArNDRYKYeASECm32b6fTe9uDkeNFXqLT",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "881jpG52fE42rkK37H2LyXV1whGAv2r1uB2aCzQ5JkHr",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "8N3B6Vk7r1r6G6JMQjzmnGebR9w9ZnahzeqsNVmnA3a9",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "8ZhTnApEwJdsv8XLW4HBg4rbXmmEBYNpQT7D9XNueUyt",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "8hKnoYEMA64f9ae2xTjgEaPQX9P1uXPfeUjHNRqBHhf4",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "8psNvWTrdNTiVRNzAgsou9kETXNJm2SXZyaKuJraVRtf",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "8vvEcVaz4ZunVGee6eeLc43fx3QQPetgfVuofxEyvkJs",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "91ABtCwn96gmRMQFnbnazT3sz41GJMeGZ5TKuR6R1PXr",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "933ruXbmYut5LCcbk57c1N4tVsg1Gfvoy5gnVsw5f7Un",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "93QtWff1ocAKXVZEgwJnSLC36UVZ2Y1Pe142AD2FeQMP",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "98HnhkpjSFV2GWqyKaw3TsGMnkMeDaLSCdBYsdDVtdRS",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "99M5ZwVSFBPztU1Sds4eZcda24H9LwiQVxk6nLMyTPvc",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "9GQYtR481J6jj6zLpYu9rTGv5t3rgRsdGJDcmvSk7Woi",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "9HUW8WbdSi3817DoeHXciePhmEXX8KMfwTLdvaGB48xV",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "9HgDcFzDzZLcQiPNvwm9JgBe8uf7a87Us6ot4NecrHsj",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "9YymBf1QqTtznoamJCF6GKNrgpvGKNtrgDNSPkCXmy6k",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "9iExJP8VxQCLFtSR5JwRP3XvXa2E9Ay96CYHEChoHEWy",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "9mbFMA8LjhQGrQUmvwCuWxpeiZFR8EEd9deXuuLEpGg3",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "9toBv6rSJNWyqf1FWyH1PhnZXrwNJEp8BuTrJKMKzL7i",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "9veCUM4XonAkB9NFXo1K9W2DA2LQ8e8gLenpgBv4huA",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "9wxmsgnqDsy3djLpcDBnQCvjD5BuVPFPf5wTXaqn16Ua",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "9zzpBj8ww1VLceWdshJtKM7wUgEVNybJ4k4HoH7GfUxo",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "AQDwNt8MAk2bYej8yjwTZWYLaReFtw7vnt1osBFtFrMv",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "AT3q1ym3Yb33GzTVoQwKR95TXbz4FsEcaZxao7uuadFy",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "AWbLmioqkAoa6ktfUZuY4FGJcLwueZqXZoTznavc3FVD",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "AX9twcf5G6WQMczjfrsacfxGnpGgwoL98wVwHJBxrXCQ",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "AZWQGSYBNi9zP6XKNPx1yEiXE46Uo7qLv4Bvon634baB",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "AfnBJhwrkRkx7b1Kjk3NgiqML1K1hXzgoFEU45DPPnQo",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Ao8VmaxXGuZcdTSvXgYRRDrF8gKYspPW2SEqynaegnKH",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "AxgUyM2sRpweE1c82zvopvp9wpVa1sP1xwPcALPPnNK1",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "B1NSpzCWXrdxS8EhxFcnLiidtPK837bDDeZB4zwA93sm",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "B6TMop1UChPiBTaqbfeopD4nJnWyfxEphHdBxYJuSzCM",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "BGEhTs2NAdeVbtSfcbUhFj47kBB6Wf3GxYK2TzzEC663",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "BJ5v3mWvFoErAXFXussMcL7c8oGefTHATZPDjQLyAb56",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "BURNNeQ2zERsVhL6GgJR45CvGtwdxHeWBs4B5V4zRFgL",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "BVxEKKbH7MBMgnyjFF9Gf9yg9ShGHvH1n75ZbJAjBqgZ",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "BZQv8Uu9cZj1Gb4RDAKz5J9JWxRhKDboe1pjFazvNMo6",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "BjNo74jQrx2QUJ8EjMCvNa9jgD7JouDfdKWucb5ANsoH",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Bjissh5zbnYMvpT2LH6BjGzL4Vxo21wHSL5JXZKdP4Qv",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "BsE93m4BqZzSFoMQmmoSCLnygmVsngds7S16DfPPp3cC",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "BsjVkTendxwy72zapnNu1DTk765BmnXdhERR7FSzinNU",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Bwhh1p2aQ21GtmVLBJCTm5TBn3G6Aw3ENEvL2q9DQhxa",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "C9uEBQw3AfTzBa5nCSgPZgZZ6R3q2xbWTRzuoAdj23DB",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "CFhibkaLdK6rv4sZCEMTbpZGRqFBDAVytsG4qvkPRzK8",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "CLJrqAeYRNSB3yWGZJuBo8fFCGENbuDdW3R37jMpPTDi",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "CN2oAtcZzjyLgkRdcdYhn9NVzTtjvXnzgMbHLuQtRBsG",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "CPVSXVKgYghEySu8hWtpcqfVCX6xXLE7Wnhc33Mxn2Yc",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "CQvZKyE2FiZcQHijHCtnQLJ3YjQzP5nFWHCsWCsNCPQN",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "CRsRjoJaDeoXYE3ZUd8fFYAXW8cY4BfQxGj2g645QiBd",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "CSmFmcVJFLZ1zQU3VMMwT9ueShDEVjGbuFNZXPKRQWBr",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "ChMnmaKmgyVXku89fVTbTeyAVbPoPeaHMDD228GHjNxV",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "CiHYKWiSmaZqtvTic59z6V6RaQskuDpunnoxaKi3kB2K",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "CiyQJBfVXD1pc9EJ231rKKNXaiV7kkUBgGfoZWv9e6Hq",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Cjzi3ns3gJcm2duCCSy4NkuNjUiV9PmAPjaruVTtrHPL",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "CkKRJ9D4yWNZuQUZ8dTmEZueToNfgymASUK2ThuR6DZB",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "CtzH5mnTqrtbq4g2HcTKpwxi4tLwhM1QDv6nwLuQzD4R",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "DAMgL4xDhFgctiEiaDkkVKNYUkaSNPBhfJE29SQ7j2QB",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "DGKeRXqdXnfX2YLWbeDjhFq4hPF7QMg2U1t3yuW4wsnB",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "DRSPYgwikNVgPctman4jFoVf2Niwr8sDpt6rir4aH2hC",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "DRpebGUMjCRyJDoqvXbpKyBekqjn5CtYWhQTg9CfsWx",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "DW7abr27FZuMYvspJPRcyRX4jQB2izMAobWFWURhf17h",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Dcr7bmHzvqm49Mv88EqxjG9scLNs2xPCMUyh9nMfdL9Z",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "DdtWB4X9FP28rqQ7TdvguC6P2JheoFqvMoRF7J5uKm4p",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "DhV4Ys191ZHsB5tRuV4Q5MjcWh11zd4S6qsrWpEZLfZP",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "DjnZ9yf7ML67gCkfXybd33caZPeBVCqNus6V3XCFHHn9",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "DwcYq1GyB9QycFHZ7YRSdspXosgTQa7GBMCBbqNceLH3",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "DwiMQfYsHYRoASjxp3fo4nzsNfETgmM17gmzPDtcc6PC",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "E3vD9Do7GCxu11YzggcEtzGPzk3qoJYPkV2RLTSS28m",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "EBT1eK3GbtS3M9CNFyWFF46jEFyL5eZFAoQmqKrMiobK",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "ECd6pSKpm45bcPua5hXLaotVbcFsd3sAWMdNm7WfN2KC",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "ENBRujvjw42MHZR4x2FHsjMPBuUXQyw3Yc35ZP1jSY41",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "EPERe2BpaunF3Sx8YLHcdzRfotcrW4Wg8votNvbnwZwK",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "EYTixePS5FzTLsFFHyr2GpkKimaUQhrYiGJEPLR1vNXM",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "EZMFjHMUV8GtENj5t7ECYuzdqKHjgHN6JZy8KuVe1bR1",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "EZV3uqGWx5pVqt3iFV8tzvvD9WeUaKtogLKL7MyJXCbc",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "EdpXSvhKvbRsWCrGAsgRMgJwgcfqMc8Wx52zXwz76486",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "EkB51QPahcPwbgsoUtPaeG2tPDXttq2ayNeTSWAcbXnP",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Eu4k7YXczzHHbkZxyax1Y8eewNgYU7mfkuXKwCNKW9eg",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Eu4uc1ryX3sxDWsgH7QHnhNcyHFzz4QBqpanDdmbZ2Br",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "EvP9zp2pH73Xkk2SZRP84yLtnBqTDFPrro6N8yZrHYCS",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Eva5UTuM2itvCww7ZqATEZUC6TynVAfpHgbYtwoLRrBp",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "F1ebRzqK2TuwjkWQseQFp6ySzZFC4DebHNc7zDkcFWTv",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "F2tWyhsRxmKdeFwFknkNrbjJdMFCmbncDnVwM6VH1ja8",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "FThosYzpGdLszcvLK32PJ8dYfD1mLiTu5AgULfv399rc",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "FUYDHXYUxTn6qvFFcHkTf88Zo8a3aqnJj48ZMwdC57iG",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "FUsLSyccsVaRnXtmaZTrQWhaWJGbCBXH6VvLPyKXtbpg",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "FVBxp2w2ah3ecxT4qbCdYPS5iQSjAgiie3on9zNaHgDX",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Fa4bLyuZ2XCrQnjZ2BM38X1BoVCLCJiLCsPRCF5qousR",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "FeWMLntzVgzf6VRU37rs8p2xCpXRXtTm695dT3R9jLhi",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "FgCu9SjjHKxRki17JtgB7sN9wKNUtYWA8iRsx7k66AFF",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "FhVo3mqL8PW5pH5U2CN4XE33DokiyZnUwuGpH2hmHLuM",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "FjxXPk5T3QgDn5aipyF66YCexDUcwKgNExhYVQAebxAt",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "FkSFwC6t76WggAYmJZhetW3nN7qTEdXeKR8NQHnf7qNw",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "FpEtDUBP1WtcgHBDhQw63A3iHguF9xGoPbm1UuMm8fPQ",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Fvpmxbhs4bt5zyQZigXbwoGapzem1ZbpWZsmXhmwz8dp",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Fwh4NxT9BuUFCNLpaNj5UVxgw3iDVUq9RJBpEw3SLMGw",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "G5UZAVbAf46s7cKWoyKu8kYTip9DGTpbLZ2qa9Aq69dP",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "G6jXEbMREoJNsjRNQ9pLSRGvYugzNHY7SpAfWNwPDrDw",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "GQu9an36m7bnzFF1oMnuQN6bvbPv9Pp3MZcTR9YLw2jg",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "GTkdNQrXPwkyTsV5FwFKTnWpSedSjXDZcWRb76T5KUc6",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "GU9Mx4rAVxvCin1hEugHeo8QwhNE9CWnBntRpNtDjUFR",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "GhR7Ff811woD5acpaJQq7srhnqbt1B3NkhtuLnqhCGdQ",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "GpMZbSM2GgvTKHJirzeGfMFoaZ8UR2X7F4v8vHTvxFbL",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Gwabfvjfn4D6iXQ3obLoJb5H23tie4bncqJiMTXitpWu",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "H2MivmR9HJVsnKjjhTqMgZXu7WMS38APrpDujf3wBqeF",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "H3J7bvpyXqDcx8m92o3GgPzLryQeTG5yM2C3LBoC3RdM",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "HDCXiiyNFTmvbNq35y8i9xoopZR7kxhccoG8BcHaYdaY",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "HF73Ay3xt8V1MNP3MXhNKa3xzEfRFajFops5TnAuht8E",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "HLnpSz9h2S4hiLQ43rnSD9XkcUThA7B8hQMKmDaiTLcC",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "HWbAZdGAPijkMqBUyoes8spNdu29nzhxByfFAVLzEXtU",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "HXeskzDWhxycCBHeXC2PszX9MRznzDwmi6P94YnZUTXU",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Hd3cMfHMHQe4j8xfpnbDkWEgDo4gbrH2eimh6vpxjC37",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "HmYDWRC555CxW3HSzLckPS6kkJxTGksNv875vBbiVbGn",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Hokum6MJvTARYhXis8HfWqunZDuHSUYr6GhUXJZKEcNx",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "HopJvWJ8jyj9r7pDGaEUyX3Z9BsJFGLqzbMGNYHZGTnD",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "HyfY9BZLZ92DJz5duNbT2ALmF7WmNLM4hurYyfReNV5v",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "JA6czYDHFz5f7CmsK9scgoTtQ3TRp2EEdDLaErZPGks1",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "L47DdkDmk5vNMvmuhPVstW3Umk39Nzthhk8Ksg41aSc",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "L543Xqoqhq6UzyD9KQ5sZ7yUffAb2xkzZE1bmrew25D",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "PaVxWXwbdooUctJN51wXWfxmNXCsTzuRAV754H2TjwY",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "absdxHZAXypPidAVHagPoELmX5SWMQEcKHucyCZp46q",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "kiwiC4pg5mC4N5AhpXc4Av3V6oV7Sn2p3CqB7NeHbJJ",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "mP4tnNkwAtRLpSZG5CqcH3CVPJHgVw7XH3j6YRyayQP",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "o1tPfaS39oexxvkBubF3u7xr5Va5SKpmvHSgfN9BMvS",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "ricEmGn6WZ9kN2ASm1MAt7LoE1hBgu1VcQrjRwkAPfc",
+      "amountRaw": "93457943925"
+    },
+    {
+      "wallet": "uZBjpZNM5Gh1AHx9tme5EnCja7b3TDd4cABtNPXbDhh",
+      "amountRaw": "93457943925"
+    }
+  ]
+}
