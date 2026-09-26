@@ -1,0 +1,43 @@
+name: PHENIX full disposable Devnet proof
+
+on:
+  push:
+    branches: [phenix-launch-prep]
+    paths:
+      - "worldzpad-devnet/phenix/**"
+      - ".github/workflows/phenix-full-devnet-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phenix-full-devnet-proof
+  cancel-in-progress: false
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/phenix
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+      - name: Execute disposable PNEX proof with memory-only signer
+        run: npm run proof
+      - name: Independently verify on-chain evidence
+        run: npm run verify
+      - name: Publish public-only Devnet evidence
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnex-full-disposable-devnet-proof
+          path: worldzpad-devnet/phenix/artifacts/pnex-full-devnet-proof.json
+          if-no-files-found: warn
+          retention-days: 14
