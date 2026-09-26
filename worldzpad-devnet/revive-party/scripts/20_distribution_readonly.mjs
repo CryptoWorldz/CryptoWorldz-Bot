@@ -11,12 +11,14 @@ if(genesis!=='5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d')throw Error('MAINNET
 const manifest=JSON.parse(fs.readFileSync('../../worldzpad-mainnet/revive/revive-legacy-216-distribution.v1.json'));
 const cfg=JSON.parse(fs.readFileSync('../../worldzpad-mainnet/revive/revive-launch-contract.v1.json'));
 const dev=JSON.parse(fs.readFileSync('../../worldzpad-mainnet/revive/revive-six-dev-distribution.v1.json'));
+const equal=JSON.parse(fs.readFileSync('../../worldzpad-mainnet/revive/revive-equal-legacy-proposal.v1.json'));
 const mint=new PublicKey(manifest.mint);
 const vault=new PublicKey(cfg.token.treasuryVault);
 const payer=new PublicKey('Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u');
 if(manifest.mint!==cfg.token.canonicalMint||manifest.recipientCount!==216||
  manifest.recipients.length!==216||new Set(manifest.recipients.map(x=>x.wallet)).size!==216||
  manifest.recipients.reduce((a,x)=>a+BigInt(x.amountRaw),0n)!==20_000_000_000_000n)throw Error('MANIFEST_INVALID');
+if(manifest.payoutExclusionsPendingRecalculation?.length!==2||equal.status!=='PROPOSED_NOT_APPROVED_NOT_SIGNABLE')throw Error('LEGACY_PAYOUT_GATE_MISSING');
 const vaultAta=getAssociatedTokenAddressSync(mint,vault,true,TOKEN_PROGRAM_ID);
 if(vaultAta.toBase58()!==cfg.token.treasuryTokenAccount)throw Error('VAULT_ATA_DRIFT');
 const [vaultTokens,payerSol,vaultSol,ataRent]=await Promise.all([
@@ -36,7 +38,7 @@ for(let offset=0;offset<atas.length;offset+=64){
 }
 const rent=BigInt(missing)*BigInt(ataRent);
 const extraDestinations=[
- ...dev.recipients.map(x=>({role:'SIX_DEV',wallet:x.wallet})),
+ ...dev.recipients.map(x=>({role:'SEVEN_DEV',wallet:x.wallet})),
  ...cfg.teamVesting.knownTeamWallets.map(x=>({role:'TEAM',wallet:x.address})),
  {role:'DEV_CITY_STAGING',wallet:cfg.devCity.stagingWallet},
  {role:'ONEWORLDZ_STAGING',wallet:cfg.charityImpact.stagingWallet},
@@ -61,5 +63,7 @@ const result={proof:'REVIVE_LEGACY_216_DISTRIBUTION_READONLY_PREFLIGHT',observed
  payerCoversAtaRentOnly:BigInt(payerSol)>=rent,
  remainingCosts:'Squads proposal rent, transaction fees and any ATA costs paid by the vault need separate exact simulation.',
  safety:{signed:false,broadcast:false,transfers:false}};
+result.safety.legacyPayoutBlocked=true;
+result.safety.reason='Historical weighted amounts and excluded addresses are not authorized; equal 214-wallet proposal requires approval.';
 console.log(JSON.stringify(result,null,2));
 if(!result.enoughRviv)process.exitCode=2;
