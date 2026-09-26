@@ -14,9 +14,26 @@ This package prepares WorldzLaunchPad launch #003 without minting, transferring,
   - later liquidity capacity: **40% / 100,000,000**
 - Developer vesting: **10% / 25,000,000**
 - Purple Diamond Handz: **1% / 2,500,000**
-- Unassigned pending final decision: **19% / 47,500,000**
+- PHENIX Total Supply FlyWheel™: **19% / 47,500,000**
 
-The allocation totals 100%, but the 19% reserve is intentionally unspendable and blocks launch readiness until a final disclosed purpose is approved.
+The full 250,000,000 PNEX supply is now assigned. The 19% is one master reserve, not extra supply and not a collection of unrelated leftovers. Its release policy remains fail-closed until the lane controls, vault, approvals and proof path are finalized.
+
+## PHENIX Total Supply FlyWheel™
+
+The 47,500,000 PNEX master reserve exists to support the system PHENIX depends on and to create a transparent supply-discipline loop. It can be used only through disclosed lanes:
+
+- Worldz infrastructure: WorldzLaunchPad, security, hosting, development, automation, maintenance and audits
+- OneWorldz Impact / charity-fund building with public proof
+- Treasury resilience
+- verified community rewards
+- additional builder/team support only when locked and vested
+- ecosystem integrations, grants, partnerships and tooling
+- additional liquidity under the PHENIX staged-liquidity rule
+- permanent, publicly verifiable PNEX burns
+
+Unused PNEX stays inside the master reserve. Burned PNEX can never return. Internal lane percentages are **not yet fixed**; this prevents us from inventing a split you have not approved.
+
+The same infrastructure work may be used to harden the WorldzLaunchPad systems needed for launch #004 **MIRACLE**, including wallet connection, locks/vesting, fee routing, accounting, security and Worldz Proof. This is infrastructure support, not a promise that PNEX or MIRACLE prices will rise.
 
 ## PHENIX Chance
 
@@ -52,7 +69,7 @@ The Worldz website remains the launch origin. The design must not require users 
 
 ## Hard blockers before mainnet
 
-1. Allocate the remaining 47,500,000 PNEX and keep the total at exactly 250,000,000.
+1. Finalize the PHENIX Total Supply FlyWheel™ internal release policy, vault, approval controls and Worldz Proof path.
 2. Finalize and enforce developer vesting.
 3. Complete and validate approved PHENIX Chance recipients.
 4. Prove all 12 monthly releases.
