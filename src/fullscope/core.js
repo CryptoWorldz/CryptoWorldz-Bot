@@ -79,6 +79,10 @@ function buildActionIntent(input = {}) {
     tokenId: String(input.tokenId),
     state: "prepared",
     custody: "external-wallet",
+    walletEntryPoint: "first-party-worldz-website",
+    requiresLiveWalletVerification: true,
+    requiresExactTransactionReview: true,
+    requiresSimulation: true,
     requiresSignature: true,
     autoBroadcast: false,
     mainnetExecutionEnabled: false
