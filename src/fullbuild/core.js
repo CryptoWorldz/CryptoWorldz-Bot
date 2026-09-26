@@ -16,6 +16,10 @@ function loadContract() {
 
 function validateFullBuildContract(contract = loadContract()) {
   if (contract.schema !== "WORLDZ-FULLBUILD-V1" || contract.brand !== FULLBUILD_BRAND) throw new Error("Invalid WorldzFullBuild contract.");
+  const integration = contract.projectWideIntegration || {};
+  if (integration.currentDirectiveState !== "WHOLE_PROJECT_AND_PROJECT_CHAT_INHERITANCE_ACTIVE") throw new Error("Whole-project WorldzFullBuild inheritance is not active.");
+  if (integration.latestOwnerDirective?.state !== "INCORPORATED") throw new Error("Latest owner incorporation directive is not locked.");
+  if (contract.commandPaths?.worldzLinks !== "/worldzlinks") throw new Error("WorldzLinkz command is not inherited by WorldzFullBuild.");
   const scope = contract.architecture && contract.architecture.fullScope;
   if (!scope || scope.required !== true) throw new Error("WorldzFullScope must remain required.");
   if (scope.chainCount !== 8 || scope.maxTokensPerChain !== 20 || scope.initialTokenEnvironmentCapacity !== 160) throw new Error("WorldzFullScope capacity contract changed.");
@@ -36,7 +40,9 @@ function summary() {
     brand: contract.brand,
     chains: contract.architecture.fullScope.chainCount,
     tokensPerChain: contract.architecture.fullScope.maxTokensPerChain,
-    capacity: contract.architecture.fullScope.initialTokenEnvironmentCapacity
+    capacity: contract.architecture.fullScope.initialTokenEnvironmentCapacity,
+    projectInheritance: contract.projectWideIntegration.currentDirectiveState,
+    worldzLinks: contract.commandPaths.worldzLinks
   };
 }
 

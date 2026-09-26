@@ -290,7 +290,7 @@ The following project ideas are preserved as build/research backlog, not represe
 - Pump.fun / Bonk / Bags / Heaven / BasedBid / Moonshot / other launch-source research for DevCity and competitive analysis;
 - AnsemAsset™ / partner-token support concept for voluntary reciprocal liquidity/buy/swap/build support;
 - future BlackBull or other approved partner-asset adapters;
-- WorldzLinks / LinkTree-style QR and all-domain directory — requested capability, final brand/domain name pending owner approval.
+- **WorldzLinkz™ — “Every Worldz. One Link.”** — approved QR + all-domain directory capability. Canonical route: `https://cryptoworldz.xyz/worldzlinkz/`; `links.cryptoworldz.xyz` remains a planned vanity alias until DNS is explicitly activated.
 
 No third-party partnership, preferential listing, gold symbol, paid package or platform approval may be claimed without direct evidence from that provider.
 
@@ -307,4 +307,4 @@ Every new Worldz feature must:
 6. produce proof/receipt where on-chain;
 7. avoid resurrecting superseded values from older chats.
 
-This continuity standard is now part of the WorldzFullBuild™ source-of-truth set.
+Latest whole-project directive (2026-09-27): **incorporate the entire Worldz Project and its project-relevant chats into WorldzFullBuild™**. This standard, the canonical manifest and the Project Source of Truth are the durable interpretation of that directive.\n\nThis continuity standard is now part of the WorldzFullBuild™ source-of-truth set.

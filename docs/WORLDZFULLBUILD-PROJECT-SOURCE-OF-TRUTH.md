@@ -189,6 +189,12 @@ When JayJayTeamDev says **"Incorporate this into Our WorldzFullBuild™"**, the 
 6. never expose private chat material merely because it appeared in the project;
 7. carry reusable lessons into every future eligible WorldzLaunchPad launch.
 
+## Latest owner directive — 2026-09-27
+
+**“Incorporate this whole Project & all of its Chat's into Our WorldzFullBuild™.”**
+
+Status: **INCORPORATED** for project-relevant, non-sensitive requirements, corrections, reusable launch rules, product architecture, deployment lessons, token continuity, humanitarian/crypto separation and preserved research backlog. Older incompatible values remain superseded rather than silently mixed back in.
+
 ## Current integration checkpoint
 
 The project-wide source-of-truth layer is now represented in `worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json` and this ledger. It is an integration contract, not permission to execute financial transactions or turn on mainnet execution.

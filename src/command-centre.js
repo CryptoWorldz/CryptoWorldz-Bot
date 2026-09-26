@@ -32,7 +32,7 @@ const MENUS = {
       ["📡 WorldzFullScope", "/fullscope"],
       ["🗳️ Votes Centre", "/worldzvotes"],
       ["🏛️ WorldzGovern", "/worldzgovern"],
-      ["📚 All Commands", "/commands"]
+      ["🔗 WorldzLinkz", "/worldzlinks"]
     ]
   },
   fullscope: {
@@ -125,7 +125,8 @@ const WEB_ROUTES = Object.freeze({
   donateReagan: "https://donateworldz.com/reagan-children/",
   publicCommands: "https://cryptoworldz.xyz/command-centre/commands/",
   fullBuild: "https://launchpad.cryptoworldz.xyz/fullbuild/",
-  fullScope: "https://launchpad.cryptoworldz.xyz/fullscope/"
+  fullScope: "https://launchpad.cryptoworldz.xyz/fullscope/",
+  worldzLinks: "https://cryptoworldz.xyz/worldzlinkz/"
 });
 
 function menuText(menu) {
@@ -230,7 +231,7 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "WorldzFullBuild™ is the master architecture. ZED leads it. WorldzLaunchPad builds, Worldz Omnichain routes chain-native execution, WorldzFullScope watches and coordinates supported tokens, AUTO controls finance workflows, G.R.A.C.E. coordinates approved communication, RECAP explains verified activity, and WorldzProof records evidence.",
     "",
     "Gateway commands:",
-    "/zedstart • /worldzfullbuild • /fullscope • /worldzvotes • /worldzgovern • /commands",
+    "/zedstart • /worldzfullbuild • /fullscope • /worldzlinks • /worldzvotes • /worldzgovern",
     "",
     "You do not need to memorise the full command list."
   ].join("\n"), mainKeyboard());
@@ -289,6 +290,8 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "",
     "/zedstart — open Command Centre MAX™",
     "/max — open the MAX learning and research hub",
+    "/worldzfullbuild — open the WorldzFullBuild parent architecture",
+    "/worldzlinks — open WorldzLinkz QR + domain directory",
     "/commands — every command available to your role",
     "/commandtree — command sections and structure",
     "/directory — public OneWorldz site/page directory",

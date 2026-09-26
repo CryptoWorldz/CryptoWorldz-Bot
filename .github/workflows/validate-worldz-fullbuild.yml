@@ -8,8 +8,12 @@ on:
       - 'src/command-centre.js'
       - 'src/command-registry.js'
       - 'src/full-runtime-entry.js'
+      - 'src/websites-telegram.js'
       - 'test/fullbuild.test.js'
       - 'test/fullscope.test.js'
+      - 'test/command-centre.test.js'
+      - 'test/command-registry.test.js'
+      - 'test/websites-telegram.test.js'
       - 'worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json'
       - 'worldzpad-omnichain/fullscope/worldz-fullscope.v1.json'
       - 'launchpad.cryptoworldz.xyz/fullbuild/**'
@@ -18,6 +22,9 @@ on:
       - 'public/miniapp/index.html'
       - 'public/miniapp/app.js'
       - 'cryptoworldz.xyz/command-centre-max/index.html'
+      - 'cryptoworldz.xyz/worldzlinkz/**'
+      - 'docs/WORLDZFULLBUILD-PROJECT-SOURCE-OF-TRUTH.md'
+      - 'docs/WORLDZFULLBUILD-PROJECT-CONTINUITY-2026-09-27.md'
       - 'scripts/validate_worldz_fullbuild.py'
       - 'scripts/validate_worldz_fullscope.py'
       - '.github/workflows/validate-worldz-fullbuild.yml'
@@ -46,6 +53,7 @@ jobs:
           node --check src/command-centre.js
           node --check src/command-registry.js
           node --check src/full-runtime-entry.js
+          node --check src/websites-telegram.js
           node --check public/miniapp/app.js
       - name: Focused tests
-        run: node --test test/fullbuild.test.js test/fullscope.test.js test/command-centre.test.js test/command-registry.test.js
+        run: node --test test/fullbuild.test.js test/fullscope.test.js test/command-centre.test.js test/command-registry.test.js test/websites-telegram.test.js

@@ -52,7 +52,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["heroes", "Open Real-World Hero evidence and recognition"], ["kitty", "View public Community Kitty addresses"],
     ["causes", "List registered causes"], ["cause", "View one cause"], ["shilllink", "Create your referral/shill link"],
     ["referrals", "View referral status"], ["rewardplan", "View reward-plan rules"], ["website", "Open a website by project"],
-    ["websites", "View the website directory"], ["worldzlive", "View live Worldz sites"], ["solworldz", "Open SolWorldz"],
+    ["websites", "View the website directory"], ["worldzlinks", "Open WorldzLinkz™ — every Worldz in one QR directory"], ["worldzlive", "View live Worldz sites"], ["solworldz", "Open SolWorldz"],
     ["tg", "Open this project's Telegram link"], ["tglinks", "View official Telegram links"],
     ["x", "Open this project's X page"], ["xlinks", "View official X pages"]
   ]),
