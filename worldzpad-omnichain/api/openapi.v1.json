@@ -1,0 +1,70 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "WorldzLaunchPad Omnichain API",
+    "version": "0.1.0-private",
+    "description": "Private API contract for quote, simulation, referral attribution and Worldz Proof. Mainnet execution is not enabled."
+  },
+  "servers": [
+    {"url": "https://launchpad.cryptoworldz.xyz/api", "description": "Production hostname contract; execution remains feature-gated"}
+  ],
+  "paths": {
+    "/v1/chains": {
+      "get": {
+        "summary": "List supported Worldz chain adapters",
+        "responses": {"200": {"description": "Chain registry"}}
+      }
+    },
+    "/v1/launch/quote": {
+      "post": {
+        "summary": "Return exact pre-sign fee and liquidity disclosure",
+        "responses": {"200": {"description": "Normalized fee quote"}, "422": {"description": "Unsupported or unproven configuration"}}
+      }
+    },
+    "/v1/launch/simulate": {
+      "post": {
+        "summary": "Simulate or testnet-prove a launch intent without mainnet execution",
+        "responses": {"200": {"description": "Simulation result and evidence"}, "422": {"description": "Simulation failed"}}
+      }
+    },
+    "/v1/launch/prepare": {
+      "post": {
+        "summary": "Prepare an unsigned chain-native transaction bundle after a successful simulation",
+        "responses": {"200": {"description": "Unsigned transaction bundle"}, "409": {"description": "Release gate not satisfied"}}
+      }
+    },
+    "/v1/launch/execute": {
+      "post": {
+        "summary": "Submit an already approved signed transaction bundle",
+        "description": "Disabled for mainnet until the selected chain adapter passes its independent release gate.",
+        "responses": {"200": {"description": "Execution receipt"}, "403": {"description": "Mainnet adapter disabled"}}
+      }
+    },
+    "/v1/referrals/resolve": {
+      "post": {
+        "summary": "Resolve one primary Worldz referrer and attribution record",
+        "responses": {"200": {"description": "Referral attribution"}}
+      }
+    },
+    "/v1/proofs/{proofId}": {
+      "get": {
+        "summary": "Read a Worldz Proof record",
+        "parameters": [{"name": "proofId", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "Worldz Proof"}, "404": {"description": "Proof not found"}}
+      }
+    },
+    "/v1/white-label/operators/{operatorId}": {
+      "get": {
+        "summary": "Read public white-label operator configuration",
+        "parameters": [{"name": "operatorId", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "Operator branding and referral configuration"}}
+      }
+    }
+  },
+  "x-worldz-safety": {
+    "mainnetExecutionEnabled": false,
+    "simulateFirst": true,
+    "noPrivateKeysAccepted": true,
+    "noHiddenFees": true
+  }
+}
