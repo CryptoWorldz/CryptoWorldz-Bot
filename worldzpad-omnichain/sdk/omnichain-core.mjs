@@ -8,7 +8,7 @@ export const CHAIN_ENVIRONMENTS = Object.freeze({
   base: Object.freeze(['base-sepolia', 'mainnet']),
   ethereum: Object.freeze(['sepolia', 'mainnet']),
   bnb: Object.freeze(['bsc-testnet', 'mainnet']),
-  sui: Object.freeze(['testnet', 'mainnet']),
+  sui: Object.freeze(['devnet', 'testnet', 'mainnet']),
   hyperevm: Object.freeze(['hyperevm-testnet', 'mainnet']),
   robinhood: Object.freeze(['robinhood-testnet', 'mainnet'])
 });
