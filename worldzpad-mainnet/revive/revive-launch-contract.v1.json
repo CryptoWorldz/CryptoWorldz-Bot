@@ -114,8 +114,17 @@
     "knownTeamWallets": [],
     "beneficiaryWeightsFinalized": false,
     "executionGate": "NO_TEAM_TRANSFER_UNTIL_WORK_VERIFIED_BENEFICIARIES_WALLETS_AND_JUPITER_LOCK_SCHEDULE_ARE_APPROVED",
-    "candidateNote": "Stepper may apply with a signed Solana wallet and verified contribution; no automatic team grant.",
-    "custodyRule": "No AI-controlled wallet or custodian. Create only a verified Jupiter Lock schedule with explicit beneficiaries after human review; no unassigned pool sent to a third-party wallet."
+    "candidateNote": "DevCity participants and other contributors may voluntarily apply with documented work and signed wallet proof; no automatic grant, including Stepper.",
+    "custodyRule": "No AI-controlled wallet or custodian. Create only a verified Jupiter Lock schedule with explicit beneficiaries after human review; no unassigned pool sent to a third-party wallet.",
+    "recruitment": {
+      "openTo": "DevCity participants and any other person contributing verifiable work or support to WorldzLaunchPad",
+      "voluntaryJoin": true,
+      "automaticGrant": false,
+      "selection": "Same published task and evidence standards for all applicants; no preference based on colour, health, appearance, role, or token holdings.",
+      "individualTokenAmounts": "PENDING_OWNER_REVIEW",
+      "recipientWalletProof": "Fresh signed challenge verified server-side before an approved grant.",
+      "claimStart": "PENDING_APPROVED_JUPITER_LOCK_SCHEDULE"
+    }
   },
   "legacyRevival": {
     "snapshotBatch": "4b7faa3f-c6cd-435f-9840-43a04cd090a0",
