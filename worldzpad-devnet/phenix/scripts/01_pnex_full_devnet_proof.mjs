@@ -15,7 +15,7 @@ import BN from "bn.js";
 const RPC = clusterApiUrl("devnet");
 const connection = new Connection(RPC, "confirmed");
 const DEVNET_GENESIS = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1";
-if (await connection.getGenesisHash() !== DEVNET_GENESIS) throw new Error("DEVNET_RPC_REQUIRED");
+if ((await connection.getGenesisHash()) !== DEVNET_GENESIS) throw new Error("DEVNET_RPC_REQUIRED");
 
 const payer = Keypair.generate(); // ephemeral, memory-only; never serialized
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
