@@ -141,7 +141,9 @@ jobs:
             root/'genesis/index.html',root/'genesis/app.js',
             root/'mint/index.html',root/'mint/app.js',root/'mint/jupiter-mobile.js',
             root/'trust/index.html',root/'trust/app.js',
-            root/'omnichain/index.html',root/'technology/index.html',root/'technology.html',
+            root/'omnichain/index.html',root/'fullscope/index.html',
+            root/'proof-receipt/index.html',root/'worlddexpush/index.html',
+            root/'technology/index.html',root/'technology.html',
             root/'wldz/index.html',root/'wldz/app.js',root/'wldz/launch-config.json',
             root/'tokenlist.json',root/'.well-known/worldz-tokens.json',
             root/'rviv/index.html',root/'rviv/verify/index.html',
@@ -634,6 +636,9 @@ jobs:
                   mint_code,mint_body=get(base+'/mint/?verify=public-v10')
                   jup_bridge_code,jup_bridge_body=get(base+'/mint/jupiter-mobile.js?verify=public-v10')
                   trust_code,trust_body=get(base+'/trust/?verify=trust-v2')
+                  fullscope_code,fullscope_body=get(base+'/fullscope/?verify=fullscope-v1')
+                  receipt_code,receipt_body=get(base+'/proof-receipt/?verify=receipt-v1')
+                  dexpush_code,dexpush_body=get(base+'/worlddexpush/?verify=dexpush-v1')
                   tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
                   wldz_code,wldz_body=get(base+'/wldz/?verify=wldz-v1')
                   wldz_cfg_code,wldz_cfg_body=get(base+'/wldz/launch-config.json?verify=wldz-v1')
@@ -707,6 +712,9 @@ jobs:
                   assert all(term not in jup_bridge_body for term in private_terms)
                   assert trust_code==200 and 'WORLDZ TRUST ORBIT' in trust_body and 'PROOF' in trust_body
                   assert all(term not in trust_body for term in private_terms)
+                  assert fullscope_code==200 and 'WORLDZFULLSCOPE™' in fullscope_body and 'POPULARITY ONLY' in fullscope_body and 'GOVERNANCE ONLY' in fullscope_body
+                  assert receipt_code==200 and 'WORLDZ PROOF RECEIPT™' in receipt_body
+                  assert dexpush_code==200 and 'WORLDDEXPUSH™' in dexpush_body and '500+ active Boosts' in dexpush_body
                   assert tech_code==200 and 'WORLDZ TECHNOLOGY & MEANINGS' in tech_body and 'Swap API V2' in tech_body and 'WorldzMINT' in tech_body
                   wldz_cfg=json.loads(wldz_cfg_body)
                   assert wldz_code==200 and 'SOLANA MAINNET • LIVE' in wldz_body
