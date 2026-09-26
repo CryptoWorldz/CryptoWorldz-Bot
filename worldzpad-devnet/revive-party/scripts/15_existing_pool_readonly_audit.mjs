@@ -27,14 +27,20 @@ const safe = value => JSON.parse(JSON.stringify(value, (_, v) =>
 ));
 const mintsMatch = pool.tokenAMint.toBase58() === rvivMint && pool.tokenBMint.equals(NATIVE_MINT);
 const positionNftHolders = await Promise.all(positions.map(async item => {
-  const largest = await connection.getTokenLargestAccounts(item.account.nftMint, 'confirmed');
-  const holding = largest.value.find(entry => entry.amount !== '0');
-  const parsed = holding ? await connection.getParsedAccountInfo(holding.address, 'confirmed') : null;
-  return { nftMint: item.account.nftMint.toBase58(),
-    tokenAccount: holding?.address.toBase58() || null,
-    tokenAmount: holding?.amount || '0',
-    owner: parsed?.value?.data?.parsed?.info?.owner || null,
-  };
+  try {
+    const largest = await connection.getTokenLargestAccounts(item.account.nftMint, 'confirmed');
+    const holding = largest.value.find(entry => entry.amount !== '0');
+    const parsed = holding ? await connection.getParsedAccountInfo(holding.address, 'confirmed') : null;
+    return { nftMint: item.account.nftMint.toBase58(),
+      tokenAccount: holding?.address.toBase58() || null,
+      tokenAmount: holding?.amount || '0',
+      owner: parsed?.value?.data?.parsed?.info?.owner || null,
+      verified: !!parsed?.value?.data?.parsed?.info?.owner,
+    };
+  } catch (error) {
+    return {nftMint: item.account.nftMint.toBase58(), verified:false,
+      error: 'READ_ONLY_OWNER_LOOKUP_UNAVAILABLE: ' + (error?.message || error)};
+  }
 }));
 const fixedFeeNumerator = new BN(fees.cliffFeeNumerator.toString('hex'), 16);
 const expectedFeeNumerator = new BN(7_500_000); // 75 bps of SDK's 1e9 denominator.
