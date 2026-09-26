@@ -8,6 +8,7 @@ on:
     paths:
       - 'worldzpad-devnet/revive-party/scripts/09_mainnet_launch_simulation_readonly.mjs'
       - 'worldzpad-devnet/revive-party/scripts/15_existing_pool_readonly_audit.mjs'
+      - 'worldzpad-devnet/revive-party/scripts/16_existing_pool_buy_simulation_readonly.mjs'
       - 'worldzpad-mainnet/revive/revive-launch-contract.v1.json'
       - 'worldzpad-mainnet/revive/revive-direct-damm-v2-existing-mint.v1.json'
       - 'worldzpad-mainnet/revive/scripts/estimate-mainnet-sol-floor.mjs'
@@ -49,6 +50,9 @@ jobs:
       - name: Audit occupied Meteora pool — READ ONLY
         continue-on-error: true
         run: node scripts/15_existing_pool_readonly_audit.mjs
+      - name: Simulate hypothetical 0.001 SOL RVIV buy — READ ONLY
+        continue-on-error: true
+        run: node scripts/16_existing_pool_buy_simulation_readonly.mjs
       - name: Simulate canonical REVIVE mainnet pool creation — READ ONLY
         run: node scripts/09_mainnet_launch_simulation_readonly.mjs
       - name: Publish read-only simulation evidence (best effort)
