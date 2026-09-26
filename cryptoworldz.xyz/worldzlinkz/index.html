@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12051f">
+<meta name="description" content="WorldzLinkz™ — Every Worldz. One Link. Official directory for the OneWorldz, CryptoWorldz, WorldzLaunchPad and community network.">
+<title>WorldzLinkz™ • Every Worldz. One Link.</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#07030d;--panel:#130821;--panel2:#1d0b31;--line:#6230a2;
+  --text:#f7f1ff;--muted:#c8b7db;--purple:#9b4dff;--violet:#c060ff;
+  --cyan:#6ee7ff;--green:#7ff7b2;--gold:#ffd56a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:
+radial-gradient(circle at 20% 0%,#261048 0,transparent 34rem),
+radial-gradient(circle at 90% 12%,#102443 0,transparent 30rem),
+var(--bg);color:var(--text);font:16px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+body{min-height:100vh}
+a{color:inherit}
+.shell{width:min(980px,calc(100% - 28px));margin:auto;padding:28px 0 60px}
+.hero{border:1px solid #50237d;border-radius:30px;padding:28px;background:linear-gradient(145deg,rgba(37,13,60,.97),rgba(9,4,17,.96));box-shadow:0 24px 80px #0008}
+.brand{display:flex;gap:14px;align-items:center}
+.orb{width:58px;height:58px;display:grid;place-items:center;border-radius:50%;font-size:30px;background:radial-gradient(circle at 30% 25%,#dfb7ff,#7c30d6 44%,#190927 72%);box-shadow:0 0 36px #9b4dff66}
+.kicker{margin:0;color:var(--cyan);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.78rem}
+h1{margin:.15rem 0 0;font-size:clamp(2.25rem,8vw,4.9rem);line-height:.95;letter-spacing:-.05em}
+.tag{font-size:clamp(1.08rem,3vw,1.4rem);color:var(--muted);margin:18px 0 0}
+.tag strong{color:var(--gold)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.btn{appearance:none;border:1px solid #7441a8;background:#241037;color:white;border-radius:16px;padding:13px 16px;font-weight:800;text-decoration:none;cursor:pointer}
+.btn.primary{background:linear-gradient(90deg,#813dff,#c25cff);border-color:transparent}
+.btn:hover{filter:brightness(1.1)}
+.grid{display:grid;grid-template-columns:1.4fr .8fr;gap:18px;margin-top:18px}
+.card{border:1px solid #3e1d5d;border-radius:24px;background:#0f0719e8;padding:20px}
+.card h2{margin:0 0 8px;font-size:1.25rem}
+.qr-wrap{display:grid;place-items:center;text-align:center}
+#qr{background:white;border-radius:18px;padding:12px;width:min(260px,100%);aspect-ratio:1}
+.qr-label{font-size:.9rem;color:var(--muted);word-break:break-word;margin:12px 0 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}
+.stat{background:#0c0614;border:1px solid #32194b;border-radius:16px;padding:13px;text-align:center}
+.stat b{display:block;font-size:1.45rem;color:var(--cyan)}
+.stat span{font-size:.78rem;color:var(--muted)}
+.search{width:100%;border:1px solid #503072;border-radius:15px;background:#0a0511;color:white;padding:14px 15px;font:inherit;outline:none;margin-top:10px}
+.search:focus{border-color:var(--violet);box-shadow:0 0 0 3px #9b4dff22}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.filter{border:1px solid #442461;border-radius:999px;background:#12081d;color:var(--muted);padding:8px 12px;cursor:pointer}
+.filter.active{background:#6b2ed1;color:white;border-color:#9b4dff}
+.directory{display:grid;gap:10px}
+.link-card{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;border:1px solid #2d1743;background:linear-gradient(135deg,#12081d,#0b0511);border-radius:18px;padding:15px;text-decoration:none}
+.link-card:hover{border-color:#8c44df;transform:translateY(-1px)}
+.link-name{font-weight:900;font-size:1.05rem}
+.link-host{color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}
+.badge{display:inline-block;margin-top:7px;padding:4px 8px;border-radius:999px;background:#1d0e2b;color:#d6c2e8;font-size:.72rem}
+.arrow{font-size:1.4rem;color:var(--violet)}
+.alias{margin-top:18px;border-left:4px solid var(--gold);padding:10px 14px;background:#19100a;border-radius:0 14px 14px 0;color:#f7e7b7}
+footer{color:#947fa8;text-align:center;padding:28px 8px 0;font-size:.86rem}
+.hidden{display:none!important}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.hero{padding:21px}.shell{width:min(100% - 18px,980px)}.stats{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <section class="hero">
+    <div class="brand">
+      <div class="orb" aria-hidden="true">🌍</div>
+      <div>
+        <p class="kicker">WorldzFullBuild™ • Official Link Gateway</p>
+        <h1>WorldzLinkz™</h1>
+      </div>
+    </div>
+    <p class="tag"><strong>Every Worldz. One Link.</strong><br>Scan one QR and open the complete Worldz domain + subdomain network.</p>
+    <div class="actions">
+      <button class="btn primary" id="copy-link" type="button">Copy WorldzLinkz™</button>
+      <button class="btn" id="download-qr" type="button">Save QR Code</button>
+      <a class="btn" href="#directory">Browse All Worldz</a>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>🌐 Worldz Network Registry</h2>
+      <p style="color:var(--muted);margin-top:0">Domains and subdomains currently recorded in the WorldzFullBuild™ source registry.</p>
+      <div class="stats">
+        <div class="stat"><b id="count-all">—</b><span>Total links</span></div>
+        <div class="stat"><b id="count-domains">—</b><span>Domains</span></div>
+        <div class="stat"><b id="count-subs">—</b><span>Subdomains</span></div>
+      </div>
+      <div class="alias"><b>Preferred vanity alias:</b> links.cryptoworldz.xyz<br><small>The canonical QR target remains the live WorldzLinkz page until that DNS alias is explicitly activated.</small></div>
+    </div>
+
+    <div class="card qr-wrap">
+      <h2>📱 Scan WorldzLinkz™</h2>
+      <canvas id="qr" width="260" height="260" aria-label="QR code for WorldzLinkz"></canvas>
+      <p class="qr-label" id="qr-target">Loading QR target…</p>
+    </div>
+  </section>
+
+  <section class="card" id="directory" style="margin-top:18px">
+    <h2>🔗 All Worldz Domains + Subdomains</h2>
+    <input id="search" class="search" type="search" placeholder="Search Worldz, chain, mission, community…" autocomplete="off">
+    <div class="filters" id="filters"></div>
+    <div class="directory" id="links"><p style="color:var(--muted)">Loading Worldz registry…</p></div>
+  </section>
+
+  <footer>
+    WorldzLinkz™ • WorldzFullBuild™ • OneWorldz × CryptoWorldz<br>
+    No wallet connection, seed phrase or private key is required to use this directory.
+  </footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script>
+const state={registry:null,category:'All',query:''};
+const byId=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+
+function render(){
+  const r=state.registry;
+  const categories=['All',...new Set(r.entries.map(x=>x.category))];
+  byId('filters').innerHTML=categories.map(c=>'<button class="filter '+(state.category===c?'active':'')+'" data-category="'+esc(c)+'">'+esc(c)+'</button>').join('');
+  const q=state.query.toLowerCase();
+  const rows=r.entries.filter(x=>(state.category==='All'||x.category===state.category)&&(!q||[x.name,x.host,x.category,x.type].some(v=>String(v).toLowerCase().includes(q))));
+  byId('links').innerHTML=rows.length?rows.map(x=>'<a class="link-card" href="'+esc(x.url)+'" target="_blank" rel="noopener"><div><div class="link-name">'+esc(x.name)+'</div><div class="link-host">'+esc(x.host)+'</div><span class="badge">'+esc(x.category)+' • '+esc(x.type)+'</span></div><div class="arrow">↗</div></a>').join(''):'<p style="color:var(--muted)">No Worldz links match that search.</p>';
+  byId('count-all').textContent=r.entries.length;
+  byId('count-domains').textContent=r.entries.filter(x=>x.type==='domain').length;
+  byId('count-subs').textContent=r.entries.filter(x=>x.type==='subdomain').length;
+}
+
+async function boot(){
+  const res=await fetch('./registry.json',{cache:'no-store'});
+  if(!res.ok)throw new Error('WorldzLinkz registry unavailable');
+  state.registry=await res.json();
+  byId('qr-target').textContent=state.registry.qrTarget;
+  if(window.QRCode){
+    await QRCode.toCanvas(byId('qr'),state.registry.qrTarget,{width:260,margin:2,errorCorrectionLevel:'H'});
+  }
+  render();
+}
+byId('search').addEventListener('input',e=>{state.query=e.target.value.trim();render()});
+byId('filters').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;state.category=b.dataset.category;render()});
+byId('copy-link').addEventListener('click',async()=>{
+  const url=state.registry?.canonicalUrl||location.href;
+  try{await navigator.clipboard.writeText(url);byId('copy-link').textContent='Copied ✅';setTimeout(()=>byId('copy-link').textContent='Copy WorldzLinkz™',1800)}
+  catch{prompt('Copy WorldzLinkz™',url)}
+});
+byId('download-qr').addEventListener('click',()=>{
+  const canvas=byId('qr');
+  const a=document.createElement('a');
+  a.download='WorldzLinkz-QR.png';
+  a.href=canvas.toDataURL('image/png');
+  a.click();
+});
+boot().catch(err=>{byId('links').innerHTML='<p style="color:#ff9aac">'+esc(err.message)+'</p>'});
+</script>
+</body>
+</html>
