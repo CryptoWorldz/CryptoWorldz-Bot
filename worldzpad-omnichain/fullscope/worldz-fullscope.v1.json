@@ -82,5 +82,43 @@
     "privateKeysInTelegramDatabase": false
   },
   "buildStage": "FOUNDATION",
-  "releaseRule": "No chain action becomes executable until its adapter, simulation, signature boundary and proof path pass validation."
+  "releaseRule": "No chain action becomes executable until its adapter, simulation, signature boundary and proof path pass validation.",
+  "worldzFullBuild": {
+    "brand": "WorldzFullBuild™",
+    "status": "RELEASE_GATE_DESIGN",
+    "walletConnection": {
+      "entryPoint": "first-party-worldz-website",
+      "walletComesToWebsite": true,
+      "manualWalletBrowserRequired": false,
+      "chainSpecificApprovedConnector": true,
+      "externalWalletCustody": true,
+      "secretPhraseCollection": false,
+      "signingOwnerMustMatchReviewedAccount": true,
+      "mobileLayout": {
+        "longAddressesWrapWithinViewport": true,
+        "buttonsFitViewport": true,
+        "liveAndroidCheckRequired": true
+      },
+      "connectionProof": {
+        "productionUrlTestRequired": true,
+        "realWalletApprovalRequired": true,
+        "connectedAddressDisplayed": true,
+        "reloadRecoveryVerified": true
+      },
+      "exactApproval": {
+        "simulateBeforeSignature": true,
+        "displayMintRecipientsAmountsRentFees": true,
+        "signedMessageMustEqualReviewedMessage": true,
+        "confirmOnChainBeforeCompleted": true,
+        "autoBroadcast": false
+      }
+    },
+    "wldzLessons": [
+      "Never substitute a page deployed for wallet connected, preflight passed, owner signed or transaction confirmed.",
+      "Verify a tappable production URL with no literal escape text and a working mobile connector.",
+      "Quote account rent and network fees before each owner signature.",
+      "Resume a Squads proposal only after proving its on-chain message matches the reviewed allocation.",
+      "Keep launch, liquidity, distribution, vesting and rent recovery as separately proven states."
+    ]
+  }
 }
