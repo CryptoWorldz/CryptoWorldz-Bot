@@ -37,7 +37,8 @@ const PUBLIC_COMMANDS = [
   { command: "vote", description: "Legacy alias: cast a WorldzGovern vote" },
   { command: "cancel", description: "Cancel wallet registration" },
   { command: "community", description: "Open CryptoWorldz community links" },
-  { command: "website", description: "Open CryptoWorldz.xyz" }
+  { command: "website", description: "Open CryptoWorldz.xyz" },
+  { command: "storage", description: "Worldz Memory & Storage Centre" }
 ];
 
 function wait(milliseconds) {
@@ -254,6 +255,7 @@ Use /help to open the Command Menu.
 
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(msg.chat.id, formatCommunity(config)));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, formatWebsite(config)));
+  bot.onText(/^\/storage(?:@\w+)?$/, (msg) => send(msg.chat.id, "🧹 Worldz Memory & Storage Centre™\n\nOpen Command Centre → More → Memory & Storage Centre.\n\n✅ Clears Worldz device/MiniApp cache and temporary local data.\n☁️ Server records are separate.\n⛓️ Confirmed on-chain history is not browser cache and is not deleted.\n🧠 ChatGPT/OpenAI memory is separate from Worldz and must be managed in ChatGPT Settings → Personalization → Memory summary → Manage.\n\n🔐 No seed phrase, private key or wallet signature is required."));
   bot.onText(/^\/kitty(?:@\w+)?$/, async (msg) => {
     try {
       const accounts = await repository.listTreasuryAccounts();
@@ -296,7 +298,7 @@ Use /help to open the Command Menu.
   bot.onText(/^\/help(?:@\w+)?$/, (msg) =>
     send(
       msg.chat.id,
-      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/worldzvotes — token popularity\n/worldzgovern — DAO governance\n/governvote proposal_id option\n/cancel\n/community\n/website\n\n⚠️ Never provide a private key or seed phrase."
+      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/worldzvotes — token popularity\n/worldzgovern — DAO governance\n/governvote proposal_id option\n/cancel\n/community\n/website\n/storage\n\n⚠️ Never provide a private key or seed phrase."
     )
   );
 
