@@ -7,6 +7,7 @@ on:
       - revive-v1-build
     paths:
       - 'worldzpad-devnet/revive-party/scripts/09_mainnet_launch_simulation_readonly.mjs'
+      - 'worldzpad-devnet/revive-party/scripts/15_existing_pool_readonly_audit.mjs'
       - 'worldzpad-mainnet/revive/revive-launch-contract.v1.json'
       - 'worldzpad-mainnet/revive/revive-direct-damm-v2-existing-mint.v1.json'
       - 'worldzpad-mainnet/revive/scripts/estimate-mainnet-sol-floor.mjs'
@@ -45,6 +46,9 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Re-prove direct DAMM v2 static contract
         run: npm run direct-damm-static
+      - name: Audit occupied Meteora pool — READ ONLY
+        continue-on-error: true
+        run: node scripts/15_existing_pool_readonly_audit.mjs
       - name: Simulate canonical REVIVE mainnet pool creation — READ ONLY
         run: node scripts/09_mainnet_launch_simulation_readonly.mjs
       - name: Publish read-only simulation evidence (best effort)
