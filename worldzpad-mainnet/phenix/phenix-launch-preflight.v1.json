@@ -1,0 +1,148 @@
+{
+  "schema": "PHENIX-LAUNCH-PREFLIGHT-V1",
+  "version": "PNEX-PREFLIGHT-2026-09-26-A",
+  "status": "PREP_ONLY__MAINNET_DISABLED",
+  "token": {
+    "launchOrder": 3,
+    "name": "PHENIX",
+    "symbol": "PNEX",
+    "networkTarget": "solana-mainnet",
+    "supplyTokens": 250000000,
+    "decimals": 6,
+    "mintAddress": null,
+    "mintAuthorityFinalStateRequired": "REVOKED",
+    "freezeAuthorityFinalStateRequired": "ABSENT_OR_REVOKED"
+  },
+  "execution": {
+    "mainnetExecutionEnabled": false,
+    "autoBroadcast": false,
+    "walletSignatureRequired": true,
+    "humanLaunchAuthorizationRequired": true,
+    "simulateBeforeSign": true
+  },
+  "allocation": {
+    "status": "WORKING_MODEL__19_PERCENT_UNASSIGNED_BLOCKS_LAUNCH",
+    "buckets": [
+      {
+        "id": "phenix_chance_immediate",
+        "percent": 10,
+        "tokens": 25000000,
+        "purpose": "PHENIX Chance launch distribution to individually approved recipients"
+      },
+      {
+        "id": "phenix_chance_12_months",
+        "percent": 15,
+        "tokens": 37500000,
+        "purpose": "PHENIX Chance 12-month monthly vesting pool"
+      },
+      {
+        "id": "liquidity_total",
+        "percent": 45,
+        "tokens": 112500000,
+        "purpose": "Total staged liquidity allocation including genesis liquidity"
+      },
+      {
+        "id": "developer_vesting",
+        "percent": 10,
+        "tokens": 25000000,
+        "purpose": "Developer allocation; final enforceable cliff/vesting schedule required before launch"
+      },
+      {
+        "id": "purple_diamond_handz",
+        "percent": 1,
+        "tokens": 2500000,
+        "purpose": "Verified legacy Purple Diamond Handz pool"
+      },
+      {
+        "id": "unassigned_pending_decision",
+        "percent": 19,
+        "tokens": 47500000,
+        "purpose": "Reserved and unspendable until a final disclosed allocation is approved"
+      }
+    ],
+    "requiredPercent": 100,
+    "requiredTokens": 250000000,
+    "unassignedMustEqualZeroForLaunch": true
+  },
+  "phenixChance": {
+    "status": "PLANNING_AND_VERIFICATION",
+    "targetMaximumSeats": 500,
+    "approvedRecipientCount": 0,
+    "recipientCountGuaranteed": false,
+    "perApprovedRecipientAt500SeatModel": {
+      "immediateTokens": 50000,
+      "vestedTokens": 75000,
+      "monthlyTokens": 6250,
+      "months": 12,
+      "totalTokens": 125000
+    },
+    "approvalRequirements": [
+      "source evidence recorded",
+      "recipient claim recorded",
+      "Solana wallet ownership proven",
+      "12-month vesting consent recorded",
+      "duplicate identity and wallet review passed",
+      "human approval recorded"
+    ],
+    "rule": "Publicly posted wallet addresses or statements of need are research evidence only; no PNEX assignment occurs until ownership, claim and approval checks pass."
+  },
+  "liquidity": {
+    "genesisTokens": 12500000,
+    "genesisPercent": 5,
+    "totalAllocationTokens": 112500000,
+    "totalAllocationPercent": 45,
+    "laterCapacityTokens": 100000000,
+    "creatorControlledLpLock": "PERMANENT_TARGET",
+    "additionalLiquidityRule": {
+      "enabled": true,
+      "minimumSolValueToPnexValueRatio": 1.05,
+      "plainEnglish": "For an additional liquidity tranche, contributed SOL value must be at least 105% of the PNEX value being added, using the approved price observation recorded in the launch proof."
+    }
+  },
+  "walletConnectivity": {
+    "siteOrigin": "https://launchpad.cryptoworldz.xyz",
+    "connectOnWorldzWebsite": true,
+    "walletBrowserRequired": false,
+    "privateKeyOrSeedPhraseCollection": false,
+    "transactionApprovalLocation": "USER_WALLET"
+  },
+  "feePolicy": {
+    "ordinaryWalletTransferTaxPercent": 0,
+    "magicFeeTargetGrossTraderFeeBps": 75,
+    "dynamicFeeEnabled": false,
+    "controlledFeeSplitPercent": {
+      "creator": 51,
+      "referrer": 17,
+      "legacyFlywheel": 15,
+      "worldzLaunchPad": 8.5,
+      "oneWorldzImpact": 8.5,
+      "total": 100
+    },
+    "note": "Fee routing is separate from PNEX token-supply allocations and must be proven end-to-end before launch."
+  },
+  "releaseGates": [
+    "allocation buckets equal exactly 250,000,000 PNEX and 100%",
+    "unassigned allocation equals zero",
+    "PHENIX Chance recipient register validates and only approved recipients are exported",
+    "12 monthly Chance releases are deterministic and tested",
+    "developer vesting schedule is finalized and time-enforced",
+    "Purple Diamond Handz entitlement source and verified wallet rules are published",
+    "genesis 5% liquidity and later-liquidity rule are simulated",
+    "creator-controlled LP lock is enforced and proven",
+    "fee routing is simulated and matches the disclosed 51/17/15/8.5/8.5 split",
+    "mint and freeze authority finalization is simulated",
+    "treasury and program authority meet the current WorldzLaunchPad multisig policy",
+    "Worldz wallet bridge connects from the Worldz website without requiring an in-wallet browser",
+    "token metadata and public proof endpoints are ready",
+    "security, accounting and applicable legal/regulatory release gates pass",
+    "JayJayTeamDev gives explicit final mainnet signing authorization"
+  ],
+  "launchReady": false,
+  "launchBlockedReasons": [
+    "19% / 47,500,000 PNEX remains unassigned",
+    "no PHENIX mainnet mint address is recorded",
+    "recipient approvals are not complete",
+    "developer vesting schedule is not finalized",
+    "mainnet execution remains disabled"
+  ]
+}
