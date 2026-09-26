@@ -18,5 +18,14 @@
     "Beneficiary amounts, claim rights and any revocation power require exact transaction preview and human approval."
   ],
   "candidateNote": "Stepper may apply; past role and historical wallet do not imply entitlement.",
-  "custodyRule": "Reserved in owner Squads vault until verified Jupiter Lock schedule and beneficiaries are approved. No AI wallet, no third-party holding account."
+  "custodyRule": "Reserved in owner Squads vault until verified Jupiter Lock schedule and beneficiaries are approved. No AI wallet, no third-party holding account.",
+  "recruitment": {
+    "openTo": "DevCity participants and any other person contributing verifiable work or support to WorldzLaunchPad",
+    "voluntaryJoin": true,
+    "automaticGrant": false,
+    "selection": "Same published task and evidence standards for all applicants; no preference based on colour, health, appearance, role, or token holdings.",
+    "individualTokenAmounts": "PENDING_OWNER_REVIEW",
+    "recipientWalletProof": "Fresh signed challenge verified server-side before an approved grant.",
+    "claimStart": "PENDING_APPROVED_JUPITER_LOCK_SCHEDULE"
+  }
 }
