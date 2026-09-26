@@ -18,9 +18,12 @@ for row in matrix["chains"]:
     assert domain.is_file(), row["domain"]
     text=domain.read_text()
     assert "WorldzLaunchPad" in text, row["domain"]
+    assert row["tokenCreation"]["path"] in text, f"{row['key']} token-creation route is not linked from its Worldz domain"
     if row["key"]!="solana":
         assert row["tokenCreation"]["mainnet"] is False, row["key"]
         assert row["marketLaunch"]["mainnet"] is False, row["key"]
+        assert "Public mainnet creator launch" in text or "public mainnet creator launch" in text, f"{row['key']} missing explicit mainnet status"
+        assert ">Off<" in text or "remain locked" in text or "mainnet stays locked" in text.lower(), f"{row['key']} domain may overstate mainnet capability"
 
 sol=next(c for c in matrix["chains"] if c["key"]=="solana")
 assert sol["tokenCreation"]["mainnet"] is True
