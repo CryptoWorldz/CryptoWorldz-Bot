@@ -12,6 +12,9 @@ const COMMAND_GROUPS = Object.freeze([
   group("max", "🧠 Command Centre MAX™ • Learn, Research, Interact & Teach", "member", [
     ["max", "Open Command Centre MAX learning and research hub"]
   ]),
+  group("fullbuild", "🌐 WorldzFullBuild™ • Master Architecture", "member", [
+    ["worldzfullbuild", "Open the complete WorldzFullBuild master architecture"]
+  ]),
   group("fullscope", "🌐 WorldzFullScope™ • Multi-chain Command Layer", "member", [
     ["fullscope", "Open the ZED-led WorldzFullScope command layer"],
     ["fullscopechains", "View every currently supported FullScope chain"],
