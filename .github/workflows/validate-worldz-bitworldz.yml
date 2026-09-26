@@ -1,17 +1,15 @@
 name: Validate BitWorldz OmniBTC
 
 on:
-    paths:
-      - 'worldzpad-omnichain/bitworldz/**'
-      - 'scripts/validate_worldz_bitworldz.py'
-      - 'launchpad.cryptoworldz.xyz/bitworldz/**'
-      - 'bitworldz.cryptoworldz.xyz/**'
   pull_request:
     paths:
       - 'worldzpad-omnichain/bitworldz/**'
+      - 'worldzpad-devnet/bitworldz/**'
       - 'scripts/validate_worldz_bitworldz.py'
       - 'launchpad.cryptoworldz.xyz/bitworldz/**'
       - 'bitworldz.cryptoworldz.xyz/**'
+      - '.github/workflows/validate-worldz-bitworldz.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
