@@ -41,7 +41,7 @@ require(flywheel["separateSupplyBuckets"] is False, "FlyWheel must not become se
 require(flywheel["internalLanePercentages"] == "DYNAMIC_WITHIN_30_DAY_CYCLE__NO_FIXED_LANE_PERCENTAGES__ALL_ACTIONS_GOVERNED", "FlyWheel lanes must remain dynamically governed within each 30-day cycle")
 require(flywheel["releasePolicyRequiredBeforeMainnet"] is True, "FlyWheel release policy must gate mainnet")
 require(flywheel["mainnetExecutionEnabled"] is False, "FlyWheel mainnet execution must remain off in prep")
-required_lanes = {"worldz_infrastructure","oneworldz_impact","treasury_resilience","community_rewards","locked_builder_team","ecosystem_growth","additional_liquidity","permanent_burn"}
+required_lanes = {"worldz_infrastructure","oneworldz_impact","treasury_resilience","community_rewards","locked_builder_team","ecosystem_growth","additional_liquidity","omni_cross_chain_lp_development","permanent_burn"}
 require({x["id"] for x in flywheel["supportedLanes"]} == required_lanes, "FlyWheel lane set drift detected")
 require(flywheel["miracleRunway"]["enabled"] is True, "MIRACLE infrastructure runway must be recorded")
 
@@ -72,6 +72,12 @@ require(universal["universalCycleDays"] == 30, "universal cycle must be 30 days"
 require(universal["legacyEpochHours"] == 6, "legacy epoch must remain 6 hours")
 require(universal["extraTraderFeeRequired"] is False, "Universal FlyWheel must not add a trader fee")
 require(universal["sharedBenefitRequired"] is True, "shared benefit rule missing")
+
+linked = cfg["linkedAssets"]
+require(linked["availableToAllWorldzLaunchPadDevelopers"] is True, "LinkedAsset must be available to all developers")
+require(linked["externalPartnershipClaimRequiresCounterpartyOptIn"] is True, "LinkedAsset partnership claims require opt-in")
+require(linked["automaticMarketBuy"] is False, "LinkedAsset automatic market buys must remain off")
+require(linked["mainnetExecutionEnabled"] is False, "LinkedAsset mainnet execution must remain off")
 
 chance = cfg["phenixChance"]
 model = chance["perApprovedRecipientAt500SeatModel"]
