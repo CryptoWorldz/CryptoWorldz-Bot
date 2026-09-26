@@ -72,7 +72,8 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "reference"
+        "reference",
+        "confirmation"
       ],
       "properties": {
         "reference": {
@@ -219,7 +220,8 @@
             ]
           }
         }
-      }
+      },
+      "minItems": 1
     },
     "fees": {
       "type": "array",
@@ -276,5 +278,56 @@
       "type": "string",
       "format": "date-time"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "PASSED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "transaction": {
+            "properties": {
+              "confirmation": {
+                "enum": [
+                  "finalized",
+                  "validated"
+                ]
+              }
+            },
+            "required": [
+              "reference",
+              "confirmation"
+            ]
+          },
+          "balances": {
+            "minItems": 1
+          },
+          "verification": {
+            "properties": {
+              "onChainReadBack": {
+                "const": true
+              },
+              "amountsReconciled": {
+                "const": true
+              },
+              "balanceChangesReconciled": {
+                "const": true
+              },
+              "privateKeysStored": {
+                "const": false
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
