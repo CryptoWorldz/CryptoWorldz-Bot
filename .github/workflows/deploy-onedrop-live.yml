@@ -160,3 +160,51 @@ jobs:
                   print('PUBLIC_EDGE_BLOCKED',url,'status='+str(e.code))
               except Exception as e:
                   print('PUBLIC_EDGE_UNAVAILABLE',url,repr(e))
+
+
+      - name: Android browser wallet-bridge smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.55.0
+          npx playwright install --with-deps chromium
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({
+              viewport:{width:412,height:915},
+              userAgent:'Mozilla/5.0 (Linux; Android 13; CPH2197) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36',
+              isMobile:true,
+              hasTouch:true
+            });
+            const page=await context.newPage();
+            const consoleErrors=[];
+            const pageErrors=[];
+            page.on('console',m=>{ if(m.type()==='error') consoleErrors.push(m.text()); });
+            page.on('pageerror',e=>pageErrors.push(String(e)));
+            const url='https://launchpad.cryptoworldz.xyz/onedrop/?wallet_e2e='+Date.now();
+            const resp=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
+            if(!resp || resp.status()!==200) throw new Error('OneDrop HTTP status '+(resp&&resp.status()));
+            await page.waitForSelector('#connect',{state:'visible',timeout:20000});
+            await page.click('#connect');
+            let bridgeReady=false;
+            try{
+              await page.waitForFunction(()=>!!window.__WORLDZ_JUPITER_MOBILE_ADAPTER__,null,{timeout:20000});
+              bridgeReady=true;
+            }catch{}
+            const status=await page.locator('#status').innerText().catch(()=>'<missing>');
+            const modalCount=await page.locator('w3m-modal,appkit-modal,w3m-router,wui-flex').count().catch(()=>0);
+            console.log('ONEDROP_E2E_STATUS='+JSON.stringify(status));
+            console.log('ONEDROP_E2E_BRIDGE_READY='+bridgeReady);
+            console.log('ONEDROP_E2E_MODAL_NODES='+modalCount);
+            if(consoleErrors.length) console.log('ONEDROP_E2E_CONSOLE_ERRORS='+JSON.stringify(consoleErrors));
+            if(pageErrors.length) console.log('ONEDROP_E2E_PAGE_ERRORS='+JSON.stringify(pageErrors));
+            await browser.close();
+            if(!bridgeReady){
+              throw new Error('Jupiter mobile bridge did not initialise in Android Chromium. '+JSON.stringify({status,consoleErrors,pageErrors}));
+            }
+            console.log('WORLDZ_ONEDROP_ANDROID_WALLET_BRIDGE=PASS');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
