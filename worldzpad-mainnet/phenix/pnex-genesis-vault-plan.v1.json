@@ -1,0 +1,93 @@
+{
+  "schema": "PNEX-GENESIS-VAULT-PLAN-V1",
+  "version": "PNEX-GENESIS-VAULTS-2026-09-26-A",
+  "status": "ADDRESS_BINDING_PENDING__MAINNET_DISABLED",
+  "token": {
+    "name": "PHENIX",
+    "symbol": "PNEX",
+    "supplyTokens": 250000000,
+    "decimals": 6,
+    "mint": null
+  },
+  "destinations": [
+    {
+      "id": "phenix_chance_vault",
+      "tokens": 62500000,
+      "percent": 25,
+      "purpose": "Protected PHENIX Chance pool: 25M immediate claims + 37.5M 12-month vested claims",
+      "destinationType": "PROGRAM_OR_MULTISIG_CONTROLLED_CLAIM_VAULT",
+      "address": null,
+      "directLiquidRecipientAtGenesis": false,
+      "proofRequired": true
+    },
+    {
+      "id": "genesis_liquidity",
+      "tokens": 12500000,
+      "percent": 5,
+      "purpose": "Initial PNEX side of the PHENIX/SOL Meteora DAMM v2 pool",
+      "destinationType": "METEORA_DAMM_V2_POOL",
+      "address": null,
+      "creatorControlledLpPermanentLockTargetPercent": 100,
+      "proofRequired": true
+    },
+    {
+      "id": "staged_liquidity_reserve",
+      "tokens": 100000000,
+      "percent": 40,
+      "purpose": "Future PHENIX liquidity expansion under the Worldz +5% Quote Commitment Rule",
+      "destinationType": "MULTISIG_OR_APPROVED_VAULT",
+      "address": null,
+      "automaticMarketBuy": false,
+      "generalOperationsAllowed": false,
+      "proofRequired": true
+    },
+    {
+      "id": "developer_streamflow_vesting",
+      "tokens": 25000000,
+      "percent": 10,
+      "purpose": "Developer allocation: 90-day cliff + 24 monthly releases",
+      "destinationType": "STREAMFLOW_VESTING_CONTRACT",
+      "address": null,
+      "genesisLiquidTokens": 0,
+      "cancelable": false,
+      "transferable": false,
+      "proofRequired": true
+    },
+    {
+      "id": "purple_diamond_handz_claim_vault",
+      "tokens": 2500000,
+      "percent": 1,
+      "purpose": "Verified Purple Diamond Handz legacy claims",
+      "destinationType": "PROGRAM_OR_MULTISIG_CONTROLLED_CLAIM_VAULT",
+      "address": null,
+      "unclaimedRemainLocked": true,
+      "proofRequired": true
+    },
+    {
+      "id": "phenix_total_supply_flywheel",
+      "tokens": 47500000,
+      "percent": 19,
+      "purpose": "PHENIX Total Supply FlyWheel master reserve including infrastructure, impact, treasury resilience, community, locked builders, ecosystem, liquidity, OmniBuildz and ProofBurn",
+      "destinationType": "MULTISIG_CONTROLLED_MASTER_VAULT",
+      "address": null,
+      "automaticDistribution": false,
+      "automaticBurn": false,
+      "proofRequired": true
+    }
+  ],
+  "reconciliation": {
+    "requiredTokens": 250000000,
+    "requiredPercent": 100,
+    "unassignedTokens": 0,
+    "creatorReceivesFullSupplyFirst": false
+  },
+  "authorityRules": {
+    "treasuryAndFlyWheel": "2_OF_3_OR_STRONGER_MULTISIG",
+    "programOrUpgradeAuthority": "2_OF_3_OR_STRONGER_MULTISIG_WHERE_APPLICABLE",
+    "mintAuthorityAfterGenesis": null,
+    "freezeAuthorityAfterGenesis": null,
+    "privateKeysStoredByWorldz": false
+  },
+  "bindingRule": "Every null address must be replaced by a verified chain/program address derived from or created during the reviewed launch process. No placeholder address may pass the release gate.",
+  "mainnetExecutionEnabled": false
+}
