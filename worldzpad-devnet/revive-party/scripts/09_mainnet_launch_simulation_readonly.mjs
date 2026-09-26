@@ -174,6 +174,19 @@ const { tx, pool, position } = await cpAmm.createCustomPool({
   isLockLiquidity: true,
 });
 
+// The SDK derives the pool from the pair and configuration. Creating an already
+// occupied address fails even when the new position NFT is unique. Stop before
+// presenting that transaction as a launch candidate; inspect the existing pool.
+const existingPool = await connection.getAccountInfo(pool, 'confirmed');
+if (existingPool) {
+  throw new Error(
+    'POOL_ALREADY_EXISTS_REVIEW_REQUIRED pool=' + pool.toBase58() +
+    ' owner=' + existingPool.owner.toBase58() +
+    ' lamports=' + existingPool.lamports +
+    ' — inspect its mints, fee config, authority, liquidity and position before choosing any route',
+  );
+}
+
 if (treasuryTopUpLamports > 0n) {
   tx.instructions.unshift(
     SystemProgram.transfer({
