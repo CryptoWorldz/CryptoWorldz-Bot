@@ -9,16 +9,35 @@ WorldzFullBuild™ is the master integration layer for the Worldz project. Proje
 
 This is **not** a verbatim chat archive. The repository is public, so personal, medical, legal, private-financial, credential, seed-phrase, private-key and unrelated conversation material is excluded. Only project-relevant decisions and approved/public operational data belong in the build.
 
+## Permanent WorldzFullBuild™ rules
+
+These rules govern the continuing WorldzFullBuild™ source-of-truth:
+
+1. **Newest explicit JayJayTeamDev instruction wins over older conflicting decisions.**
+2. **Verified GitHub, on-chain and live-deployment evidence determines actual build status.**
+3. **Previous mistakes become regression-prevention rules** and must be carried into future eligible Worldz builds and launches.
+4. **Humanitarian and CryptoWorldz functions remain connected as one ecosystem, but are clearly separated in public messaging and execution where required.**
+5. **Nothing is treated as deployed, live, signed, confirmed or mainnet-complete merely because an earlier chat said it was.**
+6. **The ecosystem is one connected Worldz architecture, not a collection of unrelated builds.**
+7. **This Project is a continuing input to the WorldzFullBuild™ source-of-truth.** Project-relevant decisions, corrections, evidence, lessons and approved architecture must be reconciled into the versioned FullBuild standard.
+
 ## Precedence when project sources conflict
 
-1. Confirmed on-chain state or live-production evidence.
-2. Latest explicit JayJayTeamDev approval or correction.
-3. Canonical versioned WorldzFullBuild/token-identity contract.
-4. Merged repository implementation.
-5. Older project-chat plan.
-6. Research or proposal.
+WorldzFullBuild separates **decision authority** from **factual status evidence**:
 
-A newer correction supersedes an older plan, but the old plan should be marked **SUPERSEDED**, not silently rewritten as if it never existed.
+### Decision authority
+1. Latest explicit JayJayTeamDev instruction, approval or correction.
+2. Canonical versioned WorldzFullBuild/token-specific contract reflecting that instruction.
+3. Older project-chat plan.
+4. Research or proposal.
+
+### Factual build status
+1. Confirmed on-chain evidence where an on-chain fact is claimed.
+2. Verified live-production/deployment evidence where a live/deployed fact is claimed.
+3. Verified repository/GitHub implementation and CI evidence for code/build facts.
+4. Unverified repository state or chat description.
+
+A newer explicit instruction supersedes an older conflicting decision, but it cannot retroactively create a factual deployment or on-chain event. Older conflicting decisions should be marked **SUPERSEDED**, not silently revived or rewritten as if they never existed.
 
 ## Required truth states
 
