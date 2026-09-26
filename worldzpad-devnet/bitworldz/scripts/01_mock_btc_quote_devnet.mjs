@@ -36,7 +36,7 @@ import {
   routePartnerQuoteAtomic,
 } from './common.mjs';
 
-const {rpc,connection}=devnetConnection();
+const {rpc,connection,genesisHash}=await devnetConnection();
 const client=new DynamicBondingCurveClient(connection,'confirmed');
 const payerConfig=payerFromEnvironment();
 const payer=payerConfig.keypair;
@@ -47,6 +47,7 @@ const report={
   proof:'BITWORLDZ_SOLANA_DEVNET_MOCK_BTC_BITPAIR_V1',
   network:'devnet',
   rpc,
+  genesisHash,
   status:'STARTED',
   stages:[],
   mainnetExecution:false,
