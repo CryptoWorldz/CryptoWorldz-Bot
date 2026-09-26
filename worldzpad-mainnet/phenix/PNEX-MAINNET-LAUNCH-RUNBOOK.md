@@ -13,13 +13,13 @@
 
 ## Phase 1 — Bind authorities and destinations
 
-1. Establish the required 2-of-3-or-stronger multisig for Treasury/FlyWheel/program authorities.
-2. Bind the PHENIX Chance protected vault.
-3. Bind the 100M staged-liquidity reserve.
-4. Prepare the 25M developer Streamflow contract.
-5. Bind the 2.5M Purple Diamond Handz claim vault.
-6. Bind the 47.5M PHENIX Total Supply FlyWheel master vault.
-7. Reconcile all destinations to exactly 250M PNEX before any mainnet signature.
+1. Upgrade Worldz Operations to the required **5-of-10** Squads governance for Chance / developer / legacy-claim operational controls.
+2. Deploy and verify the separate **6-of-9 Worldz Reserve Squads multisig** for FlyWheel / staged-liquidity / LP-quote reserves.\n3. Bind the PHENIX Chance protected Operations vault.
+4. Bind the 100M staged-liquidity reserve under the 6-of-9 Reserve multisig.
+5. Prepare the 25M developer Streamflow contract from the approved Operations-controlled funding vault.
+6. Bind the 2.5M Purple Diamond Handz claim vault.
+7. Bind the 47.5M PHENIX Total Supply FlyWheel master vault under the 6-of-9 Reserve multisig.
+8. Reconcile all destinations to exactly 250M PNEX before any mainnet signature.
 
 ## Phase 2 — Final simulation
 
@@ -102,7 +102,7 @@ Abort the launch sequence if any of the following occurs:
 - LP can be withdrawn contrary to the permanent-lock target;
 - fee settings differ from 75 bps / dynamic OFF;
 - allocation does not equal exactly 250M;
-- multisig requirement is not met;
+- Operations 5-of-10 or Reserve 6-of-9 multisig requirement is not met;
 - transaction simulation fails;
 - public proof cannot reconcile the confirmed chain state.
 
