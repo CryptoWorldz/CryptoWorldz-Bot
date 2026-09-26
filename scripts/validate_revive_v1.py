@@ -13,6 +13,7 @@ devcity = json.loads((root / "revive-devcity-100.v1.json").read_text())
 team_vesting = json.loads((root / "revive-team-vesting.v1.json").read_text())
 public_candidates = json.loads((root / "revive-devcity-public-wallet-candidates.v1.json").read_text())
 legacy_distribution = json.loads((root / "revive-legacy-216-distribution.v1.json").read_text())
+equal_legacy = json.loads((root / "revive-equal-legacy-proposal.v1.json").read_text())
 six_dev_distribution = json.loads((root / "revive-six-dev-distribution.v1.json").read_text())
 funding = json.loads((root / "revive-launch-funding.v1.json").read_text())
 candidates = json.loads((root / "revive-devcity-50-candidates.v1.json").read_text())
@@ -71,6 +72,12 @@ assert sum(int(x["amountRaw"]) for x in six_dev_distribution["recipients"]) + in
 assert not team_vesting["knownTeam"] and not contract["teamVesting"]["knownTeamWallets"]
 assert len(legacy_distribution["payoutExclusionsPendingRecalculation"]) == 2
 assert all(x.get("payoutStatus") == "EXCLUDED_PENDING_RECALCULATION" for x in legacy_distribution["recipients"] if x["wallet"] in legacy_distribution["payoutExclusionsPendingRecalculation"])
+assert equal_legacy["status"] == "PROPOSED_NOT_APPROVED_NOT_SIGNABLE"
+assert equal_legacy["eligibleCount"] == len(equal_legacy["recipients"]) == 214
+assert not ({x["wallet"] for x in equal_legacy["recipients"]} & set(equal_legacy["excludedWallets"]))
+assert {x["wallet"] for x in equal_legacy["recipients"]} == {x["wallet"] for x in legacy_distribution["recipients"]} - set(equal_legacy["excludedWallets"])
+assert len({x["amountRaw"] for x in equal_legacy["recipients"]}) == 1
+assert sum(int(x["amountRaw"]) for x in equal_legacy["recipients"]) + int(equal_legacy["reservedRemainderRaw"]) == 20_000_000_000_000
 assert candidates["targetNewSeats"] == 50
 assert len(candidates["candidates"]) == 50
 assert len({x["github"] for x in candidates["candidates"]}) == 50
