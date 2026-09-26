@@ -6,6 +6,8 @@ on:
   pull_request:
     paths:
       - 'worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json'
+      - 'worldzpad-mainnet/token-identity/worldz-token-registry.v1.json'
+      - 'launchpad.cryptoworldz.xyz/**/token-metadata.json'
       - 'launchpad.cryptoworldz.xyz/worlddexpush/jupiter/**'
       - 'scripts/audit_worldz_jupiter_vrfd.mjs'
       - '.github/workflows/audit-worldz-jupiter-vrfd.yml'
@@ -13,6 +15,8 @@ on:
     branches: [main]
     paths:
       - 'worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json'
+      - 'worldzpad-mainnet/token-identity/worldz-token-registry.v1.json'
+      - 'launchpad.cryptoworldz.xyz/**/token-metadata.json'
       - 'launchpad.cryptoworldz.xyz/worlddexpush/jupiter/**'
       - 'scripts/audit_worldz_jupiter_vrfd.mjs'
       - '.github/workflows/audit-worldz-jupiter-vrfd.yml'
@@ -30,6 +34,7 @@ jobs:
       - name: Audit Jupiter identity
         run: node scripts/audit_worldz_jupiter_vrfd.mjs
       - name: Upload Jupiter identity report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: worldz-jupiter-vrfd-status
