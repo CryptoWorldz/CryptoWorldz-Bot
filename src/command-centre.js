@@ -3,6 +3,7 @@ const { groupsForRole, normalizeRole } = require("./command-registry");
 const BOT_MENU_COMMANDS = [
   { command: "zedstart", description: "Open Command Centre MAX" },
   { command: "max", description: "Learn, research, interact and teach with MAX" },
+  { command: "fullscope", description: "Open WorldzFullScope multi-chain command layer" },
   { command: "zed", description: "Zed profile, wallet, missions and settings" },
   { command: "auto", description: "Open Auto finance controls" },
   { command: "grace", description: "Open Grace Auto Post controls" },
@@ -21,6 +22,36 @@ const MENUS = {
       ["🚀 Missions", "/missions"],
       ["🏆 Leaderboard", "/leaderboard"],
       ["📚 All Commands", "/commands"]
+    ]
+  },
+  fullscope: {
+    title: "🌐 WORLDZFULLSCOPE™",
+    rows: [
+      ["📡 FullScope Status", "/fullscope"],
+      ["🪙 Token Registry", "/fullscopetokens"],
+      ["📡 WorldzWatch", "/worldzwatch"],
+      ["🗳️ Votes Centre", "/worldzvotes"],
+      ["🏛️ WorldzGovern", "/worldzgovern"]
+    ]
+  },
+  votes: {
+    title: "🗳️ WORLDZ VOTES CENTRE™ — POPULARITY",
+    rows: [
+      ["🔥 Trending", "/worldztrending"],
+      ["🏆 Rankings", "/worldzrankings"],
+      ["🗳️ Cast Token Vote", "/tokenvote"],
+      ["🪙 Registered Tokens", "/fullscopetokens"],
+      ["🌐 FullScope", "/fullscope"]
+    ]
+  },
+  govern: {
+    title: "🏛️ WORLDZGOVERN™ — DAO GOVERNANCE",
+    rows: [
+      ["🏛️ Governance Home", "/worldzgovern"],
+      ["📜 Proposals", "/governproposals"],
+      ["✅ Cast Governance Vote", "/governvote"],
+      ["🤝 Delegation", "/governdelegate"],
+      ["🌐 FullScope", "/fullscope"]
     ]
   },
   auto: {
@@ -81,7 +112,8 @@ const WEB_ROUTES = Object.freeze({
   acknowledgements: "https://oneworldz.com/acknowledgements/",
   supportJay: "https://donateworldz.com/support-jayjayteamdev/",
   donateReagan: "https://donateworldz.com/reagan-children/",
-  publicCommands: "https://cryptoworldz.xyz/command-centre/commands/"
+  publicCommands: "https://cryptoworldz.xyz/command-centre/commands/",
+  fullScope: "https://launchpad.cryptoworldz.xyz/fullscope/"
 });
 
 function menuText(menu) {
@@ -99,6 +131,11 @@ function mainKeyboard() {
     reply_markup: {
       inline_keyboard: [
         [{ text: "🧠 OPEN COMMAND CENTRE MAX™", web_app: { url: WEB_ROUTES.miniApp } }],
+        [{ text: "🌐 WORLDZFULLSCOPE™", callback_data: "cc:menu:fullscope" }],
+        [
+          { text: "🗳️ VOTES CENTRE", callback_data: "cc:menu:votes" },
+          { text: "🏛️ WORLDZGOVERN", callback_data: "cc:menu:govern" }
+        ],
         [
           { text: "🤖 ZED", callback_data: "cc:menu:zed" },
           { text: "💎 AUTO", callback_data: "cc:menu:auto" }
@@ -177,10 +214,10 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "🧠 CryptoWorldz Command Centre MAX™",
     "",
     "LEARN • RESEARCH • INTERACT • TEACH • BUILD • PROVE",
-    "ZED guides. AUTO explains the numbers. G.R.A.C.E. coordinates approved communication. RECAP explains verified activity. WorldzLaunchPad builds and proves launches.",
+    "ZED guides. WorldzFullScope watches the supported multi-chain token universe. AUTO explains controlled finance workflows. G.R.A.C.E. coordinates approved communication. RECAP explains verified activity. WorldzLaunchPad builds and proves launches.",
     "",
     "Gateway commands:",
-    "/zedstart • /commands • /commandtree • /directory • /acknowledgements • /supportjay",
+    "/zedstart • /fullscope • /worldzvotes • /worldzgovern • /commands • /commandtree",
     "",
     "You do not need to memorise the full command list."
   ].join("\n"), mainKeyboard());
@@ -255,7 +292,7 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     if (!msg || !data.startsWith("cc:")) return;
     const actor = { ...msg, from: query.from };
 
-    const menuMatch = data.match(/^cc:menu:(zed|auto|grace|admin|settings)$/);
+    const menuMatch = data.match(/^cc:menu:(zed|fullscope|votes|govern|auto|grace|admin|settings)$/);
     if (menuMatch) {
       const key = menuMatch[1];
       if (["grace", "admin", "settings"].includes(key) && !(await isAdmin(actor))) {
