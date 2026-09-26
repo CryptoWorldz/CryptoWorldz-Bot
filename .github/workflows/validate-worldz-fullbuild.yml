@@ -7,18 +7,14 @@ on:
       - 'src/fullscope/**'
       - 'src/command-centre.js'
       - 'src/command-registry.js'
-      - 'src/full-runtime-entry.js'
-      - 'test/fullbuild.test.js'
-      - 'test/fullscope.test.js'
-      - 'worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json'
+      - 'src/full-runtime-entry.js'\n      - 'src/websites-telegram.js'\n      - 'test/fullbuild.test.js'\n      - 'test/fullscope.test.js'\n      - 'test/command-centre.test.js'\n      - 'test/command-registry.test.js'\n      - 'test/websites-telegram.test.js'\n      - 'worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json'
       - 'worldzpad-omnichain/fullscope/worldz-fullscope.v1.json'
       - 'launchpad.cryptoworldz.xyz/fullbuild/**'
       - 'launchpad.cryptoworldz.xyz/fullscope/**'
       - 'launchpad.cryptoworldz.xyz/sitemap.xml'
       - 'public/miniapp/index.html'
       - 'public/miniapp/app.js'
-      - 'cryptoworldz.xyz/command-centre-max/index.html'
-      - 'scripts/validate_worldz_fullbuild.py'
+      - 'cryptoworldz.xyz/command-centre-max/index.html'\n      - 'cryptoworldz.xyz/worldzlinkz/**'\n      - 'docs/WORLDZFULLBUILD-PROJECT-SOURCE-OF-TRUTH.md'\n      - 'docs/WORLDZFULLBUILD-PROJECT-CONTINUITY-2026-09-27.md'\n      - 'scripts/validate_worldz_fullbuild.py'
       - 'scripts/validate_worldz_fullscope.py'
       - '.github/workflows/validate-worldz-fullbuild.yml'
   workflow_dispatch:
@@ -45,7 +41,6 @@ jobs:
           node --check src/fullbuild/telegram.js
           node --check src/command-centre.js
           node --check src/command-registry.js
-          node --check src/full-runtime-entry.js
-          node --check public/miniapp/app.js
+          node --check src/full-runtime-entry.js\n          node --check src/websites-telegram.js\n          node --check public/miniapp/app.js
       - name: Focused tests
-        run: node --test test/fullbuild.test.js test/fullscope.test.js test/command-centre.test.js test/command-registry.test.js
+        run: node --test test/fullbuild.test.js test/fullscope.test.js test/command-centre.test.js test/command-registry.test.js test/websites-telegram.test.js
