@@ -12,10 +12,37 @@ import {
 } from "@meteora-ag/cp-amm-sdk";
 import BN from "bn.js";
 
-const RPC = clusterApiUrl("devnet");
-const connection = new Connection(RPC, "confirmed");
 const DEVNET_GENESIS = "GH7ome3EiwEr7tu9JuTh2dpYWBJK3z69Xm1ZE3MEE6JC";
-if ((await connection.getGenesisHash()) !== DEVNET_GENESIS) throw new Error("DEVNET_RPC_REQUIRED");
+const RPC_CANDIDATES = [
+  process.env.PNEX_DEVNET_RPC_URL,
+  "https://api.devnet.solana.com",
+  clusterApiUrl("devnet")
+].filter(Boolean);
+
+let connection = null;
+let selectedRpc = null;
+const rpcChecks = [];
+for (const rpc of [...new Set(RPC_CANDIDATES)]) {
+  try {
+    const candidate = new Connection(rpc, "confirmed");
+    const genesis = await candidate.getGenesisHash();
+    const safeRpc = rpc.replace(/([?&](?:api[-_]?key|token)=)[^&]+/gi, "$1REDACTED");
+    rpcChecks.push({ rpc: safeRpc, genesis });
+    if (genesis === DEVNET_GENESIS) {
+      connection = candidate;
+      selectedRpc = safeRpc;
+      break;
+    }
+  } catch (error) {
+    rpcChecks.push({
+      rpc: rpc.replace(/([?&](?:api[-_]?key|token)=)[^&]+/gi, "$1REDACTED"),
+      error: String(error?.message || error).slice(0, 160)
+    });
+  }
+}
+console.log("PNEX_DEVNET_RPC_CHECKS=" + JSON.stringify(rpcChecks));
+if (!connection) throw new Error("DEVNET_RPC_REQUIRED");
+console.log("PNEX_DEVNET_RPC_VERIFIED=" + selectedRpc);
 
 const payer = Keypair.generate(); // ephemeral, memory-only; never serialized
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
