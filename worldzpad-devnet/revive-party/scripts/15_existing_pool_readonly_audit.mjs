@@ -14,11 +14,12 @@ const rvivMint = 'DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R';
 const cpAmm = new CpAmm(connection);
 const pool = await cpAmm.fetchPoolState(poolAddress);
 // Inspect the pinned SDK's decoded state; do not infer safety from address occupancy.
-const [fees, positions, vaultA, vaultB] = await Promise.all([
+const [fees, positions, vaultA, vaultB, recentSignatures] = await Promise.all([
   cpAmm.fetchPoolFees(poolAddress),
   cpAmm.getAllPositionsByPool(poolAddress),
   connection.getTokenAccountBalance(pool.tokenAVault, 'confirmed'),
   connection.getTokenAccountBalance(pool.tokenBVault, 'confirmed'),
+  connection.getSignaturesForAddress(poolAddress, { limit: 20 }, 'confirmed'),
 ]);
 const asText = value => value?.toBase58?.() || value?.toString?.() || String(value);
 const safe = value => JSON.parse(JSON.stringify(value, (_, v) =>
@@ -52,6 +53,10 @@ const report = {
   sqrtPrice: asText(pool.sqrtPrice), feeVersion: pool.feeVersion,
   decodedBaseFees: safe(fees),
   sampleBuyQuote,
+  recentPoolTransactions: recentSignatures.map(item => ({
+    signature: item.signature, slot: item.slot, blockTime: item.blockTime,
+    confirmationStatus: item.confirmationStatus, err: item.err,
+  })),
   positions: positions.map(x => ({
     address: x.publicKey.toBase58(), nftMint: asText(x.account.nftMint),
     unlockedLiquidity: asText(x.account.unlockedLiquidity),
