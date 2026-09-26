@@ -6,6 +6,12 @@ on:
       - 'worldzpad-devnet/bitworldz/**'
       - 'worldzpad-omnichain/bitworldz/**'
       - '.github/workflows/bitworldz-solana-btc-devnet.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worldzpad-devnet/bitworldz/**'
+      - 'worldzpad-omnichain/bitworldz/**'
+      - '.github/workflows/bitworldz-solana-btc-devnet.yml'
   workflow_dispatch:
 
 permissions:
