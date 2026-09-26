@@ -23,3 +23,13 @@ test("WorldzFullBuild summary exposes 8 x 20 capacity", () => {
   assert.equal(build.tokensPerChain, 20);
   assert.equal(build.capacity, 160);
 });
+
+
+test("whole-project inheritance and WorldzLinkz stay locked into FullBuild", () => {
+  const contract = loadContract();
+  assert.equal(contract.projectWideIntegration.currentDirectiveState, "WHOLE_PROJECT_AND_PROJECT_CHAT_INHERITANCE_ACTIVE");
+  assert.equal(contract.projectWideIntegration.latestOwnerDirective.state, "INCORPORATED");
+  assert.equal(contract.projectContinuity.latestOwnerDirective.state, "INCORPORATED");
+  assert.equal(contract.commandPaths.worldzLinks, "/worldzlinks");
+  assert.ok(contract.projectContinuity.carriedForward.includes("WORLDZLINKZ_QR_ALL_DOMAIN_DIRECTORY"));
+});
