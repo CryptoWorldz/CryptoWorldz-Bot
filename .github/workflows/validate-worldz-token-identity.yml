@@ -9,6 +9,9 @@ on:
       - "launchpad.cryptoworldz.xyz/.well-known/worldz-tokens.json"
       - "scripts/validate_worldz_token_identity.py"
       - ".github/workflows/deploy-worldzlaunchpad.yml"
+      - ".github/workflows/indexnow-worldzlaunchpad.yml"
+      - "scripts/audit_worldz_token_identity_onchain.mjs"
+      - ".github/workflows/audit-worldz-token-identity-onchain.yml"
       - ".github/workflows/validate-worldz-token-identity.yml"
   push:
     branches: [main]
@@ -20,6 +23,9 @@ on:
       - "launchpad.cryptoworldz.xyz/.well-known/worldz-tokens.json"
       - "scripts/validate_worldz_token_identity.py"
       - ".github/workflows/deploy-worldzlaunchpad.yml"
+      - ".github/workflows/indexnow-worldzlaunchpad.yml"
+      - "scripts/audit_worldz_token_identity_onchain.mjs"
+      - ".github/workflows/audit-worldz-token-identity-onchain.yml"
 permissions:
   contents: read
 jobs:
