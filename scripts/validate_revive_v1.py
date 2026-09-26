@@ -10,6 +10,8 @@ worldz_reconcile = json.loads((root / "revive-worldz-main-reconciliation.v1.json
 fee = json.loads((root / "revive-dbc-fairfee.v1.json").read_text())
 direct = json.loads((root / "revive-direct-damm-v2-existing-mint.v1.json").read_text())
 devcity = json.loads((root / "revive-devcity-100.v1.json").read_text())
+team_vesting = json.loads((root / "revive-team-vesting.v1.json").read_text())
+public_candidates = json.loads((root / "revive-devcity-public-wallet-candidates.v1.json").read_text())
 funding = json.loads((root / "revive-launch-funding.v1.json").read_text())
 candidates = json.loads((root / "revive-devcity-50-candidates.v1.json").read_text())
 magic = json.loads((repo_root / "worldzpad-mainnet" / "fairfee" / "worldz-magic-fee.v1.json").read_text())
@@ -43,6 +45,16 @@ assert "DEVNET_GENESIS_HASH" in direct_verify
 assert "getGenesisHash()" in direct_verify
 assert devcity["seats"] == 100
 assert devcity["tokensPerSeat"] * devcity["seats"] == 20_000_000
+for schedule in (team_vesting, contract["teamVesting"]):
+    assert schedule["immediateUnlockPercent"] == 0
+    assert schedule["cliffDays"] == 0
+    assert schedule["linearVestingMonths"] == 12
+    assert schedule["releaseCount"] == 12
+    assert schedule["cadence"] == "monthly"
+    assert schedule["provider"] == "Jupiter Lock/Vesting"
+assert public_candidates["candidateCount"] == len(public_candidates["candidates"])
+assert len({c["address"] for c in public_candidates["candidates"]}) == 105
+assert all(c["chainValidation"] == "PENDING" for c in public_candidates["candidates"])
 assert candidates["targetNewSeats"] == 50
 assert len(candidates["candidates"]) == 50
 assert len({x["github"] for x in candidates["candidates"]}) == 50
