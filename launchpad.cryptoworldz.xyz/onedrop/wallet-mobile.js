@@ -1,6 +1,5 @@
-import { createAppKit } from 'https://esm.sh/@reown/appkit@1.8.24?bundle';
-import { SolanaAdapter } from 'https://esm.sh/@reown/appkit-adapter-solana@1.8.24?bundle';
-import { solana } from 'https://esm.sh/@reown/appkit@1.8.24/networks?bundle';
+import { createAppKit, SolanaAdapter, networks } from 'https://cdn.jsdelivr.net/npm/@reown/appkit-cdn@1.8.24/dist/appkit.js';
+const { solana } = networks;
 
 const REOWN_PROJECT_ID='e3d5fc46a07eb8ecb162ee048625348e';
 const WORLDZ_ORIGIN='https://launchpad.cryptoworldz.xyz';
@@ -94,7 +93,7 @@ export async function getJupiterMobileAdapter(){
 }
 
 export const worldzJupiterMobileConfig=Object.freeze({
-  provider:'Reown AppKit Vanilla Solana',
+  provider:'Reown AppKit CDN Vanilla Solana',
   projectId:REOWN_PROJECT_ID,
   origin:WORLDZ_ORIGIN,
   appKitVersion:'1.8.24',
