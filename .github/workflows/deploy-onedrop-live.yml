@@ -175,6 +175,91 @@ jobs:
           });
           NODE
 
+      - name: Full owner preflight simulation BEFORE deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs=require('fs');
+          const path=require('path');
+
+          (async()=>{
+            const owner='Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u';
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({
+              viewport:{width:412,height:915},
+              userAgent:'Mozilla/5.0 (Linux; Android 13; CPH2197) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36',
+              isMobile:true,
+              hasTouch:true
+            });
+
+            await context.addInitScript(({owner})=>{
+              const pk={toString:()=>owner};
+              window.solana={
+                publicKey:pk,
+                connect:async()=>({publicKey:pk}),
+                signTransaction:async tx=>tx
+              };
+            },{owner});
+
+            const page=await context.newPage();
+            const siteRoot=path.resolve('launchpad.cryptoworldz.xyz');
+
+            await page.route('https://launchpad.cryptoworldz.xyz/**',async route=>{
+              const u=new URL(route.request().url());
+              let rel=u.pathname;
+              while(rel.startsWith('/')) rel=rel.slice(1);
+              if(rel==='') rel='index.html';
+              if(rel.endsWith('/')) rel+='index.html';
+              const file=path.resolve(siteRoot,rel);
+              if(!file.startsWith(siteRoot)||!fs.existsSync(file)) return route.continue();
+              const ext=path.extname(file).toLowerCase();
+              const contentType=ext==='.html'?'text/html; charset=utf-8':ext==='.js'?'text/javascript; charset=utf-8':ext==='.json'?'application/json; charset=utf-8':'application/octet-stream';
+              return route.fulfill({status:200,contentType,body:fs.readFileSync(file)});
+            });
+
+            const pageErrors=[];
+            const consoleErrors=[];
+            page.on('pageerror',e=>pageErrors.push(String(e)));
+            page.on('console',m=>{if(m.type()==='error') consoleErrors.push(m.text())});
+
+            const resp=await page.goto('https://launchpad.cryptoworldz.xyz/onedrop/?full_preflight='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
+            if(!resp||resp.status()!==200) throw new Error('OneDrop page failed to load');
+
+            await page.waitForFunction(()=>document.querySelector('#status')?.textContent?.includes('Frozen REVIVE OneDrop manifest loaded'),null,{timeout:30000});
+            await page.click('#connect');
+            await page.waitForFunction(()=>document.querySelector('#connect')?.textContent?.includes('Connected:'),null,{timeout:20000});
+            await page.click('#prepare');
+
+            await page.waitForFunction(()=>{
+              const t=document.querySelector('#status')?.textContent||'';
+              return t.includes('ONE-TRANSACTION PREFLIGHT PASS') || t.includes('PREFLIGHT STOPPED');
+            },null,{timeout:90000});
+
+            const status=await page.locator('#status').innerText();
+            const review=await page.locator('#review').innerText();
+            console.log('FULL_PREFLIGHT_STATUS='+JSON.stringify(status));
+            console.log('FULL_PREFLIGHT_REVIEW='+JSON.stringify(review));
+
+            if(!status.includes('ONE-TRANSACTION PREFLIGHT PASS')){
+              throw new Error('Full owner preflight failed: '+status);
+            }
+            if(!review.includes('Simulation: PASS')){
+              throw new Error('Simulation did not pass');
+            }
+            if(pageErrors.length){
+              throw new Error('Browser page errors: '+JSON.stringify(pageErrors));
+            }
+            if(consoleErrors.some(x=>/TypeError|SyntaxError|ReferenceError/i.test(x))){
+              throw new Error('Browser console errors: '+JSON.stringify(consoleErrors));
+            }
+
+            await browser.close();
+            console.log('WORLDZ_ONEDROP_FULL_OWNER_PREFLIGHT=PASS');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
   deploy:
     needs: validate
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
