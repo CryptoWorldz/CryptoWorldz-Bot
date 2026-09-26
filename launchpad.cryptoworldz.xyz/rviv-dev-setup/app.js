@@ -41,7 +41,7 @@ async function connect(){
    next={kind:'injected',provider,address};
   }else{
    status('Opening Jupiter Mobile connection. Approve the connection in your wallet, then return here. No transaction is being signed.');
-   const bridge=await import('/mint/jupiter-mobile.js?v=20260926-reown-react19-v4');
+   const bridge=await import('/mint/jupiter-mobile.js?v=20260926-reown-react-map-v5');
    bridge.resetJupiterMobileConnectionState?.();
    const adapter=await bridge.getJupiterMobileAdapter();
    await Promise.race([adapter.connect(),new Promise((_,reject)=>setTimeout(()=>reject(Error('Jupiter connection timed out. Tap Connect to try again.')),25000))]);
