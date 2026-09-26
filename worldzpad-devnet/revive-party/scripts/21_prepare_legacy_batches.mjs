@@ -7,6 +7,7 @@ const m=JSON.parse(fs.readFileSync('../../worldzpad-mainnet/revive/revive-legacy
 const c=JSON.parse(fs.readFileSync('../../worldzpad-mainnet/revive/revive-launch-contract.v1.json'));
 const sha=x=>crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 if(m.mint!==c.token.canonicalMint||m.recipientCount!==216||m.recipients.length!==216||new Set(m.recipients.map(x=>x.wallet)).size!==216||m.recipients.reduce((n,x)=>n+BigInt(x.amountRaw),0n)!==20_000_000_000_000n)throw Error('LEDGER_GATE_FAILED');
+if(m.payoutExclusionsPendingRecalculation?.length||m.recipients.some(x=>x.payoutStatus==='EXCLUDED_PENDING_RECALCULATION'))throw Error('EXCLUDED_ENTITLEMENTS_REQUIRE_RECONCILIATION');
 const mint=new PublicKey(m.mint);
 const rows=m.recipients.map((x,i)=>({ordinal:i+1,wallet:x.wallet,tokenAccount:getAssociatedTokenAddressSync(mint,new PublicKey(x.wallet),true,TOKEN_PROGRAM_ID).toBase58(),amountRaw:x.amountRaw}));
 const batches=[];
