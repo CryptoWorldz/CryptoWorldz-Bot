@@ -749,10 +749,9 @@ jobs:
                   assert jup_control_code==200 and 'JUPITER VRFD HANDOFF' in jup_control_body
                   assert jup_package_code==200
                   jup_package=json.loads(jup_package_body)
+                  expected_jup_package=json.loads(Path('launchpad.cryptoworldz.xyz/worlddexpush/jupiter/package.json').read_text())
+                  assert jup_package==expected_jup_package, 'LIVE_JUPITER_VRFD_PACKAGE_MISMATCH'
                   assert jup_package['schema']=='WORLDZ-JUPITER-VRFD-PACKAGE-V1'
-                  jup_symbols={t['symbol']:t for t in jup_package['tokens']}
-                  assert jup_symbols['WLDZ']['mint']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
-                  assert jup_symbols['RVIV']['mint']=='DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R'
                   assert receipt_schema_code==200 and receipt_schema_alias_code==200
                   assert json.loads(receipt_schema_body)==json.loads(receipt_schema_alias_body)
                   live_receipt_schema=json.loads(receipt_schema_body)
