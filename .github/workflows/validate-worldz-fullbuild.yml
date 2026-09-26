@@ -1,0 +1,52 @@
+name: Validate WorldzFullBuild
+
+on:
+  pull_request:
+    branches: [revive-v1-build, main]
+    paths:
+      - 'WORLDZFULLBUILD.md'
+      - 'WORLDZFULLBUILD-MEMORY-STORAGE-STANDARD.md'
+      - 'docs/WORLDZFULLBUILD-WALLET-RELEASE-STANDARD.md'
+      - 'worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json'
+      - 'src/fullbuild/**'
+      - 'src/fullscope/**'
+      - 'src/command-centre.js'
+      - 'src/command-registry.js'
+      - 'src/full-runtime-entry.js'
+      - 'src/websites-telegram.js'
+      - 'cryptoworldz.xyz/worldzlinkz/**'
+      - 'launchpad.cryptoworldz.xyz/fullbuild/**'
+      - 'test/fullbuild.test.js'
+      - 'test/command-centre.test.js'
+      - 'test/command-registry.test.js'
+      - 'test/websites-telegram.test.js'
+      - 'scripts/validate_worldz_fullbuild.py'
+      - '.github/workflows/validate-worldz-fullbuild.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate WorldzFullBuild project inheritance
+        run: python scripts/validate_worldz_fullbuild.py
+      - name: Syntax checks
+        run: |
+          node --check src/fullbuild/core.js
+          node --check src/fullbuild/telegram.js
+          node --check src/fullscope/core.js
+          node --check src/fullscope/telegram.js
+          node --check src/command-centre.js
+          node --check src/command-registry.js
+          node --check src/full-runtime-entry.js
+          node --check src/websites-telegram.js
+      - name: Focused tests
+        run: node --test test/fullbuild.test.js test/fullscope.test.js test/command-centre.test.js test/command-registry.test.js test/websites-telegram.test.js
