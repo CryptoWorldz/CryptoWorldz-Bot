@@ -1,4 +1,5 @@
 name: Diagnose REVIVE Recent Signatures
+# OneDrop receipt verification 2026-09-26
 
 on:
   push:
