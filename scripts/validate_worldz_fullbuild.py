@@ -75,3 +75,5 @@ assert "https://launchpad.cryptoworldz.xyz/fullbuild/" in sitemap
 
 print("WORLDZ_FULLBUILD_VALIDATION=PASS")
 print("fullscope=REQUIRED chains=8 token_slots=160 voting=SEPARATED mainnet_default=OFF")
+
+# CI validation trigger: canonical FullBuild integration 2026-09-27
