@@ -1,5 +1,9 @@
 # Worldz Omnichain™ — private build
 
+**Parent architecture:** WorldzFullBuild™  
+**Connected command layer:** ZED LED Command Centre MAX™  
+**Connected multi-chain operations layer:** WorldzFullScope™
+
 Status: **architecture + executable fee/disclosure core; every mainnet adapter disabled.**
 
 This layer sits above the existing REVIVE / MagicFeeNumber™ / Legacy Flywheel™ build. It does not replace the Solana implementation and does not authorize a token launch.
