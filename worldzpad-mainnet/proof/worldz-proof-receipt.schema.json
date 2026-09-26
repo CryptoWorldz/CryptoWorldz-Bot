@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://launchpad.cryptoworldz.xyz/schemas/worldz-proof-receipt.schema.json",
+  "title": "Worldz Proof Receipt™",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "receiptType",
+    "chain",
+    "status",
+    "transactionId",
+    "verifiedAt",
+    "evidence"
+  ],
+  "properties": {
+    "version": {
+      "const": "WORLDZ-PROOF-RECEIPT-1"
+    },
+    "receiptType": {
+      "enum": [
+        "TOKEN_LAUNCH",
+        "TOKEN_DISTRIBUTION",
+        "LIQUIDITY",
+        "LOCK",
+        "VESTING",
+        "BURN",
+        "FEE_ROUTE",
+        "BRIDGE",
+        "PAIR"
+      ]
+    },
+    "chain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "network": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "PENDING",
+        "CONFIRMED",
+        "PASSED",
+        "FAILED"
+      ]
+    },
+    "transactionId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "recipient": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "asset": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "amount": {
+      "type": [
+        "string",
+        "number",
+        "null"
+      ]
+    },
+    "beforeBalance": {
+      "type": [
+        "string",
+        "number",
+        "null"
+      ]
+    },
+    "afterBalance": {
+      "type": [
+        "string",
+        "number",
+        "null"
+      ]
+    },
+    "verifiedAt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
