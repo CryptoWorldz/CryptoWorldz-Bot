@@ -119,6 +119,52 @@
       "Quote account rent and network fees before each owner signature.",
       "Resume a Squads proposal only after proving its on-chain message matches the reviewed allocation.",
       "Keep launch, liquidity, distribution, vesting and rent recovery as separately proven states."
-    ]
+    ],
+    "sourceOfTruth": "worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json",
+    "ownerAuthority": {
+      "owner": "JayJayTeamDev",
+      "role": "OWNER_AND_FINAL_APPROVER",
+      "approvedPlanIsSourceOfTruth": true,
+      "outsidePlanChanges": "PROPOSAL_ONLY_UNTIL_OWNER_APPROVES"
+    },
+    "deliveryTruthStandard": {
+      "states": [
+        "CODE_CHANGED",
+        "DEPLOYED",
+        "LIVE_SOURCE_VERIFIED",
+        "END_TO_END_VERIFIED",
+        "UNVERIFIED"
+      ],
+      "noGreenDeployEqualsWorking": true,
+      "endToEndRequiredBeforeDone": true
+    },
+    "bulkDistribution": {
+      "brand": "WorldzBulkDrop™",
+      "defaultForWorldzLaunchPad": true,
+      "manifestDriven": true,
+      "oneWalletSigningSessionTarget": true,
+      "squadsApprovalBoundary": true,
+      "noPerRecipientPages": true,
+      "resumableFromConfirmedSignatures": true,
+      "freshBlockhashAtSigningBoundary": true,
+      "finalOnChainReconciliation": true,
+      "proofModule": "WorldzProof™"
+    },
+    "solanaVestingDefault": {
+      "provider": "Jupiter Lock/Vesting",
+      "immediateUnlockPercent": 0,
+      "cliffDays": 0,
+      "months": 12,
+      "releases": 12,
+      "cadence": "monthly"
+    },
+    "reviveCheckpoint": {
+      "devCityCandidatesFound": 105,
+      "devCityFinalTarget": 100,
+      "legacyRecipients": 216,
+      "teamPoolTokens": 30000000,
+      "giveawayChannel": "@CryptoWorldzX via G.R.A.C.E.",
+      "executionState": "BUILD_AND_VALIDATION_IN_PROGRESS__NO_END_TO_END_BULK_DISTRIBUTION_PROOF_YET"
+    }
   }
 }
