@@ -1,6 +1,6 @@
 {
   "schema": "PNEX-LAUNCH-READINESS-V1",
-  "version": "PNEX-READINESS-2026-09-26-B",
+  "version": "PNEX-READINESS-2026-09-26-C",
   "token": "PNEX",
   "mainnetExecutionEnabled": false,
   "gates": [
@@ -53,6 +53,18 @@
       "detail": "Full 62.5M / 25% is classified in a protected Chance Vault; unknown recipients do not block genesis"
     },
     {
+      "id": "final_package",
+      "status": "PASS_STATIC",
+      "proof": "PNEX-MAINNET-LAUNCH-RUNBOOK.md",
+      "detail": "Exact 250M genesis-vault plan, fail-closed Worldz Proof template, human input binder and launch-day abort/runbook controls are built."
+    },
+    {
+      "id": "public_prelaunch_page",
+      "status": "PASS_STATIC",
+      "proof": "../../launchpad.cryptoworldz.xyz/phenix/index.html",
+      "detail": "Official PHENIX pre-launch surface exists and explicitly publishes no CA, no live pool and no buy route until on-chain confirmation."
+    },
+    {
       "id": "canonical_mint",
       "status": "BLOCKED",
       "proof": "pnex-token-identity.v1.json",
@@ -80,19 +92,19 @@
       "id": "devnet_vesting",
       "status": "BLOCKED",
       "proof": "phenix-streamflow-vesting.v1.json",
-      "detail": "Create/read-back proof of disposable Streamflow vesting contract required"
+      "detail": "Streamflow SDK compatibility/static checks PASS; disposable on-chain create/read-back proof still requires funded Devnet execution."
     },
     {
       "id": "devnet_proofburn",
       "status": "BLOCKED",
       "proof": "prepare-pnex-burn.mjs",
-      "detail": "Disposable burn must prove confirmed supply reduction and Worldz Proof receipt"
+      "detail": "Disposable proof reaches verified Solana Devnet RPC; current GitHub run is blocked by public Devnet faucet HTTP 429 / zero test SOL before any mint or burn transaction."
     },
     {
       "id": "devnet_pool_lock_fee",
       "status": "BLOCKED",
       "proof": "pnex-staged-liquidity.v1.json",
-      "detail": "Disposable 5% pool must prove 75 bps, dynamic fee OFF, permanent lock, first swap and fee claim"
+      "detail": "Same disposable proof is ready to test 5% pool, 75 bps, dynamic fee OFF, permanent lock, first swap and fee claim once the ephemeral Devnet payer can obtain test SOL."
     },
     {
       "id": "router_receipt_reconciliation",
