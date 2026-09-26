@@ -1,0 +1,160 @@
+name: Deploy Worldz OneDrop Live
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'launchpad.cryptoworldz.xyz/onedrop/**'
+      - 'launchpad.cryptoworldz.xyz/index.html'
+      - '.github/workflows/deploy-onedrop-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldz-onedrop-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate OneDrop public bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check launchpad.cryptoworldz.xyz/onedrop/app.js
+          node --check launchpad.cryptoworldz.xyz/onedrop/claim/app.js
+          test -f launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json
+          grep -q 'Worldz OneDrop' launchpad.cryptoworldz.xyz/onedrop/index.html
+          grep -q 'REVIVE' launchpad.cryptoworldz.xyz/onedrop/claim/index.html
+          echo WORLDZ_ONEDROP_BUNDLE=PASS
+
+      - name: Publish OneDrop to both known LaunchPad Hostinger roots
+        shell: python
+        run: |
+          import os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path, PurePosixPath
+
+          site_root=Path('launchpad.cryptoworldz.xyz')
+          targets=[
+            (site_root/'onedrop', PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop')),
+            (site_root/'onedrop', PurePosixPath('domains/cryptoworldz.xyz/public_html/launchpad/onedrop')),
+          ]
+          root_files=[
+            (site_root/'index.html', PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/index.html')),
+            (site_root/'index.html', PurePosixPath('domains/cryptoworldz.xyz/public_html/launchpad/index.html')),
+          ]
+
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=45)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p()
+          ftp.set_pasv(True)
+
+          def ensure(directory):
+              ftp.cwd('/')
+              for part in PurePosixPath(directory).parts:
+                  if part in ('','/'):
+                      continue
+                  try:
+                      ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part)
+                      ftp.cwd(part)
+
+          count=0
+          try:
+              for local_root, remote_root in targets:
+                  for local in sorted(p for p in local_root.rglob('*') if p.is_file()):
+                      rel=local.relative_to(local_root)
+                      remote=remote_root/PurePosixPath(rel.as_posix())
+                      ensure(remote.parent)
+                      with local.open('rb') as fh:
+                          ftp.storbinary('STOR '+remote.name,fh,blocksize=262144)
+                      print('ONEDROP_PUBLISHED',local.as_posix(),'->',remote.as_posix())
+                      count+=1
+              for local, remote in root_files:
+                  ensure(remote.parent)
+                  with local.open('rb') as fh:
+                      ftp.storbinary('STOR '+remote.name,fh,blocksize=262144)
+                  print('ONEDROP_ROOT_PUBLISHED',local.as_posix(),'->',remote.as_posix())
+                  count+=1
+          finally:
+              try:
+                  ftp.quit()
+              except Exception:
+                  ftp.close()
+
+          print('WORLDZ_ONEDROP_UPLOAD=PASS files='+str(count))
+
+      - name: Verify OneDrop is live
+        shell: python
+        run: |
+          import time, urllib.request
+
+          expected={
+            'https://launchpad.cryptoworldz.xyz/onedrop/':[
+              'WORLDZ ONEDROP','One setup.','SIGN & LAUNCH ONEDROP'
+            ],
+            'https://launchpad.cryptoworldz.xyz/onedrop/app.js':[
+              'mERKcfxMC5SqJn4Ld4BUris3WKZZ1ojjWJ3A3J5CKxv',
+              'ONE-TRANSACTION PREFLIGHT PASS'
+            ],
+            'https://launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json':[
+              'WORLDZ-ONEDROP-RVIV-2026-09-26-A',
+              '49999999999948'
+            ],
+            'https://launchpad.cryptoworldz.xyz/onedrop/claim/':[
+              'REVIVE','Claim','Verify My Allocation'
+            ],
+          }
+
+          failures=[]
+          for url, needles in expected.items():
+              last=''
+              for attempt in range(1,8):
+                  try:
+                      stamp=int(time.time()*1000)
+                      sep='&' if '?' in url else '?'
+                      req=urllib.request.Request(
+                        url+sep+'onedrop_verify='+str(stamp),
+                        headers={
+                          'User-Agent':'Worldz-OneDrop-Verify/1.0',
+                          'Cache-Control':'no-cache, no-store',
+                          'Pragma':'no-cache'
+                        }
+                      )
+                      with urllib.request.urlopen(req,timeout=30) as r:
+                          body=r.read().decode('utf-8','ignore')
+                          if r.status==200 and all(x in body for x in needles):
+                              print('WORLDZ_ONEDROP_LIVE_PASS',url)
+                              break
+                          last='contract mismatch status='+str(r.status)
+                  except Exception as exc:
+                      last=repr(exc)
+                  time.sleep(attempt*2)
+              else:
+                  failures.append((url,last))
+
+          if failures:
+              raise SystemExit('WORLDZ_ONEDROP_LIVE_FAIL '+repr(failures))
+          print('WORLDZ_ONEDROP_LIVE=PASS surfaces=4')
