@@ -1,7 +1,7 @@
-// Keep React and React DOM on the same URL/version used by the Jupiter/Reown
-// adapter's CDN bundle. Separate React copies break its hooks at runtime.
-import React,{useEffect} from 'https://cdn.jsdelivr.net/npm/react@19.0.0/+esm';
-import {createRoot} from 'https://cdn.jsdelivr.net/npm/react-dom@19.0.0/client/+esm';
+// The calling page's import map unifies Reown's React 19.0 and Jupiter's
+// React 19.1 onto one copy. Separate copies break hooks at runtime.
+import React,{useEffect} from 'https://cdn.jsdelivr.net/npm/react@19.1.0/+esm';
+import {createRoot} from 'https://cdn.jsdelivr.net/npm/react-dom@19.1.0/client/+esm';
 import {useWrappedReownAdapter} from 'https://cdn.jsdelivr.net/npm/@jup-ag/jup-mobile-adapter@0.0.2/+esm';
 
 const REOWN_PROJECT_ID='e3d5fc46a07eb8ecb162ee048625348e';
@@ -91,5 +91,5 @@ export const worldzJupiterMobileConfig=Object.freeze({
   origin:WORLDZ_ORIGIN,
   adapterPackage:'@jup-ag/jup-mobile-adapter@0.0.2',
   browserModuleProvider:'jsDelivr +esm',
-  reactVersion:'19.0.0'
+  reactVersion:'19.1.0'
 });
