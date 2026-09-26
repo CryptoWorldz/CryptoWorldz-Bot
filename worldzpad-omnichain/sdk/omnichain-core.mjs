@@ -75,7 +75,13 @@ export function validateLaunchIntent(intent) {
   if (intent?.execution?.simulateFirst !== true) {
     throw new Error('simulateFirst is mandatory');
   }
-  if (intent.environment === 'mainnet' && intent?.execution?.mainnetReleaseApproved !== true) {
+  const environment = String(intent.environment || '').trim().toLowerCase();
+  const testEnvironments = new Set(['devnet', 'testnet', 'sepolia', 'base-sepolia', 'bsc-testnet', 'hyperevm-testnet', 'robinhood-testnet']);
+  const mainnetAliases = new Set(['mainnet', 'mainnet-beta']);
+  if (!testEnvironments.has(environment) && !mainnetAliases.has(environment)) {
+    throw new Error('environment must be an explicitly allowlisted testnet or recognized mainnet');
+  }
+  if (mainnetAliases.has(environment) && intent?.execution?.mainnetReleaseApproved !== true) {
     throw new Error('mainnet requires explicit release approval');
   }
   return true;
