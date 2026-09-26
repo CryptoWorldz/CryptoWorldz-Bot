@@ -13,6 +13,7 @@ devcity = json.loads((root / "revive-devcity-100.v1.json").read_text())
 team_vesting = json.loads((root / "revive-team-vesting.v1.json").read_text())
 public_candidates = json.loads((root / "revive-devcity-public-wallet-candidates.v1.json").read_text())
 legacy_distribution = json.loads((root / "revive-legacy-216-distribution.v1.json").read_text())
+six_dev_distribution = json.loads((root / "revive-six-dev-distribution.v1.json").read_text())
 funding = json.loads((root / "revive-launch-funding.v1.json").read_text())
 candidates = json.loads((root / "revive-devcity-50-candidates.v1.json").read_text())
 magic = json.loads((repo_root / "worldzpad-mainnet" / "fairfee" / "worldz-magic-fee.v1.json").read_text())
@@ -62,6 +63,10 @@ assert legacy_distribution["snapshotRoot"] == contract["legacyRevival"]["snapsho
 assert legacy_distribution["recipientCount"] == len(legacy_distribution["recipients"]) == 216
 assert len({x["wallet"] for x in legacy_distribution["recipients"]}) == 216
 assert sum(int(x["amountRaw"]) for x in legacy_distribution["recipients"]) == 20_000_000_000_000
+assert six_dev_distribution["mint"] == contract["token"]["canonicalMint"]
+assert six_dev_distribution["recipientCount"] == len(six_dev_distribution["recipients"]) == 6
+assert {x["wallet"] for x in six_dev_distribution["recipients"]} == {x["address"] for x in contract["devAllocation"]["wallets"]}
+assert all(x["amountRaw"] == "5000000000000" for x in six_dev_distribution["recipients"])
 assert candidates["targetNewSeats"] == 50
 assert len(candidates["candidates"]) == 50
 assert len({x["github"] for x in candidates["candidates"]}) == 50
