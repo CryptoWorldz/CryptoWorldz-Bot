@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "worldzpad-mainnet/flywheel/**"
+      - "worldzpad-mainnet/phenix/**"
       - "scripts/validate_worldz_universal_flywheel.py"
       - ".github/workflows/validate-worldz-universal-flywheel.yml"
   workflow_dispatch:
@@ -22,5 +23,10 @@ jobs:
           python-version: "3.12"
       - name: Validate platform-wide Universal FlyWheel policy
         run: python scripts/validate_worldz_universal_flywheel.py
+      - name: Validate exact PNEX schedules
+        run: |
+          python worldzpad-mainnet/phenix/vesting_schedule.py developer --launch-date 2026-10-01 > /tmp/developer.json
+          python worldzpad-mainnet/phenix/vesting_schedule.py flywheel --launch-date 2026-10-01 > /tmp/flywheel.json
+          python worldzpad-mainnet/phenix/vesting_schedule.py chance --launch-date 2026-10-01 > /tmp/chance.json
       - name: Universal Cycle completeness gate
         run: python worldzpad-mainnet/flywheel/universal_cycle.py --self-test
