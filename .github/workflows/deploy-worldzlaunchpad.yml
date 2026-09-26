@@ -143,7 +143,8 @@ jobs:
             root/'trust/index.html',root/'trust/app.js',
             root/'omnichain/index.html',root/'fullscope/index.html',
             root/'proof-receipt/index.html',root/'.well-known/worldz-proof-receipt.schema.json',root/'schemas/worldz-proof-receipt.v1.json',
-            root/'worlddexpush/index.html',root/'worlddexpush/app.js',root/'bitworldz/index.html',root/'bitworldz/app.js',root/'capabilities/index.html',
+            root/'worlddexpush/index.html',root/'worlddexpush/app.js',root/'worlddexpush/jupiter/index.html',root/'worlddexpush/jupiter/package.json',
+            root/'bitworldz/index.html',root/'bitworldz/app.js',root/'capabilities/index.html',
             root/'technology/index.html',root/'technology.html',
             root/'wldz/index.html',root/'wldz/app.js',root/'wldz/launch-config.json',
             root/'tokenlist.json',root/'.well-known/worldz-tokens.json',
@@ -666,6 +667,8 @@ jobs:
                   receipt_schema_code,receipt_schema_body=get(base+'/.well-known/worldz-proof-receipt.schema.json?verify=receipt-v1')
                   receipt_schema_alias_code,receipt_schema_alias_body=get(base+'/schemas/worldz-proof-receipt.v1.json?verify=receipt-v1')
                   dexpush_code,dexpush_body=get(base+'/worlddexpush/?verify=dexpush-v1')
+                  jup_control_code,jup_control_body=get(base+'/worlddexpush/jupiter/?verify=jupiter-vrfd-v1')
+                  jup_package_code,jup_package_body=get(base+'/worlddexpush/jupiter/package.json?verify=jupiter-vrfd-v1')
                   bitworldz_code,bitworldz_body=get(base+'/bitworldz/?verify=bitworldz-v1')
                   capability_code,capability_body=get(base+'/capabilities/?verify=capability-v1')
                   tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
@@ -743,6 +746,12 @@ jobs:
                   assert all(term not in trust_body for term in private_terms)
                   assert fullscope_code==200 and 'WORLDZFULLSCOPE™' in fullscope_body and 'POPULARITY ONLY' in fullscope_body and 'GOVERNANCE ONLY' in fullscope_body
                   assert receipt_code==200 and 'WORLDZ PROOF RECEIPT™' in receipt_body
+                  assert jup_control_code==200 and 'JUPITER VRFD HANDOFF' in jup_control_body
+                  assert jup_package_code==200
+                  jup_package=json.loads(jup_package_body)
+                  expected_jup_package=json.loads(Path('launchpad.cryptoworldz.xyz/worlddexpush/jupiter/package.json').read_text())
+                  assert jup_package==expected_jup_package, 'LIVE_JUPITER_VRFD_PACKAGE_MISMATCH'
+                  assert jup_package['schema']=='WORLDZ-JUPITER-VRFD-PACKAGE-V1'
                   assert receipt_schema_code==200 and receipt_schema_alias_code==200
                   assert json.loads(receipt_schema_body)==json.loads(receipt_schema_alias_body)
                   live_receipt_schema=json.loads(receipt_schema_body)

@@ -1,0 +1,42 @@
+name: Audit Worldz Jupiter VRFD
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+  pull_request:
+    paths:
+      - 'worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json'
+      - 'worldzpad-mainnet/token-identity/worldz-token-registry.v1.json'
+      - 'launchpad.cryptoworldz.xyz/**/token-metadata.json'
+      - 'launchpad.cryptoworldz.xyz/worlddexpush/jupiter/**'
+      - 'scripts/audit_worldz_jupiter_vrfd.mjs'
+      - '.github/workflows/audit-worldz-jupiter-vrfd.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json'
+      - 'worldzpad-mainnet/token-identity/worldz-token-registry.v1.json'
+      - 'launchpad.cryptoworldz.xyz/**/token-metadata.json'
+      - 'launchpad.cryptoworldz.xyz/worlddexpush/jupiter/**'
+      - 'scripts/audit_worldz_jupiter_vrfd.mjs'
+      - '.github/workflows/audit-worldz-jupiter-vrfd.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit Jupiter identity
+        run: node scripts/audit_worldz_jupiter_vrfd.mjs
+      - name: Upload Jupiter identity report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldz-jupiter-vrfd-status
+          path: artifacts/worldz-jupiter-vrfd-status.json
+          retention-days: 30

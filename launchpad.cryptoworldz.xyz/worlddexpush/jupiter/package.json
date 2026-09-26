@@ -1,0 +1,77 @@
+{
+  "schema": "WORLDZ-JUPITER-VRFD-PACKAGE-V1",
+  "version": "2026-09-27-A",
+  "status": "CANONICAL_DATA_READY__JUPITER_UPSTREAM_REVIEW_REQUIRED",
+  "purpose": "One exact Jupiter VRFD handoff package for every live WorldzLaunchPad Solana token. Worldz-owned/on-chain identity and Jupiter upstream identity are tracked separately.",
+  "provider": {
+    "name": "Jupiter VRFD",
+    "home": "https://verified.jup.ag/",
+    "tokensApi": "https://api.jup.ag/tokens/v2/search?query={MINT}",
+    "reviewRule": "VRFD submissions are externally reviewed by Jupiter. Worldz does not mark Jupiter fields verified until Jupiter exposes them through its own data layer."
+  },
+  "tokens": [
+    {
+      "launchOrder": 1,
+      "slug": "wldz",
+      "name": "WORLDZ",
+      "symbol": "WLDZ",
+      "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "decimals": 6,
+      "image": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
+      "website": "https://launchpad.cryptoworldz.xyz/wldz/",
+      "x": "https://x.com/CryptoWorldzX",
+      "telegram": "https://t.me/CryptoWLDZ",
+      "description": "WORLDZ (WLDZ) is the canonical WorldzLaunchPad token on Solana, powering the CryptoWorldz ecosystem, community rewards, liquidity, development, charity impact, and future WorldzLaunchPad launches.",
+      "metaplexMetadataPda": "3rMLw4E4TKfuT9eCSSZMkds9BgqZgzzaRpCutVb5XcsH",
+      "metadataUri": "https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-genesis-console?metadata=AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "publicMetadata": "https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json",
+      "platformSubmissionPack": "https://launchpad.cryptoworldz.xyz/wldz/platform-submission-pack.json",
+      "circulatingSupply": "https://launchpad.cryptoworldz.xyz/wldz/circulating-supply.php",
+      "vrfdDashboard": "https://verified.jup.ag/dashboard/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U?action=update-metadata",
+      "lastObservedJupiter": {
+        "name": "",
+        "symbol": "",
+        "icon": "PRESENT",
+        "state": "METADATA_NAME_SYMBOL_PENDING",
+        "observedAt": "2026-09-26T20:31:01Z"
+      }
+    },
+    {
+      "launchOrder": 2,
+      "slug": "rviv",
+      "name": "REVIVE",
+      "symbol": "RVIV",
+      "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "decimals": 6,
+      "image": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/rviv/dcaa3f79-7c84-45ed-bab7-8466f3f8a435.jpg",
+      "website": "https://launchpad.cryptoworldz.xyz/rviv/",
+      "x": "https://x.com/CryptoWorldzX",
+      "telegram": "https://t.me/CryptoWLDZ",
+      "description": "REVIVE (RVIV) is WorldzLaunchPad token #002 on Solana. It has a fixed 200,000,000 RVIV supply with mint and freeze authorities revoked.",
+      "metaplexMetadataPda": "38FiRTdugwku2BtiUUMqcwKAAAxjdCegMJ3CHLBYTxS8",
+      "metadataUri": "https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-genesis-console?metadata=DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "publicMetadata": "https://launchpad.cryptoworldz.xyz/rviv/token-metadata.json",
+      "platformSubmissionPack": "https://launchpad.cryptoworldz.xyz/rviv/platform-submission-pack.json",
+      "circulatingSupply": null,
+      "vrfdDashboard": "https://verified.jup.ag/dashboard/DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R?action=update-metadata",
+      "lastObservedJupiter": {
+        "name": "",
+        "symbol": "",
+        "icon": "PRESENT",
+        "state": "METADATA_NAME_SYMBOL_PENDING",
+        "observedAt": "2026-09-26T20:31:01Z"
+      }
+    }
+  ],
+  "releaseRule": {
+    "correctOnWorldzOwnedSurfaces": true,
+    "onchainMatchRequired": true,
+    "offchainMatchRequired": true,
+    "jupiterNameSymbolMatchRequiredForJupiterGreen": true,
+    "blankJupiterNameSymbolState": "PENDING",
+    "wrongNonBlankJupiterNameSymbolState": "FAIL",
+    "automaticPaidVerification": false,
+    "walletSigningRequiredForAnyProviderTransaction": true
+  },
+  "source": "https://launchpad.cryptoworldz.xyz/worlddexpush/jupiter/package.json"
+}
