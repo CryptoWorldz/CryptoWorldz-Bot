@@ -30,7 +30,20 @@ require(bucket["phenix_chance_12_months"]["tokens"] == 37_500_000, "Chance vesti
 require(bucket["liquidity_total"]["tokens"] == 112_500_000, "liquidity total must be 112,500,000")
 require(bucket["developer_vesting"]["tokens"] == 25_000_000, "developer vesting must be 25,000,000")
 require(bucket["purple_diamond_handz"]["tokens"] == 2_500_000, "Purple Diamond Handz must be 2,500,000")
-require(bucket["unassigned_pending_decision"]["tokens"] == 47_500_000, "unassigned reserve must be 47,500,000 until explicitly changed")
+require(bucket["phenix_total_supply_flywheel"]["tokens"] == 47_500_000, "PHENIX Total Supply FlyWheel must be 47,500,000")
+require(cfg["allocation"]["unassignedTokens"] == 0, "PNEX must have zero unassigned supply")
+
+flywheel = cfg["totalSupplyFlyWheel"]
+require(flywheel["supplyPercent"] == 19, "FlyWheel must be 19%")
+require(flywheel["supplyTokens"] == 47_500_000, "FlyWheel token amount mismatch")
+require(flywheel["oneMasterReserve"] is True, "FlyWheel must remain one master reserve")
+require(flywheel["separateSupplyBuckets"] is False, "FlyWheel must not become separate genesis supply buckets")
+require(flywheel["internalLanePercentages"] == "NOT_YET_FIXED", "do not invent internal FlyWheel percentages")
+require(flywheel["releasePolicyRequiredBeforeMainnet"] is True, "FlyWheel release policy must gate mainnet")
+require(flywheel["mainnetExecutionEnabled"] is False, "FlyWheel mainnet execution must remain off in prep")
+required_lanes = {"worldz_infrastructure","oneworldz_impact","treasury_resilience","community_rewards","locked_builder_team","ecosystem_growth","additional_liquidity","permanent_burn"}
+require({x["id"] for x in flywheel["supportedLanes"]} == required_lanes, "FlyWheel lane set drift detected")
+require(flywheel["miracleRunway"]["enabled"] is True, "MIRACLE infrastructure runway must be recorded")
 
 chance = cfg["phenixChance"]
 model = chance["perApprovedRecipientAt500SeatModel"]
@@ -63,7 +76,7 @@ require(wallet["walletBrowserRequired"] is False, "wallet browser must not be re
 require(wallet["privateKeyOrSeedPhraseCollection"] is False, "seed/private-key collection must remain false")
 
 require(cfg["launchReady"] is False, "launchReady must stay false while blockers remain")
-require("unassigned allocation equals zero" in cfg["releaseGates"], "missing unassigned-allocation release gate")
+require("PHENIX Total Supply FlyWheel 19% / 47,500,000 PNEX policy is finalized with auditable lane controls" in cfg["releaseGates"], "missing FlyWheel release gate")
 
 if errors:
     raise SystemExit("PHENIX PREFLIGHT VALIDATION FAILED\n- " + "\n- ".join(errors))
@@ -75,4 +88,4 @@ print("Liquidity: 5% genesis / 45% current total allocation")
 print("MagicFeeNumber: 75 bps; dynamic fee OFF; split 51/17/15/8.5/8.5")
 print("Wallet connection: Worldz website origin; no wallet browser requirement")
 print("Mainnet execution: OFF")
-print("Launch readiness: BLOCKED — 19% allocation and remaining release gates still unresolved")
+print("PHENIX Total Supply FlyWheel: 19% / 47,500,000 assigned; internal release policy pending")\nprint("Launch readiness: BLOCKED — FlyWheel controls and remaining release gates still unresolved")
