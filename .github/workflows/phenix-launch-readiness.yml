@@ -1,0 +1,30 @@
+name: PHENIX launch readiness report
+
+on:
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/phenix/**"
+      - "scripts/validate_pnex_readiness.py"
+      - ".github/workflows/phenix-launch-readiness.yml"
+  push:
+    branches: [phenix-launch-prep, revive-v1-build]
+    paths:
+      - "worldzpad-mainnet/phenix/**"
+      - "scripts/validate_pnex_readiness.py"
+      - ".github/workflows/phenix-launch-readiness.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/validate_pnex_readiness.py
+      - name: Emit non-blocking readiness report
+        run: python worldzpad-mainnet/phenix/launch-readiness.py
