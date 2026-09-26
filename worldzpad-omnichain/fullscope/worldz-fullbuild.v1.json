@@ -221,10 +221,11 @@
     "status": "INCORPORATED_PROJECT_SOURCE_OF_TRUTH",
     "scope": "All non-sensitive Worldz project decisions available from project chats, canonical repository records, deployment evidence and owner-approved corrections are inputs to WorldzFullBuild.",
     "precedence": [
-      "confirmed on-chain or live production evidence",
-      "latest explicit JayJayTeamDev approval/correction",
+      "latest explicit JayJayTeamDev instruction for decisions and approved architecture",
+      "confirmed on-chain evidence for claimed on-chain status",
+      "verified live production/deployment evidence for claimed live status",
+      "verified GitHub/repository/CI evidence for code and build status",
       "canonical versioned WorldzFullBuild or token registry contract",
-      "merged repository implementation",
       "older project-chat plan",
       "research/proposal"
     ],
@@ -381,7 +382,7 @@
       ]
     },
     "sourceLedger": "docs/WORLDZFULLBUILD-PROJECT-SOURCE-OF-TRUTH.md",
-    "updateRule": "Future project-chat decisions marked for incorporation must update the versioned WorldzFullBuild source ledger/contract and must not silently erase superseded decisions."
+    "updateRule": "Future project-relevant decisions and corrections are continuing WorldzFullBuild inputs. Newest explicit owner instruction supersedes older conflicting decisions; factual build status remains evidence-driven; superseded decisions are not silently revived."
   },
   "projectContinuity": {
     "status": "INCORPORATED",
@@ -396,7 +397,7 @@
       "PROJECT_FILES",
       "OLDER_CONVERSATION_HISTORY"
     ],
-    "conflictRule": "NEWER_EXPLICIT_OWNER_APPROVAL_SUPERSEDES_OLDER_INCOMPATIBLE_VALUES__NO_SILENT_MERGE",
+    "conflictRule": "NEWEST_EXPLICIT_OWNER_INSTRUCTION_SUPERSEDES_OLDER_CONFLICTING_DECISIONS__FACTUAL_BUILD_STATUS_REQUIRES_VERIFIED_GITHUB_ON_CHAIN_OR_LIVE_DEPLOYMENT_EVIDENCE__NO_SILENT_MERGE",
     "privacyBoundary": "DO_NOT_COPY_UNRELATED_PRIVATE_PERSONAL_MEDICAL_LEGAL_OR_CREDENTIAL_DATA_INTO_PUBLIC_BUILD_SPEC",
     "ecosystem": [
       "OneWorldz",
@@ -543,5 +544,31 @@
     "testnetOrDevnetProofRequired": true,
     "worldzProofRequired": true,
     "explicitOwnerReleaseRequired": true
+  },
+  "permanentWorldzFullBuildRules": {
+    "status": "LOCKED_CONTINUING_SOURCE_OF_TRUTH",
+    "effectiveDate": "2026-09-27",
+    "decisionAuthorityRule": "NEWEST_EXPLICIT_JAYJAYTEAMDEV_INSTRUCTION_WINS_OVER_OLDER_CONFLICTING_DECISIONS",
+    "factualStatusRule": "VERIFIED_GITHUB_ON_CHAIN_AND_LIVE_DEPLOYMENT_EVIDENCE_DETERMINES_ACTUAL_BUILD_STATUS",
+    "regressionRule": "PREVIOUS_MISTAKES_BECOME_REGRESSION_PREVENTION_RULES",
+    "ecosystemRule": "TREAT_WORLDZ_AS_ONE_CONNECTED_ARCHITECTURE_NOT_RANDOM_SEPARATE_BUILDS",
+    "publicSeparationRule": "HUMANITARIAN_AND_CRYPTOWORLDZ_FUNCTIONS_REMAIN_CONNECTED_BUT_ARE_CLEARLY_SEPARATED_PUBLICLY_WHERE_REQUIRED",
+    "noChatCompletionRule": "NO_DEPLOYED_LIVE_SIGNED_CONFIRMED_OR_MAINNET_COMPLETE_CLAIM_SOLELY_FROM_EARLIER_CHAT_TEXT",
+    "projectContinuityRule": "THIS_PROJECT_IS_A_CONTINUING_INPUT_TO_THE_WORLDZFULLBUILD_SOURCE_OF_TRUTH",
+    "conflictResolution": {
+      "decisions": [
+        "LATEST_EXPLICIT_OWNER_INSTRUCTION",
+        "VERSIONED_CONTRACT_REFLECTING_LATEST_INSTRUCTION",
+        "OLDER_PROJECT_PLAN",
+        "RESEARCH_OR_PROPOSAL"
+      ],
+      "factualStatus": [
+        "CONFIRMED_ON_CHAIN_EVIDENCE_FOR_ON_CHAIN_FACTS",
+        "VERIFIED_LIVE_PRODUCTION_OR_DEPLOYMENT_EVIDENCE_FOR_LIVE_FACTS",
+        "VERIFIED_GITHUB_REPOSITORY_AND_CI_EVIDENCE_FOR_CODE_BUILD_FACTS",
+        "UNVERIFIED_REPOSITORY_STATE_OR_CHAT_DESCRIPTION"
+      ],
+      "rule": "NEWER_OWNER_INSTRUCTION_CAN_SUPERSEDE_A_DECISION_BUT_CANNOT_RETROACTIVELY_CREATE_A_DEPLOYMENT_OR_ON_CHAIN_EVENT"
+    }
   }
 }
