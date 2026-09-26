@@ -4,7 +4,10 @@ const { allRegisteredCommandNames, groupsForRole } = require("../src/command-reg
 
 const REQUIRED_RUNTIME_COMMANDS = [
   "zedstart","zed","help","commands","commandtree","directory","acknowledgements","supportjay",
-  "start","register","profile","rewards","leaderboard","raaiiidd","missions","wallet","cancel","kitty","governance","vote","impact","donate","points",
+  "start","register","profile","rewards","leaderboard","raaiiidd","missions","wallet","cancel","kitty","impact","donate","points",
+  "fullscope","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
+  "worldzvotes","tokenvote","worldztrending","worldzrankings",
+  "worldzgovern","governproposals","governvote","governdelegate",
   "raid","admin","admingrace","zedsettings","newmission","editmission","endmission","pending","approve","reject","member","admins","permissions","setkitty","setrole","setpermission","setpartner","broadcast","stats","activity",
   "causes","cause","cause_add","shilllink","referrals","rewardplan","website","websites","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
   "workstart","workstop","evidence","workevidence","rewardbudget","specialreward","rewardasset","fundingplan","funded","contribute","walletplan","setprojectwallet","investmentfunded",
@@ -32,4 +35,16 @@ test("owner command tree includes every role layer", () => {
   for (const role of ["public","member","admin","executive","owner"]) {
     assert.ok(groups.some((group) => group.minimumRole === role), `owner tree missing ${role} layer`);
   }
+});
+
+
+test("Worldz Votes Centre and WorldzGovern commands live in separate registry groups", () => {
+  const groups = groupsForRole("member");
+  const votes = groups.find((group) => group.key === "worldz-votes-centre");
+  const govern = groups.find((group) => group.key === "worldz-govern");
+  assert.ok(votes);
+  assert.ok(govern);
+  const voteNames = new Set(votes.commands.map((item) => item.command));
+  const governNames = new Set(govern.commands.map((item) => item.command));
+  for (const command of voteNames) assert.equal(governNames.has(command), false, command);
 });
