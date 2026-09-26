@@ -6,6 +6,7 @@ on:
       - "worldzpad-mainnet/phenix/pnex-genesis-vault-plan.v1.json"
       - "worldzpad-mainnet/phenix/pnex-worldz-proof-manifest.v1.json"
       - "worldzpad-mainnet/phenix/PNEX-MAINNET-LAUNCH-RUNBOOK.md"
+      - "worldzpad-mainnet/phenix/bind-final-mainnet-inputs.py"
       - "scripts/validate_pnex_final_package.py"
       - ".github/workflows/validate-pnex-final-package.yml"
   push:
@@ -14,6 +15,7 @@ on:
       - "worldzpad-mainnet/phenix/pnex-genesis-vault-plan.v1.json"
       - "worldzpad-mainnet/phenix/pnex-worldz-proof-manifest.v1.json"
       - "worldzpad-mainnet/phenix/PNEX-MAINNET-LAUNCH-RUNBOOK.md"
+      - "worldzpad-mainnet/phenix/bind-final-mainnet-inputs.py"
       - "scripts/validate_pnex_final_package.py"
       - ".github/workflows/validate-pnex-final-package.yml"
   workflow_dispatch:
@@ -30,3 +32,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: python scripts/validate_pnex_final_package.py
+      - run: python -m py_compile worldzpad-mainnet/phenix/bind-final-mainnet-inputs.py
