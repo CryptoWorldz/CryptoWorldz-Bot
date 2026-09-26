@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "identityVersion": "WORLDZ-TOKEN-IDENTITY-2026-09-27-A",
+  "identityVersion": "WORLDZ-TOKEN-IDENTITY-2026-09-27-C",
   "launchOrder": 2,
   "name": "REVIVE",
   "symbol": "RVIV",
@@ -14,7 +14,7 @@
   "x": "https://x.com/CryptoWorldzX",
   "telegram": "https://t.me/CryptoWLDZ",
   "explorer": "https://solscan.io/token/DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
-  "imageStatus": "Canonical public raster image URL has not yet been reconciled in the repository; no replacement image is guessed here.",
+  "imageStatus": "CANONICAL_ONCHAIN_METADATA_IMAGE_RECONCILED",
   "supply": {
     "fixed": 200000000,
     "currentOnChain": 200000000,
@@ -43,7 +43,7 @@
     "solscan": "TOKEN_PROFILE_RECONCILIATION_PENDING"
   },
   "official": true,
-  "lastUpdated": "2026-09-27T06:00:00+10:00",
+  "lastUpdated": "2026-09-27T06:35:00+10:00",
   "links": {
     "officialToken": "https://launchpad.cryptoworldz.xyz/rviv/",
     "verification": "https://launchpad.cryptoworldz.xyz/rviv/verify/",
@@ -61,5 +61,7 @@
     "identityRegistry": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-tokens.json",
     "tokenList": "https://launchpad.cryptoworldz.xyz/tokenlist.json",
     "platformPack": "https://launchpad.cryptoworldz.xyz/rviv/platform-submission-pack.json"
-  }
+  },
+  "image": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/rviv/dcaa3f79-7c84-45ed-bab7-8466f3f8a435.jpg",
+  "logoURI": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/rviv/dcaa3f79-7c84-45ed-bab7-8466f3f8a435.jpg"
 }

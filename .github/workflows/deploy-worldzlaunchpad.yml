@@ -610,6 +610,7 @@ jobs:
         shell: python
         run: |
           import json,time,urllib.request,urllib.error,traceback
+          from pathlib import Path
           base='https://launchpad.cryptoworldz.xyz'
           registry='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register'
           def get(url):
@@ -647,6 +648,8 @@ jobs:
                   reg_code,reg_body=get(registry+'?verify=public-v6')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
                   tokenlist=json.loads(tokenlist_body); identity=json.loads(identity_body); rviv_meta=json.loads(rviv_meta_body)
+                  local_identity=json.loads(Path('worldzpad-mainnet/token-identity/worldz-token-registry.v1.json').read_text())
+                  assert identity==local_identity, 'LIVE_CANONICAL_REGISTRY_MISMATCH'
 
                   assert status==200
                   assert 'PUBLIC TOKEN LAUNCHPAD' in body
@@ -721,23 +724,32 @@ jobs:
                   assert wldz_cfg['execution']['publicCreatorGate'] is False
                   # Canonical identity must survive the actual Hostinger deployment.
                   assert tokenlist_code==200 and identity_code==200
-                  listed={t['symbol']:t for t in tokenlist['tokens']}
-                  assert listed['WLDZ']['name']=='WORLDZ'
-                  assert listed['WLDZ']['address']=='AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U'
-                  assert listed['RVIV']['name']=='REVIVE'
-                  assert listed['RVIV']['address']=='DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R'
                   registry={t['symbol']:t for t in identity['tokens']}
-                  assert registry['WLDZ']['name']=='WORLDZ' and registry['WLDZ']['symbol']=='WLDZ'
-                  assert registry['RVIV']['name']=='REVIVE' and registry['RVIV']['symbol']=='RVIV'
-                  assert registry['PNEX']['canonicalMint'] is None
-                  assert registry['MRCL']['canonicalMint'] is None
+                  listed={t['symbol']:t for t in tokenlist['tokens']}
+                  live_tokens=[t for t in identity['tokens'] if t.get('lifecycle')=='LIVE']
+                  reserved=[t for t in identity['tokens'] if t.get('lifecycle') in ('PRELAUNCH','PLANNED')]
+                  assert all(t.get('canonicalMint') is None and t.get('decimals') is None for t in reserved)
+                  assert set(listed)=={t['symbol'] for t in live_tokens}
+                  for t in live_tokens:
+                      p=listed[t['symbol']]
+                      assert p['name']==t['name'] and p['symbol']==t['symbol']
+                      assert p['address']==t['canonicalMint'] and p['decimals']==t['decimals']
+                      assert p['chainId']==t['chainId'] and p['logoURI']==t['image']
+                      meta_code,meta_body=get(base+f"/{t['slug']}/token-metadata.json?verify=identity-v2")
+                      assert meta_code==200
+                      meta=json.loads(meta_body)
+                      assert meta['name']==t['name'] and meta['symbol']==t['symbol']
+                      assert meta['address']==t['canonicalMint'] and meta['decimals']==t['decimals']
+                      assert meta['image']==t['image'] and meta['logoURI']==t['image']
+                      pack_code,pack_body=get(base+f"/{t['slug']}/platform-submission-pack.json?verify=identity-v2")
+                      assert pack_code==200
+                      ci=json.loads(pack_body)['canonicalIdentity']
+                      assert ci['name']==t['name'] and ci['symbol']==t['symbol']
+                      assert ci['mint']==t['canonicalMint'] and ci['decimals']==t['decimals']
+                      assert ci['image']==t['image']
                   assert rviv_code==200 and 'REVIVE' in rviv_body and 'RVIV' in rviv_body
-                  assert 'DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R' in rviv_body
                   assert rviv_verify_code==200 and 'REVIVE (RVIV)' in rviv_verify_body
-                  assert rviv_meta_code==200
-                  assert rviv_meta['name']=='REVIVE' and rviv_meta['symbol']=='RVIV'
-                  assert rviv_meta['address']=='DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R'
-                  assert rviv_meta['decimals']==6
+                  assert rviv_meta_code==200 and rviv_meta['name']=='REVIVE' and rviv_meta['symbol']=='RVIV'
                   campaign_json=json.loads(campaign_json_body)
                   assert campaign_code==200 and 'WorldzLaunchPad™ + Command Centre MAX™' in campaign_body
                   assert '100,000 WLDZ' in campaign_body and '139' in campaign_body

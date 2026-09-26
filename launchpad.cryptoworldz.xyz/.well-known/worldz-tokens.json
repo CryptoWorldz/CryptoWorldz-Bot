@@ -1,5 +1,5 @@
 {
-  "version": "WORLDZ-TOKEN-IDENTITY-2026-09-27-B",
+  "version": "WORLDZ-TOKEN-IDENTITY-2026-09-27-C",
   "status": "CANONICAL_IDENTITY_REGISTRY",
   "rule": "This file is the single source of truth for WorldzLaunchPad token identity. Unknown or unverified values remain null/PENDING and are never guessed. Public token metadata and token lists must match this registry exactly.",
   "tokens": [
@@ -43,7 +43,8 @@
         "jupiterTokenApiNameSymbol": "EMPTY",
         "jupiterIcon": "PRESENT",
         "action": "VRFD_METADATA_UPDATE_REQUIRED"
-      }
+      },
+      "lifecycle": "LIVE"
     },
     {
       "launchOrder": 2,
@@ -89,7 +90,8 @@
         "jupiterTokenApiNameSymbol": "EMPTY",
         "jupiterIcon": "PRESENT",
         "action": "VRFD_METADATA_UPDATE_REQUIRED"
-      }
+      },
+      "lifecycle": "LIVE"
     },
     {
       "launchOrder": 3,
@@ -107,7 +109,8 @@
       "freezeAuthority": null,
       "image": null,
       "website": "https://launchpad.cryptoworldz.xyz/phenix/",
-      "rule": "Do not publish a contract address, token-list entry or buy route until the final mainnet mint is confirmed."
+      "rule": "Do not publish a contract address, token-list entry or buy route until the final mainnet mint is confirmed.",
+      "lifecycle": "PRELAUNCH"
     },
     {
       "launchOrder": 4,
@@ -125,7 +128,8 @@
       "freezeAuthority": null,
       "image": null,
       "website": null,
-      "rule": "Identity is reserved only. No contract address, token-list entry or market data may be published before mainnet creation is confirmed."
+      "rule": "Identity is reserved only. No contract address, token-list entry or market data may be published before mainnet creation is confirmed.",
+      "lifecycle": "PLANNED"
     }
   ],
   "requiredForEveryFutureWorldzLaunch": [
@@ -154,10 +158,12 @@
     "verificationStatus"
   ],
   "releaseRules": [
+    "Every registry record must declare an explicit lifecycle. Unknown lifecycle values fail validation.",
+    "LIVE Solana tokens require a real 32-byte base58 public key, exact name/symbol/decimals, canonical image and matching public metadata/submission pack.",
+    "PRELAUNCH and PLANNED tokens must keep canonicalMint and decimals null until the actual mainnet mint is confirmed.",
     "A live token name must never fall back to a mint-address prefix on any Worldz-owned surface.",
-    "No live token enters the public token list until name, symbol, mint and decimals match the canonical registry.",
-    "A prelaunch token must keep canonicalMint null until the actual mainnet mint is confirmed.",
+    "No live token enters the public token list until registry, metadata, submission pack and token list agree.",
     "Unknown values stay null or PENDING; they are never invented.",
-    "Every launch must pass scripts/validate_worldz_token_identity.py before production deployment."
+    "Every production deployment must execute scripts/validate_worldz_token_identity.py before upload."
   ]
 }
