@@ -1,0 +1,33 @@
+name: Audit Worldz Mainnet Readiness
+
+on:
+  pull_request:
+    paths:
+      - "launchpad.cryptoworldz.xyz/platform-config.json"
+      - "launchpad.cryptoworldz.xyz/treasury-policy.json"
+      - "launchpad.cryptoworldz.xyz/mainnet/**"
+      - "worldzpad-omnichain/fee-policy.v1.json"
+      - "scripts/audit_worldz_mainnet_readiness.mjs"
+      - ".github/workflows/audit-worldz-mainnet-readiness.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Read live mainnet gate and treasury proof
+        run: node scripts/audit_worldz_mainnet_readiness.mjs
+      - name: Upload readiness proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldz-mainnet-readiness
+          path: artifacts/worldz-mainnet-readiness.json
+          retention-days: 14
