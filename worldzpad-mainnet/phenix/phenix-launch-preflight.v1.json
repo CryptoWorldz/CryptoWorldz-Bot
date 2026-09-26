@@ -129,6 +129,8 @@
     "all 250,000,000 PNEX remain assigned with no hidden or unclassified supply",
     "PHENIX Chance recipient register validates and only approved recipients are exported",
     "Worldz Universal FlyWheel 30-day cycle validator passes and coverage registry is integrated",
+    "Worldz LinkedAsset developer standard is available to all launches with verified-asset and opt-in controls",
+    "Worldz OmniBuildz cross-chain LP lane passes policy validation and remains inside the existing 19% FlyWheel",
     "Worldz ProofBurn builder passes static/self-test and a disposable devnet burn proves BurnChecked, supply reduction and receipt reconciliation",
     "FlyWheel builder/team grants enforce 90-day cliff and 24-month vesting",
     "PHENIX FlyWheel 90-day hold and 48 x 30-day allowance schedule is time-enforced and proven",
@@ -199,6 +201,15 @@
         "liquidityRuleReference": "liquidity.additionalLiquidityRule"
       },
       {
+        "id": "omni_cross_chain_lp_development",
+        "name": "Worldz OmniBuildz™",
+        "purpose": "Fund governed cross-chain LP development, chain-native adapters, verified bridge/wrapper integrations, Worldz CrossPair/Omnichain development and LinkedAsset pair infrastructure from the existing PHENIX FlyWheel.",
+        "policyReference": "worldzpad-mainnet/flywheel/worldz-omnibuildz.v1.json",
+        "fixedPercentOfFlyWheel": null,
+        "newPnexSupplyCreated": false,
+        "cycleApprovalRequired": true
+      },
+      {
         "id": "permanent_burn",
         "purpose": "Permanently remove approved PNEX from supply using a publicly verifiable burn transaction.",
         "irreversible": true,
@@ -242,7 +253,8 @@
         "vesting and lock infrastructure",
         "fee-router and accounting proof",
         "Worldz Proof and transparency tooling",
-        "community education and verified contributor systems"
+        "community education and verified contributor systems",
+        "Worldz OmniBuildz cross-chain LP and LinkedAsset infrastructure"
       ]
     }
   },
@@ -325,5 +337,22 @@
     "extraTraderFeeRequired": false,
     "sharedBenefitRequired": true,
     "tokenSpecificBurnRequiresManifestAndAuthority": true
+  },
+  "linkedAssets": {
+    "brand": "Worldz LinkedAsset™",
+    "policyReference": "worldzpad-mainnet/linked-assets/worldz-linked-asset.v1.json",
+    "availableToAllWorldzLaunchPadDevelopers": true,
+    "capabilities": [
+      "swap",
+      "pair",
+      "omni_pair",
+      "build",
+      "support",
+      "proof"
+    ],
+    "externalPartnershipClaimRequiresCounterpartyOptIn": true,
+    "userDirectedSwapWithoutPartnershipClaimAllowedForVerifiedPublicAssets": true,
+    "automaticMarketBuy": false,
+    "mainnetExecutionEnabled": false
   }
 }
