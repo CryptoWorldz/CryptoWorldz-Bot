@@ -1,0 +1,35 @@
+{
+  "version": "2026-09-26",
+  "programs": [
+    {
+      "id": "rviv-legacy",
+      "name": "REVIVE Legacy Revival",
+      "pathway": "CryptoWorldz",
+      "status": "PREPARING",
+      "reward": "RVIV pool: 20,000,000 tokens across the recorded 216 eligible wallets",
+      "eligibility": "Existing recorded snapshot entitlement; exact wallet and amount must match the approved ledger.",
+      "proof": "Wallet signature against the published claim challenge after launch; no seed phrase or token transfer.",
+      "destination": "https://launchpad.cryptoworldz.xyz/legacy-proof/"
+    },
+    {
+      "id": "rviv-devcity",
+      "name": "DevCity™ 100",
+      "pathway": "CryptoWorldz",
+      "status": "RECRUITING",
+      "reward": "Planned 200,000 RVIV per approved seat; 100 seats maximum",
+      "eligibility": "Accepted DevCity participation, developer evidence and verified Solana wallet association. Public candidate wallets are not approved seats.",
+      "proof": "Program approval and signed wallet challenge once a claim flow is published.",
+      "destination": "https://launchpad.cryptoworldz.xyz/developers/"
+    },
+    {
+      "id": "community-support",
+      "name": "Community Support",
+      "pathway": "OneWorldz / DonateWorldz",
+      "status": "EXPLORE",
+      "reward": "Support varies by the specific community project; no token reward is promised",
+      "eligibility": "Each project sets its own eligibility and verification process.",
+      "proof": "Follow the chosen project's published support pathway; wallet ownership is not required for ordinary donations.",
+      "destination": "https://donateworldz.com/"
+    }
+  ]
+}
