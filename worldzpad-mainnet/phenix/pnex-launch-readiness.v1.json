@@ -1,28 +1,123 @@
 {
   "schema": "PNEX-LAUNCH-READINESS-V1",
-  "version": "PNEX-READINESS-2026-09-26-A",
+  "version": "PNEX-READINESS-2026-09-26-B",
   "token": "PNEX",
   "mainnetExecutionEnabled": false,
   "gates": [
-    {"id":"allocation","status":"PASS","proof":"phenix-launch-preflight.v1.json","detail":"250,000,000 PNEX / 100% assigned; 0 unassigned"},
-    {"id":"universal_flywheel","status":"PASS_POLICY","proof":"../flywheel/worldz-universal-flywheel.v1.json","detail":"30-day Universal Cycle + No Token Left Behind policy built"},
-    {"id":"linked_asset_omnibuildz","status":"PASS_POLICY","proof":"../linked-assets/worldz-linked-asset.v1.json","detail":"LinkedAsset available to developers; OmniBuildz is inside existing 19% FlyWheel"},
-    {"id":"vesting_policy","status":"PASS_STATIC","proof":"phenix-streamflow-vesting.v1.json","detail":"Streamflow-compatible non-cancellable/non-transferable schedules defined; SDK/on-chain proof still required"},
-    {"id":"liquidity_policy","status":"PASS_STATIC","proof":"pnex-staged-liquidity.v1.json","detail":"5% genesis + 40% staged reserve; +5% quote commitment rule; 100% permanent LP-lock target"},
-    {"id":"fee_router","status":"PASS_STATIC","proof":"pnex-fee-router.v1.json","detail":"Actual-receipt 51/17/15/8.5/8.5 cumulative accounting built"},
-    {"id":"purple_diamond_handz","status":"PASS_POLICY","proof":"pnex-purple-diamond-handz.v1.json","detail":"1% claim-vault policy defined; no old candidate wallet is auto-approved"},
-    {"id":"phenix_chance_recipients","status":"BLOCKED","proof":"phenix_chance.py","detail":"Approved recipient register and wallet-ownership proofs are not complete"},
-    {"id":"canonical_mint","status":"BLOCKED","proof":"pnex-token-identity.v1.json","detail":"Canonical PNEX mainnet mint does not yet exist"},
-    {"id":"approved_logo_uri","status":"BLOCKED","proof":"pnex-token-identity.v1.json","detail":"No approved PHENIX token image URI is currently locked in the build"},
-    {"id":"genesis_vault_addresses","status":"BLOCKED","proof":"phenix-launch-preflight.v1.json","detail":"Liquidity, FlyWheel, developer vesting, Chance and legacy-claim destinations require final addresses/program accounts"},
-    {"id":"genesis_sol_funding","status":"BLOCKED","proof":"pnex-staged-liquidity.v1.json","detail":"Genesis SOL amount and derived opening price require owner-funded final configuration"},
-    {"id":"devnet_vesting","status":"BLOCKED","proof":"phenix-streamflow-vesting.v1.json","detail":"Create/read-back proof of disposable Streamflow vesting contract required"},
-    {"id":"devnet_proofburn","status":"BLOCKED","proof":"prepare-pnex-burn.mjs","detail":"Disposable burn must prove confirmed supply reduction and Worldz Proof receipt"},
-    {"id":"devnet_pool_lock_fee","status":"BLOCKED","proof":"pnex-staged-liquidity.v1.json","detail":"Disposable 5% pool must prove 75 bps, dynamic fee OFF, permanent lock, first swap and fee claim"},
-    {"id":"router_receipt_reconciliation","status":"BLOCKED","proof":"pnex-fee-router.v1.json","detail":"Actual claimed fee receipt must reconcile before routing execution"},
-    {"id":"multisig","status":"BLOCKED","proof":"phenix-launch-preflight.v1.json","detail":"Final treasury/FlyWheel/program authorities must satisfy Worldz multisig policy"},
-    {"id":"security_accounting_legal","status":"BLOCKED","proof":"phenix-launch-preflight.v1.json","detail":"Release runbooks and applicable legal/regulatory gate remain required"},
-    {"id":"human_mainnet_authorization","status":"BLOCKED","proof":"phenix-launch-preflight.v1.json","detail":"JayJayTeamDev final transaction review/signing authorization required"}
+    {
+      "id": "allocation",
+      "status": "PASS",
+      "proof": "phenix-launch-preflight.v1.json",
+      "detail": "250,000,000 PNEX / 100% assigned; 0 unassigned"
+    },
+    {
+      "id": "universal_flywheel",
+      "status": "PASS_POLICY",
+      "proof": "../flywheel/worldz-universal-flywheel.v1.json",
+      "detail": "30-day Universal Cycle + No Token Left Behind policy built"
+    },
+    {
+      "id": "linked_asset_omnibuildz",
+      "status": "PASS_POLICY",
+      "proof": "../linked-assets/worldz-linked-asset.v1.json",
+      "detail": "LinkedAsset available to developers; OmniBuildz is inside existing 19% FlyWheel"
+    },
+    {
+      "id": "vesting_policy",
+      "status": "PASS_STATIC",
+      "proof": "phenix-streamflow-vesting.v1.json",
+      "detail": "Streamflow-compatible non-cancellable/non-transferable schedules defined; SDK/on-chain proof still required"
+    },
+    {
+      "id": "liquidity_policy",
+      "status": "PASS_STATIC",
+      "proof": "pnex-staged-liquidity.v1.json",
+      "detail": "5% genesis + 40% staged reserve; +5% quote commitment rule; 100% permanent LP-lock target"
+    },
+    {
+      "id": "fee_router",
+      "status": "PASS_STATIC",
+      "proof": "pnex-fee-router.v1.json",
+      "detail": "Actual-receipt 51/17/15/8.5/8.5 cumulative accounting built"
+    },
+    {
+      "id": "purple_diamond_handz",
+      "status": "PASS_POLICY",
+      "proof": "pnex-purple-diamond-handz.v1.json",
+      "detail": "1% claim-vault policy defined; no old candidate wallet is auto-approved"
+    },
+    {
+      "id": "phenix_chance_vault",
+      "status": "PASS_POLICY",
+      "proof": "pnex-phenix-chance-vault.v1.json",
+      "detail": "Full 62.5M / 25% is classified in a protected Chance Vault; unknown recipients do not block genesis"
+    },
+    {
+      "id": "canonical_mint",
+      "status": "BLOCKED",
+      "proof": "pnex-token-identity.v1.json",
+      "detail": "Canonical PNEX mainnet mint does not yet exist"
+    },
+    {
+      "id": "approved_logo_uri",
+      "status": "BLOCKED",
+      "proof": "pnex-token-identity.v1.json",
+      "detail": "No approved PHENIX token image URI is currently locked in the build"
+    },
+    {
+      "id": "genesis_vault_addresses",
+      "status": "BLOCKED",
+      "proof": "phenix-launch-preflight.v1.json",
+      "detail": "Liquidity, FlyWheel, developer vesting, Chance and legacy-claim destinations require final addresses/program accounts"
+    },
+    {
+      "id": "genesis_sol_funding",
+      "status": "BLOCKED",
+      "proof": "pnex-staged-liquidity.v1.json",
+      "detail": "Genesis SOL amount and derived opening price require owner-funded final configuration"
+    },
+    {
+      "id": "devnet_vesting",
+      "status": "BLOCKED",
+      "proof": "phenix-streamflow-vesting.v1.json",
+      "detail": "Create/read-back proof of disposable Streamflow vesting contract required"
+    },
+    {
+      "id": "devnet_proofburn",
+      "status": "BLOCKED",
+      "proof": "prepare-pnex-burn.mjs",
+      "detail": "Disposable burn must prove confirmed supply reduction and Worldz Proof receipt"
+    },
+    {
+      "id": "devnet_pool_lock_fee",
+      "status": "BLOCKED",
+      "proof": "pnex-staged-liquidity.v1.json",
+      "detail": "Disposable 5% pool must prove 75 bps, dynamic fee OFF, permanent lock, first swap and fee claim"
+    },
+    {
+      "id": "router_receipt_reconciliation",
+      "status": "BLOCKED",
+      "proof": "pnex-fee-router.v1.json",
+      "detail": "Actual claimed fee receipt must reconcile before routing execution"
+    },
+    {
+      "id": "multisig",
+      "status": "BLOCKED",
+      "proof": "phenix-launch-preflight.v1.json",
+      "detail": "Final treasury/FlyWheel/program authorities must satisfy Worldz multisig policy"
+    },
+    {
+      "id": "security_accounting_legal",
+      "status": "BLOCKED",
+      "proof": "phenix-launch-preflight.v1.json",
+      "detail": "Release runbooks and applicable legal/regulatory gate remain required"
+    },
+    {
+      "id": "human_mainnet_authorization",
+      "status": "BLOCKED",
+      "proof": "phenix-launch-preflight.v1.json",
+      "detail": "JayJayTeamDev final transaction review/signing authorization required"
+    }
   ],
   "releaseRule": "Mainnet launch is permitted only when every gate is PASS or PASS_ONCHAIN and mainnetExecutionEnabled is explicitly switched by a separately reviewed release commit."
 }
