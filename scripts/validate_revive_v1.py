@@ -70,7 +70,23 @@ assert six_dev_distribution["recipientCount"] == len(six_dev_distribution["recip
 assert {x["wallet"] for x in six_dev_distribution["recipients"]} == {x["address"] for x in contract["devAllocation"]["wallets"]}
 assert all(x["amountRaw"] == contract["devAllocation"]["rawUnitsPerWallet"] for x in six_dev_distribution["recipients"])
 assert sum(int(x["amountRaw"]) for x in six_dev_distribution["recipients"]) + int(six_dev_distribution["unassignedRemainderRaw"]) == 30_000_000_000_000
-assert not team_vesting["knownTeam"] and not contract["teamVesting"]["knownTeamWallets"]
+assert len(team_vesting["knownTeam"]) == 2
+assert team_vesting["knownTeam"][0]["name"] == "Stepper"
+assert team_vesting["knownTeam"][0]["percentOfTeamPool"] == 40
+assert team_vesting["knownTeam"][0]["tokens"] == 12_000_000
+assert team_vesting["knownTeam"][1]["name"] == "Savage"
+assert team_vesting["knownTeam"][1]["percentOfTeamPool"] == 15
+assert team_vesting["knownTeam"][1]["tokens"] == 4_500_000
+assert team_vesting["remainingTeamPool"]["tokens"] == 13_500_000
+assert contract["teamVesting"]["ownerDirectedWeights"][0]["percentOfTeamPool"] == 40
+assert contract["teamVesting"]["ownerDirectedWeights"][1]["percentOfTeamPool"] == 15
+assert contract["teamVesting"]["remainingTeamPool"]["tokens"] == 13_500_000
+assert contract["teamVesting"]["recapEdisonProposal"]["requestedTokens"] == 16_000_000
+assert contract["worldzFullBuild"]["owner"] == "JayJayTeamDev"
+assert contract["worldzFullBuild"]["bulkDistributionEngine"] == "WorldzBulkDrop™"
+assert contract["devCity"]["publicCandidatesFound"] == 105
+assert contract["devCity"]["finalRecipientTarget"] == 100
+assert contract["legacyRevival"]["requestedDelivery"] == "BULK_DISTRIBUTE_APPROVED_216_WALLET_ENTITLEMENT_LEDGER"
 assert len(legacy_distribution["payoutExclusionsPendingRecalculation"]) == 2
 assert all(x.get("payoutStatus") == "EXCLUDED_PENDING_RECALCULATION" for x in legacy_distribution["recipients"] if x["wallet"] in legacy_distribution["payoutExclusionsPendingRecalculation"])
 assert equal_legacy["status"] == "PROPOSED_NOT_APPROVED_NOT_SIGNABLE"
@@ -213,7 +229,7 @@ assert "distributes only fee revenue explicitly routed" in legacy_control["sourc
 
 print(
     "REVIVE_V1=PASS supply=200000000 allocation=100 devcity=100 "
-    "new_dev_leads=50 legacy=20000000 magic_fee_bps=75 "
+    "devcity_candidates=105 devcity_final_target=100 legacy_recipients=216 legacy=20000000 team_stepper=40pct team_savage=15pct magic_fee_bps=75 "
     "creator_effective=0.306 referrer_effective=0.102 legacy_effective=0.09 "
     "direct_damm_v2=ON devnet_price_sol=0.000045 mainnet_price=0.000045_owner_approved permanent_lp_lock_target=100 worldz_dependency_gate=RECONCILED legacy_takeover=OFF additional_mainnet_execution=LOCKED"
 )
