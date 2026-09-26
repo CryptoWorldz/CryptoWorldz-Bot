@@ -378,5 +378,92 @@
     },
     "sourceLedger": "docs/WORLDZFULLBUILD-PROJECT-SOURCE-OF-TRUTH.md",
     "updateRule": "Future project-chat decisions marked for incorporation must update the versioned WorldzFullBuild source ledger/contract and must not silently erase superseded decisions."
+  },
+  "projectContinuity": {
+    "status": "INCORPORATED",
+    "continuityStandard": "docs/WORLDZFULLBUILD-PROJECT-CONTINUITY-2026-09-27.md",
+    "scope": "PROJECT_RELEVANT_DECISIONS_AND_LESSONS_ACROSS_WORLDZ_PROJECT_CHATS",
+    "sourceHierarchy": [
+      "CURRENT_OWNER_INSTRUCTION",
+      "WORLDZFULLBUILD_MANIFEST_AND_CONTINUITY_STANDARD",
+      "MASTER_SOURCE_OF_TRUTH",
+      "LIVE_AND_ON_CHAIN_EVIDENCE",
+      "CURRENT_REPOSITORY_MACHINE_READABLE_STATE",
+      "PROJECT_FILES",
+      "OLDER_CONVERSATION_HISTORY"
+    ],
+    "conflictRule": "NEWER_EXPLICIT_OWNER_APPROVAL_SUPERSEDES_OLDER_INCOMPATIBLE_VALUES__NO_SILENT_MERGE",
+    "privacyBoundary": "DO_NOT_COPY_UNRELATED_PRIVATE_PERSONAL_MEDICAL_LEGAL_OR_CREDENTIAL_DATA_INTO_PUBLIC_BUILD_SPEC",
+    "ecosystem": [
+      "OneWorldz",
+      "DonateWorldz",
+      "CryptoWorldz",
+      "PurpleDiamondCrew",
+      "WorldzLaunchPad",
+      "WorldzFullScope",
+      "ZED_LED_Command_Centre_MAX",
+      "WorldzProof"
+    ],
+    "genesisFour": [
+      {
+        "order": 1,
+        "token": "WORLDZ",
+        "symbol": "WLDZ",
+        "supply": 100000000
+      },
+      {
+        "order": 2,
+        "token": "REVIVE",
+        "symbol": "RVIV",
+        "supply": 200000000
+      },
+      {
+        "order": 3,
+        "token": "PHENIX",
+        "symbol": "PNEX",
+        "supply": 250000000
+      },
+      {
+        "order": 4,
+        "token": "MIRACLE",
+        "symbol": "MRCL",
+        "supply": 348000000
+      }
+    ],
+    "fullScopeChains": [
+      "solana",
+      "xrpl",
+      "base",
+      "ethereum",
+      "bnb",
+      "sui",
+      "hyperevm",
+      "robinhood"
+    ],
+    "inheritedStandards": [
+      "FIRST_PARTY_WORLDZ_WALLET_ENTRY",
+      "DELIVERY_TRUTH_STATES",
+      "MAGIC_FEE_75_BPS_WHERE_PROVEN",
+      "51_17_15_8_5_8_5_WORLDZ_CONTROLLED_SPLIT",
+      "LEGACY_FLYWHEEL",
+      "WORLDZ_BULK_DROP",
+      "WORLDZ_LOCK_AND_VEST",
+      "WORLDZ_PROOF",
+      "POPULARITY_AND_GOVERNANCE_SEPARATION",
+      "CHAIN_NATIVE_ADAPTERS",
+      "TOP_100_AND_VISUAL_RELEASE_GATES",
+      "HUMANITARIAN_CRYPTO_PUBLIC_MESSAGING_SEPARATION"
+    ],
+    "preservedBacklog": [
+      "BitWorldz_BTC_REPRESENTATION_PAIR_RAIL",
+      "XRP_wXRP_CROSSPAIR",
+      "DEX_AND_LISTING_INTEGRATIONS",
+      "ANSEM_ASSET_PARTNER_MODULE_CONCEPT",
+      "WORLDZ_LINKS_QR_ALL_DOMAIN_DIRECTORY"
+    ],
+    "legacyMappingItems": [
+      "VERIFY_EXACT_STREAMFLOW_MAPPING_FOR_LMTD_1M_LOCK_UNLOCK_2036_02_22",
+      "VERIFY_OWNER_REPORTED_SEPARATE_5_YEAR_COMMUNITY_LOCK_TOKEN_POSITION_AND_ON_CHAIN_REFERENCE"
+    ]
   }
 }
