@@ -494,6 +494,26 @@ No ecosystem deployment may be described as complete, finished, fixed or fully r
 BUILD INTENT
 Use these controls to progressively realise the cohesive OneWorldz / DonateWorldz / CryptoWorldz / Purple Diamond Crew / WorldzLaunchPad / Worldz / Command Centre ecosystem JayJayTeamDev has repeatedly requested throughout the project.
 
+
+======================================================================
+18. WORLDZFULLBUILD™ WHOLE-PROJECT CONTINUITY — 2026-09-27
+======================================================================
+
+WorldzFullBuild™ is the parent build contract for the connected Worldz ecosystem.
+
+Whole-project continuity standard:
+- docs/WORLDZFULLBUILD-PROJECT-CONTINUITY-2026-09-27.md
+
+Machine-readable parent manifest:
+- worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json
+
+Rule:
+- project-relevant decisions and lessons from prior Worldz Project conversations are inherited through WorldzFullBuild™;
+- newer explicit JayJayTeamDev-approved decisions supersede older incompatible values;
+- do not silently merge superseded economics, token identities, wallet destinations or launch settings;
+- private unrelated personal/medical/legal/credential information is not part of the public build specification;
+- WorldzFullScope™, WorldzLaunchPad™, Command Centre MAX™, chain Worldz sites, legacy revival, Genesis Four tokens, humanitarian surfaces and future Worldz modules inherit the parent standards unless an approved token/chain/site override says otherwise.
+
 ======================================================================
 END OF MASTER SOURCE OF TRUTH
 ======================================================================
