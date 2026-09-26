@@ -223,7 +223,15 @@ jobs:
               if p.is_file()
               and p.suffix.lower() in {'.html','.js','.json','.php','.css'}
               and not p.relative_to(root).parts[0].startswith(('worldz-now','wldz'))
+              # JayJayTeamDev's explicit noindex RVIV signing console is an
+              # owner-only operational route, not a public launch announcement.
+              and p.relative_to(root).parts[0]!='rviv-dev-setup'
           ]
+          owner_route=root/'rviv-dev-setup'
+          for filename in ('index.html','app.js','distribute.html','distribute.js'):
+              assert (owner_route/filename).is_file(), filename
+          for filename in ('index.html','distribute.html'):
+              assert 'noindex,nofollow,noarchive' in (owner_route/filename).read_text()
           for p in public_files:
               text=p.read_text(errors='ignore')
               rel=p.relative_to(root).as_posix()
