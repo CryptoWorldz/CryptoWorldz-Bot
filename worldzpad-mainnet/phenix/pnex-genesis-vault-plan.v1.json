@@ -1,6 +1,6 @@
 {
   "schema": "PNEX-GENESIS-VAULT-PLAN-V1",
-  "version": "PNEX-GENESIS-VAULTS-2026-09-26-A",
+  "version": "PNEX-GENESIS-VAULTS-2026-09-26-B",
   "status": "ADDRESS_BINDING_PENDING__MAINNET_DISABLED",
   "token": {
     "name": "PHENIX",
@@ -18,7 +18,8 @@
       "destinationType": "PROGRAM_OR_MULTISIG_CONTROLLED_CLAIM_VAULT",
       "address": null,
       "directLiquidRecipientAtGenesis": false,
-      "proofRequired": true
+      "proofRequired": true,
+      "governanceClass": "OPERATIONS_5_OF_10"
     },
     {
       "id": "genesis_liquidity",
@@ -28,7 +29,8 @@
       "destinationType": "METEORA_DAMM_V2_POOL",
       "address": null,
       "creatorControlledLpPermanentLockTargetPercent": 100,
-      "proofRequired": true
+      "proofRequired": true,
+      "governanceClass": "PERMANENTLY_LOCKED_LP"
     },
     {
       "id": "staged_liquidity_reserve",
@@ -39,7 +41,8 @@
       "address": null,
       "automaticMarketBuy": false,
       "generalOperationsAllowed": false,
-      "proofRequired": true
+      "proofRequired": true,
+      "governanceClass": "RESERVE_6_OF_9"
     },
     {
       "id": "developer_streamflow_vesting",
@@ -51,7 +54,8 @@
       "genesisLiquidTokens": 0,
       "cancelable": false,
       "transferable": false,
-      "proofRequired": true
+      "proofRequired": true,
+      "governanceClass": "OPERATIONS_5_OF_10"
     },
     {
       "id": "purple_diamond_handz_claim_vault",
@@ -61,7 +65,8 @@
       "destinationType": "PROGRAM_OR_MULTISIG_CONTROLLED_CLAIM_VAULT",
       "address": null,
       "unclaimedRemainLocked": true,
-      "proofRequired": true
+      "proofRequired": true,
+      "governanceClass": "OPERATIONS_5_OF_10"
     },
     {
       "id": "phenix_total_supply_flywheel",
@@ -72,7 +77,8 @@
       "address": null,
       "automaticDistribution": false,
       "automaticBurn": false,
-      "proofRequired": true
+      "proofRequired": true,
+      "governanceClass": "RESERVE_6_OF_9"
     }
   ],
   "reconciliation": {
@@ -82,12 +88,36 @@
     "creatorReceivesFullSupplyFirst": false
   },
   "authorityRules": {
-    "treasuryAndFlyWheel": "2_OF_3_OR_STRONGER_MULTISIG",
-    "programOrUpgradeAuthority": "2_OF_3_OR_STRONGER_MULTISIG_WHERE_APPLICABLE",
+    "operations": {
+      "provider": "Squads v4",
+      "requiredGovernance": "5-of-10",
+      "currentGovernance": "2-of-3",
+      "upgradeRequired": true,
+      "appliesTo": [
+        "phenix_chance_vault",
+        "developer_streamflow_vesting",
+        "purple_diamond_handz_claim_vault"
+      ]
+    },
+    "reserve": {
+      "provider": "Squads v4",
+      "requiredGovernance": "6-of-9",
+      "multisigConfigAddress": null,
+      "deploymentRequired": true,
+      "appliesTo": [
+        "staged_liquidity_reserve",
+        "phenix_total_supply_flywheel",
+        "lp_quote_reserve"
+      ]
+    },
+    "genesisLiquidity": {
+      "authority": "Meteora DAMM v2 program + permanently locked creator-controlled LP position",
+      "removableCreatorLiquidityTargetPercent": 0
+    },
     "mintAuthorityAfterGenesis": null,
     "freezeAuthorityAfterGenesis": null,
     "privateKeysStoredByWorldz": false
   },
-  "bindingRule": "Every null address must be replaced by a verified chain/program address derived from or created during the reviewed launch process. No placeholder address may pass the release gate.",
+  "bindingRule": "Every destination must be bound to the correct governance class. Operations-controlled destinations require the verified 5-of-10 Squads configuration. Reserve destinations require the separate verified 6-of-9 Squads Reserve configuration. No placeholder or 2-of-3 reserve address may pass the PHENIX release gate.",
   "mainnetExecutionEnabled": false
 }
