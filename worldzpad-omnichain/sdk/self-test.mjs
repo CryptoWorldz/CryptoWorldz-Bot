@@ -1,6 +1,7 @@
 import {
   MAGIC_FEE_BPS,
   SUPPORTED_CHAINS,
+  CHAIN_ENVIRONMENTS,
   quoteMagicFee,
   validateLaunchIntent,
   buildPreSignatureDisclosure
@@ -43,6 +44,45 @@ const intent = {
 
 validateLaunchIntent(intent);
 
+const testEnvironmentByChain = {
+  solana: 'devnet',
+  xrpl: 'testnet',
+  base: 'base-sepolia',
+  ethereum: 'sepolia',
+  bnb: 'bsc-testnet',
+  sui: 'devnet',
+  hyperevm: 'hyperevm-testnet',
+  robinhood: 'robinhood-testnet'
+};
+
+for (const chain of SUPPORTED_CHAINS) {
+  const environment = testEnvironmentByChain[chain];
+  if (!CHAIN_ENVIRONMENTS[chain]?.includes(environment)) throw new Error(`missing environment map for ${chain}`);
+  validateLaunchIntent({
+    ...intent,
+    projectId: 'self-test-' + chain,
+    chain,
+    environment,
+    execution: { simulateFirst: true, mainnetReleaseApproved: false }
+  });
+}
+
+let mismatchedEnvironmentRejected = false;
+try {
+  validateLaunchIntent({ ...intent, chain: 'ethereum', environment: 'devnet' });
+} catch {
+  mismatchedEnvironmentRejected = true;
+}
+if (!mismatchedEnvironmentRejected) throw new Error('chain/environment mismatch must fail closed');
+
+let mainnetWithoutApprovalRejected = false;
+try {
+  validateLaunchIntent({ ...intent, chain: 'solana', environment: 'mainnet-beta' });
+} catch {
+  mainnetWithoutApprovalRejected = true;
+}
+if (!mainnetWithoutApprovalRejected) throw new Error('mainnet without explicit release approval must fail closed');
+
 const disclosure = buildPreSignatureDisclosure({
   chain: 'solana',
   venue: 'METEORA_DBC_DEVNET_SELF_TEST',
@@ -55,4 +95,4 @@ const disclosure = buildPreSignatureDisclosure({
 if (disclosure.noHiddenFeeAttestation !== true) throw new Error('hidden fee attestation missing');
 if (disclosure.referrerReceives !== '1020000') throw new Error('referrer disclosure drifted');
 
-console.log('WORLDZ_OMNICHAIN_SDK_SELF_TEST=PASS chains=8 magic_fee_bps=75 split=51/17/15/8.5/8.5 mainnet=OFF');
+console.log('WORLDZ_OMNICHAIN_SDK_SELF_TEST=PASS chains=8 chain_env_pairs=LOCKED magic_fee_bps=75 split=51/17/15/8.5/8.5 mainnet=OFF');

@@ -1,0 +1,47 @@
+name: Validate Worldz Launch Inheritance
+
+on:
+  pull_request:
+    paths:
+      - 'worldzpad-mainnet/launch-inheritance/**'
+      - 'launchpad.cryptoworldz.xyz/inheritance/**'
+      - 'worldzpad-mainnet/token-identity/**'
+      - 'worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json'
+      - 'worldzpad-mainnet/worldz-launch-capability-matrix.v1.json'
+      - 'worldzpad-omnichain/**'
+      - 'launchpad.cryptoworldz.xyz/platform-config.json'
+      - 'scripts/validate_worldz_launch_inheritance.py'
+      - '.github/workflows/validate-worldz-launch-inheritance.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worldzpad-mainnet/launch-inheritance/**'
+      - 'launchpad.cryptoworldz.xyz/inheritance/**'
+      - 'worldzpad-mainnet/token-identity/**'
+      - 'worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json'
+      - 'worldzpad-mainnet/worldz-launch-capability-matrix.v1.json'
+      - 'worldzpad-omnichain/**'
+      - 'launchpad.cryptoworldz.xyz/platform-config.json'
+      - 'scripts/validate_worldz_launch_inheritance.py'
+      - '.github/workflows/validate-worldz-launch-inheritance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate inherited launch contract
+        run: python scripts/validate_worldz_launch_inheritance.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate Omnichain launch intent runtime
+        run: node worldzpad-omnichain/sdk/self-test.mjs

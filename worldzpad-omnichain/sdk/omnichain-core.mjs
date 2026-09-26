@@ -2,6 +2,17 @@ export const SUPPORTED_CHAINS = Object.freeze([
   'solana', 'xrpl', 'base', 'ethereum', 'bnb', 'sui', 'hyperevm', 'robinhood'
 ]);
 
+export const CHAIN_ENVIRONMENTS = Object.freeze({
+  solana: Object.freeze(['devnet', 'mainnet', 'mainnet-beta']),
+  xrpl: Object.freeze(['testnet', 'mainnet']),
+  base: Object.freeze(['base-sepolia', 'mainnet']),
+  ethereum: Object.freeze(['sepolia', 'mainnet']),
+  bnb: Object.freeze(['bsc-testnet', 'mainnet']),
+  sui: Object.freeze(['devnet', 'testnet', 'mainnet']),
+  hyperevm: Object.freeze(['hyperevm-testnet', 'mainnet']),
+  robinhood: Object.freeze(['robinhood-testnet', 'mainnet'])
+});
+
 export const MAGIC_FEE_BPS = 75n;
 export const BPS = 10_000n;
 
@@ -76,12 +87,12 @@ export function validateLaunchIntent(intent) {
     throw new Error('simulateFirst is mandatory');
   }
   const environment = String(intent.environment || '').trim().toLowerCase();
-  const testEnvironments = new Set(['devnet', 'testnet', 'sepolia', 'base-sepolia', 'bsc-testnet', 'hyperevm-testnet', 'robinhood-testnet']);
-  const mainnetAliases = new Set(['mainnet', 'mainnet-beta']);
-  if (!testEnvironments.has(environment) && !mainnetAliases.has(environment)) {
-    throw new Error('environment must be an explicitly allowlisted testnet or recognized mainnet');
+  const allowedForChain = CHAIN_ENVIRONMENTS[intent.chain];
+  if (!allowedForChain || !allowedForChain.includes(environment)) {
+    throw new Error(`environment ${environment || '(missing)'} is not valid for Worldz chain ${intent.chain}`);
   }
-  if (mainnetAliases.has(environment) && intent?.execution?.mainnetReleaseApproved !== true) {
+  const isMainnet = environment === 'mainnet' || environment === 'mainnet-beta';
+  if (isMainnet && intent?.execution?.mainnetReleaseApproved !== true) {
     throw new Error('mainnet requires explicit release approval');
   }
   return true;

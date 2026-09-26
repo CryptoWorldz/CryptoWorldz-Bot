@@ -141,7 +141,7 @@ jobs:
             root/'genesis/index.html',root/'genesis/app.js',
             root/'mint/index.html',root/'mint/app.js',root/'mint/jupiter-mobile.js',
             root/'trust/index.html',root/'trust/app.js',
-            root/'omnichain/index.html',root/'fullscope/index.html',
+            root/'omnichain/index.html',root/'fullscope/index.html',root/'inheritance/index.html',root/'inheritance/contract.json',
             root/'proof-receipt/index.html',root/'.well-known/worldz-proof-receipt.schema.json',root/'schemas/worldz-proof-receipt.v1.json',
             root/'worlddexpush/index.html',root/'worlddexpush/app.js',root/'worlddexpush/jupiter/index.html',root/'worlddexpush/jupiter/package.json',
             root/'bitworldz/index.html',root/'bitworldz/app.js',root/'capabilities/index.html',
@@ -663,6 +663,8 @@ jobs:
                   jup_bridge_code,jup_bridge_body=get(base+'/mint/jupiter-mobile.js?verify=public-v10')
                   trust_code,trust_body=get(base+'/trust/?verify=trust-v2')
                   fullscope_code,fullscope_body=get(base+'/fullscope/?verify=fullscope-v1')
+                  inheritance_code,inheritance_body=get(base+'/inheritance/?verify=inheritance-v1')
+                  inheritance_contract_code,inheritance_contract_body=get(base+'/inheritance/contract.json?verify=inheritance-v1')
                   receipt_code,receipt_body=get(base+'/proof-receipt/?verify=receipt-v1')
                   receipt_schema_code,receipt_schema_body=get(base+'/.well-known/worldz-proof-receipt.schema.json?verify=receipt-v1')
                   receipt_schema_alias_code,receipt_schema_alias_body=get(base+'/schemas/worldz-proof-receipt.v1.json?verify=receipt-v1')
@@ -728,6 +730,9 @@ jobs:
                   assert platform['treasuryStandard']['reserveTreasury']['policy']=='6-of-9'
                   assert platform['treasuryStandard']['reserveTreasury']['maximumRequiredApprovals']==6
                   assert platform['treasuryRouting']['upgradeRequiredBeforeMainnetFeeRouting'] is True
+                  assert platform['launchInheritance']['version']=='WORLDZ-LAUNCH-INHERITANCE-V1'
+                  assert platform['launchInheritance']['appliesToAllWorldzLaunchPadLaunches'] is True
+                  assert platform['launchInheritance']['mainnetExecutionInherited'] is False
 
                   assert dev_code==200 and 'Create Devnet Token' in dev_body
                   assert curve_code==200 and 'Worldz Curve™' in curve_body
@@ -745,6 +750,12 @@ jobs:
                   assert trust_code==200 and 'WORLDZ TRUST ORBIT' in trust_body and 'PROOF' in trust_body
                   assert all(term not in trust_body for term in private_terms)
                   assert fullscope_code==200 and 'WORLDZFULLSCOPE™' in fullscope_body and 'POPULARITY ONLY' in fullscope_body and 'GOVERNANCE ONLY' in fullscope_body
+                  assert inheritance_code==200 and 'WORLDZLAUNCHINHERITANCE™' in inheritance_body.upper()
+                  assert inheritance_contract_code==200
+                  inheritance_contract=json.loads(inheritance_contract_body)
+                  expected_inheritance=json.loads(Path('launchpad.cryptoworldz.xyz/inheritance/contract.json').read_text())
+                  assert inheritance_contract==expected_inheritance, 'LIVE_LAUNCH_INHERITANCE_CONTRACT_MISMATCH'
+                  assert inheritance_contract['executionBoundary']['mainnetGlobalDefault'] is False
                   assert receipt_code==200 and 'WORLDZ PROOF RECEIPT™' in receipt_body
                   assert jup_control_code==200 and 'JUPITER VRFD HANDOFF' in jup_control_body
                   assert jup_package_code==200

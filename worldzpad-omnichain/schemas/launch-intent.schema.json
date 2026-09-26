@@ -4,85 +4,449 @@
   "title": "Worldz Omnichain Launch Intent v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "projectId", "chain", "environment", "token", "creator", "economics", "liquidity", "execution"],
+  "required": [
+    "version",
+    "projectId",
+    "chain",
+    "environment",
+    "token",
+    "creator",
+    "economics",
+    "liquidity",
+    "execution"
+  ],
   "properties": {
-    "version": {"const": "WORLDZ-LAUNCH-INTENT-V1"},
-    "projectId": {"type": "string", "minLength": 1, "maxLength": 128},
-    "chain": {"enum": ["solana", "xrpl", "base", "ethereum", "bnb", "sui", "hyperevm", "robinhood"]},
-    "environment": {"enum": ["devnet", "testnet", "mainnet"]},
+    "version": {
+      "const": "WORLDZ-LAUNCH-INTENT-V1"
+    },
+    "projectId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "chain": {
+      "enum": [
+        "solana",
+        "xrpl",
+        "base",
+        "ethereum",
+        "bnb",
+        "sui",
+        "hyperevm",
+        "robinhood"
+      ]
+    },
+    "environment": {
+      "enum": [
+        "devnet",
+        "testnet",
+        "sepolia",
+        "base-sepolia",
+        "bsc-testnet",
+        "hyperevm-testnet",
+        "robinhood-testnet",
+        "mainnet",
+        "mainnet-beta"
+      ]
+    },
     "token": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "symbol", "decimals", "totalSupply"],
+      "required": [
+        "name",
+        "symbol",
+        "decimals",
+        "totalSupply"
+      ],
       "properties": {
-        "name": {"type": "string", "minLength": 1, "maxLength": 64},
-        "symbol": {"type": "string", "minLength": 1, "maxLength": 16},
-        "decimals": {"type": "integer", "minimum": 0, "maximum": 18},
-        "totalSupply": {"type": "string", "pattern": "^[0-9]+$"},
-        "existingTokenId": {"type": ["string", "null"]},
-        "metadataUri": {"type": ["string", "null"]}
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16
+        },
+        "decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18
+        },
+        "totalSupply": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "existingTokenId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "metadataUri": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     },
     "creator": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["recipient"],
+      "required": [
+        "recipient"
+      ],
       "properties": {
-        "recipient": {"type": "string", "minLength": 1},
-        "displayName": {"type": ["string", "null"]}
+        "recipient": {
+          "type": "string",
+          "minLength": 1
+        },
+        "displayName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     },
     "referral": {
-      "type": ["object", "null"],
+      "type": [
+        "object",
+        "null"
+      ],
       "additionalProperties": false,
-      "required": ["type", "recipient"],
+      "required": [
+        "type",
+        "recipient"
+      ],
       "properties": {
-        "type": {"enum": ["WALLET", "LAUNCHPAD", "INFLUENCER", "TELEGRAM_COMMUNITY", "X_COMMUNITY", "WEBSITE", "DEVELOPER", "API_PARTNER", "WHITE_LABEL_OPERATOR"]},
-        "recipient": {"type": "string", "minLength": 1},
-        "attributionId": {"type": ["string", "null"]}
+        "type": {
+          "enum": [
+            "WALLET",
+            "LAUNCHPAD",
+            "INFLUENCER",
+            "TELEGRAM_COMMUNITY",
+            "X_COMMUNITY",
+            "WEBSITE",
+            "DEVELOPER",
+            "API_PARTNER",
+            "WHITE_LABEL_OPERATOR"
+          ]
+        },
+        "recipient": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attributionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     },
     "economics": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["targetGrossTraderFeeBps", "dynamicFeeRequested"],
+      "required": [
+        "targetGrossTraderFeeBps",
+        "dynamicFeeRequested"
+      ],
       "properties": {
-        "targetGrossTraderFeeBps": {"const": 75},
-        "dynamicFeeRequested": {"const": false},
-        "externalProtocolShareBpsOfGrossFee": {"type": ["integer", "null"], "minimum": 0, "maximum": 10000},
-        "venue": {"type": ["string", "null"]},
-        "quoteAsset": {"type": ["string", "null"]}
+        "targetGrossTraderFeeBps": {
+          "const": 75
+        },
+        "dynamicFeeRequested": {
+          "const": false
+        },
+        "externalProtocolShareBpsOfGrossFee": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "venue": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "quoteAsset": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     },
     "liquidity": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["protectionTarget"],
+      "required": [
+        "protectionTarget"
+      ],
       "properties": {
-        "mode": {"type": ["string", "null"]},
-        "quoteAsset": {"type": ["string", "null"]},
-        "protectionTarget": {"enum": ["PERMANENT_LOCK", "NON_CUSTODIAL_EQUIVALENT", "NATIVE_MARKET_STRUCTURE"]},
-        "targetLockedPercent": {"type": ["number", "null"], "minimum": 0, "maximum": 100}
+        "mode": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "quoteAsset": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "protectionTarget": {
+          "enum": [
+            "PERMANENT_LOCK",
+            "NON_CUSTODIAL_EQUIVALENT",
+            "NATIVE_MARKET_STRUCTURE"
+          ]
+        },
+        "targetLockedPercent": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        }
       }
     },
     "whiteLabel": {
-      "type": ["object", "null"],
+      "type": [
+        "object",
+        "null"
+      ],
       "additionalProperties": false,
       "properties": {
-        "operatorId": {"type": ["string", "null"]},
-        "brand": {"type": ["string", "null"]},
-        "referrerRecipient": {"type": ["string", "null"]}
+        "operatorId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "brand": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "referrerRecipient": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     },
     "execution": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["simulateFirst", "mainnetReleaseApproved"],
+      "required": [
+        "simulateFirst",
+        "mainnetReleaseApproved"
+      ],
       "properties": {
-        "simulateFirst": {"const": true},
-        "mainnetReleaseApproved": {"type": "boolean"},
-        "ownerApprovalReference": {"type": ["string", "null"]}
+        "simulateFirst": {
+          "const": true
+        },
+        "mainnetReleaseApproved": {
+          "type": "boolean"
+        },
+        "ownerApprovalReference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "chain": {
+            "const": "solana"
+          }
+        },
+        "required": [
+          "chain"
+        ]
+      },
+      "then": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "devnet",
+              "mainnet",
+              "mainnet-beta"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chain": {
+            "const": "xrpl"
+          }
+        },
+        "required": [
+          "chain"
+        ]
+      },
+      "then": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "testnet",
+              "mainnet"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chain": {
+            "const": "base"
+          }
+        },
+        "required": [
+          "chain"
+        ]
+      },
+      "then": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "base-sepolia",
+              "mainnet"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chain": {
+            "const": "ethereum"
+          }
+        },
+        "required": [
+          "chain"
+        ]
+      },
+      "then": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "sepolia",
+              "mainnet"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chain": {
+            "const": "bnb"
+          }
+        },
+        "required": [
+          "chain"
+        ]
+      },
+      "then": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "bsc-testnet",
+              "mainnet"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chain": {
+            "const": "sui"
+          }
+        },
+        "required": [
+          "chain"
+        ]
+      },
+      "then": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "devnet",
+              "testnet",
+              "mainnet"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chain": {
+            "const": "hyperevm"
+          }
+        },
+        "required": [
+          "chain"
+        ]
+      },
+      "then": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "hyperevm-testnet",
+              "mainnet"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chain": {
+            "const": "robinhood"
+          }
+        },
+        "required": [
+          "chain"
+        ]
+      },
+      "then": {
+        "properties": {
+          "environment": {
+            "enum": [
+              "robinhood-testnet",
+              "mainnet"
+            ]
+          }
+        }
+      }
+    }
+  ]
 }

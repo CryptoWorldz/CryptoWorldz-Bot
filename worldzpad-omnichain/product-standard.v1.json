@@ -1,11 +1,18 @@
 {
-  "version": "WORLDZ-LAUNCHPAD-PRODUCT-STANDARD-2026-09-24-A",
+  "version": "WORLDZ-LAUNCHPAD-PRODUCT-STANDARD-2026-09-27-A",
   "status": "PRIVATE_BUILD_STANDARD",
   "name": "WorldzLaunchPad™ Best-of-Best Product Standard",
   "experience": {
     "simpleMode": {
       "goal": "A first-time creator can launch without understanding AMMs, bonding curves or bridge mechanics.",
-      "steps": ["TOKEN_DETAILS", "CHAIN_SELECTION", "CREATOR_AND_REFERRER", "FEE_PREVIEW", "SAFETY_PREVIEW", "SIGN"]
+      "steps": [
+        "TOKEN_DETAILS",
+        "CHAIN_SELECTION",
+        "CREATOR_AND_REFERRER",
+        "FEE_PREVIEW",
+        "SAFETY_PREVIEW",
+        "SIGN"
+      ]
     },
     "proMode": {
       "goal": "Advanced creators can select supported venue, curve/market, vesting, liquidity and release options without weakening safety gates."
@@ -93,5 +100,16 @@
     "feeRevenueByRoute": true,
     "holderGrowth": true,
     "dropoffAnalysis": true
+  },
+  "inheritance": {
+    "enabled": true,
+    "contract": "worldzpad-mainnet/launch-inheritance/worldz-launch-inheritance.v1.json",
+    "everyLaunchGetsIdentity": true,
+    "everyLaunchGetsFullScope": true,
+    "everyConfirmedActionGetsProof": true,
+    "everyLiveLaunchGetsPostLaunchMonitoring": true,
+    "chainEnvironmentPairMustMatch": true,
+    "mainnetReleaseIsPerChainAndPerVenue": true,
+    "providerGreenStateMustComeFromProviderEvidence": true
   }
 }

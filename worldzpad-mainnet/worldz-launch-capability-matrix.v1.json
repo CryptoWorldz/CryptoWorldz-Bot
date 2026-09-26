@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-LAUNCH-CAPABILITY-MATRIX-V1",
-  "version": "2026-09-27-A",
+  "version": "2026-09-27-B",
   "name": "WorldzLaunchPad™ Capability Matrix",
   "rule": "A domain, UI or testnet adapter never implies mainnet market-launch capability. Every capability is independently gated and must match platform-config.json.",
   "chains": [
@@ -147,6 +147,11 @@
     }
   ],
   "platformModules": [
+    {
+      "id": "launch-inheritance",
+      "name": "WorldzLaunchInheritance™",
+      "status": "CODE_BUILT__PER_CHAIN_EXECUTION_GATED"
+    },
     {
       "id": "token-identity",
       "name": "Worldz Token Identity Engine™",

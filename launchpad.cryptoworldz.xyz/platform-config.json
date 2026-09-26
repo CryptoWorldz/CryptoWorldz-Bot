@@ -900,5 +900,17 @@
     "automaticVendorPayment": false,
     "dexScreenerGoldenTickerActiveBoostThreshold": 500,
     "partnershipClaimsRequireWrittenProviderApproval": true
+  },
+  "launchInheritance": {
+    "version": "WORLDZ-LAUNCH-INHERITANCE-V1",
+    "name": "WorldzLaunchInheritance™",
+    "status": "CODE_BUILT__PER_CHAIN_EXECUTION_GATED",
+    "publicPage": "/inheritance/",
+    "contract": "/inheritance/contract.json",
+    "appliesToAllWorldzLaunchPadLaunches": true,
+    "chainEnvironmentPairRequired": true,
+    "proofReceiptRequiredAfterConfirmedAction": true,
+    "providerStateNeverSelfApproved": true,
+    "mainnetExecutionInherited": false
   }
 }
