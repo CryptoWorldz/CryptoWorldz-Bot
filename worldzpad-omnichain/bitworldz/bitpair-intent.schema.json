@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://launchpad.cryptoworldz.xyz/schemas/bitpair-intent.v1.schema.json",
+  "title": "BitWorldz BitPair Intent V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "mode",
+    "targetChain",
+    "bitcoinAsset",
+    "economics",
+    "safety"
+  ],
+  "properties": {
+    "version": {
+      "const": "BITWORLDZ-BITPAIR-INTENT-V1"
+    },
+    "mode": {
+      "const": "RESEARCH_ONLY"
+    },
+    "targetChain": {
+      "enum": [
+        "solana",
+        "xrpl",
+        "base",
+        "ethereum",
+        "bnb",
+        "sui",
+        "hyperevm",
+        "robinhood"
+      ]
+    },
+    "bitcoinAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class",
+        "symbol",
+        "assetId",
+        "verificationStatus"
+      ],
+      "properties": {
+        "class": {
+          "enum": [
+            "NATIVE_BTC",
+            "BITCOIN_LAYER_BTC",
+            "WRAPPED_BTC",
+            "BRIDGED_BTC"
+          ]
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16
+        },
+        "assetId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 180
+        },
+        "verificationStatus": {
+          "enum": [
+            "MISSING_ID",
+            "UNVERIFIED_INPUT",
+            "VERIFIED_TESTNET",
+            "VERIFIED_MAINNET"
+          ]
+        }
+      }
+    },
+    "venue": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 120
+    },
+    "economics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetGrossTraderFeeBps",
+        "dynamicFee",
+        "externalBridgeDexAndNetworkFeesSeparate",
+        "worldzControlledSplitPercent"
+      ],
+      "properties": {
+        "targetGrossTraderFeeBps": {
+          "const": 75
+        },
+        "dynamicFee": {
+          "const": false
+        },
+        "externalBridgeDexAndNetworkFeesSeparate": {
+          "const": true
+        },
+        "worldzControlledSplitPercent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "creator",
+            "referrer",
+            "legacyFlywheel",
+            "worldzLaunchPad",
+            "oneWorldzImpact"
+          ],
+          "properties": {
+            "creator": {
+              "const": 51
+            },
+            "referrer": {
+              "const": 17
+            },
+            "legacyFlywheel": {
+              "const": 15
+            },
+            "worldzLaunchPad": {
+              "const": 8.5
+            },
+            "oneWorldzImpact": {
+              "const": 8.5
+            }
+          }
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mainnetExecutionEnabled",
+        "automaticCrossChainMovementEnabled",
+        "worldzCustodiesNativeBitcoin",
+        "exactAssetIdentityRequired",
+        "wrappedOrBridgedMayBeCalledNative"
+      ],
+      "properties": {
+        "mainnetExecutionEnabled": {
+          "const": false
+        },
+        "automaticCrossChainMovementEnabled": {
+          "const": false
+        },
+        "worldzCustodiesNativeBitcoin": {
+          "const": false
+        },
+        "exactAssetIdentityRequired": {
+          "const": true
+        },
+        "wrappedOrBridgedMayBeCalledNative": {
+          "const": false
+        }
+      }
+    }
+  }
+}
