@@ -25,6 +25,10 @@ test("financial intents are preparation-only until an adapter release gate is en
   const intent = buildActionIntent({ actionType: "buy", chainKey: "solana", tokenId: "fixture-token" });
   assert.equal(intent.requiresSignature, true);
   assert.equal(intent.custody, "external-wallet");
+  assert.equal(intent.walletEntryPoint, "first-party-worldz-website");
+  assert.equal(intent.requiresLiveWalletVerification, true);
+  assert.equal(intent.requiresExactTransactionReview, true);
+  assert.equal(intent.requiresSimulation, true);
   assert.equal(intent.autoBroadcast, false);
   assert.equal(intent.mainnetExecutionEnabled, false);
 });
