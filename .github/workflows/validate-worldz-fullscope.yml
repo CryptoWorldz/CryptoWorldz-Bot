@@ -1,0 +1,44 @@
+name: Validate WorldzFullScope
+
+on:
+  pull_request:
+    paths:
+      - 'src/fullscope/**'
+      - 'src/command-centre.js'
+      - 'src/command-registry.js'
+      - 'src/full-runtime-entry.js'
+      - 'src/telegram.js'
+      - 'test/fullscope.test.js'
+      - 'test/command-centre.test.js'
+      - 'test/command-registry.test.js'
+      - 'worldzpad-omnichain/fullscope/**'
+      - 'launchpad.cryptoworldz.xyz/fullscope/**'
+      - 'supabase/migrations/20260926172000_worldz_fullscope_foundation.sql'
+      - 'scripts/validate_worldz_fullscope.py'
+      - '.github/workflows/validate-worldz-fullscope.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static WorldzFullScope contract proof
+        run: python scripts/validate_worldz_fullscope.py
+      - name: Syntax checks
+        run: |
+          node --check src/fullscope/core.js
+          node --check src/fullscope/telegram.js
+          node --check src/command-centre.js
+          node --check src/command-registry.js
+          node --check src/full-runtime-entry.js
+          node --check src/telegram.js
+      - name: Focused Command Centre tests
+        run: node --test test/fullscope.test.js test/command-centre.test.js test/command-registry.test.js
