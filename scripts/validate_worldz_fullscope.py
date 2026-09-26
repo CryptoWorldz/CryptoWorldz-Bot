@@ -10,6 +10,8 @@ registry = (ROOT / "src/command-registry.js").read_text()
 command_centre = (ROOT / "src/command-centre.js").read_text()
 runtime = (ROOT / "src/full-runtime-entry.js").read_text()
 page = (ROOT / "launchpad.cryptoworldz.xyz/fullscope/index.html").read_text()
+mini_html = (ROOT / "public/miniapp/index.html").read_text()
+mini_js = (ROOT / "public/miniapp/app.js").read_text()
 migration = (ROOT / "supabase/migrations/20260926172000_worldz_fullscope_foundation.sql").read_text()
 
 assert contract["schema"] == "WORLDZ-FULLSCOPE-V1"
@@ -51,6 +53,14 @@ assert 'Worldz Votes Centre™' in telegram and 'WorldzGovern™' in telegram
 assert 'POPULARITY ONLY' in page
 assert 'GOVERNANCE ONLY' in page
 assert '160' in page
+assert 'WorldzFullScope™' in mini_html
+assert 'Worldz Votes Centre™' in mini_html and 'POPULARITY ONLY' in mini_html
+assert 'WorldzGovern™ — DAO Governance' in mini_html
+assert 'data-open="worldz-votes"' in mini_html
+assert 'data-open="governance"' in mini_html
+assert 'WorldzGovern™ vote recorded' in mini_js
+assert 'Popularity: Worldz Votes Centre™' in mini_js
+assert 'Governance: WorldzGovern™' in mini_js
 
 assert "worldz_popularity_votes" in migration
 assert "worldz_popularity_sponsored_boosts" in migration
