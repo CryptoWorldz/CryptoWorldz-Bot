@@ -26,12 +26,17 @@ const modal=createAppKit({
 
 let accountState={};
 let solanaProvider=null;
+let appKitState={};
 
 modal.subscribeAccount(state=>{
   accountState=state||{};
 });
 modal.subscribeProviders(state=>{
   solanaProvider=state?.solana||null;
+});
+modal.subscribeState(state=>{
+  appKitState=state||{};
+  window.__WORLDZ_REOWN_STATE__=appKitState;
 });
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -77,6 +82,7 @@ const adapter={
 };
 
 window.__WORLDZ_JUPITER_MOBILE_ADAPTER__=adapter;
+window.__WORLDZ_REOWN_STATE__=appKitState;
 window.dispatchEvent(new CustomEvent('worldz:jupiter-mobile-ready'));
 
 export function resetJupiterMobileConnectionState(){
