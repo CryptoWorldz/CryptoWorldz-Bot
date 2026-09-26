@@ -7,7 +7,7 @@
       "description": "Official WorldzLaunchPad ecosystem token"
     }
   },
-  "timestamp": "2026-09-23T05:00:00Z",
+  "timestamp": "2026-09-26T20:35:00Z",
   "tokens": [
     {
       "chainId": 101,
@@ -20,11 +20,36 @@
         "worldz"
       ],
       "extensions": {
+        "launchOrder": 1,
         "website": "https://launchpad.cryptoworldz.xyz/wldz/",
         "telegram": "https://t.me/CryptoWLDZ",
+        "x": "https://x.com/CryptoWorldzX",
         "description": "WORLDZ (WLDZ) is the canonical WorldzLaunchPad token on Solana, powering the CryptoWorldz ecosystem, community rewards, liquidity, development, charity impact, and future WorldzLaunchPad launches.",
-        "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ"
+        "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+        "identityRegistry": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-tokens.json"
       }
+    },
+    {
+      "chainId": 101,
+      "address": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "symbol": "RVIV",
+      "name": "REVIVE",
+      "decimals": 6,
+      "tags": [
+        "worldz"
+      ],
+      "extensions": {
+        "launchOrder": 2,
+        "website": "https://launchpad.cryptoworldz.xyz/rviv/",
+        "telegram": "https://t.me/CryptoWLDZ",
+        "x": "https://x.com/CryptoWorldzX",
+        "description": "REVIVE (RVIV) is WorldzLaunchPad token #002 on Solana. Fixed supply: 200,000,000 RVIV. Mint and freeze authorities are revoked.",
+        "pool": "YWEMDsd6o3dm8uXNnmnWWU3c1UtFqDUKEMfbQ512i5c",
+        "marketStatus": "POOL_EXISTS__PUBLIC_TRADING_VERIFICATION_PENDING",
+        "imageStatus": "CANONICAL_ONCHAIN_METADATA_IMAGE_RECONCILED",
+        "identityRegistry": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-tokens.json"
+      },
+      "logoURI": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/rviv/dcaa3f79-7c84-45ed-bab7-8466f3f8a435.jpg"
     }
   ]
 }

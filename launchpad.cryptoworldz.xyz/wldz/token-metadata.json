@@ -1,8 +1,12 @@
 {
+  "schemaVersion": "1.0",
+  "identityVersion": "WORLDZ-TOKEN-IDENTITY-2026-09-27-A",
+  "launchOrder": 1,
   "name": "WORLDZ",
   "symbol": "WLDZ",
   "address": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
   "chain": "Solana",
+  "network": "mainnet-beta",
   "chainId": 101,
   "decimals": 6,
   "description": "WORLDZ (WLDZ) is the canonical WorldzLaunchPad token on Solana, powering the CryptoWorldz ecosystem, community rewards, liquidity, development, charity impact, and future WorldzLaunchPad launches.",
@@ -13,16 +17,17 @@
   "telegram": "https://t.me/CryptoWLDZ",
   "explorer": "https://solscan.io/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
   "trading": {
-    "dex": "Meteora",
+    "dex": "Meteora DAMM v2",
     "pool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
-    "quote": "SOL",
+    "quote": "wSOL",
+    "pair": "WLDZ/wSOL",
     "feePercent": 2,
     "feeBps": 200,
     "dynamicFee": false,
     "lpLock": "100% permanent"
   },
   "supply": {
-    "maximum": 100000000,
+    "allocationDesignCeiling": 100000000,
     "currentOnChain": 99999951.002722,
     "mintAuthority": "REVOKED",
     "freezeAuthority": "REVOKED"
@@ -37,7 +42,7 @@
     "solscan": "TOKEN_PROFILE_PENDING"
   },
   "official": true,
-  "lastUpdated": "2026-09-25T11:55:00+10:00",
+  "lastUpdated": "2026-09-27T06:00:00+10:00",
   "links": {
     "officialToken": "https://launchpad.cryptoworldz.xyz/wldz/",
     "verification": "https://launchpad.cryptoworldz.xyz/wldz/verify/",
@@ -54,6 +59,7 @@
     "birdeye": "https://birdeye.so/solana/token/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U"
   },
   "resources": {
+    "identityRegistry": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-tokens.json",
     "manifest": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json",
     "distribution": "https://launchpad.cryptoworldz.xyz/wldz/distribution.json",
     "fees": "https://launchpad.cryptoworldz.xyz/wldz/fees.json",

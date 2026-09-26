@@ -29,6 +29,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Gate production on canonical Worldz token identity
+        run: python scripts/validate_worldz_token_identity.py
+
       - name: Validate public WorldzLaunchPad contract
         shell: python
         run: |
@@ -140,6 +143,9 @@ jobs:
             root/'trust/index.html',root/'trust/app.js',
             root/'omnichain/index.html',root/'technology/index.html',root/'technology.html',
             root/'wldz/index.html',root/'wldz/app.js',root/'wldz/launch-config.json',
+            root/'tokenlist.json',root/'.well-known/worldz-tokens.json',
+            root/'rviv/index.html',root/'rviv/verify/index.html',
+            root/'rviv/token-metadata.json',root/'rviv/platform-submission-pack.json',
             root/'worldz-launch/index.html',root/'worldz-launch/campaign.json',root/'worldz-launch/social-pack.json'
           ]
           for p in required:
@@ -211,8 +217,9 @@ jobs:
           assert 'Worldz Fee Flow' in technology_html
           assert 'WorldzMINT' in technology_html
 
-          banned=[
-            'REVIVE','RVIV','PHENIX','PNEX','MIRACLE','MRCL',
+          # Token names/tickers are intentionally public identity data. Only retired/private
+          # planning terms remain blocked from the generic public surfaces.
+          private_terms=[
             'GENESIS FOUR','Genesis Four','Legacy Loyalty','SolSavewXRP',
             'worldzpad-four-token','FOUR-TOKEN-LAUNCH'
           ]
@@ -236,7 +243,7 @@ jobs:
           for p in public_files:
               text=p.read_text(errors='ignore')
               rel=p.relative_to(root).as_posix()
-              for term in banned:
+              for term in private_terms:
                   # JayJayTeamDev explicitly approved the public validation label
                   # "REVIVE v1 VALIDATION — SUCCESS" on the dedicated X-SAVE page only.
                   if rel=='x-save/index.html' and term=='REVIVE':
@@ -284,7 +291,7 @@ jobs:
           assert 'AuthorityType.MintTokens,null' in genesis_js
           assert 'AuthorityType.FreezeAccount,null' in genesis_js
           assert 'createAssociatedTokenAccountInstruction(owner,ata,vault' in genesis_js
-          assert all(term not in genesis_html and term not in genesis_js for term in banned)
+          assert all(term not in genesis_html and term not in genesis_js for term in private_terms)
           assert platform['worldzMint']['version']=='WORLDZMINT-1'
           assert platform['worldzMint']['status']=='PUBLIC_MAINNET_MINT_BETA'
           assert platform['worldzMint']['platformTokenSupplyTakePercent']==0
@@ -395,7 +402,7 @@ jobs:
           assert 'jupiter' in mint_js.lower()
           assert 'getWallets' in mainnet_js
           assert 'jupiter' in mainnet_js.lower()
-          assert all(term not in mint_html and term not in mint_js for term in banned)
+          assert all(term not in mint_html and term not in mint_js for term in private_terms)
           assert platform['trustOrbit']['version']=='WORLDZ-TRUST-ORBIT-1'
           assert platform['trustOrbit']['status']=='PUBLIC_BETA_LIVE'
           assert platform['trustOrbit']['jupiterIntegration']['officialJupiterProduct'] is False
@@ -405,7 +412,7 @@ jobs:
           assert 'PROOF, NOT PROMISES' in trust_html.upper()
           assert 'Jupiter Signals Integrated'.upper() in trust_html.upper()
           assert 'worldz-trust-orbit' in trust_js
-          assert all(term not in trust_html and term not in trust_js for term in banned)
+          assert all(term not in trust_html and term not in trust_js for term in private_terms)
 
           import re
           assert app.count('})();')==1
@@ -603,6 +610,7 @@ jobs:
         shell: python
         run: |
           import json,time,urllib.request,urllib.error,traceback
+          from pathlib import Path
           base='https://launchpad.cryptoworldz.xyz'
           registry='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register'
           def get(url):
@@ -611,7 +619,7 @@ jobs:
               req=urllib.request.Request(url,headers={'User-Agent':'WorldzLaunchPad-Live-Verify/5.0','Cache-Control':'no-cache, no-store','Pragma':'no-cache','Origin':base})
               with urllib.request.urlopen(req,timeout=25) as r:return r.status,r.read().decode('utf-8','ignore')
           last=''
-          banned=['REVIVE','RVIV','PHENIX','PNEX','MIRACLE','MRCL','GENESIS FOUR','Genesis Four','Legacy Loyalty','SolSavewXRP']
+          private_terms=['GENESIS FOUR','Genesis Four','Legacy Loyalty','SolSavewXRP','worldzpad-four-token','FOUR-TOKEN-LAUNCH']
           for attempt in range(1,7):
               try:
                   status,body=get(base+'/?verify=public-v6')
@@ -629,11 +637,19 @@ jobs:
                   tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
                   wldz_code,wldz_body=get(base+'/wldz/?verify=wldz-v1')
                   wldz_cfg_code,wldz_cfg_body=get(base+'/wldz/launch-config.json?verify=wldz-v1')
+                  tokenlist_code,tokenlist_body=get(base+'/tokenlist.json?verify=identity-v1')
+                  identity_code,identity_body=get(base+'/.well-known/worldz-tokens.json?verify=identity-v1')
+                  rviv_code,rviv_body=get(base+'/rviv/?verify=identity-v1')
+                  rviv_verify_code,rviv_verify_body=get(base+'/rviv/verify/?verify=identity-v1')
+                  rviv_meta_code,rviv_meta_body=get(base+'/rviv/token-metadata.json?verify=identity-v1')
                   campaign_code,campaign_body=get(base+'/worldz-launch/?verify=worldz-launch-v1')
                   campaign_json_code,campaign_json_body=get(base+'/worldz-launch/campaign.json?verify=worldz-launch-v1')
                   status_code,status_body=get(base+'/status.php?verify=public-v6')
                   reg_code,reg_body=get(registry+'?verify=public-v6')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
+                  tokenlist=json.loads(tokenlist_body); identity=json.loads(identity_body); rviv_meta=json.loads(rviv_meta_body)
+                  local_identity=json.loads(Path('worldzpad-mainnet/token-identity/worldz-token-registry.v1.json').read_text())
+                  assert identity==local_identity, 'LIVE_CANONICAL_REGISTRY_MISMATCH'
 
                   assert status==200
                   assert 'PUBLIC TOKEN LAUNCHPAD' in body
@@ -650,7 +666,7 @@ jobs:
                   assert 'Who will be first?' in body
                   assert 'of your collected token fee only' in body
                   assert 'of that fee remains for your project routing' in body
-                  assert all(term not in body for term in banned)
+                  assert all(term not in body for term in private_terms)
 
                   assert platform['publicLaunchPad'] is True
                   assert platform['feePolicy']['platformShareCapPercentOfCollectedProjectFee']==10
@@ -682,15 +698,15 @@ jobs:
                   assert mainnet_code==200 and 'PUBLIC MAINNET ROUTE' in mainnet_body and 'Gate Locked' in mainnet_body and '10% ONLY' in mainnet_body
                   assert base_code==200 and 'WORLDZ EVM FAIR™' in base_body and 'BASE SEPOLIA' in base_body
                   assert genesis_code==200 and 'PRIVATE GENESIS CONSOLE' in genesis_body
-                  assert all(term not in genesis_body for term in banned)
+                  assert all(term not in genesis_body for term in private_terms)
                   assert mint_code==200 and 'WORLDZMINT' in mint_body.upper() and 'FIXED SUPPLY' in mint_body.upper() and 'Jupiter Wallet' in mint_body
-                  assert all(term not in mint_body for term in banned)
+                  assert all(term not in mint_body for term in private_terms)
                   assert jup_bridge_code==200 and '@jup-ag/jup-mobile-adapter@0.0.2' in jup_bridge_body
                   assert platform['walletConnectivity']['reown']['projectId'] in jup_bridge_body
                   assert 'https://launchpad.cryptoworldz.xyz' in jup_bridge_body
-                  assert all(term not in jup_bridge_body for term in banned)
+                  assert all(term not in jup_bridge_body for term in private_terms)
                   assert trust_code==200 and 'WORLDZ TRUST ORBIT' in trust_body and 'PROOF' in trust_body
-                  assert all(term not in trust_body for term in banned)
+                  assert all(term not in trust_body for term in private_terms)
                   assert tech_code==200 and 'WORLDZ TECHNOLOGY & MEANINGS' in tech_body and 'Swap API V2' in tech_body and 'WorldzMINT' in tech_body
                   wldz_cfg=json.loads(wldz_cfg_body)
                   assert wldz_code==200 and 'SOLANA MAINNET • LIVE' in wldz_body
@@ -706,13 +722,41 @@ jobs:
                   assert wldz_cfg['execution']['broadcasted'] is True
                   assert wldz_cfg['execution']['duplicateExecutionDisabled'] is True
                   assert wldz_cfg['execution']['publicCreatorGate'] is False
+                  # Canonical identity must survive the actual Hostinger deployment.
+                  assert tokenlist_code==200 and identity_code==200
+                  registry={t['symbol']:t for t in identity['tokens']}
+                  listed={t['symbol']:t for t in tokenlist['tokens']}
+                  live_tokens=[t for t in identity['tokens'] if t.get('lifecycle')=='LIVE']
+                  reserved=[t for t in identity['tokens'] if t.get('lifecycle') in ('PRELAUNCH','PLANNED')]
+                  assert all(t.get('canonicalMint') is None and t.get('decimals') is None for t in reserved)
+                  assert set(listed)=={t['symbol'] for t in live_tokens}
+                  for t in live_tokens:
+                      p=listed[t['symbol']]
+                      assert p['name']==t['name'] and p['symbol']==t['symbol']
+                      assert p['address']==t['canonicalMint'] and p['decimals']==t['decimals']
+                      assert p['chainId']==t['chainId'] and p['logoURI']==t['image']
+                      meta_code,meta_body=get(base+f"/{t['slug']}/token-metadata.json?verify=identity-v2")
+                      assert meta_code==200
+                      meta=json.loads(meta_body)
+                      assert meta['name']==t['name'] and meta['symbol']==t['symbol']
+                      assert meta['address']==t['canonicalMint'] and meta['decimals']==t['decimals']
+                      assert meta['image']==t['image'] and meta['logoURI']==t['image']
+                      pack_code,pack_body=get(base+f"/{t['slug']}/platform-submission-pack.json?verify=identity-v2")
+                      assert pack_code==200
+                      ci=json.loads(pack_body)['canonicalIdentity']
+                      assert ci['name']==t['name'] and ci['symbol']==t['symbol']
+                      assert ci['mint']==t['canonicalMint'] and ci['decimals']==t['decimals']
+                      assert ci['image']==t['image']
+                  assert rviv_code==200 and 'REVIVE' in rviv_body and 'RVIV' in rviv_body
+                  assert rviv_verify_code==200 and 'REVIVE (RVIV)' in rviv_verify_body
+                  assert rviv_meta_code==200 and rviv_meta['name']=='REVIVE' and rviv_meta['symbol']=='RVIV'
                   campaign_json=json.loads(campaign_json_body)
                   assert campaign_code==200 and 'WorldzLaunchPad™ + Command Centre MAX™' in campaign_body
                   assert '100,000 WLDZ' in campaign_body and '139' in campaign_body
                   assert campaign_json_code==200 and campaign_json['status']=='PUBLIC'
                   assert campaign_json['wldz']['symbol']=='WLDZ'
                   assert campaign_json['wldz']['founding100']['wldzPerQualifiedPosition']==100000
-                  assert all(term not in tech_body for term in banned)
+                  assert all(term not in tech_body for term in private_terms)
                   assert platform['trustOrbit']['version']=='WORLDZ-TRUST-ORBIT-1'
                   assert status_code==200 and live['ok'] is True
                   assert reg_code==200 and public_registry['ok'] is True
@@ -721,7 +765,7 @@ jobs:
                   assert public_registry['founding100']['futureWorldzPoolPercent']==10
                   assert public_registry['founding100']['equalAllocationPerQualifiedPositionPercent']==0.1
 
-                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 worldzmint=1 technology_guide=1 jupiter_mobile_reown=1 confidence_stack=1 registry=1 fee_only_10=1 founding100=1 base_sepolia=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
+                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 token_identity=PASS wldz=WORLDZ rviv=REVIVE future_identity_fail_closed=1 worldzmint=1 technology_guide=1 jupiter_mobile_reown=1 confidence_stack=1 registry=1 fee_only_10=1 founding100=1 base_sepolia=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:

@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Submit canonical WORLDZ URLs to IndexNow
+      - name: Submit canonical Worldz token identity URLs to IndexNow
         shell: bash
         run: |
           set -euo pipefail
@@ -27,9 +27,14 @@ jobs:
               "https://launchpad.cryptoworldz.xyz/wldz/",
               "https://launchpad.cryptoworldz.xyz/wldz/verify/",
               "https://launchpad.cryptoworldz.xyz/.well-known/worldz-token.json",
+              "https://launchpad.cryptoworldz.xyz/.well-known/worldz-tokens.json",
               "https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json",
               "https://launchpad.cryptoworldz.xyz/wldz/listing-verification.json",
               "https://launchpad.cryptoworldz.xyz/wldz/platform-submission-pack.json",
+              "https://launchpad.cryptoworldz.xyz/rviv/",
+              "https://launchpad.cryptoworldz.xyz/rviv/verify/",
+              "https://launchpad.cryptoworldz.xyz/rviv/token-metadata.json",
+              "https://launchpad.cryptoworldz.xyz/rviv/platform-submission-pack.json",
               "https://launchpad.cryptoworldz.xyz/tokenlist.json",
               "https://launchpad.cryptoworldz.xyz/sitemap.xml"
             ]
@@ -39,6 +44,6 @@ jobs:
           cat /tmp/indexnow-response.txt || true
           echo "INDEXNOW_HTTP=$code"
           case "$code" in
-            200|202) echo "INDEXNOW_WORLDZ=PASS" ;;
-            *) echo "INDEXNOW_WORLDZ=FAIL http=$code"; exit 1 ;;
+            200|202) echo "INDEXNOW_WORLDZ_IDENTITY=PASS" ;;
+            *) echo "INDEXNOW_WORLDZ_IDENTITY=FAIL http=$code"; exit 1 ;;
           esac
