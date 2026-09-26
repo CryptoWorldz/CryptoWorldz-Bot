@@ -171,6 +171,17 @@
       "reviveValidationRun": 36272658928,
       "reviveValidationConclusion": "SUCCESS",
       "note": "Trigger WorldzFullScope validator against the current WorldzFullBuild source-of-truth and distribution standards."
+    },
+    "requiredParent": true,
+    "integrationStatus": "REQUIRED_SUBSYSTEM",
+    "masterCommand": "/worldzfullbuild",
+    "fullScopeCommand": "/fullscope",
+    "popularityCommand": "/worldzvotes",
+    "governanceCommand": "/worldzgovern",
+    "capacityContract": {
+      "chainCount": 8,
+      "maxTokensPerChain": 20,
+      "initialTokenEnvironmentCapacity": 160
     }
   }
 }
