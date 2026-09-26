@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05020b">
+  <meta name="description" content="BitWorldz OmniBTC™ — WorldzLaunchPad research build for transparent Bitcoin-paired launch rails across supported chain-native adapters.">
+  <title>BitWorldz OmniBTC™ | WorldzLaunchPad™</title>
+  <link rel="stylesheet" href="/style.css?v=20260925-bitworldz-v1">
+  <style>
+    .bw{max-width:1180px;margin:auto;padding:54px 18px 100px}.hero-bw{position:relative;overflow:hidden;border:1px solid #ff9d1d36;border-radius:28px;padding:clamp(24px,5vw,54px);background:radial-gradient(circle at 82% 22%,#ff9d1d2d,transparent 23%),radial-gradient(circle at 17% 18%,#9f46ff2e,transparent 30%),linear-gradient(135deg,#120611,#06020b 62%,#100603)}
+    .hero-bw:after{content:"₿";position:absolute;right:3%;top:50%;transform:translateY(-50%);font-weight:900;font-size:clamp(10rem,28vw,24rem);line-height:.8;color:#ff9d1d0f;text-shadow:0 0 70px #ff9d1d1c;pointer-events:none}.hero-bw h1{font-size:clamp(3.2rem,8vw,7.5rem);line-height:.86;letter-spacing:-.06em;margin:10px 0 18px;position:relative;z-index:1}.hero-bw h1 span{color:#ff9d1d}.hero-bw p{max-width:820px;position:relative;z-index:1}.hero-bw .actions{position:relative;z-index:1}
+    .truth{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:20px;position:relative;z-index:1}.truth div,.panel,.route-card,.asset-card{border:1px solid #ffffff10;background:#ffffff04;border-radius:16px;padding:15px}.truth small,.eyebrow{display:block;color:#a58caa;text-transform:uppercase;letter-spacing:.12em;font-size:.6rem}.truth b{display:block;margin-top:5px;font-size:.85rem}
+    .panel{margin-top:14px;padding:22px}.panel h2{margin:.2rem 0 .6rem}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.route-card{cursor:pointer;text-align:left;color:#fff;transition:.18s}.route-card:hover,.route-card.active{border-color:#ff9d1d66;transform:translateY(-1px);background:#ff9d1d08}.route-card strong{display:block;font-size:1rem}.route-card small{display:block;color:#8f8296;margin-top:6px}.route-card em{display:inline-block;margin-top:10px;color:#ffb35b;font-style:normal;font-size:.65rem}
+    .asset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.asset-card b{display:block}.asset-card small{color:#8d8093}.asset-card code{display:block;margin-top:8px;font-size:.63rem;color:#bd72ff;word-break:break-word}
+    .builder{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}.field{display:grid;gap:6px;margin:10px 0}.field label{font-size:.68rem;color:#9d8da5}.field select,.field input{width:100%;background:#07030d;color:#fff;border:1px solid #ffffff15;border-radius:12px;padding:12px}.proof{white-space:pre-wrap;word-break:break-word;min-height:270px;background:#030106;border:1px solid #ffffff0d;border-radius:15px;padding:15px;color:#c9bbd0;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.notice{border-left:3px solid #ff9d1d;background:#ff9d1d08;padding:13px;border-radius:8px;color:#aa96a5;margin-top:12px}.ok{color:#66e7ad}.warn{color:#ffd27f}
+    .flow{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.flow span{border:1px solid #ffffff10;border-radius:999px;padding:8px 11px;font-size:.65rem}.flow i{font-style:normal;color:#ff9d1d}.tag{display:inline-flex;border:1px solid #bd72ff35;color:#c99aff;border-radius:999px;padding:7px 10px;font-size:.62rem;margin:3px}
+    @media(max-width:850px){.truth,.grid,.asset-grid,.builder{grid-template-columns:1fr 1fr}}@media(max-width:620px){.truth,.grid,.asset-grid,.builder{grid-template-columns:1fr}.bw{padding-top:30px}.hero-bw:after{right:-8%;opacity:.7}}
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-logo-official" aria-hidden="true"></span><span>WorldzLaunchPad™</span></a>
+  <nav><a href="/">LaunchPad</a><a href="/omnichain/">OmniChain</a><a href="/developers/">Developers</a><a href="/trust/">Proof</a></nav>
+  <button class="wallet-mini" type="button" disabled>Research Build</button>
+</header>
+<main class="bw">
+  <section class="hero-bw">
+    <div class="kicker">BITWORLDZ™ • OMNIBTC™ • WORLDZLAUNCHPAD™</div>
+    <h1>PRICE THE WORLD<br><span>IN BITCOIN.</span></h1>
+    <p class="lead">BitWorldz OmniBTC™ is the Bitcoin-facing launch architecture inside Worldz Omnichain. It is designed to let a supported chain launch a chain-native token against an approved Bitcoin representation while showing exactly what “Bitcoin” means before anybody signs.</p>
+    <div class="actions"><a class="btn primary" href="#builder">Open BitPair Lab</a><a class="btn secondary" href="#matrix">Explore BTCMesh</a><a class="btn ghost" href="/omnichain/">Worldz Omnichain</a></div>
+    <div class="truth">
+      <div><small>Mainnet</small><b>OFF • proof first</b></div>
+      <div><small>Worldz target</small><b>75 bps • disclosed</b></div>
+      <div><small>BTC identity</small><b>Exact asset required</b></div>
+      <div><small>Cross-chain</small><b>No silent bridging</b></div>
+    </div>
+  </section>
+
+  <section class="panel" id="matrix">
+    <span class="eyebrow">BTCMESH™</span><h2>One Bitcoin category. Different chain-native rails.</h2>
+    <p>BitWorldz does not invent one fake universal pool. Every chain + Bitcoin asset + venue combination is its own BitPair™ and its own release gate.</p>
+    <div class="grid" id="route-grid"></div>
+  </section>
+
+  <section class="panel">
+    <span class="eyebrow">BTC PASSPORT™</span><h2>Four asset classes. Never blur them.</h2>
+    <div class="asset-grid">
+      <div class="asset-card"><b>Native BTC</b><small>Actual Bitcoin L1 BTC.</small><code>NATIVE_BTC</code></div>
+      <div class="asset-card"><b>Bitcoin-layer BTC</b><small>Programmable Bitcoin-layer asset with its own security model.</small><code>BITCOIN_LAYER_BTC</code></div>
+      <div class="asset-card"><b>Wrapped BTC</b><small>Tokenized BTC representation on another chain.</small><code>WRAPPED_BTC</code></div>
+      <div class="asset-card"><b>Bridged BTC</b><small>Representation delivered through a bridge/interoperability route.</small><code>BRIDGED_BTC</code></div>
+    </div>
+    <div class="notice"><b>BitWorldz rule:</b> wrapped or bridged BTC is never labelled native BTC. The exact mint, contract or asset ID must be visible in the final BitProof™.</div>
+  </section>
+
+  <section class="panel">
+    <span class="eyebrow">BITPAIR™ PIPELINE</span><h2>Build → disclose → prove → release.</h2>
+    <div class="flow"><span>Select chain</span><i>→</i><span>Select approved BTC asset</span><i>→</i><span>Verify BTC Passport</span><i>→</i><span>Prepare token</span><i>→</i><span>Create TOKEN/BTC market</span><i>→</i><span>Disclose fees</span><i>→</i><span>Testnet / simulate</span><i>→</i><span>BitProof</span><i>→</i><span>Independent release gate</span></div>
+  </section>
+
+  <section class="panel" id="builder">
+    <span class="eyebrow">BITPAIR LAB • SAFE RESEARCH MODE</span><h2>Compose a BitWorldz launch intent.</h2>
+    <div class="builder">
+      <div>
+        <div class="field"><label for="chain">Target chain</label><select id="chain"></select></div>
+        <div class="field"><label for="asset">Bitcoin asset class</label><select id="asset"><option>NATIVE_BTC</option><option>BITCOIN_LAYER_BTC</option><option selected>WRAPPED_BTC</option><option>BRIDGED_BTC</option></select></div>
+        <div class="field"><label for="symbol">BTC quote symbol</label><input id="symbol" value="WBTC" maxlength="16"></div>
+        <div class="field"><label for="asset-id">Contract / mint / asset ID</label><input id="asset-id" placeholder="Required before execution"></div>
+        <div class="field"><label for="venue">Venue / launch adapter</label><input id="venue" placeholder="e.g. Meteora DBC → DAMM v2"></div>
+        <div class="actions"><button class="btn primary" id="build-proof" type="button">Build BitProof Preview</button><button class="btn secondary" id="copy-proof" type="button">Copy JSON</button></div>
+        <div class="notice">This lab generates a research intent only. It does not move BTC, bridge assets, create a pool or enable mainnet execution.</div>
+      </div>
+      <pre class="proof" id="proof"></pre>
+    </div>
+  </section>
+
+  <section class="panel">
+    <span class="eyebrow">WORLDZ ECONOMICS</span><h2>Transparent fee routing — no hidden “Bitcoin premium”.</h2>
+    <p>The BitWorldz target remains 0.75% / 75 bps only where the selected venue can actually support the modeled route. External bridge, protocol, DEX and network costs are shown separately.</p>
+    <div><span class="tag">51% Creator</span><span class="tag">17% Referrer</span><span class="tag">15% Legacy Flywheel</span><span class="tag">8.5% WorldzLaunchPad</span><span class="tag">8.5% OneWorldz Impact</span></div>
+  </section>
+
+  <section class="panel">
+    <span class="eyebrow">BITCOIN-NATIVE EXPANSION</span><h2>Research beyond wrapped Bitcoin.</h2>
+    <div class="grid"><div class="route-card"><strong>Stacks / sBTC</strong><small>Separate Clarity/testnet adapter research lane.</small><em>RESEARCH</em></div><div class="route-card"><strong>Rootstock / rBTC</strong><small>Bitcoin sidechain + EVM-compatible execution research lane.</small><em>RESEARCH</em></div><div class="route-card"><strong>Bitcoin L1</strong><small>Settlement-first. Direct launch primitives require separate proof rather than assumption.</small><em>RESEARCH</em></div></div>
+  </section>
+</main>
+<footer><div><b>BitWorldz OmniBTC™</b> • WorldzLaunchPad™ Bitcoin research rail</div><p>Mainnet execution disabled until chain + asset + venue proof passes.</p></footer>
+<script type="module" src="/bitworldz/app.js?v=20260925-bitworldz-v1"></script>
+</body>
+</html>

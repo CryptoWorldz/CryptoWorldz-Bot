@@ -1,0 +1,53 @@
+name: REVIVE Existing-Pool Read-Only Market Preflight
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - revive-v1-build
+    paths:
+      - 'worldzpad-devnet/revive-party/scripts/09_mainnet_launch_simulation_readonly.mjs'
+      - 'worldzpad-devnet/revive-party/scripts/15_existing_pool_readonly_audit.mjs'
+      - 'worldzpad-devnet/revive-party/scripts/16_existing_pool_buy_simulation_readonly.mjs'
+      - 'worldzpad-mainnet/revive/revive-launch-contract.v1.json'
+      - 'worldzpad-mainnet/revive/revive-direct-damm-v2-existing-mint.v1.json'
+      - 'worldzpad-mainnet/revive/scripts/estimate-mainnet-sol-floor.mjs'
+      - '.github/workflows/revive-mainnet-readonly-preflight.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-devnet/revive-party/scripts/09_mainnet_launch_simulation_readonly.mjs'
+      - 'worldzpad-mainnet/revive/revive-launch-contract.v1.json'
+      - 'worldzpad-mainnet/revive/revive-direct-damm-v2-existing-mint.v1.json'
+      - 'worldzpad-mainnet/revive/scripts/estimate-mainnet-sol-floor.mjs'
+      - '.github/workflows/revive-mainnet-readonly-preflight.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revive-mainnet-readonly-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SOLANA_MAINNET_RPC_URL: ${{ secrets.LEGACY_READ_RPC_URL }}
+      REVIVE_FEE_SPONSOR: Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u
+    defaults:
+      run:
+        working-directory: worldzpad-devnet/revive-party
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Solana + Meteora SDKs
+        run: npm ci --no-audit --no-fund
+      - name: Re-prove direct DAMM v2 static contract
+        run: npm run direct-damm-static
+      - name: Audit occupied Meteora pool — READ ONLY
+        run: node scripts/15_existing_pool_readonly_audit.mjs
+      - name: Simulate hypothetical 0.001 SOL RVIV buy — READ ONLY
+        run: node scripts/16_existing_pool_buy_simulation_readonly.mjs

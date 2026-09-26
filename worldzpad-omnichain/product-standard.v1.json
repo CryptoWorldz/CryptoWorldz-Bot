@@ -1,0 +1,97 @@
+{
+  "version": "WORLDZ-LAUNCHPAD-PRODUCT-STANDARD-2026-09-24-A",
+  "status": "PRIVATE_BUILD_STANDARD",
+  "name": "WorldzLaunchPad™ Best-of-Best Product Standard",
+  "experience": {
+    "simpleMode": {
+      "goal": "A first-time creator can launch without understanding AMMs, bonding curves or bridge mechanics.",
+      "steps": ["TOKEN_DETAILS", "CHAIN_SELECTION", "CREATOR_AND_REFERRER", "FEE_PREVIEW", "SAFETY_PREVIEW", "SIGN"]
+    },
+    "proMode": {
+      "goal": "Advanced creators can select supported venue, curve/market, vesting, liquidity and release options without weakening safety gates."
+    },
+    "plainEnglishErrors": true,
+    "mobileFirst": true
+  },
+  "creatorEconomics": {
+    "recurringTradingRevenue": true,
+    "defaultWorldzControlledSharePercent": 51,
+    "claimDashboard": true,
+    "lifetimeRevenueView": true
+  },
+  "referralEconomics": {
+    "recurringTradingRevenue": true,
+    "defaultWorldzControlledSharePercent": 17,
+    "launchpadToLaunchpad": true,
+    "whiteLabelOperator": true,
+    "apiPartner": true,
+    "referralDashboard": true
+  },
+  "launchProtection": {
+    "antiSniperAdapter": "CHAIN_AND_VENUE_SPECIFIC",
+    "fairLaunchControls": true,
+    "maxWalletOrRateControlsWhereSupported": true,
+    "dynamicFeeDefault": false,
+    "rule": "Protection may not silently replace the locked MagicFee policy; any temporary launch-specific fee must be explicitly disclosed and separately approved."
+  },
+  "liquidity": {
+    "automaticMarketCreation": true,
+    "automaticGraduationWhereVenueSupports": true,
+    "permanentLockTargetWhereSupported": 100,
+    "vestingSupport": true,
+    "stagedLiquiditySupport": true,
+    "proofRequired": true
+  },
+  "distribution": {
+    "vesting": true,
+    "airdrops": true,
+    "devCity": true,
+    "legacyFlywheel": true,
+    "treasuryRoutes": true
+  },
+  "discovery": {
+    "new": true,
+    "trending": true,
+    "graduating": true,
+    "topVolume": true,
+    "verified": true,
+    "chainFilters": true,
+    "externalMarketDiscovery": true,
+    "worldzTerminal": true
+  },
+  "builderPlatform": {
+    "publicApi": true,
+    "sdk": true,
+    "webhooks": true,
+    "whiteLabel": true,
+    "customLaunchPad": true,
+    "partnerBranding": true,
+    "partnerReferralAttribution": true
+  },
+  "automation": {
+    "aiLaunchAssistant": true,
+    "telegramLaunchCommands": true,
+    "socialLaunchEntryPoints": true,
+    "worldzProofAutomation": true,
+    "postLaunchMonitoring": true
+  },
+  "trust": {
+    "preSignatureFeeDisclosure": true,
+    "authorityDisclosure": true,
+    "liquidityProtectionDisclosure": true,
+    "verificationLinks": true,
+    "worldzProof": true,
+    "noHiddenFees": true,
+    "noGuaranteedReturns": true
+  },
+  "analytics": {
+    "creatorFunnel": true,
+    "referralFunnel": true,
+    "launchConversion": true,
+    "chainConversion": true,
+    "volumeByLaunch": true,
+    "feeRevenueByRoute": true,
+    "holderGrowth": true,
+    "dropoffAnalysis": true
+  }
+}

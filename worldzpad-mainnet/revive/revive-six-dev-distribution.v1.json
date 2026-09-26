@@ -1,0 +1,55 @@
+{
+  "version": "REVIVE-SEVEN-DEV-ALLOCATION-2026-09-26-B",
+  "status": "RESERVED_NOT_SENT",
+  "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+  "sourceVault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+  "recipientCount": 7,
+  "totalTokens": 30000000,
+  "recipients": [
+    {
+      "label": "Limited Edition",
+      "wallet": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
+      "amountRaw": "4285714285714",
+      "alsoLegacyEntitled": true
+    },
+    {
+      "label": "Next Big Coin Dev",
+      "wallet": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt",
+      "amountRaw": "4285714285714",
+      "alsoLegacyEntitled": false
+    },
+    {
+      "label": "PdCrew",
+      "wallet": "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j",
+      "amountRaw": "4285714285714",
+      "alsoLegacyEntitled": false
+    },
+    {
+      "label": "Purple Diamond Crew",
+      "wallet": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U",
+      "amountRaw": "4285714285714",
+      "alsoLegacyEntitled": true
+    },
+    {
+      "label": "Purple PDC",
+      "wallet": "G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3",
+      "amountRaw": "4285714285714",
+      "alsoLegacyEntitled": false
+    },
+    {
+      "label": "SolSavewXRP",
+      "wallet": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9",
+      "amountRaw": "4285714285714",
+      "alsoLegacyEntitled": false
+    },
+    {
+      "label": "JayJayTeamDev",
+      "wallet": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+      "amountRaw": "4285714285714",
+      "alsoLegacyEntitled": false
+    }
+  ],
+  "note": "Seven equal Dev shares including JayJayTeamDev. 0.000002 RVIV indivisible dust stays in reserved Dev pool. No token transfer submitted; prove each destination and review exact transaction.",
+  "rawUnitsPerWallet": "4285714285714",
+  "unassignedRemainderRaw": "2"
+}

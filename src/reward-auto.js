@@ -1,5 +1,5 @@
 const AUTO_REFRESH_MS = 60 * 60 * 1000;
-const TEAM_APPROVER_NAMES = new Set(["stepper", "remedy", "savage"]);
+const TEAM_APPROVER_NAMES = new Set(["stepper", "savage"]);
 
 const REWARD_QUEUE_PATTERN = /^\/rewardqueue(?:@\w+)?$/i;
 const REWARD_APPROVE_PATTERN = /^\/rewardapprove(?:@\w+)?(?:\s+(\d+))?$/i;
@@ -116,7 +116,7 @@ async function listNamedApprovers(supabase) {
   const { data: executives, error } = await supabase
     .from("executive_admins")
     .select("telegram_id,display_name,status")
-    .in("display_name", ["Stepper", "Remedy", "Savage"])
+    .in("display_name", ["Stepper", "Savage"])
     .order("display_name", { ascending: true });
   if (error) throw error;
   const ids = (executives || []).map((item) => item.telegram_id);
@@ -235,11 +235,11 @@ function registerAutoKittyRewardSystem({ bot, repository, supabase, config }) {
     const target = String(match && match[1] || "").trim();
     const enabled = String(match && match[2] || "").toLowerCase() === "on";
     if (!target || !match || !match[2]) {
-      return send(msg.chat.id, "❌ Use: /rewardapprover stepper|remedy|savage on|off");
+      return send(msg.chat.id, "❌ Use: /rewardapprover stepper|savage on|off");
     }
     try {
       const executive = await resolveTeamApprover(supabase, target);
-      if (!executive) return send(msg.chat.id, "❌ Reward approval delegation is limited to Stepper, Remedy and Savage.");
+      if (!executive) return send(msg.chat.id, "❌ Reward approval delegation is limited to Stepper and Savage.");
       await repository.setAdminPermission(
         executive.telegram_id,
         "reward.approve",

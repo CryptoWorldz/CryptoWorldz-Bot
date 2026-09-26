@@ -1,0 +1,63 @@
+{
+  "version": "REVIVE-DISTRIBUTION-FUNDING-2026-09-24-A",
+  "asset": "SOL",
+  "purpose": "Transaction fees, account creation/rent requirements and distribution execution only.",
+  "separateFromRVIVAllocation": true,
+  "initialFundingCeilingSol": 1.5,
+  "fundingMethod": "PREFLIGHT_THEN_TOP_UP",
+  "bufferPercent": 25,
+  "targets": [
+    {
+      "role": "DevCity 100 staging",
+      "address": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
+      "initialCeilingSol": 0.25
+    },
+    {
+      "role": "Legacy claim execution reserve",
+      "address": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "initialCeilingSol": 0.4
+    },
+    {
+      "role": "OneWorldz charity distribution",
+      "address": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+      "initialCeilingSol": 0.05
+    },
+    {
+      "role": "INVEST distribution",
+      "address": "Hd3cMfHMHQe4j8xfpnbDkWEgDo4gbrH2eimh6vpxjC37",
+      "initialCeilingSol": 0.05
+    },
+    {
+      "role": "NBC distribution",
+      "address": "PdABvvq4F7YjwsVRq2CCQeBNZTBq5WfkQvn8VmhRY34",
+      "initialCeilingSol": 0.05
+    },
+    {
+      "role": "PDC1 distribution",
+      "address": "4DpR79PKKQXHVZipkvb1fMAfvZNJo7ktfKdkjwrjjqAA",
+      "initialCeilingSol": 0.05
+    },
+    {
+      "role": "Limited distribution",
+      "address": "2turuerVWbeDPRZfK2iixzRnrC6zjbAzHo9NZfww6rFn",
+      "initialCeilingSol": 0.05
+    },
+    {
+      "role": "Dev allocation fanout + team vesting setup",
+      "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+      "initialCeilingSol": 0.2
+    },
+    {
+      "role": "Contingency",
+      "address": "UNASSIGNED_UNTIL_PREFLIGHT",
+      "initialCeilingSol": 0.4
+    }
+  ],
+  "rules": [
+    "Do not blindly send the ceiling amount.",
+    "Calculate current rent exemption and transaction/priority fees immediately before funding.",
+    "Only fund a wallet that must sign or pay for an approved distribution action.",
+    "Watch-only addresses remain no-auto-fund until ownership/control is verified.",
+    "Unused SOL remains separate from token allocations and is returned/reconciled after the distribution wave."
+  ]
+}

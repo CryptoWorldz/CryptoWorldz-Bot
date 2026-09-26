@@ -1,0 +1,84 @@
+{
+  "version": "REVIVE-DIRECT-DAMM-V2-EXISTING-MINT-2026-09-26-B",
+  "status": "MAINNET_PRICE_OWNER_APPROVED__EXECUTION_STILL_GATED",
+  "reason": "Canonical RVIV already exists with mint authority revoked. Meteora DBC pool initialization creates/signs a base mint, so REVIVE must not use the DBC token-creation path.",
+  "canonicalToken": {
+    "name": "REVIVE",
+    "symbol": "RVIV",
+    "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+    "supplyTokens": 200000000,
+    "decimals": 6,
+    "mintAuthority": "REVOKED",
+    "freezeAuthority": "REVOKED",
+    "noSecondMint": true
+  },
+  "route": {
+    "venue": "Meteora DAMM v2",
+    "mode": "DIRECT_CUSTOMIZABLE_POOL__EXISTING_MINT__ONE_SIDED",
+    "quote": "wSOL",
+    "initialBaseLiquidityTokens": 30000000,
+    "initialBaseLiquidityPercentOfSupply": 15,
+    "initialQuoteLiquiditySol": 0,
+    "isLockLiquidity": true,
+    "permanentLockTargetPercent": 100
+  },
+  "pricing": {
+    "devnetFixture": {
+      "priceSolPerRviv": 0.000045,
+      "status": "APPROVED_DISPOSABLE_TEST_FIXTURE",
+      "purpose": "Prove existing-mint one-sided pool mechanics, first-swap behaviour, 75-bps fee behaviour and permanent-lock evidence only."
+    },
+    "mainnet": {
+      "priceSolPerRviv": 0.000045,
+      "status": "OWNER_APPROVED_2026-09-26__FINAL_PREFLIGHT_AND_WALLET_SIGNATURE_REQUIRED",
+      "mayInheritDevnetFixtureAutomatically": false
+    }
+  },
+  "fairFee": {
+    "magicFeeBps": 75,
+    "magicFeePercent": 0.75,
+    "dynamicFee": false,
+    "collectFeeMode": "QUOTE_TOKEN_WHERE_SUPPORTED",
+    "worldzControlledRevenueSplitPercent": {
+      "creator": 51,
+      "referrer": 17,
+      "legacyFlywheel": 15,
+      "worldzLaunchPad": 8.5,
+      "oneWorldzImpact": 8.5,
+      "total": 100
+    },
+    "routingRule": "The 51/17/15/8.5/8.5 split applies only to fee revenue actually controlled/claimed by Worldz after DAMM v2 protocol/referral deductions. Do not assume the former DBC 20% protocol-share model for this direct pool.",
+    "actualProtocolDeduction": "DEVNET_PROOF_REQUIRED",
+    "feeClaimSource": "PERMANENT_LOCKED_POSITION_FEES__DEVNET_PROOF_REQUIRED"
+  },
+  "devnetProof": {
+    "useDisposableMockRvivMint": true,
+    "mockMintMustHaveFixedSupplyTokens": 200000000,
+    "mockMintMustUseDecimals": 6,
+    "mockMintAuthorityMustBeRevokedBeforePoolCreation": true,
+    "mockFreezeAuthorityMustBeRevokedBeforePoolCreation": true,
+    "baseLiquidityTokens": 30000000,
+    "priceSolPerRviv": 0.000045,
+    "required": [
+      "existing mint accepted without mint authority",
+      "one-sided pool created with zero starting quote",
+      "75-bps static base fee stored on-chain",
+      "dynamic fee disabled",
+      "first buy simulation and receipt",
+      "position permanently locked",
+      "locked position remains fee-claimable",
+      "actual protocol/referral deductions measured",
+      "Worldz-controlled claimed fee receipts reconcile before router split"
+    ]
+  },
+  "mainnetGates": {
+    "enabled": false,
+    "openingPriceSelected": true,
+    "currentFundingPreflightRequired": true,
+    "canonicalRvivBalanceProofRequired": true,
+    "exactTransactionSimulationRequired": true,
+    "permanentLockInstructionRequired": true,
+    "feeClaimAndRouterProofRequired": true,
+    "finalOwnerSignatureRequired": true
+  }
+}

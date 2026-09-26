@@ -1,0 +1,95 @@
+name: Deploy REVIVE Rent Recovery Console
+
+on:
+  push:
+    branches:
+      - revive-v1-build
+    paths:
+      - 'launchpad.cryptoworldz.xyz/wldz/rent-recovery/**'
+      - '.github/workflows/deploy-revive-rent-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revive-owner-rent-recovery-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate owner recovery console
+        shell: bash
+        run: |
+          node --check launchpad.cryptoworldz.xyz/wldz/rent-recovery/app.js
+          grep -q 'noindex,nofollow,noarchive' launchpad.cryptoworldz.xyz/wldz/rent-recovery/index.html
+          grep -q 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' launchpad.cryptoworldz.xyz/wldz/rent-recovery/app.js
+          grep -q 'B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN' launchpad.cryptoworldz.xyz/wldz/rent-recovery/app.js
+          grep -q 'SetRentCollector' launchpad.cryptoworldz.xyz/wldz/rent-recovery/app.js
+          echo REVIVE_RENT_RECOVERY_CONSOLE=PASS
+      - name: Deploy only owner recovery console
+        shell: python
+        run: |
+          import os,ssl
+          from ftplib import FTP_TLS,error_perm
+          from pathlib import Path,PurePosixPath
+          local_root=Path('launchpad.cryptoworldz.xyz/wldz/rent-recovery')
+          remote_root='domains/cryptoworldz.xyz/public_html/launchpad/wldz/rent-recovery'
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=40)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def ensure_dir(directory):
+              ftp.cwd('/')
+              for part in PurePosixPath(directory).parts:
+                  if part in ('','/'):continue
+                  try:ftp.cwd(part)
+                  except error_perm:ftp.mkd(part);ftp.cwd(part)
+          count=0
+          for f in sorted(p for p in local_root.rglob('*') if p.is_file()):
+              rel=f.relative_to(local_root).as_posix()
+              remote=PurePosixPath(remote_root)/rel
+              ensure_dir(str(remote.parent))
+              with f.open('rb') as h:ftp.storbinary(f'STOR {remote.name}',h,blocksize=262144)
+              count+=1
+          try:ftp.quit()
+          except Exception:ftp.close()
+          print(f'REVIVE_RENT_RECOVERY_DEPLOY=PASS files={count}')
+      - name: Verify live owner console
+        shell: python
+        run: |
+          import time,urllib.request
+          base='https://launchpad.cryptoworldz.xyz/wldz/rent-recovery/'
+          for attempt in range(1,7):
+              try:
+                  req=urllib.request.Request(base+'?_live='+str(int(time.time()*1000)),headers={'User-Agent':'Worldz-Owner-Recovery-Verify/1.0','Cache-Control':'no-cache'})
+                  with urllib.request.urlopen(req,timeout=25) as r:body=r.read().decode('utf-8','ignore')
+                  assert r.status==200
+                  assert 'RECOVER THE' in body
+                  assert 'Sign & Recover SOL' in body
+                  assert 'noindex,nofollow,noarchive' in body
+                  req=urllib.request.Request(base+'app.js?_live='+str(int(time.time()*1000)),headers={'User-Agent':'Worldz-Owner-Recovery-Verify/1.0','Cache-Control':'no-cache'})
+                  with urllib.request.urlopen(req,timeout=25) as r:js=r.read().decode('utf-8','ignore')
+                  assert r.status==200
+                  assert 'SetRentCollector' in js
+                  assert 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u' in js
+                  print('REVIVE_RENT_RECOVERY_LIVE=PASS')
+                  raise SystemExit(0)
+              except SystemExit:raise
+              except Exception as e:
+                  print('LIVE_RETRY',attempt,repr(e));time.sleep(attempt*3)
+          raise SystemExit('REVIVE_RENT_RECOVERY_LIVE=FAIL')

@@ -1,0 +1,371 @@
+{
+  "version": "DEVCITY-RVIV-CANDIDATES-2026-09-24-A",
+  "status": "RESEARCH_LEADS_ONLY__NO_MEMBERSHIP__NO_TOKEN_ALLOCATION",
+  "targetNewSeats": 50,
+  "discoveryBasis": "Public GitHub user-owned repositories returned by current Solana/Anchor/Rust/TypeScript repository searches. This is evidence of a relevant public repository only, not a claim about identity, suitability, reputation, or willingness to join.",
+  "requiredBeforeAdmission": [
+    "Manual technical review of the evidence repository and recent contributions",
+    "Developer explicitly accepts the DevCity invitation/terms",
+    "Developer supplies and verifies a Solana wallet",
+    "Duplicate-person and duplicate-wallet check",
+    "Seat approval recorded before any RVIV allocation"
+  ],
+  "tokenOfferIfAdmitted": {
+    "token": "RVIV",
+    "tokensPerSeat": 200000,
+    "percentOfFixedSupplyPerSeat": 0.1,
+    "note": "No candidate has earned or been allocated tokens merely by appearing in this research list."
+  },
+  "candidates": [
+    {
+      "candidateNumber": 51,
+      "github": "0xfnzero",
+      "evidenceRepo": "0xfnzero/solana-streamer",
+      "evidenceUrl": "https://github.com/0xfnzero/solana-streamer",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 52,
+      "github": "ASCorreia",
+      "evidenceRepo": "ASCorreia/solana-fall-vault",
+      "evidenceUrl": "https://github.com/ASCorreia/solana-fall-vault",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 53,
+      "github": "ronanyeah",
+      "evidenceRepo": "ronanyeah/solana-rust-examples",
+      "evidenceUrl": "https://github.com/ronanyeah/solana-rust-examples",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 54,
+      "github": "samuelvanderwaal",
+      "evidenceRepo": "samuelvanderwaal/metaboss",
+      "evidenceUrl": "https://github.com/samuelvanderwaal/metaboss",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 55,
+      "github": "aarjn",
+      "evidenceRepo": "aarjn/solana-programs-list",
+      "evidenceUrl": "https://github.com/aarjn/solana-programs-list",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 56,
+      "github": "Frankcastleauditor",
+      "evidenceRepo": "Frankcastleauditor/Solana-Audit-Arena",
+      "evidenceUrl": "https://github.com/Frankcastleauditor/Solana-Audit-Arena",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 57,
+      "github": "kevinheavey",
+      "evidenceRepo": "kevinheavey/solders",
+      "evidenceUrl": "https://github.com/kevinheavey/solders",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 58,
+      "github": "eniyos",
+      "evidenceRepo": "eniyos/anchor-sentinel",
+      "evidenceUrl": "https://github.com/eniyos/anchor-sentinel",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 59,
+      "github": "johnsaigle",
+      "evidenceRepo": "johnsaigle/anchor-version-detector",
+      "evidenceUrl": "https://github.com/johnsaigle/anchor-version-detector",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 60,
+      "github": "joaquinbejar",
+      "evidenceRepo": "joaquinbejar/matchbook",
+      "evidenceUrl": "https://github.com/joaquinbejar/matchbook",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 61,
+      "github": "romiisromie",
+      "evidenceRepo": "romiisromie/escrow_program",
+      "evidenceUrl": "https://github.com/romiisromie/escrow_program",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 62,
+      "github": "ACNoonan",
+      "evidenceRepo": "ACNoonan/solana-dlmm-meteora",
+      "evidenceUrl": "https://github.com/ACNoonan/solana-dlmm-meteora",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 63,
+      "github": "Nethsara",
+      "evidenceRepo": "Nethsara/mpc-wallet-frost",
+      "evidenceUrl": "https://github.com/Nethsara/mpc-wallet-frost",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 64,
+      "github": "alizeeshan1234",
+      "evidenceRepo": "alizeeshan1234/svmScope",
+      "evidenceUrl": "https://github.com/alizeeshan1234/svmScope",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 65,
+      "github": "davidpc007",
+      "evidenceRepo": "davidpc007/solana-agent-kit",
+      "evidenceUrl": "https://github.com/davidpc007/solana-agent-kit",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 66,
+      "github": "whisdev",
+      "evidenceRepo": "whisdev/solana-meteora-damm-v2-alpha-vault-bundler",
+      "evidenceUrl": "https://github.com/whisdev/solana-meteora-damm-v2-alpha-vault-bundler",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 67,
+      "github": "gianlucamazza",
+      "evidenceRepo": "gianlucamazza/solana-mmaker",
+      "evidenceUrl": "https://github.com/gianlucamazza/solana-mmaker",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 68,
+      "github": "lmvdz",
+      "evidenceRepo": "lmvdz/solana-tpu-client",
+      "evidenceUrl": "https://github.com/lmvdz/solana-tpu-client",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 69,
+      "github": "seetadev",
+      "evidenceRepo": "seetadev/Storacha-Solana-SDK",
+      "evidenceUrl": "https://github.com/seetadev/Storacha-Solana-SDK",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 70,
+      "github": "nirholas",
+      "evidenceRepo": "nirholas/lyra-web3-playground",
+      "evidenceUrl": "https://github.com/nirholas/lyra-web3-playground",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 71,
+      "github": "asda23acs",
+      "evidenceRepo": "asda23acs/Emblem-Vault",
+      "evidenceUrl": "https://github.com/asda23acs/Emblem-Vault",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 72,
+      "github": "dannxbt",
+      "evidenceRepo": "dannxbt/jupiverse-kit",
+      "evidenceUrl": "https://github.com/dannxbt/jupiverse-kit",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 73,
+      "github": "zfedoran",
+      "evidenceRepo": "zfedoran/brine-ed25519",
+      "evidenceUrl": "https://github.com/zfedoran/brine-ed25519",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 74,
+      "github": "joncinque",
+      "evidenceRepo": "joncinque/solana-helloworld-zig",
+      "evidenceUrl": "https://github.com/joncinque/solana-helloworld-zig",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 75,
+      "github": "thejvks",
+      "evidenceRepo": "thejvks/Solana-security-audit",
+      "evidenceUrl": "https://github.com/thejvks/Solana-security-audit",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 76,
+      "github": "febo",
+      "evidenceRepo": "febo/abiv2",
+      "evidenceUrl": "https://github.com/febo/abiv2",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 77,
+      "github": "puhtaytow",
+      "evidenceRepo": "puhtaytow/mosaic",
+      "evidenceUrl": "https://github.com/puhtaytow/mosaic",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 78,
+      "github": "A91y",
+      "evidenceRepo": "A91y/pinoc",
+      "evidenceUrl": "https://github.com/A91y/pinoc",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 79,
+      "github": "senzenn",
+      "evidenceRepo": "senzenn/yellowstone-vixen",
+      "evidenceUrl": "https://github.com/senzenn/yellowstone-vixen",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 80,
+      "github": "mikiyasrich455-designich",
+      "evidenceRepo": "mikiyasrich455-designich/program-upgrade-guardian-skill",
+      "evidenceUrl": "https://github.com/mikiyasrich455-designich/program-upgrade-guardian-skill",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 81,
+      "github": "s-damian",
+      "evidenceRepo": "s-damian/rust-solana-wallet",
+      "evidenceUrl": "https://github.com/s-damian/rust-solana-wallet",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 82,
+      "github": "YvesxDev",
+      "evidenceRepo": "YvesxDev/fomo-wallet-resolver",
+      "evidenceUrl": "https://github.com/YvesxDev/fomo-wallet-resolver",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 83,
+      "github": "pooriagg",
+      "evidenceRepo": "pooriagg/solana-cli-wallet",
+      "evidenceUrl": "https://github.com/pooriagg/solana-cli-wallet",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 84,
+      "github": "Rhovian",
+      "evidenceRepo": "Rhovian/leptos-solana",
+      "evidenceUrl": "https://github.com/Rhovian/leptos-solana",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 85,
+      "github": "Some1Uknow",
+      "evidenceRepo": "Some1Uknow/solana-txn-tui",
+      "evidenceUrl": "https://github.com/Some1Uknow/solana-txn-tui",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 86,
+      "github": "Kazopl",
+      "evidenceRepo": "Kazopl/mpc-agent-wallet",
+      "evidenceUrl": "https://github.com/Kazopl/mpc-agent-wallet",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 87,
+      "github": "ax-x2",
+      "evidenceRepo": "ax-x2/solx",
+      "evidenceUrl": "https://github.com/ax-x2/solx",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 88,
+      "github": "0xsancap",
+      "evidenceRepo": "0xsancap/solana_wallet",
+      "evidenceUrl": "https://github.com/0xsancap/solana_wallet",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 89,
+      "github": "0xSh1mm3r",
+      "evidenceRepo": "0xSh1mm3r/solana-multisig-wallet",
+      "evidenceUrl": "https://github.com/0xSh1mm3r/solana-multisig-wallet",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 90,
+      "github": "Prateek816",
+      "evidenceRepo": "Prateek816/solana-wallet-cli",
+      "evidenceUrl": "https://github.com/Prateek816/solana-wallet-cli",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 91,
+      "github": "rohitdevsol",
+      "evidenceRepo": "rohitdevsol/quasar-skill",
+      "evidenceUrl": "https://github.com/rohitdevsol/quasar-skill",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 92,
+      "github": "andi-nugroho",
+      "evidenceRepo": "andi-nugroho/solana-programs",
+      "evidenceUrl": "https://github.com/andi-nugroho/solana-programs",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 93,
+      "github": "nhatbui97",
+      "evidenceRepo": "nhatbui97/solana-tutorials",
+      "evidenceUrl": "https://github.com/nhatbui97/solana-tutorials",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 94,
+      "github": "acheroncrypto",
+      "evidenceRepo": "acheroncrypto/anchor",
+      "evidenceUrl": "https://github.com/acheroncrypto/anchor",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 95,
+      "github": "Wally869",
+      "evidenceRepo": "Wally869/SolanaEscrow",
+      "evidenceUrl": "https://github.com/Wally869/SolanaEscrow",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 96,
+      "github": "Leo-WNL-CODER",
+      "evidenceRepo": "Leo-WNL-CODER/Amm-Program",
+      "evidenceUrl": "https://github.com/Leo-WNL-CODER/Amm-Program",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 97,
+      "github": "Raad05",
+      "evidenceRepo": "Raad05/anchor-escrow",
+      "evidenceUrl": "https://github.com/Raad05/anchor-escrow",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 98,
+      "github": "TobiAdeniji94",
+      "evidenceRepo": "TobiAdeniji94/solana-anchor-security",
+      "evidenceUrl": "https://github.com/TobiAdeniji94/solana-anchor-security",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 99,
+      "github": "vittominacori",
+      "evidenceRepo": "vittominacori/token-generator",
+      "evidenceUrl": "https://github.com/vittominacori/token-generator",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    },
+    {
+      "candidateNumber": 100,
+      "github": "millw14",
+      "evidenceRepo": "millw14/create-solana-dapp",
+      "evidenceUrl": "https://github.com/millw14/create-solana-dapp",
+      "status": "UNCONTACTED_RESEARCH_LEAD"
+    }
+  ]
+}

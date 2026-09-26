@@ -1,0 +1,55 @@
+{
+  "version": "2026-09-26",
+  "programs": [
+    {
+      "id": "rviv-legacy",
+      "name": "REVIVE Legacy Revival",
+      "pathway": "CryptoWorldz",
+      "status": "PREPARING",
+      "reward": "Proposed equal share: 93,457.943925 RVIV for each of 214 eligible historical wallets; pending approval and claim deployment",
+      "eligibility": "Historical snapshot membership and verified wallet control, excluding the two removed addresses. No preference based on colour, health, appearance, social role, or past token holdings.",
+      "proof": "Wallet signature against the published claim challenge after launch; no seed phrase or token transfer.",
+      "destination": "https://launchpad.cryptoworldz.xyz/legacy-proof/"
+    },
+    {
+      "id": "rviv-devcity",
+      "name": "DevCity™ 100",
+      "pathway": "CryptoWorldz",
+      "status": "RECRUITING",
+      "reward": "Planned 200,000 RVIV per approved seat; 100 seats maximum",
+      "eligibility": "Accepted participation, developer evidence and a signed Solana wallet; all 100 accepted seats have equal shares. No identity or appearance preference.",
+      "proof": "Program approval and signed wallet challenge once a claim flow is published.",
+      "destination": "https://launchpad.cryptoworldz.xyz/developers/"
+    },
+    {
+      "id": "rviv-team-opportunity",
+      "name": "WorldzLaunchPad™ Contributor Team",
+      "pathway": "CryptoWorldz / DevCity",
+      "status": "RECRUITING",
+      "reward": "30,000,000 RVIV reserved for approved contributors as a whole; no individual allocation or guaranteed reward yet. Approved future awards use Jupiter Lock over 12 monthly releases.",
+      "eligibility": "DevCity builders and other supporters may express interest equally. Show real work, choose to join, prove a Solana wallet you control and receive an explicit approved allocation before vesting. No existing title or past token holdings confer a share.",
+      "proof": "Read the team opening and community contact route. Wallet message signing on Turn Up Town is local only and does not submit an application.",
+      "destination": "https://cryptoworldz.xyz/turn-up-town/#team-opening"
+    },
+    {
+      "id": "help-a-mate",
+      "name": "Help a Mate • True Support",
+      "pathway": "OneWorldz / DonateWorldz",
+      "status": "EXPLORE",
+      "reward": "Community support from the existing OneWorldz impact pool if a specific project and amount are approved; no automatic RVIV grant or promised payment.",
+      "eligibility": "A person or local group asking for genuine help can share what they need and consent to a fair review. Donations are separate from tokens and do not buy access.",
+      "proof": "Community evidence and a human review for each published offer; a crypto wallet is not required for ordinary support.",
+      "destination": "https://donateworldz.com/"
+    },
+    {
+      "id": "community-support",
+      "name": "Community Support",
+      "pathway": "OneWorldz / DonateWorldz",
+      "status": "EXPLORE",
+      "reward": "Support varies by the specific community project; no token reward is promised",
+      "eligibility": "Each project sets its own eligibility and verification process.",
+      "proof": "Follow the chosen project's published support pathway; wallet ownership is not required for ordinary donations.",
+      "destination": "https://donateworldz.com/"
+    }
+  ]
+}

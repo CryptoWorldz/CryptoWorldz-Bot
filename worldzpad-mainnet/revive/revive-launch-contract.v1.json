@@ -1,0 +1,248 @@
+{
+  "version": "REVIVE-LAUNCH-2026-09-26-F",
+  "status": "MAINNET_PRICE_APPROVED__FINAL_EXECUTION_GATES_PENDING",
+  "network": "solana-mainnet-beta",
+  "token": {
+    "launchOrder": 2,
+    "name": "REVIVE",
+    "symbol": "RVIV",
+    "canonicalMint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+    "fixedSupplyTokens": 200000000,
+    "decimals": 6,
+    "mintAuthority": "REVOKED",
+    "freezeAuthority": "REVOKED",
+    "treasuryVault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+    "treasuryTokenAccount": "28CwdVt2y997WZqTzEuBpuwoyVYAj6JcaD4qDMzyCdtn"
+  },
+  "allocations": [
+    {
+      "id": "dev_legacy_wallets",
+      "percent": 15,
+      "tokens": 30000000,
+      "state": "RESERVED_FOR_VERIFIED_OWNER_CONTROLLED_LEGACY_DEV_WALLETS"
+    },
+    {
+      "id": "team_vested",
+      "percent": 15,
+      "tokens": 30000000,
+      "state": "VESTING_POLICY_LOCKED__BENEFICIARY_WEIGHTS_PENDING"
+    },
+    {
+      "id": "initial_active_liquidity",
+      "percent": 15,
+      "tokens": 30000000,
+      "state": "KEEP_IN_TREASURY_UNTIL_DIRECT_DAMM_V2_EXISTING_MINT_DEVNET_PROOF"
+    },
+    {
+      "id": "staged_liquidity_reserve",
+      "percent": 20,
+      "tokens": 40000000,
+      "state": "TREASURY_RESERVED__CONTROLLED_ADDITIONS_ONLY"
+    },
+    {
+      "id": "legacy_revival_claim_pool",
+      "percent": 10,
+      "tokens": 20000000,
+      "state": "ENTITLEMENT_LEDGER_COMPLETE__CLAIMS_NOT_OPEN"
+    },
+    {
+      "id": "devcity_100",
+      "percent": 10,
+      "tokens": 20000000,
+      "state": "50_EXISTING_SEATS_GRANDFATHERED__50_NEW_VERIFIED_SLOTS"
+    },
+    {
+      "id": "oneworldz_charity_impact",
+      "percent": 10,
+      "tokens": 20000000,
+      "state": "RING_FENCED_FOR_IMPACT"
+    },
+    {
+      "id": "worldz_treasury_operations_reserve",
+      "percent": 5,
+      "tokens": 10000000,
+      "state": "TREASURY_RESERVED"
+    }
+  ],
+  "allocationPercentTotal": 100,
+  "allocationTokenTotal": 200000000,
+  "devAllocation": {
+    "mode": "EQUAL_ACROSS_VERIFIED_OWNER_CONTROLLED_LEGACY_DEV_WALLETS",
+    "wallets": [
+      {
+        "label": "Limited Edition",
+        "address": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9"
+      },
+      {
+        "label": "Next Big Coin Dev",
+        "address": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt"
+      },
+      {
+        "label": "PdCrew",
+        "address": "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j"
+      },
+      {
+        "label": "Purple Diamond Crew",
+        "address": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U"
+      },
+      {
+        "label": "Purple PDC",
+        "address": "G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3"
+      },
+      {
+        "label": "SolSavewXRP",
+        "address": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9"
+      },
+      {
+        "label": "JayJayTeamDev",
+        "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u"
+      }
+    ],
+    "rule": "Seven owner-designated Dev wallets receive exactly 4,285,714.285714 RVIV each; the 0.000002 RVIV division remainder stays reserved in the Dev pool. Fresh wallet control and exact transaction review required.",
+    "rawUnitsPerWallet": "4285714285714",
+    "unassignedRemainderRaw": "2"
+  },
+  "teamVesting": {
+    "poolTokens": 30000000,
+    "cliffDays": 0,
+    "linearVestingMonths": 12,
+    "releaseCount": 12,
+    "releaseRule": "12 equal monthly releases; rounding remainder in final release",
+    "provider": "Jupiter Lock/Vesting",
+    "cadence": "monthly",
+    "immediateUnlockPercent": 0,
+    "knownTeamWallets": [],
+    "beneficiaryWeightsFinalized": false,
+    "executionGate": "NO_TEAM_TRANSFER_UNTIL_WORK_VERIFIED_BENEFICIARIES_WALLETS_AND_JUPITER_LOCK_SCHEDULE_ARE_APPROVED",
+    "candidateNote": "DevCity participants and other contributors may voluntarily apply with documented work and signed wallet proof; no automatic grant, including Stepper.",
+    "custodyRule": "No AI-controlled wallet or custodian. Create only a verified Jupiter Lock schedule with explicit beneficiaries after human review; no unassigned pool sent to a third-party wallet.",
+    "recruitment": {
+      "openTo": "DevCity participants and any other person contributing verifiable work or support to WorldzLaunchPad",
+      "voluntaryJoin": true,
+      "automaticGrant": false,
+      "selection": "Same published task and evidence standards for all applicants; no preference based on colour, health, appearance, role, or token holdings.",
+      "individualTokenAmounts": "PENDING_OWNER_REVIEW",
+      "recipientWalletProof": "Fresh signed challenge verified server-side before an approved grant.",
+      "claimStart": "PENDING_APPROVED_JUPITER_LOCK_SCHEDULE"
+    }
+  },
+  "legacyRevival": {
+    "snapshotBatch": "4b7faa3f-c6cd-435f-9840-43a04cd090a0",
+    "snapshotRoot": "b0a58be30c8323bf22d57939cd989be6b1631f5dd17a682cd829d0cc6a85e548",
+    "eligibleWallets": 216,
+    "positiveTokenAccounts": 239,
+    "poolTokens": 20000000,
+    "distributionModel": "50% equal unique-wallet share + 50% square-root normalized historical holdings",
+    "currentLedgerTotalTokens": 20000000,
+    "currentClaims": 0,
+    "regenerationLockedUntilGeneratorFixVerified": true,
+    "payoutExclusionsPendingRecalculation": [
+      "5fFVkQuo4pnCpWhD8hx2uiFEtkBcnW3QdDUt1w2BzB71",
+      "43T8jncT5pJFo1TNenHdt6NSaPieic3iuHLQnYLLgeWy"
+    ],
+    "executionGate": "NO_LEGACY_PAYOUT_UNTIL_EXCLUDED_HISTORICAL_ENTITLEMENTS_ARE_RECONCILED_AND_LEDGER_REAPPROVED"
+  },
+  "devCity": {
+    "seats": 100,
+    "poolTokens": 20000000,
+    "tokensPerSeat": 200000,
+    "percentPerSeat": 0.1,
+    "grandfatheredSeats": 50,
+    "newVerifiedDeveloperSlots": 50,
+    "stagingWallet": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
+    "rule": "Existing 50 seats are preserved. New seats require a verified developer identity, accepted participation and a verified Solana wallet before fan-out."
+  },
+  "charityImpact": {
+    "tokens": 20000000,
+    "percent": 10,
+    "stagingWallet": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+    "rule": "Ring-fenced for OneWorldz humanitarian/community impact; not liquidity, team or operating inventory."
+  },
+  "launch": {
+    "engineCandidate": "METEORA_DAMM_V2_DIRECT_EXISTING_MINT",
+    "routeConfig": "worldzpad-mainnet/revive/revive-direct-damm-v2-existing-mint.v1.json",
+    "dbcTokenCreationPathAllowed": false,
+    "canonicalMintReuseRequired": true,
+    "publicMainnetExecutionEnabled": false,
+    "devnetRequired": true,
+    "devnetOpeningPriceSolPerRviv": 4.5e-05,
+    "mainnetOpeningPriceSolPerRviv": 4.5e-05,
+    "mainnetOpeningPriceStatus": "OWNER_APPROVED_2026-09-26",
+    "initialBaseLiquidityTokens": 30000000,
+    "initialQuoteLiquiditySol": 0,
+    "permanentLiquidityProtectionRequired": true,
+    "permanentLockAtPoolCreationTargetPercent": 100
+  },
+  "gates": {
+    "noSecondReviveMint": true,
+    "canonicalMintMustMatch": true,
+    "allocationMustEqual100Percent": true,
+    "devnetCurveProofRequired": true,
+    "exactFeeMathProofRequired": true,
+    "legacyClaimReadOnlyProofRequired": true,
+    "legacyGeneratorRepairRequiredBeforeResnapshot": true,
+    "teamVestingExecutionProofRequired": true,
+    "distributionWalletFundingPreflightRequired": true,
+    "permanentLockProofRequired": true,
+    "finalOwnerWalletApprovalRequired": true,
+    "worldzDependencyGateRequired": true,
+    "wldzPostLaunchCriticalSafetyProofRequired": true,
+    "worldzLaunchPadPublicBootProofRequired": true,
+    "legacyTenMintAuthorityAuditRequired": true,
+    "noAutomaticLegacyAuthorityTakeover": true,
+    "noAutomaticLegacyFeeHarvesting": true,
+    "noReviveIsolationLaunch": true,
+    "noDbcTokenCreationForCanonicalRviv": true,
+    "directExistingMintDammV2ProofRequired": true,
+    "mainnetOpeningPriceFinalized": true,
+    "actualDammV2ProtocolDeductionProofRequired": true,
+    "lockedPositionFeeClaimProofRequired": true
+  },
+  "worldzDependencyGate": {
+    "required": true,
+    "rule": "REVIVE may not be released as an isolated token launch. Its public mainnet execution remains locked until the canonical WORLDZ/WLDZ post-launch safety track, WorldzLaunchPad public boot/readiness checks, Legacy authority audit, fee-router proof, liquidity-lock proof and final owner approval are all evidenced.",
+    "canonicalWorldz": {
+      "name": "WORLDZ",
+      "symbol": "WLDZ",
+      "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "allocationDesignCeilingTokens": 100000000,
+      "currentOnChainSupplyTokens": 99999951.002722,
+      "circulatingSupplyTokens": 15000000,
+      "supplyDisclosure": "100M allocation design ceiling; authoritative current on-chain supply 99,999,951.002722 after mint authority revocation",
+      "livePool": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+      "livePoolVenue": "METEORA_DAMM_V2",
+      "livePoolInitialWldzTokens": 15000000,
+      "permanentLockPercent": 100,
+      "mintAuthority": "REVOKED",
+      "freezeAuthority": "REVOKED",
+      "duplicateExecutionDisabled": true,
+      "publicCreatorGate": false
+    },
+    "requiredEvidence": {
+      "wldzPostLaunchCriticalSafetyGate": "SATISFIED_BY_RECONCILED_WLDZ_LIVE_STATE",
+      "worldzLaunchPadPublicBoot": "SATISFIED_BY_RECONCILED_PUBLIC_DEPLOYMENT",
+      "legacyTenMintAuthorityAudit": "STILL_REQUIRED_LIVE_READ_ONLY_PROOF",
+      "worldzFeeRouterReceipts": "STILL_REQUIRED_FOR_REVIVE",
+      "permanentMigratedLiquidityLock": "SATISFIED__WLDZ_LIVE_POOL_100_PERCENT_PERMANENT_LOCK",
+      "finalOwnerApproval": "REQUIRED_AFTER_ALL_TECHNICAL_GATES"
+    },
+    "prohibitedUntilAllPass": [
+      "enable REVIVE public mainnet execution",
+      "advertise REVIVE as publicly launched",
+      "move launch liquidity into an executable mainnet market route",
+      "open Legacy RVIV claims as part of launch execution"
+    ],
+    "publicMainnetExecutionMustRemainFalse": true,
+    "reconciliationArtifact": "worldzpad-mainnet/revive/revive-worldz-main-reconciliation.v1.json",
+    "reconciledMainStateDate": "2026-09-25"
+  },
+  "legacyControlPolicy": {
+    "authorityAuditArtifact": "worldzpad-devnet/revive-party/artifacts/legacy-authority-audit.json",
+    "auditReadOnly": true,
+    "automaticAuthorityTakeover": false,
+    "automaticLegacyFeeHarvesting": false,
+    "antiDoubleHandling": true,
+    "sourceSeparationRule": "Existing TaxSplit, RevShare or other legacy-platform rewards are not Worldz Flywheel revenue. The Worldz six-hour Flywheel distributes only fee revenue explicitly routed into the Worldz-controlled Legacy vaults.",
+    "recoveryRule": "Verified owner-controlled authority may be migrated only by a later explicit signed owner action. Null/revoked authority is immutable. Third-party or unverified authority is never bypassed."
+  }
+}

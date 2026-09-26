@@ -1,0 +1,68 @@
+{
+  "version": "REVIVE-LOW-COST-DISTRIBUTION-2026-09-26-A",
+  "status": "REVIEW_ONLY_NOT_SIGNABLE",
+  "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+  "sourceSquadsVault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+  "ownerSigner": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+  "priorityOrder": [
+    {
+      "step": "OWNER_DEV",
+      "recipients": 7,
+      "rawEach": "4285714285714",
+      "rawTotal": "29999999999998",
+      "remainderRaw": "2",
+      "route": "Squads batch transfers directly to seven verified wallet token accounts",
+      "condition": "Confirm vault balance, all recipient ATAs, actual Squads proposal fees and signature permissions; review exact encoded transaction before owner signs."
+    },
+    {
+      "step": "LEGACY",
+      "recipients": 214,
+      "route": "Compare verified claim program escrow funding plus claimant ATA costs against direct Squads batches",
+      "condition": "Equal-share proposal must be approved and wallet ownership validated; distributor program/authority must be verified. Never send to excluded wallets."
+    },
+    {
+      "step": "DEVCITY",
+      "recipients": 100,
+      "route": "Compare direct batches vs same verified claim program",
+      "condition": "100 approved wallets and proof required; research leads are not recipients."
+    },
+    {
+      "step": "TEAM",
+      "recipients": 0,
+      "route": "Jupiter Lock after earning and verified beneficiaries",
+      "condition": "12 monthly unlocks, 0 immediate, no cliff; no AI custody."
+    }
+  ],
+  "costPrinciples": [
+    "Solana base fee 5000 lamports per transaction signature plus optional priority fee.",
+    "Creation of an absent RVIV ATA requires rent; paying for a recipient ATA gives the rent to that account, not back to the sender.",
+    "Use existing recipient token accounts where valid and supported; avoid unnecessary ATA creation.",
+    "Squads transfer/proposal costs and current rent are live values, not a fixed quoted minimum.",
+    "Batch transfers can group approvals while executing multiple onchain transactions; one click is not one atomic transaction."
+  ],
+  "sourceLinks": [
+    "https://solana.com/docs/core/fees/fee-structure",
+    "https://solana.com/docs/payments/send-payments/verify-address",
+    "https://docs.squads.so/main/navigating-your-squad/treasury/manage-assets",
+    "https://docs.jup.ag/user-docs/launch/lock"
+  ],
+  "observedReadOnlyAtUtc": "2026-09-26T05:15:27.003Z",
+  "observedOwnerFeeWalletLamports": 29059039,
+  "observedSquadsVaultSolLamports": 0,
+  "observedSquadsVaultRvivRaw": "170000000000000",
+  "ownerDevAtaReadOnly": {
+    "existing": 4,
+    "missing": 3,
+    "rentLamportsEach": 1488440,
+    "threeMissingRentLamports": 4465320,
+    "otherSquadsFeesNotIncluded": true
+  },
+  "ownerApprovalForDevAtas": {
+    "approvedAtAustraliaSydney": "2026-09-26T15:29:42+10:00",
+    "scope": "Creation of the three missing canonical RVIV associated token accounts for the seven approved owner Dev wallets",
+    "rentCeilingLamports": 4465320,
+    "additionalNetworkOrSquadsFeesIncluded": false,
+    "authorizesSignatureByAssistant": false,
+    "requiresExactWalletTransactionApproval": true
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "version": "WORLDZ-ANALYTICS-EVENTS-2026-09-24-A",
+  "status": "INSTRUMENTATION_CONTRACT__NO_POSTHOG_PROJECT_WRITE_YET",
+  "providerTarget": "PostHog",
+  "identityRules": {
+    "neverSendPrivateKeysOrSeedPhrases": true,
+    "walletAddressAllowedOnlyWhenProductPrivacyPolicyAndConsentPermit": true,
+    "preferPseudonymousWorldzUserId": true
+  },
+  "events": [
+    {"name": "worldz_page_viewed", "properties": ["page", "chain_context", "referrer_code"]},
+    {"name": "worldz_wallet_connected", "properties": ["chain", "wallet_type"]},
+    {"name": "worldz_launch_started", "properties": ["chain", "mode", "white_label_operator_id", "referrer_type"]},
+    {"name": "worldz_chain_selected", "properties": ["chain", "multi_chain_count"]},
+    {"name": "worldz_fee_preview_seen", "properties": ["chain", "gross_fee_bps", "external_fee_model", "creator_share_bps", "referrer_share_bps"]},
+    {"name": "worldz_launch_simulated", "properties": ["chain", "venue", "success", "failure_code"]},
+    {"name": "worldz_launch_signed", "properties": ["chain", "environment"]},
+    {"name": "worldz_token_created", "properties": ["chain", "environment", "token_id"]},
+    {"name": "worldz_market_created", "properties": ["chain", "venue", "market_or_pool_id"]},
+    {"name": "worldz_liquidity_protected", "properties": ["chain", "protection_type", "locked_percent"]},
+    {"name": "worldz_first_trade", "properties": ["chain", "venue", "token_id"]},
+    {"name": "worldz_referral_attributed", "properties": ["chain", "referrer_type", "attribution_id"]},
+    {"name": "worldz_creator_fee_accrued", "properties": ["chain", "asset", "amount_atomic"]},
+    {"name": "worldz_referrer_fee_accrued", "properties": ["chain", "asset", "amount_atomic"]},
+    {"name": "worldz_legacy_fee_accrued", "properties": ["chain", "asset", "amount_atomic"]},
+    {"name": "worldz_platform_fee_accrued", "properties": ["chain", "asset", "amount_atomic"]},
+    {"name": "worldz_impact_fee_accrued", "properties": ["chain", "asset", "amount_atomic"]},
+    {"name": "worldz_proof_created", "properties": ["chain", "project_id", "proof_id"]},
+    {"name": "worldz_launch_abandoned", "properties": ["chain", "last_completed_step", "failure_code"]}
+  ],
+  "canonicalFunnels": [
+    ["worldz_launch_started", "worldz_fee_preview_seen", "worldz_launch_simulated", "worldz_launch_signed", "worldz_token_created", "worldz_market_created"],
+    ["worldz_referral_attributed", "worldz_launch_started", "worldz_token_created", "worldz_first_trade"],
+    ["worldz_token_created", "worldz_first_trade", "worldz_creator_fee_accrued"]
+  ]
+}
