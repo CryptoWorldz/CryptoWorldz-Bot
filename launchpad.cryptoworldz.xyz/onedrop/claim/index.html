@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b0416"><title>REVIVE OneDrop Claim</title>
+<style>
+:root{color-scheme:dark;--bg:#090311;--card:#160927;--line:#6e3db9;--text:#faf7ff;--muted:#bcaed0;--ok:#4ee5a0;--bad:#ff6e7e;--purple:#b36cff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#35135d 0,transparent 42%),var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--text)}main{max-width:720px;margin:auto;padding:28px 16px 70px}a{color:#e7c7ff}h1{font-size:clamp(2.5rem,9vw,4.8rem);line-height:.95;margin:14px 0}h1 span{color:var(--purple)}p{line-height:1.55;color:var(--muted)}.card{background:#ffffff09;border:1px solid #9b6bdf55;border-radius:22px;padding:20px;margin:16px 0}.metric{background:#090311;border-radius:15px;padding:14px;margin:10px 0}.metric b{display:block;color:var(--muted);font-size:.78rem;text-transform:uppercase}.metric strong{display:block;font-size:1.35rem;margin-top:5px;overflow-wrap:anywhere}button{width:100%;border:0;border-radius:15px;padding:15px;font-weight:900;font-size:1rem;margin-top:10px;cursor:pointer}.connect{background:#26163e;color:#fff;border:1px solid #7449ad}.claim{background:linear-gradient(90deg,#8f50ff,#c06cff);color:#fff}.claim:disabled,.connect:disabled{opacity:.45;cursor:not-allowed}.status{white-space:pre-wrap;overflow-wrap:anywhere;background:#090311;border:1px solid #35204d;border-radius:15px;padding:14px;margin-top:14px;color:var(--muted);line-height:1.55}.good{border-color:#4ee5a077;color:#caffea}.bad{border-color:#ff6e7e77;color:#ffd8dd}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.mini{font-size:.84rem}
+</style></head><body><main>
+<a href="../">← Worldz OneDrop™</a>
+<h1>REVIVE<br><span>Claim</span></h1>
+<p>Connect the Solana wallet contained in the frozen REVIVE distribution manifest. The page verifies your Merkle proof locally before asking you to sign.</p>
+<section class="card">
+<div class="metric"><b>Token</b><strong>REVIVE • $RVIV</strong></div>
+<div class="metric"><b>Claim vault</b><strong id="vault">Waiting for live distributor…</strong></div>
+<button id="connect" class="connect">1. Connect Wallet</button>
+<button id="prepare" class="claim" disabled>2. Verify My Allocation</button>
+<button id="claim" class="claim" disabled>3. CLAIM RVIV</button>
+<div id="status" class="status">Nothing signed.</div>
+<pre id="review" class="status mono">Connect your wallet to check eligibility.</pre>
+<p class="mini">If your RVIV associated token account does not exist, this claim transaction creates it using your wallet as payer. The Worldz owner does not pay every recipient's token-account rent.</p>
+</section>
+</main><script type="module" src="./app.js?v=20260926-onedrop-a"></script></body></html>
