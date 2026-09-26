@@ -37,4 +37,5 @@ test("WorldzFullBuild is the Command Centre umbrella over FullScope", () => {
   assert.ok(MENUS.fullbuild.rows.some((row) => row[1] === "/fullscope"));
   assert.ok(MENUS.fullbuild.rows.some((row) => row[1] === "/worldzvotes"));
   assert.ok(MENUS.fullbuild.rows.some((row) => row[1] === "/worldzgovern"));
+  assert.ok(MENUS.fullbuild.rows.some((row) => row[1] === "/worldzlinks"));
 });
