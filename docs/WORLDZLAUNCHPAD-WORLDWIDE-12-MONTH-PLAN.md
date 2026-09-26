@@ -6,7 +6,13 @@ Owner direction: 26 September 2026. Goal: earn a leading launchpad position thro
 
 Turn Up Town™ is the public gateway. DevCity participants and any other qualified contributor may voluntarily apply for real development, accessibility, security, support, translation or local-impact work. Work evidence and wallet ownership proof precede an individually approved team allocation. The reserved 30M RVIV team pool has no assigned beneficiaries or automatic grants. When approved, awards use the verified Jupiter Lock twelve-month schedule. No role, identity trait or existing token balance changes eligibility. Help a Mate is a project pathway inside the existing OneWorldz 20M impact pool; its funding amount remains undecided. Donations do not purchase tokens or access.
 
-## Fee promise
+## Distribution model and fee promise
+
+The approved design shares net fees Worldz actually controls: 51% Creator, 17% Referrer, 15% Legacy Flywheel (ten equally funded verified legacy vaults), 8.5% WorldzLaunchPad and 8.5% OneWorldz impact. These percentages are of the controlled amount after outside deductions, not the gross trade. The 0.75% trader fee is a target for the specific proposed route. The direct REVIVE DAMM v2 pool still needs actual protocol deductions, claim receipts and router proof. An impact funding design does not mean any Help a Mate project has been funded.
+
+The 200M RVIV allocation is a separate token distribution; it is never replenished or represented by these fee percentages.
+
+## Full cost disclosure
 
 Show the complete expected trader cost and creator cost for each route before signing: venue/protocol trading fee, platform fee, creator share, priority fee, rent, pool setup and migration costs where applicable. Show the actual transaction and reconcile receipts after execution. Never advertise a universal cheapest fee without comparing the same chain, token, market phase and fee stack. Current Worldz target for the proposed RVIV route is 0.75% gross trading fee, subject to on-chain verification. Official Moonshot documentation lists a 1% buy/sell fee; Raydium documents 1% LaunchLab bonding-curve trades and 0.25% standard CPMM trades after graduation. These phases are different and fees may change.
 
