@@ -1,0 +1,152 @@
+{
+  "schema": "worldz.links.registry.v1",
+  "version": "WORLDZLINKZ-2026-09-27-A",
+  "brand": "WorldzLinkz™",
+  "tagline": "Every Worldz. One Link.",
+  "canonicalUrl": "https://cryptoworldz.xyz/worldzlinkz/",
+  "preferredAlias": "https://links.cryptoworldz.xyz/",
+  "aliasStatus": "PLANNED_DNS_ALIAS_NOT_ASSUMED_LIVE",
+  "qrTarget": "https://cryptoworldz.xyz/worldzlinkz/",
+  "entries": [
+    {
+      "name": "OneWorldz",
+      "host": "oneworldz.com",
+      "url": "https://oneworldz.com",
+      "category": "Mission & Impact",
+      "type": "domain"
+    },
+    {
+      "name": "DonateWorldz",
+      "host": "donateworldz.com",
+      "url": "https://donateworldz.com",
+      "category": "Mission & Impact",
+      "type": "domain"
+    },
+    {
+      "name": "FoodWorldz",
+      "host": "foodworldz.com",
+      "url": "https://foodworldz.com",
+      "category": "Mission & Impact",
+      "type": "domain"
+    },
+    {
+      "name": "ImpactBased @ OneWorldz",
+      "host": "impactbased.oneworldz.com",
+      "url": "https://impactbased.oneworldz.com",
+      "category": "Mission & Impact",
+      "type": "subdomain"
+    },
+    {
+      "name": "Law @ OneWorldz",
+      "host": "law.oneworldz.com",
+      "url": "https://law.oneworldz.com",
+      "category": "Mission & Impact",
+      "type": "subdomain"
+    },
+    {
+      "name": "Learn @ OneWorldz",
+      "host": "learn.oneworldz.com",
+      "url": "https://learn.oneworldz.com",
+      "category": "Mission & Impact",
+      "type": "subdomain"
+    },
+    {
+      "name": "CryptoWorldz",
+      "host": "cryptoworldz.xyz",
+      "url": "https://cryptoworldz.xyz",
+      "category": "CryptoWorldz Core",
+      "type": "domain"
+    },
+    {
+      "name": "WorldzLaunchPad",
+      "host": "launchpad.cryptoworldz.xyz",
+      "url": "https://launchpad.cryptoworldz.xyz",
+      "category": "CryptoWorldz Core",
+      "type": "subdomain"
+    },
+    {
+      "name": "Spam2Ham",
+      "host": "spam2ham.cryptoworldz.xyz",
+      "url": "https://spam2ham.cryptoworldz.xyz",
+      "category": "CryptoWorldz Core",
+      "type": "subdomain"
+    },
+    {
+      "name": "SolWorldz",
+      "host": "solworldz.xyz",
+      "url": "https://solworldz.xyz",
+      "category": "Blockchain Worldz",
+      "type": "domain"
+    },
+    {
+      "name": "EthWorldz",
+      "host": "ethworldz.xyz",
+      "url": "https://ethworldz.xyz",
+      "category": "Blockchain Worldz",
+      "type": "domain"
+    },
+    {
+      "name": "BaseWorldz",
+      "host": "baseworldz.xyz",
+      "url": "https://baseworldz.xyz",
+      "category": "Blockchain Worldz",
+      "type": "domain"
+    },
+    {
+      "name": "BNBWorldz",
+      "host": "bnbworldz.xyz",
+      "url": "https://bnbworldz.xyz",
+      "category": "Blockchain Worldz",
+      "type": "domain"
+    },
+    {
+      "name": "XRPWorldz",
+      "host": "xrpworldz.xyz",
+      "url": "https://xrpworldz.xyz",
+      "category": "Blockchain Worldz",
+      "type": "domain"
+    },
+    {
+      "name": "SuiWorldz",
+      "host": "suiworldz.xyz",
+      "url": "https://suiworldz.xyz",
+      "category": "Blockchain Worldz",
+      "type": "domain"
+    },
+    {
+      "name": "HyperWorldz",
+      "host": "hyperworldz.xyz",
+      "url": "https://hyperworldz.xyz",
+      "category": "Blockchain Worldz",
+      "type": "domain"
+    },
+    {
+      "name": "RobinWorldz",
+      "host": "robinworldz.xyz",
+      "url": "https://robinworldz.xyz",
+      "category": "Blockchain Worldz",
+      "type": "domain"
+    },
+    {
+      "name": "Purple Diamond Crew",
+      "host": "purplediamondcrew.com",
+      "url": "https://purplediamondcrew.com",
+      "category": "Community Worldz",
+      "type": "domain"
+    },
+    {
+      "name": "HodlerWorldz",
+      "host": "hodlerworldz.xyz",
+      "url": "https://hodlerworldz.xyz",
+      "category": "Community Worldz",
+      "type": "domain"
+    },
+    {
+      "name": "HodlerGalaxy",
+      "host": "hodlergalaxy.xyz",
+      "url": "https://hodlergalaxy.xyz",
+      "category": "Community Worldz",
+      "type": "domain"
+    }
+  ]
+}
