@@ -114,6 +114,8 @@ The Worldz website remains the launch origin. The design must not require users 
 7. Prove permanent LP lock mechanics.
 8. Prove 75-bps fee routing and the 51/17/15/8.5/8.5 split.
 9. Finalize token metadata, mint/freeze authority state and public Worldz Proof.
-10. Pass multisig, security, accounting, legal/regulatory and explicit JayJayTeamDev signing gates.\n11. Complete a ProofBurn disposable-devnet burn proving BurnChecked, confirmed supply reduction and receipt reconciliation.\n12. Integrate the Worldz Universal FlyWheel registry/cycle and pass its validator.
+10. Pass multisig, security, accounting, legal/regulatory and explicit JayJayTeamDev signing gates.
+11. Complete a ProofBurn disposable-devnet burn proving BurnChecked, confirmed supply reduction and receipt reconciliation.
+12. Integrate the Worldz Universal FlyWheel registry/cycle and pass its validator.
 
 No mainnet action is authorized by this package.
