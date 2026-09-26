@@ -3,6 +3,7 @@ name: Validate Worldz Omnichain private build
 on:
   push:
     branches:
+      - main
       - revive-v1-build
     paths:
       - 'worldzpad-omnichain/**'
