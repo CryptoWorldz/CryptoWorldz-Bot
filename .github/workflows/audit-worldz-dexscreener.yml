@@ -1,0 +1,43 @@
+name: Audit Worldz DEX Screener
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '47 */6 * * *'
+  pull_request:
+    paths:
+      - 'worldzpad-mainnet/worlddexpush/dexscreener-worldz.v1.json'
+      - 'launchpad.cryptoworldz.xyz/worlddexpush/dexscreener/**'
+      - 'worldzpad-mainnet/token-identity/worldz-token-registry.v1.json'
+      - 'scripts/audit_worldz_dexscreener.mjs'
+      - '.github/workflows/audit-worldz-dexscreener.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worldzpad-mainnet/worlddexpush/dexscreener-worldz.v1.json'
+      - 'launchpad.cryptoworldz.xyz/worlddexpush/dexscreener/**'
+      - 'worldzpad-mainnet/token-identity/worldz-token-registry.v1.json'
+      - 'scripts/audit_worldz_dexscreener.mjs'
+      - '.github/workflows/audit-worldz-dexscreener.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit DEX Screener identity, pair, price, boosts and order status
+        run: node scripts/audit_worldz_dexscreener.mjs
+      - name: Upload DEX Screener evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldz-dexscreener-status
+          path: artifacts/worldz-dexscreener-status.json
+          retention-days: 30
