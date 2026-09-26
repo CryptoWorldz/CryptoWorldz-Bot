@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import argparse,json
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]
-P=ROOT/"worldzpad-mainnet"/"phenix"/"pnex-launch-readiness.v1.json"
-I=ROOT/"worldzpad-mainnet"/"phenix"/"pnex-token-identity.v1.json"
+HERE=Path(__file__).resolve().parent
+P=HERE/"pnex-launch-readiness.v1.json"
+I=HERE/"pnex-token-identity.v1.json"
 R=json.loads(P.read_text()); identity=json.loads(I.read_text())
 BLOCK={"BLOCKED","FAIL","PENDING"}
 def report():
