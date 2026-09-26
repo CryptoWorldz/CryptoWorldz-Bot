@@ -223,6 +223,18 @@
     ],
     "internalLanePercentages": "NOT_YET_FIXED",
     "releasePolicyRequiredBeforeMainnet": true,
-    "mainnetExecutionEnabled": false
+    "mainnetExecutionEnabled": false,
+    "miracleRunway": {
+      "enabled": true,
+      "purpose": "Use approved FlyWheel infrastructure and ecosystem work to harden reusable WorldzLaunchPad systems before launch #004 MIRACLE, without treating PNEX as guaranteed funding for MIRACLE market price or buyers.",
+      "allowedExamples": [
+        "shared launch security and audits",
+        "wallet-connect reliability",
+        "vesting and lock infrastructure",
+        "fee-router and accounting proof",
+        "Worldz Proof and transparency tooling",
+        "community education and verified contributor systems"
+      ]
+    }
   }
 }
