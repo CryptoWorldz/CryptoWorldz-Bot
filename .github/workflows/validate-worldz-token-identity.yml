@@ -1,0 +1,29 @@
+name: Validate Worldz token identity
+on:
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/token-identity/**"
+      - "launchpad.cryptoworldz.xyz/tokenlist.json"
+      - "launchpad.cryptoworldz.xyz/wldz/token-metadata.json"
+      - "launchpad.cryptoworldz.xyz/rviv/**"
+      - "scripts/validate_worldz_token_identity.py"
+      - ".github/workflows/validate-worldz-token-identity.yml"
+  push:
+    branches: [main]
+    paths:
+      - "worldzpad-mainnet/token-identity/**"
+      - "launchpad.cryptoworldz.xyz/tokenlist.json"
+      - "launchpad.cryptoworldz.xyz/wldz/token-metadata.json"
+      - "launchpad.cryptoworldz.xyz/rviv/**"
+      - "scripts/validate_worldz_token_identity.py"
+permissions:
+  contents: read
+jobs:
+  identity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/validate_worldz_token_identity.py
