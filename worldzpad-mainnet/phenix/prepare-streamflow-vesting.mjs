@@ -24,7 +24,7 @@ function parseArgs(){
 }
 function raw(tokens){
   const s=String(tokens);
-  if(!/^\\d+(\\.\\d+)?$/.test(s)) throw new Error("invalid token amount");
+  if(!/^\d+(\.\d+)?$/.test(s)) throw new Error("invalid token amount");
   const parts=s.split(".");
   const w=parts[0], f=parts[1]||"";
   if(f.length>DECIMALS) throw new Error("too many decimals");
