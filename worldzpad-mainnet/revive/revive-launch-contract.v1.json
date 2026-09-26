@@ -1,5 +1,5 @@
 {
-  "version": "REVIVE-LAUNCH-2026-09-26-E",
+  "version": "REVIVE-LAUNCH-2026-09-26-F",
   "status": "MAINNET_PRICE_APPROVED__FINAL_EXECUTION_GATES_PENDING",
   "network": "solana-mainnet-beta",
   "token": {
@@ -68,8 +68,6 @@
   "allocationTokenTotal": 200000000,
   "devAllocation": {
     "mode": "EQUAL_ACROSS_VERIFIED_OWNER_CONTROLLED_LEGACY_DEV_WALLETS",
-    "tokensPerWallet": 5000000,
-    "percentPerWallet": 2.5,
     "wallets": [
       {
         "label": "Limited Edition",
@@ -94,9 +92,15 @@
       {
         "label": "SolSavewXRP",
         "address": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9"
+      },
+      {
+        "label": "JayJayTeamDev",
+        "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u"
       }
     ],
-    "rule": "Only registry wallets marked owner_controlled + legacy_dev are eligible. Watch-only distribution wallets are excluded."
+    "rule": "Seven owner-designated Dev wallets receive exactly 4,285,714.285714 RVIV each; the 0.000002 RVIV division remainder stays reserved in the Dev pool. Fresh wallet control and exact transaction review required.",
+    "rawUnitsPerWallet": "4285714285714",
+    "unassignedRemainderRaw": "2"
   },
   "teamVesting": {
     "poolTokens": 30000000,
@@ -107,22 +111,11 @@
     "provider": "Jupiter Lock/Vesting",
     "cadence": "monthly",
     "immediateUnlockPercent": 0,
-    "knownTeamWallets": [
-      {
-        "label": "Stepper",
-        "address": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ"
-      },
-      {
-        "label": "Remedy",
-        "address": "5fFVkQuo4pnCpWhD8hx2uiFEtkBcnW3QdDUt1w2BzB71"
-      },
-      {
-        "label": "Remedy Save",
-        "address": "43T8jncT5pJFo1TNenHdt6NSaPieic3iuHLQnYLLgeWy"
-      }
-    ],
+    "knownTeamWallets": [],
     "beneficiaryWeightsFinalized": false,
-    "executionGate": "NO_TEAM_TRANSFER_UNTIL_VESTING_ADAPTER_AND_WEIGHTS_ARE_VERIFIED"
+    "executionGate": "NO_TEAM_TRANSFER_UNTIL_WORK_VERIFIED_BENEFICIARIES_WALLETS_AND_JUPITER_LOCK_SCHEDULE_ARE_APPROVED",
+    "candidateNote": "Stepper may apply with a signed Solana wallet and verified contribution; no automatic team grant.",
+    "custodyRule": "No AI-controlled wallet or custodian. Create only a verified Jupiter Lock schedule with explicit beneficiaries after human review; no unassigned pool sent to a third-party wallet."
   },
   "legacyRevival": {
     "snapshotBatch": "4b7faa3f-c6cd-435f-9840-43a04cd090a0",
@@ -133,7 +126,12 @@
     "distributionModel": "50% equal unique-wallet share + 50% square-root normalized historical holdings",
     "currentLedgerTotalTokens": 20000000,
     "currentClaims": 0,
-    "regenerationLockedUntilGeneratorFixVerified": true
+    "regenerationLockedUntilGeneratorFixVerified": true,
+    "payoutExclusionsPendingRecalculation": [
+      "5fFVkQuo4pnCpWhD8hx2uiFEtkBcnW3QdDUt1w2BzB71",
+      "43T8jncT5pJFo1TNenHdt6NSaPieic3iuHLQnYLLgeWy"
+    ],
+    "executionGate": "NO_LEGACY_PAYOUT_UNTIL_EXCLUDED_HISTORICAL_ENTITLEMENTS_ARE_RECONCILED_AND_LEDGER_REAPPROVED"
   },
   "devCity": {
     "seats": 100,
@@ -158,8 +156,8 @@
     "canonicalMintReuseRequired": true,
     "publicMainnetExecutionEnabled": false,
     "devnetRequired": true,
-    "devnetOpeningPriceSolPerRviv": 0.000045,
-    "mainnetOpeningPriceSolPerRviv": 0.000045,
+    "devnetOpeningPriceSolPerRviv": 4.5e-05,
+    "mainnetOpeningPriceSolPerRviv": 4.5e-05,
     "mainnetOpeningPriceStatus": "OWNER_APPROVED_2026-09-26",
     "initialBaseLiquidityTokens": 30000000,
     "initialQuoteLiquiditySol": 0,
