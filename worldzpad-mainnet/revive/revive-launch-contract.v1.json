@@ -100,8 +100,11 @@
   },
   "teamVesting": {
     "poolTokens": 30000000,
-    "cliffDays": 90,
-    "linearVestingMonths": 24,
+    "cliffDays": 0,
+    "linearVestingMonths": 12,
+    "releaseCount": 12,
+    "releaseRule": "12 equal monthly releases; rounding remainder in final release",
+    "provider": "Jupiter Lock/Vesting",
     "cadence": "monthly",
     "immediateUnlockPercent": 0,
     "knownTeamWallets": [
