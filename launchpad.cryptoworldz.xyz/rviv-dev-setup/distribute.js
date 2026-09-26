@@ -35,7 +35,7 @@ async function connect(){
   if(provider){const result=await provider.connect();
    if(String(result?.publicKey||provider.publicKey||'')!==OWNER)stop('Connect JayJayTeamDev.');ctx={kind:'injected',provider};
   }else{status('Opening Jupiter Mobile connection. Approve in Jupiter, then return here. Nothing is signed.');
-   const bridge=await import('/mint/jupiter-mobile.js?v=20260926-reown-react19-v4');bridge.resetJupiterMobileConnectionState?.();
+   const bridge=await import('/mint/jupiter-mobile.js?v=20260926-reown-react-map-v5');bridge.resetJupiterMobileConnectionState?.();
    const adapter=await bridge.getJupiterMobileAdapter();
    await Promise.race([adapter.connect(),new Promise((_,reject)=>setTimeout(()=>reject(Error('Jupiter connection timed out. Tap Connect to retry.')),25000))]);
    if(String(adapter.publicKey||'')!==OWNER)stop('Wrong wallet connected. Select JayJayTeamDev in Jupiter and reconnect.');ctx={kind:'adapter',provider:adapter};
