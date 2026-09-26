@@ -1,0 +1,35 @@
+name: Audit Worldz token identity on-chain
+
+on:
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/token-identity/**"
+      - "launchpad.cryptoworldz.xyz/tokenlist.json"
+      - "launchpad.cryptoworldz.xyz/wldz/token-metadata.json"
+      - "launchpad.cryptoworldz.xyz/rviv/**"
+      - "scripts/audit_worldz_token_identity_onchain.mjs"
+      - ".github/workflows/audit-worldz-token-identity-onchain.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install read-only metadata audit dependencies
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund @metaplex-foundation/umi @metaplex-foundation/umi-bundle-defaults @metaplex-foundation/mpl-token-metadata
+      - name: Read canonical on-chain and upstream identity
+        run: node scripts/audit_worldz_token_identity_onchain.mjs
+      - name: Upload public identity audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldz-token-identity-onchain
+          path: artifacts/worldz-token-identity-onchain.json
+          retention-days: 14
