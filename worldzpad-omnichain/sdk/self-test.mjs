@@ -50,7 +50,7 @@ const testEnvironmentByChain = {
   base: 'base-sepolia',
   ethereum: 'sepolia',
   bnb: 'bsc-testnet',
-  sui: 'testnet',
+  sui: 'devnet',
   hyperevm: 'hyperevm-testnet',
   robinhood: 'robinhood-testnet'
 };
