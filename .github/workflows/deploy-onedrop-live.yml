@@ -201,8 +201,8 @@ jobs:
             if(consoleErrors.length) console.log('ONEDROP_E2E_CONSOLE_ERRORS='+JSON.stringify(consoleErrors));
             if(pageErrors.length) console.log('ONEDROP_E2E_PAGE_ERRORS='+JSON.stringify(pageErrors));
             await browser.close();
-            if(!bridgeReady){
-              throw new Error('Jupiter mobile bridge did not initialise in Android Chromium. '+JSON.stringify({status,consoleErrors,pageErrors}));
+            if(!bridgeReady || modalCount===0 || pageErrors.length){
+              throw new Error('Android wallet connection UI failed. '+JSON.stringify({bridgeReady,modalCount,status,consoleErrors,pageErrors}));
             }
             console.log('WORLDZ_ONEDROP_ANDROID_WALLET_BRIDGE=PASS');
           })().catch(e=>{console.error(e);process.exit(1)});
