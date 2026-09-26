@@ -5,12 +5,12 @@ const { BOT_MENU_COMMANDS, MENUS } = require("../src/command-centre");
 test("gateway commands stay simple and ordered", () => {
   assert.deepEqual(
     BOT_MENU_COMMANDS.map((item) => item.command),
-    ["zedstart", "max", "fullscope", "zed", "auto", "grace", "admin", "admingrace", "zedsettings", "help"]
+    ["zedstart", "max", "worldzfullbuild", "fullscope", "zed", "auto", "grace", "admin", "admingrace", "zedsettings", "help"]
   );
 });
 
 test("each command centre section exposes exactly five core actions", () => {
-  for (const key of ["zed", "fullscope", "votes", "govern", "auto", "grace", "admin", "admingrace", "settings"]) {
+  for (const key of ["zed", "fullbuild", "fullscope", "votes", "govern", "auto", "grace", "admin", "admingrace", "settings"]) {
     assert.equal(MENUS[key].rows.length, 5, `${key} must expose five core actions`);
   }
 });
