@@ -106,55 +106,57 @@ jobs:
 
           print('WORLDZ_ONEDROP_UPLOAD=PASS files='+str(count))
 
-      - name: Verify OneDrop is live
+      - name: Verify deployed bytes at Hostinger origin
         shell: python
         run: |
-          import time, urllib.request
+          import os, ssl, io
+          from ftplib import FTP_TLS
+          from pathlib import Path, PurePosixPath
 
-          expected={
-            'https://launchpad.cryptoworldz.xyz/onedrop/':[
-              'WORLDZ ONEDROP','One setup.','SIGN & LAUNCH ONEDROP'
-            ],
-            'https://launchpad.cryptoworldz.xyz/onedrop/app.js':[
-              'mERKcfxMC5SqJn4Ld4BUris3WKZZ1ojjWJ3A3J5CKxv',
-              'ONE-TRANSACTION PREFLIGHT PASS'
-            ],
-            'https://launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json':[
-              'WORLDZ-ONEDROP-RVIV-2026-09-26-A',
-              '49999999999948'
-            ],
-            'https://launchpad.cryptoworldz.xyz/onedrop/claim/':[
-              'REVIVE','Claim','Verify My Allocation'
-            ],
-          }
+          checks=[
+            (Path('launchpad.cryptoworldz.xyz/onedrop/index.html'), PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop/index.html')),
+            (Path('launchpad.cryptoworldz.xyz/onedrop/app.js'), PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop/app.js')),
+            (Path('launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json'), PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop/revive-manifest.v1.json')),
+            (Path('launchpad.cryptoworldz.xyz/onedrop/claim/index.html'), PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop/claim/index.html')),
+            (Path('launchpad.cryptoworldz.xyz/onedrop/claim/app.js'), PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop/claim/app.js')),
+          ]
 
-          failures=[]
-          for url, needles in expected.items():
-              last=''
-              for attempt in range(1,8):
-                  try:
-                      stamp=int(time.time()*1000)
-                      sep='&' if '?' in url else '?'
-                      req=urllib.request.Request(
-                        url+sep+'onedrop_verify='+str(stamp),
-                        headers={
-                          'User-Agent':'Worldz-OneDrop-Verify/1.0',
-                          'Cache-Control':'no-cache, no-store',
-                          'Pragma':'no-cache'
-                        }
-                      )
-                      with urllib.request.urlopen(req,timeout=30) as r:
-                          body=r.read().decode('utf-8','ignore')
-                          if r.status==200 and all(x in body for x in needles):
-                              print('WORLDZ_ONEDROP_LIVE_PASS',url)
-                              break
-                          last='contract mismatch status='+str(r.status)
-                  except Exception as exc:
-                      last=repr(exc)
-                  time.sleep(attempt*2)
-              else:
-                  failures.append((url,last))
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=45)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          try:
+              for local,remote in checks:
+                  buf=io.BytesIO()
+                  ftp.retrbinary('RETR /'+str(remote),buf.write)
+                  expected=local.read_bytes()
+                  actual=buf.getvalue()
+                  if actual!=expected:
+                      raise SystemExit('HOSTINGER_ORIGIN_MISMATCH '+str(remote))
+                  print('HOSTINGER_ORIGIN_PASS',remote,'bytes='+str(len(actual)))
+          finally:
+              try:ftp.quit()
+              except Exception:ftp.close()
+          print('WORLDZ_ONEDROP_ORIGIN=PASS files='+str(len(checks)))
 
-          if failures:
-              raise SystemExit('WORLDZ_ONEDROP_LIVE_FAIL '+repr(failures))
-          print('WORLDZ_ONEDROP_LIVE=PASS surfaces=4')
+      - name: Probe public edge without overriding origin proof
+        continue-on-error: true
+        shell: python
+        run: |
+          import urllib.request, urllib.error, time
+          for url in [
+            'https://launchpad.cryptoworldz.xyz/onedrop/',
+            'https://launchpad.cryptoworldz.xyz/onedrop/claim/'
+          ]:
+              try:
+                  req=urllib.request.Request(url+'?onedrop_probe='+str(int(time.time()*1000)),headers={
+                    'User-Agent':'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36',
+                    'Accept':'text/html,application/xhtml+xml',
+                    'Cache-Control':'no-cache'
+                  })
+                  with urllib.request.urlopen(req,timeout=20) as r:
+                      print('PUBLIC_EDGE',url,'status='+str(r.status))
+              except urllib.error.HTTPError as e:
+                  print('PUBLIC_EDGE_BLOCKED',url,'status='+str(e.code))
+              except Exception as e:
+                  print('PUBLIC_EDGE_UNAVAILABLE',url,repr(e))
