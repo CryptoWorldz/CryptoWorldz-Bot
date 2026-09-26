@@ -165,6 +165,17 @@
       "teamPoolTokens": 30000000,
       "giveawayChannel": "@CryptoWorldzX via G.R.A.C.E.",
       "executionState": "BUILD_AND_VALIDATION_IN_PROGRESS__NO_END_TO_END_BULK_DISTRIBUTION_PROOF_YET"
+    },
+    "requiredParent": true,
+    "integrationStatus": "REQUIRED_SUBSYSTEM",
+    "masterCommand": "/worldzfullbuild",
+    "fullScopeCommand": "/fullscope",
+    "popularityCommand": "/worldzvotes",
+    "governanceCommand": "/worldzgovern",
+    "capacityContract": {
+      "chainCount": 8,
+      "maxTokensPerChain": 20,
+      "initialTokenEnvironmentCapacity": 160
     }
   }
 }
