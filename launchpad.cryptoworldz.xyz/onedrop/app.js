@@ -73,7 +73,7 @@ async function connectWallet(){
     return {publicKey:new PublicKey(pk.toString()),name:'Injected Solana Wallet',signTransaction:tx=>p.signTransaction(tx)};
   }
   status('Opening secure Solana wallet connection… choose Jupiter Mobile and approve.','warn');
-  const mod=await import('./wallet-mobile.js?v=20260926-vanilla-reown-b');
+  const mod=await import('./wallet-mobile.js?v=20260926-vanilla-reown-c');
   mod.resetJupiterMobileConnectionState?.();
   const adapter=await mod.getJupiterMobileAdapter();
   await adapter.connect();
