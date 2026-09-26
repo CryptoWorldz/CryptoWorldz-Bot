@@ -1,5 +1,5 @@
 {
-  "version": "WORLDZ-TOKEN-IDENTITY-2026-09-27-A",
+  "version": "WORLDZ-TOKEN-IDENTITY-2026-09-27-B",
   "status": "CANONICAL_IDENTITY_REGISTRY",
   "rule": "This file is the single source of truth for WorldzLaunchPad token identity. Unknown or unverified values remain null/PENDING and are never guessed. Public token metadata and token lists must match this registry exactly.",
   "tokens": [
@@ -31,7 +31,19 @@
         "permanentLockPercent": 100,
         "status": "LIVE"
       },
-      "publicMetadata": "https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json"
+      "publicMetadata": "https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json",
+      "metadataUri": "https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-genesis-console?metadata=AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "metaplexMetadataPda": "3rMLw4E4TKfuT9eCSSZMkds9BgqZgzzaRpCutVb5XcsH",
+      "metadataUpdateAuthority": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+      "metadataMutable": true,
+      "upstreamIdentity": {
+        "lastAuditedUtc": "2026-09-26T20:29:53Z",
+        "onchainNameSymbol": "MATCH",
+        "offchainNameSymbol": "MATCH",
+        "jupiterTokenApiNameSymbol": "EMPTY",
+        "jupiterIcon": "PRESENT",
+        "action": "VRFD_METADATA_UPDATE_REQUIRED"
+      }
     },
     {
       "launchOrder": 2,
@@ -48,8 +60,8 @@
       "currentOnChainSupplyTokens": 200000000,
       "mintAuthority": "REVOKED",
       "freezeAuthority": "REVOKED",
-      "image": null,
-      "imageStatus": "CANONICAL_PUBLIC_RASTER_URL_NOT_YET_RECONCILED__DO_NOT_GUESS",
+      "image": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/rviv/dcaa3f79-7c84-45ed-bab7-8466f3f8a435.jpg",
+      "imageStatus": "CANONICAL_ONCHAIN_METADATA_IMAGE_RECONCILED_2026-09-26T20:29:53Z",
       "website": "https://launchpad.cryptoworldz.xyz/rviv/",
       "x": "https://x.com/CryptoWorldzX",
       "telegram": "https://t.me/CryptoWLDZ",
@@ -65,7 +77,19 @@
         "confirmedTradeAtLastAudit": false,
         "status": "POOL_EXISTS_ENABLED__PUBLIC_TRADING_NOT_YET_VERIFIED"
       },
-      "publicMetadata": "https://launchpad.cryptoworldz.xyz/rviv/token-metadata.json"
+      "publicMetadata": "https://launchpad.cryptoworldz.xyz/rviv/token-metadata.json",
+      "metadataUri": "https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-genesis-console?metadata=DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "metaplexMetadataPda": "38FiRTdugwku2BtiUUMqcwKAAAxjdCegMJ3CHLBYTxS8",
+      "metadataUpdateAuthority": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+      "metadataMutable": true,
+      "upstreamIdentity": {
+        "lastAuditedUtc": "2026-09-26T20:29:53Z",
+        "onchainNameSymbol": "MATCH",
+        "offchainNameSymbol": "MATCH",
+        "jupiterTokenApiNameSymbol": "EMPTY",
+        "jupiterIcon": "PRESENT",
+        "action": "VRFD_METADATA_UPDATE_REQUIRED"
+      }
     },
     {
       "launchOrder": 3,
