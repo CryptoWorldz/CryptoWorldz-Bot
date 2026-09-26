@@ -6,7 +6,9 @@ on:
       - "launchpad.cryptoworldz.xyz/tokenlist.json"
       - "launchpad.cryptoworldz.xyz/wldz/token-metadata.json"
       - "launchpad.cryptoworldz.xyz/rviv/**"
+      - "launchpad.cryptoworldz.xyz/.well-known/worldz-tokens.json"
       - "scripts/validate_worldz_token_identity.py"
+      - ".github/workflows/deploy-worldzlaunchpad.yml"
       - ".github/workflows/validate-worldz-token-identity.yml"
   push:
     branches: [main]
@@ -15,7 +17,9 @@ on:
       - "launchpad.cryptoworldz.xyz/tokenlist.json"
       - "launchpad.cryptoworldz.xyz/wldz/token-metadata.json"
       - "launchpad.cryptoworldz.xyz/rviv/**"
+      - "launchpad.cryptoworldz.xyz/.well-known/worldz-tokens.json"
       - "scripts/validate_worldz_token_identity.py"
+      - ".github/workflows/deploy-worldzlaunchpad.yml"
 permissions:
   contents: read
 jobs:
