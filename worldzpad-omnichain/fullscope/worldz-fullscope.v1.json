@@ -82,5 +82,11 @@
     "privateKeysInTelegramDatabase": false
   },
   "buildStage": "FOUNDATION",
-  "releaseRule": "No chain action becomes executable until its adapter, simulation, signature boundary and proof path pass validation."
+  "releaseRule": "No chain action becomes executable until its adapter, simulation, signature boundary and proof path pass validation.",
+  "parentBuild": {
+    "brand": "WorldzFullBuild™",
+    "schema": "WORLDZ-FULLBUILD-V1",
+    "required": true,
+    "contract": "worldzpad-omnichain/fullbuild/worldz-fullbuild.v1.json"
+  }
 }
