@@ -19,7 +19,7 @@ BUCKETS = {
     "liquidity_total": 112_500_000,  # 45%; includes initial pool
     "developer_vesting": 25_000_000,  # 10%; schedule not yet specified
     "purple_diamond_handz": 2_500_000,  # 1%; separate legacy pool
-    "unassigned_pending_decision": 47_500_000,  # 19%; no authority to spend
+    "phenix_total_supply_flywheel": 47_500_000,  # 19%; governed master reserve
 }
 INITIAL_LP = 12_500_000  # 5%, part of liquidity_total
 FIELDS = ["account", "wallet", "source_post_url", "claim_url", "ownership_proof_url",
@@ -35,7 +35,7 @@ def plan():
             "later_lp_capacity": BUCKETS["liquidity_total"] - INITIAL_LP,
             "per_seat": {"immediate": 50_000, "vested": 75_000,
                          "monthly": 6_250, "total": 125_000},
-            "status": "provisional; unassigned allocation and mainnet deployment pending"}
+            "status": "100% supply classified; mainnet execution and vault addresses pending"}
 
 
 def add_months(start, months):
