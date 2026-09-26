@@ -61,8 +61,10 @@ if 'TARGET_GROSS_TRADER_FEE_BPS = 75n' not in sdk:
     raise SystemExit("BitWorldz SDK fee target drifted")
 if devnet_package["dependencies"].get("@meteora-ag/dynamic-bonding-curve-sdk") != "1.5.12":
     raise SystemExit("BitWorldz devnet Meteora SDK must stay pinned to 1.5.12")
-if "MAINNET RPC FORBIDDEN FOR LIVE BITWORLDZ HARNESS" not in devnet_common:
-    raise SystemExit("BitWorldz live devnet mainnet RPC guard missing")
+if "getGenesisHash" not in devnet_common or "EtWTRABZaYq6iMfeYKouRu166VU2xqa1" not in devnet_common:
+    raise SystemExit("BitWorldz live devnet genesis-hash guard missing")
+if "BITWORLDZ DEVNET HARNESS REFUSED NON-DEVNET CLUSTER" not in devnet_common:
+    raise SystemExit("BitWorldz devnet fail-closed error missing")
 if "tokenQuoteDecimal:8" not in devnet_live:
     raise SystemExit("BitWorldz mock-BTC quote must use 8 decimals")
 if "startingFeeBps:75" not in devnet_live or "endingFeeBps:75" not in devnet_live:
