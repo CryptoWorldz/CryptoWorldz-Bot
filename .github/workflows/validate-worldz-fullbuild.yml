@@ -1,0 +1,44 @@
+name: Validate WorldzFullBuild
+
+on:
+  pull_request:
+    paths:
+      - 'worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json'
+      - 'docs/WORLDZFULLBUILD-PROJECT-SOURCE-OF-TRUTH.md'
+      - 'launchpad.cryptoworldz.xyz/fullbuild/**'
+      - 'worldzpad-mainnet/launch-inheritance/**'
+      - 'worldzpad-mainnet/token-identity/**'
+      - 'worldzpad-mainnet/worldz-launch-capability-matrix.v1.json'
+      - 'worldzpad-omnichain/fullscope/worldz-fullscope.v1.json'
+      - 'worldzpad-omnichain/fee-policy.v1.json'
+      - 'scripts/validate_worldz_fullbuild.py'
+      - '.github/workflows/validate-worldz-fullbuild.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json'
+      - 'docs/WORLDZFULLBUILD-PROJECT-SOURCE-OF-TRUTH.md'
+      - 'launchpad.cryptoworldz.xyz/fullbuild/**'
+      - 'worldzpad-mainnet/launch-inheritance/**'
+      - 'worldzpad-mainnet/token-identity/**'
+      - 'worldzpad-mainnet/worldz-launch-capability-matrix.v1.json'
+      - 'worldzpad-omnichain/fullscope/worldz-fullscope.v1.json'
+      - 'worldzpad-omnichain/fee-policy.v1.json'
+      - 'scripts/validate_worldz_fullbuild.py'
+      - '.github/workflows/validate-worldz-fullbuild.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate WorldzFullBuild master integration
+        run: python scripts/validate_worldz_fullbuild.py

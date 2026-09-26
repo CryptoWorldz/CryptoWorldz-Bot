@@ -113,7 +113,8 @@ const WEB_ROUTES = Object.freeze({
   supportJay: "https://donateworldz.com/support-jayjayteamdev/",
   donateReagan: "https://donateworldz.com/reagan-children/",
   publicCommands: "https://cryptoworldz.xyz/command-centre/commands/",
-  fullScope: "https://launchpad.cryptoworldz.xyz/fullscope/"
+  fullScope: "https://launchpad.cryptoworldz.xyz/fullscope/",
+  fullBuild: "https://launchpad.cryptoworldz.xyz/fullbuild/"
 });
 
 function menuText(menu) {
@@ -217,7 +218,7 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "ZED guides. WorldzFullScope watches the supported multi-chain token universe. AUTO explains controlled finance workflows. G.R.A.C.E. coordinates approved communication. RECAP explains verified activity. WorldzLaunchPad builds and proves launches.",
     "",
     "Gateway commands:",
-    "/zedstart • /fullscope • /worldzvotes • /worldzgovern • /commands • /commandtree",
+    "/zedstart • /worldzfullbuild • /fullscope • /worldzvotes • /worldzgovern • /commands • /commandtree",
     "",
     "You do not need to memorise the full command list."
   ].join("\n"), mainKeyboard());
@@ -251,6 +252,18 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     if (!(await isAdmin(msg))) return send(msg, "⛔ Command Centre settings require Admin access.");
     return send(msg, menuText(MENUS.settings));
   });
+
+  bot.onText(/^\/worldzfullbuild(?:@\w+)?$/, (msg) => send(msg, [
+    "🌐 WORLDZFULLBUILD™",
+    "",
+    "One Worldz. One Build.",
+    "",
+    "The current main integration source of truth for WorldzLaunchPad, FullScope, Omnichain, Proof, WorldDexPush and the connected Worldz architecture.",
+    "",
+    "Live claims stay evidence-driven; mainnet execution stays independently gated."
+  ].join("\n"), {
+    reply_markup: { inline_keyboard: [[{ text: "🌐 OPEN WORLDZFULLBUILD™", url: WEB_ROUTES.fullBuild }]] }
+  }));
 
   bot.onText(/^\/commands(?:@\w+)?$/, (msg) => sendCommandGroups(msg));
   bot.onText(/^\/ownercommands(?:@\w+)?$/, async (msg) => {

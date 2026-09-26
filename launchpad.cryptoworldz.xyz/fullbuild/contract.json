@@ -1,0 +1,305 @@
+{
+  "schema": "WORLDZ-FULLBUILD-V1",
+  "version": "2026-09-27-MAIN-A",
+  "brand": "WorldzFullBuild™",
+  "status": "MAIN_INTEGRATION_SOURCE_OF_TRUTH",
+  "updatedAt": "2026-09-27",
+  "purpose": "Unify the project-relevant Worldz architecture, approved reusable launch rules, verified repository state and regression-prevention lessons in one public, versioned, non-sensitive contract.",
+  "decisionAndTruth": {
+    "decisionAuthority": [
+      "LATEST_EXPLICIT_OWNER_INSTRUCTION",
+      "VERSIONED_CONTRACT_REFLECTING_LATEST_INSTRUCTION",
+      "OLDER_PROJECT_PLAN",
+      "RESEARCH_OR_PROPOSAL"
+    ],
+    "factualStatus": [
+      "CONFIRMED_ON_CHAIN_EVIDENCE_FOR_ON_CHAIN_FACTS",
+      "VERIFIED_LIVE_PRODUCTION_OR_DEPLOYMENT_EVIDENCE_FOR_LIVE_FACTS",
+      "VERIFIED_GITHUB_REPOSITORY_AND_CI_EVIDENCE_FOR_CODE_BUILD_FACTS",
+      "UNVERIFIED_OR_PLANNED_STATE"
+    ],
+    "rule": "A newer decision may supersede an older plan but cannot manufacture an on-chain, deployment or provider-verification event.",
+    "privacyBoundary": "Only project-relevant public/approved operational data belongs in this public contract. Private personal, medical, legal, credential, seed-phrase, private-key and unrelated chat material is excluded."
+  },
+  "deliveryTruthStates": [
+    "PLANNED",
+    "CODE_BUILT",
+    "DEPLOYED_UNVERIFIED",
+    "LIVE_SOURCE_VERIFIED",
+    "END_TO_END_VERIFIED",
+    "SUPERSEDED",
+    "REJECTED"
+  ],
+  "ecosystem": [
+    {
+      "id": "oneworldz",
+      "name": "OneWorldz",
+      "role": "HUMANITARIAN_MISSION_AND_LEADERSHIP"
+    },
+    {
+      "id": "donateworldz",
+      "name": "DonateWorldz",
+      "role": "CONTRIBUTION_AND_CAMPAIGN_LAYER"
+    },
+    {
+      "id": "cryptoworldz",
+      "name": "CryptoWorldz",
+      "role": "TECHNOLOGY_AND_FUNDING_ENGINE"
+    },
+    {
+      "id": "worldzlaunchpad",
+      "name": "WorldzLaunchPad™",
+      "role": "MULTI_CHAIN_CREATOR_AND_TOKEN_LAUNCH_FRAMEWORK"
+    },
+    {
+      "id": "fullscope",
+      "name": "WorldzFullScope™",
+      "role": "CHAIN_TOKEN_DATA_ACTION_LOCK_VEST_PROOF_LAYER"
+    },
+    {
+      "id": "zed",
+      "name": "ZED LED Command Centre MAX™",
+      "role": "OPERATIONS_AND_COMMAND_SURFACE"
+    },
+    {
+      "id": "auto",
+      "name": "AUTO",
+      "role": "APPROVAL_GATED_FINANCE_AND_ACCOUNTING_CONTROL"
+    },
+    {
+      "id": "grace",
+      "name": "G.R.A.C.E.",
+      "role": "APPROVAL_CONTROLLED_COMMUNICATIONS"
+    },
+    {
+      "id": "pdc",
+      "name": "PurpleDiamondCrew",
+      "role": "LEGACY_HOLDER_REVIVAL_AND_COMMUNITY_LAYER"
+    },
+    {
+      "id": "worldzlinkz",
+      "name": "WorldzLinkz™",
+      "role": "DOMAIN_AND_QR_DIRECTORY"
+    },
+    {
+      "id": "bitworldz",
+      "name": "BitWorldz™ / OmniBTC™",
+      "role": "BTC_REPRESENTATION_AND_PAIR_RESEARCH_LAYER"
+    }
+  ],
+  "canonicalTokens": [
+    {
+      "order": 1,
+      "name": "WORLDZ",
+      "symbol": "WLDZ",
+      "designSupplyTokens": 100000000,
+      "chain": "Solana",
+      "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "lifecycle": "LIVE",
+      "rule": "Never remint or substitute the canonical WLDZ mint to repair metadata, routing or presentation."
+    },
+    {
+      "order": 2,
+      "name": "REVIVE",
+      "symbol": "RVIV",
+      "fixedSupplyTokens": 200000000,
+      "chain": "Solana",
+      "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "lifecycle": "LIVE",
+      "rule": "Never create a second RVIV mint to repair metadata, distribution or launch presentation."
+    },
+    {
+      "order": 3,
+      "name": "PHENIX",
+      "symbol": "PNEX",
+      "fixedSupplyTokens": 250000000,
+      "chain": "Solana",
+      "mint": null,
+      "lifecycle": "PRELAUNCH",
+      "rule": "No live-mint claim until verified on-chain evidence exists."
+    },
+    {
+      "order": 4,
+      "name": "MIRACLE",
+      "symbol": "MRCL",
+      "fixedSupplyTokens": 348000000,
+      "chain": "Solana",
+      "mint": null,
+      "lifecycle": "PLANNED",
+      "rule": "No live-mint or market claim until verified evidence exists."
+    }
+  ],
+  "architecture": {
+    "commandLeader": "ZED LED Command Centre MAX™",
+    "modules": [
+      {
+        "id": "launch-inheritance",
+        "name": "WorldzLaunchInheritance™",
+        "source": "worldzpad-mainnet/launch-inheritance/worldz-launch-inheritance.v1.json",
+        "state": "CODE_BUILT"
+      },
+      {
+        "id": "token-identity",
+        "name": "Worldz Token Identity Engine™",
+        "source": "worldzpad-mainnet/token-identity/worldz-token-registry.v1.json",
+        "state": "LIVE_PRODUCTION_GATE"
+      },
+      {
+        "id": "fullscope",
+        "name": "WorldzFullScope™",
+        "source": "worldzpad-omnichain/fullscope/worldz-fullscope.v1.json",
+        "state": "FOUNDATION_BUILT"
+      },
+      {
+        "id": "proof-receipt",
+        "name": "Worldz Proof Receipt™",
+        "source": "worldzpad-omnichain/schemas/worldz-proof-receipt.v1.json",
+        "state": "BUILT_VALIDATION_REQUIRED"
+      },
+      {
+        "id": "omnichain",
+        "name": "Worldz Omnichain™",
+        "source": "worldzpad-omnichain/worldz-omnichain.v1.json",
+        "state": "ARCHITECTURE_BUILT_MAINNET_OFF"
+      },
+      {
+        "id": "worlddexpush",
+        "name": "WorldDexPush™",
+        "source": "worldzpad-mainnet/worlddexpush/worlddexpush.v1.json",
+        "state": "READ_ONLY_UPSTREAM_AUDIT_BUILT"
+      },
+      {
+        "id": "jupiter-vrfd",
+        "name": "Worldz → Jupiter VRFD",
+        "source": "worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json",
+        "state": "HANDOFF_AND_AUDIT_BUILT"
+      },
+      {
+        "id": "flywheel",
+        "name": "Worldz Universal FlyWheel™",
+        "source": "worldzpad-mainnet/flywheel/worldz-universal-flywheel.v1.json",
+        "state": "POLICY_BUILT_EXECUTION_PROOF_REQUIRED"
+      },
+      {
+        "id": "bitworldz",
+        "name": "BitWorldz OmniBTC™",
+        "source": "worldzpad-omnichain/bitworldz/bitworldz.v1.json",
+        "state": "RESEARCH_DEVNET_RAIL_MAINNET_OFF"
+      },
+      {
+        "id": "capability-matrix",
+        "name": "WorldzLaunchPad Capability Matrix",
+        "source": "worldzpad-mainnet/worldz-launch-capability-matrix.v1.json",
+        "state": "LIVE_TRUTH_MATRIX"
+      }
+    ]
+  },
+  "launchInheritance": {
+    "source": "worldzpad-mainnet/launch-inheritance/worldz-launch-inheritance.v1.json",
+    "appliesToFutureWorldzLaunchPadTokens": true,
+    "firstPartyWorldzWalletEntry": true,
+    "externalWalletCustody": true,
+    "walletBrowserPrerequisite": false,
+    "collectSeedPhrase": false,
+    "collectPrivateKey": false,
+    "exactReadableTransactionReview": true,
+    "simulationBeforeSignature": true,
+    "externalWalletSignatureRequired": true,
+    "proofReceiptRequired": true,
+    "finalStateReconciliationRequired": true,
+    "chainEnvironmentPairRequired": true,
+    "providerGreenStateMustComeFromProviderEvidence": true,
+    "mainnetExecutionInherited": false
+  },
+  "feeAndFlywheel": {
+    "magicFeePolicy": "worldzpad-omnichain/fee-policy.v1.json",
+    "targetGrossTraderFeeBpsWhereProven": 75,
+    "dynamicFeeDefault": false,
+    "worldzControlledSplitPercent": {
+      "creator": 51,
+      "referrer": 17,
+      "legacyFlywheel": 15,
+      "worldzLaunchPad": 8.5,
+      "oneWorldzImpact": 8.5
+    },
+    "rule": "Worldz Magic 75 is a route-specific target where the venue is proven. External protocol/DEX deductions are disclosed separately. Existing public creator configurable-fee routes remain a separate profile and may not be silently mixed.",
+    "universalFlywheelRule": "Every eligible registered token receives an auditable benefit record per Universal Cycle; token-specific benefits require a resolved matching PASSED Worldz Proof Receipt."
+  },
+  "fullScope": {
+    "chains": [
+      "solana",
+      "xrpl",
+      "base",
+      "ethereum",
+      "bnb",
+      "sui",
+      "hyperevm",
+      "robinhood"
+    ],
+    "maxTokensPerChain": 20,
+    "initialEnvironmentCapacity": 160,
+    "popularity": "Worldz Votes Centre™ — popularity only",
+    "governance": "WorldzGovern™ — DAO governance only",
+    "popularityMayExecuteGovernance": false,
+    "governanceMayAffectPopularityRanking": false
+  },
+  "crossChain": {
+    "rule": "Chain-native first. Wrapped, bridged and native assets remain explicitly distinguished.",
+    "solana": "SVM-native token/pool/curve/locking paths",
+    "xrpl": "Issued-token/CLOB/AMM mechanics with explicit wrapped/cross-pair disclosure",
+    "evm": "Shared EVM architecture with chain-specific network and venue proof",
+    "sui": "Move/PTB path with devnet/testnet proof before production release",
+    "bitcoin": "Native BTC, Bitcoin-layer assets, wrapped BTC and bridged BTC remain separate representations"
+  },
+  "regressionPrevention": [
+    "Do not launch liquidity before public identity/metadata/indexer readiness is verified.",
+    "Do not call CI or HTTP success an end-to-end wallet success.",
+    "Do not require users to paste a Worldz URL into a wallet browser.",
+    "Do not publish malformed or hard-to-copy action links.",
+    "Do not infer a live multisig proposal merely from a page existing.",
+    "Do not silently substitute token mints, recipient wallets, fee destinations or approved allocations.",
+    "Do not collapse deployed, connected, signed, submitted, confirmed, pool-live, locked, vested and distributed into one status.",
+    "Do not fabricate recipients or provider approvals.",
+    "Do not call wrapped or bridged BTC native BTC.",
+    "Do not unlock one chain because another chain passed.",
+    "Do not allow mint-address prefixes to become Worldz-owned token names."
+  ],
+  "branchReconciliation": {
+    "currentIntegrationBranch": "main",
+    "historicalBuildBranch": "revive-v1-build",
+    "rule": "No broad force merge. Preserve useful historical work feature-by-feature with current canonical data, tests and deployment gates.",
+    "mainNowContains": [
+      "Worldz Token Identity Engine",
+      "WorldzFullScope foundation",
+      "Worldz Omnichain foundations",
+      "Worldz Proof Receipt",
+      "WorldDexPush",
+      "Jupiter VRFD identity control",
+      "WorldzLaunchInheritance",
+      "BitWorldz foundations",
+      "Universal FlyWheel proof closure",
+      "WorldzLinkz",
+      "ZED protected runtime gates"
+    ]
+  },
+  "executionBoundary": {
+    "globalMainnetMarketLaunchDefault": false,
+    "perChainReleaseGate": true,
+    "perVenueReleaseGate": true,
+    "explicitHumanApprovalRequired": true,
+    "privateKeysStoredByWorldz": false,
+    "automaticVendorPayment": false,
+    "automaticMainnetBroadcast": false
+  },
+  "publicSurfaces": {
+    "fullBuild": "/fullbuild/",
+    "launchInheritance": "/inheritance/",
+    "fullScope": "/fullscope/",
+    "proofReceipt": "/proof-receipt/",
+    "worldDexPush": "/worlddexpush/",
+    "capabilities": "/capabilities/",
+    "worldzLinkz": "https://cryptoworldz.xyz/worldzlinkz/"
+  },
+  "updateRule": "Future project-relevant decisions, corrections, proof and regression lessons are continuing WorldzFullBuild inputs. The newest explicit owner decision supersedes older conflicting plans; factual state remains evidence-driven.",
+  "source": "https://launchpad.cryptoworldz.xyz/fullbuild/contract.json"
+}

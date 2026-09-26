@@ -912,5 +912,17 @@
     "proofReceiptRequiredAfterConfirmedAction": true,
     "providerStateNeverSelfApproved": true,
     "mainnetExecutionInherited": false
+  },
+  "worldzFullBuild": {
+    "version": "WORLDZ-FULLBUILD-V1",
+    "name": "WorldzFullBuild™",
+    "status": "MAIN_INTEGRATION_SOURCE_OF_TRUTH",
+    "publicPage": "/fullbuild/",
+    "contract": "/fullbuild/contract.json",
+    "command": "/worldzfullbuild",
+    "currentIntegrationBranch": "main",
+    "decisionRule": "LATEST_EXPLICIT_OWNER_INSTRUCTION_WINS_FOR_DECISIONS",
+    "factualStatusRule": "EVIDENCE_DRIVEN",
+    "mainnetExecutionGrantedByThisContract": false
   }
 }

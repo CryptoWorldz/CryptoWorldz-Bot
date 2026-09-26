@@ -14,6 +14,7 @@ const COMMAND_GROUPS = Object.freeze([
   ]),
   group("fullscope", "🌐 WorldzFullScope™ • Multi-chain Command Layer", "member", [
     ["fullscope", "Open the ZED-led WorldzFullScope command layer"],
+    ["worldzfullbuild", "Open the WorldzFullBuild master integration source of truth"],
     ["fullscopechains", "View every currently supported FullScope chain"],
     ["fullscopetokens", "View the multi-chain token registry"],
     ["worldzwatch", "View indexed token and chain activity"],
