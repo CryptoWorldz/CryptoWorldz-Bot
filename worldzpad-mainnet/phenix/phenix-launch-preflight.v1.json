@@ -1,6 +1,6 @@
 {
   "schema": "PHENIX-LAUNCH-PREFLIGHT-V1",
-  "version": "PNEX-PREFLIGHT-2026-09-26-C",
+  "version": "PNEX-PREFLIGHT-2026-09-26-D",
   "status": "PREP_ONLY__MAINNET_DISABLED",
   "token": {
     "launchOrder": 3,
@@ -86,7 +86,15 @@
       "duplicate identity and wallet review passed",
       "human approval recorded"
     ],
-    "rule": "Publicly posted wallet addresses or statements of need are research evidence only; no PNEX assignment occurs until ownership, claim and approval checks pass."
+    "rule": "Publicly posted wallet addresses or statements of need are research evidence only; no PNEX assignment occurs until ownership, claim and approval checks pass.",
+    "genesisModel": {
+      "policyReference": "pnex-phenix-chance-vault.v1.json",
+      "vaultTokens": 62500000,
+      "maximumSeats": 500,
+      "recipientsRequiredBeforeGenesis": false,
+      "unclaimedSeatsRemainLocked": true,
+      "rule": "Unknown PHENIX Chance recipients do not block genesis. The full 25% is classified into the dedicated Chance Vault; individual seats are released only after approval."
+    }
   },
   "liquidity": {
     "genesisTokens": 12500000,
@@ -127,7 +135,7 @@
     "PHENIX Total Supply FlyWheel 19% / 47,500,000 PNEX policy is finalized with auditable lane controls",
     "FlyWheel release caps, approval rules, vault address and Worldz Proof path are finalized",
     "all 250,000,000 PNEX remain assigned with no hidden or unclassified supply",
-    "PHENIX Chance recipient register validates and only approved recipients are exported",
+    "PHENIX Chance Vault receives exactly 62,500,000 PNEX at genesis and claim execution remains gated",
     "Worldz Universal FlyWheel 30-day cycle validator passes and coverage registry is integrated",
     "Worldz LinkedAsset developer standard is available to all launches with verified-asset and opt-in controls",
     "Worldz OmniBuildz cross-chain LP lane passes policy validation and remains inside the existing 19% FlyWheel",
@@ -153,7 +161,6 @@
     "vesting and ProofBurn policies are defined but still require on-chain/devnet enforcement proof",
     "PHENIX Total Supply FlyWheel 19% is assigned, but its internal release policy and execution controls are not yet finalized",
     "no PHENIX mainnet mint address is recorded",
-    "recipient approvals are not complete",
     "mainnet execution remains disabled"
   ],
   "totalSupplyFlyWheel": {
