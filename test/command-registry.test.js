@@ -9,7 +9,7 @@ const REQUIRED_RUNTIME_COMMANDS = [
   "worldzvotes","tokenvote","worldztrending","worldzrankings",
   "worldzgovern","governproposals","governvote","governdelegate",
   "raid","admin","admingrace","zedsettings","newmission","editmission","endmission","pending","approve","reject","member","admins","permissions","setkitty","setrole","setpermission","setpartner","broadcast","stats","activity",
-  "causes","cause","cause_add","shilllink","referrals","rewardplan","website","websites","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
+  "causes","cause","cause_add","shilllink","referrals","rewardplan","website","websites","worldzlinks","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
   "workstart","workstop","evidence","workevidence","rewardbudget","specialreward","rewardasset","fundingplan","funded","contribute","walletplan","setprojectwallet","investmentfunded",
   "worldzcast","worldzcasttargets","confirmworldzcast","cancelworldzcast","worldzcaston","worldzcastoff","boostshill","specialtiers","uniquelegend","legendstatus","reviewlegend","reserverewardon","reserverewardoff",
   "executives","addscopedadmin","disableadmin","appointexecutive",
@@ -55,4 +55,6 @@ test("WorldzFullBuild is exposed as its own member command group", () => {
   const fullbuild = groups.find((group) => group.key === "fullbuild");
   assert.ok(fullbuild);
   assert.ok(fullbuild.commands.some((item) => item.command === "worldzfullbuild"));
+  const names = new Set(groups.flatMap((group) => group.commands.map((item) => item.command)));
+  assert.ok(names.has("worldzlinks"));
 });
