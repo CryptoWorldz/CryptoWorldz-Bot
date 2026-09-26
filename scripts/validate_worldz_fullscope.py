@@ -23,6 +23,23 @@ assert contract["financialSafety"]["walletSignatureRequired"] is True
 assert contract["financialSafety"]["autoBroadcast"] is False
 assert contract["financialSafety"]["mainnetExecutionEnabled"] is False
 assert contract["financialSafety"]["privateKeysInTelegramDatabase"] is False
+\nbuild = contract["worldzFullBuild"]
+assert build["brand"] == "WorldzFullBuild™"
+assert build["status"] == "RELEASE_GATE_DESIGN"
+wallet = build["walletConnection"]
+assert wallet["entryPoint"] == "first-party-worldz-website"
+assert wallet["walletComesToWebsite"] is True
+assert wallet["manualWalletBrowserRequired"] is False
+assert wallet["externalWalletCustody"] is True
+assert wallet["secretPhraseCollection"] is False
+assert wallet["mobileLayout"]["longAddressesWrapWithinViewport"] is True
+assert wallet["mobileLayout"]["buttonsFitViewport"] is True
+assert wallet["connectionProof"]["productionUrlTestRequired"] is True
+assert wallet["connectionProof"]["realWalletApprovalRequired"] is True
+assert wallet["exactApproval"]["signedMessageMustEqualReviewedMessage"] is True
+assert wallet["exactApproval"]["confirmOnChainBeforeCompleted"] is True
+assert wallet["exactApproval"]["autoBroadcast"] is False
+assert len(build["wldzLessons"]) >= 5
 
 pop = contract["voting"]["popularity"]
 gov = contract["voting"]["governance"]
