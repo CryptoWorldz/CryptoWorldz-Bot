@@ -143,7 +143,9 @@ jobs:
             root/'trust/index.html',root/'trust/app.js',
             root/'omnichain/index.html',root/'fullbuild/index.html',root/'fullbuild/contract.json',root/'fullscope/index.html',root/'inheritance/index.html',root/'inheritance/contract.json',
             root/'proof-receipt/index.html',root/'.well-known/worldz-proof-receipt.schema.json',root/'schemas/worldz-proof-receipt.v1.json',
-            root/'worlddexpush/index.html',root/'worlddexpush/app.js',root/'worlddexpush/jupiter/index.html',root/'worlddexpush/jupiter/package.json',
+            root/'worlddexpush/index.html',root/'worlddexpush/app.js',
+            root/'worlddexpush/jupiter/index.html',root/'worlddexpush/jupiter/package.json',
+            root/'worlddexpush/dexscreener/index.html',root/'worlddexpush/dexscreener/package.json',
             root/'bitworldz/index.html',root/'bitworldz/app.js',root/'capabilities/index.html',
             root/'technology/index.html',root/'technology.html',
             root/'wldz/index.html',root/'wldz/app.js',root/'wldz/launch-config.json',
@@ -673,6 +675,8 @@ jobs:
                   dexpush_code,dexpush_body=get(base+'/worlddexpush/?verify=dexpush-v1')
                   jup_control_code,jup_control_body=get(base+'/worlddexpush/jupiter/?verify=jupiter-vrfd-v1')
                   jup_package_code,jup_package_body=get(base+'/worlddexpush/jupiter/package.json?verify=jupiter-vrfd-v1')
+                  dex_control_code,dex_control_body=get(base+'/worlddexpush/dexscreener/?verify=dexscreener-v1')
+                  dex_package_code,dex_package_body=get(base+'/worlddexpush/dexscreener/package.json?verify=dexscreener-v1')
                   bitworldz_code,bitworldz_body=get(base+'/bitworldz/?verify=bitworldz-v1')
                   capability_code,capability_body=get(base+'/capabilities/?verify=capability-v1')
                   tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
@@ -739,6 +743,10 @@ jobs:
                   assert platform['worldzFullBuild']['status']=='MAIN_INTEGRATION_SOURCE_OF_TRUTH'
                   assert platform['worldzFullBuild']['currentIntegrationBranch']=='main'
                   assert platform['worldzFullBuild']['mainnetExecutionGrantedByThisContract'] is False
+                  assert platform['worldDexPush']['dexScreenerControl']['automaticPayment'] is False
+                  assert platform['worldDexPush']['dexScreenerControl']['goldenTickerActiveBoostThreshold']==500
+                  assert platform['worldDexPush']['dexScreenerControl']['seventyFivePointsIsSufficient'] is False
+                  assert platform['worldDexPush']['dexScreenerControl']['worldzSpecialPartnershipState']=='PROPOSAL_ONLY'
 
                   assert dev_code==200 and 'Create Devnet Token' in dev_body
                   assert curve_code==200 and 'Worldz Curve™' in curve_body
@@ -782,6 +790,15 @@ jobs:
                   passed_rules=[x for x in live_receipt_schema['allOf'] if x.get('if',{}).get('properties',{}).get('status',{}).get('const')=='PASSED']
                   assert len(passed_rules)==1
                   assert dexpush_code==200 and 'WORLDDEXPUSH™' in dexpush_body and '500+ active Boosts' in dexpush_body and 'LIVE UPSTREAM CHECKER' in dexpush_body
+                  assert dex_control_code==200 and 'DEX SCREENER HANDOFF' in dex_control_body and '500+ active Boosts' in dex_control_body
+                  assert dex_package_code==200
+                  dex_package=json.loads(dex_package_body)
+                  expected_dex_package=json.loads(Path('launchpad.cryptoworldz.xyz/worlddexpush/dexscreener/package.json').read_text())
+                  assert dex_package==expected_dex_package, 'LIVE_DEXSCREENER_HANDOFF_PACKAGE_MISMATCH'
+                  assert dex_package['goldenTicker']['requiredActiveBoosts']==500
+                  assert dex_package['goldenTicker']['seventyFivePointsIsSufficient'] is False
+                  assert dex_package['worldzSpecial']['status']=='PROPOSAL_ONLY__NO_DEX_SCREENER_PARTNERSHIP_CLAIM'
+                  assert dex_package['safety']['automaticPayment'] is False
                   assert bitworldz_code==200 and 'BitWorldz' in bitworldz_body and 'Mainnet execution disabled' in bitworldz_body
                   assert capability_code==200 and 'WORLDZ' in capability_body and 'CAPABILITY MATRIX' in capability_body and 'MAINNET MARKET LAUNCH: GATED' in capability_body
                   assert tech_code==200 and 'WORLDZ TECHNOLOGY & MEANINGS' in tech_body and 'Swap API V2' in tech_body and 'WorldzMINT' in tech_body

@@ -1,0 +1,98 @@
+{
+  "schema": "WORLDZ-DEXSCREENER-HANDOFF-V1",
+  "version": "2026-09-27-A",
+  "name": "WorldDexPush™ → DEX Screener",
+  "status": "READ_ONLY_STATUS_AND_OFFICIAL_CHECKOUT_HANDOFF__NO_PARTNERSHIP_CLAIM",
+  "purpose": "Give every LIVE Worldz Solana token one canonical DEX Screener handoff with exact identity, expected market, provider status APIs, official paid-feature routes and explicit human approval boundaries.",
+  "provider": {
+    "name": "DEX Screener",
+    "pairApi": "https://api.dexscreener.com/token-pairs/v1/{CHAIN}/{TOKEN}",
+    "ordersApi": "https://api.dexscreener.com/orders/v1/{CHAIN}/{TOKEN}",
+    "profileApi": "https://api.dexscreener.com/token-profiles/recent-updates/v1",
+    "enhancedTokenInfoCheckout": "https://marketplace.dexscreener.com/product/token-info",
+    "boostsDocumentation": "https://docs.dexscreener.com/boosting",
+    "customAdvertisingContact": "ads@dexscreener.com",
+    "supportContact": "support@dexscreener.com"
+  },
+  "tokens": [
+    {
+      "launchOrder": 1,
+      "slug": "wldz",
+      "name": "WORLDZ",
+      "symbol": "WLDZ",
+      "chain": "solana",
+      "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "decimals": 6,
+      "image": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
+      "website": "https://launchpad.cryptoworldz.xyz/wldz/",
+      "x": "https://x.com/CryptoWorldzX",
+      "telegram": "https://t.me/CryptoWLDZ",
+      "publicMetadata": "https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json",
+      "expectedMarket": {
+        "venue": "Meteora DAMM v2",
+        "pair": "WLDZ/wSOL",
+        "pairAddress": "GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ",
+        "status": "LIVE"
+      },
+      "tokenPage": "https://dexscreener.com/solana/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "pairPage": "https://dexscreener.com/solana/GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ"
+    },
+    {
+      "launchOrder": 2,
+      "slug": "rviv",
+      "name": "REVIVE",
+      "symbol": "RVIV",
+      "chain": "solana",
+      "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "decimals": 6,
+      "image": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/rviv/dcaa3f79-7c84-45ed-bab7-8466f3f8a435.jpg",
+      "website": "https://launchpad.cryptoworldz.xyz/rviv/",
+      "x": "https://x.com/CryptoWorldzX",
+      "telegram": "https://t.me/CryptoWLDZ",
+      "publicMetadata": "https://launchpad.cryptoworldz.xyz/rviv/token-metadata.json",
+      "expectedMarket": {
+        "venue": "Meteora DAMM v2",
+        "pair": "RVIV/wSOL",
+        "pairAddress": "YWEMDsd6o3dm8uXNnmnWWU3c1UtFqDUKEMfbQ512i5c",
+        "status": "POOL_EXISTS_ENABLED__PUBLIC_TRADING_NOT_YET_VERIFIED"
+      },
+      "tokenPage": "https://dexscreener.com/solana/DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "pairPage": "https://dexscreener.com/solana/YWEMDsd6o3dm8uXNnmnWWU3c1UtFqDUKEMfbQ512i5c"
+    }
+  ],
+  "enhancedTokenInfo": {
+    "available": true,
+    "automaticPurchase": false,
+    "approval": "EXPLICIT_HUMAN_PROVIDER_CHECKOUT_REQUIRED",
+    "receiptRequiredAfterApprovedPurchase": true
+  },
+  "boosts": {
+    "available": true,
+    "automaticPurchase": false,
+    "approval": "EXPLICIT_HUMAN_PROVIDER_CHECKOUT_REQUIRED",
+    "activeBoostsReadFromProviderPairData": true
+  },
+  "goldenTicker": {
+    "providerTerm": "Golden Ticker",
+    "requiredActiveBoosts": 500,
+    "stateRule": "ACTIVE_ONLY_WHEN_PROVIDER_DATA_SHOWS_THRESHOLD_OR_GREATER",
+    "seventyFivePointsIsSufficient": false
+  },
+  "worldzSpecial": {
+    "status": "PROPOSAL_ONLY__NO_DEX_SCREENER_PARTNERSHIP_CLAIM",
+    "proposal": "docs/WORLDDEXPUSH-DEXSCREENER-WORLDZSPECIAL-PROPOSAL.md",
+    "rule": "WorldzSpecial becomes an official DEX Screener integration only after explicit written provider agreement."
+  },
+  "safety": {
+    "canonicalIdentityRequired": true,
+    "everyLiveSolanaWorldzTokenRequired": true,
+    "wrongNonBlankProviderIdentityFailsAudit": true,
+    "providerUnavailableFailsAudit": true,
+    "noFakeProviderApproval": true,
+    "vendorCheckoutMustBeOfficial": true,
+    "storePrivateKeys": false,
+    "storeCardData": false,
+    "automaticPayment": false
+  },
+  "source": "https://launchpad.cryptoworldz.xyz/worlddexpush/dexscreener/package.json"
+}

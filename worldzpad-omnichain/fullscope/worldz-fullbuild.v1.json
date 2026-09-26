@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-FULLBUILD-V1",
-  "version": "2026-09-27-MAIN-A",
+  "version": "2026-09-27-MAIN-B",
   "brand": "WorldzFullBuild™",
   "status": "MAIN_INTEGRATION_SOURCE_OF_TRUTH",
   "updatedAt": "2026-09-27",
@@ -175,6 +175,12 @@
         "state": "HANDOFF_AND_AUDIT_BUILT"
       },
       {
+        "id": "dexscreener-control",
+        "name": "Worldz → DEX Screener Control",
+        "source": "worldzpad-mainnet/worlddexpush/dexscreener-worldz.v1.json",
+        "state": "HANDOFF_AND_AUDIT_BUILT__PARTNERSHIP_NOT_CLAIMED"
+      },
+      {
         "id": "flywheel",
         "name": "Worldz Universal FlyWheel™",
         "source": "worldzpad-mainnet/flywheel/worldz-universal-flywheel.v1.json",
@@ -279,7 +285,8 @@
       "BitWorldz foundations",
       "Universal FlyWheel proof closure",
       "WorldzLinkz",
-      "ZED protected runtime gates"
+      "ZED protected runtime gates",
+      "DEX Screener provider-control handoff"
     ]
   },
   "executionBoundary": {
@@ -298,7 +305,8 @@
     "proofReceipt": "/proof-receipt/",
     "worldDexPush": "/worlddexpush/",
     "capabilities": "/capabilities/",
-    "worldzLinkz": "https://cryptoworldz.xyz/worldzlinkz/"
+    "worldzLinkz": "https://cryptoworldz.xyz/worldzlinkz/",
+    "dexScreenerControl": "/worlddexpush/dexscreener/"
   },
   "updateRule": "Future project-relevant decisions, corrections, proof and regression lessons are continuing WorldzFullBuild inputs. The newest explicit owner decision supersedes older conflicting plans; factual state remains evidence-driven."
 }

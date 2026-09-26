@@ -68,3 +68,13 @@ The main build permanently carries forward launch lessons: no liquidity before i
 ## Public privacy boundary
 
 This repository is public. WorldzFullBuild stores project-relevant public/approved operational rules only. Personal, medical, legal, credential, seed-phrase, private-key and unrelated chat material is not copied into the public contract.
+
+## Provider identity and market-discovery controls
+
+WorldDexPush™ keeps Worldz-owned identity separate from third-party provider state.
+
+- Jupiter VRFD: canonical WLDZ/RVIV handoff + recurring upstream audit. Provider name/symbol remain PENDING until Jupiter exposes the expected values.
+- DEX Screener: canonical LIVE-token handoff + pair/price/boost/order-status audit. Enhanced Token Info and Boosts require official provider checkout and explicit human approval.
+- Golden Ticker: Worldz records the provider threshold as 500+ active Boosts; 75 points is not treated as sufficient.
+- WorldzSpecial: proposal only until DEX Screener explicitly agrees in writing. No partnership or endorsement is inferred.
+

@@ -899,7 +899,20 @@
     ],
     "automaticVendorPayment": false,
     "dexScreenerGoldenTickerActiveBoostThreshold": 500,
-    "partnershipClaimsRequireWrittenProviderApproval": true
+    "partnershipClaimsRequireWrittenProviderApproval": true,
+    "dexScreenerControl": {
+      "status": "READ_ONLY_STATUS_AND_OFFICIAL_CHECKOUT_HANDOFF",
+      "publicPath": "/worlddexpush/dexscreener/",
+      "package": "/worlddexpush/dexscreener/package.json",
+      "recurringAudit": "EVERY_6_HOURS",
+      "everyLiveSolanaWorldzTokenRequired": true,
+      "wrongNonBlankProviderIdentityFailsAudit": true,
+      "providerUnavailableFailsAudit": true,
+      "automaticPayment": false,
+      "goldenTickerActiveBoostThreshold": 500,
+      "seventyFivePointsIsSufficient": false,
+      "worldzSpecialPartnershipState": "PROPOSAL_ONLY"
+    }
   },
   "launchInheritance": {
     "version": "WORLDZ-LAUNCH-INHERITANCE-V1",
