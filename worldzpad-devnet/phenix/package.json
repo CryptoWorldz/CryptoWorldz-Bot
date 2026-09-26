@@ -1,10 +1,9 @@
 {
   "name": "worldz-phenix-devnet-proof",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "scripts": {
-    "prepare-payer": "node scripts/00_prepare_and_fund_payer.mjs",
     "proof": "node scripts/01_pnex_full_devnet_proof.mjs",
     "verify": "node scripts/02_verify_pnex_devnet_proof.mjs"
   },
