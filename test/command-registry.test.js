@@ -6,7 +6,7 @@ const REQUIRED_RUNTIME_COMMANDS = [
   "zedstart","zed","help","commands","commandtree","directory","acknowledgements","supportjay",
   "start","register","profile","rewards","leaderboard","raaiiidd","missions","wallet","cancel","kitty","governance","vote","impact","donate","points",
   "raid","admin","admingrace","zedsettings","newmission","editmission","endmission","pending","approve","reject","member","admins","permissions","setkitty","setrole","setpermission","setpartner","broadcast","stats","activity",
-  "causes","cause","cause_add","shilllink","referrals","rewardplan","website","websites","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
+  "causes","cause","cause_add","shilllink","referrals","rewardplan","website","websites","worldzlinks","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
   "workstart","workstop","evidence","workevidence","rewardbudget","specialreward","rewardasset","fundingplan","funded","contribute","walletplan","setprojectwallet","investmentfunded",
   "worldzcast","worldzcasttargets","confirmworldzcast","cancelworldzcast","worldzcaston","worldzcastoff","boostshill","specialtiers","uniquelegend","legendstatus","reviewlegend","reserverewardon","reserverewardoff",
   "executives","addscopedadmin","disableadmin","appointexecutive",
