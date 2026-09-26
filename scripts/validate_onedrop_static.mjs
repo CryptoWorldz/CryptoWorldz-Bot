@@ -8,6 +8,10 @@ import fs from 'node:fs';
 const manifest=JSON.parse(fs.readFileSync('launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json','utf8'));
 const owner=new PublicKey(manifest.authority.owner),mint=new PublicKey(manifest.token.mint),multisig=new PublicKey(manifest.authority.squadsMultisig),vault=new PublicKey(manifest.authority.squadsVault),sourceAta=new PublicKey(manifest.authority.squadsVaultRvivAta);
 const JITO=new PublicKey(manifest.distributor.programId),version=BigInt(manifest.distributor.versionU64);
+const derivedSourceAta=getAssociatedTokenAddressSync(mint,vault,true,TOKEN_PROGRAM_ID);
+if(!derivedSourceAta.equals(sourceAta)){
+  throw new Error('canonical Squads RVIV source ATA mismatch: manifest='+sourceAta.toBase58()+' derived='+derivedSourceAta.toBase58());
+}
 const u64=v=>{const b=Buffer.alloc(8);b.writeBigUInt64LE(BigInt(v));return b};
 const i64=v=>{const b=Buffer.alloc(8);b.writeBigInt64LE(BigInt(v));return b};
 const discriminator=n=>crypto.createHash('sha256').update('global:'+n).digest().subarray(0,8);
