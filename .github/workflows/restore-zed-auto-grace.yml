@@ -8,6 +8,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "src/**"
+      - "supabase/migrations/20260926172000_worldz_fullscope_foundation.sql"
       - "public/**"
       - ".well-known/**"
       - ".github/full-current-zed-runtime.sh"
