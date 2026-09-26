@@ -5,12 +5,12 @@ const { BOT_MENU_COMMANDS, MENUS } = require("../src/command-centre");
 test("gateway commands stay simple and ordered", () => {
   assert.deepEqual(
     BOT_MENU_COMMANDS.map((item) => item.command),
-    ["zedstart", "max", "fullscope", "zed", "auto", "grace", "admin", "admingrace", "zedsettings", "help"]
+    ["zedstart", "max", "worldzfullbuild", "fullscope", "zed", "auto", "grace", "admin", "admingrace", "zedsettings", "help"]
   );
 });
 
 test("each command centre section exposes exactly five core actions", () => {
-  for (const key of ["zed", "fullscope", "votes", "govern", "auto", "grace", "admin", "admingrace", "settings"]) {
+  for (const key of ["zed", "fullbuild", "fullscope", "votes", "govern", "auto", "grace", "admin", "admingrace", "settings"]) {
     assert.equal(MENUS[key].rows.length, 5, `${key} must expose five core actions`);
   }
 });
@@ -28,4 +28,13 @@ test("popularity and governance are unmistakably separated in Command Centre", (
   assert.ok(MENUS.govern.rows.some((row) => row[1] === "/governvote"));
   assert.equal(MENUS.votes.rows.some((row) => row[1] === "/governvote"), false);
   assert.equal(MENUS.govern.rows.some((row) => row[1] === "/tokenvote"), false);
+});
+
+
+test("WorldzFullBuild is the Command Centre umbrella over FullScope", () => {
+  assert.ok(MENUS.fullbuild.title.includes("WORLDZFULLBUILD"));
+  assert.ok(MENUS.fullbuild.rows.some((row) => row[1] === "/worldzfullbuild"));
+  assert.ok(MENUS.fullbuild.rows.some((row) => row[1] === "/fullscope"));
+  assert.ok(MENUS.fullbuild.rows.some((row) => row[1] === "/worldzvotes"));
+  assert.ok(MENUS.fullbuild.rows.some((row) => row[1] === "/worldzgovern"));
 });
