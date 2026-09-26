@@ -123,6 +123,46 @@ jobs:
           print("ZED_PROTECTED_CREDENTIAL_PREFLIGHT=PASS")
           PY
 
+      - name: Verify WorldzFullScope database schema before runtime activation
+        shell: python
+        run: |
+          import json, os, urllib.parse, urllib.request
+
+          base=str(os.environ.get("SUPABASE_URL_SECRET","")).rstrip("/")
+          key=str(os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET","")).strip()
+          if not base or not key:
+              raise SystemExit("FullScope schema verification requires Supabase service credentials.")
+          print("::add-mask::"+key)
+
+          headers={
+              "apikey":key,
+              "authorization":"Bearer "+key,
+              "accept":"application/json",
+              "user-agent":"WorldzFullScope-Schema-Gate/1.0"
+          }
+          probes=[
+              ("worldz_fullscope_chains","chain_key,label,family,mainnet_execution_enabled"),
+              ("worldz_fullscope_tokens","id,chain_key,name,symbol,status"),
+              ("worldz_popularity_votes","token_id,telegram_id,verification_state"),
+              ("worldz_fullscope_events","event_type,chain_key,amount_raw,quote_value,observed_at"),
+              ("worldz_fullscope_action_intents","id,action_type,state,mainnet_execution_enabled"),
+              ("worldz_fullscope_locks","id,lock_kind,status"),
+              ("worldz_fullscope_vesting","id,schedule_kind,status")
+          ]
+          for table,columns in probes:
+              url=base+"/rest/v1/"+table+"?select="+urllib.parse.quote(columns,safe=",")+"&limit=1"
+              req=urllib.request.Request(url,headers=headers)
+              try:
+                  with urllib.request.urlopen(req,timeout=20) as response:
+                      if response.status != 200:
+                          raise SystemExit(f"FullScope schema probe failed for {table}: HTTP {response.status}")
+                      json.loads(response.read().decode("utf-8"))
+              except Exception as exc:
+                  raise SystemExit(f"FullScope schema missing/incompatible for {table}: {exc}") from exc
+
+          print("WORLDZ_FULLSCOPE_SCHEMA=PASS")
+          print("WORLDZ_FULLSCOPE_RUNTIME_ACTIVATION_GATE=PASS")
+
       - name: Prove restored historical runtime is present
         shell: bash
         run: |
