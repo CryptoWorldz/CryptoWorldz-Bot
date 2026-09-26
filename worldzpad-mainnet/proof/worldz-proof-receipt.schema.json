@@ -7,6 +7,7 @@
   "required": [
     "schema",
     "receiptId",
+    "registryTokenId",
     "chain",
     "actionType",
     "status",
@@ -202,22 +203,27 @@
         ],
         "properties": {
           "address": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "assetId": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "beforeRaw": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[0-9]+$"
           },
           "afterRaw": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[0-9]+$"
           },
           "deltaRaw": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "pattern": "^-?[0-9]+$"
           }
         }
       },
@@ -277,6 +283,11 @@
     "createdAt": {
       "type": "string",
       "format": "date-time"
+    },
+    "registryTokenId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 180
     }
   },
   "allOf": [
