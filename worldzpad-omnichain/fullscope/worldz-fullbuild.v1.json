@@ -381,7 +381,9 @@
       ]
     },
     "sourceLedger": "docs/WORLDZFULLBUILD-PROJECT-SOURCE-OF-TRUTH.md",
-    "updateRule": "Future project-chat decisions marked for incorporation must update the versioned WorldzFullBuild source ledger/contract and must not silently erase superseded decisions."
+    "updateRule": "Future project-chat decisions marked for incorporation must update the versioned WorldzFullBuild source ledger/contract and must not silently erase superseded decisions.",
+    "currentDirectiveState": "WHOLE_PROJECT_AND_PROJECT_CHAT_INHERITANCE_ACTIVE",
+    "publicBuildBoundary": "Only project-relevant, non-sensitive decisions and approved operational data are inherited into public build specifications; unrelated private personal, medical, legal, credential and secret material stays out."
   },
   "projectContinuity": {
     "status": "INCORPORATED",
@@ -462,12 +464,21 @@
       "BitWorldz_BTC_REPRESENTATION_PAIR_RAIL",
       "XRP_wXRP_CROSSPAIR",
       "DEX_AND_LISTING_INTEGRATIONS",
-      "ANSEM_ASSET_PARTNER_MODULE_CONCEPT",
-      "WORLDZ_LINKS_QR_ALL_DOMAIN_DIRECTORY"
+      "ANSEM_ASSET_PARTNER_MODULE_CONCEPT"
     ],
     "legacyMappingItems": [
       "VERIFY_EXACT_STREAMFLOW_MAPPING_FOR_LMTD_1M_LOCK_UNLOCK_2036_02_22",
       "VERIFY_OWNER_REPORTED_SEPARATE_5_YEAR_COMMUNITY_LOCK_TOKEN_POSITION_AND_ON_CHAIN_REFERENCE"
+    ],
+    "latestOwnerDirective": {
+      "date": "2026-09-27",
+      "directive": "Incorporate this whole Project and all of its project-relevant chats into Our WorldzFullBuild™.",
+      "state": "INCORPORATED_INTO_WORLDZFULLBUILD_PARENT"
+    },
+    "carriedForward": [
+      "WORLDZ_LINKS_QR_ALL_DOMAIN_DIRECTORY",
+      "WORLDZ_TOKEN_IDENTITY_ENGINE",
+      "WORLDZ_ONEDROP_AND_ANDROID_WALLET_PREFLIGHT_LESSONS"
     ]
   },
   "architecture": {
@@ -532,7 +543,8 @@
     "master": "/worldzfullbuild",
     "fullScope": "/fullscope",
     "popularity": "/worldzvotes",
-    "governance": "/worldzgovern"
+    "governance": "/worldzgovern",
+    "worldzLinks": "/worldzlinks"
   },
   "executionIntegration": {
     "fullScopeMainnetDefault": false,
