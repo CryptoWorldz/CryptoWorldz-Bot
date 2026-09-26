@@ -45,6 +45,10 @@ jobs:
           grep -Fq 'command-centre-max' public/miniapp/max.js
           grep -Fq 'max-public-feed' public/miniapp/max.js
           grep -Fq 'WORLDZLAUNCHPAD™' public/miniapp/index.html
+          grep -Fq 'WorldzFullBuild™' public/miniapp/index.html
+          grep -Fq 'WorldzFullScope™' public/miniapp/index.html
+          grep -Fq 'Worldz Votes Centre™' public/miniapp/index.html
+          grep -Fq 'WorldzGovern™ — DAO Governance' public/miniapp/index.html
           grep -Fq 'WorldzLaunchPad™' public/miniapp/auto-owner.js
           grep -Fq 'zed-miniapp-rescue' public/miniapp/app.js
           if grep -Fiq 'BASED.BID' public/miniapp/index.html; then
@@ -116,6 +120,8 @@ jobs:
                   mcode,maxjs=get('/miniapp/max.js?verify=command-centre-max')
                   xcode,maxcss=get('/miniapp/max.css?verify=command-centre-max')
                   assert hcode==200 and 'WORLDZLAUNCHPAD™' in html and 'Command Centre <span>MAX™</span>' in html
+                  assert 'WorldzFullBuild™' in html and 'WorldzFullScope™' in html
+                  assert 'Worldz Votes Centre™' in html and 'WorldzGovern™ — DAO Governance' in html
                   assert 'BASED.BID' not in html.upper()
                   assert jcode==200 and 'zed-miniapp-rescue' in js
                   assert acode==200 and 'WorldzLaunchPad™' in auto and 'Command Centre MAX™' in auto
