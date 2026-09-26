@@ -1,0 +1,49 @@
+{
+  "version": "REVIVE-FOUR-POOL-ROUTING-2026-09-26-A",
+  "status": "DESIGN_REVIEW_NOT_SIGNABLE",
+  "canonicalMint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+  "sourceVault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+  "multisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+  "rule": "All program pools remain under the same verified Squads multisig until individual eligibility and exact destination are reviewed. Do not transfer to an unverified external private key. These are accounting buckets and proposed sub-vaults, not recipients.",
+  "routes": [
+    {
+      "name": "DevCity 100",
+      "reservedTokens": 20000000,
+      "proposedSquadsVaultIndex": 1,
+      "recipientCount": 100,
+      "tokensPerVerifiedSeat": 200000,
+      "currentStagingWalletInContract": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
+      "currentStagingWalletApprovedAsCustodian": false,
+      "gate": "Do not fund index 1 or the staging wallet before confirming derived PDA, its authority, Solana account state, exact rent, and approved owner signature; no 100-wallet roster exists."
+    },
+    {
+      "name": "Team earned vesting",
+      "reservedTokens": 30000000,
+      "proposedSquadsVaultIndex": 2,
+      "approvedBeneficiaries": 0,
+      "gate": "Use Jupiter Lock only for work-approved verified beneficiaries; 0 immediate, no cliff, 12 monthly unlocks. Unassigned tokens remain in multisig control; no AI custody."
+    },
+    {
+      "name": "OneWorldz charity impact including Help a Mate",
+      "reservedTokens": 20000000,
+      "proposedSquadsVaultIndex": 3,
+      "helpAMateSubdivisionTokens": null,
+      "gate": "Help a Mate is a proposed use within the existing charity pool; amount, recipient, mission proof and controls must be approved; no additional token allocation created."
+    },
+    {
+      "name": "Legacy equal-claim source",
+      "reservedTokens": 20000000,
+      "proposedSquadsVaultIndex": 0,
+      "gate": "214-wallet equal-share proposal is not yet approved; do not fund a distributor without verified program ID, security checks and exact claim root."
+    }
+  ],
+  "observedReadOnlyAtUtc": "2026-09-26T05:15:27.003Z",
+  "observedAtaRentLamportsEach": 1488440,
+  "devcityCostComparison": {
+    "oneMissingVaultAtaRentLamports": 1488440,
+    "hundredMissingRecipientAtasMaximumRentLamports": 148844000,
+    "separateSquadsNetworkFeesAndPotentialVaultCreationRent": "NOT_YET_QUOTED",
+    "onePoolTransferMeansPaidRecipients": false
+  },
+  "settlement": "After owner signs each exact reviewed Squads proposal, reconcile source and destination balances and publish receipts. No claim or payout is represented by a pooled balance alone."
+}
