@@ -6,8 +6,15 @@
   "purpose": "Ensure legacy Worldz assets, previously launched official Worldz tokens, future official Worldz tokens and verified WorldzLaunchPad projects receive continuing shared ecosystem benefits without adding a hidden trader fee or promising investment returns.",
   "coverage": {
     "legacyWorldzTokens": "ALL_VERIFIED_LEGACY_ASSETS_IN_WORLDZ_LEGACY_FLYWHEEL",
-    "previousOfficialWorldzTokens": ["WLDZ", "RVIV"],
-    "currentAndFutureOfficialWorldzTokens": ["PNEX", "MRCL", "FUTURE_REGISTERED_WORLDZ_TOKENS"],
+    "previousOfficialWorldzTokens": [
+      "WLDZ",
+      "RVIV"
+    ],
+    "currentAndFutureOfficialWorldzTokens": [
+      "PNEX",
+      "MRCL",
+      "FUTURE_REGISTERED_WORLDZ_TOKENS"
+    ],
     "externalWorldzLaunchPadTokens": "ALL_VERIFIED_LAUNCHES_REGISTERED_AFTER_POLICY_ACTIVATION",
     "noTokenLeftBehindRule": "Every eligible registered project receives a cycle benefit record. Shared infrastructure benefits apply platform-wide. Token-specific liquidity, grants, supply actions or burns require that project's disclosed manifest, compatible token standard and required authority."
   },
@@ -20,13 +27,15 @@
       "fee accounting and public reconciliation",
       "project discovery/directory visibility",
       "education and community tooling",
-      "incident/recovery infrastructure"
+      "incident/recovery infrastructure",
+      "Worldz OmniBuildz cross-chain adapter and LinkedAsset infrastructure where applicable"
     ],
     "conditionalTokenSpecificBenefits": [
       "liquidity support or matching",
       "ecosystem/build grants",
       "community campaign support",
-      "token-native reserve burn"
+      "token-native reserve burn",
+      "verified LinkedAsset pairing, swaps or Omni Pair development"
     ],
     "notGuaranteed": [
       "cash payout",
@@ -70,7 +79,10 @@
       "require the configured wallet or multisig approvals",
       "execute approved actions only",
       "publish Worldz Proof receipts and carry unused balances forward"
-    ]
+    ],
+    "completenessRule": "A cycle cannot be marked complete until every eligible registered token has exactly one benefit record for that cycle.",
+    "zeroSpendBenefitAllowed": true,
+    "zeroSpendBenefitLabel": "SHARED_INFRASTRUCTURE_ONLY"
   },
   "fairness": {
     "projectContributionDoesNotBuyVerification": true,
@@ -108,5 +120,7 @@
     "walletOrMultisigSignatureRequired": true,
     "simulationRequired": true,
     "mainnetExecutionEnabled": false
-  }
+  },
+  "linkedAssetPolicy": "worldzpad-mainnet/linked-assets/worldz-linked-asset.v1.json",
+  "omniBuildzPolicy": "worldzpad-mainnet/flywheel/worldz-omnibuildz.v1.json"
 }
