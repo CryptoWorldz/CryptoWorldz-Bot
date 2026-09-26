@@ -133,3 +133,5 @@ assert '/governvote' in gov["commandNamespace"]
 print("WORLDZ_FULLSCOPE_VALIDATION=PASS")
 print("WORLDZ_FULLBUILD_VALIDATION=PASS")
 print("chains=8 token_slots=160 popularity=WorldzVotesCentre governance=WorldzGovern mainnet_execution=OFF bulkdrop=WorldzBulkDrop vesting=Jupiter12xMonthly owner=JayJayTeamDev")
+
+# CI validation trigger: FullScope parent integration 2026-09-27
