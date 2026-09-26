@@ -18,9 +18,15 @@ page=(ROOT/"launchpad.cryptoworldz.xyz/proof-receipt/index.html").read_text()
 assert schema["title"]=="Worldz Proof Receipt™"
 assert schema["$id"]=="https://launchpad.cryptoworldz.xyz/.well-known/worldz-proof-receipt.schema.json"
 req=set(schema["required"])
-for field in ("receiptId","chain","actionType","status","transaction","token","source","recipients","balances","verification","createdAt"):
+for field in ("receiptId","registryTokenId","chain","actionType","status","transaction","token","source","recipients","balances","verification","createdAt"):
     assert field in req, field
 assert schema["properties"]["balances"]["minItems"]==1
+balance_props=schema["properties"]["balances"]["items"]["properties"]
+assert balance_props["address"]["minLength"]==1
+assert balance_props["assetId"]["minLength"]==1
+assert balance_props["beforeRaw"]["pattern"]=="^[0-9]+$"
+assert balance_props["afterRaw"]["pattern"]=="^[0-9]+$"
+assert balance_props["deltaRaw"]["pattern"]=="^-?[0-9]+$"
 assert "confirmation" in schema["properties"]["transaction"]["required"]
 assert schema["properties"]["verification"]["properties"]["privateKeysStored"]["const"] is False
 assert {"CONFIRMED","PASSED","FAILED"}.issubset(set(schema["properties"]["status"]["enum"]))
