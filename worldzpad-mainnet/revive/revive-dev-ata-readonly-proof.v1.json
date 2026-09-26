@@ -1,0 +1,42 @@
+{
+  "status": "LIVE_READ_ONLY_PROOF_NOT_REUSABLE_TRANSACTION",
+  "network": "solana-mainnet-beta",
+  "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+  "feePayer": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+  "accountsToCreate": [
+    {
+      "label": "Purple PDC",
+      "wallet": "G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3",
+      "ata": "5Wx2mzUSNpq91YShmgdkYwfZ9yZevy98b6qtm4WV48Qe"
+    },
+    {
+      "label": "SolSavewXRP",
+      "wallet": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9",
+      "ata": "C7cn56bNANZ3a9MK4zidX2gRT9aUiqGmwZrxgRLtyg4T"
+    },
+    {
+      "label": "JayJayTeamDev",
+      "wallet": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+      "ata": "8yutMVrk3BmSJBxrN77iRmwKRpADNqFpykVFKM4wmzSx"
+    }
+  ],
+  "recipientCount": 3,
+  "rentLamports": 4465320,
+  "networkFeeLamports": 5000,
+  "exactTotalLamports": 4470320,
+  "feePayerBalanceLamports": 29059039,
+  "serializedSize": 452,
+  "simulation": {
+    "error": null,
+    "unitsConsumed": 43453
+  },
+  "instructions": "Exactly three idempotent Associated Token Account creations; zero RVIV transfers, no Squads authority change.",
+  "safety": {
+    "signed": false,
+    "submitted": false,
+    "tokenTransfers": false
+  },
+  "observedAtUtc": "2026-09-26T05:41:53.571260+00:00",
+  "signingUrl": "https://launchpad.cryptoworldz.xyz/rviv-dev-setup/",
+  "signingUrlLiveVerified": false
+}
