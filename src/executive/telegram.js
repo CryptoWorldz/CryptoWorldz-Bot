@@ -126,7 +126,7 @@ function registerExecutiveTelegramHandlers({ bot, repository, supabase, config }
     const displayName = cleanText(match?.[2], 60);
     const responsibility = cleanText(match?.[3], 100);
     if (!telegramId || !displayName || !responsibility) {
-      return send(msg, "❌ Use: /appointexecutive telegram_id Name | Responsibility\nExample: /appointexecutive 123456789 Remedy | Treasury Lead");
+      return send(msg, "❌ Use: /appointexecutive telegram_id Name | Responsibility\nExample: /appointexecutive 123456789 NewLead | Operations Lead");
     }
     if (String(telegramId) === String(config.ownerTelegramId)) {
       return send(msg, "⛔ You are already the permanent owner.");
