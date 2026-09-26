@@ -43,6 +43,7 @@ jobs:
           if not token:
               raise SystemExit("BOT_TOKEN missing")
           print("::add-mask::"+token)
+          runtime_key=hashlib.sha256(("zed-runtime-v1:"+token).encode()).hexdigest()
 
           # Read the existing protected owner ID without logging it.
           host=os.environ["FTP_HOST"].replace("ftps://","").replace("ftp://","").split("/")[0]
@@ -67,10 +68,30 @@ jobs:
                   protected[key]=value
           owner=str(protected.get("OWNER_TELEGRAM_ID","")).strip()
           if not owner.isdigit():
-              raise SystemExit("OWNER_TELEGRAM_ID missing from protected runtime")
+              # The runtime itself restores the permanent owner from bot_admins.
+              # Use the same protected publishable-key bridge instead of failing
+              # merely because OWNER_TELEGRAM_ID is absent from the .env file.
+              supabase="https://hknymhhyqldtzmplzuzh.supabase.co"
+              publishable="sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+              req=urllib.request.Request(
+                  supabase+"/rest/v1/bot_admins?select=telegram_id&role=eq.owner&status=eq.active&limit=2",
+                  headers={
+                      "apikey":publishable,
+                      "authorization":"Bearer "+publishable,
+                      "x-zed-runtime-key":runtime_key,
+                      "accept":"application/json",
+                      "user-agent":"ZED-Real-Group-Owner-Resolve/1.0"
+                  }
+              )
+              with urllib.request.urlopen(req,timeout=20) as response:
+                  rows=json.loads(response.read().decode("utf-8"))
+              if len(rows)!=1:
+                  raise SystemExit("Permanent owner registry missing or ambiguous")
+              owner=str(rows[0].get("telegram_id","")).strip()
+          if not owner.isdigit():
+              raise SystemExit("Permanent owner identity could not be resolved")
           print("::add-mask::"+owner)
 
-          runtime_key=hashlib.sha256(("zed-runtime-v1:"+token).encode()).hexdigest()
           webhook_secret=hashlib.sha256(token.encode()).hexdigest()
           api="https://api.telegram.org/bot"+token+"/"
 
