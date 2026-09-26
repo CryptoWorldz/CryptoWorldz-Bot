@@ -1,0 +1,23 @@
+name: Validate WorldzLaunchPad Matrix
+
+on:
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/worldz-launch-capability-matrix.v1.json"
+      - "launchpad.cryptoworldz.xyz/platform-config.json"
+      - "launchpad.cryptoworldz.xyz/capabilities/**"
+      - "*worldz.xyz/**"
+      - "scripts/validate_worldz_launch_capabilities.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate published capabilities
+        run: python scripts/validate_worldz_launch_capabilities.py
