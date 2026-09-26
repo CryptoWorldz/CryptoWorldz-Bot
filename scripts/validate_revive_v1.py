@@ -12,6 +12,7 @@ direct = json.loads((root / "revive-direct-damm-v2-existing-mint.v1.json").read_
 devcity = json.loads((root / "revive-devcity-100.v1.json").read_text())
 team_vesting = json.loads((root / "revive-team-vesting.v1.json").read_text())
 public_candidates = json.loads((root / "revive-devcity-public-wallet-candidates.v1.json").read_text())
+legacy_distribution = json.loads((root / "revive-legacy-216-distribution.v1.json").read_text())
 funding = json.loads((root / "revive-launch-funding.v1.json").read_text())
 candidates = json.loads((root / "revive-devcity-50-candidates.v1.json").read_text())
 magic = json.loads((repo_root / "worldzpad-mainnet" / "fairfee" / "worldz-magic-fee.v1.json").read_text())
@@ -55,6 +56,12 @@ for schedule in (team_vesting, contract["teamVesting"]):
 assert public_candidates["candidateCount"] == len(public_candidates["candidates"])
 assert len({c["address"] for c in public_candidates["candidates"]}) == 105
 assert all(c["chainValidation"] == "PENDING" for c in public_candidates["candidates"])
+assert legacy_distribution["mint"] == contract["token"]["canonicalMint"]
+assert legacy_distribution["snapshotBatch"] == contract["legacyRevival"]["snapshotBatch"]
+assert legacy_distribution["snapshotRoot"] == contract["legacyRevival"]["snapshotRoot"]
+assert legacy_distribution["recipientCount"] == len(legacy_distribution["recipients"]) == 216
+assert len({x["wallet"] for x in legacy_distribution["recipients"]}) == 216
+assert sum(int(x["amountRaw"]) for x in legacy_distribution["recipients"]) == 20_000_000_000_000
 assert candidates["targetNewSeats"] == 50
 assert len(candidates["candidates"]) == 50
 assert len({x["github"] for x in candidates["candidates"]}) == 50
@@ -187,5 +194,5 @@ print(
     "REVIVE_V1=PASS supply=200000000 allocation=100 devcity=100 "
     "new_dev_leads=50 legacy=20000000 magic_fee_bps=75 "
     "creator_effective=0.306 referrer_effective=0.102 legacy_effective=0.09 "
-    "direct_damm_v2=ON devnet_price_sol=0.000045 mainnet_price=UNSET permanent_lp_lock_target=100 worldz_dependency_gate=RECONCILED legacy_takeover=OFF mainnet=LOCKED"
+    "direct_damm_v2=ON devnet_price_sol=0.000045 mainnet_price=0.000045_owner_approved permanent_lp_lock_target=100 worldz_dependency_gate=RECONCILED legacy_takeover=OFF additional_mainnet_execution=LOCKED"
 )
