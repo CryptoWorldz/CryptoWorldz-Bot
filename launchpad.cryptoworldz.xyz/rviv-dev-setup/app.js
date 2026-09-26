@@ -34,11 +34,21 @@ async function connect(){
   next={kind:'standard',wallet,account,address:account.address};
  }else{
   const provider=[window.jupiter?.solana,window.phantom?.solana,window.solflare,window.solana].find(p=>p?.connect&&p?.signTransaction);
-  if(!provider)stop('Open this page in a Solana mainnet wallet browser.');
-  const result=await provider.connect();
-  const address=String(result?.publicKey||provider.publicKey||'');
-  if(address!==OWNER)stop('Connect the JayJayTeamDev wallet.');
-  next={kind:'injected',provider,address};
+  if(provider){
+   const result=await provider.connect();
+   const address=String(result?.publicKey||provider.publicKey||'');
+   if(address!==OWNER)stop('Connect the JayJayTeamDev wallet.');
+   next={kind:'injected',provider,address};
+  }else{
+   status('Opening Jupiter Mobile connection. Approve the connection in your wallet, then return here. No transaction is being signed.');
+   const bridge=await import('/mint/jupiter-mobile.js?v=20260921-reown-v3');
+   bridge.resetJupiterMobileConnectionState?.();
+   const adapter=await bridge.getJupiterMobileAdapter();
+   await Promise.race([adapter.connect(),new Promise((_,reject)=>setTimeout(()=>reject(Error('Jupiter connection timed out. Tap Connect to try again.')),25000))]);
+   const address=String(adapter.publicKey||'');
+   if(address!==OWNER)stop('Wrong wallet connected. Select JayJayTeamDev in Jupiter and reconnect.');
+   next={kind:'adapter',provider:adapter,address};
+  }
  }
  active=next;plan=null;$('#sign').disabled=true;status('JayJayTeamDev connected. Recheck mainnet before signing.');
 }
