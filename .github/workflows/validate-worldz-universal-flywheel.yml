@@ -40,3 +40,5 @@ jobs:
         run: npm install --prefix worldzpad-mainnet --ignore-scripts --no-audit --no-fund
       - name: Validate ProofBurn instruction builder
         run: node worldzpad-mainnet/phenix/prepare-pnex-burn.mjs --self-test
+      - name: Universal Cycle completeness gate
+        run: python worldzpad-mainnet/flywheel/universal_cycle.py --self-test
