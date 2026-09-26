@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { BOT_MENU_COMMANDS, MENUS } = require("../src/command-centre");
+const { BOT_MENU_COMMANDS, MENUS, WEB_ROUTES } = require("../src/command-centre");
 
 test("gateway commands stay simple and ordered", () => {
   assert.deepEqual(
@@ -28,4 +28,9 @@ test("popularity and governance are unmistakably separated in Command Centre", (
   assert.ok(MENUS.govern.rows.some((row) => row[1] === "/governvote"));
   assert.equal(MENUS.votes.rows.some((row) => row[1] === "/governvote"), false);
   assert.equal(MENUS.govern.rows.some((row) => row[1] === "/tokenvote"), false);
+});
+
+
+test("WorldzFullBuild has a first-party Command Centre route", () => {
+  assert.equal(WEB_ROUTES.fullBuild, "https://launchpad.cryptoworldz.xyz/fullbuild/");
 });
