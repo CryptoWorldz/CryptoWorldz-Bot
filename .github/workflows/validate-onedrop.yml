@@ -1,0 +1,19 @@
+name: Validate Worldz OneDrop
+on:
+  pull_request:
+    paths:
+      - 'launchpad.cryptoworldz.xyz/onedrop/**'
+      - 'scripts/validate_onedrop_static.mjs'
+      - '.github/workflows/validate-onedrop.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check launchpad.cryptoworldz.xyz/onedrop/app.js
+      - run: node --check launchpad.cryptoworldz.xyz/onedrop/claim/app.js
+      - run: npm install --no-save --no-package-lock --no-audit --no-fund @solana/web3.js@1.98.4 @solana/spl-token@0.4.15 @sqds/multisig@2.1.4
+      - run: node scripts/validate_onedrop_static.mjs
