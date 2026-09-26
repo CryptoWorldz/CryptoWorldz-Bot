@@ -16,6 +16,9 @@ migration = (ROOT / "supabase/migrations/20260926172000_worldz_fullscope_foundat
 
 assert contract["schema"] == "WORLDZ-FULLSCOPE-V1"
 assert contract["brand"] == "WorldzFullScope™"
+assert contract["parentBuild"]["brand"] == "WorldzFullBuild™"
+assert contract["parentBuild"]["schema"] == "WORLDZ-FULLBUILD-V1"
+assert contract["parentBuild"]["required"] is True
 assert contract["maxTokensPerChain"] == 20
 assert len(contract["chains"]) == 8
 assert len({c["key"] for c in contract["chains"]}) == 8
