@@ -3,13 +3,13 @@ const assert = require("node:assert/strict");
 const { allRegisteredCommandNames, groupsForRole } = require("../src/command-registry");
 
 const REQUIRED_RUNTIME_COMMANDS = [
-  "zedstart","zed","help","commands","commandtree","directory","acknowledgements","supportjay",
+  "zedstart","zed","help","commands","commandtree","directory","acknowledgements","supportjay","worldzfullbuild",
   "start","register","profile","rewards","leaderboard","raaiiidd","missions","wallet","cancel","kitty","impact","donate","points",
   "fullscope","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
   "worldzvotes","tokenvote","worldztrending","worldzrankings",
   "worldzgovern","governproposals","governvote","governdelegate",
   "raid","admin","admingrace","zedsettings","newmission","editmission","endmission","pending","approve","reject","member","admins","permissions","setkitty","setrole","setpermission","setpartner","broadcast","stats","activity",
-  "causes","cause","cause_add","shilllink","referrals","rewardplan","website","websites","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
+  "causes","cause","cause_add","shilllink","referrals","rewardplan","website","websites","worldzlinks","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
   "workstart","workstop","evidence","workevidence","rewardbudget","specialreward","rewardasset","fundingplan","funded","contribute","walletplan","setprojectwallet","investmentfunded",
   "worldzcast","worldzcasttargets","confirmworldzcast","cancelworldzcast","worldzcaston","worldzcastoff","boostshill","specialtiers","uniquelegend","legendstatus","reviewlegend","reserverewardon","reserverewardoff",
   "executives","addscopedadmin","disableadmin","appointexecutive",
