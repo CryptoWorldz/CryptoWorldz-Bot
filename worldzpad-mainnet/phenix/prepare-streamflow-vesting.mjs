@@ -5,7 +5,7 @@
  */
 import fs from "node:fs";
 import { PublicKey } from "@solana/web3.js";
-import { StreamflowSolana } from "@streamflow/stream";
+import * as Streamflow from "@streamflow/stream";
 import BN from "bn.js";
 
 const DAY=86400;
@@ -88,7 +88,8 @@ async function main(){
       if(d.canTopup||d.cancelableBySender||d.cancelableByRecipient||d.transferableBySender||d.transferableByRecipient) throw new Error("immutability default failed");
       if(BigInt(d.rawSchedule.exactTotalRaw)!==BigInt(d.rawSchedule.totalRaw)) throw new Error("raw reconciliation failed");
     }
-    if(typeof StreamflowSolana?.SolanaStreamClient!=="function") throw new Error("Streamflow SDK client unavailable");
+    const Client=Streamflow.StreamflowSolana?.SolanaStreamClient||Streamflow.SolanaStreamClient;
+    if(typeof Client!=="function") throw new Error("Streamflow SDK client unavailable exports="+Object.keys(Streamflow).join(","));
     console.log("PNEX_STREAMFLOW_VESTING_SELF_TEST=PASS non_cancelable=YES non_transferable=YES exact_raw=YES signing=EXTERNAL");
     return;
   }
@@ -96,7 +97,9 @@ async function main(){
   const sender=new PublicKey(a.sender);
   new PublicKey(a.recipient);
   new PublicKey(a.mint);
-  const client=new StreamflowSolana.SolanaStreamClient(a.rpc);
+  const Client=Streamflow.StreamflowSolana?.SolanaStreamClient||Streamflow.SolanaStreamClient;
+  if(typeof Client!=="function") throw new Error("Streamflow SDK client unavailable");
+  const client=new Client(a.rpc);
   const data=buildData({
     kind:a.kind,amount:a.amount,launchTimestamp:Number(a["launch-timestamp"]),
     recipient:a.recipient,mint:a.mint,name:a.name
