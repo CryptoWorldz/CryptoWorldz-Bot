@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
 
 const pack=JSON.parse(await fs.readFile('worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json','utf8'));
+const publicPack=JSON.parse(await fs.readFile('launchpad.cryptoworldz.xyz/worlddexpush/jupiter/package.json','utf8'));
+const registry=JSON.parse(await fs.readFile('worldzpad-mainnet/token-identity/worldz-token-registry.v1.json','utf8'));
 const report={schema:'WORLDZ-JUPITER-VRFD-AUDIT-V1',generatedAt:new Date().toISOString(),tokens:[]};
 
 async function getJson(url,timeoutMs=20000){
@@ -14,7 +16,18 @@ async function getJson(url,timeoutMs=20000){
 }
 
 let hardFail=false;
+const registryByMint=new Map(registry.tokens.filter(t=>t.lifecycle==='LIVE').map(t=>[t.canonicalMint,t]));
+if(publicPack.schema!==pack.schema || JSON.stringify(publicPack.tokens)!==JSON.stringify(pack.tokens)){
+  throw new Error('Public Jupiter VRFD package drifted from canonical package');
+}
 for(const token of pack.tokens){
+  const canonical=registryByMint.get(token.mint);
+  if(!canonical) throw new Error('Jupiter package contains non-LIVE or unknown mint '+token.mint);
+  for(const [key,expected] of Object.entries({
+    name:canonical.name,symbol:canonical.symbol,decimals:canonical.decimals,image:canonical.image,website:canonical.website
+  })){
+    if(token[key]!==expected) throw new Error(`Jupiter package ${token.symbol} ${key} drift`);
+  }
   const url=pack.provider.tokensApi.replace('{MINT}',encodeURIComponent(token.mint));
   const response=await getJson(url);
   const rows=Array.isArray(response.body)?response.body:[];
