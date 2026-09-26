@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0",
+  "identityVersion": "WORLDZ-TOKEN-IDENTITY-2026-09-27-A",
+  "launchOrder": 2,
+  "name": "REVIVE",
+  "symbol": "RVIV",
+  "address": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+  "chain": "Solana",
+  "network": "mainnet-beta",
+  "chainId": 101,
+  "decimals": 6,
+  "description": "REVIVE (RVIV) is WorldzLaunchPad token #002 on Solana. It has a fixed 200,000,000 RVIV supply with mint and freeze authorities revoked.",
+  "website": "https://launchpad.cryptoworldz.xyz/rviv/",
+  "x": "https://x.com/CryptoWorldzX",
+  "telegram": "https://t.me/CryptoWLDZ",
+  "explorer": "https://solscan.io/token/DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+  "imageStatus": "Canonical public raster image URL has not yet been reconciled in the repository; no replacement image is guessed here.",
+  "supply": {
+    "fixed": 200000000,
+    "currentOnChain": 200000000,
+    "mintAuthority": "REVOKED",
+    "freezeAuthority": "REVOKED"
+  },
+  "trading": {
+    "dex": "Meteora DAMM v2",
+    "pool": "YWEMDsd6o3dm8uXNnmnWWU3c1UtFqDUKEMfbQ512i5c",
+    "quote": "wSOL",
+    "pair": "RVIV/wSOL",
+    "feePercent": 0.75,
+    "feeBps": 75,
+    "dynamicFee": false,
+    "lpLock": "100% permanent",
+    "activationUtc": "2026-09-25T20:27:40Z",
+    "baseVaultRvivAtLastAudit": 30000000,
+    "quoteVaultLamportsAtLastAudit": 1
+  },
+  "marketStatus": {
+    "meteoraPool": "EXISTS_ENABLED",
+    "confirmedTradeAtLastAudit": false,
+    "lastAuditUtc": "2026-09-26T04:34:00Z",
+    "publicTrading": "NOT_YET_VERIFIED",
+    "jupiter": "IDENTITY_AND_PRICE_DISCOVERY_PENDING",
+    "solscan": "TOKEN_PROFILE_RECONCILIATION_PENDING"
+  },
+  "official": true,
+  "lastUpdated": "2026-09-27T06:00:00+10:00",
+  "links": {
+    "officialToken": "https://launchpad.cryptoworldz.xyz/rviv/",
+    "verification": "https://launchpad.cryptoworldz.xyz/rviv/verify/",
+    "CryptoWorldz": "https://cryptoworldz.xyz/",
+    "OneWorldz": "https://oneworldz.com/",
+    "DonateWorldz": "https://donateworldz.com/",
+    "WorldzLaunchPad": "https://launchpad.cryptoworldz.xyz/",
+    "x": "https://x.com/CryptoWorldzX",
+    "telegram": "https://t.me/CryptoWLDZ",
+    "meteora": "https://www.meteora.ag/dammv2/YWEMDsd6o3dm8uXNnmnWWU3c1UtFqDUKEMfbQ512i5c",
+    "jupiter": "https://jup.ag/tokens/DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+    "phantom": "https://phantom.com/tokens/solana/DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R"
+  },
+  "resources": {
+    "identityRegistry": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-tokens.json",
+    "tokenList": "https://launchpad.cryptoworldz.xyz/tokenlist.json",
+    "platformPack": "https://launchpad.cryptoworldz.xyz/rviv/platform-submission-pack.json"
+  }
+}
