@@ -1,6 +1,6 @@
 {
   "schema": "PHENIX-LAUNCH-PREFLIGHT-V1",
-  "version": "PNEX-PREFLIGHT-2026-09-26-A",
+  "version": "PNEX-PREFLIGHT-2026-09-26-B",
   "status": "PREP_ONLY__MAINNET_DISABLED",
   "token": {
     "launchOrder": 3,
@@ -21,7 +21,7 @@
     "simulateBeforeSign": true
   },
   "allocation": {
-    "status": "WORKING_MODEL__19_PERCENT_UNASSIGNED_BLOCKS_LAUNCH",
+    "status": "WORKING_MODEL__100_PERCENT_ASSIGNED__FLYWHEEL_POLICY_EXECUTION_PENDING",
     "buckets": [
       {
         "id": "phenix_chance_immediate",
@@ -54,15 +54,17 @@
         "purpose": "Verified legacy Purple Diamond Handz pool"
       },
       {
-        "id": "unassigned_pending_decision",
+        "id": "phenix_total_supply_flywheel",
         "percent": 19,
         "tokens": 47500000,
-        "purpose": "Reserved and unspendable until a final disclosed allocation is approved"
+        "purpose": "One master reserve that supports PHENIX and the Worldz infrastructure it depends on, OneWorldz impact and charity-fund building, treasury resilience, community rewards, locked builder/team support, ecosystem growth, additional liquidity and verifiable permanent burn.",
+        "name": "PHENIX Total Supply FlyWheel™"
       }
     ],
     "requiredPercent": 100,
     "requiredTokens": 250000000,
-    "unassignedMustEqualZeroForLaunch": true
+    "unassignedMustEqualZeroForLaunch": true,
+    "unassignedTokens": 0
   },
   "phenixChance": {
     "status": "PLANNING_AND_VERIFICATION",
@@ -122,7 +124,9 @@
   },
   "releaseGates": [
     "allocation buckets equal exactly 250,000,000 PNEX and 100%",
-    "unassigned allocation equals zero",
+    "PHENIX Total Supply FlyWheel 19% / 47,500,000 PNEX policy is finalized with auditable lane controls",
+    "FlyWheel release caps, approval rules, vault address and Worldz Proof path are finalized",
+    "all 250,000,000 PNEX remain assigned with no hidden or unclassified supply",
     "PHENIX Chance recipient register validates and only approved recipients are exported",
     "12 monthly Chance releases are deterministic and tested",
     "developer vesting schedule is finalized and time-enforced",
@@ -139,10 +143,86 @@
   ],
   "launchReady": false,
   "launchBlockedReasons": [
-    "19% / 47,500,000 PNEX remains unassigned",
+    "PHENIX Total Supply FlyWheel 19% is assigned, but its internal release policy and execution controls are not yet finalized",
     "no PHENIX mainnet mint address is recorded",
     "recipient approvals are not complete",
     "developer vesting schedule is not finalized",
     "mainnet execution remains disabled"
-  ]
+  ],
+  "totalSupplyFlyWheel": {
+    "brand": "PHENIX Total Supply FlyWheel™",
+    "status": "ALLOCATED__POLICY_AND_EXECUTION_PROOF_PENDING",
+    "supplyPercent": 19,
+    "supplyTokens": 47500000,
+    "designObjective": "Use a controlled portion of PHENIX supply to strengthen the token's own infrastructure, utility, liquidity, community and mission while allowing transparent permanent supply reduction. This is a structural objective and not a promise of token-price appreciation.",
+    "oneMasterReserve": true,
+    "separateSupplyBuckets": false,
+    "supportedLanes": [
+      {
+        "id": "worldz_infrastructure",
+        "purpose": "Support the infrastructure PHENIX is built on, including WorldzLaunchPad, security, hosting, development, automation, maintenance, audits and operational resilience.",
+        "lockedOrBudgetControlled": true
+      },
+      {
+        "id": "oneworldz_impact",
+        "purpose": "Build and fund OneWorldz humanitarian and charitable impact capacity with public accounting and proof of use.",
+        "publicProofRequired": true
+      },
+      {
+        "id": "treasury_resilience",
+        "purpose": "Maintain a disclosed PHENIX/Worldz treasury reserve for approved ecosystem obligations and long-term resilience.",
+        "multisigRequired": true
+      },
+      {
+        "id": "community_rewards",
+        "purpose": "Reward verified community contribution, education, onboarding, testing, moderation, security reporting and ecosystem participation.",
+        "evidenceRequired": true
+      },
+      {
+        "id": "locked_builder_team",
+        "purpose": "Support additional verified builders and team contributors only through disclosed lock and vesting schedules; no unrestricted liquid team release.",
+        "lockAndVestingRequired": true
+      },
+      {
+        "id": "ecosystem_growth",
+        "purpose": "Fund integrations, grants, tooling, partnerships and growth work that demonstrably expands PHENIX or Worldz utility.",
+        "milestoneOrEvidenceRequired": true
+      },
+      {
+        "id": "additional_liquidity",
+        "purpose": "Add liquidity only under the PHENIX staged-liquidity rules and proof requirements.",
+        "liquidityRuleReference": "liquidity.additionalLiquidityRule"
+      },
+      {
+        "id": "permanent_burn",
+        "purpose": "Permanently remove approved PNEX from supply using a publicly verifiable burn transaction.",
+        "irreversible": true,
+        "proofRequired": true
+      }
+    ],
+    "cycleDesign": [
+      "measure verified infrastructure, impact, treasury, community, builder, ecosystem and liquidity needs",
+      "prepare a proposed FlyWheel cycle allocation from the single reserve",
+      "run policy, multisig, vesting, liquidity and accounting checks",
+      "simulate all executable transactions before signature",
+      "require authorized wallet or multisig approval",
+      "execute only approved lanes",
+      "publish Worldz Proof for distributions, liquidity additions and burns",
+      "carry unused PNEX forward inside the master reserve"
+    ],
+    "hardRules": [
+      "47,500,000 PNEX is the maximum lifetime supply assigned to this master reserve; it is not additional supply",
+      "no hidden wallet or undisclosed allocation may receive FlyWheel PNEX",
+      "ordinary wallet transfer tax remains 0%",
+      "burned PNEX is permanently removed and may not be reissued",
+      "team/builder distributions from this reserve must be locked and vested",
+      "additional liquidity must obey the recorded PHENIX liquidity rule",
+      "charity and impact use requires public accounting/proof",
+      "treasury and infrastructure releases require approved controls and public classification",
+      "the FlyWheel may seek to strengthen utility, liquidity and supply discipline but must not claim guaranteed price appreciation"
+    ],
+    "internalLanePercentages": "NOT_YET_FIXED",
+    "releasePolicyRequiredBeforeMainnet": true,
+    "mainnetExecutionEnabled": false
+  }
 }
