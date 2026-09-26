@@ -58,6 +58,12 @@ assert inheritance["tokenAllocationBoundary"]["publicCreatorRoute"]["implicitWor
 
 assert product["creatorEconomics"]["defaultWorldzControlledSharePercent"]==51
 assert product["referralEconomics"]["defaultWorldzControlledSharePercent"]==17
+assert product["inheritance"]["enabled"] is True
+assert product["inheritance"]["contract"]=="worldzpad-mainnet/launch-inheritance/worldz-launch-inheritance.v1.json"
+assert product["inheritance"]["everyLaunchGetsIdentity"] is True
+assert product["inheritance"]["everyLaunchGetsFullScope"] is True
+assert product["inheritance"]["everyConfirmedActionGetsProof"] is True
+assert product["inheritance"]["mainnetReleaseIsPerChainAndPerVenue"] is True
 
 required_modules={m["id"] for m in inheritance["requiredModules"] if m["required"]}
 for module in {"token-identity","chain-capability","fee-disclosure","fullscope","proof-receipt","worlddexpush","locks","vesting","universal-flywheel","votes","govern"}:
@@ -88,6 +94,17 @@ all_mainnet_envs=set(inheritance["launchIntent"]["supportedMainnetEnvironment"].
 assert all_test_envs.issubset(intent_envs)
 assert all_mainnet_envs.issubset(intent_envs)
 assert "mainnet" in intent_envs
+
+schema_pairs={}
+for rule in intent["allOf"]:
+    chain=rule["if"]["properties"]["chain"]["const"]
+    schema_pairs[chain]=set(rule["then"]["properties"]["environment"]["enum"])
+for chain,tests in inheritance["launchIntent"]["supportedTestEnvironments"].items():
+    expected=set(tests)|{inheritance["launchIntent"]["supportedMainnetEnvironment"][chain]}
+    if inheritance["launchIntent"]["genericMainnetAliasAccepted"]:
+        expected.add("mainnet")
+    assert schema_pairs[chain]==expected, f"{chain}: chain/environment schema drift"
+
 assert intent["properties"]["economics"]["properties"]["targetGrossTraderFeeBps"]["const"]==75
 assert intent["properties"]["execution"]["properties"]["simulateFirst"]["const"] is True
 
