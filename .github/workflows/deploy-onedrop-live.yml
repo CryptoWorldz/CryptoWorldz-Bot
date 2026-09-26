@@ -51,6 +51,45 @@ jobs:
           npm install --no-save --no-package-lock --no-audit --no-fund @solana/web3.js@1.98.4 @solana/spl-token@0.4.15 @sqds/multisig@2.1.4
           node scripts/validate_onedrop_static.mjs
 
+      - name: Validate live REVIVE source account BEFORE deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const manifest=JSON.parse(fs.readFileSync('launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json','utf8'));
+          const RPC='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';
+          const MAINNET='5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
+          async function rpc(method,params=[]){
+            const r=await fetch(RPC,{
+              method:'POST',
+              headers:{'content-type':'application/json'},
+              body:JSON.stringify({jsonrpc:'2.0',id:method,method,params})
+            });
+            const j=await r.json();
+            if(!r.ok||j.error) throw new Error(method+' failed: '+JSON.stringify(j.error||r.status));
+            return j.result;
+          }
+          (async()=>{
+            const genesis=await rpc('getGenesisHash');
+            if(genesis!==MAINNET) throw new Error('wrong Solana genesis '+genesis);
+            const ata=manifest.authority.squadsVaultRvivAta;
+            const mint=manifest.token.mint;
+            const vault=manifest.authority.squadsVault;
+            const info=await rpc('getAccountInfo',[ata,{encoding:'jsonParsed',commitment:'confirmed'}]);
+            if(!info?.value) throw new Error('REVIVE source ATA does not exist: '+ata);
+            const parsed=info.value.data?.parsed?.info;
+            if(!parsed) throw new Error('REVIVE source ATA is not a parsed SPL token account');
+            if(parsed.mint!==mint) throw new Error('REVIVE source ATA mint mismatch: '+parsed.mint);
+            if(parsed.owner!==vault) throw new Error('REVIVE source ATA owner mismatch: '+parsed.owner);
+            const bal=await rpc('getTokenAccountBalance',[ata,{commitment:'confirmed'}]);
+            const amount=BigInt(bal?.value?.amount||'0');
+            const needed=BigInt(manifest.executableNow.totalMovedFromSquadsRaw);
+            if(amount<needed) throw new Error('REVIVE source balance too low: '+amount+' < '+needed);
+            console.log('WORLDZ_ONEDROP_LIVE_SOURCE=PASS ata='+ata+' raw='+amount);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
       - name: Android wallet UI smoke test BEFORE deployment
         shell: bash
         run: |
