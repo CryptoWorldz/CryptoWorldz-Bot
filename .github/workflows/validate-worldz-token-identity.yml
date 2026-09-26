@@ -14,7 +14,6 @@ on:
       - ".github/workflows/audit-worldz-token-identity-onchain.yml"
       - ".github/workflows/validate-worldz-token-identity.yml"
   push:
-    branches: [main]
     paths:
       - "worldzpad-mainnet/token-identity/**"
       - "launchpad.cryptoworldz.xyz/tokenlist.json"
