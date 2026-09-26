@@ -1,0 +1,119 @@
+{
+  "schema": "WORLDZ-FULLBUILD-V1",
+  "brand": "WorldzFullBuild™",
+  "leader": "ZED LED Command Centre MAX™",
+  "status": "INTEGRATED_FOUNDATION",
+  "purpose": "Master architecture contract for the complete Worldz technology build. Every required subsystem must remain connected, separately validated and truthfully release-gated.",
+  "requiredSubsystems": [
+    {
+      "key": "command-centre",
+      "brand": "ZED LED Command Centre MAX™",
+      "role": "human-facing command and permission layer",
+      "status": "integrated"
+    },
+    {
+      "key": "launchpad",
+      "brand": "WorldzLaunchPad™",
+      "role": "token launch and creator platform",
+      "status": "integrated"
+    },
+    {
+      "key": "omnichain",
+      "brand": "Worldz Omnichain™",
+      "role": "chain-native launch adapters and shared intent/proof contracts",
+      "status": "private-build"
+    },
+    {
+      "key": "fullscope",
+      "brand": "WorldzFullScope™",
+      "role": "multi-chain token monitoring, action preparation, locks, vesting, alerts, proof, popularity and governance",
+      "status": "integrated-foundation",
+      "required": true
+    },
+    {
+      "key": "proof",
+      "brand": "WorldzProof™",
+      "role": "normalized receipts and verifiable execution evidence",
+      "status": "integrated-architecture"
+    },
+    {
+      "key": "auto",
+      "brand": "AUTO",
+      "role": "controlled finance workflows and automation",
+      "status": "integrated"
+    },
+    {
+      "key": "grace",
+      "brand": "G.R.A.C.E.",
+      "role": "approved communications, scheduling and operational coordination",
+      "status": "integrated"
+    },
+    {
+      "key": "recap",
+      "brand": "RECAP",
+      "role": "reviewed knowledge, explanation and learning layer",
+      "status": "integrated"
+    },
+    {
+      "key": "legacy-flywheel",
+      "brand": "Legacy Flywheel™",
+      "role": "legacy-holder reward accounting and routing",
+      "status": "integrated-private-build"
+    },
+    {
+      "key": "treasury",
+      "brand": "Worldz Treasury",
+      "role": "multisig-protected treasury and reserve policy",
+      "status": "integrated-policy"
+    }
+  ],
+  "fullScope": {
+    "required": true,
+    "sourceContract": "worldzpad-omnichain/fullscope/worldz-fullscope.v1.json",
+    "chainCount": 8,
+    "maxTokensPerChain": 20,
+    "initialTokenEnvironmentCapacity": 160,
+    "requiredModules": [
+      "WorldzWatch™",
+      "WorldzTrade™",
+      "WorldzInvest™",
+      "WorldzLock™",
+      "WorldzVest™",
+      "WorldzAlert™",
+      "WorldzAuto™",
+      "WorldzProof™",
+      "Worldz Votes Centre™",
+      "WorldzGovern™"
+    ]
+  },
+  "votingSeparation": {
+    "popularity": {
+      "brand": "Worldz Votes Centre™",
+      "purpose": "token popularity, trending, visibility, rankings and raids",
+      "governanceAuthority": false
+    },
+    "governance": {
+      "brand": "WorldzGovern™",
+      "purpose": "DAO proposals, treasury decisions, ecosystem rules, grants and governance execution",
+      "popularityRankingEffect": false
+    },
+    "hardRule": "Popularity votes and governance votes must use different names, command namespaces, data stores and execution authority."
+  },
+  "commandPaths": {
+    "master": "/worldzfullbuild",
+    "fullScope": "/fullscope",
+    "popularity": "/worldzvotes",
+    "governance": "/worldzgovern"
+  },
+  "executionPolicy": {
+    "defaultMainnetExecution": false,
+    "externalWalletSignatureRequired": true,
+    "privateKeysInTelegramDatabase": false,
+    "autoBroadcastByDefault": false,
+    "perChainReleaseGate": true,
+    "testnetOrDevnetProofRequired": true,
+    "worldzProofRequired": true,
+    "explicitOwnerReleaseRequired": true
+  },
+  "releaseRule": "WorldzFullBuild™ is not globally mainnet-enabled by one successful module or chain. Every executable adapter must independently pass simulation, signature-boundary, receipt and WorldzProof validation before explicit release."
+}
