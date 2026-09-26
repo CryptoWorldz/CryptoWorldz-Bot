@@ -15,6 +15,9 @@ on:
       - 'launchpad.cryptoworldz.xyz/fullbuild/**'
       - 'launchpad.cryptoworldz.xyz/fullscope/**'
       - 'launchpad.cryptoworldz.xyz/sitemap.xml'
+      - 'public/miniapp/index.html'
+      - 'public/miniapp/app.js'
+      - 'cryptoworldz.xyz/command-centre-max/index.html'
       - 'scripts/validate_worldz_fullbuild.py'
       - 'scripts/validate_worldz_fullscope.py'
       - '.github/workflows/validate-worldz-fullbuild.yml'
@@ -43,5 +46,6 @@ jobs:
           node --check src/command-centre.js
           node --check src/command-registry.js
           node --check src/full-runtime-entry.js
+          node --check public/miniapp/app.js
       - name: Focused tests
         run: node --test test/fullbuild.test.js test/fullscope.test.js test/command-centre.test.js test/command-registry.test.js
