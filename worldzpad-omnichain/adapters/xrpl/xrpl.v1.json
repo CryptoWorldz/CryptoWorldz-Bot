@@ -1,0 +1,55 @@
+{
+  "version": "WORLDZ-ADAPTER-XRPL-2026-09-24-A",
+  "chainKey": "xrpl",
+  "status": "TESTNET_IMPLEMENTATION_REQUIRED",
+  "mainnetExecutionEnabled": false,
+  "token": {
+    "v1": "ISSUED_FUNGIBLE_TOKEN",
+    "mpt": "SEPARATE_ADAPTER_AFTER_TESTNET_PROOF",
+    "issuerConfiguration": "EXPLICIT_AND_DISCLOSED",
+    "hiddenTransferTax": false
+  },
+  "market": {
+    "nativeCLOB": true,
+    "nativeAMM": true,
+    "automaticMarketPath": "SELECT_CLOB_AMM_OR_BOTH_AFTER_QUOTE",
+    "solanaStyleGraduationRequired": false
+  },
+  "fee": {
+    "targetGrossTraderFeeBps": 75,
+    "rule": "Do not emulate MagicFeeNumber with an undisclosed issuer transfer fee. Use only a market/service/fee path that can be shown accurately before signing.",
+    "worldzControlledSplitBps": {
+      "creator": 5100,
+      "referrer": 1700,
+      "legacyFlywheel": 1500,
+      "worldzLaunchPad": 850,
+      "oneWorldzImpact": 850
+    }
+  },
+  "referral": {
+    "launchpadToLaunchpad": true,
+    "implementation": "WORLDZ_ATTRIBUTION_LEDGER_AND_PAYOUT_ADAPTER",
+    "onePrimaryReferrer": true
+  },
+  "legacyFlywheel": {
+    "sourceChainAccrualAsset": "XRP_OR_ACTUAL_COLLECTED_QUOTE_ASSET",
+    "automaticBridgeEnabled": false,
+    "destination": "SOLANA_AFTER_APPROVED_CONVERSION_BRIDGE_PROOF"
+  },
+  "releaseGates": [
+    "ISSUED_TOKEN_TESTNET_PROOF",
+    "TRUSTLINE_AND_ISSUER_FLAG_PROOF",
+    "CLOB_BUY_AND_SELL_PROOF",
+    "AMM_CREATE_AND_LIQUIDITY_PROOF_IF_SELECTED",
+    "FEE_DISCLOSURE_PROOF",
+    "REFERRAL_ACCOUNTING_PROOF",
+    "LEGACY_ACCRUAL_PROOF",
+    "WORLDZ_PROOF_RECORD",
+    "EXPLICIT_MAINNET_RELEASE"
+  ],
+  "sourceOfTruth": [
+    "https://xrpl.org/docs/concepts/tokens",
+    "https://xrpl.org/docs/concepts/tokens/decentralized-exchange",
+    "https://xrpl.org/docs/concepts/tokens/decentralized-exchange/automated-market-makers"
+  ]
+}

@@ -1,0 +1,216 @@
+{
+  "schema": "WORLDZ-LAUNCH-CAPABILITY-MATRIX-V1",
+  "version": "2026-09-27-A",
+  "name": "WorldzLaunchPad™ Capability Matrix",
+  "rule": "A domain, UI or testnet adapter never implies mainnet market-launch capability. Every capability is independently gated and must match platform-config.json.",
+  "chains": [
+    {
+      "key": "solana",
+      "domain": "solworldz.xyz",
+      "family": "SVM",
+      "tokenCreation": {
+        "mainnet": true,
+        "testnet": true,
+        "path": "/mint/?network=mainnet-beta"
+      },
+      "marketLaunch": {
+        "mainnet": false,
+        "testnet": true,
+        "path": "/mainnet/"
+      },
+      "pairing": [
+        "SOL",
+        "verified wXRP targets"
+      ],
+      "status": "MAINNET_TOKEN_MINT_LIVE__MARKET_MAINNET_GATED"
+    },
+    {
+      "key": "xrpl",
+      "domain": "xrpworldz.xyz",
+      "family": "XRPL",
+      "tokenCreation": {
+        "mainnet": false,
+        "testnet": true,
+        "path": "/xrpl/"
+      },
+      "marketLaunch": {
+        "mainnet": false,
+        "testnet": true,
+        "path": "/xrpl/"
+      },
+      "pairing": [
+        "XRP AMM testnet"
+      ],
+      "status": "TESTNET_BETA"
+    },
+    {
+      "key": "base",
+      "domain": "baseworldz.xyz",
+      "family": "EVM",
+      "tokenCreation": {
+        "mainnet": false,
+        "testnet": true,
+        "path": "/base/"
+      },
+      "marketLaunch": {
+        "mainnet": false,
+        "testnet": false,
+        "path": "/base/"
+      },
+      "pairing": [],
+      "status": "BASE_SEPOLIA_TOKEN_BETA"
+    },
+    {
+      "key": "ethereum",
+      "domain": "ethworldz.xyz",
+      "family": "EVM",
+      "tokenCreation": {
+        "mainnet": false,
+        "testnet": true,
+        "path": "/evm/?network=ethereum-sepolia"
+      },
+      "marketLaunch": {
+        "mainnet": false,
+        "testnet": false,
+        "path": "/evm/"
+      },
+      "pairing": [],
+      "status": "SEPOLIA_TOKEN_BETA"
+    },
+    {
+      "key": "bnb",
+      "domain": "bnbworldz.xyz",
+      "family": "EVM",
+      "tokenCreation": {
+        "mainnet": false,
+        "testnet": true,
+        "path": "/evm/?network=bsc-testnet"
+      },
+      "marketLaunch": {
+        "mainnet": false,
+        "testnet": false,
+        "path": "/evm/"
+      },
+      "pairing": [],
+      "status": "BSC_TESTNET_TOKEN_BETA"
+    },
+    {
+      "key": "sui",
+      "domain": "suiworldz.xyz",
+      "family": "MOVE",
+      "tokenCreation": {
+        "mainnet": false,
+        "testnet": true,
+        "path": "/sui/"
+      },
+      "marketLaunch": {
+        "mainnet": false,
+        "testnet": false,
+        "path": "/sui/"
+      },
+      "pairing": [],
+      "status": "SUI_DEVNET_TOKEN_LIVE"
+    },
+    {
+      "key": "hyperevm",
+      "domain": "hyperworldz.xyz",
+      "family": "EVM",
+      "tokenCreation": {
+        "mainnet": false,
+        "testnet": true,
+        "path": "/evm/?network=hyperevm-testnet"
+      },
+      "marketLaunch": {
+        "mainnet": false,
+        "testnet": false,
+        "path": "/evm/"
+      },
+      "pairing": [],
+      "status": "HYPEREVM_TESTNET_TOKEN_BETA"
+    },
+    {
+      "key": "robinhood",
+      "domain": "robinworldz.xyz",
+      "family": "EVM",
+      "tokenCreation": {
+        "mainnet": false,
+        "testnet": true,
+        "path": "/evm/?network=robinhood-testnet"
+      },
+      "marketLaunch": {
+        "mainnet": false,
+        "testnet": false,
+        "path": "/evm/"
+      },
+      "pairing": [],
+      "status": "ROBINHOOD_TESTNET_TOKEN_BETA"
+    }
+  ],
+  "platformModules": [
+    {
+      "id": "token-identity",
+      "name": "Worldz Token Identity Engine™",
+      "status": "LIVE_PRODUCTION_GATE"
+    },
+    {
+      "id": "proof-receipt",
+      "name": "Worldz Proof Receipt™",
+      "status": "BUILT_VALIDATION_REQUIRED"
+    },
+    {
+      "id": "fullscope",
+      "name": "WorldzFullScope™",
+      "status": "FOUNDATION_BUILT"
+    },
+    {
+      "id": "votes",
+      "name": "Worldz Votes Centre™",
+      "status": "FOUNDATION_BUILT__POPULARITY_ONLY"
+    },
+    {
+      "id": "govern",
+      "name": "WorldzGovern™",
+      "status": "FOUNDATION_BUILT__DAO_ONLY"
+    },
+    {
+      "id": "omnichain",
+      "name": "Worldz Omnichain™",
+      "status": "ARCHITECTURE_BUILT__MAINNET_OFF"
+    },
+    {
+      "id": "crosspair",
+      "name": "Worldz CrossPair™",
+      "status": "BUILDING__VERIFIED_ASSETS_ONLY"
+    },
+    {
+      "id": "linkedasset",
+      "name": "Worldz LinkedAsset™",
+      "status": "POLICY_BUILT__MAINNET_OFF"
+    },
+    {
+      "id": "flywheel",
+      "name": "Worldz Universal FlyWheel™",
+      "status": "POLICY_BUILT__EXECUTION_PROOF_REQUIRED"
+    },
+    {
+      "id": "omnibuildz",
+      "name": "Worldz OmniBuildz™",
+      "status": "POLICY_BUILT__EXECUTION_PROOF_REQUIRED"
+    },
+    {
+      "id": "worlddexpush",
+      "name": "WorldDexPush™",
+      "status": "READ_ONLY_UPSTREAM_AUDIT_BUILT"
+    },
+    {
+      "id": "bitworldz",
+      "name": "BitWorldz OmniBTC™",
+      "status": "RESEARCH_DEVNET_RAIL__MAINNET_OFF"
+    }
+  ],
+  "publicMainnetStatement": {
+    "tokenCreation": "Solana WorldzMINT™ is currently the only Worldz-owned public mainnet token-creation route in this matrix.",
+    "marketLaunch": "No general public WorldzLaunchPad mainnet market-launch route is represented as enabled until the chain-specific release gates pass.",
+    "humanApprovalRequired": true
+  }
+}

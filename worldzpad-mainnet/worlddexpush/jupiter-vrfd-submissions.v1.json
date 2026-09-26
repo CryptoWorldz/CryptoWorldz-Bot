@@ -1,0 +1,57 @@
+{
+  "schema": "WORLDDEXPUSH-JUPITER-VRFD-SUBMISSIONS-V1",
+  "generatedFor": "WorldzLaunchPad™",
+  "provider": "Jupiter VRFD",
+  "rule": "Submit only canonical identity already proven on-chain/off-chain. Never invent a mint, ticker, image or verification state.",
+  "tokens": [
+    {
+      "launchOrder": 1,
+      "name": "WORLDZ",
+      "symbol": "WLDZ",
+      "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "image": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg",
+      "website": "https://launchpad.cryptoworldz.xyz/wldz/",
+      "metadata": "https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json",
+      "verification": "https://launchpad.cryptoworldz.xyz/wldz/verify/",
+      "x": "https://x.com/CryptoWorldzX",
+      "telegram": "https://t.me/CryptoWLDZ",
+      "vrfdDashboard": "https://verified.jup.ag/dashboard/AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U?action=update-metadata",
+      "currentTokensApi": {
+        "indexed": true,
+        "nameMatches": false,
+        "symbolMatches": false,
+        "iconPresent": true,
+        "pricePresent": false
+      },
+      "requiredAction": "VRFD_METADATA_UPDATE_REVIEW"
+    },
+    {
+      "launchOrder": 2,
+      "name": "REVIVE",
+      "symbol": "RVIV",
+      "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "image": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/rviv/dcaa3f79-7c84-45ed-bab7-8466f3f8a435.jpg",
+      "website": "https://launchpad.cryptoworldz.xyz/rviv/",
+      "metadata": "https://launchpad.cryptoworldz.xyz/rviv/token-metadata.json",
+      "verification": "https://launchpad.cryptoworldz.xyz/rviv/verify/",
+      "x": "https://x.com/CryptoWorldzX",
+      "telegram": "https://t.me/CryptoWLDZ",
+      "vrfdDashboard": "https://verified.jup.ag/dashboard/DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R?action=update-metadata",
+      "currentTokensApi": {
+        "indexed": true,
+        "nameMatches": false,
+        "symbolMatches": false,
+        "iconPresent": true,
+        "pricePresent": false
+      },
+      "requiredAction": "VRFD_METADATA_UPDATE_REVIEW"
+    }
+  ],
+  "expressVerification": {
+    "optional": true,
+    "apiKeyRequired": true,
+    "paymentRequired": true,
+    "explicitWalletApprovalRequired": true,
+    "automaticWorldzPayment": false
+  }
+}

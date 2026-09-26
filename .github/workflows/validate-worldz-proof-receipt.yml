@@ -1,0 +1,25 @@
+name: Validate Worldz Proof Receipt
+
+on:
+  pull_request:
+    paths:
+      - "worldzpad-omnichain/schemas/worldz-proof-receipt.v1.json"
+      - "launchpad.cryptoworldz.xyz/.well-known/worldz-proof-receipt.schema.json"
+      - "launchpad.cryptoworldz.xyz/schemas/worldz-proof-receipt.v1.json"
+      - "launchpad.cryptoworldz.xyz/platform-config.json"
+      - "launchpad.cryptoworldz.xyz/proof-receipt/**"
+      - "scripts/validate_worldz_proof_receipt.py"
+      - ".github/workflows/validate-worldz-proof-receipt.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate receipt contract
+        run: python scripts/validate_worldz_proof_receipt.py

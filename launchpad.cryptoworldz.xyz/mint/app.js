@@ -590,7 +590,9 @@ getWallets().on('register',()=>{
     setStatus('JUPITER / SOLANA WALLET DETECTED ✅\n'+($('#wallet-choice').selectedOptions[0]?.textContent||after)+'\nTap Connect Wallet.','good');
   }
 });
-const privatePresetCode=new URLSearchParams(location.search).get('launch');
+const startupParams=new URLSearchParams(location.search);
+const privatePresetCode=startupParams.get('launch');
+const requestedNetwork=startupParams.get('network');
 let draftRestored=false;
 if(privatePresetCode){
   try{await loadPrivatePreset();draftRestored=true;}
@@ -599,6 +601,10 @@ if(privatePresetCode){
   draftRestored=restoreDraft();
 }
 restorePending();
+if(!privatePresetCode&&!pending&&['devnet','mainnet-beta'].includes(requestedNetwork)){
+  $('#network').value=requestedNetwork;
+  saveDraft();
+}
 allocationMath();renderProof();loadRegistry();
 if(draftRestored&&!pending&&!privatePresetCode){
   setStatus('WORLDZMINT DRAFT RESTORED ✅\nYour token details were saved on this device. Reconnect the wallet and continue where you left off.','good');

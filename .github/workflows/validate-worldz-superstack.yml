@@ -1,0 +1,17 @@
+name: Validate Worldz SuperStack
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate complete Worldz SuperStack contract
+        run: python scripts/validate_worldz_superstack.py

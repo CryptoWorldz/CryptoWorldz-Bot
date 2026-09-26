@@ -1,0 +1,77 @@
+{
+  "schema": "WORLDDEXPUSH-V1",
+  "version": "2026-09-27-A",
+  "name": "WorldDexPush™",
+  "status": "READ_ONLY_MONITOR__VENDOR_HANDOFF__NO_AUTOMATIC_PAYMENT",
+  "purpose": "Package canonical Worldz token identity, watch upstream Jupiter and DEX Screener status, and hand approved profile/verification/boost actions to the official provider without inventing partnerships or silently spending funds.",
+  "tokens": [
+    {
+      "name": "WORLDZ",
+      "symbol": "WLDZ",
+      "chain": "solana",
+      "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "identity": "https://launchpad.cryptoworldz.xyz/wldz/token-metadata.json"
+    },
+    {
+      "name": "REVIVE",
+      "symbol": "RVIV",
+      "chain": "solana",
+      "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "identity": "https://launchpad.cryptoworldz.xyz/rviv/token-metadata.json"
+    }
+  ],
+  "jupiter": {
+    "provider": "Jupiter VRFD",
+    "tokenApi": "https://api.jup.ag/tokens/v2/search?query={MINT}",
+    "freeCommunityRoute": "https://verified.jup.ag/dashboard/{MINT}?action=update-metadata",
+    "expressVerification": {
+      "supported": true,
+      "providerCost": "1000 JUP equivalent",
+      "paymentAssets": [
+        "JUP",
+        "SOL",
+        "USDC",
+        "JUPUSD"
+      ],
+      "apiKeyRequired": true,
+      "walletSignatureRequired": true,
+      "automaticPaymentByWorldz": false,
+      "rule": "WorldDexPush may prepare eligibility and vendor handoff data, but a signed provider payment transaction requires explicit wallet approval."
+    }
+  },
+  "dexScreener": {
+    "listingRule": "Automatic after a supported liquidity pool exists and has at least one transaction.",
+    "pairApi": "https://api.dexscreener.com/token-pairs/v1/{CHAIN}/{TOKEN}",
+    "profileApi": "https://api.dexscreener.com/token-profiles/recent-updates/v1",
+    "ordersApi": "https://api.dexscreener.com/orders/v1/{CHAIN}/{TOKEN}",
+    "enhancedTokenInfo": {
+      "available": true,
+      "checkout": "https://marketplace.dexscreener.com/product/token-info",
+      "automaticPurchase": false
+    },
+    "boosts": {
+      "available": true,
+      "checkoutRule": "Use the official token page Boost button in a web browser.",
+      "automaticPurchase": false
+    },
+    "goldenTicker": {
+      "providerName": "Golden Ticker",
+      "requiredActiveBoosts": 500,
+      "rule": "Provider-documented threshold is 500+ active Boosts. Worldz must not represent 75 points as sufficient."
+    },
+    "worldzSpecial": {
+      "status": "PROPOSAL_ONLY__NO_DEX_SCREENER_PARTNERSHIP_CLAIM",
+      "customAdvertisingContact": "ads@dexscreener.com",
+      "supportContact": "support@dexscreener.com",
+      "rule": "A custom Worldz integration or branded package exists only if DEX Screener explicitly agrees in writing."
+    }
+  },
+  "approval": {
+    "vendorCheckoutMustBeOfficial": true,
+    "explicitHumanApprovalRequired": true,
+    "walletOrCardApprovalRequiredAtProvider": true,
+    "storePrivateKeys": false,
+    "storeCardData": false,
+    "proofReceiptRequiredAfterAnyApprovedPurchase": true
+  }
+}

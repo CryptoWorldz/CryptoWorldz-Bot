@@ -11,6 +11,7 @@ const { registerAutoMiniRoutes } = require("./auto/zed-router");
 const { registerAutoTelegramHandlers } = require("./auto/telegram");
 const { registerCauseTelegramHandlers } = require("./causes/telegram");
 const { registerCommandCentreHandlers } = require("./command-centre");
+const { registerFullScopeTelegramHandlers } = require("./fullscope/telegram");
 const { registerCommunityDirectoryHandlers } = require("./community-directory");
 const { registerCurrentImpactHandlers } = require("./current-impact");
 const { registerExecutiveRoutes } = require("./executive/http");
@@ -171,6 +172,8 @@ async function start() {
   registerZedGuide({ app, repository, config, supabase });
   startupStage = "register_command_centre";
   registerCommandCentreHandlers({ bot, repository, config });
+  startupStage = "register_worldz_fullscope";
+  registerFullScopeTelegramHandlers({ bot, repository, config, supabase });
   startupStage = "register_telegram";
   registerTelegramHandlers({ bot, repository, config });
   startupStage = "register_role_profile";

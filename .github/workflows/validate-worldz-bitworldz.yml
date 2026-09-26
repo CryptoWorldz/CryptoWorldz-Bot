@@ -1,0 +1,35 @@
+name: Validate BitWorldz OmniBTC
+
+on:
+  pull_request:
+    paths:
+      - 'worldzpad-omnichain/bitworldz/**'
+      - 'worldzpad-devnet/bitworldz/**'
+      - 'scripts/validate_worldz_bitworldz.py'
+      - 'launchpad.cryptoworldz.xyz/bitworldz/**'
+      - 'bitworldz.cryptoworldz.xyz/**'
+      - '.github/workflows/validate-worldz-bitworldz.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worldzpad-omnichain/bitworldz/**'
+      - 'worldzpad-devnet/bitworldz/**'
+      - 'scripts/validate_worldz_bitworldz.py'
+      - 'launchpad.cryptoworldz.xyz/bitworldz/**'
+      - 'bitworldz.cryptoworldz.xyz/**'
+      - '.github/workflows/validate-worldz-bitworldz.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate BitWorldz contracts and public surfaces
+        run: python scripts/validate_worldz_bitworldz.py
+      - name: Run BitWorldz SDK self-test
+        run: node worldzpad-omnichain/bitworldz/sdk/self-test.mjs

@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-proof-receipt.schema.json",
+  "title": "Worldz Proof Receipt™",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "receiptId",
+    "registryTokenId",
+    "chain",
+    "actionType",
+    "status",
+    "transaction",
+    "token",
+    "source",
+    "recipients",
+    "balances",
+    "verification",
+    "createdAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "WORLDZ-PROOF-RECEIPT-V1"
+    },
+    "receiptId": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160
+    },
+    "chain": {
+      "type": "string",
+      "enum": [
+        "solana",
+        "xrpl",
+        "base",
+        "ethereum",
+        "bnb",
+        "sui",
+        "hyperevm",
+        "robinhood"
+      ]
+    },
+    "actionType": {
+      "type": "string",
+      "enum": [
+        "token_create",
+        "market_launch",
+        "distribution",
+        "liquidity",
+        "lock",
+        "vesting",
+        "burn",
+        "fee_route",
+        "bridge",
+        "linked_asset",
+        "other"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PREPARED",
+        "SIMULATED",
+        "SIGNED",
+        "BROADCAST",
+        "CONFIRMED",
+        "PASSED",
+        "FAILED"
+      ]
+    },
+    "transaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference",
+        "confirmation"
+      ],
+      "properties": {
+        "reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "explorerUrl": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "blockReference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confirmation": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "processed",
+            "confirmed",
+            "finalized",
+            "validated"
+          ]
+        }
+      }
+    },
+    "token": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "name",
+        "symbol",
+        "assetId"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assetId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decimals": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "address"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "recipients": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "address"
+        ],
+        "properties": {
+          "address": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "amountRaw": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "amountDisplay": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "balances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "address",
+          "assetId",
+          "beforeRaw",
+          "afterRaw"
+        ],
+        "properties": {
+          "address": {
+            "type": "string",
+            "minLength": 1
+          },
+          "assetId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "beforeRaw": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "afterRaw": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "deltaRaw": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^-?[0-9]+$"
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "fees": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "amountRaw": {
+            "type": "string"
+          },
+          "destination": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "onChainReadBack",
+        "amountsReconciled",
+        "balanceChangesReconciled",
+        "privateKeysStored"
+      ],
+      "properties": {
+        "onChainReadBack": {
+          "type": "boolean"
+        },
+        "amountsReconciled": {
+          "type": "boolean"
+        },
+        "balanceChangesReconciled": {
+          "type": "boolean"
+        },
+        "privateKeysStored": {
+          "const": false
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "registryTokenId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 180
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "PASSED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "transaction": {
+            "properties": {
+              "confirmation": {
+                "enum": [
+                  "finalized",
+                  "validated"
+                ]
+              }
+            },
+            "required": [
+              "reference",
+              "confirmation"
+            ]
+          },
+          "balances": {
+            "minItems": 1
+          },
+          "verification": {
+            "properties": {
+              "onChainReadBack": {
+                "const": true
+              },
+              "amountsReconciled": {
+                "const": true
+              },
+              "balanceChangesReconciled": {
+                "const": true
+              },
+              "privateKeysStored": {
+                "const": false
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

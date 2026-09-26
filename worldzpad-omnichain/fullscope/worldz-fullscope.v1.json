@@ -1,0 +1,86 @@
+{
+  "schema": "WORLDZ-FULLSCOPE-V1",
+  "brand": "WorldzFullScope™",
+  "leader": "ZED LED Command Centre MAX™",
+  "maxTokensPerChain": 20,
+  "chains": [
+    {
+      "key": "solana",
+      "family": "solana"
+    },
+    {
+      "key": "xrpl",
+      "family": "xrpl"
+    },
+    {
+      "key": "base",
+      "family": "evm"
+    },
+    {
+      "key": "ethereum",
+      "family": "evm"
+    },
+    {
+      "key": "bnb",
+      "family": "evm"
+    },
+    {
+      "key": "sui",
+      "family": "sui"
+    },
+    {
+      "key": "hyperevm",
+      "family": "evm"
+    },
+    {
+      "key": "robinhood",
+      "family": "evm"
+    }
+  ],
+  "modules": [
+    "WorldzWatch™",
+    "WorldzTrade™",
+    "WorldzInvest™",
+    "WorldzLock™",
+    "WorldzVest™",
+    "WorldzAlert™",
+    "WorldzAuto™",
+    "WorldzProof™",
+    "Worldz Votes Centre™",
+    "WorldzGovern™"
+  ],
+  "voting": {
+    "popularity": {
+      "brand": "Worldz Votes Centre™",
+      "purpose": "token popularity, trending, visibility, rankings and raids",
+      "commandNamespace": [
+        "/worldzvotes",
+        "/tokenvote",
+        "/worldztrending",
+        "/worldzrankings"
+      ],
+      "mayExecuteGovernance": false
+    },
+    "governance": {
+      "brand": "WorldzGovern™",
+      "purpose": "DAO proposals, treasury, rules, grants, fee policy, quorum and execution",
+      "commandNamespace": [
+        "/worldzgovern",
+        "/governproposals",
+        "/governvote",
+        "/governdelegate"
+      ],
+      "mayAffectPopularityRanking": false
+    }
+  },
+  "financialSafety": {
+    "custody": "external-wallet",
+    "transactionPreparation": true,
+    "walletSignatureRequired": true,
+    "autoBroadcast": false,
+    "mainnetExecutionEnabled": false,
+    "privateKeysInTelegramDatabase": false
+  },
+  "buildStage": "FOUNDATION",
+  "releaseRule": "No chain action becomes executable until its adapter, simulation, signature boundary and proof path pass validation."
+}

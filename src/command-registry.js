@@ -12,6 +12,26 @@ const COMMAND_GROUPS = Object.freeze([
   group("max", "🧠 Command Centre MAX™ • Learn, Research, Interact & Teach", "member", [
     ["max", "Open Command Centre MAX learning and research hub"]
   ]),
+  group("fullscope", "🌐 WorldzFullScope™ • Multi-chain Command Layer", "member", [
+    ["fullscope", "Open the ZED-led WorldzFullScope command layer"],
+    ["fullscopechains", "View every currently supported FullScope chain"],
+    ["fullscopetokens", "View the multi-chain token registry"],
+    ["worldzwatch", "View indexed token and chain activity"],
+    ["worldzlock", "Open the chain-aware lock centre"],
+    ["worldzvest", "Open the chain-aware vesting centre"]
+  ]),
+  group("worldz-votes-centre", "🗳️ Worldz Votes Centre™ • POPULARITY ONLY", "member", [
+    ["worldzvotes", "Open token popularity voting and visibility"],
+    ["tokenvote", "Cast an organic popularity vote for a registered token"],
+    ["worldztrending", "View the fastest-rising organic popularity ranking"],
+    ["worldzrankings", "View Worldz popularity rankings"]
+  ]),
+  group("worldz-govern", "🏛️ WorldzGovern™ • DAO GOVERNANCE ONLY", "member", [
+    ["worldzgovern", "Open DAO and ecosystem governance"],
+    ["governproposals", "View active WorldzGovern proposals"],
+    ["governvote", "Cast a vote on a WorldzGovern proposal"],
+    ["governdelegate", "View WorldzGovern delegation status"]
+  ]),
   group("legend", "🤖 ZED • Legend Profile", "member", [
     ["zed", "Open ZED profile, wallet and mission controls"], ["start", "Start or reopen ZED"],
     ["register", "Register as a CryptoWorldz Legend"], ["profile", "View your Legend profile"],
@@ -27,7 +47,6 @@ const COMMAND_GROUPS = Object.freeze([
   group("community", "💜 Community, Heroes, Causes & Social Directory", "member", [
     ["impact", "Open current DonateWorldz impact choices"], ["supportreagan", "Open Reagan & Children on DonateWorldz"],
     ["heroes", "Open Real-World Hero evidence and recognition"], ["kitty", "View public Community Kitty addresses"],
-    ["governance", "Open governance information"], ["vote", "Vote in an active governance proposal"],
     ["causes", "List registered causes"], ["cause", "View one cause"], ["shilllink", "Create your referral/shill link"],
     ["referrals", "View referral status"], ["rewardplan", "View reward-plan rules"], ["website", "Open a website by project"],
     ["websites", "View the website directory"], ["worldzlinks", "Open WorldzLinkz™ — every Worldz in one QR directory"], ["worldzlive", "View live Worldz sites"], ["solworldz", "Open SolWorldz"],
