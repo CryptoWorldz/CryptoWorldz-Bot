@@ -1,0 +1,215 @@
+{
+  "schema": "WORLDZ-FULLBUILD-V1",
+  "brand": "WorldzFullBuild™",
+  "updatedAt": "2026-09-27",
+  "ownerAuthority": {
+    "owner": "JayJayTeamDev",
+    "role": "OWNER_AND_FINAL_APPROVER",
+    "rule": "Owner-approved plans are the build source of truth. Engineering may validate, simulate and flag conflicts, but must not silently substitute a different token plan.",
+    "changesOutsideApprovedPlan": "PROPOSAL_ONLY_UNTIL_OWNER_APPROVES"
+  },
+  "deliveryTruthStandard": {
+    "allowedStates": [
+      "CODE_CHANGED",
+      "DEPLOYED",
+      "LIVE_SOURCE_VERIFIED",
+      "END_TO_END_VERIFIED",
+      "UNVERIFIED"
+    ],
+    "rule": "Never call a feature working, fixed, successful or done merely because code or deployment is green. The required live user path must pass before END_TO_END_VERIFIED.",
+    "requiredPath": [
+      "build",
+      "validate",
+      "deploy",
+      "verify production URL",
+      "verify actual user flow",
+      "verify on-chain result when applicable"
+    ]
+  },
+  "walletAndApprovalStandard": {
+    "walletEntry": "FIRST_PARTY_WORLDZ_WEBSITE",
+    "manualWalletBrowserRequired": false,
+    "externalWalletCustody": true,
+    "collectSecretPhrase": false,
+    "displayConnectedAddress": true,
+    "simulateBeforeSignature": true,
+    "useFreshBlockhashImmediatelyBeforeSigning": true,
+    "confirmByActualSignatureStatus": true,
+    "reconcileFinalOnChainState": true,
+    "doNotTreatLocalExpiryRaceAsOnChainFailure": true
+  },
+  "bulkDistributionEngine": {
+    "brand": "WorldzBulkDrop™",
+    "scope": "DEFAULT_CAPABILITY_FOR_ALL_WORLDZLAUNCHPAD_TOKENS",
+    "objective": "A manifest-driven bulk distribution path instead of building a new page for each token movement.",
+    "inputs": [
+      "canonical token mint",
+      "source vault",
+      "recipient wallets",
+      "raw token amounts",
+      "vesting policy",
+      "source evidence / snapshot identifier"
+    ],
+    "controls": [
+      "deduplicate recipients",
+      "validate chain address format",
+      "exclude program/mint/pool addresses from human-recipient sets",
+      "derive/create missing associated token accounts",
+      "reconcile manifest total to approved bucket",
+      "simulate exact instructions before signing",
+      "packet-size and transaction-count checks",
+      "fresh blockhash at signing boundary",
+      "resume from confirmed signatures without repeating completed transfers",
+      "final source-vault and recipient reconciliation",
+      "WorldzProof receipt containing signatures and manifest hash"
+    ],
+    "approvalUX": {
+      "target": "ONE_WALLET_SIGNING_SESSION_PLUS_REQUIRED_SQUADS_APPROVAL",
+      "noPerTransactionWebPages": true,
+      "signAllTransactionsWhenWalletSupportsIt": true,
+      "neverRequireSeparateDistributionPagePerRecipient": true,
+      "exactNumberOfSolanaTransactionsMayExceedOne": "ALLOWED_WHEN_PROTOCOL_PACKET_LIMITS_REQUIRE_IT"
+    }
+  },
+  "solanaVestingDefault": {
+    "provider": "Jupiter Lock/Vesting",
+    "programId": "LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn",
+    "immediateUnlockPercent": 0,
+    "cliffDays": 0,
+    "months": 12,
+    "releases": 12,
+    "cadence": "monthly",
+    "amountRule": "12 equal monthly releases; final release receives any raw-unit rounding remainder",
+    "application": "Owner-approved vested allocations on Solana unless a specific campaign/allocation is explicitly approved as immediate.",
+    "executionRule": "No lock creation until recipient, amount, schedule and owner approval are exact."
+  },
+  "revive": {
+    "token": "REVIVE",
+    "symbol": "RVIV",
+    "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+    "fixedSupplyTokens": 200000000,
+    "devCity": {
+      "bucketTokens": 20000000,
+      "targetRecipients": 100,
+      "tokensPerRecipient": 200000,
+      "publicCandidateFile": "worldzpad-mainnet/revive/revive-devcity-public-wallet-candidates.v1.json",
+      "candidatesFound": 105,
+      "currentState": "105_PUBLICLY_ATTRIBUTED_CANDIDATES_FOUND__FINAL_100_CHAIN_AND_SOURCE_VALIDATION_PENDING",
+      "sourceScope": [
+        "X",
+        "Crypto developer communities",
+        "Pump.fun",
+        "Bonk ecosystem",
+        "Bags",
+        "Meteora",
+        "Raydium",
+        "Heaven",
+        "BasedBid",
+        "RevShare",
+        "Moonshot",
+        "GitHub/public developer sources"
+      ],
+      "finalizationRule": "Select 100 unique publicly attributable developer/project wallets after source review and Solana recipient validation. No fabricated or guessed wallets.",
+      "vesting": "12_MONTHS__12_EQUAL_MONTHLY_JUPITER_RELEASES"
+    },
+    "legacyRevival": {
+      "snapshotBatch": "4b7faa3f-c6cd-435f-9840-43a04cd090a0",
+      "snapshotRoot": "b0a58be30c8323bf22d57939cd989be6b1631f5dd17a682cd829d0cc6a85e548",
+      "recipients": 216,
+      "poolTokens": 20000000,
+      "entitlementModel": "50% equal unique-wallet share + 50% square-root normalized historical holdings",
+      "requestedDelivery": "BULK_DISTRIBUTE_ALL_APPROVED_ENTITLEMENTS",
+      "vesting": "12_MONTHS__12_EQUAL_MONTHLY_JUPITER_RELEASES",
+      "currentGate": "FINAL_LEDGER_RECONCILIATION_AND_EXCLUSION_REVIEW_REQUIRED_BEFORE_SIGNING"
+    },
+    "team": {
+      "bucketTokens": 30000000,
+      "bucketPercentOfSupply": 15,
+      "vesting": "12_MONTHS__12_EQUAL_MONTHLY_JUPITER_RELEASES",
+      "ownerDirectedWeights": [
+        {
+          "name": "Stepper",
+          "percentOfTeamBucket": 40,
+          "tokens": 12000000,
+          "historicalWallet": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
+          "walletState": "REVERIFY_BEFORE_LOCK_CREATION"
+        },
+        {
+          "name": "Savage",
+          "percentOfTeamBucket": 15,
+          "tokens": 4500000,
+          "walletState": "WALLET_REQUIRED"
+        }
+      ],
+      "remainingAfterDirectedWeights": {
+        "percentOfTeamBucket": 45,
+        "tokens": 13500000,
+        "ownerNamedCandidates": [
+          "Music / SolMusic",
+          "Mohammed",
+          "HeroDaniel",
+          "other active contributors approved by JayJayTeamDev"
+        ],
+        "status": "WEIGHTS_AND_WALLETS_PENDING_OWNER_FINALIZATION"
+      },
+      "recapEdisonProposal": {
+        "requestedPercentOfTotalSupply": 8,
+        "requestedTokens": 16000000,
+        "recipientConcept": "Recapthisbot / Edison team-managed allocation",
+        "status": "PENDING_SOURCE_BUCKET_AND_VERIFIED_RECIPIENT_WALLET",
+        "arithmeticNote": "16M is greater than the 13.5M remaining team bucket, so this cannot be inserted into the existing team bucket without changing another approved allocation."
+      },
+      "exclusions": [
+        {
+          "label": "Michael / BasedBid-associated team allocation",
+          "status": "EXCLUDED_BY_OWNER_FROM_REVIVE_TEAM_ALLOCATION"
+        }
+      ]
+    },
+    "giveawayWeek": {
+      "durationDays": 7,
+      "channel": "X",
+      "account": "@CryptoWorldzX",
+      "graceAccountKey": "cryptoworldzx",
+      "graceConnectionState": "ACTIVE__APPROVAL_REQUIRED",
+      "collectionRule": "Collect Solana addresses from eligible replies to the approved giveaway post during the campaign window.",
+      "distributionRule": "Deduplicate, validate Solana recipients, build one manifest, then use WorldzBulkDrop™ rather than new pages per recipient.",
+      "tokenBudget": "PENDING_OWNER_BUCKET_AND_AMOUNT",
+      "postState": "NOT_POSTED_YET",
+      "recipientCollectionState": "NOT_STARTED"
+    }
+  },
+  "inheritance": {
+    "applyToFutureWorldzLaunchPadTokens": true,
+    "rule": "The manifest, vesting, approval, proof and live-verification standards become reusable WorldzLaunchPad defaults. Token-specific economics remain owner-approved overrides.",
+    "modules": [
+      "WorldzBulkDrop™",
+      "WorldzLock™",
+      "WorldzVest™",
+      "WorldzProof™",
+      "WorldzAuto™",
+      "G.R.A.C.E. campaign collection",
+      "ZED LED Command Centre MAX™ status"
+    ]
+  },
+  "currentChatCheckpoint": {
+    "timestamp": "2026-09-27",
+    "completed": [
+      "105 public DevCity wallet candidates collected and committed",
+      "216-wallet Legacy Revival snapshot and 20M entitlement pool identified",
+      "REVIVE team vesting policy changed to 12 monthly releases with no cliff",
+      "@CryptoWorldzX GRACE account confirmed active with approval required"
+    ],
+    "incomplete": [
+      "Final chain/source validation and selection of exactly 100 DevCity recipients",
+      "Build final 100-recipient DevCity manifest",
+      "Build final 216-recipient Legacy manifest after reconciliation gate",
+      "Finalize remaining team weights and recipient wallets",
+      "Resolve source bucket for proposed 16M Recap/Edison allocation",
+      "Build and validate WorldzBulkDrop™ production execution",
+      "Post and run the one-week REVIVE X giveaway campaign",
+      "Execute Jupiter vesting locks and on-chain bulk distributions",
+      "End-to-end on-chain verification"
+    ]
+  }
+}
