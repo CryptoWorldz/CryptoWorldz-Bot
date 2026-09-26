@@ -188,21 +188,28 @@ jobs:
             if(!resp || resp.status()!==200) throw new Error('OneDrop HTTP status '+(resp&&resp.status()));
             await page.waitForSelector('#connect',{state:'visible',timeout:20000});
             await page.click('#connect');
-            let bridgeReady=false;
+            let bridgeReady=false,modalOpen=false;
             try{
               await page.waitForFunction(()=>!!window.__WORLDZ_JUPITER_MOBILE_ADAPTER__,null,{timeout:20000});
               bridgeReady=true;
             }catch{}
+            try{
+              await page.waitForFunction(()=>window.__WORLDZ_REOWN_STATE__?.open===true,null,{timeout:15000});
+              modalOpen=true;
+            }catch{}
             const status=await page.locator('#status').innerText().catch(()=>'<missing>');
             const modalCount=await page.locator('w3m-modal,appkit-modal,w3m-router,wui-flex').count().catch(()=>0);
+            const state=await page.evaluate(()=>window.__WORLDZ_REOWN_STATE__||{});
             console.log('ONEDROP_E2E_STATUS='+JSON.stringify(status));
             console.log('ONEDROP_E2E_BRIDGE_READY='+bridgeReady);
+            console.log('ONEDROP_E2E_MODAL_OPEN='+modalOpen);
             console.log('ONEDROP_E2E_MODAL_NODES='+modalCount);
+            console.log('ONEDROP_E2E_REOWN_STATE='+JSON.stringify(state));
             if(consoleErrors.length) console.log('ONEDROP_E2E_CONSOLE_ERRORS='+JSON.stringify(consoleErrors));
             if(pageErrors.length) console.log('ONEDROP_E2E_PAGE_ERRORS='+JSON.stringify(pageErrors));
             await browser.close();
-            if(!bridgeReady || modalCount===0 || pageErrors.length){
-              throw new Error('Android wallet connection UI failed. '+JSON.stringify({bridgeReady,modalCount,status,consoleErrors,pageErrors}));
+            if(!bridgeReady || !modalOpen || pageErrors.length){
+              throw new Error('Android wallet connection UI failed. '+JSON.stringify({bridgeReady,modalOpen,modalCount,status,state,consoleErrors,pageErrors}));
             }
             console.log('WORLDZ_ONEDROP_ANDROID_WALLET_BRIDGE=PASS');
           })().catch(e=>{console.error(e);process.exit(1)});
