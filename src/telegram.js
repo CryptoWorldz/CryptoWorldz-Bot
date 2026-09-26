@@ -33,8 +33,8 @@ const PUBLIC_COMMANDS = [
   { command: "missions", description: "View every active Raaiiidd" },
   { command: "wallet", description: "Connect a public Solana wallet" },
   { command: "kitty", description: "View the community SOL/USDC kitty" },
-  { command: "governance", description: "View active community votes" },
-  { command: "vote", description: "Vote on a governance proposal" },
+  { command: "governance", description: "Legacy alias: open WorldzGovern proposals" },
+  { command: "vote", description: "Legacy alias: cast a WorldzGovern vote" },
   { command: "cancel", description: "Cancel wallet registration" },
   { command: "community", description: "Open CryptoWorldz community links" },
   { command: "website", description: "Open CryptoWorldz.xyz" }
@@ -267,11 +267,11 @@ Use /help to open the Command Menu.
     try {
       const proposals = await repository.listGovernanceProposals(10, msg.from.id);
       const active = proposals.filter((proposal) => ["active", "open"].includes(proposal.status));
-      if (!active.length) return send(msg.chat.id, "🗳️ No active CryptoWorldz Governance Votes right now.");
+      if (!active.length) return send(msg.chat.id, "🏛️ WorldzGovern™ — no active governance proposals right now. Popularity voting lives separately in /worldzvotes.");
       const rows = active.map((proposal) => {
         const options = Array.isArray(proposal.options) ? proposal.options : [];
         const choices = options.map((option, index) => `${index + 1}. ${option} — ${proposal.vote_counts[String(index + 1)] || 0} votes`).join("\n");
-        return `🗳️ Proposal #${proposal.id}\n${proposal.title}\n\n${proposal.description}\n\n${choices}\n\nTotal Votes: ${proposal.total_votes}${proposal.selected_option ? `\n✅ Your Vote: Option ${proposal.selected_option}` : `\nVote: /vote ${proposal.id} 1|2|3`}`;
+        return `🏛️ WorldzGovern Proposal #${proposal.id}\n${proposal.title}\n\n${proposal.description}\n\n${choices}\n\nTotal Votes: ${proposal.total_votes}${proposal.selected_option ? `\n✅ Your Vote: Option ${proposal.selected_option}` : `\nVote: /governvote ${proposal.id} 1|2|3`}`;
       });
       return sendLong(msg.chat.id, rows.join("\n\n——————————\n\n"));
     } catch (error) { safeError("Governance command", error); return send(msg.chat.id, "❌ I couldn't load Governance Votes."); }
@@ -279,7 +279,7 @@ Use /help to open the Command Menu.
 
   bot.onText(/^\/vote(?:@\w+)?(?:\s+(\d+)\s+(\d+))?$/, async (msg, match) => {
     const proposalId = parsePositiveId(match && match[1]);
-    if (!proposalId) return send(msg.chat.id, "❌ Use: /vote proposal_id option\nExample: /vote 1 3");
+    if (!proposalId) return send(msg.chat.id, "🏛️ Legacy governance alias. Use: /governvote proposal_id option\nExample: /governvote 1 3\n\nToken popularity voting is /tokenvote SYMBOL.");
     try {
       const proposals = await repository.listGovernanceProposals(20, msg.from.id);
       const proposal = proposals.find((item) => String(item.id) === String(proposalId));
@@ -288,15 +288,15 @@ Use /help to open the Command Menu.
       const result = await repository.castGovernanceVote(proposalId, msg.from.id, option);
       if (result.outcome === "duplicate") return send(msg.chat.id, "⚠️ You have already voted on this proposal.");
       if (result.outcome === "unregistered") return send(msg.chat.id, "❌ Register with /start before voting.");
-      if (result.outcome !== "recorded") return send(msg.chat.id, "❌ This Governance Vote is not currently open.");
-      return send(msg.chat.id, `✅ Governance Vote Recorded!\n\n🗳️ ${result.proposal.title}\nYour Choice: ${result.option}\n\nOne Legend • One Vote 💜`);
+      if (result.outcome !== "recorded") return send(msg.chat.id, "❌ This WorldzGovern™ proposal is not currently open.");
+      return send(msg.chat.id, `✅ WorldzGovern™ Vote Recorded!\n\n🗳️ ${result.proposal.title}\nYour Choice: ${result.option}\n\nOne Legend • One Governance Vote 💜\nThis does not affect Worldz Votes Centre™ popularity rankings.`);
     } catch (error) { safeError("Vote command", error); return send(msg.chat.id, "❌ I couldn't record that vote."); }
   });
 
   bot.onText(/^\/help(?:@\w+)?$/, (msg) =>
     send(
       msg.chat.id,
-      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/governance\n/vote proposal_id option\n/cancel\n/community\n/website\n\n⚠️ Never provide a private key or seed phrase."
+      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/worldzvotes — token popularity\n/worldzgovern — DAO governance\n/governvote proposal_id option\n/cancel\n/community\n/website\n\n⚠️ Never provide a private key or seed phrase."
     )
   );
 
