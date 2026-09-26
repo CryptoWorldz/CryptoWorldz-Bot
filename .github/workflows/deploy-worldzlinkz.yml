@@ -1,0 +1,193 @@
+name: Deploy WorldzLinkz
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cryptoworldz.xyz/worldzlinkz/**'
+      - 'DOMAINS.txt'
+      - 'src/websites-telegram.js'
+      - 'src/command-registry.js'
+      - 'test/websites-telegram.test.js'
+      - 'test/command-registry.test.js'
+      - '.github/workflows/deploy-worldzlinkz.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cryptoworldz.xyz/worldzlinkz/**'
+      - 'DOMAINS.txt'
+      - 'src/websites-telegram.js'
+      - 'src/command-registry.js'
+      - 'test/websites-telegram.test.js'
+      - 'test/command-registry.test.js'
+      - '.github/workflows/deploy-worldzlinkz.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldzlinkz-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate WorldzLinkz registry and page
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          page=Path('cryptoworldz.xyz/worldzlinkz/index.html')
+          registry_path=Path('cryptoworldz.xyz/worldzlinkz/registry.json')
+          assert page.is_file() and page.stat().st_size>3000
+          assert registry_path.is_file()
+
+          registry=json.loads(registry_path.read_text())
+          assert registry['brand']=='WorldzLinkz™'
+          assert registry['tagline']=='Every Worldz. One Link.'
+          assert registry['canonicalUrl']=='https://cryptoworldz.xyz/worldzlinkz/'
+          assert registry['qrTarget']==registry['canonicalUrl']
+
+          entries=registry['entries']
+          hosts=[row['host'].lower() for row in entries]
+          assert len(hosts)==len(set(hosts)), 'duplicate Worldz host'
+          assert len(entries)>=20, len(entries)
+
+          required=[
+            line.strip().lower()
+            for line in Path('DOMAINS.txt').read_text().splitlines()
+            if line.strip() and not line.lstrip().startswith('#')
+          ]
+          missing=[host for host in required if host not in hosts]
+          assert not missing, f'DOMAINS.txt missing from WorldzLinkz: {missing}'
+
+          for extra in ['launchpad.cryptoworldz.xyz','spam2ham.cryptoworldz.xyz']:
+            assert extra in hosts, extra
+
+          html=page.read_text()
+          for required_text in ['WorldzLinkz™','Every Worldz. One Link.','All Worldz Domains + Subdomains','id="qr"','registry.json']:
+            assert required_text in html, required_text
+
+          print(f'WORLDZLINKZ_REGISTRY=PASS entries={len(entries)} registered_domains={len(required)}')
+
+      - name: Validate Command Centre integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check src/websites-telegram.js
+          node --check src/command-registry.js
+          node --test test/websites-telegram.test.js test/command-registry.test.js
+
+  deploy:
+    needs: validate
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish WorldzLinkz to CryptoWorldz
+        shell: python
+        run: |
+          import os, ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path, PurePosixPath
+
+          local_root=Path('cryptoworldz.xyz/worldzlinkz')
+          remote_root=PurePosixPath('domains/cryptoworldz.xyz/public_html/worldzlinkz')
+
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=45)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p()
+          ftp.set_pasv(True)
+
+          def ensure(directory):
+              ftp.cwd('/')
+              for part in PurePosixPath(directory).parts:
+                  if part in ('','/'): continue
+                  try: ftp.cwd(part)
+                  except error_perm:
+                      ftp.mkd(part)
+                      ftp.cwd(part)
+
+          count=0
+          try:
+              for local in sorted(p for p in local_root.rglob('*') if p.is_file()):
+                  rel=local.relative_to(local_root)
+                  remote=remote_root/PurePosixPath(rel.as_posix())
+                  ensure(remote.parent)
+                  with local.open('rb') as fh:
+                      ftp.storbinary('STOR '+remote.name,fh,blocksize=262144)
+                  print('WORLDZLINKZ_PUBLISHED',local.as_posix(),'->',remote.as_posix())
+                  count+=1
+          finally:
+              try: ftp.quit()
+              except Exception: ftp.close()
+
+          print('WORLDZLINKZ_UPLOAD=PASS files='+str(count))
+
+      - name: Verify Hostinger origin bytes
+        shell: python
+        run: |
+          import os, ssl, io
+          from ftplib import FTP_TLS
+          from pathlib import Path, PurePosixPath
+
+          checks=[
+            (Path('cryptoworldz.xyz/worldzlinkz/index.html'),PurePosixPath('domains/cryptoworldz.xyz/public_html/worldzlinkz/index.html')),
+            (Path('cryptoworldz.xyz/worldzlinkz/registry.json'),PurePosixPath('domains/cryptoworldz.xyz/public_html/worldzlinkz/registry.json')),
+          ]
+
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=45)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p()
+          ftp.set_pasv(True)
+          try:
+              for local,remote in checks:
+                  buf=io.BytesIO()
+                  ftp.retrbinary('RETR /'+str(remote),buf.write)
+                  assert buf.getvalue()==local.read_bytes(), f'origin mismatch {remote}'
+                  print('WORLDZLINKZ_ORIGIN_PASS',remote)
+          finally:
+              try: ftp.quit()
+              except Exception: ftp.close()
+
+      - name: Verify public WorldzLinkz
+        shell: python
+        run: |
+          import json,time,urllib.request
+          base='https://cryptoworldz.xyz/worldzlinkz/'
+          def get(path):
+              url=base+path
+              sep='&' if '?' in url else '?'
+              req=urllib.request.Request(url+sep+'verify='+str(int(time.time()*1000)),headers={'User-Agent':'WorldzLinkz-Verify/1.0','Cache-Control':'no-cache'})
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  return r.status,r.read().decode('utf-8','ignore')
+
+          code,html=get('')
+          rcode,body=get('registry.json')
+          registry=json.loads(body)
+          assert code==200 and rcode==200
+          assert 'WorldzLinkz™' in html
+          assert 'Every Worldz. One Link.' in html
+          assert len(registry['entries'])>=20
+          assert registry['qrTarget']=='https://cryptoworldz.xyz/worldzlinkz/'
+          print('WORLDZLINKZ_PUBLIC=PASS entries='+str(len(registry['entries'])))
