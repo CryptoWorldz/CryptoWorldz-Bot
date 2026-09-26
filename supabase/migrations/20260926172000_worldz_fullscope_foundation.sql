@@ -53,6 +53,7 @@ create table if not exists public.worldz_popularity_votes (
   token_id uuid not null references public.worldz_fullscope_tokens(id) on delete cascade,
   telegram_id bigint not null,
   voted_on date not null default (timezone('utc',now()))::date,
+  verification_state text not null default 'telegram' check (verification_state in ('telegram','verified_member')),
   created_at timestamptz not null default now(),
   unique(token_id,telegram_id,voted_on)
 );
@@ -82,22 +83,33 @@ create table if not exists public.worldz_fullscope_events (
   chain_key text not null references public.worldz_fullscope_chains(chain_key),
   event_type text not null,
   tx_reference text,
+  block_reference text,
+  actor_address text,
+  amount_raw text,
+  quote_value numeric,
   payload jsonb not null default '{}'::jsonb,
-  observed_at timestamptz not null default now()
+  observed_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
 );
 
 -- Prepared action records are non-custodial and cannot self-broadcast.
+create index if not exists worldz_fullscope_events_token_observed_idx on public.worldz_fullscope_events(token_id,observed_at desc);
+create index if not exists worldz_fullscope_events_chain_observed_idx on public.worldz_fullscope_events(chain_key,observed_at desc);
+
 create table if not exists public.worldz_fullscope_action_intents (
   id uuid primary key default gen_random_uuid(),
   token_id uuid not null references public.worldz_fullscope_tokens(id),
   chain_key text not null references public.worldz_fullscope_chains(chain_key),
   action_type text not null,
+  requested_by_telegram_id bigint,
   state text not null default 'prepared',
   requires_external_signature boolean not null default true check (requires_external_signature is true),
   auto_broadcast boolean not null default false check (auto_broadcast is false),
   mainnet_execution_enabled boolean not null default false,
+  transaction_payload jsonb not null default '{}'::jsonb,
   proof_receipt jsonb,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create table if not exists public.worldz_fullscope_locks (
@@ -105,6 +117,11 @@ create table if not exists public.worldz_fullscope_locks (
   token_id uuid not null references public.worldz_fullscope_tokens(id),
   chain_key text not null references public.worldz_fullscope_chains(chain_key),
   lock_kind text not null,
+  locker_reference text,
+  amount_raw text,
+  permanent boolean not null default false,
+  starts_at timestamptz,
+  unlocks_at timestamptz,
   status text not null default 'planned',
   proof_receipt jsonb,
   created_at timestamptz not null default now()
@@ -115,8 +132,11 @@ create table if not exists public.worldz_fullscope_vesting (
   token_id uuid not null references public.worldz_fullscope_tokens(id),
   chain_key text not null references public.worldz_fullscope_chains(chain_key),
   recipient_address text not null,
+  total_amount_raw text not null,
   schedule_kind text not null,
+  initial_unlock_bps integer not null default 0 check (initial_unlock_bps between 0 and 10000),
   starts_at timestamptz not null,
+  cliff_at timestamptz,
   ends_at timestamptz not null,
   status text not null default 'planned',
   proof_receipt jsonb,
@@ -150,6 +170,7 @@ grant all on public.worldz_fullscope_chains,public.worldz_fullscope_tokens,publi
 public.worldz_popularity_sponsored_boosts,public.worldz_fullscope_events,public.worldz_fullscope_action_intents,
 public.worldz_fullscope_locks,public.worldz_fullscope_vesting to service_role;
 grant select on public.worldz_popularity_leaderboard to service_role;
+grant usage, select on sequence public.worldz_popularity_votes_id_seq to service_role;
 
 comment on table public.worldz_popularity_votes is
 'Worldz Votes Centre™ organic popularity votes only. Must never be used to authorize WorldzGovern™ actions.';
