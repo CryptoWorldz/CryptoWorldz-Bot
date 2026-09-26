@@ -6,18 +6,18 @@
       "name": "REVIVE Legacy Revival",
       "pathway": "CryptoWorldz",
       "status": "PREPARING",
-      "reward": "RVIV pool: 20,000,000 tokens across the recorded 216 eligible wallets",
-      "eligibility": "Existing recorded snapshot entitlement; exact wallet and amount must match the approved ledger.",
+      "reward": "Proposed equal share: 93,457.943925 RVIV for each of 214 eligible historical wallets; pending approval and claim deployment",
+      "eligibility": "Historical snapshot membership and verified wallet control, excluding the two removed addresses. No preference based on colour, health, appearance, social role, or past token holdings.",
       "proof": "Wallet signature against the published claim challenge after launch; no seed phrase or token transfer.",
       "destination": "https://launchpad.cryptoworldz.xyz/legacy-proof/"
     },
     {
       "id": "rviv-devcity",
-      "name": "DevCity™ 100",
+      "name": "DevCity\u2122 100",
       "pathway": "CryptoWorldz",
       "status": "RECRUITING",
       "reward": "Planned 200,000 RVIV per approved seat; 100 seats maximum",
-      "eligibility": "Accepted DevCity participation, developer evidence and verified Solana wallet association. Public candidate wallets are not approved seats.",
+      "eligibility": "Accepted participation, developer evidence and a signed Solana wallet; all 100 accepted seats have equal shares. No identity or appearance preference.",
       "proof": "Program approval and signed wallet challenge once a claim flow is published.",
       "destination": "https://launchpad.cryptoworldz.xyz/developers/"
     },
