@@ -280,7 +280,7 @@ async function connectWallet(){
       walletCtx={kind:'legacy',provider:p,address:pk.toString(),name:'Jupiter In-App Wallet'};
     }else if(choice==='jupiter-mobile'){
       setStatus('OPENING JUPITER MOBILE…\nUsing the Jupiter/Reown WalletConnect bridge. Approve only the connection — no mint transaction is being requested.','warn');
-      const mod=await import('/mint/jupiter-mobile.js?v=20260926-reown-react19-v4');
+      const mod=await import('/mint/jupiter-mobile.js?v=20260926-reown-react-map-v5');
       mod.resetJupiterMobileConnectionState?.();
       const adapter=await mod.getJupiterMobileAdapter();
       const connectTimeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Jupiter Mobile did not finish connecting within 20 seconds. The stale WalletConnect state has been cleared; reload once if this message appears.')),20000));
