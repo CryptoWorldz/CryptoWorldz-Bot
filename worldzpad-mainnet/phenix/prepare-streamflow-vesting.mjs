@@ -5,7 +5,8 @@
  */
 import fs from "node:fs";
 import { PublicKey } from "@solana/web3.js";
-import { BN, StreamflowSolana } from "@streamflow/stream";
+import { StreamflowSolana } from "@streamflow/stream";
+import BN from "bn.js";
 
 const DAY=86400;
 const PERIOD=30*DAY;
