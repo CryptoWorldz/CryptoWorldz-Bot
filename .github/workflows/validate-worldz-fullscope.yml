@@ -13,6 +13,8 @@ on:
       - 'test/command-registry.test.js'
       - 'worldzpad-omnichain/fullscope/**'
       - 'launchpad.cryptoworldz.xyz/fullscope/**'
+      - 'public/miniapp/index.html'
+      - 'public/miniapp/app.js'
       - 'supabase/migrations/20260926172000_worldz_fullscope_foundation.sql'
       - 'scripts/validate_worldz_fullscope.py'
       - '.github/workflows/validate-worldz-fullscope.yml'
@@ -40,5 +42,9 @@ jobs:
           node --check src/command-registry.js
           node --check src/full-runtime-entry.js
           node --check src/telegram.js
+          node --check public/miniapp/app.js
+          grep -Fq 'WorldzFullScope™' public/miniapp/index.html
+          grep -Fq 'Worldz Votes Centre™' public/miniapp/index.html
+          grep -Fq 'WorldzGovern™ — DAO Governance' public/miniapp/index.html
       - name: Focused Command Centre tests
         run: node --test test/fullscope.test.js test/command-centre.test.js test/command-registry.test.js
