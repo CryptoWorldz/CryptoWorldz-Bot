@@ -30,8 +30,8 @@ assert sum(x["percent"] for x in contract["allocations"]) == 100
 assert sum(x["tokens"] for x in contract["allocations"]) == 200_000_000
 
 # Dev / Legacy / DevCity.
-assert len(contract["devAllocation"]["wallets"]) == 6
-assert contract["devAllocation"]["tokensPerWallet"] * 6 == 30_000_000
+assert len(contract["devAllocation"]["wallets"]) == 7
+assert int(contract["devAllocation"]["rawUnitsPerWallet"]) * 7 + int(contract["devAllocation"]["unassignedRemainderRaw"]) == 30_000_000_000_000
 assert contract["legacyRevival"]["poolTokens"] == 20_000_000
 assert contract["legacyRevival"]["eligibleWallets"] == 216
 assert contract["legacyRevival"]["regenerationLockedUntilGeneratorFixVerified"] is True
@@ -64,9 +64,13 @@ assert legacy_distribution["recipientCount"] == len(legacy_distribution["recipie
 assert len({x["wallet"] for x in legacy_distribution["recipients"]}) == 216
 assert sum(int(x["amountRaw"]) for x in legacy_distribution["recipients"]) == 20_000_000_000_000
 assert six_dev_distribution["mint"] == contract["token"]["canonicalMint"]
-assert six_dev_distribution["recipientCount"] == len(six_dev_distribution["recipients"]) == 6
+assert six_dev_distribution["recipientCount"] == len(six_dev_distribution["recipients"]) == 7
 assert {x["wallet"] for x in six_dev_distribution["recipients"]} == {x["address"] for x in contract["devAllocation"]["wallets"]}
-assert all(x["amountRaw"] == "5000000000000" for x in six_dev_distribution["recipients"])
+assert all(x["amountRaw"] == contract["devAllocation"]["rawUnitsPerWallet"] for x in six_dev_distribution["recipients"])
+assert sum(int(x["amountRaw"]) for x in six_dev_distribution["recipients"]) + int(six_dev_distribution["unassignedRemainderRaw"]) == 30_000_000_000_000
+assert not team_vesting["knownTeam"] and not contract["teamVesting"]["knownTeamWallets"]
+assert len(legacy_distribution["payoutExclusionsPendingRecalculation"]) == 2
+assert all(x.get("payoutStatus") == "EXCLUDED_PENDING_RECALCULATION" for x in legacy_distribution["recipients"] if x["wallet"] in legacy_distribution["payoutExclusionsPendingRecalculation"])
 assert candidates["targetNewSeats"] == 50
 assert len(candidates["candidates"]) == 50
 assert len({x["github"] for x in candidates["candidates"]}) == 50
