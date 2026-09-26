@@ -28,6 +28,12 @@ assert contract["financialSafety"]["privateKeysInTelegramDatabase"] is False
 build = contract["worldzFullBuild"]
 assert build["brand"] == "WorldzFullBuild™"
 assert build["status"] == "RELEASE_GATE_DESIGN"
+assert build["requiredParent"] is True
+assert build["integrationStatus"] == "REQUIRED_SUBSYSTEM"
+assert build["sourceOfTruth"] == "worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json"
+assert build["capacityContract"]["chainCount"] == 8
+assert build["capacityContract"]["maxTokensPerChain"] == 20
+assert build["capacityContract"]["initialTokenEnvironmentCapacity"] == 160
 wallet = build["walletConnection"]
 assert wallet["entryPoint"] == "first-party-worldz-website"
 assert wallet["walletComesToWebsite"] is True
