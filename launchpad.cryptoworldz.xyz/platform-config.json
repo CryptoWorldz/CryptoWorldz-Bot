@@ -875,7 +875,8 @@
   "worldzProofReceipt": {
     "name": "Worldz Proof Receipt™",
     "publicPath": "/proof-receipt/",
-    "schema": "/schemas/worldz-proof-receipt.v1.json",
+    "schema": "/.well-known/worldz-proof-receipt.schema.json",
+    "schemaCompatibilityPath": "/schemas/worldz-proof-receipt.v1.json",
     "requiredAfter": [
       "token_create",
       "market_launch",
