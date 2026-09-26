@@ -142,7 +142,8 @@ jobs:
             root/'mint/index.html',root/'mint/app.js',root/'mint/jupiter-mobile.js',
             root/'trust/index.html',root/'trust/app.js',
             root/'omnichain/index.html',root/'fullscope/index.html',
-            root/'proof-receipt/index.html',root/'worlddexpush/index.html',root/'worlddexpush/app.js',root/'bitworldz/index.html',root/'bitworldz/app.js',root/'capabilities/index.html',
+            root/'proof-receipt/index.html',root/'.well-known/worldz-proof-receipt.schema.json',root/'schemas/worldz-proof-receipt.v1.json',
+            root/'worlddexpush/index.html',root/'worlddexpush/app.js',root/'bitworldz/index.html',root/'bitworldz/app.js',root/'capabilities/index.html',
             root/'technology/index.html',root/'technology.html',
             root/'wldz/index.html',root/'wldz/app.js',root/'wldz/launch-config.json',
             root/'tokenlist.json',root/'.well-known/worldz-tokens.json',
@@ -638,6 +639,8 @@ jobs:
                   trust_code,trust_body=get(base+'/trust/?verify=trust-v2')
                   fullscope_code,fullscope_body=get(base+'/fullscope/?verify=fullscope-v1')
                   receipt_code,receipt_body=get(base+'/proof-receipt/?verify=receipt-v1')
+                  receipt_schema_code,receipt_schema_body=get(base+'/.well-known/worldz-proof-receipt.schema.json?verify=receipt-v1')
+                  receipt_schema_alias_code,receipt_schema_alias_body=get(base+'/schemas/worldz-proof-receipt.v1.json?verify=receipt-v1')
                   dexpush_code,dexpush_body=get(base+'/worlddexpush/?verify=dexpush-v1')
                   bitworldz_code,bitworldz_body=get(base+'/bitworldz/?verify=bitworldz-v1')
                   capability_code,capability_body=get(base+'/capabilities/?verify=capability-v1')
@@ -716,6 +719,12 @@ jobs:
                   assert all(term not in trust_body for term in private_terms)
                   assert fullscope_code==200 and 'WORLDZFULLSCOPE™' in fullscope_body and 'POPULARITY ONLY' in fullscope_body and 'GOVERNANCE ONLY' in fullscope_body
                   assert receipt_code==200 and 'WORLDZ PROOF RECEIPT™' in receipt_body
+                  assert receipt_schema_code==200 and receipt_schema_alias_code==200
+                  assert json.loads(receipt_schema_body)==json.loads(receipt_schema_alias_body)
+                  live_receipt_schema=json.loads(receipt_schema_body)
+                  assert live_receipt_schema['$id']=='https://launchpad.cryptoworldz.xyz/.well-known/worldz-proof-receipt.schema.json'
+                  passed_rules=[x for x in live_receipt_schema['allOf'] if x.get('if',{}).get('properties',{}).get('status',{}).get('const')=='PASSED']
+                  assert len(passed_rules)==1
                   assert dexpush_code==200 and 'WORLDDEXPUSH™' in dexpush_body and '500+ active Boosts' in dexpush_body and 'LIVE UPSTREAM CHECKER' in dexpush_body
                   assert bitworldz_code==200 and 'BitWorldz' in bitworldz_body and 'Mainnet execution disabled' in bitworldz_body
                   assert capability_code==200 and 'WORLDZ' in capability_body and 'CAPABILITY MATRIX' in capability_body and 'MAINNET MARKET LAUNCH: GATED' in capability_body
