@@ -1,0 +1,86 @@
+{
+  "version": "WORLDZ-MAGIC-FEE-2026-09-24-A",
+  "status": "DEVNET_STANDARD_CANDIDATE__MAINNET_REQUIRES_PER_VENUE_PROOF",
+  "name": "MagicFeeNumber™",
+  "target": {
+    "grossTraderFeeBps": 75,
+    "grossTraderFeePercent": 0.75,
+    "dynamicFeeDefault": false
+  },
+  "meteoraDbcModel": {
+    "documentedProtocolFeePercentOfTradingFees": 20,
+    "grossFeePercentOfTrade": 0.75,
+    "protocolFeePercentOfTrade": 0.15,
+    "worldzControlledPercentOfTrade": 0.6,
+    "creatorTradingFeePercentage": 51,
+    "partnerTradingFeePercentage": 49
+  },
+  "worldzControlledSplit": {
+    "creator": {
+      "percent": 51,
+      "effectivePercentOfTrade": 0.306
+    },
+    "referrer": {
+      "percent": 17,
+      "effectivePercentOfTrade": 0.102
+    },
+    "legacyFlywheel": {
+      "percent": 15,
+      "effectivePercentOfTrade": 0.09
+    },
+    "worldzLaunchPad": {
+      "percent": 8.5,
+      "effectivePercentOfTrade": 0.051
+    },
+    "oneWorldzImpact": {
+      "percent": 8.5,
+      "effectivePercentOfTrade": 0.051
+    },
+    "totalPercent": 100,
+    "totalEffectivePercentOfTrade": 0.6
+  },
+  "partnerRouter": {
+    "receivesPercentOfWorldzControlledFee": 49,
+    "weights": {
+      "referrer": 170,
+      "legacyFlywheel": 150,
+      "worldzLaunchPad": 85,
+      "oneWorldzImpact": 85,
+      "total": 490
+    }
+  },
+  "legacyFlywheel": {
+    "vaultCount": 10,
+    "equalFunding": true,
+    "percentOfWorldzControlledFee": 15,
+    "effectivePercentOfTradeTotal": 0.09,
+    "effectivePercentOfTradePerVault": 0.009,
+    "epochHours": 6
+  },
+  "examples": [
+    {
+      "tradingVolume": 1000000,
+      "grossFees": 7500,
+      "protocol": 1500,
+      "creator": 3060,
+      "referrer": 1020,
+      "legacyFlywheel": 900,
+      "worldzLaunchPad": 510,
+      "oneWorldzImpact": 510,
+      "eachLegacyVault": 90
+    },
+    {
+      "tradingVolume": 100000000,
+      "grossFees": 750000,
+      "protocol": 150000,
+      "creator": 306000,
+      "referrer": 102000,
+      "legacyFlywheel": 90000,
+      "worldzLaunchPad": 51000,
+      "oneWorldzImpact": 51000,
+      "eachLegacyVault": 9000
+    }
+  ],
+  "crossChainRule": "0.75% is the Worldz target only where the underlying venue can reproduce and disclose the economics accurately. If protocol/network/DEX deductions differ, the UI must show the actual trader fee and each destination before signing; never hide extra fees under the MagicFeeNumber label.",
+  "executionGate": "No mainnet venue inherits MagicFeeNumber automatically. Each venue requires fee-field validation, simulation/devnet proof, receipt reconciliation and explicit release approval."
+}
