@@ -1,0 +1,42 @@
+name: Validate Worldz Provider Handoffs
+
+on:
+  pull_request:
+    paths:
+      - 'worldzpad-mainnet/token-identity/worldz-token-registry.v1.json'
+      - 'launchpad.cryptoworldz.xyz/**/token-metadata.json'
+      - 'worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json'
+      - 'worldzpad-mainnet/worlddexpush/dexscreener-worldz.v1.json'
+      - 'worldzpad-mainnet/worlddexpush/worlddexpush.v1.json'
+      - 'launchpad.cryptoworldz.xyz/worlddexpush/jupiter/package.json'
+      - 'launchpad.cryptoworldz.xyz/worlddexpush/dexscreener/package.json'
+      - 'scripts/build_worldz_provider_handoffs.mjs'
+      - '.github/workflows/validate-worldz-provider-handoffs.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worldzpad-mainnet/token-identity/worldz-token-registry.v1.json'
+      - 'launchpad.cryptoworldz.xyz/**/token-metadata.json'
+      - 'worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json'
+      - 'worldzpad-mainnet/worlddexpush/dexscreener-worldz.v1.json'
+      - 'worldzpad-mainnet/worlddexpush/worlddexpush.v1.json'
+      - 'launchpad.cryptoworldz.xyz/worlddexpush/jupiter/package.json'
+      - 'launchpad.cryptoworldz.xyz/worlddexpush/dexscreener/package.json'
+      - 'scripts/build_worldz_provider_handoffs.mjs'
+      - '.github/workflows/validate-worldz-provider-handoffs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compile and compare every LIVE provider handoff
+        run: node scripts/build_worldz_provider_handoffs.mjs --check
