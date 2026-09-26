@@ -1,0 +1,67 @@
+{
+  "version": "2026-09-27-A",
+  "status": "IDENTITY_PACKAGE_READY__UPSTREAM_PLATFORM_REVIEW_PENDING",
+  "canonicalIdentity": {
+    "launchOrder": 2,
+    "name": "REVIVE",
+    "symbol": "RVIV",
+    "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+    "network": "Solana mainnet-beta",
+    "decimals": 6,
+    "fixedSupply": 200000000,
+    "mintAuthority": "REVOKED",
+    "freezeAuthority": "REVOKED",
+    "image": null,
+    "imageStatus": "CANONICAL_PUBLIC_RASTER_URL_NOT_YET_RECONCILED__DO_NOT_GUESS"
+  },
+  "description": "REVIVE (RVIV) is WorldzLaunchPad token #002 on Solana. Fixed supply: 200,000,000 RVIV. Mint and freeze authorities are revoked.",
+  "websites": {
+    "officialToken": "https://launchpad.cryptoworldz.xyz/rviv/",
+    "verification": "https://launchpad.cryptoworldz.xyz/rviv/verify/",
+    "CryptoWorldz": "https://cryptoworldz.xyz/",
+    "OneWorldz": "https://oneworldz.com/",
+    "DonateWorldz": "https://donateworldz.com/",
+    "WorldzLaunchPad": "https://launchpad.cryptoworldz.xyz/"
+  },
+  "social": {
+    "x": "https://x.com/CryptoWorldzX",
+    "telegram": "https://t.me/CryptoWLDZ"
+  },
+  "machineReadable": {
+    "metadata": "https://launchpad.cryptoworldz.xyz/rviv/token-metadata.json",
+    "tokenList": "https://launchpad.cryptoworldz.xyz/tokenlist.json",
+    "registry": "https://launchpad.cryptoworldz.xyz/.well-known/worldz-tokens.json"
+  },
+  "market": {
+    "venue": "Meteora DAMM v2",
+    "pool": "YWEMDsd6o3dm8uXNnmnWWU3c1UtFqDUKEMfbQ512i5c",
+    "pair": "RVIV/wSOL",
+    "feeBps": 75,
+    "dynamicFee": false,
+    "permanentLockPercent": 100,
+    "activationUtc": "2026-09-25T20:27:40Z",
+    "publicTradingVerification": "PENDING",
+    "confirmedTradeAtLastAudit": false,
+    "lastAuditUtc": "2026-09-26T04:34:00Z"
+  },
+  "platformTargets": {
+    "Jupiter": {
+      "page": "https://jup.ag/tokens/DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "status": "IDENTITY_AND_PRICE_DISCOVERY_PENDING",
+      "action": "Submit/update the exact canonical identity only after the public metadata endpoints are live."
+    },
+    "Solscan": {
+      "page": "https://solscan.io/token/DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "status": "TOKEN_PROFILE_RECONCILIATION_PENDING",
+      "action": "Use the exact canonical identity and official project URLs from this package."
+    },
+    "Phantom": {
+      "page": "https://phantom.com/tokens/solana/DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "status": "UPSTREAM_INDEXING_DEPENDENT"
+    },
+    "Meteora": {
+      "page": "https://www.meteora.ag/dammv2/YWEMDsd6o3dm8uXNnmnWWU3c1UtFqDUKEMfbQ512i5c",
+      "status": "POOL_EXISTS"
+    }
+  }
+}
