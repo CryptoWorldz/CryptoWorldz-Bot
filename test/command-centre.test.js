@@ -5,7 +5,7 @@ const { BOT_MENU_COMMANDS, MENUS } = require("../src/command-centre");
 test("gateway commands stay simple and ordered", () => {
   assert.deepEqual(
     BOT_MENU_COMMANDS.map((item) => item.command),
-    ["zedstart", "fullscope", "zed", "auto", "grace", "admin", "admingrace", "zedsettings", "help"]
+    ["zedstart", "max", "fullscope", "zed", "auto", "grace", "admin", "admingrace", "zedsettings", "help"]
   );
 });
 
