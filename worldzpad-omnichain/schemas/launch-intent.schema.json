@@ -396,6 +396,7 @@
         "properties": {
           "environment": {
             "enum": [
+              "devnet",
               "testnet",
               "mainnet"
             ]
