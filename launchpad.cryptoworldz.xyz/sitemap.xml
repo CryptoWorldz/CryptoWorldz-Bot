@@ -20,4 +20,5 @@
   <url><loc>https://launchpad.cryptoworldz.xyz/fullscope/</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
   <url><loc>https://launchpad.cryptoworldz.xyz/proof-receipt/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://launchpad.cryptoworldz.xyz/worlddexpush/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://launchpad.cryptoworldz.xyz/bitworldz/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
 </urlset>
