@@ -7,6 +7,9 @@ function registerFullBuildTelegramHandlers({ bot }) {
     return bot.sendMessage(msg.chat.id, [
       "🌐 WORLDZFULLBUILD™ — MASTER BUILD",
       "",
+      "Whole-project inheritance: ACTIVE",
+      "All project-relevant, non-sensitive Worldz decisions and lessons are governed by the canonical FullBuild source-of-truth set.",
+      "",
       "ZED LED Command Centre MAX™ leads the complete Worldz architecture.",
       "WorldzLaunchPad™ builds.",
       "Worldz Omnichain™ routes chain-native execution.",
@@ -21,7 +24,9 @@ function registerFullBuildTelegramHandlers({ bot }) {
       "🗳️ Worldz Votes Centre™ = POPULARITY ONLY",
       "🏛️ WorldzGovern™ = DAO GOVERNANCE ONLY",
       "",
-      "/fullscope • /worldzvotes • /worldzgovern"
+      "/fullscope • /worldzlinks • /worldzvotes • /worldzgovern",
+      "",
+      "🔗 WorldzLinkz™ — https://cryptoworldz.xyz/worldzlinkz/"
     ].join("\n"));
   });
 }
