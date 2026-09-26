@@ -5,7 +5,7 @@ const { allRegisteredCommandNames, groupsForRole } = require("../src/command-reg
 const REQUIRED_RUNTIME_COMMANDS = [
   "zedstart","zed","help","commands","commandtree","directory","acknowledgements","supportjay",
   "start","register","profile","rewards","leaderboard","raaiiidd","missions","wallet","cancel","kitty","impact","donate","points",
-  "fullscope","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
+  "worldzfullbuild","fullscope","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
   "worldzvotes","tokenvote","worldztrending","worldzrankings",
   "worldzgovern","governproposals","governvote","governdelegate",
   "raid","admin","admingrace","zedsettings","newmission","editmission","endmission","pending","approve","reject","member","admins","permissions","setkitty","setrole","setpermission","setpartner","broadcast","stats","activity",
@@ -47,4 +47,12 @@ test("Worldz Votes Centre and WorldzGovern commands live in separate registry gr
   const voteNames = new Set(votes.commands.map((item) => item.command));
   const governNames = new Set(govern.commands.map((item) => item.command));
   for (const command of voteNames) assert.equal(governNames.has(command), false, command);
+});
+
+
+test("WorldzFullBuild is exposed as its own member command group", () => {
+  const groups = groupsForRole("member");
+  const fullbuild = groups.find((group) => group.key === "fullbuild");
+  assert.ok(fullbuild);
+  assert.ok(fullbuild.commands.some((item) => item.command === "worldzfullbuild"));
 });
