@@ -23,7 +23,8 @@ assert contract["financialSafety"]["walletSignatureRequired"] is True
 assert contract["financialSafety"]["autoBroadcast"] is False
 assert contract["financialSafety"]["mainnetExecutionEnabled"] is False
 assert contract["financialSafety"]["privateKeysInTelegramDatabase"] is False
-\nbuild = contract["worldzFullBuild"]
+
+build = contract["worldzFullBuild"]
 assert build["brand"] == "WorldzFullBuild™"
 assert build["status"] == "RELEASE_GATE_DESIGN"
 wallet = build["walletConnection"]
