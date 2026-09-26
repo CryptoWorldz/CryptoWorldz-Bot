@@ -1,0 +1,81 @@
+{
+  "version": "WORLDZ-OMNICHAIN-FEE-POLICY-2026-09-24-A",
+  "name": "MagicFeeNumber™ Omnichain Policy",
+  "status": "PRIVATE_BUILD__PER_CHAIN_PROOF_REQUIRED",
+  "targetGrossTraderFeeBps": 75,
+  "targetGrossTraderFeePercent": 0.75,
+  "dynamicFeeDefault": false,
+  "rule": "75 bps is the target gross trading fee only where the selected venue can implement and disclose it accurately. Network gas and external venue deductions must never be hidden.",
+  "worldzControlledSplitBps": {
+    "creator": 5100,
+    "referrer": 1700,
+    "legacyFlywheel": 1500,
+    "worldzLaunchPad": 850,
+    "oneWorldzImpact": 850,
+    "total": 10000
+  },
+  "worldzControlledSplitPercent": {
+    "creator": 51,
+    "referrer": 17,
+    "legacyFlywheel": 15,
+    "worldzLaunchPad": 8.5,
+    "oneWorldzImpact": 8.5,
+    "total": 100
+  },
+  "referralPolicy": {
+    "onePrimaryReferrerPerLaunchOrTradeAttribution": true,
+    "eligibleTypes": ["WALLET", "LAUNCHPAD", "INFLUENCER", "TELEGRAM_COMMUNITY", "X_COMMUNITY", "WEBSITE", "DEVELOPER", "API_PARTNER", "WHITE_LABEL_OPERATOR"],
+    "launchpadToLaunchpadSupported": true,
+    "referrerSharePercentOfWorldzControlledRevenue": 17,
+    "subAffiliateRule": "Any sub-affiliate split must come from the primary referrer's own 17% share and may not increase the trader fee."
+  },
+  "legacyFlywheelPolicy": {
+    "percentOfWorldzControlledRevenue": 15,
+    "solanaVaultCount": 10,
+    "equalSourceFundingAcrossLegacyVaults": true,
+    "settlementHours": 6,
+    "crossChainRule": "Accrue the 15% Legacy Flywheel entitlement on the source chain until an approved audited conversion/bridge path can deliver SOL. Unsupported automatic bridging is forbidden."
+  },
+  "knownVenueModels": {
+    "solanaMeteoraDbc": {
+      "externalProtocolShareBpsOfGrossTradingFee": 2000,
+      "externalProtocolSharePercentOfGrossTradingFee": 20,
+      "targetGrossTraderFeeBps": 75,
+      "modeledEffectivePercentOfTrade": {
+        "externalProtocol": 0.15,
+        "worldzControlled": 0.60,
+        "creator": 0.306,
+        "referrer": 0.102,
+        "legacyFlywheel": 0.09,
+        "worldzLaunchPad": 0.051,
+        "oneWorldzImpact": 0.051
+      }
+    }
+  },
+  "unknownVenueRule": {
+    "externalProtocolShare": "MUST_BE_DISCOVERED_AND_PROVEN",
+    "grossFee": "MUST_BE_SIMULATED_OR_TESTNET_PROVEN",
+    "worldzControlledRevenue": "ACTUAL_COLLECTED_REVENUE_AFTER_EXTERNAL_DEDUCTIONS",
+    "mainnetAllowedWithoutProof": false
+  },
+  "requiredQuoteFields": [
+    "grossTraderFeeBps",
+    "grossTraderFeeAmount",
+    "networkGasEstimate",
+    "externalProtocolOrDexFeeAmount",
+    "worldzControlledAmount",
+    "creatorAmount",
+    "referrerAmount",
+    "legacyFlywheelAmount",
+    "worldzLaunchPadAmount",
+    "oneWorldzImpactAmount"
+  ],
+  "prohibited": [
+    "hidden_fee",
+    "undisclosed_transfer_tax",
+    "fake_referral",
+    "wash_volume",
+    "unproven_cross_chain_bridge",
+    "mainnet_fee_claim_without_receipt_reconciliation"
+  ]
+}
