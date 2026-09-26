@@ -3,6 +3,7 @@ const { groupsForRole, normalizeRole } = require("./command-registry");
 const BOT_MENU_COMMANDS = [
   { command: "zedstart", description: "Open Command Centre MAX" },
   { command: "max", description: "Learn, research, interact and teach with MAX" },
+  { command: "worldzfullbuild", description: "Open the complete WorldzFullBuild master architecture" },
   { command: "fullscope", description: "Open WorldzFullScope multi-chain command layer" },
   { command: "zed", description: "Zed profile, wallet, missions and settings" },
   { command: "auto", description: "Open Auto finance controls" },
@@ -22,6 +23,16 @@ const MENUS = {
       ["🚀 Missions", "/missions"],
       ["🏆 Leaderboard", "/leaderboard"],
       ["📚 All Commands", "/commands"]
+    ]
+  },
+  fullbuild: {
+    title: "🌐 WORLDZFULLBUILD™ — MASTER BUILD",
+    rows: [
+      ["🌐 Master Build", "/worldzfullbuild"],
+      ["📡 WorldzFullScope", "/fullscope"],
+      ["🔗 WorldzLinkz", "/worldzlinks"],
+      ["🗳️ Votes Centre", "/worldzvotes"],
+      ["🏛️ WorldzGovern", "/worldzgovern"]
     ]
   },
   fullscope: {
@@ -113,7 +124,9 @@ const WEB_ROUTES = Object.freeze({
   supportJay: "https://donateworldz.com/support-jayjayteamdev/",
   donateReagan: "https://donateworldz.com/reagan-children/",
   publicCommands: "https://cryptoworldz.xyz/command-centre/commands/",
-  fullScope: "https://launchpad.cryptoworldz.xyz/fullscope/"
+  fullBuild: "https://launchpad.cryptoworldz.xyz/fullbuild/",
+  fullScope: "https://launchpad.cryptoworldz.xyz/fullscope/",
+  worldzLinks: "https://cryptoworldz.xyz/worldzlinkz/"
 });
 
 function menuText(menu) {
@@ -131,7 +144,8 @@ function mainKeyboard() {
     reply_markup: {
       inline_keyboard: [
         [{ text: "🧠 OPEN COMMAND CENTRE MAX™", web_app: { url: WEB_ROUTES.miniApp } }],
-        [{ text: "🌐 WORLDZFULLSCOPE™", callback_data: "cc:menu:fullscope" }],
+        [{ text: "🌐 WORLDZFULLBUILD™", callback_data: "cc:menu:fullbuild" }],
+        [{ text: "📡 WORLDZFULLSCOPE™", callback_data: "cc:menu:fullscope" }],
         [
           { text: "🗳️ VOTES CENTRE", callback_data: "cc:menu:votes" },
           { text: "🏛️ WORLDZGOVERN", callback_data: "cc:menu:govern" }
@@ -214,10 +228,10 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "🧠 CryptoWorldz Command Centre MAX™",
     "",
     "LEARN • RESEARCH • INTERACT • TEACH • BUILD • PROVE",
-    "ZED guides. WorldzFullScope watches the supported multi-chain token universe. AUTO explains controlled finance workflows. G.R.A.C.E. coordinates approved communication. RECAP explains verified activity. WorldzLaunchPad builds and proves launches.",
+    "WorldzFullBuild™ is the parent architecture. ZED leads it. WorldzLaunchPad builds, Worldz Omnichain routes chain-native execution, WorldzFullScope watches and coordinates the token universe, AUTO controls finance workflows, G.R.A.C.E. coordinates approved communication, RECAP explains verified activity, and WorldzProof records evidence.",
     "",
     "Gateway commands:",
-    "/zedstart • /fullscope • /worldzvotes • /worldzgovern • /commands • /commandtree",
+    "/zedstart • /worldzfullbuild • /fullscope • /worldzlinks • /worldzvotes • /worldzgovern",
     "",
     "You do not need to memorise the full command list."
   ].join("\n"), mainKeyboard());
@@ -276,6 +290,8 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "",
     "/zedstart — open Command Centre MAX™",
     "/max — open the MAX learning and research hub",
+    "/worldzfullbuild — open the parent WorldzFullBuild architecture",
+    "/worldzlinks — open WorldzLinkz QR + domain directory",
     "/commands — every command available to your role",
     "/commandtree — command sections and structure",
     "/directory — public OneWorldz site/page directory",
@@ -292,7 +308,7 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     if (!msg || !data.startsWith("cc:")) return;
     const actor = { ...msg, from: query.from };
 
-    const menuMatch = data.match(/^cc:menu:(zed|fullscope|votes|govern|auto|grace|admin|settings)$/);
+    const menuMatch = data.match(/^cc:menu:(zed|fullbuild|fullscope|votes|govern|auto|grace|admin|settings)$/);
     if (menuMatch) {
       const key = menuMatch[1];
       if (["grace", "admin", "settings"].includes(key) && !(await isAdmin(actor))) {
