@@ -1,5 +1,5 @@
 {
-  "version": "REVIVE-LAUNCH-2026-09-26-F",
+  "version": "REVIVE-LAUNCH-2026-09-27-G",
   "status": "MAINNET_PRICE_APPROVED__FINAL_EXECUTION_GATES_PENDING",
   "network": "solana-mainnet-beta",
   "token": {
@@ -113,7 +113,7 @@
     "immediateUnlockPercent": 0,
     "knownTeamWallets": [],
     "beneficiaryWeightsFinalized": false,
-    "executionGate": "NO_TEAM_TRANSFER_UNTIL_WORK_VERIFIED_BENEFICIARIES_WALLETS_AND_JUPITER_LOCK_SCHEDULE_ARE_APPROVED",
+    "executionGate": "NO_TEAM_LOCK_CREATION_UNTIL_FINAL_WALLETS_REMAINING_WEIGHTS_AND_SOURCE_BUCKET_CONFLICT_ARE_OWNER_APPROVED",
     "candidateNote": "DevCity participants and other contributors may voluntarily apply with documented work and signed wallet proof; no automatic grant, including Stepper.",
     "custodyRule": "No AI-controlled wallet or custodian. Create only a verified Jupiter Lock schedule with explicit beneficiaries after human review; no unassigned pool sent to a third-party wallet.",
     "recruitment": {
@@ -124,6 +124,38 @@
       "individualTokenAmounts": "PENDING_OWNER_REVIEW",
       "recipientWalletProof": "Fresh signed challenge verified server-side before an approved grant.",
       "claimStart": "PENDING_APPROVED_JUPITER_LOCK_SCHEDULE"
+    },
+    "ownerDirectedWeights": [
+      {
+        "name": "Stepper",
+        "percentOfTeamPool": 40,
+        "tokens": 12000000,
+        "historicalWallet": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
+        "walletStatus": "REVERIFY_BEFORE_LOCK"
+      },
+      {
+        "name": "Savage",
+        "percentOfTeamPool": 15,
+        "tokens": 4500000,
+        "walletStatus": "WALLET_REQUIRED"
+      }
+    ],
+    "remainingTeamPool": {
+      "percentOfTeamPool": 45,
+      "tokens": 13500000,
+      "candidates": [
+        "Music / SolMusic",
+        "Mohammed",
+        "HeroDaniel",
+        "other active contributors approved by JayJayTeamDev"
+      ],
+      "status": "PENDING_OWNER_WEIGHTS_AND_VERIFIED_WALLETS"
+    },
+    "recapEdisonProposal": {
+      "requestedPercentOfTotalSupply": 8,
+      "requestedTokens": 16000000,
+      "status": "PENDING_SOURCE_BUCKET_AND_VERIFIED_WALLET",
+      "arithmeticConflict": "16M exceeds the 13.5M remaining team bucket after Stepper and Savage."
     }
   },
   "legacyRevival": {
@@ -140,7 +172,15 @@
       "5fFVkQuo4pnCpWhD8hx2uiFEtkBcnW3QdDUt1w2BzB71",
       "43T8jncT5pJFo1TNenHdt6NSaPieic3iuHLQnYLLgeWy"
     ],
-    "executionGate": "NO_LEGACY_PAYOUT_UNTIL_EXCLUDED_HISTORICAL_ENTITLEMENTS_ARE_RECONCILED_AND_LEDGER_REAPPROVED"
+    "executionGate": "NO_LEGACY_PAYOUT_UNTIL_EXCLUDED_HISTORICAL_ENTITLEMENTS_ARE_RECONCILED_AND_LEDGER_REAPPROVED",
+    "requestedDelivery": "BULK_DISTRIBUTE_APPROVED_216_WALLET_ENTITLEMENT_LEDGER",
+    "vestingProvider": "Jupiter Lock/Vesting",
+    "vestingMonths": 12,
+    "vestingReleases": 12,
+    "vestingCliffDays": 0,
+    "vestingImmediateUnlockPercent": 0,
+    "vestingRule": "12 equal monthly releases; final release receives raw-unit rounding remainder",
+    "bulkEngine": "WorldzBulkDrop™"
   },
   "devCity": {
     "seats": 100,
@@ -150,7 +190,17 @@
     "grandfatheredSeats": 50,
     "newVerifiedDeveloperSlots": 50,
     "stagingWallet": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
-    "rule": "Existing 50 seats are preserved. New seats require a verified developer identity, accepted participation and a verified Solana wallet before fan-out."
+    "rule": "Finalize 100 unique publicly attributable developer/project Solana recipients from the researched ecosystem pool; validate source and recipient before owner signing.",
+    "publicCandidatesFound": 105,
+    "finalRecipientTarget": 100,
+    "candidateArtifact": "worldzpad-mainnet/revive/revive-devcity-public-wallet-candidates.v1.json",
+    "selectionState": "105_FOUND__FINAL_100_CHAIN_AND_SOURCE_VALIDATION_PENDING",
+    "vestingProvider": "Jupiter Lock/Vesting",
+    "vestingMonths": 12,
+    "vestingReleases": 12,
+    "vestingCliffDays": 0,
+    "vestingImmediateUnlockPercent": 0,
+    "bulkEngine": "WorldzBulkDrop™"
   },
   "charityImpact": {
     "tokens": 20000000,
@@ -165,8 +215,8 @@
     "canonicalMintReuseRequired": true,
     "publicMainnetExecutionEnabled": false,
     "devnetRequired": true,
-    "devnetOpeningPriceSolPerRviv": 4.5e-05,
-    "mainnetOpeningPriceSolPerRviv": 4.5e-05,
+    "devnetOpeningPriceSolPerRviv": 0.000045,
+    "mainnetOpeningPriceSolPerRviv": 0.000045,
     "mainnetOpeningPriceStatus": "OWNER_APPROVED_2026-09-26",
     "initialBaseLiquidityTokens": 30000000,
     "initialQuoteLiquiditySol": 0,
@@ -244,5 +294,14 @@
     "antiDoubleHandling": true,
     "sourceSeparationRule": "Existing TaxSplit, RevShare or other legacy-platform rewards are not Worldz Flywheel revenue. The Worldz six-hour Flywheel distributes only fee revenue explicitly routed into the Worldz-controlled Legacy vaults.",
     "recoveryRule": "Verified owner-controlled authority may be migrated only by a later explicit signed owner action. Null/revoked authority is immutable. Third-party or unverified authority is never bypassed."
+  },
+  "worldzFullBuild": {
+    "source": "worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json",
+    "owner": "JayJayTeamDev",
+    "bulkDistributionEngine": "WorldzBulkDrop™",
+    "firstPartyWalletFlow": true,
+    "noPerRecipientPages": true,
+    "oneWalletSigningSessionTarget": true,
+    "endToEndProofRequired": true
   }
 }
