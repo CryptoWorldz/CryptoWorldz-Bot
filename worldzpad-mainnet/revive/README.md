@@ -34,7 +34,7 @@ The 15% Dev allocation is split equally across the six registry wallets already 
 
 ## Team
 
-15% is vested: **0% immediate**, 90-day cliff, then 24-month monthly linear vesting. Beneficiary weights are intentionally not invented; they must be finalized and verified before execution.
+15% is vested through **Jupiter Lock/Vesting**: **0% immediate**, no cliff, then **12 equal monthly releases over 12 months** (any integer rounding remainder in the final release). Beneficiary weights must be finalized and verified before execution. Verify the Jupiter schedule on devnet and inspect the resulting transactions before mainnet signing.
 
 ## DevCity™ 100
 
@@ -43,6 +43,8 @@ WORLDZ uses 50 seats × 100,000 WLDZ. REVIVE expands to **100 seats × 200,000 R
 - Existing 50 seats: grandfathered.
 - New seats: 50 verified-developer recruitment slots.
 - Total pool: 20,000,000 RVIV (10%).
+
+The 105 publicly posted wallets in `revive-devcity-public-wallet-candidates.v1.json` are research leads. A public address does not establish accepted DevCity participation, wallet control, or a grandfathered seat. No automatic selection of 100 recipients or transfer from the staging wallet is authorized by that file.
 
 ## Legacy Revival
 
