@@ -12,6 +12,7 @@ const poolAddress = new PublicKey('YWEMDsd6o3dm8uXNnmnWWU3c1UtFqDUKEMfbQ512i5c')
 const rvivMint = 'DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R';
 const cpAmm = new CpAmm(connection);
 const pool = await cpAmm.fetchPoolState(poolAddress);
+// Inspect the pinned SDK's decoded state; do not infer safety from address occupancy.
 const [fees, positions, vaultA, vaultB] = await Promise.all([
   cpAmm.fetchPoolFees(poolAddress),
   cpAmm.getAllPositionsByPool(poolAddress),
