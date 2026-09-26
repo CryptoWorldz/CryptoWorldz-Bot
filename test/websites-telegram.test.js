@@ -31,8 +31,9 @@ test("verified live directory remains registered", () => {
 });
 
 test("WorldzLinkz command opens the canonical directory", () => {
-  assert.match(buildWorldzLinkzMessage(), /WorldzLinkz/);
-  assert.match(buildWorldzLinkzMessage(), /https:\\/\\/cryptoworldz\\.xyz\\/worldzlinkz\\//);
+  const text = buildWorldzLinkzMessage();
+  assert.match(text, /WorldzLinkz/);
+  assert.equal(text.includes("https://cryptoworldz.xyz/worldzlinkz/"), true);
 });
 
 test("SolWorldz command opens the official domain", () => {
