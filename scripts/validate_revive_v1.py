@@ -14,6 +14,7 @@ team_vesting = json.loads((root / "revive-team-vesting.v1.json").read_text())
 public_candidates = json.loads((root / "revive-devcity-public-wallet-candidates.v1.json").read_text())
 legacy_distribution = json.loads((root / "revive-legacy-216-distribution.v1.json").read_text())
 equal_legacy = json.loads((root / "revive-equal-legacy-proposal.v1.json").read_text())
+four_pool = json.loads((root / "revive-four-pool-routing-review.v1.json").read_text())
 six_dev_distribution = json.loads((root / "revive-six-dev-distribution.v1.json").read_text())
 funding = json.loads((root / "revive-launch-funding.v1.json").read_text())
 candidates = json.loads((root / "revive-devcity-50-candidates.v1.json").read_text())
@@ -78,6 +79,10 @@ assert not ({x["wallet"] for x in equal_legacy["recipients"]} & set(equal_legacy
 assert {x["wallet"] for x in equal_legacy["recipients"]} == {x["wallet"] for x in legacy_distribution["recipients"]} - set(equal_legacy["excludedWallets"])
 assert len({x["amountRaw"] for x in equal_legacy["recipients"]}) == 1
 assert sum(int(x["amountRaw"]) for x in equal_legacy["recipients"]) + int(equal_legacy["reservedRemainderRaw"]) == 20_000_000_000_000
+assert four_pool["status"] == "DESIGN_REVIEW_NOT_SIGNABLE"
+assert sum(x["reservedTokens"] for x in four_pool["routes"]) == 90_000_000
+assert four_pool["devcityCostComparison"]["hundredMissingRecipientAtasMaximumRentLamports"] == 100 * four_pool["observedAtaRentLamportsEach"]
+assert four_pool["devcityCostComparison"]["onePoolTransferMeansPaidRecipients"] is False
 assert candidates["targetNewSeats"] == 50
 assert len(candidates["candidates"]) == 50
 assert len({x["github"] for x in candidates["candidates"]}) == 50
