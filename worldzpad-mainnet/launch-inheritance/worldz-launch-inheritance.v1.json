@@ -1,0 +1,255 @@
+{
+  "schema": "WORLDZ-LAUNCH-INHERITANCE-V1",
+  "version": "2026-09-27-A",
+  "brand": "WorldzLaunchInheritance™",
+  "status": "CODE_BUILT__PER_CHAIN_EXECUTION_GATED",
+  "purpose": "Make every WorldzLaunchPad launch inherit the same identity, wallet, proof, safety, FullScope and post-launch observability standards without pretending an unproven chain or venue is mainnet-ready.",
+  "scope": {
+    "supportedChains": [
+      "solana",
+      "xrpl",
+      "base",
+      "ethereum",
+      "bnb",
+      "sui",
+      "hyperevm",
+      "robinhood"
+    ],
+    "appliesToWorldzOwnedLaunches": true,
+    "appliesToPublicCreatorLaunches": true,
+    "chainNativeExecution": true,
+    "oneChainProofNeverUnlocksAnother": true
+  },
+  "walletBoundary": {
+    "firstPartyWorldzEntry": true,
+    "externalWalletCustody": true,
+    "walletBrowserPrerequisite": false,
+    "collectSeedPhrase": false,
+    "collectPrivateKey": false,
+    "readableExactTransactionReview": true,
+    "simulateBeforeSignature": true,
+    "humanWalletSignatureRequired": true,
+    "freshChainStateBeforeSigning": true,
+    "reconcileFinalChainState": true
+  },
+  "truthStates": [
+    "PLANNED",
+    "PREPARED",
+    "SIMULATED",
+    "AWAITING_SIGNATURE",
+    "SIGNED",
+    "SUBMITTED",
+    "CONFIRMED",
+    "MARKET_LIVE",
+    "LIQUIDITY_PROTECTED",
+    "VESTING_ACTIVE",
+    "DISTRIBUTION_COMPLETE",
+    "INDEXED",
+    "VERIFIED"
+  ],
+  "requiredModules": [
+    {
+      "id": "token-identity",
+      "name": "Worldz Token Identity Engine™",
+      "stage": "PRE_SIGNATURE",
+      "required": true
+    },
+    {
+      "id": "chain-capability",
+      "name": "Worldz Chain Capability Gate™",
+      "stage": "PRE_SIGNATURE",
+      "required": true
+    },
+    {
+      "id": "fee-disclosure",
+      "name": "Worldz Fee Disclosure™",
+      "stage": "PRE_SIGNATURE",
+      "required": true
+    },
+    {
+      "id": "fullscope",
+      "name": "WorldzFullScope™",
+      "stage": "PRE_SIGNATURE",
+      "required": true
+    },
+    {
+      "id": "proof-receipt",
+      "name": "Worldz Proof Receipt™",
+      "stage": "POST_CONFIRMATION",
+      "required": true
+    },
+    {
+      "id": "worlddexpush",
+      "name": "WorldDexPush™",
+      "stage": "POST_CONFIRMATION",
+      "required": true
+    },
+    {
+      "id": "locks",
+      "name": "WorldzLock™",
+      "stage": "AS_CONFIGURED",
+      "required": true
+    },
+    {
+      "id": "vesting",
+      "name": "WorldzVest™",
+      "stage": "AS_CONFIGURED",
+      "required": true
+    },
+    {
+      "id": "universal-flywheel",
+      "name": "Worldz Universal FlyWheel™",
+      "stage": "POST_CONFIRMATION",
+      "required": true
+    },
+    {
+      "id": "votes",
+      "name": "Worldz Votes Centre™",
+      "stage": "POST_CONFIRMATION",
+      "required": true
+    },
+    {
+      "id": "govern",
+      "name": "WorldzGovern™",
+      "stage": "POST_CONFIRMATION",
+      "required": true
+    }
+  ],
+  "economicsProfiles": {
+    "worldzMagic75": {
+      "source": "worldzpad-omnichain/fee-policy.v1.json",
+      "selection": "DEFAULT_FOR_WORLDZ_OMNICHAIN_ROUTES_WHERE_VENUE_SUPPORT_IS_PROVEN",
+      "targetGrossTraderFeeBps": 75,
+      "dynamicFeeDefault": false,
+      "splitPercent": {
+        "creator": 51,
+        "referrer": 17,
+        "legacyFlywheel": 15,
+        "worldzLaunchPad": 8.5,
+        "oneWorldzImpact": 8.5
+      },
+      "externalVenueDeductions": "DISCLOSE_SEPARATELY",
+      "unprovenVenueMainnetAllowed": false
+    },
+    "publicCreatorConfigurable": {
+      "source": "launchpad.cryptoworldz.xyz/platform-config.json",
+      "selection": "EXISTING_PUBLIC_CREATOR_ROUTE__DO_NOT_SILENTLY_MIX_WITH_WORLDZ_MAGIC_75",
+      "projectTradingFeeMinPercent": 0.5,
+      "projectTradingFeeMaxPercent": 3,
+      "worldzLaunchPadShareOfCollectedProjectFeePercent": 10,
+      "walletTransferTaxPercent": 0
+    }
+  },
+  "tokenAllocationBoundary": {
+    "hiddenSupplyDeductionsForbidden": true,
+    "worldzOwnedLegacyDefault": {
+      "name": "Purple Diamond Handz",
+      "percent": 1,
+      "appliesTo": "ELIGIBLE_WORLDZ_OWNED_LAUNCHES",
+      "rule": "Disclose in the signed launch manifest. A later explicit token-specific owner approval may replace this default."
+    },
+    "publicCreatorRoute": {
+      "implicitWorldzTokenSupplySharePercent": 0,
+      "rule": "The existing public creator promise remains zero implicit WorldzLaunchPad token-supply allocation. Any creator-approved legacy/community allocation must be explicit before signature."
+    }
+  },
+  "chainGate": {
+    "source": "worldzpad-mainnet/worldz-launch-capability-matrix.v1.json",
+    "rule": "Token creation, market launch, pairing, bridge and mainnet execution are independent capabilities. A UI, domain or testnet proof is never sufficient by itself."
+  },
+  "launchIntent": {
+    "schema": "worldzpad-omnichain/schemas/launch-intent.schema.json",
+    "exactChainEnvironmentRequired": true,
+    "supportedTestEnvironments": {
+      "solana": [
+        "devnet"
+      ],
+      "xrpl": [
+        "testnet"
+      ],
+      "base": [
+        "base-sepolia"
+      ],
+      "ethereum": [
+        "sepolia"
+      ],
+      "bnb": [
+        "bsc-testnet"
+      ],
+      "sui": [
+        "testnet"
+      ],
+      "hyperevm": [
+        "hyperevm-testnet"
+      ],
+      "robinhood": [
+        "robinhood-testnet"
+      ]
+    },
+    "supportedMainnetEnvironment": {
+      "solana": "mainnet-beta",
+      "xrpl": "mainnet",
+      "base": "mainnet",
+      "ethereum": "mainnet",
+      "bnb": "mainnet",
+      "sui": "mainnet",
+      "hyperevm": "mainnet",
+      "robinhood": "mainnet"
+    },
+    "genericMainnetAliasAccepted": true,
+    "mainnetReleaseApprovalRequired": true
+  },
+  "identityInheritance": {
+    "canonicalRegistry": "worldzpad-mainnet/token-identity/worldz-token-registry.v1.json",
+    "liveTokenRequiredFields": [
+      "name",
+      "symbol",
+      "canonicalMint",
+      "decimals",
+      "image",
+      "website",
+      "publicMetadata"
+    ],
+    "mintPrefixNeverUsedAsName": true,
+    "unknownValuesRemainPending": true,
+    "solanaLiveProviderHandoff": {
+      "provider": "Jupiter VRFD",
+      "package": "worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json",
+      "everyLiveSolanaWorldzTokenRequired": true,
+      "providerGreenOnlyFromProviderData": true
+    }
+  },
+  "proofInheritance": {
+    "schema": "worldzpad-omnichain/schemas/worldz-proof-receipt.v1.json",
+    "receiptRequiredAfterConfirmedChainAction": true,
+    "passedRequiresFinalChainConfirmation": true,
+    "passedRequiresBeforeAfterBalances": true,
+    "passedRequiresReconciliation": true,
+    "receiptMustMatchRegistryToken": true
+  },
+  "fullScopeInheritance": {
+    "contract": "worldzpad-omnichain/fullscope/worldz-fullscope.v1.json",
+    "registerEverySupportedLaunch": true,
+    "actionIntentsNeverSelfBroadcast": true,
+    "externalSignatureRequired": true,
+    "popularityGovernanceSeparate": true
+  },
+  "postLaunchInheritance": {
+    "marketDiscovery": "WorldDexPush™",
+    "observability": "WorldzWatch™",
+    "proof": "Worldz Proof Receipt™",
+    "lifecycleReconciliation": true,
+    "indexerStateNeverFaked": true,
+    "vendorPaymentAutomatic": false
+  },
+  "executionBoundary": {
+    "mainnetGlobalDefault": false,
+    "perChainReleaseGate": true,
+    "perVenueReleaseGate": true,
+    "testnetOrDevnetProofRequired": true,
+    "explicitHumanApprovalRequired": true,
+    "noAutomaticVendorPayment": true,
+    "noAutomaticMainnetBroadcast": true
+  },
+  "futureLaunchRule": "A new LIVE token cannot silently bypass inheritance. CI must fail when canonical identity, provider handoff where applicable, chain/environment pairing, proof schema, FullScope registration contract or public deployment package drifts."
+}
