@@ -38,7 +38,7 @@ require(flywheel["supplyPercent"] == 19, "FlyWheel must be 19%")
 require(flywheel["supplyTokens"] == 47_500_000, "FlyWheel token amount mismatch")
 require(flywheel["oneMasterReserve"] is True, "FlyWheel must remain one master reserve")
 require(flywheel["separateSupplyBuckets"] is False, "FlyWheel must not become separate genesis supply buckets")
-require(flywheel["internalLanePercentages"] == "NOT_YET_FIXED", "do not invent internal FlyWheel percentages")
+require(flywheel["internalLanePercentages"] == "DYNAMIC_WITHIN_30_DAY_CYCLE__NO_FIXED_LANE_PERCENTAGES__ALL_ACTIONS_GOVERNED", "FlyWheel lanes must remain dynamically governed within each 30-day cycle")
 require(flywheel["releasePolicyRequiredBeforeMainnet"] is True, "FlyWheel release policy must gate mainnet")
 require(flywheel["mainnetExecutionEnabled"] is False, "FlyWheel mainnet execution must remain off in prep")
 required_lanes = {"worldz_infrastructure","oneworldz_impact","treasury_resilience","community_rewards","locked_builder_team","ecosystem_growth","additional_liquidity","permanent_burn"}
