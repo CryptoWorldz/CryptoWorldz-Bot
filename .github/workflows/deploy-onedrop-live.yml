@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: worldz-onedrop-production
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
