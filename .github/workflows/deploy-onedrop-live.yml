@@ -170,6 +170,8 @@ jobs:
           npx playwright install --with-deps chromium
           node <<'NODE'
           const { chromium } = require('playwright');
+          const fs=require('fs');
+          const path=require('path');
           (async()=>{
             const browser=await chromium.launch({headless:true});
             const context=await browser.newContext({
@@ -179,13 +181,25 @@ jobs:
               hasTouch:true
             });
             const page=await context.newPage();
+            const siteRoot=path.resolve('launchpad.cryptoworldz.xyz');
+            await page.route('https://launchpad.cryptoworldz.xyz/**',async route=>{
+              const u=new URL(route.request().url());
+              let rel=u.pathname.replace(/^\\/+/, '');
+              if(rel==='') rel='index.html';
+              if(rel.endsWith('/')) rel+='index.html';
+              const file=path.resolve(siteRoot,rel);
+              if(!file.startsWith(siteRoot)||!fs.existsSync(file)) return route.continue();
+              const ext=path.extname(file).toLowerCase();
+              const contentType=ext==='.html'?'text/html; charset=utf-8':ext==='.js'?'text/javascript; charset=utf-8':ext==='.json'?'application/json; charset=utf-8':'application/octet-stream';
+              return route.fulfill({status:200,contentType,body:fs.readFileSync(file)});
+            });
             const consoleErrors=[];
             const pageErrors=[];
             page.on('console',m=>{ if(m.type()==='error') consoleErrors.push(m.text()); });
             page.on('pageerror',e=>pageErrors.push(String(e)));
             const url='https://launchpad.cryptoworldz.xyz/onedrop/?wallet_e2e='+Date.now();
             const resp=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
-            if(!resp || resp.status()!==200) throw new Error('OneDrop HTTP status '+(resp&&resp.status()));
+            if(!resp || resp.status()!==200) throw new Error('OneDrop routed production-bundle status '+(resp&&resp.status()));
             await page.waitForSelector('#connect',{state:'visible',timeout:20000});
             await page.click('#connect');
             let bridgeReady=false,modalOpen=false;
