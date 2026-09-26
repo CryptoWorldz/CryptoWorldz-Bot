@@ -177,6 +177,7 @@
         "bsc-testnet"
       ],
       "sui": [
+        "devnet",
         "testnet"
       ],
       "hyperevm": [
