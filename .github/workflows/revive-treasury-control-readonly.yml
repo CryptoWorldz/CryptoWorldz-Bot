@@ -8,6 +8,8 @@ on:
     paths:
       - 'worldzpad-devnet/revive-party/scripts/10_treasury_control_readonly.mjs'
       - 'worldzpad-devnet/revive-party/scripts/11_squads_vault_readonly.mjs'
+      - 'worldzpad-devnet/revive-party/scripts/20_distribution_readonly.mjs'
+      - 'worldzpad-mainnet/revive/revive-legacy-216-distribution.v1.json'
       - 'worldzpad-mainnet/revive/revive-launch-contract.v1.json'
       - '.github/workflows/revive-treasury-control-readonly.yml'
   pull_request:
@@ -43,6 +45,8 @@ jobs:
         run: node scripts/10_treasury_control_readonly.mjs
       - name: Verify Squads V4 Vault #0 derivation — READ ONLY
         run: node scripts/11_squads_vault_readonly.mjs
+      - name: Check 216 recipient token accounts and fee floor — READ ONLY
+        run: node scripts/20_distribution_readonly.mjs
       - name: Print evidence digest
         shell: bash
         run: |
