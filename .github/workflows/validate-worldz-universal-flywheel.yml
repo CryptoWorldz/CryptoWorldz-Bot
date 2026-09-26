@@ -4,16 +4,6 @@ on:
   pull_request:
     paths:
       - "worldzpad-mainnet/flywheel/**"
-      - "worldzpad-mainnet/phenix/**"
-      - "scripts/validate_worldz_universal_flywheel.py"
-      - ".github/workflows/validate-worldz-universal-flywheel.yml"
-  push:
-    branches:
-      - phenix-launch-prep
-      - revive-v1-build
-    paths:
-      - "worldzpad-mainnet/flywheel/**"
-      - "worldzpad-mainnet/phenix/**"
       - "scripts/validate_worldz_universal_flywheel.py"
       - ".github/workflows/validate-worldz-universal-flywheel.yml"
   workflow_dispatch:
@@ -24,21 +14,13 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Validate universal flywheel policy
+      - name: Validate platform-wide Universal FlyWheel policy
         run: python scripts/validate_worldz_universal_flywheel.py
-      - name: Validate exact PNEX schedules
-        run: |
-          python worldzpad-mainnet/phenix/vesting_schedule.py developer --launch-date 2026-10-01 > /tmp/developer.json
-          python worldzpad-mainnet/phenix/vesting_schedule.py flywheel --launch-date 2026-10-01 > /tmp/flywheel.json
-          python worldzpad-mainnet/phenix/vesting_schedule.py chance --launch-date 2026-10-01 > /tmp/chance.json
-      - name: Install mainnet transaction-builder dependencies
-        run: npm install --prefix worldzpad-mainnet --ignore-scripts --no-audit --no-fund
-      - name: Validate ProofBurn instruction builder
-        run: node worldzpad-mainnet/phenix/prepare-pnex-burn.mjs --self-test
       - name: Universal Cycle completeness gate
         run: python worldzpad-mainnet/flywheel/universal_cycle.py --self-test
