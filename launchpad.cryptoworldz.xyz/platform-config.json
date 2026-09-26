@@ -824,5 +824,80 @@
       "mainnetExecution": false,
       "note": "Disposable Sui Devnet proof executed with @mysten/sui 2.32.0. The ephemeral proof key is not persisted. Testnet, market execution and mainnet remain separate release gates."
     }
+  },
+  "publicMainnetTokenMintingEnabled": true,
+  "mainnetCreatorLaunchReadiness": {
+    "solana": {
+      "tokenMinting": "LIVE_PUBLIC_BETA",
+      "marketLaunch": "GATED",
+      "mintPath": "/mint/",
+      "marketPath": "/mainnet/",
+      "blocker": "Worldz market-launch release gate remains closed until treasury fee-routing and Safe Launch enforcement proofs pass."
+    },
+    "ethereum": {
+      "tokenMinting": "TESTNET_ONLY",
+      "marketLaunch": "GATED"
+    },
+    "base": {
+      "tokenMinting": "TESTNET_ONLY",
+      "marketLaunch": "GATED"
+    },
+    "bnb": {
+      "tokenMinting": "TESTNET_ONLY",
+      "marketLaunch": "GATED"
+    },
+    "hyperevm": {
+      "tokenMinting": "TESTNET_ONLY",
+      "marketLaunch": "GATED"
+    },
+    "robinhood": {
+      "tokenMinting": "TESTNET_ONLY",
+      "marketLaunch": "GATED"
+    },
+    "xrpl": {
+      "tokenMinting": "TESTNET_ONLY",
+      "marketLaunch": "GATED"
+    },
+    "sui": {
+      "tokenMinting": "DEVNET_ONLY",
+      "marketLaunch": "GATED"
+    }
+  },
+  "worldzFullScope": {
+    "name": "WorldzFullScope™",
+    "publicPath": "/fullscope/",
+    "supportedChains": 8,
+    "maxTokensPerChain": 20,
+    "popularityVoting": "Worldz Votes Centre™",
+    "governance": "WorldzGovern™",
+    "mainnetExecutionEnabled": false
+  },
+  "worldzProofReceipt": {
+    "name": "Worldz Proof Receipt™",
+    "publicPath": "/proof-receipt/",
+    "schema": "/schemas/worldz-proof-receipt.v1.json",
+    "requiredAfter": [
+      "token_create",
+      "market_launch",
+      "distribution",
+      "liquidity",
+      "lock",
+      "vesting",
+      "burn",
+      "fee_route",
+      "bridge"
+    ],
+    "privateKeysStored": false
+  },
+  "worldDexPush": {
+    "name": "WorldDexPush™",
+    "publicPath": "/worlddexpush/",
+    "providers": [
+      "Jupiter VRFD",
+      "DEX Screener"
+    ],
+    "automaticVendorPayment": false,
+    "dexScreenerGoldenTickerActiveBoostThreshold": 500,
+    "partnershipClaimsRequireWrittenProviderApproval": true
   }
 }
