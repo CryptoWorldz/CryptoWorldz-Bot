@@ -2,11 +2,16 @@ name: Deploy Worldz OneDrop Live
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'launchpad.cryptoworldz.xyz/onedrop/**'
-      - 'launchpad.cryptoworldz.xyz/index.html'
+      - 'scripts/validate_onedrop_static.mjs'
+      - '.github/workflows/deploy-onedrop-live.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'launchpad.cryptoworldz.xyz/onedrop/**'
+      - 'scripts/validate_onedrop_static.mjs'
       - '.github/workflows/deploy-onedrop-live.yml'
   workflow_dispatch:
 
@@ -14,11 +19,126 @@ permissions:
   contents: read
 
 concurrency:
-  group: worldz-onedrop-production
-  cancel-in-progress: false
+  group: worldz-onedrop-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate OneDrop bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check launchpad.cryptoworldz.xyz/onedrop/app.js
+          node --check launchpad.cryptoworldz.xyz/onedrop/claim/app.js
+          node --check launchpad.cryptoworldz.xyz/onedrop/wallet-mobile.js
+          test -f launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json
+          grep -q 'Worldz OneDrop' launchpad.cryptoworldz.xyz/onedrop/index.html
+          grep -q 'REVIVE' launchpad.cryptoworldz.xyz/onedrop/claim/index.html
+          echo WORLDZ_ONEDROP_BUNDLE=PASS
+
+      - name: Validate distribution arithmetic and transaction packet size
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund @solana/web3.js@1.98.4 @solana/spl-token@0.4.15 @sqds/multisig@2.1.4
+          node scripts/validate_onedrop_static.mjs
+
+      - name: Android wallet UI smoke test BEFORE deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.55.0
+          npx playwright install --with-deps chromium
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const context = await browser.newContext({
+              viewport: { width: 412, height: 915 },
+              userAgent: 'Mozilla/5.0 (Linux; Android 13; CPH2197) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36',
+              isMobile: true,
+              hasTouch: true
+            });
+            const page = await context.newPage();
+            const siteRoot = path.resolve('launchpad.cryptoworldz.xyz');
+
+            await page.route('https://launchpad.cryptoworldz.xyz/**', async route => {
+              const u = new URL(route.request().url());
+              let rel = u.pathname;
+              while (rel.startsWith('/')) rel = rel.slice(1);
+              if (rel === '') rel = 'index.html';
+              if (rel.endsWith('/')) rel += 'index.html';
+              const file = path.resolve(siteRoot, rel);
+              if (!file.startsWith(siteRoot) || !fs.existsSync(file)) return route.continue();
+              const ext = path.extname(file).toLowerCase();
+              const contentType =
+                ext === '.html' ? 'text/html; charset=utf-8' :
+                ext === '.js' ? 'text/javascript; charset=utf-8' :
+                ext === '.json' ? 'application/json; charset=utf-8' :
+                'application/octet-stream';
+              return route.fulfill({ status: 200, contentType, body: fs.readFileSync(file) });
+            });
+
+            const consoleErrors = [];
+            const pageErrors = [];
+            page.on('console', m => { if (m.type() === 'error') consoleErrors.push(m.text()); });
+            page.on('pageerror', e => pageErrors.push(String(e)));
+
+            const resp = await page.goto(
+              'https://launchpad.cryptoworldz.xyz/onedrop/?wallet_e2e=' + Date.now(),
+              { waitUntil: 'domcontentloaded', timeout: 60000 }
+            );
+            if (!resp || resp.status() !== 200) throw new Error('OneDrop bundle failed to load');
+
+            await page.waitForSelector('#connect', { state: 'visible', timeout: 20000 });
+            await page.click('#connect');
+
+            await page.waitForFunction(
+              () => !!window.__WORLDZ_JUPITER_MOBILE_ADAPTER__,
+              null,
+              { timeout: 30000 }
+            );
+
+            await page.waitForFunction(
+              () => window.__WORLDZ_REOWN_STATE__?.open === true,
+              null,
+              { timeout: 30000 }
+            );
+
+            const status = await page.locator('#status').innerText();
+            const state = await page.evaluate(() => window.__WORLDZ_REOWN_STATE__ || {});
+            console.log('ONEDROP_E2E_STATUS=' + JSON.stringify(status));
+            console.log('ONEDROP_E2E_REOWN_OPEN=' + JSON.stringify(state.open));
+
+            if (pageErrors.length) {
+              throw new Error('Browser page errors: ' + JSON.stringify(pageErrors));
+            }
+            if (consoleErrors.some(x => /TypeError|SyntaxError|ReferenceError|does not provide an export/i.test(x))) {
+              throw new Error('Browser console errors: ' + JSON.stringify(consoleErrors));
+            }
+
+            await browser.close();
+            console.log('WORLDZ_ONEDROP_ANDROID_WALLET_UI=PASS');
+          })().catch(err => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
+
   deploy:
+    needs: validate
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
@@ -28,26 +148,10 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Validate OneDrop public bundle
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --check launchpad.cryptoworldz.xyz/onedrop/app.js
-          node --check launchpad.cryptoworldz.xyz/onedrop/claim/app.js
-          test -f launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json
-          grep -q 'Worldz OneDrop' launchpad.cryptoworldz.xyz/onedrop/index.html
-          grep -q 'REVIVE' launchpad.cryptoworldz.xyz/onedrop/claim/index.html
-          echo WORLDZ_ONEDROP_BUNDLE=PASS
-
-      - name: Publish OneDrop to both known LaunchPad Hostinger roots
+      - name: Publish approved main OneDrop bundle
         shell: python
         run: |
           import os, ssl
@@ -59,14 +163,10 @@ jobs:
             (site_root/'onedrop', PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop')),
             (site_root/'onedrop', PurePosixPath('domains/cryptoworldz.xyz/public_html/launchpad/onedrop')),
           ]
-          root_files=[
-            (site_root/'index.html', PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/index.html')),
-            (site_root/'index.html', PurePosixPath('domains/cryptoworldz.xyz/public_html/launchpad/index.html')),
-          ]
 
           ftp=FTP_TLS(context=ssl._create_unverified_context())
-          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=45)
-          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.connect(os.environ['FTP_HOST'], int(os.environ.get('FTP_PORT','21')), timeout=45)
+          ftp.login(os.environ['FTP_USERNAME'], os.environ['FTP_PASSWORD'])
           ftp.prot_p()
           ftp.set_pasv(True)
 
@@ -89,24 +189,16 @@ jobs:
                       remote=remote_root/PurePosixPath(rel.as_posix())
                       ensure(remote.parent)
                       with local.open('rb') as fh:
-                          ftp.storbinary('STOR '+remote.name,fh,blocksize=262144)
-                      print('ONEDROP_PUBLISHED',local.as_posix(),'->',remote.as_posix())
+                          ftp.storbinary('STOR '+remote.name, fh, blocksize=262144)
+                      print('ONEDROP_PUBLISHED', local.as_posix(), '->', remote.as_posix())
                       count+=1
-              for local, remote in root_files:
-                  ensure(remote.parent)
-                  with local.open('rb') as fh:
-                      ftp.storbinary('STOR '+remote.name,fh,blocksize=262144)
-                  print('ONEDROP_ROOT_PUBLISHED',local.as_posix(),'->',remote.as_posix())
-                  count+=1
           finally:
-              try:
-                  ftp.quit()
-              except Exception:
-                  ftp.close()
+              try: ftp.quit()
+              except Exception: ftp.close()
 
           print('WORLDZ_ONEDROP_UPLOAD=PASS files='+str(count))
 
-      - name: Verify deployed bytes at Hostinger origin
+      - name: Verify deployed OneDrop bytes at Hostinger origin
         shell: python
         run: |
           import os, ssl, io
@@ -116,47 +208,56 @@ jobs:
           checks=[
             (Path('launchpad.cryptoworldz.xyz/onedrop/index.html'), PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop/index.html')),
             (Path('launchpad.cryptoworldz.xyz/onedrop/app.js'), PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop/app.js')),
+            (Path('launchpad.cryptoworldz.xyz/onedrop/wallet-mobile.js'), PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop/wallet-mobile.js')),
             (Path('launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json'), PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop/revive-manifest.v1.json')),
             (Path('launchpad.cryptoworldz.xyz/onedrop/claim/index.html'), PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop/claim/index.html')),
             (Path('launchpad.cryptoworldz.xyz/onedrop/claim/app.js'), PurePosixPath('domains/launchpad.cryptoworldz.xyz/public_html/onedrop/claim/app.js')),
           ]
 
           ftp=FTP_TLS(context=ssl._create_unverified_context())
-          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=45)
-          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
-          ftp.prot_p();ftp.set_pasv(True)
+          ftp.connect(os.environ['FTP_HOST'], int(os.environ.get('FTP_PORT','21')), timeout=45)
+          ftp.login(os.environ['FTP_USERNAME'], os.environ['FTP_PASSWORD'])
+          ftp.prot_p()
+          ftp.set_pasv(True)
           try:
               for local,remote in checks:
                   buf=io.BytesIO()
                   ftp.retrbinary('RETR /'+str(remote),buf.write)
-                  expected=local.read_bytes()
                   actual=buf.getvalue()
-                  if actual!=expected:
+                  expected=local.read_bytes()
+                  if actual != expected:
                       raise SystemExit('HOSTINGER_ORIGIN_MISMATCH '+str(remote))
                   print('HOSTINGER_ORIGIN_PASS',remote,'bytes='+str(len(actual)))
           finally:
-              try:ftp.quit()
-              except Exception:ftp.close()
-          print('WORLDZ_ONEDROP_ORIGIN=PASS files='+str(len(checks)))
+              try: ftp.quit()
+              except Exception: ftp.close()
+          print('WORLDZ_ONEDROP_ORIGIN=PASS')
 
-      - name: Probe public edge without overriding origin proof
-        continue-on-error: true
+      - name: Verify public pages
         shell: python
         run: |
-          import urllib.request, urllib.error, time
-          for url in [
-            'https://launchpad.cryptoworldz.xyz/onedrop/',
-            'https://launchpad.cryptoworldz.xyz/onedrop/claim/'
-          ]:
-              try:
-                  req=urllib.request.Request(url+'?onedrop_probe='+str(int(time.time()*1000)),headers={
-                    'User-Agent':'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36',
-                    'Accept':'text/html,application/xhtml+xml',
-                    'Cache-Control':'no-cache'
-                  })
-                  with urllib.request.urlopen(req,timeout=20) as r:
-                      print('PUBLIC_EDGE',url,'status='+str(r.status))
-              except urllib.error.HTTPError as e:
-                  print('PUBLIC_EDGE_BLOCKED',url,'status='+str(e.code))
-              except Exception as e:
-                  print('PUBLIC_EDGE_UNAVAILABLE',url,repr(e))
+          import time, urllib.request
+          expected={
+            'https://launchpad.cryptoworldz.xyz/onedrop/':['Worldz OneDrop','SIGN & LAUNCH ONEDROP'],
+            'https://launchpad.cryptoworldz.xyz/onedrop/claim/':['REVIVE','Verify My Allocation']
+          }
+          for url,needles in expected.items():
+              last=None
+              for attempt in range(1,6):
+                  try:
+                      req=urllib.request.Request(
+                        url+'?release='+str(int(time.time()*1000)),
+                        headers={'User-Agent':'Mozilla/5.0','Cache-Control':'no-cache'}
+                      )
+                      with urllib.request.urlopen(req,timeout=30) as r:
+                          body=r.read().decode('utf-8','ignore')
+                          if r.status==200 and all(n in body for n in needles):
+                              print('PUBLIC_PASS',url)
+                              break
+                          last='contract mismatch'
+                  except Exception as e:
+                      last=repr(e)
+                  time.sleep(attempt*2)
+              else:
+                  raise SystemExit('PUBLIC_FAIL '+url+' '+str(last))
+          print('WORLDZ_ONEDROP_PUBLIC=PASS')

@@ -72,8 +72,8 @@ async function connectWallet(){
     if(!pk)stop('Wallet returned no public key.');
     return {publicKey:new PublicKey(pk.toString()),name:'Injected Solana Wallet',signTransaction:tx=>p.signTransaction(tx)};
   }
-  status('Opening the normal mobile wallet connection…','warn');
-  const mod=await import('/mint/jupiter-mobile.js?v=20260926-onedrop-a');
+  status('Opening secure Solana wallet connection… choose Jupiter Mobile and approve.','warn');
+  const mod=await import('./wallet-mobile.js?v=20260926-vanilla-reown-c');
   mod.resetJupiterMobileConnectionState?.();
   const adapter=await mod.getJupiterMobileAdapter();
   await adapter.connect();
