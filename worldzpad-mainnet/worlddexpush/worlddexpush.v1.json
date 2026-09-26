@@ -1,6 +1,6 @@
 {
   "schema": "WORLDDEXPUSH-V1",
-  "version": "2026-09-27-A",
+  "version": "2026-09-27-B",
   "name": "WorldDexPush™",
   "status": "READ_ONLY_MONITOR__VENDOR_HANDOFF__NO_AUTOMATIC_PAYMENT",
   "purpose": "Package canonical Worldz token identity, watch upstream Jupiter and DEX Screener status, and hand approved profile/verification/boost actions to the official provider without inventing partnerships or silently spending funds.",
@@ -64,6 +64,13 @@
       "customAdvertisingContact": "ads@dexscreener.com",
       "supportContact": "support@dexscreener.com",
       "rule": "A custom Worldz integration or branded package exists only if DEX Screener explicitly agrees in writing."
+    },
+    "worldzControl": {
+      "canonicalPackage": "worldzpad-mainnet/worlddexpush/dexscreener-worldz.v1.json",
+      "publicPath": "/worlddexpush/dexscreener/",
+      "publicPackage": "/worlddexpush/dexscreener/package.json",
+      "audit": "scripts/audit_worldz_dexscreener.mjs",
+      "providerStateRule": "READ_ONLY_PROVIDER_EVIDENCE__NO_SELF_APPROVAL"
     }
   },
   "approval": {
