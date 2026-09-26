@@ -211,5 +211,172 @@
       "Execute Jupiter vesting locks and on-chain bulk distributions",
       "End-to-end on-chain verification"
     ]
+  },
+  "projectWideIntegration": {
+    "schema": "WORLDZ-PROJECT-INTEGRATION-V1",
+    "status": "INCORPORATED_PROJECT_SOURCE_OF_TRUTH",
+    "scope": "All non-sensitive Worldz project decisions available from project chats, canonical repository records, deployment evidence and owner-approved corrections are inputs to WorldzFullBuild.",
+    "precedence": [
+      "confirmed on-chain or live production evidence",
+      "latest explicit JayJayTeamDev approval/correction",
+      "canonical versioned WorldzFullBuild or token registry contract",
+      "merged repository implementation",
+      "older project-chat plan",
+      "research/proposal"
+    ],
+    "lifecycleStates": [
+      "LIVE_VERIFIED",
+      "DEPLOYED_UNVERIFIED",
+      "CODE_BUILT",
+      "READY_WITH_GATES",
+      "PLANNED",
+      "RESEARCH",
+      "SUPERSEDED",
+      "REJECTED"
+    ],
+    "privacyBoundary": "Do not copy personal, medical, legal, private financial, credential, seed phrase, private-key or unrelated chat material into the public build. Incorporate only project-relevant decisions and public/approved operational data.",
+    "productFamilies": [
+      "OneWorldz mission layer",
+      "DonateWorldz contribution layer",
+      "CryptoWorldz funding/technology layer",
+      "WorldzLaunchPad multi-chain launch layer",
+      "WorldzFullScope command/data/action layer",
+      "ZED LED Command Centre MAX",
+      "AUTO protected finance/accounting controls",
+      "G.R.A.C.E. approval-controlled communications",
+      "PurpleDiamondCrew legacy/revival layer",
+      "WorldzLinkz directory/QR layer",
+      "Worldz Memory & Storage Centre",
+      "BitWorldz / OmniBTC / BitPair layer",
+      "Spam2Ham",
+      "Worldz campaign/content surfaces"
+    ],
+    "canonicalTokens": [
+      {
+        "sequence": 1,
+        "name": "WORLDZ",
+        "symbol": "WLDZ",
+        "supply": 100000000,
+        "solanaMint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+        "rule": "Never remint or substitute the canonical mint."
+      },
+      {
+        "sequence": 2,
+        "name": "REVIVE",
+        "symbol": "RVIV",
+        "supply": 200000000,
+        "solanaMint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+        "rule": "Never create a second RVIV mint to repair metadata, distribution or launch issues."
+      },
+      {
+        "sequence": 3,
+        "name": "PHENIX",
+        "symbol": "PNEX",
+        "supply": 250000000,
+        "lifecycle": "PRE_LAUNCH",
+        "rule": "No live-mint claim until on-chain evidence exists."
+      },
+      {
+        "sequence": 4,
+        "name": "MIRACLE",
+        "symbol": "MRCL",
+        "supply": 348000000,
+        "lifecycle": "PRE_LAUNCH",
+        "rule": "No live-mint claim until on-chain evidence exists."
+      }
+    ],
+    "launchPadInheritance": {
+      "firstPartyWalletEntry": true,
+      "walletBrowserPrerequisite": false,
+      "neverCollectSeedPhraseOrPrivateKey": true,
+      "simulationBeforeSignature": true,
+      "readableExactTransactionReview": true,
+      "freshBlockhashAtSigningBoundary": true,
+      "confirmedSignatureAndFinalStateReconciliation": true,
+      "oneVerifiedProductionLinkPerAction": true,
+      "mobileViewportAndCopyRegressionGate": true,
+      "statusLabelsMustRemainSeparate": [
+        "page deployed",
+        "wallet connected",
+        "preflight passed",
+        "signed",
+        "submitted",
+        "confirmed",
+        "pool live",
+        "LP locked",
+        "vesting active",
+        "distribution complete"
+      ],
+      "legacyPurpleDiamondHandzDefaultPercent": 1,
+      "legacyDefaultRule": "Reserve 1% of eligible new WorldzLaunchPad token supply for verified legacy Purple Diamond Handz unless a later explicit token-specific approval replaces it.",
+      "proofRequired": "WorldzProof receipt with canonical identity, reviewed manifest/profile hash, signatures and final state."
+    },
+    "fullScope": {
+      "initialChains": 8,
+      "tokenSlotsPerChain": 20,
+      "initialEnvironments": 160,
+      "popularityVoting": "Worldz Votes Centre only",
+      "daoGovernance": "WorldzGovern only",
+      "rule": "Popularity voting and governance remain separate in commands, storage and authority."
+    },
+    "feeAndFlywheel": {
+      "revivePilotGrossFeeBps": 75,
+      "reviveDynamicFee": false,
+      "reviveProposedSplitPercent": {
+        "creator": 51,
+        "referrer": 17,
+        "legacyFlywheel": 15,
+        "worldzLaunchPad": 8.5,
+        "oneWorldzImpact": 8.5
+      },
+      "rule": "Fee routing and token allocation are separate systems. Do not advertise a proposed fee split as live until the executed route is verified.",
+      "universalCycle": "30-day Universal FlyWheel concept remains separate from the 6-hour Legacy Flywheel.",
+      "noTokenLeftBehind": "Every eligible registered token receives an auditable benefit record per Universal Cycle; a zero-direct-spend shared-infrastructure record may satisfy the cycle."
+    },
+    "phenixPreparedArchitecture": {
+      "status": "OPEN_DRAFT_PR_198__NOT_MAINNET",
+      "supply": 250000000,
+      "purpleDiamondHandzPercent": 1,
+      "totalSupplyFlywheelPercent": 19,
+      "omniBuildz": "Governed use inside the 19% FlyWheel, not additional supply.",
+      "linkedAsset": "Opt-in verified linked-asset pairing/swap/build capability for WorldzLaunchPad developers; no hidden fee, forced swap, automatic market buy or partnership claim without evidence."
+    },
+    "lessonsNeverToRepeat": [
+      "Do not launch liquidity before public token identity/metadata/indexer readiness is verified.",
+      "Do not treat repository CI or HTTP 200 as proof that the real mobile wallet flow works.",
+      "Do not require the user to paste a Worldz URL into a wallet browser.",
+      "Do not publish malformed or hard-to-copy action links.",
+      "Do not infer a live Squads proposal from a page existing.",
+      "Do not silently replace recipient wallets, token mints, fee destinations or owner-approved allocations.",
+      "Do not collapse setup, distribution, liquidity, vesting, rent recovery and verification into one status.",
+      "Do not fabricate DevCity, legacy-holder, charity, team or giveaway recipients.",
+      "Do not label wrapped/bridged BTC as native BTC.",
+      "Do not enable mainnet execution for a chain merely because another chain passed."
+    ],
+    "crossBranchReconciliation": {
+      "activeFullBuildBranch": "revive-v1-build",
+      "observedOn2026_09_27": {
+        "aheadOfMain": 181,
+        "behindMain": 95,
+        "state": "DIVERGED"
+      },
+      "rule": "Do not force-merge branch histories. Reconcile feature-by-feature with canonical data and tests.",
+      "knownMainLineFeaturesToCarryForward": [
+        "Worldz Token Identity Engine",
+        "WorldzLinkz",
+        "Worldz OneDrop production/distribution fixes and Android wallet preflight"
+      ],
+      "knownReviveLineFeaturesToPreserve": [
+        "WorldzFullScope",
+        "WorldzFullBuild contract",
+        "Worldz Memory & Storage Centre",
+        "REVIVE launch/distribution research and controls",
+        "BitWorldz",
+        "Legacy Flywheel",
+        "Omnichain adapters"
+      ]
+    },
+    "sourceLedger": "docs/WORLDZFULLBUILD-PROJECT-SOURCE-OF-TRUTH.md",
+    "updateRule": "Future project-chat decisions marked for incorporation must update the versioned WorldzFullBuild source ledger/contract and must not silently erase superseded decisions."
   }
 }
