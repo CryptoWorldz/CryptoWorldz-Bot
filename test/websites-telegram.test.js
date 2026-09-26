@@ -30,7 +30,12 @@ test("verified live directory remains registered", () => {
   assert.match(buildLiveDirectoryMessage(), /18 verified browser routes/);
 });
 
-test("WorldzLinkz command opens the canonical directory", () => {\n  assert.match(buildWorldzLinkzMessage(), /WorldzLinkz/);\n  assert.match(buildWorldzLinkzMessage(), /https:\\/\\/cryptoworldz\\.xyz\\/worldzlinkz\\//);\n});\n\ntest("SolWorldz command opens the official domain", () => {
+test("WorldzLinkz command opens the canonical directory", () => {
+  assert.match(buildWorldzLinkzMessage(), /WorldzLinkz/);
+  assert.match(buildWorldzLinkzMessage(), /https:\\/\\/cryptoworldz\\.xyz\\/worldzlinkz\\//);
+});
+
+test("SolWorldz command opens the official domain", () => {
   assert.match(buildSolWorldzMessage(), /https:\/\/SolWorldz\.xyz/);
 });
 
