@@ -65,8 +65,13 @@ assert 'Governance: WorldzGovern™' in mini_js
 assert "worldz_popularity_votes" in migration
 assert "worldz_popularity_sponsored_boosts" in migration
 assert "worldz_fullscope_action_intents" in migration
+assert "verification_state text not null default 'telegram'" in migration
+for field in ("amount_raw text", "quote_value numeric", "block_reference text", "actor_address text"):
+    assert field in migration, field
 assert "requires_external_signature boolean not null default true" in migration
 assert "auto_broadcast boolean not null default false" in migration
+assert "transaction_payload jsonb" in migration
+assert "grant usage, select on sequence public.worldz_popularity_votes_id_seq" in migration
 assert "maximum 20 enabled tokens" in migration
 assert "Must never be used to authorize WorldzGovern" in migration
 assert "Must never be counted in Worldz Votes Centre" in migration
