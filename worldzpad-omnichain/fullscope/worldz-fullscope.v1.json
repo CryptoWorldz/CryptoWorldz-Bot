@@ -165,6 +165,12 @@
       "teamPoolTokens": 30000000,
       "giveawayChannel": "@CryptoWorldzX via G.R.A.C.E.",
       "executionState": "BUILD_AND_VALIDATION_IN_PROGRESS__NO_END_TO_END_BULK_DISTRIBUTION_PROOF_YET"
+    },
+    "validationCheckpoint": {
+      "date": "2026-09-27",
+      "reviveValidationRun": 36272658928,
+      "reviveValidationConclusion": "SUCCESS",
+      "note": "Trigger WorldzFullScope validator against the current WorldzFullBuild source-of-truth and distribution standards."
     }
   }
 }
