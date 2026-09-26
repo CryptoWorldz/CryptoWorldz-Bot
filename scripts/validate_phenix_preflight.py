@@ -45,6 +45,34 @@ required_lanes = {"worldz_infrastructure","oneworldz_impact","treasury_resilienc
 require({x["id"] for x in flywheel["supportedLanes"]} == required_lanes, "FlyWheel lane set drift detected")
 require(flywheel["miracleRunway"]["enabled"] is True, "MIRACLE infrastructure runway must be recorded")
 
+vesting = cfg["vestingPolicy"]
+require(vesting["developer"]["cliffDays"] == 90, "developer cliff must be 90 days")
+require(vesting["developer"]["releases"] == 24, "developer vesting must have 24 releases")
+require(vesting["developer"]["liquidAtGenesisTokens"] == 0, "developer vesting must have zero genesis liquidity")
+require(vesting["developer"]["earlyUnlock"] is False, "developer early unlock must remain false")
+require(vesting["flyWheelReserve"]["holdDays"] == 90, "FlyWheel hold must be 90 days")
+require(vesting["flyWheelReserve"]["cycleAllowances"] == 48, "FlyWheel must have 48 cycle allowances")
+require(vesting["flyWheelReserve"]["cadenceDays"] == 30, "FlyWheel allowance cadence must be 30 days")
+require(vesting["flyWheelReserve"]["automaticDistribution"] is False, "FlyWheel allowance must not auto-distribute")
+require(vesting["flyWheelBuilderTeamGrantDefault"]["cliffDays"] == 90, "FlyWheel builder cliff must be 90 days")
+require(vesting["flyWheelBuilderTeamGrantDefault"]["releases"] == 24, "FlyWheel builder vesting must have 24 releases")
+
+burn = cfg["burnPolicy"]
+require(burn["mode"] == "TOKEN_NATIVE_RESERVE_BURN", "PNEX burn mode drift")
+require(burn["automatedMarketBuyAndBurn"] is False, "automated market buy-and-burn must stay off")
+require(burn["automaticBurn"] is False, "automatic PNEX burn must stay off")
+require(burn["perUniversalCycle"]["cadenceDays"] == 30, "burn cycle must be 30 days")
+require(burn["perUniversalCycle"]["maximumPercentOfNewFlyWheelCycleAllowance"] == 25, "burn cap drift")
+require(burn["perUniversalCycle"]["minimumPercent"] == 0, "burn must be allowed to be zero")
+require(burn["irreversible"] is True and burn["reissuanceAllowed"] is False, "burn must be irreversible")
+require(burn["autoBroadcast"] is False and burn["mainnetExecutionEnabled"] is False, "burn mainnet/auto broadcast must stay off")
+
+universal = cfg["universalFlyWheel"]
+require(universal["universalCycleDays"] == 30, "universal cycle must be 30 days")
+require(universal["legacyEpochHours"] == 6, "legacy epoch must remain 6 hours")
+require(universal["extraTraderFeeRequired"] is False, "Universal FlyWheel must not add a trader fee")
+require(universal["sharedBenefitRequired"] is True, "shared benefit rule missing")
+
 chance = cfg["phenixChance"]
 model = chance["perApprovedRecipientAt500SeatModel"]
 require(chance["targetMaximumSeats"] == 500, "Chance max seats must be 500")
@@ -88,5 +116,5 @@ print("Liquidity: 5% genesis / 45% current total allocation")
 print("MagicFeeNumber: 75 bps; dynamic fee OFF; split 51/17/15/8.5/8.5")
 print("Wallet connection: Worldz website origin; no wallet browser requirement")
 print("Mainnet execution: OFF")
-print("PHENIX Total Supply FlyWheel: 19% / 47,500,000 assigned; internal release policy pending")
+print("PHENIX Total Supply FlyWheel: 19% / 47,500,000 assigned; 90-day hold + 48 cycle allowances")\nprint("Developer vesting: 90-day cliff + 24 monthly releases")\nprint("Worldz ProofBurn: wallet/multisig signed; auto-broadcast OFF; cycle cap 25% of new FlyWheel allowance")\nprint("Worldz Universal Cycle: 30 days; Legacy Flywheel remains 6-hour cadence")
 print("Launch readiness: BLOCKED — FlyWheel controls and remaining release gates still unresolved")
