@@ -12,7 +12,7 @@ import {
 } from "@meteora-ag/cp-amm-sdk";
 import BN from "bn.js";
 
-const DEVNET_GENESIS = "GH7ome3EiwEr7tu9JuTh2dpYWBJK3z69Xm1ZE3MEE6JC";
+const DEVNET_GENESIS = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBGwcaWoxPkrZBG";
 const RPC_CANDIDATES = [
   process.env.PNEX_DEVNET_RPC_URL,
   "https://api.devnet.solana.com",
