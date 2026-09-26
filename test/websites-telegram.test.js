@@ -6,6 +6,7 @@ const {
   PRIMARY_WEBSITES,
   WEBSITE_COMMANDS,
   buildLiveDirectoryMessage,
+  buildWorldzLinkzMessage,
   buildSolWorldzMessage,
   buildWebsiteDirectoryMessage,
   buildWebsiteMessage,
@@ -29,7 +30,7 @@ test("verified live directory remains registered", () => {
   assert.match(buildLiveDirectoryMessage(), /18 verified browser routes/);
 });
 
-test("SolWorldz command opens the official domain", () => {
+test("WorldzLinkz command opens the canonical directory", () => {\n  assert.match(buildWorldzLinkzMessage(), /WorldzLinkz/);\n  assert.match(buildWorldzLinkzMessage(), /https:\\/\\/cryptoworldz\\.xyz\\/worldzlinkz\\//);\n});\n\ntest("SolWorldz command opens the official domain", () => {
   assert.match(buildSolWorldzMessage(), /https:\/\/SolWorldz\.xyz/);
 });
 
@@ -49,13 +50,14 @@ test("Telegram registration replaces website and adds all website commands", asy
 
   registerWebsiteTelegramHandlers({ bot, config: { websiteUrl: "https://CryptoWorldz.xyz" } });
   assert.equal(removed.length, 1);
-  assert.deepEqual(WEBSITE_COMMANDS.map((item) => item.command), ["websites", "worldzlive", "solworldz"]);
+  assert.deepEqual(WEBSITE_COMMANDS.map((item) => item.command), ["websites", "worldzlive", "worldzlinks", "solworldz"]);
 
   const website = listeners.find((listener) => listener.pattern.test("/website"));
   const websites = listeners.find((listener) => listener.pattern.test("/websites"));
   const worldzlive = listeners.find((listener) => listener.pattern.test("/worldzlive"));
+  const worldzlinks = listeners.find((listener) => listener.pattern.test("/worldzlinks"));
   const solworldz = listeners.find((listener) => listener.pattern.test("/solworldz"));
-  assert.ok(website && websites && worldzlive && solworldz);
+  assert.ok(website && websites && worldzlive && worldzlinks && solworldz);
 
   await website.handler({ chat: { id: 77 } });
   assert.match(messages[0].text, /Check This Out/);
