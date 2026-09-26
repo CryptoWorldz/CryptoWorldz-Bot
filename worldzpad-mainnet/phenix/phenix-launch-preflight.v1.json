@@ -1,6 +1,6 @@
 {
   "schema": "PHENIX-LAUNCH-PREFLIGHT-V1",
-  "version": "PNEX-PREFLIGHT-2026-09-26-B",
+  "version": "PNEX-PREFLIGHT-2026-09-26-C",
   "status": "PREP_ONLY__MAINNET_DISABLED",
   "token": {
     "launchOrder": 3,
@@ -128,6 +128,11 @@
     "FlyWheel release caps, approval rules, vault address and Worldz Proof path are finalized",
     "all 250,000,000 PNEX remain assigned with no hidden or unclassified supply",
     "PHENIX Chance recipient register validates and only approved recipients are exported",
+    "Worldz Universal FlyWheel 30-day cycle validator passes and coverage registry is integrated",
+    "Worldz ProofBurn builder passes static/self-test and a disposable devnet burn proves BurnChecked, supply reduction and receipt reconciliation",
+    "FlyWheel builder/team grants enforce 90-day cliff and 24-month vesting",
+    "PHENIX FlyWheel 90-day hold and 48 x 30-day allowance schedule is time-enforced and proven",
+    "developer 90-day cliff and 24-month PNEX vesting is time-enforced and proven",
     "12 monthly Chance releases are deterministic and tested",
     "developer vesting schedule is finalized and time-enforced",
     "Purple Diamond Handz entitlement source and verified wallet rules are published",
@@ -143,15 +148,15 @@
   ],
   "launchReady": false,
   "launchBlockedReasons": [
+    "vesting and ProofBurn policies are defined but still require on-chain/devnet enforcement proof",
     "PHENIX Total Supply FlyWheel 19% is assigned, but its internal release policy and execution controls are not yet finalized",
     "no PHENIX mainnet mint address is recorded",
     "recipient approvals are not complete",
-    "developer vesting schedule is not finalized",
     "mainnet execution remains disabled"
   ],
   "totalSupplyFlyWheel": {
     "brand": "PHENIX Total Supply FlyWheel™",
-    "status": "ALLOCATED__POLICY_AND_EXECUTION_PROOF_PENDING",
+    "status": "ALLOCATED__VESTING_AND_BURN_POLICY_DEFINED__ONCHAIN_PROOF_PENDING",
     "supplyPercent": 19,
     "supplyTokens": 47500000,
     "designObjective": "Use a controlled portion of PHENIX supply to strengthen the token's own infrastructure, utility, liquidity, community and mission while allowing transparent permanent supply reduction. This is a structural objective and not a promise of token-price appreciation.",
@@ -201,13 +206,17 @@
       }
     ],
     "cycleDesign": [
+      "wait through the 90-day FlyWheel hold before non-genesis FlyWheel releases",
+      "unlock only the exact 48-cycle allowance for the current 30-day cycle; unused allowance rolls forward",
       "measure verified infrastructure, impact, treasury, community, builder, ecosystem and liquidity needs",
-      "prepare a proposed FlyWheel cycle allocation from the single reserve",
+      "create benefit records for PHENIX and all eligible Worldz Universal FlyWheel projects",
+      "prepare approved lane actions; builder/team grants receive a new 90-day cliff and 24-month vesting schedule",
+      "calculate any PNEX burn at zero to 25% of the new cycle allowance; no automatic burn",
       "run policy, multisig, vesting, liquidity and accounting checks",
       "simulate all executable transactions before signature",
       "require authorized wallet or multisig approval",
-      "execute only approved lanes",
-      "publish Worldz Proof for distributions, liquidity additions and burns",
+      "execute only approved actions",
+      "publish Worldz Proof for vesting, distributions, liquidity additions and burns",
       "carry unused PNEX forward inside the master reserve"
     ],
     "hardRules": [
@@ -221,7 +230,7 @@
       "treasury and infrastructure releases require approved controls and public classification",
       "the FlyWheel may seek to strengthen utility, liquidity and supply discipline but must not claim guaranteed price appreciation"
     ],
-    "internalLanePercentages": "NOT_YET_FIXED",
+    "internalLanePercentages": "DYNAMIC_WITHIN_30_DAY_CYCLE__NO_FIXED_LANE_PERCENTAGES__ALL_ACTIONS_GOVERNED",
     "releasePolicyRequiredBeforeMainnet": true,
     "mainnetExecutionEnabled": false,
     "miracleRunway": {
@@ -236,5 +245,85 @@
         "community education and verified contributor systems"
       ]
     }
+  },
+  "vestingPolicy": {
+    "scheduleTool": "worldzpad-mainnet/phenix/vesting_schedule.py",
+    "decimals": 6,
+    "earlyUnlock": false,
+    "phenixChance12MonthPool": {
+      "tokens": 37500000,
+      "cliffDays": 0,
+      "releases": 12,
+      "cadence": "MONTHLY_LAUNCH_ANNIVERSARY",
+      "tokensPerRelease": 3125000,
+      "onChainEnforcementRequiredBeforeMainnet": true
+    },
+    "developer": {
+      "tokens": 25000000,
+      "cliffDays": 90,
+      "releases": 24,
+      "cadence": "MONTHLY_FROM_CLIFF",
+      "exactRawUnitReconciliation": true,
+      "liquidAtGenesisTokens": 0,
+      "earlyUnlock": false,
+      "onChainEnforcementRequiredBeforeMainnet": true
+    },
+    "flyWheelReserve": {
+      "tokens": 47500000,
+      "holdDays": 90,
+      "cycleAllowances": 48,
+      "cadenceDays": 30,
+      "exactRawUnitReconciliation": true,
+      "unusedAllowance": "ROLL_FORWARD_INSIDE_MASTER_RESERVE",
+      "automaticDistribution": false,
+      "rule": "A cycle allowance only makes that amount eligible for approved FlyWheel actions. It does not automatically transfer PNEX."
+    },
+    "flyWheelBuilderTeamGrantDefault": {
+      "cliffDays": 90,
+      "releases": 24,
+      "cadence": "MONTHLY_FROM_CLIFF",
+      "earlyUnlock": false,
+      "appliesAfterGrantApproval": true,
+      "exactRawUnitReconciliation": true
+    }
+  },
+  "burnPolicy": {
+    "brand": "Worldz ProofBurn™",
+    "universalPolicyReference": "worldzpad-mainnet/flywheel/worldz-universal-flywheel.v1.json",
+    "transactionBuilder": "worldzpad-mainnet/phenix/prepare-pnex-burn.mjs",
+    "mode": "TOKEN_NATIVE_RESERVE_BURN",
+    "source": "PHENIX_TOTAL_SUPPLY_FLYWHEEL_AVAILABLE_ALLOWANCE_ONLY",
+    "automatedMarketBuyAndBurn": false,
+    "automaticBurn": false,
+    "perUniversalCycle": {
+      "cadenceDays": 30,
+      "maximumPercentOfNewFlyWheelCycleAllowance": 25,
+      "minimumPercent": 0,
+      "unusedBurnCapacity": "DOES_NOT_ACCUMULATE_AS_EXTRA_BURN_AUTHORITY",
+      "rule": "Each cycle may burn zero up to 25% of that cycle's newly vested FlyWheel allowance. The burn amount must be separately approved; the remaining allowance stays governed by the FlyWheel."
+    },
+    "requirements": [
+      "PNEX must be held in the disclosed burn-capable FlyWheel token account",
+      "burn amount must be inside the current approved cycle cap",
+      "BurnChecked instruction must use the canonical PNEX mint and correct decimals",
+      "transaction must be reviewed and signed by the configured wallet or multisig",
+      "signed transaction must be simulated successfully before broadcast",
+      "broadcast requires explicit human authorization",
+      "confirmed transaction signature and pre/post supply must be recorded",
+      "Worldz Proof burn receipt must be published"
+    ],
+    "irreversible": true,
+    "reissuanceAllowed": false,
+    "autoBroadcast": false,
+    "mainnetExecutionEnabled": false
+  },
+  "universalFlyWheel": {
+    "policyReference": "worldzpad-mainnet/flywheel/worldz-universal-flywheel.v1.json",
+    "universalCycleDays": 30,
+    "legacyEpochHours": 6,
+    "coverage": "LEGACY_PLUS_PREVIOUS_WORLDZ_PLUS_FUTURE_WORLDZ_PLUS_EVERY_VERIFIED_WORLDZLAUNCHPAD_PROJECT",
+    "extraTraderFeeRequired": false,
+    "sharedBenefitRequired": true,
+    "tokenSpecificBurnRequiresManifestAndAuthority": true
   }
 }
