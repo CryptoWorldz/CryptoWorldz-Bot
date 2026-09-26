@@ -6,9 +6,15 @@ from urllib.parse import urlparse
 
 root = Path(__file__).resolve().parents[1]
 page = (root / 'cryptoworldz.xyz/turn-up-town/index.html').read_text()
+wallet_ui = (root / 'cryptoworldz.xyz/turn-up-town/wallet.js').read_text()
 programs = json.loads((root / 'cryptoworldz.xyz/turn-up-town/programs.json').read_text())['programs']
 assert 'Claiming is not live on this page yet.' in page
 assert 'programs.js' in page
+assert 'wallet.js' in page and 'id="wallet-choice"' in page
+assert "['solana:signMessage']" in wallet_ui
+assert 'getRandomValues(new Uint8Array(16))' in wallet_ui
+assert 'action=PROVE_WALLET_CONTROL_ONLY' in wallet_ui
+assert 'signTransaction' not in wallet_ui and 'sendTransaction' not in wallet_ui
 assert len(programs) == len({item['id'] for item in programs})
 for item in programs:
     assert item['status'] in {'PREPARING', 'RECRUITING', 'EXPLORE', 'OPEN', 'CLOSED'}
