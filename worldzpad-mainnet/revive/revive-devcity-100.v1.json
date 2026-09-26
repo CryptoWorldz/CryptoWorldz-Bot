@@ -1,5 +1,5 @@
 {
-  "version": "DEVCITY-RVIV-100-2026-09-24-A",
+  "version": "DEVCITY-RVIV-100-2026-09-27-B",
   "token": "RVIV",
   "poolTokens": 20000000,
   "poolPercent": 10,
@@ -21,12 +21,48 @@
     "status": "OPEN_FOR_VERIFIED_DEVELOPER_RECRUITMENT"
   },
   "eligibility": [
-    "Public evidence of real software development or technical contribution",
-    "Accepted participation in DevCity",
-    "Verified Solana wallet association",
-    "No duplicate identity or duplicate reward slot",
+    "Public evidence connecting the recipient wallet to a real developer, builder, validator, open-source project or technical contributor",
+    "Valid Solana public key suitable for receiving SPL tokens",
+    "No obvious program, mint, pool or market address substituted for a recipient wallet",
+    "No duplicate recipient slot unless JayJayTeamDev explicitly approves it",
     "No purchase requirement",
     "No price-promotion requirement"
   ],
-  "stagingWallet": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m"
+  "stagingWallet": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
+  "selectionMode": "PUBLIC_DEVELOPER_AND_PROJECT_WALLET_RESEARCH__FINAL_100",
+  "candidateArtifact": "worldzpad-mainnet/revive/revive-devcity-public-wallet-candidates.v1.json",
+  "candidatesFound": 105,
+  "finalRecipientTarget": 100,
+  "currentStatus": "105_PUBLIC_CANDIDATES_FOUND__FINAL_100_CHAIN_AND_SOURCE_VALIDATION_PENDING",
+  "sourceScope": [
+    "X",
+    "Crypto developer communities",
+    "Pump.fun",
+    "Bonk ecosystem",
+    "Bags",
+    "Meteora",
+    "Raydium",
+    "Heaven",
+    "BasedBid",
+    "RevShare",
+    "Moonshot",
+    "GitHub/public developer sources"
+  ],
+  "vesting": {
+    "provider": "Jupiter Lock/Vesting",
+    "immediateUnlockPercent": 0,
+    "cliffDays": 0,
+    "months": 12,
+    "releases": 12,
+    "cadence": "monthly",
+    "releaseRule": "12 equal monthly releases; final release receives any raw-unit rounding remainder"
+  },
+  "bulkDistribution": {
+    "engine": "WorldzBulkDrop™",
+    "approvalTarget": "ONE_WALLET_SIGNING_SESSION_PLUS_REQUIRED_SQUADS_APPROVAL",
+    "noPerRecipientPages": true,
+    "finalManifestRequired": true,
+    "worldzProofRequired": true
+  },
+  "owner": "JayJayTeamDev"
 }
