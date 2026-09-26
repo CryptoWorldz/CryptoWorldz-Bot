@@ -17,6 +17,7 @@ platform=load("launchpad.cryptoworldz.xyz/platform-config.json")
 fullscope=load("worldzpad-omnichain/fullscope/worldz-fullscope.v1.json")
 identity=load("worldzpad-mainnet/token-identity/worldz-token-registry.v1.json")
 jupiter=load("worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json")
+dexscreener=load("worldzpad-mainnet/worlddexpush/dexscreener-worldz.v1.json")
 proof=load("worldzpad-omnichain/schemas/worldz-proof-receipt.v1.json")
 intent=load("worldzpad-omnichain/schemas/launch-intent.schema.json")
 product=load("worldzpad-omnichain/product-standard.v1.json")
@@ -86,7 +87,13 @@ assert bp["deltaRaw"]["pattern"]=="^-?[0-9]+$"
 
 live_solana={t["canonicalMint"] for t in identity["tokens"] if t.get("lifecycle")=="LIVE" and t.get("chain")=="Solana"}
 jupiter_mints={t["mint"] for t in jupiter["tokens"]}
+dexscreener_mints={t["mint"] for t in dexscreener["tokens"]}
 assert live_solana==jupiter_mints, "every LIVE Solana Worldz token must inherit Jupiter handoff"
+assert live_solana==dexscreener_mints, "every LIVE Solana Worldz token must inherit DEX Screener handoff"
+provider_handoff=inheritance["identityInheritance"]["solanaLiveProviderHandoff"]
+assert provider_handoff["compiler"]=="scripts/build_worldz_provider_handoffs.mjs"
+assert {p["id"] for p in provider_handoff["providers"]}=={"jupiter-vrfd","dexscreener"}
+assert (ROOT/provider_handoff["compiler"]).exists()
 
 intent_envs=set(intent["properties"]["environment"]["enum"])
 all_test_envs={v for values in inheritance["launchIntent"]["supportedTestEnvironments"].values() for v in values}
@@ -114,4 +121,4 @@ assert inheritance["postLaunchInheritance"]["indexerStateNeverFaked"] is True
 assert inheritance["postLaunchInheritance"]["vendorPaymentAutomatic"] is False
 
 print("WORLDZ_LAUNCH_INHERITANCE=PASS")
-print("chains=8 identity=LOCKED proof=REQUIRED fullscope=REQUIRED jupiter_live_solana=COVERED mainnet=PER_CHAIN_GATED")
+print("chains=8 identity=LOCKED proof=REQUIRED fullscope=REQUIRED provider_handoffs=JUPITER+DEXSCREENER mainnet=PER_CHAIN_GATED")
