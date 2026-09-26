@@ -8,6 +8,9 @@ fullscope = json.loads((ROOT / "worldzpad-omnichain/fullscope/worldz-fullscope.v
 runtime = (ROOT / "src/full-runtime-entry.js").read_text()
 registry = (ROOT / "src/command-registry.js").read_text()
 command_centre = (ROOT / "src/command-centre.js").read_text()
+mini_html = (ROOT / "public/miniapp/index.html").read_text()
+mini_js = (ROOT / "public/miniapp/app.js").read_text()
+max_page = (ROOT / "cryptoworldz.xyz/command-centre-max/index.html").read_text()
 page = (ROOT / "launchpad.cryptoworldz.xyz/fullbuild/index.html").read_text()
 scope_page = (ROOT / "launchpad.cryptoworldz.xyz/fullscope/index.html").read_text()
 sitemap = (ROOT / "launchpad.cryptoworldz.xyz/sitemap.xml").read_text()
@@ -57,6 +60,13 @@ assert "register_worldz_fullbuild" in runtime
 assert re.search(r'\["worldzfullbuild",\s*"Open the complete WorldzFullBuild', registry)
 assert "WORLDZFULLBUILD™ — MASTER BUILD" in command_centre
 assert "/worldzfullbuild" in command_centre
+assert 'id="fullbuild"' in mini_html
+assert 'id="fullbuild-home-card"' in mini_html
+assert 'id="memory-storage"' in mini_html
+assert "WorldzFullBuild™" in mini_js
+assert 'data-open="fullbuild"' in mini_js
+assert "WORLDZFULLBUILD™" in max_page
+assert "WORLDZFULLSCOPE™" in max_page
 assert "WorldzFullScope™ is part of the master build." in page
 assert "POPULARITY ONLY" in page
 assert "DAO GOVERNANCE ONLY" in page
