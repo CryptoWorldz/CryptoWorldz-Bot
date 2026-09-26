@@ -124,23 +124,38 @@ jobs:
           print("ZED_PROTECTED_CREDENTIAL_PREFLIGHT=PASS")
           PY
 
-      - name: Verify WorldzFullScope database schema before runtime activation
+      - name: Verify WorldzFullScope database + protected runtime bridge
         shell: python
         run: |
-          import json, os, urllib.parse, urllib.request
+          import hashlib, json, os, urllib.parse, urllib.request
 
-          base=str(os.environ.get("SUPABASE_URL_SECRET","")).rstrip("/")
-          key=str(os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET","")).strip()
-          if not base or not key:
-              raise SystemExit("FullScope schema verification requires Supabase service credentials.")
-          print("::add-mask::"+key)
+          base=(str(os.environ.get("SUPABASE_URL_SECRET","")).strip() or "https://hknymhhyqldtzmplzuzh.supabase.co").rstrip("/")
+          publishable=str(os.environ.get("SUPABASE_PUBLISHABLE_KEY_SECRET","")).strip() or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+          bot_token=str(os.environ.get("BOT_TOKEN_SECRET","")).strip()
+          if not bot_token:
+              raise SystemExit("FullScope runtime bridge proof requires the protected bot token.")
 
+          runtime_key=hashlib.sha256(("zed-runtime-v1:"+bot_token).encode()).hexdigest()
           headers={
-              "apikey":key,
-              "authorization":"Bearer "+key,
+              "apikey":publishable,
+              "authorization":"Bearer "+publishable,
+              "x-zed-runtime-key":runtime_key,
+              "content-type":"application/json",
               "accept":"application/json",
-              "user-agent":"WorldzFullScope-Schema-Gate/1.0"
+              "user-agent":"WorldzFullScope-Runtime-Gate/2.0"
           }
+
+          auth_req=urllib.request.Request(
+              base+"/rest/v1/rpc/zed_runtime_authorized",
+              data=b"{}",
+              headers=headers,
+              method="POST"
+          )
+          with urllib.request.urlopen(auth_req,timeout=20) as response:
+              authorized=json.loads(response.read().decode("utf-8"))
+          if authorized is not True:
+              raise SystemExit("Protected ZED runtime bridge authorization failed.")
+
           probes=[
               ("worldz_fullscope_chains","chain_key,label,family,mainnet_execution_enabled"),
               ("worldz_fullscope_tokens","id,chain_key,name,symbol,status"),
@@ -156,49 +171,14 @@ jobs:
               try:
                   with urllib.request.urlopen(req,timeout=20) as response:
                       if response.status != 200:
-                          raise SystemExit(f"FullScope schema probe failed for {table}: HTTP {response.status}")
-                      json.loads(response.read().decode("utf-8"))
+                          raise SystemExit(f"FullScope runtime probe failed for {table}: HTTP {response.status}")
+                      rows=json.loads(response.read().decode("utf-8"))
+                      if not isinstance(rows,list):
+                          raise SystemExit(f"FullScope runtime probe returned invalid payload for {table}")
               except Exception as exc:
-                  raise SystemExit(f"FullScope schema missing/incompatible for {table}: {exc}") from exc
+                  raise SystemExit(f"FullScope schema/runtime bridge incompatible for {table}: {exc}") from exc
 
           print("WORLDZ_FULLSCOPE_SCHEMA=PASS")
-
-          # Prove the exact publishable-key + x-zed-runtime-key bridge used by
-          # the protected runtime when a service-role key is not loaded.
-          import hashlib
-          publishable=str(os.environ.get("SUPABASE_PUBLISHABLE_KEY_SECRET","")).strip() or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
-          bot_token=str(os.environ.get("BOT_TOKEN_SECRET","")).strip()
-          if not bot_token:
-              raise SystemExit("FullScope runtime bridge proof requires the protected bot token.")
-          runtime_key=hashlib.sha256(("zed-runtime-v1:"+bot_token).encode()).hexdigest()
-          runtime_headers={
-              "apikey":publishable,
-              "authorization":"Bearer "+publishable,
-              "x-zed-runtime-key":runtime_key,
-              "content-type":"application/json",
-              "accept":"application/json",
-              "user-agent":"WorldzFullScope-Runtime-Bridge-Gate/1.0"
-          }
-          auth_req=urllib.request.Request(
-              base+"/rest/v1/rpc/zed_runtime_authorized",
-              data=b"{}",
-              headers=runtime_headers,
-              method="POST"
-          )
-          with urllib.request.urlopen(auth_req,timeout=20) as response:
-              authorized=json.loads(response.read().decode("utf-8"))
-          if authorized is not True:
-              raise SystemExit("FullScope protected publishable-key runtime bridge is not authorized.")
-
-          read_req=urllib.request.Request(
-              base+"/rest/v1/worldz_fullscope_chains?select=chain_key&limit=1",
-              headers=runtime_headers
-          )
-          with urllib.request.urlopen(read_req,timeout=20) as response:
-              rows=json.loads(response.read().decode("utf-8"))
-          if not isinstance(rows,list):
-              raise SystemExit("FullScope protected runtime bridge cannot read the chain registry.")
-
           print("WORLDZ_FULLSCOPE_RUNTIME_BRIDGE=PASS")
           print("WORLDZ_FULLSCOPE_RUNTIME_ACTIVATION_GATE=PASS")
 
