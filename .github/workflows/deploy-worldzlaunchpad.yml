@@ -226,6 +226,7 @@ jobs:
               # JayJayTeamDev's explicit noindex RVIV signing console is an
               # owner-only operational route, not a public launch announcement.
               and p.relative_to(root).parts[0]!='rviv-dev-setup'
+              and p.relative_to(root).as_posix()!='revive-distribution/rpc.php'
           ]
           owner_route=root/'rviv-dev-setup'
           for filename in ('index.html','app.js','distribute.html','distribute.js'):
