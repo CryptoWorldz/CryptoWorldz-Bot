@@ -1,7 +1,7 @@
 # REVIVE ($RVIV) — v1 build
 
 Branch: `revive-v1-build`  
-Status: **build only; no mainnet launch execution is authorized by these files.**
+Status: **canonical RVIV mint and RVIV/WSOL DAMM v2 pool exist on mainnet.** The pool creation transaction is complete; no subsequent pool trade was found in the 26 September 2026 04:34 UTC audit. No additional mainnet execution is authorized by these files. See `POOL-EXISTS-REVIEW.md` for fresh decoded state and a successful unsigned sample buy simulation.
 
 ## Canonical token
 
@@ -13,6 +13,7 @@ REVIVE is already minted. Do **not** create a second RVIV mint.
 - Mint authority: **revoked**
 - Freeze authority: **revoked**
 - Source treasury vault: `n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB`
+- Existing RVIV/WSOL pool: `YWEMDsd6o3dm8uXNnmnWWU3c1UtFqDUKEMfbQ512i5c` — 30M RVIV in its vault, 75-bps fixed fee and permanently locked initial position at audit time. Its WSOL vault held 1 lamport. Do not submit another create-pool transaction against this address.
 
 ## Locked supply plan
 
