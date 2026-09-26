@@ -5,7 +5,7 @@ import { CollectFeeMode, CpAmm } from "@meteora-ag/cp-amm-sdk";
 import BN from "bn.js";
 
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-if ((await connection.getGenesisHash()) !== "GH7ome3EiwEr7tu9JuTh2dpYWBJK3z69Xm1ZE3MEE6JC") throw new Error("DEVNET_RPC_REQUIRED");
+if ((await connection.getGenesisHash()) !== "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBGwcaWoxPkrZBG") throw new Error("DEVNET_RPC_REQUIRED");
 const evidence = JSON.parse(fs.readFileSync("artifacts/pnex-full-devnet-proof.json", "utf8"));
 if (evidence.mainnetTouched !== false || evidence.mainnetExecution !== false || evidence.genesis.mainnetPrice !== null) {
   throw new Error("MAINNET_ISOLATION_FAILED");
