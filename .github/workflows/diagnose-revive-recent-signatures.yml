@@ -31,3 +31,12 @@ jobs:
           rows=rpc('getSignaturesForAddress',[MEMBER,{'limit':25,'commitment':'confirmed'}])
           for x in rows:
               print(json.dumps({k:x.get(k) for k in ['signature','slot','blockTime','confirmationStatus','err','memo']}))
+
+          DISTRIBUTOR='8zhVEUZMcs78AoddrZKm2HrFtpNabxaZNZEDsv8FBfj2'
+          SOURCE_ATA='28CwdVt2y997WZqTzEuBpuwoyVYAj6JcaD4qDMzyCdtn'
+          dist=rpc('getAccountInfo',[DISTRIBUTOR,{'encoding':'base64','commitment':'confirmed'}])
+          dsigs=rpc('getSignaturesForAddress',[DISTRIBUTOR,{'limit':10,'commitment':'confirmed'}])
+          bal=rpc('getTokenAccountBalance',[SOURCE_ATA,{'commitment':'confirmed'}])
+          print('ONEDROP_DISTRIBUTOR_EXISTS='+str(bool(dist.get('value'))))
+          print('ONEDROP_DISTRIBUTOR_SIGNATURES='+json.dumps(dsigs))
+          print('REVIVE_SOURCE_BALANCE='+json.dumps(bal))
