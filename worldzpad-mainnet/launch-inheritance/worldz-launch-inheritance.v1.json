@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-LAUNCH-INHERITANCE-V1",
-  "version": "2026-09-27-A",
+  "version": "2026-09-27-B",
   "brand": "WorldzLaunchInheritance™",
   "status": "CODE_BUILT__PER_CHAIN_EXECUTION_GATED",
   "purpose": "Make every WorldzLaunchPad launch inherit the same identity, wallet, proof, safety, FullScope and post-launch observability standards without pretending an unproven chain or venue is mainnet-ready.",
@@ -214,10 +214,19 @@
     "mintPrefixNeverUsedAsName": true,
     "unknownValuesRemainPending": true,
     "solanaLiveProviderHandoff": {
-      "provider": "Jupiter VRFD",
-      "package": "worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json",
+      "compiler": "scripts/build_worldz_provider_handoffs.mjs",
       "everyLiveSolanaWorldzTokenRequired": true,
-      "providerGreenOnlyFromProviderData": true
+      "providerGreenOnlyFromProviderData": true,
+      "providers": [
+        {
+          "id": "jupiter-vrfd",
+          "package": "worldzpad-mainnet/worlddexpush/jupiter-vrfd-worldz.v1.json"
+        },
+        {
+          "id": "dexscreener",
+          "package": "worldzpad-mainnet/worlddexpush/dexscreener-worldz.v1.json"
+        }
+      ]
     }
   },
   "proofInheritance": {
