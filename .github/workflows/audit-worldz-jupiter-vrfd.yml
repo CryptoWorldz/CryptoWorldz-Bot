@@ -10,6 +10,7 @@ on:
       - 'launchpad.cryptoworldz.xyz/**/token-metadata.json'
       - 'launchpad.cryptoworldz.xyz/worlddexpush/jupiter/**'
       - 'scripts/audit_worldz_jupiter_vrfd.mjs'
+      - 'scripts/build_worldz_provider_handoffs.mjs'
       - '.github/workflows/audit-worldz-jupiter-vrfd.yml'
   push:
     branches: [main]
@@ -19,6 +20,7 @@ on:
       - 'launchpad.cryptoworldz.xyz/**/token-metadata.json'
       - 'launchpad.cryptoworldz.xyz/worlddexpush/jupiter/**'
       - 'scripts/audit_worldz_jupiter_vrfd.mjs'
+      - 'scripts/build_worldz_provider_handoffs.mjs'
       - '.github/workflows/audit-worldz-jupiter-vrfd.yml'
 permissions:
   contents: read

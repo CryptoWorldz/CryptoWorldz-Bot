@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-FULLBUILD-V1",
-  "version": "2026-09-27-MAIN-B",
+  "version": "2026-09-27-MAIN-C",
   "brand": "WorldzFullBuild™",
   "status": "MAIN_INTEGRATION_SOURCE_OF_TRUTH",
   "updatedAt": "2026-09-27",
@@ -181,6 +181,12 @@
         "state": "HANDOFF_AND_AUDIT_BUILT__PARTNERSHIP_NOT_CLAIMED"
       },
       {
+        "id": "provider-handoff-compiler",
+        "name": "Worldz Provider Handoff Compiler™",
+        "source": "scripts/build_worldz_provider_handoffs.mjs",
+        "state": "CI_GATE__EVERY_LIVE_SOLANA_TOKEN"
+      },
+      {
         "id": "flywheel",
         "name": "Worldz Universal FlyWheel™",
         "source": "worldzpad-mainnet/flywheel/worldz-universal-flywheel.v1.json",
@@ -286,7 +292,8 @@
       "Universal FlyWheel proof closure",
       "WorldzLinkz",
       "ZED protected runtime gates",
-      "DEX Screener provider-control handoff"
+      "DEX Screener provider-control handoff",
+      "Provider handoff compiler for every LIVE Solana token"
     ]
   },
   "executionBoundary": {
