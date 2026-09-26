@@ -189,7 +189,11 @@
       "WorldzProof™",
       "WorldzAuto™",
       "G.R.A.C.E. campaign collection",
-      "ZED LED Command Centre MAX™ status"
+      "ZED LED Command Centre MAX™ status",
+      "WorldzFullScope™",
+      "WorldzWatch™",
+      "Worldz Votes Centre™",
+      "WorldzGovern™"
     ]
   },
   "currentChatCheckpoint": {
@@ -465,5 +469,79 @@
       "VERIFY_EXACT_STREAMFLOW_MAPPING_FOR_LMTD_1M_LOCK_UNLOCK_2036_02_22",
       "VERIFY_OWNER_REPORTED_SEPARATE_5_YEAR_COMMUNITY_LOCK_TOKEN_POSITION_AND_ON_CHAIN_REFERENCE"
     ]
+  },
+  "architecture": {
+    "commandLeader": "ZED LED Command Centre MAX™",
+    "requiredSubsystems": [
+      "WorldzLaunchPad™",
+      "Worldz Omnichain™",
+      "WorldzFullScope™",
+      "AUTO",
+      "G.R.A.C.E.",
+      "RECAP",
+      "WorldzProof™",
+      "Legacy Flywheel™",
+      "Worldz Treasury"
+    ],
+    "fullScope": {
+      "required": true,
+      "sourceContract": "worldzpad-omnichain/fullscope/worldz-fullscope.v1.json",
+      "chainCount": 8,
+      "maxTokensPerChain": 20,
+      "initialTokenEnvironmentCapacity": 160,
+      "requiredModules": [
+        "WorldzWatch™",
+        "WorldzTrade™",
+        "WorldzInvest™",
+        "WorldzLock™",
+        "WorldzVest™",
+        "WorldzAlert™",
+        "WorldzAuto™",
+        "WorldzProof™",
+        "Worldz Votes Centre™",
+        "WorldzGovern™"
+      ]
+    }
+  },
+  "votingSeparation": {
+    "popularity": {
+      "brand": "Worldz Votes Centre™",
+      "purpose": "token popularity, trending, visibility, rankings and raids",
+      "commands": [
+        "/worldzvotes",
+        "/tokenvote",
+        "/worldztrending",
+        "/worldzrankings"
+      ],
+      "governanceAuthority": false
+    },
+    "governance": {
+      "brand": "WorldzGovern™",
+      "purpose": "DAO proposals, treasury decisions, ecosystem rules, grants, delegation and approved governance execution",
+      "commands": [
+        "/worldzgovern",
+        "/governproposals",
+        "/governvote",
+        "/governdelegate"
+      ],
+      "popularityRankingEffect": false
+    },
+    "hardRule": "Popularity and governance use different names, commands, data stores and execution authority."
+  },
+  "commandPaths": {
+    "master": "/worldzfullbuild",
+    "fullScope": "/fullscope",
+    "popularity": "/worldzvotes",
+    "governance": "/worldzgovern"
+  },
+  "executionIntegration": {
+    "fullScopeMainnetDefault": false,
+    "externalWalletSignatureRequired": true,
+    "telegramPrivateKeyCustody": false,
+    "autoBroadcastDefault": false,
+    "perChainReleaseGate": true,
+    "testnetOrDevnetProofRequired": true,
+    "worldzProofRequired": true,
+    "explicitOwnerReleaseRequired": true
   }
 }
