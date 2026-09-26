@@ -134,7 +134,8 @@
     },
     {
       "wallet": "43T8jncT5pJFo1TNenHdt6NSaPieic3iuHLQnYLLgeWy",
-      "amountRaw": "325554968873"
+      "amountRaw": "325554968873",
+      "payoutStatus": "EXCLUDED_PENDING_RECALCULATION"
     },
     {
       "wallet": "44URgZpyU9j9xbuF7ueVtB1MRQfovgzmb6s4DgmbX9bJ",
@@ -226,7 +227,8 @@
     },
     {
       "wallet": "5fFVkQuo4pnCpWhD8hx2uiFEtkBcnW3QdDUt1w2BzB71",
-      "amountRaw": "259919677738"
+      "amountRaw": "259919677738",
+      "payoutStatus": "EXCLUDED_PENDING_RECALCULATION"
     },
     {
       "wallet": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
@@ -872,5 +874,10 @@
       "wallet": "uZBjpZNM5Gh1AHx9tme5EnCja7b3TDd4cABtNPXbDhh",
       "amountRaw": "57775508916"
     }
-  ]
+  ],
+  "payoutExclusionsPendingRecalculation": [
+    "5fFVkQuo4pnCpWhD8hx2uiFEtkBcnW3QdDUt1w2BzB71",
+    "43T8jncT5pJFo1TNenHdt6NSaPieic3iuHLQnYLLgeWy"
+  ],
+  "executionGate": "DO_NOT_SEND_OR_OPEN_CLAIMS_UNTIL_EXCLUDED_ENTITLEMENTS_RECONCILED"
 }
