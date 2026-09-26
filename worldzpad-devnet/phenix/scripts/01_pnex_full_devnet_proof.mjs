@@ -12,7 +12,10 @@ import {
 } from "@meteora-ag/cp-amm-sdk";
 import BN from "bn.js";
 
-const DEVNET_GENESIS = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBGwcaWoxPkrZBG";
+const DEVNET_GENESIS_HASHES = new Set([
+  "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
+  "GH7ome3EiwEr7tu9JuTh2dpYWBJK3z69Xm1ZE3MEE6JC"
+]);
 const RPC_CANDIDATES = [
   process.env.PNEX_DEVNET_RPC_URL,
   "https://api.devnet.solana.com",
@@ -28,7 +31,7 @@ for (const rpc of [...new Set(RPC_CANDIDATES)]) {
     const genesis = await candidate.getGenesisHash();
     const safeRpc = rpc.replace(/([?&](?:api[-_]?key|token)=)[^&]+/gi, "$1REDACTED");
     rpcChecks.push({ rpc: safeRpc, genesis });
-    if (genesis === DEVNET_GENESIS) {
+    if (DEVNET_GENESIS_HASHES.has(genesis)) {
       connection = candidate;
       selectedRpc = safeRpc;
       break;
