@@ -1,0 +1,49 @@
+{
+  "version": "WORLDZ-ADAPTER-SOLANA-2026-09-24-A",
+  "chainKey": "solana",
+  "status": "DEVNET_IMPLEMENTATION_IN_PROGRESS",
+  "mainnetExecutionEnabled": false,
+  "referenceImplementation": "worldzpad-devnet/revive-party",
+  "token": {
+    "v1": "SPL_TOKEN",
+    "token2022": "SEPARATE_PROOF_REQUIRED",
+    "authorityPolicy": "DISCLOSE_AND_PROVE_PER_LAUNCH"
+  },
+  "launchModes": [
+    "METEORA_DBC_TO_DAMM_V2",
+    "DIRECT_DAMM_V2_AFTER_PROOF",
+    "RAYDIUM_LAUNCHLAB_ADAPTER_CANDIDATE"
+  ],
+  "routing": ["JUPITER"],
+  "fee": {
+    "targetGrossTraderFeeBps": 75,
+    "dynamicFeeDefault": false,
+    "knownMeteoraProtocolSharePercentOfTradingFee": 20,
+    "worldzRouter": "PENDING_WORLDZ_FEE_ROUTER_PDA",
+    "quoteTokenCollectionPreferred": true
+  },
+  "legacyFlywheel": {
+    "nativeSettlementAsset": "SOL",
+    "vaultCount": 10,
+    "epochHours": 6,
+    "bridgeRequired": false
+  },
+  "liquidity": {
+    "permanentLockTargetPercent": 100,
+    "migrationProofRequired": true
+  },
+  "releaseGates": [
+    "75_BPS_DEVNET_PROOF",
+    "FEE_ROUTER_RECEIPT_PROOF",
+    "10_LEGACY_PDA_PROOF",
+    "CREATOR_AND_REFERRER_RECEIPT_PROOF",
+    "DAMM_V2_MIGRATION_PROOF",
+    "100_PERCENT_PERMANENT_LOCK_PROOF",
+    "BUY_AND_SELL_ROUTE_PROOF",
+    "WORLDZ_PROOF_RECORD"
+  ],
+  "sourceOfTruth": [
+    "https://docs.meteora.ag/",
+    "https://developers.jup.ag/"
+  ]
+}
