@@ -40,6 +40,13 @@ async function rpc(method,params){const response=await fetch(RPC,{method:'POST',
 function exact(d,s){
  return RECIPIENTS.map(([,wallet])=>d.spl.createTransferCheckedInstruction(s.sourceAta,s.mint,d.spl.getAssociatedTokenAddressSync(s.mint,new d.web3.PublicKey(wallet),true,d.spl.TOKEN_PROGRAM_ID),s.vault,RAW,6,[],d.spl.TOKEN_PROGRAM_ID));
 }
+async function transactionFingerprint(conn,d,s){
+ const [txPda]=d.sqds.getTransactionPda({multisigPda:s.ms,index:s.next});
+ const info=await conn.getAccountInfo(txPda,'confirmed');
+ if(!info?.owner.equals(d.sqds.PROGRAM_ID))stop('Squads vault transaction missing or changed owner.');
+ const bytes=await crypto.subtle.digest('SHA-256',new Uint8Array(info.data));
+ return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
+}
 async function check(){
  if(!ctx)stop('Connect JayJayTeamDev first.');disable();state=null;
  const d=await deps(),conn=new d.web3.Connection(RPC,'confirmed');
@@ -101,12 +108,12 @@ async function create(){
  const ix=s.d.sqds.instructions.vaultTransactionCreate({multisigPda:s.ms,transactionIndex:s.next,creator:s.owner,rentPayer:s.owner,vaultIndex:0,ephemeralSigners:0,transactionMessage:message,memo:'RVIV seven owner Dev shares 4285714.285714 each'});
  const proposal=s.d.sqds.instructions.proposalCreate({multisigPda:s.ms,transactionIndex:s.next,creator:s.owner,rentPayer:s.owner,isDraft:true});
  await send([ix,proposal],'Create exact seven-share Squads proposal',s);
- const [txPda]=s.d.sqds.getTransactionPda({multisigPda:s.ms,index:s.next});
- if(!await s.conn.getAccountInfo(txPda,'confirmed'))stop('Squads proposal not found after confirmation.');
+ s.transactionFingerprint=await transactionFingerprint(s.conn,s.d,s);
  $('#approve').disabled=false;$('#review').textContent+='\nProposal created at Squads index '+s.next+'. Recheck every step in your wallet.';
 }
 async function approve(){
  const s=state;if(!s)stop('Run the live check.');disable();
+ if(!s.transactionFingerprint||await transactionFingerprint(s.conn,s.d,s)!==s.transactionFingerprint)stop('Squads vault transaction changed; stop.');
  const [pda]=s.d.sqds.getProposalPda({multisigPda:s.ms,transactionIndex:s.next});
  const p=await s.d.sqds.accounts.Proposal.fromAccountAddress(s.conn,pda,'confirmed');
  const kind=String(p.status?.__kind||'');
@@ -117,6 +124,7 @@ async function approve(){
 }
 async function execute(){
  const s=state;if(!s)stop('Run the live check.');disable();
+ if(!s.transactionFingerprint||await transactionFingerprint(s.conn,s.d,s)!==s.transactionFingerprint)stop('Squads vault transaction changed; stop.');
  const [pda]=s.d.sqds.getProposalPda({multisigPda:s.ms,transactionIndex:s.next});
  const p=await s.d.sqds.accounts.Proposal.fromAccountAddress(s.conn,pda,'confirmed');
  if(String(p.status?.__kind)!=='Approved')stop('Squads proposal is not approved.');
