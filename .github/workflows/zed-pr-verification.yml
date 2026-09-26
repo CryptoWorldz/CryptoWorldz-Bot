@@ -1,0 +1,33 @@
+name: ZED PR verification
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - '.github/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  zed-safe-checks:
+    name: ZED safe checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts
+      - name: Syntax checks
+        run: npm run check
+      - name: WorldPing and build-poll regression tests
+        run: node --test test/worldping.test.js test/zed-hostinger-build-poll-timeouts.test.js
