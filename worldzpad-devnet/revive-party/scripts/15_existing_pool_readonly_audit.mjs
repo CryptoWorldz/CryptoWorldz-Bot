@@ -2,7 +2,8 @@
 // REVIVE existing Meteora DAMM v2 pool audit. READ ONLY: no keys, signatures or sends.
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import { NATIVE_MINT } from '@solana/spl-token';
-import { CpAmm } from '@meteora-ag/cp-amm-sdk';
+import { CpAmm, swapQuoteExactInput } from '@meteora-ag/cp-amm-sdk';
+import BN from 'bn.js';
 
 const rpc = process.env.SOLANA_MAINNET_RPC_URL?.trim() || clusterApiUrl('mainnet-beta');
 const connection = new Connection(rpc, 'confirmed');
@@ -24,6 +25,18 @@ const safe = value => JSON.parse(JSON.stringify(value, (_, v) =>
   typeof v === 'bigint' ? v.toString() : v?.toBase58?.() || (v?.constructor?.name === 'BN' ? v.toString() : v)
 ));
 const mintsMatch = pool.tokenAMint.toBase58() === rvivMint && pool.tokenBMint.equals(NATIVE_MINT);
+let sampleBuyQuote;
+try {
+  const quote = swapQuoteExactInput(pool, new BN(Math.floor(Date.now() / 1000)),
+    new BN(1_000_000), 1, false, false, 6, 9);
+  sampleBuyQuote = {
+    inputLamports: '1000000', estimatedRvivRaw: asText(quote.outputAmount),
+    minimumRvivRaw: asText(quote.minimumAmountOut),
+    source: 'LOCAL_SDK_QUOTE_ONLY_NOT_TRANSACTION_SIMULATION',
+  };
+} catch (error) {
+  sampleBuyQuote = { error: error?.message || String(error), source: 'LOCAL_SDK_QUOTE_ONLY' };
+}
 const report = {
   proof: 'REVIVE_EXISTING_METEORA_POOL_READ_ONLY_AUDIT',
   observedAt: new Date().toISOString(), network: 'solana-mainnet-beta', genesis,
@@ -38,6 +51,7 @@ const report = {
   activationPoint: asText(pool.activationPoint), collectFeeMode: pool.collectFeeMode,
   sqrtPrice: asText(pool.sqrtPrice), feeVersion: pool.feeVersion,
   decodedBaseFees: safe(fees),
+  sampleBuyQuote,
   positions: positions.map(x => ({
     address: x.publicKey.toBase58(), nftMint: asText(x.account.nftMint),
     unlockedLiquidity: asText(x.account.unlockedLiquidity),
