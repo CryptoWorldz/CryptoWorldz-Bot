@@ -26,6 +26,16 @@ const safe = value => JSON.parse(JSON.stringify(value, (_, v) =>
   typeof v === 'bigint' ? v.toString() : v?.toBase58?.() || (v?.constructor?.name === 'BN' ? v.toString() : v)
 ));
 const mintsMatch = pool.tokenAMint.toBase58() === rvivMint && pool.tokenBMint.equals(NATIVE_MINT);
+const positionNftHolders = await Promise.all(positions.map(async item => {
+  const largest = await connection.getTokenLargestAccounts(item.account.nftMint, 'confirmed');
+  const holding = largest.value.find(entry => entry.amount !== '0');
+  const parsed = holding ? await connection.getParsedAccountInfo(holding.address, 'confirmed') : null;
+  return { nftMint: item.account.nftMint.toBase58(),
+    tokenAccount: holding?.address.toBase58() || null,
+    tokenAmount: holding?.amount || '0',
+    owner: parsed?.value?.data?.parsed?.info?.owner || null,
+  };
+}));
 const fixedFeeNumerator = new BN(fees.cliffFeeNumerator.toString('hex'), 16);
 const expectedFeeNumerator = new BN(7_500_000); // 75 bps of SDK's 1e9 denominator.
 const fullPoolLock = pool.permanentLockLiquidity.eq(pool.liquidity) &&
@@ -69,6 +79,7 @@ const report = {
     vestedLiquidity: asText(x.account.vestedLiquidity),
     permanentLockedLiquidity: asText(x.account.permanentLockedLiquidity),
   })),
+  positionNftHolders,
   safety: { signed: false, broadcast: false, keysRead: false },
 };
 console.log(JSON.stringify(report, null, 2));
