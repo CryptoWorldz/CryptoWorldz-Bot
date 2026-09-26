@@ -4,6 +4,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 contract = json.loads((ROOT / "worldzpad-omnichain/fullscope/worldz-fullscope.v1.json").read_text())
+fullbuild = json.loads((ROOT / "worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json").read_text())
 core = (ROOT / "src/fullscope/core.js").read_text()
 telegram = (ROOT / "src/fullscope/telegram.js").read_text()
 registry = (ROOT / "src/command-registry.js").read_text()
@@ -41,6 +42,36 @@ assert wallet["exactApproval"]["signedMessageMustEqualReviewedMessage"] is True
 assert wallet["exactApproval"]["confirmOnChainBeforeCompleted"] is True
 assert wallet["exactApproval"]["autoBroadcast"] is False
 assert len(build["wldzLessons"]) >= 5
+assert build["sourceOfTruth"] == "worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json"
+assert build["ownerAuthority"]["owner"] == "JayJayTeamDev"
+assert build["ownerAuthority"]["approvedPlanIsSourceOfTruth"] is True
+assert build["deliveryTruthStandard"]["noGreenDeployEqualsWorking"] is True
+assert build["deliveryTruthStandard"]["endToEndRequiredBeforeDone"] is True
+assert build["bulkDistribution"]["brand"] == "WorldzBulkDrop™"
+assert build["bulkDistribution"]["defaultForWorldzLaunchPad"] is True
+assert build["bulkDistribution"]["noPerRecipientPages"] is True
+assert build["bulkDistribution"]["freshBlockhashAtSigningBoundary"] is True
+assert build["solanaVestingDefault"]["provider"] == "Jupiter Lock/Vesting"
+assert build["solanaVestingDefault"]["cliffDays"] == 0
+assert build["solanaVestingDefault"]["months"] == 12
+assert build["solanaVestingDefault"]["releases"] == 12
+
+assert fullbuild["schema"] == "WORLDZ-FULLBUILD-V1"
+assert fullbuild["brand"] == "WorldzFullBuild™"
+assert fullbuild["ownerAuthority"]["owner"] == "JayJayTeamDev"
+assert fullbuild["bulkDistributionEngine"]["brand"] == "WorldzBulkDrop™"
+assert fullbuild["bulkDistributionEngine"]["approvalUX"]["noPerTransactionWebPages"] is True
+assert fullbuild["solanaVestingDefault"]["provider"] == "Jupiter Lock/Vesting"
+assert fullbuild["solanaVestingDefault"]["months"] == 12
+assert fullbuild["solanaVestingDefault"]["releases"] == 12
+assert fullbuild["revive"]["devCity"]["candidatesFound"] >= 100
+assert fullbuild["revive"]["devCity"]["targetRecipients"] == 100
+assert fullbuild["revive"]["legacyRevival"]["recipients"] == 216
+assert fullbuild["revive"]["team"]["ownerDirectedWeights"][0]["name"] == "Stepper"
+assert fullbuild["revive"]["team"]["ownerDirectedWeights"][0]["percentOfTeamBucket"] == 40
+assert fullbuild["revive"]["team"]["ownerDirectedWeights"][1]["name"] == "Savage"
+assert fullbuild["revive"]["team"]["ownerDirectedWeights"][1]["percentOfTeamBucket"] == 15
+assert fullbuild["revive"]["giveawayWeek"]["account"] == "@CryptoWorldzX"
 
 pop = contract["voting"]["popularity"]
 gov = contract["voting"]["governance"]
@@ -94,4 +125,5 @@ assert '/vote' not in pop["commandNamespace"]
 assert '/governvote' in gov["commandNamespace"]
 
 print("WORLDZ_FULLSCOPE_VALIDATION=PASS")
-print("chains=8 token_slots=160 popularity=WorldzVotesCentre governance=WorldzGovern mainnet_execution=OFF")
+print("WORLDZ_FULLBUILD_VALIDATION=PASS")
+print("chains=8 token_slots=160 popularity=WorldzVotesCentre governance=WorldzGovern mainnet_execution=OFF bulkdrop=WorldzBulkDrop vesting=Jupiter12xMonthly owner=JayJayTeamDev")
