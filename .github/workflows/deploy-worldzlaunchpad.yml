@@ -138,6 +138,7 @@ jobs:
             root/'genesis/index.html',root/'genesis/app.js',
             root/'mint/index.html',root/'mint/app.js',root/'mint/jupiter-mobile.js',
             root/'trust/index.html',root/'trust/app.js',
+            root/'fullbuild/index.html',root/'fullscope/index.html',
             root/'omnichain/index.html',root/'technology/index.html',root/'technology.html',
             root/'wldz/index.html',root/'wldz/app.js',root/'wldz/launch-config.json',
             root/'worldz-launch/index.html',root/'worldz-launch/campaign.json',root/'worldz-launch/social-pack.json'
@@ -617,6 +618,8 @@ jobs:
                   mint_code,mint_body=get(base+'/mint/?verify=public-v10')
                   jup_bridge_code,jup_bridge_body=get(base+'/mint/jupiter-mobile.js?verify=public-v10')
                   trust_code,trust_body=get(base+'/trust/?verify=trust-v2')
+                  fullbuild_code,fullbuild_body=get(base+'/fullbuild/?verify=fullbuild-v1')
+                  fullscope_code,fullscope_body=get(base+'/fullscope/?verify=fullscope-v1')
                   tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
                   wldz_code,wldz_body=get(base+'/wldz/?verify=wldz-v1')
                   wldz_cfg_code,wldz_cfg_body=get(base+'/wldz/launch-config.json?verify=wldz-v1')
@@ -682,6 +685,10 @@ jobs:
                   assert all(term not in jup_bridge_body for term in banned)
                   assert trust_code==200 and 'WORLDZ TRUST ORBIT' in trust_body and 'PROOF' in trust_body
                   assert all(term not in trust_body for term in banned)
+                  assert fullbuild_code==200 and 'WORLDZFULLBUILD' in fullbuild_body.upper() and 'WorldzFullScope™ is now part of the master build.' in fullbuild_body
+                  assert fullscope_code==200 and 'WorldzFullScope™' in fullscope_body and 'Part of WorldzFullBuild™' in fullscope_body
+                  assert all(term not in fullbuild_body for term in banned)
+                  assert all(term not in fullscope_body for term in banned)
                   assert tech_code==200 and 'WORLDZ TECHNOLOGY & MEANINGS' in tech_body and 'Swap API V2' in tech_body and 'WorldzMINT' in tech_body
                   wldz_cfg=json.loads(wldz_cfg_body)
                   assert wldz_code==200 and 'SOLANA MAINNET • LIVE' in wldz_body
