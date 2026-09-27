@@ -628,5 +628,24 @@
       "Worldz Collaborator",
       "Miracle Church Kitchen and Community Service"
     ]
+  },
+  "worldzApp": {
+    "brand": "WorldzApp™",
+    "contract": "worldzpad-omnichain/fullscope/worldz-app.v1.json",
+    "architecture": "docs/WORLDZAPP-ARCHITECTURE.md",
+    "lifecycle": "CODE_BUILT",
+    "route": "/worldz-app/",
+    "sourcePath": "launchpad.cryptoworldz.xyz/worldz-app/",
+    "role": "UMBRELLA_FIRST_PARTY_APPLICATION",
+    "currentDelivery": "INSTALLABLE_PWA_FOUNDATION",
+    "nativeTargets": [
+      "Android",
+      "iOS"
+    ],
+    "moduleAuthorityIsolation": true,
+    "capabilityDefault": "DENY",
+    "appLevelMainnetBroadcast": false,
+    "worldzMiracleWalletModule": "/miracle-wallet/",
+    "nextEngineeringGate": "READ_ONLY_CHAIN_AND_TREASURY_ADAPTERS"
   }
 }
