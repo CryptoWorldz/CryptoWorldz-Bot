@@ -1,0 +1,62 @@
+{
+  "schema": "WORLDZ-APP-IDENTITY-POLICY-V1",
+  "updatedAt": "2026-09-27",
+  "defaultSessionRole": "GUEST",
+  "defaultWalletState": "CONNECTED_UNVERIFIED_CONTROL",
+  "principles": {
+    "walletConnectionIsIdentityProof": false,
+    "publicAddressIsSecret": false,
+    "publicAddressPersistenceRequiresConsent": true,
+    "challengeSignatureRequiredForControlVerification": true,
+    "telegramIdentityAutomaticallyGrantsWalletAuthority": false,
+    "walletConnectionAutomaticallyGrantsTreasurySignerAuthority": false,
+    "treasurySignerAuthorityRequiresTreasurySpecificVerification": true,
+    "authorityNeverInheritsBetweenTreasuries": true,
+    "authorityNeverInheritsBetweenChains": true
+  },
+  "identityStates": [
+    "GUEST",
+    "PUBLIC_PROFILE",
+    "WALLET_CONNECTED_UNVERIFIED",
+    "WALLET_CONTROL_CHALLENGE_VERIFIED",
+    "TREASURY_SIGNER_CANDIDATE",
+    "TREASURY_SIGNER_VERIFIED"
+  ],
+  "treasurySignerRequirements": [
+    "explicit signer consent",
+    "verified public wallet address",
+    "wallet-control challenge verification when enabled",
+    "treasury-specific signer approval",
+    "actual chain-native multisig membership",
+    "WorldzProof record for enrollment/change"
+  ],
+  "persistence": {
+    "default": "SESSION_ONLY",
+    "sessionStorageAllowed": [
+      "sessionId",
+      "public wallet connection",
+      "provider label",
+      "chain",
+      "selected module",
+      "non-sensitive capability view"
+    ],
+    "localStorageAllowedOnlyWithConsent": [
+      "public wallet address",
+      "preferred public provider label"
+    ],
+    "forbidden": [
+      "seed phrase",
+      "private key",
+      "recovery phrase",
+      "hardware-wallet secret",
+      "wallet unlock password",
+      "raw signing key",
+      "secret API credential"
+    ]
+  },
+  "federation": {
+    "telegram": "FUTURE_OPTIONAL_IDENTITY_LINK__NO_TREASURY_AUTHORITY_INHERITANCE",
+    "email": "FUTURE_OPTIONAL_VERIFIED_CONTACT__NO_WALLET_AUTHORITY",
+    "worldzAccount": "PLANNED_ROLE_AWARE_IDENTITY_LAYER"
+  }
+}
