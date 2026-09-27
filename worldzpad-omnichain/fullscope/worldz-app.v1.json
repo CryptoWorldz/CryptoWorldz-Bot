@@ -134,12 +134,14 @@
     "activityEventSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json",
     "supportedAdapterSlots": 8,
     "providerBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json",
-    "liveReadProof": "CI_WORKFLOW_ADDED__NOT_YET_PASSED",
+    "liveReadProof": "RERUN_PENDING_AFTER_SUI_GRAPHQL_MIGRATION",
     "execution": false,
     "nextGate": "PASS_LIVE_PUBLIC_READ_PROOF_THEN_BIND_PRODUCTION_PROVIDERS",
     "publicVerificationProviders": "OFFICIAL_OR_DOCUMENTED_PUBLIC_ENDPOINTS__DEVELOPMENT_ONLY",
     "productionProviders": "ENV_REQUIRED",
     "liveReadWorkflow": ".github/workflows/worldzapp-live-read-proof.yml",
-    "liveReadScript": "scripts/worldz-app-verify-live-reads.js"
+    "liveReadScript": "scripts/worldz-app-verify-live-reads.js",
+    "suiTransport": "GRAPHQL__JSON_RPC_REMOVED_FROM_PUBLIC_FULLNODE",
+    "transportVerificationRule": "VERIFY_CURRENT_TRANSPORT_LIVE__DO_NOT_ASSUME_HOST_SUPPORTS_LEGACY_PROTOCOL"
   }
 }
