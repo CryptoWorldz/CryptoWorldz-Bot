@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-MULTISIG-APPROVAL-ADAPTERS-V1",
   "updatedAt": "2026-09-27",
-  "state": "CODE_BUILT_APPROVAL_EVIDENCE_FOUNDATION__LIVE_MULTISIG_PROOF_PENDING",
+  "state": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__OTHER_CHAIN_PROFILES_PENDING",
   "mode": "PUBLIC_APPROVAL_STATE_NORMALIZATION_ONLY",
   "signing": false,
   "execution": false,
@@ -12,9 +12,14 @@
       "chain": "solana",
       "system": "Squads Protocol v4",
       "thresholdMode": "COUNT",
-      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
-      "reads": ["members", "threshold", "proposal approvals"],
-      "writes": []
+      "state": "LIVE_PROFILE_PROOF_PASSED__APPROVAL_SUBMISSION_OFF",
+      "reads": [
+        "members",
+        "threshold",
+        "proposal approvals"
+      ],
+      "writes": [],
+      "verifiedProfile": "WLDZ_OPERATIONAL_SQUADS"
     },
     {
       "id": "safe_smart_account",
@@ -22,7 +27,11 @@
       "system": "Safe Smart Account",
       "thresholdMode": "COUNT",
       "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
-      "reads": ["owners", "threshold", "transaction confirmations"],
+      "reads": [
+        "owners",
+        "threshold",
+        "transaction confirmations"
+      ],
       "writes": []
     },
     {
@@ -31,7 +40,11 @@
       "system": "XRPL SignerList",
       "thresholdMode": "WEIGHT",
       "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
-      "reads": ["SignerEntries", "SignerQuorum", "transaction Signers"],
+      "reads": [
+        "SignerEntries",
+        "SignerQuorum",
+        "transaction Signers"
+      ],
       "writes": []
     },
     {
@@ -40,7 +53,12 @@
       "system": "Sui weighted multisig",
       "thresholdMode": "WEIGHT",
       "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
-      "reads": ["public keys", "weights", "threshold", "approval identities"],
+      "reads": [
+        "public keys",
+        "weights",
+        "threshold",
+        "approval identities"
+      ],
       "writes": []
     }
   ],
@@ -51,5 +69,30 @@
     "Private keys, seed phrases, recovery material and raw custody secrets remain forbidden.",
     "The exact simulated unsigned payload hash must remain bound to the approval-review envelope.",
     "Live treasury/multisig proof is required before an adapter is marked LIVE."
-  ]
+  ],
+  "liveProof": {
+    "squadsWldz": {
+      "state": "PASSED",
+      "verifiedAt": "2026-09-27T12:09:21.856Z",
+      "workflowRunId": 36318035477,
+      "proofSha256": "ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0",
+      "worldzProfile": "WLDZ_OPERATIONAL_SQUADS",
+      "network": "mainnet-beta",
+      "multisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+      "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "threshold": 1,
+      "memberCount": 2,
+      "transactionIndex": 20,
+      "proposalIndex": 14,
+      "proposalStatus": "Executed",
+      "proposalPda": "3AxY7YshaCNSyu37hpGRYqwqW2AZs4E6kEZk6SE12kiB",
+      "approvedCount": 1,
+      "thresholdMet": true,
+      "executionAllowed": false,
+      "broadcastAllowed": false,
+      "approvalSubmission": false,
+      "signing": false,
+      "privateMaterialRead": false
+    }
+  }
 }
