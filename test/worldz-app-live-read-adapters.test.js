@@ -36,3 +36,16 @@ test("XRPL and Sui adapters expose read-only contracts",()=>{
     assert.equal(Object.hasOwn(adapter.methods,"sign"),false);
   }
 });
+
+
+test("Sui adapter uses GraphQL health reads",async()=>{
+  const previous=global.fetch;
+  global.fetch=async()=>({ok:true,json:async()=>({data:{chainIdentifier:"sui-mainnet"}})});
+  try{
+    const adapter=suiAdapter({providerUrl:"https://example.invalid/graphql"});
+    const snapshot=await adapter.methods.getHealth();
+    assert.equal(snapshot.data.chainIdentifier,"sui-mainnet");
+    assert.equal(snapshot.data.transport,"GRAPHQL");
+    assert.equal(adapter.execution,false);
+  }finally{global.fetch=previous}
+});
