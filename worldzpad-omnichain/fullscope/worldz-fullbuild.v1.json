@@ -652,8 +652,10 @@
       "adapters": 8,
       "execution": false,
       "providerBindings": "OFFICIAL_PUBLIC_VERIFY_ENDPOINTS_CONFIGURED__PRODUCTION_ENV_REQUIRED",
-      "liveReadProof": "PENDING_CI_VERIFICATION",
-      "liveReadWorkflow": ".github/workflows/worldzapp-live-read-proof.yml"
+      "liveReadProof": "RERUN_PENDING_AFTER_SUI_GRAPHQL_MIGRATION",
+      "liveReadWorkflow": ".github/workflows/worldzapp-live-read-proof.yml",
+      "sui": "GRAPHQL_MIGRATED_AFTER_LIVE_JSON_RPC_DEPRECATION_PROOF",
+      "protocolRegressionRule": "ENDPOINT_HOST_EXISTENCE_IS_NOT_PROTOCOL_SUPPORT__LIVE_VERIFY_TRANSPORT"
     }
   }
 }
