@@ -1,0 +1,24 @@
+{
+  "schema": "WORLDZ-APP-PLAY-REVIEW-ACCESS-V1",
+  "updatedAt": "2026-09-27",
+  "state": "FOUNDATION_BUILT__RECHECK_BEFORE_SUBMISSION",
+  "publicCoreAccess": {
+    "requiresWorldzAccount": false,
+    "requiresWallet": false,
+    "requiresPayment": false,
+    "reviewerCanOpenCoreWithoutSpecialAccess": true
+  },
+  "restrictedFeatures": {
+    "privilegedWorldzRoles": "NOT_LIVE_FOR_PUBLIC_EXECUTION",
+    "treasuryApprovalSubmission": false,
+    "transactionSigning": false,
+    "mainnetBroadcast": false
+  },
+  "submissionRule": "If any release functionality is restricted by login, membership, geography, wallet state, subscription or other authentication, provide Google Play with durable reusable review access and English instructions. Never provide a production user's credentials.",
+  "reviewerNotesDraft": [
+    "WorldzApp is non-custodial. Reviewers do not need to provide a seed phrase or private key.",
+    "Public modules and security status can be inspected without connecting a wallet.",
+    "Wallet connection is optional and currently used for public address/network association only.",
+    "Gated treasury actions must be described as gated and must not be represented as executable when they are not."
+  ]
+}

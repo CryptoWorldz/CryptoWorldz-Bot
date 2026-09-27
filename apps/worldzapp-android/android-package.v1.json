@@ -2,7 +2,7 @@
   "schema": "WORLDZ-APP-ANDROID-PACKAGE-V1",
   "updatedAt": "2026-09-27",
   "product": "WorldzApp™",
-  "state": "CODE_BUILT_ANDROID_API36_PACKAGING_FOUNDATION__AAB_NOT_RELEASED",
+  "state": "CODE_BUILT_ANDROID_API36_PACKAGING_AND_PLAY_READINESS_FOUNDATION__AAB_NOT_RELEASED",
   "packaging": {
     "technology": "TRUSTED_WEB_ACTIVITY",
     "generator": "Bubblewrap",
@@ -33,7 +33,12 @@
     "playListingCreated": false,
     "publicReleaseAuthorized": false,
     "mainnetBroadcastEnabledByAndroidPackage": false,
-    "privateKeyOrSeedPhraseBundled": false
+    "privateKeyOrSeedPhraseBundled": false,
+    "playReadinessFoundationBuilt": true,
+    "privacyPolicyFinalized": false,
+    "dataSafetyFinalized": false,
+    "financialFeaturesDeclarationFinalized": false,
+    "reviewAccessFinalized": false
   },
   "assetGates": {
     "officialCenterLogoRasterReady": false,
@@ -48,22 +53,27 @@
   "inheritedWorldzSecurity": {
     "stage4bLiveSimulationProof": "PASSED",
     "stage5bLiveSquadsProfileProof": "PASSED",
-    "safeLiveProfile": "GATED",
-    "xrplLiveProfile": "GATED",
-    "suiLiveProfile": "GATED",
+    "safeLiveProfile": "WORLDZ_PROFILE_REQUIRED",
+    "xrplLiveProfile": "WORLDZ_PROFILE_REQUIRED",
+    "suiLiveProfile": "WORLDZ_PROFILE_REQUIRED",
     "approvalSubmission": false,
     "signing": false,
     "execution": false,
-    "broadcast": false
+    "broadcast": false,
+    "stage5cMultichainHarness": "BUILT"
   },
   "nextGates": [
     "LOCK_ANDROID_APPLICATION_ID_BEFORE_PLAY_APP_CREATION",
-    "ADD_APPROVED_CENTER_LOGO_ANDROID_ASSETS",
-    "GENERATE_UNSIGNED_API36_TWA_PROJECT",
-    "VERIFY_DIGITAL_ASSET_LINKS_AFTER_SIGNING_IDENTITY_EXISTS",
-    "BUILD_SIGNED_AAB_WITH_SECRET_SIGNING_MATERIAL_OUTSIDE_REPOSITORY",
-    "ANDROID_DEVICE_QA",
+    "ADD_OWNER_APPROVED_CENTER_LOGO_512_AND_MASKABLE_ASSETS",
+    "VERIFY_PLAY_DEVELOPER_IDENTITY_AND_ACCOUNT_REQUIREMENTS",
+    "FINALIZE_PUBLIC_SUPPORT_AND_PRIVACY_POLICY_URLS",
+    "FINAL_RUNTIME_DATA_SAFETY_AND_FINANCIAL_FEATURES_AUDIT",
+    "CONFIGURE_PLAY_APP_SIGNING",
+    "PUBLISH_DIGITAL_ASSET_LINKS_FROM_REAL_PLAY_CERTIFICATE",
+    "GENERATE_AND_BUILD_RELEASE_AAB_WITH_SIGNING_SECRETS_OUTSIDE_REPOSITORY",
+    "ANDROID_DEVICE_ACCESSIBILITY_AND_WALLET_HANDOFF_QA",
     "PLAY_INTERNAL_OR_CLOSED_TESTING",
-    "PLAY_POLICY_AND_DATA_SAFETY_REVIEW"
-  ]
+    "FINAL_PLAY_CONSOLE_DECLARATIONS_AND_HUMAN_RELEASE_AUTHORIZATION"
+  ],
+  "playReleaseContract": "apps/worldzapp-android/play-release.v1.json"
 }

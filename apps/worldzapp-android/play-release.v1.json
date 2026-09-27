@@ -1,0 +1,109 @@
+{
+  "schema": "WORLDZ-APP-GOOGLE-PLAY-RELEASE-V1",
+  "updatedAt": "2026-09-27",
+  "product": "WorldzApp™",
+  "state": "CODE_BUILT_PLAY_READINESS_GATES__SUBMISSION_NOT_READY",
+  "submissionReady": false,
+  "publicReleaseAuthorized": false,
+  "android": {
+    "applicationId": "xyz.cryptoworldz.worldzapp",
+    "applicationIdState": "PROVISIONAL_UNTIL_PLAY_APP_CREATED",
+    "targetSdk": 36,
+    "compileSdk": 36,
+    "releaseFormat": "ANDROID_APP_BUNDLE_AAB",
+    "packaging": "TRUSTED_WEB_ACTIVITY",
+    "sourcePwa": "https://launchpad.cryptoworldz.xyz/worldz-app/"
+  },
+  "playRequirements": {
+    "targetApi": {
+      "state": "BUILT",
+      "requiredMinimumForNewMobileAppsFrom2026_08_31": 36
+    },
+    "developerIdentity": {
+      "state": "REQUIRED_PENDING",
+      "rule": "Developer and linked Play Console identity information must be verified before submission."
+    },
+    "playAppSigning": {
+      "state": "REQUIRED_PENDING",
+      "repositoryMayContainSigningSecrets": false
+    },
+    "digitalAssetLinks": {
+      "state": "REQUIRED_PENDING",
+      "requiredHostPath": "https://launchpad.cryptoworldz.xyz/.well-known/assetlinks.json",
+      "requiresPlayAppSigningSha256Fingerprint": true
+    },
+    "privacyPolicy": {
+      "state": "REQUIRED_PENDING_PUBLIC_URL",
+      "draft": "apps/worldzapp-android/privacy-policy.draft.md"
+    },
+    "dataSafety": {
+      "state": "REQUIRED_PENDING_FINAL_RUNTIME_AND_SDK_AUDIT",
+      "inventory": "apps/worldzapp-android/play-data-safety.v1.json"
+    },
+    "financialFeaturesDeclaration": {
+      "state": "REQUIRED_PENDING_FINAL_CONFIRMATION",
+      "inventory": "apps/worldzapp-android/play-financial-features.v1.json"
+    },
+    "appAccess": {
+      "state": "FOUNDATION_BUILT",
+      "inventory": "apps/worldzapp-android/play-review-access.v1.json"
+    },
+    "adsDeclaration": {
+      "state": "REQUIRED_PENDING_FINAL_RUNTIME_AUDIT"
+    },
+    "targetAudience": {
+      "state": "REQUIRED_PENDING_PLAY_CONSOLE"
+    },
+    "contentRating": {
+      "state": "REQUIRED_PENDING_PLAY_CONSOLE"
+    },
+    "accountDeletion": {
+      "state": "CONDITIONAL",
+      "rule": "If any shipped WorldzApp flow enables creation of a Worldz-hosted app account, an in-app deletion path and public web deletion resource are required before submission."
+    },
+    "testingTrack": {
+      "state": "REQUIRED_ACCOUNT_DEPENDENT",
+      "rule": "Use internal/closed testing before production. New personal developer accounts created after 2023-11-13 have additional closed-testing production-access requirements."
+    },
+    "storeListing": {
+      "state": "DRAFT_BUILT",
+      "inventory": "apps/worldzapp-android/play-store-listing.v1.json"
+    },
+    "jurisdictionDistributionReview": {
+      "state": "REQUIRED_BEFORE_COUNTRY_SELECTION",
+      "rule": "Crypto/financial functionality and local requirements must be reviewed for each selected distribution jurisdiction."
+    }
+  },
+  "worldzSecurity": {
+    "stage4bSimulationProof": "PASSED",
+    "stage5bSquadsWldzProof": "PASSED",
+    "stage5cHarness": "BUILT",
+    "safeWorldzProfile": "WORLDZ_PROFILE_REQUIRED",
+    "xrplWorldzProfile": "WORLDZ_PROFILE_REQUIRED",
+    "suiWorldzProfile": "WORLDZ_PROFILE_REQUIRED",
+    "approvalSubmission": false,
+    "transactionSigning": false,
+    "transactionExecution": false,
+    "mainnetBroadcast": false,
+    "seedPhraseCollection": false,
+    "privateKeyCollection": false
+  },
+  "releaseBlockers": [
+    "FINAL_APPLICATION_ID_LOCK",
+    "OWNER_APPROVED_CENTER_LOGO_512_AND_MASKABLE_ASSETS",
+    "VERIFIED_PLAY_DEVELOPER_IDENTITY",
+    "PUBLIC_SUPPORT_CONTACT",
+    "PUBLIC_PRIVACY_POLICY_URL",
+    "FINAL_DATA_SAFETY_AUDIT_AND_PLAY_FORM",
+    "FINAL_FINANCIAL_FEATURES_DECLARATION",
+    "ADS_TARGET_AUDIENCE_AND_CONTENT_RATING_DECLARATIONS",
+    "PLAY_APP_SIGNING_CONFIGURATION",
+    "PLAY_APP_SIGNING_CERT_SHA256",
+    "DEPLOYED_DIGITAL_ASSET_LINKS",
+    "SIGNED_AAB",
+    "ANDROID_DEVICE_AND_ACCESSIBILITY_QA",
+    "PLAY_TESTING_TRACK_REQUIREMENTS",
+    "STORE_LISTING_ASSETS_AND_SCREENSHOTS",
+    "FINAL_HUMAN_RELEASE_AUTHORIZATION"
+  ]
+}

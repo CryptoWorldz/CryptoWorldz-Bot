@@ -1,0 +1,59 @@
+{
+  "schema": "WORLDZ-APP-PLAY-DATA-SAFETY-INVENTORY-V1",
+  "updatedAt": "2026-09-27",
+  "state": "PRE_SUBMISSION_INVENTORY__FINAL_AUDIT_REQUIRED",
+  "finalPlayFormReady": false,
+  "currentCore": {
+    "worldzHostedAccountCreation": false,
+    "walletCustody": "EXTERNAL_NON_CUSTODIAL",
+    "sessionOnlyByDefault": true,
+    "knownSessionData": [
+      "public wallet address",
+      "wallet provider label",
+      "selected network/chain",
+      "public role/capability view",
+      "selected treasury profile"
+    ],
+    "persistentPublicWalletAddress": "ONLY_AFTER_EXPLICIT_USER_CONSENT",
+    "permittedServerCoordinationData": [
+      "public wallet address with consent",
+      "signer consent/status",
+      "treasury public identifiers",
+      "proposal identifiers",
+      "approval proof references",
+      "transaction hashes",
+      "WorldzProof receipts",
+      "audit timestamps"
+    ],
+    "forbiddenData": [
+      "seed phrase",
+      "private key",
+      "recovery phrase",
+      "hardware wallet secret",
+      "wallet unlock password",
+      "exported signing key"
+    ]
+  },
+  "requiredFinalAudit": [
+    "all production analytics and telemetry",
+    "server/CDN request logging and retention",
+    "all first-party Worldz modules reachable in the shipped app",
+    "all third-party SDKs and wallet/provider integrations",
+    "crash reporting",
+    "push notifications if later enabled",
+    "authentication/identity flows if later enabled",
+    "data sharing with providers",
+    "encryption in transit and deletion/retention practices"
+  ],
+  "accountDeletionGate": {
+    "requiredNow": false,
+    "reason": "Current WorldzApp core does not create a Worldz-hosted user account.",
+    "becomesRequiredIf": "A shipped flow allows creation of a Worldz-hosted app account.",
+    "requiredThen": [
+      "readily discoverable in-app deletion request path",
+      "public web deletion request resource",
+      "associated account-data deletion subject to documented lawful retention"
+    ]
+  },
+  "rule": "Never submit a Data safety form from this inventory alone. Re-audit the exact production bundle, PWA, server behavior and third-party integrations immediately before Play submission."
+}

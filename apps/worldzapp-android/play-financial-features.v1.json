@@ -1,0 +1,42 @@
+{
+  "schema": "WORLDZ-APP-PLAY-FINANCIAL-FEATURES-V1",
+  "updatedAt": "2026-09-27",
+  "state": "DECLARATION_REQUIRED__FINAL_SELECTION_PENDING_EXACT_RELEASE_FEATURES",
+  "financialFeaturesFormRequired": true,
+  "expectedSelectionsForCurrentCore": [
+    {
+      "playCategory": "Cryptocurrency wallet",
+      "state": "EXPECTED_IF_EXTERNAL_WALLET_CONNECTION_SHIPS",
+      "worldzBehavior": "Non-custodial connection to external wallets; WorldzApp does not collect seed phrases or private keys."
+    }
+  ],
+  "conditionalSelectionsToRecheck": [
+    {
+      "playCategory": "Rewards, points, frequent flier miles, and other incentives",
+      "condition": "Select if the submitted app directly exposes qualifying Worldz points/reward functionality."
+    },
+    {
+      "playCategory": "Tokenized digital asset sales, trading, and awards",
+      "condition": "Select only if qualifying tokenized-asset functionality is directly present in the submitted release."
+    },
+    {
+      "playCategory": "Crowdfunding and chit funds",
+      "condition": "Review only if a shipped contribution/fundraising flow falls within Google's definition."
+    },
+    {
+      "playCategory": "Cryptocurrency exchange",
+      "condition": "Do not select merely because wallets connect. Reassess if exchange/trading execution is later shipped."
+    }
+  ],
+  "currentExecutionTruth": {
+    "custodialWallet": false,
+    "seedPhraseCollection": false,
+    "privateKeyCollection": false,
+    "automaticSwap": false,
+    "automaticInvestment": false,
+    "mainnetAppBroadcast": false,
+    "financialAdviceClaim": false
+  },
+  "jurisdictionRule": "Distribution countries must be reviewed against current Google Play and local financial/crypto requirements before they are selected in Play Console.",
+  "rule": "The Play Console declaration must match the exact submitted release, not future roadmap features."
+}

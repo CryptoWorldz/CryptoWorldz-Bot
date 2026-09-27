@@ -1,0 +1,47 @@
+name: WorldzApp Google Play Readiness
+
+on:
+  pull_request:
+    paths:
+      - 'apps/worldzapp-android/**'
+      - 'docs/WORLDZAPP-GOOGLE-PLAY-RELEASE.md'
+      - 'tools/verify-worldzapp-play-readiness.js'
+      - 'tools/verify-worldzapp-android-package.js'
+      - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/config.json'
+      - 'package.json'
+      - '.github/workflows/verify-worldzapp-google-play-readiness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-play-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check Play readiness verifier
+        run: node --check tools/verify-worldzapp-play-readiness.js
+      - name: Verify existing Android API 36 foundation
+        run: npm run verify:worldzapp:android
+      - name: Verify Google Play fail-closed readiness contract
+        run: npm run verify:worldzapp:play
+      - name: Parse Play JSON contracts
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const paths=[
+            'apps/worldzapp-android/play-release.v1.json',
+            'apps/worldzapp-android/play-data-safety.v1.json',
+            'apps/worldzapp-android/play-financial-features.v1.json',
+            'apps/worldzapp-android/play-review-access.v1.json',
+            'apps/worldzapp-android/play-store-listing.v1.json'
+          ];
+          for(const path of paths) JSON.parse(fs.readFileSync(path,'utf8'));
+          console.log('WORLDZAPP_PLAY_JSON_CONTRACTS=PASS');
+          NODE
