@@ -502,7 +502,8 @@
       "RECAP",
       "WorldzProof™",
       "Legacy Flywheel™",
-      "Worldz Treasury"
+      "Worldz Treasury",
+      "WorldzAUTO Buy-Only™"
     ],
     "fullScope": {
       "required": true,
@@ -799,6 +800,22 @@
       "JUPITER_VRFD_HANDOFF",
       "DEXSCREENER_PAIR_AND_IDENTITY_PARITY",
       "WORLDZPROOF_RELEASE_RECEIPT"
-    ]
+    ],
+    "autoBuyOnly": "REQUIRED_FOR_APPROVED_AUTO_BOOTSTRAP_BUYS__BUY_ONLY__ONE_SHOT__FAIL_CLOSED__NO_PROVIDER_SCORE_GAMING"
+  },
+  "autoBuyOnly": {
+    "brand": "WorldzAUTO Buy-Only™",
+    "standard": "docs/WORLDZ-AUTO-BUY-ONLY-STANDARD.md",
+    "contract": "worldzpad-omnichain/fullscope/worldz-auto-buy-only.v1.json",
+    "lifecycle": "CODE_SPEC_FOUNDATION__MAINNET_OFF_BY_DEFAULT",
+    "reusableDefault": true,
+    "allowedSide": "BUY",
+    "autoSell": false,
+    "launchBootstrap": "ONE_SHOT_BUY__CONFIRM_THEN_DISARM",
+    "executionRule": "PREPARE_ONLY_DISARMED_BY_DEFAULT__TOKEN_SPECIFIC_BUDGET_LIMITS_AND_EXTERNAL_SIGNATURE_OR_MULTISIG_APPROVAL_REQUIRED",
+    "marketIntegrity": "NO_WASH_TRADING__NO_SELF_TRADING__NO_VOLUME_HOLDER_MAKER_TRENDING_OR_ORGANIC_SCORE_GAMING",
+    "dexScreener": "LEGITIMATE_POOL_TRANSACTION_MAY_SATISFY_AUTOMATIC_LISTING_PREREQUISITE__PROVIDER_INDEXING_OBSERVED_NOT_ASSUMED",
+    "jupiter": "ORGANIC_SCORE_IS_POST_LAUNCH_OBSERVED_SIGNAL__NO_BLOCK_ZERO_GUARANTEE__AUTOMATED_ACTIVITY_NOT_DESCRIBED_AS_ORGANIC",
+    "mrcl": "INHERITS__AUD_200_TARGET_REAL_SOL_FIRST_BUY__EXACT_SOL_BOUND_AT_TRANSACTION_REVIEW__NO_AUTO_SELL"
   }
 }
