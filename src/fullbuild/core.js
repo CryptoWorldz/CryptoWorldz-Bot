@@ -30,6 +30,11 @@ function validateFullBuildContract(contract = loadContract()) {
   if (!pop || !gov || pop.governanceAuthority !== false || gov.popularityRankingEffect !== false) throw new Error("Voting separation invalid.");
   const execution = contract.executionIntegration || {};
   if (execution.fullScopeMainnetDefault !== false || execution.externalWalletSignatureRequired !== true || execution.telegramPrivateKeyCustody !== false) throw new Error("FullBuild execution boundary invalid.");
+  const auto = contract.autoBuyOnlySystem || {};
+  if (auto.required !== true || auto.buyOnly !== true || auto.sellAutomation !== false) throw new Error("Worldz AUTO Buy-Only contract is not locked.");
+  if (auto.fundingAsset !== "SOL" || auto.randomizedExecution !== false || auto.automaticMainnetEnable !== false) throw new Error("Worldz AUTO execution policy invalid.");
+  if (auto.legacyAssetsRequired !== 10 || auto.futureWorldzLaunchPadAutoRegistration !== true || auto.realContractRequiredBeforeExecution !== true) throw new Error("Worldz AUTO inheritance policy invalid.");
+  if (auto.privateKeysInTelegramOrDatabase !== false || auto.explicitWalletAllowlistRequired !== true) throw new Error("Worldz AUTO wallet boundary invalid.");
   return true;
 }
 
@@ -42,7 +47,9 @@ function summary() {
     tokensPerChain: contract.architecture.fullScope.maxTokensPerChain,
     capacity: contract.architecture.fullScope.initialTokenEnvironmentCapacity,
     projectInheritance: contract.projectWideIntegration.currentDirectiveState,
-    worldzLinks: contract.commandPaths.worldzLinks
+    worldzLinks: contract.commandPaths.worldzLinks,
+    autoBuyOnly: contract.autoBuyOnlySystem.buyOnly,
+    autoFundingAsset: contract.autoBuyOnlySystem.fundingAsset
   };
 }
 
