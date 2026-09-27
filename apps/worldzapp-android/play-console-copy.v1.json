@@ -8,5 +8,22 @@
   "privacyPolicy": "https://launchpad.cryptoworldz.xyz/worldz-app/privacy/",
   "supportWebsite": "https://launchpad.cryptoworldz.xyz/worldz-app/support/",
   "developerEmail": "PENDING_DEDICATED_WORLDZAPP_PUBLIC_SUPPORT_EMAIL",
-  "finalReviewRule": "Copy must be rechecked against the exact signed AAB and production PWA immediately before submission."
+  "finalReviewRule": "Copy must be rechecked against the exact signed AAB and production PWA immediately before submission.",
+  "commercialModel": {
+    "priceAud": 2.5,
+    "purchaseType": "ONE_TIME_PAID_APP",
+    "proceedsAllocationBasis": "NET_APP_SALE_PROCEEDS_AFTER_PLATFORM_FEES_TAXES_REFUNDS_AND_PAYMENT_ADJUSTMENTS",
+    "publicWording": "WorldzApp™ is a one-time A$2.50 purchase. After applicable platform fees, taxes, refunds and payment adjustments, Worldz intends to allocate net app-sale proceeds 50/50: 50% toward future Worldz ecosystem liquidity provisioning and 50% toward WorldzApp development, infrastructure and ongoing operations. Purchasing WorldzApp does not purchase tokens, LP ownership, an investment interest, revenue share, or any right to financial returns.",
+    "allocation": {
+      "futureWorldzEcosystemLiquidityProvisioningPercent": 50,
+      "worldzAppDevelopmentInfrastructureOperationsPercent": 50
+    },
+    "purchaserEntitlements": {
+      "tokens": false,
+      "lpOwnership": false,
+      "investmentInterest": false,
+      "revenueShare": false,
+      "financialReturns": false
+    }
+  }
 }
