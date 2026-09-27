@@ -78,3 +78,12 @@ WorldDexPush™ keeps Worldz-owned identity separate from third-party provider s
 - Golden Ticker: Worldz records the provider threshold as 500+ active Boosts; 75 points is not treated as sufficient.
 - WorldzSpecial: proposal only until DEX Screener explicitly agrees in writing. No partnership or endorsement is inferred.
 
+## Historical engineering references
+
+WorldzFullBuild™ preserves selected historical build records where they materially explain why current safeguards exist.
+
+- **WLDZ Origin Reference — How WORLDZ #001 Started:** `docs/WLDZ-ORIGIN-REFERENCE-HOW-WORLDZ-STARTED.md`
+  - Classification: **HISTORICAL REFERENCE / ORIGIN RECORD**
+  - Covers the early 100M test architecture, 25/25/25/25 model, Meteora DAMM v2 `OnlyB` / quote-side fee experiment, AUTO/HODL/LP/burn/Charity execution proofs, and fail-closed pre-mainnet preparation.
+  - It is **not** current token identity or economics authority. The current canonical WLDZ mint and active WorldzFullBuild contracts override it wherever later work differs.
+
