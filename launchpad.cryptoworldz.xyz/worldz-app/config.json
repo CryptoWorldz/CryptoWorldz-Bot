@@ -128,5 +128,26 @@
     "providerBindings": "NOT_CONFIGURED",
     "liveReadProof": "NOT_RUN",
     "execution": false
+  },
+  "identitySessionFoundation": {
+    "state": "CODE_BUILT",
+    "identityPolicy": "/worldz-app/core/identity-policy.json",
+    "sessionSchema": "/worldz-app/core/session.schema.json",
+    "browserStorage": "SESSION_ONLY_BY_DEFAULT",
+    "walletConnectionIsIdentityProof": false,
+    "walletConnectionGrantsTreasuryAuthority": false
+  },
+  "walletConnectionFoundation": {
+    "state": "CODE_BUILT_PUBLIC_CONNECTION_CORE",
+    "registry": "/worldz-app/core/wallet-connection-registry.json",
+    "browserCore": "/worldz-app/connections.js",
+    "evm": "EIP_6963_DISCOVERY__EIP_1193_PUBLIC_ACCOUNT_CONNECTION",
+    "solana": "INJECTED_FALLBACK_BUILT__WALLET_STANDARD_AND_MOBILE_STANDARD_NEXT",
+    "walletConnect": "SDK_AND_PROJECT_CONFIGURATION_NEXT",
+    "xrpl": "XAMAN_INTEGRATION_PLANNED",
+    "sui": "DAPP_KIT_V2_INTEGRATION_PLANNED",
+    "worldzCard": "TANGEM_VIA_WALLETCONNECT_RESEARCH_PATH",
+    "signingEnabled": false,
+    "broadcastEnabled": false
   }
 }
