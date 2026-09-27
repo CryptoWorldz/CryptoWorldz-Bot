@@ -1,0 +1,34 @@
+{
+  "name": "WorldzApp™",
+  "short_name": "WorldzApp",
+  "description": "First-party Worldz ecosystem app foundation.",
+  "id": "/worldz-app/",
+  "start_url": "/worldz-app/",
+  "scope": "/worldz-app/",
+  "display": "standalone",
+  "background_color": "#05020b",
+  "theme_color": "#6d28d9",
+  "categories": [
+    "finance",
+    "utilities",
+    "social"
+  ],
+  "shortcuts": [
+    {
+      "name": "Treasury",
+      "url": "/miracle-wallet/"
+    },
+    {
+      "name": "LaunchPad",
+      "url": "/"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/worldz-app/worldz-app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

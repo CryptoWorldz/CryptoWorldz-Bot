@@ -1,0 +1,123 @@
+{
+  "schema": "WORLDZ-APP-V1",
+  "brand": "WorldzApp™",
+  "parent": "WorldzFullBuild™",
+  "updatedAt": "2026-09-27",
+  "lifecycle": "CODE_BUILT_FOUNDATION",
+  "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
+  "delivery": {
+    "current": "INSTALLABLE_PWA_FOUNDATION",
+    "targets": [
+      "Android",
+      "iOS"
+    ],
+    "nativePackaging": "PLANNED_AFTER_SECURITY_AND_WALLET_ADAPTER_GATES"
+  },
+  "principles": {
+    "oneInterface": true,
+    "onePrivateKeyForAllChains": false,
+    "externalWalletCustody": true,
+    "denyByDefaultCapabilities": true,
+    "perModuleAuthorityIsolation": true,
+    "perChainReleaseGates": true,
+    "noSeedPhraseCollection": true,
+    "noPrivateKeyCollection": true,
+    "worldzProofForValueMovement": true
+  },
+  "modules": [
+    {
+      "id": "home",
+      "brand": "WorldzApp Home",
+      "state": "CODE_BUILT",
+      "route": "/worldz-app/",
+      "authority": "READ_ONLY"
+    },
+    {
+      "id": "treasury",
+      "brand": "WorldzMiracleWallet™",
+      "state": "CODE_BUILT_FOUNDATION",
+      "route": "/miracle-wallet/",
+      "authority": "DRAFT_ONLY_NO_MAINNET"
+    },
+    {
+      "id": "launchpad",
+      "brand": "WorldzLaunchPad™",
+      "state": "EXISTING_SURFACE",
+      "route": "/",
+      "authority": "CHAIN_BY_CHAIN_GATED"
+    },
+    {
+      "id": "command",
+      "brand": "ZED LED Command Centre MAX™",
+      "state": "EXISTING_SURFACE",
+      "route": "https://cryptoworldz.xyz/command-centre-max/",
+      "authority": "ROLE_GATED"
+    },
+    {
+      "id": "fullbuild",
+      "brand": "WorldzFullBuild™",
+      "state": "EXISTING_SURFACE",
+      "route": "/fullbuild/",
+      "authority": "READ_ONLY"
+    },
+    {
+      "id": "fullscope",
+      "brand": "WorldzFullScope™",
+      "state": "EXISTING_SURFACE",
+      "route": "/fullscope/",
+      "authority": "CONTROLLED_ACTION_INTENTS"
+    },
+    {
+      "id": "votes",
+      "brand": "Worldz Votes Centre™",
+      "state": "INTEGRATION_PLANNED",
+      "route": null,
+      "authority": "POPULARITY_ONLY"
+    },
+    {
+      "id": "govern",
+      "brand": "WorldzGovern™",
+      "state": "INTEGRATION_PLANNED",
+      "route": null,
+      "authority": "DAO_GOVERNANCE_ONLY"
+    },
+    {
+      "id": "linkz",
+      "brand": "WorldzLinkz™",
+      "state": "EXISTING_SURFACE",
+      "route": "https://cryptoworldz.xyz/worldzlinkz/",
+      "authority": "READ_ONLY"
+    },
+    {
+      "id": "proof",
+      "brand": "WorldzProof™",
+      "state": "FOUNDATION",
+      "route": null,
+      "authority": "PROOF_AND_AUDIT"
+    },
+    {
+      "id": "impact",
+      "brand": "OneWorldz / DonateWorldz",
+      "state": "INTEGRATION_PLANNED",
+      "route": null,
+      "authority": "HUMANITARIAN_SEPARATE_FROM_CRYPTO_CUSTODY"
+    }
+  ],
+  "appSecurity": {
+    "mainnetBroadcastEnabled": false,
+    "automaticBridgeEnabled": false,
+    "automaticInvestmentEnabled": false,
+    "automaticSwapEnabled": false,
+    "transactionReviewRequired": true,
+    "simulationRequiredBeforeSigning": true,
+    "signerThresholdRequiredForTreasury": true
+  },
+  "sourcePaths": {
+    "web": "launchpad.cryptoworldz.xyz/worldz-app/",
+    "architecture": "docs/WORLDZAPP-ARCHITECTURE.md",
+    "capabilities": "launchpad.cryptoworldz.xyz/worldz-app/core/capability-registry.json",
+    "treasuryProfiles": "launchpad.cryptoworldz.xyz/worldz-app/core/treasury-profiles.json",
+    "proposalSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/proposal.schema.json",
+    "proofSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/worldzproof.schema.json"
+  }
+}

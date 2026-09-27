@@ -1,0 +1,47 @@
+{
+  "schema": "WORLDZ-APP-TREASURY-PROFILES-V1",
+  "profiles": [
+    {
+      "id": "miracle-church",
+      "label": "Miracle Church Treasury",
+      "token": "MRCL",
+      "allocationPercent": 20,
+      "governance": {
+        "threshold": 4,
+        "signers": 10,
+        "display": "4-of-10"
+      },
+      "custody": {
+        "solana": "Squads",
+        "evm": "Safe where separately approved",
+        "xrpl": "SignerList",
+        "sui": "Native weighted multisig"
+      },
+      "state": "NOT_DEPLOYED",
+      "mainnetExecution": false
+    },
+    {
+      "id": "worldz-operations",
+      "label": "Worldz Operations Treasury",
+      "governance": {
+        "threshold": 5,
+        "signers": 10,
+        "display": "5-of-10"
+      },
+      "state": "ROLLOUT_PENDING",
+      "mainnetExecution": false
+    },
+    {
+      "id": "worldz-reserve",
+      "label": "Worldz Reserve Treasury",
+      "governance": {
+        "threshold": 6,
+        "signers": 9,
+        "display": "6-of-9"
+      },
+      "state": "NOT_DEPLOYED",
+      "mainnetExecution": false
+    }
+  ],
+  "rule": "Treasury membership and authority never silently inherit between profiles."
+}

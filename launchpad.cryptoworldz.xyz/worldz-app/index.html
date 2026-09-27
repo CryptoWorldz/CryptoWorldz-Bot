@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#6d28d9">
+  <meta name="description" content="WorldzApp™ — one first-party interface for Worldz treasury, launch, command, proof and ecosystem modules.">
+  <title>WorldzApp™ | One Worldz. One App.</title>
+  <link rel="manifest" href="/worldz-app/manifest.webmanifest">
+  <link rel="icon" href="/worldz-app/worldz-app-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/worldz-app/style.css?v=20260927-1">
+</head>
+<body>
+  <header class="topbar">
+    <a class="app-brand" href="#top"><span class="brand-mark">W</span><span><b>WorldzApp™</b><small>WorldzFullBuild™ application layer</small></span></a>
+    <div class="actions">
+      <span id="core-state" class="state">Loading core…</span>
+      <button id="install-app" class="btn ghost" type="button" hidden>Install App</button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">WORLDZFULLBUILD™ • FIRST-PARTY APP FOUNDATION</span>
+        <h1>ONE WORLDZ.<br><span>ONE APP.</span></h1>
+        <p>WorldzApp™ is the umbrella application for the Worldz ecosystem. Every module can share navigation, identity, proof and status while keeping its own permissions, treasury authority and chain security.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="/miracle-wallet/">Open WorldzMiracleWallet™</a>
+          <a class="btn" href="/">Open WorldzLaunchPad™</a>
+        </div>
+        <div class="truth">
+          <span><b>External custody</b> — no Worldz private-key vault</span>
+          <span><b>Deny by default</b> — modules get only approved capabilities</span>
+          <span><b>Chain-native</b> — one UI does not mean one universal address</span>
+          <span><b>Mainnet app broadcast OFF</b> — execution remains separately gated</span>
+        </div>
+      </div>
+      <aside class="core-card">
+        <span>WORLDZAPP CORE</span>
+        <strong id="module-count">—</strong>
+        <small>registered modules</small>
+        <div class="core-grid">
+          <div><b id="treasury-count">—</b><span>Treasury profiles</span></div>
+          <div><b id="chain-count">—</b><span>Chain families</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <nav class="tabs" aria-label="WorldzApp sections">
+      <button class="tab active" data-panel="modules">Modules</button>
+      <button class="tab" data-panel="treasuries">Treasuries</button>
+      <button class="tab" data-panel="security">Security</button>
+      <button class="tab" data-panel="roadmap">Native App</button>
+    </nav>
+
+    <section id="modules" class="panel active">
+      <div class="section-head"><span>MODULE REGISTRY</span><h2>One app shell. Separate authority.</h2><p>These modules are registered in the WorldzApp contract. An app tile never grants signing or financial authority by itself.</p></div>
+      <div id="module-grid" class="grid"></div>
+    </section>
+
+    <section id="treasuries" class="panel">
+      <div class="section-head"><span>TREASURY PROFILES</span><h2>Governance remains profile-specific.</h2><p>Signer membership in one treasury does not silently make a person a signer of another treasury.</p></div>
+      <div id="treasury-grid" class="grid"></div>
+    </section>
+
+    <section id="security" class="panel">
+      <div class="section-head"><span>CAPABILITY FIREWALL</span><h2>Deny unless explicitly enabled.</h2><p>WorldzApp core can coordinate modules without becoming a master key. Mainnet actions remain gated at the module, treasury and blockchain level.</p></div>
+      <div class="security-layout">
+        <div id="security-list" class="security-list"></div>
+        <article class="guard-card">
+          <span>NON-NEGOTIABLE</span>
+          <h3>WorldzApp never asks for:</h3>
+          <ul><li>Seed phrase</li><li>Private key</li><li>Recovery words</li><li>A universal key shared across blockchains</li></ul>
+          <p>Wallet signing stays with the connected wallet, hardware device or native multisig system.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="roadmap" class="panel">
+      <div class="section-head"><span>WORLDZAPP NATIVE ROADMAP</span><h2>Web foundation → tested mobile app.</h2></div>
+      <div class="roadmap">
+        <article><b>01</b><h3>Shared Core</h3><p>Module registry, capabilities, treasury profiles, proposal schema and WorldzProof.</p><span class="done">BUILT</span></article>
+        <article><b>02</b><h3>Read Adapters</h3><p>Read chain state, balances, multisig configuration and proposal history without execution.</p><span>NEXT</span></article>
+        <article><b>03</b><h3>Identity + Wallet Connect</h3><p>External signer connection, mobile wallet standards and role-aware app sessions.</p><span>PLANNED</span></article>
+        <article><b>04</b><h3>Simulation + Approvals</h3><p>Unsigned proposals, exact review, simulation and chain-native multisig approvals.</p><span>GATED</span></article>
+        <article><b>05</b><h3>WorldzCard™</h3><p>Hardware/card signing adapter; Tangem remains the first research target.</p><span>RESEARCH</span></article>
+        <article><b>06</b><h3>Android + iOS</h3><p>Package the proven app core with native deep links, notifications and wallet integrations.</p><span>FUTURE</span></article>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>WorldzApp™ • WorldzFullBuild™</span><span>One World • One Mission</span></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/worldz-app/app.js?v=20260927-1" defer></script>
+</body>
+</html>

@@ -236,3 +236,12 @@ The owner-approved Miracle treasury target is now **10 total signers with 4 appr
 ### Miracle community nominations
 
 Future Miracle Church outreach must make clear that the Church may suggest other trusted Miracle Church or Dubbo-area people for treasury participation. Suggestions are welcome, but signer authority remains consent-gated and any expansion beyond the approved 4-of-10 model requires an explicit governance update rather than silently changing the multisig.
+
+
+## WorldzApp™ core foundation — 2026-09-27
+
+WorldzApp™ is now a first-party umbrella application workstream inside WorldzFullBuild™. Its canonical contract is `worldzpad-omnichain/fullscope/worldz-app.v1.json`, its architecture standard is `docs/WORLDZAPP-ARCHITECTURE.md`, and its current installable PWA foundation is `launchpad.cryptoworldz.xyz/worldz-app/`.
+
+WorldzMiracleWallet™ becomes the secured treasury module inside WorldzApp™. WorldzLaunchPad™, Command Centre MAX™, WorldzFullBuild™, WorldzFullScope™, Worldz Votes Centre™, WorldzGovern™, WorldzLinkz™ and WorldzProof™ are registered as separate modules or integration targets. Module registration never grants authority: the app capability model is **DENY BY DEFAULT**, app-level mainnet broadcast is off, and every chain/module retains its own release and approval gates.
+
+The next engineering gate is read-only chain and treasury adapters: balances, multisig configuration and proposal history first, with no execution. Native Android/iOS packaging remains a later stage after identity, signer-connection, simulation, multisig and security gates are proven.
