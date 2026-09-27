@@ -47,7 +47,7 @@ async function simulateSolanaUnsigned(input={},options={}){
     diagnostics:Object.freeze({
       transport:"JSON_RPC_HTTP",
       method:"simulateTransaction",
-      rpcExecution:false,
+      stateMutation:false,
       unitsConsumed:result.value.unitsConsumed==null?null:String(result.value.unitsConsumed),
       error:failed?result.value.err:null,
       logCount:Array.isArray(result.value.logs)?result.value.logs.length:null
@@ -79,7 +79,7 @@ async function simulateEvmUnsigned(input={},options={}){
   let callResult=null,gasEstimate=null,state="SIMULATED",failure=null;
   try{
     callResult=await rpc(rpcUrl,"eth_call",[tx,"pending"]);
-    gasEstimate=await rpc(rpcUrl,"eth_estimateGas",[tx,"pending"]);
+    gasEstimate=await rpc(rpcUrl,"eth_estimateGas",[tx]);
   }catch(error){
     state="FAILED";
     failure=String(error&&error.message||error);
@@ -97,7 +97,7 @@ async function simulateEvmUnsigned(input={},options={}){
     diagnostics:Object.freeze({
       transport:"JSON_RPC_HTTP",
       methods:["eth_call","eth_estimateGas"],
-      rpcExecution:false,
+      stateMutation:false,
       chainId,
       callReturn:callResult,
       failure
