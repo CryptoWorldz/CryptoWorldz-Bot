@@ -146,14 +146,6 @@ on conflict (network,token_mint) do update
 set symbol=excluded.symbol, display_name=excluded.display_name, status='allowlisted',
     source_kind='canonical', inherited_buy_only=true, auto_buy_enabled=true, updated_at=now();
 
--- PHENIX and MIRACLE are tracked without inventing mints.
-insert into public.auto_worldz_asset_registry
-  (chain_key,name,symbol,contract_address,source_kind,buy_policy,funding_asset,execution_state)
-values
-  ('solana','PHENIX','PNEX',null,'canonical','BUY_ONLY','SOL','PENDING_REAL_CONTRACT'),
-  ('solana','MIRACLE','MRCL',null,'canonical','BUY_ONLY','SOL','PENDING_REAL_CONTRACT')
-on conflict do nothing;
-
 create or replace function public.sync_worldzlaunchpad_auto_buy_token()
 returns trigger
 language plpgsql
@@ -164,7 +156,9 @@ begin
   insert into public.auto_worldz_asset_registry
     (chain_key,source_token_id,name,symbol,contract_address,source_kind,buy_policy,funding_asset,execution_state,enabled,updated_at)
   values (
-    new.chain_key,new.id,new.name,new.symbol,new.contract_address,'worldzlaunchpad','BUY_ONLY','SOL',
+    new.chain_key,new.id,new.name,new.symbol,new.contract_address,
+    case when upper(new.symbol) in ('WLDZ','RVIV','PNEX','MRCL') then 'canonical' else 'worldzlaunchpad' end,
+    'BUY_ONLY','SOL',
     case
       when new.contract_address is null or new.contract_address = '' then 'PENDING_REAL_CONTRACT'
       when new.chain_key = 'solana' then 'SOLANA_ELIGIBLE'
@@ -175,7 +169,8 @@ begin
   on conflict (source_token_id) where source_token_id is not null
   do update set
     chain_key=excluded.chain_key,name=excluded.name,symbol=excluded.symbol,
-    contract_address=excluded.contract_address,buy_policy='BUY_ONLY',funding_asset='SOL',
+    contract_address=excluded.contract_address,source_kind=excluded.source_kind,
+    buy_policy='BUY_ONLY',funding_asset='SOL',
     execution_state=excluded.execution_state,enabled=excluded.enabled,updated_at=now();
 
   if new.chain_key = 'solana'
@@ -187,7 +182,9 @@ begin
     insert into public.auto_tokens
       (network,token_mint,symbol,display_name,status,source_kind,source_token_id,inherited_buy_only,auto_buy_enabled)
     values
-      ('solana',new.contract_address,new.symbol,new.name,'allowlisted','worldzlaunchpad',new.id,true,true)
+      ('solana',new.contract_address,new.symbol,new.name,'allowlisted',
+       case when upper(new.symbol) in ('WLDZ','RVIV','PNEX','MRCL') then 'canonical' else 'worldzlaunchpad' end,
+       new.id,true,true)
     on conflict (network,token_mint) do update
     set symbol=excluded.symbol,display_name=excluded.display_name,status='allowlisted',
         source_kind='worldzlaunchpad',source_token_id=new.id,
@@ -207,7 +204,9 @@ for each row execute function public.sync_worldzlaunchpad_auto_buy_token();
 insert into public.auto_worldz_asset_registry
   (chain_key,source_token_id,name,symbol,contract_address,source_kind,buy_policy,funding_asset,execution_state,enabled)
 select
-  chain_key,id,name,symbol,contract_address,'worldzlaunchpad','BUY_ONLY','SOL',
+  chain_key,id,name,symbol,contract_address,
+  case when upper(symbol) in ('WLDZ','RVIV','PNEX','MRCL') then 'canonical' else 'worldzlaunchpad' end,
+  'BUY_ONLY','SOL',
   case
     when contract_address is null or contract_address = '' then 'PENDING_REAL_CONTRACT'
     when chain_key = 'solana' then 'SOLANA_ELIGIBLE'
@@ -218,7 +217,8 @@ from public.worldz_fullscope_tokens
 on conflict (source_token_id) where source_token_id is not null
 do update set
   name=excluded.name,symbol=excluded.symbol,contract_address=excluded.contract_address,
-  execution_state=excluded.execution_state,enabled=excluded.enabled,updated_at=now();
+  source_kind=excluded.source_kind,execution_state=excluded.execution_state,
+  enabled=excluded.enabled,updated_at=now();
 
 create or replace function public.claim_auto_dca_schedule(p_worker_id text)
 returns setof public.auto_dca_schedules
