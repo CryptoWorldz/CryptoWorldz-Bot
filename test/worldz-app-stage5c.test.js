@@ -8,14 +8,21 @@ test("Stage 5C rejects insecure public proof endpoints",()=>{
   assert.throws(()=>readers.requireHttps("https://user:pass@example.com","TEST"),/INLINE_CREDENTIALS_FORBIDDEN/);
 });
 
-test("Stage 5C Safe proof normalizes public owners and confirmations only",async()=>{
-  const original=global.fetch;
-  global.fetch=async url=>({
+function safeFetchFixture({txSafe="0xSafe"}={}){
+  return async url=>({
     ok:true,
-    json:async()=>String(url).includes("/safes/")
-      ?{threshold:2,owners:["0xA","0xB","0xC"]}
-      :{results:[{owner:"0xA"},{owner:"0xB"}]}
+    json:async()=>{
+      const value=String(url);
+      if(value.includes("/safes/")) return {threshold:2,owners:["0xA","0xB","0xC"]};
+      if(value.endsWith("/confirmations/")) return {results:[{owner:"0xA"},{owner:"0xB"}]};
+      return {safe:txSafe,safeTxHash:"0xTx"};
+    }
   });
+}
+
+test("Stage 5C Safe proof binds transaction evidence to requested Safe",async()=>{
+  const original=global.fetch;
+  global.fetch=safeFetchFixture();
   try{
     const proof=await readers.readSafeApprovalState({
       serviceUrl:"https://safe.example",
@@ -28,9 +35,20 @@ test("Stage 5C Safe proof normalizes public owners and confirmations only",async
   } finally { global.fetch=original; }
 });
 
-test("Stage 5C XRPL proof uses weighted SignerList and transaction Signers",async()=>{
+test("Stage 5C Safe proof rejects a transaction from another Safe",async()=>{
   const original=global.fetch;
-  global.fetch=async(_url,init)=>{
+  global.fetch=safeFetchFixture({txSafe:"0xOther"});
+  try{
+    await assert.rejects(()=>readers.readSafeApprovalState({
+      serviceUrl:"https://safe.example",
+      safeAddress:"0xSafe",
+      safeTxHash:"0xTx"
+    }),/SAFE_TX_SAFE_MISMATCH/);
+  } finally { global.fetch=original; }
+});
+
+function xrplFetchFixture({validated=true,txAccount="rWorldz"}={}){
+  return async(_url,init)=>{
     const body=JSON.parse(init.body);
     const isAccount=body.method==="account_info";
     return {
@@ -40,9 +58,16 @@ test("Stage 5C XRPL proof uses weighted SignerList and transaction Signers",asyn
           {SignerEntry:{Account:"rA",SignerWeight:2}},
           {SignerEntry:{Account:"rB",SignerWeight:1}}
         ]}]}}
-        :{result:{tx_json:{Signers:[{Signer:{Account:"rA"}},{Signer:{Account:"rB"}}]}}}
+        :{result:{validated,tx_json:{Account:txAccount,Signers:[
+          {Signer:{Account:"rA"}},{Signer:{Account:"rB"}}
+        ]}}}
     };
   };
+}
+
+test("Stage 5C XRPL proof uses validated weighted SignerList evidence for the configured account",async()=>{
+  const original=global.fetch;
+  global.fetch=xrplFetchFixture();
   try{
     const proof=await readers.readXrplApprovalState({
       rpcUrl:"https://xrpl.example",
@@ -52,6 +77,38 @@ test("Stage 5C XRPL proof uses weighted SignerList and transaction Signers",asyn
     assert.equal(proof.state.approvedWeight,3);
     assert.equal(proof.state.thresholdMet,true);
     assert.equal(proof.state.executionAllowed,false);
+  } finally { global.fetch=original; }
+});
+
+test("Stage 5C XRPL proof requires HTTPS",async()=>{
+  await assert.rejects(()=>readers.readXrplApprovalState({
+    rpcUrl:"http://xrpl.example",
+    account:"rWorldz",
+    txHash:"ABC"
+  }),/XRPL_RPC_URL_HTTPS_REQUIRED/);
+});
+
+test("Stage 5C XRPL proof rejects unvalidated transaction evidence",async()=>{
+  const original=global.fetch;
+  global.fetch=xrplFetchFixture({validated:false});
+  try{
+    await assert.rejects(()=>readers.readXrplApprovalState({
+      rpcUrl:"https://xrpl.example",
+      account:"rWorldz",
+      txHash:"ABC"
+    }),/XRPL_TX_NOT_VALIDATED/);
+  } finally { global.fetch=original; }
+});
+
+test("Stage 5C XRPL proof rejects transaction evidence for another account",async()=>{
+  const original=global.fetch;
+  global.fetch=xrplFetchFixture({txAccount:"rOther"});
+  try{
+    await assert.rejects(()=>readers.readXrplApprovalState({
+      rpcUrl:"https://xrpl.example",
+      account:"rWorldz",
+      txHash:"ABC"
+    }),/XRPL_TX_ACCOUNT_MISMATCH/);
   } finally { global.fetch=original; }
 });
 
