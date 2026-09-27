@@ -67,7 +67,9 @@
     },
     "storeListing": {
       "state": "DRAFT_BUILT",
-      "inventory": "apps/worldzapp-android/play-store-listing.v1.json"
+      "inventory": "apps/worldzapp-android/play-store-listing.v1.json",
+      "appIcon": "OWNER_APPROVED_AND_BOUND",
+      "appIconPath": "apps/worldzapp-android/assets/worldzapp-icon-512.png"
     },
     "jurisdictionDistributionReview": {
       "state": "REQUIRED_BEFORE_COUNTRY_SELECTION",
@@ -90,7 +92,6 @@
   },
   "releaseBlockers": [
     "FINAL_APPLICATION_ID_LOCK",
-    "OWNER_APPROVED_CENTER_LOGO_512_AND_MASKABLE_ASSETS",
     "VERIFIED_PLAY_DEVELOPER_IDENTITY",
     "PUBLIC_SUPPORT_CONTACT",
     "PUBLIC_PRIVACY_POLICY_URL",
@@ -105,5 +106,8 @@
     "PLAY_TESTING_TRACK_REQUIREMENTS",
     "STORE_LISTING_ASSETS_AND_SCREENSHOTS",
     "FINAL_HUMAN_RELEASE_AUTHORIZATION"
+  ],
+  "clearedGates": [
+    "OWNER_APPROVED_CENTER_LOGO_512_AND_MASKABLE_ASSETS"
   ]
 }
