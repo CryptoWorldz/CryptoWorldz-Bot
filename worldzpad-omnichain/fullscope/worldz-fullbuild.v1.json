@@ -388,7 +388,7 @@
     "latestOwnerDirective": {
       "date": "2026-09-27",
       "directive": "Incorporate this Project and all project-relevant contents into WorldzFullBuild™.",
-      "state": "INCORPORATED_ON_FEATURE_BRANCH"
+      "state": "INCORPORATED"
     },
     "publicBuildBoundary": "Inherit project-relevant decisions and approved operational data only. Do not publish unrelated private personal, medical, legal, credential, seed-phrase, private-key or secret material from project chats."
   },
