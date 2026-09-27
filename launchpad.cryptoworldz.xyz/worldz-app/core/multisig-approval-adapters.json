@@ -1,0 +1,55 @@
+{
+  "schema": "WORLDZ-APP-MULTISIG-APPROVAL-ADAPTERS-V1",
+  "updatedAt": "2026-09-27",
+  "state": "CODE_BUILT_APPROVAL_EVIDENCE_FOUNDATION__LIVE_MULTISIG_PROOF_PENDING",
+  "mode": "PUBLIC_APPROVAL_STATE_NORMALIZATION_ONLY",
+  "signing": false,
+  "execution": false,
+  "broadcast": false,
+  "adapters": [
+    {
+      "id": "squads_v4",
+      "chain": "solana",
+      "system": "Squads Protocol v4",
+      "thresholdMode": "COUNT",
+      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
+      "reads": ["members", "threshold", "proposal approvals"],
+      "writes": []
+    },
+    {
+      "id": "safe_smart_account",
+      "chain": "evm",
+      "system": "Safe Smart Account",
+      "thresholdMode": "COUNT",
+      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
+      "reads": ["owners", "threshold", "transaction confirmations"],
+      "writes": []
+    },
+    {
+      "id": "xrpl_signer_list",
+      "chain": "xrpl",
+      "system": "XRPL SignerList",
+      "thresholdMode": "WEIGHT",
+      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
+      "reads": ["SignerEntries", "SignerQuorum", "transaction Signers"],
+      "writes": []
+    },
+    {
+      "id": "sui_weighted_multisig",
+      "chain": "sui",
+      "system": "Sui weighted multisig",
+      "thresholdMode": "WEIGHT",
+      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
+      "reads": ["public keys", "weights", "threshold", "approval identities"],
+      "writes": []
+    }
+  ],
+  "rules": [
+    "WorldzApp does not become a signer merely by normalizing approval state.",
+    "Threshold met is not broadcast permission.",
+    "Only public signer identifiers and public approval evidence may enter the WorldzApp approval state.",
+    "Private keys, seed phrases, recovery material and raw custody secrets remain forbidden.",
+    "The exact simulated unsigned payload hash must remain bound to the approval-review envelope.",
+    "Live treasury/multisig proof is required before an adapter is marked LIVE."
+  ]
+}
