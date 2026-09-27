@@ -51,6 +51,8 @@
       <button class="tab active" data-panel="modules">Modules</button>
       <button class="tab" data-panel="treasuries">Treasuries</button>
       <button class="tab" data-panel="adapters">Adapters</button>
+      <button class="tab" data-panel="identity">Identity</button>
+      <button class="tab" data-panel="connections">Connections</button>
       <button class="tab" data-panel="security">Security</button>
       <button class="tab" data-panel="roadmap">Native App</button>
     </nav>
@@ -68,6 +70,37 @@
     <section id="adapters" class="panel">
       <div class="section-head"><span>READ-ONLY CHAIN ADAPTERS</span><h2>Observe first. Execute later.</h2><p>These adapters define how WorldzApp will read balances, multisig configuration, proposal history and transaction state without exposing any signing or broadcast method.</p></div>
       <div id="adapter-grid" class="grid"></div>
+    </section>
+
+    <section id="identity" class="panel">
+      <div class="section-head"><span>PUBLIC IDENTITY + SESSION</span><h2>A session is not a signing authority.</h2><p>WorldzApp keeps public identity, wallet control proof and treasury signer authority as three separate states.</p></div>
+      <div class="security-layout">
+        <article class="card">
+          <span>CURRENT BROWSER SESSION</span>
+          <h3 id="identity-state">Guest</h3>
+          <p id="session-id" class="session-id">Creating session…</p>
+          <div class="meta"><span class="chip good">SESSION ONLY</span><span class="chip">NO SIGNER AUTHORITY</span></div>
+        </article>
+        <article class="guard-card">
+          <span>AUTHORITY RULE</span>
+          <h3>Connected ≠ Verified ≠ Treasury Signer</h3>
+          <p>A connected public address remains unverified until a future challenge proof succeeds. Even a verified wallet does not become a treasury signer unless the treasury-specific consent and chain-native multisig enrollment gates pass.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="connections" class="panel">
+      <div class="section-head"><span>EXTERNAL SELF-CUSTODY CONNECTIONS</span><h2>Bring the wallet to WorldzApp™.</h2><p>Connection requests ask the external wallet for public account/network metadata only. Stage 3 contains no transaction-signing or broadcast implementation.</p></div>
+      <div class="connection-actions">
+        <button id="discover-evm" class="btn primary" type="button">Discover EVM Wallets</button>
+        <button id="connect-solana-fallback" class="btn" type="button">Connect Solana Wallet</button>
+        <button id="clear-worldz-session" class="btn ghost" type="button">Clear Session</button>
+      </div>
+      <div id="evm-provider-list" class="wallet-list"></div>
+      <div class="section-head compact"><span>CONNECTED PUBLIC ACCOUNTS</span></div>
+      <div id="live-wallets" class="wallet-list"></div>
+      <div class="section-head compact"><span>CONNECTOR ROADMAP</span></div>
+      <div id="connection-grid" class="grid"></div>
     </section>
 
     <section id="security" class="panel">
@@ -88,7 +121,7 @@
       <div class="roadmap">
         <article><b>01</b><h3>Shared Core</h3><p>Module registry, capabilities, treasury profiles, proposal schema and WorldzProof.</p><span class="done">BUILT</span></article>
         <article><b>02</b><h3>Read Adapters</h3><p>Shared read-only adapter contract, chain registry, session/storage policy and event schema.</p><span class="done">FOUNDATION BUILT</span></article>
-        <article><b>03</b><h3>Identity + Wallet Connect</h3><p>External signer connection, mobile wallet standards and role-aware app sessions.</p><span>PLANNED</span></article>
+        <article><b>03</b><h3>Identity + Wallet Connect</h3><p>Role-aware public sessions, EIP-6963/EIP-1193 discovery, Solana external-wallet fallback and standards registry.</p><span class="done">FOUNDATION BUILT</span></article>
         <article><b>04</b><h3>Simulation + Approvals</h3><p>Unsigned proposals, exact review, simulation and chain-native multisig approvals.</p><span>GATED</span></article>
         <article><b>05</b><h3>WorldzCard™</h3><p>Hardware/card signing adapter; Tangem remains the first research target.</p><span>RESEARCH</span></article>
         <article><b>06</b><h3>Android + iOS</h3><p>Package the proven app core with native deep links, notifications and wallet integrations.</p><span>FUTURE</span></article>
@@ -98,6 +131,7 @@
 
   <footer><span>WorldzApp™ • WorldzFullBuild™</span><span>One World • One Mission</span></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="/worldz-app/app.js?v=20260927-1" defer></script>
+  <script src="/worldz-app/connections.js?v=20260927-1" defer></script>
+  <script src="/worldz-app/app.js?v=20260927-2" defer></script>
 </body>
 </html>
