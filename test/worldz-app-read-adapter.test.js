@@ -54,3 +54,10 @@ test("read snapshot contains observation state but no execution authority",()=>{
   assert.equal(snapshot.state,"READ_OK");
   assert.equal(Object.hasOwn(snapshot,"execution"),false);
 });
+
+
+test("WorldzApp browser shell parses after provider binding changes",()=>{
+  const vm=require("node:vm");
+  const shell=fs.readFileSync(path.join(root,"launchpad.cryptoworldz.xyz","worldz-app","app.js"),"utf8");
+  assert.doesNotThrow(()=>new vm.Script(shell,{filename:"worldz-app/app.js"}));
+});
