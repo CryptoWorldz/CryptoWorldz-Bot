@@ -1,0 +1,30 @@
+{
+  "schema": "WORLDZAPP-SIGNED-RELEASE-PREPARATION-V1",
+  "updatedAt": "2026-09-28",
+  "state": "PIPELINE_BUILT__SECRETS_PLAY_IDENTITY_AND_FINAL_ASSET_IMPORT_PENDING",
+  "applicationId": "xyz.cryptoworldz.worldzapp",
+  "targetSdk": 36,
+  "format": "AAB",
+  "uploadSigning": {
+    "method": "runtime keystore + jarsigner",
+    "keystoreCommitted": false,
+    "requiredProtectedSecrets": [
+      "WORLDZAPP_UPLOAD_KEYSTORE_B64",
+      "WORLDZAPP_UPLOAD_KEY_ALIAS",
+      "WORLDZAPP_UPLOAD_KEYSTORE_PASSWORD",
+      "WORLDZAPP_UPLOAD_KEY_PASSWORD"
+    ]
+  },
+  "playAppSigning": {
+    "configured": false,
+    "certificateSha256Known": false,
+    "requiredProtectedValue": "WORLDZAPP_PLAY_SIGNING_SHA256",
+    "rule": "Digital Asset Links must use the Play App Signing certificate fingerprint, not merely the local upload-key fingerprint."
+  },
+  "release": {
+    "workflow": ".github/workflows/worldzapp-final-release-aab.yml",
+    "manualDispatchOnly": true,
+    "autoSubmitToPlay": false,
+    "publicReleaseAuthorized": false
+  }
+}
