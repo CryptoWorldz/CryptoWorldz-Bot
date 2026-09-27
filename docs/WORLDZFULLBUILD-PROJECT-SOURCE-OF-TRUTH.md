@@ -254,8 +254,22 @@ WorldzApp Stage 2 infrastructure is now code-built at the interface level. Eight
 The app also now has a storage policy, public session schema and normalized activity-event schema. Seed phrases, private keys, recovery phrases, hardware-wallet secrets and exported signing keys are forbidden from WorldzApp storage. Provider/RPC bindings are not yet configured and no live balance or multisig-read claim is made until chain-by-chain read proof passes.
 
 
-## WorldzApp™ continuation approval + provider bindings — 2026-09-27
+## WorldzApp™ live-read provider gate — 2026-09-27
 
-JayJayTeamDev gave full approval to continue the staged WorldzApp build through verified reads, multisig state/history, identity/session, mobile wallet connections, simulation, multisig approvals, WorldzProof and Android/iOS packaging. This continuation approval does not bypass transaction review, external signatures, treasury thresholds, chain release gates or other explicit mainnet value-movement controls.
+The Stage 2 read-only layer now includes documented development verification bindings for Solana, Base, BNB Chain, HyperEVM, XRPL, Sui and Robinhood Chain. Ethereum remains provider/environment-required rather than inventing an official public production endpoint.
 
-Read-provider bindings are now code-built for Solana, Ethereum, Base, BNB Chain, HyperEVM, XRPL and Sui using deployment environment variables. No credential-bearing RPC URL is committed to the repository or public app. Live-read status remains pending until `tools/verify-worldzapp-live-reads.js` succeeds against configured deployment providers.
+A dedicated CI workflow and proof runner now verify public chain health/identity reads and a finalized Solana balance read for the owner-approved public JayJayTeamDev address. These public endpoints are development verification infrastructure only; production providers remain environment/secret configured.
+
+The proof workflow contains no signing, submission, broadcasting, bridging, swapping, staking or signer-change path.
+
+
+### Sui read transport correction
+
+The first WorldzApp live-read proof confirmed that the Sui mainnet fullnode host is reachable but its legacy JSON-RPC API is no longer available. The Sui verification adapter was therefore migrated to the current GraphQL read path.
+
+Permanent regression rule: **never infer protocol support from an endpoint hostname or old example. Verify the exact current transport/method live before declaring a chain adapter ready.**
+
+
+### WorldzApp live-read proof passed
+
+A WorldzApp public verification run on 2026-09-27 passed read-only checks for Solana health, the approved public JayJayTeamDev Solana balance, Base chain ID 8453, BNB Chain ID 56, HyperEVM chain ID 999, XRPL validated-ledger access, Sui GraphQL chain identification, and Robinhood Chain ID 4663. The proof performed **no execution**. Public endpoints remain verification-only; dedicated production provider configuration is still a separate release gate.
