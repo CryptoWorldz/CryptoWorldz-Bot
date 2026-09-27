@@ -46,14 +46,18 @@ async function run(){
     if(!url){proof.results.push({name,state:"SKIPPED_PROVIDER_NOT_CONFIGURED"});continue;}
     try{
       const snapshot=await task();
+      if(snapshot?.state!=="READ_OK") throw new Error("WORLDZAPP_LIVE_READ_NOT_OK:"+String(snapshot?.state||"UNKNOWN"));
       proof.results.push({name,state:"PASS",provider:redact(url),snapshot});
     }catch(error){
       proof.results.push({name,state:"FAIL",provider:redact(url),error:String(error.message||error)});
     }
   }
   const required=["solana","solana-balance","base","bnb","hyperevm","xrpl","sui","robinhood"];
-  const failed=proof.results.filter(item=>required.includes(item.name)&&item.state==="FAIL");
+  const incomplete=required.filter(name=>proof.results.find(item=>item.name===name)?.state!=="PASS");
   console.log(JSON.stringify(proof,null,2));
-  if(failed.length) process.exitCode=1;
+  if(incomplete.length){
+    console.error("Required live-read proof entries not PASS:",incomplete.join(", "));
+    process.exitCode=1;
+  }
 }
 run().catch(error=>{console.error(error);process.exitCode=1});
