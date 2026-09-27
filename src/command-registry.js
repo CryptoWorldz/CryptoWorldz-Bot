@@ -83,7 +83,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["autopost", "Create a Grace Auto Post schedule"], ["graceadmin", "Manage delegated Grace scheduling access"],
     ["connectx", "Connect an approved X account"], ["gracex", "Alias for X connection"],
     ["connectfacebook", "Connect an approved Facebook Page"], ["gracefacebook", "Alias for Facebook connection"],
-    ["pauseall", "Emergency stop Grace publishing"]
+    ["pauseall", "Emergency stop Grace publishing"], ["autobuypolicy", "View the read-only Worldz AUTO Buy-Only policy"]
   ]),
   group("executive", "🛡 Executive Controls", "executive", [
     ["executives", "View Executive team"], ["addscopedadmin", "Add a scoped admin"], ["disableadmin", "Disable a delegated admin"],
@@ -91,10 +91,10 @@ const COMMAND_GROUPS = Object.freeze([
     ["campaigns", "List Grace campaigns"], ["graceanalytics", "View Grace campaign analytics"]
   ]),
   group("owner-auto", "💎 Owner • AUTO Diamond Buy™", "owner", [
-    ["auto", "View AUTO status"], ["autosimulate", "Run an AUTO simulation"], ["autodca", "View DCA plans"],
+    ["auto", "View AUTO status"], ["autobuypolicy", "View the Worldz AUTO Buy-Only policy"], ["autobuyuniverse", "View all inherited BUY-ONLY assets"], ["autosimulate", "Run an AUTO simulation"], ["autodca", "View DCA plans"],
     ["autodcanew", "Create an owner DCA plan"], ["autodcastart", "Start an approved DCA plan"],
     ["autodcapause", "Pause a DCA plan"], ["autodcaresume", "Resume a DCA plan"], ["autodcacancel", "Cancel a DCA plan"],
-    ["autodcawallet", "Set the owner DCA wallet boundary"], ["autodcaenable", "Enable AUTO DCA execution after gates"],
+    ["autodcawallet", "Set the primary owner DCA wallet boundary"], ["autodcawalletadd", "Register an owner/dev public wallet for AUTO"], ["autodcaenable", "Enable AUTO DCA execution after gates"],
     ["autodcadisable", "Disable AUTO DCA execution"], ["autopause", "Pause AUTO"], ["autoresume", "Resume AUTO after safety review"],
     ["autoemergency", "Emergency stop AUTO"]
   ]),
