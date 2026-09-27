@@ -268,3 +268,8 @@ The proof workflow contains no signing, submission, broadcasting, bridging, swap
 The first WorldzApp live-read proof confirmed that the Sui mainnet fullnode host is reachable but its legacy JSON-RPC API is no longer available. The Sui verification adapter was therefore migrated to the current GraphQL read path.
 
 Permanent regression rule: **never infer protocol support from an endpoint hostname or old example. Verify the exact current transport/method live before declaring a chain adapter ready.**
+
+
+### WorldzApp live-read proof passed
+
+A WorldzApp public verification run on 2026-09-27 passed read-only checks for Solana health, the approved public JayJayTeamDev Solana balance, Base chain ID 8453, BNB Chain ID 56, HyperEVM chain ID 999, XRPL validated-ledger access, Sui GraphQL chain identification, and Robinhood Chain ID 4663. The proof performed **no execution**. Public endpoints remain verification-only; dedicated production provider configuration is still a separate release gate.
