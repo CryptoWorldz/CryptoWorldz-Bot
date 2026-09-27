@@ -593,7 +593,7 @@
     "manifest": "worldzpad-omnichain/fullscope/worldz-miracle-wallet.v1.json",
     "state": "PLANNED",
     "miracleTokenTreasuryPercent": 20,
-    "signerPlan": "8_SIGNERS__4_OF_8_OWNER_APPROVED__7_NOMINEES_CONSENT_AND_ADDRESS_VERIFICATION_PENDING__JAYJAYTEAMDEV_CONFIRMED",
+    "signerPlan": "10_SIGNERS__4_OF_10_OWNER_APPROVED__9_INVITEE_POSITIONS_CONSENT_AND_ADDRESS_VERIFICATION_REQUIRED__JAYJAYTEAMDEV_CONFIRMED",
     "solana": "JUPITER_MOBILE_SIGNER_ONBOARDING__SQUADS_TREASURY",
     "universalWallet": "WORLDZ_MIRACLE_WALLET__CHAIN_NATIVE_CUSTODY_ADAPTERS",
     "chainCustody": {
@@ -621,10 +621,12 @@
       "installableWebAppFoundation": true,
       "nativeAndroidIosGoal": true,
       "nextEngineeringGate": "LIVE_READ_ADAPTERS_AND_AUDITED_MOBILE_SIGNER_CONNECTIONS",
-      "miracleGovernance": "4-of-8"
+      "miracleGovernance": "4-of-10"
     },
     "pendingSignerRoles": [
-      "Sound Production nominee — intended invitee private until consent"
+      "Sound Production",
+      "Worldz Collaborator",
+      "Miracle Church Kitchen and Community Service"
     ]
   }
 }
