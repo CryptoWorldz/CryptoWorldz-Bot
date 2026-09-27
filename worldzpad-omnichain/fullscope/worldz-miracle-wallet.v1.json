@@ -8,8 +8,8 @@
     "token": "MIRACLE",
     "symbol": "MRCL",
     "tokenLifecycle": "PRE_LAUNCH",
-    "treasuryAllocationPercent": 20,
-    "allocationMeaning": "CHURCH_CONTROLLED_TOKEN_TREASURY__NOT_PERSONAL_SIGNER_OWNERSHIP__NOT_EQUITY",
+    "treasuryAllocationPercent": null,
+    "allocationMeaning": "MULTISIG_CONTROLLED_MIRACLE_TEAM_VAULT__BENEFICIARY_ALLOCATIONS_REQUIRE_OPT_IN_VERIFIED_WALLETS_AND_TOKEN_SPECIFIC_LEDGER__SIGNER_AUTHORITY_DOES_NOT_SET_PERSONAL_SHARE",
     "nominatedSignerCount": 11,
     "signerIdentityStorage": "CHURCH_NOMINEES_PRIVATE_UNTIL_CONSENT__JAYJAYTEAMDEV_PUBLIC_SIGNER_APPROVED",
     "proposedThreshold": {
@@ -55,7 +55,7 @@
     "currentGovernance": "4-of-11",
     "teamTokenParticipation": {
       "state": "OWNER_APPROVED_PLAN__AMOUNTS_PENDING",
-      "participantTarget": 11,
+      "participantTarget": 12,
       "legacyTokenCount": 10,
       "officialTokens": [
         "WLDZ",
@@ -63,8 +63,16 @@
         "PNEX",
         "MRCL"
       ],
-      "rule": "OPT_IN_PLUS_VERIFIED_PUBLIC_SOLANA_ADDRESS_REQUIRED__TOKEN_SPECIFIC_AMOUNTS_AND_SOURCE_BUCKETS_MUST_BE_APPROVED_BEFORE_EXECUTION"
-    }
+      "rule": "OPT_IN_PLUS_VERIFIED_PUBLIC_SOLANA_ADDRESS_REQUIRED__TOKEN_SPECIFIC_AMOUNTS_AND_SOURCE_BUCKETS_MUST_BE_APPROVED_BEFORE_EXECUTION",
+      "mrclSpecificRule": "20_PERCENT_MRCL_TEAM_VAULT__24_MONTHLY_RELEASES_AFTER_30_DAY_FIRST_RELEASE_CLIFF__0_PERCENT_IMMEDIATE__INDIVIDUAL_AMOUNTS_PENDING"
+    },
+    "priorTreasuryAllocationPercent": 20,
+    "priorTreasuryAllocationState": "SUPERSEDED_AS_GENERAL_PURPOSE_CHURCH_TREASURY_ALLOCATION_BY_LATEST_OWNER_DIRECTION",
+    "miracleTeamVaultAllocationPercent": 20,
+    "miracleTeamVaultTokens": 69600000,
+    "miracleMagicSupplyPercent": 20,
+    "miracleMagicSupplyTokens": 69600000,
+    "miracleMagicSupplyControl": "SEPARATE_MIRACLEMAGICVAULT__NOT_TEAM_PERSONAL_ALLOCATION"
   },
   "futureLaunchPadRole": {
     "state": "OPT_IN_APPROVAL_ROLE_PLANNED",
@@ -177,5 +185,7 @@
     "parentApp": "WorldzApp™",
     "parentAppRoute": "/worldz-app/",
     "moduleId": "treasury"
-  }
+  },
+  "miracleTokenStandard": "docs/WORLDZ-MIRACLE-TOKEN-STANDARD.md",
+  "miracleTokenContract": "worldzpad-omnichain/fullscope/worldz-miracle-token.v1.json"
 }
