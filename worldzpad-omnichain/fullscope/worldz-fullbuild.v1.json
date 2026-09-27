@@ -711,5 +711,21 @@
     "jaysSafePlace": "PLANNED_LOCAL_INFORMATION_AND_REFERRAL_LAYER",
     "proposedTokenCandidate": "NOURISH / NRSH — PROPOSAL_ONLY_NOT_CANONICAL",
     "mission": "No World Hunger Ever Again."
+  },
+  "projectIdeasRegistry": {
+    "path": "worldzpad-omnichain/fullscope/worldz-project-ideas.v1.json",
+    "brand": "Worldz Ideas Registry™",
+    "consumers": [
+      "WorldzFullBuild™",
+      "WorldzApp™"
+    ],
+    "status": "INTEGRATED",
+    "privacy": "NON_SENSITIVE_PROJECT_INFORMATION_ONLY",
+    "executionAuthority": false
+  },
+  "worldzAppInheritance": {
+    "contract": "worldzpad-omnichain/fullscope/worldz-app.v1.json",
+    "projectIdeasRegistry": "worldzpad-omnichain/fullscope/worldz-project-ideas.v1.json",
+    "rule": "WorldzApp inherits the same reconciled Project source-of-truth and lifecycle truth standard; it must not create a conflicting independent plan."
   }
 }
