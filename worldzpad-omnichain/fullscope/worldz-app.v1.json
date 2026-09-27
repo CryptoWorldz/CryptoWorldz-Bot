@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "CODE_BUILT_STAGE_2_FOUNDATION",
+  "lifecycle": "CODE_BUILT_STAGE_2_PROVIDER_BINDINGS",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -122,7 +122,8 @@
     "readAdapters": "launchpad.cryptoworldz.xyz/worldz-app/core/read-adapter-registry.json",
     "storagePolicy": "launchpad.cryptoworldz.xyz/worldz-app/core/storage-policy.json",
     "sessionSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/session.schema.json",
-    "activityEventSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json"
+    "activityEventSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json",
+    "providerBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -132,9 +133,9 @@
     "sessionSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/session.schema.json",
     "activityEventSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json",
     "supportedAdapterSlots": 8,
-    "providerBindings": "NOT_CONFIGURED",
-    "liveReadProof": "NOT_RUN",
+    "providerBindings": "CODE_BUILT_ENVIRONMENT_ONLY",
+    "liveReadProof": "PENDING_DEPLOYMENT_ENVIRONMENT",
     "execution": false,
-    "nextGate": "CONFIGURE_VERIFIED_READ_PROVIDERS_AND_PROVE_LIVE_READS"
+    "nextGate": "CONFIGURE_DEPLOYMENT_RPC_ENV_AND_RUN_LIVE_READ_VERIFIER"
   }
 }
