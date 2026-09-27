@@ -1,0 +1,30 @@
+{
+  "schema": "WORLDZ-APP-APPROVED-CENTER-LOGO-V1",
+  "updatedAt": "2026-09-27",
+  "state": "APPROVED_SOURCE_IDENTIFIED__FIRST_PARTY_WEB_DERIVATIVE_PENDING",
+  "approval": {
+    "source": "USER_SUPPLIED",
+    "approvedAt": "2026-09-27T05:15:58Z",
+    "rule": "Use this as the centre logo only. Do not substitute or redesign it."
+  },
+  "sourceEvidence": {
+    "sha256": "ca401c3a559ffcd8b1829118595138a9c1efa33c4838df45e1565f6bdc751a35",
+    "width": 1536,
+    "height": 1536,
+    "format": "PNG"
+  },
+  "androidRequirements": {
+    "launcherIconMin": "512x512",
+    "approvedFirstPartyIconUrl": null,
+    "approvedFirstPartyMaskableIconUrl": null,
+    "maskableSafeAreaQa": "PENDING",
+    "publicAssetDeployment": "PENDING"
+  },
+  "deprecatedAssets": [
+    {
+      "path": "launchpad.cryptoworldz.xyz/worldz-app/worldz-app-icon.svg",
+      "state": "REJECTED__MUST_NOT_BE_REFERENCED"
+    }
+  ],
+  "releaseRule": "No Android project, AAB, PWA manifest or public WorldzApp surface may substitute the rejected W icon or a newly invented logo for the approved centre-logo artwork."
+}
