@@ -141,7 +141,11 @@ A WorldzProof receipt never substitutes for actual chain confirmation.
 Current.
 
 ### Stage 2 — Read adapters
-Read balances, multisig state, proposal history and public chain state. No execution.
+**Foundation built.**
+
+The shared read-only adapter interface now exists for Solana, Ethereum, Base, BNB Chain, HyperEVM, XRP Ledger, Sui and a Robinhood research slot. The adapter contract permits only health/network/account/balance/treasury/proposal-history/transaction-status reads. Signing, broadcasting, bridging, swapping, staking, signer changes and key import/export are structurally rejected.
+
+The remaining Stage 2 gate is provider binding and live read proof: configure verified provider/RPC access without committing credentials, then prove real balance, multisig configuration and proposal-history reads chain by chain.
 
 ### Stage 3 — Identity and signer connections
 Build role-aware sessions and verified external wallet connections. Keep secrets out of Worldz infrastructure.
@@ -174,3 +178,14 @@ Security review, privacy policy, incident recovery, accessibility/mobile QA and 
 - exact human-readable review before signatures;
 - WorldzProof after value-moving actions;
 - public identity association only with consent.
+
+
+## Stage 2 infrastructure additions
+
+- `core/read-adapter-registry.json` — chain/family read capabilities and forbidden methods.
+- `src/worldz-app/read-adapter-contract.js` — runtime guard that rejects write/sign/broadcast handlers.
+- `core/storage-policy.json` — browser/session/server storage boundaries and secret-data prohibition.
+- `core/session.schema.json` — public identity and wallet-connection session shape; no secret fields.
+- `core/activity-event.schema.json` — normalized WorldzApp activity stream for future notifications, audit and FullScope integration.
+
+No RPC endpoint or credential is hard-coded in the public registry. Provider configuration remains environment-specific.
