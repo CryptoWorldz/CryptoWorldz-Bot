@@ -25,16 +25,14 @@
   ],
   "icons": [
     {
-      "src": "/worldz-app/worldz-app-icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
       "src": "/worldz-app/worldz-app-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "approvedWorldzEmblem": {
+    "state": "OWNER_APPROVED_SOURCE_REGISTERED__FINAL_PNG_PENDING",
+    "registry": "apps/worldzapp-android/approved-emblem.v1.json"
+  }
 }
