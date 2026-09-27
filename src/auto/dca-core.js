@@ -1,7 +1,7 @@
 const SOL_MINT = "So11111111111111111111111111111111111111112";
 const DEFAULT_USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const SUPPORTED_INPUTS = Object.freeze({ SOL: 9, USDC: 6 });
-const DEFAULT_AMOUNT_PRESETS = Object.freeze([2, 3, 5, 7, 10, 15]);
+const DEFAULT_AMOUNT_PRESETS = Object.freeze([0.005, 0.01, 0.02, 0.05, 0.1]);
 const DCA_STATUSES = Object.freeze(["draft", "active", "paused", "cancelled", "completed", "error"]);
 
 function finiteNumber(value) {
@@ -46,6 +46,12 @@ function decimalToBaseUnits(value, decimals) {
   }
 }
 
+function asAddressSet(value) {
+  if (value instanceof Set) return value;
+  if (Array.isArray(value)) return new Set(value.map((item) => String(item || "").trim()).filter(Boolean));
+  return new Set();
+}
+
 function loadDcaLimits(settings = {}) {
   let presets = settings.amount_presets;
   if (typeof presets === "string") {
@@ -64,13 +70,14 @@ function loadDcaLimits(settings = {}) {
     minIntervalMinutes: Math.max(15, Math.floor(nonNegativeNumber(settings.min_interval_minutes) ?? 60)),
     maxSlippageBps: Math.max(1, Math.floor(nonNegativeNumber(settings.max_slippage_bps) ?? 300)),
     maxPriceImpactBps: Math.max(1, Math.floor(nonNegativeNumber(settings.max_price_impact_bps) ?? 500)),
-    allowedInputCurrency: normalizeCurrency(settings.allowed_input_currency || "USDC"),
-    maxBuysPerDay: Math.max(1, Math.min(6, Math.floor(nonNegativeNumber(settings.max_buys_per_day) ?? 6))),
+    allowedInputCurrency: normalizeCurrency(settings.allowed_input_currency || "SOL"),
+    maxBuysPerDay: Math.max(1, Math.min(24, Math.floor(nonNegativeNumber(settings.max_buys_per_day) ?? 6))),
     amountPresets: normalizePresets(presets),
-    weeklyBudgetAudCents: Math.max(0, Math.floor(nonNegativeNumber(settings.weekly_budget_aud_cents) ?? 10000)),
+    weeklyBudgetAudCents: Math.max(0, Math.floor(nonNegativeNumber(settings.weekly_budget_aud_cents) ?? 0)),
     buyOnly: settings.buy_only !== false,
     multiwalletEnabled: settings.multiwallet_enabled === true,
-    randomizedExecution: settings.randomized_execution === true
+    randomizedExecution: settings.randomized_execution === true,
+    autoEnrollWorldzTokens: settings.auto_enroll_worldz_tokens !== false
   };
 }
 
@@ -85,11 +92,12 @@ function validateDcaSchedule(input = {}, context = {}) {
   const maxPriceImpactBps = Math.floor(nonNegativeNumber(input.max_price_impact_bps ?? input.price_impact_bps) ?? -1);
   const startAt = input.start_at ? new Date(input.start_at) : new Date();
   const limits = loadDcaLimits(context.settings);
+  const walletAddress = String(input.wallet_address || input.walletAddress || limits.walletAddress || "").trim();
   const errors = [];
 
   if (!isValidSolanaAddress(tokenMint)) errors.push("invalid_token_mint");
   if (!Object.prototype.hasOwnProperty.call(SUPPORTED_INPUTS, currency)) errors.push("currency_not_allowed");
-  if (currency !== limits.allowedInputCurrency) errors.push("investment_currency_must_be_usdc");
+  if (currency !== limits.allowedInputCurrency) errors.push("investment_currency_not_allowed");
   if (amount === null) errors.push("invalid_amount");
   if (amount !== null && !limits.amountPresets.some((preset) => Math.abs(preset - amount) < 0.0000001)) errors.push("amount_not_approved_preset");
   if (!Number.isSafeInteger(orderCount) || orderCount < 1 || orderCount > 10000) errors.push("invalid_order_count");
@@ -97,12 +105,19 @@ function validateDcaSchedule(input = {}, context = {}) {
   if (!Number.isSafeInteger(slippageBps) || slippageBps < 1 || slippageBps > limits.maxSlippageBps) errors.push("slippage_limit_exceeded");
   if (!Number.isSafeInteger(maxPriceImpactBps) || maxPriceImpactBps < 1 || maxPriceImpactBps > limits.maxPriceImpactBps) errors.push("price_impact_limit_exceeded");
   if (Number.isNaN(startAt.getTime())) errors.push("invalid_start_time");
-  if (!limits.buyOnly || limits.multiwalletEnabled || limits.randomizedExecution) errors.push("investment_policy_locked");
+  if (!limits.buyOnly || limits.randomizedExecution) errors.push("investment_policy_locked");
 
-  const allowlistedTokens = context.allowlistedTokens instanceof Set
-    ? context.allowlistedTokens
-    : new Set(Array.isArray(context.allowlistedTokens) ? context.allowlistedTokens : []);
+  const allowlistedTokens = asAddressSet(context.allowlistedTokens);
   if (!allowlistedTokens.has(tokenMint)) errors.push("token_not_allowlisted");
+
+  const allowlistedWallets = asAddressSet(context.allowlistedWallets);
+  if (!isValidSolanaAddress(walletAddress)) {
+    errors.push("invalid_wallet_address");
+  } else if (limits.multiwalletEnabled) {
+    if (!allowlistedWallets.has(walletAddress)) errors.push("wallet_not_allowlisted");
+  } else if (limits.walletAddress && walletAddress !== limits.walletAddress) {
+    errors.push("wallet_not_allowlisted");
+  }
 
   const decimals = SUPPORTED_INPUTS[currency];
   const amountBaseUnits = decimals === undefined ? null : decimalToBaseUnits(amountText, decimals);
@@ -124,6 +139,7 @@ function validateDcaSchedule(input = {}, context = {}) {
     errors: [...new Set(errors)],
     proposal: {
       token_mint: tokenMint,
+      wallet_address: walletAddress || null,
       input_currency: currency,
       input_mint: currency === "SOL" ? SOL_MINT : String(context.usdcMint || DEFAULT_USDC_MINT),
       input_decimals: decimals,
@@ -148,7 +164,7 @@ function dcaPublicStatus(settings = {}, counts = {}, runtime = {}) {
   const apiReady = runtime.apiReady === true;
   const walletMatches = runtime.walletMatches === true;
   return {
-    mode: "owner_investment_dca",
+    mode: "worldz_owner_dev_buy_only",
     prepared: true,
     enabled: limits.enabled,
     paused: limits.paused,
@@ -158,14 +174,18 @@ function dcaPublicStatus(settings = {}, counts = {}, runtime = {}) {
     api_ready: apiReady,
     wallet_address: limits.walletAddress || null,
     wallet_matches_signer: walletMatches,
+    approved_wallets: Number(runtime.approvedWallets) || 0,
+    matched_wallets: Number(runtime.matchedWallets) || 0,
     active_schedules: Number(counts.active) || 0,
     draft_schedules: Number(counts.draft) || 0,
     completed_schedules: Number(counts.completed) || 0,
     total_executions: Number(counts.executions) || 0,
     policy: {
       buy_only: limits.buyOnly,
-      one_wallet_only: !limits.multiwalletEnabled,
+      sell_automation: false,
+      multiwallet_enabled: limits.multiwalletEnabled,
       randomized_execution: limits.randomizedExecution,
+      auto_enroll_worldz_tokens: limits.autoEnrollWorldzTokens,
       allowed_input_currency: limits.allowedInputCurrency,
       amount_presets: limits.amountPresets,
       max_buys_per_day: limits.maxBuysPerDay,
