@@ -119,6 +119,10 @@
     "G.R.A.C.E."
   ],
   "executionGates": [
+    "WORLDZ_LAUNCH_QUALITY_GATE_PASS",
+    "CANONICAL_METADATA_CREATED_BEFORE_POOL",
+    "JUPITER_VRFD_HANDOFF_PREPARED",
+    "DEXSCREENER_OBSERVATION_GATE_PREPARED",
     "FINAL_LOGO_AND_METADATA_URI",
     "FINAL_ALLOCATION_LEDGER_TOTALS_100_PERCENT",
     "TEAM_OPT_INS_AND_VERIFIED_WALLETS",
@@ -135,5 +139,56 @@
     "ON_CHAIN_CONFIRMATION",
     "WORLDZPROOF_PUBLICATION_AFTER_CONFIRMATION"
   ],
-  "mainnetExecutionAuthorized": false
+  "mainnetExecutionAuthorized": false,
+  "launchQualityGate": {
+    "standard": "docs/WORLDZ-LAUNCH-QUALITY-GATE.md",
+    "contract": "worldzpad-omnichain/fullscope/worldz-launch-quality-gate.v1.json",
+    "required": true,
+    "officialLaunchBlockedUntilPass": true,
+    "currentState": "PREPARED",
+    "externalProviderTruth": "OBSERVED_ONLY__NO_FAKE_PASS",
+    "jupiter": {
+      "vrfdVerification": "REQUIRED_HANDOFF__EXTERNAL_REVIEW",
+      "organicScore": "OBSERVE_POST_LAUNCH__CANNOT_PRE_GUARANTEE",
+      "shieldTargets": [
+        "MINT_AUTHORITY_DISABLED",
+        "FREEZE_AUTHORITY_DISABLED",
+        "NO_TRANSFER_FEE",
+        "SELLABILITY_PROVEN",
+        "LIQUIDITY_DEPTH_OBSERVED",
+        "TOP_HOLDER_CONCENTRATION_DISCLOSED"
+      ]
+    },
+    "dexScreener": {
+      "indexing": "VERIFY_AFTER_POOL_PLUS_FIRST_TRANSACTION",
+      "identityParityRequired": true,
+      "enhancedTokenInfo": "OPTIONAL_PAID_PROVIDER_ACTION__HUMAN_APPROVAL_REQUIRED"
+    },
+    "metadata": {
+      "name": "MIRACLE",
+      "symbol": "MRCL",
+      "description": "PENDING_FINAL_OWNER_APPROVAL",
+      "canonicalImage": "PENDING_FINAL_URI",
+      "website": "PENDING_FINAL_MRCL_ROUTE",
+      "socials": "PENDING_FINAL_MRCL_PROFILE",
+      "rule": "NO_POOL_CREATION_WITH_PLACEHOLDER_OR_UNVERIFIED_CANONICAL_IDENTITY"
+    },
+    "worldzTechnologyRequired": [
+      "Worldz Token Identity Engine™",
+      "WorldDexPush™",
+      "WorldzProof™",
+      "WorldzFullScope™",
+      "WorldzWatch™",
+      "WorldzLock™",
+      "WorldzVest™",
+      "Worldz Universal FlyWheel™",
+      "No Token Left Behind™",
+      "Worldz OmniBuildz™",
+      "Worldz LinkedAsset™",
+      "ProofBurn™",
+      "AUTO",
+      "G.R.A.C.E.",
+      "ZED LED Command Centre MAX™"
+    ]
+  }
 }
