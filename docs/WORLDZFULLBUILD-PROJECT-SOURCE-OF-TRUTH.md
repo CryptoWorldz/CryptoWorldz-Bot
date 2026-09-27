@@ -252,3 +252,12 @@ The next engineering gate is read-only chain and treasury adapters: balances, mu
 WorldzApp Stage 2 infrastructure is now code-built at the interface level. Eight chain adapter slots are registered across Solana, EVM networks, XRPL, Sui and Robinhood research. The shared adapter contract is **read only** and structurally rejects signing, sending, broadcasting, bridging, swapping, staking, signer changes and private-key operations.
 
 The app also now has a storage policy, public session schema and normalized activity-event schema. Seed phrases, private keys, recovery phrases, hardware-wallet secrets and exported signing keys are forbidden from WorldzApp storage. Provider/RPC bindings are not yet configured and no live balance or multisig-read claim is made until chain-by-chain read proof passes.
+
+
+## WorldzApp™ live-read provider gate — 2026-09-27
+
+The Stage 2 read-only layer now includes documented development verification bindings for Solana, Base, BNB Chain, HyperEVM, XRPL, Sui and Robinhood Chain. Ethereum remains provider/environment-required rather than inventing an official public production endpoint.
+
+A dedicated CI workflow and proof runner now verify public chain health/identity reads and a finalized Solana balance read for the owner-approved public JayJayTeamDev address. These public endpoints are development verification infrastructure only; production providers remain environment/secret configured.
+
+The proof workflow contains no signing, submission, broadcasting, bridging, swapping, staking or signer-change path.
