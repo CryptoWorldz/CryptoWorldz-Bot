@@ -1,0 +1,74 @@
+{
+  "schema": "WORLDZ-APP-STAGE5C-LIVE-MULTISIG-PROOF-GATES-V1",
+  "updatedAt": "2026-09-27",
+  "mode": "READ_ONLY_PUBLIC_EVIDENCE",
+  "approvalSubmission": false,
+  "signing": false,
+  "execution": false,
+  "broadcast": false,
+  "profiles": [
+    {
+      "id": "wldz_squads",
+      "system": "SQUADS_V4",
+      "chain": "solana",
+      "state": "LIVE_PROOF_PASSED",
+      "proofWorkflow": "WorldzApp Stage 5B Live Squads Proof",
+      "adapterId": "squads_v4"
+    },
+    {
+      "id": "worldz_safe",
+      "system": "SAFE_SMART_ACCOUNT",
+      "chain": "evm",
+      "state": "WORLDZ_PROFILE_REQUIRED",
+      "requiredConfiguration": [
+        "WORLDZ_SAFE_ADDRESS",
+        "WORLDZ_SAFE_TX_HASH",
+        "WORLDZ_SAFE_TX_SERVICE_URL"
+      ],
+      "optionalSecretConfiguration": [
+        "WORLDZ_SAFE_API_KEY"
+      ],
+      "proofReads": [
+        "Safe status owners/threshold",
+        "multisig transaction confirmations"
+      ],
+      "adapterId": "safe_smart_account"
+    },
+    {
+      "id": "worldz_xrpl",
+      "system": "XRPL_SIGNER_LIST",
+      "chain": "xrpl",
+      "state": "WORLDZ_PROFILE_REQUIRED",
+      "requiredConfiguration": [
+        "WORLDZ_XRPL_RPC_URL",
+        "WORLDZ_XRPL_MULTISIG_ACCOUNT",
+        "WORLDZ_XRPL_TX_HASH"
+      ],
+      "proofReads": [
+        "validated account SignerList",
+        "SignerQuorum and SignerEntries",
+        "public transaction Signers"
+      ],
+      "adapterId": "xrpl_signer_list"
+    },
+    {
+      "id": "worldz_sui",
+      "system": "SUI_WEIGHTED_MULTISIG",
+      "chain": "sui",
+      "state": "WORLDZ_PROFILE_REQUIRED",
+      "requiredConfiguration": [
+        "WORLDZ_SUI_MULTISIG_ADDRESS",
+        "WORLDZ_SUI_MULTISIG_CONFIG_JSON",
+        "WORLDZ_SUI_PROOF_TX_DIGEST"
+      ],
+      "proofReads": [
+        "canonical public multisig member configuration",
+        "threshold and weights",
+        "known public transaction evidence"
+      ],
+      "note": "Sui native multisig configuration is key-based; do not invent an on-chain Safe-style owner registry.",
+      "adapterId": "sui_weighted_multisig"
+    }
+  ],
+  "releaseRule": "Stage 5C is not complete until each non-Solana Worldz profile has an explicitly approved public identifier and proof evidence. Harness readiness is not live-profile proof."
+}

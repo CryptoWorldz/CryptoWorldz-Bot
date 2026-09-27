@@ -1,0 +1,88 @@
+{
+  "schema": "WORLDZ-APP-PROVIDER-BINDINGS-V1",
+  "mode": "READ_ONLY",
+  "updatedAt": "2026-09-27",
+  "bindings": [
+    {
+      "chain": "solana",
+      "family": "SOLANA",
+      "env": "WORLDZ_SOLANA_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "publicVerificationEndpoint": "https://api.mainnet.solana.com",
+      "state": "PUBLIC_VERIFY_READY__PRODUCTION_ENV_REQUIRED",
+      "healthMethod": "getHealth"
+    },
+    {
+      "chain": "ethereum",
+      "family": "EVM",
+      "env": "WORLDZ_ETHEREUM_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "expectedChainId": 1,
+      "publicVerificationEndpoint": null,
+      "state": "ENV_BINDING_READY__NO_OFFICIAL_PUBLIC_VERIFY_ENDPOINT_SELECTED",
+      "healthMethod": "eth_chainId"
+    },
+    {
+      "chain": "base",
+      "family": "EVM",
+      "env": "WORLDZ_BASE_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "expectedChainId": 8453,
+      "publicVerificationEndpoint": "https://mainnet.base.org",
+      "state": "PUBLIC_VERIFY_READY__PRODUCTION_ENV_REQUIRED",
+      "healthMethod": "eth_chainId"
+    },
+    {
+      "chain": "bnb",
+      "family": "EVM",
+      "env": "WORLDZ_BNB_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "expectedChainId": 56,
+      "publicVerificationEndpoint": "https://bsc-dataseed.bnbchain.org",
+      "state": "PUBLIC_VERIFY_READY__PRODUCTION_ENV_REQUIRED",
+      "healthMethod": "eth_chainId"
+    },
+    {
+      "chain": "hyperevm",
+      "family": "EVM",
+      "env": "WORLDZ_HYPEREVM_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "expectedChainId": 999,
+      "publicVerificationEndpoint": "https://rpc.hyperliquid.xyz/evm",
+      "state": "PUBLIC_VERIFY_READY__PRODUCTION_ENV_REQUIRED",
+      "healthMethod": "eth_chainId"
+    },
+    {
+      "chain": "xrpl",
+      "family": "XRPL",
+      "env": "WORLDZ_XRPL_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "publicVerificationEndpoint": "https://s1.ripple.com:51234/",
+      "state": "PUBLIC_VERIFY_READY__PRODUCTION_ENV_REQUIRED",
+      "healthMethod": "server_info"
+    },
+    {
+      "chain": "sui",
+      "family": "SUI",
+      "env": "WORLDZ_SUI_GRAPHQL_URL",
+      "transport": "GRAPHQL_HTTP",
+      "publicVerificationEndpoint": "https://graphql.mainnet.sui.io/graphql",
+      "state": "PUBLIC_VERIFY_READY__GRAPHQL__PRODUCTION_ENV_REQUIRED",
+      "healthMethod": "chainIdentifier"
+    },
+    {
+      "chain": "robinhood",
+      "family": "EVM",
+      "env": "WORLDZ_ROBINHOOD_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "expectedChainId": 4663,
+      "publicVerificationEndpoint": "https://rpc.mainnet.chain.robinhood.com",
+      "state": "PUBLIC_VERIFY_READY__PRODUCTION_ENV_REQUIRED",
+      "healthMethod": "eth_chainId"
+    }
+  ],
+  "secretRule": "Credential-bearing production provider URLs come from deployment environment only. Never expose API keys or credentials to browser bundles or public JSON.",
+  "publicVerificationRule": "Public endpoints listed here are development/live-read verification paths only, not production infrastructure commitments.",
+  "proofRule": "A configured environment variable or reachable hostname is not live proof. Required reads pass only when the exact current transport returns READ_OK and expected chain identity.",
+  "transportRule": "Verify the exact current transport/method live. Endpoint hostname existence does not prove legacy protocol support."
+}

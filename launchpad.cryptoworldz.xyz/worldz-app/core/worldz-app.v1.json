@@ -1,0 +1,284 @@
+{
+  "schema": "WORLDZ-APP-V1",
+  "brand": "WorldzApp™",
+  "parent": "WorldzFullBuild™",
+  "updatedAt": "2026-09-27",
+  "lifecycle": "GOOGLE_PLAY_READINESS__APPROVED_EMBLEM_PRODUCTION_ASSETS_READY__ANDROID_API36__SIGNED_AAB_RELEASE_GATED",
+  "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
+  "delivery": {
+    "current": "INSTALLABLE_PWA_FOUNDATION",
+    "targets": [
+      "Android",
+      "iOS"
+    ],
+    "nativePackaging": "PLANNED_AFTER_SECURITY_AND_WALLET_ADAPTER_GATES"
+  },
+  "principles": {
+    "oneInterface": true,
+    "onePrivateKeyForAllChains": false,
+    "externalWalletCustody": true,
+    "denyByDefaultCapabilities": true,
+    "perModuleAuthorityIsolation": true,
+    "perChainReleaseGates": true,
+    "noSeedPhraseCollection": true,
+    "noPrivateKeyCollection": true,
+    "worldzProofForValueMovement": true
+  },
+  "modules": [
+    {
+      "id": "home",
+      "brand": "WorldzApp Home",
+      "state": "CODE_BUILT",
+      "route": "/worldz-app/",
+      "authority": "READ_ONLY"
+    },
+    {
+      "id": "treasury",
+      "brand": "WorldzMiracleWallet™",
+      "state": "CODE_BUILT_FOUNDATION",
+      "route": "/miracle-wallet/",
+      "authority": "DRAFT_ONLY_NO_MAINNET"
+    },
+    {
+      "id": "launchpad",
+      "brand": "WorldzLaunchPad™",
+      "state": "EXISTING_SURFACE",
+      "route": "/",
+      "authority": "CHAIN_BY_CHAIN_GATED"
+    },
+    {
+      "id": "command",
+      "brand": "ZED LED Command Centre MAX™",
+      "state": "EXISTING_SURFACE",
+      "route": "https://cryptoworldz.xyz/command-centre-max/",
+      "authority": "ROLE_GATED"
+    },
+    {
+      "id": "fullbuild",
+      "brand": "WorldzFullBuild™",
+      "state": "EXISTING_SURFACE",
+      "route": "/fullbuild/",
+      "authority": "READ_ONLY"
+    },
+    {
+      "id": "fullscope",
+      "brand": "WorldzFullScope™",
+      "state": "EXISTING_SURFACE",
+      "route": "/fullscope/",
+      "authority": "CONTROLLED_ACTION_INTENTS"
+    },
+    {
+      "id": "votes",
+      "brand": "Worldz Votes Centre™",
+      "state": "INTEGRATION_PLANNED",
+      "route": null,
+      "authority": "POPULARITY_ONLY"
+    },
+    {
+      "id": "govern",
+      "brand": "WorldzGovern™",
+      "state": "INTEGRATION_PLANNED",
+      "route": null,
+      "authority": "DAO_GOVERNANCE_ONLY"
+    },
+    {
+      "id": "linkz",
+      "brand": "WorldzLinkz™",
+      "state": "EXISTING_SURFACE",
+      "route": "https://cryptoworldz.xyz/worldzlinkz/",
+      "authority": "READ_ONLY"
+    },
+    {
+      "id": "proof",
+      "brand": "WorldzProof™",
+      "state": "FOUNDATION",
+      "route": null,
+      "authority": "PROOF_AND_AUDIT"
+    },
+    {
+      "id": "impact",
+      "brand": "DonateWorldz",
+      "state": "INTEGRATION_PLANNED",
+      "route": null,
+      "authority": "HUMANITARIAN_SEPARATE_FROM_CRYPTO_CUSTODY"
+    }
+  ],
+  "appSecurity": {
+    "mainnetBroadcastEnabled": false,
+    "automaticBridgeEnabled": false,
+    "automaticInvestmentEnabled": false,
+    "automaticSwapEnabled": false,
+    "transactionReviewRequired": true,
+    "simulationRequiredBeforeSigning": true,
+    "signerThresholdRequiredForTreasury": true
+  },
+  "sourcePaths": {
+    "web": "launchpad.cryptoworldz.xyz/worldz-app/",
+    "architecture": "docs/WORLDZAPP-ARCHITECTURE.md",
+    "capabilities": "launchpad.cryptoworldz.xyz/worldz-app/core/capability-registry.json",
+    "treasuryProfiles": "launchpad.cryptoworldz.xyz/worldz-app/core/treasury-profiles.json",
+    "proposalSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/proposal.schema.json",
+    "proofSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/worldzproof.schema.json",
+    "identityRoles": "launchpad.cryptoworldz.xyz/worldz-app/core/identity-roles.json",
+    "mobileHandoff": "launchpad.cryptoworldz.xyz/worldz-app/core/mobile-handoff.json",
+    "mobileHandoffRuntime": "launchpad.cryptoworldz.xyz/worldz-app/mobile-handoff.js",
+    "simulationPolicy": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-policy.json",
+    "simulationContract": "src/worldz-app/simulation-contract.js",
+    "simulationBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-bindings.json",
+    "simulationAdapterContract": "src/worldz-app/simulation-adapter-contract.js",
+    "simulationAdapters": "src/worldz-app/simulation-adapters.js",
+    "multisigApprovalAdapters": "launchpad.cryptoworldz.xyz/worldz-app/core/multisig-approval-adapters.json",
+    "multisigApprovalContract": "src/worldz-app/multisig-approval-contract.js",
+    "multisigApprovalRuntimeAdapters": "src/worldz-app/multisig-approval-adapters.js",
+    "androidPackageContract": "apps/worldzapp-android/android-package.v1.json",
+    "androidTwaManifestTemplate": "apps/worldzapp-android/twa-manifest.template.json",
+    "androidAssetLinksTemplate": "apps/worldzapp-android/assetlinks.template.json",
+    "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
+    "androidPlayIcon": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
+    "androidMaskableIcon": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
+    "androidIconVerifier": "tools/verify-worldzapp-icon-assets.js"
+  },
+  "identityWalletFoundation": {
+    "lifecycle": "CODE_BUILT_STAGE_3B_GUARDED_FOUNDATION",
+    "publicSessionContract": "src/worldz-app/session-contract.js",
+    "identityAssertionContract": "src/worldz-app/identity-assertion-contract.js",
+    "walletConnectionContract": "src/worldz-app/wallet-connection-contract.js",
+    "mobileHandoffContract": "src/worldz-app/mobile-handoff-contract.js",
+    "runtime": "launchpad.cryptoworldz.xyz/worldz-app/wallet-connect.js",
+    "mobileRuntime": "launchpad.cryptoworldz.xyz/worldz-app/mobile-handoff.js",
+    "registry": "launchpad.cryptoworldz.xyz/worldz-app/core/wallet-connectors.json",
+    "identityRoles": "launchpad.cryptoworldz.xyz/worldz-app/core/identity-roles.json",
+    "mobileHandoffPolicy": "launchpad.cryptoworldz.xyz/worldz-app/core/mobile-handoff.json",
+    "activeConnectionPaths": [
+      "SOLANA_INJECTED",
+      "EVM_EIP1193",
+      "EXTERNAL_CONNECTION_ONLY_ADAPTER_BRIDGE"
+    ],
+    "providerIntegrationGates": [
+      "XRPL_XAMAN_PUBLIC_CLIENT_ID_AND_REDIRECT_REGISTRATION",
+      "SUI_DAPP_KIT_CORE_INTEGRATION",
+      "WALLETCONNECT_V2_PAIRING_CLIENT_INTEGRATION"
+    ],
+    "sessionPersistence": "SESSION_ONLY_BY_DEFAULT",
+    "publicAddressPersistence": "REQUIRES_EXPLICIT_CONSENT",
+    "roleAuthorityInheritance": false,
+    "signing": false,
+    "transactionSend": false,
+    "broadcast": false,
+    "secretCollection": false,
+    "tests": [
+      "test/worldz-app-stage3.test.js",
+      "test/worldz-app-stage3b.test.js"
+    ],
+    "nextGate": "BIND_AND_VERIFY_XRPL_SUI_MOBILE_PROVIDERS"
+  },
+  "simulationFoundation": {
+    "lifecycle": "STAGE_4B_LIVE_PROOF_PASSED",
+    "contract": "src/worldz-app/simulation-contract.js",
+    "adapterContract": "src/worldz-app/simulation-adapter-contract.js",
+    "adapters": "src/worldz-app/simulation-adapters.js",
+    "policy": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-policy.json",
+    "bindings": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-bindings.json",
+    "humanReadableEffectsRequired": true,
+    "effectAcknowledgementRequired": true,
+    "liveChainBindings": "SOLANA_AND_EVM_CODE_BUILT__LIVE_PROOF_PENDING",
+    "methods": [
+      "SOLANA_SIMULATE_TRANSACTION",
+      "EVM_ETH_CALL",
+      "EVM_ETH_ESTIMATE_GAS"
+    ],
+    "signatureRequest": false,
+    "broadcast": false,
+    "nextGate": "STAGE_5_NATIVE_MULTISIG_APPROVAL_ADAPTERS",
+    "liveProof": {
+      "state": "PASSED",
+      "verifiedAt": "2026-09-27T12:00:25.715Z",
+      "workflowRunId": 36317541759,
+      "proofSha256": "bc74711f21b1e3a53f7b444df2b70bc8e3e8cb425397788c02254dc77b5caca1",
+      "requiredPassed": [
+        "solana",
+        "base",
+        "bnb",
+        "hyperevm",
+        "robinhood"
+      ],
+      "ethereum": "SKIP_NO_APPROVED_VERIFY_ENDPOINT",
+      "signing": false,
+      "broadcast": false,
+      "stateMutation": false
+    }
+  },
+  "multisigApprovalFoundation": {
+    "lifecycle": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__SAFE_XRPL_SUI_LIVE_PROOF_PENDING",
+    "contract": "src/worldz-app/multisig-approval-contract.js",
+    "adapters": "src/worldz-app/multisig-approval-adapters.js",
+    "registry": "launchpad.cryptoworldz.xyz/worldz-app/core/multisig-approval-adapters.json",
+    "systems": [
+      "SQUADS_V4",
+      "SAFE_SMART_ACCOUNT",
+      "XRPL_SIGNER_LIST",
+      "SUI_WEIGHTED_MULTISIG"
+    ],
+    "thresholdModes": [
+      "COUNT",
+      "WEIGHT"
+    ],
+    "approvalSubmission": false,
+    "signing": false,
+    "execution": false,
+    "broadcast": false,
+    "nextGate": "ANDROID_16_PACKAGE_FOUNDATION__NON_SOLANA_MULTISIG_PROFILES_REMAIN_GATED",
+    "liveProof": {
+      "squadsWldz": {
+        "state": "PASSED",
+        "verifiedAt": "2026-09-27T12:09:21.856Z",
+        "workflowRunId": 36318035477,
+        "proofSha256": "ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0",
+        "worldzProfile": "WLDZ_OPERATIONAL_SQUADS",
+        "network": "mainnet-beta",
+        "multisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+        "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+        "threshold": 1,
+        "memberCount": 2,
+        "transactionIndex": 20,
+        "proposalIndex": 14,
+        "proposalStatus": "Executed",
+        "proposalPda": "3AxY7YshaCNSyu37hpGRYqwqW2AZs4E6kEZk6SE12kiB",
+        "approvedCount": 1,
+        "thresholdMet": true,
+        "executionAllowed": false,
+        "broadcastAllowed": false,
+        "approvalSubmission": false,
+        "signing": false,
+        "privateMaterialRead": false
+      }
+    }
+  },
+  "androidPackagingFoundation": {
+    "lifecycle": "CODE_BUILT_API36_TWA_PLAY_READINESS__APPROVED_EMBLEM_PRODUCTION_ASSETS_READY__AAB_RELEASE_GATED",
+    "technology": "TRUSTED_WEB_ACTIVITY",
+    "bubblewrapVersion": "1.25.0",
+    "targetSdk": 36,
+    "compileSdk": 36,
+    "sourcePwa": "https://launchpad.cryptoworldz.xyz/worldz-app/",
+    "candidateApplicationId": "xyz.cryptoworldz.worldzapp",
+    "applicationIdState": "PROVISIONAL_UNTIL_PLAY_APPLICATION_CREATED",
+    "outputFormat": "ANDROID_APP_BUNDLE_AAB",
+    "signedAabBuilt": false,
+    "digitalAssetLinksDeployed": false,
+    "officialCenterLogoRasterReady": true,
+    "playAppSigningConfigured": false,
+    "publicReleaseAuthorized": false,
+    "mainnetBroadcastEnabled": false,
+    "nextGate": "FINAL_APPLICATION_ID__PLAY_IDENTITY_PRIVACY_SIGNING_ASSETLINKS_AAB_TESTING",
+    "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
+    "playIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
+      "sha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d"
+    },
+    "maskableIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
+      "sha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15"
+    }
+  }
+}

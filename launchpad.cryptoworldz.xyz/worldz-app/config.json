@@ -1,0 +1,241 @@
+{
+  "schema": "WORLDZ-APP-RUNTIME-V1",
+  "brand": "WorldzApp™",
+  "status": "GOOGLE_PLAY_READINESS__APPROVED_EMBLEM_PRODUCTION_ASSETS_READY__ANDROID_API36__STAGE_5C_HARNESS_BUILT__NO_MAINNET_EXECUTION",
+  "tagline": "WorldzEcosystem™. One App. Separate Authority.",
+  "coreContract": "/worldz-app/core/worldz-app.v1.json",
+  "modules": [
+    {
+      "id": "home",
+      "brand": "WorldzApp Home",
+      "state": "CODE_BUILT",
+      "route": "/worldz-app/",
+      "authority": "READ_ONLY"
+    },
+    {
+      "id": "treasury",
+      "brand": "WorldzMiracleWallet™",
+      "state": "CODE_BUILT_FOUNDATION",
+      "route": "/miracle-wallet/",
+      "authority": "DRAFT_ONLY_NO_MAINNET"
+    },
+    {
+      "id": "launchpad",
+      "brand": "WorldzLaunchPad™",
+      "state": "EXISTING_SURFACE",
+      "route": "/",
+      "authority": "CHAIN_BY_CHAIN_GATED"
+    },
+    {
+      "id": "command",
+      "brand": "ZED LED Command Centre MAX™",
+      "state": "EXISTING_SURFACE",
+      "route": "https://cryptoworldz.xyz/command-centre-max/",
+      "authority": "ROLE_GATED"
+    },
+    {
+      "id": "fullbuild",
+      "brand": "WorldzFullBuild™",
+      "state": "EXISTING_SURFACE",
+      "route": "/fullbuild/",
+      "authority": "READ_ONLY"
+    },
+    {
+      "id": "fullscope",
+      "brand": "WorldzFullScope™",
+      "state": "EXISTING_SURFACE",
+      "route": "/fullscope/",
+      "authority": "CONTROLLED_ACTION_INTENTS"
+    },
+    {
+      "id": "votes",
+      "brand": "Worldz Votes Centre™",
+      "state": "INTEGRATION_PLANNED",
+      "route": null,
+      "authority": "POPULARITY_ONLY"
+    },
+    {
+      "id": "govern",
+      "brand": "WorldzGovern™",
+      "state": "INTEGRATION_PLANNED",
+      "route": null,
+      "authority": "DAO_GOVERNANCE_ONLY"
+    },
+    {
+      "id": "linkz",
+      "brand": "WorldzLinkz™",
+      "state": "EXISTING_SURFACE",
+      "route": "https://cryptoworldz.xyz/worldzlinkz/",
+      "authority": "READ_ONLY"
+    },
+    {
+      "id": "proof",
+      "brand": "WorldzProof™",
+      "state": "FOUNDATION",
+      "route": null,
+      "authority": "PROOF_AND_AUDIT"
+    },
+    {
+      "id": "impact",
+      "brand": "DonateWorldz",
+      "state": "INTEGRATION_PLANNED",
+      "route": null,
+      "authority": "HUMANITARIAN_SEPARATE_FROM_CRYPTO_CUSTODY"
+    }
+  ],
+  "security": {
+    "mainnetBroadcastEnabled": false,
+    "automaticBridgeEnabled": false,
+    "automaticInvestmentEnabled": false,
+    "automaticSwapEnabled": false,
+    "transactionReviewRequired": true,
+    "simulationRequiredBeforeSigning": true,
+    "signerThresholdRequiredForTreasury": true
+  },
+  "quickLinks": [
+    {
+      "label": "WorldzMiracleWallet™",
+      "href": "/miracle-wallet/",
+      "kind": "treasury"
+    },
+    {
+      "label": "WorldzLaunchPad™",
+      "href": "/",
+      "kind": "launch"
+    },
+    {
+      "label": "WorldzFullBuild™",
+      "href": "/fullbuild/",
+      "kind": "architecture"
+    },
+    {
+      "label": "WorldzFullScope™",
+      "href": "/fullscope/",
+      "kind": "command"
+    },
+    {
+      "label": "WorldzLinkz™",
+      "href": "https://cryptoworldz.xyz/worldzlinkz/",
+      "kind": "directory"
+    }
+  ],
+  "readAdapterFoundation": {
+    "state": "LIVE_READ_VERIFIED",
+    "registry": "/worldz-app/core/read-adapter-registry.json",
+    "storagePolicy": "/worldz-app/core/storage-policy.json",
+    "sessionSchema": "/worldz-app/core/session.schema.json",
+    "activityEventSchema": "/worldz-app/core/activity-event.schema.json",
+    "providerBindings": "ENVIRONMENT_ONLY_PRODUCTION__PUBLIC_VERIFY_MODE_AVAILABLE",
+    "liveReadProof": "PASSED_WORKFLOW_36287750004",
+    "execution": false
+  },
+  "identityWalletFoundation": {
+    "state": "CODE_BUILT_STAGE_3B_GUARDED_FOUNDATION",
+    "sessionStorage": "SESSION_ONLY_BY_DEFAULT",
+    "connectors": "/worldz-app/core/wallet-connectors.json",
+    "identityRoles": "/worldz-app/core/identity-roles.json",
+    "mobileHandoff": "/worldz-app/core/mobile-handoff.json",
+    "browserRuntime": "/worldz-app/wallet-connect.js",
+    "mobileRuntime": "/worldz-app/mobile-handoff.js",
+    "supportedNow": [
+      "SOLANA_INJECTED",
+      "EVM_EIP1193",
+      "EXTERNAL_CONNECTION_ONLY_ADAPTER_BRIDGE"
+    ],
+    "providerGates": [
+      "XRPL_XAMAN_PUBLIC_CLIENT_ID_AND_REDIRECT_REGISTRATION",
+      "SUI_DAPP_KIT_CORE_INTEGRATION",
+      "WALLETCONNECT_V2_PAIRING_CLIENT_INTEGRATION"
+    ],
+    "signing": false,
+    "broadcast": false,
+    "secretCollection": false,
+    "roleAuthorityInheritance": false,
+    "nextGate": "BIND_AND_VERIFY_XRPL_SUI_MOBILE_PROVIDERS"
+  },
+  "simulationFoundation": {
+    "state": "STAGE_4B_LIVE_PROOF_PASSED",
+    "policy": "/worldz-app/core/simulation-policy.json",
+    "contract": "src/worldz-app/simulation-contract.js",
+    "liveChainBindings": "SOLANA_AND_EVM_CODE_BUILT__LIVE_PROOF_PENDING",
+    "signatureRequest": false,
+    "broadcast": false,
+    "nextGate": "STAGE_5_NATIVE_MULTISIG_APPROVAL_ADAPTERS",
+    "bindings": "/worldz-app/core/simulation-bindings.json",
+    "supportedNow": [
+      "SOLANA_SIMULATE_TRANSACTION",
+      "EVM_ETH_CALL",
+      "EVM_ETH_ESTIMATE_GAS"
+    ],
+    "liveProof": {
+      "state": "PASSED",
+      "verifiedAt": "2026-09-27T12:00:25.715Z",
+      "workflowRunId": 36317541759,
+      "proofSha256": "bc74711f21b1e3a53f7b444df2b70bc8e3e8cb425397788c02254dc77b5caca1",
+      "requiredPassed": [
+        "solana",
+        "base",
+        "bnb",
+        "hyperevm",
+        "robinhood"
+      ],
+      "ethereum": "SKIP_NO_APPROVED_VERIFY_ENDPOINT",
+      "signing": false,
+      "broadcast": false,
+      "stateMutation": false
+    }
+  },
+  "multisigApprovalFoundation": {
+    "state": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__STAGE_5C_HARNESS_BUILT",
+    "registry": "/worldz-app/core/multisig-approval-adapters.json",
+    "supportedNow": [
+      "SQUADS_V4_STATE",
+      "SAFE_CONFIRMATION_STATE",
+      "XRPL_SIGNERLIST_WEIGHT",
+      "SUI_WEIGHTED_MULTISIG_STATE"
+    ],
+    "approvalSubmission": false,
+    "signing": false,
+    "execution": false,
+    "broadcast": false,
+    "nextGate": "APPROVE_REAL_WORLDZ_SAFE_XRPL_SUI_PUBLIC_PROFILES__THEN_RUN_LIVE_PROOFS",
+    "liveProof": {
+      "squads": {
+        "state": "PASSED",
+        "workflowRunId": 36318035477,
+        "proofSha256": "ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0",
+        "profile": "WLDZ_OPERATIONAL_SQUADS"
+      },
+      "safe": "WORLDZ_PROFILE_REQUIRED",
+      "xrpl": "WORLDZ_PROFILE_REQUIRED",
+      "sui": "WORLDZ_PROFILE_REQUIRED"
+    },
+    "liveProofGates": "/worldz-app/core/multisig-live-proof-gates.json"
+  },
+  "androidPackagingFoundation": {
+    "state": "CODE_BUILT_API36_TWA_PLAY_READINESS__APPROVED_EMBLEM_PRODUCTION_ASSETS_READY",
+    "technology": "TRUSTED_WEB_ACTIVITY",
+    "targetSdk": 36,
+    "candidateApplicationId": "xyz.cryptoworldz.worldzapp",
+    "packageIdState": "PROVISIONAL_UNTIL_PLAY_APPLICATION_CREATED",
+    "signedAabBuilt": false,
+    "approvedCenterLogoReady": true,
+    "digitalAssetLinksDeployed": false,
+    "publicReleaseAuthorized": false,
+    "nextGate": "FINAL_APPLICATION_ID_PLAY_DEVELOPER_IDENTITY_PRIVACY_SIGNING_ASSETLINKS_AAB_TESTING",
+    "playReleaseContract": "apps/worldzapp-android/play-release.v1.json",
+    "playSubmissionReady": false,
+    "privacyPolicyFinalized": false,
+    "dataSafetyFinalized": false,
+    "financialFeaturesDeclarationFinalized": false,
+    "ownerApprovedEmblemSource": true,
+    "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
+    "approvedEmblemPreview": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg",
+    "finalIconRaster": "PENDING_VALID_512_PNG_AND_MASKABLE_EXPORT",
+    "playIcon": "/worldz-app/assets/worldz-app-icon-512.png",
+    "playIconSha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d",
+    "maskableIcon": "/worldz-app/assets/worldz-app-icon-maskable-512.png",
+    "maskableIconSha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15"
+  },
+  "keepOnKeepinOn": true
+}
