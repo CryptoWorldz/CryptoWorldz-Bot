@@ -1,0 +1,99 @@
+{
+  "schema": "WORLDZ-APP-READ-PROVIDERS-V1",
+  "updatedAt": "2026-09-27",
+  "purpose": "DEVELOPMENT_AND_LIVE_READ_VERIFICATION_ONLY",
+  "productionRule": "Public/rate-limited endpoints are not production infrastructure. Production provider URLs must be configured through environment/secrets and verified independently.",
+  "providers": [
+    {
+      "chain": "solana",
+      "family": "SOLANA",
+      "network": "mainnet",
+      "chainId": null,
+      "publicVerificationEndpoint": "https://api.mainnet.solana.com",
+      "sourceAuthority": "Solana official docs",
+      "production": "ENV_PROVIDER_REQUIRED",
+      "state": "PUBLIC_VERIFY_READY"
+    },
+    {
+      "chain": "ethereum",
+      "family": "EVM",
+      "network": "mainnet",
+      "chainId": 1,
+      "publicVerificationEndpoint": null,
+      "sourceAuthority": "No Ethereum Foundation public production RPC selected",
+      "production": "ENV_PROVIDER_REQUIRED",
+      "state": "ENV_REQUIRED"
+    },
+    {
+      "chain": "base",
+      "family": "EVM",
+      "network": "mainnet",
+      "chainId": 8453,
+      "publicVerificationEndpoint": "https://mainnet.base.org",
+      "sourceAuthority": "Base official docs",
+      "production": "ENV_PROVIDER_REQUIRED",
+      "state": "PUBLIC_VERIFY_READY"
+    },
+    {
+      "chain": "bnb",
+      "family": "EVM",
+      "network": "mainnet",
+      "chainId": 56,
+      "publicVerificationEndpoint": "https://bsc-dataseed.bnbchain.org",
+      "sourceAuthority": "BNB Chain official docs",
+      "production": "ENV_PROVIDER_REQUIRED",
+      "state": "PUBLIC_VERIFY_READY"
+    },
+    {
+      "chain": "hyperevm",
+      "family": "EVM",
+      "network": "mainnet",
+      "chainId": 999,
+      "publicVerificationEndpoint": "https://rpc.hyperliquid.xyz/evm",
+      "sourceAuthority": "Hyperliquid official docs",
+      "production": "ENV_PROVIDER_REQUIRED",
+      "state": "PUBLIC_VERIFY_READY"
+    },
+    {
+      "chain": "xrpl",
+      "family": "XRPL",
+      "network": "mainnet",
+      "chainId": null,
+      "publicVerificationEndpoint": "https://s1.ripple.com:51234/",
+      "sourceAuthority": "XRPL official docs",
+      "production": "ENV_PROVIDER_REQUIRED",
+      "state": "PUBLIC_VERIFY_READY"
+    },
+    {
+      "chain": "sui",
+      "family": "SUI",
+      "network": "mainnet",
+      "chainId": null,
+      "publicVerificationEndpoint": "https://fullnode.mainnet.sui.io:443",
+      "sourceAuthority": "Sui official network info",
+      "production": "ENV_PROVIDER_REQUIRED",
+      "state": "PUBLIC_VERIFY_READY"
+    },
+    {
+      "chain": "robinhood",
+      "family": "EVM",
+      "network": "mainnet",
+      "chainId": 4663,
+      "publicVerificationEndpoint": "https://rpc.mainnet.chain.robinhood.com",
+      "sourceAuthority": "Robinhood Chain official docs",
+      "production": "ENV_PROVIDER_REQUIRED",
+      "state": "PUBLIC_VERIFY_READY"
+    }
+  ],
+  "envNames": {
+    "solana": "WORLDZAPP_SOLANA_RPC_URL",
+    "ethereum": "WORLDZAPP_ETHEREUM_RPC_URL",
+    "base": "WORLDZAPP_BASE_RPC_URL",
+    "bnb": "WORLDZAPP_BNB_RPC_URL",
+    "hyperevm": "WORLDZAPP_HYPEREVM_RPC_URL",
+    "xrpl": "WORLDZAPP_XRPL_RPC_URL",
+    "sui": "WORLDZAPP_SUI_RPC_URL",
+    "robinhood": "WORLDZAPP_ROBINHOOD_RPC_URL"
+  },
+  "secretRule": "Provider credentials and API keys must never be committed to repository files."
+}
