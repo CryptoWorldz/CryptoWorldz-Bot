@@ -4,14 +4,24 @@
   "updatedAt": "2026-09-27",
   "lifecycle": "OWNER_APPROVED_PLAN__NO_DISTRIBUTION_EXECUTED",
   "team": {
-    "participantTarget": 11,
-    "treasuryTarget": "11_SIGNERS__4_APPROVALS_REQUIRED",
+    "participantTarget": 12,
+    "treasuryTarget": "12_PLANNED_PARTICIPANTS__4_APPROVALS_REQUIRED",
     "identityPrivacy": "NON_OWNER_INVITEE_IDENTITY_TO_WALLET_MAPPING_PRIVATE_UNTIL_INDIVIDUAL_CONSENT",
     "additionalRole": {
       "role": "Community Hospitality / Barber & Barista",
       "intendedInvitee": "PRIVATE_UNTIL_CONSENT",
       "status": "INVITATION_APPROVED__CONSENT_AND_VERIFIED_PUBLIC_SOLANA_ADDRESS_PENDING"
-    }
+    },
+    "latestInvitation": {
+      "name": "Amanda",
+      "status": "INVITED__PENDING_ACCEPTANCE",
+      "signerRegistration": "NOT_ACTIVE_UNTIL_EXPLICIT_CONSENT_AND_VERIFIED_PUBLIC_SOLANA_ADDRESS",
+      "tokenParticipation": "NOT_ACTIVE_UNTIL_EXPLICIT_OPT_IN_AND_VERIFIED_PUBLIC_SOLANA_ADDRESS"
+    },
+    "targetHistory": [
+      "11-person target superseded by latest owner direction",
+      "12-person target current as of 2026-09-27"
+    ]
   },
   "walletVerification": {
     "chain": "solana",
