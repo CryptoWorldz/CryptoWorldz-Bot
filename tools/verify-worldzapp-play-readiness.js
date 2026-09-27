@@ -40,7 +40,10 @@ assert(access.publicCoreAccess.requiresPayment===false,"reviewer must not need p
 
 assert(listing.appName==="WorldzApp","listing name drift");
 assert(!/profit|guaranteed return|guaranteed yield/i.test(listing.fullDescriptionDraft),"prohibited/misleading investment language in draft listing");
-assert(listing.graphics.appIcon==="PENDING_OWNER_APPROVED_WORLDZ_CENTER_LOGO","approved icon gate must remain explicit");
+assert(release.branding?.ownerApprovedCentreEmblem===true,"owner-approved centre emblem must be locked");
+assert(release.branding?.sourceSha256==="685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050","approved emblem checksum drift");
+assert(release.branding?.regenerationAllowed===false,"approved emblem must not be regenerated");
+assert(listing.graphics.appIcon==="OWNER_APPROVED_WORLDZ_CENTRE_EMBLEM__SOURCE_LOCKED__ANDROID_DERIVATIVES_PENDING","approved icon status drift");
 
 assert(android.packaging.targetSdk===36&&android.packaging.compileSdk===36,"Android package API drift");
 assert(android.releaseSecurity.signedReleaseBuilt===false,"signed AAB may not be falsely claimed");
@@ -51,7 +54,7 @@ assert(worldz.appSecurity?.mainnetBroadcastEnabled===false,"WorldzApp mainnet br
 
 const blockers=release.releaseBlockers;
 for(const required of [
-  "OWNER_APPROVED_CENTER_LOGO_512_AND_MASKABLE_ASSETS",
+  "APPROVED_EMBLEM_BINARY_IMPORT_AND_DERIVED_ANDROID_ASSETS",
   "VERIFIED_PLAY_DEVELOPER_IDENTITY",
   "PUBLIC_PRIVACY_POLICY_URL",
   "FINAL_DATA_SAFETY_AUDIT_AND_PLAY_FORM",
@@ -66,4 +69,4 @@ console.log("WORLDZAPP_GOOGLE_PLAY_READINESS_FOUNDATION=PASS");
 console.log("submission_ready=false public_release=false");
 console.log("target_sdk="+release.android.targetSdk+" format="+release.android.releaseFormat);
 console.log("data_safety=FINAL_AUDIT_REQUIRED financial_features=FINAL_CONFIRMATION_REQUIRED");
-console.log("approved_icon=PENDING play_app_signing=PENDING signed_aab=PENDING");
+console.log("approved_emblem=LOCKED android_derivatives=PENDING play_app_signing=PENDING signed_aab=PENDING");
