@@ -10,7 +10,6 @@ on:
       - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
       - 'launchpad.cryptoworldz.xyz/worldz-app/config.json'
       - 'launchpad.cryptoworldz.xyz/worldz-app/manifest.webmanifest'
-      - 'launchpad.cryptoworldz.xyz/worldz-app/worldz-app-icon-512.png'
       - 'package.json'
       - '.github/workflows/verify-worldzapp-google-play-readiness.yml'
   workflow_dispatch:
