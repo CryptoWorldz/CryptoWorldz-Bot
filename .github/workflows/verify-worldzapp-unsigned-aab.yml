@@ -75,12 +75,13 @@ jobs:
           const source=JSON.parse(fs.readFileSync('apps/worldzapp-android/twa-manifest.template.json','utf8'));
           const rawBase='https://raw.githubusercontent.com/'+process.env.GITHUB_REPOSITORY+'/'+process.env.GITHUB_SHA+'/apps/worldzapp-android/assets/';
           const keys=[
-            'packageId','host','name','launcherName','themeColor','themeColorDark',
-            'navigationColor','navigationColorDark','navigationDividerColor','navigationDividerColorDark',
+            'packageId','host','name','launcherName','display','backgroundColor',
+            'themeColor','themeColorDark','navigationColor','navigationColorDark',
+            'navigationDividerColor','navigationDividerColorDark','enableNotifications',
             'startUrl','splashScreenFadeOutDuration','appVersion','appVersionCode','shortcuts',
-            'generatorApp','webManifestUrl','fullScopeUrl','features','alphaDependencies',
-            'isChromeOSOnly','isMetaQuest','minSdkVersion','orientation','fingerprints',
-            'additionalTrustedOrigins'
+            'generatorApp','webManifestUrl','fullScopeUrl','fallbackType','features','alphaDependencies',
+            'enableSiteSettingsShortcut','isChromeOSOnly','isMetaQuest','minSdkVersion','orientation',
+            'fingerprints','additionalTrustedOrigins'
           ];
           const manifest={};
           for(const key of keys) if(source[key]!==undefined) manifest[key]=source[key];
