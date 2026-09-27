@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "CODE_BUILT_STAGE_5_MULTISIG_APPROVAL_EVIDENCE_FOUNDATION__LIVE_PROFILE_PROOF_PENDING",
+  "lifecycle": "STAGE_5B_LIVE_SQUADS_PROFILE_PROOF_PASSED__ANDROID_PACKAGE_FOUNDATION_NEXT",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -255,7 +255,7 @@
     }
   },
   "multisigApprovalFoundation": {
-    "lifecycle": "CODE_BUILT_APPROVAL_EVIDENCE_FOUNDATION__LIVE_MULTISIG_PROOF_PENDING",
+    "lifecycle": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__SAFE_XRPL_SUI_LIVE_PROOF_PENDING",
     "contract": "src/worldz-app/multisig-approval-contract.js",
     "adapters": "src/worldz-app/multisig-approval-adapters.js",
     "registry": "launchpad.cryptoworldz.xyz/worldz-app/core/multisig-approval-adapters.json",
@@ -273,6 +273,31 @@
     "signing": false,
     "execution": false,
     "broadcast": false,
-    "nextGate": "BIND_VERIFIED_LIVE_MULTISIG_PROFILES_AND_APPROVAL_EVIDENCE"
+    "nextGate": "ANDROID_16_PACKAGE_FOUNDATION__NON_SOLANA_MULTISIG_PROFILES_REMAIN_GATED",
+    "liveProof": {
+      "squadsWldz": {
+        "state": "PASSED",
+        "verifiedAt": "2026-09-27T12:09:21.856Z",
+        "workflowRunId": 36318035477,
+        "proofSha256": "ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0",
+        "worldzProfile": "WLDZ_OPERATIONAL_SQUADS",
+        "network": "mainnet-beta",
+        "multisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+        "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+        "threshold": 1,
+        "memberCount": 2,
+        "transactionIndex": 20,
+        "proposalIndex": 14,
+        "proposalStatus": "Executed",
+        "proposalPda": "3AxY7YshaCNSyu37hpGRYqwqW2AZs4E6kEZk6SE12kiB",
+        "approvedCount": 1,
+        "thresholdMet": true,
+        "executionAllowed": false,
+        "broadcastAllowed": false,
+        "approvalSubmission": false,
+        "signing": false,
+        "privateMaterialRead": false
+      }
+    }
   }
 }
