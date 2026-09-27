@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-APPROVED-EMBLEM-V1",
   "updatedAt": "2026-09-27",
-  "state": "OWNER_APPROVED_SOURCE_REGISTERED__FINAL_PRODUCTION_RASTER_PENDING",
+  "state": "OWNER_APPROVED_SOURCE_REGISTERED__PRODUCTION_ANDROID_ASSETS_VERIFIED",
   "brand": "Worldz Emblem",
   "approval": {
     "ownerApproved": true,
@@ -20,13 +20,26 @@
     "releaseAsset": false
   },
   "finalProductionAssets": {
-    "state": "PENDING_VALID_EXPORT_AND_CHECKSUM_BINDING",
-    "required": [
-      "512x512 Google Play PNG",
-      "Android launcher/mipmap assets",
-      "maskable safe-zone asset"
-    ],
-    "mustDeriveFromApprovedMaster": true
+    "state": "VERIFIED_AND_CHECKSUM_BOUND",
+    "mustDeriveFromApprovedMaster": true,
+    "playIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
+      "hostedPath": "/worldz-app/assets/worldz-app-icon-512.png",
+      "dimensions": "512x512",
+      "format": "PNG_RGBA_32_BIT_SRGB",
+      "sizeBytes": 670286,
+      "sha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d"
+    },
+    "maskableIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
+      "hostedPath": "/worldz-app/assets/worldz-app-icon-maskable-512.png",
+      "dimensions": "512x512",
+      "format": "PNG_RGBA_32_BIT_SRGB",
+      "sizeBytes": 427484,
+      "sha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15",
+      "safeZone": "APPROVED_EMBLEM_SCALED_WITHIN_MASKABLE_SAFE_ZONE"
+    },
+    "verifier": "tools/verify-worldzapp-icon-assets.js"
   },
   "keepOnKeepinOn": true
 }
