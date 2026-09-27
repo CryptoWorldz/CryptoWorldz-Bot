@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-APP-ANDROID-PACKAGE-V1",
-  "updatedAt": "2026-09-27",
+  "updatedAt": "2026-09-28",
   "product": "WorldzApp™",
   "state": "CODE_BUILT_ANDROID_API36_PLAY_READINESS__APPROVED_EMBLEM_ASSETS_READY__AAB_NOT_RELEASED",
   "packaging": {
@@ -42,7 +42,7 @@
     "unsignedAabBuildProof": "CI_PENDING"
   },
   "assetGates": {
-    "officialCenterLogoRasterReady": true,
+    "officialCenterLogoRasterReady": false,
     "ownerApprovedSourceRegistered": true,
     "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
     "rule": "Use only checksum-bound derivatives of the owner-approved Worldz Emblem. No regeneration or substitution without explicit owner approval.",
@@ -67,7 +67,10 @@
     "requiredBeforeSignedAab": [
       "PLAY_APP_SIGNING_CERT_SHA256",
       "PUBLISHED_DIGITAL_ASSET_LINKS"
-    ]
+    ],
+    "ownerApprovedFinalLogoMasterSha256": "e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec",
+    "finalLogoBinaryReconciliation": "REQUIRED",
+    "currentCommittedIconAssets": "SUPERSEDED_FOR_FINAL_RELEASE__CI_BUILD_ONLY"
   },
   "inheritedWorldzSecurity": {
     "stage4bLiveSimulationProof": "PASSED",
@@ -82,6 +85,7 @@
     "stage5cMultichainHarness": "BUILT"
   },
   "nextGates": [
+    "RECONCILE_FINAL_OWNER_APPROVED_WORLDZAPP_LOGO_BINARIES",
     "PROVE_UNSIGNED_AAB_BUILD",
     "LOCK_ANDROID_APPLICATION_ID_BEFORE_PLAY_APP_CREATION",
     "VERIFY_PLAY_DEVELOPER_IDENTITY_AND_ACCOUNT_REQUIREMENTS",
