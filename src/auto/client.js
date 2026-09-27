@@ -55,6 +55,10 @@ function createAutoClient(config) {
     status: () => request(""),
     dcaStatus: () => request("/dca"),
     dcaSetWallet: (walletAddress) => request("/dca/wallet", { method: "POST", body: { wallet_address: walletAddress } }),
+    dcaAddWallet: (walletAddress, walletRole, label) => request("/dca/wallets", {
+      method: "POST",
+      body: { wallet_address: walletAddress, wallet_role: walletRole, label }
+    }),
     dcaSetLimits: (body) => request("/dca/limits", { method: "POST", body }),
     dcaCreate: (body) => request("/dca/schedules", { method: "POST", body }),
     dcaAction: (scheduleId, action) => request(`/dca/schedules/${encodeURIComponent(scheduleId)}/${encodeURIComponent(action)}`, { method: "POST", body: {} }),
