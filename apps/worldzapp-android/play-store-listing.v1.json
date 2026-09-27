@@ -10,9 +10,10 @@
   "privacyPolicyUrl": "PENDING_PUBLIC_PRIVACY_POLICY_URL",
   "developerContact": "PENDING_PUBLIC_SUPPORT_CONTACT",
   "graphics": {
-    "appIcon": "PENDING_OWNER_APPROVED_WORLDZ_CENTER_LOGO",
+    "appIcon": "OWNER_APPROVED_WORLDZ_CENTRE_EMBLEM__SOURCE_LOCKED__ANDROID_DERIVATIVES_PENDING",
     "featureGraphic": "PENDING",
-    "phoneScreenshots": "PENDING_DEVICE_QA_CAPTURE"
+    "phoneScreenshots": "PENDING_DEVICE_QA_CAPTURE",
+    "ownerApprovedSourceSha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050"
   },
   "truthRule": "Store text and screenshots must describe only capabilities present in the exact submitted build. Gated roadmap features may not be portrayed as live."
 }
