@@ -39,7 +39,10 @@
     "dataSafetyFinalized": false,
     "financialFeaturesDeclarationFinalized": false,
     "reviewAccessFinalized": false,
-    "unsignedAabBuildProof": "CI_PENDING"
+    "unsignedAabBuildProof": "CI_PENDING",
+    "signedReleasePipelineBuilt": true,
+    "signedReleasePipeline": ".github/workflows/worldzapp-final-release-aab.yml",
+    "autoSubmitToPlay": false
   },
   "assetGates": {
     "officialCenterLogoRasterReady": false,
@@ -69,8 +72,11 @@
       "PUBLISHED_DIGITAL_ASSET_LINKS"
     ],
     "ownerApprovedFinalLogoMasterSha256": "e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec",
-    "finalLogoBinaryReconciliation": "REQUIRED",
-    "currentCommittedIconAssets": "SUPERSEDED_FOR_FINAL_RELEASE__CI_BUILD_ONLY"
+    "finalLogoBinaryReconciliation": "DERIVATIVES_PREPARED__REPOSITORY_IMPORT_PENDING",
+    "currentCommittedIconAssets": "SUPERSEDED_FOR_FINAL_RELEASE__CI_BUILD_ONLY",
+    "finalIconPackManifest": "apps/worldzapp-android/final-icon-pack.v1.json",
+    "expectedFinalPlayIconSha256": "f4a517537c1309a5792cbf707f76a945735fd1610bb98a437789f341c6b5c3f8",
+    "expectedFinalMaskableIconSha256": "54615f8001e6664f6c3681e9fa30eeba47b322720ba4af63e943b02a71d76da1"
   },
   "inheritedWorldzSecurity": {
     "stage4bLiveSimulationProof": "PASSED",
