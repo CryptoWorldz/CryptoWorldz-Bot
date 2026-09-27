@@ -23,12 +23,5 @@
       "url": "/"
     }
   ],
-  "icons": [
-    {
-      "src": "/worldz-app/worldz-app-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
+  "icons": []
 }
