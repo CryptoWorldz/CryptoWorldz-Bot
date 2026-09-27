@@ -20,7 +20,8 @@
     "verify:worldzapp:reads": "node tools/verify-worldzapp-live-reads.js",
     "verify:worldzapp:stage3": "node --test test/worldz-app-stage3.test.js",
     "verify:worldzapp:stage3b": "node --test test/worldz-app-stage3b.test.js",
-    "verify:worldzapp:stage4": "node --test test/worldz-app-stage4.test.js"
+    "verify:worldzapp:stage4": "node --test test/worldz-app-stage4.test.js",
+    "verify:worldzapp:stage4b": "node tools/verify-worldzapp-live-simulations.js"
   },
   "engines": {
     "node": ">=20 <25"

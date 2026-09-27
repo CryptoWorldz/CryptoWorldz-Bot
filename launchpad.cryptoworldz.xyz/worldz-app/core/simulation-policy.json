@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-APP-SIMULATION-POLICY-V1",
-  "state": "CODE_BUILT_STAGE_4A_UNSIGNED_ADAPTERS__LIVE_PROOF_PENDING",
+  "state": "STAGE_4B_LIVE_PROOF_PASSED_FOR_REQUIRED_SET",
   "execution": false,
   "broadcast": false,
   "signatureRequest": false,
@@ -24,6 +24,23 @@
     "sui": "PENDING_CHAIN_NATIVE_DRY_RUN_BINDING",
     "robinhood": "CODE_BUILT_LIVE_PROOF_PENDING"
   },
-  "rule": "A successful simulation does not authorize signing or broadcast. Stage 4A adapters use only unsigned/non-broadcast RPC methods and remain LIVE_PROOF_PENDING until chain-by-chain proof passes.",
-  "bindings": "/worldz-app/core/simulation-bindings.json"
+  "rule": "Stage 4B live unsigned simulation proof passed for the required Solana/Base/BNB/HyperEVM/Robinhood set. Ethereum remains unverified until an approved endpoint is configured. A simulation never authorizes signing or broadcast.",
+  "bindings": "/worldz-app/core/simulation-bindings.json",
+  "liveProof": {
+    "state": "PASSED",
+    "verifiedAt": "2026-09-27T12:00:25.715Z",
+    "workflowRunId": 36317541759,
+    "proofSha256": "bc74711f21b1e3a53f7b444df2b70bc8e3e8cb425397788c02254dc77b5caca1",
+    "requiredPassed": [
+      "solana",
+      "base",
+      "bnb",
+      "hyperevm",
+      "robinhood"
+    ],
+    "ethereum": "SKIP_NO_APPROVED_VERIFY_ENDPOINT",
+    "signing": false,
+    "broadcast": false,
+    "stateMutation": false
+  }
 }
