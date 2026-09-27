@@ -540,3 +540,16 @@ Current Play truth:
 - app-level transaction signing/execution/mainnet broadcast remain **OFF**.
 
 The Financial features form must reflect the exact submitted release. External non-custodial wallet connection is expected to require the cryptocurrency-wallet selection if it remains in the submitted build. No future roadmap feature may be declared as live merely to satisfy Play review.
+
+
+## WorldzApp owner-approved Worldz Emblem source — 2026-09-27
+
+Status: **OWNER APPROVED / SOURCE HASH LOCKED / REPOSITORY PREVIEW VERIFIED / FINAL PRODUCTION RASTERS PENDING**
+
+The user-supplied 1536×1536 Worldz Emblem is the canonical WorldzApp / Google Play visual source. Source SHA-256: `685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050`.
+
+A valid repository identity preview is stored at `apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg` and checksum-verified as `b3152a79fd46e0fcb4f4f00e536ea7bc9ee6279986eff3abaf60e225d91d9f7d`. Registry: `apps/worldzapp-android/approved-emblem.v1.json`.
+
+The emblem must not be regenerated, reinterpreted or replaced without explicit owner approval. Final 512×512 Play PNG, Android launcher/mipmap and maskable safe-zone derivatives remain an explicit release gate and must be generated from the approved master.
+
+Keep On Keepin On™ remains active: progress the build continuously without bypassing truth, security or release gates.

@@ -89,7 +89,7 @@
     "privateKeyCollection": false
   },
   "releaseBlockers": [
-    "APPROVED_EMBLEM_BINARY_IMPORT_AND_DERIVED_ANDROID_ASSETS",
+    "FINAL_PRODUCTION_512_PNG_AND_MASKABLE_EXPORT_FROM_APPROVED_WORLDZ_EMBLEM",
     "FINAL_APPLICATION_ID_LOCK",
     "VERIFIED_PLAY_DEVELOPER_IDENTITY",
     "PUBLIC_SUPPORT_CONTACT",
@@ -114,11 +114,14 @@
     "sourceSha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
     "regenerationAllowed": false,
     "replacementRequiresExplicitOwnerApproval": true,
-    "androidAssetImport": "PENDING_BINARY_REPOSITORY_IMPORT",
+    "androidAssetImport": "APPROVED_SOURCE_PREVIEW_BOUND__FINAL_PRODUCTION_RASTER_PENDING",
     "requiredDerivedAssets": [
       "512x512 Google Play icon",
       "Android launcher/mipmap assets",
       "maskable safe-zone asset"
-    ]
+    ],
+    "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
+    "repositoryPreview": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg",
+    "repositoryPreviewSha256": "b3152a79fd46e0fcb4f4f00e536ea7bc9ee6279986eff3abaf60e225d91d9f7d"
   }
 }

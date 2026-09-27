@@ -1,8 +1,10 @@
 "use strict";
 const fs=require("node:fs");
+const crypto=require("node:crypto");
 
 function read(path){return JSON.parse(fs.readFileSync(path,"utf8"))}
 function assert(value,message){if(!value)throw new Error("WORLDZAPP_PLAY_READINESS_FAIL:"+message)}
+function sha256(path){return crypto.createHash("sha256").update(fs.readFileSync(path)).digest("hex")}
 
 const release=read("apps/worldzapp-android/play-release.v1.json");
 const data=read("apps/worldzapp-android/play-data-safety.v1.json");
@@ -11,6 +13,7 @@ const access=read("apps/worldzapp-android/play-review-access.v1.json");
 const listing=read("apps/worldzapp-android/play-store-listing.v1.json");
 const android=read("apps/worldzapp-android/android-package.v1.json");
 const worldz=read("worldzpad-omnichain/fullscope/worldz-app.v1.json");
+const emblem=read("apps/worldzapp-android/approved-emblem.v1.json");
 
 assert(release.schema==="WORLDZ-APP-GOOGLE-PLAY-RELEASE-V1","release schema");
 assert(release.submissionReady===false,"submission may not be claimed ready");
@@ -44,6 +47,11 @@ assert(release.branding?.ownerApprovedCentreEmblem===true,"owner-approved centre
 assert(release.branding?.sourceSha256==="685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050","approved emblem checksum drift");
 assert(release.branding?.regenerationAllowed===false,"approved emblem must not be regenerated");
 assert(listing.graphics.appIcon==="OWNER_APPROVED_WORLDZ_CENTRE_EMBLEM__SOURCE_LOCKED__ANDROID_DERIVATIVES_PENDING","approved icon status drift");
+assert(emblem.masterSource.sha256===release.branding.sourceSha256,"approved emblem registry/source hash drift");
+assert(emblem.approval.regenerationAllowed===false,"approved emblem registry regeneration rule drift");
+assert(fs.existsSync(emblem.repositoryPreview.path),"approved emblem preview missing");
+assert(sha256(emblem.repositoryPreview.path)===emblem.repositoryPreview.sha256,"approved emblem preview checksum mismatch");
+assert(listing.graphics.approvedEmblemPreview===emblem.repositoryPreview.path,"listing preview path drift");
 
 assert(android.packaging.targetSdk===36&&android.packaging.compileSdk===36,"Android package API drift");
 assert(android.releaseSecurity.signedReleaseBuilt===false,"signed AAB may not be falsely claimed");
@@ -54,7 +62,7 @@ assert(worldz.appSecurity?.mainnetBroadcastEnabled===false,"WorldzApp mainnet br
 
 const blockers=release.releaseBlockers;
 for(const required of [
-  "APPROVED_EMBLEM_BINARY_IMPORT_AND_DERIVED_ANDROID_ASSETS",
+  "FINAL_PRODUCTION_512_PNG_AND_MASKABLE_EXPORT_FROM_APPROVED_WORLDZ_EMBLEM",
   "VERIFIED_PLAY_DEVELOPER_IDENTITY",
   "PUBLIC_PRIVACY_POLICY_URL",
   "FINAL_DATA_SAFETY_AUDIT_AND_PLAY_FORM",
@@ -69,4 +77,4 @@ console.log("WORLDZAPP_GOOGLE_PLAY_READINESS_FOUNDATION=PASS");
 console.log("submission_ready=false public_release=false");
 console.log("target_sdk="+release.android.targetSdk+" format="+release.android.releaseFormat);
 console.log("data_safety=FINAL_AUDIT_REQUIRED financial_features=FINAL_CONFIRMATION_REQUIRED");
-console.log("approved_emblem=LOCKED android_derivatives=PENDING play_app_signing=PENDING signed_aab=PENDING");
+console.log("approved_emblem=LOCKED preview=CHECKSUM_VERIFIED final_android_derivatives=PENDING play_app_signing=PENDING signed_aab=PENDING");

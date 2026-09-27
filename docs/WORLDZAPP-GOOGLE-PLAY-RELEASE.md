@@ -49,3 +49,10 @@ Passing this repository gate means the Play submission architecture is prepared.
 ## Owner-approved Worldz centre emblem — LOCKED 2026-09-27
 
 The user-supplied 1536×1536 Worldz emblem is the approved master source for WorldzApp and Google Play branding. It must not be regenerated, reinterpreted or replaced without explicit owner approval. Source SHA-256: `685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050`. Binary repository import and derived Android raster/maskable assets remain an implementation step; approval itself is complete.
+
+
+### Repository identity reference
+
+The exact owner-approved master remains identified by SHA-256 `685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050`. A valid checksum-protected identity preview derived from that master is stored at `apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg` with SHA-256 `b3152a79fd46e0fcb4f4f00e536ea7bc9ee6279986eff3abaf60e225d91d9f7d`.
+
+This does not clear the final production asset gate. The 512×512 Play PNG, Android launcher/mipmap set and maskable safe-zone asset must still be generated from the approved master and checksum-verified before the signed AAB release.
