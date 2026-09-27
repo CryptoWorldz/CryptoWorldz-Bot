@@ -222,11 +222,16 @@
     "approvedCenterLogoReady": false,
     "digitalAssetLinksDeployed": false,
     "publicReleaseAuthorized": false,
-    "nextGate": "FINAL_IDENTITY_ASSETS_PLAY_POLICY_SIGNING_AND_TESTING",
+    "nextGate": "FINAL_512_ICON_EXPORT__FINAL_APPLICATION_ID__PLAY_DEVELOPER_IDENTITY__PRIVACY_DATA_SAFETY_FINANCIAL_DECLARATIONS__PLAY_SIGNING__ASSET_LINKS__SIGNED_AAB__TESTING",
     "playReleaseContract": "apps/worldzapp-android/play-release.v1.json",
     "playSubmissionReady": false,
     "privacyPolicyFinalized": false,
     "dataSafetyFinalized": false,
-    "financialFeaturesDeclarationFinalized": false
-  }
+    "financialFeaturesDeclarationFinalized": false,
+    "ownerApprovedEmblemSource": true,
+    "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
+    "approvedEmblemPreview": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg",
+    "finalIconRaster": "PENDING_VALID_512_PNG_AND_MASKABLE_EXPORT"
+  },
+  "keepOnKeepinOn": true
 }
