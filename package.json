@@ -27,7 +27,8 @@
     "verify:worldzapp:android": "node tools/verify-worldzapp-android-package.js",
     "verify:worldzapp:stage5c": "node --test test/worldz-app-stage5c.test.js && node tools/verify-worldzapp-stage5c-readiness.mjs",
     "verify:worldzapp:play": "node tools/verify-worldzapp-play-readiness.js",
-    "verify:worldzapp:icons": "node tools/verify-worldzapp-icon-assets.js"
+    "verify:worldzapp:icons": "node tools/verify-worldzapp-icon-assets.js",
+    "verify:worldzapp:unsigned-aab": "node tools/verify-worldzapp-unsigned-aab-contract.js"
   },
   "engines": {
     "node": ">=20 <25"

@@ -40,5 +40,11 @@
     "approvedEmblemSourceSha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
     "playIconSha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d",
     "maskableIconSha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15"
+  },
+  "iconUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-512.png",
+  "maskableIconUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-maskable-512.png",
+  "signingKey": {
+    "path": "WORLDZAPP_RELEASE_KEY_NOT_COMMITTED.keystore",
+    "alias": "worldzapp"
   }
 }

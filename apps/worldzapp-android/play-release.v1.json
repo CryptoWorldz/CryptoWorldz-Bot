@@ -12,7 +12,8 @@
     "compileSdk": 36,
     "releaseFormat": "ANDROID_APP_BUNDLE_AAB",
     "packaging": "TRUSTED_WEB_ACTIVITY",
-    "sourcePwa": "https://launchpad.cryptoworldz.xyz/worldz-app/"
+    "sourcePwa": "https://launchpad.cryptoworldz.xyz/worldz-app/",
+    "unsignedAabProof": "CI_PENDING"
   },
   "playRequirements": {
     "targetApi": {
@@ -89,6 +90,7 @@
     "privateKeyCollection": false
   },
   "releaseBlockers": [
+    "UNSIGNED_AAB_BUILD_PROOF",
     "FINAL_APPLICATION_ID_LOCK",
     "VERIFIED_PLAY_DEVELOPER_IDENTITY",
     "PUBLIC_SUPPORT_CONTACT",

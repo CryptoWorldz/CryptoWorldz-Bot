@@ -1,0 +1,18 @@
+{
+  "schema": "WORLDZ-APP-ANDROID-UNSIGNED-AAB-PROOF-V1",
+  "updatedAt": "2026-09-27",
+  "state": "CI_PROOF_PENDING",
+  "purpose": "Prove the WorldzApp TWA compiles into an Android App Bundle without signing material.",
+  "bubblewrapVersion": "1.25.0",
+  "targetSdk": 36,
+  "compileSdk": 36,
+  "applicationId": "xyz.cryptoworldz.worldzapp",
+  "buildMode": "SKIP_SIGNING",
+  "signed": false,
+  "releaseAuthorized": false,
+  "keystoreCommitted": false,
+  "expectedOutput": "app/build/outputs/bundle/release/app-release.aab",
+  "workflow": ".github/workflows/verify-worldzapp-unsigned-aab.yml",
+  "proof": null,
+  "rule": "A successful unsigned build proves package compilation only. It does not satisfy Play App Signing, Digital Asset Links, testing or release authorization."
+}
