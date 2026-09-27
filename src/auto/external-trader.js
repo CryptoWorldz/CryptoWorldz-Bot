@@ -1,34 +1,51 @@
-const { isValidSolanaAddress } = require('./dca-core');
+const { isValidSolanaAddress } = require("./dca-core");
+
+function uniqueWallets(values = []) {
+  return [...new Set(values.map((value) => String(value || "").trim()).filter(isValidSolanaAddress))];
+}
 
 function createExternalDcaTrader(config = {}) {
-  const executorUrl = String(config.dcaExecutorUrl || '').replace(/\/$/, '');
-  const executorToken = String(config.dcaExecutorToken || '').trim();
-  const configuredWallet = String(config.dcaWalletAddress || '').trim();
+  const executorUrl = String(config.dcaExecutorUrl || "").replace(/\/$/, "");
+  const executorToken = String(config.dcaExecutorToken || "").trim();
+  const configuredWallets = uniqueWallets([
+    ...(Array.isArray(config.dcaWalletAddresses) ? config.dcaWalletAddresses : []),
+    config.dcaWalletAddress
+  ]);
+  const configuredWalletSet = new Set(configuredWallets);
 
-  function runtimeStatus(databaseWallet = '') {
-    const wallet = String(databaseWallet || '').trim();
+  function normalizeDatabaseWallets(value) {
+    if (Array.isArray(value)) {
+      return uniqueWallets(value.map((item) => typeof item === "string" ? item : item?.wallet_address));
+    }
+    return uniqueWallets([value]);
+  }
+
+  function runtimeStatus(databaseWallets = []) {
+    const approved = normalizeDatabaseWallets(databaseWallets);
+    const matched = approved.filter((wallet) => configuredWalletSet.has(wallet));
+    const executorReady = Boolean(executorUrl && executorToken);
     return {
-      apiReady: Boolean(executorUrl && executorToken),
-      signerReady: Boolean(executorUrl && executorToken),
-      executorReady: Boolean(executorUrl && executorToken),
-      derivedWallet: configuredWallet || null,
-      walletMatches: Boolean(
-        isValidSolanaAddress(wallet) &&
-        isValidSolanaAddress(configuredWallet) &&
-        wallet === configuredWallet
-      )
+      apiReady: executorReady,
+      signerReady: executorReady && configuredWallets.length > 0,
+      executorReady,
+      derivedWallet: configuredWallets[0] || null,
+      configuredWallets: configuredWallets.length,
+      approvedWallets: approved.length,
+      matchedWallets: matched.length,
+      walletMatches: approved.length > 0 && matched.length === approved.length
     };
   }
 
-  function configured(databaseWallet = '') {
-    const status = runtimeStatus(databaseWallet);
-    return status.executorReady && status.walletMatches;
+  function configured(databaseWallet = "") {
+    const wallet = String(databaseWallet || "").trim();
+    return Boolean(executorUrl && executorToken && isValidSolanaAddress(wallet) && configuredWalletSet.has(wallet));
   }
 
   async function executeBuy(schedule, settings = {}) {
-    if (!configured(settings.wallet_address)) {
-      const error = new Error('Auto DCA executor or dedicated wallet verification is incomplete.');
-      error.code = 'dca_runtime_not_ready';
+    const walletAddress = String(schedule.wallet_address || settings.wallet_address || "").trim();
+    if (!configured(walletAddress)) {
+      const error = new Error("Auto DCA executor or approved owner/dev wallet verification is incomplete.");
+      error.code = "dca_runtime_not_ready";
       throw error;
     }
 
@@ -36,27 +53,28 @@ function createExternalDcaTrader(config = {}) {
     const timeout = setTimeout(() => controller.abort(), 30000);
     try {
       const response = await fetch(`${executorUrl}/execute-buy`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           authorization: `Bearer ${executorToken}`,
-          'content-type': 'application/json'
+          "content-type": "application/json"
         },
         body: JSON.stringify({
           schedule_id: schedule.id,
           owner_telegram_id: schedule.owner_telegram_id,
-          wallet_address: settings.wallet_address,
+          wallet_address: walletAddress,
           input_mint: schedule.input_mint,
           output_mint: schedule.token_mint,
           amount_base_units: schedule.amount_base_units,
           slippage_bps: schedule.slippage_bps,
-          max_price_impact_bps: schedule.max_price_impact_bps
+          max_price_impact_bps: schedule.max_price_impact_bps,
+          policy: "BUY_ONLY"
         }),
         signal: controller.signal
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.signature) {
         const error = new Error(payload.error || `Auto DCA executor returned ${response.status}.`);
-        error.code = payload.error || 'dca_executor_failed';
+        error.code = payload.error || "dca_executor_failed";
         error.payload = payload;
         throw error;
       }
@@ -70,8 +88,9 @@ function createExternalDcaTrader(config = {}) {
     configured,
     executeBuy,
     runtimeStatus,
-    walletAddress: () => configuredWallet || null
+    walletAddress: () => configuredWallets[0] || null,
+    walletAddresses: () => [...configuredWallets]
   };
 }
 
-module.exports = { createExternalDcaTrader };
+module.exports = { createExternalDcaTrader, uniqueWallets };
