@@ -8,7 +8,7 @@
   <title>WorldzApp™ | One Worldz. One App.</title>
   <link rel="manifest" href="/worldz-app/manifest.webmanifest">
   <link rel="icon" href="/worldz-app/worldz-app-icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/worldz-app/style.css?v=20260927-1">
+  <link rel="stylesheet" href="/worldz-app/style.css?v=20260927-2">
 </head>
 <body>
   <header class="topbar">
@@ -51,6 +51,7 @@
       <button class="tab active" data-panel="modules">Modules</button>
       <button class="tab" data-panel="treasuries">Treasuries</button>
       <button class="tab" data-panel="adapters">Adapters</button>
+      <button class="tab" data-panel="connections">Wallets</button>
       <button class="tab" data-panel="security">Security</button>
       <button class="tab" data-panel="roadmap">Native App</button>
     </nav>
@@ -68,6 +69,12 @@
     <section id="adapters" class="panel">
       <div class="section-head"><span>READ-ONLY CHAIN ADAPTERS</span><h2>Observe first. Execute later.</h2><p>These adapters define how WorldzApp will read balances, multisig configuration, proposal history and transaction state without exposing any signing or broadcast method.</p></div>
       <div id="adapter-grid" class="grid"></div>
+    </section>
+
+    <section id="connections" class="panel">
+      <div class="section-head"><span>IDENTITY + EXTERNAL WALLET CONNECTIONS</span><h2>Your wallet comes to WorldzApp™.</h2><p>Connect an external wallet from the WorldzApp surface. Stage 3 reads only the public address and network needed for the session. It does not request signatures, send transactions or collect custody secrets.</p></div>
+      <div id="connection-summary" class="wallet-status"></div>
+      <div id="connection-grid" class="grid"></div>
     </section>
 
     <section id="security" class="panel">
@@ -88,7 +95,7 @@
       <div class="roadmap">
         <article><b>01</b><h3>Shared Core</h3><p>Module registry, capabilities, treasury profiles, proposal schema and WorldzProof.</p><span class="done">BUILT</span></article>
         <article><b>02</b><h3>Read Adapters</h3><p>Shared read-only adapter contract, chain registry, session/storage policy and event schema.</p><span class="done">FOUNDATION BUILT</span></article>
-        <article><b>03</b><h3>Identity + Wallet Connect</h3><p>External signer connection, mobile wallet standards and role-aware app sessions.</p><span>PLANNED</span></article>
+        <article><b>03</b><h3>Identity + Wallet Connect</h3><p>Public role-aware sessions plus connection-only Solana and EVM external-wallet foundations.</p><span class="done">CONNECTION FOUNDATION BUILT</span></article>
         <article><b>04</b><h3>Simulation + Approvals</h3><p>Unsigned proposals, exact review, simulation and chain-native multisig approvals.</p><span>GATED</span></article>
         <article><b>05</b><h3>WorldzCard™</h3><p>Hardware/card signing adapter; Tangem remains the first research target.</p><span>RESEARCH</span></article>
         <article><b>06</b><h3>Android + iOS</h3><p>Package the proven app core with native deep links, notifications and wallet integrations.</p><span>FUTURE</span></article>
@@ -98,6 +105,7 @@
 
   <footer><span>WorldzApp™ • WorldzFullBuild™</span><span>One World • One Mission</span></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="/worldz-app/app.js?v=20260927-1" defer></script>
+  <script src="/worldz-app/wallet-connect.js?v=20260927-2" defer></script>
+  <script src="/worldz-app/app.js?v=20260927-2" defer></script>
 </body>
 </html>

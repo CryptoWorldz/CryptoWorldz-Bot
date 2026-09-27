@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "CODE_BUILT_STAGE_2_LIVE_READ_VERIFIED",
+  "lifecycle": "CODE_BUILT_STAGE_3_IDENTITY_WALLET_FOUNDATION",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -123,7 +123,9 @@
     "storagePolicy": "launchpad.cryptoworldz.xyz/worldz-app/core/storage-policy.json",
     "sessionSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/session.schema.json",
     "activityEventSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json",
-    "providerBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json"
+    "providerBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json",
+    "walletConnectors": "launchpad.cryptoworldz.xyz/worldz-app/core/wallet-connectors.json",
+    "walletConnectionRuntime": "launchpad.cryptoworldz.xyz/worldz-app/wallet-connect.js"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -153,7 +155,30 @@
       "productionBoundary": "PUBLIC_ENDPOINTS_VERIFY_READ_PATHS_ONLY__PRODUCTION_PROVIDERS_REMAIN_ENVIRONMENT_CONFIGURED"
     },
     "execution": false,
-    "nextGate": "IDENTITY_SESSION_AND_EXTERNAL_WALLET_CONNECTION_FOUNDATION",
+    "nextGate": "STAGE_3_IDENTITY_WALLET_FOUNDATION_BUILT__MOBILE_HANDOFF_AND_ROLE_ASSERTION_NEXT",
     "suiTransport": "GRAPHQL__PUBLIC_JSON_RPC_DEPRECATED"
+  },
+  "identityWalletFoundation": {
+    "lifecycle": "CODE_BUILT_CONNECTION_ONLY",
+    "publicSessionContract": "src/worldz-app/session-contract.js",
+    "walletConnectionContract": "src/worldz-app/wallet-connection-contract.js",
+    "runtime": "launchpad.cryptoworldz.xyz/worldz-app/wallet-connect.js",
+    "registry": "launchpad.cryptoworldz.xyz/worldz-app/core/wallet-connectors.json",
+    "activeConnectionPaths": [
+      "SOLANA_INJECTED",
+      "EVM_EIP1193"
+    ],
+    "mobileConnectionPaths": [
+      "WALLET_STANDARD_OR_VERIFIED_DEEP_LINK_PLANNED",
+      "WALLETCONNECT_V2_OR_VERIFIED_DEEP_LINK_PLANNED"
+    ],
+    "sessionPersistence": "SESSION_ONLY_BY_DEFAULT",
+    "publicAddressPersistence": "REQUIRES_EXPLICIT_CONSENT",
+    "signing": false,
+    "transactionSend": false,
+    "broadcast": false,
+    "secretCollection": false,
+    "tests": "test/worldz-app-stage3.test.js",
+    "nextGate": "ROLE_AWARE_IDENTITY_ASSERTIONS_AND_VERIFIED_MOBILE_WALLET_HANDOFF"
   }
 }

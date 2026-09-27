@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-RUNTIME-V1",
   "brand": "WorldzApp™",
-  "status": "CODE_BUILT_FOUNDATION__NO_MAINNET_EXECUTION",
+  "status": "CODE_BUILT_STAGE_3_IDENTITY_WALLET_CONNECTION_FOUNDATION__NO_MAINNET_EXECUTION",
   "tagline": "One Worldz. One App. Every module keeps its own authority.",
   "coreContract": "/worldz-app/core/worldz-app.v1.json",
   "modules": [
@@ -120,13 +120,32 @@
     }
   ],
   "readAdapterFoundation": {
-    "state": "CODE_BUILT_INTERFACE",
+    "state": "LIVE_READ_VERIFIED",
     "registry": "/worldz-app/core/read-adapter-registry.json",
     "storagePolicy": "/worldz-app/core/storage-policy.json",
     "sessionSchema": "/worldz-app/core/session.schema.json",
     "activityEventSchema": "/worldz-app/core/activity-event.schema.json",
-    "providerBindings": "NOT_CONFIGURED",
-    "liveReadProof": "NOT_RUN",
+    "providerBindings": "ENVIRONMENT_ONLY_PRODUCTION__PUBLIC_VERIFY_MODE_AVAILABLE",
+    "liveReadProof": "PASSED_WORKFLOW_36287750004",
     "execution": false
+  },
+  "identityWalletFoundation": {
+    "state": "CODE_BUILT_CONNECTION_ONLY",
+    "sessionStorage": "SESSION_ONLY_BY_DEFAULT",
+    "connectors": "/worldz-app/core/wallet-connectors.json",
+    "browserRuntime": "/worldz-app/wallet-connect.js",
+    "supportedNow": [
+      "SOLANA_INJECTED",
+      "EVM_EIP1193"
+    ],
+    "planned": [
+      "XRPL_EXTERNAL",
+      "SUI_WALLET_STANDARD",
+      "WALLETCONNECT_V2_MOBILE_HANDOFF"
+    ],
+    "signing": false,
+    "broadcast": false,
+    "secretCollection": false,
+    "nextGate": "ROLE_AWARE_IDENTITY_ASSERTIONS_AND_VERIFIED_MOBILE_HANDOFF"
   }
 }

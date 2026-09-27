@@ -1,0 +1,68 @@
+{
+  "schema": "WORLDZ-APP-WALLET-CONNECTORS-V1",
+  "mode": "EXTERNAL_CUSTODY_CONNECTION_ONLY",
+  "default": "DENY",
+  "execution": false,
+  "allowedOperations": [
+    "detect_provider",
+    "request_connection",
+    "read_public_address",
+    "read_network",
+    "disconnect_local_session"
+  ],
+  "forbiddenOperations": [
+    "request_seed_phrase",
+    "request_private_key",
+    "sign_message",
+    "sign_transaction",
+    "send_transaction",
+    "broadcast_transaction",
+    "automatic_chain_switch",
+    "automatic_asset_add",
+    "automatic_bridge",
+    "automatic_swap"
+  ],
+  "connectors": [
+    {
+      "id": "solana_injected",
+      "family": "SOLANA",
+      "label": "Solana Wallet",
+      "standard": "INJECTED_PROVIDER",
+      "state": "CODE_BUILT_CONNECTION_ONLY",
+      "providerHint": "window.solana",
+      "mobileHandoff": "PLANNED_WALLET_STANDARD_OR_VERIFIED_DEEP_LINK",
+      "execution": false
+    },
+    {
+      "id": "evm_eip1193",
+      "family": "EVM",
+      "label": "EVM Wallet",
+      "standard": "EIP-1193",
+      "state": "CODE_BUILT_CONNECTION_ONLY",
+      "providerHint": "window.ethereum",
+      "mobileHandoff": "PLANNED_WALLETCONNECT_V2_OR_VERIFIED_DEEP_LINK",
+      "execution": false
+    },
+    {
+      "id": "xrpl_external",
+      "family": "XRPL",
+      "label": "XRPL Wallet",
+      "standard": "EXTERNAL_WALLET",
+      "state": "ADAPTER_PLANNED",
+      "providerHint": null,
+      "mobileHandoff": "PLANNED_AFTER_PROVIDER_REVIEW",
+      "execution": false
+    },
+    {
+      "id": "sui_external",
+      "family": "SUI",
+      "label": "Sui Wallet",
+      "standard": "WALLET_STANDARD",
+      "state": "ADAPTER_PLANNED",
+      "providerHint": null,
+      "mobileHandoff": "PLANNED_AFTER_PROVIDER_REVIEW",
+      "execution": false
+    }
+  ],
+  "rule": "WorldzApp may request an external wallet connection and read the resulting public address/network. Stage 3 does not request signatures, send transactions or collect custody secrets."
+}

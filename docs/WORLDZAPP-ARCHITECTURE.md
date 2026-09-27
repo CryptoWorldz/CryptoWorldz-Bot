@@ -148,7 +148,11 @@ The shared read-only adapter interface now exists for Solana, Ethereum, Base, BN
 The remaining Stage 2 gate is provider binding and live read proof: configure verified provider/RPC access without committing credentials, then prove real balance, multisig configuration and proposal-history reads chain by chain.
 
 ### Stage 3 — Identity and signer connections
-Build role-aware sessions and verified external wallet connections. Keep secrets out of Worldz infrastructure.
+**Connection foundation built.**
+
+WorldzApp now has a public-session contract and a connection-only external-wallet contract. The browser foundation can detect/request a Solana injected wallet connection and an EIP-1193 EVM wallet connection from the first-party WorldzApp surface, then read only the resulting public address/network into session-only storage by default.
+
+XRPL, Sui and production mobile handoff remain separately gated. WalletConnect v2 / chain wallet-standard deep links are not declared complete until provider-specific mobile verification passes. Stage 3 does not request messages or transaction signatures, send transactions, broadcast, bridge, swap, import keys or collect recovery material.
 
 ### Stage 4 — Proposal + simulation
 Real unsigned payload generation and exact effects review.
@@ -207,3 +211,18 @@ On 2026-09-27 the reconciled WorldzApp provider stack passed CI workflow run `36
 No transaction was signed, submitted or broadcast. Public verification endpoints remain development/proof infrastructure only; production provider URLs remain deployment-environment configuration.
 
 The Sui proof uses GraphQL after live verification showed the legacy public JSON-RPC path is no longer supported. This is now a permanent adapter rule: verify the exact current transport and network identity, not merely a hostname.
+
+
+## Stage 3 identity + external-wallet foundation — 2026-09-27
+
+New components:
+
+- `core/wallet-connectors.json` — connection-only registry and forbidden-operation list.
+- `src/worldz-app/session-contract.js` — validates public session data and rejects secret-shaped fields.
+- `src/worldz-app/wallet-connection-contract.js` — permits detect/connect/public-address/network/disconnect only.
+- `wallet-connect.js` — first-party browser connection layer for injected Solana and EIP-1193 EVM wallets.
+- `test/worldz-app-stage3.test.js` — regression tests for secret-data and signing-method rejection.
+
+The WorldzApp UI now exposes a Wallets panel. Public wallet addresses are session-only by default; persistence beyond the session requires explicit consent under the existing storage policy. Mainnet broadcast remains OFF.
+
+Next gate: role-aware identity assertions plus verified mobile wallet handoff. This must preserve the permanent rule that the wallet comes to the Worldz website/app; users are not required to paste Worldz URLs into a wallet browser.

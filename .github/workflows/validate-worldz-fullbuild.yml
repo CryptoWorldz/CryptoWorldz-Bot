@@ -5,19 +5,23 @@ on:
     paths:
       - 'src/fullbuild/**'
       - 'src/fullscope/**'
+      - 'src/worldz-app/**'
       - 'src/command-centre.js'
       - 'src/command-registry.js'
       - 'src/full-runtime-entry.js'
       - 'src/websites-telegram.js'
       - 'test/fullbuild.test.js'
       - 'test/fullscope.test.js'
+      - 'test/worldz-app-stage3.test.js'
       - 'test/command-centre.test.js'
       - 'test/command-registry.test.js'
       - 'test/websites-telegram.test.js'
       - 'worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json'
       - 'worldzpad-omnichain/fullscope/worldz-fullscope.v1.json'
+      - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
       - 'launchpad.cryptoworldz.xyz/fullbuild/**'
       - 'launchpad.cryptoworldz.xyz/fullscope/**'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/**'
       - 'launchpad.cryptoworldz.xyz/sitemap.xml'
       - 'public/miniapp/index.html'
       - 'public/miniapp/app.js'
@@ -55,5 +59,9 @@ jobs:
           node --check src/full-runtime-entry.js
           node --check src/websites-telegram.js
           node --check public/miniapp/app.js
+          node --check src/worldz-app/session-contract.js
+          node --check src/worldz-app/wallet-connection-contract.js
+          node --check launchpad.cryptoworldz.xyz/worldz-app/app.js
+          node --check launchpad.cryptoworldz.xyz/worldz-app/wallet-connect.js
       - name: Focused tests
-        run: node --test test/fullbuild.test.js test/fullscope.test.js test/command-centre.test.js test/command-registry.test.js test/websites-telegram.test.js
+        run: node --test test/fullbuild.test.js test/fullscope.test.js test/worldz-app-stage3.test.js test/command-centre.test.js test/command-registry.test.js test/websites-telegram.test.js

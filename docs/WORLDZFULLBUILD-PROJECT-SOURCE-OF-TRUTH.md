@@ -280,3 +280,20 @@ OneWorldz's Dubbo community layer now includes a dedicated Miracle Church Dubbo 
 - Miracle Church official service times shown as 9am, 11am and 5:30pm Sundays.
 - Accessibility and Thompson Street construction-access notes are retained for visitors.
 - User-provided on-site photographs are approved source material for a future gallery asset pass; no image is treated as deployed until it is actually stored in the repository and verified on the live route.
+
+
+## WorldzApp™ Stage 3 identity + wallet connection foundation — 2026-09-27
+
+Status: **CODE_BUILT / VERIFICATION PENDING**
+
+WorldzApp now includes a public-session contract, a deny-by-default connection-only wallet contract, a wallet connector registry and first-party browser connection UI.
+
+- Solana injected wallet connection and EIP-1193 EVM connection paths are code-built.
+- The app reads only approved public connection fields: chain, public address, provider label and network.
+- Session storage is the default; public-address persistence beyond the session requires explicit consent.
+- Seed phrases, recovery phrases, private keys, wallet passwords and exported signing keys remain forbidden.
+- Stage 3 exposes no sign-message, sign-transaction, send, broadcast, bridge, swap, stake or signer-change method.
+- XRPL/Sui connection adapters and verified mobile wallet handoff remain gated.
+- The permanent Worldz launch rule remains: the wallet comes to the Worldz first-party surface; the user is not required to paste a Worldz URL into a wallet browser.
+
+Mainnet app broadcast remains OFF. The next engineering gate is role-aware identity assertions plus verified mobile-wallet handoff before transaction simulation/approval stages advance.
