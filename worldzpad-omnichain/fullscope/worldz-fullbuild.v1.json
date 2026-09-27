@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-FULLBUILD-V1",
-  "version": "2026-09-27-MAIN-C",
+  "version": "2026-09-27-MAIN-D",
   "brand": "WorldzFullBuild™",
   "status": "MAIN_INTEGRATION_SOURCE_OF_TRUTH",
   "updatedAt": "2026-09-27",
@@ -315,5 +315,29 @@
     "worldzLinkz": "https://cryptoworldz.xyz/worldzlinkz/",
     "dexScreenerControl": "/worlddexpush/dexscreener/"
   },
-  "updateRule": "Future project-relevant decisions, corrections, proof and regression lessons are continuing WorldzFullBuild inputs. The newest explicit owner decision supersedes older conflicting plans; factual state remains evidence-driven."
+  "updateRule": "Future project-relevant decisions, corrections, proof and regression lessons are continuing WorldzFullBuild inputs. The newest explicit owner decision supersedes older conflicting plans; factual state remains evidence-driven.",
+  "historicalReferences": [
+    {
+      "id": "wldz-origin-reference",
+      "title": "WLDZ Origin Reference — How WORLDZ #001 Started",
+      "source": "docs/WLDZ-ORIGIN-REFERENCE-HOW-WORLDZ-STARTED.md",
+      "classification": "HISTORICAL_REFERENCE_ORIGIN_RECORD",
+      "historicalBuildPeriod": "2026-09-07",
+      "addedToFullBuild": "2026-09-27",
+      "authoritativeForCurrentTokenIdentity": false,
+      "authoritativeForCurrentEconomics": false,
+      "currentCanonicalStateOverrides": true,
+      "preservedTopics": [
+        "100M_TEST_WLDZ_AND_FOUR_25M_MASTER_VAULTS",
+        "EARLY_25_25_25_25_ALLOCATION_MODEL",
+        "METEORA_DAMM_V2_ONLYB_QUOTE_SIDE_FEE_EXPERIMENT",
+        "HISTORICAL_200_BPS_WLDZ_FEE_TEST",
+        "AUTO_10_40_20_15_10_5_TEST_ROUTING",
+        "SIX_HOUR_HODL_70_30_EQUALIZER_TEST",
+        "SWAP_FEE_CLAIM_LP_BUYBACK_BURN_CHARITY_PROOFS",
+        "FAIL_CLOSED_PRE_MAINNET_PREPARATION"
+      ],
+      "rule": "Reference only. Never use this origin record to replace the current canonical WLDZ mint, live lifecycle, active economics, provider state or current WorldzFullBuild release gates."
+    }
+  ]
 }
