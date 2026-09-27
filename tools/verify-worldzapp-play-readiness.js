@@ -43,10 +43,12 @@ assert(access.publicCoreAccess.requiresPayment===false,"reviewer must not need p
 
 assert(listing.appName==="WorldzApp","listing name drift");
 assert(!/profit|guaranteed return|guaranteed yield/i.test(listing.fullDescriptionDraft),"prohibited/misleading investment language in draft listing");
-assert(listing.graphics.appIcon===emblem.releaseDerivative.androidAssetPath,"Play listing icon path drift");
-assert(listing.graphics.appIconState==="OWNER_APPROVED_AND_REPOSITORY_BOUND","Play listing icon approval state");
-assert(listing.graphics.appIconSha256===emblem.releaseDerivative.sha256,"Play listing icon checksum registry drift");
-assert(sha256(listing.graphics.appIcon)===emblem.releaseDerivative.sha256,"Play listing icon checksum mismatch");
+assert(listing.graphics.appIcon==="PENDING_FINAL_512_PNG_EXPORT_FROM_OWNER_APPROVED_WORLDZ_EMBLEM","Play listing final icon must remain gated");
+assert(listing.graphics.appIconState==="OWNER_APPROVED_SOURCE_REGISTERED__FINAL_RELEASE_RASTER_PENDING","Play listing icon state drift");
+assert(listing.graphics.approvedEmblemRegistry==="apps/worldzapp-android/approved-emblem.v1.json","approved emblem registry drift");
+assert(fs.existsSync(emblem.repositoryPreview.path),"approved emblem preview missing");
+assert(sha256(emblem.repositoryPreview.path)===emblem.repositoryPreview.sha256,"approved emblem preview checksum mismatch");
+assert(emblem.masterSource.sha256==="685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050","approved master hash drift");
 
 assert(android.packaging.targetSdk===36&&android.packaging.compileSdk===36,"Android package API drift");
 assert(android.releaseSecurity.signedReleaseBuilt===false,"signed AAB may not be falsely claimed");
@@ -56,9 +58,10 @@ assert(worldz.multisigApprovalFoundation?.liveProof?.squadsWldz?.state==="PASSED
 assert(worldz.appSecurity?.mainnetBroadcastEnabled===false,"WorldzApp mainnet broadcast must remain off");
 
 const blockers=release.releaseBlockers;
-assert(!blockers.includes("OWNER_APPROVED_CENTER_LOGO_512_AND_MASKABLE_ASSETS"),"approved emblem blocker should be cleared");
-assert((release.clearedGates||[]).includes("OWNER_APPROVED_CENTER_LOGO_512_AND_MASKABLE_ASSETS"),"approved emblem cleared gate missing");
+assert(!blockers.includes("OWNER_APPROVED_CENTER_LOGO_512_AND_MASKABLE_ASSETS"),"legacy combined icon blocker should be replaced");
+assert((release.clearedGates||[]).includes("OWNER_APPROVED_WORLDZ_EMBLEM_SOURCE"),"approved emblem source gate missing");
 for(const required of [
+  "FINAL_PRODUCTION_512_PNG_AND_MASKABLE_EXPORT_FROM_APPROVED_WORLDZ_EMBLEM",
   "VERIFIED_PLAY_DEVELOPER_IDENTITY",
   "PUBLIC_PRIVACY_POLICY_URL",
   "FINAL_DATA_SAFETY_AUDIT_AND_PLAY_FORM",
@@ -73,4 +76,4 @@ console.log("WORLDZAPP_GOOGLE_PLAY_READINESS_FOUNDATION=PASS");
 console.log("submission_ready=false public_release=false");
 console.log("target_sdk="+release.android.targetSdk+" format="+release.android.releaseFormat);
 console.log("data_safety=FINAL_AUDIT_REQUIRED financial_features=FINAL_CONFIRMATION_REQUIRED");
-console.log("approved_icon=OWNER_APPROVED_BOUND play_app_signing=PENDING signed_aab=PENDING");
+console.log("approved_emblem_source=BOUND final_512_icon=PENDING play_app_signing=PENDING signed_aab=PENDING");
