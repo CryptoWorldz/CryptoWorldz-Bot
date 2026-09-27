@@ -1,0 +1,23 @@
+{
+  "schema": "WORLDZAPP-PLAY-SCREENSHOT-PLAN-V1",
+  "updatedAt": "2026-09-28",
+  "state": "CAPTURE_PLAN_READY__REAL_DEVICE_OR_RELEASE_BUILD_CAPTURE_PENDING",
+  "truthRule": "Use screenshots from the exact submitted release. Do not create mock screens that imply gated features are live.",
+  "phoneShots": [
+    {"id":1,"surface":"WorldzApp home","caption":"One App • Every Worldz","mustShow":"WorldzApp branding and public navigation"},
+    {"id":2,"surface":"Wallet connection","caption":"Connect Without Giving Up Custody","mustShow":"external non-custodial wallet connection and no secret-key request"},
+    {"id":3,"surface":"Chain status","caption":"Verified Chain Status","mustShow":"only chains whose displayed state is genuinely verified"},
+    {"id":4,"surface":"Simulation","caption":"Review Before Signing","mustShow":"unsigned simulation/effects review with signing still separate"},
+    {"id":5,"surface":"Treasury / multisig evidence","caption":"Public Multisig Evidence","mustShow":"WLDZ Squads proof and truthful gated states for unproven profiles"},
+    {"id":6,"surface":"Security / proof","caption":"Proof Before Authority","mustShow":"signing, execution and broadcast boundary as represented by the release"}
+  ],
+  "captureRequirements": [
+    "capture after final logo binaries are integrated",
+    "capture from release-equivalent Android build",
+    "no debug overlays",
+    "no private wallet secrets",
+    "no personal notifications/status-bar information",
+    "crop only; no feature-changing compositing",
+    "recheck Play Console image dimensions/count requirements at upload time"
+  ]
+}
