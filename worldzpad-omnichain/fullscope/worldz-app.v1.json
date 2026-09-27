@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "CODE_BUILT_STAGE_5_MULTISIG_APPROVAL_EVIDENCE_FOUNDATION__LIVE_PROFILE_PROOF_PENDING",
+  "lifecycle": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__STAGE_5C_MULTICHAIN_PROOF_HARNESS_BUILT",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -145,7 +145,9 @@
     "simulationAdapters": "src/worldz-app/simulation-adapters.js",
     "multisigApprovalAdapters": "launchpad.cryptoworldz.xyz/worldz-app/core/multisig-approval-adapters.json",
     "multisigApprovalContract": "src/worldz-app/multisig-approval-contract.js",
-    "multisigApprovalRuntimeAdapters": "src/worldz-app/multisig-approval-adapters.js"
+    "multisigApprovalRuntimeAdapters": "src/worldz-app/multisig-approval-adapters.js",
+    "multisigLiveProofGates": "launchpad.cryptoworldz.xyz/worldz-app/core/multisig-live-proof-gates.json",
+    "liveMultisigReaders": "src/worldz-app/live-multisig-readers.js"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -255,7 +257,7 @@
     }
   },
   "multisigApprovalFoundation": {
-    "lifecycle": "CODE_BUILT_APPROVAL_EVIDENCE_FOUNDATION__LIVE_MULTISIG_PROOF_PENDING",
+    "lifecycle": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__STAGE_5C_HARNESS_BUILT",
     "contract": "src/worldz-app/multisig-approval-contract.js",
     "adapters": "src/worldz-app/multisig-approval-adapters.js",
     "registry": "launchpad.cryptoworldz.xyz/worldz-app/core/multisig-approval-adapters.json",
@@ -273,6 +275,28 @@
     "signing": false,
     "execution": false,
     "broadcast": false,
-    "nextGate": "BIND_VERIFIED_LIVE_MULTISIG_PROFILES_AND_APPROVAL_EVIDENCE"
+    "nextGate": "REAL_WORLDZ_SAFE_XRPL_SUI_PROFILE_IDENTIFIERS_AND_PUBLIC_EVIDENCE",
+    "liveProofGates": "launchpad.cryptoworldz.xyz/worldz-app/core/multisig-live-proof-gates.json",
+    "liveReaders": "src/worldz-app/live-multisig-readers.js",
+    "liveProof": {
+      "squads": {
+        "state": "PASSED",
+        "workflowRunId": 36318035477,
+        "proofSha256": "ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0",
+        "profile": "WLDZ_OPERATIONAL_SQUADS",
+        "approvalSubmission": false,
+        "execution": false,
+        "broadcast": false
+      },
+      "safe": {
+        "state": "WORLDZ_PROFILE_REQUIRED"
+      },
+      "xrpl": {
+        "state": "WORLDZ_PROFILE_REQUIRED"
+      },
+      "sui": {
+        "state": "WORLDZ_PROFILE_REQUIRED"
+      }
+    }
   }
 }
