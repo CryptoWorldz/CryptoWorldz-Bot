@@ -28,16 +28,16 @@ assert(twa.fullScopeUrl==="https://launchpad.cryptoworldz.xyz/worldz-app/","scop
 assert(twa.minSdkVersion>=23,"minSdk too low");
 assert(Array.isArray(twa.fingerprints)&&twa.fingerprints.length===0,"fingerprint may not be invented");
 assert(twa.releaseGate&&twa.releaseGate.templateOnly===true,"template gate required");
-assert(twa.releaseGate.iconUrl==="https://launchpad.cryptoworldz.xyz/worldz-app/worldz-app-icon-512.png","approved icon URL drift");
-assert(twa.releaseGate.maskableIconUrl===twa.releaseGate.iconUrl,"maskable icon URL drift");
-assert(twa.releaseGate.iconApproval==="OWNER_APPROVED_WORLDZ_EMBLEM","owner approval marker required");
-assert(twa.releaseGate.iconSha256===emblem.releaseDerivative.sha256,"TWA icon checksum registry drift");
+assert(twa.releaseGate.iconUrl==="PENDING_FINAL_512_PNG_EXPORT_FROM_OWNER_APPROVED_WORLDZ_EMBLEM","final icon must remain gated");
+assert(twa.releaseGate.maskableIconUrl==="PENDING_FINAL_512_MASKABLE_PNG_EXPORT_FROM_OWNER_APPROVED_WORLDZ_EMBLEM","final maskable icon must remain gated");
+assert(twa.releaseGate.iconApproval==="OWNER_APPROVED_SOURCE_REGISTERED","owner approval marker required");
 assert(twa.releaseGate.signingKey==="NOT_COMMITTED_TO_REPOSITORY","signing secret boundary");
 
 assert(web.name==="WorldzApp™","PWA name drift");
 assert(web.start_url==="/worldz-app/"&&web.scope==="/worldz-app/","PWA route drift");
 assert(["standalone","fullscreen","minimal-ui"].includes(web.display),"PWA display unsupported");
-assert(web.icons.some(icon=>icon.src==="/worldz-app/worldz-app-icon-512.png"&&icon.sizes==="512x512"&&/maskable/.test(icon.purpose||"")),"approved 512 maskable PWA icon missing");
+assert(web.icons.some(icon=>icon.src==="/worldz-app/worldz-app-icon.svg"),"existing PWA fallback icon missing");
+assert(web.approvedWorldzEmblem?.state==="OWNER_APPROVED_SOURCE_REGISTERED__FINAL_PNG_PENDING","PWA approved-emblem state drift");
 
 assert(assetlinks.length===1,"assetlinks template");
 assert(assetlinks[0].target.package_name===twa.packageId,"assetlinks package drift");
@@ -61,4 +61,4 @@ assert(worldz.appSecurity?.mainnetBroadcastEnabled===false,"WorldzApp mainnet br
 console.log("WORLDZAPP_ANDROID_API36_FOUNDATION=PASS");
 console.log("package_id_candidate="+twa.packageId);
 console.log("target_sdk=36 compile_sdk=36 bubblewrap=1.25.0");
-console.log("signed_aab=OFF public_release=OFF digital_asset_links=PENDING approved_logo=OWNER_APPROVED_BOUND");
+console.log("signed_aab=OFF public_release=OFF digital_asset_links=PENDING approved_emblem_source=BOUND final_512_raster=PENDING");
