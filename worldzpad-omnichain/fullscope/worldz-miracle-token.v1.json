@@ -1,0 +1,139 @@
+{
+  "schema": "WORLDZ-MIRACLE-TOKEN-V1",
+  "token": {
+    "name": "MIRACLE",
+    "symbol": "MRCL",
+    "fixedSupplyTokens": 348000000,
+    "lifecycle": "PRE_LAUNCH",
+    "canonicalMint": null
+  },
+  "parent": "WorldzFullBuild™",
+  "updatedAt": "2026-09-27",
+  "purpose": "MIRACLE is the Miracle Church-minded real-world community impact token. It inherits proven Worldz launch technology while keeping Purple Diamond Crew activity structurally separate from the Miracle Layer.",
+  "allocations": {
+    "miracleTeam": {
+      "brand": "Miracle Team Vault™",
+      "percentOfSupply": 20,
+      "tokens": 69600000,
+      "status": "OWNER_APPROVED__VAULT_AND_INDIVIDUAL_ALLOCATIONS_NOT_YET_DEPLOYED",
+      "beneficiaryClass": "OPTED_IN_MIRACLE_TEAM_PARTICIPANTS",
+      "individualAmounts": "PENDING_EXPLICIT_ALLOCATION_APPROVAL",
+      "walletRule": "VERIFIED_PUBLIC_WALLET_REQUIRED_FOR_EACH_RECIPIENT",
+      "consentRule": "EXPLICIT_OPT_IN_REQUIRED",
+      "control": "MULTISIG_CONTROLLED",
+      "vesting": {
+        "immediateUnlockPercent": 0,
+        "cliffDays": 30,
+        "releases": 24,
+        "cadence": "MONTHLY",
+        "durationMonths": 24,
+        "rounding": "FINAL_RELEASE_RECEIVES_RAW_UNIT_REMAINDER"
+      },
+      "unclaimedRule": "UNCLAIMED_OR_UNASSIGNED_TOKENS_REMAIN_IN_MIRACLE_TEAM_VAULT",
+      "reassignmentRule": "NO_SILENT_OR_AUTOMATIC_REALLOCATION__EXPLICIT_OWNER_APPROVAL_AND_RECORDED_GOVERNANCE_ACTION_REQUIRED",
+      "proof": "PUBLIC_ALLOCATION_AND_VESTING_PROOF_WITHOUT_PUBLISHING_PRIVATE_IDENTITY_DATA"
+    },
+    "miracleMagicSupply": {
+      "brand": "MiracleMagicSupply™",
+      "percentOfSupply": 20,
+      "tokens": 69600000,
+      "intent": "MATCH_THE_MIRACLE_TEAM_20_PERCENT_WITH_AN_EQUAL_20_PERCENT_OWNER_GIFT_SUPPLY_FOR_PEOPLE_IN_NEED",
+      "status": "OWNER_APPROVED__DISTRIBUTION_RULES_CODE_AND_VAULT_DEPLOYMENT_PENDING",
+      "vault": "MiracleMagicVault™",
+      "recipientRule": "VERIFIED_NEED_OR_APPROVED_MIRACLE_MISSION__RECIPIENT_CONSENT_REQUIRED",
+      "cryptoRule": "NO_RECIPIENT_IS_REQUIRED_TO_BUY_CRYPTO_OR_PROVIDE_PRIVATE_KEYS",
+      "valueDisclosure": "MRCL_IS_A_VOLATILE_TOKEN__NO_CASH_VALUE_OR_RETURN_IS_GUARANTEED",
+      "privacy": "PUBLIC_PROOF_USES_MINIMUM_NECESSARY_OR_AGGREGATED_RECIPIENT_DATA",
+      "proof": "Miracle Proof™"
+    },
+    "genesisLiquidity": {
+      "percentOfSupply": 5,
+      "tokens": 17400000,
+      "status": "OWNER_APPROVED_LAUNCH_ENGINEERING_TARGET__NOT_DEPLOYED",
+      "model": "METEORA_DBC_VIRTUAL_POOL_TO_DAMM_V2",
+      "realQuoteAsset": "SOL",
+      "creatorFirstBuyTargetAUD": 200,
+      "exactSolAmount": "BIND_AT_TRANSACTION_BUILD_TIME_USING_LIVE_AUD_SOL_QUOTE",
+      "stagedAdditions": "ALLOWED_POST_LAUNCH_OR_POST_MIGRATION_ONLY_AFTER_SEPARATE_SIMULATION_REVIEW_AND_APPROVAL",
+      "totalStagedLiquidityCapPercent": "NOT_YET_APPROVED",
+      "permanentLock": "APPLY_WORLDZ_PROOF_AND_LOCK_POLICY_TO_OWNER_APPROVED_MIGRATED_LIQUIDITY"
+    },
+    "purpleDiamondHandz": {
+      "percentOfSupply": 1,
+      "tokens": 3480000,
+      "status": "WORLDZLAUNCHPAD_DEFAULT__SEPARATE_FROM_MIRACLE_LAYER__TOKEN_SPECIFIC_CONFIRMATION_RETAINED",
+      "rule": "DO_NOT_MERGE_PURPLE_DIAMOND_CREW_MISSION_OR_IDENTITY_WITH_MIRACLE_CHURCH_MISSION"
+    },
+    "unallocated": {
+      "percentOfSupply": 54,
+      "tokens": 187920000,
+      "status": "UNALLOCATED__NO_AUTOMATIC_USE",
+      "rule": "FUTURE_BUCKETS_REQUIRE_EXPLICIT_OWNER_APPROVAL"
+    }
+  },
+  "miracleLayer": {
+    "communityOrientation": "MIRACLE_CHURCH_MINDED",
+    "modules": [
+      "Miracle Missions™",
+      "Miracle Proof™",
+      "Miracle Fund™",
+      "Miracle Match™",
+      "Miracle Emergency Vault™",
+      "Miracle Volunteers™"
+    ],
+    "missionFlow": "SEE_A_NEED__CREATE_A_MIRACLE__PROVE_THE_IMPACT__PASS_IT_FORWARD",
+    "separationRule": "CHARITABLE_OR_COMMUNITY_ASSISTANCE_ACCOUNTING_REMAINS_SEPARATE_FROM TRADING_LIQUIDITY_AND_PLATFORM_REVENUE_ACCOUNTING"
+  },
+  "liquidityArchitecture": {
+    "virtualPool": {
+      "protocol": "Meteora DBC",
+      "purpose": "ON_CHAIN_PRICE_DISCOVERY_BEFORE_DAMM_V2_GRADUATION",
+      "realLiquidityClaim": false,
+      "rule": "VIRTUAL_RESERVES_SHAPE_THE_CURVE_AND_MUST_NOT_BE_DESCRIBED_AS_REAL_TVL_OR_REAL_SOL"
+    },
+    "firstBuy": {
+      "supportedPath": "DBC_CREATE_POOL_WITH_FIRST_BUY",
+      "targetFundingAUD": 200,
+      "quoteMint": "SOL",
+      "accounting": "REAL_SOL_ENTERS_DBC_QUOTE_RESERVE_THROUGH_THE_BUY",
+      "doublesValue": false
+    },
+    "migration": {
+      "target": "Meteora DAMM v2",
+      "rule": "ACCUMULATED_QUOTE_RESERVE_AND_CONFIGURED_BASE_AMOUNT_SEED_GRADUATED_LIQUIDITY",
+      "additionalRealLp": "ADD_AS_SEPARATE_DAMM_V2_LIQUIDITY_POSITION_AFTER_MIGRATION_IF_APPROVED"
+    },
+    "noParallelGenesisPool": "DO_NOT_CREATE_A_SECOND_COMPETING_TRADITIONAL_AMM_POOL_AT_GENESIS__AVOID_SPLIT_PRICE_DISCOVERY_AND_FRAGMENTED_LIQUIDITY"
+  },
+  "inheritedTechnology": [
+    "Worldz Universal FlyWheel™",
+    "No Token Left Behind™",
+    "Worldz OmniBuildz™",
+    "Worldz LinkedAsset™",
+    "ProofBurn™",
+    "Worldz Proof™",
+    "WorldzBulkDrop™",
+    "WorldzLock™",
+    "WorldzVest™",
+    "AUTO",
+    "G.R.A.C.E."
+  ],
+  "executionGates": [
+    "FINAL_LOGO_AND_METADATA_URI",
+    "FINAL_ALLOCATION_LEDGER_TOTALS_100_PERCENT",
+    "TEAM_OPT_INS_AND_VERIFIED_WALLETS",
+    "MIRACLE_TEAM_VAULT_MULTISIG_DEPLOYMENT",
+    "MIRACLE_MAGIC_VAULT_POLICY_AND_MULTISIG_DEPLOYMENT",
+    "DBC_CURVE_SIMULATION_WITH_5_PERCENT_BASE_AND_200_AUD_FIRST_BUY_TARGET",
+    "EXACT_LIVE_SOL_AMOUNT_BOUND_AT_SIGNING_PREVIEW",
+    "DEVNET_OR_DISPOSABLE_PROOF_WHERE_PROTOCOL_SUPPORTS_IT",
+    "CANONICAL_MRCL_MAINNET_MINT",
+    "VESTING_BUILD_AND_SIMULATION",
+    "POOL_AND_MIGRATION_CONFIG_REVIEW",
+    "HUMAN_READABLE_TRANSACTION_REVIEW",
+    "REQUIRED_MULTISIG_APPROVALS",
+    "ON_CHAIN_CONFIRMATION",
+    "WORLDZPROOF_PUBLICATION_AFTER_CONFIRMATION"
+  ],
+  "mainnetExecutionAuthorized": false
+}
