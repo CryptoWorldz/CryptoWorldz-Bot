@@ -1,0 +1,138 @@
+{
+  "schema": "WORLDZ-MIRACLE-WALLET-APP-V1",
+  "brand": "WorldzMiracleWallet™",
+  "status": "CODE_BUILT_FOUNDATION__NO_MAINNET_EXECUTION",
+  "updatedAt": "2026-09-27",
+  "mode": "NON_CUSTODIAL_TREASURY_COORDINATION",
+  "miracleTreasury": {
+    "token": "MIRACLE",
+    "symbol": "MRCL",
+    "allocationPercent": 20,
+    "governance": "4-of-7",
+    "threshold": 4,
+    "signerCount": 7,
+    "mainnetState": "NOT_DEPLOYED",
+    "confirmedPublicSigners": [
+      {
+        "label": "JayJayTeamDev",
+        "chain": "solana",
+        "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+        "status": "CONFIRMED"
+      }
+    ],
+    "privateSignerSlots": [
+      {
+        "slot": 1,
+        "status": "INVITE_AND_CONSENT_PENDING"
+      },
+      {
+        "slot": 2,
+        "status": "INVITE_AND_CONSENT_PENDING"
+      },
+      {
+        "slot": 3,
+        "status": "INVITE_AND_CONSENT_PENDING"
+      },
+      {
+        "slot": 4,
+        "status": "INVITE_AND_CONSENT_PENDING"
+      },
+      {
+        "slot": 5,
+        "status": "INVITE_AND_CONSENT_PENDING"
+      },
+      {
+        "slot": 6,
+        "status": "INVITE_AND_CONSENT_PENDING"
+      }
+    ]
+  },
+  "worldzTreasuries": {
+    "operations": {
+      "governance": "5-of-10",
+      "status": "ROLLOUT_PENDING"
+    },
+    "reserve": {
+      "governance": "6-of-9",
+      "status": "NOT_DEPLOYED"
+    }
+  },
+  "chains": [
+    {
+      "id": "solana",
+      "label": "Solana",
+      "provider": "Squads v4",
+      "state": "FOUNDATION_READY__MIRACLE_MULTISIG_NOT_DEPLOYED"
+    },
+    {
+      "id": "ethereum",
+      "label": "Ethereum",
+      "provider": "Safe Smart Account",
+      "state": "ADAPTER_PLANNED"
+    },
+    {
+      "id": "base",
+      "label": "Base",
+      "provider": "Safe Smart Account",
+      "state": "ADAPTER_PLANNED"
+    },
+    {
+      "id": "bnb",
+      "label": "BNB Chain",
+      "provider": "Safe Smart Account",
+      "state": "ADAPTER_PLANNED"
+    },
+    {
+      "id": "hyperevm",
+      "label": "HyperEVM",
+      "provider": "Safe-compatible / verified EVM adapter",
+      "state": "ADAPTER_PLANNED"
+    },
+    {
+      "id": "xrpl",
+      "label": "XRP Ledger",
+      "provider": "Native SignerList multisigning",
+      "state": "ADAPTER_PLANNED"
+    },
+    {
+      "id": "sui",
+      "label": "Sui",
+      "provider": "Native weighted multisig",
+      "state": "ADAPTER_PLANNED"
+    },
+    {
+      "id": "robinhood",
+      "label": "Robinhood Chain",
+      "provider": "Verified EVM adapter required",
+      "state": "RESEARCH"
+    }
+  ],
+  "worldzCard": {
+    "brand": "WorldzCard™",
+    "firstResearchTarget": "Tangem",
+    "connectionModel": "WalletConnect where supported",
+    "state": "RESEARCH",
+    "privateKeysLeaveProvider": false,
+    "partnershipClaimed": false
+  },
+  "safety": {
+    "collectSeedPhrase": false,
+    "collectPrivateKey": false,
+    "mainnetBroadcastEnabled": false,
+    "simulationRequiredBeforeSigning": true,
+    "worldzProofRequired": true,
+    "perChainReleaseGate": true
+  },
+  "roadmap": [
+    "PWA_FOUNDATION",
+    "CHAIN_READ_ADAPTERS",
+    "SIGNER_CONNECTION",
+    "PROPOSAL_ENGINE",
+    "SIMULATION_AND_HUMAN_REVIEW",
+    "MULTISIG_APPROVALS",
+    "WORLDZPROOF",
+    "WALLETCONNECT_AND_WORLDZCARD",
+    "NATIVE_APP_PACKAGING",
+    "APP_STORE_RELEASE"
+  ]
+}
