@@ -38,7 +38,8 @@
     "privacyPolicyFinalized": false,
     "dataSafetyFinalized": false,
     "financialFeaturesDeclarationFinalized": false,
-    "reviewAccessFinalized": false
+    "reviewAccessFinalized": false,
+    "unsignedAabBuildProof": "CI_PENDING"
   },
   "assetGates": {
     "officialCenterLogoRasterReady": true,
@@ -81,6 +82,7 @@
     "stage5cMultichainHarness": "BUILT"
   },
   "nextGates": [
+    "PROVE_UNSIGNED_AAB_BUILD",
     "LOCK_ANDROID_APPLICATION_ID_BEFORE_PLAY_APP_CREATION",
     "VERIFY_PLAY_DEVELOPER_IDENTITY_AND_ACCOUNT_REQUIREMENTS",
     "FINALIZE_PUBLIC_SUPPORT_AND_PRIVACY_POLICY_URLS",
@@ -92,5 +94,6 @@
     "PLAY_INTERNAL_OR_CLOSED_TESTING",
     "FINAL_PLAY_CONSOLE_DECLARATIONS_AND_HUMAN_RELEASE_AUTHORIZATION"
   ],
-  "playReleaseContract": "apps/worldzapp-android/play-release.v1.json"
+  "playReleaseContract": "apps/worldzapp-android/play-release.v1.json",
+  "unsignedAabProofContract": "apps/worldzapp-android/unsigned-aab-proof.v1.json"
 }
