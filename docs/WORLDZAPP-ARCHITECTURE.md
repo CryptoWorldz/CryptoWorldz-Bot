@@ -148,7 +148,11 @@ The shared read-only adapter interface now exists for Solana, Ethereum, Base, BN
 The remaining Stage 2 gate is provider binding and live read proof: configure verified provider/RPC access without committing credentials, then prove real balance, multisig configuration and proposal-history reads chain by chain.
 
 ### Stage 3 — Identity and signer connections
-Build role-aware sessions and verified external wallet connections. Keep secrets out of Worldz infrastructure.
+**Foundation built.**
+
+WorldzApp now has a session-only public identity core, identity authority policy, external wallet connection registry, EIP-6963/EIP-1193 EVM discovery/account connection, and a Solana injected-provider fallback. A connected wallet is deliberately recorded as **CONNECTED_UNVERIFIED_CONTROL** and never grants treasury signer authority.
+
+The next Stage 3 sub-gate is standards-based mobile integration: Solana Mobile Wallet Standard, WalletConnect/AppKit, Sui dApp Kit v2 and the XRPL/Xaman connector, followed by explicit wallet-control challenge proof.
 
 ### Stage 4 — Proposal + simulation
 Real unsigned payload generation and exact effects review.
@@ -207,3 +211,8 @@ On 2026-09-27 the reconciled WorldzApp provider stack passed CI workflow run `36
 No transaction was signed, submitted or broadcast. Public verification endpoints remain development/proof infrastructure only; production provider URLs remain deployment-environment configuration.
 
 The Sui proof uses GraphQL after live verification showed the legacy public JSON-RPC path is no longer supported. This is now a permanent adapter rule: verify the exact current transport and network identity, not merely a hostname.
+
+
+## Identity and wallet authority separation
+
+See `docs/WORLDZAPP-IDENTITY-WALLET-STANDARD.md`. WorldzApp permanently separates wallet connection, wallet-control verification and treasury signer authority. Telegram/session identity and wallet connection cannot silently become treasury authority.
