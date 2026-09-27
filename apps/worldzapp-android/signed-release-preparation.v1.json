@@ -1,10 +1,34 @@
 {
-  "schema": "WORLDZAPP-SIGNED-RELEASE-PREPARATION-V1",
+  "schema": "WORLDZ-APP-SIGNED-RELEASE-PREPARATION-V1",
   "updatedAt": "2026-09-28",
-  "state": "PIPELINE_BUILT__SECRETS_PLAY_IDENTITY_AND_FINAL_ASSET_IMPORT_PENDING",
-  "applicationId": "xyz.cryptoworldz.worldzapp",
-  "targetSdk": 36,
-  "format": "AAB",
+  "state": "PREPARED__PHASE3_MANUAL_PIPELINE_BUILT__REAL_PLAY_IDENTITY_REQUIRED",
+  "inputs": {
+    "applicationId": "xyz.cryptoworldz.worldzapp",
+    "targetSdk": 36,
+    "sourcePwa": "https://launchpad.cryptoworldz.xyz/worldz-app/",
+    "finalLogoSha256": "e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec",
+    "playAppSigningCertificateSha256": "PENDING_FROM_PLAY_CONSOLE"
+  },
+  "secretPolicy": [
+    "Never commit keystore bytes",
+    "Never commit keystore password",
+    "Never commit private signing key",
+    "Never commit Play service-account credentials"
+  ],
+  "sequence": [
+    "Create/verify Play developer identity",
+    "Create Play app and confirm package ID",
+    "Enable Play App Signing",
+    "Record Play app-signing SHA-256 certificate",
+    "Render Digital Asset Links",
+    "Deploy and verify assetlinks.json",
+    "Build release AAB with secrets outside source control",
+    "Verify AAB package/version/target SDK",
+    "Run Play internal testing",
+    "Complete final declarations",
+    "Human-authorize submission"
+  ],
+  "releaseAuthorized": false,
   "uploadSigning": {
     "method": "runtime keystore + jarsigner",
     "keystoreCommitted": false,
@@ -26,5 +50,8 @@
     "manualDispatchOnly": true,
     "autoSubmitToPlay": false,
     "publicReleaseAuthorized": false
-  }
+  },
+  "format": "AAB",
+  "applicationId": "xyz.cryptoworldz.worldzapp",
+  "targetSdk": 36
 }
