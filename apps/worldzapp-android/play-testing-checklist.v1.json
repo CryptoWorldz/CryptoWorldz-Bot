@@ -1,0 +1,69 @@
+{
+  "schema": "WORLDZAPP-PLAY-TESTING-CHECKLIST-V1",
+  "updatedAt": "2026-09-28",
+  "state": "READY_FOR_EXECUTION_AFTER_FINAL_BINARY_BUILD",
+  "tracks": {
+    "preDevice": [
+      "API 36 build passes",
+      "final owner-approved icon hashes pass",
+      "AAB zip integrity passes",
+      "jarsigner verification passes for upload-signed release",
+      "privacy and support routes are bundled/reachable",
+      "Digital Asset Links file is rendered only from real Play App Signing fingerprint"
+    ],
+    "androidDevice": [
+      "cold launch",
+      "warm launch",
+      "back navigation",
+      "deep link to /worldz-app/",
+      "privacy page",
+      "support page",
+      "PWA/TWA fallback behavior",
+      "network loss and recovery",
+      "screen rotation",
+      "font scaling 200 percent",
+      "TalkBack navigation",
+      "tap target and focus visibility",
+      "dark theme legibility"
+    ],
+    "walletBoundary": [
+      "public core works without wallet",
+      "connect supported wallet",
+      "deny wallet connection",
+      "disconnect wallet",
+      "switch supported network",
+      "no seed phrase request anywhere",
+      "no private key request anywhere",
+      "no automatic transaction signing",
+      "no automatic execution",
+      "no mainnet broadcast"
+    ],
+    "worldzFunctions": [
+      "verified chain status renders",
+      "unsigned simulation status renders",
+      "WLDZ Squads public proof renders",
+      "Safe profile remains gated unless genuine Worldz profile exists",
+      "XRPL profile remains gated unless genuine Worldz SignerList exists",
+      "Sui profile remains gated unless genuine Worldz multisig exists",
+      "WorldzProof/status language matches actual proof state"
+    ],
+    "playReview": [
+      "reviewer can open public core without account",
+      "reviewer does not need wallet",
+      "reviewer does not need payment",
+      "store text matches exact release",
+      "screenshots contain only shipped features",
+      "Data Safety matches exact production behavior",
+      "Financial Features selections match exact release",
+      "content rating, target audience and ads declarations completed"
+    ]
+  },
+  "completionEvidence": {
+    "deviceModel": "PENDING",
+    "androidVersion": "PENDING",
+    "testTrack": "PENDING",
+    "testerCountOrRequirement": "ACCOUNT_DEPENDENT_PENDING",
+    "completedAt": null,
+    "passed": false
+  }
+}
