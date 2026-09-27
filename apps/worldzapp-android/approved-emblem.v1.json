@@ -1,0 +1,32 @@
+{
+  "schema": "WORLDZ-APP-APPROVED-EMBLEM-V1",
+  "updatedAt": "2026-09-27",
+  "state": "OWNER_APPROVED_SOURCE_REGISTERED__FINAL_PRODUCTION_RASTER_PENDING",
+  "brand": "Worldz Emblem",
+  "approval": {
+    "ownerApproved": true,
+    "replacementRequiresExplicitOwnerApproval": true,
+    "regenerationAllowed": false
+  },
+  "masterSource": {
+    "dimensions": "1536x1536",
+    "sha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
+    "source": "USER_SUPPLIED_WORLDZ_EMBLEM"
+  },
+  "repositoryPreview": {
+    "path": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg",
+    "dimensions": "128x128",
+    "sha256": "b3152a79fd46e0fcb4f4f00e536ea7bc9ee6279986eff3abaf60e225d91d9f7d",
+    "releaseAsset": false
+  },
+  "finalProductionAssets": {
+    "state": "PENDING_VALID_EXPORT_AND_CHECKSUM_BINDING",
+    "required": [
+      "512x512 Google Play PNG",
+      "Android launcher/mipmap assets",
+      "maskable safe-zone asset"
+    ],
+    "mustDeriveFromApprovedMaster": true
+  },
+  "keepOnKeepinOn": true
+}
