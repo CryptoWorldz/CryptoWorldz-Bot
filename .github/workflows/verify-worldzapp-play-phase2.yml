@@ -1,0 +1,40 @@
+name: WorldzApp Play Phase 2
+
+on:
+  pull_request:
+    paths:
+      - 'launchpad.cryptoworldz.xyz/worldz-app/privacy/**'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/support/**'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/index.html'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/style.css'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/service-worker.js'
+      - 'apps/worldzapp-android/play-release.v1.json'
+      - 'apps/worldzapp-android/play-store-listing.v1.json'
+      - 'apps/worldzapp-android/play-final-preflight.v1.json'
+      - 'tools/render-worldzapp-assetlinks.js'
+      - 'tools/verify-worldzapp-play-phase2.js'
+      - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
+      - 'package.json'
+      - '.github/workflows/verify-worldzapp-play-phase2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-play-phase2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks
+        run: |
+          node --check tools/render-worldzapp-assetlinks.js
+          node --check tools/verify-worldzapp-play-phase2.js
+      - name: Verify Play readiness baseline
+        run: npm run verify:worldzapp:play
+      - name: Verify Play Phase 2
+        run: npm run verify:worldzapp:play-phase2

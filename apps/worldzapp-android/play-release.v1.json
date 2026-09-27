@@ -7,7 +7,7 @@
   "publicReleaseAuthorized": false,
   "android": {
     "applicationId": "xyz.cryptoworldz.worldzapp",
-    "applicationIdState": "PROVISIONAL_UNTIL_PLAY_APP_CREATED",
+    "applicationIdState": "SOURCE_LOCKED__PLAY_CONSOLE_AVAILABILITY_REQUIRED",
     "targetSdk": 36,
     "compileSdk": 36,
     "releaseFormat": "ANDROID_APP_BUNDLE_AAB",
@@ -29,13 +29,15 @@
       "repositoryMayContainSigningSecrets": false
     },
     "digitalAssetLinks": {
-      "state": "REQUIRED_PENDING",
+      "state": "RENDERER_BUILT__REAL_PLAY_SIGNING_FINGERPRINT_REQUIRED",
       "requiredHostPath": "https://launchpad.cryptoworldz.xyz/.well-known/assetlinks.json",
-      "requiresPlayAppSigningSha256Fingerprint": true
+      "requiresPlayAppSigningSha256Fingerprint": true,
+      "renderer": "tools/render-worldzapp-assetlinks.js"
     },
     "privacyPolicy": {
-      "state": "REQUIRED_PENDING_PUBLIC_URL",
-      "draft": "apps/worldzapp-android/privacy-policy.draft.md"
+      "state": "CODE_BUILT_PUBLIC_URL_PENDING_DEPLOYMENT_VERIFICATION",
+      "draft": "apps/worldzapp-android/privacy-policy.draft.md",
+      "candidateUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/privacy/"
     },
     "dataSafety": {
       "state": "REQUIRED_PENDING_FINAL_RUNTIME_AND_SDK_AUDIT",
@@ -73,6 +75,18 @@
     "jurisdictionDistributionReview": {
       "state": "REQUIRED_BEFORE_COUNTRY_SELECTION",
       "rule": "Crypto/financial functionality and local requirements must be reviewed for each selected distribution jurisdiction."
+    },
+    "supportWebsite": {
+      "state": "CODE_BUILT_PUBLIC_URL_PENDING_DEPLOYMENT_VERIFICATION",
+      "candidateUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/support/",
+      "dedicatedWrittenContact": "REQUIRED_PENDING"
+    },
+    "unsignedAabProof": {
+      "state": "PASSED",
+      "mergeCommit": "bb43c9344ad1fbd3e6fdfa3f06810599f7ca2dee",
+      "workflowArtifact": "worldzapp-unsigned-aab-proof",
+      "signed": false,
+      "releaseAuthorized": false
     }
   },
   "worldzSecurity": {
@@ -143,5 +157,9 @@
       "sizeBytes": 427484,
       "sha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15"
     }
+  },
+  "releasePhase2": {
+    "state": "CODE_SIDE_BUILT__EXTERNAL_GATES_REMAIN",
+    "preflight": "apps/worldzapp-android/play-final-preflight.v1.json"
   }
 }

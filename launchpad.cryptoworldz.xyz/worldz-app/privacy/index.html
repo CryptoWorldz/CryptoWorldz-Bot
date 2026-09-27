@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#05020b">
+  <title>WorldzApp™ Privacy</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="app-brand" href="../"><span class="brand-mark">W</span><span><strong>WorldzApp™</strong><small>Privacy</small></span></a>
+    <div class="actions"><a class="btn ghost" href="../">Back to WorldzApp</a></div>
+  </header>
+  <main>
+    <section class="panel active">
+      <div class="section-head"><span>PRIVACY</span><h2>WorldzApp™ Privacy Notice</h2><p>Last updated 28 September 2026. This notice describes the current WorldzApp core and must be re-audited against the exact production release before Google Play submission.</p></div>
+      <article class="guard-card">
+        <h3>Non-custodial by design</h3>
+        <p>WorldzApp may read public wallet connection information when you choose to connect a supported external wallet, including a public wallet address, provider label and selected blockchain network. The current core keeps wallet connection state in browser session storage by default. Persistent storage of a public wallet address requires explicit user consent under the WorldzApp storage policy.</p>
+        <p><strong>WorldzApp does not ask for seed phrases, private keys, recovery phrases, wallet unlock passwords or exported signing keys.</strong></p>
+
+        <h3>Public blockchain and treasury information</h3>
+        <p>WorldzApp may display or coordinate public blockchain information such as public wallet addresses, treasury identifiers, proposal identifiers, public approval-state references, transaction hashes and WorldzProof™ receipts. Information published to a public blockchain remains publicly observable independently of WorldzApp.</p>
+
+        <h3>Accounts and identity</h3>
+        <p>The current public WorldzApp core does not create a Worldz-hosted consumer account. If a future release adds account creation, the privacy notice, Data Safety declaration and account-deletion controls must be updated before that release ships.</p>
+
+        <h3>Third-party providers</h3>
+        <p>Supported wallets, blockchain RPC providers and external services operate under their own privacy practices. Opening or connecting an external provider may cause that provider to process information under its own terms and privacy policy.</p>
+
+        <h3>Security boundaries</h3>
+        <p>WorldzApp separates public identity, chain reads, simulation, multisig evidence and transaction authority. The current Android release pipeline does not itself authorize transaction signing, execution or mainnet broadcast.</p>
+
+        <h3>Retention and deletion</h3>
+        <p>Session-only connection data is intended to end with the browser/app session unless the user explicitly consents to persistence. Public blockchain records cannot be deleted by WorldzApp. Any production analytics, hosting logs, support records or future identity data must be included in the final production retention audit before Play submission.</p>
+
+        <h3>Support and privacy contact</h3>
+        <p>The dedicated public WorldzApp support contact is a release gate and will be published on the <a href="../support/">WorldzApp Support page</a> before Google Play submission. Do not send seed phrases, private keys or recovery words to any support channel.</p>
+      </article>
+    </section>
+  </main>
+  <footer><span>WorldzApp™ • WorldzFullBuild™</span><span><a href="../support/">Support</a> • <a href="../">App</a></span></footer>
+</body>
+</html>

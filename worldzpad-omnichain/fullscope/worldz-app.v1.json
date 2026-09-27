@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "GOOGLE_PLAY_READINESS__APPROVED_EMBLEM_PRODUCTION_ASSETS_READY__ANDROID_API36__STAGE_5C__SIGNED_AAB_RELEASE_GATED",
+  "lifecycle": "PLAY_PHASE2_CODE_BUILT__UNSIGNED_AAB_PROVEN__SIGNED_RELEASE_GATED",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -165,7 +165,11 @@
     "androidMaskableIcon": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
     "androidIconVerifier": "tools/verify-worldzapp-icon-assets.js",
     "androidUnsignedAabProof": "apps/worldzapp-android/unsigned-aab-proof.v1.json",
-    "androidUnsignedAabWorkflow": ".github/workflows/verify-worldzapp-unsigned-aab.yml"
+    "androidUnsignedAabWorkflow": ".github/workflows/verify-worldzapp-unsigned-aab.yml",
+    "playFinalPreflight": "apps/worldzapp-android/play-final-preflight.v1.json",
+    "playPrivacySurface": "launchpad.cryptoworldz.xyz/worldz-app/privacy/index.html",
+    "playSupportSurface": "launchpad.cryptoworldz.xyz/worldz-app/support/index.html",
+    "playAssetLinksRenderer": "tools/render-worldzapp-assetlinks.js"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -347,7 +351,7 @@
     "playAppSigningConfigured": false,
     "publicReleaseAuthorized": false,
     "mainnetBroadcastEnabled": false,
-    "nextGate": "UNSIGNED_AAB_BUILD_PROOF__THEN_FINAL_APPLICATION_ID__PLAY_IDENTITY__PRIVACY_SUPPORT__PLAY_SIGNING__ASSET_LINKS__SIGNED_AAB__TESTING",
+    "nextGate": "PLAY_DEVELOPER_IDENTITY__DEDICATED_SUPPORT_CONTACT__PUBLIC_DEPLOYMENT_VERIFICATION__PLAY_APP_SIGNING__CERT_FINGERPRINT__ASSETLINKS_DEPLOYMENT__SIGNED_AAB__TESTING__FINAL_DECLARATIONS",
     "playReadinessFoundation": "BUILT",
     "playSubmissionReady": false,
     "privacyPolicyFinalized": false,
@@ -371,7 +375,11 @@
       "sha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15",
       "format": "PNG_RGBA_SRGB"
     },
-    "unsignedAabBuildProof": "CI_PENDING"
+    "unsignedAabBuildProof": "CI_PENDING",
+    "unsignedAabCompilationProof": "PASSED",
+    "playPrivacySurface": "CODE_BUILT_DEPLOYMENT_VERIFICATION_PENDING",
+    "playSupportSurface": "CODE_BUILT_DEPLOYMENT_VERIFICATION_PENDING",
+    "digitalAssetLinksRenderer": "BUILT"
   },
   "keepOnKeepinOn": {
     "enabled": true,
