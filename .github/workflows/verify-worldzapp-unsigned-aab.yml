@@ -69,7 +69,7 @@ jobs:
 
       - name: Prepare CI-only TWA manifest
         run: |
-          mkdir -p .worldzapp-android-build
+          mkdir -p worldzapp-android-build
           node - <<'NODE'
           const fs=require('node:fs');
           const source=JSON.parse(fs.readFileSync('apps/worldzapp-android/twa-manifest.template.json','utf8'));
@@ -88,22 +88,22 @@ jobs:
           manifest.iconUrl=rawBase+'worldz-app-icon-512.png';
           manifest.maskableIconUrl=rawBase+'worldz-app-icon-maskable-512.png';
           manifest.signingKey={path:'UNUSED_UNSIGNED_BUILD.keystore',alias:'worldzapp'};
-          fs.writeFileSync('.worldzapp-android-build/twa-manifest.json',JSON.stringify(manifest,null,2)+'\n');
+          fs.writeFileSync('worldzapp-android-build/twa-manifest.json',JSON.stringify(manifest,null,2)+'\n');
           console.log('WORLDZAPP_CI_TWA_MANIFEST=READY');
           NODE
 
       - name: Generate Android project from TWA manifest
-        working-directory: .worldzapp-android-build
+        working-directory: worldzapp-android-build
         run: npx bubblewrap update --skipVersionUpgrade --manifest=twa-manifest.json
 
       - name: Build unsigned APK and AAB
-        working-directory: .worldzapp-android-build
+        working-directory: worldzapp-android-build
         run: npx bubblewrap build --skipSigning --skipPwaValidation --manifest=twa-manifest.json
 
       - name: Verify unsigned AAB artifact
         run: |
-          AAB=".worldzapp-android-build/app/build/outputs/bundle/release/app-release.aab"
-          APK=".worldzapp-android-build/app-release-unsigned-aligned.apk"
+          AAB="worldzapp-android-build/app/build/outputs/bundle/release/app-release.aab"
+          APK="worldzapp-android-build/app-release-unsigned-aligned.apk"
           test -s "$AAB"
           unzip -t "$AAB" >/dev/null
           SHA="$(sha256sum "$AAB" | awk '{print $1}')"
