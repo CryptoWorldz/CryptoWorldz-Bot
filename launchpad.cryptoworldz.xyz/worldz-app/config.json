@@ -125,8 +125,10 @@
     "storagePolicy": "/worldz-app/core/storage-policy.json",
     "sessionSchema": "/worldz-app/core/session.schema.json",
     "activityEventSchema": "/worldz-app/core/activity-event.schema.json",
-    "providerBindings": "NOT_CONFIGURED",
-    "liveReadProof": "NOT_RUN",
-    "execution": false
+    "providerBindings": "/worldz-app/core/provider-bindings.json",
+    "liveReadProof": "CI_WORKFLOW_ADDED__NOT_YET_PASSED",
+    "execution": false,
+    "publicVerificationProviders": "CONFIGURED_FOR_DEVELOPMENT_PROOF_ONLY",
+    "productionProviders": "ENVIRONMENT_OR_SECRET_CONFIG_REQUIRED"
   }
 }
