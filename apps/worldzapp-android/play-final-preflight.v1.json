@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-PLAY-FINAL-PREFLIGHT-V1",
   "updatedAt": "2026-09-28",
-  "state": "CODE_SIDE_PHASE2_BUILT__FINAL_LOGO_BINARY_AND_EXTERNAL_GATES_REMAIN",
+  "state": "PHASE3_RELEASE_PIPELINE_BUILT__BINARY_IMPORT_AND_EXTERNAL_PLAY_GATES_REMAIN",
   "codeSide": {
     "api36": true,
     "unsignedAabCompilationProven": true,
@@ -13,7 +13,15 @@
     "finalOwnerApprovedLogoMasterLocked": true,
     "finalOwnerApprovedLogoMasterSha256": "e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec",
     "previousIconAssets": "SUPERSEDED_FOR_FINAL_PLAY_RELEASE",
-    "finalLogoBinaryReconciliation": "REQUIRED"
+    "finalLogoBinaryReconciliation": "DERIVATIVES_PREPARED__REPOSITORY_IMPORT_PENDING",
+    "finalIconPackManifestBuilt": true,
+    "finalIconPackManifest": "apps/worldzapp-android/final-icon-pack.v1.json",
+    "dataSafetyDraftAdvanced": true,
+    "financialFeaturesDraftAdvanced": true,
+    "storeListingCopyReady": true,
+    "screenshotCapturePlanReady": true,
+    "testingChecklistReady": true,
+    "finalSignedAabPipelineBuilt": true
   },
   "publicUrls": {
     "privacyCandidate": "https://launchpad.cryptoworldz.xyz/worldz-app/privacy/",
@@ -32,7 +40,10 @@
     "playSigningCertificateSha256Known": false,
     "digitalAssetLinksRenderer": "tools/render-worldzapp-assetlinks.js",
     "digitalAssetLinksDeployed": false,
-    "signedAabBuilt": false
+    "signedAabBuilt": false,
+    "signedAabPipeline": ".github/workflows/worldzapp-final-release-aab.yml",
+    "uploadKeySecretsConfigured": false,
+    "autoSubmitToGoogle": false
   },
   "console": {
     "dataSafetyFinalized": false,
@@ -40,7 +51,9 @@
     "adsDeclarationFinalized": false,
     "targetAudienceFinalized": false,
     "contentRatingFinalized": false,
-    "testingRequirementSatisfied": false
+    "testingRequirementSatisfied": false,
+    "storeListingCopyReady": true,
+    "screenshotCapturePending": true
   },
   "releaseAuthorized": false,
   "rule": "Code-side readiness must never be represented as Google Play approval. Account, deployment, signing, testing and final declaration gates require real external evidence."
