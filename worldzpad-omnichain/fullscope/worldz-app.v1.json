@@ -157,7 +157,9 @@
     "googlePlayFinancialFeatures": "apps/worldzapp-android/play-financial-features.v1.json",
     "googlePlayReviewAccess": "apps/worldzapp-android/play-review-access.v1.json",
     "googlePlayStoreListing": "apps/worldzapp-android/play-store-listing.v1.json",
-    "googlePlayReleaseGuide": "docs/WORLDZAPP-GOOGLE-PLAY-RELEASE.md"
+    "googlePlayReleaseGuide": "docs/WORLDZAPP-GOOGLE-PLAY-RELEASE.md",
+    "approvedWorldzEmblem": "apps/worldzapp-android/approved-emblem.v1.json",
+    "androidIcon512": "apps/worldzapp-android/assets/worldzapp-icon-512.png"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -335,15 +337,21 @@
     "outputFormat": "ANDROID_APP_BUNDLE_AAB",
     "signedAabBuilt": false,
     "digitalAssetLinksDeployed": false,
-    "officialCenterLogoRasterReady": false,
+    "officialCenterLogoRasterReady": true,
     "playAppSigningConfigured": false,
     "publicReleaseAuthorized": false,
     "mainnetBroadcastEnabled": false,
-    "nextGate": "FINAL_APPLICATION_ID_AND_CENTER_LOGO__PLAY_DEVELOPER_IDENTITY__PRIVACY_DATA_SAFETY_FINANCIAL_DECLARATIONS__PLAY_SIGNING__ASSET_LINKS__SIGNED_AAB__TESTING",
+    "nextGate": "FINAL_APPLICATION_ID__PLAY_DEVELOPER_IDENTITY__PRIVACY_DATA_SAFETY_FINANCIAL_DECLARATIONS__PLAY_SIGNING__ASSET_LINKS__SIGNED_AAB__TESTING",
     "playReadinessFoundation": "BUILT",
     "playSubmissionReady": false,
     "privacyPolicyFinalized": false,
     "dataSafetyFinalized": false,
-    "financialFeaturesDeclarationFinalized": false
+    "financialFeaturesDeclarationFinalized": false,
+    "approvedEmblem": "/worldz-app/worldz-app-icon-512.png",
+    "approvedEmblemSha256": "3710472b055d46fb2dec3ff2a1e71f4382787520e775477b6511dc8e9dfb34ef"
+  },
+  "keepOnKeepinOn": {
+    "enabled": true,
+    "rule": "Continue the staged WorldzApp build without bypassing release gates."
   }
 }
