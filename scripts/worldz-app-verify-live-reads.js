@@ -31,14 +31,14 @@ async function run(){
     results:[]
   };
   const jobs=[
-    ["solana",()=>solanaAdapter({providerUrl:endpoint("solana")}).getHealth()],
-    ["solana-balance",()=>solanaAdapter({providerUrl:endpoint("solana")}).getBalanceSummary({address:targetWallet})],
-    ["base",()=>evmAdapter({id:"base",providerUrl:endpoint("base"),expectedChainId:8453}).getHealth()],
-    ["bnb",()=>evmAdapter({id:"bnb",providerUrl:endpoint("bnb"),expectedChainId:56}).getHealth()],
-    ["hyperevm",()=>evmAdapter({id:"hyperevm",providerUrl:endpoint("hyperevm"),expectedChainId:999}).getHealth()],
-    ["xrpl",()=>xrplAdapter({providerUrl:endpoint("xrpl")}).getHealth()],
-    ["sui",()=>suiAdapter({providerUrl:endpoint("sui")}).getHealth()],
-    ["robinhood",()=>evmAdapter({id:"robinhood",providerUrl:endpoint("robinhood"),expectedChainId:4663}).getHealth()]
+    ["solana",()=>solanaAdapter({providerUrl:endpoint("solana")}).methods.getHealth()],
+    ["solana-balance",()=>solanaAdapter({providerUrl:endpoint("solana")}).methods.getBalanceSummary({address:targetWallet})],
+    ["base",()=>evmAdapter({id:"base",providerUrl:endpoint("base"),expectedChainId:8453}).methods.getHealth()],
+    ["bnb",()=>evmAdapter({id:"bnb",providerUrl:endpoint("bnb"),expectedChainId:56}).methods.getHealth()],
+    ["hyperevm",()=>evmAdapter({id:"hyperevm",providerUrl:endpoint("hyperevm"),expectedChainId:999}).methods.getHealth()],
+    ["xrpl",()=>xrplAdapter({providerUrl:endpoint("xrpl")}).methods.getHealth()],
+    ["sui",()=>suiAdapter({providerUrl:endpoint("sui")}).methods.getHealth()],
+    ["robinhood",()=>evmAdapter({id:"robinhood",providerUrl:endpoint("robinhood"),expectedChainId:4663}).methods.getHealth()]
   ];
   for(const [name,task] of jobs){
     const chain=name==="solana-balance"?"solana":name;
