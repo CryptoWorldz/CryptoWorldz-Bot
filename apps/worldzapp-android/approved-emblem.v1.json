@@ -1,27 +1,39 @@
 {
   "schema": "WORLDZ-APP-APPROVED-EMBLEM-V1",
   "updatedAt": "2026-09-27",
-  "state": "OWNER_APPROVED_AND_REPOSITORY_BOUND",
+  "state": "OWNER_APPROVED_SOURCE_REGISTERED__FINAL_PRODUCTION_RASTER_PENDING",
   "brand": "Worldz Emblem",
   "approval": {
     "ownerApproved": true,
-    "approvalContext": "User explicitly supplied the selected WorldzApp icon artwork and instructed: Use this as Part of this.",
-    "replacementRule": "Do not replace or redesign this emblem for WorldzApp release assets unless the owner explicitly approves a replacement."
+    "approvalContext": "Owner supplied the selected WorldzApp artwork and explicitly instructed that it be used in the Google Play build.",
+    "replacementRule": "Do not replace, redesign or substitute this approved Worldz Emblem for WorldzApp release assets unless the owner explicitly approves a replacement."
   },
   "masterSource": {
     "originalDimensions": "1536x1536",
     "sha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
+    "originalConversationAsset": "OWNER_SUPPLIED_CURRENT_PROJECT_ASSET",
     "repositoryMasterOriginalCommitted": false,
-    "rule": "The original owner upload remains the approval source; repository release derivatives must preserve the approved composition."
+    "rule": "The approved 1536×1536 owner upload is the visual source of truth. Release derivatives must preserve this composition."
   },
-  "releaseDerivative": {
-    "dimensions": "512x512",
-    "format": "PNG",
-    "sha256": "3710472b055d46fb2dec3ff2a1e71f4382787520e775477b6511dc8e9dfb34ef",
-    "publicPath": "launchpad.cryptoworldz.xyz/worldz-app/worldz-app-icon-512.png",
-    "androidAssetPath": "apps/worldzapp-android/assets/worldzapp-icon-512.png",
-    "purpose": ["PLAY_STORE_ICON_SOURCE","ANDROID_TWA_ICON","PWA_MASKABLE_ICON"],
-    "derivedFromOwnerApprovedMaster": true
+  "repositoryPreview": {
+    "state": "BOUND_FOR_VISUAL_IDENTITY_REFERENCE",
+    "path": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg",
+    "dimensions": "128x128",
+    "format": "JPEG",
+    "sha256": "b3152a79fd46e0fcb4f4f00e536ea7bc9ee6279986eff3abaf60e225d91d9f7d",
+    "releaseAsset": false
+  },
+  "finalReleaseRaster": {
+    "state": "PENDING_VALID_EXPORT_AND_REPOSITORY_BINDING",
+    "requiredFormat": "PNG",
+    "requiredDimensions": "512x512",
+    "requiredPurposes": [
+      "PLAY_STORE_ICON_SOURCE",
+      "ANDROID_TWA_ICON",
+      "PWA_MASKABLE_ICON"
+    ],
+    "mustDeriveFromApprovedMaster": true,
+    "requiredBeforeSignedAab": true
   },
   "keepOnKeepinOn": true
 }
