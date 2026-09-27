@@ -564,3 +564,22 @@ The owner-approved Worldz Emblem master remains locked by SHA-256 `685fac492b05f
 - `tools/verify-worldzapp-icon-assets.js` verifies dimensions, PNG color type, profile marker, Play file-size cap, exact hashes and byte equality between hosted and Android copies.
 - The production asset blocker is cleared. Play developer identity, final application ID, privacy/support publication, Play App Signing, Digital Asset Links, signed AAB, device/testing tracks and final declarations remain gated.
 - No wallet signing, approval submission, transaction execution or mainnet broadcast is enabled by the asset work.
+
+
+## WorldzApp™ Play release Phase 2 — 2026-09-28
+
+Status: **CODE-SIDE RELEASE SURFACES BUILT / EXTERNAL GOOGLE PLAY GATES REMAIN**
+
+Following the successful unsigned Android API-36 AAB proof merged in PR #251:
+
+- public WorldzApp privacy surface is code-built at `/worldz-app/privacy/`;
+- public WorldzApp support surface is code-built at `/worldz-app/support/`;
+- both surfaces are linked from WorldzApp and included in the PWA cache;
+- Play listing candidates now point to those first-party URLs;
+- the dedicated written support contact remains intentionally pending because the only currently connected Hostinger mailbox uses retired public branding and must not be reused;
+- a fail-closed Digital Asset Links renderer now accepts only a valid SHA-256 Play App Signing certificate fingerprint and writes the exact package binding for `xyz.cryptoworldz.worldzapp`;
+- no fake `.well-known/assetlinks.json` is committed before the real Play signing fingerprint exists;
+- the application ID is source-locked as the current candidate, but Play Console availability still requires real verification;
+- signed AAB, Play App Signing, developer identity, public deployment verification, testing and final Play declarations remain external release gates.
+
+Permanent security boundary remains unchanged: approval submission, transaction signing, execution and mainnet broadcast are OFF.
