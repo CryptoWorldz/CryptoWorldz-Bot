@@ -205,9 +205,13 @@ The project-wide source-of-truth layer is now represented in `worldzpad-omnichai
 Owner direction is incorporated as a **planned** WorldzFullBuild workstream via `docs/WORLDZ-MIRACLE-WALLET-TREASURY-STANDARD.md` and `worldzpad-omnichain/fullscope/worldz-miracle-wallet.v1.json`.
 
 - MIRACLE ($MRCL) includes a planned **20% Miracle Church treasury allocation**, held by a church-controlled multisig rather than personally divided between signers.
-- Six nominated church signers are to be invited; public wallet-to-person association requires individual consent and is not stored in this public source-of-truth.
-- Solana starts with external signer wallets plus Squads; a 4-of-6 threshold is the proposed default, not yet deployed.
+- Six nominated church signers are to be invited, and **JayJayTeamDev is added as signer #7**. Church nominee wallet-to-person association remains private until individual consent; JayJayTeamDev has explicitly approved the public signer association.
+- Solana starts with external signer wallets plus Squads; the owner-approved signer model is **4-of-7**, with four approvals required. It is not yet deployed.
 - WorldzMiracleWallet™ is the universal first-party treasury interface over chain-native custody: Squads for Solana, Safe for supported EVM networks, XRPL SignerList/quorum, Sui native multisig, and separately verified adapters for other chains.
 - WorldzCard™ is a provider-adapter layer; Tangem is the first research target using WalletConnect where supported. No physical co-branded card or provider partnership is claimed without an actual agreement.
 - The church signer group may be invited into future WorldzLaunchPad treasury/deployment approvals, but this does **not** create an automatic 20% allocation or control right over unrelated future tokens.
 - No mainnet treasury creation, allocation transfer or signer enrollment is treated as complete until consent, address verification, threshold approval, simulation, test transaction and WorldzProof gates pass.
+
+### Signer update — 2026-09-27
+
+JayJayTeamDev is signer #7 for the planned Miracle Church treasury using public Solana address `Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u`. The threshold remains four required approvals, producing a **4-of-7** multisig policy. This is a build/specification decision only; no on-chain multisig creation or token transfer is implied.
