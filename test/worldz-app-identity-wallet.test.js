@@ -82,3 +82,20 @@ test("identity policy separates connection, control proof and signer authority",
   assert.equal(policy.principles.walletConnectionAutomaticallyGrantsTreasurySignerAuthority,false);
   assert.equal(policy.principles.treasurySignerAuthorityRequiresTreasurySpecificVerification,true);
 });
+
+
+test("control proof cannot create a wallet connection that was never connected",()=>{
+  const value=session.createSession();
+  assert.throws(
+    ()=>session.markControlChallengeVerified(value,{chain:"solana",publicAddress:"FakePublicAddress1111",proofId:"proof-1"}),
+    /CONNECTION_NOT_FOUND/
+  );
+});
+
+test("WorldzApp Stage 3 browser scripts parse cleanly",()=>{
+  const vm=require("node:vm");
+  for(const file of ["app.js","connections.js"]){
+    const source=fs.readFileSync(path.join(root,"launchpad.cryptoworldz.xyz","worldz-app",file),"utf8");
+    assert.doesNotThrow(()=>new vm.Script(source,{filename:file}));
+  }
+});
