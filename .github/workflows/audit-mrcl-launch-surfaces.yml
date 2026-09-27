@@ -1,0 +1,36 @@
+name: Audit MRCL launch surfaces
+
+on:
+  workflow_dispatch:
+    inputs:
+      strict:
+        description: 'Fail unless Jupiter + DEX Screener identity gates pass'
+        required: true
+        default: false
+        type: boolean
+  schedule:
+    - cron: '17 * * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      JUPITER_API_KEY: ${{ secrets.JUPITER_API_KEY }}
+      WORLDZ_RELEASE_STRICT: ${{ inputs.strict && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit Jupiter and DEX Screener launch surfaces
+        run: node scripts/audit_mrcl_launch_surfaces.mjs
+      - name: Upload launch audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mrcl-launch-surface-audit
+          path: artifacts/mrcl-launch-surface-audit.json
+          if-no-files-found: error
