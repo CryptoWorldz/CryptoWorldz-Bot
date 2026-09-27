@@ -183,6 +183,9 @@
     "applyToFutureWorldzLaunchPadTokens": true,
     "rule": "The manifest, vesting, approval, proof and live-verification standards become reusable WorldzLaunchPad defaults. Token-specific economics remain owner-approved overrides.",
     "modules": [
+      "WorldzLaunch Quality Gate™",
+      "Worldz Token Identity Engine™",
+      "WorldDexPush™",
       "WorldzBulkDrop™",
       "WorldzLock™",
       "WorldzVest™",
@@ -775,6 +778,27 @@
       "Miracle Volunteers™"
     ],
     "virtualLiquidityTruth": "DBC_VIRTUAL_RESERVES_ARE_CURVE_MATH_NOT_REAL_TVL__REAL_SOL_FIRST_BUY_ENTERS_QUOTE_RESERVE__NO_VALUE_DOUBLING_CLAIM",
-    "parallelGenesisPool": false
+    "parallelGenesisPool": false,
+    "launchQualityGate": "REQUIRED__OFFICIAL_LAUNCH_BLOCKED_UNTIL_GATE_PASS"
+  },
+  "launchQualityGate": {
+    "brand": "WorldzLaunch Quality Gate™",
+    "standard": "docs/WORLDZ-LAUNCH-QUALITY-GATE.md",
+    "contract": "worldzpad-omnichain/fullscope/worldz-launch-quality-gate.v1.json",
+    "scope": "REUSABLE_DEFAULT_FOR_WORLDZLAUNCHPAD_SOLANA_LAUNCHES__CHAIN_SPECIFIC_EQUIVALENT_REQUIRED_ELSEWHERE",
+    "rule": "NO_PUBLIC_LAUNCH_STATUS_UNTIL_CANONICAL_IDENTITY_SAFETY_LIQUIDITY_EXTERNAL_INDEXING_AND_WORLDZPROOF_GATES_ARE_RECONCILED",
+    "providerTruth": "JUPITER_DEXSCREENER_AND_OTHER_PROVIDER_STATES_ARE_OBSERVED_NOT_INVENTED",
+    "organicScore": "POST_LAUNCH_OBSERVED_SIGNAL__NO_PRELAUNCH_GUARANTEE_OR_GAMING",
+    "antiRegression": [
+      "METADATA_BEFORE_POOL",
+      "NO_PLACEHOLDER_IMAGE_NAME_SYMBOL_DESCRIPTION",
+      "MINT_FREEZE_TRANSFER_FEE_AUDIT",
+      "EXACT_CANONICAL_MINT_EVERYWHERE",
+      "MOBILE_BUY_ROUTE_END_TO_END",
+      "JUPITER_TOKENS_V2_PARITY",
+      "JUPITER_VRFD_HANDOFF",
+      "DEXSCREENER_PAIR_AND_IDENTITY_PARITY",
+      "WORLDZPROOF_RELEASE_RECEIPT"
+    ]
   }
 }
