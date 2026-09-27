@@ -10,23 +10,30 @@
     "tokenLifecycle": "PRE_LAUNCH",
     "treasuryAllocationPercent": 20,
     "allocationMeaning": "CHURCH_CONTROLLED_TOKEN_TREASURY__NOT_PERSONAL_SIGNER_OWNERSHIP__NOT_EQUITY",
-    "nominatedSignerCount": 7,
+    "nominatedSignerCount": 8,
     "signerIdentityStorage": "CHURCH_NOMINEES_PRIVATE_UNTIL_CONSENT__JAYJAYTEAMDEV_PUBLIC_SIGNER_APPROVED",
     "proposedThreshold": {
       "approvals": 4,
-      "signers": 7,
+      "signers": 8,
       "status": "OWNER_APPROVED_DEFAULT"
     },
     "preferredSolanaOnboardingWallet": "Jupiter Mobile",
     "solanaTreasury": "Squads multisig",
     "mainnetState": "NOT_DEPLOYED",
-    "churchNomineeCount": 6,
+    "churchNomineeCount": 7,
     "confirmedPublicSigners": [
       {
         "name": "JayJayTeamDev",
         "chain": "solana",
         "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
         "consent": "OWNER_EXPLICITLY_APPROVED_PUBLIC_SIGNER_ASSOCIATION"
+      }
+    ],
+    "pendingRoleInvitations": [
+      {
+        "role": "Sound Production",
+        "intendedInvitee": "PRIVATE_UNTIL_CONSENT",
+        "status": "INVITE_APPROVED__CONSENT_AND_PUBLIC_ADDRESS_PENDING"
       }
     ]
   },
@@ -136,6 +143,7 @@
       "WORLDZCARD",
       "NATIVE_PACKAGING",
       "APP_STORES"
-    ]
+    ],
+    "miracleGovernance": "4-of-8"
   }
 }
