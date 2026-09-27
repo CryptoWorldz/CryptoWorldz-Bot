@@ -1,0 +1,35 @@
+name: WorldzApp Stage 5B Live Squads Proof
+
+on:
+  pull_request:
+    paths:
+      - 'src/worldz-app/multisig-approval-**'
+      - 'test/worldz-app-stage5.test.js'
+      - 'tools/verify-worldzapp-stage5b-squads.mjs'
+      - 'worldzpad-mainnet/wldz-one-sided-launch.candidate.json'
+      - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
+      - '.github/workflows/verify-worldzapp-stage5b-squads.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WORLDZ_SOLANA_RPC_URL: ${{ secrets.WORLDZ_SOLANA_RPC_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Stage 5 deterministic safety tests
+        run: node --test test/worldz-app-stage5.test.js
+      - name: Install pinned read-only Squads proof SDK
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund @sqds/multisig@2.1.4 @solana/web3.js@1.98.4
+      - name: Verify live WLDZ Squads public profile and proposal evidence
+        run: node tools/verify-worldzapp-stage5b-squads.mjs
+      - name: Evidence checksum
+        run: sha256sum worldzapp-stage5b-squads-live-proof.json
