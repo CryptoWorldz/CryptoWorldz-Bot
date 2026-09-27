@@ -32,7 +32,8 @@ function createExternalDcaTrader(config = {}) {
       configuredWallets: configuredWallets.length,
       approvedWallets: approved.length,
       matchedWallets: matched.length,
-      walletMatches: approved.length > 0 && matched.length === approved.length
+      walletMatches: matched.length > 0,
+      allWalletsMatch: approved.length > 0 && matched.length === approved.length
     };
   }
 
