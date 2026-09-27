@@ -122,7 +122,8 @@
     "readAdapters": "launchpad.cryptoworldz.xyz/worldz-app/core/read-adapter-registry.json",
     "storagePolicy": "launchpad.cryptoworldz.xyz/worldz-app/core/storage-policy.json",
     "sessionSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/session.schema.json",
-    "activityEventSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json"
+    "activityEventSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json",
+    "providerBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -132,9 +133,13 @@
     "sessionSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/session.schema.json",
     "activityEventSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json",
     "supportedAdapterSlots": 8,
-    "providerBindings": "NOT_CONFIGURED",
-    "liveReadProof": "NOT_RUN",
+    "providerBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json",
+    "liveReadProof": "CI_WORKFLOW_ADDED__NOT_YET_PASSED",
     "execution": false,
-    "nextGate": "CONFIGURE_VERIFIED_READ_PROVIDERS_AND_PROVE_LIVE_READS"
+    "nextGate": "PASS_LIVE_PUBLIC_READ_PROOF_THEN_BIND_PRODUCTION_PROVIDERS",
+    "publicVerificationProviders": "OFFICIAL_OR_DOCUMENTED_PUBLIC_ENDPOINTS__DEVELOPMENT_ONLY",
+    "productionProviders": "ENV_REQUIRED",
+    "liveReadWorkflow": ".github/workflows/worldzapp-live-read-proof.yml",
+    "liveReadScript": "scripts/worldz-app-verify-live-reads.js"
   }
 }
