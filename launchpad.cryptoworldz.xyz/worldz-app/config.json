@@ -118,5 +118,15 @@
       "href": "https://cryptoworldz.xyz/worldzlinkz/",
       "kind": "directory"
     }
-  ]
+  ],
+  "readAdapterFoundation": {
+    "state": "CODE_BUILT_INTERFACE",
+    "registry": "/worldz-app/core/read-adapter-registry.json",
+    "storagePolicy": "/worldz-app/core/storage-policy.json",
+    "sessionSchema": "/worldz-app/core/session.schema.json",
+    "activityEventSchema": "/worldz-app/core/activity-event.schema.json",
+    "providerBindings": "NOT_CONFIGURED",
+    "liveReadProof": "NOT_RUN",
+    "execution": false
+  }
 }

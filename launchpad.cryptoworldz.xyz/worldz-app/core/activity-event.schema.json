@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json",
+  "title": "WorldzApp Activity Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "eventId",
+    "module",
+    "kind",
+    "state",
+    "occurredAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "WORLDZ-APP-EVENT-V1"
+    },
+    "eventId": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128
+    },
+    "module": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "chain": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 40
+    },
+    "treasuryProfile": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "kind": {
+      "enum": [
+        "READ_REFRESH",
+        "WALLET_CONNECTED",
+        "WALLET_DISCONNECTED",
+        "PROPOSAL_DRAFTED",
+        "SIMULATION_RESULT",
+        "APPROVAL_RECORDED",
+        "TRANSACTION_STATUS",
+        "PROOF_RECORDED",
+        "MODULE_STATUS",
+        "SECURITY_EVENT"
+      ]
+    },
+    "state": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "referenceId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 256
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "publicData": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  }
+}

@@ -50,6 +50,7 @@
     <nav class="tabs" aria-label="WorldzApp sections">
       <button class="tab active" data-panel="modules">Modules</button>
       <button class="tab" data-panel="treasuries">Treasuries</button>
+      <button class="tab" data-panel="adapters">Adapters</button>
       <button class="tab" data-panel="security">Security</button>
       <button class="tab" data-panel="roadmap">Native App</button>
     </nav>
@@ -62,6 +63,11 @@
     <section id="treasuries" class="panel">
       <div class="section-head"><span>TREASURY PROFILES</span><h2>Governance remains profile-specific.</h2><p>Signer membership in one treasury does not silently make a person a signer of another treasury.</p></div>
       <div id="treasury-grid" class="grid"></div>
+    </section>
+
+    <section id="adapters" class="panel">
+      <div class="section-head"><span>READ-ONLY CHAIN ADAPTERS</span><h2>Observe first. Execute later.</h2><p>These adapters define how WorldzApp will read balances, multisig configuration, proposal history and transaction state without exposing any signing or broadcast method.</p></div>
+      <div id="adapter-grid" class="grid"></div>
     </section>
 
     <section id="security" class="panel">
@@ -81,7 +87,7 @@
       <div class="section-head"><span>WORLDZAPP NATIVE ROADMAP</span><h2>Web foundation → tested mobile app.</h2></div>
       <div class="roadmap">
         <article><b>01</b><h3>Shared Core</h3><p>Module registry, capabilities, treasury profiles, proposal schema and WorldzProof.</p><span class="done">BUILT</span></article>
-        <article><b>02</b><h3>Read Adapters</h3><p>Read chain state, balances, multisig configuration and proposal history without execution.</p><span>NEXT</span></article>
+        <article><b>02</b><h3>Read Adapters</h3><p>Shared read-only adapter contract, chain registry, session/storage policy and event schema.</p><span class="done">FOUNDATION BUILT</span></article>
         <article><b>03</b><h3>Identity + Wallet Connect</h3><p>External signer connection, mobile wallet standards and role-aware app sessions.</p><span>PLANNED</span></article>
         <article><b>04</b><h3>Simulation + Approvals</h3><p>Unsigned proposals, exact review, simulation and chain-native multisig approvals.</p><span>GATED</span></article>
         <article><b>05</b><h3>WorldzCard™</h3><p>Hardware/card signing adapter; Tangem remains the first research target.</p><span>RESEARCH</span></article>

@@ -633,7 +633,7 @@
     "brand": "WorldzApp™",
     "contract": "worldzpad-omnichain/fullscope/worldz-app.v1.json",
     "architecture": "docs/WORLDZAPP-ARCHITECTURE.md",
-    "lifecycle": "CODE_BUILT",
+    "lifecycle": "CODE_BUILT_STAGE_2_FOUNDATION",
     "route": "/worldz-app/",
     "sourcePath": "launchpad.cryptoworldz.xyz/worldz-app/",
     "role": "UMBRELLA_FIRST_PARTY_APPLICATION",
@@ -646,6 +646,13 @@
     "capabilityDefault": "DENY",
     "appLevelMainnetBroadcast": false,
     "worldzMiracleWalletModule": "/miracle-wallet/",
-    "nextEngineeringGate": "READ_ONLY_CHAIN_AND_TREASURY_ADAPTERS"
+    "nextEngineeringGate": "CONFIGURE_VERIFIED_READ_PROVIDERS_AND_PROVE_LIVE_BALANCE_MULTISIG_AND_PROPOSAL_READS",
+    "readAdapterFoundation": {
+      "contract": "src/worldz-app/read-adapter-contract.js",
+      "adapters": 8,
+      "execution": false,
+      "providerBindings": "NOT_CONFIGURED",
+      "liveReadProof": "NOT_RUN"
+    }
   }
 }

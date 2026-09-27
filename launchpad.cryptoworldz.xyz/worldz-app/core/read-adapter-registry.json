@@ -1,0 +1,143 @@
+{
+  "schema": "WORLDZ-APP-READ-ADAPTERS-V1",
+  "mode": "READ_ONLY",
+  "defaultState": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+  "permittedMethods": [
+    "getHealth",
+    "getNetwork",
+    "getAccountSummary",
+    "getBalanceSummary",
+    "getTreasuryState",
+    "getProposalHistory",
+    "getTransactionStatus"
+  ],
+  "forbiddenMethods": [
+    "sign",
+    "signTransaction",
+    "sendTransaction",
+    "broadcast",
+    "bridge",
+    "swap",
+    "stake",
+    "changeSigner",
+    "createPrivateKey",
+    "importPrivateKey",
+    "exportPrivateKey",
+    "requestSeedPhrase"
+  ],
+  "adapters": [
+    {
+      "id": "solana",
+      "family": "SOLANA",
+      "custody": "Squads / external Solana wallets",
+      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "plannedReads": [
+        "native balance",
+        "SPL token balances",
+        "Squads multisig configuration",
+        "proposal history",
+        "transaction status"
+      ],
+      "execution": false
+    },
+    {
+      "id": "ethereum",
+      "family": "EVM",
+      "custody": "Safe / external EVM wallets",
+      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "plannedReads": [
+        "native balance",
+        "ERC-20 balances",
+        "Safe owners/threshold",
+        "Safe proposal history",
+        "transaction status"
+      ],
+      "execution": false
+    },
+    {
+      "id": "base",
+      "family": "EVM",
+      "custody": "Safe / external EVM wallets",
+      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "plannedReads": [
+        "native balance",
+        "ERC-20 balances",
+        "Safe owners/threshold",
+        "Safe proposal history",
+        "transaction status"
+      ],
+      "execution": false
+    },
+    {
+      "id": "bnb",
+      "family": "EVM",
+      "custody": "Safe / external EVM wallets",
+      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "plannedReads": [
+        "native balance",
+        "BEP-20 balances",
+        "Safe owners/threshold",
+        "Safe proposal history",
+        "transaction status"
+      ],
+      "execution": false
+    },
+    {
+      "id": "hyperevm",
+      "family": "EVM",
+      "custody": "Safe-compatible verified adapter",
+      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "plannedReads": [
+        "native balance",
+        "token balances",
+        "multisig configuration",
+        "proposal history",
+        "transaction status"
+      ],
+      "execution": false
+    },
+    {
+      "id": "xrpl",
+      "family": "XRPL",
+      "custody": "Native SignerList multisigning",
+      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "plannedReads": [
+        "XRP balance",
+        "issued-token balances",
+        "SignerList/quorum",
+        "account transaction history",
+        "transaction status"
+      ],
+      "execution": false
+    },
+    {
+      "id": "sui",
+      "family": "SUI",
+      "custody": "Native weighted multisig",
+      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "plannedReads": [
+        "SUI balance",
+        "coin balances",
+        "multisig configuration",
+        "object/transaction history",
+        "transaction status"
+      ],
+      "execution": false
+    },
+    {
+      "id": "robinhood",
+      "family": "EVM",
+      "custody": "Verified EVM adapter required",
+      "state": "RESEARCH",
+      "plannedReads": [
+        "network identity",
+        "native balance",
+        "token balances",
+        "verified multisig support"
+      ],
+      "execution": false
+    }
+  ],
+  "providerRule": "RPC/provider URLs and credentials are environment-specific and are not committed into this registry.",
+  "authorityRule": "Read adapter state never enables write/sign/broadcast capability."
+}
