@@ -49,3 +49,23 @@ test("Sui adapter uses GraphQL health reads",async()=>{
     assert.equal(adapter.execution,false);
   }finally{global.fetch=previous}
 });
+
+
+test("EVM adapter reports chain mismatch instead of READ_OK",async()=>{
+  const previous=global.fetch;global.fetch=fakeFetch("0x1");
+  try{
+    const adapter=evmAdapter({id:"base",providerUrl:"https://example.invalid",expectedChainId:8453});
+    const health=await adapter.methods.getHealth();
+    assert.equal(health.state,"CHAIN_ID_MISMATCH");
+    assert.equal(health.data.chainId,1);
+  }finally{global.fetch=previous}
+});
+
+test("XRPL adapter rejects nested result-envelope errors",async()=>{
+  const previous=global.fetch;
+  global.fetch=async()=>({ok:true,json:async()=>({result:{status:"error",error:"actNotFound",error_message:"Account not found"}})});
+  try{
+    const adapter=xrplAdapter({providerUrl:"https://example.invalid"});
+    await assert.rejects(()=>adapter.methods.getAccountSummary({address:"rExample"}),/WORLDZAPP_XRPL_RPC_actNotFound/);
+  }finally{global.fetch=previous}
+});
