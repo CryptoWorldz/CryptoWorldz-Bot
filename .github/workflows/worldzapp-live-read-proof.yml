@@ -25,5 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Syntax check WorldzApp live-read verifier
+        run: node --check tools/verify-worldzapp-live-reads.js
       - name: Run WorldzApp public live-read proof
         run: npm run verify:worldzapp:reads
