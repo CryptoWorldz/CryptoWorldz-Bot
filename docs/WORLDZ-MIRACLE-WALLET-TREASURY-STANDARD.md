@@ -11,7 +11,7 @@ WorldzFullBuild adds a Miracle Church treasury and universal-wallet workstream.
 
 The intended church treasury allocation is **20% of MIRACLE ($MRCL)**, held by a church-controlled multisig rather than by any one individual signer.
 
-Six church nominees are to be invited as the initial Solana treasury signer group. Their identities and wallet-to-person mappings must remain off the public repository until each person has consented to that association. A proposed starting threshold is **4-of-6**, subject to final approval before deployment.
+Six church nominees plus **JayJayTeamDev** are to form the initial Solana treasury signer group. The six church nominees' identities and wallet-to-person mappings must remain off the public repository until each person has consented to that association. JayJayTeamDev has explicitly approved use of the public Solana signer address `Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u`. The approved starting threshold is **4-of-7**.
 
 The same signer group may be offered an ongoing treasury/deployment approval role for future WorldzLaunchPad launches. This does **not** automatically give Miracle Church 20% of every future third-party or WorldzLaunchPad token. Any token allocation outside MIRACLE remains token-specific and explicitly approved.
 
@@ -22,7 +22,7 @@ The same signer group may be offered an ongoing treasury/deployment approval rol
 3. Never request, collect, copy or store seed phrases, private keys or wallet recovery material.
 4. Validate each public address and obtain explicit consent to act as a treasury signer.
 5. Create the Miracle Church treasury using **Squads multisig**.
-6. Proposed initial policy: 6 signers, 4 approvals required.
+6. Initial policy: **7 signers, 4 approvals required**.
 7. Allocate the approved 20% MIRACLE treasury bucket only after the canonical MRCL mint and launch manifest are final and verified.
 8. Every proposal, approval, execution and final balance is captured in WorldzProof™.
 9. Signer addition/removal and threshold changes are themselves multisig-governed actions.
@@ -91,7 +91,7 @@ WorldzCard is therefore an adapter/product layer first. A physical co-branded ca
 Before any mainnet treasury receives MIRACLE:
 - canonical MRCL mint verified;
 - exact 20% allocation approved in the MRCL allocation manifest;
-- all six intended signer addresses verified;
+- all seven intended signer addresses verified;
 - signer consent recorded;
 - threshold approved;
 - multisig address independently verified;
@@ -119,9 +119,17 @@ Miracle Church's signer participation in future deployments is **opt-in and appr
 
 - Miracle Church 20% MRCL treasury direction: **OWNER_APPROVED_PLAN**
 - Named signer invitation: **OWNER_APPROVED_TO_INVITE / CONSENT_PENDING**
-- 4-of-6 threshold: **PROPOSED_DEFAULT**
+- 4-of-7 threshold: **OWNER_APPROVED_DEFAULT**
 - Squads treasury: **PLANNED / NOT DEPLOYED**
 - WorldzMiracleWallet: **PLANNED**
 - Multi-chain adapters: **PLANNED**
 - WorldzCard / Tangem integration: **RESEARCH + PLANNED ADAPTER**
 - Mainnet transfers: **NOT AUTHORIZED BY THIS DOCUMENT**
+
+## JayJayTeamDev signer update — 2026-09-27
+
+- JayJayTeamDev is added as signer #7.
+- Public Solana signer address: `Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u`.
+- Treasury threshold remains **4 approvals required**.
+- Effective signer model: **4-of-7**.
+- This update changes signer membership only; it does not authorize a mainnet transfer or create the multisig on-chain.
