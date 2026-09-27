@@ -84,6 +84,21 @@ Every eligible MRCL launch stage consumes Worldz-owned modules rather than one-o
 
 This quality gate is designed to become a reusable WorldzLaunchPad default for future launches.
 
+## Trader / investor / whale readiness
+
+The **AUD $200 first buy is acceptable as curve bootstrap capital**, but it is not enough evidence to call MRCL deep-liquidity or whale-ready.
+
+WorldzMarketReadiness™ keeps four separate states:
+
+- **INDEXABLE** — pool exists, at least one real transaction exists, price is discoverable.
+- **TRADER READY** — real two-way buy/sell routing is proven and price impact is recorded.
+- **SCALE READY** — repeated real quote tests pass across an approved notional matrix.
+- **WHALE READY** — larger approved notionals are supported by actual real liquidity with measured price impact/slippage inside approved limits.
+
+The system never derives “Whale Ready” from a token allocation percentage, market-cap headline, virtual reserves, or a small creator buy. That label must be backed by live quote/liquidity evidence.
+
+This allows MRCL to begin with the 5% DBC allocation + AUD $200 creator first buy while adding real liquidity in stages. The public dashboard can show the exact readiness state rather than pretending the launch is deeper than it is.
+
 ## Release truth states
 
 **PREPARED → MINTED_UNRELEASED → POOL_CREATED_UNVERIFIED → INDEXING_PENDING → EXTERNAL_IDENTITY_VERIFIED → PUBLIC_RELEASED**
