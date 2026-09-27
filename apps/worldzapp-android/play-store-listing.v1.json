@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-PLAY-STORE-LISTING-V1",
-  "updatedAt": "2026-09-27",
-  "state": "DRAFT__APP_ICON_READY__PRIVACY_SUPPORT_URLS_CODE_BUILT__DEPLOYMENT_AND_FINAL_AUDIT_PENDING",
+  "updatedAt": "2026-09-28",
+  "state": "DRAFT__FINAL_OWNER_APPROVED_LOGO_BINARY_RECONCILIATION_REQUIRED__OTHER_PLAY_GATES_PENDING",
   "appName": "WorldzApp",
   "categoryCandidate": "Finance",
   "shortDescription": "Explore Worldz with non-custodial wallet connections and verified chain status.",
@@ -10,7 +10,7 @@
   "privacyPolicyUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/privacy/",
   "developerContact": "PENDING_DEDICATED_WORLDZAPP_WRITTEN_SUPPORT_CONTACT",
   "graphics": {
-    "appIcon": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
+    "appIcon": "PENDING_FINAL_APPROVED_WORLDZAPP_LOGO_512_PNG",
     "featureGraphic": "PENDING",
     "phoneScreenshots": "PENDING_DEVICE_QA_CAPTURE",
     "ownerApprovedSourceSha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
@@ -18,10 +18,12 @@
     "approvedEmblemPreview": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg",
     "approvedEmblemPreviewSha256": "b3152a79fd46e0fcb4f4f00e536ea7bc9ee6279986eff3abaf60e225d91d9f7d",
     "appIconHostedUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-512.png",
-    "appIconSha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d",
-    "maskableIcon": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
-    "maskableIconSha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15",
-    "appIconReady": true
+    "appIconSha256": "PENDING",
+    "maskableIcon": "PENDING_FINAL_APPROVED_WORLDZAPP_LOGO_MASKABLE_512_PNG",
+    "maskableIconSha256": "PENDING",
+    "appIconReady": true,
+    "finalLogoMasterSha256": "e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec",
+    "previousBuildIconState": "SUPERSEDED_FOR_FINAL_PLAY_RELEASE"
   },
   "truthRule": "Store text and screenshots must describe only capabilities present in the exact submitted build. Gated roadmap features may not be portrayed as live."
 }

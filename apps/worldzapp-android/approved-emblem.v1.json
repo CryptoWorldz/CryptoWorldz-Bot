@@ -1,8 +1,8 @@
 {
   "schema": "WORLDZ-APP-APPROVED-EMBLEM-V1",
-  "updatedAt": "2026-09-27",
-  "state": "OWNER_APPROVED_SOURCE_REGISTERED__PRODUCTION_ANDROID_ASSETS_VERIFIED",
-  "brand": "Worldz Emblem",
+  "updatedAt": "2026-09-28",
+  "state": "OWNER_APPROVED_FINAL_WORLDZAPP_LOGO_LOCKED__FINAL_BINARY_RECONCILIATION_REQUIRED",
+  "brand": "WorldzApp™",
   "approval": {
     "ownerApproved": true,
     "replacementRequiresExplicitOwnerApproval": true,
@@ -10,8 +10,10 @@
   },
   "masterSource": {
     "dimensions": "1536x1536",
-    "sha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
-    "source": "USER_SUPPLIED_WORLDZ_EMBLEM"
+    "sha256": "e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec",
+    "source": "USER_SUPPLIED_FINAL_WORLDZAPP_LOGO",
+    "conversationFile": "1000027745.png",
+    "approvedAfterEarlierEmblem": true
   },
   "repositoryPreview": {
     "path": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg",
@@ -20,7 +22,25 @@
     "releaseAsset": false
   },
   "finalProductionAssets": {
-    "state": "VERIFIED_AND_CHECKSUM_BOUND",
+    "state": "REBUILD_REQUIRED_FROM_FINAL_OWNER_APPROVED_MASTER",
+    "mustDeriveFromApprovedMaster": true,
+    "regenerationAllowed": false,
+    "required": [
+      "512x512 Google Play PNG",
+      "512x512 maskable safe-zone PNG",
+      "Android launcher/mipmap derivatives"
+    ],
+    "rule": "Derive only by deterministic resize/padding/compression from the exact final master. Do not redraw, regenerate, restyle or substitute."
+  },
+  "keepOnKeepinOn": true,
+  "previousApprovedSource": {
+    "dimensions": "1536x1536",
+    "sha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
+    "source": "USER_SUPPLIED_WORLDZ_EMBLEM",
+    "state": "SUPERSEDED_BY_LATER_EXPLICIT_OWNER_APPROVAL"
+  },
+  "supersededBuildAssets": {
+    "state": "VALID_CI_BUILD_ASSETS__NOT_FINAL_PLAY_BRANDING",
     "mustDeriveFromApprovedMaster": true,
     "playIcon": {
       "path": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
@@ -40,6 +60,5 @@
       "safeZone": "APPROVED_EMBLEM_SCALED_WITHIN_MASKABLE_SAFE_ZONE"
     },
     "verifier": "tools/verify-worldzapp-icon-assets.js"
-  },
-  "keepOnKeepinOn": true
+  }
 }
