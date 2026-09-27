@@ -1,0 +1,159 @@
+{
+  "schema": "WORLDZ-LAUNCH-QUALITY-GATE-V1",
+  "brand": "WorldzLaunch Quality Gate™",
+  "parent": "WorldzFullBuild™",
+  "updatedAt": "2026-09-27",
+  "objective": "No WorldzLaunchPad Solana token is publicly declared LAUNCHED until canonical identity, safety signals, liquidity path, external indexing and WorldzProof release evidence are reconciled.",
+  "truthRule": "NO_EXTERNAL_PROVIDER_SCORE_VERIFICATION_INDEXING_OR_MARKET_SUCCESS_IS_GUARANTEED_OR_FAKED. Provider-observed states remain PENDING until independently returned by that provider.",
+  "tokenProfile": {
+    "target": "MIRACLE",
+    "symbol": "MRCL",
+    "supply": 348000000,
+    "lifecycle": "PRE_LAUNCH",
+    "mainnetExecutionAuthorized": false
+  },
+  "launchStages": [
+    {
+      "id": "IDENTITY_LOCK",
+      "required": true,
+      "beforePool": true,
+      "checks": [
+        "CANONICAL_NAME_EXACT_MIRACLE",
+        "CANONICAL_SYMBOL_EXACT_MRCL",
+        "CANONICAL_DESCRIPTION_APPROVED",
+        "CANONICAL_IMAGE_FINAL_AND_PUBLICLY_FETCHABLE",
+        "METADATA_JSON_EXACT_MATCH",
+        "OFFICIAL_WEBSITE_AND_SOCIALS_EXACT",
+        "METAPLEX_METADATA_CREATED_AND_READ_BACK",
+        "CANONICAL_MINT_READ_BACK_AFTER_CREATION"
+      ]
+    },
+    {
+      "id": "JUPITER_SHIELD_READINESS",
+      "required": true,
+      "beforePublicRelease": true,
+      "checks": [
+        "FIXED_SUPPLY_RECONCILED",
+        "MINT_AUTHORITY_DISABLED_AFTER_FINAL_MINT",
+        "FREEZE_AUTHORITY_DISABLED",
+        "NO_TRANSFER_FEE",
+        "SELLABILITY_PROVEN_WITH_REAL_REVERSIBLE_TEST_PATH",
+        "LIQUIDITY_DEPTH_READ_AND_RECORDED",
+        "TOP_HOLDER_CONCENTRATION_READ_AND_DISCLOSED",
+        "DEV_BALANCE_READ_AND_DISCLOSED",
+        "LOCKED_OR_VESTED_VAULTS_PROVEN_NOT_DISGUISED_AS_RETAIL_DISTRIBUTION"
+      ],
+      "antiGaming": "DO_NOT_SPLIT_WALLETS_WASH_TRADE_OR_MANUFACTURE_ACTIVITY_TO_GAME_JUPITER_ORGANIC_SCORE_OR_HOLDER_METRICS"
+    },
+    {
+      "id": "JUPITER_VRFD",
+      "required": true,
+      "beforeOfficialLaunchAnnouncement": true,
+      "checks": [
+        "TOKENS_V2_SEARCH_RETURNS_CANONICAL_MINT",
+        "RETURNED_NAME_MATCHES",
+        "RETURNED_SYMBOL_MATCHES",
+        "RETURNED_ICON_MATCHES",
+        "WEBSITE_AND_SOCIAL_METADATA_SUBMITTED",
+        "EXPRESS_VERIFICATION_ELIGIBILITY_CHECKED",
+        "VRFD_SUBMISSION_PREPARED",
+        "IS_VERIFIED_OBSERVED_OR_EXPLICITLY_LABELLED_PENDING"
+      ],
+      "paidAction": "EXPRESS_VERIFICATION_PAYMENT_REQUIRES_EXPLICIT_HUMAN_APPROVAL_AND_WALLET_SIGNATURE",
+      "scoreRule": "ORGANIC_SCORE_IS_POST_LAUNCH_OBSERVED_MARKET_DATA__NOT_A_PRELAUNCH_PASS_FAIL_VALUE",
+      "monitor": [
+        "organicScore",
+        "organicScoreLabel",
+        "holderCount",
+        "liquidity",
+        "audit.mintAuthorityDisabled",
+        "audit.freezeAuthorityDisabled",
+        "audit.topHoldersPercentage",
+        "stats5m.numOrganicBuyers",
+        "stats1h.numOrganicBuyers",
+        "stats24h.numOrganicBuyers",
+        "isVerified"
+      ]
+    },
+    {
+      "id": "METEORA_DBC",
+      "required": true,
+      "checks": [
+        "DBC_CONFIGURATION_HASHED",
+        "5_PERCENT_BASE_ALLOCATION_RECONCILED_TO_17400000_MRCL",
+        "AUD_200_FIRST_BUY_TARGET_BOUND_TO_LIVE_SOL_AT_REVIEW",
+        "NO_PARALLEL_COMPETING_GENESIS_AMM",
+        "GRADUATION_TARGET_AND_DAMM_V2_MIGRATION_REVIEWED",
+        "VIRTUAL_RESERVES_NEVER_REPRESENTED_AS_REAL_TVL"
+      ],
+      "discoveryNote": "Jupiter Launchpad Screener currently supports Meteora DBC launchpads out of the box; WorldzLaunchPad provider listing remains an external Jupiter decision."
+    },
+    {
+      "id": "DEXSCREENER",
+      "required": true,
+      "afterFirstPoolTransaction": true,
+      "checks": [
+        "TOKEN_PAIR_INDEXED",
+        "PAIR_ADDRESS_MATCHES_WORLDZ_REGISTRY",
+        "NAME_MATCHES",
+        "SYMBOL_MATCHES",
+        "IMAGE_MATCHES_WHEN_PROVIDER_EXPOSES_IT",
+        "WEBSITE_SOCIALS_DESCRIPTION_MATCH_WHEN_PROVIDER_EXPOSES_IT",
+        "PRICE_AND_LIQUIDITY_FIELDS_PRESENT"
+      ],
+      "providerRule": "DEX_SCREENER_AUTO_LISTING_REQUIRES_POOL_PLUS_AT_LEAST_ONE_TRANSACTION",
+      "enhancedInfo": "OPTIONAL_PROVIDER_PAID_FEATURE__NEVER_AUTOPURCHASE__EXPLICIT_HUMAN_APPROVAL_REQUIRED"
+    },
+    {
+      "id": "PUBLIC_RELEASE",
+      "required": true,
+      "checks": [
+        "WORLDZ_OWNED_TOKEN_PAGE_SHOWS_EXACT_CANONICAL_IDENTITY",
+        "BUY_ROUTE_USES_CANONICAL_MINT",
+        "MOBILE_WALLET_FLOW_END_TO_END_VERIFIED",
+        "JUPITER_IDENTITY_STATE_PASS_OR_CLEarly_DISCLOSED_PENDING",
+        "DEXSCREENER_IDENTITY_STATE_PASS_OR_CLEarly_DISCLOSED_PENDING",
+        "WORLDZPROOF_RECEIPT_PUBLISHED",
+        "NO_PROVIDER_VERIFICATION_OR_SCORE_CLAIM_WITHOUT_PROVIDER_EVIDENCE"
+      ],
+      "hardRule": "OFFICIAL_LAUNCH_ANNOUNCEMENT_IS_BLOCKED_BY_ANY_WRONG_NONBLANK_EXTERNAL_IDENTITY. Provider indexing latency may be PENDING, but incorrect name/symbol/image is FAIL."
+    }
+  ],
+  "worldzTechnology": [
+    "Worldz Token Identity Engine™",
+    "WorldDexPush™",
+    "WorldzProof™",
+    "WorldzFullScope™",
+    "WorldzWatch™",
+    "WorldzBulkDrop™",
+    "WorldzLock™",
+    "WorldzVest™",
+    "Worldz Universal FlyWheel™",
+    "No Token Left Behind™",
+    "Worldz OmniBuildz™",
+    "Worldz LinkedAsset™",
+    "ProofBurn™",
+    "AUTO",
+    "G.R.A.C.E.",
+    "ZED LED Command Centre MAX™",
+    "WorldzApp™ / WorldzMiracleWallet™"
+  ],
+  "scaleRules": [
+    "ONE_CANONICAL_MACHINE_READABLE_TOKEN_PROFILE_FEEDS_METADATA_WEBSITE_JUPITER_DEXSCREENER_AND_WORLDZPROOF_HANDOFFS",
+    "NO_COPY_PASTE_PROVIDER_IDENTITY",
+    "PROVIDER_ADAPTERS_RETURN_OBSERVED_STATE_NOT_ASSUMED_STATE",
+    "EVERY_CHAIN_ADAPTER_FAILS_CLOSED",
+    "EVERY_LAUNCH_INHERITS_THIS_GATE_UNLESS_CHAIN_SPECIFIC_PROVIDER_EQUIVALENT_REPLACES_A_SOLANA_ONLY_CHECK",
+    "NO_MARKET_SUCCESS_OR_INVESTMENT_RETURN_GUARANTEE"
+  ],
+  "releaseStates": [
+    "PREPARED",
+    "MINTED_UNRELEASED",
+    "POOL_CREATED_UNVERIFIED",
+    "INDEXING_PENDING",
+    "EXTERNAL_IDENTITY_VERIFIED",
+    "PUBLIC_RELEASED"
+  ],
+  "currentState": "PREPARED",
+  "officialLaunchAllowed": false
+}
