@@ -458,3 +458,21 @@ WorldzApp now has separate approval-state adapters for Squads v4, Safe Smart Acc
 - Live treasury/multisig profile bindings remain required before any adapter is marked LIVE.
 
 The next gate is read-only proof against actual verified multisig profiles, followed by separately gated external-wallet/native-provider approval submission.
+
+
+## WorldzApp Stage 5B live WLDZ Squads proof — PASSED — 2026-09-27
+
+Workflow run `36318035477` proved WorldzApp's Stage 5 approval-state normalization against the actual WLDZ Squads v4 mainnet profile.
+
+Live state:
+- multisig `B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN`;
+- vault `n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB`;
+- threshold **1-of-2 temporary**;
+- current transaction index `20`;
+- proposal #14 `Executed`;
+- one public approval observed and normalized as threshold met;
+- no approval submission, signing, execution or broadcast enabled.
+
+Evidence SHA-256: `ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0`.
+
+This supersedes older preparation-era assumptions of a 2-of-3 WLDZ threshold. The newer repository record and live on-chain state both confirm the temporary 1-of-2 custody policy. Android packaging may begin from this proven Solana path while Safe/XRPL/Sui live-profile proof remains fail-closed.
