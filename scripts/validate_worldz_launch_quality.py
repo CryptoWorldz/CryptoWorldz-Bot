@@ -76,6 +76,16 @@ if "AUD_200_FIRST_BUY_TARGET_BOUND_TO_LIVE_SOL_AT_REVIEW" not in checks:
 if "NO_PARALLEL_COMPETING_GENESIS_AMM" not in checks:
     fail("parallel genesis AMM prohibition missing")
 
+market=GATE.get("marketReadiness",{})
+tiers={x.get("tier"):x for x in market.get("tiers",[])}
+for required in ["INDEXABLE","TRADER_READY","SCALE_READY","WHALE_READY"]:
+    if required not in tiers:
+        fail(f"missing market-readiness tier {required}")
+if "NEVER_LABEL_WHALE_READY_FROM_TOKEN_PERCENTAGE_OR_VIRTUAL_LIQUIDITY_ALONE" not in tiers["WHALE_READY"].get("rule",""):
+    fail("Whale Ready truth rule missing")
+if "5_PERCENT_TOKEN_ALLOCATION_AND_VIRTUAL_RESERVES_DO_NOT_EQUAL_DEEP_REAL_LIQUIDITY" not in market.get("truthRule",""):
+    fail("real-liquidity truth rule missing")
+
 fb=FULL.get("launchQualityGate",{})
 if fb.get("contract")!="worldzpad-omnichain/fullscope/worldz-launch-quality-gate.v1.json":
     fail("WorldzFullBuild does not point to launch quality contract")
@@ -87,4 +97,5 @@ for mod in ["WorldzLaunch Quality Gate™","Worldz Token Identity Engine™","Wo
 print("WORLDZ_LAUNCH_QUALITY=PASS")
 print("MRCL=PRE_LAUNCH supply=348000000 allocations=100% official_launch=BLOCKED")
 print("Jupiter=VRFD+Shield+OrganicScore-observed DEXScreener=provider-observed Meteora=DBC")
+print("market_readiness=INDEXABLE->TRADER_READY->SCALE_READY->WHALE_READY real_liquidity_only")
 print("anti_gaming=ENFORCED mainnet=OFF")
