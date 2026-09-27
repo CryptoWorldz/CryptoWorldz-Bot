@@ -254,7 +254,8 @@
       "Worldz Memory & Storage Centre",
       "BitWorldz / OmniBTC / BitPair layer",
       "Spam2Ham",
-      "Worldz campaign/content surfaces"
+      "Worldz campaign/content surfaces",
+      "OneWorldz Top Up Gift Card / Jay's Safe Place food-security system"
     ],
     "canonicalTokens": [
       {
@@ -386,8 +387,8 @@
     "currentDirectiveState": "WHOLE_PROJECT_AND_PROJECT_CHAT_INHERITANCE_ACTIVE",
     "latestOwnerDirective": {
       "date": "2026-09-27",
-      "directive": "Incorporate this whole Project and all of its project-relevant chats into Our WorldzFullBuild™.",
-      "state": "INCORPORATED"
+      "directive": "Incorporate this Project and all project-relevant contents into WorldzFullBuild™.",
+      "state": "INCORPORATED_ON_FEATURE_BRANCH"
     },
     "publicBuildBoundary": "Inherit project-relevant decisions and approved operational data only. Do not publish unrelated private personal, medical, legal, credential, seed-phrase, private-key or secret material from project chats."
   },
@@ -697,5 +698,18 @@
       "scope": "CONTINUE_ENGINEERING_THROUGH_READS_IDENTITY_WALLET_CONNECTION_SIMULATION_MULTISIG_WORLDZPROOF_AND_NATIVE_PACKAGING",
       "safetyBoundary": "MAINNET_VALUE_MOVEMENT_REMAINS_SUBJECT_TO_EXISTING_EXPLICIT_REVIEW_SIGNATURE_THRESHOLD_AND_CHAIN_RELEASE_GATES"
     }
+  },
+  "oneWorldzTopUpGiftCardSystem": {
+    "status": "PLANNED_DUBBO_PILOT",
+    "standardTopUpAUD": 50,
+    "foodOnly": true,
+    "detailedStandard": "docs/ONEWORLDZ-TOP-UP-GIFT-CARD-SYSTEM.md",
+    "machineContract": "worldzpad-omnichain/fullscope/oneworldz-top-up-gift-card.v1.json",
+    "humanitarianCryptoSeparation": "RECIPIENTS_NEVER_REQUIRED_TO_BUY_HOLD_OR_USE_CRYPTO",
+    "preferredPartnerDiscussion": "HopeStreet Dubbo / BaptistCare",
+    "launchForGood": "PLANNED_OPT_IN_WORLDZLAUNCHPAD_CAPABILITY",
+    "jaysSafePlace": "PLANNED_LOCAL_INFORMATION_AND_REFERRAL_LAYER",
+    "proposedTokenCandidate": "NOURISH / NRSH — PROPOSAL_ONLY_NOT_CANONICAL",
+    "mission": "No World Hunger Ever Again."
   }
 }

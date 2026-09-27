@@ -1,0 +1,270 @@
+{
+  "schema": "ONEWORLDZ-TOP-UP-GIFT-CARD-V1",
+  "brand": "OneWorldz Top Up Gift Card™",
+  "incorporatedAt": "2026-09-27",
+  "lifecycle": "PLANNED",
+  "pilotLocation": "Dubbo NSW Australia",
+  "mission": "No World Hunger Ever Again.",
+  "separationRule": "Receiving humanitarian food assistance never requires crypto purchase, token holding, wallet connection, crypto education participation or investment risk.",
+  "card": {
+    "standardTopUpAUD": 50,
+    "audience": "LOW_INCOME_OR_GENUINE_FINANCIAL_HARDSHIP",
+    "entry": [
+      "APPLICATION",
+      "APPROVED_REFERRAL"
+    ],
+    "intendedUse": "FOOD_AND_APPROVED_GROCERIES_ONLY",
+    "cashWithdrawal": false,
+    "personToPersonTransfer": false,
+    "reloadableGoal": true,
+    "recipientPrivacy": "PUBLIC_IMPACT_REPORTING_MUST_NOT_IDENTIFY_RECIPIENTS",
+    "initialDelivery": "EXISTING_RETAILER_FOOD_VOUCHER_OR_ESTABLISHED_REGULATED_PROVIDER",
+    "providerState": "NOT_SELECTED",
+    "foodOnlyGate": "DO_NOT_CLAIM_ITEM_RESTRICTION_UNLESS_TECHNICALLY_OR_OPERATIONALLY_VERIFIED"
+  },
+  "preferredPilotPartner": {
+    "name": "HopeStreet Dubbo",
+    "organization": "BaptistCare",
+    "contactRole": "Manager",
+    "contactName": "Kristine Holland",
+    "state": "PARTNERSHIP_DISCUSSION_ONLY_NOT_CONFIRMED",
+    "possibleRoles": [
+      "referral and eligibility guidance",
+      "frontline-need advice",
+      "controlled distribution",
+      "impact measurement",
+      "grant/funding collaboration",
+      "food infrastructure planning",
+      "Jay's Safe Place information review"
+    ]
+  },
+  "foodInfrastructure": {
+    "state": "PLANNED",
+    "targets": [
+      "commercial refrigerators",
+      "commercial freezers",
+      "cold storage",
+      "dry-food shelving/storage",
+      "food-rescue transport",
+      "meal-preparation equipment",
+      "bulk food purchasing",
+      "food-safe freezer/storage/reheat meal containers"
+    ],
+    "containerConcept": "Semi-transparent blue HopeStreet × OneWorldz branded container subject to partner approval and food-safety/supplier requirements."
+  },
+  "donateWorldz": {
+    "role": "HUMANITARIAN_FUNDRAISING_AND_IMPACT_ACCOUNTING",
+    "exampleImpactAmountsAUD": [
+      10,
+      25,
+      50,
+      250,
+      500,
+      5000
+    ],
+    "standardImpactUnit": "ONE_50_AUD_FOOD_TOP_UP",
+    "fundingSources": [
+      "individual donations",
+      "recurring donors",
+      "local business sponsorship",
+      "corporate matching",
+      "supermarket/manufacturer donations",
+      "hospitality/wholesaler support",
+      "food rescue",
+      "foundations/philanthropy",
+      "government/community grants",
+      "major donors",
+      "community campaigns",
+      "approved crypto donations",
+      "documented CryptoWorldz commercial contributions"
+    ],
+    "grantRule": "VERIFY_CURRENT_PROGRAM_OPENING_DATES_ELIGIBILITY_AND_AMOUNTS_AT_APPLICATION_TIME"
+  },
+  "cryptoWorldz": {
+    "role": "SEPARATE_TECHNOLOGY_AND_COMMERCIAL_FUNDING_ENGINE",
+    "accountingBoundary": "HUMANITARIAN_FUNDS_AND_COMMERCIAL_CRYPTO_ASSETS_SEPARATELY_ACCOUNTED",
+    "permittedFundingConcepts": [
+      "platform revenue",
+      "development services",
+      "advertising/sponsorship",
+      "education",
+      "crypto donations",
+      "WorldzLaunchPad commercial revenue",
+      "voluntary project campaigns",
+      "Launch for Good",
+      "approved OneWorldz Impact fee routes"
+    ],
+    "humanitarianCryptoRule": "Do not speculate with humanitarian funds merely to pursue returns; use an appropriate compliant donation/settlement process and convert to AUD or other stable settlement form where appropriate."
+  },
+  "launchForGood": {
+    "state": "PLANNED_REUSABLE_WORLDZLAUNCHPAD_CAPABILITY",
+    "optIn": true,
+    "presetPercents": [
+      0.5,
+      1,
+      2,
+      5
+    ],
+    "customAllowed": true,
+    "rules": [
+      "exact eligible revenue source disclosed",
+      "no hidden deduction",
+      "no forced token-holder asset transfer",
+      "creator/project approval required",
+      "contribution accounting provable",
+      "impact based on settled value not projections"
+    ]
+  },
+  "cryptoWorldzLearn": {
+    "state": "PLANNED",
+    "topics": [
+      "blockchain basics",
+      "wallets",
+      "scam/fraud awareness",
+      "security",
+      "Solana",
+      "XRP/XRPL",
+      "digital assets",
+      "responsible risk awareness",
+      "liquidity",
+      "token launches",
+      "development",
+      "WorldzLaunchPad"
+    ],
+    "humanitarianEligibilityIndependent": true
+  },
+  "tokenConnection": {
+    "currentCanonicalFamily": [
+      "WLDZ",
+      "RVIV",
+      "PNEX",
+      "MRCL"
+    ],
+    "proposedNextGenerationCandidate": {
+      "sequenceCandidate": 5,
+      "name": "NOURISH",
+      "symbol": "NRSH",
+      "theme": "No World Hunger Ever Again.",
+      "state": "PROPOSED_NAME_AND_MISSION_ONLY_NOT_CANONICAL",
+      "gates": [
+        "real utility",
+        "tokenomics",
+        "treasury relationship",
+        "legal/regulatory treatment",
+        "risk disclosures",
+        "explicit owner approval"
+      ]
+    }
+  },
+  "jaysSafePlace": {
+    "state": "PLANNED_COMMUNITY_INFORMATION_AND_REFERRAL_INITIATIVE",
+    "notA": [
+      "emergency service",
+      "housing provider",
+      "medical service",
+      "professional case-management service"
+    ],
+    "businessCard": {
+      "front": [
+        "JAY'S SAFE PLACE",
+        "Need Food?",
+        "Need Somewhere Safe to Sit?",
+        "Need Clothes, Support or Someone to Point You in the Right Direction?",
+        "Helping the People who Help the People",
+        "OneWorldz",
+        "live support QR"
+      ],
+      "backCategories": [
+        "Food",
+        "Mental Health & Wellbeing",
+        "Housing & Homelessness",
+        "Community",
+        "Emergency"
+      ],
+      "emergency": "000",
+      "verifyBeforePrint": true
+    },
+    "pamphlet": {
+      "format": "TRI_FOLD",
+      "sections": [
+        "Front cover",
+        "Food First",
+        "Housing & Homelessness",
+        "Mental Health & Wellbeing",
+        "Community & Connection",
+        "Practical Help",
+        "Emergency + live QR"
+      ],
+      "design": [
+        "calm and welcoming",
+        "OneWorldz deep blue/purple",
+        "large readable headings",
+        "white space",
+        "simple icons",
+        "minimal jargon",
+        "prominent QR",
+        "clear disclaimer"
+      ],
+      "serviceDataMustBeCurrent": true
+    },
+    "liveDirectory": {
+      "targetFields": [
+        "service name",
+        "category",
+        "address",
+        "hours",
+        "meal schedule",
+        "eligibility",
+        "phone/contact",
+        "accessibility notes",
+        "transport information",
+        "last verified date"
+      ]
+    }
+  },
+  "pilotPhases": [
+    {
+      "phase": 0,
+      "name": "PARTNER_DISCOVERY",
+      "state": "PLANNED"
+    },
+    {
+      "phase": 1,
+      "name": "CONTROLLED_VOUCHER_PILOT",
+      "state": "PLANNED"
+    },
+    {
+      "phase": 2,
+      "name": "PERSISTENT_RELOADABLE_CARD",
+      "state": "GATED"
+    },
+    {
+      "phase": 3,
+      "name": "REGIONAL_REPLICATION",
+      "state": "GATED_BY_DUBBO_EVIDENCE"
+    }
+  ],
+  "integrityRules": [
+    "never require crypto participation for food",
+    "never claim HopeStreet/BaptistCare partnership before agreement",
+    "never claim grant funding before award",
+    "never call card live before end-to-end provider/redemption verification",
+    "never claim food-only restriction unless true",
+    "never expose recipient identity in public reporting without lawful consent",
+    "never fabricate partner approvals service information or funding",
+    "never count projected crypto/platform revenue as delivered humanitarian impact",
+    "keep humanitarian and crypto messaging distinct"
+  ],
+  "longTermLoop": [
+    "Fund",
+    "Feed",
+    "Stabilise",
+    "Connect",
+    "Support",
+    "Equip",
+    "Create Opportunity",
+    "Measure",
+    "Improve",
+    "Expand"
+  ]
+}
