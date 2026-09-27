@@ -215,3 +215,12 @@ Owner direction is incorporated as a **planned** WorldzFullBuild workstream via 
 ### Signer update — 2026-09-27
 
 JayJayTeamDev is signer #7 for the planned Miracle Church treasury using public Solana address `Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u`. The threshold remains four required approvals, producing a **4-of-7** multisig policy. This is a build/specification decision only; no on-chain multisig creation or token transfer is implied.
+
+
+## WorldzMiracleWallet™ app foundation — 2026-09-27
+
+WorldzMiracleWallet™ is now an active application workstream, not only a concept. The first code foundation lives at `launchpad.cryptoworldz.xyz/miracle-wallet/` with an installable-web-app manifest, offline shell, treasury/chains/proposal/signers/WorldzCard/WorldzProof modules and a 4-of-7 Miracle treasury profile.
+
+The current proposal engine is deliberately **draft-only**: it cannot sign, broadcast or move funds. The first Solana signer connector can use an already-present injected wallet provider, while audited mobile wallet connection, chain read adapters, real unsigned transaction generation, simulation, multisig approvals and mainnet execution remain separately gated.
+
+The long-term product goal is a first-party Android/iOS Worldz app. The current architecture uses the tested web/PWA foundation first, then native packaging and device integrations after the security and chain-adapter gates pass. See `docs/WORLDZ-MIRACLE-WALLET-APP-ARCHITECTURE.md`.
