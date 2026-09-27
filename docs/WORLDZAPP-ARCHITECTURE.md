@@ -189,3 +189,34 @@ Security review, privacy policy, incident recovery, accessibility/mobile QA and 
 - `core/activity-event.schema.json` — normalized WorldzApp activity stream for future notifications, audit and FullScope integration.
 
 No RPC endpoint or credential is hard-coded in the public registry. Provider configuration remains environment-specific.
+
+
+## Verified development read providers
+
+WorldzApp includes a provider-binding registry for live read proof. Public endpoints are used only for development verification and are not treated as production infrastructure.
+
+Current verification bindings:
+
+- Solana mainnet public RPC — official Solana endpoint.
+- Base mainnet public RPC — official Base endpoint.
+- BNB Chain mainnet public RPC — official BNB Chain endpoint.
+- HyperEVM mainnet RPC — official Hyperliquid endpoint.
+- XRP Ledger mainnet public server — documented XRPL/Ripple endpoint.
+- Sui mainnet fullnode — documented Sui mainnet fullnode endpoint.
+- Robinhood Chain mainnet public RPC — official Robinhood Chain endpoint.
+- Ethereum mainnet — no Ethereum Foundation public production RPC is selected; a production/provider environment variable is required.
+
+The public endpoints are rate-limited or otherwise unsuitable as a production guarantee. Production URLs and credentials must be supplied through environment/secrets and independently verified.
+
+The live-read proof workflow checks:
+
+1. Solana RPC health.
+2. A finalized Solana balance read for the approved JayJayTeamDev public wallet.
+3. Base chain ID.
+4. BNB Chain chain ID.
+5. HyperEVM chain ID.
+6. XRP Ledger validated server state.
+7. Sui latest checkpoint.
+8. Robinhood Chain chain ID.
+
+No signing, transaction submission or broadcasting is present in this workflow.
