@@ -10,17 +10,17 @@
     "tokenLifecycle": "PRE_LAUNCH",
     "treasuryAllocationPercent": 20,
     "allocationMeaning": "CHURCH_CONTROLLED_TOKEN_TREASURY__NOT_PERSONAL_SIGNER_OWNERSHIP__NOT_EQUITY",
-    "nominatedSignerCount": 8,
+    "nominatedSignerCount": 10,
     "signerIdentityStorage": "CHURCH_NOMINEES_PRIVATE_UNTIL_CONSENT__JAYJAYTEAMDEV_PUBLIC_SIGNER_APPROVED",
     "proposedThreshold": {
       "approvals": 4,
-      "signers": 8,
+      "signers": 10,
       "status": "OWNER_APPROVED_DEFAULT"
     },
     "preferredSolanaOnboardingWallet": "Jupiter Mobile",
     "solanaTreasury": "Squads multisig",
     "mainnetState": "NOT_DEPLOYED",
-    "churchNomineeCount": 7,
+    "churchNomineeCount": 8,
     "confirmedPublicSigners": [
       {
         "name": "JayJayTeamDev",
@@ -34,8 +34,19 @@
         "role": "Sound Production",
         "intendedInvitee": "PRIVATE_UNTIL_CONSENT",
         "status": "INVITE_APPROVED__CONSENT_AND_PUBLIC_ADDRESS_PENDING"
+      },
+      {
+        "role": "Worldz Collaborator",
+        "intendedInvitee": "PRIVATE_UNTIL_CONSENT",
+        "status": "INVITE_APPROVED__CONSENT_AND_PUBLIC_ADDRESS_PENDING"
+      },
+      {
+        "role": "Miracle Church Kitchen and Community Service",
+        "intendedInvitee": "PRIVATE_UNTIL_CONSENT",
+        "status": "INVITE_APPROVED__CONSENT_AND_PUBLIC_ADDRESS_PENDING"
       }
-    ]
+    ],
+    "additionalWorldzNomineeCount": 1
   },
   "futureLaunchPadRole": {
     "state": "OPT_IN_APPROVAL_ROLE_PLANNED",
@@ -144,6 +155,6 @@
       "NATIVE_PACKAGING",
       "APP_STORES"
     ],
-    "miracleGovernance": "4-of-8"
+    "miracleGovernance": "4-of-10"
   }
 }
