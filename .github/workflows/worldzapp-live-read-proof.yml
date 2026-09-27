@@ -1,0 +1,28 @@
+name: WorldzApp Live Read Proof
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/worldz-app/**'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json'
+      - 'scripts/worldz-app-verify-live-reads.js'
+      - '.github/workflows/worldzapp-live-read-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  public-read-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      WORLDZAPP_ALLOW_PUBLIC_VERIFY: '1'
+      WORLDZAPP_SOLANA_VERIFY_ADDRESS: 'Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run WorldzApp public read verification
+        run: node scripts/worldz-app-verify-live-reads.js
