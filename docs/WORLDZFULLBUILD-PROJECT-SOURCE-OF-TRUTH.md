@@ -261,3 +261,10 @@ The Stage 2 read-only layer now includes documented development verification bin
 A dedicated CI workflow and proof runner now verify public chain health/identity reads and a finalized Solana balance read for the owner-approved public JayJayTeamDev address. These public endpoints are development verification infrastructure only; production providers remain environment/secret configured.
 
 The proof workflow contains no signing, submission, broadcasting, bridging, swapping, staking or signer-change path.
+
+
+### Sui read transport correction
+
+The first WorldzApp live-read proof confirmed that the Sui mainnet fullnode host is reachable but its legacy JSON-RPC API is no longer available. The Sui verification adapter was therefore migrated to the current GraphQL read path.
+
+Permanent regression rule: **never infer protocol support from an endpoint hostname or old example. Verify the exact current transport/method live before declaring a chain adapter ready.**
