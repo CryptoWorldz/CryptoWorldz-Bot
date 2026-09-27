@@ -1,0 +1,22 @@
+{
+  "schema": "WORLDZ-APP-IDENTITY-ROLES-V1",
+  "defaultRole": "PUBLIC_USER",
+  "default": "DENY_PRIVILEGED_ROLE",
+  "roles": [
+    {"id":"PUBLIC_USER","selfAssertable":true,"verifiedIssuerRequired":false,"transactionAuthority":false},
+    {"id":"VERIFIED_MEMBER","selfAssertable":false,"verifiedIssuerRequired":true,"transactionAuthority":false},
+    {"id":"TEAM_MEMBER","selfAssertable":false,"verifiedIssuerRequired":true,"transactionAuthority":false},
+    {"id":"TREASURY_SIGNER","selfAssertable":false,"verifiedIssuerRequired":true,"transactionAuthority":false},
+    {"id":"MODULE_OPERATOR","selfAssertable":false,"verifiedIssuerRequired":true,"transactionAuthority":false},
+    {"id":"ADMIN","selfAssertable":false,"verifiedIssuerRequired":true,"transactionAuthority":false}
+  ],
+  "rules": [
+    "Identity assertions never grant transaction authority by themselves.",
+    "Privileged roles require a separately configured trusted issuer and verified assertion.",
+    "Treasury signer status never bypasses the chain-native multisig threshold.",
+    "Roles never silently inherit between modules, treasuries or chains.",
+    "Public wallet association requires user consent."
+  ],
+  "trustedIssuers": [],
+  "trustedIssuerState": "DEPLOYMENT_CONFIGURATION_REQUIRED"
+}
