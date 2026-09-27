@@ -1,0 +1,39 @@
+name: WorldzApp Stage 4B Live Simulation Proof
+
+on:
+  pull_request:
+    paths:
+      - 'src/worldz-app/simulation-**'
+      - 'test/worldz-app-stage4.test.js'
+      - 'tools/verify-worldzapp-live-simulations.js'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/core/simulation-**'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json'
+      - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
+      - '.github/workflows/verify-worldzapp-live-simulations.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      WORLDZ_ETHEREUM_RPC_URL: ${{ secrets.WORLDZ_ETHEREUM_RPC_URL }}
+      WORLDZ_BASE_RPC_URL: ${{ secrets.WORLDZ_BASE_RPC_URL }}
+      WORLDZ_BNB_RPC_URL: ${{ secrets.WORLDZ_BNB_RPC_URL }}
+      WORLDZ_HYPEREVM_RPC_URL: ${{ secrets.WORLDZ_HYPEREVM_RPC_URL }}
+      WORLDZ_ROBINHOOD_RPC_URL: ${{ secrets.WORLDZ_ROBINHOOD_RPC_URL }}
+      WORLDZ_SOLANA_SIMULATION_RPC_URL: ${{ secrets.WORLDZ_SOLANA_DEVNET_RPC_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Stage 4A deterministic safety tests
+        run: node --test test/worldz-app-stage4.test.js
+      - name: Stage 4B live unsigned simulation proof
+        run: node tools/verify-worldzapp-live-simulations.js
+      - name: Evidence checksum
+        run: sha256sum worldzapp-stage4b-live-simulation-proof.json
