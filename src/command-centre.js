@@ -66,17 +66,18 @@ const MENUS = {
     ]
   },
   auto: {
-    title: "💎 AUTO",
+    title: "💎 AUTO — BUY ONLY",
     rows: [
       ["📊 Status", "/auto"],
-      ["🧪 Simulation", "/autosimulate"],
-      ["📅 DCA", "/autodca"],
+      ["🌐 Buy Universe", "/autobuyuniverse"],
+      ["📅 Small-Batch DCA", "/autodca"],
       ["⏸ Pause", "/autopause"],
       ["🛑 Emergency Stop", "/autoemergency"]
     ]
   },
   grace: {
     title: "👩‍💼 GRACE AUTO POST™",
+    note: "AUTO integration is read-only for G.R.A.C.E.: /autobuypolicy. G.R.A.C.E. may report verified activity but cannot add wallets, change limits, enable execution or submit buys.",
     rows: [
       ["✍️ Create Post", "/draft"],
       ["📅 Schedule", "/calendar"],
@@ -132,6 +133,7 @@ const WEB_ROUTES = Object.freeze({
 function menuText(menu) {
   return [
     menu.title,
+    ...(menu.note ? ["", menu.note] : []),
     "",
     ...menu.rows.map(([label, command]) => `${label} — ${command}`),
     "",
@@ -228,7 +230,7 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "🧠 CryptoWorldz Command Centre MAX™",
     "",
     "LEARN • RESEARCH • INTERACT • TEACH • BUILD • PROVE",
-    "WorldzFullBuild™ is the master architecture. ZED leads it. WorldzLaunchPad builds, Worldz Omnichain routes chain-native execution, WorldzFullScope watches and coordinates supported tokens, AUTO controls finance workflows, G.R.A.C.E. coordinates approved communication, RECAP explains verified activity, and WorldzProof records evidence.",
+    "WorldzFullBuild™ is the master architecture. ZED leads it. WorldzLaunchPad builds, Worldz Omnichain routes chain-native execution, WorldzFullScope watches and coordinates supported tokens, AUTO controls owner-funded BUY-ONLY small-batch workflows, G.R.A.C.E. reports approved verified activity without trading authority, RECAP explains verified activity, and WorldzProof records evidence.",
     "",
     "Gateway commands:",
     "/zedstart • /worldzfullbuild • /fullscope • /worldzlinks • /worldzvotes • /worldzgovern",
