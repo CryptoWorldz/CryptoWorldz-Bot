@@ -8,9 +8,9 @@
     "token": "MIRACLE",
     "symbol": "MRCL",
     "allocationPercent": 20,
-    "governance": "4-of-7",
+    "governance": "4-of-8",
     "threshold": 4,
-    "signerCount": 7,
+    "signerCount": 8,
     "mainnetState": "NOT_DEPLOYED",
     "confirmedPublicSigners": [
       {
@@ -23,27 +23,38 @@
     "privateSignerSlots": [
       {
         "slot": 1,
-        "status": "INVITE_AND_CONSENT_PENDING"
+        "status": "INVITE_AND_CONSENT_PENDING",
+        "role": "CHURCH_COMMUNITY"
       },
       {
         "slot": 2,
-        "status": "INVITE_AND_CONSENT_PENDING"
+        "status": "INVITE_AND_CONSENT_PENDING",
+        "role": "CHURCH_COMMUNITY"
       },
       {
         "slot": 3,
-        "status": "INVITE_AND_CONSENT_PENDING"
+        "status": "INVITE_AND_CONSENT_PENDING",
+        "role": "CHURCH_COMMUNITY"
       },
       {
         "slot": 4,
-        "status": "INVITE_AND_CONSENT_PENDING"
+        "status": "INVITE_AND_CONSENT_PENDING",
+        "role": "CHURCH_COMMUNITY"
       },
       {
         "slot": 5,
-        "status": "INVITE_AND_CONSENT_PENDING"
+        "status": "INVITE_AND_CONSENT_PENDING",
+        "role": "CHURCH_COMMUNITY"
       },
       {
         "slot": 6,
-        "status": "INVITE_AND_CONSENT_PENDING"
+        "status": "INVITE_AND_CONSENT_PENDING",
+        "role": "CHURCH_COMMUNITY"
+      },
+      {
+        "slot": 7,
+        "status": "INVITE_AND_CONSENT_PENDING",
+        "role": "SOUND_PRODUCTION"
       }
     ]
   },
