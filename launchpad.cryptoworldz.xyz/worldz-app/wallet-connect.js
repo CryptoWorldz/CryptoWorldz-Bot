@@ -2,7 +2,7 @@
   "use strict";
   const SESSION_KEY="worldzapp.publicSession.v1";
   const now=()=>new Date().toISOString();
-  const newId=()=>globalThis.crypto&&crypto.randomUUID?crypto.randomUUID():"wz-"+Date.now()+"-"+Math.random().toString(16).slice(2);
+  const newId=()=>globalThis.crypto&&globalThis.crypto.randomUUID?globalThis.crypto.randomUUID():"wz-"+Date.now()+"-"+Math.random().toString(16).slice(2);
   function emptySession(){return{schema:"WORLDZ-APP-SESSION-V1",sessionId:newId(),createdAt:now(),expiresAt:null,publicIdentity:null,permissions:["read_public_state","connect_external_wallet"],walletConnections:[]}}
   function loadSession(){
     try{
