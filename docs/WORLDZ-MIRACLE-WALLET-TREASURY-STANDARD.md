@@ -9,7 +9,7 @@ Canonical token: **MIRACLE ($MRCL), pre-launch**
 
 WorldzFullBuild adds a Miracle Church treasury and universal-wallet workstream.
 
-The intended church treasury allocation is **20% of MIRACLE ($MRCL)**, held by a church-controlled multisig rather than by any one individual signer.
+**Latest owner direction supersedes the earlier general-purpose 20% church-treasury interpretation.** The protected 20% of MIRACLE ($MRCL) is now the **Miracle Team Vault™**: a multisig-controlled team-benefit allocation with individual entitlements activated only after opt-in, verified public wallet, and an approved allocation ledger. A separate matched **20% MiracleMagicSupply™** is reserved for people in need under the MIRACLE token standard.
 
 Ten invited signer positions plus **JayJayTeamDev** form the planned Solana treasury signer group. The invited positions include the existing Miracle Church/community nominees, Sound Production, one Worldz collaborator, and an additional Miracle Church Kitchen and Community Service representative. Invitee identities and wallet-to-person mappings remain private until each person consents to public association. JayJayTeamDev has explicitly approved use of the public Solana signer address `Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u`. The approved threshold remains **4 approvals**, producing the current **4-of-11** policy.
 
@@ -23,11 +23,11 @@ The same signer group may be offered an ongoing treasury/deployment approval rol
 4. Validate each public address and obtain explicit consent to act as a treasury signer.
 5. Create the Miracle Church treasury using **Squads multisig**.
 6. Current policy: **11 signers, 4 approvals required**.
-7. Allocate the approved 20% MIRACLE treasury bucket only after the canonical MRCL mint and launch manifest are final and verified.
+7. Fund the approved 20% **Miracle Team Vault™** only after the canonical MRCL mint and launch manifest are final and verified; the separate 20% **MiracleMagicSupply™** uses its own vault/accounting path.
 8. Every proposal, approval, execution and final balance is captured in WorldzProof™.
 9. Signer addition/removal and threshold changes are themselves multisig-governed actions.
 
-The 20% allocation is a treasury token allocation. It is not an equity/shareholding statement and it is not divided personally between signers merely because they hold signing authority.
+The 20% Miracle Team allocation is a protected beneficial team bucket, not equity/shareholding and not a signer-control reward. Signer authority does not determine personal share. Individual amounts require a separate approved ledger, explicit opt-in and verified wallet. MRCL team entitlements vest with 0% immediate unlock, a 30-day first-release cliff and 24 monthly releases.
 
 ## Phase 2 — WorldzMiracleWallet™
 
@@ -90,7 +90,7 @@ WorldzCard is therefore an adapter/product layer first. A physical co-branded ca
 
 Before any mainnet treasury receives MIRACLE:
 - canonical MRCL mint verified;
-- exact 20% allocation approved in the MRCL allocation manifest;
+- exact 20% Miracle Team Vault allocation and separate 20% MiracleMagicSupply allocation reconciled in the MRCL allocation manifest;
 - all eleven intended signer addresses verified;
 - signer consent recorded;
 - threshold approved;
@@ -117,7 +117,9 @@ Miracle Church's signer participation in future deployments is **opt-in and appr
 
 ## Truth state
 
-- Miracle Church 20% MRCL treasury direction: **OWNER_APPROVED_PLAN**
+- Prior general-purpose Miracle Church 20% MRCL treasury interpretation: **SUPERSEDED**
+- Miracle Team Vault™ 20% / 69,600,000 MRCL: **OWNER_APPROVED_PLAN / NOT DEPLOYED**
+- MiracleMagicSupply™ 20% / 69,600,000 MRCL: **OWNER_APPROVED_PLAN / NOT DEPLOYED**
 - Named signer invitation: **OWNER_APPROVED_TO_INVITE / CONSENT_PENDING**
 - 4-of-10 threshold: **OWNER_APPROVED_DEFAULT**
 - Squads treasury: **PLANNED / NOT DEPLOYED**
@@ -179,7 +181,7 @@ Planned token scope:
 
 Rules:
 - signer authority and personal token allocation are separate;
-- exact per-person/per-token amounts remain **PENDING OWNER APPROVAL** and must be written to a token-specific distribution manifest before execution;
+- exact per-person/per-token amounts remain **PENDING OWNER APPROVAL** and must be written to a token-specific distribution manifest before execution; for MRCL, the total Miracle Team bucket is locked at **20% / 69,600,000 MRCL**;
 - never invent a recipient address;
 - verify canonical mint, source wallet/bucket, available balance and any lock/vesting restrictions before building a transfer;
 - do not take tokens from LP, charity, church treasury, locked/vested, fee-routing or other reserved allocations unless that exact source is separately approved;
@@ -187,3 +189,13 @@ Rules:
 - a pre-launch token creates an entitlement/plan only, not a transfer, until its canonical mint exists and is verified.
 
 Machine-readable plan: `worldzpad-omnichain/fullscope/worldz-miracle-team-participation.v1.json`.
+
+
+## MIRACLE token-standard reconciliation — 2026-09-27
+
+Canonical token-specific standard: `docs/WORLDZ-MIRACLE-TOKEN-STANDARD.md`  
+Machine contract: `worldzpad-omnichain/fullscope/worldz-miracle-token.v1.json`
+
+The WorldzMiracleWallet™ remains the first-party multisig coordination interface. It does not convert the 20% Miracle Team Vault into a general-purpose church treasury and does not merge the separate MiracleMagicSupply™ with team personal allocations.
+
+MRCL mainnet remains OFF.
