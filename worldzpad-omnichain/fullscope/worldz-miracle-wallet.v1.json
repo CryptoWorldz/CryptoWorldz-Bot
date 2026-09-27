@@ -1,0 +1,101 @@
+{
+  "schema": "WORLDZ-MIRACLE-WALLET-V1",
+  "brand": "WorldzMiracleWallet™",
+  "parent": "WorldzFullBuild™",
+  "updatedAt": "2026-09-27",
+  "lifecycle": "PLANNED",
+  "miracleTreasury": {
+    "token": "MIRACLE",
+    "symbol": "MRCL",
+    "tokenLifecycle": "PRE_LAUNCH",
+    "treasuryAllocationPercent": 20,
+    "allocationMeaning": "CHURCH_CONTROLLED_TOKEN_TREASURY__NOT_PERSONAL_SIGNER_OWNERSHIP__NOT_EQUITY",
+    "nominatedSignerCount": 6,
+    "signerIdentityStorage": "OFF_PUBLIC_REPOSITORY_UNTIL_INDIVIDUAL_CONSENT",
+    "proposedThreshold": {
+      "approvals": 4,
+      "signers": 6,
+      "status": "PROPOSED_DEFAULT"
+    },
+    "preferredSolanaOnboardingWallet": "Jupiter Mobile",
+    "solanaTreasury": "Squads multisig",
+    "mainnetState": "NOT_DEPLOYED"
+  },
+  "futureLaunchPadRole": {
+    "state": "OPT_IN_APPROVAL_ROLE_PLANNED",
+    "rule": "Miracle Church treasury signers may be invited to future WorldzLaunchPad treasury/deployment approvals. This does not create automatic 20% ownership or allocation in future tokens.",
+    "thirdPartyTokenControl": "NEVER_SILENTLY_INHERITED"
+  },
+  "security": {
+    "nonCustodial": true,
+    "collectSeedPhrase": false,
+    "collectPrivateKey": false,
+    "storePublicAddresses": true,
+    "publicIdentityAssociationRequiresConsent": true,
+    "humanReadableReview": true,
+    "simulationBeforeSigning": true,
+    "chainNativeThresholdEnforcement": true,
+    "worldzProofRequired": true
+  },
+  "chainAdapters": [
+    {
+      "chain": "solana",
+      "treasury": "Squads",
+      "state": "PLANNED"
+    },
+    {
+      "chain": "ethereum",
+      "treasury": "Safe",
+      "state": "PLANNED"
+    },
+    {
+      "chain": "base",
+      "treasury": "Safe",
+      "state": "PLANNED"
+    },
+    {
+      "chain": "bnb",
+      "treasury": "Safe",
+      "state": "PLANNED"
+    },
+    {
+      "chain": "hyperevm",
+      "treasury": "Safe_or_verified_chain_native_adapter",
+      "state": "PLANNED"
+    },
+    {
+      "chain": "xrpl",
+      "treasury": "XRPL_SignerList",
+      "state": "PLANNED"
+    },
+    {
+      "chain": "sui",
+      "treasury": "Sui_MultiSigPublicKey",
+      "state": "PLANNED"
+    },
+    {
+      "chain": "robinhood",
+      "treasury": "VERIFIED_EVM_ADAPTER_REQUIRED",
+      "state": "RESEARCH"
+    }
+  ],
+  "worldzCard": {
+    "brand": "WorldzCard™",
+    "model": "PROVIDER_ADAPTER",
+    "firstResearchTarget": "Tangem",
+    "connection": "WalletConnect_where_supported",
+    "privateKeysRemainWithProviderWallet": true,
+    "physicalCoBranding": "REQUIRES_SEPARATE_PROVIDER_AND_COMPLIANCE_AGREEMENT",
+    "state": "RESEARCH"
+  },
+  "integrations": [
+    "WorldzFullScope™",
+    "WorldzProof™",
+    "WorldzGovern™",
+    "AUTO",
+    "ZED LED Command Centre MAX™",
+    "WorldzLaunchPad™"
+  ],
+  "mainnetExecutionAuthorized": false,
+  "standard": "docs/WORLDZ-MIRACLE-WALLET-TREASURY-STANDARD.md"
+}
