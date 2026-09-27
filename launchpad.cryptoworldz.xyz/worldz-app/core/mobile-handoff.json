@@ -1,0 +1,48 @@
+{
+  "schema": "WORLDZ-APP-MOBILE-HANDOFF-V1",
+  "state": "CODE_BUILT_GUARDED_FOUNDATION",
+  "default": "DENY",
+  "firstPartyOrigins": ["https://launchpad.cryptoworldz.xyz"],
+  "persistence": "MEMORY_ONLY_FOR_PAIRING_OR_OAUTH_CREDENTIALS",
+  "providers": [
+    {
+      "id": "walletconnect_v2",
+      "families": ["EVM"],
+      "state": "PAIRING_CLIENT_INTEGRATION_REQUIRED",
+      "protocol": "wc:",
+      "execution": false,
+      "signing": false,
+      "notes": "Pairing URI may exist in memory only and must be redacted from logs or WorldzProof."
+    },
+    {
+      "id": "xaman_oauth",
+      "families": ["XRPL"],
+      "state": "PUBLIC_CLIENT_ID_AND_REDIRECT_REGISTRATION_REQUIRED",
+      "authorizationOrigin": "https://oauth2.xumm.app",
+      "authorizationEndpoint": "https://oauth2.xumm.app/auth",
+      "userinfoEndpoint": "https://oauth2.xumm.app/userinfo",
+      "preferredFlow": "OAUTH2_PKCE_OR_PROVIDER_SDK",
+      "execution": false,
+      "signing": false,
+      "credentialPersistence": "MEMORY_ONLY_NO_WORLDZ_SESSION_STORAGE"
+    },
+    {
+      "id": "sui_dapp_kit",
+      "families": ["SUI"],
+      "state": "DAPP_KIT_CORE_INTEGRATION_REQUIRED",
+      "package": "@mysten/dapp-kit-core",
+      "autoConnect": false,
+      "execution": false,
+      "signing": false,
+      "notes": "Connection-only adapter must expose authorized accounts without registering sign or execute methods."
+    }
+  ],
+  "rules": [
+    "WorldzApp initiates wallet handoff from the first-party app surface.",
+    "No wallet-browser URL pasting is required as a product rule.",
+    "No seed phrase or private key is collected.",
+    "OAuth or WalletConnect credentials are never written into the public Worldz session.",
+    "Provider origins and first-party return origins must be explicitly allowlisted.",
+    "Signing remains a later separately reviewed gate."
+  ]
+}

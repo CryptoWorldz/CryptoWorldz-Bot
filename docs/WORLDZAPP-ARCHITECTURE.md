@@ -1,6 +1,6 @@
 # WorldzApp™ — Core Architecture v1
 
-Status: **CODE BUILT — FOUNDATION / NO APP-LEVEL MAINNET EXECUTION**  
+Status: **CODE BUILT — STAGE 3B IDENTITY/MOBILE HANDOFF + STAGE 4 SIMULATION CONTRACT FOUNDATION / NO APP-LEVEL MAINNET EXECUTION**  
 Date: **2026-09-27**  
 Parent: **WorldzFullBuild™**
 
@@ -155,7 +155,7 @@ WorldzApp now has a public-session contract and a connection-only external-walle
 XRPL, Sui and production mobile handoff remain separately gated. WalletConnect v2 / chain wallet-standard deep links are not declared complete until provider-specific mobile verification passes. Stage 3 does not request messages or transaction signatures, send transactions, broadcast, bridge, swap, import keys or collect recovery material.
 
 ### Stage 4 — Proposal + simulation
-Real unsigned payload generation and exact effects review.
+**Contract foundation built.** `src/worldz-app/simulation-contract.js` now normalizes simulation evidence, requires human-readable effects for successful simulations, and creates an acknowledgement gate. Live chain simulator bindings remain pending chain by chain. Simulation still cannot request signatures or broadcast.
 
 ### Stage 5 — Native multisig approvals
 Squads, Safe, XRPL and Sui adapters; chain by chain.
@@ -226,3 +226,33 @@ New components:
 The WorldzApp UI now exposes a Wallets panel. Public wallet addresses are session-only by default; persistence beyond the session requires explicit consent under the existing storage policy. Mainnet broadcast remains OFF.
 
 Next gate: role-aware identity assertions plus verified mobile wallet handoff. This must preserve the permanent rule that the wallet comes to the Worldz website/app; users are not required to paste Worldz URLs into a wallet browser.
+
+
+## Stage 3B — role-aware identity + guarded mobile handoff — 2026-09-27
+
+Built:
+
+- `src/worldz-app/identity-assertion-contract.js` — role assertions with a hard rule that self-assertion can create only `PUBLIC_USER`; privileged roles require a separately configured trusted issuer and verification.
+- `core/identity-roles.json` — public role registry. A role never grants transaction authority by itself and never bypasses chain-native multisig thresholds.
+- `src/worldz-app/mobile-handoff-contract.js` — fail-closed first-party return-origin and provider-origin validation.
+- `mobile-handoff.js` — browser handoff coordinator with memory-only WalletConnect pairing material and OAuth callback credential handling that is excluded from the public Worldz session.
+- `wallet-connect.js` — guarded external connection-adapter registration for XRPL/Sui/provider integrations. Any adapter exposing signing, sending, broadcasting, bridging, swapping, staking, signer changes or secret collection is rejected.
+- `core/mobile-handoff.json` — provider gates for WalletConnect v2, Xaman OAuth and Mysten Sui dApp Kit.
+
+Provider truth remains fail-closed:
+
+- Xaman/XRPL requires an approved public client ID and registered first-party redirect before the browser flow can be enabled.
+- Sui requires the current `@mysten/dapp-kit-core` connection layer to be integrated and verified.
+- WalletConnect v2 still requires a pairing client. Pairing URIs are ephemeral and must never be logged, persisted into the Worldz public session or emitted into WorldzProof.
+- No provider configuration is treated as live merely because its adapter interface exists.
+
+## Stage 4 — simulation + human effects review foundation — 2026-09-27
+
+Built:
+
+- `src/worldz-app/simulation-contract.js`
+- `core/simulation-policy.json`
+- Stage 3B/4 regression tests in `test/worldz-app-stage3b.test.js`
+- WorldzApp UI status for identity, mobile handoff and simulation gates
+
+A successful simulation remains evidence only. It does not enable signature requests, multisig approvals or broadcast. The next gate is verified chain-specific simulator binding, followed by separately reviewed native multisig approval adapters.

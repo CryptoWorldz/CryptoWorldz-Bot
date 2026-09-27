@@ -4,103 +4,60 @@
   "title": "WorldzApp Public Session",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "schema",
-    "sessionId",
-    "createdAt",
-    "permissions",
-    "walletConnections"
-  ],
+  "required": ["schema","sessionId","createdAt","permissions","walletConnections","identityAssertions"],
   "properties": {
-    "schema": {
-      "const": "WORLDZ-APP-SESSION-V1"
-    },
-    "sessionId": {
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 128
-    },
-    "createdAt": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "expiresAt": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "format": "date-time"
-    },
+    "schema": {"const": "WORLDZ-APP-SESSION-V1"},
+    "sessionId": {"type":"string","minLength":8,"maxLength":128},
+    "createdAt": {"type":"string","format":"date-time"},
+    "expiresAt": {"type":["string","null"],"format":"date-time"},
     "publicIdentity": {
-      "type": [
-        "object",
-        "null"
-      ],
+      "type":["object","null"],
       "additionalProperties": false,
       "properties": {
-        "displayName": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "maxLength": 120
-        },
-        "role": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "maxLength": 80
-        },
-        "consentedPublicAssociation": {
-          "type": "boolean"
+        "displayName":{"type":["string","null"],"maxLength":120},
+        "role":{"type":["string","null"],"maxLength":80},
+        "consentedPublicAssociation":{"type":"boolean"},
+        "authorityGrant":{"const":false}
+      }
+    },
+    "identityAssertions": {
+      "type":"array",
+      "items": {
+        "type":"object",
+        "additionalProperties": false,
+        "required":["schema","assertionId","subject","role","issuer","scope","verified","authorityGrant"],
+        "properties": {
+          "schema":{"const":"WORLDZ-APP-IDENTITY-ASSERTION-V1"},
+          "assertionId":{"type":"string","minLength":8,"maxLength":160},
+          "subject":{"type":"string","minLength":1,"maxLength":256},
+          "role":{"type":"string","minLength":1,"maxLength":80},
+          "issuer":{"type":"string","minLength":1,"maxLength":160},
+          "scope":{"type":"array","items":{"type":"string","maxLength":120},"uniqueItems":true},
+          "verified":{"type":"boolean"},
+          "verifiedAt":{"type":["string","null"],"format":"date-time"},
+          "expiresAt":{"type":["string","null"],"format":"date-time"},
+          "evidenceRef":{"type":["string","null"],"maxLength":512},
+          "consentedPublicAssociation":{"type":"boolean"},
+          "authorityGrant":{"const":false}
         }
       }
     },
-    "permissions": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "maxLength": 100
-      },
-      "uniqueItems": true
-    },
+    "permissions": {"type":"array","items":{"type":"string","maxLength":100},"uniqueItems":true},
     "walletConnections": {
-      "type": "array",
+      "type":"array",
       "items": {
-        "type": "object",
+        "type":"object",
         "additionalProperties": false,
-        "required": [
-          "chain",
-          "publicAddress",
-          "provider",
-          "connectionState"
-        ],
+        "required":["chain","publicAddress","provider","connectionState"],
         "properties": {
-          "chain": {
-            "type": "string",
-            "maxLength": 40
-          },
-          "publicAddress": {
-            "type": "string",
-            "minLength": 4,
-            "maxLength": 256
-          },
-          "provider": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 120
-          },
-          "connectionState": {
-            "enum": [
-              "CONNECTED",
-              "DISCONNECTED",
-              "READ_ONLY"
-            ]
-          },
-          "persistedByConsent": {
-            "type": "boolean"
-          }
+          "connectorId":{"type":["string","null"],"maxLength":120},
+          "chain":{"type":"string","maxLength":40},
+          "publicAddress":{"type":"string","minLength":4,"maxLength":256},
+          "provider":{"type":"string","minLength":1,"maxLength":120},
+          "connectionState":{"enum":["CONNECTED","DISCONNECTED","READ_ONLY"]},
+          "network":{"type":["string","null"],"maxLength":120},
+          "observedAt":{"type":["string","null"],"format":"date-time"},
+          "persistedByConsent":{"type":"boolean"}
         }
       }
     }

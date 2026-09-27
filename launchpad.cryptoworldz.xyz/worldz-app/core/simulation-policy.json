@@ -1,0 +1,28 @@
+{
+  "schema": "WORLDZ-APP-SIMULATION-POLICY-V1",
+  "state": "CODE_BUILT_CONTRACT_FOUNDATION",
+  "execution": false,
+  "broadcast": false,
+  "signatureRequest": false,
+  "requirements": [
+    "canonical_proposal_id",
+    "chain_and_network_identity",
+    "unsigned_payload_hash",
+    "verified_simulation_provider",
+    "human_readable_effects",
+    "fee_estimate_when_available",
+    "warnings",
+    "human_effect_acknowledgement"
+  ],
+  "adapterBinding": {
+    "solana": "PENDING",
+    "ethereum": "PENDING",
+    "base": "PENDING",
+    "bnb": "PENDING",
+    "hyperevm": "PENDING",
+    "xrpl": "PENDING",
+    "sui": "PENDING",
+    "robinhood": "RESEARCH"
+  },
+  "rule": "A successful simulation does not authorize signing or broadcast. Those remain separate release gates."
+}
