@@ -1,0 +1,41 @@
+name: WorldzApp Stage 5C Multichain Proof Readiness
+
+on:
+  pull_request:
+    paths:
+      - 'src/worldz-app/live-multisig-readers.js'
+      - 'src/worldz-app/multisig-approval-**'
+      - 'test/worldz-app-stage5c.test.js'
+      - 'tools/verify-worldzapp-stage5c-readiness.mjs'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/core/multisig-live-proof-gates.json'
+      - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
+      - '.github/workflows/verify-worldzapp-stage5c.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      WORLDZ_SAFE_ADDRESS: ${{ vars.WORLDZ_SAFE_ADDRESS }}
+      WORLDZ_SAFE_TX_HASH: ${{ vars.WORLDZ_SAFE_TX_HASH }}
+      WORLDZ_SAFE_TX_SERVICE_URL: ${{ vars.WORLDZ_SAFE_TX_SERVICE_URL }}
+      WORLDZ_XRPL_MULTISIG_ACCOUNT: ${{ vars.WORLDZ_XRPL_MULTISIG_ACCOUNT }}
+      WORLDZ_XRPL_TX_HASH: ${{ vars.WORLDZ_XRPL_TX_HASH }}
+      WORLDZ_SUI_MULTISIG_ADDRESS: ${{ vars.WORLDZ_SUI_MULTISIG_ADDRESS }}
+      WORLDZ_SUI_MULTISIG_CONFIG_JSON: ${{ vars.WORLDZ_SUI_MULTISIG_CONFIG_JSON }}
+      WORLDZ_SUI_PROOF_TX_DIGEST: ${{ vars.WORLDZ_SUI_PROOF_TX_DIGEST }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Stage 5C deterministic proof-reader tests
+        run: node --test test/worldz-app-stage5c.test.js
+      - name: Stage 5C Worldz profile readiness
+        run: node tools/verify-worldzapp-stage5c-readiness.mjs
+      - name: Evidence checksum
+        run: sha256sum worldzapp-stage5c-profile-readiness.json
