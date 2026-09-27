@@ -508,3 +508,35 @@ WorldzApp now carries both the **Android API-36 packaging foundation** and the *
 - No third-party example profile may satisfy a Worldz live-proof gate.
 - Android packaging does not authorize wallet signing, approval submission, transaction execution or broadcast.
 - Signed AAB, Digital Asset Links, Play signing identity, approved centre-logo assets, device QA and Play policy/testing gates remain separate release requirements.
+
+
+## WorldzApp™ Google Play readiness foundation — 2026-09-27
+
+Status: **CODE BUILT / GOOGLE PLAY SUBMISSION NOT YET AUTHORIZED**
+
+WorldzApp now has a versioned Google Play release-readiness layer on top of the merged Android 16 / API 36 TWA foundation and Stage 5C security harness.
+
+Built:
+
+- Google Play release contract and explicit release blockers;
+- Data safety pre-submission inventory;
+- Financial features declaration mapping for the exact shipped feature set;
+- Google reviewer-access plan;
+- truthful draft Play Store listing;
+- privacy-policy draft with a mandatory final production data-flow audit;
+- CI verifier that fails if WorldzApp is falsely marked submission-ready or if crypto/security boundaries drift.
+
+Current Play truth:
+
+- targetSdk / compileSdk 36: built;
+- Android App Bundle is the required release format;
+- Play submission ready: **NO**;
+- signed AAB: **NO**;
+- final owner-approved centre-logo Android raster/maskable assets: **PENDING**;
+- Play developer identity / Play App Signing certificate: **PENDING**;
+- Digital Asset Links using the real Play certificate: **PENDING**;
+- public support/privacy URLs and final Data safety / Financial features declarations: **PENDING**;
+- testing-track and device/accessibility QA: **PENDING**;
+- app-level transaction signing/execution/mainnet broadcast remain **OFF**.
+
+The Financial features form must reflect the exact submitted release. External non-custodial wallet connection is expected to require the cryptocurrency-wallet selection if it remains in the submitted build. No future roadmap feature may be declared as live merely to satisfy Play review.
