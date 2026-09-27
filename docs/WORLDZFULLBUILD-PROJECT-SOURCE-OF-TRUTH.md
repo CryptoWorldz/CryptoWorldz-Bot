@@ -583,3 +583,21 @@ Following the successful unsigned Android API-36 AAB proof merged in PR #251:
 - signed AAB, Play App Signing, developer identity, public deployment verification, testing and final Play declarations remain external release gates.
 
 Permanent security boundary remains unchanged: approval submission, transaction signing, execution and mainnet broadcast are OFF.
+
+
+## WorldzApp™ final logo + Play Console handoff — 2026-09-28
+
+Latest explicit owner approval supersedes the earlier WorldzApp emblem asset revision for final Play branding.
+
+- Final owner-approved master: `1000027745.png`
+- Dimensions: 1536 × 1536
+- SHA-256: `e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec`
+- Regeneration/redraw/restyle: forbidden.
+- Allowed production derivation: deterministic resize, maskable safe-zone padding, format conversion/compression only.
+- Earlier committed 512px icon assets remain accepted only for non-release CI compilation proof and are superseded for final Play submission.
+- Final Play icon/maskable binaries must be reconciled from the final owner-approved master before signing/submission.
+- Play Console handoff runbook: `docs/WORLDZAPP-PLAY-CONSOLE-HANDOFF.md`.
+- No Play developer account evidence was found in the connected Google mailbox checked on 2026-09-28, so developer identity/account remains a real external gate.
+- Hostinger production upload of the WorldzApp public subtree succeeded on deploy run 417; the legacy whole-LaunchPad HTTP verifier received 403 Forbidden from the host/WAF, so public HTTP verification remains separate and must not be falsely marked passed.
+
+Security boundary remains unchanged: approval submission OFF, transaction signing OFF, execution OFF, mainnet broadcast OFF.
