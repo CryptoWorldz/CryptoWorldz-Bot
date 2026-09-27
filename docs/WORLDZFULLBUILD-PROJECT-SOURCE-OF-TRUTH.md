@@ -330,3 +330,17 @@ Locked project direction:
 Long-term loop: **Fund → Feed → Stabilise → Connect → Support → Equip → Create Opportunity → Measure → Improve → Expand.**
 
 Mission line: **No World Hunger Ever Again.**
+
+
+## Project-wide Ideas + WorldzApp inheritance — 2026-09-27
+
+Latest owner directive extends the Project incorporation rule to **both WorldzFullBuild™ and WorldzApp™**.
+
+Canonical project-ideas registry: `worldzpad-omnichain/fullscope/worldz-project-ideas.v1.json`.
+
+- All durable, non-sensitive Project ideas and approved directions are inputs to WorldzFullBuild™.
+- WorldzApp™ consumes the same reconciled registry read-only; it does not maintain a conflicting chat-only product plan.
+- Newest explicit owner direction wins for decisions, while verified on-chain/live/repository evidence controls factual status.
+- Public source control continues to exclude private medical, legal, credential, secret-key and unrelated personal material.
+- The current Ideas Registry captures the newest durable workstreams: Worldz Mini Cities™ and the 25/25/25/25 Worldz Community Legacy Fund™ model; Aboriginal Elders/Traditional Owners permission-and-guidance principle; 12-person Miracle Church / Worldz team target with Amanda pending acceptance; AUTO small-batch dev-funded buy-only concept with execution gates; INVEST/LMTD asset-intelligence research; WorldzLinkz™ all-domains QR; Miracle Church Dubbo community features; and reusable WorldzLaunchPad inheritance.
+- Idea capture never implies deployment, signing, token transfer, investment performance or mainnet execution.
