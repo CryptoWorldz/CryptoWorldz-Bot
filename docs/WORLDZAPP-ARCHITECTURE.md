@@ -198,3 +198,12 @@ Environment-only JSON-RPC bindings are code-built for Solana, Ethereum, Base, BN
 The public registry stores only environment-variable names, never provider credentials. `src/worldz-app/rpc-client.js` rejects inline URL credentials and non-HTTP(S) transports. `tools/verify-worldzapp-live-reads.js` is the evidence gate: a chain remains **LIVE_PROOF_PENDING** until the deployment environment is configured and the verifier completes a successful network read.
 
 Provider binding does not add any signing/broadcast method. The existing read-adapter contract remains authoritative.
+
+
+## Reconciled live-read proof — PASSED
+
+On 2026-09-27 the reconciled WorldzApp provider stack passed CI workflow run `36287750004` in public verification mode. The proof confirmed Solana health and a finalized public-address balance read, Base chain ID 8453, BNB Chain ID 56, HyperEVM chain ID 999, XRPL validated-ledger access, Sui GraphQL chain identification, and Robinhood Chain ID 4663.
+
+No transaction was signed, submitted or broadcast. Public verification endpoints remain development/proof infrastructure only; production provider URLs remain deployment-environment configuration.
+
+The Sui proof uses GraphQL after live verification showed the legacy public JSON-RPC path is no longer supported. This is now a permanent adapter rule: verify the exact current transport and network identity, not merely a hostname.
