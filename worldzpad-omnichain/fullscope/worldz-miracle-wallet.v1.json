@@ -106,5 +106,36 @@
     "WorldzLaunchPad™"
   ],
   "mainnetExecutionAuthorized": false,
-  "standard": "docs/WORLDZ-MIRACLE-WALLET-TREASURY-STANDARD.md"
+  "standard": "docs/WORLDZ-MIRACLE-WALLET-TREASURY-STANDARD.md",
+  "appFoundation": {
+    "brand": "WorldzMiracleWallet™",
+    "lifecycle": "CODE_BUILT",
+    "path": "launchpad.cryptoworldz.xyz/miracle-wallet/",
+    "architecture": "docs/WORLDZ-MIRACLE-WALLET-APP-ARCHITECTURE.md",
+    "delivery": "PWA_FIRST__NATIVE_ANDROID_IOS_TARGET",
+    "modules": [
+      "Treasury",
+      "Chains",
+      "Proposal Lab",
+      "Signers",
+      "WorldzCard™",
+      "WorldzProof™"
+    ],
+    "proposalExecution": "DRAFT_ONLY__NO_SIGN_OR_BROADCAST",
+    "solanaInjectedSignerConnection": "FOUNDATION_IMPLEMENTED",
+    "mobileWalletConnect": "NEXT_BUILD_STAGE",
+    "serviceWorker": true,
+    "webManifest": true,
+    "mainnetExecutionEnabled": false,
+    "nativeRoadmap": [
+      "READ_ADAPTERS",
+      "SIGNER_CONNECTION",
+      "PROPOSAL_SIMULATION",
+      "MULTISIG_APPROVALS",
+      "WORLDZPROOF",
+      "WORLDZCARD",
+      "NATIVE_PACKAGING",
+      "APP_STORES"
+    ]
+  }
 }
