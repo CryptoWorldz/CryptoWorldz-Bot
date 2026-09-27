@@ -155,5 +155,10 @@
     "WALLETCONNECT_AND_WORLDZCARD",
     "NATIVE_APP_PACKAGING",
     "APP_STORE_RELEASE"
-  ]
+  ],
+  "parentApp": {
+    "brand": "WorldzApp™",
+    "route": "/worldz-app/",
+    "moduleId": "treasury"
+  }
 }
