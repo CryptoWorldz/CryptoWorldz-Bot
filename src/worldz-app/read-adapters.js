@@ -20,6 +20,25 @@ async function postJson(url,body,{timeoutMs=12000}={}){
   } finally { clearTimeout(timer); }
 }
 
+
+async function postGraphQL(url,query,variables={},options={}){
+  if(!url) throw new Error("WORLDZAPP_READ_PROVIDER_URL_REQUIRED");
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),options.timeoutMs||12000);
+  try{
+    const response=await fetch(url,{
+      method:"POST",
+      headers:{"content-type":"application/json"},
+      body:JSON.stringify({query,variables}),
+      signal:controller.signal
+    });
+    if(!response.ok) throw new Error("WORLDZAPP_READ_PROVIDER_HTTP_"+response.status);
+    const payload=await response.json();
+    if(payload.errors?.length) throw new Error("WORLDZAPP_SUI_GRAPHQL:"+payload.errors.map(e=>e.message).join(" | "));
+    return payload.data;
+  } finally { clearTimeout(timer); }
+}
+
 function evmAdapter({id,providerUrl,expectedChainId}){
   return createReadAdapter({id,family:"EVM",state:providerUrl?"PROVIDER_CONFIGURED":"PROVIDER_NOT_CONFIGURED"},{
     async getHealth(){
@@ -95,22 +114,12 @@ function xrplAdapter({providerUrl}){
 }
 
 function suiAdapter({providerUrl}){
-  const request=async(method,params=[])=>postJson(providerUrl,{jsonrpc:"2.0",id:1,method,params});
-  return createReadAdapter({id:"sui",family:"SUI",state:providerUrl?"PROVIDER_CONFIGURED":"PROVIDER_NOT_CONFIGURED"},{
+  return createReadAdapter({id:"sui",family:"SUI",state:providerUrl?"PROVIDER_CONFIGURED_GRAPHQL":"PROVIDER_NOT_CONFIGURED"},{
     async getHealth(){
-      const checkpoint=await request("sui_getLatestCheckpointSequenceNumber");
-      return createReadSnapshot({adapterId:"sui",chain:"sui",data:{latestCheckpoint:String(checkpoint)}});
-    },
-    async getBalanceSummary({address}){
-      if(!/^0x[a-fA-F0-9]{1,64}$/.test(String(address||""))) throw new Error("WORLDZAPP_SUI_ADDRESS_INVALID");
-      const balances=await request("suix_getAllBalances",[address]);
-      return createReadSnapshot({adapterId:"sui",chain:"sui",data:{address,balances}});
-    },
-    async getTransactionStatus({transactionId}){
-      const tx=await request("sui_getTransactionBlock",[transactionId,{"showEffects":true,"showEvents":true}]);
-      return createReadSnapshot({adapterId:"sui",chain:"sui",data:{transactionId,tx}});
+      const data=await postGraphQL(providerUrl,"query WorldzAppSuiHealth { chainIdentifier }");
+      return createReadSnapshot({adapterId:"sui",chain:"sui",data:{chainIdentifier:data?.chainIdentifier??null,transport:"GRAPHQL"}});
     }
   });
 }
 
-module.exports={postJson,evmAdapter,solanaAdapter,xrplAdapter,suiAdapter};
+module.exports={postJson,postGraphQL,evmAdapter,solanaAdapter,xrplAdapter,suiAdapter};
