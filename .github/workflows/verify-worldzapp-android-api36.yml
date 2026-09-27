@@ -26,9 +26,17 @@ jobs:
         run: node tools/verify-worldzapp-android-package.js
       - name: Install pinned Bubblewrap tooling
         run: npm install --no-save --ignore-scripts --no-audit --no-fund @bubblewrap/cli@1.25.0
-      - name: Verify Bubblewrap API 36 template
+      - name: Verify installed Bubblewrap version and API 36 template
         run: |
-          npx bubblewrap version
-          grep -q 'compileSdkVersion 36' node_modules/@bubblewrap/core/template_project/app/build.gradle
-          grep -q 'targetSdkVersion 36' node_modules/@bubblewrap/core/template_project/app/build.gradle
-          echo WORLDZAPP_BUBBLEWRAP_API36_TEMPLATE=PASS
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const path=require('node:path');
+          const cli=require('@bubblewrap/cli/package.json');
+          const coreDir=path.dirname(require.resolve('@bubblewrap/core/package.json'));
+          const gradle=fs.readFileSync(path.join(coreDir,'template_project/app/build.gradle'),'utf8');
+          if(cli.version!=='1.25.0') throw new Error('BUBBLEWRAP_VERSION_DRIFT:'+cli.version);
+          if(!gradle.includes('compileSdkVersion 36')) throw new Error('BUBBLEWRAP_COMPILE_SDK_36_MISSING');
+          if(!gradle.includes('targetSdkVersion 36')) throw new Error('BUBBLEWRAP_TARGET_SDK_36_MISSING');
+          console.log('WORLDZAPP_BUBBLEWRAP_VERSION='+cli.version);
+          console.log('WORLDZAPP_BUBBLEWRAP_API36_TEMPLATE=PASS');
+          NODE
