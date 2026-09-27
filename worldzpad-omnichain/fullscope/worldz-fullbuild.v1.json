@@ -593,7 +593,7 @@
     "manifest": "worldzpad-omnichain/fullscope/worldz-miracle-wallet.v1.json",
     "state": "PLANNED",
     "miracleTokenTreasuryPercent": 20,
-    "signerPlan": "6_NOMINEES__4_OF_6_PROPOSED__CONSENT_AND_ADDRESS_VERIFICATION_REQUIRED",
+    "signerPlan": "7_SIGNERS__4_OF_7_OWNER_APPROVED__6_CHURCH_NOMINEES_CONSENT_AND_ADDRESS_VERIFICATION_PENDING__JAYJAYTEAMDEV_CONFIRMED",
     "solana": "JUPITER_MOBILE_SIGNER_ONBOARDING__SQUADS_TREASURY",
     "universalWallet": "WORLDZ_MIRACLE_WALLET__CHAIN_NATIVE_CUSTODY_ADAPTERS",
     "chainCustody": {
@@ -605,6 +605,12 @@
     },
     "worldzCard": "TANGEM_FIRST_RESEARCH_TARGET__WALLETCONNECT_WHERE_SUPPORTED__NO_PARTNERSHIP_CLAIM",
     "futureLaunchPadRole": "OPT_IN_TREASURY_DEPLOYMENT_APPROVAL_ROLE__NO_AUTOMATIC_20_PERCENT_FUTURE_TOKEN_ALLOCATION",
-    "mainnetExecutionAuthorized": false
+    "mainnetExecutionAuthorized": false,
+    "ownerSigner": {
+      "name": "JayJayTeamDev",
+      "chain": "solana",
+      "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+      "status": "CONFIRMED_PUBLIC_SIGNER"
+    }
   }
 }
