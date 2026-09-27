@@ -19,12 +19,11 @@ WorldzApp's Android path uses a **Trusted Web Activity (TWA)** so the proven PWA
 
 A Play release needs immutable identity inputs that must not be guessed:
 
-1. owner-approved Worldz centre-logo Android raster/maskable assets;
-2. final application ID lock;
-3. Play/App signing identity;
-4. SHA-256 signing-certificate fingerprint;
-5. Digital Asset Links deployed at the verified Worldz host;
-6. Play developer/listing and policy declarations.
+1. final application ID lock;
+2. Play/App signing identity;
+3. SHA-256 signing-certificate fingerprint;
+4. Digital Asset Links deployed at the verified Worldz host;
+5. Play developer/listing and policy declarations.
 
 The template intentionally blocks a signed-release claim until those exist.
 
@@ -51,4 +50,9 @@ Run:
 
 `npm run verify:worldzapp:play`
 
-A PASS means the **readiness controls exist and remain fail-closed**. It does not mean the app is approved or ready to submit. The final owner-approved centre logo, public support/privacy URLs, Play developer identity, Play App Signing certificate, Digital Asset Links, signed AAB, testing and final Play Console declarations are still required.
+A PASS means the **readiness controls exist and remain fail-closed**. It does not mean the app is approved or ready to submit. The owner-approved production icon assets are now checksum-verified. Public support/privacy URLs, final application-ID lock, Play developer identity, Play App Signing certificate, Digital Asset Links, signed AAB, testing and final Play Console declarations are still required.
+
+
+## Production emblem assets
+
+The owner-approved Worldz Emblem source remains locked in `approved-emblem.v1.json`. Production Play and maskable PNGs are committed under `apps/worldzapp-android/assets/` and mirrored under the hosted WorldzApp path. Run `npm run verify:worldzapp:icons` to verify their exact bytes, dimensions, RGBA format, color-profile marker and SHA-256 values.
