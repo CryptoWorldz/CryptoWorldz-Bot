@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "CODE_BUILT_STAGE_3B_IDENTITY_MOBILE_HANDOFF__STAGE_4_SIMULATION_CONTRACT_FOUNDATION",
+  "lifecycle": "CODE_BUILT_STAGE_3B_IDENTITY_MOBILE_HANDOFF__STAGE_4A_UNSIGNED_SIMULATION_ADAPTERS",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -123,7 +123,10 @@
     "mobileHandoff": "launchpad.cryptoworldz.xyz/worldz-app/core/mobile-handoff.json",
     "mobileHandoffRuntime": "launchpad.cryptoworldz.xyz/worldz-app/mobile-handoff.js",
     "simulationPolicy": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-policy.json",
-    "simulationContract": "src/worldz-app/simulation-contract.js"
+    "simulationContract": "src/worldz-app/simulation-contract.js",
+    "simulationBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-bindings.json",
+    "simulationAdapterContract": "src/worldz-app/simulation-adapter-contract.js",
+    "simulationAdapters": "src/worldz-app/simulation-adapters.js"
   },
   "identityWalletFoundation": {
     "lifecycle": "CODE_BUILT_STAGE_3B_GUARDED_FOUNDATION",
@@ -160,14 +163,22 @@
     "nextGate": "BIND_AND_VERIFY_XRPL_SUI_MOBILE_PROVIDERS"
   },
   "simulationFoundation": {
-    "lifecycle": "CODE_BUILT_CONTRACT_FOUNDATION",
+    "lifecycle": "CODE_BUILT_STAGE_4A_UNSIGNED_ADAPTERS__LIVE_PROOF_PENDING",
     "contract": "src/worldz-app/simulation-contract.js",
+    "adapterContract": "src/worldz-app/simulation-adapter-contract.js",
+    "adapters": "src/worldz-app/simulation-adapters.js",
     "policy": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-policy.json",
+    "bindings": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-bindings.json",
     "humanReadableEffectsRequired": true,
     "effectAcknowledgementRequired": true,
-    "liveChainBindings": "PENDING_CHAIN_BY_CHAIN",
+    "liveChainBindings": "SOLANA_AND_EVM_CODE_BUILT__LIVE_PROOF_PENDING",
+    "methods": [
+      "SOLANA_SIMULATE_TRANSACTION",
+      "EVM_ETH_CALL",
+      "EVM_ETH_ESTIMATE_GAS"
+    ],
     "signatureRequest": false,
     "broadcast": false,
-    "nextGate": "VERIFIED_LIVE_SIMULATION_ADAPTER_BINDINGS"
+    "nextGate": "LIVE_PROOF_SOLANA_AND_EVM__THEN_CHAIN_NATIVE_XRPL_SUI_DRY_RUN_BINDINGS"
   }
 }

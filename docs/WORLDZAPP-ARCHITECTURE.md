@@ -1,6 +1,6 @@
 # WorldzApp™ — Core Architecture v1
 
-Status: **CODE BUILT — STAGE 3B IDENTITY/MOBILE HANDOFF + STAGE 4 SIMULATION CONTRACT FOUNDATION / NO APP-LEVEL MAINNET EXECUTION**  
+Status: **CODE BUILT — STAGE 3B IDENTITY/MOBILE HANDOFF + STAGE 4A UNSIGNED SIMULATION ADAPTERS / NO APP-LEVEL MAINNET EXECUTION**  
 Date: **2026-09-27**  
 Parent: **WorldzFullBuild™**
 
@@ -155,7 +155,7 @@ WorldzApp now has a public-session contract and a connection-only external-walle
 XRPL, Sui and production mobile handoff remain separately gated. WalletConnect v2 / chain wallet-standard deep links are not declared complete until provider-specific mobile verification passes. Stage 3 does not request messages or transaction signatures, send transactions, broadcast, bridge, swap, import keys or collect recovery material.
 
 ### Stage 4 — Proposal + simulation
-**Contract foundation built.** `src/worldz-app/simulation-contract.js` now normalizes simulation evidence, requires human-readable effects for successful simulations, and creates an acknowledgement gate. Live chain simulator bindings remain pending chain by chain. Simulation still cannot request signatures or broadcast.
+**Stage 4A unsigned adapters built; live proof pending.** `src/worldz-app/simulation-contract.js` normalizes simulation evidence, requires human-readable effects for successful simulations, and creates an acknowledgement gate. `src/worldz-app/simulation-adapters.js` now binds Solana `simulateTransaction` and EVM `eth_call` + `eth_estimateGas` as non-broadcast dry-run methods. Exact chain identity is checked before accepting an EVM result. Simulation still cannot request signatures or broadcast.
 
 ### Stage 5 — Native multisig approvals
 Squads, Safe, XRPL and Sui adapters; chain by chain.
@@ -256,3 +256,23 @@ Built:
 - WorldzApp UI status for identity, mobile handoff and simulation gates
 
 A successful simulation remains evidence only. It does not enable signature requests, multisig approvals or broadcast. The next gate is verified chain-specific simulator binding, followed by separately reviewed native multisig approval adapters.
+
+
+## Stage 4A — unsigned simulation adapter bindings — 2026-09-27
+
+Built:
+
+- `src/worldz-app/simulation-adapter-contract.js` — exposes only `simulateUnsigned`; signing, sending, broadcasting, bridging, swapping, staking, signer changes and secret requests are forbidden methods.
+- `src/worldz-app/simulation-adapters.js` — Solana `simulateTransaction` with `sigVerify:false`, `replaceRecentBlockhash:true`, and EVM `eth_call` + `eth_estimateGas`.
+- `core/simulation-bindings.json` — chain-by-chain Stage 4A registry.
+- `test/worldz-app-stage4.test.js` — verifies non-broadcast behavior, Solana simulation settings and EVM chain-ID fail-closed behavior.
+
+Current Stage 4A truth:
+
+- Solana and EVM adapter code is built.
+- Live network proof of the new simulation adapters is still pending.
+- XRPL native transaction simulation design remains pending.
+- Sui chain-native dry-run binding remains pending.
+- A successful simulation is evidence only. It does not authorize a signature, multisig approval or broadcast.
+
+Next gate: run verified live simulations using non-value test/fixture payloads on the exact configured networks, record evidence without secrets, then advance to chain-native XRPL/Sui dry-run bindings.
