@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "CODE_BUILT_STAGE_3_IDENTITY_WALLET_FOUNDATION",
+  "lifecycle": "CODE_BUILT_STAGE_3B_IDENTITY_MOBILE_HANDOFF__STAGE_4_SIMULATION_CONTRACT_FOUNDATION",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -97,7 +97,7 @@
     },
     {
       "id": "impact",
-      "brand": "OneWorldz / DonateWorldz",
+      "brand": "DonateWorldz",
       "state": "INTEGRATION_PLANNED",
       "route": null,
       "authority": "HUMANITARIAN_SEPARATE_FROM_CRYPTO_CUSTODY"
@@ -134,7 +134,12 @@
     "providerBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json",
     "walletConnectors": "launchpad.cryptoworldz.xyz/worldz-app/core/wallet-connectors.json",
     "walletConnectionRuntime": "launchpad.cryptoworldz.xyz/worldz-app/wallet-connect.js",
-    "projectIdeasRegistry": "worldzpad-omnichain/fullscope/worldz-project-ideas.v1.json"
+    "projectIdeasRegistry": "worldzpad-omnichain/fullscope/worldz-project-ideas.v1.json",
+    "identityRoles": "launchpad.cryptoworldz.xyz/worldz-app/core/identity-roles.json",
+    "mobileHandoff": "launchpad.cryptoworldz.xyz/worldz-app/core/mobile-handoff.json",
+    "mobileHandoffRuntime": "launchpad.cryptoworldz.xyz/worldz-app/mobile-handoff.js",
+    "simulationPolicy": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-policy.json",
+    "simulationContract": "src/worldz-app/simulation-contract.js"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -164,36 +169,58 @@
       "productionBoundary": "PUBLIC_ENDPOINTS_VERIFY_READ_PATHS_ONLY__PRODUCTION_PROVIDERS_REMAIN_ENVIRONMENT_CONFIGURED"
     },
     "execution": false,
-    "nextGate": "STAGE_3_IDENTITY_WALLET_FOUNDATION_BUILT__MOBILE_HANDOFF_AND_ROLE_ASSERTION_NEXT",
+    "nextGate": "STAGE_3B_FOUNDATION_BUILT__PROVIDER_BINDING_AND_STAGE_4_LIVE_SIMULATION_NEXT",
     "suiTransport": "GRAPHQL__PUBLIC_JSON_RPC_DEPRECATED"
   },
   "identityWalletFoundation": {
-    "lifecycle": "CODE_BUILT_CONNECTION_ONLY",
+    "lifecycle": "CODE_BUILT_STAGE_3B_GUARDED_FOUNDATION",
     "publicSessionContract": "src/worldz-app/session-contract.js",
+    "identityAssertionContract": "src/worldz-app/identity-assertion-contract.js",
     "walletConnectionContract": "src/worldz-app/wallet-connection-contract.js",
+    "mobileHandoffContract": "src/worldz-app/mobile-handoff-contract.js",
     "runtime": "launchpad.cryptoworldz.xyz/worldz-app/wallet-connect.js",
+    "mobileRuntime": "launchpad.cryptoworldz.xyz/worldz-app/mobile-handoff.js",
     "registry": "launchpad.cryptoworldz.xyz/worldz-app/core/wallet-connectors.json",
+    "identityRoles": "launchpad.cryptoworldz.xyz/worldz-app/core/identity-roles.json",
+    "mobileHandoffPolicy": "launchpad.cryptoworldz.xyz/worldz-app/core/mobile-handoff.json",
     "activeConnectionPaths": [
       "SOLANA_INJECTED",
-      "EVM_EIP1193"
+      "EVM_EIP1193",
+      "EXTERNAL_CONNECTION_ONLY_ADAPTER_BRIDGE"
     ],
-    "mobileConnectionPaths": [
-      "WALLET_STANDARD_OR_VERIFIED_DEEP_LINK_PLANNED",
-      "WALLETCONNECT_V2_OR_VERIFIED_DEEP_LINK_PLANNED"
+    "providerIntegrationGates": [
+      "XRPL_XAMAN_PUBLIC_CLIENT_ID_AND_REDIRECT_REGISTRATION",
+      "SUI_DAPP_KIT_CORE_INTEGRATION",
+      "WALLETCONNECT_V2_PAIRING_CLIENT_INTEGRATION"
     ],
     "sessionPersistence": "SESSION_ONLY_BY_DEFAULT",
     "publicAddressPersistence": "REQUIRES_EXPLICIT_CONSENT",
+    "roleAuthorityInheritance": false,
     "signing": false,
     "transactionSend": false,
     "broadcast": false,
     "secretCollection": false,
-    "tests": "test/worldz-app-stage3.test.js",
-    "nextGate": "ROLE_AWARE_IDENTITY_ASSERTIONS_AND_VERIFIED_MOBILE_WALLET_HANDOFF"
+    "tests": [
+      "test/worldz-app-stage3.test.js",
+      "test/worldz-app-stage3b.test.js"
+    ],
+    "nextGate": "BIND_AND_VERIFY_XRPL_SUI_MOBILE_PROVIDERS"
   },
   "projectSource": {
     "parent": "WorldzFullBuild™",
     "ideasRegistry": "worldzpad-omnichain/fullscope/worldz-project-ideas.v1.json",
     "mode": "READ_ONLY_INHERITANCE",
     "rule": "WorldzApp inherits reconciled durable Project decisions from WorldzFullBuild and the Worldz Ideas Registry; module registration does not grant transaction authority."
+  },
+  "simulationFoundation": {
+    "lifecycle": "CODE_BUILT_CONTRACT_FOUNDATION",
+    "contract": "src/worldz-app/simulation-contract.js",
+    "policy": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-policy.json",
+    "humanReadableEffectsRequired": true,
+    "effectAcknowledgementRequired": true,
+    "liveChainBindings": "PENDING_CHAIN_BY_CHAIN",
+    "signatureRequest": false,
+    "broadcast": false,
+    "nextGate": "VERIFIED_LIVE_SIMULATION_ADAPTER_BINDINGS"
   }
 }
