@@ -17,7 +17,8 @@
     "verify:web": "npm run check:structure && npm run build:ecosystem-release && npm run check:web",
     "verify:auto": "npm run check:auto && node --test test/auto-core.test.js",
     "verify": "npm run check:structure && npm run check && npm run build:ecosystem-release && npm test && npm run check:web && npm run check:auto && npm run check:lighthouse-seo",
-    "verify:worldzapp:reads": "node tools/verify-worldzapp-live-reads.js"
+    "verify:worldzapp:reads": "node tools/verify-worldzapp-live-reads.js",
+    "verify:worldzapp:stage3": "node --test test/worldz-app-stage3.test.js"
   },
   "engines": {
     "node": ">=20 <25"
