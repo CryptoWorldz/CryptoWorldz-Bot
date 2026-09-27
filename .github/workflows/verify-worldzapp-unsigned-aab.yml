@@ -65,6 +65,10 @@ jobs:
           NODE
           test -x "$BUBBLEWRAP_SDK/bin/sdkmanager"
           test -d "$BUBBLEWRAP_SDK/build-tools/36.1.0"
+          export ANDROID_HOME="$BUBBLEWRAP_SDK"
+          export ANDROID_SDK_ROOT="$BUBBLEWRAP_SDK"
+          echo "ANDROID_HOME=$BUBBLEWRAP_SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$BUBBLEWRAP_SDK" >> "$GITHUB_ENV"
           npx bubblewrap doctor
 
       - name: Prepare CI-only TWA manifest
