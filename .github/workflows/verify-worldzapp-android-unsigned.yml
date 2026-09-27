@@ -1,0 +1,37 @@
+name: WorldzApp Android Unsigned Build Gate
+
+on:
+  pull_request:
+    paths:
+      - 'apps/worldzapp-android/**'
+      - 'tools/prepare-worldzapp-android-unsigned.mjs'
+      - 'tools/verify-worldzapp-android-unsigned-readiness.mjs'
+      - 'test/worldz-app-android-unsigned.test.js'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/**'
+      - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
+      - '.github/workflows/verify-worldzapp-android-unsigned.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Android unsigned manifest safety tests
+        run: node --test test/worldz-app-android-unsigned.test.js
+      - name: Android unsigned build readiness
+        run: node tools/verify-worldzapp-android-unsigned-readiness.mjs
+      - name: Verify Bubblewrap unsigned build capability
+        run: |
+          npm pack @bubblewrap/cli@1.25.0 --silent
+          tar -xzf bubblewrap-cli-1.25.0.tgz
+          grep -R -- '--skipSigning' package/dist/lib/cmds/build.js package/README.md
+      - name: Evidence checksum
+        run: sha256sum worldzapp-android-unsigned-readiness.json
