@@ -1,0 +1,42 @@
+name: WorldzApp Android API 36 Foundation
+
+on:
+  pull_request:
+    paths:
+      - 'apps/worldzapp-android/**'
+      - 'tools/verify-worldzapp-android-package.js'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/manifest.webmanifest'
+      - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
+      - '.github/workflows/verify-worldzapp-android-api36.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-android-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify WorldzApp Android release contract
+        run: node tools/verify-worldzapp-android-package.js
+      - name: Install pinned Bubblewrap tooling
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund @bubblewrap/cli@1.25.0
+      - name: Verify installed Bubblewrap version and API 36 template
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const path=require('node:path');
+          const cli=require('@bubblewrap/cli/package.json');
+          const coreDir=path.dirname(require.resolve('@bubblewrap/core/package.json'));
+          const gradle=fs.readFileSync(path.join(coreDir,'template_project/app/build.gradle'),'utf8');
+          if(cli.version!=='1.25.0') throw new Error('BUBBLEWRAP_VERSION_DRIFT:'+cli.version);
+          if(!gradle.includes('compileSdkVersion 36')) throw new Error('BUBBLEWRAP_COMPILE_SDK_36_MISSING');
+          if(!gradle.includes('targetSdkVersion 36')) throw new Error('BUBBLEWRAP_TARGET_SDK_36_MISSING');
+          console.log('WORLDZAPP_BUBBLEWRAP_VERSION='+cli.version);
+          console.log('WORLDZAPP_BUBBLEWRAP_API36_TEMPLATE=PASS');
+          NODE

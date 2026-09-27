@@ -1,0 +1,41 @@
+{
+  "packageId": "xyz.cryptoworldz.worldzapp",
+  "host": "launchpad.cryptoworldz.xyz",
+  "name": "WorldzApp™",
+  "launcherName": "WorldzApp",
+  "display": "standalone",
+  "themeColor": "#6d28d9",
+  "themeColorDark": "#05020b",
+  "navigationColor": "#05020b",
+  "navigationColorDark": "#05020b",
+  "navigationDividerColor": "#392557",
+  "navigationDividerColorDark": "#392557",
+  "backgroundColor": "#05020b",
+  "enableNotifications": false,
+  "startUrl": "/worldz-app/",
+  "splashScreenFadeOutDuration": 300,
+  "appVersion": "0.1.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "Bubblewrap",
+  "webManifestUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/manifest.webmanifest",
+  "fullScopeUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 26,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "releaseGate": {
+    "templateOnly": true,
+    "iconUrl": "PENDING_APPROVED_WORLDZ_CENTER_LOGO_PNG",
+    "maskableIconUrl": "PENDING_APPROVED_WORLDZ_CENTER_LOGO_MASKABLE_PNG",
+    "signingKey": "NOT_COMMITTED_TO_REPOSITORY"
+  }
+}

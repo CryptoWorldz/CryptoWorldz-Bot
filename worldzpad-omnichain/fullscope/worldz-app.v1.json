@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "STAGE_5B_LIVE_SQUADS_PROFILE_PROOF_PASSED__ANDROID_PACKAGE_FOUNDATION_NEXT",
+  "lifecycle": "ANDROID_API36_PACKAGING_FOUNDATION_BUILT__SIGNED_AAB_RELEASE_GATED",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -145,7 +145,10 @@
     "simulationAdapters": "src/worldz-app/simulation-adapters.js",
     "multisigApprovalAdapters": "launchpad.cryptoworldz.xyz/worldz-app/core/multisig-approval-adapters.json",
     "multisigApprovalContract": "src/worldz-app/multisig-approval-contract.js",
-    "multisigApprovalRuntimeAdapters": "src/worldz-app/multisig-approval-adapters.js"
+    "multisigApprovalRuntimeAdapters": "src/worldz-app/multisig-approval-adapters.js",
+    "androidPackageContract": "apps/worldzapp-android/android-package.v1.json",
+    "androidTwaManifestTemplate": "apps/worldzapp-android/twa-manifest.template.json",
+    "androidAssetLinksTemplate": "apps/worldzapp-android/assetlinks.template.json"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -299,5 +302,23 @@
         "privateMaterialRead": false
       }
     }
+  },
+  "androidPackagingFoundation": {
+    "lifecycle": "CODE_BUILT_API36_TWA_PACKAGING_FOUNDATION__AAB_RELEASE_GATED",
+    "technology": "TRUSTED_WEB_ACTIVITY",
+    "bubblewrapVersion": "1.25.0",
+    "targetSdk": 36,
+    "compileSdk": 36,
+    "sourcePwa": "https://launchpad.cryptoworldz.xyz/worldz-app/",
+    "candidateApplicationId": "xyz.cryptoworldz.worldzapp",
+    "applicationIdState": "PROVISIONAL_UNTIL_PLAY_APPLICATION_CREATED",
+    "outputFormat": "ANDROID_APP_BUNDLE_AAB",
+    "signedAabBuilt": false,
+    "digitalAssetLinksDeployed": false,
+    "officialCenterLogoRasterReady": false,
+    "playAppSigningConfigured": false,
+    "publicReleaseAuthorized": false,
+    "mainnetBroadcastEnabled": false,
+    "nextGate": "LOCK_RELEASE_IDENTITY_AND_APPROVED_CENTER_LOGO__THEN_GENERATE_UNSIGNED_TWA_PROJECT_AND_AAB"
   }
 }

@@ -1,6 +1,6 @@
 # WorldzApp™ — Core Architecture v1
 
-Status: **STAGE 5B LIVE WLDZ SQUADS PROOF PASSED / ANDROID PACKAGING FOUNDATION NEXT / NO APP-LEVEL MAINNET EXECUTION**  
+Status: **ANDROID 16 / API 36 PACKAGING FOUNDATION BUILT / SIGNED AAB RELEASE GATED / NO APP-LEVEL MAINNET EXECUTION**  
 Date: **2026-09-27**  
 Parent: **WorldzFullBuild™**
 
@@ -173,7 +173,13 @@ The Stage 5 foundation can determine whether public approval evidence meets thre
 Hardware/card connection layer. Tangem remains the first research target; no partnership claim.
 
 ### Stage 7 — Android/iOS packaging
-Package the proven app core with secure deep links, native notifications and platform wallet handoff.
+**Android foundation built; signed release gated.**
+
+The Android path packages the proven WorldzApp PWA as a **Trusted Web Activity (TWA)** rather than rebuilding a second app. The foundation pins Bubblewrap `1.25.0`, targets/compiles against API 36, requires Android App Bundle output, and keeps signing material outside the repository.
+
+Current candidate Android application ID is `xyz.cryptoworldz.worldzapp`. It remains provisional until the Play application identity is deliberately locked. The signed release is blocked until the owner-approved Worldz centre-logo raster/maskable assets and Play signing certificate fingerprint exist.
+
+iOS remains a separate later packaging track.
 
 ### Stage 8 — App-store release
 Security review, privacy policy, incident recovery, accessibility/mobile QA and platform compliance are release gates.
@@ -351,3 +357,27 @@ Evidence SHA-256: `ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcd
 This proves the WorldzApp Stage 5 read/normalization path against a real Worldz multisig without giving WorldzApp custody or execution authority. Safe, XRPL and Sui live Worldz profiles remain separately gated.
 
 The Android packaging foundation may now begin while those non-Solana capabilities remain disabled until separately proven.
+
+
+## Android API 36 packaging foundation — 2026-09-27
+
+Built:
+
+- `apps/worldzapp-android/android-package.v1.json`
+- `apps/worldzapp-android/twa-manifest.template.json`
+- `apps/worldzapp-android/assetlinks.template.json`
+- `tools/verify-worldzapp-android-package.js`
+- `.github/workflows/verify-worldzapp-android-api36.yml`
+
+The packaging foundation reuses `https://launchpad.cryptoworldz.xyz/worldz-app/` as the app core. It does not duplicate the WorldzApp business/security logic.
+
+Release blockers are intentionally explicit:
+
+1. lock the final Android application ID before creating the Play application;
+2. use only the owner-approved Worldz centre-logo assets for launcher/maskable artwork;
+3. configure Play App Signing outside source control;
+4. publish the real signing-certificate fingerprint in Digital Asset Links;
+5. generate and test the unsigned/signed API-36 TWA project;
+6. complete device QA, Play testing and policy/data-safety declarations.
+
+Android packaging does not unlock Safe, XRPL or Sui features that still lack their own live profile proof, and it does not enable mainnet broadcast.
