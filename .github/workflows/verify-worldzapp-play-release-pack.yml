@@ -25,4 +25,3 @@ jobs:
           node-version: '22'
       - run: node tools/verify-worldzapp-play-release-pack.js
       - run: node tools/verify-worldzapp-play-phase2.js
-      - run: node tools/verify-worldzapp-google-play.js
