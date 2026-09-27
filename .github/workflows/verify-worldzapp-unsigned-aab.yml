@@ -84,6 +84,7 @@ jobs:
           ];
           const manifest={};
           for(const key of keys) if(source[key]!==undefined) manifest[key]=source[key];
+          manifest.webManifestUrl='https://raw.githubusercontent.com/'+process.env.GITHUB_REPOSITORY+'/'+process.env.GITHUB_SHA+'/launchpad.cryptoworldz.xyz/worldz-app/manifest.webmanifest';
           manifest.iconUrl=rawBase+'worldz-app-icon-512.png';
           manifest.maskableIconUrl=rawBase+'worldz-app-icon-maskable-512.png';
           manifest.signingKey={path:'UNUSED_UNSIGNED_BUILD.keystore',alias:'worldzapp'};
