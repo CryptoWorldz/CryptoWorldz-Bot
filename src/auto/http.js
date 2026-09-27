@@ -44,19 +44,32 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
     return false;
   }
 
-  function dcaRuntime(settings) {
+  function approvedWalletAddresses(wallets = [], settings = {}) {
+    const addresses = (wallets || [])
+      .filter((wallet) => wallet.enabled === true && wallet.verified === true)
+      .map((wallet) => String(wallet.wallet_address || "").trim())
+      .filter(Boolean);
+    if (!addresses.length && settings?.wallet_address) addresses.push(String(settings.wallet_address).trim());
+    return [...new Set(addresses)];
+  }
+
+  function dcaRuntime(settings, wallets = []) {
+    const approved = approvedWalletAddresses(wallets, settings);
     return trader && typeof trader.runtimeStatus === "function"
-      ? trader.runtimeStatus(settings?.wallet_address)
-      : { apiReady: false, signerReady: false, walletMatches: false };
+      ? trader.runtimeStatus(approved)
+      : { apiReady: false, signerReady: false, walletMatches: false, approvedWallets: approved.length, matchedWallets: 0 };
   }
 
   app.get("/health", async (req, res) => {
     let dca = { ...lockedDcaStatus, prepared: dcaPrepared };
     try {
       if (dcaPrepared) {
-        const settings = await dcaRepository.getSettings();
-        const counts = await dcaRepository.countStatus();
-        dca = dcaPublicStatus(settings, counts, dcaRuntime(settings));
+        const [settings, counts, wallets] = await Promise.all([
+          dcaRepository.getSettings(),
+          dcaRepository.countStatus(),
+          dcaRepository.listWallets()
+        ]);
+        dca = dcaPublicStatus(settings, counts, dcaRuntime(settings, wallets));
       }
     } catch {
       dca = { ...lockedDcaStatus, prepared: true, database_ready: false };
@@ -90,16 +103,20 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
       };
     }
 
-    const [dcaSettings, dcaCounts, schedules] = await Promise.all([
+    const [dcaSettings, dcaCounts, schedules, wallets, assets] = await Promise.all([
       dcaRepository.getSettings(),
       dcaRepository.countStatus(),
-      dcaRepository.listSchedules(25)
+      dcaRepository.listSchedules(25),
+      dcaRepository.listWallets(),
+      dcaRepository.listAssetRegistry(250)
     ]);
     return {
       ok: true,
       status: publicStatus(settings, { allowlistedTokens: tokens.length }),
       tokens,
-      dca: dcaPublicStatus(dcaSettings, dcaCounts, dcaRuntime(dcaSettings)),
+      dca: dcaPublicStatus(dcaSettings, dcaCounts, dcaRuntime(dcaSettings, wallets)),
+      dca_wallets: wallets,
+      buy_universe: assets,
       dca_schedules: schedules
     };
   }
@@ -177,13 +194,21 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   router.get("/dca", async (req, res) => {
     if (!requireDca(res)) return undefined;
     try {
-      const settings = await dcaRepository.getSettings();
-      const counts = await dcaRepository.countStatus();
+      const [settings, counts, schedules, tokens, wallets, assets] = await Promise.all([
+        dcaRepository.getSettings(),
+        dcaRepository.countStatus(),
+        dcaRepository.listSchedules(100),
+        dcaRepository.listAllowlistedTokens(),
+        dcaRepository.listWallets(),
+        dcaRepository.listAssetRegistry(250)
+      ]);
       return res.json({
         ok: true,
-        dca: dcaPublicStatus(settings, counts, dcaRuntime(settings)),
-        schedules: await dcaRepository.listSchedules(100),
-        tokens: await dcaRepository.listAllowlistedTokens()
+        dca: dcaPublicStatus(settings, counts, dcaRuntime(settings, wallets)),
+        schedules,
+        tokens,
+        wallets,
+        buy_universe: assets
       });
     } catch (error) {
       console.error("Auto DCA status failed", { name: error?.name || "Error" });
@@ -197,9 +222,50 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
     if (!isValidSolanaAddress(walletAddress)) return res.status(400).json({ ok: false, error: "invalid_wallet_address" });
     try {
       const settings = await dcaRepository.setWalletAddress({ walletAddress, actorTelegramId: req.ownerTelegramId });
-      return res.json({ ok: true, settings, runtime: dcaRuntime(settings) });
+      const verified = Boolean(trader && typeof trader.configured === "function" && trader.configured(walletAddress));
+      const wallet = await dcaRepository.upsertWallet({
+        walletAddress,
+        label: "Primary Owner AUTO Wallet",
+        walletRole: "owner",
+        enabled: true,
+        verified,
+        actorTelegramId: req.ownerTelegramId
+      });
+      const wallets = await dcaRepository.listWallets();
+      return res.json({ ok: true, settings, wallet, runtime: dcaRuntime(settings, wallets) });
     } catch {
       return res.status(500).json({ ok: false, error: "dca_wallet_update_failed" });
+    }
+  });
+
+  router.post("/dca/wallets", async (req, res) => {
+    if (!requireDca(res)) return undefined;
+    const walletAddress = String(req.body?.wallet_address || "").trim();
+    const walletRole = String(req.body?.wallet_role || "dev").trim().toLowerCase();
+    const label = String(req.body?.label || (walletRole === "owner" ? "Owner AUTO Wallet" : "Dev AUTO Wallet")).trim().slice(0, 120);
+    if (!isValidSolanaAddress(walletAddress)) return res.status(400).json({ ok: false, error: "invalid_wallet_address" });
+    if (!["owner", "dev"].includes(walletRole)) return res.status(400).json({ ok: false, error: "invalid_wallet_role" });
+    try {
+      const verified = Boolean(trader && typeof trader.configured === "function" && trader.configured(walletAddress));
+      const wallet = await dcaRepository.upsertWallet({
+        walletAddress,
+        label: label || "AUTO Wallet",
+        walletRole,
+        enabled: true,
+        verified,
+        actorTelegramId: req.ownerTelegramId
+      });
+      const settings = await dcaRepository.getSettings();
+      const wallets = await dcaRepository.listWallets();
+      return res.status(verified ? 201 : 202).json({
+        ok: true,
+        wallet,
+        executor_verified: verified,
+        execution_ready: verified,
+        runtime: dcaRuntime(settings, wallets)
+      });
+    } catch {
+      return res.status(500).json({ ok: false, error: "dca_wallet_allowlist_update_failed" });
     }
   });
 
@@ -225,13 +291,19 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   router.post("/dca/schedules", async (req, res) => {
     if (!requireDca(res)) return undefined;
     try {
-      const [settings, tokens] = await Promise.all([
+      const [settings, tokens, wallets] = await Promise.all([
         dcaRepository.getSettings(),
-        dcaRepository.listAllowlistedTokens()
+        dcaRepository.listAllowlistedTokens(),
+        dcaRepository.listWallets()
       ]);
       const result = validateDcaSchedule(req.body || {}, {
         settings,
-        allowlistedTokens: new Set(tokens.map((token) => token.token_mint)),
+        allowlistedTokens: new Set(tokens.filter((token) => token.auto_buy_enabled !== false).map((token) => token.token_mint)),
+        allowlistedWallets: new Set(
+          wallets
+            .filter((wallet) => wallet.enabled === true && wallet.verified === true)
+            .map((wallet) => wallet.wallet_address)
+        ),
         usdcMint: process.env.SOLANA_USDC_MINT
       });
       if (!result.ok) return res.status(400).json({ ok: false, errors: result.errors, result });
@@ -253,10 +325,19 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
     if (!status) return res.status(404).json({ ok: false, error: "unknown_dca_action" });
     try {
       if (["start", "resume"].includes(action)) {
-        const settings = await dcaRepository.getSettings();
-        const runtime = dcaRuntime(settings);
-        if (!settings.enabled || !settings.execution_enabled || settings.paused || settings.emergency_stop || !runtime.walletMatches || !runtime.apiReady || !runtime.signerReady) {
-          return res.status(409).json({ ok: false, error: "dca_activation_incomplete", runtime });
+        const [settings, schedule] = await Promise.all([
+          dcaRepository.getSettings(),
+          dcaRepository.getSchedule(id)
+        ]);
+        const walletAddress = String(schedule?.wallet_address || settings.wallet_address || "").trim();
+        const walletReady = Boolean(trader && typeof trader.configured === "function" && trader.configured(walletAddress));
+        if (!settings.enabled || !settings.execution_enabled || settings.paused || settings.emergency_stop || !walletReady) {
+          return res.status(409).json({
+            ok: false,
+            error: "dca_activation_incomplete",
+            wallet_address: walletAddress || null,
+            wallet_executor_verified: walletReady
+          });
         }
       }
       const schedule = await dcaRepository.setScheduleStatus({ id, status, actorTelegramId: req.ownerTelegramId });
@@ -269,8 +350,11 @@ function createAutoHttpApp({ config, repository, dcaRepository, trader, dcaWorke
   router.post("/dca/enable", async (req, res) => {
     if (!requireDca(res)) return undefined;
     try {
-      const settings = await dcaRepository.getSettings();
-      const runtime = dcaRuntime(settings);
+      const [settings, wallets] = await Promise.all([
+        dcaRepository.getSettings(),
+        dcaRepository.listWallets()
+      ]);
+      const runtime = dcaRuntime(settings, wallets);
       if (!runtime.apiReady || !runtime.signerReady || !runtime.walletMatches) {
         return res.status(409).json({ ok: false, error: "dca_runtime_not_ready", runtime });
       }
