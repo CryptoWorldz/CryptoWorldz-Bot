@@ -91,7 +91,15 @@ function solanaAdapter({providerUrl}){
 }
 
 function xrplAdapter({providerUrl}){
-  const request=async(method,params={})=>postJson(providerUrl,{method,params:[params]});
+  const request=async(method,params={})=>{
+    const result=await postJson(providerUrl,{method,params:[params]});
+    if(result?.status==="error"||result?.error){
+      const code=result.error||result.error_code||"XRPL_ERROR";
+      const message=result.error_message||result.error_exception||"XRPL request failed";
+      throw new Error("WORLDZAPP_XRPL_RPC_"+code+":"+message);
+    }
+    return result;
+  };
   return createReadAdapter({id:"xrpl",family:"XRPL",state:providerUrl?"PROVIDER_CONFIGURED":"PROVIDER_NOT_CONFIGURED"},{
     async getHealth(){
       const info=await request("server_info");
