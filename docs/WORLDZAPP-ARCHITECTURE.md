@@ -1,6 +1,6 @@
 # WorldzApp™ — Core Architecture v1
 
-Status: **CODE BUILT — STAGE 3B IDENTITY/MOBILE HANDOFF + STAGE 4A UNSIGNED SIMULATION ADAPTERS / NO APP-LEVEL MAINNET EXECUTION**  
+Status: **STAGE 4B LIVE SIMULATION PROOF PASSED / STAGE 5 NEXT / NO APP-LEVEL MAINNET EXECUTION**  
 Date: **2026-09-27**  
 Parent: **WorldzFullBuild™**
 
@@ -276,3 +276,23 @@ Current Stage 4A truth:
 - A successful simulation is evidence only. It does not authorize a signature, multisig approval or broadcast.
 
 Next gate: run verified live simulations using non-value test/fixture payloads on the exact configured networks, record evidence without secrets, then advance to chain-native XRPL/Sui dry-run bindings.
+
+
+## Stage 4B — live unsigned simulation proof — PASSED
+
+GitHub Actions workflow run `36317541759` completed successfully on 2026-09-27.
+
+Passed live proof:
+- Solana devnet — `simulateTransaction`, unsigned/documented fixture.
+- Base mainnet — `eth_call` + `eth_estimateGas`, chain ID 8453.
+- BNB Chain mainnet — chain ID 56.
+- HyperEVM mainnet — chain ID 999.
+- Robinhood Chain mainnet — chain ID 4663.
+
+Evidence SHA-256: `bc74711f21b1e3a53f7b444df2b70bc8e3e8cb425397788c02254dc77b5caca1`.
+
+All passed evidence explicitly records `signatureRequested:false`, `broadcast:false` and `stateMutation:false`.
+
+Ethereum was deliberately reported as `SKIP_NO_APPROVED_VERIFY_ENDPOINT`; no pass is claimed for Ethereum until an approved environment or verification endpoint is configured.
+
+**Next gate: Stage 5 native multisig approval adapters.**
