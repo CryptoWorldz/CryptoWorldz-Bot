@@ -1,0 +1,24 @@
+{
+  "name": "WorldzMiracleWallet™",
+  "short_name": "WorldzMiracle",
+  "description": "Non-custodial multi-chain Worldz treasury and multisig coordination app.",
+  "id": "/miracle-wallet/",
+  "start_url": "/miracle-wallet/",
+  "scope": "/miracle-wallet/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#05020b",
+  "theme_color": "#6d28d9",
+  "categories": [
+    "finance",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "/miracle-wallet/worldz-miracle-wallet-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

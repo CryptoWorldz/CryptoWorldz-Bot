@@ -593,7 +593,7 @@
     "manifest": "worldzpad-omnichain/fullscope/worldz-miracle-wallet.v1.json",
     "state": "PLANNED",
     "miracleTokenTreasuryPercent": 20,
-    "signerPlan": "7_SIGNERS__4_OF_7_OWNER_APPROVED__6_CHURCH_NOMINEES_CONSENT_AND_ADDRESS_VERIFICATION_PENDING__JAYJAYTEAMDEV_CONFIRMED",
+    "signerPlan": "8_SIGNERS__4_OF_8_OWNER_APPROVED__7_NOMINEES_CONSENT_AND_ADDRESS_VERIFICATION_PENDING__JAYJAYTEAMDEV_CONFIRMED",
     "solana": "JUPITER_MOBILE_SIGNER_ONBOARDING__SQUADS_TREASURY",
     "universalWallet": "WORLDZ_MIRACLE_WALLET__CHAIN_NATIVE_CUSTODY_ADAPTERS",
     "chainCustody": {
@@ -611,6 +611,20 @@
       "chain": "solana",
       "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
       "status": "CONFIRMED_PUBLIC_SIGNER"
-    }
+    },
+    "app": {
+      "lifecycle": "CODE_BUILT",
+      "route": "/miracle-wallet/",
+      "sourcePath": "launchpad.cryptoworldz.xyz/miracle-wallet/",
+      "architecture": "docs/WORLDZ-MIRACLE-WALLET-APP-ARCHITECTURE.md",
+      "currentMode": "NON_CUSTODIAL_FOUNDATION__NO_MAINNET_BROADCAST",
+      "installableWebAppFoundation": true,
+      "nativeAndroidIosGoal": true,
+      "nextEngineeringGate": "LIVE_READ_ADAPTERS_AND_AUDITED_MOBILE_SIGNER_CONNECTIONS",
+      "miracleGovernance": "4-of-8"
+    },
+    "pendingSignerRoles": [
+      "Sound Production nominee — intended invitee private until consent"
+    ]
   }
 }
