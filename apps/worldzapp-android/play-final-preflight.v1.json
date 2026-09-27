@@ -13,7 +13,7 @@
     "finalOwnerApprovedLogoMasterLocked": true,
     "finalOwnerApprovedLogoMasterSha256": "e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec",
     "previousIconAssets": "SUPERSEDED_FOR_FINAL_PLAY_RELEASE",
-    "finalLogoBinaryReconciliation": "DERIVATIVES_PREPARED__REPOSITORY_IMPORT_PENDING",
+    "finalLogoBinaryReconciliation": "REQUIRED",
     "finalIconPackManifestBuilt": true,
     "finalIconPackManifest": "apps/worldzapp-android/final-icon-pack.v1.json",
     "dataSafetyDraftAdvanced": true,
@@ -21,7 +21,8 @@
     "storeListingCopyReady": true,
     "screenshotCapturePlanReady": true,
     "testingChecklistReady": true,
-    "finalSignedAabPipelineBuilt": true
+    "finalSignedAabPipelineBuilt": true,
+    "finalLogoDerivativePreparation": "PREPARED__REPOSITORY_IMPORT_PENDING"
   },
   "publicUrls": {
     "privacyCandidate": "https://launchpad.cryptoworldz.xyz/worldz-app/privacy/",
