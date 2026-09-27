@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-RUNTIME-V1",
   "brand": "WorldzApp™",
-  "status": "STAGE_5_MULTISIG_APPROVAL_EVIDENCE_FOUNDATION_BUILT__NO_MAINNET_EXECUTION",
+  "status": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__STAGE_5C_MULTICHAIN_PROOF_HARNESS_BUILT__NO_MAINNET_EXECUTION",
   "tagline": "WorldzEcosystem™. One App. Separate Authority.",
   "coreContract": "/worldz-app/core/worldz-app.v1.json",
   "modules": [
@@ -186,7 +186,7 @@
     }
   },
   "multisigApprovalFoundation": {
-    "state": "CODE_BUILT_APPROVAL_EVIDENCE_FOUNDATION__LIVE_MULTISIG_PROOF_PENDING",
+    "state": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__STAGE_5C_HARNESS_BUILT",
     "registry": "/worldz-app/core/multisig-approval-adapters.json",
     "supportedNow": [
       "SQUADS_V4_STATE",
@@ -198,6 +198,18 @@
     "signing": false,
     "execution": false,
     "broadcast": false,
-    "nextGate": "LIVE_MULTISIG_PROFILE_BINDING_AND_APPROVAL_EVIDENCE"
+    "nextGate": "PROVISION_OR_APPROVE_REAL_WORLDZ_SAFE_XRPL_SUI_PUBLIC_PROFILES__THEN_RUN_STAGE_5C_LIVE_PROOFS",
+    "liveProofGates": "/worldz-app/core/multisig-live-proof-gates.json",
+    "liveProof": {
+      "squads": {
+        "state": "PASSED",
+        "workflowRunId": 36318035477,
+        "proofSha256": "ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0",
+        "profile": "WLDZ_OPERATIONAL_SQUADS"
+      },
+      "safe": "WORLDZ_PROFILE_REQUIRED",
+      "xrpl": "WORLDZ_PROFILE_REQUIRED",
+      "sui": "WORLDZ_PROFILE_REQUIRED"
+    }
   }
 }
