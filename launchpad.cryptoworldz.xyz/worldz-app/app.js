@@ -1,4 +1,4 @@
-let runtime=null,capabilities=null,treasuries=null,readAdapters=null,storagePolicy=null,deferredInstall=null;
+let runtime=null,capabilities=null,treasuries=null,readAdapters=null,storagePolicy=null,providerBindings=null,deferredInstall=null;
 const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
 const escapeHtml=value=>String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 function toast(message){const el=qs("#toast");el.textContent=message;el.classList.add("show");clearTimeout(window.__worldzToast);window.__worldzToast=setTimeout(()=>el.classList.remove("show"),2500)}
@@ -18,7 +18,7 @@ function renderTreasuries(){
 }
 
 function renderAdapters(){
-  qs("#adapter-grid").innerHTML=readAdapters.adapters.map(adapter=>'<article class="card"><span>'+escapeHtml(adapter.family)+'</span><h3>'+escapeHtml(adapter.id.toUpperCase())+'</h3><p>'+escapeHtml(adapter.custody)+'</p><div class="meta"><span class="chip '+stateClass(adapter.state)+'">'+escapeHtml(adapter.state.replaceAll("_"," "))+'</span><span class="chip">'+(adapter.execution?"EXECUTION":"READ ONLY")+'</span></div><p>'+escapeHtml(adapter.plannedReads.join(" • "))+'</p></article>').join("");
+  qs("#adapter-grid").innerHTML=readAdapters.adapters.map(adapter=>{const provider=providerBindings.providers.find(item=>item.chain===adapter.id);return '<article class="card"><span>'+escapeHtml(adapter.family)+'</span><h3>'+escapeHtml(adapter.id.toUpperCase())+'</h3><p>'+escapeHtml(adapter.custody)+'</p><div class="meta"><span class="chip '+stateClass(adapter.state)+'">'+escapeHtml(adapter.state.replaceAll("_"," "))+'</span><span class="chip">'+(adapter.execution?"EXECUTION":"READ ONLY")+'</span></div><p>'+escapeHtml(adapter.plannedReads.join(" • "))+'</p></article>').join("");
 }
 function renderSecurity(){
   const treasury=capabilities.modules.treasury;
@@ -37,12 +37,13 @@ function renderSecurity(){
 }
 async function boot(){
   try{
-    [runtime,capabilities,treasuries,readAdapters,storagePolicy]=await Promise.all([
+    [runtime,capabilities,treasuries,readAdapters,storagePolicy,providerBindings]=await Promise.all([
       json("/worldz-app/config.json"),
       json("/worldz-app/core/capability-registry.json"),
       json("/worldz-app/core/treasury-profiles.json"),
       json("/worldz-app/core/read-adapter-registry.json"),
-      json("/worldz-app/core/storage-policy.json")
+      json("/worldz-app/core/storage-policy.json"),
+      json("/worldz-app/core/provider-bindings.json")
     ]);
     renderModules();renderTreasuries();renderAdapters();renderSecurity();
     qs("#core-state").textContent="Core loaded • mainnet off";qs("#core-state").classList.add("good");
