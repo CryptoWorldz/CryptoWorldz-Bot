@@ -532,7 +532,7 @@ Current Play truth:
 - Android App Bundle is the required release format;
 - Play submission ready: **NO**;
 - signed AAB: **NO**;
-- final owner-approved centre-logo Android raster/maskable assets: **PENDING**;
+- owner-approved Worldz Emblem Android raster/maskable asset: **BOUND / CHECKSUM-PROTECTED**;
 - Play developer identity / Play App Signing certificate: **PENDING**;
 - Digital Asset Links using the real Play certificate: **PENDING**;
 - public support/privacy URLs and final Data safety / Financial features declarations: **PENDING**;
@@ -540,3 +540,24 @@ Current Play truth:
 - app-level transaction signing/execution/mainnet broadcast remain **OFF**.
 
 The Financial features form must reflect the exact submitted release. External non-custodial wallet connection is expected to require the cryptocurrency-wallet selection if it remains in the submitted build. No future roadmap feature may be declared as live merely to satisfy Play review.
+
+
+## WorldzApp™ owner-approved Worldz Emblem — 2026-09-27
+
+Status: **OWNER APPROVED / REPOSITORY BOUND / CI CHECKSUM PROTECTED**
+
+The owner supplied and approved the selected Worldz Emblem for the WorldzApp / Google Play build. It is now the canonical WorldzApp Android/PWA icon source unless the owner explicitly approves a replacement.
+
+- approved source dimensions: 1536×1536;
+- approved source SHA-256: `685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050`;
+- 512×512 release derivative SHA-256: `3710472b055d46fb2dec3ff2a1e71f4382787520e775477b6511dc8e9dfb34ef`;
+- Android path: `apps/worldzapp-android/assets/worldzapp-icon-512.png`;
+- public WorldzApp path: `launchpad.cryptoworldz.xyz/worldz-app/worldz-app-icon-512.png`;
+- registry: `apps/worldzapp-android/approved-emblem.v1.json`;
+- PWA manifest uses the PNG for `any maskable`;
+- TWA manifest points to the same public approved asset;
+- Android and Play CI verify the exact SHA-256 and fail on unapproved byte drift.
+
+This clears the owner-approved centre-logo asset blocker only. Play developer identity, final application-ID lock, privacy/support publication, Data Safety/Financial Features final audit, Play App Signing, Digital Asset Links, signed AAB, device/testing QA and human release authorization remain separate gates.
+
+**Keep On Keepin On™ remains active as a WorldzApp build principle: continue progressing without bypassing security or release gates.**
