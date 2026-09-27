@@ -388,7 +388,7 @@
     "latestOwnerDirective": {
       "date": "2026-09-27",
       "directive": "Incorporate this Project and all project-relevant contents into WorldzFullBuild™.",
-      "state": "INCORPORATED_ON_FEATURE_BRANCH"
+      "state": "INCORPORATED"
     },
     "publicBuildBoundary": "Inherit project-relevant decisions and approved operational data only. Do not publish unrelated private personal, medical, legal, credential, seed-phrase, private-key or secret material from project chats."
   },
@@ -593,7 +593,7 @@
     "standard": "docs/WORLDZ-MIRACLE-WALLET-TREASURY-STANDARD.md",
     "manifest": "worldzpad-omnichain/fullscope/worldz-miracle-wallet.v1.json",
     "state": "PLANNED",
-    "miracleTokenTreasuryPercent": 20,
+    "miracleTokenTreasuryPercent": null,
     "signerPlan": "11_SIGNERS__4_OF_11_OWNER_APPROVED_TARGET__10_INVITEE_POSITIONS_CONSENT_AND_ADDRESS_VERIFICATION_REQUIRED__JAYJAYTEAMDEV_CONFIRMED",
     "solana": "JUPITER_MOBILE_SIGNER_ONBOARDING__SQUADS_TREASURY",
     "universalWallet": "WORLDZ_MIRACLE_WALLET__CHAIN_NATIVE_CUSTODY_ADAPTERS",
@@ -633,7 +633,7 @@
     "teamTokenParticipation": {
       "manifest": "worldzpad-omnichain/fullscope/worldz-miracle-team-participation.v1.json",
       "state": "OWNER_APPROVED_PLAN__AMOUNTS_PENDING",
-      "participantTarget": 11,
+      "participantTarget": 12,
       "tokenScope": {
         "legacyTokenCount": 10,
         "official": [
@@ -643,8 +643,14 @@
           "MRCL"
         ]
       },
-      "executionRule": "CONSENT_AND_VERIFIED_PUBLIC_SOLANA_ADDRESS_REQUIRED__TOKEN_SPECIFIC_AMOUNTS_SOURCE_BUCKETS_AND_CANONICAL_MINTS_MUST_BE_VERIFIED_BEFORE_EXECUTION"
-    }
+      "executionRule": "CONSENT_AND_VERIFIED_PUBLIC_SOLANA_ADDRESS_REQUIRED__TOKEN_SPECIFIC_AMOUNTS_SOURCE_BUCKETS_AND_CANONICAL_MINTS_MUST_BE_VERIFIED_BEFORE_EXECUTION",
+      "mrcl": "20_PERCENT_TEAM_VAULT__INDIVIDUAL_AMOUNTS_AFTER_OPT_IN_AND_VERIFIED_WALLET"
+    },
+    "priorMiracleTokenTreasuryPercent": 20,
+    "prior20PercentState": "SUPERSEDED_AS_GENERAL_PURPOSE_TREASURY_BY_MIRACLE_TEAM_VAULT_DIRECTION",
+    "miracleTeamVaultPercent": 20,
+    "miracleMagicSupplyPercent": 20,
+    "tokenStandard": "docs/WORLDZ-MIRACLE-TOKEN-STANDARD.md"
   },
   "worldzApp": {
     "brand": "WorldzApp™",
@@ -727,5 +733,48 @@
     "contract": "worldzpad-omnichain/fullscope/worldz-app.v1.json",
     "projectIdeasRegistry": "worldzpad-omnichain/fullscope/worldz-project-ideas.v1.json",
     "rule": "WorldzApp inherits the same reconciled Project source-of-truth and lifecycle truth standard; it must not create a conflicting independent plan."
+  },
+  "miracleToken": {
+    "standard": "docs/WORLDZ-MIRACLE-TOKEN-STANDARD.md",
+    "contract": "worldzpad-omnichain/fullscope/worldz-miracle-token.v1.json",
+    "lifecycle": "PRE_LAUNCH__MAINNET_OFF",
+    "supply": 348000000,
+    "miracleTeamVault": {
+      "percent": 20,
+      "tokens": 69600000,
+      "vesting": "30_DAY_FIRST_RELEASE_CLIFF__24_MONTHLY_RELEASES__0_PERCENT_IMMEDIATE"
+    },
+    "miracleMagicSupply": {
+      "percent": 20,
+      "tokens": 69600000,
+      "purpose": "MATCHED_OWNER_GIFT_SUPPLY_FOR_VERIFIED_PEOPLE_IN_NEED"
+    },
+    "genesisLiquidity": {
+      "percent": 5,
+      "tokens": 17400000,
+      "protocol": "METEORA_DBC_TO_DAMM_V2",
+      "firstBuyTargetAUD": 200,
+      "quote": "SOL",
+      "exactSol": "BIND_AT_TRANSACTION_BUILD_TIME"
+    },
+    "purpleDiamondHandz": {
+      "percent": 1,
+      "tokens": 3480000,
+      "separation": "SEPARATE_FROM_MIRACLE_CHURCH_MISSION_LAYER"
+    },
+    "unallocated": {
+      "percent": 54,
+      "tokens": 187920000
+    },
+    "miracleLayer": [
+      "Miracle Missions™",
+      "Miracle Proof™",
+      "Miracle Fund™",
+      "Miracle Match™",
+      "Miracle Emergency Vault™",
+      "Miracle Volunteers™"
+    ],
+    "virtualLiquidityTruth": "DBC_VIRTUAL_RESERVES_ARE_CURVE_MATH_NOT_REAL_TVL__REAL_SOL_FIRST_BUY_ENTERS_QUOTE_RESERVE__NO_VALUE_DOUBLING_CLAIM",
+    "parallelGenesisPool": false
   }
 }

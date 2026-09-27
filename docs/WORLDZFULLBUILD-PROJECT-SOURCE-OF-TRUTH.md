@@ -344,3 +344,29 @@ Canonical project-ideas registry: `worldzpad-omnichain/fullscope/worldz-project-
 - Public source control continues to exclude private medical, legal, credential, secret-key and unrelated personal material.
 - The current Ideas Registry captures the newest durable workstreams: Worldz Mini Cities™ and the 25/25/25/25 Worldz Community Legacy Fund™ model; Aboriginal Elders/Traditional Owners permission-and-guidance principle; 12-person Miracle Church / Worldz team target with Amanda pending acceptance; AUTO small-batch dev-funded buy-only concept with execution gates; INVEST/LMTD asset-intelligence research; WorldzLinkz™ all-domains QR; Miracle Church Dubbo community features; and reusable WorldzLaunchPad inheritance.
 - Idea capture never implies deployment, signing, token transfer, investment performance or mainnet execution.
+
+
+## MIRACLE $MRCL — Miracle Layer™ locked direction — 2026-09-27
+
+Status: **OWNER APPROVED / PRE-LAUNCH / MAINNET OFF**
+
+Canonical standard: `docs/WORLDZ-MIRACLE-TOKEN-STANDARD.md`  
+Machine contract: `worldzpad-omnichain/fullscope/worldz-miracle-token.v1.json`
+
+Latest owner direction supersedes the earlier interpretation that the full 20% MRCL commitment was a general-purpose Miracle Church treasury bucket.
+
+- **20% / 69,600,000 MRCL — Miracle Team Vault™.** Individual allocations activate only after opt-in, verified public wallet and an approved allocation ledger. Team tokens have 0% immediate unlock, a 30-day first-release cliff and 24 monthly releases. Unclaimed/unassigned tokens remain vaulted and cannot be silently reassigned.
+- **20% / 69,600,000 MRCL — MiracleMagicSupply™.** A matched owner-gift supply reserved for verified people in need through a separate MiracleMagicVault™ / Miracle Mission process. It is not part of team personal allocation.
+- **5% / 17,400,000 MRCL — genesis liquidity target.** Current launch-engineering target uses Meteora DBC virtual-pool price discovery plus an AUD $200 target real-SOL creator first buy. The exact SOL amount is bound at transaction-review time from a live quote.
+- **Virtual-liquidity truth rule:** virtual reserves are curve mathematics, not real SOL/TVL and must never be described as doubling the token's value. Real SOL from a first buy becomes quote reserve; post-graduation staged liquidity is added through separately approved DAMM v2 positions.
+- Do not create a second competing traditional AMM pool alongside the DBC at genesis.
+- PHENIX's 45% total staged-liquidity target is **not** automatically copied into MIRACLE. MIRACLE already protects 40% for Team + MiracleMagicSupply, so later liquidity percentages require explicit MRCL-specific approval.
+- Purple Diamond Crew / Purple Diamond Handz remains structurally separate from the Miracle Church mission layer. The inherited 1% legacy default remains a separate WorldzLaunchPad bucket unless explicitly replaced.
+
+The MIRACLE Layer™ includes Miracle Missions™, Miracle Proof™, Miracle Fund™, Miracle Match™, Miracle Emergency Vault™ and Miracle Volunteers™.
+
+Mission flow: **See a Need → Create a Miracle → Prove the Impact → Pass It Forward.**
+
+### Public-brand supersession reminder
+
+The public-facing **OneWorldz** brand is retired. Historical references in this internal migration/source ledger may remain only for provenance and reconciliation. New public-facing Worldz work uses the active WorldzEcosystem™ / WorldzFullBuild™ direction.

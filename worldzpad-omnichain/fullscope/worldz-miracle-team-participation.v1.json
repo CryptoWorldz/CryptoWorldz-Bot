@@ -2,7 +2,7 @@
   "schema": "WORLDZ-MIRACLE-TEAM-PARTICIPATION-V1",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "OWNER_APPROVED_PLAN__NO_DISTRIBUTION_EXECUTED",
+  "lifecycle": "OWNER_APPROVED_PLAN__MRCL_20_PERCENT_TEAM_VAULT_LOCKED_IN_SPEC__NO_DISTRIBUTION_EXECUTED",
   "team": {
     "participantTarget": 12,
     "treasuryTarget": "12_PLANNED_PARTICIPANTS__4_APPROVALS_REQUIRED",
@@ -64,7 +64,27 @@
     "perParticipantAmounts": "PENDING_OWNER_APPROVAL",
     "perTokenSourceBuckets": "PENDING_TOKEN_SPECIFIC_APPROVAL",
     "personalAllocationSeparateFromSignerAuthority": true,
-    "noAutomaticClaimOnTreasuryLpCharityLocksVestingOrFees": true
+    "noAutomaticClaimOnTreasuryLpCharityLocksVestingOrFees": true,
+    "mrclMiracleTeamVault": {
+      "standard": "docs/WORLDZ-MIRACLE-TOKEN-STANDARD.md",
+      "percentOfMrclSupply": 20,
+      "tokens": 69600000,
+      "status": "OWNER_APPROVED__NOT_DEPLOYED",
+      "control": "MULTISIG_CONTROLLED_MIRACLE_TEAM_VAULT",
+      "individualAmounts": "PENDING_EXPLICIT_ALLOCATION_LEDGER",
+      "optInRequired": true,
+      "verifiedPublicWalletRequired": true,
+      "vesting": {
+        "immediateUnlockPercent": 0,
+        "cliffDays": 30,
+        "months": 24,
+        "releases": 24,
+        "cadence": "monthly"
+      },
+      "unclaimedRule": "REMAIN_IN_MIRACLE_TEAM_VAULT",
+      "reassignmentRule": "NO_SILENT_OR_AUTOMATIC_REALLOCATION"
+    },
+    "mrclMagicSupplySeparation": "MIRACLEMAGICSUPPLY_20_PERCENT_IS_A_SEPARATE_NEEDY_RECIPIENT_BUCKET_AND_IS_NOT_PART_OF_TEAM_PERSONAL_ALLOCATIONS"
   },
   "executionGates": [
     "PARTICIPANT_OPT_IN_RECORDED",
@@ -77,7 +97,9 @@
     "HUMAN_READABLE_REVIEW_COMPLETED",
     "REQUIRED_MULTISIG_APPROVALS_COLLECTED",
     "ON_CHAIN_CONFIRMATION_RECONCILED",
-    "WORLDZPROOF_RECORDED"
+    "WORLDZPROOF_RECORDED",
+    "MRCL_TEAM_VAULT_LEDGER_TOTAL_RECONCILES_TO_69600000",
+    "MRCL_24_MONTH_VESTING_SCHEDULE_VERIFIED"
   ],
   "mainnetExecutionAuthorized": false
 }
