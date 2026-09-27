@@ -1,0 +1,70 @@
+{
+  "schema": "WORLDZ-APP-WALLET-CONNECTORS-V1",
+  "mode": "EXTERNAL_CUSTODY_CONNECTION_ONLY",
+  "default": "DENY",
+  "execution": false,
+  "allowedOperations": [
+    "detect_provider",
+    "request_connection",
+    "read_public_address",
+    "read_network",
+    "disconnect_local_session",
+    "register_connection_only_adapter",
+    "prepare_verified_mobile_handoff"
+  ],
+  "forbiddenOperations": [
+    "request_seed_phrase",
+    "request_private_key",
+    "sign_message",
+    "sign_transaction",
+    "send_transaction",
+    "broadcast_transaction",
+    "automatic_chain_switch",
+    "automatic_asset_add",
+    "automatic_bridge",
+    "automatic_swap"
+  ],
+  "connectors": [
+    {
+      "id": "solana_injected",
+      "family": "SOLANA",
+      "label": "Solana Wallet",
+      "standard": "INJECTED_PROVIDER",
+      "state": "CODE_BUILT_CONNECTION_ONLY",
+      "providerHint": "window.solana",
+      "mobileHandoff": "VERIFIED_WALLET_STANDARD_OR_PROVIDER_DEEP_LINK_REQUIRED",
+      "execution": false
+    },
+    {
+      "id": "evm_eip1193",
+      "family": "EVM",
+      "label": "EVM Wallet",
+      "standard": "EIP-1193",
+      "state": "CODE_BUILT_CONNECTION_ONLY",
+      "providerHint": "window.ethereum",
+      "mobileHandoff": "WALLETCONNECT_V2_PAIRING_CLIENT_REQUIRED",
+      "execution": false
+    },
+    {
+      "id": "xrpl_external",
+      "family": "XRPL",
+      "label": "XRPL Wallet",
+      "standard": "XAMAN_OAUTH_OR_VERIFIED_CONNECTION_ADAPTER",
+      "state": "CONNECTION_BRIDGE_BUILT_PROVIDER_CONFIG_REQUIRED",
+      "providerHint": null,
+      "mobileHandoff": "XAMAN_OAUTH_PUBLIC_CLIENT_ID_AND_REDIRECT_REGISTRATION_REQUIRED",
+      "execution": false
+    },
+    {
+      "id": "sui_external",
+      "family": "SUI",
+      "label": "Sui Wallet",
+      "standard": "MYSTEN_DAPP_KIT_WALLET_STANDARD",
+      "state": "CONNECTION_BRIDGE_BUILT_DAPP_KIT_INTEGRATION_REQUIRED",
+      "providerHint": null,
+      "mobileHandoff": "MYSTEN_DAPP_KIT_CONNECTION_ADAPTER_REQUIRED",
+      "execution": false
+    }
+  ],
+  "rule": "WorldzApp may request an external wallet connection and read the resulting public address/network. Stage 3B adds a guarded external-adapter bridge and mobile-handoff contract without enabling signatures or transaction execution."
+}

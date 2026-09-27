@@ -1,0 +1,35 @@
+{
+  "schema": "WORLDZ-APP-STORAGE-POLICY-V1",
+  "browserPersistentAllowed": [
+    "theme preference",
+    "last opened module",
+    "selected chain",
+    "PWA install preference",
+    "public wallet address only after explicit user consent"
+  ],
+  "browserSessionOnly": [
+    "connected public wallet address",
+    "wallet provider label",
+    "selected treasury profile",
+    "role/capability view"
+  ],
+  "serverOperationalAllowed": [
+    "public wallet addresses with consent",
+    "signer consent/status",
+    "treasury account identifiers",
+    "proposal identifiers",
+    "approval proof references",
+    "transaction hashes",
+    "WorldzProof receipts",
+    "audit timestamps"
+  ],
+  "forbiddenEverywhere": [
+    "seed phrase",
+    "private key",
+    "recovery phrase",
+    "hardware-wallet secret",
+    "wallet unlock password",
+    "exported signing key"
+  ],
+  "rule": "WorldzApp stores coordination and proof data, never custody secrets."
+}
