@@ -1,6 +1,6 @@
 # WorldzApp™ — Core Architecture v1
 
-Status: **STAGE 4B LIVE SIMULATION PROOF PASSED / STAGE 5 NEXT / NO APP-LEVEL MAINNET EXECUTION**  
+Status: **STAGE 5 MULTISIG APPROVAL EVIDENCE FOUNDATION BUILT / LIVE PROFILE PROOF PENDING / NO APP-LEVEL MAINNET EXECUTION**  
 Date: **2026-09-27**  
 Parent: **WorldzFullBuild™**
 
@@ -158,7 +158,16 @@ XRPL, Sui and production mobile handoff remain separately gated. WalletConnect v
 **Stage 4A unsigned adapters built; live proof pending.** `src/worldz-app/simulation-contract.js` normalizes simulation evidence, requires human-readable effects for successful simulations, and creates an acknowledgement gate. `src/worldz-app/simulation-adapters.js` now binds Solana `simulateTransaction` and EVM `eth_call` + `eth_estimateGas` as non-broadcast dry-run methods. Exact chain identity is checked before accepting an EVM result. Simulation still cannot request signatures or broadcast.
 
 ### Stage 5 — Native multisig approvals
-Squads, Safe, XRPL and Sui adapters; chain by chain.
+**Approval-evidence foundation built; live profile binding pending.**
+
+WorldzApp now normalizes the chain-native approval models instead of pretending they share one multisig format:
+
+- Squads v4 → count-based member approvals against the configured threshold.
+- Safe Smart Account → owner confirmations against the Safe threshold.
+- XRPL SignerList → signer weights summed against `SignerQuorum`.
+- Sui weighted multisig → public-key weights summed against the configured threshold.
+
+The Stage 5 foundation can determine whether public approval evidence meets threshold, but deliberately returns `executionAllowed:false` and `broadcastAllowed:false`. It does not create signatures, submit confirmations or execute a multisig transaction.
 
 ### Stage 6 — WorldzCard™
 Hardware/card connection layer. Tangem remains the first research target; no partnership claim.
@@ -296,3 +305,24 @@ All passed evidence explicitly records `signatureRequested:false`, `broadcast:fa
 Ethereum was deliberately reported as `SKIP_NO_APPROVED_VERIFY_ENDPOINT`; no pass is claimed for Ethereum until an approved environment or verification endpoint is configured.
 
 **Next gate: Stage 5 native multisig approval adapters.**
+
+
+## Stage 5 — multisig approval evidence adapters — 2026-09-27
+
+Built:
+
+- `src/worldz-app/multisig-approval-contract.js` — creates simulation-bound approval-review envelopes and normalized threshold state.
+- `src/worldz-app/multisig-approval-adapters.js` — Squads v4, Safe, XRPL SignerList and Sui weighted-multisig normalizers.
+- `core/multisig-approval-adapters.json` — public adapter registry.
+- `test/worldz-app-stage5.test.js` — count thresholds, weighted quorums, duplicate approval handling and fail-closed impossible-threshold tests.
+- WorldzApp UI now reports each Stage 5 adapter separately.
+
+Security boundary:
+
+- The exact proposal/simulation/payload hashes remain bound into the approval-review envelope.
+- Threshold met is **not** execution permission.
+- WorldzApp stores public approval evidence only.
+- WorldzApp does not collect private keys, recovery material or wallet signing secrets.
+- Approval submission/signing/broadcast remain disabled until each native provider path is separately integrated and verified.
+
+Next gate: bind actual verified treasury/multisig public profiles, prove read-only approval state from the native systems, and only then design the external-wallet approval-submission path.
