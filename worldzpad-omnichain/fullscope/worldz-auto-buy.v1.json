@@ -1,0 +1,66 @@
+{
+  "schema": "WORLDZ-AUTO-BUY-ONLY-V1",
+  "brand": "Worldz AUTO Buy-Only™",
+  "leader": "ZED LED Command Centre MAX™",
+  "status": "CODE_BUILT__EXECUTION_DISABLED_UNTIL_OWNER_WALLET_BUDGET_AND_EXECUTOR_GATES",
+  "purpose": "Owner-funded small-batch accumulation for verified Worldz assets using owner-approved owner/dev wallets. This system is not a sell bot, volume bot or price-support promise.",
+  "executionPolicy": {
+    "buyOnly": true,
+    "sellAutomation": false,
+    "randomizedExecution": false,
+    "marketVolumePromotion": false,
+    "selfTradeIntent": false,
+    "fundingAsset": "SOL",
+    "batchSizing": "OWNER_CONFIGURED_SMALL_BATCHES",
+    "nonZeroBudgetMustBeExplicitlySetByOwner": true,
+    "globalSpendCapsRequired": true,
+    "maxBuysPerDayRequired": true,
+    "slippageAndPriceImpactCapsRequired": true,
+    "walletClasses": ["owner", "dev"],
+    "walletsMustBeExplicitlyAllowlisted": true,
+    "privateKeyCustody": "SEPARATE_SECURE_EXECUTOR_ONLY",
+    "telegramPrivateKeyCustody": false,
+    "automaticMainnetEnable": false,
+    "emergencyStopRequired": true,
+    "auditLedgerRequired": true
+  },
+  "inheritance": {
+    "legacyRegistry": "worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json",
+    "legacyCount": 10,
+    "canonicalFour": ["WLDZ", "RVIV", "PNEX", "MRCL"],
+    "futureWorldzLaunchPadTokens": {
+      "autoRegister": true,
+      "allChainsTracked": true,
+      "canonicalRegistry": "worldz_fullscope_tokens",
+      "solanaExecution": "BUY_ONLY_ELIGIBLE_AFTER_REAL_MINT_LIQUIDITY_ROUTE_AND_OWNER_LIMIT_GATES",
+      "nonSolanaExecution": "TRACKED_BUT_ADAPTER_GATED_UNTIL_AN_APPROVED_SOL_FUNDED_CHAIN_ROUTE_EXISTS",
+      "rule": "Every future WorldzLaunchPad token inherits the buy-only registry policy. Registration never invents a contract address and never bypasses chain-specific execution gates."
+    }
+  },
+  "legacyAssets": [
+    {"order":1,"name":"Purple Diamond Crew","symbol":"PDC","mint":"F82HFwxDLKFAbQWq7BmniWWxMgUerQsVu8jS357epump","decimals":6},
+    {"order":2,"name":"The Purple Diamond Crew","symbol":"PDC1","mint":"PDC1K9aG6vAg5jFYkLin2tdTgwqZypsdvVHhHN2WnWw","decimals":6},
+    {"order":3,"name":"Purple Diamond Crew","symbol":"PDC1","mint":"PDC1NgvtvLZwnopTfQdzXT5iAqBeGyLdFXEcqnvsR52","decimals":9},
+    {"order":4,"name":"Purple Diamond Crew – MAGA Edition","symbol":"PDCMAGA","mint":"7mwWRQeNpwWrnNhRpC48k7xQCdjCXDWfLLuYsphupump","decimals":6},
+    {"order":5,"name":"PurpleDiamondCrewShares","symbol":"PDCshare","mint":"PDCLsBaTM3MxCzTWNoRvQejZ4kkhAWZiSc3ipCsoFuE","decimals":9},
+    {"order":6,"name":"Purple Diamond Crew","symbol":"PurpleDC","mint":"9Jd67VEgqWA2K5mck7yiYGxfLrQnmrTnXXzDYE3b7MLf","decimals":2},
+    {"order":7,"name":"OG Purple Diamond","symbol":"PurpleOg","mint":"DyZP9zn6vRu8J8XCQLNCREgCc12YN4JndnrmE5Upump","decimals":6},
+    {"order":8,"name":"Purple Diamond Crew – PCC1 Legacy","symbol":"PDC1","mint":"DcekG6rLbQ3K5LtZfSMLgecfqnFAZgJUSpoY7tBgmuGv","decimals":6},
+    {"order":9,"name":"INVEST","symbol":"INVEST","mint":"VeSt6vaWE5JsT36sVCzL21daiY7nNNs73TJcJMHgnjC","decimals":9},
+    {"order":10,"name":"Limited Edition","symbol":"LMTD","mint":"Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY","decimals":9}
+  ],
+  "canonicalFour": [
+    {"order":1,"name":"WORLDZ","symbol":"WLDZ","mint":"AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U","state":"MINT_KNOWN"},
+    {"order":2,"name":"REVIVE","symbol":"RVIV","mint":"DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R","state":"MINT_KNOWN"},
+    {"order":3,"name":"PHENIX","symbol":"PNEX","mint":null,"state":"PENDING_REAL_MINT"},
+    {"order":4,"name":"MIRACLE","symbol":"MRCL","mint":null,"state":"PENDING_REAL_MINT"}
+  ],
+  "graceBoundary": {
+    "mayReportVerifiedAutoActivity": true,
+    "mayDraftApprovedCommunications": true,
+    "mayChangeBuyRules": false,
+    "mayAddWallets": false,
+    "mayEnableExecution": false,
+    "maySubmitTrades": false
+  }
+}
