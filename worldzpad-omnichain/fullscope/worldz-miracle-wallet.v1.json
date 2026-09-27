@@ -155,6 +155,9 @@
       "NATIVE_PACKAGING",
       "APP_STORES"
     ],
-    "miracleGovernance": "4-of-10"
+    "miracleGovernance": "4-of-10",
+    "parentApp": "WorldzApp™",
+    "parentAppRoute": "/worldz-app/",
+    "moduleId": "treasury"
   }
 }
