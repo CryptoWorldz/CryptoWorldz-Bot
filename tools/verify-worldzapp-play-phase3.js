@@ -23,8 +23,10 @@ assert(finance.currentExecutionTruth.custodialWallet===false,"non-custodial boun
 assert(finance.currentExecutionTruth.mainnetAppBroadcast===false,"broadcast boundary");
 assert(finance.releaseCandidateDraft.expectedSelection==="Cryptocurrency wallet","financial feature draft");
 assert(listing.graphics.finalLogoMasterSha256===icons.finalMaster.sha256,"listing logo master");
-assert(listing.graphics.appIcon==="PENDING_FINAL_APPROVED_WORLDZAPP_LOGO_512_PNG","listing Play icon must stay pending");\nassert(listing.graphics.expectedFinalPlayIconSha256===icons.assets.play512.sha256,"expected final Play icon hash");
-assert(listing.graphics.maskableIcon==="PENDING_FINAL_APPROVED_WORLDZAPP_LOGO_MASKABLE_512_PNG","listing maskable icon must stay pending");\nassert(listing.graphics.expectedFinalMaskableIconSha256===icons.assets.maskable512.sha256,"expected final maskable hash");
+assert(listing.graphics.appIcon==="PENDING_FINAL_APPROVED_WORLDZAPP_LOGO_512_PNG","listing Play icon must stay pending");
+assert(listing.graphics.expectedFinalPlayIconSha256===icons.assets.play512.sha256,"expected final Play icon hash");
+assert(listing.graphics.maskableIcon==="PENDING_FINAL_APPROVED_WORLDZAPP_LOGO_MASKABLE_512_PNG","listing maskable icon must stay pending");
+assert(listing.graphics.expectedFinalMaskableIconSha256===icons.assets.maskable512.sha256,"expected final maskable hash");
 assert(testing.completionEvidence.passed===false,"testing may not be pre-claimed passed");
 assert(Array.isArray(shots.phoneShots)&&shots.phoneShots.length>=6,"screenshot capture plan");
 assert(fs.existsSync(".github/workflows/worldzapp-final-release-aab.yml"),"final AAB workflow");
