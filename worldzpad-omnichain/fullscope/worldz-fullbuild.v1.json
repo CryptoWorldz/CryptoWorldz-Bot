@@ -646,13 +646,29 @@
     "capabilityDefault": "DENY",
     "appLevelMainnetBroadcast": false,
     "worldzMiracleWalletModule": "/miracle-wallet/",
-    "nextEngineeringGate": "PASS_LIVE_READ_PROOF__THEN_PRODUCTION_PROVIDER_BINDING_AND_IDENTITY_SESSION",
+    "nextEngineeringGate": "IDENTITY_SESSION_AND_MOBILE_WALLET_CONNECTION_FOUNDATION",
     "readAdapterFoundation": {
       "contract": "src/worldz-app/read-adapter-contract.js",
       "adapters": 8,
       "execution": false,
       "providerBindings": "OFFICIAL_PUBLIC_VERIFY_ENDPOINTS_CONFIGURED__PRODUCTION_ENV_REQUIRED",
-      "liveReadProof": "RERUN_PENDING_AFTER_SUI_GRAPHQL_MIGRATION",
+      "liveReadProof": {
+        "observedAt": "2026-09-27T02:01:06.980Z",
+        "state": "PASSED",
+        "mode": "PUBLIC_VERIFICATION_ENDPOINTS",
+        "execution": false,
+        "passed": [
+          "solana_health",
+          "solana_finalized_balance",
+          "base_chain_id_8453",
+          "bnb_chain_id_56",
+          "hyperevm_chain_id_999",
+          "xrpl_validated_ledger",
+          "sui_graphql_chain_identifier",
+          "robinhood_chain_id_4663"
+        ],
+        "note": "Public verification endpoints only; production provider binding remains a separate release gate."
+      },
       "liveReadWorkflow": ".github/workflows/worldzapp-live-read-proof.yml",
       "sui": "GRAPHQL_MIGRATED_AFTER_LIVE_JSON_RPC_DEPRECATION_PROOF",
       "protocolRegressionRule": "ENDPOINT_HOST_EXISTENCE_IS_NOT_PROTOCOL_SUPPORT__LIVE_VERIFY_TRANSPORT"
