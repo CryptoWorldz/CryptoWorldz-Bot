@@ -67,11 +67,9 @@ async function executeCheck(name,chain,method,args){
   const target=process.env.WORLDZAPP_READ_PROOF_OUT;
   if(target){
     fs.mkdirSync(path.dirname(target),{recursive:true});
-    fs.writeFileSync(target,JSON.stringify(out,null,2)+"
-");
+    fs.writeFileSync(target,JSON.stringify(out,null,2)+"\\n");
   }
-  process.stdout.write(JSON.stringify(out,null,2)+"
-");
+  process.stdout.write(JSON.stringify(out,null,2)+"\\n");
   if(incomplete.length){
     console.error("Required live-read proof entries not PASS:",incomplete.join(", "));
     process.exitCode=1;
