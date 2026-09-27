@@ -205,8 +205,8 @@ The project-wide source-of-truth layer is now represented in `worldzpad-omnichai
 Owner direction is incorporated as a **planned** WorldzFullBuild workstream via `docs/WORLDZ-MIRACLE-WALLET-TREASURY-STANDARD.md` and `worldzpad-omnichain/fullscope/worldz-miracle-wallet.v1.json`.
 
 - MIRACLE ($MRCL) includes a planned **20% Miracle Church treasury allocation**, held by a church-controlled multisig rather than personally divided between signers.
-- Six nominated church signers are to be invited, and **JayJayTeamDev is added as signer #7**. Church nominee wallet-to-person association remains private until individual consent; JayJayTeamDev has explicitly approved the public signer association.
-- Solana starts with external signer wallets plus Squads; the owner-approved signer model is **4-of-7**, with four approvals required. It is not yet deployed.
+- Seven church/community signers are to be invited, including an additional Sound Production signer role, and **JayJayTeamDev remains the confirmed public signer**. Nominee wallet-to-person association remains private until individual consent; JayJayTeamDev has explicitly approved the public signer association.
+- Solana starts with external signer wallets plus Squads; the owner-approved signer model is **4-of-8**, with four approvals required. It is not yet deployed.
 - WorldzMiracleWallet™ is the universal first-party treasury interface over chain-native custody: Squads for Solana, Safe for supported EVM networks, XRPL SignerList/quorum, Sui native multisig, and separately verified adapters for other chains.
 - WorldzCard™ is a provider-adapter layer; Tangem is the first research target using WalletConnect where supported. No physical co-branded card or provider partnership is claimed without an actual agreement.
 - The church signer group may be invited into future WorldzLaunchPad treasury/deployment approvals, but this does **not** create an automatic 20% allocation or control right over unrelated future tokens.
@@ -214,13 +214,17 @@ Owner direction is incorporated as a **planned** WorldzFullBuild workstream via 
 
 ### Signer update — 2026-09-27
 
-JayJayTeamDev is signer #7 for the planned Miracle Church treasury using public Solana address `Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u`. The threshold remains four required approvals, producing a **4-of-7** multisig policy. This is a build/specification decision only; no on-chain multisig creation or token transfer is implied.
+JayJayTeamDev is signer #7 for the planned Miracle Church treasury using public Solana address `Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u`. The threshold remains four required approvals. With the additional approved Sound Production invitation, the planned policy is now **4-of-8**. This is a build/specification decision only; no on-chain multisig creation or token transfer is implied.
 
 
 ## WorldzMiracleWallet™ app foundation — 2026-09-27
 
-WorldzMiracleWallet™ is now an active application workstream, not only a concept. The first code foundation lives at `launchpad.cryptoworldz.xyz/miracle-wallet/` with an installable-web-app manifest, offline shell, treasury/chains/proposal/signers/WorldzCard/WorldzProof modules and a 4-of-7 Miracle treasury profile.
+WorldzMiracleWallet™ is now an active application workstream, not only a concept. The first code foundation lives at `launchpad.cryptoworldz.xyz/miracle-wallet/` with an installable-web-app manifest, offline shell, treasury/chains/proposal/signers/WorldzCard/WorldzProof modules and a 4-of-8 Miracle treasury profile.
 
 The current proposal engine is deliberately **draft-only**: it cannot sign, broadcast or move funds. The first Solana signer connector can use an already-present injected wallet provider, while audited mobile wallet connection, chain read adapters, real unsigned transaction generation, simulation, multisig approvals and mainnet execution remain separately gated.
 
 The long-term product goal is a first-party Android/iOS Worldz app. The current architecture uses the tested web/PWA foundation first, then native packaging and device integrations after the security and chain-adapter gates pass. See `docs/WORLDZ-MIRACLE-WALLET-APP-ARCHITECTURE.md`.
+
+### Additional signer invitation — Sound Production
+
+An eighth planned Miracle treasury signer position is approved for Sound Production. The intended invitee is Callam, but the public source-of-truth does not publish the person's wallet-to-identity association until consent and a verified public Solana address are supplied. The treasury threshold remains four approvals, so the planned governance is **4-of-8**.
