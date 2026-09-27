@@ -1,0 +1,112 @@
+{
+  "schema": "WORLDZ-APP-WALLET-CONNECTIONS-V1",
+  "updatedAt": "2026-09-27",
+  "defaultAuthority": "CONNECT_PUBLIC_ACCOUNT_ONLY",
+  "signingEnabled": false,
+  "broadcastEnabled": false,
+  "connectors": [
+    {
+      "id": "evm-injected",
+      "families": [
+        "EVM"
+      ],
+      "standards": [
+        "EIP-6963",
+        "EIP-1193"
+      ],
+      "state": "CODE_BUILT_PUBLIC_ACCOUNT_CONNECTION",
+      "discovery": "EIP-6963 preferred; legacy window.ethereum fallback only when discovery finds none",
+      "connectionCapability": "REQUEST_PUBLIC_ACCOUNTS_AND_CHAIN_ID_ONLY",
+      "signing": false
+    },
+    {
+      "id": "solana-wallet-standard",
+      "families": [
+        "SOLANA"
+      ],
+      "standards": [
+        "Wallet Standard",
+        "Solana Wallet Standard",
+        "Mobile Wallet Standard"
+      ],
+      "packages": [
+        "@solana/wallet-standard",
+        "@solana-mobile/wallet-standard-mobile"
+      ],
+      "state": "SDK_INTEGRATION_PLANNED",
+      "preferredForMobile": true,
+      "signing": false
+    },
+    {
+      "id": "solana-injected-fallback",
+      "families": [
+        "SOLANA"
+      ],
+      "standards": [
+        "legacy injected provider fallback"
+      ],
+      "state": "CODE_BUILT_PUBLIC_ACCOUNT_CONNECTION_FALLBACK",
+      "preferredForMobile": false,
+      "signing": false
+    },
+    {
+      "id": "walletconnect",
+      "families": [
+        "EVM",
+        "SOLANA_WHERE_WALLET_SUPPORTS"
+      ],
+      "standards": [
+        "WalletConnect / AppKit"
+      ],
+      "state": "SDK_AND_PROJECT_CONFIGURATION_REQUIRED",
+      "config": "WORLDZAPP_WALLETCONNECT_PROJECT_ID",
+      "deepLinkTarget": true,
+      "qrTarget": true,
+      "signing": false
+    },
+    {
+      "id": "xrpl-xaman",
+      "families": [
+        "XRPL"
+      ],
+      "standards": [
+        "Xaman SDK / xApp external-wallet flow"
+      ],
+      "state": "APP_REGISTRATION_AND_INTEGRATION_PLANNED",
+      "signing": false
+    },
+    {
+      "id": "sui-dapp-kit",
+      "families": [
+        "SUI"
+      ],
+      "standards": [
+        "Sui dApp Kit v2",
+        "Sui Wallet Standard"
+      ],
+      "packages": [
+        "@mysten/dapp-kit-core",
+        "@mysten/sui"
+      ],
+      "state": "SDK_INTEGRATION_PLANNED",
+      "signing": false
+    },
+    {
+      "id": "worldzcard-tangem",
+      "families": [
+        "EVM",
+        "SOLANA"
+      ],
+      "standards": [
+        "WalletConnect where Tangem supports the network"
+      ],
+      "state": "RESEARCH_COMPATIBLE_CONNECTION_PATH",
+      "purpose": "WorldzCard™ hardware/card external signer adapter",
+      "partnershipClaimed": false,
+      "privateKeysLeaveProvider": false,
+      "signing": false
+    }
+  ],
+  "connectionResultRule": "Every Stage 3 connector returns only public account/network metadata and CONNECTED_UNVERIFIED_CONTROL. No connector grants signer authority.",
+  "futureControlProof": "A separate user-approved challenge-signature verifier may promote a connection to VERIFIED_BY_CHALLENGE without granting treasury authority."
+}
