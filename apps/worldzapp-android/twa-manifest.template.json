@@ -39,7 +39,10 @@
     "signingKey": "NOT_COMMITTED_TO_REPOSITORY",
     "approvedEmblemSourceSha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
     "playIconSha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d",
-    "maskableIconSha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15"
+    "maskableIconSha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15",
+    "finalOwnerApprovedLogoMasterSha256": "e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec",
+    "currentIconAssets": "CI_BUILD_ONLY__SUPERSEDED_FOR_FINAL_PLAY_RELEASE",
+    "finalLogoBinaryReconciliationRequired": true
   },
   "iconUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-512.png",
   "maskableIconUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-maskable-512.png",
