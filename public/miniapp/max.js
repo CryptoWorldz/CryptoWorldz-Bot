@@ -146,6 +146,18 @@
         <div class="ultimate-note max-truth">Market cap = price × supply. It is not the same thing as liquidity. Fee examples depend on actual eligible trading volume and the launch engine's real on-chain rules.</div>
       </article>
 
+      <div class="section-title"><h2>📈 WealthBuild™ • WorldzAutoInvest™</h2></div>
+      <article class="panel">
+        <p>A separate member-facing, self-directed <b>BUY-only</b> planner. You choose the token, amount, cadence and maximum spend; the public architecture uses your external wallet and never asks for a seed phrase or private key.</p>
+        <div class="profile-row"><span>Execution side</span><b>BUY ONLY</b></div>
+        <div class="profile-row"><span>Custody</span><b>External wallet</b></div>
+        <div class="profile-row"><span>Automatic selling</span><b>OFF</b></div>
+        <div class="ultimate-note max-truth">Code-foundation state: the planner is available, while public mainnet recurring-order execution stays OFF until provider, cancellation, security and compliance gates pass. AutoInvest is not a token recommendation or return promise.</div>
+        <div class="max-actions">
+          <a class="button" href="https://cryptoworldz.xyz/wealthbuild/" target="_blank" rel="noopener">Open WealthBuild™ Planner ↗</a>
+        </div>
+      </article>
+
       <div class="section-title"><h2>🔎 MAX Research Desk</h2></div>
       <article class="panel">
         <p>Ask about CryptoWorldz, chains, launch technology, token mechanics, wallets, security, food security or anything MAX should investigate. A queued question is <b>not</b> treated as fact.</p>
