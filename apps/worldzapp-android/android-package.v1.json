@@ -41,14 +41,16 @@
     "reviewAccessFinalized": false
   },
   "assetGates": {
-    "officialCenterLogoRasterReady": false,
-    "rule": "Do not generate or publish the signed Android release with an old/generated Worldz icon. Use the owner-approved Worldz centre logo only.",
+    "officialCenterLogoRasterReady": true,
+    "rule": "Use the owner-approved Worldz Emblem release derivative only. Do not substitute old branding or generated alternatives without explicit owner approval.",
     "requiredBeforeSignedAab": [
-      "APPROVED_WORLDZ_CENTER_LOGO_PNG_512_OR_LARGER",
-      "APPROVED_MASKABLE_ICON",
       "PLAY_APP_SIGNING_CERT_SHA256",
       "PUBLISHED_DIGITAL_ASSET_LINKS"
-    ]
+    ],
+    "ownerApproved": true,
+    "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
+    "icon512": "apps/worldzapp-android/assets/worldzapp-icon-512.png",
+    "maskableIcon512": "apps/worldzapp-android/assets/worldzapp-icon-512.png"
   },
   "inheritedWorldzSecurity": {
     "stage4bLiveSimulationProof": "PASSED",
@@ -64,7 +66,6 @@
   },
   "nextGates": [
     "LOCK_ANDROID_APPLICATION_ID_BEFORE_PLAY_APP_CREATION",
-    "ADD_OWNER_APPROVED_CENTER_LOGO_512_AND_MASKABLE_ASSETS",
     "VERIFY_PLAY_DEVELOPER_IDENTITY_AND_ACCOUNT_REQUIREMENTS",
     "FINALIZE_PUBLIC_SUPPORT_AND_PRIVACY_POLICY_URLS",
     "FINAL_RUNTIME_DATA_SAFETY_AND_FINANCIAL_FEATURES_AUDIT",
