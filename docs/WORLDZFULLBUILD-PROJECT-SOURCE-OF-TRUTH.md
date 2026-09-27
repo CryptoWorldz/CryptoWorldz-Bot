@@ -433,3 +433,10 @@ WorldzApp Stage 4 now has guarded unsigned simulation adapters instead of only a
 - Mainnet app broadcast remains OFF.
 
 Canonical status remains in `worldzpad-omnichain/fullscope/worldz-app.v1.json`.
+
+
+## WorldzApp Stage 4B live simulation proof — PASSED — 2026-09-27
+
+Workflow run `36317541759` proved the unsigned WorldzApp simulation path live for the required set: Solana, Base, BNB Chain, HyperEVM and Robinhood Chain. Evidence checksum: `bc74711f21b1e3a53f7b444df2b70bc8e3e8cb425397788c02254dc77b5caca1`.
+
+No signature was requested, no transaction was broadcast and no state mutation was authorized. Ethereum remains unverified because no approved public/environment verification endpoint was configured. Stage 5 native multisig approval adapters are the next WorldzApp gate.
