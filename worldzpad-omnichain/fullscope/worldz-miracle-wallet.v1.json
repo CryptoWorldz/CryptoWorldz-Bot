@@ -10,17 +10,17 @@
     "tokenLifecycle": "PRE_LAUNCH",
     "treasuryAllocationPercent": 20,
     "allocationMeaning": "CHURCH_CONTROLLED_TOKEN_TREASURY__NOT_PERSONAL_SIGNER_OWNERSHIP__NOT_EQUITY",
-    "nominatedSignerCount": 10,
+    "nominatedSignerCount": 11,
     "signerIdentityStorage": "CHURCH_NOMINEES_PRIVATE_UNTIL_CONSENT__JAYJAYTEAMDEV_PUBLIC_SIGNER_APPROVED",
     "proposedThreshold": {
       "approvals": 4,
-      "signers": 10,
+      "signers": 11,
       "status": "OWNER_APPROVED_DEFAULT"
     },
     "preferredSolanaOnboardingWallet": "Jupiter Mobile",
     "solanaTreasury": "Squads multisig",
     "mainnetState": "NOT_DEPLOYED",
-    "churchNomineeCount": 8,
+    "churchNomineeCount": 9,
     "confirmedPublicSigners": [
       {
         "name": "JayJayTeamDev",
@@ -44,9 +44,27 @@
         "role": "Miracle Church Kitchen and Community Service",
         "intendedInvitee": "PRIVATE_UNTIL_CONSENT",
         "status": "INVITE_APPROVED__CONSENT_AND_PUBLIC_ADDRESS_PENDING"
+      },
+      {
+        "role": "Community Hospitality / Barber & Barista",
+        "intendedInvitee": "PRIVATE_UNTIL_CONSENT",
+        "status": "OWNER_APPROVED_INVITATION__CONSENT_AND_VERIFIED_PUBLIC_ADDRESS_PENDING"
       }
     ],
-    "additionalWorldzNomineeCount": 1
+    "additionalWorldzNomineeCount": 1,
+    "currentGovernance": "4-of-11",
+    "teamTokenParticipation": {
+      "state": "OWNER_APPROVED_PLAN__AMOUNTS_PENDING",
+      "participantTarget": 11,
+      "legacyTokenCount": 10,
+      "officialTokens": [
+        "WLDZ",
+        "RVIV",
+        "PNEX",
+        "MRCL"
+      ],
+      "rule": "OPT_IN_PLUS_VERIFIED_PUBLIC_SOLANA_ADDRESS_REQUIRED__TOKEN_SPECIFIC_AMOUNTS_AND_SOURCE_BUCKETS_MUST_BE_APPROVED_BEFORE_EXECUTION"
+    }
   },
   "futureLaunchPadRole": {
     "state": "OPT_IN_APPROVAL_ROLE_PLANNED",
@@ -155,7 +173,7 @@
       "NATIVE_PACKAGING",
       "APP_STORES"
     ],
-    "miracleGovernance": "4-of-10",
+    "miracleGovernance": "4-of-11",
     "parentApp": "WorldzApp™",
     "parentAppRoute": "/worldz-app/",
     "moduleId": "treasury"
