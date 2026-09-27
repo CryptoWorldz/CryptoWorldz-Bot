@@ -14,13 +14,13 @@ WorldzApp's Android packaging foundation targets Android 16 / API 36 and Android
 - Stage 4B live unsigned simulation proof.
 - Stage 5B live WLDZ Squads approval-state proof.
 - Stage 5C fail-closed Safe / XRPL / Sui public proof harness.
-- **Owner-approved Worldz Emblem is repository-bound as the 512×512 Android / Play / maskable icon source.**
+- **Owner-approved Worldz Emblem source is registered and checksum-anchored; the final production 512×512 PNG/maskable export remains a release gate.**
 - app-level signing, execution and mainnet broadcast remain OFF.
 
 ## Play submission gates
 
 1. Lock the final Android application ID before the Play app identity becomes permanent.
-2. ✅ Owner-approved Worldz Emblem Android / Play / maskable icon is bound and checksum-protected.
+2. ✅ Owner-approved Worldz Emblem source is locked. ⏳ Export and bind the final valid 512×512 PNG + maskable production raster from that approved source.
 3. Verify the Play developer identity and developer-account requirements.
 4. Complete Play App Signing without committing signing secrets to source control.
 5. publish Digital Asset Links using the actual Play App Signing SHA-256 certificate fingerprint.
@@ -52,8 +52,10 @@ Passing this repository gate means the Play submission architecture is prepared.
 Owner approval received on 27 September 2026.
 
 - Registry: `apps/worldzapp-android/approved-emblem.v1.json`
-- Android asset: `apps/worldzapp-android/assets/worldzapp-icon-512.png`
-- Public PWA asset: `launchpad.cryptoworldz.xyz/worldz-app/worldz-app-icon-512.png`
-- Release derivative SHA-256: `3710472b055d46fb2dec3ff2a1e71f4382787520e775477b6511dc8e9dfb34ef`
+- Approved 1536×1536 source SHA-256: `685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050`
+- Repository identity preview: `apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg`
+- Preview SHA-256: `b3152a79fd46e0fcb4f4f00e536ea7bc9ee6279986eff3abaf60e225d91d9f7d`
+- Final Play/TWA/PWA 512×512 PNG and maskable export: **PENDING VALID EXPORT + CHECKSUM BINDING**
 
-The icon verifier fails CI if those bytes drift without an explicitly approved replacement.
+The approved design itself must not be replaced or redesigned without explicit owner approval. The final raster gate remains fail-closed until valid production bytes are committed and verified.
+
