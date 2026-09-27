@@ -15,6 +15,7 @@ on:
       - 'test/worldz-app-stage3.test.js'
       - 'test/worldz-app-stage3b.test.js'
       - 'test/worldz-app-stage4.test.js'
+      - 'test/worldz-app-stage5.test.js'
       - 'test/command-centre.test.js'
       - 'test/command-registry.test.js'
       - 'test/websites-telegram.test.js'
@@ -68,8 +69,10 @@ jobs:
           node --check src/worldz-app/simulation-contract.js
           node --check src/worldz-app/simulation-adapter-contract.js
           node --check src/worldz-app/simulation-adapters.js
+          node --check src/worldz-app/multisig-approval-contract.js
+          node --check src/worldz-app/multisig-approval-adapters.js
           node --check launchpad.cryptoworldz.xyz/worldz-app/app.js
           node --check launchpad.cryptoworldz.xyz/worldz-app/wallet-connect.js
           node --check launchpad.cryptoworldz.xyz/worldz-app/mobile-handoff.js
       - name: Focused tests
-        run: node --test test/fullbuild.test.js test/fullscope.test.js test/worldz-app-stage3.test.js test/worldz-app-stage3b.test.js test/worldz-app-stage4.test.js test/command-centre.test.js test/command-registry.test.js test/websites-telegram.test.js
+        run: node --test test/fullbuild.test.js test/fullscope.test.js test/worldz-app-stage3.test.js test/worldz-app-stage3b.test.js test/worldz-app-stage4.test.js test/worldz-app-stage5.test.js test/command-centre.test.js test/command-registry.test.js test/websites-telegram.test.js
