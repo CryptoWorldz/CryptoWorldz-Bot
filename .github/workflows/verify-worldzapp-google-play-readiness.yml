@@ -7,6 +7,8 @@ on:
       - 'docs/WORLDZAPP-GOOGLE-PLAY-RELEASE.md'
       - 'tools/verify-worldzapp-play-readiness.js'
       - 'tools/verify-worldzapp-android-package.js'
+      - 'tools/verify-worldzapp-icon-assets.js'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/assets/**'
       - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
       - 'launchpad.cryptoworldz.xyz/worldz-app/config.json'
       - 'package.json'
@@ -27,6 +29,8 @@ jobs:
           node-version: '22'
       - name: Syntax check Play readiness verifier
         run: node --check tools/verify-worldzapp-play-readiness.js
+      - name: Verify owner-approved WorldzApp icon binaries
+        run: npm run verify:worldzapp:icons
       - name: Verify existing Android API 36 foundation
         run: npm run verify:worldzapp:android
       - name: Verify Google Play fail-closed readiness contract
