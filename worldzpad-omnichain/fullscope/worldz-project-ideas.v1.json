@@ -1,0 +1,184 @@
+{
+  "schema": "WORLDZ-PROJECT-IDEAS-V1",
+  "brand": "Worldz Ideas Registry™",
+  "parent": "WorldzFullBuild™",
+  "consumers": [
+    "WorldzFullBuild™",
+    "WorldzApp™"
+  ],
+  "updatedAt": "2026-09-27",
+  "status": "PROJECT_WIDE_DURABLE_IDEAS_INTEGRATED",
+  "purpose": "Versioned non-sensitive registry of durable Worldz project ideas and approved directions from Project chats so WorldzFullBuild and WorldzApp consume one reconciled source rather than separate chat-only plans.",
+  "precedence": [
+    "latest explicit JayJayTeamDev instruction for decisions",
+    "confirmed on-chain evidence for on-chain status",
+    "verified live/deployment evidence for live status",
+    "verified GitHub/repository evidence for code status",
+    "canonical versioned WorldzFullBuild contracts",
+    "older project-chat plans",
+    "research and proposals"
+  ],
+  "privacy": {
+    "publicRepository": true,
+    "exclude": [
+      "personal medical information",
+      "legal case material",
+      "private financial-management details",
+      "credentials",
+      "seed phrases",
+      "private keys",
+      "private identity-to-wallet mappings without consent",
+      "unrelated private conversation material"
+    ]
+  },
+  "lifecycle": [
+    "IDEA_CAPTURED",
+    "OWNER_APPROVED_PLAN",
+    "CODE_BUILT",
+    "DEPLOYED_UNVERIFIED",
+    "LIVE_VERIFIED",
+    "RESEARCH",
+    "SUPERSEDED",
+    "REJECTED"
+  ],
+  "ecosystem": {
+    "humanitarianGateway": [
+      "OneWorldz",
+      "DonateWorldz"
+    ],
+    "technologyFundingEngine": [
+      "CryptoWorldz",
+      "WorldzLaunchPad™"
+    ],
+    "publicSeparationRule": "Humanitarian and crypto activity remain connected as one ecosystem but must be clearly distinguishable in public messaging and accounting."
+  },
+  "ideas": [
+    {
+      "id": "WORLDZAPP_UNIFIED_IDEAS",
+      "name": "WorldzApp™ Ideas Registry",
+      "state": "OWNER_APPROVED_PLAN",
+      "rule": "WorldzApp consumes this versioned registry read-only so approved project ideas, status and source-of-truth links can be surfaced without granting transaction authority."
+    },
+    {
+      "id": "MINI_CITIES_AFFORDABLE_HOUSING",
+      "name": "Worldz Mini Cities™",
+      "state": "OWNER_APPROVED_PLAN",
+      "model": {
+        "targetRent": "approximately 50% of local market rent",
+        "incomeSplitPercent": {
+          "worldzTeam": 25,
+          "communityDevelopment": 25,
+          "worldzEcosystem": 25,
+          "worldzCommunityLegacyFund": 25
+        },
+        "legacyFundUses": [
+          "maintenance and repairs",
+          "emergency reserve",
+          "resident ownership pathways",
+          "future land deposits",
+          "expansion",
+          "solar and batteries",
+          "sanitation",
+          "internet"
+        ],
+        "cycle": "Buy Land → Build Affordable Homes → Charge about Half Local Market Rent → Residents Contribute → Community Improves → Build Resident Ownership/Resilience → Fund More Land → Build the Next Mini City → Repeat"
+      }
+    },
+    {
+      "id": "AUSTRALIA_FIRST_NATIONS_ENGAGEMENT",
+      "name": "Aboriginal Elders and Traditional Owners engagement principle",
+      "state": "OWNER_APPROVED_PLAN",
+      "rule": "Where invited to explore work involving Aboriginal communities or Country, begin by respectfully approaching the relevant Elders and Traditional Owners, present ideas in their own community and cultural setting, ask permission, ask for guidance, invite communities to shape and lead the work in their own way, and honour local traditions and priorities."
+    },
+    {
+      "id": "MIRACLE_TEAM_12",
+      "name": "Miracle Church / Worldz real-life team",
+      "state": "OWNER_APPROVED_PLAN",
+      "participantTarget": 12,
+      "treasuryThreshold": "4 approvals required",
+      "latestInvitation": "Amanda — INVITED / PENDING ACCEPTANCE",
+      "controls": [
+        "explicit individual consent required",
+        "verified public Solana address required before signer registration or token distribution",
+        "do not invent wallet addresses",
+        "token participation and multisig signer authority remain separate",
+        "no completed allocation is implied"
+      ]
+    },
+    {
+      "id": "AUTO_DEV_BUY_ONLY",
+      "name": "AUTO small-batch Dev Buy-Only System",
+      "state": "OWNER_APPROVED_PLAN__EXECUTION_GATED",
+      "scope": [
+        "verified legacy token registry",
+        "WLDZ",
+        "RVIV",
+        "PNEX",
+        "MRCL",
+        "future eligible WorldzLaunchPad tokens"
+      ],
+      "funding": "JayJayTeamDev-controlled developer wallets funded by JayJayTeamDev with SOL or the applicable chain-native asset",
+      "behavior": "small-batch buy-only strategy; no automatic sell authority is created by this plan",
+      "controls": [
+        "canonical token identity verification",
+        "configured per-token and per-period limits before automation",
+        "simulation and readable transaction review",
+        "existing Worldz approval and mainnet release gates",
+        "WorldzProof reconciliation",
+        "no third-party funds"
+      ],
+      "appDefault": "NOT_ENABLED_BY_DEFAULT"
+    },
+    {
+      "id": "ASSET_INTELLIGENCE_INVEST_LMTD",
+      "name": "INVEST / LMTD Asset Intelligence",
+      "state": "RESEARCH_AND_VERIFICATION",
+      "purpose": "Detailed verified asset, authority, lock, liquidity, supply, holder, extension and risk records for future planned asset growth.",
+      "rules": [
+        "on-chain evidence controls factual status",
+        "do not infer a token identity from screenshots alone",
+        "record lock terms and community locks separately",
+        "no asset-growth assumption is treated as guaranteed"
+      ]
+    },
+    {
+      "id": "WORLDZLINKZ_ALL_DOMAINS_QR",
+      "name": "WorldzLinkz™ all-domains QR directory",
+      "state": "OWNER_APPROVED_PLAN",
+      "tagline": "Every Worldz. One Link.",
+      "scope": "One QR/link hub listing verified Worldz domains and subdomains with canonical destination checks."
+    },
+    {
+      "id": "MIRACLE_CHURCH_DUBBO_COMMUNITY",
+      "name": "Miracle Church Dubbo community feature",
+      "state": "CODE_BUILT",
+      "scope": [
+        "Fresh Water arts exhibition",
+        "art purchase enquiries",
+        "church service information",
+        "tea/coffee/snacks and community hospitality",
+        "Keep On Keepin On™ community direction"
+      ],
+      "rule": "Community/church information remains separate from CryptoWorldz financial claims."
+    },
+    {
+      "id": "GLOBAL_LAUNCH_INHERITANCE",
+      "name": "WorldzLaunchPad™ reusable inheritance",
+      "state": "OWNER_APPROVED_PLAN",
+      "includes": [
+        "8 chains × 20 initial token environments",
+        "WorldzBulkDrop™",
+        "WorldzLock™",
+        "WorldzVest™",
+        "WorldzProof™",
+        "CrossPair™",
+        "Omnichain™",
+        "Legacy Flywheel",
+        "Universal FlyWheel™",
+        "No Token Left Behind",
+        "Worldz Votes Centre™ popularity-only separation from WorldzGovern™ DAO governance",
+        "wallet comes to first-party Worldz surfaces without a wallet-browser prerequisite"
+      ]
+    }
+  ]
+}
