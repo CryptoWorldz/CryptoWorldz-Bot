@@ -219,14 +219,17 @@
     "candidateApplicationId": "xyz.cryptoworldz.worldzapp",
     "packageIdState": "PROVISIONAL_UNTIL_PLAY_APPLICATION_CREATED",
     "signedAabBuilt": false,
-    "approvedCenterLogoReady": false,
+    "approvedCenterLogoReady": true,
     "digitalAssetLinksDeployed": false,
     "publicReleaseAuthorized": false,
-    "nextGate": "FINAL_IDENTITY_ASSETS_PLAY_POLICY_SIGNING_AND_TESTING",
+    "nextGate": "FINAL_APPLICATION_ID__PLAY_DEVELOPER_IDENTITY__PRIVACY_DATA_SAFETY_FINANCIAL_DECLARATIONS__PLAY_SIGNING__ASSET_LINKS__SIGNED_AAB__TESTING",
     "playReleaseContract": "apps/worldzapp-android/play-release.v1.json",
     "playSubmissionReady": false,
     "privacyPolicyFinalized": false,
     "dataSafetyFinalized": false,
-    "financialFeaturesDeclarationFinalized": false
-  }
+    "financialFeaturesDeclarationFinalized": false,
+    "approvedEmblem": "/worldz-app/worldz-app-icon-512.png",
+    "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json"
+  },
+  "keepOnKeepinOn": true
 }
