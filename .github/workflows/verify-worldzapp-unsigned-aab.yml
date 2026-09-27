@@ -35,7 +35,7 @@ jobs:
           test -n "$ANDROID_SDK_ROOT"
           test -d "$ANDROID_SDK_ROOT"
           yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
-          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-36" "build-tools;36.0.0" "build-tools;36.1.0"
 
       - name: Verify WorldzApp unsigned-build and icon contracts
         run: |
@@ -48,14 +48,23 @@ jobs:
 
       - name: Configure Bubblewrap toolchain non-interactively
         run: |
-          mkdir -p "$HOME/.bubblewrap"
-          node - <<'NODE'
+          BUBBLEWRAP_SDK="$RUNNER_TEMP/bubblewrap-android-sdk"
+          mkdir -p "$BUBBLEWRAP_SDK" "$HOME/.bubblewrap"
+          ln -s "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" "$BUBBLEWRAP_SDK/bin"
+          ln -s "$ANDROID_SDK_ROOT/build-tools" "$BUBBLEWRAP_SDK/build-tools"
+          ln -s "$ANDROID_SDK_ROOT/platforms" "$BUBBLEWRAP_SDK/platforms"
+          ln -s "$ANDROID_SDK_ROOT/platform-tools" "$BUBBLEWRAP_SDK/platform-tools"
+          if [ -d "$ANDROID_SDK_ROOT/licenses" ]; then ln -s "$ANDROID_SDK_ROOT/licenses" "$BUBBLEWRAP_SDK/licenses"; fi
+          node - "$BUBBLEWRAP_SDK" <<'NODE'
           const fs=require('node:fs');
           const path=require('node:path');
-          const config={jdkPath:process.env.JAVA_HOME,androidSdkPath:process.env.ANDROID_SDK_ROOT};
+          const sdkPath=process.argv[2];
+          const config={jdkPath:process.env.JAVA_HOME,androidSdkPath:sdkPath};
           fs.writeFileSync(path.join(process.env.HOME,'.bubblewrap','config.json'),JSON.stringify(config,null,2)+'\n');
           console.log(config);
           NODE
+          test -x "$BUBBLEWRAP_SDK/bin/sdkmanager"
+          test -d "$BUBBLEWRAP_SDK/build-tools/36.1.0"
           npx bubblewrap doctor
 
       - name: Prepare CI-only TWA manifest
