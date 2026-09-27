@@ -1,0 +1,12 @@
+{
+  "schema": "WORLDZ-APP-PLAY-CONSOLE-COPY-V1",
+  "updatedAt": "2026-09-28",
+  "state": "DRAFT_READY__FINAL_BINARY_AUDIT_REQUIRED",
+  "appName": "WorldzApp",
+  "shortDescription": "Explore Worldz, connect external wallets and review verified blockchain status.",
+  "fullDescription": "WorldzApp is the first-party gateway to the WorldzEcosystem. Explore Worldz services, view verified blockchain and treasury status, connect supported external wallets without giving Worldz your seed phrase or private key, and review supported infrastructure through clear security gates.\\n\\nThe current release is non-custodial. Wallet connection does not give Worldz custody of your assets. WorldzApp separates public identity, chain reads, unsigned simulation and multisig evidence from transaction authority. Features that have not passed their release gates remain disabled and are not presented as live.\\n\\nWorldzApp does not promise investment returns and never asks users to send seed phrases, private keys or recovery words to Worldz support.",
+  "privacyPolicy": "https://launchpad.cryptoworldz.xyz/worldz-app/privacy/",
+  "supportWebsite": "https://launchpad.cryptoworldz.xyz/worldz-app/support/",
+  "developerEmail": "PENDING_DEDICATED_WORLDZAPP_PUBLIC_SUPPORT_EMAIL",
+  "finalReviewRule": "Copy must be rechecked against the exact signed AAB and production PWA immediately before submission."
+}

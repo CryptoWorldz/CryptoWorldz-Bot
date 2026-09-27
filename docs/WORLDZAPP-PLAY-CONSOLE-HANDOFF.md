@@ -70,3 +70,18 @@ A clean written WorldzApp support address is still required. The existing mailbo
 ## Release truth
 
 A successful CI build, unsigned AAB, FTP deployment or passing preflight is **not Google Play approval**. WorldzApp becomes Play-live only after Google accepts the submitted release and makes it available through the selected production countries.
+
+
+## Play release pack — 28 September 2026
+
+The code-side release pack now also includes:
+- `apps/worldzapp-android/play-testing-checklist.v1.json`
+- `apps/worldzapp-android/play-screenshot-plan.v1.json`
+- `apps/worldzapp-android/play-console-copy.v1.json`
+- `apps/worldzapp-android/signed-release-preparation.v1.json`
+
+The intended Google/Play account login is `jayjayteamdev@outlook.com`. This is an account-ownership/login identifier, not automatically the final public support address.
+
+Final owner-approved logo master remains SHA-256 `e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec`. Final icon binaries must be deterministic derivatives of that exact master; no redraw/regeneration is permitted.
+
+Screenshot capture remains pending the exact real-device/submitted build. Digital Asset Links remains pending the real Play App Signing certificate SHA-256. Signed AAB remains pending real signing identity. These external gates must not be bypassed.

@@ -1,0 +1,77 @@
+{
+  "schema": "WORLDZ-APP-PLAY-TESTING-CHECKLIST-V1",
+  "updatedAt": "2026-09-28",
+  "state": "CHECKLIST_BUILT__EXECUTION_PENDING",
+  "tracks": [
+    {
+      "gate": "STATIC_RELEASE_PREFLIGHT",
+      "status": "READY",
+      "checks": [
+        "API 36 / targetSdk 36",
+        "package ID consistency",
+        "final logo checksum gate",
+        "no signing secrets in repository",
+        "privacy/support routes present",
+        "retired public branding absent from WorldzApp release surfaces"
+      ]
+    },
+    {
+      "gate": "ANDROID_DEVICE_QA",
+      "status": "PENDING_REAL_DEVICE",
+      "checks": [
+        "cold launch",
+        "warm launch",
+        "back navigation",
+        "rotation/resume",
+        "offline/error state",
+        "external wallet handoff and return",
+        "font scaling 200%",
+        "TalkBack labels/order",
+        "touch targets",
+        "dark theme contrast",
+        "privacy/support links",
+        "no unexpected signing/broadcast path"
+      ]
+    },
+    {
+      "gate": "PLAY_INTERNAL_TEST",
+      "status": "PENDING_PLAY_ACCOUNT",
+      "checks": [
+        "upload signed AAB",
+        "install from Play",
+        "TWA verified origin",
+        "assetlinks association",
+        "launch on production host",
+        "wallet deep-link behavior",
+        "privacy/support public access",
+        "crash/ANR review"
+      ]
+    },
+    {
+      "gate": "PLAY_CLOSED_TEST",
+      "status": "PENDING_ACCOUNT_REQUIREMENT",
+      "checks": [
+        "tester access",
+        "feedback collection",
+        "release notes",
+        "policy declarations match exact binary",
+        "no roadmap-only feature portrayed as live"
+      ]
+    },
+    {
+      "gate": "PRODUCTION_RELEASE",
+      "status": "BLOCKED",
+      "checks": [
+        "Google review passed",
+        "human release authorization",
+        "country/jurisdiction review complete"
+      ]
+    }
+  ],
+  "security": {
+    "approvalSubmission": false,
+    "transactionSigning": false,
+    "execution": false,
+    "mainnetBroadcast": false
+  }
+}
