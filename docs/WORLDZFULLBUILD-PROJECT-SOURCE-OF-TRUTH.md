@@ -266,3 +266,17 @@ Read-provider bindings are now code-built for Solana, Ethereum, Base, BNB Chain,
 WorldzApp Stage 2 live-read infrastructure passed GitHub Actions workflow run `36287750004` on 2026-09-27. Read-only proof passed for Solana, Base, BNB Chain, HyperEVM, XRPL, Sui GraphQL and Robinhood Chain, including a finalized read against the owner-approved public Solana address. Exact wallet balance is deliberately not copied into this public source-of-truth.
 
 Production providers remain environment-configured. The proof grants no signing or mainnet execution authority. Next gate: WorldzApp public identity/session and external mobile-wallet connection infrastructure.
+
+## Miracle Church / Fresh Water community feature — 2026-09-27
+
+Status: **CODE_BUILT / PUBLIC EVENT INFORMATION VERIFIED**
+
+OneWorldz's Dubbo community layer now includes a dedicated Miracle Church Dubbo feature for the **Fresh Water** local art exhibition.
+
+- Dedicated route: `/miracle-church-dubbo/`, linked from `/links-in-dubbo/`.
+- Event schedule recorded from current public event information: opened 26 September 2026; 9am–3pm through 11 November; Sundays only through 29 November; free entry.
+- Public contact route supports enquiries with Miracle Church and exhibition contact Alison Francis.
+- Page promotes local artwork, art purchasing enquiries, Sunday services and the church's tea/coffee/community hospitality without merging church activity into CryptoWorldz financial claims.
+- Miracle Church official service times shown as 9am, 11am and 5:30pm Sundays.
+- Accessibility and Thompson Street construction-access notes are retained for visitors.
+- User-provided on-site photographs are approved source material for a future gallery asset pass; no image is treated as deployed until it is actually stored in the repository and verified on the live route.
