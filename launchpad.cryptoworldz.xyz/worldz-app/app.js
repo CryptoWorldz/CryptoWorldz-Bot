@@ -1,4 +1,4 @@
-let runtime=null,capabilities=null,treasuries=null,readAdapters=null,storagePolicy=null,walletConnectors=null,identityRoles=null,mobileHandoff=null,simulationPolicy=null,deferredInstall=null;
+let runtime=null,capabilities=null,treasuries=null,readAdapters=null,storagePolicy=null,walletConnectors=null,identityRoles=null,mobileHandoff=null,simulationPolicy=null,simulationBindings=null,deferredInstall=null;
 const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
 const escapeHtml=value=>String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 function toast(message){const el=qs("#toast");el.textContent=message;el.classList.add("show");clearTimeout(window.__worldzToast);window.__worldzToast=setTimeout(()=>el.classList.remove("show"),2800)}
@@ -60,8 +60,10 @@ function renderIdentity(){
   const roles=identityRoles.roles||[];
   qs("#identity-grid").innerHTML=roles.map(role=>'<article class="card"><span>'+escapeHtml(role.id)+'</span><h3>'+escapeHtml(role.selfAssertable?"Public session role":"Verified role")+'</h3><p>'+(role.selfAssertable?'Can exist as a local public-session identity.':'Requires a trusted verified issuer before WorldzApp accepts the role assertion.')+'</p><div class="meta"><span class="chip '+(role.selfAssertable?"good":"warn")+'">'+(role.selfAssertable?"SELF ASSERTABLE":"VERIFICATION REQUIRED")+'</span><span class="chip">NO AUTHORITY INHERITANCE</span></div></article>').join("");
   qs("#handoff-grid").innerHTML=(mobileHandoff.providers||[]).map(provider=>'<article class="card"><span>'+escapeHtml((provider.families||[]).join(" / "))+'</span><h3>'+escapeHtml(provider.id.replaceAll("_"," ").toUpperCase())+'</h3><p>'+escapeHtml((provider.notes||provider.preferredFlow||provider.protocol||provider.package||"").replaceAll("_"," "))+'</p><div class="meta"><span class="chip '+stateClass(provider.state)+'">'+escapeHtml(provider.state.replaceAll("_"," "))+'</span><span class="chip">MEMORY-ONLY CREDENTIALS</span></div></article>').join("");
-  const pending=Object.entries(simulationPolicy.adapterBinding||{}).filter(([,state])=>state!=="LIVE").length;
-  qs("#simulation-status").innerHTML='<article class="card"><span>STAGE 4 FOUNDATION</span><h3>Simulation + Human Effects Review</h3><p>The contract can normalize simulation evidence and require every rendered effect to be acknowledged. Signing and broadcast remain separately disabled.</p><div class="meta"><span class="chip good">CONTRACT BUILT</span><span class="chip warn">'+pending+' CHAIN BINDINGS GATED</span><span class="chip">NO SIGNING</span></div></article>';
+  const bindingItems=(simulationBindings&&simulationBindings.bindings)||[];
+  const built=bindingItems.filter(item=>/CODE_BUILT/.test(item.state||"")).length;
+  const pending=bindingItems.filter(item=>!/CODE_BUILT/.test(item.state||"")).length;
+  qs("#simulation-status").innerHTML='<article class="card"><span>STAGE 4A</span><h3>Unsigned Simulation Adapters</h3><p>Solana simulateTransaction plus EVM eth_call / eth_estimateGas adapters are code-built for pre-sign dry runs. They cannot sign, send or broadcast and remain live-proof pending chain by chain.</p><div class="meta"><span class="chip good">'+built+' ADAPTER BINDINGS BUILT</span><span class="chip warn">'+pending+' CHAIN-NATIVE BINDINGS PENDING</span><span class="chip">NO SIGNING</span></div></article>';
 }
 function renderSecurity(){
   const treasury=capabilities.modules.treasury;
@@ -80,12 +82,12 @@ function renderSecurity(){
 }
 async function boot(){
   try{
-    [runtime,capabilities,treasuries,readAdapters,storagePolicy,walletConnectors,identityRoles,mobileHandoff,simulationPolicy]=await Promise.all([
-      json("/worldz-app/config.json"),json("/worldz-app/core/capability-registry.json"),json("/worldz-app/core/treasury-profiles.json"),json("/worldz-app/core/read-adapter-registry.json"),json("/worldz-app/core/storage-policy.json"),json("/worldz-app/core/wallet-connectors.json"),json("/worldz-app/core/identity-roles.json"),json("/worldz-app/core/mobile-handoff.json"),json("/worldz-app/core/simulation-policy.json")
+    [runtime,capabilities,treasuries,readAdapters,storagePolicy,walletConnectors,identityRoles,mobileHandoff,simulationPolicy,simulationBindings]=await Promise.all([
+      json("/worldz-app/config.json"),json("/worldz-app/core/capability-registry.json"),json("/worldz-app/core/treasury-profiles.json"),json("/worldz-app/core/read-adapter-registry.json"),json("/worldz-app/core/storage-policy.json"),json("/worldz-app/core/wallet-connectors.json"),json("/worldz-app/core/identity-roles.json"),json("/worldz-app/core/mobile-handoff.json"),json("/worldz-app/core/simulation-policy.json"),json("/worldz-app/core/simulation-bindings.json")
     ]);
     if(window.WorldzMobileHandoff)window.WorldzMobileHandoff.configure(mobileHandoff);
     renderModules();renderTreasuries();renderAdapters();renderConnections();renderIdentity();renderSecurity();
-    qs("#core-state").textContent="Stage 3B + Stage 4 foundation loaded • mainnet off";qs("#core-state").classList.add("good");
+    qs("#core-state").textContent="Stage 3B + Stage 4A adapters loaded • mainnet off";qs("#core-state").classList.add("good");
   }catch(error){qs("#core-state").textContent="Core load error";toast(error.message)}
 }
 qsa(".tab").forEach(tab=>tab.addEventListener("click",()=>{qsa(".tab").forEach(x=>x.classList.remove("active"));qsa(".panel").forEach(x=>x.classList.remove("active"));tab.classList.add("active");qs("#"+tab.dataset.panel).classList.add("active")}));
