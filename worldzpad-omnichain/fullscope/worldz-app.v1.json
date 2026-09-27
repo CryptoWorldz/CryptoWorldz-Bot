@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "CODE_BUILT_STAGE_2_LIVE_READ_VERIFIED",
+  "lifecycle": "CODE_BUILT_STAGE_3_IDENTITY_WALLET_FOUNDATION",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -123,7 +123,10 @@
     "storagePolicy": "launchpad.cryptoworldz.xyz/worldz-app/core/storage-policy.json",
     "sessionSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/session.schema.json",
     "activityEventSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json",
-    "providerBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json"
+    "providerBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json",
+    "identityPolicy": "launchpad.cryptoworldz.xyz/worldz-app/core/identity-policy.json",
+    "walletConnections": "launchpad.cryptoworldz.xyz/worldz-app/core/wallet-connection-registry.json",
+    "identityWalletStandard": "docs/WORLDZAPP-IDENTITY-WALLET-STANDARD.md"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -155,5 +158,31 @@
     "execution": false,
     "nextGate": "IDENTITY_SESSION_AND_EXTERNAL_WALLET_CONNECTION_FOUNDATION",
     "suiTransport": "GRAPHQL__PUBLIC_JSON_RPC_DEPRECATED"
-  }
+  },
+  "identitySessionFoundation": {
+    "lifecycle": "CODE_BUILT",
+    "policy": "launchpad.cryptoworldz.xyz/worldz-app/core/identity-policy.json",
+    "sessionCore": "src/worldz-app/session-core.js",
+    "browserConnectionCore": "launchpad.cryptoworldz.xyz/worldz-app/connections.js",
+    "defaultSessionPersistence": "SESSION_ONLY",
+    "walletConnectionIsIdentityProof": false,
+    "controlChallengeImplemented": false,
+    "walletConnectionGrantsTreasuryAuthority": false,
+    "telegramIdentityGrantsTreasuryAuthority": false
+  },
+  "walletConnectionFoundation": {
+    "lifecycle": "CODE_BUILT_FOUNDATION",
+    "registry": "launchpad.cryptoworldz.xyz/worldz-app/core/wallet-connection-registry.json",
+    "evmInjected": "EIP_6963_AND_EIP_1193_PUBLIC_ACCOUNT_CONNECTION_BUILT",
+    "solanaInjectedFallback": "BUILT",
+    "solanaWalletStandard": "SDK_INTEGRATION_NEXT",
+    "solanaMobileWalletStandard": "SDK_INTEGRATION_NEXT",
+    "walletConnectAppKit": "PROJECT_CONFIGURATION_AND_SDK_NEXT",
+    "xrplXaman": "APP_REGISTRATION_AND_CONNECTOR_NEXT",
+    "suiDappKitV2": "SDK_INTEGRATION_NEXT",
+    "worldzCardTangem": "WALLETCONNECT_RESEARCH_PATH__NO_PARTNERSHIP_CLAIM",
+    "signingEnabled": false,
+    "broadcastEnabled": false
+  },
+  "nextEngineeringGate": "MOBILE_WALLET_SDK_CONNECTIONS_AND_CONTROL_CHALLENGE_FOUNDATION"
 }
