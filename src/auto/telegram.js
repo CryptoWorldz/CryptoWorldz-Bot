@@ -24,8 +24,8 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
 
   function formatStatus(payload) {
     const status = payload.status || {};
-    const limits = status.limits || {};
     const dca = payload.dca || {};
+    const limits = dca.limits || status.limits || {};
     const policy = dca.policy || {};
     return [
       "💎 Worldz AUTO Buy-Only™",
@@ -48,8 +48,8 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
       "",
       `Funding asset: ${policy.allowed_input_currency || "SOL"}`,
       `Approved small batches: ${(policy.amount_presets || [0.005, 0.01, 0.02, 0.05, 0.1]).join(", ")} ${policy.allowed_input_currency || "SOL"}`,
-      `Maximum order: ${limits.maxOrderAmount || 0} USDC`,
-      `Daily spending cap: ${limits.maxDailyAmount || 0} USDC`,
+      `Maximum order: ${limits.maxOrderAmount || 0} ${policy.allowed_input_currency || "SOL"}`,
+      `Daily spending cap: ${limits.maxDailyAmount || 0} ${policy.allowed_input_currency || "SOL"}`,
       `Maximum completed buys: ${policy.max_buys_per_day || 6} per day`,
       `Minimum interval: ${limits.minIntervalMinutes || 0} minutes`,
       "Buy only: YES • Sell automation: NO • Owner/dev wallets only • Randomisation: OFF",
