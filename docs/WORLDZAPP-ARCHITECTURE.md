@@ -1,6 +1,6 @@
 # WorldzApp™ — Core Architecture v1
 
-Status: **STAGE 5 MULTISIG APPROVAL EVIDENCE FOUNDATION BUILT / LIVE PROFILE PROOF PENDING / NO APP-LEVEL MAINNET EXECUTION**  
+Status: **STAGE 5B WLDZ/SQUADS LIVE PROOF PASSED + STAGE 5C SAFE/XRPL/SUI PROOF HARNESS BUILT / NO APP-LEVEL MAINNET EXECUTION**  
 Date: **2026-09-27**  
 Parent: **WorldzFullBuild™**
 
@@ -326,3 +326,18 @@ Security boundary:
 - Approval submission/signing/broadcast remain disabled until each native provider path is separately integrated and verified.
 
 Next gate: bind actual verified treasury/multisig public profiles, prove read-only approval state from the native systems, and only then design the external-wallet approval-submission path.
+
+
+## Stage 5B / 5C — live multisig proof progression — 2026-09-27
+
+Stage 5B passed against the real public WLDZ Squads v4 profile. Workflow run `36318035477` verified the public multisig profile and historical proposal approval evidence, with proof checksum `ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0`. Approval submission, signing, execution and broadcast remained false.
+
+Stage 5C now adds fail-closed public proof readers and readiness gates for:
+
+- Safe Smart Account status + transaction confirmations;
+- XRPL validated SignerList / SignerQuorum + public transaction Signers;
+- Sui weighted multisig public configuration + known public transaction evidence.
+
+The repository currently contains no approved deployed Worldz Safe address, XRPL multisig account or Sui multisig configuration suitable for a real Worldz proof. Those three systems therefore remain `WORLDZ_PROFILE_REQUIRED`, not live. No address is guessed and no unrelated third-party multisig can satisfy the Worldz release gate.
+
+The Android packaging phase remains downstream of these profile/security gates. The current PWA foundation is preserved so Android packaging can reuse the proven app core once the remaining release prerequisites are met.
