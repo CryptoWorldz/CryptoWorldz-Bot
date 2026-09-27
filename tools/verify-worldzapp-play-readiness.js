@@ -44,16 +44,15 @@ assert(access.publicCoreAccess.requiresPayment===false,"reviewer must not need p
 assert(listing.appName==="WorldzApp","listing name drift");
 assert(!/profit|guaranteed return|guaranteed yield/i.test(listing.fullDescriptionDraft),"prohibited/misleading investment language in draft listing");
 assert(release.branding?.ownerApprovedCentreEmblem===true,"owner-approved centre emblem must be locked");
-assert(release.branding?.sourceSha256==="685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050","approved emblem checksum drift");
-assert(release.branding?.regenerationAllowed===false,"approved emblem must not be regenerated");
-assert(release.branding?.androidAssetImport==="COMMITTED_AND_VERIFIED","production emblem asset import must be verified");
-assert(release.branding?.androidAssetsReady===true,"production emblem assets must be ready");
-assert(release.branding?.playIcon?.sha256==="27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d","Play release icon hash drift");
-assert(release.branding?.maskableIcon?.sha256==="b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15","Play release maskable hash drift");
-assert(listing.graphics.appIcon==="apps/worldzapp-android/assets/worldz-app-icon-512.png","listing Play icon path drift");
-assert(listing.graphics.appIconSha256==="27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d","listing Play icon hash drift");
-assert(listing.graphics.maskableIconSha256==="b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15","listing maskable hash drift");
-assert(emblem.masterSource.sha256===release.branding.sourceSha256,"approved emblem registry/source hash drift");
+assert(release.branding?.sourceSha256==="e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec","final approved WorldzApp logo checksum drift");
+assert(release.branding?.regenerationAllowed===false,"approved logo must not be regenerated");
+assert(release.branding?.androidAssetImport==="FINAL_BINARY_RECONCILIATION_REQUIRED","final logo binary gate must stay explicit");
+assert(release.branding?.androidAssetsReady===false,"final Play logo assets may not be pre-claimed ready");
+assert(release.branding?.previousBuildAssets?.state==="SUPERSEDED_FOR_FINAL_PLAY_RELEASE","previous icon assets must remain superseded");
+assert(listing.graphics.finalLogoMasterSha256===release.branding.sourceSha256,"listing final logo master hash drift");
+assert(listing.graphics.appIcon==="PENDING_FINAL_APPROVED_WORLDZAPP_LOGO_512_PNG","final Play icon must remain pending until exact binary reconciliation");
+assert(listing.graphics.maskableIcon==="PENDING_FINAL_APPROVED_WORLDZAPP_LOGO_MASKABLE_512_PNG","final maskable icon must remain pending until exact binary reconciliation");
+assert(emblem.masterSource.sha256===release.branding.sourceSha256,"final approved logo registry/source hash drift");
 assert(emblem.approval.regenerationAllowed===false,"approved emblem registry regeneration rule drift");
 assert(fs.existsSync(emblem.repositoryPreview.path),"approved emblem preview missing");
 assert(sha256(emblem.repositoryPreview.path)===emblem.repositoryPreview.sha256,"approved emblem preview checksum mismatch");
@@ -68,6 +67,7 @@ assert(worldz.appSecurity?.mainnetBroadcastEnabled===false,"WorldzApp mainnet br
 
 const blockers=release.releaseBlockers;
 for(const required of [
+  "FINAL_APPROVED_LOGO_BINARY_ASSET_RECONCILIATION",
   "VERIFIED_PLAY_DEVELOPER_IDENTITY",
   "PUBLIC_PRIVACY_POLICY_URL",
   "FINAL_DATA_SAFETY_AUDIT_AND_PLAY_FORM",
@@ -82,4 +82,4 @@ console.log("WORLDZAPP_GOOGLE_PLAY_READINESS_FOUNDATION=PASS");
 console.log("submission_ready=false public_release=false");
 console.log("target_sdk="+release.android.targetSdk+" format="+release.android.releaseFormat);
 console.log("data_safety=FINAL_AUDIT_REQUIRED financial_features=FINAL_CONFIRMATION_REQUIRED");
-console.log("approved_emblem=LOCKED preview=CHECKSUM_VERIFIED production_icons=READY play_app_signing=PENDING signed_aab=PENDING");
+console.log("final_worldzapp_logo=LOCKED final_icon_binaries=RECONCILIATION_REQUIRED play_app_signing=PENDING signed_aab=PENDING");
