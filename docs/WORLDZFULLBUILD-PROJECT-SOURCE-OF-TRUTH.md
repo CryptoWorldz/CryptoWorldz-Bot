@@ -232,3 +232,7 @@ An eighth planned Miracle treasury signer position is approved for Sound Product
 ### Miracle treasury ten-signer model — 2026-09-27
 
 The owner-approved Miracle treasury target is now **10 total signers with 4 approvals required**. Two additional invitation positions complete the ten-member model: a Worldz collaborator and a Miracle Church Kitchen and Community Service representative. Personal invitee identities remain private in the public repository until consent and verified public addresses are recorded. JayJayTeamDev remains the confirmed public signer. No mainnet multisig creation or token transfer is implied by this specification update.
+
+### Miracle community nominations
+
+Future Miracle Church outreach must make clear that the Church may suggest other trusted Miracle Church or Dubbo-area people for treasury participation. Suggestions are welcome, but signer authority remains consent-gated and any expansion beyond the approved 4-of-10 model requires an explicit governance update rather than silently changing the multisig.
