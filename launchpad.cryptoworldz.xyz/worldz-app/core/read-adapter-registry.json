@@ -30,7 +30,7 @@
       "id": "solana",
       "family": "SOLANA",
       "custody": "Squads / external Solana wallets",
-      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
       "plannedReads": [
         "native balance",
         "SPL token balances",
@@ -38,13 +38,14 @@
         "proposal history",
         "transaction status"
       ],
-      "execution": false
+      "execution": false,
+      "providerBinding": "/worldz-app/core/provider-bindings.json"
     },
     {
       "id": "ethereum",
       "family": "EVM",
       "custody": "Safe / external EVM wallets",
-      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
       "plannedReads": [
         "native balance",
         "ERC-20 balances",
@@ -52,13 +53,14 @@
         "Safe proposal history",
         "transaction status"
       ],
-      "execution": false
+      "execution": false,
+      "providerBinding": "/worldz-app/core/provider-bindings.json"
     },
     {
       "id": "base",
       "family": "EVM",
       "custody": "Safe / external EVM wallets",
-      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
       "plannedReads": [
         "native balance",
         "ERC-20 balances",
@@ -66,13 +68,14 @@
         "Safe proposal history",
         "transaction status"
       ],
-      "execution": false
+      "execution": false,
+      "providerBinding": "/worldz-app/core/provider-bindings.json"
     },
     {
       "id": "bnb",
       "family": "EVM",
       "custody": "Safe / external EVM wallets",
-      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
       "plannedReads": [
         "native balance",
         "BEP-20 balances",
@@ -80,13 +83,14 @@
         "Safe proposal history",
         "transaction status"
       ],
-      "execution": false
+      "execution": false,
+      "providerBinding": "/worldz-app/core/provider-bindings.json"
     },
     {
       "id": "hyperevm",
       "family": "EVM",
       "custody": "Safe-compatible verified adapter",
-      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
       "plannedReads": [
         "native balance",
         "token balances",
@@ -94,13 +98,14 @@
         "proposal history",
         "transaction status"
       ],
-      "execution": false
+      "execution": false,
+      "providerBinding": "/worldz-app/core/provider-bindings.json"
     },
     {
       "id": "xrpl",
       "family": "XRPL",
       "custody": "Native SignerList multisigning",
-      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
       "plannedReads": [
         "XRP balance",
         "issued-token balances",
@@ -108,13 +113,14 @@
         "account transaction history",
         "transaction status"
       ],
-      "execution": false
+      "execution": false,
+      "providerBinding": "/worldz-app/core/provider-bindings.json"
     },
     {
       "id": "sui",
       "family": "SUI",
       "custody": "Native weighted multisig",
-      "state": "INTERFACE_BUILT_PROVIDER_NOT_CONFIGURED",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
       "plannedReads": [
         "SUI balance",
         "coin balances",
@@ -122,7 +128,8 @@
         "object/transaction history",
         "transaction status"
       ],
-      "execution": false
+      "execution": false,
+      "providerBinding": "/worldz-app/core/provider-bindings.json"
     },
     {
       "id": "robinhood",
