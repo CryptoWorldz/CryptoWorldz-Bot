@@ -306,3 +306,27 @@ Latest owner direction expands the planned Miracle treasury signer target to **1
 The trusted Miracle Church / Worldz team is also approved for a future **token participation program** covering the ten legacy token positions plus WLDZ, RVIV, PNEX and MRCL. This is an approved participation plan, **not a completed distribution**. Exact amounts and source allocation buckets remain pending token-specific owner approval. Pre-launch tokens remain non-transferable plans until canonical mints exist. The canonical machine-readable plan is `worldzpad-omnichain/fullscope/worldz-miracle-team-participation.v1.json`.
 
 No signer or recipient address may be guessed. Multisig membership, personal token allocations, church treasury assets, LP, charity, locks/vesting and fee-routing remain separate accounting/authority domains.
+
+
+## OneWorldz Top Up Gift Card™ / HopeStreet / Jay's Safe Place — 2026-09-27
+
+The **OneWorldz Top Up Gift Card™ System** is incorporated as a **PLANNED Dubbo food-security pilot**. Canonical detail lives in `docs/ONEWORLDZ-TOP-UP-GIFT-CARD-SYSTEM.md` and `worldzpad-omnichain/fullscope/oneworldz-top-up-gift-card.v1.json`.
+
+Locked project direction:
+
+- standard pilot impact unit is **AUD $50** for food/groceries;
+- low-income / hardship application or approved-referral model;
+- use an existing retailer voucher or established regulated payment/card provider first; OneWorldz does not self-issue an unreviewed financial product;
+- do not advertise "food only" unless the restriction is actually enforceable;
+- HopeStreet Dubbo / BaptistCare is the preferred first partnership discussion, with Kristine Holland as the manager contact; no partnership or funding is claimed until agreed;
+- build a parallel HopeStreet food-infrastructure fundraising stream for refrigeration/freezers, storage, food-rescue transport, meal-preparation equipment, bulk food and food-safe containers;
+- DonateWorldz is the humanitarian fundraising/accountability layer;
+- CryptoWorldz and WorldzLaunchPad™ may provide separately accounted commercial/technology funding, crypto donations and voluntary **Launch for Good** contributions;
+- **food recipients never need to buy/hold crypto, connect a wallet or participate in crypto education**;
+- Jay's Safe Place is a community information/referral initiative with a front/back business card, tri-fold pamphlet and maintainable QR-linked Dubbo service directory; it is not represented as an emergency, medical, housing or professional case-management service;
+- proposed token candidate **NOURISH™ / $NRSH** is **proposal-only and not canonical/launched** until utility, economics, legal/regulatory treatment, treasury design, disclosures and explicit owner approval are complete;
+- public impact reporting uses aggregate units and preserves recipient privacy.
+
+Long-term loop: **Fund → Feed → Stabilise → Connect → Support → Equip → Create Opportunity → Measure → Improve → Expand.**
+
+Mission line: **No World Hunger Ever Again.**
