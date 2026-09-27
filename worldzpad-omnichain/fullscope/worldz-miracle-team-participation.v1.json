@@ -1,0 +1,73 @@
+{
+  "schema": "WORLDZ-MIRACLE-TEAM-PARTICIPATION-V1",
+  "parent": "WorldzFullBuild™",
+  "updatedAt": "2026-09-27",
+  "lifecycle": "OWNER_APPROVED_PLAN__NO_DISTRIBUTION_EXECUTED",
+  "team": {
+    "participantTarget": 11,
+    "treasuryTarget": "11_SIGNERS__4_APPROVALS_REQUIRED",
+    "identityPrivacy": "NON_OWNER_INVITEE_IDENTITY_TO_WALLET_MAPPING_PRIVATE_UNTIL_INDIVIDUAL_CONSENT",
+    "additionalRole": {
+      "role": "Community Hospitality / Barber & Barista",
+      "intendedInvitee": "PRIVATE_UNTIL_CONSENT",
+      "status": "INVITATION_APPROVED__CONSENT_AND_VERIFIED_PUBLIC_SOLANA_ADDRESS_PENDING"
+    }
+  },
+  "walletVerification": {
+    "chain": "solana",
+    "publicAddressOnly": true,
+    "neverCollectSeedPhrase": true,
+    "neverCollectPrivateKey": true,
+    "consentRequired": true,
+    "verifiedAddressRequired": true,
+    "rule": "DO_NOT_INVENT_OR_SUBSTITUTE_A_RECIPIENT_ADDRESS"
+  },
+  "tokenScope": {
+    "legacy": {
+      "count": 10,
+      "identities": "VERIFY_CANONICAL_LEGACY_TOKEN_REGISTRY_BEFORE_DISTRIBUTION"
+    },
+    "official": [
+      {
+        "token": "WORLDZ",
+        "symbol": "WLDZ",
+        "state": "CANONICAL_MINT_EXISTS"
+      },
+      {
+        "token": "REVIVE",
+        "symbol": "RVIV",
+        "state": "CANONICAL_MINT_EXISTS"
+      },
+      {
+        "token": "PHENIX",
+        "symbol": "PNEX",
+        "state": "PRE_LAUNCH__NO_TRANSFER_UNTIL_CANONICAL_MINT_VERIFIED"
+      },
+      {
+        "token": "MIRACLE",
+        "symbol": "MRCL",
+        "state": "PRE_LAUNCH__NO_TRANSFER_UNTIL_CANONICAL_MINT_VERIFIED"
+      }
+    ]
+  },
+  "allocation": {
+    "perParticipantAmounts": "PENDING_OWNER_APPROVAL",
+    "perTokenSourceBuckets": "PENDING_TOKEN_SPECIFIC_APPROVAL",
+    "personalAllocationSeparateFromSignerAuthority": true,
+    "noAutomaticClaimOnTreasuryLpCharityLocksVestingOrFees": true
+  },
+  "executionGates": [
+    "PARTICIPANT_OPT_IN_RECORDED",
+    "PUBLIC_SOLANA_ADDRESS_VERIFIED",
+    "CANONICAL_TOKEN_MINT_VERIFIED",
+    "TOKEN_SPECIFIC_AMOUNT_APPROVED",
+    "SOURCE_BUCKET_AND_AVAILABLE_BALANCE_VERIFIED",
+    "LOCK_AND_VESTING_RESTRICTIONS_CHECKED",
+    "TRANSFER_BATCH_SIMULATED",
+    "HUMAN_READABLE_REVIEW_COMPLETED",
+    "REQUIRED_MULTISIG_APPROVALS_COLLECTED",
+    "ON_CHAIN_CONFIRMATION_RECONCILED",
+    "WORLDZPROOF_RECORDED"
+  ],
+  "mainnetExecutionAuthorized": false
+}

@@ -297,3 +297,12 @@ WorldzApp now includes a public-session contract, a deny-by-default connection-o
 - The permanent Worldz launch rule remains: the wallet comes to the Worldz first-party surface; the user is not required to paste a Worldz URL into a wallet browser.
 
 Mainnet app broadcast remains OFF. The next engineering gate is role-aware identity assertions plus verified mobile-wallet handoff before transaction simulation/approval stages advance.
+
+
+## Miracle Church / Worldz real-life team expansion — 2026-09-27
+
+Latest owner direction expands the planned Miracle treasury signer target to **11 people with 4 approvals required**. The additional seat is a Miracle Church community-hospitality role associated privately with Matt (barber / Head Barista on 2026-09-27). Identity-to-wallet association remains private until individual consent and verified public Solana address are supplied.
+
+The trusted Miracle Church / Worldz team is also approved for a future **token participation program** covering the ten legacy token positions plus WLDZ, RVIV, PNEX and MRCL. This is an approved participation plan, **not a completed distribution**. Exact amounts and source allocation buckets remain pending token-specific owner approval. Pre-launch tokens remain non-transferable plans until canonical mints exist. The canonical machine-readable plan is `worldzpad-omnichain/fullscope/worldz-miracle-team-participation.v1.json`.
+
+No signer or recipient address may be guessed. Multisig membership, personal token allocations, church treasury assets, LP, charity, locks/vesting and fee-routing remain separate accounting/authority domains.
