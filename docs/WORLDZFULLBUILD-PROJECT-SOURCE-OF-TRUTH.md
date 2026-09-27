@@ -402,3 +402,17 @@ Command Centre MAX™ now has a separate public-facing buy-only automation works
 - Automatic SELL, round-trip trading, wash/self-trading, multi-wallet activity manufacture, holder/maker/volume fabrication and external-score/trending manipulation are denied.
 - Public value-moving execution remains OFF until member auth, wallet/provider adapter, cancellation, duplicate prevention, rate limits, security, privacy, jurisdiction/compliance and WorldzProof gates pass.
 - Code foundation: `src/auto/public-autoinvest-core.js`; tests: `test/public-autoinvest-core.test.js`; public planner: `cryptoworldz.xyz/wealthbuild/`.
+
+
+## WorldzApp Stage 3B + Stage 4 foundation — 2026-09-27
+
+WorldzApp™ progressed beyond the Stage 3 injected-wallet foundation:
+
+- role-aware identity assertions are code-built and privileged roles require trusted verification;
+- a deny-by-default external connection bridge now exists for future XRPL/Sui adapters;
+- guarded mobile handoff contracts cover allowlisted HTTPS returns, memory-only WalletConnect pairing data and non-persistent OAuth credentials;
+- Xaman/XRPL, Sui dApp Kit and WalletConnect remain provider/configuration-gated and are not falsely marked live;
+- Stage 4 simulation evidence + human-readable effects review contracts are code-built, while live chain simulation bindings remain pending;
+- signing, transaction sending, mainnet broadcast, automatic bridge/swap/stake and signer changes remain OFF at WorldzApp core.
+
+Canonical machine-readable status: `worldzpad-omnichain/fullscope/worldz-app.v1.json`.
