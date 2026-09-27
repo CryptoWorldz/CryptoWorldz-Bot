@@ -106,3 +106,12 @@ This allows MRCL to begin with the 5% DBC allocation + AUD $200 creator first bu
 Wrong non-blank external identity is a hard **FAIL**. Mere indexing delay is **PENDING**, not a fake pass.
 
 No market-price, investor-demand, whale participation, Organic Score or investment-return outcome is guaranteed by the launch technology.
+
+
+## WorldzAUTO Buy-Only™
+
+The reusable AUTO launch mode is **BUY ONLY** and defaults to **PREPARE_ONLY / DISARMED**. For launch bootstrap it uses a one-shot purchase: verify canonical mint/pool, obtain a fresh quote, bind maximum spend/minimum received/slippage/price-impact/fee limits, simulate, show the readable transaction, obtain the required external signature or multisig approval, broadcast once, confirm, reconcile, then disarm.
+
+AUTO Buy-Only never performs an automatic sell or round trip. It is not a wash-volume, holder-count, maker-count, trending or Organic Score tool. The legitimate first buy may satisfy DEX Screener's transaction prerequisite, but provider indexing remains an observed state. Jupiter Organic Score is monitored only after launch and is never guaranteed or gamed.
+
+For MRCL, this mode inherits the approved AUD $200 target real-SOL creator first buy; exact SOL is calculated from live pricing at transaction review time.

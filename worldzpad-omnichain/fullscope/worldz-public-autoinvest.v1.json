@@ -1,0 +1,87 @@
+{
+  "schema": "WORLDZ-PUBLIC-AUTOINVEST-V1",
+  "brand": "WorldzAutoInvest™",
+  "uiBrand": "WealthBuild™",
+  "parent": "ZED LED Command Centre MAX™ / WorldzFullBuild™",
+  "updatedAt": "2026-09-27",
+  "lifecycle": "CODE_FOUNDATION__PUBLIC_MAINNET_ADAPTER_OFF",
+  "audience": "SELF_DIRECTED_USERS",
+  "ownerAutoSeparation": true,
+  "custody": "NON_CUSTODIAL_EXTERNAL_WALLET",
+  "allowedSide": "BUY",
+  "denied": [
+    "AUTO_SELL",
+    "TAKE_PROFIT",
+    "STOP_LOSS",
+    "BUY_SELL_LOOP",
+    "WASH_TRADING",
+    "SELF_TRADING",
+    "MULTIWALLET_ACTIVITY_MANUFACTURING",
+    "HOLDER_MAKER_VOLUME_MANIPULATION",
+    "PROVIDER_SCORE_GAMING",
+    "PRIVATE_KEY_OR_SEED_CUSTODY"
+  ],
+  "adviceBoundary": "USER_SELECTS_ASSET_AMOUNT_CADENCE_AND_BUDGET__NO_TOKEN_SELECTION_RANKING_RETURN_PREDICTION_OR_INVESTMENT_RECOMMENDATION",
+  "initialScope": {
+    "chain": "solana",
+    "inputAssets": [
+      "SOL",
+      "USDC"
+    ],
+    "output": "USER_SELECTED_CANONICAL_SPL_TOKEN",
+    "providerTarget": "JUPITER_RECURRING_ORDER",
+    "leverage": false,
+    "borrowing": false,
+    "perps": false,
+    "autoSell": false
+  },
+  "states": [
+    "PLAN_ONLY",
+    "REVIEW_REQUIRED",
+    "AWAITING_USER_SIGNATURE",
+    "PROVIDER_ORDER_ACTIVE",
+    "CANCELLATION_REQUESTED",
+    "CANCELLED",
+    "COMPLETED",
+    "FAILED"
+  ],
+  "requiredBindings": [
+    "USER_SESSION_REFERENCE",
+    "EXTERNAL_WALLET",
+    "CHAIN",
+    "OUTPUT_MINT",
+    "INPUT_MINT_OR_CURRENCY",
+    "AMOUNT_PER_PURCHASE",
+    "CADENCE",
+    "OCCURRENCE_COUNT_OR_END_CONDITION",
+    "MAX_TOTAL_SPEND",
+    "PROVIDER",
+    "PLAN_ID_IDEMPOTENCY_KEY",
+    "CREATED_AT"
+  ],
+  "providerRules": {
+    "observedNotAssumed": true,
+    "pauseResume": "ONLY_IF_PROVIDER_SUPPORTS__OTHERWISE_CANCEL_AND_RECREATE",
+    "quoteAndFees": "DISPLAY_WHEN_PROVIDER_RETURNS",
+    "cancellation": "MUST_BE_USER_ACCESSIBLE_AND_PROVIDER_SUPPORTED"
+  },
+  "releaseGates": [
+    "MEMBER_AUTH_BOUNDARY",
+    "NO_OWNER_AUTO_AUTHORITY_REUSE",
+    "NO_SECRET_CUSTODY",
+    "CANONICAL_TOKEN_IDENTITY",
+    "PROVIDER_RISK_SIGNALS",
+    "FRESH_PROVIDER_DATA",
+    "MAX_TOTAL_SPEND_REVIEW",
+    "USER_CANCEL_PATH",
+    "DUPLICATE_ORDER_PREVENTION",
+    "PER_USER_RATE_LIMIT",
+    "SECRET_FREE_AUDIT_LOG",
+    "PROVIDER_ADAPTER_SECURITY_REVIEW",
+    "PRIVACY_REVIEW",
+    "JURISDICTION_COMPLIANCE_REVIEW",
+    "WORLDZPROOF"
+  ],
+  "marketIntegrity": "SELF_DIRECTED_ACCUMULATION_ONLY__NO_COORDINATED_MARKET_ACTIVITY_OR_EXTERNAL_SCORE_GAMING",
+  "standard": "docs/WORLDZ-AUTOINVEST-WEALTHBUILD-STANDARD.md"
+}

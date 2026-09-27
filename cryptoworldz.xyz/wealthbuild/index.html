@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WealthBuild™ | WorldzAutoInvest™</title>
+<meta name="description" content="WealthBuild™ is the Command Centre MAX planning surface for self-directed, buy-only WorldzAutoInvest™.">
+<link rel="canonical" href="https://cryptoworldz.xyz/wealthbuild/">
+<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/mobile-safe.css">
+<style>
+body{background:#06020b;color:#fff}.wrap{max-width:980px;margin:auto;padding:24px 18px 80px}.hero,.panel{border:1px solid #ffffff18;border-radius:24px;background:#ffffff06;padding:22px;margin-bottom:16px}.ey{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:#caa7ff;font-weight:900}h1{font-size:clamp(2.5rem,8vw,5rem);line-height:.92;margin:10px 0}p,li,label,small{color:#c3b4cc;line-height:1.55}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.field{display:grid;gap:6px}input,select{width:100%;box-sizing:border-box;padding:12px;border-radius:12px;border:1px solid #ffffff22;background:#100b16;color:#fff}.result{font-size:1.3rem;font-weight:900}.btn{display:inline-block;padding:12px 16px;border-radius:12px;background:linear-gradient(90deg,#a95cff,#2cbcff);color:#fff;text-decoration:none;font-weight:900;border:0}.truth{border-left:4px solid #55e6a5;padding:14px;background:#55e6a50b;border-radius:10px}.warn{border-left-color:#ffcf66;background:#ffcf660b}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}@media(max-width:720px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a href="/command-centre-max/" style="color:#d8c8ff;text-decoration:none">← Command Centre MAX™</a>
+<section class="hero">
+<div class="ey">WORLDZAUTOINVEST™ • WEALTHBUILD™</div>
+<h1>BUY ONLY.<br>YOUR PLAN. YOUR WALLET.</h1>
+<p>Build a self-directed recurring purchase plan without handing Worldz your seed phrase or private key. WealthBuild™ is the planning and proof layer; provider order creation remains externally wallet-signed.</p>
+<div class="truth warn"><b>Code-foundation state:</b> public mainnet AutoInvest execution is not released yet. This screen is a planner while the user-wallet/provider adapter and release gates are completed.</div>
+</section>
+
+<section class="panel">
+<div class="ey">BUILD A PLAN</div>
+<div class="grid">
+<label class="field">Input asset<select id="input"><option>USDC</option><option>SOL</option></select></label>
+<label class="field">Amount per buy<input id="amount" type="number" min="0" step="any" value="10"></label>
+<label class="field">Cadence<select id="cadence"><option value="daily">Daily</option><option value="weekly" selected>Weekly</option><option value="fortnightly">Fortnightly</option><option value="monthly">Monthly</option></select></label>
+<label class="field">Number of buys<input id="count" type="number" min="1" max="3650" step="1" value="12"></label>
+</div>
+<p class="result">Planned maximum: <span id="total">120</span> <span id="unit">USDC</span></p>
+<p><small>This calculator does not forecast price, profit, yield or token performance. You choose the asset and budget yourself.</small></p>
+</section>
+
+<section class="panel">
+<div class="ey">PUBLIC SAFETY MODEL</div>
+<ul>
+<li>BUY only — no automatic selling or round-trip trading.</li>
+<li>External wallet approval; no seed/private-key custody.</li>
+<li>Exact token identity and maximum planned spend shown before signing.</li>
+<li>User-accessible cancellation path is required before mainnet release.</li>
+<li>No wash volume, holder/maker fabrication, trending manipulation or Organic Score gaming.</li>
+</ul>
+<div class="actions"><a class="btn" href="https://jup.ag/?tab=recurring" target="_blank" rel="noopener">View Jupiter Recurring ↗</a></div>
+</section>
+
+<section class="panel">
+<div class="ey">WEALTHBUILD™ TRACKING</div>
+<p>Planned Command Centre states: <b>PLAN_ONLY → REVIEW_REQUIRED → AWAITING_USER_SIGNATURE → PROVIDER_ORDER_ACTIVE → CANCELLED / COMPLETED</b>.</p>
+<p>WorldzProof™ will record order IDs/signatures, observed executions and cancellation evidence without storing wallet secrets.</p>
+</section>
+</div>
+<script>
+const amount=document.getElementById('amount'),count=document.getElementById('count'),input=document.getElementById('input');
+function calc(){const a=Number(amount.value)||0,c=Math.max(0,Math.floor(Number(count.value)||0));document.getElementById('total').textContent=(a*c).toLocaleString(undefined,{maximumFractionDigits:8});document.getElementById('unit').textContent=input.value}
+[amount,count,input].forEach(x=>x.addEventListener('input',calc));calc();
+</script>
+</body></html>
