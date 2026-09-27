@@ -5,6 +5,8 @@ on:
     paths:
       - 'apps/worldzapp-android/**'
       - 'tools/verify-worldzapp-android-package.js'
+      - 'tools/verify-worldzapp-icon-assets.js'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/assets/**'
       - 'launchpad.cryptoworldz.xyz/worldz-app/manifest.webmanifest'
       - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
       - '.github/workflows/verify-worldzapp-android-api36.yml'
@@ -22,6 +24,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify owner-approved WorldzApp production icon binaries
+        run: npm run verify:worldzapp:icons
       - name: Verify WorldzApp Android release contract
         run: node tools/verify-worldzapp-android-package.js
       - name: Install pinned Bubblewrap tooling

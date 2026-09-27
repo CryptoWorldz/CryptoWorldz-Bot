@@ -28,7 +28,10 @@ assert(twa.fullScopeUrl==="https://launchpad.cryptoworldz.xyz/worldz-app/","scop
 assert(twa.minSdkVersion>=23,"minSdk too low");
 assert(Array.isArray(twa.fingerprints)&&twa.fingerprints.length===0,"fingerprint may not be invented");
 assert(twa.releaseGate&&twa.releaseGate.templateOnly===true,"template gate required");
-assert(/PENDING_APPROVED_WORLDZ_CENTER_LOGO/.test(twa.releaseGate.iconUrl),"approved centre-logo gate required");
+assert(twa.releaseGate.iconUrl==="https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-512.png","approved Play icon URL drift");
+assert(twa.releaseGate.maskableIconUrl==="https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-maskable-512.png","approved maskable icon URL drift");
+assert(twa.releaseGate.playIconSha256==="27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d","approved Play icon hash drift");
+assert(twa.releaseGate.maskableIconSha256==="b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15","approved maskable icon hash drift");
 assert(twa.releaseGate.signingKey==="NOT_COMMITTED_TO_REPOSITORY","signing secret boundary");
 
 assert(web.name==="WorldzApp™","PWA name drift");
@@ -43,14 +46,21 @@ assert(contract.releaseSecurity.signedReleaseBuilt===false,"signed release canno
 assert(contract.releaseSecurity.publicReleaseAuthorized===false,"release authorization must remain false");
 assert(contract.releaseSecurity.mainnetBroadcastEnabledByAndroidPackage===false,"Android package cannot unlock broadcast");
 assert(contract.releaseSecurity.privateKeyOrSeedPhraseBundled===false,"secret material forbidden");
-assert(contract.assetGates.officialCenterLogoRasterReady===false,"final production raster must remain gated");
+assert(contract.assetGates.officialCenterLogoRasterReady===true,"final production raster must be ready");
+assert(contract.assetGates.playIcon?.sha256==="27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d","Play icon contract hash drift");
+assert(contract.assetGates.maskableIcon?.sha256==="b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15","maskable icon contract hash drift");
 assert(contract.assetGates.ownerApprovedSourceRegistered===true,"approved emblem source must be registered");
 assert(emblem.approval.ownerApproved===true,"owner approval missing");
 assert(emblem.approval.regenerationAllowed===false,"approved emblem must not be regenerated");
 assert(emblem.masterSource.sha256==="685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050","approved source hash drift");
 assert(fs.existsSync(emblem.repositoryPreview.path),"approved emblem preview missing");
 assert(sha256(emblem.repositoryPreview.path)===emblem.repositoryPreview.sha256,"approved emblem preview checksum mismatch");
-assert(emblem.finalProductionAssets.state==="PENDING_VALID_EXPORT_AND_CHECKSUM_BINDING","final production icon gate drift");
+assert(emblem.finalProductionAssets.state==="VERIFIED_AND_CHECKSUM_BOUND","final production icon state drift");
+assert(emblem.finalProductionAssets.playIcon?.sha256==="27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d","emblem registry Play icon hash drift");
+assert(emblem.finalProductionAssets.maskableIcon?.sha256==="b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15","emblem registry maskable hash drift");
+const webIcons=Array.isArray(web.icons)?web.icons:[];
+assert(webIcons.some(x=>x.src==="/worldz-app/assets/worldz-app-icon-512.png"&&x.sizes==="512x512"&&x.type==="image/png"&&x.purpose==="any"),"PWA Play icon binding missing");
+assert(webIcons.some(x=>x.src==="/worldz-app/assets/worldz-app-icon-maskable-512.png"&&x.sizes==="512x512"&&x.type==="image/png"&&x.purpose==="maskable"),"PWA maskable icon binding missing");
 assert(worldz.simulationFoundation?.liveProof?.state==="PASSED","Stage 4B proof prerequisite");
 assert(worldz.multisigApprovalFoundation?.liveProof?.squadsWldz?.state==="PASSED","Stage 5B Squads proof prerequisite");
 assert(worldz.appSecurity?.mainnetBroadcastEnabled===false,"WorldzApp mainnet broadcast must remain off");
@@ -58,4 +68,4 @@ assert(worldz.appSecurity?.mainnetBroadcastEnabled===false,"WorldzApp mainnet br
 console.log("WORLDZAPP_ANDROID_API36_FOUNDATION=PASS");
 console.log("package_id_candidate="+twa.packageId);
 console.log("target_sdk=36 compile_sdk=36 bubblewrap=1.25.0");
-console.log("signed_aab=OFF public_release=OFF digital_asset_links=PENDING approved_emblem_source=BOUND final_production_raster=PENDING");
+console.log("approved_emblem_source=BOUND production_icons=READY signed_aab=OFF public_release=OFF digital_asset_links=PENDING");

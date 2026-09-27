@@ -2,7 +2,7 @@
   "schema": "WORLDZ-APP-ANDROID-PACKAGE-V1",
   "updatedAt": "2026-09-27",
   "product": "WorldzApp™",
-  "state": "CODE_BUILT_ANDROID_API36_PACKAGING_AND_PLAY_READINESS_FOUNDATION__AAB_NOT_RELEASED",
+  "state": "CODE_BUILT_ANDROID_API36_PLAY_READINESS__APPROVED_EMBLEM_ASSETS_READY__AAB_NOT_RELEASED",
   "packaging": {
     "technology": "TRUSTED_WEB_ACTIVITY",
     "generator": "Bubblewrap",
@@ -41,16 +41,32 @@
     "reviewAccessFinalized": false
   },
   "assetGates": {
-    "officialCenterLogoRasterReady": false,
-    "rule": "Use only derivatives of the owner-approved Worldz Emblem. Final production 512px/launcher/maskable assets remain gated until valid bytes are checksum-bound.",
-    "requiredBeforeSignedAab": [
-      "FINAL_PRODUCTION_512_PNG_AND_MASKABLE_EXPORT_FROM_APPROVED_WORLDZ_EMBLEM",
-      "PLAY_APP_SIGNING_CERT_SHA256",
-      "PUBLISHED_DIGITAL_ASSET_LINKS"
-    ],
+    "officialCenterLogoRasterReady": true,
     "ownerApprovedSourceRegistered": true,
     "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
-    "approvedEmblemPreview": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg"
+    "rule": "Use only checksum-bound derivatives of the owner-approved Worldz Emblem. No regeneration or substitution without explicit owner approval.",
+    "playIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
+      "hostedPath": "/worldz-app/assets/worldz-app-icon-512.png",
+      "width": 512,
+      "height": 512,
+      "format": "PNG_RGBA_32_BIT_SRGB",
+      "sizeBytes": 670286,
+      "sha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d"
+    },
+    "maskableIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
+      "hostedPath": "/worldz-app/assets/worldz-app-icon-maskable-512.png",
+      "width": 512,
+      "height": 512,
+      "format": "PNG_RGBA_32_BIT_SRGB",
+      "sizeBytes": 427484,
+      "sha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15"
+    },
+    "requiredBeforeSignedAab": [
+      "PLAY_APP_SIGNING_CERT_SHA256",
+      "PUBLISHED_DIGITAL_ASSET_LINKS"
+    ]
   },
   "inheritedWorldzSecurity": {
     "stage4bLiveSimulationProof": "PASSED",
@@ -65,7 +81,6 @@
     "stage5cMultichainHarness": "BUILT"
   },
   "nextGates": [
-    "FINAL_PRODUCTION_512_PNG_AND_MASKABLE_EXPORT_FROM_APPROVED_WORLDZ_EMBLEM",
     "LOCK_ANDROID_APPLICATION_ID_BEFORE_PLAY_APP_CREATION",
     "VERIFY_PLAY_DEVELOPER_IDENTITY_AND_ACCOUNT_REQUIREMENTS",
     "FINALIZE_PUBLIC_SUPPORT_AND_PRIVACY_POLICY_URLS",
