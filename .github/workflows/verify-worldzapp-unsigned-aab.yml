@@ -1,0 +1,121 @@
+name: WorldzApp Android Unsigned AAB Proof
+
+on:
+  pull_request:
+    paths:
+      - 'apps/worldzapp-android/**'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/manifest.webmanifest'
+      - 'tools/verify-worldzapp-icon-assets.js'
+      - 'tools/verify-worldzapp-unsigned-aab-contract.js'
+      - '.github/workflows/verify-worldzapp-unsigned-aab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-unsigned-aab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android API 36 build tools
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Verify WorldzApp unsigned-build and icon contracts
+        run: |
+          node tools/verify-worldzapp-unsigned-aab-contract.js
+          npm run verify:worldzapp:icons
+          npm run verify:worldzapp:android
+
+      - name: Install pinned Bubblewrap
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund @bubblewrap/cli@1.25.0
+
+      - name: Configure Bubblewrap toolchain
+        run: npx bubblewrap updateConfig --jdkPath="$JAVA_HOME" --androidSdkPath="$ANDROID_SDK_ROOT"
+
+      - name: Prepare CI-only TWA manifest
+        run: |
+          mkdir -p .worldzapp-android-build
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const source=JSON.parse(fs.readFileSync('apps/worldzapp-android/twa-manifest.template.json','utf8'));
+          const rawBase='https://raw.githubusercontent.com/'+process.env.GITHUB_REPOSITORY+'/'+process.env.GITHUB_SHA+'/apps/worldzapp-android/assets/';
+          const keys=[
+            'packageId','host','name','launcherName','themeColor','themeColorDark',
+            'navigationColor','navigationColorDark','navigationDividerColor','navigationDividerColorDark',
+            'startUrl','splashScreenFadeOutDuration','appVersion','appVersionCode','shortcuts',
+            'generatorApp','webManifestUrl','fullScopeUrl','features','alphaDependencies',
+            'isChromeOSOnly','isMetaQuest','minSdkVersion','orientation','fingerprints',
+            'additionalTrustedOrigins'
+          ];
+          const manifest={};
+          for(const key of keys) if(source[key]!==undefined) manifest[key]=source[key];
+          manifest.iconUrl=rawBase+'worldz-app-icon-512.png';
+          manifest.maskableIconUrl=rawBase+'worldz-app-icon-maskable-512.png';
+          manifest.signingKey={path:'UNUSED_UNSIGNED_BUILD.keystore',alias:'worldzapp'};
+          fs.writeFileSync('.worldzapp-android-build/twa-manifest.json',JSON.stringify(manifest,null,2)+'\n');
+          console.log('WORLDZAPP_CI_TWA_MANIFEST=READY');
+          NODE
+
+      - name: Generate Android project from TWA manifest
+        working-directory: .worldzapp-android-build
+        run: npx bubblewrap update --skipVersionUpgrade --manifest=twa-manifest.json
+
+      - name: Build unsigned APK and AAB
+        working-directory: .worldzapp-android-build
+        run: npx bubblewrap build --skipSigning --skipPwaValidation --manifest=twa-manifest.json
+
+      - name: Verify unsigned AAB artifact
+        run: |
+          AAB=".worldzapp-android-build/app/build/outputs/bundle/release/app-release.aab"
+          APK=".worldzapp-android-build/app-release-unsigned-aligned.apk"
+          test -s "$AAB"
+          unzip -t "$AAB" >/dev/null
+          SHA="$(sha256sum "$AAB" | awk '{print $1}')"
+          SIZE="$(stat -c%s "$AAB")"
+          mkdir -p .worldzapp-aab-proof
+          cp "$AAB" .worldzapp-aab-proof/worldzapp-unsigned-release.aab
+          if [ -f "$APK" ]; then cp "$APK" .worldzapp-aab-proof/worldzapp-unsigned-release.apk; fi
+          node - "$SHA" "$SIZE" <<'NODE'
+          const fs=require('node:fs');
+          const [sha256,sizeBytes]=process.argv.slice(2);
+          const proof={
+            schema:'WORLDZ-APP-ANDROID-UNSIGNED-AAB-CI-PROOF-V1',
+            generatedAt:new Date().toISOString(),
+            commit:process.env.GITHUB_SHA,
+            workflowRunId:process.env.GITHUB_RUN_ID,
+            applicationId:'xyz.cryptoworldz.worldzapp',
+            targetSdk:36,
+            bubblewrapVersion:'1.25.0',
+            signed:false,
+            releaseAuthorized:false,
+            aab:{sha256,sizeBytes:Number(sizeBytes)}
+          };
+          fs.writeFileSync('.worldzapp-aab-proof/proof.json',JSON.stringify(proof,null,2)+'\n');
+          console.log(JSON.stringify(proof,null,2));
+          console.log('WORLDZAPP_UNSIGNED_AAB_SHA256='+sha256);
+          console.log('WORLDZAPP_UNSIGNED_AAB_SIZE='+sizeBytes);
+          console.log('WORLDZAPP_UNSIGNED_AAB_BUILD=PASS');
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldzapp-unsigned-aab-proof
+          path: .worldzapp-aab-proof/
+          if-no-files-found: error
+          retention-days: 14
