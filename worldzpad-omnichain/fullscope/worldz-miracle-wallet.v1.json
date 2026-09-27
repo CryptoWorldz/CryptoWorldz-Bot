@@ -10,16 +10,25 @@
     "tokenLifecycle": "PRE_LAUNCH",
     "treasuryAllocationPercent": 20,
     "allocationMeaning": "CHURCH_CONTROLLED_TOKEN_TREASURY__NOT_PERSONAL_SIGNER_OWNERSHIP__NOT_EQUITY",
-    "nominatedSignerCount": 6,
-    "signerIdentityStorage": "OFF_PUBLIC_REPOSITORY_UNTIL_INDIVIDUAL_CONSENT",
+    "nominatedSignerCount": 7,
+    "signerIdentityStorage": "CHURCH_NOMINEES_PRIVATE_UNTIL_CONSENT__JAYJAYTEAMDEV_PUBLIC_SIGNER_APPROVED",
     "proposedThreshold": {
       "approvals": 4,
-      "signers": 6,
-      "status": "PROPOSED_DEFAULT"
+      "signers": 7,
+      "status": "OWNER_APPROVED_DEFAULT"
     },
     "preferredSolanaOnboardingWallet": "Jupiter Mobile",
     "solanaTreasury": "Squads multisig",
-    "mainnetState": "NOT_DEPLOYED"
+    "mainnetState": "NOT_DEPLOYED",
+    "churchNomineeCount": 6,
+    "confirmedPublicSigners": [
+      {
+        "name": "JayJayTeamDev",
+        "chain": "solana",
+        "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+        "consent": "OWNER_EXPLICITLY_APPROVED_PUBLIC_SIGNER_ASSOCIATION"
+      }
+    ]
   },
   "futureLaunchPadRole": {
     "state": "OPT_IN_APPROVAL_ROLE_PLANNED",
