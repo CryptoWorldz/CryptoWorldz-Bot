@@ -1,0 +1,40 @@
+{
+  "schema": "WORLDZ-APP-ANDROID-UNSIGNED-BUILD-V1",
+  "updatedAt": "2026-09-27",
+  "state": "GENERATOR_AND_CI_GATE_BUILT__APPROVED_WEB_ICON_DEPLOYMENT_REQUIRED",
+  "bubblewrapVersion": "1.25.0",
+  "targetSdk": 36,
+  "compileSdk": 36,
+  "mode": "UNSIGNED_NON_RELEASE_BUILD",
+  "sourcePwa": "https://launchpad.cryptoworldz.xyz/worldz-app/",
+  "candidateApplicationId": "xyz.cryptoworldz.worldzapp",
+  "applicationIdState": "PROVISIONAL",
+  "commands": {
+    "projectRegeneration": "bubblewrap update --skipVersionUpgrade",
+    "build": "bubblewrap build --skipSigning"
+  },
+  "requiredInputs": [
+    "WORLDZ_ANDROID_APPROVED_ICON_URL",
+    "WORLDZ_ANDROID_APPROVED_MASKABLE_ICON_URL"
+  ],
+  "optionalInputs": [
+    "WORLDZ_ANDROID_APPLICATION_ID"
+  ],
+  "forbiddenInputs": [
+    "keystore",
+    "private signing key",
+    "BUBBLEWRAP_KEYSTORE_PASSWORD",
+    "BUBBLEWRAP_KEY_PASSWORD"
+  ],
+  "outputs": {
+    "unsignedApk": "app-release-unsigned-aligned.apk",
+    "unsignedAab": "app/build/outputs/bundle/release/app-release.aab",
+    "playUploadAuthorized": false
+  },
+  "releaseBoundary": {
+    "signing": false,
+    "playUpload": false,
+    "publicRelease": false,
+    "mainnetBroadcast": false
+  }
+}
