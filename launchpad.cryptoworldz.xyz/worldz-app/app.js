@@ -18,7 +18,11 @@ function renderTreasuries(){
 }
 
 function renderAdapters(){
-  qs("#adapter-grid").innerHTML=readAdapters.adapters.map(adapter=>{const provider=providerBindings.providers.find(item=>item.chain===adapter.id);return '<article class="card"><span>'+escapeHtml(adapter.family)+'</span><h3>'+escapeHtml(adapter.id.toUpperCase())+'</h3><p>'+escapeHtml(adapter.custody)+'</p><div class="meta"><span class="chip '+stateClass(adapter.state)+'">'+escapeHtml(adapter.state.replaceAll("_"," "))+'</span><span class="chip">'+(adapter.execution?"EXECUTION":"READ ONLY")+'</span></div><p>'+escapeHtml(adapter.plannedReads.join(" • "))+'</p></article>').join("");
+  qs("#adapter-grid").innerHTML=readAdapters.adapters.map(adapter=>{
+    const provider=providerBindings.providers.find(item=>item.chain===adapter.id);
+    const providerState=provider?.state||"ENV_REQUIRED";
+    return '<article class="card"><span>'+escapeHtml(adapter.family)+'</span><h3>'+escapeHtml(adapter.id.toUpperCase())+'</h3><p>'+escapeHtml(adapter.custody)+'</p><div class="meta"><span class="chip '+stateClass(adapter.state)+'">'+escapeHtml(adapter.state.replaceAll("_"," "))+'</span><span class="chip">'+(adapter.execution?"EXECUTION":"READ ONLY")+'</span><span class="chip '+stateClass(providerState)+'">'+escapeHtml(providerState.replaceAll("_"," "))+'</span></div><p>'+escapeHtml(adapter.plannedReads.join(" • "))+'</p></article>';
+  }).join("");
 }
 function renderSecurity(){
   const treasury=capabilities.modules.treasury;
