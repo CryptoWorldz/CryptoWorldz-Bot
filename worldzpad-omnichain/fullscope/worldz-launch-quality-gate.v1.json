@@ -207,5 +207,28 @@
       "TIMESTAMP"
     ],
     "launchRule": "PUBLIC_RELEASE_CAN_OCCUR_AT_TRADER_READY_IF_OWNER_APPROVES__SCALE_READY_AND_WHALE_READY_ARE_SEPARATE_EVIDENCE_BACKED_STATES"
+  },
+  "autoBuyOnly": {
+    "contract": "worldzpad-omnichain/fullscope/worldz-auto-buy-only.v1.json",
+    "standard": "docs/WORLDZ-AUTO-BUY-ONLY-STANDARD.md",
+    "defaultState": "PREPARE_ONLY_DISARMED",
+    "launchMode": "ONE_SHOT_BUY",
+    "allowedSide": "BUY",
+    "autoSell": false,
+    "requires": [
+      "CANONICAL_MINT_AND_POOL_MATCH",
+      "FRESH_QUOTE",
+      "EXPLICIT_MAXIMUM_SPEND",
+      "MINIMUM_RECEIVED",
+      "EXPLICIT_MAX_SLIPPAGE",
+      "EXPLICIT_MAX_PRICE_IMPACT",
+      "EXPLICIT_MAX_NETWORK_OR_PRIORITY_FEE",
+      "SIMULATION_PASS",
+      "READABLE_TRANSACTION_REVIEW",
+      "EXTERNAL_SIGNATURE_OR_MULTISIG_APPROVAL",
+      "IDEMPOTENCY_KEY"
+    ],
+    "postConfirm": "DISARM_AND_RECONCILE_PROVIDER_OBSERVATIONS",
+    "antiGaming": "NO_WASH_SELF_OR_ROUND_TRIP_TRADING__NO_ACTIVITY_MANUFACTURING__NO_JUPITER_OR_DEXSCREENER_SCORE_GAMING"
   }
 }
