@@ -12,12 +12,12 @@ test("WorldzMiracleWallet foundation files exist",()=>{
   }
 });
 
-test("Miracle treasury app config keeps owner-approved 4-of-8 policy",()=>{
+test("Miracle treasury app config keeps owner-approved 4-of-10 policy",()=>{
   const config=JSON.parse(fs.readFileSync(path.join(appDir,"config.json"),"utf8"));
   assert.equal(config.miracleTreasury.allocationPercent,20);
   assert.equal(config.miracleTreasury.threshold,4);
-  assert.equal(config.miracleTreasury.signerCount,8);
-  assert.equal(config.miracleTreasury.governance,"4-of-8");
+  assert.equal(config.miracleTreasury.signerCount,10);
+  assert.equal(config.miracleTreasury.governance,"4-of-10");
   assert.equal(config.safety.mainnetBroadcastEnabled,false);
   assert.equal(config.safety.collectSeedPhrase,false);
   assert.equal(config.safety.collectPrivateKey,false);
