@@ -29,6 +29,8 @@ async function readSafeApprovalState({
   const base=requireHttps(serviceUrl,"SAFE_SERVICE_URL");
   const headers=apiKey?{authorization:"Bearer "+String(apiKey)}:{};
   const safe=await fetchJson(base+"/api/v1/safes/"+encodeURIComponent(safeAddress)+"/",{headers});
+  const txRecord=await fetchJson(base+"/api/v1/multisig-transactions/"+encodeURIComponent(safeTxHash)+"/",{headers});
+  if(String(txRecord.safe||"").toLowerCase()!==String(safeAddress).toLowerCase()) throw new Error("WORLDZAPP_SAFE_TX_SAFE_MISMATCH");
   const confirmations=await fetchJson(base+"/api/v1/multisig-transactions/"+encodeURIComponent(safeTxHash)+"/confirmations/",{headers});
   const owners=Array.isArray(safe.owners)?safe.owners:[];
   const rows=Array.isArray(confirmations.results)?confirmations.results:[];
@@ -48,7 +50,8 @@ async function readSafeApprovalState({
 }
 
 async function xrplRpc(rpcUrl,method,params){
-  const body=await requestJson(rpcUrl,{method,params:[params]});
+  const endpoint=requireHttps(rpcUrl,"XRPL_RPC_URL");
+  const body=await requestJson(endpoint,{method,params:[params]});
   if(body&&body.result&&body.result.error) throw new Error("WORLDZAPP_XRPL_ERROR_"+String(body.result.error));
   if(body&&body.error) throw new Error("WORLDZAPP_XRPL_ERROR_"+String(body.error));
   return body.result||body;
@@ -59,11 +62,14 @@ async function readXrplApprovalState({
 }={}){
   if(!rpcUrl||!account||!txHash) throw new Error("WORLDZAPP_XRPL_LIVE_PROFILE_CONFIG_REQUIRED");
   const accountInfo=await xrplRpc(rpcUrl,"account_info",{account,ledger_index:"validated",signer_lists:true,api_version:2});
+  if(accountInfo.validated!==true) throw new Error("WORLDZAPP_XRPL_ACCOUNT_INFO_NOT_VALIDATED");
   const signerLists=accountInfo.signer_lists||accountInfo.account_data&&accountInfo.account_data.signer_lists||[];
   if(!Array.isArray(signerLists)||signerLists.length!==1) throw new Error("WORLDZAPP_XRPL_SIGNER_LIST_REQUIRED");
   const signerList=signerLists[0];
   const tx=await xrplRpc(rpcUrl,"tx",{transaction:txHash,binary:false,api_version:2});
+  if(tx.validated!==true) throw new Error("WORLDZAPP_XRPL_TX_NOT_VALIDATED");
   const txJson=tx.tx_json||tx;
+  if(String(txJson.Account||"")!==String(account)) throw new Error("WORLDZAPP_XRPL_TX_ACCOUNT_MISMATCH");
   const signers=Array.isArray(txJson.Signers)?txJson.Signers:[];
   const state=fromXrplSignerList({
     network,treasuryProfile,proposalId:"xrpl:"+txHash,account,
