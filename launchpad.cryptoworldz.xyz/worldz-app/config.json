@@ -1,8 +1,8 @@
 {
   "schema": "WORLDZ-APP-RUNTIME-V1",
   "brand": "WorldzApp™",
-  "status": "CODE_BUILT_STAGE_3_IDENTITY_WALLET_CONNECTION_FOUNDATION__NO_MAINNET_EXECUTION",
-  "tagline": "One Worldz. One App. Every module keeps its own authority.",
+  "status": "CODE_BUILT_STAGE_3B_IDENTITY_MOBILE_HANDOFF_FOUNDATION__STAGE_4_SIMULATION_CONTRACT_FOUNDATION__NO_MAINNET_EXECUTION",
+  "tagline": "WorldzEcosystem™. One App. Separate Authority.",
   "coreContract": "/worldz-app/core/worldz-app.v1.json",
   "modules": [
     {
@@ -77,7 +77,7 @@
     },
     {
       "id": "impact",
-      "brand": "OneWorldz / DonateWorldz",
+      "brand": "DonateWorldz",
       "state": "INTEGRATION_PLANNED",
       "route": null,
       "authority": "HUMANITARIAN_SEPARATE_FROM_CRYPTO_CUSTODY"
@@ -130,22 +130,36 @@
     "execution": false
   },
   "identityWalletFoundation": {
-    "state": "CODE_BUILT_CONNECTION_ONLY",
+    "state": "CODE_BUILT_STAGE_3B_GUARDED_FOUNDATION",
     "sessionStorage": "SESSION_ONLY_BY_DEFAULT",
     "connectors": "/worldz-app/core/wallet-connectors.json",
+    "identityRoles": "/worldz-app/core/identity-roles.json",
+    "mobileHandoff": "/worldz-app/core/mobile-handoff.json",
     "browserRuntime": "/worldz-app/wallet-connect.js",
+    "mobileRuntime": "/worldz-app/mobile-handoff.js",
     "supportedNow": [
       "SOLANA_INJECTED",
-      "EVM_EIP1193"
+      "EVM_EIP1193",
+      "EXTERNAL_CONNECTION_ONLY_ADAPTER_BRIDGE"
     ],
-    "planned": [
-      "XRPL_EXTERNAL",
-      "SUI_WALLET_STANDARD",
-      "WALLETCONNECT_V2_MOBILE_HANDOFF"
+    "providerGates": [
+      "XRPL_XAMAN_PUBLIC_CLIENT_ID_AND_REDIRECT_REGISTRATION",
+      "SUI_DAPP_KIT_CORE_INTEGRATION",
+      "WALLETCONNECT_V2_PAIRING_CLIENT_INTEGRATION"
     ],
     "signing": false,
     "broadcast": false,
     "secretCollection": false,
-    "nextGate": "ROLE_AWARE_IDENTITY_ASSERTIONS_AND_VERIFIED_MOBILE_HANDOFF"
+    "roleAuthorityInheritance": false,
+    "nextGate": "BIND_AND_VERIFY_XRPL_SUI_MOBILE_PROVIDERS"
+  },
+  "simulationFoundation": {
+    "state": "CODE_BUILT_CONTRACT_FOUNDATION",
+    "policy": "/worldz-app/core/simulation-policy.json",
+    "contract": "src/worldz-app/simulation-contract.js",
+    "liveChainBindings": "PENDING_CHAIN_BY_CHAIN",
+    "signatureRequest": false,
+    "broadcast": false,
+    "nextGate": "VERIFIED_LIVE_SIMULATION_ADAPTER_BINDINGS"
   }
 }
