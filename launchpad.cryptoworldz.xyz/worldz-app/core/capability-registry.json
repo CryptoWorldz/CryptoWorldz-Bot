@@ -1,0 +1,110 @@
+{
+  "schema": "WORLDZ-APP-CAPABILITIES-V1",
+  "default": "DENY",
+  "capabilities": [
+    "read_public_state",
+    "connect_external_wallet",
+    "create_draft_proposal",
+    "read_chain_state",
+    "simulate_transaction",
+    "request_signature",
+    "collect_multisig_approval",
+    "broadcast_mainnet",
+    "bridge_assets",
+    "swap_assets",
+    "stake_assets",
+    "change_signers"
+  ],
+  "modules": {
+    "home": {
+      "read_public_state": true
+    },
+    "treasury": {
+      "read_public_state": true,
+      "connect_external_wallet": true,
+      "create_draft_proposal": true,
+      "read_chain_state": false,
+      "simulate_transaction": false,
+      "request_signature": false,
+      "collect_multisig_approval": false,
+      "broadcast_mainnet": false,
+      "bridge_assets": false,
+      "swap_assets": false,
+      "stake_assets": false,
+      "change_signers": false
+    },
+    "launchpad": {
+      "read_public_state": true,
+      "connect_external_wallet": true,
+      "create_draft_proposal": false,
+      "read_chain_state": true,
+      "simulate_transaction": "CHAIN_ADAPTER_GATED",
+      "request_signature": "CHAIN_ADAPTER_GATED",
+      "collect_multisig_approval": "CHAIN_ADAPTER_GATED",
+      "broadcast_mainnet": "RELEASE_GATE_REQUIRED",
+      "bridge_assets": false,
+      "swap_assets": "VENUE_AND_CHAIN_GATED",
+      "stake_assets": false,
+      "change_signers": false
+    },
+    "fullbuild": {
+      "read_public_state": true
+    },
+    "fullscope": {
+      "read_public_state": true,
+      "create_draft_proposal": true,
+      "broadcast_mainnet": false
+    },
+    "votes": {
+      "read_public_state": true,
+      "broadcast_mainnet": false
+    },
+    "govern": {
+      "read_public_state": true,
+      "create_draft_proposal": true,
+      "broadcast_mainnet": false
+    },
+    "proof": {
+      "read_public_state": true,
+      "broadcast_mainnet": false
+    },
+    "impact": {
+      "read_public_state": true,
+      "broadcast_mainnet": false
+    }
+  },
+  "chains": {
+    "solana": {
+      "custody": "Squads / external Solana wallets",
+      "appExecution": "NOT_ENABLED_BY_WORLDZAPP_CORE"
+    },
+    "ethereum": {
+      "custody": "Safe / external EVM wallets",
+      "appExecution": "NOT_ENABLED_BY_WORLDZAPP_CORE"
+    },
+    "base": {
+      "custody": "Safe / external EVM wallets",
+      "appExecution": "NOT_ENABLED_BY_WORLDZAPP_CORE"
+    },
+    "bnb": {
+      "custody": "Safe / external EVM wallets",
+      "appExecution": "NOT_ENABLED_BY_WORLDZAPP_CORE"
+    },
+    "hyperevm": {
+      "custody": "Safe-compatible verified adapter",
+      "appExecution": "NOT_ENABLED_BY_WORLDZAPP_CORE"
+    },
+    "xrpl": {
+      "custody": "Native SignerList multisigning",
+      "appExecution": "NOT_ENABLED_BY_WORLDZAPP_CORE"
+    },
+    "sui": {
+      "custody": "Native weighted multisig",
+      "appExecution": "NOT_ENABLED_BY_WORLDZAPP_CORE"
+    },
+    "robinhood": {
+      "custody": "Verified EVM adapter required",
+      "appExecution": "RESEARCH"
+    }
+  }
+}
