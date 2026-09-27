@@ -1,4 +1,4 @@
-let runtime=null,capabilities=null,treasuries=null,readAdapters=null,storagePolicy=null,walletConnectors=null,identityRoles=null,mobileHandoff=null,simulationPolicy=null,simulationBindings=null,deferredInstall=null;
+let runtime=null,capabilities=null,treasuries=null,readAdapters=null,storagePolicy=null,walletConnectors=null,identityRoles=null,mobileHandoff=null,simulationPolicy=null,simulationBindings=null,multisigAdapters=null,deferredInstall=null;
 const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
 const escapeHtml=value=>String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 function toast(message){const el=qs("#toast");el.textContent=message;el.classList.add("show");clearTimeout(window.__worldzToast);window.__worldzToast=setTimeout(()=>el.classList.remove("show"),2800)}
@@ -65,6 +65,10 @@ function renderIdentity(){
   const pending=bindingItems.filter(item=>!/CODE_BUILT/.test(item.state||"")).length;
   qs("#simulation-status").innerHTML='<article class="card"><span>STAGE 4A</span><h3>Unsigned Simulation Adapters</h3><p>Solana simulateTransaction plus EVM eth_call / eth_estimateGas adapters are code-built for pre-sign dry runs. They cannot sign, send or broadcast and remain live-proof pending chain by chain.</p><div class="meta"><span class="chip good">'+built+' ADAPTER BINDINGS BUILT</span><span class="chip warn">'+pending+' CHAIN-NATIVE BINDINGS PENDING</span><span class="chip">NO SIGNING</span></div></article>';
 }
+function renderApprovals(){
+  const items=(multisigAdapters&&multisigAdapters.adapters)||[];
+  qs("#approval-status").innerHTML=items.map(item=>'<article class="card"><span>'+escapeHtml(item.chain.toUpperCase())+'</span><h3>'+escapeHtml(item.system)+'</h3><p>'+escapeHtml(item.thresholdMode==='WEIGHT'?'Weighted quorum approval evidence':'Count-based approval evidence')+'</p><div class="meta"><span class="chip '+stateClass(item.state)+'">'+escapeHtml(item.state.replaceAll("_"," "))+'</span><span class="chip">NO SIGNING</span><span class="chip">NO BROADCAST</span></div></article>').join("");
+}
 function renderSecurity(){
   const treasury=capabilities.modules.treasury;
   const checks=[
@@ -82,12 +86,12 @@ function renderSecurity(){
 }
 async function boot(){
   try{
-    [runtime,capabilities,treasuries,readAdapters,storagePolicy,walletConnectors,identityRoles,mobileHandoff,simulationPolicy,simulationBindings]=await Promise.all([
-      json("/worldz-app/config.json"),json("/worldz-app/core/capability-registry.json"),json("/worldz-app/core/treasury-profiles.json"),json("/worldz-app/core/read-adapter-registry.json"),json("/worldz-app/core/storage-policy.json"),json("/worldz-app/core/wallet-connectors.json"),json("/worldz-app/core/identity-roles.json"),json("/worldz-app/core/mobile-handoff.json"),json("/worldz-app/core/simulation-policy.json"),json("/worldz-app/core/simulation-bindings.json")
+    [runtime,capabilities,treasuries,readAdapters,storagePolicy,walletConnectors,identityRoles,mobileHandoff,simulationPolicy,simulationBindings,multisigAdapters]=await Promise.all([
+      json("/worldz-app/config.json"),json("/worldz-app/core/capability-registry.json"),json("/worldz-app/core/treasury-profiles.json"),json("/worldz-app/core/read-adapter-registry.json"),json("/worldz-app/core/storage-policy.json"),json("/worldz-app/core/wallet-connectors.json"),json("/worldz-app/core/identity-roles.json"),json("/worldz-app/core/mobile-handoff.json"),json("/worldz-app/core/simulation-policy.json"),json("/worldz-app/core/simulation-bindings.json"),json("/worldz-app/core/multisig-approval-adapters.json")
     ]);
     if(window.WorldzMobileHandoff)window.WorldzMobileHandoff.configure(mobileHandoff);
-    renderModules();renderTreasuries();renderAdapters();renderConnections();renderIdentity();renderSecurity();
-    qs("#core-state").textContent="Stage 3B + Stage 4A adapters loaded • mainnet off";qs("#core-state").classList.add("good");
+    renderModules();renderTreasuries();renderAdapters();renderConnections();renderIdentity();renderApprovals();renderSecurity();
+    qs("#core-state").textContent="Stage 5 approval foundation loaded • mainnet off";qs("#core-state").classList.add("good");
   }catch(error){qs("#core-state").textContent="Core load error";toast(error.message)}
 }
 qsa(".tab").forEach(tab=>tab.addEventListener("click",()=>{qsa(".tab").forEach(x=>x.classList.remove("active"));qsa(".panel").forEach(x=>x.classList.remove("active"));tab.classList.add("active");qs("#"+tab.dataset.panel).classList.add("active")}));
