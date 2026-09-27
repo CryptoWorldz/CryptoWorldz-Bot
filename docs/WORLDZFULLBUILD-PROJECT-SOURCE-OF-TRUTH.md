@@ -416,3 +416,20 @@ WorldzApp™ progressed beyond the Stage 3 injected-wallet foundation:
 - signing, transaction sending, mainnet broadcast, automatic bridge/swap/stake and signer changes remain OFF at WorldzApp core.
 
 Canonical machine-readable status: `worldzpad-omnichain/fullscope/worldz-app.v1.json`.
+
+
+## WorldzApp Stage 4A unsigned simulation adapters — 2026-09-27
+
+Status: **CODE BUILT / LIVE SIMULATION PROOF PENDING**
+
+WorldzApp Stage 4 now has guarded unsigned simulation adapters instead of only a result schema.
+
+- Solana adapter uses `simulateTransaction` only, with signature verification disabled and recent-blockhash replacement enabled for unsigned pre-sign simulation.
+- EVM adapter uses `eth_call` and `eth_estimateGas` only, with exact chain-ID verification before evidence is accepted.
+- Solana, Ethereum, Base, BNB Chain, HyperEVM and Robinhood/EVM simulation bindings are code-built but remain live-proof pending.
+- XRPL and Sui require their own chain-native dry-run/simulation binding and remain gated.
+- The adapter contract structurally rejects sign, send, broadcast, bridge, swap, stake, signer-change and secret-request handlers.
+- Human-readable effects must exist before the network simulation is requested; simulation evidence never creates execution authority.
+- Mainnet app broadcast remains OFF.
+
+Canonical status remains in `worldzpad-omnichain/fullscope/worldz-app.v1.json`.
