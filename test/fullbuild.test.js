@@ -17,13 +17,14 @@ test("FullBuild separates popularity from governance", () => {
   assert.equal(contract.votingSeparation.governance.popularityRankingEffect, false);
 });
 
-test("WorldzFullBuild summary exposes 8 x 20 capacity", () => {
+test("WorldzFullBuild summary exposes 8 x 20 capacity and AUTO buy-only policy", () => {
   const build = summary();
   assert.equal(build.chains, 8);
   assert.equal(build.tokensPerChain, 20);
   assert.equal(build.capacity, 160);
+  assert.equal(build.autoBuyOnly, true);
+  assert.equal(build.autoFundingAsset, "SOL");
 });
-
 
 test("whole-project inheritance and WorldzLinkz stay locked into FullBuild", () => {
   const contract = loadContract();
@@ -32,4 +33,17 @@ test("whole-project inheritance and WorldzLinkz stay locked into FullBuild", () 
   assert.equal(contract.projectContinuity.latestOwnerDirective.state, "INCORPORATED");
   assert.equal(contract.commandPaths.worldzLinks, "/worldzlinks");
   assert.ok(contract.projectContinuity.carriedForward.includes("WORLDZLINKZ_QR_ALL_DOMAIN_DIRECTORY"));
+});
+
+test("Worldz AUTO is required, SOL-funded, buy-only and inherits every WorldzLaunchPad token", () => {
+  const auto = loadContract().autoBuyOnlySystem;
+  assert.equal(auto.required, true);
+  assert.equal(auto.buyOnly, true);
+  assert.equal(auto.sellAutomation, false);
+  assert.equal(auto.fundingAsset, "SOL");
+  assert.equal(auto.randomizedExecution, false);
+  assert.equal(auto.legacyAssetsRequired, 10);
+  assert.deepEqual(auto.canonicalTokens, ["WLDZ", "RVIV", "PNEX", "MRCL"]);
+  assert.equal(auto.futureWorldzLaunchPadAutoRegistration, true);
+  assert.equal(auto.explicitWalletAllowlistRequired, true);
 });
