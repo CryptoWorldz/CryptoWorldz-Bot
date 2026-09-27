@@ -17,7 +17,7 @@ Path: `launchpad.cryptoworldz.xyz/miracle-wallet/`
 The first foundation includes:
 
 - installable-web-app manifest and offline app shell;
-- Miracle Church treasury profile: 20% MRCL, 4-of-7 policy;
+- Miracle Church treasury profile: 20% MRCL, 4-of-8 policy;
 - Worldz Operations 5-of-10 and Reserve 6-of-9 profiles;
 - chain adapter registry for Solana, Ethereum, Base, BNB, HyperEVM, XRPL, Sui and Robinhood Chain research;
 - public signer display only where owner/signer consent exists;
@@ -49,7 +49,7 @@ Modules:
 
 The app can display and coordinate multiple treasury profiles without mixing their authority.
 
-- Miracle Church: **4-of-7**
+- Miracle Church: **4-of-8**
 - Worldz Operations: **5-of-10**
 - Worldz Reserve: **6-of-9**
 - future token/project treasuries: token-specific policies
