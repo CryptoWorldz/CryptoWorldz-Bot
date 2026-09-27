@@ -1,6 +1,6 @@
 # WorldzApp™ — Core Architecture v1
 
-Status: **STAGE 5 MULTISIG APPROVAL EVIDENCE FOUNDATION BUILT / LIVE PROFILE PROOF PENDING / NO APP-LEVEL MAINNET EXECUTION**  
+Status: **STAGE 5B LIVE WLDZ SQUADS PROOF PASSED / ANDROID PACKAGING FOUNDATION NEXT / NO APP-LEVEL MAINNET EXECUTION**  
 Date: **2026-09-27**  
 Parent: **WorldzFullBuild™**
 
@@ -326,3 +326,28 @@ Security boundary:
 - Approval submission/signing/broadcast remain disabled until each native provider path is separately integrated and verified.
 
 Next gate: bind actual verified treasury/multisig public profiles, prove read-only approval state from the native systems, and only then design the external-wallet approval-submission path.
+
+
+## Stage 5B — live Worldz Squads approval proof — PASSED
+
+Workflow run `36318035477` verified the actual WLDZ operational Squads v4 profile on Solana mainnet.
+
+- Multisig: `B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN`
+- Vault: `n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB`
+- Live threshold: **1-of-2 temporary**
+- Current transaction index: `20`
+- Historical proposal #14: **Executed**
+- Proposal PDA: `3AxY7YshaCNSyu37hpGRYqwqW2AZs4E6kEZk6SE12kiB`
+- Public approvals observed: **1**
+- WorldzApp normalized threshold state: **met**
+- `executionAllowed:false`
+- `broadcastAllowed:false`
+- `approvalSubmission:false`
+- `signing:false`
+- private material read: **false**
+
+Evidence SHA-256: `ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0`.
+
+This proves the WorldzApp Stage 5 read/normalization path against a real Worldz multisig without giving WorldzApp custody or execution authority. Safe, XRPL and Sui live Worldz profiles remain separately gated.
+
+The Android packaging foundation may now begin while those non-Solana capabilities remain disabled until separately proven.
