@@ -1,0 +1,121 @@
+{
+  "schema": "WORLDZ-AUTO-BUY-ONLY-V1",
+  "brand": "WorldzAUTO Buy-Only™",
+  "parent": "WorldzFullBuild™ / WorldzLaunchPad™ / AUTO",
+  "updatedAt": "2026-09-27",
+  "lifecycle": "CODE_SPEC_FOUNDATION",
+  "objective": "Safely prepare and execute only explicitly approved BUY intents without enabling automatic selling, round-trip trading, market-activity fabrication or provider-score gaming.",
+  "defaultState": "PREPARE_ONLY_DISARMED",
+  "mainnetExecutionAuthorized": false,
+  "allowedSide": "BUY",
+  "deniedSides": [
+    "SELL",
+    "BUY_SELL_LOOP",
+    "SELL_BUY_LOOP"
+  ],
+  "modes": {
+    "launchBootstrap": {
+      "default": "ONE_SHOT_BUY",
+      "purpose": "LEGITIMATE_FIRST_OR_BOOTSTRAP_PURCHASE",
+      "duplicateConfirmedExecution": false,
+      "postConfirmState": "COMPLETED_AND_DISARMED"
+    },
+    "treasuryAcquisition": {
+      "enabledOnlyByExplicitTokenSpecificApproval": true,
+      "requiresBudgetEnvelope": true,
+      "unattendedSigningDefault": false
+    }
+  },
+  "providerTruth": {
+    "dexScreener": "POOL_PLUS_AT_LEAST_ONE_TRANSACTION_CAN_TRIGGER_AUTOMATIC_LISTING__INDEXING_REMAINS_PROVIDER_OBSERVED",
+    "jupiterOrganicScore": "POST_LAUNCH_OBSERVED_SIGNAL__NO_GUARANTEE__NO_GAMING__AUTOMATED_ACTIVITY_MUST_NOT_BE_DESCRIBED_AS_ORGANIC"
+  },
+  "antiGaming": [
+    "NO_WASH_TRADING",
+    "NO_SELF_TRADING",
+    "NO_VOLUME_MANUFACTURING",
+    "NO_HOLDER_FRAGMENTATION",
+    "NO_MAKER_COUNT_MANIPULATION",
+    "NO_TRENDING_SCORE_GAMING",
+    "NO_ORGANIC_SCORE_GAMING"
+  ],
+  "requiredIntentBindings": [
+    "CHAIN",
+    "CANONICAL_MINT",
+    "EXPECTED_POOL_OR_APPROVED_ROUTER",
+    "QUOTE_ASSET",
+    "MAXIMUM_SPEND",
+    "MINIMUM_RECEIVED",
+    "MAX_SLIPPAGE",
+    "MAX_PRICE_IMPACT",
+    "MAX_NETWORK_OR_PRIORITY_FEE",
+    "QUOTE_TIMESTAMP_AND_EXPIRY",
+    "DESTINATION_WALLET",
+    "PURPOSE",
+    "IDEMPOTENCY_KEY",
+    "SIMULATION_RESULT",
+    "READABLE_TRANSACTION_REVIEW",
+    "REQUIRED_SIGNER_OR_MULTISIG_POLICY"
+  ],
+  "failClosedOn": [
+    "MINT_MISMATCH",
+    "POOL_MISMATCH",
+    "STALE_QUOTE",
+    "FAILED_SIMULATION",
+    "BUDGET_BREACH",
+    "SLIPPAGE_BREACH",
+    "PRICE_IMPACT_BREACH",
+    "FEE_BREACH",
+    "INSUFFICIENT_REAL_LIQUIDITY",
+    "TRANSACTION_AMBIGUITY",
+    "DUPLICATE_OR_UNKNOWN_SIGNATURE_STATE",
+    "UNEXPECTED_OUTPUT_TOKEN",
+    "UNEXPECTED_TRANSFER_FEE_OR_TOKEN_EXTENSION",
+    "SELL_REQUEST_WHILE_BUY_ONLY_ACTIVE"
+  ],
+  "executionSequence": [
+    "VERIFY_CANONICAL_IDENTITY",
+    "VERIFY_EXPECTED_POOL_OR_ROUTE",
+    "FETCH_FRESH_BUY_QUOTE",
+    "BIND_EXPLICIT_BUDGET_AND_LIMITS",
+    "SIMULATE",
+    "DISPLAY_READABLE_REVIEW",
+    "OBTAIN_REQUIRED_EXTERNAL_SIGNATURE_OR_MULTISIG_APPROVAL",
+    "BROADCAST_ONCE",
+    "CONFIRM_AND_RECONCILE",
+    "MARK_IDEMPOTENCY_KEY_COMPLETE",
+    "READ_PROVIDER_OBSERVATIONS",
+    "WRITE_WORLDZPROOF"
+  ],
+  "mrcl": {
+    "inherits": true,
+    "genesisAllocationMrcl": 17400000,
+    "genesisAllocationPercent": 5,
+    "creatorFirstBuyTargetAud": 200,
+    "inputAsset": "SOL",
+    "exactInput": "BIND_FROM_LIVE_PRICING_AT_TRANSACTION_REVIEW",
+    "autoSell": false,
+    "scoreGuarantee": false,
+    "note": "The first legitimate real buy may satisfy DEX Screener's transaction prerequisite, but indexing and Jupiter Organic Score remain external observed states."
+  },
+  "proofFields": [
+    "INTENT_ID",
+    "CANONICAL_MINT",
+    "PAIR_OR_POOL",
+    "ROUTE",
+    "QUOTED_INPUT",
+    "ACTUAL_INPUT",
+    "QUOTED_OUTPUT",
+    "ACTUAL_OUTPUT",
+    "LIMITS",
+    "TRANSACTION_SIGNATURE",
+    "CONFIRMATION_STATE",
+    "PRE_BALANCES",
+    "POST_BALANCES",
+    "DEXSCREENER_OBSERVATION",
+    "JUPITER_OBSERVATION",
+    "TIMESTAMP"
+  ],
+  "reusableDefault": "AVAILABLE_FOR_ELIGIBLE_WORLDZLAUNCHPAD_LAUNCHES__NEVER_AUTO_ARMED_WITHOUT_TOKEN_SPECIFIC_BUDGET_SIGNER_POLICY_AND_LIMITS",
+  "standard": "docs/WORLDZ-AUTO-BUY-ONLY-STANDARD.md"
+}
