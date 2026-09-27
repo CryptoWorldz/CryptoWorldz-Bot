@@ -89,7 +89,6 @@
     "privateKeyCollection": false
   },
   "releaseBlockers": [
-    "APPROVED_EMBLEM_BINARY_IMPORT_AND_DERIVED_ANDROID_ASSETS",
     "FINAL_APPLICATION_ID_LOCK",
     "VERIFIED_PLAY_DEVELOPER_IDENTITY",
     "PUBLIC_SUPPORT_CONTACT",
@@ -114,11 +113,34 @@
     "sourceSha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
     "regenerationAllowed": false,
     "replacementRequiresExplicitOwnerApproval": true,
-    "androidAssetImport": "PENDING_BINARY_REPOSITORY_IMPORT",
+    "androidAssetImport": "COMMITTED_AND_VERIFIED",
     "requiredDerivedAssets": [
       "512x512 Google Play icon",
       "Android launcher/mipmap assets",
       "maskable safe-zone asset"
-    ]
+    ],
+    "playIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
+      "hostedUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-512.png",
+      "width": 512,
+      "height": 512,
+      "format": "PNG",
+      "colorType": "RGBA_32_BIT",
+      "colorProfile": "sRGB_ICC",
+      "sizeBytes": 670286,
+      "sha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d"
+    },
+    "maskableIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
+      "hostedUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-maskable-512.png",
+      "width": 512,
+      "height": 512,
+      "format": "PNG",
+      "colorType": "RGBA_32_BIT",
+      "colorProfile": "sRGB_ICC",
+      "sizeBytes": 427484,
+      "sha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15"
+    },
+    "androidAssetsReady": true
   }
 }
