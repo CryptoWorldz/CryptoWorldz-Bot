@@ -126,7 +126,23 @@
     "sessionSchema": "/worldz-app/core/session.schema.json",
     "activityEventSchema": "/worldz-app/core/activity-event.schema.json",
     "providerBindings": "/worldz-app/core/provider-bindings.json",
-    "liveReadProof": "CI_WORKFLOW_ADDED__NOT_YET_PASSED",
+    "liveReadProof": {
+      "observedAt": "2026-09-27T02:01:06.980Z",
+      "state": "PASSED",
+      "mode": "PUBLIC_VERIFICATION_ENDPOINTS",
+      "execution": false,
+      "passed": [
+        "solana_health",
+        "solana_finalized_balance",
+        "base_chain_id_8453",
+        "bnb_chain_id_56",
+        "hyperevm_chain_id_999",
+        "xrpl_validated_ledger",
+        "sui_graphql_chain_identifier",
+        "robinhood_chain_id_4663"
+      ],
+      "note": "Public verification endpoints only; production provider binding remains a separate release gate."
+    },
     "execution": false,
     "publicVerificationProviders": "CONFIGURED_FOR_DEVELOPMENT_PROOF_ONLY",
     "productionProviders": "ENVIRONMENT_OR_SECRET_CONFIG_REQUIRED"
