@@ -633,7 +633,7 @@
     "brand": "WorldzApp™",
     "contract": "worldzpad-omnichain/fullscope/worldz-app.v1.json",
     "architecture": "docs/WORLDZAPP-ARCHITECTURE.md",
-    "lifecycle": "CODE_BUILT_STAGE_2_PROVIDER_BINDINGS",
+    "lifecycle": "CODE_BUILT_STAGE_2_LIVE_READ_VERIFIED",
     "route": "/worldz-app/",
     "sourcePath": "launchpad.cryptoworldz.xyz/worldz-app/",
     "role": "UMBRELLA_FIRST_PARTY_APPLICATION",
@@ -646,14 +646,33 @@
     "capabilityDefault": "DENY",
     "appLevelMainnetBroadcast": false,
     "worldzMiracleWalletModule": "/miracle-wallet/",
-    "nextEngineeringGate": "CONFIGURE_DEPLOYMENT_RPC_ENV__RUN_LIVE_READ_PROOF__THEN_ADD_MULTISIG_READERS",
+    "nextEngineeringGate": "IDENTITY_SESSION_AND_EXTERNAL_MOBILE_WALLET_CONNECTION_FOUNDATION",
     "readAdapterFoundation": {
       "contract": "src/worldz-app/read-adapter-contract.js",
       "adapters": 8,
       "execution": false,
-      "providerBindings": "CODE_BUILT_ENVIRONMENT_ONLY",
-      "liveReadProof": "PENDING_DEPLOYMENT_ENVIRONMENT",
-      "verifier": "tools/verify-worldzapp-live-reads.js"
+      "providerBindings": "ENVIRONMENT_ONLY_PRODUCTION__PUBLIC_VERIFY_MODE_AVAILABLE",
+      "liveReadProof": {
+        "state": "PASSED",
+        "verifiedAt": "2026-09-27T02:10:49.715Z",
+        "workflowRunId": 36287750004,
+        "mode": "PUBLIC_VERIFICATION_ENDPOINTS",
+        "execution": false,
+        "passed": [
+          "SOLANA_HEALTH",
+          "SOLANA_FINALIZED_BALANCE_READ",
+          "BASE_CHAIN_ID_8453",
+          "BNB_CHAIN_ID_56",
+          "HYPEREVM_CHAIN_ID_999",
+          "XRPL_VALIDATED_LEDGER",
+          "SUI_GRAPHQL_CHAIN_IDENTIFIER",
+          "ROBINHOOD_CHAIN_ID_4663"
+        ],
+        "productionBoundary": "PUBLIC_ENDPOINTS_VERIFY_READ_PATHS_ONLY__PRODUCTION_PROVIDERS_REMAIN_ENVIRONMENT_CONFIGURED"
+      },
+      "verifier": "tools/verify-worldzapp-live-reads.js",
+      "sui": "GRAPHQL_READ_PATH_VERIFIED",
+      "protocolRegressionRule": "VERIFY_EXACT_CURRENT_TRANSPORT_AND_CHAIN_ID_LIVE"
     },
     "ownerContinuationApproval": {
       "date": "2026-09-27",
