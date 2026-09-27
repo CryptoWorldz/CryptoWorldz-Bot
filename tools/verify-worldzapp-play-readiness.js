@@ -43,7 +43,13 @@ assert(!/profit|guaranteed return|guaranteed yield/i.test(listing.fullDescriptio
 assert(release.branding?.ownerApprovedCentreEmblem===true,"owner-approved centre emblem must be locked");
 assert(release.branding?.sourceSha256==="685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050","approved emblem checksum drift");
 assert(release.branding?.regenerationAllowed===false,"approved emblem must not be regenerated");
-assert(listing.graphics.appIcon==="OWNER_APPROVED_WORLDZ_CENTRE_EMBLEM__SOURCE_LOCKED__ANDROID_DERIVATIVES_PENDING","approved icon status drift");
+assert(release.branding?.androidAssetImport==="COMMITTED_AND_VERIFIED","approved emblem binary import must be verified");
+assert(release.branding?.androidAssetsReady===true,"approved Android emblem assets must be ready");
+assert(release.branding?.playIcon?.sha256==="27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d","Play icon release hash drift");
+assert(release.branding?.maskableIcon?.sha256==="b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15","maskable icon release hash drift");
+assert(listing.graphics.appIcon==="apps/worldzapp-android/assets/worldz-app-icon-512.png","approved listing icon path drift");
+assert(listing.graphics.appIconSha256==="27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d","approved listing icon hash drift");
+assert(listing.graphics.maskableIconSha256==="b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15","approved listing maskable hash drift");
 
 assert(android.packaging.targetSdk===36&&android.packaging.compileSdk===36,"Android package API drift");
 assert(android.releaseSecurity.signedReleaseBuilt===false,"signed AAB may not be falsely claimed");
@@ -54,7 +60,6 @@ assert(worldz.appSecurity?.mainnetBroadcastEnabled===false,"WorldzApp mainnet br
 
 const blockers=release.releaseBlockers;
 for(const required of [
-  "APPROVED_EMBLEM_BINARY_IMPORT_AND_DERIVED_ANDROID_ASSETS",
   "VERIFIED_PLAY_DEVELOPER_IDENTITY",
   "PUBLIC_PRIVACY_POLICY_URL",
   "FINAL_DATA_SAFETY_AUDIT_AND_PLAY_FORM",
@@ -69,4 +74,4 @@ console.log("WORLDZAPP_GOOGLE_PLAY_READINESS_FOUNDATION=PASS");
 console.log("submission_ready=false public_release=false");
 console.log("target_sdk="+release.android.targetSdk+" format="+release.android.releaseFormat);
 console.log("data_safety=FINAL_AUDIT_REQUIRED financial_features=FINAL_CONFIRMATION_REQUIRED");
-console.log("approved_emblem=LOCKED android_derivatives=PENDING play_app_signing=PENDING signed_aab=PENDING");
+console.log("approved_emblem_assets=READY play_app_signing=PENDING signed_aab=PENDING");
