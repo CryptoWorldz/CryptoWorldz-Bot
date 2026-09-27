@@ -69,7 +69,7 @@ function renderApprovals(){
   const items=(multisigAdapters&&multisigAdapters.adapters)||[];
   const gates=(multisigProofGates&&multisigProofGates.profiles)||[];
   qs("#approval-status").innerHTML=items.map(item=>{
-    const gate=gates.find(entry=>entry.system===item.system);
+    const gate=gates.find(entry=>entry.adapterId===item.id);
     const liveState=gate?gate.state:item.state;
     const message=liveState==="LIVE_PROOF_PASSED"
       ?"Verified Worldz public profile proof passed."
