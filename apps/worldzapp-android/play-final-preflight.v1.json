@@ -1,0 +1,43 @@
+{
+  "schema": "WORLDZ-APP-PLAY-FINAL-PREFLIGHT-V1",
+  "updatedAt": "2026-09-28",
+  "state": "CODE_SIDE_PHASE2_BUILT__ACCOUNT_AND_DEPLOYMENT_GATES_REMAIN",
+  "codeSide": {
+    "api36": true,
+    "unsignedAabCompilationProven": true,
+    "approvedProductionIconsReady": true,
+    "privacySurfaceBuilt": true,
+    "supportSurfaceBuilt": true,
+    "assetlinksRendererBuilt": true,
+    "playReadinessCiBuilt": true
+  },
+  "publicUrls": {
+    "privacyCandidate": "https://launchpad.cryptoworldz.xyz/worldz-app/privacy/",
+    "supportCandidate": "https://launchpad.cryptoworldz.xyz/worldz-app/support/",
+    "privacyDeploymentVerified": false,
+    "supportDeploymentVerified": false
+  },
+  "identity": {
+    "applicationIdCandidate": "xyz.cryptoworldz.worldzapp",
+    "sourceLocked": true,
+    "playConsoleAvailabilityVerified": false,
+    "playDeveloperIdentityVerified": false
+  },
+  "signing": {
+    "playAppSigningConfigured": false,
+    "playSigningCertificateSha256Known": false,
+    "digitalAssetLinksRenderer": "tools/render-worldzapp-assetlinks.js",
+    "digitalAssetLinksDeployed": false,
+    "signedAabBuilt": false
+  },
+  "console": {
+    "dataSafetyFinalized": false,
+    "financialFeaturesFinalized": false,
+    "adsDeclarationFinalized": false,
+    "targetAudienceFinalized": false,
+    "contentRatingFinalized": false,
+    "testingRequirementSatisfied": false
+  },
+  "releaseAuthorized": false,
+  "rule": "Code-side readiness must never be represented as Google Play approval. Account, deployment, signing, testing and final declaration gates require real external evidence."
+}
