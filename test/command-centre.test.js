@@ -39,3 +39,6 @@ test("WorldzFullBuild is the Command Centre umbrella over FullScope", () => {
   assert.ok(MENUS.fullbuild.rows.some((row) => row[1] === "/worldzgovern"));
   assert.ok(MENUS.fullbuild.rows.some((row) => row[1] === "/worldzlinks"));
 });
+
+
+test("AUTO is visibly buy-only and Grace remains read-only", () => {\n  assert.ok(MENUS.auto.title.includes("BUY ONLY"));\n  assert.ok(MENUS.auto.rows.some((row) => row[1] === "/autobuyuniverse"));\n  assert.ok(String(MENUS.grace.note || "").includes("read-only"));\n});\n
