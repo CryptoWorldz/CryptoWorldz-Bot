@@ -1,0 +1,32 @@
+name: Validate WorldzLaunch Quality Gate
+
+on:
+  push:
+    paths:
+      - 'worldzpad-omnichain/fullscope/worldz-launch-quality-gate.v1.json'
+      - 'worldzpad-omnichain/fullscope/worldz-miracle-token.v1.json'
+      - 'worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json'
+      - 'docs/WORLDZ-LAUNCH-QUALITY-GATE.md'
+      - 'scripts/validate_worldz_launch_quality.py'
+      - '.github/workflows/validate-worldz-launch-quality.yml'
+  pull_request:
+    paths:
+      - 'worldzpad-omnichain/fullscope/worldz-launch-quality-gate.v1.json'
+      - 'worldzpad-omnichain/fullscope/worldz-miracle-token.v1.json'
+      - 'worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json'
+      - 'docs/WORLDZ-LAUNCH-QUALITY-GATE.md'
+      - 'scripts/validate_worldz_launch_quality.py'
+      - '.github/workflows/validate-worldz-launch-quality.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate WorldzLaunch Quality Gate
+        run: python scripts/validate_worldz_launch_quality.py
+      - name: Validate WorldzFullBuild
+        run: python scripts/validate_worldz_fullbuild.py
