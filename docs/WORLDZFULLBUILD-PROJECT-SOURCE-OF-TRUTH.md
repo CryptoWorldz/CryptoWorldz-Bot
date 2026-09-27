@@ -266,3 +266,12 @@ Read-provider bindings are now code-built for Solana, Ethereum, Base, BNB Chain,
 WorldzApp Stage 2 live-read infrastructure passed GitHub Actions workflow run `36287750004` on 2026-09-27. Read-only proof passed for Solana, Base, BNB Chain, HyperEVM, XRPL, Sui GraphQL and Robinhood Chain, including a finalized read against the owner-approved public Solana address. Exact wallet balance is deliberately not copied into this public source-of-truth.
 
 Production providers remain environment-configured. The proof grants no signing or mainnet execution authority. Next gate: WorldzApp public identity/session and external mobile-wallet connection infrastructure.
+
+
+## WorldzApp™ identity + wallet connection foundation — 2026-09-27
+
+WorldzApp Stage 3 identity/session infrastructure is code-built. Browser sessions are session-only by default; EIP-6963/EIP-1193 EVM wallet discovery/public-account connection and a Solana injected-provider fallback are implemented without signing or transaction broadcast methods.
+
+Permanent authority rule: **connected wallet ≠ verified wallet control ≠ treasury signer**. A future challenge signature may verify control of a public address, but treasury authority still requires treasury-specific consent, approval and actual chain-native multisig membership. Telegram identity does not inherit treasury authority.
+
+The connector registry now targets Solana Wallet Standard/Mobile Wallet Standard, WalletConnect/AppKit, current Sui dApp Kit v2, Xaman for XRPL integration research, and Tangem through WalletConnect for supported Solana/EVM WorldzCard™ paths. No partnership claim is made.
