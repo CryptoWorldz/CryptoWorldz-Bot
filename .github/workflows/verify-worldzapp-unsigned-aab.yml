@@ -113,9 +113,9 @@ jobs:
           unzip -t "$AAB" >/dev/null
           SHA="$(sha256sum "$AAB" | awk '{print $1}')"
           SIZE="$(stat -c%s "$AAB")"
-          mkdir -p .worldzapp-aab-proof
-          cp "$AAB" .worldzapp-aab-proof/worldzapp-unsigned-release.aab
-          if [ -f "$APK" ]; then cp "$APK" .worldzapp-aab-proof/worldzapp-unsigned-release.apk; fi
+          mkdir -p worldzapp-aab-proof
+          cp "$AAB" worldzapp-aab-proof/worldzapp-unsigned-release.aab
+          if [ -f "$APK" ]; then cp "$APK" worldzapp-aab-proof/worldzapp-unsigned-release.apk; fi
           node - "$SHA" "$SIZE" <<'NODE'
           const fs=require('node:fs');
           const [sha256,sizeBytes]=process.argv.slice(2);
@@ -131,7 +131,7 @@ jobs:
             releaseAuthorized:false,
             aab:{sha256,sizeBytes:Number(sizeBytes)}
           };
-          fs.writeFileSync('.worldzapp-aab-proof/proof.json',JSON.stringify(proof,null,2)+'\n');
+          fs.writeFileSync('worldzapp-aab-proof/proof.json',JSON.stringify(proof,null,2)+'\n');
           console.log(JSON.stringify(proof,null,2));
           console.log('WORLDZAPP_UNSIGNED_AAB_SHA256='+sha256);
           console.log('WORLDZAPP_UNSIGNED_AAB_SIZE='+sizeBytes);
@@ -141,6 +141,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: worldzapp-unsigned-aab-proof
-          path: .worldzapp-aab-proof/
+          path: worldzapp-aab-proof/
           if-no-files-found: error
           retention-days: 14
