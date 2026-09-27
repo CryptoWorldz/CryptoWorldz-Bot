@@ -39,12 +39,62 @@ function createAutoDcaRepository(supabase) {
   async function listAllowlistedTokens() {
     const { data, error } = await supabase
       .from("auto_tokens")
-      .select("id,network,token_mint,symbol,status,display_name,created_at,updated_at")
+      .select("id,network,token_mint,symbol,status,display_name,source_kind,source_token_id,inherited_buy_only,auto_buy_enabled,created_at,updated_at")
       .eq("network", "solana")
       .eq("status", "allowlisted")
       .order("created_at", { ascending: true });
     if (error) throw error;
     return data || [];
+  }
+
+  async function listWallets() {
+    const { data, error } = await supabase
+      .from("auto_dca_wallets")
+      .select("wallet_address,label,wallet_role,enabled,verified,verified_at,created_at,updated_at")
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function listAssetRegistry(limit = 250) {
+    const { data, error } = await supabase
+      .from("auto_worldz_asset_registry")
+      .select("id,chain_key,source_token_id,name,symbol,contract_address,source_kind,buy_policy,funding_asset,execution_state,enabled,created_at,updated_at")
+      .eq("enabled", true)
+      .order("source_kind", { ascending: true })
+      .order("symbol", { ascending: true })
+      .limit(Math.max(1, Math.min(Number(limit) || 250, 500)));
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function upsertWallet({ walletAddress, label, walletRole, enabled = true, verified = false, actorTelegramId }) {
+    const row = {
+      wallet_address: walletAddress,
+      label,
+      wallet_role: walletRole,
+      enabled,
+      verified,
+      added_by: actorTelegramId,
+      updated_at: new Date().toISOString()
+    };
+    if (verified) {
+      row.verified_by = actorTelegramId;
+      row.verified_at = new Date().toISOString();
+    }
+    const { data, error } = await supabase
+      .from("auto_dca_wallets")
+      .upsert(row, { onConflict: "wallet_address" })
+      .select("*")
+      .single();
+    if (error) throw error;
+    await audit("dca_wallet_allowlist_updated", actorTelegramId, {
+      wallet_address: walletAddress,
+      wallet_role: walletRole,
+      enabled,
+      verified
+    });
+    return data;
   }
 
   async function audit(action, actorTelegramId, details = {}) {
@@ -63,6 +113,7 @@ function createAutoDcaRepository(supabase) {
       .insert({
         owner_telegram_id: actorTelegramId,
         token_mint: proposal.token_mint,
+        wallet_address: proposal.wallet_address,
         input_currency: proposal.input_currency,
         input_mint: proposal.input_mint,
         input_decimals: proposal.input_decimals,
@@ -272,12 +323,15 @@ function createAutoDcaRepository(supabase) {
     getSchedule,
     getSettings,
     listAllowlistedTokens,
+    listAssetRegistry,
     listSchedules,
+    listWallets,
     setControl,
     setLimits,
     setScheduleStatus,
     setWalletAddress,
-    startExecution
+    startExecution,
+    upsertWallet
   };
 }
 
