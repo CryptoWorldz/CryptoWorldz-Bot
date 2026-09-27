@@ -490,7 +490,7 @@ After Stage 4B live simulation proof and Stage 5B live WLDZ Squads proof passed,
 - Publishing format target: **Android App Bundle (.aab)**.
 - Candidate application ID: `xyz.cryptoworldz.worldzapp`, provisional until the Play application is created.
 - No Android signing key, keystore password, Play service credential, private key or seed phrase is committed.
-- Signed release remains blocked until the owner-approved Worldz centre-logo raster/maskable assets, final application ID, Play signing identity and Digital Asset Links are real and verified.
+- Owner-approved Worldz production Play/maskable assets are now real and checksum-verified. Signed release remains blocked on the final application ID, Play signing identity, Digital Asset Links and remaining release gates.
 - Packaging does not enable app-level mainnet broadcast or unproven Safe/XRPL/Sui capabilities.
 
 Canonical packaging contract: `apps/worldzapp-android/android-package.v1.json`.
@@ -532,7 +532,7 @@ Current Play truth:
 - Android App Bundle is the required release format;
 - Play submission ready: **NO**;
 - signed AAB: **NO**;
-- final owner-approved centre-logo Android raster/maskable assets: **PENDING**;
+- final owner-approved centre-logo Android raster/maskable assets: **READY / CHECKSUM VERIFIED**;
 - Play developer identity / Play App Signing certificate: **PENDING**;
 - Digital Asset Links using the real Play certificate: **PENDING**;
 - public support/privacy URLs and final Data safety / Financial features declarations: **PENDING**;
@@ -553,3 +553,14 @@ A valid repository identity preview is stored at `apps/worldzapp-android/assets/
 The emblem must not be regenerated, reinterpreted or replaced without explicit owner approval. Final 512×512 Play PNG, Android launcher/mipmap and maskable safe-zone derivatives remain an explicit release gate and must be generated from the approved master.
 
 Keep On Keepin On™ remains active: progress the build continuously without bypassing truth, security or release gates.
+
+
+## WorldzApp production emblem assets — VERIFIED — 2026-09-27
+
+The owner-approved Worldz Emblem master remains locked by SHA-256 `685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050`. The production Google Play icon and Android maskable source are now committed and checksum-bound rather than merely represented by a preview.
+
+- Play icon: 512×512 PNG, 32-bit RGBA, embedded sRGB ICC profile, SHA-256 `27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d`.
+- Android maskable source: 512×512 PNG, 32-bit RGBA, embedded sRGB ICC profile, SHA-256 `b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15`.
+- `tools/verify-worldzapp-icon-assets.js` verifies dimensions, PNG color type, profile marker, Play file-size cap, exact hashes and byte equality between hosted and Android copies.
+- The production asset blocker is cleared. Play developer identity, final application ID, privacy/support publication, Play App Signing, Digital Asset Links, signed AAB, device/testing tracks and final declarations remain gated.
+- No wallet signing, approval submission, transaction execution or mainnet broadcast is enabled by the asset work.
