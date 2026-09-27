@@ -1,0 +1,189 @@
+name: WorldzApp Final Signed AAB Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_label:
+        description: 'Human-readable candidate label'
+        required: true
+        default: 'worldzapp-play-candidate'
+
+permissions:
+  contents: read
+
+jobs:
+  build-signed-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      WORLDZAPP_UPLOAD_KEYSTORE_B64: ${{ secrets.WORLDZAPP_UPLOAD_KEYSTORE_B64 }}
+      WORLDZAPP_UPLOAD_KEY_ALIAS: ${{ secrets.WORLDZAPP_UPLOAD_KEY_ALIAS }}
+      WORLDZAPP_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.WORLDZAPP_UPLOAD_KEYSTORE_PASSWORD }}
+      WORLDZAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.WORLDZAPP_UPLOAD_KEY_PASSWORD }}
+      WORLDZAPP_PLAY_SIGNING_SHA256: ${{ secrets.WORLDZAPP_PLAY_SIGNING_SHA256 }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Fail closed unless protected release inputs exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in             WORLDZAPP_UPLOAD_KEYSTORE_B64             WORLDZAPP_UPLOAD_KEY_ALIAS             WORLDZAPP_UPLOAD_KEYSTORE_PASSWORD             WORLDZAPP_UPLOAD_KEY_PASSWORD             WORLDZAPP_PLAY_SIGNING_SHA256
+          do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::$name is required for a signed release candidate"
+              exit 1
+            fi
+          done
+          echo "WORLDZAPP_PROTECTED_RELEASE_INPUTS=PASS"
+
+      - name: Verify final WorldzApp release contracts and exact icon hashes
+        run: |
+          npm run verify:worldzapp:play
+          npm run verify:worldzapp:play-phase2
+          npm run verify:worldzapp:play-phase3
+          node tools/verify-worldzapp-final-icon-pack.js --require-assets
+
+      - name: Install Android API 36 build tools
+        run: |
+          set -euo pipefail
+          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"             "platform-tools" "platforms;android-36" "build-tools;36.0.0" "build-tools;36.1.0"
+
+      - name: Install pinned Bubblewrap
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund @bubblewrap/cli@1.25.0
+
+      - name: Configure Bubblewrap toolchain
+        run: |
+          set -euo pipefail
+          BUBBLEWRAP_SDK="$RUNNER_TEMP/bubblewrap-android-sdk"
+          mkdir -p "$BUBBLEWRAP_SDK" "$HOME/.bubblewrap"
+          ln -s "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" "$BUBBLEWRAP_SDK/bin"
+          ln -s "$ANDROID_SDK_ROOT/build-tools" "$BUBBLEWRAP_SDK/build-tools"
+          ln -s "$ANDROID_SDK_ROOT/platforms" "$BUBBLEWRAP_SDK/platforms"
+          ln -s "$ANDROID_SDK_ROOT/platform-tools" "$BUBBLEWRAP_SDK/platform-tools"
+          if [ -d "$ANDROID_SDK_ROOT/licenses" ]; then ln -s "$ANDROID_SDK_ROOT/licenses" "$BUBBLEWRAP_SDK/licenses"; fi
+          node - "$BUBBLEWRAP_SDK" <<'NODE'
+          const fs=require('node:fs'), path=require('node:path');
+          const sdkPath=process.argv[2];
+          fs.writeFileSync(path.join(process.env.HOME,'.bubblewrap','config.json'),JSON.stringify({
+            jdkPath:process.env.JAVA_HOME,
+            androidSdkPath:sdkPath
+          },null,2)+'\n');
+          NODE
+          echo "ANDROID_HOME=$BUBBLEWRAP_SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$BUBBLEWRAP_SDK" >> "$GITHUB_ENV"
+
+      - name: Prepare final TWA manifest using checksum-bound final assets
+        run: |
+          mkdir -p worldzapp-final-build
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const source=JSON.parse(fs.readFileSync('apps/worldzapp-android/twa-manifest.template.json','utf8'));
+          const raw='https://raw.githubusercontent.com/'+process.env.GITHUB_REPOSITORY+'/'+process.env.GITHUB_SHA+'/';
+          const keys=[
+            'packageId','host','name','launcherName','display','backgroundColor',
+            'themeColor','themeColorDark','navigationColor','navigationColorDark',
+            'navigationDividerColor','navigationDividerColorDark','enableNotifications',
+            'startUrl','splashScreenFadeOutDuration','appVersion','appVersionCode','shortcuts',
+            'generatorApp','fullScopeUrl','fallbackType','features','alphaDependencies',
+            'enableSiteSettingsShortcut','isChromeOSOnly','isMetaQuest','minSdkVersion',
+            'orientation','fingerprints','additionalTrustedOrigins'
+          ];
+          const m={};
+          for(const key of keys) if(source[key]!==undefined) m[key]=source[key];
+          m.webManifestUrl=raw+'launchpad.cryptoworldz.xyz/worldz-app/manifest.webmanifest';
+          m.iconUrl=raw+'apps/worldzapp-android/assets/worldzapp-play-icon-512.png';
+          m.maskableIconUrl=raw+'apps/worldzapp-android/assets/worldzapp-maskable-icon-512.png';
+          m.signingKey={path:'UNUSED_BY_SKIP_SIGNING.keystore',alias:'worldzapp'};
+          fs.writeFileSync('worldzapp-final-build/twa-manifest.json',JSON.stringify(m,null,2)+'\n');
+          console.log('WORLDZAPP_FINAL_TWA_MANIFEST=READY');
+          NODE
+
+      - name: Generate Android project
+        working-directory: worldzapp-final-build
+        run: npx bubblewrap update --skipVersionUpgrade --manifest=twa-manifest.json
+
+      - name: Build unsigned release AAB before protected runtime signing
+        working-directory: worldzapp-final-build
+        run: npx bubblewrap build --skipSigning --skipPwaValidation --manifest=twa-manifest.json
+
+      - name: Decode protected upload keystore
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/worldzapp-signing"
+          printf '%s' "$WORLDZAPP_UPLOAD_KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/worldzapp-signing/upload.keystore"
+          test -s "$RUNNER_TEMP/worldzapp-signing/upload.keystore"
+          chmod 600 "$RUNNER_TEMP/worldzapp-signing/upload.keystore"
+          echo "WORLDZAPP_UPLOAD_KEYSTORE_READY=PASS"
+
+      - name: Sign and verify AAB with upload key
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB="worldzapp-final-build/app/build/outputs/bundle/release/app-release.aab"
+          test -s "$AAB"
+          jarsigner             -keystore "$RUNNER_TEMP/worldzapp-signing/upload.keystore"             -storepass:env WORLDZAPP_UPLOAD_KEYSTORE_PASSWORD             -keypass:env WORLDZAPP_UPLOAD_KEY_PASSWORD             -sigalg SHA256withRSA             -digestalg SHA-256             "$AAB" "$WORLDZAPP_UPLOAD_KEY_ALIAS"
+          jarsigner -verify -strict -verbose -certs "$AAB" >/dev/null
+          echo "WORLDZAPP_UPLOAD_SIGNED_AAB=PASS"
+
+      - name: Render Digital Asset Links from real Play App Signing fingerprint
+        run: |
+          node tools/render-worldzapp-assetlinks.js
+          test -s launchpad.cryptoworldz.xyz/.well-known/assetlinks.json
+
+      - name: Create signed candidate proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB="worldzapp-final-build/app/build/outputs/bundle/release/app-release.aab"
+          SHA="$(sha256sum "$AAB" | awk '{print $1}')"
+          SIZE="$(stat -c%s "$AAB")"
+          mkdir -p worldzapp-signed-candidate
+          cp "$AAB" worldzapp-signed-candidate/worldzapp-upload-signed-release.aab
+          cp launchpad.cryptoworldz.xyz/.well-known/assetlinks.json worldzapp-signed-candidate/assetlinks.json
+          node - "$SHA" "$SIZE" "${{ inputs.release_label }}" <<'NODE'
+          const fs=require('node:fs');
+          const [sha256,sizeBytes,label]=process.argv.slice(2);
+          const proof={
+            schema:'WORLDZAPP-SIGNED-AAB-CANDIDATE-PROOF-V1',
+            generatedAt:new Date().toISOString(),
+            commit:process.env.GITHUB_SHA,
+            workflowRunId:process.env.GITHUB_RUN_ID,
+            label,
+            applicationId:'xyz.cryptoworldz.worldzapp',
+            targetSdk:36,
+            aab:{sha256,sizeBytes:Number(sizeBytes),uploadSigned:true},
+            playAppSigningFingerprintProvided:true,
+            digitalAssetLinksRendered:true,
+            autoSubmittedToGooglePlay:false,
+            productionReleaseAuthorized:false,
+            transactionSigningEnabledByWorldzApp:false,
+            mainnetBroadcastEnabledByWorldzApp:false
+          };
+          fs.writeFileSync('worldzapp-signed-candidate/proof.json',JSON.stringify(proof,null,2)+'\n');
+          console.log(JSON.stringify(proof,null,2));
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldzapp-signed-aab-candidate
+          path: worldzapp-signed-candidate/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Remove runtime keystore
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/worldzapp-signing"

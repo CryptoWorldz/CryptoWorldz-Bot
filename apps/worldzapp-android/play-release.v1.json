@@ -2,7 +2,7 @@
   "schema": "WORLDZ-APP-GOOGLE-PLAY-RELEASE-V1",
   "updatedAt": "2026-09-28",
   "product": "WorldzApp™",
-  "state": "CODE_BUILT_PLAY_READINESS_GATES__SUBMISSION_NOT_READY",
+  "state": "PLAY_PHASE3_PIPELINE_BUILT__PLAY_ACCOUNT_FINAL_BINARIES_SIGNING_TESTING_AND_SUBMISSION_PENDING",
   "submissionReady": false,
   "publicReleaseAuthorized": false,
   "android": {
@@ -66,11 +66,13 @@
     },
     "testingTrack": {
       "state": "REQUIRED_ACCOUNT_DEPENDENT",
-      "rule": "Use internal/closed testing before production. New personal developer accounts created after 2023-11-13 have additional closed-testing production-access requirements."
+      "rule": "Use internal/closed testing before production. New personal developer accounts created after 2023-11-13 have additional closed-testing production-access requirements.",
+      "inventory": "apps/worldzapp-android/play-testing-checklist.v1.json"
     },
     "storeListing": {
       "state": "DRAFT_BUILT",
-      "inventory": "apps/worldzapp-android/play-store-listing.v1.json"
+      "inventory": "apps/worldzapp-android/play-store-listing.v1.json",
+      "screenshotPlan": "apps/worldzapp-android/play-screenshot-plan.v1.json"
     },
     "jurisdictionDistributionReview": {
       "state": "REQUIRED_BEFORE_COUNTRY_SELECTION",
@@ -87,6 +89,12 @@
       "workflowArtifact": "worldzapp-unsigned-aab-proof",
       "signed": false,
       "releaseAuthorized": false
+    },
+    "signedAabPipeline": {
+      "state": "BUILT_MANUAL_ONLY",
+      "workflow": ".github/workflows/worldzapp-final-release-aab.yml",
+      "autoSubmitToPlay": false,
+      "secretsCommitted": false
     }
   },
   "worldzSecurity": {
@@ -143,10 +151,20 @@
       "state": "SUPERSEDED_FOR_FINAL_PLAY_RELEASE",
       "playIconSha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d",
       "maskableIconSha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15"
-    }
+    },
+    "finalIconPackManifest": "apps/worldzapp-android/final-icon-pack.v1.json",
+    "finalDerivedAssetState": "PREPARED__REPOSITORY_BINARY_IMPORT_PENDING",
+    "expectedPlayIconSha256": "f4a517537c1309a5792cbf707f76a945735fd1610bb98a437789f341c6b5c3f8",
+    "expectedMaskableIconSha256": "54615f8001e6664f6c3681e9fa30eeba47b322720ba4af63e943b02a71d76da1"
   },
   "releasePhase2": {
     "state": "CODE_SIDE_BUILT__EXTERNAL_GATES_REMAIN",
     "preflight": "apps/worldzapp-android/play-final-preflight.v1.json"
+  },
+  "releasePhase3": {
+    "state": "BUILT",
+    "signedReleasePreparation": "apps/worldzapp-android/signed-release-preparation.v1.json",
+    "testingChecklist": "apps/worldzapp-android/play-testing-checklist.v1.json",
+    "screenshotPlan": "apps/worldzapp-android/play-screenshot-plan.v1.json"
   }
 }
