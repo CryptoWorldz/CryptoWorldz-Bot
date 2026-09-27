@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://launchpad.cryptoworldz.xyz/worldz-app/core/proposal.schema.json",
+  "title": "WorldzApp Treasury Proposal Draft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "proposalId",
+    "treasuryProfile",
+    "chain",
+    "action",
+    "executionMode",
+    "createdAt",
+    "review"
+  ],
+  "properties": {
+    "schema": {
+      "const": "WORLDZ-APP-PROPOSAL-V1"
+    },
+    "proposalId": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128
+    },
+    "treasuryProfile": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "chain": {
+      "enum": [
+        "solana",
+        "ethereum",
+        "base",
+        "bnb",
+        "hyperevm",
+        "xrpl",
+        "sui",
+        "robinhood"
+      ]
+    },
+    "action": {
+      "enum": [
+        "transfer",
+        "swap",
+        "add_liquidity",
+        "remove_liquidity",
+        "lock",
+        "vesting",
+        "stake",
+        "bridge",
+        "signer_change",
+        "governance_action"
+      ]
+    },
+    "asset": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "amount": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 96
+    },
+    "destination": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 256
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 2000
+    },
+    "executionMode": {
+      "const": "DRAFT_ONLY"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "humanReadable",
+        "simulationRequired",
+        "worldzProofRequired"
+      ],
+      "properties": {
+        "humanReadable": {
+          "const": true
+        },
+        "simulationRequired": {
+          "const": true
+        },
+        "worldzProofRequired": {
+          "const": true
+        }
+      }
+    }
+  }
+}
