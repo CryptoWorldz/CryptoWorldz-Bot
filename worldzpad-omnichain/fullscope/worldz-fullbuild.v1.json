@@ -646,13 +646,14 @@
     "capabilityDefault": "DENY",
     "appLevelMainnetBroadcast": false,
     "worldzMiracleWalletModule": "/miracle-wallet/",
-    "nextEngineeringGate": "CONFIGURE_VERIFIED_READ_PROVIDERS_AND_PROVE_LIVE_BALANCE_MULTISIG_AND_PROPOSAL_READS",
+    "nextEngineeringGate": "PASS_LIVE_READ_PROOF__THEN_PRODUCTION_PROVIDER_BINDING_AND_IDENTITY_SESSION",
     "readAdapterFoundation": {
       "contract": "src/worldz-app/read-adapter-contract.js",
       "adapters": 8,
       "execution": false,
-      "providerBindings": "NOT_CONFIGURED",
-      "liveReadProof": "NOT_RUN"
+      "providerBindings": "OFFICIAL_PUBLIC_VERIFY_ENDPOINTS_CONFIGURED__PRODUCTION_ENV_REQUIRED",
+      "liveReadProof": "PENDING_CI_VERIFICATION",
+      "liveReadWorkflow": ".github/workflows/worldzapp-live-read-proof.yml"
     }
   }
 }
