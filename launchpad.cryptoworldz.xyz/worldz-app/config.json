@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-RUNTIME-V1",
   "brand": "WorldzApp™",
-  "status": "ANDROID_API36_PACKAGING_FOUNDATION_BUILT__SIGNED_AAB_RELEASE_GATED__NO_MAINNET_EXECUTION",
+  "status": "ANDROID_API36_PACKAGING_FOUNDATION_BUILT__STAGE_5B_SQUADS_PROVEN__STAGE_5C_MULTICHAIN_HARNESS_BUILT__NO_MAINNET_EXECUTION",
   "tagline": "WorldzEcosystem™. One App. Separate Authority.",
   "coreContract": "/worldz-app/core/worldz-app.v1.json",
   "modules": [
@@ -186,7 +186,7 @@
     }
   },
   "multisigApprovalFoundation": {
-    "state": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__OTHER_CHAINS_GATED",
+    "state": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__STAGE_5C_HARNESS_BUILT",
     "registry": "/worldz-app/core/multisig-approval-adapters.json",
     "supportedNow": [
       "SQUADS_V4_STATE",
@@ -198,32 +198,19 @@
     "signing": false,
     "execution": false,
     "broadcast": false,
-    "nextGate": "ANDROID_16_PACKAGE_FOUNDATION",
+    "nextGate": "APPROVE_REAL_WORLDZ_SAFE_XRPL_SUI_PUBLIC_PROFILES__THEN_RUN_LIVE_PROOFS",
     "liveProof": {
-      "squadsWldz": {
+      "squads": {
         "state": "PASSED",
-        "verifiedAt": "2026-09-27T12:09:21.856Z",
         "workflowRunId": 36318035477,
         "proofSha256": "ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0",
-        "worldzProfile": "WLDZ_OPERATIONAL_SQUADS",
-        "network": "mainnet-beta",
-        "multisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
-        "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-        "threshold": 1,
-        "memberCount": 2,
-        "transactionIndex": 20,
-        "proposalIndex": 14,
-        "proposalStatus": "Executed",
-        "proposalPda": "3AxY7YshaCNSyu37hpGRYqwqW2AZs4E6kEZk6SE12kiB",
-        "approvedCount": 1,
-        "thresholdMet": true,
-        "executionAllowed": false,
-        "broadcastAllowed": false,
-        "approvalSubmission": false,
-        "signing": false,
-        "privateMaterialRead": false
-      }
-    }
+        "profile": "WLDZ_OPERATIONAL_SQUADS"
+      },
+      "safe": "WORLDZ_PROFILE_REQUIRED",
+      "xrpl": "WORLDZ_PROFILE_REQUIRED",
+      "sui": "WORLDZ_PROFILE_REQUIRED"
+    },
+    "liveProofGates": "/worldz-app/core/multisig-live-proof-gates.json"
   },
   "androidPackagingFoundation": {
     "state": "CODE_BUILT_API36_TWA_FOUNDATION",

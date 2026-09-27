@@ -1,6 +1,6 @@
 # WorldzApp™ — Core Architecture v1
 
-Status: **ANDROID 16 / API 36 PACKAGING FOUNDATION BUILT / SIGNED AAB RELEASE GATED / NO APP-LEVEL MAINNET EXECUTION**  
+Status: **ANDROID API-36 PACKAGING FOUNDATION BUILT + STAGE 5B SQUADS LIVE PROOF PASSED + STAGE 5C MULTICHAIN PROOF HARNESS BUILT / NO APP-LEVEL MAINNET EXECUTION**  
 Date: **2026-09-27**  
 Parent: **WorldzFullBuild™**
 
@@ -381,3 +381,26 @@ Release blockers are intentionally explicit:
 6. complete device QA, Play testing and policy/data-safety declarations.
 
 Android packaging does not unlock Safe, XRPL or Sui features that still lack their own live profile proof, and it does not enable mainnet broadcast.
+
+
+## Stage 5C — Safe / XRPL / Sui live-proof harness — 2026-09-27
+
+The Android API-36 packaging foundation and Stage 5 security gates now coexist in the same canonical WorldzApp build.
+
+Stage 5B already passed against the real public WLDZ Squads v4 profile. Workflow run `36318035477` produced proof checksum `ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0`.
+
+Stage 5C adds fail-closed public proof readers and readiness gates for:
+
+- Safe Smart Account owners/threshold plus transaction confirmations, with the transaction record required to belong to the configured Safe;
+- XRPL validated SignerList / SignerQuorum plus validated transaction Signers, with HTTPS required and transaction Account required to match the configured Worldz account;
+- Sui weighted multisig public configuration evidence, without pretending Sui has a Safe-style on-chain owner registry.
+
+Current truth:
+
+- Squads/WLDZ: **LIVE PROOF PASSED**.
+- Safe: **WORLDZ_PROFILE_REQUIRED**.
+- XRPL: **WORLDZ_PROFILE_REQUIRED**.
+- Sui: **WORLDZ_PROFILE_REQUIRED**.
+- Android API-36 TWA packaging foundation: **BUILT**, but signed AAB/public Play release remains gated.
+
+No unrelated third-party multisig may be substituted to produce a green Worldz proof. Approval submission, signing, execution and broadcast remain OFF.

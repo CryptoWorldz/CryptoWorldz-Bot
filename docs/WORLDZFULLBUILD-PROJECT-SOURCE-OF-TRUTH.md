@@ -494,3 +494,17 @@ After Stage 4B live simulation proof and Stage 5B live WLDZ Squads proof passed,
 - Packaging does not enable app-level mainnet broadcast or unproven Safe/XRPL/Sui capabilities.
 
 Canonical packaging contract: `apps/worldzapp-android/android-package.v1.json`.
+
+
+## WorldzApp Stage 5C reconciled security checkpoint — 2026-09-27
+
+WorldzApp now carries both the **Android API-36 packaging foundation** and the **Stage 5C multisig proof harness** without weakening either gate.
+
+- WLDZ / Squads v4 public approval-state proof: **PASSED**.
+- Safe, XRPL and Sui adapters/readers: **HARNESS BUILT / WORLDZ_PROFILE_REQUIRED**.
+- Safe proof must bind the selected transaction hash to the configured Worldz Safe before confirmations count.
+- XRPL proof requires HTTPS, validated account state, a validated proof transaction and an exact transaction Account match.
+- Sui remains explicit public-configuration evidence until an approved Worldz Sui multisig profile exists and current SDK/address verification is completed.
+- No third-party example profile may satisfy a Worldz live-proof gate.
+- Android packaging does not authorize wallet signing, approval submission, transaction execution or broadcast.
+- Signed AAB, Digital Asset Links, Play signing identity, approved centre-logo assets, device QA and Play policy/testing gates remain separate release requirements.
