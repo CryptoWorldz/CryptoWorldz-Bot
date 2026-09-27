@@ -1,0 +1,70 @@
+{
+  "schema": "WORLDZ-APP-SIMULATION-BINDINGS-V1",
+  "updatedAt": "2026-09-27",
+  "mode": "UNSIGNED_SIMULATION_ONLY",
+  "execution": false,
+  "signatureRequest": false,
+  "broadcast": false,
+  "bindings": [
+    {
+      "chain": "solana",
+      "family": "SOLANA",
+      "method": "simulateTransaction",
+      "state": "CODE_BUILT_LIVE_PROOF_PENDING",
+      "requires": ["base64_unsigned_transaction", "unsigned_payload_hash", "human_readable_effects"],
+      "rpcConfig": {"encoding":"base64","sigVerify":false,"replaceRecentBlockhash":true,"commitment":"confirmed"}
+    },
+    {
+      "chain": "ethereum",
+      "family": "EVM",
+      "methods": ["eth_call","eth_estimateGas"],
+      "state": "CODE_BUILT_LIVE_PROOF_PENDING",
+      "expectedChainId": 1
+    },
+    {
+      "chain": "base",
+      "family": "EVM",
+      "methods": ["eth_call","eth_estimateGas"],
+      "state": "CODE_BUILT_LIVE_PROOF_PENDING",
+      "expectedChainId": 8453
+    },
+    {
+      "chain": "bnb",
+      "family": "EVM",
+      "methods": ["eth_call","eth_estimateGas"],
+      "state": "CODE_BUILT_LIVE_PROOF_PENDING",
+      "expectedChainId": 56
+    },
+    {
+      "chain": "hyperevm",
+      "family": "EVM",
+      "methods": ["eth_call","eth_estimateGas"],
+      "state": "CODE_BUILT_LIVE_PROOF_PENDING",
+      "expectedChainId": 999
+    },
+    {
+      "chain": "robinhood",
+      "family": "EVM",
+      "methods": ["eth_call","eth_estimateGas"],
+      "state": "CODE_BUILT_LIVE_PROOF_PENDING",
+      "expectedChainId": 4663
+    },
+    {
+      "chain": "xrpl",
+      "family": "XRPL",
+      "state": "PENDING_CHAIN_NATIVE_SIMULATION_DESIGN"
+    },
+    {
+      "chain": "sui",
+      "family": "SUI",
+      "state": "PENDING_CHAIN_NATIVE_DRY_RUN_BINDING"
+    }
+  ],
+  "rules": [
+    "Simulation inputs must already have human-readable effects derived from the unsigned proposal review.",
+    "A successful simulation never authorizes a signature request or broadcast.",
+    "Simulation adapters may call only non-broadcast RPC methods.",
+    "Exact network identity must be checked before a result is accepted.",
+    "Live proof remains chain-by-chain and fail-closed."
+  ]
+}
