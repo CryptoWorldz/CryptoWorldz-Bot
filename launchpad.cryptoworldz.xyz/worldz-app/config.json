@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-RUNTIME-V1",
   "brand": "WorldzApp™",
-  "status": "CODE_BUILT_STAGE_3B_IDENTITY_MOBILE_HANDOFF__STAGE_4A_UNSIGNED_SIMULATION_ADAPTERS__NO_MAINNET_EXECUTION",
+  "status": "STAGE_4B_LIVE_SIMULATION_PROOF_PASSED__STAGE_5_NEXT__NO_MAINNET_EXECUTION",
   "tagline": "WorldzEcosystem™. One App. Separate Authority.",
   "coreContract": "/worldz-app/core/worldz-app.v1.json",
   "modules": [
@@ -154,18 +154,35 @@
     "nextGate": "BIND_AND_VERIFY_XRPL_SUI_MOBILE_PROVIDERS"
   },
   "simulationFoundation": {
-    "state": "CODE_BUILT_STAGE_4A_UNSIGNED_ADAPTERS__LIVE_PROOF_PENDING",
+    "state": "STAGE_4B_LIVE_PROOF_PASSED",
     "policy": "/worldz-app/core/simulation-policy.json",
     "contract": "src/worldz-app/simulation-contract.js",
     "liveChainBindings": "SOLANA_AND_EVM_CODE_BUILT__LIVE_PROOF_PENDING",
     "signatureRequest": false,
     "broadcast": false,
-    "nextGate": "LIVE_PROOF_SOLANA_AND_EVM__THEN_XRPL_SUI_DRY_RUNS",
+    "nextGate": "STAGE_5_NATIVE_MULTISIG_APPROVAL_ADAPTERS",
     "bindings": "/worldz-app/core/simulation-bindings.json",
     "supportedNow": [
       "SOLANA_SIMULATE_TRANSACTION",
       "EVM_ETH_CALL",
       "EVM_ETH_ESTIMATE_GAS"
-    ]
+    ],
+    "liveProof": {
+      "state": "PASSED",
+      "verifiedAt": "2026-09-27T12:00:25.715Z",
+      "workflowRunId": 36317541759,
+      "proofSha256": "bc74711f21b1e3a53f7b444df2b70bc8e3e8cb425397788c02254dc77b5caca1",
+      "requiredPassed": [
+        "solana",
+        "base",
+        "bnb",
+        "hyperevm",
+        "robinhood"
+      ],
+      "ethereum": "SKIP_NO_APPROVED_VERIFY_ENDPOINT",
+      "signing": false,
+      "broadcast": false,
+      "stateMutation": false
+    }
   }
 }
