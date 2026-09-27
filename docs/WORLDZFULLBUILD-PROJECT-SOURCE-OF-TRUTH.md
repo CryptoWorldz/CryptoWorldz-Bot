@@ -245,3 +245,10 @@ WorldzApp™ is now a first-party umbrella application workstream inside WorldzF
 WorldzMiracleWallet™ becomes the secured treasury module inside WorldzApp™. WorldzLaunchPad™, Command Centre MAX™, WorldzFullBuild™, WorldzFullScope™, Worldz Votes Centre™, WorldzGovern™, WorldzLinkz™ and WorldzProof™ are registered as separate modules or integration targets. Module registration never grants authority: the app capability model is **DENY BY DEFAULT**, app-level mainnet broadcast is off, and every chain/module retains its own release and approval gates.
 
 The next engineering gate is read-only chain and treasury adapters: balances, multisig configuration and proposal history first, with no execution. Native Android/iOS packaging remains a later stage after identity, signer-connection, simulation, multisig and security gates are proven.
+
+
+## WorldzApp™ read-adapter foundation — 2026-09-27
+
+WorldzApp Stage 2 infrastructure is now code-built at the interface level. Eight chain adapter slots are registered across Solana, EVM networks, XRPL, Sui and Robinhood research. The shared adapter contract is **read only** and structurally rejects signing, sending, broadcasting, bridging, swapping, staking, signer changes and private-key operations.
+
+The app also now has a storage policy, public session schema and normalized activity-event schema. Seed phrases, private keys, recovery phrases, hardware-wallet secrets and exported signing keys are forbidden from WorldzApp storage. Provider/RPC bindings are not yet configured and no live balance or multisig-read claim is made until chain-by-chain read proof passes.
