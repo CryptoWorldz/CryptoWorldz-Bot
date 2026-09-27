@@ -2,7 +2,7 @@
   "schema": "WORLDZ-APP-ANDROID-PACKAGE-V1",
   "updatedAt": "2026-09-27",
   "product": "WorldzApp™",
-  "state": "CODE_BUILT_ANDROID_API36_PACKAGING_AND_PLAY_READINESS_FOUNDATION__AAB_NOT_RELEASED",
+  "state": "CODE_BUILT_ANDROID_API36_PLAY_READINESS__APPROVED_EMBLEM_ASSETS_READY__AAB_NOT_RELEASED",
   "packaging": {
     "technology": "TRUSTED_WEB_ACTIVITY",
     "generator": "Bubblewrap",
@@ -41,11 +41,35 @@
     "reviewAccessFinalized": false
   },
   "assetGates": {
-    "officialCenterLogoRasterReady": false,
-    "rule": "Do not generate or publish the signed Android release with an old/generated Worldz icon. Use the owner-approved Worldz centre logo only.",
+    "officialCenterLogoRasterReady": true,
+    "sourceApproved": true,
+    "sourceSha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
+    "regenerationAllowed": false,
+    "playIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
+      "hostedPath": "/worldz-app/assets/worldz-app-icon-512.png",
+      "width": 512,
+      "height": 512,
+      "bitDepth": 8,
+      "colorType": "RGBA",
+      "colorProfile": "sRGB_ICC",
+      "sizeBytes": 670286,
+      "sha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d"
+    },
+    "maskableIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
+      "hostedPath": "/worldz-app/assets/worldz-app-icon-maskable-512.png",
+      "width": 512,
+      "height": 512,
+      "bitDepth": 8,
+      "colorType": "RGBA",
+      "colorProfile": "sRGB_ICC",
+      "sizeBytes": 427484,
+      "sha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15",
+      "safeZone": "APPROVED_EMBLEM_SCALED_WITHIN_MASKABLE_SAFE_ZONE"
+    },
+    "rule": "Use only derivatives of the exact owner-approved Worldz centre emblem. No regeneration or reinterpretation without explicit owner approval.",
     "requiredBeforeSignedAab": [
-      "APPROVED_WORLDZ_CENTER_LOGO_PNG_512_OR_LARGER",
-      "APPROVED_MASKABLE_ICON",
       "PLAY_APP_SIGNING_CERT_SHA256",
       "PUBLISHED_DIGITAL_ASSET_LINKS"
     ]
@@ -64,7 +88,6 @@
   },
   "nextGates": [
     "LOCK_ANDROID_APPLICATION_ID_BEFORE_PLAY_APP_CREATION",
-    "ADD_OWNER_APPROVED_CENTER_LOGO_512_AND_MASKABLE_ASSETS",
     "VERIFY_PLAY_DEVELOPER_IDENTITY_AND_ACCOUNT_REQUIREMENTS",
     "FINALIZE_PUBLIC_SUPPORT_AND_PRIVACY_POLICY_URLS",
     "FINAL_RUNTIME_DATA_SAFETY_AND_FINANCIAL_FEATURES_AUDIT",
