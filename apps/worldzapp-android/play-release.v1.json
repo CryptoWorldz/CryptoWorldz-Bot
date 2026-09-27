@@ -89,7 +89,6 @@
     "privateKeyCollection": false
   },
   "releaseBlockers": [
-    "FINAL_PRODUCTION_512_PNG_AND_MASKABLE_EXPORT_FROM_APPROVED_WORLDZ_EMBLEM",
     "FINAL_APPLICATION_ID_LOCK",
     "VERIFIED_PLAY_DEVELOPER_IDENTITY",
     "PUBLIC_SUPPORT_CONTACT",
@@ -114,7 +113,7 @@
     "sourceSha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
     "regenerationAllowed": false,
     "replacementRequiresExplicitOwnerApproval": true,
-    "androidAssetImport": "APPROVED_SOURCE_PREVIEW_BOUND__FINAL_PRODUCTION_RASTER_PENDING",
+    "androidAssetImport": "COMMITTED_AND_VERIFIED",
     "requiredDerivedAssets": [
       "512x512 Google Play icon",
       "Android launcher/mipmap assets",
@@ -122,6 +121,25 @@
     ],
     "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
     "repositoryPreview": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg",
-    "repositoryPreviewSha256": "b3152a79fd46e0fcb4f4f00e536ea7bc9ee6279986eff3abaf60e225d91d9f7d"
+    "repositoryPreviewSha256": "b3152a79fd46e0fcb4f4f00e536ea7bc9ee6279986eff3abaf60e225d91d9f7d",
+    "androidAssetsReady": true,
+    "playIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
+      "hostedUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-512.png",
+      "width": 512,
+      "height": 512,
+      "format": "PNG_RGBA_32_BIT_SRGB",
+      "sizeBytes": 670286,
+      "sha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d"
+    },
+    "maskableIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
+      "hostedUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-maskable-512.png",
+      "width": 512,
+      "height": 512,
+      "format": "PNG_RGBA_32_BIT_SRGB",
+      "sizeBytes": 427484,
+      "sha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15"
+    }
   }
 }
