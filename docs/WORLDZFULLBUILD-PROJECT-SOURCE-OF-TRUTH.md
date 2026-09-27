@@ -476,3 +476,21 @@ Live state:
 Evidence SHA-256: `ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0`.
 
 This supersedes older preparation-era assumptions of a 2-of-3 WLDZ threshold. The newer repository record and live on-chain state both confirm the temporary 1-of-2 custody policy. Android packaging may begin from this proven Solana path while Safe/XRPL/Sui live-profile proof remains fail-closed.
+
+
+## WorldzApp Android API 36 packaging foundation — 2026-09-27
+
+Status: **CODE BUILT FOUNDATION / SIGNED AAB NOT YET RELEASED**
+
+After Stage 4B live simulation proof and Stage 5B live WLDZ Squads proof passed, WorldzApp's Android packaging work began.
+
+- Packaging model: Trusted Web Activity over the proven WorldzApp PWA.
+- Bubblewrap pin: `1.25.0`.
+- Android compile/target API: **36**.
+- Publishing format target: **Android App Bundle (.aab)**.
+- Candidate application ID: `xyz.cryptoworldz.worldzapp`, provisional until the Play application is created.
+- No Android signing key, keystore password, Play service credential, private key or seed phrase is committed.
+- Signed release remains blocked until the owner-approved Worldz centre-logo raster/maskable assets, final application ID, Play signing identity and Digital Asset Links are real and verified.
+- Packaging does not enable app-level mainnet broadcast or unproven Safe/XRPL/Sui capabilities.
+
+Canonical packaging contract: `apps/worldzapp-android/android-package.v1.json`.
