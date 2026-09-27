@@ -611,6 +611,16 @@
       "chain": "solana",
       "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
       "status": "CONFIRMED_PUBLIC_SIGNER"
+    },
+    "app": {
+      "lifecycle": "CODE_BUILT",
+      "route": "/miracle-wallet/",
+      "sourcePath": "launchpad.cryptoworldz.xyz/miracle-wallet/",
+      "architecture": "docs/WORLDZ-MIRACLE-WALLET-APP-ARCHITECTURE.md",
+      "currentMode": "NON_CUSTODIAL_FOUNDATION__NO_MAINNET_BROADCAST",
+      "installableWebAppFoundation": true,
+      "nativeAndroidIosGoal": true,
+      "nextEngineeringGate": "LIVE_READ_ADAPTERS_AND_AUDITED_MOBILE_SIGNER_CONNECTIONS"
     }
   }
 }
