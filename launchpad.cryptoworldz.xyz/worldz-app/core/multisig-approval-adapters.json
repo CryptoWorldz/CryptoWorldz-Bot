@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-MULTISIG-APPROVAL-ADAPTERS-V1",
   "updatedAt": "2026-09-27",
-  "state": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__OTHER_CHAIN_PROFILES_PENDING",
+  "state": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__STAGE_5C_MULTICHAIN_HARNESS_BUILT",
   "mode": "PUBLIC_APPROVAL_STATE_NORMALIZATION_ONLY",
   "signing": false,
   "execution": false,
@@ -12,7 +12,7 @@
       "chain": "solana",
       "system": "Squads Protocol v4",
       "thresholdMode": "COUNT",
-      "state": "LIVE_PROFILE_PROOF_PASSED__APPROVAL_SUBMISSION_OFF",
+      "state": "LIVE_WLDZ_PROFILE_PROOF_PASSED",
       "reads": [
         "members",
         "threshold",
@@ -26,7 +26,7 @@
       "chain": "evm",
       "system": "Safe Smart Account",
       "thresholdMode": "COUNT",
-      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
+      "state": "PROOF_HARNESS_BUILT__WORLDZ_PROFILE_REQUIRED",
       "reads": [
         "owners",
         "threshold",
@@ -39,7 +39,7 @@
       "chain": "xrpl",
       "system": "XRPL SignerList",
       "thresholdMode": "WEIGHT",
-      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
+      "state": "PROOF_HARNESS_BUILT__WORLDZ_PROFILE_REQUIRED",
       "reads": [
         "SignerEntries",
         "SignerQuorum",
@@ -52,7 +52,7 @@
       "chain": "sui",
       "system": "Sui weighted multisig",
       "thresholdMode": "WEIGHT",
-      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
+      "state": "PROOF_HARNESS_BUILT__WORLDZ_PROFILE_REQUIRED",
       "reads": [
         "public keys",
         "weights",
@@ -68,7 +68,8 @@
     "Only public signer identifiers and public approval evidence may enter the WorldzApp approval state.",
     "Private keys, seed phrases, recovery material and raw custody secrets remain forbidden.",
     "The exact simulated unsigned payload hash must remain bound to the approval-review envelope.",
-    "Live treasury/multisig proof is required before an adapter is marked LIVE."
+    "Live treasury/multisig proof is required before an adapter is marked LIVE.",
+    "Stage 5B live WLDZ Squads proof passed; Safe/XRPL/Sui stay unproven until explicit Worldz public profiles exist."
   ],
   "liveProof": {
     "squadsWldz": {
@@ -94,5 +95,6 @@
       "signing": false,
       "privateMaterialRead": false
     }
-  }
+  },
+  "liveProofGates": "/worldz-app/core/multisig-live-proof-gates.json"
 }
