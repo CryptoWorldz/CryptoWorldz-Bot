@@ -1,0 +1,18 @@
+{
+  "schema": "WORLDZ-APP-PLAY-STORE-LISTING-V1",
+  "updatedAt": "2026-09-27",
+  "state": "DRAFT__ASSETS_AND_FINAL_FEATURE_AUDIT_PENDING",
+  "appName": "WorldzApp",
+  "categoryCandidate": "Finance",
+  "shortDescription": "Explore Worldz with non-custodial wallet connections and verified chain status.",
+  "fullDescriptionDraft": "WorldzApp is the first-party gateway to the WorldzEcosystem. Explore Worldz modules, view verified blockchain and treasury status, connect supported external wallets without giving Worldz your seed phrase or private key, and review the security state of supported Worldz infrastructure.\n\nWorldzApp is built around separate authority: one app does not mean one master wallet or one universal signing key. Chain and treasury capabilities are enabled only after their own verification and release gates pass.\n\nCurrent release capabilities may include public ecosystem navigation, verified read-only chain information, external non-custodial wallet connection, simulation status and public multisig proof information. Features that remain gated are clearly marked in the app.\n\nWorldzApp does not promise investment returns and does not require users to hand custody secrets to Worldz.",
+  "supportWebsite": "PENDING_PUBLIC_SUPPORT_URL",
+  "privacyPolicyUrl": "PENDING_PUBLIC_PRIVACY_POLICY_URL",
+  "developerContact": "PENDING_PUBLIC_SUPPORT_CONTACT",
+  "graphics": {
+    "appIcon": "PENDING_OWNER_APPROVED_WORLDZ_CENTER_LOGO",
+    "featureGraphic": "PENDING",
+    "phoneScreenshots": "PENDING_DEVICE_QA_CAPTURE"
+  },
+  "truthRule": "Store text and screenshots must describe only capabilities present in the exact submitted build. Gated roadmap features may not be portrayed as live."
+}
