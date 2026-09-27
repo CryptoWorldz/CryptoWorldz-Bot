@@ -147,7 +147,8 @@
     "multisigApprovalContract": "src/worldz-app/multisig-approval-contract.js",
     "multisigApprovalRuntimeAdapters": "src/worldz-app/multisig-approval-adapters.js",
     "multisigLiveProofGates": "launchpad.cryptoworldz.xyz/worldz-app/core/multisig-live-proof-gates.json",
-    "liveMultisigReaders": "src/worldz-app/live-multisig-readers.js"
+    "liveMultisigReaders": "src/worldz-app/live-multisig-readers.js",
+    "stage5cRunbook": "docs/WORLDZAPP-STAGE5C-LIVE-PROOF-RUNBOOK.md"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
