@@ -12,7 +12,7 @@ const index=fs.readFileSync("launchpad.cryptoworldz.xyz/worldz-app/index.html","
 const worker=fs.readFileSync("launchpad.cryptoworldz.xyz/worldz-app/service-worker.js","utf8");
 
 const failures=[];
-if(pkg.targetSdk!==36 || pkg.compileSdk!==36) failures.push("API_36_CONTRACT_REQUIRED");
+if(pkg.packaging?.targetSdk!==36 || pkg.packaging?.compileSdk!==36) failures.push("API_36_CONTRACT_REQUIRED");
 if(unsigned.bubblewrapVersion!=="1.25.0") failures.push("BUBBLEWRAP_PIN_REQUIRED");
 if(unsigned.commands.build!=="bubblewrap build --skipSigning") failures.push("UNSIGNED_BUILD_COMMAND_REQUIRED");
 if(unsigned.releaseBoundary.signing!==false || unsigned.releaseBoundary.playUpload!==false) failures.push("UNSIGNED_RELEASE_BOUNDARY_INVALID");
