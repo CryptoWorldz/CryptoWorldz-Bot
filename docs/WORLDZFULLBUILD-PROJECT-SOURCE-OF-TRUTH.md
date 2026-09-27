@@ -440,3 +440,21 @@ Canonical status remains in `worldzpad-omnichain/fullscope/worldz-app.v1.json`.
 Workflow run `36317541759` proved the unsigned WorldzApp simulation path live for the required set: Solana, Base, BNB Chain, HyperEVM and Robinhood Chain. Evidence checksum: `bc74711f21b1e3a53f7b444df2b70bc8e3e8cb425397788c02254dc77b5caca1`.
 
 No signature was requested, no transaction was broadcast and no state mutation was authorized. Ethereum remains unverified because no approved public/environment verification endpoint was configured. Stage 5 native multisig approval adapters are the next WorldzApp gate.
+
+
+## WorldzApp Stage 5 multisig approval foundation — 2026-09-27
+
+Status: **CODE BUILT / LIVE MULTISIG PROFILE PROOF PENDING**
+
+WorldzApp now has separate approval-state adapters for Squads v4, Safe Smart Account, XRPL SignerList and Sui weighted multisig.
+
+- Squads/Safe use count-based approval thresholds.
+- XRPL/Sui use weighted quorum/threshold accounting.
+- Duplicate or ineligible approvals do not count.
+- Impossible thresholds fail closed.
+- Approval review remains bound to the proposal ID, Stage 4 simulation ID/proof hash and unsigned payload hash.
+- A met threshold is evidence only: `executionAllowed:false`, `broadcastAllowed:false`.
+- No approval signature, private key, seed phrase or custody secret is collected by this foundation.
+- Live treasury/multisig profile bindings remain required before any adapter is marked LIVE.
+
+The next gate is read-only proof against actual verified multisig profiles, followed by separately gated external-wallet/native-provider approval submission.
