@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-RUNTIME-V1",
   "brand": "WorldzApp™",
-  "status": "STAGE_5B_LIVE_SQUADS_PROOF_PASSED__ANDROID_PACKAGE_FOUNDATION_NEXT__NO_MAINNET_EXECUTION",
+  "status": "ANDROID_API36_PACKAGING_FOUNDATION_BUILT__SIGNED_AAB_RELEASE_GATED__NO_MAINNET_EXECUTION",
   "tagline": "WorldzEcosystem™. One App. Separate Authority.",
   "coreContract": "/worldz-app/core/worldz-app.v1.json",
   "modules": [
@@ -224,5 +224,17 @@
         "privateMaterialRead": false
       }
     }
+  },
+  "androidPackagingFoundation": {
+    "state": "CODE_BUILT_API36_TWA_FOUNDATION",
+    "technology": "TRUSTED_WEB_ACTIVITY",
+    "targetSdk": 36,
+    "candidateApplicationId": "xyz.cryptoworldz.worldzapp",
+    "packageIdState": "PROVISIONAL_UNTIL_PLAY_APPLICATION_CREATED",
+    "signedAabBuilt": false,
+    "approvedCenterLogoReady": false,
+    "digitalAssetLinksDeployed": false,
+    "publicReleaseAuthorized": false,
+    "nextGate": "FINAL_ANDROID_IDENTITY_ASSETS_AND_SIGNING"
   }
 }
