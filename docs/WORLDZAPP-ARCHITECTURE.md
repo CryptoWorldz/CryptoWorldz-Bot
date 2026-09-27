@@ -189,3 +189,12 @@ Security review, privacy policy, incident recovery, accessibility/mobile QA and 
 - `core/activity-event.schema.json` — normalized WorldzApp activity stream for future notifications, audit and FullScope integration.
 
 No RPC endpoint or credential is hard-coded in the public registry. Provider configuration remains environment-specific.
+
+
+## Provider-binding implementation — 2026-09-27
+
+Environment-only JSON-RPC bindings are code-built for Solana, Ethereum, Base, BNB Chain, HyperEVM, XRP Ledger and Sui. Robinhood remains research until its intended network/provider contract is verified.
+
+The public registry stores only environment-variable names, never provider credentials. `src/worldz-app/rpc-client.js` rejects inline URL credentials and non-HTTP(S) transports. `tools/verify-worldzapp-live-reads.js` is the evidence gate: a chain remains **LIVE_PROOF_PENDING** until the deployment environment is configured and the verifier completes a successful network read.
+
+Provider binding does not add any signing/broadcast method. The existing read-adapter contract remains authoritative.

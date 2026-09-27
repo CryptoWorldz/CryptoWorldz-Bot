@@ -1,0 +1,73 @@
+{
+  "schema": "WORLDZ-APP-PROVIDER-BINDINGS-V1",
+  "mode": "READ_ONLY",
+  "updatedAt": "2026-09-27",
+  "bindings": [
+    {
+      "chain": "solana",
+      "family": "SOLANA",
+      "env": "WORLDZ_SOLANA_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
+      "healthMethod": "getHealth"
+    },
+    {
+      "chain": "ethereum",
+      "family": "EVM",
+      "env": "WORLDZ_ETHEREUM_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
+      "healthMethod": "eth_chainId"
+    },
+    {
+      "chain": "base",
+      "family": "EVM",
+      "env": "WORLDZ_BASE_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
+      "healthMethod": "eth_chainId"
+    },
+    {
+      "chain": "bnb",
+      "family": "EVM",
+      "env": "WORLDZ_BNB_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
+      "healthMethod": "eth_chainId"
+    },
+    {
+      "chain": "hyperevm",
+      "family": "EVM",
+      "env": "WORLDZ_HYPEREVM_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
+      "healthMethod": "eth_chainId"
+    },
+    {
+      "chain": "xrpl",
+      "family": "XRPL",
+      "env": "WORLDZ_XRPL_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
+      "healthMethod": "server_info"
+    },
+    {
+      "chain": "sui",
+      "family": "SUI",
+      "env": "WORLDZ_SUI_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "state": "ENV_BINDING_READY__LIVE_PROOF_PENDING",
+      "healthMethod": "rpc.discover"
+    },
+    {
+      "chain": "robinhood",
+      "family": "EVM",
+      "env": "WORLDZ_ROBINHOOD_RPC_URL",
+      "transport": "JSON_RPC_HTTP",
+      "state": "RESEARCH__DO_NOT_CONFIGURE_UNTIL_NETWORK_VERIFIED",
+      "healthMethod": "eth_chainId"
+    }
+  ],
+  "secretRule": "Provider URLs and credentials come from deployment environment only. Never expose credential-bearing RPC URLs to browser bundles or public JSON.",
+  "proofRule": "A configured environment variable is not live proof. Promote a chain only after the verifier records a successful network read."
+}
