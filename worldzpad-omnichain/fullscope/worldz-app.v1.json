@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "CODE_BUILT_STAGE_2_PROVIDER_BINDINGS",
+  "lifecycle": "CODE_BUILT_STAGE_2_LIVE_READ_VERIFIED",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -133,9 +133,27 @@
     "sessionSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/session.schema.json",
     "activityEventSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json",
     "supportedAdapterSlots": 8,
-    "providerBindings": "CODE_BUILT_ENVIRONMENT_ONLY",
-    "liveReadProof": "PENDING_DEPLOYMENT_ENVIRONMENT",
+    "providerBindings": "ENVIRONMENT_ONLY_PRODUCTION__PUBLIC_VERIFY_MODE_AVAILABLE",
+    "liveReadProof": {
+      "state": "PASSED",
+      "verifiedAt": "2026-09-27T02:10:49.715Z",
+      "workflowRunId": 36287750004,
+      "mode": "PUBLIC_VERIFICATION_ENDPOINTS",
+      "execution": false,
+      "passed": [
+        "SOLANA_HEALTH",
+        "SOLANA_FINALIZED_BALANCE_READ",
+        "BASE_CHAIN_ID_8453",
+        "BNB_CHAIN_ID_56",
+        "HYPEREVM_CHAIN_ID_999",
+        "XRPL_VALIDATED_LEDGER",
+        "SUI_GRAPHQL_CHAIN_IDENTIFIER",
+        "ROBINHOOD_CHAIN_ID_4663"
+      ],
+      "productionBoundary": "PUBLIC_ENDPOINTS_VERIFY_READ_PATHS_ONLY__PRODUCTION_PROVIDERS_REMAIN_ENVIRONMENT_CONFIGURED"
+    },
     "execution": false,
-    "nextGate": "CONFIGURE_DEPLOYMENT_RPC_ENV_AND_RUN_LIVE_READ_VERIFIER"
+    "nextGate": "IDENTITY_SESSION_AND_EXTERNAL_WALLET_CONNECTION_FOUNDATION",
+    "suiTransport": "GRAPHQL__PUBLIC_JSON_RPC_DEPRECATED"
   }
 }
