@@ -26,7 +26,7 @@ test("Android unsigned manifest preparer rejects substitute and insecure logo UR
     fingerprints:[],
     additionalTrustedOrigins:[]
   };
-  const contract={applicationId:{candidate:"xyz.cryptoworldz.worldzapp"}};
+  const contract={androidIdentity:{candidateApplicationId:"xyz.cryptoworldz.worldzapp"}};
   const logo={state:"APPROVED_SOURCE_IDENTIFIED__FIRST_PARTY_WEB_DERIVATIVE_PENDING"};
   assert.throws(()=>mod.buildUnsignedManifest({
     template,contract,logo,
@@ -44,6 +44,5 @@ test("Android unsigned manifest preparer rejects substitute and insecure logo UR
     maskableIconUrl:"https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-center-logo-approved-maskable-512.jpg"
   });
   assert.equal(out.packageId,"xyz.cryptoworldz.worldzapp");
-  assert.equal(out.signingKey.path,"__UNSIGNED_BUILD_NO_KEY__");
-  assert.equal(out.signingKey.alias,"unsigned");
+  assert.equal(Object.prototype.hasOwnProperty.call(out,"signingKey"),false);
 });
