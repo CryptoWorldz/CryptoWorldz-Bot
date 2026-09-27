@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-PLAY-STORE-LISTING-V1",
   "updatedAt": "2026-09-27",
-  "state": "DRAFT__ASSETS_AND_FINAL_FEATURE_AUDIT_PENDING",
+  "state": "DRAFT__APP_ICON_READY__FEATURE_GRAPHIC_SCREENSHOTS_AND_FINAL_FEATURE_AUDIT_PENDING",
   "appName": "WorldzApp",
   "categoryCandidate": "Finance",
   "shortDescription": "Explore Worldz with non-custodial wallet connections and verified chain status.",
@@ -10,10 +10,15 @@
   "privacyPolicyUrl": "PENDING_PUBLIC_PRIVACY_POLICY_URL",
   "developerContact": "PENDING_PUBLIC_SUPPORT_CONTACT",
   "graphics": {
-    "appIcon": "OWNER_APPROVED_WORLDZ_CENTRE_EMBLEM__SOURCE_LOCKED__ANDROID_DERIVATIVES_PENDING",
+    "appIcon": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
     "featureGraphic": "PENDING",
     "phoneScreenshots": "PENDING_DEVICE_QA_CAPTURE",
-    "ownerApprovedSourceSha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050"
+    "ownerApprovedSourceSha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
+    "appIconHostedUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/assets/worldz-app-icon-512.png",
+    "appIconSha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d",
+    "maskableIcon": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
+    "maskableIconSha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15",
+    "appIconReady": true
   },
   "truthRule": "Store text and screenshots must describe only capabilities present in the exact submitted build. Gated roadmap features may not be portrayed as live."
 }
