@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-APP-SIMULATION-POLICY-V1",
-  "state": "CODE_BUILT_CONTRACT_FOUNDATION",
+  "state": "CODE_BUILT_STAGE_4A_UNSIGNED_ADAPTERS__LIVE_PROOF_PENDING",
   "execution": false,
   "broadcast": false,
   "signatureRequest": false,
@@ -15,14 +15,15 @@
     "human_effect_acknowledgement"
   ],
   "adapterBinding": {
-    "solana": "PENDING",
-    "ethereum": "PENDING",
-    "base": "PENDING",
-    "bnb": "PENDING",
-    "hyperevm": "PENDING",
-    "xrpl": "PENDING",
-    "sui": "PENDING",
-    "robinhood": "RESEARCH"
+    "solana": "CODE_BUILT_LIVE_PROOF_PENDING",
+    "ethereum": "CODE_BUILT_LIVE_PROOF_PENDING",
+    "base": "CODE_BUILT_LIVE_PROOF_PENDING",
+    "bnb": "CODE_BUILT_LIVE_PROOF_PENDING",
+    "hyperevm": "CODE_BUILT_LIVE_PROOF_PENDING",
+    "xrpl": "PENDING_CHAIN_NATIVE_SIMULATION_DESIGN",
+    "sui": "PENDING_CHAIN_NATIVE_DRY_RUN_BINDING",
+    "robinhood": "CODE_BUILT_LIVE_PROOF_PENDING"
   },
-  "rule": "A successful simulation does not authorize signing or broadcast. Those remain separate release gates."
+  "rule": "A successful simulation does not authorize signing or broadcast. Stage 4A adapters use only unsigned/non-broadcast RPC methods and remain LIVE_PROOF_PENDING until chain-by-chain proof passes.",
+  "bindings": "/worldz-app/core/simulation-bindings.json"
 }
