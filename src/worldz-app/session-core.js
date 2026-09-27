@@ -79,6 +79,10 @@ function addWalletConnection(session,connection){
 
 function markControlChallengeVerified(session,{chain,publicAddress,proofId}){
   if(!proofId) throw new Error("WORLDZAPP_CONTROL_PROOF_ID_REQUIRED");
+  const existing=(session.walletConnections||[]).some(item=>
+    String(item.chain).toLowerCase()===String(chain).toLowerCase() && item.publicAddress===publicAddress
+  );
+  if(!existing) throw new Error("WORLDZAPP_CONTROL_PROOF_CONNECTION_NOT_FOUND");
   const walletConnections=(session.walletConnections||[]).map(item=>{
     if(String(item.chain).toLowerCase()!==String(chain).toLowerCase() || item.publicAddress!==publicAddress) return item;
     return Object.freeze({
