@@ -503,7 +503,8 @@
       "WorldzProof™",
       "Legacy Flywheel™",
       "Worldz Treasury",
-      "WorldzAUTO Buy-Only™"
+      "WorldzAUTO Buy-Only™",
+      "WorldzAutoInvest™ / WealthBuild™"
     ],
     "fullScope": {
       "required": true,
@@ -817,5 +818,22 @@
     "dexScreener": "LEGITIMATE_POOL_TRANSACTION_MAY_SATISFY_AUTOMATIC_LISTING_PREREQUISITE__PROVIDER_INDEXING_OBSERVED_NOT_ASSUMED",
     "jupiter": "ORGANIC_SCORE_IS_POST_LAUNCH_OBSERVED_SIGNAL__NO_BLOCK_ZERO_GUARANTEE__AUTOMATED_ACTIVITY_NOT_DESCRIBED_AS_ORGANIC",
     "mrcl": "INHERITS__AUD_200_TARGET_REAL_SOL_FIRST_BUY__EXACT_SOL_BOUND_AT_TRANSACTION_REVIEW__NO_AUTO_SELL"
+  },
+  "publicAutoInvest": {
+    "brand": "WorldzAutoInvest™",
+    "uiBrand": "WealthBuild™",
+    "standard": "docs/WORLDZ-AUTOINVEST-WEALTHBUILD-STANDARD.md",
+    "contract": "worldzpad-omnichain/fullscope/worldz-public-autoinvest.v1.json",
+    "core": "src/auto/public-autoinvest-core.js",
+    "commandCentreSurface": "cryptoworldz.xyz/wealthbuild/",
+    "lifecycle": "CODE_FOUNDATION__PUBLIC_MAINNET_ADAPTER_OFF",
+    "audience": "SELF_DIRECTED_USERS",
+    "ownerAutoIsolation": true,
+    "allowedSide": "BUY",
+    "autoSell": false,
+    "custody": "NON_CUSTODIAL_EXTERNAL_WALLET",
+    "providerTarget": "JUPITER_RECURRING_ORDER",
+    "marketIntegrity": "NO_WASH_SELF_ROUND_TRIP_MULTI_WALLET_VOLUME_HOLDER_MAKER_TRENDING_OR_SCORE_GAMING",
+    "releaseRule": "DO_NOT_LABEL_LIVE_UNTIL_USER_WALLET_PROVIDER_ORDER_CANCEL_SECURITY_PRIVACY_COMPLIANCE_AND_WORLDZPROOF_GATES_PASS"
   }
 }
