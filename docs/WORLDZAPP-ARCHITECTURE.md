@@ -220,3 +220,14 @@ The live-read proof workflow checks:
 8. Robinhood Chain chain ID.
 
 No signing, transaction submission or broadcasting is present in this workflow.
+
+
+### Sui transport migration discovered by live proof
+
+The first live provider run reached the Sui public fullnode but the node rejected the legacy JSON-RPC method because JSON-RPC has been disabled on current public fullnodes.
+
+WorldzApp therefore migrated the Sui read verification path to the current Sui GraphQL API. This creates a permanent rule for every Worldz chain adapter:
+
+> A documented endpoint host is not enough. The exact transport and method set must pass a live proof before the adapter is treated as current.
+
+Sui remains read-only. No Sui signing or execution capability is introduced by the migration.
