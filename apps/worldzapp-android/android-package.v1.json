@@ -2,7 +2,7 @@
   "schema": "WORLDZ-APP-ANDROID-PACKAGE-V1",
   "updatedAt": "2026-09-27",
   "product": "WorldzApp™",
-  "state": "CODE_BUILT_ANDROID_API36_PACKAGING_FOUNDATION__AAB_NOT_RELEASED",
+  "state": "API36_FOUNDATION__APPROVED_CENTER_LOGO_SOURCE_LOCKED__UNSIGNED_BUILD_GATE_BUILT__FIRST_PARTY_ICON_DEPLOYMENT_REQUIRED",
   "packaging": {
     "technology": "TRUSTED_WEB_ACTIVITY",
     "generator": "Bubblewrap",
@@ -43,7 +43,12 @@
       "APPROVED_MASKABLE_ICON",
       "PLAY_APP_SIGNING_CERT_SHA256",
       "PUBLISHED_DIGITAL_ASSET_LINKS"
-    ]
+    ],
+    "officialCenterLogoSourceIdentified": true,
+    "officialCenterLogoSourceSha256": "ca401c3a559ffcd8b1829118595138a9c1efa33c4838df45e1565f6bdc751a35",
+    "officialCenterLogoSourceDimensions": "1536x1536",
+    "rejectedWorldzWIconAllowed": false,
+    "firstPartyApprovedIconDeployment": "PENDING"
   },
   "inheritedWorldzSecurity": {
     "stage4bLiveSimulationProof": "PASSED",
@@ -57,13 +62,25 @@
     "broadcast": false
   },
   "nextGates": [
-    "LOCK_ANDROID_APPLICATION_ID_BEFORE_PLAY_APP_CREATION",
-    "ADD_APPROVED_CENTER_LOGO_ANDROID_ASSETS",
+    "DEPLOY_EXACT_APPROVED_CENTER_LOGO_DERIVATIVE_TO_FIRST_PARTY_HTTPS",
+    "VERIFY_MASKABLE_SAFE_AREA",
     "GENERATE_UNSIGNED_API36_TWA_PROJECT",
+    "BUILD_UNSIGNED_API36_AAB",
+    "LOCK_ANDROID_APPLICATION_ID_BEFORE_PLAY_APP_CREATION",
     "VERIFY_DIGITAL_ASSET_LINKS_AFTER_SIGNING_IDENTITY_EXISTS",
     "BUILD_SIGNED_AAB_WITH_SECRET_SIGNING_MATERIAL_OUTSIDE_REPOSITORY",
     "ANDROID_DEVICE_QA",
     "PLAY_INTERNAL_OR_CLOSED_TESTING",
     "PLAY_POLICY_AND_DATA_SAFETY_REVIEW"
-  ]
+  ],
+  "unsignedBuild": {
+    "state": "GENERATOR_AND_CI_GATE_BUILT__APPROVED_WEB_ICON_DEPLOYMENT_REQUIRED",
+    "contract": "apps/worldzapp-android/unsigned-build.v1.json",
+    "logoContract": "apps/worldzapp-android/approved-center-logo.v1.json",
+    "prepareTool": "tools/prepare-worldzapp-android-unsigned.mjs",
+    "readinessTool": "tools/verify-worldzapp-android-unsigned-readiness.mjs",
+    "signing": false,
+    "playUpload": false,
+    "unsignedAabBuilt": false
+  }
 }
