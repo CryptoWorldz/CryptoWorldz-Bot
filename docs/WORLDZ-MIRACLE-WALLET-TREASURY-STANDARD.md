@@ -152,3 +152,7 @@ Miracle Church's signer participation in future deployments is **opt-in and appr
 - Required approvals remain **4**.
 - Effective planned policy: **4-of-10**.
 - No new signer is enrolled on-chain until consent and a verified public Solana address are supplied.
+
+## Community nominations
+
+Miracle Church is explicitly welcome to suggest additional trusted people from Miracle Church or the wider Dubbo community for treasury participation. A nomination does not automatically create signer authority. A nominee may fill a declined/vacant planned seat, or an expansion beyond 10 signers may be considered through a separate owner-approved governance change with threshold review, consent, address verification and WorldzProof.
