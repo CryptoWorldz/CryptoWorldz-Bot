@@ -1,15 +1,19 @@
 {
   "schema": "WORLDZ-APP-PLAY-FINAL-PREFLIGHT-V1",
   "updatedAt": "2026-09-28",
-  "state": "CODE_SIDE_PHASE2_BUILT__ACCOUNT_AND_DEPLOYMENT_GATES_REMAIN",
+  "state": "CODE_SIDE_PHASE2_BUILT__FINAL_LOGO_BINARY_AND_EXTERNAL_GATES_REMAIN",
   "codeSide": {
     "api36": true,
     "unsignedAabCompilationProven": true,
-    "approvedProductionIconsReady": true,
+    "approvedProductionIconsReady": false,
     "privacySurfaceBuilt": true,
     "supportSurfaceBuilt": true,
     "assetlinksRendererBuilt": true,
-    "playReadinessCiBuilt": true
+    "playReadinessCiBuilt": true,
+    "finalOwnerApprovedLogoMasterLocked": true,
+    "finalOwnerApprovedLogoMasterSha256": "e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec",
+    "previousIconAssets": "SUPERSEDED_FOR_FINAL_PLAY_RELEASE",
+    "finalLogoBinaryReconciliation": "REQUIRED"
   },
   "publicUrls": {
     "privacyCandidate": "https://launchpad.cryptoworldz.xyz/worldz-app/privacy/",
