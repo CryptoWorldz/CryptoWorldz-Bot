@@ -1,0 +1,42 @@
+{
+  "schema": "WORLDZAPP-FINAL-ICON-PACK-V1",
+  "updatedAt": "2026-09-28",
+  "state": "DERIVATIVES_PREPARED__REPOSITORY_BINARY_IMPORT_PENDING",
+  "finalMaster": {
+    "dimensions": "1536x1536",
+    "sha256": "e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec",
+    "source": "USER_SUPPLIED_FINAL_WORLDZAPP_LOGO"
+  },
+  "derivationRule": "Deterministic resize/padding only. No redraw, regeneration, restyling or substitute artwork.",
+  "assets": {
+    "play512": {
+      "targetPath": "apps/worldzapp-android/assets/worldzapp-play-icon-512.png",
+      "dimensions": "512x512",
+      "sha256": "f4a517537c1309a5792cbf707f76a945735fd1610bb98a437789f341c6b5c3f8"
+    },
+    "pwa192": {
+      "targetPath": "launchpad.cryptoworldz.xyz/worldz-app/assets/worldzapp-pwa-icon-192.png",
+      "dimensions": "192x192",
+      "sha256": "9f8e8e2b09a8629f992bbdce6b0b44e63a2439fc1f58c49ffff0e443222aecf2"
+    },
+    "maskable512": {
+      "targetPath": "apps/worldzapp-android/assets/worldzapp-maskable-icon-512.png",
+      "dimensions": "512x512",
+      "safeZone": "384x384 exact resized master centered on #05020b padding",
+      "sha256": "54615f8001e6664f6c3681e9fa30eeba47b322720ba4af63e943b02a71d76da1"
+    },
+    "adaptiveForeground512": {
+      "targetPath": "apps/worldzapp-android/assets/worldzapp-adaptive-foreground-512.png",
+      "dimensions": "512x512",
+      "sha256": "d3bfb27b5cd0781ba1421fcd09d6025c140fd049a5dde021d38c650b4445c6d7"
+    }
+  },
+  "launcherDensityHashes": {
+    "mdpi48": "d5b78ceadafc114cfa03091df0a703db0d8f551517e494658d65aa2e6c701bdc",
+    "hdpi72": "dd7ea477faa6c5ad80685339bb205b40084b93a995445ad39ce34e3d86defa51",
+    "xhdpi96": "1cce026980751d6619a3d9efa2986e8dfcec64939b749e8c7013de3156526133",
+    "xxhdpi144": "efc9906e2596094c046f1754fc0ac7a5c1158659fbde2d067faa456ea00e33bf",
+    "xxxhdpi192": "4ce98f64f2f7acf92953f0a98eedd12e9737cfcdaa6a1ce87a50525053101e86"
+  },
+  "releaseRule": "Final signed AAB workflow must fail until the exact target files exist and match every required hash."
+}
