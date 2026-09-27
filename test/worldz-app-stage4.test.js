@@ -31,7 +31,7 @@ test("Stage 4A Solana adapter uses simulateTransaction without execution",async(
   assert.equal(result.simulation.state,"SIMULATED");
   assert.equal(result.simulation.signatureRequested,false);
   assert.equal(result.simulation.broadcast,false);
-  assert.equal(result.diagnostics.rpcExecution,false);
+  assert.equal(result.diagnostics.stateMutation,false);
 });
 
 test("Stage 4A EVM adapter checks chain ID and uses non-broadcast methods",async()=>{
@@ -58,7 +58,7 @@ test("Stage 4A EVM adapter checks chain ID and uses non-broadcast methods",async
   assert.equal(result.simulation.state,"SIMULATED");
   assert.equal(result.simulation.feeEstimate,"21000");
   assert.equal(result.simulation.broadcast,false);
-  assert.equal(result.diagnostics.rpcExecution,false);
+  assert.equal(result.diagnostics.stateMutation,false);
 });
 
 test("Stage 4A EVM adapter fails closed on wrong network",async()=>{
