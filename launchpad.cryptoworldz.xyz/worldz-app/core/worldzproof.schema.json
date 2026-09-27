@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://launchpad.cryptoworldz.xyz/worldz-app/core/worldzproof.schema.json",
+  "title": "WorldzProof Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "proofId",
+    "module",
+    "chain",
+    "treasuryProfile",
+    "proposalHash",
+    "state",
+    "createdAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "WORLDZPROOF-V1"
+    },
+    "proofId": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128
+    },
+    "module": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "chain": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "treasuryProfile": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "proposalHash": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 256
+    },
+    "simulation": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "transactionId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 256
+    },
+    "finalState": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "state": {
+      "enum": [
+        "DRAFT",
+        "SIMULATED",
+        "APPROVALS_PENDING",
+        "THRESHOLD_MET",
+        "SUBMITTED",
+        "CONFIRMED",
+        "RECONCILED",
+        "FAILED"
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "appVersion": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    }
+  }
+}
