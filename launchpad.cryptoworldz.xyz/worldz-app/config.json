@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-RUNTIME-V1",
   "brand": "WorldzApp™",
-  "status": "GOOGLE_PLAY_READINESS_FOUNDATION_BUILT__ANDROID_API36__STAGE_5C_HARNESS_BUILT__NO_MAINNET_EXECUTION",
+  "status": "GOOGLE_PLAY_READINESS__APPROVED_EMBLEM_PRODUCTION_ASSETS_READY__ANDROID_API36__STAGE_5C_HARNESS_BUILT__NO_MAINNET_EXECUTION",
   "tagline": "WorldzEcosystem™. One App. Separate Authority.",
   "coreContract": "/worldz-app/core/worldz-app.v1.json",
   "modules": [
@@ -213,16 +213,16 @@
     "liveProofGates": "/worldz-app/core/multisig-live-proof-gates.json"
   },
   "androidPackagingFoundation": {
-    "state": "CODE_BUILT_API36_TWA_AND_PLAY_READINESS_FOUNDATION",
+    "state": "CODE_BUILT_API36_TWA_PLAY_READINESS__APPROVED_EMBLEM_PRODUCTION_ASSETS_READY",
     "technology": "TRUSTED_WEB_ACTIVITY",
     "targetSdk": 36,
     "candidateApplicationId": "xyz.cryptoworldz.worldzapp",
     "packageIdState": "PROVISIONAL_UNTIL_PLAY_APPLICATION_CREATED",
     "signedAabBuilt": false,
-    "approvedCenterLogoReady": false,
+    "approvedCenterLogoReady": true,
     "digitalAssetLinksDeployed": false,
     "publicReleaseAuthorized": false,
-    "nextGate": "FINAL_512_ICON_EXPORT__FINAL_APPLICATION_ID__PLAY_DEVELOPER_IDENTITY__PRIVACY_DATA_SAFETY_FINANCIAL_DECLARATIONS__PLAY_SIGNING__ASSET_LINKS__SIGNED_AAB__TESTING",
+    "nextGate": "FINAL_APPLICATION_ID_PLAY_DEVELOPER_IDENTITY_PRIVACY_SIGNING_ASSETLINKS_AAB_TESTING",
     "playReleaseContract": "apps/worldzapp-android/play-release.v1.json",
     "playSubmissionReady": false,
     "privacyPolicyFinalized": false,
@@ -231,7 +231,11 @@
     "ownerApprovedEmblemSource": true,
     "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
     "approvedEmblemPreview": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg",
-    "finalIconRaster": "PENDING_VALID_512_PNG_AND_MASKABLE_EXPORT"
+    "finalIconRaster": "PENDING_VALID_512_PNG_AND_MASKABLE_EXPORT",
+    "playIcon": "/worldz-app/assets/worldz-app-icon-512.png",
+    "playIconSha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d",
+    "maskableIcon": "/worldz-app/assets/worldz-app-icon-maskable-512.png",
+    "maskableIconSha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15"
   },
   "keepOnKeepinOn": true
 }
