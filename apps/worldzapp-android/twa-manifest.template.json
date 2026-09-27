@@ -34,8 +34,10 @@
   "additionalTrustedOrigins": [],
   "releaseGate": {
     "templateOnly": true,
-    "iconUrl": "PENDING_APPROVED_WORLDZ_CENTER_LOGO_PNG",
-    "maskableIconUrl": "PENDING_APPROVED_WORLDZ_CENTER_LOGO_MASKABLE_PNG",
-    "signingKey": "NOT_COMMITTED_TO_REPOSITORY"
+    "iconUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/worldz-app-icon-512.png",
+    "maskableIconUrl": "https://launchpad.cryptoworldz.xyz/worldz-app/worldz-app-icon-512.png",
+    "signingKey": "NOT_COMMITTED_TO_REPOSITORY",
+    "iconApproval": "OWNER_APPROVED_WORLDZ_EMBLEM",
+    "iconSha256": "3710472b055d46fb2dec3ff2a1e71f4382787520e775477b6511dc8e9dfb34ef"
   }
 }
