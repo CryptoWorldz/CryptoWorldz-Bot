@@ -28,13 +28,15 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
     const dca = payload.dca || {};
     const policy = dca.policy || {};
     return [
-      "💎 Diamond Buy™ Auto",
+      "💎 Worldz AUTO Buy-Only™",
       "",
       `AUTO mode: ${String(dca.mode || status.mode || "owner_dca").toUpperCase()}`,
       `DCA execution: ${dca.execution_enabled ? "ENABLED" : "READY WHEN OWNER ENABLES"}`,
       `Paused: ${status.paused ? "YES" : "NO"}`,
       `Emergency stop: ${status.emergency_stop ? "ACTIVE" : "CLEAR"}`,
       `Allowlisted tokens: ${status.allowlisted_tokens || 0}`,
+      `Worldz buy universe: ${(payload.buy_universe || []).length}`,
+      `Approved owner/dev wallets: ${dca.approved_wallets || 0} • executor matched: ${dca.matched_wallets || 0}`,
       "",
       "🤖 Owner Investment DCA",
       `Prepared: ${dca.prepared ? "YES" : "NO"}`,
@@ -44,13 +46,13 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
       `Executor API ready: ${dca.api_ready ? "YES" : "NO"}`,
       `Active schedules: ${dca.active_schedules || 0}`,
       "",
-      `Funding asset: ${policy.allowed_input_currency || "USDC"}`,
-      `Approved amounts: ${(policy.amount_presets || [2, 3, 5, 7, 10, 15]).join(", ")} USDC`,
+      `Funding asset: ${policy.allowed_input_currency || "SOL"}`,
+      `Approved small batches: ${(policy.amount_presets || [0.005, 0.01, 0.02, 0.05, 0.1]).join(", ")} ${policy.allowed_input_currency || "SOL"}`,
       `Maximum order: ${limits.maxOrderAmount || 0} USDC`,
       `Daily spending cap: ${limits.maxDailyAmount || 0} USDC`,
       `Maximum completed buys: ${policy.max_buys_per_day || 6} per day`,
       `Minimum interval: ${limits.minIntervalMinutes || 0} minutes`,
-      "Buy only: YES • One wallet only: YES • Randomisation: OFF",
+      "Buy only: YES • Sell automation: NO • Owner/dev wallets only • Randomisation: OFF",
       "",
       "Executive Leaders may view status, pause and trigger the emergency stop.",
       "Schedule creation, activation and wallet controls are permanent-owner only."
@@ -73,13 +75,13 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
       `Executor API: ${dca.api_ready ? "READY" : "NOT CONFIGURED"}`,
       `Emergency stop: ${dca.emergency_stop ? "ACTIVE" : "CLEAR"}`,
       "",
-      `Policy: BUY ONLY • USDC • one wallet • no randomisation`,
-      `Presets: ${(policy.amount_presets || [2, 3, 5, 7, 10, 15]).join(", ")} USDC`,
+      `Policy: BUY ONLY • SOL • verified owner/dev wallets • no randomisation`,
+      `Presets: ${(policy.amount_presets || [0.005, 0.01, 0.02, 0.05, 0.1]).join(", ")} SOL`,
       `Limit: ${policy.max_buys_per_day || 6} completed buys per day • minimum 240 minutes`,
       "",
       rows.length ? rows.join("\n\n") : "No DCA schedules yet.",
       "",
-      "Create: /autodcanew MINT 5 USDC 6 240 150 250",
+      "Create: /autodcanew MINT 0.01 SOL 6 240 150 250 [WALLET]",
       "Actions: /autodcastart UUID • /autodcapause UUID • /autodcaresume UUID • /autodcacancel UUID"
     ].join("\n");
   }
@@ -141,10 +143,10 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
   bot.onText(/^\/autodcanew(?:@\w+)?(?:\s+([\s\S]+))?$/, async (msg, match) => {
     if (!isOwner(msg)) return ownerRequired(msg);
     const values = String(match?.[1] || "").trim().split(/\s+/);
-    if (values.length !== 7) {
-      return send(msg, "❌ Use: /autodcanew MINT preset_amount USDC buys interval_minutes slippage_bps max_price_impact_bps\nExample: /autodcanew MINT 5 USDC 6 240 150 250\n\nApproved amounts: 2, 3, 5, 7, 10 or 15 USDC. Minimum interval: 240 minutes.");
+    if (![7, 8].includes(values.length)) {
+      return send(msg, "❌ Use: /autodcanew MINT preset_amount SOL buys interval_minutes slippage_bps max_price_impact_bps [WALLET]\nExample: /autodcanew MINT 0.01 SOL 6 240 150 250 DEV_WALLET\n\nSmall-batch amounts are controlled by the current AUTO settings.");
     }
-    const [tokenMint, amount, currency, orderCount, intervalMinutes, slippageBps, maxPriceImpactBps] = values;
+    const [tokenMint, amount, currency, orderCount, intervalMinutes, slippageBps, maxPriceImpactBps, walletAddress] = values;
     try {
       const payload = await autoClient.dcaCreate({
         token_mint: tokenMint,
@@ -153,9 +155,10 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
         order_count: orderCount,
         interval_minutes: intervalMinutes,
         slippage_bps: slippageBps,
-        max_price_impact_bps: maxPriceImpactBps
+        max_price_impact_bps: maxPriceImpactBps,
+        wallet_address: walletAddress || undefined
       });
-      return send(msg, `✅ Owner Investment DCA Draft Created\n\nID: ${payload.schedule.id}\nBuy: ${payload.schedule.amount_per_buy} ${payload.schedule.input_currency}\nOrders: ${payload.schedule.order_count}\nInterval: ${payload.schedule.interval_minutes} minutes\n\nThe schedule remains a draft until the dedicated wallet and secure executor are verified and you use /autodcastart.`);
+      return send(msg, `✅ Worldz AUTO Buy-Only Draft Created\n\nID: ${payload.schedule.id}\nWallet: ${payload.schedule.wallet_address || "Primary owner wallet"}\nBuy: ${payload.schedule.amount_per_buy} ${payload.schedule.input_currency}\nOrders: ${payload.schedule.order_count}\nInterval: ${payload.schedule.interval_minutes} minutes\n\nThe schedule remains a draft until the wallet/executor and spending gates are verified and you use /autodcastart.`);
     } catch (error) {
       const errors = error.payload?.errors;
       return send(msg, `⚠️ DCA draft rejected.\n\n${Array.isArray(errors) ? errors.join("\n") : error.code || "validation_failed"}`);
@@ -192,9 +195,65 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
     }
   });
 
+  bot.onText(/^\/autodcawalletadd(?:@\w+)?(?:\s+([1-9A-HJ-NP-Za-km-z]{32,44}))?(?:\s+(owner|dev))?(?:\s+([\s\S]+))?$/i, async (msg, match) => {
+    if (!isOwner(msg)) return ownerRequired(msg);
+    const walletAddress = match?.[1];
+    const walletRole = String(match?.[2] || "dev").toLowerCase();
+    const label = String(match?.[3] || (walletRole === "owner" ? "Owner AUTO Wallet" : "Dev AUTO Wallet")).trim();
+    if (!walletAddress) return send(msg, "❌ Use: /autodcawalletadd PUBLIC_SOLANA_ADDRESS owner|dev LABEL\nNever send a seed phrase or private key.");
+    try {
+      const payload = await autoClient.dcaAddWallet(walletAddress, walletRole, label);
+      return send(msg, [
+        "✅ AUTO wallet registered.",
+        `Role: ${walletRole.toUpperCase()}`,
+        `Address: ${walletAddress}`,
+        `Executor verified: ${payload.executor_verified ? "YES" : "NO — registration only"}`,
+        "",
+        "No spending authority is granted until the secure executor verifies this public wallet."
+      ].join("\n"));
+    } catch (error) {
+      return send(msg, `❌ AUTO wallet could not be registered: ${error.code || "wallet_update_failed"}`);
+    }
+  });
+
+  bot.onText(/^\/autobuyuniverse(?:@\w+)?$/, async (msg) => {
+    if (!isOwner(msg)) return ownerRequired(msg);
+    try {
+      const payload = await autoClient.dcaStatus();
+      const assets = payload.buy_universe || [];
+      const grouped = {
+        legacy: assets.filter((asset) => asset.source_kind === "legacy"),
+        canonical: assets.filter((asset) => asset.source_kind === "canonical"),
+        worldzlaunchpad: assets.filter((asset) => asset.source_kind === "worldzlaunchpad")
+      };
+      const rows = assets.slice(0, 60).map((asset) =>
+        `• ${asset.symbol} • ${String(asset.chain_key || "").toUpperCase()} • ${asset.execution_state} • BUY ONLY`
+      );
+      return send(msg, [
+        "🌐 WORLDZ AUTO BUY-ONLY UNIVERSE",
+        `Legacy: ${grouped.legacy.length}`,
+        `Canonical: ${grouped.canonical.length}`,
+        `WorldzLaunchPad inherited: ${grouped.worldzlaunchpad.length}`,
+        "",
+        ...(rows.length ? rows : ["No migrated buy-universe rows are active on this runtime yet."]),
+        "",
+        "Registration does not itself enable spending."
+      ].join("\n"));
+    } catch (error) {
+      return send(msg, `❌ AUTO buy universe could not be loaded: ${error.code || "service_unavailable"}`);
+    }
+  });
+
+  bot.onText(/^\/autobuypolicy(?:@\w+)?$/, (msg) => send(msg, [
+    "💎 WORLDZ AUTO BUY-ONLY™",
+    "Owner-funded SOL • small batches • verified owner/dev wallets",
+    "10 legacy tokens + WLDZ/RVIV + PNEX/MRCL when real mints exist + every future WorldzLaunchPad token",
+    "No automated sells • no randomized volume pattern • no automatic spending merely from registration"
+  ].join("\n")));
+
   bot.onText(/^\/autodcaenable(?:@\w+)?$/, async (msg) => {
     if (!isOwner(msg)) return ownerRequired(msg);
-    try { await autoClient.dcaEnable(); return send(msg, "✅ Owner Investment DCA enabled. Only owner-created, allowlisted, USDC-funded, capped buy-only schedules can run."); }
+    try { await autoClient.dcaEnable(); return send(msg, "✅ Worldz AUTO Buy-Only enabled. Only owner-created, inherited/allowlisted, SOL-funded, capped schedules on verified owner/dev wallets can run."); }
     catch (error) { return send(msg, `⚠️ Auto DCA activation is incomplete: ${error.code || "runtime_not_ready"}`); }
   });
 
