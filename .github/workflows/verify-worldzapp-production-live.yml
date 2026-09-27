@@ -1,0 +1,48 @@
+name: WorldzApp Production Live Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'launchpad.cryptoworldz.xyz/worldz-app/**'
+      - '.github/workflows/verify-worldzapp-production-live.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/verify-worldzapp-production-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-worldzapp-public:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Verify WorldzApp public endpoints with browser request profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          UA='Mozilla/5.0 (Linux; Android 16) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36'
+          BASE='https://launchpad.cryptoworldz.xyz/worldz-app'
+          fetch() {
+            local url="$1" out="$2"
+            curl --fail --silent --show-error --location \
+              --retry 4 --retry-delay 4 --connect-timeout 15 --max-time 35 \
+              -A "$UA" -H 'Accept: text/html,application/json;q=0.9,*/*;q=0.8' \
+              -H 'Cache-Control: no-cache' "$url" -o "$out"
+          }
+          fetch "$BASE/index.html?worldzapp_live=1" index.html
+          fetch "$BASE/privacy/index.html?worldzapp_live=1" privacy.html
+          fetch "$BASE/support/index.html?worldzapp_live=1" support.html
+          fetch "$BASE/manifest.webmanifest?worldzapp_live=1" manifest.json
+          fetch "$BASE/config.json?worldzapp_live=1" config.json
+          grep -q 'WorldzApp' index.html
+          grep -q 'WorldzApp' privacy.html
+          grep -q 'WorldzApp' support.html
+          node -e "const fs=require('fs');const m=JSON.parse(fs.readFileSync('manifest.json'));if(m.name!=='WorldzApp™')process.exit(1)"
+          node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('config.json'));if(c.brand!=='WorldzApp™')process.exit(1)"
+          ! grep -qi 'OneWorldz' index.html
+          ! grep -qi 'OneWorldz' privacy.html
+          ! grep -qi 'OneWorldz' support.html
+          echo 'WORLDZAPP_PRODUCTION_HTTP=PASS'
