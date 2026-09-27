@@ -458,3 +458,16 @@ WorldzApp now has separate approval-state adapters for Squads v4, Safe Smart Acc
 - Live treasury/multisig profile bindings remain required before any adapter is marked LIVE.
 
 The next gate is read-only proof against actual verified multisig profiles, followed by separately gated external-wallet/native-provider approval submission.
+
+
+## WorldzApp Stage 5B + Stage 5C multisig proof checkpoint — 2026-09-27
+
+- **Stage 5B WLDZ/Squads live public proof: PASSED.**
+- Workflow run: `36318035477`.
+- Evidence checksum: `ee26cd097ca32f7b9caf9c49e8802a41032e1da97f6bff60b7eaf002ccfcdcd0`.
+- Approval submission, signing, execution and broadcast remained OFF.
+- Stage 5C proof readers and readiness gates are code-built for Safe, XRPL and Sui.
+- No verified deployed Worldz Safe, XRPL SignerList account or Sui multisig profile is presently registered in the canonical treasury profiles. Their status is therefore **WORLDZ_PROFILE_REQUIRED**, not LIVE.
+- The proof harness may read only public status/approval evidence. It cannot submit confirmations, sign, execute or broadcast.
+- Do not substitute a random third-party multisig to obtain a green proof.
+- Android packaging remains the next major product phase after the remaining real Worldz multisig profiles/security gates are satisfied.
