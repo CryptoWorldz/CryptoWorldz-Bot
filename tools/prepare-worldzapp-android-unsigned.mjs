@@ -30,13 +30,13 @@ function packageId(value){
 export function buildUnsignedManifest({template,contract,logo,iconUrl,maskableIconUrl,applicationId}){
   if(logo.state!=="APPROVED_SOURCE_IDENTIFIED__FIRST_PARTY_WEB_DERIVATIVE_PENDING" &&
      logo.state!=="APPROVED_SOURCE_DEPLOYED") throw new Error("WORLDZ_ANDROID_APPROVED_LOGO_STATE_INVALID");
-  const id=packageId(applicationId||contract.applicationId.candidate);
+  const id=packageId(applicationId||contract.androidIdentity.candidateApplicationId);
+  const {releaseGate:_releaseGate, signingKey:_signingKey, ...base}=template;
   return {
-    ...template,
+    ...base,
     packageId:id,
     iconUrl:requiredHttps(iconUrl,"APPROVED_ICON_URL"),
     maskableIconUrl:requiredHttps(maskableIconUrl,"APPROVED_MASKABLE_ICON_URL"),
-    signingKey:{path:"__UNSIGNED_BUILD_NO_KEY__",alias:"unsigned"},
     appVersion:template.appVersion||"0.1.0",
     appVersionCode:template.appVersionCode||1,
     generatorApp:"WorldzApp Android unsigned build gate"
@@ -68,8 +68,8 @@ if(process.argv[1] && path.resolve(process.argv[1])===path.resolve(new URL(impor
     signing:false,
     publicRelease:false,
     nextCommands:[
-      "npx --yes @bubblewrap/cli@1.25.0 update --skipVersionUpgrade --manifest="+manifestPath,
-      "npx --yes @bubblewrap/cli@1.25.0 build --skipSigning --manifest="+manifestPath
+      "cd "+OUT+" && npx --yes @bubblewrap/cli@1.25.0 update --skipVersionUpgrade",
+      "cd "+OUT+" && npx --yes @bubblewrap/cli@1.25.0 build --skipSigning"
     ]
   };
   fs.writeFileSync(path.join(OUT,"unsigned-prep-proof.json"),JSON.stringify(proof,null,2)+"\n");
