@@ -587,5 +587,24 @@
       ],
       "rule": "NEWER_OWNER_INSTRUCTION_CAN_SUPERSEDE_A_DECISION_BUT_CANNOT_RETROACTIVELY_CREATE_A_DEPLOYMENT_OR_ON_CHAIN_EVENT"
     }
+  },
+  "miracleTreasuryAndWallet": {
+    "standard": "docs/WORLDZ-MIRACLE-WALLET-TREASURY-STANDARD.md",
+    "manifest": "worldzpad-omnichain/fullscope/worldz-miracle-wallet.v1.json",
+    "state": "PLANNED",
+    "miracleTokenTreasuryPercent": 20,
+    "signerPlan": "6_NOMINEES__4_OF_6_PROPOSED__CONSENT_AND_ADDRESS_VERIFICATION_REQUIRED",
+    "solana": "JUPITER_MOBILE_SIGNER_ONBOARDING__SQUADS_TREASURY",
+    "universalWallet": "WORLDZ_MIRACLE_WALLET__CHAIN_NATIVE_CUSTODY_ADAPTERS",
+    "chainCustody": {
+      "solana": "SQUADS",
+      "evm": "SAFE_WHERE_VERIFIED_SUPPORTED",
+      "xrpl": "SIGNER_LIST_AND_QUORUM",
+      "sui": "NATIVE_MULTISIG",
+      "other": "CHAIN_SPECIFIC_ADAPTER_REQUIRED"
+    },
+    "worldzCard": "TANGEM_FIRST_RESEARCH_TARGET__WALLETCONNECT_WHERE_SUPPORTED__NO_PARTNERSHIP_CLAIM",
+    "futureLaunchPadRole": "OPT_IN_TREASURY_DEPLOYMENT_APPROVAL_ROLE__NO_AUTOMATIC_20_PERCENT_FUTURE_TOKEN_ALLOCATION",
+    "mainnetExecutionAuthorized": false
   }
 }
