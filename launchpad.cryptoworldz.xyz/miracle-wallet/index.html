@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#6d28d9">
+  <meta name="description" content="WorldzMiracleWallet™ — non-custodial multi-chain Worldz treasury and multisig coordination.">
+  <title>WorldzMiracleWallet™</title>
+  <link rel="manifest" href="/miracle-wallet/manifest.webmanifest">
+  <link rel="icon" href="/miracle-wallet/worldz-miracle-wallet-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/miracle-wallet/style.css?v=20260927-1">
+</head>
+<body>
+  <header class="appbar">
+    <a class="brand" href="#dashboard"><span class="mark">W</span><span><b>WorldzMiracleWallet™</b><small>Worldz treasury app foundation</small></span></a>
+    <div class="app-actions">
+      <button id="install-app" class="btn ghost" type="button" hidden>Install App</button>
+      <button id="connect-signer" class="btn primary" type="button">Connect Signer</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="dashboard">
+      <div>
+        <span class="eyebrow">NON-CUSTODIAL • MULTI-CHAIN • MULTISIG</span>
+        <h1>One Worldz interface.<br><span>Chain-native security underneath.</span></h1>
+        <p>Coordinate treasury balances, proposals, signers, approvals and WorldzProof™ without storing seed phrases or private keys on Worldz servers.</p>
+        <div class="truth-row">
+          <span>Private-key custody: <b>External</b></span>
+          <span>Mainnet broadcast: <b>OFF</b></span>
+          <span>WorldzProof: <b>Required</b></span>
+        </div>
+      </div>
+      <aside class="hero-card">
+        <span class="label">MIRACLE CHURCH TREASURY</span>
+        <strong>20% $MRCL</strong>
+        <div class="governance"><b>4</b><span>approvals required</span><b>7</b><span>total signers</span></div>
+        <small id="miracle-state">Loading treasury state…</small>
+      </aside>
+    </section>
+
+    <nav class="tabs" aria-label="Wallet sections">
+      <button class="tab active" data-target="treasury">Treasury</button>
+      <button class="tab" data-target="chains">Chains</button>
+      <button class="tab" data-target="proposal">Proposal</button>
+      <button class="tab" data-target="signers">Signers</button>
+      <button class="tab" data-target="card">WorldzCard™</button>
+      <button class="tab" data-target="proof">Proof</button>
+    </nav>
+
+    <section id="treasury" class="panel active">
+      <div class="section-head"><span>TREASURY CONTROL</span><h2>Miracle + Worldz treasury profiles</h2></div>
+      <div class="cards">
+        <article class="card accent"><span>MIRACLE</span><h3>Miracle Church Treasury</h3><p>Planned 20% $MRCL treasury with 4-of-7 governance.</p><dl><div><dt>State</dt><dd>Not deployed</dd></div><div><dt>Provider</dt><dd>Squads v4</dd></div></dl></article>
+        <article class="card"><span>WORLDZ OPERATIONS</span><h3>Operations Treasury</h3><p>WorldzLaunchPad chain-native operational treasury standard.</p><dl><div><dt>Governance</dt><dd>5-of-10</dd></div><div><dt>Rollout</dt><dd>Pending</dd></div></dl></article>
+        <article class="card"><span>WORLDZ RESERVE</span><h3>Reserve Treasury</h3><p>Separate reserve vault, requiring stronger approval.</p><dl><div><dt>Governance</dt><dd>6-of-9</dd></div><div><dt>State</dt><dd>Not deployed</dd></div></dl></article>
+      </div>
+    </section>
+
+    <section id="chains" class="panel">
+      <div class="section-head"><span>CHAIN ADAPTERS</span><h2>Universal interface, native execution</h2><p>Each network keeps its proper account and multisig model. A passing adapter never unlocks another chain.</p></div>
+      <div id="chain-grid" class="cards"></div>
+    </section>
+
+    <section id="proposal" class="panel">
+      <div class="section-head"><span>PROPOSAL LAB</span><h2>Build a human-readable treasury proposal</h2><p>Foundation mode creates a reviewable draft only. It cannot sign, broadcast or move funds.</p></div>
+      <form id="proposal-form" class="proposal-form">
+        <label>Treasury<select name="treasury"><option>Miracle Church — 4-of-7</option><option>Worldz Operations — 5-of-10</option><option>Worldz Reserve — 6-of-9</option></select></label>
+        <label>Chain<select name="chain"><option>Solana</option><option>Ethereum</option><option>Base</option><option>BNB Chain</option><option>HyperEVM</option><option>XRP Ledger</option><option>Sui</option></select></label>
+        <label>Action<select name="action"><option>Transfer</option><option>Swap</option><option>Add Liquidity</option><option>Lock</option><option>Vesting</option><option>Signer Change</option></select></label>
+        <label>Asset<input name="asset" placeholder="e.g. MRCL"></label>
+        <label>Amount<input name="amount" inputmode="decimal" placeholder="0.00"></label>
+        <label>Destination<input name="destination" placeholder="Public destination address"></label>
+        <label class="wide">Reason / notes<textarea name="reason" rows="4" placeholder="Why should the multisig approve this?"></textarea></label>
+        <div class="wide form-actions"><button class="btn primary" type="submit">Create Review Draft</button><button class="btn ghost" type="reset">Clear</button></div>
+      </form>
+      <pre id="proposal-preview" class="preview" aria-live="polite">No proposal drafted.</pre>
+    </section>
+
+    <section id="signers" class="panel">
+      <div class="section-head"><span>SIGNER SECURITY</span><h2>Miracle 4-of-7</h2><p>Only public addresses belong in app coordination. Recovery phrases and private keys never do.</p></div>
+      <div id="signer-grid" class="cards"></div>
+    </section>
+
+    <section id="card" class="panel">
+      <div class="section-head"><span>WORLDZCARD™</span><h2>Hardware/card signing adapter</h2></div>
+      <div class="cards">
+        <article class="card accent"><span>FIRST RESEARCH TARGET</span><h3>Tangem</h3><p>WorldzCard™ will connect to compatible self-custody hardware/card wallets through supported connection standards such as WalletConnect. Keys stay with the wallet/device.</p><dl><div><dt>State</dt><dd>Research</dd></div><div><dt>Partnership</dt><dd>Not claimed</dd></div></dl></article>
+        <article class="card"><span>RULE</span><h3>No key import</h3><p>WorldzMiracleWallet™ must never ask a hardware-wallet user to export a private key or recovery phrase into the app.</p></article>
+      </div>
+    </section>
+
+    <section id="proof" class="panel">
+      <div class="section-head"><span>WORLDZPROOF™</span><h2>Every treasury action needs evidence</h2></div>
+      <div class="proof-list">
+        <div>1 <b>Canonical treasury identity</b><span>Correct chain, vault and multisig.</span></div>
+        <div>2 <b>Readable proposal</b><span>Exact action, amount, destination and reason.</span></div>
+        <div>3 <b>Simulation</b><span>Preflight result before signing where supported.</span></div>
+        <div>4 <b>Threshold approval</b><span>Chain-native multisig approvals.</span></div>
+        <div>5 <b>Execution proof</b><span>Transaction hash plus final-state reconciliation.</span></div>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>WorldzMiracleWallet™ • WorldzFullBuild™</span><a href="/">WorldzLaunchPad™</a></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/miracle-wallet/app.js?v=20260927-1" defer></script>
+</body>
+</html>
