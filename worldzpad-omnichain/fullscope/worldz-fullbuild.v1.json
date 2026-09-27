@@ -593,7 +593,7 @@
     "manifest": "worldzpad-omnichain/fullscope/worldz-miracle-wallet.v1.json",
     "state": "PLANNED",
     "miracleTokenTreasuryPercent": 20,
-    "signerPlan": "10_SIGNERS__4_OF_10_OWNER_APPROVED__9_INVITEE_POSITIONS_CONSENT_AND_ADDRESS_VERIFICATION_REQUIRED__JAYJAYTEAMDEV_CONFIRMED",
+    "signerPlan": "11_SIGNERS__4_OF_11_OWNER_APPROVED_TARGET__10_INVITEE_POSITIONS_CONSENT_AND_ADDRESS_VERIFICATION_REQUIRED__JAYJAYTEAMDEV_CONFIRMED",
     "solana": "JUPITER_MOBILE_SIGNER_ONBOARDING__SQUADS_TREASURY",
     "universalWallet": "WORLDZ_MIRACLE_WALLET__CHAIN_NATIVE_CUSTODY_ADAPTERS",
     "chainCustody": {
@@ -621,13 +621,29 @@
       "installableWebAppFoundation": true,
       "nativeAndroidIosGoal": true,
       "nextEngineeringGate": "LIVE_READ_ADAPTERS_AND_AUDITED_MOBILE_SIGNER_CONNECTIONS",
-      "miracleGovernance": "4-of-10"
+      "miracleGovernance": "4-of-11"
     },
     "pendingSignerRoles": [
       "Sound Production",
       "Worldz Collaborator",
-      "Miracle Church Kitchen and Community Service"
-    ]
+      "Miracle Church Kitchen and Community Service",
+      "Community Hospitality / Barber & Barista"
+    ],
+    "teamTokenParticipation": {
+      "manifest": "worldzpad-omnichain/fullscope/worldz-miracle-team-participation.v1.json",
+      "state": "OWNER_APPROVED_PLAN__AMOUNTS_PENDING",
+      "participantTarget": 11,
+      "tokenScope": {
+        "legacyTokenCount": 10,
+        "official": [
+          "WLDZ",
+          "RVIV",
+          "PNEX",
+          "MRCL"
+        ]
+      },
+      "executionRule": "CONSENT_AND_VERIFIED_PUBLIC_SOLANA_ADDRESS_REQUIRED__TOKEN_SPECIFIC_AMOUNTS_SOURCE_BUCKETS_AND_CANONICAL_MINTS_MUST_BE_VERIFIED_BEFORE_EXECUTION"
+    }
   },
   "worldzApp": {
     "brand": "WorldzApp™",
