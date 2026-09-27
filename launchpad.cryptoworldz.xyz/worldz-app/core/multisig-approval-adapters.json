@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-MULTISIG-APPROVAL-ADAPTERS-V1",
   "updatedAt": "2026-09-27",
-  "state": "CODE_BUILT_APPROVAL_EVIDENCE_FOUNDATION__LIVE_MULTISIG_PROOF_PENDING",
+  "state": "STAGE_5B_SQUADS_LIVE_PROOF_PASSED__STAGE_5C_MULTICHAIN_HARNESS_BUILT",
   "mode": "PUBLIC_APPROVAL_STATE_NORMALIZATION_ONLY",
   "signing": false,
   "execution": false,
@@ -12,8 +12,12 @@
       "chain": "solana",
       "system": "Squads Protocol v4",
       "thresholdMode": "COUNT",
-      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
-      "reads": ["members", "threshold", "proposal approvals"],
+      "state": "LIVE_WLDZ_PROFILE_PROOF_PASSED",
+      "reads": [
+        "members",
+        "threshold",
+        "proposal approvals"
+      ],
       "writes": []
     },
     {
@@ -21,8 +25,12 @@
       "chain": "evm",
       "system": "Safe Smart Account",
       "thresholdMode": "COUNT",
-      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
-      "reads": ["owners", "threshold", "transaction confirmations"],
+      "state": "PROOF_HARNESS_BUILT__WORLDZ_PROFILE_REQUIRED",
+      "reads": [
+        "owners",
+        "threshold",
+        "transaction confirmations"
+      ],
       "writes": []
     },
     {
@@ -30,8 +38,12 @@
       "chain": "xrpl",
       "system": "XRPL SignerList",
       "thresholdMode": "WEIGHT",
-      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
-      "reads": ["SignerEntries", "SignerQuorum", "transaction Signers"],
+      "state": "PROOF_HARNESS_BUILT__WORLDZ_PROFILE_REQUIRED",
+      "reads": [
+        "SignerEntries",
+        "SignerQuorum",
+        "transaction Signers"
+      ],
       "writes": []
     },
     {
@@ -39,8 +51,13 @@
       "chain": "sui",
       "system": "Sui weighted multisig",
       "thresholdMode": "WEIGHT",
-      "state": "CODE_BUILT_LIVE_PROFILE_BINDING_PENDING",
-      "reads": ["public keys", "weights", "threshold", "approval identities"],
+      "state": "PROOF_HARNESS_BUILT__WORLDZ_PROFILE_REQUIRED",
+      "reads": [
+        "public keys",
+        "weights",
+        "threshold",
+        "approval identities"
+      ],
       "writes": []
     }
   ],
@@ -50,6 +67,8 @@
     "Only public signer identifiers and public approval evidence may enter the WorldzApp approval state.",
     "Private keys, seed phrases, recovery material and raw custody secrets remain forbidden.",
     "The exact simulated unsigned payload hash must remain bound to the approval-review envelope.",
-    "Live treasury/multisig proof is required before an adapter is marked LIVE."
-  ]
+    "Live treasury/multisig proof is required before an adapter is marked LIVE.",
+    "Stage 5B live WLDZ Squads proof passed; Safe/XRPL/Sui stay unproven until explicit Worldz public profiles exist."
+  ],
+  "liveProofGates": "/worldz-app/core/multisig-live-proof-gates.json"
 }
