@@ -52,7 +52,7 @@ assert(contract.assetGates.ownerApproved===true,"owner-approved emblem flag requ
 assert(emblem.approval.ownerApproved===true,"approved emblem registry must record owner approval");
 assert(fs.existsSync(emblem.releaseDerivative.androidAssetPath),"Android approved emblem asset missing");
 assert(fs.existsSync(emblem.releaseDerivative.publicPath),"public approved emblem asset missing");
-assert(sha256(emblem.releaseDerivative.androidAssetPath)===emblem.releaseDerivative.sha256,"Android approved emblem checksum mismatch");
+assert(sha256(emblem.releaseDerivative.androidAssetPath)===emblem.releaseDerivative.sha256,"Android approved emblem checksum mismatch actual="+sha256(emblem.releaseDerivative.androidAssetPath)+" expected="+emblem.releaseDerivative.sha256);
 assert(sha256(emblem.releaseDerivative.publicPath)===emblem.releaseDerivative.sha256,"public approved emblem checksum mismatch");
 assert(worldz.simulationFoundation?.liveProof?.state==="PASSED","Stage 4B proof prerequisite");
 assert(worldz.multisigApprovalFoundation?.liveProof?.squadsWldz?.state==="PASSED","Stage 5B Squads proof prerequisite");
