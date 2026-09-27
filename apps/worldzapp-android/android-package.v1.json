@@ -1,0 +1,69 @@
+{
+  "schema": "WORLDZ-APP-ANDROID-PACKAGE-V1",
+  "updatedAt": "2026-09-27",
+  "product": "WorldzApp™",
+  "state": "CODE_BUILT_ANDROID_API36_PACKAGING_FOUNDATION__AAB_NOT_RELEASED",
+  "packaging": {
+    "technology": "TRUSTED_WEB_ACTIVITY",
+    "generator": "Bubblewrap",
+    "bubblewrapVersion": "1.25.0",
+    "sourcePwa": "https://launchpad.cryptoworldz.xyz/worldz-app/",
+    "webManifest": "https://launchpad.cryptoworldz.xyz/worldz-app/manifest.webmanifest",
+    "host": "launchpad.cryptoworldz.xyz",
+    "startUrl": "/worldz-app/",
+    "scope": "/worldz-app/",
+    "targetSdk": 36,
+    "compileSdk": 36,
+    "requiredOutput": "ANDROID_APP_BUNDLE_AAB",
+    "rebuildWebApp": false
+  },
+  "androidIdentity": {
+    "candidateApplicationId": "xyz.cryptoworldz.worldzapp",
+    "state": "PROVISIONAL_UNTIL_PLAY_APPLICATION_CREATED",
+    "launcherName": "WorldzApp",
+    "displayName": "WorldzApp™",
+    "versionName": "0.1.0",
+    "versionCode": 1
+  },
+  "releaseSecurity": {
+    "signedReleaseBuilt": false,
+    "playAppSigningConfigured": false,
+    "digitalAssetLinksDeployed": false,
+    "playDeveloperIdentityVerified": false,
+    "playListingCreated": false,
+    "publicReleaseAuthorized": false,
+    "mainnetBroadcastEnabledByAndroidPackage": false,
+    "privateKeyOrSeedPhraseBundled": false
+  },
+  "assetGates": {
+    "officialCenterLogoRasterReady": false,
+    "rule": "Do not generate or publish the signed Android release with an old/generated Worldz icon. Use the owner-approved Worldz centre logo only.",
+    "requiredBeforeSignedAab": [
+      "APPROVED_WORLDZ_CENTER_LOGO_PNG_512_OR_LARGER",
+      "APPROVED_MASKABLE_ICON",
+      "PLAY_APP_SIGNING_CERT_SHA256",
+      "PUBLISHED_DIGITAL_ASSET_LINKS"
+    ]
+  },
+  "inheritedWorldzSecurity": {
+    "stage4bLiveSimulationProof": "PASSED",
+    "stage5bLiveSquadsProfileProof": "PASSED",
+    "safeLiveProfile": "GATED",
+    "xrplLiveProfile": "GATED",
+    "suiLiveProfile": "GATED",
+    "approvalSubmission": false,
+    "signing": false,
+    "execution": false,
+    "broadcast": false
+  },
+  "nextGates": [
+    "LOCK_ANDROID_APPLICATION_ID_BEFORE_PLAY_APP_CREATION",
+    "ADD_APPROVED_CENTER_LOGO_ANDROID_ASSETS",
+    "GENERATE_UNSIGNED_API36_TWA_PROJECT",
+    "VERIFY_DIGITAL_ASSET_LINKS_AFTER_SIGNING_IDENTITY_EXISTS",
+    "BUILD_SIGNED_AAB_WITH_SECRET_SIGNING_MATERIAL_OUTSIDE_REPOSITORY",
+    "ANDROID_DEVICE_QA",
+    "PLAY_INTERNAL_OR_CLOSED_TESTING",
+    "PLAY_POLICY_AND_DATA_SAFETY_REVIEW"
+  ]
+}
