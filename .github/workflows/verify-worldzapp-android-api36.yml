@@ -6,6 +6,7 @@ on:
       - 'apps/worldzapp-android/**'
       - 'tools/verify-worldzapp-android-package.js'
       - 'launchpad.cryptoworldz.xyz/worldz-app/manifest.webmanifest'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/worldz-app-icon-512.png'
       - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
       - '.github/workflows/verify-worldzapp-android-api36.yml'
   workflow_dispatch:
