@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-PLAY-FINANCIAL-FEATURES-V1",
-  "updatedAt": "2026-09-27",
-  "state": "DECLARATION_REQUIRED__FINAL_SELECTION_PENDING_EXACT_RELEASE_FEATURES",
+  "updatedAt": "2026-09-28",
+  "state": "RELEASE_CANDIDATE_DRAFT__PLAY_CONSOLE_CONFIRMATION_REQUIRED",
   "financialFeaturesFormRequired": true,
   "expectedSelectionsForCurrentCore": [
     {
@@ -35,8 +35,27 @@
     "automaticSwap": false,
     "automaticInvestment": false,
     "mainnetAppBroadcast": false,
-    "financialAdviceClaim": false
+    "financialAdviceClaim": false,
+    "walletConnection": "EXTERNAL_NON_CUSTODIAL",
+    "transferOrPaymentExecution": false,
+    "tokenTradingExecution": false,
+    "cryptoPurchaseExecution": false,
+    "stakingExecution": false,
+    "lendingOrBorrowingExecution": false,
+    "custodialAssetHolding": false
   },
   "jurisdictionRule": "Distribution countries must be reviewed against current Google Play and local financial/crypto requirements before they are selected in Play Console.",
-  "rule": "The Play Console declaration must match the exact submitted release, not future roadmap features."
+  "rule": "The Play Console declaration must match the exact submitted release, not future roadmap features.",
+  "releaseCandidateDraft": {
+    "expectedSelection": "Cryptocurrency wallet",
+    "reason": "The submitted candidate includes connection to supported external non-custodial crypto wallets.",
+    "doNotSelectFromRoadmap": [
+      "Cryptocurrency exchange",
+      "Token trading/sales",
+      "Staking",
+      "Lending/borrowing",
+      "Automatic investment"
+    ],
+    "finalRule": "Re-evaluate the exact Play Console wording and exact submitted binary immediately before submission."
+  }
 }

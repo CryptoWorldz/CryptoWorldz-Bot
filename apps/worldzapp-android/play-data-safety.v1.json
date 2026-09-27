@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-APP-PLAY-DATA-SAFETY-INVENTORY-V1",
-  "updatedAt": "2026-09-27",
-  "state": "PRE_SUBMISSION_INVENTORY__FINAL_AUDIT_REQUIRED",
+  "updatedAt": "2026-09-28",
+  "state": "RELEASE_CANDIDATE_DRAFT__FINAL_PRODUCTION_NETWORK_AND_PROVIDER_AUDIT_REQUIRED",
   "finalPlayFormReady": false,
   "currentCore": {
     "worldzHostedAccountCreation": false,
@@ -32,7 +32,13 @@
       "hardware wallet secret",
       "wallet unlock password",
       "exported signing key"
-    ]
+    ],
+    "analyticsConfigured": false,
+    "adSdkConfigured": false,
+    "crashReportingConfigured": false,
+    "pushNotificationsConfigured": false,
+    "transactionSigningByApp": false,
+    "mainnetBroadcastByApp": false
   },
   "requiredFinalAudit": [
     "all production analytics and telemetry",
@@ -55,5 +61,24 @@
       "associated account-data deletion subject to documented lawful retention"
     ]
   },
-  "rule": "Never submit a Data safety form from this inventory alone. Re-audit the exact production bundle, PWA, server behavior and third-party integrations immediately before Play submission."
+  "rule": "Never submit a Data safety form from this inventory alone. Re-audit the exact production bundle, PWA, server behavior and third-party integrations immediately before Play submission.",
+  "codeScan": {
+    "scope": "WorldzApp source/repository keyword scan",
+    "noMatchesFoundFor": [
+      "analytics/GA/gtag/PostHog",
+      "advertising/AdSense/DoubleClick",
+      "Sentry/Crashlytics",
+      "push notifications",
+      "Worldz-hosted signup/login/auth"
+    ],
+    "interpretation": "No matching integration was found by the repository scan. This is evidence for the draft only, not a substitute for final runtime/network inspection."
+  },
+  "playFormDraft": {
+    "state": "DO_NOT_SUBMIT_YET",
+    "likelyNoDeveloperCollectionForSessionOnlyWalletState": "REQUIRES_FINAL_RUNTIME_CONFIRMATION",
+    "publicWalletAddressClassification": "REQUIRES_FINAL_PLAY_FORM_INTERPRETATION",
+    "thirdPartyRpcAndWalletProviders": "AUDIT_REQUEST_FIELDS_AND_PROVIDER_HANDLING_BEFORE_SUBMISSION",
+    "ads": "EXPECTED_NO__FINAL_RUNTIME_AUDIT_REQUIRED",
+    "analytics": "EXPECTED_NO__FINAL_RUNTIME_AUDIT_REQUIRED"
+  }
 }

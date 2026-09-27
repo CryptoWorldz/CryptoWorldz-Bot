@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "PLAY_PHASE2_CODE_BUILT__UNSIGNED_AAB_PROVEN__SIGNED_RELEASE_GATED",
+  "lifecycle": "PLAY_PHASE3_PIPELINE_BUILT__FINAL_BINARY_IMPORT_AND_EXTERNAL_PLAY_GATES_PENDING",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -169,7 +169,12 @@
     "playFinalPreflight": "apps/worldzapp-android/play-final-preflight.v1.json",
     "playPrivacySurface": "launchpad.cryptoworldz.xyz/worldz-app/privacy/index.html",
     "playSupportSurface": "launchpad.cryptoworldz.xyz/worldz-app/support/index.html",
-    "playAssetLinksRenderer": "tools/render-worldzapp-assetlinks.js"
+    "playAssetLinksRenderer": "tools/render-worldzapp-assetlinks.js",
+    "finalIconPack": "apps/worldzapp-android/final-icon-pack.v1.json",
+    "playTestingChecklist": "apps/worldzapp-android/play-testing-checklist.v1.json",
+    "playScreenshotPlan": "apps/worldzapp-android/play-screenshot-plan.v1.json",
+    "signedReleasePreparation": "apps/worldzapp-android/signed-release-preparation.v1.json",
+    "finalReleasePipeline": "docs/WORLDZAPP-FINAL-RELEASE-PIPELINE.md"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -351,7 +356,7 @@
     "playAppSigningConfigured": false,
     "publicReleaseAuthorized": false,
     "mainnetBroadcastEnabled": false,
-    "nextGate": "PLAY_DEVELOPER_IDENTITY__DEDICATED_SUPPORT_CONTACT__PUBLIC_DEPLOYMENT_VERIFICATION__PLAY_APP_SIGNING__CERT_FINGERPRINT__ASSETLINKS_DEPLOYMENT__SIGNED_AAB__TESTING__FINAL_DECLARATIONS",
+    "nextGate": "IMPORT_CHECKSUM_BOUND_FINAL_ICON_BINARIES__PLAY_DEVELOPER_ACCOUNT__PLAY_APP_SIGNING__SIGNED_AAB_CANDIDATE__DEVICE_TESTING__FINAL_DECLARATIONS__SUBMISSION",
     "playReadinessFoundation": "BUILT",
     "playSubmissionReady": false,
     "privacyPolicyFinalized": false,
@@ -379,7 +384,11 @@
     "unsignedAabCompilationProof": "PASSED",
     "playPrivacySurface": "CODE_BUILT_DEPLOYMENT_VERIFICATION_PENDING",
     "playSupportSurface": "CODE_BUILT_DEPLOYMENT_VERIFICATION_PENDING",
-    "digitalAssetLinksRenderer": "BUILT"
+    "digitalAssetLinksRenderer": "BUILT",
+    "finalOwnerApprovedAssetDerivatives": "PREPARED_REPOSITORY_IMPORT_PENDING",
+    "signedAabCandidatePipeline": "BUILT_MANUAL_ONLY",
+    "playTestingChecklist": "BUILT",
+    "storeScreenshotPlan": "BUILT_REAL_CAPTURE_PENDING"
   },
   "keepOnKeepinOn": {
     "enabled": true,

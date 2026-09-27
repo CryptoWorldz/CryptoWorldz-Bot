@@ -1,0 +1,40 @@
+name: WorldzApp Play Phase 3
+
+on:
+  pull_request:
+    paths:
+      - 'apps/worldzapp-android/**'
+      - 'docs/WORLDZAPP-PLAY-TESTING.md'
+      - 'docs/WORLDZAPP-FINAL-RELEASE-PIPELINE.md'
+      - 'tools/verify-worldzapp-final-icon-pack.js'
+      - 'tools/verify-worldzapp-play-phase3.js'
+      - 'worldzpad-omnichain/fullscope/worldz-app.v1.json'
+      - 'package.json'
+      - '.github/workflows/worldzapp-final-release-aab.yml'
+      - '.github/workflows/verify-worldzapp-play-phase3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-play-phase3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks
+        run: |
+          node --check tools/verify-worldzapp-final-icon-pack.js
+          node --check tools/verify-worldzapp-play-phase3.js
+      - name: Verify existing Play layers
+        run: |
+          npm run verify:worldzapp:play
+          npm run verify:worldzapp:play-phase2
+      - name: Verify Phase 3 contracts
+        run: |
+          npm run verify:worldzapp:final-icons
+          npm run verify:worldzapp:play-phase3
