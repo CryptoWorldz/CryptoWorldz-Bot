@@ -85,3 +85,10 @@ The intended Google/Play account login is `jayjayteamdev@outlook.com`. This is a
 Final owner-approved logo master remains SHA-256 `e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec`. Final icon binaries must be deterministic derivatives of that exact master; no redraw/regeneration is permitted.
 
 Screenshot capture remains pending the exact real-device/submitted build. Digital Asset Links remains pending the real Play App Signing certificate SHA-256. Signed AAB remains pending real signing identity. These external gates must not be bypassed.
+
+
+## Locked paid-app proceeds wording — 28 September 2026
+
+> WorldzApp™ is a one-time A$2.50 purchase. After applicable platform fees, taxes, refunds and payment adjustments, Worldz intends to allocate net app-sale proceeds 50/50: 50% toward future Worldz ecosystem liquidity provisioning and 50% toward WorldzApp development, infrastructure and ongoing operations. Purchasing WorldzApp does not purchase tokens, LP ownership, an investment interest, revenue share, or any right to financial returns.
+
+This wording is the canonical public description of the WorldzApp paid-app proceeds model unless the owner explicitly replaces it. The 50/50 allocation is based on net app-sale proceeds after the stated adjustments, and app purchase does not create token, LP, investment, revenue-share or financial-return rights.
