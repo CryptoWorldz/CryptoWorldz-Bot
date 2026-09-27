@@ -69,10 +69,11 @@
       "family": "SUI",
       "network": "mainnet",
       "chainId": null,
-      "publicVerificationEndpoint": "https://fullnode.mainnet.sui.io:443",
-      "sourceAuthority": "Sui official network info",
+      "publicVerificationEndpoint": "https://graphql.mainnet.sui.io/graphql",
+      "sourceAuthority": "Mysten Labs Sui TypeScript SDK docs",
       "production": "ENV_PROVIDER_REQUIRED",
-      "state": "PUBLIC_VERIFY_READY"
+      "state": "PUBLIC_VERIFY_READY__GRAPHQL",
+      "transport": "GRAPHQL"
     },
     {
       "chain": "robinhood",
@@ -92,8 +93,9 @@
     "bnb": "WORLDZAPP_BNB_RPC_URL",
     "hyperevm": "WORLDZAPP_HYPEREVM_RPC_URL",
     "xrpl": "WORLDZAPP_XRPL_RPC_URL",
-    "sui": "WORLDZAPP_SUI_RPC_URL",
+    "sui": "WORLDZAPP_SUI_GRAPHQL_URL",
     "robinhood": "WORLDZAPP_ROBINHOOD_RPC_URL"
   },
-  "secretRule": "Provider credentials and API keys must never be committed to repository files."
+  "secretRule": "Provider credentials and API keys must never be committed to repository files.",
+  "protocolVerificationRule": "A documented host is not considered verified until the current transport/protocol succeeds in live proof."
 }
