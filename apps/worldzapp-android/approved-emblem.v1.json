@@ -1,0 +1,27 @@
+{
+  "schema": "WORLDZ-APP-APPROVED-EMBLEM-V1",
+  "updatedAt": "2026-09-27",
+  "state": "OWNER_APPROVED_AND_REPOSITORY_BOUND",
+  "brand": "Worldz Emblem",
+  "approval": {
+    "ownerApproved": true,
+    "approvalContext": "User explicitly supplied the selected WorldzApp icon artwork and instructed: Use this as Part of this.",
+    "replacementRule": "Do not replace or redesign this emblem for WorldzApp release assets unless the owner explicitly approves a replacement."
+  },
+  "masterSource": {
+    "originalDimensions": "1536x1536",
+    "sha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
+    "repositoryMasterOriginalCommitted": false,
+    "rule": "The original owner upload remains the approval source; repository release derivatives must preserve the approved composition."
+  },
+  "releaseDerivative": {
+    "dimensions": "512x512",
+    "format": "PNG",
+    "sha256": "3710472b055d46fb2dec3ff2a1e71f4382787520e775477b6511dc8e9dfb34ef",
+    "publicPath": "launchpad.cryptoworldz.xyz/worldz-app/worldz-app-icon-512.png",
+    "androidAssetPath": "apps/worldzapp-android/assets/worldzapp-icon-512.png",
+    "purpose": ["PLAY_STORE_ICON_SOURCE","ANDROID_TWA_ICON","PWA_MASKABLE_ICON"],
+    "derivedFromOwnerApprovedMaster": true
+  },
+  "keepOnKeepinOn": true
+}
