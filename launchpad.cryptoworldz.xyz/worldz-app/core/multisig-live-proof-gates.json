@@ -12,7 +12,8 @@
       "system": "SQUADS_V4",
       "chain": "solana",
       "state": "LIVE_PROOF_PASSED",
-      "proofWorkflow": "WorldzApp Stage 5B Live Squads Proof"
+      "proofWorkflow": "WorldzApp Stage 5B Live Squads Proof",
+      "adapterId": "squads_v4"
     },
     {
       "id": "worldz_safe",
@@ -30,7 +31,8 @@
       "proofReads": [
         "Safe status owners/threshold",
         "multisig transaction confirmations"
-      ]
+      ],
+      "adapterId": "safe_smart_account"
     },
     {
       "id": "worldz_xrpl",
@@ -38,6 +40,7 @@
       "chain": "xrpl",
       "state": "WORLDZ_PROFILE_REQUIRED",
       "requiredConfiguration": [
+        "WORLDZ_XRPL_RPC_URL",
         "WORLDZ_XRPL_MULTISIG_ACCOUNT",
         "WORLDZ_XRPL_TX_HASH"
       ],
@@ -45,7 +48,8 @@
         "validated account SignerList",
         "SignerQuorum and SignerEntries",
         "public transaction Signers"
-      ]
+      ],
+      "adapterId": "xrpl_signer_list"
     },
     {
       "id": "worldz_sui",
@@ -62,7 +66,8 @@
         "threshold and weights",
         "known public transaction evidence"
       ],
-      "note": "Sui native multisig configuration is key-based; do not invent an on-chain Safe-style owner registry."
+      "note": "Sui native multisig configuration is key-based; do not invent an on-chain Safe-style owner registry.",
+      "adapterId": "sui_weighted_multisig"
     }
   ],
   "releaseRule": "Stage 5C is not complete until each non-Solana Worldz profile has an explicitly approved public identifier and proof evidence. Harness readiness is not live-profile proof."
