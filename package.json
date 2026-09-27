@@ -30,7 +30,9 @@
     "verify:worldzapp:icons": "node tools/verify-worldzapp-icon-assets.js",
     "verify:worldzapp:unsigned-aab": "node tools/verify-worldzapp-unsigned-aab-contract.js",
     "verify:worldzapp:play-phase2": "node tools/verify-worldzapp-play-phase2.js",
-    "render:worldzapp:assetlinks": "node tools/render-worldzapp-assetlinks.js"
+    "render:worldzapp:assetlinks": "node tools/render-worldzapp-assetlinks.js",
+    "verify:worldzapp:final-icons": "node tools/verify-worldzapp-final-icon-pack.js",
+    "verify:worldzapp:play-phase3": "node tools/verify-worldzapp-play-phase3.js"
   },
   "engines": {
     "node": ">=20 <25"
