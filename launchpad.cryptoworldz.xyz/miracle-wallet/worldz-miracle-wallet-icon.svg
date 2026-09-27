@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="WorldzMiracleWallet">
+<defs><radialGradient id="g" cx="50%" cy="42%" r="70%"><stop offset="0" stop-color="#7c3aed"/><stop offset=".55" stop-color="#2e1065"/><stop offset="1" stop-color="#05020b"/></radialGradient></defs>
+<rect width="512" height="512" rx="112" fill="url(#g)"/>
+<circle cx="256" cy="256" r="172" fill="none" stroke="#c4b5fd" stroke-width="10" opacity=".72"/>
+<circle cx="256" cy="256" r="134" fill="none" stroke="#60a5fa" stroke-width="6" opacity=".72"/>
+<path d="M142 170l58 190 56-124 56 124 58-190" fill="none" stroke="#fff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="256" cy="256" r="18" fill="#fff"/>
+</svg>
