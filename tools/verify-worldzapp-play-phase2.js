@@ -11,7 +11,7 @@ const listing=read("apps/worldzapp-android/play-store-listing.v1.json");
 assert(preflight.schema==="WORLDZ-APP-PLAY-FINAL-PREFLIGHT-V1","preflight schema");
 assert(preflight.codeSide.api36===true,"API 36");
 assert(preflight.codeSide.unsignedAabCompilationProven===true,"unsigned AAB proof");
-assert(preflight.codeSide.approvedProductionIconsReady===true,"approved production icons");
+assert(preflight.codeSide.approvedProductionIconsReady===false,"final production icons must remain pending after later owner logo approval");\nassert(preflight.codeSide.finalOwnerApprovedLogoMasterLocked===true,"final owner-approved logo master must be locked");\nassert(preflight.codeSide.finalOwnerApprovedLogoMasterSha256==="e23b67694d0a28e2775e57a80511a3407bc9e39751661d1fbf378f560ff97eec","final logo checksum drift");\nassert(preflight.codeSide.finalLogoBinaryReconciliation==="REQUIRED","final logo binary reconciliation gate");
 assert(preflight.codeSide.privacySurfaceBuilt===true,"privacy surface");
 assert(preflight.codeSide.supportSurfaceBuilt===true,"support surface");
 assert(preflight.codeSide.assetlinksRendererBuilt===true,"assetlinks renderer");
@@ -34,5 +34,5 @@ cp.execFileSync(process.execPath,["tools/render-worldzapp-assetlinks.js","--chec
 });
 
 console.log("WORLDZAPP_PLAY_PHASE2=PASS");
-console.log("privacy_surface=BUILT support_surface=BUILT assetlinks_renderer=READY");
+console.log("privacy_surface=BUILT support_surface=BUILT assetlinks_renderer=READY final_logo_master=LOCKED final_icon_binaries=PENDING");
 console.log("play_identity=PENDING signing=PENDING deployment_verification=PENDING release=false");
