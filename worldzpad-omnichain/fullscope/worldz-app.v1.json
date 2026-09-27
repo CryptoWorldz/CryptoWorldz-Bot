@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "GOOGLE_PLAY_READINESS_FOUNDATION_BUILT__ANDROID_API36__STAGE_5C_HARNESS_BUILT__SIGNED_AAB_RELEASE_GATED",
+  "lifecycle": "GOOGLE_PLAY_READINESS__APPROVED_EMBLEM_PRODUCTION_ASSETS_READY__ANDROID_API36__STAGE_5C__SIGNED_AAB_RELEASE_GATED",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -159,7 +159,11 @@
     "googlePlayStoreListing": "apps/worldzapp-android/play-store-listing.v1.json",
     "googlePlayReleaseGuide": "docs/WORLDZAPP-GOOGLE-PLAY-RELEASE.md",
     "approvedWorldzEmblem": "apps/worldzapp-android/approved-emblem.v1.json",
-    "approvedWorldzEmblemPreview": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg"
+    "approvedWorldzEmblemPreview": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg",
+    "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
+    "androidPlayIcon": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
+    "androidMaskableIcon": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
+    "androidIconVerifier": "tools/verify-worldzapp-icon-assets.js"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -326,7 +330,7 @@
     "liveReaders": "src/worldz-app/live-multisig-readers.js"
   },
   "androidPackagingFoundation": {
-    "lifecycle": "CODE_BUILT_API36_TWA_AND_GOOGLE_PLAY_READINESS_FOUNDATION__AAB_RELEASE_GATED",
+    "lifecycle": "CODE_BUILT_API36_TWA_PLAY_READINESS__APPROVED_EMBLEM_PRODUCTION_ASSETS_READY__AAB_RELEASE_GATED",
     "technology": "TRUSTED_WEB_ACTIVITY",
     "bubblewrapVersion": "1.25.0",
     "targetSdk": 36,
@@ -337,11 +341,11 @@
     "outputFormat": "ANDROID_APP_BUNDLE_AAB",
     "signedAabBuilt": false,
     "digitalAssetLinksDeployed": false,
-    "officialCenterLogoRasterReady": false,
+    "officialCenterLogoRasterReady": true,
     "playAppSigningConfigured": false,
     "publicReleaseAuthorized": false,
     "mainnetBroadcastEnabled": false,
-    "nextGate": "FINAL_512_ICON_EXPORT__FINAL_APPLICATION_ID__PLAY_DEVELOPER_IDENTITY__PRIVACY_DATA_SAFETY_FINANCIAL_DECLARATIONS__PLAY_SIGNING__ASSET_LINKS__SIGNED_AAB__TESTING",
+    "nextGate": "FINAL_APPLICATION_ID__PLAY_DEVELOPER_IDENTITY__PRIVACY_SUPPORT__PLAY_SIGNING__ASSET_LINKS__SIGNED_AAB__TESTING",
     "playReadinessFoundation": "BUILT",
     "playSubmissionReady": false,
     "privacyPolicyFinalized": false,
@@ -350,7 +354,21 @@
     "ownerApprovedEmblemSource": true,
     "approvedEmblemRegistry": "apps/worldzapp-android/approved-emblem.v1.json",
     "approvedEmblemPreview": "apps/worldzapp-android/assets/worldz-emblem-approved-preview-128.jpg",
-    "finalIconRaster": "PENDING_VALID_512_PNG_AND_MASKABLE_EXPORT"
+    "finalIconRaster": "VERIFIED_AND_CHECKSUM_BOUND",
+    "playIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-512.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "27bea13731d943511429b74f75d175e5613e24bdc53079d4cf1b906e45a4692d",
+      "format": "PNG_RGBA_SRGB"
+    },
+    "maskableIcon": {
+      "path": "apps/worldzapp-android/assets/worldz-app-icon-maskable-512.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "b09b93d8462ca96aba9d16f96eacf758b2bb6e41879016342919f318a223ac15",
+      "format": "PNG_RGBA_SRGB"
+    }
   },
   "keepOnKeepinOn": {
     "enabled": true,
