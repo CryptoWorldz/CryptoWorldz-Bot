@@ -101,6 +101,13 @@
       "state": "INTEGRATION_PLANNED",
       "route": null,
       "authority": "HUMANITARIAN_SEPARATE_FROM_CRYPTO_CUSTODY"
+    },
+    {
+      "id": "ideas",
+      "brand": "Worldz Ideas Registry™",
+      "state": "SOURCE_REGISTERED",
+      "route": null,
+      "authority": "READ_ONLY_PROJECT_STATUS"
     }
   ],
   "appSecurity": {
@@ -110,7 +117,8 @@
     "automaticSwapEnabled": false,
     "transactionReviewRequired": true,
     "simulationRequiredBeforeSigning": true,
-    "signerThresholdRequiredForTreasury": true
+    "signerThresholdRequiredForTreasury": true,
+    "projectIdeasCanGrantExecutionAuthority": false
   },
   "sourcePaths": {
     "web": "launchpad.cryptoworldz.xyz/worldz-app/",
@@ -125,7 +133,8 @@
     "activityEventSchema": "launchpad.cryptoworldz.xyz/worldz-app/core/activity-event.schema.json",
     "providerBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/provider-bindings.json",
     "walletConnectors": "launchpad.cryptoworldz.xyz/worldz-app/core/wallet-connectors.json",
-    "walletConnectionRuntime": "launchpad.cryptoworldz.xyz/worldz-app/wallet-connect.js"
+    "walletConnectionRuntime": "launchpad.cryptoworldz.xyz/worldz-app/wallet-connect.js",
+    "projectIdeasRegistry": "worldzpad-omnichain/fullscope/worldz-project-ideas.v1.json"
   },
   "readAdapterFoundation": {
     "lifecycle": "CODE_BUILT_INTERFACE",
@@ -180,5 +189,11 @@
     "secretCollection": false,
     "tests": "test/worldz-app-stage3.test.js",
     "nextGate": "ROLE_AWARE_IDENTITY_ASSERTIONS_AND_VERIFIED_MOBILE_WALLET_HANDOFF"
+  },
+  "projectSource": {
+    "parent": "WorldzFullBuild™",
+    "ideasRegistry": "worldzpad-omnichain/fullscope/worldz-project-ideas.v1.json",
+    "mode": "READ_ONLY_INHERITANCE",
+    "rule": "WorldzApp inherits reconciled durable Project decisions from WorldzFullBuild and the Worldz Ideas Registry; module registration does not grant transaction authority."
   }
 }
