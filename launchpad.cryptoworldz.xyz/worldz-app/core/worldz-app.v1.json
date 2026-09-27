@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "CODE_BUILT_STAGE_4B_LIVE_SIMULATION_PROOF_PASSED__STAGE_5_NEXT",
+  "lifecycle": "CODE_BUILT_STAGE_5_MULTISIG_APPROVAL_EVIDENCE_FOUNDATION__LIVE_PROFILE_PROOF_PENDING",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -126,7 +126,10 @@
     "simulationContract": "src/worldz-app/simulation-contract.js",
     "simulationBindings": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-bindings.json",
     "simulationAdapterContract": "src/worldz-app/simulation-adapter-contract.js",
-    "simulationAdapters": "src/worldz-app/simulation-adapters.js"
+    "simulationAdapters": "src/worldz-app/simulation-adapters.js",
+    "multisigApprovalAdapters": "launchpad.cryptoworldz.xyz/worldz-app/core/multisig-approval-adapters.json",
+    "multisigApprovalContract": "src/worldz-app/multisig-approval-contract.js",
+    "multisigApprovalRuntimeAdapters": "src/worldz-app/multisig-approval-adapters.js"
   },
   "identityWalletFoundation": {
     "lifecycle": "CODE_BUILT_STAGE_3B_GUARDED_FOUNDATION",
@@ -197,5 +200,26 @@
       "broadcast": false,
       "stateMutation": false
     }
+  },
+  "multisigApprovalFoundation": {
+    "lifecycle": "CODE_BUILT_APPROVAL_EVIDENCE_FOUNDATION__LIVE_MULTISIG_PROOF_PENDING",
+    "contract": "src/worldz-app/multisig-approval-contract.js",
+    "adapters": "src/worldz-app/multisig-approval-adapters.js",
+    "registry": "launchpad.cryptoworldz.xyz/worldz-app/core/multisig-approval-adapters.json",
+    "systems": [
+      "SQUADS_V4",
+      "SAFE_SMART_ACCOUNT",
+      "XRPL_SIGNER_LIST",
+      "SUI_WEIGHTED_MULTISIG"
+    ],
+    "thresholdModes": [
+      "COUNT",
+      "WEIGHT"
+    ],
+    "approvalSubmission": false,
+    "signing": false,
+    "execution": false,
+    "broadcast": false,
+    "nextGate": "BIND_VERIFIED_LIVE_MULTISIG_PROFILES_AND_APPROVAL_EVIDENCE"
   }
 }
