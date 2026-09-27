@@ -14,7 +14,7 @@ function safeFetchFixture({txSafe="0xSafe"}={}){
     json:async()=>{
       const value=String(url);
       if(value.includes("/safes/")) return {threshold:2,owners:["0xA","0xB","0xC"]};
-      if(value.endsWith("/confirmations/")) return {results:[{owner:"0xA"},{owner:"0xB"}]};
+      if(value.includes("/confirmations")) return {results:[{owner:"0xA"},{owner:"0xB"}]};
       return {safe:txSafe,safeTxHash:"0xTx"};
     }
   });
