@@ -1,0 +1,48 @@
+{
+  "schema": "WORLDZ-APP-PLAY-SCREENSHOT-PLAN-V1",
+  "updatedAt": "2026-09-28",
+  "state": "CAPTURE_PLAN_READY__REAL_DEVICE_CAPTURES_PENDING",
+  "rules": [
+    "Capture only the exact submitted build",
+    "Do not depict gated roadmap features as live",
+    "Do not show seed phrases/private keys/recovery words",
+    "Do not use retired public branding",
+    "Use the owner-approved WorldzApp master/logo only"
+  ],
+  "phoneShots": [
+    {
+      "slot": 1,
+      "title": "WorldzApp Home",
+      "purpose": "First-party Worldz gateway and current verified status"
+    },
+    {
+      "slot": 2,
+      "title": "Wallet Connections",
+      "purpose": "External non-custodial wallet connection; no custody-secret collection"
+    },
+    {
+      "slot": 3,
+      "title": "Chain Status",
+      "purpose": "Verified read-only chain/network status"
+    },
+    {
+      "slot": 4,
+      "title": "Simulation Review",
+      "purpose": "Unsigned simulation and human-readable effects; signing remains off"
+    },
+    {
+      "slot": 5,
+      "title": "Treasury Proof",
+      "purpose": "Public multisig/treasury evidence and explicit capability gates"
+    },
+    {
+      "slot": 6,
+      "title": "Privacy & Support",
+      "purpose": "First-party privacy and support access"
+    }
+  ],
+  "featureGraphic": {
+    "state": "PENDING_DESIGN_FROM_FINAL_APPROVED_MASTER",
+    "rule": "No regenerated/reinterpreted logo"
+  }
+}
