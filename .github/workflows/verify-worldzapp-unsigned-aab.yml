@@ -46,8 +46,17 @@ jobs:
       - name: Install pinned Bubblewrap
         run: npm install --no-save --ignore-scripts --no-audit --no-fund @bubblewrap/cli@1.25.0
 
-      - name: Configure Bubblewrap toolchain
-        run: npx bubblewrap updateConfig --jdkPath="$JAVA_HOME" --androidSdkPath="$ANDROID_SDK_ROOT"
+      - name: Configure Bubblewrap toolchain non-interactively
+        run: |
+          mkdir -p "$HOME/.bubblewrap"
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const path=require('node:path');
+          const config={jdkPath:process.env.JAVA_HOME,androidSdkPath:process.env.ANDROID_SDK_ROOT};
+          fs.writeFileSync(path.join(process.env.HOME,'.bubblewrap','config.json'),JSON.stringify(config,null,2)+'\n');
+          console.log(config);
+          NODE
+          npx bubblewrap doctor
 
       - name: Prepare CI-only TWA manifest
         run: |
