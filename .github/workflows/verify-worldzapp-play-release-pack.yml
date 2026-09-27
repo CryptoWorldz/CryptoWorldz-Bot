@@ -1,0 +1,28 @@
+name: WorldzApp Play Release Pack
+on:
+  pull_request:
+    paths:
+      - 'apps/worldzapp-android/**'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/**'
+      - 'tools/verify-worldzapp-play-release-pack.js'
+      - '.github/workflows/verify-worldzapp-play-release-pack.yml'
+  push:
+    branches: [revive-v1-build]
+    paths:
+      - 'apps/worldzapp-android/**'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/**'
+      - 'tools/verify-worldzapp-play-release-pack.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tools/verify-worldzapp-play-release-pack.js
+      - run: node tools/verify-worldzapp-play-phase2.js
+      - run: node tools/verify-worldzapp-google-play.js
