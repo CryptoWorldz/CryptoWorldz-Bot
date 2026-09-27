@@ -370,3 +370,18 @@ Mission flow: **See a Need → Create a Miracle → Prove the Impact → Pass It
 ### Public-brand supersession reminder
 
 The public-facing **OneWorldz** brand is retired. Historical references in this internal migration/source ledger may remain only for provenance and reconciliation. New public-facing Worldz work uses the active WorldzEcosystem™ / WorldzFullBuild™ direction.
+
+
+## WorldzAUTO Buy-Only™ — 2026-09-27
+
+Status: **CODE/SPEC FOUNDATION — MAINNET OFF BY DEFAULT**
+
+WorldzFullBuild™ now includes a reusable **WorldzAUTO Buy-Only™** mode. The canonical standard is `docs/WORLDZ-AUTO-BUY-ONLY-STANDARD.md` and the machine contract is `worldzpad-omnichain/fullscope/worldz-auto-buy-only.v1.json`.
+
+- AUTO may prepare and execute only an explicitly approved **BUY** intent; **automatic SELL is denied**.
+- New-token launch bootstrap defaults to **ONE_SHOT_BUY**: one confirmed approved purchase consumes the idempotency key and disarms the launch intent.
+- It must fail closed on mint/pool mismatch, stale quote, failed simulation, budget/slippage/price-impact/fee breach, insufficient real liquidity, ambiguous signature state or unexpected token behavior.
+- Every real spend remains bound to token-specific budget limits and the required external wallet or multisig approval; the feature does not bypass signer policy.
+- DEX Screener's documented pool + transaction prerequisite may be satisfied by a legitimate first purchase, but indexing remains provider-observed.
+- Jupiter Organic Score remains a post-launch observed signal. WorldzAUTO must not wash trade, self-trade, split wallets, manufacture volume/makers/holders, or describe automated activity as organic.
+- MIRACLE ($MRCL) inherits the mode for the existing **AUD $200 target real-SOL creator first buy**, with exact SOL bound from live pricing at transaction review time. No Organic Score or score label is guaranteed.
