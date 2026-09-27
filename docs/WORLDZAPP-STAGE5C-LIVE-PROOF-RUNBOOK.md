@@ -26,8 +26,10 @@ Proof reads:
 1. Safe account status;
 2. owner list;
 3. threshold;
-4. selected Safe transaction confirmation list;
-5. normalize through the Worldz Stage 5 count-threshold adapter.
+4. selected Safe transaction record and its Safe address;
+5. reject evidence unless that transaction belongs to the configured Worldz Safe;
+6. selected Safe transaction confirmation list;
+7. normalize through the Worldz Stage 5 count-threshold adapter.
 
 Do not create a Safe solely to make CI green. The address must belong to an approved Worldz treasury profile.
 
@@ -35,9 +37,9 @@ Do not create a Safe solely to make CI green. The address must belong to an appr
 
 Required public configuration:
 
+- `WORLDZ_XRPL_RPC_URL` — environment/secret configured; HTTPS required
 - `WORLDZ_XRPL_MULTISIG_ACCOUNT`
 - `WORLDZ_XRPL_TX_HASH`
-- production RPC remains environment-configured, with the public verification endpoint allowed only for proof
 
 Proof reads:
 
@@ -45,8 +47,10 @@ Proof reads:
 2. exactly one SignerList;
 3. SignerQuorum;
 4. SignerEntries and weights;
-5. public transaction Signers;
-6. normalize through the Worldz Stage 5 weighted-quorum adapter.
+5. require the proof transaction to be validated;
+6. require the proof transaction Account to equal the configured Worldz multisig account;
+7. read public transaction Signers;
+8. normalize through the Worldz Stage 5 weighted-quorum adapter.
 
 Do not create or modify a SignerList merely to satisfy this check.
 
