@@ -191,10 +191,43 @@ Security review, privacy policy, incident recovery, accessibility/mobile QA and 
 No RPC endpoint or credential is hard-coded in the public registry. Provider configuration remains environment-specific.
 
 
-## Provider-binding implementation — 2026-09-27
+## Verified development read providers
 
-Environment-only JSON-RPC bindings are code-built for Solana, Ethereum, Base, BNB Chain, HyperEVM, XRP Ledger and Sui. Robinhood remains research until its intended network/provider contract is verified.
+WorldzApp includes a provider-binding registry for live read proof. Public endpoints are used only for development verification and are not treated as production infrastructure.
 
-The public registry stores only environment-variable names, never provider credentials. `src/worldz-app/rpc-client.js` rejects inline URL credentials and non-HTTP(S) transports. `tools/verify-worldzapp-live-reads.js` is the evidence gate: a chain remains **LIVE_PROOF_PENDING** until the deployment environment is configured and the verifier completes a successful network read.
+Current verification bindings:
 
-Provider binding does not add any signing/broadcast method. The existing read-adapter contract remains authoritative.
+- Solana mainnet public RPC — official Solana endpoint.
+- Base mainnet public RPC — official Base endpoint.
+- BNB Chain mainnet public RPC — official BNB Chain endpoint.
+- HyperEVM mainnet RPC — official Hyperliquid endpoint.
+- XRP Ledger mainnet public server — documented XRPL/Ripple endpoint.
+- Sui mainnet fullnode — documented Sui mainnet fullnode endpoint.
+- Robinhood Chain mainnet public RPC — official Robinhood Chain endpoint.
+- Ethereum mainnet — no Ethereum Foundation public production RPC is selected; a production/provider environment variable is required.
+
+The public endpoints are rate-limited or otherwise unsuitable as a production guarantee. Production URLs and credentials must be supplied through environment/secrets and independently verified.
+
+The live-read proof workflow checks:
+
+1. Solana RPC health.
+2. A finalized Solana balance read for the approved JayJayTeamDev public wallet.
+3. Base chain ID.
+4. BNB Chain chain ID.
+5. HyperEVM chain ID.
+6. XRP Ledger validated server state.
+7. Sui latest checkpoint.
+8. Robinhood Chain chain ID.
+
+No signing, transaction submission or broadcasting is present in this workflow.
+
+
+### Sui transport migration discovered by live proof
+
+The first live provider run reached the Sui public fullnode but the node rejected the legacy JSON-RPC method because JSON-RPC has been disabled on current public fullnodes.
+
+WorldzApp therefore migrated the Sui read verification path to the current Sui GraphQL API. This creates a permanent rule for every Worldz chain adapter:
+
+> A documented endpoint host is not enough. The exact transport and method set must pass a live proof before the adapter is treated as current.
+
+Sui remains read-only. No Sui signing or execution capability is introduced by the migration.
