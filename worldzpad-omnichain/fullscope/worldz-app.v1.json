@@ -3,7 +3,7 @@
   "brand": "WorldzApp™",
   "parent": "WorldzFullBuild™",
   "updatedAt": "2026-09-27",
-  "lifecycle": "CODE_BUILT_STAGE_3B_IDENTITY_MOBILE_HANDOFF__STAGE_4A_UNSIGNED_SIMULATION_ADAPTERS",
+  "lifecycle": "CODE_BUILT_STAGE_4B_LIVE_SIMULATION_PROOF_PASSED__STAGE_5_NEXT",
   "purpose": "FIRST_PARTY_UMBRELLA_APPLICATION_FOR_WORLDZ_ECOSYSTEM",
   "delivery": {
     "current": "INSTALLABLE_PWA_FOUNDATION",
@@ -216,7 +216,7 @@
     "rule": "WorldzApp inherits reconciled durable Project decisions from WorldzFullBuild and the Worldz Ideas Registry; module registration does not grant transaction authority."
   },
   "simulationFoundation": {
-    "lifecycle": "CODE_BUILT_STAGE_4A_UNSIGNED_ADAPTERS__LIVE_PROOF_PENDING",
+    "lifecycle": "STAGE_4B_LIVE_PROOF_PASSED",
     "contract": "src/worldz-app/simulation-contract.js",
     "policy": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-policy.json",
     "humanReadableEffectsRequired": true,
@@ -224,7 +224,7 @@
     "liveChainBindings": "SOLANA_AND_EVM_CODE_BUILT__LIVE_PROOF_PENDING",
     "signatureRequest": false,
     "broadcast": false,
-    "nextGate": "LIVE_PROOF_SOLANA_AND_EVM__THEN_CHAIN_NATIVE_XRPL_SUI_DRY_RUN_BINDINGS",
+    "nextGate": "STAGE_5_NATIVE_MULTISIG_APPROVAL_ADAPTERS",
     "adapterContract": "src/worldz-app/simulation-adapter-contract.js",
     "adapters": "src/worldz-app/simulation-adapters.js",
     "bindings": "launchpad.cryptoworldz.xyz/worldz-app/core/simulation-bindings.json",
@@ -232,6 +232,23 @@
       "SOLANA_SIMULATE_TRANSACTION",
       "EVM_ETH_CALL",
       "EVM_ETH_ESTIMATE_GAS"
-    ]
+    ],
+    "liveProof": {
+      "state": "PASSED",
+      "verifiedAt": "2026-09-27T12:00:25.715Z",
+      "workflowRunId": 36317541759,
+      "proofSha256": "bc74711f21b1e3a53f7b444df2b70bc8e3e8cb425397788c02254dc77b5caca1",
+      "requiredPassed": [
+        "solana",
+        "base",
+        "bnb",
+        "hyperevm",
+        "robinhood"
+      ],
+      "ethereum": "SKIP_NO_APPROVED_VERIFY_ENDPOINT",
+      "signing": false,
+      "broadcast": false,
+      "stateMutation": false
+    }
   }
 }
