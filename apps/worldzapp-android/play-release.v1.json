@@ -89,8 +89,8 @@
     "privateKeyCollection": false
   },
   "releaseBlockers": [
+    "APPROVED_EMBLEM_BINARY_IMPORT_AND_DERIVED_ANDROID_ASSETS",
     "FINAL_APPLICATION_ID_LOCK",
-    "OWNER_APPROVED_CENTER_LOGO_512_AND_MASKABLE_ASSETS",
     "VERIFIED_PLAY_DEVELOPER_IDENTITY",
     "PUBLIC_SUPPORT_CONTACT",
     "PUBLIC_PRIVACY_POLICY_URL",
@@ -105,5 +105,20 @@
     "PLAY_TESTING_TRACK_REQUIREMENTS",
     "STORE_LISTING_ASSETS_AND_SCREENSHOTS",
     "FINAL_HUMAN_RELEASE_AUTHORIZATION"
-  ]
+  ],
+  "branding": {
+    "ownerApprovedCentreEmblem": true,
+    "approvalDate": "2026-09-27",
+    "approvedSource": "USER_SUPPLIED_WORLDZ_EMBLEM",
+    "sourcePixelSize": "1536x1536",
+    "sourceSha256": "685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050",
+    "regenerationAllowed": false,
+    "replacementRequiresExplicitOwnerApproval": true,
+    "androidAssetImport": "PENDING_BINARY_REPOSITORY_IMPORT",
+    "requiredDerivedAssets": [
+      "512x512 Google Play icon",
+      "Android launcher/mipmap assets",
+      "maskable safe-zone asset"
+    ]
+  }
 }

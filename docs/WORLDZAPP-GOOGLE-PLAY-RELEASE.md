@@ -19,7 +19,7 @@ WorldzApp's Android packaging foundation targets Android 16 / API 36 and Android
 ## Play submission gates
 
 1. Lock the final Android application ID before the Play app identity becomes permanent.
-2. Use only the owner-approved Worldz centre-logo Android icon and maskable assets.
+2. Owner-approved Worldz centre emblem is now LOCKED (1536×1536 source; SHA-256 `685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050`). Import the exact binary and derive the required 512px/launcher/maskable Android assets without redesigning it.
 3. Verify the Play developer identity and developer-account requirements.
 4. Complete Play App Signing without committing signing secrets to source control.
 5. publish Digital Asset Links using the actual Play App Signing SHA-256 certificate fingerprint.
@@ -44,3 +44,8 @@ The current WorldzApp core does not create a Worldz-hosted consumer account. If 
 ## Truth rule
 
 Passing this repository gate means the Play submission architecture is prepared. It does **not** mean Google has approved the app. Only Google Play review can grant store approval.
+
+
+## Owner-approved Worldz centre emblem — LOCKED 2026-09-27
+
+The user-supplied 1536×1536 Worldz emblem is the approved master source for WorldzApp and Google Play branding. It must not be regenerated, reinterpreted or replaced without explicit owner approval. Source SHA-256: `685fac492b05fc104ebb368517292d43eb1ac1ac890d353e7db73a8c9feb7050`. Binary repository import and derived Android raster/maskable assets remain an implementation step; approval itself is complete.
