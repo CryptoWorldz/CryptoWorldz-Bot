@@ -25,7 +25,8 @@
     "verify:worldzapp:stage5": "node --test test/worldz-app-stage5.test.js",
     "verify:worldzapp:stage5b": "node tools/verify-worldzapp-stage5b-squads.mjs",
     "verify:worldzapp:android": "node tools/verify-worldzapp-android-package.js",
-    "verify:worldzapp:stage5c": "node --test test/worldz-app-stage5c.test.js && node tools/verify-worldzapp-stage5c-readiness.mjs"
+    "verify:worldzapp:stage5c": "node --test test/worldz-app-stage5c.test.js && node tools/verify-worldzapp-stage5c-readiness.mjs",
+    "verify:worldzapp:android:unsigned": "node --test test/worldz-app-android-unsigned.test.js && node tools/verify-worldzapp-android-unsigned-readiness.mjs"
   },
   "engines": {
     "node": ">=20 <25"
