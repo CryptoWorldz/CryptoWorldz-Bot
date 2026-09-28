@@ -19,7 +19,7 @@ const fee=quoteWorldzFee({tradeAmountAtomic:100_000_000n});
 if(fee.grossWorldzFeeAtomic!=='750000') throw new Error('75 bps static fee math failed');
 
 const routed=routePartnerQuoteAtomic(490_000n);
-if(routed.referrer!=='170000'||routed.legacyFlywheel!=='150000'||routed.worldzLaunchPad!=='85000'||routed.oneWorldzImpact!=='85000'){
+if(routed.referrer!=='170000'||routed.legacyFlywheel!=='150000'||routed.worldzLaunchPad!=='85000'||routed.impact!=='85000'){
   throw new Error('partner router math failed');
 }
 
