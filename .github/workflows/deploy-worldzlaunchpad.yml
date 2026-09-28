@@ -582,7 +582,7 @@ jobs:
       - name: Deploy public WorldzLaunchPad to Hostinger
         shell: python
         run: |
-          import os, ssl, time
+          import os, ssl, time, hashlib, io
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path, PurePosixPath
 
@@ -627,6 +627,17 @@ jobs:
                       try: ftp.delete(str(PurePosixPath(remote_root)/old))
                       except Exception: pass
 
+                  # Prove the critical FullScope file actually reached Hostinger unchanged.
+                  local_fullscope=local_root/'fullscope'/'index.html'
+                  local_sha=hashlib.sha256(local_fullscope.read_bytes()).hexdigest()
+                  remote_bytes=bytearray()
+                  ftp.cwd('/'+str(PurePosixPath(remote_root)/'fullscope'))
+                  ftp.retrbinary('RETR index.html', remote_bytes.extend, blocksize=262144)
+                  remote_sha=hashlib.sha256(bytes(remote_bytes)).hexdigest()
+                  print(f'WORLDZLAUNCHPAD_REMOTE_FULLSCOPE_SHA local={local_sha} remote={remote_sha} bytes={len(remote_bytes)}')
+                  if remote_sha != local_sha:
+                      raise RuntimeError('WORLDZLAUNCHPAD_REMOTE_FULLSCOPE_MISMATCH')
+
                   try: ftp.quit()
                   except Exception: ftp.close()
                   print(f'WORLDZLAUNCHPAD_DEPLOY=PASS files={count} target={remote_root} attempt={attempt}')
@@ -646,7 +657,7 @@ jobs:
       - name: Verify live public application
         shell: python
         run: |
-          import json,time,urllib.request,urllib.error,traceback
+          import json,time,urllib.request,urllib.error,traceback,hashlib
           from pathlib import Path
           base='https://launchpad.cryptoworldz.xyz'
           registry='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register'
@@ -786,7 +797,17 @@ jobs:
                   expected_fullbuild=json.loads(Path('launchpad.cryptoworldz.xyz/fullbuild/contract.json').read_text())
                   assert fullbuild_contract==expected_fullbuild, 'LIVE_WORLDZFULLBUILD_CONTRACT_MISMATCH'
                   assert fullbuild_contract['executionBoundary']['globalMainnetMarketLaunchDefault'] is False
-                  assert fullscope_code==200 and 'WORLDZFULLSCOPE™' in fullscope_body and 'POPULARITY ONLY' in fullscope_body and 'GOVERNANCE ONLY' in fullscope_body
+                  fullscope_markers={
+                      'WORLDZFULLSCOPE': 'WORLDZFULLSCOPE™' in fullscope_body,
+                      'POPULARITY_ONLY': 'POPULARITY ONLY' in fullscope_body,
+                      'GOVERNANCE_ONLY': 'GOVERNANCE ONLY' in fullscope_body,
+                  }
+                  print('WORLDZLAUNCHPAD_LIVE_FULLSCOPE_DIAGNOSTIC',
+                        'status='+str(fullscope_code),
+                        'bytes='+str(len(fullscope_body.encode('utf-8'))),
+                        'sha256='+hashlib.sha256(fullscope_body.encode('utf-8')).hexdigest(),
+                        'markers='+json.dumps(fullscope_markers,sort_keys=True))
+                  assert fullscope_code==200 and all(fullscope_markers.values()), ('LIVE_FULLSCOPE_MISMATCH',fullscope_markers)
                   assert inheritance_code==200 and 'WORLDZLAUNCHINHERITANCE™' in inheritance_body.upper()
                   assert inheritance_contract_code==200
                   inheritance_contract=json.loads(inheritance_contract_body)
