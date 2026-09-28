@@ -1,8 +1,13 @@
 const { createRequestLimiter, validateTelegramInitData } = require("../miniapp-auth");
+const {
+  ULTIMATE_PROVIDER_CAPABILITIES,
+  ULTIMATE_SIGNERS,
+  nextFundingWindow,
+  ultimatePublicBlueprint
+} = require("./ultimate-blueprint");
 
 function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
   const allowRequest = createRequestLimiter({ maxEvents: 30, intervalMs: 60000 });
-  let ultimateModulesPromise = null;
 
   const miniInitDataMaxAgeSeconds = Math.min(
     86400,
@@ -47,16 +52,9 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
   }
 
   async function ultimateStatusPayload() {
-    if (!ultimateModulesPromise) {
-      ultimateModulesPromise = Promise.all([
-        import("../../platform/src/ultimate.mjs"),
-        import("../../platform/src/ultimate-adapters.mjs")
-      ]);
-    }
-    const [ultimate, adapters] = await ultimateModulesPromise;
-    const blueprint = ultimate.ultimatePublicBlueprint();
-    const nextFunding = ultimate.nextFundingWindow(new Date());
-    const providers = Object.fromEntries(Object.entries(adapters.ULTIMATE_PROVIDER_CAPABILITIES).map(([name, provider]) => [name, {
+    const blueprint = ultimatePublicBlueprint();
+    const nextFunding = nextFundingWindow(new Date());
+    const providers = Object.fromEntries(Object.entries(ULTIMATE_PROVIDER_CAPABILITIES).map(([name, provider]) => [name, {
       role: provider.role,
       mode: provider.mode,
       external_authorization_required: provider.canAutoAuthorize === false,
@@ -75,11 +73,17 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
         { id: "curve-pro", name: "Worldz Curve Pro™", url: "https://launchpad.cryptoworldz.xyz/curve-pro/" }
       ],
       feePolicy: {
-        projectTradingFeeMinPercent: 0.5,
-        projectTradingFeeMaxPercent: 4,
-        worldzLaunchPadShareOfCollectedProjectFeePercent: 10,
-        worldzLaunchPadShareOfTokenSupplyPercent: 0,
-        worldzLaunchPadShareOfInitialLiquidityPercent: 0
+        targetGrossTraderFeeBpsWhereProven: 75,
+        targetGrossTraderFeePercentWhereProven: 0.75,
+        dynamicFeeDefault: false,
+        worldzControlledSplitPercent: {
+          creator: 51,
+          referrer: 17,
+          legacyFlywheel: 15,
+          worldzLaunchPad: 8.5,
+          impact: 8.5
+        },
+        externalVenueAndNetworkFeesSeparate: true
       },
       publicMainnetCreatorLaunchesEnabled: false
     };
@@ -88,7 +92,7 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
       ultimate: {
         ...blueprint,
         nextFunding,
-        signers: ultimate.ULTIMATE_SIGNERS.map(({ handle, role, immutable }) => ({ handle, role, immutable })),
+        signers: ULTIMATE_SIGNERS.map(({ handle, role, immutable }) => ({ handle, role, immutable })),
         providers,
         launch: {
           concept: "WORLDZ",
