@@ -180,17 +180,19 @@
     const policy = model.ultimate.launchPolicy || {};
     const platform = policy.platform || {};
     const fee = policy.feePolicy || {};
+    const split = fee.worldzControlledSplitPercent || {};
     const engines = Array.isArray(policy.engines) ? policy.engines : [];
     return `<section class="panel">
       <h3>🚀 WorldzLaunchPad™</h3>
       <div class="ultimate-grid">
         <div class="ultimate-card"><small>Platform</small><strong>WorldzLaunchPad™</strong></div>
         <div class="ultimate-card"><small>Status</small><strong>${escapeHtml(String(platform.status || 'DEVNET_BETA').replaceAll('_', ' '))}</strong></div>
-        <div class="ultimate-card"><small>Project Fee Range</small><strong>${Number(fee.projectTradingFeeMinPercent ?? 0.5).toFixed(2)}% → ${Number(fee.projectTradingFeeMaxPercent ?? 4).toFixed(2)}%</strong></div>
-        <div class="ultimate-card"><small>Worldz Share</small><strong>${Number(fee.worldzLaunchPadShareOfCollectedProjectFeePercent ?? 10)}% OF COLLECTED PROJECT FEE</strong></div>
+        <div class="ultimate-card"><small>MagicFee Target</small><strong>${Number(fee.targetGrossTraderFeePercentWhereProven ?? 0.75).toFixed(2)}% WHERE PROVEN</strong></div>
+        <div class="ultimate-card"><small>LaunchPad Share</small><strong>${Number(split.worldzLaunchPad ?? 8.5)}% OF WORLDZ-CONTROLLED FEE</strong></div>
       </div>
       <p><strong>Launch engines:</strong> ${engines.length ? engines.map((engine) => escapeHtml(engine.name)).join(' • ') : 'Worldz Flash™ • Worldz Curve™ • Worldz Curve Pro™'}.</p>
-      <p><strong>Platform cut:</strong> 0% token supply • 0% initial liquidity • 10% of collected project fee revenue.</p>
+      <p><strong>Worldz-controlled split:</strong> Creator ${Number(split.creator ?? 51)}% • Referrer ${Number(split.referrer ?? 17)}% • Legacy FlyWheel ${Number(split.legacyFlywheel ?? 15)}% • WorldzLaunchPad ${Number(split.worldzLaunchPad ?? 8.5)}% • Impact ${Number(split.impact ?? 8.5)}%.</p>
+      <div class="ultimate-note">0.75% is a route-specific target only where the venue is proven. External protocol/DEX and network fees are separate and must be disclosed.</div>
       <div class="ultimate-note ultimate-danger">Public mainnet creator launches remain fail-closed. Devnet launch, proof, wallet signing and release gates remain visible before anything reaches mainnet.</div>
       <div class="ultimate-safety-actions">
         <a class="button" href="https://launchpad.cryptoworldz.xyz/" target="_blank" rel="noopener">Open WorldzLaunchPad™</a>
