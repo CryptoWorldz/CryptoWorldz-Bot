@@ -39,12 +39,15 @@ jobs:
           test -s public/miniapp/max.js
           test -s public/miniapp/max.css
           test -s public/miniapp/dipshit.js
+          test -s public/miniapp/inbox.js
+          test -s public/miniapp/inbox.css
           test -s public/miniapp/assets/dipshit-worldz-dude.svg
           test -s public/miniapp/assets/dipshit-worldz-dude.png
           node --check public/miniapp/app.js
           node --check public/miniapp/max.js
           node --check public/miniapp/auto-owner.js
           node --check public/miniapp/dipshit.js
+          node --check public/miniapp/inbox.js
           grep -Fq 'Command Centre <span>MAX™</span>' public/miniapp/index.html
           grep -Fq 'command-centre-max' public/miniapp/max.js
           grep -Fq 'max-public-feed' public/miniapp/max.js
@@ -54,6 +57,9 @@ jobs:
           grep -Fq 'DIPSHIT™' public/miniapp/dipshit.js
           grep -Fq 'WORLDZ DUDE' public/miniapp/dipshit.js
           grep -Fq 'walletSigning: false' public/miniapp/dipshit.js
+          grep -Fq 'Worldz Inbox™' public/miniapp/index.html
+          grep -Fq '/api/mini/inbox' public/miniapp/inbox.js
+          grep -Fq 'Exact @username' public/miniapp/inbox.js
           if grep -Fiq 'BASED.BID' public/miniapp/index.html; then
             echo 'OBSOLETE_BASED_BID_REFERENCE=FAIL'
             exit 1
@@ -146,6 +152,8 @@ jobs:
                   jcode,js=get('/miniapp/app.js?verify=worldzlaunchpad-rescue')
                   acode,auto=get('/miniapp/auto-owner.js?verify=worldzlaunchpad-rescue')
                   dcode,dipshit=get('/miniapp/dipshit.js?verify=dipshit-worldz-dude')
+                  ncode,inbox=get('/miniapp/inbox.js?verify=worldz-inbox')
+                  ccode,inboxcss=get('/miniapp/inbox.css?verify=worldz-inbox')
                   icode,avatar=get('/miniapp/assets/dipshit-worldz-dude.svg?verify=dipshit-worldz-dude')
                   mcode,maxjs=get('/miniapp/max.js?verify=command-centre-max')
                   xcode,maxcss=get('/miniapp/max.css?verify=command-centre-max')
@@ -154,10 +162,12 @@ jobs:
                   assert jcode==200 and 'zed-miniapp-rescue' in js
                   assert acode==200 and 'WorldzLaunchPad™' in auto and 'Command Centre MAX™' in auto
                   assert dcode==200 and 'DIPSHIT™' in dipshit and 'WORLDZ DUDE' in dipshit and 'walletSigning: false' in dipshit
+                  assert ncode==200 and '/api/mini/inbox' in inbox and 'Worldz Inbox' in inbox
+                  assert ccode==200 and '.worldz-inbox-shell' in inboxcss
                   assert icode==200 and '<svg' in avatar and 'WORLDZ DUDE' in avatar
                   assert mcode==200 and 'command-centre-max' in maxjs and 'LEARN' in maxjs and 'RESEARCH' in maxjs
                   assert xcode==200 and '.max-home-card' in maxcss
-                  print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 max=1 worldzlaunchpad=1 dipshit=1 basedbid=0')
+                  print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 max=1 worldzlaunchpad=1 dipshit=1 inbox=1 basedbid=0')
                   raise SystemExit(0)
               except SystemExit:
                   raise
