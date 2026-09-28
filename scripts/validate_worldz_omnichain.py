@@ -43,12 +43,12 @@ if magic["target"]["grossTraderFeeBps"] != 75:
     raise SystemExit("omnichain policy disagrees with canonical MagicFee policy")
 
 split = fee["worldzControlledSplitPercent"]
-if sum(Decimal(str(split[k])) for k in ("creator","referrer","legacyFlywheel","worldzLaunchPad","oneWorldzImpact")) != Decimal("100"):
+if sum(Decimal(str(split[k])) for k in ("creator","referrer","legacyFlywheel","worldzLaunchPad","impact")) != Decimal("100"):
     raise SystemExit("Worldz-controlled percentage split != 100")
 split_bps = fee["worldzControlledSplitBps"]
-if sum(split_bps[k] for k in ("creator","referrer","legacyFlywheel","worldzLaunchPad","oneWorldzImpact")) != 10000:
+if sum(split_bps[k] for k in ("creator","referrer","legacyFlywheel","worldzLaunchPad","impact")) != 10000:
     raise SystemExit("Worldz-controlled basis-point split != 10000")
-if [split_bps[k] for k in ("creator","referrer","legacyFlywheel","worldzLaunchPad","oneWorldzImpact")] != [5100,1700,1500,850,850]:
+if [split_bps[k] for k in ("creator","referrer","legacyFlywheel","worldzLaunchPad","impact")] != [5100,1700,1500,850,850]:
     raise SystemExit("locked 51/17/15/8.5/8.5 split drifted")
 
 if legacy["sourceFeeRule"]["legacyFlywheelPercent"] != 15:
