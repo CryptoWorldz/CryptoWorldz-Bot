@@ -5,7 +5,6 @@ const BOT_MENU_COMMANDS = [
   { command: "max", description: "Learn, research, interact and teach with MAX" },
   { command: "fullscope", description: "Open WorldzFullScope multi-chain command layer" },
   { command: "zed", description: "Zed profile, wallet, missions and settings" },
-  { command: "inbox", description: "Open your private Worldz Inbox" },
   { command: "auto", description: "Open Auto finance controls" },
   { command: "grace", description: "Open Grace Auto Post controls" },
   { command: "admin", description: "Open Admin controls" },
@@ -21,7 +20,6 @@ const MENUS = {
       ["👤 Profile", "/profile"],
       ["👛 Wallet", "/wallet"],
       ["🚀 Missions", "/missions"],
-      ["📥 Inbox", "/inbox"],
       ["🏆 Leaderboard", "/leaderboard"],
       ["📚 All Commands", "/commands"]
     ]
