@@ -18,7 +18,7 @@ export const WORLDZ_CONTROLLED_SPLIT_BPS = Object.freeze({
   referrer: 1700n,
   legacyFlywheel: 1500n,
   worldzLaunchPad: 850n,
-  oneWorldzImpact: 850n
+  impact: 850n
 });
 
 export const TARGET_GROSS_TRADER_FEE_BPS = 75n;
@@ -75,7 +75,7 @@ export function quoteWorldzFee({
   const referrer = grossWorldzFee * WORLDZ_CONTROLLED_SPLIT_BPS.referrer / BPS;
   const legacyFlywheel = grossWorldzFee * WORLDZ_CONTROLLED_SPLIT_BPS.legacyFlywheel / BPS;
   const worldzLaunchPad = grossWorldzFee * WORLDZ_CONTROLLED_SPLIT_BPS.worldzLaunchPad / BPS;
-  const oneWorldzImpact = grossWorldzFee - creator - referrer - legacyFlywheel - worldzLaunchPad;
+  const impact = grossWorldzFee - creator - referrer - legacyFlywheel - worldzLaunchPad;
 
   return Object.freeze({
     tradeAmountAtomic: trade.toString(),
@@ -86,7 +86,7 @@ export function quoteWorldzFee({
     referrerAtomic: referrer.toString(),
     legacyFlywheelAtomic: legacyFlywheel.toString(),
     worldzLaunchPadAtomic: worldzLaunchPad.toString(),
-    oneWorldzImpactAtomic: oneWorldzImpact.toString()
+    impactAtomic: impact.toString()
   });
 }
 
@@ -118,7 +118,7 @@ export function buildBitPairIntent({
         referrer: 17,
         legacyFlywheel: 15,
         worldzLaunchPad: 8.5,
-        oneWorldzImpact: 8.5
+        impact: 8.5
       })
     }),
     safety: Object.freeze({
