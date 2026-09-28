@@ -298,13 +298,25 @@ NODE
 echo "HOSTINGER_MANAGED_BUILD=STARTED uuid=$build_uuid"
 
 build_pass=0
+build_last_poll_error="none"
+# Keep the full polling section below the shortest caller's workflow timeout.
+# Individual retries are useful for a transient Hostinger API failure, but may
+# never consume the whole job and prevent its failure diagnostics from running.
+build_poll_deadline=$((SECONDS + 1500))
 for attempt in $(seq 1 90); do
+  if [ "$SECONDS" -ge "$build_poll_deadline" ]; then
+    build_last_poll_error="overall_poll_deadline_exceeded"
+    echo "::warning::HOSTINGER_MANAGED_BUILD_POLL_DEADLINE=EXCEEDED after 25 minutes."
+    break
+  fi
   sleep 10
-  poll_code="$(curl --silent --show-error --location --connect-timeout 10 --max-time 30 \
+  poll_code="$(curl --silent --show-error --location \
+    --connect-timeout 15 --max-time 15 --retry 1 --retry-all-errors --retry-delay 2 --retry-max-time 20 \
     -H "Authorization: Bearer $HOSTINGER_API_TOKEN" -H 'Accept: application/json' \
     "$base/builds?per_page=25" -o "$RUNNER_TEMP/builds.json" -w '%{http_code}' || true)"
   if [ "$poll_code" != "200" ]; then
-    echo "HOSTINGER_MANAGED_BUILD poll=$attempt/90 http=$poll_code retrying"
+    build_last_poll_error="http_${poll_code:-curl_failed}_attempt_${attempt}"
+    echo "::warning::HOSTINGER_MANAGED_BUILD_POLL_FAILED attempt=${attempt}/90 http=$poll_code; retrying within the bounded build wait."
     continue
   fi
   build_state="$(BUILD_LIST="$RUNNER_TEMP/builds.json" BUILD_UUID="$build_uuid" node - <<'NODE'
@@ -325,7 +337,10 @@ NODE
       exit 1;;
   esac
 done
-test "$build_pass" = '1'
+if [ "$build_pass" != '1' ]; then
+  echo "::error::Managed Hostinger build did not complete within 90 bounded polls (last_poll_error=$build_last_poll_error)."
+  exit 1
+fi
 echo 'HOSTINGER_MANAGED_BUILD=PASS'
 
 # The build archive deliberately contains no secrets. Restore the preserved

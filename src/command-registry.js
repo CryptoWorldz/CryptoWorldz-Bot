@@ -6,7 +6,7 @@ const COMMAND_GROUPS = Object.freeze([
   group("start", "🌐 Start & Navigation", "public", [
     ["zedstart", "Open the complete CryptoWorldz Command Centre"], ["help", "Simple command help"],
     ["commands", "Show commands available to your access level"], ["commandtree", "Show the Command Centre structural tree"],
-    ["directory", "Open Directory@OneWorldz"], ["acknowledgements", "Open Acknowledgements@OneWorldz"],
+    ["directory", "Open the Worldz directory"], ["acknowledgements", "Open DonateWorldz acknowledgements"],
     ["supportjay", "Open JayJayTeamDev@DonateWorldz"], ["donate", "Open the current DonateWorldz support choices"]
   ]),
   group("max", "🧠 Command Centre MAX™ • Learn, Research, Interact & Teach", "member", [

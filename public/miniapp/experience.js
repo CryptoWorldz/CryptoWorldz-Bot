@@ -3,8 +3,7 @@
   const $ = (id) => document.getElementById(id);
   const escape = (value) => String(value ?? "").replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[c]);
   const experience = { bootstrap: null, referral: null, draft: { title: "", body: "", image_path: "", image_url: "" }, chat: [] };
-  const HEROES = "https://oneworldz.com/heroes/";
-  const LEARN = "https://learn.oneworldz.com/";
+  const LEARN = "https://cryptoworldz.xyz/command-centre-max/";
   const PDC = "https://purplediamondcrew.com/";
 
   async function request(path, options = {}) {
@@ -47,7 +46,7 @@
       experience.referral = data;
       const referralDone = data.referral_recognised;
       const qualified = data.inbound?.status === "qualified";
-      root.innerHTML = `<section class="panel referral-progress"><p class="eyebrow">LEGEND JOURNEY</p><h3>${referralDone ? "Your referral is recognised" : "Your OneWorldz journey"}</h3><div class="progress-steps">
+      root.innerHTML = `<section class="panel referral-progress"><p class="eyebrow">LEGEND JOURNEY</p><h3>${referralDone ? "Your referral is recognised" : "Your Worldz journey"}</h3><div class="progress-steps">
         ${progressStep(referralDone, "Shill Link recognised", "Direct join")}
         ${progressStep(data.registration_complete, "Legend registered")}
         ${progressStep(data.first_raaiiidd_complete, "First verified Raaiiidd")}
@@ -92,7 +91,7 @@
   function renderHeroes() {
     const root = $("heroes-root"); if (!root) return;
     const name = experience.bootstrap?.profile?.first_name || experience.bootstrap?.telegram_user?.first_name || "";
-    root.innerHTML = `<section class="panel"><span class="hero-mark">ALREADY HELPING?</span><h3>Real work deserves a real evidence path.</h3><p>If you were helping people before OneWorldz, submit evidence. We do not pretend your work started here. Human review decides public recognition.</p><form id="hero-form" class="hero-evidence"><label>Name<input name="display_name" maxlength="120" value="${escape(name)}" required></label><label>What have you actually been doing?<textarea name="story" maxlength="3000" minlength="20" required placeholder="Describe the real activity, where it happened and who it helped."></textarea></label><label>Public evidence link<input name="evidence_url" type="url" required placeholder="https://..."></label><button class="button" type="submit">Submit Hero Evidence</button></form><a class="button secondary" href="${HEROES}" target="_blank" rel="noopener">Open OneWorldz Heroes</a></section><div id="hero-history"></div>`;
+    root.innerHTML = `<section class="panel"><span class="hero-mark">ALREADY HELPING?</span><h3>Real work deserves a real evidence path.</h3><p>If you were helping people before joining Worldz, submit evidence. We do not pretend your work started here. Human review decides public recognition.</p><form id="hero-form" class="hero-evidence"><label>Name<input name="display_name" maxlength="120" value="${escape(name)}" required></label><label>What have you actually been doing?<textarea name="story" maxlength="3000" minlength="20" required placeholder="Describe the real activity, where it happened and who it helped."></textarea></label><label>Public evidence link<input name="evidence_url" type="url" required placeholder="https://..."></label><button class="button" type="submit">Submit Hero Evidence</button></form></section><div id="hero-history"></div>`;
     loadHeroHistory();
   }
   async function loadHeroHistory() {
