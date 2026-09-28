@@ -1,10 +1,10 @@
 {
   "source": "worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json",
   "schema": "WORLDZ-FULLBUILD-V1",
-  "version": "2026-09-27-MAIN-D",
+  "version": "2026-09-29-MAIN-E",
   "brand": "WorldzFullBuild™",
   "status": "MAIN_INTEGRATION_SOURCE_OF_TRUTH",
-  "updatedAt": "2026-09-27",
+  "updatedAt": "2026-09-29",
   "purpose": "Unify the project-relevant Worldz architecture, approved reusable launch rules, verified repository state and regression-prevention lessons in one public, versioned, non-sensitive contract.",
   "decisionAndTruth": {
     "decisionAuthority": [
@@ -33,9 +33,9 @@
   ],
   "ecosystem": [
     {
-      "id": "oneworldz",
-      "name": "OneWorldz",
-      "role": "HUMANITARIAN_MISSION_AND_LEADERSHIP"
+      "id": "worldzecosystem",
+      "name": "WorldzEcosystem™",
+      "role": "MASTER_PUBLIC_GATEWAY_AND_CONNECTED_MISSION_LAYER"
     },
     {
       "id": "donateworldz",
@@ -275,7 +275,8 @@
     "Do not fabricate recipients or provider approvals.",
     "Do not call wrapped or bridged BTC native BTC.",
     "Do not unlock one chain because another chain passed.",
-    "Do not allow mint-address prefixes to become Worldz-owned token names."
+    "Do not allow mint-address prefixes to become Worldz-owned token names.",
+    "Do not restore retired public branding to active public surfaces."
   ],
   "branchReconciliation": {
     "currentIntegrationBranch": "main",
@@ -340,5 +341,30 @@
       ],
       "rule": "Reference only. Never use this origin record to replace the current canonical WLDZ mint, live lifecycle, active economics, provider state or current WorldzFullBuild release gates."
     }
-  ]
+  ],
+  "publicBranding": {
+    "activeMasterBrand": "WorldzEcosystem™ / WorldzFullBuild™",
+    "retiredPublicBrand": "OneWorldz",
+    "retiredPublicUseAllowed": false,
+    "rule": "Retired branding is historical/internal only and must not appear in active public navigation, marketing, descriptions, images or future public builds."
+  },
+  "celebrations": {
+    "woodstockReturnsParty": {
+      "workingTitle": "2026–2030 WOODSTOCK RETURNS PARTY",
+      "state": "PLANNED",
+      "period": "2026–2030",
+      "purpose": "A Worldz community music, peace, kindness and humanitarian celebration concept supporting the wider mission.",
+      "affiliationClaimed": false,
+      "licensingRule": "No official Woodstock affiliation, sponsorship, trademark licence, artist booking or venue approval is claimed until written evidence exists.",
+      "releaseGates": [
+        "community_and_local_permission",
+        "venue_and_event_permits",
+        "trademark_and_brand_review",
+        "artist_and_supplier_contracts",
+        "public_liability_and_event_safety",
+        "funding_and_budget_proof",
+        "humanitarian_fund_separation_and_reporting"
+      ]
+    }
+  }
 }
