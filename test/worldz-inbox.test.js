@@ -13,3 +13,13 @@ test("contact refresh does not hard-code DM receiving back on", () => {
   assert.doesNotMatch(touch[1],/enabled:true/);
   assert.match(touch[1],/telegram_dm_reachable:true/);
 });
+
+
+test("Worldz Inbox has protected server runtime bridge without authenticated public access", () => {
+  const bridge=fs.readFileSync(path.join(ROOT,"supabase/migrations/20260928235200_worldz_inbox_runtime_bridge.sql"),"utf8");
+  assert.match(bridge,/zed_runtime_authorized\(\)/);
+  assert.match(bridge,/to service_role/);
+  assert.match(bridge,/to anon/);
+  assert.match(bridge,/revoke all[\s\S]*from authenticated/);
+  assert.match(bridge,/worldz_dm_messages_id_seq/);
+});
