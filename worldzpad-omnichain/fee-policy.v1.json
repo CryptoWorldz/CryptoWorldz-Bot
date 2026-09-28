@@ -11,7 +11,7 @@
     "referrer": 1700,
     "legacyFlywheel": 1500,
     "worldzLaunchPad": 850,
-    "oneWorldzImpact": 850,
+    "impact": 850,
     "total": 10000
   },
   "worldzControlledSplitPercent": {
@@ -19,7 +19,7 @@
     "referrer": 17,
     "legacyFlywheel": 15,
     "worldzLaunchPad": 8.5,
-    "oneWorldzImpact": 8.5,
+    "impact": 8.5,
     "total": 100
   },
   "referralPolicy": {
@@ -48,7 +48,7 @@
         "referrer": 0.102,
         "legacyFlywheel": 0.09,
         "worldzLaunchPad": 0.051,
-        "oneWorldzImpact": 0.051
+        "impact": 0.051
       }
     }
   },
@@ -68,7 +68,7 @@
     "referrerAmount",
     "legacyFlywheelAmount",
     "worldzLaunchPadAmount",
-    "oneWorldzImpactAmount"
+    "impactAmount"
   ],
   "prohibited": [
     "hidden_fee",
