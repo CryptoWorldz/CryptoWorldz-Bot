@@ -93,7 +93,7 @@ if set(spec["supportedWorldzChainTargets"]) != targets:
 if spec["feePolicy"]["targetGrossTraderFeeBps"] != 75 or fee["targetGrossTraderFeeBps"] != 75:
     raise SystemExit("MagicFeeNumber drifted")
 split = spec["feePolicy"]["worldzControlledSplitPercent"]
-keys = ("creator","referrer","legacyFlywheel","worldzLaunchPad","oneWorldzImpact")
+keys = ("creator","referrer","legacyFlywheel","worldzLaunchPad","impact")
 if sum(Decimal(str(split[k])) for k in keys) != Decimal("100"):
     raise SystemExit("BitWorldz Worldz-controlled split != 100")
 if [Decimal(str(split[k])) for k in keys] != [Decimal("51"),Decimal("17"),Decimal("15"),Decimal("8.5"),Decimal("8.5")]:
