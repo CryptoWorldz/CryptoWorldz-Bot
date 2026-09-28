@@ -30,7 +30,7 @@ const split = [
   quote.referrerAtomic,
   quote.legacyFlywheelAtomic,
   quote.worldzLaunchPadAtomic,
-  quote.oneWorldzImpactAtomic
+  quote.impactAtomic
 ].reduce((a,b)=>a + BigInt(b), 0n);
 if (split !== BigInt(quote.grossWorldzFeeAtomic)) throw new Error("fee split conservation failed");
 
