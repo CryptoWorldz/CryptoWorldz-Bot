@@ -257,7 +257,7 @@ Use /help to open the Command Menu.
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(msg.chat.id, formatCommunity(config)));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, formatWebsite(config)));
   bot.onText(/^\/dipshit(?:@\w+)?$/, async (msg) => {
-    const image = path.join(__dirname, "../assets-source/dipshit/blue-worldz-dude.png");
+    const image = path.join(__dirname, "../public/miniapp/assets/dipshit-worldz-dude.png");
     const caption = "💙 DIPSHIT™ — WORLDZ DUDE\n\nCommand Centre QA + troubleshooting helper. Finds the dumb little problems before they become expensive big ones.\n\n🔐 No wallet signing • No treasury control • No governance execution • No mainnet broadcast.\n\nProfile: https://cryptoworldz.xyz/dipshit/\nUse /help for ZED commands.";
     try {
       return await bot.sendPhoto(msg.chat.id, image, { caption });
