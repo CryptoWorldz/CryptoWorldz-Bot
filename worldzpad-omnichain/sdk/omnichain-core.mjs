@@ -21,7 +21,7 @@ export const WORLDZ_CONTROLLED_SPLIT_BPS = Object.freeze({
   referrer: 1700n,
   legacyFlywheel: 1500n,
   worldzLaunchPad: 850n,
-  oneWorldzImpact: 850n
+  impact: 850n
 });
 
 function divFloor(n, d) {
@@ -56,7 +56,7 @@ export function quoteMagicFee({
   const referrer = divFloor(worldzControlled * WORLDZ_CONTROLLED_SPLIT_BPS.referrer, BPS);
   const legacyFlywheel = divFloor(worldzControlled * WORLDZ_CONTROLLED_SPLIT_BPS.legacyFlywheel, BPS);
   const worldzLaunchPad = divFloor(worldzControlled * WORLDZ_CONTROLLED_SPLIT_BPS.worldzLaunchPad, BPS);
-  const oneWorldzImpact = worldzControlled - creator - referrer - legacyFlywheel - worldzLaunchPad;
+  const impact = worldzControlled - creator - referrer - legacyFlywheel - worldzLaunchPad;
 
   return Object.freeze({
     grossTraderFeeBps: grossBps.toString(),
@@ -68,7 +68,7 @@ export function quoteMagicFee({
     referrerAmount: referrer.toString(),
     legacyFlywheelAmount: legacyFlywheel.toString(),
     worldzLaunchPadAmount: worldzLaunchPad.toString(),
-    oneWorldzImpactAmount: oneWorldzImpact.toString(),
+    impactAmount: impact.toString(),
     networkGasEstimate: null
   });
 }
@@ -120,7 +120,7 @@ export function buildPreSignatureDisclosure({
     referrerReceives: quote.referrerAmount,
     legacyFlywheelReceives: quote.legacyFlywheelAmount,
     worldzLaunchPadReceives: quote.worldzLaunchPadAmount,
-    oneWorldzImpactReceives: quote.oneWorldzImpactAmount,
+    impactReceives: quote.impactAmount,
     liquidityProtection,
     tokenAuthorityState,
     noHiddenFeeAttestation: true
