@@ -26,3 +26,8 @@ Presets: `worldz`, `dm`, `announcement`, `update`, `launch`, `mission`, `impact`
 Format: `PRESET | TITLE | MESSAGE | BUTTON LABEL | https://optional-link`
 
 Plain legacy WorldzCast/WorldPing text remains valid.
+
+
+## MiniApp controls
+
+The authenticated MiniApp supports Inbox/Sent tabs, reply, hide, block-sender and DM receiving on/off. Raw Telegram numeric IDs are removed from the MiniApp Inbox response; server-side message IDs are used for reply/block/hide authorization.
