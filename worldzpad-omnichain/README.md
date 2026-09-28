@@ -131,3 +131,29 @@ Then, and only then, an explicit owner release may enable mainnet execution.
 - `analytics/events.v1.json` — PostHog-ready event taxonomy (not written to the wrong PostHog workspace).
 - `api/openapi.v1.json` — quote/simulate/prepare/execute/referral/proof/white-label API contract.
 - `scripts/validate_worldz_omnichain.py` — repository safety validator.
+
+
+## BitWorldz OmniBTC™
+
+BitWorldz is now registered as the Bitcoin-facing product rail inside Worldz Omnichain.
+
+It adds:
+
+- `OmniBTC™` — common BTC quote/settlement abstraction;
+- `BTCMesh™` — chain + asset + venue route discovery;
+- `BitPair™` — chain-local TOKEN/BTC-ASSET launch markets;
+- `BTC Passport™` — exact Bitcoin representation identity;
+- `BitProof™` — asset, route, fee, liquidity and transaction evidence.
+
+BitWorldz does not treat wrapped or bridged BTC as native Bitcoin. Every chain + BTC asset + venue combination remains independently gated. Mainnet execution is OFF.
+
+Current BitWorldz build files:
+
+- `bitworldz/bitworldz.v1.json`
+- `bitworldz/btc-asset-registry.v1.json`
+- `bitworldz/chain-matrix.v1.json`
+- `bitworldz/bitpair-intent.schema.json`
+- `bitworldz/sdk/bitworldz-core.mjs`
+- `bitworldz/sdk/self-test.mjs`
+- `launchpad.cryptoworldz.xyz/bitworldz/`
+- `bitworldz.cryptoworldz.xyz/`
