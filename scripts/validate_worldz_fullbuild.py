@@ -54,7 +54,7 @@ assert fullscope["voting"]["governance"]["mayAffectPopularityRanking"] is False
 magic=full["feeAndFlywheel"]
 assert magic["targetGrossTraderFeeBpsWhereProven"]==fee["targetGrossTraderFeeBps"]==75
 assert magic["dynamicFeeDefault"]==fee["dynamicFeeDefault"] is False
-for key in ("creator","referrer","legacyFlywheel","worldzLaunchPad","oneWorldzImpact"):
+for key in ("creator","referrer","legacyFlywheel","worldzLaunchPad","impact"):
     assert Decimal(str(magic["worldzControlledSplitPercent"][key]))==Decimal(str(fee["worldzControlledSplitPercent"][key]))
 assert sum(Decimal(str(v)) for v in magic["worldzControlledSplitPercent"].values())==Decimal("100")
 
