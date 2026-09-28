@@ -44,6 +44,7 @@ const { registerUserExperienceSystem } = require("./user-experience");
 const { registerWebsiteTelegramHandlers } = require("./websites-telegram");
 const { registerWorkEvidenceHandlers } = require("./work-evidence");
 const { registerWorldzCastSystem } = require("./worldzcast");
+const { registerWorldzInboxSystem } = require("./worldz-inbox");
 const { registerWorldPingHandlers } = require("./worldping");
 const { registerZedGuide } = require("./zed-guide");
 
@@ -196,6 +197,8 @@ async function start() {
   registerRewardSettlementHandlers({ bot, repository, config, supabase });
   startupStage = "register_project_wallets";
   registerProjectWalletSystem({ app, bot, config, supabase });
+  startupStage = "register_worldz_inbox";
+  registerWorldzInboxSystem({ app, bot, config, supabase });
   startupStage = "register_worldzcast";
   registerWorldzCastSystem({ app, bot, repository, config, supabase });
   startupStage = "register_worldping";
