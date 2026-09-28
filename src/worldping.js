@@ -1,3 +1,4 @@
+const { formatWorldzStyleInput } = require("./worldz-style");
 const WORLD_PING_COMMANDS = Object.freeze([
   { command: "worldping", description: "Send a visible group WorldPing" },
   { command: "worldpingmode", description: "Set AdminsOnlyPing or FullMemberPing" },
@@ -63,8 +64,9 @@ function registerWorldPingHandlers({ bot, config, supabase, env = process.env })
   bot.onText(/^\/worldping(?:@\w+)?(?:\s+([\s\S]+))?$/i, async (message, match) => {
     try {
       if (!isGroup(message)) return send(message, "❌ Add ZED MAX to a Telegram group, then use /worldping your message.");
-      const body = String(match?.[1] || "").trim();
-      if (!body) return send(message, "❌ Use /worldping followed by the message for the group.");
+      const rawBody = String(match?.[1] || "").trim();
+      if (!rawBody) return send(message, "❌ Use /worldping followed by the message for the group.");
+      const body = formatWorldzStyleInput(rawBody);
       if (!isOwner(message, config) && !(await activeLicence(supabase, message.chat.id))) {
         return send(message, "🔒 This group needs an active ZED MAX licence. Use /zedmaxprice, pay SOL, then submit /zedmaxreceipt SIGNATURE for owner review.");
       }

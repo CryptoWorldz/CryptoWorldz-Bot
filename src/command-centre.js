@@ -133,6 +133,7 @@ function mainKeyboard() {
       inline_keyboard: [
         [{ text: "🧠 OPEN COMMAND CENTRE MAX™", web_app: { url: WEB_ROUTES.miniApp } }],
         [{ text: "🌐 WORLDZFULLSCOPE™", callback_data: "cc:menu:fullscope" }],
+        [{ text: "📥 WORLDZ INBOX™", web_app: { url: `${WEB_ROUTES.miniApp}#inbox` } }],
         [
           { text: "🗳️ VOTES CENTRE", callback_data: "cc:menu:votes" },
           { text: "🏛️ WORLDZGOVERN", callback_data: "cc:menu:govern" }
@@ -290,6 +291,7 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "/zedstart — open Command Centre MAX™",
     "/max — open the MAX learning and research hub",
     "/commands — every command available to your role",
+    "/inbox — private Worldz Inbox + DM messaging",
     "/commandtree — command sections and structure",
     "/directory — Worldz site directory",
     "/acknowledgements — DonateWorldz Acknowledgements page",

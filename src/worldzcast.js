@@ -1,6 +1,7 @@
 const express = require("express");
 const { createRateLimiter } = require("./core");
 const { validateTelegramInitData } = require("./miniapp-auth");
+const { formatWorldzStyleInput } = require("./worldz-style");
 
 const WORLDZCAST_COMMANDS = Object.freeze([
   { command: "worldzcast", description: "Create a WorldzCast post" },
@@ -430,7 +431,8 @@ function registerWorldzCastSystem({ app, bot, config, repository, supabase }) {
       }
       const reply = msg.reply_to_message || null;
       const photo = extractPhoto(reply);
-      const body = String(match && match[1] || reply && (reply.caption || reply.text) || "").trim();
+      const rawBody = String(match && match[1] || reply && (reply.caption || reply.text) || "").trim();
+      const body = formatWorldzStyleInput(rawBody);
       const { draft, targets } = await createDraft({
         creatorId: msg.from.id,
         body,
