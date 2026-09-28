@@ -17,7 +17,7 @@ req(cfg["funding"]["extraTraderFeeRequired"] is False, "universal cycle must not
 req(cfg["funding"]["legacyFlywheel"]["percentOfWorldzControlledFee"] == 15, "legacy flywheel share drift")
 req(cfg["funding"]["legacyFlywheel"]["cadenceHours"] == 6, "legacy cadence drift")
 req(cfg["funding"]["worldzLaunchPadShare"]["percentOfWorldzControlledFee"] == 8.5, "Worldz share drift")
-req(cfg["funding"]["oneWorldzImpactShare"]["percentOfWorldzControlledFee"] == 8.5, "Impact share drift")
+req(cfg["funding"]["impactShare"]["percentOfWorldzControlledFee"] == 8.5, "Impact share drift")
 req(cfg["burnStandard"]["marketBuyAndBurnAutomated"] is False, "automated market buy/burn must remain disabled")
 req(cfg["burnStandard"]["burnCannotBeReissued"] is True, "burn must be irreversible")
 req(cfg["vestingStandard"]["worldzDefaultBuilderCliffDays"] >= 90, "builder cliff below policy")
