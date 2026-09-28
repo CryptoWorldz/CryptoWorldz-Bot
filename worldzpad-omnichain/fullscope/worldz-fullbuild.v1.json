@@ -232,7 +232,7 @@
       "referrer": 17,
       "legacyFlywheel": 15,
       "worldzLaunchPad": 8.5,
-      "oneWorldzImpact": 8.5
+      "impact": 8.5
     },
     "rule": "Worldz Magic 75 is a route-specific target where the venue is proven. External protocol/DEX deductions are disclosed separately. Existing public creator configurable-fee routes remain a separate profile and may not be silently mixed.",
     "universalFlywheelRule": "Every eligible registered token receives an auditable benefit record per Universal Cycle; token-specific benefits require a resolved matching PASSED Worldz Proof Receipt."
