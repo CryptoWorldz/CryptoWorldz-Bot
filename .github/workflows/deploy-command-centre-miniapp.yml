@@ -38,15 +38,21 @@ jobs:
           test -s public/miniapp/auto-owner.js
           test -s public/miniapp/max.js
           test -s public/miniapp/max.css
+          test -s public/miniapp/dipshit.js
+          test -s public/miniapp/assets/dipshit-worldz-dude.svg
           node --check public/miniapp/app.js
           node --check public/miniapp/max.js
           node --check public/miniapp/auto-owner.js
+          node --check public/miniapp/dipshit.js
           grep -Fq 'Command Centre <span>MAX™</span>' public/miniapp/index.html
           grep -Fq 'command-centre-max' public/miniapp/max.js
           grep -Fq 'max-public-feed' public/miniapp/max.js
           grep -Fq 'WORLDZLAUNCHPAD™' public/miniapp/index.html
           grep -Fq 'WorldzLaunchPad™' public/miniapp/auto-owner.js
           grep -Fq 'zed-miniapp-rescue' public/miniapp/app.js
+          grep -Fq 'DIPSHIT™' public/miniapp/dipshit.js
+          grep -Fq 'WORLDZ DUDE' public/miniapp/dipshit.js
+          grep -Fq 'walletSigning: false' public/miniapp/dipshit.js
           if grep -Fiq 'BASED.BID' public/miniapp/index.html; then
             echo 'OBSOLETE_BASED_BID_REFERENCE=FAIL'
             exit 1
