@@ -5,3 +5,11 @@ test("exact username normalisation blocks directory-like input",()=>{assert.equa
 test("styled DM parser recognises impact preset",()=>{const p=parseStyledBody("impact | COMMUNITY UPDATE | Food delivery confirmed");assert.equal(p.preset,"impact");assert.equal(p.title,"COMMUNITY UPDATE");assert.equal(p.body,"Food delivery confirmed")});
 test("DM migration is private by default and separates sent/read",()=>{const s=fs.readFileSync(path.join(ROOT,"supabase/migrations/20260928233100_worldz_inbox_dm.sql"),"utf8");assert.match(s,/enable row level security/i);assert.match(s,/revoke all on table public\.worldz_dm_messages from anon,authenticated/i);assert.match(s,/telegram_sent/);assert.match(s,/read_at/);assert.doesNotMatch(s,/create policy/i)});
 test("delivery errors are bounded",()=>assert.ok(safeDeliveryError({message:"x".repeat(400)}).length<=180));
+
+test("contact refresh does not hard-code DM receiving back on", () => {
+  const source=fs.readFileSync(path.join(ROOT,"src/worldz-inbox.js"),"utf8");
+  const touch=source.match(/async function touch\(user\)\{([\s\S]*?)\n  \}/);
+  assert.ok(touch);
+  assert.doesNotMatch(touch[1],/enabled:true/);
+  assert.match(touch[1],/telegram_dm_reachable:true/);
+});
