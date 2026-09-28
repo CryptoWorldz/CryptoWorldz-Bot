@@ -55,6 +55,13 @@ const COMMAND_GROUPS = Object.freeze([
     ["tg", "Open this project's Telegram link"], ["tglinks", "View official Telegram links"],
     ["x", "Open this project's X page"], ["xlinks", "View official X pages"]
   ]),
+  group("inbox", "📥 Worldz Inbox™ • Private DM Messaging", "member", [
+    ["inbox", "Open your private Worldz Inbox"], ["dm", "Send a private Worldz DM"],
+    ["dmstyle", "Send a WorldzStyle private DM"], ["replydm", "Reply to an Inbox message"],
+    ["dmsettings", "Turn private Worldz DMs on or off"], ["dmblock", "Block a Worldz DM sender"],
+    ["dmunblock", "Unblock a Worldz DM sender"], ["dmdelete", "Hide an Inbox message"],
+    ["dmstatus", "View private messaging status"], ["worldzstyle", "View WorldzStyle message formats"]
+  ]),
   group("worldping", "🌐 WorldPing™ • Licensed Group Alerts", "member", [
     ["worldping", "Send a visible group WorldPing"], ["worldpingmode", "Group admin: AdminsOnlyPing or FullMemberPing"],
     ["zedmaxprice", "View ZED MAX SOL licence prices"], ["zedmaxreceipt", "Submit a SOL payment receipt"]
