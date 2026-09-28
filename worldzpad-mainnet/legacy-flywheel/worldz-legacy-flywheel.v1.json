@@ -15,7 +15,7 @@
     "referrer": 17,
     "legacyFlywheel": 15,
     "worldzLaunchPad": 8.5,
-    "oneWorldzImpact": 8.5,
+    "impact": 8.5,
     "total": 100,
     "derivation": "Legacy Flywheel takes 15% first. The remaining 85% preserves the prior 60/20/10/10 creator/referrer/Worldz/Impact proportions."
   },
