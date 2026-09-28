@@ -10,7 +10,8 @@ const COMMAND_GROUPS = Object.freeze([
     ["supportjay", "Open JayJayTeamDev@DonateWorldz"], ["donate", "Open the current DonateWorldz support choices"]
   ]),
   group("max", "🧠 Command Centre MAX™ • Learn, Research, Interact & Teach", "member", [
-    ["max", "Open Command Centre MAX learning and research hub"]
+    ["max", "Open Command Centre MAX learning and research hub"],
+    ["dipshit", "Meet DIPSHIT, the blue Worldz Dude and proof-first guide"]
   ]),
   group("fullscope", "🌐 WorldzFullScope™ • Multi-chain Command Layer", "member", [
     ["fullscope", "Open the ZED-led WorldzFullScope command layer"],

@@ -83,13 +83,13 @@
       <h3>📅 Weekday Funding Planner</h3>
       <div class="ultimate-grid">
         <div class="ultimate-card"><small>Next Window</small><strong>${escapeHtml(localDateTime(ultimate.nextFunding?.scheduledAt))}</strong></div>
-        <div class="ultimate-card"><small>Schedule</small><strong>Mon–Fri • 6:30pm Sydney</strong></div>
-        <div class="ultimate-card"><small>Approval</small><strong>2 of 3</strong></div>
+        <div class="ultimate-card"><small>Schedule</small><strong>Set after funding approval</strong></div>
+        <div class="ultimate-card"><small>Approval</small><strong>Profile-specific multisig</strong></div>
         <div class="ultimate-card"><small>Execution</small><strong>${ultimate.executionEnabled ? 'ENABLED' : 'LOCKED'}</strong></div>
       </div>
-      <p>Preferred route: <strong>Westpac → Coinbase Australia → USDC → MultiSig Wallet Pro™ → approved allocation → Jupiter.</strong></p>
+      <p>Each funding route requires its own verified wallet, budget, signer approvals and transaction review.</p>
       <div>${providerChips(ultimate.providers)}</div>
-      <div class="ultimate-note ultimate-danger">Planner automation may prepare a funding cycle, but it cannot store bank passwords, approve a Coinbase send, sign a wallet transaction or bypass 2-of-3 approval.</div>
+      <div class="ultimate-note ultimate-danger">Planning cannot store bank passwords, sign wallet transactions or bypass the selected treasury's approvals.</div>
     </section>`;
   }
 
@@ -120,7 +120,7 @@
       <h3>🏦 Four-Purpose Treasury</h3>
       <p>One funding plan, four clearly separated purposes. Zed stores public addresses and audit records only.</p>
       ${walletMarkup(model.wallets, model.ultimate)}
-      <div class="ultimate-note">Current allocation: 35% Treasury • 25% Dev + Grace • 20% Rewards • 20% Owner Diamond Buy™.</div>
+      <div class="ultimate-note">These wallet purposes are separate from the proposed Miracle Church, Operations and Reserve multisig profiles. An allocation requires its own approved policy.</div>
     </section>`;
   }
 
@@ -163,16 +163,11 @@
 
   function renderMultisig(model) {
     const ultimate = model.ultimate;
-    const signers = ultimate.signers || [];
+    const profiles = ultimate.treasuryProfiles || [];
     return `<section class="panel">
-      <h3>🔐 MultiSig Wallet Pro™</h3>
-      <div class="ultimate-grid">
-        <div class="ultimate-card"><small>Threshold</small><strong>${Number(ultimate.multisig?.threshold) || 2} of ${Number(ultimate.multisig?.signers) || 3}</strong></div>
-        <div class="ultimate-card"><small>Owner</small><strong>${escapeHtml(ultimate.multisig?.immutableOwner || 'JayJayTeamDev')} • PERMANENT</strong></div>
-      </div>
-      ${signers.map((signer) => `<div class="profile-row"><span>${signer.role === 'owner' ? '👑' : '✅'} ${escapeHtml(signer.handle)}</span><b>${escapeHtml(signer.role.toUpperCase())}${signer.immutable ? ' • LOCKED' : ''}</b></div>`).join('')}
-      <div class="ultimate-note">Sensitive changes require the permanent Owner plus another signer. Signing remains external; Zed never holds the signing keys.</div>
-      <span class="ultimate-chip pending">SQUADS / EXTERNAL MULTISIG CONNECTION PENDING</span>
+      <h3>🔐 Worldz Treasury Profiles</h3>
+      ${profiles.map((profile) => `<div class="profile-row"><span>${escapeHtml(profile.label)}</span><b>${escapeHtml(profile.governance.display)} • ${escapeHtml(profile.state.replaceAll('_',' '))}</b></div>`).join('')}
+      <div class="ultimate-note">Membership does not transfer between profiles. Signers opt in with verified public addresses. Wallet signing stays external; ZED never holds keys.</div>
     </section>`;
   }
 
@@ -273,7 +268,7 @@
       <div class="ultimate-pulse">
         <div><small>Owner</small><strong>JayJayTeamDev • PERMANENT</strong></div>
         <div><small>Next Funding</small><strong>${escapeHtml(localDateTime(ultimate.nextFunding?.scheduledAt))}</strong></div>
-        <div><small>Approval</small><strong>2 OF 3</strong></div>
+        <div><small>Approval</small><strong>PROFILE-SPECIFIC</strong></div>
         <div><small>MAX Execution</small><strong>${ultimate.executionEnabled ? 'ENABLED' : 'LOCKED'}</strong></div>
       </div>
       <nav class="ultimate-gateway" aria-label="MAX owner controls">

@@ -1,8 +1,8 @@
 const { createRequestLimiter, validateTelegramInitData } = require("../miniapp-auth");
+const treasuryProfiles = require("../../launchpad.cryptoworldz.xyz/worldz-app/core/treasury-profiles.json");
 
 function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
   const allowRequest = createRequestLimiter({ maxEvents: 30, intervalMs: 60000 });
-  let ultimateModulesPromise = null;
 
   const miniInitDataMaxAgeSeconds = Math.min(
     86400,
@@ -47,21 +47,8 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
   }
 
   async function ultimateStatusPayload() {
-    if (!ultimateModulesPromise) {
-      ultimateModulesPromise = Promise.all([
-        import("../../platform/src/ultimate.mjs"),
-        import("../../platform/src/ultimate-adapters.mjs")
-      ]);
-    }
-    const [ultimate, adapters] = await ultimateModulesPromise;
-    const blueprint = ultimate.ultimatePublicBlueprint();
-    const nextFunding = ultimate.nextFundingWindow(new Date());
-    const providers = Object.fromEntries(Object.entries(adapters.ULTIMATE_PROVIDER_CAPABILITIES).map(([name, provider]) => [name, {
-      role: provider.role,
-      mode: provider.mode,
-      external_authorization_required: provider.canAutoAuthorize === false,
-      secret_custody: provider.canHoldSecrets ? "provider" : "prohibited"
-    }]));
+    // Read the current treasury contract. The historical platform/src/ultimate.mjs
+    // was removed; importing it made the protected Mini App route return HTTP 500.
     const launchPolicy = {
       platform: {
         name: "WorldzLaunchPad™",
@@ -86,14 +73,16 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
     return {
       ok: true,
       ultimate: {
-        ...blueprint,
-        nextFunding,
-        signers: ultimate.ULTIMATE_SIGNERS.map(({ handle, role, immutable }) => ({ handle, role, immutable })),
-        providers,
+        name: "Command Centre MAX™",
+        executionEnabled: false,
+        nextFunding: null,
+        treasuryProfiles: treasuryProfiles.profiles,
+        signers: [],
+        providers: {},
         launch: {
           concept: "WORLDZ",
           ticker: "$WLDZ",
-          status: "candidate-mainnet-disabled"
+          status: "mainnet-execution-disabled"
         },
         launchPolicy,
         publicUrl: "https://launchpad.cryptoworldz.xyz/"

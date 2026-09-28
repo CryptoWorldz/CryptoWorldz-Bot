@@ -11,6 +11,9 @@ function loadAutoConfig(env = process.env) {
   if (!new Set(["safe_locked", "owner_dca"]).has(mode)) {
     throw new Error("AUTO_MODE must be safe_locked or owner_dca.");
   }
+  if (parseBoolean(env.AUTO_EXECUTION_ENABLED, false)) {
+    throw new Error("AUTO_EXECUTION_ENABLED must remain false in the control service; the separate owner DCA executor has its own gates.");
+  }
   if (env.AUTO_WALLET_PRIVATE_KEY || env.AUTO_WALLET_SEED || env.AUTO_SIGNER_SECRET) {
     throw new Error("Wallet signing secrets are forbidden in the Auto control service. The separate executor owns signing.");
   }

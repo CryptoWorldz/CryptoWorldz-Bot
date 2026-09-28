@@ -44,17 +44,17 @@ test("Auto safety limits always force SAFE LOCKED MODE", () => {
   assert.equal(limits.manualConfirmationRequired, true);
 });
 
-test("valid allowlisted plan can be simulated but never executed", () => {
+test("valid allowlisted plan can be simulated without moving funds", () => {
   const result = validateSimulationRequest(validRequest(), {
     settings: SAFE_SETTINGS,
     allowlistedTokens: new Set([MINT])
   });
   assert.equal(result.ok, true);
-  assert.equal(result.mode, "safe_locked");
+  assert.equal(result.mode, "owner_dca");
   assert.equal(result.execution_enabled, false);
   assert.equal(result.manual_confirmation_required, true);
   assert.equal(result.proposal.total_amount, 2);
-  assert.match(result.disclaimer, /No transaction/i);
+  assert.match(result.disclaimer, /Planning mode only/i);
 });
 
 test("zero production caps reject every proposed purchase simulation", () => {
@@ -122,7 +122,7 @@ test("public status never reports live execution or signing", () => {
   assert.equal(status.allowlisted_tokens, 3);
 });
 
-test("service configuration refuses any live mode or signing secret", () => {
+test("service configuration refuses unsafe live mode or signing secret", () => {
   const base = {
     SUPABASE_URL: "https://example.supabase.co",
     SUPABASE_SERVICE_ROLE_KEY: "server-only-test-value",
@@ -133,6 +133,6 @@ test("service configuration refuses any live mode or signing secret", () => {
   assert.throws(() => loadAutoConfig({ ...base, AUTO_EXECUTION_ENABLED: "true" }), /must remain false/);
   assert.throws(() => loadAutoConfig({ ...base, AUTO_WALLET_PRIVATE_KEY: "forbidden" }), /forbidden/);
   const config = loadAutoConfig(base);
-  assert.equal(config.mode, "safe_locked");
+  assert.equal(config.mode, "owner_dca");
   assert.equal(config.executionEnabled, false);
 });

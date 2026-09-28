@@ -3,6 +3,7 @@ const { groupsForRole, normalizeRole } = require("./command-registry");
 const BOT_MENU_COMMANDS = [
   { command: "zedstart", description: "Open Command Centre MAX" },
   { command: "max", description: "Learn, research, interact and teach with MAX" },
+  { command: "dipshit", description: "Meet the blue Worldz Dude" },
   { command: "fullscope", description: "Open WorldzFullScope multi-chain command layer" },
   { command: "zed", description: "Zed profile, wallet, missions and settings" },
   { command: "auto", description: "Open Auto finance controls" },
@@ -114,7 +115,8 @@ const WEB_ROUTES = Object.freeze({
   donateReagan: "https://donateworldz.com/reagan-children/",
   publicCommands: "https://cryptoworldz.xyz/command-centre-max/",
   fullScope: "https://launchpad.cryptoworldz.xyz/fullscope/",
-  fullBuild: "https://launchpad.cryptoworldz.xyz/fullbuild/"
+  fullBuild: "https://launchpad.cryptoworldz.xyz/fullbuild/",
+  dipshit: "https://cryptoworldz.xyz/dipshit/"
 });
 
 function menuText(menu) {
@@ -132,6 +134,7 @@ function mainKeyboard() {
     reply_markup: {
       inline_keyboard: [
         [{ text: "🧠 OPEN COMMAND CENTRE MAX™", web_app: { url: WEB_ROUTES.miniApp } }],
+        [{ text: "🔵 MEET DIPSHIT", url: WEB_ROUTES.dipshit }],
         [{ text: "🌐 WORLDZFULLSCOPE™", callback_data: "cc:menu:fullscope" }],
         [
           { text: "🗳️ VOTES CENTRE", callback_data: "cc:menu:votes" },
@@ -218,13 +221,21 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "ZED guides. WorldzFullScope watches the supported multi-chain token universe. AUTO explains controlled finance workflows. G.R.A.C.E. coordinates approved communication. RECAP explains verified activity. WorldzLaunchPad builds and proves launches.",
     "",
     "Gateway commands:",
-    "/zedstart • /worldzfullbuild • /fullscope • /worldzvotes • /worldzgovern • /commands • /commandtree",
+    "/zedstart • /dipshit • /worldzfullbuild • /fullscope • /worldzvotes • /worldzgovern • /commands • /commandtree",
     "",
     "You do not need to memorise the full command list."
   ].join("\n"), mainKeyboard());
 
   bot.onText(/^\/zedstart(?:@\w+)?$/, openHome);
   bot.onText(/^\/zed(?:@\w+)?$/, (msg) => send(msg, menuText(MENUS.zed)));
+  bot.onText(/^\/dipshit(?:@\w+)?$/i, (msg) => send(msg, [
+    "🔵 DIPSHIT — the blue Worldz Dude",
+    "",
+    "Your direct, proof-first guide to the Worldz build. Open the profile for the token family, Command Centre and live-vs-planned status.",
+    WEB_ROUTES.dipshit,
+    "",
+    "DIPSHIT does not trade, sign transactions or promise returns."
+  ].join("\n"), { reply_markup: { inline_keyboard: [[{ text: "🔵 OPEN DIPSHIT", url: WEB_ROUTES.dipshit }]] } }));
   bot.onText(/^\/max(?:@\w+)?$/, (msg) => send(msg, [
     "🧠 COMMAND CENTRE MAX™",
     "",
@@ -289,6 +300,7 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "",
     "/zedstart — open Command Centre MAX™",
     "/max — open the MAX learning and research hub",
+    "/dipshit — meet the blue Worldz Dude and open the proof-first guide",
     "/commands — every command available to your role",
     "/commandtree — command sections and structure",
     "/directory — Worldz site directory",

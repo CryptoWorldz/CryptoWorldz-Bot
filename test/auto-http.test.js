@@ -58,7 +58,7 @@ test("Auto service rejects incorrect owner credentials and reports locked status
   });
   assert.equal(accepted.status, 200);
   const payload = await accepted.json();
-  assert.equal(payload.status.mode, "safe_locked");
+  assert.equal(payload.status.mode, "owner_dca");
   assert.equal(payload.status.execution_enabled, false);
   assert.equal(payload.status.signing_enabled, false);
   assert.equal(payload.status.active_schedules, 0);
@@ -97,16 +97,12 @@ test("Zed Mini App Auto routes require signed primary-owner identity", async (t)
   const ultimate = await fetch(`${base}/api/mini/auto/ultimate`, { headers: ownerHeaders });
   assert.equal(ultimate.status, 200);
   const ultimatePayload = await ultimate.json();
-  assert.equal(ultimatePayload.ultimate.name, "Command Centre Ultimate™");
-  assert.equal(ultimatePayload.ultimate.multisig.threshold, 2);
-  assert.equal(ultimatePayload.ultimate.multisig.signers, 3);
-  assert.equal(ultimatePayload.ultimate.multisig.immutableOwner, "JayJayTeamDev");
+  assert.equal(ultimatePayload.ultimate.name, "Command Centre MAX™");
+  assert.deepEqual(ultimatePayload.ultimate.treasuryProfiles.map((profile) => profile.governance.display), ["4-of-10", "5-of-10", "6-of-9"]);
   assert.equal(ultimatePayload.ultimate.executionEnabled, false);
-  assert.equal(ultimatePayload.ultimate.fundingSchedule.hour, 18);
-  assert.equal(ultimatePayload.ultimate.fundingSchedule.minute, 30);
-  assert.equal(ultimatePayload.ultimate.providers.jupiter.secret_custody, "prohibited");
-  assert.equal(ultimatePayload.ultimate.launch.status, "legal_review");
-  assert.equal(ultimatePayload.ultimate.signers.find((signer) => signer.role === "owner").immutable, true);
+  assert.equal(ultimatePayload.ultimate.nextFunding, null);
+  assert.equal(ultimatePayload.ultimate.launch.status, "mainnet-execution-disabled");
+  assert.deepEqual(ultimatePayload.ultimate.signers, []);
 
   const deniedUltimate = await fetch(`${base}/api/mini/auto/ultimate`, {
     headers: { "x-telegram-init-data": signedInitData({ id: 999, first_name: "Admin" }, botToken) }

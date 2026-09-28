@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const { allRegisteredCommandNames, groupsForRole } = require("../src/command-registry");
 
 const REQUIRED_RUNTIME_COMMANDS = [
-  "zedstart","zed","help","commands","commandtree","directory","acknowledgements","supportjay",
+  "zedstart","zed","dipshit","help","commands","commandtree","directory","acknowledgements","supportjay",
   "start","register","profile","rewards","leaderboard","raaiiidd","missions","wallet","cancel","kitty","impact","donate","points",
   "fullscope","worldzfullbuild","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
   "worldzvotes","tokenvote","worldztrending","worldzrankings",

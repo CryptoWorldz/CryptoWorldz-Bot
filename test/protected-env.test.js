@@ -36,12 +36,12 @@ test("does not overwrite a nonblank managed OpenAI key", () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
-test("candidate order prefers an explicit file, then release, then protected home", () => {
+test("candidate order prefers an explicit file, then protected root, then release", () => {
   const env = { ONEWORLDZ_ENV_FILE: "/explicit/.env", HOME: "/runtime/home", USER: "account", LOGNAME: "account" };
   assert.deepEqual(candidateEnvironmentFiles({ appRoot: "/home/account/domains/cryptobotz.cryptoworldz.xyz/nodejs/.builds/release/source", env, home: "/home/account" }), [
     "/explicit/.env",
-    "/home/account/domains/cryptobotz.cryptoworldz.xyz/nodejs/.builds/release/source/.env",
     "/home/account/domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",
+    "/home/account/domains/cryptobotz.cryptoworldz.xyz/nodejs/.builds/release/source/.env",
     "/runtime/home/domains/cryptobotz.cryptoworldz.xyz/nodejs/.env"
   ]);
 });
