@@ -5,6 +5,7 @@ const BOT_MENU_COMMANDS = [
   { command: "max", description: "Learn, research, interact and teach with MAX" },
   { command: "fullscope", description: "Open WorldzFullScope multi-chain command layer" },
   { command: "zed", description: "Zed profile, wallet, missions and settings" },
+  { command: "inbox", description: "Open your private Worldz Inbox" },
   { command: "auto", description: "Open Auto finance controls" },
   { command: "grace", description: "Open Grace Auto Post controls" },
   { command: "admin", description: "Open Admin controls" },
@@ -20,6 +21,7 @@ const MENUS = {
       ["👤 Profile", "/profile"],
       ["👛 Wallet", "/wallet"],
       ["🚀 Missions", "/missions"],
+      ["📥 Inbox", "/inbox"],
       ["🏆 Leaderboard", "/leaderboard"],
       ["📚 All Commands", "/commands"]
     ]
@@ -133,6 +135,7 @@ function mainKeyboard() {
       inline_keyboard: [
         [{ text: "🧠 OPEN COMMAND CENTRE MAX™", web_app: { url: WEB_ROUTES.miniApp } }],
         [{ text: "🌐 WORLDZFULLSCOPE™", callback_data: "cc:menu:fullscope" }],
+        [{ text: "📥 WORLDZ INBOX™", web_app: { url: `${WEB_ROUTES.miniApp}#inbox` } }],
         [
           { text: "🗳️ VOTES CENTRE", callback_data: "cc:menu:votes" },
           { text: "🏛️ WORLDZGOVERN", callback_data: "cc:menu:govern" }
@@ -290,6 +293,7 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "/zedstart — open Command Centre MAX™",
     "/max — open the MAX learning and research hub",
     "/commands — every command available to your role",
+    "/inbox — private Worldz Inbox + DM messaging",
     "/commandtree — command sections and structure",
     "/directory — Worldz site directory",
     "/acknowledgements — DonateWorldz Acknowledgements page",
