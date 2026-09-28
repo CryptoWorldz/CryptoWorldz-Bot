@@ -426,6 +426,7 @@ jobs:
             'https://donateworldz.com/community-impact/':('https://www.facebook.com/share/',35),
             'https://oneworldz.com/community-support/':('https://www.facebook.com/share/',35),
             'https://cryptoworldz.xyz/clarity-watch.html':('data-verified-insight-page="1"',1),
+            'https://cryptoworldz.xyz/dipshit/':('DIPSHIT™',1),
           }
           for u,(needle,count) in specials.items():
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)

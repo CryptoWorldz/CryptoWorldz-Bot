@@ -20,6 +20,7 @@ const {
   splitTelegramMessage
 } = require("./core");
 const { recordStartReply } = require("./telegram-proof");
+const path = require("node:path");
 
 const PUBLIC_COMMANDS = [
   { command: "start", description: "Open the Zed Command Centre" },
@@ -37,7 +38,8 @@ const PUBLIC_COMMANDS = [
   { command: "vote", description: "Legacy alias: cast a WorldzGovern vote" },
   { command: "cancel", description: "Cancel wallet registration" },
   { command: "community", description: "Open CryptoWorldz community links" },
-  { command: "website", description: "Open CryptoWorldz.xyz" }
+  { command: "website", description: "Open CryptoWorldz.xyz" },
+  { command: "dipshit", description: "Meet DIPSHIT, the blue Worldz Dude" }
 ];
 
 function wait(milliseconds) {
@@ -254,6 +256,16 @@ Use /help to open the Command Menu.
 
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(msg.chat.id, formatCommunity(config)));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, formatWebsite(config)));
+  bot.onText(/^\/dipshit(?:@\w+)?$/, async (msg) => {
+    const image = path.join(__dirname, "../assets-source/dipshit/blue-worldz-dude.png");
+    const caption = "💙 DIPSHIT™ — WORLDZ DUDE\n\nCommand Centre QA + troubleshooting helper. Finds the dumb little problems before they become expensive big ones.\n\n🔐 No wallet signing • No treasury control • No governance execution • No mainnet broadcast.\n\nProfile: https://cryptoworldz.xyz/dipshit/\nUse /help for ZED commands.";
+    try {
+      return await bot.sendPhoto(msg.chat.id, image, { caption });
+    } catch (error) {
+      safeError("DIPSHIT profile", error);
+      return send(msg.chat.id, "💙 DIPSHIT™ — WORLDZ DUDE\nProfile: https://cryptoworldz.xyz/dipshit/\nUse /help for ZED commands.\n\nNo wallet signing or treasury authority.");
+    }
+  });
   bot.onText(/^\/kitty(?:@\w+)?$/, async (msg) => {
     try {
       const accounts = await repository.listTreasuryAccounts();
@@ -296,7 +308,7 @@ Use /help to open the Command Menu.
   bot.onText(/^\/help(?:@\w+)?$/, (msg) =>
     send(
       msg.chat.id,
-      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/worldzvotes — token popularity\n/worldzgovern — DAO governance\n/governvote proposal_id option\n/cancel\n/community\n/website\n\n⚠️ Never provide a private key or seed phrase."
+      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/worldzvotes — token popularity\n/worldzgovern — DAO governance\n/governvote proposal_id option\n/cancel\n/community\n/website\n/dipshit — meet the blue Worldz Dude\n\n⚠️ Never provide a private key or seed phrase."
     )
   );
 
