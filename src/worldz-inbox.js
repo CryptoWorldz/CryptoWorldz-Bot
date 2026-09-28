@@ -85,6 +85,18 @@ function registerWorldzInboxSystem({app,bot,config,supabase}){
     const map=new Map(people.map(p=>[String(p.telegram_id),p]));
     return rows.map(r=>({...r,[incoming?"sender":"recipient"]:map.get(String(incoming?r.sender_telegram_id:r.recipient_telegram_id))||(String(incoming?r.sender_telegram_id:r.recipient_telegram_id)===ownerId()?{telegram_id:Number(ownerId()),username:"JayJayTeamDev",first_name:"JayJay"}:null)}));
   }
+  function miniRows(rows,kind){
+    const incoming=kind==="incoming";
+    return (rows||[]).map(row=>{
+      const safe={...row};
+      delete safe.sender_telegram_id;
+      delete safe.recipient_telegram_id;
+      const key=incoming?"sender":"recipient";
+      const person=safe[key];
+      safe[key]=person?{username:person.username||null,first_name:person.first_name||null}:null;
+      return safe;
+    });
+  }
   async function markRead(ids,id){
     const valid=(Array.isArray(ids)?ids:[ids]).map(Number).filter(n=>Number.isSafeInteger(n)&&n>0).slice(0,50);if(!valid.length)return 0;
     const q=await supabase.from("worldz_dm_messages").update({read_at:new Date().toISOString()}).in("id",valid).eq("recipient_telegram_id",Number(id)).is("read_at",null).select("id");if(q.error)throw q.error;return(q.data||[]).length;
@@ -106,11 +118,14 @@ function registerWorldzInboxSystem({app,bot,config,supabase}){
   bot.onText(/^\/dmstatus(?:@\w+)?$/i,async m=>{if(!needPrivate(m))return;try{await touch(m.from);const p=await pref(m.from.id),u=await unread(m.from.id);return bot.sendMessage(m.chat.id,["📥 WORLDZ INBOX™ STATUS","",`Receiving: ${p.enabled===false?"OFF 🔕":"ON ✅"}`,`Unread: ${u}`,"Reachability: Telegram private chat confirmed ✅","","Privacy: exact-username targeting • private records • no WorldzCast exposure"].join("\n"))}catch(e){return bot.sendMessage(m.chat.id,err(e))}});
 
   function auth(req,res,next){const r=validateTelegramInitData(req.get("x-telegram-init-data")||"",config.botToken);if(!r.ok)return res.status(401).json({ok:false,error:r.error});if(!mini(`${r.user.id}:${req.ip}`))return res.status(429).json({ok:false,error:"rate_limited"});req.telegramUser=r.user;next()}
-  app.get("/api/mini/inbox",auth,async(req,res)=>{try{await touch(req.telegramUser);const [incoming,sent,p,u]=await Promise.all([rowsFor(req.telegramUser.id,"incoming",30),rowsFor(req.telegramUser.id,"sent",20),pref(req.telegramUser.id),unread(req.telegramUser.id)]);res.json({ok:true,incoming,sent,unread:u,settings:{enabled:p.enabled!==false}})}catch{res.status(503).json({ok:false,error:"inbox_unavailable"})}});
+  app.get("/api/mini/inbox",auth,async(req,res)=>{try{await touch(req.telegramUser);const [incoming,sent,p,u]=await Promise.all([rowsFor(req.telegramUser.id,"incoming",30),rowsFor(req.telegramUser.id,"sent",20),pref(req.telegramUser.id),unread(req.telegramUser.id)]);res.json({ok:true,incoming:miniRows(incoming,"incoming"),sent:miniRows(sent,"sent"),unread:u,settings:{enabled:p.enabled!==false}})}catch{res.status(503).json({ok:false,error:"inbox_unavailable"})}});
   app.post("/api/mini/inbox/send",auth,async(req,res)=>{try{await touch(req.telegramUser);const r=await target(req.body?.recipient);if(!r)return res.status(404).json({ok:false,error:"recipient_not_found"});const s=await sendDirect({senderId:req.telegramUser.id,recipient:r,body:req.body?.body,preset:req.body?.preset,title:req.body?.title,ctaLabel:req.body?.cta_label,ctaUrl:req.body?.cta_url});res.json({ok:true,message:{id:s.id,status:s.status},recipient:displayName(r)})}catch(e){res.status(e?.code==="dm_rate_limited"?429:503).json({ok:false,error:e?.code||"dm_send_failed"})}});
   app.post("/api/mini/inbox/reply",auth,async(req,res)=>{try{const src=await getMessage(req.body?.message_id);if(!src||String(src.recipient_telegram_id)!==String(req.telegramUser.id))return res.status(404).json({ok:false,error:"message_not_found"});const r=await profile(src.sender_telegram_id);if(!r)return res.status(404).json({ok:false,error:"recipient_not_found"});const s=await sendDirect({senderId:req.telegramUser.id,recipient:r,body:req.body?.body,preset:req.body?.preset,title:req.body?.title});await markRead([src.id],req.telegramUser.id);res.json({ok:true,message:{id:s.id,status:s.status}})}catch(e){res.status(e?.code==="dm_rate_limited"?429:503).json({ok:false,error:e?.code||"dm_reply_failed"})}});
   app.post("/api/mini/inbox/read",auth,async(req,res)=>{try{res.json({ok:true,marked_read:await markRead(req.body?.message_ids||[],req.telegramUser.id)})}catch{res.status(503).json({ok:false,error:"read_update_failed"})}});
   app.post("/api/mini/inbox/settings",auth,async(req,res)=>{try{const enabled=req.body?.enabled!==false;const q=await supabase.from("worldz_dm_preferences").upsert({telegram_id:Number(req.telegramUser.id),enabled,telegram_dm_reachable:true,username:req.telegramUser.username||null,first_name:req.telegramUser.first_name||null,last_private_seen_at:new Date().toISOString(),updated_at:new Date().toISOString()},{onConflict:"telegram_id"});if(q.error)throw q.error;res.json({ok:true,enabled})}catch{res.status(503).json({ok:false,error:"settings_update_failed"})}});
+  app.post("/api/mini/inbox/hide",auth,async(req,res)=>{try{const src=await getMessage(req.body?.message_id);if(!src)return res.status(404).json({ok:false,error:"message_not_found"});const patch={};if(String(src.sender_telegram_id)===String(req.telegramUser.id))patch.sender_deleted_at=new Date().toISOString();if(String(src.recipient_telegram_id)===String(req.telegramUser.id))patch.recipient_deleted_at=new Date().toISOString();if(!Object.keys(patch).length)return res.status(403).json({ok:false,error:"not_your_message"});const q=await supabase.from("worldz_dm_messages").update(patch).eq("id",src.id);if(q.error)throw q.error;res.json({ok:true,message_id:src.id})}catch{res.status(503).json({ok:false,error:"hide_failed"})}});
+  app.post("/api/mini/inbox/block-sender",auth,async(req,res)=>{try{const src=await getMessage(req.body?.message_id);if(!src||String(src.recipient_telegram_id)!==String(req.telegramUser.id))return res.status(404).json({ok:false,error:"message_not_found"});const sender=await profile(src.sender_telegram_id);if(!sender)return res.status(404).json({ok:false,error:"sender_not_found"});const q=await supabase.from("worldz_dm_blocks").upsert({blocker_telegram_id:Number(req.telegramUser.id),blocked_telegram_id:Number(src.sender_telegram_id),created_at:new Date().toISOString()},{onConflict:"blocker_telegram_id,blocked_telegram_id"});if(q.error)throw q.error;res.json({ok:true,blocked:true,sender:displayName(sender)})}catch{res.status(503).json({ok:false,error:"block_failed"})}});
+
   return{sendDirect,rowsFor,markRead,unread,target};
 }
 module.exports={MAX_BODY_LENGTH,WORLDZ_INBOX_COMMANDS,displayName,isPrivateChat,normalizeUsername,parseStyledBody,registerWorldzInboxSystem,safeDeliveryError};
