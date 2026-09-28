@@ -347,7 +347,7 @@ jobs:
           if hook.get("last_error_message") and pending_after:
               raise SystemExit("Telegram webhook still reports an active delivery error: "+str(hook.get("last_error_message"))[:160])
           print("ZED_TELEGRAM_BOT=PASS")
-          print("ZED_TELEGRAM_COMMANDS=18")
+          print("ZED_TELEGRAM_COMMANDS="+str(len(commands)))
           print("ZED_TELEGRAM_BACKLOG_CONTROL=PASS")
           print("ZED_TELEGRAM_WEBHOOK=PASS")
           print("ZED_TELEGRAM_MENU_BUTTON=PASS")
@@ -364,11 +364,14 @@ jobs:
           case "$auto_code" in 200|401|403) ;; *) echo "AUTO route missing HTTP=$auto_code"; exit 1;; esac
           wallet_code="$(curl --silent --show-error --location -o "$RUNNER_TEMP/wallet.json" -w '%{http_code}' "$root/api/mini/project-wallets" || true)"
           case "$wallet_code" in 200|401|403) ;; *) echo "Project-wallet route missing HTTP=$wallet_code"; exit 1;; esac
+          inbox_code="$(curl --silent --show-error --location -o "$RUNNER_TEMP/inbox.json" -w '%{http_code}' "$root/api/mini/inbox" || true)"
+          test "$inbox_code" = 401
           gpt_code="$(curl --silent --show-error --location -o "$RUNNER_TEMP/gpt.json" -w '%{http_code}' "$root/api/oneworldz-gpt/status" || true)"
           test "$gpt_code" = 200
           echo 'ZED_AUTO_ROUTE=PASS'
           echo 'ZED_GRACE_ROUTE=PASS'
           echo 'ZED_PROJECT_WALLETS_ROUTE=PASS'
+          echo 'WORLDZ_INBOX_PRIVATE_ROUTE=PASS HTTP=401'
           echo 'ONEWORLDZ_GPT_ROUTE=PASS'
 
       - name: Final verdict
