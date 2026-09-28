@@ -9,7 +9,6 @@
     { name: "MUSKMAN / SolMars", handle: "@MuskManMars", url: "https://x.com/MuskManMars", status: "CONFIRMED" },
     { name: "CryptoWorldz", handle: "@CryptoWorldzX", url: "https://x.com/CryptoWorldzX", status: "CONFIRMED" },
     { name: "XrpWorldz", handle: "@XrpWorldz", url: "https://x.com/XrpWorldz", status: "CONFIRMED" },
-    { name: "OneWorldz", handle: "@OneWorldzX", url: "https://x.com/OneWorldzX", status: "CONFIRMED" },
     { name: "JayJayTeamDev", handle: "@JayJayTeamDev", url: "https://x.com/JayJayTeamDev", status: "KNOWN" },
     { name: "SolWorld / SolWorldz", handle: "@SolWorldX", url: "https://x.com/SolWorldX", status: "KNOWN" },
     { name: "Robin Hood Law", handle: "@RobinHoodLawX", url: "https://x.com/RobinHoodLawX", status: "KNOWN" },
@@ -31,12 +30,12 @@
     const suspended = X_PAGES.filter((page) => page.status === "SUSPENDED").length;
     const known = X_PAGES.filter((page) => page.status === "KNOWN").length;
     return `<section class="panel x-pages-directory" id="x-pages-directory">
-      <div class="section-title"><h2>𝕏 OneWorldz X Network</h2></div>
+      <div class="section-title"><h2>𝕏 Worldz X Network</h2></div>
       <p><strong>${X_PAGES.length} known X pages</strong> • ${confirmed} confirmed • ${known} known • ${suspended} suspended.</p>
       <div class="links x-page-links">
         ${X_PAGES.map((page) => `<a class="link x-page-link" href="${escapeHtml(page.url)}" target="_blank" rel="noopener noreferrer"><span><strong>${escapeHtml(page.name)}</strong><small>${escapeHtml(page.handle)}</small></span><b>${escapeHtml(page.status)}</b></a>`).join("")}
       </div>
-      <small>CONFIRMED means directly evidenced from the signed-in X account selector. KNOWN means already recorded in the OneWorldz/CryptoWorldz project records. SUSPENDED means the account is retained for historical/project identity but must not be treated as an active X destination. Legacy @CharityBased is represented by the current @ImpactBased identity and is not counted twice.</small>
+      <small>CONFIRMED means directly evidenced from the signed-in X account selector. KNOWN means already recorded in the Worldz project records. SUSPENDED means the account is retained for historical/project identity but must not be treated as an active X destination. Legacy @CharityBased is represented by the current @ImpactBased identity and is not counted twice.</small>
     </section>`;
   }
 

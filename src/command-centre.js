@@ -108,11 +108,11 @@ const MENUS = {
 
 const WEB_ROUTES = Object.freeze({
   miniApp: "https://cryptobotz.cryptoworldz.xyz/miniapp/",
-  directory: "https://oneworldz.com/directory/",
-  acknowledgements: "https://oneworldz.com/acknowledgements/",
+  directory: "https://cryptoworldz.xyz/",
+  acknowledgements: "https://donateworldz.com/acknowledgements/",
   supportJay: "https://donateworldz.com/support-jayjayteamdev/",
   donateReagan: "https://donateworldz.com/reagan-children/",
-  publicCommands: "https://cryptoworldz.xyz/command-centre/commands/",
+  publicCommands: "https://cryptoworldz.xyz/command-centre-max/",
   fullScope: "https://launchpad.cryptoworldz.xyz/fullscope/",
   fullBuild: "https://launchpad.cryptoworldz.xyz/fullbuild/"
 });
@@ -272,8 +272,8 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
   });
   bot.onText(/^\/commandtree(?:@\w+)?$/, async (msg) => send(msg, commandTreeText(await roleFor(msg))));
 
-  bot.onText(/^\/directory(?:@\w+)?$/, (msg) => send(msg, `🌐 Directory@OneWorldz\n${WEB_ROUTES.directory}`));
-  bot.onText(/^\/acknowledgements?(?:@\w+)?$/i, (msg) => send(msg, `💜 Acknowledgements@OneWorldz\n${WEB_ROUTES.acknowledgements}`));
+  bot.onText(/^\/directory(?:@\w+)?$/, (msg) => send(msg, `🌐 Worldz directory\n${WEB_ROUTES.directory}`));
+  bot.onText(/^\/acknowledgements?(?:@\w+)?$/i, (msg) => send(msg, `💜 Acknowledgements\n${WEB_ROUTES.acknowledgements}`));
   bot.onText(/^\/supportjay(?:@\w+)?$/i, (msg) => send(msg, `💜 JayJayTeamDev@DonateWorldz\n${WEB_ROUTES.supportJay}`));
 
   // Current launch route override: the retired GoFundMe route must never be the Command Centre donation destination.
@@ -291,8 +291,8 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "/max — open the MAX learning and research hub",
     "/commands — every command available to your role",
     "/commandtree — command sections and structure",
-    "/directory — public OneWorldz site/page directory",
-    "/acknowledgements — exact Acknowledgements page",
+    "/directory — Worldz site directory",
+    "/acknowledgements — DonateWorldz Acknowledgements page",
     "/supportjay — exact Support JayJayTeamDev page",
     isOwner(msg) ? "/ownercommands — full owner inventory" : "",
     "",

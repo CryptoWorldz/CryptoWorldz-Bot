@@ -34,3 +34,9 @@ test("popularity and governance are unmistakably separated in Command Centre", (
 test("WorldzFullBuild has a first-party Command Centre route", () => {
   assert.equal(WEB_ROUTES.fullBuild, "https://launchpad.cryptoworldz.xyz/fullbuild/");
 });
+
+test("public Command Centre links resolve to active Worldz destinations", () => {
+  assert.equal(WEB_ROUTES.publicCommands, "https://cryptoworldz.xyz/command-centre-max/");
+  assert.equal(WEB_ROUTES.acknowledgements, "https://donateworldz.com/acknowledgements/");
+  assert.equal(WEB_ROUTES.directory, "https://cryptoworldz.xyz/");
+});
