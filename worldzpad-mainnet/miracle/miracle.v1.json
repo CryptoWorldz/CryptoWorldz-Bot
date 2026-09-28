@@ -1,0 +1,85 @@
+{
+  "schema": "WORLDZ-MIRACLE-V1",
+  "version": "2026-09-29",
+  "status": "PLANNED_SPEC_LOCKED",
+  "token": {
+    "order": 4,
+    "name": "MIRACLE",
+    "symbol": "MRCL",
+    "chain": "Solana",
+    "fixedSupplyTokens": 348000000,
+    "decimals": null,
+    "canonicalMint": null,
+    "lifecycle": "PLANNED"
+  },
+  "committedAllocations": {
+    "miracleTeamVault": {
+      "percent": 20,
+      "tokens": 69600000,
+      "purpose": "OPTED_IN_TEAM_VESTING",
+      "explicitOptInRequired": true,
+      "verifiedPublicWalletRequired": true,
+      "approvedAllocationLedgerRequired": true,
+      "immediateUnlockPercent": 0,
+      "firstReleaseCliffDays": 30,
+      "monthlyReleases": 24,
+      "unassignedTokensRemainVaulted": true,
+      "silentAutomaticReassignmentAllowed": false,
+      "proposedMultisig": {
+        "policy": "4-of-10",
+        "state": "PROPOSED_NOT_DEPLOYED"
+      }
+    },
+    "miracleMagicSupply": {
+      "percent": 20,
+      "tokens": 69600000,
+      "purpose": "VERIFIED_PEOPLE_IN_NEED_GIFT_SUPPLY",
+      "vaultName": "MiracleMagicVault™",
+      "processName": "Miracle Mission",
+      "separateFromTeamVault": true,
+      "separateFromPurpleDiamondHandz": true
+    },
+    "genesisLiquidityTarget": {
+      "percent": 5,
+      "tokens": 17400000,
+      "route": "Meteora DBC virtual-pool price discovery",
+      "creatorFirstBuyTargetAud": 200,
+      "creatorFirstBuyExactSol": null,
+      "exactSolBoundAtTransactionReviewFromLivePricing": true,
+      "virtualLiquidityIsRealBacking": false
+    },
+    "purpleDiamondHandzInherited": {
+      "percent": 1,
+      "tokens": 3480000,
+      "status": "INHERITED_DEFAULT_UNLESS_EXPLICITLY_REPLACED",
+      "separateFromMiracleChurchMissionLayer": true
+    }
+  },
+  "remainingAllocation": {
+    "percent": 54,
+    "tokens": 187920000,
+    "status": "UNALLOCATED_PENDING_EXPLICIT_OWNER_DECISION",
+    "rule": "Do not invent or silently assign the remaining supply."
+  },
+  "treasuryProfiles": {
+    "miracleChurchTreasury": {
+      "proposedPolicy": "4-of-10",
+      "state": "PROPOSED_NOT_DEPLOYED",
+      "signerConsentRequired": true,
+      "verifiedPublicWalletRequired": true,
+      "membershipDoesNotAutomaticallyCreateSignerAuthority": true
+    }
+  },
+  "executionBoundary": {
+    "mintCreated": false,
+    "mainnetExecutionEnabled": false,
+    "liquidityExecutionEnabled": false,
+    "creatorFirstBuyExecuted": false,
+    "privateKeysStoredByWorldz": false,
+    "signerWalletsMayBeInvented": false,
+    "beneficiaryWalletsMayBeInvented": false,
+    "exactSolMayBeInvented": false,
+    "finalHumanSignatureRequired": true,
+    "proofReceiptRequired": true
+  }
+}

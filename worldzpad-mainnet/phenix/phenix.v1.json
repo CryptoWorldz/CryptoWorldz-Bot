@@ -1,0 +1,112 @@
+{
+  "schema": "WORLDZ-PHENIX-V1",
+  "version": "2026-09-29",
+  "status": "PRELAUNCH_SPEC_LOCKED",
+  "token": {
+    "order": 3,
+    "name": "PHENIX",
+    "symbol": "PNEX",
+    "chain": "Solana",
+    "fixedSupplyTokens": 250000000,
+    "decimals": null,
+    "canonicalMint": null,
+    "lifecycle": "PRELAUNCH"
+  },
+  "allocations": {
+    "phenixChanceImmediate": {
+      "percent": 10,
+      "tokens": 25000000,
+      "unlock": "GENESIS"
+    },
+    "phenixChanceVested": {
+      "percent": 15,
+      "tokens": 37500000,
+      "release": "12_MONTHLY_RELEASES"
+    },
+    "liquidity": {
+      "percent": 45,
+      "tokens": 112500000,
+      "genesisLiquidityPercentOfTotalSupply": 5,
+      "genesisLiquidityTokens": 12500000,
+      "remainingLiquidityReservePercentOfTotalSupply": 40,
+      "remainingLiquidityReserveTokens": 100000000
+    },
+    "developerVesting": {
+      "percent": 10,
+      "tokens": 25000000
+    },
+    "purpleDiamondHandz": {
+      "percent": 1,
+      "tokens": 2500000,
+      "rule": "VERIFIED_LEGACY_HOLDER_BUCKET"
+    },
+    "phenixTotalSupplyFlyWheel": {
+      "percent": 19,
+      "tokens": 47500000
+    },
+    "unassigned": {
+      "percent": 0,
+      "tokens": 0
+    }
+  },
+  "vesting": {
+    "developer": {
+      "immediateUnlockPercent": 0,
+      "cliffDays": 90,
+      "monthlyReleases": 24
+    },
+    "phenixChanceVested": {
+      "monthlyReleases": 12
+    },
+    "flyWheelMasterReserve": {
+      "initialHoldDays": 90,
+      "controlledCycleCount": 48,
+      "cycleDays": 30
+    },
+    "flyWheelBuilderGrant": {
+      "immediateUnlockPercent": 0,
+      "cliffDays": 90,
+      "monthlyReleases": 24
+    }
+  },
+  "proofBurn": {
+    "source": "PHENIX_TOTAL_SUPPLY_FLYWHEEL",
+    "automatic": false,
+    "automaticMarketBuyAndBurn": false,
+    "maxPercentOfNewlyAvailableCycleAllowance": 25,
+    "simulationRequired": true,
+    "externalWalletOrMultisigSignatureRequired": true,
+    "explicitBroadcastApprovalRequired": true,
+    "confirmedSupplyReductionReceiptRequired": true
+  },
+  "omniBuildz": {
+    "source": "PHENIX_TOTAL_SUPPLY_FLYWHEEL",
+    "fixedSubAllocationPercent": null,
+    "rule": "Governed uses must remain inside approved FlyWheel cycle allowances; this lane creates no extra PNEX supply.",
+    "eligibleUses": [
+      "cross_chain_liquidity_development",
+      "chain_native_pool_and_curve_adapters",
+      "Worldz_CrossPair",
+      "Worldz_LinkedAsset_connections",
+      "locks_and_vesting_infrastructure",
+      "audit_and_security_work"
+    ]
+  },
+  "linkedAsset": {
+    "creatorOptInRequired": true,
+    "verifiedAssetIdentityRequired": true,
+    "partnershipClaimRequiresCounterpartyEvidence": true,
+    "hiddenFeeAllowed": false,
+    "forcedSwapAllowed": false,
+    "automaticMarketBuyAllowed": false
+  },
+  "executionBoundary": {
+    "mintCreated": false,
+    "mainnetExecutionEnabled": false,
+    "liquidityExecutionEnabled": false,
+    "privateKeysStoredByWorldz": false,
+    "exactRecipientsMayBeInvented": false,
+    "finalHumanSignatureRequired": true,
+    "proofReceiptRequired": true
+  }
+}

@@ -1,0 +1,35 @@
+name: Validate Worldz future token specs
+
+on:
+  pull_request:
+    paths:
+      - 'worldzpad-mainnet/phenix/**'
+      - 'worldzpad-mainnet/miracle/**'
+      - 'worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json'
+      - 'launchpad.cryptoworldz.xyz/fullbuild/contract.json'
+      - 'scripts/validate_worldz_future_tokens.py'
+      - '.github/workflows/validate-worldz-future-tokens.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worldzpad-mainnet/phenix/**'
+      - 'worldzpad-mainnet/miracle/**'
+      - 'worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json'
+      - 'launchpad.cryptoworldz.xyz/fullbuild/contract.json'
+      - 'scripts/validate_worldz_future_tokens.py'
+      - '.github/workflows/validate-worldz-future-tokens.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PHENIX and MIRACLE locked specifications
+        run: python3 scripts/validate_worldz_future_tokens.py
+      - name: Validate WorldzFullBuild mirror
+        run: python3 scripts/validate_worldz_fullbuild.py
