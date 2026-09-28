@@ -26,10 +26,12 @@ const { registerTelegramHandlers, PUBLIC_COMMANDS } = require("../src/telegram")
 const { allRegisteredCommandNames } = require("../src/command-registry");
 
 test("DIPSHIT public profile and Telegram command use the blue Worldz Dude with no financial authority", async () => {
-  const image = path.join(ROOT, "assets-source/dipshit/blue-worldz-dude.png");
+  const sourceImage = path.join(ROOT, "assets-source/dipshit/blue-worldz-dude.png");
+  const image = path.join(ROOT, "public/miniapp/assets/dipshit-worldz-dude.png");
   const publicImage = path.join(ROOT, "cryptoworldz.xyz/dipshit/blue-worldz-dude.png");
   const page = fs.readFileSync(path.join(ROOT, "cryptoworldz.xyz/dipshit/index.html"), "utf8");
 
+  assert.ok(fs.statSync(sourceImage).size > 1000);
   assert.ok(fs.statSync(image).size > 1000);
   assert.ok(fs.statSync(publicImage).size > 1000);
   assert.match(page, /DIPSHIT™/);
