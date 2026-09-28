@@ -20,6 +20,7 @@ const {
   splitTelegramMessage
 } = require("./core");
 const { recordStartReply } = require("./telegram-proof");
+const path = require("node:path");
 
 const PUBLIC_COMMANDS = [
   { command: "start", description: "Open the Zed Command Centre" },
@@ -38,7 +39,8 @@ const PUBLIC_COMMANDS = [
   { command: "cancel", description: "Cancel wallet registration" },
   { command: "community", description: "Open CryptoWorldz community links" },
   { command: "website", description: "Open CryptoWorldz.xyz" },
-  { command: "storage", description: "Worldz Memory & Storage Centre" }
+  { command: "storage", description: "Worldz Memory & Storage Centre" },
+  { command: "dipshit", description: "Meet DIPSHIT, the blue Worldz Dude" }
 ];
 
 function wait(milliseconds) {
@@ -256,6 +258,16 @@ Use /help to open the Command Menu.
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(msg.chat.id, formatCommunity(config)));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, formatWebsite(config)));
   bot.onText(/^\/storage(?:@\w+)?$/, (msg) => send(msg.chat.id, "🧹 Worldz Memory & Storage Centre™\n\nOpen Command Centre → More → Memory & Storage Centre.\n\n✅ Clears Worldz device/MiniApp cache and temporary local data.\n☁️ Server records are separate.\n⛓️ Confirmed on-chain history is not browser cache and is not deleted.\n🧠 ChatGPT/OpenAI memory is separate from Worldz and must be managed in ChatGPT Settings → Personalization → Memory summary → Manage.\n\n🔐 No seed phrase, private key or wallet signature is required."));
+  bot.onText(/^\/dipshit(?:@\w+)?$/, async (msg) => {
+    try {
+      return await bot.sendPhoto(msg.chat.id, path.join(__dirname, "../assets-source/dipshit/blue-worldz-dude.png"), {
+        caption: "💙 DIPSHIT — the blue Worldz Dude. A cheeky Worldz character, here to point you toward the real tools.\n\nUse /help for ZED commands or visit https://cryptoworldz.xyz/dipshit/ for his profile. Never send a seed phrase or private key."
+      });
+    } catch (error) {
+      safeError("DIPSHIT profile", error);
+      return send(msg.chat.id, "💙 DIPSHIT — the blue Worldz Dude. Profile: https://cryptoworldz.xyz/dipshit/\nUse /help for ZED commands.");
+    }
+  });
   bot.onText(/^\/kitty(?:@\w+)?$/, async (msg) => {
     try {
       const accounts = await repository.listTreasuryAccounts();
@@ -298,7 +310,7 @@ Use /help to open the Command Menu.
   bot.onText(/^\/help(?:@\w+)?$/, (msg) =>
     send(
       msg.chat.id,
-      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/worldzvotes — token popularity\n/worldzgovern — DAO governance\n/governvote proposal_id option\n/cancel\n/community\n/website\n/storage\n\n⚠️ Never provide a private key or seed phrase."
+      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/worldzvotes — token popularity\n/worldzgovern — DAO governance\n/governvote proposal_id option\n/dipshit — meet the blue Worldz Dude\n/cancel\n/community\n/website\n/storage\n\n⚠️ Never provide a private key or seed phrase."
     )
   );
 
