@@ -145,6 +145,17 @@ jobs:
               "user-agent":"WorldzFullScope-Runtime-Gate/2.0"
           }
 
+          bootstrap_req=urllib.request.Request(
+              base+"/rest/v1/rpc/zed_runtime_bootstrap",
+              data=json.dumps({"p_bot_token":bot_token}).encode("utf-8"),
+              headers=headers,
+              method="POST"
+          )
+          with urllib.request.urlopen(bootstrap_req,timeout=30) as response:
+              bootstrapped=json.loads(response.read().decode("utf-8"))
+          if bootstrapped is not True:
+              raise SystemExit("Protected ZED runtime token does not match the registered Telegram bot identity.")
+
           auth_req=urllib.request.Request(
               base+"/rest/v1/rpc/zed_runtime_authorized",
               data=b"{}",
