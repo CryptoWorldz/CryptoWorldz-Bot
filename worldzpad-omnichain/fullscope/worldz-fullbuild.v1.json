@@ -343,9 +343,8 @@
   ],
   "publicBranding": {
     "activeMasterBrand": "WorldzEcosystem™ / WorldzFullBuild™",
-    "retiredPublicBrand": "OneWorldz",
     "retiredPublicUseAllowed": false,
-    "rule": "Retired branding is historical/internal only and must not appear in active public navigation, marketing, descriptions, images or future public builds."
+    "rule": "Historical retired branding is internal-only and must not appear in active public navigation, marketing, descriptions, images or future public builds."
   },
   "celebrations": {
     "woodstockReturnsParty": {
