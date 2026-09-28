@@ -32,7 +32,7 @@
       "referrer": 1700,
       "legacyFlywheel": 1500,
       "worldzLaunchPad": 850,
-      "oneWorldzImpact": 850
+      "impact": 850
     },
     "externalDexFeeRule": "DISCOVER_AND_DISCLOSE_BEFORE_SIGNING",
     "gasRule": "DISPLAY_SEPARATELY",

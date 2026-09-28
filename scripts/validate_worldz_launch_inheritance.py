@@ -45,7 +45,7 @@ assert all(c["mainnetExecutionEnabled"] is False for c in chain_registry["chains
 magic=inheritance["economicsProfiles"]["worldzMagic75"]
 assert magic["targetGrossTraderFeeBps"]==fee["targetGrossTraderFeeBps"]==75
 assert magic["dynamicFeeDefault"]==fee["dynamicFeeDefault"] is False
-for key in ("creator","referrer","legacyFlywheel","worldzLaunchPad","oneWorldzImpact"):
+for key in ("creator","referrer","legacyFlywheel","worldzLaunchPad","impact"):
     assert Decimal(str(magic["splitPercent"][key]))==Decimal(str(fee["worldzControlledSplitPercent"][key]))
 assert sum(Decimal(str(v)) for v in magic["splitPercent"].values())==Decimal("100")
 

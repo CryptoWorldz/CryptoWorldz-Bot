@@ -57,7 +57,7 @@
       "percentOfWorldzControlledFee": 8.5,
       "use": "Funds shared Worldz infrastructure and approved Universal FlyWheel support. Internal spending does not alter the disclosed 51/17/15/8.5/8.5 fee split."
     },
-    "oneWorldzImpactShare": {
+    "impactShare": {
       "percentOfWorldzControlledFee": 8.5,
       "use": "Continues as the separate impact/charity funding lane with public accounting."
     }

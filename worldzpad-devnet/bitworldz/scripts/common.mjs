@@ -7,7 +7,7 @@ export const PARTNER_WEIGHTS=Object.freeze({
   referrer:170n,
   legacyFlywheel:150n,
   worldzLaunchPad:85n,
-  oneWorldzImpact:85n,
+  impact:85n,
 });
 export const WBTC_SOLANA_MAINNET=Object.freeze({
   symbol:'WBTC',

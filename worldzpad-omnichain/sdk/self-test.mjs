@@ -23,7 +23,7 @@ const expected = {
   referrerAmount: '1020000',
   legacyFlywheelAmount: '900000',
   worldzLaunchPadAmount: '510000',
-  oneWorldzImpactAmount: '510000'
+  impactAmount: '510000'
 };
 
 for (const [key, value] of Object.entries(expected)) {

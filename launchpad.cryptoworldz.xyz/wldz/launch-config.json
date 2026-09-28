@@ -52,7 +52,7 @@
     "lpGrowth": 30,
     "holdersLegacy": 20,
     "communityGrowthMarketing": 20,
-    "oneWorldzImpact": 10,
+    "impact": 10,
     "operations": 5,
     "reserve": 5
   }

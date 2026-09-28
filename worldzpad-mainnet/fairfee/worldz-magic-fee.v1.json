@@ -32,7 +32,7 @@
       "percent": 8.5,
       "effectivePercentOfTrade": 0.051
     },
-    "oneWorldzImpact": {
+    "impact": {
       "percent": 8.5,
       "effectivePercentOfTrade": 0.051
     },
@@ -45,7 +45,7 @@
       "referrer": 170,
       "legacyFlywheel": 150,
       "worldzLaunchPad": 85,
-      "oneWorldzImpact": 85,
+      "impact": 85,
       "total": 490
     }
   },
@@ -66,7 +66,7 @@
       "referrer": 1020,
       "legacyFlywheel": 900,
       "worldzLaunchPad": 510,
-      "oneWorldzImpact": 510,
+      "impact": 510,
       "eachLegacyVault": 90
     },
     {
@@ -77,7 +77,7 @@
       "referrer": 102000,
       "legacyFlywheel": 90000,
       "worldzLaunchPad": 51000,
-      "oneWorldzImpact": 51000,
+      "impact": 51000,
       "eachLegacyVault": 9000
     }
   ],

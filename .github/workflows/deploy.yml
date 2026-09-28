@@ -1,4 +1,4 @@
-name: Deploy OneWorldz Ecosystem
+name: Deploy WorldzEcosystem
 # mission-production-trigger: 2026-09-19-donateworldz-masterpiece-global-v2
 
 on:
@@ -31,7 +31,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: oneworldz-production-v3
+  group: worldz-ecosystem-production-v4
   cancel-in-progress: true
 
 jobs:
@@ -337,6 +337,13 @@ jobs:
 
           print(f'CONTRACT=PASS sites=18 pages={len(urls)} mission_system=1 specialist_worldz=10 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 jayjay_vision_support=1 community_links=35 core_style=1')
           PY
+
+      - name: Retire historical public branding before audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/retire_public_brand.py --apply
+          python3 tools/retire_public_brand.py --check
 
       - name: Audit every page, stylesheet and image before deployment
         shell: bash
