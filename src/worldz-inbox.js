@@ -27,7 +27,7 @@ function registerWorldzInboxSystem({app,bot,config,supabase}){
   async function touch(user){
     if(!user?.id)return;
     const {error}=await supabase.from("worldz_dm_preferences").upsert({
-      telegram_id:Number(user.id),enabled:true,telegram_dm_reachable:true,username:user.username||null,first_name:user.first_name||null,
+      telegram_id:Number(user.id),telegram_dm_reachable:true,username:user.username||null,first_name:user.first_name||null,
       last_private_seen_at:new Date().toISOString(),updated_at:new Date().toISOString()
     },{onConflict:"telegram_id"});
     if(error)throw error;
