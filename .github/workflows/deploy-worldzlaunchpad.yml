@@ -572,6 +572,13 @@ jobs:
           assert branded >= 15, branded
           print(f'WORLDZLAUNCHPAD_OFFICIAL_LOGO_GATE=PASS pages={branded}')
 
+      - name: Retire historical public branding from WorldzLaunchPad payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/retire_public_brand.py --apply
+          python3 tools/retire_public_brand.py --check
+
       - name: Deploy public WorldzLaunchPad to Hostinger
         shell: python
         run: |
@@ -712,6 +719,16 @@ jobs:
                   assert 'of your collected token fee only' in body
                   assert 'of that fee remains for your project routing' in body
                   assert all(term not in body for term in private_terms)
+                  retired_public_terms=('OneWorldz','ONEWORLDZ','oneworldz.com')
+                  for label,payload in {
+                      'home':body,
+                      'fullbuild':fullbuild_body,
+                      'fullbuild_contract':fullbuild_contract_body,
+                      'bitworldz':bitworldz_body,
+                      'wldz':wldz_body,
+                      'campaign':campaign_body,
+                  }.items():
+                      assert all(term not in payload for term in retired_public_terms), ('RETIRED_PUBLIC_BRAND_LIVE',label)
 
                   assert platform['publicLaunchPad'] is True
                   assert platform['feePolicy']['platformShareCapPercentOfCollectedProjectFee']==10
