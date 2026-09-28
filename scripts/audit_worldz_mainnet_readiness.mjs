@@ -37,7 +37,7 @@ const checks={
     && omniFee.worldzControlledSplitPercent?.referrer===17
     && omniFee.worldzControlledSplitPercent?.legacyFlywheel===15
     && omniFee.worldzControlledSplitPercent?.worldzLaunchPad===8.5
-    && omniFee.worldzControlledSplitPercent?.oneWorldzImpact===8.5
+    && omniFee.worldzControlledSplitPercent?.impact===8.5
 };
 
 const blockers=[];
