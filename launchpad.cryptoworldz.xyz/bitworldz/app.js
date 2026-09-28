@@ -65,7 +65,7 @@ function buildIntent() {
         referrer: 17,
         legacyFlywheel: 15,
         worldzLaunchPad: 8.5,
-        oneWorldzImpact: 8.5
+        impact: 8.5
       }
     },
     safety: {
