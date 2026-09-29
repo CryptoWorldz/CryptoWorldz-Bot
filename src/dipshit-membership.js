@@ -1,6 +1,7 @@
 const crypto = require("node:crypto");
 const { isValidSolanaAddress } = require("./core");
 const { solanaPayUri, verifySolanaContribution } = require("./solana");
+const { registerDipshitConversation } = require("./dipshit-conversation");
 
 const DIPSHIT_PERIOD_SECONDS = 30 * 24 * 60 * 60;
 const DIPSHIT_INVOICE_PAYLOAD = "dipshit_pro_monthly_v1";
@@ -13,6 +14,7 @@ const DIPSHIT_COMMANDS = Object.freeze([
   { command: "status", description: "Check Worldz system status" },
   { command: "check", description: "Run Worldz QA checks" },
   { command: "fix", description: "Troubleshoot a problem" },
+  { command: "ask", description: "Talk to DIPSHIT™ in normal language" },
   { command: "report", description: "Report a bug or broken feature" },
   { command: "worldz", description: "Open the WorldzEcosystem™" },
   { command: "zed", description: "Open the ZED Command Centre" },
@@ -128,12 +130,26 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
   const starsEnabled = Number.isInteger(starsPrice) && starsPrice > 0;
   const solEnabled = solMembershipEnabled(config);
   const send = (chatId, text, options) => bot.sendMessage(chatId, text, options);
+  const conversation = registerDipshitConversation({
+    bot,
+    config,
+    starsEnabled,
+    solEnabled,
+    send,
+    privacyUrl: DIPSHIT_PRIVACY_URL,
+    termsUrl: DIPSHIT_TERMS_URL,
+    fetchImpl
+  });
+  const aiEnabled = conversation.aiEnabled;
 
   const helpText = () => [
     "💙 DIPSHIT™ — WORLDZ DUDE",
     "",
+    "💬 Talk normally in private chat. In groups, mention @DipShitBossBot, reply to me, or start with “DipShit …”",
+    "",
     "/status — runtime status",
     "/check — quick QA check",
+    "/ask <question> — normal-language troubleshooting",
     "/report <problem> — send a bug report",
     "/subscribe — Telegram Stars monthly membership",
     "/membership — membership status",
@@ -165,16 +181,16 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
 
   bot.onText(/^\/start(?:@\w+)?$/, (msg) => send(
     msg.chat.id,
-    "💙 DIPSHIT™ — WORLDZ DUDE\n\nQA, troubleshooting and Worldz navigation.\n\nUse /help for commands or /subscribe for DIPSHIT™ Pro.\n\nNever send a seed phrase or private key."
+    "💙 DIPSHIT™ — WORLDZ DUDE\n\nInteractive QA, troubleshooting and Worldz navigation.\n\n💬 You can talk to me normally. In groups, mention @DipShitBossBot, reply to me, or start with “DipShit …”\n\nUse /help for commands or /subscribe for DIPSHIT™ Pro.\n\nNever send a seed phrase or private key."
   ));
   bot.onText(/^\/help(?:@\w+)?$/, (msg) => send(msg.chat.id, helpText()));
   bot.onText(/^\/status(?:@\w+)?$/, (msg) => send(
     msg.chat.id,
-    `💙 DIPSHIT™ STATUS\n\nRuntime: ✅ ONLINE\nPrivacy + Terms: ✅ READY\nTelegram Stars membership: ${starsEnabled ? "✅ READY" : "⚙️ PRICE NOT SET"}\nExternal SOL month pass: ${solEnabled ? "✅ READY" : "⚙️ NOT CONFIGURED"}\n\nPayments never require a seed phrase or private key.`
+    `💙 DIPSHIT™ STATUS\n\nRuntime: ✅ ONLINE\nNatural chat listener: ✅ ACTIVE\nConversational AI: ${aiEnabled ? "✅ READY" : "⚙️ KEY NOT CONFIGURED"}\nSupport relay: ${config.ownerTelegramId ? "✅ READY" : "⚙️ NOT CONFIGURED"}\nPrivacy + Terms: ✅ READY\nTelegram Stars membership: ${starsEnabled ? "✅ READY" : "⚙️ PRICE NOT SET"}\nExternal SOL month pass: ${solEnabled ? "✅ READY" : "⚙️ NOT CONFIGURED"}\n\nPayments never require a seed phrase or private key.`
   ));
   bot.onText(/^\/check(?:@\w+)?$/, (msg) => send(
     msg.chat.id,
-    `🧪 DIPSHIT™ QUICK CHECK\n\n✅ Bot runtime responding\n✅ Privacy route defined\n✅ Terms route defined\n${starsEnabled ? "✅" : "⚙️"} Stars billing\n${solEnabled ? "✅" : "⚙️"} SOL verification\n\nReport a problem with /report <message>.`
+    `🧪 DIPSHIT™ QUICK CHECK\n\n✅ Bot runtime responding\n✅ Natural-language listener active\n${aiEnabled ? "✅" : "⚙️"} Conversational AI\n${config.ownerTelegramId ? "✅" : "⚙️"} Operator support relay\n✅ Privacy route defined\n✅ Terms route defined\n${starsEnabled ? "✅" : "⚙️"} Stars billing\n${solEnabled ? "✅" : "⚙️"} SOL verification\n\nTalk to me normally, or report a problem with /report <message>.`
   ));
   bot.onText(/^\/fix(?:@\w+)?(?:\s+([\s\S]+))?$/, (msg, match) => {
     const problem = String(match && match[1] || "").trim();
@@ -372,7 +388,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     return undefined;
   });
 
-  return { enabled: true, starsEnabled, solEnabled, commandCount: DIPSHIT_COMMANDS.length };
+  return { enabled: true, aiEnabled, starsEnabled, solEnabled, commandCount: DIPSHIT_COMMANDS.length };
 }
 
 module.exports = {
