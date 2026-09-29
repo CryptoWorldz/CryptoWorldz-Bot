@@ -40,6 +40,31 @@ function loadConfig(env = process.env) {
     throw new Error("TELEGRAM_WEBHOOK_URL must be a valid HTTPS URL.");
   }
 
+  const dipshitBotToken = String(env.DIPSHIT_BOT_TOKEN || "").trim();
+  const dipshitWebhookUrl = String(
+    env.DIPSHIT_WEBHOOK_URL || "https://cryptobotz.cryptoworldz.xyz/dipshit-telegram-webhook"
+  ).trim();
+  if (dipshitBotToken) {
+    try {
+      const parsedDipshitWebhookUrl = new URL(dipshitWebhookUrl);
+      if (parsedDipshitWebhookUrl.protocol !== "https:") throw new Error();
+    } catch {
+      throw new Error("DIPSHIT_WEBHOOK_URL must be a valid HTTPS URL.");
+    }
+  }
+  const dipshitStarsMonthlyPriceRaw = Number(env.DIPSHIT_STARS_MONTHLY_PRICE || 0);
+  const dipshitStarsMonthlyPrice =
+    Number.isInteger(dipshitStarsMonthlyPriceRaw) &&
+    dipshitStarsMonthlyPriceRaw >= 0 &&
+    dipshitStarsMonthlyPriceRaw <= 10000
+      ? dipshitStarsMonthlyPriceRaw
+      : 0;
+  const dipshitSolMonthlyAmountRaw = Number(env.DIPSHIT_SOL_MONTHLY_AMOUNT || 0);
+  const dipshitSolMonthlyAmount =
+    Number.isFinite(dipshitSolMonthlyAmountRaw) && dipshitSolMonthlyAmountRaw >= 0
+      ? dipshitSolMonthlyAmountRaw
+      : 0;
+
   const autoServiceUrl = String(
     env.AUTO_SERVICE_URL || `${supabaseUrl}/functions/v1/diamond-buy-auto`
   ).trim().replace(/\/$/, "");
@@ -61,6 +86,14 @@ function loadConfig(env = process.env) {
     allowedChatIds: parseIdSet(env.ALLOWED_CHAT_IDS),
     adminTelegramIds: parseIdSet(env.ADMIN_TELEGRAM_IDS),
     ownerTelegramId: String(env.OWNER_TELEGRAM_ID || "").trim(),
+    dipshitBotToken,
+    dipshitWebhookUrl,
+    dipshitWebhookSecret: dipshitBotToken
+      ? crypto.createHash("sha256").update(dipshitBotToken).digest("hex")
+      : "",
+    dipshitStarsMonthlyPrice,
+    dipshitSolMonthlyAmount,
+    dipshitSolRecipient: String(env.DIPSHIT_SOL_RECIPIENT || "").trim(),
     autoApproveMissionClaims: parseBoolean(env.AUTO_APPROVE_MISSION_CLAIMS, false),
     autoServiceUrl,
     autoAuthToken,
@@ -89,6 +122,9 @@ function configWarnings(config) {
   if (config.adminTelegramIds.size === 0) warnings.push("ADMIN_TELEGRAM_IDS is empty; Telegram admin commands are disabled.");
   if (!config.ownerTelegramId) warnings.push("OWNER_TELEGRAM_ID is empty; owner-only commands are disabled.");
   if (!config.autoServiceUrl || !config.autoAuthToken) warnings.push("Auto SAFE LOCKED service is not connected; owner Auto commands will remain unavailable.");
+  if (config.dipshitBotToken && config.dipshitBotToken === config.botToken) warnings.push("DIPSHIT_BOT_TOKEN matches BOT_TOKEN; separate DIPSHIT runtime is disabled.");
+  if (config.dipshitBotToken && !config.dipshitStarsMonthlyPrice) warnings.push("DIPSHIT Stars billing is built but DIPSHIT_STARS_MONTHLY_PRICE is not set.");
+  if (config.dipshitSolMonthlyAmount && !config.dipshitSolRecipient) warnings.push("DIPSHIT SOL amount is set without DIPSHIT_SOL_RECIPIENT; SOL membership remains disabled.");
   return warnings;
 }
 
