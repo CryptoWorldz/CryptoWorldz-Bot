@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-MIRACLE-V1",
-  "version": "2026-09-29",
+  "version": "2026-09-30",
   "status": "PLANNED_SPEC_LOCKED",
   "token": {
     "order": 4,
@@ -28,7 +28,8 @@
       "proposedMultisig": {
         "policy": "4-of-10",
         "state": "PROPOSED_NOT_DEPLOYED"
-      }
+      },
+      "registeredRecipientSource": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json"
     },
     "miracleMagicSupply": {
       "percent": 20,
@@ -81,5 +82,12 @@
     "exactSolMayBeInvented": false,
     "finalHumanSignatureRequired": true,
     "proofReceiptRequired": true
+  },
+  "recipientWalletRegistry": {
+    "source": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json",
+    "eligibleRole": "ADDITIONAL_DEV_AND_REWARDS",
+    "canonicalSymbol": "MRCL",
+    "approvedAllocationLedgerRequired": true,
+    "automaticTransfer": false
   }
 }

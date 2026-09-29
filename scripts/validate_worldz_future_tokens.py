@@ -11,6 +11,7 @@ def load(rel):
 pnex = load("worldzpad-mainnet/phenix/phenix.v1.json")
 mrcl = load("worldzpad-mainnet/miracle/miracle.v1.json")
 full = load("worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json")
+recipients = load("worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json")
 
 assert pnex["schema"] == "WORLDZ-PHENIX-V1"
 assert pnex["token"]["symbol"] == "PNEX"
@@ -87,6 +88,19 @@ assert by_symbol["PNEX"]["designSpec"] == "worldzpad-mainnet/phenix/phenix.v1.js
 assert by_symbol["MRCL"]["designSpec"] == "worldzpad-mainnet/miracle/miracle.v1.json"
 assert full["futureTokenSpecifications"]["phenix"]["mainnetExecution"] is False
 assert full["futureTokenSpecifications"]["miracle"]["mainnetExecution"] is False
+
+assert recipients["schema"] == "WORLDZ-FUTURE-DEV-REWARDS-WALLETS-V1"
+purple = next(w for w in recipients["wallets"] if w["label"] == "Purple Diamond")
+assert purple["address"] == "4HzhLhBkw5YQ4GDVfYkbrkt7f3Ps9kTPRHv5oPYsGyon"
+assert purple["walletRole"] == "ADDITIONAL_DEV_AND_REWARDS"
+assert purple["eligibleTokens"]["PNEX"]["canonicalProjectSymbol"] == "PNEX"
+assert purple["eligibleTokens"]["PNEX"]["allocationTokens"] is None
+assert purple["eligibleTokens"]["PNEX"]["rewardEligible"] is True
+assert purple["eligibleTokens"]["MRCL"]["canonicalProjectSymbol"] == "MRCL"
+assert purple["eligibleTokens"]["MRCL"]["allocationTokens"] is None
+assert purple["eligibleTokens"]["MRCL"]["approvedAllocationLedgerRequired"] is True
+assert recipients["rules"]["automaticTransferAllowed"] is False
+assert recipients["rules"]["allocationAmountsMayBeInvented"] is False
 
 for payload in (pnex, mrcl):
     blob = json.dumps(payload).lower()

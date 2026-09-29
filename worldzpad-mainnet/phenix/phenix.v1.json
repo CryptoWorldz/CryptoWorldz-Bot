@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-PHENIX-V1",
-  "version": "2026-09-29",
+  "version": "2026-09-30",
   "status": "PRELAUNCH_SPEC_LOCKED",
   "token": {
     "order": 3,
@@ -33,7 +33,8 @@
     },
     "developerVesting": {
       "percent": 10,
-      "tokens": 25000000
+      "tokens": 25000000,
+      "registeredRecipientSource": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json"
     },
     "purpleDiamondHandz": {
       "percent": 1,
@@ -108,5 +109,11 @@
     "exactRecipientsMayBeInvented": false,
     "finalHumanSignatureRequired": true,
     "proofReceiptRequired": true
+  },
+  "recipientWalletRegistry": {
+    "source": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json",
+    "eligibleRole": "ADDITIONAL_DEV_AND_REWARDS",
+    "canonicalSymbol": "PNEX",
+    "automaticTransfer": false
   }
 }

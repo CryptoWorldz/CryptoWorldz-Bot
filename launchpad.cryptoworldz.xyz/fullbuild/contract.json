@@ -1,10 +1,9 @@
 {
-  "source": "worldzpad-omnichain/fullscope/worldz-fullbuild.v1.json",
   "schema": "WORLDZ-FULLBUILD-V1",
-  "version": "2026-09-29-MAIN-F",
+  "version": "2026-09-30-MAIN-G",
   "brand": "WorldzFullBuild™",
   "status": "MAIN_INTEGRATION_SOURCE_OF_TRUTH",
-  "updatedAt": "2026-09-29",
+  "updatedAt": "2026-09-30",
   "purpose": "Unify the project-relevant Worldz architecture, approved reusable launch rules, verified repository state and regression-prevention lessons in one public, versioned, non-sensitive contract.",
   "decisionAndTruth": {
     "decisionAuthority": [
@@ -396,14 +395,26 @@
       "source": "worldzpad-mainnet/phenix/phenix.v1.json",
       "supplyTokens": 250000000,
       "state": "PRELAUNCH",
-      "mainnetExecution": false
+      "mainnetExecution": false,
+      "recipientRegistry": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json"
     },
     "miracle": {
       "symbol": "MRCL",
       "source": "worldzpad-mainnet/miracle/miracle.v1.json",
       "supplyTokens": 348000000,
       "state": "PLANNED",
-      "mainnetExecution": false
+      "mainnetExecution": false,
+      "recipientRegistry": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json"
+    }
+  },
+  "walletRegistries": {
+    "futureTokenDevRewards": {
+      "source": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json",
+      "state": "REGISTERED_RECIPIENTS_NO_TRANSFER",
+      "includes": [
+        "Purple Diamond"
+      ],
+      "rule": "Public recipient eligibility only; no allocation amount or transfer is implied."
     }
   }
 }

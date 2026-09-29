@@ -1,0 +1,47 @@
+{
+  "schema": "WORLDZ-FUTURE-DEV-REWARDS-WALLETS-V1",
+  "version": "2026-09-30",
+  "network": "solana-mainnet-beta",
+  "status": "REGISTERED_RECIPIENTS_NO_TRANSFER",
+  "wallets": [
+    {
+      "label": "Purple Diamond",
+      "address": "4HzhLhBkw5YQ4GDVfYkbrkt7f3Ps9kTPRHv5oPYsGyon",
+      "walletRole": "ADDITIONAL_DEV_AND_REWARDS",
+      "status": "REGISTERED_ELIGIBLE",
+      "addedBy": "JayJayTeamDev",
+      "addedAt": "2026-09-30",
+      "eligibleTokens": {
+        "PNEX": {
+          "tokenName": "PHENIX",
+          "requestedSymbolText": "PHEX",
+          "canonicalProjectSymbol": "PNEX",
+          "allocationSource": "developerVesting",
+          "allocationTokens": null,
+          "rewardEligible": true,
+          "vestingRequired": true,
+          "executionRule": "Use the canonical PHENIX/PNEX token identity at transaction review. Registration does not authorize an automatic transfer."
+        },
+        "MRCL": {
+          "tokenName": "MIRACLE",
+          "canonicalProjectSymbol": "MRCL",
+          "allocationSource": "miracleTeamVault",
+          "allocationTokens": null,
+          "rewardEligible": true,
+          "vestingRequired": true,
+          "approvedAllocationLedgerRequired": true,
+          "executionRule": "Registration records eligibility only. An allocation amount and any transfer remain separately approval- and signature-gated."
+        }
+      }
+    }
+  ],
+  "rules": {
+    "publicAddressesOnly": true,
+    "privateKeysOrSeedPhrasesStored": false,
+    "registrationIsNotTransfer": true,
+    "automaticTransferAllowed": false,
+    "allocationAmountsMayBeInvented": false,
+    "finalWalletOrMultisigSignatureRequired": true,
+    "proofReceiptRequiredForExecutedDistribution": true
+  }
+}
