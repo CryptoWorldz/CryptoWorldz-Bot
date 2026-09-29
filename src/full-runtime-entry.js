@@ -14,6 +14,7 @@ const { registerCommandCentreHandlers } = require("./command-centre");
 const { registerFullScopeTelegramHandlers } = require("./fullscope/telegram");
 const { registerCommunityDirectoryHandlers } = require("./community-directory");
 const { registerCurrentImpactHandlers } = require("./current-impact");
+const { registerDipshitMembershipSystem } = require("./dipshit-membership");
 const { registerExecutiveRoutes } = require("./executive/http");
 const { registerExecutiveTelegramHandlers } = require("./executive/telegram");
 const { createGracePublisher } = require("./grace/adapters");
@@ -99,6 +100,9 @@ async function start() {
   const supabase = createClient(config.supabaseUrl, config.supabaseApiKey, supabaseOptions);
   startupStage = "create_telegram_bot";
   const bot = new TelegramBot(config.botToken, { onlyFirstMatch: true });
+  const dipshitBot = config.dipshitBotToken && config.dipshitBotToken !== config.botToken
+    ? new TelegramBot(config.dipshitBotToken, { onlyFirstMatch: true })
+    : null;
   startupStage = "create_repository";
   const repository = createRepository(supabase);
   if (!config.ownerTelegramId) {
@@ -163,6 +167,8 @@ async function start() {
   startupStage = "create_http_app";
   const app = createHttpApp({ bot, repository, config });
 
+  startupStage = "register_dipshit_membership";
+  if (dipshitBot) registerDipshitMembershipSystem({ app, bot: dipshitBot, config, supabase });
   startupStage = "register_oneworldz_cors";
   registerOneWorldzPublicCors(app);
   startupStage = "register_current_impact";
