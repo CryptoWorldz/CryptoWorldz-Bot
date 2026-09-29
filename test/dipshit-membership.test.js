@@ -4,6 +4,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const {
+  shouldHandleDipshitConversation,
+  stripDipshitAddressing
+} = require("../src/dipshit-conversation");
+
+const {
   DIPSHIT_COMMANDS,
   DIPSHIT_INVOICE_PAYLOAD,
   DIPSHIT_PERIOD_SECONDS,
@@ -41,7 +46,7 @@ test("SOL month pass stays disabled without an explicit valid recipient and amou
 
 test("DIPSHIT command menu includes payment, privacy and cancellation controls", () => {
   const names = DIPSHIT_COMMANDS.map((item) => item.command);
-  for (const command of ["subscribe","membership","solmembership","claimsol","cancelmembership","privacy","terms","paysupport"]) {
+  for (const command of ["ask","subscribe","membership","solmembership","claimsol","cancelmembership","privacy","terms","paysupport"]) {
     assert.ok(names.includes(command), command);
   }
 });
@@ -63,4 +68,22 @@ test("membership migration is private-by-default and idempotent", () => {
   assert.match(sql, /unique \(source, payment_ref\)/i);
   assert.match(sql, /zed_runtime_authorized\(\)/);
   assert.match(sql, /record_dipshit_membership_payment/);
+});
+
+
+test("DIPSHIT conversational routing is private-first and group-safe", () => {
+  assert.equal(shouldHandleDipshitConversation({ text: "why is Zed broken?", chat: { type: "private" } }), true);
+  assert.equal(shouldHandleDipshitConversation({ text: "random group chatter", chat: { type: "group" } }), false);
+  assert.equal(shouldHandleDipshitConversation({ text: "@DipShitBossBot why is Zed broken?", chat: { type: "group" } }), true);
+  assert.equal(shouldHandleDipshitConversation({ text: "DipShit, check Zed", chat: { type: "supergroup" } }), true);
+  assert.equal(shouldHandleDipshitConversation({
+    text: "can you explain that?",
+    chat: { type: "group" },
+    reply_to_message: { from: { username: "DipShitBossBot" } }
+  }), true);
+});
+
+test("DIPSHIT strips Telegram addressing before sending text to the AI", () => {
+  assert.equal(stripDipshitAddressing("@DipShitBossBot why is Zed broken?"), "why is Zed broken?");
+  assert.equal(stripDipshitAddressing("DipShit: run me through the problem"), "run me through the problem");
 });
