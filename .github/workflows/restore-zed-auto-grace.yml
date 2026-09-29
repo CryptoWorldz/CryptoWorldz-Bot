@@ -9,6 +9,7 @@ on:
       - "package-lock.json"
       - "src/**"
       - "supabase/migrations/*worldz_fullscope*.sql"
+      - "supabase/migrations/*dipshit*.sql"
       - "public/**"
       - ".well-known/**"
       - ".github/full-current-zed-runtime.sh"
@@ -41,6 +42,11 @@ jobs:
       HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       BOT_TOKEN_SECRET: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      DIPSHIT_BOT_TOKEN_SECRET: ${{ secrets.DIPSHIT_BOT_TOKEN }}
+      DIPSHIT_WEBHOOK_URL: ${{ vars.DIPSHIT_WEBHOOK_URL }}
+      DIPSHIT_STARS_MONTHLY_PRICE: ${{ vars.DIPSHIT_STARS_MONTHLY_PRICE }}
+      DIPSHIT_SOL_MONTHLY_AMOUNT: ${{ vars.DIPSHIT_SOL_MONTHLY_AMOUNT }}
+      DIPSHIT_SOL_RECIPIENT: ${{ vars.DIPSHIT_SOL_RECIPIENT }}
       SUPABASE_URL_SECRET: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY_SECRET: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_SECRET_KEY }}
       SUPABASE_PUBLISHABLE_KEY_SECRET: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY || secrets.SUPABASE_KEY }}
@@ -78,6 +84,7 @@ jobs:
           HAS_TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN != '' }}
           HAS_ZED_BOT_TOKEN: ${{ secrets.ZED_BOT_TOKEN != '' }}
           HAS_CRYPTOWORLDZ_BOT_TOKEN: ${{ secrets.CRYPTOWORLDZ_BOT_TOKEN != '' }}
+          HAS_DIPSHIT_BOT_TOKEN: ${{ secrets.DIPSHIT_BOT_TOKEN != '' }}
           HAS_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
           HAS_SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY != '' }}
           HAS_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY != '' }}
@@ -92,6 +99,7 @@ jobs:
             "TELEGRAM_TOKEN=$HAS_TELEGRAM_TOKEN" \
             "ZED_BOT_TOKEN=$HAS_ZED_BOT_TOKEN" \
             "CRYPTOWORLDZ_BOT_TOKEN=$HAS_CRYPTOWORLDZ_BOT_TOKEN" \
+            "DIPSHIT_BOT_TOKEN=$HAS_DIPSHIT_BOT_TOKEN" \
             "SUPABASE_SERVICE_ROLE_KEY=$HAS_SUPABASE_SERVICE_ROLE_KEY" \
             "SUPABASE_SERVICE_KEY=$HAS_SUPABASE_SERVICE_KEY" \
             "SUPABASE_SECRET_KEY=$HAS_SUPABASE_SECRET_KEY" \
@@ -205,6 +213,8 @@ jobs:
           grep -Fq 'registerAutoTelegramHandlers' src/full-runtime-entry.js
           grep -Fq 'registerGraceTelegramHandlers' src/full-runtime-entry.js
           grep -Fq 'registerProjectWalletSystem' src/full-runtime-entry.js
+          grep -Fq 'registerDipshitMembershipSystem' src/full-runtime-entry.js
+          test -s src/dipshit-membership.js
           grep -Fq 'leaderboard' src/telegram.js
           grep -Fq 'wallet' src/telegram.js
           grep -Fq 'governance' src/telegram.js
@@ -351,6 +361,68 @@ jobs:
           print("ZED_TELEGRAM_BACKLOG_CONTROL=PASS")
           print("ZED_TELEGRAM_WEBHOOK=PASS")
           print("ZED_TELEGRAM_MENU_BUTTON=PASS")
+
+          dipshit_token=env.get("DIPSHIT_BOT_TOKEN","").strip()
+          if not dipshit_token:
+              print("DIPSHIT_TELEGRAM=WAITING_FOR_DIPSHIT_BOT_TOKEN")
+          else:
+              print("::add-mask::"+dipshit_token)
+              dapi="https://api.telegram.org/bot"+dipshit_token+"/"
+              def dcall(method,payload=None):
+                  data=None
+                  headers={}
+                  if payload is not None:
+                      data=json.dumps(payload).encode("utf-8")
+                      headers["content-type"]="application/json"
+                  with urllib.request.urlopen(urllib.request.Request(dapi+method,data=data,headers=headers),timeout=30) as r:
+                      out=json.loads(r.read().decode("utf-8"))
+                  if out.get("ok") is not True: raise SystemExit("DIPSHIT Telegram "+method+" failed")
+                  return out.get("result")
+
+              dipshit_commands=[
+                {"command":"start","description":"Wake up DIPSHIT™"},
+                {"command":"help","description":"Show the command menu"},
+                {"command":"status","description":"Check Worldz system status"},
+                {"command":"check","description":"Run Worldz QA checks"},
+                {"command":"fix","description":"Troubleshoot a problem"},
+                {"command":"report","description":"Report a bug or broken feature"},
+                {"command":"worldz","description":"Open the WorldzEcosystem™"},
+                {"command":"zed","description":"Open the ZED Command Centre"},
+                {"command":"inbox","description":"Open Worldz Inbox"},
+                {"command":"dipshit","description":"Meet the WORLDZ DUDE"},
+                {"command":"website","description":"Open CryptoWorldz"},
+                {"command":"community","description":"Open Worldz community links"},
+                {"command":"subscribe","description":"Join DIPSHIT™ Pro with Telegram Stars"},
+                {"command":"membership","description":"Check your membership"},
+                {"command":"solmembership","description":"View the optional SOL month pass"},
+                {"command":"claimsol","description":"Verify a SOL membership payment"},
+                {"command":"cancelmembership","description":"Stop subscription renewal"},
+                {"command":"privacy","description":"Read the Privacy Policy"},
+                {"command":"terms","description":"Read membership Terms"},
+                {"command":"paysupport","description":"Get payment support"}
+              ]
+              dcall("setMyCommands",{"commands":dipshit_commands})
+              dcall("setMyDescription",{"description":"💙 DIPSHIT™ — WORLDZ DUDE\n\nThe WorldzEcosystem™ QA, troubleshooting and chat bot. Finds bugs, checks Worldz systems and supports optional paid membership. Never send seed phrases or private keys."})
+              dcall("setMyShortDescription",{"short_description":"💙 DIPSHIT™ — WORLDZ DUDE | QA, troubleshooting, chat & Worldz membership."})
+              dipshit_secret=hashlib.sha256(dipshit_token.encode()).hexdigest()
+              dipshit_hook_url=env.get("DIPSHIT_WEBHOOK_URL","").strip() or "https://cryptobotz.cryptoworldz.xyz/dipshit-telegram-webhook"
+              dcall("setWebhook",{
+                "url":dipshit_hook_url,
+                "secret_token":dipshit_secret,
+                "allowed_updates":["message","pre_checkout_query"],
+                "drop_pending_updates":False,
+                "max_connections":5
+              })
+              dbot=dcall("getMe")
+              dcommands=dcall("getMyCommands")
+              dhook=dcall("getWebhookInfo")
+              expected_d=[x["command"] for x in dipshit_commands]
+              got_d=[x.get("command") for x in dcommands]
+              if got_d != expected_d: raise SystemExit("DIPSHIT Telegram command list mismatch")
+              if dhook.get("url") != dipshit_hook_url: raise SystemExit("DIPSHIT Telegram webhook URL mismatch")
+              print("DIPSHIT_TELEGRAM_BOT=PASS @"+str(dbot.get("username","")))
+              print("DIPSHIT_TELEGRAM_COMMANDS="+str(len(dipshit_commands)))
+              print("DIPSHIT_TELEGRAM_WEBHOOK=PASS")
           PY
 
       - name: Prove live AUTO, GRACE and protected surfaces

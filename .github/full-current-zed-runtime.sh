@@ -10,16 +10,17 @@ set -Eeuo pipefail
 : "${HOSTINGER_API_TOKEN:?}"
 : "${OPENAI_API_KEY:?}"
 
-for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN" "$OPENAI_API_KEY" "$BOT_TOKEN_SECRET" "$SUPABASE_URL_SECRET" "$SUPABASE_SERVICE_ROLE_KEY_SECRET"; do
+for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN" "$OPENAI_API_KEY" "$BOT_TOKEN_SECRET" "${DIPSHIT_BOT_TOKEN_SECRET:-}" "$SUPABASE_URL_SECRET" "$SUPABASE_SERVICE_ROLE_KEY_SECRET"; do
   [ -n "$value" ] && echo "::add-mask::$value"
 done
 
 npm ci
-node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js
+node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js test/dipshit-membership.test.js
 node --check index.js
 find src -type f -name '*.js' -exec node --check {} +
 node --check src/oneworldz-gpt/http.js
 grep -Fq 'registerProjectWalletSystem({ app, bot, config, supabase });' src/full-runtime-entry.js
+grep -Fq 'registerDipshitMembershipSystem' src/full-runtime-entry.js
 for marker in 'id="splashback"' 'id="zed-guide"' 'id="create"' 'id="heroes"'; do
   grep -Fq "$marker" public/miniapp/index.html
 done
@@ -95,6 +96,13 @@ required = {
     "SUPABASE_URL": os.environ.get("SUPABASE_URL_SECRET", "").strip() or existing.get("SUPABASE_URL", "") or "https://hknymhhyqldtzmplzuzh.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": os.environ.get("SUPABASE_PUBLISHABLE_KEY_SECRET", "").strip() or existing.get("SUPABASE_PUBLISHABLE_KEY", "") or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV",
 }
+optional = {
+    "DIPSHIT_BOT_TOKEN": os.environ.get("DIPSHIT_BOT_TOKEN_SECRET", "").strip() or existing.get("DIPSHIT_BOT_TOKEN", ""),
+    "DIPSHIT_WEBHOOK_URL": os.environ.get("DIPSHIT_WEBHOOK_URL", "").strip() or existing.get("DIPSHIT_WEBHOOK_URL", "") or "https://cryptobotz.cryptoworldz.xyz/dipshit-telegram-webhook",
+    "DIPSHIT_STARS_MONTHLY_PRICE": os.environ.get("DIPSHIT_STARS_MONTHLY_PRICE", "").strip() or existing.get("DIPSHIT_STARS_MONTHLY_PRICE", ""),
+    "DIPSHIT_SOL_MONTHLY_AMOUNT": os.environ.get("DIPSHIT_SOL_MONTHLY_AMOUNT", "").strip() or existing.get("DIPSHIT_SOL_MONTHLY_AMOUNT", ""),
+    "DIPSHIT_SOL_RECIPIENT": os.environ.get("DIPSHIT_SOL_RECIPIENT", "").strip() or existing.get("DIPSHIT_SOL_RECIPIENT", ""),
+}
 for key, value in required.items():
     if key == "BOT_TOKEN" and managed_bot:
         continue
@@ -105,7 +113,7 @@ print("GRACE_X_CLIENT_ID_PRESENT="+("YES" if existing.get("GRACE_X_CLIENT_ID",""
 print("GRACE_X_CLIENT_SECRET_PRESENT="+("YES" if existing.get("GRACE_X_CLIENT_SECRET","").strip() else "NO"))
 print("GRACE_X_REDIRECT_PRESENT="+("YES" if existing.get("GRACE_X_REDIRECT_URI","").strip() else "NO"))
 
-for key, value in required.items():
+for key, value in {**required, **optional}.items():
     pattern = re.compile(rf"^\s*(?:export\s+)?{re.escape(key)}\s*=")
     lines = [line for line in lines if not pattern.match(line)]
     if value:
@@ -151,6 +159,7 @@ critical=(
   package-lock.json
   .github/install-ci-apt-wrapper.cjs
   src/full-runtime-entry.js
+  src/dipshit-membership.js
   src/http.js
   src/oneworldz-gpt/http.js
   src/user-experience.js
