@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-FULLBUILD-V1",
   "brand": "WorldzFullBuild™",
-  "updatedAt": "2026-09-27",
+  "updatedAt": "2026-09-29",
   "ownerAuthority": {
     "owner": "JayJayTeamDev",
     "role": "OWNER_AND_FINAL_APPROVER",
@@ -835,5 +835,41 @@
     "providerTarget": "JUPITER_RECURRING_ORDER",
     "marketIntegrity": "NO_WASH_SELF_ROUND_TRIP_MULTI_WALLET_VOLUME_HOLDER_MAKER_TRENDING_OR_SCORE_GAMING",
     "releaseRule": "DO_NOT_LABEL_LIVE_UNTIL_USER_WALLET_PROVIDER_ORDER_CANCEL_SECURITY_PRIVACY_COMPLIANCE_AND_WORLDZPROOF_GATES_PASS"
+  },
+  "worldzTokenSystem": {
+    "schema": "WORLDZ-TOKEN-SYSTEM-V1",
+    "purpose": "Registry and routing rules for canonical Worldz tokens plus approved legacy/community tokens.",
+    "registeredCommunityTokens": [
+      {
+        "name": "Hope St Support Coin",
+        "symbol": "HSSC",
+        "chain": "SOLANA",
+        "solanaMint": "29xKqmkvhYvMgWMqHgUoimzfBxweLUvcASAJUHHSkJMW",
+        "identityState": "PUBLIC_MINT_LOCATED__VERIFY_ON_CHAIN_BEFORE_AUTOMATED_ROUTING",
+        "creatorProfile": "@distribution",
+        "classification": "EXISTING_COMMUNITY_SUPPORT_TOKEN",
+        "worldzTokenSystemState": "REGISTERED_WITH_ROUTING_GATES",
+        "protectedRevenueCommitment": {
+          "percent": 50,
+          "destination": "Hope St / HopeStreet centres in NSW, Australia",
+          "source": "creator/reward revenue",
+          "rule": "This 50% commitment is protected and must not be diverted unless JayJayTeamDev explicitly changes it."
+        },
+        "remainingRevenue": {
+          "percent": 50,
+          "state": "OWNER_ROUTING_NOT_YET_LOCKED",
+          "intent": "Eligible for future HSSC growth/boost routing after the exact mechanism is owner-approved.",
+          "rule": "Do not invent or silently assign the remaining 50%."
+        },
+        "automationGates": [
+          "verify canonical mint on chain",
+          "verify reward source and claim mechanics",
+          "bind verified Hope St destination before any transfer",
+          "record routed payments in WorldzProof / accounting ledger",
+          "never describe a donation as completed until the actual transfer is verified"
+        ],
+        "evidenceNote": "User screenshots identify HSSC, @distribution and the 50% Hope St reward commitment; a public indexed record matches the full Solana mint."
+      }
+    ]
   }
 }
