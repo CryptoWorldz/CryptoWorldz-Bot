@@ -106,6 +106,39 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
     return data || [];
   }
 
+  async function savePreset(message, key) {
+    const profile = await profileFor(message);
+    const update = presetUpdate(key, profile);
+    if (!update) return null;
+    const preset = presetByKey(key);
+    const { data, error } = await supabase.from("community_suite_ai_profiles").update({
+      ...update,
+      purpose: key === "custom"
+        ? profile.purpose
+        : (preset?.defaultInstructions || profile.purpose || ""),
+      updated_by: Number(message.from.id),
+      updated_at: new Date().toISOString()
+    }).eq("chat_id", Number(message.chat.id)).select("*").single();
+    if (error) throw error;
+    await recordAnalytics(supabase, message.chat.id, message.from.id, "community_ai_preset_changed", { preset: key });
+    return data;
+  }
+
+  function configKeyboard(profile) {
+    const keys = ["no5","dipshit","alice","rex","grace","max"];
+    const rows = [];
+    for (let i = 0; i < keys.length; i += 2) {
+      rows.push(keys.slice(i, i + 2).map((key) => ({
+        text: `${profile?.preset_key === key ? "✅ " : ""}${AUTO_PICK_PRESETS[key].displayName}`,
+        callback_data: `ai:preset:${key}`
+      })));
+    }
+    rows.push([
+      { text: `${profile?.preset_key === "custom" ? "✅ " : ""}🛠 Custom Build`, callback_data: "ai:preset:custom" },
+      { text: "🧠 Capabilities", callback_data: "ai:capabilities" }
+    ]);
+    return { reply_markup: { inline_keyboard: rows } };
+  }
   async function answer(message, question) {
     if (!isGroup(message)) return send(message, "🤖 Customer AI runs inside its configured community group.");
     await ensureGroup(supabase, message, config);
