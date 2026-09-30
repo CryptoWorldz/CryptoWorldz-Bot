@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "brand": "Worldz FullBuild™ Community Suite",
   "packages": [
     {
@@ -69,17 +69,141 @@
     "customer_branding": true,
     "premium_custom": true
   },
-  "planned_modules": [
-    "REX SecureGuard™",
-    "Market + Buy Alerts",
-    "ALICE™ Support",
-    "Scanner",
-    "Promotion/Discovery"
-  ],
   "rules": {
     "organic_paid_separation": true,
     "real_transaction_alerts_only": true,
     "no_fake_engagement": true,
     "no_guaranteed_safety_claims": true
-  }
+  },
+  "branch_state": "SOURCE_IMPLEMENTED_NOT_DEPLOYED",
+  "modules": {
+    "rex_secureguard": {
+      "source": true,
+      "live": false
+    },
+    "alice_support": {
+      "source": true,
+      "live": false
+    },
+    "custom_ai": {
+      "source": true,
+      "live": false
+    },
+    "ronald_raider": {
+      "source": true,
+      "live": "existing_runtime_feature"
+    },
+    "shill_rewards": {
+      "source": true,
+      "live": "existing_runtime_feature"
+    },
+    "worldz_votes": {
+      "source": true,
+      "live": "existing_runtime_feature"
+    },
+    "worldz_govern": {
+      "source": true,
+      "live": "existing_runtime_feature"
+    },
+    "worldzscan": {
+      "source": true,
+      "live": false
+    },
+    "market_alerts": {
+      "source": true,
+      "live": false,
+      "requires": "authenticated provider/indexer ingest"
+    },
+    "wallet_watch": {
+      "source": true,
+      "live": false
+    },
+    "calendar": {
+      "source": true,
+      "live": false
+    },
+    "giveaways": {
+      "source": true,
+      "live": false
+    },
+    "analytics": {
+      "source": true,
+      "live": false
+    },
+    "social_registry": {
+      "source": true,
+      "live": false
+    },
+    "inbox": {
+      "source": true,
+      "live": "existing runtime feature"
+    },
+    "worldping": {
+      "source": true,
+      "live": "existing runtime feature"
+    },
+    "worldzcast": {
+      "source": true,
+      "live": "existing runtime feature"
+    },
+    "api_webhooks": {
+      "source": true,
+      "live": false
+    },
+    "marketplace": {
+      "source": true,
+      "live": false
+    },
+    "multi_group_licensing": {
+      "source": true,
+      "live": false
+    },
+    "launchpad_linkage": {
+      "source": true,
+      "live": false
+    }
+  },
+  "social": {
+    "x": {
+      "registry": true,
+      "publishing_adapter": "existing_grace_oauth"
+    },
+    "facebook": {
+      "registry": true,
+      "publishing_adapter": "existing_grace_oauth"
+    },
+    "instagram": {
+      "registry": true,
+      "publishing_adapter": "pending"
+    },
+    "youtube": {
+      "registry": true,
+      "publishing_adapter": "pending"
+    },
+    "tiktok": {
+      "registry": true,
+      "publishing_adapter": "pending"
+    },
+    "telegram": {
+      "registry": true,
+      "publishing_adapter": "native"
+    }
+  },
+  "marketplace_addons": [
+    "premium_custom_brand",
+    "branded_miniapp",
+    "custom_website",
+    "advanced_ai",
+    "advanced_analytics",
+    "api_webhooks",
+    "extra_socials",
+    "multi_group",
+    "custom_chain",
+    "launch_support",
+    "priority_support",
+    "custom_security",
+    "sponsored_slot",
+    "campaign_pack",
+    "migration_setup"
+  ]
 }
