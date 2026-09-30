@@ -1,4 +1,5 @@
 const crypto = require("node:crypto");
+const { ensureGroup, suiteAccessAllowed } = require("./community-suite-core");
 
 const BLOCKED_PERMISSIONS = Object.freeze({
   can_send_messages: false,
@@ -490,6 +491,10 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     }
 
     if (action === "on") {
+      await ensureGroup(supabase, msg, config);
+      if (!(await suiteAccessAllowed(supabase, chatId))) {
+        return bot.sendMessage(chatId, "🔒 REX SecureGuard™ requires an active Worldz FullBuild Community Suite licence. Use /suiteprice and /suitereceipt, or activate an approved trial.");
+      }
       if (type !== "supergroup") {
         return bot.sendMessage(chatId,
           "🛡 REX is ready, but number-match member restriction requires a Telegram Supergroup. Upgrade this group to a Supergroup in Telegram first, then run /secureguard on again. REX will recognise the migrated group automatically."
@@ -549,6 +554,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       if (!["group","supergroup"].includes(String(msg.chat?.type || ""))) return;
       const cfg = await setting(msg.chat.id);
       if (!cfg.enabled) return;
+      if (!(await suiteAccessAllowed(supabase, msg.chat.id))) return;
 
       if (Array.isArray(msg.new_chat_members) && msg.new_chat_members.length > 0) {
         if (!cfg.numberMatch || msg.chat.type !== "supergroup") return;
