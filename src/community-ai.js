@@ -25,7 +25,7 @@ function stripCommunityAIAddressing(text, profile = {}) {
   }
   return value;
 }
-const { buildAssistantCapabilityContext, formatCapabilitySummary } = require("./assistant-capabilities");
+const { buildAssistantCapabilityContext, deterministicCapabilityAnswer, formatCapabilitySummary } = require("./assistant-capabilities");
 const { AUTO_PICK_PRESETS, formatAutoPicks, presetByKey, presetKeys, presetUpdate } = require("./community-ai-presets");
 
 async function callCommunityAI({ apiKey, model, question, history, profile, knowledge, context, capabilityContext, fetchImpl = fetch }) {
@@ -170,6 +170,16 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
     ]);
     const key = `${message.chat.id}:${message.from?.id || "unknown"}`;
     const history = histories.get(key) || [];
+    const directCapability = deterministicCapabilityAnswer(question, capabilityContext);
+    if (directCapability) {
+      await recordAnalytics(supabase, message.chat.id, message.from.id, "community_ai_answer", {
+        preset: profile.preset_key || "custom",
+        answer_mode: "capability_registry",
+        capability_key: directCapability.key
+      });
+      histories.set(key, [...history, { role:"user", content:question }, { role:"assistant", content:directCapability.text }].slice(-8));
+      return send(message, `🤖 ${profile.display_name}\n\n${directCapability.text.slice(0, 3800)}`);
+    }
     const context = {
       chat_id: message.chat.id,
       community: message.chat.title || "",
