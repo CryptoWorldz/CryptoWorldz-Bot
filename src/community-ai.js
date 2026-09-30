@@ -11,6 +11,20 @@ const {
   moderationRequiresHardBlock,
   normalizeDipshitHistory
 } = require("./dipshit-conversation");
+
+function escapeAssistantName(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function stripCommunityAIAddressing(text, profile = {}) {
+  const value = String(text || "").trim();
+  const labels = ["AI", profile.display_name].filter(Boolean);
+  for (const label of labels) {
+    const pattern = new RegExp(`^${escapeAssistantName(label)}(?:\\s*[:;,.-]\\s*|\\s+)`, "i");
+    if (pattern.test(value)) return value.replace(pattern, "").trim();
+  }
+  return value;
+}
 const { buildAssistantCapabilityContext, formatCapabilitySummary } = require("./assistant-capabilities");
 const { AUTO_PICK_PRESETS, formatAutoPicks, presetByKey, presetKeys, presetUpdate } = require("./community-ai-presets");
 
