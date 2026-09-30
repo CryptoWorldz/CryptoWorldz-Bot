@@ -15,6 +15,15 @@ function parseIsoWithOffset(value) {
   return Number.isFinite(ms) ? new Date(ms) : null;
 }
 
+function formatCountdown(targetMs, nowMs = Date.now()) {
+  const diff = Math.max(0, Number(targetMs) - Number(nowMs));
+  const totalMinutes = Math.floor(diff / 60000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  return `${days}d ${hours}h ${minutes}m`;
+}
+
 function pickWinners(entries, count) {
   const pool = [...new Set((entries || []).map(Number).filter(Number.isFinite))];
   const winners = [];
@@ -67,6 +76,7 @@ function registerCommunityOps({ bot, config, supabase }) {
       const { data, error } = await supabase.from("community_suite_calendar_events").insert({
         chat_id: Number(message.chat.id),
         title: title.slice(0, 160),
+        event_type: "community",
         starts_at: starts.toISOString(),
         description: description.slice(0, 1500),
         link_url: linkUrl ? linkUrl.slice(0, 500) : null,
@@ -78,6 +88,54 @@ function registerCommunityOps({ bot, config, supabase }) {
       return send(message, `✅ Event #${data.id} scheduled for ${starts.toLocaleString("en-AU")}. Default reminder: 60 minutes before.`);
     } catch {
       return send(message, "❌ Event could not be created.");
+    }
+  });
+
+  bot.onText(/^\/launchcountdown(?:@\w+)?(?:\s+([\s\S]+))?$/i, async (message, match) => {
+    try {
+      if (!(await ready(message, "calendar"))) return send(message, "⏸ Community Calendar is switched off or paused.");
+      const raw = String(match?.[1] || "").trim();
+      if (!raw) {
+        const { data, error } = await supabase.from("community_suite_calendar_events")
+          .select("*").eq("chat_id", Number(message.chat.id)).eq("event_type", "launch")
+          .gte("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle();
+        if (error) throw error;
+        if (!data) return send(message, "🚀 No future launch countdown is configured. Admin: /launchcountdown ISO_WITH_OFFSET | TITLE | OPTIONAL_URL");
+        const target = Date.parse(data.starts_at);
+        return send(message, [
+          "🚀 LAUNCH COUNTDOWN",
+          "",
+          data.title,
+          `⏳ ${formatCountdown(target)}`,
+          `Launch time: ${new Date(target).toLocaleString("en-AU")}`,
+          data.link_url || null,
+          "",
+          `Event #${data.id} • reminder 60 minutes before`
+        ].filter(Boolean).join("\n"));
+      }
+
+      if (!(await requireAdmin(message))) return send(message, "⛔ Group admin access required.");
+      const parts = raw.split("|").map((part) => part.trim());
+      const starts = parseIsoWithOffset(parts[0]);
+      const title = parts[1] || "";
+      const linkUrl = parts[2] || null;
+      if (!starts || !title) return send(message, "❌ Use /launchcountdown 2026-10-08T19:00+11:00 | TOKEN/PROJECT LAUNCH | OPTIONAL_URL");
+      if (starts.getTime() <= Date.now()) return send(message, "❌ Launch time must be in the future.");
+      const { data, error } = await supabase.from("community_suite_calendar_events").insert({
+        chat_id: Number(message.chat.id),
+        title: title.slice(0, 160),
+        event_type: "launch",
+        starts_at: starts.toISOString(),
+        description: "Worldz Launch Countdown",
+        link_url: linkUrl ? linkUrl.slice(0, 500) : null,
+        reminder_minutes: 60,
+        created_by: Number(message.from.id)
+      }).select("*").single();
+      if (error) throw error;
+      await recordAnalytics(supabase, message.chat.id, message.from.id, "launch_countdown_created", { eventId:data.id });
+      return send(message, `🚀 Launch Countdown #${data.id} set.\n\n${data.title}\n⏳ ${formatCountdown(starts.getTime())}\nLaunch: ${starts.toLocaleString("en-AU")}\n\nDelete/change via the calendar controls if needed.`);
+    } catch {
+      return send(message, "❌ Launch Countdown could not be loaded or saved.");
     }
   });
 
@@ -283,4 +341,4 @@ function registerCommunityOps({ bot, config, supabase }) {
   return { parseIsoWithOffset, pickWinners, sendDueReminders };
 }
 
-module.exports = { parseIsoWithOffset, pickWinners, registerCommunityOps };
+module.exports = { formatCountdown, parseIsoWithOffset, pickWinners, registerCommunityOps };
