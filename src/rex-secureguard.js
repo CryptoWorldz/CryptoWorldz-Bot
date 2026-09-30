@@ -39,6 +39,16 @@ function extractHosts(text) {
   return [...new Set(hosts)];
 }
 
+function normalizeIdentityLabel(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/^@/, "")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
 function registerRexSecureGuard({ bot, supabase, config }) {
   const token = String(config.botToken || "").trim();
   const base = `https://api.telegram.org/bot${token}`;
@@ -211,16 +221,6 @@ function registerRexSecureGuard({ bot, supabase, config }) {
         console.error("REX expiry action failed", { code: error2?.code || error2?.message || "unknown" });
       }
     }
-  }
-
-  function normalizeIdentityLabel(value) {
-    return String(value || "")
-      .normalize("NFKC")
-      .toLowerCase()
-      .replace(/^@/, "")
-      .replace(/[^a-z0-9]+/g, " ")
-      .trim()
-      .replace(/\s+/g, " ");
   }
 
   function memberDisplayLabel(from) {
