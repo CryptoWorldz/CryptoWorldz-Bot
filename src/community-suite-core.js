@@ -157,7 +157,7 @@ async function recordAnalytics(supabase, chatId, telegramId, eventType, metadata
 
 async function currentLicence(supabase, chatId) {
   const { data, error } = await supabase.from("zed_group_licences")
-    .select("chat_id,plan,status,expires_at,product_package,rent_to_own_payments")
+    .select("chat_id,plan,status,expires_at,product_package,rent_to_own_payments,trial_credit_sol,trial_credit_used_at")
     .eq("chat_id", Number(chatId)).maybeSingle();
   if (error) throw error;
   if (!data || data.status !== "active") return null;
