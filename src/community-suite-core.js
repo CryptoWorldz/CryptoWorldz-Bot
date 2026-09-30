@@ -67,13 +67,20 @@ async function ensureGroup(supabase, message, config) {
   const chatId = Number(message.chat.id);
   const displayName = String(message.chat.title || "Worldz Community").slice(0, 120);
   const workspaceSlug = slugify(`${displayName}-${Math.abs(chatId)}`, `group-${Math.abs(chatId)}`);
-  const { data, error } = await supabase.from("community_suite_groups").upsert({
+  const groupPayload = {
     chat_id: chatId,
     workspace_slug: workspaceSlug,
     display_name: displayName,
-    owner_telegram_id: owner(message, config) ? Number(message.from.id) : null,
     updated_at: new Date().toISOString()
-  }, { onConflict: "chat_id" }).select("*").single();
+  };
+  if (owner(message, config)) {
+    groupPayload.owner_telegram_id = Number(message.from.id);
+    groupPayload.internal_access = true;
+  }
+  const { data, error } = await supabase.from("community_suite_groups").upsert(
+    groupPayload,
+    { onConflict: "chat_id" }
+  ).select("*").single();
   if (error) throw error;
 
   await supabase.from("community_suite_branding").upsert({
@@ -105,7 +112,16 @@ async function moduleEnabled(supabase, chatId, moduleKey) {
   return data ? data.enabled !== false : true;
 }
 
+async function suiteAccessAllowed(supabase, chatId) {
+  const { data: group, error: groupError } = await supabase.from("community_suite_groups")
+    .select("internal_access").eq("chat_id", Number(chatId)).maybeSingle();
+  if (groupError) throw groupError;
+  if (group?.internal_access === true) return true;
+  return Boolean(await currentLicence(supabase, chatId));
+}
+
 async function moduleAvailable(supabase, chatId, moduleKey) {
+  if (!(await suiteAccessAllowed(supabase, chatId))) return false;
   const { data: group, error: groupError } = await supabase.from("community_suite_groups")
     .select("emergency_lockdown").eq("chat_id", Number(chatId)).maybeSingle();
   if (groupError) throw groupError;
@@ -180,6 +196,7 @@ module.exports = {
   isGroup,
   moduleAvailable,
   moduleEnabled,
+  suiteAccessAllowed,
   owner,
   pricing,
   recordAnalytics,
