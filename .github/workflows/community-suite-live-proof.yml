@@ -95,6 +95,15 @@ jobs:
                   raise RuntimeError(f"REST read failed {table} HTTP={code}")
               return body
 
+          def wait_rows(table, params, predicate=lambda rows: bool(rows), attempts=30, delay=1):
+              last=[]
+              for _ in range(attempts):
+                  last=rest_rows(table,params)
+                  if predicate(last):
+                      return last
+                  time.sleep(delay)
+              return last
+
           owner_rows=rest_rows("bot_admins",{
               "select":"telegram_id",
               "role":"eq.owner",
@@ -236,34 +245,34 @@ jobs:
 
               # ALICE front desk + tracked ticket lifecycle in the real group.
               send_command("/alice@"+bot_username)
-              alice=rest_rows("community_suite_analytics_events",{
+              alice=wait_rows("community_suite_analytics_events",{
                   "select":"id,event_type,created_at",
                   "chat_id":"eq."+str(chat_id),
                   "event_type":"eq.alice_open",
                   "created_at":"gte."+started_at,
                   "order":"created_at.desc",
                   "limit":"1"
-              })
+              },attempts=30,delay=1)
               if not alice:
-                  raise SystemExit("ALICE live analytics proof missing")
+                  raise SystemExit("ALICE live analytics proof missing after async wait")
               subject="LIVE-PROOF-"+run_id
               send_command("/ticket@"+bot_username+" "+subject+" | Automated production proof")
-              tickets=rest_rows("community_suite_tickets",{
+              tickets=wait_rows("community_suite_tickets",{
                   "select":"id,status,subject",
                   "chat_id":"eq."+str(chat_id),
                   "subject":"eq."+subject,
                   "order":"created_at.desc",
                   "limit":"1"
-              })
+              },attempts=30,delay=1)
               if not tickets:
-                  raise SystemExit("ALICE ticket was not created")
+                  raise SystemExit("ALICE ticket was not created after async wait")
               ticket_id=int(tickets[0]["id"])
               send_command("/ticketclose@"+bot_username+" "+str(ticket_id)+" | Automated production proof complete")
-              closed=rest_rows("community_suite_tickets",{
+              closed=wait_rows("community_suite_tickets",{
                   "select":"id,status","id":"eq."+str(ticket_id),"limit":"1"
-              })
+              },predicate=lambda rows: bool(rows) and rows[0].get("status")=="closed",attempts=30,delay=1)
               if not closed or closed[0].get("status")!="closed":
-                  raise SystemExit("ALICE ticket did not close")
+                  raise SystemExit("ALICE ticket did not close after async wait")
               print("ALICE_LIVE_TICKET_FLOW=PASS ticket_id="+str(ticket_id))
 
               # REX licence gate: prove an unlicensed external group cannot turn REX on,
@@ -273,9 +282,15 @@ jobs:
               })
               send_command("/secureguard@"+bot_username+" off")
               secureguard_touched=True
+              off_rows=wait_rows("zed_chat_settings",{
+                  "select":"secureguard_enabled","chat_id":"eq."+str(chat_id),"limit":"1"
+              },predicate=lambda rows: (not rows) or rows[0].get("secureguard_enabled") is False,attempts=30,delay=1)
+              if off_rows and off_rows[0].get("secureguard_enabled") is True:
+                  raise SystemExit("REX could not be placed OFF before licence proof")
               runtime_patch("community_suite_groups",{"chat_id":"eq."+str(chat_id)},{"internal_access":False})
               if not existing_licence:
                   send_command("/secureguard@"+bot_username+" on")
+                  time.sleep(3)
                   settings=rest_rows("zed_chat_settings",{
                       "select":"secureguard_enabled","chat_id":"eq."+str(chat_id),"limit":"1"
                   })
@@ -299,49 +314,43 @@ jobs:
                   },"chat_id")
                   temp_licence=True
                   send_command("/secureguard@"+bot_username+" on")
-                  settings=rest_rows("zed_chat_settings",{
+                  settings=wait_rows("zed_chat_settings",{
                       "select":"secureguard_enabled","chat_id":"eq."+str(chat_id),"limit":"1"
-                  })
+                  },predicate=lambda rows: bool(rows) and rows[0].get("secureguard_enabled") is True,attempts=30,delay=1)
                   if not settings or settings[0].get("secureguard_enabled") is not True:
-                      raise SystemExit("REX did not enable with an active Suite licence")
+                      raise SystemExit("REX did not enable with an active Suite licence after async wait")
                   print("SUITE_LICENCE_ALLOW_GATE=PASS")
               else:
                   print("SUITE_LICENCE_GATE=EXISTING_LICENSE_PRESERVED")
 
               send_command("/secureguard@"+bot_username+" off")
-              settings=rest_rows("zed_chat_settings",{
+              settings=wait_rows("zed_chat_settings",{
                   "select":"secureguard_enabled","chat_id":"eq."+str(chat_id),"limit":"1"
-              })
+              },predicate=lambda rows: (not rows) or rows[0].get("secureguard_enabled") is False,attempts=30,delay=1)
               if settings and settings[0].get("secureguard_enabled") is True:
-                  raise SystemExit("REX did not return to OFF")
+                  raise SystemExit("REX did not return to OFF after async wait")
               print("REX_SECUREGUARD_TOGGLE=PASS")
 
               # Customer AI profile + a real provider-backed answer.
               runtime_patch("community_suite_groups",{"chat_id":"eq."+str(chat_id)},{"internal_access":True})
               send_command("/aicommunity@"+bot_username)
-              profiles=rest_rows("community_suite_ai_profiles",{
+              profiles=wait_rows("community_suite_ai_profiles",{
                   "select":"chat_id,display_name,enabled","chat_id":"eq."+str(chat_id),"limit":"1"
-              })
+              },predicate=lambda rows: bool(rows) and rows[0].get("enabled") is True,attempts=30,delay=1)
               if not profiles or profiles[0].get("enabled") is not True:
-                  raise SystemExit("Customer AI profile was not created")
+                  raise SystemExit("Customer AI profile was not created after async wait")
               ai_started=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
               send_command("/askcommunity@"+bot_username+" Reply exactly with: WORLDZ AI LIVE")
-              ai_ok=False
-              for _ in range(20):
-                  rows=rest_rows("community_suite_analytics_events",{
-                      "select":"id,event_type,created_at",
-                      "chat_id":"eq."+str(chat_id),
-                      "event_type":"eq.community_ai_answer",
-                      "created_at":"gte."+ai_started,
-                      "order":"created_at.desc",
-                      "limit":"1"
-                  })
-                  if rows:
-                      ai_ok=True
-                      break
-                  time.sleep(2)
-              if not ai_ok:
-                  raise SystemExit("Customer AI provider-backed answer proof missing")
+              rows=wait_rows("community_suite_analytics_events",{
+                  "select":"id,event_type,created_at",
+                  "chat_id":"eq."+str(chat_id),
+                  "event_type":"eq.community_ai_answer",
+                  "created_at":"gte."+ai_started,
+                  "order":"created_at.desc",
+                  "limit":"1"
+              },attempts=45,delay=2)
+              if not rows:
+                  raise SystemExit("Customer AI provider-backed answer proof missing after async wait")
               print("CUSTOMER_AI_LIVE_PROVIDER=PASS")
 
               print("WORLDZ_COMMUNITY_SUITE_LIVE_SUPERGROUP_PROOF=PASS")
