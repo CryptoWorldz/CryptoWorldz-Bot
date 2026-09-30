@@ -175,7 +175,7 @@ async function start() {
   startupStage = "create_grace_worker";
   const graceWorker = createGraceWorker({ repository: graceRepository, publisher: gracePublisher, intervalMs: Number(process.env.GRACE_WORKER_INTERVAL_MS) || 60000 });
   startupStage = "create_http_app";
-  const app = createHttpApp({ bot, repository, config });
+  const app = createHttpApp({ bot, repository, config, supabase });
 
   startupStage = "register_dipshit_membership";
   if (dipshitBot) registerDipshitMembershipSystem({ app, bot: dipshitBot, config, supabase });
