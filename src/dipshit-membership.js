@@ -138,6 +138,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     send,
     privacyUrl: DIPSHIT_PRIVACY_URL,
     termsUrl: DIPSHIT_TERMS_URL,
+    supabase,
     fetchImpl
   });
   const aiEnabled = conversation.aiEnabled;

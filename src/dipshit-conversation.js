@@ -24,6 +24,17 @@ function escapeRegex(value) {
   return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function moderationRequiresHardBlock(result) {
+  const categories = result && result.categories || {};
+  return Boolean(
+    categories["sexual/minors"] ||
+    categories["self-harm/instructions"] ||
+    categories["self-harm/intent"] ||
+    categories["illicit/violent"] ||
+    categories["hate/threatening"] ||
+    categories["harassment/threatening"]
+  );
+}
 function shouldHandleDipshitConversation(msg, botUsername = DEFAULT_BOT_USERNAME) {
   const text = String(msg && msg.text || "").trim();
   if (!text || text.startsWith("/")) return false;
@@ -58,8 +69,9 @@ async function callDipshitAI({ apiKey, model, message, history, context, fetchIm
   });
   const moderationPayload = await moderation.json().catch(() => ({}));
   if (!moderation.ok) throw new Error("moderation_unavailable");
-  if (moderationPayload?.results?.[0]?.flagged) {
-    return "I can't help with that request. If you've got a Worldz, ZED, Telegram, wallet-display or site problem, tell me what is going wrong and I'll troubleshoot it.";
+  const moderationResult = moderationPayload?.results?.[0];
+  if (moderationResult?.flagged && moderationRequiresHardBlock(moderationResult)) {
+    return "Nah — that one crosses a line I can't help with. Give me the Worldz, ZED, Telegram, wallet-display or site problem instead and this DipShit will get useful.";
   }
 
   const response = await fetchImpl("https://api.openai.com/v1/responses", {
@@ -71,7 +83,9 @@ async function callDipshitAI({ apiKey, model, message, history, context, fetchIm
       max_output_tokens: 420,
       instructions: [
         "You are DIPSHIT™, the blue WORLDZ DUDE inside CryptoWorldz.",
-        "Your job is interactive QA, troubleshooting and Worldz navigation. Be concise, practical and friendly.",
+        "Your job is interactive QA, troubleshooting and Worldz navigation. Be concise, practical and genuinely useful.",
+        "Personality: you are a smart DipShit on purpose — cheeky, quick, self-aware, a little irreverent and comfortable with mild swearing when the user is clearly bantering. You can joke about yourself being a DipShit. Never become cruel, threatening, discriminatory or relentlessly insulting.",
+        "Do not treat ordinary profanity, teasing or a user calling you slow or stupid as a safety refusal. Answer the substance and banter back lightly when appropriate.",
         "Diagnose symptoms step by step. Ask one useful follow-up only when necessary.",
         "Never claim you ran a live check unless the supplied runtime context proves it or the user ran /check.",
         "Never request or accept seed phrases, private keys, passwords, API keys, bank-card details or other secrets.",
@@ -98,6 +112,7 @@ function registerDipshitConversation({
   send,
   privacyUrl,
   termsUrl,
+  supabase = null,
   fetchImpl = fetch
 }) {
   const openaiKey = String(process.env.OPENAI_API_KEY || "").trim();
@@ -114,7 +129,24 @@ function registerDipshitConversation({
     conversations.set(key, [...(conversations.get(key) || []), { role, content }].slice(-8));
   };
 
+  const chatAllowsConversation = async (msg) => {
+    const chatType = String(msg?.chat?.type || "");
+    if (!supabase || chatType === "private") return true;
+    try {
+      const { data, error } = await supabase
+        .from("zed_chat_settings")
+        .select("dipshit_enabled")
+        .eq("chat_id", Number(msg.chat.id))
+        .maybeSingle();
+      if (error) throw error;
+      return data ? data.dipshit_enabled !== false : true;
+    } catch {
+      return true;
+    }
+  };
+
   const handleConversation = async (msg, suppliedText) => {
+    if (!(await chatAllowsConversation(msg))) return undefined;
     const raw = String(suppliedText == null ? msg?.text || "" : suppliedText).trim();
     const message = stripDipshitAddressing(raw, botUsername);
     if (!message) {
@@ -178,6 +210,7 @@ function registerDipshitConversation({
 module.exports = {
   callDipshitAI,
   extractDipshitResponseText,
+  moderationRequiresHardBlock,
   normalizeDipshitHistory,
   registerDipshitConversation,
   shouldHandleDipshitConversation,

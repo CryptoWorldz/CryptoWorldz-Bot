@@ -19,8 +19,8 @@ const MENUS = {
     rows: [
       ["👤 Profile", "/profile"],
       ["👛 Wallet", "/wallet"],
-      ["🚀 Missions", "/missions"],
-      ["🏆 Leaderboard", "/leaderboard"],
+      ["🤠 Ronald Raider", "/raid"],
+      ["📣 Shill Rewards", "/shillpoints"],
       ["📚 All Commands", "/commands"]
     ]
   },
@@ -179,7 +179,7 @@ function commandTreeText(role) {
   ].join("\n");
 }
 
-function registerCommandCentreHandlers({ bot, repository, config }) {
+function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
   const send = (msg, text, options) => bot.sendMessage(msg.chat.id, text, options);
   const isOwner = (msg) => String(msg.from?.id || "") === String(config.ownerTelegramId || "");
 
@@ -205,6 +205,67 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
 
   const isAdmin = async (msg) => ["admin", "executive", "owner"].includes(await roleFor(msg));
 
+  const SETTING_ROWS = Object.freeze([
+    ["ronald_raider_enabled", "🤠 Ronald Raider"],
+    ["shill_rewards_enabled", "📣 Shill Rewards"],
+    ["referral_links_enabled", "🔗 Shill Links"],
+    ["dipshit_enabled", "💙 DipShit"]
+  ]);
+  const SETTING_KEYS = new Set(SETTING_ROWS.map(([key]) => key));
+
+  async function getChatSettings(chatId) {
+    if (!supabase) return Object.fromEntries(SETTING_ROWS.map(([key]) => [key, true]));
+    const { data, error } = await supabase
+      .from("zed_chat_settings")
+      .select("*")
+      .eq("chat_id", Number(chatId))
+      .maybeSingle();
+    if (error) throw error;
+    if (data) return data;
+    const seed = { chat_id: Number(chatId) };
+    const { data: created, error: createError } = await supabase
+      .from("zed_chat_settings")
+      .upsert(seed, { onConflict: "chat_id" })
+      .select("*")
+      .single();
+    if (createError) throw createError;
+    return created;
+  }
+
+  function settingsText(row) {
+    return [
+      "⚙️ ZED BOT SETTINGS",
+      "",
+      ...SETTING_ROWS.map(([key, label]) => `${row[key] !== false ? "✅" : "⬜"} ${label}: ${row[key] !== false ? "On" : "Off"}`),
+      "",
+      "Tap any box to switch it on or off.",
+      "Only controls wired to live runtime behaviour are shown here.",
+      "Changes apply to this Telegram chat only."
+    ].join("\n");
+  }
+
+  function settingsKeyboard(row) {
+    const rows = [];
+    for (let i = 0; i < SETTING_ROWS.length; i += 2) {
+      rows.push(SETTING_ROWS.slice(i, i + 2).map(([key, label]) => ({
+        text: `${row[key] !== false ? "✅" : "⬜"} ${label.replace(/^[^ ]+ /, "")}`,
+        callback_data: `cc:toggle:${key}`
+      })));
+    }
+    rows.push([{ text: "🔄 Refresh Settings", callback_data: "cc:settings:refresh" }]);
+    return { reply_markup: { inline_keyboard: rows } };
+  }
+
+  async function sendSettingsPanel(msg) {
+    try {
+      const row = await getChatSettings(msg.chat.id);
+      return send(msg, settingsText(row), settingsKeyboard(row));
+    } catch (error) {
+      console.error("Command Centre settings panel failed", { code: error?.code || error?.message || "unknown" });
+      return send(msg, "❌ ZED couldn't load the toggle settings panel.");
+    }
+  }
+
   async function sendCommandGroups(msg, forcedRole = null) {
     const role = forcedRole || await roleFor(msg);
     const groups = groupsForRole(role);
@@ -216,7 +277,7 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     "🧠 CryptoWorldz Command Centre MAX™",
     "",
     "LEARN • RESEARCH • INTERACT • TEACH • BUILD • PROVE",
-    "ZED guides. WorldzFullScope watches the supported multi-chain token universe. AUTO explains controlled finance workflows. G.R.A.C.E. coordinates approved communication. RECAP explains verified activity. WorldzLaunchPad builds and proves launches.",
+    "ZED guides. Ronald Raider runs live Raid queues and points submissions. Shill Rewards tracks verified token sharing. WorldzFullScope watches the supported multi-chain token universe. AUTO explains controlled finance workflows. G.R.A.C.E. coordinates approved communication. RECAP explains verified activity. WorldzLaunchPad builds and proves launches.",
     "",
     "Gateway commands:",
     "/zedstart • /worldzfullbuild • /fullscope • /worldzvotes • /worldzgovern • /commands • /commandtree",
@@ -251,7 +312,7 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
   });
   bot.onText(/^\/zedsettings(?:@\w+)?$/, async (msg) => {
     if (!(await isAdmin(msg))) return send(msg, "⛔ Command Centre settings require Admin access.");
-    return send(msg, menuText(MENUS.settings));
+    return sendSettingsPanel(msg);
   });
 
   bot.onText(/^\/worldzfullbuild(?:@\w+)?$/, (msg) => send(msg, [
@@ -307,7 +368,54 @@ function registerCommandCentreHandlers({ bot, repository, config }) {
     if (!msg || !data.startsWith("cc:")) return;
     const actor = { ...msg, from: query.from };
 
-    const menuMatch = data.match(/^cc:menu:(zed|fullscope|votes|govern|auto|grace|admin|settings)$/);
+    if (data === "cc:menu:settings" || data === "cc:settings:refresh") {
+      if (!(await isAdmin(actor))) {
+        await bot.answerCallbackQuery(query.id, { text: "Admin access required", show_alert: true });
+        return;
+      }
+      await bot.answerCallbackQuery(query.id);
+      return sendSettingsPanel(actor);
+    }
+
+    const toggleMatch = data.match(/^cc:toggle:([a-z_]+)$/);
+    if (toggleMatch) {
+      if (!(await isAdmin(actor))) {
+        await bot.answerCallbackQuery(query.id, { text: "Admin access required", show_alert: true });
+        return;
+      }
+      const key = toggleMatch[1];
+      if (!SETTING_KEYS.has(key)) {
+        await bot.answerCallbackQuery(query.id, { text: "Unknown setting", show_alert: true });
+        return;
+      }
+      try {
+        const current = await getChatSettings(msg.chat.id);
+        const next = current[key] === false;
+        const { data: updated, error } = await supabase
+          .from("zed_chat_settings")
+          .update({ [key]: next, updated_by: Number(query.from.id), updated_at: new Date().toISOString() })
+          .eq("chat_id", Number(msg.chat.id))
+          .select("*")
+          .single();
+        if (error) throw error;
+        await bot.answerCallbackQuery(query.id, { text: `${next ? "Enabled" : "Disabled"}` });
+        if (typeof bot.editMessageText === "function") {
+          await bot.editMessageText(settingsText(updated), {
+            chat_id: msg.chat.id,
+            message_id: msg.message_id,
+            ...settingsKeyboard(updated)
+          }).catch(() => sendSettingsPanel(actor));
+        } else {
+          await sendSettingsPanel(actor);
+        }
+      } catch (error) {
+        console.error("Command Centre setting toggle failed", { code: error?.code || error?.message || "unknown" });
+        await bot.answerCallbackQuery(query.id, { text: "Setting update failed", show_alert: true }).catch(() => undefined);
+      }
+      return;
+    }
+
+    const menuMatch = data.match(/^cc:menu:(zed|fullscope|votes|govern|auto|grace|admin)$/);
     if (menuMatch) {
       const key = menuMatch[1];
       if (["grace", "admin", "settings"].includes(key) && !(await isAdmin(actor))) {
