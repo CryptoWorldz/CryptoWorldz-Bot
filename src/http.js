@@ -4,6 +4,7 @@ const path = require("path");
 const express = require("express");
 const QRCode = require("qrcode");
 const { getRank, parseSimpleRaid, shortenWallet } = require("./core");
+const { MODULES } = require("./community-suite-core");
 const { createRequestLimiter, validateTelegramInitData } = require("./miniapp-auth");
 const { solanaPayUri, verifySolanaContribution } = require("./solana");
 const { registerPdcHost } = require("./pdc-host");
@@ -28,7 +29,7 @@ function audit(event, details = {}) {
   );
 }
 
-function createHttpApp({ bot, config, repository }) {
+function createHttpApp({ bot, config, repository, supabase = null }) {
   const app = express();
   const openApiPath = path.join(__dirname, "..", ".well-known", "openapi.yaml");
   const openApiDocument = fs.readFileSync(openApiPath, "utf8");
@@ -178,6 +179,87 @@ function createHttpApp({ bot, config, repository }) {
       admin_access: adminAccess,
       treasury
     });
+  });
+
+  const requireGroupAdmin = async (chatId, telegramId) => {
+    if (String(telegramId) === String(config.ownerTelegramId || "")) return true;
+    try {
+      const member = await bot.getChatMember(chatId, telegramId);
+      return ["creator","administrator"].includes(String(member?.status || ""));
+    } catch {
+      return false;
+    }
+  };
+
+  app.get("/api/mini/community-suite", authenticateMiniApp, async (req, res) => {
+    if (!supabase) return res.status(503).json({ ok:false, error:"suite_unavailable" });
+    const chatId = Number(req.query.chat_id);
+    if (!Number.isSafeInteger(chatId)) return res.status(400).json({ ok:false, error:"invalid_chat_id" });
+    if (!(await requireGroupAdmin(chatId, req.telegramUser.id))) return res.status(403).json({ ok:false, error:"group_admin_required" });
+    try {
+      const [group, modules, branding, licence, tickets, watches, alerts, events, giveaways] = await Promise.all([
+        supabase.from("community_suite_groups").select("*").eq("chat_id",chatId).maybeSingle(),
+        supabase.from("community_suite_modules").select("module_key,enabled,config").eq("chat_id",chatId).order("module_key"),
+        supabase.from("community_suite_branding").select("*").eq("chat_id",chatId).maybeSingle(),
+        supabase.from("zed_group_licences").select("plan,status,expires_at,product_package,rent_to_own_payments").eq("chat_id",chatId).maybeSingle(),
+        supabase.from("community_suite_tickets").select("*",{count:"exact",head:true}).eq("chat_id",chatId).in("status",["open","pending"]),
+        supabase.from("community_suite_wallet_watchlist").select("*",{count:"exact",head:true}).eq("chat_id",chatId).eq("enabled",true),
+        supabase.from("community_suite_market_alert_rules").select("*",{count:"exact",head:true}).eq("chat_id",chatId).eq("enabled",true),
+        supabase.from("community_suite_calendar_events").select("*",{count:"exact",head:true}).eq("chat_id",chatId).gte("starts_at",new Date().toISOString()),
+        supabase.from("community_suite_giveaways").select("*",{count:"exact",head:true}).eq("chat_id",chatId).eq("status","open")
+      ]);
+      if (!group.data) return res.status(404).json({ ok:false, error:"suite_group_not_initialized" });
+      return res.json({
+        ok:true,
+        chat_id:chatId,
+        group:group.data,
+        modules:modules.data || [],
+        branding:branding.data || null,
+        licence:licence.data || null,
+        counts:{
+          open_tickets:tickets.count || 0,
+          watched_wallets:watches.count || 0,
+          market_alerts:alerts.count || 0,
+          upcoming_events:events.count || 0,
+          open_giveaways:giveaways.count || 0
+        }
+      });
+    } catch (error) {
+      console.error("Mini App Community Suite load failed", { name:error?.name || "Error" });
+      return res.status(500).json({ ok:false, error:"suite_load_failed" });
+    }
+  });
+
+  app.post("/api/mini/community-suite/module", authenticateMiniApp, async (req, res) => {
+    if (!supabase) return res.status(503).json({ ok:false, error:"suite_unavailable" });
+    const chatId=Number(req.body?.chat_id), key=String(req.body?.module_key || ""), enabled=Boolean(req.body?.enabled);
+    if (!Number.isSafeInteger(chatId) || !MODULES.some(([candidate]) => candidate === key)) return res.status(400).json({ ok:false,error:"invalid_module" });
+    if (!(await requireGroupAdmin(chatId, req.telegramUser.id))) return res.status(403).json({ ok:false,error:"group_admin_required" });
+    try {
+      const {error}=await supabase.from("community_suite_modules").upsert({
+        chat_id:chatId,module_key:key,enabled,updated_by_telegram_id:req.telegramUser.id,updated_at:new Date().toISOString()
+      },{onConflict:"chat_id,module_key"});
+      if(error) throw error;
+      return res.json({ok:true,module_key:key,enabled});
+    } catch {
+      return res.status(500).json({ok:false,error:"module_update_failed"});
+    }
+  });
+
+  app.post("/api/mini/community-suite/lockdown", authenticateMiniApp, async (req, res) => {
+    if (!supabase) return res.status(503).json({ ok:false, error:"suite_unavailable" });
+    const chatId=Number(req.body?.chat_id), enabled=Boolean(req.body?.enabled);
+    if (!Number.isSafeInteger(chatId)) return res.status(400).json({ok:false,error:"invalid_chat_id"});
+    if (!(await requireGroupAdmin(chatId, req.telegramUser.id))) return res.status(403).json({ok:false,error:"group_admin_required"});
+    try {
+      const {error}=await supabase.from("community_suite_groups").update({
+        emergency_lockdown:enabled,updated_at:new Date().toISOString()
+      }).eq("chat_id",chatId);
+      if(error) throw error;
+      return res.json({ok:true,emergency_lockdown:enabled});
+    } catch {
+      return res.status(500).json({ok:false,error:"lockdown_update_failed"});
+    }
   });
 
   app.get("/api/mini/admin/submissions", authenticateMiniApp, async (req, res) => {
