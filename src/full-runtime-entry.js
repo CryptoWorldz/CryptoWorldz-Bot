@@ -11,6 +11,7 @@ const { registerAliceSupport } = require("./alice-support");
 const { registerCommunityApi } = require("./community-api");
 const { registerCommunityOps } = require("./community-ops");
 const { registerCommunitySuiteHandlers } = require("./community-suite");
+const { registerCommunitySocial } = require("./community-social");
 const { registerMarketAlertSystem } = require("./market-alerts");
 const { registerWorldzScan } = require("./worldzscan");
 const { registerAutoMiniRoutes } = require("./auto/zed-router");
@@ -191,6 +192,8 @@ async function start() {
   registerCommandCentreHandlers({ bot, repository, config, supabase });
   startupStage = "register_community_suite";
   registerCommunitySuiteHandlers({ bot, config, supabase });
+  startupStage = "register_community_social";
+  registerCommunitySocial({ bot, config, supabase });
   startupStage = "register_community_ai";
   registerCommunityAI({ bot, config, supabase });
   startupStage = "register_alice_support";
