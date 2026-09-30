@@ -115,6 +115,23 @@ function registerReferralTelegramHandlers({ bot, repository, supabase, config })
     return Array.isArray(data) ? data[0] : data;
   }
 
+  async function getBudgetStatusSafe() {
+    try {
+      const status = await getBudgetStatus();
+      if (status) return status;
+    } catch (error) {
+      console.warn("Referral reward status unavailable; using safe display defaults", {
+        code: error && (error.code || error.message) ? (error.code || error.message) : "unknown"
+      });
+    }
+    return {
+      referral_inviter_points: 20,
+      referral_newcomer_points: 5,
+      referral_retention_days: 7,
+      inviter_weekly_qualified_cap: 5
+    };
+  }
+
   async function getReferralTarget(chatId) {
     const { data, error } = await supabase
       .from("community_referral_targets")
@@ -236,7 +253,24 @@ Use /shilllink inside an eligible CryptoWorldz group to create your unique link.
         return send(msg.chat.id, `🔗 Your CryptoWorldz Shill Links\n\n${rows.join("\n\n")}`);
       }
 
-      const target = await getReferralTarget(msg.chat.id);
+      let target = await getReferralTarget(msg.chat.id);
+      if (!target && ownerAllowed(msg)) {
+        const chat = await bot.getChat(msg.chat.id).catch(() => msg.chat);
+        const { data: autoTarget, error: autoTargetError } = await supabase
+          .from("community_referral_targets")
+          .upsert({
+            chat_id: Number(msg.chat.id),
+            project_slug: null,
+            title: chat.title || chat.username || "CryptoWorldz Community",
+            enabled: true,
+            created_by: Number(msg.from.id),
+            updated_at: new Date().toISOString()
+          }, { onConflict: "chat_id" })
+          .select("chat_id,project_slug,title,enabled")
+          .single();
+        if (autoTargetError) throw autoTargetError;
+        target = autoTarget;
+      }
       if (!target || !target.enabled) {
         return send(
           msg.chat.id,
@@ -285,7 +319,7 @@ Use /shilllink inside an eligible CryptoWorldz group to create your unique link.
         link = data;
       }
 
-      const status = await getBudgetStatus();
+      const status = await getBudgetStatusSafe();
       const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link.invite_link)}&text=${encodeURIComponent(
         `Join ${target.title} through my official CryptoWorldz Legend Link 💜`
       )}`;
@@ -325,7 +359,7 @@ No points are awarded for clicks alone. Self-referrals, bots, existing members, 
     try {
       const [stats, status] = await Promise.all([
         referralStats(msg.from.id),
-        getBudgetStatus()
+        getBudgetStatusSafe()
       ]);
       return send(
         msg.chat.id,
