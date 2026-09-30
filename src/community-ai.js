@@ -97,9 +97,7 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
   async function answer(message, question) {
     if (!isGroup(message)) return send(message, "🤖 Customer AI runs inside its configured community group.");
     await ensureGroup(supabase, message, config);
-    if (!(await moduleAvailable(supabase, message.chat.id, "alice_support")) && !(await moduleAvailable(supabase, message.chat.id, "webhooks"))) {
-      // AI package can operate independently of ALICE/webhooks; this condition is only a fast route to group initialization.
-    }
+    if (!(await moduleAvailable(supabase, message.chat.id, "custom_ai"))) return send(message, "⏸ Custom Community AI is switched off or paused.");
     const { data: group } = await supabase.from("community_suite_groups")
       .select("emergency_lockdown,language_code,product_package").eq("chat_id", Number(message.chat.id)).maybeSingle();
     if (group?.emergency_lockdown) return send(message, "🚨 Community AI is paused during Emergency Lockdown. ALICE support remains available.");
