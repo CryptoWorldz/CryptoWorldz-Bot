@@ -42,14 +42,18 @@ const COMMAND_GROUPS = Object.freeze([
     ["legendstatus", "View Legend recognition status"], ["specialtiers", "View Special Request tiers"],
     ["uniquelegend", "Apply for Unique Legend review"], ["boostshill", "Boost an eligible referred Legend"]
   ]),
-  group("missions", "🚀 Missions, Creator & Raaiiidd", "member", [
-    ["raaiiidd", "Open Raaiiidd missions"], ["missions", "List active missions"], ["raid", "Open or record a Raaiiidd link"],
-    ["creator", "Open ZED Raaiiidd Creator for post, artwork, preview and Admin review"]
+  group("missions", "🤠 Ronald Raider • Raids & Missions", "member", [
+    ["raid", "Open Ronald Raider or view the live Raid"],
+    ["next", "View the next Raid lined up"],
+    ["raaiiidd", "Open the current Ronald Raider mission"],
+    ["missions", "List active Raid missions"],
+    ["creator", "Open ZED Raid Creator for post, artwork, preview and Admin review"]
   ]),
   group("community", "💜 Community, Heroes, Causes & Social Directory", "member", [
     ["impact", "Open current DonateWorldz impact choices"], ["supportreagan", "Open Reagan & Children on DonateWorldz"],
     ["heroes", "Open Real-World Hero evidence and recognition"], ["kitty", "View public Community Kitty addresses"],
-    ["causes", "List registered causes"], ["cause", "View one cause"], ["shilllink", "Create your referral/shill link"],
+    ["causes", "List registered causes"], ["cause", "View one cause"], ["shilllink", "Create your referral/invite Shill Link"],
+    ["shillpoints", "View token Shill Rewards and eligible platforms"], ["shill", "Submit a verified token shill proof for points"],
     ["referrals", "View referral status"], ["rewardplan", "View reward-plan rules"], ["website", "Open a website by project"],
     ["websites", "View the website directory"], ["worldzlinks", "Open WorldzLinkz™ — every Worldz in one QR directory"], ["worldzlive", "View live Worldz sites"], ["solworldz", "Open SolWorldz"],
     ["tg", "Open this project's Telegram link"], ["tglinks", "View official Telegram links"],
@@ -70,8 +74,11 @@ const COMMAND_GROUPS = Object.freeze([
     ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"],
     ["reviewqueue", "Open mission, Creator and Hero human-review queues"],
     ["newmission", "Create a mission"], ["editmission", "Edit a mission"], ["endmission", "End a mission"],
+    ["raidprogress", "Update Ronald Raider likes/reposts/replies/views"], ["stopraid", "Stop the live Ronald Raider Raid"],
     ["pending", "Review pending mission submissions"], ["approve", "Approve an authorised pending action"],
-    ["reject", "Reject an authorised pending action"], ["member", "Inspect a Legend member"], ["admins", "List managed admins"],
+    ["reject", "Reject an authorised pending action"], ["pendingshills", "Review pending token shill proofs"],
+    ["approveshill", "Approve a verified token shill proof"], ["rejectshill", "Reject a token shill proof"],
+    ["member", "Inspect a Legend member"], ["admins", "List managed admins"],
     ["permissions", "View permission structure"], ["setrole", "Set a managed role"], ["setpermission", "Set a scoped permission"],
     ["setpartner", "Create or update a partner profile"], ["stats", "View system statistics"], ["activity", "View safe activity log"]
   ]),
