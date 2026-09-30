@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { challengeOptions, BLOCKED_PERMISSIONS, extractHosts, normalizeDomain } = require("../src/rex-secureguard");
+const { challengeOptions, BLOCKED_PERMISSIONS, extractHosts, normalizeDomain, normalizeIdentityLabel } = require("../src/rex-secureguard");
 
 test("REX number-match options contain one correct two-digit code and four unique options", () => {
   const code = 42;
@@ -32,4 +32,10 @@ test("REX extracts unique HTTPS/HTTP hosts from member messages", () => {
     extractHosts("See https://example.com/a and https://www.example.com/b plus http://other.test/x"),
     ["example.com","other.test"]
   );
+});
+
+
+test("REX normalizes identity labels before comparing display names", () => {
+  assert.equal(normalizeIdentityLabel("  @JayJay-TeamDev  "), "jayjay teamdev");
+  assert.equal(normalizeIdentityLabel("Professor  Pepe"), "professor pepe");
 });
