@@ -12,7 +12,7 @@ const CAPABILITY_CATALOG = Object.freeze([
     label: "WorldPing™",
     moduleKey: "worldping",
     summary: "Visible Telegram group alerts with AdminsOnlyPing or FullMemberPing modes.",
-    memberCommands: ["/worldping <message>"],
+    memberCommands: ["/worldping alert | TITLE | MESSAGE", "/worldping <message>"],
     adminCommands: ["/worldpingmode admin", "/worldpingmode full"]
   },
   {
@@ -169,6 +169,95 @@ const CAPABILITY_CATALOG = Object.freeze([
   }
 ]);
 
+
+const CAPABILITY_ALIASES = Object.freeze({
+  command_centre: ["command centre", "command center", "zed"],
+  worldping: ["worldping", "world ping"],
+  ronald_raider: ["ronald raider", "raid bot", "raider"],
+  shill_links: ["shill link", "shill links", "referral link", "referral links"],
+  shill_rewards: ["shill rewards", "shill points"],
+  rex_secureguard: ["rex secureguard", "secureguard", "secure guard", "rex"],
+  alice_support: ["alice support", "alice"],
+  custom_ai: ["community ai", "auto pick", "autopick", "custom ai"],
+  worldzscan: ["worldzscan", "worldz scan", "token scan"],
+  market_alerts: ["buy alerts", "market alerts", "whale alerts"],
+  wallet_watch: ["wallet watch", "wallet watchlist", "wallet watchlists"],
+  calendar: ["community calendar", "calendar", "launch countdown"],
+  giveaways: ["giveaway", "giveaways"],
+  votes: ["worldz votes", "votes centre", "votes center", "token vote"],
+  govern: ["worldzgovern", "worldz govern", "governance"],
+  inbox: ["worldz inbox", "inbox", "private dm"],
+  worldzcast: ["worldzcast", "worldz cast"],
+  social: ["g.r.a.c.e.", "grace social", "grace"],
+  analytics: ["community analytics", "analytics"],
+  launchpad: ["worldzlaunchpad", "worldz launchpad", "launchpad"],
+  webhooks: ["api and webhooks", "api + webhooks", "webhooks", "api key"]
+});
+
+const CAPABILITY_INTENT = /\b(do we|have|has|is there|can we|can i|how|what|where|use|using|send|start|run|open|enable|disable|set|feature|command|available|works?|alert|broadcast|create|make|show)\b/i;
+const LOCKDOWN_ALLOWED = new Set(["command_centre", "rex_secureguard", "alice_support", "inbox"]);
+
+function normalizeCapabilityQuestion(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[™®©]/g, "")
+    .replace(/[^a-z0-9+.]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function findCapabilityMention(question) {
+  const normalized = normalizeCapabilityQuestion(question);
+  if (!normalized || !CAPABILITY_INTENT.test(normalized)) return null;
+  for (const capability of CAPABILITY_CATALOG) {
+    const aliases = CAPABILITY_ALIASES[capability.key] || [capability.label.toLowerCase()];
+    if (aliases.some((alias) => normalized.includes(normalizeCapabilityQuestion(alias)))) return capability.key;
+  }
+  return null;
+}
+
+function stateSentence(item) {
+  switch (item?.state) {
+    case "enabled":
+      return "It is enabled and available in this group.";
+    case "runtime_available":
+      return "It is built into the Worldz runtime and available.";
+    case "runtime_available_group_state_unknown":
+      return "It is built into the Worldz runtime; this group's module/licence state is not configured or not readable yet.";
+    case "disabled_in_group":
+      return "It exists, but it is switched off in this group.";
+    case "configured_but_unlicensed":
+      return "It exists, but this group needs active Community Suite access/licensing before the module can run.";
+    case "paused_by_lockdown":
+      return "It exists, but Emergency Lockdown is currently pausing this module in this group.";
+    default:
+      return "It exists in the Worldz runtime.";
+  }
+}
+
+function formatSingleCapability(item) {
+  if (!item) return null;
+  const member = item.member_commands || [];
+  const admin = item.admin_commands || [];
+  const lines = [
+    `✅ ${item.label} exists.`,
+    stateSentence(item),
+    item.summary || ""
+  ];
+  if (member.length) lines.push("", `Use: ${member[0]}`);
+  if (member.length > 1) lines.push(`Simple form: ${member[1]}`);
+  if (admin.length) lines.push(`Admin controls: ${admin.slice(0, 3).join(" • ")}`);
+  return lines.filter(Boolean).join("\n");
+}
+
+function deterministicCapabilityAnswer(question, context) {
+  const key = findCapabilityMention(question);
+  if (!key) return null;
+  const item = (context?.capabilities || []).find((row) => row.key === key);
+  if (!item) return null;
+  return { key, text: formatSingleCapability(item), item };
+}
+
 function safeRows(result) {
   return result && !result.error && Array.isArray(result.data) ? result.data : [];
 }
@@ -178,11 +267,12 @@ function licenceIsActive(licence) {
   return !licence.expires_at || Date.parse(licence.expires_at) > Date.now();
 }
 
-function capabilityState({ capability, groupKnown, suiteAccess, moduleState }) {
+function capabilityState({ capability, groupKnown, suiteAccess, moduleState, emergencyLockdown }) {
   if (!capability.moduleKey) return "runtime_available";
   if (!groupKnown) return "runtime_available_group_state_unknown";
   if (moduleState === false) return "disabled_in_group";
   if (!suiteAccess) return "configured_but_unlicensed";
+  if (emergencyLockdown && !LOCKDOWN_ALLOWED.has(capability.key)) return "paused_by_lockdown";
   return "enabled";
 }
 
@@ -224,7 +314,8 @@ async function buildAssistantCapabilityContext({ supabase, chatId }) {
       capability,
       groupKnown,
       suiteAccess,
-      moduleState: capability.moduleKey ? moduleMap.get(capability.moduleKey) : true
+      moduleState: capability.moduleKey ? moduleMap.get(capability.moduleKey) : true,
+      emergencyLockdown: group?.emergency_lockdown === true
     }),
     member_commands: capability.memberCommands,
     admin_commands: capability.adminCommands
@@ -254,7 +345,8 @@ function formatCapabilitySummary(context) {
   const rows = (context?.capabilities || []).map((item) => {
     const mark = item.state === "enabled" || item.state === "runtime_available" ? "✅" :
       item.state === "disabled_in_group" ? "⬜" :
-      item.state === "configured_but_unlicensed" ? "🔒" : "ℹ️";
+      item.state === "configured_but_unlicensed" ? "🔒" :
+      item.state === "paused_by_lockdown" ? "🚨" : "ℹ️";
     const commands = [...(item.member_commands || []), ...(item.admin_commands || [])].slice(0, 3).join(" • ");
     return `${mark} ${item.label} — ${item.state}${commands ? `\n   ${commands}` : ""}`;
   });
@@ -263,13 +355,17 @@ function formatCapabilitySummary(context) {
     "",
     ...rows,
     "",
-    "✅ enabled/runtime available • ⬜ disabled here • 🔒 licence required • ℹ️ group state not configured"
+    "✅ enabled/runtime available • ⬜ disabled here • 🔒 licence required • 🚨 paused by lockdown • ℹ️ group state not configured"
   ].join("\n");
 }
 
 module.exports = {
+  CAPABILITY_ALIASES,
   CAPABILITY_CATALOG,
   buildAssistantCapabilityContext,
+  deterministicCapabilityAnswer,
+  findCapabilityMention,
   formatCapabilitySummary,
+  formatSingleCapability,
   licenceIsActive
 };
