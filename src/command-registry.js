@@ -78,7 +78,8 @@ const COMMAND_GROUPS = Object.freeze([
     ["booststatus", "Check provider paid-order status"], ["boostcentre", "Open legitimate promotion options"],
     ["events", "View community calendar events"], ["giveaway", "View open giveaways"],
     ["giveawayjoin", "Enter an open giveaway"], ["walletwatch", "View public wallet watchlist"],
-    ["buyalerts", "View real market/buy alert rules"]
+    ["buyalerts", "View real market/buy alert rules"],
+    ["networkstatus", "View multi-group network licence status"], ["launchstatus", "View LaunchPad community linkage"]
   ]),
   group("worldping", "🌐 WorldPing™ • Licensed Group Alerts", "member", [
     ["worldping", "Send a visible group WorldPing"], ["worldpingmode", "Group admin: AdminsOnlyPing or FullMemberPing"],
@@ -111,7 +112,8 @@ const COMMAND_GROUPS = Object.freeze([
     ["buyalert", "Configure real buy/whale alert thresholds"], ["buyalertoff", "Disable a market alert rule"],
     ["apikeycreate", "Create a hashed customer API key"], ["apikeys", "List customer API keys"],
     ["apikeyrevoke", "Revoke a customer API key"], ["webhookadd", "Register a signed HTTPS webhook"],
-    ["webhooks", "List signed webhooks"], ["webhookremove", "Disable a webhook"], ["webhooktest", "Test webhook delivery"]
+    ["webhooks", "List signed webhooks"], ["webhookremove", "Disable a webhook"], ["webhooktest", "Test webhook delivery"],
+    ["networkrequest", "Request a multi-group network slot"], ["launchconnect", "Link this group to a LaunchPad project/token"]
   ]),
   group("communications", "📡 Admin • Communications", "admin", [
     ["broadcast", "Create a scoped broadcast draft"], ["confirmbroadcast", "Confirm a scoped broadcast"],
@@ -157,6 +159,8 @@ const COMMAND_GROUPS = Object.freeze([
     ["gracestatus", "Check live Grace X runtime"], ["metacheck", "Check Meta OAuth configuration safely"],
     ["adbudget", "Create an advertising budget record"], ["adapprove", "Approve an advertising budget record"],
     ["suiteapprove", "Approve a Community Suite licence/package after payment review"],
+    ["networkcreate", "Create a multi-group network licence"], ["networkapprove", "Approve a network group slot"],
+    ["networkremove", "Remove a group from a network licence"],
     ["reviewlegend", "Review a Unique Legend application"], ["reserverewardon", "Open the protected Legend reward reserve"],
     ["reserverewardoff", "Lock the protected Legend reward reserve"]
   ])
