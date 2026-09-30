@@ -55,7 +55,7 @@ test("Community Suite command groups expose member tools without leaking owner c
   const suite = member.find((group) => group.key === "community-suite");
   assert.ok(suite);
   const memberNames = new Set(suite.commands.map((item) => item.command));
-  for (const command of ["suite","alice","aicommunity","scan","scan20","events","giveaway","buyalerts","networkstatus","launchstatus"]) {
+  for (const command of ["suite","alice","aicommunity","autopicks","aiconfig","aicapabilities","scan","scan20","events","giveaway","buyalerts","networkstatus","launchstatus"]) {
     assert.ok(memberNames.has(command), command);
   }
   for (const command of ["suiteapprove","networkcreate","networkapprove","networkremove"]) {
@@ -68,7 +68,7 @@ test("Community Suite admin and owner controls are registered at the correct lay
   const suiteAdmin = admin.find((group) => group.key === "community-suite-admin");
   assert.ok(suiteAdmin);
   const adminNames = new Set(suiteAdmin.commands.map((item) => item.command));
-  for (const command of ["module","brand","lockdown","tickets","buyalert","apikeycreate","webhookadd","networkrequest","launchconnect"]) {
+  for (const command of ["module","brand","lockdown","autopick","aipreset","aibuild","tickets","buyalert","apikeycreate","webhookadd","networkrequest","launchconnect"]) {
     assert.ok(adminNames.has(command), command);
   }
   const ownerNames = new Set(groupsForRole("owner").flatMap((group) => group.commands.map((item) => item.command)));
