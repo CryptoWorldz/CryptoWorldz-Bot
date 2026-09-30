@@ -5,6 +5,8 @@ const express = require("express");
 const QRCode = require("qrcode");
 const { getRank, parseSimpleRaid, shortenWallet } = require("./core");
 const { MODULES } = require("./community-suite-core");
+const { buildAssistantCapabilityContext } = require("./assistant-capabilities");
+const { presetByKey, presetKeys, presetUpdate } = require("./community-ai-presets");
 const { createRequestLimiter, validateTelegramInitData } = require("./miniapp-auth");
 const { solanaPayUri, verifySolanaContribution } = require("./solana");
 const { registerPdcHost } = require("./pdc-host");
@@ -197,11 +199,13 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
     if (!Number.isSafeInteger(chatId)) return res.status(400).json({ ok:false, error:"invalid_chat_id" });
     if (!(await requireGroupAdmin(chatId, req.telegramUser.id))) return res.status(403).json({ ok:false, error:"group_admin_required" });
     try {
-      const [group, modules, branding, licence, tickets, watches, alerts, events, giveaways] = await Promise.all([
+      const [group, modules, branding, licence, aiProfile, capabilityContext, tickets, watches, alerts, events, giveaways] = await Promise.all([
         supabase.from("community_suite_groups").select("*").eq("chat_id",chatId).maybeSingle(),
         supabase.from("community_suite_modules").select("module_key,enabled,config").eq("chat_id",chatId).order("module_key"),
         supabase.from("community_suite_branding").select("*").eq("chat_id",chatId).maybeSingle(),
         supabase.from("zed_group_licences").select("plan,status,expires_at,product_package,rent_to_own_payments").eq("chat_id",chatId).maybeSingle(),
+        supabase.from("community_suite_ai_profiles").select("*").eq("chat_id",chatId).maybeSingle(),
+        buildAssistantCapabilityContext({ supabase, chatId }),
         supabase.from("community_suite_tickets").select("*",{count:"exact",head:true}).eq("chat_id",chatId).in("status",["open","pending"]),
         supabase.from("community_suite_wallet_watchlist").select("*",{count:"exact",head:true}).eq("chat_id",chatId).eq("enabled",true),
         supabase.from("community_suite_market_alert_rules").select("*",{count:"exact",head:true}).eq("chat_id",chatId).eq("enabled",true),
@@ -216,6 +220,8 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
         modules:modules.data || [],
         branding:branding.data || null,
         licence:licence.data || null,
+        ai_profile:aiProfile.data || null,
+        ai_capabilities:capabilityContext,
         counts:{
           open_tickets:tickets.count || 0,
           watched_wallets:watches.count || 0,
@@ -246,6 +252,61 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
     }
   });
 
+  app.post("/api/mini/community-suite/ai/preset", authenticateMiniApp, async (req, res) => {
+    if (!supabase) return res.status(503).json({ ok:false, error:"suite_unavailable" });
+    const chatId=Number(req.body?.chat_id), presetKey=String(req.body?.preset_key || "").toLowerCase();
+    if (!Number.isSafeInteger(chatId) || !presetKeys().includes(presetKey)) return res.status(400).json({ok:false,error:"invalid_ai_preset"});
+    if (!(await requireGroupAdmin(chatId, req.telegramUser.id))) return res.status(403).json({ok:false,error:"group_admin_required"});
+    try {
+      const { data: current, error: currentError } = await supabase.from("community_suite_ai_profiles").select("*").eq("chat_id",chatId).maybeSingle();
+      if (currentError) throw currentError;
+      const update = presetUpdate(presetKey, current || {});
+      const preset = presetByKey(presetKey);
+      const payload = {
+        chat_id: chatId,
+        ...(current ? {} : { model:"gpt-4o-mini", enabled:true }),
+        ...update,
+        purpose: presetKey === "custom" ? String(current?.purpose || "") : String(preset?.defaultInstructions || ""),
+        updated_by: Number(req.telegramUser.id),
+        updated_at: new Date().toISOString()
+      };
+      const { data, error } = await supabase.from("community_suite_ai_profiles").upsert(payload,{onConflict:"chat_id"}).select("*").single();
+      if(error) throw error;
+      return res.json({ok:true,profile:data});
+    } catch (error) {
+      console.error("Mini App AI preset update failed", { name:error?.name || "Error" });
+      return res.status(500).json({ok:false,error:"ai_preset_update_failed"});
+    }
+  });
+
+  app.post("/api/mini/community-suite/ai/custom", authenticateMiniApp, async (req, res) => {
+    if (!supabase) return res.status(503).json({ ok:false, error:"suite_unavailable" });
+    const chatId=Number(req.body?.chat_id);
+    const displayName=String(req.body?.display_name || "").trim().slice(0,64);
+    const personality=String(req.body?.personality || "").trim().slice(0,700);
+    const purpose=String(req.body?.purpose || "").trim().slice(0,1200);
+    if (!Number.isSafeInteger(chatId) || !displayName || !personality || !purpose) return res.status(400).json({ok:false,error:"invalid_custom_ai"});
+    if (!(await requireGroupAdmin(chatId, req.telegramUser.id))) return res.status(403).json({ok:false,error:"group_admin_required"});
+    try {
+      const { data, error } = await supabase.from("community_suite_ai_profiles").upsert({
+        chat_id:chatId,
+        preset_key:"custom",
+        display_name:displayName,
+        role_label:"Custom Community Assistant",
+        personality,
+        purpose,
+        custom_instructions:`Customer-defined purpose: ${purpose}`,
+        enabled:true,
+        updated_by:Number(req.telegramUser.id),
+        updated_at:new Date().toISOString()
+      },{onConflict:"chat_id"}).select("*").single();
+      if(error) throw error;
+      return res.json({ok:true,profile:data});
+    } catch (error) {
+      console.error("Mini App custom AI update failed", { name:error?.name || "Error" });
+      return res.status(500).json({ok:false,error:"custom_ai_update_failed"});
+    }
+  });
   app.post("/api/mini/community-suite/lockdown", authenticateMiniApp, async (req, res) => {
     if (!supabase) return res.status(503).json({ ok:false, error:"suite_unavailable" });
     const chatId=Number(req.body?.chat_id), enabled=Boolean(req.body?.enabled);
