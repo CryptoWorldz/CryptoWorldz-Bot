@@ -1,0 +1,385 @@
+name: Community Suite Live Supergroup Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/community-suite*.js"
+      - "src/community-ai.js"
+      - "src/community-api.js"
+      - "src/community-ops.js"
+      - "src/community-social.js"
+      - "src/alice-support.js"
+      - "src/rex-secureguard.js"
+      - "src/worldzscan.js"
+      - "src/http.js"
+      - "src/full-runtime-entry.js"
+      - "public/miniapp/community-suite.js"
+      - ".github/workflows/community-suite-live-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: community-suite-live-supergroup-proof
+  cancel-in-progress: true
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: cryptoworldz-production
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY || secrets.SUPABASE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_SECRET_KEY }}
+      TARGET_CHAT_ID: ${{ vars.ZED_REAL_GROUP_CHAT_ID || '-1004404927235' }}
+
+    steps:
+      - name: Prove Community Suite in the real Telegram Supergroup
+        shell: python
+        run: |
+          import hashlib, hmac, json, os, time, urllib.error, urllib.parse, urllib.request
+
+          base="https://cryptobotz.cryptoworldz.xyz"
+          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          supabase=(str(os.environ.get("SUPABASE_URL","")).strip() or "https://hknymhhyqldtzmplzuzh.supabase.co").rstrip("/")
+          publishable=str(os.environ.get("SUPABASE_PUBLISHABLE_KEY","")).strip() or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+          service=str(os.environ.get("SUPABASE_SERVICE_ROLE_KEY","")).strip()
+          chat_id=int(str(os.environ.get("TARGET_CHAT_ID","-1004404927235")).strip())
+          run_id=os.environ.get("GITHUB_RUN_ID","local")
+          if not token:
+              raise SystemExit("BOT_TOKEN missing")
+          if not service:
+              raise SystemExit("SUPABASE_SERVICE_ROLE_KEY missing")
+          print("::add-mask::"+token)
+          print("::add-mask::"+service)
+
+          runtime_key=hashlib.sha256(("zed-runtime-v1:"+token).encode()).hexdigest()
+          runtime_headers={
+              "apikey":publishable,
+              "authorization":"Bearer "+publishable,
+              "x-zed-runtime-key":runtime_key,
+              "accept":"application/json",
+              "content-type":"application/json",
+              "user-agent":"Worldz-Community-Suite-Live-Proof/1.0"
+          }
+          service_headers={
+              "apikey":service,
+              "authorization":"Bearer "+service,
+              "accept":"application/json",
+              "content-type":"application/json",
+              "user-agent":"Worldz-Community-Suite-Live-Proof/1.0"
+          }
+
+          def request_json(url, method="GET", payload=None, headers=None, timeout=30, allow=(200,201,204)):
+              data=None if payload is None else json.dumps(payload,separators=(",",":")).encode()
+              req=urllib.request.Request(url,data=data,headers=headers or {},method=method)
+              try:
+                  with urllib.request.urlopen(req,timeout=timeout) as response:
+                      body=response.read().decode("utf-8","ignore")
+                      if response.status not in allow:
+                          raise RuntimeError("HTTP "+str(response.status))
+                      return response.status, (json.loads(body) if body else None)
+              except urllib.error.HTTPError as exc:
+                  body=exc.read().decode("utf-8","ignore")
+                  try: parsed=json.loads(body)
+                  except Exception: parsed={"raw":body[:500]}
+                  return exc.code, parsed
+
+          # Refresh the protected publishable-key bridge for this exact Telegram bot.
+          code,boot=request_json(
+              supabase+"/rest/v1/rpc/zed_runtime_bootstrap",
+              "POST",
+              {"p_bot_token":token},
+              runtime_headers
+          )
+          if code != 200 or boot is not True:
+              raise SystemExit("ZED runtime bridge bootstrap failed")
+
+          def rest_rows(table, params, privileged=False):
+              headers=service_headers if privileged else runtime_headers
+              url=supabase+"/rest/v1/"+table+"?"+urllib.parse.urlencode(params,safe=",.*()-:")
+              code,body=request_json(url,headers=headers)
+              if code != 200 or not isinstance(body,list):
+                  raise RuntimeError(f"REST read failed {table} HTTP={code}")
+              return body
+
+          owner_rows=rest_rows("bot_admins",{
+              "select":"telegram_id",
+              "role":"eq.owner",
+              "status":"eq.active",
+              "limit":"2"
+          })
+          if len(owner_rows)!=1:
+              raise SystemExit("Permanent owner registry missing or ambiguous")
+          owner=int(owner_rows[0]["telegram_id"])
+          print("::add-mask::"+str(owner))
+
+          api="https://api.telegram.org/bot"+token+"/"
+          def tg(method,payload=None):
+              code,body=request_json(api+method,"POST" if payload is not None else "GET",payload,{"content-type":"application/json"},30)
+              if code != 200 or not body or body.get("ok") is not True:
+                  raise RuntimeError("Telegram "+method+" failed")
+              return body.get("result")
+
+          bot=tg("getMe")
+          chat=tg("getChat",{"chat_id":chat_id})
+          member=tg("getChatMember",{"chat_id":chat_id,"user_id":owner})
+          user=member.get("user") or {}
+          if str(chat.get("type"))!="supergroup":
+              raise SystemExit("Target chat is not a Telegram Supergroup")
+          if str(member.get("status")) not in ("creator","administrator"):
+              raise SystemExit("Worldz owner is not a Telegram admin in the target Supergroup")
+          if int(user.get("id") or 0)!=owner:
+              raise SystemExit("Owner identity mismatch")
+          bot_username=str(bot.get("username") or "")
+          if not bot_username:
+              raise SystemExit("Telegram bot username missing")
+          print("COMMUNITY_SUITE_REAL_SUPERGROUP=PASS")
+          print("COMMUNITY_SUITE_OWNER_ADMIN=PASS")
+
+          # Build valid Telegram Mini App initData for the real owner.
+          init_fields={
+              "auth_date":str(int(time.time())),
+              "query_id":"suite-proof-"+run_id,
+              "user":json.dumps(user,separators=(",",":"),ensure_ascii=False)
+          }
+          check="\n".join(f"{k}={v}" for k,v in sorted(init_fields.items()))
+          secret=hmac.new(b"WebAppData",token.encode(),hashlib.sha256).digest()
+          init_fields["hash"]=hmac.new(secret,check.encode(),hashlib.sha256).hexdigest()
+          init_data=urllib.parse.urlencode(init_fields)
+          mini_headers={"x-telegram-init-data":init_data,"accept":"application/json","user-agent":"Worldz-Community-Suite-Live-Proof/1.0"}
+
+          # Wait until the newly deployed runtime owns the Community Suite route.
+          route_ready=False
+          for attempt in range(1,121):
+              url=base+"/api/mini/community-suite?chat_id="+urllib.parse.quote(str(chat_id),safe="")
+              code,body=request_json(url,headers=mini_headers,allow=(200,404))
+              if code==200 or (code==404 and isinstance(body,dict) and body.get("error")=="suite_group_not_initialized"):
+                  route_ready=True
+                  print("COMMUNITY_SUITE_RUNTIME_ROUTE=PASS attempt="+str(attempt))
+                  break
+              time.sleep(5)
+          if not route_ready:
+              raise SystemExit("Community Suite runtime route did not become ready")
+
+          webhook_secret=hashlib.sha256(token.encode()).hexdigest()
+          message_seed=int(time.time()) % 1800000000
+          # Keep synthetic Telegram update IDs monotonic for this proof run.
+          ids=[message_seed]
+          def send_command(text):
+              ids[0]+=1
+              mid=ids[0]
+              update={
+                  "update_id":mid+100000000,
+                  "message":{
+                      "message_id":mid,
+                      "from":user,
+                      "chat":chat,
+                      "date":int(time.time()),
+                      "text":text
+                  }
+              }
+              req=urllib.request.Request(
+                  base+"/telegram-webhook",
+                  data=json.dumps(update,separators=(",",":")).encode(),
+                  headers={
+                      "content-type":"application/json",
+                      "x-telegram-bot-api-secret-token":webhook_secret,
+                      "user-agent":"Worldz-Community-Suite-Live-Proof/1.0"
+                  },
+                  method="POST"
+              )
+              with urllib.request.urlopen(req,timeout=60) as response:
+                  if response.status!=200:
+                      raise RuntimeError("Telegram webhook rejected "+text)
+                  response.read()
+              time.sleep(1)
+              return mid
+
+          started_at=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
+          secureguard_touched=False
+          temp_licence=False
+          original_group=None
+
+          def service_patch(table, filters, payload):
+              url=supabase+"/rest/v1/"+table+"?"+urllib.parse.urlencode(filters,safe=",.*()-:")
+              headers={**service_headers,"prefer":"return=representation"}
+              code,body=request_json(url,"PATCH",payload,headers,30,allow=(200,204))
+              if code not in (200,204): raise RuntimeError("PATCH failed "+table)
+              return body
+
+          def service_delete(table, filters):
+              url=supabase+"/rest/v1/"+table+"?"+urllib.parse.urlencode(filters,safe=",.*()-:")
+              code,body=request_json(url,"DELETE",None,service_headers,30,allow=(200,204))
+              if code not in (200,204): raise RuntimeError("DELETE failed "+table)
+
+          def service_upsert(table,payload,on_conflict):
+              url=supabase+"/rest/v1/"+table+"?on_conflict="+urllib.parse.quote(on_conflict,safe="")
+              headers={**service_headers,"prefer":"resolution=merge-duplicates,return=representation"}
+              code,body=request_json(url,"POST",payload,headers,30,allow=(200,201))
+              if code not in (200,201): raise RuntimeError("UPSERT failed "+table)
+              return body
+
+          try:
+              send_command("/suite@"+bot_username)
+              groups=rest_rows("community_suite_groups",{
+                  "select":"*","chat_id":"eq."+str(chat_id),"limit":"1"
+              })
+              if len(groups)!=1 or groups[0].get("internal_access") is not True:
+                  raise SystemExit("/suite did not initialize internal Worldz access")
+              original_group=dict(groups[0])
+
+              modules=rest_rows("community_suite_modules",{
+                  "select":"module_key,enabled","chat_id":"eq."+str(chat_id),"order":"module_key.asc"
+              })
+              if len(modules)<10:
+                  raise SystemExit("Community Suite module catalogue was not seeded")
+              print("COMMUNITY_SUITE_INITIALIZE=PASS modules="+str(len(modules)))
+
+              # Signed Mini App request must now return the real group control surface.
+              code,mini=request_json(
+                  base+"/api/mini/community-suite?chat_id="+urllib.parse.quote(str(chat_id),safe=""),
+                  headers=mini_headers
+              )
+              if code!=200 or not isinstance(mini,dict) or mini.get("ok") is not True:
+                  raise SystemExit("Authenticated Community Suite Mini App API failed")
+              if int(mini.get("chat_id") or 0)!=chat_id or len(mini.get("modules") or [])<10:
+                  raise SystemExit("Community Suite Mini App payload mismatch")
+              print("COMMUNITY_SUITE_MINIAPP_AUTH=PASS")
+
+              # ALICE front desk + tracked ticket lifecycle in the real group.
+              send_command("/alice@"+bot_username)
+              alice=rest_rows("community_suite_analytics_events",{
+                  "select":"id,event_type,created_at",
+                  "chat_id":"eq."+str(chat_id),
+                  "event_type":"eq.alice_open",
+                  "created_at":"gte."+started_at,
+                  "order":"created_at.desc",
+                  "limit":"1"
+              })
+              if not alice:
+                  raise SystemExit("ALICE live analytics proof missing")
+              subject="LIVE-PROOF-"+run_id
+              send_command("/ticket@"+bot_username+" "+subject+" | Automated production proof")
+              tickets=rest_rows("community_suite_tickets",{
+                  "select":"id,status,subject",
+                  "chat_id":"eq."+str(chat_id),
+                  "subject":"eq."+subject,
+                  "order":"created_at.desc",
+                  "limit":"1"
+              })
+              if not tickets:
+                  raise SystemExit("ALICE ticket was not created")
+              ticket_id=int(tickets[0]["id"])
+              send_command("/ticketclose@"+bot_username+" "+str(ticket_id)+" | Automated production proof complete")
+              closed=rest_rows("community_suite_tickets",{
+                  "select":"id,status","id":"eq."+str(ticket_id),"limit":"1"
+              })
+              if not closed or closed[0].get("status")!="closed":
+                  raise SystemExit("ALICE ticket did not close")
+              print("ALICE_LIVE_TICKET_FLOW=PASS ticket_id="+str(ticket_id))
+
+              # REX licence gate: prove an unlicensed external group cannot turn REX on,
+              # then grant a short-lived test licence and prove it can.
+              existing_licence=rest_rows("zed_group_licences",{
+                  "select":"*","chat_id":"eq."+str(chat_id),"limit":"1"
+              },privileged=True)
+              send_command("/secureguard@"+bot_username+" off")
+              secureguard_touched=True
+              service_patch("community_suite_groups",{"chat_id":"eq."+str(chat_id)},{"internal_access":False})
+              if not existing_licence:
+                  send_command("/secureguard@"+bot_username+" on")
+                  settings=rest_rows("zed_chat_settings",{
+                      "select":"secureguard_enabled","chat_id":"eq."+str(chat_id),"limit":"1"
+                  })
+                  if settings and settings[0].get("secureguard_enabled") is True:
+                      raise SystemExit("REX enabled without a Suite licence")
+                  print("SUITE_LICENCE_DENY_GATE=PASS")
+
+                  expires=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime(time.time()+600))
+                  now_iso=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
+                  service_upsert("zed_group_licences",{
+                      "chat_id":chat_id,
+                      "plan":"trial",
+                      "status":"active",
+                      "product_package":"full",
+                      "rent_to_own_payments":0,
+                      "trial_credit_sol":0,
+                      "approved_by_telegram_id":owner,
+                      "approved_at":now_iso,
+                      "expires_at":expires,
+                      "updated_at":now_iso
+                  },"chat_id")
+                  temp_licence=True
+                  send_command("/secureguard@"+bot_username+" on")
+                  settings=rest_rows("zed_chat_settings",{
+                      "select":"secureguard_enabled","chat_id":"eq."+str(chat_id),"limit":"1"
+                  })
+                  if not settings or settings[0].get("secureguard_enabled") is not True:
+                      raise SystemExit("REX did not enable with an active Suite licence")
+                  print("SUITE_LICENCE_ALLOW_GATE=PASS")
+              else:
+                  print("SUITE_LICENCE_GATE=EXISTING_LICENSE_PRESERVED")
+
+              send_command("/secureguard@"+bot_username+" off")
+              settings=rest_rows("zed_chat_settings",{
+                  "select":"secureguard_enabled","chat_id":"eq."+str(chat_id),"limit":"1"
+              })
+              if settings and settings[0].get("secureguard_enabled") is True:
+                  raise SystemExit("REX did not return to OFF")
+              print("REX_SECUREGUARD_TOGGLE=PASS")
+
+              # Customer AI profile + a real provider-backed answer.
+              service_patch("community_suite_groups",{"chat_id":"eq."+str(chat_id)},{"internal_access":True})
+              send_command("/aicommunity@"+bot_username)
+              profiles=rest_rows("community_suite_ai_profiles",{
+                  "select":"chat_id,display_name,enabled","chat_id":"eq."+str(chat_id),"limit":"1"
+              })
+              if not profiles or profiles[0].get("enabled") is not True:
+                  raise SystemExit("Customer AI profile was not created")
+              ai_started=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
+              send_command("/askcommunity@"+bot_username+" Reply exactly with: WORLDZ AI LIVE")
+              ai_ok=False
+              for _ in range(20):
+                  rows=rest_rows("community_suite_analytics_events",{
+                      "select":"id,event_type,created_at",
+                      "chat_id":"eq."+str(chat_id),
+                      "event_type":"eq.community_ai_answer",
+                      "created_at":"gte."+ai_started,
+                      "order":"created_at.desc",
+                      "limit":"1"
+                  })
+                  if rows:
+                      ai_ok=True
+                      break
+                  time.sleep(2)
+              if not ai_ok:
+                  raise SystemExit("Customer AI provider-backed answer proof missing")
+              print("CUSTOMER_AI_LIVE_PROVIDER=PASS")
+
+              print("WORLDZ_COMMUNITY_SUITE_LIVE_SUPERGROUP_PROOF=PASS")
+
+          finally:
+              # Leave the real community in a safe, non-disruptive state.
+              try:
+                  if secureguard_touched:
+                      send_command("/secureguard@"+bot_username+" off")
+              except Exception as exc:
+                  print("::warning::REX cleanup command failed: "+str(exc)[:160])
+              try:
+                  if temp_licence:
+                      service_delete("zed_group_licences",{"chat_id":"eq."+str(chat_id)})
+              except Exception as exc:
+                  print("::warning::Temporary licence cleanup failed: "+str(exc)[:160])
+              try:
+                  if original_group is not None:
+                      service_patch("community_suite_groups",{"chat_id":"eq."+str(chat_id)},{
+                          "internal_access":bool(original_group.get("internal_access",True))
+                      })
+              except Exception as exc:
+                  print("::warning::Internal-access cleanup failed: "+str(exc)[:160])
