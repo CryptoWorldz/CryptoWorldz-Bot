@@ -12,6 +12,7 @@ const { registerCommunityApi } = require("./community-api");\nconst { registerCo
 const { registerAutoTelegramHandlers } = require("./auto/telegram");
 const { registerCauseTelegramHandlers } = require("./causes/telegram");
 const { registerCommandCentreHandlers } = require("./command-centre");
+const { registerCommunityAI } = require("./community-ai");
 const { registerFullScopeTelegramHandlers } = require("./fullscope/telegram");
 const { registerCommunityDirectoryHandlers } = require("./community-directory");
 const { registerCurrentImpactHandlers } = require("./current-impact");
@@ -185,6 +186,8 @@ async function start() {
   registerCommandCentreHandlers({ bot, repository, config, supabase });
   startupStage = "register_community_suite";
   registerCommunitySuiteHandlers({ bot, config, supabase });
+  startupStage = "register_community_ai";
+  registerCommunityAI({ bot, config, supabase });
   startupStage = "register_alice_support";
   registerAliceSupport({ bot, config, supabase });
   startupStage = "register_worldzscan";
