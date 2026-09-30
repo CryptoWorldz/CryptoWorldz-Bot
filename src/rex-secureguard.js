@@ -44,6 +44,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
   const base = `https://api.telegram.org/bot${token}`;
   let sweeper = null;
   const messageRates = new Map();
+  const impersonationCooldowns = new Map();
 
   async function api(method, payload = {}) {
     const response = await fetch(`${base}/${method}`, {
@@ -64,7 +65,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
   async function setting(chatId) {
     const { data, error } = await supabase
       .from("zed_chat_settings")
-      .select("secureguard_enabled,secureguard_number_match_enabled,secureguard_timeout_seconds,secureguard_max_attempts,secureguard_antiflood_enabled,secureguard_max_messages_10s,secureguard_links_mode")
+      .select("secureguard_enabled,secureguard_number_match_enabled,secureguard_timeout_seconds,secureguard_max_attempts,secureguard_antiflood_enabled,secureguard_max_messages_10s,secureguard_links_mode,secureguard_impersonation_mode")
       .eq("chat_id", Number(chatId))
       .maybeSingle();
     if (error) throw error;
@@ -75,7 +76,8 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       maxAttempts: Number(data?.secureguard_max_attempts) || 3,
       antiflood: data?.secureguard_antiflood_enabled !== false,
       maxMessages10s: Number(data?.secureguard_max_messages_10s) || 8,
-      linksMode: String(data?.secureguard_links_mode || "blocklist")
+      linksMode: String(data?.secureguard_links_mode || "blocklist"),
+      impersonationMode: String(data?.secureguard_impersonation_mode || "warn")
     };
   }
 
@@ -211,6 +213,84 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     }
   }
 
+  function normalizeIdentityLabel(value) {
+    return String(value || "")
+      .normalize("NFKC")
+      .toLowerCase()
+      .replace(/^@/, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
+  function memberDisplayLabel(from) {
+    return [from?.first_name, from?.last_name].filter(Boolean).join(" ").trim();
+  }
+
+  async function trustedIdentities(chatId) {
+    const { data, error } = await supabase.from("secureguard_trusted_identities")
+      .select("telegram_id,identity_type,label,username").eq("chat_id", Number(chatId));
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function enforceImpersonation(msg, cfg) {
+    if (cfg.impersonationMode === "off" || !msg.from?.id || msg.from?.is_bot) return false;
+    const trusted = await trustedIdentities(msg.chat.id);
+    if (!trusted.length) return false;
+    const actualId = Number(msg.from.id);
+    const display = normalizeIdentityLabel(memberDisplayLabel(msg.from));
+    const username = normalizeIdentityLabel(msg.from.username || "");
+    const match = trusted.find((row) => {
+      if (Number(row.telegram_id) === actualId) return false;
+      const trustedUsername = normalizeIdentityLabel(row.username || "");
+      const trustedLabel = normalizeIdentityLabel(row.label || "");
+      return Boolean(
+        trustedUsername && username && trustedUsername === username ||
+        trustedLabel && display && trustedLabel === display
+      );
+    });
+    if (!match) return false;
+
+    const key = `${msg.chat.id}:${actualId}:${match.telegram_id}`;
+    const now = Date.now();
+    if (now - Number(impersonationCooldowns.get(key) || 0) < 5 * 60 * 1000) return false;
+    impersonationCooldowns.set(key, now);
+
+    const reason = normalizeIdentityLabel(match.username || "") && username === normalizeIdentityLabel(match.username || "")
+      ? "username matches a trusted identity"
+      : "display name matches a trusted identity";
+    await logEvent(msg.chat.id, actualId, "impersonation_signal", `${reason};trusted_id=${match.telegram_id}`);
+
+    if (cfg.impersonationMode === "quarantine") {
+      try {
+        await api("restrictChatMember", {
+          chat_id: msg.chat.id,
+          user_id: actualId,
+          permissions: BLOCKED_PERMISSIONS,
+          until_date: Math.floor(Date.now() / 1000) + 300
+        });
+      } catch {}
+    }
+
+    try {
+      await bot.sendMessage(msg.chat.id, [
+        "🛡 REX IDENTITY ALERT",
+        "",
+        `Account: ${msg.from.username ? "@"+msg.from.username : memberDisplayLabel(msg.from) || actualId}`,
+        `Telegram ID: ${actualId}`,
+        `Signal: ${reason}`,
+        `Trusted identity: ${match.label} • ID ${match.telegram_id}`,
+        "",
+        cfg.impersonationMode === "quarantine"
+          ? "REX quarantined this account for 5 minutes pending human admin review."
+          : "REX is warning only. A human admin should verify the account before taking action.",
+        "Display-name matches can be false positives; Telegram ID is the stronger identity anchor."
+      ].join("\n"));
+    } catch {}
+    return cfg.impersonationMode === "quarantine";
+  }
+
   async function domainRules(chatId) {
     const { data, error } = await supabase.from("secureguard_domains")
       .select("domain,action,reason").eq("chat_id", Number(chatId));
@@ -265,6 +345,100 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     try { await bot.sendMessage(msg.chat.id, `🛡 REX removed a link from a non-admin member${blockedHost ? `: ${blockedHost}` : "."}`); } catch {}
     return true;
   }
+
+  bot.onText(/^\/rextrust(?:@\w+)?\s+(-?\d+)\s*\|\s*([^|]+)(?:\s*\|\s*([^|]+))?(?:\s*\|\s*(admin|team|bot|channel|partner))?$/i, async (msg, match) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    const telegramId = Number(match[1]);
+    const label = String(match[2] || "").trim().slice(0, 120);
+    const username = String(match[3] || "").trim().replace(/^@/, "").slice(0, 64) || null;
+    const identityType = String(match[4] || "admin").toLowerCase();
+    if (!Number.isSafeInteger(telegramId) || !label) return bot.sendMessage(msg.chat.id, "❌ Use /rextrust TELEGRAM_ID | LABEL | optional-username | admin|team|bot|channel|partner");
+    const { error } = await supabase.from("secureguard_trusted_identities").upsert({
+      chat_id: Number(msg.chat.id), telegram_id: telegramId, identity_type: identityType,
+      label, username, created_by: Number(msg.from.id), created_at: new Date().toISOString()
+    }, { onConflict: "chat_id,telegram_id" });
+    if (error) return bot.sendMessage(msg.chat.id, "❌ REX could not save that trusted identity.");
+    await logEvent(msg.chat.id, telegramId, "trusted_identity_added", label, msg.from.id);
+    return bot.sendMessage(msg.chat.id, `✅ REX trusts ${label} as ${identityType} • Telegram ID ${telegramId}.`);
+  });
+
+  bot.onText(/^\/rexuntrust(?:@\w+)?\s+(-?\d+)$/i, async (msg, match) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    const telegramId = Number(match[1]);
+    const { error } = await supabase.from("secureguard_trusted_identities")
+      .delete().eq("chat_id", Number(msg.chat.id)).eq("telegram_id", telegramId);
+    if (error) return bot.sendMessage(msg.chat.id, "❌ REX could not remove that trusted identity.");
+    await logEvent(msg.chat.id, telegramId, "trusted_identity_removed", "", msg.from.id);
+    return bot.sendMessage(msg.chat.id, `✅ Trusted identity ${telegramId} removed.`);
+  });
+
+  bot.onText(/^\/rextrusted(?:@\w+)?$/i, async (msg) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    const rows = await trustedIdentities(msg.chat.id).catch(() => []);
+    const lines = rows.map((row) => `• ${row.label} • ${row.identity_type} • ID ${row.telegram_id}${row.username ? " • @"+row.username : ""}`);
+    return bot.sendMessage(msg.chat.id, `🛡 REX TRUSTED IDENTITIES\n\n${lines.join("\n") || "No trusted identities recorded."}\n\nTelegram ID is the primary anchor.`);
+  });
+
+  bot.onText(/^\/reximpostor(?:@\w+)?\s+(off|warn|quarantine)$/i, async (msg, match) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    const mode = String(match[1]).toLowerCase();
+    await upsertSetting(msg.chat.id, { secureguard_impersonation_mode: mode });
+    await logEvent(msg.chat.id, null, "impersonation_mode_changed", mode, msg.from.id);
+    return bot.sendMessage(msg.chat.id, `🛡 REX impersonation mode: ${mode.toUpperCase()}.`);
+  });
+
+  bot.onText(/^\/rexposture(?:@\w+)?$/i, async (msg) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    try {
+      const [chat, me, cfg] = await Promise.all([api("getChat",{chat_id:msg.chat.id}), api("getMe"), setting(msg.chat.id)]);
+      const member = await api("getChatMember",{chat_id:msg.chat.id,user_id:me.id});
+      const linkedId = chat?.linked_chat_id || null;
+      let linked = "Not linked";
+      if (linkedId) {
+        try {
+          const linkedChat = await api("getChat",{chat_id:linkedId});
+          const linkedMember = await api("getChatMember",{chat_id:linkedId,user_id:me.id});
+          linked = `✅ ${linkedChat?.title || linkedId} • bot ${["administrator","creator"].includes(String(linkedMember?.status || "")) ? "admin" : linkedMember?.status || "member"}`;
+        } catch {
+          linked = `⚠️ Linked chat ${linkedId} exists but REX could not verify its permissions.`;
+        }
+      }
+      return bot.sendMessage(msg.chat.id, [
+        "🛡 REX SECURITY POSTURE",
+        "",
+        `Chat type: ${msg.chat.type === "supergroup" ? "✅ Supergroup" : "⚠️ "+msg.chat.type}`,
+        `Restrict Members: ${member?.can_restrict_members ? "✅" : "⚠️ missing"}`,
+        `Delete Messages: ${member?.can_delete_messages ? "✅" : "⚠️ missing"}`,
+        `Invite Users: ${member?.can_invite_users ? "✅" : "ℹ️ not granted"}`,
+        `Linked channel/group: ${linked}`,
+        `Number Match: ${cfg.numberMatch ? "✅" : "⬜"}`,
+        `Anti-Flood: ${cfg.antiflood ? "✅" : "⬜"}`,
+        `Link Guard: ${cfg.linksMode}`,
+        `Identity Guard: ${cfg.impersonationMode}`,
+        "",
+        "Use /rexrecovery for the admin recovery checklist."
+      ].join("\n"));
+    } catch {
+      return bot.sendMessage(msg.chat.id, "❌ REX could not complete the security posture check.");
+    }
+  });
+
+  bot.onText(/^\/rexrecovery(?:@\w+)?$/i, async (msg) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    return bot.sendMessage(msg.chat.id, [
+      "🛡 REX RECOVERY CHECKLIST",
+      "",
+      "1. Keep at least two trusted human owners/admins with separate Telegram accounts.",
+      "2. Give REX only the admin rights its enabled security modules require.",
+      "3. Record trusted team Telegram IDs with /rextrust — usernames/display names can change.",
+      "4. If a bot token is exposed, rotate it in BotFather and update the protected runtime secret.",
+      "5. Verify linked-channel permissions with /rexposture after any group/channel migration.",
+      "6. Use /lockdown on if automation or promotion activity must be paused immediately.",
+      "7. Review /rextrusted and /rexdomains after team changes.",
+      "",
+      "Never paste bot tokens, private keys, seed phrases or passwords into group chat."
+    ].join("\n"));
+  });
 
   bot.onText(/^\/rexblockdomain(?:@\w+)?\s+(\S+)(?:\s*\|\s*([\s\S]+))?$/i, async (msg, match) => {
     if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
@@ -347,9 +521,12 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       `Attempts: ${cfg.maxAttempts}`,
       `Anti-Flood: ${cfg.antiflood ? "✅ ON" : "⏸ OFF"} • max ${cfg.maxMessages10s}/10s`,
       `Link Guard: ${cfg.linksMode}`,
+      `Identity Guard: ${cfg.impersonationMode}`,
       "",
       "Commands: /secureguard on • /secureguard off • /secureguard status",
-      "Domains: /rexblockdomain • /rexallowdomain • /rexdomains • /rexlinkmode"
+      "Domains: /rexblockdomain • /rexallowdomain • /rexdomains • /rexlinkmode",
+      "Identity: /rextrust • /rexuntrust • /rextrusted • /reximpostor",
+      "Audit: /rexposture • /rexrecovery"
     ].join("\n"));
   });
 
@@ -381,6 +558,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
 
       if (!msg.from?.id || msg.from?.is_bot || String(msg.text || "").startsWith("/")) return;
       if (await isTelegramAdmin(msg.chat.id, msg.from.id)) return;
+      if (await enforceImpersonation(msg, cfg)) return;
       if (await enforceFlood(msg, cfg)) return;
       await enforceLinks(msg, cfg);
     } catch (error) {
@@ -447,4 +625,4 @@ function registerRexSecureGuard({ bot, supabase, config }) {
   return { challengeOptions, expirePending };
 }
 
-module.exports = { BLOCKED_PERMISSIONS, challengeOptions, extractHosts, normalizeDomain, registerRexSecureGuard };
+module.exports = { BLOCKED_PERMISSIONS, challengeOptions, extractHosts, normalizeDomain, normalizeIdentityLabel, registerRexSecureGuard };
