@@ -80,7 +80,8 @@ const COMMAND_GROUPS = Object.freeze([
     ["giveawayjoin", "Enter an open giveaway"], ["walletwatch", "View public wallet watchlist"],
     ["buyalerts", "View real market/buy alert rules"],
     ["networkstatus", "View multi-group network licence status"], ["launchstatus", "View LaunchPad community linkage"],
-    ["marketplace", "Open Worldz Marketplace add-ons"]
+    ["marketplace", "Open Worldz Marketplace add-ons"], ["socials", "View customer social accounts"],
+    ["socialcapabilities", "View social publishing/connection capabilities"]
   ]),
   group("worldping", "🌐 WorldPing™ • Licensed Group Alerts", "member", [
     ["worldping", "Send a visible group WorldPing"], ["worldpingmode", "Group admin: AdminsOnlyPing or FullMemberPing"],
@@ -115,7 +116,8 @@ const COMMAND_GROUPS = Object.freeze([
     ["apikeyrevoke", "Revoke a customer API key"], ["webhookadd", "Register a signed HTTPS webhook"],
     ["webhooks", "List signed webhooks"], ["webhookremove", "Disable a webhook"], ["webhooktest", "Test webhook delivery"],
     ["networkrequest", "Request a multi-group network slot"], ["launchconnect", "Link this group to a LaunchPad project/token"],
-    ["addonrequest", "Request a Worldz Marketplace add-on"], ["addons", "View Marketplace requests"]
+    ["addonrequest", "Request a Worldz Marketplace add-on"], ["addons", "View Marketplace requests"],
+    ["sociallink", "Register an official customer social account"], ["socialdisable", "Disable a social directory account"]
   ]),
   group("communications", "📡 Admin • Communications", "admin", [
     ["broadcast", "Create a scoped broadcast draft"], ["confirmbroadcast", "Confirm a scoped broadcast"],
