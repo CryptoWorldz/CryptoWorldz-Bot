@@ -311,28 +311,44 @@ function bind(){
   $('#wallet-mini').addEventListener('click',connectWallet);$('#refresh-runtime').addEventListener('click',refreshRuntime);
   $('#devnet-launch-link').addEventListener('click',e=>{if(e.currentTarget.getAttribute('aria-disabled')==='true')e.preventDefault();});
 }
+function validatePlatformConfig(candidate){
+  if(candidate.publicLaunchPad!==true||candidate.publicLaunchIntakeEnabled!==true)throw new Error('Public LaunchPad contract mismatch');
+  if(candidate.feePolicy?.projectTradingFeeMaxPercent!==3||candidate.feePolicy?.worldzLaunchPadShareOfCollectedProjectFeePercent!==10||candidate.feePolicy?.platformShareCapPercentOfCollectedProjectFee!==10)throw new Error('10% fee-only contract mismatch');
+  if(candidate.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent!==0||candidate.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent!==0||candidate.feePolicy?.walletTransferTaxPercent!==0)throw new Error('Worldz zero-supply/liquidity/transfer-tax contract mismatch');
+  const p=candidate.safeLaunchPolicy;
+  if(!p||p.version!=='WORLDZ-SAFE-LAUNCH-1'||p.compulsory.fixedSupply!==true||p.compulsory.revokeMintAuthorityAfterGenesis!==true||p.compulsory.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('Safe Launch Standard contract mismatch');
+  if(candidate.baseEvmFair?.status!=='BASE_SEPOLIA_BETA'||candidate.baseEvmFair?.mainnetExecution!==false)throw new Error('Base testnet adapter contract mismatch');
+  if(candidate.founding100?.totalPositions!==100||candidate.founding100?.futureWorldzPoolPercent!==10||candidate.founding100?.equalAllocationPerQualifiedPositionPercent!==0.1)throw new Error('Founding 100 contract mismatch');
+  if(candidate.trustOrbit?.version!=='WORLDZ-TRUST-ORBIT-1'||candidate.trustOrbit?.status!=='PUBLIC_BETA_LIVE'||candidate.trustOrbit?.jupiterIntegration?.officialJupiterEndorsement!==false)throw new Error('Trust Orbit contract mismatch');
+  if(candidate.worldzMint?.version!=='WORLDZMINT-1'||candidate.worldzMint?.platformTokenSupplyTakePercent!==0||candidate.worldzMint?.compulsory?.revokeMintAuthorityAfterGenesis!==true||candidate.worldzMint?.compulsory?.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('WorldzMINT contract mismatch');
+  if(candidate.confidenceCurve?.version!=='WORLDZ-CONFIDENCE-CURVE-1'||candidate.confidenceCurve?.mainnetExecutionEnabled!==false||candidate.confidenceCurve?.feePolicy?.worldzSharePercentOfCollectedSupportedProjectTradingFee!==10)throw new Error('Confidence Curve contract mismatch');
+  if(candidate.confidencePulse?.version!=='WORLDZ-CONFIDENCE-PULSE-1'||candidate.confidencePulse?.systemTradesCountTowardConfidence!==false)throw new Error('Confidence Pulse contract mismatch');
+  if(candidate.confidenceConstellation?.version!=='WORLDZ-CONFIDENCE-CONSTELLATION-1'||candidate.confidenceConstellation?.opaqueSafetyScore!==false)throw new Error('Confidence Constellation contract mismatch');
+  return candidate;
+}
+async function fetchPlatformConfig(){
+  const url='/platform-config.json?fresh='+Date.now();
+  const r=await fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
+  if(!r.ok)throw new Error('Platform configuration unavailable (HTTP '+r.status+')');
+  return validatePlatformConfig(await r.json());
+}
 async function boot(){
-  try{
-    const r=await fetch('/platform-config.json?v=20260921-public-v9',{cache:'no-store'});
-    if(!r.ok)throw new Error('Platform configuration unavailable');
-    platform=await r.json();
-    if(platform.publicLaunchPad!==true||platform.publicLaunchIntakeEnabled!==true)throw new Error('Public LaunchPad contract mismatch');
-    if(platform.feePolicy?.projectTradingFeeMaxPercent!==3||platform.feePolicy?.worldzLaunchPadShareOfCollectedProjectFeePercent!==10||platform.feePolicy?.platformShareCapPercentOfCollectedProjectFee!==10)throw new Error('10% fee-only contract mismatch');
-    if(platform.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent!==0||platform.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent!==0||platform.feePolicy?.walletTransferTaxPercent!==0)throw new Error('Worldz zero-supply/liquidity/transfer-tax contract mismatch');
-    const p=platform.safeLaunchPolicy;
-    if(!p||p.version!=='WORLDZ-SAFE-LAUNCH-1'||p.compulsory.fixedSupply!==true||p.compulsory.revokeMintAuthorityAfterGenesis!==true||p.compulsory.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('Safe Launch Standard contract mismatch');
-    if(platform.baseEvmFair?.status!=='BASE_SEPOLIA_BETA'||platform.baseEvmFair?.mainnetExecution!==false)throw new Error('Base testnet adapter contract mismatch');
-    if(platform.founding100?.totalPositions!==100||platform.founding100?.futureWorldzPoolPercent!==10||platform.founding100?.equalAllocationPerQualifiedPositionPercent!==0.1)throw new Error('Founding 100 contract mismatch');
-    if(platform.trustOrbit?.version!=='WORLDZ-TRUST-ORBIT-1'||platform.trustOrbit?.status!=='PUBLIC_BETA_LIVE'||platform.trustOrbit?.jupiterIntegration?.officialJupiterEndorsement!==false)throw new Error('Trust Orbit contract mismatch');
-    if(platform.worldzMint?.version!=='WORLDZMINT-1'||platform.worldzMint?.platformTokenSupplyTakePercent!==0||platform.worldzMint?.compulsory?.revokeMintAuthorityAfterGenesis!==true||platform.worldzMint?.compulsory?.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('WorldzMINT contract mismatch');
-    if(platform.confidenceCurve?.version!=='WORLDZ-CONFIDENCE-CURVE-1'||platform.confidenceCurve?.mainnetExecutionEnabled!==false||platform.confidenceCurve?.feePolicy?.worldzSharePercentOfCollectedSupportedProjectTradingFee!==10)throw new Error('Confidence Curve contract mismatch');
-    if(platform.confidencePulse?.version!=='WORLDZ-CONFIDENCE-PULSE-1'||platform.confidencePulse?.systemTradesCountTowardConfidence!==false)throw new Error('Confidence Pulse contract mismatch');
-    if(platform.confidenceConstellation?.version!=='WORLDZ-CONFIDENCE-CONSTELLATION-1'||platform.confidenceConstellation?.opaqueSafetyScore!==false)throw new Error('Confidence Constellation contract mismatch');
-    bind();feeMath();renderProof();renderMarket();refreshRuntime();
-  }catch(e){
-    console.error(e);document.body.dataset.boot='failed';
-    alert('WorldzLaunchPad refused to initialize because its public launch configuration did not pass fail-closed checks.');
+  let firstError=null;
+  for(let attempt=1;attempt<=2;attempt++){
+    try{
+      platform=await fetchPlatformConfig();
+      bind();feeMath();renderProof();renderMarket();refreshRuntime();
+      document.body.dataset.boot='ready';
+      return;
+    }catch(e){
+      firstError=firstError||e;
+      console.error('WorldzLaunchPad boot attempt '+attempt+' failed',e);
+      if(attempt<2)await new Promise(resolve=>setTimeout(resolve,900));
+    }
   }
+  document.body.dataset.boot='failed';
+  const detail=(firstError&&firstError.message)?firstError.message:'Unknown configuration mismatch';
+  alert('WorldzLaunchPad safety check blocked startup: '+detail+'\n\nThe builder stayed fail-closed. Refresh once after the deployment finishes.');
 }
 boot();
 
