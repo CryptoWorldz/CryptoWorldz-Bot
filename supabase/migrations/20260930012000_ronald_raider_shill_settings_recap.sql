@@ -124,6 +124,10 @@ declare
   v_submission public.social_shill_submissions%rowtype;
   v_token public.shill_reward_tokens%rowtype;
 begin
+  if coalesce(auth.role(), '') <> 'service_role' and not public.zed_runtime_authorized() then
+    raise exception 'not_authorized';
+  end if;
+
   select * into v_submission
   from public.social_shill_submissions
   where id = p_submission_id
@@ -200,8 +204,8 @@ begin
 end;
 $$;
 
-revoke all on function public.approve_social_shill_submission(bigint,bigint) from public;
-grant execute on function public.approve_social_shill_submission(bigint,bigint) to service_role;
+revoke all on function public.approve_social_shill_submission(bigint,bigint) from public, authenticated;
+grant execute on function public.approve_social_shill_submission(bigint,bigint) to anon, service_role;
 
 -- One allowlist drives both the public AUTO token list and owner DCA validation.
 insert into public.auto_tokens(network, token_mint, symbol, display_name, status, approved_at)
@@ -266,3 +270,40 @@ to service_role;
 
 grant usage, select on sequence public.raid_campaigns_id_seq to service_role;
 grant usage, select on sequence public.social_shill_submissions_id_seq to service_role;
+
+-- Hostinger can run ZED with a publishable Supabase key. Its server-only
+-- x-zed-runtime-key is validated by zed_runtime_authorized(); ordinary anon
+-- requests still fail these RLS policies.
+drop policy if exists "zed_runtime_bridge" on public.zed_chat_settings;
+create policy "zed_runtime_bridge" on public.zed_chat_settings
+for all to anon using (public.zed_runtime_authorized()) with check (public.zed_runtime_authorized());
+
+drop policy if exists "zed_runtime_bridge" on public.raid_campaigns;
+create policy "zed_runtime_bridge" on public.raid_campaigns
+for all to anon using (public.zed_runtime_authorized()) with check (public.zed_runtime_authorized());
+
+drop policy if exists "zed_runtime_bridge" on public.shill_reward_tokens;
+create policy "zed_runtime_bridge" on public.shill_reward_tokens
+for all to anon using (public.zed_runtime_authorized()) with check (public.zed_runtime_authorized());
+
+drop policy if exists "zed_runtime_bridge" on public.social_shill_submissions;
+create policy "zed_runtime_bridge" on public.social_shill_submissions
+for all to anon using (public.zed_runtime_authorized()) with check (public.zed_runtime_authorized());
+
+grant select, insert, update, delete on
+  public.zed_chat_settings,
+  public.raid_campaigns,
+  public.shill_reward_tokens,
+  public.social_shill_submissions
+to anon;
+
+grant usage, select on sequence public.raid_campaigns_id_seq to anon;
+grant usage, select on sequence public.social_shill_submissions_id_seq to anon;
+
+revoke all on
+  public.zed_chat_settings,
+  public.raid_campaigns,
+  public.shill_reward_tokens,
+  public.social_shill_submissions,
+  public.partner_allocation_candidates
+from authenticated;
