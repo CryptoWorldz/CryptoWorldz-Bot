@@ -1,4 +1,4 @@
-const { buildAssistantCapabilityContext } = require("./assistant-capabilities");
+const { buildAssistantCapabilityContext, deterministicCapabilityAnswer } = require("./assistant-capabilities");
 const DEFAULT_BOT_USERNAME = "DipShitBossBot";
 
 function extractDipshitResponseText(payload) {
@@ -164,6 +164,12 @@ function registerDipshitConversation({
     const key = `${msg.chat.id}:${msg.from?.id || "unknown"}`;
     const history = conversations.get(key) || [];
     const capabilityContext = await buildAssistantCapabilityContext({ supabase, chatId: msg.chat.id });
+    const directCapability = deterministicCapabilityAnswer(message, capabilityContext);
+    if (directCapability) {
+      remember(key, "user", message);
+      remember(key, "assistant", directCapability.text);
+      return send(msg.chat.id, `💙 ${directCapability.text.slice(0, 3800)}`);
+    }
     const context = {
       runtime_online: true,
       natural_chat_listener: true,
