@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05020b">
+<meta name="description" content="Deploy a real fixed-supply Solana token with WorldzMINT™ on WorldzLaunchPad™.">
+<title>Deploy Token | WorldzLaunchPad™</title>
+<link rel="stylesheet" href="/style.css?v=20261001-deploy-v1">
+<style>
+.deploy{max-width:1180px;margin:auto;padding:42px 18px 110px}
+.deploy-hero{border:1px solid #a64cff35;border-radius:28px;padding:clamp(24px,5vw,52px);background:radial-gradient(circle at 74% 0,#55c7ff12,transparent 36%),radial-gradient(circle at 18% 0,#a64cff24,transparent 40%),#08040e}
+.deploy-hero h1{font-size:clamp(3.3rem,9vw,7.8rem);line-height:.84;letter-spacing:-.07em;margin:10px 0 17px}
+.deploy-hero h1 span{background:linear-gradient(95deg,#fff,#d49aff 48%,#65d5ff);-webkit-background-clip:text;color:transparent}
+.deploy-hero p{max-width:780px;color:#ad9bb8;font-size:1.02rem}
+.livebar{display:flex;gap:7px;flex-wrap:wrap;margin:20px 0 0}.livebar span{border:1px solid #ffffff12;border-radius:999px;padding:7px 10px;font-size:.62rem;font-weight:900;color:#8f8198}.livebar .ok{border-color:#55e6a544;color:#82efc4;background:#55e6a508}.livebar .wait{border-color:#ffd16644;color:#dec484;background:#ffd16608}
+.deploy-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-top:12px}.card{border:1px solid #ffffff0e;border-radius:21px;padding:20px;background:linear-gradient(145deg,#ffffff055,#ffffff025)}.card h2{font-size:1.7rem;margin:4px 0 8px}.card p{color:#8e8097;font-size:.78rem}.big-action{display:flex;min-height:84px;align-items:center;justify-content:space-between;gap:12px;border:1px solid #a64cff48;border-radius:17px;padding:16px;text-decoration:none;color:#fff;background:linear-gradient(120deg,#a64cff18,#55c7ff09);margin-top:12px}.big-action strong{display:block;font-size:1.08rem}.big-action small{display:block;color:#9f8aaa;margin-top:3px}.big-action b{font-size:1.5rem;color:#c781ff}.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.fact{border:1px solid #ffffff0d;border-radius:14px;padding:13px;background:#07030d}.fact span{display:block;font-size:.58rem;color:#6f6378;text-transform:uppercase;letter-spacing:.1em}.fact b{display:block;margin-top:4px}.steps{display:grid;gap:8px;margin-top:12px}.step{display:grid;grid-template-columns:33px 1fr;gap:9px;padding:12px;border:1px solid #ffffff0d;border-radius:13px}.step>span{width:29px;height:29px;display:grid;place-items:center;border-radius:9px;background:#a64cff14;color:#c383ff;font-weight:950}.step b{display:block;font-size:.75rem}.step small{color:#75687e}.status{white-space:pre-wrap;border:1px solid #ffffff0e;border-radius:13px;padding:12px;color:#887a91;margin-top:12px;font-size:.69rem}.status.good{border-color:#55e6a53d;color:#83e9bf}.status.bad{border-color:#ff6d8a3d;color:#ff9caf}.market-gate{border-left:3px solid #ffd166;padding:12px 14px;background:#ffd16608;color:#9e8d68;margin-top:12px;font-size:.71rem}
+@media(max-width:780px){.deploy{padding-top:24px}.deploy-grid{grid-template-columns:1fr}.facts{grid-template-columns:1fr 1fr}.deploy-hero h1{font-size:4rem}}
+</style>
+</head>
+<body>
+<header class="topbar">
+<a class="brand" href="/"><span class="brand-logo-official" aria-hidden="true"></span><span>WorldzLaunchPad™</span></a>
+<nav><a href="/">LaunchPad</a><a href="/deploy/">Deploy Token</a><a href="/mint/">WorldzMINT</a><a href="/revenue/">Revenue</a><a href="/trust/">Proof</a></nav>
+<a class="wallet-mini" href="/mint/?network=mainnet-beta">Mainnet Mint</a>
+</header>
+<main class="deploy">
+<section class="deploy-hero">
+<div class="kicker">WORLDZLAUNCHPAD™ • PUBLIC TOKEN DEPLOYMENT</div>
+<h1>DEPLOY<br><span>YOUR TOKEN.</span></h1>
+<p>WorldzMINT™ creates a real fixed-supply SPL token on Solana Mainnet. Supply is distributed directly to the disclosed genesis wallets, metadata is made immutable, and Mint + Freeze authority are permanently revoked before WorldzMINT marks the token verified.</p>
+<div class="livebar">
+<span class="ok" id="site-state">LAUNCHPAD LIVE</span>
+<span class="ok" id="mint-state">WORLDZMINT CHECKING</span>
+<span class="ok">SOLANA MAINNET</span>
+<span class="ok">0% WORLDZ SUPPLY TAKE</span>
+<span class="ok">0% TRANSFER TAX</span>
+<span class="wait">MARKET LAUNCH SEPARATE</span>
+</div>
+<a class="big-action" href="/mint/?network=mainnet-beta">
+<div><strong>DEPLOY REAL MAINNET TOKEN</strong><small>Open WorldzMINT™ with Solana Mainnet selected. Wallet approvals remain explicit.</small></div><b>→</b>
+</a>
+<a class="big-action" href="/mint/?network=devnet">
+<div><strong>REHEARSE ON DEVNET</strong><small>Test the same mint lifecycle without creating a real mainnet token.</small></div><b>→</b>
+</a>
+</section>
+
+<div class="deploy-grid">
+<article class="card">
+<div class="section-kicker">WHAT ACTUALLY HAPPENS</div>
+<h2>Three approvals. One fixed supply.</h2>
+<div class="steps">
+<div class="step"><span>1</span><div><b>Create mint</b><small>Your connected wallet creates the SPL mint. Nothing is silently signed.</small></div></div>
+<div class="step"><span>2</span><div><b>Distribute genesis supply</b><small>The exact fixed supply goes directly to the five disclosed destination wallets.</small></div></div>
+<div class="step"><span>3</span><div><b>Finalize + revoke</b><small>Immutable metadata is created; Mint and Freeze authority are permanently removed.</small></div></div>
+<div class="step"><span>✓</span><div><b>Independent proof</b><small>The Worldz backend checks supply, allocations, authorities and transaction evidence before verification.</small></div></div>
+</div>
+<div class="facts">
+<div class="fact"><span>Creator liquid</span><b>≤ 5%</b></div>
+<div class="fact"><span>Liquidity reserve</span><b>25–60%</b></div>
+<div class="fact"><span>Community</span><b>≥ 20%</b></div>
+<div class="fact"><span>Treasury</span><b>≤ 15%</b></div>
+</div>
+</article>
+
+<aside class="card">
+<div class="section-kicker">PRODUCTION STATUS</div>
+<h2>Deployment stack</h2>
+<div class="status" id="backend-status">Checking WorldzMINT registry and public configuration…</div>
+<div class="market-gate"><b>Token deployment and market launch are different.</b><br>WorldzMINT Mainnet creates the token now. The Worldz Confidence Curve / Meteora public market-launch route stays fail-closed until its treasury and release gate is independently verified.</div>
+<div class="actions" style="margin-top:12px">
+<a class="btn primary" href="/mint/?network=mainnet-beta">START WORLDZMINT™</a>
+<a class="btn secondary" href="/mainnet/">Market Launch Status</a>
+<a class="btn secondary" href="/trust/">Trust Orbit</a>
+</div>
+</aside>
+</div>
+</main>
+<footer><div><b>WorldzLaunchPad™</b> • Public Token Deployment</div><p>Creating a token does not guarantee price, liquidity, exchange listing, verification by third parties, or financial returns.</p></footer>
+<script>
+(async()=>{
+ const box=document.getElementById('backend-status'),mint=document.getElementById('mint-state');
+ try{
+   const [p,m]=await Promise.all([
+     fetch('/platform-config.json?deploy='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('platform config HTTP '+r.status);return r.json()}),
+     fetch('https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-mint-register?deploy='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('mint registry HTTP '+r.status);return r.json()})
+   ]);
+   if(p.worldzMint?.status!=='PUBLIC_MAINNET_MINT_BETA'||m.standard!=='WORLDZMINT-1'||m.ok!==true)throw new Error('production contract mismatch');
+   mint.textContent='WORLDZMINT BACKEND LIVE';
+   box.className='status good';
+   box.textContent='WORLDZMINT MAINNET READY ✅\\nFrontend: public\\nRegistry API: online\\nStandard: WORLDZMINT-1\\nVerified public mints: '+((m.mints||[]).filter(x=>x.environment==='mainnet-beta').length)+'\\n\\nFirst verified mainnet WorldzMINT slot '+(((m.mints||[]).some(x=>x.environment==='mainnet-beta'))?'has activity.':'is OPEN.');
+ }catch(e){
+   mint.textContent='WORLDZMINT CHECK FAILED';mint.className='wait';
+   box.className='status bad';box.textContent='DEPLOYMENT CHECK FAILED\\n'+(e?.message||e)+'\\nNo token transaction is being attempted.';
+ }
+})();
+</script>
+</body>
+</html>
