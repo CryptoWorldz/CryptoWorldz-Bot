@@ -12,6 +12,24 @@ const {
   telegramAdmin
 } = require("./community-suite-core");
 
+const MARKETPLACE_ADDONS = Object.freeze([
+  ["premium_custom_brand", "🎨 Premium Custom Brand", "Custom bot names, artwork, command labels and visual system", "quote"],
+  ["branded_miniapp", "📱 Branded Mini App", "Customer-branded Telegram Mini App/control surface", "quote"],
+  ["custom_website", "🌐 Custom Project Page", "Branded project/community web page with Worldz integrations", "quote"],
+  ["advanced_ai", "🧠 Advanced AI Knowledge", "Larger approved knowledge base, premium AI usage and custom workflows", "quote"],
+  ["advanced_analytics", "📊 Advanced Analytics", "Expanded community, campaign and conversion reporting", "quote"],
+  ["api_webhooks", "🔌 API + Webhooks", "Customer API keys, signed webhooks and integration support", "included_or_quote"],
+  ["extra_socials", "📣 Extra Social Connections", "Additional social accounts/platform connection work", "quote"],
+  ["multi_group", "🌐 Multi-Group Network", "One customer network operating across multiple Telegram groups", "quote"],
+  ["custom_chain", "⛓ Custom Chain Adapter", "Additional token/chain data integration beyond standard support", "quote"],
+  ["launch_support", "🚀 Launch Support Pack", "LaunchPad/community setup, countdown, links and launch-day support", "quote"],
+  ["priority_support", "⚡ Priority Support", "Higher-priority Worldz technical support lane", "quote"],
+  ["custom_security", "🛡 Custom REX Rules", "Custom moderation, trusted identity and security-policy configuration", "quote"],
+  ["sponsored_slot", "📢 Sponsored Worldz Placement", "Clearly disclosed paid promotional placement", "quote"],
+  ["campaign_pack", "📣 Campaign Pack", "G.R.A.C.E.-assisted campaign setup across supported social channels", "quote"],
+  ["migration_setup", "🧰 Migration + Setup", "Move an existing Telegram project into the Worldz Suite", "quote"]
+]);
+
 const COMPAT_TOGGLES = Object.freeze({
   rex_secureguard: "secureguard_enabled",
   ronald_raider: "ronald_raider_enabled",
@@ -493,6 +511,121 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
     }
   });
 
+  bot.onText(/^\/marketplace(?:@\w+)?$/i, async (message) => {
+    try {
+      if (!isGroup(message)) {
+        const lines = MARKETPLACE_ADDONS.map(([key,label,description]) => `• ${label} — ${description} — ${key}`);
+        return send(message, `🌐 WORLDZ MARKETPLACE™\n\n${lines.join("\n")}\n\nOpen this inside your customer group to request an add-on.`);
+      }
+      await groupRow(message);
+      const { data: requests, error } = await supabase.from("community_suite_addon_requests")
+        .select("id,addon_key,status,quoted_sol,quoted_aud,owner_note,created_at")
+        .eq("chat_id", Number(message.chat.id))
+        .order("created_at", { ascending:false }).limit(15);
+      if (error) throw error;
+      const requested = new Map((requests || []).map((row) => [row.addon_key,row]));
+      const lines = MARKETPLACE_ADDONS.map(([key,label,description,pricingType]) => {
+        const row = requested.get(key);
+        const state = row ? ` • ${row.status.toUpperCase()}` : "";
+        const price = row?.quoted_sol != null ? ` • quote ${row.quoted_sol} SOL` :
+          row?.quoted_aud != null ? ` • quote A${row.quoted_aud}` :
+          pricingType === "included_or_quote" ? " • may be included by package" : " • quote";
+        return `${label}${state}\n${description}${price}\nKey: ${key}`;
+      });
+      return send(message, [
+        "🌐 WORLDZ MARKETPLACE™",
+        "",
+        lines.join("\n\n"),
+        "",
+        "Admin request: /addonrequest ADDON_KEY | optional note",
+        "View requests: /addons",
+        "",
+        "No add-on activates or charges automatically. A quote/review comes first."
+      ].join("\n"));
+    } catch {
+      return send(message, "❌ Worldz Marketplace could not load.");
+    }
+  });
+
+  bot.onText(/^\/addonrequest(?:@\w+)?\s+([a-z0-9_]+)(?:\s*\|\s*([\s\S]+))?$/i, async (message, match) => {
+    try {
+      if (!isGroup(message) || !(await requireAdmin(message))) return send(message, "⛔ Group admin access required.");
+      await groupRow(message);
+      const addonKey = String(match[1]).toLowerCase();
+      const addon = MARKETPLACE_ADDONS.find(([key]) => key === addonKey);
+      if (!addon) return send(message, "❌ Unknown add-on. Use /marketplace.");
+      const note = String(match?.[2] || "").trim().slice(0, 1200);
+      const { data, error } = await supabase.from("community_suite_addon_requests").insert({
+        chat_id: Number(message.chat.id),
+        addon_key: addonKey,
+        status: "requested",
+        requested_by: Number(message.from.id),
+        request_note: note
+      }).select("*").single();
+      if (error) throw error;
+      await recordAnalytics(supabase, message.chat.id, message.from.id, "addon_requested", { addonKey, requestId:data.id });
+      return send(message, `🧾 Marketplace Request #${data.id}\n\n${addon[1]}\nStatus: REQUESTED\n\nNo charge or activation has occurred. Worldz can review scope and quote it next.`);
+    } catch {
+      return send(message, "❌ Add-on request could not be recorded.");
+    }
+  });
+
+  bot.onText(/^\/addons(?:@\w+)?$/i, async (message) => {
+    try {
+      if (!isGroup(message) || !(await requireAdmin(message))) return send(message, "⛔ Group admin access required.");
+      const { data, error } = await supabase.from("community_suite_addon_requests")
+        .select("*").eq("chat_id", Number(message.chat.id)).order("created_at",{ascending:false}).limit(30);
+      if (error) throw error;
+      const lines = (data || []).map((row) => {
+        const addon = MARKETPLACE_ADDONS.find(([key]) => key === row.addon_key);
+        const quote = row.quoted_sol != null ? `${row.quoted_sol} SOL` : row.quoted_aud != null ? `A${row.quoted_aud}` : "not quoted";
+        return `#${row.id} • ${addon?.[1] || row.addon_key} • ${row.status.toUpperCase()} • ${quote}`;
+      });
+      return send(message, `🌐 MARKETPLACE REQUESTS\n\n${lines.join("\n") || "No add-on requests yet."}`);
+    } catch {
+      return send(message, "❌ Marketplace requests could not be loaded.");
+    }
+  });
+
+  bot.onText(/^\/addonquote(?:@\w+)?\s+(\d+)\s+(sol|aud)\s+([0-9]+(?:\.[0-9]+)?)(?:\s*\|\s*([\s\S]+))?$/i, async (message, match) => {
+    try {
+      if (!owner(message, config)) return send(message, "⛔ Worldz owner access required.");
+      const id = Number(match[1]);
+      const currency = String(match[2]).toLowerCase();
+      const amount = Number(match[3]);
+      const note = String(match?.[4] || "").trim().slice(0, 1200);
+      if (!Number.isFinite(amount) || amount < 0) return send(message, "❌ Quote amount must be valid.");
+      const patch = {
+        status:"quoted",
+        owner_note:note,
+        updated_at:new Date().toISOString(),
+        quoted_sol: currency === "sol" ? amount : null,
+        quoted_aud: currency === "aud" ? amount : null
+      };
+      const { data, error } = await supabase.from("community_suite_addon_requests")
+        .update(patch).eq("id", id).select("*").maybeSingle();
+      if (error) throw error;
+      if (!data) return send(message, "❌ Marketplace request not found.");
+      return send(message, `✅ Request #${id} quoted at ${currency === "sol" ? amount+" SOL" : "A$"+amount}. No activation/payment occurs automatically.`);
+    } catch {
+      return send(message, "❌ Marketplace quote could not be saved.");
+    }
+  });
+
+  bot.onText(/^\/addonstatus(?:@\w+)?\s+(\d+)\s+(approved|active|declined|cancelled)$/i, async (message, match) => {
+    try {
+      if (!owner(message, config)) return send(message, "⛔ Worldz owner access required.");
+      const id = Number(match[1]), status = String(match[2]).toLowerCase();
+      const { data, error } = await supabase.from("community_suite_addon_requests")
+        .update({status,updated_at:new Date().toISOString()}).eq("id",id).select("*").maybeSingle();
+      if (error) throw error;
+      if (!data) return send(message, "❌ Marketplace request not found.");
+      return send(message, `✅ Marketplace Request #${id} → ${status.toUpperCase()}.`);
+    } catch {
+      return send(message, "❌ Marketplace status could not be updated.");
+    }
+  });
+
   bot.onText(/^\/boostcentre(?:@\w+)?$/i, async (message) => {
     if (isGroup(message)) await recordAnalytics(supabase, message.chat.id, message.from.id, "boost_centre_open");
     return send(message, [
@@ -515,6 +648,7 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
 }
 
 module.exports = {
+  MARKETPLACE_ADDONS,
   moduleText,
   packageLabel,
   planLabel,
