@@ -11,8 +11,10 @@ const {
   moderationRequiresHardBlock,
   normalizeDipshitHistory
 } = require("./dipshit-conversation");
+const { buildAssistantCapabilityContext, formatCapabilitySummary } = require("./assistant-capabilities");
+const { AUTO_PICK_PRESETS, formatAutoPicks, presetByKey, presetKeys, presetUpdate } = require("./community-ai-presets");
 
-async function callCommunityAI({ apiKey, model, question, history, profile, knowledge, context, fetchImpl = fetch }) {
+async function callCommunityAI({ apiKey, model, question, history, profile, knowledge, context, capabilityContext, fetchImpl = fetch }) {
   if (!apiKey) throw new Error("openai_api_not_configured");
 
   const moderation = await fetchImpl("https://api.openai.com/v1/moderations", {
