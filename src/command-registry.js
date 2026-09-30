@@ -71,7 +71,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["zedmaxprice", "View ZED MAX SOL licence prices"], ["zedmaxreceipt", "Submit a SOL payment receipt"]
   ]),
   group("admin-missions", "🛡 Admin • Missions, Reviews, Members & Settings", "admin", [
-    ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"],
+    ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"], ["secureguard", "Open REX SecureGuard security controls"],
     ["reviewqueue", "Open mission, Creator and Hero human-review queues"],
     ["newmission", "Create a mission"], ["editmission", "Edit a mission"], ["endmission", "End a mission"],
     ["raidprogress", "Update Ronald Raider likes/reposts/replies/views"], ["stopraid", "Stop the live Ronald Raider Raid"],
