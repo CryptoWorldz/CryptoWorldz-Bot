@@ -33,6 +33,27 @@ create table if not exists public.community_suite_groups (
   unique(workspace_slug)
 );
 
+create table if not exists public.community_suite_networks (
+  network_key text primary key,
+  name text not null,
+  owner_telegram_id bigint not null,
+  max_groups integer not null default 5 check (max_groups between 1 and 1000),
+  status text not null default 'active' check (status in ('active','suspended','closed')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.community_suite_network_members (
+  network_key text not null references public.community_suite_networks(network_key) on delete cascade,
+  chat_id bigint not null references public.community_suite_groups(chat_id) on delete cascade,
+  status text not null default 'pending' check (status in ('pending','active','removed')),
+  requested_by bigint,
+  approved_by bigint,
+  requested_at timestamptz not null default now(),
+  approved_at timestamptz,
+  primary key(network_key,chat_id)
+);
+
 create table if not exists public.community_suite_modules (
   chat_id bigint not null references public.community_suite_groups(chat_id) on delete cascade,
   module_key text not null,
@@ -256,7 +277,7 @@ declare
   t text;
 begin
   foreach t in array array[
-    'community_suite_groups','community_suite_modules','community_suite_branding',
+    'community_suite_groups','community_suite_networks','community_suite_network_members','community_suite_modules','community_suite_branding',
     'community_suite_ai_profiles','community_suite_ai_knowledge',
     'community_suite_tickets','community_suite_ticket_messages','community_suite_calendar_events','community_suite_giveaways',
     'community_suite_giveaway_entries','community_suite_wallet_watchlist',
