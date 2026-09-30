@@ -333,6 +333,148 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
     }
   });
 
+  bot.onText(/^\/networkstatus(?:@\w+)?$/i, async (message) => {
+    try {
+      if (!isGroup(message)) return send(message, "❌ Network status belongs inside a customer group.");
+      await groupRow(message);
+      const { data: group, error } = await supabase.from("community_suite_groups")
+        .select("network_key").eq("chat_id", Number(message.chat.id)).maybeSingle();
+      if (error) throw error;
+      if (!group?.network_key) return send(message, "🌐 This group is not attached to a multi-group network licence.");
+      const { data: network } = await supabase.from("community_suite_networks").select("*").eq("network_key", group.network_key).maybeSingle();
+      const { count } = await supabase.from("community_suite_network_members").select("*", { count:"exact", head:true })
+        .eq("network_key", group.network_key).eq("status", "active");
+      return send(message, [
+        "🌐 COMMUNITY SUITE NETWORK",
+        "",
+        `Network: ${network?.name || group.network_key}`,
+        `Key: ${group.network_key}`,
+        `Active groups: ${count || 0}/${network?.max_groups || "—"}`,
+        `Status: ${network?.status || "unknown"}`
+      ].join("\n"));
+    } catch {
+      return send(message, "❌ Network status could not be loaded.");
+    }
+  });
+
+  bot.onText(/^\/networkrequest(?:@\w+)?\s+([a-z0-9_-]{2,48})$/i, async (message, match) => {
+    try {
+      if (!isGroup(message) || !(await requireAdmin(message))) return send(message, "⛔ Group admin access required.");
+      await groupRow(message);
+      const networkKey = String(match[1]).toLowerCase();
+      const { data: network, error } = await supabase.from("community_suite_networks")
+        .select("*").eq("network_key", networkKey).eq("status", "active").maybeSingle();
+      if (error) throw error;
+      if (!network) return send(message, "❌ Active network licence not found.");
+      const { error: requestError } = await supabase.from("community_suite_network_members").upsert({
+        network_key: networkKey,
+        chat_id: Number(message.chat.id),
+        status: "pending",
+        requested_by: Number(message.from.id),
+        requested_at: new Date().toISOString()
+      }, { onConflict:"network_key,chat_id" });
+      if (requestError) throw requestError;
+      return send(message, `🌐 Network request submitted for ${network.name}. Owner approval is required before this group consumes a network slot.`);
+    } catch {
+      return send(message, "❌ Network request could not be recorded.");
+    }
+  });
+
+  bot.onText(/^\/networkcreate(?:@\w+)?\s+([a-z0-9_-]{2,48})\s*\|\s*([^|]+)\s*\|\s*(\d+)$/i, async (message, match) => {
+    try {
+      if (!owner(message, config)) return send(message, "⛔ Worldz owner access required.");
+      const networkKey = String(match[1]).toLowerCase();
+      const name = String(match[2]).trim().slice(0, 120);
+      const maxGroups = Number(match[3]);
+      if (!name || !Number.isInteger(maxGroups) || maxGroups < 1 || maxGroups > 1000) return send(message, "❌ Use /networkcreate KEY | NAME | MAX_GROUPS");
+      const { error } = await supabase.from("community_suite_networks").upsert({
+        network_key: networkKey,
+        name,
+        owner_telegram_id: Number(message.from.id),
+        max_groups: maxGroups,
+        status: "active",
+        updated_at: new Date().toISOString()
+      }, { onConflict:"network_key" });
+      if (error) throw error;
+      return send(message, `✅ Network ${name} created with up to ${maxGroups} group slots.`);
+    } catch {
+      return send(message, "❌ Network licence could not be created.");
+    }
+  });
+
+  bot.onText(/^\/networkapprove(?:@\w+)?\s+([a-z0-9_-]{2,48})\s+(-?\d+)$/i, async (message, match) => {
+    try {
+      if (!owner(message, config)) return send(message, "⛔ Worldz owner access required.");
+      const networkKey = String(match[1]).toLowerCase();
+      const chatId = Number(match[2]);
+      const { data: network, error } = await supabase.from("community_suite_networks").select("*").eq("network_key", networkKey).eq("status","active").maybeSingle();
+      if (error) throw error;
+      if (!network) return send(message, "❌ Active network not found.");
+      const { count } = await supabase.from("community_suite_network_members").select("*",{count:"exact",head:true}).eq("network_key",networkKey).eq("status","active");
+      const { data: existing } = await supabase.from("community_suite_network_members").select("status").eq("network_key",networkKey).eq("chat_id",chatId).maybeSingle();
+      if (existing?.status !== "active" && Number(count || 0) >= Number(network.max_groups)) return send(message, "❌ That network has no free group slots.");
+      await supabase.from("community_suite_network_members").upsert({
+        network_key:networkKey, chat_id:chatId, status:"active",
+        approved_by:Number(message.from.id), approved_at:new Date().toISOString()
+      }, {onConflict:"network_key,chat_id"});
+      await supabase.from("community_suite_groups").update({network_key:networkKey,updated_at:new Date().toISOString()}).eq("chat_id",chatId);
+      return send(message, `✅ Group ${chatId} activated on network ${network.name}.`);
+    } catch {
+      return send(message, "❌ Network group approval failed.");
+    }
+  });
+
+  bot.onText(/^\/networkremove(?:@\w+)?\s+([a-z0-9_-]{2,48})\s+(-?\d+)$/i, async (message, match) => {
+    try {
+      if (!owner(message, config)) return send(message, "⛔ Worldz owner access required.");
+      const networkKey=String(match[1]).toLowerCase(), chatId=Number(match[2]);
+      await supabase.from("community_suite_network_members").update({status:"removed"}).eq("network_key",networkKey).eq("chat_id",chatId);
+      await supabase.from("community_suite_groups").update({network_key:null,updated_at:new Date().toISOString()}).eq("chat_id",chatId).eq("network_key",networkKey);
+      return send(message, `✅ Group ${chatId} removed from network ${networkKey}.`);
+    } catch {
+      return send(message, "❌ Network group could not be removed.");
+    }
+  });
+
+  bot.onText(/^\/launchconnect(?:@\w+)?\s+([^|]+)\s*\|\s*([^|]+)\s*\|\s*(\S+)$/i, async (message, match) => {
+    try {
+      if (!isGroup(message) || !(await requireAdmin(message))) return send(message, "⛔ Group admin access required.");
+      await groupRow(message);
+      const slug=String(match[1]).trim().toLowerCase().replace(/[^a-z0-9_-]+/g,"-").slice(0,80);
+      const symbol=String(match[2]).trim().toUpperCase().replace(/^\$/,"").slice(0,24);
+      const address=String(match[3]).trim().slice(0,240);
+      if (!slug || !symbol || !address) return send(message, "❌ Use /launchconnect PROJECT_SLUG | SYMBOL | TOKEN_ADDRESS");
+      await supabase.from("community_suite_groups").update({launchpad_project_slug:slug,updated_at:new Date().toISOString()}).eq("chat_id",Number(message.chat.id));
+      await supabase.from("community_suite_branding").upsert({
+        chat_id:Number(message.chat.id),token_symbol:symbol,token_address:address,updated_by_telegram_id:Number(message.from.id),updated_at:new Date().toISOString()
+      },{onConflict:"chat_id"});
+      await recordAnalytics(supabase,message.chat.id,message.from.id,"launchpad_link_recorded",{slug,symbol});
+      return send(message, `🚀 LaunchPad linkage recorded: ${slug} • ${symbol} • ${address}\n\nThis records the community relationship; it does not claim an external listing or launch is live without separate evidence.`);
+    } catch {
+      return send(message, "❌ LaunchPad linkage could not be recorded.");
+    }
+  });
+
+  bot.onText(/^\/launchstatus(?:@\w+)?$/i, async (message) => {
+    try {
+      if (!isGroup(message)) return send(message, "❌ Launch status belongs inside the customer group.");
+      await groupRow(message);
+      const {data:group}=await supabase.from("community_suite_groups").select("launchpad_project_slug").eq("chat_id",Number(message.chat.id)).maybeSingle();
+      const {data:brand}=await supabase.from("community_suite_branding").select("token_symbol,token_address").eq("chat_id",Number(message.chat.id)).maybeSingle();
+      return send(message, [
+        "🚀 WORLDZLAUNCHPAD™ COMMUNITY LINK",
+        "",
+        `Project slug: ${group?.launchpad_project_slug || "not linked"}`,
+        `Token: ${brand?.token_symbol ? "$"+brand.token_symbol : "—"}`,
+        `Address: ${brand?.token_address || "—"}`,
+        "",
+        "Use /scan TOKEN_ADDRESS for live market/authority evidence."
+      ].join("\n"));
+    } catch {
+      return send(message, "❌ Launch linkage could not be loaded.");
+    }
+  });
+
   bot.onText(/^\/analytics(?:@\w+)?$/i, async (message) => {
     try {
       if (!isGroup(message)) return send(message, "❌ Analytics belongs inside the group.");
