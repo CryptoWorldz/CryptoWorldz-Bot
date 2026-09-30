@@ -76,7 +76,7 @@ async function callCommunityAI({ apiKey, model, question, history, profile, know
 function registerCommunityAI({ bot, config, supabase, env = process.env, fetchImpl = fetch }) {
   const apiKey = String(env.OPENAI_API_KEY || "").trim();
   const fallbackModel = String(env.COMMUNITY_AI_MODEL || "gpt-4o-mini").trim();
-  const send = (message, text) => bot.sendMessage(message.chat.id, text);
+  const send = (message, text, options) => bot.sendMessage(message.chat.id, text, options);
   const histories = new Map();
   const requireAdmin = async (message) => owner(message, config) || await telegramAdmin(bot, message);
 
@@ -225,6 +225,97 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
     }
   });
 
+  bot.onText(/^\/autopicks(?:@\w+)?$/i, async (message) => {
+    try {
+      if (!isGroup(message)) return send(message, "🤖 Open Auto Picks inside the customer group.");
+      const profile = await profileFor(message);
+      return send(message, formatAutoPicks(profile.preset_key), configKeyboard(profile));
+    } catch {
+      return send(message, "❌ Auto Picks could not load.");
+    }
+  });
+
+  bot.onText(/^\/aiconfig(?:@\w+)?$/i, async (message) => {
+    try {
+      if (!isGroup(message)) return send(message, "🤖 Open AI settings inside the customer group.");
+      const profile = await profileFor(message);
+      return send(message, [
+        "⚙️ COMMUNITY AI SETTINGS",
+        "",
+        `Selected: ${profile.display_name} • ${profile.role_label || "Community Assistant"}`,
+        "",
+        "Choose a ready-made Auto Pick below, or choose Custom Build.",
+        "Personality changes do not bypass module, licence or admin permissions.",
+        "",
+        "Custom command:",
+        "/aibuild NAME | PERSONALITY | PURPOSE"
+      ].join("\n"), configKeyboard(profile));
+    } catch {
+      return send(message, "❌ AI settings could not load.");
+    }
+  });
+
+  bot.onText(/^\/(?:autopick|aipreset)(?:@\w+)?\s+([a-z0-9.]+)$/i, async (message, match) => {
+    try {
+      if (!isGroup(message) || !(await requireAdmin(message))) return send(message, "⛔ Group admin access required.");
+      const key = String(match[1] || "").toLowerCase();
+      if (!presetKeys().includes(key)) return send(message, `❌ Unknown Auto Pick. Choose: ${presetKeys().join(", ")}`);
+      const profile = await savePreset(message, key);
+      if (key === "custom") {
+        return send(message, "🛠 Custom Build selected. Finish it with:\n/aibuild NAME | PERSONALITY | PURPOSE", configKeyboard(profile));
+      }
+      return send(message, `✅ Auto Pick selected: ${profile.display_name}\nRole: ${profile.role_label}\n\nUse /aicapabilities to see what it knows how to route.`, configKeyboard(profile));
+    } catch {
+      return send(message, "❌ Auto Pick could not be changed.");
+    }
+  });
+
+  bot.onText(/^\/aibuild(?:@\w+)?\s+([\s\S]+)$/i, async (message, match) => {
+    try {
+      if (!isGroup(message) || !(await requireAdmin(message))) return send(message, "⛔ Group admin access required.");
+      const parts = String(match[1] || "").split("|").map((part) => part.trim());
+      const displayName = parts.shift();
+      const personality = parts.shift();
+      const purpose = parts.join(" | ").trim();
+      if (!displayName || !personality || !purpose) return send(message, "❌ Use: /aibuild NAME | PERSONALITY | PURPOSE");
+      await profileFor(message);
+      const { data, error } = await supabase.from("community_suite_ai_profiles").update({
+        preset_key: "custom",
+        display_name: displayName.slice(0, 64),
+        role_label: "Custom Community Assistant",
+        personality: personality.slice(0, 700),
+        purpose: purpose.slice(0, 1200),
+        custom_instructions: `Customer-defined purpose: ${purpose.slice(0, 1200)}`,
+        updated_by: Number(message.from.id),
+        updated_at: new Date().toISOString()
+      }).eq("chat_id", Number(message.chat.id)).select("*").single();
+      if (error) throw error;
+      await recordAnalytics(supabase, message.chat.id, message.from.id, "community_ai_custom_build");
+      return send(message, [
+        "✅ CUSTOM AI BUILD SAVED",
+        "",
+        `Name: ${data.display_name}`,
+        `Personality: ${data.personality}`,
+        `Purpose: ${data.purpose}`,
+        "",
+        "It now uses the live Command Centre capability map plus approved project knowledge.",
+        "Add project facts with /aiknowledge TITLE | CONTENT | optional-source-url"
+      ].join("\n"), configKeyboard(data));
+    } catch {
+      return send(message, "❌ Custom AI Build could not be saved.");
+    }
+  });
+
+  bot.onText(/^\/aicapabilities(?:@\w+)?$/i, async (message) => {
+    try {
+      if (!isGroup(message)) return send(message, "🧠 Capability state belongs to the configured customer group.");
+      await ensureGroup(supabase, message, config);
+      const context = await buildAssistantCapabilityContext({ supabase, chatId: message.chat.id });
+      return send(message, formatCapabilitySummary(context));
+    } catch {
+      return send(message, "❌ Live AI capability map could not load.");
+    }
+  });
   bot.onText(/^\/askcommunity(?:@\w+)?(?:\s+([\s\S]+))?$/i, async (message, match) => {
     const question = String(match?.[1] || "").trim();
     return question ? answer(message, question) : send(message, "🤖 Use /askcommunity followed by your question.");
