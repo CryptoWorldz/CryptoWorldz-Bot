@@ -48,3 +48,29 @@ test("Worldz Votes Centre and WorldzGovern commands live in separate registry gr
   const governNames = new Set(govern.commands.map((item) => item.command));
   for (const command of voteNames) assert.equal(governNames.has(command), false, command);
 });
+
+
+test("Community Suite command groups expose member tools without leaking owner controls", () => {
+  const member = groupsForRole("member");
+  const suite = member.find((group) => group.key === "community-suite");
+  assert.ok(suite);
+  const memberNames = new Set(suite.commands.map((item) => item.command));
+  for (const command of ["suite","alice","aicommunity","scan","scan20","events","giveaway","buyalerts","networkstatus","launchstatus"]) {
+    assert.ok(memberNames.has(command), command);
+  }
+  for (const command of ["suiteapprove","networkcreate","networkapprove","networkremove"]) {
+    assert.equal(memberNames.has(command), false, command);
+  }
+});
+
+test("Community Suite admin and owner controls are registered at the correct layers", () => {
+  const admin = groupsForRole("admin");
+  const suiteAdmin = admin.find((group) => group.key === "community-suite-admin");
+  assert.ok(suiteAdmin);
+  const adminNames = new Set(suiteAdmin.commands.map((item) => item.command));
+  for (const command of ["module","brand","lockdown","tickets","buyalert","apikeycreate","webhookadd","networkrequest","launchconnect"]) {
+    assert.ok(adminNames.has(command), command);
+  }
+  const ownerNames = new Set(groupsForRole("owner").flatMap((group) => group.commands.map((item) => item.command)));
+  for (const command of ["suiteapprove","networkcreate","networkapprove","networkremove"]) assert.ok(ownerNames.has(command), command);
+});
