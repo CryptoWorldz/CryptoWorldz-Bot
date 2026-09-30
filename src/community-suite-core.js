@@ -6,6 +6,7 @@ const SOL_SIGNATURE = /^[1-9A-HJ-NP-Za-km-z]{32,128}$/;
 const MODULES = Object.freeze([
   ["rex_secureguard", "🛡 REX SecureGuard™"],
   ["alice_support", "📥 ALICE™ Support"],
+  ["custom_ai", "🤖 Custom AI Community Bot"],
   ["ronald_raider", "🤠 Ronald Raider"],
   ["shill_rewards", "📣 Shill Rewards"],
   ["votes", "🗳 Worldz Votes Centre™"],
