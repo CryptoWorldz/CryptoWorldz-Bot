@@ -104,6 +104,15 @@ async function moduleEnabled(supabase, chatId, moduleKey) {
   return data ? data.enabled !== false : true;
 }
 
+async function moduleAvailable(supabase, chatId, moduleKey) {
+  const { data: group, error: groupError } = await supabase.from("community_suite_groups")
+    .select("emergency_lockdown").eq("chat_id", Number(chatId)).maybeSingle();
+  if (groupError) throw groupError;
+  const emergencyAllowed = new Set(["rex_secureguard","alice_support","inbox"]);
+  if (group?.emergency_lockdown && !emergencyAllowed.has(String(moduleKey))) return false;
+  return moduleEnabled(supabase, chatId, moduleKey);
+}
+
 async function setModule(supabase, chatId, moduleKey, enabled, actorId) {
   if (!MODULES.some(([key]) => key === moduleKey)) throw new Error("unknown_module");
   const { error } = await supabase.from("community_suite_modules").upsert({
@@ -168,6 +177,7 @@ module.exports = {
   currentLicence,
   ensureGroup,
   isGroup,
+  moduleAvailable,
   moduleEnabled,
   owner,
   pricing,
