@@ -169,10 +169,7 @@ jobs:
 
           webhook_secret=hashlib.sha256(token.encode()).hexdigest()
           message_seed=int(time.time()) % 1800000000
-          counter=0
-          def post_command(text):
-              nonlocal_counter=None
-              # Python's nested mutation uses the list below to keep IDs monotonic.
+          # Keep synthetic Telegram update IDs monotonic for this proof run.
           ids=[message_seed]
           def send_command(text):
               ids[0]+=1
@@ -197,7 +194,7 @@ jobs:
                   },
                   method="POST"
               )
-              with urllib.request.urlopen(req,timeout=30) as response:
+              with urllib.request.urlopen(req,timeout=60) as response:
                   if response.status!=200:
                       raise RuntimeError("Telegram webhook rejected "+text)
                   response.read()
