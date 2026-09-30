@@ -52,7 +52,7 @@
     .switch:after{content:"";position:absolute;width:17px;height:17px;border-radius:50%;left:3px;top:3px;background:#73677d;transition:.2s}
     .switch.on{background:#55e6a51a;border-color:#55e6a54a}.switch.on:after{left:23px;background:#55e6a5;box-shadow:0 0 10px #55e6a566}
     .switch.locked{background:#a84cff16;border-color:#a84cff44}.switch.locked:after{left:23px;background:#bd74ff}
-    .flow{display:grid;grid-template-columns:repeat(7,minmax(100px,1fr));align-items:stretch;gap:7px;margin-top:16px;overflow:auto;padding-bottom:4px}
+    .flow{display:flex;align-items:stretch;gap:7px;margin-top:16px;overflow:auto;padding-bottom:4px}.flow-node{flex:1 0 132px}.flow-arrow{flex:0 0 18px}
     .flow-node{min-width:120px;border:1px solid #ffffff0d;border-radius:15px;padding:13px;background:#09040f;position:relative}
     .flow-node b{display:block;font-size:.75rem}.flow-node small{display:block;color:#6e6277;font-size:.61rem;margin-top:4px}.flow-node strong{display:block;margin-top:9px;color:#d096ff}
     .flow-arrow{display:grid;place-items:center;color:#6c3c91;font-size:1.25rem;font-weight:950;min-width:18px}
@@ -75,7 +75,7 @@
     @media(max-width:680px){
       .revenue-shell{padding:17px 12px 100px}.app-head{display:block}.status-stack{justify-content:flex-start;margin-top:14px}
       .metric-grid,.calc-grid,.result-grid{grid-template-columns:1fr 1fr}.metric{padding:13px}.metric strong{font-size:1.55rem}
-      .side-nav{display:none}.panel{padding:14px}.flow{grid-template-columns:repeat(7,132px)}
+      .side-nav{display:none}.panel{padding:14px}.flow-node{flex-basis:132px}
       .mobile-dock{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);left:10px;right:10px;bottom:10px;z-index:120;border:1px solid #ffffff12;border-radius:18px;padding:7px;background:rgba(9,4,14,.94);backdrop-filter:blur(20px);box-shadow:0 18px 60px #000}
       .dock-btn{border:0;background:transparent;color:#7f7188;padding:7px 2px;border-radius:11px;font-size:.58rem;font-weight:850}.dock-btn b{display:block;font-size:.9rem;color:#a889b8}.dock-btn.active{background:#a84cff15;color:#ead9f4}.dock-btn.active b{color:#ce8eff}
     }
