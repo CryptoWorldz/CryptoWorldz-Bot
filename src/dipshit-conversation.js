@@ -112,6 +112,7 @@ function registerDipshitConversation({
   send,
   privacyUrl,
   termsUrl,
+  supabase = null,
   fetchImpl = fetch
 }) {
   const openaiKey = String(process.env.OPENAI_API_KEY || "").trim();
@@ -128,7 +129,24 @@ function registerDipshitConversation({
     conversations.set(key, [...(conversations.get(key) || []), { role, content }].slice(-8));
   };
 
+  const chatAllowsConversation = async (msg) => {
+    const chatType = String(msg?.chat?.type || "");
+    if (!supabase || chatType === "private") return true;
+    try {
+      const { data, error } = await supabase
+        .from("zed_chat_settings")
+        .select("dipshit_enabled")
+        .eq("chat_id", Number(msg.chat.id))
+        .maybeSingle();
+      if (error) throw error;
+      return data ? data.dipshit_enabled !== false : true;
+    } catch {
+      return true;
+    }
+  };
+
   const handleConversation = async (msg, suppliedText) => {
+    if (!(await chatAllowsConversation(msg))) return undefined;
     const raw = String(suppliedText == null ? msg?.text || "" : suppliedText).trim();
     const message = stripDipshitAddressing(raw, botUsername);
     if (!message) {
