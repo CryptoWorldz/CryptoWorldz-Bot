@@ -194,23 +194,32 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
     try {
       if (!isGroup(message)) return send(message, "🤖 Open /aicommunity inside the customer group.");
       const profile = await profileFor(message);
-      const knowledge = await knowledgeFor(message.chat.id);
+      const [knowledge, capabilityContext] = await Promise.all([
+        knowledgeFor(message.chat.id),
+        buildAssistantCapabilityContext({ supabase, chatId: message.chat.id })
+      ]);
       const { data: group } = await supabase.from("community_suite_groups").select("product_package,language_code").eq("chat_id", Number(message.chat.id)).maybeSingle();
+      const ready = capabilityContext.capabilities.filter((row) => ["enabled","runtime_available"].includes(row.state)).length;
       return send(message, [
-        "🤖 CUSTOM AI COMMUNITY BOT",
+        "🤖 COMMUNITY AI",
         "",
+        `Auto Pick: ${profile.preset_key || "custom"}`,
         `Name: ${profile.display_name}`,
+        `Role: ${profile.role_label || "Customer Community Assistant"}`,
         `Personality: ${profile.personality}`,
+        `Purpose: ${profile.purpose || "Not set"}`,
         `Package: ${group?.product_package || "full"}`,
         `Language preference: ${group?.language_code || "en"}`,
         `Approved knowledge entries: ${knowledge.length}`,
+        `Known runtime capabilities: ${capabilityContext.capabilities.length} • ready here: ${ready}`,
         `AI runtime: ${apiKey ? "✅ connected" : "⚙️ provider key not connected"}`,
         "",
         "Ask: /askcommunity QUESTION",
-        "Or start a message with: AI: QUESTION",
+        "Or address the selected AI by name, e.g. No.5: what can we do?",
         "",
-        "Admins: /ainame • /aipersonality • /aiinstructions • /aiknowledge • /aiforget"
-      ].join("\n"));
+        "Settings: /aiconfig • /autopicks • /aicapabilities",
+        "Custom Build: /aibuild NAME | PERSONALITY | PURPOSE"
+      ].join("\n"), configKeyboard(profile));
     } catch {
       return send(message, "❌ Community AI profile could not load.");
     }
