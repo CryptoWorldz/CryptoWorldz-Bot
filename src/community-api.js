@@ -9,6 +9,7 @@ const {
   owner,
   recordAnalytics,
   secureRandomToken,
+  suiteAccessAllowed,
   telegramAdmin
 } = require("./community-suite-core");
 
@@ -87,6 +88,7 @@ function registerCommunityApi({ app, bot, config, supabase, env = process.env })
     const { data, error } = await supabase.from("community_suite_api_keys")
       .select("*").eq("chat_id", Number(chatId)).eq("token_hash", hash).eq("enabled", true).maybeSingle();
     if (error || !data) return null;
+    if (!(await suiteAccessAllowed(supabase, chatId))) return null;
     if (!(data.scopes || []).includes(requiredScope) && !(data.scopes || []).includes("*")) return null;
     await supabase.from("community_suite_api_keys").update({ last_used_at: new Date().toISOString() }).eq("id", data.id);
     return data;
