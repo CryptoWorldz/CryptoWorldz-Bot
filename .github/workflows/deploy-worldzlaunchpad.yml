@@ -131,7 +131,7 @@ jobs:
           assert safe['feeRoutes']['holdersLpCommunityCombinedMinPercent']==60
 
           required=[
-            root/'index.html',root/'app.js',root/'style.css',root/'status.php',
+            root/'index.html',root/'app.js',root/'style.css',root/'status.php',root/'deploy/index.html',
             root/'platform-config.json',root/'treasury-policy.json',root/'metadata.php',
             root/'devnet/index.html',root/'devnet/app.js',
             root/'curve/index.html',root/'curve/app.js',
@@ -679,7 +679,9 @@ jobs:
                   mainnet_code,mainnet_body=get(base+'/mainnet/?verify=public-v6')
                   base_code,base_body=get(base+'/base/?verify=public-v6')
                   genesis_code,genesis_body=get(base+'/genesis/?verify=public-v9')
-                  mint_code,mint_body=get(base+'/mint/?verify=public-v10')
+                  deploy_code,deploy_body=get(base+'/deploy/?verify=deploy-v1')
+                  mint_code,mint_body=get(base+'/mint/?verify=public-v11')
+                  mint_js_code,mint_js_body=get(base+'/mint/app.js?verify=public-v11')
                   jup_bridge_code,jup_bridge_body=get(base+'/mint/jupiter-mobile.js?verify=public-v10')
                   trust_code,trust_body=get(base+'/trust/?verify=trust-v2')
                   fullbuild_code,fullbuild_body=get(base+'/fullbuild/?verify=fullbuild-v1')
@@ -709,7 +711,9 @@ jobs:
                   campaign_json_code,campaign_json_body=get(base+'/worldz-launch/campaign.json?verify=worldz-launch-v1')
                   status_code,status_body=get(base+'/status.php?verify=public-v6')
                   reg_code,reg_body=get(registry+'?verify=public-v6')
-                  platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body)
+                  mint_registry='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-mint-register'
+                  mint_reg_code,mint_reg_body=get(mint_registry+'?verify=worldzmint-v1')
+                  platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body); public_mint_registry=json.loads(mint_reg_body)
                   tokenlist=json.loads(tokenlist_body); identity=json.loads(identity_body); rviv_meta=json.loads(rviv_meta_body)
                   local_identity=json.loads(Path('worldzpad-mainnet/token-identity/worldz-token-registry.v1.json').read_text())
                   assert identity==local_identity, 'LIVE_CANONICAL_REGISTRY_MISMATCH'
@@ -783,7 +787,10 @@ jobs:
                   assert base_code==200 and 'WORLDZ EVM FAIR™' in base_body and 'BASE SEPOLIA' in base_body
                   assert genesis_code==200 and 'PRIVATE GENESIS CONSOLE' in genesis_body
                   assert all(term not in genesis_body for term in private_terms)
+                  assert deploy_code==200 and 'DEPLOY YOUR TOKEN' in deploy_body.upper() and 'DEPLOY REAL MAINNET TOKEN' in deploy_body
+                  assert '/mint/?network=mainnet-beta' in deploy_body
                   assert mint_code==200 and 'WORLDZMINT' in mint_body.upper() and 'FIXED SUPPLY' in mint_body.upper() and 'Jupiter Wallet' in mint_body
+                  assert mint_js_code==200 and 'WORLDZMINT-1' in mint_js_body and "environment:network()" in mint_js_body and "action:'FINALIZE'" in mint_js_body
                   assert all(term not in mint_body for term in private_terms)
                   assert jup_bridge_code==200 and '@jup-ag/jup-mobile-adapter@0.0.2' in jup_bridge_body
                   assert platform['walletConnectivity']['reown']['projectId'] in jup_bridge_body
@@ -892,12 +899,16 @@ jobs:
                   assert platform['trustOrbit']['version']=='WORLDZ-TRUST-ORBIT-1'
                   assert status_code==200 and live['ok'] is True
                   assert reg_code==200 and public_registry['ok'] is True
+                  assert mint_reg_code==200 and public_mint_registry['ok'] is True
+                  assert public_mint_registry['standard']=='WORLDZMINT-1'
+                  assert public_mint_registry['platformTokenSupplyTakePercent']==0
+                  assert public_mint_registry['walletTransferTaxPercent']==0
                   assert public_registry['platformSharePercentOfCollectedTokenFee']==10
                   assert public_registry['founding100']['totalPositions']==100
                   assert public_registry['founding100']['futureWorldzPoolPercent']==10
                   assert public_registry['founding100']['equalAllocationPerQualifiedPositionPercent']==0.1
 
-                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 token_identity=PASS wldz=WORLDZ rviv=REVIVE future_identity_fail_closed=1 worldzmint=1 technology_guide=1 jupiter_mobile_reown=1 confidence_stack=1 registry=1 fee_only_10=1 founding100=1 base_sepolia=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
+                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 mainnet_token_deploy=1 worldzmint_backend=1 token_identity=PASS wldz=WORLDZ rviv=REVIVE future_identity_fail_closed=1 worldzmint=1 technology_guide=1 jupiter_mobile_reown=1 confidence_stack=1 registry=1 fee_only_10=1 founding100=1 base_sepolia=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:
