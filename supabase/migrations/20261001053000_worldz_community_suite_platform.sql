@@ -28,6 +28,7 @@ create table if not exists public.community_suite_groups (
   emergency_lockdown boolean not null default false,
   owner_telegram_id bigint,
   network_key text,
+  launchpad_project_slug text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique(workspace_slug)
