@@ -1,6 +1,15 @@
 (() => {
   const tg = window.Telegram && window.Telegram.WebApp;
   const root = () => document.getElementById("community-suite-root");
+  const AI_PRESETS = [
+    ["no5","No.5","Smart Operator"],
+    ["dipshit","DipShit","Cheeky Troubleshooter"],
+    ["alice","ALICE","Support + Organisation"],
+    ["rex","REX","Security + Moderation"],
+    ["grace","G.R.A.C.E.","Communications + Campaigns"],
+    ["max","MAX","Knowledge + Learning"],
+    ["custom","Custom Build","Your Name + Personality + Purpose"]
+  ];
 
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -30,7 +39,7 @@
 
   function packageName(value) {
     return value === "operations" ? "Operations Bot" :
-      value === "ai" ? "Custom AI Community Bot" :
+      value === "ai" ? "AI Community Bot — Auto Pick / Custom" :
       value === "full" ? "Full 2-Bot Suite" : "Not selected";
   }
 
@@ -66,6 +75,13 @@
     const brand = data.branding || {};
     const licence = data.licence || {};
     const counts = data.counts || {};
+    const ai = data.ai_profile || { preset_key:"no5", display_name:"No.5", role_label:"Smart Community Operator", personality:"Fast, practical and capability-aware", purpose:"Route the community to the right installed tool." };
+    const capabilityRows = (data.ai_capabilities?.capabilities || []).map((item) => {
+      const mark = ["enabled","runtime_available"].includes(item.state) ? "✅" : item.state === "disabled_in_group" ? "⬜" : item.state === "configured_but_unlicensed" ? "🔒" : "ℹ️";
+      const command = [...(item.member_commands || []), ...(item.admin_commands || [])][0] || "";
+      return `<div><b>${mark} ${escapeHtml(item.label)}</b><small>${escapeHtml(item.state)}${command ? " • " + escapeHtml(command) : ""}</small></div>`;
+    }).join("");
+    const presetButtons = AI_PRESETS.map(([key,name,role]) => `<button class="button ${ai.preset_key === key ? "" : "secondary"} suite-ai-preset" data-preset="${key}">${ai.preset_key === key ? "✅ " : ""}${escapeHtml(name)}<br><small>${escapeHtml(role)}</small></button>`).join("");
     node.innerHTML = `
       <article class="panel">
         <p class="eyebrow">WORLDZ FULLBUILD™ COMMUNITY SUITE</p>
@@ -82,6 +98,28 @@
         <article><span>🐋</span><strong>${Number(counts.market_alerts || 0)}</strong><small>Market Alerts</small></article>
         <article><span>📅</span><strong>${Number(counts.upcoming_events || 0)}</strong><small>Upcoming Events</small></article>
       </section>
+
+      <article class="panel">
+        <p class="eyebrow">🤖 AI AUTO PICK + CUSTOM BUILD</p>
+        <h3>${escapeHtml(ai.display_name || "Community AI")}</h3>
+        <p><b>${escapeHtml(ai.role_label || "Community Assistant")}</b></p>
+        <p>${escapeHtml(ai.personality || "")}</p>
+        <p><small>Purpose: ${escapeHtml(ai.purpose || "Not set")}</small></p>
+        <div class="form-row" style="flex-wrap:wrap;gap:8px">${presetButtons}</div>
+        <details style="margin-top:14px">
+          <summary><b>🧠 Live Capability Map</b></summary>
+          <div class="stats-grid" style="margin-top:10px">${capabilityRows || "<p>No live capability state yet.</p>"}</div>
+        </details>
+        <details style="margin-top:14px" ${ai.preset_key === "custom" ? "open" : ""}>
+          <summary><b>🛠 Custom — Build Your Own</b></summary>
+          <div style="display:grid;gap:8px;margin-top:10px">
+            <label>Name<input id="suite-ai-name" maxlength="64" value="${escapeHtml(ai.preset_key === "custom" ? ai.display_name || "" : "")}" placeholder="Community AI name"></label>
+            <label>Personality<textarea id="suite-ai-personality" maxlength="700" placeholder="How should it speak and behave?">${escapeHtml(ai.preset_key === "custom" ? ai.personality || "" : "")}</textarea></label>
+            <label>Purpose<textarea id="suite-ai-purpose" maxlength="1200" placeholder="What is this AI responsible for?">${escapeHtml(ai.preset_key === "custom" ? ai.purpose || "" : "")}</textarea></label>
+            <button id="suite-ai-custom-save" class="button">💾 Save Custom Build</button>
+          </div>
+        </details>
+      </article>
 
       <article class="panel security">
         <b>Emergency Control</b>
@@ -114,6 +152,51 @@
   }
 
   document.addEventListener("click", async (event) => {
+    const preset = event.target.closest(".suite-ai-preset");
+    if (preset) {
+      const id = chatId();
+      if (!id) return;
+      preset.disabled = true;
+      try {
+        await api("/api/mini/community-suite/ai/preset", {
+          method:"POST",
+          body:JSON.stringify({ chat_id:id, preset_key:preset.dataset.preset })
+        });
+        await load();
+      } catch (error) {
+        if (tg?.showAlert) tg.showAlert(`AI preset update failed: ${error.message}`);
+      } finally {
+        preset.disabled = false;
+      }
+      return;
+    }
+
+    const customSave = event.target.closest("#suite-ai-custom-save");
+    if (customSave) {
+      const id = chatId();
+      if (!id) return;
+      const display_name = document.getElementById("suite-ai-name")?.value?.trim() || "";
+      const personality = document.getElementById("suite-ai-personality")?.value?.trim() || "";
+      const purpose = document.getElementById("suite-ai-purpose")?.value?.trim() || "";
+      if (!display_name || !personality || !purpose) {
+        if (tg?.showAlert) tg.showAlert("Custom Build needs a name, personality and purpose.");
+        return;
+      }
+      customSave.disabled = true;
+      try {
+        await api("/api/mini/community-suite/ai/custom", {
+          method:"POST",
+          body:JSON.stringify({ chat_id:id, display_name, personality, purpose })
+        });
+        await load();
+      } catch (error) {
+        if (tg?.showAlert) tg.showAlert(`Custom AI update failed: ${error.message}`);
+      } finally {
+        customSave.disabled = false;
+      }
+      return;
+    }
+
     const toggle = event.target.closest(".suite-module-toggle");
     if (toggle) {
       const id = chatId();
