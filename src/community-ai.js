@@ -150,16 +150,23 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
     const profile = await profileFor(message);
     if (!profile.enabled) return send(message, "⏸ Custom Community AI is switched off.");
     if (!apiKey) return send(message, "⚙️ The customer AI profile is configured, but the runtime AI provider key is not connected.");
-    const knowledge = await knowledgeFor(message.chat.id);
+    const [knowledge, capabilityContext] = await Promise.all([
+      knowledgeFor(message.chat.id),
+      buildAssistantCapabilityContext({ supabase, chatId: message.chat.id })
+    ]);
     const key = `${message.chat.id}:${message.from?.id || "unknown"}`;
     const history = histories.get(key) || [];
     const context = {
       chat_id: message.chat.id,
       community: message.chat.title || "",
       language_preference: group?.language_code || "en",
+      auto_pick: profile.preset_key || "custom",
+      role: profile.role_label || "Customer Community Assistant",
+      purpose: profile.purpose || "",
       support_command: "/ticket SUBJECT | MESSAGE",
       security_command: "/secureguard status",
-      scan_command: "/scan TOKEN_ADDRESS"
+      scan_command: "/scan TOKEN_ADDRESS",
+      settings_command: "/aiconfig"
     };
     try {
       if (typeof bot.sendChatAction === "function") bot.sendChatAction(message.chat.id, "typing").catch(() => {});
@@ -171,10 +178,11 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
         profile,
         knowledge,
         context,
+        capabilityContext,
         fetchImpl
       });
       histories.set(key, [...history, { role:"user", content:question }, { role:"assistant", content:result }].slice(-8));
-      await recordAnalytics(supabase, message.chat.id, message.from.id, "community_ai_answer");
+      await recordAnalytics(supabase, message.chat.id, message.from.id, "community_ai_answer", { preset: profile.preset_key || "custom" });
       return send(message, `🤖 ${profile.display_name}\n\n${result.slice(0, 3800)}`);
     } catch (error) {
       console.error("Community AI failed", { code: error?.message || error?.code || "unknown" });
