@@ -305,8 +305,12 @@ jobs:
             {"command":"rewards","description":"View reward history"},
             {"command":"points","description":"View your Legend Points"},
             {"command":"leaderboard","description":"View the Top 25 Legends"},
-            {"command":"raaiiidd","description":"View the newest active Raaiiidd"},
-            {"command":"missions","description":"View every active Raaiiidd"},
+            {"command":"raid","description":"Open Ronald Raider"},
+            {"command":"next","description":"View the next Raid in line"},
+            {"command":"raaiiidd","description":"View the newest active Raid"},
+            {"command":"missions","description":"View every active Raid"},
+            {"command":"shillpoints","description":"View token Shill Rewards"},
+            {"command":"zedsettings","description":"Open live Bot Settings"},
             {"command":"wallet","description":"Connect a public Solana wallet"},
             {"command":"inbox","description":"Open your private Worldz Inbox"},
             {"command":"dm","description":"Send a private Worldz DM"},
@@ -329,7 +333,7 @@ jobs:
           call("setWebhook",{
             "url":"https://cryptobotz.cryptoworldz.xyz/telegram-webhook",
             "secret_token":secret,
-            "allowed_updates":["message","callback_query"],
+            "allowed_updates":["message","callback_query","chat_member"],
             "drop_pending_updates":False,
             "max_connections":5
           })
