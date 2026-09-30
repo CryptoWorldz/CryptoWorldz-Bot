@@ -17,7 +17,7 @@ Third-party API charges, premium AI usage, hosting outside included limits and f
 
 ## Branding
 ### Worldz Theme Packs
-Ship 5–10 coordinated themes. Each theme can include:
+Ship 10 coordinated themes. Each theme can include:
 - bot avatar
 - group welcome image
 - raid card
@@ -130,3 +130,32 @@ Never generate fake buys, wash trading, spoofed alerts, fake votes, bot engageme
 - Paid promotions are labelled and separated from organic rankings.
 - Real transaction data only for buy/market alerts.
 - No promise of token price, trading profit, ranking result or guaranteed safety.
+
+
+## Current branch implementation map
+The feature branch now contains:
+- commercial package/licence controls and payment-receipt review
+- 10 theme packs plus customer/premium branding modes
+- secure Mini App Community Suite admin surface
+- REX number-match verification, anti-flood, domain rules, trusted Telegram IDs, impersonation modes, linked-channel posture and recovery guidance
+- ALICE tracked support tickets and admin queues
+- custom customer AI profiles with approved knowledge
+- WorldzScan single-token and x20 scanning
+- authenticated provider/indexer market event ingest for real buy/whale/liquidity alerts
+- wallet watchlists
+- community calendar/reminders and giveaways
+- API keys and signed HTTPS webhooks with private-network blocking
+- multi-group network licences
+- LaunchPad community linkage
+- Worldz Marketplace add-on request/quote/status flow
+- customer social-account registry for X, Facebook, Instagram, YouTube, TikTok and Telegram
+- X and Facebook mapped to existing G.R.A.C.E. OAuth/publishing flows
+- Instagram, YouTube and TikTok direct publishing kept pending until dedicated OAuth adapters and credentials exist
+
+## Runtime truth
+This blueprint distinguishes source implementation from live deployment.
+- Source present on a feature branch does not mean the feature is live.
+- Database migrations must be applied before database-backed modules can run.
+- OAuth/provider integrations require their own valid credentials and provider approval.
+- Telegram security controls require the relevant bot admin rights.
+- Production status must be proven after merge/deployment with live runtime checks.
