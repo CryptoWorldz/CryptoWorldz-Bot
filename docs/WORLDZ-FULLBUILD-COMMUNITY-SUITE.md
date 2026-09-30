@@ -3,7 +3,7 @@
 ## Product
 A Worldz-hosted Telegram community platform built around two specialised bot roles:
 1. Operations Bot — ZED • AUTO • G.R.A.C.E. Command Centre functions, raids, missions, points, voting, scanning, alerts, settings and admin controls.
-2. Custom AI Community Bot — configurable name, personality, knowledge, support and conversational assistance.
+2. AI Community Bot — choose a ready-made Auto Pick (No.5, DipShit, ALICE, REX, G.R.A.C.E. or MAX) or create a Custom Build with its own name, personality and purpose. Every option uses the same live Worldz capability registry plus customer-approved project knowledge.
 
 Customers can purchase either bot alone or the complete two-bot suite.
 
@@ -38,6 +38,24 @@ Customer can supply:
 
 ### Premium Custom
 Paid custom artwork, personality writing, bot naming, custom command labels and bespoke integration work.
+
+### AI Auto Pick + Custom Build
+Ready-made Auto Picks:
+- No.5 — Smart Community Operator
+- DipShit — Cheeky Smart Troubleshooter
+- ALICE — Support + Organisation
+- REX — Security + Moderation
+- G.R.A.C.E. — Communications + Campaigns
+- MAX — Knowledge + Learning
+
+Custom Build lets the group admin define:
+- AI display name
+- personality
+- purpose / responsibility
+- approved project knowledge
+
+All choices share the live capability registry. The assistant should know that installed Worldz features exist, report the current group state, and give the exact command instead of guessing. A persona never bypasses licence, module, admin, wallet, treasury or execution controls.
+
 
 ## Modules
 ### Core
@@ -139,7 +157,7 @@ The feature branch now contains:
 - secure Mini App Community Suite admin surface
 - REX number-match verification, anti-flood, domain rules, trusted Telegram IDs, impersonation modes, linked-channel posture and recovery guidance
 - ALICE tracked support tickets and admin queues
-- custom customer AI profiles with approved knowledge
+- capability-aware customer AI profiles with approved knowledge, No.5/DipShit/ALICE/REX/G.R.A.C.E./MAX Auto Picks, deterministic named-feature routing, and Custom Build settings
 - WorldzScan single-token and x20 scanning
 - authenticated provider/indexer market event ingest for real buy/whale/liquidity alerts
 - wallet watchlists
