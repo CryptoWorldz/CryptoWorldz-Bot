@@ -76,7 +76,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["ticketreply", "Reply to a support ticket"], ["mytickets", "View your open support tickets"],
     ["scan", "Scan one token/CA"], ["scan20", "Scan up to 20 token addresses"],
     ["booststatus", "Check provider paid-order status"], ["boostcentre", "Open legitimate promotion options"],
-    ["events", "View community calendar events"], ["giveaway", "View open giveaways"],
+    ["events", "View community calendar events"], ["launchcountdown", "View or configure the next launch countdown"], ["giveaway", "View open giveaways"],
     ["giveawayjoin", "Enter an open giveaway"], ["walletwatch", "View public wallet watchlist"],
     ["buyalerts", "View real market/buy alert rules"],
     ["networkstatus", "View multi-group network licence status"], ["launchstatus", "View LaunchPad community linkage"],
