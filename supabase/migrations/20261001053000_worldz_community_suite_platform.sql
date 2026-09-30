@@ -12,6 +12,12 @@ alter table public.zed_group_licences
   add column if not exists product_package text not null default 'full'
     check (product_package in ('operations','ai','full'));
 
+alter table public.zed_group_licence_receipts
+  add column if not exists requested_plan text
+    check (requested_plan is null or requested_plan in ('trial','rent','rent_to_own','own')),
+  add column if not exists requested_package text
+    check (requested_package is null or requested_package in ('operations','ai','full'));
+
 create table if not exists public.community_suite_groups (
   chat_id bigint primary key,
   workspace_slug text not null,
