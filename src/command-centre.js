@@ -10,9 +10,6 @@ const BOT_MENU_COMMANDS = [
   { command: "admin", description: "Open Admin controls" },
   { command: "admingrace", description: "Open Grace Admin controls" },
   { command: "zedsettings", description: "Open Command Centre settings" },
-  { command: "raid", description: "Open Ronald Raider" },
-  { command: "next", description: "View the next Raid" },
-  { command: "shillpoints", description: "Open token Shill Rewards" },
   { command: "help", description: "Show the simple command guide" }
 ];
 
@@ -24,7 +21,6 @@ const MENUS = {
       ["👛 Wallet", "/wallet"],
       ["🤠 Ronald Raider", "/raid"],
       ["📣 Shill Rewards", "/shillpoints"],
-      ["🏆 Leaderboard", "/leaderboard"],
       ["📚 All Commands", "/commands"]
     ]
   },
