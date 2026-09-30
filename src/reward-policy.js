@@ -86,7 +86,7 @@ function buildLaunchRewardPlan(status) {
   ].join("\n");
 }
 
-function registerRewardPolicyHandlers({ bot, repository, supabase, config }) {
+function registerRewardPolicyHandlers({ bot, repository, supabase, config, registerRaid = true }) {
   const send = (chatId, text) => bot.sendMessage(chatId, text);
   const ownerAllowed = (msg) =>
     String(msg && msg.from && msg.from.id) === String(config.ownerTelegramId);
@@ -105,38 +105,41 @@ function registerRewardPolicyHandlers({ bot, repository, supabase, config }) {
   }
 
   if (typeof bot.removeTextListener === "function") {
-    bot.removeTextListener(RAID_CREATE_PATTERN);
+    if (registerRaid) bot.removeTextListener(RAID_CREATE_PATTERN);
     bot.removeTextListener(REWARD_PLAN_PATTERN);
     bot.removeTextListener(REWARD_BUDGET_PATTERN);
     bot.removeTextListener(SPECIAL_REWARD_PATTERN);
   }
 
-  bot.onText(RAID_CREATE_PATTERN, async (msg, match) => {
-    if (!(await permissionAllowed(msg, "mission.create"))) {
-      return send(msg.chat.id, "⛔ Admin access required.");
-    }
-
-    const parsed = parseStandardRaid(match && match[1]);
-    if (!parsed.ok) {
-      return send(msg.chat.id, "❌ Use: /raid <safe HTTPS link> | 24h\nEvery verified Raaiiidd is fixed at 20 LP.");
-    }
-
-    try {
-      if (await repository.findMissionByUrl(parsed.mission.target_url)) {
-        return send(msg.chat.id, "⚠️ A mission already exists for this link.");
+  if (registerRaid) {
+    bot.onText(RAID_CREATE_PATTERN, async (msg, match) => {
+      if (!(await permissionAllowed(msg, "mission.create"))) {
+        return send(msg.chat.id, "⛔ Admin access required.");
       }
-      const mission = await repository.createMission(parsed.mission, msg.from.id);
-      return send(
-        msg.chat.id,
-        `✅ New Raaiiidd Created!\n\n🎯 ${mission.title}\n🌐 ${mission.platform}\n⭐ 20 Legend Points\n🔗 ${mission.link}\n\nMission #${mission.id} is active. Rewards stop automatically when the 1,500 LP weekly Raaiiidd pool is full.`
-      );
-    } catch (error) {
-      console.error("Fixed reward Raaiiidd creation failed", {
-        name: error && error.name ? error.name : "Error"
-      });
-      return send(msg.chat.id, "❌ Zed couldn't create that Raaiiidd.");
-    }
-  });
+  
+      const parsed = parseStandardRaid(match && match[1]);
+      if (!parsed.ok) {
+        return send(msg.chat.id, "❌ Use: /raid <safe HTTPS link> | 24h\nEvery verified Raaiiidd is fixed at 20 LP.");
+      }
+  
+      try {
+        if (await repository.findMissionByUrl(parsed.mission.target_url)) {
+          return send(msg.chat.id, "⚠️ A mission already exists for this link.");
+        }
+        const mission = await repository.createMission(parsed.mission, msg.from.id);
+        return send(
+          msg.chat.id,
+          `✅ New Raaiiidd Created!\n\n🎯 ${mission.title}\n🌐 ${mission.platform}\n⭐ 20 Legend Points\n🔗 ${mission.link}\n\nMission #${mission.id} is active. Rewards stop automatically when the 1,500 LP weekly Raaiiidd pool is full.`
+        );
+      } catch (error) {
+        console.error("Fixed reward Raaiiidd creation failed", {
+          name: error && error.name ? error.name : "Error"
+        });
+        return send(msg.chat.id, "❌ Zed couldn't create that Raaiiidd.");
+      }
+    });
+  }
+
 
   bot.onText(REWARD_PLAN_PATTERN, async (msg) => {
     try {
