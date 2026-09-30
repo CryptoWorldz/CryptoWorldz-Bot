@@ -398,14 +398,57 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
     return send(message, `✅ Approved knowledge #${match[1]} removed.`);
   });
 
-  bot.on("message", async (message) => {
-    const text = String(message?.text || "").trim();
-    if (!isGroup(message) || !/^ai\s*[:,-]\s*/i.test(text) || text.startsWith("/")) return;
-    const question = text.replace(/^ai\s*[:,-]\s*/i, "").trim();
-    if (question) return answer(message, question);
+  bot.on("callback_query", async (query) => {
+    const data = String(query?.data || "");
+    if (!data.startsWith("ai:") || !query.message) return;
+    const actorMessage = { ...query.message, from: query.from };
+    try {
+      if (data === "ai:capabilities") {
+        await bot.answerCallbackQuery(query.id);
+        const context = await buildAssistantCapabilityContext({ supabase, chatId: query.message.chat.id });
+        return send(actorMessage, formatCapabilitySummary(context));
+      }
+      const match = data.match(/^ai:preset:(no5|dipshit|alice|rex|grace|max|custom)$/);
+      if (!match) return;
+      if (!(await requireAdmin(actorMessage))) {
+        return bot.answerCallbackQuery(query.id, { text: "Group admin access required.", show_alert: true });
+      }
+      const profile = await savePreset(actorMessage, match[1]);
+      await bot.answerCallbackQuery(query.id, {
+        text: match[1] === "custom" ? "Custom Build selected." : `${profile.display_name} selected.`
+      });
+      return send(actorMessage,
+        match[1] === "custom"
+          ? "🛠 Custom Build selected. Finish it with:\n/aibuild NAME | PERSONALITY | PURPOSE"
+          : `✅ Auto Pick selected: ${profile.display_name}\nRole: ${profile.role_label}`,
+        configKeyboard(profile)
+      );
+    } catch {
+      try { await bot.answerCallbackQuery(query.id, { text: "AI setting update failed.", show_alert: true }); } catch {}
+    }
   });
 
-  return { answer, profileFor };
+  bot.on("message", async (message) => {
+    const text = String(message?.text || "").trim();
+    if (!isGroup(message) || !text || text.startsWith("/")) return;
+
+    if (/^ai\s*[:;,.-]\s*/i.test(text)) {
+      const question = text.replace(/^ai\s*[:;,.-]\s*/i, "").trim();
+      if (question) return answer(message, question);
+      return;
+    }
+
+    const likelyNamed = /^(?:no\.?5|dip\s*shit|alice|rex|g\.?r\.?a\.?c\.?e\.?|grace|max)(?:\s*[:;,.-]\s*|\s+)/i.test(text)
+      || /^[^:\n]{1,64}:\s+/.test(text);
+    if (!likelyNamed) return;
+    try {
+      const profile = await profileFor(message);
+      const question = stripCommunityAIAddressing(text, profile);
+      if (question && question !== text) return answer(message, question);
+    } catch {}
+  });
+
+  return { answer, profileFor, savePreset };
 }
 
-module.exports = { callCommunityAI, registerCommunityAI };
+module.exports = { callCommunityAI, registerCommunityAI, stripCommunityAIAddressing };
