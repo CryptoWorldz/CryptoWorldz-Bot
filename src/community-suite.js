@@ -61,6 +61,19 @@ function planLabel(value) {
     value === "own" ? "Own" : String(value || "Unlicensed");
 }
 
+function upgradeQuote(prices, plan, licence = null) {
+  const base = plan === "rent" ? Number(prices.rentSol) :
+    plan === "rent_to_own" ? Number(prices.rentToOwnSol) :
+    plan === "own" ? Number(prices.ownSol) : Number(prices.trialSol);
+  const storedCredit = Number(licence?.trial_credit_sol || 0);
+  const credit = plan !== "trial" && !licence?.trial_credit_used_at ? Math.min(base, Math.max(0, storedCredit)) : 0;
+  return {
+    base: Number(base.toFixed(9)),
+    credit: Number(credit.toFixed(9)),
+    due: Number(Math.max(0, base - credit).toFixed(9))
+  };
+}
+
 function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.env }) {
   const prices = pricing(env);
   const send = (message, text, options) => bot.sendMessage(message.chat.id, text, options);
@@ -115,7 +128,8 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
     `🏠 RENT TO OWN — ${prices.rentToOwnSol} SOL / month × ${prices.rentToOwnMonths}`,
     `👑 OWN — ${prices.ownSol} SOL one-time perpetual group licence`,
     "",
-    "Trial payment is credited toward the first upgrade.",
+    "One Starter Trial per group. Its 0.05 SOL payment is stored as a one-time credit toward the first paid upgrade.",
+    "Use /suitequote rent|rent_to_own|own inside the group before paying.",
     "Rent-to-Own converts to Own after 12 approved monthly payments.",
     "Own covers the purchased release. Third-party APIs, premium AI usage, external hosting and future major-version upgrades can be separate.",
     "",
@@ -125,6 +139,38 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
     "PLAN: trial | rent | rent_to_own | own",
     "PACKAGE: operations | ai | full"
   ].join("\n")));
+
+  bot.onText(/^\/suitequote(?:@\w+)?\s+(rent|rent_to_own|own)$/i, async (message, match) => {
+    try {
+      if (!isGroup(message)) return send(message, "❌ Open the quote inside the group being licensed.");
+      if (!(await requireAdmin(message))) return send(message, "⛔ Group admin access required.");
+      await groupRow(message);
+      const plan = String(match[1]).toLowerCase();
+      const { data: licence, error } = await supabase.from("zed_group_licences")
+        .select("plan,status,trial_credit_sol,trial_credit_used_at,rent_to_own_payments")
+        .eq("chat_id", Number(message.chat.id)).maybeSingle();
+      if (error) throw error;
+      const quote = upgradeQuote(prices, plan, licence);
+      const creditLine = quote.credit > 0
+        ? `Trial credit: -${quote.credit} SOL ✅`
+        : `Trial credit: ${Number(licence?.trial_credit_sol || 0) > 0 ? "already used" : "none"}`;
+      return send(message, [
+        "🧾 WORLDZ SUITE QUOTE",
+        "",
+        `Plan: ${planLabel(plan)}`,
+        `Base: ${quote.base} SOL`,
+        creditLine,
+        `DUE: ${quote.due} SOL`,
+        plan === "rent_to_own" ? `Approved RTO payments so far: ${Number(licence?.rent_to_own_payments || 0)}/${prices.rentToOwnMonths}` : null,
+        "",
+        `Payment wallet: ${prices.wallet}`,
+        "After payment: /suitereceipt PLAN PACKAGE SOL_SIGNATURE",
+        "Payment still requires on-chain review before activation."
+      ].filter(Boolean).join("\n"));
+    } catch {
+      return send(message, "❌ Suite quote could not be calculated.");
+    }
+  });
 
   bot.onText(/^\/suitereceipt(?:@\w+)?\s+(trial|rent|rent_to_own|own)\s+(operations|ai|full)\s+(\S+)$/i, async (message, match) => {
     try {
@@ -166,8 +212,17 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
       let plan = requestedPlan;
       let payments = Number(previous?.rent_to_own_payments || 0);
       let expiresAt = null;
+      let trialCreditSol = Number(previous?.trial_credit_sol || 0);
+      let trialCreditUsedAt = previous?.trial_credit_used_at || null;
 
-      if (requestedPlan === "trial") expiresAt = new Date(now + prices.trialDays * 86400000).toISOString();
+      if (requestedPlan === "trial" && previous?.approved_at) {
+        return send(message, "❌ This group has already used or held an approved Suite plan. Starter Trial is one-time per group.");
+      }
+      if (requestedPlan === "trial") {
+        trialCreditSol = prices.trialSol;
+        trialCreditUsedAt = null;
+        expiresAt = new Date(now + prices.trialDays * 86400000).toISOString();
+      }
       if (requestedPlan === "rent") expiresAt = new Date(now + prices.rentDays * 86400000).toISOString();
       if (requestedPlan === "rent_to_own") {
         payments = Math.min(prices.rentToOwnMonths, payments + 1);
@@ -186,6 +241,8 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
         status: "active",
         product_package: productPackage,
         rent_to_own_payments: payments,
+        trial_credit_sol: trialCreditSol,
+        trial_credit_used_at: requestedPlan !== "trial" && trialCreditSol > 0 && !trialCreditUsedAt ? new Date().toISOString() : trialCreditUsedAt,
         approved_by_telegram_id: Number(message.from.id),
         approved_at: new Date().toISOString(),
         expires_at: expiresAt,
@@ -203,7 +260,8 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
         .eq("requested_plan", requestedPlan).eq("requested_package", productPackage);
 
       const rto = requestedPlan === "rent_to_own" ? ` • payment ${payments}/${prices.rentToOwnMonths}` : "";
-      return send(message, `✅ ${packageLabel(productPackage)} • ${planLabel(plan)} activated for ${chatId}${rto}${expiresAt ? ` until ${expiresAt}` : " • perpetual release licence"}.`);
+      const usedCredit = requestedPlan !== "trial" && trialCreditSol > 0 && !trialCreditUsedAt ? ` • ${trialCreditSol} SOL trial credit consumed` : "";
+      return send(message, `✅ ${packageLabel(productPackage)} • ${planLabel(plan)} activated for ${chatId}${rto}${usedCredit}${expiresAt ? ` until ${expiresAt}` : " • perpetual release licence"}.`);
     } catch (error) {
       console.error("Community Suite approval failed", { code: error?.code || error?.message || "unknown" });
       return send(message, "❌ Licence approval could not be saved.");
@@ -653,5 +711,6 @@ module.exports = {
   packageLabel,
   planLabel,
   registerCommunitySuiteHandlers,
-  themeText
+  themeText,
+  upgradeQuote
 };
