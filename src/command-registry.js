@@ -66,12 +66,30 @@ const COMMAND_GROUPS = Object.freeze([
     ["dmunblock", "Unblock a Worldz DM sender"], ["dmdelete", "Hide an Inbox message"],
     ["dmstatus", "View private messaging status"], ["worldzstyle", "View WorldzStyle message formats"]
   ]),
+  group("community-suite", "🌐 Worldz FullBuild™ Community Suite", "member", [
+    ["suite", "Open the Community Suite"], ["suiteprice", "View Trial, Rent, Rent-to-Own and Own pricing"],
+    ["suitequote", "Calculate the group price after any unused trial credit"],
+    ["modules", "View installed community modules"], ["themes", "View Worldz theme packs"],
+    ["alice", "Open ALICE community support"], ["support", "Ask ALICE for support"],
+    ["aicommunity", "Open the Custom AI Community Bot"], ["askcommunity", "Ask the customer AI"],
+    ["aiknowledge", "View approved customer AI knowledge"],
+    ["ticket", "Create a tracked support ticket"], ["ticketstatus", "View a support ticket"],
+    ["ticketreply", "Reply to a support ticket"], ["mytickets", "View your open support tickets"],
+    ["scan", "Scan one token/CA"], ["scan20", "Scan up to 20 token addresses"],
+    ["booststatus", "Check provider paid-order status"], ["boostcentre", "Open legitimate promotion options"],
+    ["events", "View community calendar events"], ["launchcountdown", "View or configure the next launch countdown"], ["giveaway", "View open giveaways"],
+    ["giveawayjoin", "Enter an open giveaway"], ["walletwatch", "View public wallet watchlist"],
+    ["buyalerts", "View real market/buy alert rules"],
+    ["networkstatus", "View multi-group network licence status"], ["launchstatus", "View LaunchPad community linkage"],
+    ["marketplace", "Open Worldz Marketplace add-ons"], ["socials", "View customer social accounts"],
+    ["socialcapabilities", "View social publishing/connection capabilities"]
+  ]),
   group("worldping", "🌐 WorldPing™ • Licensed Group Alerts", "member", [
     ["worldping", "Send a visible group WorldPing"], ["worldpingmode", "Group admin: AdminsOnlyPing or FullMemberPing"],
     ["zedmaxprice", "View ZED MAX SOL licence prices"], ["zedmaxreceipt", "Submit a SOL payment receipt"]
   ]),
   group("admin-missions", "🛡 Admin • Missions, Reviews, Members & Settings", "admin", [
-    ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"],
+    ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"], ["secureguard", "Open REX SecureGuard security controls"],
     ["reviewqueue", "Open mission, Creator and Hero human-review queues"],
     ["newmission", "Create a mission"], ["editmission", "Edit a mission"], ["endmission", "End a mission"],
     ["raidprogress", "Update Ronald Raider likes/reposts/replies/views"], ["stopraid", "Stop the live Ronald Raider Raid"],
@@ -81,6 +99,26 @@ const COMMAND_GROUPS = Object.freeze([
     ["member", "Inspect a Legend member"], ["admins", "List managed admins"],
     ["permissions", "View permission structure"], ["setrole", "Set a managed role"], ["setpermission", "Set a scoped permission"],
     ["setpartner", "Create or update a partner profile"], ["stats", "View system statistics"], ["activity", "View safe activity log"]
+  ]),
+  group("community-suite-admin", "🌐 Admin • Community Suite", "admin", [
+    ["suitereceipt", "Submit a Community Suite payment receipt"],
+    ["module", "Turn a Community Suite module on or off"], ["brand", "Configure community branding"],
+    ["language", "Set community language preference"], ["lockdown", "Control emergency lockdown"],
+    ["analytics", "View seven-day Community Suite analytics"],
+    ["ainame", "Set the customer AI display name"], ["aipersonality", "Set the customer AI personality"],
+    ["aiinstructions", "Set customer-approved AI instructions"], ["aiforget", "Remove approved AI knowledge"],
+    ["tickets", "View ALICE admin ticket queue"], ["ticketclose", "Close an ALICE support ticket"],
+    ["eventadd", "Add a community calendar event"], ["eventdel", "Remove a community calendar event"],
+    ["giveawaydraw", "Draw recorded giveaway entries"],
+    ["watchwallet", "Add a public wallet to the watchlist"], ["unwatchwallet", "Disable a watched wallet"],
+    ["promote", "Record a disclosed sponsored promotion"],
+    ["buyalert", "Configure real buy/whale alert thresholds"], ["buyalertoff", "Disable a market alert rule"],
+    ["apikeycreate", "Create a hashed customer API key"], ["apikeys", "List customer API keys"],
+    ["apikeyrevoke", "Revoke a customer API key"], ["webhookadd", "Register a signed HTTPS webhook"],
+    ["webhooks", "List signed webhooks"], ["webhookremove", "Disable a webhook"], ["webhooktest", "Test webhook delivery"],
+    ["networkrequest", "Request a multi-group network slot"], ["launchconnect", "Link this group to a LaunchPad project/token"],
+    ["addonrequest", "Request a Worldz Marketplace add-on"], ["addons", "View Marketplace requests"],
+    ["sociallink", "Register an official customer social account"], ["socialdisable", "Disable a social directory account"]
   ]),
   group("communications", "📡 Admin • Communications", "admin", [
     ["broadcast", "Create a scoped broadcast draft"], ["confirmbroadcast", "Confirm a scoped broadcast"],
@@ -125,6 +163,10 @@ const COMMAND_GROUPS = Object.freeze([
     ["cause_add", "Add a cause"], ["identify", "Identify/register a Telegram destination"], ["setx", "Link an X page to a project"],
     ["gracestatus", "Check live Grace X runtime"], ["metacheck", "Check Meta OAuth configuration safely"],
     ["adbudget", "Create an advertising budget record"], ["adapprove", "Approve an advertising budget record"],
+    ["suiteapprove", "Approve a Community Suite licence/package after payment review"],
+    ["networkcreate", "Create a multi-group network licence"], ["networkapprove", "Approve a network group slot"],
+    ["networkremove", "Remove a group from a network licence"],
+    ["addonquote", "Quote a Marketplace request"], ["addonstatus", "Update Marketplace request status"],
     ["reviewlegend", "Review a Unique Legend application"], ["reserverewardon", "Open the protected Legend reward reserve"],
     ["reserverewardoff", "Lock the protected Legend reward reserve"]
   ])
