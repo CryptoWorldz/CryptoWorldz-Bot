@@ -1,0 +1,85 @@
+{
+  "version": "1.0",
+  "brand": "Worldz FullBuild™ Community Suite",
+  "packages": [
+    {
+      "id": "operations",
+      "name": "Operations Bot",
+      "engine": "ZED • AUTO • G.R.A.C.E. Command Centre"
+    },
+    {
+      "id": "ai",
+      "name": "Custom AI Community Bot",
+      "engine": "configurable AI community assistant"
+    },
+    {
+      "id": "full",
+      "name": "Full 2-Bot Suite",
+      "includes": [
+        "operations",
+        "ai"
+      ]
+    }
+  ],
+  "licences": [
+    {
+      "id": "trial",
+      "name": "Starter Trial",
+      "price": {
+        "amount": 0.05,
+        "currency": "SOL"
+      },
+      "term_days": 7,
+      "groups": 1,
+      "upgrade_credit": true
+    },
+    {
+      "id": "rent",
+      "name": "Rent",
+      "price": {
+        "amount": 0.3,
+        "currency": "SOL"
+      },
+      "term_days": 31,
+      "groups": 1
+    },
+    {
+      "id": "rent_to_own",
+      "name": "Rent-to-Own",
+      "price": {
+        "amount": 0.5,
+        "currency": "SOL"
+      },
+      "term_months": 12,
+      "groups": 1
+    },
+    {
+      "id": "own",
+      "name": "Own",
+      "price": {
+        "amount": 4.5,
+        "currency": "SOL"
+      },
+      "perpetual_release_licence": true,
+      "groups": 1
+    }
+  ],
+  "branding": {
+    "worldz_theme_packs": 10,
+    "customer_branding": true,
+    "premium_custom": true
+  },
+  "planned_modules": [
+    "REX SecureGuard™",
+    "Market + Buy Alerts",
+    "ALICE™ Support",
+    "Scanner",
+    "Promotion/Discovery"
+  ],
+  "rules": {
+    "organic_paid_separation": true,
+    "real_transaction_alerts_only": true,
+    "no_fake_engagement": true,
+    "no_guaranteed_safety_claims": true
+  }
+}
