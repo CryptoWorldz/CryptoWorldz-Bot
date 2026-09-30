@@ -41,6 +41,7 @@ jobs:
           test -s public/miniapp/dipshit.js
           test -s public/miniapp/inbox.js
           test -s public/miniapp/inbox.css
+          test -s public/miniapp/community-suite.js
           test -s public/miniapp/assets/dipshit-worldz-dude.svg
           test -s public/miniapp/assets/dipshit-worldz-dude.png
           node --check public/miniapp/app.js
@@ -48,6 +49,7 @@ jobs:
           node --check public/miniapp/auto-owner.js
           node --check public/miniapp/dipshit.js
           node --check public/miniapp/inbox.js
+          node --check public/miniapp/community-suite.js
           grep -Fq 'Command Centre <span>MAX™</span>' public/miniapp/index.html
           grep -Fq 'command-centre-max' public/miniapp/max.js
           grep -Fq 'max-public-feed' public/miniapp/max.js
@@ -60,6 +62,8 @@ jobs:
           grep -Fq 'Worldz Inbox™' public/miniapp/index.html
           grep -Fq '/api/mini/inbox' public/miniapp/inbox.js
           grep -Fq 'Exact @username' public/miniapp/inbox.js
+          grep -Fq '/api/mini/community-suite' public/miniapp/community-suite.js
+          grep -Fq 'WorldzCommunitySuite' public/miniapp/community-suite.js
           if grep -Fiq 'BASED.BID' public/miniapp/index.html; then
             echo 'OBSOLETE_BASED_BID_REFERENCE=FAIL'
             exit 1
@@ -157,6 +161,7 @@ jobs:
                   icode,avatar=get('/miniapp/assets/dipshit-worldz-dude.svg?verify=dipshit-worldz-dude')
                   mcode,maxjs=get('/miniapp/max.js?verify=command-centre-max')
                   xcode,maxcss=get('/miniapp/max.css?verify=command-centre-max')
+                  scode,suite=get('/miniapp/community-suite.js?verify=community-suite')
                   assert hcode==200 and 'WORLDZLAUNCHPAD™' in html and 'Command Centre <span>MAX™</span>' in html
                   assert 'BASED.BID' not in html.upper()
                   assert jcode==200 and 'zed-miniapp-rescue' in js
@@ -167,7 +172,8 @@ jobs:
                   assert icode==200 and '<svg' in avatar and 'WORLDZ DUDE' in avatar
                   assert mcode==200 and 'command-centre-max' in maxjs and 'LEARN' in maxjs and 'RESEARCH' in maxjs
                   assert xcode==200 and '.max-home-card' in maxcss
-                  print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 max=1 worldzlaunchpad=1 dipshit=1 inbox=1 basedbid=0')
+                  assert scode==200 and '/api/mini/community-suite' in suite and 'WorldzCommunitySuite' in suite
+                  print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 max=1 worldzlaunchpad=1 dipshit=1 inbox=1 community_suite=1 basedbid=0')
                   raise SystemExit(0)
               except SystemExit:
                   raise
