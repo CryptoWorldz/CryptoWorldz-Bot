@@ -1,3 +1,4 @@
+const { buildAssistantCapabilityContext } = require("./assistant-capabilities");
 const DEFAULT_BOT_USERNAME = "DipShitBossBot";
 
 function extractDipshitResponseText(payload) {
@@ -93,6 +94,10 @@ async function callDipshitAI({ apiKey, model, message, history, context, fetchIm
         "Do not invent deployments, balances, listings, approvals, memberships, transactions, partnerships or verification states.",
         "For bugs that need the operator, tell the user to use /report followed by the problem. For payment issues use /paysupport.",
         "For navigation, use the supplied official Worldz links and commands.",
+        "The supplied Worldz runtime capability registry is authoritative about which built features exist and their exact commands.",
+        "If the user asks whether a listed feature exists, do not say you cannot confirm it. Say it exists, distinguish the group state if known, and give the exact command.",
+        "Example: WorldPing exists. A normal alert route is /worldping alert | TITLE | MESSAGE. Group licence/mode still controls whether that command can run there.",
+        "You can explain and prepare commands, but do not claim ZED or another subsystem executed an action unless the runtime result proves it."
         `RUNTIME CONTEXT JSON: ${JSON.stringify(context)}`
       ].join(" "),
       input: [...normalizeDipshitHistory(history), { role: "user", content: String(message || "").slice(0, 1200) }]
@@ -158,6 +163,7 @@ function registerDipshitConversation({
 
     const key = `${msg.chat.id}:${msg.from?.id || "unknown"}`;
     const history = conversations.get(key) || [];
+    const capabilityContext = await buildAssistantCapabilityContext({ supabase, chatId: msg.chat.id });
     const context = {
       runtime_online: true,
       natural_chat_listener: true,
@@ -174,7 +180,17 @@ function registerDipshitConversation({
         privacy: privacyUrl,
         terms: termsUrl
       },
-      support_commands: ["/status", "/check", "/fix <problem>", "/report <problem>", "/paysupport <message>"]
+      support_commands: ["/status", "/check", "/fix <problem>", "/report <problem>", "/paysupport <message>"],
+      operational_shortcuts: {
+        worldping: "/worldping alert | TITLE | MESSAGE",
+        ronald_raider: "/raid",
+        shill_link: "/shilllink",
+        shill_rewards: "/shillpoints",
+        community_suite: "/suite",
+        ai_settings: "/aiconfig",
+        security: "/secureguard status"
+      },
+      worldz_runtime_capabilities: capabilityContext
     };
 
     try {
