@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const {
   CAPABILITY_CATALOG,
   buildAssistantCapabilityContext,
+  deterministicCapabilityAnswer,
   formatCapabilitySummary
 } = require("../src/assistant-capabilities");
 
@@ -21,4 +22,20 @@ test("capability catalog covers the sale-facing Community Suite modules", () => 
   for (const key of ["ronald_raider","shill_rewards","rex_secureguard","alice_support","custom_ai","worldzscan","market_alerts","wallet_watch","calendar","giveaways","votes","govern","inbox","worldzcast","social","launchpad","webhooks"]) {
     assert.ok(keys.has(key), key);
   }
+});
+
+
+test("WorldPing existence questions bypass model guessing and return the exact command", async () => {
+  const context = await buildAssistantCapabilityContext({ supabase: null, chatId: -100123 });
+  const answer = deterministicCapabilityAnswer("Do We have a WorldPing??", context);
+  assert.ok(answer);
+  assert.equal(answer.key, "worldping");
+  assert.match(answer.text, /WorldPing™ exists/);
+  assert.match(answer.text, /\/worldping alert \| TITLE \| MESSAGE/);
+  assert.doesNotMatch(answer.text, /can.?t confirm/i);
+});
+
+test("deterministic capability lookup does not hijack unrelated conversation", async () => {
+  const context = await buildAssistantCapabilityContext({ supabase: null, chatId: -100123 });
+  assert.equal(deterministicCapabilityAnswer("Good morning team", context), null);
 });
