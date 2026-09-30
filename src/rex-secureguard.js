@@ -25,10 +25,25 @@ function challengeOptions(code) {
   return values;
 }
 
+function normalizeDomain(value) {
+  const raw = String(value || "").trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, "");
+  return /^[a-z0-9.-]+$/.test(raw) && raw.includes(".") ? raw : null;
+}
+
+function extractHosts(text) {
+  const matches = String(text || "").match(/https?:\/\/[^\s<>()]+/gi) || [];
+  const hosts = [];
+  for (const value of matches.slice(0, 20)) {
+    try { hosts.push(new URL(value).hostname.toLowerCase().replace(/^www\./, "")); } catch {}
+  }
+  return [...new Set(hosts)];
+}
+
 function registerRexSecureGuard({ bot, supabase, config }) {
   const token = String(config.botToken || "").trim();
   const base = `https://api.telegram.org/bot${token}`;
   let sweeper = null;
+  const messageRates = new Map();
 
   async function api(method, payload = {}) {
     const response = await fetch(`${base}/${method}`, {
@@ -49,7 +64,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
   async function setting(chatId) {
     const { data, error } = await supabase
       .from("zed_chat_settings")
-      .select("secureguard_enabled,secureguard_number_match_enabled,secureguard_timeout_seconds,secureguard_max_attempts")
+      .select("secureguard_enabled,secureguard_number_match_enabled,secureguard_timeout_seconds,secureguard_max_attempts,secureguard_antiflood_enabled,secureguard_max_messages_10s,secureguard_links_mode")
       .eq("chat_id", Number(chatId))
       .maybeSingle();
     if (error) throw error;
@@ -57,7 +72,10 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       enabled: data?.secureguard_enabled === true,
       numberMatch: data?.secureguard_number_match_enabled !== false,
       timeout: Number(data?.secureguard_timeout_seconds) || 120,
-      maxAttempts: Number(data?.secureguard_max_attempts) || 3
+      maxAttempts: Number(data?.secureguard_max_attempts) || 3,
+      antiflood: data?.secureguard_antiflood_enabled !== false,
+      maxMessages10s: Number(data?.secureguard_max_messages_10s) || 8,
+      linksMode: String(data?.secureguard_links_mode || "blocklist")
     };
   }
 
@@ -193,6 +211,96 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     }
   }
 
+  async function domainRules(chatId) {
+    const { data, error } = await supabase.from("secureguard_domains")
+      .select("domain,action,reason").eq("chat_id", Number(chatId));
+    if (error) throw error;
+    return data || [];
+  }
+
+  function matchingRule(host, rules) {
+    const matches = (rules || []).filter((rule) => host === rule.domain || host.endsWith("." + rule.domain));
+    const allow = matches.find((rule) => rule.action === "allow");
+    return allow || matches.find((rule) => rule.action === "block") || null;
+  }
+
+  async function enforceFlood(msg, cfg) {
+    if (!cfg.antiflood || !msg.from?.id) return false;
+    const key = `${msg.chat.id}:${msg.from.id}`;
+    const now = Date.now();
+    const recent = (messageRates.get(key) || []).filter((stamp) => now - stamp < 10000);
+    recent.push(now);
+    messageRates.set(key, recent);
+    if (recent.length <= cfg.maxMessages10s) return false;
+    try { await api("deleteMessage", { chat_id: msg.chat.id, message_id: msg.message_id }); } catch {}
+    try {
+      await api("restrictChatMember", {
+        chat_id: msg.chat.id,
+        user_id: msg.from.id,
+        permissions: BLOCKED_PERMISSIONS,
+        until_date: Math.floor(Date.now() / 1000) + 60
+      });
+    } catch {}
+    await logEvent(msg.chat.id, msg.from.id, "antiflood_triggered", `messages_10s=${recent.length}`);
+    return true;
+  }
+
+  async function enforceLinks(msg, cfg) {
+    const hosts = extractHosts(msg.text || msg.caption || "");
+    if (!hosts.length || cfg.linksMode === "allow") return false;
+    const admin = await isTelegramAdmin(msg.chat.id, msg.from?.id);
+    if (admin) return false;
+    let blocked = cfg.linksMode === "admins_only";
+    let blockedHost = null;
+    if (!blocked && cfg.linksMode === "blocklist") {
+      const rules = await domainRules(msg.chat.id);
+      for (const host of hosts) {
+        const rule = matchingRule(host, rules);
+        if (rule?.action === "block") { blocked = true; blockedHost = host; break; }
+      }
+    }
+    if (!blocked) return false;
+    try { await api("deleteMessage", { chat_id: msg.chat.id, message_id: msg.message_id }); } catch {}
+    await logEvent(msg.chat.id, msg.from?.id, "link_blocked", blockedHost || cfg.linksMode);
+    try { await bot.sendMessage(msg.chat.id, `🛡 REX removed a link from a non-admin member${blockedHost ? `: ${blockedHost}` : "."}`); } catch {}
+    return true;
+  }
+
+  bot.onText(/^\/rexblockdomain(?:@\w+)?\s+(\S+)(?:\s*\|\s*([\s\S]+))?$/i, async (msg, match) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    const domain = normalizeDomain(match?.[1]);
+    if (!domain) return bot.sendMessage(msg.chat.id, "❌ Use /rexblockdomain example.com | optional reason");
+    const { error } = await supabase.from("secureguard_domains").upsert({
+      chat_id: Number(msg.chat.id), domain, action: "block", reason: String(match?.[2] || "").slice(0, 300), created_by: Number(msg.from.id)
+    }, { onConflict: "chat_id,domain" });
+    if (error) return bot.sendMessage(msg.chat.id, "❌ REX could not save that domain rule.");
+    return bot.sendMessage(msg.chat.id, `🛡 Block rule saved for ${domain}.`);
+  });
+
+  bot.onText(/^\/rexallowdomain(?:@\w+)?\s+(\S+)$/i, async (msg, match) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    const domain = normalizeDomain(match?.[1]);
+    if (!domain) return bot.sendMessage(msg.chat.id, "❌ Use /rexallowdomain example.com");
+    const { error } = await supabase.from("secureguard_domains").upsert({
+      chat_id: Number(msg.chat.id), domain, action: "allow", reason: "Admin allowlist", created_by: Number(msg.from.id)
+    }, { onConflict: "chat_id,domain" });
+    if (error) return bot.sendMessage(msg.chat.id, "❌ REX could not save that domain rule.");
+    return bot.sendMessage(msg.chat.id, `✅ Allow rule saved for ${domain}.`);
+  });
+
+  bot.onText(/^\/rexdomains(?:@\w+)?$/i, async (msg) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    const rules = await domainRules(msg.chat.id).catch(() => []);
+    const lines = rules.map((row) => `${row.action === "allow" ? "✅" : "⛔"} ${row.domain}${row.reason ? " — " + row.reason : ""}`);
+    return bot.sendMessage(msg.chat.id, `🛡 REX DOMAIN RULES\n\n${lines.join("\n") || "No explicit domain rules."}`);
+  });
+
+  bot.onText(/^\/rexlinkmode(?:@\w+)?\s+(allow|blocklist|admins_only)$/i, async (msg, match) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    await upsertSetting(msg.chat.id, { secureguard_links_mode: String(match[1]).toLowerCase() });
+    return bot.sendMessage(msg.chat.id, `🛡 REX link mode: ${String(match[1]).toLowerCase()}`);
+  });
+
   bot.onText(/^\/secureguard(?:@\w+)?(?:\s+(on|off|status))?$/i, async (msg, match) => {
     const action = String(match?.[1] || "status").toLowerCase();
     const chatId = msg.chat.id;
@@ -237,8 +345,11 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       `Number Match: ${cfg.numberMatch ? "✅ ON" : "⏸ OFF"}`,
       `Timeout: ${cfg.timeout}s`,
       `Attempts: ${cfg.maxAttempts}`,
+      `Anti-Flood: ${cfg.antiflood ? "✅ ON" : "⏸ OFF"} • max ${cfg.maxMessages10s}/10s`,
+      `Link Guard: ${cfg.linksMode}`,
       "",
-      "Commands: /secureguard on • /secureguard off • /secureguard status"
+      "Commands: /secureguard on • /secureguard off • /secureguard status",
+      "Domains: /rexblockdomain • /rexallowdomain • /rexdomains • /rexlinkmode"
     ].join("\n"));
   });
 
@@ -258,11 +369,20 @@ function registerRexSecureGuard({ bot, supabase, config }) {
         return;
       }
 
-      if (!Array.isArray(msg.new_chat_members) || msg.new_chat_members.length === 0) return;
+      if (!["group","supergroup"].includes(String(msg.chat?.type || ""))) return;
       const cfg = await setting(msg.chat.id);
-      if (!cfg.enabled || !cfg.numberMatch) return;
-      if (msg.chat.type !== "supergroup") return;
-      for (const member of msg.new_chat_members) await createChallenge(msg, member, cfg);
+      if (!cfg.enabled) return;
+
+      if (Array.isArray(msg.new_chat_members) && msg.new_chat_members.length > 0) {
+        if (!cfg.numberMatch || msg.chat.type !== "supergroup") return;
+        for (const member of msg.new_chat_members) await createChallenge(msg, member, cfg);
+        return;
+      }
+
+      if (!msg.from?.id || msg.from?.is_bot || String(msg.text || "").startsWith("/")) return;
+      if (await isTelegramAdmin(msg.chat.id, msg.from.id)) return;
+      if (await enforceFlood(msg, cfg)) return;
+      await enforceLinks(msg, cfg);
     } catch (error) {
       console.error("REX SecureGuard message handling failed", { code: error?.code || error?.message || "unknown" });
     }
@@ -327,4 +447,4 @@ function registerRexSecureGuard({ bot, supabase, config }) {
   return { challengeOptions, expirePending };
 }
 
-module.exports = { BLOCKED_PERMISSIONS, challengeOptions, registerRexSecureGuard };
+module.exports = { BLOCKED_PERMISSIONS, challengeOptions, extractHosts, normalizeDomain, registerRexSecureGuard };
