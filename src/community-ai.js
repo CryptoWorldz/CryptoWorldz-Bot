@@ -86,10 +86,11 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
       .select("*").eq("chat_id", Number(message.chat.id)).maybeSingle();
     if (error) throw error;
     if (data) return data;
+    const defaults = presetUpdate("no5") || {};
     const { data: created, error: createError } = await supabase.from("community_suite_ai_profiles").insert({
       chat_id: Number(message.chat.id),
-      display_name: "Community AI",
-      personality: "Helpful, concise and practical",
+      ...defaults,
+      purpose: "Understand what the community is trying to do and route them to the correct installed Community Suite feature, command or support path.",
       model: fallbackModel,
       enabled: true
     }).select("*").single();
