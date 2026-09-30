@@ -10,7 +10,9 @@ alter table public.zed_group_licences
 alter table public.zed_group_licences
   add column if not exists rent_to_own_payments integer not null default 0 check (rent_to_own_payments between 0 and 12),
   add column if not exists product_package text not null default 'full'
-    check (product_package in ('operations','ai','full'));
+    check (product_package in ('operations','ai','full')),
+  add column if not exists trial_credit_sol numeric(20,9) not null default 0 check (trial_credit_sol >= 0),
+  add column if not exists trial_credit_used_at timestamptz;
 
 alter table public.zed_group_licence_receipts
   add column if not exists requested_plan text
