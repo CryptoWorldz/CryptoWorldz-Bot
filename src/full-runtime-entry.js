@@ -204,7 +204,7 @@ async function start() {
   startupStage = "register_work_evidence";
   registerWorkEvidenceHandlers({ bot, repository, config });
   startupStage = "register_reward_policy";
-  registerRewardPolicyHandlers({ bot, repository, supabase, config });
+  registerRewardPolicyHandlers({ bot, repository, supabase, config, registerRaid: false });
   startupStage = "register_reward_settlement";
   registerRewardSettlementHandlers({ bot, repository, config, supabase });
   startupStage = "register_project_wallets";
