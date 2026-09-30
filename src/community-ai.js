@@ -326,7 +326,7 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
     const value = String(match[1]).trim().slice(0, 64);
     if (!value) return send(message, "❌ Use /ainame DISPLAY NAME");
     await profileFor(message);
-    const { error } = await supabase.from("community_suite_ai_profiles").update({ display_name:value, updated_by:Number(message.from.id), updated_at:new Date().toISOString() }).eq("chat_id", Number(message.chat.id));
+    const { error } = await supabase.from("community_suite_ai_profiles").update({ preset_key:"custom", role_label:"Custom Community Assistant", display_name:value, updated_by:Number(message.from.id), updated_at:new Date().toISOString() }).eq("chat_id", Number(message.chat.id));
     if (error) return send(message, "❌ AI name could not be changed.");
     return send(message, `✅ Custom AI name set to ${value}.`);
   });
@@ -335,7 +335,7 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
     if (!isGroup(message) || !(await requireAdmin(message))) return send(message, "⛔ Group admin access required.");
     const value = String(match[1]).trim().slice(0, 700);
     await profileFor(message);
-    const { error } = await supabase.from("community_suite_ai_profiles").update({ personality:value, updated_by:Number(message.from.id), updated_at:new Date().toISOString() }).eq("chat_id", Number(message.chat.id));
+    const { error } = await supabase.from("community_suite_ai_profiles").update({ preset_key:"custom", role_label:"Custom Community Assistant", personality:value, updated_by:Number(message.from.id), updated_at:new Date().toISOString() }).eq("chat_id", Number(message.chat.id));
     if (error) return send(message, "❌ AI personality could not be changed.");
     return send(message, "✅ Custom AI personality updated.");
   });
@@ -344,9 +344,9 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
     if (!isGroup(message) || !(await requireAdmin(message))) return send(message, "⛔ Group admin access required.");
     const value = String(match[1]).trim().slice(0, 1800);
     await profileFor(message);
-    const { error } = await supabase.from("community_suite_ai_profiles").update({ custom_instructions:value, updated_by:Number(message.from.id), updated_at:new Date().toISOString() }).eq("chat_id", Number(message.chat.id));
+    const { error } = await supabase.from("community_suite_ai_profiles").update({ preset_key:"custom", role_label:"Custom Community Assistant", custom_instructions:value, updated_by:Number(message.from.id), updated_at:new Date().toISOString() }).eq("chat_id", Number(message.chat.id));
     if (error) return send(message, "❌ AI instructions could not be changed.");
-    return send(message, "✅ Customer-approved AI instructions updated.");
+    return send(message, "✅ Customer-approved AI instructions updated. This profile is now a Custom Build.");
   });
 
   bot.onText(/^\/aiknowledge(?:@\w+)?(?:\s+([\s\S]+))?$/i, async (message, match) => {
