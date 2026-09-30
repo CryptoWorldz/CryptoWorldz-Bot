@@ -8,7 +8,12 @@ const TelegramBot = telegramLibrary.TelegramBot || telegramLibrary.default || te
 const { createClient } = require("@supabase/supabase-js");
 const { createAutoClient } = require("./auto/client");
 const { registerAliceSupport } = require("./alice-support");
-const { registerCommunityApi } = require("./community-api");\nconst { registerCommunityOps } = require("./community-ops");\nconst { registerCommunitySuiteHandlers } = require("./community-suite");\nconst { registerMarketAlertSystem } = require("./market-alerts");\nconst { registerWorldzScan } = require("./worldzscan");\nconst { registerAutoMiniRoutes } = require("./auto/zed-router");
+const { registerCommunityApi } = require("./community-api");
+const { registerCommunityOps } = require("./community-ops");
+const { registerCommunitySuiteHandlers } = require("./community-suite");
+const { registerMarketAlertSystem } = require("./market-alerts");
+const { registerWorldzScan } = require("./worldzscan");
+const { registerAutoMiniRoutes } = require("./auto/zed-router");
 const { registerAutoTelegramHandlers } = require("./auto/telegram");
 const { registerCauseTelegramHandlers } = require("./causes/telegram");
 const { registerCommandCentreHandlers } = require("./command-centre");
