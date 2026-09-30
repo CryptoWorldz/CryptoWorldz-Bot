@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-25-public-launchpad-v19-sui-devnet",
+  "version": "2026-10-01-public-launchpad-v20-revenue-engine",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -937,5 +937,32 @@
     "decisionRule": "LATEST_EXPLICIT_OWNER_INSTRUCTION_WINS_FOR_DECISIONS",
     "factualStatusRule": "EVIDENCE_DRIVEN",
     "mainnetExecutionGrantedByThisContract": false
+  },
+  "revenueEngine": {
+    "name": "Worldz Revenue Engine™",
+    "status": "PUBLIC_CONTROL_SURFACE_LIVE__MAINNET_EXECUTION_GATED",
+    "publicPath": "/revenue/",
+    "principle": "Revenue must come from disclosed platform usage and actually collected supported fees. Simulation is never reported as live revenue.",
+    "launchFee": {
+      "enabled": false,
+      "amount": null,
+      "asset": null,
+      "destination": "same-chain Worldz Operations Treasury after verification",
+      "activationRule": "Set a public amount, fee asset, same-chain treasury destination and executable-adapter enforcement before enabling a production launch fee."
+    },
+    "supportedTradingFee": {
+      "worldzSharePercentOfCollectedProjectTradingFee": 10,
+      "projectRetainedPercentOfCollectedProjectTradingFee": 90,
+      "walletTransferTaxPercent": 0,
+      "tokenSupplyTakePercent": 0,
+      "initialLiquidityTakePercent": 0
+    },
+    "treasuryPolicy": "/treasury-policy.json",
+    "accounting": {
+      "reportOnlyActuallyCollectedRevenue": true,
+      "separateLaunchFeeFromTradingFee": true,
+      "separateVenueProtocolFees": true,
+      "proofReceiptRequiredForProductionReporting": true
+    }
   }
 }
