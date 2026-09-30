@@ -68,6 +68,7 @@ const COMMAND_GROUPS = Object.freeze([
   ]),
   group("community-suite", "🌐 Worldz FullBuild™ Community Suite", "member", [
     ["suite", "Open the Community Suite"], ["suiteprice", "View Trial, Rent, Rent-to-Own and Own pricing"],
+    ["suitequote", "Calculate the group price after any unused trial credit"],
     ["modules", "View installed community modules"], ["themes", "View Worldz theme packs"],
     ["alice", "Open ALICE community support"], ["support", "Ask ALICE for support"],
     ["aicommunity", "Open the Custom AI Community Bot"], ["askcommunity", "Ask the customer AI"],
