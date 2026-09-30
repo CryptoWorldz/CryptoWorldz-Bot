@@ -210,19 +210,9 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
   const isAdmin = async (msg) => ["admin", "executive", "owner"].includes(await roleFor(msg));
 
   const SETTING_ROWS = Object.freeze([
-    ["welcome_enabled", "👋 Welcome Messages"],
-    ["welcome_variations_enabled", "🎲 Welcome Variations"],
-    ["welcome_media_enabled", "🖼 Welcome Media"],
-    ["welcome_buttons_enabled", "🔗 Welcome Buttons"],
     ["ronald_raider_enabled", "🤠 Ronald Raider"],
     ["shill_rewards_enabled", "📣 Shill Rewards"],
     ["referral_links_enabled", "🔗 Shill Links"],
-    ["points_enabled", "⭐ Legend Points"],
-    ["leaderboard_enabled", "🏆 Leaderboard"],
-    ["notifications_enabled", "🔔 Notifications"],
-    ["worldping_enabled", "🌐 WorldPing"],
-    ["auto_panel_enabled", "💎 AUTO Panel"],
-    ["grace_panel_enabled", "👩‍💼 G.R.A.C.E. Panel"],
     ["dipshit_enabled", "💙 DipShit"]
   ]);
   const SETTING_KEYS = new Set(SETTING_ROWS.map(([key]) => key));
@@ -253,6 +243,7 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
       ...SETTING_ROWS.map(([key, label]) => `${row[key] !== false ? "✅" : "⬜"} ${label}: ${row[key] !== false ? "On" : "Off"}`),
       "",
       "Tap any box to switch it on or off.",
+      "Only controls wired to live runtime behaviour are shown here.",
       "Changes apply to this Telegram chat only."
     ].join("\n");
   }
