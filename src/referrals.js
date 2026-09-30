@@ -109,6 +109,20 @@ function registerReferralTelegramHandlers({ bot, repository, supabase, config })
 
   const send = (chatId, text, options) => bot.sendMessage(chatId, text, options);
 
+  async function referralLinksEnabled(chatId) {
+    try {
+      const { data, error } = await supabase
+        .from("zed_chat_settings")
+        .select("referral_links_enabled")
+        .eq("chat_id", Number(chatId))
+        .maybeSingle();
+      if (error) throw error;
+      return data ? data.referral_links_enabled !== false : true;
+    } catch {
+      return true;
+    }
+  }
+
   async function getBudgetStatus() {
     const { data, error } = await supabase.rpc("get_reward_budget_status");
     if (error) throw error;
@@ -251,6 +265,10 @@ Use /shilllink inside an eligible CryptoWorldz group to create your unique link.
           return `🔗 ${title}\n${link.invite_link}\n👥 ${link.joins_recorded} joins • ✅ ${link.qualified_joins} qualified`;
         });
         return send(msg.chat.id, `🔗 Your CryptoWorldz Shill Links\n\n${rows.join("\n\n")}`);
+      }
+
+      if (!(await referralLinksEnabled(msg.chat.id))) {
+        return send(msg.chat.id, "⏸ Shill Links are switched off in /zedsettings for this chat.");
       }
 
       let target = await getReferralTarget(msg.chat.id);
