@@ -39,6 +39,7 @@ const { registerReferralTelegramHandlers } = require("./referrals");
 const { createRepository } = require("./repository");
 const { registerRewardPolicyHandlers } = require("./reward-policy");
 const { registerRewardSettlementHandlers } = require("./reward-settlement");
+const { registerRexSecureGuard } = require("./rex-secureguard");
 const { registerRonaldRaider } = require("./ronald-raider");
 const { registerShillRewards } = require("./shill-rewards");
 const { registerScopedBroadcastHandlers } = require("./scoped-broadcast");
@@ -183,6 +184,8 @@ async function start() {
   registerCommandCentreHandlers({ bot, repository, config, supabase });
   startupStage = "register_worldz_fullscope";
   registerFullScopeTelegramHandlers({ bot, repository, config, supabase });
+  startupStage = "register_rex_secureguard";
+  registerRexSecureGuard({ bot, supabase, config });
   startupStage = "register_ronald_raider";
   registerRonaldRaider({ bot, repository, supabase, config });
   startupStage = "register_shill_rewards";
