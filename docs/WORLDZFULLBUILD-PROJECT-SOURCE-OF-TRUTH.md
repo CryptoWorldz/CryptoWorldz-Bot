@@ -47,7 +47,7 @@ Mainnet market execution remains fail-closed unless the selected chain + venue p
 
 **Worldz Fee Flow™ V2 is the default economics for new WorldzLaunchPad intakes.**
 
-The creator selects **3% / 5% / 8%** back to WorldzLaunchPad. The fixed lanes are **10% Creator / Developer, 15% Launch Referrer, 15% final 12-token Legacy Core, 12% WLDZ-RVIV-PNEX-MRCL market-buy ledger, 10% LP Growth, 8% launched-token Buyback + Burn, 5% Impact / Charity, 5% Team / Builders and 5% Future Token Deployment**. Treasury / Reserve balances at **12% / 10% / 7%** for BUILD / GROW / BOOST.
+The creator selects **3% / 5% / 8%** back to WorldzLaunchPad. The fixed lanes are **10% Creator / Developer, 15% Launch Referrer, 15% final 12-token Legacy Core, 12% WLDZ-RVIV-PNEX-MRCL market-buy ledger, 10% LP Growth, 8% launched-token Buyback + Burn, 5% Impact / Charity, 5% Team / Builders and 5% Future Token Deployment**. Operations Treasury residual balances at **12% / 10% / 7%** for BUILD / GROW / BOOST.
 
 The Legacy Core membership is permanently closed at **12 tokens**, with **1.25% each** from the single 15% Legacy allocation. No second Legacy deduction is allowed.
 

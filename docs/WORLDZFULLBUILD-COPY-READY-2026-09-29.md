@@ -188,11 +188,14 @@ Token-specific grants, liquidity support or ProofBurn actions require their own 
 
 ## TREASURY SEPARATION 🔐
 
-Current proposed profiles remain separate:
+Current treasury profiles remain separate:
 
 - **Miracle Church Treasury — proposed 4-of-10**
-- **Worldz Operations Treasury — proposed 5-of-10**
-- **Worldz Reserve Treasury — proposed 6-of-9**
+- **Worldz Operations Treasury — permanent 3-of-5 policy**
+- **Worldz Reserve Treasury — not deployed / disabled**
+- **Reserve sweeps — OFF**
+
+The current Operations signer set is JayJayTeamDev, Stepper, Savage, SolMusic and Mahammad. Live Squads membership and threshold must still be independently re-read before automated production routing is marked verified.
 
 A person is never silently made a signer. Participation requires consent and a verified public address. Membership in one profile never automatically grants authority in another.
 

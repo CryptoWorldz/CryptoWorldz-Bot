@@ -31,9 +31,9 @@ The following percentages are allocations of **eligible collected supported trad
 
 Fixed subtotal: **85%**.
 
-The selected WorldzLaunchPad contribution and Treasury/Reserve finish the 100%:
+The selected WorldzLaunchPad contribution and Operations Treasury allocation finish the 100%:
 
-| Profile | WorldzLaunchPad | Treasury / Reserve | Total |
+| Profile | WorldzLaunchPad | Operations Treasury | Total |
 |---|---:|---:|---:|
 | BUILD | 3% | 12% | 100% |
 | GROW | 5% | 10% | 100% |

@@ -24,56 +24,39 @@ TARGETS = [
 
 MESSAGE = """TEAM — WORLDZ TREASURY UPDATE 🔐🌍
 
-We’ve now locked in the new WorldzLaunchPad™ Treasury structure.
+Worldz Operations Treasury is now locked to the permanent 3-of-5 policy.
 
 Operations Treasury
-• 10 authorised signers
-• 5-of-10 approvals required
+• 5 authorised signers
+• 3-of-5 approvals required
+• JayJayTeamDev
+• Stepper
+• Savage
+• SolMusic
+• Mahammad
 
 Reserve Treasury
-• 9 authorised signers
-• 6-of-9 approvals required
-• We will never require more than 6 signatures
+• NOT DEPLOYED
+• Reserve sweeps OFF
+• Approved funds remain in Operations Treasury unless a separate Reserve is explicitly approved later.
 
-This structure will be used across:
+This structure is the Worldz treasury standard for supported chain-native deployments:
 • Solana — Squads
 • Ethereum / Base / BNB / HyperEVM — Safe
 • XRP Ledger — native XRPL multisig
 • Sui — native Sui multisig
 
-The Operations Treasury will receive the WorldzLaunchPad™ 10% share of collected supported trading-fee revenue.
-
-IMPORTANT:
-
-I now need each Treasury team member to send me their PUBLIC wallet addresses only.
-
-Please send:
-
-SOL:
-"Your Solana public address"
-
-EVM:
-"Your Ethereum / Base / BNB public address"
-
-XRPL:
-"Your XRP Ledger public address"
-
-SUI:
-"Your Sui public address"
-
-🚨 NEVER send your seed phrase, recovery phrase, private key or password.
-
+🚨 NEVER send seed phrases, recovery phrases, private keys or passwords.
 Public wallet addresses ONLY.
 
-Our current Solana Team Zed Treasury is already verified as a 2-of-3 Squads multisig.
+The Solana Operations vault remains:
+n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB
 
-The next step is upgrading it toward the new 5-of-10 Worldz Treasury standard through proper on-chain approvals.
-
-Once the signer addresses are registered, we can build and verify the Treasury wallets chain by chain.
+The five-member / 3-of-5 Squads state must be independently re-read on-chain before automated production fee routing is marked verified.
 
 WorldzLaunchPad™
-5-of-10 Operations
-6-of-9 Reserve
+3-of-5 Operations
+Reserve Disabled
 
 One World • One Mission 💜🌍"""
 

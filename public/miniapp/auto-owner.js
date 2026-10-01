@@ -99,7 +99,7 @@
 
   function walletMarkup(wallets, ultimate) {
     const items = [
-      { purpose: 'treasury', key: 'treasury', label: 'Treasury Reserve', icon: '🏦' },
+      { purpose: 'treasury', key: 'treasury', label: 'Operations Treasury', icon: '🏦' },
       { purpose: 'dev', key: 'dev_grace_operations', label: 'Dev + Grace Operations', icon: '🛠️' },
       { purpose: 'rewards', key: 'rewards', label: 'Rewards', icon: '🎁' },
       { purpose: 'investment', key: 'owner_diamond_buy', label: 'Owner Diamond Buy™', icon: '💎' }

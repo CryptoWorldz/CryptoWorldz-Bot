@@ -24,24 +24,33 @@
       "id": "worldz-operations",
       "label": "Worldz Operations Treasury",
       "governance": {
-        "threshold": 5,
-        "signers": 10,
-        "display": "5-of-10"
+        "threshold": 3,
+        "signers": 5,
+        "display": "3-of-5"
       },
-      "state": "ROLLOUT_PENDING",
-      "mainnetExecution": false
+      "state": "ONCHAIN_REVERIFY_REQUIRED",
+      "mainnetExecution": false,
+      "signers": [
+        "JayJayTeamDev",
+        "Stepper",
+        "Savage",
+        "SolMusic",
+        "Mahammad"
+      ]
     },
     {
       "id": "worldz-reserve",
       "label": "Worldz Reserve Treasury",
       "governance": {
-        "threshold": 6,
-        "signers": 9,
-        "display": "6-of-9"
+        "threshold": 0,
+        "signers": 0,
+        "display": "NOT_DEPLOYED"
       },
-      "state": "NOT_DEPLOYED",
-      "mainnetExecution": false
+      "state": "DISABLED_NOT_DEPLOYED",
+      "mainnetExecution": false,
+      "enabled": false,
+      "note": "No separate Worldz Reserve Treasury is currently required. Reserve sweeps are disabled; funds remain in the Operations Treasury until a future explicit decision."
     }
   ],
-  "rule": "Treasury membership and authority never silently inherit between profiles."
+  "rule": "Worldz Operations uses permanent 3-of-5 governance. Reserve is disabled/not deployed. Treasury membership and authority never silently inherit between profiles."
 }

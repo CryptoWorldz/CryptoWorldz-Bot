@@ -255,7 +255,7 @@ async function runPreflight(){
     ['Creator liquid-at-genesis cap',m.safetyPolicy.creatorUnlockedAtGenesisPercent>=0&&m.safetyPolicy.creatorUnlockedAtGenesisPercent<=p.allocations.creatorTeamUnlockedAtGenesisMaxPercent&&m.safetyPolicy.creatorUnlockedAtGenesisPercent<=alloc.creatorTeam,m.safetyPolicy.creatorUnlockedAtGenesisPercent.toFixed(1)+'% / max '+Math.min(p.allocations.creatorTeamUnlockedAtGenesisMaxPercent,alloc.creatorTeam)+'%'],
     ['Liquidity allocation range',alloc.liquidity>=p.allocations.liquidityMinPercent&&alloc.liquidity<=p.allocations.liquidityMaxPercent,alloc.liquidity.toFixed(1)+'%'],
     ['Community/public minimum',alloc.communityPublic>=p.allocations.communityPublicMinPercent,alloc.communityPublic.toFixed(1)+'% / min '+p.allocations.communityPublicMinPercent+'%'],
-    ['Treasury/reserve cap',alloc.treasuryReserve<=p.allocations.treasuryReserveMaxPercent,alloc.treasuryReserve.toFixed(1)+'% / max '+p.allocations.treasuryReserveMaxPercent+'%'],
+    ['Operations Treasury cap',alloc.treasuryReserve<=p.allocations.treasuryReserveMaxPercent,alloc.treasuryReserve.toFixed(1)+'% / max '+p.allocations.treasuryReserveMaxPercent+'%'],
     ['Founder cliff',m.safetyPolicy.founderCliffDays>=p.allocations.founderCliffMinDays,m.safetyPolicy.founderCliffDays+' days'],
     ['Founder vesting',m.safetyPolicy.founderVestingMonths>=p.allocations.founderVestingMinMonths,m.safetyPolicy.founderVestingMonths+' months'],
     ['Creator-controlled LP lock',m.safetyPolicy.creatorControlledLpLockPercent===100&&m.safetyPolicy.lpLockDays>=p.allocations.lpLockMinDays,'100% • '+m.safetyPolicy.lpLockDays+' days'],
