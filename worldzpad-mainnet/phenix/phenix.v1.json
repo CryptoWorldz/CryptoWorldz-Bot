@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-PHENIX-V1",
-  "version": "2026-09-30",
+  "version": "2026-10-01",
   "status": "PRELAUNCH_SPEC_LOCKED",
   "token": {
     "order": 3,
@@ -115,5 +115,31 @@
     "eligibleRole": "ADDITIONAL_DEV_AND_REWARDS",
     "canonicalSymbol": "PNEX",
     "automaticTransfer": false
+  },
+  "worldzLaunchPadTestPlan": {
+    "role": "NEXT_WORLDZ_OWNED_LAUNCH_REHEARSAL_CANDIDATE",
+    "canonicalTicker": "PNEX",
+    "mintRoute": "WORLDZMINT_NEW_UNLESS_A_REAL_EXISTING_MINT_IS_CREATED_AND_VERIFIED",
+    "existingMintImportAllowed": true,
+    "existingMintImportPath": "/launch-station/?mode=existing",
+    "newMintPath": "/mint/",
+    "launchStationPath": "/launch-station/",
+    "feeFlowPolicy": "worldzpad-mainnet/fairfee/worldz-fee-flow.v2.json",
+    "recommendedTestProfile": "GROW_5",
+    "requiredStages": [
+      "DEVNET_OR_SAFE_REHEARSAL",
+      "TOKEN_IDENTITY_PROOF",
+      "GENESIS_ALLOCATION_PROOF",
+      "VESTING_AND_LOCK_PLAN",
+      "FEE_FLOW_V2_100_PERCENT_RECONCILIATION",
+      "MARKET_ROUTE_SIMULATION",
+      "LP_PROTECTION_PROOF",
+      "WORLDZ_PROOF_RECEIPT",
+      "WORLDDEXPUSH_HANDOFF",
+      "COMMUNITY_AND_SOCIAL_HANDOFF"
+    ],
+    "automaticMainnetBroadcast": false,
+    "mainnetLaunchRequiresExplicitHumanApproval": true,
+    "noMintMayBeInvented": true
   }
 }
