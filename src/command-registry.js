@@ -86,6 +86,7 @@ const COMMAND_GROUPS = Object.freeze([
   ]),
   group("admin-missions", "🛡 Admin • Raids, Reviews, Members & Settings", "admin", [
     ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"], ["secureguard", "Open REXSECURE ULTIMATE security controls"],
+    ["rexwelcome", "Resend the REXSECURE ULTIMATE branded welcome"],
     ["rexintel", "Check a Telegram ID against REX Network Shield and CAS"], ["rexreport", "Record evidence about a suspicious Telegram profile"],
     ["rexpatternban", "Reply to confirmed scam/spam and add its message pattern"], ["rexunderattack", "Turn strict REX raid posture on or off"],
     ["reviewqueue", "Open Raid, Creator and Hero human-review queues"],
