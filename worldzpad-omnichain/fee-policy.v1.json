@@ -1,5 +1,5 @@
 {
-  "version": "WORLDZ-OMNICHAIN-FEE-POLICY-2026-09-24-A",
+  "version": "WORLDZ-OMNICHAIN-FEE-POLICY-2026-10-01-B",
   "name": "MagicFeeNumber™ Omnichain Policy",
   "status": "PRIVATE_BUILD__PER_CHAIN_PROOF_REQUIRED",
   "targetGrossTraderFeeBps": 75,
@@ -24,17 +24,29 @@
   },
   "referralPolicy": {
     "onePrimaryReferrerPerLaunchOrTradeAttribution": true,
-    "eligibleTypes": ["WALLET", "LAUNCHPAD", "INFLUENCER", "TELEGRAM_COMMUNITY", "X_COMMUNITY", "WEBSITE", "DEVELOPER", "API_PARTNER", "WHITE_LABEL_OPERATOR"],
+    "eligibleTypes": [
+      "WALLET",
+      "LAUNCHPAD",
+      "INFLUENCER",
+      "TELEGRAM_COMMUNITY",
+      "X_COMMUNITY",
+      "WEBSITE",
+      "DEVELOPER",
+      "API_PARTNER",
+      "WHITE_LABEL_OPERATOR"
+    ],
     "launchpadToLaunchpadSupported": true,
     "referrerSharePercentOfWorldzControlledRevenue": 17,
     "subAffiliateRule": "Any sub-affiliate split must come from the primary referrer's own 17% share and may not increase the trader fee."
   },
   "legacyFlywheelPolicy": {
     "percentOfWorldzControlledRevenue": 15,
-    "solanaVaultCount": 10,
+    "solanaVaultCount": 12,
     "equalSourceFundingAcrossLegacyVaults": true,
     "settlementHours": 6,
-    "crossChainRule": "Accrue the 15% Legacy Flywheel entitlement on the source chain until an approved audited conversion/bridge path can deliver SOL. Unsupported automatic bridging is forbidden."
+    "crossChainRule": "Accrue each token's equal Legacy market-buy entitlement on the source chain until an approved audited route can settle it. Unsupported automatic bridging is forbidden.",
+    "equalPerTokenPercentOfWorldzControlledRevenue": 1.25,
+    "allocationMode": "TRANSPARENT_MARKET_BUY_ACCRUAL"
   },
   "knownVenueModels": {
     "solanaMeteoraDbc": {
@@ -43,7 +55,7 @@
       "targetGrossTraderFeeBps": 75,
       "modeledEffectivePercentOfTrade": {
         "externalProtocol": 0.15,
-        "worldzControlled": 0.60,
+        "worldzControlled": 0.6,
         "creator": 0.306,
         "referrer": 0.102,
         "legacyFlywheel": 0.09,
