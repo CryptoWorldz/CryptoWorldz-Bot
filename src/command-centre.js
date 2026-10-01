@@ -196,7 +196,7 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
     ["ronald_raider_enabled", "🤠 Ronald Raider"],
     ["shill_rewards_enabled", "📣 Shill Rewards"],
     ["referral_links_enabled", "🔗 Shill Links"],
-    ["secureguard_enabled", "🛡 REX SecureGuard"],
+    ["secureguard_enabled", "🛡 REXSECURE ULTIMATE"],
     ["dipshit_enabled", "💙 DipShit"]
   ]);
   const SETTING_KEYS = new Set(SETTING_ROWS.map(([key]) => key));

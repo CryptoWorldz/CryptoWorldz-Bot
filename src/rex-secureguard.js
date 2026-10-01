@@ -1,5 +1,12 @@
 const crypto = require("node:crypto");
 const { ensureGroup, suiteAccessAllowed } = require("./community-suite-core");
+const { createRexThreatIntel, safeTelegramId } = require("./rex-threat-intel");
+
+const REX_BRAND = Object.freeze({
+  name: "REXSECURE ULTIMATE™",
+  tagline: "Security for Your Community",
+  casAttribution: "Powered by CAS • https://cas.chat"
+});
 
 const BLOCKED_PERMISSIONS = Object.freeze({
   can_send_messages: false,
@@ -56,6 +63,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
   let sweeper = null;
   const messageRates = new Map();
   const impersonationCooldowns = new Map();
+  const threatIntel = createRexThreatIntel({ supabase });
 
   async function api(method, payload = {}) {
     const response = await fetch(`${base}/${method}`, {
@@ -76,7 +84,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
   async function setting(chatId) {
     const { data, error } = await supabase
       .from("zed_chat_settings")
-      .select("secureguard_enabled,secureguard_number_match_enabled,secureguard_timeout_seconds,secureguard_max_attempts,secureguard_antiflood_enabled,secureguard_max_messages_10s,secureguard_links_mode,secureguard_impersonation_mode")
+      .select("secureguard_enabled,secureguard_number_match_enabled,secureguard_timeout_seconds,secureguard_max_attempts,secureguard_antiflood_enabled,secureguard_max_messages_10s,secureguard_links_mode,secureguard_impersonation_mode,secureguard_threat_intel_enabled,secureguard_cas_enabled,secureguard_network_shield_mode,secureguard_external_bots_mode,secureguard_pattern_guard_enabled,secureguard_under_attack")
       .eq("chat_id", Number(chatId))
       .maybeSingle();
     if (error) throw error;
@@ -86,9 +94,15 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       timeout: Number(data?.secureguard_timeout_seconds) || 120,
       maxAttempts: Number(data?.secureguard_max_attempts) || 3,
       antiflood: data?.secureguard_antiflood_enabled !== false,
-      maxMessages10s: Number(data?.secureguard_max_messages_10s) || 8,
-      linksMode: String(data?.secureguard_links_mode || "blocklist"),
-      impersonationMode: String(data?.secureguard_impersonation_mode || "warn")
+      maxMessages10s: data?.secureguard_under_attack === true ? Math.min(Number(data?.secureguard_max_messages_10s) || 8, 4) : (Number(data?.secureguard_max_messages_10s) || 8),
+      linksMode: data?.secureguard_under_attack === true ? "admins_only" : String(data?.secureguard_links_mode || "blocklist"),
+      impersonationMode: data?.secureguard_under_attack === true ? "quarantine" : String(data?.secureguard_impersonation_mode || "warn"),
+      threatIntel: data?.secureguard_threat_intel_enabled !== false,
+      casEnabled: data?.secureguard_cas_enabled !== false,
+      networkShieldMode: String(data?.secureguard_network_shield_mode || "ban"),
+      externalBotsMode: String(data?.secureguard_external_bots_mode || "remove"),
+      patternGuard: data?.secureguard_pattern_guard_enabled !== false,
+      underAttack: data?.secureguard_under_attack === true
     };
   }
 
@@ -120,6 +134,93 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     } catch {
       return false;
     }
+  }
+
+  function isOwner(userId) {
+    return Boolean(config.ownerTelegramId) && String(userId || "") === String(config.ownerTelegramId);
+  }
+
+  async function banMember(chatId, userId, reason = "") {
+    await api("banChatMember", { chat_id: chatId, user_id: userId, revoke_messages: true });
+    await logEvent(chatId, userId, "member_banned", reason);
+  }
+
+  async function quarantineMember(chatId, userId, seconds = 3600, reason = "") {
+    await api("restrictChatMember", {
+      chat_id: chatId,
+      user_id: userId,
+      permissions: BLOCKED_PERMISSIONS,
+      until_date: Math.floor(Date.now() / 1000) + Math.max(60, Number(seconds) || 3600)
+    });
+    await logEvent(chatId, userId, "member_quarantined", reason);
+  }
+
+  async function enforceThreatProfile(chatId, user, cfg, { announce = true } = {}) {
+    if (!cfg.threatIntel || !user?.id) return false;
+    const assessment = await threatIntel.assessUser(user.id, { casEnabled: cfg.casEnabled });
+    if (!assessment.blocked || cfg.networkShieldMode === "off") return false;
+    const reason = assessment.reason || "documented threat profile";
+    if (cfg.networkShieldMode === "quarantine") {
+      await quarantineMember(chatId, user.id, 3600, `threat_intel:${reason}`);
+    } else {
+      await banMember(chatId, user.id, `threat_intel:${reason}`);
+    }
+    await logEvent(chatId, user.id, "threat_intel_block", `${assessment.sources.map((row) => row.source).join(",")}:${reason}`);
+    if (announce) {
+      try {
+        await bot.sendMessage(chatId, [
+          "🛡 REXSECURE ULTIMATE™ — THREAT BLOCK",
+          "",
+          `Telegram ID: ${user.id}`,
+          `Action: ${cfg.networkShieldMode === "quarantine" ? "QUARANTINED" : "BANNED"}`,
+          `Reason: ${reason}`,
+          "",
+          REX_BRAND.casAttribution
+        ].join("\n"), { disable_web_page_preview: true });
+      } catch {}
+    }
+    return true;
+  }
+
+  async function trustedBot(chatId, member) {
+    if (!member?.is_bot) return false;
+    try {
+      const me = await api("getMe");
+      if (Number(me?.id) === Number(member.id)) return true;
+    } catch {}
+    const trusted = await trustedIdentities(chatId).catch(() => []);
+    return trusted.some((row) => row.identity_type === "bot" && Number(row.telegram_id) === Number(member.id));
+  }
+
+  async function handleNewMember(msg, member, cfg) {
+    if (!member?.id) return;
+    if (member.is_bot) {
+      if (cfg.externalBotsMode === "remove" && !(await trustedBot(msg.chat.id, member))) {
+        try {
+          await removeMember(msg.chat.id, member.id);
+          await logEvent(msg.chat.id, member.id, "external_bot_removed", member.username || member.first_name || "");
+          await bot.sendMessage(msg.chat.id, `🛡 REX removed untrusted bot ${member.username ? "@"+member.username : member.first_name || member.id}. Trust approved bots first with /rextrust.`);
+        } catch {}
+      }
+      return;
+    }
+    if (await enforceThreatProfile(msg.chat.id, member, cfg)) return;
+    if (cfg.numberMatch && msg.chat.type === "supergroup") await createChallenge(msg, member, cfg);
+  }
+
+  async function enforcePatternGuard(msg, cfg) {
+    if (!cfg.patternGuard || !msg.from?.id) return false;
+    const text = msg.text || msg.caption || "";
+    if (!text) return false;
+    const match = await threatIntel.matchPattern(msg.chat.id, text).catch(() => null);
+    if (!match) return false;
+    try { await api("deleteMessage", { chat_id: msg.chat.id, message_id: msg.message_id }); } catch {}
+    try { await quarantineMember(msg.chat.id, msg.from.id, cfg.underAttack ? 86400 : 3600, `pattern_similarity=${match.similarity.toFixed(2)}`); } catch {}
+    await logEvent(msg.chat.id, msg.from.id, "pattern_guard_triggered", `pattern_id=${match.row.id};similarity=${match.similarity.toFixed(3)}`);
+    try {
+      await bot.sendMessage(msg.chat.id, `🛡 REX Pattern Guard removed a message matching a confirmed scam/spam pattern (${Math.round(match.similarity * 100)}%). Sender quarantined.`);
+    } catch {}
+    return true;
   }
 
   async function unlockMember(chatId, userId) {
@@ -180,7 +281,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     const options = challengeOptions(code);
     const sent = await bot.sendMessage(
       msg.chat.id,
-      `🛡 REX SecureGuard™\n\nWelcome ${member.first_name || "member"}. Match this number to unlock chat access:\n\n🔢 ${code}\n\nYou have ${cfg.timeout} seconds.`,
+      `🛡 REXSECURE ULTIMATE™\n\nWelcome ${member.first_name || "member"}. Match this number to unlock chat access:\n\n🔢 ${code}\n\nYou have ${cfg.timeout} seconds.`,
       {
         reply_markup: {
           inline_keyboard: [
@@ -215,7 +316,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
           .eq("id", row.id)
           .eq("status", "pending");
         if (row.message_id) {
-          try { await bot.editMessageText("🛡 REX SecureGuard™ — verification expired. Member removed; they may rejoin and try again.", { chat_id: row.chat_id, message_id: row.message_id }); } catch {}
+          try { await bot.editMessageText("🛡 REXSECURE ULTIMATE™ — verification expired. Member removed; they may rejoin and try again.", { chat_id: row.chat_id, message_id: row.message_id }); } catch {}
         }
         await logEvent(row.chat_id, row.telegram_id, "challenge_expired", `challenge_id=${row.id}`);
       } catch (error2) {
@@ -347,6 +448,112 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     return true;
   }
 
+  bot.onText(/^\/rexintel(?:@\w+)?\s+(\d+)$/i, async (msg, match) => {
+    if (!isOwner(msg.from?.id) && !(await isTelegramAdmin(msg.chat.id, msg.from?.id))) {
+      return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    }
+    const telegramId = safeTelegramId(match?.[1]);
+    if (!telegramId) return bot.sendMessage(msg.chat.id, "❌ Use /rexintel TELEGRAM_ID");
+    const assessment = await threatIntel.assessUser(telegramId, { casEnabled: true });
+    const sourceLines = assessment.sources.map((row) =>
+      `• ${row.source}: ${row.blocked ? "BLOCKED" : row.available ? "clear/no block" : "unavailable"}${row.reason ? " — "+row.reason : ""}`
+    );
+    return bot.sendMessage(msg.chat.id, [
+      "🛡 REXSECURE ULTIMATE™ — PROFILE INTELLIGENCE",
+      "",
+      `Telegram ID: ${telegramId}`,
+      `Decision: ${assessment.blocked ? "⛔ BLOCK" : assessment.watch ? "⚠️ WATCH" : "✅ NO DOCUMENTED BLOCK"}`,
+      `Confidence: ${assessment.confidence || 0}%`,
+      ...sourceLines,
+      "",
+      REX_BRAND.casAttribution
+    ].join("\n"), { disable_web_page_preview: true });
+  });
+
+  bot.onText(/^\/rexreport(?:@\w+)?(?:\s+(\d+))?(?:\s*\|\s*([\s\S]+))?$/i, async (msg, match) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    const replied = msg.reply_to_message;
+    const subjectTelegramId = safeTelegramId(replied?.from?.id || match?.[1]);
+    const reason = String(match?.[2] || (!match?.[1] ? String(msg.text || "").replace(/^\/rexreport(?:@\w+)?\s*/i, "") : "") || "Admin security report").trim();
+    if (!subjectTelegramId) return bot.sendMessage(msg.chat.id, "❌ Reply to a message with /rexreport reason, or use /rexreport USER_ID | reason");
+    const report = await threatIntel.reportProfile({
+      chatId: msg.chat.id,
+      reporterTelegramId: msg.from.id,
+      subjectTelegramId,
+      messageId: replied?.message_id || null,
+      reason,
+      evidence: replied ? String(replied.text || replied.caption || "").slice(0, 1200) : ""
+    });
+    await logEvent(msg.chat.id, subjectTelegramId, "threat_report_created", `report_id=${report.id}`, msg.from.id);
+    return bot.sendMessage(msg.chat.id, `🛡 REX report #${report.id} recorded for Telegram ID ${subjectTelegramId}. It is evidence for review — not an automatic network-wide ban.`);
+  });
+
+  bot.onText(/^\/rexglobalblock(?:@\w+)?\s+(\d+)\s*\|\s*([^|]+?)(?:\s*\|\s*(https?:\/\/\S+))?$/i, async (msg, match) => {
+    if (!isOwner(msg.from?.id)) return bot.sendMessage(msg.chat.id, "⛔ Worldz owner access required for network-wide blocks.");
+    const telegramId = safeTelegramId(match?.[1]);
+    const reason = String(match?.[2] || "").trim();
+    const evidenceUrl = String(match?.[3] || "").trim() || null;
+    if (!telegramId || !reason) return bot.sendMessage(msg.chat.id, "❌ Use /rexglobalblock USER_ID | reason | optional evidence URL");
+    await threatIntel.setRegistryProfile({
+      telegramId,
+      status: "blocked",
+      confidence: 100,
+      source: "worldz_owner",
+      reason,
+      evidenceUrl,
+      actorTelegramId: msg.from.id
+    });
+    await logEvent(msg.chat.id, telegramId, "network_block_added", reason, msg.from.id);
+    return bot.sendMessage(msg.chat.id, `⛔ REX Network Shield now blocks Telegram ID ${telegramId} across protected Worldz communities. Reason: ${reason}`);
+  });
+
+  bot.onText(/^\/rexglobalclear(?:@\w+)?\s+(\d+)(?:\s*\|\s*([\s\S]+))?$/i, async (msg, match) => {
+    if (!isOwner(msg.from?.id)) return bot.sendMessage(msg.chat.id, "⛔ Worldz owner access required for network-wide clears.");
+    const telegramId = safeTelegramId(match?.[1]);
+    const reason = String(match?.[2] || "Owner reviewed and cleared").trim();
+    if (!telegramId) return bot.sendMessage(msg.chat.id, "❌ Use /rexglobalclear USER_ID | reason");
+    await threatIntel.setRegistryProfile({
+      telegramId,
+      status: "cleared",
+      confidence: 100,
+      source: "worldz_owner",
+      reason,
+      actorTelegramId: msg.from.id
+    });
+    await logEvent(msg.chat.id, telegramId, "network_block_cleared", reason, msg.from.id);
+    return bot.sendMessage(msg.chat.id, `✅ REX Network Shield cleared Telegram ID ${telegramId}. This does not override an independent CAS ban.`);
+  });
+
+  bot.onText(/^\/rexpatternban(?:@\w+)?(?:\s+([\s\S]+))?$/i, async (msg, match) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    const target = msg.reply_to_message;
+    if (!target?.from?.id) return bot.sendMessage(msg.chat.id, "❌ Reply to a scam/spam message with /rexpatternban optional reason");
+    if (await isTelegramAdmin(msg.chat.id, target.from.id)) return bot.sendMessage(msg.chat.id, "⛔ REX will not pattern-ban a Telegram admin.");
+    const sample = String(target.text || target.caption || "");
+    if (sample.trim().length < 12) return bot.sendMessage(msg.chat.id, "❌ That message is too short to become a safe pattern.");
+    const reason = String(match?.[1] || "Admin-confirmed scam/spam pattern").trim();
+    const pattern = await threatIntel.addPattern({
+      chatId: msg.chat.id,
+      text: sample,
+      sourceTelegramId: target.from.id,
+      actorTelegramId: msg.from.id,
+      reason
+    });
+    try { await banMember(msg.chat.id, target.from.id, `pattern_ban:${reason}`); } catch {}
+    try { await api("deleteMessage", { chat_id: msg.chat.id, message_id: target.message_id }); } catch {}
+    return bot.sendMessage(msg.chat.id, `🛡 REX Pattern Guard saved pattern #${pattern.id}, banned the source profile locally, and will quarantine highly similar future messages.`);
+  });
+
+  bot.onText(/^\/rexunderattack(?:@\w+)?\s+(on|off)$/i, async (msg, match) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    const enabled = String(match?.[1]).toLowerCase() === "on";
+    await upsertSetting(msg.chat.id, { secureguard_under_attack: enabled });
+    await logEvent(msg.chat.id, null, enabled ? "under_attack_enabled" : "under_attack_disabled", "", msg.from.id);
+    return bot.sendMessage(msg.chat.id, enabled
+      ? "🚨 REX UNDER ATTACK MODE ON — links are admin-only, identity signals quarantine, flood limits tighten, threat intelligence and Pattern Guard remain active."
+      : "✅ REX Under Attack mode released. Normal group security settings restored.");
+  });
+
   bot.onText(/^\/rextrust(?:@\w+)?\s+(-?\d+)\s*\|\s*([^|]+)(?:\s*\|\s*([^|]+))?(?:\s*\|\s*(admin|team|bot|channel|partner))?$/i, async (msg, match) => {
     if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
     const telegramId = Number(match[1]);
@@ -416,7 +623,14 @@ function registerRexSecureGuard({ bot, supabase, config }) {
         `Anti-Flood: ${cfg.antiflood ? "✅" : "⬜"}`,
         `Link Guard: ${cfg.linksMode}`,
         `Identity Guard: ${cfg.impersonationMode}`,
+        `Threat Intelligence: ${cfg.threatIntel ? "✅" : "⬜"}`,
+        `CAS: ${cfg.casEnabled ? "✅" : "⬜"}`,
+        `Network Shield: ${cfg.networkShieldMode}`,
+        `External Bot Guard: ${cfg.externalBotsMode}`,
+        `Pattern Guard: ${cfg.patternGuard ? "✅" : "⬜"}`,
+        `Under Attack: ${cfg.underAttack ? "🚨 ON" : "✅ OFF"}`,
         "",
+        REX_BRAND.casAttribution,
         "Use /rexrecovery for the admin recovery checklist."
       ].join("\n"));
     } catch {
@@ -483,7 +697,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     const actorId = msg.from?.id;
 
     if (!["group", "supergroup"].includes(type)) {
-      return bot.sendMessage(chatId, "🛡 REX SecureGuard™ works inside Telegram groups/supergroups.");
+      return bot.sendMessage(chatId, "🛡 REXSECURE ULTIMATE™ works inside Telegram groups/supergroups.");
     }
 
     if (!(await isTelegramAdmin(chatId, actorId))) {
@@ -493,15 +707,29 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     if (action === "on") {
       await ensureGroup(supabase, msg, config);
       if (!(await suiteAccessAllowed(supabase, chatId))) {
-        return bot.sendMessage(chatId, "🔒 REX SecureGuard™ requires an active Worldz FullBuild Community Suite licence. Use /suiteprice and /suitereceipt, or activate an approved trial.");
+        return bot.sendMessage(chatId, "🔒 REXSECURE ULTIMATE™ requires an active Worldz FullBuild Community Suite licence. Use /suiteprice and /suitereceipt, or activate an approved trial.");
       }
       if (type !== "supergroup") {
         return bot.sendMessage(chatId,
           "🛡 REX is ready, but number-match member restriction requires a Telegram Supergroup. Upgrade this group to a Supergroup in Telegram first, then run /secureguard on again. REX will recognise the migrated group automatically."
         );
       }
+      const wasEnabled = (await setting(chatId)).enabled;
       await upsertSetting(chatId, { secureguard_enabled: true });
       await logEvent(chatId, null, "secureguard_enabled", "", actorId);
+      if (!wasEnabled) {
+        try {
+          await bot.sendMessage(chatId, [
+            "🛡 REXSECURE ULTIMATE™ is now on the door.",
+            REX_BRAND.tagline,
+            "",
+            "New members: threat intelligence → trusted-bot gate → number match.",
+            "Active chat: Network Shield → identity → Pattern Guard → anti-flood → link guard.",
+            "",
+            REX_BRAND.casAttribution
+          ].join("\n"), { disable_web_page_preview: true });
+        } catch {}
+      }
     } else if (action === "off") {
       await upsertSetting(chatId, { secureguard_enabled: false });
       await logEvent(chatId, null, "secureguard_disabled", "", actorId);
@@ -516,7 +744,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     } catch {}
 
     return bot.sendMessage(chatId, [
-      "🛡 REX SecureGuard™",
+      "🛡 REXSECURE ULTIMATE™",
       "",
       `Status: ${cfg.enabled ? "✅ ON" : "⏸ OFF"}`,
       `Chat: ${type === "supergroup" ? "✅ Supergroup" : "⚠️ Basic group"}`,
@@ -527,8 +755,19 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       `Anti-Flood: ${cfg.antiflood ? "✅ ON" : "⏸ OFF"} • max ${cfg.maxMessages10s}/10s`,
       `Link Guard: ${cfg.linksMode}`,
       `Identity Guard: ${cfg.impersonationMode}`,
+      `Threat Intelligence: ${cfg.threatIntel ? "✅ ON" : "⏸ OFF"}`,
+      `CAS: ${cfg.casEnabled ? "✅ ON" : "⏸ OFF"}`,
+      `Network Shield: ${cfg.networkShieldMode}`,
+      `External Bot Guard: ${cfg.externalBotsMode}`,
+      `Pattern Guard: ${cfg.patternGuard ? "✅ ON" : "⏸ OFF"}`,
+      `Under Attack: ${cfg.underAttack ? "🚨 ON" : "✅ OFF"}`,
+      "",
+      REX_BRAND.tagline,
+      REX_BRAND.casAttribution,
       "",
       "Commands: /secureguard on • /secureguard off • /secureguard status",
+      "Threats: /rexintel • /rexreport • /rexpatternban • /rexunderattack",
+      "Network owner: /rexglobalblock • /rexglobalclear",
       "Domains: /rexblockdomain • /rexallowdomain • /rexdomains • /rexlinkmode",
       "Identity: /rextrust • /rexuntrust • /rextrusted • /reximpostor",
       "Audit: /rexposture • /rexrecovery"
@@ -557,14 +796,15 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       if (!(await suiteAccessAllowed(supabase, msg.chat.id))) return;
 
       if (Array.isArray(msg.new_chat_members) && msg.new_chat_members.length > 0) {
-        if (!cfg.numberMatch || msg.chat.type !== "supergroup") return;
-        for (const member of msg.new_chat_members) await createChallenge(msg, member, cfg);
+        for (const member of msg.new_chat_members) await handleNewMember(msg, member, cfg);
         return;
       }
 
       if (!msg.from?.id || msg.from?.is_bot || String(msg.text || "").startsWith("/")) return;
       if (await isTelegramAdmin(msg.chat.id, msg.from.id)) return;
+      if (await enforceThreatProfile(msg.chat.id, msg.from, cfg, { announce: false })) return;
       if (await enforceImpersonation(msg, cfg)) return;
+      if (await enforcePatternGuard(msg, cfg)) return;
       if (await enforceFlood(msg, cfg)) return;
       await enforceLinks(msg, cfg);
     } catch (error) {
@@ -595,7 +835,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
         await removeMember(row.chat_id, row.telegram_id);
         await supabase.from("secureguard_challenges").update({ status: "expired", updated_at: new Date().toISOString() }).eq("id", row.id);
         await bot.answerCallbackQuery(query.id, { text: "Verification expired.", show_alert: true });
-        return bot.editMessageText("🛡 REX SecureGuard™ — verification expired. Rejoin to try again.", { chat_id: row.chat_id, message_id: query.message.message_id });
+        return bot.editMessageText("🛡 REXSECURE ULTIMATE™ — verification expired. Rejoin to try again.", { chat_id: row.chat_id, message_id: query.message.message_id });
       }
 
       if (answer === Number(row.challenge_code)) {
@@ -603,7 +843,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
         await supabase.from("secureguard_challenges").update({ status: "passed", updated_at: new Date().toISOString() }).eq("id", row.id);
         await logEvent(row.chat_id, row.telegram_id, "challenge_passed", `challenge_id=${row.id}`);
         await bot.answerCallbackQuery(query.id, { text: "Verified ✅" });
-        return bot.editMessageText(`🛡 REX SecureGuard™\n\n✅ ${query.from.first_name || "Member"} verified. Welcome in.`, { chat_id: row.chat_id, message_id: query.message.message_id });
+        return bot.editMessageText(`🛡 REXSECURE ULTIMATE™\n\n✅ ${query.from.first_name || "Member"} verified. Welcome in.`, { chat_id: row.chat_id, message_id: query.message.message_id });
       }
 
       const attempts = Number(row.attempts || 0) + 1;
@@ -612,7 +852,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
         await supabase.from("secureguard_challenges").update({ status: "failed", attempts, updated_at: new Date().toISOString() }).eq("id", row.id);
         await logEvent(row.chat_id, row.telegram_id, "challenge_failed", `challenge_id=${row.id}`);
         await bot.answerCallbackQuery(query.id, { text: "Too many wrong attempts.", show_alert: true });
-        return bot.editMessageText("🛡 REX SecureGuard™ — verification failed. Member removed; they may rejoin and try again.", { chat_id: row.chat_id, message_id: query.message.message_id });
+        return bot.editMessageText("🛡 REXSECURE ULTIMATE™ — verification failed. Member removed; they may rejoin and try again.", { chat_id: row.chat_id, message_id: query.message.message_id });
       }
 
       await supabase.from("secureguard_challenges").update({ attempts, updated_at: new Date().toISOString() }).eq("id", row.id);
@@ -631,4 +871,4 @@ function registerRexSecureGuard({ bot, supabase, config }) {
   return { challengeOptions, expirePending };
 }
 
-module.exports = { BLOCKED_PERMISSIONS, challengeOptions, extractHosts, normalizeDomain, normalizeIdentityLabel, registerRexSecureGuard };
+module.exports = { BLOCKED_PERMISSIONS, REX_BRAND, challengeOptions, extractHosts, normalizeDomain, normalizeIdentityLabel, registerRexSecureGuard };

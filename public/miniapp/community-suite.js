@@ -1,11 +1,12 @@
 (() => {
   const tg = window.Telegram && window.Telegram.WebApp;
   const root = () => document.getElementById("community-suite-root");
+  const REX_BRAND_IMAGE = window.REXSECURE_BRAND_IMAGE || {};
   const AI_PRESETS = [
     ["no5","No.5","Smart Operator"],
     ["dipshit","DipShit","Cheeky Troubleshooter"],
     ["alice","ALICE","Support + Organisation"],
-    ["rex","REX","Security + Moderation"],
+    ["rex","REXSECURE ULTIMATE™","Security for Your Community"],
     ["grace","G.R.A.C.E.","Communications + Campaigns"],
     ["max","MAX","Knowledge + Learning"],
     ["custom","Custom Build","Your Name + Personality + Purpose"]
@@ -82,6 +83,17 @@
       return `<div><b>${mark} ${escapeHtml(item.label)}</b><small>${escapeHtml(item.state)}${command ? " • " + escapeHtml(command) : ""}</small></div>`;
     }).join("");
     const presetButtons = AI_PRESETS.map(([key,name,role]) => `<button class="button ${ai.preset_key === key ? "" : "secondary"} suite-ai-preset" data-preset="${key}">${ai.preset_key === key ? "✅ " : ""}${escapeHtml(name)}<br><small>${escapeHtml(role)}</small></button>`).join("");
+    const rexBrandCard = ai.preset_key === "rex" ? `
+      <section style="display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:14px;align-items:center;margin:14px 0;padding:12px;border:1px solid rgba(139,92,246,.35);border-radius:18px;background:linear-gradient(135deg,rgba(28,20,55,.94),rgba(8,18,35,.92))">
+        <img src="${escapeHtml(REX_BRAND_IMAGE.dataUrl || "")}" alt="REXSECURE ULTIMATE — Security for Your Community" style="width:100%;max-width:180px;border-radius:14px;display:block">
+        <div>
+          <p class="eyebrow">🛡 REXSECURE ULTIMATE™</p>
+          <h3 style="margin:.2rem 0">Security for Your Community</h3>
+          <p>Telegram-ID threat intelligence • Network Shield • Number Match • External Bot Guard • Identity Guard • Pattern Guard • Anti-Flood • Link Guard • Under Attack mode.</p>
+          <p><small><a href="https://cas.chat" target="_blank" rel="noopener">Powered by CAS</a></small></p>
+        </div>
+      </section>
+    ` : "";
     node.innerHTML = `
       <article class="panel">
         <p class="eyebrow">WORLDZ FULLBUILD™ COMMUNITY SUITE</p>
@@ -105,6 +117,7 @@
         <p><b>${escapeHtml(ai.role_label || "Community Assistant")}</b></p>
         <p>${escapeHtml(ai.personality || "")}</p>
         <p><small>Purpose: ${escapeHtml(ai.purpose || "Not set")}</small></p>
+        ${rexBrandCard}
         <div class="form-row" style="flex-wrap:wrap;gap:8px">${presetButtons}</div>
         <details style="margin-top:14px">
           <summary><b>🧠 Live Capability Map</b></summary>
