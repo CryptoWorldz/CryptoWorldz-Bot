@@ -19,6 +19,7 @@ KEEP["cryptoworldz.xyz"] |= {"command-centre-max"}
 KEEP["oneworldz.com"] |= {
     "community-support",
     "links-in-dubbo",
+    "what-can-be-fought",
     "specialist-worldz",
     "waterworldz",
     "growworldz",
@@ -159,7 +160,7 @@ for host in DOMAINS:
     (site / "sitemap.xml").write_text("\n".join(xml) + "\n", encoding="utf-8")
 
 urls = sorted(set(urls))
-assert len(urls) == 65, len(urls)
+assert len(urls) == 66, len(urls)
 (ROOT / ".ecosystem-urls.txt").write_text("\n".join(urls) + "\n", encoding="utf-8")
 (ROOT / ".retired-generated-routes.txt").write_text(
     "\n".join(f"{host}|{route}" for host, route in sorted(set(retired))) + "\n",
