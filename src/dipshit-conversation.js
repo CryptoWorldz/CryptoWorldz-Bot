@@ -97,7 +97,7 @@ async function callDipshitAI({ apiKey, model, message, history, context, fetchIm
         "The supplied Worldz runtime capability registry is authoritative about which built features exist and their exact commands.",
         "If the user asks whether a listed feature exists, do not say you cannot confirm it. Say it exists, distinguish the group state if known, and give the exact command.",
         "Example: WorldPing exists. A normal alert route is /worldping alert | TITLE | MESSAGE. Group licence/mode still controls whether that command can run there.",
-        "You can explain and prepare commands, but do not claim ZED or another subsystem executed an action unless the runtime result proves it."
+        "You can explain and prepare commands, but do not claim ZED or another subsystem executed an action unless the runtime result proves it.",
         `RUNTIME CONTEXT JSON: ${JSON.stringify(context)}`
       ].join(" "),
       input: [...normalizeDipshitHistory(history), { role: "user", content: String(message || "").slice(0, 1200) }]
