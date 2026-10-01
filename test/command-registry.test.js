@@ -81,3 +81,12 @@ test("Community Suite admin and owner controls are registered at the correct lay
   const ownerNames = new Set(groupsForRole("owner").flatMap((group) => group.commands.map((item) => item.command)));
   for (const command of ["suiteapprove","networkcreate","networkapprove","networkremove"]) assert.ok(ownerNames.has(command), command);
 });
+
+test("REXSECURE ULTIMATE commands respect admin and owner boundaries", () => {
+  const adminNames = new Set(groupsForRole("admin").flatMap((group) => group.commands.map((item) => item.command)));
+  for (const command of ["secureguard","rexintel","rexreport","rexpatternban","rexunderattack"]) assert.ok(adminNames.has(command), command);
+  for (const command of ["rexglobalblock","rexglobalclear"]) assert.equal(adminNames.has(command), false, command);
+
+  const ownerNames = new Set(groupsForRole("owner").flatMap((group) => group.commands.map((item) => item.command)));
+  for (const command of ["rexglobalblock","rexglobalclear"]) assert.ok(ownerNames.has(command), command);
+});
