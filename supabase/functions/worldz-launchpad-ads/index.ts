@@ -15,6 +15,8 @@ const ALLOWED_ORIGINS = new Set([
   "http://localhost:3000",
   "http://127.0.0.1:3000"
 ]);
+const ORDER_ID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const SOL_SIGNATURE=/^[1-9A-HJ-NP-Za-km-z]{64,88}$/;
 
 function cors(req: Request) {
   const origin = req.headers.get("origin") || "";
@@ -59,6 +61,19 @@ Deno.serve(async (req: Request) => {
   });
 
   if (req.method === "GET") {
+    const orderId = String(url.searchParams.get("order") || "").trim();
+    if (orderId) {
+      if (!ORDER_ID.test(orderId)) return json(req, { ok: false, error: "invalid_order_id" }, 400);
+      const { data, error } = await supabase
+        .from("worldz_launchpad_ads")
+        .select("id,project_name,token_symbol,chain,status,slot,package_code,price_aud,duration_days,payment_currency,payment_amount,payment_destination,payment_submitted_at,payment_verified_at,approved_at,activated_at,start_at,end_at,reviewer_note")
+        .eq("id", orderId)
+        .maybeSingle();
+      if (error) return json(req, { ok: false, error: "order_read_failed" }, 500);
+      if (!data) return json(req, { ok: false, error: "order_not_found" }, 404);
+      return json(req, { ok: true, order: data });
+    }
+
     const slot = String(url.searchParams.get("slot") || "home_spotlight");
     if (!SLOTS.has(slot)) return json(req, { ok: false, error: "invalid_slot" }, 400);
 
@@ -91,6 +106,55 @@ Deno.serve(async (req: Request) => {
   try { form = await req.formData(); }
   catch { return json(req, { ok: false, error: "multipart_form_required" }, 400); }
 
+  const action = clean(form.get("action"), 32).toLowerCase();
+  if (action === "receipt") {
+    const orderId = clean(form.get("order_id"), 64);
+    const signature = clean(form.get("payment_signature"), 100);
+    if (!ORDER_ID.test(orderId)) return json(req, { ok: false, error: "invalid_order_id" }, 400);
+    if (!SOL_SIGNATURE.test(signature)) return json(req, { ok: false, error: "invalid_solana_signature" }, 400);
+
+    const { data: order, error: orderError } = await supabase
+      .from("worldz_launchpad_ads")
+      .select("id,status,payment_currency,payment_amount,payment_destination,payment_signature")
+      .eq("id", orderId)
+      .maybeSingle();
+    if (orderError) return json(req, { ok: false, error: "order_read_failed" }, 500);
+    if (!order) return json(req, { ok: false, error: "order_not_found" }, 404);
+    if (!["approved","payment_review"].includes(String(order.status))) {
+      return json(req, { ok: false, error: "order_not_awaiting_payment" }, 409);
+    }
+    if (!order.payment_currency || !Number(order.payment_amount) || !order.payment_destination) {
+      return json(req, { ok: false, error: "payment_quote_not_ready" }, 409);
+    }
+    if (order.payment_signature && order.payment_signature === signature && order.status === "payment_review") {
+      return json(req, { ok: true, order: { id: order.id, status: order.status }, note: "Receipt already submitted and awaiting on-chain review." });
+    }
+
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from("worldz_launchpad_ads")
+      .update({
+        payment_signature: signature,
+        payment_submitted_at: now,
+        status: "payment_review",
+        updated_at: now
+      })
+      .eq("id", orderId)
+      .in("status", ["approved","payment_review"])
+      .select("id,status,payment_currency,payment_amount,payment_destination,payment_submitted_at")
+      .maybeSingle();
+    if (error) {
+      if (String(error.code || "") === "23505") return json(req, { ok: false, error: "signature_already_used" }, 409);
+      return json(req, { ok: false, error: "receipt_submit_failed" }, 500);
+    }
+    if (!data) return json(req, { ok: false, error: "order_not_awaiting_payment" }, 409);
+    return json(req, {
+      ok: true,
+      order: data,
+      note: "Receipt recorded. Worldz will verify the finalized on-chain transfer before the sponsored placement is activated."
+    });
+  }
+
   const projectName = clean(form.get("project_name"), 80);
   const tokenSymbol = clean(form.get("token_symbol"), 20).toUpperCase().replace(/^\$/,"");
   const chain = clean(form.get("chain"), 40);
@@ -118,7 +182,7 @@ Deno.serve(async (req: Request) => {
     .select("id", { count: "exact", head: true })
     .eq("contact", contact)
     .gte("created_at", cutoff)
-    .in("status", ["pending_review","approved"]);
+    .in("status", ["pending_review","approved","payment_review","active"]);
   if ((count || 0) >= 3) return json(req, { ok: false, error: "submission_limit_reached" }, 429);
 
   const extension = banner.type === "image/jpeg" ? "jpg" : banner.type.split("/")[1];
@@ -157,7 +221,7 @@ Deno.serve(async (req: Request) => {
     pricing: { currency: "AUD", package: packageCode, label: pkg.label },
     payment: {
       state: "AFTER_HUMAN_APPROVAL",
-      note: "No payment is requested until the ad passes Worldz review. Approved ads receive SOL/USDC payment instructions tied to the Worldz Operations Treasury."
+      note: "No payment is requested until the ad passes Worldz review. Approved ads receive a SOL/USDC payment quote tied to the Worldz Operations Treasury."
     }
   }, 201);
 });
