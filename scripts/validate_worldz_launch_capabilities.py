@@ -32,8 +32,9 @@ solpage=(ROOT/"solworldz.xyz/index.html").read_text()
 assert "WorldzMINT™ LIVE" in solpage
 assert "Worldz market-launch mainnet" in solpage
 
-for expected in ("Worldz Token Identity Engine™","Worldz Proof Receipt™","WorldzFullScope™","Worldz Votes Centre™","WorldzGovern™","Worldz Omnichain™","WorldDexPush™","BitWorldz OmniBTC™"):
+for expected in ("Worldz Token Identity Engine™","Worldz Proof Receipt™","WorldzFullScope™","Worldz Votes Centre™","Worldz Omnichain™","WorldDexPush™","BitWorldz OmniBTC™"):
     assert any(m["name"]==expected for m in matrix["platformModules"]), expected
+assert not any(m["name"]=="WorldzGovern™" for m in matrix["platformModules"])
 
 assert "Solana Mainnet token creation is live" in page
 assert "MAINNET MARKET LAUNCH: GATED" in page
