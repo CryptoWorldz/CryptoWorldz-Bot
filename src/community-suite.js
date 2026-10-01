@@ -11,6 +11,7 @@ const {
   setModule,
   telegramAdmin
 } = require("./community-suite-core");
+const { buildLegacyCoreAllocation } = require("./worldz-core-legacy-revenue");
 
 const MARKETPLACE_ADDONS = Object.freeze([
   ["premium_custom_brand", "🎨 Premium Custom Brand", "Custom bot names, artwork, command labels and visual system", "quote"],
@@ -72,6 +73,34 @@ function upgradeQuote(prices, plan, licence = null) {
     credit: Number(credit.toFixed(9)),
     due: Number(Math.max(0, base - credit).toFixed(9))
   };
+}
+
+const LAMPORTS_PER_SOL = 1_000_000_000n;
+
+function solToLamports(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) throw new Error("Invalid SOL revenue amount.");
+  const [whole, fraction = ""] = number.toFixed(9).split(".");
+  return BigInt(whole) * LAMPORTS_PER_SOL + BigInt(fraction.padEnd(9, "0"));
+}
+
+function suiteRevenueSource(plan) {
+  return plan === "trial" ? "community_suite_trial" :
+    plan === "rent" ? "community_suite_rent" :
+    plan === "rent_to_own" ? "community_suite_rent_to_own" :
+    plan === "own" ? "community_suite_own" : null;
+}
+
+function serialiseLegacyCoreAllocation(allocation) {
+  return allocation.allocations.map((item) => ({
+    symbol: item.symbol,
+    tokenMint: item.tokenMint,
+    tokenShareLamports: item.tokenShareLamports.toString(),
+    transparentMarketBuybackLamports: item.transparentMarketBuybackLamports.toString(),
+    liquidityGrowthLamports: item.liquidityGrowthLamports.toString(),
+    holderRewardsLamports: item.holderRewardsLamports.toString(),
+    executionState: item.executionState
+  }));
 }
 
 function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.env }) {
@@ -209,6 +238,18 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
         .select("*").eq("chat_id", chatId).maybeSingle();
       if (readError) throw readError;
 
+      const approvedQuote = upgradeQuote(prices, requestedPlan, previous);
+      const { data: pendingReceipt, error: receiptReadError } = await supabase.from("zed_group_licence_receipts")
+        .select("receipt_signature,submitted_at")
+        .eq("chat_id", chatId)
+        .eq("status", "pending_review")
+        .eq("requested_plan", requestedPlan)
+        .eq("requested_package", productPackage)
+        .order("submitted_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (receiptReadError) throw receiptReadError;
+
       let plan = requestedPlan;
       let payments = Number(previous?.rent_to_own_payments || 0);
       let expiresAt = null;
@@ -259,9 +300,48 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
         .eq("chat_id", chatId).eq("status", "pending_review")
         .eq("requested_plan", requestedPlan).eq("requested_package", productPackage);
 
+      let legacyCoreLine = "";
+      const sourceId = suiteRevenueSource(requestedPlan);
+      if (pendingReceipt?.receipt_signature && sourceId) {
+        try {
+          const allocation = buildLegacyCoreAllocation({
+            sourceId,
+            netRevenueLamports: solToLamports(approvedQuote.due)
+          });
+          const bySymbol = Object.fromEntries(allocation.allocations.map((item) => [item.symbol, item]));
+          const { error: revenueError } = await supabase.from("worldz_legacy_core_revenue_events").upsert({
+            source_id: sourceId,
+            source_reference: pendingReceipt.receipt_signature,
+            source_chat_id: chatId,
+            source_plan: requestedPlan,
+            source_package: productPackage,
+            asset: "SOL",
+            net_revenue_lamports: allocation.netRevenueLamports.toString(),
+            legacy_core_pool_lamports: allocation.legacyCorePoolLamports.toString(),
+            nbc_lamports: bySymbol.NBC.tokenShareLamports.toString(),
+            lmtd_lamports: bySymbol.LMTD.tokenShareLamports.toString(),
+            invest_lamports: bySymbol.INVEST.tokenShareLamports.toString(),
+            rounding_lamports: allocation.poolRoundingLamports.toString(),
+            policy_version: allocation.policyVersion,
+            execution_state: "accrued",
+            allocation_detail: {
+              allocations: serialiseLegacyCoreAllocation(allocation),
+              liveTransfersEnabled: allocation.liveTransfersEnabled,
+              historicalDistributionWalletFundingForbidden: allocation.historicalDistributionWalletFundingForbidden
+            },
+            updated_at: new Date().toISOString()
+          }, { onConflict: "source_reference" });
+          if (revenueError) throw revenueError;
+          legacyCoreLine = `\nLegacy Core: ${Number(allocation.legacyCorePoolLamports) / 1e9} SOL accrued across NBC • LMTD • INVEST (no live transfer).`;
+        } catch (revenueError) {
+          console.error("Legacy Core revenue ledger failed", { code: revenueError?.code || revenueError?.message || "unknown" });
+          legacyCoreLine = "\nLegacy Core: ledger sync pending; no funds were moved.";
+        }
+      }
+
       const rto = requestedPlan === "rent_to_own" ? ` • payment ${payments}/${prices.rentToOwnMonths}` : "";
       const usedCredit = requestedPlan !== "trial" && trialCreditSol > 0 && !trialCreditUsedAt ? ` • ${trialCreditSol} SOL trial credit consumed` : "";
-      return send(message, `✅ ${packageLabel(productPackage)} • ${planLabel(plan)} activated for ${chatId}${rto}${usedCredit}${expiresAt ? ` until ${expiresAt}` : " • perpetual release licence"}.`);
+      return send(message, `✅ ${packageLabel(productPackage)} • ${planLabel(plan)} activated for ${chatId}${rto}${usedCredit}${expiresAt ? ` until ${expiresAt}` : " • perpetual release licence"}.${legacyCoreLine}`);
     } catch (error) {
       console.error("Community Suite approval failed", { code: error?.code || error?.message || "unknown" });
       return send(message, "❌ Licence approval could not be saved.");
