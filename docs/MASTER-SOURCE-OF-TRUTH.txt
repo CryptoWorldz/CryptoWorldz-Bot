@@ -300,10 +300,11 @@ Current showcase:
 - AUTO
 - G.R.A.C.E.
 - MAX
-- RECAP
 - WorldPing
 - WorldzCast
 - WorldzLaunchPad
+
+RECAP / RecapThisBot is retired from Command Centre control. Historical references do not grant runtime, admin, command, treasury or governance authority.
 
 Recorded Command Centre registry:
 - 139 registered command entries
