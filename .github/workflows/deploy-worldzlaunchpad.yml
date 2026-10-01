@@ -481,6 +481,27 @@ jobs:
           fee=p['feePolicy']
           A=safe['allocations']
           R=safe['feeRoutes']
+          FIXED=R['exactLockedFixedPercent']
+          EXPECTED_FIXED={
+            'creatorDeveloper':10,
+            'launchReferrer':15,
+            'legacyCore':15,
+            'worldzCoreFamilyMarketBuys':12,
+            'lpGrowth':10,
+            'launchedTokenBuybackAndBurn':8,
+            'impactCharity':5,
+            'teamBuilderRewards':5,
+            'futureTokenDeploymentReserve':5,
+          }
+          TREASURY_BY_CHOICE={3:12,5:10,8:7}
+          EXPECTED_ROUTE_KEYS=set(EXPECTED_FIXED)|{'worldzLaunchPad','treasuryReserve'}
+
+          assert R['model']=='WORLDZ_FEE_FLOW_V2'
+          assert FIXED==EXPECTED_FIXED
+          assert R['worldzLaunchPadAllowedPercent']==[3,5,8]
+          assert R['treasuryReserveByLaunchPadChoice']=={'3':12,'5':10,'8':7}
+          assert R['totalPercent']==100
+          assert R['walletTransferTaxPercent']==0
 
           def valid(cfg):
               try:
@@ -499,80 +520,92 @@ jobs:
                   if cfg['cliffDays']<A['founderCliffMinDays']: return False
                   if cfg['vestingMonths']<A['founderVestingMinMonths']: return False
                   if cfg['lpLockPercent']!=100 or cfg['lpLockDays']<A['lpLockMinDays']: return False
-                  if abs(sum(routes.values())-100)>1e-9: return False
+
+                  if set(routes)!=EXPECTED_ROUTE_KEYS: return False
                   if any((not math.isfinite(float(v)) or v<0 or v>100) for v in routes.values()): return False
-                  if routes['creator']>R['creatorMaxPercent']: return False
-                  if routes['treasury']>R['treasuryMaxPercent']: return False
-                  if routes['lp']<R['lpGrowthMinPercent']: return False
-                  if routes['holders']+routes['lp']+routes['community']<R['holdersLpCommunityCombinedMinPercent']: return False
+                  for key,value in EXPECTED_FIXED.items():
+                      if routes.get(key)!=value: return False
+                  choice=routes.get('worldzLaunchPad')
+                  if choice not in TREASURY_BY_CHOICE: return False
+                  if routes.get('treasuryReserve')!=TREASURY_BY_CHOICE[choice]: return False
+                  if abs(sum(routes.values())-100)>1e-9: return False
                   return True
               except Exception:
                   return False
 
+          base_routes={**EXPECTED_FIXED,'worldzLaunchPad':5,'treasuryReserve':10}
           base={
             'supply':1_000_000,'decimals':9,'fee':1.0,
             'alloc':{'creatorTeam':15,'liquidity':30,'communityPublic':30,'treasuryReserve':10,'growthEcosystem':15},
             'creatorUnlocked':5,'cliffDays':90,'vestingMonths':24,'lpLockPercent':100,'lpLockDays':365,
-            'routes':{'creator':20,'holders':30,'lp':25,'treasury':15,'community':10}
+            'routes':base_routes
           }
           def clone():
               return json.loads(json.dumps(base))
 
-          cases=[]
-          cases.append(('baseline_valid',clone(),True))
+          cases=[('baseline_valid',clone(),True)]
 
           for f in [0,0.1,0.49,0.5,0.75,1,1.5,2,2.5,3,3.01,4,9,99]:
-              c=clone();c['fee']=f;cases.append((f'fee_{f}',c,0.5<=f<=3))
+              x=clone();x['fee']=f;cases.append((f'fee_{f}',x,0.5<=f<=3))
           for v in range(0,26):
-              c=clone();c['alloc']['creatorTeam']=v;c['alloc']['growthEcosystem']=30-v
-              c['creatorUnlocked']=min(5,v)
-              cases.append((f'creator_alloc_{v}',c,v<=15))
+              x=clone();x['alloc']['creatorTeam']=v;x['alloc']['growthEcosystem']=30-v
+              x['creatorUnlocked']=min(5,v)
+              cases.append((f'creator_alloc_{v}',x,v<=15))
           for v in range(15,71,5):
-              c=clone();delta=v-c['alloc']['liquidity'];c['alloc']['liquidity']=v;c['alloc']['growthEcosystem']-=delta
-              expect=25<=v<=60 and c['alloc']['growthEcosystem']>=0
-              cases.append((f'liquidity_{v}',c,expect))
-          for v in [0,5,10,15,19,20,21,30,50]:
-              c=clone();delta=v-c['routes']['creator'];c['routes']['creator']=v;c['routes']['holders']-=delta
-              expect=v<=20 and c['routes']['holders']>=0
-              cases.append((f'creator_route_{v}',c,expect))
-          for v in [0,5,10,15,19,20,21,30,50]:
-              c=clone();delta=v-c['routes']['treasury'];c['routes']['treasury']=v;c['routes']['holders']-=delta
-              expect=v<=20 and c['routes']['holders']>=0
-              cases.append((f'treasury_route_{v}',c,expect))
-          for v in [0,5,10,15,19,20,21,25,30,50]:
-              c=clone();delta=v-c['routes']['lp'];c['routes']['lp']=v;c['routes']['holders']-=delta
-              expect=v>=20 and c['routes']['holders']>=0 and (c['routes']['holders']+v+c['routes']['community']>=60)
-              cases.append((f'lp_route_{v}',c,expect))
+              x=clone();delta=v-x['alloc']['liquidity'];x['alloc']['liquidity']=v;x['alloc']['growthEcosystem']-=delta
+              expect=25<=v<=60 and x['alloc']['growthEcosystem']>=0
+              cases.append((f'liquidity_{v}',x,expect))
           for v in [0,30,60,89,90,91,120,365]:
-              c=clone();c['cliffDays']=v;cases.append((f'cliff_{v}',c,v>=90))
+              x=clone();x['cliffDays']=v;cases.append((f'cliff_{v}',x,v>=90))
           for v in [0,1,6,12,17,18,19,24,36,60]:
-              c=clone();c['vestingMonths']=v;cases.append((f'vesting_{v}',c,v>=18))
+              x=clone();x['vestingMonths']=v;cases.append((f'vesting_{v}',x,v>=18))
           for v in [0,30,90,180,364,365,366,730]:
-              c=clone();c['lpLockDays']=v;cases.append((f'lp_lock_days_{v}',c,v>=365))
+              x=clone();x['lpLockDays']=v;cases.append((f'lp_lock_days_{v}',x,v>=365))
           for v in [0,25,50,99,100]:
-              c=clone();c['lpLockPercent']=v;cases.append((f'lp_lock_percent_{v}',c,v==100))
+              x=clone();x['lpLockPercent']=v;cases.append((f'lp_lock_percent_{v}',x,v==100))
           for v in [1,999,1000,10_000,1_000_000,1_000_000_000_000,1_000_000_000_001]:
-              c=clone();c['supply']=v;cases.append((f'supply_{v}',c,1000<=v<=1_000_000_000_000))
+              x=clone();x['supply']=v;cases.append((f'supply_{v}',x,1000<=v<=1_000_000_000_000))
           for v in [-1,0,1,6,9,10]:
-              c=clone();c['decimals']=v;cases.append((f'decimals_{v}',c,0<=v<=9))
+              x=clone();x['decimals']=v;cases.append((f'decimals_{v}',x,0<=v<=9))
 
-          # Deliberate total/negative/over-100 tampering.
-          for i in range(25):
-              c=clone()
-              if i%5==0: c['alloc']['growthEcosystem']+=1
-              elif i%5==1: c['alloc']['creatorTeam']=-1
-              elif i%5==2: c['routes']['community']+=1
-              elif i%5==3: c['routes']['creator']=-1
-              else: c['routes']['lp']=101
-              cases.append((f'tamper_{i}',c,False))
+          # Fee Flow V2 profile choices: only 3/5/8 are valid and Treasury must balance.
+          for choice in range(0,13):
+              x=clone();x['routes']['worldzLaunchPad']=choice
+              x['routes']['treasuryReserve']=TREASURY_BY_CHOICE.get(choice,15-choice)
+              cases.append((f'launchpad_choice_{choice}',x,choice in TREASURY_BY_CHOICE))
 
-          assert len(cases)>=100, len(cases)
+          for choice in [3,5,8]:
+              for treasury in range(0,16):
+                  x=clone();x['routes']['worldzLaunchPad']=choice;x['routes']['treasuryReserve']=treasury
+                  cases.append((f'treasury_balance_{choice}_{treasury}',x,treasury==TREASURY_BY_CHOICE[choice]))
+
+          # Every fixed lane is immutable. Any +/- 1 drift must fail.
+          for key,value in EXPECTED_FIXED.items():
+              for delta in [-1,1]:
+                  x=clone();x['routes'][key]=value+delta
+                  # keep arithmetic total at 100 to prove exact-lane locking, not just total checking
+                  x['routes']['treasuryReserve']-=delta
+                  cases.append((f'fixed_lane_drift_{key}_{delta:+d}',x,False))
+
+          # Key injection/removal, negative values and over-100 values must fail.
+          for i in range(30):
+              x=clone()
+              mode=i%6
+              if mode==0: x['alloc']['growthEcosystem']+=1
+              elif mode==1: x['alloc']['creatorTeam']=-1
+              elif mode==2: x['routes']['legacyCore']=-1
+              elif mode==3: x['routes']['lpGrowth']=101
+              elif mode==4: x['routes']['unexpectedBucket']=0
+              else: del x['routes']['impactCharity']
+              cases.append((f'tamper_{i}',x,False))
+
+          assert len(cases)>=150, len(cases)
           failed=[]
           for name,cfg,expected in cases:
               got=valid(cfg)
               if got!=expected: failed.append((name,expected,got,cfg))
           assert not failed, failed[:5]
-          print(f'WORLDZLAUNCHPAD_POLICY_SCENARIOS=PASS scenarios={len(cases)}')
+          print(f'WORLDZLAUNCHPAD_POLICY_SCENARIOS=PASS scenarios={len(cases)} fee_flow=v2')
 
       - name: Enforce official WorldzLaunchPad logo
         shell: python
@@ -724,6 +757,12 @@ jobs:
                   bitworldz_code,bitworldz_body=get(base+'/bitworldz/?verify=bitworldz-v1')
                   capability_code,capability_body=get(base+'/capabilities/?verify=capability-v1')
                   tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
+                  launch_station_code,launch_station_body=get(base+'/launch-station/?verify=party-v2')
+                  community_code,community_body=get(base+'/community/?verify=party-v2')
+                  integrations_code,integrations_body=get(base+'/integrations/?verify=party-v2')
+                  ready_code,ready_body=get(base+'/ready/?verify=party-v2')
+                  readiness_code,readiness_body=get(base+'/.well-known/worldzlaunch-readiness.json?verify=party-v2')
+                  domain_plan_code,domain_plan_body=get(base+'/.well-known/worldzlaunch-domain-plan.json?verify=party-v2')
                   wldz_code,wldz_body=get(base+'/wldz/?verify=wldz-v1')
                   wldz_cfg_code,wldz_cfg_body=get(base+'/wldz/launch-config.json?verify=wldz-v1')
                   tokenlist_code,tokenlist_body=get(base+'/tokenlist.json?verify=identity-v1')
@@ -739,6 +778,7 @@ jobs:
                   mint_reg_code,mint_reg_body=get(mint_registry+'?verify=worldzmint-v1')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body); public_mint_registry=json.loads(mint_reg_body)
                   tokenlist=json.loads(tokenlist_body); identity=json.loads(identity_body); rviv_meta=json.loads(rviv_meta_body)
+                  readiness=json.loads(readiness_body); domain_plan=json.loads(domain_plan_body)
                   local_identity=json.loads(Path('worldzpad-mainnet/token-identity/worldz-token-registry.v1.json').read_text())
                   assert identity==local_identity, 'LIVE_CANONICAL_REGISTRY_MISMATCH'
 
@@ -808,6 +848,24 @@ jobs:
                   assert platform['worldDexPush']['dexScreenerControl']['goldenTickerActiveBoostThreshold']==500
                   assert platform['worldDexPush']['dexScreenerControl']['seventyFivePointsIsSufficient'] is False
                   assert platform['worldDexPush']['dexScreenerControl']['worldzSpecialPartnershipState']=='PROPOSAL_ONLY'
+
+                  assert launch_station_code==200 and 'WORLDZ LAUNCH STATION' in launch_station_body
+                  assert 'Mint New' in launch_station_body and 'Import Existing Mint' in launch_station_body
+                  assert 'PHENIX' in launch_station_body and 'PNEX' in launch_station_body
+                  assert community_code==200 and 'WORLDZLAUNCH COMMUNITY' in community_body
+                  assert 'TheChaos' in community_body and 'DipShitBossBot' in community_body and 'Command Centre MAX' in community_body
+                  assert integrations_code==200 and 'WORLDZLAUNCH INTEGRATIONS' in integrations_body
+                  assert 'X API v2' in integrations_body and 'pump.fun / PumpSwap' in integrations_body
+                  assert ready_code==200 and 'WORLDZLAUNCH READINESS GATE' in ready_body
+                  assert readiness_code==200 and readiness['status']=='PUBLIC_PRODUCT_READY__MAINNET_MARKET_EXECUTION_GATED'
+                  assert readiness['economics']['launchPadChoicesPercent']==[3,5,8]
+                  assert readiness['economics']['legacyCorePercent']==15
+                  assert readiness['nextWorldzTest']['symbol']=='PNEX'
+                  assert readiness['nextWorldzTest']['canonicalMint'] is None
+                  assert readiness['launchPaths']['solanaMainnetMarket']['status']=='GATED'
+                  assert domain_plan_code==200 and domain_plan['futurePrimaryHost']=='worldzlaunch.com'
+                  assert domain_plan['futureHostStatus']=='NOT_OWNED_OR_LIVE_YET'
+                  assert domain_plan['migrationReady'] is True
 
                   assert dev_code==200 and 'Create Devnet Token' in dev_body
                   assert curve_code==200 and 'Worldz Curve™' in curve_body
