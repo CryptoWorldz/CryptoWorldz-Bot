@@ -1,7 +1,7 @@
 # WorldzFullBuild™ — Main Integration Source of Truth
 
 **Status:** MAIN INTEGRATION SOURCE OF TRUTH  
-**Date:** 27 September 2026
+**Date:** 1 October 2026
 
 WorldzFullBuild™ is the versioned integration layer for the project-relevant Worldz architecture. It keeps owner-approved decisions, verified repository/on-chain/live evidence, reusable launch rules and lessons from failed paths connected without treating chat statements as deployment proof.
 
@@ -15,7 +15,7 @@ A newer plan can supersede an older plan. It cannot retroactively create a trans
 
 ## Current architecture
 
-WorldzFullBuild connects OneWorldz, DonateWorldz, CryptoWorldz, WorldzLaunchPad™, WorldzFullScope™, ZED LED Command Centre MAX™, AUTO, G.R.A.C.E., PurpleDiamondCrew, WorldzLinkz™ and BitWorldz™ while keeping humanitarian and crypto functions clearly distinguishable in public execution and messaging.
+WorldzFullBuild connects WorldzEcosystem™, DonateWorldz, CryptoWorldz, WorldzLaunchPad™, WorldzFullScope™, ZED LED Command Centre MAX™, AUTO, G.R.A.C.E., DIPSHIT™, PurpleDiamondCrew, WorldzLinkz™ and BitWorldz™ while keeping support/humanitarian and crypto functions clearly distinguishable in public execution and messaging.
 
 ### Canonical token family
 
@@ -45,11 +45,15 @@ Mainnet market execution remains fail-closed unless the selected chain + venue p
 
 ## Economics truth
 
-The Worldz Omnichain MagicFee policy targets **75 bps / 0.75%** where the selected venue can prove it. The Worldz-controlled split is:
+**Worldz Fee Flow™ V2 is the default economics for new WorldzLaunchPad intakes.**
 
-**51% Creator / 17% Referrer / 15% Legacy Flywheel / 8.5% WorldzLaunchPad / 8.5% OneWorldz Impact.**
+The creator selects **3% / 5% / 8%** back to WorldzLaunchPad. The fixed lanes are **10% Creator / Developer, 15% Launch Referrer, 15% final 12-token Legacy Core, 12% WLDZ-RVIV-PNEX-MRCL market-buy ledger, 10% LP Growth, 8% launched-token Buyback + Burn, 5% Impact / Charity, 5% Team / Builders and 5% Future Token Deployment**. Treasury / Reserve balances at **12% / 10% / 7%** for BUILD / GROW / BOOST.
 
-External venue deductions are separate and must be disclosed. Existing public creator configurable-fee routing is a separate profile and must not be silently mixed into MagicFee accounting.
+The Legacy Core membership is permanently closed at **12 tokens**, with **1.25% each** from the single 15% Legacy allocation. No second Legacy deduction is allowed.
+
+The older MagicFeeNumber™ 75-bps and 51/17/15/8.5/8.5 configuration remains an adapter/historical profile only where existing venue proof depends on it. It is not the default economics for new launch intakes.
+
+External venue deductions are separate and must be disclosed. Mainnet Fee Flow V2 execution remains fail-closed until the selected chain/venue can enforce and reconcile the V2 destinations.
 
 ## FullScope truth
 
