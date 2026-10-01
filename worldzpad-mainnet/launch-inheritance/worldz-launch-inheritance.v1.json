@@ -107,12 +107,6 @@
       "name": "Worldz Votes Centre™",
       "stage": "POST_CONFIRMATION",
       "required": true
-    },
-    {
-      "id": "govern",
-      "name": "WorldzGovern™",
-      "stage": "POST_CONFIRMATION",
-      "required": true
     }
   ],
   "economicsProfiles": {
