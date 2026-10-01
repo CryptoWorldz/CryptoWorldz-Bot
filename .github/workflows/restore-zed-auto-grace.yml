@@ -353,7 +353,32 @@ jobs:
             {"command":"community","description":"Open CryptoWorldz community links"},
             {"command":"website","description":"Open CryptoWorldz.xyz"}
           ]
+          stale_scopes=[
+            {"type":"default"},
+            {"type":"all_private_chats"},
+            {"type":"all_group_chats"},
+            {"type":"all_chat_administrators"},
+            {"type":"chat","chat_id":-1003732353996},
+            {"type":"chat_administrators","chat_id":-1003732353996},
+            {"type":"chat","chat_id":-1004404927235},
+            {"type":"chat_administrators","chat_id":-1004404927235}
+          ]
+          for scope in stale_scopes:
+              for language_code in (None,"en"):
+                  payload={"scope":scope}
+                  if language_code: payload["language_code"]=language_code
+                  try:
+                      call("deleteMyCommands",payload)
+                  except Exception as exc:
+                      print("ZED_COMMAND_SCOPE_CLEAR_WARN scope="+json.dumps(scope,separators=(",",":"))+" language="+str(language_code)+" error="+str(exc)[:120])
+
           call("setMyCommands",{"commands":commands})
+          for chat_id in (-1003732353996,-1004404927235):
+              for scope_type in ("chat","chat_administrators"):
+                  try:
+                      call("setMyCommands",{"scope":{"type":scope_type,"chat_id":chat_id},"commands":commands})
+                  except Exception as exc:
+                      print("ZED_COMMAND_SCOPE_SET_WARN chat="+str(chat_id)+" scope="+scope_type+" error="+str(exc)[:120])
           call("setChatMenuButton",{"menu_button":{"type":"web_app","text":"🌐 OPEN COMMAND CENTRE","web_app":{"url":"https://cryptobotz.cryptoworldz.xyz/miniapp/"}}})
           secret=hashlib.sha256(token.encode()).hexdigest()
           before=call("getWebhookInfo")
@@ -434,6 +459,21 @@ jobs:
                 {"command":"terms","description":"Read membership Terms"},
                 {"command":"paysupport","description":"Get payment support"}
               ]
+              dipshit_scopes=[
+                {"type":"default"},
+                {"type":"all_private_chats"},
+                {"type":"all_group_chats"},
+                {"type":"all_chat_administrators"}
+              ]
+              for scope in dipshit_scopes:
+                  for language_code in (None,"en"):
+                      payload={"scope":scope}
+                      if language_code: payload["language_code"]=language_code
+                      try:
+                          dcall("deleteMyCommands",payload)
+                      except Exception as exc:
+                          print("DIPSHIT_COMMAND_SCOPE_CLEAR_WARN scope="+json.dumps(scope,separators=(",",":"))+" language="+str(language_code)+" error="+str(exc)[:120])
+
               dcall("setMyCommands",{"commands":dipshit_commands})
               dcall("setMyDescription",{"description":"💙 DIPSHIT™ — WORLDZ DUDE\n\nThe WorldzEcosystem™ QA, troubleshooting and chat bot. Finds bugs, checks Worldz systems and supports optional paid membership. Never send seed phrases or private keys."})
               dcall("setMyShortDescription",{"short_description":"💙 DIPSHIT™ — WORLDZ DUDE | QA, troubleshooting, chat & Worldz membership."})
