@@ -73,10 +73,10 @@ jobs:
           assert treasury['vaultAddress']=='n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB'
           assert treasury['multisigConfigAddress']=='B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN'
           assert treasury['vaultIndex']==0
-          assert treasury['status']=='OPERATIONS_3_OF_5_POLICY__ONCHAIN_REVERIFY_REQUIRED'
+          assert treasury['status']=='OPERATIONS_3_OF_5_ONCHAIN_VERIFIED__FEE_ROUTING_GATED'
           assert treasury['verifiedEvidence']['providerProgram']=='SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf'
-          assert treasury['verifiedEvidence']['memberCount']==2
-          assert treasury['verifiedEvidence']['threshold']=='1-of-2 temporary'
+          assert treasury['verifiedEvidence']['memberCount']==5
+          assert treasury['verifiedEvidence']['threshold']=='3-of-5'
           assert treasury['verifiedEvidence']['vaultDerivationVerified'] is True
           assert treasury['verifiedEvidence']['squadsProgramOwnerVerified'] is True
           assert treasury['targetGovernance']=='3-of-5'
@@ -917,10 +917,11 @@ jobs:
                   expected_fullbuild=json.loads(Path('launchpad.cryptoworldz.xyz/fullbuild/contract.json').read_text())
                   assert fullbuild_contract==expected_fullbuild, 'LIVE_WORLDZFULLBUILD_CONTRACT_MISMATCH'
                   assert fullbuild_contract['executionBoundary']['globalMainnetMarketLaunchDefault'] is False
+                  fullscope_upper=fullscope_body.upper()
                   fullscope_markers={
-                      'WORLDZFULLSCOPE': 'WORLDZFULLSCOPE™' in fullscope_body,
-                      'POPULARITY_ONLY': 'POPULARITY ONLY' in fullscope_body,
-                      'GOVERNANCE_ONLY': 'GOVERNANCE ONLY' in fullscope_body,
+                      'WORLDZFULLSCOPE': 'WORLDZFULLSCOPE™' in fullscope_upper,
+                      'HOURLY_TOKEN_VOTE': 'ONE VOTE • ONE USER • EVERY 60 MINUTES' in fullscope_upper,
+                      'NO_TREASURY_CONTROL': 'NO DAO OR TREASURY CONTROL' in fullscope_upper,
                   }
                   print('WORLDZLAUNCHPAD_LIVE_FULLSCOPE_DIAGNOSTIC',
                         'status='+str(fullscope_code),

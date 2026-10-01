@@ -424,21 +424,22 @@
     "network": "solana",
     "requiredThreshold": "3-of-5",
     "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-    "status": "OPERATIONS_3_OF_5_POLICY__ONCHAIN_REVERIFY_REQUIRED",
+    "status": "OPERATIONS_3_OF_5_ONCHAIN_VERIFIED__FEE_ROUTING_GATED",
     "mainnetRoutingEnabled": false,
-    "rule": "Permanent Worldz Operations Treasury policy is 3-of-5. Public creator mainnet routing remains disabled until the live Squads account is independently re-read and the active fee-route/release evidence is complete.",
+    "rule": "Squads v4 Operations Treasury was independently read on Solana mainnet as 3-of-5. Public creator mainnet fee routing remains disabled until the active fee route and release evidence pass end-to-end.",
     "verifiedEvidence": {
       "squadLabel": "Team Zed Treasury",
       "providerProgram": "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf",
-      "memberCount": 2,
-      "threshold": "1-of-2 temporary",
+      "memberCount": 5,
+      "threshold": "3-of-5",
       "multisigConfigAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
       "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
       "vaultIndex": 0,
       "vaultDerivationVerified": true,
       "squadsProgramOwnerVerified": true,
       "verification": "Independent Solana mainnet Squads v4 account decode and vault derivation",
-      "note": "Historical last independently verified snapshot only. The project now targets permanent 3-of-5 governance; live Squads membership and threshold must be re-read before production routing is marked verified."
+      "note": "Live Squads v4 decode confirmed five members, threshold three and vault index zero. This verifies custody governance only; fee routing remains disabled.",
+      "verifiedAt": "2026-10-01T20:22:59Z"
     },
     "multisigConfigAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
     "vaultIndex": 0,
@@ -493,7 +494,7 @@
   },
   "treasuryStandard": {
     "version": "WORLDZ-TREASURY-2",
-    "status": "OPERATIONS_3_OF_5_APPROVED__RESERVE_DISABLED__ONCHAIN_REVERIFY_REQUIRED",
+    "status": "OPERATIONS_3_OF_5_ONCHAIN_VERIFIED__RESERVE_DISABLED__FEE_ROUTING_GATED",
     "purpose": "Chain-native WorldzLaunchPad treasury governance for the 10% Worldz share of collected supported project trading-fee revenue.",
     "feePolicy": {
       "worldzSharePercentOfCollectedProjectTradingFee": 10,
@@ -684,7 +685,7 @@
       "provider": "Squads v4",
       "configAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
       "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-      "threshold": "1-of-2 temporary",
+      "threshold": "3-of-5",
       "onChainVerified": true
     },
     "antiManipulation": {
@@ -822,11 +823,11 @@
     "rule": "WorldzLaunchPad never asks for XRPL seeds. Mainnet remains gated until issuer/hot-wallet governance, treasury fee routing, manifest, accounting/legal and proof checks pass."
   },
   "temporaryCoreWldzCustody": {
-    "active": true,
-    "policy": "1-of-2 temporary",
-    "scope": "Current core operational vault only",
+    "active": false,
+    "policy": "RETIRED_AFTER_3_OF_5_ONCHAIN_VERIFICATION",
+    "scope": "Historical temporary custody policy; Operations Treasury now has five members and threshold three",
     "publicCreatorMainnetLaunchesEnabled": false,
-    "conditionToEnd": "Independent replacement signer is verified and an approved governance configuration is executed."
+    "conditionToEnd": "Satisfied by verified Squads v4 Operations Treasury 3-of-5"
   },
   "suiNative": {
     "status": "DEVNET_BETA",

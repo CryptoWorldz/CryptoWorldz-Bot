@@ -1,7 +1,7 @@
 {
   "version": "2026-10-01-worldz-treasury-v2",
   "product": "WorldzLaunchPad™",
-  "status": "OPERATIONS_3_OF_5_APPROVED__RESERVE_DISABLED__ONCHAIN_REVERIFY_REQUIRED",
+  "status": "OPERATIONS_3_OF_5_ONCHAIN_VERIFIED__RESERVE_DISABLED__FEE_ROUTING_GATED",
   "feeCollection": {
     "worldzSharePercentOfCollectedSupportedProjectTradingFee": 10,
     "projectRetainedPercentOfCollectedSupportedProjectTradingFee": 90,
@@ -35,7 +35,7 @@
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "REGISTERED__LIVE_MULTISIG_REVERIFY_REQUIRED"
+      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02"
     },
     {
       "slot": "SIGNER_02",
@@ -46,7 +46,7 @@
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "REGISTERED__LIVE_MULTISIG_REVERIFY_REQUIRED"
+      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02"
     },
     {
       "slot": "SIGNER_03",
@@ -57,7 +57,7 @@
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "REGISTERED__LIVE_MULTISIG_REVERIFY_REQUIRED"
+      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02"
     },
     {
       "slot": "SIGNER_04",
@@ -68,7 +68,7 @@
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "REGISTERED__LIVE_MULTISIG_REVERIFY_REQUIRED"
+      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02"
     },
     {
       "slot": "SIGNER_05",
@@ -79,7 +79,7 @@
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "REGISTERED__LIVE_MULTISIG_REVERIFY_REQUIRED"
+      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02"
     }
   ],
   "chains": {
@@ -89,9 +89,10 @@
         "multisigConfigAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
         "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
         "vaultIndex": 0,
-        "currentGovernance": "USER_REPORTED_3_OF_5__LIVE_RECHECK_REQUIRED",
+        "currentGovernance": "3-of-5",
         "targetGovernance": "3-of-5",
-        "status": "MEMBERS_REPORTED_ADDED__THRESHOLD_LIVE_RECHECK_REQUIRED"
+        "status": "ONCHAIN_VERIFIED__FEE_ROUTING_GATED",
+        "verifiedAt": "2026-10-01T20:22:59Z"
       },
       "reserve": {
         "enabled": false,
