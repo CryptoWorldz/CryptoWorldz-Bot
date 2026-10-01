@@ -1,0 +1,125 @@
+{
+  "schema": "WORLDZ-FEE-FLOW-V2",
+  "version": "2026-10-01-A",
+  "status": "LOCKED_FOR_NEW_WORLDZ_LAUNCH_INTAKES__MAINNET_EXECUTION_GATED",
+  "name": "Worldz Fee Flow™ V2",
+  "basis": "ELIGIBLE_WORLDZ_ROUTED_SUPPORTED_TRADING_FEE_REVENUE_AFTER_EXTERNAL_PROTOCOL_NETWORK_AND_VENUE_DEDUCTIONS",
+  "scopeRule": "Percentages are allocations of eligible collected fee revenue only. They are not token-supply allocations, wallet-transfer taxes, or promises of return.",
+  "platformContributionChoice": {
+    "allowedPercent": [
+      3,
+      5,
+      8
+    ],
+    "defaultPercent": 5,
+    "voluntaryCreatorChoice": true,
+    "snapshottedAtLaunch": true,
+    "changeAfterLaunchRequiresNewSignedRouteOrMigration": true,
+    "purpose": "WorldzLaunchPad platform operations, owner-led product development, security, hosting, integrations, support and continued LaunchPad build."
+  },
+  "fixedAllocationsPercent": {
+    "creatorDeveloper": 10,
+    "launchReferrer": 15,
+    "legacyCore": 15,
+    "worldzCoreFamilyMarketBuys": 12,
+    "lpGrowth": 10,
+    "launchedTokenBuybackAndBurn": 8,
+    "impactCharity": 5,
+    "teamBuilderRewards": 5,
+    "futureTokenDeploymentReserve": 5
+  },
+  "worldzCoreFamilyMarketBuys": {
+    "totalPercent": 12,
+    "equalPercentEach": 3,
+    "tokens": [
+      {
+        "order": 1,
+        "name": "WORLDZ",
+        "symbol": "WLDZ",
+        "canonicalMint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+        "execution": "LIVE_ROUTE_REQUIRED"
+      },
+      {
+        "order": 2,
+        "name": "REVIVE",
+        "symbol": "RVIV",
+        "canonicalMint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+        "execution": "LIVE_ROUTE_REQUIRED"
+      },
+      {
+        "order": 3,
+        "name": "PHENIX",
+        "symbol": "PNEX",
+        "canonicalMint": null,
+        "execution": "ACCRUE_UNTIL_VERIFIED_LIVE_MINT_AND_ROUTE"
+      },
+      {
+        "order": 4,
+        "name": "MIRACLE",
+        "symbol": "MRCL",
+        "canonicalMint": null,
+        "execution": "ACCRUE_UNTIL_VERIFIED_LIVE_MINT_AND_ROUTE"
+      }
+    ],
+    "rule": "Each token receives an equal 3% fee-revenue allocation. PNEX/MRCL allocations accrue until a verified canonical mint and executable live route exist; no mint may be guessed."
+  },
+  "legacyCore": {
+    "totalPercent": 15,
+    "closedTokenCount": 12,
+    "equalPercentEach": 1.25,
+    "source": "worldzpad-mainnet/revenue/worldz-core-legacy-revenue.v1.json",
+    "noSecondLegacyDeduction": true,
+    "rule": "This is the same permanently closed 12-token Legacy Core allocation. It must never be charged a second time."
+  },
+  "profiles": {
+    "BUILD_3": {
+      "worldzLaunchPadPercent": 3,
+      "treasuryReservePercent": 12,
+      "totalPercent": 100,
+      "label": "BUILD",
+      "intent": "Lowest voluntary LaunchPad contribution; highest Treasury/Reserve share."
+    },
+    "GROW_5": {
+      "worldzLaunchPadPercent": 5,
+      "treasuryReservePercent": 10,
+      "totalPercent": 100,
+      "label": "GROW",
+      "default": true,
+      "intent": "Balanced default for platform growth and treasury strength."
+    },
+    "BOOST_8": {
+      "worldzLaunchPadPercent": 8,
+      "treasuryReservePercent": 7,
+      "totalPercent": 100,
+      "label": "BOOST",
+      "intent": "Highest voluntary LaunchPad contribution; Treasury/Reserve remains protected."
+    }
+  },
+  "flywheelRules": {
+    "creatorDeveloper": "10% recurring creator/developer fee reward after actual eligible fee collection.",
+    "launchReferrer": "15% to the recorded launch referrer. Sub-referrals must come from this 15% and cannot increase trader fees.",
+    "legacyCore": "15% to the final 12-token Legacy market-buy ledger.",
+    "worldzCoreFamilyMarketBuys": "12% total: 3% each to WLDZ, RVIV, PNEX and MRCL market-buy ledgers.",
+    "lpGrowth": "10% accrues for staged liquidity additions only after route, price-impact and treasury approval checks.",
+    "launchedTokenBuybackAndBurn": "8% accrues for transparent market buyback followed by verifiable on-chain burn/supply reduction where supported.",
+    "impactCharity": "5% impact allocation, separately accounted; recipient must be explicitly approved and no charity affiliation may be implied without evidence.",
+    "teamBuilderRewards": "5% for verified team/build contributions under the current team registry and proof rules.",
+    "futureTokenDeploymentReserve": "5% reserved for future token minting, metadata, pools, locks, vesting, audits and launch proof costs.",
+    "treasuryReserve": "Residual 12% / 10% / 7% depending on BUILD/GROW/BOOST profile; controlled by approved treasury policy.",
+    "platform": "3% / 5% / 8% voluntary creator-selected WorldzLaunchPad platform contribution."
+  },
+  "executionSafety": {
+    "mainnetAutomaticRoutingEnabled": false,
+    "mainnetAutomaticMarketBuysEnabled": false,
+    "mainnetAutomaticBurnEnabled": false,
+    "treasuryMultisigRequired": true,
+    "simulateBeforeSign": true,
+    "publicWorldzProofReceiptRequired": true,
+    "realMarketDataRequired": true,
+    "noWashTrading": true,
+    "noSelfTrading": true,
+    "noFakeVolume": true,
+    "noHistoricalDistributionWalletAutofunding": true,
+    "failClosedRule": "If a route, mint, market, liquidity, treasury authority, price-impact or provider check fails, accrue the allocation rather than force execution."
+  }
+}
