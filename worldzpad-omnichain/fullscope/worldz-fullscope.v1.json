@@ -46,31 +46,21 @@
     "WorldzAlert™",
     "WorldzAuto™",
     "WorldzProof™",
-    "Worldz Votes Centre™",
-    "WorldzGovern™"
+    "Worldz Votes Centre™"
   ],
   "voting": {
     "popularity": {
       "brand": "Worldz Votes Centre™",
-      "purpose": "token popularity, trending, visibility, rankings and raids",
+      "purpose": "DEX-style favourite-token voting, hourly trending, visibility, rankings and raids",
+      "cadence": "one vote per Telegram user per rolling 60 minutes",
       "commandNamespace": [
         "/worldzvotes",
+        "/vote",
         "/tokenvote",
         "/worldztrending",
         "/worldzrankings"
       ],
-      "mayExecuteGovernance": false
-    },
-    "governance": {
-      "brand": "WorldzGovern™",
-      "purpose": "DAO proposals, treasury, rules, grants, fee policy, quorum and execution",
-      "commandNamespace": [
-        "/worldzgovern",
-        "/governproposals",
-        "/governvote",
-        "/governdelegate"
-      ],
-      "mayAffectPopularityRanking": false
+      "sponsoredExposureCountsAsVote": false
     }
   },
   "financialSafety": {
