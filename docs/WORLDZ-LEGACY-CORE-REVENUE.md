@@ -1,69 +1,64 @@
-# Worldz Legacy Core Revenue Share™ — NBC • LMTD • INVEST
+# Worldz Legacy Core Market-Buy Pool™ — 12 tokens / 15% total
 
-Version: `WORLDZ-CORE-LEGACY-REVENUE-2026-10-01-A`
+Version: `WORLDZ-CORE-LEGACY-REVENUE-2026-10-01-B`
 
-## Locked source design
+## Locked rule
 
-Eligible **net Worldz-controlled SOL revenue** contributes **15%** to the Legacy Core pool.
+Eligible net Worldz-controlled revenue contributes **one 15% Legacy Core bucket**.
 
-The pool is divided equally:
+That bucket is divided equally across the **12 recorded Legacy tokens**:
 
-- **5% of eligible net revenue → NBC**
-- **5% → LMTD**
-- **5% → INVEST**
-- **85% remains with the originating Worldz revenue stream** for its existing treasury/operating policy.
+- **1.25% of eligible net revenue per token**
+- **15% total**
+- every token is above the requested **1% minimum**
+- **100% of each token's Legacy share is reserved for transparent market buys**
+- no historical distribution wallet receives the allocation
 
-Within each token's 5% share:
+The 12-token set is:
 
-- **50%** — transparent market buyback allocation
-- **25%** — liquidity-growth allocation
-- **25%** — holder-reward allocation
+1. Original PDC — `F82HFwxDLKFAbQWq7BmniWWxMgUerQsVu8jS357epump`
+2. First PDC1 — `PDC1K9aG6vAg5jFYkLin2tdTgwqZypsdvVHhHN2WnWw`
+3. PDC1-2 — `PDC1NgvtvLZwnopTfQdzXT5iAqBeGyLdFXEcqnvsR52`
+4. PDCMAGA — `7mwWRQeNpwWrnNhRpC48k7xQCdjCXDWfLLuYsphupump`
+5. PDCShares — `PDCLsBaTM3MxCzTWNoRvQejZ4kkhAWZiSc3ipCsoFuE`
+6. PurpleDC — `9Jd67VEgqWA2K5mck7yiYGxfLrQnmrTnXXzDYE3b7MLf`
+7. OG Purple — `DyZP9zn6vRu8J8XCQLNCREgCc12YN4JndnrmE5Upump`
+8. PCC1 Legacy — `DcekG6rLbQ3K5LtZfSMLgecfqnFAZgJUSpoY7tBgmuGv`
+9. INVEST — `VeSt6vaWE5JsT36sVCzL21daiY7nNNs73TJcJMHgnjC`
+10. LMTD — `Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY`
+11. NBC — mint remains gated until verified; Dev wallet `3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt`
+12. Hope St Support Coin (HSSC) — `29xKqmkvhYvMgWMqHgUoimzfBxweLUvcASAJUHHSkJMW`
 
-That means each token receives, from total eligible net revenue:
+## HSSC protected commitment
 
-- **2.5% buyback**
-- **1.25% liquidity growth**
-- **1.25% holder rewards**
+The recorded HSSC rule remains separate: **50% of HSSC creator/reward revenue is reserved for the Hope St / HopeStreet support commitment**.
 
-No market trade is enabled by this source release. Allocations accrue until the required treasury/multisig, token identity, liquidity, market-data and execution gates pass.
+HSSC also receives its equal **1.25% Legacy Core market-buy allocation**. The 50% commitment does not increase the overall Legacy bucket above 15%, and it does not imply endorsement by a charity.
 
-## Revenue sources
+## Market-buy rule
 
-The policy includes Community Suite Starter Trial, Rent, Rent-to-Own and Own receipts, Community Suite add-ons, custom AI/branding work, Worldz-hosted services/subscriptions, affiliate/partner revenue and the **Worldz-owned platform share** of LaunchPad revenue.
+Each token's allocation is intended to create real market demand for that token. It is not paid to old distribution wallets.
 
-For LaunchPad revenue, this is applied only after the existing creator/referrer/Legacy Flywheel/Worldz/Impact split. It does not reduce those protected allocations.
+If a token has no verified mint, no live route/liquidity, excessive price impact, missing market data, or no approved treasury authority, its allocation **accrues instead of trading**.
 
-## Distribution-wallet rule
+Mainnet execution remains disabled until the treasury/multisig and market-route gates pass. Every live buy must produce a public WorldzProof receipt.
 
-Historical distribution wallets are explicitly **excluded as funding destinations**.
+## Forbidden historical destinations
 
-Known watch-only/history addresses:
+These addresses remain watch-only/history and must not receive Legacy Core funding:
 
 - NBC Distribution — `PdABvvq4F7YjwsVRq2CCQeBNZTBq5WfkQvn8VmhRY34`
 - LMTD Distribution — `2turuerVWbeDPRZfK2iixzRnrC6zjbAzHo9NZfww6rFn`
 - INVEST Distribution — `Hd3cMfHMHQe4j8xfpnbDkWEgDo4gbrH2eimh6vpxjC37`
+- PDC1 historical distribution — `4DpR79PKKQXHVZipkvb1fMAfvZNJo7ktfKdkjwrjjqAA`
 
-Each token requires a new dedicated multisig-controlled vault or program-derived revenue vault.
+## Example
 
-## Recorded identities
+For **10 SOL** of eligible net revenue:
 
-- NBC Dev wallet — `3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt`
-- NBC mint — **not yet verified in the repository; required before holder rewards or buyback execution**
-- LMTD mint — `Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY`
-- INVEST mint — `VeSt6vaWE5JsT36sVCzL21daiY7nNNs73TJcJMHgnjC`
+- Legacy Core total = **1.5 SOL**
+- 12 tokens × **0.125 SOL each**
+- each token therefore receives **1.25% of the original eligible revenue**
+- remaining non-Legacy revenue = **8.5 SOL**
 
-## Buyback safety
-
-Revenue-funded buys must use real market data, public receipts, no self-trading/wash trading, estimated price impact no greater than 1%, and at least six hours between automated chunks. If a gate fails, SOL stays accrued rather than forcing a trade.
-
-## Protected exclusions
-
-Do not route customer/pass-through funds, refunds, taxes, external fees, impact donations, liquidity principal, borrowed/investment principal, internal treasury transfers or balances merely sitting in historical distribution wallets.
-
-WorldzApp's existing 50% liquidity / 50% development revenue policy remains untouched.
-
-## Execution status
-
-**SOURCE CONFIGURED — MAINNET ROUTING DISABLED.**
-
-The next live gate is creation/approval of dedicated treasury vaults and verification of the NBC mint. No source file should claim that SOL has been routed until an on-chain receipt proves it.
+No live transfer or market trade is authorized by this source change.
