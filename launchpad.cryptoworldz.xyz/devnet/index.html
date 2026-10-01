@@ -89,17 +89,22 @@
           <div>
             <div class="lab-form">
               <label>Project trading fee %<input id="project-fee" type="number" min="0.5" max="3" step="0.25" value="1"></label>
-              <label>WorldzLaunchPad share<input value="10% of collected project fee revenue" disabled></label>
+              <label>Fee Flow standard<input value="WORLDZ FEE FLOW V2 • GROW 5% DEFAULT" disabled></label>
             </div>
             <div class="route-grid">
-              <label>Creator ≤20%<input class="route-input" data-route="creator" type="number" min="0" max="20" value="20"></label>
-              <label>Holders<input class="route-input" data-route="holders" type="number" min="0" max="70" value="30"></label>
-              <label>LP Growth ≥20%<input class="route-input" data-route="lp" type="number" min="20" max="100" value="25"></label>
-              <label>Treasury ≤20%<input class="route-input" data-route="treasury" type="number" min="0" max="20" value="15"></label>
-              <label>Community/Impact<input class="route-input" data-route="community" type="number" min="0" max="70" value="10"></label>
+              <label>Creator / Developer<input value="10%" disabled></label>
+              <label>Launch Referrer<input value="15%" disabled></label>
+              <label>Legacy Core<input value="15% • 12 × 1.25%" disabled></label>
+              <label>WLDZ / RVIV / PNEX / MRCL<input value="12% • 3% each" disabled></label>
+              <label>LP Growth<input value="10%" disabled></label>
+              <label>Buyback + Burn<input value="8%" disabled></label>
+              <label>Impact / Charity<input value="5%" disabled></label>
+              <label>Team / Builders<input value="5%" disabled></label>
+              <label>Future Deployment<input value="5%" disabled></label>
+              <label>LaunchPad / Treasury<input value="5% / 10% • GROW profile" disabled></label>
             </div>
           </div>
-          <div class="lock-banner"><b>ROUTER EXECUTION NOT YET LIVE</b><br>The exact Worldz fee distribution is recorded in the launch registry now. The direct CPMM adapter does not pretend Raydium's venue fee is our configurable Worldz project-fee router. This stage stays amber until the real routing adapter is proven.</div>
+          <div class="lock-banner"><b>ROUTER EXECUTION NOT YET LIVE</b><br>Worldz Fee Flow V2 is recorded in the launch registry now. The direct CPMM adapter does not pretend Raydium's venue fee is the completed Worldz V2 treasury router. This stage stays amber until the real routing adapter is proven.</div>
         </div>
         <div class="lab-actions"><button class="btn secondary" id="save-fees" type="button" disabled>Save Fee Snapshot</button><span class="stage-state" id="route-total">100%</span></div>
       </div>

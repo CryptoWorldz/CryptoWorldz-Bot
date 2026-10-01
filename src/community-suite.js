@@ -624,7 +624,13 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
         `Token: ${brand?.token_symbol ? "$"+brand.token_symbol : "—"}`,
         `Address: ${brand?.token_address || "—"}`,
         "",
-        "Use /scan TOKEN_ADDRESS for live market/authority evidence."
+        "Fee standard: Worldz Fee Flow™ V2 • BUILD 3% / GROW 5% / BOOST 8%",
+        "Legacy Core: 15% • final 12-token set",
+        "Launch Station: https://launchpad.cryptoworldz.xyz/launch-station/",
+        "Community: https://launchpad.cryptoworldz.xyz/community/",
+        "Readiness: https://launchpad.cryptoworldz.xyz/ready/",
+        "",
+        "Use /scan TOKEN_ADDRESS for live market/authority evidence. Command Centre and DipShit can explain/read launch state; they do not gain authority to move launch funds."
       ].join("\n"));
     } catch {
       return send(message, "❌ Launch linkage could not be loaded.");

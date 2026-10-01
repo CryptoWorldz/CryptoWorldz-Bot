@@ -1,0 +1,21 @@
+{
+  "version": "2026-10-01-A",
+  "currentPrimaryHost": "launchpad.cryptoworldz.xyz",
+  "futurePrimaryHost": "worldzlaunch.com",
+  "futureHostStatus": "NOT_OWNED_OR_LIVE_YET",
+  "migrationReady": true,
+  "internalNavigationPolicy": "RELATIVE_URLS",
+  "cutoverChecklist": [
+    "purchase domain",
+    "attach domain to production host",
+    "verify DNS",
+    "issue TLS",
+    "mirror current build",
+    "switch canonical and metadata origins",
+    "301 redirect old launchpad host where appropriate",
+    "verify wallet/metadata/API CORS origins",
+    "run full link and proof regression",
+    "only then mark WorldzLaunch.com LIVE"
+  ],
+  "preserveOldHostAsCompatibilityAlias": true
+}

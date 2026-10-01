@@ -25,6 +25,12 @@ let poolId='';
 let lpMint='';
 let poolTxSignature='';
 let feeSaved=false;
+let feeFlowV2=true;
+let v2Routes={
+  creatorDeveloper:10,launchReferrer:15,legacyCore:15,worldzCoreFamilyMarketBuys:12,
+  lpGrowth:10,launchedTokenBuybackAndBurn:8,impactCharity:5,teamBuilderRewards:5,
+  futureTokenDeploymentReserve:5,worldzLaunchPad:5,treasuryReserve:10
+};
 let lockPlanSaved=false;
 let commandRegistered=false;
 
@@ -59,7 +65,8 @@ function metadata(){
   };
 }
 function routes(){
-  const out={};$$('.route-input').forEach(x=>out[x.dataset.route]=Number(x.value)||0);return out;
+  if(feeFlowV2&&v2Routes)return {...v2Routes};
+  const out={};$('.route-input').forEach(x=>out[x.dataset.route]=Number(x.value)||0);return out;
 }
 function routeTotal(){return Object.values(routes()).reduce((a,b)=>a+b,0);}
 const SAFE={
@@ -71,6 +78,17 @@ function feePolicyErrors(){
   if(!Number.isFinite(fee)||fee<SAFE.feeMin||fee>SAFE.feeMax)errors.push('Trading fee must be 0.50%–3.00%.');
   if(!Object.values(r).every(v=>Number.isFinite(v)&&v>=0&&v<=100))errors.push('Fee routes must each be between 0% and 100%.');
   if(Math.abs(routeTotal()-100)>.001)errors.push('Fee routes must total exactly 100%.');
+  if(feeFlowV2){
+    const fixed={
+      creatorDeveloper:10,launchReferrer:15,legacyCore:15,worldzCoreFamilyMarketBuys:12,
+      lpGrowth:10,launchedTokenBuybackAndBurn:8,impactCharity:5,teamBuilderRewards:5,futureTokenDeploymentReserve:5
+    };
+    for(const [key,value] of Object.entries(fixed))if(r[key]!==value)errors.push('Fee Flow V2 drift: '+key+' must equal '+value+'%.');
+    if(![3,5,8].includes(r.worldzLaunchPad))errors.push('Fee Flow V2 LaunchPad contribution must be 3%, 5% or 8%.');
+    const treasuryExpected=r.worldzLaunchPad===3?12:r.worldzLaunchPad===8?7:10;
+    if(r.treasuryReserve!==treasuryExpected)errors.push('Fee Flow V2 Treasury/Reserve must equal '+treasuryExpected+'% for this profile.');
+    return errors;
+  }
   if((r.creator||0)>SAFE.creatorFeeMax)errors.push('Creator fee route cannot exceed 20%.');
   if((r.treasury||0)>SAFE.treasuryFeeMax)errors.push('Treasury fee route cannot exceed 20%.');
   if((r.lp||0)<SAFE.lpFeeMin)errors.push('LP Growth fee route must be at least 20%.');
@@ -208,7 +226,7 @@ async function registerLaunch(stage='registered',extra={}){
     intent_hash:hash,mint:mintAddress,wallet:walletAddress,issued_at:issuedAt,signature,
     environment:'devnet',network:'solana',engine:'flash',quote_asset:selectedQuote,
     token_name:p.name,symbol:p.symbol,decimals:p.decimals,fixed_supply:p.supply,
-    project_fee_percent:fee,fee_routes:routes(),metadata:metadata(),
+    project_fee_percent:fee,fee_flow_version:feeFlowV2?'WORLDZ-FEE-FLOW-V2':'LEGACY-DEVNET-ROUTING',launchpad_contribution_percent:feeFlowV2?(routes().worldzLaunchPad||null):null,fee_routes:routes(),metadata:metadata(),
     metadata_uri:mintAddress?'https://launchpad.cryptoworldz.xyz/metadata.php?mint='+encodeURIComponent(mintAddress):null,
     mint_tx_signature:mintTxSignature||null,pool_id:poolId||null,lp_mint:lpMint||null,pool_tx_signature:poolTxSignature||null,
     vesting_config:vestingPlan(),lock_config:lockPlan(),
@@ -444,7 +462,25 @@ function loadQuery(){
   if(q.get('intent')&&/^[0-9a-f]{64}$/.test(q.get('intent')))intentHash=q.get('intent');
   if(q.get('quote')&&['SOL','wXRP'].includes(q.get('quote')))chooseQuote(q.get('quote'));
   if(q.get('fee'))$('#project-fee').value=Math.min(SAFE.feeMax,Math.max(SAFE.feeMin,Number(q.get('fee'))||1));
-  ['creator','holders','lp','treasury','community'].forEach(k=>{if(q.get('route_'+k))$('[data-route="'+k+'"]').value=q.get('route_'+k);});
+  feeFlowV2=q.get('fee_v2')!=='0';
+  if(feeFlowV2){
+    v2Routes={
+      creatorDeveloper:Number(q.get('v2_creator')),
+      launchReferrer:Number(q.get('v2_referrer')),
+      legacyCore:Number(q.get('v2_legacy')),
+      worldzCoreFamilyMarketBuys:Number(q.get('v2_core_buys')),
+      lpGrowth:Number(q.get('v2_lp')),
+      launchedTokenBuybackAndBurn:Number(q.get('v2_buyburn')),
+      impactCharity:Number(q.get('v2_impact')),
+      teamBuilderRewards:Number(q.get('v2_team')),
+      futureTokenDeploymentReserve:Number(q.get('v2_future')),
+      worldzLaunchPad:Number(q.get('launchpad_contribution')),
+      treasuryReserve:Number(q.get('v2_treasury'))
+    };
+    $('.route-input').forEach(x=>{x.disabled=true;});
+  }else{
+    ['creator','holders','lp','treasury','community'].forEach(k=>{if(q.get('route_'+k))$('[data-route="'+k+'"]').value=q.get('route_'+k);});
+  }
   if(q.get('founder_cliff'))$('#vesting-cliff-days').value=Math.max(SAFE.founderCliffMinDays,Number(q.get('founder_cliff'))||SAFE.founderCliffMinDays);
   if(q.get('founder_vesting'))$('#vesting-months').value=Math.max(SAFE.founderVestingMinMonths,Number(q.get('founder_vesting'))||24);
   if(q.get('lp_lock_days'))$('#lp-lock-months').value=Math.max(SAFE.lpLockMinMonths,Math.ceil((Number(q.get('lp_lock_days'))||365)/30.4375));
@@ -454,6 +490,7 @@ function loadQuery(){
   if(q.get('engine'))meta.push('Engine: '+q.get('engine'));
   meta.push('Quote: '+selectedQuote);
   if(q.get('fee'))meta.push('Project fee design: '+q.get('fee')+'%');
+  if(feeFlowV2)meta.push('Fee Flow: V2 • LaunchPad '+(v2Routes?.worldzLaunchPad||'?')+'% • Legacy 15% • Core buys 12%');
   if(meta.length)setStatus('#status','WORLDZLAUNCHPAD MANIFEST LOADED\n'+meta.join('\n')+'\n\nRun Local Checks before creating the Devnet mint.');
   updateRoutes();renderProof();
 }

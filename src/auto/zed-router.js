@@ -64,15 +64,22 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
       platform: {
         name: "WorldzLaunchPad™",
         url: "https://launchpad.cryptoworldz.xyz/",
+        launchStationUrl: "https://launchpad.cryptoworldz.xyz/launch-station/",
+        communityUrl: "https://launchpad.cryptoworldz.xyz/community/",
+        integrationsUrl: "https://launchpad.cryptoworldz.xyz/integrations/",
+        readinessUrl: "https://launchpad.cryptoworldz.xyz/ready/",
         omnichainUrl: "https://launchpad.cryptoworldz.xyz/omnichain/",
-        status: "DEVNET_BETA"
+        status: "PUBLIC_PRODUCT_READY__MAINNET_MARKET_EXECUTION_GATED"
       },
       engines: [
+        { id: "mint", name: "WorldzMINT™", url: "https://launchpad.cryptoworldz.xyz/mint/" },
+        { id: "existing-mint", name: "Existing Mint Intake", url: "https://launchpad.cryptoworldz.xyz/launch-station/?mode=existing" },
         { id: "flash", name: "Worldz Flash™", url: "https://launchpad.cryptoworldz.xyz/devnet/" },
         { id: "curve", name: "Worldz Curve™", url: "https://launchpad.cryptoworldz.xyz/curve/" },
         { id: "curve-pro", name: "Worldz Curve Pro™", url: "https://launchpad.cryptoworldz.xyz/curve-pro/" }
       ],
       feePolicy: {
+        version: "WORLDZ-FEE-FLOW-V2",
         targetGrossTraderFeeBpsWhereProven: 75,
         targetGrossTraderFeePercentWhereProven: 0.75,
         dynamicFeeDefault: false,
@@ -83,7 +90,32 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
           worldzLaunchPad: 8.5,
           impact: 8.5
         },
-        externalVenueAndNetworkFeesSeparate: true
+        legacyAdapterProfileOnly: true,
+        launchPadContributionChoicesPercent: [3, 5, 8],
+        launchPadContributionDefaultPercent: 5,
+        fixedSplitPercent: {
+          creatorDeveloper: 10,
+          launchReferrer: 15,
+          legacyCore: 15,
+          worldzCoreFamilyMarketBuys: 12,
+          lpGrowth: 10,
+          launchedTokenBuybackAndBurn: 8,
+          impactCharity: 5,
+          teamBuilderRewards: 5,
+          futureTokenDeploymentReserve: 5
+        },
+        treasuryReserveByLaunchPadChoice: { "3": 12, "5": 10, "8": 7 },
+        legacyTokenCount: 12,
+        coreFamilySymbols: ["WLDZ", "RVIV", "PNEX", "MRCL"],
+        externalVenueAndNetworkFeesSeparate: true,
+        automaticMainnetRoutingEnabled: false
+      },
+      community: {
+        commandCentre: true,
+        dipshit: true,
+        telegram: true,
+        xOfficialApiRail: true,
+        pumpSquadExternalRail: "TheChaos"
       },
       publicMainnetCreatorLaunchesEnabled: false
     };

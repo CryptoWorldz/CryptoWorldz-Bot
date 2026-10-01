@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-01-public-launchpad-v20-revenue-engine",
+  "version": "2026-10-01-public-launchpad-v21-party-v2",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -25,14 +25,31 @@
     "projectTradingFeeMinPercent": 0.5,
     "projectTradingFeeMaxPercent": 3,
     "stepPercent": 0.25,
-    "worldzLaunchPadShareOfCollectedProjectFeePercent": 10,
+    "worldzFeeFlowPolicy": "worldzpad-mainnet/fairfee/worldz-fee-flow.v2.json",
+    "worldzLaunchPadContributionChoicesPercent": [
+      3,
+      5,
+      8
+    ],
+    "worldzLaunchPadContributionDefaultPercent": 5,
+    "contributionChoiceVoluntary": true,
+    "contributionChoiceSnapshottedAtLaunch": true,
+    "walletTransferTaxPercent": 0,
     "worldzLaunchPadShareOfTokenSupplyPercent": 0,
     "worldzLaunchPadShareOfInitialLiquidityPercent": 0,
-    "description": "WorldzLaunchPad permits a 0.50%–3.00% project trading-fee configuration only through supported launch routes. Ordinary wallet transfers carry 0% WorldzLaunchPad transfer tax. WorldzLaunchPad receives 10% of collected project trading-fee revenue, never token supply or initial liquidity.",
-    "platformShareCapPercentOfCollectedProjectFee": 10,
-    "projectRetainedShareOfCollectedProjectFeePercent": 90,
-    "walletTransferTaxPercent": 0,
-    "publicPromise": "WorldzLaunchPad takes 10% of the token's supported configured trading-fee revenue only — never 10% of token supply and never 10% of initial liquidity."
+    "legacyCorePercent": 15,
+    "legacyCoreTokenCount": 12,
+    "legacyCoreEqualPerTokenPercent": 1.25,
+    "coreFamilyMarketBuyPercent": 12,
+    "coreFamilyEqualPerTokenPercent": 3,
+    "coreFamilySymbols": [
+      "WLDZ",
+      "RVIV",
+      "PNEX",
+      "MRCL"
+    ],
+    "description": "Worldz Fee Flow V2 routes eligible collected supported trading-fee revenue through the creator-selected BUILD 3%, GROW 5% or BOOST 8% WorldzLaunchPad contribution profile. The same fee flow permanently reserves 15% for the closed 12-token Legacy Core and 12% for equal WLDZ/RVIV/PNEX/MRCL market-buy ledgers. It takes 0% token supply, 0% initial liquidity and 0% wallet-transfer tax.",
+    "publicPromise": "Choose 3%, 5% or 8% back to WorldzLaunchPad at launch. The choice is voluntary and locked into that launch snapshot. No hidden supply take or wallet-transfer tax."
   },
   "launchEngines": [
     {
@@ -207,7 +224,7 @@
   "releaseGate": {
     "mainnetCreatorLaunch": [
       "verified Worldz Treasury Multisig vault address registered",
-      "10% platform fee-share route proven end-to-end",
+      "selected 3% / 5% / 8% Worldz Fee Flow V2 route proven end-to-end",
       "Worldz Safe Launch Standard v1 hard-limit proof",
       "Worldz Reserve Treasury target capped at 6-of-9 approvals",
       "atomic genesis distribution to tagged destinations",
@@ -356,10 +373,31 @@
       "lpLockMinDays": 365
     },
     "feeRoutes": {
-      "creatorMaxPercent": 20,
-      "treasuryMaxPercent": 20,
-      "lpGrowthMinPercent": 20,
-      "holdersLpCommunityCombinedMinPercent": 60
+      "model": "WORLDZ_FEE_FLOW_V2",
+      "exactLockedFixedPercent": {
+        "creatorDeveloper": 10,
+        "launchReferrer": 15,
+        "legacyCore": 15,
+        "worldzCoreFamilyMarketBuys": 12,
+        "lpGrowth": 10,
+        "launchedTokenBuybackAndBurn": 8,
+        "impactCharity": 5,
+        "teamBuilderRewards": 5,
+        "futureTokenDeploymentReserve": 5
+      },
+      "worldzLaunchPadAllowedPercent": [
+        3,
+        5,
+        8
+      ],
+      "treasuryReserveByLaunchPadChoice": {
+        "3": 12,
+        "5": 10,
+        "8": 7
+      },
+      "totalPercent": 100,
+      "walletTransferTaxPercent": 0,
+      "rule": "The fixed lanes cannot be edited. Only the creator-selected WorldzLaunchPad contribution (3/5/8) changes; Treasury/Reserve receives the balancing 12/10/7."
     },
     "mainnetEnforcement": {
       "atomicGenesisDistributionRequired": true,
@@ -941,7 +979,7 @@
     "name": "Worldz Revenue Engine™",
     "status": "PUBLIC_CONTROL_SURFACE_LIVE__MAINNET_EXECUTION_GATED",
     "publicPath": "/revenue/",
-    "principle": "Revenue must come from disclosed platform usage and actually collected supported fees. Simulation is never reported as live revenue.",
+    "principle": "Revenue must come from disclosed platform usage and actually collected supported fees. New launch intakes use Worldz Fee Flow V2 with the creator-selected 3% / 5% / 8% LaunchPad contribution. Simulation is never reported as live revenue.",
     "launchFee": {
       "enabled": false,
       "amount": null,
@@ -950,11 +988,19 @@
       "activationRule": "Set a public amount, fee asset, same-chain treasury destination and executable-adapter enforcement before enabling a production launch fee."
     },
     "supportedTradingFee": {
-      "worldzSharePercentOfCollectedProjectTradingFee": 10,
-      "projectRetainedPercentOfCollectedProjectTradingFee": 90,
+      "feeFlowVersion": "WORLDZ-FEE-FLOW-V2",
+      "contributionChoicesPercent": [
+        3,
+        5,
+        8
+      ],
+      "defaultContributionPercent": 5,
+      "legacyCorePercent": 15,
+      "worldzCoreFamilyMarketBuyPercent": 12,
       "walletTransferTaxPercent": 0,
       "tokenSupplyTakePercent": 0,
-      "initialLiquidityTakePercent": 0
+      "initialLiquidityTakePercent": 0,
+      "execution": "GATED_UNTIL_CHAIN_NATIVE_ROUTING_PROOF"
     },
     "treasuryPolicy": "/treasury-policy.json",
     "accounting": {
@@ -963,5 +1009,91 @@
       "separateVenueProtocolFees": true,
       "proofReceiptRequiredForProductionReporting": true
     }
+  },
+  "launchStation": {
+    "name": "Worldz Launch Station™",
+    "publicPath": "/launch-station/",
+    "mintNewPath": "/mint/",
+    "importExistingMintPath": "/launch-station/?mode=existing",
+    "existingMintSupported": true,
+    "existingMintRule": "An existing mint may enter WorldzLaunchPad intake after on-chain identity/authority/supply checks. Importing a mint never implies Worldz verification or enables mainnet market execution by itself.",
+    "mintAndMarketLaunchSeparate": true,
+    "currentWorldzTestCandidate": {
+      "name": "PHENIX",
+      "symbol": "PNEX",
+      "canonicalMint": null,
+      "status": "PRELAUNCH_USE_MINT_NEW_UNLESS_A_REAL_MINT_IS_CREATED_AND_VERIFIED"
+    }
+  },
+  "community": {
+    "name": "WorldzLaunch Community™",
+    "publicPath": "/community/",
+    "commandCentre": "https://cryptobotz.cryptoworldz.xyz/miniapp/",
+    "dipshit": "https://t.me/DipShitBossBot",
+    "telegram": [
+      "https://t.me/CryptoWLDZ",
+      "https://t.me/CryptoWorldzHQ",
+      "https://t.me/GoFuckYourSelfTG"
+    ],
+    "x": [
+      "https://x.com/WorldzLaunchPad",
+      "https://x.com/CryptoWorldzX",
+      "https://x.com/JayJayTeamDev"
+    ],
+    "pumpSquad": {
+      "name": "TheChaos",
+      "joinUrl": "https://join.pump.fun/HSag/rwtn4stv",
+      "integrationMode": "EXTERNAL_LINK__NO_UNDOCUMENTED_API"
+    }
+  },
+  "integrations": {
+    "publicPath": "/integrations/",
+    "x": {
+      "status": "OFFICIAL_API_ARCHITECTURE_READY__CREDENTIALS_AND_USAGE_CREDITS_REQUIRED",
+      "api": "X API v2",
+      "capabilities": [
+        "posts",
+        "users",
+        "direct_messages",
+        "communities",
+        "metrics",
+        "filtered_stream",
+        "x_activity",
+        "webhooks"
+      ],
+      "commandCentreBridge": [
+        "G.R.A.C.E.",
+        "Ronald Raider",
+        "WorldzCast",
+        "WorldzLaunchPad"
+      ],
+      "fiveYearRail": "WorldzPay/X Money remains a separate provider-access side rail and is never claimed live without official access."
+    },
+    "pump": {
+      "status": "EXTERNAL_LINK_AND_EXISTING_MINT_IMPORT_READY__NO_UNDOCUMENTED_API",
+      "squadName": "TheChaos",
+      "squadJoinUrl": "https://join.pump.fun/HSag/rwtn4stv",
+      "rules": [
+        "No scraping/private API dependency",
+        "Use official links and on-chain evidence",
+        "Pump-launched Solana mints may enter Worldz existing-mint intake",
+        "Worldz Verified remains subject to Worldz safety/proof gates"
+      ]
+    },
+    "telegram": {
+      "status": "INTEGRATED",
+      "commandCentre": true,
+      "dipshit": true,
+      "raids": true,
+      "launchNotifications": "APPROVAL_CONTROLLED"
+    }
+  },
+  "domainMigration": {
+    "currentPrimary": "https://launchpad.cryptoworldz.xyz",
+    "reservedFuturePrimary": "https://worldzlaunch.com",
+    "futureDomainOwned": false,
+    "relativeInternalLinksRequired": true,
+    "migrationReady": true,
+    "rule": "Do not publish WorldzLaunch.com as live until DNS, TLS, canonical URLs, redirects and deployment are verified."
   }
 }

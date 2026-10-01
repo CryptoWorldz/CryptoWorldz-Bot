@@ -1,73 +1,78 @@
-# Worldz Fee Flow™ — Worldz-Owned Launch Standard
+# Worldz Fee Flow™ V2 — New Launch Intake Standard
 
-Version: `WORLDZ-FEE-FLOW-1`
-Status: **current working default for Worldz-owned launches**
+Version: `WORLDZ-FEE-FLOW-V2-2026-10-01-A`  
+Status: **LOCKED FOR NEW WORLDZLAUNCHPAD INTAKES — MAINNET EXECUTION GATED**
 
-This file supersedes older Worldz-owned token fee-routing and initial-LP figures wherever they conflict with this standard. It does not change the separate public-creator WorldzLaunchPad platform rules.
+Machine policy: `worldzpad-mainnet/fairfee/worldz-fee-flow.v2.json`
 
-## Collected supported trading-fee revenue
+## Creator choice
 
-Route only trading-fee revenue actually collected/claimable through a supported Worldz-owned launch route. Ordinary wallet-to-wallet transfers carry no Worldz transfer tax.
+At launch, the creator voluntarily selects the WorldzLaunchPad contribution:
 
-- **10%** WorldzLaunchPad Treasury
-- **30%** LP Growth
-- **20%** Holders + Legacy
-- **20%** Community / Growth / Marketing
-- **10%** OneWorldz Impact
-- **5%** Operations
-- **5%** Reserve
+- **BUILD — 3%**
+- **GROW — 5%** *(default)*
+- **BOOST — 8%**
 
-Total: **100%**
+The choice is snapshotted in the launch manifest. A later change requires a new disclosed signed route/migration.
 
-## LP Growth deployment
+## Fixed fee-revenue flywheel
 
-The 30% LP Growth bucket is deployed from actual collected treasury receipts in four stages:
+The following percentages are allocations of **eligible collected supported trading-fee revenue** after disclosed external protocol/network deductions. They are not token-supply allocations and are not wallet-transfer taxes.
 
-1. **20%** of the available LP Growth bucket
-2. **25%**
-3. **25%**
-4. **30%**
+- **10%** Creator / Developer
+- **15%** Launch Referrer
+- **15%** Legacy Core — permanently closed 12-token set, **1.25% each**
+- **12%** Worldz Core Family market-buy ledger — **3% each to WLDZ / RVIV / PNEX / MRCL**
+- **10%** LP Growth
+- **8%** Launched-token Buyback + Burn
+- **5%** Impact / Charity
+- **5%** Team / Builder Rewards
+- **5%** Future Token Deployment Reserve
 
-Total deployed across the four stages: **100% of that available LP Growth bucket**.
+Fixed subtotal: **85%**.
 
-Unused or gated value remains in its designated LP Growth vault until a later approved stage. No virtual, unpaired or unavailable value is described as real liquidity.
+The selected WorldzLaunchPad contribution and Treasury/Reserve finish the 100%:
 
-## Initial liquidity
+| Profile | WorldzLaunchPad | Treasury / Reserve | Total |
+|---|---:|---:|---:|
+| BUILD | 3% | 12% | 100% |
+| GROW | 5% | 10% | 100% |
+| BOOST | 8% | 7% | 100% |
 
-Worldz-owned launches start with **15% of the fixed token supply active in LP at launch** and build from there.
+## Legacy Core lock
 
-Current Worldz launch control retains a further **20% designated staged liquidity reserve** for controlled additions. No extra token supply is minted to top up LP.
+Legacy Core is **final at exactly 12 tokens**. No additions, removals, replacements or future Legacy designations are allowed.
 
-LP additions must use real matching quote liquidity and pass the applicable price-impact, slippage, treasury, lock and execution checks.
+The same single 15% Legacy allocation is used here. It must **never be deducted twice**.
 
-## REVIVE Legacy Revival snapshot
+Automated Worldz routing does not fund historical distribution wallets. Owner-initiated manual transfers to those wallets remain outside Worldz automation.
 
-REVIVE fixed supply: **200,000,000 RVIV**.
+## WLDZ / RVIV / PNEX / MRCL flywheel
 
-Legacy Revival launch pool: **10% = 20,000,000 RVIV**.
+The 12% family bucket is equal:
 
-Fresh snapshot:
-- Batch: `4b7faa3f-c6cd-435f-9840-43a04cd090a0`
-- Snapshot root: `b0a58be30c8323bf22d57939cd989be6b1631f5dd17a682cd829d0cc6a85e548`
-- Legacy assets: **10**
-- Positive legacy token-account rows: **239**
-- Unique eligible snapshot-owner wallets: **216**
-- Status: **COMPLETE**
+- **3% WLDZ**
+- **3% RVIV**
+- **3% PNEX**
+- **3% MRCL**
 
-Distribution:
-- **50% of the 20M RVIV pool** is divided equally across eligible unique snapshot-owner wallets.
-- **50%** is distributed using square-root weighting of normalized historical legacy holdings.
-- Claim requires proof of control of the snapshot owner wallet.
-- Unclaimed or non-signable entitlements remain reserved; they are not silently redistributed.
+WLDZ and RVIV may execute only through verified routes. PNEX/MRCL allocations accrue until their canonical mint and live executable market route are verified. No mint may be guessed.
 
-The entitlement ledger reconciles to exactly **20,000,000 RVIV**.
+## Safety
 
-## Mint and launch sequence
+- 0% WorldzLaunchPad token-supply take
+- 0% WorldzLaunchPad initial-liquidity take
+- 0% Worldz wallet-transfer tax
+- no wash trading or self-trading
+- market buys require real market data and price-impact checks
+- burn requires verifiable on-chain execution
+- LP additions require matching quote liquidity and treasury approval
+- production routing requires the approved Treasury Multisig
+- every confirmed production action requires WorldzProof evidence
+- if a gate fails, the allocation accrues instead of forcing execution
 
-1. Mint **#001 WORLDZ — WLDZ — 100,000,000**
-2. Mint **#002 REVIVE — RVIV — 200,000,000**
-3. Mint **#003 PHENIX — PNEX — 250,000,000**
-4. Mint **#004 MIRACLE — MRCL — 348,000,000**
-5. Launch **WORLDZ** with the current Worldz-owned launch controls.
+## Adapter migration
 
-Each genesis mint remains fixed-supply. Mint and freeze authorities are permanently revoked after the required metadata/finalisation stage. Mainnet wallet approvals remain explicit and cannot be bypassed.
+Older `MagicFeeNumber™` / 51-17-15-8.5-8.5 and 90/10 adapter configurations remain historical/test-adapter references where required by existing code. They are **not the default economics for new WorldzLaunchPad intakes**.
+
+New launch manifests inherit Worldz Fee Flow V2. A chain/venue adapter is not called V2-mainnet-ready until it can enforce and reconcile the V2 destinations on-chain.

@@ -1,0 +1,25 @@
+{
+  "version": "2026-10-01-A",
+  "name": "Worldz Pump External Rail™",
+  "status": "EXTERNAL_LINK_AND_ONCHAIN_INTAKE_READY",
+  "provider": "pump.fun",
+  "squad": {
+    "name": "TheChaos",
+    "joinUrl": "https://join.pump.fun/HSag/rwtn4stv"
+  },
+  "supported": [
+    "official_external_links",
+    "pump_create_handoff",
+    "solana_existing_mint_import",
+    "onchain_identity_checks",
+    "community_squad_link"
+  ],
+  "unsupported": [
+    "undocumented_private_api_dependency",
+    "unauthorized_scraping",
+    "fake_pump_partnership_claim",
+    "automatic_pump_account_actions"
+  ],
+  "existingMintIntake": "/launch-station/?mode=existing",
+  "rule": "A Pump-created Solana mint may be imported for Worldz read-only preflight, but Worldz verification and market execution remain subject to Worldz gates."
+}

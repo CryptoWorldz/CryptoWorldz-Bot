@@ -1,6 +1,6 @@
 {
-  "version": "WORLDZ-LAUNCHPAD-PRODUCT-STANDARD-2026-09-27-A",
-  "status": "PRIVATE_BUILD_STANDARD",
+  "version": "WORLDZ-LAUNCHPAD-PRODUCT-STANDARD-2026-10-01-B",
+  "status": "BEST_OF_BEST_STANDARD__NEW_INTAKES_USE_FEE_FLOW_V2",
   "name": "WorldzLaunchPad™ Best-of-Best Product Standard",
   "experience": {
     "simpleMode": {
@@ -18,7 +18,14 @@
       "goal": "Advanced creators can select supported venue, curve/market, vesting, liquidity and release options without weakening safety gates."
     },
     "plainEnglishErrors": true,
-    "mobileFirst": true
+    "mobileFirst": true,
+    "launchStation": {
+      "publicPath": "/launch-station/",
+      "mintNew": true,
+      "importExistingMint": true,
+      "readOnlyExistingMintPreflight": true,
+      "mintAndMarketLaunchSeparate": true
+    }
   },
   "creatorEconomics": {
     "recurringTradingRevenue": true,
@@ -73,7 +80,10 @@
     "whiteLabel": true,
     "customLaunchPad": true,
     "partnerBranding": true,
-    "partnerReferralAttribution": true
+    "partnerReferralAttribution": true,
+    "existingMintIntake": true,
+    "communityHub": true,
+    "integrationHub": true
   },
   "automation": {
     "aiLaunchAssistant": true,
@@ -111,5 +121,79 @@
     "chainEnvironmentPairMustMatch": true,
     "mainnetReleaseIsPerChainAndPerVenue": true,
     "providerGreenStateMustComeFromProviderEvidence": true
+  },
+  "economicsV2": {
+    "policy": "worldzpad-mainnet/fairfee/worldz-fee-flow.v2.json",
+    "creatorSelectableLaunchPadContributionPercent": [
+      3,
+      5,
+      8
+    ],
+    "defaultLaunchPadContributionPercent": 5,
+    "fixedLegacyCorePercent": 15,
+    "fixedLegacyTokenCount": 12,
+    "fixedWorldzCoreFamilyMarketBuyPercent": 12,
+    "coreFamilySymbols": [
+      "WLDZ",
+      "RVIV",
+      "PNEX",
+      "MRCL"
+    ],
+    "zeroTokenSupplyTake": true,
+    "zeroInitialLiquidityTake": true,
+    "zeroWalletTransferTax": true
+  },
+  "community": {
+    "publicPath": "/community/",
+    "launchGetsCommunityProfile": true,
+    "commandCentreHandoff": true,
+    "dipshitHandoff": true,
+    "telegramHandoff": true,
+    "xHandoff": true,
+    "pumpSquadExternalRail": true,
+    "hourlyFavouriteTokenVoting": true,
+    "raidQueue": true,
+    "legendPoints": true
+  },
+  "integrations": {
+    "publicPath": "/integrations/",
+    "x": {
+      "mode": "OFFICIAL_API_ONLY",
+      "capabilities": [
+        "posts",
+        "users",
+        "direct_messages",
+        "communities",
+        "metrics",
+        "filtered_stream",
+        "x_activity",
+        "webhooks"
+      ],
+      "credentialsRequiredForLiveActions": true,
+      "commandCentreComponents": [
+        "G.R.A.C.E.",
+        "Ronald Raider",
+        "WorldzCast",
+        "WorldzLaunchPad"
+      ]
+    },
+    "pump": {
+      "mode": "EXTERNAL_LINK_PLUS_ONCHAIN_EXISTING_MINT_INTAKE",
+      "undocumentedApiDependency": false,
+      "squadSupport": true,
+      "externalPartnershipClaim": false
+    },
+    "telegram": {
+      "commandCentre": true,
+      "dipshit": true,
+      "raids": true,
+      "approvalControlledAnnouncements": true
+    }
+  },
+  "domainPortability": {
+    "relativeInternalLinks": true,
+    "futurePrimaryHost": "worldzlaunch.com",
+    "currentPrimaryHost": "launchpad.cryptoworldz.xyz",
+    "futureHostMustBeOwnedAndVerifiedBeforeLiveClaim": true
   }
 }
