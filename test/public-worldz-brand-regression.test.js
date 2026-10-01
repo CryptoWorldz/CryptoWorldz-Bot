@@ -30,3 +30,12 @@ test("WorldzLaunch Pack exposes current ZED-led modules and Spotlight",()=>{
     assert.ok(campaign.commandCentre.modules.includes(item),item);
   }
 });
+
+test("visible Raid experience does not present Missions as the primary system",()=>{
+  const experience=read("public/miniapp/experience.js");
+  const registry=read("src/command-registry.js");
+  assert.doesNotMatch(experience,/My Missions|MISSION EVIDENCE|Mission #/);
+  assert.match(experience,/My Raids|RAID EVIDENCE|Raid #/);
+  assert.match(registry,/Admin • Raids, Reviews, Members & Settings/);
+  assert.match(registry,/Ronald Raider Raid/);
+});
