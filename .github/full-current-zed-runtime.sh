@@ -145,6 +145,7 @@ proofdir="$RUNNER_TEMP/zed-runtime-byte-proof"
 mkdir -p "$proofdir"
 {
   printf '%s\n' index.js package.json package-lock.json .github/install-ci-apt-wrapper.cjs
+  printf '%s\n' worldzpad-mainnet/payments/worldzpay.v1.json worldzpad-mainnet/revenue/worldz-core-legacy-revenue.v1.json
   find src public .well-known -type f ! -name '.env' ! -name '*.log' -printf '%p\n' | sort
 } > "$runtime_files"
 test -s "$runtime_files"
@@ -158,6 +159,8 @@ critical=(
   package.json
   package-lock.json
   .github/install-ci-apt-wrapper.cjs
+  worldzpad-mainnet/payments/worldzpay.v1.json
+  worldzpad-mainnet/revenue/worldz-core-legacy-revenue.v1.json
   src/full-runtime-entry.js
   src/dipshit-membership.js
   src/http.js
