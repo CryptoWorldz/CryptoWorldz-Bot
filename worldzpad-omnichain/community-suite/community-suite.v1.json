@@ -205,5 +205,18 @@
     "sponsored_slot",
     "campaign_pack",
     "migration_setup"
-  ]
+  ],
+  "revenue": {
+    "legacy_core_policy": "worldzpad-mainnet/revenue/worldz-core-legacy-revenue.v1.json",
+    "eligible": true,
+    "routing_state": "accrue_only_until_dedicated_multisig_or_pda_ready",
+    "source_ids": {
+      "trial": "community_suite_trial",
+      "rent": "community_suite_rent",
+      "rent_to_own": "community_suite_rent_to_own",
+      "own": "community_suite_own",
+      "addons": "community_suite_addons"
+    },
+    "protected_rule": "Historical token distribution wallets are never revenue destinations."
+  }
 }
