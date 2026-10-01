@@ -58,8 +58,9 @@ test("ranked-choice IRV counts preferences and does not invent a hidden tie-brea
   const result = countRankedChoiceIRV([
     ["a","b","c"],
     ["a","b","c"],
-    ["b","c","a"],
-    ["c","b","a"]
+    ["b","a","c"],
+    ["b","a","c"],
+    ["c","a","b"]
   ], ["a","b","c"]);
   assert.equal(result.status, "complete");
   assert.equal(result.winner, "a");
