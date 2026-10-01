@@ -3,7 +3,7 @@ const MAX_POINT_ADJUSTMENT = 10000;
 const ADMIN_PERMISSIONS = Object.freeze([
   "mission.create", "mission.edit", "mission.end",
   "submission.view", "submission.approve", "submission.reject",
-  "communication.broadcast", "recap.publish", "member.view", "report.view",
+  "communication.broadcast", "member.view", "report.view",
   "treasury.view", "treasury.reconcile", "partner.report"
 ]);
 
@@ -11,7 +11,6 @@ const ROLE_PERMISSIONS = Object.freeze({
   owner: ADMIN_PERMISSIONS,
   admin: ["mission.create", "mission.edit", "mission.end", "submission.view", "submission.approve", "submission.reject", "communication.broadcast", "member.view", "report.view"],
   moderator: ["submission.view", "submission.reject", "member.view"],
-  recap_manager: ["recap.publish", "report.view"],
   partner_manager: ["mission.create", "partner.report", "report.view"],
   treasury_manager: ["treasury.view", "treasury.reconcile", "report.view"]
 });
@@ -150,7 +149,7 @@ function formatMission(mission, options = {}) {
 
   const reward = Math.max(0, Number(mission.reward_points) || 0);
   const parts = [
-    "🚀💜 CryptoWorldz Raaiiidd Mission",
+    "🚀💜 CryptoWorldz Raid",
     "",
     `🆔 Mission #${mission.id}`,
     `🎯 ${mission.title || "CryptoWorldz Mission"}`,
@@ -165,7 +164,7 @@ function formatMission(mission, options = {}) {
 
   parts.push("", "Reply DONE or ✅ DONE once completed.");
   if (options.includeMissionsHint !== false) {
-    parts.push("Use /missions to view every active Raaiiidd.");
+    parts.push("Use /raids to view every active Raid.");
   }
 
   return parts.join("\n");
