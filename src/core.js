@@ -145,14 +145,14 @@ function missionLink(mission) {
 }
 
 function formatMission(mission, options = {}) {
-  if (!mission) return "🚀 No active Raaiiidd missions right now. Check back soon, Legend!";
+  if (!mission) return "🚀 No active Raids right now. Check back soon, Legend!";
 
   const reward = Math.max(0, Number(mission.reward_points) || 0);
   const parts = [
     "🚀💜 CryptoWorldz Raid",
     "",
-    `🆔 Mission #${mission.id}`,
-    `🎯 ${mission.title || "CryptoWorldz Mission"}`,
+    `🆔 Raid #${mission.id}`,
+    `🎯 ${mission.title || "CryptoWorldz Raid"}`,
     `🌐 Platform: ${mission.platform || "Community"}`,
     `⭐ Reward: ${reward} Legend Points`
   ];
@@ -172,12 +172,12 @@ function formatMission(mission, options = {}) {
 
 function formatMissionList(missions) {
   if (!Array.isArray(missions) || missions.length === 0) {
-    return "🚀 Active CryptoWorldz Raaiiidds\n\nNo active missions right now. Check back soon, Legend!";
+    return "🚀 Active CryptoWorldz Raids\n\nNo active Raids right now. Check back soon, Legend!";
   }
 
   const blocks = missions.map((mission) => {
     const lines = [
-      `🆔 #${mission.id} — ${mission.title || "CryptoWorldz Mission"}`,
+      `🆔 #${mission.id} — ${mission.title || "CryptoWorldz Raid"}`,
       `🌐 ${mission.platform || "Community"} • ⭐ ${Math.max(0, Number(mission.reward_points) || 0)} LP`
     ];
     if (mission.instructions) lines.push(`📋 ${String(mission.instructions).trim()}`);
@@ -186,7 +186,7 @@ function formatMissionList(missions) {
     return lines.join("\n");
   });
 
-  return `🚀 Active CryptoWorldz Raaiiidds\n\n${blocks.join("\n\n")}`;
+  return `🚀 Active CryptoWorldz Raids\n\n${blocks.join("\n\n")}`;
 }
 
 function medalFor(index) {
@@ -369,12 +369,6 @@ function createRateLimiter({ maxEvents, intervalMs, now = () => Date.now() }) {
   };
 }
 
-function normalizeGovernanceOption(value, optionCount) {
-  const option = Number(value);
-  if (!Number.isSafeInteger(option) || option < 1 || option > optionCount) return null;
-  return String(option);
-}
-
 module.exports = {
   ADMIN_PERMISSIONS,
   EDITABLE_MISSION_FIELDS,
@@ -392,7 +386,6 @@ module.exports = {
   isDuplicateError,
   isValidSolanaAddress,
   medalFor,
-  normalizeGovernanceOption,
   missionLink,
   parseBoolean,
   parseEditMissionPayload,
