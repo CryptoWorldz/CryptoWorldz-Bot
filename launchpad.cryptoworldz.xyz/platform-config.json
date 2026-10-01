@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-01-public-launchpad-v21-party-v2",
+  "version": "2026-10-01-public-launchpad-v22-treasury-3of5",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -226,11 +226,10 @@
       "verified Worldz Treasury Multisig vault address registered",
       "selected 3% / 5% / 8% Worldz Fee Flow V2 route proven end-to-end",
       "Worldz Safe Launch Standard v1 hard-limit proof",
-      "Worldz Reserve Treasury target capped at 6-of-9 approvals",
       "atomic genesis distribution to tagged destinations",
       "100% creator-controlled LP lock proof for at least 365 days",
       "founder vesting proof: at least 90-day cliff and 18-month vesting",
-      "verified chain-specific Worldz Operations Treasury at 5-of-10 governance",
+      "verified chain-specific Worldz Operations Treasury at 3-of-5 governance",
       "chain adapter security review",
       "incident and recovery runbook",
       "accounting and recordkeeping runbook",
@@ -423,11 +422,11 @@
     "destination": "Worldz Treasury Multisig",
     "provider": "Squads",
     "network": "solana",
-    "requiredThreshold": "1-of-2 temporary",
+    "requiredThreshold": "3-of-5",
     "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-    "status": "TEMPORARY_1_OF_2_CUSTODY__PUBLIC_CREATOR_ROUTE_PROOF_PENDING",
+    "status": "OPERATIONS_3_OF_5_POLICY__ONCHAIN_REVERIFY_REQUIRED",
     "mainnetRoutingEnabled": false,
-    "rule": "Temporary 1-of-2 custody applies only to the current core operational vault while a replacement signer is verified. Public creator mainnet routing remains disabled until its separate fee-route and release evidence is complete.",
+    "rule": "Permanent Worldz Operations Treasury policy is 3-of-5. Public creator mainnet routing remains disabled until the live Squads account is independently re-read and the active fee-route/release evidence is complete.",
     "verifiedEvidence": {
       "squadLabel": "Team Zed Treasury",
       "providerProgram": "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf",
@@ -439,17 +438,20 @@
       "vaultDerivationVerified": true,
       "squadsProgramOwnerVerified": true,
       "verification": "Independent Solana mainnet Squads v4 account decode and vault derivation",
-      "note": "The recorded temporary operational configuration is 1-of-2. It does not satisfy the published public-creator governance target and does not itself enable public creator mainnet launches."
+      "note": "Historical last independently verified snapshot only. The project now targets permanent 3-of-5 governance; live Squads membership and threshold must be re-read before production routing is marked verified."
     },
     "multisigConfigAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
     "vaultIndex": 0,
-    "targetGovernance": "5-of-10",
-    "targetMemberCount": 10,
-    "targetThreshold": 5,
-    "upgradeRequiredBeforeMainnetFeeRouting": true,
-    "reserveTargetGovernance": "6-of-9",
-    "reserveMaximumRequiredApprovals": 6,
-    "policyFile": "/treasury-policy.json"
+    "targetGovernance": "3-of-5",
+    "targetMemberCount": 5,
+    "targetThreshold": 3,
+    "upgradeRequiredBeforeMainnetFeeRouting": false,
+    "reserveTargetGovernance": "NOT_DEPLOYED",
+    "reserveMaximumRequiredApprovals": 0,
+    "policyFile": "/treasury-policy.json",
+    "onchainVerificationRequiredBeforeMainnetFeeRouting": true,
+    "reserveSweepEnabled": false,
+    "reserveTreasuryRequired": false
   },
   "baseEvmFair": {
     "status": "BASE_SEPOLIA_BETA",
@@ -490,8 +492,8 @@
     "wldzPerQualifiedPositionTokens": 100000
   },
   "treasuryStandard": {
-    "version": "WORLDZ-TREASURY-1",
-    "status": "APPROVED_CONFIGURATION__ONCHAIN_ROLLOUT_PENDING",
+    "version": "WORLDZ-TREASURY-2",
+    "status": "OPERATIONS_3_OF_5_APPROVED__RESERVE_DISABLED__ONCHAIN_REVERIFY_REQUIRED",
     "purpose": "Chain-native WorldzLaunchPad treasury governance for the 10% Worldz share of collected supported project trading-fee revenue.",
     "feePolicy": {
       "worldzSharePercentOfCollectedProjectTradingFee": 10,
@@ -501,18 +503,21 @@
     },
     "operationsTreasury": {
       "label": "Worldz Operations Treasury",
-      "signerCount": 10,
-      "approvalThreshold": 5,
-      "policy": "5-of-10",
+      "signerCount": 5,
+      "approvalThreshold": 3,
+      "policy": "3-of-5",
       "purpose": "Primary per-chain collector for WorldzLaunchPad fee-share revenue and approved operating transfers."
     },
     "reserveTreasury": {
       "label": "Worldz Reserve Treasury",
-      "signerCount": 9,
-      "approvalThreshold": 6,
-      "policy": "6-of-9",
-      "maximumRequiredApprovals": 6,
-      "purpose": "Long-term reserve vault funded only by approved transfers from the Operations Treasury."
+      "enabled": false,
+      "status": "NOT_DEPLOYED",
+      "signerCount": 0,
+      "approvalThreshold": 0,
+      "policy": "NOT_DEPLOYED",
+      "maximumRequiredApprovals": 0,
+      "reserveSweepEnabled": false,
+      "purpose": "No separate Reserve Treasury is currently deployed. Approved funds remain in Operations Treasury until a future explicit decision."
     },
     "signerRules": {
       "privateKeysInRepository": false,
@@ -526,7 +531,7 @@
       "xrpl": "XRPL native SignerList multisigning",
       "sui": "Sui native multisig"
     },
-    "routingRule": "Supported launch fee route -> same-chain Worldz Operations Treasury (5-of-10) -> approved reserve sweep -> same-chain Worldz Reserve Treasury (6-of-9). No cross-chain address is treated as universal custody."
+    "routingRule": "Supported Worldz fee allocation -> same-chain Worldz Operations Treasury (3-of-5). Reserve sweep disabled; no Reserve Treasury is currently deployed. No cross-chain address is treated as universal custody."
   },
   "trustOrbit": {
     "name": "Worldz Trust Orbit™",
