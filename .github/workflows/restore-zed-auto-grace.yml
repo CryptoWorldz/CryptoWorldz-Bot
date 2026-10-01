@@ -229,7 +229,6 @@ jobs:
           test -s src/dipshit-membership.js
           grep -Fq 'leaderboard' src/telegram.js
           grep -Fq 'wallet' src/telegram.js
-          grep -Fq 'governance' src/telegram.js
           grep -Fq 'kitty' src/telegram.js
           echo 'ZED_AUTO_GRACE_HISTORICAL_RUNTIME=PASS'
 
@@ -270,7 +269,7 @@ jobs:
           fi
           echo 'ZED_AUTO_GRACE_LIVE_CORE=PASS'
 
-      - name: Configure and prove Telegram legacy Command Centre
+      - name: Configure and prove ZED Command Centre
         shell: bash
         run: |
           set -euo pipefail
@@ -320,7 +319,7 @@ jobs:
             {"command":"raid","description":"Open Ronald Raider"},
             {"command":"next","description":"View the next Raid in line"},
             {"command":"raaiiidd","description":"View the newest active Raid"},
-            {"command":"missions","description":"View every active Raid"},
+            {"command":"raids","description":"View every active Raid"},
             {"command":"shillpoints","description":"View token Shill Rewards"},
             {"command":"zedsettings","description":"Open live Bot Settings"},
             {"command":"suite","description":"Open Worldz FullBuild Community Suite"},
@@ -346,8 +345,8 @@ jobs:
             {"command":"dm","description":"Send a private Worldz DM"},
             {"command":"worldzstyle","description":"View WorldzStyle messaging"},
             {"command":"kitty","description":"View the community SOL/USDC kitty"},
-            {"command":"governance","description":"View active community votes"},
-            {"command":"vote","description":"Vote on a governance proposal"},
+            {"command":"worldzvotes","description":"Open hourly token voting"},
+            {"command":"vote","description":"Vote for your favourite token this hour"},
             {"command":"impact","description":"Open the featured impact mission"},
             {"command":"donate","description":"Open the featured donation route"},
             {"command":"cancel","description":"Cancel wallet registration"},

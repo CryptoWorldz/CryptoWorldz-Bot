@@ -15,19 +15,15 @@ const SUPPORTED_CHAINS = Object.freeze([
 
 const FULLSCOPE_MODULES = Object.freeze([
   "watch", "trade", "invest", "liquidity", "lock", "vesting",
-  "alerts", "auto", "proof", "votes-centre", "govern"
+  "alerts", "auto", "proof", "votes-centre"
 ]);
 
 const VOTING_NAMESPACES = Object.freeze({
   popularity: Object.freeze({
     brand: "Worldz Votes Centre™",
-    purpose: "token-popularity",
-    commands: Object.freeze(["worldzvotes", "tokenvote", "worldztrending", "worldzrankings"])
-  }),
-  governance: Object.freeze({
-    brand: "WorldzGovern™",
-    purpose: "dao-governance",
-    commands: Object.freeze(["worldzgovern", "governproposals", "governvote", "governdelegate"])
+    purpose: "dex-token-popularity",
+    cadence: "one-vote-per-user-per-rolling-hour",
+    commands: Object.freeze(["worldzvotes", "vote", "tokenvote", "worldztrending", "worldzrankings"])
   })
 });
 
@@ -38,14 +34,13 @@ function normalizeChain(value) {
   return SUPPORTED_CHAINS.find((chain) => chain.key === key) || null;
 }
 
-function assertVotingSeparation() {
-  const popular = new Set(VOTING_NAMESPACES.popularity.commands);
-  const governance = new Set(VOTING_NAMESPACES.governance.commands);
-  for (const command of popular) {
-    if (governance.has(command)) throw new Error(`Voting namespace collision: /${command}`);
+function assertVotingRules() {
+  const commands = VOTING_NAMESPACES.popularity.commands;
+  if (!commands.includes("vote") || !commands.includes("tokenvote")) {
+    throw new Error("Worldz token voting must expose /vote and /tokenvote.");
   }
-  if (VOTING_NAMESPACES.popularity.purpose === VOTING_NAMESPACES.governance.purpose) {
-    throw new Error("Popularity and governance purposes must remain distinct.");
+  if (VOTING_NAMESPACES.popularity.cadence !== "one-vote-per-user-per-rolling-hour") {
+    throw new Error("Worldz token voting cadence must remain hourly.");
   }
   return true;
 }
@@ -97,7 +92,7 @@ function capacitySummary(activeByChain = {}) {
   });
 }
 
-assertVotingSeparation();
+assertVotingRules();
 
 module.exports = {
   MAX_TOKENS_PER_CHAIN,
@@ -108,5 +103,5 @@ module.exports = {
   validateTokenRegistration,
   buildActionIntent,
   capacitySummary,
-  assertVotingSeparation
+  assertVotingRules
 };

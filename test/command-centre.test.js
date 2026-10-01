@@ -10,9 +10,10 @@ test("gateway commands stay simple and ordered", () => {
 });
 
 test("each command centre section exposes exactly five core actions", () => {
-  for (const key of ["zed", "fullscope", "votes", "govern", "auto", "grace", "admin", "admingrace", "settings"]) {
+  for (const key of ["zed", "fullscope", "votes", "auto", "grace", "admin", "admingrace", "settings"]) {
     assert.equal(MENUS[key].rows.length, 5, `${key} must expose five core actions`);
   }
+  assert.equal(Boolean(MENUS.govern), false);
 });
 
 test("safety-critical emergency commands remain visible", () => {
@@ -20,16 +21,11 @@ test("safety-critical emergency commands remain visible", () => {
   assert.ok(MENUS.admingrace.rows.some((row) => row[1] === "/pauseall"));
 });
 
-
-test("popularity and governance are unmistakably separated in Command Centre", () => {
-  assert.ok(MENUS.votes.title.includes("POPULARITY"));
-  assert.ok(MENUS.govern.title.includes("GOVERNANCE"));
-  assert.ok(MENUS.votes.rows.some((row) => row[1] === "/tokenvote"));
-  assert.ok(MENUS.govern.rows.some((row) => row[1] === "/governvote"));
-  assert.equal(MENUS.votes.rows.some((row) => row[1] === "/governvote"), false);
-  assert.equal(MENUS.govern.rows.some((row) => row[1] === "/tokenvote"), false);
+test("Worldz Votes Centre exposes the hourly favourite-token vote", () => {
+  assert.match(MENUS.votes.title, /1 VOTE \/ HOUR/);
+  assert.ok(MENUS.votes.rows.some((row) => row[1] === "/vote"));
+  assert.equal(MENUS.votes.rows.some((row) => /govern/i.test(row[1])), false);
 });
-
 
 test("WorldzFullBuild has a first-party Command Centre route", () => {
   assert.equal(WEB_ROUTES.fullBuild, "https://launchpad.cryptoworldz.xyz/fullbuild/");

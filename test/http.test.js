@@ -48,9 +48,8 @@ test("Mini App page is served while protected data rejects unsigned browser IDs"
   assert.match(miniAppSource, /Copy.*Address/);
   assert.match(miniAppSource, /Copy Payment Request/);
   assert.match(miniAppSource, /navigator\.clipboard\.writeText/);
-  assert.match(miniAppSource, /governance-vote/);
-  assert.match(miniAppSource, /\/api\/mini\/governance\/\$\{vote\.dataset\.proposalId\}\/vote/);
-  assert.match(miniAppSource, /selected_option/);
+  assert.doesNotMatch(miniAppSource, /governance-vote|WorldzGovern|selected_option/);
+  assert.match(miniAppSource, /Hourly Token Votes|rolling 60 minutes|Raid/);
   assert.doesNotMatch(miniAppSource, /wallet\.href/);
 
   const protectedResponse = await fetch(`http://127.0.0.1:${port}/api/mini/bootstrap`, {

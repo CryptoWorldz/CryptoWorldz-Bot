@@ -72,14 +72,7 @@
       "brand": "Worldz Votes Centre™",
       "state": "INTEGRATION_PLANNED",
       "route": null,
-      "authority": "POPULARITY_ONLY"
-    },
-    {
-      "id": "govern",
-      "brand": "WorldzGovern™",
-      "state": "INTEGRATION_PLANNED",
-      "route": null,
-      "authority": "DAO_GOVERNANCE_ONLY"
+      "authority": "DEX_TOKEN_VOTE__ONE_PER_USER_PER_ROLLING_HOUR"
     },
     {
       "id": "linkz",

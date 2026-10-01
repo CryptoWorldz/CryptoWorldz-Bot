@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>WorldzFullScope™ | ZED LED Command Centre</title>
-<meta name="description" content="WorldzFullScope™ — multi-chain token monitoring, action preparation, locks, vesting, popularity voting and DAO governance inside the ZED LED Command Centre.">
+<meta name="description" content="WorldzFullScope™ — multi-chain token monitoring, action preparation, locks, vesting, hourly favourite-token voting inside the ZED LED Command Centre.">
 <link rel="canonical" href="https://launchpad.cryptoworldz.xyz/fullscope/">
 <link rel="stylesheet" href="/style.css">
 <style>
@@ -29,7 +29,7 @@ footer{margin-top:42px;border-top:1px solid var(--line);padding-top:20px;color:#
 <header class="hero">
 <div class="ey">ZED LED • WORLDZ COMMAND LAYER • FOUNDATION BUILD</div>
 <h1>WORLDZ<span>FULLSCOPE™</span></h1>
-<p class="lead">One multi-chain command layer for monitoring registered WorldzLaunchPad tokens, preparing finance actions, recording locks and vesting, producing WorldzProof receipts, ranking community favourites and operating DAO governance. The eight chain slots are architecture targets; each execution adapter remains separately gated until proven.</p>
+<p class="lead">One multi-chain command layer for monitoring registered WorldzLaunchPad tokens, preparing finance actions, recording locks and vesting, producing WorldzProof receipts, ranking favourite tokens with one vote per user per rolling hour. The eight chain slots are architecture targets; each execution adapter remains separately gated until proven.</p>
 <div class="actions">
 <a class="btn" href="https://t.me/CryptoWLDZ">OPEN TELEGRAM</a>
 <a class="btn alt" href="https://cryptoworldz.xyz/command-centre-max/">COMMAND CENTRE MAX™</a>
@@ -40,7 +40,7 @@ footer{margin-top:42px;border-top:1px solid var(--line);padding-top:20px;color:#
 <div class="stat"><b>8</b><span>target chain slots — execution gated individually</span></div>
 <div class="stat"><b>20</b><span>token slots per supported chain</span></div>
 <div class="stat"><b>160</b><span>initial FullScope token environments</span></div>
-<div class="stat"><b>2</b><span>strictly separated voting systems</span></div>
+<div class="stat"><b>1h</b><span>one favourite-token vote per user</span></div>
 </div>
 
 <section>
@@ -56,23 +56,14 @@ footer{margin-top:42px;border-top:1px solid var(--line);padding-top:20px;color:#
 </section>
 
 <section id="votes">
-<div class="ey">DO NOT MIX THESE</div><h2>Two different voting systems</h2>
-<div class="split">
+<div class="ey">DEX-STYLE TOKEN VOTING</div><h2>Vote for your favourite token every hour</h2>
 <article class="card votes">
 <span class="tag">🗳️ WORLDZ VOTES CENTRE™</span>
-<h3>POPULARITY ONLY</h3>
-<p>Favourite tokens, organic community votes, trending, raids, rankings and visibility.</p>
-<ul><li>/worldzvotes</li><li>/tokenvote SYMBOL [chain]</li><li>/worldztrending</li><li>/worldzrankings</li></ul>
-<p><strong>Cannot approve treasury, DAO or governance actions.</strong></p>
+<h3>ONE VOTE • ONE USER • EVERY 60 MINUTES</h3>
+<p>Favourite tokens, 1-hour trending, rankings, raids and visibility. Sponsored exposure is stored separately and never counted as a vote.</p>
+<ul><li>/worldzvotes</li><li>/vote SYMBOL [chain]</li><li>/tokenvote SYMBOL [chain]</li><li>/worldztrending</li><li>/worldzrankings</li></ul>
+<p><strong>Pure crypto token voting — no DAO or treasury control.</strong></p>
 </article>
-<article class="card govern" id="govern">
-<span class="tag">🏛️ WORLDZGOVERN™</span>
-<h3>DAO GOVERNANCE ONLY</h3>
-<p>Proposals, ecosystem rules, treasury decisions, grants, quorum, delegation architecture and future timelocked execution.</p>
-<ul><li>/worldzgovern</li><li>/governproposals</li><li>/governvote ID OPTION</li><li>/governdelegate</li></ul>
-<p><strong>Cannot increase a token's popularity ranking.</strong></p>
-</article>
-</div>
 </section>
 
 <section>

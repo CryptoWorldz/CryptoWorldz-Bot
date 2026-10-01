@@ -12,7 +12,8 @@
   <link rel="stylesheet" href="/miniapp/contributions.css?v=1.0.0">
   <link rel="stylesheet" href="/miniapp/worldzcast.css?v=1.0.0">
   <link rel="stylesheet" href="/miniapp/inbox.css?v=1.0.0">
-  <link rel="stylesheet" href="/miniapp/legend-v8.css?v=1.0.0">\n  <link rel="stylesheet" href="/miniapp/max.css?v=1.0.0">
+  <link rel="stylesheet" href="/miniapp/legend-v8.css?v=1.0.0">
+  <link rel="stylesheet" href="/miniapp/max.css?v=1.0.0">
   <style>
     .kitty-card{overflow:hidden}
     .kitty-address{display:flex;flex-direction:column;gap:7px;margin:16px 0 4px;padding:13px 15px;background:rgba(21,9,35,.8);border:1px solid var(--line);border-radius:14px;min-width:0}
@@ -78,10 +79,9 @@
       <p class="splash-line">Learn • Research • Interact • Teach • Build • Prove — one source-first Command Centre for CryptoWorldz.</p>
       <div class="system-orbit" aria-label="Command Centre system leaders">
         <div><b>ZED</b><small>Learn • Guide</small></div>
-        <div><b>FULLSCOPE™</b><small>Watch • Vote • Govern</small></div>
+        <div><b>FULLSCOPE™</b><small>Watch • Vote • Rank</small></div>
         <div><b>AUTO</b><small>Ability • Economics</small></div>
         <div><b>G.R.A.C.E.</b><small>Admin • Teach</small></div>
-        <div><b>RECAP</b><small>Research • Explain</small></div>
         <div><b>WORLDZLAUNCHPAD™</b><small>Build • Prove</small></div>
       </div>
       <button id="enter-command-centre" class="splash-enter" type="button">Enter Command Centre</button>
@@ -114,8 +114,9 @@
       </section>
 
       <section id="home" class="screen active"><div id="max-home-card"></div><div id="dipshit-worldz-dude"></div><div id="fullscope-home-card"></div><div id="experience-launchpad"></div><div id="referral-progress"></div><div id="current-mission"></div><div id="home-rewards"></div></section>
-      <section id="missions" class="screen"><div class="section-title"><h2>🚀 Active Raaiiidds</h2></div><div id="mission-list"></div></section>
-      <section id="zed-guide" class="screen screen-experience"><div class="section-title"><h2>🤖 Ask ZED</h2></div><div id="zed-guide-root"></div></section>\n      <section id="max" class="screen screen-experience"><div class="section-title"><h2>🧠 Command Centre MAX™</h2></div><div id="max-root"></div></section>
+      <section id="raids" class="screen"><div class="section-title"><h2>🚀 Active Raids</h2></div><div id="mission-list"></div></section>
+      <section id="zed-guide" class="screen screen-experience"><div class="section-title"><h2>🤖 Ask ZED</h2></div><div id="zed-guide-root"></div></section>
+      <section id="max" class="screen screen-experience"><div class="section-title"><h2>🧠 Command Centre MAX™</h2></div><div id="max-root"></div></section>
       <section id="create" class="screen screen-experience"><div class="section-title"><h2>🎨 Create a Raaiiidd</h2></div><div id="creator-root"></div></section>
       <section id="heroes" class="screen screen-experience"><div class="section-title"><h2>🦸 Real-World Heroes</h2></div><div id="heroes-root"></div></section>
       <section id="inbox" class="screen screen-experience"><div class="section-title"><h2>📥 Worldz Inbox™</h2></div><div id="worldz-inbox-root"></div></section>
@@ -127,15 +128,13 @@
       <section id="kitty" class="screen"><div class="section-title"><h2>💜 Community Kitty</h2></div><div id="kitty-list"></div></section>
       <section id="fullscope" class="screen">
         <div class="section-title"><h2>🌐 WorldzFullScope™</h2></div>
-        <article class="panel"><p class="eyebrow">ZED LED • MULTI-CHAIN COMMAND LAYER</p><h3>Up to 20 tokens on every supported WorldzLaunchPad chain.</h3><p>Watch activity, prepare controlled actions, track locks and vesting, and route proof through one Command Centre.</p><div class="form-row"><button class="button" type="button" data-open="worldz-votes">🗳️ Votes Centre</button><button class="button secondary" type="button" data-open="governance">🏛️ WorldzGovern</button></div><a class="button secondary" href="https://launchpad.cryptoworldz.xyz/fullscope/" target="_blank" rel="noopener">Open FullScope Surface ↗</a></article>
+        <article class="panel"><p class="eyebrow">ZED LED • MULTI-CHAIN COMMAND LAYER</p><h3>Up to 20 tokens on every supported WorldzLaunchPad chain.</h3><p>Watch activity, prepare controlled actions, track locks and vesting, and route proof through one Command Centre.</p><button class="button" type="button" data-open="worldz-votes">🗳️ Worldz Token Votes</button><a class="button secondary" href="https://launchpad.cryptoworldz.xyz/fullscope/" target="_blank" rel="noopener">Open FullScope Surface ↗</a></article>
         <article class="panel security"><b>Signing boundary</b><p>FullScope prepares and proves actions. Wallet signatures stay external and Telegram stores no private keys.</p></article>
       </section>
       <section id="worldz-votes" class="screen">
         <div class="section-title"><h2>🗳️ Worldz Votes Centre™</h2></div>
-        <article class="panel"><p class="eyebrow">POPULARITY ONLY</p><h3>Favourite Tokens • Trending • Visibility • Rankings</h3><p>Organic token-popularity votes live here. Sponsored exposure is separate. These votes can never approve treasury, DAO or governance actions.</p><p><b>Telegram commands:</b><br>/worldzvotes<br>/tokenvote SYMBOL [chain]<br>/worldztrending<br>/worldzrankings</p></article>
-        <button class="button secondary" type="button" data-open="governance">Open WorldzGovern™ instead</button>
+        <article class="panel"><p class="eyebrow">DEX TOKEN VOTING • HOURLY</p><h3>Vote for your Favourite Token — once per hour</h3><p>One Telegram user gets one favourite-token vote every rolling 60 minutes. The 1-hour leaderboard drives Worldz trending and rankings. Sponsored exposure stays separate from votes.</p><p><b>Telegram commands:</b><br>/vote SYMBOL [chain]<br>/tokenvote SYMBOL [chain]<br>/worldztrending<br>/worldzrankings</p></article>
       </section>
-      <section id="governance" class="screen"><div class="section-title"><h2>🏛️ WorldzGovern™ — DAO Governance</h2></div><div class="panel security"><b>GOVERNANCE ONLY</b><p>Proposals and governance decisions live here. Governance votes never affect Worldz Votes Centre™ popularity rankings.</p></div><div id="governance-list"></div></section>
       <section id="admin" class="screen"><div class="section-title"><h2>🛡️ Admin Centre</h2></div><div id="admin-panel"></div><div id="worldzcast-root"></div></section>
       <section id="admin-review" class="screen screen-experience"><div class="section-title"><h2>✅ Human Review Queue</h2></div><div id="admin-review-root"></div></section>
     </div>
@@ -143,7 +142,7 @@
 
   <nav id="nav" class="nav hidden" aria-label="Command Centre navigation">
     <button data-screen="home" class="active"><span>⌂</span>Home</button>
-    <button data-screen="missions"><span>🚀</span>Missions</button>
+    <button data-screen="raids"><span>🚀</span>Raids</button>
     <button data-screen="max"><span>🧠</span>MAX</button>
     <button data-screen="zed-guide"><span>🤖</span>ZED</button>
     <button data-screen="inbox"><span>📥</span>Inbox</button>
@@ -153,7 +152,8 @@
   <script src="/miniapp/dipshit.js?v=1.0.0" defer></script>
   <script src="/miniapp/x-pages.js?v=1.0.1" defer></script>
   <script src="/miniapp/contributions.js?v=1.0.0" defer></script>
-  <script src="/miniapp/legend-v8.js?v=1.0.0" defer></script>\n  <script src="/miniapp/max.js?v=1.0.0" defer></script>
+  <script src="/miniapp/legend-v8.js?v=1.0.0" defer></script>
+  <script src="/miniapp/max.js?v=1.0.0" defer></script>
   <script src="/miniapp/worldzcast.js?v=1.0.0" defer></script>
   <script src="/miniapp/inbox.js?v=1.0.0" defer></script>
   <script src="/miniapp/community-suite.js?v=1.0.0" defer></script>

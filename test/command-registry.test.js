@@ -4,10 +4,9 @@ const { allRegisteredCommandNames, groupsForRole } = require("../src/command-reg
 
 const REQUIRED_RUNTIME_COMMANDS = [
   "zedstart","zed","help","commands","commandtree","directory","acknowledgements","supportjay",
-  "start","register","profile","rewards","leaderboard","raaiiidd","missions","wallet","cancel","kitty","impact","donate","points",
+  "start","register","profile","rewards","leaderboard","raaiiidd","raids","wallet","cancel","kitty","impact","donate","points",
   "fullscope","worldzfullbuild","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
-  "worldzvotes","tokenvote","worldztrending","worldzrankings",
-  "worldzgovern","governproposals","governvote","governdelegate",
+  "worldzvotes","vote","tokenvote","worldztrending","worldzrankings",
   "raid","next","raidprogress","stopraid","admin","admingrace","zedsettings","newmission","editmission","endmission","pending","approve","reject","member","admins","permissions","setkitty","setrole","setpermission","setpartner","broadcast","stats","activity",
   "causes","cause","cause_add","shilllink","shill","shillpoints","pendingshills","approveshill","rejectshill","referrals","rewardplan","website","websites","worldzlinks","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
   "workstart","workstop","evidence","workevidence","rewardbudget","specialreward","rewardasset","fundingplan","funded","contribute","walletplan","setprojectwallet","investmentfunded",
@@ -21,6 +20,9 @@ const REQUIRED_RUNTIME_COMMANDS = [
 test("Command Centre registry contains the audited runtime and gateway command inventory", () => {
   const names = new Set(allRegisteredCommandNames());
   for (const command of REQUIRED_RUNTIME_COMMANDS) assert.ok(names.has(command), `missing /${command}`);
+  for (const retired of ["missions","worldzgovern","governproposals","governvote","governdelegate"]) {
+    assert.equal(names.has(retired), false, `retired /${retired} leaked into registry`);
+  }
 });
 
 test("member command guide cannot expose protected controls", () => {
@@ -37,18 +39,23 @@ test("owner command tree includes every role layer", () => {
   }
 });
 
-
-test("Worldz Votes Centre and WorldzGovern commands live in separate registry groups", () => {
-  const groups = groupsForRole("member");
-  const votes = groups.find((group) => group.key === "worldz-votes-centre");
-  const govern = groups.find((group) => group.key === "worldz-govern");
-  assert.ok(votes);
-  assert.ok(govern);
-  const voteNames = new Set(votes.commands.map((item) => item.command));
-  const governNames = new Set(govern.commands.map((item) => item.command));
-  for (const command of voteNames) assert.equal(governNames.has(command), false, command);
+test("Ronald Raider is exposed as RAIDS, not Missions", () => {
+  const raids = groupsForRole("member").find((group) => group.key === "raids");
+  assert.ok(raids);
+  const names = new Set(raids.commands.map((item) => item.command));
+  for (const command of ["raid","next","raaiiidd","raids","creator"]) assert.ok(names.has(command), command);
+  assert.equal(names.has("missions"), false);
 });
 
+test("Worldz Votes Centre is the only public voting group", () => {
+  const groups = groupsForRole("member");
+  const votes = groups.find((group) => group.key === "worldz-votes-centre");
+  assert.ok(votes);
+  assert.equal(Boolean(groups.find((group) => group.key === "worldz-govern")), false);
+  const names = new Set(votes.commands.map((item) => item.command));
+  assert.ok(names.has("vote"));
+  assert.ok(names.has("tokenvote"));
+});
 
 test("Community Suite command groups expose member tools without leaking owner controls", () => {
   const member = groupsForRole("member");

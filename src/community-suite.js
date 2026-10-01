@@ -119,7 +119,7 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
           "🌐 WORLDZ FULLBUILD™ COMMUNITY SUITE",
           "",
           "Operations Bot • Custom AI Community Bot • Full 2-Bot Suite",
-          "REX security • ALICE support • raids • shills • scanning • market alerts • votes • governance • social • inbox • analytics • webhooks",
+          "REX security • ALICE support • raids • shills • scanning • market alerts • hourly token votes • social • inbox • analytics • webhooks",
           "",
           "Add the Worldz operations bot to a Telegram group and run /suite there."
         ].join("\n"));

@@ -136,13 +136,12 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
       }
     };
 
-    const [profile, missions, leaderboard, rewards, history, governance, adminAccess, treasury] = await Promise.all([
+    const [profile, missions, leaderboard, rewards, history, adminAccess, treasury] = await Promise.all([
       safe("profile", repository.getMemberDetails(telegramId), null),
       safe("missions", repository.listActiveMissions(), []),
       safe("leaderboard", repository.getLeaderboard(), []),
       safe("rewards", repository.getRewards(telegramId, 10), []),
       safe("mission_history", repository.getMissionHistory(telegramId, 25), []),
-      safe("governance", repository.listGovernanceProposals(20, telegramId), []),
       safe("admin_access", repository.getAdminAccess(telegramId, config.adminTelegramIds, config.ownerTelegramId), {
         authorized: String(telegramId) === String(config.ownerTelegramId),
         role: String(telegramId) === String(config.ownerTelegramId) ? "owner" : "public",
@@ -176,7 +175,6 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
       leaderboard,
       rewards,
       mission_history: history,
-      governance,
       admin: Boolean(adminAccess && adminAccess.authorized),
       admin_access: adminAccess,
       treasury
@@ -373,20 +371,7 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
     } catch (error) { console.error("Mini App mission submission failed", { name: error && error.name || "Error" }); return res.status(500).json({ ok: false, error: "submission_failed" }); }
   });
 
-  app.post("/api/mini/governance/:id/vote", authenticateMiniApp, async (req, res) => {
-    try {
-      const proposalId = Number(req.params.id);
-      const selectedOption = String(req.body && req.body.selected_option || "");
-      if (!Number.isSafeInteger(proposalId) || proposalId < 1 || !/^\d+$/.test(selectedOption)) return res.status(400).json({ ok: false, error: "invalid_vote" });
-      const result = await repository.castGovernanceVote(proposalId, req.telegramUser.id, selectedOption);
-      const status = { unregistered: 403, not_found: 404, closed: 409, invalid_option: 400, duplicate: 409 }[result.outcome];
-      if (status) return res.status(status).json({ ok: false, error: result.outcome === "duplicate" ? "already_voted" : result.outcome });
-      return res.status(201).json({ ok: true, result });
-    } catch (error) {
-      console.error("Governance vote failed", { name: error && error.name || "Error" });
-      return res.status(500).json({ ok: false, error: "vote_failed" });
-    }
-  });
+
 
   app.get("/api/mini/kitty/qr", authenticateMiniApp, async (req, res) => {
     try {
@@ -445,7 +430,7 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
   app.post("/api/mini/owner/admins", authenticateMiniApp, async (req, res) => {
     if (String(req.telegramUser.id) !== String(config.ownerTelegramId)) return res.status(403).json({ ok: false, error: "owner_required" });
     const telegramId = Number(req.body && req.body.telegram_id); const role = String(req.body && req.body.role || ""); const status = String(req.body && req.body.status || "active");
-    if (!Number.isSafeInteger(telegramId) || telegramId < 1 || String(telegramId) === String(config.ownerTelegramId) || !["admin","moderator","recap_manager","partner_manager","treasury_manager"].includes(role) || !["active","disabled"].includes(status)) return res.status(400).json({ ok: false, error: "invalid_admin_update" });
+    if (!Number.isSafeInteger(telegramId) || telegramId < 1 || String(telegramId) === String(config.ownerTelegramId) || !["admin","moderator","partner_manager","treasury_manager"].includes(role) || !["active","disabled"].includes(status)) return res.status(400).json({ ok: false, error: "invalid_admin_update" });
     try { const admin = status === "active" ? await repository.setAdminRole(telegramId, role, req.telegramUser.id) : await repository.setAdmin(telegramId, "disabled", req.telegramUser.id); return res.json({ ok: true, admin }); } catch { return res.status(500).json({ ok: false, error: "admin_update_failed" }); }
   });
 

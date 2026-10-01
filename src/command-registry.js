@@ -22,31 +22,26 @@ const COMMAND_GROUPS = Object.freeze([
     ["worldzlock", "Open the chain-aware lock centre"],
     ["worldzvest", "Open the chain-aware vesting centre"]
   ]),
-  group("worldz-votes-centre", "🗳️ Worldz Votes Centre™ • POPULARITY ONLY", "member", [
-    ["worldzvotes", "Open token popularity voting and visibility"],
-    ["tokenvote", "Cast an organic popularity vote for a registered token"],
+  group("worldz-votes-centre", "🗳️ Worldz Votes Centre™ • DEX TOKEN VOTING • 1 VOTE / HOUR", "member", [
+    ["worldzvotes", "Open hourly favourite-token voting and rankings"],
+    ["vote", "Vote for one favourite registered token this hour"],
+    ["tokenvote", "Alias for the hourly favourite-token vote"],
     ["worldztrending", "View the fastest-rising organic popularity ranking"],
     ["worldzrankings", "View Worldz popularity rankings"]
   ]),
-  group("worldz-govern", "🏛️ WorldzGovern™ • DAO GOVERNANCE ONLY", "member", [
-    ["worldzgovern", "Open DAO and ecosystem governance"],
-    ["governproposals", "View active WorldzGovern proposals"],
-    ["governvote", "Cast a vote on a WorldzGovern proposal"],
-    ["governdelegate", "View WorldzGovern delegation status"]
-  ]),
   group("legend", "🤖 ZED • Legend Profile", "member", [
-    ["zed", "Open ZED profile, wallet and mission controls"], ["start", "Start or reopen ZED"],
+    ["zed", "Open ZED profile, wallet and Raid controls"], ["start", "Start or reopen ZED"],
     ["register", "Register as a CryptoWorldz Legend"], ["profile", "View your Legend profile"],
     ["points", "View Legend Points"], ["rewards", "View reward activity"], ["leaderboard", "View the leaderboard"],
     ["wallet", "Register or view your public wallet association"], ["cancel", "Cancel the current guided action"],
     ["legendstatus", "View Legend recognition status"], ["specialtiers", "View Special Request tiers"],
     ["uniquelegend", "Apply for Unique Legend review"], ["boostshill", "Boost an eligible referred Legend"]
   ]),
-  group("missions", "🤠 Ronald Raider • Raids & Missions", "member", [
+  group("raids", "🤠 Ronald Raider • RAIDS", "member", [
     ["raid", "Open Ronald Raider or view the live Raid"],
     ["next", "View the next Raid lined up"],
-    ["raaiiidd", "Open the current Ronald Raider mission"],
-    ["missions", "List active Raid missions"],
+    ["raaiiidd", "Open the current Ronald Raider Raid"],
+    ["raids", "List active Ronald Raider Raids"],
     ["creator", "Open ZED Raid Creator for post, artwork, preview and Admin review"]
   ]),
   group("community", "💜 Community, Heroes, Causes & Social Directory", "member", [

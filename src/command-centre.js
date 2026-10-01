@@ -4,7 +4,7 @@ const BOT_MENU_COMMANDS = [
   { command: "zedstart", description: "Open Command Centre MAX" },
   { command: "max", description: "Learn, research, interact and teach with MAX" },
   { command: "fullscope", description: "Open WorldzFullScope multi-chain command layer" },
-  { command: "zed", description: "Zed profile, wallet, missions and settings" },
+  { command: "zed", description: "Zed profile, wallet, raids and settings" },
   { command: "auto", description: "Open Auto finance controls" },
   { command: "grace", description: "Open Grace Auto Post controls" },
   { command: "admin", description: "Open Admin controls" },
@@ -31,26 +31,16 @@ const MENUS = {
       ["🪙 Token Registry", "/fullscopetokens"],
       ["📡 WorldzWatch", "/worldzwatch"],
       ["🗳️ Votes Centre", "/worldzvotes"],
-      ["🏛️ WorldzGovern", "/worldzgovern"]
+      ["⏱️ Hourly Token Vote", "/vote"]
     ]
   },
   votes: {
-    title: "🗳️ WORLDZ VOTES CENTRE™ — POPULARITY",
+    title: "🗳️ WORLDZ VOTES CENTRE™ — DEX TOKEN VOTING • 1 VOTE / HOUR",
     rows: [
       ["🔥 Trending", "/worldztrending"],
       ["🏆 Rankings", "/worldzrankings"],
-      ["🗳️ Cast Token Vote", "/tokenvote"],
+      ["🗳️ Vote Favourite Token", "/vote"],
       ["🪙 Registered Tokens", "/fullscopetokens"],
-      ["🌐 FullScope", "/fullscope"]
-    ]
-  },
-  govern: {
-    title: "🏛️ WORLDZGOVERN™ — DAO GOVERNANCE",
-    rows: [
-      ["🏛️ Governance Home", "/worldzgovern"],
-      ["📜 Proposals", "/governproposals"],
-      ["✅ Cast Governance Vote", "/governvote"],
-      ["🤝 Delegation", "/governdelegate"],
       ["🌐 FullScope", "/fullscope"]
     ]
   },
@@ -134,10 +124,7 @@ function mainKeyboard() {
         [{ text: "🧠 OPEN COMMAND CENTRE MAX™", web_app: { url: WEB_ROUTES.miniApp } }],
         [{ text: "🌐 WORLDZFULLSCOPE™", callback_data: "cc:menu:fullscope" }],
         [{ text: "📥 WORLDZ INBOX™", web_app: { url: `${WEB_ROUTES.miniApp}#inbox` } }],
-        [
-          { text: "🗳️ VOTES CENTRE", callback_data: "cc:menu:votes" },
-          { text: "🏛️ WORLDZGOVERN", callback_data: "cc:menu:govern" }
-        ],
+        [{ text: "🗳️ WORLDZ TOKEN VOTES • HOURLY", callback_data: "cc:menu:votes" }],
         [
           { text: "🤖 ZED", callback_data: "cc:menu:zed" },
           { text: "💎 AUTO", callback_data: "cc:menu:auto" }
@@ -278,10 +265,10 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
     "🧠 CryptoWorldz Command Centre MAX™",
     "",
     "LEARN • RESEARCH • INTERACT • TEACH • BUILD • PROVE",
-    "ZED guides. Ronald Raider runs live Raid queues and points submissions. Shill Rewards tracks verified token sharing. WorldzFullScope watches the supported multi-chain token universe. AUTO explains controlled finance workflows. G.R.A.C.E. coordinates approved communication. RECAP explains verified activity. WorldzLaunchPad builds and proves launches.",
+    "ZED leads the Command Centre. Ronald Raider runs live Raid queues and points submissions. Shill Rewards tracks verified token sharing. WorldzFullScope watches the supported multi-chain token universe and hourly Worldz token votes. AUTO explains controlled finance workflows. G.R.A.C.E. coordinates approved communication. MAX keeps reviewed knowledge clear. WorldzLaunchPad builds and proves launches.",
     "",
     "Gateway commands:",
-    "/zedstart • /worldzfullbuild • /fullscope • /worldzvotes • /worldzgovern • /commands • /commandtree",
+    "/zedstart • /worldzfullbuild • /fullscope • /worldzvotes • /vote • /commands • /commandtree",
     "",
     "You do not need to memorise the full command list."
   ].join("\n"), mainKeyboard());
@@ -416,7 +403,7 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
       return;
     }
 
-    const menuMatch = data.match(/^cc:menu:(zed|fullscope|votes|govern|auto|grace|admin)$/);
+    const menuMatch = data.match(/^cc:menu:(zed|fullscope|votes|auto|grace|admin)$/);
     if (menuMatch) {
       const key = menuMatch[1];
       if (["grace", "admin", "settings"].includes(key) && !(await isAdmin(actor))) {

@@ -13,7 +13,6 @@ const {
   isDoneClaim,
   isDuplicateError,
   isValidSolanaAddress,
-  normalizeGovernanceOption,
   parseBoolean,
   parseEditMissionPayload,
   parseIdSet,
@@ -47,18 +46,10 @@ test("wallet shortening does not expose the whole address", () => {
 test("admin roles receive least-privilege defaults", () => {
   assert.equal(permissionsForRole("admin").has("submission.approve"), true);
   assert.equal(permissionsForRole("moderator").has("submission.approve"), false);
-  assert.equal(permissionsForRole("recap_manager").has("recap.publish"), true);
+  assert.equal(permissionsForRole("recap_manager").size, 0);
   assert.equal(permissionsForRole("partner_manager").has("mission.create"), true);
   assert.equal(permissionsForRole("treasury_manager").has("treasury.reconcile"), true);
   assert.equal(permissionsForRole("unknown").size, 0);
-});
-
-test("Governance choices accept only numbered proposal options", () => {
-  assert.equal(normalizeGovernanceOption("1", 3), "1");
-  assert.equal(normalizeGovernanceOption(3, 3), "3");
-  assert.equal(normalizeGovernanceOption("0", 3), null);
-  assert.equal(normalizeGovernanceOption("4", 3), null);
-  assert.equal(normalizeGovernanceOption("Shared", 3), null);
 });
 
 test("admin ID parsing rejects non-numeric entries", () => {
@@ -72,7 +63,7 @@ test("unauthorized users fail the admin check", () => {
   assert.equal(isAdmin(222, new Set(["111"])), false);
 });
 
-test("mission formatting includes ID, reward, link and DONE instruction", () => {
+test("Raid formatting includes ID, reward, link and DONE instruction", () => {
   const formatted = formatMission({
     id: 12,
     title: "Support CryptoWorldz",
@@ -81,13 +72,13 @@ test("mission formatting includes ID, reward, link and DONE instruction", () => 
     link: "https://x.com/CryptoWorldzX",
     instructions: "Like and repost"
   });
-  assert.match(formatted, /Mission #12/);
+  assert.match(formatted, /Raid #12/);
   assert.match(formatted, /30 Legend Points/);
   assert.match(formatted, /https:\/\/x\.com\/CryptoWorldzX/);
   assert.match(formatted, /✅ DONE/);
 });
 
-test("mission list preserves newest-first input order", () => {
+test("Raid list preserves newest-first input order", () => {
   const formatted = formatMissionList([
     { id: 2, title: "Newest", reward_points: 5 },
     { id: 1, title: "Older", reward_points: 3 }

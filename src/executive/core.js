@@ -1,7 +1,6 @@
 const SCOPED_ADMIN_ROLES = Object.freeze([
   "admin",
   "moderator",
-  "recap_manager",
   "partner_manager",
   "treasury_manager",
   "grace_manager"
@@ -15,7 +14,6 @@ const EXECUTIVE_PERMISSIONS = Object.freeze([
   "submission.approve",
   "submission.reject",
   "communication.broadcast",
-  "recap.publish",
   "member.view",
   "report.view",
   "treasury.view",

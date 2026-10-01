@@ -4,7 +4,7 @@ const {
   MAX_TOKENS_PER_CHAIN,
   SUPPORTED_CHAINS,
   VOTING_NAMESPACES,
-  assertVotingSeparation,
+  assertVotingRules,
   capacitySummary
 } = require("../src/fullscope/core");
 
@@ -14,10 +14,12 @@ test("WorldzFullScope supports eight current launchpad chains at twenty token sl
   assert.equal(SUPPORTED_CHAINS.length * MAX_TOKENS_PER_CHAIN, 160);
 });
 
-test("Worldz Votes Centre and WorldzGovern never share a command namespace", () => {
-  assert.equal(assertVotingSeparation(), true);
+test("Worldz Votes Centre is hourly DEX-style token voting only", () => {
+  assert.equal(assertVotingRules(), true);
   assert.equal(VOTING_NAMESPACES.popularity.brand, "Worldz Votes Centre™");
-  assert.equal(VOTING_NAMESPACES.governance.brand, "WorldzGovern™");
+  assert.equal(VOTING_NAMESPACES.popularity.cadence, "one-vote-per-user-per-rolling-hour");
+  assert.ok(VOTING_NAMESPACES.popularity.commands.includes("vote"));
+  assert.equal("governance" in VOTING_NAMESPACES, false);
 });
 
 test("capacity summary enforces twenty slots per chain", () => {

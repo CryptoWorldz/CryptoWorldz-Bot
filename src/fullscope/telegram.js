@@ -79,21 +79,22 @@ function registerFullScopeTelegramHandlers({ bot, repository, supabase }) {
 
   async function openVotesCentre(msg) {
     try {
-      const rows = await readLeaderboard("votes_24h", 10);
+      const rows = await readLeaderboard("votes_1h", 10);
       return send(msg, [
         "🗳️ WORLDZ VOTES CENTRE™",
-        "POPULARITY • TRENDING • VISIBILITY • RANKINGS",
+        "DEX TOKEN VOTING • ONE VOTE PER USER PER HOUR",
         "",
-        "This is community popularity voting. It cannot authorize treasury, DAO or governance actions.",
+        "Vote for your favourite registered token once every rolling 60 minutes.",
         "",
-        "🔥 24-HOUR ORGANIC LEADERBOARD",
-        formatLeaderboard(rows, "votes_24h"),
+        "🔥 1-HOUR VOTE LEADERBOARD",
+        formatLeaderboard(rows, "votes_1h"),
         "",
-        "Cast: /tokenvote SYMBOL [chain]",
+        "Vote: /vote SYMBOL [chain]",
+        "Alias: /tokenvote SYMBOL [chain]",
         "Trend: /worldztrending",
         "Rankings: /worldzrankings",
         "",
-        "Sponsored exposure is stored separately and never counted as an organic vote."
+        "Sponsored exposure is stored separately and never counted as a token vote."
       ].join("\n"));
     } catch (error) {
       safeError("votes-centre", error);
@@ -101,39 +102,7 @@ function registerFullScopeTelegramHandlers({ bot, repository, supabase }) {
     }
   }
 
-  async function openGovern(msg) {
-    try {
-      const proposals = await repository.listGovernanceProposals(20, msg.from.id);
-      const active = (proposals || []).filter((proposal) => ["active", "open"].includes(proposal.status));
-      if (!active.length) {
-        return send(msg, [
-          "🏛️ WORLDZGOVERN™",
-          "DAO • PROPOSALS • TREASURY • RULES • GOVERNANCE",
-          "",
-          "No active governance proposals right now.",
-          "",
-          "WorldzGovern™ is completely separate from Worldz Votes Centre™ popularity rankings."
-        ].join("\n"));
-      }
-      const rows = active.map((proposal) => {
-        const choices = (Array.isArray(proposal.options) ? proposal.options : [])
-          .map((option, index) => `${index + 1}. ${option} — ${proposal.vote_counts[String(index + 1)] || 0}`)
-          .join("\n");
-        return `🏛️ Proposal #${proposal.id}\n${proposal.title}\n${choices}\nTotal governance votes: ${proposal.total_votes}\nCast: /governvote ${proposal.id} OPTION`;
-      });
-      return send(msg, [
-        "🏛️ WORLDZGOVERN™",
-        "DAO • PROPOSALS • TREASURY • RULES • GOVERNANCE",
-        "",
-        ...rows,
-        "",
-        "Governance results never increase token popularity rankings."
-      ].join("\n\n"));
-    } catch (error) {
-      safeError("govern", error);
-      return send(msg, "❌ WorldzGovern™ could not load governance proposals.");
-    }
-  }
+
 
   bot.onText(/^\/fullscope(?:@\w+)?$/, async (msg) => {
     let status = "Registry status unavailable.";
@@ -160,8 +129,8 @@ function registerFullScopeTelegramHandlers({ bot, repository, supabase }) {
       "⛓️ /fullscopechains — supported chains",
       "🔐 /worldzlock — lock centre",
       "⏳ /worldzvest — vesting centre",
-      "🗳️ /worldzvotes — POPULARITY ONLY",
-      "🏛️ /worldzgovern — GOVERNANCE ONLY",
+      "🗳️ /worldzvotes — HOURLY TOKEN VOTING",
+      "🗳️ /vote SYMBOL [chain] — favourite-token vote",
       "",
       "Financial actions are transaction-intent first: simulate → review → external wallet signature → proof. Telegram stores no private keys."
     ].join("\n"));
@@ -253,17 +222,17 @@ function registerFullScopeTelegramHandlers({ bot, repository, supabase }) {
     }
   });
 
-  bot.onText(/^\/tokenvote(?:@\w+)?(?:\s+([A-Za-z0-9._-]+))?(?:\s+([A-Za-z0-9._-]+))?$/, async (msg, match) => {
+  bot.onText(/^\/(?:vote|tokenvote)(?:@\w+)?(?:\s+([A-Za-z0-9._-]+))?(?:\s+([A-Za-z0-9._-]+))?$/, async (msg, match) => {
     const symbol = String(match && match[1] || "").trim().toUpperCase();
     const chain = String(match && match[2] || "").trim().toLowerCase();
-    if (!symbol) return send(msg, "🗳️ Use: /tokenvote SYMBOL [chain]\nExample: /tokenvote PNEX solana");
+    if (!symbol) return send(msg, "🗳️ Use: /vote SYMBOL [chain]\nExample: /vote PNEX solana");
     try {
       const matches = await resolveToken(symbol, chain);
       if (!matches.length) return send(msg, `❌ ${symbol} is not registered in WorldzFullScope™${chain ? ` on ${chain}` : ""}.`);
       if (matches.length > 1) {
         return send(msg, [
           `⚠️ ${symbol} exists on more than one chain.`,
-          ...matches.map((row) => `/tokenvote ${symbol} ${row.chain_key}`)
+          ...matches.map((row) => `/vote ${symbol} ${row.chain_key}`)
         ].join("\n"));
       }
       const token = matches[0];
@@ -272,16 +241,15 @@ function registerFullScopeTelegramHandlers({ bot, repository, supabase }) {
         telegram_id: String(msg.from.id),
         verification_state: "telegram"
       });
-      if (error && error.code === "23505") {
-        return send(msg, `⚠️ You already cast today's organic popularity vote for ${token.symbol} on ${token.chain_key.toUpperCase()}.`);
+      if (error && (error.code === "P0001" || String(error.message || "").includes("worldz_hourly_vote_limit"))) {
+        return send(msg, "⏳ You have already used your Worldz token vote this hour. Your next favourite-token vote unlocks 60 minutes after your last vote.");
       }
       if (error) throw error;
       return send(msg, [
-        "✅ WORLDZ POPULARITY VOTE RECORDED",
+        "✅ WORLDZ TOKEN VOTE RECORDED",
         `${token.name} • $${token.symbol} • ${token.chain_key.toUpperCase()}`,
         "",
-        "This affects Worldz Votes Centre™ popularity only.",
-        "It gives ZERO authority in WorldzGovern™."
+        "Your one-hour vote is recorded. You can vote again 60 minutes after this vote."
       ].join("\n"));
     } catch (error) {
       safeError("token-vote", error);
@@ -289,38 +257,7 @@ function registerFullScopeTelegramHandlers({ bot, repository, supabase }) {
     }
   });
 
-  bot.onText(/^\/worldzgovern(?:@\w+)?$/, openGovern);
-  bot.onText(/^\/governproposals(?:@\w+)?$/, openGovern);
-  bot.onText(/^\/governvote(?:@\w+)?(?:\s+(\d+)\s+(\d+))?$/, async (msg, match) => {
-    const proposalId = Number(match && match[1] || 0);
-    const option = Number(match && match[2] || 0);
-    if (!Number.isInteger(proposalId) || proposalId < 1 || !Number.isInteger(option) || option < 1) {
-      return send(msg, "🏛️ Use: /governvote PROPOSAL_ID OPTION\nExample: /governvote 12 2");
-    }
-    try {
-      const result = await repository.castGovernanceVote(proposalId, msg.from.id, String(option));
-      if (result.outcome === "duplicate") return send(msg, "⚠️ You have already cast your WorldzGovern™ vote on this proposal.");
-      if (result.outcome === "invalid_option") return send(msg, "❌ That WorldzGovern™ option does not exist.");
-      if (result.outcome !== "recorded") return send(msg, "❌ That WorldzGovern™ proposal is not currently open.");
-      return send(msg, [
-        "✅ WORLDZGOVERN™ VOTE RECORDED",
-        `Proposal #${result.proposal.id} — ${result.proposal.title}`,
-        `Choice: ${result.option}`,
-        "",
-        "This governance vote does NOT alter Worldz Votes Centre™ popularity rankings."
-      ].join("\n"));
-    } catch (error) {
-      safeError("govern-vote", error);
-      return send(msg, "❌ WorldzGovern™ could not record that governance vote.");
-    }
-  });
 
-  bot.onText(/^\/governdelegate(?:@\w+)?$/, (msg) => send(msg, [
-    "🏛️ WORLDZGOVERN™ DELEGATION",
-    "",
-    "Delegation is reserved in the architecture but is NOT enabled in the current governance runtime.",
-    "Current governance remains the existing one-member / one-vote model until a separately reviewed delegation contract is activated."
-  ].join("\n")));
 
   bot.onText(/^\/worldzlock(?:@\w+)?$/, (msg) => send(msg, [
     "🔐 WORLDZLOCK™",
@@ -341,6 +278,5 @@ module.exports = {
   registerFullScopeTelegramHandlers,
   formatLeaderboard,
   formatToken,
-  popularityBrand: VOTING_NAMESPACES.popularity.brand,
-  governanceBrand: VOTING_NAMESPACES.governance.brand
+  popularityBrand: VOTING_NAMESPACES.popularity.brand
 };

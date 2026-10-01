@@ -1,7 +1,6 @@
 (() => {
   'use strict';
   const MAX_API = 'https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/command-centre-max';
-  const RECAP_FEED = 'https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/max-public-feed';
   const tgMax = window.Telegram && window.Telegram.WebApp;
   const maxState = { dashboard:null, loading:false };
 
@@ -73,7 +72,7 @@
       <div class="max-mark">MAX</div>
       <div class="max-line">LEARN • RESEARCH • INTERACT • TEACH</div>
       <h2>Command Centre MAX™</h2>
-      <p>The CryptoWorldz knowledge engine: ZED guides, AUTO explains the numbers, G.R.A.C.E. turns approved knowledge into communication, and RECAP keeps the story understandable.</p>
+      <p>The CryptoWorldz knowledge engine: ZED guides, AUTO explains the numbers, and G.R.A.C.E. turns approved knowledge into communication while MAX keeps reviewed knowledge clear.</p>
       <div class="max-progress"><span style="width:${pct}%"></span></div>
       <small>${complete}/${lessons.length || '—'} approved lessons completed</small>
       <button class="button" type="button" data-open="max">Open MAX™</button>
@@ -103,12 +102,11 @@
           <div><small>ZED</small><b>Guide • Teach • Onboard</b></div>
           <div><small>AUTO ABILITY</small><b>Economics • Supply • Liquidity</b></div>
           <div><small>G.R.A.C.E. ADMIN</small><b>Approve • Explain • Distribute</b></div>
-          <div><small>RECAP</small><b>Research • Summarise • Remember</b></div>
         </div>
         <div class="max-grid">
           <div class="max-module learn"><b>📚 LEARN</b><small>Approved lessons and verified ecosystem knowledge.</small></div>
           <div class="max-module research"><b>🔎 RESEARCH</b><small>Ask MAX what needs investigating. New claims start queued, not assumed true.</small></div>
-          <div class="max-module interact"><b>🤝 INTERACT</b><small>ZED, missions, community, WorldzLaunchPad and real-world impact.</small></div>
+          <div class="max-module interact"><b>🤝 INTERACT</b><small>ZED, Raids, community, WorldzLaunchPad and real-world impact.</small></div>
           <div class="max-module teach"><b>🎓 TEACH</b><small>Use the same approved lesson pack to bring new members up to speed.</small></div>
         </div>
         <div class="max-truth ultimate-note"><b>MAX learns by building a reviewed knowledge registry — not by silently rewriting itself.</b><br>Research becomes knowledge only after it is sourced and approved. Human leadership stays above automation.</div>
@@ -169,17 +167,11 @@
         <div class="max-actions">
           <button class="button" type="button" data-open="zed-guide">Ask ZED</button>
           <button class="button secondary" type="button" data-open="create">Create a Raaiiidd</button>
-          <button class="button secondary" type="button" data-open="missions">Open Missions</button>
+          <button class="button secondary" type="button" data-open="raids">Open Raids</button>
           <a class="button secondary" href="https://launchpad.cryptoworldz.xyz/" target="_blank" rel="noopener">WorldzLaunchPad™</a>
           <a class="button secondary" href="https://launchpad.cryptoworldz.xyz/omnichain/" target="_blank" rel="noopener">Worldz OmniChain™</a>
-          <a class="button wide" id="max-share" href="https://t.me/share/url?url=${encodeURIComponent('https://cryptoworldz.xyz/')}&text=${encodeURIComponent('Join CryptoWorldz and learn through Command Centre MAX™ — source-first crypto education, WorldzLaunchPad, missions and community.')}" target="_blank" rel="noopener">Bring In a New Legend ↗</a>
+          <a class="button wide" id="max-share" href="https://t.me/share/url?url=${encodeURIComponent('https://cryptoworldz.xyz/')}&text=${encodeURIComponent('Join CryptoWorldz and learn through Command Centre MAX™ — source-first crypto education, WorldzLaunchPad, Raids and community.')}" target="_blank" rel="noopener">Bring In a New Legend ↗</a>
         </div>
-      </article>
-
-      <article class="panel max-recap">
-        <h3>🧾 RECAP This — Approved Knowledge Feed</h3>
-        <p>RECAP gets a clean feed containing only MAX knowledge marked <b>approved + public</b>. This gives RecapThisBot a safe source to work alongside once its connector is wired.</p>
-        <a class="button secondary" href="${RECAP_FEED}" target="_blank" rel="noopener">Open Approved RECAP Feed</a>
       </article>
 
       <article class="panel">
@@ -191,7 +183,7 @@
       ${isAdmin ? `
       <div class="section-title"><h2>🛡 G.R.A.C.E. Admin Publisher</h2></div>
       <article class="panel max-admin">
-        <p>Admin-reviewed material can be published into MAX Academy and the RECAP feed. Add sources whenever a factual claim comes from outside the ecosystem.</p>
+        <p>Admin-reviewed material can be published into MAX Academy. Add sources whenever a factual claim comes from outside the ecosystem.</p>
         <form id="max-publish-form">
           <input name="slug" required placeholder="slug-like-this">
           <input name="title" required maxlength="160" placeholder="Lesson / research title">
@@ -307,7 +299,7 @@
         });
         event.target.reset();
         await loadDashboardFresh();
-        if(tgMax?.showAlert) tgMax.showAlert('✅ Approved knowledge published to MAX + RECAP feed.');
+        if(tgMax?.showAlert) tgMax.showAlert('✅ Approved knowledge published to MAX.');
       }catch(error){
         if(tgMax?.showAlert) tgMax.showAlert('Publish failed: '+(error.code||error.message));
       }finally{button.disabled=false;}

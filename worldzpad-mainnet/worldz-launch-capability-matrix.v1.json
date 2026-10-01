@@ -170,12 +170,7 @@
     {
       "id": "votes",
       "name": "Worldz Votes Centre™",
-      "status": "FOUNDATION_BUILT__POPULARITY_ONLY"
-    },
-    {
-      "id": "govern",
-      "name": "WorldzGovern™",
-      "status": "FOUNDATION_BUILT__DAO_ONLY"
+      "status": "FOUNDATION_BUILT__DEX_TOKEN_VOTE__ONE_PER_USER_PER_HOUR"
     },
     {
       "id": "omnichain",

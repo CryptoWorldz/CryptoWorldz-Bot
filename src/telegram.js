@@ -10,7 +10,6 @@ const {
   isDoneClaim,
   isValidSolanaAddress,
   medalFor,
-  normalizeGovernanceOption,
   parseEditMissionPayload,
   parseNewMissionPayload,
   parseSimpleRaid,
@@ -30,12 +29,14 @@ const PUBLIC_COMMANDS = [
   { command: "rewards", description: "View reward history" },
   { command: "points", description: "View your Legend Points" },
   { command: "leaderboard", description: "View the Top 25 Legends" },
-  { command: "raaiiidd", description: "View the newest active Raaiiidd" },
-  { command: "missions", description: "View every active Raaiiidd" },
+  { command: "raid", description: "Open Ronald Raider" },
+  { command: "next", description: "View the next Raid in line" },
+  { command: "raids", description: "View all active Raids" },
+  { command: "raaiiidd", description: "View the current Raid" },
   { command: "wallet", description: "Connect a public Solana wallet" },
   { command: "kitty", description: "View the community SOL/USDC kitty" },
-  { command: "governance", description: "Legacy alias: open WorldzGovern proposals" },
-  { command: "vote", description: "Legacy alias: cast a WorldzGovern vote" },
+  { command: "worldzvotes", description: "Open Worldz hourly token voting" },
+  { command: "vote", description: "Vote for your favourite token this hour" },
   { command: "cancel", description: "Cancel wallet registration" },
   { command: "community", description: "Open CryptoWorldz community links" },
   { command: "website", description: "Open CryptoWorldz.xyz" },
@@ -76,10 +77,10 @@ function registerTelegramHandlers({ bot, repository, config }) {
 
 I'm Zed — your guide to the CryptoWorldz Command Centre.
 
-🚀 Raaiiidd Missions
+🚀 Ronald Raider Raids
 🏆 Leaderboards & Rewards
 👛 Wallet Registration
-🗳️ Governance & Voting
+🗳️ Hourly Token Voting
 💰 Treasury Transparency
 🎁 Airdrops & Events
 
@@ -238,18 +239,18 @@ Use /help to open the Command Menu.
     try {
       if (await repository.findMissionByUrl(parsed.mission.target_url)) return send(msg.chat.id, "⚠️ A mission already exists for this link.");
       const mission = await repository.createMission(parsed.mission, msg.from.id);
-      return send(msg.chat.id, `✅ New Raaiiidd Created!\n\n🎯 ${mission.title}\n🌐 ${mission.platform}\n⭐ ${mission.reward_points} Legend Points\n🔗 ${mission.link}\n\nMission #${mission.id} is now active.\n\nUse /raaiiidd to view it.`);
+      return send(msg.chat.id, `✅ New Raaiiidd Created!\n\n🎯 ${mission.title}\n🌐 ${mission.platform}\n⭐ ${mission.reward_points} Legend Points\n🔗 ${mission.link}\n\nRaid #${mission.id} is now active.\n\nUse /raaiiidd to view it.`);
     } catch (error) {
       safeError("Simple Raaiiidd", error);
       return send(msg.chat.id, "❌ I couldn't create that Raaiiidd.");
     }
   });
 
-  bot.onText(/^\/missions(?:@\w+)?$/, async (msg) => {
+  bot.onText(/^\/(?:raids|missions)(?:@\w+)?$/, async (msg) => {
     try {
       return sendLong(msg.chat.id, formatMissionList(await repository.listActiveMissions()));
     } catch (error) {
-      safeError("Missions command", error);
+      safeError("Raids command", error);
       return send(msg.chat.id, "❌ I couldn't load active Raaiiidds.");
     }
   });
@@ -275,47 +276,17 @@ Use /help to open the Command Menu.
     } catch (error) { safeError("Kitty command", error); return send(msg.chat.id, "❌ I couldn't load the Community Kitty."); }
   });
 
-  bot.onText(/^\/governance(?:@\w+)?$/, async (msg) => {
-    try {
-      const proposals = await repository.listGovernanceProposals(10, msg.from.id);
-      const active = proposals.filter((proposal) => ["active", "open"].includes(proposal.status));
-      if (!active.length) return send(msg.chat.id, "🏛️ WorldzGovern™ — no active governance proposals right now. Popularity voting lives separately in /worldzvotes.");
-      const rows = active.map((proposal) => {
-        const options = Array.isArray(proposal.options) ? proposal.options : [];
-        const choices = options.map((option, index) => `${index + 1}. ${option} — ${proposal.vote_counts[String(index + 1)] || 0} votes`).join("\n");
-        return `🏛️ WorldzGovern Proposal #${proposal.id}\n${proposal.title}\n\n${proposal.description}\n\n${choices}\n\nTotal Votes: ${proposal.total_votes}${proposal.selected_option ? `\n✅ Your Vote: Option ${proposal.selected_option}` : `\nVote: /governvote ${proposal.id} 1|2|3`}`;
-      });
-      return sendLong(msg.chat.id, rows.join("\n\n——————————\n\n"));
-    } catch (error) { safeError("Governance command", error); return send(msg.chat.id, "❌ I couldn't load Governance Votes."); }
-  });
-
-  bot.onText(/^\/vote(?:@\w+)?(?:\s+(\d+)\s+(\d+))?$/, async (msg, match) => {
-    const proposalId = parsePositiveId(match && match[1]);
-    if (!proposalId) return send(msg.chat.id, "🏛️ Legacy governance alias. Use: /governvote proposal_id option\nExample: /governvote 1 3\n\nToken popularity voting is /tokenvote SYMBOL.");
-    try {
-      const proposals = await repository.listGovernanceProposals(20, msg.from.id);
-      const proposal = proposals.find((item) => String(item.id) === String(proposalId));
-      const option = normalizeGovernanceOption(match && match[2], proposal && Array.isArray(proposal.options) ? proposal.options.length : 0);
-      if (!option) return send(msg.chat.id, "❌ That voting option is not available.");
-      const result = await repository.castGovernanceVote(proposalId, msg.from.id, option);
-      if (result.outcome === "duplicate") return send(msg.chat.id, "⚠️ You have already voted on this proposal.");
-      if (result.outcome === "unregistered") return send(msg.chat.id, "❌ Register with /start before voting.");
-      if (result.outcome !== "recorded") return send(msg.chat.id, "❌ This WorldzGovern™ proposal is not currently open.");
-      return send(msg.chat.id, `✅ WorldzGovern™ Vote Recorded!\n\n🗳️ ${result.proposal.title}\nYour Choice: ${result.option}\n\nOne Legend • One Governance Vote 💜\nThis does not affect Worldz Votes Centre™ popularity rankings.`);
-    } catch (error) { safeError("Vote command", error); return send(msg.chat.id, "❌ I couldn't record that vote."); }
-  });
-
   bot.onText(/^\/help(?:@\w+)?$/, (msg) =>
     send(
       msg.chat.id,
-      "🤖💜 Zed — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/raaiiidd\n/missions\n/wallet\n/kitty\n/worldzvotes — token popularity\n/worldzgovern — DAO governance\n/governvote proposal_id option\n/cancel\n/community\n/website\n/dipshit — meet the blue Worldz Dude\n\n⚠️ Never provide a private key or seed phrase."
+      "🤖💜 ZED — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/next\n/raids\n/raaiiidd\n/wallet\n/kitty\n/worldzvotes — hourly token voting\n/vote SYMBOL [chain] — favourite token vote\n/cancel\n/community\n/website\n/dipshit — meet the blue Worldz Dude\n\n⚠️ Never provide a private key or seed phrase."
     )
   );
 
   bot.onText(/^\/admin(?:@\w+)?$/, async (msg) => {
     if (!(await adminAllowed(msg))) return denyAdmin(msg);
     const access = await repository.getAdminAccess(msg.from.id, config.adminTelegramIds, config.ownerTelegramId);
-    return send(msg.chat.id, `🛡️ Zed Admin Command Centre\n\nRole: ${access.role}\n\n🚀 Missions\n/raid <link>\n/newmission\n/editmission\n/endmission\n/missions\n\n📥 Submissions\n/pending\n/approve\n/reject\n\n🏆 Legend Management\n/member telegram_id\n/points\n/admins\n/permissions\n\n💜 Community Operations\n/kitty\n/setkitty\n/setrole\n/setpermission\n/setpartner\n\n📢 Communication\n/broadcast\n\n📊 Reports\n/stats\n/activity`);
+    return send(msg.chat.id, `🛡️ Zed Admin Command Centre\n\nRole: ${access.role}\n\n🚀 RAIDS\n/raid <link>\n/next\n/raids\n/newmission\n/editmission\n/endmission\n\n📥 Submissions\n/pending\n/approve\n/reject\n\n🏆 Legend Management\n/member telegram_id\n/points\n/admins\n/permissions\n\n💜 Community Operations\n/kitty\n/setkitty\n/setrole\n/setpermission\n/setpartner\n\n📢 Communication\n/broadcast\n\n📊 Reports\n/stats\n/activity`);
   });
 
   bot.onText(/^\/admins(?:@\w+)?$/, async (msg) => {
@@ -347,10 +318,10 @@ Use /help to open the Command Menu.
     } catch { return send(msg.chat.id, "❌ I couldn't load permissions."); }
   });
 
-  bot.onText(/^\/setrole(?:@\w+)?(?:\s+(\d+)\s+(owner|admin|moderator|recap_manager|partner_manager|treasury_manager))?$/, async (msg, match) => {
+  bot.onText(/^\/setrole(?:@\w+)?(?:\s+(\d+)\s+(owner|admin|moderator|partner_manager|treasury_manager))?$/, async (msg, match) => {
     if (!ownerAllowed(msg)) return send(msg.chat.id, "⛔ Owner access required.");
     const id = parsePositiveId(match && match[1]); const role = match && match[2];
-    if (!id || !role || role === "owner") return send(msg.chat.id, "❌ Use: /setrole telegram_id admin|moderator|recap_manager|partner_manager|treasury_manager");
+    if (!id || !role || role === "owner") return send(msg.chat.id, "❌ Use: /setrole telegram_id admin|moderator|partner_manager|treasury_manager");
     try { await repository.setAdminRole(id, role, msg.from.id); return send(msg.chat.id, `✅ ${id} now has the ${role} role.`); }
     catch { return send(msg.chat.id, "❌ I couldn't update that role."); }
   });
@@ -372,10 +343,10 @@ Use /help to open the Command Menu.
     catch { return send(msg.chat.id, "❌ I couldn't configure that Kitty account."); }
   });
 
-  bot.onText(/^\/setpartner(?:@\w+)?(?:\s+(\d+)\s+(recap_manager|partner_manager|treasury_manager)\s*\|\s*([^|]+)\s*\|\s*([^|]+))?$/, async (msg, match) => {
+  bot.onText(/^\/setpartner(?:@\w+)?(?:\s+(\d+)\s+(partner_manager|treasury_manager)\s*\|\s*([^|]+)\s*\|\s*([^|]+))?$/, async (msg, match) => {
     if (!ownerAllowed(msg)) return send(msg.chat.id, "⛔ Owner access required.");
     const telegramId = parsePositiveId(match && match[1]); const partnerRole = match && match[2]; const displayName = match && match[3] && match[3].trim(); const organization = match && match[4] && match[4].trim();
-    if (!telegramId || !partnerRole || !displayName || !organization) return send(msg.chat.id, "❌ Use: /setpartner telegram_id recap_manager|partner_manager|treasury_manager | Name | Organization");
+    if (!telegramId || !partnerRole || !displayName || !organization) return send(msg.chat.id, "❌ Use: /setpartner telegram_id partner_manager|treasury_manager | Name | Organization");
     try { await repository.setPartnerProfile({ telegramId, displayName, organization, partnerRole }, msg.from.id); return send(msg.chat.id, `✅ Partner profile created.\n\n👤 ${displayName}\n🏢 ${organization}\n🎖 ${partnerRole}\n\nPermissions remain owner-adjustable with /setpermission.`); }
     catch { return send(msg.chat.id, "❌ I couldn't configure that partner profile."); }
   });

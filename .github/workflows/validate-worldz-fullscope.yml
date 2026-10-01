@@ -16,6 +16,7 @@ on:
       - 'public/miniapp/index.html'
       - 'public/miniapp/app.js'
       - 'supabase/migrations/20260926172000_worldz_fullscope_foundation.sql'
+      - 'supabase/migrations/20261001054000_worldz_votes_hourly_only.sql'
       - 'scripts/validate_worldz_fullscope.py'
       - '.github/workflows/validate-worldz-fullscope.yml'
   workflow_dispatch:
@@ -45,6 +46,7 @@ jobs:
           node --check public/miniapp/app.js
           grep -Fq 'WorldzFullScope™' public/miniapp/index.html
           grep -Fq 'Worldz Votes Centre™' public/miniapp/index.html
-          grep -Fq 'WorldzGovern™ — DAO Governance' public/miniapp/index.html
+          grep -Fq 'DEX TOKEN VOTING • HOURLY' public/miniapp/index.html
+          ! grep -Fq 'WorldzGovern' public/miniapp/index.html
       - name: Focused Command Centre tests
         run: node --test test/fullscope.test.js test/command-centre.test.js test/command-registry.test.js

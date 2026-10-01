@@ -270,10 +270,8 @@
     ],
     "maxTokensPerChain": 20,
     "initialEnvironmentCapacity": 160,
-    "popularity": "Worldz Votes Centre™ — popularity only",
-    "governance": "WorldzGovern™ — DAO governance only",
-    "popularityMayExecuteGovernance": false,
-    "governanceMayAffectPopularityRanking": false
+    "popularity": "Worldz Votes Centre™ — DEX-style favourite-token voting every rolling 60 minutes",
+    "voteCadence": "one vote per Telegram user per rolling 60 minutes"
   },
   "crossChain": {
     "rule": "Chain-native first. Wrapped, bridged and native assets remain explicitly distinguished.",
