@@ -1,0 +1,52 @@
+{
+  "version": "WORLDZPAY-TREASURY-2026-10-02-B",
+  "name": "WorldzPay™ Treasury Settlement Policy",
+  "state": "SIDE_RAIL_PREPARED_ONLY",
+  "liveExecutionEnabled": false,
+  "signingEnabled": false,
+  "broadcastEnabled": false,
+  "profiles": {
+    "operations": {
+      "profileId": "worldz-operations",
+      "targetGovernance": "3-of-5",
+      "currentGovernance": "ONCHAIN_REVERIFY_REQUIRED",
+      "destinationAddress": null,
+      "destinationState": "VERIFY_BEFORE_ACTIVATION"
+    },
+    "reserve": {
+      "profileId": "worldz-reserve",
+      "targetGovernance": "DISABLED_NOT_DEPLOYED",
+      "currentGovernance": "DISABLED_NOT_DEPLOYED",
+      "destinationAddress": null,
+      "destinationState": "DISABLED_NOT_DEPLOYED"
+    }
+  },
+  "routing": {
+    "basis": "NET_WORLDZ_CONTROLLED_REVENUE_AFTER_REFUNDS_CHARGEBACKS_TAXES_EXTERNAL_PROCESSOR_PROTOCOL_FEES_AND_PROTECTED_EARMARKS",
+    "operationsFirst": true,
+    "reserveSweepsEnabled": false,
+    "reserveSweepRequiresSeparateApproval": false,
+    "legacyCorePolicyAppliesWhenEligible": true,
+    "legacyCoreBeneficiaryCount": 12,
+    "legacyCoreTotalPercent": 15,
+    "legacyCoreEqualPerTokenPercent": 1.25,
+    "nonSolLegacyCoreRouting": "HOLD_PENDING_ASSET_SPECIFIC_POLICY",
+    "historicalDistributionWalletFundingForbidden": true
+  },
+  "approvalControls": {
+    "verifiedMultisigProfileRequired": true,
+    "verifiedDestinationRequired": true,
+    "unsignedPayloadHashRequired": true,
+    "publicWorldzProofRequiredAfterSettlement": true,
+    "humanApprovalRequired": true,
+    "providerSettlementEvidenceRequired": true,
+    "noAutomaticReserveSweep": true
+  },
+  "executionControls": {
+    "prepareUnsignedOnly": true,
+    "privateKeysAllowed": false,
+    "seedPhrasesAllowed": false,
+    "automaticSigningAllowed": false,
+    "automaticBroadcastAllowed": false
+  }
+}
