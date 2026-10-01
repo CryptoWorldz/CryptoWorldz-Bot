@@ -71,7 +71,10 @@ function buildLegacyCoreAllocation({ sourceId, netRevenueLamports, policy = POLI
 }
 
 function assertSafeDestinations({ policy = POLICY } = {}) {
-  const historical = new Set([\n    ...(policy.forbiddenHistoricalDistributionWallets || []),\n    ...policy.beneficiaries.map((x) => x.historicalDistributionWallet).filter(Boolean)\n  ]);
+  const historical = new Set([
+    ...(policy.forbiddenHistoricalDistributionWallets || []),
+    ...policy.beneficiaries.map((x) => x.historicalDistributionWallet).filter(Boolean)
+  ]);
   for (const token of policy.beneficiaries) {
     if (token.dedicatedRevenueVault && historical.has(token.dedicatedRevenueVault)) {
       throw new Error(`Historical distribution wallet cannot be a revenue vault: ${token.symbol}`);
