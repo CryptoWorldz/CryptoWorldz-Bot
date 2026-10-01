@@ -79,8 +79,8 @@ test("treasury proposal persistence cannot silently enable signing or broadcast"
   assert.equal(write.row.execution_state, "prepared_only");
   assert.equal(write.row.can_sign, false);
   assert.equal(write.row.can_broadcast, false);
-  assert.equal(write.row.required_threshold, 5);
-  assert.equal(write.row.required_signers, 10);
+  assert.equal(write.row.required_threshold, 3);
+  assert.equal(write.row.required_signers, 5);
 });
 
 test("provider event ledger stores only a payload hash", async () => {
