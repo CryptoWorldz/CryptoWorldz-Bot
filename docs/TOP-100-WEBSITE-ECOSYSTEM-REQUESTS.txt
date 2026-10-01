@@ -106,7 +106,7 @@ COMMAND CENTRE / TELEGRAM / SOCIAL
 86. Preserve ZED as the Telegram Commander for registration, profiles, wallets, missions, Raaiiidds, points, rewards, leaderboards, referrals, governance and community operations.
 87. Preserve AUTO as the protected Finance Controller with owner-only source configuration, budgets, limits, pause/stop, simulation, audit history and confirmation gates; no live signing/movement without separate approval.
 88. Preserve G.R.A.C.E. as the organiser/social engine for drafts, approvals, calendars, scheduling, campaigns, account connections, publishing, analytics and emergency stop controls.
-89. Preserve RECAP / RecapThisBot as the community-management, recap, transparency and learning layer.
+89. RECAP / RecapThisBot is retired from Command Centre control; ZED remains the command core and MAX carries approved learning/research functions.
 90. Preserve WorldPing so approved groups/channels can receive the intended everyone-notification workflow.
 91. Preserve WorldzCast for controlled multi-destination Telegram/ecosystem broadcasting.
 92. Keep Command Centre MAX™ education/academy/research/Impact Lab capability so new members can learn the ecosystem and its tools.
