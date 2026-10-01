@@ -23,10 +23,10 @@ test("WorldzLaunch Pack exposes current ZED-led modules and Spotlight",()=>{
   const html=read("launchpad.cryptoworldz.xyz/worldz-launch/index.html");
   const campaign=JSON.parse(read("launchpad.cryptoworldz.xyz/worldz-launch/campaign.json"));
   assert.match(html,/248/);
-  assert.match(html,/REX SECUREGUARD™/);
+  assert.match(html,/REXSECURE ULTIMATE™/);
   assert.match(html,/WORLDZ SPOTLIGHT™/);
   assert.equal(campaign.commandCentre.registeredCommandEntries,248);
-  for(const item of ["ZED","REX SecureGuard™","DIPSHIT™","Ronald Raider","Worldz Spotlight™"]) {
+  for(const item of ["ZED","REXSECURE ULTIMATE™","DIPSHIT™","Ronald Raider","Worldz Spotlight™"]) {
     assert.ok(campaign.commandCentre.modules.includes(item),item);
   }
 });
