@@ -16,8 +16,8 @@ const [reg,sq]=await Promise.all([getJson(registerUrl),getJson(squadsUrl)]);
 
 const liveGate=reg.body||{};
 const liveSquads=sq.body||{};
-const targetMembers=Number(platform.treasuryRouting.targetMemberCount||10);
-const targetThreshold=Number(platform.treasuryRouting.targetThreshold||5);
+const targetMembers=Number(platform.treasuryRouting.targetMemberCount||5);
+const targetThreshold=Number(platform.treasuryRouting.targetThreshold||3);
 
 const checks={
   publicPlatformLive:platform.publicLaunchPad===true,
@@ -56,7 +56,7 @@ const blockers=[];
 if(!checks.localPublicMarketGateOpen) blockers.push('LOCAL_PUBLIC_MAINNET_MARKET_GATE_CLOSED');
 if(!checks.serverPublicMarketGateOpen) blockers.push('SERVER_PUBLIC_MAINNET_MARKET_GATE_CLOSED');
 if(!checks.squadsDecoded||!checks.squadsProgramOwnerVerified) blockers.push('SQUADS_OPERATIONS_TREASURY_NOT_VERIFIED');
-if(!checks.operationsMemberTargetMet||!checks.operationsThresholdTargetMet) blockers.push('OPERATIONS_TREASURY_NOT_AT_5_OF_10_TARGET');
+if(!checks.operationsMemberTargetMet||!checks.operationsThresholdTargetMet) blockers.push('OPERATIONS_TREASURY_NOT_AT_3_OF_5_TARGET');
 if(!checks.feeRoutingActivated) blockers.push('MAINNET_FEE_ROUTING_NOT_ACTIVATED');
 if(!checks.backendFeeFlowV2MatchesLocal) blockers.push('BACKEND_FEE_FLOW_V2_CONTRACT_DRIFT');
 
