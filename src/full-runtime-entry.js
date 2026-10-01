@@ -21,6 +21,7 @@ const { registerCauseTelegramHandlers } = require("./causes/telegram");
 const { registerCommandCentreHandlers } = require("./command-centre");
 const { registerCommunityAI } = require("./community-ai");
 const { registerFullScopeTelegramHandlers } = require("./fullscope/telegram");
+const { registerCivicVotesHandlers } = require("./votes-centre/telegram");
 const { registerCommunityDirectoryHandlers } = require("./community-directory");
 const { registerCurrentImpactHandlers } = require("./current-impact");
 const { registerDipshitMembershipSystem } = require("./dipshit-membership");
@@ -249,6 +250,8 @@ async function start() {
   registerMarketAlertSystem({ app, bot, config, supabase });
   startupStage = "register_worldz_fullscope";
   registerFullScopeTelegramHandlers({ bot, repository, config, supabase });
+  startupStage = "register_worldz_civic_votes";
+  registerCivicVotesHandlers({ bot, supabase });
   startupStage = "register_rex_secureguard";
   registerRexSecureGuard({ bot, supabase, config });
   startupStage = "register_ronald_raider";
