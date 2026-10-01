@@ -470,7 +470,7 @@ jobs:
           node --check launchpad.cryptoworldz.xyz/curve-pro/app.js
           node --check launchpad.cryptoworldz.xyz/wldz/app.js
 
-      - name: Run 100+ anti-cheat tokenomics scenarios
+      - name: Run 150+ Fee Flow V2 anti-cheat tokenomics scenarios
         shell: python
         run: |
           import json, math
