@@ -14,6 +14,7 @@ const { registerCommunitySuiteHandlers } = require("./community-suite");
 const { registerCommunitySocial } = require("./community-social");
 const { registerMarketAlertSystem } = require("./market-alerts");
 const { registerWorldzScan } = require("./worldzscan");
+const { registerWorldzPayRoutes } = require("./worldzpay-http");
 const { registerAutoMiniRoutes } = require("./auto/zed-router");
 const { registerAutoTelegramHandlers } = require("./auto/telegram");
 const { registerCauseTelegramHandlers } = require("./causes/telegram");
@@ -204,6 +205,8 @@ async function start() {
   registerCommunityOps({ bot, config, supabase });
   startupStage = "register_community_api";
   registerCommunityApi({ app, bot, config, supabase });
+  startupStage = "register_worldzpay";
+  registerWorldzPayRoutes({ app });
   startupStage = "register_market_alerts";
   registerMarketAlertSystem({ app, bot, config, supabase });
   startupStage = "register_worldz_fullscope";
