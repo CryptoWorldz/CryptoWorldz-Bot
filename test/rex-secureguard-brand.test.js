@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { REXSECURE_BRAND, REXSECURE_WELCOME_PRESET } = require("../src/rex-secureguard");
+const REXSECURE_BRAND_IMAGE = require("../public/miniapp/rexsecure-brand-image");
 
 test("REXSECURE brand and welcome preset stay attached to community setup", () => {
   assert.equal(REXSECURE_BRAND.name, "REXSECURE™");
