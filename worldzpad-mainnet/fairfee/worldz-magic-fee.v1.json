@@ -1,5 +1,5 @@
 {
-  "version": "WORLDZ-MAGIC-FEE-2026-09-24-A",
+  "version": "WORLDZ-MAGIC-FEE-2026-10-01-B",
   "status": "DEVNET_STANDARD_CANDIDATE__MAINNET_REQUIRES_PER_VENUE_PROOF",
   "name": "MagicFeeNumber™",
   "target": {
@@ -50,12 +50,14 @@
     }
   },
   "legacyFlywheel": {
-    "vaultCount": 10,
+    "vaultCount": 12,
     "equalFunding": true,
     "percentOfWorldzControlledFee": 15,
     "effectivePercentOfTradeTotal": 0.09,
-    "effectivePercentOfTradePerVault": 0.009,
-    "epochHours": 6
+    "effectivePercentOfTradePerVault": 0.0075,
+    "epochHours": 6,
+    "equalPerTokenPercentOfWorldzControlledFee": 1.25,
+    "mode": "TRANSPARENT_MARKET_BUY_ACCRUAL"
   },
   "examples": [
     {
@@ -67,7 +69,7 @@
       "legacyFlywheel": 900,
       "worldzLaunchPad": 510,
       "impact": 510,
-      "eachLegacyVault": 90
+      "eachLegacyVault": 75
     },
     {
       "tradingVolume": 100000000,
@@ -78,7 +80,7 @@
       "legacyFlywheel": 90000,
       "worldzLaunchPad": 51000,
       "impact": 51000,
-      "eachLegacyVault": 9000
+      "eachLegacyVault": 7500
     }
   ],
   "crossChainRule": "0.75% is the Worldz target only where the underlying venue can reproduce and disclose the economics accurately. If protocol/network/DEX deductions differ, the UI must show the actual trader fee and each destination before signing; never hide extra fees under the MagicFeeNumber label.",
