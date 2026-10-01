@@ -1,11 +1,25 @@
 const crypto = require("node:crypto");
 const { ensureGroup, suiteAccessAllowed } = require("./community-suite-core");
 const { createRexThreatIntel, safeTelegramId } = require("./rex-threat-intel");
+const REXSECURE_BRAND_IMAGE = require("../public/miniapp/rexsecure-brand-image");
 
 const REX_BRAND = Object.freeze({
   name: "REXSECURE ULTIMATE™",
   tagline: "Security for Your Community",
+  imageName: REXSECURE_BRAND_IMAGE.fileName,
   casAttribution: "Powered by CAS • https://cas.chat"
+});
+
+const REX_WELCOME_PRESET = Object.freeze({
+  id: "community-door",
+  message: [
+    "Welcome to the community.",
+    "REXSECURE ULTIMATE™ is now active.",
+    "",
+    "Please respect the rules, look after each other, and enjoy the group.",
+    "",
+    "Security for Your Community."
+  ].join("\n")
 });
 
 const BLOCKED_PERMISSIONS = Object.freeze({
@@ -138,6 +152,31 @@ function registerRexSecureGuard({ bot, supabase, config }) {
 
   function isOwner(userId) {
     return Boolean(config.ownerTelegramId) && String(userId || "") === String(config.ownerTelegramId);
+  }
+
+  async function sendWelcomePreset(chatId) {
+    const caption = [
+      "🛡 REXSECURE ULTIMATE™",
+      REX_BRAND.tagline,
+      "",
+      REX_WELCOME_PRESET.message,
+      "",
+      REX_BRAND.casAttribution
+    ].join("\n");
+    try {
+      await bot.sendPhoto(
+        chatId,
+        Buffer.from(REXSECURE_BRAND_IMAGE.base64, "base64"),
+        { caption },
+        { filename: REX_BRAND.imageName, contentType: REXSECURE_BRAND_IMAGE.mimeType }
+      );
+      await logEvent(chatId, null, "welcome_preset_sent", REX_WELCOME_PRESET.id);
+      return true;
+    } catch (error) {
+      try { await bot.sendMessage(chatId, caption, { disable_web_page_preview: true }); } catch {}
+      console.error("REX welcome image failed", { code: error?.code || error?.message || "unknown" });
+      return false;
+    }
   }
 
   async function banMember(chatId, userId, reason = "") {
@@ -448,6 +487,13 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     return true;
   }
 
+  bot.onText(/^\/rexwelcome(?:@\w+)?$/i, async (msg) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) {
+      return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    }
+    await sendWelcomePreset(msg.chat.id);
+  });
+
   bot.onText(/^\/rexintel(?:@\w+)?\s+(\d+)$/i, async (msg, match) => {
     if (!isOwner(msg.from?.id) && !(await isTelegramAdmin(msg.chat.id, msg.from?.id))) {
       return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
@@ -717,19 +763,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       const wasEnabled = (await setting(chatId)).enabled;
       await upsertSetting(chatId, { secureguard_enabled: true });
       await logEvent(chatId, null, "secureguard_enabled", "", actorId);
-      if (!wasEnabled) {
-        try {
-          await bot.sendMessage(chatId, [
-            "🛡 REXSECURE ULTIMATE™ is now on the door.",
-            REX_BRAND.tagline,
-            "",
-            "New members: threat intelligence → trusted-bot gate → number match.",
-            "Active chat: Network Shield → identity → Pattern Guard → anti-flood → link guard.",
-            "",
-            REX_BRAND.casAttribution
-          ].join("\n"), { disable_web_page_preview: true });
-        } catch {}
-      }
+      if (!wasEnabled) await sendWelcomePreset(chatId);
     } else if (action === "off") {
       await upsertSetting(chatId, { secureguard_enabled: false });
       await logEvent(chatId, null, "secureguard_disabled", "", actorId);
@@ -766,6 +800,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       REX_BRAND.casAttribution,
       "",
       "Commands: /secureguard on • /secureguard off • /secureguard status",
+      "Welcome: /rexwelcome",
       "Threats: /rexintel • /rexreport • /rexpatternban • /rexunderattack",
       "Network owner: /rexglobalblock • /rexglobalclear",
       "Domains: /rexblockdomain • /rexallowdomain • /rexdomains • /rexlinkmode",
@@ -871,4 +906,4 @@ function registerRexSecureGuard({ bot, supabase, config }) {
   return { challengeOptions, expirePending };
 }
 
-module.exports = { BLOCKED_PERMISSIONS, REX_BRAND, challengeOptions, extractHosts, normalizeDomain, normalizeIdentityLabel, registerRexSecureGuard };
+module.exports = { BLOCKED_PERMISSIONS, REX_BRAND, REX_WELCOME_PRESET, challengeOptions, extractHosts, normalizeDomain, normalizeIdentityLabel, registerRexSecureGuard };
