@@ -10,7 +10,6 @@ const MODULES = Object.freeze([
   ["ronald_raider", "🤠 Ronald Raider"],
   ["shill_rewards", "📣 Shill Rewards"],
   ["votes", "🗳 Worldz Votes Centre™"],
-  ["govern", "🏛 WorldzGovern™"],
   ["worldzscan", "🔎 WorldzScan™"],
   ["market_alerts", "🐋 Major Buy + Market Alerts"],
   ["wallet_watch", "👛 Wallet Watchlists"],
