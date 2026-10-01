@@ -4,7 +4,7 @@ const GROUP_TYPES = new Set(["group", "supergroup"]);
 const SOL_SIGNATURE = /^[1-9A-HJ-NP-Za-km-z]{32,128}$/;
 
 const MODULES = Object.freeze([
-  ["rex_secureguard", "🛡 REX SecureGuard™"],
+  ["rex_secureguard", "🛡 REXSECURE ULTIMATE™"],
   ["alice_support", "📥 ALICE™ Support"],
   ["custom_ai", "🤖 Custom AI Community Bot"],
   ["ronald_raider", "🤠 Ronald Raider"],
