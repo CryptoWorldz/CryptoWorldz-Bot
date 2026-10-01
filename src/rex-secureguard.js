@@ -1,6 +1,25 @@
 const crypto = require("node:crypto");
 const { ensureGroup, suiteAccessAllowed } = require("./community-suite-core");
 
+const REXSECURE_BRAND = Object.freeze({
+  name: "REXSECURE™",
+  tagline: "Security for Your Community",
+  imageUrl: "https://cryptobotz.cryptoworldz.xyz/miniapp/assets/rexsecure-brand-poster.jpg"
+});
+
+const REXSECURE_WELCOME_PRESET = Object.freeze({
+  id: "community-door",
+  title: "Welcome to the community.",
+  message: [
+    "Welcome to the community.",
+    "REXSECURE™ is now active.",
+    "",
+    "Please respect the rules, look after each other, and enjoy the group.",
+    "",
+    "Security for Your Community."
+  ].join("\n")
+});
+
 const BLOCKED_PERMISSIONS = Object.freeze({
   can_send_messages: false,
   can_send_audios: false,
@@ -71,6 +90,24 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       throw error;
     }
     return body.result;
+  }
+
+  async function sendWelcomePreset(chatId) {
+    const caption = [
+      "🛡 REXSECURE™",
+      REXSECURE_BRAND.tagline,
+      "",
+      REXSECURE_WELCOME_PRESET.message
+    ].join("\n");
+    try {
+      await bot.sendPhoto(chatId, REXSECURE_BRAND.imageUrl, { caption });
+      await logEvent(chatId, null, "welcome_preset_sent", REXSECURE_WELCOME_PRESET.id);
+      return true;
+    } catch (error) {
+      try { await bot.sendMessage(chatId, caption); } catch {}
+      console.error("REX welcome preset image failed", { code: error?.code || error?.message || "unknown" });
+      return false;
+    }
   }
 
   async function setting(chatId) {
@@ -476,6 +513,13 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     return bot.sendMessage(msg.chat.id, `🛡 REX link mode: ${String(match[1]).toLowerCase()}`);
   });
 
+  bot.onText(/^\/rexwelcome(?:@\w+)?$/i, async (msg) => {
+    if (!(await isTelegramAdmin(msg.chat.id, msg.from?.id))) {
+      return bot.sendMessage(msg.chat.id, "⛔ Telegram group admin access required.");
+    }
+    await sendWelcomePreset(msg.chat.id);
+  });
+
   bot.onText(/^\/secureguard(?:@\w+)?(?:\s+(on|off|status))?$/i, async (msg, match) => {
     const action = String(match?.[1] || "status").toLowerCase();
     const chatId = msg.chat.id;
@@ -500,8 +544,10 @@ function registerRexSecureGuard({ bot, supabase, config }) {
           "🛡 REX is ready, but number-match member restriction requires a Telegram Supergroup. Upgrade this group to a Supergroup in Telegram first, then run /secureguard on again. REX will recognise the migrated group automatically."
         );
       }
+      const wasEnabled = (await setting(chatId)).enabled;
       await upsertSetting(chatId, { secureguard_enabled: true });
       await logEvent(chatId, null, "secureguard_enabled", "", actorId);
+      if (!wasEnabled) await sendWelcomePreset(chatId);
     } else if (action === "off") {
       await upsertSetting(chatId, { secureguard_enabled: false });
       await logEvent(chatId, null, "secureguard_disabled", "", actorId);
@@ -531,6 +577,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       "Commands: /secureguard on • /secureguard off • /secureguard status",
       "Domains: /rexblockdomain • /rexallowdomain • /rexdomains • /rexlinkmode",
       "Identity: /rextrust • /rexuntrust • /rextrusted • /reximpostor",
+      "Brand: /rexwelcome",
       "Audit: /rexposture • /rexrecovery"
     ].join("\n"));
   });
@@ -631,4 +678,4 @@ function registerRexSecureGuard({ bot, supabase, config }) {
   return { challengeOptions, expirePending };
 }
 
-module.exports = { BLOCKED_PERMISSIONS, challengeOptions, extractHosts, normalizeDomain, normalizeIdentityLabel, registerRexSecureGuard };
+module.exports = { BLOCKED_PERMISSIONS, REXSECURE_BRAND, REXSECURE_WELCOME_PRESET, challengeOptions, extractHosts, normalizeDomain, normalizeIdentityLabel, registerRexSecureGuard };
