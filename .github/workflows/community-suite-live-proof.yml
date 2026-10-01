@@ -212,6 +212,7 @@ jobs:
           secureguard_touched=False
           temp_licence=False
           original_group=None
+          original_secureguard_enabled=False
 
           def runtime_patch(table, filters, payload):
               url=supabase+"/rest/v1/"+table+"?"+urllib.parse.urlencode(filters,safe=",.*()-:")
@@ -235,6 +236,11 @@ jobs:
               if len(groups)!=1 or groups[0].get("internal_access") is not True:
                   raise SystemExit("/suite did not initialize internal Worldz access")
               original_group=dict(groups[0])
+              settings_before=rest_rows("zed_chat_settings",{
+                  "select":"secureguard_enabled","chat_id":"eq."+str(chat_id),"limit":"1"
+              })
+              original_secureguard_enabled=bool(settings_before and settings_before[0].get("secureguard_enabled") is True)
+              print("REX_ORIGINAL_STATE="+("ON" if original_secureguard_enabled else "OFF"))
 
               modules=rest_rows("community_suite_modules",{
                   "select":"module_key,enabled","chat_id":"eq."+str(chat_id),"order":"module_key.asc"
@@ -383,11 +389,6 @@ jobs:
           finally:
               # Leave the real community in a safe, non-disruptive state.
               try:
-                  if secureguard_touched:
-                      send_command("/secureguard@"+bot_username+" off",customer_admin_user)
-              except Exception as exc:
-                  print("::warning::REX cleanup command failed: "+str(exc)[:160])
-              try:
                   if temp_licence:
                       now_iso=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
                       runtime_patch("zed_group_licences",{"chat_id":"eq."+str(chat_id)},{
@@ -411,3 +412,12 @@ jobs:
                       })
               except Exception as exc:
                   print("::warning::Internal-access cleanup failed: "+str(exc)[:160])
+              try:
+                  if secureguard_touched:
+                      runtime_patch("zed_chat_settings",{"chat_id":"eq."+str(chat_id)},{
+                          "secureguard_enabled":bool(original_secureguard_enabled),
+                          "updated_at":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
+                      })
+                      print("REX_RESTORED_STATE="+("ON" if original_secureguard_enabled else "OFF"))
+              except Exception as exc:
+                  print("::warning::REX state restore failed: "+str(exc)[:160])
