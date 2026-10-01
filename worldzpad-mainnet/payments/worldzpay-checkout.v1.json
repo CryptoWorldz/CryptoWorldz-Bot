@@ -1,0 +1,49 @@
+{
+  "version": "WORLDZPAY-CHECKOUT-2026-10-01-A",
+  "name": "WorldzPay Checkout™",
+  "status": "SIDE_RAIL_PREVIEW_ONLY",
+  "liveCheckoutEnabled": false,
+  "products": {
+    "community_suite_trial": {
+      "label": "WorldzFullBuild Community Suite — Trial",
+      "revenueSourceId": "community_suite_trial",
+      "pricingMode": "quote_required"
+    },
+    "community_suite_rent": {
+      "label": "WorldzFullBuild Community Suite — Rent",
+      "revenueSourceId": "community_suite_rent",
+      "pricingMode": "quote_required"
+    },
+    "community_suite_rent_to_own": {
+      "label": "WorldzFullBuild Community Suite — Rent to Own",
+      "revenueSourceId": "community_suite_rent_to_own",
+      "pricingMode": "quote_required"
+    },
+    "community_suite_own": {
+      "label": "WorldzFullBuild Community Suite — Buy Outright",
+      "revenueSourceId": "community_suite_own",
+      "pricingMode": "quote_required"
+    },
+    "community_suite_addons": {
+      "label": "WorldzFullBuild Community Suite — Add-ons",
+      "revenueSourceId": "community_suite_addons",
+      "pricingMode": "quote_required"
+    }
+  },
+  "checkoutStates": [
+    "draft",
+    "quoted",
+    "awaiting_payment",
+    "paid",
+    "cancelled",
+    "refunded"
+  ],
+  "controls": {
+    "previewOnly": true,
+    "paymentProviderExecutionDisabled": true,
+    "worldzProofDraftAllowed": true,
+    "worldzProofConfirmedRequiresRealSettlement": true,
+    "distributionWalletFundingForbidden": true,
+    "noImpliedXAffiliation": true
+  }
+}
