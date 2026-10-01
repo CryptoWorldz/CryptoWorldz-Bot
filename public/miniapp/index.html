@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/miniapp/inbox.css?v=1.0.0">
   <link rel="stylesheet" href="/miniapp/legend-v8.css?v=1.0.0">
   <link rel="stylesheet" href="/miniapp/max.css?v=1.0.0">
+  <link rel="stylesheet" href="/miniapp/worldz-votes-civic.css?v=1.0.0">
   <style>
     .kitty-card{overflow:hidden}
     .kitty-address{display:flex;flex-direction:column;gap:7px;margin:16px 0 4px;padding:13px 15px;background:rgba(21,9,35,.8);border:1px solid var(--line);border-radius:14px;min-width:0}
@@ -133,7 +134,11 @@
       </section>
       <section id="worldz-votes" class="screen">
         <div class="section-title"><h2>🗳️ Worldz Votes Centre™</h2></div>
-        <article class="panel"><p class="eyebrow">DEX TOKEN VOTING • HOURLY</p><h3>Vote for your Favourite Token — once per hour</h3><p>One Telegram user gets one favourite-token vote every rolling 60 minutes. The 1-hour leaderboard drives Worldz trending and rankings. Sponsored exposure stays separate from votes.</p><p><b>Telegram commands:</b><br>/vote SYMBOL [chain]<br>/tokenvote SYMBOL [chain]<br>/worldztrending<br>/worldzrankings</p></article>
+        <article class="panel"><p class="eyebrow">TOKEN POPULARITY • HOURLY</p><h3>Vote for your Favourite Token — once per hour</h3><p>One Telegram user gets one favourite-token vote every rolling 60 minutes. The 1-hour leaderboard drives Worldz trending and rankings. Sponsored exposure stays separate from votes.</p><p><b>Telegram commands:</b><br>/vote SYMBOL [chain]<br>/tokenvote SYMBOL [chain]<br>/worldztrending<br>/worldzrankings</p><button class="button secondary" type="button" data-open="worldz-civic-votes">🌐 Open Civic Public Voice</button></article>
+      </section>
+      <section id="worldz-civic-votes" class="screen">
+        <div class="section-title"><h2>🌐 Worldz Votes Centre™ — Civic Public Voice</h2></div>
+        <div id="worldz-civic-votes-root"></div>
       </section>
       <section id="admin" class="screen"><div class="section-title"><h2>🛡️ Admin Centre</h2></div><div id="admin-panel"></div><div id="worldzcast-root"></div></section>
       <section id="admin-review" class="screen screen-experience"><div class="section-title"><h2>✅ Human Review Queue</h2></div><div id="admin-review-root"></div></section>
@@ -157,6 +162,7 @@
   <script src="/miniapp/worldzcast.js?v=1.0.0" defer></script>
   <script src="/miniapp/inbox.js?v=1.0.0" defer></script>
   <script src="/miniapp/community-suite.js?v=1.0.0" defer></script>
+  <script src="/miniapp/worldz-votes-civic.js?v=1.0.0" defer></script>
   <script src="/miniapp/auto-owner.js?v=3.0.0" defer></script>
   <script src="/miniapp/executive-admin.js?v=1.0.0" defer></script>
   <script src="/miniapp/admin-gateway.js?v=1.0.0" defer></script>
