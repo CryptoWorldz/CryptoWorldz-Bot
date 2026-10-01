@@ -341,7 +341,7 @@ function bind(){
   $('#chain-grid .choice').forEach(b=>b.addEventListener('click',()=>selectChain(b,b.dataset.chain)));
   $('#engine-grid .choice').forEach(b=>b.addEventListener('click',()=>selectChoice('#engine-grid',b,'engine',b.dataset.engine)));
   $$('.quote').forEach(b=>b.addEventListener('click',()=>{$$('.quote').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');build.quote=b.dataset.quote;$('#wxrp-proof').classList.toggle('show',build.quote==='wXRP');}));
-  $('#project-fee').addEventListener('input',feeMath);$('#example-volume').addEventListener('input',feeMath);$('#launchpad-contribution')?.addEventListener('change',feeMath);$('.allocation-input').forEach(x=>x.addEventListener('input',feeMath));
+  $('#project-fee').addEventListener('input',feeMath);$('#example-volume').addEventListener('input',feeMath);$('#launchpad-contribution')?.addEventListener('change',feeMath);$$('.allocation-input').forEach(x=>x.addEventListener('input',feeMath));
   $('#run-preflight').addEventListener('click',runPreflight);$('#download-manifest').addEventListener('click',downloadManifest);
   $('#wallet-mini').addEventListener('click',connectWallet);$('#refresh-runtime').addEventListener('click',refreshRuntime);
   $('#devnet-launch-link').addEventListener('click',e=>{if(e.currentTarget.getAttribute('aria-disabled')==='true')e.preventDefault();});
