@@ -1,5 +1,5 @@
 {
-  "version": "WORLDZ-ADAPTER-SOLANA-2026-09-24-A",
+  "version": "WORLDZ-ADAPTER-SOLANA-2026-10-01-B",
   "chainKey": "solana",
   "status": "DEVNET_IMPLEMENTATION_IN_PROGRESS",
   "mainnetExecutionEnabled": false,
@@ -14,7 +14,9 @@
     "DIRECT_DAMM_V2_AFTER_PROOF",
     "RAYDIUM_LAUNCHLAB_ADAPTER_CANDIDATE"
   ],
-  "routing": ["JUPITER"],
+  "routing": [
+    "JUPITER"
+  ],
   "fee": {
     "targetGrossTraderFeeBps": 75,
     "dynamicFeeDefault": false,
@@ -24,9 +26,11 @@
   },
   "legacyFlywheel": {
     "nativeSettlementAsset": "SOL",
-    "vaultCount": 10,
+    "vaultCount": 12,
     "epochHours": 6,
-    "bridgeRequired": false
+    "bridgeRequired": false,
+    "allocationMode": "TRANSPARENT_MARKET_BUY_ACCRUAL",
+    "equalPerTokenPercentOfWorldzControlledRevenue": 1.25
   },
   "liquidity": {
     "permanentLockTargetPercent": 100,
@@ -35,7 +39,7 @@
   "releaseGates": [
     "75_BPS_DEVNET_PROOF",
     "FEE_ROUTER_RECEIPT_PROOF",
-    "10_LEGACY_PDA_PROOF",
+    "12_LEGACY_MARKET_BUY_ROUTE_PROOF",
     "CREATOR_AND_REFERRER_RECEIPT_PROOF",
     "DAMM_V2_MIGRATION_PROOF",
     "100_PERCENT_PERMANENT_LOCK_PROOF",
