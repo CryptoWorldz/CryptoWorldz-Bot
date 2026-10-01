@@ -46,3 +46,11 @@ test("deterministic capability lookup does not hijack unrelated conversation", a
   const context = await buildAssistantCapabilityContext({ supabase: null, chatId: -100123 });
   assert.equal(deterministicCapabilityAnswer("Good morning team", context), null);
 });
+
+test("REXSECURE ULTIMATE capability exposes threat intelligence controls", async () => {
+  const context = await buildAssistantCapabilityContext({ supabase: null, chatId: -100123 });
+  const rex = context.capabilities.find((row) => row.key === "rex_secureguard");
+  assert.equal(rex.label, "REXSECURE ULTIMATE™");
+  assert.ok(rex.admin_commands.some((command) => command.startsWith("/rexintel")));
+  assert.match(rex.summary, /Network Shield/i);
+});
