@@ -736,7 +736,8 @@ jobs:
                   mainnet_code,mainnet_body=get(base+'/mainnet/?verify=public-v6')
                   base_code,base_body=get(base+'/base/?verify=public-v6')
                   genesis_code,genesis_body=get(base+'/genesis/?verify=public-v9')
-                  deploy_code,deploy_body=get(base+'/deploy/?verify=deploy-v1')
+                  deploy_pretty_code,deploy_pretty_body=get(base+'/deploy/?verify=deploy-route-v2')
+                  deploy_code,deploy_body=get(base+'/deploy/index.html?verify=deploy-file-v2')
                   mint_code,mint_body=get(base+'/mint/?verify=public-v11')
                   mint_js_code,mint_js_body=get(base+'/mint/app.js?verify=public-v11')
                   jup_bridge_code,jup_bridge_body=get(base+'/mint/jupiter-mobile.js?verify=public-v10')
@@ -874,6 +875,7 @@ jobs:
                   assert base_code==200 and 'WORLDZ EVM FAIR™' in base_body and 'BASE SEPOLIA' in base_body
                   assert genesis_code==200 and 'PRIVATE GENESIS CONSOLE' in genesis_body
                   assert all(term not in genesis_body for term in private_terms)
+                  assert deploy_pretty_code==200
                   assert deploy_code==200 and 'DEPLOY YOUR TOKEN' in deploy_body.upper() and 'DEPLOY REAL MAINNET TOKEN' in deploy_body
                   assert '/mint/?network=mainnet-beta' in deploy_body
                   assert mint_code==200 and 'WORLDZMINT' in mint_body.upper() and 'FIXED SUPPLY' in mint_body.upper() and 'Jupiter Wallet' in mint_body
@@ -990,12 +992,27 @@ jobs:
                   assert public_mint_registry['standard']=='WORLDZMINT-1'
                   assert public_mint_registry['platformTokenSupplyTakePercent']==0
                   assert public_mint_registry['walletTransferTaxPercent']==0
-                  assert public_registry['platformSharePercentOfCollectedTokenFee']==10
+                  assert public_registry['standard']=='WORLDZ-LAUNCH-REGISTER-V2'
+                  assert public_registry['feeFlowVersion']=='WORLDZ-FEE-FLOW-V2'
+                  assert public_registry['worldzLaunchPadContributionChoicesPercent']==[3,5,8]
+                  assert public_registry['worldzLaunchPadContributionDefaultPercent']==5
+                  assert public_registry['fixedFeeDistributionPercent']==platform['safeLaunchPolicy']['feeRoutes']['exactLockedFixedPercent']
+                  assert public_registry['treasuryReserveByLaunchPadChoice']=={'3':12,'5':10,'8':7}
+                  assert public_registry['legacyCore']=={'totalPercent':15,'tokenCount':12,'equalPercentEach':1.25,'closed':True}
+                  assert public_registry['worldzCoreFamily']['totalPercent']==12
+                  assert public_registry['worldzCoreFamily']['equalPercentEach']==3
+                  assert public_registry['worldzCoreFamily']['symbols']==['WLDZ','RVIV','PNEX','MRCL']
+                  assert public_registry['tokenSupplyTakePercent']==0
+                  assert public_registry['initialLiquidityTakePercent']==0
+                  assert public_registry['walletTransferTaxPercent']==0
+                  assert public_registry['legacyAdapter']['profileOnly'] is True
+                  assert public_registry['legacyAdapter']['platformSharePercentOfCollectedTokenFee']==10
+                  assert public_registry['legacyAdapter']['projectSharePercentOfCollectedTokenFee']==90
                   assert public_registry['founding100']['totalPositions']==100
                   assert public_registry['founding100']['futureWorldzPoolPercent']==10
                   assert public_registry['founding100']['equalAllocationPerQualifiedPositionPercent']==0.1
 
-                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 mainnet_token_deploy=1 worldzmint_backend=1 token_identity=PASS wldz=WORLDZ rviv=REVIVE future_identity_fail_closed=1 worldzmint=1 technology_guide=1 jupiter_mobile_reown=1 confidence_stack=1 registry=1 fee_only_10=1 founding100=1 base_sepolia=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
+                  print('WORLDZLAUNCHPAD_LIVE=PASS public=1 mainnet_token_deploy=1 worldzmint_backend=1 token_identity=PASS wldz=WORLDZ rviv=REVIVE pnex=PRELAUNCH future_identity_fail_closed=1 worldzmint=1 launch_station=1 community=1 integrations=1 readiness=1 technology_guide=1 jupiter_mobile_reown=1 confidence_stack=1 registry_v2=1 fee_flow_v2=1 launchpad_choice=3/5/8 legacy_core=15x12 core_family_buys=12 founding100=1 base_sepolia=1 private_plan_exposure=0 flash=1 curve=1 curve_pro=1 mainnet_adapter=1 mainnet_gate_closed=1')
                   raise SystemExit(0)
               except SystemExit: raise
               except Exception as e:

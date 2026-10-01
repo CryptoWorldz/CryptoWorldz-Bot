@@ -30,9 +30,21 @@ const checks={
   operationsMemberTargetMet:Number(liveSquads.memberCount)===targetMembers,
   operationsThresholdTargetMet:Number(liveSquads.threshold)===targetThreshold,
   feeRoutingActivated:treasury.activation?.mainnetFeeRoutingEnabled===true,
-  legacyBackendFeeContractMatchesLocal:Number(liveGate.platformSharePercentOfCollectedTokenFee)===Number(platform.feePolicy.platformShareCapPercentOfCollectedProjectFee)
-    && Number(liveGate.projectSharePercentOfCollectedTokenFee)===Number(platform.feePolicy.projectRetainedShareOfCollectedProjectFeePercent),
-  nextGenEconomicsDeclared:omniFee.targetGrossTraderFeeBps===75
+  backendFeeFlowV2MatchesLocal:liveGate.standard==='WORLDZ-LAUNCH-REGISTER-V2'
+    && liveGate.feeFlowVersion==='WORLDZ-FEE-FLOW-V2'
+    && JSON.stringify(liveGate.worldzLaunchPadContributionChoicesPercent)==='[3,5,8]'
+    && Number(liveGate.worldzLaunchPadContributionDefaultPercent)===5
+    && Number(liveGate.legacyCore?.totalPercent)===Number(platform.feePolicy.legacyCorePercent)
+    && Number(liveGate.legacyCore?.tokenCount)===Number(platform.feePolicy.legacyCoreTokenCount)
+    && Number(liveGate.worldzCoreFamily?.totalPercent)===Number(platform.feePolicy.coreFamilyMarketBuyPercent)
+    && JSON.stringify(liveGate.worldzCoreFamily?.symbols||[])===JSON.stringify(platform.feePolicy.coreFamilySymbols||[])
+    && Number(liveGate.tokenSupplyTakePercent)===0
+    && Number(liveGate.initialLiquidityTakePercent)===0
+    && Number(liveGate.walletTransferTaxPercent)===0,
+  legacyAdapterDeclared:liveGate.legacyAdapter?.profileOnly===true
+    && Number(liveGate.legacyAdapter?.platformSharePercentOfCollectedTokenFee)===10
+    && Number(liveGate.legacyAdapter?.projectSharePercentOfCollectedTokenFee)===90,
+  legacyOmnichainAdapterDeclared:omniFee.targetGrossTraderFeeBps===75
     && omniFee.worldzControlledSplitPercent?.creator===51
     && omniFee.worldzControlledSplitPercent?.referrer===17
     && omniFee.worldzControlledSplitPercent?.legacyFlywheel===15
@@ -46,7 +58,7 @@ if(!checks.serverPublicMarketGateOpen) blockers.push('SERVER_PUBLIC_MAINNET_MARK
 if(!checks.squadsDecoded||!checks.squadsProgramOwnerVerified) blockers.push('SQUADS_OPERATIONS_TREASURY_NOT_VERIFIED');
 if(!checks.operationsMemberTargetMet||!checks.operationsThresholdTargetMet) blockers.push('OPERATIONS_TREASURY_NOT_AT_5_OF_10_TARGET');
 if(!checks.feeRoutingActivated) blockers.push('MAINNET_FEE_ROUTING_NOT_ACTIVATED');
-if(!checks.legacyBackendFeeContractMatchesLocal) blockers.push('BACKEND_LOCAL_FEE_CONTRACT_DRIFT');
+if(!checks.backendFeeFlowV2MatchesLocal) blockers.push('BACKEND_FEE_FLOW_V2_CONTRACT_DRIFT');
 
 const releaseGate=(platform.releaseGate?.mainnetCreatorLaunch||[]).map(item=>({requirement:item,status:'REQUIRES_SEPARATE_PROOF'}));
 const report={
@@ -68,10 +80,24 @@ const report={
    target:{members:targetMembers,threshold:targetThreshold}
  },
  feeContracts:{
-   currentPublicBackend:{project:liveGate.projectSharePercentOfCollectedTokenFee??null,worldz:liveGate.platformSharePercentOfCollectedTokenFee??null},
-   currentLocal:{project:platform.feePolicy.projectRetainedShareOfCollectedProjectFeePercent,worldz:platform.feePolicy.platformShareCapPercentOfCollectedProjectFee},
-   nextGenOmnichain:{grossBps:omniFee.targetGrossTraderFeeBps,split:omniFee.worldzControlledSplitPercent},
-   note:'Current public Confidence Curve backend remains 90/10. The newer 51/17/15/8.5/8.5 Omnichain fee engine is a separate build and must not be represented as live until its settlement router is proven.'
+   currentPublicBackend:{
+     standard:liveGate.standard??null,
+     feeFlowVersion:liveGate.feeFlowVersion??null,
+     launchPadChoices:liveGate.worldzLaunchPadContributionChoicesPercent??null,
+     fixed:liveGate.fixedFeeDistributionPercent??null,
+     treasuryByChoice:liveGate.treasuryReserveByLaunchPadChoice??null,
+     legacyCore:liveGate.legacyCore??null,
+     worldzCoreFamily:liveGate.worldzCoreFamily??null
+   },
+   currentLocal:{
+     feeFlowVersion:'WORLDZ-FEE-FLOW-V2',
+     launchPadChoices:platform.feePolicy.worldzLaunchPadContributionChoicesPercent,
+     fixed:platform.safeLaunchPolicy.feeRoutes.exactLockedFixedPercent,
+     treasuryByChoice:platform.safeLaunchPolicy.feeRoutes.treasuryReserveByLaunchPadChoice
+   },
+   legacyAdapter:liveGate.legacyAdapter??null,
+   historicalOmnichainAdapter:{grossBps:omniFee.targetGrossTraderFeeBps,split:omniFee.worldzControlledSplitPercent},
+   note:'Worldz Fee Flow V2 is the new-launch registry standard. Current mainnet market settlement remains fail-closed until treasury/venue V2 settlement is independently proven. The 90/10 and 51/17/15/8.5/8.5 profiles are retained only as explicitly labelled legacy adapter contracts.'
  },
  checks,
  releaseGate
