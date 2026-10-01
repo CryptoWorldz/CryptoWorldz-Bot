@@ -868,8 +868,7 @@
     "publicPath": "/fullscope/",
     "supportedChains": 8,
     "maxTokensPerChain": 20,
-    "popularityVoting": "Worldz Votes Centre™",
-    "governance": "WorldzGovern™",
+    "popularityVoting": "Worldz Votes Centre™ — one favourite-token vote per Telegram user per rolling 60 minutes",
     "mainnetExecutionEnabled": false
   },
   "worldzProofReceipt": {
