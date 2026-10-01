@@ -7,7 +7,6 @@ let autoRewardSystemRegistered = false;
 const ROLE_LABELS = Object.freeze({
   admin: "Admin",
   moderator: "Moderator",
-  recap_manager: "Recap Manager",
   partner_manager: "Partner Manager",
   treasury_manager: "Treasury Manager",
   grace_manager: "Grace Controller"
