@@ -80,6 +80,16 @@
     },
     "x": {
       "status": "OFFICIAL_API_ARCHITECTURE_READY__LIVE_ACTIONS_REQUIRE_CREDENTIALS_AND_USAGE_CREDITS"
+    },
+    "rexSecureGuard": {
+      "url": "https://cryptobotz.cryptoworldz.xyz/miniapp/",
+      "status": "CONNECTED_COMMAND_CENTRE_SECURITY_MODULE",
+      "controls": [
+        "number_match",
+        "anti_flood",
+        "link_blocklist",
+        "impersonation_warning"
+      ]
     }
   },
   "integrations": {
@@ -101,6 +111,9 @@
     },
     "commandCentre": {
       "status": "CONNECTED"
+    },
+    "rexSecureGuard": {
+      "status": "CONNECTED_VIA_COMMAND_CENTRE"
     }
   },
   "mainnetBlockers": [
