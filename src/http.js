@@ -11,6 +11,7 @@ const { createRequestLimiter, validateTelegramInitData } = require("./miniapp-au
 const { solanaPayUri, verifySolanaContribution } = require("./solana");
 const { registerPdcHost } = require("./pdc-host");
 const { getLastStartReply } = require("./telegram-proof");
+const { createRexThreatIntel } = require("./rex-threat-intel");
 
 function safeTokenMatch(received, expected) {
   if (typeof received !== "string" || typeof expected !== "string") return false;
@@ -38,6 +39,7 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
   const miniAppPath = path.join(__dirname, "..", "public", "miniapp");
   const allowMiniRequest = createRequestLimiter({ maxEvents: 60, intervalMs: 60000 });
   const allowMiniAuthAttempt = createRequestLimiter({ maxEvents: 120, intervalMs: 60000 });
+  const rexThreatIntel = supabase ? createRexThreatIntel({ supabase }) : null;
 
   app.disable("x-powered-by");
   app.use(express.json({ limit: "32kb", type: "application/json" }));
@@ -87,6 +89,14 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
     maxAge: 0,
     setHeaders: (res) => res.setHeader("Cache-Control", "no-store, max-age=0")
   }));
+  app.get("/api/public/rexsecure", (req, res) => res.json({
+    ok: true,
+    product: "REXSECURE ULTIMATE™",
+    tagline: "Security for Your Community",
+    protections: ["CAS threat intelligence","REX Network Shield","Number Match","External Bot Guard","Identity Guard","Pattern Guard","Anti-Flood","Link Guard","Under Attack mode"],
+    attribution: { label: "Powered by CAS", url: "https://cas.chat" }
+  }));
+
   app.get("/api/public/mini-config", (req, res) => res.json({
     ok: true,
     community: {
@@ -103,7 +113,7 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
     Math.max(300, Number(process.env.MINIAPP_INIT_DATA_MAX_AGE_SECONDS) || 86400)
   );
 
-  const authenticateMiniApp = (req, res, next) => {
+  const authenticateMiniApp = async (req, res, next) => {
     if (!allowMiniAuthAttempt(req.ip)) return res.status(429).json({ ok: false, error: "rate_limited" });
     const result = validateTelegramInitData(
       req.get("x-telegram-init-data") || "",
@@ -116,6 +126,26 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
     }
     const rateKey = `${result.user.id}:${req.ip}`;
     if (!allowMiniRequest(rateKey)) return res.status(429).json({ ok: false, error: "rate_limited" });
+
+    if (rexThreatIntel) {
+      try {
+        const assessment = await rexThreatIntel.assessUser(result.user.id, { casEnabled: true });
+        if (assessment.blocked) {
+          audit("rexsecure_web_block", {
+            telegram_id: result.user.id,
+            sources: assessment.sources.map((row) => row.source).join(",")
+          });
+          return res.status(403).json({
+            ok: false,
+            error: "rexsecure_blocked",
+            message: "REXSECURE ULTIMATE™ blocked this Telegram identity from the authenticated Worldz surface."
+          });
+        }
+      } catch (error) {
+        audit("rexsecure_web_check_degraded", { telegram_id: result.user.id, error: error?.message || "unknown" });
+      }
+    }
+
     req.telegramUser = result.user;
     return next();
   };
