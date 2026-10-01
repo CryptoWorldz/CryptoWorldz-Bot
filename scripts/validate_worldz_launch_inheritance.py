@@ -67,14 +67,15 @@ assert product["inheritance"]["everyConfirmedActionGetsProof"] is True
 assert product["inheritance"]["mainnetReleaseIsPerChainAndPerVenue"] is True
 
 required_modules={m["id"] for m in inheritance["requiredModules"] if m["required"]}
-for module in {"token-identity","chain-capability","fee-disclosure","fullscope","proof-receipt","worlddexpush","locks","vesting","universal-flywheel","votes","govern"}:
+for module in {"token-identity","chain-capability","fee-disclosure","fullscope","proof-receipt","worlddexpush","locks","vesting","universal-flywheel","votes"}:
     assert module in required_modules, module
 
 assert fullscope["financialSafety"]["walletSignatureRequired"] is True
 assert fullscope["financialSafety"]["autoBroadcast"] is False
 assert fullscope["financialSafety"]["mainnetExecutionEnabled"] is False
-assert fullscope["voting"]["popularity"]["mayExecuteGovernance"] is False
-assert fullscope["voting"]["governance"]["mayAffectPopularityRanking"] is False
+assert fullscope["voting"]["popularity"]["cadence"]=="one vote per Telegram user per rolling 60 minutes"
+assert "/vote" in fullscope["voting"]["popularity"]["commandNamespace"]
+assert "governance" not in fullscope["voting"]
 
 proof_required=set(proof["required"])
 assert {"receiptId","registryTokenId","chain","actionType","status","transaction","token","balances","verification"}.issubset(proof_required)
