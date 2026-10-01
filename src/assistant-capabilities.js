@@ -41,11 +41,11 @@ const CAPABILITY_CATALOG = Object.freeze([
   },
   {
     key: "rex_secureguard",
-    label: "REX SecureGuard™",
+    label: "REXSECURE ULTIMATE™",
     moduleKey: "rex_secureguard",
-    summary: "Group security, verification, moderation and emergency controls.",
+    summary: "Telegram-ID threat intelligence, Network Shield, new-member verification, bot guard, impersonation protection, scam-pattern quarantine, anti-flood, link guard and emergency controls.",
     memberCommands: ["/secureguard status"],
-    adminCommands: ["/secureguard"]
+    adminCommands: ["/secureguard", "/rexintel USER_ID", "/rexreport", "/rexpatternban", "/rexunderattack on|off", "/rexposture", "/rexrecovery"]
   },
   {
     key: "alice_support",
