@@ -95,6 +95,10 @@ one_sections = [
         ("Grow food locally","Seeds, fruit trees, vegetable gardens, hand tools, irrigation, soil improvement, composting, training and storage.","https://donateworldz.com/grow-food-mission/"),
         ("Protect food","Cold-chain planning, safe storage, hygiene, food rescue, date-labelling rules, transport and community kitchens.","https://foodworldz.com/food-safety/"),
     ]},
+    {"eyebrow":"Public accountability","title":"Reference of What Can Be Fought","text":"A redacted evidence-based case study documenting government financial management, written records, complaints, review pathways and the importance of preserving evidence.","cards":[
+        ("Read the Reference","Open the documented NCAT/TAG timeline, redacted correspondence index and practical record-keeping lessons.","https://oneworldz.com/what-can-be-fought/"),
+        ("LawWorldz","General public-interest information about evidence, rights, complaints and lawful reform pathways.","https://law.oneworldz.com/"),
+    ]},
 ]
 write("oneworldz.com","",page("oneworldz.com","OneWorldz","One World • One Vision","End World Hunger. Change What Causes It.","OneWorldz connects evidence, lawful reform, public spending transparency and practical field missions so communities can move from emergency relief toward lasting food, water, health and dignity.",one_sections,"OneWorldz humanitarian mission artwork","One World • One Vision • One Fam • #MakeADifferenceTogether"))
 
