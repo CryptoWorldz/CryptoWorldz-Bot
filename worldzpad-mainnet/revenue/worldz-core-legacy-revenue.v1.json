@@ -1,0 +1,109 @@
+{
+  "version": "WORLDZ-CORE-LEGACY-REVENUE-2026-10-01-A",
+  "name": "Worldz Legacy Core Revenue Share™",
+  "status": "SOURCE_CONFIGURED__MAINNET_ROUTING_DISABLED",
+  "purpose": "Give NBC, LMTD and INVEST a transparent share of eligible Worldz-controlled SOL revenue without funding historical distribution wallets or disturbing protected creator, referrer, impact or customer funds.",
+  "accountingBasis": "NET_WORLDZ_CONTROLLED_REVENUE_AFTER_REFUNDS_CHARGEBACKS_TAXES_EXTERNAL_PROCESSOR_PROTOCOL_FEES_AND_PROTECTED_EARMARKS",
+  "asset": "SOL",
+  "poolBps": 1500,
+  "poolPercent": 15,
+  "eligibleSources": [
+    "community_suite_trial",
+    "community_suite_rent",
+    "community_suite_rent_to_own",
+    "community_suite_own",
+    "community_suite_addons",
+    "custom_ai_builds",
+    "custom_branding",
+    "hosted_worldz_services",
+    "worldz_subscriptions",
+    "worldz_affiliate_partner_revenue",
+    "worldz_launchpad_platform_share"
+  ],
+  "sourceRule": "For WorldzLaunchPad, calculate this only from the Worldz platform share after the launch/token fee split. Do not reduce creator, referrer, Legacy Flywheel or Impact allocations.",
+  "excludedSources": [
+    "customer_principal_or_pass_through_funds",
+    "refunds_and_chargebacks",
+    "tax_collections",
+    "external_protocol_or_processor_fees",
+    "impact_or_charity_donations",
+    "protected_worldzapp_revenue",
+    "treasury_internal_transfers",
+    "token_distribution_wallet_balances",
+    "liquidity_principal",
+    "borrowed_or_investment_principal"
+  ],
+  "beneficiaries": [
+    {
+      "order": 1,
+      "name": "Next Big Coin",
+      "symbol": "NBC",
+      "tokenMint": null,
+      "tokenMintStatus": "VERIFY_BEFORE_HOLDER_REWARDS_OR_BUYBACK_EXECUTION",
+      "knownDevWallet": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt",
+      "historicalDistributionWallet": "PdABvvq4F7YjwsVRq2CCQeBNZTBq5WfkQvn8VmhRY34",
+      "shareMode": "EQUAL_THREE_WAY",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    },
+    {
+      "order": 2,
+      "name": "Limited Edition",
+      "symbol": "LMTD",
+      "tokenMint": "Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_BEFORE_EXECUTION",
+      "knownDevWallet": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
+      "historicalDistributionWallet": "2turuerVWbeDPRZfK2iixzRnrC6zjbAzHo9NZfww6rFn",
+      "shareMode": "EQUAL_THREE_WAY",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    },
+    {
+      "order": 3,
+      "name": "INVEST",
+      "symbol": "INVEST",
+      "tokenMint": "VeSt6vaWE5JsT36sVCzL21daiY7nNNs73TJcJMHgnjC",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_BEFORE_EXECUTION",
+      "knownDevWallet": null,
+      "historicalDistributionWallet": "Hd3cMfHMHQe4j8xfpnbDkWEgDo4gbrH2eimh6vpxjC37",
+      "shareMode": "EQUAL_THREE_WAY",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    }
+  ],
+  "perTokenUseBps": {
+    "transparentMarketBuyback": 5000,
+    "liquidityGrowth": 2500,
+    "holderRewards": 2500,
+    "total": 10000
+  },
+  "buybackControls": {
+    "executionEnabled": false,
+    "publicReceiptsRequired": true,
+    "realMarketDataRequired": true,
+    "maxEstimatedPriceImpactBps": 100,
+    "minimumSecondsBetweenChunks": 21600,
+    "noWashTrading": true,
+    "noSelfTrading": true,
+    "noFakeBuyAlerts": true,
+    "rule": "If liquidity, price-impact, token identity, treasury authority or market-data checks fail, accrue the allocation instead of trading."
+  },
+  "holderRewardControls": {
+    "executionEnabled": false,
+    "distributionWalletsExcluded": true,
+    "systemWalletsExcluded": true,
+    "liquidityVaultsExcluded": true,
+    "proofOfHoldingRequired": true,
+    "noGuaranteedReturn": true
+  },
+  "treasuryControls": {
+    "liveTransfersEnabled": false,
+    "mode": "ACCRUE_LEDGER_UNTIL_DEDICATED_MULTISIG_OR_PDA_READY",
+    "dedicatedVaultPerTokenRequired": true,
+    "historicalDistributionWalletFundingForbidden": true,
+    "mainnetExecutionRequiresExplicitTreasuryApproval": true,
+    "publicWorldzProofReceiptRequired": true
+  },
+  "protectedExistingRules": {
+    "launchpadCreatorReferrerLegacyImpactSplitUnchanged": true,
+    "worldzApp50Liquidity50DevelopmentPolicyUnchanged": true,
+    "historicalDistributionWalletsRemainWatchOnly": true
+  }
+}
