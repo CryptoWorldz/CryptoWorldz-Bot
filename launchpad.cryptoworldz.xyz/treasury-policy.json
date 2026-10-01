@@ -1,7 +1,7 @@
 {
-  "version": "2026-09-21-worldz-treasury-v1",
+  "version": "2026-10-01-worldz-treasury-v2",
   "product": "WorldzLaunchPad™",
-  "status": "APPROVED_CONFIGURATION__SIGNER_AND_ONCHAIN_ROLLOUT_PENDING",
+  "status": "OPERATIONS_3_OF_5_APPROVED__RESERVE_DISABLED__ONCHAIN_REVERIFY_REQUIRED",
   "feeCollection": {
     "worldzSharePercentOfCollectedSupportedProjectTradingFee": 10,
     "projectRetainedPercentOfCollectedSupportedProjectTradingFee": 90,
@@ -11,118 +11,75 @@
   },
   "governance": {
     "operations": {
-      "signers": 10,
-      "threshold": 5,
-      "display": "5-of-10"
+      "signers": 5,
+      "threshold": 3,
+      "display": "3-of-5"
     },
     "reserve": {
-      "signers": 9,
-      "threshold": 6,
-      "display": "6-of-9",
-      "maximumThreshold": 6
+      "enabled": false,
+      "status": "NOT_DEPLOYED",
+      "signers": 0,
+      "threshold": 0,
+      "display": "NOT_DEPLOYED",
+      "maximumThreshold": 0
     },
-    "maximumApprovalsRequiredByWorldzPolicy": 6
+    "maximumApprovalsRequiredByWorldzPolicy": 3
   },
   "signerSlots": [
     {
       "slot": "SIGNER_01",
+      "label": "JayJayTeamDev",
       "operationsMember": true,
-      "reserveCandidate": true,
-      "solanaPublicKey": null,
+      "reserveCandidate": false,
+      "solanaPublicKey": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "UNASSIGNED"
+      "status": "REGISTERED__LIVE_MULTISIG_REVERIFY_REQUIRED"
     },
     {
       "slot": "SIGNER_02",
+      "label": "Stepper",
       "operationsMember": true,
-      "reserveCandidate": true,
-      "solanaPublicKey": null,
+      "reserveCandidate": false,
+      "solanaPublicKey": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "UNASSIGNED"
+      "status": "REGISTERED__LIVE_MULTISIG_REVERIFY_REQUIRED"
     },
     {
       "slot": "SIGNER_03",
+      "label": "Savage",
       "operationsMember": true,
-      "reserveCandidate": true,
-      "solanaPublicKey": null,
+      "reserveCandidate": false,
+      "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn",
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "UNASSIGNED"
+      "status": "REGISTERED__LIVE_MULTISIG_REVERIFY_REQUIRED"
     },
     {
       "slot": "SIGNER_04",
+      "label": "SolMusic",
       "operationsMember": true,
-      "reserveCandidate": true,
-      "solanaPublicKey": null,
+      "reserveCandidate": false,
+      "solanaPublicKey": "FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ",
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "UNASSIGNED"
+      "status": "REGISTERED__LIVE_MULTISIG_REVERIFY_REQUIRED"
     },
     {
       "slot": "SIGNER_05",
-      "operationsMember": true,
-      "reserveCandidate": true,
-      "solanaPublicKey": null,
-      "evmAddress": null,
-      "xrplAddress": null,
-      "suiPublicKey": null,
-      "status": "UNASSIGNED"
-    },
-    {
-      "slot": "SIGNER_06",
-      "operationsMember": true,
-      "reserveCandidate": true,
-      "solanaPublicKey": null,
-      "evmAddress": null,
-      "xrplAddress": null,
-      "suiPublicKey": null,
-      "status": "UNASSIGNED"
-    },
-    {
-      "slot": "SIGNER_07",
-      "operationsMember": true,
-      "reserveCandidate": true,
-      "solanaPublicKey": null,
-      "evmAddress": null,
-      "xrplAddress": null,
-      "suiPublicKey": null,
-      "status": "UNASSIGNED"
-    },
-    {
-      "slot": "SIGNER_08",
-      "operationsMember": true,
-      "reserveCandidate": true,
-      "solanaPublicKey": null,
-      "evmAddress": null,
-      "xrplAddress": null,
-      "suiPublicKey": null,
-      "status": "UNASSIGNED"
-    },
-    {
-      "slot": "SIGNER_09",
-      "operationsMember": true,
-      "reserveCandidate": true,
-      "solanaPublicKey": null,
-      "evmAddress": null,
-      "xrplAddress": null,
-      "suiPublicKey": null,
-      "status": "UNASSIGNED"
-    },
-    {
-      "slot": "SIGNER_10",
+      "label": "Mahammad",
       "operationsMember": true,
       "reserveCandidate": false,
-      "solanaPublicKey": null,
+      "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok",
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "UNASSIGNED"
+      "status": "REGISTERED__LIVE_MULTISIG_REVERIFY_REQUIRED"
     }
   ],
   "chains": {
@@ -132,15 +89,14 @@
         "multisigConfigAddress": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
         "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
         "vaultIndex": 0,
-        "currentGovernance": "2-of-3",
-        "targetGovernance": "5-of-10",
-        "status": "CURRENT_VAULT_VERIFIED__MEMBER_AND_THRESHOLD_UPGRADE_REQUIRED"
+        "currentGovernance": "USER_REPORTED_3_OF_5__LIVE_RECHECK_REQUIRED",
+        "targetGovernance": "3-of-5",
+        "status": "MEMBERS_REPORTED_ADDED__THRESHOLD_LIVE_RECHECK_REQUIRED"
       },
       "reserve": {
-        "targetGovernance": "6-of-9",
-        "multisigConfigAddress": null,
-        "vaultAddress": null,
-        "status": "NOT_DEPLOYED"
+        "enabled": false,
+        "status": "NOT_DEPLOYED",
+        "targetGovernance": null
       }
     },
     "evm": {
@@ -153,48 +109,49 @@
         "future supported EVM chains"
       ],
       "operations": {
-        "targetGovernance": "5-of-10",
+        "targetGovernance": "3-of-5",
         "safeAddress": null,
         "status": "NOT_DEPLOYED"
       },
       "reserve": {
-        "targetGovernance": "6-of-9",
-        "safeAddress": null,
-        "status": "NOT_DEPLOYED"
+        "enabled": false,
+        "status": "NOT_DEPLOYED",
+        "targetGovernance": null
       }
     },
     "xrpl": {
       "provider": "XRPL native SignerList multisigning",
       "operations": {
-        "targetGovernance": "5-of-10",
+        "targetGovernance": "3-of-5",
         "account": null,
-        "signerQuorum": 5,
+        "signerQuorum": 3,
         "status": "NOT_DEPLOYED"
       },
       "reserve": {
-        "targetGovernance": "6-of-9",
-        "account": null,
-        "signerQuorum": 6,
-        "status": "NOT_DEPLOYED"
+        "enabled": false,
+        "status": "NOT_DEPLOYED",
+        "targetGovernance": null
       }
     },
     "sui": {
       "provider": "Sui native multisig",
       "operations": {
-        "targetGovernance": "5-of-10",
+        "targetGovernance": "3-of-5",
         "multisigAddress": null,
         "status": "NOT_DEPLOYED"
       },
       "reserve": {
-        "targetGovernance": "6-of-9",
-        "multisigAddress": null,
-        "status": "NOT_DEPLOYED"
+        "enabled": false,
+        "status": "NOT_DEPLOYED",
+        "targetGovernance": null
       }
     }
   },
   "activation": {
     "mainnetFeeRoutingEnabled": false,
-    "rule": "A chain may activate fee routing only after signer addresses, chain-native multisig configuration, destination address and an end-to-end 10% fee-only route are independently verified.",
-    "noPrivateKeysInRepository": true
+    "rule": "A chain may activate fee routing only after the five signer addresses, chain-native 3-of-5 Operations multisig, destination address and the exact active fee route are independently verified. No Reserve Treasury is required while Reserve status is disabled.",
+    "noPrivateKeysInRepository": true,
+    "reserveSweepEnabled": false,
+    "reserveTreasuryRequired": false
   }
 }
