@@ -1,12 +1,16 @@
 {
-  "version": "WORLDZ-CORE-LEGACY-REVENUE-2026-10-01-A",
-  "name": "Worldz Legacy Core Revenue Share™",
+  "version": "WORLDZ-CORE-LEGACY-REVENUE-2026-10-01-B",
+  "name": "Worldz Legacy Core Market-Buy Pool™",
   "status": "SOURCE_CONFIGURED__MAINNET_ROUTING_DISABLED",
-  "purpose": "Give NBC, LMTD and INVEST a transparent share of eligible Worldz-controlled SOL revenue without funding historical distribution wallets or disturbing protected creator, referrer, impact or customer funds.",
+  "purpose": "Allocate one 15% Legacy Core bucket across 12 recorded Legacy tokens as equal market-buy allocations. Historical distribution wallets are never funding destinations.",
   "accountingBasis": "NET_WORLDZ_CONTROLLED_REVENUE_AFTER_REFUNDS_CHARGEBACKS_TAXES_EXTERNAL_PROCESSOR_PROTOCOL_FEES_AND_PROTECTED_EARMARKS",
   "asset": "SOL",
   "poolBps": 1500,
   "poolPercent": 15,
+  "beneficiaryCount": 12,
+  "equalPerTokenBpsOfEligibleRevenue": 125,
+  "equalPerTokenPercentOfEligibleRevenue": 1.25,
+  "minimumPerTokenPercentOfEligibleRevenue": 1,
   "eligibleSources": [
     "community_suite_trial",
     "community_suite_rent",
@@ -18,9 +22,9 @@
     "hosted_worldz_services",
     "worldz_subscriptions",
     "worldz_affiliate_partner_revenue",
-    "worldz_launchpad_platform_share"
+    "worldz_launchpad_legacy_bucket"
   ],
-  "sourceRule": "For WorldzLaunchPad, calculate this only from the Worldz platform share after the launch/token fee split. Do not reduce creator, referrer, Legacy Flywheel or Impact allocations.",
+  "sourceRule": "The 15% Legacy Core bucket is the complete Legacy allocation for an eligible receipt. Do not layer a second Legacy deduction on the same revenue. Split it equally across all 12 recorded Legacy tokens.",
   "excludedSources": [
     "customer_principal_or_pass_through_funds",
     "refunds_and_chargebacks",
@@ -33,45 +37,163 @@
     "liquidity_principal",
     "borrowed_or_investment_principal"
   ],
+  "forbiddenHistoricalDistributionWallets": [
+    "PdABvvq4F7YjwsVRq2CCQeBNZTBq5WfkQvn8VmhRY34",
+    "2turuerVWbeDPRZfK2iixzRnrC6zjbAzHo9NZfww6rFn",
+    "Hd3cMfHMHQe4j8xfpnbDkWEgDo4gbrH2eimh6vpxjC37",
+    "4DpR79PKKQXHVZipkvb1fMAfvZNJo7ktfKdkjwrjjqAA"
+  ],
   "beneficiaries": [
     {
       "order": 1,
-      "name": "Next Big Coin",
-      "symbol": "NBC",
-      "tokenMint": null,
-      "tokenMintStatus": "VERIFY_BEFORE_HOLDER_REWARDS_OR_BUYBACK_EXECUTION",
-      "knownDevWallet": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt",
-      "historicalDistributionWallet": "PdABvvq4F7YjwsVRq2CCQeBNZTBq5WfkQvn8VmhRY34",
-      "shareMode": "EQUAL_THREE_WAY",
+      "tokenKey": "PDC_ORIGINAL",
+      "name": "Purple Diamond Crew",
+      "symbol": "PDC",
+      "tokenMint": "F82HFwxDLKFAbQWq7BmniWWxMgUerQsVu8jS357epump",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "historicalDistributionWallet": null,
+      "knownDevWallet": null,
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
       "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
     },
     {
       "order": 2,
-      "name": "Limited Edition",
-      "symbol": "LMTD",
-      "tokenMint": "Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY",
-      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_BEFORE_EXECUTION",
-      "knownDevWallet": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
-      "historicalDistributionWallet": "2turuerVWbeDPRZfK2iixzRnrC6zjbAzHo9NZfww6rFn",
-      "shareMode": "EQUAL_THREE_WAY",
+      "tokenKey": "PDC1_FIRST",
+      "name": "The Purple Diamond Crew",
+      "symbol": "PDC1",
+      "tokenMint": "PDC1K9aG6vAg5jFYkLin2tdTgwqZypsdvVHhHN2WnWw",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "historicalDistributionWallet": null,
+      "knownDevWallet": null,
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
       "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
     },
     {
       "order": 3,
+      "tokenKey": "PDC1_SECOND",
+      "name": "Purple Diamond Crew",
+      "symbol": "PDC1",
+      "tokenMint": "PDC1NgvtvLZwnopTfQdzXT5iAqBeGyLdFXEcqnvsR52",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "historicalDistributionWallet": null,
+      "knownDevWallet": null,
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    },
+    {
+      "order": 4,
+      "tokenKey": "PDCMAGA",
+      "name": "Purple Diamond Crew – MAGA Edition",
+      "symbol": "PDCMAGA",
+      "tokenMint": "7mwWRQeNpwWrnNhRpC48k7xQCdjCXDWfLLuYsphupump",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "historicalDistributionWallet": null,
+      "knownDevWallet": null,
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    },
+    {
+      "order": 5,
+      "tokenKey": "PDCSHARE",
+      "name": "PurpleDiamondCrewShares",
+      "symbol": "PDCshare",
+      "tokenMint": "PDCLsBaTM3MxCzTWNoRvQejZ4kkhAWZiSc3ipCsoFuE",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "historicalDistributionWallet": null,
+      "knownDevWallet": null,
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    },
+    {
+      "order": 6,
+      "tokenKey": "PURPLE_DC",
+      "name": "Purple Diamond Crew",
+      "symbol": "PurpleDC",
+      "tokenMint": "9Jd67VEgqWA2K5mck7yiYGxfLrQnmrTnXXzDYE3b7MLf",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "historicalDistributionWallet": null,
+      "knownDevWallet": null,
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    },
+    {
+      "order": 7,
+      "tokenKey": "PURPLE_OG",
+      "name": "OG Purple Diamond",
+      "symbol": "PurpleOg",
+      "tokenMint": "DyZP9zn6vRu8J8XCQLNCREgCc12YN4JndnrmE5Upump",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "historicalDistributionWallet": null,
+      "knownDevWallet": null,
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    },
+    {
+      "order": 8,
+      "tokenKey": "PCC1_LEGACY",
+      "name": "Purple Diamond Crew – PCC1 Legacy",
+      "symbol": "PDC1",
+      "tokenMint": "DcekG6rLbQ3K5LtZfSMLgecfqnFAZgJUSpoY7tBgmuGv",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "historicalDistributionWallet": null,
+      "knownDevWallet": null,
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    },
+    {
+      "order": 9,
+      "tokenKey": "INVEST",
       "name": "INVEST",
       "symbol": "INVEST",
       "tokenMint": "VeSt6vaWE5JsT36sVCzL21daiY7nNNs73TJcJMHgnjC",
-      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_BEFORE_EXECUTION",
-      "knownDevWallet": null,
       "historicalDistributionWallet": "Hd3cMfHMHQe4j8xfpnbDkWEgDo4gbrH2eimh6vpxjC37",
-      "shareMode": "EQUAL_THREE_WAY",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "knownDevWallet": null,
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    },
+    {
+      "order": 10,
+      "tokenKey": "LMTD",
+      "name": "Limited Edition",
+      "symbol": "LMTD",
+      "tokenMint": "Lmtdfb2b392STncVxf2rD6csY4w1rxuHEMizv7vXVtY",
+      "knownDevWallet": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
+      "historicalDistributionWallet": "2turuerVWbeDPRZfK2iixzRnrC6zjbAzHo9NZfww6rFn",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    },
+    {
+      "order": 11,
+      "tokenKey": "NBC",
+      "name": "Next Big Coin",
+      "symbol": "NBC",
+      "tokenMint": null,
+      "knownDevWallet": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt",
+      "historicalDistributionWallet": "PdABvvq4F7YjwsVRq2CCQeBNZTBq5WfkQvn8VmhRY34",
+      "tokenMintStatus": "VERIFY_MINT_BEFORE_MARKET_BUY_EXECUTION",
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
+      "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
+    },
+    {
+      "order": 12,
+      "tokenKey": "HSSC",
+      "name": "Hope St Support Coin",
+      "symbol": "HSSC",
+      "tokenMint": "29xKqmkvhYvMgWMqHgUoimzfBxweLUvcASAJUHHSkJMW",
+      "protectedCommitment": "50% of HSSC creator/reward revenue is reserved for the Hope St / HopeStreet support commitment; this is separate from the Legacy Core market-buy allocation and does not imply charity endorsement.",
+      "tokenMintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "historicalDistributionWallet": null,
+      "knownDevWallet": null,
+      "shareMode": "EQUAL_12_WAY__125_BPS_OF_ELIGIBLE_REVENUE",
       "dedicatedRevenueVault": "PENDING_MULTISIG_OR_PDA"
     }
   ],
   "perTokenUseBps": {
-    "transparentMarketBuyback": 5000,
-    "liquidityGrowth": 2500,
-    "holderRewards": 2500,
+    "transparentMarketBuyback": 10000,
+    "liquidityGrowth": 0,
+    "holderRewards": 0,
     "total": 10000
   },
   "buybackControls": {
@@ -83,27 +205,20 @@
     "noWashTrading": true,
     "noSelfTrading": true,
     "noFakeBuyAlerts": true,
-    "rule": "If liquidity, price-impact, token identity, treasury authority or market-data checks fail, accrue the allocation instead of trading."
-  },
-  "holderRewardControls": {
-    "executionEnabled": false,
-    "distributionWalletsExcluded": true,
-    "systemWalletsExcluded": true,
-    "liquidityVaultsExcluded": true,
-    "proofOfHoldingRequired": true,
-    "noGuaranteedReturn": true
+    "rule": "Each token's 1.25% share is reserved for transparent market buys. If mint identity, live liquidity, route quality, price impact, treasury authority or market-data checks fail, accrue that token's share instead of trading."
   },
   "treasuryControls": {
     "liveTransfersEnabled": false,
-    "mode": "ACCRUE_LEDGER_UNTIL_DEDICATED_MULTISIG_OR_PDA_READY",
-    "dedicatedVaultPerTokenRequired": true,
+    "mode": "ACCRUE_LEDGER_UNTIL_MULTISIG_AND_MARKET_ROUTE_READY",
     "historicalDistributionWalletFundingForbidden": true,
     "mainnetExecutionRequiresExplicitTreasuryApproval": true,
     "publicWorldzProofReceiptRequired": true
   },
-  "protectedExistingRules": {
-    "launchpadCreatorReferrerLegacyImpactSplitUnchanged": true,
-    "worldzApp50Liquidity50DevelopmentPolicyUnchanged": true,
-    "historicalDistributionWalletsRemainWatchOnly": true
+  "protectedRules": {
+    "totalLegacyAllocationPercent": 15,
+    "allTwelveReceiveEqualShare": true,
+    "hsscHopeStCommitmentPreserved": true,
+    "noSecondLegacyDeduction": true,
+    "worldzApp50Liquidity50DevelopmentPolicyUnchanged": true
   }
 }
