@@ -53,9 +53,20 @@ public=inheritance["economicsProfiles"]["publicCreatorConfigurable"]
 policy=platform["feePolicy"]
 assert Decimal(str(public["projectTradingFeeMinPercent"]))==Decimal(str(policy["projectTradingFeeMinPercent"]))
 assert Decimal(str(public["projectTradingFeeMaxPercent"]))==Decimal(str(policy["projectTradingFeeMaxPercent"]))
-assert Decimal(str(public["worldzLaunchPadShareOfCollectedProjectFeePercent"]))==Decimal(str(policy["worldzLaunchPadShareOfCollectedProjectFeePercent"]))
+assert public["worldzLaunchPadContributionChoicesPercent"]==policy["worldzLaunchPadContributionChoicesPercent"]==[3,5,8]
+assert public["worldzLaunchPadContributionDefaultPercent"]==policy["worldzLaunchPadContributionDefaultPercent"]==5
+assert public["legacyCorePercent"]==policy["legacyCorePercent"]==15
+assert public["worldzCoreFamilyMarketBuyPercent"]==policy["coreFamilyMarketBuyPercent"]==12
 assert public["walletTransferTaxPercent"]==policy["walletTransferTaxPercent"]==0
 assert inheritance["tokenAllocationBoundary"]["publicCreatorRoute"]["implicitWorldzTokenSupplySharePercent"]==policy["worldzLaunchPadShareOfTokenSupplyPercent"]==0
+v2=inheritance["economicsProfiles"]["worldzFeeFlowV2"]
+assert v2["launchPadContributionChoicesPercent"]==[3,5,8]
+assert v2["launchPadContributionDefaultPercent"]==5
+assert v2["fixedPercent"]["creatorDeveloper"]==10
+assert v2["fixedPercent"]["launchReferrer"]==15
+assert v2["fixedPercent"]["legacyCore"]==15
+assert v2["fixedPercent"]["worldzCoreFamilyMarketBuys"]==12
+assert v2["treasuryReserveByLaunchPadChoice"]=={"3":12,"5":10,"8":7}
 
 assert product["creatorEconomics"]["defaultWorldzControlledSharePercent"]==51
 assert product["referralEconomics"]["defaultWorldzControlledSharePercent"]==17
