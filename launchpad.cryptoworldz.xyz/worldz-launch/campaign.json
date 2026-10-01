@@ -1,14 +1,16 @@
 {
-  "campaign": "WORLDZLAUNCHPAD_WORLDZ_LAUNCH_2026_09_23",
+  "campaign": "WORLDZLAUNCHPAD_PARTY_V2_2026_10_01",
   "status": "PUBLIC",
-  "title": "WorldzLaunchPad™ + ZED LED Command Centre MAX™",
+  "title": "WorldzLaunchPad™ • Fee Flow V2 • Community • Command Centre",
   "urls": {
     "campaign": "https://launchpad.cryptoworldz.xyz/worldz-launch/",
     "launchpad": "https://launchpad.cryptoworldz.xyz/",
     "commandCentre": "https://cryptoworldz.xyz/command-centre-max/",
     "cryptoWorldz": "https://cryptoworldz.xyz/",
-    "oneWorldz": "https://oneworldz.com/",
-    "donateWorldz": "https://donateworldz.com/"
+    "donateWorldz": "https://donateworldz.com/",
+    "launchStation": "https://launchpad.cryptoworldz.xyz/launch-station/",
+    "community": "https://launchpad.cryptoworldz.xyz/community/",
+    "integrations": "https://launchpad.cryptoworldz.xyz/integrations/"
   },
   "wldz": {
     "name": "WORLDZ",
@@ -29,15 +31,20 @@
     }
   },
   "launchpadFeatures": [
+    "Worldz Launch Station™",
     "WorldzMINT™",
+    "Existing Mint Intake",
     "Worldz Flash™",
     "Worldz Curve™",
     "Worldz Curve Pro™",
     "Worldz CrossPair™",
     "Worldz OmniChain™",
+    "Worldz Fee Flow™ V2",
     "Worldz Safe Launch Standard™",
     "Worldz Proof™",
-    "Worldz Trust Orbit™"
+    "Worldz Trust Orbit™",
+    "WorldDexPush™",
+    "WorldzLaunch Community™"
   ],
   "commandCentre": {
     "registeredCommandEntries": 139,
@@ -60,18 +67,40 @@
     "x": [
       "https://x.com/WorldzLaunchPad",
       "https://x.com/CryptoWorldzX",
-      "https://x.com/OneWorldzX",
       "https://x.com/JayJayTeamDev"
     ],
     "telegram": [
       "https://t.me/CryptoWLDZ",
       "https://t.me/CryptoWorldzHQ",
-      "https://t.me/CryptoWorldzRaaiiiddTeam"
-    ]
+      "https://t.me/CryptoWorldzRaaiiiddTeam",
+      "https://t.me/GoFuckYourSelfTG"
+    ],
+    "pumpSquad": {
+      "name": "TheChaos",
+      "joinUrl": "https://join.pump.fun/HSag/rwtn4stv",
+      "mode": "EXTERNAL_LINK"
+    }
   },
   "images": {
     "commandCentre": "https://cryptoworldz.xyz/command-centre-five.png",
     "wldz": "https://hknymhhyqldtzmplzuzh.supabase.co/storage/v1/object/public/worldz-genesis-art/wldz/29c018b7-25f0-4b00-bb59-6f9711e462ae.jpg"
   },
-  "separationNotice": "CryptoWorldz and WorldzLaunchPad are crypto/technology activities. OneWorldz and DonateWorldz remain distinct humanitarian and donation pathways."
+  "separationNotice": "CryptoWorldz and WorldzLaunchPad are crypto/technology activities. DonateWorldz remains a separate humanitarian/support pathway.",
+  "feeFlowV2": {
+    "launchPadChoicesPercent": [
+      3,
+      5,
+      8
+    ],
+    "defaultPercent": 5,
+    "legacyCorePercent": 15,
+    "legacyTokenCount": 12,
+    "worldzCoreBuyPercent": 12,
+    "coreSymbols": [
+      "WLDZ",
+      "RVIV",
+      "PNEX",
+      "MRCL"
+    ]
+  }
 }
