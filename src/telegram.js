@@ -279,7 +279,7 @@ Use /help to open the Command Menu.
   bot.onText(/^\/help(?:@\w+)?$/, (msg) =>
     send(
       msg.chat.id,
-      "🤖💜 ZED — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/next\n/raids\n/raaiiidd\n/wallet\n/kitty\n/worldzvotes — hourly token voting\n/vote SYMBOL [chain] — favourite token vote\n/cancel\n/community\n/website\n/dipshit — meet the blue Worldz Dude\n\n⚠️ Never provide a private key or seed phrase."
+      "🤖💜 ZED — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/next\n/raids\n/raaiiidd\n/wallet\n/kitty\n/worldzvotes — hourly token voting\n/vote SYMBOL [chain] — favourite token vote\n/worldzvoice — civic public voice\n/worldzballots — civic ballot list\n/cancel\n/community\n/website\n/dipshit — meet the blue Worldz Dude\n\n⚠️ Never provide a private key or seed phrase."
     )
   );
 
