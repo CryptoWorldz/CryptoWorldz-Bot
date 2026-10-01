@@ -1,0 +1,114 @@
+{
+  "version": "WORLDZLAUNCH-READINESS-2026-10-01-A",
+  "status": "PUBLIC_PRODUCT_READY__MAINNET_MARKET_EXECUTION_GATED",
+  "currentHost": "launchpad.cryptoworldz.xyz",
+  "futureHost": {
+    "host": "worldzlaunch.com",
+    "ownedOrLive": false,
+    "migrationPrepared": true
+  },
+  "economics": {
+    "policy": "WORLDZ-FEE-FLOW-V2",
+    "launchPadChoicesPercent": [
+      3,
+      5,
+      8
+    ],
+    "defaultPercent": 5,
+    "legacyCorePercent": 15,
+    "legacyTokenCount": 12,
+    "coreFamilyBuyPercent": 12
+  },
+  "launchPaths": {
+    "launchStation": {
+      "path": "/launch-station/",
+      "status": "PUBLIC_READY"
+    },
+    "mintNew": {
+      "path": "/mint/",
+      "status": "SOLANA_MAINNET_MINT_BETA"
+    },
+    "importExistingMint": {
+      "path": "/launch-station/?mode=existing",
+      "status": "PUBLIC_READ_ONLY_PREFLIGHT_READY"
+    },
+    "flashDevnet": {
+      "path": "/devnet/",
+      "status": "DEVNET_EXECUTABLE__V2_SNAPSHOT_READY"
+    },
+    "curveDevnet": {
+      "path": "/curve/",
+      "status": "DEVNET_BETA__LEGACY_ADAPTER_REVIEW"
+    },
+    "curveProDevnet": {
+      "path": "/curve-pro/",
+      "status": "DEVNET_EXECUTABLE__V2_LEDGER_SNAPSHOT_READY__V2_ONCHAIN_SETTLEMENT_NOT_YET_PROVEN"
+    },
+    "solanaMainnetMarket": {
+      "path": "/mainnet/",
+      "status": "GATED"
+    }
+  },
+  "nextWorldzTest": {
+    "name": "PHENIX",
+    "symbol": "PNEX",
+    "supply": 250000000,
+    "canonicalMint": null,
+    "route": "MINT_NEW_UNLESS_REAL_EXISTING_MINT_IS_VERIFIED",
+    "automaticMainnetBroadcast": false
+  },
+  "community": {
+    "hub": {
+      "path": "/community/",
+      "status": "PUBLIC_READY"
+    },
+    "commandCentre": {
+      "url": "https://cryptobotz.cryptoworldz.xyz/miniapp/",
+      "status": "CONNECTED_SURFACE"
+    },
+    "dipshit": {
+      "url": "https://t.me/DipShitBossBot",
+      "status": "CONNECTED_SURFACE"
+    },
+    "pumpSquad": {
+      "name": "TheChaos",
+      "url": "https://join.pump.fun/HSag/rwtn4stv",
+      "status": "EXTERNAL_LINK"
+    },
+    "telegram": {
+      "status": "CONNECTED_SURFACES"
+    },
+    "x": {
+      "status": "OFFICIAL_API_ARCHITECTURE_READY__LIVE_ACTIONS_REQUIRE_CREDENTIALS_AND_USAGE_CREDITS"
+    }
+  },
+  "integrations": {
+    "xApi": {
+      "contract": "worldzpad-omnichain/integrations/x-api.v1.json",
+      "status": "ARCHITECTURE_READY"
+    },
+    "pump": {
+      "contract": "worldzpad-omnichain/integrations/pump.v1.json",
+      "status": "LINK_AND_ONCHAIN_INTAKE_READY"
+    },
+    "worldDexPush": {
+      "path": "/worlddexpush/",
+      "status": "PUBLIC_CONTROL_SURFACE"
+    },
+    "proof": {
+      "path": "/trust/",
+      "status": "PUBLIC_PROOF_SURFACE"
+    },
+    "commandCentre": {
+      "status": "CONNECTED"
+    }
+  },
+  "mainnetBlockers": [
+    "Fee Flow V2 chain-native settlement router proof",
+    "approved Treasury Multisig execution path",
+    "chain/venue security and simulation proof",
+    "LP lock and vesting enforcement proof where required",
+    "final human launch authorization"
+  ],
+  "truthRule": "No page, config snapshot, simulation, testnet transaction or external link is enough by itself to claim mainnet market execution."
+}
