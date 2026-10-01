@@ -92,3 +92,15 @@ test("readiness contract distinguishes public readiness from mainnet market exec
   assert.equal(r.launchPaths.solanaMainnetMarket.status,"GATED");
   assert.equal(r.community.pumpSquad.name,"TheChaos");
 });
+
+test("Command Centre exposes Launch Station and Community without fund authority",()=>{
+  const experience=read("public/miniapp/experience.js");
+  const router=read("src/auto/zed-router.js");
+  const suite=read("src/community-suite.js");
+  assert.match(experience,/Launch Token/);
+  assert.match(experience,/Launch Community/);
+  assert.match(experience,/launch-station/);
+  assert.match(router,/WORLDZ-FEE-FLOW-V2/);
+  assert.match(router,/pumpSquadExternalRail: "TheChaos"/);
+  assert.match(suite,/they do not gain authority to move launch funds/);
+});
