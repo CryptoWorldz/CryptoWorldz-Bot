@@ -771,8 +771,10 @@ jobs:
                   capability_code,capability_body=get(base+'/capabilities/?verify=capability-v1')
                   tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
                   launch_station_code,launch_station_body=get(base+'/launch-station/?verify=party-v2')
-                  advertise_code,advertise_body=get(base+'/advertise/?verify=ads-v1')
-                  ads_js_code,ads_js_body=get(base+'/ads.js?verify=ads-v1')
+                  advertise_code,advertise_body=get(base+'/advertise/?verify=ads-v2')
+                  ads_js_code,ads_js_body=get(base+'/ads.js?verify=ads-v2')
+                  spotlight_api='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launchpad-ads'
+                  spotlight_api_code,spotlight_api_body=get(spotlight_api+'?slot=home_spotlight&verify=ads-v2')
                   community_code,community_body=get(base+'/community/?verify=party-v2')
                   integrations_code,integrations_body=get(base+'/integrations/?verify=party-v2')
                   ready_code,ready_body=get(base+'/ready/?verify=party-v2')
@@ -866,7 +868,14 @@ jobs:
                   assert platform['worldDexPush']['dexScreenerControl']['worldzSpecialPartnershipState']=='PROPOSAL_ONLY'
 
                   assert advertise_code==200 and 'WORLDZ SPOTLIGHT' in advertise_body and 'A$5' in advertise_body and 'A$22' in advertise_body
+                  assert 'ORDER STATUS + PAYMENT' in advertise_body and 'SUBMIT PAYMENT RECEIPT' in advertise_body
+                  assert 'No payment is due yet' in advertise_body and 'payment_review' not in advertise_body.lower()
                   assert ads_js_code==200 and 'SPONSORED' in ads_js_body and 'worldz-launchpad-ads' in ads_js_body
+                  assert spotlight_api_code==200
+                  spotlight_feed=json.loads(spotlight_api_body)
+                  assert spotlight_feed.get('ok') is True and spotlight_feed.get('slot')=='home_spotlight'
+                  assert isinstance(spotlight_feed.get('ads'),list)
+                  print('WORLDZ_SPOTLIGHT_PAYMENT_FLOW_LIVE=PASS review_before_payment=1 receipt_intake=1 public_feed=1')
                   assert 'data-worldz-ad-slot="home_spotlight"' in body
                   assert 'data-worldz-ad-slot="community_spotlight"' in community_body
                   assert 'data-worldz-ad-slot="launch_station_spotlight"' in launch_station_body
