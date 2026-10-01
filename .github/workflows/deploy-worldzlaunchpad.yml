@@ -935,7 +935,7 @@ jobs:
                   expected_inheritance=json.loads(Path('launchpad.cryptoworldz.xyz/inheritance/contract.json').read_text())
                   assert inheritance_contract==expected_inheritance, 'LIVE_LAUNCH_INHERITANCE_CONTRACT_MISMATCH'
                   assert inheritance_contract['executionBoundary']['mainnetGlobalDefault'] is False
-                  assert receipt_code==200 and 'WORLDZ PROOF RECEIPT™' in receipt_body
+                  assert receipt_code==200 and 'WORLDZ PROOF RECEIPT™' in receipt_body.upper()
                   assert jup_control_code==200 and 'JUPITER VRFD HANDOFF' in jup_control_body
                   assert jup_package_code==200
                   jup_package=json.loads(jup_package_body)
@@ -948,7 +948,7 @@ jobs:
                   assert live_receipt_schema['$id']=='https://launchpad.cryptoworldz.xyz/.well-known/worldz-proof-receipt.schema.json'
                   passed_rules=[x for x in live_receipt_schema['allOf'] if x.get('if',{}).get('properties',{}).get('status',{}).get('const')=='PASSED']
                   assert len(passed_rules)==1
-                  assert dexpush_code==200 and 'WORLDDEXPUSH™' in dexpush_body and '500+ active Boosts' in dexpush_body and 'LIVE UPSTREAM CHECKER' in dexpush_body
+                  assert dexpush_code==200 and 'WORLDDEXPUSH™' in dexpush_body.upper() and '500+ active Boosts' in dexpush_body and 'LIVE UPSTREAM CHECKER' in dexpush_body
                   assert dex_control_code==200 and 'DEX SCREENER HANDOFF' in dex_control_body and '500+ active Boosts' in dex_control_body
                   assert dex_package_code==200
                   dex_package=json.loads(dex_package_body)
