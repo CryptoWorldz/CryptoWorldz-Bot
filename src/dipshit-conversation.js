@@ -59,6 +59,29 @@ function stripDipshitAddressing(text, botUsername = DEFAULT_BOT_USERNAME) {
   return cleaned.replace(/\s{2,}/g, " ").trim();
 }
 
+
+function localDipshitFallback(message) {
+  const text = String(message || "").toLowerCase();
+
+  if (/\b(join|register|become|legend)\b/.test(text)) {
+    return "To join as a CryptoWorldz Legend: use /register, then /wallet to link your public Solana wallet, /profile to view your Legend Profile, and /raid or /next to join active Raids and earn Legend Points.";
+  }
+  if (/\b(raid|raids|raider|next)\b/.test(text)) {
+    return "Ronald Raider is the Raid system. Use /raid for the active Raid, /next for the next queued Raid, and /raids to view all active Raids.";
+  }
+  if (/\b(vote|voting|token vote)\b/.test(text)) {
+    return "Worldz voting is hourly token popularity voting. Use /worldzvotes to open it or /vote to vote for your favourite token this hour.";
+  }
+  if (/\b(wallet|solana address)\b/.test(text)) {
+    return "Use /wallet to link a public Solana wallet to your Legend Profile. Never send a seed phrase or private key.";
+  }
+  if (/\b(help|commands|menu)\b/.test(text)) {
+    return "Use /help for the ZED command menu. Core routes include /register, /profile, /wallet, /raid, /next, /worldzvotes, /shillpoints and /zedsettings.";
+  }
+
+  return "I'm online, but my conversational AI provider is unavailable right now. Core Worldz controls still work: /help, /check, /raid, /next, /profile and /report <problem>.";
+}
+
 async function callDipshitAI({ apiKey, model, message, history, context, fetchImpl = fetch }) {
   if (!apiKey) throw new Error("openai_api_not_configured");
 
@@ -97,7 +120,7 @@ async function callDipshitAI({ apiKey, model, message, history, context, fetchIm
         "The supplied Worldz runtime capability registry is authoritative about which built features exist and their exact commands.",
         "If the user asks whether a listed feature exists, do not say you cannot confirm it. Say it exists, distinguish the group state if known, and give the exact command.",
         "Example: WorldPing exists. A normal alert route is /worldping alert | TITLE | MESSAGE. Group licence/mode still controls whether that command can run there.",
-        "You can explain and prepare commands, but do not claim ZED or another subsystem executed an action unless the runtime result proves it."
+        "You can explain and prepare commands, but do not claim ZED or another subsystem executed an action unless the runtime result proves it.",
         `RUNTIME CONTEXT JSON: ${JSON.stringify(context)}`
       ].join(" "),
       input: [...normalizeDipshitHistory(history), { role: "user", content: String(message || "").slice(0, 1200) }]
@@ -210,7 +233,7 @@ function registerDipshitConversation({
         name: error?.name || "Error",
         code: error?.message || "unknown"
       });
-      return send(msg.chat.id, "⚠️ My conversational brain hit a problem. /check still works, and /report <problem> will send the issue to the Worldz operator.");
+      return send(msg.chat.id, `💙 ${localDipshitFallback(message)}`);
     }
   };
 
@@ -234,6 +257,7 @@ module.exports = {
   extractDipshitResponseText,
   moderationRequiresHardBlock,
   normalizeDipshitHistory,
+  localDipshitFallback,
   registerDipshitConversation,
   shouldHandleDipshitConversation,
   stripDipshitAddressing
