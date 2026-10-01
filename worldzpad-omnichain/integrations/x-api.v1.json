@@ -1,0 +1,35 @@
+{
+  "version": "2026-10-01-A",
+  "name": "Worldz X Integration Rail™",
+  "status": "ARCHITECTURE_READY__LIVE_ACTIONS_REQUIRE_OFFICIAL_X_CREDENTIALS_AND_USAGE_CREDITS",
+  "api": "X API v2",
+  "officialDocs": "https://docs.x.com/x-api/introduction",
+  "capabilities": [
+    "posts",
+    "users",
+    "direct_messages",
+    "communities",
+    "metrics",
+    "filtered_stream",
+    "x_activity",
+    "webhooks"
+  ],
+  "worldzComponents": [
+    "WorldzLaunchPad",
+    "G.R.A.C.E.",
+    "Ronald Raider",
+    "WorldzCast",
+    "Command Centre"
+  ],
+  "prohibited": [
+    "scraping_as_primary_integration",
+    "credential_exposure",
+    "claiming_x_partnership_without_evidence",
+    "claiming_x_money_access_without_official_access"
+  ],
+  "fiveYearRail": {
+    "xMoneySeparate": true,
+    "worldzPayProviderAdapterSeparate": true,
+    "officialAccessRequired": true
+  }
+}
