@@ -80,6 +80,17 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
       ],
       feePolicy: {
         version: "WORLDZ-FEE-FLOW-V2",
+        targetGrossTraderFeeBpsWhereProven: 75,
+        targetGrossTraderFeePercentWhereProven: 0.75,
+        dynamicFeeDefault: false,
+        worldzControlledSplitPercent: {
+          creator: 51,
+          referrer: 17,
+          legacyFlywheel: 15,
+          worldzLaunchPad: 8.5,
+          impact: 8.5
+        },
+        legacyAdapterProfileOnly: true,
         launchPadContributionChoicesPercent: [3, 5, 8],
         launchPadContributionDefaultPercent: 5,
         fixedSplitPercent: {
