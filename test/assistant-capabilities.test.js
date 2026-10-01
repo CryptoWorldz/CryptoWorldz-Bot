@@ -17,13 +17,20 @@ test("shared AI capability registry always knows WorldPing and its exact command
   assert.match(formatCapabilitySummary(context), /WorldPing/);
 });
 
-test("capability catalog covers the sale-facing Community Suite modules", () => {
+test("capability catalog covers sale-facing Community Suite modules without governance", () => {
   const keys = new Set(CAPABILITY_CATALOG.map((row) => row.key));
-  for (const key of ["ronald_raider","shill_rewards","rex_secureguard","alice_support","custom_ai","worldzscan","market_alerts","wallet_watch","calendar","giveaways","votes","govern","inbox","worldzcast","social","launchpad","webhooks"]) {
+  for (const key of ["ronald_raider","shill_rewards","rex_secureguard","alice_support","custom_ai","worldzscan","market_alerts","wallet_watch","calendar","giveaways","votes","inbox","worldzcast","social","launchpad","webhooks"]) {
     assert.ok(keys.has(key), key);
   }
+  assert.equal(keys.has("govern"), false);
 });
 
+test("Worldz Votes capability exposes hourly favourite-token voting", async () => {
+  const context = await buildAssistantCapabilityContext({ supabase: null, chatId: -100123 });
+  const votes = context.capabilities.find((row) => row.key === "votes");
+  assert.ok(votes.member_commands.some((command) => command.startsWith("/vote ")));
+  assert.match(votes.summary, /rolling hour/i);
+});
 
 test("WorldPing existence questions bypass model guessing and return the exact command", async () => {
   const context = await buildAssistantCapabilityContext({ supabase: null, chatId: -100123 });
