@@ -869,7 +869,7 @@ jobs:
 
                   assert advertise_code==200 and 'WORLDZ SPOTLIGHT' in advertise_body and 'A$5' in advertise_body and 'A$22' in advertise_body
                   assert 'ORDER STATUS + PAYMENT' in advertise_body and 'SUBMIT PAYMENT RECEIPT' in advertise_body
-                  assert 'No payment is due yet' in advertise_body and 'payment_review' not in advertise_body.lower()
+                  assert 'No payment is due yet' in advertise_body and 'Payment happens after approval.' in advertise_body
                   assert ads_js_code==200 and 'SPONSORED' in ads_js_body and 'worldz-launchpad-ads' in ads_js_body
                   assert spotlight_api_code==200
                   spotlight_feed=json.loads(spotlight_api_body)
