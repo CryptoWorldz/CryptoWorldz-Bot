@@ -161,6 +161,8 @@ const COMMAND_GROUPS = Object.freeze([
     ["cause_add", "Add a cause"], ["identify", "Identify/register a Telegram destination"], ["setx", "Link an X page to a project"],
     ["gracestatus", "Check live Grace X runtime"], ["metacheck", "Check Meta OAuth configuration safely"],
     ["adbudget", "Create an advertising budget record"], ["adapprove", "Approve an advertising budget record"],
+    ["launchads", "Review Worldz Spotlight ad orders"], ["launchadapprove", "Approve a Spotlight ad and set its SOL/USDC quote"],
+    ["launchadreject", "Reject a Spotlight ad order"], ["launchadactivate", "Verify payment and activate a Spotlight ad"],
     ["suiteapprove", "Approve a Community Suite licence/package after payment review"],
     ["networkcreate", "Create a multi-group network licence"], ["networkapprove", "Approve a network group slot"],
     ["networkremove", "Remove a group from a network licence"],

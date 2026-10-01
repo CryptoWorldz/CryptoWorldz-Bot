@@ -41,6 +41,7 @@ const { createGraceWorker } = require("./grace/worker");
 const { configWarnings, loadConfig } = require("./config");
 const { createHttpApp } = require("./http");
 const { registerLegendV8System } = require("./legend-v8");
+const { registerLaunchpadAds } = require("./launchpad-ads");
 const { registerOneWorldzPublicCors } = require("./oneworldz-public-cors");
 const { registerRoleProfileHandler } = require("./profile-role");
 const { registerProjectWalletSystem } = require("./project-wallets");
@@ -226,6 +227,8 @@ async function start() {
   registerZedGuide({ app, repository, config, supabase });
   startupStage = "register_command_centre";
   registerCommandCentreHandlers({ bot, repository, config, supabase });
+  startupStage = "register_launchpad_ads";
+  registerLaunchpadAds({ bot, config, supabase });
   startupStage = "register_community_suite";
   registerCommunitySuiteHandlers({ bot, config, supabase });
   startupStage = "register_community_social";
