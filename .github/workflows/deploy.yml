@@ -335,7 +335,18 @@ jobs:
               text=Path(path).read_text(encoding='utf-8')
               assert url in text and '<iframe' not in text.lower(), name
 
-          print(f'CONTRACT=PASS sites=18 pages={len(urls)} mission_system=1 specialist_worldz=10 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 jayjay_vision_support=1 community_links=35 core_style=1')
+          reference=Path('oneworldz.com/integrityworldz/index.html').read_text(encoding='utf-8')
+          for required in (
+              'WORLDZ REFERENCE #001',
+              'data-worldz-reference="001"',
+              'data-evidence-register="v1"',
+              'Government Service Accountability',
+              'Correspondence Evidence Register',
+              'Public Money Behind the Services',
+          ):
+              assert required in reference, ('worldz-reference-001-local', required)
+
+          print(f'CONTRACT=PASS sites=18 pages={len(urls)} mission_system=1 specialist_worldz=10 researchworldz=1 lawworldz=1 foodworldz=1 water_mission=1 jayjay_vision_support=1 community_links=35 core_style=1 worldz_reference_001=1')
           PY
 
       - name: Retire historical public branding before audit
@@ -430,6 +441,20 @@ jobs:
           }
           for u,(needle,count) in specials.items():
               status,body=get(u); assert status==200 and body.count(needle)==count,(u,body.count(needle),count)
+          status,reference_body=get('https://oneworldz.com/integrityworldz/')
+          assert status==200, ('worldz-reference-001-live',status)
+          for required in (
+              'WORLDZ REFERENCE #001',
+              'data-worldz-reference="001"',
+              'data-evidence-register="v1"',
+              'Government Service Accountability',
+              'Correspondence Evidence Register',
+              'Public Money Behind the Services',
+          ):
+              assert required in reference_body, ('worldz-reference-001-live',required)
+          assert not any(x in reference_body for x in ('OneWorldz','ONEWORLDZ')), 'worldz-reference-001-retired-brand'
+          print('LIVE PASS WORLDZ REFERENCE #001 https://oneworldz.com/integrityworldz/')
+
           status,dubbo_body=get('https://oneworldz.com/links-in-dubbo/')
           assert status==200, ('links-in-dubbo',status)
           for required in (
