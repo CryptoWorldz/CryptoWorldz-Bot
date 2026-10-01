@@ -48,8 +48,9 @@ assert full["launchInheritance"]["mainnetExecutionInherited"]==inheritance["exec
 assert full["fullScope"]["chains"]==[c["key"] for c in fullscope["chains"]]
 assert full["fullScope"]["maxTokensPerChain"]==fullscope["maxTokensPerChain"]==20
 assert full["fullScope"]["initialEnvironmentCapacity"]==160
-assert fullscope["voting"]["popularity"]["mayExecuteGovernance"] is False
-assert fullscope["voting"]["governance"]["mayAffectPopularityRanking"] is False
+assert fullscope["voting"]["popularity"]["cadence"]=="one vote per Telegram user per rolling 60 minutes"
+assert "/vote" in fullscope["voting"]["popularity"]["commandNamespace"]
+assert "governance" not in fullscope["voting"]
 
 magic=full["feeAndFlywheel"]
 assert magic["targetGrossTraderFeeBpsWhereProven"]==fee["targetGrossTraderFeeBps"]==75
