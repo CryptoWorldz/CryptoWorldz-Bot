@@ -1,0 +1,5 @@
+.worldz-civic-hero{border:1px solid rgba(190,151,255,.58);box-shadow:0 0 24px rgba(135,70,255,.14)}
+.worldz-civic-status{margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(45,21,70,.72);border:1px solid rgba(210,184,255,.24)}
+.worldz-civic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:12px 0}
+.worldz-civic-grid .panel{margin:0}
+.worldz-civic-grid h3{margin-top:0}
