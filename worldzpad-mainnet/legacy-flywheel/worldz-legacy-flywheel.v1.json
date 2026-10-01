@@ -1,6 +1,6 @@
 {
-  "version": "WORLDZ-LEGACY-FLYWHEEL-2026-10-01-D",
-  "status": "PRIVATE_BUILD__DEVNET_REQUIRED__MAINNET_DISABLED",
+  "version": "WORLDZ-LEGACY-FLYWHEEL-2026-10-01-E",
+  "status": "FINAL_12_TOKEN_MEMBERSHIP_LOCKED__MAINNET_DISABLED",
   "name": "Legacy Core Market-Buy Flywheel™",
   "purpose": "Use the single 15% Legacy allocation from WorldzLaunchPad fee revenue for equal transparent market-buy accruals across 12 recorded Legacy tokens.",
   "sourceFeeRule": {
@@ -296,7 +296,7 @@
     }
   ],
   "historicalDistributionWallets": {
-    "rule": "These are historical/watch-only distribution addresses. They are not the new Legacy Flywheel reward vaults and must not be auto-funded merely because they exist in the registry.",
+    "rule": "Historical distribution wallets are never automated Worldz Legacy Core destinations. The owner may manually send SOL to them outside Worldz routing; such transfers are owner actions and are not Legacy Core settlement receipts.",
     "wallets": [
       {
         "label": "INVEST Distribution",
@@ -337,5 +337,15 @@
   },
   "protectedTokenRules": {
     "HSSC": "50% of HSSC creator/reward revenue is reserved for the Hope St / HopeStreet support commitment; it does not increase the Legacy bucket above 15%."
+  },
+  "membershipLock": {
+    "status": "FINAL_CLOSED_SET",
+    "tokenCount": 12,
+    "additionsAllowed": false,
+    "removalsAllowed": false,
+    "replacementsAllowed": false,
+    "futureLegacyDesignationsAllowed": false,
+    "equalMarketBuySharePercentEach": 1.25,
+    "totalLegacyAllocationPercent": 15
   }
 }
