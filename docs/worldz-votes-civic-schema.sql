@@ -91,5 +91,38 @@ create policy "worldz_civic_audit_server_only"
 on public.worldz_civic_audit_events for all to anon, authenticated
 using (false) with check (false);
 
+
+-- Match the existing protected ZED runtime bridge. The publishable-key server
+-- client only passes these policies when x-zed-runtime-key satisfies the
+-- existing zed_runtime_authorized() check. Ordinary anonymous requests remain denied.
+create policy "zed_runtime_bridge" on public.worldz_civic_ballots
+for all to anon
+using (public.zed_runtime_authorized())
+with check (public.zed_runtime_authorized());
+
+create policy "zed_runtime_bridge" on public.worldz_civic_options
+for all to anon
+using (public.zed_runtime_authorized())
+with check (public.zed_runtime_authorized());
+
+create policy "zed_runtime_bridge" on public.worldz_civic_votes
+for all to anon
+using (public.zed_runtime_authorized())
+with check (public.zed_runtime_authorized());
+
+create policy "zed_runtime_bridge" on public.worldz_civic_audit_events
+for all to anon
+using (public.zed_runtime_authorized())
+with check (public.zed_runtime_authorized());
+
+grant select, insert, update, delete on
+  public.worldz_civic_ballots,
+  public.worldz_civic_options,
+  public.worldz_civic_votes,
+  public.worldz_civic_audit_events
+to anon;
+
+grant usage, select on sequence public.worldz_civic_audit_events_id_seq to anon;
+
 comment on table public.worldz_civic_votes is
 'Non-binding civic consultation votes only until independent identity/privacy/security/legal gates are complete. Never authorizes treasury or WorldzGovern actions.';
