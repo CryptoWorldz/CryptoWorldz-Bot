@@ -69,34 +69,37 @@ jobs:
           assert fee['walletTransferTaxPercent']==0
 
           assert treasury['destination']=='Worldz Treasury Multisig'
-          assert treasury['requiredThreshold']=='1-of-2 temporary'
+          assert treasury['requiredThreshold']=='3-of-5'
           assert treasury['vaultAddress']=='n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB'
           assert treasury['multisigConfigAddress']=='B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN'
           assert treasury['vaultIndex']==0
-          assert treasury['status']=='TEMPORARY_1_OF_2_CUSTODY__PUBLIC_CREATOR_ROUTE_PROOF_PENDING'
+          assert treasury['status']=='OPERATIONS_3_OF_5_POLICY__ONCHAIN_REVERIFY_REQUIRED'
           assert treasury['verifiedEvidence']['providerProgram']=='SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf'
           assert treasury['verifiedEvidence']['memberCount']==2
           assert treasury['verifiedEvidence']['threshold']=='1-of-2 temporary'
           assert treasury['verifiedEvidence']['vaultDerivationVerified'] is True
           assert treasury['verifiedEvidence']['squadsProgramOwnerVerified'] is True
-          assert treasury['targetGovernance']=='5-of-10'
-          assert treasury['targetMemberCount']==10
-          assert treasury['targetThreshold']==5
-          assert treasury['upgradeRequiredBeforeMainnetFeeRouting'] is True
-          assert treasury['reserveTargetGovernance']=='6-of-9'
-          assert treasury['reserveMaximumRequiredApprovals']==6
+          assert treasury['targetGovernance']=='3-of-5'
+          assert treasury['targetMemberCount']==5
+          assert treasury['targetThreshold']==3
+          assert treasury['upgradeRequiredBeforeMainnetFeeRouting'] is False
+          assert treasury['onchainVerificationRequiredBeforeMainnetFeeRouting'] is True
+          assert treasury['reserveTargetGovernance']=='NOT_DEPLOYED'
+          assert treasury['reserveMaximumRequiredApprovals']==0
+          assert treasury['reserveSweepEnabled'] is False
           standard=platform['treasuryStandard']
-          assert standard['version']=='WORLDZ-TREASURY-1'
-          assert standard['operationsTreasury']['signerCount']==10
-          assert standard['operationsTreasury']['approvalThreshold']==5
-          assert standard['reserveTreasury']['signerCount']==9
-          assert standard['reserveTreasury']['approvalThreshold']==6
-          assert standard['reserveTreasury']['maximumRequiredApprovals']==6
+          assert standard['version']=='WORLDZ-TREASURY-2'
+          assert standard['operationsTreasury']['signerCount']==5
+          assert standard['operationsTreasury']['approvalThreshold']==3
+          assert standard['reserveTreasury']['enabled'] is False
+          assert standard['reserveTreasury']['signerCount']==0
+          assert standard['reserveTreasury']['approvalThreshold']==0
+          assert standard['reserveTreasury']['maximumRequiredApprovals']==0
           assert standard['signerRules']['privateKeysInRepository'] is False
           treasury_policy=json.loads((root/'treasury-policy.json').read_text())
-          assert treasury_policy['governance']['operations']['display']=='5-of-10'
-          assert treasury_policy['governance']['reserve']['display']=='6-of-9'
-          assert treasury_policy['governance']['maximumApprovalsRequiredByWorldzPolicy']==6
+          assert treasury_policy['governance']['operations']['display']=='3-of-5'
+          assert treasury_policy['governance']['reserve']['display']=='NOT_DEPLOYED'
+          assert treasury_policy['governance']['maximumApprovalsRequiredByWorldzPolicy']==3
           assert treasury_policy['activation']['mainnetFeeRoutingEnabled'] is False
           assert treasury_policy['chains']['solana']['operations']['vaultAddress']==treasury['vaultAddress']
           assert treasury['mainnetRoutingEnabled'] is False
@@ -451,7 +454,7 @@ jobs:
           assert "selectedLaunchPadContribution" in app
           assert "worldzCoreFamilyMarketBuys:12" in app
 
-          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_flow=v2 launchpad_choice=3/5/8 legacy=15x12 core_buys=12 treasury_balance=12/10/7 treasury_ops=5of10 treasury_reserve=6of9 max_approvals=6 supply_take=0 liquidity_take=0 founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
+          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_flow=v2 launchpad_choice=3/5/8 legacy=15x12 core_buys=12 treasury_balance=12/10/7 treasury_ops=3of5 treasury_reserve=disabled max_approvals=3 supply_take=0 liquidity_take=0 founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
 
       - name: Syntax-check browser JavaScript
         shell: bash
@@ -834,10 +837,11 @@ jobs:
                   assert platform['founding100']['wldzPerQualifiedPositionTokens']==100000
                   assert platform['baseEvmFair']['status']=='BASE_SEPOLIA_BETA'
                   assert platform['baseEvmFair']['mainnetExecution'] is False
-                  assert platform['treasuryStandard']['operationsTreasury']['policy']=='5-of-10'
-                  assert platform['treasuryStandard']['reserveTreasury']['policy']=='6-of-9'
-                  assert platform['treasuryStandard']['reserveTreasury']['maximumRequiredApprovals']==6
-                  assert platform['treasuryRouting']['upgradeRequiredBeforeMainnetFeeRouting'] is True
+                  assert platform['treasuryStandard']['operationsTreasury']['policy']=='3-of-5'
+                  assert platform['treasuryStandard']['reserveTreasury']['policy']=='NOT_DEPLOYED'
+                  assert platform['treasuryStandard']['reserveTreasury']['maximumRequiredApprovals']==0
+                  assert platform['treasuryRouting']['upgradeRequiredBeforeMainnetFeeRouting'] is False
+                  assert platform['treasuryRouting']['onchainVerificationRequiredBeforeMainnetFeeRouting'] is True
                   assert platform['launchInheritance']['version']=='WORLDZ-LAUNCH-INHERITANCE-V1'
                   assert platform['launchInheritance']['appliesToAllWorldzLaunchPadLaunches'] is True
                   assert platform['launchInheritance']['mainnetExecutionInherited'] is False
