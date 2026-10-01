@@ -169,6 +169,7 @@ jobs:
             root/'worlddexpush/dexscreener/index.html',root/'worlddexpush/dexscreener/package.json',
             root/'bitworldz/index.html',root/'bitworldz/app.js',root/'capabilities/index.html',
             root/'technology/index.html',root/'technology.html',
+            root/'advertise/index.html',root/'ads.js',
             root/'launch-station/index.html',root/'community/index.html',root/'integrations/index.html',root/'ready/index.html',
             root/'.well-known/worldzlaunch-readiness.json',root/'.well-known/worldzlaunch-domain-plan.json',
             root/'wldz/index.html',root/'wldz/app.js',root/'wldz/launch-config.json',
@@ -182,6 +183,14 @@ jobs:
 
           home=(root/'index.html').read_text()
           app=(root/'app.js').read_text()
+          advertise_html=(root/'advertise/index.html').read_text()
+          ads_js=(root/'ads.js').read_text()
+          assert 'data-worldz-ad-slot="home_spotlight"' in home
+          assert all(price in advertise_html for price in ('A$5','A$12','A$22','A$75'))
+          assert 'SUBMIT FOR REVIEW' in advertise_html
+          assert 'worldz-launchpad-ads' in advertise_html and 'worldz-launchpad-ads' in ads_js
+          assert 'SPONSORED' in ads_js and 'rel = "noopener sponsored"' in ads_js
+          print('WORLDZ_SPOTLIGHT_LOCAL=PASS pricing=5/12/22/75_AUD slots=3')
           devnet=(root/'devnet/index.html').read_text()
           devnet_js=(root/'devnet/app.js').read_text()
           curve=(root/'curve/index.html').read_text()
@@ -762,6 +771,8 @@ jobs:
                   capability_code,capability_body=get(base+'/capabilities/?verify=capability-v1')
                   tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
                   launch_station_code,launch_station_body=get(base+'/launch-station/?verify=party-v2')
+                  advertise_code,advertise_body=get(base+'/advertise/?verify=ads-v1')
+                  ads_js_code,ads_js_body=get(base+'/ads.js?verify=ads-v1')
                   community_code,community_body=get(base+'/community/?verify=party-v2')
                   integrations_code,integrations_body=get(base+'/integrations/?verify=party-v2')
                   ready_code,ready_body=get(base+'/ready/?verify=party-v2')
@@ -854,6 +865,13 @@ jobs:
                   assert platform['worldDexPush']['dexScreenerControl']['seventyFivePointsIsSufficient'] is False
                   assert platform['worldDexPush']['dexScreenerControl']['worldzSpecialPartnershipState']=='PROPOSAL_ONLY'
 
+                  assert advertise_code==200 and 'WORLDZ SPOTLIGHT' in advertise_body and 'A$5' in advertise_body and 'A$22' in advertise_body
+                  assert ads_js_code==200 and 'SPONSORED' in ads_js_body and 'worldz-launchpad-ads' in ads_js_body
+                  assert 'data-worldz-ad-slot="home_spotlight"' in body
+                  assert 'data-worldz-ad-slot="community_spotlight"' in community_body
+                  assert 'data-worldz-ad-slot="launch_station_spotlight"' in launch_station_body
+                  print('WORLDZ_SPOTLIGHT_LIVE=PASS pricing=AUD_5_DAY/AUD_22_WEEK slots=3')
+
                   assert launch_station_code==200 and 'WORLDZ LAUNCH STATION' in launch_station_body
                   assert 'Mint New' in launch_station_body and 'Import Existing Mint' in launch_station_body
                   assert 'PHENIX' in launch_station_body and 'PNEX' in launch_station_body
@@ -880,7 +898,9 @@ jobs:
                   assert genesis_code==200 and 'PRIVATE GENESIS CONSOLE' in genesis_body
                   assert all(term not in genesis_body for term in private_terms)
                   assert deploy_pretty_code==200
-                  assert deploy_code==200 and 'DEPLOY YOUR TOKEN' in deploy_body.upper() and 'DEPLOY REAL MAINNET TOKEN' in deploy_body
+                  assert deploy_pretty_code==200 and deploy_code==200
+                  assert 'DEPLOY<br><span>YOUR TOKEN.' in deploy_pretty_body and 'DEPLOY REAL MAINNET TOKEN' in deploy_pretty_body
+                  assert deploy_pretty_body==deploy_body, 'DEPLOY_PRETTY_FILE_MISMATCH'
                   assert '/mint/?network=mainnet-beta' in deploy_body
                   assert mint_code==200 and 'WORLDZMINT' in mint_body.upper() and 'FIXED SUPPLY' in mint_body.upper() and 'Jupiter Wallet' in mint_body
                   assert mint_js_code==200 and 'WORLDZMINT-1' in mint_js_body and "environment:network()" in mint_js_body and "action:'FINALIZE'" in mint_js_body
