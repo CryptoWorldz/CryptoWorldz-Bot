@@ -54,7 +54,15 @@ if [split_bps[k] for k in ("creator","referrer","legacyFlywheel","worldzLaunchPa
 if legacy["sourceFeeRule"]["legacyFlywheelPercent"] != 15:
     raise SystemExit("Legacy Flywheel must receive 15% of Worldz-controlled revenue")
 if legacy["legacyVaultFunding"]["vaultCount"] != 12:
-    raise SystemExit("Legacy Core must contain twelve token allocations")
+    raise SystemExit("Legacy Core must contain exactly twelve token allocations")
+if legacy.get("membershipLock", {}).get("status") != "FINAL_CLOSED_SET":
+    raise SystemExit("Legacy Core membership must remain permanently closed")
+if any(legacy.get("membershipLock", {}).get(k) is not False for k in ("additionsAllowed","removalsAllowed","replacementsAllowed","futureLegacyDesignationsAllowed")):
+    raise SystemExit("Legacy Core membership mutation must remain disabled")
+if Decimal(str(legacy["membershipLock"]["totalLegacyAllocationPercent"])) != Decimal("15"):
+    raise SystemExit("Legacy Core total allocation must remain 15%")
+if Decimal(str(legacy["membershipLock"]["equalMarketBuySharePercentEach"])) != Decimal("1.25"):
+    raise SystemExit("Legacy Core per-token allocation must remain 1.25%")
 if legacy["epoch"]["hours"] != 6:
     raise SystemExit("Legacy Flywheel epoch must remain six hours")
 if "No unsupported auto-bridge" not in legacy["legacyVaultFunding"]["nonSolanaSource"]:

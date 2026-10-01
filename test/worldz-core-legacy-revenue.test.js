@@ -6,7 +6,9 @@ const {
   POLICY,
   eligibleSource,
   buildLegacyCoreAllocation,
-  assertSafeDestinations
+  assertSafeDestinations,
+  assertLockedLegacyPolicy,
+  LOCKED_LEGACY_TOKEN_KEYS
 } = require("../src/worldz-core-legacy-revenue");
 
 test("Community Suite revenue is eligible and protected sources are not", () => {
@@ -61,4 +63,31 @@ test("HSSC is recorded with the Hope St commitment and equal 1.25% Legacy share"
   assert.equal(POLICY.poolPercent, 15);
   assert.equal(POLICY.beneficiaryCount, 12);
   assert.equal(POLICY.equalPerTokenPercentOfEligibleRevenue, 1.25);
+});
+
+test("Legacy Core membership is permanently closed at exactly 12 tokens", () => {
+  assert.equal(assertLockedLegacyPolicy(), true);
+  assert.equal(POLICY.membershipLock.status, "FINAL_CLOSED_SET");
+  assert.equal(POLICY.membershipLock.additionsAllowed, false);
+  assert.equal(POLICY.membershipLock.removalsAllowed, false);
+  assert.equal(POLICY.membershipLock.replacementsAllowed, false);
+  assert.equal(POLICY.membershipLock.futureLegacyDesignationsAllowed, false);
+  assert.equal(POLICY.beneficiaries.length, 12);
+  assert.deepEqual(POLICY.beneficiaries.map((token) => token.tokenKey), [...LOCKED_LEGACY_TOKEN_KEYS]);
+});
+
+test("Legacy Core allocation is locked at 15% total and 1.25% per token", () => {
+  assert.equal(POLICY.allocationLock.status, "FINAL_LOCKED");
+  assert.equal(POLICY.poolBps, 1500);
+  assert.equal(POLICY.poolPercent, 15);
+  assert.equal(POLICY.equalPerTokenBpsOfEligibleRevenue, 125);
+  assert.equal(POLICY.equalPerTokenPercentOfEligibleRevenue, 1.25);
+  assert.equal(POLICY.allocationLock.variableWeightingAllowed, false);
+  assert.equal(POLICY.allocationLock.extraLegacyBucketAllowed, false);
+});
+
+test("Worldz automation never funds historical distribution wallets", () => {
+  assert.equal(POLICY.manualDistributionWalletPolicy.automatedWorldzRoutingToHistoricalDistributionWalletsAllowed, false);
+  assert.equal(POLICY.manualDistributionWalletPolicy.ownerManualFundingOutsideWorldzRoutingAllowed, true);
+  assert.equal(POLICY.manualDistributionWalletPolicy.accountingTreatment, "OUTSIDE_WORLDZ_LEGACY_CORE_AUTOMATION");
 });

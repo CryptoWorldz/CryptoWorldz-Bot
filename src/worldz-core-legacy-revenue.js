@@ -3,6 +3,21 @@
 const POLICY = require("../worldzpad-mainnet/revenue/worldz-core-legacy-revenue.v1.json");
 
 const BPS = 10000n;
+const LOCKED_LEGACY_TOKEN_KEYS = Object.freeze([
+  "PDC_ORIGINAL",
+  "PDC1_FIRST",
+  "PDC1_SECOND",
+  "PDCMAGA",
+  "PDCSHARE",
+  "PURPLE_DC",
+  "PURPLE_OG",
+  "PCC1_LEGACY",
+  "INVEST",
+  "LMTD",
+  "NBC",
+  "HSSC"
+]);
+
 
 function asLamports(value) {
   const amount = typeof value === "bigint" ? value : BigInt(value);
@@ -70,6 +85,41 @@ function buildLegacyCoreAllocation({ sourceId, netRevenueLamports, policy = POLI
   });
 }
 
+function assertLockedLegacyPolicy({ policy = POLICY } = {}) {
+  const lock = policy.membershipLock || {};
+  const allocation = policy.allocationLock || {};
+  const actualKeys = policy.beneficiaries.map((token) => token.tokenKey);
+
+  if (lock.status !== "FINAL_CLOSED_SET") throw new Error("Legacy Core membership must remain FINAL_CLOSED_SET.");
+  if (lock.additionsAllowed !== false || lock.removalsAllowed !== false || lock.replacementsAllowed !== false) {
+    throw new Error("Legacy Core membership mutation is forbidden.");
+  }
+  if (lock.futureLegacyDesignationsAllowed !== false) throw new Error("Future Legacy token designations are forbidden.");
+  if (policy.beneficiaryCount !== 12 || policy.beneficiaries.length !== 12) {
+    throw new Error("Legacy Core must contain exactly 12 tokens.");
+  }
+  if (JSON.stringify(actualKeys) !== JSON.stringify(LOCKED_LEGACY_TOKEN_KEYS)) {
+    throw new Error("Legacy Core token membership or order drifted from the final locked set.");
+  }
+  if (policy.poolBps !== 1500 || policy.poolPercent !== 15) {
+    throw new Error("Legacy Core allocation must remain exactly 15%.");
+  }
+  if (policy.equalPerTokenBpsOfEligibleRevenue !== 125 || policy.equalPerTokenPercentOfEligibleRevenue !== 1.25) {
+    throw new Error("Each Legacy Core token must remain at exactly 1.25%.");
+  }
+  if (
+    allocation.status !== "FINAL_LOCKED" ||
+    allocation.totalLegacyBps !== 1500 ||
+    allocation.equalPerTokenBps !== 125 ||
+    allocation.beneficiaryCount !== 12 ||
+    allocation.variableWeightingAllowed !== false ||
+    allocation.extraLegacyBucketAllowed !== false
+  ) {
+    throw new Error("Legacy Core allocation lock drifted.");
+  }
+  return true;
+}
+
 function assertSafeDestinations({ policy = POLICY } = {}) {
   const historical = new Set([
     ...(policy.forbiddenHistoricalDistributionWallets || []),
@@ -83,11 +133,14 @@ function assertSafeDestinations({ policy = POLICY } = {}) {
   return true;
 }
 
+assertLockedLegacyPolicy();
 assertSafeDestinations();
 
 module.exports = {
   POLICY,
   eligibleSource,
   buildLegacyCoreAllocation,
-  assertSafeDestinations
+  assertSafeDestinations,
+  assertLockedLegacyPolicy,
+  LOCKED_LEGACY_TOKEN_KEYS
 };

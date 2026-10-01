@@ -1,8 +1,18 @@
 # Worldz Legacy Core Market-Buy Pool™ — 12 tokens / 15% total
 
-Version: `WORLDZ-CORE-LEGACY-REVENUE-2026-10-01-B`
+Version: `WORLDZ-CORE-LEGACY-REVENUE-2026-10-01-C`
 
-## Locked rule
+## FINAL CLOSED LEGACY RULE
+
+The Legacy Core list is **complete and permanently closed at 12 tokens**.
+
+- no 13th Legacy Token
+- no future Legacy designations
+- no additions, removals, replacements or expansion of the Legacy membership
+- metadata corrections and verification of an existing member do not create a new Legacy member
+- **15% total Legacy allocation is locked**
+- **1.25% to each of the 12 Legacy Tokens is locked**
+- no variable weighting and no second Legacy bucket
 
 Eligible net Worldz-controlled revenue contributes **one 15% Legacy Core bucket**.
 
@@ -62,3 +72,11 @@ For **10 SOL** of eligible net revenue:
 - remaining non-Legacy revenue = **8.5 SOL**
 
 No live transfer or market trade is authorized by this source change.
+
+## Manual distribution-wallet funding
+
+Worldz automation will **not** send Legacy Core SOL to historical distribution wallets.
+
+The owner may manually send SOL to those wallets outside Worldz routing. Those owner-initiated transfers are separate manual actions and are **not** counted as automated Legacy Core settlements or Worldz treasury execution receipts.
+
+This separation prevents an old distribution wallet from becoming an automatic treasury destination while still leaving the owner free to fund it manually.
