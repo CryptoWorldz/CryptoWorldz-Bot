@@ -1,10 +1,11 @@
 const crypto = require("node:crypto");
 const { ensureGroup, suiteAccessAllowed } = require("./community-suite-core");
+const REXSECURE_BRAND_IMAGE = require("../public/miniapp/rexsecure-brand-image");
 
 const REXSECURE_BRAND = Object.freeze({
   name: "REXSECURE™",
   tagline: "Security for Your Community",
-  imageUrl: "https://cryptobotz.cryptoworldz.xyz/miniapp/assets/rexsecure-brand-poster.jpg"
+  imageName: REXSECURE_BRAND_IMAGE.fileName
 });
 
 const REXSECURE_WELCOME_PRESET = Object.freeze({
@@ -100,7 +101,7 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       REXSECURE_WELCOME_PRESET.message
     ].join("\n");
     try {
-      await bot.sendPhoto(chatId, REXSECURE_BRAND.imageUrl, { caption });
+      await bot.sendPhoto(chatId, Buffer.from(REXSECURE_BRAND_IMAGE.base64, "base64"), { caption }, { filename: REXSECURE_BRAND.imageName, contentType: REXSECURE_BRAND_IMAGE.mimeType });
       await logEvent(chatId, null, "welcome_preset_sent", REXSECURE_WELCOME_PRESET.id);
       return true;
     } catch (error) {
