@@ -1,10 +1,6 @@
 name: Publish WorldzLaunchPad X Direct
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/publish-worldzlaunchpad-x-direct.yml"
   workflow_dispatch:
 
 permissions:
