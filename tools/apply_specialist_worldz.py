@@ -458,6 +458,28 @@ INTEGRITY_REFERENCE_001 = r'''<!doctype html>
 </div>
 </section>
 
+<section class="section" id="correspondence-register" data-evidence-register="v1">
+<p class="eyebrow">Correspondence Evidence Register</p>
+<h2>Material agency wording, preserved by date and source.</h2>
+<p>The original emails remain in the source mailboxes. This public register reproduces only the material lines needed to understand the decision or service response, while removing private identifiers, unrelated third-party details and email-signature clutter.</p>
+<div class="timeline">
+<div class="event"><time>2 JUN 2026</time><b>Homes NSW Dubbo — “Housing Application Outcome letter”</b><span class="status">VERIFIED AGENCY EMAIL</span><p>“Please see attached outcome letter confirming you have been approved for priority housing in Narromine.”</p></div>
+
+<div class="event"><time>28 AUG 2026</time><b>Dubbo Medicare Mental Health Centre / Stride — “Request for Support – Jason Wright – Current Hospital, Housing and Bail Situation”</b><span class="status">VERIFIED SERVICE EMAIL</span><p>The Clinical Care Coordinator acknowledged Jason's stress and supplied housing/homelessness contacts. The email stated that the centre provides short-to-medium-term psychosocial support and that “we are unable to contact these services or make enquiries on your behalf.”</p><p>It also stated that a letter provided the previous day confirmed Jason's attendance and engagement with the service for psychosocial support.</p></div>
+
+<div class="event"><time>31 AUG 2026</time><b>NSW Ombudsman — “Message Received By NSW Ombudsman”</b><span class="status">VERIFIED OMBUDSMAN ACKNOWLEDGEMENT</span><p>“Thank you for your email. It has been forwarded to an appropriate person for action.”</p><p>The acknowledgement explained that emails also directed to other parties are generally treated as information unless a response is assessed as warranted, and directed a person intending to lodge a complaint to the Ombudsman's complaint process.</p><p>It also stated that the Ombudsman can assess NSW-government administration complaints, does not have to investigate every complaint, cannot force an agency to act in the way a court can, and does not give legal advice.</p></div>
+
+<div class="event"><time>4 SEP 2026</time><b>NSW Trustee &amp; Guardian — “Centrelink Advance”</b><span class="status">VERIFIED TAG EMAIL</span><p>TAG wrote that the Trust account balance was $800 and that an additional $200 had been placed into Jason's account for the weekend. The email said that balance did not afford the proposed car purchase and directed Jason to the Dubbo housing office regarding accommodation.</p></div>
+
+<div class="event"><time>14 SEP 2026</time><b>NSW Trustee &amp; Guardian — urgent personal-funds correspondence</b><span class="status">VERIFIED TAG EMAIL</span><p>TAG wrote that Jason was receiving “the bulk” of his funds, approved additional phone credit, and stated: “No other funds are affordable at this time.”</p></div>
+
+<div class="event"><time>15 SEP 2026</time><b>NSW Trustee &amp; Guardian — rent follow-up</b><span class="status">VERIFIED TAG EMAIL</span><p>TAG wrote: “We do not have any funds available to cover your rent.” It stated that Jason was receiving all funds allocated to him and would need to use those funds to pay rent, and said further emails would be answered on Friday.</p></div>
+
+<div class="event"><time>1–2 OCT 2026</time><b>Jason Wright → NSW Trustee &amp; Guardian</b><span class="status">USER'S DOCUMENTED REQUESTS</span><p>Jason sent written requests for an explanation of the unexpected $160 payment, urgent food assistance, email-based communication, an itemised history of previous payments, and an individual written explanation of every future payment and budget/schedule change.</p></div>
+</div>
+<p class="evidence-note"><strong>Archive rule:</strong> a source excerpt proves what the source said on that date. It does not by itself prove a broader allegation about motive, misconduct or legality. Full original messages are retained separately so context can be checked if legitimately required.</p>
+</section>
+
 <section class="section">
 <p class="eyebrow">The 15-day statement</p>
 <h2>Recollection and published rule are kept separate.</h2>
