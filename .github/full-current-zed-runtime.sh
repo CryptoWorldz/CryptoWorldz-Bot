@@ -439,5 +439,26 @@ for i in $(seq 1 30); do
   fi
 done
 
+echo 'ZED_CONVERGENCE_SAFE_ROOT_PAYLOAD=BEGIN'
+node - <<'NODE'
+const fs=require('fs');
+for (const [label,file] of [['root',process.env.RUNNER_TEMP+'/root.json'],['health',process.env.RUNNER_TEMP+'/health.json']]) {
+  let p={}; try { p=JSON.parse(fs.readFileSync(file,'utf8')); } catch { p={parse_error:true}; }
+  console.log(JSON.stringify({
+    label,
+    ok:p.ok,
+    ready:p.ready,
+    degraded:p.degraded,
+    service:p.service,
+    runtime:p.runtime,
+    full_runtime_configured:p.full_runtime_configured,
+    bot_token_configured:p.bot_token_configured,
+    supabase_runtime_key_configured:p.supabase_runtime_key_configured,
+    reason:p.reason,
+    full_runtime_load_error:p.full_runtime_load_error
+  }));
+}
+NODE
+echo 'ZED_CONVERGENCE_SAFE_ROOT_PAYLOAD=END'
 echo '::error::ZED/AUTO/GRACE full runtime did not satisfy the complete live identity contract after full runtime and MiniApp sync.'
 exit 1
