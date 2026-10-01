@@ -46,12 +46,6 @@ jobs:
           founding=platform['founding100']
           base_adapter=platform['baseEvmFair']
 
-          assert 'data-worldz-ad-slot="home_spotlight"' in home
-          assert 'A$5' in advertise_html and 'A$22' in advertise_html and 'SUBMIT FOR REVIEW' in advertise_html
-          assert 'worldz-launchpad-ads' in advertise_html and 'worldz-launchpad-ads' in ads_js
-          assert 'SPONSORED' in ads_js and 'rel = "noopener sponsored"' in ads_js
-          print('WORLDZ_SPOTLIGHT_LOCAL=PASS pricing=AUD_5_DAY/AUD_22_WEEK slots=3')
-
           assert platform['publicLaunchPad'] is True
           assert platform['publicLaunchIntakeEnabled'] is True
           assert platform['publicLaunchRegistryEnabled'] is True
@@ -191,6 +185,12 @@ jobs:
           app=(root/'app.js').read_text()
           advertise_html=(root/'advertise/index.html').read_text()
           ads_js=(root/'ads.js').read_text()
+          assert 'data-worldz-ad-slot="home_spotlight"' in home
+          assert all(price in advertise_html for price in ('A$5','A$12','A$22','A$75'))
+          assert 'SUBMIT FOR REVIEW' in advertise_html
+          assert 'worldz-launchpad-ads' in advertise_html and 'worldz-launchpad-ads' in ads_js
+          assert 'SPONSORED' in ads_js and 'rel = "noopener sponsored"' in ads_js
+          print('WORLDZ_SPOTLIGHT_LOCAL=PASS pricing=5/12/22/75_AUD slots=3')
           devnet=(root/'devnet/index.html').read_text()
           devnet_js=(root/'devnet/app.js').read_text()
           curve=(root/'curve/index.html').read_text()
@@ -898,7 +898,9 @@ jobs:
                   assert genesis_code==200 and 'PRIVATE GENESIS CONSOLE' in genesis_body
                   assert all(term not in genesis_body for term in private_terms)
                   assert deploy_pretty_code==200
-                  assert deploy_code==200 and 'DEPLOY YOUR TOKEN' in deploy_body.upper() and 'DEPLOY REAL MAINNET TOKEN' in deploy_body
+                  assert deploy_pretty_code==200 and deploy_code==200
+                  assert 'DEPLOY<br><span>YOUR TOKEN.' in deploy_pretty_body and 'DEPLOY REAL MAINNET TOKEN' in deploy_pretty_body
+                  assert deploy_pretty_body==deploy_body, 'DEPLOY_PRETTY_FILE_MISMATCH'
                   assert '/mint/?network=mainnet-beta' in deploy_body
                   assert mint_code==200 and 'WORLDZMINT' in mint_body.upper() and 'FIXED SUPPLY' in mint_body.upper() and 'Jupiter Wallet' in mint_body
                   assert mint_js_code==200 and 'WORLDZMINT-1' in mint_js_body and "environment:network()" in mint_js_body and "action:'FINALIZE'" in mint_js_body
