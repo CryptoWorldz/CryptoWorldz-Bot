@@ -1,0 +1,42 @@
+{
+  "version": "WORLDZPAY-2026-10-01-A",
+  "name": "WorldzPay™",
+  "status": "SIMULATION_ONLY",
+  "liveFundsEnabled": false,
+  "custodyEnabled": false,
+  "settlementAssets": ["SOL", "USDC", "USDT"],
+  "methods": {
+    "x_money": {
+      "status": "RESERVED_OFFICIAL_ACCESS_REQUIRED",
+      "liveEnabled": false,
+      "officialAccessRequired": true
+    },
+    "card": {
+      "status": "PROVIDER_ADAPTER_REQUIRED",
+      "liveEnabled": false
+    },
+    "bank": {
+      "status": "PROVIDER_ADAPTER_REQUIRED",
+      "liveEnabled": false
+    },
+    "solana_wallet": {
+      "status": "WALLET_ADAPTER_REQUIRED",
+      "liveEnabled": false
+    },
+    "usdc": {
+      "status": "WALLET_ADAPTER_REQUIRED",
+      "liveEnabled": false
+    },
+    "usdt": {
+      "status": "WALLET_ADAPTER_REQUIRED",
+      "liveEnabled": false
+    }
+  },
+  "controls": {
+    "noPrivateKeys": true,
+    "noSeedPhrases": true,
+    "noLiveTransfers": true,
+    "noImpliedXAffiliation": true,
+    "worldzProofRequiredBeforeLiveSettlement": true
+  }
+}
