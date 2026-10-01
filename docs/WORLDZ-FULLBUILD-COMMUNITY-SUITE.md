@@ -68,25 +68,27 @@ All choices share the live capability registry. The assistant should know that i
 - Worldz Inbox
 - WorldzCast / WorldPing
 - Worldz Votes Centre™
-- WorldzGovern™
 - Custom AI Community Bot
 
-### REX SecureGuard™
-- detects group vs supergroup
-- checks required bot admin permissions
+### REXSECURE ULTIMATE™ — Security for Your Community
+- latest Worldz-linked Persona Option 4/5 artwork shared by MiniApp + Telegram welcome
+- detects group vs supergroup and required bot admin permissions
 - handles Telegram migration IDs after owner upgrades group
-- new-member temporary restriction
-- number-match verification challenge
-- challenge timeout and retry policy
-- anti-spam/flood rules
-- suspicious-link and impersonation rules
-- allowlist/blocklist
-- moderation audit log
-- emergency lockdown
-- admin action alerts
-- backup admin / recovery instructions
+- CAS Telegram-ID threat intelligence with visible CAS attribution
+- REX Network Shield for explicit Worldz owner-reviewed blocks
+- new-member temporary restriction + Number Match verification
+- External Bot Guard for untrusted bots
+- Identity Guard for impersonation signals
+- Pattern Guard for admin-confirmed scam/spam similarity
+- anti-flood and link protection
+- evidence reports: a local report is review evidence, not an automatic global ban
+- Under Attack strict posture
+- moderation audit log, recovery guidance and admin controls
+- /secureguard on|off|status • /rexwelcome • /rexintel • /rexreport • /rexpatternban • /rexunderattack
 
-Telegram limitation: Bot API bots cannot themselves perform the user-only basic-group to supergroup conversion. REX should detect, guide and resume after migration.
+Permanent network-wide action remains evidence-controlled: a current CAS record or an explicit Worldz owner Network Shield block.
+
+Telegram limitation: Bot API bots cannot themselves perform the user-only basic-group to supergroup conversion. REX detects, guides and resumes after migration.
 
 ### Market / Token Intelligence
 - contract/CA lookup

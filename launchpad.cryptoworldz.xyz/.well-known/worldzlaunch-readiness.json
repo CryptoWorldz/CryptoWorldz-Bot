@@ -1,5 +1,5 @@
 {
-  "version": "WORLDZLAUNCH-READINESS-2026-10-01-A",
+  "version": "WORLDZLAUNCH-READINESS-2026-10-02-B",
   "status": "PUBLIC_PRODUCT_READY__MAINNET_MARKET_EXECUTION_GATED",
   "currentHost": "launchpad.cryptoworldz.xyz",
   "futureHost": {
@@ -84,11 +84,19 @@
     "rexSecureGuard": {
       "url": "https://cryptobotz.cryptoworldz.xyz/miniapp/",
       "status": "CONNECTED_COMMAND_CENTRE_SECURITY_MODULE",
+      "product": "REXSECURE ULTIMATE™",
+      "tagline": "Security for Your Community",
+      "persona": "4/5",
       "controls": [
+        "cas_threat_intelligence",
+        "rex_network_shield",
         "number_match",
+        "external_bot_guard",
+        "identity_guard",
+        "pattern_guard",
         "anti_flood",
-        "link_blocklist",
-        "impersonation_warning"
+        "link_guard",
+        "under_attack"
       ]
     }
   },
@@ -113,7 +121,8 @@
       "status": "CONNECTED"
     },
     "rexSecureGuard": {
-      "status": "CONNECTED_VIA_COMMAND_CENTRE"
+      "status": "CONNECTED_VIA_COMMAND_CENTRE",
+      "product": "REXSECURE ULTIMATE™"
     }
   },
   "mainnetBlockers": [

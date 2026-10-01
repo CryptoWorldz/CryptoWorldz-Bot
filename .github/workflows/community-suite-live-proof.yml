@@ -1,21 +1,9 @@
 name: Community Suite Live Supergroup Proof
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "src/community-suite*.js"
-      - "src/community-ai.js"
-      - "src/community-api.js"
-      - "src/community-ops.js"
-      - "src/community-social.js"
-      - "src/alice-support.js"
-      - "src/rex-secureguard.js"
-      - "src/worldzscan.js"
-      - "src/http.js"
-      - "src/full-runtime-entry.js"
-      - "public/miniapp/community-suite.js"
-      - ".github/workflows/community-suite-live-proof.yml"
+  workflow_run:
+    workflows: ["Restore ZED AUTO GRACE Command Centre"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -27,6 +15,7 @@ concurrency:
 
 jobs:
   proof:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment:

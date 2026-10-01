@@ -886,18 +886,18 @@ jobs:
                   assert 'PHENIX' in launch_station_body and 'PNEX' in launch_station_body
                   assert community_code==200 and 'WORLDZLAUNCH COMMUNITY' in community_body
                   assert 'TheChaos' in community_body and 'DipShitBossBot' in community_body and 'Command Centre MAX' in community_body
-                  assert 'REX SecureGuard™' in community_body
+                  assert 'REXSECURE ULTIMATE™' in community_body
                   assert integrations_code==200 and 'WORLDZLAUNCH INTEGRATIONS' in integrations_body
                   assert 'X API v2' in integrations_body and 'pump.fun / PumpSwap' in integrations_body
-                  assert 'REX SecureGuard™' in integrations_body and 'Command Centre + REX' in integrations_body
+                  assert 'REXSECURE ULTIMATE™' in integrations_body and 'Command Centre + REX' in integrations_body
                   assert ready_code==200 and 'WORLDZLAUNCH READINESS GATE' in ready_body
                   assert readiness_code==200 and readiness['status']=='PUBLIC_PRODUCT_READY__MAINNET_MARKET_EXECUTION_GATED'
                   assert readiness['economics']['launchPadChoicesPercent']==[3,5,8]
                   assert readiness['economics']['legacyCorePercent']==15
                   assert readiness['community']['rexSecureGuard']['status']=='CONNECTED_COMMAND_CENTRE_SECURITY_MODULE'
-                  assert readiness['community']['rexSecureGuard']['controls']==['number_match','anti_flood','link_blocklist','impersonation_warning']
+                  assert readiness['community']['rexSecureGuard']['product']=='REXSECURE ULTIMATE™'\n                  assert readiness['community']['rexSecureGuard']['persona']=='4/5'\n                  assert readiness['community']['rexSecureGuard']['controls']==['cas_threat_intelligence','rex_network_shield','number_match','external_bot_guard','identity_guard','pattern_guard','anti_flood','link_guard','under_attack']
                   assert readiness['integrations']['rexSecureGuard']['status']=='CONNECTED_VIA_COMMAND_CENTRE'
-                  print('REX_LAUNCHPAD_CONNECTION_LIVE=PASS controls=number_match/anti_flood/link_blocklist/impersonation_warning')
+                  print('REX_LAUNCHPAD_CONNECTION_LIVE=PASS product=REXSECURE_ULTIMATE persona=4/5 controls=threat_intel/network_shield/number_match/bot_guard/identity/pattern/flood/link/under_attack')
                   assert readiness['nextWorldzTest']['symbol']=='PNEX'
                   assert readiness['nextWorldzTest']['canonicalMint'] is None
                   assert readiness['launchPaths']['solanaMainnetMarket']['status']=='GATED'
