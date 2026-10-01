@@ -31,8 +31,8 @@ The Community Suite REX persona now uses the latest approved semi-real Worldz-li
 - Auto-Pick Ready
 - linked to ZED • AUTO • G.R.A.C.E.
 
-Canonical MiniApp asset: `public/miniapp/assets/rexsecure-ultimate-profile.jpg`.
-The browser-safe embedded fallback is reconstructed from `rexsecure-image-part-1.js` through `rexsecure-image-part-9.js`.
+Canonical shipped REX artwork is the embedded **Persona Option 4/5** image assembled by `public/miniapp/rexsecure-brand-image.js` from `rexsecure-image-part-1.js` through `rexsecure-image-part-9.js`.
+That same assembled image is used by the Community Suite and the Telegram branded welcome, so there is one REX visual source in the deployed runtime.
 
 ## Open rails intentionally not silently merged
 
