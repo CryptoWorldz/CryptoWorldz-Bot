@@ -5,6 +5,8 @@
   const experience = { bootstrap: null, referral: null, draft: { title: "", body: "", image_path: "", image_url: "" }, chat: [] };
   const LEARN = "https://cryptoworldz.xyz/command-centre-max/";
   const PDC = "https://purplediamondcrew.com/";
+  const LAUNCH = "https://launchpad.cryptoworldz.xyz/launch-station/";
+  const LAUNCH_COMMUNITY = "https://launchpad.cryptoworldz.xyz/community/";
 
   async function request(path, options = {}) {
     const response = await fetch(path, {
@@ -25,12 +27,12 @@
   function launchpad() {
     const root = $("experience-launchpad");
     if (!root) return;
-    root.innerHTML = `<section class="panel experience-launchpad"><p class="eyebrow">ONE MISSION • MANY WAYS TO ACT</p><h2>What do you want to do?</h2><div class="experience-grid">
+    root.innerHTML = `<section class="panel experience-launchpad"><p class="eyebrow">WORLDZ • BUILD • RAID • LAUNCH</p><h2>What do you want to do?</h2><div class="experience-grid">
       <button class="experience-tile" data-exp-open="zed-guide"><span>🤖</span><b>Ask ZED</b><small>Guided Command Centre</small></button>
-      <button class="experience-tile" data-exp-open="missions"><span>🚀</span><b>Missions</b><small>Complete a Raaiiidd</small></button>
+      <button class="experience-tile" data-exp-open="missions"><span>🚀</span><b>Raids</b><small>Ronald Raider • active queue</small></button>
+      <a class="experience-tile" href="${LAUNCH}" target="_blank" rel="noopener"><span>🌐</span><b>Launch Token</b><small>Mint New • Import Existing</small></a>
+      <a class="experience-tile" href="${LAUNCH_COMMUNITY}" target="_blank" rel="noopener"><span>💜</span><b>Launch Community</b><small>Telegram • X • Pump Squad</small></a>
       <button class="experience-tile" data-exp-open="create"><span>🎨</span><b>Create</b><small>Post + artwork + review</small></button>
-      <a class="experience-tile" href="${PDC}" target="_blank" rel="noopener"><span>🧤</span><b>On the Ground</b><small>Practical action</small></a>
-      <button class="experience-tile" data-exp-open="heroes"><span>🦸</span><b>Heroes</b><small>Already helping?</small></button>
       <a class="experience-tile" href="${LEARN}" target="_blank" rel="noopener"><span>📚</span><b>Learn</b><small>Skills and knowledge</small></a>
     </div></section>`;
   }
