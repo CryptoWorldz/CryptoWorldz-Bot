@@ -348,7 +348,14 @@ function bind(){
 }
 function validatePlatformConfig(candidate){
   if(candidate.publicLaunchPad!==true||candidate.publicLaunchIntakeEnabled!==true)throw new Error('Public LaunchPad contract mismatch');
-  if(candidate.feePolicy?.projectTradingFeeMaxPercent!==3||candidate.feePolicy?.worldzLaunchPadShareOfCollectedProjectFeePercent!==10||candidate.feePolicy?.platformShareCapPercentOfCollectedProjectFee!==10)throw new Error('10% fee-only contract mismatch');
+  if(
+    candidate.feePolicy?.projectTradingFeeMaxPercent!==3||
+    JSON.stringify(candidate.feePolicy?.worldzLaunchPadContributionChoicesPercent)!=='[3,5,8]'||
+    candidate.feePolicy?.worldzLaunchPadContributionDefaultPercent!==5||
+    candidate.feePolicy?.legacyCorePercent!==15||
+    candidate.feePolicy?.legacyCoreTokenCount!==12||
+    candidate.feePolicy?.coreFamilyMarketBuyPercent!==12
+  )throw new Error('Worldz Fee Flow V2 contract mismatch');
   if(candidate.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent!==0||candidate.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent!==0||candidate.feePolicy?.walletTransferTaxPercent!==0)throw new Error('Worldz zero-supply/liquidity/transfer-tax contract mismatch');
   const p=candidate.safeLaunchPolicy;
   if(!p||p.version!=='WORLDZ-SAFE-LAUNCH-1'||p.compulsory.fixedSupply!==true||p.compulsory.revokeMintAuthorityAfterGenesis!==true||p.compulsory.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('Safe Launch Standard contract mismatch');
