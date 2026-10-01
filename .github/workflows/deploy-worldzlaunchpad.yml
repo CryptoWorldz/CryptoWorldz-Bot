@@ -757,6 +757,12 @@ jobs:
                   bitworldz_code,bitworldz_body=get(base+'/bitworldz/?verify=bitworldz-v1')
                   capability_code,capability_body=get(base+'/capabilities/?verify=capability-v1')
                   tech_code,tech_body=get(base+'/technology.html?verify=tech-v1')
+                  launch_station_code,launch_station_body=get(base+'/launch-station/?verify=party-v2')
+                  community_code,community_body=get(base+'/community/?verify=party-v2')
+                  integrations_code,integrations_body=get(base+'/integrations/?verify=party-v2')
+                  ready_code,ready_body=get(base+'/ready/?verify=party-v2')
+                  readiness_code,readiness_body=get(base+'/.well-known/worldzlaunch-readiness.json?verify=party-v2')
+                  domain_plan_code,domain_plan_body=get(base+'/.well-known/worldzlaunch-domain-plan.json?verify=party-v2')
                   wldz_code,wldz_body=get(base+'/wldz/?verify=wldz-v1')
                   wldz_cfg_code,wldz_cfg_body=get(base+'/wldz/launch-config.json?verify=wldz-v1')
                   tokenlist_code,tokenlist_body=get(base+'/tokenlist.json?verify=identity-v1')
@@ -772,6 +778,7 @@ jobs:
                   mint_reg_code,mint_reg_body=get(mint_registry+'?verify=worldzmint-v1')
                   platform=json.loads(platform_body); live=json.loads(status_body); public_registry=json.loads(reg_body); public_mint_registry=json.loads(mint_reg_body)
                   tokenlist=json.loads(tokenlist_body); identity=json.loads(identity_body); rviv_meta=json.loads(rviv_meta_body)
+                  readiness=json.loads(readiness_body); domain_plan=json.loads(domain_plan_body)
                   local_identity=json.loads(Path('worldzpad-mainnet/token-identity/worldz-token-registry.v1.json').read_text())
                   assert identity==local_identity, 'LIVE_CANONICAL_REGISTRY_MISMATCH'
 
@@ -841,6 +848,24 @@ jobs:
                   assert platform['worldDexPush']['dexScreenerControl']['goldenTickerActiveBoostThreshold']==500
                   assert platform['worldDexPush']['dexScreenerControl']['seventyFivePointsIsSufficient'] is False
                   assert platform['worldDexPush']['dexScreenerControl']['worldzSpecialPartnershipState']=='PROPOSAL_ONLY'
+
+                  assert launch_station_code==200 and 'WORLDZ LAUNCH STATION' in launch_station_body
+                  assert 'Mint New' in launch_station_body and 'Import Existing Mint' in launch_station_body
+                  assert 'PHENIX' in launch_station_body and 'PNEX' in launch_station_body
+                  assert community_code==200 and 'WORLDZLAUNCH COMMUNITY' in community_body
+                  assert 'TheChaos' in community_body and 'DipShitBossBot' in community_body and 'Command Centre MAX' in community_body
+                  assert integrations_code==200 and 'WORLDZLAUNCH INTEGRATIONS' in integrations_body
+                  assert 'X API v2' in integrations_body and 'pump.fun / PumpSwap' in integrations_body
+                  assert ready_code==200 and 'WORLDZLAUNCH READINESS GATE' in ready_body
+                  assert readiness_code==200 and readiness['status']=='PUBLIC_PRODUCT_READY__MAINNET_MARKET_EXECUTION_GATED'
+                  assert readiness['economics']['launchPadChoicesPercent']==[3,5,8]
+                  assert readiness['economics']['legacyCorePercent']==15
+                  assert readiness['nextWorldzTest']['symbol']=='PNEX'
+                  assert readiness['nextWorldzTest']['canonicalMint'] is None
+                  assert readiness['launchPaths']['solanaMainnetMarket']['status']=='GATED'
+                  assert domain_plan_code==200 and domain_plan['futurePrimaryHost']=='worldzlaunch.com'
+                  assert domain_plan['futureHostStatus']=='NOT_OWNED_OR_LIVE_YET'
+                  assert domain_plan['migrationReady'] is True
 
                   assert dev_code==200 and 'Create Devnet Token' in dev_body
                   assert curve_code==200 and 'Worldz Curve™' in curve_body
