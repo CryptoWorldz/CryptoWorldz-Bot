@@ -132,10 +132,21 @@ jobs:
           assert safe['allocations']['founderVestingMinMonths']==18
           assert safe['allocations']['creatorControlledLpLockPercent']==100
           assert safe['allocations']['lpLockMinDays']==365
-          assert safe['feeRoutes']['creatorMaxPercent']==20
-          assert safe['feeRoutes']['treasuryMaxPercent']==20
-          assert safe['feeRoutes']['lpGrowthMinPercent']==20
-          assert safe['feeRoutes']['holdersLpCommunityCombinedMinPercent']==60
+          fee_routes=safe['feeRoutes']
+          assert fee_routes['model']=='WORLDZ_FEE_FLOW_V2'
+          assert fee_routes['exactLockedFixedPercent']['creatorDeveloper']==10
+          assert fee_routes['exactLockedFixedPercent']['launchReferrer']==15
+          assert fee_routes['exactLockedFixedPercent']['legacyCore']==15
+          assert fee_routes['exactLockedFixedPercent']['worldzCoreFamilyMarketBuys']==12
+          assert fee_routes['exactLockedFixedPercent']['lpGrowth']==10
+          assert fee_routes['exactLockedFixedPercent']['launchedTokenBuybackAndBurn']==8
+          assert fee_routes['exactLockedFixedPercent']['impactCharity']==5
+          assert fee_routes['exactLockedFixedPercent']['teamBuilderRewards']==5
+          assert fee_routes['exactLockedFixedPercent']['futureTokenDeploymentReserve']==5
+          assert fee_routes['worldzLaunchPadAllowedPercent']==[3,5,8]
+          assert fee_routes['treasuryReserveByLaunchPadChoice']=={'3':12,'5':10,'8':7}
+          assert fee_routes['totalPercent']==100
+          assert fee_routes['walletTransferTaxPercent']==0
 
           required=[
             root/'index.html',root/'app.js',root/'style.css',root/'status.php',root/'deploy/index.html',
@@ -155,6 +166,8 @@ jobs:
             root/'worlddexpush/dexscreener/index.html',root/'worlddexpush/dexscreener/package.json',
             root/'bitworldz/index.html',root/'bitworldz/app.js',root/'capabilities/index.html',
             root/'technology/index.html',root/'technology.html',
+            root/'launch-station/index.html',root/'community/index.html',root/'integrations/index.html',root/'ready/index.html',
+            root/'.well-known/worldzlaunch-readiness.json',root/'.well-known/worldzlaunch-domain-plan.json',
             root/'wldz/index.html',root/'wldz/app.js',root/'wldz/launch-config.json',
             root/'tokenlist.json',root/'.well-known/worldz-tokens.json',
             root/'rviv/index.html',root/'rviv/verify/index.html',
