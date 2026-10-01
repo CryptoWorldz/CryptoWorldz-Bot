@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-LAUNCH-INHERITANCE-V1",
-  "version": "2026-09-27-B",
+  "version": "2026-10-01-C",
   "brand": "WorldzLaunchInheritance™",
   "status": "CODE_BUILT__PER_CHAIN_EXECUTION_GATED",
   "purpose": "Make every WorldzLaunchPad launch inherit the same identity, wallet, proof, safety, FullScope and post-launch observability standards without pretending an unproven chain or venue is mainnet-ready.",
@@ -112,7 +112,7 @@
   "economicsProfiles": {
     "worldzMagic75": {
       "source": "worldzpad-omnichain/fee-policy.v1.json",
-      "selection": "DEFAULT_FOR_WORLDZ_OMNICHAIN_ROUTES_WHERE_VENUE_SUPPORT_IS_PROVEN",
+      "selection": "LEGACY_ADAPTER_PROFILE__NOT_DEFAULT_FOR_NEW_WORLDZ_FEE_FLOW_V2_INTAKES",
       "targetGrossTraderFeeBps": 75,
       "dynamicFeeDefault": false,
       "splitPercent": {
@@ -127,11 +127,49 @@
     },
     "publicCreatorConfigurable": {
       "source": "launchpad.cryptoworldz.xyz/platform-config.json",
-      "selection": "EXISTING_PUBLIC_CREATOR_ROUTE__DO_NOT_SILENTLY_MIX_WITH_WORLDZ_MAGIC_75",
+      "selection": "WORLDZ_FEE_FLOW_V2",
       "projectTradingFeeMinPercent": 0.5,
       "projectTradingFeeMaxPercent": 3,
-      "worldzLaunchPadShareOfCollectedProjectFeePercent": 10,
+      "worldzLaunchPadContributionChoicesPercent": [
+        3,
+        5,
+        8
+      ],
+      "worldzLaunchPadContributionDefaultPercent": 5,
+      "legacyCorePercent": 15,
+      "worldzCoreFamilyMarketBuyPercent": 12,
       "walletTransferTaxPercent": 0
+    },
+    "worldzFeeFlowV2": {
+      "source": "worldzpad-mainnet/fairfee/worldz-fee-flow.v2.json",
+      "selection": "DEFAULT_FOR_NEW_WORLDZ_LAUNCH_INTAKES__EXECUTION_REQUIRES_CHAIN_NATIVE_PROOF",
+      "projectTradingFeeMinPercent": 0.5,
+      "projectTradingFeeMaxPercent": 3,
+      "launchPadContributionChoicesPercent": [
+        3,
+        5,
+        8
+      ],
+      "launchPadContributionDefaultPercent": 5,
+      "fixedPercent": {
+        "creatorDeveloper": 10,
+        "launchReferrer": 15,
+        "legacyCore": 15,
+        "worldzCoreFamilyMarketBuys": 12,
+        "lpGrowth": 10,
+        "launchedTokenBuybackAndBurn": 8,
+        "impactCharity": 5,
+        "teamBuilderRewards": 5,
+        "futureTokenDeploymentReserve": 5
+      },
+      "treasuryReserveByLaunchPadChoice": {
+        "3": 12,
+        "5": 10,
+        "8": 7
+      },
+      "walletTransferTaxPercent": 0,
+      "tokenSupplyTakePercent": 0,
+      "initialLiquidityTakePercent": 0
     }
   },
   "tokenAllocationBoundary": {
@@ -253,8 +291,9 @@
     "testnetOrDevnetProofRequired": true,
     "explicitHumanApprovalRequired": true,
     "noAutomaticVendorPayment": true,
-    "noAutomaticMainnetBroadcast": true
+    "noAutomaticMainnetBroadcast": true,
+    "feeFlowV2MainnetRequiresRouteProof": true
   },
-  "futureLaunchRule": "A new LIVE token cannot silently bypass inheritance. CI must fail when canonical identity, provider handoff where applicable, chain/environment pairing, proof schema, FullScope registration contract or public deployment package drifts.",
+  "futureLaunchRule": "A new LIVE token cannot silently bypass inheritance or Worldz Fee Flow V2. CI must fail when canonical identity, fee-flow choice, provider handoff where applicable, chain/environment pairing, proof schema, FullScope registration contract or public deployment package drifts.",
   "source": "https://launchpad.cryptoworldz.xyz/inheritance/contract.json"
 }
