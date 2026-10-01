@@ -53,8 +53,8 @@ if [split_bps[k] for k in ("creator","referrer","legacyFlywheel","worldzLaunchPa
 
 if legacy["sourceFeeRule"]["legacyFlywheelPercent"] != 15:
     raise SystemExit("Legacy Flywheel must receive 15% of Worldz-controlled revenue")
-if legacy["legacyVaultFunding"]["vaultCount"] != 10:
-    raise SystemExit("Legacy Flywheel must retain ten legacy vaults")
+if legacy["legacyVaultFunding"]["vaultCount"] != 12:
+    raise SystemExit("Legacy Core must contain twelve token allocations")
 if legacy["epoch"]["hours"] != 6:
     raise SystemExit("Legacy Flywheel epoch must remain six hours")
 if "No unsupported auto-bridge" not in legacy["legacyVaultFunding"]["nonSolanaSource"]:
@@ -184,7 +184,7 @@ for name, adapter in (
 
 if solana_adapter["fee"]["targetGrossTraderFeeBps"] != 75:
     raise SystemExit("Solana adapter MagicFee target drifted")
-if solana_adapter["legacyFlywheel"]["vaultCount"] != 10 or solana_adapter["legacyFlywheel"]["epochHours"] != 6:
+if solana_adapter["legacyFlywheel"]["vaultCount"] != 12 or solana_adapter["legacyFlywheel"]["epochHours"] != 6:
     raise SystemExit("Solana Legacy Flywheel adapter drifted")
 if set(evm_adapter["chainKeys"]) != {"ethereum","base","bnb","hyperevm","robinhood"}:
     raise SystemExit("shared EVM adapter must cover exactly five EVM chains")
@@ -206,4 +206,4 @@ if sui_adapter["legacyFlywheel"]["automaticBridgeEnabled"] is not False:
     raise SystemExit("Sui Legacy Flywheel auto-bridge must remain disabled")
 
 print("WORLDZ_OMNICHAIN_VALIDATION=PASS")
-print("chains=8 adapters=4/native+sharedEVM fee_bps=75 split=51/17/15/8.5/8.5 legacy_vaults=10 epoch_hours=6 api=LOCKED product=LOCKED analytics=LOCKED mainnet=OFF")
+print("chains=8 adapters=4/native+sharedEVM fee_bps=75 split=51/17/15/8.5/8.5 legacy_tokens=12 epoch_hours=6 api=LOCKED product=LOCKED analytics=LOCKED mainnet=OFF")

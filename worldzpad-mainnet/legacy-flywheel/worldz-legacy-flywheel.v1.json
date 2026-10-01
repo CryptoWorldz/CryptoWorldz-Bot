@@ -1,14 +1,14 @@
 {
-  "version": "WORLDZ-LEGACY-FLYWHEEL-2026-09-25-C",
+  "version": "WORLDZ-LEGACY-FLYWHEEL-2026-10-01-D",
   "status": "PRIVATE_BUILD__DEVNET_REQUIRED__MAINNET_DISABLED",
-  "name": "Legacy Flywheel™",
-  "purpose": "Use fee revenue from new WorldzLaunchPad launches to create recurring SOL rewards for qualifying holders of the 10 verified PurpleDiamondCrew legacy mints.",
+  "name": "Legacy Core Market-Buy Flywheel™",
+  "purpose": "Use the single 15% Legacy allocation from WorldzLaunchPad fee revenue for equal transparent market-buy accruals across 12 recorded Legacy tokens.",
   "sourceFeeRule": {
     "basis": "NET_WORLDZ_CONTROLLED_CLAIMABLE_FEE_REVENUE_AFTER_EXTERNAL_PROTOCOL_DEDUCTIONS",
     "allSupportedWorldzLaunchPadTokens": true,
     "legacyFlywheelPercent": 15,
     "traderFeeIncreaseRequired": false,
-    "rule": "Legacy Flywheel is part of the disclosed MagicFeeNumber™ allocation. No additional hidden fee is layered on top."
+    "rule": "Legacy Core is the single disclosed 15% allocation. It is not an additional fee and must not be deducted twice."
   },
   "controlledFeeSplitPercent": {
     "creator": 51,
@@ -24,15 +24,16 @@
     "inputAsset": "native quote asset or collected fee asset",
     "solanaSource": "wSOL may be unwrapped to SOL before vault credit",
     "nonSolanaSource": "Accrue the 15% payable on the source chain until an approved, audited conversion/bridge route can deliver SOL. No unsupported auto-bridge.",
-    "vaultCount": 10,
-    "splitMode": "EQUAL_ACROSS_10_VERIFIED_LEGACY_MINTS",
-    "percentOfFlywheelBucketPerVault": 10,
-    "percentOfWorldzControlledFeeRevenuePerVault": 1.5
+    "vaultCount": 12,
+    "splitMode": "EQUAL_ACROSS_12_LEGACY_MARKET_BUY_ALLOCATIONS",
+    "percentOfFlywheelBucketPerVault": 8.333333333333,
+    "percentOfWorldzControlledFeeRevenuePerVault": 1.25,
+    "use": "TRANSPARENT_MARKET_BUY_ACCRUAL"
   },
   "epoch": {
     "seconds": 21600,
     "hours": 6,
-    "fundingCadence": "every_6_hours",
+    "fundingCadence": "every_6_hours_or_accrue",
     "eligibilitySnapshot": "START_AND_END_OF_EPOCH",
     "qualifyingBalance": "MIN(start_balance,end_balance)",
     "rollForwardRule": "If an epoch or individual payout is uneconomic, accrue it to the next claimable balance rather than waste SOL on fees."
@@ -49,19 +50,18 @@
     "newBuyerEligibility": "A wallet that later acquires at least the published minimum may qualify once live acquisition/liquidity exists and the scanner verifies both epoch boundaries."
   },
   "rewardWeighting": {
-    "equalEligibleWalletPoolPercent": 50,
-    "sqrtHoldingPoolPercent": 50,
-    "formula": "50% equal among eligible wallets + 50% proportional to sqrt(qualifying legacy-token balance)",
-    "linkedVerifiedWalletsAggregated": true,
-    "reason": "Preserves meaningful small-holder rewards without letting one historical whale absorb the entire legacy vault."
+    "mode": "SUPERSEDED_BY_EQUAL_MARKET_BUY_ALLOCATION",
+    "equalPerTokenPercentOfWorldzControlledFeeRevenue": 1.25,
+    "totalLegacyPercentOfWorldzControlledFeeRevenue": 15,
+    "holderRewardWeightingEnabled": false
   },
   "settlement": {
-    "accounting": "Every 6 hours each eligible wallet receives a ledger entitlement.",
+    "accounting": "Every eligible fee settlement accrues one equal 1.25% market-buy entitlement for each of the 12 Legacy tokens.",
     "directPushRequired": false,
-    "claimModel": "cumulative_claimable_SOL",
-    "automaticPayout": "Only when current execution cost and minimum-payout rules make the transfer economical.",
-    "noGuaranteedReturn": true,
-    "noGuaranteedApy": true
+    "claimModel": "per_token_market_buy_accrual",
+    "automaticPayout": false,
+    "marketExecutionEnabled": false,
+    "noGuaranteedReturn": true
   },
   "assets": [
     {
@@ -77,10 +77,11 @@
       "snapshotOwners": 19,
       "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
       "rewardVault": {
-        "type": "PROGRAM_DERIVED_SOL_VAULT",
-        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
-        "worldzControlledFeeSharePercent": 1.5,
-        "flywheelBucketSharePercent": 10
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
       }
     },
     {
@@ -96,10 +97,11 @@
       "snapshotOwners": 106,
       "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
       "rewardVault": {
-        "type": "PROGRAM_DERIVED_SOL_VAULT",
-        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
-        "worldzControlledFeeSharePercent": 1.5,
-        "flywheelBucketSharePercent": 10
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
       }
     },
     {
@@ -115,10 +117,11 @@
       "snapshotOwners": 26,
       "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
       "rewardVault": {
-        "type": "PROGRAM_DERIVED_SOL_VAULT",
-        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
-        "worldzControlledFeeSharePercent": 1.5,
-        "flywheelBucketSharePercent": 10
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
       }
     },
     {
@@ -134,10 +137,11 @@
       "snapshotOwners": 3,
       "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
       "rewardVault": {
-        "type": "PROGRAM_DERIVED_SOL_VAULT",
-        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
-        "worldzControlledFeeSharePercent": 1.5,
-        "flywheelBucketSharePercent": 10
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
       }
     },
     {
@@ -153,10 +157,11 @@
       "snapshotOwners": 6,
       "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
       "rewardVault": {
-        "type": "PROGRAM_DERIVED_SOL_VAULT",
-        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
-        "worldzControlledFeeSharePercent": 1.5,
-        "flywheelBucketSharePercent": 10
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
       }
     },
     {
@@ -172,10 +177,11 @@
       "snapshotOwners": 3,
       "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
       "rewardVault": {
-        "type": "PROGRAM_DERIVED_SOL_VAULT",
-        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
-        "worldzControlledFeeSharePercent": 1.5,
-        "flywheelBucketSharePercent": 10
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
       }
     },
     {
@@ -191,10 +197,11 @@
       "snapshotOwners": 1,
       "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
       "rewardVault": {
-        "type": "PROGRAM_DERIVED_SOL_VAULT",
-        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
-        "worldzControlledFeeSharePercent": 1.5,
-        "flywheelBucketSharePercent": 10
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
       }
     },
     {
@@ -210,10 +217,11 @@
       "snapshotOwners": 3,
       "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
       "rewardVault": {
-        "type": "PROGRAM_DERIVED_SOL_VAULT",
-        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
-        "worldzControlledFeeSharePercent": 1.5,
-        "flywheelBucketSharePercent": 10
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
       }
     },
     {
@@ -229,10 +237,11 @@
       "snapshotOwners": 26,
       "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
       "rewardVault": {
-        "type": "PROGRAM_DERIVED_SOL_VAULT",
-        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
-        "worldzControlledFeeSharePercent": 1.5,
-        "flywheelBucketSharePercent": 10
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
       }
     },
     {
@@ -248,10 +257,41 @@
       "snapshotOwners": 46,
       "minimumPolicy": "0.01% of verified 2026-09-21 supply, rounded up to the smallest raw unit",
       "rewardVault": {
-        "type": "PROGRAM_DERIVED_SOL_VAULT",
-        "address": "PENDING_PDA_DERIVATION_AND_DEVNET_PROOF",
-        "worldzControlledFeeSharePercent": 1.5,
-        "flywheelBucketSharePercent": 10
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
+      }
+    },
+    {
+      "order": 11,
+      "name": "Next Big Coin",
+      "symbol": "NBC",
+      "mint": null,
+      "mintStatus": "VERIFY_BEFORE_MARKET_BUY_EXECUTION",
+      "knownDevWallet": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt",
+      "rewardVault": {
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
+      }
+    },
+    {
+      "order": 12,
+      "name": "Hope St Support Coin",
+      "symbol": "HSSC",
+      "mint": "29xKqmkvhYvMgWMqHgUoimzfBxweLUvcASAJUHHSkJMW",
+      "mintStatus": "RECORDED__REVERIFY_LIVE_MARKET_BEFORE_EXECUTION",
+      "protectedCommitment": "50% of HSSC creator/reward revenue remains reserved for the Hope St / HopeStreet support commitment; separate from this Legacy market-buy share.",
+      "rewardVault": {
+        "type": "LEGACY_MARKET_BUY_LEDGER",
+        "address": "PENDING_MULTISIG_OR_PDA",
+        "worldzControlledFeeSharePercent": 1.25,
+        "flywheelBucketSharePercent": 8.333333333333,
+        "marketBuyOnly": true
       }
     }
   ],
@@ -277,14 +317,13 @@
     ]
   },
   "executionGates": [
-    "Derive and verify 10 dedicated Solana reward-vault PDAs on devnet.",
-    "Prove live holder scanning for all 10 mints and both epoch boundaries.",
-    "Verify threshold calculations against raw integer balances and token decimals.",
-    "Exclude project/system/distribution/liquidity wallets before rewards are finalized.",
-    "Prove exact fee contribution accounting from each source WorldzLaunchPad token.",
-    "Prove 50/50 equal + sqrt reward math reconciles to each vault's funded epoch amount.",
-    "Prove roll-forward and cumulative-claim accounting.",
-    "Security review the payout/claim adapter.",
+    "Verify all 12 token identities; NBC mint remains unresolved.",
+    "Verify a real live market route and acceptable liquidity/price impact before any token buy.",
+    "Accrue rather than trade when a mint, route, liquidity, treasury authority or market-data gate fails.",
+    "Historical distribution wallets are forbidden funding destinations.",
+    "Prove exact 15% fee contribution accounting and equal 1.25% per-token allocations.",
+    "Require treasury/multisig approval and WorldzProof receipts before mainnet execution.",
+    "Security review the market-buy adapter.",
     "Mainnet remains disabled until explicit owner approval."
   ],
   "magicFeeStandard": {
@@ -293,6 +332,10 @@
     "targetGrossTraderFeePercent": 0.75,
     "modeledWorldzControlledPercentOfTrade": 0.6,
     "effectiveLegacyFlywheelPercentOfTrade": 0.09,
-    "effectivePerLegacyVaultPercentOfTrade": 0.009
+    "effectivePerLegacyVaultPercentOfTrade": 0.0075,
+    "mode": "12_TOKEN_EQUAL_MARKET_BUY_ALLOCATION"
+  },
+  "protectedTokenRules": {
+    "HSSC": "50% of HSSC creator/reward revenue is reserved for the Hope St / HopeStreet support commitment; it does not increase the Legacy bucket above 15%."
   }
 }
