@@ -1,6 +1,7 @@
 (() => {
   const tg = window.Telegram && window.Telegram.WebApp;
   const root = () => document.getElementById("community-suite-root");
+  const REX_BRAND_IMAGE = window.REXSECURE_BRAND_IMAGE || {};
   const AI_PRESETS = [
     ["no5","No.5","Smart Operator"],
     ["dipshit","DipShit","Cheeky Troubleshooter"],
@@ -84,7 +85,7 @@
     const presetButtons = AI_PRESETS.map(([key,name,role]) => `<button class="button ${ai.preset_key === key ? "" : "secondary"} suite-ai-preset" data-preset="${key}">${ai.preset_key === key ? "✅ " : ""}${escapeHtml(name)}<br><small>${escapeHtml(role)}</small></button>`).join("");
     const rexBrandCard = ai.preset_key === "rex" ? `
       <section style="display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:14px;align-items:center;margin:14px 0;padding:12px;border:1px solid rgba(139,92,246,.35);border-radius:18px;background:linear-gradient(135deg,rgba(28,20,55,.94),rgba(8,18,35,.92))">
-        <img src="/miniapp/assets/rexsecure-brand-poster.jpg" alt="REXSECURE — Security for Your Community" style="width:100%;max-width:180px;border-radius:14px;display:block">
+        <img src="${escapeHtml(REX_BRAND_IMAGE.dataUrl || "")}" alt="REXSECURE — Security for Your Community" style="width:100%;max-width:180px;border-radius:14px;display:block">
         <div>
           <p class="eyebrow">🛡 REXSECURE™</p>
           <h3 style="margin:.2rem 0">Security for Your Community</h3>
