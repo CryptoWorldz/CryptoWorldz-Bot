@@ -1,7 +1,7 @@
 {
-  "version": "WORLDZ-CORE-LEGACY-REVENUE-2026-10-01-B",
+  "version": "WORLDZ-CORE-LEGACY-REVENUE-2026-10-01-C",
   "name": "Worldz Legacy Core Market-Buy Pool™",
-  "status": "SOURCE_CONFIGURED__MAINNET_ROUTING_DISABLED",
+  "status": "FINAL_12_TOKEN_MEMBERSHIP_LOCKED__MAINNET_ROUTING_DISABLED",
   "purpose": "Allocate one 15% Legacy Core bucket across 12 recorded Legacy tokens as equal market-buy allocations. Historical distribution wallets are never funding destinations.",
   "accountingBasis": "NET_WORLDZ_CONTROLLED_REVENUE_AFTER_REFUNDS_CHARGEBACKS_TAXES_EXTERNAL_PROCESSOR_PROTOCOL_FEES_AND_PROTECTED_EARMARKS",
   "asset": "SOL",
@@ -219,6 +219,51 @@
     "allTwelveReceiveEqualShare": true,
     "hsscHopeStCommitmentPreserved": true,
     "noSecondLegacyDeduction": true,
-    "worldzApp50Liquidity50DevelopmentPolicyUnchanged": true
+    "worldzApp50Liquidity50DevelopmentPolicyUnchanged": true,
+    "finalLegacyMembershipClosed": true,
+    "noFutureLegacyTokens": true,
+    "legacyAllocationLockedAt15Percent": true,
+    "equalTwelveWaySplitLocked": true
+  },
+  "membershipLock": {
+    "status": "FINAL_CLOSED_SET",
+    "effectiveDate": "2026-10-01",
+    "beneficiaryCount": 12,
+    "tokenKeys": [
+      "PDC_ORIGINAL",
+      "PDC1_FIRST",
+      "PDC1_SECOND",
+      "PDCMAGA",
+      "PDCSHARE",
+      "PURPLE_DC",
+      "PURPLE_OG",
+      "PCC1_LEGACY",
+      "INVEST",
+      "LMTD",
+      "NBC",
+      "HSSC"
+    ],
+    "additionsAllowed": false,
+    "removalsAllowed": false,
+    "replacementsAllowed": false,
+    "futureLegacyDesignationsAllowed": false,
+    "note": "The Legacy Token list is complete. No additional token may become a Legacy Core beneficiary. Metadata corrections or verification of an existing member (for example NBC mint verification) do not create a new Legacy member."
+  },
+  "allocationLock": {
+    "status": "FINAL_LOCKED",
+    "totalLegacyPercent": 15,
+    "totalLegacyBps": 1500,
+    "equalPerTokenPercent": 1.25,
+    "equalPerTokenBps": 125,
+    "beneficiaryCount": 12,
+    "formula": "12 × 1.25% = 15%",
+    "variableWeightingAllowed": false,
+    "extraLegacyBucketAllowed": false
+  },
+  "manualDistributionWalletPolicy": {
+    "automatedWorldzRoutingToHistoricalDistributionWalletsAllowed": false,
+    "ownerManualFundingOutsideWorldzRoutingAllowed": true,
+    "accountingTreatment": "OUTSIDE_WORLDZ_LEGACY_CORE_AUTOMATION",
+    "rule": "Owner-initiated SOL transfers to historical distribution wallets are manual actions and are not Worldz Legacy Core settlements, automated routing, or proof that the Worldz treasury executed a Legacy allocation."
   }
 }
