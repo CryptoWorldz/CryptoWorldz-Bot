@@ -78,8 +78,39 @@ function missingGraceXSecretError() {
   return error;
 }
 
+function zedRuntimeKey(botToken) {
+  return crypto.createHash("sha256").update(`zed-runtime-v1:${botToken}`).digest("hex");
+}
+
+async function supabaseRuntimeAuthorized(config) {
+  const response = await fetch(config.supabaseUrl + "/rest/v1/rpc/zed_runtime_authorized", {
+    method: "POST",
+    headers: {
+      apikey: config.supabaseApiKey,
+      "content-type": "application/json",
+      "x-zed-runtime-key": zedRuntimeKey(config.botToken)
+    },
+    body: "{}",
+    signal: AbortSignal.timeout(15000)
+  });
+  const payload = await response.json().catch(() => null);
+  return response.ok && payload === true;
+}
+
 async function bootstrapSupabaseRuntime(config) {
   if (config.usingServiceRole) return;
+
+  // Normal restarts must not depend on Supabase being able to call Telegram.
+  // If the server-only runtime key is already registered, use it immediately.
+  try {
+    if (await supabaseRuntimeAuthorized(config)) {
+      console.log("Supabase runtime bridge authorization reused.");
+      return;
+    }
+  } catch (error) {
+    console.warn("Supabase runtime bridge authorization preflight failed; attempting bootstrap.", sanitizeStartupError(error));
+  }
+
   const response = await fetch(config.supabaseUrl + "/rest/v1/rpc/zed_runtime_bootstrap", {
     method: "POST",
     headers: {
@@ -91,7 +122,11 @@ async function bootstrapSupabaseRuntime(config) {
   });
   const payload = await response.json().catch(() => null);
   if (!response.ok || payload !== true) {
-    throw new Error("Supabase runtime bridge bootstrap failed.");
+    throw new Error(`Supabase runtime bridge bootstrap failed (HTTP ${response.status}).`);
+  }
+
+  if (!(await supabaseRuntimeAuthorized(config))) {
+    throw new Error("Supabase runtime bridge authorization failed after bootstrap.");
   }
 }
 
@@ -105,7 +140,7 @@ async function start() {
   if (!config.usingServiceRole) {
     supabaseOptions.global = {
       headers: {
-        "x-zed-runtime-key": crypto.createHash("sha256").update(`zed-runtime-v1:${config.botToken}`).digest("hex")
+        "x-zed-runtime-key": zedRuntimeKey(config.botToken)
       }
     };
   }
