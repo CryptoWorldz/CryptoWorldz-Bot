@@ -11,7 +11,9 @@ test("Mini App loads Command Centre MAX and WorldzLaunchPad", () => {
   assert.match(html, /Command Centre <span>MAX™<\/span>/);
   assert.match(html, /WORLDZLAUNCHPAD™/);
   assert.match(max, /command-centre-max/);
-  assert.match(max, /max-public-feed/);
+  assert.doesNotMatch(max, /max-public-feed/);
+  assert.doesNotMatch(max, /RECAP/);
+  assert.match(max, /data-open="raids"/);
   assert.doesNotMatch(html, /based[.]bid/i);
   assert.equal(fs.existsSync(path.join(root, "public/miniapp/based-bid-launch-view.js")), false);
 });
