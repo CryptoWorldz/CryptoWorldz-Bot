@@ -84,12 +84,12 @@ const COMMAND_GROUPS = Object.freeze([
     ["worldping", "Send a visible group WorldPing"], ["worldpingmode", "Group admin: AdminsOnlyPing or FullMemberPing"],
     ["zedmaxprice", "View ZED MAX SOL licence prices"], ["zedmaxreceipt", "Submit a SOL payment receipt"]
   ]),
-  group("admin-missions", "🛡 Admin • Missions, Reviews, Members & Settings", "admin", [
+  group("admin-missions", "🛡 Admin • Raids, Reviews, Members & Settings", "admin", [
     ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"], ["secureguard", "Open REX SecureGuard security controls"],
-    ["reviewqueue", "Open mission, Creator and Hero human-review queues"],
-    ["newmission", "Create a mission"], ["editmission", "Edit a mission"], ["endmission", "End a mission"],
+    ["reviewqueue", "Open Raid, Creator and Hero human-review queues"],
+    ["newmission", "Create a Ronald Raider Raid (legacy command)"], ["editmission", "Edit a Raid (legacy command)"], ["endmission", "End a Raid (legacy command)"],
     ["raidprogress", "Update Ronald Raider likes/reposts/replies/views"], ["stopraid", "Stop the live Ronald Raider Raid"],
-    ["pending", "Review pending mission submissions"], ["approve", "Approve an authorised pending action"],
+    ["pending", "Review pending Raid submissions"], ["approve", "Approve an authorised pending action"],
     ["reject", "Reject an authorised pending action"], ["pendingshills", "Review pending token shill proofs"],
     ["approveshill", "Approve a verified token shill proof"], ["rejectshill", "Reject a token shill proof"],
     ["member", "Inspect a Legend member"], ["admins", "List managed admins"],

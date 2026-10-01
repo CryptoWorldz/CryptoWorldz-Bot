@@ -44,24 +44,30 @@
     "Worldz Proof™",
     "Worldz Trust Orbit™",
     "WorldDexPush™",
-    "WorldzLaunch Community™"
+    "WorldzLaunch Community™",
+    "Worldz Spotlight™"
   ],
   "commandCentre": {
-    "registeredCommandEntries": 139,
+    "registeredCommandEntries": 248,
     "modules": [
       "ZED",
       "AUTO",
       "G.R.A.C.E.",
       "MAX",
+      "REX SecureGuard™",
+      "DIPSHIT™",
+      "Ronald Raider",
       "WorldPing™",
       "WorldzCast™",
-      "WorldzLaunchPad™"
+      "WorldzLaunchPad™",
+      "Worldz Spotlight™"
     ],
     "licensing": {
       "rent": "0.3 SOL / group / 31 days",
       "rentToOwn": "0.5 SOL / group / month for 12 months",
       "own": "4.5 SOL one-time perpetual group licence"
-    }
+    },
+    "registeredCommandEntriesAsOf": "2026-10-02"
   },
   "socials": {
     "x": [

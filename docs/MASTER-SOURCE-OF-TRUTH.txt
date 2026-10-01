@@ -307,7 +307,7 @@ Current showcase:
 RECAP / RecapThisBot is retired from Command Centre control. Historical references do not grant runtime, admin, command, treasury or governance authority.
 
 Recorded Command Centre registry:
-- 139 registered command entries
+- 248 registered command entries (2026-10-02 registry snapshot)
 
 Licensing shown:
 - Rent: 0.3 SOL / group / 31 days
