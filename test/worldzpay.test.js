@@ -59,7 +59,7 @@ test("SOL settlement preview plugs into the protected Legacy Core revenue ledger
   assert.equal(preview.legacyCoreRouting, "accrue_only");
   assert.equal(preview.liveTransfersEnabled, false);
   assert.equal(preview.legacyCore.legacyCorePoolLamports, 1_500_000_000n);
-  assert.equal(preview.legacyCore.allocations.length, 3);
+  assert.equal(preview.legacyCore.allocations.length, 12);\n  assert.equal(preview.legacyCore.allocations[0].tokenShareLamports, 125_000_000n);
   assert.equal(preview.legacyCore.historicalDistributionWalletFundingForbidden, true);
 });
 
