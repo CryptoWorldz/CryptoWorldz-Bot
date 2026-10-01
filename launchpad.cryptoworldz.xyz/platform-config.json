@@ -373,10 +373,31 @@
       "lpLockMinDays": 365
     },
     "feeRoutes": {
-      "creatorMaxPercent": 20,
-      "treasuryMaxPercent": 20,
-      "lpGrowthMinPercent": 20,
-      "holdersLpCommunityCombinedMinPercent": 60
+      "model": "WORLDZ_FEE_FLOW_V2",
+      "exactLockedFixedPercent": {
+        "creatorDeveloper": 10,
+        "launchReferrer": 15,
+        "legacyCore": 15,
+        "worldzCoreFamilyMarketBuys": 12,
+        "lpGrowth": 10,
+        "launchedTokenBuybackAndBurn": 8,
+        "impactCharity": 5,
+        "teamBuilderRewards": 5,
+        "futureTokenDeploymentReserve": 5
+      },
+      "worldzLaunchPadAllowedPercent": [
+        3,
+        5,
+        8
+      ],
+      "treasuryReserveByLaunchPadChoice": {
+        "3": 12,
+        "5": 10,
+        "8": 7
+      },
+      "totalPercent": 100,
+      "walletTransferTaxPercent": 0,
+      "rule": "The fixed lanes cannot be edited. Only the creator-selected WorldzLaunchPad contribution (3/5/8) changes; Treasury/Reserve receives the balancing 12/10/7."
     },
     "mainnetEnforcement": {
       "atomicGenesisDistributionRequired": true,
