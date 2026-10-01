@@ -85,7 +85,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["zedmaxprice", "View ZED MAX SOL licence prices"], ["zedmaxreceipt", "Submit a SOL payment receipt"]
   ]),
   group("admin-missions", "🛡 Admin • Raids, Reviews, Members & Settings", "admin", [
-    ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"], ["secureguard", "Open REX SecureGuard security controls"],
+    ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"], ["secureguard", "Open REXSECURE ULTIMATE security controls"],\n    ["rexintel", "Check a Telegram ID against REX Network Shield and CAS"], ["rexreport", "Record evidence about a suspicious Telegram profile"],\n    ["rexpatternban", "Reply to confirmed scam/spam and add its message pattern"], ["rexunderattack", "Turn strict REX raid posture on or off"],
     ["reviewqueue", "Open Raid, Creator and Hero human-review queues"],
     ["newmission", "Create a Ronald Raider Raid (legacy command)"], ["editmission", "Edit a Raid (legacy command)"], ["endmission", "End a Raid (legacy command)"],
     ["raidprogress", "Update Ronald Raider likes/reposts/replies/views"], ["stopraid", "Stop the live Ronald Raider Raid"],
@@ -165,7 +165,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["launchadreject", "Reject a Spotlight ad order"], ["launchadactivate", "Verify payment and activate a Spotlight ad"],
     ["suiteapprove", "Approve a Community Suite licence/package after payment review"],
     ["networkcreate", "Create a multi-group network licence"], ["networkapprove", "Approve a network group slot"],
-    ["networkremove", "Remove a group from a network licence"],
+    ["networkremove", "Remove a group from a network licence"],\n    ["rexglobalblock", "Add a confirmed Telegram ID to REX Network Shield"], ["rexglobalclear", "Clear a reviewed Telegram ID from REX Network Shield"],
     ["addonquote", "Quote a Marketplace request"], ["addonstatus", "Update Marketplace request status"],
     ["reviewlegend", "Review a Unique Legend application"], ["reserverewardon", "Open the protected Legend reward reserve"],
     ["reserverewardoff", "Lock the protected Legend reward reserve"]
