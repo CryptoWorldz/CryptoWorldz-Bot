@@ -2,6 +2,8 @@
   "profile": "AU-FED",
   "name": "Australia — Federal",
   "asOf": "2026-10-02",
+  "validThrough": "2026-12-31",
+  "nextMandatoryReview": "2027-01-01",
   "status": "technical-guardrail-not-legal-advice",
   "officialSources": [
     "https://www.aec.gov.au/about_aec/Publications/Backgrounders/authorisation.htm",
