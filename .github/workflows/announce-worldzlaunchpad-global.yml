@@ -1,10 +1,6 @@
 name: Announce WorldzLaunchPad Global Launch
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/announce-worldzlaunchpad-global.yml"
   workflow_dispatch:
 
 permissions:
@@ -38,7 +34,7 @@ jobs:
               "WorldzMINT™ • Flash™ • Curve™ • Curve Pro™ • CrossPair™ • OmniChain™ • Safe Launch Standard™ • Worldz Proof™ • Trust Orbit™",
               "",
               "🤖 ZED • 💎 AUTO • 👩‍💼 G.R.A.C.E. • 🧠 MAX • 🛡 REX • 💙 DIPSHIT • 🤠 Ronald Raider • 🌐 WorldPing™ • 📡 WorldzCast™",
-              "248 registered Command Centre entries across Raids, wallets, rewards, research, socials, hourly token voting, security and community tools.",
+              "248 Command Centre entries: Raids • wallets • rewards • hourly votes • security • socials.",
               "",
               "🔥 FOUNDING 100™",
               "10,000,000 WLDZ reserved across 100 qualified verified mainnet positions = 100,000 WLDZ per qualified team position.",
@@ -51,7 +47,7 @@ jobs:
               "",
               "𝕏 @WorldzLaunchPad • @CryptoWorldzX • @JayJayTeamDev",
               "",
-              "CryptoWorldz builds the technology. DonateWorldz carries the separately accounted humanitarian/support pathway inside the wider WorldzEcosystem™.",
+              "CryptoWorldz builds the tech. DonateWorldz carries the separate humanitarian/support pathway.",
               "Helping the People who Help the People. 🌏"
           ])
 
