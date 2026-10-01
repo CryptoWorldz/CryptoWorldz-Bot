@@ -9,7 +9,7 @@ from html import escape
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD = "2026-09-19-specialist-worldz"
+BUILD = "2026-10-02-worldz-reference-001"
 
 DEPARTMENTS = {
     "waterworldz": {
@@ -351,6 +351,174 @@ for slug, cfg in DEPARTMENTS.items():
     out = ROOT / "oneworldz.com" / slug / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(dept_page(slug, cfg), encoding="utf-8")
+
+
+# WORLDZ REFERENCE #001 — permanent public accountability case file.
+# This intentionally overwrites the generic IntegrityWorldz page after the
+# department loop so the permanent route survives prune/deploy while retaining
+# the Specialist Worldz contract.
+INTEGRITY_REFERENCE_001 = r'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WORLDZ REFERENCE #001 | IntegrityWorldz</title>
+<meta name="description" content="WORLDZ REFERENCE #001 — a source-first case study in disability, government financial management, housing, mental-health support, complaints, public money and written accountability.">
+<link rel="stylesheet" href="/style.css">
+<style>
+:root{--accent:#9a42ff;--accent2:#38bdf8;--gold:#f0c85b}
+.ref-hero{min-height:0;background:radial-gradient(circle at 18% 10%,rgba(154,66,255,.24),transparent 40%),radial-gradient(circle at 86% 16%,rgba(56,189,248,.16),transparent 36%),linear-gradient(145deg,#120822,#05030a 74%)}
+.ref-hero .hero-copy{padding:clamp(28px,6vw,76px);min-height:0}
+.ref-hero h1{max-width:1050px;font-size:clamp(2.5rem,7vw,6rem);line-height:.94;letter-spacing:-.04em}
+.ref-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.ref-card{padding:18px;border:1px solid rgba(154,66,255,.35);border-radius:18px;background:rgba(255,255,255,.035);line-height:1.55}
+.ref-card strong{display:block;color:#fff;margin-bottom:8px}
+.ref-card small{display:block;color:#bdb6ce;margin-top:8px}
+.status{display:inline-block;padding:5px 9px;border-radius:999px;border:1px solid rgba(56,189,248,.38);font-size:.78rem;font-weight:900;letter-spacing:.03em;color:#bdeaff;margin-bottom:8px}
+.timeline{display:grid;gap:12px}
+.event{padding:16px;border-left:4px solid var(--accent2);border-radius:12px;background:rgba(56,189,248,.055)}
+.event b{display:block;color:#fff;margin-bottom:5px}
+.event time{font-weight:900;color:#bdeaff}
+.funding{overflow-x:auto;border:1px solid rgba(255,255,255,.12);border-radius:16px}
+.funding table{width:100%;border-collapse:collapse;min-width:820px}
+.funding th,.funding td{padding:12px 14px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.1)}
+.funding th{background:#170d2b}
+.evidence-note{padding:18px;border-left:4px solid var(--gold);background:rgba(240,200,91,.07);border-radius:12px;line-height:1.62}
+.source-list a{overflow-wrap:anywhere}
+@media(max-width:760px){.ref-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-oneworldz-build="2026-10-02-worldz-reference-001" data-specialist-worldz="integrityworldz" data-worldz-reference="001">
+<nav class="nav">
+<a class="brand" href="/">WorldzEcosystem™</a>
+<a href="/specialist-worldz/">Specialist Worldz</a>
+<a href="#research">ResearchWorldz</a>
+<a href="#law">LawWorldz</a>
+<a href="#public-money">Public Money</a>
+<a href="#timeline">Evidence Timeline</a>
+</nav>
+<main class="shell">
+<section class="hero ref-hero" data-verified-identity="text-first">
+<div class="hero-copy">
+<p class="eyebrow">IntegrityWorldz • ResearchWorldz • LawWorldz</p>
+<h1>WORLDZ REFERENCE #001</h1>
+<p><strong>Government Service Accountability — Evidence • Disability • Public Money • Written Records</strong></p>
+<p>This is a source-first reference case showing how one Australian documented dealings with government agencies and government-funded services, preserved written evidence, separated verified records from recollection and opinion, and used lawful complaint, review and court pathways.</p>
+</div>
+</section>
+
+<section class="section">
+<p class="eyebrow">No.1 Reference & Guidance</p>
+<h2>Start with the person's documented circumstances — then examine the service record.</h2>
+<div class="evidence-note">
+<p><strong>Primary Australian Government evidence:</strong> a Services Australia Income Statement dated 12 March 2026 records that Jason Wright was receiving the maximum-rate Disability Support Pension and gives a DSP grant date of 29 May 1997.</p>
+<p><strong>Primary tribunal evidence:</strong> an NCAT Financial Management Order issued 12 November 2025 states that Jason Wright's estate is subject to management under the NSW Trustee and Guardian Act 2009, commits management to NSW Trustee &amp; Guardian, and requires review within 12 months.</p>
+<p>Disability or financial-management status does not make clear written communication, accurate records, understandable explanations, lawful review pathways or attention to essential living needs unimportant. This case is published to show how records can be built and checked.</p>
+</div>
+</section>
+
+<section class="section">
+<p class="eyebrow">Evidence status</p>
+<h2>Not every statement has the same evidentiary weight.</h2>
+<div class="ref-grid">
+<div class="ref-card"><span class="status">PRIMARY VERIFIED RECORD</span><strong>Original official document</strong><span>An order, government statement, official letter or other original record available in the evidence set.</span></div>
+<div class="ref-card"><span class="status">SECONDARY VERIFIED RECORD</span><strong>Dated correspondence describing another record</strong><span>For example, court-related correspondence describing a medical report where the original report has not yet been recovered.</span></div>
+<div class="ref-card"><span class="status">USER'S DOCUMENTED STATEMENT</span><strong>What Jason put in writing at the time</strong><span>This proves what was communicated. It does not automatically prove every allegation inside the message.</span></div>
+<div class="ref-card"><span class="status">USER RECOLLECTION</span><strong>A remembered verbal conversation</strong><span>Used only where no recording or contemporaneous written confirmation has been located.</span></div>
+<div class="ref-card"><span class="status">ALLEGATION / OPINION</span><strong>A criticism that has not been independently established</strong><span>Presented as Jason's view unless a court, tribunal, Ombudsman, audit or other authority has made a finding.</span></div>
+<div class="ref-card"><span class="status">PUBLIC FUNDING RECORD</span><strong>Official budget, appropriation, grant or procurement source</strong><span>Each amount is labelled by financial year and program so unrelated funding is not falsely combined.</span></div>
+</div>
+</section>
+
+<section class="section" id="research">
+<p class="eyebrow">Medical and disability evidence trail</p>
+<h2>Use the strongest record actually available.</h2>
+<div class="ref-grid">
+<div class="ref-card"><span class="status">PRIMARY VERIFIED RECORD</span><strong>Services Australia — 12 March 2026</strong><span>Income Statement confirms maximum-rate DSP and records a DSP grant date of 29 May 1997. Private identifiers such as address, date of birth and customer reference are not reproduced here.</span></div>
+<div class="ref-card"><span class="status">PRIMARY TRANSMISSION RECORD</span><strong>Dubbo Medicare Mental Health Centre — 12 March 2026</strong><span>A sent email titled “Jason Wright's Information” included both the NCAT Order and the Services Australia Income Statement as attachments, establishing that those records were supplied to that service.</span></div>
+<div class="ref-card"><span class="status">CORROBORATING RECORD</span><strong>Western Plains Medical Centre</strong><span>Appointment records establish an ongoing treatment relationship, including appointments with Dr Logan Jeyaindruan/Jeyaindran.</span></div>
+<div class="ref-card"><span class="status">SECONDARY VERIFIED RECORD</span><strong>GP report described in court-related correspondence</strong><span>Solicitor correspondence dated 4 July 2026 describes a Dr Jeyaindran report dated 27 October 2025 addressing schizophrenia, depression and gambling-related financial decision-making concerns, and states that the report could be relied on at the hearing.</span><small>The original 27 October 2025 GP report itself has not yet been located in the currently accessible source archive, so this page does not pretend it has been independently inspected.</small></div>
+</div>
+<p class="evidence-note"><strong>Transmission caution:</strong> Jason states that Western Plains Medical Centre certificates were supplied to agencies when requested. This archive only marks a particular agency as having received a particular certificate where an email, attachment or other delivery record verifies that transmission.</p>
+</section>
+
+<section class="section" id="timeline">
+<p class="eyebrow">Evidence timeline</p>
+<h2>Key documented events from the case record.</h2>
+<div class="timeline">
+<div class="event"><time>12 NOV 2025</time><b>NCAT Financial Management Order</b><span>The order placed Jason Wright's estate under management by NSW Trustee &amp; Guardian and required review within 12 months.</span></div>
+<div class="event"><time>12 MAR 2026</time><b>Services Australia DSP evidence supplied to Dubbo Medicare Mental Health Centre</b><span>The sent email included the NCAT Order and Centrelink Income Statement as attachments.</span></div>
+<div class="event"><time>MAY 2026</time><b>Homes NSW complaint and urgent-housing correspondence</b><span>The mailbox record contains complaints and follow-ups concerning housing assistance and response times.</span></div>
+<div class="event"><time>2 JUN 2026</time><b>Homes NSW priority-housing outcome</b><span>Homes NSW Dubbo wrote: “Please see attached outcome letter confirming you have been approved for priority housing in Narromine.”</span></div>
+<div class="event"><time>4 JUL 2026</time><b>Court-related medical evidence described</b><span>Solicitor correspondence describes the 27 October 2025 Western Plains Medical Centre GP report and the financial-management evidence being considered.</span></div>
+<div class="event"><time>28 AUG 2026</time><b>Dubbo Medicare Mental Health Centre / Stride response</b><span>Correspondence acknowledged Jason's stress, supplied housing/homelessness contacts, described the centre's short-to-medium-term psychosocial-support role and stated that it could not contact the identified accommodation/homelessness services or make enquiries on his behalf.</span></div>
+<div class="event"><time>31 AUG 2026</time><b>NSW Ombudsman correspondence trail</b><span>Jason forwarded material concerning homelessness and government services. Ombudsman acknowledgement material explained complaint assessment, supporting-document requirements and the Ombudsman's powers and limitations.</span></div>
+<div class="event"><time>SEP 2026</time><b>Accommodation and allowance correspondence</b><span>TAG correspondence addressed caravan-park accommodation, scheduled allowances, an approved shoes payment and the handling of essential living costs.</span></div>
+<div class="event"><time>1–2 OCT 2026</time><b>Formal requests for written financial records</b><span>Jason requested an itemised history of previous payments, the date/amount/purpose of each future payment, written notice of budget or schedule changes, urgent food assistance and communication by email rather than requiring a phone call.</span></div>
+</div>
+</section>
+
+<section class="section">
+<p class="eyebrow">The 15-day statement</p>
+<h2>Recollection and published rule are kept separate.</h2>
+<div class="evidence-note">
+<p><strong>Jason's recollection:</strong> during his first phone call with his newly assigned NSW Trustee &amp; Guardian manager after review, he recalls being told words to the effect that there was a 15-day period available to respond to client emails about money.</p>
+<p><strong>Evidence limitation:</strong> no recording or written confirmation of that exact statement has been located.</p>
+<p><strong>Published standard:</strong> NSW Trustee &amp; Guardian's complaints information describes a 15-business-day target for a written response to a formal complaint after acknowledgement. The official material reviewed does not establish that every ordinary urgent money, food or payment email automatically carries the same response window.</p>
+</div>
+</section>
+
+<section class="section" id="public-money">
+<p class="eyebrow">Public Money Behind the Services</p>
+<h2>Use official figures — and label what each figure actually means.</h2>
+<div class="funding"><table>
+<thead><tr><th>Organisation / service</th><th>Period</th><th>Official amount</th><th>What the figure means</th></tr></thead>
+<tbody>
+<tr><td>NSW Trustee &amp; Guardian</td><td>2026–27</td><td><strong>A$142.474m</strong> total expenses</td><td>Budget papers also record A$88.560m sales/services revenue, A$36.994m grants &amp; contributions and A$12.620m investment revenue. The whole expense budget is therefore <strong>not</strong> described here as taxpayer funding.</td></tr>
+<tr><td>NSW Ombudsman</td><td>2026–27</td><td><strong>A$56.548163m</strong> appropriation</td><td>The Appropriation Bill notes this plus other sources is intended to fund A$60.683222m of expenses and A$0.5m capital expenditure.</td></tr>
+<tr><td>Homes NSW / social housing</td><td>2024–25 to 2027–28</td><td><strong>A$6.1b</strong> allocated</td><td>A$5.1b for new/replacement homes and A$1b for urgent public-housing repairs and maintenance under Building Homes for NSW.</td></tr>
+<tr><td>Dubbo Medicare Mental Health Centre</td><td>Announced 30 Sep 2025</td><td><strong>A$14.35m</strong></td><td>Commonwealth + NSW governments' combined investment for establishment and operation. The centre is commissioned by Western NSW Primary Health Network and operated by Stride.</td></tr>
+<tr><td>Stride — LikeMind</td><td>July 2026</td><td><strong>A$2,095,104</strong></td><td>Separate NSW Health grant for LikeMind services in Orange and Wagga Wagga. This is <strong>not</strong> presented as Dubbo MMHC funding or as money spent on Jason's individual care.</td></tr>
+<tr><td>Stride — Dubbo sub-acute day program</td><td>Dec 2025–Jan 2027</td><td><strong>A$154,000</strong></td><td>Separate HealthShare NSW contract for a Dubbo sub-acute mental-health day program, distinct from the Medicare Mental Health Centre funding.</td></tr>
+</tbody></table></div>
+<div class="source-list">
+<p><strong>Official source links:</strong></p>
+<p><a href="https://www.parliament.nsw.gov.au/tp/files/211356/2026-27%20Budget%20Paper%20No.04%20-%20Agency%20Financial%20Statements.pdf">NSW Budget Paper No.4 — Agency Financial Statements 2026–27</a></p>
+<p><a href="https://www.parliament.nsw.gov.au/bill/files/18923/First%20Print.pdf">NSW Appropriation Bill 2026</a></p>
+<p><a href="https://www.nsw.gov.au/departments-and-agencies/homes-nsw/building-homes-for-nsw">Homes NSW — Building Homes for NSW</a></p>
+<p><a href="https://www.health.gov.au/ministers/the-hon-emma-mcbride-mp/media/dubbo-medicare-mental-health-centre-now-open">Australian Government — Dubbo Medicare Mental Health Centre</a></p>
+<p><a href="https://www.nsw.gov.au/grants-and-funding/mental-health-ad-hoc-grants/recipients">NSW mental-health ad hoc grant recipients</a></p>
+<p><a href="https://buy.nsw.gov.au/notices/C9D41C5A-B1A2-40A1-B60A1599C0C7E900">buy.nsw — Stride Dubbo sub-acute day-program contract</a></p>
+</div>
+</section>
+
+<section class="section" id="law">
+<p class="eyebrow">LawWorldz Guidance</p>
+<h2>How another person can build a checkable evidence file.</h2>
+<div class="ref-grid">
+<div class="ref-card"><strong>1. Keep originals</strong><span>Save orders, letters, attachments, emails and complaint acknowledgements.</span></div>
+<div class="ref-card"><strong>2. Ask in writing</strong><span>For decisions involving money, housing, access or essential needs, request a written explanation.</span></div>
+<div class="ref-card"><strong>3. Build a dated timeline</strong><span>Record what was requested, when, who responded and what changed.</span></div>
+<div class="ref-card"><strong>4. Separate evidence levels</strong><span>Do not present memory, allegation or opinion as though it were an official finding.</span></div>
+<div class="ref-card"><strong>5. Request itemised records</strong><span>When money is managed for you, ask for dates, amounts, purposes and changes to the payment plan.</span></div>
+<div class="ref-card"><strong>6. Use formal review pathways</strong><span>Complaints, internal review, tribunal/court processes, advocacy and legal advice each have different roles.</span></div>
+<div class="ref-card"><strong>7. Follow the public money</strong><span>Use budgets, appropriations, annual reports, grant registers, procurement records and audits.</span></div>
+<div class="ref-card"><strong>8. Protect the source file</strong><span>Publish a privacy-safe copy while preserving the original record for legitimate evidentiary use.</span></div>
+</div>
+</section>
+
+<section class="section">
+<p class="eyebrow">Publication standard</p>
+<h2>Evidence before accusation.</h2>
+<p class="evidence-note">This public reference does not publish residential addresses, dates of birth, Centrelink/customer reference numbers, bank details, login/security data or unrelated third-party private information. Historical messages that contain abusive or threatening language may remain part of the original evidence record, but they are not reproduced here as advocacy or endorsed conduct. The case record distinguishes official findings from Jason's allegations, criticism and recollections.</p>
+</section>
+</main>
+<footer class="footer">WORLDZ REFERENCE #001 • IntegrityWorldz • ResearchWorldz • LawWorldz • Evidence before accusation</footer>
+</body>
+</html>'''
+
+integrity_out = ROOT / "oneworldz.com" / "integrityworldz" / "index.html"
+integrity_out.write_text(INTEGRITY_REFERENCE_001, encoding="utf-8")
 
 # Specialist Worldz index.
 cards = "".join(
