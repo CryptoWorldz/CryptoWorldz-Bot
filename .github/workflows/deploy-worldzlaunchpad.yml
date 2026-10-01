@@ -917,10 +917,11 @@ jobs:
                   expected_fullbuild=json.loads(Path('launchpad.cryptoworldz.xyz/fullbuild/contract.json').read_text())
                   assert fullbuild_contract==expected_fullbuild, 'LIVE_WORLDZFULLBUILD_CONTRACT_MISMATCH'
                   assert fullbuild_contract['executionBoundary']['globalMainnetMarketLaunchDefault'] is False
+                  fullscope_upper=fullscope_body.upper()
                   fullscope_markers={
-                      'WORLDZFULLSCOPE': 'WORLDZFULLSCOPE™' in fullscope_body,
-                      'POPULARITY_ONLY': 'POPULARITY ONLY' in fullscope_body,
-                      'GOVERNANCE_ONLY': 'GOVERNANCE ONLY' in fullscope_body,
+                      'WORLDZFULLSCOPE': 'WORLDZFULLSCOPE™' in fullscope_upper,
+                      'HOURLY_TOKEN_VOTE': 'ONE VOTE • ONE USER • EVERY 60 MINUTES' in fullscope_upper,
+                      'NO_TREASURY_CONTROL': 'NO DAO OR TREASURY CONTROL' in fullscope_upper,
                   }
                   print('WORLDZLAUNCHPAD_LIVE_FULLSCOPE_DIAGNOSTIC',
                         'status='+str(fullscope_code),
