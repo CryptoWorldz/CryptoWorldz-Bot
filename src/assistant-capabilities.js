@@ -107,16 +107,8 @@ const CAPABILITY_CATALOG = Object.freeze([
     key: "votes",
     label: "Worldz Votes Centre™",
     moduleKey: "votes",
-    summary: "Organic popularity voting and rankings.",
-    memberCommands: ["/worldzvotes", "/tokenvote", "/worldztrending", "/worldzrankings"],
-    adminCommands: []
-  },
-  {
-    key: "govern",
-    label: "WorldzGovern™",
-    moduleKey: "govern",
-    summary: "DAO governance proposals, voting and delegation, separate from popularity voting.",
-    memberCommands: ["/worldzgovern", "/governproposals", "/governvote"],
+    summary: "DEX-style favourite-token voting: one vote per user per rolling hour, with trending and rankings.",
+    memberCommands: ["/worldzvotes", "/vote SYMBOL [chain]", "/tokenvote SYMBOL [chain]", "/worldztrending", "/worldzrankings"],
     adminCommands: []
   },
   {
@@ -185,7 +177,6 @@ const CAPABILITY_ALIASES = Object.freeze({
   calendar: ["community calendar", "calendar", "launch countdown"],
   giveaways: ["giveaway", "giveaways"],
   votes: ["worldz votes", "votes centre", "votes center", "token vote"],
-  govern: ["worldzgovern", "worldz govern", "governance"],
   inbox: ["worldz inbox", "inbox", "private dm"],
   worldzcast: ["worldzcast", "worldz cast"],
   social: ["g.r.a.c.e.", "grace social", "grace"],
