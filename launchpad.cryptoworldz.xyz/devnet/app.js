@@ -25,8 +25,12 @@ let poolId='';
 let lpMint='';
 let poolTxSignature='';
 let feeSaved=false;
-let feeFlowV2=false;
-let v2Routes=null;
+let feeFlowV2=true;
+let v2Routes={
+  creatorDeveloper:10,launchReferrer:15,legacyCore:15,worldzCoreFamilyMarketBuys:12,
+  lpGrowth:10,launchedTokenBuybackAndBurn:8,impactCharity:5,teamBuilderRewards:5,
+  futureTokenDeploymentReserve:5,worldzLaunchPad:5,treasuryReserve:10
+};
 let lockPlanSaved=false;
 let commandRegistered=false;
 
@@ -458,7 +462,7 @@ function loadQuery(){
   if(q.get('intent')&&/^[0-9a-f]{64}$/.test(q.get('intent')))intentHash=q.get('intent');
   if(q.get('quote')&&['SOL','wXRP'].includes(q.get('quote')))chooseQuote(q.get('quote'));
   if(q.get('fee'))$('#project-fee').value=Math.min(SAFE.feeMax,Math.max(SAFE.feeMin,Number(q.get('fee'))||1));
-  feeFlowV2=q.get('fee_v2')==='1';
+  feeFlowV2=q.get('fee_v2')!=='0';
   if(feeFlowV2){
     v2Routes={
       creatorDeveloper:Number(q.get('v2_creator')),
