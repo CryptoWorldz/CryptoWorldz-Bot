@@ -43,6 +43,35 @@ function starCopy(x){
   return '';
 }
 
+function rexCard(name,status,copy){
+  const cls=status==='EVIDENCE PRESENT'?'good':status==='REVIEW REQUIRED'?'bad':'warn';
+  return '<article class="ring '+cls+'"><div class="ring-top"><h3>'+esc(name)+'</h3><span class="state">'+esc(status)+'</span></div><p>'+esc(copy)+'</p></article>';
+}
+function buildRexSignals(out){
+  const rings=Array.isArray(out.rings)?out.rings:[];
+  const authority=rings.find(x=>x.id==='authority')||{},distribution=rings.find(x=>x.id==='distribution')||{},locks=rings.find(x=>x.id==='locks_control')||{};
+  const ae=authority.evidence||{},de=distribution.evidence||{},le=locks.evidence||{};
+  const top10=de.top10Percentage??de.jupiterTopHoldersPercentage;
+  return [
+    ['Mint Authority',ae.mintAuthority===null?'EVIDENCE PRESENT':ae.mintAuthority?'REVIEW REQUIRED':'UNKNOWN',ae.mintAuthority===null?'Mint authority is absent.':ae.mintAuthority?'Mint authority remains active.':'Mint authority evidence unavailable.'],
+    ['Freeze Authority',ae.freezeAuthority===null?'EVIDENCE PRESENT':ae.freezeAuthority?'REVIEW REQUIRED':'UNKNOWN',ae.freezeAuthority===null?'Freeze authority is absent.':ae.freezeAuthority?'Freeze authority remains active.':'Freeze authority evidence unavailable.'],
+    ['Holder Concentration',top10!=null?(Number(top10)>50?'REVIEW REQUIRED':'EVIDENCE PRESENT'):'UNKNOWN',top10!=null?'Top 10 observed token accounts: '+pct(top10)+'. This is a concentration fact, not a safety score.':'Holder concentration evidence unavailable.'],
+    ['Liquidity Protection',(le.worldzLockEnforced||le.worldzVestingEnforced)?'EVIDENCE PRESENT':'UNKNOWN',(le.worldzLockEnforced||le.worldzVestingEnforced)?'Worldz lock/vesting evidence is recorded.':'No independent token-specific Worldz lock/vesting proof is currently available.'],
+    ['Related Wallets','UNKNOWN','Related-wallet analysis is not yet connected to a verified provider feed for this passport.'],
+    ['Creator Selling','UNKNOWN','Creator-selling history is not inferred without original-deployer and transaction evidence.'],
+    ['Bundled / Sniper Activity','UNKNOWN','Bundler/sniper evidence requires a verified provider or on-chain analysis feed.'],
+    ['Malicious Links','UNKNOWN','Link reputation is not yet independently verified by this passport.']
+  ];
+}
+function renderCreatorHistory(out){
+  const w=out.worldz||{};
+  return [
+    metric('Worldz launch record',w.launchRegistered?'REGISTERED':'NONE / EXTERNAL'),
+    metric('Original deployer','EVIDENCE PENDING'),
+    metric('Related wallets','EVIDENCE PENDING'),
+    metric('Previous launches','EVIDENCE PENDING')
+  ].join('');
+}
 async function lookup(mint){
   $('#status').className='status';$('#status').textContent='Reading Solana + Worldz Proof + Jupiter signals…';
   $('#result').classList.add('hidden');
@@ -85,6 +114,8 @@ function render(out){
     metric('System Trades',pulse.systemTradesCountTowardConfidence===false?'EXCLUDED':'UNKNOWN')
   ].join('');
   $('#constellation').innerHTML=(out.confidenceConstellation||[]).map(x=>'<article class="star '+starClass(x.status)+'"><b>⭐ '+esc(x.name)+'</b><span>'+esc(String(x.status).replaceAll('_',' '))+'</span><p>'+esc(starCopy(x))+'</p></article>').join('');
+  $('#rex-signals').innerHTML=buildRexSignals(out).map(x=>rexCard(x[0],x[1],x[2])).join('');
+  $('#creator-history').innerHTML=renderCreatorHistory(out);
   $('#rings').innerHTML=(out.rings||[]).map(r=>'<article class="ring '+ringClass(r.status)+'"><div class="ring-top"><h3>'+esc(r.name)+'</h3><span class="state">'+esc(String(r.status).replaceAll('_',' '))+'</span></div><p>'+esc(ringCopy(r))+'</p></article>').join('');
   const count=out.proofSummary?.verifiedEvidenceRings??0,total=out.proofSummary?.totalRings??6;
   $('#passport-note').innerHTML='<b>'+esc(count)+' of '+esc(total)+' rings currently contain a positive verified/proof-present state.</b> This is an evidence count, <b>not</b> a safety score. A token can still carry risks that these rings do not measure.';
