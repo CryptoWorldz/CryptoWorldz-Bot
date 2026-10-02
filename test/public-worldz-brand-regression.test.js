@@ -22,10 +22,10 @@ test("launch announcement workflows are manual-only and cannot resurrect retired
 test("WorldzLaunch Pack exposes current ZED-led modules and Spotlight",()=>{
   const html=read("launchpad.cryptoworldz.xyz/worldz-launch/index.html");
   const campaign=JSON.parse(read("launchpad.cryptoworldz.xyz/worldz-launch/campaign.json"));
-  assert.match(html,/248/);
+  assert.match(html,/252/);
   assert.match(html,/REXSECURE ULTIMATE™/);
   assert.match(html,/WORLDZ SPOTLIGHT™/);
-  assert.equal(campaign.commandCentre.registeredCommandEntries,248);
+  assert.equal(campaign.commandCentre.registeredCommandEntries,252);
   for(const item of ["ZED","REXSECURE ULTIMATE™","DIPSHIT™","Ronald Raider","Worldz Spotlight™"]) {
     assert.ok(campaign.commandCentre.modules.includes(item),item);
   }
