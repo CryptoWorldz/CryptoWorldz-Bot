@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://launchpad.cryptoworldz.xyz/schemas/rex-token-intelligence.v1.json",
+  "title": "REX SecureGuard Token Intelligence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "chain",
+    "tokenId",
+    "signals",
+    "checkedAt",
+    "overallSafetyRating"
+  ],
+  "properties": {
+    "version": {
+      "const": "REX-TOKEN-INTELLIGENCE-V1"
+    },
+    "chain": {
+      "type": "string"
+    },
+    "tokenId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "MINT_AUTHORITY",
+              "FREEZE_AUTHORITY",
+              "LP_PROTECTION",
+              "HOLDER_CONCENTRATION",
+              "RELATED_WALLETS",
+              "BUNDLED_ACTIVITY",
+              "SNIPER_ACTIVITY",
+              "CREATOR_SELLING",
+              "DUPLICATE_METADATA",
+              "MALICIOUS_LINKS"
+            ]
+          },
+          "status": {
+            "enum": [
+              "EVIDENCE_PRESENT",
+              "REVIEW_REQUIRED",
+              "BLOCK",
+              "UNKNOWN"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "observedValue": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null"
+            ]
+          },
+          "explanation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "overallSafetyRating": {
+      "const": null
+    },
+    "rule": {
+      "const": "REX shows separate evidence signals and never converts them into an unsupported overall SAFE score."
+    },
+    "checkedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
