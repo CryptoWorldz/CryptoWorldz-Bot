@@ -63,3 +63,11 @@ test("latest REX Persona 4\/5 artwork is the one shared by MiniApp and Telegram"
   assert.match(rex, /REXSECURE_BRAND_IMAGE/);
   assert.match(rex, /\/rexwelcome/);
 });
+
+
+test("WorldzLaunchPad live proof keeps REX assertions as real Python lines", () => {
+  const workflow = read(".github/workflows/deploy-worldzlaunchpad.yml");
+  assert.doesNotMatch(workflow, /REXSECURE ULTIMATE™'\\n\s+assert/);
+  assert.match(workflow, /rexSecureGuard'\]\['product'\].*REXSECURE ULTIMATE™/);
+  assert.match(workflow, /rexSecureGuard'\]\['persona'\].*4\/5/);
+});
