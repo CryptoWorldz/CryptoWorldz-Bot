@@ -50,7 +50,7 @@ function provider(string $name,array $r,string $reference): array {
 
 $uMint=rawurlencode($mint);
 $urls=[
- 'jupiter'=>"https://api.jup.ag/tokens/v2/search?query=$uMint",
+ 'jupiter'=>"https://lite-api.jup.ag/tokens/v2/search?query=$uMint",
  'dex'=>"https://api.dexscreener.com/token-pairs/v1/solana/$uMint",
  'gecko'=>"https://api.geckoterminal.com/api/v2/networks/solana/tokens/$uMint",
  'rugcheck'=>"https://api.rugcheck.xyz/v1/tokens/$uMint/report"
