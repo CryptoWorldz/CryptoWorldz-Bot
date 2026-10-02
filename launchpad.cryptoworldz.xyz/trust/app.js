@@ -1,5 +1,6 @@
 const $=s=>document.querySelector(s);
 const API='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-trust-orbit';
+const REAL_INTELLIGENCE='/intelligence.php';
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fmtNum(v,dec=2){
@@ -72,13 +73,40 @@ function renderCreatorHistory(out){
     metric('Previous launches','EVIDENCE PENDING')
   ].join('');
 }
+async function realIntelligence(mint){
+  try{
+    const r=await fetch(REAL_INTELLIGENCE+'?mint='+encodeURIComponent(mint)+'&x='+Date.now(),{cache:'no-store'});
+    const out=await r.json().catch(()=>null);
+    return r.ok&&out?.ok?out:null;
+  }catch{return null;}
+}
+function renderRealIntelligence(real){
+  if(!real){
+    $('#data-sources').innerHTML=metric('Cross-provider evidence','UNAVAILABLE');
+    $('#liquidity-intel').innerHTML=metric('Observed liquidity','—');
+    return;
+  }
+  const providers=Array.isArray(real.providers)?real.providers:[];
+  $('#data-sources').innerHTML=providers.map(x=>metric(x.provider,String(x.status||'UNKNOWN').replaceAll('_',' '))).join('');
+  const liq=real.liquidity||{};
+  $('#liquidity-intel').innerHTML=[
+    metric('DEX pairs observed',liq.pairCount??'—'),
+    metric('Deepest liquidity',liq.deepestPair?.liquidityUsd!=null?usd(liq.deepestPair.liquidityUsd):'—'),
+    metric('Observed DEX liquidity',liq.aggregateObservedDexLiquidityUsd!=null?usd(liq.aggregateObservedDexLiquidityUsd):'—'),
+    metric('Deepest venue',liq.deepestPair?.dexId||'—')
+  ].join('');
+}
 async function lookup(mint){
   $('#status').className='status';$('#status').textContent='Reading Solana + Worldz Proof + Jupiter signals…';
   $('#result').classList.add('hidden');
   try{
-    const r=await fetch(API+'?mint='+encodeURIComponent(mint),{cache:'no-store'});
-    const out=await r.json().catch(()=>({}));
-    if(!r.ok||!out.ok)throw new Error(out.detail||out.error||('HTTP '+r.status));
+    const [trustResponse,real]=await Promise.all([
+      fetch(API+'?mint='+encodeURIComponent(mint),{cache:'no-store'}),
+      realIntelligence(mint)
+    ]);
+    const out=await trustResponse.json().catch(()=>({}));
+    if(!trustResponse.ok||!out.ok)throw new Error(out.detail||out.error||('HTTP '+trustResponse.status));
+    out.realIntelligence=real;
     render(out);
     const u=new URL(location.href);u.searchParams.set('mint',mint);history.replaceState(null,'',u);
     $('#status').className='status good';$('#status').textContent='TRUST PASSPORT UPDATED ✅\nEvidence checked: '+new Date(out.checkedAt).toLocaleString();
@@ -87,7 +115,7 @@ async function lookup(mint){
   }
 }
 function render(out){
-  const j=out.jupiter||{},w=out.worldz||{},o=out.onChain||{},pulse=out.confidencePulse||{};
+  const j=out.jupiter||{},w=out.worldz||{},o=out.onChain||{},pulse=out.confidencePulse||{},real=out.realIntelligence||null;
   $('#token-name').textContent=j.name||w.mint?.tokenName||w.launch?.tokenName||'Solana Token';
   $('#token-symbol').textContent=j.symbol?String.fromCharCode(36)+j.symbol:(w.mint?.symbol?String.fromCharCode(36)+w.mint.symbol:'SOLANA TOKEN');
   $('#mint').textContent=out.mint;
@@ -114,8 +142,32 @@ function render(out){
     metric('System Trades',pulse.systemTradesCountTowardConfidence===false?'EXCLUDED':'UNKNOWN')
   ].join('');
   $('#constellation').innerHTML=(out.confidenceConstellation||[]).map(x=>'<article class="star '+starClass(x.status)+'"><b>⭐ '+esc(x.name)+'</b><span>'+esc(String(x.status).replaceAll('_',' '))+'</span><p>'+esc(starCopy(x))+'</p></article>').join('');
-  $('#rex-signals').innerHTML=buildRexSignals(out).map(x=>rexCard(x[0],x[1],x[2])).join('');
-  $('#creator-history').innerHTML=renderCreatorHistory(out);
+  if(real?.onchain){
+    const ro=real.onchain;
+    const rr=real.rugcheck||{};
+    const rc=real.creatorHistory||{};
+    const rex=[
+      ['Mint Authority',ro.mintAuthority===null?'EVIDENCE PRESENT':'REVIEW REQUIRED',ro.mintAuthority===null?'Mint authority is absent on Solana.':'Mint authority remains active: '+String(ro.mintAuthority)],
+      ['Freeze Authority',ro.freezeAuthority===null?'EVIDENCE PRESENT':'REVIEW REQUIRED',ro.freezeAuthority===null?'Freeze authority is absent on Solana.':'Freeze authority remains active: '+String(ro.freezeAuthority)],
+      ['Holder Concentration',ro.top10ObservedTokenAccountPercent==null?'UNKNOWN':Number(ro.top10ObservedTokenAccountPercent)>50?'REVIEW REQUIRED':'EVIDENCE PRESENT',ro.top10ObservedTokenAccountPercent==null?'Top-10 concentration unavailable.':'Top 10 observed token accounts hold '+pct(ro.top10ObservedTokenAccountPercent)+'. Accounts may include LP, treasury or exchange custody.'],
+      ['Liquidity Protection','UNKNOWN',real.liquidity?.deepestPair?'Liquidity is observed, but lock/permanent-protection evidence is a separate proof.':'No DEX pair was observed by the connected provider.'],
+      ['Related Wallets','UNKNOWN','No wallet relationship is inferred without attributable evidence.'],
+      ['Creator Selling','UNKNOWN',rc.originalDeployerCandidate?'Original deployer evidence exists; sell history still requires transaction reconstruction.':'Original deployer evidence is incomplete, so creator selling is not inferred.'],
+      ['Provider Risk Signals',Array.isArray(rr.risks)&&rr.risks.length?'REVIEW REQUIRED':'UNKNOWN',Array.isArray(rr.risks)&&rr.risks.length?rr.risks.length+' RugCheck risk signal(s) observed. Open provider evidence before drawing conclusions.':'No provider risk rows were returned or the provider was unavailable.'],
+      ['Malicious Links','UNKNOWN','Token-risk feeds are not treated as malicious-link reputation feeds.']
+    ];
+    $('#rex-signals').innerHTML=rex.map(x=>rexCard(x[0],x[1],x[2])).join('');
+    $('#creator-history').innerHTML=[
+      metric('History state',rc.status||'UNKNOWN'),
+      metric('Original deployer',rc.originalDeployerCandidate?String(rc.originalDeployerCandidate).slice(0,6)+'…'+String(rc.originalDeployerCandidate).slice(-6):'NOT PROVEN'),
+      metric('Creation tx',rc.creationSignature?String(rc.creationSignature).slice(0,8)+'…':'—'),
+      metric('History complete',rc.historyComplete===true?'YES':rc.historyComplete===false?'NO':'UNKNOWN')
+    ].join('');
+  }else{
+    $('#rex-signals').innerHTML=buildRexSignals(out).map(x=>rexCard(x[0],x[1],x[2])).join('');
+    $('#creator-history').innerHTML=renderCreatorHistory(out);
+  }
+  renderRealIntelligence(real);
   $('#rings').innerHTML=(out.rings||[]).map(r=>'<article class="ring '+ringClass(r.status)+'"><div class="ring-top"><h3>'+esc(r.name)+'</h3><span class="state">'+esc(String(r.status).replaceAll('_',' '))+'</span></div><p>'+esc(ringCopy(r))+'</p></article>').join('');
   const count=out.proofSummary?.verifiedEvidenceRings??0,total=out.proofSummary?.totalRings??6;
   $('#passport-note').innerHTML='<b>'+esc(count)+' of '+esc(total)+' rings currently contain a positive verified/proof-present state.</b> This is an evidence count, <b>not</b> a safety score. A token can still carry risks that these rings do not measure.';
