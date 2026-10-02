@@ -1,5 +1,5 @@
 {
-  "version": "WLDZ-DISTRIBUTION-SIGN-2026-10-02-3OF5-A",
+  "version": "WLDZ-DISTRIBUTION-2026-10-02-FANOUT-MIGRATION",
   "network": "mainnet-beta",
   "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
   "decimals": 6,
@@ -7,64 +7,8 @@
   "vaultIndex": 0,
   "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
   "authorisedMember": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
-  "totalWldz": 47000000,
-  "legs": [
-    [
-      {
-        "role": "Stepper",
-        "address": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
-        "wldz": 1000000
-      }
-    ],
-    [
-      {
-        "role": "Purple Diamond Handz",
-        "address": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U",
-        "wldz": 5000000
-      },
-      {
-        "role": "Dev City 50-wallet pool",
-        "address": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
-        "wldz": 5000000
-      }
-    ],
-    [
-      {
-        "role": "Worldz Impact / DonateWorldz",
-        "address": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
-        "wldz": 10000000
-      },
-      {
-        "role": "General Reserve",
-        "address": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9",
-        "wldz": 5000000
-      }
-    ],
-    [
-      {
-        "role": "First 100 WorldzLaunchPad",
-        "address": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt",
-        "wldz": 10000000
-      },
-      {
-        "role": "Future Team Reserve",
-        "address": "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j",
-        "wldz": 4000000
-      }
-    ],
-    [
-      {
-        "role": "Command Centre Rewards",
-        "address": "fa35y2GdDKhdZ6uyS5mouEPQSFiHGyRuMSWp3Vz5Cob",
-        "wldz": 2000000
-      },
-      {
-        "role": "Operations / Security / Infrastructure",
-        "address": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
-        "wldz": 5000000
-      }
-    ]
-  ],
+  "totalWldz": 0,
+  "legs": [],
   "feePolicy": {
     "mode": "JAYJAY_SIGNER_PAYS_SOL_FEES_AND_RECIPIENT_ACCOUNT_RENT",
     "payer": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
@@ -115,5 +59,69 @@
   "transparency": {
     "commonControlDisclosureRequired": true,
     "rule": "Purpose-specific wallets or vaults controlled by the same owner or Worldz treasury must be labelled as common-beneficial-control. Splitting custody must not be represented as independent holder decentralisation."
-  }
+  },
+  "executionEnabled": false,
+  "executionBlockReason": "Superseded by concentration-aware treasury/claim/vesting routes. Do not bulk-send the 47M reserve map to ordinary destination wallets.",
+  "replacementPolicy": "worldzpad-mainnet/distribution/worldz-holder-concentration.v1.json",
+  "historicalPendingDirectMap": {
+    "totalWldz": 47000000,
+    "legs": [
+      [
+        {
+          "role": "Stepper",
+          "address": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
+          "wldz": 1000000
+        }
+      ],
+      [
+        {
+          "role": "Purple Diamond Handz",
+          "address": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U",
+          "wldz": 5000000
+        },
+        {
+          "role": "Dev City 50-wallet pool",
+          "address": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
+          "wldz": 5000000
+        }
+      ],
+      [
+        {
+          "role": "Worldz Impact / DonateWorldz",
+          "address": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+          "wldz": 10000000
+        },
+        {
+          "role": "General Reserve",
+          "address": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9",
+          "wldz": 5000000
+        }
+      ],
+      [
+        {
+          "role": "First 100 WorldzLaunchPad",
+          "address": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt",
+          "wldz": 10000000
+        },
+        {
+          "role": "Future Team Reserve",
+          "address": "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j",
+          "wldz": 4000000
+        }
+      ],
+      [
+        {
+          "role": "Command Centre Rewards",
+          "address": "fa35y2GdDKhdZ6uyS5mouEPQSFiHGyRuMSWp3Vz5Cob",
+          "wldz": 2000000
+        },
+        {
+          "role": "Operations / Security / Infrastructure",
+          "address": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
+          "wldz": 5000000
+        }
+      ]
+    ]
+  },
+  "currentMode": "RESERVES_STAY_IN_3_OF_5_TREASURY_PENDING_CLAIM_VESTING_OR_VERIFIED_FANOUT"
 }
