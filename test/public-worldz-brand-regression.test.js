@@ -46,6 +46,7 @@ test("Create Your Own Money campaign is accurate, connected and non-misleading",
   const launch=read("launchpad.cryptoworldz.xyz/worldz-launch/index.html");
   const campaign=JSON.parse(read("launchpad.cryptoworldz.xyz/worldz-launch/campaign.json"));
   const social=JSON.parse(read("launchpad.cryptoworldz.xyz/worldz-launch/social-pack.json"));
+  const sitemap=read("launchpad.cryptoworldz.xyz/sitemap.xml");
   assert.match(html,/CREATE[\s\S]*YOUR OWN[\s\S]*MONEY/i);
   assert.match(html,/create your own crypto token/i);
   assert.match(html,/not automatically legal tender/i);
@@ -65,4 +66,5 @@ test("Create Your Own Money campaign is accurate, connected and non-misleading",
   assert.equal(campaign.creatorCampaign.url,"https://launchpad.cryptoworldz.xyz/create-your-own-money/");
   assert.ok(Array.isArray(social.creatorCampaign.x));
   assert.ok(social.creatorCampaign.x.length>=2);
+  assert.match(sitemap,/https:\/\/launchpad\.cryptoworldz\.xyz\/create-your-own-money\//);
 });
