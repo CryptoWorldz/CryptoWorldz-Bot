@@ -161,6 +161,7 @@ function render(out){
       metric('History state',rc.status||'UNKNOWN'),
       metric('Original deployer',rc.originalDeployerCandidate?String(rc.originalDeployerCandidate).slice(0,6)+'…'+String(rc.originalDeployerCandidate).slice(-6):'NOT PROVEN'),
       metric('Creation tx',rc.creationSignature?String(rc.creationSignature).slice(0,8)+'…':'—'),
+      metric('Worldz previous launches',rc.worldzRegistry?.launchCount??'—'),
       metric('History complete',rc.historyComplete===true?'YES':rc.historyComplete===false?'NO':'UNKNOWN')
     ].join('');
   }else{
