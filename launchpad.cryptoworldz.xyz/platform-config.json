@@ -239,7 +239,10 @@
       "issuer": "Hex Trust",
       "interoperability": "LayerZero",
       "proofUrl": "https://www.hextrust.com/services/wrapping/wxrp",
-      "explorerUrl": "https://solscan.io/token/6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2"
+      "explorerUrl": "https://solscan.io/token/6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2",
+      "identityStatus": "VERIFIED_ASSET_IDENTITY",
+      "reserveProofStatus": "ISSUER_CUSTODY_CLAIM__WORLDZ_INDEPENDENT_RESERVE_RECONCILIATION_PENDING",
+      "reserveProofSchema": "worldzpad-omnichain/schemas/worldz-reserve-proof.v1.json"
     }
   ],
   "crossPair": {
