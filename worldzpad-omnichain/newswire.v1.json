@@ -1,0 +1,83 @@
+{
+  "schema": "WORLDZ-NEWSWIRE-V1",
+  "version": "2026-10-03-A",
+  "name": "Worldz NewsWire™",
+  "status": "PUBLIC_AGGREGATOR_BUILD",
+  "display": "SCROLLING_HEADLINE_STRIP_PLUS_NEWS_CENTRE",
+  "principles": [
+    "headline + source + timestamp + original-link only",
+    "do not republish full articles",
+    "separate independent media from first-party chain updates",
+    "news is not a buy or sell instruction",
+    "Worldz project events may appear only when supported by WorldzProof or registry evidence"
+  ],
+  "autoFeeds": [
+    {
+      "id": "coindesk",
+      "name": "CoinDesk",
+      "class": "INDEPENDENT_MEDIA",
+      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "enabled": true,
+      "maxItems": 12
+    },
+    {
+      "id": "solana",
+      "name": "Solana Changelog",
+      "class": "FIRST_PARTY_CHAIN",
+      "url": "https://solana.com/changelog/rss.xml",
+      "enabled": true,
+      "maxItems": 8
+    },
+    {
+      "id": "ethereum",
+      "name": "Ethereum Foundation Blog",
+      "class": "FIRST_PARTY_CHAIN",
+      "url": "https://blog.ethereum.org/feed.xml",
+      "enabled": true,
+      "maxItems": 8
+    }
+  ],
+  "sourceDeck": [
+    {
+      "name": "XRPL Blog",
+      "class": "FIRST_PARTY_CHAIN",
+      "url": "https://xrpl.org/blog",
+      "topic": "XRP"
+    },
+    {
+      "name": "Decrypt",
+      "class": "INDEPENDENT_MEDIA",
+      "url": "https://decrypt.co/news",
+      "topic": "CRYPTO"
+    },
+    {
+      "name": "Base Blog",
+      "class": "FIRST_PARTY_CHAIN",
+      "url": "https://blog.base.org/",
+      "topic": "BASE"
+    },
+    {
+      "name": "Sui Blog",
+      "class": "FIRST_PARTY_CHAIN",
+      "url": "https://www.sui.io/blog",
+      "topic": "SUI"
+    }
+  ],
+  "topicFilters": [
+    "ALL",
+    "XRP",
+    "SOL",
+    "BTC",
+    "ETH",
+    "BASE",
+    "SUI",
+    "HYPER",
+    "ROBINHOOD",
+    "DEFI",
+    "SECURITY",
+    "BUILDERS",
+    "WORLDZ"
+  ],
+  "cacheSeconds": 120,
+  "maximumHeadlines": 24
+}
