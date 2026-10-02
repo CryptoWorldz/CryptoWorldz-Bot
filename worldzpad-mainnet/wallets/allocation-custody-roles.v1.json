@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-ALLOCATION-CUSTODY-ROLES-V1",
-  "version": "2026-10-02-B",
-  "status": "OWNER_DIRECTION_RECORDED__WALLET_ADDRESSES_PENDING",
+  "version": "2026-10-02-C",
+  "status": "FOUR_OWNER_CONTROLLED_ALLOCATION_WALLETS_RECORDED",
   "purpose": "Role-based custody separation for Worldz-owned allocation wallets. This is operational segregation, not a claim of independent ownership or decentralization.",
   "operationsTreasury": {
     "provider": "Squads v4",
@@ -19,23 +19,35 @@
   "renameTheseWallets": [
     {
       "label": "WORLDZ • JayJay Dev A",
-      "address": null,
-      "intendedUse": "WLDZ/RVIV earned developer allocation custody"
+      "address": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U",
+      "intendedUse": "WLDZ/RVIV earned developer allocation custody",
+      "walletAlias": "Purple Diamond Crew",
+      "control": "OWNER_CONTROLLED",
+      "solanaKeyValidation": "VALID_32_BYTE_BASE58"
     },
     {
       "label": "WORLDZ • JayJay Dev B",
-      "address": null,
-      "intendedUse": "WLDZ/RVIV earned developer allocation custody"
+      "address": "4HzhLhBkw5YQ4GDVfYkbrkt7f3Ps9kTPRHv5oPYsGyon",
+      "intendedUse": "WLDZ/RVIV earned developer allocation custody",
+      "walletAlias": "PDCPDC.com",
+      "control": "OWNER_CONTROLLED",
+      "solanaKeyValidation": "VALID_32_BYTE_BASE58"
     },
     {
       "label": "WORLDZ • JayJay Dev C",
-      "address": null,
-      "intendedUse": "Additional disclosed personal/dev allocation custody"
+      "address": "CNgriBpq58XFNGcnMwJSvohonzRnVcEvYGhHBT5fYhVE",
+      "intendedUse": "Additional disclosed personal/dev allocation custody",
+      "walletAlias": "Account 82",
+      "control": "OWNER_CONTROLLED",
+      "solanaKeyValidation": "VALID_32_BYTE_BASE58"
     },
     {
       "label": "WORLDZ • JayJay Dev D",
-      "address": null,
-      "intendedUse": "Additional disclosed personal/dev allocation custody"
+      "address": "G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3",
+      "intendedUse": "Additional disclosed personal/dev allocation custody",
+      "walletAlias": "Purple PDC Dev",
+      "control": "OWNER_CONTROLLED",
+      "solanaKeyValidation": "VALID_32_BYTE_BASE58"
     },
     {
       "label": "WORLDZ • Legacy Custody",
@@ -100,5 +112,5 @@
       "note": "Planned. Miracle Team and MiracleMagic remain separate. The currently unallocated supply must not be silently assigned."
     }
   },
-  "activationRule": "Rename the owner-controlled personal allocation wallets first, then register the exact public addresses. Large community/team/impact/liquidity reserves remain multisig, claim, vesting or program custody rather than being scattered to imitate holder decentralisation."
+  "activationRule": "The four owner-controlled personal allocation wallets are now recorded. They may be used for disclosed personal/dev custody separation, but they do not count as independent human multisig members. Large community/team/impact/liquidity reserves remain multisig, claim, vesting or program custody."
 }
