@@ -145,10 +145,10 @@ async function preflight(){
 
  const bh=(await connection.getLatestBlockhash('confirmed')).blockhash;
  const inner=new d.web3.VersionedTransaction(new d.web3.TransactionMessage({payerKey:s.vault,recentBlockhash:bh,instructions:transferInstructions(d,s)}).compileToV0Message());
- await simulate(connection,inner,'55M WLDZ transfer');
+ await simulate(connection,inner,'WLDZ pending distribution');
  const have=s.memberSol/d.web3.LAMPORTS_PER_SOL;
  $('#sign').disabled=false;
- status('READY ✅\nJayJay signer: '+have.toFixed(6)+' SOL\nSquads vault WLDZ: '+Number(s.sourceWldz/1000000n).toLocaleString()+'\nTreasury governance: 3-of-5\nRecipient token accounts missing: 0\n55M WLDZ transfer dry-run: PASSED ✅\n\nCreate the proposal and record the first approval. Execution stays locked until 3 approvals exist.','good');
+ status('READY ✅\nJayJay signer: '+have.toFixed(6)+' SOL\nSquads vault WLDZ: '+Number(s.sourceWldz/1000000n).toLocaleString()+'\nTreasury governance: 3-of-5\nRecipient token accounts missing: 0\nWLDZ pending transfer dry-run: PASSED ✅\n\nCreate the proposal and record the first approval. Execution stays locked until 3 approvals exist.','good');
  return true;
 }
 
@@ -175,7 +175,7 @@ async function run(){
    const vaultMessage=new d.web3.TransactionMessage({payerKey:s.vault,recentBlockhash:bh,instructions:transferInstructions(d,s)});
    const create=d.sqds.instructions.vaultTransactionCreate({
     multisigPda:s.ms,transactionIndex:index,creator:s.member,rentPayer:s.member,vaultIndex:Number(cfg.vaultIndex),
-    ephemeralSigners:0,transactionMessage:vaultMessage,memo:'WORLDZ WLDZ 55M owner distribution'
+    ephemeralSigners:0,transactionMessage:vaultMessage,memo:'WORLDZ WLDZ pending 3-of-5 distribution'
    });
    const proposal=d.sqds.instructions.proposalCreate({multisigPda:s.ms,transactionIndex:index,creator:s.member,rentPayer:s.member,isDraft:true});
    await sendInstructions(connection,d,[create,proposal],'1/3 Create WLDZ proposal');
@@ -205,13 +205,13 @@ async function run(){
 
   if(kind!=='executed'){
    const built=await d.sqds.instructions.vaultTransactionExecute({connection,multisigPda:s.ms,transactionIndex:index,member:s.member});
-   await sendInstructions(connection,d,[built.instruction],'3/3 Execute approved 55M WLDZ distribution',built.lookupTableAccounts);
+   await sendInstructions(connection,d,[built.instruction],'3/3 Execute approved WLDZ distribution',built.lookupTableAccounts);
   }
 
   await sleep(800);
   s=await state(connection,d);
   localStorage.removeItem(RESUME_KEY);
-  status('WLDZ DISTRIBUTION EXECUTED ✅\n\nDistributed: 55,000,000 WLDZ\nVault remaining: '+Number(s.sourceWldz/1000000n).toLocaleString()+' WLDZ','good');
+  status('WLDZ DISTRIBUTION EXECUTED ✅\n\nDistributed: '+Number(cfg.totalWldz).toLocaleString()+' WLDZ\nVault remaining: '+Number(s.sourceWldz/1000000n).toLocaleString()+' WLDZ','good');
  }catch(e){
   status('STOPPED\n\n'+(e?.message||String(e))+'\n\nNo next transaction will be signed until its dry-run passes.','bad');
  }finally{
