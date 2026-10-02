@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-MIRACLE-V1",
-  "version": "2026-09-30",
+  "version": "2026-10-02",
   "status": "PLANNED_SPEC_LOCKED",
   "token": {
     "order": 4,
@@ -26,8 +26,15 @@
       "unassignedTokensRemainVaulted": true,
       "silentAutomaticReassignmentAllowed": false,
       "proposedMultisig": {
-        "policy": "4-of-10",
-        "state": "PROPOSED_NOT_DEPLOYED"
+        "policy": "4-of-8",
+        "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_VERIFIED_SIGNERS",
+        "requiredNamedSigners": [
+          "JayJayTeamDev",
+          "Stepper",
+          "Savage"
+        ],
+        "additionalVerifiedSignerSlots": 5,
+        "exactAdditionalWalletsMayBeInvented": false
       },
       "registeredRecipientSource": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json"
     },
@@ -64,11 +71,23 @@
   },
   "treasuryProfiles": {
     "miracleChurchTreasury": {
-      "proposedPolicy": "4-of-10",
-      "state": "PROPOSED_NOT_DEPLOYED",
+      "proposedPolicy": "4-of-8",
+      "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_VERIFIED_SIGNERS",
       "signerConsentRequired": true,
       "verifiedPublicWalletRequired": true,
-      "membershipDoesNotAutomaticallyCreateSignerAuthority": true
+      "membershipDoesNotAutomaticallyCreateSignerAuthority": true,
+      "requiredNamedSigners": [
+        "JayJayTeamDev",
+        "Stepper",
+        "Savage"
+      ],
+      "additionalVerifiedSignerSlots": 5,
+      "treasuryBoundRevenueSplitAfterActivation": {
+        "worldzOperationsPercent": 70,
+        "miracleTeamPercent": 30
+      },
+      "revenueScope": "TREASURY_BOUND_REVENUE_ONLY",
+      "noNewFeeCreated": true
     }
   },
   "executionBoundary": {
