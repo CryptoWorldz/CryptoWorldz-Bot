@@ -91,7 +91,7 @@ async function prepareRecipients(){
   const connection=new d.web3.Connection(PREP_RPC,'confirmed');
   let missing=await missingRecipientAccounts(connection,d,cfg);
   if(!missing.length){
-   prepStatus('RECIPIENT ACCOUNTS READY ✅\nAll 10 WLDZ recipient accounts already exist. Squads vault SOL is not needed.','good');
+   prepStatus('RECIPIENT ACCOUNTS READY ✅\nAll '+cfg.legs.flat().length+' WLDZ recipient accounts already exist. Squads vault SOL is not needed.','good');
    const main=document.querySelector('#status');if(main){main.textContent='Recipient accounts ready ✅ — checking balance now…';main.className='status good';}
    document.querySelector('#preflight')?.click();return;
   }
