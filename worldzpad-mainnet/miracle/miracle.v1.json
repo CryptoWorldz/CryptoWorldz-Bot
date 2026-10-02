@@ -116,5 +116,19 @@
     "canonicalSymbol": "MRCL",
     "approvedAllocationLedgerRequired": true,
     "automaticTransfer": false
+  },
+  "genesisCustody": {
+    "provider": "Squads v4",
+    "operationsMultisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+    "operationsVault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+    "governance": "3-of-5",
+    "rule": "If MRCL is minted before the separate Miracle Team Treasury is live, the fixed supply remains reconciled in Operations custody. The 69.6M Miracle Team allocation transfers only after live 4-of-8 proof and approved vesting setup."
+  },
+  "distributionPolicy": {
+    "concentrationPolicy": "worldzpad-mainnet/distribution/worldz-holder-concentration.v1.json",
+    "miracleTeamAllocationDestination": "4-of-8 Miracle Team Treasury after activation",
+    "miracleMagicDestination": "separately accounted mission/gift custody; no single ordinary-holder wallet",
+    "unallocatedSupplyRemainsCustodied": true,
+    "simulateBeforeEveryTreasuryProposal": true
   }
 }
