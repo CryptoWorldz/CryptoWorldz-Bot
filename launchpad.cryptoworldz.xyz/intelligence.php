@@ -45,7 +45,7 @@ function rpc(string $method,array $params): array {
 }
 function n($v): ?float { return is_numeric($v)?(float)$v:null; }
 function provider(string $name,array $r,string $reference): array {
-  return ['provider'=>$name,'status'=>$r['ok']?'CONFIRMED':'UNAVAILABLE','reference'=>$reference,'error'=>$r['ok']?null:($r['error']??('HTTP '.$r['code']))];
+  return ['provider'=>$name,'status'=>$r['ok']?'AVAILABLE':'UNAVAILABLE','reference'=>$reference,'error'=>$r['ok']?null:($r['error']??('HTTP '.$r['code']))];
 }
 
 $uMint=rawurlencode($mint);
