@@ -31,22 +31,24 @@ Current Operations governance is **3-of-5**. Mainnet actions still re-read live 
 
 Target governance: **4-of-8**.
 
-Verified/documented team wallets already eligible as signer candidates:
+Locked signer roster:
 
-1. JayJayTeamDev
-2. Stepper
-3. Savage
-4. SolMusic
-5. Mahammad
-
-Three additional signer slots remain **PENDING** until three distinct consenting Legend/Admin/Miracle Team members provide verified public Solana wallets.
+1. JayJayTeamDev — `Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u`
+2. Stepper — `DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ`
+3. Savage — `2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn`
+4. SolMusic — `FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ`
+5. Mahammad — `6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok`
+6. Zephyr — `JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc`
+7. Troll George — `GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc`
+8. Annabel — `2fnb5CeAtvgUxz1R46e4DQJ8q99M5bn5oEgQMTYS1fa`
 
 Rules:
-- Remedy is not a signer candidate.
-- Do not invent signer addresses.
-- One person using multiple wallets must not be counted as multiple independent Miracle Team signers.
-- Owner-controlled extra wallets may be used as clearly-labelled allocation/custody wallets, but they do not create extra human multisig independence.
-- Signer consent and live Squads membership proof are required.
+- Remedy is not a signer.
+- These are public wallet addresses only; no private keys are stored.
+- Live Squads membership must exactly match these eight addresses before activation.
+- Signer consent is required.
+- Multiple wallets controlled by one person may not be substituted to pad the human threshold.
+- Owner-controlled extra wallets may still be used as clearly labelled allocation/custody wallets, but they do not create extra human multisig independence.
 
 ## Treasury-bound revenue route
 
