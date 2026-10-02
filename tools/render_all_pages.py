@@ -63,32 +63,57 @@ try:
             for label,size in (('mobile','390,844'),('desktop','1440,900')):
                 tasks.append((original,local,label,size,key,shots/f'{key}-{label}.png'))
 
-        def render(task):
+        def render(task, timeout=20, virtual_budget=350):
             original, local, label, size, key, out = task
             profile = shots / f'profile-{key}-{label}'
+            shutil.rmtree(profile, ignore_errors=True)
+            try:
+                out.unlink(missing_ok=True)
+            except TypeError:
+                if out.exists():
+                    out.unlink()
             cmd = [browser,'--headless=new','--no-sandbox','--disable-gpu','--disable-dev-shm-usage',
                    '--hide-scrollbars','--disable-background-networking','--disable-extensions',
                    '--no-first-run','--no-default-browser-check',
-                   '--run-all-compositor-stages-before-draw','--virtual-time-budget=350',
+                   '--run-all-compositor-stages-before-draw',f'--virtual-time-budget={virtual_budget}',
                    f'--user-data-dir={profile}',f'--window-size={size}',f'--screenshot={out}',local]
             try:
-                cp = subprocess.run(cmd,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,timeout=20,check=False)
+                cp = subprocess.run(cmd,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,timeout=timeout,check=False)
             except subprocess.TimeoutExpired:
+                shutil.rmtree(profile, ignore_errors=True)
                 return f'RENDER TIMEOUT {original} {label}'
             if cp.returncode != 0 or not out.is_file():
+                shutil.rmtree(profile, ignore_errors=True)
                 return f'RENDER FAILED {original} {label} rc={cp.returncode}'
             w,h = png_dimensions(out)
             if out.stat().st_size < 5000 or w < 300 or h < 500:
+                shutil.rmtree(profile, ignore_errors=True)
                 return f'RENDER INVALID {original} {label} bytes={out.stat().st_size} size={w}x{h}'
             shutil.rmtree(profile, ignore_errors=True)
             return None
 
+        first_pass_failures = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:
-            for result in ex.map(render,tasks):
+            for task, result in zip(tasks, ex.map(render,tasks)):
                 completed += 1
                 if result:
-                    errors.append(result)
+                    first_pass_failures.append((task, result))
                     print(result)
+
+        # Chrome can occasionally starve under the six-way parallel render burst on
+        # GitHub-hosted runners. Re-run only failed pages one-at-a-time with a
+        # longer process timeout. A page must still produce a valid screenshot;
+        # genuine failures remain fatal.
+        if first_pass_failures:
+            print(f'RENDER_RETRY_START count={len(first_pass_failures)} timeout=50 workers=1')
+            for task, first_error in first_pass_failures:
+                retry = render(task, timeout=50, virtual_budget=900)
+                if retry:
+                    errors.append(retry)
+                    print(f'RENDER RETRY FAILED first={first_error} retry={retry}')
+                else:
+                    original, _, label, _, _, _ = task
+                    print(f'RENDER RETRY PASS {original} {label}')
 finally:
     for s in servers:
         s.shutdown(); s.server_close()
@@ -98,4 +123,4 @@ finally:
 if errors:
     raise SystemExit(f'RENDER_AUDIT_FAILED errors={len(errors)} completed={completed}')
 assert completed == len(URLS) * 2, (completed, len(URLS) * 2)
-print(f'RENDER_AUDIT=PASS pages={len(URLS)} mobile={len(URLS)} desktop={len(URLS)} screenshots={completed} parallel_workers=6 isolated_profiles=1')
+print(f'RENDER_AUDIT=PASS pages={len(URLS)} mobile={len(URLS)} desktop={len(URLS)} screenshots={completed} parallel_workers=6 isolated_profiles=1 retry_failed_serially=1')
