@@ -31,24 +31,26 @@ Current Operations governance is **3-of-5**. Mainnet actions still re-read live 
 
 Target governance: **4-of-8**.
 
-Locked signer roster:
+Current valid recorded signer candidates:
 
 1. JayJayTeamDev — `Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u`
 2. Stepper — `DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ`
 3. Savage — `2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn`
-4. SolMusic — `FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ`
-5. Mahammad — `6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok`
-6. Zephyr — `JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc`
-7. Troll George — `GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc`
-8. Annabel — `2fnb5CeAtvgUxz1R46e4DQJ8q99M5bn5oEgQMTYS1fa`
+4. Mahammad — `6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok`
+5. Zephyr — `JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc`
+6. Troll George — `GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc`
+
+Two replacement signer slots remain pending:
+- one replacement for **SolMusic** by owner request;
+- one replacement for **Annabel** because the supplied address is not a valid 32-byte Solana public key.
+
+Owner-controlled allocation wallets are recorded separately and do not count as additional independent human signers.
 
 Rules:
-- Remedy is not a signer.
-- These are public wallet addresses only; no private keys are stored.
-- Live Squads membership must exactly match these eight addresses before activation.
-- Signer consent is required.
-- Multiple wallets controlled by one person may not be substituted to pad the human threshold.
-- Owner-controlled extra wallets may still be used as clearly labelled allocation/custody wallets, but they do not create extra human multisig independence.
+- Do not use the rejected Annabel address.
+- Do not invent replacement signer addresses.
+- Final deployment requires 8 valid public Solana keys and signer consent.
+- Live Squads membership must match the final approved eight-wallet roster before activation.
 
 ## Treasury-bound revenue route
 
