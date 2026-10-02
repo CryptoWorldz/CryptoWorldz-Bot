@@ -1,0 +1,105 @@
+{
+  "schema": "WORLDZ-LAUNCH-RECIPES-V1",
+  "version": "2026-10-02",
+  "rule": "Recipes are transparent starting presets only. They never bypass the Worldz Safe Launch Standard, alter the fixed Worldz Fee Flow V2 lanes, or imply mainnet availability.",
+  "recipes": [
+    {
+      "id": "CREATOR",
+      "label": "Creator Launch",
+      "description": "Balanced creator allocation with public/community and liquidity kept substantial.",
+      "allocations": {
+        "creatorTeam": 15,
+        "liquidity": 30,
+        "communityPublic": 30,
+        "treasuryReserve": 10,
+        "growthEcosystem": 15
+      },
+      "fixedFeeFlowNote": "Worldz Fee Flow V2 remains unchanged."
+    },
+    {
+      "id": "COMMUNITY",
+      "label": "Community Launch",
+      "description": "More genesis supply directed to community/public distribution.",
+      "allocations": {
+        "creatorTeam": 10,
+        "liquidity": 30,
+        "communityPublic": 40,
+        "treasuryReserve": 10,
+        "growthEcosystem": 10
+      },
+      "fixedFeeFlowNote": "Worldz Fee Flow V2 remains unchanged."
+    },
+    {
+      "id": "HOLDER_REWARDS",
+      "label": "Holder Rewards",
+      "description": "Community-heavy distribution with growth capacity for holder-focused programs.",
+      "allocations": {
+        "creatorTeam": 10,
+        "liquidity": 30,
+        "communityPublic": 35,
+        "treasuryReserve": 10,
+        "growthEcosystem": 15
+      },
+      "fixedFeeFlowNote": "Reward execution requires separate disclosed mechanics and proof."
+    },
+    {
+      "id": "LIQUIDITY_GROWTH",
+      "label": "Liquidity Growth",
+      "description": "Higher genesis liquidity allocation while preserving community distribution.",
+      "allocations": {
+        "creatorTeam": 10,
+        "liquidity": 45,
+        "communityPublic": 25,
+        "treasuryReserve": 10,
+        "growthEcosystem": 10
+      },
+      "fixedFeeFlowNote": "LP protection and venue proof remain required."
+    },
+    {
+      "id": "BUYBACK",
+      "label": "Buyback Focus",
+      "description": "Keeps a balanced genesis allocation while using the existing disclosed buyback lane in Fee Flow V2.",
+      "allocations": {
+        "creatorTeam": 10,
+        "liquidity": 35,
+        "communityPublic": 30,
+        "treasuryReserve": 10,
+        "growthEcosystem": 15
+      },
+      "fixedFeeFlowNote": "The fixed launched-token Buyback + Burn lane remains 8%; no extra hidden fee is added."
+    },
+    {
+      "id": "IMPACT",
+      "label": "Impact Launch",
+      "description": "Growth allocation can support separately disclosed impact programs without reducing public proof requirements.",
+      "allocations": {
+        "creatorTeam": 10,
+        "liquidity": 30,
+        "communityPublic": 30,
+        "treasuryReserve": 10,
+        "growthEcosystem": 20
+      },
+      "fixedFeeFlowNote": "The fixed Impact / Charity Fee Flow V2 lane remains 5%."
+    },
+    {
+      "id": "FAIR_LAUNCH",
+      "label": "Fair Launch",
+      "description": "Low creator allocation with stronger liquidity and public distribution.",
+      "allocations": {
+        "creatorTeam": 5,
+        "liquidity": 40,
+        "communityPublic": 40,
+        "treasuryReserve": 5,
+        "growthEcosystem": 10
+      },
+      "fixedFeeFlowNote": "Fair Launch is a distribution preset, not a guarantee of price, demand or equal outcomes."
+    },
+    {
+      "id": "CUSTOM",
+      "label": "Custom",
+      "description": "Start from the current values and edit within enforced Worldz limits.",
+      "allocations": null,
+      "fixedFeeFlowNote": "All Safe Launch limits and fixed Fee Flow V2 lanes remain enforced."
+    }
+  ]
+}
