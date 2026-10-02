@@ -21,7 +21,6 @@ const MENUS = {
       ["👛 Wallet", "/wallet"],
       ["🤠 Ronald Raider", "/raid"],
       ["📣 Shill Pack", "/shillpack"],
-      ["⭐ Shill Rewards", "/shillpoints"],
       ["📚 All Commands", "/commands"]
     ]
   },
