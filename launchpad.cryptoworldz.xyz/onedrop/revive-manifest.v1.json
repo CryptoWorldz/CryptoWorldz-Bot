@@ -1,7 +1,7 @@
 {
   "schema": "worldz.onedrop.v1",
-  "version": "WORLDZ-ONEDROP-RVIV-2026-09-26-A",
-  "status": "EXECUTABLE_OWNER_REVIEW_REQUIRED",
+  "version": "WORLDZ-ONEDROP-RVIV-2026-10-02-B",
+  "status": "EXECUTABLE_3_OF_5_PROPOSAL__IMPACT_REMAINS_RESERVED",
   "network": "solana-mainnet-beta",
   "token": {
     "name": "REVIVE",
@@ -57,8 +57,9 @@
       "name": "ONEWORLDZ_IMPACT",
       "raw": "20000000000000",
       "tokens": "20000000",
-      "status": "DIRECT_TRANSFER_IN_SAME_SQUADS_INNER_MESSAGE",
-      "destination": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW"
+      "status": "RESERVED_IN_SQUADS_PENDING_CONCENTRATION_AWARE_IMPACT_ROUTE",
+      "destination": null,
+      "note": "The 20M impact allocation remains fully reserved. It is intentionally excluded from this OneDrop transaction so it is not parked as a 10%-of-supply ordinary wallet balance."
     },
     {
       "name": "DEVCITY_100",
@@ -93,9 +94,9 @@
   ],
   "executableNow": {
     "oneDropClaimRaw": "49999999999948",
-    "oneWorldzDirectRaw": "20000000000000",
-    "totalMovedFromSquadsRaw": "69999999999948",
-    "expectedRemainingSquadsRaw": "100000000000052"
+    "impactMovedRaw": "0",
+    "totalMovedFromSquadsRaw": "49999999999948",
+    "expectedRemainingSquadsRaw": "120000000000052"
   },
   "sourceEvidence": {
     "legacySourceVersion": "REVIVE-EQUAL-LEGACY-2026-09-26-A",
@@ -103,7 +104,7 @@
     "legacyHistoricalCount": 216,
     "legacyEligibleCount": 214,
     "devSourceVersion": "REVIVE-SEVEN-DEV-ALLOCATION-2026-09-26-B",
-    "rule": "Final wallet signature is required. Browser recomputes the Merkle root, exact sums, PDAs, transaction size and live simulation before broadcast."
+    "rule": "3-of-5 Squads approval is required. Browser recomputes the Merkle root, exact sums, PDAs, transaction size and live simulation before the first approval is requested. Impact remains reserved and is not part of this transaction."
   },
   "recipients": [
     {
