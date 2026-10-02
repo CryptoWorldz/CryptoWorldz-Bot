@@ -136,7 +136,7 @@
         <div class="profile-row"><span>Implied Market Cap</span><b id="max-auto-marketcap">—</b></div>
         <div class="form-row">
           <label>Trading Volume<input id="max-auto-volume" inputmode="decimal" value="10000"></label>
-          <label>Project Fee %<input id="max-auto-fee" type="number" min="0.5" max="4" step="0.25" value="2"></label>
+          <label>Project Fee %<input id="max-auto-fee" type="number" min="0.5" max="3" step="0.25" value="1"></label>
         </div>
         <div class="profile-row"><span>Collected Project Fee</span><b id="max-auto-collected">—</b></div>
         <div class="profile-row"><span>WorldzLaunchPad 10%</span><b id="max-auto-worldz">—</b></div>
