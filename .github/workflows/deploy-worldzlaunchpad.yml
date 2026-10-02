@@ -58,12 +58,19 @@ jobs:
           assert fee['worldzLaunchPadContributionDefaultPercent']==5
           assert fee['contributionChoiceVoluntary'] is True
           assert fee['contributionChoiceSnapshottedAtLaunch'] is True
-          assert fee['legacyCorePercent']==15
+          assert fee['feeFlowVersion']=='WORLDZ-FEE-FLOW-V3'
+          assert fee['creatorRetentionByContribution']=={'3':97,'5':95,'8':92}
+          assert fee['legacyCorePercentOfWorldzContribution']==10
           assert fee['legacyCoreTokenCount']==12
-          assert fee['legacyCoreEqualPerTokenPercent']==1.25
-          assert fee['coreFamilyMarketBuyPercent']==12
-          assert fee['coreFamilyEqualPerTokenPercent']==3
+          assert fee['coreFamilyMarketBuyPercentOfWorldzContribution']==10
           assert fee['coreFamilySymbols']==['WLDZ','RVIV','PNEX','MRCL']
+          assert fee['worldzInternalSplitPercent']=={
+            'operationsProductDevelopment':20,'treasury':20,'lpGrowth':15,'legacyCore':10,
+            'worldzCoreFamilyMarketBuys':10,'impactCharity':10,'teamBuilderRewards':5,
+            'futureLaunchInfrastructure':5,'launchReferrer':5
+          }
+          assert fee['treasuryLane']['worldzOperationsTreasuryPercent']==70
+          assert fee['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
           assert fee['worldzLaunchPadShareOfTokenSupplyPercent']==0
           assert fee['worldzLaunchPadShareOfInitialLiquidityPercent']==0
           assert fee['walletTransferTaxPercent']==0
@@ -136,19 +143,18 @@ jobs:
           assert safe['allocations']['creatorControlledLpLockPercent']==100
           assert safe['allocations']['lpLockMinDays']==365
           fee_routes=safe['feeRoutes']
-          assert fee_routes['model']=='WORLDZ_FEE_FLOW_V2'
-          assert fee_routes['exactLockedFixedPercent']['creatorDeveloper']==10
-          assert fee_routes['exactLockedFixedPercent']['launchReferrer']==15
-          assert fee_routes['exactLockedFixedPercent']['legacyCore']==15
-          assert fee_routes['exactLockedFixedPercent']['worldzCoreFamilyMarketBuys']==12
-          assert fee_routes['exactLockedFixedPercent']['lpGrowth']==10
-          assert fee_routes['exactLockedFixedPercent']['launchedTokenBuybackAndBurn']==8
-          assert fee_routes['exactLockedFixedPercent']['impactCharity']==5
-          assert fee_routes['exactLockedFixedPercent']['teamBuilderRewards']==5
-          assert fee_routes['exactLockedFixedPercent']['futureTokenDeploymentReserve']==5
-          assert fee_routes['worldzLaunchPadAllowedPercent']==[3,5,8]
-          assert fee_routes['treasuryReserveByLaunchPadChoice']=={'3':12,'5':10,'8':7}
-          assert fee_routes['totalPercent']==100
+          assert fee_routes['model']=='WORLDZ_FEE_FLOW_V3'
+          assert fee_routes['creatorRetentionByWorldzContribution']=={'3':97,'5':95,'8':92}
+          assert fee_routes['worldzContributionAllowedPercent']==[3,5,8]
+          assert fee_routes['worldzInternalSplitPercent']=={
+            'operationsProductDevelopment':20,'treasury':20,'lpGrowth':15,'legacyCore':10,
+            'worldzCoreFamilyMarketBuys':10,'impactCharity':10,'teamBuilderRewards':5,
+            'futureLaunchInfrastructure':5,'launchReferrer':5
+          }
+          assert fee_routes['treasuryLane']['percentOfWorldzContribution']==20
+          assert fee_routes['treasuryLane']['worldzOperationsTreasuryPercent']==70
+          assert fee_routes['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
+          assert fee_routes['totalWorldzInternalPercent']==100
           assert fee_routes['walletTransferTaxPercent']==0
 
           required=[
@@ -492,7 +498,7 @@ jobs:
           node --check launchpad.cryptoworldz.xyz/curve-pro/app.js
           node --check launchpad.cryptoworldz.xyz/wldz/app.js
 
-      - name: Run 150+ Fee Flow V2 anti-cheat tokenomics scenarios
+      - name: Run 150+ Fee Flow V3 anti-cheat tokenomics scenarios
         shell: python
         run: |
           import json, math
