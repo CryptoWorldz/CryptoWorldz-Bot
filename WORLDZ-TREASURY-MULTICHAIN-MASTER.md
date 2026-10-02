@@ -1,19 +1,19 @@
 # WorldzLaunchPad™ Multichain Treasury Master
 
-Version: 2026-10-01 — WORLDZ-TREASURY-2
+Version: 2026-10-02 — WORLDZ-TREASURY-3
 
 ## Locked Governance
 
-WorldzLaunchPad uses chain-native treasury wallets under one common governance policy.
+Worldz uses separate chain-native treasuries for distinct purposes.
 
 - **Worldz Operations Treasury:** 5 signers, **3-of-5** approvals.
+- **Worldz Miracle Team Treasury:** 8 signers, **4-of-8** approvals, separate from Operations.
 - **Worldz Reserve Treasury:** **not deployed / disabled**.
 - **Reserve sweeps:** **OFF**.
-- Approved revenue remains in the Operations Treasury until a separate Reserve Treasury is explicitly approved and deployed in the future.
 - Private keys, seed phrases and recovery material must never be committed to GitHub.
-- Each blockchain has its own treasury address. There is no fake "universal address".
+- Each blockchain has its own treasury address. There is no fake universal address.
 
-Using the same five signers and the same 3-of-5 threshold for a second Reserve vault is not treated as added security, so Worldz does not require a duplicate Reserve Treasury.
+The Miracle Team Treasury is **not** a renamed Reserve Treasury. It is a separate team/impact treasury with a different signer set and purpose.
 
 ## Current Solana Operations Signer Set
 
@@ -25,51 +25,69 @@ Using the same five signers and the same 3-of-5 threshold for a second Reserve v
 | SolMusic | `FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ` |
 | Mahammad | `6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok` |
 
-These are public signer addresses only. Live Squads membership and threshold must still be independently re-read before Worldz marks the configuration as on-chain verified.
+Current Operations governance is **3-of-5**. Mainnet actions still re-read live Squads state immediately before proposal creation/execution.
 
-## Fee Route
+## Miracle Team Treasury signer plan
 
-WorldzLaunchPad receives only the applicable Worldz share of collected supported project trading-fee revenue defined by the active fee policy.
+Target governance: **4-of-8**.
 
-It does **not** take token supply, initial liquidity, or ordinary wallet transfers unless a separate explicit launch policy says otherwise.
+Verified/documented team wallets already eligible as signer candidates:
 
-Current treasury route:
+1. JayJayTeamDev
+2. Stepper
+3. Savage
+4. SolMusic
+5. Mahammad
 
-`Supported Worldz fee allocation -> chain Operations Treasury (3-of-5)`
+Three additional signer slots remain **PENDING** until three distinct consenting Legend/Admin/Miracle Team members provide verified public Solana wallets.
 
-There is currently **no automatic Reserve sweep**.
+Rules:
+- Remedy is not a signer candidate.
+- Do not invent signer addresses.
+- One person using multiple wallets must not be counted as multiple independent Miracle Team signers.
+- Owner-controlled extra wallets may be used as clearly-labelled allocation/custody wallets, but they do not create extra human multisig independence.
+- Signer consent and live Squads membership proof are required.
+
+## Treasury-bound revenue route
+
+Before the Miracle Team Treasury is live-verified:
+
+`Treasury-bound revenue -> 100% Worldz Operations Treasury (3-of-5)`
+
+After the separate Miracle Team Treasury passes deployment and live proof:
+
+`Treasury-bound revenue -> 70% Worldz Operations Treasury (3-of-5) + 30% Worldz Miracle Team Treasury (4-of-8)`
+
+The 30% is taken only from revenue that otherwise would have gone 100% to Operations Treasury custody. It does **not** create a new fee and does not override explicit Creator, Referrer, Legacy, WLDZ/RVIV/PNEX/MRCL, LP, Buyback/Burn, Impact or Builder lanes.
 
 ## Chain Standard
 
-| Chain family | Operations | Reserve | Provider |
+| Chain family | Operations | Miracle Team | Reserve |
 | --- | --- | --- | --- |
-| Solana | 3-of-5 | Not deployed | Squads v4 |
-| EVM (Ethereum, Base, BNB, HyperEVM and supported EVM chains) | 3-of-5 | Not deployed | Safe Smart Account |
-| XRP Ledger | 3-of-5 | Not deployed | Native SignerList multisigning |
-| Sui | 3-of-5 | Not deployed | Native Sui multisig |
+| Solana | 3-of-5 Squads v4 | 4-of-8 Squads v4 target | Not deployed |
+| EVM | 3-of-5 Safe target | 4-of-8 Safe target if separately approved | Not deployed |
+| XRP Ledger | 3-of-5 SignerList target | 4-of-8 SignerList target if separately approved | Not deployed |
+| Sui | 3-of-5 native multisig target | 4-of-8 native multisig target if separately approved | Not deployed |
 
 ## Solana Operations Treasury
-
-The existing Team Zed Treasury remains the configured Solana Operations vault:
 
 - Squads multisig config: `B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN`
 - Vault index: `0`
 - Vault: `n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB`
-- Permanent Worldz target governance: **3-of-5**
+- Governance: **3-of-5**
 - Reserve Treasury: **not deployed**
 - Reserve sweep: **disabled**
 
-The five-member/3-of-5 change must be independently confirmed from live Squads state before automated production routing treats it as verified.
+## Miracle Team activation gate
 
-## Activation Gate
+The 30% route remains OFF until all are true:
 
-No chain's public mainnet fee routing activates until:
+1. All 8 signer public wallets are recorded and consented.
+2. A separate Solana Squads Miracle Team multisig is created.
+3. Live chain state proves **4-of-8**.
+4. The new Miracle Team vault address is recorded.
+5. A 70/30 treasury-bound revenue split is simulated end-to-end.
+6. Human approval is completed.
+7. Worldz Proof receipt records the deployment/activation evidence.
 
-1. The five signer public addresses are registered and checked.
-2. The chain-native Operations Treasury is proven at **3-of-5**.
-3. The exact active Worldz fee route is proven end-to-end.
-4. The treasury destination is verified on-chain.
-5. The applicable Worldz Safe Launch and mainnet release gates pass.
-6. Human authorization is completed.
-
-A Reserve Treasury is **not** an activation requirement while Reserve status is disabled.
+Until then, treasury-bound revenue remains 100% in the existing 3-of-5 Operations Treasury.
