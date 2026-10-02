@@ -179,6 +179,16 @@ async function prepare(){
     const impactBalance=impactBucket?.destination?await balanceForOwner(impactBucket.destination):0n;
     const devCityBalance=devCityBucket?.destination?await balanceForOwner(devCityBucket.destination):0n;
     const devTotal=devBalances.reduce((s,x)=>s+x.raw,0n);
+    const largest=(await connection.getTokenLargestAccounts(mint,'confirmed')).value.slice(0,20);
+    const largestOwners=[];
+    for(const entry of largest){
+      let owner='UNKNOWN';
+      try{
+        const parsed=await connection.getParsedAccountInfo(entry.address,'confirmed');
+        owner=parsed.value?.data?.parsed?.info?.owner||'UNKNOWN';
+      }catch{}
+      largestOwners.push({account:entry.address.toBase58(),owner,amount:entry.amount});
+    }
     const fmt=x=>(Number(x)/1e6).toFixed(6);
     $('#review').textContent=
       'RVIV LIVE RECONCILIATION — EXECUTION BLOCKED\n'+
@@ -191,6 +201,8 @@ async function prepare(){
       '\nDev-wallet balance total: '+fmt(devTotal)+' RVIV\n'+
       'DevCity staging owner balance: '+fmt(devCityBalance)+' RVIV\n'+
       'Worldz Impact owner balance: '+fmt(impactBalance)+' RVIV\n\n'+
+      'Top RVIV token accounts / owners:\n'+
+      largestOwners.map(x=>x.amount+' RVIV | owner '+x.owner+' | ATA '+x.account).join('\n')+'\n\n'+
       'No new OneDrop proposal will be built until previous RVIV movements are reconciled from chain evidence.';
     stop('RVIV treasury source is '+fmt(source.amount)+' RVIV, not the frozen pre-OneDrop '+fmt(expectedPre)+' RVIV. Earlier RVIV distribution activity may already have occurred. Duplicate distribution is blocked.');
   }
