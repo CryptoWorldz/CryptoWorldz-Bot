@@ -99,7 +99,7 @@ const exists=(connection,key)=>connection.getAccountInfo(key,'confirmed').then(B
 async function state(connection,d){
  const member=new d.web3.PublicKey(ctx.address),ms=new d.web3.PublicKey(cfg.multisig),vault=new d.web3.PublicKey(cfg.vault),mint=new d.web3.PublicKey(cfg.mint);
  const ma=await d.sqds.accounts.Multisig.fromAccountAddress(connection,ms,'confirmed');
- if(Number(ma.threshold)!==1)fail('Squads threshold is not 1.');
+ if(Number(ma.threshold)!==3||ma.members.length!==5)fail('Squads governance is not the required 3-of-5.');
  const mm=ma.members.find(x=>x.key.equals(member));if(!mm)fail('JayJayTeamDev is not a live Squad member.');
  if((Number(mm.permissions.mask)&1)!==1)fail('JayJayTeamDev cannot initiate this Squad transaction.');
  if(!d.sqds.getVaultPda({multisigPda:ms,index:Number(cfg.vaultIndex)})[0].equals(vault))fail('Squads vault mismatch.');
@@ -148,7 +148,7 @@ async function preflight(){
  await simulate(connection,inner,'55M WLDZ transfer');
  const have=s.memberSol/d.web3.LAMPORTS_PER_SOL;
  $('#sign').disabled=false;
- status('READY ✅\nJayJay signer: '+have.toFixed(6)+' SOL\nSquads vault WLDZ: '+Number(s.sourceWldz/1000000n).toLocaleString()+'\nRecipient token accounts missing: 0\n55M WLDZ transfer dry-run: PASSED ✅\n\nSign & Execute is armed.','good');
+ status('READY ✅\nJayJay signer: '+have.toFixed(6)+' SOL\nSquads vault WLDZ: '+Number(s.sourceWldz/1000000n).toLocaleString()+'\nTreasury governance: 3-of-5\nRecipient token accounts missing: 0\n55M WLDZ transfer dry-run: PASSED ✅\n\nCreate the proposal and record the first approval. Execution stays locked until 3 approvals exist.','good');
  return true;
 }
 
@@ -184,22 +184,28 @@ async function run(){
 
   let proposal=await d.sqds.accounts.Proposal.fromAccountAddress(connection,proposalPda,'confirmed');
   let kind=String(proposal.status?.__kind||'').toLowerCase();
+  const memberAlreadyApproved=()=>Array.from(proposal.approved||[]).some(k=>k.equals(s.member));
   if(kind==='draft'){
    await sendInstructions(connection,d,[
     d.sqds.instructions.proposalActivate({multisigPda:s.ms,transactionIndex:index,member:s.member}),
     d.sqds.instructions.proposalApprove({multisigPda:s.ms,transactionIndex:index,member:s.member,memo:'JayJayTeamDev approved WLDZ distribution'})
-   ],'2/3 Approve WLDZ proposal');
-  }else if(kind==='active'){
-   await sendInstructions(connection,d,[d.sqds.instructions.proposalApprove({multisigPda:s.ms,transactionIndex:index,member:s.member,memo:'JayJayTeamDev approved WLDZ distribution'})],'2/3 Approve WLDZ proposal');
+   ],'2/3 Record first WLDZ approval');
+  }else if(kind==='active'&&!memberAlreadyApproved()){
+   await sendInstructions(connection,d,[d.sqds.instructions.proposalApprove({multisigPda:s.ms,transactionIndex:index,member:s.member,memo:'JayJayTeamDev approved WLDZ distribution'})],'2/3 Record first WLDZ approval');
   }
 
   proposal=await d.sqds.accounts.Proposal.fromAccountAddress(connection,proposalPda,'confirmed');
   kind=String(proposal.status?.__kind||'').toLowerCase();
+  const approvalCount=Array.from(proposal.approved||[]).length;
+  if(kind==='active'){
+   status('WLDZ PROPOSAL READY ✅\n\nSquads index: '+index+'\nApprovals: '+approvalCount+'/3\n\nCollect the remaining approvals in the 3-of-5 Team Zed Treasury, then return here to execute. No WLDZ has moved yet.','good');
+   return;
+  }
   if(!['approved','executing','executed'].includes(kind))fail('Proposal status is '+kind+'.');
 
   if(kind!=='executed'){
    const built=await d.sqds.instructions.vaultTransactionExecute({connection,multisigPda:s.ms,transactionIndex:index,member:s.member});
-   await sendInstructions(connection,d,[built.instruction],'3/3 Execute 55M WLDZ distribution',built.lookupTableAccounts);
+   await sendInstructions(connection,d,[built.instruction],'3/3 Execute approved 55M WLDZ distribution',built.lookupTableAccounts);
   }
 
   await sleep(800);
