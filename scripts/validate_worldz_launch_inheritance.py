@@ -86,8 +86,12 @@ assert v3["treasuryLane"]=={
     "miracleTeamGovernance":"4-of-7",
 }
 
-assert product["creatorEconomics"]["defaultWorldzControlledSharePercent"]==51
-assert product["referralEconomics"]["defaultWorldzControlledSharePercent"]==17
+assert product["creatorEconomics"]["worldzContributionChoicesPercent"]==[3,5,8]
+assert product["creatorEconomics"]["defaultCreatorRetentionPercent"]==95
+assert product["creatorEconomics"]["creatorRetentionByWorldzContributionPercent"]=={"3":97,"5":95,"8":92}
+assert product["creatorEconomics"]["legacyMagicFeeCreatorSharePercent"]==51
+assert product["referralEconomics"]["sharePercentOfWorldzContribution"]==5
+assert product["referralEconomics"]["legacyMagicFeeReferrerSharePercent"]==17
 assert product["inheritance"]["enabled"] is True
 assert product["inheritance"]["contract"]=="worldzpad-mainnet/launch-inheritance/worldz-launch-inheritance.v1.json"
 assert product["inheritance"]["everyLaunchGetsIdentity"] is True
