@@ -156,7 +156,9 @@
     ],
     "zeroTokenSupplyTake": true,
     "zeroInitialLiquidityTake": true,
-    "zeroWalletTransferTax": true
+    "zeroWalletTransferTax": true,
+    "status": "HISTORICAL_AUDIT_ONLY__SUPERSEDED_BY_V3",
+    "canonicalForNewLaunches": false
   },
   "community": {
     "publicPath": "/community/",
@@ -219,5 +221,53 @@
       "MAGIC_FEE_NUMBER_75_BPS",
       "LEGACY_90_10_ADAPTER"
     ]
+  },
+  "economicsV3": {
+    "policy": "worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json",
+    "creatorRetentionByWorldzContributionPercent": {
+      "3": 97,
+      "5": 95,
+      "8": 92
+    },
+    "worldzContributionChoicesPercent": [
+      3,
+      5,
+      8
+    ],
+    "defaultWorldzContributionPercent": 5,
+    "worldzInternalSplitPercent": {
+      "operationsProductDevelopment": 20,
+      "treasury": 20,
+      "lpGrowth": 15,
+      "legacyCore": 10,
+      "worldzCoreFamilyMarketBuys": 10,
+      "impactCharity": 10,
+      "teamBuilderRewards": 5,
+      "futureLaunchInfrastructure": 5,
+      "launchReferrer": 5
+    },
+    "treasuryLane": {
+      "operationsPercent": 70,
+      "miracleTeamPercent": 30
+    },
+    "zeroTokenSupplyTake": true,
+    "zeroInitialLiquidityTake": true,
+    "zeroWalletTransferTax": true
+  },
+  "founding100": {
+    "enabled": true,
+    "contract": "worldzpad-omnichain/founding100.v1.json",
+    "positions": 100,
+    "wldzPerQualifiedPosition": 100000,
+    "mainnetQualificationRequired": true
+  },
+  "launchBenefits": {
+    "enabled": true,
+    "contract": "worldzpad-omnichain/launch-benefits.v1.json"
+  },
+  "newsWire": {
+    "enabled": true,
+    "contract": "worldzpad-omnichain/newswire.v1.json",
+    "publicPath": "/news/"
   }
 }
