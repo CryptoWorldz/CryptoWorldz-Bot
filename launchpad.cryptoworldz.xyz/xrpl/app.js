@@ -11,7 +11,7 @@ function proofStatus(t,c=''){const e=$('#proof');e.textContent=t;e.className='st
 function validAddr(s){return /^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(String(s||''));}
 function positive(v){return /^\d+(\.\d+)?$/.test(String(v||''))&&Number(v)>0;}
 function drops(x){const n=Number(x);if(!Number.isFinite(n)||n<=0)throw new Error('XRP amount must be greater than zero.');return String(Math.round(n*1_000_000));}
-function feeUnits(p){const n=Number(p);if(!Number.isFinite(n)||n<0||n>1)throw new Error('XRPL AMM fee must be 0%–1%.');return Math.round(n*1000);}
+function feeUnits(p){const n=Number(p);if(!Number.isFinite(n)||n<0.25||n>1)throw new Error('XRPWorldz AMM fee must be 0.25%–1.00%.');if(Math.abs((n/.25)-Math.round(n/.25))>1e-9)throw new Error('XRPWorldz AMM fee uses 0.25% increments.');return Math.round(n*1000);}
 function marketRoute(){return $('#market-route').value;}
 function values(){return{
   issuer:$('#issuer').value.trim(),hot:$('#hot').value.trim(),currency:$('#currency').value.trim().toUpperCase(),
@@ -69,7 +69,7 @@ function marketErrors(v){
     if(!positive(v.tokenLiquidity))e.push('AMM token amount must be positive.');
     if(!positive(v.xrpLiquidity))e.push('AMM XRP amount must be positive.');
     if(Number(v.tokenLiquidity)>=Number(v.supply))e.push('AMM token amount must be less than intended supply.');
-    if(!Number.isFinite(v.ammFee)||v.ammFee<0||v.ammFee>1)e.push('XRPL AMM fee must be 0%–1%.');
+    if(!Number.isFinite(v.ammFee)||v.ammFee<0.25||v.ammFee>1)e.push('XRPWorldz AMM fee must be 0.25%–1.00%.');else if(Math.abs((v.ammFee/.25)-Math.round(v.ammFee/.25))>1e-9)e.push('XRPWorldz AMM fee must use 0.25% increments.');
   }
   if(v.route==='CLOB'||v.route==='BOTH'){
     if(!positive(v.clobToken))e.push('CLOB token amount must be positive.');
