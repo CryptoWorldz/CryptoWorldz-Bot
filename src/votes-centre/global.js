@@ -31,6 +31,12 @@ function getGlobalPublicVoiceStatus() {
       POLICY.participation.wealthWeightingAllowed === true ||
       POLICY.participation.tokenWeightingAllowed === true,
     publicMoneyVoiceEnabled: POLICY.publicMoneyVoice.enabled === true,
+    concernPublicReadEnabled: POLICY.concernRegistry?.publicReadEnabled === true,
+    moderatedConcernSubmissionEnabled: POLICY.concernRegistry?.moderatedSubmissionEnabled === true,
+    concernAutoPublicationEnabled: POLICY.concernRegistry?.autoPublicationEnabled === true,
+    concernHumanReviewRequired: POLICY.concernRegistry?.humanReviewRequiredBeforePublication === true,
+    concernSubmissionRateLimitPerIp10m: Number(POLICY.concernRegistry?.submissionRateLimitPerIp10m || 0),
+    structuredPrivateIdentityFieldsAccepted: POLICY.concernRegistry?.structuredPrivateIdentityFieldsAccepted === true,
     officialBudgetAuthority: POLICY.publicMoneyVoice.officialBudgetAuthority === true,
     treasuryExecution: POLICY.publicMoneyVoice.treasuryExecution === true,
     humanNeedsMission: POLICY.humanNeedsMission.statement,
