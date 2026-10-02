@@ -29,17 +29,32 @@
   },
   "creatorEconomics": {
     "recurringTradingRevenue": true,
-    "defaultWorldzControlledSharePercent": 51,
+    "worldzContributionChoicesPercent": [
+      3,
+      5,
+      8
+    ],
+    "worldzContributionDefaultPercent": 5,
+    "defaultCreatorRetentionPercent": 95,
+    "creatorRetentionByWorldzContributionPercent": {
+      "3": 97,
+      "5": 95,
+      "8": 92
+    },
     "claimDashboard": true,
-    "lifetimeRevenueView": true
+    "lifetimeRevenueView": true,
+    "legacyMagicFeeCreatorSharePercent": 51,
+    "rule": "New WorldzLaunchPad intakes use Fee Flow V3. The old 51% creator share belongs only to historical MagicFeeNumber/adapters."
   },
   "referralEconomics": {
     "recurringTradingRevenue": true,
-    "defaultWorldzControlledSharePercent": 17,
+    "sharePercentOfWorldzContribution": 5,
     "launchpadToLaunchpad": true,
     "whiteLabelOperator": true,
     "apiPartner": true,
-    "referralDashboard": true
+    "referralDashboard": true,
+    "legacyMagicFeeReferrerSharePercent": 17,
+    "rule": "The V3 referral lane is 5% of the Worldz contribution, never an extra deduction from the creator-retained 97/95/92%."
   },
   "launchProtection": {
     "antiSniperAdapter": "CHAIN_AND_VENUE_SPECIFIC",
@@ -195,5 +210,14 @@
     "futurePrimaryHost": "worldzlaunch.com",
     "currentPrimaryHost": "launchpad.cryptoworldz.xyz",
     "futureHostMustBeOwnedAndVerifiedBeforeLiveClaim": true
+  },
+  "economicsStandard": {
+    "canonical": "WORLDZ-FEE-FLOW-V3",
+    "source": "worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json",
+    "legacyProfiles": [
+      "WORLDZ-FEE-FLOW-V2",
+      "MAGIC_FEE_NUMBER_75_BPS",
+      "LEGACY_90_10_ADAPTER"
+    ]
   }
 }
