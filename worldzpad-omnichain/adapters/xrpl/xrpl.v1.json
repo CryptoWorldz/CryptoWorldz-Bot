@@ -1,19 +1,60 @@
 {
-  "version": "WORLDZ-ADAPTER-XRPL-2026-09-24-A",
+  "version": "WORLDZ-ADAPTER-XRPL-2026-10-02-B",
   "chainKey": "xrpl",
-  "status": "TESTNET_IMPLEMENTATION_REQUIRED",
+  "status": "TESTNET_BROWSER_ADAPTER_BUILT__NATIVE_MARKET_DEPTH_IN_BUILD",
   "mainnetExecutionEnabled": false,
   "token": {
-    "v1": "ISSUED_FUNGIBLE_TOKEN",
-    "mpt": "SEPARATE_ADAPTER_AFTER_TESTNET_PROOF",
+    "v1": "TRUST_LINE_TOKEN",
+    "mpt": "RESEARCH_GATED_UNTIL_MPT_DEX_AMM_SUPPORT_AND_SEPARATE_TESTNET_PROOF",
     "issuerConfiguration": "EXPLICIT_AND_DISCLOSED",
-    "hiddenTransferTax": false
+    "hiddenTransferTax": false,
+    "currentLaunchStandard": "TRUST_LINE_TOKEN",
+    "standardDecision": {
+      "reason": "Trust-line tokens remain the current XRPWorldz launch standard because they support XRPL native DEX and AMM execution now. MPT issuance exists, but Worldz does not promote MPT as the same launch route until the required MPT DEX/AMM capability is enabled and independently proven.",
+      "mptOnChainMetadataAdvantage": true,
+      "mptCurrentLaunchMarketParityAssumed": false
+    },
+    "transferFeeDefault": false,
+    "defaultRippleRequiredForTradeableTrustLineTokens": true,
+    "noFreezeDefault": true,
+    "fixedSupplyMeaning": "INTENDED_UNTIL_ISSUER_CONTROL_IS_PROVEN_IMMUTABLE",
+    "fixedSupplyProofModes": [
+      "BLACKHOLED_ISSUER",
+      "SEPARATELY_PROVEN_IMMUTABLE_PROTOCOL_CONTROL"
+    ]
   },
   "market": {
     "nativeCLOB": true,
     "nativeAMM": true,
-    "automaticMarketPath": "SELECT_CLOB_AMM_OR_BOTH_AFTER_QUOTE",
-    "solanaStyleGraduationRequired": false
+    "automaticMarketPath": "CREATOR_SELECTS_CLOB_AMM_OR_BOTH_WITH_PLAIN_ENGLISH_PREVIEW",
+    "solanaStyleGraduationRequired": false,
+    "routes": {
+      "CLOB_SEED": {
+        "transaction": "OfferCreate",
+        "purpose": "Seed a native XRP Ledger order-book ask using the hot wallet.",
+        "valueMovement": true,
+        "mainnet": false
+      },
+      "AMM": {
+        "transaction": "AMMCreate",
+        "purpose": "Create Token/XRP native AMM liquidity.",
+        "initialAssetsShouldBeApproximatelyEqualValue": true,
+        "tradingFeeRangeUnits": [
+          0,
+          1000
+        ],
+        "mainnet": false
+      },
+      "HYBRID": {
+        "transactions": [
+          "AMMCreate",
+          "OfferCreate"
+        ],
+        "purpose": "Use both native AMM liquidity and a native DEX seed offer without pretending they are the same market primitive.",
+        "initialPriceAlignmentDisclosureRequired": true,
+        "mainnet": false
+      }
+    }
   },
   "fee": {
     "targetGrossTraderFeeBps": 75,
@@ -37,10 +78,14 @@
     "destination": "SOLANA_AFTER_APPROVED_CONVERSION_BRIDGE_PROOF"
   },
   "releaseGates": [
-    "ISSUED_TOKEN_TESTNET_PROOF",
-    "TRUSTLINE_AND_ISSUER_FLAG_PROOF",
-    "CLOB_BUY_AND_SELL_PROOF",
-    "AMM_CREATE_AND_LIQUIDITY_PROOF_IF_SELECTED",
+    "TRUST_LINE_TOKEN_TESTNET_PROOF",
+    "ISSUER_DEFAULT_RIPPLE_PROOF",
+    "ISSUER_NO_FREEZE_PROOF",
+    "HOT_WALLET_TRUSTLINE_PROOF",
+    "ISSUED_OBLIGATION_PROOF",
+    "CLOB_BUY_AND_SELL_OR_EXPLICIT_NOT_SELECTED_PROOF",
+    "AMM_CREATE_AND_LIQUIDITY_OR_EXPLICIT_NOT_SELECTED_PROOF",
+    "ISSUER_CONTROL_MODE_PROOF",
     "FEE_DISCLOSURE_PROOF",
     "REFERRAL_ACCOUNTING_PROOF",
     "LEGACY_ACCRUAL_PROOF",
@@ -48,8 +93,65 @@
     "EXPLICIT_MAINNET_RELEASE"
   ],
   "sourceOfTruth": [
-    "https://xrpl.org/docs/concepts/tokens",
+    "https://xrpl.org/docs/concepts/tokens/fungible-tokens/trust-line-tokens",
     "https://xrpl.org/docs/concepts/tokens/decentralized-exchange",
-    "https://xrpl.org/docs/concepts/tokens/decentralized-exchange/automated-market-makers"
-  ]
+    "https://xrpl.org/docs/concepts/tokens/decentralized-exchange/automated-market-makers",
+    "https://xrpl.org/docs/references/protocol/transactions/types/offercreate",
+    "https://xrpl.org/docs/references/protocol/transactions/types/ammcreate",
+    "https://xrpl.org/docs/use-cases/tokenization/migrating-from-trust-lines-to-mpts",
+    "https://xrpl.org/docs/concepts/accounts/blackholed-accounts",
+    "https://xrpl.org/docs/references/protocol/transactions/types/signerlistset"
+  ],
+  "issuerControl": {
+    "defaultMode": "GOVERNED_ISSUER",
+    "modes": {
+      "GOVERNED_ISSUER": {
+        "fixedSupplyGuaranteed": false,
+        "explanation": "Issuer remains able to authorize future issuer transactions. Worldz displays this plainly."
+      },
+      "MULTISIG_ISSUER": {
+        "transaction": "SignerListSet",
+        "maxSigners": 8,
+        "fixedSupplyGuaranteed": false,
+        "explanation": "Native XRPL SignerList can replace unilateral control after the master key is disabled, but governance can still authorize issuer transactions."
+      },
+      "BLACKHOLED_FIXED_SUPPLY": {
+        "transactions": [
+          "SetRegularKey to ACCOUNT_ZERO",
+          "AccountSet asfDisableMaster"
+        ],
+        "fixedSupplyGuaranteedWhenProofPasses": true,
+        "irreversible": true,
+        "proofRequirements": [
+          "master key disabled",
+          "regular key is known blackhole address",
+          "no signer list",
+          "no delegate entries"
+        ],
+        "explanation": "Use only after every issuer setting and issuance action is complete. A blackholed issuer cannot be maintained later."
+      }
+    },
+    "noFreezeCaveat": "No Freeze permanently gives up individual/deep-freeze capability but does not by itself make supply fixed or prove a blackholed issuer."
+  },
+  "escrow": {
+    "trustLineTokenEscrow": "FEATURE_GATED",
+    "issuerFlag": "asfAllowTrustLineLocking",
+    "issuerFlagValue": 17,
+    "rule": "Worldz checks TokenEscrow amendment status before presenting native token escrow as available. Escrow capability is separate from launch-market capability."
+  },
+  "intelligence": {
+    "readOnlyEndpoint": "/xrpl-intelligence.php",
+    "evidence": [
+      "issuer account flags",
+      "regular key",
+      "signer list",
+      "delegate objects",
+      "hot-wallet trust line",
+      "issued obligations",
+      "native AMM",
+      "native CLOB offers",
+      "amendment feature state"
+    ],
+    "noOpaqueSafetyScore": true
+  }
 }

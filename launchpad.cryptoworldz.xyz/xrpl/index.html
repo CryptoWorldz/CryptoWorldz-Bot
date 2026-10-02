@@ -1,19 +1,62 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#05020b">
-<title>XRPWorldz Mint & Launch™ | WorldzLaunchPad</title><link rel="stylesheet" href="/style.css?v=20260922-xrpl-v1">
-<style>.lab{max-width:1050px;margin:auto;padding:54px 18px 100px}.card{border:1px solid #ffffff0d;border-radius:18px;padding:18px;background:#ffffff03;margin-bottom:12px}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form label{display:grid;gap:5px;color:#9584a0;font-size:.72rem}.form input{width:100%;padding:11px;border:1px solid #ffffff12;border-radius:11px;background:#07030d;color:#fff}.wide{grid-column:1/-1}.status{white-space:pre-wrap;word-break:break-word;border:1px solid #ffffff0d;border-radius:12px;padding:12px;color:#9586a0;margin-top:12px}.status.good{border-color:#55e6a544;color:#7ce9ba}.status.bad{border-color:#ff668844;color:#ffa0b2}.status.warn{border-color:#ffd16644;color:#d9be7e}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.steps div{border:1px solid #ffffff0d;border-radius:12px;padding:11px}.steps b{display:block}.steps small{color:#7d6e86}@media(max-width:760px){.form,.steps{grid-template-columns:1fr}.wide{grid-column:auto}}</style></head>
-<body><header class="topbar"><a class="brand" href="/"><span class="brand-logo-official" aria-hidden="true"></span><span>WorldzLaunchPad™</span></a><nav><a href="/">LaunchPad</a><a href="/omnichain/">OmniChain</a><a href="/evm/">EVM</a></nav><button class="wallet-mini" id="connect">Connect GemWallet</button></header>
+<title>XRPWorldz Mint & Launch™ | WorldzLaunchPad</title><link rel="stylesheet" href="/style.css?v=20261002-xrpl-v2">
+<style>
+.lab{max-width:1080px;margin:auto;padding:54px 18px 100px}.card{border:1px solid #ffffff0d;border-radius:18px;padding:18px;background:#ffffff03;margin-bottom:12px}.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form label{display:grid;gap:5px;color:#9584a0;font-size:.72rem}.form input,.form select{width:100%;padding:11px;border:1px solid #ffffff12;border-radius:11px;background:#07030d;color:#fff}.wide{grid-column:1/-1}.status{white-space:pre-wrap;word-break:break-word;border:1px solid #ffffff0d;border-radius:12px;padding:12px;color:#9586a0;margin-top:12px}.status.good{border-color:#55e6a544;color:#7ce9ba}.status.bad{border-color:#ff668844;color:#ffa0b2}.status.warn{border-color:#ffd16644;color:#d9be7e}.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.steps div,.proof-grid>div{border:1px solid #ffffff0d;border-radius:12px;padding:11px}.steps b,.proof-grid b{display:block}.steps small,.proof-grid small{color:#7d6e86}.choice-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.choice{border:1px solid #ffffff12;border-radius:14px;background:#07030d;color:#fff;padding:14px;text-align:left}.choice.selected{border-color:#9b68ff88;background:#8f54ff12}.choice strong,.choice small{display:block}.choice small{color:#87798f;margin-top:4px}.proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.danger{border-color:#ff668833;background:#ff668806}.mpt{border-color:#36c5f033;background:#36c5f006}.micro{font-size:.68rem;color:#84758e}.switch-note{padding:10px 12px;border-left:3px solid #a76dff;background:#a76dff08;color:#a998b2;font-size:.7rem;margin-top:10px}.confirm{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:760px){.form,.steps,.choice-row,.proof-grid{grid-template-columns:1fr}.wide{grid-column:auto}}
+</style></head>
+<body><header class="topbar"><a class="brand" href="/"><span class="brand-logo-official" aria-hidden="true"></span><span>WorldzLaunchPad™</span></a><nav><a href="/">LaunchPad</a><a href="/omnichain/">OmniChain</a><a href="/trust/">Trust Orbit</a></nav><button class="wallet-mini" id="connect">Connect GemWallet</button></header>
 <main class="lab">
-<section class="card"><div class="kicker">XRPWORLDZ™ • XRPL-NATIVE TESTNET ADAPTER</div><h1>ISSUE NATIVE.<br><span>LAUNCH ON XRPL.</span></h1><p>XRPL is not treated like Solana or EVM. This adapter uses XRPL trust-line tokens because they have production DEX and AMM compatibility. It never asks for or stores a wallet seed.</p>
-<div class="steps"><div><b>1 • Issuer</b><small>Default Ripple + No Freeze</small></div><div><b>2 • Trust</b><small>Hot wallet trust line</small></div><div><b>3 • Issue</b><small>Fixed intended supply to hot wallet</small></div><div><b>4 • AMM</b><small>Token/XRP pool creation</small></div></div></section>
+<section class="card"><div class="kicker">XRPWORLDZ™ • XRPL-NATIVE TESTNET ADAPTER</div><h1>XRP NATIVE.<br><span>WORLDZ CONNECTED.</span></h1><p>XRPL is not treated like Solana or EVM. Worldz keeps native issuer controls, trust lines, the XRP Ledger order book and native AMM as separate building blocks. The wallet signs; Worldz never asks for a seed.</p>
+<div class="steps"><div><b>1 • Issuer</b><small>Default Ripple + No Freeze</small></div><div><b>2 • Trust</b><small>Hot-wallet trust line</small></div><div><b>3 • Issue</b><small>Disclosed intended supply</small></div><div><b>4 • Market</b><small>AMM, CLOB or both</small></div><div><b>5 • Proof</b><small>Read XRPL evidence</small></div></div></section>
+
 <section class="card"><h2>Testnet launch configuration</h2>
-<div class="form"><label>Issuer wallet<input id="issuer" readonly placeholder="Connect GemWallet as issuer"></label><label>Hot / operational wallet<input id="hot" placeholder="r..."></label><label>Currency code<input id="currency" maxlength="3" value="WRL"></label><label>Intended fixed supply<input id="supply" inputmode="decimal" value="100000000"></label><label>Launch liquidity token amount<input id="token-liquidity" inputmode="decimal" value="5000000"></label><label>Launch liquidity XRP<input id="xrp-liquidity" inputmode="decimal" placeholder="e.g. 100"></label><label>AMM trading fee %<input id="amm-fee" type="number" min="0" max="1" step=".001" value=".5"></label><label>Network<input value="XRPL Testnet only" disabled></label></div>
-<div class="actions"><button class="btn secondary" id="check">Run XRPL Preflight</button></div><div class="status" id="status">Connect GemWallet on XRPL Testnet. Use a dedicated issuer account and a separate hot/operational account.</div></section>
-<section class="card"><h2>Issuer approvals</h2><p>Connect GemWallet to the issuer account. Two account-setting transactions are intentionally separate because XRPL AccountSet accepts one SetFlag at a time.</p>
-<div class="actions"><button class="btn primary" id="default-ripple" disabled>1A • Enable Default Ripple</button><button class="btn primary" id="no-freeze" disabled>1B • Permanently Enable No Freeze</button></div></section>
+<div class="form">
+<label>Issuer wallet<input id="issuer" readonly placeholder="Connect GemWallet as issuer"></label>
+<label>Hot / operational wallet<input id="hot" placeholder="r..."></label>
+<label>Currency code<input id="currency" maxlength="3" value="WRL"></label>
+<label>Intended supply<input id="supply" inputmode="decimal" value="100000000"></label>
+<label>Network<input value="XRPL Testnet only" disabled></label>
+<label>Market route<select id="market-route"><option value="AMM">Native AMM</option><option value="CLOB">Native DEX order book</option><option value="BOTH">AMM + order book</option></select></label>
+</div>
+<div class="choice-row" id="market-route-cards">
+<button class="choice selected" type="button" data-route="AMM"><strong>AMM</strong><small>Token/XRP automated liquidity.</small></button>
+<button class="choice" type="button" data-route="CLOB"><strong>CLOB</strong><small>Native OfferCreate order-book seed.</small></button>
+<button class="choice" type="button" data-route="BOTH"><strong>Hybrid</strong><small>AMM + CLOB, with launch prices aligned.</small></button>
+</div>
+<div class="actions"><button class="btn secondary" id="check">Run XRPL Preflight</button><button class="btn secondary" id="read-proof">Read XRPL Native Proof</button></div>
+<div class="status" id="status">Connect GemWallet on XRPL Testnet. Use a dedicated issuer account and a separate hot/operational account.</div></section>
+
+<section class="card"><h2>Issuer approvals</h2><p>Connect GemWallet to the issuer account. These settings are separate approvals and are shown separately in proof.</p>
+<div class="actions"><button class="btn primary" id="default-ripple" disabled>1A • Enable Default Ripple</button><button class="btn primary" id="no-freeze" disabled>1B • Permanently Enable No Freeze</button><button class="btn secondary" id="allow-escrow" disabled>Optional • Allow Token Escrow</button></div>
+<div class="switch-note">No Freeze is an issuer-control choice. It is <b>not</b> proof of fixed supply by itself. Token escrow stays feature-gated until XRPL reports the required amendment available.</div></section>
+
 <section class="card"><h2>Hot-wallet trust line</h2><p>Switch GemWallet to the hot wallet entered above, reconnect, then approve the trust line.</p><div class="actions"><button class="btn primary" id="trust" disabled>2 • Create Trust Line</button></div></section>
-<section class="card"><h2>Issue supply</h2><p>Switch GemWallet back to the issuer, reconnect, then issue the configured supply to the hot wallet.</p><div class="actions"><button class="btn primary" id="issue" disabled>3 • Issue Token Supply</button></div></section>
-<section class="card"><h2>Create XRPL AMM</h2><p>Switch GemWallet to the hot wallet, reconnect, then create the Token/XRP AMM with the configured launch liquidity. AMM creation has a higher XRPL transaction cost than normal transactions.</p><div class="actions"><button class="btn primary" id="amm" disabled>4 • Create Token/XRP AMM</button></div><div class="status" id="proof">No XRPL launch proof yet.</div></section>
-<section class="card"><h2>Mainnet gate</h2><p>This first executable adapter is Testnet-only. Mainnet will use the same native transaction sequence after issuer/hot-wallet governance, Worldz fee-routing policy, public manifest and accounting/legal gates are approved. No secret keys belong in WorldzLaunchPad.</p></section>
-</main><footer><div><b>XRPWorldz Mint & Launch™</b> • WorldzLaunchPad™</div><p>XRPL-native trust-line token + DEX/AMM architecture.</p></footer>
-<script type="module" src="/xrpl/app.js?v=20260922-xrpl-v1"></script></body></html>
+
+<section class="card"><h2>Issue supply</h2><p>Switch GemWallet back to the issuer, reconnect, then issue the configured amount to the hot wallet. Worldz labels this <b>intended supply</b> until issuer control is separately proven immutable.</p><div class="actions"><button class="btn primary" id="issue" disabled>3 • Issue Token Supply</button></div></section>
+
+<section class="card" id="amm-card"><h2>Native Token/XRP AMM</h2>
+<div class="form"><label>AMM token amount<input id="token-liquidity" inputmode="decimal" value="5000000"></label><label>AMM XRP amount<input id="xrp-liquidity" inputmode="decimal" placeholder="e.g. 100"></label><label>AMM trading fee %<input id="amm-fee" type="number" min="0" max="1" step=".001" value=".5"></label><label>Implied XRP per token<input id="amm-price" readonly></label></div>
+<p class="micro">Worldz shows the AMM's implied starting ratio. Liquidity existence is not the same as issuer immutability or LP-style lock proof.</p>
+<div class="actions"><button class="btn primary" id="amm" disabled>4A • Create Token/XRP AMM</button></div></section>
+
+<section class="card" id="clob-card"><h2>Native XRPL order-book seed</h2>
+<div class="form"><label>Token amount offered<input id="clob-token" inputmode="decimal" value="1000000"></label><label>Target XRP per token<input id="clob-price" inputmode="decimal" placeholder="e.g. 0.00002"></label><label>Total XRP requested<input id="clob-total" readonly></label><label>Hybrid divergence<input id="price-divergence" readonly></label></div>
+<p class="micro">This creates a native <b>OfferCreate</b> ask from the hot wallet. In Hybrid mode Worldz blocks a grossly misaligned seed price before signing.</p>
+<div class="actions"><button class="btn primary" id="offer" disabled>4B • Seed Native DEX Offer</button></div></section>
+
+<section class="card"><h2>WorldzProof™ — XRP native evidence</h2><p>Read-only evidence checks issuer flags, signer/delegate controls, trust line, obligations, amendments, native AMM and native CLOB separately.</p>
+<div class="proof-grid" id="native-proof"><div><small>Issuer</small><b>NOT READ</b></div><div><small>Supply control</small><b>NOT READ</b></div><div><small>AMM</small><b>NOT READ</b></div><div><small>CLOB</small><b>NOT READ</b></div></div>
+<div class="status" id="proof">No XRPL launch proof yet.</div></section>
+
+<section class="card mpt"><div class="kicker">MPT RESEARCH LANE</div><h2>Multi-Purpose Tokens — respected, not prematurely substituted.</h2><p>Worldz tracks MPT issuance and amendment support, but the current XRPWorldz trading launch route remains the trust-line token path until MPT market support is separately enabled and proven for the DEX/AMM experience we promise.</p><div class="status" id="mpt-status">Read XRPL Native Proof to check current amendment evidence.</div></section>
+
+<section class="card"><h2>Issuer control after launch</h2>
+<div class="choice-row"><div class="choice selected"><strong>Governed issuer</strong><small>Issuer remains operable. Worldz does not call this immutable fixed supply.</small></div><div class="choice"><strong>Native multisig issuer</strong><small>XRPL SignerList is the target governance route; full multisign orchestration remains separately gated.</small></div><div class="choice danger"><strong>Blackholed fixed supply</strong><small>Irreversible. Only after all issuer work is finished and proof shows no signer/delegate backdoor.</small></div></div>
+<div class="form" style="margin-top:12px"><label class="wide">Type <b>BLACKHOLE</b> to unlock irreversible Testnet controls<input class="confirm" id="blackhole-confirm" autocomplete="off" placeholder="BLACKHOLE"></label></div>
+<div class="actions"><button class="btn secondary" id="set-blackhole-key" disabled>5A • Set Blackhole RegularKey</button><button class="btn secondary" id="disable-master" disabled>5B • Disable Master Key</button></div>
+<div class="switch-note">Worldz only marks an issuer <b>blackhole verified</b> after live XRPL evidence shows master disabled, a known blackhole RegularKey, and no SignerList or Delegate objects. The button press itself is not proof.</div></section>
+
+<section class="card"><h2>Mainnet gate</h2><p>This adapter remains Testnet-only. Mainnet execution stays OFF until fee routing, issuer/hot-wallet governance, accounting/legal checks, chain-native proof and explicit release approval pass. No secret keys belong in WorldzLaunchPad.</p></section>
+</main><footer><div><b>XRPWorldz Mint & Launch™</b> • WorldzLaunchPad™</div><p>Native XRPL issuer + trust line + CLOB + AMM + proof architecture.</p></footer>
+<script type="module" src="/xrpl/app.js?v=20261002-xrpl-v2"></script></body></html>
