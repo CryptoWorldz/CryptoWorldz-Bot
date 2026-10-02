@@ -25,26 +25,23 @@ It does not add a new fee, change token supply allocations, or override explicit
 - Human approval required
 - No automatic broadcast until live 4-of-8 state and destination vault are verified
 
-## Confirmed signer public keys
+## Locked signer public keys
 
 1. JayJayTeamDev — `Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u`
 2. Stepper — `DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ`
 3. Savage — `2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn`
 4. SolMusic — `FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ`
 5. Mahammad — `6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok`
+6. Zephyr — `JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc`
+7. Troll George — `GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc`
+8. Annabel — `2fnb5CeAtvgUxz1R46e4DQJ8q99M5bn5oEgQMTYS1fa`
 
-## Remaining three signer slots
-
-Use three additional **verified Legend/Admin/Miracle Team wallets belonging to distinct consenting people**.
-
-Do not invent addresses.
-
-Owner-controlled legacy/spare wallets may be used for allocation custody, but should not be counted as independent team approvals. Multiple wallets controlled by one person weaken the effective multisig threshold.
+All eight public wallets are now recorded for the proposed **4-of-8** Worldz Miracle Team Treasury. Remedy is excluded.
 
 ## Activation gate
 
 The 30% Miracle Team route remains OFF until:
-1. all 8 signer public keys are recorded;
+1. the deployed Squads member set exactly matches the 8 recorded signer public keys;
 2. the Squads multisig and Vault #0 addresses are recorded;
 3. live chain state reads 8 members / threshold 4;
 4. the 70/30 treasury-bound revenue route passes simulation;
