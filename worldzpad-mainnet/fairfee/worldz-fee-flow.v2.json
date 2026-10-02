@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-FEE-FLOW-V2",
   "version": "2026-10-01-A",
-  "status": "LOCKED_FOR_NEW_WORLDZ_LAUNCH_INTAKES__MAINNET_EXECUTION_GATED",
+  "status": "SUPERSEDED_FOR_NEW_INTAKES__HISTORICAL_AUDIT_ONLY",
   "name": "Worldz Fee Flow™ V2",
   "basis": "ELIGIBLE_WORLDZ_ROUTED_SUPPORTED_TRADING_FEE_REVENUE_AFTER_EXTERNAL_PROTOCOL_NETWORK_AND_VENUE_DEDUCTIONS",
   "scopeRule": "Percentages are allocations of eligible collected fee revenue only. They are not token-supply allocations, wallet-transfer taxes, or promises of return.",
@@ -121,5 +121,7 @@
     "noFakeVolume": true,
     "noHistoricalDistributionWalletAutofunding": true,
     "failClosedRule": "If a route, mint, market, liquidity, treasury authority, price-impact or provider check fails, accrue the allocation rather than force execution."
-  }
+  },
+  "supersededBy": "worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json",
+  "supersededAt": "2026-10-02"
 }
