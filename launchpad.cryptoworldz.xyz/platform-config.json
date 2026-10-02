@@ -25,7 +25,7 @@
     "projectTradingFeeMinPercent": 0.5,
     "projectTradingFeeMaxPercent": 3,
     "stepPercent": 0.25,
-    "worldzFeeFlowPolicy": "worldzpad-mainnet/fairfee/worldz-fee-flow.v2.json",
+    "worldzFeeFlowPolicy": "worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json",
     "worldzLaunchPadContributionChoicesPercent": [
       3,
       5,
@@ -37,19 +37,15 @@
     "walletTransferTaxPercent": 0,
     "worldzLaunchPadShareOfTokenSupplyPercent": 0,
     "worldzLaunchPadShareOfInitialLiquidityPercent": 0,
-    "legacyCorePercent": 15,
     "legacyCoreTokenCount": 12,
-    "legacyCoreEqualPerTokenPercent": 1.25,
-    "coreFamilyMarketBuyPercent": 12,
-    "coreFamilyEqualPerTokenPercent": 3,
     "coreFamilySymbols": [
       "WLDZ",
       "RVIV",
       "PNEX",
       "MRCL"
     ],
-    "description": "Worldz Fee Flow V2 routes eligible collected supported trading-fee revenue through the creator-selected BUILD 3%, GROW 5% or BOOST 8% WorldzLaunchPad contribution profile. The same fee flow permanently reserves 15% for the closed 12-token Legacy Core and 12% for equal WLDZ/RVIV/PNEX/MRCL market-buy ledgers. It takes 0% token supply, 0% initial liquidity and 0% wallet-transfer tax.",
-    "publicPromise": "Choose 3%, 5% or 8% back to WorldzLaunchPad at launch. The choice is voluntary and locked into that launch snapshot. No hidden supply take or wallet-transfer tax.",
+    "description": "Worldz Fee Flow V3 lets creators keep 97%, 95% or 92% of eligible fee revenue after external venue/network deductions. The creator voluntarily contributes 3%, 5% or 8% to Worldz. Only that Worldz contribution is internally split across operations, treasury, LP growth, Legacy, Worldz-family buys, impact, builders, future infrastructure and referral.",
+    "publicPromise": "Creators keep 97% / 95% / 92% of eligible fee revenue. Worldz receives only the selected 3% / 5% / 8% contribution. 0% token-supply take, 0% initial-liquidity take and 0% wallet-transfer tax.",
     "projectTradingFeeDefaultPercent": 1,
     "publicFeeBuilderPolicy": "worldzpad-omnichain/chain-native-fee-builder.v1.json",
     "publicFeeRule": "1.00% Worldz default; 3.00% hard public cap; prefer 0.25% steps only where the selected chain/venue supports that setting truthfully. Native venue fees and network costs stay separate.",
@@ -88,7 +84,33 @@
       "bitcoin": {
         "projectTradingFeeSlider": false
       }
-    }
+    },
+    "feeFlowVersion": "WORLDZ-FEE-FLOW-V3",
+    "creatorRetentionByContribution": {
+      "3": 97,
+      "5": 95,
+      "8": 92
+    },
+    "worldzInternalSplitPercent": {
+      "operationsProductDevelopment": 20,
+      "treasury": 20,
+      "lpGrowth": 15,
+      "legacyCore": 10,
+      "worldzCoreFamilyMarketBuys": 10,
+      "impactCharity": 10,
+      "teamBuilderRewards": 5,
+      "futureLaunchInfrastructure": 5,
+      "launchReferrer": 5
+    },
+    "treasuryLane": {
+      "percentOfWorldzContribution": 20,
+      "worldzOperationsTreasuryPercent": 70,
+      "worldzMiracleTeamTreasuryPercent": 30,
+      "operationsGovernance": "3-of-5",
+      "miracleTeamGovernance": "4-of-7"
+    },
+    "legacyCorePercentOfWorldzContribution": 10,
+    "coreFamilyMarketBuyPercentOfWorldzContribution": 10
   },
   "launchEngines": [
     {
@@ -271,7 +293,7 @@
   "releaseGate": {
     "mainnetCreatorLaunch": [
       "verified Worldz Treasury Multisig vault address registered",
-      "selected 3% / 5% / 8% Worldz Fee Flow V2 route proven end-to-end",
+      "selected 3% / 5% / 8% Worldz Fee Flow V3 route proven end-to-end",
       "Worldz Safe Launch Standard v1 hard-limit proof",
       "atomic genesis distribution to tagged destinations",
       "100% creator-controlled LP lock proof for at least 365 days",
@@ -419,31 +441,38 @@
       "lpLockMinDays": 365
     },
     "feeRoutes": {
-      "model": "WORLDZ_FEE_FLOW_V2",
-      "exactLockedFixedPercent": {
-        "creatorDeveloper": 10,
-        "launchReferrer": 15,
-        "legacyCore": 15,
-        "worldzCoreFamilyMarketBuys": 12,
-        "lpGrowth": 10,
-        "launchedTokenBuybackAndBurn": 8,
-        "impactCharity": 5,
-        "teamBuilderRewards": 5,
-        "futureTokenDeploymentReserve": 5
+      "model": "WORLDZ_FEE_FLOW_V3",
+      "creatorRetentionByWorldzContribution": {
+        "3": 97,
+        "5": 95,
+        "8": 92
       },
-      "worldzLaunchPadAllowedPercent": [
+      "worldzContributionAllowedPercent": [
         3,
         5,
         8
       ],
-      "treasuryReserveByLaunchPadChoice": {
-        "3": 12,
-        "5": 10,
-        "8": 7
+      "worldzInternalSplitPercent": {
+        "operationsProductDevelopment": 20,
+        "treasury": 20,
+        "lpGrowth": 15,
+        "legacyCore": 10,
+        "worldzCoreFamilyMarketBuys": 10,
+        "impactCharity": 10,
+        "teamBuilderRewards": 5,
+        "futureLaunchInfrastructure": 5,
+        "launchReferrer": 5
       },
-      "totalPercent": 100,
+      "treasuryLane": {
+        "percentOfWorldzContribution": 20,
+        "worldzOperationsTreasuryPercent": 70,
+        "worldzMiracleTeamTreasuryPercent": 30,
+        "operationsGovernance": "3-of-5",
+        "miracleTeamGovernance": "4-of-7"
+      },
+      "totalWorldzInternalPercent": 100,
       "walletTransferTaxPercent": 0,
-      "rule": "The fixed lanes cannot be edited. Only the creator-selected WorldzLaunchPad contribution (3/5/8) changes; Treasury/Reserve receives the balancing 12/10/7."
+      "rule": "The internal routes total 100% of the Worldz contribution only. They do not consume the creator-retained 97/95/92%."
     },
     "mainnetEnforcement": {
       "atomicGenesisDistributionRequired": true,
@@ -461,7 +490,7 @@
   "publicLaunchRegistryEnabled": true,
   "publicPositioning": {
     "headline": "Public WorldzLaunchPad™",
-    "rule": "WorldzLaunchPad takes exactly 10% of the collected trading-fee revenue configured for a supported token launch route. The project keeps/routs the other 90%.",
+    "rule": "WorldzLaunchPad receives only the creator-selected 3% / 5% / 8% of eligible fee revenue. The creator retains 97% / 95% / 92%. External venue/network deductions remain separate and disclosed.",
     "privateProjectPlansPublished": false,
     "genesisTokensUsedAsPublicTestTokens": false
   },
@@ -1056,7 +1085,7 @@
     "name": "Worldz Revenue Engine™",
     "status": "PUBLIC_CONTROL_SURFACE_LIVE__MAINNET_EXECUTION_GATED",
     "publicPath": "/revenue/",
-    "principle": "Revenue must come from disclosed platform usage and actually collected supported fees. New launch intakes use Worldz Fee Flow V2 with the creator-selected 3% / 5% / 8% LaunchPad contribution. Simulation is never reported as live revenue.",
+    "principle": "Revenue must come from disclosed platform usage and actually collected supported fees. New launch intakes use Worldz Fee Flow V3: creators retain 97% / 95% / 92% of eligible fee revenue and voluntarily contribute 3% / 5% / 8% to Worldz. Simulation is never reported as live revenue.",
     "launchFee": {
       "enabled": false,
       "amount": null,
@@ -1065,15 +1094,36 @@
       "activationRule": "Set a public amount, fee asset, same-chain treasury destination and executable-adapter enforcement before enabling a production launch fee."
     },
     "supportedTradingFee": {
-      "feeFlowVersion": "WORLDZ-FEE-FLOW-V2",
+      "feeFlowVersion": "WORLDZ-FEE-FLOW-V3",
       "contributionChoicesPercent": [
         3,
         5,
         8
       ],
       "defaultContributionPercent": 5,
-      "legacyCorePercent": 15,
-      "worldzCoreFamilyMarketBuyPercent": 12,
+      "creatorRetentionByContributionPercent": {
+        "3": 97,
+        "5": 95,
+        "8": 92
+      },
+      "worldzInternalSplitPercent": {
+        "operationsProductDevelopment": 20,
+        "treasury": 20,
+        "lpGrowth": 15,
+        "legacyCore": 10,
+        "worldzCoreFamilyMarketBuys": 10,
+        "impactCharity": 10,
+        "teamBuilderRewards": 5,
+        "futureLaunchInfrastructure": 5,
+        "launchReferrer": 5
+      },
+      "treasuryLane": {
+        "percentOfWorldzContribution": 20,
+        "operationsPercent": 70,
+        "miracleTeamPercent": 30
+      },
+      "legacyCorePercentOfWorldzContribution": 10,
+      "worldzCoreFamilyMarketBuyPercentOfWorldzContribution": 10,
       "walletTransferTaxPercent": 0,
       "tokenSupplyTakePercent": 0,
       "initialLiquidityTakePercent": 0,
@@ -1176,7 +1226,7 @@
   "launchRecipes": {
     "version": "WORLDZ-LAUNCH-RECIPES-V1",
     "source": "worldzpad-omnichain/launch-recipes.v1.json",
-    "rule": "Presets never bypass Safe Launch limits or change fixed Fee Flow V2 lanes.",
+    "rule": "Presets never bypass Safe Launch limits or change Fee Flow V3 creator retention or Worldz-internal routing.",
     "recipes": [
       {
         "id": "CREATOR",

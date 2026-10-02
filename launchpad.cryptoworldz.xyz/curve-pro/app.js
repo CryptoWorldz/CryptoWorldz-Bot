@@ -12,7 +12,7 @@ const $=s=>document.querySelector(s);
 const connection=new Connection(clusterApiUrl('devnet'),'confirmed');
 const DBC_PROGRAM=new PublicKey('dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN');
 const REGISTER_URL='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register';
-let wallet=null,client=null,curveConfig=null,preflight=false,baseMint=null,configKey=null,poolId='',launchTx='',registered=false,feeFlowV2=false,v2Routes=null;
+let wallet=null,client=null,curveConfig=null,preflight=false,baseMint=null,configKey=null,poolId='',launchTx='',registered=false,feeFlowV3=false,v3Routes=null,worldzContribution=5,creatorRetention=95;
 
 function provider(){return [window.phantom&&window.phantom.solana,window.solflare,window.solana].filter(Boolean).find(p=>typeof p.connect==='function'&&typeof p.signTransaction==='function')||null;}
 function setStatus(id,text,type=''){const el=$(id);el.textContent=text;el.className='status'+(type?' '+type:'');}
@@ -171,7 +171,7 @@ async function register(){
   $('#register-btn').disabled=true;
   try{
     const v=values(),mint=baseMint.publicKey.toBase58(),issuedAt=new Date().toISOString();
-    const intent=await sha256(JSON.stringify({schema:'worldzlaunchpad.curve-pro.devnet.v2',mint,poolId,config:configKey.publicKey.toBase58(),fee:v.fee,feeFlow:feeFlowV2?'WORLDZ-FEE-FLOW-V2':'LEGACY-DBC-UNDERLAY',feeRoutes:feeFlowV2?v2Routes:{project:90,worldz:10},permanentLock:100}));
+    const intent=await sha256(JSON.stringify({schema:'worldzlaunchpad.curve-pro.devnet.v2',mint,poolId,config:configKey.publicKey.toBase58(),fee:v.fee,feeFlow:feeFlowV3?'WORLDZ-FEE-FLOW-V3':'LEGACY-DBC-UNDERLAY',feeRoutes:feeFlowV3?v3Routes:{project:90,worldz:10},permanentLock:100}));
     const message=['WORLDZLAUNCHPAD_REGISTER_V1','intent_hash='+intent,'mint='+mint,'wallet='+wallet.publicKey.toBase58(),'issued_at='+issuedAt].join('\n');
     const signed=await wallet.signMessage(new TextEncoder().encode(message),'utf8');
     const signature=await encodeSig(signed?.signature||signed);
@@ -179,7 +179,7 @@ async function register(){
       intent_hash:intent,mint,wallet:wallet.publicKey.toBase58(),issued_at:issuedAt,signature,
       environment:'devnet',network:'solana',engine:'curve-pro',quote_asset:'SOL',
       token_name:v.name,symbol:v.symbol,decimals:6,fixed_supply:String(v.supply),
-      project_fee_percent:v.fee,fee_flow_version:feeFlowV2?'WORLDZ-FEE-FLOW-V2':'LEGACY-DBC-UNDERLAY',launchpad_contribution_percent:feeFlowV2?(v2Routes?.worldzLaunchPad||null):null,fee_routes:feeFlowV2?v2Routes:{project:90,worldz:10},metadata:meta(),
+      project_fee_percent:v.fee,fee_flow_version:feeFlowV3?'WORLDZ-FEE-FLOW-V3':'LEGACY-DBC-UNDERLAY',launchpad_contribution_percent:feeFlowV3?worldzContribution:null,fee_routes:feeFlowV3?v3Routes:{project:90,worldz:10},metadata:meta(),
       metadata_uri:'https://launchpad.cryptoworldz.xyz/metadata.php?mint='+encodeURIComponent(mint),
       mint_tx_signature:launchTx,pool_id:poolId,lp_mint:null,pool_tx_signature:launchTx,
       vesting_config:{lockedTokenPercent:v.vestingPercent,cliffDays:v.cliffDays,durationMonths:v.vestingMonths,enforcedInDbcConfig:v.vestingPercent>0},
@@ -188,8 +188,8 @@ async function register(){
         meteoraDbcDevnet:true,dbcProgram:DBC_PROGRAM.toBase58(),dbcConfig:configKey.publicKey.toBase58(),
         migrationOption:'DAMM_V2',migrationQuoteThresholdSol:v.threshold,percentageSupplyOnMigration:v.migrationPercent,
         preGraduationTradingFeePercent:v.fee,creatorTradingFeePercent:90,worldzPartnerTradingFeePercent:10,
-        feeFlowV2LedgerSnapshot:feeFlowV2,feeFlowV2OnchainSettlement:false,
-        dbcUnderlayNote:'Current Devnet DBC partner/creator split is a market-route underlay test and is not proof of full Fee Flow V2 treasury settlement.',
+        feeFlowV3LedgerSnapshot:feeFlowV3,feeFlowV3OnchainSettlement:false,
+        dbcUnderlayNote:'Current Devnet DBC partner/creator split is a market-route underlay test and is not proof of full Fee Flow V3 settlement.',
         graduatedLiquidityPermanentLockPercent:100
       },
       stage:'locked'
@@ -221,25 +221,25 @@ function loadQuery(){
   if(q.get('supply'))$('#supply').value=q.get('supply');
   if(q.get('description'))$('#description').value=q.get('description');
   if(q.get('fee'))$('#fee').value=q.get('fee');
-  feeFlowV2=q.get('fee_v2')==='1';
-  if(feeFlowV2){
-    v2Routes={
-      creatorDeveloper:Number(q.get('v2_creator')),
-      launchReferrer:Number(q.get('v2_referrer')),
-      legacyCore:Number(q.get('v2_legacy')),
-      worldzCoreFamilyMarketBuys:Number(q.get('v2_core_buys')),
-      lpGrowth:Number(q.get('v2_lp')),
-      launchedTokenBuybackAndBurn:Number(q.get('v2_buyburn')),
-      impactCharity:Number(q.get('v2_impact')),
-      teamBuilderRewards:Number(q.get('v2_team')),
-      futureTokenDeploymentReserve:Number(q.get('v2_future')),
-      worldzLaunchPad:Number(q.get('launchpad_contribution')),
-      treasuryReserve:Number(q.get('v2_treasury'))
+  feeFlowV3=q.get('fee_v3')==='1';
+  if(feeFlowV3){
+    worldzContribution=Number(q.get('launchpad_contribution'))||5;
+    creatorRetention=Number(q.get('creator_retention'))||100-worldzContribution;
+    v3Routes={
+      operationsProductDevelopment:Number(q.get('v3_ops')),
+      treasury:Number(q.get('v3_treasury')),
+      lpGrowth:Number(q.get('v3_lp')),
+      legacyCore:Number(q.get('v3_legacy')),
+      worldzCoreFamilyMarketBuys:Number(q.get('v3_core_buys')),
+      impactCharity:Number(q.get('v3_impact')),
+      teamBuilderRewards:Number(q.get('v3_team')),
+      futureLaunchInfrastructure:Number(q.get('v3_future')),
+      launchReferrer:Number(q.get('v3_referrer'))
     };
   }
   const notes=[];
   if(q.get('intent'))notes.push('Manifest: '+q.get('intent').slice(0,16)+'…');
-  if(feeFlowV2)notes.push('Fee Flow V2 snapshot: LaunchPad '+(v2Routes?.worldzLaunchPad||'?')+'% • Legacy 15% • WLDZ/RVIV/PNEX/MRCL 12% • on-chain V2 settlement remains gated');
+  if(feeFlowV3)notes.push('Fee Flow V3 snapshot: Creator keeps '+creatorRetention+'% • Worldz '+worldzContribution+'% • internal Treasury 20% → 70% Operations / 30% Miracle Team • on-chain V3 settlement remains gated');
   if(q.get('decimals')&&q.get('decimals')!=='6')notes.push('Curve Pro Devnet beta currently executes 6-decimal DBC launches.');
   if(q.get('quote')&&q.get('quote')!=='SOL')notes.push('Curve Pro Devnet beta currently executes SOL quote only.');
   if(notes.length)setStatus('#status','MANIFEST LOADED\n'+notes.join('\n'),'warn');

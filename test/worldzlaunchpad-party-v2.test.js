@@ -9,27 +9,32 @@ const root=path.resolve(__dirname,"..");
 const read=(p)=>fs.readFileSync(path.join(root,p),"utf8");
 const json=(p)=>JSON.parse(read(p));
 
-test("WorldzLaunchPad new-launch economics are Fee Flow V2",()=>{
+test("WorldzLaunchPad new-launch economics are Fee Flow V3",()=>{
   const p=json("launchpad.cryptoworldz.xyz/platform-config.json");
+  assert.equal(p.feePolicy.feeFlowVersion,"WORLDZ-FEE-FLOW-V3");
   assert.deepEqual(p.feePolicy.worldzLaunchPadContributionChoicesPercent,[3,5,8]);
   assert.equal(p.feePolicy.worldzLaunchPadContributionDefaultPercent,5);
-  assert.equal(p.feePolicy.legacyCorePercent,15);
+  assert.deepEqual(p.feePolicy.creatorRetentionByContribution,{"3":97,"5":95,"8":92});
+  assert.equal(p.feePolicy.legacyCorePercentOfWorldzContribution,10);
   assert.equal(p.feePolicy.legacyCoreTokenCount,12);
-  assert.equal(p.feePolicy.legacyCoreEqualPerTokenPercent,1.25);
-  assert.equal(p.feePolicy.coreFamilyMarketBuyPercent,12);
+  assert.equal(p.feePolicy.coreFamilyMarketBuyPercentOfWorldzContribution,10);
   assert.deepEqual(p.feePolicy.coreFamilySymbols,["WLDZ","RVIV","PNEX","MRCL"]);
+  assert.equal(p.feePolicy.worldzInternalSplitPercent.operationsProductDevelopment,20);
+  assert.equal(p.feePolicy.worldzInternalSplitPercent.treasury,20);
+  assert.equal(p.feePolicy.treasuryLane.worldzOperationsTreasuryPercent,70);
+  assert.equal(p.feePolicy.treasuryLane.worldzMiracleTeamTreasuryPercent,30);
   assert.equal(p.feePolicy.worldzLaunchPadShareOfTokenSupplyPercent,0);
   assert.equal(p.feePolicy.worldzLaunchPadShareOfInitialLiquidityPercent,0);
   assert.equal(p.feePolicy.walletTransferTaxPercent,0);
 });
 
-test("public LaunchPad builder uses locked V2 choice and no stale 90/10 public copy",()=>{
+test("public LaunchPad builder uses locked V3 choice and no stale 90/10 public copy",()=>{
   const home=read("launchpad.cryptoworldz.xyz/index.html");
   const app=read("launchpad.cryptoworldz.xyz/app.js");
   assert.match(home,/3% • 5% • 8%/);
   assert.match(home,/Legacy Core/);
   assert.match(home,/WLDZ • RVIV • PNEX • MRCL/);
-  assert.match(app,/WORLDZ-FEE-FLOW-V2/);
+  assert.match(app,/WORLDZ-FEE-FLOW-V3/);
   assert.match(app,/selectedLaunchPadContribution/);
   assert.doesNotMatch(home,/10% Worldz • 90% project/);
   assert.doesNotMatch(home,/90% remains for your project routing/);
@@ -100,7 +105,7 @@ test("Command Centre exposes Launch Station and Community without fund authority
   assert.match(experience,/Launch Token/);
   assert.match(experience,/Launch Community/);
   assert.match(experience,/launch-station/);
-  assert.match(router,/WORLDZ-FEE-FLOW-V2/);
+  assert.match(router,/WORLDZ-FEE-FLOW-V3/);
   assert.match(router,/pumpSquadExternalRail: "TheChaos"/);
   assert.match(suite,/they do not gain authority to move launch funds/);
 });

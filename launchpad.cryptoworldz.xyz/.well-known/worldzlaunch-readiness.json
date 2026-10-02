@@ -8,16 +8,35 @@
     "migrationPrepared": true
   },
   "economics": {
-    "policy": "WORLDZ-FEE-FLOW-V2",
-    "launchPadChoicesPercent": [
+    "policy": "WORLDZ-FEE-FLOW-V3",
+    "worldzContributionChoicesPercent": [
       3,
       5,
       8
     ],
-    "defaultPercent": 5,
-    "legacyCorePercent": 15,
-    "legacyTokenCount": 12,
-    "coreFamilyBuyPercent": 12
+    "defaultWorldzContributionPercent": 5,
+    "creatorRetentionByContributionPercent": {
+      "3": 97,
+      "5": 95,
+      "8": 92
+    },
+    "worldzInternalSplitPercent": {
+      "operationsProductDevelopment": 20,
+      "treasury": 20,
+      "lpGrowth": 15,
+      "legacyCore": 10,
+      "worldzCoreFamilyMarketBuys": 10,
+      "impactCharity": 10,
+      "teamBuilderRewards": 5,
+      "futureLaunchInfrastructure": 5,
+      "launchReferrer": 5
+    },
+    "treasuryLane": {
+      "operationsPercent": 70,
+      "miracleTeamPercent": 30,
+      "operationsGovernance": "3-of-5",
+      "miracleTeamGovernance": "4-of-7"
+    }
   },
   "launchPaths": {
     "launchStation": {
@@ -34,7 +53,7 @@
     },
     "flashDevnet": {
       "path": "/devnet/",
-      "status": "DEVNET_EXECUTABLE__V2_SNAPSHOT_READY"
+      "status": "DEVNET_EXECUTABLE__V3_SNAPSHOT_READY"
     },
     "curveDevnet": {
       "path": "/curve/",
@@ -42,7 +61,7 @@
     },
     "curveProDevnet": {
       "path": "/curve-pro/",
-      "status": "DEVNET_EXECUTABLE__V2_LEDGER_SNAPSHOT_READY__V2_ONCHAIN_SETTLEMENT_NOT_YET_PROVEN"
+      "status": "DEVNET_EXECUTABLE__V3_LEDGER_SNAPSHOT_READY__V3_ONCHAIN_SETTLEMENT_NOT_YET_PROVEN"
     },
     "solanaMainnetMarket": {
       "path": "/mainnet/",
@@ -126,7 +145,7 @@
     }
   },
   "mainnetBlockers": [
-    "Fee Flow V2 chain-native settlement router proof",
+    "Fee Flow V3 chain-native settlement router proof",
     "approved Treasury Multisig execution path",
     "chain/venue security and simulation proof",
     "LP lock and vesting enforcement proof where required",

@@ -1,11 +1,11 @@
 {
   "version": "WORLDZ-OMNICHAIN-FEE-POLICY-2026-10-01-B",
   "name": "MagicFeeNumber™ Omnichain Policy",
-  "status": "PRIVATE_BUILD__PER_CHAIN_PROOF_REQUIRED",
+  "status": "HISTORICAL_MAGICFEE_ADAPTER_PROFILE__NOT_CANONICAL_NEW_LAUNCH_ECONOMICS",
   "targetGrossTraderFeeBps": 75,
   "targetGrossTraderFeePercent": 0.75,
   "dynamicFeeDefault": false,
-  "rule": "75 bps is the target gross trading fee only where the selected venue can implement and disclose it accurately. Network gas and external venue deductions must never be hidden.",
+  "rule": "This file preserves the historical MagicFeeNumber 75-bps adapter profile for routes that explicitly depend on it. It is not the economics for new WorldzLaunchPad intakes. New intakes use Fee Flow V3. Where this adapter is used, network gas and external venue deductions must never be hidden.",
   "worldzControlledSplitBps": {
     "creator": 5100,
     "referrer": 1700,
@@ -89,5 +89,6 @@
     "wash_volume",
     "unproven_cross_chain_bridge",
     "mainnet_fee_claim_without_receipt_reconciliation"
-  ]
+  ],
+  "canonicalNewLaunchPolicy": "worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json"
 }

@@ -123,10 +123,18 @@ if registry["chains"]["xrpl"]["feeCapability"] != "CHAIN_NATIVE_MARKET_RULES__NO
     raise SystemExit("XRPL must not emulate MagicFee with a hidden transfer tax")
 
 # Best-of-best product features must not silently disappear.
-if product["creatorEconomics"]["defaultWorldzControlledSharePercent"] != 51:
-    raise SystemExit("creator product share drifted")
-if product["referralEconomics"]["defaultWorldzControlledSharePercent"] != 17:
-    raise SystemExit("referrer product share drifted")
+if product["creatorEconomics"]["worldzContributionChoicesPercent"] != [3,5,8]:
+    raise SystemExit("creator Worldz contribution choices drifted")
+if product["creatorEconomics"]["creatorRetentionByWorldzContributionPercent"] != {"3":97,"5":95,"8":92}:
+    raise SystemExit("creator retention contract drifted")
+if product["creatorEconomics"]["defaultCreatorRetentionPercent"] != 95:
+    raise SystemExit("creator default retention drifted")
+if product["referralEconomics"]["sharePercentOfWorldzContribution"] != 5:
+    raise SystemExit("V3 referrer share drifted")
+if product["creatorEconomics"]["legacyMagicFeeCreatorSharePercent"] != 51:
+    raise SystemExit("legacy creator profile drifted")
+if product["referralEconomics"]["legacyMagicFeeReferrerSharePercent"] != 17:
+    raise SystemExit("legacy referrer profile drifted")
 for flag_path, value in (
     ("launchpad-to-launchpad", product["referralEconomics"]["launchpadToLaunchpad"]),
     ("white-label", product["builderPlatform"]["whiteLabel"]),

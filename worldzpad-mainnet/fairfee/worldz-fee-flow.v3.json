@@ -1,0 +1,105 @@
+{
+  "schema": "WORLDZ-FEE-FLOW-V3",
+  "version": "2026-10-02-A",
+  "status": "LOCKED_FOR_NEW_WORLDZ_LAUNCH_INTAKES__MAINNET_EXECUTION_GATED",
+  "name": "Worldz Fee Flow™ V3",
+  "basis": "ELIGIBLE_CREATOR_FEE_REVENUE_AFTER_EXTERNAL_PROTOCOL_NETWORK_AND_VENUE_DEDUCTIONS",
+  "scopeRule": "The creator-selected Worldz contribution is 3%, 5% or 8% of eligible creator fee revenue. The creator retains the remaining 97%, 95% or 92%. The Worldz internal split applies only to the Worldz contribution, never to the creator-retained portion.",
+  "creatorChoice": {
+    "profiles": {
+      "BUILD_3": {
+        "worldzContributionPercent": 3,
+        "creatorRetentionPercent": 97,
+        "label": "BUILD"
+      },
+      "GROW_5": {
+        "worldzContributionPercent": 5,
+        "creatorRetentionPercent": 95,
+        "label": "GROW",
+        "default": true
+      },
+      "BOOST_8": {
+        "worldzContributionPercent": 8,
+        "creatorRetentionPercent": 92,
+        "label": "BOOST"
+      }
+    },
+    "allowedWorldzContributionPercent": [
+      3,
+      5,
+      8
+    ],
+    "defaultWorldzContributionPercent": 5,
+    "voluntary": true,
+    "snapshottedAtLaunch": true,
+    "changeAfterLaunchRequiresNewSignedRouteOrMigration": true
+  },
+  "worldzInternalSplitPercent": {
+    "operationsProductDevelopment": 20,
+    "treasury": 20,
+    "lpGrowth": 15,
+    "legacyCore": 10,
+    "worldzCoreFamilyMarketBuys": 10,
+    "impactCharity": 10,
+    "teamBuilderRewards": 5,
+    "futureLaunchInfrastructure": 5,
+    "launchReferrer": 5
+  },
+  "treasuryLane": {
+    "percentOfWorldzContribution": 20,
+    "split": {
+      "worldzOperationsTreasuryPercent": 70,
+      "worldzMiracleTeamTreasuryPercent": 30
+    },
+    "effectivePercentOfWorldzContribution": {
+      "worldzOperationsTreasury": 14,
+      "worldzMiracleTeamTreasury": 6
+    },
+    "governance": {
+      "worldzOperationsTreasury": "3-of-5",
+      "worldzMiracleTeamTreasury": "4-of-7"
+    },
+    "rule": "The 70/30 split is inside the Treasury lane only. It is not 30% of creator revenue, not 30% of trader volume, and not 30% of the full Worldz contribution."
+  },
+  "miracleSeparation": {
+    "mrclMiracleTeamTokenVaultPercent": 20,
+    "worldzMiracleTeamTreasuryRevenueShareOfTreasuryLanePercent": 30,
+    "accountingBucketsSeparate": true,
+    "rule": "The MRCL 20% Miracle Team token vault is a token-supply allocation. The 30% Miracle Team Treasury share is revenue routing inside the Worldz Treasury lane. They are never combined or represented as the same percentage."
+  },
+  "legacyCore": {
+    "percentOfWorldzContribution": 10,
+    "closedTokenCount": 12,
+    "equalShareWithinLegacyLane": true,
+    "noSecondLegacyDeduction": true
+  },
+  "worldzCoreFamilyMarketBuys": {
+    "percentOfWorldzContribution": 10,
+    "symbols": [
+      "WLDZ",
+      "RVIV",
+      "PNEX",
+      "MRCL"
+    ],
+    "equalShareWithinLanePercent": 25,
+    "effectivePercentOfWorldzContributionEach": 2.5,
+    "accrueUntilExecutableRoute": true
+  },
+  "safety": {
+    "tokenSupplyTakePercent": 0,
+    "initialLiquidityTakePercent": 0,
+    "walletTransferTaxPercent": 0,
+    "automaticMainnetRoutingEnabled": false,
+    "automaticMarketBuysEnabled": false,
+    "automaticBurnEnabled": false,
+    "treasuryMultisigRequired": true,
+    "simulateBeforeSign": true,
+    "worldzProofRequired": true,
+    "failClosed": true
+  },
+  "legacyPolicy": {
+    "worldzFeeFlowV2": "SUPERSEDED_FOR_NEW_INTAKES__HISTORICAL_AUDIT_ONLY",
+    "magicFeeNumber75Bps": "HISTORICAL_OR_ADAPTER_SPECIFIC",
+    "legacy90_10Adapter": "TEST_ADAPTER_ONLY__NOT_NEW_LAUNCH_ECONOMICS"
+  }
+}

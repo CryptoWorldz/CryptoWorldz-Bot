@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-LAUNCH-INHERITANCE-V1",
-  "version": "2026-10-01-C",
+  "version": "2026-10-02-D",
   "brand": "WorldzLaunchInheritance™",
   "status": "CODE_BUILT__PER_CHAIN_EXECUTION_GATED",
   "purpose": "Make every WorldzLaunchPad launch inherit the same identity, wallet, proof, safety, FullScope and post-launch observability standards without pretending an unproven chain or venue is mainnet-ready.",
@@ -112,7 +112,7 @@
   "economicsProfiles": {
     "worldzMagic75": {
       "source": "worldzpad-omnichain/fee-policy.v1.json",
-      "selection": "LEGACY_ADAPTER_PROFILE__NOT_DEFAULT_FOR_NEW_WORLDZ_FEE_FLOW_V2_INTAKES",
+      "selection": "LEGACY_ADAPTER_PROFILE__NOT_DEFAULT_FOR_NEW_WORLDZ_FEE_FLOW_V3_INTAKES",
       "targetGrossTraderFeeBps": 75,
       "dynamicFeeDefault": false,
       "splitPercent": {
@@ -127,7 +127,7 @@
     },
     "publicCreatorConfigurable": {
       "source": "launchpad.cryptoworldz.xyz/platform-config.json",
-      "selection": "WORLDZ_FEE_FLOW_V2",
+      "selection": "WORLDZ_FEE_FLOW_V3",
       "projectTradingFeeMinPercent": 0.5,
       "projectTradingFeeMaxPercent": 3,
       "worldzLaunchPadContributionChoicesPercent": [
@@ -136,13 +136,16 @@
         8
       ],
       "worldzLaunchPadContributionDefaultPercent": 5,
-      "legacyCorePercent": 15,
-      "worldzCoreFamilyMarketBuyPercent": 12,
+      "creatorRetentionByContributionPercent": {
+        "3": 97,
+        "5": 95,
+        "8": 92
+      },
       "walletTransferTaxPercent": 0
     },
     "worldzFeeFlowV2": {
       "source": "worldzpad-mainnet/fairfee/worldz-fee-flow.v2.json",
-      "selection": "DEFAULT_FOR_NEW_WORLDZ_LAUNCH_INTAKES__EXECUTION_REQUIRES_CHAIN_NATIVE_PROOF",
+      "selection": "HISTORICAL_AUDIT_ONLY__SUPERSEDED_BY_V3",
       "projectTradingFeeMinPercent": 0.5,
       "projectTradingFeeMaxPercent": 3,
       "launchPadContributionChoicesPercent": [
@@ -166,6 +169,44 @@
         "3": 12,
         "5": 10,
         "8": 7
+      },
+      "walletTransferTaxPercent": 0,
+      "tokenSupplyTakePercent": 0,
+      "initialLiquidityTakePercent": 0
+    },
+    "worldzFeeFlowV3": {
+      "source": "worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json",
+      "selection": "DEFAULT_FOR_NEW_WORLDZ_LAUNCH_INTAKES__EXECUTION_REQUIRES_CHAIN_NATIVE_PROOF",
+      "projectTradingFeeMinPercent": 0.5,
+      "projectTradingFeeMaxPercent": 3,
+      "worldzContributionChoicesPercent": [
+        3,
+        5,
+        8
+      ],
+      "worldzContributionDefaultPercent": 5,
+      "creatorRetentionByContributionPercent": {
+        "3": 97,
+        "5": 95,
+        "8": 92
+      },
+      "worldzInternalSplitPercent": {
+        "operationsProductDevelopment": 20,
+        "treasury": 20,
+        "lpGrowth": 15,
+        "legacyCore": 10,
+        "worldzCoreFamilyMarketBuys": 10,
+        "impactCharity": 10,
+        "teamBuilderRewards": 5,
+        "futureLaunchInfrastructure": 5,
+        "launchReferrer": 5
+      },
+      "treasuryLane": {
+        "percentOfWorldzContribution": 20,
+        "operationsPercent": 70,
+        "miracleTeamPercent": 30,
+        "operationsGovernance": "3-of-5",
+        "miracleTeamGovernance": "4-of-7"
       },
       "walletTransferTaxPercent": 0,
       "tokenSupplyTakePercent": 0,
@@ -292,8 +333,9 @@
     "explicitHumanApprovalRequired": true,
     "noAutomaticVendorPayment": true,
     "noAutomaticMainnetBroadcast": true,
-    "feeFlowV2MainnetRequiresRouteProof": true
+    "feeFlowV2MainnetRequiresRouteProof": false,
+    "feeFlowV3MainnetRequiresRouteProof": true
   },
-  "futureLaunchRule": "A new LIVE token cannot silently bypass inheritance or Worldz Fee Flow V2. CI must fail when canonical identity, fee-flow choice, provider handoff where applicable, chain/environment pairing, proof schema, FullScope registration contract or public deployment package drifts.",
+  "futureLaunchRule": "A new LIVE token cannot silently bypass inheritance or Worldz Fee Flow V3. CI must fail when canonical identity, creator-retention choice, Worldz-internal split, provider handoff where applicable, chain/environment pairing, proof schema, FullScope registration contract or public deployment package drifts.",
   "source": "https://launchpad.cryptoworldz.xyz/inheritance/contract.json"
 }

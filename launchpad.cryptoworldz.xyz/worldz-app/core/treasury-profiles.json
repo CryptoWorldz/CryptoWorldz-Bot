@@ -3,13 +3,12 @@
   "profiles": [
     {
       "id": "miracle-church",
-      "label": "Miracle Church Treasury",
+      "label": "Worldz Miracle Team Treasury",
       "token": "MRCL",
-      "allocationPercent": 20,
       "governance": {
         "threshold": 4,
-        "signers": 10,
-        "display": "4-of-10"
+        "signers": 7,
+        "display": "4-of-7"
       },
       "custody": {
         "solana": "Squads",
@@ -17,8 +16,19 @@
         "xrpl": "SignerList",
         "sui": "Native weighted multisig"
       },
-      "state": "NOT_DEPLOYED",
-      "mainnetExecution": false
+      "state": "FUNDING_PENDING_NOT_DEPLOYED",
+      "mainnetExecution": false,
+      "revenueRouting": {
+        "source": "WORLDZ_FEE_FLOW_V3_TREASURY_LANE",
+        "shareOfTreasuryLanePercent": 30,
+        "shareOfWorldzContributionPercent": 6,
+        "automaticRoutingEnabled": false
+      },
+      "mrclTokenVault": {
+        "allocationPercent": 20,
+        "accountingSeparateFromRevenueRouting": true,
+        "note": "20% MRCL token allocation is not the same bucket as the 30% share of the Worldz Treasury revenue lane."
+      }
     },
     {
       "id": "worldz-operations",
@@ -52,5 +62,5 @@
       "note": "No separate Worldz Reserve Treasury is currently required. Reserve sweeps are disabled; funds remain in the Operations Treasury until a future explicit decision."
     }
   ],
-  "rule": "Worldz Operations uses permanent 3-of-5 governance. Reserve is disabled/not deployed. Treasury membership and authority never silently inherit between profiles."
+  "rule": "Worldz Operations uses permanent 3-of-5 governance. Worldz Miracle Team Treasury is 4-of-7 and receives 30% of the Fee Flow V3 Treasury lane only when routing is activated. MRCL's 20% Miracle Team token vault remains a separate token-supply bucket. Reserve is disabled/not deployed."
 }

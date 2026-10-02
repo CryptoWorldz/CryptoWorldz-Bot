@@ -19,6 +19,21 @@ const ENGINE_POOL_PROGRAMS: Record<string,string> = {
   curve: "DRay6fNdQ5J82H7xV6uq2aV3mNrUZ1J4PgSKsWgptcm6",
   "curve-pro": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN"
 };
+const FEE_FLOW_V3 = "WORLDZ-FEE-FLOW-V3";
+const V3_INTERNAL_ROUTES: Record<string,number> = {
+  operationsProductDevelopment: 20,
+  treasury: 20,
+  lpGrowth: 15,
+  legacyCore: 10,
+  worldzCoreFamilyMarketBuys: 10,
+  impactCharity: 10,
+  teamBuilderRewards: 5,
+  futureLaunchInfrastructure: 5,
+  launchReferrer: 5
+};
+const V3_LAUNCHPAD_CHOICES = [3, 5, 8] as const;
+const V3_CREATOR_RETENTION_BY_CHOICE: Record<number,number> = { 3: 97, 5: 95, 8: 92 };
+const V3_ROUTE_KEYS = new Set(Object.keys(V3_INTERNAL_ROUTES));
 const FEE_FLOW_V2 = "WORLDZ-FEE-FLOW-V2";
 const V2_FIXED_ROUTES: Record<string,number> = {
   creatorDeveloper: 10,
@@ -146,14 +161,15 @@ Deno.serve(async (req: Request) => {
     return json({
       ok: true,
       launches: data ?? [],
-      standard: "WORLDZ-LAUNCH-REGISTER-V2",
-      feeFlowVersion: FEE_FLOW_V2,
-      worldzLaunchPadContributionChoicesPercent: [...V2_LAUNCHPAD_CHOICES],
+      standard: "WORLDZ-LAUNCH-REGISTER-V3",
+      feeFlowVersion: FEE_FLOW_V3,
+      worldzLaunchPadContributionChoicesPercent: [...V3_LAUNCHPAD_CHOICES],
       worldzLaunchPadContributionDefaultPercent: 5,
-      fixedFeeDistributionPercent: V2_FIXED_ROUTES,
-      treasuryReserveByLaunchPadChoice: { "3": 12, "5": 10, "8": 7 },
-      legacyCore: { totalPercent: 15, tokenCount: 12, equalPercentEach: 1.25, closed: true },
-      worldzCoreFamily: { totalPercent: 12, equalPercentEach: 3, symbols: ["WLDZ","RVIV","PNEX","MRCL"] },
+      creatorRetentionByContributionPercent: { "3": 97, "5": 95, "8": 92 },
+      worldzInternalDistributionPercent: V3_INTERNAL_ROUTES,
+      treasuryLane: { percentOfWorldzContribution: 20, operationsPercent: 70, miracleTeamPercent: 30, operationsGovernance: "3-of-5", miracleTeamGovernance: "4-of-7" },
+      legacyCore: { percentOfWorldzContribution: 10, tokenCount: 12, closed: true },
+      worldzCoreFamily: { percentOfWorldzContribution: 10, equalShareWithinLanePercent: 25, symbols: ["WLDZ","RVIV","PNEX","MRCL"] },
       tokenSupplyTakePercent: 0,
       initialLiquidityTakePercent: 0,
       walletTransferTaxPercent: 0,
@@ -196,6 +212,7 @@ Deno.serve(async (req: Request) => {
 
   const isMainnet = environment === "mainnet-beta";
   const feeFlowVersion = String(fee_flow_version || "");
+  const isV3 = feeFlowVersion === FEE_FLOW_V3;
   const isV2 = feeFlowVersion === FEE_FLOW_V2;
   let mainnetGate: any = null;
   if (isMainnet) {
@@ -209,7 +226,8 @@ Deno.serve(async (req: Request) => {
     if (gate.public_mainnet_enabled !== true) return json({ ok: false, error: "public_mainnet_gate_closed" }, 403);
     if (!/^[1-9A-HJ-NP-Za-km-z]{32,64}$/.test(String(gate.treasury_vault_address || ""))) return json({ ok: false, error: "treasury_multisig_not_registered" }, 503);
     if (engine !== "curve-pro") return json({ ok: false, error: "mainnet_engine_not_enabled" }, 400);
-    if (isV2) return json({ ok: false, error: "fee_flow_v2_mainnet_settlement_not_proven" }, 503);
+    if (isV3) return json({ ok: false, error: "fee_flow_v3_mainnet_settlement_not_proven" }, 503);
+    if (isV2) return json({ ok: false, error: "fee_flow_v2_historical_mainnet_settlement_not_proven" }, 503);
     if (Number(gate.platform_fee_share_percent) !== 10 || Number(gate.project_fee_share_percent) !== 90) return json({ ok: false, error: "legacy_mainnet_fee_share_contract_mismatch" }, 500);
   }
   const rpcUrl = isMainnet ? "https://api.mainnet-beta.solana.com" : "https://api.devnet.solana.com";
@@ -250,7 +268,27 @@ Deno.serve(async (req: Request) => {
   if (Math.abs(routeTotal - 100) > 0.001) return json({ ok: false, error: "fee_routes_must_total_100" }, 400);
 
   let launchPadContribution: number | null = null;
-  if (isV2) {
+  let creatorRetention: number | null = null;
+  if (isV3) {
+    const keys = Object.keys(routes);
+    if (keys.length !== V3_ROUTE_KEYS.size || keys.some((key) => !V3_ROUTE_KEYS.has(key))) {
+      return json({ ok: false, error: "fee_flow_v3_route_keys_mismatch" }, 400);
+    }
+    for (const [key, expected] of Object.entries(V3_INTERNAL_ROUTES)) {
+      if (Number(routes[key]) !== expected) return json({ ok: false, error: "fee_flow_v3_internal_route_drift", route: key, expected }, 400);
+    }
+    launchPadContribution = Number(launchpad_contribution_percent);
+    if (!V3_LAUNCHPAD_CHOICES.includes(launchPadContribution as 3|5|8)) {
+      return json({ ok: false, error: "fee_flow_v3_worldz_contribution_invalid" }, 400);
+    }
+    creatorRetention = V3_CREATOR_RETENTION_BY_CHOICE[launchPadContribution];
+    if (creatorRetention + launchPadContribution !== 100) {
+      return json({ ok: false, error: "fee_flow_v3_creator_retention_invariant_failed" }, 500);
+    }
+    if ((engine === "curve" || engine === "curve-pro") && environment === "devnet" && proof?.feeFlowV3OnchainSettlement === true) {
+      return json({ ok: false, error: "devnet_adapter_cannot_claim_fee_flow_v3_onchain_settlement" }, 400);
+    }
+  } else if (isV2) {
     const keys = Object.keys(routes);
     if (keys.length !== V2_ROUTE_KEYS.size || keys.some((key) => !V2_ROUTE_KEYS.has(key))) {
       return json({ ok: false, error: "fee_flow_v2_route_keys_mismatch" }, 400);
@@ -349,8 +387,13 @@ Deno.serve(async (req: Request) => {
       poolProgram: poolCheck?.ownerProgram ?? null,
       launchTransactionSignerVerified: !!txCheck?.ok,
       launchTransactionSlot: txCheck?.slot ?? null,
-      feeFlowVersion: isV2 ? FEE_FLOW_V2 : "LEGACY-ADAPTER",
-      worldzLaunchPadContributionPercent: isV2 ? launchPadContribution : null,
+      feeFlowVersion: isV3 ? FEE_FLOW_V3 : isV2 ? FEE_FLOW_V2 : "LEGACY-ADAPTER",
+      worldzLaunchPadContributionPercent: (isV3 || isV2) ? launchPadContribution : null,
+      creatorRetentionPercent: isV3 ? creatorRetention : null,
+      feeFlowV3InternalSplitPercent: isV3 ? V3_INTERNAL_ROUTES : null,
+      feeFlowV3TreasuryLane: isV3 ? { percentOfWorldzContribution: 20, operationsPercent: 70, miracleTeamPercent: 30 } : null,
+      feeFlowV3LedgerSnapshot: isV3,
+      feeFlowV3OnchainSettlement: false,
       feeFlowV2LedgerSnapshot: isV2,
       feeFlowV2OnchainSettlement: false,
       legacyAdapterProfileOnly: !isV2,

@@ -1,19 +1,32 @@
 {
-  "version": "2026-10-01-worldz-treasury-v2",
+  "version": "2026-10-02-worldz-treasury-v3",
   "product": "WorldzLaunchPad™",
-  "status": "OPERATIONS_3_OF_5_ONCHAIN_VERIFIED__RESERVE_DISABLED__FEE_ROUTING_GATED",
+  "status": "OPERATIONS_3_OF_5_ONCHAIN_VERIFIED__MIRACLE_TEAM_4_OF_7_FUNDING_PENDING__V3_ROUTING_GATED",
   "feeCollection": {
-    "worldzSharePercentOfCollectedSupportedProjectTradingFee": 10,
-    "projectRetainedPercentOfCollectedSupportedProjectTradingFee": 90,
+    "policy": "WORLDZ-FEE-FLOW-V3",
+    "worldzContributionChoicesPercent": [
+      3,
+      5,
+      8
+    ],
+    "creatorRetentionByContributionPercent": {
+      "3": 97,
+      "5": 95,
+      "8": 92
+    },
+    "worldzTreasuryLanePercentOfWorldzContribution": 20,
     "worldzTokenSupplyTakePercent": 0,
     "worldzInitialLiquidityTakePercent": 0,
-    "walletTransferTaxPercent": 0
+    "walletTransferTaxPercent": 0,
+    "rule": "Only the creator-selected 3% / 5% / 8% Worldz contribution enters Worldz internal routing. The Treasury lane is 20% of that Worldz contribution."
   },
   "governance": {
     "operations": {
       "signers": 5,
       "threshold": 3,
-      "display": "3-of-5"
+      "display": "3-of-5",
+      "revenueSharePercentOfTreasuryLane": 70,
+      "revenueSharePercentOfWorldzContribution": 14
     },
     "reserve": {
       "enabled": false,
@@ -23,7 +36,16 @@
       "display": "NOT_DEPLOYED",
       "maximumThreshold": 0
     },
-    "maximumApprovalsRequiredByWorldzPolicy": 3
+    "maximumApprovalsRequiredByWorldzPolicy": 4,
+    "miracleTeam": {
+      "signers": 7,
+      "threshold": 4,
+      "display": "4-of-7",
+      "status": "FUNDING_PENDING_NOT_DEPLOYED",
+      "revenueSharePercentOfTreasuryLane": 30,
+      "revenueSharePercentOfWorldzContribution": 6,
+      "automaticRoutingEnabled": false
+    }
   },
   "signerSlots": [
     {
@@ -98,6 +120,13 @@
         "enabled": false,
         "status": "NOT_DEPLOYED",
         "targetGovernance": null
+      },
+      "miracleTeam": {
+        "provider": "Squads v4",
+        "targetGovernance": "4-of-7",
+        "multisigConfigAddress": null,
+        "vaultAddress": null,
+        "status": "FUNDING_PENDING_NOT_DEPLOYED"
       }
     },
     "evm": {
@@ -118,6 +147,11 @@
         "enabled": false,
         "status": "NOT_DEPLOYED",
         "targetGovernance": null
+      },
+      "miracleTeam": {
+        "targetGovernance": "4-of-7",
+        "address": null,
+        "status": "NOT_DEPLOYED"
       }
     },
     "xrpl": {
@@ -132,6 +166,11 @@
         "enabled": false,
         "status": "NOT_DEPLOYED",
         "targetGovernance": null
+      },
+      "miracleTeam": {
+        "targetGovernance": "4-of-7",
+        "address": null,
+        "status": "NOT_DEPLOYED"
       }
     },
     "sui": {
@@ -145,14 +184,22 @@
         "enabled": false,
         "status": "NOT_DEPLOYED",
         "targetGovernance": null
+      },
+      "miracleTeam": {
+        "targetGovernance": "4-of-7",
+        "address": null,
+        "status": "NOT_DEPLOYED"
       }
     }
   },
   "activation": {
     "mainnetFeeRoutingEnabled": false,
-    "rule": "A chain may activate fee routing only after the five signer addresses, chain-native 3-of-5 Operations multisig, destination address and the exact active fee route are independently verified. No Reserve Treasury is required while Reserve status is disabled.",
+    "rule": "Fee Flow V3 mainnet routing stays disabled until the chain-native 3-of-5 Operations path is verified and every Worldz internal lane has a proven destination or fail-closed accrual path. The Miracle Team Treasury share is 30% of the Treasury lane only; until its 4-of-7 destination is deployed, that share must accrue and must not be redirected.",
     "noPrivateKeysInRepository": true,
     "reserveSweepEnabled": false,
-    "reserveTreasuryRequired": false
+    "reserveTreasuryRequired": false,
+    "miracleTeamRoutingEnabled": false,
+    "miracleTeamFundingPending": true,
+    "unavailableDestinationRule": "ACCRUE_DO_NOT_REDIRECT"
   }
 }
