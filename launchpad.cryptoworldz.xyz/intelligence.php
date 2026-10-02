@@ -155,6 +155,14 @@ function agrees(array $rows): ?bool {
   if(count($rows)<2)return null;$v=[];foreach($rows as $r)$v[]=strtolower(trim((string)$r['value']));return count(array_unique($v))===1;
 }
 
+$worldzCreatorHistory=null;
+$deployer=$creator['originalDeployerCandidate']??null;
+if(is_string($deployer)&&preg_match('/^[1-9A-HJ-NP-Za-km-z]{32,64}$/',$deployer)){
+  $registryUrl='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register?creator='.rawurlencode($deployer);
+  $registry=http_json($registryUrl);
+  if($registry['ok']&&is_array($registry['json']['creatorHistory']??null))$worldzCreatorHistory=$registry['json']['creatorHistory'];
+}
+
 $providers=[
  provider('Jupiter Tokens V2',$j,$urls['jupiter']),
  provider('DEX Screener',$d,$urls['dex']),
@@ -190,6 +198,6 @@ out([
    'holderCount'=>n($jrow['holderCount']??null),'liquidityUsd'=>n($jrow['liquidity']??null),'usdPrice'=>n($jrow['usdPrice']??null)
  ]:null,
  'rugcheck'=>['creatorCandidate'=>$creatorCandidate,'score'=>$r['ok']?n($r['json']['score']??null):null,'risks'=>$riskRows],
- 'creatorHistory'=>$creator,
+ 'creatorHistory'=>array_merge($creator,['worldzRegistry'=>$worldzCreatorHistory]),
  'rule'=>'Worldz shows provider-attributed evidence and disagreements. No provider result alone creates a SAFE label.'
 ]);
