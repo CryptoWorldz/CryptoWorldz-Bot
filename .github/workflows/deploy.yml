@@ -135,25 +135,6 @@ jobs:
       - name: "Apply verified insight tooling LAST"
         run: python3 tools/apply_verified_insights.py
 
-      - name: "Expose WORLDZ REFERENCE #001 relatable case"
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          page = Path("oneworldz.com/integrityworldz/index.html")
-          body = page.read_text(encoding="utf-8")
-          href = "/integrityworldz/reference-001.html"
-          if href not in body:
-              block = '<div class="actions"><a class="btn" href="' + href + '">Open WORLDZ REFERENCE #001 — No.1 Relatable Problem</a></div>'
-              body = body.replace("</section>", block + "</section>", 1)
-              page.write_text(body, encoding="utf-8")
-          ref = Path("oneworldz.com/integrityworldz/reference-001.html")
-          assert ref.is_file(), ref
-          assert href in page.read_text(encoding="utf-8")
-          print("WORLDZ_REFERENCE_001_LINK=PASS")
-          PY
-
       - name: Restore blockchain WorldzLaunchPad gateways LAST
         shell: bash
         run: |
