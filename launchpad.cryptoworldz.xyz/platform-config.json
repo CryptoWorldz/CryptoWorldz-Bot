@@ -49,7 +49,46 @@
       "MRCL"
     ],
     "description": "Worldz Fee Flow V2 routes eligible collected supported trading-fee revenue through the creator-selected BUILD 3%, GROW 5% or BOOST 8% WorldzLaunchPad contribution profile. The same fee flow permanently reserves 15% for the closed 12-token Legacy Core and 12% for equal WLDZ/RVIV/PNEX/MRCL market-buy ledgers. It takes 0% token supply, 0% initial liquidity and 0% wallet-transfer tax.",
-    "publicPromise": "Choose 3%, 5% or 8% back to WorldzLaunchPad at launch. The choice is voluntary and locked into that launch snapshot. No hidden supply take or wallet-transfer tax."
+    "publicPromise": "Choose 3%, 5% or 8% back to WorldzLaunchPad at launch. The choice is voluntary and locked into that launch snapshot. No hidden supply take or wallet-transfer tax.",
+    "projectTradingFeeDefaultPercent": 1,
+    "publicFeeBuilderPolicy": "worldzpad-omnichain/chain-native-fee-builder.v1.json",
+    "publicFeeRule": "1.00% Worldz default; 3.00% hard public cap; prefer 0.25% steps only where the selected chain/venue supports that setting truthfully. Native venue fees and network costs stay separate.",
+    "absurdHighFeeProfilesHidden": true,
+    "sixToTenPercentProjectTradingFeesOffered": false,
+    "chainNativeOverrides": {
+      "xrplAmm": {
+        "defaultPercent": 1,
+        "choicesPercent": [
+          0.25,
+          0.5,
+          0.75,
+          1
+        ],
+        "maxPercent": 1
+      },
+      "xrplClob": {
+        "feeSlider": false
+      },
+      "suiCetus": {
+        "defaultPercent": 1,
+        "worldzExposedNativeTiersPercent": [
+          0.25,
+          0.4,
+          0.6,
+          0.8,
+          1,
+          2
+        ]
+      },
+      "evm": {
+        "projectFeeDefaultPercent": 1,
+        "projectFeeMaxPercent": 3,
+        "nativePoolTierSeparate": true
+      },
+      "bitcoin": {
+        "projectTradingFeeSlider": false
+      }
+    }
   },
   "launchEngines": [
     {
@@ -1256,5 +1295,26 @@
     "status": "SOLANA_READ_ONLY_WIRED",
     "source": "worldzpad-omnichain/liquidity-intelligence.v1.json",
     "automaticValueMovementEnabled": false
+  },
+  "investmentCentre": {
+    "name": "Worldz Investment Centre™",
+    "status": "READ_ONLY_PORTFOLIO_RESEARCH_BETA",
+    "publicPath": "/invest/",
+    "contract": "worldzpad-omnichain/investment-centre.v1.json",
+    "portfolioStorage": "BROWSER_LOCAL_ONLY",
+    "executionEnabled": false,
+    "guaranteeOfReturns": false,
+    "reserveProofSchema": "worldzpad-omnichain/schemas/worldz-reserve-proof.v1.json",
+    "initialResearchLanes": [
+      "XRP",
+      "wXRP",
+      "SOL",
+      "HYPE",
+      "Robinhood Chain",
+      "Base",
+      "SUI",
+      "BTC"
+    ],
+    "rule": "Research, education, portfolio modelling and proof are live product directions. Buying, selling, DCA execution and auto-rebalancing stay separately gated."
   }
 }
