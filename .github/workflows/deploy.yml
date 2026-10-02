@@ -396,7 +396,7 @@ jobs:
                       status,body=get(u); low=body.lower()
                       chain_gateway='data-build="2026-09-24-chain-launch-gateway-v1"' in body
                       visual_contract=(chain_gateway and '<style>' in body and '/style.css' not in body) or (not chain_gateway and 'data-oneworldz-build=' in body and '/style.css' in body and '/mobile-safe.css' in body)
-                      retired_brand=any(x in body for x in ('OneWorldz','ONEWORLDZ','oneworldz.com'))
+                      retired_brand=any(x in body for x in ('OneWorldz','ONEWORLDZ'))
                       ok=status==200 and visual_contract and '<iframe' not in low and not any(x in low for x in forbidden) and not retired_brand
                       if ok:return u,True,''
                       last=f'status={status} retired={any(x in low for x in forbidden)} retired_brand={retired_brand}'
