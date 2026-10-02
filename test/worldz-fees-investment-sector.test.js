@@ -102,8 +102,8 @@ test('1-to-1 wrapped asset labels require reserve and redemption proof',()=>{
 });
 
 test('launch builder collection bindings are valid and fee manifests carry the builder contract',()=>{
-  assert.doesNotMatch(launchJs,/\$\('#launch-recipes \.choice'\)\.forEach/);
-  assert.doesNotMatch(launchJs,/\$\('\.next-step'\)\.forEach/);
+  assert.equal(/(^|[^$])\$\('#launch-recipes \.choice'\)\.forEach/m.test(launchJs),false);
+  assert.equal(/(^|[^$])\$\('\.next-step'\)\.forEach/m.test(launchJs),false);
   assert.doesNotMatch(launchJs,/\$\$\$\('/);
   assert.match(launchJs,/\$\$\('#launch-recipes \.choice'\)\.forEach/);
   assert.match(launchJs,/builder:'WORLDZ-CHAIN-NATIVE-FEE-BUILDER-V1'/);
