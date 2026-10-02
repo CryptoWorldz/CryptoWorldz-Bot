@@ -25,17 +25,55 @@ jobs:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_SECRET_KEY }}
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
     steps:
       - name: Send opt-out-aware batch
         shell: python
         run: |
-          import json, os, time, urllib.parse, urllib.request, urllib.error
+          import io, json, os, re, time, urllib.parse, urllib.request, urllib.error
           from datetime import datetime, timezone
+          from ftplib import FTP_TLS
 
+          def protected_env():
+              host=str(os.environ.get("FTP_HOST","")).replace("ftps://","").replace("ftp://","").split("/")[0]
+              if host.count(":")==1:
+                  host=host.split(":",1)[0]
+              user=str(os.environ.get("FTP_USERNAME","")).strip()
+              password=str(os.environ.get("FTP_PASSWORD","")).strip()
+              if not host or not user or not password:
+                  return {}
+              ftp=FTP_TLS()
+              ftp.connect(host,int(os.environ.get("FTP_PORT","21")),timeout=45)
+              ftp.login(user,password)
+              ftp.prot_p()
+              buf=io.BytesIO()
+              ftp.retrbinary("RETR /domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",buf.write)
+              ftp.quit()
+              env={}
+              for raw in buf.getvalue().decode("utf-8").splitlines():
+                  line=raw.strip()
+                  if not line or line.startswith("#") or "=" not in line:
+                      continue
+                  k,v=line.split("=",1)
+                  k=re.sub(r"^export\\s+","",k).strip()
+                  v=v.strip().strip('"').strip("'")
+                  if v:
+                      env[k]=v
+              return env
+
+          runtime = {}
           BOT_TOKEN = str(os.environ.get("BOT_TOKEN","")).strip()
-          SUPABASE_URL = str(os.environ.get("SUPABASE_URL","")).strip() or "https://hknymhhyqldtzmplzuzh.supabase.co"
           SERVICE = str(os.environ.get("SUPABASE_SERVICE_KEY","")).strip()
-          OWNER_ID = 8029135300
+          SUPABASE_URL = str(os.environ.get("SUPABASE_URL","")).strip()
+          if not SERVICE or not SUPABASE_URL:
+              runtime = protected_env()
+          BOT_TOKEN = BOT_TOKEN or str(runtime.get("BOT_TOKEN","")).strip()
+          SERVICE = SERVICE or str(runtime.get("SUPABASE_SERVICE_ROLE_KEY") or runtime.get("SUPABASE_SERVICE_KEY") or runtime.get("SUPABASE_SECRET_KEY") or "").strip()
+          SUPABASE_URL = SUPABASE_URL or str(runtime.get("SUPABASE_URL","")).strip() or "https://hknymhhyqldtzmplzuzh.supabase.co"
+          OWNER_ID = int(str(runtime.get("OWNER_TELEGRAM_ID") or "8029135300").strip())
           CAMPAIGN_TITLE = "WORLDZ — A BETTER WORLD 🌏 • INTRO V1"
           BATCH_LIMIT = 8
 
