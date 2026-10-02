@@ -95,7 +95,7 @@ Do not mark public Google Play release complete until those external proofs exis
 ## Side rails / gated work
 
 ### WorldzPay / X Money provider rail
-WorldzPay stays a provider-ready side rail:
+WorldzPay Build #2 is merged as provider-ready infrastructure:
 - checkout/provider/receipt/treasury architecture may continue
 - provider execution OFF without official provider credentials/access
 - X Money access is not assumed
@@ -104,10 +104,11 @@ WorldzPay stays a provider-ready side rail:
 - eligible Legacy Core routing must match 12-token / 15% / 1.25%-each policy
 
 ### Civic Worldz Votes foundation
-Any civic/public-voice layer remains:
+The merged civic/public-voice foundation remains:
 - neutral
 - nonbinding by default
 - separate from DEX token popularity voting
+- ballot casting remains OFF pending eligibility/privacy/legal/audit gates
 - binding cast/execution OFF unless a lawful, explicit future authority and jurisdiction-specific compliance layer exists
 - no candidate/party endorsement, ranking, steering or election prediction
 

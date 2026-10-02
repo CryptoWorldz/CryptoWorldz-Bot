@@ -1,0 +1,48 @@
+{
+  "profile": "AU-FED",
+  "name": "Australia — Federal",
+  "asOf": "2026-10-02",
+  "validThrough": "2026-12-31",
+  "nextMandatoryReview": "2027-01-01",
+  "status": "technical-guardrail-not-legal-advice",
+  "officialSources": [
+    "https://www.aec.gov.au/about_aec/Publications/Backgrounders/authorisation.htm",
+    "https://www.aec.gov.au/FADTransitionalRules/",
+    "https://www.aec.gov.au/FADReform/whats-changing.htm"
+  ],
+  "communications": {
+    "authorisationReviewRequired": true,
+    "rule": "Electoral communications that fall within Commonwealth authorisation requirements must not publish until the responsible-person/entity authorisation is present and reviewed."
+  },
+  "fundingDisclosure": {
+    "currentPeriod": {
+      "from": "2026-07-01",
+      "to": "2026-12-31",
+      "disclosureThresholdAud": 17300,
+      "note": "Existing scheme applies unless transitional rules specify otherwise."
+    },
+    "futurePeriod": {
+      "from": "2027-01-01",
+      "disclosureThresholdAud": 5000,
+      "thresholdMeaning": "above",
+      "donationCapsIntroduced": true,
+      "electoralExpenditureCapsIntroduced": true,
+      "expeditedDisclosureIntroduced": true
+    }
+  },
+  "worldzProductRules": {
+    "paidBallotPlacementAllowed": false,
+    "candidateOptionBoostingAllowed": false,
+    "voteBuyingAllowed": false,
+    "bindingVotingEnabled": false,
+    "officialElectionImpersonationAllowed": false,
+    "neutralPresentationRequired": true,
+    "sourceDisclosureRequired": true
+  },
+  "reviewTriggers": [
+    "AEC authorisation determination changes",
+    "Commonwealth Electoral Act amendments",
+    "funding/disclosure commencement changes",
+    "binding or official election integration request"
+  ]
+}

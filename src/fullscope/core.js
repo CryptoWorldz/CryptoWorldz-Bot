@@ -24,6 +24,15 @@ const VOTING_NAMESPACES = Object.freeze({
     purpose: "dex-token-popularity",
     cadence: "one-vote-per-user-per-rolling-hour",
     commands: Object.freeze(["worldzvotes", "vote", "tokenvote", "worldztrending", "worldzrankings"])
+  }),
+  civic: Object.freeze({
+    brand: "Worldz Votes Centre™",
+    purpose: "civic-public-consultation",
+    bindingDefault: "non-binding-public-consultation",
+    equalExposure: true,
+    paidPlacementAllowed: false,
+    identityVoteSeparationRequired: true,
+    commands: Object.freeze(["worldzvoice", "worldzballots", "worldzballot", "worldzresults"])
   })
 });
 
@@ -41,6 +50,12 @@ function assertVotingRules() {
   }
   if (VOTING_NAMESPACES.popularity.cadence !== "one-vote-per-user-per-rolling-hour") {
     throw new Error("Worldz token voting cadence must remain hourly.");
+  }
+  if (VOTING_NAMESPACES.civic.paidPlacementAllowed !== false || VOTING_NAMESPACES.civic.equalExposure !== true) {
+    throw new Error("Worldz civic ballots must preserve equal exposure and prohibit paid ballot placement.");
+  }
+  if (VOTING_NAMESPACES.civic.bindingDefault !== "non-binding-public-consultation") {
+    throw new Error("Worldz civic voting must default to non-binding.");
   }
   return true;
 }
