@@ -229,7 +229,10 @@ jobs:
           assert 'PUBLIC TOKEN LAUNCHPAD' in home
           assert 'Who will be first?' in home
           assert '3% • 5% • 8%' in home
-          assert '15%' in home and 'Legacy Core' in home
+          assert '97% • 95% • 92%' in home
+          assert 'WORLDZ FEE FLOW V3' in home
+          assert '70% Operations / 30% Miracle Team' in home
+          assert 'Legacy Core' in home
           assert 'WLDZ • RVIV • PNEX • MRCL' in home
           assert 'token supply / initial LP taken by WorldzLaunchPad' in home
           assert 'WORLDZ SAFE LAUNCH STANDARD' in home
