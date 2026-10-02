@@ -34,16 +34,16 @@ It does not add a new fee, change token supply allocations, or override explicit
 5. Zephyr — `JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc`
 6. Troll George — `GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc`
 
-Two signer slots remain pending:
-- replacement for SolMusic;
-- replacement for Annabel, whose supplied address is invalid for Solana.
+Two signer slots are reserved and pending public keys:
+- SolPaul — verified public Solana key required;
+- SolMark (@MARKW30) — verified public Solana key required.
 
 The four additional owner-controlled wallets are tracked separately for allocation custody and are not treated as separate human signers.
 
 ## Activation gate
 
 The 30% Miracle Team route remains OFF until:
-1. two replacement signer public keys are supplied and all final 8 keys validate as Solana public keys;
+1. verified public Solana keys for SolPaul and SolMark (@MARKW30) are supplied and all final 8 keys validate as Solana public keys;
 2. the Squads multisig and Vault #0 addresses are recorded;
 3. live chain state reads 8 members / threshold 4;
 4. the 70/30 treasury-bound revenue route passes simulation;
