@@ -1,0 +1,247 @@
+{
+  "schema": "WORLDZ-RESEARCH-LED-PRODUCT-POLICY-V1",
+  "version": "2026-10-02",
+  "status": "ACTIVE_BUILD_POLICY",
+  "mission": "Build Worldz from evidence: preserve each chain's native strengths and culture, remove repeated user pain, prove claims on-chain, and make advanced crypto understandable to newcomers without reducing expert capability.",
+  "researchStandard": {
+    "requiredQuestions": [
+      "WHAT_DID_THEY_BUILD",
+      "WHAT_DID_THEIR_USERS_WISH_THEY_BUILT",
+      "WHAT_DOES_THE_BLOCKCHAIN_PROVE",
+      "WHAT_OPPORTUNITY_DID_THEY_LEAVE_BEHIND"
+    ],
+    "evidenceOrder": [
+      "ONCHAIN_STATE",
+      "CONTRACT_OR_PROTOCOL_CODE",
+      "OFFICIAL_TECHNICAL_DOCUMENTATION",
+      "INDEPENDENT_MARKET_DATA",
+      "MULTIPLE_CREDIBLE_REPORTS",
+      "USER_FEEDBACK",
+      "PROJECT_MARKETING",
+      "INFLUENCER_CLAIMS"
+    ],
+    "noSingleProviderMayDeclareSafe": true
+  },
+  "experience": {
+    "visualIdentity": [
+      "deep purple galaxy",
+      "metallic silver",
+      "electric blue inner glow",
+      "black depth",
+      "Worldz emblem"
+    ],
+    "firstImpressionIsProductRequirement": true,
+    "modes": {
+      "beginner": {
+        "label": "NEW TO CRYPTO",
+        "progressiveDisclosure": true,
+        "explainAtPointOfNeed": [
+          "wallet",
+          "gas",
+          "liquidity",
+          "slippage",
+          "market cap",
+          "LP",
+          "bonding curve",
+          "trust line",
+          "bridge",
+          "multisig"
+        ],
+        "practiceModeTarget": true
+      },
+      "pro": {
+        "label": "I KNOW CRYPTO",
+        "exposeAdvancedControls": true,
+        "controls": [
+          "curve parameters",
+          "fee routing",
+          "liquidity",
+          "vesting",
+          "authority state",
+          "holder distribution",
+          "treasury",
+          "raw transaction proof"
+        ]
+      }
+    },
+    "transactionStateMachine": [
+      "PREPARING",
+      "AWAITING_SIGNATURE",
+      "SUBMITTED",
+      "CONFIRMING",
+      "CONFIRMED"
+    ],
+    "successRequiresChainConfirmation": true,
+    "failureMustExplain": [
+      "failure point",
+      "funds moved or not",
+      "network fee paid",
+      "transaction reference",
+      "safe retry path"
+    ]
+  },
+  "chainCultureRule": {
+    "statement": "Connected, not erased. Worldz keeps each chain's identity and uses chain-native execution instead of forcing one market design everywhere.",
+    "solana": [
+      "fast creator UX",
+      "bonding curve where appropriate",
+      "Meteora/Raydium/Jupiter-native routes",
+      "creator and community economics"
+    ],
+    "xrpl": [
+      "native DEX order book",
+      "native AMM",
+      "issuer controls",
+      "trust lines or MPT where appropriate",
+      "Xaman-compatible signing",
+      "multisign",
+      "escrow",
+      "XRP-first terminology",
+      "wXRP specialty routes"
+    ],
+    "bitcoin": [
+      "native UTXO model",
+      "Runes",
+      "PSBT signing",
+      "Bitcoin confirmation",
+      "no fake EVM-style Bitcoin abstraction"
+    ],
+    "ethereumAndEvm": [
+      "Uniswap-compatible liquidity",
+      "v4 hooks where appropriate",
+      "ENS identity compatibility",
+      "chain-native gas and proof"
+    ],
+    "sui": [
+      "Move-native assets",
+      "PTB-native execution",
+      "Sui-native liquidity"
+    ],
+    "hyperliquid": [
+      "order-book-native market structure",
+      "HIP-native routes where appropriate"
+    ]
+  },
+  "launchUX": {
+    "beginnerSteps": [
+      "CHOOSE_CHAIN",
+      "TOKEN_IDENTITY",
+      "PURPOSE",
+      "LAUNCH_STYLE",
+      "REWARDS",
+      "LIQUIDITY",
+      "COMMUNITY",
+      "PLAIN_ENGLISH_PREVIEW",
+      "SIGN",
+      "CONFIRM",
+      "WORLDZ_PROOF"
+    ],
+    "launchRecipes": [
+      "CREATOR",
+      "COMMUNITY",
+      "HOLDER_REWARDS",
+      "LIQUIDITY_GROWTH",
+      "BUYBACK",
+      "IMPACT",
+      "FAIR_LAUNCH",
+      "CUSTOM"
+    ],
+    "hideUnsupportedOptions": true,
+    "noFalseMainnetClaims": true
+  },
+  "trust": {
+    "worldzProofRequiredForVerifiedStatus": true,
+    "evidenceModules": [
+      "original deployer",
+      "creator history",
+      "authority state",
+      "supply",
+      "liquidity ownership and lock",
+      "treasury governance",
+      "fee destinations",
+      "transaction references"
+    ],
+    "rexSignals": [
+      "related-wallet patterns",
+      "holder concentration",
+      "bundled activity",
+      "sniper activity",
+      "creator selling",
+      "mint/freeze authority",
+      "LP protection",
+      "duplicate metadata/socials",
+      "malicious links"
+    ],
+    "rule": "Show evidence, not an unsupported SAFE badge."
+  },
+  "dataTruthLayer": {
+    "providerTargets": [
+      "native explorers",
+      "Jupiter",
+      "Birdeye",
+      "GMGN",
+      "CoinGecko/GeckoTerminal",
+      "DEX Screener",
+      "DefiLlama"
+    ],
+    "crossCheckCriticalClaims": true,
+    "disagreementsRemainVisible": true
+  },
+  "successMetrics": {
+    "rejectRawLaunchCountAsPrimaryMetric": true,
+    "track": [
+      "created",
+      "graduated",
+      "7d survival",
+      "30d survival",
+      "90d survival",
+      "365d survival",
+      "unique holders",
+      "repeat traders",
+      "creator activity",
+      "retained liquidity",
+      "creator earnings",
+      "holder concentration",
+      "security incidents"
+    ]
+  },
+  "support": {
+    "transactionScopedHelp": true,
+    "knownContext": [
+      "chain",
+      "wallet",
+      "transaction",
+      "route",
+      "token",
+      "error",
+      "network result"
+    ],
+    "goal": "Start support from the known transaction state rather than making the user repeat information Worldz already has."
+  },
+  "communityRetention": {
+    "principles": [
+      "purpose",
+      "identity",
+      "participation",
+      "ownership",
+      "recognition",
+      "utility",
+      "shared history",
+      "future",
+      "belonging"
+    ],
+    "chainCommunitiesRemainDistinct": true
+  },
+  "prohibitedProductModels": [
+    "JACKPOT",
+    "LOTTERY",
+    "POWERBALL",
+    "CASINO_GAMBLING_MECHANICS"
+  ],
+  "fundingGates": {
+    "multisigDeploymentMayBeFundingPending": true,
+    "googlePlayAccountMayBeFundingPending": true,
+    "liquidityMayBeFundingPending": true,
+    "fundingPendingNeverMeansLive": true
+  }
+}

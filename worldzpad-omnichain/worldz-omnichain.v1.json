@@ -32,7 +32,8 @@
     "chainRegistry": "worldzpad-omnichain/chain-registry.v1.json",
     "feePolicy": "worldzpad-omnichain/fee-policy.v1.json",
     "launchIntentSchema": "worldzpad-omnichain/schemas/launch-intent.schema.json",
-    "worldzProofSchema": "worldzpad-omnichain/schemas/worldz-proof.schema.json"
+    "worldzProofSchema": "worldzpad-omnichain/schemas/worldz-proof.schema.json",
+    "researchLedProduct": "worldzpad-omnichain/research-led-product-policy.v1.json"
   },
   "pipeline": [
     "CREATE_PROJECT",
@@ -79,44 +80,89 @@
     "No unsupported automatic bridge may move Legacy Flywheel funds cross-chain.",
     "Permanent liquidity locking is the default target where the venue supports it; equivalent non-custodial protection requires explicit proof elsewhere.",
     "A mainnet adapter cannot activate merely because another chain adapter passed.",
-    "Every mainnet launch requires chain-specific simulation/testnet evidence and explicit release approval."
+    "Every mainnet launch requires chain-specific simulation/testnet evidence and explicit release approval.",
+    "Worldz preserves chain-native culture and market structure instead of flattening every chain into one launch model.",
+    "A verified success state requires chain confirmation; submitted is never displayed as confirmed.",
+    "Beginner and Pro experiences share the same proof rules while exposing different levels of complexity.",
+    "Raw token creation count is not a primary success metric; survival, retained liquidity, holders, creator activity and security outcomes are tracked.",
+    "Jackpot, lottery, Powerball and casino-style launch models are not WorldzLaunchPad product modes."
   ],
   "buildPhases": [
     {
       "phase": 1,
       "name": "Omnichain Contract",
       "status": "IN_BUILD",
-      "deliverables": ["chain registry", "launch intent", "fee disclosure", "Worldz Proof schema", "CI validator"]
+      "deliverables": [
+        "chain registry",
+        "launch intent",
+        "fee disclosure",
+        "Worldz Proof schema",
+        "CI validator"
+      ]
     },
     {
       "phase": 2,
       "name": "Solana Reference Adapter",
       "status": "IN_PROGRESS",
-      "deliverables": ["Meteora DBC devnet", "75 bps proof", "Fee Router", "Legacy PDAs", "DAMM v2 migration", "100% lock proof"]
+      "deliverables": [
+        "Meteora DBC devnet",
+        "75 bps proof",
+        "Fee Router",
+        "Legacy PDAs",
+        "DAMM v2 migration",
+        "100% lock proof"
+      ]
     },
     {
       "phase": 3,
       "name": "Shared EVM Adapter",
       "status": "PLANNED",
-      "deliverables": ["Ethereum", "Base", "BNB", "HyperEVM", "Robinhood testnet deployments", "deterministic token factory", "fee router", "referral attribution", "liquidity adapters"]
+      "deliverables": [
+        "Ethereum",
+        "Base",
+        "BNB",
+        "HyperEVM",
+        "Robinhood testnet deployments",
+        "deterministic token factory",
+        "fee router",
+        "referral attribution",
+        "liquidity adapters"
+      ]
     },
     {
       "phase": 4,
       "name": "XRPL Adapter",
       "status": "PLANNED",
-      "deliverables": ["issued-token testnet path", "CLOB/AMM market path", "fee disclosure", "Worldz Proof"]
+      "deliverables": [
+        "issued-token testnet path",
+        "CLOB/AMM market path",
+        "fee disclosure",
+        "Worldz Proof"
+      ]
     },
     {
       "phase": 5,
       "name": "Sui Adapter",
       "status": "PLANNED",
-      "deliverables": ["Move fungible-token package", "PTB launch path", "market/liquidity adapter", "fee router", "Worldz Proof"]
+      "deliverables": [
+        "Move fungible-token package",
+        "PTB launch path",
+        "market/liquidity adapter",
+        "fee router",
+        "Worldz Proof"
+      ]
     },
     {
       "phase": 6,
       "name": "LaunchPad-as-a-Service",
       "status": "PLANNED",
-      "deliverables": ["API", "SDK", "white label", "launchpad-to-launchpad referrals", "partner analytics"]
+      "deliverables": [
+        "API",
+        "SDK",
+        "white label",
+        "launchpad-to-launchpad referrals",
+        "partner analytics"
+      ]
     }
   ]
 }

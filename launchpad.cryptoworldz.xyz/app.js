@@ -6,15 +6,49 @@ const fmt=n=>new Intl.NumberFormat('en-AU',{maximumFractionDigits:4}).format(Num
 const feeColors=['#a74cff','#5d8bff','#38e3b0','#ffd166','#ff759c','#b66cff'];
 let platform=null,walletProvider=null,lastManifest=null;
 const build={chain:'solana',engine:'flash',quote:'SOL'};
+let experienceMode='beginner';
+const CHAIN_CULTURE_NOTES=Object.freeze({
+  solana:'SolWorldz: fast creator UX with Solana-native liquidity and proof. Worldz connects Solana without erasing Solana.',
+  ethereum:'EthWorldz: EVM-native execution, Ethereum identity and transparent contract/market proof stay first-class.',
+  base:'BaseWorldz: EVM-native execution with Base-native gas, liquidity and ecosystem context.',
+  bnb:'BNBWorldz: BNB-native execution and Pancake/BNB market conventions remain visible where supported.',
+  robinhood:'RobinWorldz: EVM-compatible execution with Robinhood Chain-specific market infrastructure exposed where verified.',
+  xrpl:'XRPWorldz: native XRPL DEX, AMM, issuer controls, trust-line/MPT rules and XRP-first terminology — not a Solana clone.',
+  sui:'SuiWorldz: Move-native assets and Sui-native execution remain native to Sui.'
+});
+const BEGINNER_HELP=Object.freeze({
+  1:'Pick the blockchain community you want to launch in. Worldz will only show routes that have a real adapter or clearly mark them as planned/testnet.',
+  2:'Choose how the token reaches a market. Direct liquidity starts with a pool; a curve starts with price discovery and can graduate into liquidity.',
+  3:'Set the token identity and fixed supply. Worldz requires authority controls to be disclosed before a verified launch.',
+  4:'Choose what your token trades against. A quote asset is the asset buyers use on the other side of the market.',
+  5:'Choose distribution and fees inside the published Worldz limits. Nothing hidden should appear after you sign.',
+  6:'Review the evidence before anything signs. Submitted is not confirmed; Worldz only treats chain-confirmed execution as success.'
+});
 const PUBLIC_REGISTRY_URL='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register';
 
 
 function humanKey(k){return String(k).replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());}
 function setDot(id,state){const el=$(id);if(!el)return;el.className='state-dot '+(state==='healthy'?'good':state==='gateway'||state==='protected'?'warn':state==='missing'||state==='degraded'?'bad':'idle');}
 function step(n){
-  $$('.wizard-step').forEach(x=>x.classList.toggle('active',x.dataset.panel===String(n)));
-  $$('.step-tab').forEach(x=>x.classList.toggle('active',x.dataset.step===String(n)));
+  $('.wizard-step').forEach(x=>x.classList.toggle('active',x.dataset.panel===String(n)));
+  $('.step-tab').forEach(x=>x.classList.toggle('active',x.dataset.step===String(n)));
+  const help=$('#experience-help');
+  if(help) help.textContent=experienceMode==='beginner'?'Beginner Mode: '+(BEGINNER_HELP[Number(n)]||'Worldz explains the choice before you sign.'):'Pro Mode: technical controls and raw proof remain visible.';
   const target=$('.builder'); if(target&&window.innerWidth<720)target.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function setExperienceMode(mode){
+  experienceMode=mode==='pro'?'pro':'beginner';
+  document.body.dataset.experience=experienceMode;
+  $('.experience-choice').forEach(x=>x.classList.toggle('hero-card',x.dataset.experience===experienceMode));
+  $('.experience-choice').forEach(x=>x.classList.toggle('active',x.dataset.experience===experienceMode));
+  const labels=experienceMode==='beginner'?['World','Launch Style','Token','Trading Pair','Setup','Review']:['World','Engine','Token','Pair','Economics','Proof'];
+  $('.step-tab span').forEach((x,i)=>{if(labels[i])x.textContent=labels[i];});
+  const active=$('.wizard-step.active');
+  step(active?active.dataset.panel:1);
+}
+function updateChainCultureNote(chain){
+  const note=$('#chain-culture-note');
+  if(note)note.textContent=CHAIN_CULTURE_NOTES[chain]||'Worldz uses chain-native execution and keeps unsupported routes clearly gated.';
 }
 function selectChoice(group,el,key,value){
   $(group+' .choice').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');build[key]=value;
@@ -24,6 +58,7 @@ function markChoice(selector,dataKey,value){
 }
 function selectChain(el,chain){
   selectChoice('#chain-grid',el,'chain',chain);
+  updateChainCultureNote(chain);
   if(chain==='base'){
     build.engine='evm-fixed';build.quote='ETH';
     markChoice('#engine-grid .choice','engine','evm-fixed');
@@ -335,7 +370,8 @@ async function refreshRuntime(){
   finally{b.disabled=false;b.textContent='Refresh Runtime';}
 }
 function bind(){
-  $$('.next-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.next)));
+  $('.experience-choice').forEach(b=>b.addEventListener('click',()=>setExperienceMode(b.dataset.experience)));
+  $('.next-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.next)));
   $$('.prev-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.prev)));
   $$('.step-tab').forEach(b=>b.addEventListener('click',()=>step(b.dataset.step)));
   $('#chain-grid .choice').forEach(b=>b.addEventListener('click',()=>selectChain(b,b.dataset.chain)));
@@ -379,7 +415,7 @@ async function boot(){
   for(let attempt=1;attempt<=2;attempt++){
     try{
       platform=await fetchPlatformConfig();
-      bind();feeMath();renderProof();renderMarket();refreshRuntime();
+      bind();setExperienceMode('beginner');updateChainCultureNote(build.chain);feeMath();renderProof();renderMarket();refreshRuntime();
       document.body.dataset.boot='ready';
       return;
     }catch(e){
