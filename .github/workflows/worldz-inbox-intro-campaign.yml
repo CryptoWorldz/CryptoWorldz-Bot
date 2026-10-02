@@ -21,6 +21,8 @@ jobs:
     name: Send next Worldz Inbox batch
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
