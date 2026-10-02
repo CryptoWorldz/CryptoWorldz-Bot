@@ -106,7 +106,7 @@ function registerShillRewards({ bot, repository, supabase, config }) {
       ]);
       if (statusResult.error) throw statusResult.error;
       const status = Array.isArray(statusResult.data) ? statusResult.data[0] : statusResult.data;
-      const rows = tokens.map((item) => `• ${item.symbol} — ${item.points_per_verified_share} LP per genuine share that passes the automatic safety checks`).join("\n");
+      const rows = tokens.map((item) => `• ${item.symbol} — ${item.points_per_verified_share} LP per eligible submitted share that passes the automatic safety checks`).join("\n");
       return send(msg.chat.id, [
         "📣💜 WORLDZ SHILLPOINTS",
         "",
@@ -125,7 +125,7 @@ function registerShillRewards({ bot, repository, supabase, config }) {
         "Submit: /shill TOKEN | https://your-proof-link",
         "Example: /shill RECAP | https://x.com/yourname/status/123",
         "",
-        "⚡ Normal proofs that pass the automatic checks are awarded immediately.",
+        "⚡ Eligible submissions that pass the automatic checks are awarded immediately.",
         "🛡 Only cap hits, anomalies and other exceptions go to Admin review.",
         "🏦 Reward funding: Treasury → ring-fenced Reward Wallet → capped weekly member allocation.",
         "Spam, bots, duplicate links and fake engagement earn nothing."

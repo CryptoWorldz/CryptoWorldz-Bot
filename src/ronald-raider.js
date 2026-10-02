@@ -85,7 +85,7 @@ function campaignText(campaign) {
     `🔗 ${campaign.source_url}`,
     "",
     "Open the post → do the genuine actions → tap ✅ DONE.",
-    "⚡ RaidPoints are awarded automatically when the safety caps pass. Admin only handles exceptions."
+    "⚡ RaidPoints are awarded automatically when the activity and safety caps pass. Admin only handles exceptions."
   ];
   if (campaign.platform === "X") {
     lines.push("", "📊 X targets are stored with the Raid. Current counters can be updated with /raidprogress until the X metrics read-scope adapter is connected.");
