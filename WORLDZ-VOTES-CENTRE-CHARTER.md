@@ -8,6 +8,16 @@ Worldz Votes Centre™ exists to make public participation easier to understand,
 
 Worldz does **not** decide political outcomes for people. It provides an equal voting surface so people can examine proposals, compare evidence and record their own preferences.
 
+## Worldwide scope
+
+Worldz Votes Centre™ is worldwide by design. The general **non-binding Public Voice** layer has no country or territory allowlist. Australia is one jurisdiction profile, not the boundary of Worldz.
+
+People in Uganda, across Africa, Indonesia, the Philippines, Greenland, Iceland, Mexico, Austria, Belgium, France, Hong Kong, China, India and anywhere else use the same global Public Voice principles.
+
+General public-voice participation is designed to be age-inclusive with age-appropriate privacy and safety safeguards. Any official or legally binding vote still follows the lawful eligibility rules of the relevant jurisdiction.
+
+Worldz does not use a person's race, ethnicity, nationality, wealth, token holdings, social status or location to give extra civic weight, and it should not require race/ethnicity or an exact home address merely to document a public concern.
+
 ## Non-negotiable principles
 
 1. **Equal voting power** — one verified eligible person gets one vote in a ballot.
@@ -49,11 +59,23 @@ Every candidate/option receives:
 
 Option order should be rotated or randomised using a published method when legally appropriate.
 
+## Human-needs mission
+
+Worldz works toward a world where **no child or adult dies from hunger or is denied available preventable care because money stood in the way**.
+
+Public Voice may document concerns and priorities about food and hunger, preventable disease, essential healthcare and medicines, clean water and sanitation, safe shelter and housing, education and opportunity, and how public/community resources are prioritised.
+
+Worldz can aggregate and publish what people say about public money and resource priorities. It does not claim authority over government budgets, and civic results never execute Worldz treasury actions.
+
 ## Funding transparency
 
 Worldz should publish funding and electoral-spend compliance information when applicable. Product policy is stricter than many current laws: **money cannot buy a better position inside the ballot interface.**
 
-## Australian federal compliance snapshot
+## Jurisdiction compliance profiles
+
+Every regulated or official use receives its own dated jurisdiction profile. No jurisdiction profile turns into a worldwide rule.
+
+### Australia — federal worked example
 
 This repository includes a dated Australia federal compliance profile. It is a technical guardrail, not legal advice.
 
