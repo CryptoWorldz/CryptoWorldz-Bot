@@ -106,7 +106,11 @@ jobs:
           treasury_policy=json.loads((root/'treasury-policy.json').read_text())
           assert treasury_policy['governance']['operations']['display']=='3-of-5'
           assert treasury_policy['governance']['reserve']['display']=='NOT_DEPLOYED'
-          assert treasury_policy['governance']['maximumApprovalsRequiredByWorldzPolicy']==3
+          assert treasury_policy['governance']['maximumApprovalsRequiredByWorldzPolicy']==4
+          assert treasury_policy['governance']['miracleTeam']['display']=='4-of-7'
+          assert treasury_policy['governance']['miracleTeam']['revenueSharePercentOfTreasuryLane']==30
+          assert treasury_policy['activation']['miracleTeamRoutingEnabled'] is False
+          assert treasury_policy['activation']['unavailableDestinationRule']=='ACCRUE_DO_NOT_REDIRECT'
           assert treasury_policy['activation']['mainnetFeeRoutingEnabled'] is False
           assert treasury_policy['chains']['solana']['operations']['vaultAddress']==treasury['vaultAddress']
           assert treasury['mainnetRoutingEnabled'] is False
@@ -480,9 +484,12 @@ jobs:
           assert not re.search(r"(?<!\$)\$\('\.allocation-input'\)",app)
           assert "$('.allocation-input')" in app
           assert "selectedLaunchPadContribution" in app
-          assert "worldzCoreFamilyMarketBuys:12" in app
+          assert "worldzCoreFamilyMarketBuys:10" in app
+          assert "operationsProductDevelopment:20" in app
+          assert "treasury:20" in app
+          assert "worldzMiracleTeamTreasury:30" in app
 
-          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_flow=v2 launchpad_choice=3/5/8 legacy=15x12 core_buys=12 treasury_balance=12/10/7 treasury_ops=3of5 treasury_reserve=disabled max_approvals=3 supply_take=0 liquidity_take=0 founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
+          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_flow=v3 creator_retention=97/95/92 worldz_contribution=3/5/8 legacy=10_of_worldz_share core_buys=10_of_worldz_share treasury_lane=20 treasury_split=70/30 treasury_ops=3of5 miracle_team=4of7 miracle_routing=off_unless_deployed max_approvals=4 supply_take=0 liquidity_take=0 founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
 
       - name: Syntax-check browser JavaScript
         shell: bash
