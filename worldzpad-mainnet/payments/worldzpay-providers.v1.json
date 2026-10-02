@@ -1,0 +1,80 @@
+{
+  "version": "WORLDZPAY-PROVIDERS-2026-10-01-A",
+  "name": "WorldzPay™ Provider Access Registry",
+  "state": "SIDE_RAIL_ONLY",
+  "productionProvidersEnabled": false,
+  "providers": {
+    "x_money": {
+      "label": "X Money",
+      "methods": ["x_money"],
+      "accessState": "NO_VERIFIED_WORLDZ_PAYMENT_ACCESS",
+      "productionEnabled": false,
+      "officialAccessRequired": true,
+      "requiredReadiness": [
+        "official_access_granted",
+        "official_docs_verified",
+        "commercial_terms_approved",
+        "compliance_review_approved",
+        "credentials_configured_server_side",
+        "webhook_or_callback_verification_ready",
+        "sandbox_or_certification_passed"
+      ],
+      "notes": "Reserved adapter only. Do not imply partnership or production access."
+    },
+    "card_processor": {
+      "label": "Card Processor",
+      "methods": ["card"],
+      "accessState": "PROVIDER_SELECTION_PENDING",
+      "productionEnabled": false,
+      "officialAccessRequired": true,
+      "requiredReadiness": [
+        "provider_selected",
+        "merchant_account_approved",
+        "commercial_terms_approved",
+        "compliance_review_approved",
+        "credentials_configured_server_side",
+        "webhook_signature_verification_ready",
+        "sandbox_or_certification_passed"
+      ]
+    },
+    "bank_rail": {
+      "label": "Bank / Account-to-Account Rail",
+      "methods": ["bank"],
+      "accessState": "PROVIDER_SELECTION_PENDING",
+      "productionEnabled": false,
+      "officialAccessRequired": true,
+      "requiredReadiness": [
+        "provider_selected",
+        "merchant_account_approved",
+        "commercial_terms_approved",
+        "compliance_review_approved",
+        "credentials_configured_server_side",
+        "webhook_signature_verification_ready",
+        "sandbox_or_certification_passed"
+      ]
+    },
+    "solana_wallet": {
+      "label": "Solana Wallet Rail",
+      "methods": ["solana_wallet", "usdc", "usdt"],
+      "accessState": "UNSIGNED_INTEGRATION_ONLY",
+      "productionEnabled": false,
+      "officialAccessRequired": false,
+      "requiredReadiness": [
+        "rpc_provider_verified",
+        "token_mints_verified",
+        "recipient_vault_verified",
+        "transaction_verification_passed",
+        "multisig_treasury_gate_passed"
+      ],
+      "notes": "WorldzPay may prepare and verify public transaction data but never stores private keys or seed phrases."
+    }
+  },
+  "globalControls": {
+    "noSecretsInRepository": true,
+    "noPrivateKeys": true,
+    "noSeedPhrases": true,
+    "noAutomaticProviderActivation": true,
+    "noProductionWithoutExplicitTreasuryApproval": true,
+    "noImpliedProviderPartnership": true
+  }
+}
