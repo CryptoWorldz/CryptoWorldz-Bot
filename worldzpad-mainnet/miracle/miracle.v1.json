@@ -26,7 +26,7 @@
       "unassignedTokensRemainVaulted": true,
       "silentAutomaticReassignmentAllowed": false,
       "proposedMultisig": {
-        "policy": "4-of-10",
+        "policy": "4-of-7",
         "state": "PROPOSED_NOT_DEPLOYED"
       },
       "registeredRecipientSource": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json"
@@ -64,11 +64,18 @@
   },
   "treasuryProfiles": {
     "miracleChurchTreasury": {
-      "proposedPolicy": "4-of-10",
+      "proposedPolicy": "4-of-7",
       "state": "PROPOSED_NOT_DEPLOYED",
       "signerConsentRequired": true,
       "verifiedPublicWalletRequired": true,
-      "membershipDoesNotAutomaticallyCreateSignerAuthority": true
+      "membershipDoesNotAutomaticallyCreateSignerAuthority": true,
+      "label": "Worldz Miracle Team Treasury",
+      "revenueRouting": {
+        "source": "WORLDZ_FEE_FLOW_V3_TREASURY_LANE",
+        "shareOfTreasuryLanePercent": 30,
+        "automaticRoutingEnabled": false
+      },
+      "accountingRule": "The 30% revenue share applies only to the Worldz Treasury lane. The separate 20% MRCL Miracle Team Vault remains a token-supply allocation."
     }
   },
   "executionBoundary": {
