@@ -25,11 +25,13 @@ let poolId='';
 let lpMint='';
 let poolTxSignature='';
 let feeSaved=false;
-let feeFlowV2=true;
-let v2Routes={
-  creatorDeveloper:10,launchReferrer:15,legacyCore:15,worldzCoreFamilyMarketBuys:12,
-  lpGrowth:10,launchedTokenBuybackAndBurn:8,impactCharity:5,teamBuilderRewards:5,
-  futureTokenDeploymentReserve:5,worldzLaunchPad:5,treasuryReserve:10
+let feeFlowV3=true;
+let worldzContribution=5;
+let creatorRetention=95;
+let v3Routes={
+  operationsProductDevelopment:20,treasury:20,lpGrowth:15,legacyCore:10,
+  worldzCoreFamilyMarketBuys:10,impactCharity:10,teamBuilderRewards:5,
+  futureLaunchInfrastructure:5,launchReferrer:5
 };
 let lockPlanSaved=false;
 let commandRegistered=false;
@@ -65,7 +67,7 @@ function metadata(){
   };
 }
 function routes(){
-  if(feeFlowV2&&v2Routes)return {...v2Routes};
+  if(feeFlowV3&&v3Routes)return {...v3Routes};
   const out={};$('.route-input').forEach(x=>out[x.dataset.route]=Number(x.value)||0);return out;
 }
 function routeTotal(){return Object.values(routes()).reduce((a,b)=>a+b,0);}
@@ -78,15 +80,15 @@ function feePolicyErrors(){
   if(!Number.isFinite(fee)||fee<SAFE.feeMin||fee>SAFE.feeMax)errors.push('Trading fee must be 0.50%–3.00%.');if(Number.isFinite(fee)&&Math.abs(((fee-SAFE.feeMin)/.25)-Math.round((fee-SAFE.feeMin)/.25))>1e-9)errors.push('Worldz project fee must use 0.25% increments.');
   if(!Object.values(r).every(v=>Number.isFinite(v)&&v>=0&&v<=100))errors.push('Fee routes must each be between 0% and 100%.');
   if(Math.abs(routeTotal()-100)>.001)errors.push('Fee routes must total exactly 100%.');
-  if(feeFlowV2){
+  if(feeFlowV3){
     const fixed={
-      creatorDeveloper:10,launchReferrer:15,legacyCore:15,worldzCoreFamilyMarketBuys:12,
-      lpGrowth:10,launchedTokenBuybackAndBurn:8,impactCharity:5,teamBuilderRewards:5,futureTokenDeploymentReserve:5
+      operationsProductDevelopment:20,treasury:20,lpGrowth:15,legacyCore:10,
+      worldzCoreFamilyMarketBuys:10,impactCharity:10,teamBuilderRewards:5,
+      futureLaunchInfrastructure:5,launchReferrer:5
     };
-    for(const [key,value] of Object.entries(fixed))if(r[key]!==value)errors.push('Fee Flow V2 drift: '+key+' must equal '+value+'%.');
-    if(![3,5,8].includes(r.worldzLaunchPad))errors.push('Fee Flow V2 LaunchPad contribution must be 3%, 5% or 8%.');
-    const treasuryExpected=r.worldzLaunchPad===3?12:r.worldzLaunchPad===8?7:10;
-    if(r.treasuryReserve!==treasuryExpected)errors.push('Fee Flow V2 Treasury/Reserve must equal '+treasuryExpected+'% for this profile.');
+    for(const [key,value] of Object.entries(fixed))if(r[key]!==value)errors.push('Fee Flow V3 drift: '+key+' must equal '+value+'% of the Worldz contribution.');
+    if(![3,5,8].includes(worldzContribution))errors.push('Fee Flow V3 Worldz contribution must be 3%, 5% or 8%.');
+    if(creatorRetention!==100-worldzContribution)errors.push('Fee Flow V3 creator retention must equal 100% minus the Worldz contribution.');
     return errors;
   }
   if((r.creator||0)>SAFE.creatorFeeMax)errors.push('Creator fee route cannot exceed 20%.');
@@ -226,7 +228,7 @@ async function registerLaunch(stage='registered',extra={}){
     intent_hash:hash,mint:mintAddress,wallet:walletAddress,issued_at:issuedAt,signature,
     environment:'devnet',network:'solana',engine:'flash',quote_asset:selectedQuote,
     token_name:p.name,symbol:p.symbol,decimals:p.decimals,fixed_supply:p.supply,
-    project_fee_percent:fee,fee_flow_version:feeFlowV2?'WORLDZ-FEE-FLOW-V2':'LEGACY-DEVNET-ROUTING',launchpad_contribution_percent:feeFlowV2?(routes().worldzLaunchPad||null):null,fee_routes:routes(),metadata:metadata(),
+    project_fee_percent:fee,fee_flow_version:feeFlowV3?'WORLDZ-FEE-FLOW-V3':'LEGACY-DEVNET-ROUTING',launchpad_contribution_percent:feeFlowV3?worldzContribution:null,fee_routes:routes(),metadata:metadata(),
     metadata_uri:mintAddress?'https://launchpad.cryptoworldz.xyz/metadata.php?mint='+encodeURIComponent(mintAddress):null,
     mint_tx_signature:mintTxSignature||null,pool_id:poolId||null,lp_mint:lpMint||null,pool_tx_signature:poolTxSignature||null,
     vesting_config:vestingPlan(),lock_config:lockPlan(),
@@ -462,20 +464,20 @@ function loadQuery(){
   if(q.get('intent')&&/^[0-9a-f]{64}$/.test(q.get('intent')))intentHash=q.get('intent');
   if(q.get('quote')&&['SOL','wXRP'].includes(q.get('quote')))chooseQuote(q.get('quote'));
   if(q.get('fee'))$('#project-fee').value=Math.min(SAFE.feeMax,Math.max(SAFE.feeMin,Number(q.get('fee'))||1));
-  feeFlowV2=q.get('fee_v2')!=='0';
-  if(feeFlowV2){
-    v2Routes={
-      creatorDeveloper:Number(q.get('v2_creator')),
-      launchReferrer:Number(q.get('v2_referrer')),
-      legacyCore:Number(q.get('v2_legacy')),
-      worldzCoreFamilyMarketBuys:Number(q.get('v2_core_buys')),
-      lpGrowth:Number(q.get('v2_lp')),
-      launchedTokenBuybackAndBurn:Number(q.get('v2_buyburn')),
-      impactCharity:Number(q.get('v2_impact')),
-      teamBuilderRewards:Number(q.get('v2_team')),
-      futureTokenDeploymentReserve:Number(q.get('v2_future')),
-      worldzLaunchPad:Number(q.get('launchpad_contribution')),
-      treasuryReserve:Number(q.get('v2_treasury'))
+  feeFlowV3=q.get('fee_v3')==='1';
+  if(feeFlowV3){
+    worldzContribution=Number(q.get('launchpad_contribution'))||5;
+    creatorRetention=Number(q.get('creator_retention'))||100-worldzContribution;
+    v3Routes={
+      operationsProductDevelopment:Number(q.get('v3_ops')),
+      treasury:Number(q.get('v3_treasury')),
+      lpGrowth:Number(q.get('v3_lp')),
+      legacyCore:Number(q.get('v3_legacy')),
+      worldzCoreFamilyMarketBuys:Number(q.get('v3_core_buys')),
+      impactCharity:Number(q.get('v3_impact')),
+      teamBuilderRewards:Number(q.get('v3_team')),
+      futureLaunchInfrastructure:Number(q.get('v3_future')),
+      launchReferrer:Number(q.get('v3_referrer'))
     };
     $('.route-input').forEach(x=>{x.disabled=true;});
   }else{
@@ -490,7 +492,7 @@ function loadQuery(){
   if(q.get('engine'))meta.push('Engine: '+q.get('engine'));
   meta.push('Quote: '+selectedQuote);
   if(q.get('fee'))meta.push('Project fee design: '+q.get('fee')+'%');
-  if(feeFlowV2)meta.push('Fee Flow: V2 • LaunchPad '+(v2Routes?.worldzLaunchPad||'?')+'% • Legacy 15% • Core buys 12%');
+  if(feeFlowV3)meta.push('Fee Flow: V3 • Creator keeps '+creatorRetention+'% • Worldz '+worldzContribution+'% • internal Treasury 20% → 70% Operations / 30% Miracle Team');
   if(meta.length)setStatus('#status','WORLDZLAUNCHPAD MANIFEST LOADED\n'+meta.join('\n')+'\n\nRun Local Checks before creating the Devnet mint.');
   updateRoutes();renderProof();
 }
