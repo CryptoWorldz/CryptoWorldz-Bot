@@ -100,12 +100,22 @@ function registerShillRewards({ bot, repository, supabase, config }) {
 
   bot.onText(/^\/shillpoints(?:@\w+)?$/i, async (msg) => {
     try {
-      const tokens = await tokenList();
-      const rows = tokens.map((item) => `• $${item.symbol} — ${item.points_per_verified_share} LP per approved genuine share`).join("\n");
+      const [tokens, statusResult] = await Promise.all([
+        tokenList(),
+        supabase.rpc("get_activity_reward_automation_status", { p_telegram_id: Number(msg.from.id) })
+      ]);
+      if (statusResult.error) throw statusResult.error;
+      const status = Array.isArray(statusResult.data) ? statusResult.data[0] : statusResult.data;
+      const rows = tokens.map((item) => `• ${item.symbol} — ${item.points_per_verified_share} LP per genuine share that passes the automatic safety checks`).join("\n");
       return send(msg.chat.id, [
-        "📣💜 WORLDZ SHILL REWARDS",
+        "📣💜 WORLDZ SHILLPOINTS",
         "",
         rows || "No reward tokens are enabled.",
+        "",
+        `⚡ Automation: ${status?.enabled && status?.auto_shill_points ? "ON" : "OFF"}`,
+        `Today: ${Number(status?.shill_claims_today) || 0}/${Number(status?.shill_daily_claim_cap) || 0} Shills`,
+        `Points today: ${Number(status?.points_today) || 0}/${Number(status?.user_daily_points_cap) || 0} LP`,
+        `Points this week: ${Number(status?.points_this_week) || 0}/${Number(status?.user_weekly_points_cap) || 0} LP`,
         "",
         "Eligible proof platforms:",
         "𝕏 X • Facebook • YouTube • TikTok • Instagram • Reddit • Telegram • Discord • public websites",
@@ -115,7 +125,10 @@ function registerShillRewards({ bot, repository, supabase, config }) {
         "Submit: /shill TOKEN | https://your-proof-link",
         "Example: /shill RECAP | https://x.com/yourname/status/123",
         "",
-        "Proof is reviewed before points are awarded. Spam, bots, duplicate links and fake engagement earn nothing."
+        "⚡ Normal proofs that pass the automatic checks are awarded immediately.",
+        "🛡 Only cap hits, anomalies and other exceptions go to Admin review.",
+        "🏦 Reward funding: Treasury → ring-fenced Reward Wallet → capped weekly member allocation.",
+        "Spam, bots, duplicate links and fake engagement earn nothing."
       ].join("\n"));
     } catch {
       return send(msg.chat.id, "❌ ZED couldn't load the Shill Rewards list.");
@@ -163,15 +176,37 @@ function registerShillRewards({ bot, repository, supabase, config }) {
         throw error;
       }
 
+      const { data: autoData, error: autoError } = await supabase.rpc("auto_award_social_shill_submission", {
+        p_submission_id: Number(data.id)
+      });
+      if (autoError) throw autoError;
+      const auto = Array.isArray(autoData) ? autoData[0] : autoData;
+
+      if (auto?.outcome === "awarded") {
+        return send(msg.chat.id, [
+          "⚡ SHILLPOINTS AUTO-AWARDED",
+          "",
+          `Submission #${data.id}`,
+          `🪙 ${data.token_symbol}`,
+          `🌐 ${data.platform}`,
+          `⭐ +${auto.points_awarded} LP`,
+          `🏆 New total: ${auto.total_points} LP`,
+          "",
+          "No Admin approval needed."
+        ].join("\n"));
+      }
+
+      if (auto?.outcome === "budget_deferred") {
+        return send(msg.chat.id, "⏳ Shill proof recorded, but the protected weekly reward pool is full. No extra points were issued.");
+      }
+
       return send(msg.chat.id, [
-        "✅ SHILL PROOF RECEIVED",
+        "🛡 SHILLPOINTS SAFETY HOLD",
         "",
         `Submission #${data.id}`,
-        `🪙 $${data.token_symbol}`,
-        `🌐 ${data.platform}`,
-        `⭐ Pending reward: ${asset.points_per_verified_share} LP`,
+        `Reason: ${auto?.review_reason || "automatic safety check"}`,
         "",
-        "An Admin review is required before the points are added."
+        "Normal genuine proofs auto-award. Only exceptions enter Admin review."
       ].join("\n"));
     } catch (error) {
       console.error("Shill proof submission failed", { code: error?.code || error?.message || "unknown" });

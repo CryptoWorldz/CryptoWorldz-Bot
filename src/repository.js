@@ -83,6 +83,13 @@ function createRepository(supabase) {
     return { duplicate: false, submission: data };
   }
 
+  async function autoAwardRaidSubmission(submissionId) {
+    const { data, error } = await supabase
+      .rpc("auto_award_raid_submission", { p_submission_id: Number(submissionId) });
+    if (error) throw error;
+    return Array.isArray(data) ? data[0] : data;
+  }
+
   async function getMission(missionId) {
     const { data, error } = await supabase.from("missions").select("*").eq("id", missionId).maybeSingle();
     if (error) throw error;
@@ -527,6 +534,7 @@ function createRepository(supabase) {
   return {
     adjustPoints,
     approveSubmission,
+    autoAwardRaidSubmission,
     castGovernanceVote,
     createMission,
     editMission,

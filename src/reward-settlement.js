@@ -67,9 +67,13 @@ function buildFundingPlan(status, treasuryAccount = null) {
     ...(rows.length ? rows : ["• No active deposit schedule"]),
     wallet,
     "",
-    "Members may choose USDC or SOL. USDC is the default. A SOL reward keeps the same USDC value and is converted using the current quote only when the payout is approved.",
+    "Members may choose USDC or SOL. USDC is the default. A SOL reward keeps the same USDC value and is converted using the current quote at payout.",
     "",
-    "The AUD $200 wallet cap is an emergency maximum, not a spending recommendation. No automatic transfers are enabled."
+    "⚡ Routine weekly allocations are automatic for connected wallets. Admin handles exceptions only.",
+    "🏦 Funding boundary: Treasury → Reward Wallet → capped member allocation.",
+    "The Treasury is not used as a per-member hot wallet.",
+    "",
+    "The AUD $200 wallet cap is an emergency maximum, not a spending recommendation. Automatic on-chain transfers remain disabled until a dedicated payout signer/claim executor is separately enabled."
   ].join("\n");
 }
 
@@ -105,7 +109,7 @@ function registerRewardSettlementHandlers({ bot, repository, supabase, config })
         const asset = preference ? preference.preferred_asset : "USDC";
         return send(
           msg.chat.id,
-          `💜 Your Reward Asset\n\nCurrent choice: ${asset}\nNetwork: Solana\nWallet: ${user.wallet || "Not connected"}\n\nChoose with:\n/rewardasset usdc\n/rewardasset sol\n\nUSDC is paid at its approved USDC amount. SOL keeps the same USDC value and is converted at the payout-time quote. Rewards remain manually approved and are not sent automatically.`
+          `💜 Your Reward Asset\n\nCurrent choice: ${asset}\nNetwork: Solana\nWallet: ${user.wallet || "Not connected"}\n\nChoose with:\n/rewardasset usdc\n/rewardasset sol\n\nUSDC is paid at its approved USDC amount. SOL keeps the same USDC value and is converted at the payout-time quote. Reward allocations are automatic when the safety checks pass. On-chain transfers remain separately controlled.`
         );
       }
 
@@ -129,7 +133,7 @@ function registerRewardSettlementHandlers({ bot, repository, supabase, config })
 
       return send(
         msg.chat.id,
-        `✅ Reward asset updated to ${requested}.\n\n${detail}\n${walletLine}\n\nNo payout is automatic; each reward remains owner-approved and recorded on-chain.`
+        `✅ Reward asset updated to ${requested}.\n\n${detail}\n${walletLine}\n\nAllocation approval is automatic when the safety checks pass; on-chain payout execution remains separately controlled and recorded.`
       );
     } catch (error) {
       console.error("Reward asset preference failed", {

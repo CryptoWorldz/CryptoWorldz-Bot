@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { parseRaidPayload, progressLine, detectPlatform } = require("../src/ronald-raider");
+const { campaignText, parseRaidPayload, progressLine, detectPlatform } = require("../src/ronald-raider");
 
 test("Ronald Raider short form loads safe defaults", () => {
   const result = parseRaidPayload("https://x.com/example/status/123");
@@ -28,4 +28,25 @@ test("Ronald Raider detects supported social platforms and rejects unsafe URLs",
 test("Ronald Raider progress is capped for display", () => {
   assert.match(progressLine("Likes", 5, 10), /50%/);
   assert.match(progressLine("Likes", 20, 10), /100%/);
+});
+
+
+test("Ronald Raider tells members RaidPoints are automatic with exception review", () => {
+  const text = campaignText({
+    id: 9,
+    platform: "X",
+    status: "active",
+    likes_current: 0,
+    likes_goal: 10,
+    reposts_current: 0,
+    reposts_goal: 5,
+    replies_current: 0,
+    replies_goal: 3,
+    views_current: 0,
+    views_goal: 8,
+    reward_points: 20,
+    source_url: "https://x.com/worldz/status/9"
+  });
+  assert.match(text, /RaidPoints are awarded automatically/);
+  assert.match(text, /Admin only handles exceptions/);
 });

@@ -48,6 +48,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["next", "View the next Raid lined up"],
     ["raaiiidd", "Open the current Ronald Raider Raid"],
     ["raids", "List active Ronald Raider Raids"],
+    ["raidpoints", "View automatic RaidPoints caps and Reward Wallet funding"],
     ["creator", "Open ZED Raid Creator for post, artwork, preview and Admin review"]
   ]),
   group("community", "💜 Community, Heroes, Causes & Social Directory", "member", [
