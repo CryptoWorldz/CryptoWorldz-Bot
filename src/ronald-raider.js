@@ -85,7 +85,7 @@ function campaignText(campaign) {
     `🔗 ${campaign.source_url}`,
     "",
     "Open the post → do the genuine actions → tap ✅ DONE.",
-    "Points stay pending until the existing ZED review/approval step."
+    "⚡ RaidPoints are awarded automatically when the safety caps pass. Admin only handles exceptions."
   ];
   if (campaign.platform === "X") {
     lines.push("", "📊 X targets are stored with the Raid. Current counters can be updated with /raidprogress until the X metrics read-scope adapter is connected.");
@@ -136,6 +136,40 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     } catch {
       return true;
     }
+  }
+
+  async function autoRewardStatus(telegramId) {
+    const { data, error } = await supabase.rpc("get_activity_reward_automation_status", {
+      p_telegram_id: Number(telegramId)
+    });
+    if (error) throw error;
+    return Array.isArray(data) ? data[0] : data;
+  }
+
+  async function autoAwardRaid(submissionId) {
+    const { data, error } = await supabase.rpc("auto_award_raid_submission", {
+      p_submission_id: Number(submissionId)
+    });
+    if (error) throw error;
+    return Array.isArray(data) ? data[0] : data;
+  }
+
+  function rewardStatusText(status) {
+    return [
+      "🤠⚡ WORLDZ RAIDPOINTS",
+      "",
+      `Automation: ${status?.enabled && status?.auto_raid_points ? "✅ ON" : "⏸ OFF"}`,
+      `Today: ${Number(status?.raid_claims_today) || 0}/${Number(status?.raid_daily_claim_cap) || 0} Raids`,
+      `Points today: ${Number(status?.points_today) || 0}/${Number(status?.user_daily_points_cap) || 0} LP`,
+      `Points this week: ${Number(status?.points_this_week) || 0}/${Number(status?.user_weekly_points_cap) || 0} LP`,
+      "",
+      "✅ Normal genuine completions → auto-award",
+      "🛡 Caps / duplicates / unusual cases → exception review only",
+      "🏦 Funding path: Treasury → ring-fenced Reward Wallet",
+      `🎁 Weekly allocation: up to ${Number(status?.pool_percent) || 0}% of the available Reward Wallet pool`,
+      "",
+      "The Treasury is not the per-member hot wallet. Automatic allocation stays inside the capped Reward Wallet."
+    ].join("\n");
   }
 
   async function campaignById(id) {
@@ -247,6 +281,15 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     } catch (error) {
       console.error("Ronald Raider load failed", { code: error?.code || error?.message || "unknown" });
       return send(msg.chat.id, "❌ Ronald tripped over his own boots loading this Raid. Try again in a moment.");
+    }
+  });
+
+  bot.onText(/^\/raidpoints(?:@\w+)?$/i, async (msg) => {
+    try {
+      return send(msg.chat.id, rewardStatusText(await autoRewardStatus(msg.from.id)));
+    } catch (error) {
+      console.error("RaidPoints status failed", { code: error?.code || error?.message || "unknown" });
+      return send(msg.chat.id, "❌ Ronald couldn't load the RaidPoints engine.");
     }
   });
 
@@ -368,17 +411,46 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
         completionText: "Ronald Raider DONE button",
         proofUrl: ""
       });
-      await bot.answerCallbackQuery(query.id, { text: claim.duplicate ? "Already submitted." : "DONE submitted for review." });
-      if (!claim.duplicate) {
-        return send(chatId, `✅ Ronald logged your Raid completion.\nSubmission #${claim.submission.id} is pending review for ${campaign.reward_points} LP.`);
+      if (claim.duplicate) {
+        await bot.answerCallbackQuery(query.id, { text: "Already submitted." });
+        return;
       }
+
+      const award = await autoAwardRaid(claim.submission.id);
+      if (award?.outcome === "awarded") {
+        await bot.answerCallbackQuery(query.id, { text: `⚡ +${award.points_awarded} RaidPoints` });
+        return send(chatId, [
+          "⚡ RAIDPOINTS AUTO-AWARDED",
+          "",
+          `Raid #${campaign.id}`,
+          `⭐ +${award.points_awarded} LP`,
+          `🏆 New total: ${award.total_points} LP`,
+          "",
+          "No Admin approval needed."
+        ].join("\n"));
+      }
+
+      if (award?.outcome === "budget_deferred") {
+        await bot.answerCallbackQuery(query.id, { text: "Weekly reward pool is full.", show_alert: true });
+        return send(chatId, "⏳ Raid completion recorded. The protected weekly reward pool is currently full, so no extra points were issued.");
+      }
+
+      await bot.answerCallbackQuery(query.id, { text: "Recorded — safety review only.", show_alert: true });
+      return send(chatId, [
+        "🛡 RAIDPOINTS SAFETY HOLD",
+        "",
+        `Submission #${claim.submission.id}`,
+        `Reason: ${award?.review_reason || "automatic safety check"}`,
+        "",
+        "Normal completions auto-award. Only exceptions enter review."
+      ].join("\n"));
     } catch (error) {
       console.error("Ronald Raider callback failed", { code: error?.code || error?.message || "unknown" });
       try { await bot.answerCallbackQuery(query.id, { text: "Ronald hit an error.", show_alert: true }); } catch {}
     }
   });
 
-  return { parseRaidPayload, activeCampaign, queuedCampaign };
+  return { parseRaidPayload, activeCampaign, queuedCampaign, autoRewardStatus, autoAwardRaid };
 }
 
 module.exports = {
