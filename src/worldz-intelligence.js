@@ -55,8 +55,10 @@ function normalizeJupiter(raw,address){
 function normalizeDex(raw,address){
   const rows=Array.isArray(raw)?raw:[];
   const unique=new Map();
-  for(const row of rows){
-    const key=String(row?.pairAddress||row?.url||Math.random());
+  for(const [index,row] of rows.entries()){
+    const key=String(row?.pairAddress||row?.url||[
+      row?.dexId||'dex',row?.baseToken?.address||'base',row?.quoteToken?.address||'quote',index
+    ].join(':'));
     if(!unique.has(key))unique.set(key,row);
   }
   const pairs=[...unique.values()];
