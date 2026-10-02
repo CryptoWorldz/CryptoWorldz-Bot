@@ -170,6 +170,7 @@ jobs:
             root/'bitworldz/index.html',root/'bitworldz/app.js',root/'capabilities/index.html',
             root/'technology/index.html',root/'technology.html',
             root/'advertise/index.html',root/'ads.js',
+            root/'create-your-own-money/index.html',
             root/'launch-station/index.html',root/'community/index.html',root/'integrations/index.html',root/'ready/index.html',
             root/'.well-known/worldzlaunch-readiness.json',root/'.well-known/worldzlaunch-domain-plan.json',
             root/'wldz/index.html',root/'wldz/app.js',root/'wldz/launch-config.json',
@@ -185,12 +186,19 @@ jobs:
           app=(root/'app.js').read_text()
           advertise_html=(root/'advertise/index.html').read_text()
           ads_js=(root/'ads.js').read_text()
+          creator_campaign_html=(root/'create-your-own-money/index.html').read_text()
           assert 'data-worldz-ad-slot="home_spotlight"' in home
           assert all(price in advertise_html for price in ('A$5','A$12','A$22','A$75'))
           assert 'SUBMIT FOR REVIEW' in advertise_html
           assert 'worldz-launchpad-ads' in advertise_html and 'worldz-launchpad-ads' in ads_js
           assert 'SPONSORED' in ads_js and 'rel = "noopener sponsored"' in ads_js
+          assert 'CREATE' in creator_campaign_html and 'YOUR OWN' in creator_campaign_html and 'MONEY' in creator_campaign_html
+          assert 'create your own crypto token' in creator_campaign_html.lower()
+          assert 'not automatically legal tender' in creator_campaign_html.lower()
+          assert 'BUILD MY TOKEN PLAN' in creator_campaign_html
+          assert 'href="/launch-station/"' in creator_campaign_html
           print('WORLDZ_SPOTLIGHT_LOCAL=PASS pricing=5/12/22/75_AUD slots=3')
+          print('WORLDZ_CREATE_YOUR_OWN_MONEY_LOCAL=PASS')
           devnet=(root/'devnet/index.html').read_text()
           devnet_js=(root/'devnet/app.js').read_text()
           curve=(root/'curve/index.html').read_text()
@@ -252,6 +260,8 @@ jobs:
           assert campaign_json['status']=='PUBLIC'
           assert campaign_json['wldz']['symbol']=='WLDZ'
           assert campaign_json['wldz']['founding100']['wldzPerQualifiedPosition']==100000
+          assert campaign_json['creatorCampaign']['id']=='CREATE_YOUR_OWN_MONEY_2026_10_02'
+          assert campaign_json['creatorCampaign']['url']=='https://launchpad.cryptoworldz.xyz/create-your-own-money/'
           assert social_pack['approvedBy']=='JayJayTeamDev'
           assert 'Swap API V2' in technology_html
           assert 'Worldz Confidence Pulse' in technology_html
@@ -773,6 +783,7 @@ jobs:
                   launch_station_code,launch_station_body=get(base+'/launch-station/?verify=party-v2')
                   advertise_code,advertise_body=get(base+'/advertise/?verify=ads-v2')
                   ads_js_code,ads_js_body=get(base+'/ads.js?verify=ads-v2')
+                  creator_campaign_code,creator_campaign_body=get(base+'/create-your-own-money/?verify=creator-campaign-v1')
                   spotlight_api='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launchpad-ads'
                   spotlight_api_code,spotlight_api_body=get(spotlight_api+'?slot=home_spotlight&verify=ads-v2')
                   community_code,community_body=get(base+'/community/?verify=party-v2')
@@ -801,6 +812,14 @@ jobs:
 
                   assert status==200
                   assert 'PUBLIC TOKEN LAUNCHPAD' in body
+                  assert 'CREATE YOUR OWN MONEY' in body
+                  assert 'href="/create-your-own-money/"' in body
+                  assert creator_campaign_code==200
+                  assert 'CREATE' in creator_campaign_body and 'YOUR OWN' in creator_campaign_body and 'MONEY' in creator_campaign_body
+                  assert 'create your own crypto token' in creator_campaign_body.lower()
+                  assert 'not automatically legal tender' in creator_campaign_body.lower()
+                  assert 'BUILD MY TOKEN PLAN' in creator_campaign_body
+                  assert 'href="/launch-station/"' in creator_campaign_body
                   assert 'href="/x-save/"' in body
                   assert xsave_code==200
                   assert 'data-worldz-x-save="1"' in xsave_body

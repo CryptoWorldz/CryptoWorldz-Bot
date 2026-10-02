@@ -39,3 +39,32 @@ test("visible Raid experience does not present Missions as the primary system",(
   assert.match(registry,/Admin • Raids, Reviews, Members & Settings/);
   assert.match(registry,/Ronald Raider Raid/);
 });
+
+
+test("Create Your Own Money campaign is accurate, connected and non-misleading",()=>{
+  const html=read("launchpad.cryptoworldz.xyz/create-your-own-money/index.html");
+  const launch=read("launchpad.cryptoworldz.xyz/worldz-launch/index.html");
+  const campaign=JSON.parse(read("launchpad.cryptoworldz.xyz/worldz-launch/campaign.json"));
+  const social=JSON.parse(read("launchpad.cryptoworldz.xyz/worldz-launch/social-pack.json"));
+  const sitemap=read("launchpad.cryptoworldz.xyz/sitemap.xml");
+  assert.match(html,/CREATE[\s\S]*YOUR OWN[\s\S]*MONEY/i);
+  assert.match(html,/create your own crypto token/i);
+  assert.match(html,/not automatically legal tender/i);
+  assert.match(html,/does not guarantee value|not automatically.*valuable/i);
+  assert.match(html,/BUILD MY TOKEN PLAN/);
+  assert.match(html,/\/launch-station\//);
+  assert.match(html,/\/community\//);
+  assert.match(html,/\/advertise\//);
+  assert.match(html,/No guaranteed returns/i);
+  assert.doesNotMatch(html,/guaranteed profit|guaranteed 1000×/i);
+  assert.match(launch,/\/create-your-own-money\//);
+  const home=read("launchpad.cryptoworldz.xyz/index.html");
+  assert.match(home,/CREATE YOUR OWN MONEY/);
+  assert.match(home,/\/create-your-own-money\//);
+  assert.match(home,/not automatically legal tender/);
+  assert.equal(campaign.creatorCampaign.id,"CREATE_YOUR_OWN_MONEY_2026_10_02");
+  assert.equal(campaign.creatorCampaign.url,"https://launchpad.cryptoworldz.xyz/create-your-own-money/");
+  assert.ok(Array.isArray(social.creatorCampaign.x));
+  assert.ok(social.creatorCampaign.x.length>=2);
+  assert.match(sitemap,/https:\/\/launchpad\.cryptoworldz\.xyz\/create-your-own-money\//);
+});
