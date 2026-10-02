@@ -147,6 +147,20 @@ jobs:
             );
             if (!resp || resp.status() !== 200) throw new Error('OneDrop bundle failed to load');
 
+            const manifest = JSON.parse(fs.readFileSync(path.join(siteRoot,'onedrop','revive-manifest.v1.json'),'utf8'));
+            if (manifest.executionEnabled !== true) {
+              await page.waitForFunction(
+                () => document.querySelector('#status')?.textContent?.includes('REVIVE ONEDROP ALREADY EXECUTED'),
+                null,
+                { timeout: 20000 }
+              );
+              if (!(await page.locator('#connect').isDisabled())) throw new Error('Executed OneDrop must keep create controls disabled');
+              if (pageErrors.length) throw new Error('Browser page errors: ' + JSON.stringify(pageErrors));
+              await browser.close();
+              console.log('WORLDZ_ONEDROP_ANDROID_READONLY_UI=PASS');
+              return;
+            }
+
             await page.waitForSelector('#connect', { state: 'visible', timeout: 20000 });
             await page.click('#connect');
 
