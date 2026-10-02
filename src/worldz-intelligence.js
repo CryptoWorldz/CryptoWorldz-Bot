@@ -220,7 +220,7 @@ function buildRexEvidence({onchain,dex,rugcheck,creator}){
 }
 
 async function providerResult(provider,fn,reference){
-  try{return {provider,status:'CONFIRMED',reference,data:await fn(),error:null};}
+  try{return {provider,status:'AVAILABLE',reference,data:await fn(),error:null};}
   catch(error){return {provider,status:'UNAVAILABLE',reference,data:null,error:error?.message||'provider_error'};}
 }
 
