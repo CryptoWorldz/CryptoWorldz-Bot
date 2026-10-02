@@ -148,7 +148,10 @@ async function prepare(){
   const mint=new PublicKey(manifest.token.mint),multisig=new PublicKey(manifest.authority.squadsMultisig),vault=new PublicKey(manifest.authority.squadsVault);
   const sourceAta=new PublicKey(manifest.authority.squadsVaultRvivAta),version=BigInt(manifest.distributor.versionU64);
   const mintInfo=await getMint(connection,mint,'confirmed',TOKEN_PROGRAM_ID);
-  if(mintInfo.decimals!==manifest.token.decimals||mintInfo.supply!==BigInt(manifest.token.totalSupplyRaw)||mintInfo.mintAuthority||mintInfo.freezeAuthority)stop('Canonical RVIV mint state changed.');
+  if(mintInfo.decimals!==manifest.token.decimals)stop('Canonical RVIV decimals changed: '+mintInfo.decimals+' expected '+manifest.token.decimals);
+  if(mintInfo.supply!==BigInt(manifest.token.totalSupplyRaw))stop('Canonical RVIV supply changed: '+mintInfo.supply+' expected '+manifest.token.totalSupplyRaw);
+  if(mintInfo.mintAuthority!==null)stop('Canonical RVIV mint authority is not revoked: '+mintInfo.mintAuthority.toBase58());
+  if(mintInfo.freezeAuthority!==null)stop('Canonical RVIV freeze authority is not revoked: '+mintInfo.freezeAuthority.toBase58());
 
   const ms=await squads.accounts.Multisig.fromAccountAddress(connection,multisig,'confirmed');
   if(Number(ms.threshold)!==3||ms.members.length!==5)stop('Squads governance is not the required 3-of-5. Nothing will be built.');
