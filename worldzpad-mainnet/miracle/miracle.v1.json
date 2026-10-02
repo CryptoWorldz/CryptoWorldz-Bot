@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-MIRACLE-V1",
-  "version": "2026-10-02-B",
+  "version": "2026-10-02-C",
   "status": "PLANNED_SPEC_LOCKED",
   "token": {
     "order": 4,
@@ -27,17 +27,45 @@
       "silentAutomaticReassignmentAllowed": false,
       "proposedMultisig": {
         "policy": "4-of-8",
-        "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_3_MORE_VERIFIED_SIGNERS",
+        "state": "SIGNER_SET_LOCKED__PENDING_SQUADS_DEPLOYMENT_AND_LIVE_4_OF_8_PROOF",
         "exactAdditionalWalletsMayBeInvented": false,
-        "confirmedDocumentedCandidates": [
-          "JayJayTeamDev",
-          "Stepper",
-          "Savage",
-          "SolMusic",
-          "Mahammad"
+        "onePersonMultipleWalletsCountAsIndependentSigners": false,
+        "signers": [
+          {
+            "label": "JayJayTeamDev",
+            "solanaPublicKey": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u"
+          },
+          {
+            "label": "Stepper",
+            "solanaPublicKey": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ"
+          },
+          {
+            "label": "Savage",
+            "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
+          },
+          {
+            "label": "SolMusic",
+            "solanaPublicKey": "FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ"
+          },
+          {
+            "label": "Mahammad",
+            "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
+          },
+          {
+            "label": "Zephyr",
+            "solanaPublicKey": "JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc"
+          },
+          {
+            "label": "Troll George",
+            "solanaPublicKey": "GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc"
+          },
+          {
+            "label": "Annabel",
+            "solanaPublicKey": "2fnb5CeAtvgUxz1R46e4DQJ8q99M5bn5oEgQMTYS1fa"
+          }
         ],
-        "additionalDistinctSignerSlots": 3,
-        "onePersonMultipleWalletsCountAsIndependentSigners": false
+        "signerCount": 8,
+        "threshold": 4
       },
       "registeredRecipientSource": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json",
       "accountingSeparationRequired": true,
@@ -77,7 +105,7 @@
   "treasuryProfiles": {
     "miracleChurchTreasury": {
       "proposedPolicy": "4-of-8",
-      "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_3_MORE_VERIFIED_SIGNERS",
+      "state": "SIGNER_SET_LOCKED__PENDING_SQUADS_DEPLOYMENT_AND_LIVE_4_OF_8_PROOF",
       "signerConsentRequired": true,
       "verifiedPublicWalletRequired": true,
       "membershipDoesNotAutomaticallyCreateSignerAuthority": true,
@@ -87,15 +115,44 @@
       },
       "revenueScope": "TREASURY_BOUND_REVENUE_ONLY",
       "noNewFeeCreated": true,
-      "confirmedDocumentedCandidates": [
-        "JayJayTeamDev",
-        "Stepper",
-        "Savage",
-        "SolMusic",
-        "Mahammad"
+      "onePersonMultipleWalletsCountAsIndependentSigners": false,
+      "policy": "4-of-8",
+      "signers": [
+        {
+          "label": "JayJayTeamDev",
+          "solanaPublicKey": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u"
+        },
+        {
+          "label": "Stepper",
+          "solanaPublicKey": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ"
+        },
+        {
+          "label": "Savage",
+          "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
+        },
+        {
+          "label": "SolMusic",
+          "solanaPublicKey": "FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ"
+        },
+        {
+          "label": "Mahammad",
+          "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
+        },
+        {
+          "label": "Zephyr",
+          "solanaPublicKey": "JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc"
+        },
+        {
+          "label": "Troll George",
+          "solanaPublicKey": "GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc"
+        },
+        {
+          "label": "Annabel",
+          "solanaPublicKey": "2fnb5CeAtvgUxz1R46e4DQJ8q99M5bn5oEgQMTYS1fa"
+        }
       ],
-      "additionalDistinctSignerSlots": 3,
-      "onePersonMultipleWalletsCountAsIndependentSigners": false
+      "signerCount": 8,
+      "threshold": 4
     }
   },
   "executionBoundary": {
