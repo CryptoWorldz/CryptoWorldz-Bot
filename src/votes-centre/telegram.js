@@ -5,6 +5,7 @@ const {
   countSingleChoice,
   countRankedChoiceIRV
 } = require("./civic");
+const { getGlobalPublicVoiceStatus } = require("./global");
 
 function safeMessage(error) {
   return String(error && (error.message || error.code) || "unavailable")
@@ -16,26 +17,38 @@ function safeMessage(error) {
 function registerCivicVotesHandlers({ bot, supabase }) {
   const send = (msg, text) => bot.sendMessage(msg.chat.id, text);
 
-  bot.onText(/^\/worldzvoice(?:@\w+)?$/, (msg) => send(msg, [
-    "🌐 WORLDZ VOTES CENTRE™ — CIVIC PUBLIC VOICE",
-    "",
-    "Your vote. Your preferences. Equal treatment. Transparent count.",
-    "",
-    "• One verified eligible person = one vote",
-    "• Equal option presentation",
-    "• No paid ballot advantage",
-    "• Rules + sources published before voting",
-    "• Private individual choices",
-    "• Transparent public count + audit status",
-    "• Current law first; reform only through lawful democratic processes",
-    "",
-    "⚠️ Current civic build is NON-BINDING.",
-    "Binding/official election use stays locked until jurisdiction legal review, privacy-preserving eligibility and independent audit gates pass.",
-    "",
-    "/worldzballots — public civic ballot list",
-    "/worldzballot SLUG — ballot details",
-    "/worldzresults SLUG — closed/audited public result"
-  ].join("\n")));
+  bot.onText(/^\/worldzvoice(?:@\w+)?$/, (msg) => {
+    const global = getGlobalPublicVoiceStatus();
+    return send(msg, [
+      "🌐 WORLDZ VOTES CENTRE™ — GLOBAL PUBLIC VOICE",
+      "",
+      "Worldz 🌐 A Better World 🌍",
+      "",
+      "Worldwide by default — no country or territory allowlist for general non-binding Public Voice.",
+      "Uganda • Africa • Indonesia • Philippines • Greenland • Iceland • Mexico • Austria • Belgium • France • Hong Kong • China • India • Australia • everywhere else.",
+      "",
+      "• Equal civic weight — not weighted by location, nationality, race/ethnicity, wealth, tokens or social status",
+      "• General Public Voice is age-inclusive with age-appropriate privacy/safety safeguards",
+      "• Official/binding eligibility remains jurisdiction-specific",
+      "• Equal option presentation",
+      "• No paid ballot advantage",
+      "• Rules + sources published before voting",
+      "• Private individual choices",
+      "• Transparent public count + audit status",
+      "",
+      "💜 HUMAN-NEEDS MISSION",
+      global.humanNeedsMission,
+      "",
+      "People can document priorities about hunger, preventable disease, healthcare, water, shelter, education and public/community resources.",
+      "Worldz does not claim legal authority over government budgets and civic results never execute Worldz treasury actions.",
+      "",
+      "⚠️ Current civic build is NON-BINDING. Public concern submission remains gated until moderation/privacy/safety controls are active.",
+      "",
+      "/worldzballots — public civic ballot list",
+      "/worldzballot SLUG — ballot details",
+      "/worldzresults SLUG — closed/audited public result"
+    ].join("\n"));
+  });
 
   bot.onText(/^\/worldzballots(?:@\w+)?$/, async (msg) => {
     try {
