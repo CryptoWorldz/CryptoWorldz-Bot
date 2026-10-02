@@ -72,9 +72,9 @@ test('real intelligence cross-checks public providers and keeps REX evidence sep
   const fetchImpl=async(url,opts={})=>{
     if(opts.method==='POST'){
       const req=JSON.parse(opts.body);
-      if(req.method==='getAccountInfo')return response(rpcResult({value:{data:{parsed:{info:{
-        mintAuthority:null,freezeAuthority:null,decimals:6,supply:'1000'
-      }}}}));
+      if(req.method==='getAccountInfo')return response(rpcResult({
+        value:{data:{parsed:{info:{mintAuthority:null,freezeAuthority:null,decimals:6,supply:'1000'}}}}
+      }));
       if(req.method==='getTokenLargestAccounts')return response(rpcResult({value:[
         {address:'A',amount:'400'},{address:'B',amount:'150'},{address:'C',amount:'50'}
       ]}));
