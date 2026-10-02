@@ -133,7 +133,7 @@ function transferInstructions(d,s){
 async function preflight(){
  await connect();
  const d=await deps(),connection=new d.web3.Connection(RPC,'confirmed'),s=await state(connection,d);
- if(s.sourceWldz<BigInt(cfg.totalWldz)*1000000n)fail('Squads vault does not contain the full 55,000,000 WLDZ.');
+ if(s.sourceWldz<BigInt(cfg.totalWldz)*1000000n)fail('Squads vault does not contain the full '+Number(cfg.totalWldz).toLocaleString()+' WLDZ pending distribution.');
  const missing=await recipientCheck(connection,d,s);
  if(missing){
   $('#sign').disabled=true;
