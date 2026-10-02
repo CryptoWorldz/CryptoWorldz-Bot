@@ -13,6 +13,9 @@ test("Command Centre exposes a separate civic public voice surface", () => {
   assert.match(html, /worldz-votes-civic[.]js/);
   assert.match(js, /No paid ballot advantage/);
   assert.match(js, /NON-BINDING|non-binding/i);
+  assert.match(js, /Worldwide by default/i);
+  assert.match(js, /Uganda/i);
+  assert.match(js, /Food & hunger/i);
   assert.match(js, /Worldz does not endorse/i);
 });
 
@@ -27,5 +30,9 @@ test("Civic runtime registers read-only public routes and Telegram commands", ()
   assert.doesNotMatch(telegram, /\/civicvote/);
   assert.match(http, /bindingVotingEnabled: false/);
   assert.match(http, /voteCastingEnabled: false/);
+  assert.match(http, /concernSubmissionEnabled: false/);
+  assert.match(http, /worldwide/);
+  assert.match(http, /worldz_civic_concerns/);
   assert.doesNotMatch(http, /app[.]post\("\/api\/worldz-votes\/civic\/.*vote/);
+  assert.doesNotMatch(http, /app[.]post\("\/api\/worldz-votes\/civic\/.*concern/);
 });
