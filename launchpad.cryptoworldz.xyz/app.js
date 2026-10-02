@@ -114,7 +114,7 @@ async function renderMarket(){
     renderFounding100(out.founding100);
     const launches=Array.isArray(out.launches)?out.launches:[];
     if(!launches.length){
-      target.innerHTML='<article class="market-card"><span class="market-num">#001?</span><div><strong>FIRST PUBLIC LAUNCH SLOT OPEN</strong><em>Who will be first?</em><small>Build + prove your token through WorldzLaunchPad™</small></div><div class="market-stat"><span>Platform share</span><b>10% of token fee only</b></div><span class="arrow">→</span></article>';
+      target.innerHTML='<article class="market-card"><span class="market-num">#001?</span><div><strong>FIRST PUBLIC LAUNCH SLOT OPEN</strong><em>Who will be first?</em><small>Build + prove your token through WorldzLaunchPad™</small></div><div class="market-stat"><span>Fee Flow V3</span><b>Creator keeps 97 / 95 / 92%</b></div><span class="arrow">→</span></article>';
       return;
     }
     target.innerHTML=launches.map((x,i)=>{
@@ -264,6 +264,16 @@ function manifestBase(){
       walletTransferTax:false
     },
     launchRecipe:selectedRecipe,
+    launchBenefits:{
+      version:'WORLDZ-LAUNCH-BENEFITS-V1',
+      founding100Candidate:true,
+      founding100QualificationRequiresMainnet:true,
+      launchReferrerPercentOfWorldzContribution:5,
+      legendReferralProgram:'20 LP inviter + 10 LP newcomer after 7-day qualification',
+      newcomerShillBoost:'20 LP after first verified Raaiiidd',
+      devCityParticipation:'OPT_IN_REVIEW_PATH__NO_AUTOMATIC_TOKEN_AWARD',
+      worldzNewsWireEligibleAfterRegistryEvidence:true
+    },
     supplyAllocationPercent:currentAllocations(),
     safetyPolicy:{
       standard:platform.safeLaunchPolicy.version,
