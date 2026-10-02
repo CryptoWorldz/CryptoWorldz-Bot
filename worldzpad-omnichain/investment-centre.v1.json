@@ -1,0 +1,75 @@
+{
+  "version": "WORLDZ-INVESTMENT-CENTRE-V1",
+  "date": "2026-10-02",
+  "name": "Worldz Investment Centre™",
+  "status": "READ_ONLY_PORTFOLIO_RESEARCH_BETA",
+  "publicPath": "/invest/",
+  "mission": "Help people learn, research, compare, track and model crypto exposure without turning a Worldz interface into a promise that prices will rise.",
+  "modes": [
+    "LEARN",
+    "WATCH",
+    "PORTFOLIO_LAB",
+    "RESERVE_PROOF",
+    "RISK_LENS"
+  ],
+  "initialChainWatch": [
+    {
+      "asset": "XRP",
+      "world": "XRPWorldz",
+      "type": "native"
+    },
+    {
+      "asset": "wXRP",
+      "world": "XRPWorldz / SolWorldz",
+      "type": "wrapped",
+      "reserveProofRequired": true
+    },
+    {
+      "asset": "SOL",
+      "world": "SolWorldz",
+      "type": "native"
+    },
+    {
+      "asset": "HYPE",
+      "world": "HyperWorldz",
+      "type": "native/ecosystem"
+    },
+    {
+      "asset": "Robinhood Chain",
+      "world": "RobinWorldz",
+      "type": "network"
+    },
+    {
+      "asset": "Base",
+      "world": "BaseWorldz",
+      "type": "network"
+    },
+    {
+      "asset": "SUI",
+      "world": "SuiWorldz",
+      "type": "native"
+    }
+  ],
+  "portfolioPrivacy": {
+    "serverStorageDefault": false,
+    "browserLocalOnly": true,
+    "walletConnectionRequired": false,
+    "seedPhraseOrPrivateKeyNeverAccepted": true
+  },
+  "investmentGuardrails": {
+    "guaranteedReturns": false,
+    "pricePredictionDefault": false,
+    "leverageDefault": false,
+    "copyTradingDefault": false,
+    "concentrationWarning": true,
+    "wrappedAssetCustodyWarning": true,
+    "liquidityWarning": true,
+    "smartContractOrIssuerControlWarning": true,
+    "chainMainnetStatusVisible": true,
+    "proofBefore1To1Claim": true
+  },
+  "futureExecution": {
+    "enabled": false,
+    "rule": "Buying, selling, DCA execution or automated rebalancing require separate provider, legal, custody, best-execution and chain-specific proof before activation."
+  }
+}
