@@ -100,12 +100,22 @@ function registerShillRewards({ bot, repository, supabase, config }) {
 
   bot.onText(/^\/shillpoints(?:@\w+)?$/i, async (msg) => {
     try {
-      const tokens = await tokenList();
-      const rows = tokens.map((item) => `• $${item.symbol} — ${item.points_per_verified_share} LP per approved genuine share`).join("\n");
+      const [tokens, statusResult] = await Promise.all([
+        tokenList(),
+        supabase.rpc("get_activity_reward_automation_status", { p_telegram_id: Number(msg.from.id) })
+      ]);
+      if (statusResult.error) throw statusResult.error;
+      const status = Array.isArray(statusResult.data) ? statusResult.data[0] : statusResult.data;
+      const rows = tokens.map((item) => `• ${item.symbol} — ${item.points_per_verified_share} LP per genuine share that passes the automatic safety checks`).join("\n");
       return send(msg.chat.id, [
-        "📣💜 WORLDZ SHILL REWARDS",
+        "📣💜 WORLDZ SHILLPOINTS",
         "",
         rows || "No reward tokens are enabled.",
+        "",
+        `⚡ Automation: ${status?.enabled && status?.auto_shill_points ? "ON" : "OFF"}`,
+        `Today: ${Number(status?.shill_claims_today) || 0}/${Number(status?.shill_daily_claim_cap) || 0} Shills`,
+        `Points today: ${Number(status?.points_today) || 0}/${Number(status?.user_daily_points_cap) || 0} LP`,
+        `Points this week: ${Number(status?.points_this_week) || 0}/${Number(status?.user_weekly_points_cap) || 0} LP`,
         "",
         "Eligible proof platforms:",
         "𝕏 X • Facebook • YouTube • TikTok • Instagram • Reddit • Telegram • Discord • public websites",
@@ -115,7 +125,9 @@ function registerShillRewards({ bot, repository, supabase, config }) {
         "Submit: /shill TOKEN | https://your-proof-link",
         "Example: /shill RECAP | https://x.com/yourname/status/123",
         "",
-        "⚡ Genuine low-risk proofs auto-award points. Only exceptions need Admin review.",
+        "⚡ Normal proofs that pass the automatic checks are awarded immediately.",
+        "🛡 Only cap hits, anomalies and other exceptions go to Admin review.",
+        "🏦 Reward funding: Treasury → ring-fenced Reward Wallet → capped weekly member allocation.",
         "Spam, bots, duplicate links and fake engagement earn nothing."
       ].join("\n"));
     } catch {
