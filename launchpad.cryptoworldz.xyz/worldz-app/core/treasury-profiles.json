@@ -8,8 +8,8 @@
       "allocationPercent": 20,
       "governance": {
         "threshold": 4,
-        "signers": 10,
-        "display": "4-of-10"
+        "signers": 7,
+        "display": "4-of-7"
       },
       "custody": {
         "solana": "Squads",
@@ -17,6 +17,14 @@
         "xrpl": "SignerList",
         "sui": "Native weighted multisig"
       },
+      "registeredSignerCandidates": [
+        {
+          "name": "Jackson Dave",
+          "telegram": "@Jacksontytq",
+          "solana": "99M5ZwVSFBPztU1Sds4eZcda24H9LwiQVxk6nLMyTPvc",
+          "status": "RECORDED_PENDING_SIGNER_ACTIVATION"
+        }
+      ],
       "state": "NOT_DEPLOYED",
       "mainnetExecution": false
     },
@@ -52,5 +60,5 @@
       "note": "No separate Worldz Reserve Treasury is currently required. Reserve sweeps are disabled; funds remain in the Operations Treasury until a future explicit decision."
     }
   ],
-  "rule": "Worldz Operations uses permanent 3-of-5 governance. Reserve is disabled/not deployed. Treasury membership and authority never silently inherit between profiles."
+  "rule": "Worldz Operations uses permanent 3-of-5 governance. Miracle Church/secondary treasury uses a 4-of-7 target once all seven signer wallets are independently verified and the profile is actually deployed. Reserve is disabled/not deployed. Treasury membership and authority never silently inherit between profiles."
 }

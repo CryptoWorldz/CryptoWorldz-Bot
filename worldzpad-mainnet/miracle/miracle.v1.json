@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-MIRACLE-V1",
-  "version": "2026-09-30",
+  "version": "2026-10-02",
   "status": "PLANNED_SPEC_LOCKED",
   "token": {
     "order": 4,
@@ -26,9 +26,17 @@
       "unassignedTokensRemainVaulted": true,
       "silentAutomaticReassignmentAllowed": false,
       "proposedMultisig": {
-        "policy": "4-of-10",
+        "policy": "4-of-7",
         "state": "PROPOSED_NOT_DEPLOYED"
       },
+      "registeredSignerCandidates": [
+        {
+          "name": "Jackson Dave",
+          "telegram": "@Jacksontytq",
+          "solana": "99M5ZwVSFBPztU1Sds4eZcda24H9LwiQVxk6nLMyTPvc",
+          "status": "RECORDED_PENDING_SIGNER_ACTIVATION"
+        }
+      ],
       "registeredRecipientSource": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json"
     },
     "miracleMagicSupply": {
@@ -64,7 +72,7 @@
   },
   "treasuryProfiles": {
     "miracleChurchTreasury": {
-      "proposedPolicy": "4-of-10",
+      "proposedPolicy": "4-of-7",
       "state": "PROPOSED_NOT_DEPLOYED",
       "signerConsentRequired": true,
       "verifiedPublicWalletRequired": true,
