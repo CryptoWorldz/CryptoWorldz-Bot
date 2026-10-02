@@ -36,8 +36,8 @@
 <section class="card"><h2>Issue supply</h2><p>Switch GemWallet back to the issuer, reconnect, then issue the configured amount to the hot wallet. Worldz labels this <b>intended supply</b> until issuer control is separately proven immutable.</p><div class="actions"><button class="btn primary" id="issue" disabled>3 • Issue Token Supply</button></div></section>
 
 <section class="card" id="amm-card"><h2>Native Token/XRP AMM</h2>
-<div class="form"><label>AMM token amount<input id="token-liquidity" inputmode="decimal" value="5000000"></label><label>AMM XRP amount<input id="xrp-liquidity" inputmode="decimal" placeholder="e.g. 100"></label><label>AMM trading fee %<input id="amm-fee" type="number" min="0" max="1" step=".001" value=".5"></label><label>Implied XRP per token<input id="amm-price" readonly></label></div>
-<p class="micro">Worldz shows the AMM's implied starting ratio. Liquidity existence is not the same as issuer immutability or LP-style lock proof.</p>
+<div class="form"><label>AMM token amount<input id="token-liquidity" inputmode="decimal" value="5000000"></label><label>AMM XRP amount<input id="xrp-liquidity" inputmode="decimal" placeholder="e.g. 100"></label><label>AMM trading fee %<input id="amm-fee" type="number" min=".25" max="1" step=".25" value="1"></label><label>Implied XRP per token<input id="amm-price" readonly></label></div>
+<p class="micro"><b>XRPWorldz Fair Fee:</b> 1.00% default with simple 0.25% choices down to 0.25%. XRPL itself supports finer fee precision, but Worldz deliberately keeps the creator experience simple. Worldz shows the AMM's implied starting ratio. Liquidity existence is not the same as issuer immutability or LP-style lock proof.</p>
 <div class="actions"><button class="btn primary" id="amm" disabled>4A • Create Token/XRP AMM</button></div></section>
 
 <section class="card" id="clob-card"><h2>Native XRPL order-book seed</h2>
