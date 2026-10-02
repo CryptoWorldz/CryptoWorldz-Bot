@@ -55,18 +55,36 @@ assert Decimal(str(public["projectTradingFeeMinPercent"]))==Decimal(str(policy["
 assert Decimal(str(public["projectTradingFeeMaxPercent"]))==Decimal(str(policy["projectTradingFeeMaxPercent"]))
 assert public["worldzLaunchPadContributionChoicesPercent"]==policy["worldzLaunchPadContributionChoicesPercent"]==[3,5,8]
 assert public["worldzLaunchPadContributionDefaultPercent"]==policy["worldzLaunchPadContributionDefaultPercent"]==5
-assert public["legacyCorePercent"]==policy["legacyCorePercent"]==15
-assert public["worldzCoreFamilyMarketBuyPercent"]==policy["coreFamilyMarketBuyPercent"]==12
+assert public["creatorRetentionByContributionPercent"]==policy["creatorRetentionByContribution"]=={"3":97,"5":95,"8":92}
 assert public["walletTransferTaxPercent"]==policy["walletTransferTaxPercent"]==0
 assert inheritance["tokenAllocationBoundary"]["publicCreatorRoute"]["implicitWorldzTokenSupplySharePercent"]==policy["worldzLaunchPadShareOfTokenSupplyPercent"]==0
+
 v2=inheritance["economicsProfiles"]["worldzFeeFlowV2"]
-assert v2["launchPadContributionChoicesPercent"]==[3,5,8]
-assert v2["launchPadContributionDefaultPercent"]==5
-assert v2["fixedPercent"]["creatorDeveloper"]==10
-assert v2["fixedPercent"]["launchReferrer"]==15
-assert v2["fixedPercent"]["legacyCore"]==15
-assert v2["fixedPercent"]["worldzCoreFamilyMarketBuys"]==12
-assert v2["treasuryReserveByLaunchPadChoice"]=={"3":12,"5":10,"8":7}
+assert v2["selection"]=="HISTORICAL_AUDIT_ONLY__SUPERSEDED_BY_V3"
+
+v3=inheritance["economicsProfiles"]["worldzFeeFlowV3"]
+assert v3["worldzContributionChoicesPercent"]==[3,5,8]
+assert v3["worldzContributionDefaultPercent"]==5
+assert v3["creatorRetentionByContributionPercent"]=={"3":97,"5":95,"8":92}
+assert v3["worldzInternalSplitPercent"]=={
+    "operationsProductDevelopment":20,
+    "treasury":20,
+    "lpGrowth":15,
+    "legacyCore":10,
+    "worldzCoreFamilyMarketBuys":10,
+    "impactCharity":10,
+    "teamBuilderRewards":5,
+    "futureLaunchInfrastructure":5,
+    "launchReferrer":5,
+}
+assert sum(v3["worldzInternalSplitPercent"].values())==100
+assert v3["treasuryLane"]=={
+    "percentOfWorldzContribution":20,
+    "operationsPercent":70,
+    "miracleTeamPercent":30,
+    "operationsGovernance":"3-of-5",
+    "miracleTeamGovernance":"4-of-7",
+}
 
 assert product["creatorEconomics"]["defaultWorldzControlledSharePercent"]==51
 assert product["referralEconomics"]["defaultWorldzControlledSharePercent"]==17
@@ -133,4 +151,4 @@ assert inheritance["postLaunchInheritance"]["indexerStateNeverFaked"] is True
 assert inheritance["postLaunchInheritance"]["vendorPaymentAutomatic"] is False
 
 print("WORLDZ_LAUNCH_INHERITANCE=PASS")
-print("chains=8 identity=LOCKED proof=REQUIRED fullscope=REQUIRED provider_handoffs=JUPITER+DEXSCREENER mainnet=PER_CHAIN_GATED")
+print("chains=8 identity=LOCKED proof=REQUIRED fullscope=REQUIRED fee_flow=V3_97_95_92 provider_handoffs=JUPITER+DEXSCREENER mainnet=PER_CHAIN_GATED")
