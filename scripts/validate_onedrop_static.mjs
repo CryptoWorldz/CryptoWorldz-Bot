@@ -23,7 +23,6 @@ if(manifest.recipients.length!==219)throw new Error('unexpected claimant count')
 const [distributor]=PublicKey.findProgramAddressSync([Buffer.from('MerkleDistributor'),mint.toBuffer(),u64(version)],JITO);
 const tokenVault=getAssociatedTokenAddressSync(mint,distributor,true,TOKEN_PROGRAM_ID);
 const ownerAta=getAssociatedTokenAddressSync(mint,owner,false,TOKEN_PROGRAM_ID);
-const impact=manifest.buckets.find(x=>x.name==='ONEWORLDZ_IMPACT'),impactOwner=new PublicKey(impact.destination),impactAta=getAssociatedTokenAddressSync(mint,impactOwner,true,TOKEN_PROGRAM_ID);
 const root=Buffer.alloc(32,7),now=2_000_000_000n;
 const distData=Buffer.concat([discriminator('new_distributor'),u64(version),root,u64(total),u64(manifest.recipients.length),i64(now),i64(now+3600n),i64(now+3600n+315360000n)]);
 const distIx=new TransactionInstruction({programId:JITO,data:distData,keys:[
@@ -31,16 +30,14 @@ const distIx=new TransactionInstruction({programId:JITO,data:distData,keys:[
 ]});
 const blockhash='11111111111111111111111111111111';
 const inner=new TransactionMessage({payerKey:vault,recentBlockhash:blockhash,instructions:[
- createTransferCheckedInstruction(sourceAta,mint,tokenVault,vault,total,manifest.token.decimals,[],TOKEN_PROGRAM_ID),
- createTransferCheckedInstruction(sourceAta,mint,impactAta,vault,BigInt(impact.raw),manifest.token.decimals,[],TOKEN_PROGRAM_ID)
+ createTransferCheckedInstruction(sourceAta,mint,tokenVault,vault,total,manifest.token.decimals,[],TOKEN_PROGRAM_ID)
 ]});
 const transactionIndex=999n,[transactionPda]=squads.getTransactionPda({multisigPda:multisig,index:transactionIndex}),[proposalPda]=squads.getProposalPda({multisigPda:multisig,transactionIndex});
-const createIx=squads.instructions.vaultTransactionCreate({multisigPda:multisig,transactionIndex,creator:owner,rentPayer:owner,vaultIndex:0,ephemeralSigners:0,transactionMessage:inner,memo:'Worldz OneDrop REVIVE: Dev + Legacy claims and OneWorldz Impact'});
+const createIx=squads.instructions.vaultTransactionCreate({multisigPda:multisig,transactionIndex,creator:owner,rentPayer:owner,vaultIndex:0,ephemeralSigners:0,transactionMessage:inner,memo:'Worldz OneDrop REVIVE: Dev + Legacy claims only'});
 const proposalIx=squads.instructions.proposalCreate({multisigPda:multisig,transactionIndex,creator:owner,rentPayer:owner,isDraft:false});
 const approveIx=squads.instructions.proposalApprove({multisigPda:multisig,transactionIndex,member:owner,memo:'Approve exact REVIVE OneDrop distribution'});
 const tx=new Transaction({feePayer:owner,recentBlockhash:blockhash}).add(
  createAssociatedTokenAccountIdempotentInstruction(owner,ownerAta,owner,mint,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID),
- createAssociatedTokenAccountIdempotentInstruction(owner,impactAta,impactOwner,mint,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID),
  distIx,createIx,proposalIx,approveIx
 );
 const size=tx.serialize({requireAllSignatures:false,verifySignatures:false}).length;
