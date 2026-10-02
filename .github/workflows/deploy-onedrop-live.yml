@@ -362,7 +362,7 @@ jobs:
         run: |
           import time, urllib.request
           expected={
-            'https://launchpad.cryptoworldz.xyz/onedrop/':['Worldz OneDrop','SIGN & LAUNCH ONEDROP'],
+            'https://launchpad.cryptoworldz.xyz/onedrop/':['Worldz OneDrop','CREATE PROPOSAL + APPROVAL 1/3'],
             'https://launchpad.cryptoworldz.xyz/onedrop/claim/':['REVIVE','Verify My Allocation']
           }
           for url,needles in expected.items():
