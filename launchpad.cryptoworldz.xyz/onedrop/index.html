@@ -27,7 +27,7 @@ main{max-width:900px;margin:auto;padding:28px 16px 70px}a{color:#e7c7ff}h1{font-
 <div class="metric"><b>Already in locked LP</b><strong>30,000,000 RVIV</strong></div>
 <div class="metric"><b>OneDrop claim vault</b><strong>49,999,999.999948 RVIV</strong></div>
 <div class="metric"><b>Unique claimants</b><strong>219 wallets</strong></div>
-<div class="metric"><b>OneWorldz Impact</b><strong>20,000,000 RVIV</strong></div>
+<div class="metric"><b>Worldz Impact</b><strong>20,000,000 RVIV</strong></div>
 <div class="metric"><b>Remains reserved</b><strong>100,000,000.000052 RVIV</strong></div>
 </div>
 </section>
@@ -35,9 +35,9 @@ main{max-width:900px;margin:auto;padding:28px 16px 70px}a{color:#e7c7ff}h1{font-
 <section class="card">
 <h2>Full model</h2>
 <div class="bucket"><b>Initial Liquidity</b><strong>30M</strong><small>Already in the mainnet pool / permanent-lock proof path.</small></div>
-<div class="bucket"><b>Seven Dev shares</b><strong>30M</strong><small>OneDrop claims; 7 equal allocations, with 0.000002 RVIV dust retained.</small></div>
+<div class="bucket"><b>Seven Dev shares</b><strong>30M</strong><small>OneDrop claims with zero immediate Dev unlock and 12-month linear vesting; 7 equal allocations, with 0.000002 RVIV dust retained.</small></div>
 <div class="bucket"><b>Legacy Revival</b><strong>20M</strong><small>214 eligible snapshot wallets in OneDrop; 0.000050 RVIV dust retained.</small></div>
-<div class="bucket"><b>OneWorldz Impact</b><strong>20M</strong><small>Direct transfer in the same Squads inner distribution message.</small></div>
+<div class="bucket"><b>Worldz Impact</b><strong>20M</strong><small>Direct transfer only after the Squads proposal reaches the permanent 3-of-5 approval threshold.</small></div>
 <div class="bucket"><b>DevCity™ 100</b><strong>20M</strong><small>Reserved until the exact 100-wallet approved roster exists.</small></div>
 <div class="bucket"><b>Team Vesting</b><strong>30M</strong><small>Reserved until beneficiaries and Jupiter vesting schedules are approved.</small></div>
 <div class="bucket"><b>Staged Liquidity</b><strong>40M</strong><small>Reserved for separately reviewed LP additions.</small></div>
@@ -46,19 +46,19 @@ main{max-width:900px;margin:auto;padding:28px 16px 70px}a{color:#e7c7ff}h1{font-
 
 <section class="card">
 <h2>Owner launch console</h2>
-<p class="truth"><b>Important:</b> “one transaction” here means one owner-signed Solana transaction to create and fund the Merkle distributor and route the currently executable buckets. Recipients claim later with their own signatures. The page refuses to broadcast if the exact transaction exceeds Solana's packet limit, fails simulation, or costs more SOL than the connected wallet has.</p>
+<p class="truth"><b>Important:</b> Team Zed Treasury is now permanent <strong>3-of-5</strong>. The first JayJayTeamDev signature creates the OneDrop distributor + Squads proposal and records approval 1/3; it does <strong>not</strong> move RVIV from the treasury. Two more authorized members approve the exact pending proposal in Squads. Only after 3/5 is reached can the final treasury execution be simulated and signed.</p>
 <div class="actions">
 <button id="connect" class="connect">1. Connect JayJayTeamDev</button>
-<button id="prepare" class="primary" disabled>2. Build + Simulate ONE Transaction</button>
-<button id="launch" class="primary" disabled>3. SIGN & LAUNCH ONEDROP</button>
+<button id="prepare" class="primary" disabled>2. Build / Refresh 3-of-5 Proposal</button>
+<button id="launch" class="primary" disabled>3. Create Proposal + Approval 1/3</button>
 </div>
-<div id="status" class="status">Nothing signed. Load the frozen manifest and connect the authorized wallet.</div>
+<div id="status" class="status">Nothing signed. Load the frozen manifest and connect the authorized wallet. Permanent treasury rule: 3-of-5.</div>
 <pre id="review" class="status mono">Waiting for live mainnet preflight…</pre>
 <a class="claim" href="./claim/">Open REVIVE Claim Page →</a>
-<p class="mini">No seed phrase is requested. The connected wallet remains the signer. The browser recomputes the Merkle root from the frozen recipient manifest, verifies the RVIV mint and Squads vault, simulates the exact transaction, shows its byte size and estimated SOL debit, then asks for the wallet signature.</p>
+<p class="mini">No seed phrase is requested. The connected wallet remains the signer. The browser recomputes the Merkle root from the frozen recipient manifest, verifies the RVIV mint and live Squads 3-of-5 governance, simulates each exact stage, and shows the estimated SOL debit before any signature. Legacy claims are unlocked; Dev claims are locked into 12-month linear vesting.</p>
 </section>
 </main>
-<script type="module" src="./app.js?v=20260926-vanilla-reown-c"></script>
-<!-- WORLDZ_ONEDROP_DEPLOY_20260926_A -->
+<script type="module" src="./app.js?v=20261002-3of5-vesting"></script>
+<!-- WORLDZ_ONEDROP_3OF5_VESTING_20261002 -->
 </body>
 </html>
