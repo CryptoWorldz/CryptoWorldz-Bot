@@ -17,7 +17,7 @@
         "xrpl": "SignerList",
         "sui": "Native weighted multisig"
       },
-      "state": "PENDING_2_REPLACEMENT_SIGNERS__NOT_DEPLOYED",
+      "state": "PENDING_SOLPAUL_SOLMARK_PUBLIC_KEYS__NOT_DEPLOYED",
       "mainnetExecution": false,
       "signerPolicy": {
         "signers": [
@@ -60,6 +60,19 @@
           {
             "label": "Annabel",
             "reason": "INVALID_SOLANA_PUBLIC_KEY"
+          }
+        ],
+        "pendingNamedReplacements": [
+          {
+            "label": "SolPaul",
+            "solanaPublicKey": null,
+            "status": "PUBLIC_SOLANA_KEY_REQUIRED"
+          },
+          {
+            "label": "SolMark",
+            "handle": "@MARKW30",
+            "solanaPublicKey": null,
+            "status": "PUBLIC_SOLANA_KEY_REQUIRED"
           }
         ]
       },
@@ -104,5 +117,5 @@
       "note": "No separate Worldz Reserve Treasury is currently required. Reserve sweeps are disabled; funds remain in the Operations Treasury until a future explicit decision."
     }
   ],
-  "rule": "Worldz Operations remains permanent 3-of-5. The separate Miracle Team Treasury still targets 4-of-8, but SolMusic was removed by owner request and Annabel was removed because the supplied key is not a valid 32-byte Solana public key. Two replacement signer wallets are required before deployment."
+  "rule": "Worldz Operations remains permanent 3-of-5. The separate Miracle Team Treasury targets 4-of-8. The two remaining human signer slots are reserved for SolPaul and SolMark (@MARKW30); deployment waits for their verified public Solana keys."
 }
