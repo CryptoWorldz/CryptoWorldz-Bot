@@ -141,7 +141,7 @@ async function preflight(){
   return false;
  }
  const prep=$('#prepare-accounts');if(prep){prep.disabled=true;prep.textContent='1. Recipient Accounts Ready ✅';}
- const ps=$('#prepare-status');if(ps){ps.textContent='RECIPIENT ACCOUNTS READY ✅\nAll 10 destination token accounts are confirmed on-chain.';ps.className='status good';}
+ const ps=$('#prepare-status');if(ps){ps.textContent='RECIPIENT ACCOUNTS READY ✅\nAll '+cfg.legs.flat().length+' destination token accounts are confirmed on-chain.';ps.className='status good';}
 
  const bh=(await connection.getLatestBlockhash('confirmed')).blockhash;
  const inner=new d.web3.VersionedTransaction(new d.web3.TransactionMessage({payerKey:s.vault,recentBlockhash:bh,instructions:transferInstructions(d,s)}).compileToV0Message());
