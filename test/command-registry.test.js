@@ -7,7 +7,7 @@ const REQUIRED_RUNTIME_COMMANDS = [
   "start","register","profile","rewards","leaderboard","raaiiidd","raids","wallet","cancel","kitty","impact","donate","points",
   "fullscope","worldzfullbuild","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
   "worldzvotes","vote","tokenvote","worldztrending","worldzrankings","worldzvoice","worldzballots","worldzballot","worldzresults",
-  "raid","next","raidprogress","stopraid","admin","admingrace","zedsettings","newmission","editmission","endmission","pending","approve","reject","member","admins","permissions","setkitty","setrole","setpermission","setpartner","broadcast","stats","activity",
+  "raid","next","raidpoints","raidprogress","stopraid","admin","admingrace","zedsettings","newmission","editmission","endmission","pending","approve","reject","member","admins","permissions","setkitty","setrole","setpermission","setpartner","broadcast","stats","activity",
   "causes","cause","cause_add","shilllink","shillpack","shillcampaign","shill","shillpoints","pendingshills","approveshill","rejectshill","referrals","rewardplan","website","websites","worldzlinks","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
   "workstart","workstop","evidence","workevidence","rewardbudget","specialreward","rewardasset","fundingplan","funded","contribute","walletplan","setprojectwallet","investmentfunded",
   "worldzcast","worldzcasttargets","confirmworldzcast","cancelworldzcast","worldzcaston","worldzcastoff","boostshill","specialtiers","uniquelegend","legendstatus","reviewlegend","reserverewardon","reserverewardoff",
@@ -43,7 +43,7 @@ test("Ronald Raider is exposed as RAIDS, not Missions", () => {
   const raids = groupsForRole("member").find((group) => group.key === "raids");
   assert.ok(raids);
   const names = new Set(raids.commands.map((item) => item.command));
-  for (const command of ["raid","next","raaiiidd","raids","creator"]) assert.ok(names.has(command), command);
+  for (const command of ["raid","next","raaiiidd","raids","raidpoints","creator"]) assert.ok(names.has(command), command);
   assert.equal(names.has("missions"), false);
 });
 
