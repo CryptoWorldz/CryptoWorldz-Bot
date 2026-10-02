@@ -151,18 +151,14 @@ async function prepare(){
   if(await connection.getAccountInfo(tokenVault,'confirmed'))stop('Unexpected pre-existing OneDrop token vault.');
 
   const clawbackAta=getAssociatedTokenAddressSync(mint,owner,false,TOKEN_PROGRAM_ID);
-  const impact=manifest.buckets.find(x=>x.name==='ONEWORLDZ_IMPACT');
-  const impactOwner=new PublicKey(impact.destination);
-  const impactAta=getAssociatedTokenAddressSync(mint,impactOwner,true,TOKEN_PROGRAM_ID);
-  const [clawbackInfo,impactInfo]=await connection.getMultipleAccountsInfo([clawbackAta,impactAta],'confirmed');
+  const clawbackInfo=await connection.getAccountInfo(clawbackAta,'confirmed');
 
   const now=Math.floor(Date.now()/1000),start=now+3600,end=now+7200,clawback=end+(manifest.distributor.clawbackDelayDays*86400);
   const distIx=await newDistributorIx({distributor,clawbackAta,mint,tokenVault,admin:owner,root,version,maxTotal:BigInt(manifest.distributor.maxTotalClaimRaw),maxNodes:BigInt(manifest.distributor.maxNumNodes),start,end,clawback});
 
   const claimTransfer=createTransferCheckedInstruction(sourceAta,mint,tokenVault,vault,BigInt(manifest.distributor.maxTotalClaimRaw),manifest.token.decimals,[],TOKEN_PROGRAM_ID);
-  const impactTransfer=createTransferCheckedInstruction(sourceAta,mint,impactAta,vault,BigInt(impact.raw),manifest.token.decimals,[],TOKEN_PROGRAM_ID);
   const latest=await connection.getLatestBlockhash('confirmed');
-  const inner=new TransactionMessage({payerKey:vault,recentBlockhash:latest.blockhash,instructions:[claimTransfer,impactTransfer]});
+  const inner=new TransactionMessage({payerKey:vault,recentBlockhash:latest.blockhash,instructions:[claimTransfer]});
   const wrappedBytes=squads.utils.transactionMessageToMultisigTransactionMessageBytes({message:inner,vaultPda:vault});
   const [wrappedMessage]=squads.types.transactionMessageBeet.deserialize(Buffer.from(wrappedBytes));
 
@@ -171,12 +167,11 @@ async function prepare(){
   const [proposalPda]=squads.getProposalPda({multisigPda:multisig,transactionIndex});
   if((await connection.getAccountInfo(transactionPda,'confirmed'))||(await connection.getAccountInfo(proposalPda,'confirmed')))stop('Next Squads transaction index is already occupied. Rebuild from live state.');
 
-  const createIx=squads.instructions.vaultTransactionCreate({multisigPda:multisig,transactionIndex,creator:owner,rentPayer:owner,vaultIndex:0,ephemeralSigners:0,transactionMessage:inner,memo:'Worldz OneDrop REVIVE: Dev + Legacy claims and OneWorldz Impact'});
+  const createIx=squads.instructions.vaultTransactionCreate({multisigPda:multisig,transactionIndex,creator:owner,rentPayer:owner,vaultIndex:0,ephemeralSigners:0,transactionMessage:inner,memo:'Worldz OneDrop REVIVE: Dev + Legacy claims only'});
   const proposalIx=squads.instructions.proposalCreate({multisigPda:multisig,transactionIndex,creator:owner,rentPayer:owner,isDraft:false});
   const approveIx=squads.instructions.proposalApprove({multisigPda:multisig,transactionIndex,member:owner,memo:'Approve exact REVIVE OneDrop distribution'});
   const outer=new Transaction({feePayer:owner,recentBlockhash:latest.blockhash});
   if(!clawbackInfo)outer.add(createAssociatedTokenAccountIdempotentInstruction(owner,clawbackAta,owner,mint,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID));
-  if(!impactInfo)outer.add(createAssociatedTokenAccountIdempotentInstruction(owner,impactAta,impactOwner,mint,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID));
   outer.add(distIx,createIx,proposalIx,approveIx);
   const raw=outer.serialize({requireAllSignatures:false,verifySignatures:false});
   if(raw.length>1232)stop('Exact ONE-transaction build is '+raw.length+' bytes, above Solana\'s 1232-byte packet limit. Nothing was signed or sent.');
@@ -187,7 +182,7 @@ async function prepare(){
   if(debit!==null&&debit<0)stop('Simulation returned an invalid owner SOL delta.');
   if(debit!==null&&debit>ownerLamports)stop('Connected wallet does not have enough SOL for the simulated OneDrop transaction.');
 
-  plan={outer,latest,root,distributor,tokenVault,impactAta,transactionIndex,transactionPda,proposalPda,ownerLamports,debit,rawLength:raw.length,sourceBefore:source.amount};
+  plan={outer,latest,root,distributor,tokenVault,transactionIndex,transactionPda,proposalPda,ownerLamports,debit,rawLength:raw.length,sourceBefore:source.amount};
   $('#review').textContent=
     'NETWORK: Solana Mainnet\n'+
     'RVIV mint: '+mint.toBase58()+'\n'+
@@ -196,14 +191,14 @@ async function prepare(){
     'Merkle root: '+hex(root)+'\n'+
     'Unique claimants: '+manifest.recipients.length+'\n'+
     'OneDrop claims: '+(Number(BigInt(manifest.distributor.maxTotalClaimRaw))/1e6).toFixed(6)+' RVIV\n'+
-    'OneWorldz direct: 20,000,000 RVIV → '+impactOwner.toBase58()+'\n'+
-    'Expected Squads reserve after execution: 100,000,000.000052 RVIV\n'+
+    'Impact reserve moved in this proposal: 0 RVIV\n'+
+    'Expected Squads reserve after execution: 120,000,000.000052 RVIV\n'+
     'Squads transaction index: '+transactionIndex+'\n'+
     'Outer transaction bytes: '+raw.length+' / 1232\n'+
     'Owner SOL now: '+(ownerLamports/1e9).toFixed(9)+' SOL\n'+
     'Simulated owner SOL debit: '+(debit===null?'not returned by RPC':(debit/1e9).toFixed(9)+' SOL')+'\n'+
     'Simulation: PASS\n\n'+
-    'Final wallet signature creates the claim distributor, creates any missing required ATAs, creates the exact Squads distribution proposal and records the first approval. Two additional treasury approvals are required before execution can fund the 219-wallet claim vault and route the 20M impact allocation.';
+    'Final wallet signature creates the claim distributor, creates any missing required ATAs, creates the exact Squads distribution proposal and records the first approval. Two additional treasury approvals are required before execution can fund the 219-wallet claim vault. The 20M impact allocation stays reserved in Squads.';
   status('3-OF-5 PROPOSAL PREFLIGHT PASS ✅\nReview every line, then sign only if your wallet shows the expected proposal transaction.','good');
   $('#launch').disabled=false;
 }
