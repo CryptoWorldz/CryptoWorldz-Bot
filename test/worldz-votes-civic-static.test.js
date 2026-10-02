@@ -35,5 +35,5 @@ test("Civic runtime registers moderated concern intake while keeping vote castin
   assert.match(http, /worldwide/);
   assert.match(http, /worldz_civic_concerns/);
   assert.doesNotMatch(http, /app[.]post\("\/api\/worldz-votes\/civic\/.*vote/);
-  assert.doesNotMatch(http, /app[.]post\("\/api\/worldz-votes\/civic\/.*concern/);
+  assert.match(http, /app[.]post\("\/api\/worldz-votes\/civic\/concerns"/);\n  assert.match(http, /status: "review"/);\n  assert.match(http, /public-intake-pending-human-review/);
 });
