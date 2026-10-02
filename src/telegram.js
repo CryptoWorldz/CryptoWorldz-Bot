@@ -33,6 +33,7 @@ const PUBLIC_COMMANDS = [
   { command: "next", description: "View the next Raid in line" },
   { command: "raids", description: "View all active Raids" },
   { command: "raaiiidd", description: "View the current Raid" },
+  { command: "raidpoints", description: "View automatic RaidPoints" },
   { command: "wallet", description: "Connect a public Solana wallet" },
   { command: "kitty", description: "View the community SOL/USDC kitty" },
   { command: "worldzvotes", description: "Open Worldz hourly token voting" },
