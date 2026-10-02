@@ -17,15 +17,15 @@ main{max-width:900px;margin:auto;padding:28px 16px 70px}a{color:#e7c7ff}h1{font-
 <main>
 <a href="/">← WorldzLaunchPad™</a>
 <div class="kicker">WORLDZ ONEDROP™ • SOLANA MAINNET DISTRIBUTION ENGINE</div>
-<h1>REVIVE state.<br><span>Reconcile first.</span></h1>
-<p class="lead">Live treasury proof now shows the Squads RVIV source already at the 100M reserved-state level. Dev + Legacy payouts are therefore frozen from re-issue until prior on-chain outflows are reconciled. This page is read-only for distribution execution.</p>
+<h1>REVIVE OneDrop.<br><span>Executed.</span></h1>
+<p class="lead">On-chain history proves the Dev + Legacy claim vault and the 20M Impact allocation were already funded. Re-issuing them is disabled permanently. Eligible wallets can use the existing claim route.</p>
 
 <section class="card">
 <h2>REVIVE allocation</h2>
 <div class="grid">
 <div class="metric"><b>Total supply</b><strong>200,000,000 RVIV</strong></div>
 <div class="metric"><b>Already in locked LP</b><strong>30,000,000 RVIV</strong></div>
-<div class="metric"><b>Dev + Legacy claim model</b><strong>FROZEN — reconciliation required</strong></div>
+<div class="metric"><b>Dev + Legacy claim vault</b><strong>49,999,999.999948 RVIV funded</strong></div>
 <div class="metric"><b>Unique claimants</b><strong>219 wallets</strong></div>
 <div class="metric"><b>Impact reserve</b><strong>20,000,000 RVIV — stays in Treasury</strong></div>
 <div class="metric"><b>Remains reserved</b><strong>100,000,000.000052 RVIV</strong></div>
@@ -45,16 +45,16 @@ main{max-width:900px;margin:auto;padding:28px 16px 70px}a{color:#e7c7ff}h1{font-
 </section>
 
 <section class="card">
-<h2>Reconciliation console</h2>
-<p class="truth"><b>Important:</b> No new Dev or Legacy payout is permitted from this console. The live source balance is already at the remaining-reserve level, so a second 50M claim funding transaction could duplicate prior allocations.</p>
+<h2>Execution proof</h2>
+<p class="truth"><b>Important:</b> No new Dev, Legacy or Impact funding is permitted from this console because the original distribution already executed. The remaining 100M RVIV stays reserved for DevCity, Team Vesting, staged liquidity and Treasury operations.</p>
 <div class="actions">
 <button id="connect" class="connect" disabled>1. Execution Frozen</button>
-<button id="prepare" class="primary" disabled>2. Reconcile Prior Outflows</button>
+<button id="prepare" class="primary" disabled>2. On-chain Outflows Verified</button>
 <button id="launch" class="primary" disabled>3. NO DUPLICATE PAYOUT</button>
 </div>
 <div id="status" class="status">Nothing signed. Load the frozen manifest and connect the authorized wallet.</div>
 <pre id="review" class="status mono">Waiting for live mainnet preflight…</pre>
-<span class="claim" aria-disabled="true">Claims remain frozen pending reconciliation</span>
+<a class="claim" href="./claim/">Open REVIVE Claim Page →</a>
 <p class="mini">No seed phrase is requested. The connected wallet remains the signer. The browser recomputes the Merkle root from the frozen recipient manifest, verifies the RVIV mint and 3-of-5 Squads vault, simulates the exact proposal transaction, shows its byte size and estimated SOL debit, then asks for the first signer approval. No RVIV moves until the Squads proposal reaches 3 approvals and is executed.</p>
 </section>
 </main>
