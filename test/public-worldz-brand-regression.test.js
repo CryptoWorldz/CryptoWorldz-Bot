@@ -54,7 +54,8 @@ test("Create Your Own Money campaign is accurate, connected and non-misleading",
   assert.match(html,/\/launch-station\//);
   assert.match(html,/\/community\//);
   assert.match(html,/\/advertise\//);
-  assert.doesNotMatch(html,/guaranteed profit|guaranteed returns|guaranteed 1000×/i);
+  assert.match(html,/No guaranteed returns/i);
+  assert.doesNotMatch(html,/guaranteed profit|guaranteed 1000×/i);
   assert.match(launch,/\/create-your-own-money\//);
   const home=read("launchpad.cryptoworldz.xyz/index.html");
   assert.match(home,/CREATE YOUR OWN MONEY/);
