@@ -1,5 +1,6 @@
 const $=s=>document.querySelector(s);
 const KEY='worldz-investment-centre-v1';
+const THESIS_KEY='worldz-investment-thesis-v1';
 const assets=[
   {id:'XRP',label:'XRP',world:'XRPWorldz',risk:'Native XRPL asset'},
   {id:'wXRP',label:'wXRP',world:'XRPWorldz / SolWorldz',risk:'Wrapped asset • reserve/custody proof required'},
@@ -52,11 +53,19 @@ function calc(){
   $('#largest').textContent=largest&&largest.value>0?largest.id+' • '+largest.share.toFixed(1)+'%':'—';
   $('#concentration').textContent=!largest||largest.value<=0?'Add holdings':largest.share>=70?'VERY CONCENTRATED':largest.share>=50?'CONCENTRATED':largest.share>=35?'WATCH':'DISTRIBUTED';
 }
+function loadThesis(){try{return JSON.parse(localStorage.getItem(THESIS_KEY)||'{}')}catch{return {}}}
+function thesisState(){return {asset:$('#thesis-asset').value.trim(),horizon:$('#thesis-horizon').value.trim(),case:$('#thesis-case').value.trim(),evidence:$('#thesis-evidence').value.trim(),disconfirm:$('#thesis-disconfirm').value.trim()};}
+function bootThesis(){
+  const t=loadThesis();
+  $('#thesis-asset').value=t.asset||'';$('#thesis-horizon').value=t.horizon||'';$('#thesis-case').value=t.case||'';$('#thesis-evidence').value=t.evidence||'';$('#thesis-disconfirm').value=t.disconfirm||'';
+  $('#save-thesis').onclick=()=>{const x=thesisState();if(!x.case||!x.disconfirm){$('#thesis-status').textContent='Add both your belief and what would prove it wrong before saving.';return;}localStorage.setItem(THESIS_KEY,JSON.stringify(x));$('#thesis-status').textContent='Thesis saved locally ✓ • still labelled as thesis, not verified fact.';};
+  $('#clear-thesis').onclick=()=>{localStorage.removeItem(THESIS_KEY);for(const id of ['#thesis-asset','#thesis-horizon','#thesis-case','#thesis-evidence','#thesis-disconfirm'])$(id).value='';$('#thesis-status').textContent='Local thesis cleared.';};
+}
 function boot(){
   const saved=load();$('#rows').innerHTML=assets.map(a=>row(a,saved)).join('');
   $('#calc').onclick=calc;
   $('#save').onclick=()=>{localStorage.setItem(KEY,JSON.stringify(state()));calc();$('#save').textContent='Saved Locally ✓';setTimeout(()=>$('#save').textContent='Save Locally',1200);};
   $('#reset').onclick=()=>{localStorage.removeItem(KEY);location.reload();};
-  document.querySelectorAll('#rows input').forEach(i=>i.addEventListener('input',calc));calc();
+  document.querySelectorAll('#rows input').forEach(i=>i.addEventListener('input',calc));calc();bootThesis();
 }
 boot();
