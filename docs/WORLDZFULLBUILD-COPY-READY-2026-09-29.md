@@ -41,7 +41,7 @@ The locked planned supply is **348M MRCL**. The currently committed buckets are 
 
 The planned creator first buy targets **A$200 of real SOL**. The exact SOL amount is never guessed; it is bound from live pricing at transaction review. Virtual curve liquidity is not represented as real backing.
 
-The **Miracle Church Treasury** remains a proposed **4-of-10** profile until real people opt in, verify their public wallets and the signer set is actually deployed.
+The **Miracle Church Treasury / secondary treasury** is now targeted as **4-of-7**. Jackson Dave / @Jacksontytq is recorded as a signer candidate with Solana wallet `99M5ZwVSFBPztU1Sds4eZcda24H9LwiQVxk6nLMyTPvc`. The treasury remains NOT DEPLOYED until all seven people have opted in, every public wallet is independently verified, and the signer set is actually created on-chain.
 
 ## WORLDZLAUNCHPAD™ 🚀
 
@@ -190,7 +190,7 @@ Token-specific grants, liquidity support or ProofBurn actions require their own 
 
 Current treasury profiles remain separate:
 
-- **Miracle Church Treasury — proposed 4-of-10**
+- **Miracle Church Treasury — proposed 4-of-7**
 - **Worldz Operations Treasury — permanent 3-of-5 policy**
 - **Worldz Reserve Treasury — not deployed / disabled**
 - **Reserve sweeps — OFF**
