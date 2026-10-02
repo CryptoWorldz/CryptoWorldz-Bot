@@ -49,7 +49,7 @@
       <h3>Worldz Global Public Voice 🌐</h3>
       <p><b>Your voice. Your preferences. Equal treatment. Transparent count.</b></p>
       <p>From Uganda and communities across Africa to Indonesia, the Philippines, Greenland, Iceland, Mexico, Austria, Belgium, France, Hong Kong, China, India, Australia and everywhere else: the general non-binding Public Voice layer is worldwide.</p>
-      <div class="worldz-civic-status"><b>Current build state:</b> worldwide non-binding Public Voice with a read-only concern register. Public submissions and binding/official voting remain locked behind safety, privacy, legal and audit gates.</div>
+      <div class="worldz-civic-status"><b>Current build state:</b> worldwide non-binding Public Voice with moderated concern intake. Submissions enter human review; automatic publication and binding/official voting remain locked.</div>
     </article>
     <div class="worldz-civic-grid">
       ${rules.map(([title,body]) => `<article class="panel"><h3>${title}</h3><p>${body}</p></article>`).join("")}
@@ -202,7 +202,7 @@
               const language = concern.language_code ? ` • ${escapeHtml(concern.language_code)}` : "";
               return `<article class="panel"><p class="eyebrow">${place} • ${topic}${language}</p><h3>${title}</h3><p>${summary}</p></article>`;
             }).join("")}</div>`
-          : "<p>No concerns have been published yet. The registry is read-only until the public submission safety gates are complete.</p>";
+          : "<p>No concerns have been published yet. New submissions remain private until human review approves publication.</p>";
       } else {
         concernRoot.innerHTML = "<p>The public concern database is not active on this deployment yet.</p>";
       }
