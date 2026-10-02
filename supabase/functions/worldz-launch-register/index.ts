@@ -104,6 +104,30 @@ Deno.serve(async (req: Request) => {
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
   if (req.method === "GET") {
+    const url = new URL(req.url);
+    const creatorHistoryQuery = String(url.searchParams.get("creator") || "").trim();
+    if (creatorHistoryQuery) {
+      if (!/^[1-9A-HJ-NP-Za-km-z]{32,64}$/.test(creatorHistoryQuery)) {
+        return json({ ok: false, error: "invalid_creator_wallet" }, 400);
+      }
+      const { data: creatorRows, error: creatorError } = await supabase
+        .from("worldz_launch_registry")
+        .select("environment,network,engine,quote_asset,mint,token_name,symbol,pool_id,stage,proof,created_at,updated_at")
+        .eq("is_public", true)
+        .eq("wallet_address", creatorHistoryQuery)
+        .order("created_at", { ascending: true })
+        .limit(100);
+      if (creatorError) return json({ ok: false, error: "creator_history_lookup_failed" }, 500);
+      return json({
+        ok: true,
+        creatorHistory: {
+          wallet: creatorHistoryQuery,
+          launchCount: creatorRows?.length ?? 0,
+          launches: creatorRows ?? [],
+          rule: "Worldz Creator History contains only public WorldzLaunchPad registry records attributable to this exact registered wallet. It does not claim control of other wallets."
+        }
+      });
+    }
     const { data, error } = await supabase
       .from("worldz_launch_registry")
       .select("id,environment,network,engine,quote_asset,mint,token_name,symbol,decimals,fixed_supply,project_fee_percent,fee_routes,pool_id,stage,proof,created_at,updated_at")
