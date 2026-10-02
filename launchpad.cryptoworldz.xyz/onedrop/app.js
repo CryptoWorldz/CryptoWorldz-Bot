@@ -116,7 +116,7 @@ async function load(){
   manifest=await r.json();
   if(manifest.schema!=='worldz.onedrop.v1'||manifest.token?.mint!=='DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R')stop('Manifest contract mismatch.');
   if(manifest.recipients.length!==219||exactTotal(manifest.recipients)!==BigInt(manifest.distributor.maxTotalClaimRaw))stop('Manifest total mismatch.');
-  if(manifest.executionEnabled!==true){status('REVIVE DISTRIBUTION RECONCILIATION MODE ✅\n'+(manifest.executionBlockReason||'Execution disabled.'),'warn');$('#connect').disabled=true;$('#prepare').disabled=true;$('#launch').disabled=true;return;}\n  status('Frozen REVIVE OneDrop manifest loaded. Connect JayJayTeamDev.','good');
+  if(manifest.executionEnabled!==true){status('REVIVE ONEDROP ALREADY EXECUTED ✅\n'+(manifest.executionBlockReason||'Reissue disabled.')+'\nEligible wallets can use the Claim Page.','good');$('#connect').disabled=true;$('#prepare').disabled=true;$('#launch').disabled=true;return;}\n  status('Frozen REVIVE OneDrop manifest loaded. Connect JayJayTeamDev.','good');
 }
 async function prepare(){
   plan=null;$('#launch').disabled=true;
