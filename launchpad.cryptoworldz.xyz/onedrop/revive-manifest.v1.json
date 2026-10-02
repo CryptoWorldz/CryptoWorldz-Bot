@@ -1651,7 +1651,17 @@
     "squadsSourceRaw": "100000000000052",
     "impactStagingObservedRaw": "20000000000000",
     "jayJayObservedRaw": "4285758308538",
-    "rule": "These are audit observations, not new allocations. Re-read chain state before any later execution."
+    "rule": "Re-read chain state before presenting live balances; reissue remains forbidden.",
+    "claimVaultTokenAccount": "9Uxikt4zgSkBPqVPFPQGyUGRDrcKVTQGPHj1mM8omXo9",
+    "claimVaultOwner": "8zhVEUZMcs78AoddrZKm2HrFtpNabxaZNZEDsv8FBfj2",
+    "claimVaultCurrentRaw": "45714285714234",
+    "claimVaultFundedRaw": "49999999999948",
+    "claimVaultClaimedDeltaRaw": "4285714285714",
+    "impactTokenAccount": "DLoyRKLfoT2BuifzZrrCbnaxfCEo6dpVFDwNZn8Pjc6B",
+    "impactOwner": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+    "impactCurrentRaw": "20000000000000",
+    "lpTokenAccount": "2NisBL7PJ3Zz31eiDvmP9Yraqix5rL9SmudnXPn47NMh",
+    "lpCurrentRaw": "29999954874402"
   },
   "distributionExecutionEvidence": {
     "signature": "4a9uuK8fCYUuZdssSAf1Sm5DLHRg3wJPHwXpGbFBAGbRWT52GZjMgWjz3MPxz3WxBrmp9aGm3NMxPrrej1uo6v2q",
