@@ -7,6 +7,7 @@ const feeColors=['#a74cff','#5d8bff','#38e3b0','#ffd166','#ff759c','#b66cff'];
 let platform=null,walletProvider=null,lastManifest=null;
 const build={chain:'solana',engine:'flash',quote:'SOL'};
 let experienceMode='beginner';
+let selectedRecipe='CUSTOM';
 const CHAIN_CULTURE_NOTES=Object.freeze({
   solana:'SolWorldz: fast creator UX with Solana-native liquidity and proof. Worldz connects Solana without erasing Solana.',
   ethereum:'EthWorldz: EVM-native execution, Ethereum identity and transparent contract/market proof stay first-class.',
@@ -30,8 +31,8 @@ const PUBLIC_REGISTRY_URL='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1
 function humanKey(k){return String(k).replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());}
 function setDot(id,state){const el=$(id);if(!el)return;el.className='state-dot '+(state==='healthy'?'good':state==='gateway'||state==='protected'?'warn':state==='missing'||state==='degraded'?'bad':'idle');}
 function step(n){
-  $('.wizard-step').forEach(x=>x.classList.toggle('active',x.dataset.panel===String(n)));
-  $('.step-tab').forEach(x=>x.classList.toggle('active',x.dataset.step===String(n)));
+  $$('.wizard-step').forEach(x=>x.classList.toggle('active',x.dataset.panel===String(n)));
+  $$('.step-tab').forEach(x=>x.classList.toggle('active',x.dataset.step===String(n)));
   const help=$('#experience-help');
   if(help) help.textContent=experienceMode==='beginner'?'Beginner Mode: '+(BEGINNER_HELP[Number(n)]||'Worldz explains the choice before you sign.'):'Pro Mode: technical controls and raw proof remain visible.';
   const target=$('.builder'); if(target&&window.innerWidth<720)target.scrollIntoView({behavior:'smooth',block:'start'});
@@ -39,10 +40,10 @@ function step(n){
 function setExperienceMode(mode){
   experienceMode=mode==='pro'?'pro':'beginner';
   document.body.dataset.experience=experienceMode;
-  $('.experience-choice').forEach(x=>x.classList.toggle('hero-card',x.dataset.experience===experienceMode));
-  $('.experience-choice').forEach(x=>x.classList.toggle('active',x.dataset.experience===experienceMode));
+  $$('.experience-choice').forEach(x=>x.classList.toggle('hero-card',x.dataset.experience===experienceMode));
+  $$('.experience-choice').forEach(x=>x.classList.toggle('active',x.dataset.experience===experienceMode));
   const labels=experienceMode==='beginner'?['World','Launch Style','Token','Trading Pair','Setup','Review']:['World','Engine','Token','Pair','Economics','Proof'];
-  $('.step-tab span').forEach((x,i)=>{if(labels[i])x.textContent=labels[i];});
+  $$('.step-tab span').forEach((x,i)=>{if(labels[i])x.textContent=labels[i];});
   const active=$('.wizard-step.active');
   step(active?active.dataset.panel:1);
 }
@@ -51,10 +52,10 @@ function updateChainCultureNote(chain){
   if(note)note.textContent=CHAIN_CULTURE_NOTES[chain]||'Worldz uses chain-native execution and keeps unsupported routes clearly gated.';
 }
 function selectChoice(group,el,key,value){
-  $(group+' .choice').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');build[key]=value;
+  $$(group+' .choice').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');build[key]=value;
 }
 function markChoice(selector,dataKey,value){
-  $(selector).forEach(x=>x.classList.toggle('selected',x.dataset[dataKey]===value));
+  $$(selector).forEach(x=>x.classList.toggle('selected',x.dataset[dataKey]===value));
 }
 function selectChain(el,chain){
   selectChoice('#chain-grid',el,'chain',chain);
@@ -185,6 +186,26 @@ function currentRoutes(){
     treasuryReserve:treasury
   };
 }
+function setRecipeSelection(id){
+  selectedRecipe=String(id||'CUSTOM');
+  $('#launch-recipes .choice').forEach(x=>x.classList.toggle('selected',x.dataset.recipe===selectedRecipe));
+  const state=$('#recipe-state');if(state)state.textContent=selectedRecipe.replaceAll('_',' ');
+}
+function applyLaunchRecipe(id){
+  const recipes=platform?.launchRecipes?.recipes||[];
+  const recipe=recipes.find(x=>x.id===id);
+  if(!recipe)return;
+  setRecipeSelection(recipe.id);
+  if(recipe.allocations){
+    for(const [key,value] of Object.entries(recipe.allocations)){
+      const input=$('[data-allocation="'+key+'"]');if(input)input.value=String(value);
+    }
+  }
+  feeMath();
+}
+function markRecipeCustom(){
+  if(selectedRecipe!=='CUSTOM')setRecipeSelection('CUSTOM');
+}
 function feeMath(){
   const fee=Number($('#project-fee').value)||0,vol=Math.max(0,Number($('#example-volume').value)||0);
   const routes=currentRoutes(),launchPad=routes.worldzLaunchPad;
@@ -234,6 +255,7 @@ function manifestBase(){
       worldzLaunchPadShareOfInitialLiquidityPercent:0,
       walletTransferTax:false
     },
+    launchRecipe:selectedRecipe,
     supplyAllocationPercent:currentAllocations(),
     safetyPolicy:{
       standard:platform.safeLaunchPolicy.version,
@@ -370,14 +392,15 @@ async function refreshRuntime(){
   finally{b.disabled=false;b.textContent='Refresh Runtime';}
 }
 function bind(){
-  $('.experience-choice').forEach(b=>b.addEventListener('click',()=>setExperienceMode(b.dataset.experience)));
+  $('#launch-recipes .choice').forEach(b=>b.addEventListener('click',()=>applyLaunchRecipe(b.dataset.recipe)));
+  $$('.experience-choice').forEach(b=>b.addEventListener('click',()=>setExperienceMode(b.dataset.experience)));
   $('.next-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.next)));
   $$('.prev-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.prev)));
-  $$('.step-tab').forEach(b=>b.addEventListener('click',()=>step(b.dataset.step)));
-  $('#chain-grid .choice').forEach(b=>b.addEventListener('click',()=>selectChain(b,b.dataset.chain)));
-  $('#engine-grid .choice').forEach(b=>b.addEventListener('click',()=>selectChoice('#engine-grid',b,'engine',b.dataset.engine)));
+  $$$('.step-tab').forEach(b=>b.addEventListener('click',()=>step(b.dataset.step)));
+  $$('#chain-grid .choice').forEach(b=>b.addEventListener('click',()=>selectChain(b,b.dataset.chain)));
+  $$('#engine-grid .choice').forEach(b=>b.addEventListener('click',()=>selectChoice('#engine-grid',b,'engine',b.dataset.engine)));
   $$('.quote').forEach(b=>b.addEventListener('click',()=>{$$('.quote').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');build.quote=b.dataset.quote;$('#wxrp-proof').classList.toggle('show',build.quote==='wXRP');}));
-  $('#project-fee').addEventListener('input',feeMath);$('#example-volume').addEventListener('input',feeMath);$('#launchpad-contribution')?.addEventListener('change',feeMath);$$('.allocation-input').forEach(x=>x.addEventListener('input',feeMath));
+  $('#project-fee').addEventListener('input',feeMath);$('#example-volume').addEventListener('input',feeMath);$('#launchpad-contribution')?.addEventListener('change',feeMath);$('.allocation-input').forEach(x=>x.addEventListener('input',()=>{markRecipeCustom();feeMath();}));
   $('#run-preflight').addEventListener('click',runPreflight);$('#download-manifest').addEventListener('click',downloadManifest);
   $('#wallet-mini').addEventListener('click',connectWallet);$('#refresh-runtime').addEventListener('click',refreshRuntime);
   $('#devnet-launch-link').addEventListener('click',e=>{if(e.currentTarget.getAttribute('aria-disabled')==='true')e.preventDefault();});
@@ -415,7 +438,7 @@ async function boot(){
   for(let attempt=1;attempt<=2;attempt++){
     try{
       platform=await fetchPlatformConfig();
-      bind();setExperienceMode('beginner');updateChainCultureNote(build.chain);feeMath();renderProof();renderMarket();refreshRuntime();
+      bind();setExperienceMode('beginner');setRecipeSelection('CUSTOM');updateChainCultureNote(build.chain);feeMath();renderProof();renderMarket();refreshRuntime();
       document.body.dataset.boot='ready';
       return;
     }catch(e){
