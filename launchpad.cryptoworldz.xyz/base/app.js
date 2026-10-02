@@ -174,7 +174,7 @@ function runPreflight(){
   if(v.name.length<2||v.name.length>32)errors.push('Token name must be 2–32 characters.');
   if(!/^[A-Z0-9_$]{2,10}$/.test(v.symbol))errors.push('Ticker must be 2–10 letters/numbers/$/_.');
   if(!/^\d+$/.test(v.supply)||BigInt(v.supply)<1000n||BigInt(v.supply)>1000000000000n)errors.push('Supply must be 1,000 to 1,000,000,000,000 whole tokens.');
-  if(!Number.isFinite(v.fee)||v.fee<0.5||v.fee>3)errors.push('Configured project trading fee must be 0.50%–3.00%.');
+  if(!Number.isFinite(v.fee)||v.fee<0.5||v.fee>3)errors.push('Configured project trading fee must be 0.50%–3.00%.');if(Number.isFinite(v.fee)&&Math.abs(((v.fee-.5)/.25)-Math.round((v.fee-.5)/.25))>1e-9)errors.push('Worldz project fee must use 0.25% increments.');
   const total=allocationTotal();
   if(Math.abs(total-100)>0.001)errors.push('Genesis allocations must total exactly 100%. Current: '+total+'%.');
   if(v.alloc.creator<0||v.alloc.creator>5)errors.push('Base v1 creator liquid allocation is capped at 5%.');

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05020b">
+<title>Worldz Investment Centre™ | Research • Track • Learn</title>
+<meta name="description" content="Worldz Investment Centre — privacy-first crypto research, portfolio modelling, chain-native evidence and 1:1 reserve proof.">
+<link rel="stylesheet" href="/style.css?v=20261002-invest-v1">
+<style>
+.wrap{max-width:1120px;margin:auto;padding:48px 18px 100px}.hero,.card{border:1px solid #ffffff10;border-radius:22px;background:#ffffff03;padding:22px;margin:12px 0}.hero{min-height:350px;background:radial-gradient(circle at 75% 10%,#8f54ff33,transparent 42%),radial-gradient(circle at 20% 0,#36c5f022,transparent 34%),#07030d}.k{color:#bd82ff;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;font-weight:900}.hero h1{font-size:clamp(2.8rem,8vw,6.5rem);line-height:.86;letter-spacing:-.055em;margin:.18em 0}.hero h1 span{color:#c68cff}.hero p,.card p{color:#9f90aa;max-width:800px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.box{border:1px solid #ffffff0d;border-radius:15px;padding:15px;background:#0002}.box small{display:block;color:#7e7087;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em}.box b{display:block;margin-top:4px}.portfolio{overflow:auto}.portfolio table{width:100%;border-collapse:collapse;min-width:790px}.portfolio th,.portfolio td{padding:10px;border-bottom:1px solid #ffffff0c;text-align:left;font-size:.72rem}.portfolio th{color:#8d7d98;font-size:.6rem;text-transform:uppercase}.portfolio input{width:110px;border:1px solid #ffffff13;border-radius:9px;background:#07030d;color:#fff;padding:9px}.portfolio input.target{width:78px}.asset b{font-size:.84rem}.asset small{display:block;color:#75677e}.risk{font-size:.64rem}.risk.warn{color:#e5c47b}.risk.good{color:#7ce9ba}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.notice{border-left:3px solid #a76dff;background:#a76dff08;padding:12px;color:#a998b2;font-size:.72rem}.watch{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.watch a,.watch div{border:1px solid #ffffff0d;border-radius:13px;padding:12px;background:#0002}.watch b,.watch small{display:block}.watch small{color:#80728a;font-size:.65rem}.local{color:#78e6b7;font-size:.65rem}.section-title{font-size:1.55rem;margin:0 0 6px}@media(max-width:800px){.grid,.watch{grid-template-columns:1fr 1fr}}@media(max-width:560px){.grid,.watch{grid-template-columns:1fr}.hero{min-height:auto}}
+</style>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="/"><span class="brand-logo-official" aria-hidden="true"></span><span>WorldzLaunchPad™</span></a><nav><a href="/">Launch</a><a href="/trust/">Trust</a><a href="/invest/" aria-current="page">Invest</a><a href="/omnichain/">OmniChain</a></nav></header>
+<main class="wrap">
+<section class="hero"><div class="k">WORLDZ INVESTMENT CENTRE™ • READ-ONLY BETA</div><h1>LEARN IT.<br><span>TRACK IT.</span><br>PROVE IT.</h1><p>Crypto investment tools built around evidence rather than promises: portfolio modelling, chain research, liquidity context, wrapped-asset reserve proof and plain-English learning for the next wave of crypto users.</p><div class="actions"><a class="btn primary" href="#portfolio">Open Portfolio Lab →</a><a class="btn secondary" href="/trust/">Research a Solana Token</a><a class="btn secondary" href="/x-save/">XRP ↔ wXRP Research</a></div></section>
+
+<section class="card"><h2 class="section-title">Worldz Chain Watch</h2><p>Chain-native communities keep what they know and value. Worldz adds one evidence layer across them without flattening their identity.</p>
+<div class="watch">
+<a href="https://xrpworldz.xyz"><small>XRPWORLDZ</small><b>XRP • wXRP</b><small>XRPL native + reserve-proof lane</small></a>
+<a href="https://solworldz.xyz"><small>SOLWORLDZ</small><b>SOL</b><small>Solana launch + liquidity intelligence</small></a>
+<a href="https://hyperworldz.xyz"><small>HYPERWORLDZ</small><b>HYPE / HyperEVM</b><small>EVM + Hyper-native research lane</small></a>
+<a href="https://robinworldz.xyz"><small>ROBINWORLDZ</small><b>Robinhood Chain</b><small>Chain-specific execution lane</small></a>
+<a href="https://baseworldz.xyz"><small>BASEWORLDZ</small><b>Base</b><small>ETH-native Base exposure + EVM build</small></a>
+<a href="https://suiworldz.xyz"><small>SUIWORLDZ</small><b>SUI</b><small>Move-native proof + market research</small></a>
+<div><small>BITWORLDZ</small><b>BTC rails</b><small>Native/wrapped distinction stays explicit</small></div>
+<div><small>WORLDZPROOF</small><b>Evidence first</b><small>Authority • liquidity • reserve • transaction truth</small></div>
+</div></section>
+
+<section class="card" id="portfolio"><div class="k">PRIVATE BY DEFAULT</div><h2 class="section-title">Portfolio Lab</h2><p>Enter your own holdings and reference prices. The model stays in this browser only; Worldz does not need your wallet, seed phrase or exchange login.</p>
+<div class="portfolio"><table><thead><tr><th>Exposure</th><th>Units</th><th>Reference price</th><th>Value</th><th>Portfolio</th><th>Target</th><th>Lens</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="actions"><button class="btn primary" id="calc">Recalculate</button><button class="btn secondary" id="save">Save Locally</button><button class="btn secondary" id="reset">Reset Local Model</button></div>
+<div class="grid" style="margin-top:12px"><div class="box"><small>Modelled portfolio</small><b id="total">$0.00</b></div><div class="box"><small>Largest exposure</small><b id="largest">—</b></div><div class="box"><small>Concentration lens</small><b id="concentration">—</b></div></div>
+<div class="notice" style="margin-top:12px">Reference prices are user inputs in this first beta, not live quotes. The lab does not forecast returns or tell you what to buy. Future execution stays separately gated.</div></section>
+
+<section class="card" id="thesis-lab"><div class="k">WORLDZ THESIS LAB™</div><h2 class="section-title">Belief is allowed. Label it properly.</h2><p>Die-hard communities often have a long-term reason they stay. Record the thesis — then record what evidence would strengthen it and what evidence would prove it wrong. This stays in your browser.</p>
+<div class="form-grid">
+<label><span>Asset / network</span><input id="thesis-asset" placeholder="e.g. XRP"></label>
+<label><span>Time horizon</span><input id="thesis-horizon" placeholder="e.g. 5–10 years"></label>
+<label class="wide"><span>Why I believe</span><textarea id="thesis-case" maxlength="1200" placeholder="Utility, adoption, supply structure, community, technology…"></textarea></label>
+<label class="wide"><span>Evidence I want to watch</span><textarea id="thesis-evidence" maxlength="1200" placeholder="Usage, liquidity, reserves, issuance, network activity…"></textarea></label>
+<label class="wide"><span>What would prove me wrong?</span><textarea id="thesis-disconfirm" maxlength="1200" placeholder="Write the evidence that would make you reconsider."></textarea></label>
+</div>
+<div class="actions"><button class="btn primary" id="save-thesis">Save Thesis Locally</button><button class="btn secondary" id="clear-thesis">Clear Thesis</button></div>
+<div class="notice" id="thesis-status">A thesis is not a forecast. Worldz keeps opinions and measurable facts separate.</div></section>
+
+<section class="card"><div class="k">WORLDZ 1:1 RESERVE PROOF™</div><h2 class="section-title">“1:1 backed” must be provable.</h2><p>For wXRP and future wrapped assets, Worldz separates the original asset from the representation. A verified 1:1 label requires attributable reserves, issued supply, redemption evidence, mint/issuer control and burn/redemption reconciliation.</p>
+<div class="grid"><div class="box"><small>Origin</small><b>XRP</b></div><div class="box"><small>Representation</small><b>wXRP</b></div><div class="box"><small>Worldz rule</small><b>Reserve ÷ issued supply must reconcile</b></div></div>
+<div class="actions"><a class="btn primary" href="/x-save/">Open XRP / wXRP Lane →</a><a class="btn secondary" href="/trust/">Open WorldzProof →</a></div></section>
+
+<section class="card"><div class="k">LEARN BEFORE RISK</div><h2 class="section-title">Built for people entering crypto next.</h2>
+<div class="grid"><div class="box"><small>01</small><b>Wallets & custody</b><p>Understand the difference between owning an asset, holding an exchange balance and holding a wrapped representation.</p></div><div class="box"><small>02</small><b>Markets & liquidity</b><p>Learn why displayed price, available liquidity, slippage and exit value are different numbers.</p></div><div class="box"><small>03</small><b>Proof & control</b><p>Check supply, issuer/mint control, liquidity protection, reserves and transaction confirmation before relying on a claim.</p></div></div></section>
+
+<section class="card"><h2 class="section-title">Investment guardrails</h2><p>Worldz can be strongly oriented toward investment research without pretending any crypto is guaranteed to rise.</p><div class="grid"><div class="box"><small>NO DEFAULT LEVERAGE</small><b>Spot-first research</b></div><div class="box"><small>NO GUARANTEED RETURNS</small><b>Potential ≠ certainty</b></div><div class="box"><small>CONCENTRATION</small><b>Large single-asset exposure is surfaced</b></div><div class="box"><small>WRAPPED ASSETS</small><b>Custody + redemption risk stays visible</b></div><div class="box"><small>NETWORK STATUS</small><b>Testnet is not mainnet</b></div><div class="box"><small>TRANSACTION TRUTH</small><b>Submitted is not confirmed</b></div></div></section>
+</main>
+<footer><div><b>Worldz Investment Centre™</b> • Research • Track • Learn • Prove</div><p>Portfolio data stays local in this beta. No private keys. No guaranteed outcomes.</p></footer>
+<script src="/invest/app.js?v=20261002-invest-v1"></script>
+</body></html>

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://launchpad.cryptoworldz.xyz/schemas/worldz-reserve-proof.v1.json",
+  "title": "Worldz 1:1 Reserve Proof",
+  "type": "object",
+  "required": [
+    "version",
+    "originAsset",
+    "representedAsset",
+    "network",
+    "issuedSupply",
+    "reserveAmount",
+    "redemption",
+    "checkedAt",
+    "status"
+  ],
+  "properties": {
+    "version": {
+      "const": "WORLDZ-RESERVE-PROOF-V1"
+    },
+    "originAsset": {
+      "type": "string",
+      "minLength": 1
+    },
+    "representedAsset": {
+      "type": "string",
+      "minLength": 1
+    },
+    "network": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issuerOrCustodian": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "issuedSupply": {
+      "type": "number",
+      "minimum": 0
+    },
+    "reserveAmount": {
+      "type": "number",
+      "minimum": 0
+    },
+    "reserveRatio": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "reserveEvidence": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "redemption": {
+      "type": "object",
+      "required": [
+        "available",
+        "evidence"
+      ],
+      "properties": {
+        "available": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "mintOrIssueControl": {
+      "type": "object"
+    },
+    "burnOrRedemptionReconciliation": {
+      "type": "object"
+    },
+    "checkedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": [
+        "VERIFIED_1_TO_1",
+        "UNDERBACKED",
+        "OVERBACKED_OR_PENDING_RECONCILIATION",
+        "INSUFFICIENT_EVIDENCE",
+        "UNAVAILABLE"
+      ]
+    },
+    "rule": {
+      "const": "A 1:1 label requires independently attributable reserve amount, issued supply, redemption evidence and control/reconciliation evidence. Branding or an issuer statement alone is not enough."
+    }
+  },
+  "additionalProperties": true
+}

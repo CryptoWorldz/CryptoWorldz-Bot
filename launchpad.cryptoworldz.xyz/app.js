@@ -188,7 +188,7 @@ function currentRoutes(){
 }
 function setRecipeSelection(id){
   selectedRecipe=String(id||'CUSTOM');
-  $('#launch-recipes .choice').forEach(x=>x.classList.toggle('selected',x.dataset.recipe===selectedRecipe));
+  $$('#launch-recipes .choice').forEach(x=>x.classList.toggle('selected',x.dataset.recipe===selectedRecipe));
   const state=$('#recipe-state');if(state)state.textContent=selectedRecipe.replaceAll('_',' ');
 }
 function applyLaunchRecipe(id){
@@ -250,7 +250,11 @@ function manifestBase(){
     quoteAsset:build.quote,
     feePolicy:{
       version:'WORLDZ-FEE-FLOW-V2',
+      builder:'WORLDZ-CHAIN-NATIVE-FEE-BUILDER-V1',
       projectTradingFeePercent:Number($('#project-fee').value),
+      publicDefaultPercent:1,
+      publicMaximumPercent:3,
+      preferredIncrementPercent:0.25,
       worldzLaunchPadContributionPercent:selectedLaunchPadContribution(),
       worldzLaunchPadContributionChoicesPercent:[3,5,8],
       feeDistributionPercent:currentRoutes(),
@@ -323,6 +327,7 @@ async function runPreflight(){
     ['Founder vesting',m.safetyPolicy.founderVestingMonths>=p.allocations.founderVestingMinMonths,m.safetyPolicy.founderVestingMonths+' months'],
     ['Creator-controlled LP lock',m.safetyPolicy.creatorControlledLpLockPercent===100&&m.safetyPolicy.lpLockDays>=p.allocations.lpLockMinDays,'100% • '+m.safetyPolicy.lpLockDays+' days'],
     ['Project trading fee',m.feePolicy.projectTradingFeePercent>=platform.feePolicy.projectTradingFeeMinPercent&&m.feePolicy.projectTradingFeePercent<=platform.feePolicy.projectTradingFeeMaxPercent,m.feePolicy.projectTradingFeePercent.toFixed(2)+'%'],
+    ['Project fee increment',Math.abs(((m.feePolicy.projectTradingFeePercent-platform.feePolicy.projectTradingFeeMinPercent)/platform.feePolicy.stepPercent)-Math.round((m.feePolicy.projectTradingFeePercent-platform.feePolicy.projectTradingFeeMinPercent)/platform.feePolicy.stepPercent))<1e-9,'0.25% steps'],
     ['Fee Flow V2 = 100%',Math.abs(routes-100)<.001,routes.toFixed(0)+'%'],
     ['Fee Flow values valid',Object.values(r).every(v=>Number.isFinite(v)&&v>=0&&v<=100),'No negative or >100% route'],
     ['Creator / Developer lane',r.creatorDeveloper===10,'10% LOCKED'],
@@ -398,15 +403,15 @@ async function refreshRuntime(){
   finally{b.disabled=false;b.textContent='Refresh Runtime';}
 }
 function bind(){
-  $('#launch-recipes .choice').forEach(b=>b.addEventListener('click',()=>applyLaunchRecipe(b.dataset.recipe)));
+  $$('#launch-recipes .choice').forEach(b=>b.addEventListener('click',()=>applyLaunchRecipe(b.dataset.recipe)));
   $$('.experience-choice').forEach(b=>b.addEventListener('click',()=>setExperienceMode(b.dataset.experience)));
-  $('.next-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.next)));
+  $$('.next-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.next)));
   $$('.prev-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.prev)));
-  $$$('.step-tab').forEach(b=>b.addEventListener('click',()=>step(b.dataset.step)));
+  $$('.step-tab').forEach(b=>b.addEventListener('click',()=>step(b.dataset.step)));
   $$('#chain-grid .choice').forEach(b=>b.addEventListener('click',()=>selectChain(b,b.dataset.chain)));
   $$('#engine-grid .choice').forEach(b=>b.addEventListener('click',()=>selectChoice('#engine-grid',b,'engine',b.dataset.engine)));
   $$('.quote').forEach(b=>b.addEventListener('click',()=>{$$('.quote').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');build.quote=b.dataset.quote;$('#wxrp-proof').classList.toggle('show',build.quote==='wXRP');}));
-  $('#project-fee').addEventListener('input',feeMath);$('#example-volume').addEventListener('input',feeMath);$('#launchpad-contribution')?.addEventListener('change',feeMath);$('.allocation-input').forEach(x=>x.addEventListener('input',()=>{markRecipeCustom();feeMath();}));
+  $('#project-fee').addEventListener('input',feeMath);$('#example-volume').addEventListener('input',feeMath);$('#launchpad-contribution')?.addEventListener('change',feeMath);$$('.allocation-input').forEach(x=>x.addEventListener('input',()=>{markRecipeCustom();feeMath();}));
   $('#run-preflight').addEventListener('click',runPreflight);$('#download-manifest').addEventListener('click',downloadManifest);
   $('#wallet-mini').addEventListener('click',connectWallet);$('#refresh-runtime').addEventListener('click',refreshRuntime);
   $('#devnet-launch-link').addEventListener('click',e=>{if(e.currentTarget.getAttribute('aria-disabled')==='true')e.preventDefault();});
@@ -414,7 +419,10 @@ function bind(){
 function validatePlatformConfig(candidate){
   if(candidate.publicLaunchPad!==true||candidate.publicLaunchIntakeEnabled!==true)throw new Error('Public LaunchPad contract mismatch');
   if(
+    candidate.feePolicy?.projectTradingFeeDefaultPercent!==1||
     candidate.feePolicy?.projectTradingFeeMaxPercent!==3||
+    candidate.feePolicy?.stepPercent!==0.25||
+    candidate.feePolicy?.sixToTenPercentProjectTradingFeesOffered!==false||
     JSON.stringify(candidate.feePolicy?.worldzLaunchPadContributionChoicesPercent)!=='[3,5,8]'||
     candidate.feePolicy?.worldzLaunchPadContributionDefaultPercent!==5||
     candidate.feePolicy?.legacyCorePercent!==15||
@@ -427,6 +435,7 @@ function validatePlatformConfig(candidate){
   if(candidate.baseEvmFair?.status!=='BASE_SEPOLIA_BETA'||candidate.baseEvmFair?.mainnetExecution!==false)throw new Error('Base testnet adapter contract mismatch');
   if(candidate.founding100?.totalPositions!==100||candidate.founding100?.futureWorldzPoolPercent!==10||candidate.founding100?.equalAllocationPerQualifiedPositionPercent!==0.1)throw new Error('Founding 100 contract mismatch');
   if(candidate.trustOrbit?.version!=='WORLDZ-TRUST-ORBIT-1'||candidate.trustOrbit?.status!=='PUBLIC_BETA_LIVE'||candidate.trustOrbit?.jupiterIntegration?.officialJupiterEndorsement!==false)throw new Error('Trust Orbit contract mismatch');
+  if(candidate.investmentCentre?.status!=='READ_ONLY_PORTFOLIO_RESEARCH_BETA'||candidate.investmentCentre?.executionEnabled!==false||candidate.investmentCentre?.guaranteeOfReturns!==false)throw new Error('Investment Centre contract mismatch');
   if(candidate.worldzMint?.version!=='WORLDZMINT-1'||candidate.worldzMint?.platformTokenSupplyTakePercent!==0||candidate.worldzMint?.compulsory?.revokeMintAuthorityAfterGenesis!==true||candidate.worldzMint?.compulsory?.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('WorldzMINT contract mismatch');
   if(candidate.confidenceCurve?.version!=='WORLDZ-CONFIDENCE-CURVE-1'||candidate.confidenceCurve?.mainnetExecutionEnabled!==false||candidate.confidenceCurve?.feePolicy?.worldzSharePercentOfCollectedSupportedProjectTradingFee!==10)throw new Error('Confidence Curve contract mismatch');
   if(candidate.confidencePulse?.version!=='WORLDZ-CONFIDENCE-PULSE-1'||candidate.confidencePulse?.systemTradesCountTowardConfidence!==false)throw new Error('Confidence Pulse contract mismatch');

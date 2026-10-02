@@ -1,0 +1,204 @@
+{
+  "version": "WORLDZ-CHAIN-NATIVE-FEE-BUILDER-V1",
+  "date": "2026-10-02",
+  "name": "Worldz Fair Fee Builder™",
+  "publicRule": "Worldz starts new creator launches at 1.00% where the selected venue can implement that fee accurately. Worldz public launch settings never expose a project trading fee above 3.00%. Use 0.25% increments where that maps truthfully to the chain or venue; otherwise show the venue's real discrete tiers or native market model.",
+  "defaultPercent": 1,
+  "publicMaximumPercent": 3,
+  "preferredIncrementPercent": 0.25,
+  "absurdHighFeeProfilesHidden": true,
+  "sixToTenPercentProfilesOffered": false,
+  "walletTransferTaxPercent": 0,
+  "externalVenueFeesSeparate": true,
+  "legacyProfiles": {
+    "magicFeeNumber75Bps": {
+      "status": "HISTORICAL_OR_ADAPTER_SPECIFIC",
+      "percent": 0.75,
+      "rule": "Preserved where existing REVIVE/MagicFeeNumber proof or an adapter explicitly depends on it. It is not the default for new WorldzLaunchPad intakes."
+    }
+  },
+  "chains": {
+    "solana": {
+      "world": "SolWorldz",
+      "creatorExperience": {
+        "defaultPercent": 1,
+        "minPercent": 0.5,
+        "maxPercent": 3,
+        "stepPercent": 0.25
+      },
+      "venueRule": "Worldz project-fee selection is separate from Raydium/Meteora protocol deductions. An adapter must prove the exact venue fee and recipient split before mainnet.",
+      "supportedNow": [
+        "Worldz Flash devnet",
+        "Worldz Curve devnet",
+        "Worldz Curve Pro devnet"
+      ],
+      "mainnet": false,
+      "routeOverrides": {
+        "worldzFlash": {
+          "worldzProjectFeeDefaultPercent": 1,
+          "executionState": "CONFIG_SNAPSHOT_ONLY_FOR_FEE_ROUTING",
+          "venueFeeSeparate": true
+        },
+        "worldzCurve": {
+          "currentReviewedDevnetFeePercent": 2,
+          "creatorChoiceTemporarilyLocked": true,
+          "reason": "Current reviewed Raydium LaunchLab Devnet config requires its proven 2.00% profile; do not pretend the generic 1% choice is executable on this route yet."
+        },
+        "worldzCurvePro": {
+          "worldzProjectFeeDefaultPercent": 1,
+          "minPercent": 0.5,
+          "maxPercent": 3,
+          "stepPercent": 0.25
+        }
+      }
+    },
+    "xrpl": {
+      "world": "XRPWorldz",
+      "amm": {
+        "defaultPercent": 1,
+        "publicChoicesPercent": [
+          0.25,
+          0.5,
+          0.75,
+          1
+        ],
+        "nativeMinimumPercent": 0,
+        "nativeMaximumPercent": 1,
+        "nativePrecisionPercent": 0.001,
+        "worldzUiIncrementPercent": 0.25,
+        "rule": "XRPL AMM TradingFee cannot exceed 1%. Worldz deliberately presents four simple choices instead of exposing unnecessary fine-grained complexity.",
+        "note": "XRPL protocol supports 0.001% fee precision and a 1% maximum. Worldz uses 0.25% public UI steps for simplicity, not because the protocol requires that step."
+      },
+      "clob": {
+        "projectTradingFeeSlider": false,
+        "rule": "XRPL native order-book Offers do not use an AMM trading-fee slider. Show price/spread, network transaction cost and any separately disclosed Worldz service/accounting route."
+      },
+      "hiddenIssuerTransferTax": false,
+      "mainnet": false
+    },
+    "ethereum": {
+      "family": "EVM",
+      "world": "EthWorldz",
+      "creatorExperience": {
+        "defaultPercent": 1,
+        "minPercent": 0.5,
+        "maxPercent": 3,
+        "stepPercent": 0.25
+      },
+      "venueRule": "The Worldz project-fee target and the selected AMM's native fee tier are separate. Never invent a 0.25% tier if the chosen DEX exposes only discrete tiers.",
+      "liquidityExecution": "TESTNET_OR_RESEARCH_GATED",
+      "mainnet": false
+    },
+    "base": {
+      "family": "EVM",
+      "world": "BaseWorldz",
+      "creatorExperience": {
+        "defaultPercent": 1,
+        "minPercent": 0.5,
+        "maxPercent": 3,
+        "stepPercent": 0.25
+      },
+      "venueRule": "The Worldz project-fee target and the selected AMM's native fee tier are separate.",
+      "liquidityExecution": "TESTNET_OR_RESEARCH_GATED",
+      "mainnet": false
+    },
+    "bnb": {
+      "family": "EVM",
+      "world": "BNBWorldz",
+      "creatorExperience": {
+        "defaultPercent": 1,
+        "minPercent": 0.5,
+        "maxPercent": 3,
+        "stepPercent": 0.25
+      },
+      "venueRule": "Use only the exact fee capabilities proven for the selected BNB venue.",
+      "liquidityExecution": "TESTNET_OR_RESEARCH_GATED",
+      "mainnet": false
+    },
+    "hyperevm": {
+      "family": "EVM",
+      "world": "HyperWorldz",
+      "creatorExperience": {
+        "defaultPercent": 1,
+        "minPercent": 0.5,
+        "maxPercent": 3,
+        "stepPercent": 0.25
+      },
+      "venueRule": "HyperEVM fee routing and any HyperCore market integration remain distinct. Do not pretend an EVM token fee controls HyperCore order-book fees.",
+      "liquidityExecution": "TESTNET_OR_RESEARCH_GATED",
+      "mainnet": false
+    },
+    "robinhood": {
+      "family": "EVM",
+      "world": "RobinWorldz",
+      "creatorExperience": {
+        "defaultPercent": 1,
+        "minPercent": 0.5,
+        "maxPercent": 3,
+        "stepPercent": 0.25
+      },
+      "venueRule": "Use only chain/venue fee controls independently proven for Robinhood Chain.",
+      "liquidityExecution": "TESTNET_OR_RESEARCH_GATED",
+      "mainnet": false
+    },
+    "sui": {
+      "world": "SuiWorldz",
+      "creatorExperience": {
+        "defaultPercent": 1,
+        "worldzMaximumPercent": 3
+      },
+      "cetusCLMM": {
+        "knownNativeTiersPercent": [
+          0.01,
+          0.02,
+          0.03,
+          0.04,
+          0.05,
+          0.1,
+          0.15,
+          0.2,
+          0.25,
+          0.3,
+          0.4,
+          0.6,
+          0.8,
+          1,
+          2,
+          4
+        ],
+        "worldzExposedTiersPercent": [
+          0.25,
+          0.4,
+          0.6,
+          0.8,
+          1,
+          2
+        ],
+        "defaultPercent": 1,
+        "rule": "Worldz only exposes real Cetus tiers and filters out 4% because it exceeds the Worldz 3% public cap. It does not fabricate 0.25-step tiers the venue does not support."
+      },
+      "deepBook": {
+        "projectTradingFeeSlider": false,
+        "rule": "Order-book fees are venue-native and disclosed separately."
+      },
+      "marketExecution": "GATED",
+      "mainnet": false
+    },
+    "bitcoin": {
+      "world": "BitWorldz",
+      "creatorExperience": {
+        "projectTradingFeeSlider": false
+      },
+      "rule": "Native Bitcoin does not receive a fake token transfer tax. Marketplace, bridge, wrapping and execution fees are provider/venue-specific and disclosed separately.",
+      "mainnet": false
+    }
+  },
+  "preSignatureDisclosure": [
+    "selected Worldz fee setting",
+    "actual native venue fee or tier",
+    "network fee estimate",
+    "external protocol deduction",
+    "Worldz-controlled amount",
+    "creator/referrer/flywheel routes where applicable"
+  ]
+}
