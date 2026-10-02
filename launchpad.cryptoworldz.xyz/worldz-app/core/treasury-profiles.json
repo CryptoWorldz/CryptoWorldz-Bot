@@ -17,18 +17,22 @@
         "xrpl": "SignerList",
         "sui": "Native weighted multisig"
       },
-      "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_8_VERIFIED_SIGNERS",
+      "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_3_MORE_VERIFIED_SIGNERS",
       "mainnetExecution": false,
       "signerPolicy": {
-        "requiredNamedOverlap": [
+        "confirmedDocumentedCandidates": [
           "JayJayTeamDev",
           "Stepper",
-          "Savage"
+          "Savage",
+          "SolMusic",
+          "Mahammad"
         ],
-        "remainingSignerSlots": 5,
-        "remainingSignerSource": "Verified Worldz Legend/Admin/Miracle Team public wallets only",
+        "confirmedCandidateCount": 5,
+        "remainingSignerSlots": 3,
+        "remainingSignerSource": "Three distinct consenting verified Worldz Legend/Admin/Miracle Team public wallets",
         "noInventedWallets": true,
-        "separationRule": "The three named Operations signers alone cannot reach the 4-of-8 Miracle threshold."
+        "noSamePersonMultiKeyThresholdPadding": true,
+        "ownerControlledExtraWalletsMayBeAllocationCustodyButNotIndependentHumanSigners": true
       },
       "revenueRouting": {
         "scope": "TREASURY_BOUND_REVENUE_ONLY",
@@ -71,5 +75,5 @@
       "note": "No separate Worldz Reserve Treasury is currently required. Reserve sweeps are disabled; funds remain in the Operations Treasury until a future explicit decision."
     }
   ],
-  "rule": "Worldz Operations uses permanent 3-of-5 governance. The Worldz Miracle Team Treasury is a separate 4-of-8 profile pending deployment and verified signers. Treasury-bound revenue may split 70% Operations / 30% Miracle only after the Miracle route is live-verified. Reserve remains disabled/not deployed."
+  "rule": "Worldz Operations uses permanent 3-of-5 governance. The separate Miracle Team Treasury targets 4-of-8 and receives 30% only of treasury-bound revenue after live deployment proof; Operations receives the other 70%. Five documented signer candidates are known and three distinct consenting signer wallets remain pending. Reserve remains disabled/not deployed."
 }
