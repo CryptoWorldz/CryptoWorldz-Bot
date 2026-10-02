@@ -1,0 +1,59 @@
+{
+  "schema": "WORLDZ-FOUNDING-100-V1",
+  "version": "2026-10-03-A",
+  "name": "WorldzLaunchPad Founding 100™",
+  "status": "REGISTRY_LIVE__AWARDS_BEGIN_WITH_QUALIFYING_MAINNET_LAUNCHES",
+  "canonicalToken": {
+    "name": "WORLDZ",
+    "symbol": "WLDZ",
+    "network": "solana",
+    "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+    "maximumSupplyTokens": 100000000
+  },
+  "allocation": {
+    "totalPoolTokens": 10000000,
+    "totalPositions": 100,
+    "tokensPerQualifiedPosition": 100000,
+    "percentOfCanonicalMaximumSupplyPerPosition": 0.1,
+    "accounting": "RESERVED_PROGRAM_ALLOCATION"
+  },
+  "registry": {
+    "dynamicAuthority": "worldz-launch-register",
+    "publicApi": "https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register",
+    "repoFileIsPolicyNotPositionLedger": true,
+    "initialPublicPositionState": "POSITION_001_OPEN_UNTIL_DYNAMIC_REGISTRY_PROVES_OTHERWISE"
+  },
+  "qualification": {
+    "supportedMainnetLaunchRequired": true,
+    "safeLaunchProofRequired": true,
+    "chainNativeProofRequired": true,
+    "worldzProofRequired": true,
+    "teamIdentityReviewRequired": true,
+    "antiSybilReviewRequired": true,
+    "humanOrMultisigQualificationRequired": true,
+    "onePositionPerVerifiedTeamIdentity": true,
+    "devnetOrTestnetEligible": false,
+    "priceOrVolumeRankingUsed": false,
+    "qualificationOrder": "VERIFIED_MAINNET_PROOF_COMPLETION_TIMESTAMP",
+    "historicalPositionDeletionAllowed": false,
+    "fraudFindingCanMarkForfeited": true
+  },
+  "launchBenefitStack": {
+    "creatorFeeRetention": "97% / 95% / 92% of eligible creator fee revenue under Fee Flow V3",
+    "worldzContributionChoice": "3% / 5% / 8%",
+    "launchReferrer": "5% of the Worldz contribution when an attributed and executable fee route is proven",
+    "legacyCore": "10% of the Worldz contribution to the closed 12-token Legacy Core lane",
+    "worldzCoreFamily": "10% of the Worldz contribution; 2.5% each to WLDZ, RVIV, PNEX and MRCL lanes",
+    "teamBuilders": "5% of the Worldz contribution",
+    "impact": "10% of the Worldz contribution",
+    "treasury": "20% of the Worldz contribution; 70% Operations / 30% Worldz Miracle Team Treasury",
+    "lpGrowth": "15% of the Worldz contribution",
+    "futureLaunchInfrastructure": "5% of the Worldz contribution"
+  },
+  "disclosures": [
+    "Founding 100 is a token-allocation program, not company equity.",
+    "100,000 WLDZ is reserved per qualified position; this does not guarantee price, liquidity or returns.",
+    "No devnet or testnet launch receives a Founding 100 position.",
+    "No position is purchased with volume, token holdings, donations or paid promotion."
+  ]
+}
