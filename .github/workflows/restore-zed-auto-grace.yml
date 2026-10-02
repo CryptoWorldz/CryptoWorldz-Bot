@@ -379,14 +379,40 @@ jobs:
                   except Exception as exc:
                       print("ZED_COMMAND_SCOPE_CLEAR_WARN scope="+json.dumps(scope,separators=(",",":"))+" language="+str(language_code)+" error="+str(exc)[:120])
 
+          private_commands=commands+[
+            {"command":"dmstyle","description":"Send a WorldzStyle private DM"},
+            {"command":"replydm","description":"Reply to a Worldz Inbox message"},
+            {"command":"dmsettings","description":"Turn Worldz DMs on or off"},
+            {"command":"dmblock","description":"Block a Worldz DM sender"},
+            {"command":"dmunblock","description":"Unblock a Worldz DM sender"},
+            {"command":"dmdelete","description":"Hide a Worldz Inbox message"},
+            {"command":"dmstatus","description":"View private messaging status"}
+          ]
           call("setMyCommands",{"commands":commands})
+          call("setMyCommands",{"scope":{"type":"all_private_chats"},"commands":private_commands})
           for chat_id in (-1003732353996,-1004404927235):
               for scope_type in ("chat","chat_administrators"):
                   try:
                       call("setMyCommands",{"scope":{"type":scope_type,"chat_id":chat_id},"commands":commands})
                   except Exception as exc:
                       print("ZED_COMMAND_SCOPE_SET_WARN chat="+str(chat_id)+" scope="+scope_type+" error="+str(exc)[:120])
-          call("setChatMenuButton",{"menu_button":{"type":"web_app","text":"🌐 OPEN COMMAND CENTRE","web_app":{"url":"https://cryptobotz.cryptoworldz.xyz/miniapp/"}}})
+          call("setChatMenuButton",{"menu_button":{"type":"commands"}})
+          menu=call("getChatMenuButton")
+          if menu.get("type") != "commands":
+              raise SystemExit("Telegram private composer/menu restore failed")
+
+          owner_chat_id=str(env.get("OWNER_TELEGRAM_ID","")).strip()
+          if owner_chat_id.lstrip("-").isdigit():
+              try:
+                  call("sendMessage",{
+                    "chat_id":int(owner_chat_id),
+                    "text":"✅ ZED private Telegram chat restored. Normal message entry + /commands are available again. Command Centre remains available from the bot commands and links.",
+                    "reply_markup":{"remove_keyboard":True}
+                  })
+                  print("ZED_PRIVATE_COMPOSER_KEYBOARD_CLEAR=PASS")
+              except Exception as exc:
+                  print("ZED_PRIVATE_COMPOSER_KEYBOARD_CLEAR_WARN error="+str(exc)[:120])
+
           secret=hashlib.sha256(token.encode()).hexdigest()
           before=call("getWebhookInfo")
           pending_before=int(before.get("pending_update_count") or 0)
@@ -400,10 +426,14 @@ jobs:
           })
           bot=call("getMe")
           actual=call("getMyCommands")
+          private_actual=call("getMyCommands",{"scope":{"type":"all_private_chats"}})
           hook=call("getWebhookInfo")
           got=[x.get("command") for x in actual]
           expected=[x["command"] for x in commands]
+          private_got=[x.get("command") for x in private_actual]
+          private_expected=[x["command"] for x in private_commands]
           if got != expected: raise SystemExit("Telegram command list mismatch")
+          if private_got != private_expected: raise SystemExit("Telegram private command list mismatch")
           if hook.get("url") != "https://cryptobotz.cryptoworldz.xyz/telegram-webhook": raise SystemExit("Telegram webhook URL mismatch")
 
           pending_after=int(hook.get("pending_update_count") or 0)
@@ -423,9 +453,10 @@ jobs:
               raise SystemExit("Telegram webhook still reports an active delivery error: "+str(hook.get("last_error_message"))[:160])
           print("ZED_TELEGRAM_BOT=PASS")
           print("ZED_TELEGRAM_COMMANDS="+str(len(commands)))
+          print("ZED_TELEGRAM_PRIVATE_COMMANDS="+str(len(private_commands)))
           print("ZED_TELEGRAM_BACKLOG_CONTROL=PASS")
           print("ZED_TELEGRAM_WEBHOOK=PASS")
-          print("ZED_TELEGRAM_MENU_BUTTON=PASS")
+          print("ZED_TELEGRAM_PRIVATE_COMPOSER_MENU=PASS type=commands")
 
           dipshit_token=env.get("DIPSHIT_BOT_TOKEN","").strip()
           if not dipshit_token:
