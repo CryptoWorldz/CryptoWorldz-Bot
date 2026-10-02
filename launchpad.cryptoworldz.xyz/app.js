@@ -170,20 +170,16 @@ function selectedLaunchPadContribution(){
   return allowed.includes(picked)?picked:fallback;
 }
 function currentRoutes(){
-  const launchPad=selectedLaunchPadContribution();
-  const treasury=launchPad===3?12:launchPad===8?7:10;
   return {
-    creatorDeveloper:10,
-    launchReferrer:15,
-    legacyCore:15,
-    worldzCoreFamilyMarketBuys:12,
-    lpGrowth:10,
-    launchedTokenBuybackAndBurn:8,
-    impactCharity:5,
+    operationsProductDevelopment:20,
+    treasury:20,
+    lpGrowth:15,
+    legacyCore:10,
+    worldzCoreFamilyMarketBuys:10,
+    impactCharity:10,
     teamBuilderRewards:5,
-    futureTokenDeploymentReserve:5,
-    worldzLaunchPad:launchPad,
-    treasuryReserve:treasury
+    futureLaunchInfrastructure:5,
+    launchReferrer:5
   };
 }
 function setRecipeSelection(id){
@@ -214,11 +210,11 @@ function markRecipeCustom(){
 }
 function feeMath(){
   const fee=Number($('#project-fee').value)||0,vol=Math.max(0,Number($('#example-volume').value)||0);
-  const routes=currentRoutes(),launchPad=routes.worldzLaunchPad;
-  const gross=vol*(fee/100),platformAmount=gross*(launchPad/100),routed=gross-platformAmount;
+  const routes=currentRoutes(),launchPad=selectedLaunchPadContribution();
+  const gross=vol*(fee/100),worldzAmount=gross*(launchPad/100),creatorRetained=gross-worldzAmount;
   $('#project-fee-value').textContent=fee.toFixed(2)+'%';
   const lpv=$('#launchpad-contribution-value');if(lpv)lpv.textContent=launchPad+'%';
-  $('#gross-fee').textContent=fmt(gross);$('#worldz-fee').textContent=fmt(platformAmount);$('#project-pool').textContent=fmt(routed);
+  $('#gross-fee').textContent=fmt(gross);$('#worldz-fee').textContent=fmt(worldzAmount);$('#project-pool').textContent=fmt(creatorRetained);
   const total=Object.values(routes).reduce((s,x)=>s+(Number(x)||0),0);
   const rt=$('#route-total');if(rt){rt.textContent=total.toFixed(0)+'%';rt.className='pill '+(Math.abs(total-100)<.001?'safe':'locked');}
   const at=allocationTotal();
@@ -230,7 +226,7 @@ function currentAllocations(){
 function allocationTotal(){return Object.values(currentAllocations()).reduce((a,b)=>a+b,0);}
 function publicBenefitRouteTotal(){
   const r=currentRoutes();
-  return r.legacyCore+r.worldzCoreFamilyMarketBuys+r.lpGrowth+r.launchedTokenBuybackAndBurn+r.impactCharity+r.teamBuilderRewards+r.futureTokenDeploymentReserve;
+  return r.legacyCore+r.worldzCoreFamilyMarketBuys+r.lpGrowth+r.impactCharity+r.teamBuilderRewards+r.futureLaunchInfrastructure;
 }
 function manifestBase(){
   return {
@@ -249,18 +245,20 @@ function manifestBase(){
     },
     quoteAsset:build.quote,
     feePolicy:{
-      version:'WORLDZ-FEE-FLOW-V2',
+      version:'WORLDZ-FEE-FLOW-V3',
       builder:'WORLDZ-CHAIN-NATIVE-FEE-BUILDER-V1',
       projectTradingFeePercent:Number($('#project-fee').value),
       publicDefaultPercent:1,
       publicMaximumPercent:3,
       preferredIncrementPercent:0.25,
       worldzLaunchPadContributionPercent:selectedLaunchPadContribution(),
+      creatorRetentionPercent:100-selectedLaunchPadContribution(),
       worldzLaunchPadContributionChoicesPercent:[3,5,8],
-      feeDistributionPercent:currentRoutes(),
-      legacyCorePercent:15,
+      worldzInternalDistributionPercent:currentRoutes(),
+      treasuryLaneSplitPercent:{worldzOperationsTreasury:70,worldzMiracleTeamTreasury:30},
+      legacyCorePercentOfWorldzContribution:10,
       legacyCoreTokenCount:12,
-      worldzCoreFamilyMarketBuyPercent:12,
+      worldzCoreFamilyMarketBuyPercentOfWorldzContribution:10,
       worldzLaunchPadShareOfTokenSupplyPercent:0,
       worldzLaunchPadShareOfInitialLiquidityPercent:0,
       walletTransferTax:false
@@ -294,8 +292,8 @@ async function sha256(text){
   return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 async function runPreflight(){
-  const m=manifestBase(),routes=Object.values(m.feePolicy.feeDistributionPercent).reduce((a,b)=>a+b,0);
-  const alloc=m.supplyAllocationPercent,allocTotal=Object.values(alloc).reduce((a,b)=>a+b,0),r=m.feePolicy.feeDistributionPercent,p=platform.safeLaunchPolicy;
+  const m=manifestBase(),routes=Object.values(m.feePolicy.worldzInternalDistributionPercent).reduce((a,b)=>a+b,0);
+  const alloc=m.supplyAllocationPercent,allocTotal=Object.values(alloc).reduce((a,b)=>a+b,0),r=m.feePolicy.worldzInternalDistributionPercent,p=platform.safeLaunchPolicy;
   const solanaAdapter=m.network==='solana'&&['flash','curve','curve-pro'].includes(m.launchEngine);
   const baseAdapter=m.network==='base'&&m.launchEngine==='evm-fixed';
   const adapterReady=solanaAdapter||baseAdapter;
@@ -328,19 +326,20 @@ async function runPreflight(){
     ['Creator-controlled LP lock',m.safetyPolicy.creatorControlledLpLockPercent===100&&m.safetyPolicy.lpLockDays>=p.allocations.lpLockMinDays,'100% • '+m.safetyPolicy.lpLockDays+' days'],
     ['Project trading fee',m.feePolicy.projectTradingFeePercent>=platform.feePolicy.projectTradingFeeMinPercent&&m.feePolicy.projectTradingFeePercent<=platform.feePolicy.projectTradingFeeMaxPercent,m.feePolicy.projectTradingFeePercent.toFixed(2)+'%'],
     ['Project fee increment',Math.abs(((m.feePolicy.projectTradingFeePercent-platform.feePolicy.projectTradingFeeMinPercent)/platform.feePolicy.stepPercent)-Math.round((m.feePolicy.projectTradingFeePercent-platform.feePolicy.projectTradingFeeMinPercent)/platform.feePolicy.stepPercent))<1e-9,'0.25% steps'],
-    ['Fee Flow V2 = 100%',Math.abs(routes-100)<.001,routes.toFixed(0)+'%'],
-    ['Fee Flow values valid',Object.values(r).every(v=>Number.isFinite(v)&&v>=0&&v<=100),'No negative or >100% route'],
-    ['Creator / Developer lane',r.creatorDeveloper===10,'10% LOCKED'],
-    ['Launch Referrer lane',r.launchReferrer===15,'15% LOCKED'],
-    ['Legacy Core lane',r.legacyCore===15&&m.feePolicy.legacyCoreTokenCount===12,'15% • 12 TOKENS • 1.25% EACH'],
-    ['WLDZ/RVIV/PNEX/MRCL buy lane',r.worldzCoreFamilyMarketBuys===12,'12% • 3% EACH'],
-    ['LP Growth lane',r.lpGrowth===10,'10% LOCKED'],
-    ['Project Buyback + Burn lane',r.launchedTokenBuybackAndBurn===8,'8% LOCKED'],
-    ['Impact / Charity lane',r.impactCharity===5,'5% LOCKED'],
-    ['Team / Builder lane',r.teamBuilderRewards===5,'5% LOCKED'],
-    ['Future Deployment lane',r.futureTokenDeploymentReserve===5,'5% LOCKED'],
-    ['LaunchPad contribution choice',[3,5,8].includes(r.worldzLaunchPad),r.worldzLaunchPad+'% • CREATOR SELECTED'],
-    ['Treasury balance rule',r.treasuryReserve===(r.worldzLaunchPad===3?12:r.worldzLaunchPad===8?7:10),r.treasuryReserve+'%'],
+    ['Fee Flow V3 Worldz-internal split = 100%',Math.abs(routes-100)<.001,routes.toFixed(0)+'% OF WORLDZ SHARE'],
+    ['Worldz internal values valid',Object.values(r).every(v=>Number.isFinite(v)&&v>=0&&v<=100),'No negative or >100% internal route'],
+    ['Creator retention',[97,95,92].includes(m.feePolicy.creatorRetentionPercent),m.feePolicy.creatorRetentionPercent+'% OF ELIGIBLE FEE REVENUE'],
+    ['Worldz contribution',[3,5,8].includes(m.feePolicy.worldzLaunchPadContributionPercent),m.feePolicy.worldzLaunchPadContributionPercent+'% • CREATOR SELECTED'],
+    ['Operations / Product lane',r.operationsProductDevelopment===20,'20% OF WORLDZ SHARE'],
+    ['Treasury lane',r.treasury===20,'20% OF WORLDZ SHARE'],
+    ['Treasury 70/30 split',m.feePolicy.treasuryLaneSplitPercent.worldzOperationsTreasury===70&&m.feePolicy.treasuryLaneSplitPercent.worldzMiracleTeamTreasury===30,'70% OPERATIONS • 30% MIRACLE TEAM'],
+    ['LP Growth lane',r.lpGrowth===15,'15% OF WORLDZ SHARE'],
+    ['Legacy Core lane',r.legacyCore===10&&m.feePolicy.legacyCoreTokenCount===12,'10% OF WORLDZ SHARE • CLOSED 12 TOKEN SET'],
+    ['WLDZ/RVIV/PNEX/MRCL lane',r.worldzCoreFamilyMarketBuys===10,'10% OF WORLDZ SHARE • 2.5% EACH'],
+    ['Impact / Charity lane',r.impactCharity===10,'10% OF WORLDZ SHARE'],
+    ['Team / Builder lane',r.teamBuilderRewards===5,'5% OF WORLDZ SHARE'],
+    ['Future Launch / Infrastructure lane',r.futureLaunchInfrastructure===5,'5% OF WORLDZ SHARE'],
+    ['Launch Referrer lane',r.launchReferrer===5,'5% OF WORLDZ SHARE'],
     ['0% supply / initial LP take',m.feePolicy.worldzLaunchPadShareOfTokenSupplyPercent===0&&m.feePolicy.worldzLaunchPadShareOfInitialLiquidityPercent===0,'HARD LOCK'],
     ['Wallet transfer tax',m.feePolicy.walletTransferTax===false,'0% • HARD LOCK'],
     ['Mainnet enforcement',m.execution.publicMainnetCreatorLaunch===false,'FAIL-CLOSED UNTIL ON-CHAIN PROOF']
@@ -354,8 +353,8 @@ async function runPreflight(){
   $('#download-manifest').disabled=!all;
   const link=$('#devnet-launch-link');
   if(all&&adapterReady){
-    const route=m.feePolicy.feeDistributionPercent,alloc=m.supplyAllocationPercent,sp=m.safetyPolicy;
-    const q=new URLSearchParams({name:m.token.name,symbol:m.token.symbol,supply:String(m.token.fixedSupply),decimals:String(m.token.decimals),fixed:'1',description:m.token.description||'',engine:m.launchEngine,quote:m.quoteAsset,fee:String(m.feePolicy.projectTradingFeePercent),intent:hash,route_creator:String(route.creatorDeveloper||0),route_holders:String((route.legacyCore||0)+(route.worldzCoreFamilyMarketBuys||0)+(route.launchedTokenBuybackAndBurn||0)),route_lp:String(route.lpGrowth||0),route_treasury:String(route.treasuryReserve||0),route_community:String((route.launchReferrer||0)+(route.impactCharity||0)+(route.teamBuilderRewards||0)+(route.futureTokenDeploymentReserve||0)+(route.worldzLaunchPad||0)),fee_v2:'1',launchpad_contribution:String(route.worldzLaunchPad||5),v2_creator:String(route.creatorDeveloper||0),v2_referrer:String(route.launchReferrer||0),v2_legacy:String(route.legacyCore||0),v2_core_buys:String(route.worldzCoreFamilyMarketBuys||0),v2_lp:String(route.lpGrowth||0),v2_buyburn:String(route.launchedTokenBuybackAndBurn||0),v2_impact:String(route.impactCharity||0),v2_team:String(route.teamBuilderRewards||0),v2_future:String(route.futureTokenDeploymentReserve||0),v2_treasury:String(route.treasuryReserve||0),alloc_creatorTeam:String(alloc.creatorTeam||0),alloc_liquidity:String(alloc.liquidity||0),alloc_communityPublic:String(alloc.communityPublic||0),alloc_treasuryReserve:String(alloc.treasuryReserve||0),alloc_growthEcosystem:String(alloc.growthEcosystem||0),creator_unlocked:String(sp.creatorUnlockedAtGenesisPercent),founder_cliff:String(sp.founderCliffDays),founder_vesting:String(sp.founderVestingMonths),lp_lock_days:String(sp.lpLockDays),multisig:sp.treasuryProgramMultisigAddress});
+    const route=m.feePolicy.worldzInternalDistributionPercent,alloc=m.supplyAllocationPercent,sp=m.safetyPolicy;
+    const q=new URLSearchParams({name:m.token.name,symbol:m.token.symbol,supply:String(m.token.fixedSupply),decimals:String(m.token.decimals),fixed:'1',description:m.token.description||'',engine:m.launchEngine,quote:m.quoteAsset,fee:String(m.feePolicy.projectTradingFeePercent),intent:hash,fee_v3:'1',launchpad_contribution:String(m.feePolicy.worldzLaunchPadContributionPercent),creator_retention:String(m.feePolicy.creatorRetentionPercent),v3_ops:String(route.operationsProductDevelopment||0),v3_treasury:String(route.treasury||0),v3_lp:String(route.lpGrowth||0),v3_legacy:String(route.legacyCore||0),v3_core_buys:String(route.worldzCoreFamilyMarketBuys||0),v3_impact:String(route.impactCharity||0),v3_team:String(route.teamBuilderRewards||0),v3_future:String(route.futureLaunchInfrastructure||0),v3_referrer:String(route.launchReferrer||0),alloc_creatorTeam:String(alloc.creatorTeam||0),alloc_liquidity:String(alloc.liquidity||0),alloc_communityPublic:String(alloc.communityPublic||0),alloc_treasuryReserve:String(alloc.treasuryReserve||0),alloc_growthEcosystem:String(alloc.growthEcosystem||0),creator_unlocked:String(sp.creatorUnlockedAtGenesisPercent),founder_cliff:String(sp.founderCliffDays),founder_vesting:String(sp.founderVestingMonths),lp_lock_days:String(sp.lpLockDays),multisig:sp.treasuryProgramMultisigAddress});
     const routeBase=baseAdapter?'/base/':m.launchEngine==='curve'?'/curve/':m.launchEngine==='curve-pro'?'/curve-pro/':'/devnet/';
     link.href=routeBase+'?'+q.toString();link.classList.remove('disabled-link');link.setAttribute('aria-disabled','false');
     link.textContent=baseAdapter?'Open Base Sepolia Lab →':m.launchEngine==='curve'?'Open Worldz Curve Devnet →':m.launchEngine==='curve-pro'?'Open Curve Pro Devnet →':'Open Flash Devnet Launch →';
