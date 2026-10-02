@@ -126,6 +126,113 @@ function registerWorldzInboxSystem({app,bot,config,supabase}){
   app.post("/api/mini/inbox/hide",auth,async(req,res)=>{try{const src=await getMessage(req.body?.message_id);if(!src)return res.status(404).json({ok:false,error:"message_not_found"});const patch={};if(String(src.sender_telegram_id)===String(req.telegramUser.id))patch.sender_deleted_at=new Date().toISOString();if(String(src.recipient_telegram_id)===String(req.telegramUser.id))patch.recipient_deleted_at=new Date().toISOString();if(!Object.keys(patch).length)return res.status(403).json({ok:false,error:"not_your_message"});const q=await supabase.from("worldz_dm_messages").update(patch).eq("id",src.id);if(q.error)throw q.error;res.json({ok:true,message_id:src.id})}catch{res.status(503).json({ok:false,error:"hide_failed"})}});
   app.post("/api/mini/inbox/block-sender",auth,async(req,res)=>{try{const src=await getMessage(req.body?.message_id);if(!src||String(src.recipient_telegram_id)!==String(req.telegramUser.id))return res.status(404).json({ok:false,error:"message_not_found"});const sender=await profile(src.sender_telegram_id);if(!sender)return res.status(404).json({ok:false,error:"sender_not_found"});const q=await supabase.from("worldz_dm_blocks").upsert({blocker_telegram_id:Number(req.telegramUser.id),blocked_telegram_id:Number(src.sender_telegram_id),created_at:new Date().toISOString()},{onConflict:"blocker_telegram_id,blocked_telegram_id"});if(q.error)throw q.error;res.json({ok:true,blocked:true,sender:displayName(sender)})}catch{res.status(503).json({ok:false,error:"block_failed"})}});
 
-  return{sendDirect,rowsFor,markRead,unread,target};
+  const INTRO_CAMPAIGN_TITLE="WORLDZ — A BETTER WORLD 🌏 • INTRO V1";
+  const INTRO_BATCH_LIMIT=8;
+  const introBody=(person)=>{
+    const hello=cleanText(person?.first_name,60)||displayName(person);
+    return [
+      `Hi ${hello} 👋`,
+      "",
+      "JayJayTeamDev is building Worldz 🌐 around a simple mission: help people build, document, support and organise practical action toward ending world hunger and preventable disease.",
+      "",
+      "💜 SUPPORT JAYJAYTEAMDEV",
+      "https://donateworldz.com/jayjay-support/",
+      "",
+      "🚀 CREATE YOUR OWN CRYPTO TOKEN",
+      "https://launchpad.cryptoworldz.xyz/create-your-own-money/",
+      "A created token is not automatically legal tender, valuable or liquid.",
+      "",
+      "🌍 FOOD + HUMANITARIAN MISSION",
+      "https://foodworldz.com/",
+      "",
+      "🗳️ HAVE YOUR SAY",
+      "Worldz Votes Centre includes a worldwide, non-binding Public Voice space for documenting concerns and ideas — including experiences with government departments, councils, community services or other public issues.",
+      "https://cryptobotz.cryptoworldz.xyz/miniapp/#worldz-civic-votes",
+      "",
+      "🛠️ BUILD WITH WORLDZ",
+      "WorldzLaunchPad connects creators with ZED, AUTO, G.R.A.C.E., REXSECURE, DIPSHIT, raids, ShillPoints, referral pathways and community tooling.",
+      "",
+      "🔥 FOUNDING 100",
+      "The first 100 qualified verified mainnet launch positions have 100,000 WLDZ reserved per position under the published program rules. Token allocation is not equity and does not guarantee value or liquidity.",
+      "",
+      "We are also growing the Worldz community and inviting people interested in future opt-in community and secondary-treasury multisig stewardship roles under documented security and approval rules.",
+      "",
+      "Start by joining in — support something, create something, document something, suggest something or build something. 🌐💜",
+      "",
+      "To stop Worldz Inbox messages, send /dmsettings off."
+    ].join("\n");
+  };
+
+  async function runIntroCampaignBatch(){
+    if(String(process.env.WORLDZ_INBOX_INTRO_CAMPAIGN_DISABLED||"").trim()==="1")return{sent:0,skipped:"disabled"};
+    const oid=Number(ownerId());
+    if(!Number.isSafeInteger(oid)||oid<=0)return{sent:0,skipped:"owner_missing"};
+
+    const recent=await supabase.from("worldz_dm_messages")
+      .select("created_at,status")
+      .eq("sender_telegram_id",oid)
+      .eq("style_title",INTRO_CAMPAIGN_TITLE)
+      .in("status",["queued","telegram_sent"])
+      .order("created_at",{ascending:false})
+      .limit(1);
+    if(recent.error)throw recent.error;
+    const latest=recent.data?.[0]?.created_at?Date.parse(recent.data[0].created_at):0;
+    if(latest&&Date.now()-latest<55*60*1000)return{sent:0,skipped:"cadence"};
+
+    const prefRows=await supabase.from("worldz_dm_preferences")
+      .select("telegram_id,username,first_name,enabled,telegram_dm_reachable,last_private_seen_at")
+      .eq("enabled",true)
+      .eq("telegram_dm_reachable",true)
+      .order("last_private_seen_at",{ascending:false})
+      .limit(250);
+    if(prefRows.error)throw prefRows.error;
+
+    const prior=await supabase.from("worldz_dm_messages")
+      .select("recipient_telegram_id,status")
+      .eq("sender_telegram_id",oid)
+      .eq("style_title",INTRO_CAMPAIGN_TITLE)
+      .in("status",["queued","telegram_sent"])
+      .limit(2000);
+    if(prior.error)throw prior.error;
+    const already=new Set((prior.data||[]).map(x=>String(x.recipient_telegram_id)));
+
+    let sent=0,failed=0;
+    for(const person of prefRows.data||[]){
+      if(sent>=INTRO_BATCH_LIMIT)break;
+      const rid=Number(person.telegram_id);
+      if(!Number.isSafeInteger(rid)||rid<=0||rid===oid||already.has(String(rid)))continue;
+      if(String(person.username||"").toLowerCase()==="stepper_web_3")continue;
+      try{
+        if(await blocked(rid,oid))continue;
+        await sendDirect({
+          senderId:oid,
+          recipient:person,
+          body:introBody(person),
+          preset:"impact",
+          title:INTRO_CAMPAIGN_TITLE,
+          ctaLabel:"OPEN WORLDZLAUNCHPAD",
+          ctaUrl:"https://launchpad.cryptoworldz.xyz/worldz-launch/"
+        });
+        already.add(String(rid));
+        sent+=1;
+        if(sent<INTRO_BATCH_LIMIT)await new Promise(resolve=>setTimeout(resolve,7000));
+      }catch(error){
+        failed+=1;
+        console.warn("Worldz Inbox intro campaign send failed",{recipient:String(person.username||rid),code:error?.code||"unknown"});
+      }
+    }
+    console.info("Worldz Inbox intro campaign batch",{sent,failed});
+    return{sent,failed};
+  }
+
+  if(!globalThis.__worldzInboxIntroCampaignStarted){
+    globalThis.__worldzInboxIntroCampaignStarted=true;
+    const first=setTimeout(()=>runIntroCampaignBatch().catch(error=>console.warn("Worldz Inbox intro campaign startup failed",{code:error?.code||error?.message||"unknown"})),30000);
+    if(typeof first.unref==="function")first.unref();
+    const hourly=setInterval(()=>runIntroCampaignBatch().catch(error=>console.warn("Worldz Inbox intro campaign hourly failed",{code:error?.code||error?.message||"unknown"})),60*60*1000);
+    if(typeof hourly.unref==="function")hourly.unref();
+  }
+
+  return{sendDirect,rowsFor,markRead,unread,target,runIntroCampaignBatch};
 }
 module.exports={MAX_BODY_LENGTH,WORLDZ_INBOX_COMMANDS,displayName,isPrivateChat,normalizeUsername,parseStyledBody,registerWorldzInboxSystem,safeDeliveryError};
