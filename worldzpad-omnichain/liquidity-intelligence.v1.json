@@ -1,0 +1,75 @@
+{
+  "schema": "WORLDZ-LIQUIDITY-INTELLIGENCE-V1",
+  "version": "2026-10-02",
+  "status": "SOLANA_READ_ONLY_PUBLIC_FEEDS_WIRED__VALUE_MOVEMENT_OFF",
+  "mission": "Make liquidity understandable without confusing observed market depth with locked/protected liquidity or with a promise that liquidity will remain.",
+  "truthRules": [
+    "Observed liquidity and LP protection are separate facts.",
+    "Aggregate observed pair liquidity is not labelled protocol TVL.",
+    "Do not double-count duplicate pair addresses.",
+    "Deepest observed market is selected by reported USD liquidity, with provider attribution.",
+    "Provider disagreement remains visible.",
+    "No automatic LP move, rebalance, compound, zap, migration or withdrawal occurs from intelligence data."
+  ],
+  "solana": {
+    "providers": [
+      "DEX Screener",
+      "GeckoTerminal",
+      "Jupiter Tokens V2",
+      "Solana RPC"
+    ],
+    "liveReadOnlyEndpoint": "/intelligence.php?mint=<MINT>",
+    "metrics": [
+      "pair count",
+      "deepest pair liquidity",
+      "aggregate observed DEX liquidity",
+      "deepest venue",
+      "price",
+      "24h volume",
+      "Jupiter liquidity signal"
+    ],
+    "protectionProofSeparate": true,
+    "executionAdapters": [
+      "Raydium CPMM",
+      "Raydium LaunchLab",
+      "Meteora DBC → DAMM v2"
+    ],
+    "futureManagement": [
+      "one-click compound",
+      "rebalance suggestion",
+      "zap in/out",
+      "out-of-range warning",
+      "position P&L"
+    ],
+    "automaticValueMovementEnabled": false
+  },
+  "xrpl": {
+    "model": [
+      "native CLOB",
+      "native AMM"
+    ],
+    "rule": "Do not force Solana LP concepts onto XRPL order-book markets. Quote CLOB and AMM independently and explain which path supplies the market.",
+    "automaticValueMovementEnabled": false
+  },
+  "evm": {
+    "model": [
+      "Uniswap-compatible pools",
+      "chain-native venues"
+    ],
+    "hooksAndDynamicFees": "SEPARATE_EXECUTION_ADAPTER_AFTER_TESTNET_PROOF",
+    "automaticValueMovementEnabled": false
+  },
+  "sui": {
+    "model": [
+      "Sui-native Move liquidity venues"
+    ],
+    "automaticValueMovementEnabled": false
+  },
+  "bitcoin": {
+    "model": [
+      "marketplace/order liquidity for native Bitcoin assets",
+      "verified wrapped-BTC liquidity only on non-Bitcoin chains"
+    ],
+    "automaticValueMovementEnabled": false
+  }
+}

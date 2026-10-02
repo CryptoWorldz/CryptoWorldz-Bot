@@ -1193,23 +1193,39 @@
   },
   "intelligenceStack": {
     "worldzProofIntelligence": {
-      "status": "SCHEMA_BUILT__RUNTIME_INTEGRATION_NEXT",
-      "schema": "worldzpad-omnichain/schemas/worldz-proof-intelligence.v1.json"
+      "status": "SOLANA_CROSS_PROVIDER_RUNTIME_WIRED",
+      "schema": "worldzpad-omnichain/schemas/worldz-proof-intelligence.v1.json",
+      "publicEndpoint": "/intelligence.php?mint=<MINT>"
     },
     "creatorHistory": {
-      "status": "SCHEMA_BUILT__EVIDENCE_ONLY",
-      "schema": "worldzpad-omnichain/schemas/worldz-creator-history.v1.json"
+      "status": "SOLANA_BOUNDED_GENESIS_RECONSTRUCTION_WIRED",
+      "schema": "worldzpad-omnichain/schemas/worldz-creator-history.v1.json",
+      "rule": "Original deployer is only shown when the bounded mint-address history is complete and the oldest observed transaction contains initializeMint/initializeMint2 for the target mint. Otherwise it stays unproven."
     },
     "rexTokenIntelligence": {
-      "status": "ENGINE_BUILT__PROVIDER_FEEDS_PENDING",
+      "status": "SOLANA_REAL_EVIDENCE_WIRED__ADVANCED_WALLET_LINK_FEEDS_PENDING",
       "schema": "worldzpad-omnichain/schemas/rex-token-intelligence.v1.json",
       "engine": "worldzpad-omnichain/sdk/rex-token-intelligence.mjs",
-      "overallSafetyScore": false
+      "overallSafetyScore": false,
+      "providerFeeds": [
+        "Solana RPC",
+        "Jupiter Tokens V2",
+        "DEX Screener",
+        "GeckoTerminal",
+        "RugCheck"
+      ]
     },
     "transactionSupport": {
-      "status": "CONTEXT_MODEL_BUILT__READ_ONLY",
+      "status": "SOLANA_ONCHAIN_DIAGNOSIS_WIRED__OTHER_CHAINS_PENDING",
       "schema": "worldzpad-omnichain/schemas/worldz-transaction-support.v1.json",
-      "publicPath": "/transaction-help/"
+      "publicPath": "/transaction-help/",
+      "statusEndpoint": "/transaction-status.php?tx=<SIGNATURE>"
     }
+  },
+  "liquidityIntelligence": {
+    "version": "WORLDZ-LIQUIDITY-INTELLIGENCE-V1",
+    "status": "SOLANA_READ_ONLY_WIRED",
+    "source": "worldzpad-omnichain/liquidity-intelligence.v1.json",
+    "automaticValueMovementEnabled": false
   }
 }

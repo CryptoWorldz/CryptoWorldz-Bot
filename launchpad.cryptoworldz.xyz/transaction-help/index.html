@@ -24,7 +24,7 @@
 <label>Route<input id="route" autocomplete="off" spellcheck="false" placeholder="e.g. Meteora DBC, XRPL AMM"></label>
 <label class="wide">Known error<input id="error" autocomplete="off" spellcheck="false" placeholder="Optional error message — never paste secrets"></label>
 </div>
-<div class="actions"><button class="btn primary" id="review" type="button">Review Context →</button><button class="btn secondary" id="clear" type="button">Clear</button></div>
+<div class="actions"><button class="btn primary" id="review" type="button">Review Context →</button><button class="btn secondary" id="verify-chain" type="button">Verify On-Chain →</button><button class="btn secondary" id="clear" type="button">Clear</button></div>
 </section>
 <section class="card">
 <h2>What Worldz can say from this context</h2>
@@ -52,6 +52,30 @@ function review(){
  else {box.className='state warn';box.textContent='State is not independently established. Worldz treats unknown as unknown.';}
  const u=new URL(location.href);for(const [k,v] of Object.entries({chain,state,tx,token,route,error})){if(v)u.searchParams.set(k,v);else u.searchParams.delete(k);}history.replaceState(null,'',u);
 }
-$('#review').addEventListener('click',review);$('#clear').addEventListener('click',()=>{history.replaceState(null,'',location.pathname);location.reload();});load();
+async function verifyChain(){
+ const chain=$('#chain').value,tx=$('#tx').value.trim(),box=$('#result'),btn=$('#verify-chain');
+ if(chain!=='solana'){box.className='state warn';box.textContent='On-chain diagnosis is currently wired for Solana first. Other chains remain UNKNOWN rather than borrowing Solana logic.';return;}
+ if(!tx){box.className='state bad';box.textContent='Enter a public Solana transaction signature first.';return;}
+ btn.disabled=true;btn.textContent='Checking…';
+ try{
+   const r=await fetch('/transaction-status.php?tx='+encodeURIComponent(tx)+'&x='+Date.now(),{cache:'no-store'});
+   const out=await r.json().catch(()=>({}));
+   if(!r.ok||!out.ok)throw new Error(out.error||('HTTP '+r.status));
+   $('#state').value=out.state||'UNKNOWN';
+   box.className='state '+(out.state==='CONFIRMED'?'good':out.state==='FAILED'?'bad':'warn');
+   box.textContent=[
+     'ON-CHAIN STATE: '+String(out.state||'UNKNOWN'),
+     'Confirmation: '+String(out.confirmationStatus||'—'),
+     'Funds moved beyond network fee: '+String(out.fundsMoved||'UNKNOWN'),
+     'Network fee: '+(out.networkFeeLamports==null?'—':String(out.networkFeeLamports)+' lamports'),
+     'Slot: '+String(out.slot||'—'),
+     out.error?'Chain error: '+JSON.stringify(out.error):null,
+     '',
+     out.rule||''
+   ].filter(Boolean).join('\n');
+ }catch(e){box.className='state bad';box.textContent='On-chain diagnosis unavailable: '+(e?.message||String(e))+'. State remains unverified.';}
+ finally{btn.disabled=false;btn.textContent='Verify On-Chain →';}
+}
+$('#review').addEventListener('click',review);$('#verify-chain').addEventListener('click',verifyChain);$('#clear').addEventListener('click',()=>{history.replaceState(null,'',location.pathname);location.reload();});load();
 </script>
 </body></html>
