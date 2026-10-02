@@ -19,7 +19,7 @@ test("Command Centre exposes a separate civic public voice surface", () => {
   assert.match(js, /Worldz does not endorse/i);
 });
 
-test("Civic runtime registers read-only public routes and Telegram commands", () => {
+test("Civic runtime registers moderated concern intake while keeping vote casting locked", () => {
   const runtime = fs.readFileSync(path.join(ROOT, "src/full-runtime-entry.js"), "utf8");
   const telegram = fs.readFileSync(path.join(ROOT, "src/votes-centre/telegram.js"), "utf8");
   const http = fs.readFileSync(path.join(ROOT, "src/votes-centre/http.js"), "utf8");
@@ -30,9 +30,12 @@ test("Civic runtime registers read-only public routes and Telegram commands", ()
   assert.doesNotMatch(telegram, /\/civicvote/);
   assert.match(http, /bindingVotingEnabled: false/);
   assert.match(http, /voteCastingEnabled: false/);
-  assert.match(http, /concernSubmissionEnabled: false/);
+  assert.match(http, /concernSubmissionEnabled: true/);
+  assert.match(http, /concernAutoPublicationEnabled: false/);
   assert.match(http, /worldwide/);
   assert.match(http, /worldz_civic_concerns/);
   assert.doesNotMatch(http, /app[.]post\("\/api\/worldz-votes\/civic\/.*vote/);
-  assert.doesNotMatch(http, /app[.]post\("\/api\/worldz-votes\/civic\/.*concern/);
+  assert.match(http, /app[.]post\("\/api\/worldz-votes\/civic\/concerns"/);
+  assert.match(http, /status: "review"/);
+  assert.match(http, /public-intake-pending-human-review/);
 });

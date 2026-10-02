@@ -2,7 +2,7 @@
   "version": "WORLDZ-GLOBAL-PUBLIC-VOICE-1",
   "brand": "Worldz Votes Centre™",
   "scope": "worldwide",
-  "status": "non-binding-public-voice-foundation",
+  "status": "non-binding-public-voice-with-moderated-intake",
   "countryTerritoryAllowlist": null,
   "nonBindingPublicVoiceOpenWorldwide": true,
   "bindingVotingEnabled": false,
@@ -58,5 +58,13 @@
     "https://www.ohchr.org/en/UDHR/Documents/60UDHR/DECLARATION.pdf",
     "https://www.unicef.org/child-rights-convention/convention-text",
     "https://www.un.org/sustainabledevelopment/sustainable-development-goals/"
-  ]
+  ],
+  "concernRegistry": {
+    "publicReadEnabled": true,
+    "moderatedSubmissionEnabled": true,
+    "autoPublicationEnabled": false,
+    "submissionRateLimitPerIp10m": 3,
+    "structuredPrivateIdentityFieldsAccepted": false,
+    "humanReviewRequiredBeforePublication": true
+  }
 }

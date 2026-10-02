@@ -49,7 +49,7 @@
       <h3>Worldz Global Public Voice 🌐</h3>
       <p><b>Your voice. Your preferences. Equal treatment. Transparent count.</b></p>
       <p>From Uganda and communities across Africa to Indonesia, the Philippines, Greenland, Iceland, Mexico, Austria, Belgium, France, Hong Kong, China, India, Australia and everywhere else: the general non-binding Public Voice layer is worldwide.</p>
-      <div class="worldz-civic-status"><b>Current build state:</b> worldwide non-binding Public Voice with a read-only concern register. Public submissions and binding/official voting remain locked behind safety, privacy, legal and audit gates.</div>
+      <div class="worldz-civic-status"><b>Current build state:</b> worldwide non-binding Public Voice with moderated concern intake. Submissions enter human review; automatic publication and binding/official voting remain locked.</div>
     </article>
     <div class="worldz-civic-grid">
       ${rules.map(([title,body]) => `<article class="panel"><h3>${title}</h3><p>${body}</p></article>`).join("")}
@@ -66,8 +66,44 @@
       <div id="worldz-civic-priority-topics"><p>Loading worldwide priority categories…</p></div>
     </article>
     <article class="panel">
+      <p class="eyebrow">HAVE YOUR SAY — WORLDWIDE</p>
+      <h3>Submit a public concern for human review</h3>
+      <p>This is a non-binding Public Voice submission. It is <b>not</b> an official election vote, government budget decision, or Worldz treasury instruction.</p>
+      <p><b>Privacy:</b> do not include your name, phone, email, wallet address, exact home address, race/ethnicity or other private identity details. Children and young people should not include their school, contact details or exact location.</p>
+      <form id="worldz-civic-concern-form">
+        <p>
+          <label>Topic<br>
+            <select name="topic" required>
+              ${Object.entries(topicLabels).map(([value,label]) => `<option value="${value}">${label}</option>`).join("")}
+            </select>
+          </label>
+        </p>
+        <p>
+          <label>Location scope<br>
+            <select name="location_scope" required>
+              <option value="global">Global</option>
+              <option value="country">Country</option>
+              <option value="territory">Territory</option>
+              <option value="region">Region</option>
+              <option value="local">Local</option>
+            </select>
+          </label>
+        </p>
+        <p><label>Place label<br><input name="place_label" maxlength="120" value="Worldwide" required></label></p>
+        <p><label>Country / territory code (optional)<br><input name="country_or_territory_code" maxlength="12" placeholder="UG, ID, PH, MX, IN…"></label></p>
+        <p><label>Language code (optional)<br><input name="language_code" maxlength="20" placeholder="en, fr, id, sw…"></label></p>
+        <p><label>Concern title<br><input name="title" minlength="5" maxlength="160" required></label></p>
+        <p><label>Concern / proposal<br><textarea name="summary" minlength="20" maxlength="3000" rows="7" required></textarea></label></p>
+        <p><label>Supporting source links (optional, one per line, maximum 5)<br><textarea name="sources" rows="3" placeholder="https://…"></textarea></label></p>
+        <p><label><input type="checkbox" name="privacy_acknowledged" required> I have not included private identity/contact information.</label></p>
+        <p><label><input type="checkbox" name="review_acknowledged" required> I understand this enters human review and is not published automatically.</label></p>
+        <button type="submit">Submit Concern for Review</button>
+      </form>
+      <div id="worldz-civic-concern-submit-result" class="worldz-civic-status" hidden></div>
+    </article>
+    <article class="panel">
       <p class="eyebrow">WORLDWIDE PUBLIC CONCERN REGISTER</p>
-      <p>Published concerns are readable worldwide. Public submissions remain OFF until moderation, privacy, abuse-prevention and age-safety gates pass.</p>
+      <p>Only human-reviewed concerns marked <b>published</b> appear here. Submitting a concern never publishes it automatically.</p>
       <div id="worldz-civic-concerns"><p>Loading published concerns…</p></div>
     </article>
     <article class="panel">
@@ -80,6 +116,59 @@
       <p>Worldz can show proposals, candidates, evidence, counterarguments, public concerns and results. It does not tell people which political choice to make.</p>
     </article>
   `;
+
+  const concernForm = document.getElementById("worldz-civic-concern-form");
+  const concernSubmitResult = document.getElementById("worldz-civic-concern-submit-result");
+
+  concernForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submitButton = concernForm.querySelector('button[type="submit"]');
+    const form = new FormData(concernForm);
+    const sources = String(form.get("sources") || "")
+      .split(/\r?\n/)
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .slice(0, 6);
+
+    const payload = {
+      topic: form.get("topic"),
+      location_scope: form.get("location_scope"),
+      place_label: form.get("place_label"),
+      country_or_territory_code: form.get("country_or_territory_code"),
+      language_code: form.get("language_code"),
+      title: form.get("title"),
+      summary: form.get("summary"),
+      sources,
+      privacy_acknowledged: form.get("privacy_acknowledged") === "on",
+      review_acknowledged: form.get("review_acknowledged") === "on"
+    };
+
+    submitButton.disabled = true;
+    concernSubmitResult.hidden = false;
+    concernSubmitResult.textContent = "Submitting for human review…";
+
+    try {
+      const response = await fetch("/api/worldz-votes/civic/concerns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const invalid = Array.isArray(result.invalid) ? ` (${result.invalid.join(", ")})` : "";
+        throw new Error(`${result.message || result.error || "Submission failed"}${invalid}`);
+      }
+
+      concernSubmitResult.innerHTML =
+        `<b>Received for human review.</b><br>Reference: ${escapeHtml(result.publicId || "")}<br>Not published yet • Non-binding • No treasury action`;
+      concernForm.reset();
+      concernForm.elements.place_label.value = "Worldwide";
+    } catch (error) {
+      concernSubmitResult.textContent = error?.message || "Submission failed. Please try again later.";
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
 
   async function loadPublicVoice() {
     const priorityRoot = document.getElementById("worldz-civic-priority-topics");
@@ -113,7 +202,7 @@
               const language = concern.language_code ? ` • ${escapeHtml(concern.language_code)}` : "";
               return `<article class="panel"><p class="eyebrow">${place} • ${topic}${language}</p><h3>${title}</h3><p>${summary}</p></article>`;
             }).join("")}</div>`
-          : "<p>No concerns have been published yet. The registry is read-only until the public submission safety gates are complete.</p>";
+          : "<p>No concerns have been published yet. New submissions remain private until human review approves publication.</p>";
       } else {
         concernRoot.innerHTML = "<p>The public concern database is not active on this deployment yet.</p>";
       }

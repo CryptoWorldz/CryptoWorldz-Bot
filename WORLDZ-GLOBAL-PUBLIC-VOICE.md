@@ -67,7 +67,25 @@ The worldwide Public Voice foundation now has a usable read-only discovery layer
 - `GET /api/worldz-votes/civic/concerns` exposes only concerns already marked `published`.
 - concern discovery can be filtered by approved topic, location scope, country/territory code and language code.
 - the MiniApp renders the priority categories and published concern cards from the live API.
-- public concern submission remains OFF until moderation, privacy, abuse-prevention and age-appropriate safety gates are implemented and reviewed.
+- public concern submission now enters a private `review` queue with rate limiting, privacy minimisation and mandatory human review; nothing is published automatically.
 - binding/official voting remains OFF unless lawful authority and the jurisdiction-specific legal, identity, privacy and independent-audit gates are satisfied.
 
 This layer is for transparent public expression and discovery. It does not rank politicians or parties, decide elections, control government budgets, or execute Worldz treasury transactions.
+
+
+## Build #3 — Have Your Say moderated intake
+
+Worldz Public Voice now includes a worldwide **Submit Concern for Review** rail.
+
+Safeguards:
+- every new public submission is stored with `status = review`;
+- publication is never automatic;
+- human review is required before a concern can appear in the public register;
+- three submissions per IP per ten-minute window;
+- structured name, email, phone, exact-address, wallet-address, race/ethnicity and date-of-birth fields are rejected;
+- the form tells children and young people not to provide school, contact or exact-location information;
+- source links are optional, limited to five and restricted to HTTP/HTTPS;
+- the submitter must acknowledge the privacy rule and human-review rule;
+- submissions are non-binding and cannot execute a government budget, Worldz treasury transaction, WorldzGovern action or official election vote.
+
+Worldz can host documented criticism, support, concerns and proposals as public expression where lawful. The platform itself remains politically neutral and does not turn a person's submission into a Worldz endorsement.

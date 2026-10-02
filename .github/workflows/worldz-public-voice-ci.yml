@@ -1,0 +1,52 @@
+name: Worldz Public Voice CI
+
+on:
+  pull_request:
+    paths:
+      - "WORLDZ-GLOBAL-PUBLIC-VOICE.md"
+      - "config/worldz-votes/**"
+      - "public/miniapp/worldz-votes-civic.js"
+      - "src/full-runtime-entry.js"
+      - "src/votes-centre/**"
+      - "supabase/migrations/*worldz_civic*"
+      - "test/worldz-*.test.js"
+      - ".github/workflows/worldz-public-voice-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldz-public-voice-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  civic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Syntax check
+        run: |
+          node --check src/votes-centre/http.js
+          node --check src/votes-centre/global.js
+          node --check src/votes-centre/telegram.js
+          node --check public/miniapp/worldz-votes-civic.js
+          node --check src/full-runtime-entry.js
+
+      - name: Run Worldz Public Voice tests
+        run: |
+          node --test \
+            test/worldz-votes-civic.test.js \
+            test/worldz-votes-civic-static.test.js \
+            test/worldz-global-public-voice.test.js \
+            test/worldz-global-public-voice-readonly.test.js \
+            test/worldz-public-voice-intake.test.js \
+            test/worldz-civic-migration-static.test.js

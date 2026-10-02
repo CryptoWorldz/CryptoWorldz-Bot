@@ -40,3 +40,13 @@ test("Human-needs mission covers core Worldz priorities without treasury authori
   assert.equal(status.officialBudgetAuthority, false);
   assert.equal(status.treasuryExecution, false);
 });
+
+test("Public Voice concern intake is moderated and never auto-published", () => {
+  const status = getGlobalPublicVoiceStatus();
+  assert.equal(status.concernPublicReadEnabled, true);
+  assert.equal(status.moderatedConcernSubmissionEnabled, true);
+  assert.equal(status.concernAutoPublicationEnabled, false);
+  assert.equal(status.concernHumanReviewRequired, true);
+  assert.equal(status.concernSubmissionRateLimitPerIp10m, 3);
+  assert.equal(status.structuredPrivateIdentityFieldsAccepted, false);
+});

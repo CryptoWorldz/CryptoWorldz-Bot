@@ -1,5 +1,7 @@
 "use strict";
 
+const crypto = require("node:crypto");
+
 const {
   CIVIC_PRINCIPLES,
   countApproval,
@@ -20,6 +22,102 @@ const CONCERN_LOCATION_SCOPES = Object.freeze([
   "region",
   "local"
 ]);
+
+const DISALLOWED_CONCERN_FIELDS = Object.freeze([
+  "name",
+  "email",
+  "phone",
+  "address",
+  "exactAddress",
+  "dateOfBirth",
+  "race",
+  "ethnicity",
+  "wallet",
+  "walletAddress"
+]);
+
+function createConcernSubmissionLimiter({ limit = 3, windowMs = 10 * 60 * 1000 } = {}) {
+  const buckets = new Map();
+  return (req, res, next) => {
+    const now = Date.now();
+    const key = String(req.ip || req.socket?.remoteAddress || "unknown");
+    const current = buckets.get(key);
+    if (!current || current.resetAt <= now) {
+      buckets.set(key, { count: 1, resetAt: now + windowMs });
+      return next();
+    }
+    current.count += 1;
+    if (current.count > limit) {
+      return res.status(429).json({
+        ok: false,
+        error: "civic_concern_rate_limited",
+        retryAfterSeconds: Math.max(1, Math.ceil((current.resetAt - now) / 1000))
+      });
+    }
+    return next();
+  };
+}
+
+function normalizeSourceBundle(input) {
+  if (input == null) return { value: [], invalid: false };
+  if (!Array.isArray(input) || input.length > 5) return { value: [], invalid: true };
+
+  const value = [];
+  for (const item of input) {
+    const raw = typeof item === "string" ? item : item && typeof item.url === "string" ? item.url : "";
+    if (!raw || raw.length > 500) return { value: [], invalid: true };
+    try {
+      const url = new URL(raw);
+      if (!["http:", "https:"].includes(url.protocol)) return { value: [], invalid: true };
+      value.push({ url: url.toString() });
+    } catch {
+      return { value: [], invalid: true };
+    }
+  }
+  return { value, invalid: false };
+}
+
+function normalizeConcernSubmission(body = {}) {
+  const invalid = [];
+  const forbiddenFields = DISALLOWED_CONCERN_FIELDS.filter((field) => body[field] != null && String(body[field]).trim() !== "");
+  if (forbiddenFields.length) invalid.push("private_identity_fields");
+
+  const topic = String(body.topic || "").trim();
+  const locationScope = String(body.location_scope || body.locationScope || "global").trim();
+  const countryOrTerritoryCode = String(body.country_or_territory_code || body.countryOrTerritoryCode || "").trim().toUpperCase();
+  const placeLabel = String(body.place_label || body.placeLabel || "Worldwide").trim();
+  const title = String(body.title || "").trim();
+  const summary = String(body.summary || "").trim();
+  const languageCode = String(body.language_code || body.languageCode || "").trim();
+  const privacyAcknowledged = body.privacy_acknowledged === true || body.privacyAcknowledged === true;
+  const reviewAcknowledged = body.review_acknowledged === true || body.reviewAcknowledged === true;
+  const sources = normalizeSourceBundle(body.sources || body.source_bundle || body.sourceBundle);
+
+  if (!CONCERN_TOPICS.includes(topic)) invalid.push("topic");
+  if (!CONCERN_LOCATION_SCOPES.includes(locationScope)) invalid.push("location_scope");
+  if (countryOrTerritoryCode && !/^[A-Z0-9-]{2,12}$/.test(countryOrTerritoryCode)) invalid.push("country_or_territory_code");
+  if (placeLabel.length < 2 || placeLabel.length > 120) invalid.push("place_label");
+  if (title.length < 5 || title.length > 160) invalid.push("title");
+  if (summary.length < 20 || summary.length > 3000) invalid.push("summary");
+  if (languageCode && !/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(languageCode)) invalid.push("language_code");
+  if (sources.invalid) invalid.push("sources");
+  if (!privacyAcknowledged) invalid.push("privacy_acknowledged");
+  if (!reviewAcknowledged) invalid.push("review_acknowledged");
+
+  return {
+    invalid: [...new Set(invalid)],
+    value: {
+      place_label: placeLabel,
+      location_scope: locationScope,
+      country_or_territory_code: countryOrTerritoryCode || null,
+      topic,
+      title,
+      summary,
+      language_code: languageCode || null,
+      source_bundle: sources.value
+    }
+  };
+}
 
 function normalizeConcernListQuery(query = {}) {
   const rawTopic = String(query.topic || "").trim();
@@ -47,6 +145,7 @@ function normalizeConcernListQuery(query = {}) {
 }
 
 function registerCivicVotesRoutes({ app, supabase }) {
+  const allowConcernSubmission = createConcernSubmissionLimiter({ limit: 3, windowMs: 10 * 60 * 1000 });
   app.get("/api/worldz-votes/civic/status", (_req, res) => {
     res.json({
       ok: true,
@@ -54,7 +153,8 @@ function registerCivicVotesRoutes({ app, supabase }) {
       layer: "civic-public-voice",
       bindingVotingEnabled: false,
       voteCastingEnabled: false,
-      concernSubmissionEnabled: false,
+      concernSubmissionEnabled: true,
+      concernAutoPublicationEnabled: false,
       globalPublicVoice: getGlobalPublicVoiceStatus(),
       principles: CIVIC_PRINCIPLES
     });
@@ -67,8 +167,9 @@ function registerCivicVotesRoutes({ app, supabase }) {
       concernRegistry: {
         designed: true,
         publicReadEnabled: true,
-        publicSubmissionEnabled: false,
-        reason: "Moderation, privacy, abuse-prevention and age-appropriate safety gates are required before public writes."
+        publicSubmissionEnabled: true,
+        autoPublicationEnabled: false,
+        reason: "Submissions enter a private human-review queue. Nothing is published automatically."
       }
     });
   });
@@ -116,7 +217,8 @@ function registerCivicVotesRoutes({ app, supabase }) {
     return res.json({
       ok: true,
       readOnly: true,
-      submissionEnabled: false,
+      submissionEnabled: true,
+      autoPublicationEnabled: false,
       filters: {
         topic: filters.topic,
         locationScope: filters.locationScope,
@@ -125,6 +227,44 @@ function registerCivicVotesRoutes({ app, supabase }) {
         limit: filters.limit
       },
       concerns: data || []
+    });
+  });
+
+
+  app.post("/api/worldz-votes/civic/concerns", allowConcernSubmission, async (req, res) => {
+    const normalized = normalizeConcernSubmission(req.body || {});
+    if (normalized.invalid.length) {
+      return res.status(400).json({
+        ok: false,
+        error: "invalid_civic_concern_submission",
+        invalid: normalized.invalid,
+        message: "Submit the public concern only. Do not include names, contact details, exact home addresses, wallet addresses or demographic identity fields."
+      });
+    }
+
+    const publicId = `WZC-${crypto.randomUUID()}`;
+    const row = {
+      public_id: publicId,
+      ...normalized.value,
+      status: "review",
+      moderation_note: "public-intake-pending-human-review"
+    };
+
+    const { error } = await supabase.from("worldz_civic_concerns").insert(row);
+    if (error) {
+      console.error("Worldz civic concern intake failed", { code: error.code || "unknown" });
+      return res.status(503).json({ ok: false, error: "civic_concern_intake_unavailable" });
+    }
+
+    return res.status(202).json({
+      ok: true,
+      publicId,
+      status: "review",
+      published: false,
+      binding: false,
+      officialBudgetAuthority: false,
+      treasuryExecution: false,
+      message: "Concern received for human review. Submission does not create an official vote, budget decision or Worldz treasury action."
     });
   });
 
@@ -203,6 +343,10 @@ function registerCivicVotesRoutes({ app, supabase }) {
 module.exports = {
   CONCERN_LOCATION_SCOPES,
   CONCERN_TOPICS,
+  DISALLOWED_CONCERN_FIELDS,
+  createConcernSubmissionLimiter,
   normalizeConcernListQuery,
+  normalizeConcernSubmission,
+  normalizeSourceBundle,
   registerCivicVotesRoutes
 };

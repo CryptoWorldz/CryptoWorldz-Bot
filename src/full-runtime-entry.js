@@ -252,7 +252,7 @@ async function start() {
   startupStage = "register_worldz_fullscope";
   registerFullScopeTelegramHandlers({ bot, repository, config, supabase });
   startupStage = "register_worldz_civic_votes";
-  registerCivicVotesHandlers({ bot, supabase });
+  registerCivicVotesHandlers({ bot, supabase, config });
   registerCivicVotesRoutes({ app, supabase });
   startupStage = "register_rex_secureguard";
   registerRexSecureGuard({ bot, supabase, config });
