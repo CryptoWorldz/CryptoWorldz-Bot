@@ -234,7 +234,7 @@ jobs:
 
             await page.waitForFunction(()=>{
               const t=document.querySelector('#status')?.textContent||'';
-              return t.includes('ONE-TRANSACTION PREFLIGHT PASS') || t.includes('PREFLIGHT STOPPED');
+              return t.includes('3-OF-5 PROPOSAL PREFLIGHT PASS') || t.includes('PREFLIGHT STOPPED');
             },null,{timeout:90000});
 
             const status=await page.locator('#status').innerText();
@@ -242,7 +242,7 @@ jobs:
             console.log('FULL_PREFLIGHT_STATUS='+JSON.stringify(status));
             console.log('FULL_PREFLIGHT_REVIEW='+JSON.stringify(review));
 
-            if(!status.includes('ONE-TRANSACTION PREFLIGHT PASS')){
+            if(!status.includes('3-OF-5 PROPOSAL PREFLIGHT PASS')){
               throw new Error('Full owner preflight failed: '+status);
             }
             if(!review.includes('Simulation: PASS')){
