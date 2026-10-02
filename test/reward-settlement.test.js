@@ -50,5 +50,7 @@ test("funding plan explains target, hard cap, tranches and payout choices", () =
   assert.match(text, /Tuesday: AUD \$30\.00/);
   assert.match(text, /USDC or SOL/);
   assert.match(text, /emergency maximum, not a spending recommendation/);
-  assert.match(text, /No automatic transfers/);
+  assert.match(text, /Routine weekly allocations are automatic/);
+  assert.match(text, /Treasury → Reward Wallet/);
+  assert.match(text, /Automatic on-chain transfers remain disabled/);
 });
