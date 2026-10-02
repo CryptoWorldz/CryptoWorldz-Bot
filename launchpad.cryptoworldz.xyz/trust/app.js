@@ -87,7 +87,10 @@ function renderRealIntelligence(real){
     return;
   }
   const providers=Array.isArray(real.providers)?real.providers:[];
-  $('#data-sources').innerHTML=providers.map(x=>metric(x.provider,String(x.status||'UNKNOWN').replaceAll('_',' '))).join('');
+  const identity=real.identity||{};
+  $('#data-sources').innerHTML=providers.map(x=>metric(x.provider,String(x.status||'UNKNOWN').replaceAll('_',' '))).join('')+
+    metric('Name agreement',identity.nameAgreement===true?'YES':identity.nameAgreement===false?'DISAGREES':'NOT ENOUGH DATA')+
+    metric('Symbol agreement',identity.symbolAgreement===true?'YES':identity.symbolAgreement===false?'DISAGREES':'NOT ENOUGH DATA');
   const liq=real.liquidity||{};
   $('#liquidity-intel').innerHTML=[
     metric('DEX pairs observed',liq.pairCount??'—'),
@@ -159,7 +162,7 @@ function render(out){
     $('#rex-signals').innerHTML=rex.map(x=>rexCard(x[0],x[1],x[2])).join('');
     $('#creator-history').innerHTML=[
       metric('History state',rc.status||'UNKNOWN'),
-      metric('Original deployer',rc.originalDeployerCandidate?String(rc.originalDeployerCandidate).slice(0,6)+'…'+String(rc.originalDeployerCandidate).slice(-6):'NOT PROVEN'),
+      metric('Deployer candidate',rc.originalDeployerCandidate?String(rc.originalDeployerCandidate).slice(0,6)+'…'+String(rc.originalDeployerCandidate).slice(-6):'NOT PROVEN'),
       metric('Creation tx',rc.creationSignature?String(rc.creationSignature).slice(0,8)+'…':'—'),
       metric('Worldz previous launches',rc.worldzRegistry?.launchCount??'—'),
       metric('History complete',rc.historyComplete===true?'YES':rc.historyComplete===false?'NO':'UNKNOWN')
