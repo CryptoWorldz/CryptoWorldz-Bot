@@ -250,7 +250,7 @@ async function prepare(){
   plan={mode:'CREATE',outer,latest,root,distributor,tokenVault,impactAta,transactionIndex,proposalPda,debit};
   $('#launch').textContent='3. Create Proposal + Approval 1/3';
   $('#review').textContent='NETWORK: Solana Mainnet\nRVIV mint: '+mint.toBase58()+'\nSquads source: '+vault.toBase58()+'\nRequired governance: 3-of-5\nSquads proposal index: '+transactionIndex+'\nMerkle distributor: '+distributor.toBase58()+'\nUnique claimants: '+manifest.recipients.length+'\nLegacy unlocked: '+(Number(BigInt(manifest.distributor.amountUnlockedRaw))/1e6).toFixed(6)+' RVIV\nDev locked / 12-month linear vesting: '+(Number(BigInt(manifest.distributor.amountLockedRaw))/1e6).toFixed(6)+' RVIV\nWorldz Impact after treasury execution: 20,000,000 RVIV\nOuter setup bytes: '+raw.length+' / 1232\nOwner SOL now: '+(ownerLamports/1e9).toFixed(9)+' SOL\nSimulated owner SOL debit: '+(debit===null?'not returned by RPC':(debit/1e9).toFixed(9)+' SOL')+'\nSimulation: PASS\n\nThis first signature creates the distributor and Squads proposal and records JayJayTeamDev approval 1/3. It DOES NOT execute the Squads RVIV transfers.';
-  status('3-OF-5 SETUP PREFLIGHT PASS ✅\nReview every line. The first signature records only approval 1/3; two more Squads approvals are required before RVIV can move.','good');
+  status('3-OF-5 SETUP PREFLIGHT PASS ✅\nONE-TRANSACTION PREFLIGHT PASS — SETUP STAGE ONLY; NO TREASURY EXECUTION\nReview every line. The first signature records only approval 1/3; two more Squads approvals are required before RVIV can move.','good');
   $('#launch').disabled=false;
 }
 
