@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-MIRACLE-V1",
-  "version": "2026-10-02-C",
+  "version": "2026-10-02-D",
   "status": "PLANNED_SPEC_LOCKED",
   "token": {
     "order": 4,
@@ -27,7 +27,7 @@
       "silentAutomaticReassignmentAllowed": false,
       "proposedMultisig": {
         "policy": "4-of-8",
-        "state": "SIGNER_SET_LOCKED__PENDING_SQUADS_DEPLOYMENT_AND_LIVE_4_OF_8_PROOF",
+        "state": "PENDING_2_REPLACEMENT_SIGNERS__NOT_DEPLOYED",
         "exactAdditionalWalletsMayBeInvented": false,
         "onePersonMultipleWalletsCountAsIndependentSigners": false,
         "signers": [
@@ -44,10 +44,6 @@
             "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
           },
           {
-            "label": "SolMusic",
-            "solanaPublicKey": "FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ"
-          },
-          {
             "label": "Mahammad",
             "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
           },
@@ -58,14 +54,22 @@
           {
             "label": "Troll George",
             "solanaPublicKey": "GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc"
+          }
+        ],
+        "signerCount": 6,
+        "threshold": 4,
+        "targetSignerCount": 8,
+        "remainingSignerSlots": 2,
+        "removedSigners": [
+          {
+            "label": "SolMusic",
+            "reason": "OWNER_REQUESTED_REPLACEMENT"
           },
           {
             "label": "Annabel",
-            "solanaPublicKey": "2fnb5CeAtvgUxz1R46e4DQJ8q99M5bn5oEgQMTYS1fa"
+            "reason": "INVALID_SOLANA_PUBLIC_KEY"
           }
-        ],
-        "signerCount": 8,
-        "threshold": 4
+        ]
       },
       "registeredRecipientSource": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json",
       "accountingSeparationRequired": true,
@@ -105,7 +109,7 @@
   "treasuryProfiles": {
     "miracleChurchTreasury": {
       "proposedPolicy": "4-of-8",
-      "state": "SIGNER_SET_LOCKED__PENDING_SQUADS_DEPLOYMENT_AND_LIVE_4_OF_8_PROOF",
+      "state": "PENDING_2_REPLACEMENT_SIGNERS__NOT_DEPLOYED",
       "signerConsentRequired": true,
       "verifiedPublicWalletRequired": true,
       "membershipDoesNotAutomaticallyCreateSignerAuthority": true,
@@ -131,10 +135,6 @@
           "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
         },
         {
-          "label": "SolMusic",
-          "solanaPublicKey": "FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ"
-        },
-        {
           "label": "Mahammad",
           "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
         },
@@ -145,14 +145,22 @@
         {
           "label": "Troll George",
           "solanaPublicKey": "GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc"
+        }
+      ],
+      "signerCount": 6,
+      "threshold": 4,
+      "targetSignerCount": 8,
+      "remainingSignerSlots": 2,
+      "removedSigners": [
+        {
+          "label": "SolMusic",
+          "reason": "OWNER_REQUESTED_REPLACEMENT"
         },
         {
           "label": "Annabel",
-          "solanaPublicKey": "2fnb5CeAtvgUxz1R46e4DQJ8q99M5bn5oEgQMTYS1fa"
+          "reason": "INVALID_SOLANA_PUBLIC_KEY"
         }
-      ],
-      "signerCount": 8,
-      "threshold": 4
+      ]
     }
   },
   "executionBoundary": {
