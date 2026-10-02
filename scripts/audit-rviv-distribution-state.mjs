@@ -9,7 +9,7 @@ const owners=[
  ['Next Big Coin Dev','3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt'],
  ['PdCrew','DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j'],
  ['Purple Diamond Crew','ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U'],
- ['Purple PDC','G35RixuDLj8wnKF4Hc518nbYxp1cZwGL5wJTG3'.replace('wnK','wnK')],
+ ['Purple PDC','G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3'],
  ['SolSavewXRP','5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9'],
  ['DevCity staging','2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m'],
  ['Impact staging','5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW']
