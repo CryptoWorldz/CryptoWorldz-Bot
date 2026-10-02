@@ -39,8 +39,8 @@ test('launch builder recipes are functional and Beginner/Pro selector regression
   assert.match(launchHtml,/id="launch-recipes"/);
   assert.match(launchJs,/function applyLaunchRecipe\(id\)/);
   assert.match(launchJs,/launchRecipe:selectedRecipe/);
-  assert.doesNotMatch(launchJs,/\$\('\.wizard-step'\)\.forEach/);
-  assert.doesNotMatch(launchJs,/\$\('\.experience-choice'\)\.forEach/);
+  assert.equal(/(^|[^$])\$\('\.wizard-step'\)\.forEach/m.test(launchJs),false);
+  assert.equal(/(^|[^$])\$\('\.experience-choice'\)\.forEach/m.test(launchJs),false);
   assert.match(launchJs,/\$\$\('\.wizard-step'\)\.forEach/);
 });
 
