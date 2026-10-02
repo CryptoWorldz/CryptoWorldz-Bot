@@ -39,3 +39,16 @@ test("Civic runtime registers moderated concern intake while keeping vote castin
   assert.match(http, /status: "review"/);
   assert.match(http, /public-intake-pending-human-review/);
 });
+
+test("Civic concern moderation commands are admin-gated and viewpoint-neutral", () => {
+  const runtime = fs.readFileSync(path.join(ROOT, "src/full-runtime-entry.js"), "utf8");
+  const telegram = fs.readFileSync(path.join(ROOT, "src/votes-centre/telegram.js"), "utf8");
+  assert.match(runtime, /registerCivicVotesHandlers\(\{ bot, supabase, config \}\)/);
+  assert.match(telegram, /const isAdmin/);
+  assert.match(telegram, /worldzconcerns/);
+  assert.match(telegram, /worldzconcern/);
+  assert.match(telegram, /worldzpublish/);
+  assert.match(telegram, /worldzreject/);
+  assert.match(telegram, /Do not approve\/reject based on political viewpoint/);
+  assert.match(telegram, /Moderate for privacy\/safety\/process quality, not political viewpoint/);
+});
