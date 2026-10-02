@@ -1,0 +1,212 @@
+name: Worldz Inbox Intro Campaign
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/worldz-inbox-intro-campaign.yml"
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldz-inbox-intro-campaign
+  cancel-in-progress: false
+
+jobs:
+  send:
+    name: Send next Worldz Inbox batch
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_SECRET_KEY }}
+    steps:
+      - name: Send opt-out-aware batch
+        shell: python
+        run: |
+          import json, os, time, urllib.parse, urllib.request, urllib.error
+          from datetime import datetime, timezone
+
+          BOT_TOKEN = str(os.environ.get("BOT_TOKEN","")).strip()
+          SUPABASE_URL = str(os.environ.get("SUPABASE_URL","")).strip() or "https://hknymhhyqldtzmplzuzh.supabase.co"
+          SERVICE = str(os.environ.get("SUPABASE_SERVICE_KEY","")).strip()
+          OWNER_ID = 8029135300
+          CAMPAIGN_TITLE = "WORLDZ — A BETTER WORLD 🌏 • INTRO V1"
+          BATCH_LIMIT = 8
+
+          if not BOT_TOKEN:
+              raise SystemExit("Missing protected Telegram bot token")
+          if not SERVICE:
+              raise SystemExit("Missing protected Supabase service key")
+
+          print("::add-mask::"+BOT_TOKEN)
+          print("::add-mask::"+SERVICE)
+
+          base = SUPABASE_URL.rstrip("/") + "/rest/v1"
+          sb_headers = {
+              "apikey": SERVICE,
+              "authorization": "Bearer " + SERVICE,
+              "accept": "application/json",
+              "content-type": "application/json",
+              "user-agent": "Worldz-Inbox-Intro/1.0"
+          }
+
+          def sb(method, route, payload=None, prefer=None):
+              headers = dict(sb_headers)
+              if prefer:
+                  headers["Prefer"] = prefer
+              data = None if payload is None else json.dumps(payload, ensure_ascii=False).encode("utf-8")
+              req = urllib.request.Request(base + route, data=data, headers=headers, method=method)
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  raw = r.read().decode("utf-8")
+                  return json.loads(raw) if raw else None
+
+          def tg(method, payload):
+              data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+              req = urllib.request.Request(
+                  "https://api.telegram.org/bot" + BOT_TOKEN + "/" + method,
+                  data=data,
+                  headers={"content-type":"application/json"},
+                  method="POST"
+              )
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  out = json.loads(r.read().decode("utf-8"))
+              if out.get("ok") is not True:
+                  raise RuntimeError(str(out.get("description") or "telegram_rejected"))
+              return out.get("result") or {}
+
+          prefs = sb(
+              "GET",
+              "/worldz_dm_preferences?select=telegram_id,username,first_name,enabled,telegram_dm_reachable,last_private_seen_at"
+              "&enabled=eq.true&telegram_dm_reachable=eq.true"
+              "&order=last_private_seen_at.desc.nullslast&limit=250"
+          ) or []
+
+          blocks = sb(
+              "GET",
+              f"/worldz_dm_blocks?select=blocker_telegram_id&blocked_telegram_id=eq.{OWNER_ID}&limit=1000"
+          ) or []
+          blocked_ids = {int(x["blocker_telegram_id"]) for x in blocks if x.get("blocker_telegram_id")}
+
+          title_q = urllib.parse.quote(CAMPAIGN_TITLE, safe="")
+          prior = sb(
+              "GET",
+              f"/worldz_dm_messages?select=recipient_telegram_id&sender_telegram_id=eq.{OWNER_ID}"
+              f"&style_title=eq.{title_q}&limit=2000"
+          ) or []
+          already = {int(x["recipient_telegram_id"]) for x in prior if x.get("recipient_telegram_id")}
+
+          eligible = []
+          for p in prefs:
+              rid = int(p.get("telegram_id") or 0)
+              if not rid or rid == OWNER_ID or rid in blocked_ids or rid in already:
+                  continue
+              # Stepper already received the live DM #1 test; leave the intro campaign for other recipients first.
+              if str(p.get("username") or "").lower() == "stepper_web_3":
+                  continue
+              eligible.append(p)
+
+          print(f"WORLDZ_INBOX_ELIGIBLE_UNSENT={len(eligible)}")
+          batch = eligible[:BATCH_LIMIT]
+          if not batch:
+              print("WORLDZ_INBOX_CAMPAIGN_BATCH=NO_ELIGIBLE_RECIPIENTS")
+              raise SystemExit(0)
+
+          sent = failed = 0
+          for p in batch:
+              rid = int(p["telegram_id"])
+              name = (p.get("first_name") or "").strip() or ("@" + p["username"] if p.get("username") else "Worldz Legend")
+              body = (
+                  f"Hi {name} 👋\n\n"
+                  "JayJayTeamDev is building Worldz 🌐 around a simple mission: help people build, document, support and organise practical action toward ending world hunger and preventable disease.\n\n"
+                  "💜 SUPPORT JAYJAYTEAMDEV\n"
+                  "https://donateworldz.com/jayjay-support/\n\n"
+                  "🚀 CREATE YOUR OWN CRYPTO TOKEN\n"
+                  "https://launchpad.cryptoworldz.xyz/create-your-own-money/\n"
+                  "A created token is not automatically legal tender, valuable or liquid.\n\n"
+                  "🌍 FOOD + HUMANITARIAN MISSION\n"
+                  "https://foodworldz.com/\n\n"
+                  "🗳️ HAVE YOUR SAY\n"
+                  "Worldz Votes Centre includes a worldwide, non-binding Public Voice space for documenting concerns and ideas — including experiences with government departments, councils, community services or other public issues.\n"
+                  "https://cryptobotz.cryptoworldz.xyz/miniapp/#worldz-civic-votes\n\n"
+                  "🛠️ BUILD WITH WORLDZ\n"
+                  "WorldzLaunchPad connects creators with ZED, AUTO, G.R.A.C.E., REXSECURE, DIPSHIT, raids, ShillPoints, referral pathways and community tooling.\n\n"
+                  "🔥 FOUNDING 100\n"
+                  "The first 100 qualified verified mainnet launch positions have 100,000 WLDZ reserved per position under the published program rules. Token allocation is not equity and does not guarantee value or liquidity.\n\n"
+                  "We are also growing the Worldz community and inviting people interested in future opt-in community and secondary-treasury multisig stewardship roles under documented security and approval rules.\n\n"
+                  "Start by joining in — support something, create something, document something, suggest something or build something. 🌐💜\n\n"
+                  "To stop Worldz Inbox messages, send /dmsettings off."
+              )
+
+              row = {
+                  "sender_telegram_id": OWNER_ID,
+                  "recipient_telegram_id": rid,
+                  "body": body[:2800],
+                  "style_preset": "impact",
+                  "style_title": CAMPAIGN_TITLE,
+                  "status": "queued"
+              }
+
+              try:
+                  inserted = sb("POST", "/worldz_dm_messages?select=*", row, "return=representation")
+                  message_id = int(inserted[0]["id"])
+
+                  text = (
+                      "💜 WORLDZ IMPACT\n"
+                      "━━━━━━━━━━━━━━━━━━━━\n"
+                      "🌐 WORLDZ — A BETTER WORLD 🌏\n\n"
+                      + body +
+                      f"\n\n📥 Worldz Inbox #{message_id}"
+                  )
+                  result = tg("sendMessage", {
+                      "chat_id": rid,
+                      "text": text,
+                      "disable_web_page_preview": True,
+                      "reply_markup": {
+                          "inline_keyboard": [
+                              [
+                                  {"text":"💜 Support JayJay","url":"https://donateworldz.com/jayjay-support/"},
+                                  {"text":"🚀 Create a Token","url":"https://launchpad.cryptoworldz.xyz/create-your-own-money/"}
+                              ],
+                              [
+                                  {"text":"🌍 FoodWorldz","url":"https://foodworldz.com/"},
+                                  {"text":"🗳 Public Voice","url":"https://cryptobotz.cryptoworldz.xyz/miniapp/#worldz-civic-votes"}
+                              ],
+                              [
+                                  {"text":"🌐 WorldzLaunchPad","url":"https://launchpad.cryptoworldz.xyz/worldz-launch/"}
+                              ]
+                          ]
+                      }
+                  })
+                  patch = {
+                      "status":"telegram_sent",
+                      "telegram_message_id": result.get("message_id"),
+                      "sent_at": datetime.now(timezone.utc).isoformat(),
+                      "error_code": None
+                  }
+                  sb("PATCH", f"/worldz_dm_messages?id=eq.{message_id}", patch, "return=minimal")
+                  sent += 1
+                  print(f"WORLDZ_INBOX_SENT recipient=@{p.get('username') or rid} message_id={message_id}")
+              except Exception as exc:
+                  failed += 1
+                  print(f"WORLDZ_INBOX_SEND_FAILED recipient=@{p.get('username') or rid} error={str(exc)[:160]}")
+                  try:
+                      if 'message_id' in locals():
+                          sb("PATCH", f"/worldz_dm_messages?id=eq.{message_id}", {
+                              "status":"failed",
+                              "failed_at": datetime.now(timezone.utc).isoformat(),
+                              "error_code": str(exc)[:180]
+                          }, "return=minimal")
+                  except Exception:
+                      pass
+              time.sleep(8)
+
+          print(f"WORLDZ_INBOX_CAMPAIGN_SENT={sent}")
+          print(f"WORLDZ_INBOX_CAMPAIGN_FAILED={failed}")
+          if sent == 0 and failed:
+              raise SystemExit("No Worldz Inbox campaign messages were accepted by Telegram")
