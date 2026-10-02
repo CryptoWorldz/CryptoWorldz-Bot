@@ -18,7 +18,7 @@ This checkpoint consolidates the build work requested across the previous 72 hou
 - Hourly favourite-token Worldz voting remains separate from civic/public-policy voting.
 - Worldz Spotlight advertising: A$5/1 day, A$12/3 days, A$22/7 days, A$75/30 days; Home/Community/Launch Station placements, SPONSORED labels, human review before payment/activation, SOL/USDC payment flow and live-proof gates.
 - LaunchPad ↔ REX connection and production proof coverage.
-- WorldzPay Phase 1 merged. Checkout Build #2 remains intentionally on its separate non-deployed side rail until explicitly released.
+- WorldzPay Phase 1 and Checkout Build #2 provider-ready architecture are merged. Live provider execution remains explicitly gated OFF.
 
 ## REX profile artwork update
 
@@ -34,10 +34,10 @@ The Community Suite REX persona now uses the latest approved semi-real Worldz-li
 Canonical shipped REX artwork is the embedded **Persona Option 4/5** image assembled by `public/miniapp/rexsecure-brand-image.js` from `rexsecure-image-part-1.js` through `rexsecure-image-part-9.js`.
 That same assembled image is used by the Community Suite and the Telegram branded welcome, so there is one REX visual source in the deployed runtime.
 
-## Open rails intentionally not silently merged
+## Gated rails integrated into the build
 
-- WorldzPay Checkout Build #2: separate, unmerged/non-deployed rail by explicit instruction.
-- Worldz Votes Centre civic/public-voice foundation: kept separate from hourly DEX token voting. It requires conflict-safe integration onto current main before production release.
+- WorldzPay Checkout Build #2 provider-ready architecture is merged; provider execution, signing and broadcast remain OFF until verified access and explicit release gates pass.
+- Worldz Votes Centre civic/public-voice foundation is merged as a separate neutral, non-binding/read-only foundation. It remains separate from hourly DEX token voting; ballot casting stays OFF pending eligibility, privacy, legal and independent-audit gates.
 
 ## Release rule
 
