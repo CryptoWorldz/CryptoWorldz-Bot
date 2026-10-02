@@ -1,0 +1,145 @@
+{
+  "schema": "WORLDZ-LAUNCH-BENEFITS-V1",
+  "version": "2026-10-03-A",
+  "name": "Worldz Launch Benefits™",
+  "status": "PUBLIC_PRODUCT_CONTRACT__EXECUTION_VARIES_BY_FEATURE",
+  "principle": "Launch once, then connect the project to proof, community, referral, recognition, flywheel and impact systems without turning unproven benefits into guaranteed payouts.",
+  "feeFlowV3": {
+    "tradingFeeBuilder": {
+      "defaultPercent": 1,
+      "publicMaximumPercent": 3,
+      "preferredStepPercent": 0.25,
+      "chainNativeOverridesApply": true
+    },
+    "creatorChoices": {
+      "BUILD": {
+        "creatorRetentionPercent": 97,
+        "worldzContributionPercent": 3
+      },
+      "GROW": {
+        "creatorRetentionPercent": 95,
+        "worldzContributionPercent": 5,
+        "default": true
+      },
+      "BOOST": {
+        "creatorRetentionPercent": 92,
+        "worldzContributionPercent": 8
+      }
+    },
+    "launchReferrer": {
+      "sharePercentOfWorldzContribution": 5,
+      "recurring": true,
+      "automaticMainnetSettlementEnabled": false,
+      "attributionRequiredAtLaunch": true,
+      "proofRequired": true,
+      "rule": "This is 5% of the Worldz contribution, not 5% of the trade and not an extra deduction from the creator-retained 97/95/92%."
+    }
+  },
+  "founding100": {
+    "policy": "worldzpad-omnichain/founding100.v1.json",
+    "positions": 100,
+    "wldzPerQualifiedPosition": 100000,
+    "mainnetQualificationRequired": true
+  },
+  "legendReferralRewards": {
+    "status": "EXISTING_COMMAND_CENTRE_REWARD_RULES",
+    "qualifiedReferral": {
+      "inviterLegendPoints": 20,
+      "newcomerLegendPoints": 10,
+      "retentionDays": 7,
+      "inviterWeeklyQualifiedCap": 20
+    },
+    "newcomerShillBoost": {
+      "legendPoints": 20,
+      "unlock": "FIRST_VERIFIED_RAAIIIDD_AFTER_QUALIFIED_REFERRAL",
+      "inviterWeeklySuccessfulBoostCap": 15
+    },
+    "uniqueLegend": {
+      "legendPoints": 250,
+      "ownerReviewRequired": true,
+      "reserveGated": true
+    },
+    "antiAbuse": [
+      "no self-referrals",
+      "no bot referrals",
+      "no duplicate referrals",
+      "no existing-member recycling",
+      "clicks alone earn no points",
+      "token purchases, holdings and donations do not buy Legend Points"
+    ]
+  },
+  "communityStack": {
+    "zed": "profiles • wallet association • guidance • rewards • referrals",
+    "ronaldRaider": "Raids • /next • verified participation",
+    "shillRewards": "verified public sharing • Legend Points",
+    "dipshit": "interactive Worldz QA and troubleshooting",
+    "rexSecureGuard": "scam and impersonation protection controls",
+    "grace": "approved communications and publishing workflow",
+    "max": "research and learning",
+    "worldzVotes": "hourly favourite-token popularity voting"
+  },
+  "flywheel": {
+    "legacyCorePercentOfWorldzContribution": 10,
+    "closedLegacyTokenCount": 12,
+    "worldzCoreFamilyPercentOfWorldzContribution": 10,
+    "coreFamilySymbols": [
+      "WLDZ",
+      "RVIV",
+      "PNEX",
+      "MRCL"
+    ],
+    "coreFamilyEqualShareWithinLanePercent": 25,
+    "lpGrowthPercentOfWorldzContribution": 15,
+    "impactPercentOfWorldzContribution": 10,
+    "teamBuilderRewardsPercentOfWorldzContribution": 5,
+    "futureLaunchInfrastructurePercentOfWorldzContribution": 5
+  },
+  "treasury": {
+    "percentOfWorldzContribution": 20,
+    "operations": {
+      "percentOfTreasuryLane": 70,
+      "governance": "3-of-5"
+    },
+    "miracleTeam": {
+      "percentOfTreasuryLane": 30,
+      "governance": "4-of-7",
+      "status": "FUNDING_PENDING_NOT_DEPLOYED",
+      "unavailableDestinationRule": "ACCRUE_DO_NOT_REDIRECT"
+    },
+    "mrclTokenVaultIsSeparate": true
+  },
+  "devCity": {
+    "enabledAsWorldzProgram": true,
+    "launchParticipation": "OPT_IN_BUILDER_AND_REVIEW_PATH",
+    "automaticTokenAwardForLaunching": false,
+    "rule": "DevCity allocations and rosters remain separate token-specific programs. A WorldzLaunchPad launch can expose a DevCity participation path, but cannot silently invent a wallet, recipient or token allocation."
+  },
+  "xrpArmy": {
+    "world": "XRPWorldz",
+    "currentLaunchState": "XRPL_TESTNET_NATIVE_ISSUE_AMM_CLOB",
+    "mainnetMarketLaunch": "GATED",
+    "nativeFeatures": [
+      "issuer controls",
+      "trust lines",
+      "CLOB / OfferCreate",
+      "native AMM",
+      "validated transaction proof",
+      "issuer-control intelligence"
+    ],
+    "feeChoicesPercent": [
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "founding100Eligibility": "ONLY_AFTER_XRPL_MAINNET_ROUTE_PASSES_THE_WORLDZ_RELEASE_GATE"
+  },
+  "safety": {
+    "noGuaranteedReturns": true,
+    "noGuaranteedTokenValue": true,
+    "noRewardForBuyingOrHolding": true,
+    "noPrivateKeyOrSeedPhraseRequests": true,
+    "submittedIsNotConfirmed": true,
+    "mainnetFinancialAutomationFailClosed": true
+  }
+}
