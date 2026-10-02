@@ -57,3 +57,17 @@ There is no single Worldz rule that replaces local law.
 - **Binding/official mode:** OFF unless lawful authority, eligibility, privacy and independent audit gates are satisfied.
 
 Australia is one worked compliance profile, not the geographic boundary of Worldz.
+
+
+## Build #2 — read-only worldwide discovery
+
+The worldwide Public Voice foundation now has a usable read-only discovery layer:
+
+- `GET /api/worldz-votes/civic/priorities` publishes the human-needs/resource-priority taxonomy as non-binding public priorities.
+- `GET /api/worldz-votes/civic/concerns` exposes only concerns already marked `published`.
+- concern discovery can be filtered by approved topic, location scope, country/territory code and language code.
+- the MiniApp renders the priority categories and published concern cards from the live API.
+- public concern submission remains OFF until moderation, privacy, abuse-prevention and age-appropriate safety gates are implemented and reviewed.
+- binding/official voting remains OFF unless lawful authority and the jurisdiction-specific legal, identity, privacy and independent-audit gates are satisfied.
+
+This layer is for transparent public expression and discovery. It does not rank politicians or parties, decide elections, control government budgets, or execute Worldz treasury transactions.
