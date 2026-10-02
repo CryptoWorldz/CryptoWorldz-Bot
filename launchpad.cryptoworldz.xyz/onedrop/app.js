@@ -133,7 +133,7 @@ async function prepare(){
   if(mintInfo.decimals!==manifest.token.decimals||mintInfo.supply!==BigInt(manifest.token.totalSupplyRaw)||mintInfo.mintAuthority||mintInfo.freezeAuthority)stop('Canonical RVIV mint state changed.');
 
   const ms=await squads.accounts.Multisig.fromAccountAddress(connection,multisig,'confirmed');
-  if(Number(ms.threshold)!==1)stop('Squads threshold changed; OneDrop requires a fresh review.');
+  if(Number(ms.threshold)!==3||ms.members.length!==5)stop('Squads governance is not the required 3-of-5; OneDrop requires a fresh review.');
   const member=ms.members.find(x=>x.key.equals(owner));
   if(!member||![squads.types.Permission.Initiate,squads.types.Permission.Vote,squads.types.Permission.Execute].every(p=>squads.types.Permissions.has(member.permissions,p)))stop('JayJayTeamDev lacks current Squads Initiate + Vote + Execute permissions.');
   const [derivedVault]=squads.getVaultPda({multisigPda:multisig,index:0});
@@ -174,12 +174,10 @@ async function prepare(){
   const createIx=squads.instructions.vaultTransactionCreate({multisigPda:multisig,transactionIndex,creator:owner,rentPayer:owner,vaultIndex:0,ephemeralSigners:0,transactionMessage:inner,memo:'Worldz OneDrop REVIVE: Dev + Legacy claims and OneWorldz Impact'});
   const proposalIx=squads.instructions.proposalCreate({multisigPda:multisig,transactionIndex,creator:owner,rentPayer:owner,isDraft:false});
   const approveIx=squads.instructions.proposalApprove({multisigPda:multisig,transactionIndex,member:owner,memo:'Approve exact REVIVE OneDrop distribution'});
-  const executeIx=squads.generated.createVaultTransactionExecuteInstruction({multisig,proposal:proposalPda,transaction:transactionPda,member:owner,anchorRemainingAccounts:metasForWrapped(wrappedMessage,vault)},squads.PROGRAM_ID);
-
   const outer=new Transaction({feePayer:owner,recentBlockhash:latest.blockhash});
   if(!clawbackInfo)outer.add(createAssociatedTokenAccountIdempotentInstruction(owner,clawbackAta,owner,mint,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID));
   if(!impactInfo)outer.add(createAssociatedTokenAccountIdempotentInstruction(owner,impactAta,impactOwner,mint,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID));
-  outer.add(distIx,createIx,proposalIx,approveIx,executeIx);
+  outer.add(distIx,createIx,proposalIx,approveIx);
   const raw=outer.serialize({requireAllSignatures:false,verifySignatures:false});
   if(raw.length>1232)stop('Exact ONE-transaction build is '+raw.length+' bytes, above Solana\'s 1232-byte packet limit. Nothing was signed or sent.');
   const sim=await rpc('simulateTransaction',[Buffer.from(raw).toString('base64'),{encoding:'base64',sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed',accounts:{encoding:'base64',addresses:[owner.toBase58()]}}]);
@@ -205,32 +203,29 @@ async function prepare(){
     'Owner SOL now: '+(ownerLamports/1e9).toFixed(9)+' SOL\n'+
     'Simulated owner SOL debit: '+(debit===null?'not returned by RPC':(debit/1e9).toFixed(9)+' SOL')+'\n'+
     'Simulation: PASS\n\n'+
-    'Final wallet signature creates the claim distributor, creates any missing required ATAs, creates/approves/executes the exact Squads distribution, funds the 219-wallet claim vault, and routes the 20M OneWorldz allocation.';
-  status('ONE-TRANSACTION PREFLIGHT PASS ✅\nReview every line, then sign only if your wallet shows the expected transaction.','good');
+    'Final wallet signature creates the claim distributor, creates any missing required ATAs, creates the exact Squads distribution proposal and records the first approval. Two additional treasury approvals are required before execution can fund the 219-wallet claim vault and route the 20M impact allocation.';
+  status('3-OF-5 PROPOSAL PREFLIGHT PASS ✅\nReview every line, then sign only if your wallet shows the expected proposal transaction.','good');
   $('#launch').disabled=false;
 }
 async function launch(){
   if(!plan||!wallet)stop('Run the live preflight first.');
   $('#launch').disabled=true;$('#prepare').disabled=true;
   const beforeMessage=plan.outer.compileMessage().serialize().toString('hex');
-  status('Wallet approval requested. This is the ONE owner transaction described in the review.','warn');
+  status('Wallet approval requested. This creates the OneDrop distributor + 3-of-5 Squads proposal and records the first approval.','warn');
   const signed=await wallet.signTransaction(plan.outer);
   if(!signed||signed.compileMessage().serialize().toString('hex')!==beforeMessage||!signed.verifySignatures())stop('Wallet signature/message mismatch. Nothing broadcast.');
   const sig=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false,maxRetries:5});
   status('Broadcast: '+sig+'\nWaiting for mainnet confirmation…','warn');
   const conf=await connection.confirmTransaction({signature:sig,blockhash:plan.latest.blockhash,lastValidBlockHeight:plan.latest.lastValidBlockHeight},'confirmed');
-  if(conf.value.err)stop('On-chain execution failed: '+JSON.stringify(conf.value.err)+'\nSignature: '+sig);
-  const [distInfo,vaultBal,impactBal,source]=await Promise.all([
-    connection.getAccountInfo(plan.distributor,'confirmed'),
-    connection.getTokenAccountBalance(plan.tokenVault,'confirmed'),
-    connection.getTokenAccountBalance(plan.impactAta,'confirmed'),
-    getAccount(connection,new PublicKey(manifest.authority.squadsVaultRvivAta),'confirmed',TOKEN_PROGRAM_ID)
-  ]);
+  if(conf.value.err)stop('On-chain proposal creation failed: '+JSON.stringify(conf.value.err)+'\nSignature: '+sig);
+  const distInfo=await connection.getAccountInfo(plan.distributor,'confirmed');
   if(!distInfo)stop('Transaction confirmed but distributor account is not readable yet. DO NOT RETRY. Signature: '+sig);
-  if(BigInt(vaultBal.value.amount)!==BigInt(manifest.distributor.maxTotalClaimRaw))stop('Transaction confirmed but claim-vault amount differs from the frozen manifest. DO NOT RETRY. Signature: '+sig);
-  if(BigInt(impactBal.value.amount)<20000000000000n)stop('Transaction confirmed but OneWorldz destination is below 20M RVIV. DO NOT RETRY. Signature: '+sig);
-  status('WORLDZ ONEDROP LIVE ✅\nSignature: '+sig+'\nClaim vault funded: '+vaultBal.value.uiAmountString+' RVIV\nOneWorldz destination: '+impactBal.value.uiAmountString+' RVIV\nSquads remaining: '+(Number(source.amount)/1e6).toFixed(6)+' RVIV\n\nRecipients can now use the Claim Page.','good');
-  $('#review').textContent+='\n\nCONFIRMED SIGNATURE: '+sig;
+  const proposal=await squads.accounts.Proposal.fromAccountAddress(connection,plan.proposalPda,'confirmed');
+  const kind=String(proposal.status?.__kind||'');
+  const approvals=Array.from(proposal.approved||[]).length;
+  if(!['Active','Approved','Executing','Executed'].includes(kind))stop('Unexpected Squads proposal state after confirmation: '+kind+'. Signature: '+sig);
+  status('REVIVE ONEDROP PROPOSAL CREATED ✅\nSignature: '+sig+'\nSquads transaction index: '+plan.transactionIndex+'\nApprovals: '+approvals+'/3\n\nCollect the remaining approvals in the 3-of-5 Team Zed Treasury, then execute the approved Squads transaction. The claim page is not funded until execution confirms.','good');
+  $('#review').textContent+='\n\nPROPOSAL CREATION SIGNATURE: '+sig+'\nCURRENT APPROVALS: '+approvals+'/3';
 }
 $('#connect').addEventListener('click',async()=>{
   try{status('Connecting…','warn');wallet=await connectWallet();if(!manifest)await load();if(wallet.publicKey.toBase58()!==manifest.authority.owner)stop('Wrong wallet connected: '+wallet.publicKey.toBase58());$('#connect').textContent='Connected: '+wallet.publicKey.toBase58().slice(0,5)+'…'+wallet.publicKey.toBase58().slice(-5);$('#connect').disabled=true;$('#prepare').disabled=false;status('JayJayTeamDev connected. Build and simulate the exact OneDrop transaction.','good')}catch(e){wallet=null;status('CONNECT STOPPED\n'+(e?.message||e),'bad')}
