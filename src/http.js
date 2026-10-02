@@ -397,6 +397,10 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
       if (!mission || !["active", "open"].includes(mission.status) || mission.expires_at && Date.parse(mission.expires_at) <= Date.now()) return res.status(409).json({ ok: false, error: "mission_not_active" });
       const result = await repository.submitMissionClaim({ missionId, telegramId: req.telegramUser.id, completionText: proofUrl ? "Proof submitted in Command Centre" : "DONE submitted in Command Centre", proofUrl });
       if (result.duplicate) return res.status(409).json({ ok: false, error: "duplicate_submission" });
+      if (typeof repository.autoAwardRaidSubmission === "function") {
+        const award = await repository.autoAwardRaidSubmission(result.submission.id);
+        return res.status(201).json({ ok: true, submission: result.submission, award });
+      }
       return res.status(201).json({ ok: true, submission: result.submission });
     } catch (error) { console.error("Mini App mission submission failed", { name: error && error.name || "Error" }); return res.status(500).json({ ok: false, error: "submission_failed" }); }
   });
