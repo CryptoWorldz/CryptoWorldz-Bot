@@ -158,9 +158,14 @@
       "name": "XRP Ledger",
       "world": "XRPWorldz",
       "status": "TESTNET_BETA",
-      "creatorLaunch": "XRPL_TESTNET_TRUSTLINE_AMM",
+      "creatorLaunch": "XRPL_TESTNET_TRUSTLINE_AMM_CLOB",
       "mainnetCreatorLaunch": "OFF",
-      "engine": "xrpl-trustline-amm"
+      "engine": "xrpl-native",
+      "nativeMarkets": [
+        "CLOB",
+        "AMM"
+      ],
+      "intelligence": "XRPL_NATIVE_READ_ONLY"
     },
     {
       "id": "sui",
@@ -805,7 +810,7 @@
     "rule": "Fixed-supply token deployment is executable on listed testnets. Chain-specific liquidity, 90/10 fee routing, LP lock and Worldz mainnet launch verification remain fail-closed."
   },
   "xrplNative": {
-    "status": "PUBLIC_TESTNET_BETA",
+    "status": "PUBLIC_TESTNET_BETA_NATIVE_AMM_CLOB_PROOF",
     "path": "/xrpl/",
     "tokenStandard": "XRPL trust-line token",
     "reason": "Trust-line tokens are used for the launch adapter because they currently support XRPL DEX and AMM execution.",
@@ -817,10 +822,33 @@
       "issuer No Freeze",
       "hot-wallet TrustSet",
       "issuer Payment supply",
-      "hot-wallet AMMCreate"
+      "native AMMCreate and/or OfferCreate",
+      "native evidence read"
     ],
     "secretKeysCollected": false,
-    "rule": "WorldzLaunchPad never asks for XRPL seeds. Mainnet remains gated until issuer/hot-wallet governance, treasury fee routing, manifest, accounting/legal and proof checks pass."
+    "rule": "XRPWorldz uses native XRPL trust-line issuance, native CLOB Offers and native AMMs as separate primitives. A transaction hash is SUBMITTED until validated tesSUCCESS proof. Mainnet remains disabled.",
+    "currentTokenStandard": "TRUST_LINE_TOKEN",
+    "mptRoute": "RESEARCH_GATED_UNTIL_MPT_DEX_AMM_PARITY_AND_SEPARATE_TESTNET_PROOF",
+    "marketRoutes": [
+      "AMM",
+      "CLOB",
+      "BOTH"
+    ],
+    "intelligenceEndpoint": "/xrpl-intelligence.php",
+    "transactionDiagnosisEndpoint": "/xrpl-transaction-status.php",
+    "issuerControlModes": [
+      "GOVERNED_ISSUER",
+      "MULTISIG_ISSUER_TARGET",
+      "BLACKHOLED_FIXED_SUPPLY"
+    ],
+    "blackholeProofRequired": [
+      "master key disabled",
+      "known blackhole RegularKey",
+      "no SignerList",
+      "no Delegate objects"
+    ],
+    "tokenEscrow": "FEATURE_GATED_BY_XRPL_AMENDMENT_EVIDENCE",
+    "submittedIsConfirmed": false
   },
   "temporaryCoreWldzCustody": {
     "active": false,
