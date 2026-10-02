@@ -1,0 +1,23 @@
+{
+  "schema": "PNEX-PUBLIC-PRELAUNCH-V1",
+  "updated": "2026-09-26",
+  "name": "PHENIX",
+  "symbol": "PNEX",
+  "launchOrder": 3,
+  "network": "Solana mainnet-beta target",
+  "status": "PRE_LAUNCH",
+  "canonicalMint": null,
+  "liveTrading": false,
+  "pool": null,
+  "officialBuyRoute": null,
+  "fixedSupplyTokens": 250000000,
+  "decimals": 6,
+  "allocationPercent": {
+    "phenixChance": 25,
+    "liquidityTotal": 45,
+    "developerVesting": 10,
+    "purpleDiamondHandz": 1,
+    "totalSupplyFlyWheel": 19
+  },
+  "truth": "No canonical PNEX mainnet mint, live pool or official buy route is published until confirmed on-chain and reflected by Worldz Proof."
+}

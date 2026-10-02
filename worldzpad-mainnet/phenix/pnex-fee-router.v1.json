@@ -1,0 +1,66 @@
+{
+  "schema": "PNEX-FEE-ROUTER-V1",
+  "version": "PNEX-FEE-ROUTER-2026-09-26-A",
+  "status": "ACCOUNTING_AND_TRANSACTION_PREP_SPEC__MAINNET_DISABLED",
+  "source": {
+    "basis": "ACTUAL_WORLDZ_CONTROLLED_CLAIMED_FEE_AMOUNT_AFTER_VENUE_DEDUCTIONS",
+    "grossTraderFeeTargetBps": 75,
+    "dynamicFee": false,
+    "doNotAssumeVenueProtocolPercent": true,
+    "receiptReconciliationRequired": true
+  },
+  "splitPercentOfWorldzControlledClaimedFee": {
+    "creator": 51,
+    "referrer": 17,
+    "legacyFlywheel": 15,
+    "worldzLaunchPad": 8.5,
+    "oneWorldzImpact": 8.5,
+    "total": 100
+  },
+  "integerWeights": {
+    "denominator": 1000,
+    "creator": 510,
+    "referrer": 170,
+    "legacyVault01": 15,
+    "legacyVault02": 15,
+    "legacyVault03": 15,
+    "legacyVault04": 15,
+    "legacyVault05": 15,
+    "legacyVault06": 15,
+    "legacyVault07": 15,
+    "legacyVault08": 15,
+    "legacyVault09": 15,
+    "legacyVault10": 15,
+    "worldzLaunchPad": 85,
+    "oneWorldzImpact": 85
+  },
+  "rounding": {
+    "method": "CUMULATIVE_ENTITLEMENT_DELTA",
+    "rule": "Each destination entitlement is floor(total_claimed * weight / 1000). Each routing cycle pays only the delta since the last reconciled total. Integer dust remains in the router/source account and is naturally included in later cumulative calculations.",
+    "overAllocationForbidden": true
+  },
+  "noReferrer": {
+    "automaticRedirect": false,
+    "rule": "The 17% referrer entitlement remains accrued/unpaid until the launch manifest defines and discloses a no-referrer destination. No silent reassignment."
+  },
+  "legacy": {
+    "totalPercent": 15,
+    "verifiedVaultCount": 10,
+    "equalPercentPerLegacyVault": 1.5,
+    "epochHours": 6,
+    "policyReference": "worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json"
+  },
+  "universalBenefit": {
+    "worldzLaunchPadPercent": 8.5,
+    "worldzUniversalFlyWheelReference": "worldzpad-mainnet/flywheel/worldz-universal-flywheel.v1.json",
+    "oneWorldzImpactPercent": 8.5
+  },
+  "execution": {
+    "mainnetExecutionEnabled": false,
+    "autoBroadcast": false,
+    "privateKeyStorage": false,
+    "walletOrMultisigSignatureRequired": true,
+    "simulationRequired": true,
+    "sourceBalanceAndClaimReceiptRequired": true
+  }
+}

@@ -1,0 +1,35 @@
+name: Derive PHENIX Squads vault map
+on:
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/phenix/derive-pnex-squads-vaults.mjs"
+      - "scripts/validate_pnex_squads_vaults.py"
+      - ".github/workflows/derive-pnex-squads-vaults.yml"
+  push:
+    branches: [phenix-launch-prep, revive-v1-build]
+    paths:
+      - "worldzpad-mainnet/phenix/derive-pnex-squads-vaults.mjs"
+      - "scripts/validate_pnex_squads_vaults.py"
+      - ".github/workflows/derive-pnex-squads-vaults.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  derive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm install --prefix worldzpad-mainnet --ignore-scripts --no-audit --no-fund
+      - run: node worldzpad-mainnet/phenix/derive-pnex-squads-vaults.mjs
+      - run: python scripts/validate_pnex_squads_vaults.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnex-squads-vault-map
+          path: worldzpad-mainnet/phenix/pnex-squads-vault-map.v1.json
+          retention-days: 14

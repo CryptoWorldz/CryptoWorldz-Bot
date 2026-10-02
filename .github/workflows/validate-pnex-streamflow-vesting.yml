@@ -1,0 +1,46 @@
+name: Validate PNEX Streamflow vesting
+
+on:
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/phenix/phenix-streamflow-vesting.v1.json"
+      - "worldzpad-mainnet/phenix/prepare-streamflow-vesting.mjs"
+      - "scripts/validate_pnex_streamflow_vesting.py"
+      - ".github/workflows/validate-pnex-streamflow-vesting.yml"
+  push:
+    branches: [phenix-launch-prep, revive-v1-build]
+    paths:
+      - "worldzpad-mainnet/phenix/phenix-streamflow-vesting.v1.json"
+      - "worldzpad-mainnet/phenix/prepare-streamflow-vesting.mjs"
+      - "scripts/validate_pnex_streamflow_vesting.py"
+      - ".github/workflows/validate-pnex-streamflow-vesting.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/validate_pnex_streamflow_vesting.py
+      - name: Install exact Streamflow SDK for compatibility test
+        run: |
+          mkdir -p /tmp/pnex-vesting
+          cd /tmp/pnex-vesting
+          npm init -y >/dev/null
+          npm install @streamflow/stream@13.4.0 @solana/web3.js@1.98.4 bn.js@5.2.2 --no-audit --no-fund
+      - name: Link temporary SDK for self-test
+        run: |
+          mkdir -p worldzpad-mainnet/phenix/node_modules
+          ln -s /tmp/pnex-vesting/node_modules/@streamflow worldzpad-mainnet/phenix/node_modules/@streamflow
+          ln -s /tmp/pnex-vesting/node_modules/@solana worldzpad-mainnet/phenix/node_modules/@solana
+          ln -s /tmp/pnex-vesting/node_modules/bn.js worldzpad-mainnet/phenix/node_modules/bn.js
+      - run: node worldzpad-mainnet/phenix/prepare-streamflow-vesting.mjs --self-test

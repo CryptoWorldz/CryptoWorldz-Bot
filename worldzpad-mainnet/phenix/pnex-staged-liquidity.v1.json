@@ -1,0 +1,66 @@
+{
+  "schema": "PNEX-STAGED-LIQUIDITY-V1",
+  "version": "PNEX-STAGED-LIQUIDITY-2026-09-26-A",
+  "status": "BUILD_SPEC__MAINNET_FUNDING_AND_MINT_PENDING",
+  "token": {
+    "symbol": "PNEX",
+    "supplyTokens": 250000000,
+    "decimals": 6,
+    "mainnetMint": null
+  },
+  "venueTarget": {
+    "primary": "Meteora DAMM v2",
+    "mode": "DIRECT_CUSTOMIZABLE_POOL",
+    "quote": "wSOL",
+    "dynamicFee": false,
+    "baseFeeBps": 75,
+    "collectFeeMode": "QUOTE_TOKEN_WHERE_SUPPORTED"
+  },
+  "genesis": {
+    "pnexTokens": 12500000,
+    "percentOfSupply": 5,
+    "minimumQuoteSol": "GREATER_THAN_ZERO__OWNER_FUNDED",
+    "quoteSolAmount": null,
+    "openingPriceSolPerPnex": null,
+    "priceRule": "OPENING_PRICE_IS_DERIVED_FROM_THE_FINAL_APPROVED_PNEX_AND_SOL_LIQUIDITY_CONFIGURATION__NO_MAINNET_PRICE_IS_INVENTED",
+    "creatorControlledLpPermanentLockTargetPercent": 100
+  },
+  "stagedReserve": {
+    "pnexTokens": 100000000,
+    "percentOfSupply": 40,
+    "combinedLiquidityAllocationTokens": 112500000,
+    "combinedLiquidityPercent": 45,
+    "source": "DISCLOSED_PNEX_LIQUIDITY_ALLOCATION"
+  },
+  "expansionRule": {
+    "name": "Worldz +5% Quote Commitment Rule",
+    "minimumQuoteValueToPnexNotionalRatio": 1.05,
+    "priceObservation": "PRE_DEPOSIT_APPROVED_PRICE_WITH_TIMESTAMP_AND_SOURCE",
+    "formula": "committed_SOL >= PNEX_tranche * observed_SOL_per_PNEX * 1.05",
+    "protocolDepositRule": "Only the amount accepted by the chain-native liquidity venue is deposited. Excess committed SOL remains in the tagged LP Quote Reserve for future PHENIX liquidity.",
+    "automaticMarketBuy": false,
+    "failedRatioAction": "REJECT_TRANCHE",
+    "worldzProofRequired": true
+  },
+  "lpQuoteReserve": {
+    "asset": "SOL_OR_WSOL",
+    "purpose": "Hold committed quote-side surplus exclusively for approved PHENIX liquidity expansion and related protocol transaction costs.",
+    "mayFundGeneralOperations": false,
+    "mayAutoBuyPnex": false,
+    "multisigOrApprovedVaultRequired": true,
+    "publicAccountingRequired": true
+  },
+  "permanentLock": {
+    "targetPercentOfCreatorControlledLp": 100,
+    "target": "PERMANENT",
+    "removableCreatorLiquidityTarget": 0,
+    "feeClaimabilityMayRemain": true,
+    "proofRequired": true
+  },
+  "execution": {
+    "mainnetExecutionEnabled": false,
+    "autoBroadcast": false,
+    "walletOrMultisigSignatureRequired": true,
+    "simulateBeforeSign": true
+  }
+}

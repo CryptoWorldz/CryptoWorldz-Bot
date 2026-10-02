@@ -1,0 +1,50 @@
+{
+  "schema": "WORLDZ-OMNIBUILDZ-V1",
+  "version": "WORLDZ-OMNIBUILDZ-2026-09-26-A",
+  "name": "Worldz OmniBuildz™",
+  "status": "PHENIX_FLYWHEEL_LANE__EXECUTION_PROOF_PENDING",
+  "source": {
+    "token": "PNEX",
+    "masterReserve": "PHENIX Total Supply FlyWheel™",
+    "maximumMasterReserveTokens": 47500000,
+    "newSupplyCreated": false,
+    "fixedLanePercent": null,
+    "rule": "OmniBuildz is a governed use inside the existing 19% PHENIX FlyWheel, not an additional PNEX allocation. Each 30-day cycle must approve its amount inside the currently available FlyWheel allowance."
+  },
+  "uses": [
+    "cross-chain LP development",
+    "chain-native pool and curve adapters",
+    "verified bridge/wrapper integration",
+    "paired-liquidity proof on supported chains",
+    "Worldz CrossPair™ development",
+    "Worldz Omnichain™ development",
+    "LinkedAsset pair development",
+    "LP lock/vesting infrastructure",
+    "security audits and cross-chain incident tooling"
+  ],
+  "liquidityRules": {
+    "noUnsupportedBridge": true,
+    "noFakeWrappedAsset": true,
+    "chainNativeExecutionRequired": true,
+    "pairAssetsMustBeVerified": true,
+    "lpOwnershipAndLockMustBeDisclosed": true,
+    "creatorControlledLpPermanentLockTargetForPNEX": true,
+    "mainnetPairRequiresSimulationAndProof": true
+  },
+  "supportedArchitectureTargets": [
+    "solana",
+    "xrpl",
+    "base",
+    "ethereum",
+    "bnb",
+    "sui",
+    "hyperevm",
+    "robinhood"
+  ],
+  "execution": {
+    "mainnetExecutionEnabled": false,
+    "autoBroadcast": false,
+    "walletOrMultisigSignatureRequired": true,
+    "worldzProofRequired": true
+  }
+}

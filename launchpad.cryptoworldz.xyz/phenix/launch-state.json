@@ -1,0 +1,54 @@
+{
+  "schema": "PNEX-PUBLIC-LAUNCH-STATE-V1",
+  "version": "2026-09-26-prelaunch-a",
+  "name": "PHENIX",
+  "symbol": "PNEX",
+  "launchOrder": 3,
+  "status": "PRELAUNCH_FAIL_CLOSED",
+  "network": "solana-mainnet-beta",
+  "fixedSupply": 250000000,
+  "decimals": 6,
+  "mint": null,
+  "pool": null,
+  "image": null,
+  "metadataUri": null,
+  "tradeUrl": null,
+  "mainnetExecutionEnabled": false,
+  "walletConnectionEnabled": true,
+  "allocation": [
+    {"label":"PHENIX Chance Vault","percent":25,"tokens":62500000},
+    {"label":"Genesis Liquidity","percent":5,"tokens":12500000},
+    {"label":"Staged Liquidity Reserve","percent":40,"tokens":100000000},
+    {"label":"Developer Vesting","percent":10,"tokens":25000000},
+    {"label":"Purple Diamond Handz","percent":1,"tokens":2500000},
+    {"label":"PHENIX Total Supply FlyWheel™","percent":19,"tokens":47500000}
+  ],
+  "economics": {
+    "grossTraderFeeTargetBps": 75,
+    "dynamicFee": false,
+    "ordinaryTransferTaxPercent": 0,
+    "controlledClaimedFeeSplit": {
+      "creator": 51,
+      "referrer": 17,
+      "legacyFlywheel": 15,
+      "worldzLaunchPad": 8.5,
+      "oneWorldzImpact": 8.5
+    }
+  },
+  "safety": {
+    "developerGenesisLiquidTokens": 0,
+    "developerCliffDays": 90,
+    "developerVestingPeriods": 24,
+    "creatorControlledLpPermanentLockTargetPercent": 100,
+    "chanceUnknownRecipientsReceiveGenesisTokens": false,
+    "autoBurn": false,
+    "autoMarketBuy": false
+  },
+  "worldz": {
+    "universalFlyWheel": true,
+    "omniBuildz": true,
+    "linkedAsset": true,
+    "noTokenLeftBehindCycle": true
+  },
+  "truth": "No CA, pool, price or trade route is published until independently confirmed on mainnet."
+}

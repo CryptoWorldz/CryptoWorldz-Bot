@@ -1,0 +1,35 @@
+name: Validate PNEX final package
+
+on:
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/phenix/pnex-genesis-vault-plan.v1.json"
+      - "worldzpad-mainnet/phenix/pnex-worldz-proof-manifest.v1.json"
+      - "worldzpad-mainnet/phenix/PNEX-MAINNET-LAUNCH-RUNBOOK.md"
+      - "worldzpad-mainnet/phenix/bind-final-mainnet-inputs.py"
+      - "scripts/validate_pnex_final_package.py"
+      - ".github/workflows/validate-pnex-final-package.yml"
+  push:
+    branches: [phenix-launch-prep, revive-v1-build]
+    paths:
+      - "worldzpad-mainnet/phenix/pnex-genesis-vault-plan.v1.json"
+      - "worldzpad-mainnet/phenix/pnex-worldz-proof-manifest.v1.json"
+      - "worldzpad-mainnet/phenix/PNEX-MAINNET-LAUNCH-RUNBOOK.md"
+      - "worldzpad-mainnet/phenix/bind-final-mainnet-inputs.py"
+      - "scripts/validate_pnex_final_package.py"
+      - ".github/workflows/validate-pnex-final-package.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/validate_pnex_final_package.py
+      - run: python -m py_compile worldzpad-mainnet/phenix/bind-final-mainnet-inputs.py

@@ -1,0 +1,38 @@
+name: Validate PNEX staged liquidity
+
+on:
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/phenix/pnex-staged-liquidity.v1.json"
+      - "worldzpad-mainnet/phenix/check-staged-liquidity.py"
+      - "worldzpad-mainnet/phenix/validate-meteora-static.mjs"
+      - "scripts/validate_pnex_staged_liquidity.py"
+      - ".github/workflows/validate-pnex-staged-liquidity.yml"
+  push:
+    branches: [phenix-launch-prep, revive-v1-build]
+    paths:
+      - "worldzpad-mainnet/phenix/pnex-staged-liquidity.v1.json"
+      - "worldzpad-mainnet/phenix/check-staged-liquidity.py"
+      - "worldzpad-mainnet/phenix/validate-meteora-static.mjs"
+      - "scripts/validate_pnex_staged_liquidity.py"
+      - ".github/workflows/validate-pnex-staged-liquidity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/validate_pnex_staged_liquidity.py
+      - run: python worldzpad-mainnet/phenix/check-staged-liquidity.py --pnex 1000000 --price 0.000001 --committed-sol 1.05 --self-test
+      - run: npm install --prefix worldzpad-mainnet --ignore-scripts --no-audit --no-fund
+      - run: node worldzpad-mainnet/phenix/validate-meteora-static.mjs

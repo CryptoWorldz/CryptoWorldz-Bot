@@ -1,0 +1,34 @@
+name: Validate PNEX fee router
+
+on:
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/phenix/pnex-fee-router.v1.json"
+      - "worldzpad-mainnet/phenix/fee-router-math.mjs"
+      - "scripts/validate_pnex_fee_router.py"
+      - ".github/workflows/validate-pnex-fee-router.yml"
+  push:
+    branches: [phenix-launch-prep, revive-v1-build]
+    paths:
+      - "worldzpad-mainnet/phenix/pnex-fee-router.v1.json"
+      - "worldzpad-mainnet/phenix/fee-router-math.mjs"
+      - "scripts/validate_pnex_fee_router.py"
+      - ".github/workflows/validate-pnex-fee-router.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/validate_pnex_fee_router.py
+      - run: node worldzpad-mainnet/phenix/fee-router-math.mjs --self-test

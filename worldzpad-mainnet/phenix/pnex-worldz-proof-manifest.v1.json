@@ -1,0 +1,52 @@
+{
+  "schema": "PNEX-WORLDZ-PROOF-MANIFEST-V1",
+  "version": "PNEX-WORLDZ-PROOF-2026-09-26-A",
+  "status": "PRELAUNCH_TEMPLATE",
+  "identity": {
+    "name": "PHENIX",
+    "symbol": "PNEX",
+    "network": "solana-mainnet-beta",
+    "mint": null,
+    "decimals": 6,
+    "initialSupplyTokens": 250000000,
+    "imageUri": null,
+    "metadataUri": null,
+    "website": "https://launchpad.cryptoworldz.xyz/phenix/"
+  },
+  "requiredProofs": {
+    "mintTransaction": null,
+    "mintAuthorityRevocation": null,
+    "freezeAuthorityRevocation": null,
+    "genesisAllocationTransactionOrTransactions": [],
+    "genesisAllocationReconciliation": null,
+    "developerVestingContract": null,
+    "chanceVault": null,
+    "purpleDiamondHandzVault": null,
+    "flyWheelVault": null,
+    "stagedLiquidityReserve": null,
+    "genesisPool": null,
+    "permanentLpLock": null,
+    "firstSwap": null,
+    "feeClaim": null,
+    "feeRouterReconciliation": null,
+    "multisigAuthorityProof": null
+  },
+  "publicFacts": {
+    "grossTraderFeeTargetBps": 75,
+    "dynamicFee": false,
+    "ordinaryTransferTaxPercent": 0,
+    "controlledClaimedFeeSplitPercent": {
+      "creator": 51,
+      "referrer": 17,
+      "legacyFlywheel": 15,
+      "worldzLaunchPad": 8.5,
+      "oneWorldzImpact": 8.5
+    },
+    "genesisLiquidityPercent": 5,
+    "totalLiquidityAllocationPercent": 45,
+    "developerGenesisLiquidPercent": 0,
+    "creatorControlledLpPermanentLockTargetPercent": 100
+  },
+  "publicationRule": "A field may move from null/empty to published only after the referenced mainnet transaction or program account is confirmed and independently checked. The manifest must never predict a contract address or claim a transaction occurred before confirmation.",
+  "mainnetExecutionEnabled": false
+}

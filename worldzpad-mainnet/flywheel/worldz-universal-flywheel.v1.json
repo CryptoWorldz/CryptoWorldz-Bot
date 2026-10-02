@@ -1,0 +1,126 @@
+{
+  "schema": "WORLDZ-UNIVERSAL-FLYWHEEL-V1",
+  "version": "WORLDZ-UNIVERSAL-FLYWHEEL-2026-09-26-A",
+  "name": "Worldz Universal FlyWheel™",
+  "status": "BUILD_COMPLETE_POLICY__DEVNET_AND_MAINNET_EXECUTION_PROOF_REQUIRED",
+  "purpose": "Ensure legacy Worldz assets, previously launched official Worldz tokens, future official Worldz tokens and verified WorldzLaunchPad projects receive continuing shared ecosystem benefits without adding a hidden trader fee or promising investment returns.",
+  "coverage": {
+    "legacyWorldzTokens": "ALL_VERIFIED_LEGACY_ASSETS_IN_WORLDZ_LEGACY_FLYWHEEL",
+    "previousOfficialWorldzTokens": [
+      "WLDZ",
+      "RVIV"
+    ],
+    "currentAndFutureOfficialWorldzTokens": [
+      "PNEX",
+      "MRCL",
+      "FUTURE_REGISTERED_WORLDZ_TOKENS"
+    ],
+    "externalWorldzLaunchPadTokens": "ALL_VERIFIED_LAUNCHES_REGISTERED_AFTER_POLICY_ACTIVATION",
+    "noTokenLeftBehindRule": "Every eligible registered project receives a cycle benefit record. Shared infrastructure benefits apply platform-wide. Token-specific liquidity, grants, supply actions or burns require that project's disclosed manifest, compatible token standard and required authority."
+  },
+  "benefitDefinition": {
+    "mandatorySharedBenefits": [
+      "Worldz Proof and transparent launch records",
+      "metadata and token identity maintenance",
+      "wallet-connect and supported chain-adapter maintenance",
+      "security monitoring and scam/impostor protection",
+      "fee accounting and public reconciliation",
+      "project discovery/directory visibility",
+      "education and community tooling",
+      "incident/recovery infrastructure",
+      "Worldz OmniBuildz cross-chain adapter and LinkedAsset infrastructure where applicable"
+    ],
+    "conditionalTokenSpecificBenefits": [
+      "liquidity support or matching",
+      "ecosystem/build grants",
+      "community campaign support",
+      "token-native reserve burn",
+      "verified LinkedAsset pairing, swaps or Omni Pair development"
+    ],
+    "notGuaranteed": [
+      "cash payout",
+      "APY or yield",
+      "token price appreciation",
+      "liquidity support in every cycle",
+      "burn in every cycle"
+    ]
+  },
+  "funding": {
+    "extraTraderFeeRequired": false,
+    "magicFeeReference": "worldzpad-mainnet/fairfee/worldz-magic-fee.v1.json",
+    "legacyFlywheel": {
+      "percentOfWorldzControlledFee": 15,
+      "cadenceHours": 6,
+      "unchanged": true
+    },
+    "worldzLaunchPadShare": {
+      "percentOfWorldzControlledFee": 8.5,
+      "use": "Funds shared Worldz infrastructure and approved Universal FlyWheel support. Internal spending does not alter the disclosed 51/17/15/8.5/8.5 fee split."
+    },
+    "oneWorldzImpactShare": {
+      "percentOfWorldzControlledFee": 8.5,
+      "use": "Continues as the separate impact/charity funding lane with public accounting."
+    }
+  },
+  "cycle": {
+    "name": "Worldz Universal Cycle™",
+    "seconds": 2592000,
+    "days": 30,
+    "activationAnchor": "SET_AT_APPROVED_MAINNET_ACTIVATION__NO_BACKDATING",
+    "legacyEpochsRemainIndependent": true,
+    "steps": [
+      "snapshot the verified project registry and all eligible official/legacy assets",
+      "reconcile collected Worldz-controlled fees by source project and chain",
+      "fund the existing 6-hour Legacy Flywheel entitlements independently",
+      "fund shared infrastructure/security/identity/proof services from the WorldzLaunchPad share",
+      "create one benefit record for every eligible registered token",
+      "evaluate token-specific liquidity, grant or burn proposals only where manifest and authority permit",
+      "simulate every executable transaction before signature",
+      "require the configured wallet or multisig approvals",
+      "execute approved actions only",
+      "publish Worldz Proof receipts and carry unused balances forward"
+    ],
+    "completenessRule": "A cycle cannot be marked complete until every eligible registered token has exactly one benefit record for that cycle.",
+    "zeroSpendBenefitAllowed": true,
+    "zeroSpendBenefitLabel": "SHARED_INFRASTRUCTURE_ONLY"
+  },
+  "fairness": {
+    "projectContributionDoesNotBuyVerification": true,
+    "projectContributionDoesNotBuyRanking": true,
+    "popularityVotesSeparatedFromFunding": true,
+    "governanceSeparatedFromPopularity": true,
+    "directFinancialSupportPolicy": "When a cycle has a distributable token-support pool, allocation rules must be published before that cycle. A project may receive zero direct financial support while still receiving the mandatory shared platform benefits.",
+    "antiWhaleRule": "No project may obtain all shared support solely because it generated the most fees.",
+    "noRetroactiveHiddenCharge": true
+  },
+  "burnStandard": {
+    "name": "Worldz ProofBurn™",
+    "defaultMode": "TOKEN_NATIVE_RESERVE_BURN",
+    "marketBuyAndBurnAutomated": false,
+    "rule": "Worldz never assumes it can burn a token. A burn requires token units controlled by the project's disclosed burn-capable reserve, a compatible chain-native burn path, simulation, authorized signature and a public receipt.",
+    "externalProjectBurnDefault": "OPT_IN_AT_MANIFEST_OR_LATER_GOVERNED_UPDATE",
+    "officialWorldzTokenBurnDefault": "ENABLED_ONLY_WHEN_TOKEN_SPECIFIC_POLICY_AND_RESERVE_EXIST",
+    "burnCannotBeReissued": true,
+    "burnReceiptRequired": true,
+    "burnMayBeZeroInAnyCycle": true
+  },
+  "vestingStandard": {
+    "founderTeamMinimumCliffDays": 90,
+    "founderTeamMinimumVestingMonths": 18,
+    "worldzDefaultBuilderCliffDays": 90,
+    "worldzDefaultBuilderVestingMonths": 24,
+    "enforcement": "CHAIN_NATIVE_OR_AUDITED_VESTING_ADAPTER_REQUIRED",
+    "scheduleProofRequired": true,
+    "earlyUnlock": false
+  },
+  "chainRule": "Shared benefits can be recorded for every supported chain. Token-specific execution occurs only through a verified chain-native adapter; no unsupported bridge, burn, vesting or liquidity action is implied.",
+  "execution": {
+    "autoBroadcast": false,
+    "privateKeysStored": false,
+    "walletOrMultisigSignatureRequired": true,
+    "simulationRequired": true,
+    "mainnetExecutionEnabled": false
+  },
+  "linkedAssetPolicy": "worldzpad-mainnet/linked-assets/worldz-linked-asset.v1.json",
+  "omniBuildzPolicy": "worldzpad-mainnet/flywheel/worldz-omnibuildz.v1.json"
+}

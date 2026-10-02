@@ -1,0 +1,33 @@
+name: Validate PHENIX launch prep
+
+on:
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/phenix/**"
+      - "scripts/validate_phenix_preflight.py"
+      - ".github/workflows/validate-phenix-launch-prep.yml"
+  push:
+    branches:
+      - revive-v1-build
+      - phenix-launch-prep
+    paths:
+      - "worldzpad-mainnet/phenix/**"
+      - "scripts/validate_phenix_preflight.py"
+      - ".github/workflows/validate-phenix-launch-prep.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phenix-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate PHENIX launch manifest
+        run: python scripts/validate_phenix_preflight.py
+      - name: Validate PHENIX Chance planning tool
+        run: python worldzpad-mainnet/phenix/phenix_chance.py plan

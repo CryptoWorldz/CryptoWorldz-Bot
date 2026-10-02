@@ -1,0 +1,365 @@
+{
+  "schema": "PHENIX-LAUNCH-PREFLIGHT-V1",
+  "version": "PNEX-PREFLIGHT-2026-09-26-D",
+  "status": "PREP_ONLY__MAINNET_DISABLED",
+  "token": {
+    "launchOrder": 3,
+    "name": "PHENIX",
+    "symbol": "PNEX",
+    "networkTarget": "solana-mainnet",
+    "supplyTokens": 250000000,
+    "decimals": 6,
+    "mintAddress": null,
+    "mintAuthorityFinalStateRequired": "REVOKED",
+    "freezeAuthorityFinalStateRequired": "ABSENT_OR_REVOKED"
+  },
+  "execution": {
+    "mainnetExecutionEnabled": false,
+    "autoBroadcast": false,
+    "walletSignatureRequired": true,
+    "humanLaunchAuthorizationRequired": true,
+    "simulateBeforeSign": true
+  },
+  "allocation": {
+    "status": "WORKING_MODEL__100_PERCENT_ASSIGNED__FLYWHEEL_POLICY_EXECUTION_PENDING",
+    "buckets": [
+      {
+        "id": "phenix_chance_immediate",
+        "percent": 10,
+        "tokens": 25000000,
+        "purpose": "PHENIX Chance launch distribution to individually approved recipients"
+      },
+      {
+        "id": "phenix_chance_12_months",
+        "percent": 15,
+        "tokens": 37500000,
+        "purpose": "PHENIX Chance 12-month monthly vesting pool"
+      },
+      {
+        "id": "liquidity_total",
+        "percent": 45,
+        "tokens": 112500000,
+        "purpose": "Total staged liquidity allocation including genesis liquidity"
+      },
+      {
+        "id": "developer_vesting",
+        "percent": 10,
+        "tokens": 25000000,
+        "purpose": "Developer allocation; final enforceable cliff/vesting schedule required before launch"
+      },
+      {
+        "id": "purple_diamond_handz",
+        "percent": 1,
+        "tokens": 2500000,
+        "purpose": "Verified legacy Purple Diamond Handz pool"
+      },
+      {
+        "id": "phenix_total_supply_flywheel",
+        "percent": 19,
+        "tokens": 47500000,
+        "purpose": "One master reserve that supports PHENIX and the Worldz infrastructure it depends on, OneWorldz impact and charity-fund building, treasury resilience, community rewards, locked builder/team support, ecosystem growth, additional liquidity and verifiable permanent burn.",
+        "name": "PHENIX Total Supply FlyWheel™"
+      }
+    ],
+    "requiredPercent": 100,
+    "requiredTokens": 250000000,
+    "unassignedMustEqualZeroForLaunch": true,
+    "unassignedTokens": 0
+  },
+  "phenixChance": {
+    "status": "PLANNING_AND_VERIFICATION",
+    "targetMaximumSeats": 500,
+    "approvedRecipientCount": 0,
+    "recipientCountGuaranteed": false,
+    "perApprovedRecipientAt500SeatModel": {
+      "immediateTokens": 50000,
+      "vestedTokens": 75000,
+      "monthlyTokens": 6250,
+      "months": 12,
+      "totalTokens": 125000
+    },
+    "approvalRequirements": [
+      "source evidence recorded",
+      "recipient claim recorded",
+      "Solana wallet ownership proven",
+      "12-month vesting consent recorded",
+      "duplicate identity and wallet review passed",
+      "human approval recorded"
+    ],
+    "rule": "Publicly posted wallet addresses or statements of need are research evidence only; no PNEX assignment occurs until ownership, claim and approval checks pass.",
+    "genesisModel": {
+      "policyReference": "pnex-phenix-chance-vault.v1.json",
+      "vaultTokens": 62500000,
+      "maximumSeats": 500,
+      "recipientsRequiredBeforeGenesis": false,
+      "unclaimedSeatsRemainLocked": true,
+      "rule": "Unknown PHENIX Chance recipients do not block genesis. The full 25% is classified into the dedicated Chance Vault; individual seats are released only after approval."
+    }
+  },
+  "liquidity": {
+    "genesisTokens": 12500000,
+    "genesisPercent": 5,
+    "totalAllocationTokens": 112500000,
+    "totalAllocationPercent": 45,
+    "laterCapacityTokens": 100000000,
+    "creatorControlledLpLock": "PERMANENT_TARGET",
+    "additionalLiquidityRule": {
+      "enabled": true,
+      "minimumSolValueToPnexValueRatio": 1.05,
+      "plainEnglish": "For an additional liquidity tranche, contributed SOL value must be at least 105% of the PNEX value being added, using the approved price observation recorded in the launch proof."
+    }
+  },
+  "walletConnectivity": {
+    "siteOrigin": "https://launchpad.cryptoworldz.xyz",
+    "connectOnWorldzWebsite": true,
+    "walletBrowserRequired": false,
+    "privateKeyOrSeedPhraseCollection": false,
+    "transactionApprovalLocation": "USER_WALLET"
+  },
+  "feePolicy": {
+    "ordinaryWalletTransferTaxPercent": 0,
+    "magicFeeTargetGrossTraderFeeBps": 75,
+    "dynamicFeeEnabled": false,
+    "controlledFeeSplitPercent": {
+      "creator": 51,
+      "referrer": 17,
+      "legacyFlywheel": 15,
+      "worldzLaunchPad": 8.5,
+      "oneWorldzImpact": 8.5,
+      "total": 100
+    },
+    "note": "Fee routing is separate from PNEX token-supply allocations and must be proven end-to-end before launch."
+  },
+  "releaseGates": [
+    "allocation buckets equal exactly 250,000,000 PNEX and 100%",
+    "PHENIX Total Supply FlyWheel 19% / 47,500,000 PNEX policy is finalized with auditable lane controls",
+    "FlyWheel release caps, approval rules, vault address and Worldz Proof path are finalized",
+    "all 250,000,000 PNEX remain assigned with no hidden or unclassified supply",
+    "PHENIX Chance Vault receives exactly 62,500,000 PNEX at genesis and claim execution remains gated",
+    "Worldz Universal FlyWheel 30-day cycle validator passes and coverage registry is integrated",
+    "Worldz LinkedAsset developer standard is available to all launches with verified-asset and opt-in controls",
+    "Worldz OmniBuildz cross-chain LP lane passes policy validation and remains inside the existing 19% FlyWheel",
+    "Worldz ProofBurn builder passes static/self-test and a disposable devnet burn proves BurnChecked, supply reduction and receipt reconciliation",
+    "FlyWheel builder/team grants enforce 90-day cliff and 24-month vesting",
+    "PHENIX FlyWheel 90-day hold and 48 x 30-day allowance schedule is time-enforced and proven",
+    "developer 90-day cliff and 24-month PNEX vesting is time-enforced and proven",
+    "12 monthly Chance releases are deterministic and tested",
+    "developer vesting schedule is finalized and time-enforced",
+    "Purple Diamond Handz entitlement source and verified wallet rules are published",
+    "genesis 5% liquidity and later-liquidity rule are simulated",
+    "creator-controlled LP lock is enforced and proven",
+    "fee routing is simulated and matches the disclosed 51/17/15/8.5/8.5 split",
+    "mint and freeze authority finalization is simulated",
+    "treasury and program authority meet the current WorldzLaunchPad multisig policy",
+    "Worldz wallet bridge connects from the Worldz website without requiring an in-wallet browser",
+    "token metadata and public proof endpoints are ready",
+    "security, accounting and applicable legal/regulatory release gates pass",
+    "JayJayTeamDev gives explicit final mainnet signing authorization"
+  ],
+  "launchReady": false,
+  "launchBlockedReasons": [
+    "vesting and ProofBurn policies are defined but still require on-chain/devnet enforcement proof",
+    "PHENIX Total Supply FlyWheel 19% is assigned, but its internal release policy and execution controls are not yet finalized",
+    "no PHENIX mainnet mint address is recorded",
+    "mainnet execution remains disabled"
+  ],
+  "totalSupplyFlyWheel": {
+    "brand": "PHENIX Total Supply FlyWheel™",
+    "status": "ALLOCATED__VESTING_AND_BURN_POLICY_DEFINED__ONCHAIN_PROOF_PENDING",
+    "supplyPercent": 19,
+    "supplyTokens": 47500000,
+    "designObjective": "Use a controlled portion of PHENIX supply to strengthen the token's own infrastructure, utility, liquidity, community and mission while allowing transparent permanent supply reduction. This is a structural objective and not a promise of token-price appreciation.",
+    "oneMasterReserve": true,
+    "separateSupplyBuckets": false,
+    "supportedLanes": [
+      {
+        "id": "worldz_infrastructure",
+        "purpose": "Support the infrastructure PHENIX is built on, including WorldzLaunchPad, security, hosting, development, automation, maintenance, audits and operational resilience.",
+        "lockedOrBudgetControlled": true
+      },
+      {
+        "id": "oneworldz_impact",
+        "purpose": "Build and fund OneWorldz humanitarian and charitable impact capacity with public accounting and proof of use.",
+        "publicProofRequired": true
+      },
+      {
+        "id": "treasury_resilience",
+        "purpose": "Maintain a disclosed PHENIX/Worldz treasury reserve for approved ecosystem obligations and long-term resilience.",
+        "multisigRequired": true
+      },
+      {
+        "id": "community_rewards",
+        "purpose": "Reward verified community contribution, education, onboarding, testing, moderation, security reporting and ecosystem participation.",
+        "evidenceRequired": true
+      },
+      {
+        "id": "locked_builder_team",
+        "purpose": "Support additional verified builders and team contributors only through disclosed lock and vesting schedules; no unrestricted liquid team release.",
+        "lockAndVestingRequired": true
+      },
+      {
+        "id": "ecosystem_growth",
+        "purpose": "Fund integrations, grants, tooling, partnerships and growth work that demonstrably expands PHENIX or Worldz utility.",
+        "milestoneOrEvidenceRequired": true
+      },
+      {
+        "id": "additional_liquidity",
+        "purpose": "Add liquidity only under the PHENIX staged-liquidity rules and proof requirements.",
+        "liquidityRuleReference": "liquidity.additionalLiquidityRule"
+      },
+      {
+        "id": "omni_cross_chain_lp_development",
+        "name": "Worldz OmniBuildz™",
+        "purpose": "Fund governed cross-chain LP development, chain-native adapters, verified bridge/wrapper integrations, Worldz CrossPair/Omnichain development and LinkedAsset pair infrastructure from the existing PHENIX FlyWheel.",
+        "policyReference": "worldzpad-mainnet/flywheel/worldz-omnibuildz.v1.json",
+        "fixedPercentOfFlyWheel": null,
+        "newPnexSupplyCreated": false,
+        "cycleApprovalRequired": true
+      },
+      {
+        "id": "permanent_burn",
+        "purpose": "Permanently remove approved PNEX from supply using a publicly verifiable burn transaction.",
+        "irreversible": true,
+        "proofRequired": true
+      }
+    ],
+    "cycleDesign": [
+      "wait through the 90-day FlyWheel hold before non-genesis FlyWheel releases",
+      "unlock only the exact 48-cycle allowance for the current 30-day cycle; unused allowance rolls forward",
+      "measure verified infrastructure, impact, treasury, community, builder, ecosystem and liquidity needs",
+      "create benefit records for PHENIX and all eligible Worldz Universal FlyWheel projects",
+      "prepare approved lane actions; builder/team grants receive a new 90-day cliff and 24-month vesting schedule",
+      "calculate any PNEX burn at zero to 25% of the new cycle allowance; no automatic burn",
+      "run policy, multisig, vesting, liquidity and accounting checks",
+      "simulate all executable transactions before signature",
+      "require authorized wallet or multisig approval",
+      "execute only approved actions",
+      "publish Worldz Proof for vesting, distributions, liquidity additions and burns",
+      "carry unused PNEX forward inside the master reserve"
+    ],
+    "hardRules": [
+      "47,500,000 PNEX is the maximum lifetime supply assigned to this master reserve; it is not additional supply",
+      "no hidden wallet or undisclosed allocation may receive FlyWheel PNEX",
+      "ordinary wallet transfer tax remains 0%",
+      "burned PNEX is permanently removed and may not be reissued",
+      "team/builder distributions from this reserve must be locked and vested",
+      "additional liquidity must obey the recorded PHENIX liquidity rule",
+      "charity and impact use requires public accounting/proof",
+      "treasury and infrastructure releases require approved controls and public classification",
+      "the FlyWheel may seek to strengthen utility, liquidity and supply discipline but must not claim guaranteed price appreciation"
+    ],
+    "internalLanePercentages": "DYNAMIC_WITHIN_30_DAY_CYCLE__NO_FIXED_LANE_PERCENTAGES__ALL_ACTIONS_GOVERNED",
+    "releasePolicyRequiredBeforeMainnet": true,
+    "mainnetExecutionEnabled": false,
+    "miracleRunway": {
+      "enabled": true,
+      "purpose": "Use approved FlyWheel infrastructure and ecosystem work to harden reusable WorldzLaunchPad systems before launch #004 MIRACLE, without treating PNEX as guaranteed funding for MIRACLE market price or buyers.",
+      "allowedExamples": [
+        "shared launch security and audits",
+        "wallet-connect reliability",
+        "vesting and lock infrastructure",
+        "fee-router and accounting proof",
+        "Worldz Proof and transparency tooling",
+        "community education and verified contributor systems",
+        "Worldz OmniBuildz cross-chain LP and LinkedAsset infrastructure"
+      ]
+    }
+  },
+  "vestingPolicy": {
+    "scheduleTool": "worldzpad-mainnet/phenix/vesting_schedule.py",
+    "decimals": 6,
+    "earlyUnlock": false,
+    "phenixChance12MonthPool": {
+      "tokens": 37500000,
+      "cliffDays": 0,
+      "releases": 12,
+      "cadence": "MONTHLY_LAUNCH_ANNIVERSARY",
+      "tokensPerRelease": 3125000,
+      "onChainEnforcementRequiredBeforeMainnet": true
+    },
+    "developer": {
+      "tokens": 25000000,
+      "cliffDays": 90,
+      "releases": 24,
+      "cadence": "MONTHLY_FROM_CLIFF",
+      "exactRawUnitReconciliation": true,
+      "liquidAtGenesisTokens": 0,
+      "earlyUnlock": false,
+      "onChainEnforcementRequiredBeforeMainnet": true
+    },
+    "flyWheelReserve": {
+      "tokens": 47500000,
+      "holdDays": 90,
+      "cycleAllowances": 48,
+      "cadenceDays": 30,
+      "exactRawUnitReconciliation": true,
+      "unusedAllowance": "ROLL_FORWARD_INSIDE_MASTER_RESERVE",
+      "automaticDistribution": false,
+      "rule": "A cycle allowance only makes that amount eligible for approved FlyWheel actions. It does not automatically transfer PNEX."
+    },
+    "flyWheelBuilderTeamGrantDefault": {
+      "cliffDays": 90,
+      "releases": 24,
+      "cadence": "MONTHLY_FROM_CLIFF",
+      "earlyUnlock": false,
+      "appliesAfterGrantApproval": true,
+      "exactRawUnitReconciliation": true
+    }
+  },
+  "burnPolicy": {
+    "brand": "Worldz ProofBurn™",
+    "universalPolicyReference": "worldzpad-mainnet/flywheel/worldz-universal-flywheel.v1.json",
+    "transactionBuilder": "worldzpad-mainnet/phenix/prepare-pnex-burn.mjs",
+    "mode": "TOKEN_NATIVE_RESERVE_BURN",
+    "source": "PHENIX_TOTAL_SUPPLY_FLYWHEEL_AVAILABLE_ALLOWANCE_ONLY",
+    "automatedMarketBuyAndBurn": false,
+    "automaticBurn": false,
+    "perUniversalCycle": {
+      "cadenceDays": 30,
+      "maximumPercentOfNewFlyWheelCycleAllowance": 25,
+      "minimumPercent": 0,
+      "unusedBurnCapacity": "DOES_NOT_ACCUMULATE_AS_EXTRA_BURN_AUTHORITY",
+      "rule": "Each cycle may burn zero up to 25% of that cycle's newly vested FlyWheel allowance. The burn amount must be separately approved; the remaining allowance stays governed by the FlyWheel."
+    },
+    "requirements": [
+      "PNEX must be held in the disclosed burn-capable FlyWheel token account",
+      "burn amount must be inside the current approved cycle cap",
+      "BurnChecked instruction must use the canonical PNEX mint and correct decimals",
+      "transaction must be reviewed and signed by the configured wallet or multisig",
+      "signed transaction must be simulated successfully before broadcast",
+      "broadcast requires explicit human authorization",
+      "confirmed transaction signature and pre/post supply must be recorded",
+      "Worldz Proof burn receipt must be published"
+    ],
+    "irreversible": true,
+    "reissuanceAllowed": false,
+    "autoBroadcast": false,
+    "mainnetExecutionEnabled": false
+  },
+  "universalFlyWheel": {
+    "policyReference": "worldzpad-mainnet/flywheel/worldz-universal-flywheel.v1.json",
+    "universalCycleDays": 30,
+    "legacyEpochHours": 6,
+    "coverage": "LEGACY_PLUS_PREVIOUS_WORLDZ_PLUS_FUTURE_WORLDZ_PLUS_EVERY_VERIFIED_WORLDZLAUNCHPAD_PROJECT",
+    "extraTraderFeeRequired": false,
+    "sharedBenefitRequired": true,
+    "tokenSpecificBurnRequiresManifestAndAuthority": true
+  },
+  "linkedAssets": {
+    "brand": "Worldz LinkedAsset™",
+    "policyReference": "worldzpad-mainnet/linked-assets/worldz-linked-asset.v1.json",
+    "availableToAllWorldzLaunchPadDevelopers": true,
+    "capabilities": [
+      "swap",
+      "pair",
+      "omni_pair",
+      "build",
+      "support",
+      "proof"
+    ],
+    "externalPartnershipClaimRequiresCounterpartyOptIn": true,
+    "userDirectedSwapWithoutPartnershipClaimAllowedForVerifiedPublicAssets": true,
+    "automaticMarketBuy": false,
+    "mainnetExecutionEnabled": false
+  }
+}

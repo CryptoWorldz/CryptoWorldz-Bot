@@ -1,0 +1,53 @@
+{
+  "schema": "PNEX-PURPLE-DIAMOND-HANDZ-V1",
+  "version": "PNEX-PDH-2026-09-26-A",
+  "status": "CLAIM_VAULT_POLICY__MAINNET_VAULT_PENDING",
+  "pool": {
+    "tokens": 2500000,
+    "percentOfSupply": 1,
+    "decimals": 6,
+    "raw": "2500000000000",
+    "genesisDestination": "DEDICATED_PNEX_LEGACY_CLAIM_VAULT",
+    "vaultAddress": null,
+    "unclaimedTokensRemainLocked": true,
+    "automaticForfeiture": false
+  },
+  "eligibilitySource": {
+    "legacyPolicy": "worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json",
+    "verifiedLegacyAssetCount": 10,
+    "snapshotDate": "2026-09-21",
+    "thresholdBasisPercentOfVerifiedSupply": 0.01,
+    "reviveCandidateLedgerReference": "worldzpad-mainnet/revive/revive-legacy-216-distribution.v1.json",
+    "reviveCandidateLedgerIsNotApproval": true,
+    "sourceSnapshotRoot": "b0a58be30c8323bf22d57939cd989be6b1631f5dd17a682cd829d0cc6a85e548"
+  },
+  "claimRequirements": [
+    "wallet appears in or is independently proven from the verified legacy snapshot source",
+    "legacy-token threshold requirement is satisfied",
+    "fresh Solana wallet ownership challenge is signed",
+    "wallet is not a Worldz project/system/distribution/liquidity/program/funding vault",
+    "duplicate identity and linked-wallet review is complete",
+    "linked verified wallets are aggregated to one claimant identity before weighting",
+    "claim record is human-approved or passes the approved automated proof policy"
+  ],
+  "weighting": {
+    "mode": "50_PERCENT_EQUAL_PLUS_50_PERCENT_SQRT_LEGACY_WEIGHT",
+    "equalPoolPercent": 50,
+    "sqrtHoldingPoolPercent": 50,
+    "linkedWalletsAggregated": true,
+    "calculationPoint": "AFTER_CLAIMANT_VERIFICATION",
+    "rounding": "FLOOR_PER_CLAIMANT__FINAL_DUST_REMAINS_IN_CLAIM_VAULT",
+    "note": "The 2.5M PNEX pool is not pre-paid to the old 216-wallet REVIVE candidate ledger. Entitlements are calculated from verified claimants."
+  },
+  "claimWindow": {
+    "expiry": null,
+    "rule": "No automatic expiry or confiscation is invented. Any future close/expiry requires a separately disclosed governed policy."
+  },
+  "execution": {
+    "mainnetExecutionEnabled": false,
+    "autoTransfer": false,
+    "walletSignatureProofRequired": true,
+    "vaultSignatureOrProgramAuthorityRequired": true,
+    "worldzProofRequired": true
+  }
+}

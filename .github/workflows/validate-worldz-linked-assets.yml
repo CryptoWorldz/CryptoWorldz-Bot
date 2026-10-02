@@ -1,0 +1,32 @@
+name: Validate LinkedAsset and OmniBuildz
+
+on:
+  pull_request:
+    paths:
+      - "worldzpad-mainnet/linked-assets/**"
+      - "worldzpad-mainnet/flywheel/worldz-omnibuildz.v1.json"
+      - "scripts/validate_worldz_linked_assets.py"
+      - ".github/workflows/validate-worldz-linked-assets.yml"
+  push:
+    branches:
+      - phenix-launch-prep
+      - revive-v1-build
+    paths:
+      - "worldzpad-mainnet/linked-assets/**"
+      - "worldzpad-mainnet/flywheel/worldz-omnibuildz.v1.json"
+      - "scripts/validate_worldz_linked_assets.py"
+      - ".github/workflows/validate-worldz-linked-assets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/validate_worldz_linked_assets.py
