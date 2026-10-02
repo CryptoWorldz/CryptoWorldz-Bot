@@ -41,14 +41,14 @@ Current valid recorded signer candidates:
 6. Troll George — `GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc`
 
 Two replacement signer slots remain pending:
-- one replacement for **SolMusic** by owner request;
-- one replacement for **Annabel** because the supplied address is not a valid 32-byte Solana public key.
+- **SolPaul** — public Solana key still required;
+- **SolMark (@MARKW30)** — public Solana key still required.
 
 Owner-controlled allocation wallets are recorded separately and do not count as additional independent human signers.
 
 Rules:
 - Do not use the rejected Annabel address.
-- Do not invent replacement signer addresses.
+- Do not invent SolPaul or SolMark addresses; only their verified public Solana keys may fill the two reserved slots.
 - Final deployment requires 8 valid public Solana keys and signer consent.
 - Live Squads membership must match the final approved eight-wallet roster before activation.
 
