@@ -2,14 +2,14 @@
   "schema": "WORLDZ-APP-TREASURY-PROFILES-V1",
   "profiles": [
     {
-      "id": "miracle-church",
-      "label": "Miracle Church Treasury",
+      "id": "miracle-team",
+      "label": "Worldz Miracle Team Treasury",
       "token": "MRCL",
       "allocationPercent": 20,
       "governance": {
         "threshold": 4,
-        "signers": 10,
-        "display": "4-of-10"
+        "signers": 8,
+        "display": "4-of-8"
       },
       "custody": {
         "solana": "Squads",
@@ -17,8 +17,27 @@
         "xrpl": "SignerList",
         "sui": "Native weighted multisig"
       },
-      "state": "NOT_DEPLOYED",
-      "mainnetExecution": false
+      "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_8_VERIFIED_SIGNERS",
+      "mainnetExecution": false,
+      "signerPolicy": {
+        "requiredNamedOverlap": [
+          "JayJayTeamDev",
+          "Stepper",
+          "Savage"
+        ],
+        "remainingSignerSlots": 5,
+        "remainingSignerSource": "Verified Worldz Legend/Admin/Miracle Team public wallets only",
+        "noInventedWallets": true,
+        "separationRule": "The three named Operations signers alone cannot reach the 4-of-8 Miracle threshold."
+      },
+      "revenueRouting": {
+        "scope": "TREASURY_BOUND_REVENUE_ONLY",
+        "mainOperationsPercent": 70,
+        "miracleTeamPercent": 30,
+        "grossPlatformRevenuePercent": null,
+        "note": "This is a split of revenue that would otherwise route 100% to the main Operations Treasury. It does not add a new fee, tax token supply, or override non-treasury Fee Flow lanes."
+      },
+      "note": "Separate from the Worldz Operations Treasury and from any disabled Reserve Treasury. Activation requires a real Squads vault, all 8 signer public keys, live 4-of-8 proof, route simulation and explicit human approval."
     },
     {
       "id": "worldz-operations",
@@ -52,5 +71,5 @@
       "note": "No separate Worldz Reserve Treasury is currently required. Reserve sweeps are disabled; funds remain in the Operations Treasury until a future explicit decision."
     }
   ],
-  "rule": "Worldz Operations uses permanent 3-of-5 governance. Reserve is disabled/not deployed. Treasury membership and authority never silently inherit between profiles."
+  "rule": "Worldz Operations uses permanent 3-of-5 governance. The Worldz Miracle Team Treasury is a separate 4-of-8 profile pending deployment and verified signers. Treasury-bound revenue may split 70% Operations / 30% Miracle only after the Miracle route is live-verified. Reserve remains disabled/not deployed."
 }
