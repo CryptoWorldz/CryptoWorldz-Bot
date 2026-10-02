@@ -6,7 +6,45 @@ const {
   countSingleChoice,
   countRankedChoiceIRV
 } = require("./civic");
-const { getGlobalPublicVoiceStatus } = require("./global");
+const { GLOBAL_HUMAN_NEEDS, getGlobalPublicVoiceStatus } = require("./global");
+
+const CONCERN_TOPICS = Object.freeze([
+  ...GLOBAL_HUMAN_NEEDS,
+  "other-public-concern"
+]);
+
+const CONCERN_LOCATION_SCOPES = Object.freeze([
+  "global",
+  "country",
+  "territory",
+  "region",
+  "local"
+]);
+
+function normalizeConcernListQuery(query = {}) {
+  const rawTopic = String(query.topic || "").trim();
+  const rawLocationScope = String(query.location_scope || query.locationScope || "").trim();
+  const rawCountry = String(query.country_or_territory_code || query.countryOrTerritoryCode || "").trim().toUpperCase();
+  const rawLanguage = String(query.language_code || query.languageCode || "").trim();
+  const rawLimit = Number.parseInt(String(query.limit || "25"), 10);
+
+  const invalid = [];
+  if (rawTopic && !CONCERN_TOPICS.includes(rawTopic)) invalid.push("topic");
+  if (rawLocationScope && !CONCERN_LOCATION_SCOPES.includes(rawLocationScope)) invalid.push("location_scope");
+  if (rawCountry && !/^[A-Z0-9-]{2,12}$/.test(rawCountry)) invalid.push("country_or_territory_code");
+  if (rawLanguage && !/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(rawLanguage)) invalid.push("language_code");
+
+  const limit = Number.isFinite(rawLimit) ? Math.min(100, Math.max(1, rawLimit)) : 25;
+
+  return {
+    invalid,
+    topic: rawTopic || null,
+    locationScope: rawLocationScope || null,
+    countryOrTerritoryCode: rawCountry || null,
+    languageCode: rawLanguage || null,
+    limit
+  };
+}
 
 function registerCivicVotesRoutes({ app, supabase }) {
   app.get("/api/worldz-votes/civic/status", (_req, res) => {
@@ -35,15 +73,59 @@ function registerCivicVotesRoutes({ app, supabase }) {
     });
   });
 
-  app.get("/api/worldz-votes/civic/concerns", async (_req, res) => {
-    const { data, error } = await supabase
+  app.get("/api/worldz-votes/civic/priorities", (_req, res) => {
+    const status = getGlobalPublicVoiceStatus();
+    res.json({
+      ok: true,
+      brand: status.brand,
+      scope: status.scope,
+      binding: false,
+      officialBudgetAuthority: status.officialBudgetAuthority,
+      treasuryExecution: status.treasuryExecution,
+      mission: status.humanNeedsMission,
+      topics: status.humanNeedsTopics,
+      statement: "These are non-binding public priority categories. They document what people want prioritised; they do not move public money or Worldz treasury funds."
+    });
+  });
+
+  app.get("/api/worldz-votes/civic/concerns", async (req, res) => {
+    const filters = normalizeConcernListQuery(req.query || {});
+    if (filters.invalid.length) {
+      return res.status(400).json({
+        ok: false,
+        error: "invalid_civic_concern_filter",
+        invalid: filters.invalid
+      });
+    }
+
+    let query = supabase
       .from("worldz_civic_concerns")
-      .select("public_id,place_label,location_scope,topic,title,summary,language_code,status,source_bundle,created_at")
-      .eq("status", "published")
+      .select("public_id,place_label,location_scope,country_or_territory_code,topic,title,summary,language_code,status,source_bundle,created_at")
+      .eq("status", "published");
+
+    if (filters.topic) query = query.eq("topic", filters.topic);
+    if (filters.locationScope) query = query.eq("location_scope", filters.locationScope);
+    if (filters.countryOrTerritoryCode) query = query.eq("country_or_territory_code", filters.countryOrTerritoryCode);
+    if (filters.languageCode) query = query.eq("language_code", filters.languageCode);
+
+    const { data, error } = await query
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(filters.limit);
+
     if (error) return res.status(503).json({ ok: false, error: "civic_concern_registry_not_active" });
-    return res.json({ ok: true, concerns: data || [] });
+    return res.json({
+      ok: true,
+      readOnly: true,
+      submissionEnabled: false,
+      filters: {
+        topic: filters.topic,
+        locationScope: filters.locationScope,
+        countryOrTerritoryCode: filters.countryOrTerritoryCode,
+        languageCode: filters.languageCode,
+        limit: filters.limit
+      },
+      concerns: data || []
+    });
   });
 
   app.get("/api/worldz-votes/civic/ballots", async (_req, res) => {
@@ -118,4 +200,9 @@ function registerCivicVotesRoutes({ app, supabase }) {
   });
 }
 
-module.exports = { registerCivicVotesRoutes };
+module.exports = {
+  CONCERN_LOCATION_SCOPES,
+  CONCERN_TOPICS,
+  normalizeConcernListQuery,
+  registerCivicVotesRoutes
+};
