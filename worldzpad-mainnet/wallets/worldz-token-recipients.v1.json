@@ -1,0 +1,297 @@
+{
+  "schema": "WORLDZ-TOKEN-RECIPIENT-REGISTRY-V1",
+  "version": "2026-10-02-A",
+  "status": "OWNER_APPROVED_RECIPIENTS__21_VALID__4_ADDRESS_CORRECTIONS_REQUIRED",
+  "source": "Purple Diamond Crew X follower/reply capture supplied by owner on 2026-10-02",
+  "scope": "WORLDZ_ECOSYSTEM_TOKENS",
+  "rules": {
+    "recipientRegistrationIsNotTransfer": true,
+    "exactTokenAndAmountRequireSeparateApprovedAllocation": true,
+    "transferEnabledByDefault": false,
+    "invalidWalletsCannotReceiveTokens": true,
+    "duplicateWalletsMustBeRejectedBeforeAllocation": true,
+    "simulateBeforeAnyTreasuryDistribution": true
+  },
+  "counts": {
+    "submitted": 25,
+    "valid": 21,
+    "invalidPendingCorrection": 4
+  },
+  "recipients": [
+    {
+      "key": "zikiaa_eth",
+      "displayName": "Zikiaa.eth",
+      "xHandle": "@Zikiaa19",
+      "walletAddress": "H6siGm2Vzwyj4GaL7535ULDpJYgj9fKVDvUuohi9Kn7p",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "cowboygan",
+      "displayName": "CowboyGan",
+      "xHandle": null,
+      "walletAddress": "Gh6FjHuVVB3MHACJ8dTPMUDejJ6gQXEtMBgXyYAPLokf",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "mystiverse",
+      "displayName": "Mystiverse",
+      "xHandle": null,
+      "walletAddress": "CS9Df98s9sWCmWjWtLgCNjYMnZkwi9wzyqKfjjmcbyeW",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "shieta",
+      "displayName": "Shieta",
+      "xHandle": "@vyurixtaa",
+      "walletAddress": "AXbhKzWjhFeNPG42sBFgmJsOdeb671vyNWV23L2x7VAi",
+      "walletValidation": "INVALID_AS_POSTED__CORRECTION_REQUIRED",
+      "status": "INVALID_ADDRESS_PENDING_CORRECTION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "lmo_sol",
+      "displayName": "LMO.SOL",
+      "xHandle": "@fw_lmo171",
+      "walletAddress": "LmovS36E5iGBDVQchWPiF97WJ81uGGS33tgV5ThKWkK",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "kiyo",
+      "displayName": "kiyo",
+      "xHandle": null,
+      "walletAddress": "53p6g9CMoPs4D8jYwZW2nYfejZExS4y7oYyZg2RgJkNk",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "jkids",
+      "displayName": "Jkids",
+      "xHandle": "@Jkids58",
+      "walletAddress": "7vqG1cX8Y7YvpqR66G9384X8MTg8nBAXMCmJtwg8hyah",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "valentine",
+      "displayName": "Valentine",
+      "xHandle": null,
+      "walletAddress": "4rM8yPnTGCuEAptAu1sKxfJWmgG8zLtiHN77JHiAUBPRR",
+      "walletValidation": "INVALID_AS_POSTED__CORRECTION_REQUIRED",
+      "status": "INVALID_ADDRESS_PENDING_CORRECTION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "zyro",
+      "displayName": "Zyro",
+      "xHandle": "@Zyro_41",
+      "walletAddress": "9yBQ7Rp8NgK94XaCEFV2VPYJqppSGRxrTW44pJfeH7Sx",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "rish",
+      "displayName": "rish",
+      "xHandle": null,
+      "walletAddress": "7QeAuqNKhzmlMpMjFm6wUQRuZwtJXUn3KgdinGSzoDfyQ",
+      "walletValidation": "INVALID_AS_POSTED__CORRECTION_REQUIRED",
+      "status": "INVALID_ADDRESS_PENDING_CORRECTION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "logan",
+      "displayName": "Logan",
+      "xHandle": "@loganstayy",
+      "walletAddress": "GQrBvqKLrNfFhWG7pZZ2222KukW6GPDvvpBdxiA1ujJK",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "rubel",
+      "displayName": "Rubel",
+      "xHandle": "@farukkcp0",
+      "walletAddress": "EoPdYkvqHrc2f75YingJi7D1dZ3LwPy69vYsoQDUC7wS",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "nychaca",
+      "displayName": "nychaca",
+      "xHandle": null,
+      "walletAddress": "7ZpRyuPL7T8JJHF7ikUqx5Cohm1u4obY8zSaucwXR5FJ",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "cealum",
+      "displayName": "Cealum",
+      "xHandle": null,
+      "walletAddress": "GDjJCr8TtXTAA6HKNTuFs9gteexs5j97XE8fLrrxVqSV",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "ridho_alpha",
+      "displayName": "Ridho Alpha",
+      "xHandle": null,
+      "walletAddress": "4ZH782EEShj4FmCod1eFcKbQsNm4dctwco2aMubpSMXX",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "mei",
+      "displayName": "mei",
+      "xHandle": "@mxxnwins",
+      "walletAddress": "BADR3kkf4d7qv7L9rwZCwyW4rOVUtBCDYtw9M5h5Qi4j",
+      "walletValidation": "INVALID_AS_POSTED__CORRECTION_REQUIRED",
+      "status": "INVALID_ADDRESS_PENDING_CORRECTION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "mike_sol",
+      "displayName": "mike.sol",
+      "xHandle": null,
+      "walletAddress": "88xHWqyNmQXKTn2F7me8dSme86bMMGNDCkDPS9JeBehZ",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "millie",
+      "displayName": "Millie",
+      "xHandle": null,
+      "walletAddress": "Gsw6dinmXNJrTkiAohdmJa8vwDm5VLCDtWk4LQdR9Cj4",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "udf",
+      "displayName": "UDF",
+      "xHandle": null,
+      "walletAddress": "CaPhCPgBDjAEXAW6G7W1BLbYoYrsWkfAHZY6CpufkvnL",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "cj",
+      "displayName": "CJ",
+      "xHandle": "@CJMamaa",
+      "walletAddress": "5jNSM268nfCUBoPGzjzHBgRqip6yGqi3yTg9N8PiuAQC",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "raees_crypto",
+      "displayName": "Raees Crypto",
+      "xHandle": null,
+      "walletAddress": "FaX14qGiKofqRRdtXyRykaz4NHokcSs8KrCfZ2iWd1yR",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "wagmi",
+      "displayName": "WAGMI",
+      "xHandle": null,
+      "walletAddress": "eW2RQQCS5FEec8VPjEu2E6NNHTxmvLY88EtLBnK63p6",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "yami",
+      "displayName": "yami",
+      "xHandle": "@etherYami",
+      "walletAddress": "57uhVLjyzLufbuUPfVdL4E1TEHWi3XgydEh9GfiTRA5m",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "zorix",
+      "displayName": "Zorix",
+      "xHandle": "@NextZorix",
+      "walletAddress": "6S5bDaggDnqLfteMWX8vntQ5zNsnTkhTbMeF3jyBJnxp",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    },
+    {
+      "key": "s3an",
+      "displayName": "s3aN_",
+      "xHandle": "@Seansbw3",
+      "walletAddress": "5JAXb7yf62gZKnzUVxYVX583q5TemRaL2kEPowZUQeQu",
+      "walletValidation": "VALID_32_BYTE_SOLANA_PUBLIC_KEY",
+      "status": "RECORDED_VALID_PENDING_ALLOCATION",
+      "transferEnabled": false,
+      "tokenSymbol": null,
+      "allocationTokens": null
+    }
+  ]
+}
