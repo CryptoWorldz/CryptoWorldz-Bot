@@ -181,12 +181,26 @@ Deno.serve(async (req: Request) => {
       mainnetPublicLaunchEnabled: gate?.public_mainnet_enabled === true,
       treasuryMultisigReady: !!gate?.treasury_vault_address,
       founding100: {
+        programVersion: "WORLDZ-FOUNDING-100-V1",
+        programPath: "/founding100/",
         totalPositions: 100,
-        futureWorldzPoolPercent: 10,
+        canonicalWldzMint: "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+        wldzAllocationPoolTokens: 10000000,
+        wldzPerQualifiedPositionTokens: 100000,
         equalAllocationPerQualifiedPositionPercent: 0.1,
+        mainnetQualificationRequired: true,
         qualifiedCount: foundingRows.filter((x: any) => x.status === "qualified").length,
         pendingReviewCount: foundingRows.filter((x: any) => x.status === "pending_review").length,
         positions: foundingRows
+      },
+      launchBenefits: {
+        version: "WORLDZ-LAUNCH-BENEFITS-V1",
+        publicPath: "/launch-benefits/",
+        launchReferrerPercentOfWorldzContribution: 5,
+        qualifiedReferralLegendPoints: { inviter: 20, newcomer: 10, retentionDays: 7, inviterWeeklyQualifiedCap: 20 },
+        newcomerShillBoostLegendPoints: 20,
+        worldzNewsWirePath: "/news/",
+        rule: "Benefits are conditional on their own proof, funding and qualification rules. No token value or return is guaranteed."
       }
     });
   }
