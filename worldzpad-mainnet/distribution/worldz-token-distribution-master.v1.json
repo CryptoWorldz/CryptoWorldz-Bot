@@ -1,0 +1,312 @@
+{
+  "schema": "WORLDZ-TOKEN-DISTRIBUTION-MASTER-V1",
+  "version": "2026-10-02",
+  "status": "RECONCILED_FOR_3OF5__PARTIAL_MAINNET_EXECUTION_ONLY",
+  "network": "solana-mainnet-beta",
+  "operationsTreasury": {
+    "multisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+    "vaultIndex": 0,
+    "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+    "memberCount": 5,
+    "threshold": 3,
+    "policy": "PERMANENT_3_OF_5",
+    "reserveTreasury": "DISABLED_NOT_DEPLOYED",
+    "runtimeReadRequiredBeforeEveryProposal": true,
+    "signers": [
+      {
+        "label": "JayJayTeamDev",
+        "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u"
+      },
+      {
+        "label": "Stepper",
+        "address": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ"
+      },
+      {
+        "label": "Savage",
+        "address": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
+      },
+      {
+        "label": "SolMusic",
+        "address": "FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ"
+      },
+      {
+        "label": "Mahammad",
+        "address": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
+      }
+    ]
+  },
+  "tokens": {
+    "WLDZ": {
+      "name": "WORLDZ",
+      "symbol": "WLDZ",
+      "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "supply": 100000000,
+      "lifecycle": "LIVE_PARTIALLY_DISTRIBUTED",
+      "live": {
+        "ownerDev": 8000000,
+        "initialLockedLiquidity": 15000000,
+        "total": 23000000
+      },
+      "remainingControlled": 77000000,
+      "buckets": [
+        {
+          "name": "Staged liquidity",
+          "tokens": 20000000,
+          "state": "RETAIN_IN_TREASURY_PENDING_REVIEWED_LP_ADDITION"
+        },
+        {
+          "name": "Purple Diamond Handz holder pool",
+          "tokens": 5000000,
+          "state": "PENDING_EQUAL_CLAIM_MANIFEST_AND_3OF5_PROPOSAL",
+          "eligibleHistoricalWallets": 216
+        },
+        {
+          "name": "Founding 100 launches",
+          "tokens": 10000000,
+          "state": "PENDING_VERIFIED_LAUNCHES",
+          "maxRecipients": 100,
+          "tokensPerVerifiedLaunch": 100000
+        },
+        {
+          "name": "Worldz Impact",
+          "tokens": 10000000,
+          "state": "PENDING_3OF5_APPROVED_DISTRIBUTION"
+        },
+        {
+          "name": "Operations Treasury allocation",
+          "tokens": 10000000,
+          "state": "RETAIN_IN_OPERATIONS_TREASURY"
+        },
+        {
+          "name": "Reserve earmark",
+          "tokens": 5000000,
+          "state": "RETAIN_IN_OPERATIONS_TREASURY__RESERVE_DISABLED"
+        },
+        {
+          "name": "Stepper team allocation",
+          "tokens": 1000000,
+          "state": "PENDING_EARNED_TEAM_APPROVAL"
+        },
+        {
+          "name": "Future team reserve",
+          "tokens": 4000000,
+          "state": "PENDING_EARNED_TEAM_APPROVAL"
+        },
+        {
+          "name": "DevCity 100",
+          "tokens": 5000000,
+          "state": "PENDING_VERIFIED_100_WALLET_ROSTER",
+          "recipients": 100,
+          "tokensPerWallet": 50000
+        },
+        {
+          "name": "Community rewards",
+          "tokens": 2000000,
+          "state": "PENDING_REWARD_POLICY_PROPOSAL"
+        },
+        {
+          "name": "Operations/security/infrastructure",
+          "tokens": 5000000,
+          "state": "PENDING_3OF5_APPROVED_USE"
+        }
+      ],
+      "executionNote": "Legacy 55M direct-wallet batch is retired because it duplicated already-live owner tokens and conflicts with newer Reserve, DevCity and team rules."
+    },
+    "RVIV": {
+      "name": "REVIVE",
+      "symbol": "RVIV",
+      "mint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "supply": 200000000,
+      "lifecycle": "LIVE_DISTRIBUTION_READY_FOR_3OF5_PROPOSAL",
+      "buckets": [
+        {
+          "name": "Initial liquidity",
+          "tokens": 30000000,
+          "state": "LIVE_MAINNET_POOL"
+        },
+        {
+          "name": "Dev claims",
+          "tokens": 29999999.999998,
+          "state": "ONEDROP_12_MONTH_LINEAR_VESTING_ZERO_IMMEDIATE_DEV_UNLOCK",
+          "recipients": 7
+        },
+        {
+          "name": "Legacy Revival claims",
+          "tokens": 19999999.99995,
+          "state": "ONEDROP_UNLOCKED",
+          "recipients": 214
+        },
+        {
+          "name": "Worldz Impact",
+          "tokens": 20000000,
+          "state": "SAME_SQUADS_PROPOSAL_AFTER_3OF5"
+        },
+        {
+          "name": "DevCity 100",
+          "tokens": 20000000,
+          "state": "PENDING_VERIFIED_100_WALLET_ROSTER",
+          "recipients": 100,
+          "tokensPerWallet": 200000
+        },
+        {
+          "name": "Team vesting",
+          "tokens": 30000000,
+          "state": "PENDING_APPROVED_BENEFICIARIES_AND_VESTING_LOCK"
+        },
+        {
+          "name": "Staged liquidity",
+          "tokens": 40000000,
+          "state": "RETAIN_PENDING_REVIEWED_LP_ADDITIONS"
+        },
+        {
+          "name": "Operations Treasury",
+          "tokens": 10000000,
+          "state": "RETAIN_IN_SQUADS_VAULT"
+        },
+        {
+          "name": "Rounding dust",
+          "tokens": 0.000052,
+          "state": "RETAIN_IN_SQUADS_VAULT"
+        }
+      ],
+      "oneDrop": {
+        "claimants": 219,
+        "legacyRecipients": 214,
+        "devRecipients": 7,
+        "unlockedRaw": "19999999999950",
+        "lockedRaw": "29999999999998",
+        "governance": "3-of-5",
+        "flow": "JayJay setup+approval 1/3 -> two additional Squads approvals -> simulated execute"
+      }
+    },
+    "PNEX": {
+      "name": "PHENIX",
+      "symbol": "PNEX",
+      "mint": null,
+      "supply": 250000000,
+      "lifecycle": "PRELAUNCH_NO_MINT",
+      "buckets": [
+        {
+          "name": "PHENIX Chance immediate",
+          "tokens": 25000000,
+          "percent": 10
+        },
+        {
+          "name": "PHENIX Chance vested",
+          "tokens": 37500000,
+          "percent": 15,
+          "vesting": "12 monthly releases"
+        },
+        {
+          "name": "Liquidity",
+          "tokens": 112500000,
+          "percent": 45,
+          "genesisTokens": 12500000,
+          "reserveTokens": 100000000
+        },
+        {
+          "name": "Developer vesting",
+          "tokens": 25000000,
+          "percent": 10,
+          "vesting": "0 immediate; 90-day cliff; 24 monthly releases"
+        },
+        {
+          "name": "Purple Diamond Handz",
+          "tokens": 2500000,
+          "percent": 1
+        },
+        {
+          "name": "PHENIX Total Supply FlyWheel",
+          "tokens": 47500000,
+          "percent": 19
+        }
+      ],
+      "mainnetExecution": false,
+      "blockReason": "No canonical PNEX mint exists yet; exact developer allocation amounts beyond registered eligibility must not be invented."
+    },
+    "MRCL": {
+      "name": "MIRACLE",
+      "symbol": "MRCL",
+      "mint": null,
+      "supply": 348000000,
+      "lifecycle": "PLANNED_NO_MINT",
+      "buckets": [
+        {
+          "name": "Miracle Team Vault",
+          "tokens": 69600000,
+          "percent": 20,
+          "state": "OPT_IN_VERIFIED_WALLETS_REQUIRED",
+          "vesting": "0 immediate; 30-day first release; 24 monthly releases"
+        },
+        {
+          "name": "MiracleMagicVault",
+          "tokens": 69600000,
+          "percent": 20,
+          "state": "VERIFIED_PEOPLE_IN_NEED_GIFT_SUPPLY"
+        },
+        {
+          "name": "Genesis liquidity target",
+          "tokens": 17400000,
+          "percent": 5,
+          "state": "PLANNED"
+        },
+        {
+          "name": "Purple Diamond Handz",
+          "tokens": 3480000,
+          "percent": 1,
+          "state": "INHERITED_DEFAULT"
+        },
+        {
+          "name": "Unallocated",
+          "tokens": 187920000,
+          "percent": 54,
+          "state": "NO_SILENT_ASSIGNMENT"
+        }
+      ],
+      "miracleTeamGovernance": {
+        "policy": "4-of-10 proposed",
+        "state": "NOT_DEPLOYED",
+        "operations3of5MayCustodyPendingAllocation": true,
+        "operations3of5DoesNotReplaceMiracleTeamSignerConsent": true
+      },
+      "mainnetExecution": false,
+      "blockReason": "No canonical MRCL mint and 54% remains intentionally unallocated."
+    }
+  },
+  "legacyCore": {
+    "purpose": "REVENUE_MARKET_BUYS_NOT_DIRECT_DISTRIBUTION_WALLET_FUNDING",
+    "totalAllocationPercent": 15,
+    "beneficiaryCount": 12,
+    "equalPercentEach": 1.25,
+    "executionEnabled": false,
+    "members": [
+      "PDC_ORIGINAL",
+      "PDC1_FIRST",
+      "PDC1_SECOND",
+      "PDCMAGA",
+      "PDCSHARE",
+      "PURPLE_DC",
+      "PURPLE_OG",
+      "PCC1_LEGACY",
+      "INVEST",
+      "LMTD",
+      "NBC",
+      "HSSC"
+    ],
+    "note": "NBC mint must be verified before any automated market buy. Historical distribution wallets remain forbidden Worldz automation destinations."
+  },
+  "feePolicy": {
+    "rule": "No fixed SOL spend assumption. Simulate each exact transaction and require the signing wallet balance to cover its displayed fee/rent.",
+    "recipientClaimsPayOwnAtaRentWhereApplicable": true,
+    "multisigApproversMayNeedSolForTheirApprovalTransactions": true,
+    "noAutomaticTreasuryTopup": true
+  },
+  "releaseOrder": [
+    "RVIV OneDrop 3-of-5 proposal: exact 219-wallet manifest, unlocked Legacy + 12-month vested Dev, plus Worldz Impact",
+    "RVIV DevCity 100 after exact verified roster",
+    "RVIV Team vesting after exact approved beneficiaries and lock",
+    "WLDZ holder/DevCity/team claim manifests after current recipient rules are frozen",
+    "PNEX only after canonical mint + genesis allocation proof",
+    "MRCL only after canonical mint + explicit remaining-allocation decisions + Miracle Team consent"
+  ]
+}
