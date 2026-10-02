@@ -1,0 +1,182 @@
+name: Worldz Public Voice Live Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/worldz-public-voice-live-proof.yml"
+  workflow_run:
+    workflows: ["Restore ZED AUTO GRACE Command Centre"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldz-public-voice-live-proof
+  cancel-in-progress: true
+
+jobs:
+  proof:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      BASE_URL: https://cryptobotz.cryptoworldz.xyz
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY || secrets.SUPABASE_KEY }}
+
+    steps:
+      - name: Prove Worldz Public Voice live runtime
+        shell: python
+        run: |
+          import hashlib, json, os, time, urllib.error, urllib.parse, urllib.request
+
+          base=str(os.environ.get("BASE_URL","")).rstrip("/")
+          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          supabase=(str(os.environ.get("SUPABASE_URL","")).strip() or "https://hknymhhyqldtzmplzuzh.supabase.co").rstrip("/")
+          publishable=str(os.environ.get("SUPABASE_PUBLISHABLE_KEY","")).strip() or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+          if not base or not token:
+              raise SystemExit("Required live-proof runtime configuration is missing.")
+          print("::add-mask::"+token)
+
+          def request_json(url, method="GET", payload=None, headers=None, timeout=30, allow=(200,)):
+              data=None if payload is None else json.dumps(payload,separators=(",",":")).encode("utf-8")
+              merged={"Accept":"application/json","User-Agent":"Worldz-Public-Voice-Live-Proof/1.0"}
+              if headers: merged.update(headers)
+              if payload is not None: merged.setdefault("Content-Type","application/json")
+              req=urllib.request.Request(url,data=data,headers=merged,method=method)
+              try:
+                  with urllib.request.urlopen(req,timeout=timeout) as response:
+                      body=response.read().decode("utf-8","ignore")
+                      parsed=json.loads(body) if body else None
+                      if response.status not in allow:
+                          raise RuntimeError("HTTP "+str(response.status))
+                      return response.status, parsed
+              except urllib.error.HTTPError as exc:
+                  body=exc.read().decode("utf-8","ignore")
+                  try: parsed=json.loads(body)
+                  except Exception: parsed={"raw":body[:500]}
+                  return exc.code, parsed
+
+          expected_status=None
+          for attempt in range(1,31):
+              code,payload=request_json(base+"/api/worldz-votes/civic/status",allow=(200,404,502,503))
+              if code==200 and isinstance(payload,dict):
+                  if (
+                      payload.get("concernSubmissionEnabled") is True
+                      and payload.get("concernAutoPublicationEnabled") is False
+                      and payload.get("voteCastingEnabled") is False
+                      and payload.get("bindingVotingEnabled") is False
+                  ):
+                      expected_status=payload
+                      print("WORLDZ_PUBLIC_VOICE_STATUS=PASS attempt="+str(attempt))
+                      break
+              time.sleep(5)
+          if expected_status is None:
+              raise SystemExit("Worldz Public Voice status endpoint did not reach the expected deployed state.")
+
+          code,worldwide=request_json(base+"/api/worldz-votes/civic/worldwide")
+          registry=(worldwide or {}).get("concernRegistry") or {}
+          if (
+              code!=200
+              or registry.get("publicReadEnabled") is not True
+              or registry.get("publicSubmissionEnabled") is not True
+              or registry.get("autoPublicationEnabled") is not False
+          ):
+              raise SystemExit("Worldwide Public Voice registry state is incorrect.")
+          print("WORLDZ_PUBLIC_VOICE_WORLDWIDE=PASS")
+
+          code,priorities=request_json(base+"/api/worldz-votes/civic/priorities")
+          topics=(priorities or {}).get("topics") or []
+          required={"food-and-hunger","preventable-disease","essential-healthcare-and-medicines","clean-water-and-sanitation","public-money-and-resource-priorities"}
+          if code!=200 or not required.issubset(set(topics)):
+              raise SystemExit("Public Voice priority taxonomy proof failed.")
+          if priorities.get("officialBudgetAuthority") is not False or priorities.get("treasuryExecution") is not False:
+              raise SystemExit("Public Voice priority authority boundaries are incorrect.")
+          print("WORLDZ_PUBLIC_VOICE_PRIORITIES=PASS")
+
+          code,concerns=request_json(base+"/api/worldz-votes/civic/concerns?limit=1")
+          if code!=200 or not isinstance((concerns or {}).get("concerns"),list):
+              raise SystemExit("Published concern register is not readable.")
+          if concerns.get("submissionEnabled") is not True or concerns.get("autoPublicationEnabled") is not False:
+              raise SystemExit("Published concern register intake flags are incorrect.")
+          print("WORLDZ_PUBLIC_VOICE_PUBLIC_REGISTER=PASS")
+
+          req=urllib.request.Request(
+              base+"/miniapp/worldz-votes-civic.js?live-proof="+str(os.environ.get("GITHUB_RUN_ID","0")),
+              headers={"User-Agent":"Worldz-Public-Voice-Live-Proof/1.0","Cache-Control":"no-cache"}
+          )
+          with urllib.request.urlopen(req,timeout=30) as response:
+              mini=response.read().decode("utf-8","ignore")
+          if "HAVE YOUR SAY — WORLDWIDE" not in mini or '/api/worldz-votes/civic/concerns' not in mini:
+              raise SystemExit("Live MiniApp does not contain the Have Your Say intake.")
+          print("WORLDZ_PUBLIC_VOICE_MINIAPP=PASS")
+
+          proof_id=None
+          runtime_key=hashlib.sha256(("zed-runtime-v1:"+token).encode()).hexdigest()
+          runtime_headers={
+              "apikey":publishable,
+              "authorization":"Bearer "+publishable,
+              "x-zed-runtime-key":runtime_key,
+              "accept":"application/json",
+              "content-type":"application/json",
+              "user-agent":"Worldz-Public-Voice-Live-Proof/1.0"
+          }
+          try:
+              payload={
+                  "topic":"other-public-concern",
+                  "location_scope":"global",
+                  "place_label":"Worldwide",
+                  "title":"Worldz Public Voice live proof",
+                  "summary":"Automated deployment proof for the moderated worldwide Public Voice concern intake. This test record is deleted immediately after verification.",
+                  "language_code":"en",
+                  "sources":[],
+                  "privacy_acknowledged":True,
+                  "review_acknowledged":True
+              }
+              code,submitted=request_json(
+                  base+"/api/worldz-votes/civic/concerns",
+                  method="POST",
+                  payload=payload,
+                  allow=(202,)
+              )
+              if code!=202 or submitted.get("status")!="review" or submitted.get("published") is not False:
+                  raise SystemExit("Moderated concern POST did not return the expected review state.")
+              if submitted.get("binding") is not False or submitted.get("officialBudgetAuthority") is not False or submitted.get("treasuryExecution") is not False:
+                  raise SystemExit("Moderated concern POST authority boundaries are incorrect.")
+              proof_id=str(submitted.get("publicId") or "")
+              if not proof_id.startswith("WZC-"):
+                  raise SystemExit("Moderated concern POST did not return a valid public reference.")
+              print("WORLDZ_PUBLIC_VOICE_MODERATED_INTAKE=PASS")
+
+              query=urllib.parse.urlencode({
+                  "select":"public_id,status,moderation_note",
+                  "public_id":"eq."+proof_id,
+                  "limit":"1"
+              },safe=",.*()-:")
+              code,rows=request_json(supabase+"/rest/v1/worldz_civic_concerns?"+query,headers=runtime_headers)
+              if code!=200 or len(rows or [])!=1 or rows[0].get("status")!="review":
+                  raise SystemExit("Submitted proof concern was not stored in review state.")
+              if rows[0].get("moderation_note")!="public-intake-pending-human-review":
+                  raise SystemExit("Submitted proof concern moderation marker is incorrect.")
+              print("WORLDZ_PUBLIC_VOICE_REVIEW_QUEUE=PASS")
+          finally:
+              if proof_id:
+                  query=urllib.parse.urlencode({"public_id":"eq."+proof_id},safe=",.*()-:")
+                  cleanup_headers={**runtime_headers,"Prefer":"return=minimal"}
+                  code,_=request_json(
+                      supabase+"/rest/v1/worldz_civic_concerns?"+query,
+                      method="DELETE",
+                      headers=cleanup_headers,
+                      allow=(200,204)
+                  )
+                  if code not in (200,204):
+                      raise SystemExit("Live proof cleanup failed for "+proof_id)
+                  print("WORLDZ_PUBLIC_VOICE_PROOF_CLEANUP=PASS")
+
+          print("WORLDZ_PUBLIC_VOICE_LIVE=PASS")
