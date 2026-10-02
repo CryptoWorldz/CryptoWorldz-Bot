@@ -6,6 +6,7 @@ on:
     paths:
       - 'launchpad.cryptoworldz.xyz/onedrop/**'
       - 'scripts/validate_onedrop_static.mjs'
+      - 'scripts/audit-rviv-distribution-state.mjs'
       - '.github/workflows/deploy-onedrop-live.yml'
   push:
     branches: [main]
@@ -50,6 +51,12 @@ jobs:
           set -euo pipefail
           npm install --no-save --no-package-lock --no-audit --no-fund @solana/web3.js@1.98.4 @solana/spl-token@0.4.15 @sqds/multisig@2.1.4
           node scripts/validate_onedrop_static.mjs
+
+      - name: Audit live REVIVE distribution state
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/audit-rviv-distribution-state.mjs
 
       - name: Validate live REVIVE source account BEFORE deployment
         shell: bash
@@ -140,6 +147,20 @@ jobs:
             );
             if (!resp || resp.status() !== 200) throw new Error('OneDrop bundle failed to load');
 
+            const manifest = JSON.parse(fs.readFileSync(path.join(siteRoot,'onedrop','revive-manifest.v1.json'),'utf8'));
+            if (manifest.executionEnabled !== true) {
+              await page.waitForFunction(
+                () => document.querySelector('#status')?.textContent?.includes('REVIVE ONEDROP ALREADY EXECUTED'),
+                null,
+                { timeout: 20000 }
+              );
+              if (!(await page.locator('#connect').isDisabled())) throw new Error('Executed OneDrop must keep create controls disabled');
+              if (pageErrors.length) throw new Error('Browser page errors: ' + JSON.stringify(pageErrors));
+              await browser.close();
+              console.log('WORLDZ_ONEDROP_ANDROID_READONLY_UI=PASS');
+              return;
+            }
+
             await page.waitForSelector('#connect', { state: 'visible', timeout: 20000 });
             await page.click('#connect');
 
@@ -175,10 +196,20 @@ jobs:
           });
           NODE
 
-      - name: Full owner preflight simulation BEFORE deployment
+      - name: Reconciliation gate or full owner preflight
         shell: bash
         run: |
           set -euo pipefail
+          if ! node -e "const m=require('./launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json'); process.exit(m.executionEnabled===true?0:1)"; then
+            node - <<'NODE'
+          const fs=require('fs');
+          const m=JSON.parse(fs.readFileSync('launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json','utf8'));
+          if(!['RECONCILIATION_REQUIRED__EXECUTION_DISABLED','EXECUTED__CLAIM_VAULT_AND_IMPACT_FUNDED__REISSUE_DISABLED'].includes(m.status)) throw new Error('Unexpected disabled OneDrop state');
+          if(m.executableNow.totalMovedFromSquadsRaw!=='0') throw new Error('Disabled OneDrop must move zero RVIV');
+          console.log('WORLDZ_ONEDROP_RECONCILIATION_MODE=PASS');
+          NODE
+            exit 0
+          fi
           node <<'NODE'
           const { chromium } = require('playwright');
           const fs=require('fs');
@@ -234,7 +265,7 @@ jobs:
 
             await page.waitForFunction(()=>{
               const t=document.querySelector('#status')?.textContent||'';
-              return t.includes('ONE-TRANSACTION PREFLIGHT PASS') || t.includes('PREFLIGHT STOPPED');
+              return t.includes('3-OF-5 PROPOSAL PREFLIGHT PASS') || t.includes('PREFLIGHT STOPPED');
             },null,{timeout:90000});
 
             const status=await page.locator('#status').innerText();
@@ -242,7 +273,7 @@ jobs:
             console.log('FULL_PREFLIGHT_STATUS='+JSON.stringify(status));
             console.log('FULL_PREFLIGHT_REVIEW='+JSON.stringify(review));
 
-            if(!status.includes('ONE-TRANSACTION PREFLIGHT PASS')){
+            if(!status.includes('3-OF-5 PROPOSAL PREFLIGHT PASS')){
               throw new Error('Full owner preflight failed: '+status);
             }
             if(!review.includes('Simulation: PASS')){
@@ -362,7 +393,7 @@ jobs:
         run: |
           import time, urllib.request
           expected={
-            'https://launchpad.cryptoworldz.xyz/onedrop/':['Worldz OneDrop','SIGN & LAUNCH ONEDROP'],
+            'https://launchpad.cryptoworldz.xyz/onedrop/':['Worldz OneDrop','NO DUPLICATE PAYOUT'],
             'https://launchpad.cryptoworldz.xyz/onedrop/claim/':['REVIVE','Verify My Allocation']
           }
           for url,needles in expected.items():

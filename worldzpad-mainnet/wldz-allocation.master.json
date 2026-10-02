@@ -1,6 +1,6 @@
 {
-  "version": "WLDZ-ALLOCATION-2026-09-25-D",
-  "status": "PARTIALLY_EXECUTED__8M_OWNER_AND_15M_LP_LIVE__REMAINDER_PENDING",
+  "version": "WLDZ-ALLOCATION-2026-10-02-E",
+  "status": "PARTIALLY_EXECUTED__8M_OWNER_AND_15M_LP_LIVE__REMAINDER_3_OF_5_CUSTODY_AND_FANOUT_PENDING",
   "network": "mainnet-beta",
   "token": {
     "name": "WORLDZ",
@@ -15,7 +15,9 @@
     "squadsMultisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
     "vaultIndex": 0,
     "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-    "currentGovernance": "1-of-2 temporary"
+    "currentGovernance": "3-of-5",
+    "memberCount": 5,
+    "requiredApprovals": 3
   },
   "allocation": [
     {
@@ -25,7 +27,10 @@
       "destination": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
       "destinationRole": "COMMAND_CENTRE_DEV_AND_LAUNCH_WALLET",
       "state": "LIVE_IN_JAYJAYTEAMDEV_WALLET",
-      "executionEvidence": "Jupiter token data reports dev balance ~8%; owner wallet UI shows 8,000,000 WLDZ."
+      "executionEvidence": "Jupiter token data reports dev balance ~8%; owner wallet UI shows 8,000,000 WLDZ.",
+      "commonBeneficialControlDisclosureRequired": true,
+      "personalCustodyShardingAllowed": true,
+      "personalCustodyShardingRule": "Owner may split the already-executed 8M personal/dev allocation among disclosed owner-controlled wallets for operational custody. Those wallets remain aggregated as common beneficial control."
     },
     {
       "id": "initial_launch_lp",
@@ -47,9 +52,9 @@
       "id": "legacy_purple_diamond_handz",
       "percent": 5,
       "tokens": 5000000,
-      "destination": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U",
-      "destinationRole": "PURPLE_DIAMOND_HANDZ_DISTRIBUTION_POOL",
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL",
+      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "destinationRole": "LEGACY_CLAIM_RESERVE_IN_OPERATIONS_TREASURY",
+      "state": "RESERVED_IN_3_OF_5_TREASURY_PENDING_CLAIM_DISTRIBUTOR",
       "snapshot": {
         "batchId": "4b7faa3f-c6cd-435f-9840-43a04cd090a0",
         "root": "b0a58be30c8323bf22d57939cd989be6b1631f5dd17a682cd829d0cc6a85e548",
@@ -60,25 +65,28 @@
           "equalPercent": 50,
           "sqrtWeightedPercent": 50
         }
-      }
+      },
+      "historicalPlannedDestination": "ABmLL6XyNZPBQ5LZpg6DoxqtzHTCUufWUNMkbFfFh53U"
     },
     {
       "id": "first_100_worldzlaunchpad",
       "percent": 10,
       "tokens": 10000000,
-      "destination": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt",
-      "destinationRole": "WORLDZLAUNCHPAD_FIRST_100_REWARD_POOL",
+      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "destinationRole": "FOUNDING_100_RESERVE_IN_OPERATIONS_TREASURY",
       "perVerifiedLaunchTokens": 100000,
       "maxLaunches": 100,
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+      "state": "RESERVED_IN_3_OF_5_TREASURY__RELEASE_100K_PER_VERIFIED_LAUNCH",
+      "historicalPlannedDestination": "3jA7TFbW6h8q75mWpYxkAiAntRm16z9ZRnLiZkjFCTdt"
     },
     {
       "id": "oneworldz_charity_impact",
       "percent": 10,
       "tokens": 10000000,
-      "destination": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
-      "destinationRole": "ONEWORLDZ_CHARITY_IMPACT_DISTRIBUTION",
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "destinationRole": "IMPACT_RESERVE_IN_OPERATIONS_TREASURY",
+      "state": "RESERVED_IN_3_OF_5_TREASURY_PENDING_IMPACT_ROUTE",
+      "historicalPlannedDestination": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW"
     },
     {
       "id": "worldz_treasury",
@@ -92,9 +100,10 @@
       "id": "general_reserve",
       "percent": 5,
       "tokens": 5000000,
-      "destination": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9",
-      "destinationRole": "GENERAL_RESERVE_DISTRIBUTION",
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "destinationRole": "GENERAL_RESERVE_IN_OPERATIONS_TREASURY",
+      "state": "RESERVED_IN_3_OF_5_TREASURY",
+      "historicalPlannedDestination": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9"
     },
     {
       "id": "stepper",
@@ -102,26 +111,28 @@
       "tokens": 1000000,
       "destination": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
       "destinationRole": "TEAM_STEPPER",
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+      "state": "RESERVED_PENDING_TEAM_VESTING_RELEASE__NO_DIRECT_UNVESTED_TRANSFER"
     },
     {
       "id": "future_team_reserve",
       "percent": 4,
       "tokens": 4000000,
-      "destination": "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j",
-      "destinationRole": "VERIFIED_FUTURE_TEAM_RESERVE",
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "destinationRole": "TEAM_VESTING_RESERVE_IN_OPERATIONS_TREASURY",
+      "state": "RESERVED_IN_3_OF_5_TREASURY_PENDING_VERIFIED_BENEFICIARIES_AND_VESTING",
+      "historicalPlannedDestination": "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j"
     },
     {
       "id": "dev_city_verified_wallets",
       "percent": 5,
       "tokens": 5000000,
-      "destination": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
-      "destinationRole": "DEV_CITY_50_WALLET_DISTRIBUTION_POOL",
+      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "destinationRole": "DEVCITY_FANOUT_RESERVE_IN_OPERATIONS_TREASURY",
       "recipients": 50,
       "tokensPerVerifiedWallet": 100000,
       "percentPerVerifiedWallet": 0.1,
-      "state": "READY_FOR_POOL_TRANSFER__RECIPIENT_ASSOCIATION_REQUIRED_BEFORE_FANOUT"
+      "state": "RESERVED_IN_3_OF_5_TREASURY_PENDING_VERIFIED_ROSTER_AND_FANOUT",
+      "historicalPlannedDestination": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m"
     },
     {
       "id": "community_ecosystem_growth",
@@ -129,15 +140,16 @@
       "tokens": 2000000,
       "destination": "fa35y2GdDKhdZ6uyS5mouEPQSFiHGyRuMSWp3Vz5Cob",
       "destinationRole": "COMMAND_CENTRE_REWARD_WALLET",
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+      "state": "RESERVED_PENDING_BATCHED_REWARD_RELEASE"
     },
     {
       "id": "operations_security_infrastructure",
       "percent": 5,
       "tokens": 5000000,
-      "destination": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9",
-      "destinationRole": "OPERATIONS_SECURITY_INFRASTRUCTURE_DISTRIBUTION",
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "destinationRole": "OPERATIONS_RESERVE_IN_OPERATIONS_TREASURY",
+      "state": "RESERVED_IN_3_OF_5_TREASURY",
+      "historicalPlannedDestination": "5HiRrJRU1fyW5eXzHgvSgykBZ6PtrSVzg8A1e8eHB1u9"
     }
   ],
   "distributionWallets": {
@@ -166,14 +178,18 @@
     "allocationTokenTotal": 100000000,
     "noSecondWldzMint": true,
     "walletTransferTaxPercent": 0,
-    "ordinaryWalletTransfersUntaxed": true
+    "ordinaryWalletTransfersUntaxed": true,
+    "commonBeneficialControlAggregationRequired": true,
+    "noFakeHolderDecentralisation": true
   },
   "feePolicy": {
     "mode": "MEMBER_FEE_PAYER",
     "signerWallet": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
     "wldzSourceVault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-    "minimumSignerSolForDistributionUi": 0.05,
+    "minimumSignerSolForDistributionUi": null,
     "feeRelayer": false,
-    "note": "WLDZ remains in Squads custody until execution. The JayJayTeamDev member wallet pays Solana proposal/rent/execution fees. Distribution UI will not start below 0.05 SOL."
-  }
+    "note": "No fixed 0.05 SOL gate. Build/simulate the exact proposal and require the signer wallet to cover the simulated fee/rent plus a small safety margin. Large recipient sets should use claim/fanout patterns to minimize ATA rent.",
+    "dynamicSimulationRequired": true
+  },
+  "concentrationPolicy": "worldzpad-mainnet/distribution/worldz-holder-concentration.v1.json"
 }

@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-MIRACLE-V1",
-  "version": "2026-09-30",
+  "version": "2026-10-02-D",
   "status": "PLANNED_SPEC_LOCKED",
   "token": {
     "order": 4,
@@ -26,10 +26,67 @@
       "unassignedTokensRemainVaulted": true,
       "silentAutomaticReassignmentAllowed": false,
       "proposedMultisig": {
-        "policy": "4-of-10",
-        "state": "PROPOSED_NOT_DEPLOYED"
+        "policy": "4-of-8",
+        "state": "PENDING_SOLPAUL_SOLMARK_PUBLIC_KEYS__NOT_DEPLOYED",
+        "exactAdditionalWalletsMayBeInvented": false,
+        "onePersonMultipleWalletsCountAsIndependentSigners": false,
+        "signers": [
+          {
+            "label": "JayJayTeamDev",
+            "solanaPublicKey": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u"
+          },
+          {
+            "label": "Stepper",
+            "solanaPublicKey": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ"
+          },
+          {
+            "label": "Savage",
+            "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
+          },
+          {
+            "label": "Mahammad",
+            "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
+          },
+          {
+            "label": "Zephyr",
+            "solanaPublicKey": "JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc"
+          },
+          {
+            "label": "Troll George",
+            "solanaPublicKey": "GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc"
+          }
+        ],
+        "signerCount": 6,
+        "threshold": 4,
+        "targetSignerCount": 8,
+        "remainingSignerSlots": 2,
+        "removedSigners": [
+          {
+            "label": "SolMusic",
+            "reason": "OWNER_REQUESTED_REPLACEMENT"
+          },
+          {
+            "label": "Annabel",
+            "reason": "INVALID_SOLANA_PUBLIC_KEY"
+          }
+        ],
+        "pendingNamedSigners": [
+          {
+            "label": "SolPaul",
+            "solanaPublicKey": null,
+            "status": "PUBLIC_SOLANA_KEY_REQUIRED"
+          },
+          {
+            "label": "SolMark",
+            "handle": "@MARKW30",
+            "solanaPublicKey": null,
+            "status": "PUBLIC_SOLANA_KEY_REQUIRED"
+          }
+        ]
       },
-      "registeredRecipientSource": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json"
+      "registeredRecipientSource": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json",
+      "accountingSeparationRequired": true,
+      "accountingRule": "MRCL team-allocation custody and treasury revenue may use the same 4-of-8 governance only with separate accounting and public reconciliation."
     },
     "miracleMagicSupply": {
       "percent": 20,
@@ -64,11 +121,72 @@
   },
   "treasuryProfiles": {
     "miracleChurchTreasury": {
-      "proposedPolicy": "4-of-10",
-      "state": "PROPOSED_NOT_DEPLOYED",
+      "proposedPolicy": "4-of-8",
+      "state": "PENDING_SOLPAUL_SOLMARK_PUBLIC_KEYS__NOT_DEPLOYED",
       "signerConsentRequired": true,
       "verifiedPublicWalletRequired": true,
-      "membershipDoesNotAutomaticallyCreateSignerAuthority": true
+      "membershipDoesNotAutomaticallyCreateSignerAuthority": true,
+      "treasuryBoundRevenueSplitAfterActivation": {
+        "worldzOperationsPercent": 70,
+        "miracleTeamPercent": 30
+      },
+      "revenueScope": "TREASURY_BOUND_REVENUE_ONLY",
+      "noNewFeeCreated": true,
+      "onePersonMultipleWalletsCountAsIndependentSigners": false,
+      "policy": "4-of-8",
+      "signers": [
+        {
+          "label": "JayJayTeamDev",
+          "solanaPublicKey": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u"
+        },
+        {
+          "label": "Stepper",
+          "solanaPublicKey": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ"
+        },
+        {
+          "label": "Savage",
+          "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
+        },
+        {
+          "label": "Mahammad",
+          "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
+        },
+        {
+          "label": "Zephyr",
+          "solanaPublicKey": "JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc"
+        },
+        {
+          "label": "Troll George",
+          "solanaPublicKey": "GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc"
+        }
+      ],
+      "signerCount": 6,
+      "threshold": 4,
+      "targetSignerCount": 8,
+      "remainingSignerSlots": 2,
+      "removedSigners": [
+        {
+          "label": "SolMusic",
+          "reason": "OWNER_REQUESTED_REPLACEMENT"
+        },
+        {
+          "label": "Annabel",
+          "reason": "INVALID_SOLANA_PUBLIC_KEY"
+        }
+      ],
+      "pendingNamedSigners": [
+        {
+          "label": "SolPaul",
+          "solanaPublicKey": null,
+          "status": "PUBLIC_SOLANA_KEY_REQUIRED"
+        },
+        {
+          "label": "SolMark",
+          "handle": "@MARKW30",
+          "solanaPublicKey": null,
+          "status": "PUBLIC_SOLANA_KEY_REQUIRED"
+        }
+      ]
     }
   },
   "executionBoundary": {
@@ -89,5 +207,19 @@
     "canonicalSymbol": "MRCL",
     "approvedAllocationLedgerRequired": true,
     "automaticTransfer": false
+  },
+  "genesisCustody": {
+    "provider": "Squads v4",
+    "operationsMultisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+    "operationsVault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+    "governance": "3-of-5",
+    "rule": "If MRCL is minted before the separate Miracle Team Treasury is live, the fixed supply remains reconciled in Operations custody. The 69.6M Miracle Team allocation transfers only after live 4-of-8 proof and approved vesting setup."
+  },
+  "distributionPolicy": {
+    "concentrationPolicy": "worldzpad-mainnet/distribution/worldz-holder-concentration.v1.json",
+    "miracleTeamAllocationDestination": "4-of-8 Miracle Team Treasury after activation",
+    "miracleMagicDestination": "separately accounted mission/gift custody; no single ordinary-holder wallet",
+    "unallocatedSupplyRemainsCustodied": true,
+    "simulateBeforeEveryTreasuryProposal": true
   }
 }

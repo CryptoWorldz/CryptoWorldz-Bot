@@ -65,7 +65,17 @@ assert team["firstReleaseCliffDays"] == 30
 assert team["monthlyReleases"] == 24
 assert team["unassignedTokensRemainVaulted"] is True
 assert team["silentAutomaticReassignmentAllowed"] is False
-assert team["proposedMultisig"]["state"] == "PROPOSED_NOT_DEPLOYED"
+assert team["proposedMultisig"]["policy"] == "4-of-8"
+assert team["proposedMultisig"]["state"] == "PENDING_SOLPAUL_SOLMARK_PUBLIC_KEYS__NOT_DEPLOYED"
+assert team["proposedMultisig"]["signerCount"] == 6
+assert team["proposedMultisig"]["targetSignerCount"] == 8
+assert team["proposedMultisig"]["remainingSignerSlots"] == 2
+assert [x["label"] for x in team["proposedMultisig"]["pendingNamedSigners"]] == ["SolPaul", "SolMark"]
+assert all(x["solanaPublicKey"] is None for x in team["proposedMultisig"]["pendingNamedSigners"])
+assert team["proposedMultisig"]["threshold"] == 4
+assert [x["label"] for x in team["proposedMultisig"]["signers"]] == ["JayJayTeamDev", "Stepper", "Savage", "Mahammad", "Zephyr", "Troll George"]
+assert team["proposedMultisig"]["onePersonMultipleWalletsCountAsIndependentSigners"] is False
+assert team["accountingSeparationRequired"] is True
 
 assert magic["percent"] == 20 and magic["tokens"] == 69_600_000
 assert magic["separateFromTeamVault"] is True

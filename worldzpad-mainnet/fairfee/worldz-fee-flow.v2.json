@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-FEE-FLOW-V2",
-  "version": "2026-10-01-A",
+  "version": "2026-10-02-B",
   "status": "LOCKED_FOR_NEW_WORLDZ_LAUNCH_INTAKES__MAINNET_EXECUTION_GATED",
   "name": "Worldz Fee Flow™ V2",
   "basis": "ELIGIBLE_WORLDZ_ROUTED_SUPPORTED_TRADING_FEE_REVENUE_AFTER_EXTERNAL_PROTOCOL_NETWORK_AND_VENUE_DEDUCTIONS",
@@ -77,7 +77,12 @@
       "treasuryReservePercent": 12,
       "totalPercent": 100,
       "label": "BUILD",
-      "intent": "Lowest voluntary LaunchPad contribution; highest Treasury/Reserve share."
+      "intent": "Lowest voluntary LaunchPad contribution; highest Treasury/Reserve share.",
+      "treasuryBoundPercent": 12,
+      "treasuryBoundSplitAfterSecondaryActivation": {
+        "operationsPercentOfEligibleFeeRevenue": 8.4,
+        "miracleTeamPercentOfEligibleFeeRevenue": 3.6
+      }
     },
     "GROW_5": {
       "worldzLaunchPadPercent": 5,
@@ -85,14 +90,24 @@
       "totalPercent": 100,
       "label": "GROW",
       "default": true,
-      "intent": "Balanced default for platform growth and treasury strength."
+      "intent": "Balanced default for platform growth and treasury strength.",
+      "treasuryBoundPercent": 10,
+      "treasuryBoundSplitAfterSecondaryActivation": {
+        "operationsPercentOfEligibleFeeRevenue": 7,
+        "miracleTeamPercentOfEligibleFeeRevenue": 3
+      }
     },
     "BOOST_8": {
       "worldzLaunchPadPercent": 8,
       "treasuryReservePercent": 7,
       "totalPercent": 100,
       "label": "BOOST",
-      "intent": "Highest voluntary LaunchPad contribution; Treasury/Reserve remains protected."
+      "intent": "Highest voluntary LaunchPad contribution; Treasury/Reserve remains protected.",
+      "treasuryBoundPercent": 7,
+      "treasuryBoundSplitAfterSecondaryActivation": {
+        "operationsPercentOfEligibleFeeRevenue": 4.9,
+        "miracleTeamPercentOfEligibleFeeRevenue": 2.1
+      }
     }
   },
   "flywheelRules": {
@@ -121,5 +136,21 @@
     "noFakeVolume": true,
     "noHistoricalDistributionWalletAutofunding": true,
     "failClosedRule": "If a route, mint, market, liquidity, treasury authority, price-impact or provider check fails, accrue the allocation rather than force execution."
+  },
+  "treasuryBoundRevenueRouting": {
+    "scope": "ONLY_REVENUE_ALREADY_ASSIGNED_TO_TREASURY_CUSTODY",
+    "beforeSecondaryTreasuryActivation": {
+      "operationsPercent": 100,
+      "miracleTeamPercent": 0
+    },
+    "afterSecondaryTreasuryActivation": {
+      "operationsPercent": 70,
+      "miracleTeamPercent": 30
+    },
+    "secondaryTreasuryGovernance": "4-of-8",
+    "operationsGovernance": "3-of-5",
+    "activationRequiresLiveVerification": true,
+    "noNewFee": true,
+    "doesNotOverrideOtherFeeFlowLanes": true
   }
 }

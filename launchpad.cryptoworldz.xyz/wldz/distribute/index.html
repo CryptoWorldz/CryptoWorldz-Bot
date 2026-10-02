@@ -10,10 +10,10 @@ h1{font-size:clamp(2.5rem,8vw,5rem);line-height:.92;margin:8px 0 14px}.purple{co
 <body>
 <header class="topbar"><a class="brand" href="/wldz/"><span class="brand-logo-official" aria-hidden="true"></span><span>WorldzLaunchPad™</span></a><button class="wallet-mini btn secondary" id="connect" type="button">Connect Wallet</button></header>
 <main class="lab">
-<section class="card"><div class="kicker">WLDZ • SQUADS MAINNET • OWNER DISTRIBUTION</div><h1>READY TO <span class="purple">SIGN.</span></h1>
-<div class="grid"><div class="box"><small>Distribution</small><b>55,000,000 WLDZ</b></div><div class="box"><small>Destinations</small><b>10</b></div><div class="box"><small>SOL fee + rent payer</small><b>JayJayTeamDev</b></div></div>
-<div class="status warn" id="status">JayJayTeamDev pays the Solana fees and recipient-account rent. The Squads vault supplies WLDZ only.</div>
-<div class="actions"><button class="btn" id="prepare-accounts" type="button">1. Prepare Recipient Accounts</button><button class="btn secondary" id="preflight" type="button">2. Check Balance</button><button class="btn" id="sign" type="button" disabled>3. Sign & Execute Distribution</button></div>
+<section class="card"><div class="kicker">WLDZ • SQUADS MAINNET • 3-OF-5 TREASURY DISTRIBUTION</div><h1>MIGRATED TO <span class="purple">CLAIMS + VESTING.</span></h1>
+<div class="grid"><div class="box"><small>Distribution</small><b>0 WLDZ direct-send</b></div><div class="box"><small>Direct destinations</small><b>0</b></div><div class="box"><small>SOL fee + rent payer</small><b>JayJayTeamDev</b></div></div>
+<div class="status warn" id="status">The old 47M bulk-send route is retired. Remaining WLDZ allocations stay in the 3-of-5 Treasury until their claim, vesting, Founding 100, DevCity, impact or reviewed release path is ready. This avoids parking large allocations in ordinary holder wallets.</div>
+<div class="actions"><button class="btn" id="prepare-accounts" type="button" disabled>1. Bulk ATA Setup Retired</button><button class="btn secondary" id="preflight" type="button" disabled>2. Direct Send Disabled</button><button class="btn" id="sign" type="button" disabled>3. Use Claim / Vesting Route</button></div>
 <div class="status warn" id="prepare-status">No SOL will be taken from the Squads vault. Recipient WLDZ accounts are prepared from JayJayTeamDev first.</div>
 </section>
 <section class="card"><h2>Distribution</h2><div class="rows" id="rows"></div></section>

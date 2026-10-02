@@ -1,7 +1,7 @@
 {
-  "version": "2026-10-01-worldz-treasury-v2",
+  "version": "2026-10-02-worldz-treasury-v5",
   "product": "WorldzLaunchPad™",
-  "status": "OPERATIONS_3_OF_5_ONCHAIN_VERIFIED__RESERVE_DISABLED__FEE_ROUTING_GATED",
+  "status": "OPERATIONS_3_OF_5_ONCHAIN_VERIFIED__MIRACLE_4_OF_8_PENDING_SOLPAUL_SOLMARK_PUBLIC_KEYS__RESERVE_DISABLED__FEE_ROUTING_GATED",
   "feeCollection": {
     "worldzSharePercentOfCollectedSupportedProjectTradingFee": 10,
     "projectRetainedPercentOfCollectedSupportedProjectTradingFee": 90,
@@ -23,7 +23,16 @@
       "display": "NOT_DEPLOYED",
       "maximumThreshold": 0
     },
-    "maximumApprovalsRequiredByWorldzPolicy": 3
+    "maximumApprovalsRequiredByWorldzPolicy": 4,
+    "miracleTeam": {
+      "enabled": true,
+      "status": "PENDING_SOLPAUL_SOLMARK_PUBLIC_KEYS__NOT_DEPLOYED",
+      "signers": 8,
+      "threshold": 4,
+      "display": "4-of-8",
+      "separateFromOperations": true,
+      "separateFromReserve": true
+    }
   },
   "signerSlots": [
     {
@@ -153,6 +162,93 @@
     "rule": "A chain may activate fee routing only after the five signer addresses, chain-native 3-of-5 Operations multisig, destination address and the exact active fee route are independently verified. No Reserve Treasury is required while Reserve status is disabled.",
     "noPrivateKeysInRepository": true,
     "reserveSweepEnabled": false,
-    "reserveTreasuryRequired": false
+    "reserveTreasuryRequired": false,
+    "miracleTeamFeeRoutingEnabled": false,
+    "miracleTeamRule": "Do not activate the 30% treasury-bound share until verified public Solana keys for SolPaul and SolMark (@MARKW30) are recorded, all final 8 keys validate as 32-byte Solana public keys, the separate Squads treasury is deployed, live chain state reads threshold 4, and the 70/30 route is simulated and explicitly approved."
+  },
+  "treasuryBoundRevenueRouting": {
+    "status": "PENDING_MIRACLE_TREASURY_LIVE_PROOF",
+    "beforeActivation": {
+      "worldzOperationsPercent": 100,
+      "miracleTeamPercent": 0
+    },
+    "afterActivation": {
+      "worldzOperationsPercent": 70,
+      "miracleTeamPercent": 30
+    },
+    "scope": "ONLY_REVENUE_ALREADY_DESTINED_FOR_WORLDZ_TREASURY_CUSTODY",
+    "doesNotChangeGrossFeeRate": true,
+    "doesNotChangeTokenSupplyAllocation": true,
+    "doesNotOverrideExplicitImpactLegacyLpCreatorReferrerOrOtherFeeFlowLanes": true
+  },
+  "miracleTeamSignerPlan": {
+    "signers": [
+      {
+        "slot": 1,
+        "label": "JayJayTeamDev",
+        "solanaPublicKey": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+        "status": "RECORDED_PUBLIC_WALLET"
+      },
+      {
+        "slot": 2,
+        "label": "Stepper",
+        "solanaPublicKey": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
+        "status": "RECORDED_PUBLIC_WALLET"
+      },
+      {
+        "slot": 3,
+        "label": "Savage",
+        "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn",
+        "status": "RECORDED_PUBLIC_WALLET"
+      },
+      {
+        "slot": 4,
+        "label": "Mahammad",
+        "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok",
+        "status": "RECORDED_PUBLIC_WALLET"
+      },
+      {
+        "slot": 5,
+        "label": "Zephyr",
+        "solanaPublicKey": "JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc",
+        "status": "RECORDED_PUBLIC_WALLET"
+      },
+      {
+        "slot": 6,
+        "label": "Troll George",
+        "solanaPublicKey": "GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc",
+        "status": "RECORDED_PUBLIC_WALLET"
+      }
+    ],
+    "signerCount": 6,
+    "threshold": 4,
+    "noInventedAddresses": true,
+    "distinctWalletsRequired": true,
+    "samePersonMultipleWalletsCountAsIndependentSigners": false,
+    "targetSignerCount": 8,
+    "remainingSignerSlots": 2,
+    "removed": [
+      {
+        "label": "SolMusic",
+        "reason": "OWNER_REQUESTED_REPLACEMENT"
+      },
+      {
+        "label": "Annabel",
+        "reason": "INVALID_SOLANA_PUBLIC_KEY__BASE58_DECODES_TO_31_BYTES"
+      }
+    ],
+    "pendingNamedReplacements": [
+      {
+        "slot": 7,
+        "label": "SolPaul",
+        "status": "PUBLIC_SOLANA_KEY_REQUIRED"
+      },
+      {
+        "slot": 8,
+        "label": "SolMark",
+        "handle": "@MARKW30",
+        "status": "PUBLIC_SOLANA_KEY_REQUIRED"
+      }
+    ]
   }
 }

@@ -2,14 +2,14 @@
   "schema": "WORLDZ-APP-TREASURY-PROFILES-V1",
   "profiles": [
     {
-      "id": "miracle-church",
-      "label": "Miracle Church Treasury",
+      "id": "miracle-team",
+      "label": "Worldz Miracle Team Treasury",
       "token": "MRCL",
       "allocationPercent": 20,
       "governance": {
         "threshold": 4,
-        "signers": 10,
-        "display": "4-of-10"
+        "signers": 8,
+        "display": "4-of-8"
       },
       "custody": {
         "solana": "Squads",
@@ -17,8 +17,73 @@
         "xrpl": "SignerList",
         "sui": "Native weighted multisig"
       },
-      "state": "NOT_DEPLOYED",
-      "mainnetExecution": false
+      "state": "PENDING_SOLPAUL_SOLMARK_PUBLIC_KEYS__NOT_DEPLOYED",
+      "mainnetExecution": false,
+      "signerPolicy": {
+        "signers": [
+          {
+            "label": "JayJayTeamDev",
+            "solanaPublicKey": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u"
+          },
+          {
+            "label": "Stepper",
+            "solanaPublicKey": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ"
+          },
+          {
+            "label": "Savage",
+            "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
+          },
+          {
+            "label": "Mahammad",
+            "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
+          },
+          {
+            "label": "Zephyr",
+            "solanaPublicKey": "JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc"
+          },
+          {
+            "label": "Troll George",
+            "solanaPublicKey": "GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc"
+          }
+        ],
+        "signerCount": 6,
+        "threshold": 4,
+        "noInventedWallets": true,
+        "samePersonMultiKeyThresholdPadding": false,
+        "targetSignerCount": 8,
+        "remainingSignerSlots": 2,
+        "removed": [
+          {
+            "label": "SolMusic",
+            "reason": "OWNER_REQUESTED_REPLACEMENT"
+          },
+          {
+            "label": "Annabel",
+            "reason": "INVALID_SOLANA_PUBLIC_KEY"
+          }
+        ],
+        "pendingNamedReplacements": [
+          {
+            "label": "SolPaul",
+            "solanaPublicKey": null,
+            "status": "PUBLIC_SOLANA_KEY_REQUIRED"
+          },
+          {
+            "label": "SolMark",
+            "handle": "@MARKW30",
+            "solanaPublicKey": null,
+            "status": "PUBLIC_SOLANA_KEY_REQUIRED"
+          }
+        ]
+      },
+      "revenueRouting": {
+        "scope": "TREASURY_BOUND_REVENUE_ONLY",
+        "mainOperationsPercent": 70,
+        "miracleTeamPercent": 30,
+        "grossPlatformRevenuePercent": null,
+        "note": "This is a split of revenue that would otherwise route 100% to the main Operations Treasury. It does not add a new fee, tax token supply, or override non-treasury Fee Flow lanes."
+      },
+      "note": "Separate from the Worldz Operations Treasury and from any disabled Reserve Treasury. Activation requires a real Squads vault, all 8 signer public keys, live 4-of-8 proof, route simulation and explicit human approval."
     },
     {
       "id": "worldz-operations",
@@ -52,5 +117,5 @@
       "note": "No separate Worldz Reserve Treasury is currently required. Reserve sweeps are disabled; funds remain in the Operations Treasury until a future explicit decision."
     }
   ],
-  "rule": "Worldz Operations uses permanent 3-of-5 governance. Reserve is disabled/not deployed. Treasury membership and authority never silently inherit between profiles."
+  "rule": "Worldz Operations remains permanent 3-of-5. The separate Miracle Team Treasury targets 4-of-8. The two remaining human signer slots are reserved for SolPaul and SolMark (@MARKW30); deployment waits for their verified public Solana keys."
 }

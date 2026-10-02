@@ -1,7 +1,7 @@
 {
   "schema": "worldz.onedrop.v1",
-  "version": "WORLDZ-ONEDROP-RVIV-2026-09-26-A",
-  "status": "EXECUTABLE_OWNER_REVIEW_REQUIRED",
+  "version": "WORLDZ-ONEDROP-RVIV-2026-10-02-D",
+  "status": "EXECUTED__CLAIM_VAULT_AND_IMPACT_FUNDED__REISSUE_DISABLED",
   "network": "solana-mainnet-beta",
   "token": {
     "name": "REVIVE",
@@ -39,14 +39,14 @@
       "name": "DEV_CLAIMS",
       "raw": "29999999999998",
       "tokens": "29999999.999998",
-      "status": "INCLUDED_IN_ONEDROP",
+      "status": "FUNDED_IN_EXISTING_ONEDROP_CLAIM_VAULT__NO_REISSUE",
       "recipientCount": 7
     },
     {
       "name": "LEGACY_REVIVAL_CLAIMS",
       "raw": "19999999999950",
       "tokens": "19999999.999950",
-      "status": "INCLUDED_IN_ONEDROP",
+      "status": "FUNDED_IN_EXISTING_ONEDROP_CLAIM_VAULT__NO_REISSUE",
       "recipientCount": 214,
       "excludedWallets": [
         "43T8jncT5pJFo1TNenHdt6NSaPieic3iuHLQnYLLgeWy",
@@ -57,32 +57,33 @@
       "name": "ONEWORLDZ_IMPACT",
       "raw": "20000000000000",
       "tokens": "20000000",
-      "status": "DIRECT_TRANSFER_IN_SAME_SQUADS_INNER_MESSAGE",
-      "destination": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW"
+      "status": "EXECUTED_20M_TO_APPROVED_IMPACT_STAGING__NO_REISSUE",
+      "destination": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+      "note": "The 20M impact allocation remains fully reserved. It is intentionally excluded from this OneDrop transaction so it is not parked as a 10%-of-supply ordinary wallet balance."
     },
     {
       "name": "DEVCITY_100",
       "raw": "20000000000000",
       "tokens": "20000000",
-      "status": "RESERVED_PENDING_APPROVED_100_WALLET_ROSTER"
+      "status": "RESERVED_IN_CURRENT_100M_SQUADS_SOURCE_PENDING_APPROVED_100_WALLET_ROSTER"
     },
     {
       "name": "TEAM_VESTING",
       "raw": "30000000000000",
       "tokens": "30000000",
-      "status": "RESERVED_PENDING_APPROVED_BENEFICIARIES_AND_JUPITER_LOCK"
+      "status": "RESERVED_IN_CURRENT_100M_SQUADS_SOURCE_PENDING_APPROVED_BENEFICIARIES_AND_VESTING"
     },
     {
       "name": "STAGED_LIQUIDITY",
       "raw": "40000000000000",
       "tokens": "40000000",
-      "status": "RESERVED_FOR_FUTURE_REVIEWED_LP_ADDITIONS"
+      "status": "RESERVED_IN_CURRENT_100M_SQUADS_SOURCE_FOR_FUTURE_REVIEWED_LP_ADDITIONS"
     },
     {
       "name": "TREASURY_OPERATIONS",
       "raw": "10000000000000",
       "tokens": "10000000",
-      "status": "RESERVED_IN_SQUADS_VAULT"
+      "status": "RESERVED_IN_CURRENT_100M_SQUADS_SOURCE"
     },
     {
       "name": "ROUNDING_DUST",
@@ -92,9 +93,9 @@
     }
   ],
   "executableNow": {
-    "oneDropClaimRaw": "49999999999948",
-    "oneWorldzDirectRaw": "20000000000000",
-    "totalMovedFromSquadsRaw": "69999999999948",
+    "oneDropClaimRaw": "0",
+    "impactMovedRaw": "0",
+    "totalMovedFromSquadsRaw": "0",
     "expectedRemainingSquadsRaw": "100000000000052"
   },
   "sourceEvidence": {
@@ -103,7 +104,7 @@
     "legacyHistoricalCount": 216,
     "legacyEligibleCount": 214,
     "devSourceVersion": "REVIVE-SEVEN-DEV-ALLOCATION-2026-09-26-B",
-    "rule": "Final wallet signature is required. Browser recomputes the Merkle root, exact sums, PDAs, transaction size and live simulation before broadcast."
+    "rule": "On-chain source history proves the 49,999,999.999948 RVIV Dev+Legacy claim funding and 20M Impact transfer executed in one confirmed transaction. Reissue is permanently disabled; claimants use the existing claim route."
   },
   "recipients": [
     {
@@ -1641,5 +1642,40 @@
         "LEGACY_REVIVAL"
       ]
     }
-  ]
+  ],
+  "executionEnabled": false,
+  "executionBlockReason": "This distribution already executed on Solana mainnet. Creating or funding it again would duplicate Dev/Legacy/Impact allocations.",
+  "liveAudit": {
+    "auditedAtUtc": "2026-10-02",
+    "liveSupplyRaw": "199999998897226",
+    "squadsSourceRaw": "100000000000052",
+    "impactStagingObservedRaw": "20000000000000",
+    "jayJayObservedRaw": "4285758308538",
+    "rule": "Re-read chain state before presenting live balances; reissue remains forbidden.",
+    "claimVaultTokenAccount": "9Uxikt4zgSkBPqVPFPQGyUGRDrcKVTQGPHj1mM8omXo9",
+    "claimVaultOwner": "8zhVEUZMcs78AoddrZKm2HrFtpNabxaZNZEDsv8FBfj2",
+    "claimVaultCurrentRaw": "45714285714234",
+    "claimVaultFundedRaw": "49999999999948",
+    "claimVaultClaimedDeltaRaw": "4285714285714",
+    "impactTokenAccount": "DLoyRKLfoT2BuifzZrrCbnaxfCEo6dpVFDwNZn8Pjc6B",
+    "impactOwner": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
+    "impactCurrentRaw": "20000000000000",
+    "lpTokenAccount": "2NisBL7PJ3Zz31eiDvmP9Yraqix5rL9SmudnXPn47NMh",
+    "lpCurrentRaw": "29999954874402"
+  },
+  "distributionExecutionEvidence": {
+    "signature": "4a9uuK8fCYUuZdssSAf1Sm5DLHRg3wJPHwXpGbFBAGbRWT52GZjMgWjz3MPxz3WxBrmp9aGm3NMxPrrej1uo6v2q",
+    "blockTimeUtc": "2026-09-26T10:09:20Z",
+    "sourceAta": "28CwdVt2y997WZqTzEuBpuwoyVYAj6JcaD4qDMzyCdtn",
+    "claimVaultTokenAccount": "9Uxikt4zgSkBPqVPFPQGyUGRDrcKVTQGPHj1mM8omXo9",
+    "claimVaultFundedRaw": "49999999999948",
+    "impactTokenAccount": "DLoyRKLfoT2BuifzZrrCbnaxfCEo6dpVFDwNZn8Pjc6B",
+    "impactFundedRaw": "20000000000000"
+  },
+  "initialLiquidityExecutionEvidence": {
+    "signature": "5VPjnawgCqomqP3ktUpWU55K5iUB9f83HKXTktRxDZDJGtaJN9tS8FFi34NDffVqRLUi8BYjZBP3iVKV6nnxDLF1",
+    "blockTimeUtc": "2026-09-25T20:27:40Z",
+    "raw": "30000000000000",
+    "destinationTokenAccount": "2NisBL7PJ3Zz31eiDvmP9Yraqix5rL9SmudnXPn47NMh"
+  }
 }

@@ -1,0 +1,73 @@
+{
+  "schema": "WORLDZ-HOLDER-CONCENTRATION-V1",
+  "version": "2026-10-02-A",
+  "status": "OWNER_APPROVED_DISTRIBUTION_POLICY__EXECUTION_STILL_PROOF_GATED",
+  "purpose": "Avoid unnecessary large ordinary-holder balances while preserving exact token allocations and transparent custody.",
+  "principles": {
+    "preserveCanonicalBucketTotals": true,
+    "useClaimsForLargeRecipientSets": true,
+    "useVestingForTeamAndBuilderAllocations": true,
+    "largeLiquidityPositionsAreNotOrdinaryHolderAllocations": true,
+    "multisigProgramAndVestingVaultsMustBeLabelledAsCustody": true,
+    "ownerControlledWalletSplittingMustNotBePresentedAsIndependentHolderDecentralisation": true,
+    "aggregateCommonBeneficialControlForTransparency": true,
+    "noInventedRecipients": true,
+    "noInventedWallets": true,
+    "simulateBeforeEveryMainnetProposal": true,
+    "minimizeAtaAndRentCosts": true
+  },
+  "ordinaryHolderTarget": {
+    "defaultMaximumPercentOfSupplyPerSingleWallet": 2.5,
+    "rule": "Target only. Exact approved allocations, public recipients and existing on-chain balances are not silently rewritten. Exceptions require explicit disclosure."
+  },
+  "tokenPlans": {
+    "WLDZ": {
+      "supply": 100000000,
+      "existingOwnerBalanceTokens": 8000000,
+      "existingOwnerBalanceState": "ALREADY_EXECUTED__DO_NOT_DUPLICATE",
+      "legacy": "Keep 5M in treasury until claim-distributor fanout to verified legacy recipients.",
+      "devCity": "Keep 5M in treasury until verified roster fanout; target 100k per recipient under current WLDZ plan unless superseded.",
+      "founding100": "Keep 10M in treasury; release 100k per verified launch rather than parking 10M in one ordinary wallet.",
+      "team": "Use vesting/claim schedules. Do not park the whole team reserve in one ordinary personal wallet.",
+      "impact": "Ring-fence under treasury accounting; do not create a 10M ordinary-holder balance merely for custody.",
+      "operations": "Remain multisig custody.",
+      "stagedLiquidity": "Remain treasury/liquidity reserve until reviewed LP deployment."
+    },
+    "RVIV": {
+      "supply": 200000000,
+      "devClaims": "30M across the approved seven-dev claim set; no single dev receives the entire bucket.",
+      "legacyClaims": "20M across the approved legacy claimant set.",
+      "devCity": "20M intended for 100 verified DevCity recipients, 200k each when roster is approved.",
+      "team": "30M reserved for approved vesting beneficiaries rather than one ordinary personal wallet.",
+      "impact": "20M remains treasury-reserved until a concentration-aware impact custody/fanout route is approved.",
+      "liquidity": "30M existing initial liquidity plus 40M staged reserve are liquidity custody, not ordinary holder allocations."
+    },
+    "PNEX": {
+      "supply": 250000000,
+      "chance": "Immediate and vested Chance allocations fan out to verified recipients; no single recipient receives the whole pool.",
+      "developerVesting": "25M uses multiple verified developer beneficiaries with 90-day cliff and 24 monthly releases.",
+      "purpleDiamondHandz": "2.5M fanout/claim bucket.",
+      "flywheel": "47.5M governed program reserve, not an ordinary personal holder.",
+      "liquidity": "112.5M liquidity allocation remains pool/reserve custody."
+    },
+    "MRCL": {
+      "supply": 348000000,
+      "miracleTeam": "69.6M is governed 4-of-8 team-vault custody with individual vesting ledgers; it is not a single-person holding.",
+      "miracleMagic": "69.6M is mission/gift supply custody with verified beneficiary releases.",
+      "purpleDiamondHandz": "3.48M fanout/claim bucket.",
+      "remaining": "187.92M stays unallocated/custodied until an explicit allocation decision; do not scatter it merely to make holder charts look distributed."
+    }
+  },
+  "ownerControlledAllocationWallets": {
+    "allowed": true,
+    "use": "Operational separation of personally controlled allocations only.",
+    "namingConvention": [
+      "Worldz Personal Allocation A",
+      "Worldz Personal Allocation B",
+      "Worldz Personal Allocation C",
+      "Worldz Personal Allocation D"
+    ],
+    "disclosure": "Every such wallet must remain marked OWNER_CONTROLLED / COMMON_BENEFICIAL_CONTROL in Worldz records.",
+    "signerRule": "Extra wallets controlled by one person do not count as additional independent multisig people."
+  }
+}
