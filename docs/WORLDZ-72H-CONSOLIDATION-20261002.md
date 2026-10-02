@@ -16,6 +16,8 @@ This checkpoint consolidates the build work requested across the previous 72 hou
 - Operations Treasury permanent 3-of-5 state; Reserve disabled until separately reintroduced by a newer explicit decision.
 - Command Centre restored to ZED-led RAIDS-only operation; stale RECAP control/public branding retired.
 - Hourly favourite-token Worldz voting remains separate from civic/public-policy voting.
+- Worldz Global Public Voice is worldwide by default for non-binding participation: no country/territory allowlist, age-inclusive general voice with age-appropriate safeguards, no demographic/wealth/token weighting, and Australia retained only as one jurisdiction compliance profile.
+- Human-needs Public Voice priorities include hunger, preventable disease, essential healthcare/medicines, water/sanitation, shelter/housing, education/opportunity and public/community resource priorities.
 - Worldz Spotlight advertising: A$5/1 day, A$12/3 days, A$22/7 days, A$75/30 days; Home/Community/Launch Station placements, SPONSORED labels, human review before payment/activation, SOL/USDC payment flow and live-proof gates.
 - LaunchPad ↔ REX connection and production proof coverage.
 - WorldzPay Phase 1 and Checkout Build #2 provider-ready architecture are merged. Live provider execution remains explicitly gated OFF.
@@ -37,7 +39,7 @@ That same assembled image is used by the Community Suite and the Telegram brande
 ## Gated rails integrated into the build
 
 - WorldzPay Checkout Build #2 provider-ready architecture is merged; provider execution, signing and broadcast remain OFF until verified access and explicit release gates pass.
-- Worldz Votes Centre civic/public-voice foundation is merged as a separate neutral, non-binding/read-only foundation. It remains separate from hourly DEX token voting; ballot casting stays OFF pending eligibility, privacy, legal and independent-audit gates.
+- Worldz Votes Centre civic/public-voice foundation is worldwide, neutral and non-binding by default. A structured public-concern registry is designed; public writes stay OFF pending moderation/privacy/abuse-prevention/age-safety gates. It remains separate from hourly DEX token voting; ballot casting stays OFF pending eligibility, privacy, legal and independent-audit gates.
 
 ## Release rule
 
