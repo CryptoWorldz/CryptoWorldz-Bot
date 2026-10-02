@@ -46,16 +46,16 @@ main{max-width:900px;margin:auto;padding:28px 16px 70px}a{color:#e7c7ff}h1{font-
 
 <section class="card">
 <h2>Owner launch console</h2>
-<p class="truth"><b>Important:</b> “one transaction” here means one owner-signed Solana transaction to create and fund the Merkle distributor and route the currently executable buckets. Recipients claim later with their own signatures. The page refuses to broadcast if the exact transaction exceeds Solana's packet limit, fails simulation, or costs more SOL than the connected wallet has.</p>
+<p class="truth"><b>Important:</b> the first owner-signed transaction creates the Merkle distributor, creates the exact Squads proposal and records approval 1 of 3. The 3-of-5 Operations Treasury then requires two more signer approvals before the Squads transaction can execute and fund the claim vault. Recipients claim later with their own signatures.</p>
 <div class="actions">
 <button id="connect" class="connect">1. Connect JayJayTeamDev</button>
-<button id="prepare" class="primary" disabled>2. Build + Simulate ONE Transaction</button>
-<button id="launch" class="primary" disabled>3. SIGN & LAUNCH ONEDROP</button>
+<button id="prepare" class="primary" disabled>2. Build + Simulate 3-of-5 Proposal</button>
+<button id="launch" class="primary" disabled>3. CREATE PROPOSAL + APPROVAL 1/3</button>
 </div>
 <div id="status" class="status">Nothing signed. Load the frozen manifest and connect the authorized wallet.</div>
 <pre id="review" class="status mono">Waiting for live mainnet preflight…</pre>
 <a class="claim" href="./claim/">Open REVIVE Claim Page →</a>
-<p class="mini">No seed phrase is requested. The connected wallet remains the signer. The browser recomputes the Merkle root from the frozen recipient manifest, verifies the RVIV mint and Squads vault, simulates the exact transaction, shows its byte size and estimated SOL debit, then asks for the wallet signature.</p>
+<p class="mini">No seed phrase is requested. The connected wallet remains the signer. The browser recomputes the Merkle root from the frozen recipient manifest, verifies the RVIV mint and 3-of-5 Squads vault, simulates the exact proposal transaction, shows its byte size and estimated SOL debit, then asks for the first signer approval. No RVIV moves until the Squads proposal reaches 3 approvals and is executed.</p>
 </section>
 </main>
 <script type="module" src="./app.js?v=20260926-vanilla-reown-c"></script>
