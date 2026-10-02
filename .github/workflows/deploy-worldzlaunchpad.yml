@@ -509,35 +509,41 @@ jobs:
           fee=p['feePolicy']
           A=safe['allocations']
           R=safe['feeRoutes']
-          FIXED=R['exactLockedFixedPercent']
-          EXPECTED_FIXED={
-            'creatorDeveloper':10,
-            'launchReferrer':15,
-            'legacyCore':15,
-            'worldzCoreFamilyMarketBuys':12,
-            'lpGrowth':10,
-            'launchedTokenBuybackAndBurn':8,
-            'impactCharity':5,
+          EXPECTED_INTERNAL={
+            'operationsProductDevelopment':20,
+            'treasury':20,
+            'lpGrowth':15,
+            'legacyCore':10,
+            'worldzCoreFamilyMarketBuys':10,
+            'impactCharity':10,
             'teamBuilderRewards':5,
-            'futureTokenDeploymentReserve':5,
+            'futureLaunchInfrastructure':5,
+            'launchReferrer':5,
           }
-          TREASURY_BY_CHOICE={3:12,5:10,8:7}
-          EXPECTED_ROUTE_KEYS=set(EXPECTED_FIXED)|{'worldzLaunchPad','treasuryReserve'}
+          RETENTION={3:97,5:95,8:92}
+          EXPECTED_ROUTE_KEYS=set(EXPECTED_INTERNAL)
 
-          assert R['model']=='WORLDZ_FEE_FLOW_V2'
-          assert FIXED==EXPECTED_FIXED
-          assert R['worldzLaunchPadAllowedPercent']==[3,5,8]
-          assert R['treasuryReserveByLaunchPadChoice']=={'3':12,'5':10,'8':7}
-          assert R['totalPercent']==100
+          assert R['model']=='WORLDZ_FEE_FLOW_V3'
+          assert R['worldzContributionAllowedPercent']==[3,5,8]
+          assert R['creatorRetentionByWorldzContribution']=={'3':97,'5':95,'8':92}
+          assert R['worldzInternalSplitPercent']==EXPECTED_INTERNAL
+          assert sum(R['worldzInternalSplitPercent'].values())==100
+          assert R['treasuryLane']['percentOfWorldzContribution']==20
+          assert R['treasuryLane']['worldzOperationsTreasuryPercent']==70
+          assert R['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
+          assert R['totalWorldzInternalPercent']==100
           assert R['walletTransferTaxPercent']==0
 
           def valid(cfg):
               try:
                   supply=int(cfg['supply']); decimals=int(cfg['decimals']); f=float(cfg['fee'])
                   alloc=cfg['alloc']; routes=cfg['routes']
+                  choice=int(cfg['worldzContribution']); retention=int(cfg['creatorRetention'])
                   if not (p['safeLaunchPolicy']['token']['supplyMin'] <= supply <= p['safeLaunchPolicy']['token']['supplyMax']): return False
                   if not (p['safeLaunchPolicy']['token']['decimalsMin'] <= decimals <= p['safeLaunchPolicy']['token']['decimalsMax']): return False
                   if not (fee['projectTradingFeeMinPercent'] <= f <= fee['projectTradingFeeMaxPercent']): return False
+                  step=float(fee['stepPercent']); base=float(fee['projectTradingFeeMinPercent'])
+                  if abs(((f-base)/step)-round((f-base)/step))>1e-9: return False
                   if abs(sum(alloc.values())-100)>1e-9: return False
                   if any((not math.isfinite(float(v)) or v<0 or v>100) for v in alloc.values()): return False
                   if alloc['creatorTeam']>A['creatorTeamMaxPercent']: return False
@@ -548,33 +554,30 @@ jobs:
                   if cfg['cliffDays']<A['founderCliffMinDays']: return False
                   if cfg['vestingMonths']<A['founderVestingMinMonths']: return False
                   if cfg['lpLockPercent']!=100 or cfg['lpLockDays']<A['lpLockMinDays']: return False
-
                   if set(routes)!=EXPECTED_ROUTE_KEYS: return False
-                  if any((not math.isfinite(float(v)) or v<0 or v>100) for v in routes.values()): return False
-                  for key,value in EXPECTED_FIXED.items():
-                      if routes.get(key)!=value: return False
-                  choice=routes.get('worldzLaunchPad')
-                  if choice not in TREASURY_BY_CHOICE: return False
-                  if routes.get('treasuryReserve')!=TREASURY_BY_CHOICE[choice]: return False
+                  if routes!=EXPECTED_INTERNAL: return False
                   if abs(sum(routes.values())-100)>1e-9: return False
+                  if choice not in RETENTION: return False
+                  if retention!=RETENTION[choice]: return False
+                  if choice+retention!=100: return False
                   return True
               except Exception:
                   return False
 
-          base_routes={**EXPECTED_FIXED,'worldzLaunchPad':5,'treasuryReserve':10}
           base={
             'supply':1_000_000,'decimals':9,'fee':1.0,
             'alloc':{'creatorTeam':15,'liquidity':30,'communityPublic':30,'treasuryReserve':10,'growthEcosystem':15},
             'creatorUnlocked':5,'cliffDays':90,'vestingMonths':24,'lpLockPercent':100,'lpLockDays':365,
-            'routes':base_routes
+            'routes':dict(EXPECTED_INTERNAL),'worldzContribution':5,'creatorRetention':95
           }
           def clone():
               return json.loads(json.dumps(base))
 
           cases=[('baseline_valid',clone(),True)]
 
-          for f in [0,0.1,0.49,0.5,0.75,1,1.5,2,2.5,3,3.01,4,9,99]:
-              x=clone();x['fee']=f;cases.append((f'fee_{f}',x,0.5<=f<=3))
+          valid_fees={0.5,0.75,1,1.5,2,2.5,3}
+          for f in [0,0.1,0.49,0.5,0.6,0.75,1,1.25,1.5,2,2.5,3,3.01,4,9,99]:
+              x=clone();x['fee']=f;cases.append((f'fee_{f}',x,f in valid_fees or f==1.25))
           for v in range(0,26):
               x=clone();x['alloc']['creatorTeam']=v;x['alloc']['growthEcosystem']=30-v
               x['creatorUnlocked']=min(5,v)
@@ -596,24 +599,22 @@ jobs:
           for v in [-1,0,1,6,9,10]:
               x=clone();x['decimals']=v;cases.append((f'decimals_{v}',x,0<=v<=9))
 
-          # Fee Flow V2 profile choices: only 3/5/8 are valid and Treasury must balance.
+          # Only 3/5/8 are valid and creator retention is mathematically locked to 97/95/92.
           for choice in range(0,13):
-              x=clone();x['routes']['worldzLaunchPad']=choice
-              x['routes']['treasuryReserve']=TREASURY_BY_CHOICE.get(choice,15-choice)
-              cases.append((f'launchpad_choice_{choice}',x,choice in TREASURY_BY_CHOICE))
-
+              x=clone();x['worldzContribution']=choice;x['creatorRetention']=RETENTION.get(choice,100-choice)
+              cases.append((f'worldz_choice_{choice}',x,choice in RETENTION))
           for choice in [3,5,8]:
-              for treasury in range(0,16):
-                  x=clone();x['routes']['worldzLaunchPad']=choice;x['routes']['treasuryReserve']=treasury
-                  cases.append((f'treasury_balance_{choice}_{treasury}',x,treasury==TREASURY_BY_CHOICE[choice]))
+              for retention in [0,50,91,92,94,95,96,97,98,100]:
+                  x=clone();x['worldzContribution']=choice;x['creatorRetention']=retention
+                  cases.append((f'retention_{choice}_{retention}',x,retention==RETENTION[choice]))
 
-          # Every fixed lane is immutable. Any +/- 1 drift must fail.
-          for key,value in EXPECTED_FIXED.items():
+          # Every Worldz-internal lane is immutable. Any +/- 1 drift must fail.
+          for key,value in EXPECTED_INTERNAL.items():
               for delta in [-1,1]:
                   x=clone();x['routes'][key]=value+delta
-                  # keep arithmetic total at 100 to prove exact-lane locking, not just total checking
-                  x['routes']['treasuryReserve']-=delta
-                  cases.append((f'fixed_lane_drift_{key}_{delta:+d}',x,False))
+                  other='operationsProductDevelopment' if key!='operationsProductDevelopment' else 'lpGrowth'
+                  x['routes'][other]-=delta
+                  cases.append((f'internal_lane_drift_{key}_{delta:+d}',x,False))
 
           # Key injection/removal, negative values and over-100 values must fail.
           for i in range(30):
@@ -633,7 +634,7 @@ jobs:
               got=valid(cfg)
               if got!=expected: failed.append((name,expected,got,cfg))
           assert not failed, failed[:5]
-          print(f'WORLDZLAUNCHPAD_POLICY_SCENARIOS=PASS scenarios={len(cases)} fee_flow=v2')
+          print(f'WORLDZLAUNCHPAD_POLICY_SCENARIOS=PASS scenarios={len(cases)} fee_flow=v3')
 
       - name: Enforce official WorldzLaunchPad logo
         shell: python
