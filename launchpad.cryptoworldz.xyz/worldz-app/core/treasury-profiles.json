@@ -17,7 +17,7 @@
         "xrpl": "SignerList",
         "sui": "Native weighted multisig"
       },
-      "state": "SIGNER_SET_LOCKED__PENDING_SQUADS_DEPLOYMENT_AND_LIVE_4_OF_8_PROOF",
+      "state": "PENDING_2_REPLACEMENT_SIGNERS__NOT_DEPLOYED",
       "mainnetExecution": false,
       "signerPolicy": {
         "signers": [
@@ -34,10 +34,6 @@
             "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
           },
           {
-            "label": "SolMusic",
-            "solanaPublicKey": "FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ"
-          },
-          {
             "label": "Mahammad",
             "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
           },
@@ -48,16 +44,24 @@
           {
             "label": "Troll George",
             "solanaPublicKey": "GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc"
+          }
+        ],
+        "signerCount": 6,
+        "threshold": 4,
+        "noInventedWallets": true,
+        "samePersonMultiKeyThresholdPadding": false,
+        "targetSignerCount": 8,
+        "remainingSignerSlots": 2,
+        "removed": [
+          {
+            "label": "SolMusic",
+            "reason": "OWNER_REQUESTED_REPLACEMENT"
           },
           {
             "label": "Annabel",
-            "solanaPublicKey": "2fnb5CeAtvgUxz1R46e4DQJ8q99M5bn5oEgQMTYS1fa"
+            "reason": "INVALID_SOLANA_PUBLIC_KEY"
           }
-        ],
-        "signerCount": 8,
-        "threshold": 4,
-        "noInventedWallets": true,
-        "samePersonMultiKeyThresholdPadding": false
+        ]
       },
       "revenueRouting": {
         "scope": "TREASURY_BOUND_REVENUE_ONLY",
@@ -100,5 +104,5 @@
       "note": "No separate Worldz Reserve Treasury is currently required. Reserve sweeps are disabled; funds remain in the Operations Treasury until a future explicit decision."
     }
   ],
-  "rule": "Worldz Operations uses permanent 3-of-5 governance. The separate Miracle Team Treasury uses the locked eight-wallet roster and target 4-of-8 governance. After live Squads deployment proof, 30% of treasury-bound revenue routes to Miracle Team and 70% remains Operations. Reserve remains disabled/not deployed."
+  "rule": "Worldz Operations remains permanent 3-of-5. The separate Miracle Team Treasury still targets 4-of-8, but SolMusic was removed by owner request and Annabel was removed because the supplied key is not a valid 32-byte Solana public key. Two replacement signer wallets are required before deployment."
 }
