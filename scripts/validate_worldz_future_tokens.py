@@ -66,9 +66,10 @@ assert team["monthlyReleases"] == 24
 assert team["unassignedTokensRemainVaulted"] is True
 assert team["silentAutomaticReassignmentAllowed"] is False
 assert team["proposedMultisig"]["policy"] == "4-of-8"
-assert team["proposedMultisig"]["state"] == "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_3_MORE_VERIFIED_SIGNERS"
-assert team["proposedMultisig"]["confirmedDocumentedCandidates"] == ["JayJayTeamDev", "Stepper", "Savage", "SolMusic", "Mahammad"]
-assert team["proposedMultisig"]["additionalDistinctSignerSlots"] == 3
+assert team["proposedMultisig"]["state"] == "SIGNER_SET_LOCKED__PENDING_SQUADS_DEPLOYMENT_AND_LIVE_4_OF_8_PROOF"
+assert team["proposedMultisig"]["signerCount"] == 8
+assert team["proposedMultisig"]["threshold"] == 4
+assert [x["label"] for x in team["proposedMultisig"]["signers"]] == ["JayJayTeamDev", "Stepper", "Savage", "SolMusic", "Mahammad", "Zephyr", "Troll George", "Annabel"]
 assert team["proposedMultisig"]["onePersonMultipleWalletsCountAsIndependentSigners"] is False
 assert team["accountingSeparationRequired"] is True
 
