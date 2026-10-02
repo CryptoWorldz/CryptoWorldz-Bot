@@ -239,7 +239,7 @@ function loadQuery(){
   }
   const notes=[];
   if(q.get('intent'))notes.push('Manifest: '+q.get('intent').slice(0,16)+'…');
-  if(feeFlowV3)notes.push('Fee Flow V2 snapshot: LaunchPad '+(v3Routes?.worldzLaunchPad||'?')+'% • Legacy 15% • WLDZ/RVIV/PNEX/MRCL 12% • on-chain V2 settlement remains gated');
+  if(feeFlowV3)notes.push('Fee Flow V3 snapshot: Creator keeps '+creatorRetention+'% • Worldz '+worldzContribution+'% • internal Treasury 20% → 70% Operations / 30% Miracle Team • on-chain V3 settlement remains gated');
   if(q.get('decimals')&&q.get('decimals')!=='6')notes.push('Curve Pro Devnet beta currently executes 6-decimal DBC launches.');
   if(q.get('quote')&&q.get('quote')!=='SOL')notes.push('Curve Pro Devnet beta currently executes SOL quote only.');
   if(notes.length)setStatus('#status','MANIFEST LOADED\n'+notes.join('\n'),'warn');
