@@ -130,7 +130,7 @@ async function prepare(){
   const mint=new PublicKey(manifest.token.mint),multisig=new PublicKey(manifest.authority.squadsMultisig),vault=new PublicKey(manifest.authority.squadsVault);
   const sourceAta=new PublicKey(manifest.authority.squadsVaultRvivAta),version=BigInt(manifest.distributor.versionU64);
   const mintInfo=await getMint(connection,mint,'confirmed',TOKEN_PROGRAM_ID);
-  if(mintInfo.decimals!==manifest.token.decimals||mintInfo.supply!==BigInt(manifest.token.totalSupplyRaw)||mintInfo.mintAuthority||mintInfo.freezeAuthority)stop('Canonical RVIV mint state changed.');
+  if(mintInfo.decimals!==manifest.token.decimals||mintInfo.supply!==BigInt(manifest.token.totalSupplyRaw)||mintInfo.mintAuthority||mintInfo.freezeAuthority)stop('Canonical RVIV mint state changed. decimals='+mintInfo.decimals+' expected='+manifest.token.decimals+' supplyRaw='+mintInfo.supply.toString()+' expectedSupplyRaw='+manifest.token.totalSupplyRaw+' mintAuthority='+(mintInfo.mintAuthority?.toBase58?.()||'null')+' freezeAuthority='+(mintInfo.freezeAuthority?.toBase58?.()||'null'));
 
   const ms=await squads.accounts.Multisig.fromAccountAddress(connection,multisig,'confirmed');
   if(Number(ms.threshold)!==3||ms.members.length!==5)stop('Squads governance is not the required 3-of-5; OneDrop requires a fresh review.');
