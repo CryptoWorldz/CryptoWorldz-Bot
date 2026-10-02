@@ -1,0 +1,62 @@
+{
+  "version": "WORLDZ-GLOBAL-PUBLIC-VOICE-1",
+  "brand": "Worldz Votes Centre™",
+  "scope": "worldwide",
+  "status": "non-binding-public-voice-foundation",
+  "countryTerritoryAllowlist": null,
+  "nonBindingPublicVoiceOpenWorldwide": true,
+  "bindingVotingEnabled": false,
+  "officialElectionImpersonationAllowed": false,
+  "examplesOfWorldwideReach": [
+    "Uganda",
+    "Africa",
+    "Indonesia",
+    "Philippines",
+    "Greenland",
+    "Iceland",
+    "Mexico",
+    "Austria",
+    "Belgium",
+    "France",
+    "Hong Kong",
+    "China",
+    "India"
+  ],
+  "participation": {
+    "geographicExclusionAllowed": false,
+    "raceOrEthnicityWeightingAllowed": false,
+    "nationalityWeightingAllowed": false,
+    "wealthWeightingAllowed": false,
+    "tokenWeightingAllowed": false,
+    "socialStatusWeightingAllowed": false,
+    "generalPublicVoiceAgeInclusive": true,
+    "bindingEligibility": "jurisdiction-specific-law-and-authority",
+    "childAndYoungPersonSafeguardsRequired": true,
+    "exactHomeAddressRequired": false,
+    "raceOrEthnicityCollectionRequired": false
+  },
+  "publicMoneyVoice": {
+    "enabled": true,
+    "purpose": "Let people document priorities and concerns about how public or community resources should be used.",
+    "officialBudgetAuthority": false,
+    "treasuryExecution": false
+  },
+  "humanNeedsMission": {
+    "statement": "Worldz works toward a world where no child or adult dies from hunger or is denied available preventable care because money stood in the way.",
+    "priorityTopics": [
+      "food-and-hunger",
+      "preventable-disease",
+      "essential-healthcare-and-medicines",
+      "clean-water-and-sanitation",
+      "safe-shelter-and-housing",
+      "education-and-opportunity",
+      "public-money-and-resource-priorities"
+    ]
+  },
+  "jurisdictionRule": "Worldwide non-binding public voice does not require a Worldz country allowlist. Regulated, official or binding voting requires a current jurisdiction-specific compliance profile and lawful authority.",
+  "referencePrinciples": [
+    "https://www.ohchr.org/en/UDHR/Documents/60UDHR/DECLARATION.pdf",
+    "https://www.unicef.org/child-rights-convention/convention-text",
+    "https://www.un.org/sustainabledevelopment/sustainable-development-goals/"
+  ]
+}

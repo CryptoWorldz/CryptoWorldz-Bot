@@ -4,9 +4,13 @@
 
 Build a civic participation platform that is **Fair • Calm • Organised • Transparent • Safe**, while remaining politically neutral and complying with the law of each jurisdiction in which it operates.
 
-## Phase 0 — Foundation (this PR)
+## Phase 0 — Foundation
 
 - preserve existing hourly token-popularity voting;
+- establish a worldwide non-binding Public Voice contract with no country/territory allowlist;
+- keep Australia as one jurisdiction adapter rather than the geographic scope of Worldz;
+- make general Public Voice age-inclusive with age-appropriate privacy/safety safeguards;
+- prohibit civic weighting by race/ethnicity, nationality, wealth, token holdings, social status or location;
 - add a separate civic/public-consultation namespace;
 - hard-code equal option weight and prohibit paid ballot placement;
 - provide single-choice, approval and ranked-choice IRV counting;
@@ -78,15 +82,28 @@ A jurisdiction adapter contains:
 
 **Fail closed:** an expired compliance profile blocks regulated publication until reviewed.
 
-Initial target:
-1. Australia — Federal
-2. Australia — NSW
-3. other Australian states/territories
-4. additional countries only after jurisdiction-specific legal review
+Global rollout:
+1. Worldwide non-binding Public Voice — no country/territory allowlist.
+2. Australia — Federal remains the first worked compliance adapter.
+3. Add jurisdiction adapters as regulated or official use requires them, without blocking general Public Voice elsewhere.
+4. Prioritise adapters where communities actively request them, including Africa, Asia, Europe, the Americas and island/territory communities.
 
-There is no single “world election law”; adapters must not assume Australian rules apply elsewhere.
+There is no single “world election law”; jurisdiction adapters must not assume Australian rules apply elsewhere.
 
-## Phase 4 — Public money + funding transparency
+## Phase 4 — Human needs + public money priorities
+
+Worldz Public Voice should support transparent concern/priorities categories for:
+- food and hunger;
+- preventable disease;
+- essential healthcare and medicines;
+- clean water and sanitation;
+- shelter and housing;
+- education and opportunity;
+- public/community resource priorities.
+
+Worldz can show aggregated priorities and evidence without claiming authority over a government budget or allowing civic votes to execute treasury actions.
+
+## Phase 5 — Public money + funding transparency
 
 Build a neutral transparency register that can show, where legally available:
 - declared donations;
@@ -98,7 +115,7 @@ Build a neutral transparency register that can show, where legally available:
 
 Worldz must present these records descriptively and never convert financial data into a political recommendation or ranking.
 
-## Phase 5 — Official-authority integration
+## Phase 6 — Official-authority integration
 
 Binding election mode remains impossible until:
 - an official authority is integrated;

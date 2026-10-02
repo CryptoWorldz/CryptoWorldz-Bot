@@ -53,6 +53,38 @@ create table if not exists public.worldz_civic_votes (
   unique (ballot_id, eligibility_receipt_hash)
 );
 
+create table if not exists public.worldz_civic_concerns (
+  id uuid primary key default gen_random_uuid(),
+  public_id text not null unique,
+  place_label text not null,
+  location_scope text not null default 'global'
+    check (location_scope in ('global','country','territory','region','local')),
+  country_or_territory_code text,
+  topic text not null
+    check (topic in (
+      'food-and-hunger',
+      'preventable-disease',
+      'essential-healthcare-and-medicines',
+      'clean-water-and-sanitation',
+      'safe-shelter-and-housing',
+      'education-and-opportunity',
+      'public-money-and-resource-priorities',
+      'other-public-concern'
+    )),
+  title text not null,
+  summary text not null,
+  language_code text,
+  source_bundle jsonb not null default '[]'::jsonb,
+  status text not null default 'review'
+    check (status in ('review','published','rejected','archived')),
+  moderation_note text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- Do not add race/ethnicity fields or exact home-address requirements to this
+-- registry. Worldz Public Voice is about the concern, not demographic weighting.
+
 create table if not exists public.worldz_civic_audit_events (
   id bigserial primary key,
   ballot_id uuid not null references public.worldz_civic_ballots(id) on delete cascade,
@@ -72,6 +104,7 @@ alter table public.worldz_civic_ballots enable row level security;
 alter table public.worldz_civic_options enable row level security;
 alter table public.worldz_civic_votes enable row level security;
 alter table public.worldz_civic_audit_events enable row level security;
+alter table public.worldz_civic_concerns enable row level security;
 
 -- Server-only by default. Public reads should go through a reviewed API that
 -- exposes only approved ballot metadata/results and never eligibility hashes.
@@ -89,6 +122,10 @@ using (false) with check (false);
 
 create policy "worldz_civic_audit_server_only"
 on public.worldz_civic_audit_events for all to anon, authenticated
+using (false) with check (false);
+
+create policy "worldz_civic_concerns_server_only"
+on public.worldz_civic_concerns for all to anon, authenticated
 using (false) with check (false);
 
 
@@ -115,14 +152,23 @@ for all to anon
 using (public.zed_runtime_authorized())
 with check (public.zed_runtime_authorized());
 
+create policy "zed_runtime_bridge" on public.worldz_civic_concerns
+for all to anon
+using (public.zed_runtime_authorized())
+with check (public.zed_runtime_authorized());
+
 grant select, insert, update, delete on
   public.worldz_civic_ballots,
   public.worldz_civic_options,
   public.worldz_civic_votes,
-  public.worldz_civic_audit_events
+  public.worldz_civic_audit_events,
+  public.worldz_civic_concerns
 to anon;
 
 grant usage, select on sequence public.worldz_civic_audit_events_id_seq to anon;
 
 comment on table public.worldz_civic_votes is
 'Non-binding civic consultation votes only until independent identity/privacy/security/legal gates are complete. Never authorizes treasury or WorldzGovern actions.';
+
+comment on table public.worldz_civic_concerns is
+'Worldwide non-binding public concern registry. No race/ethnicity weighting, no exact home address requirement, no treasury execution, and public write access remains gated pending moderation/privacy/safety review.';

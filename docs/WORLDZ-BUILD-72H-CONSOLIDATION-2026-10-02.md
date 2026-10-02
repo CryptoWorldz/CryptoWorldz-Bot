@@ -103,11 +103,18 @@ WorldzPay Build #2 is merged as provider-ready infrastructure:
 - any treasury policy in the side rail must match current 3-of-5 Operations + Reserve disabled
 - eligible Legacy Core routing must match 12-token / 15% / 1.25%-each policy
 
-### Civic Worldz Votes foundation
-The merged civic/public-voice foundation remains:
-- neutral
-- nonbinding by default
+### Worldz Global Public Voice foundation
+The merged civic/public-voice foundation is worldwide:
+- no country/territory allowlist for general non-binding Public Voice
+- Australia remains one jurisdiction compliance profile, not the geographic boundary
+- examples of worldwide reach include Uganda/Africa, Indonesia, Philippines, Greenland, Iceland, Mexico, Austria, Belgium, France, Hong Kong, China and India
+- general Public Voice is age-inclusive with age-appropriate privacy/safety safeguards
+- no weighting by race/ethnicity, nationality, geography, wealth, token holdings or social status
+- neutral and nonbinding by default
 - separate from DEX token popularity voting
+- structured public-concern registry designed; public submissions remain OFF pending moderation/privacy/abuse-prevention/age-safety gates
+- human-needs priorities include hunger, preventable disease, essential healthcare/medicines, clean water/sanitation, shelter/housing, education/opportunity and public/community resource priorities
+- Worldz can document public-money priorities but does not claim government budget authority and civic results never execute Worldz treasury actions
 - ballot casting remains OFF pending eligibility/privacy/legal/audit gates
 - binding cast/execution OFF unless a lawful, explicit future authority and jurisdiction-specific compliance layer exists
 - no candidate/party endorsement, ranking, steering or election prediction
