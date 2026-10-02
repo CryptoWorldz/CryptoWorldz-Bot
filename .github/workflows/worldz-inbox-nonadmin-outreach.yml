@@ -1,0 +1,221 @@
+name: Worldz Inbox Non-Admin Outreach
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/worldz-inbox-nonadmin-outreach.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    name: Send non-admin Worldz outreach
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - name: Send next non-admin batch
+        shell: python
+        run: |
+          import io, json, os, re, time, hashlib, urllib.parse, urllib.request, urllib.error
+          from datetime import datetime, timezone
+          from ftplib import FTP_TLS
+
+          SUPABASE_URL="https://hknymhhyqldtzmplzuzh.supabase.co"
+          ANON_KEY="sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+          OWNER_ID=8029135300
+          CAMPAIGN_TITLE="WORLDZ NON-ADMIN OUTREACH V1"
+          LIMIT=8
+
+          # Explicitly exclude the documented owner/admin/core-team Telegram IDs.
+          EXCLUDED_IDS={
+              8029135300,  # JayJayTeamDev
+              7615025841,  # Stepper
+              5978625584,  # Savage
+              5457233387,  # SolMusic
+              8604306923,  # Remedy historical/admin record
+          }
+
+          host=str(os.environ.get("FTP_HOST","")).replace("ftps://","").replace("ftp://","").split("/")[0]
+          if host.count(":")==1: host=host.split(":",1)[0]
+          user=str(os.environ.get("FTP_USERNAME","")).strip()
+          password=str(os.environ.get("FTP_PASSWORD","")).strip()
+          if not host or not user or not password:
+              raise SystemExit("Protected Hostinger transport missing")
+
+          ftp=FTP_TLS()
+          ftp.connect(host,int(os.environ.get("FTP_PORT","21")),timeout=45)
+          ftp.login(user,password)
+          ftp.prot_p()
+          buf=io.BytesIO()
+          ftp.retrbinary("RETR /domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",buf.write)
+          ftp.quit()
+
+          env={}
+          for raw in buf.getvalue().decode("utf-8").splitlines():
+              line=raw.strip()
+              if not line or line.startswith("#") or "=" not in line: continue
+              k,v=line.split("=",1)
+              k=re.sub(r"^export\s+","",k).strip()
+              v=v.strip().strip('"').strip("'")
+              if v: env[k]=v
+
+          token=str(env.get("BOT_TOKEN") or env.get("TELEGRAM_BOT_TOKEN") or env.get("TELEGRAM_TOKEN") or env.get("ZED_BOT_TOKEN") or env.get("CRYPTOWORLDZ_BOT_TOKEN") or "").strip()
+          if not token:
+              raise SystemExit("Live Hostinger Telegram token missing")
+          print("::add-mask::"+token)
+
+          runtime_key=hashlib.sha256(("zed-runtime-v1:"+token).encode()).hexdigest()
+          print("::add-mask::"+runtime_key)
+
+          base=SUPABASE_URL.rstrip("/")+"/rest/v1"
+          sb_headers={
+              "apikey":ANON_KEY,
+              "authorization":"Bearer "+ANON_KEY,
+              "x-zed-runtime-key":runtime_key,
+              "accept":"application/json",
+              "content-type":"application/json",
+              "user-agent":"Worldz-NonAdmin-Outreach/1.0"
+          }
+
+          def sb(method,route,payload=None,prefer=None):
+              headers=dict(sb_headers)
+              if prefer: headers["Prefer"]=prefer
+              data=None if payload is None else json.dumps(payload,ensure_ascii=False).encode("utf-8")
+              req=urllib.request.Request(base+route,data=data,headers=headers,method=method)
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  raw=r.read().decode("utf-8")
+                  return json.loads(raw) if raw else None
+
+          def tg_send(chat_id,text):
+              data=json.dumps({
+                  "chat_id":chat_id,
+                  "text":text,
+                  "disable_web_page_preview":True
+              },ensure_ascii=False).encode("utf-8")
+              req=urllib.request.Request(
+                  "https://api.telegram.org/bot"+token+"/sendMessage",
+                  data=data,
+                  headers={"content-type":"application/json"},
+                  method="POST"
+              )
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as r:
+                      out=json.loads(r.read().decode("utf-8"))
+                  if out.get("ok") is True:
+                      return True,out.get("result") or {},""
+                  return False,{},str(out.get("description") or "telegram_rejected")
+              except urllib.error.HTTPError as e:
+                  body=e.read().decode("utf-8","replace")
+                  try: reason=json.loads(body).get("description",body[:180])
+                  except: reason=body[:180]
+                  return False,{},reason
+
+          prefs=sb(
+              "GET",
+              "/worldz_dm_preferences?select=telegram_id,username,first_name,enabled,telegram_dm_reachable,last_private_seen_at"
+              "&enabled=eq.true&telegram_dm_reachable=eq.true"
+              "&order=last_private_seen_at.desc.nullslast&limit=250"
+          ) or []
+
+          blocks=sb(
+              "GET",
+              f"/worldz_dm_blocks?select=blocker_telegram_id&blocked_telegram_id=eq.{OWNER_ID}&limit=1000"
+          ) or []
+          blocked={int(x["blocker_telegram_id"]) for x in blocks if x.get("blocker_telegram_id")}
+
+          qtitle=urllib.parse.quote(CAMPAIGN_TITLE,safe="")
+          prior=sb(
+              "GET",
+              f"/worldz_dm_messages?select=recipient_telegram_id&sender_telegram_id=eq.{OWNER_ID}"
+              f"&style_title=eq.{qtitle}&limit=2000"
+          ) or []
+          already={int(x["recipient_telegram_id"]) for x in prior if x.get("recipient_telegram_id")}
+
+          candidates=[]
+          for p in prefs:
+              rid=int(p.get("telegram_id") or 0)
+              if not rid or rid in EXCLUDED_IDS or rid in blocked or rid in already:
+                  continue
+              candidates.append(p)
+
+          print(f"NONADMIN_REACHABLE_UNSENT={len(candidates)}")
+
+          message_template=(
+              "🌐 WORLDZ — A BETTER WORLD 🌏\n\n"
+              "Hi {name} 👋\n\n"
+              "JayJayTeamDev is building Worldz around a mission to help people create, support and document practical ideas aimed at reducing world hunger and preventable disease.\n\n"
+              "💜 SUPPORT THE BUILD\n"
+              "https://donateworldz.com/jayjay-support/\n\n"
+              "🚀 CREATE YOUR OWN CRYPTO TOKEN\n"
+              "https://launchpad.cryptoworldz.xyz/create-your-own-money/\n"
+              "Creating a token does not automatically make it legal tender, valuable or liquid.\n\n"
+              "🌍 WORLDZLAUNCHPAD\n"
+              "https://launchpad.cryptoworldz.xyz/worldz-launch/\n\n"
+              "🗳 HAVE YOUR SAY\n"
+              "Worldz Public Voice is a worldwide, non-binding space where people can document concerns, ideas and experiences involving communities, councils, government services or other public issues.\n"
+              "https://cryptobotz.cryptoworldz.xyz/miniapp/#worldz-civic-votes\n\n"
+              "📥 WORLDZ INBOX\n"
+              "You can reply through ZED and use /inbox to see Worldz messages.\n\n"
+              "Worldz also includes REXSECURE, ZED, AUTO, G.R.A.C.E., DipShit, raids, ShillPoints, referral pathways and community tools for projects that build through the ecosystem.\n\n"
+              "If you want to join in, support something, create something, document something, suggest something or help build something. 🌐💜\n\n"
+              "To stop Worldz Inbox messages, send /dmsettings off."
+          )
+
+          sent=failed=0
+          for p in candidates[:LIMIT]:
+              rid=int(p["telegram_id"])
+              name=(p.get("first_name") or "").strip() or ("@"+p["username"] if p.get("username") else "there")
+              body=message_template.format(name=name)
+
+              row={
+                  "sender_telegram_id":OWNER_ID,
+                  "recipient_telegram_id":rid,
+                  "body":body[:2800],
+                  "style_preset":"impact",
+                  "style_title":CAMPAIGN_TITLE,
+                  "status":"queued"
+              }
+
+              message_id=None
+              try:
+                  inserted=sb("POST","/worldz_dm_messages?select=*",row,"return=representation")
+                  message_id=int(inserted[0]["id"])
+                  ok,result,reason=tg_send(rid,body+f"\n\n📥 Worldz Inbox #{message_id}")
+                  if ok:
+                      sb("PATCH",f"/worldz_dm_messages?id=eq.{message_id}",{
+                          "status":"telegram_sent",
+                          "telegram_message_id":result.get("message_id"),
+                          "sent_at":datetime.now(timezone.utc).isoformat(),
+                          "error_code":None
+                      },"return=minimal")
+                      sent+=1
+                      print(f"NONADMIN_DM_ACCEPTED recipient={rid} inbox_id={message_id} telegram_message_id={result.get('message_id')}")
+                  else:
+                      sb("PATCH",f"/worldz_dm_messages?id=eq.{message_id}",{
+                          "status":"failed",
+                          "failed_at":datetime.now(timezone.utc).isoformat(),
+                          "error_code":str(reason)[:180]
+                      },"return=minimal")
+                      failed+=1
+                      print(f"NONADMIN_DM_REJECTED recipient={rid} reason={reason}")
+              except Exception as exc:
+                  failed+=1
+                  print(f"NONADMIN_DM_ERROR recipient={rid} error={str(exc)[:180]}")
+              time.sleep(4)
+
+          print(f"NONADMIN_DM_ACCEPTED_TOTAL={sent}")
+          print(f"NONADMIN_DM_FAILED_TOTAL={failed}")
+          if not candidates:
+              print("NONADMIN_DM_NO_ELIGIBLE_RECIPIENTS=1")
+          elif sent==0:
+              raise SystemExit("No non-admin outreach DMs were accepted by Telegram")
