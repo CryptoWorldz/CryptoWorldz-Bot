@@ -138,3 +138,20 @@ test('public surfaces keep liquidity and confirmation truth separate',()=>{
   assert.match(intelPhp,/No provider result alone creates a SAFE label/);
   assert.match(txPhp,/CONFIRMED is reported only from Solana RPC confirmation state/);
 });
+
+test('creator-history registry lookup is exact-wallet and public-record only',()=>{
+  const src=read('supabase/functions/worldz-launch-register/index.ts');
+  assert.match(src,/creatorHistoryQuery/);
+  assert.match(src,/\.eq\("wallet_address", creatorHistoryQuery\)/);
+  assert.match(src,/\.eq\("is_public", true\)/);
+  assert.match(src,/does not claim control of other wallets/);
+});
+
+test('provider availability is not mislabeled as confirmed truth',()=>{
+  const schema=json('worldzpad-omnichain/schemas/worldz-proof-intelligence.v1.json');
+  const statuses=schema.properties.dataSources.items.properties.status.enum;
+  assert.ok(statuses.includes('AVAILABLE'));
+  const moduleSrc=read('src/worldz-intelligence.js');
+  assert.match(moduleSrc,/status:'AVAILABLE'/);
+  assert.doesNotMatch(moduleSrc,/provider,status:'CONFIRMED'/);
+});
