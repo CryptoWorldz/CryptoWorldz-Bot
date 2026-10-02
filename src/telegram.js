@@ -593,10 +593,27 @@ Use /help to open the Command Menu.
         return send(msg.chat.id, "⚠️ You have already claimed this mission reward.");
       }
 
+      if (typeof repository.autoAwardRaidSubmission === "function") {
+        const auto = await repository.autoAwardRaidSubmission(claim.submission.id);
+        if (auto?.outcome === "awarded") {
+          return send(
+            msg.chat.id,
+            `⚡ Raaiiidd Complete — RaidPoints Auto-Awarded!\n\n⭐ +${auto.points_awarded} Legend Points\n🏆 New total: ${auto.total_points} LP\n\nNo Admin approval needed.`
+          );
+        }
+        if (auto?.outcome === "budget_deferred") {
+          return send(msg.chat.id, "⏳ Raid completion recorded. The protected weekly reward pool is full, so no extra points were issued.");
+        }
+        return send(
+          msg.chat.id,
+          `🛡 Raaiiidd recorded — exception review only.\n\nSubmission #${claim.submission.id}\nReason: ${auto?.review_reason || "automatic safety check"}\n\nNormal RaidPoints are automatic.`
+        );
+      }
+
       if (!config.autoApproveMissionClaims) {
         return send(
           msg.chat.id,
-          `✅ Raaiiidd Submission Received!\n\n🎯 ${mission.title}\n📥 Submission #${claim.submission.id}\n⏳ Status: Pending Review\n⭐ Potential Reward: ${mission.reward_points} Legend Points\n\nAn Admin Team member will review it.`
+          `✅ Raaiiidd Submission Received!\n\n🎯 ${mission.title}\n📥 Submission #${claim.submission.id}\n⏳ Status: Pending Review\n⭐ Potential Reward: ${mission.reward_points} Legend Points\n\nAutomatic RaidPoints are not available on this runtime yet.`
         );
       }
 
