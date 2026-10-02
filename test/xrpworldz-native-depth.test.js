@@ -38,7 +38,7 @@ test('XRPWorldz uses native OfferCreate and AMMCreate instead of flattening XRPL
   assert.match(app,/TransactionType:'OfferCreate'/);
   assert.match(app,/TakerGets:\{currency:v\.currency,issuer:v\.issuer,value:v\.clobToken\}/);
   assert.match(app,/TakerPays:drops\(total\)/);
-  assert.match(html,/AMM \+ order book are both first-class/);
+  assert.match(html,/AMM \+ CLOB, with launch prices aligned/);
 });
 
 test('hybrid launch preflight rejects grossly misaligned AMM and CLOB prices',()=>{
