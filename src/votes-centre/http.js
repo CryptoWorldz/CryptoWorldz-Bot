@@ -6,6 +6,7 @@ const {
   countSingleChoice,
   countRankedChoiceIRV
 } = require("./civic");
+const { getGlobalPublicVoiceStatus } = require("./global");
 
 function registerCivicVotesRoutes({ app, supabase }) {
   app.get("/api/worldz-votes/civic/status", (_req, res) => {
@@ -15,8 +16,34 @@ function registerCivicVotesRoutes({ app, supabase }) {
       layer: "civic-public-voice",
       bindingVotingEnabled: false,
       voteCastingEnabled: false,
+      concernSubmissionEnabled: false,
+      globalPublicVoice: getGlobalPublicVoiceStatus(),
       principles: CIVIC_PRINCIPLES
     });
+  });
+
+  app.get("/api/worldz-votes/civic/worldwide", (_req, res) => {
+    res.json({
+      ok: true,
+      ...getGlobalPublicVoiceStatus(),
+      concernRegistry: {
+        designed: true,
+        publicReadEnabled: true,
+        publicSubmissionEnabled: false,
+        reason: "Moderation, privacy, abuse-prevention and age-appropriate safety gates are required before public writes."
+      }
+    });
+  });
+
+  app.get("/api/worldz-votes/civic/concerns", async (_req, res) => {
+    const { data, error } = await supabase
+      .from("worldz_civic_concerns")
+      .select("public_id,place_label,location_scope,topic,title,summary,language_code,status,source_bundle,created_at")
+      .eq("status", "published")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) return res.status(503).json({ ok: false, error: "civic_concern_registry_not_active" });
+    return res.json({ ok: true, concerns: data || [] });
   });
 
   app.get("/api/worldz-votes/civic/ballots", async (_req, res) => {
