@@ -38,6 +38,7 @@ Confirmed mainnet outflows from the Squads source:
 
 Therefore:
 - OneDrop funding is already executed and reissue is disabled.
+- Claim vault audit: 45,714,285.714234 RVIV remains from the original 49,999,999.999948 RVIV funding; 4,285,714.285714 RVIV has left the claim vault.
 - Eligible Dev/Legacy wallets use the existing claim route.
 - 20M Impact must not be sent a second time.
 - The remaining ~100M model is reserved for DevCity 100 (20M), Team Vesting (30M), staged liquidity (40M), Treasury/Operations (10M), plus recorded raw-unit dust.
