@@ -28,7 +28,7 @@
     <a href="/bitworldz/">BitWorldz</a>
     <a href="/worlddexpush/">WorldDexPush</a>
     <a href="/inheritance/">Inheritance</a>
-    <a href="/capabilities/">Capabilities</a>
+    <a href="/capabilities/">Capabilities</a><a href="/transaction-help/">Transaction Help</a>
     <a href="/technology.html">Technology</a>
   </nav>
   <button class="wallet-mini" id="wallet-mini" type="button">Connect Wallet</button>
@@ -269,6 +269,20 @@
 
         <section class="wizard-step" data-panel="5">
           <div class="step-head"><span>05 / SAFE TOKENOMICS</span><h3>Choose inside the limits. The limits cannot be switched off.</h3></div>
+          <div class="route-builder">
+            <div class="route-head"><h4>Launch Recipe™ — start simple, then customise</h4><span id="recipe-state" class="pill safe">CUSTOM</span></div>
+            <div class="choice-grid" id="launch-recipes">
+              <button class="choice" type="button" data-recipe="CREATOR"><strong>Creator</strong><small>Balanced creator + public launch</small></button>
+              <button class="choice" type="button" data-recipe="COMMUNITY"><strong>Community</strong><small>More supply for public/community</small></button>
+              <button class="choice" type="button" data-recipe="HOLDER_REWARDS"><strong>Holder Rewards</strong><small>Community-heavy starting allocation</small></button>
+              <button class="choice" type="button" data-recipe="LIQUIDITY_GROWTH"><strong>Liquidity Growth</strong><small>Higher genesis liquidity</small></button>
+              <button class="choice" type="button" data-recipe="BUYBACK"><strong>Buyback Focus</strong><small>Uses the fixed disclosed 8% buyback lane</small></button>
+              <button class="choice" type="button" data-recipe="IMPACT"><strong>Impact</strong><small>Growth capacity for disclosed impact work</small></button>
+              <button class="choice" type="button" data-recipe="FAIR_LAUNCH"><strong>Fair Launch</strong><small>Low creator • stronger public + liquidity</small></button>
+              <button class="choice selected" type="button" data-recipe="CUSTOM"><strong>Custom</strong><small>Edit everything inside Worldz limits</small></button>
+            </div>
+            <p class="micro">Recipes are starting presets only. They never change the fixed Worldz Fee Flow V2 lanes, bypass Safe Launch limits, or imply a guaranteed market outcome.</p>
+          </div>
           <div class="route-builder">
             <div class="route-head"><h4>Genesis supply allocation</h4><span id="allocation-total" class="pill safe">100%</span></div>
             <div class="route-inputs">

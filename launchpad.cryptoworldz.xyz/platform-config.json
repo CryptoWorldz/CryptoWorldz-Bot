@@ -1101,5 +1101,115 @@
     "relativeInternalLinksRequired": true,
     "migrationReady": true,
     "rule": "Do not publish WorldzLaunch.com as live until DNS, TLS, canonical URLs, redirects and deployment are verified."
+  },
+  "launchRecipes": {
+    "version": "WORLDZ-LAUNCH-RECIPES-V1",
+    "source": "worldzpad-omnichain/launch-recipes.v1.json",
+    "rule": "Presets never bypass Safe Launch limits or change fixed Fee Flow V2 lanes.",
+    "recipes": [
+      {
+        "id": "CREATOR",
+        "label": "Creator Launch",
+        "allocations": {
+          "creatorTeam": 15,
+          "liquidity": 30,
+          "communityPublic": 30,
+          "treasuryReserve": 10,
+          "growthEcosystem": 15
+        }
+      },
+      {
+        "id": "COMMUNITY",
+        "label": "Community Launch",
+        "allocations": {
+          "creatorTeam": 10,
+          "liquidity": 30,
+          "communityPublic": 40,
+          "treasuryReserve": 10,
+          "growthEcosystem": 10
+        }
+      },
+      {
+        "id": "HOLDER_REWARDS",
+        "label": "Holder Rewards",
+        "allocations": {
+          "creatorTeam": 10,
+          "liquidity": 30,
+          "communityPublic": 35,
+          "treasuryReserve": 10,
+          "growthEcosystem": 15
+        }
+      },
+      {
+        "id": "LIQUIDITY_GROWTH",
+        "label": "Liquidity Growth",
+        "allocations": {
+          "creatorTeam": 10,
+          "liquidity": 45,
+          "communityPublic": 25,
+          "treasuryReserve": 10,
+          "growthEcosystem": 10
+        }
+      },
+      {
+        "id": "BUYBACK",
+        "label": "Buyback Focus",
+        "allocations": {
+          "creatorTeam": 10,
+          "liquidity": 35,
+          "communityPublic": 30,
+          "treasuryReserve": 10,
+          "growthEcosystem": 15
+        }
+      },
+      {
+        "id": "IMPACT",
+        "label": "Impact Launch",
+        "allocations": {
+          "creatorTeam": 10,
+          "liquidity": 30,
+          "communityPublic": 30,
+          "treasuryReserve": 10,
+          "growthEcosystem": 20
+        }
+      },
+      {
+        "id": "FAIR_LAUNCH",
+        "label": "Fair Launch",
+        "allocations": {
+          "creatorTeam": 5,
+          "liquidity": 40,
+          "communityPublic": 40,
+          "treasuryReserve": 5,
+          "growthEcosystem": 10
+        }
+      },
+      {
+        "id": "CUSTOM",
+        "label": "Custom",
+        "allocations": null
+      }
+    ]
+  },
+  "intelligenceStack": {
+    "worldzProofIntelligence": {
+      "status": "SCHEMA_BUILT__RUNTIME_INTEGRATION_NEXT",
+      "schema": "worldzpad-omnichain/schemas/worldz-proof-intelligence.v1.json"
+    },
+    "creatorHistory": {
+      "status": "SCHEMA_BUILT__EVIDENCE_ONLY",
+      "schema": "worldzpad-omnichain/schemas/worldz-creator-history.v1.json"
+    },
+    "rexTokenIntelligence": {
+      "status": "ENGINE_BUILT__PROVIDER_FEEDS_PENDING",
+      "schema": "worldzpad-omnichain/schemas/rex-token-intelligence.v1.json",
+      "engine": "worldzpad-omnichain/sdk/rex-token-intelligence.mjs",
+      "overallSafetyScore": false
+    },
+    "transactionSupport": {
+      "status": "CONTEXT_MODEL_BUILT__READ_ONLY",
+      "schema": "worldzpad-omnichain/schemas/worldz-transaction-support.v1.json",
+      "publicPath": "/transaction-help/"
+    }
   }
 }

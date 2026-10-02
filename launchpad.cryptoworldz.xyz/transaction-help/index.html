@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05020b">
+<title>Help With This Transaction | WorldzLaunchPad™</title>
+<meta name="description" content="Worldz transaction support context — chain, transaction state, funds movement, network fee and safe retry path without requesting private keys.">
+<link rel="stylesheet" href="/style.css?v=20261002-txhelp-v1">
+<style>
+.wrap{max-width:960px;margin:auto;padding:48px 18px 100px}.hero,.card{border:1px solid #ffffff10;border-radius:22px;background:#ffffff03;padding:22px;margin:12px 0}.hero{background:radial-gradient(circle at 50% 0,#8f54ff22,transparent 55%),#07030d}.hero h1{font-size:clamp(2rem,7vw,4.8rem);letter-spacing:-.05em;margin:.2em 0}.k{color:#ba82ff;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid label{display:grid;gap:6px;color:#9d8aa9;font-size:.72rem}.grid input,.grid select{padding:13px;border-radius:12px;border:1px solid #ffffff14;background:#05020a;color:#fff}.wide{grid-column:1/-1}.context{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.context div{padding:12px;border:1px solid #ffffff0d;border-radius:12px;background:#0002}.context small{display:block;color:#796a82;text-transform:uppercase;font-size:.55rem}.context b{word-break:break-word}.notice{border-left:3px solid #a76dff;padding:12px;background:#a76dff08;color:#a995b2;margin-top:12px}.state{white-space:pre-wrap;border:1px solid #ffffff10;border-radius:14px;padding:14px;margin-top:12px}.good{border-color:#55e6a544;color:#7ce9ba}.bad{border-color:#ff668844;color:#ffa0b2}.warn{border-color:#ffd16644;color:#dbc080}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}@media(max-width:720px){.grid,.context{grid-template-columns:1fr}.wide{grid-column:auto}}
+</style>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="/"><span class="brand-logo-official" aria-hidden="true"></span><span>WorldzLaunchPad™</span></a><nav><a href="/">LaunchPad</a><a href="/trust/">Trust Orbit</a><a href="/proof-receipt/">Proof Receipt</a></nav></header>
+<main class="wrap">
+<section class="hero"><div class="k">WORLDZ TRANSACTION SUPPORT™</div><h1>HELP WITH THIS<br>TRANSACTION.</h1><p>Start from what Worldz already knows. Never send a seed phrase, private key, recovery phrase or wallet password.</p></section>
+<section class="card">
+<h2>Transaction context</h2>
+<div class="grid">
+<label>Chain<select id="chain"><option value="solana">Solana</option><option value="xrpl">XRP Ledger</option><option value="ethereum">Ethereum</option><option value="base">Base</option><option value="bnb">BNB Chain</option><option value="sui">Sui</option><option value="hyperevm">HyperEVM</option><option value="robinhood">Robinhood Chain</option><option value="bitcoin">Bitcoin / BitWorldz</option></select></label>
+<label>Current state<select id="state"><option>UNKNOWN</option><option>PREPARING</option><option>AWAITING_SIGNATURE</option><option>SUBMITTED</option><option>CONFIRMING</option><option>CONFIRMED</option><option>FAILED</option></select></label>
+<label class="wide">Public transaction ID / signature<input id="tx" autocomplete="off" spellcheck="false" placeholder="Optional public transaction reference"></label>
+<label>Token / mint / asset ID<input id="token" autocomplete="off" spellcheck="false" placeholder="Optional"></label>
+<label>Route<input id="route" autocomplete="off" spellcheck="false" placeholder="e.g. Meteora DBC, XRPL AMM"></label>
+<label class="wide">Known error<input id="error" autocomplete="off" spellcheck="false" placeholder="Optional error message — never paste secrets"></label>
+</div>
+<div class="actions"><button class="btn primary" id="review" type="button">Review Context →</button><button class="btn secondary" id="clear" type="button">Clear</button></div>
+</section>
+<section class="card">
+<h2>What Worldz can say from this context</h2>
+<div class="context" id="context"></div>
+<div class="state warn" id="result">No transaction has been independently verified on this page yet.</div>
+<div class="notice"><b>Truth rule:</b> manually supplied context never upgrades a transaction to WorldzProof CONFIRMED. Final success requires chain confirmation from a verified adapter/provider.</div>
+</section>
+</main>
+<footer><div><b>Worldz Transaction Support™</b> • Proof before claims.</div></footer>
+<script>
+const $=s=>document.querySelector(s);
+const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function params(){const p=new URLSearchParams(location.search);return {chain:p.get('chain'),state:p.get('state'),tx:p.get('tx'),token:p.get('token'),route:p.get('route'),error:p.get('error')};}
+function load(){const p=params();for(const k of ['chain','state','tx','token','route','error'])if(p[k]&&$('#'+k))$('#'+k).value=p[k];review();}
+function review(){
+ const chain=$('#chain').value,state=$('#state').value,tx=$('#tx').value.trim(),token=$('#token').value.trim(),route=$('#route').value.trim(),error=$('#error').value.trim();
+ $('#context').innerHTML=[
+  ['Chain',chain],['State supplied',state],['Transaction',tx||'NOT PROVIDED'],['Token / asset',token||'NOT PROVIDED'],['Route',route||'NOT PROVIDED'],['Error',error||'NONE PROVIDED']
+ ].map(x=>'<div><small>'+esc(x[0])+'</small><b>'+esc(x[1])+'</b></div>').join('');
+ const box=$('#result');
+ if(state==='CONFIRMED'){box.className='state warn';box.textContent='CONFIRMED was supplied as context, but this page has not independently checked the chain. WorldzProof must verify it before presenting final success.';}
+ else if(state==='FAILED'){box.className='state bad';box.textContent='FAILED context recorded. Next support step: identify the failure point, confirm whether funds moved, identify any network fee paid, then build a safe retry only if the original transaction cannot still execute.';}
+ else if(state==='SUBMITTED'||state==='CONFIRMING'){box.className='state warn';box.textContent='Transaction is not final. Do not label it successful yet. Check the chain/provider before retrying so the same action is not accidentally duplicated.';}
+ else if(state==='AWAITING_SIGNATURE'){box.className='state warn';box.textContent='No broadcast should be assumed. Review the readable transaction summary and wallet prompt before signing.';}
+ else {box.className='state warn';box.textContent='State is not independently established. Worldz treats unknown as unknown.';}
+ const u=new URL(location.href);for(const [k,v] of Object.entries({chain,state,tx,token,route,error})){if(v)u.searchParams.set(k,v);else u.searchParams.delete(k);}history.replaceState(null,'',u);
+}
+$('#review').addEventListener('click',review);$('#clear').addEventListener('click',()=>{history.replaceState(null,'',location.pathname);location.reload();});load();
+</script>
+</body></html>

@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://launchpad.cryptoworldz.xyz/schemas/worldz-creator-history.v1.json",
+  "title": "Worldz Creator History Evidence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "creatorId",
+    "wallets",
+    "launches",
+    "evidenceUpdatedAt"
+  ],
+  "properties": {
+    "version": {
+      "const": "WORLDZ-CREATOR-HISTORY-V1"
+    },
+    "creatorId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "displayName": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "identities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "value",
+          "verification"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "verification": {
+            "enum": [
+              "VERIFIED",
+              "SELF_ASSERTED",
+              "UNVERIFIED"
+            ]
+          },
+          "proofReference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "wallets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "chain",
+          "address",
+          "relationship",
+          "evidence"
+        ],
+        "properties": {
+          "chain": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1
+          },
+          "relationship": {
+            "enum": [
+              "ORIGINAL_DEPLOYER",
+              "DISCLOSED_CREATOR",
+              "TREASURY_SIGNER",
+              "FUNDING_SOURCE",
+              "RELATED_BY_EVIDENCE",
+              "UNKNOWN"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "launches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "chain",
+          "tokenId",
+          "status"
+        ],
+        "properties": {
+          "chain": {
+            "type": "string"
+          },
+          "tokenId": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "CREATED",
+              "GRADUATED",
+              "ACTIVE",
+              "INACTIVE",
+              "FAILED",
+              "UNKNOWN"
+            ]
+          },
+          "createdAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "proofReference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "creatorSellEvidence": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidenceUpdatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

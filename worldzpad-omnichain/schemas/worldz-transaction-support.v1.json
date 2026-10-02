@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://launchpad.cryptoworldz.xyz/schemas/worldz-transaction-support.v1.json",
+  "title": "Worldz Transaction Support Context v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "chain",
+    "state",
+    "fundsMoved",
+    "checkedAt"
+  ],
+  "properties": {
+    "version": {
+      "const": "WORLDZ-TRANSACTION-SUPPORT-V1"
+    },
+    "chain": {
+      "type": "string"
+    },
+    "network": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "wallet": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tokenId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "route": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "txId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "state": {
+      "enum": [
+        "PREPARING",
+        "AWAITING_SIGNATURE",
+        "SUBMITTED",
+        "CONFIRMING",
+        "CONFIRMED",
+        "FAILED",
+        "UNKNOWN"
+      ]
+    },
+    "fundsMoved": {
+      "enum": [
+        "YES",
+        "NO",
+        "UNKNOWN"
+      ]
+    },
+    "networkFee": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "failurePoint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "safeRetryPath": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "explorerReference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "checkedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
