@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-MIRACLE-V1",
-  "version": "2026-10-02",
+  "version": "2026-10-02-B",
   "status": "PLANNED_SPEC_LOCKED",
   "token": {
     "order": 4,
@@ -27,16 +27,21 @@
       "silentAutomaticReassignmentAllowed": false,
       "proposedMultisig": {
         "policy": "4-of-8",
-        "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_VERIFIED_SIGNERS",
-        "requiredNamedSigners": [
+        "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_3_MORE_VERIFIED_SIGNERS",
+        "exactAdditionalWalletsMayBeInvented": false,
+        "confirmedDocumentedCandidates": [
           "JayJayTeamDev",
           "Stepper",
-          "Savage"
+          "Savage",
+          "SolMusic",
+          "Mahammad"
         ],
-        "additionalVerifiedSignerSlots": 5,
-        "exactAdditionalWalletsMayBeInvented": false
+        "additionalDistinctSignerSlots": 3,
+        "onePersonMultipleWalletsCountAsIndependentSigners": false
       },
-      "registeredRecipientSource": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json"
+      "registeredRecipientSource": "worldzpad-mainnet/wallets/future-token-dev-rewards.v1.json",
+      "accountingSeparationRequired": true,
+      "accountingRule": "MRCL team-allocation custody and treasury revenue may use the same 4-of-8 governance only with separate accounting and public reconciliation."
     },
     "miracleMagicSupply": {
       "percent": 20,
@@ -72,22 +77,25 @@
   "treasuryProfiles": {
     "miracleChurchTreasury": {
       "proposedPolicy": "4-of-8",
-      "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_VERIFIED_SIGNERS",
+      "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_3_MORE_VERIFIED_SIGNERS",
       "signerConsentRequired": true,
       "verifiedPublicWalletRequired": true,
       "membershipDoesNotAutomaticallyCreateSignerAuthority": true,
-      "requiredNamedSigners": [
-        "JayJayTeamDev",
-        "Stepper",
-        "Savage"
-      ],
-      "additionalVerifiedSignerSlots": 5,
       "treasuryBoundRevenueSplitAfterActivation": {
         "worldzOperationsPercent": 70,
         "miracleTeamPercent": 30
       },
       "revenueScope": "TREASURY_BOUND_REVENUE_ONLY",
-      "noNewFeeCreated": true
+      "noNewFeeCreated": true,
+      "confirmedDocumentedCandidates": [
+        "JayJayTeamDev",
+        "Stepper",
+        "Savage",
+        "SolMusic",
+        "Mahammad"
+      ],
+      "additionalDistinctSignerSlots": 3,
+      "onePersonMultipleWalletsCountAsIndependentSigners": false
     }
   },
   "executionBoundary": {
