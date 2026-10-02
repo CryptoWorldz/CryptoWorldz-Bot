@@ -239,7 +239,7 @@ jobs:
           assert '100,000 WLDZ per qualified position' in home
           assert 'WORLDZLAUNCHPAD™ GLOBAL LAUNCH PACK' in home
           assert 'Founding 100 contract mismatch' in app
-          assert 'WORLDZ-FEE-FLOW-V2' in app
+          assert 'WORLDZ-FEE-FLOW-V3' in app
           assert 'launchpad-contribution' in app
           assert 'legacyCoreTokenCount:12' in app
           assert 'WORLDZ TECHNOLOGY & MEANINGS' in technology_html
@@ -923,8 +923,12 @@ jobs:
                   assert 'REXSECURE ULTIMATE™' in integrations_body and 'Command Centre + REX' in integrations_body
                   assert ready_code==200 and 'WORLDZLAUNCH READINESS GATE' in ready_body
                   assert readiness_code==200 and readiness['status']=='PUBLIC_PRODUCT_READY__MAINNET_MARKET_EXECUTION_GATED'
-                  assert readiness['economics']['launchPadChoicesPercent']==[3,5,8]
-                  assert readiness['economics']['legacyCorePercent']==15
+                  assert readiness['economics']['policy']=='WORLDZ-FEE-FLOW-V3'
+                  assert readiness['economics']['worldzContributionChoicesPercent']==[3,5,8]
+                  assert readiness['economics']['creatorRetentionByContributionPercent']=={'3':97,'5':95,'8':92}
+                  assert readiness['economics']['worldzInternalSplitPercent']['legacyCore']==10
+                  assert readiness['economics']['treasuryLane']['operationsPercent']==70
+                  assert readiness['economics']['treasuryLane']['miracleTeamPercent']==30
                   assert readiness['community']['rexSecureGuard']['status']=='CONNECTED_COMMAND_CENTRE_SECURITY_MODULE'
                   assert readiness['community']['rexSecureGuard']['product']=='REXSECURE ULTIMATE™'
                   assert readiness['community']['rexSecureGuard']['persona']=='4/5'
