@@ -54,6 +54,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["impact", "Open current DonateWorldz impact choices"], ["supportreagan", "Open Reagan & Children on DonateWorldz"],
     ["heroes", "Open Real-World Hero evidence and recognition"], ["kitty", "View public Community Kitty addresses"],
     ["causes", "List registered causes"], ["cause", "View one cause"], ["shilllink", "Create your referral/invite Shill Link"],
+    ["shillpack", "Open the current Worldz ready-to-share Shill Pack"], ["shillcampaign", "Alias for the current Worldz Shill Pack"],
     ["shillpoints", "View token Shill Rewards and eligible platforms"], ["shill", "Submit a verified token shill proof for points"],
     ["referrals", "View referral status"], ["rewardplan", "View reward-plan rules"], ["website", "Open a website by project"],
     ["websites", "View the website directory"], ["worldzlinks", "Open WorldzLinkz™ — every Worldz in one QR directory"], ["worldzlive", "View live Worldz sites"], ["solworldz", "Open SolWorldz"],
