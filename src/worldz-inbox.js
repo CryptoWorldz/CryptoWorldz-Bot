@@ -225,6 +225,39 @@ function registerWorldzInboxSystem({app,bot,config,supabase}){
     return{sent,failed};
   }
 
+  app.get("/api/worldz-inbox/intro-campaign-status",async(_req,res)=>{
+    try{
+      const oid=Number(ownerId());
+      const messages=await supabase.from("worldz_dm_messages")
+        .select("id,status,created_at",{count:"exact"})
+        .eq("sender_telegram_id",oid)
+        .eq("style_title",INTRO_CAMPAIGN_TITLE)
+        .limit(500);
+      if(messages.error)throw messages.error;
+      const rows=messages.data||[];
+      const counts=rows.reduce((a,r)=>{a[r.status]=(a[r.status]||0)+1;return a;},{});
+      const prefs=await supabase.from("worldz_dm_preferences")
+        .select("telegram_id",{count:"exact",head:true})
+        .eq("enabled",true)
+        .eq("telegram_dm_reachable",true);
+      if(prefs.error)throw prefs.error;
+      res.json({
+        ok:true,
+        campaign:"worldz-inbox-intro-v1",
+        reachable_enabled:Number(prefs.count)||0,
+        recorded:rows.length,
+        telegram_sent:Number(counts.telegram_sent)||0,
+        queued:Number(counts.queued)||0,
+        failed:Number(counts.failed)||0,
+        latest_at:rows.map(r=>r.created_at).filter(Boolean).sort().at(-1)||null,
+        batch_limit:INTRO_BATCH_LIMIT,
+        cadence_minutes:60
+      });
+    }catch(error){
+      res.status(503).json({ok:false,error:"campaign_status_unavailable"});
+    }
+  });
+
   if(!globalThis.__worldzInboxIntroCampaignStarted){
     globalThis.__worldzInboxIntroCampaignStarted=true;
     const first=setTimeout(()=>runIntroCampaignBatch().catch(error=>console.warn("Worldz Inbox intro campaign startup failed",{code:error?.code||error?.message||"unknown"})),30000);
