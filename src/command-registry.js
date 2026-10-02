@@ -29,6 +29,12 @@ const COMMAND_GROUPS = Object.freeze([
     ["worldztrending", "View the fastest-rising organic popularity ranking"],
     ["worldzrankings", "View Worldz popularity rankings"]
   ]),
+  group("worldz-civic-voice", "🌐 Worldz Votes Centre™ • Civic Public Voice • NON-BINDING", "member", [
+    ["worldzvoice", "Open the neutral civic public-voice foundation"],
+    ["worldzballots", "List published civic consultations"],
+    ["worldzballot", "View one civic consultation by slug"],
+    ["worldzresults", "View published civic results after a consultation closes"]
+  ]),
   group("legend", "🤖 ZED • Legend Profile", "member", [
     ["zed", "Open ZED profile, wallet and Raid controls"], ["start", "Start or reopen ZED"],
     ["register", "Register as a CryptoWorldz Legend"], ["profile", "View your Legend profile"],
