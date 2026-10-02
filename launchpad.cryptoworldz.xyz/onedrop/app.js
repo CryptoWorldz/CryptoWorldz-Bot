@@ -149,7 +149,7 @@ async function prepare(){
   const sourceAta=new PublicKey(manifest.authority.squadsVaultRvivAta),version=BigInt(manifest.distributor.versionU64);
   const mintInfo=await getMint(connection,mint,'confirmed',TOKEN_PROGRAM_ID);
   if(mintInfo.decimals!==manifest.token.decimals)stop('Canonical RVIV decimals changed: '+mintInfo.decimals+' expected '+manifest.token.decimals);
-  if(mintInfo.supply!==BigInt(manifest.token.totalSupplyRaw))stop('Canonical RVIV supply changed: '+mintInfo.supply+' expected '+manifest.token.totalSupplyRaw);
+  if(mintInfo.supply>BigInt(manifest.token.totalSupplyRaw))stop('Canonical RVIV supply exceeds the fixed original cap: '+mintInfo.supply+' > '+manifest.token.totalSupplyRaw);
   if(mintInfo.mintAuthority!==null)stop('Canonical RVIV mint authority is not revoked: '+mintInfo.mintAuthority.toBase58());
   if(mintInfo.freezeAuthority!==null)stop('Canonical RVIV freeze authority is not revoked: '+mintInfo.freezeAuthority.toBase58());
 
@@ -163,7 +163,38 @@ async function prepare(){
   if(!derivedSource.equals(sourceAta))stop('Squads RVIV source ATA mismatch.');
   const source=await getAccount(connection,sourceAta,'confirmed',TOKEN_PROGRAM_ID);
   const movedRaw=BigInt(manifest.executableNow.totalMovedFromSquadsRaw);
-  if(source.amount<movedRaw)stop('Squads vault no longer has enough RVIV for the executable OneDrop model.');
+  const expectedPre=BigInt(manifest.executableNow.expectedPreOneDropSquadsRaw||'170000000000000');
+  if(source.amount!==expectedPre){
+    const balanceForOwner=async address=>{
+      const ownerPk=new PublicKey(address),ata=getAssociatedTokenAddressSync(mint,ownerPk,false,TOKEN_PROGRAM_ID);
+      const info=await connection.getAccountInfo(ata,'confirmed');
+      if(!info)return 0n;
+      return BigInt((await connection.getTokenAccountBalance(ata,'confirmed')).value.amount);
+    };
+    const devRows=manifest.recipients.filter(x=>x.buckets.includes('DEV'));
+    const devBalances=[];
+    for(const row of devRows)devBalances.push({wallet:row.wallet,raw:await balanceForOwner(row.wallet)});
+    const impactBucket=manifest.buckets.find(x=>x.name==='WORLDZ_IMPACT')||manifest.buckets.find(x=>x.name==='ONEWORLDZ_IMPACT');
+    const devCityBucket=manifest.buckets.find(x=>x.name==='DEVCITY_100');
+    const impactBalance=impactBucket?.destination?await balanceForOwner(impactBucket.destination):0n;
+    const devCityBalance=devCityBucket?.destination?await balanceForOwner(devCityBucket.destination):0n;
+    const devTotal=devBalances.reduce((s,x)=>s+x.raw,0n);
+    const fmt=x=>(Number(x)/1e6).toFixed(6);
+    $('#review').textContent=
+      'RVIV LIVE RECONCILIATION — EXECUTION BLOCKED\n'+
+      'Current mint supply: '+fmt(mintInfo.supply)+' RVIV\n'+
+      'Squads source now: '+fmt(source.amount)+' RVIV\n'+
+      'Frozen pre-OneDrop source expectation: '+fmt(expectedPre)+' RVIV\n'+
+      'Difference: '+fmt(expectedPre-source.amount)+' RVIV\n\n'+
+      'Seven registered Dev-wallet current balances (not proof of source by themselves):\n'+
+      devBalances.map(x=>x.wallet+' = '+fmt(x.raw)+' RVIV').join('\n')+
+      '\nDev-wallet balance total: '+fmt(devTotal)+' RVIV\n'+
+      'DevCity staging owner balance: '+fmt(devCityBalance)+' RVIV\n'+
+      'Worldz Impact owner balance: '+fmt(impactBalance)+' RVIV\n\n'+
+      'No new OneDrop proposal will be built until previous RVIV movements are reconciled from chain evidence.';
+    stop('RVIV treasury source is '+fmt(source.amount)+' RVIV, not the frozen pre-OneDrop '+fmt(expectedPre)+' RVIV. Earlier RVIV distribution activity may already have occurred. Duplicate distribution is blocked.');
+  }
+  if(source.amount<movedRaw)stop('Squads vault does not have enough RVIV for the executable OneDrop model.');
 
   const root=await merkleRoot(manifest.recipients);
   const [distributor]=PublicKey.findProgramAddressSync([new TextEncoder().encode('MerkleDistributor'),mint.toBytes(),u64(version)],JITO);
