@@ -32,3 +32,18 @@ for(const [label,owner] of owners){
  console.log('RVIV_OWNER_BALANCE '+label+' '+owner+' raw='+raw+' ui='+(Number(raw)/1e6).toFixed(6));
 }
 console.log('RVIV_AUDITED_OWNER_BALANCES_RAW='+known);
+
+const signatures=await rpc('getSignaturesForAddress',[SOURCE_ATA,{limit:50,commitment:'confirmed'}]);
+for(const row of signatures){
+ const tx=await rpc('getTransaction',[row.signature,{encoding:'jsonParsed',commitment:'confirmed',maxSupportedTransactionVersion:0}]);
+ const groups=[...(tx?.transaction?.message?.instructions||[])];
+ for(const inner of (tx?.meta?.innerInstructions||[])) groups.push(...(inner.instructions||[]));
+ for(const ix of groups){
+  const p=ix?.parsed;
+  if(!p||!['transfer','transferChecked'].includes(p.type))continue;
+  const info=p.info||{};
+  if(info.source!==SOURCE_ATA)continue;
+  const raw=String(info.tokenAmount?.amount??info.amount??'unknown');
+  console.log('RVIV_SOURCE_OUTFLOW signature='+row.signature+' blockTime='+String(row.blockTime||'')+' type='+p.type+' raw='+raw+' destination='+String(info.destination||''));
+ }
+}
