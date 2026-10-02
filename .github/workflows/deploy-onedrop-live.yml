@@ -6,6 +6,7 @@ on:
     paths:
       - 'launchpad.cryptoworldz.xyz/onedrop/**'
       - 'scripts/validate_onedrop_static.mjs'
+      - 'scripts/audit-rviv-distribution-state.mjs'
       - '.github/workflows/deploy-onedrop-live.yml'
   push:
     branches: [main]
@@ -50,6 +51,12 @@ jobs:
           set -euo pipefail
           npm install --no-save --no-package-lock --no-audit --no-fund @solana/web3.js@1.98.4 @solana/spl-token@0.4.15 @sqds/multisig@2.1.4
           node scripts/validate_onedrop_static.mjs
+
+      - name: Audit live REVIVE distribution state
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/audit-rviv-distribution-state.mjs
 
       - name: Validate live REVIVE source account BEFORE deployment
         shell: bash
