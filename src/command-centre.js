@@ -20,7 +20,7 @@ const MENUS = {
       ["👤 Profile", "/profile"],
       ["👛 Wallet", "/wallet"],
       ["🤠 Ronald Raider", "/raid"],
-      ["📣 Shill Rewards", "/shillpoints"],
+      ["📣 Shill Pack", "/shillpack"],
       ["📚 All Commands", "/commands"]
     ]
   },

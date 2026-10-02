@@ -8,7 +8,7 @@ const REQUIRED_RUNTIME_COMMANDS = [
   "fullscope","worldzfullbuild","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
   "worldzvotes","vote","tokenvote","worldztrending","worldzrankings","worldzvoice","worldzballots","worldzballot","worldzresults",
   "raid","next","raidprogress","stopraid","admin","admingrace","zedsettings","newmission","editmission","endmission","pending","approve","reject","member","admins","permissions","setkitty","setrole","setpermission","setpartner","broadcast","stats","activity",
-  "causes","cause","cause_add","shilllink","shill","shillpoints","pendingshills","approveshill","rejectshill","referrals","rewardplan","website","websites","worldzlinks","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
+  "causes","cause","cause_add","shilllink","shillpack","shillcampaign","shill","shillpoints","pendingshills","approveshill","rejectshill","referrals","rewardplan","website","websites","worldzlinks","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
   "workstart","workstop","evidence","workevidence","rewardbudget","specialreward","rewardasset","fundingplan","funded","contribute","walletplan","setprojectwallet","investmentfunded",
   "worldzcast","worldzcasttargets","confirmworldzcast","cancelworldzcast","worldzcaston","worldzcastoff","boostshill","specialtiers","uniquelegend","legendstatus","reviewlegend","reserverewardon","reserverewardoff",
   "executives","addscopedadmin","disableadmin","appointexecutive",

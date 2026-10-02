@@ -27,6 +27,34 @@ function parseShillProof(value) {
   return { ok: true, symbol, ...proof };
 }
 
+const CURRENT_SHILL_CAMPAIGN = Object.freeze({
+  id: "CREATE_YOUR_OWN_MONEY_2026_10_02",
+  title: "CREATE YOUR OWN MONEY‼️*",
+  url: "https://launchpad.cryptoworldz.xyz/create-your-own-money/",
+  tagline: "Your Idea. Your Token. Your Community.",
+  shareLine: "Share it with your Family & Friends 💜",
+  truth: "*Create your own crypto token. Creating one does not automatically make it legal tender, valuable or liquid.",
+  footer: "WORLDZ 🌐 — A BETTER WORLD 🌏"
+});
+
+function buildShillPackText(campaign = CURRENT_SHILL_CAMPAIGN) {
+  return [
+    "📣 WORLDZ SHILL PACK",
+    "",
+    campaign.title,
+    campaign.tagline,
+    campaign.shareLine,
+    "",
+    campaign.url,
+    "",
+    campaign.truth,
+    "",
+    campaign.footer,
+    "",
+    "Share genuinely. No spam • No bots • No fake engagement."
+  ].join("\n");
+}
+
 function registerShillRewards({ bot, repository, supabase, config }) {
   const send = (chatId, text, options) => bot.sendMessage(chatId, text, options);
   const permission = (telegramId, name) => repository.hasPermission(
@@ -82,6 +110,8 @@ function registerShillRewards({ bot, repository, supabase, config }) {
         "Eligible proof platforms:",
         "𝕏 X • Facebook • YouTube • TikTok • Instagram • Reddit • Telegram • Discord • public websites",
         "",
+        "Current Worldz campaign: /shillpack",
+        "",
         "Submit: /shill TOKEN | https://your-proof-link",
         "Example: /shill RECAP | https://x.com/yourname/status/123",
         "",
@@ -90,6 +120,18 @@ function registerShillRewards({ bot, repository, supabase, config }) {
     } catch {
       return send(msg.chat.id, "❌ ZED couldn't load the Shill Rewards list.");
     }
+  });
+
+  bot.onText(/^\/(?:shillpack|shillcampaign)(?:@\w+)?$/i, async (msg) => {
+    if (!(await enabled(msg.chat.id))) return send(msg.chat.id, "⏸ Shill Rewards are switched off in /zedsettings.");
+    return send(msg.chat.id, buildShillPackText(), {
+      disable_web_page_preview: false,
+      reply_markup: {
+        inline_keyboard: [[
+          { text: "🌐 OPEN CREATE YOUR OWN MONEY", url: CURRENT_SHILL_CAMPAIGN.url }
+        ]]
+      }
+    });
   });
 
   bot.onText(/^\/shill(?:@\w+)?(?:\s+([\s\S]+))?$/i, async (msg, match) => {
@@ -212,6 +254,8 @@ function registerShillRewards({ bot, repository, supabase, config }) {
 }
 
 module.exports = {
+  CURRENT_SHILL_CAMPAIGN,
+  buildShillPackText,
   normalizeSymbol,
   parseShillProof,
   platformFromUrl,
