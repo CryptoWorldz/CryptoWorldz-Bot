@@ -238,10 +238,17 @@ def build_donate():
     body=hero("DONATEWORLDZ • CLEAR SUPPORT PATHWAYS",'Give clearly.<br><span class="wx-gradient">Support directly.</span>',
       "Choose the purpose you want to support. Humanitarian donations, community impact and voluntary support remain clearly separated from CryptoWorldz activity.",
       "/hero.png",[("Community Impact","/community-impact/",False),("Reagan & Children","/reagan-children/",True),("Support JayJayTeamDev","/jayjay-support/",True)])
-    body+=f"""<section class="wx-section"><h2>Choose the purpose.</h2><div class="wx-grid">
+    body+=f"""<section class="wx-section" data-jayjay-urgent-support="2026-10-02">
+<div class="wx-kicker">URGENT PERSONAL SUPPORT • JAYJAYTEAMDEV</div>
+<h2>Food &amp; Stability Support</h2>
+<p class="wx-lead">Jason is currently seeking short-term help with food and essential living costs while working through an urgent financial-management issue. This is the existing voluntary JayJayTeamDev personal-support pathway — clearly separated from every humanitarian, family and community mission on DonateWorldz.</p>
+<div class="wx-actions"><a class="wx-btn" href="/jayjay-support/">Support JayJayTeamDev</a><a class="wx-btn alt" href="#support-pathways">See Every Support Path</a></div>
+<div class="wx-note">Transparency: support through this pathway is personal support for JayJayTeamDev and the work behind WorldzEcosystem™. It is not presented as a tax-deductible charity donation, and it does not use funds intended for any other DonateWorldz mission.</div>
+</section>
+<section class="wx-section" id="support-pathways"><h2>Choose the purpose.</h2><div class="wx-grid">
 {card("Reagan & Children • Action Spread Smiles","Mayuge District, Uganda — food, medicine, school fees, hygiene, mattresses, water, farming and a safe home.","/reagan-children/")}
 {card("Community Impact","Verified community support pathways and people already helping people.","/community-impact/")}
-{card("Support JayJayTeamDev","Voluntary support for the work of building and coordinating the mission.","/jayjay-support/")}
+{card("Support JayJayTeamDev","Immediate food and stability support, plus voluntary support for the work of building and coordinating WorldzEcosystem™. This pathway stays separate from every community and humanitarian mission.","/jayjay-support/")}
 {card("Davis Family","Dedicated family support page and story.","/davis-family/")}
 {card("Slice of Hope Australia","Community food outreach initiative and volunteer/partner pathway.","/slice-of-hope-australia/")}
 {card("Fresh Water + Grow Food","Practical clean-water and food-growing mission pathways.","/fresh-water-mission/")}
