@@ -42,8 +42,13 @@ assert "one-vote-per-user-per-rolling-hour" in core
 assert "mainnetExecutionEnabled: false" in core
 
 for command in ["fullscope","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
-                "worldzvotes","vote","tokenvote","worldztrending","worldzrankings"]:
+                "worldzvotes","vote","tokenvote","worldztrending","worldzrankings",
+                "worldzvoice","worldzballots","worldzballot","worldzresults"]:
     assert re.search(rf'["\[]({re.escape(command)})["\],]', registry), command
+
+assert 'purpose: "civic-public-consultation"' in core
+assert 'paidPlacementAllowed: false' in core
+assert 'group("worldz-civic-voice"' in registry
 
 for retired in ["worldzgovern","governproposals","governvote","governdelegate"]:
     assert retired not in registry
