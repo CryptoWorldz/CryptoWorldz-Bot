@@ -158,8 +158,8 @@ function renderProof(){
     pill.textContent='FINAL GATE';pill.className='pill locked';
     title.textContent='Treasury Multisig + end-to-end routing proof required';
     copy.textContent=treasury.vaultAddress
-      ?'Treasury vault is registered. Mainnet remains locked until the selected 3% / 5% / 8% Fee Flow V2 route and remaining release checks are proven.'
-      :'The public platform is live now. Mainnet execution remains locked until the verified Worldz Treasury Multisig vault address and selected 3% / 5% / 8% Fee Flow V2 route are proven end-to-end.';
+      ?'Treasury vault is registered. Mainnet remains locked until the selected 3% / 5% / 8% Fee Flow V3 route and remaining release checks are proven.'
+      :'The public platform is live now. Mainnet execution remains locked until the verified Worldz Treasury Multisig vault address and selected 3% / 5% / 8% Fee Flow V3 route are proven end-to-end.';
   }
 }
 function selectedLaunchPadContribution(){
@@ -424,10 +424,15 @@ function validatePlatformConfig(candidate){
     candidate.feePolicy?.sixToTenPercentProjectTradingFeesOffered!==false||
     JSON.stringify(candidate.feePolicy?.worldzLaunchPadContributionChoicesPercent)!=='[3,5,8]'||
     candidate.feePolicy?.worldzLaunchPadContributionDefaultPercent!==5||
-    candidate.feePolicy?.legacyCorePercent!==15||
+    JSON.stringify(candidate.feePolicy?.creatorRetentionByContribution)!=='{"3":97,"5":95,"8":92}'||
     candidate.feePolicy?.legacyCoreTokenCount!==12||
-    candidate.feePolicy?.coreFamilyMarketBuyPercent!==12
-  )throw new Error('Worldz Fee Flow V2 contract mismatch');
+    candidate.feePolicy?.legacyCorePercentOfWorldzContribution!==10||
+    candidate.feePolicy?.coreFamilyMarketBuyPercentOfWorldzContribution!==10||
+    candidate.feePolicy?.worldzInternalSplitPercent?.operationsProductDevelopment!==20||
+    candidate.feePolicy?.worldzInternalSplitPercent?.treasury!==20||
+    candidate.feePolicy?.treasuryLane?.worldzOperationsTreasuryPercent!==70||
+    candidate.feePolicy?.treasuryLane?.worldzMiracleTeamTreasuryPercent!==30
+  )throw new Error('Worldz Fee Flow V3 contract mismatch');
   if(candidate.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent!==0||candidate.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent!==0||candidate.feePolicy?.walletTransferTaxPercent!==0)throw new Error('Worldz zero-supply/liquidity/transfer-tax contract mismatch');
   const p=candidate.safeLaunchPolicy;
   if(!p||p.version!=='WORLDZ-SAFE-LAUNCH-1'||p.compulsory.fixedSupply!==true||p.compulsory.revokeMintAuthorityAfterGenesis!==true||p.compulsory.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('Safe Launch Standard contract mismatch');
