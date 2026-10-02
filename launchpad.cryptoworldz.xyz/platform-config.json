@@ -566,7 +566,10 @@
     "canonicalWldzMint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
     "canonicalWldzMaxSupplyTokens": 100000000,
     "wldzAllocationPoolTokens": 10000000,
-    "wldzPerQualifiedPositionTokens": 100000
+    "wldzPerQualifiedPositionTokens": 100000,
+    "policyFile": "worldzpad-omnichain/founding100.v1.json",
+    "publicPath": "/founding100/",
+    "publicProgramFile": "/founding100/program.v1.json"
   },
   "treasuryStandard": {
     "version": "WORLDZ-TREASURY-2",
@@ -1369,5 +1372,39 @@
       "BTC"
     ],
     "rule": "Research, education, portfolio modelling and proof are live product directions. Buying, selling, DCA execution and auto-rebalancing stay separately gated."
+  },
+  "launchBenefits": {
+    "name": "Worldz Launch Benefits™",
+    "version": "WORLDZ-LAUNCH-BENEFITS-V1",
+    "publicPath": "/launch-benefits/",
+    "contract": "worldzpad-omnichain/launch-benefits.v1.json",
+    "founding100WldzPerQualifiedPosition": 100000,
+    "referralLegendPoints": {
+      "inviter": 20,
+      "newcomer": 10,
+      "retentionDays": 7,
+      "weeklyQualifiedCapPerInviter": 20
+    },
+    "newcomerShillBoost": {
+      "legendPoints": 20,
+      "unlock": "FIRST_VERIFIED_RAAIIIDD",
+      "weeklySuccessfulBoostCapPerInviter": 15
+    },
+    "uniqueLegendPoints": 250,
+    "launchReferrerPercentOfWorldzContribution": 5,
+    "devCityParticipation": "OPT_IN_REVIEW_PATH__NO_AUTOMATIC_TOKEN_AWARD",
+    "mainnetFinancialExecution": "GATED"
+  },
+  "newsWire": {
+    "name": "Worldz NewsWire™",
+    "version": "WORLDZ-NEWSWIRE-V1",
+    "publicPath": "/news/",
+    "endpoint": "/newswire.php",
+    "contract": "worldzpad-omnichain/newswire.v1.json",
+    "cacheSeconds": 120,
+    "fullArticleRepublishing": false,
+    "headlineAttributionRequired": true,
+    "newsIsInvestmentInstruction": false,
+    "worldzRegistryEventsRequireEvidence": true
   }
 }
