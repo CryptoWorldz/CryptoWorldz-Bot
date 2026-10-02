@@ -15,17 +15,47 @@ jobs:
     name: Send immediate Worldz team DMs
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    environment:
+      name: cryptoworldz-production
     env:
-      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
     steps:
       - name: Send Telegram DMs
         shell: python
         run: |
-          import json, os, time, urllib.request, urllib.error
+          import io, json, os, re, time, urllib.request, urllib.error
+          from ftplib import FTP_TLS
 
-          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          host=str(os.environ.get("FTP_HOST","")).replace("ftps://","").replace("ftp://","").split("/")[0]
+          if host.count(":")==1: host=host.split(":",1)[0]
+          user=str(os.environ.get("FTP_USERNAME","")).strip()
+          password=str(os.environ.get("FTP_PASSWORD","")).strip()
+          if not host or not user or not password:
+              raise SystemExit("Protected Hostinger transport missing")
+
+          ftp=FTP_TLS()
+          ftp.connect(host,int(os.environ.get("FTP_PORT","21")),timeout=45)
+          ftp.login(user,password)
+          ftp.prot_p()
+          buf=io.BytesIO()
+          ftp.retrbinary("RETR /domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",buf.write)
+          ftp.quit()
+
+          env={}
+          for raw in buf.getvalue().decode("utf-8").splitlines():
+              line=raw.strip()
+              if not line or line.startswith("#") or "=" not in line: continue
+              k,v=line.split("=",1)
+              k=re.sub(r"^export\\s+","",k).strip()
+              v=v.strip().strip('"').strip("'")
+              if v: env[k]=v
+
+          token=str(env.get("BOT_TOKEN") or env.get("TELEGRAM_BOT_TOKEN") or env.get("TELEGRAM_TOKEN") or env.get("ZED_BOT_TOKEN") or env.get("CRYPTOWORLDZ_BOT_TOKEN") or "").strip()
           if not token:
-              raise SystemExit("BOT_TOKEN missing")
+              raise SystemExit("Live Hostinger Telegram token missing")
           print("::add-mask::"+token)
 
           recipients=[
