@@ -124,5 +124,34 @@
       "PNEX",
       "MRCL"
     ]
+  },
+  "creatorCampaign": {
+    "id": "CREATE_YOUR_OWN_MONEY_2026_10_02",
+    "status": "PUBLIC_BUILD",
+    "title": "Create Your Own Money*",
+    "subtitle": "Your idea. Your token. Your community.",
+    "url": "https://launchpad.cryptoworldz.xyz/create-your-own-money/",
+    "truthNote": "Create your own crypto token. A created token is not automatically legal tender, valuable, liquid or accepted.",
+    "audience": [
+      "first-time creators",
+      "families and friends",
+      "communities",
+      "developers"
+    ],
+    "basics": [
+      "name and symbol",
+      "blockchain",
+      "fixed supply",
+      "distribution",
+      "liquidity",
+      "purpose",
+      "public proof"
+    ],
+    "paths": {
+      "planner": "https://launchpad.cryptoworldz.xyz/create-your-own-money/#planner",
+      "launchStation": "https://launchpad.cryptoworldz.xyz/launch-station/",
+      "community": "https://launchpad.cryptoworldz.xyz/community/",
+      "spotlight": "https://launchpad.cryptoworldz.xyz/advertise/"
+    }
   }
 }
