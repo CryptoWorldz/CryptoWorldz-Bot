@@ -1,0 +1,54 @@
+{
+  "schema": "WORLDZ-ALLOCATION-CUSTODY-ROLES-V1",
+  "version": "2026-10-02",
+  "status": "OWNER_DIRECTION_RECORDED__WALLET_ADDRESSES_PENDING",
+  "purpose": "Role-based custody separation for Worldz-owned allocation wallets. This is operational segregation, not a claim of independent ownership or decentralization.",
+  "operationsTreasury": {
+    "provider": "Squads v4",
+    "multisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+    "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+    "governance": "3-of-5",
+    "rule": "Treasury, liquidity reserves, claim vaults and large unallocated reserves remain multisig/program controlled unless a later explicit approved model says otherwise."
+  },
+  "plainWalletPolicy": {
+    "targetMaximumPercentOfTokenSupplyPerOwnerControlledEOA": 5,
+    "exceptionRule": "A larger balance is allowed only when the wallet is clearly disclosed as a treasury, vesting, claim, liquidity or other protocol custody vault.",
+    "noFakeDecentralization": true,
+    "beneficialOwnershipDisclosureRequired": true
+  },
+  "renameTheseWallets": [
+    {"label": "WORLDZ • JayJay Dev A", "address": null, "intendedUse": "WLDZ/RVIV earned developer allocation custody"},
+    {"label": "WORLDZ • JayJay Dev B", "address": null, "intendedUse": "WLDZ/RVIV earned developer allocation custody"},
+    {"label": "WORLDZ • Legacy Custody", "address": null, "intendedUse": "Legacy allocation staging only; final eligible recipients remain separately accounted"},
+    {"label": "WORLDZ • DevCity Staging", "address": null, "intendedUse": "DevCity allocation staging before verified recipient fanout"},
+    {"label": "WORLDZ • Team Vesting Staging", "address": null, "intendedUse": "Earned team allocations before approved vesting execution"},
+    {"label": "WORLDZ • Impact Staging", "address": null, "intendedUse": "Approved humanitarian/impact allocation staging"},
+    {"label": "PHENIX • Dev Vesting", "address": null, "intendedUse": "PNEX developer vesting custody"},
+    {"label": "PHENIX • Chance Vault", "address": null, "intendedUse": "PNEX PHENIX Chance allocation custody"},
+    {"label": "MIRACLE • Team Vault", "address": null, "intendedUse": "MRCL Miracle Team allocation custody under its separate approval/vesting model"},
+    {"label": "MIRACLE • Magic Vault", "address": null, "intendedUse": "MRCL MiracleMagic allocation custody"}
+  ],
+  "tokenRules": {
+    "WLDZ": {
+      "canonicalMint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "fixedSupplyTokens": 100000000,
+      "note": "Existing allocations remain authoritative. Plain owner-controlled wallet splitting may be used for custody separation, but not to represent the balances as independent holders."
+    },
+    "RVIV": {
+      "canonicalMint": "DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R",
+      "fixedSupplyTokens": 200000000,
+      "note": "OneDrop/Legacy/DevCity/Team buckets remain separately accounted. No duplicate distribution is allowed."
+    },
+    "PNEX": {
+      "canonicalMint": null,
+      "fixedSupplyTokens": 250000000,
+      "note": "Prelaunch. No owner wallet may substitute for required vesting, Chance, liquidity or FlyWheel custody."
+    },
+    "MRCL": {
+      "canonicalMint": null,
+      "fixedSupplyTokens": 348000000,
+      "note": "Planned. Miracle Team and MiracleMagic remain separate. The currently unallocated supply must not be silently assigned."
+    }
+  },
+  "activationRule": "Rename wallets first, then register the exact public addresses. No transfer is generated from a placeholder or invented address."
+}
