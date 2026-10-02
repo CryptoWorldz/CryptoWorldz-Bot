@@ -115,7 +115,8 @@ function registerShillRewards({ bot, repository, supabase, config }) {
         "Submit: /shill TOKEN | https://your-proof-link",
         "Example: /shill RECAP | https://x.com/yourname/status/123",
         "",
-        "Proof is reviewed before points are awarded. Spam, bots, duplicate links and fake engagement earn nothing."
+        "⚡ Genuine low-risk proofs auto-award points. Only exceptions need Admin review.",
+        "Spam, bots, duplicate links and fake engagement earn nothing."
       ].join("\n"));
     } catch {
       return send(msg.chat.id, "❌ ZED couldn't load the Shill Rewards list.");
@@ -163,15 +164,37 @@ function registerShillRewards({ bot, repository, supabase, config }) {
         throw error;
       }
 
+      const { data: autoData, error: autoError } = await supabase.rpc("auto_award_social_shill_submission", {
+        p_submission_id: Number(data.id)
+      });
+      if (autoError) throw autoError;
+      const auto = Array.isArray(autoData) ? autoData[0] : autoData;
+
+      if (auto?.outcome === "awarded") {
+        return send(msg.chat.id, [
+          "⚡ SHILLPOINTS AUTO-AWARDED",
+          "",
+          `Submission #${data.id}`,
+          `🪙 ${data.token_symbol}`,
+          `🌐 ${data.platform}`,
+          `⭐ +${auto.points_awarded} LP`,
+          `🏆 New total: ${auto.total_points} LP`,
+          "",
+          "No Admin approval needed."
+        ].join("\n"));
+      }
+
+      if (auto?.outcome === "budget_deferred") {
+        return send(msg.chat.id, "⏳ Shill proof recorded, but the protected weekly reward pool is full. No extra points were issued.");
+      }
+
       return send(msg.chat.id, [
-        "✅ SHILL PROOF RECEIVED",
+        "🛡 SHILLPOINTS SAFETY HOLD",
         "",
         `Submission #${data.id}`,
-        `🪙 $${data.token_symbol}`,
-        `🌐 ${data.platform}`,
-        `⭐ Pending reward: ${asset.points_per_verified_share} LP`,
+        `Reason: ${auto?.review_reason || "automatic safety check"}`,
         "",
-        "An Admin review is required before the points are added."
+        "Normal genuine proofs auto-award. Only exceptions enter Admin review."
       ].join("\n"));
     } catch (error) {
       console.error("Shill proof submission failed", { code: error?.code || error?.message || "unknown" });
