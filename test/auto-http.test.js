@@ -106,8 +106,14 @@ test("Zed Mini App Auto routes require signed primary-owner identity", async (t)
   assert.equal(ultimatePayload.ultimate.fundingSchedule.minute, 30);
   assert.equal(ultimatePayload.ultimate.providers.jupiter.secret_custody, "prohibited");
   assert.equal(ultimatePayload.ultimate.launch.status, "candidate-mainnet-disabled");
-  assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.targetGrossTraderFeeBpsWhereProven, 75);
-  assert.deepEqual(ultimatePayload.ultimate.launchPolicy.feePolicy.worldzControlledSplitPercent, { creator: 51, referrer: 17, legacyFlywheel: 15, worldzLaunchPad: 8.5, impact: 8.5 });
+  assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.version, "WORLDZ-FEE-FLOW-V3");
+  assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.projectTradingFeeDefaultPercent, 1);
+  assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.projectTradingFeeMaxPercent, 3);
+  assert.deepEqual(ultimatePayload.ultimate.launchPolicy.feePolicy.launchPadContributionChoicesPercent, [3, 5, 8]);
+  assert.deepEqual(ultimatePayload.ultimate.launchPolicy.feePolicy.creatorRetentionByContributionPercent, { "3": 97, "5": 95, "8": 92 });
+  assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.worldzInternalSplitPercent.treasury, 20);
+  assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.treasuryLane.operationsPercent, 70);
+  assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.treasuryLane.miracleTeamPercent, 30);
   assert.equal(ultimatePayload.ultimate.signers.find((signer) => signer.role === "owner").immutable, true);
 
   const deniedUltimate = await fetch(`${base}/api/mini/auto/ultimate`, {
