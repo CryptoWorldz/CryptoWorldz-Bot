@@ -51,7 +51,8 @@ for(const row of signatures){
   const info=p.info||{};
   if(info.source!==SOURCE_ATA)continue;
   const raw=String(info.tokenAmount?.amount??info.amount??'unknown');
-  console.log('RVIV_SOURCE_OUTFLOW signature='+row.signature+' blockTime='+String(row.blockTime||'')+' type='+p.type+' raw='+raw+' destination='+String(info.destination||''));
+  const dest=String(info.destination||''); outflowDestinations.add(dest);
+  console.log('RVIV_SOURCE_OUTFLOW signature='+row.signature+' blockTime='+String(row.blockTime||'')+' type='+p.type+' raw='+raw+' destination='+dest);
  }
 }
 \n}catch(e){console.log('RVIV_HISTORY_AUDIT_UNAVAILABLE '+(e?.message||e));}\n
