@@ -132,6 +132,7 @@ function transferInstructions(d,s){
 
 async function preflight(){
  await connect();
+ if(cfg.executionEnabled!==true)fail(cfg.executionBlockReason||'Direct WLDZ distribution is disabled.');
  const d=await deps(),connection=new d.web3.Connection(RPC,'confirmed'),s=await state(connection,d);
  if(s.sourceWldz<BigInt(cfg.totalWldz)*1000000n)fail('Squads vault does not contain the full '+Number(cfg.totalWldz).toLocaleString()+' WLDZ pending distribution.');
  const missing=await recipientCheck(connection,d,s);
