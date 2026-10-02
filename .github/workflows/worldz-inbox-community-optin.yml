@@ -1,0 +1,87 @@
+name: Worldz Inbox Community Opt-In
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/worldz-inbox-community-optin.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    name: Invite community into Worldz Inbox
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - name: Post community opt-in invite
+        shell: python
+        run: |
+          import io, json, os, re, urllib.request, urllib.error
+          from ftplib import FTP_TLS
+
+          groups=[
+              (-1003732353996,"Worldz Community"),
+              (-1004404927235,"CryptoWorldz HQ"),
+          ]
+
+          host=str(os.environ.get("FTP_HOST","")).replace("ftps://","").replace("ftp://","").split("/")[0]
+          if host.count(":")==1: host=host.split(":",1)[0]
+          user=str(os.environ.get("FTP_USERNAME","")).strip()
+          password=str(os.environ.get("FTP_PASSWORD","")).strip()
+          ftp=FTP_TLS(); ftp.connect(host,int(os.environ.get("FTP_PORT","21")),timeout=45); ftp.login(user,password); ftp.prot_p()
+          buf=io.BytesIO(); ftp.retrbinary("RETR /domains/cryptobotz.cryptoworldz.xyz/nodejs/.env",buf.write); ftp.quit()
+          env={}
+          for raw in buf.getvalue().decode("utf-8").splitlines():
+              line=raw.strip()
+              if not line or line.startswith("#") or "=" not in line: continue
+              k,v=line.split("=",1); k=re.sub(r"^export\s+","",k).strip(); v=v.strip().strip('"').strip("'")
+              if v: env[k]=v
+          token=str(env.get("BOT_TOKEN") or env.get("TELEGRAM_BOT_TOKEN") or env.get("ZED_BOT_TOKEN") or "").strip()
+          if not token: raise SystemExit("Live ZED token missing")
+          print("::add-mask::"+token)
+
+          text=(
+              "📥 WORLDZ INBOX™ — COMMUNITY INVITE 🌐\n\n"
+              "We’re opening the new Worldz private messaging system to COMMUNITY MEMBERS — not just admins.\n\n"
+              "Open ZED privately and send:\n"
+              "/start\n"
+              "then\n"
+              "/inbox\n\n"
+              "That registers your private Telegram chat so Worldz can send you project updates, launch opportunities, community invitations and replies through the Worldz Inbox.\n\n"
+              "🌍 Explore the mission: https://foodworldz.com/\n"
+              "💜 Support JayJayTeamDev: https://donateworldz.com/jayjay-support/\n"
+              "🚀 Create your own token: https://launchpad.cryptoworldz.xyz/create-your-own-money/\n"
+              "🗳 Worldz Public Voice: https://cryptobotz.cryptoworldz.xyz/miniapp/#worldz-civic-votes\n\n"
+              "If you want to help build, test, launch, suggest, document or support something — jump in. 🌐💜\n\n"
+              "Private Inbox messages can be disabled anytime with /dmsettings off."
+          )
+
+          accepted=0
+          for chat_id,label in groups:
+              data=json.dumps({"chat_id":chat_id,"text":text,"disable_web_page_preview":True},ensure_ascii=False).encode("utf-8")
+              req=urllib.request.Request("https://api.telegram.org/bot"+token+"/sendMessage",data=data,headers={"content-type":"application/json"},method="POST")
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as r: out=json.loads(r.read().decode("utf-8"))
+                  if out.get("ok"):
+                      accepted+=1
+                      print(f"COMMUNITY_INVITE_ACCEPTED group={label} message_id={out.get('result',{}).get('message_id')}")
+                  else:
+                      print(f"COMMUNITY_INVITE_REJECTED group={label} reason={out.get('description','unknown')}")
+              except urllib.error.HTTPError as e:
+                  body=e.read().decode("utf-8","replace")
+                  try: reason=json.loads(body).get("description",body[:180])
+                  except: reason=body[:180]
+                  print(f"COMMUNITY_INVITE_REJECTED group={label} reason={reason}")
+
+          print(f"COMMUNITY_INVITE_ACCEPTED_TOTAL={accepted}")
+          if accepted==0: raise SystemExit("No community invite posts accepted")
