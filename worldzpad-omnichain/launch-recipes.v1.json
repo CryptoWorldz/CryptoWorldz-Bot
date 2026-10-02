@@ -1,7 +1,7 @@
 {
   "schema": "WORLDZ-LAUNCH-RECIPES-V1",
   "version": "2026-10-02",
-  "rule": "Recipes are transparent starting presets only. They never bypass the Worldz Safe Launch Standard, alter the fixed Worldz Fee Flow V2 lanes, or imply mainnet availability.",
+  "rule": "Recipes are transparent genesis-allocation presets only. They never bypass the Worldz Safe Launch Standard, alter Fee Flow V3 creator retention or Worldz-internal routing, or imply mainnet availability.",
   "recipes": [
     {
       "id": "CREATOR",
@@ -14,7 +14,7 @@
         "treasuryReserve": 10,
         "growthEcosystem": 15
       },
-      "fixedFeeFlowNote": "Worldz Fee Flow V2 remains unchanged."
+      "fixedFeeFlowNote": "Worldz Fee Flow V3 remains unchanged."
     },
     {
       "id": "COMMUNITY",
@@ -27,7 +27,7 @@
         "treasuryReserve": 10,
         "growthEcosystem": 10
       },
-      "fixedFeeFlowNote": "Worldz Fee Flow V2 remains unchanged."
+      "fixedFeeFlowNote": "Worldz Fee Flow V3 remains unchanged."
     },
     {
       "id": "HOLDER_REWARDS",
@@ -40,7 +40,7 @@
         "treasuryReserve": 10,
         "growthEcosystem": 15
       },
-      "fixedFeeFlowNote": "Reward execution requires separate disclosed mechanics and proof."
+      "fixedFeeFlowNote": "Worldz Fee Flow V3 remains unchanged."
     },
     {
       "id": "LIQUIDITY_GROWTH",
@@ -53,12 +53,12 @@
         "treasuryReserve": 10,
         "growthEcosystem": 10
       },
-      "fixedFeeFlowNote": "LP protection and venue proof remain required."
+      "fixedFeeFlowNote": "Worldz Fee Flow V3 remains unchanged."
     },
     {
       "id": "BUYBACK",
       "label": "Buyback Focus",
-      "description": "Keeps a balanced genesis allocation while using the existing disclosed buyback lane in Fee Flow V2.",
+      "description": "Balanced genesis allocation for a project that may later use a separately disclosed and proven buyback program.",
       "allocations": {
         "creatorTeam": 10,
         "liquidity": 35,
@@ -66,7 +66,7 @@
         "treasuryReserve": 10,
         "growthEcosystem": 15
       },
-      "fixedFeeFlowNote": "The fixed launched-token Buyback + Burn lane remains 8%; no extra hidden fee is added."
+      "fixedFeeFlowNote": "Fee Flow V3 has no automatic fixed buyback deduction. Any buyback or burn requires its own disclosed source, route, approval and WorldzProof."
     },
     {
       "id": "IMPACT",
@@ -79,7 +79,7 @@
         "treasuryReserve": 10,
         "growthEcosystem": 20
       },
-      "fixedFeeFlowNote": "The fixed Impact / Charity Fee Flow V2 lane remains 5%."
+      "fixedFeeFlowNote": "Fee Flow V3 keeps Impact / Charity at 10% of the Worldz contribution; this recipe does not change that internal lane."
     },
     {
       "id": "FAIR_LAUNCH",
@@ -92,14 +92,14 @@
         "treasuryReserve": 5,
         "growthEcosystem": 10
       },
-      "fixedFeeFlowNote": "Fair Launch is a distribution preset, not a guarantee of price, demand or equal outcomes."
+      "fixedFeeFlowNote": "Worldz Fee Flow V3 remains unchanged."
     },
     {
       "id": "CUSTOM",
       "label": "Custom",
       "description": "Start from the current values and edit within enforced Worldz limits.",
       "allocations": null,
-      "fixedFeeFlowNote": "All Safe Launch limits and fixed Fee Flow V2 lanes remain enforced."
+      "fixedFeeFlowNote": "All Safe Launch limits and Fee Flow V3 creator-retention/internal-routing rules remain enforced."
     }
   ]
 }
