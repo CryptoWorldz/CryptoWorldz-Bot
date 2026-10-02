@@ -1,5 +1,5 @@
 {
-  "version": "WLDZ-DISTRIBUTION-SIGN-2026-09-23-D",
+  "version": "WLDZ-DISTRIBUTION-SIGN-2026-10-02-3OF5-A",
   "network": "mainnet-beta",
   "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
   "decimals": 6,
@@ -7,14 +7,9 @@
   "vaultIndex": 0,
   "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
   "authorisedMember": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
-  "totalWldz": 55000000,
+  "totalWldz": 47000000,
   "legs": [
     [
-      {
-        "role": "JayJayTeamDev",
-        "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
-        "wldz": 8000000
-      },
       {
         "role": "Stepper",
         "address": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
@@ -35,7 +30,7 @@
     ],
     [
       {
-        "role": "OneWorldz Charity Impact",
+        "role": "Worldz Impact / DonateWorldz",
         "address": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
         "wldz": 10000000
       },
@@ -83,5 +78,42 @@
     "maximumTreasuryTopupSol": 0,
     "vaultSafetyReserveSol": 0,
     "source": "JAYJAY_SIGNER_ONLY"
+  },
+  "governance": {
+    "policy": "3-of-5",
+    "requiredApprovals": 3,
+    "memberCount": 5,
+    "multisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
+    "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB"
+  },
+  "alreadyExecuted": [
+    {
+      "role": "JayJayTeamDev",
+      "wldz": 8000000,
+      "state": "LIVE_ALREADY_EXECUTED__DO_NOT_REPEAT"
+    },
+    {
+      "role": "Initial locked liquidity",
+      "wldz": 15000000,
+      "state": "LIVE_ALREADY_EXECUTED__DO_NOT_REPEAT"
+    }
+  ],
+  "postDistributionVaultReserve": {
+    "expectedWldz": 30000000,
+    "components": [
+      {
+        "role": "Staged Liquidity Reserve",
+        "wldz": 20000000
+      },
+      {
+        "role": "Worldz Operations Treasury Reserve",
+        "wldz": 10000000
+      }
+    ],
+    "rule": "These allocations remain in 3-of-5 Squads custody and are not included in the 47M pending distribution."
+  },
+  "transparency": {
+    "commonControlDisclosureRequired": true,
+    "rule": "Purpose-specific wallets or vaults controlled by the same owner or Worldz treasury must be labelled as common-beneficial-control. Splitting custody must not be represented as independent holder decentralisation."
   }
 }
