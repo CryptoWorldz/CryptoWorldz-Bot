@@ -188,12 +188,12 @@ jobs:
           set -euo pipefail
           if ! node -e "const m=require('./launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json'); process.exit(m.executionEnabled===true?0:1)"; then
             node - <<'NODE'
-const fs=require('fs');
-const m=JSON.parse(fs.readFileSync('launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json','utf8'));
-if(m.status!=='RECONCILIATION_REQUIRED__EXECUTION_DISABLED') throw new Error('Unexpected disabled OneDrop state');
-if(m.executableNow.totalMovedFromSquadsRaw!=='0') throw new Error('Disabled OneDrop must move zero RVIV');
-console.log('WORLDZ_ONEDROP_RECONCILIATION_MODE=PASS');
-NODE
+          const fs=require('fs');
+          const m=JSON.parse(fs.readFileSync('launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json','utf8'));
+          if(m.status!=='RECONCILIATION_REQUIRED__EXECUTION_DISABLED') throw new Error('Unexpected disabled OneDrop state');
+          if(m.executableNow.totalMovedFromSquadsRaw!=='0') throw new Error('Disabled OneDrop must move zero RVIV');
+          console.log('WORLDZ_ONEDROP_RECONCILIATION_MODE=PASS');
+          NODE
             exit 0
           fi
           node <<'NODE'
