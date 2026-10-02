@@ -20,9 +20,7 @@ async function configureTelegramMenuButton() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         menu_button: {
-          type: "web_app",
-          text: "🌐 OPEN COMMAND CENTRE",
-          web_app: { url: COMMAND_CENTRE_MINIAPP_URL }
+          type: "commands"
         }
       }),
       signal: AbortSignal.timeout(15000)
@@ -31,7 +29,7 @@ async function configureTelegramMenuButton() {
     if (!response.ok || payload.ok !== true) {
       console.warn("Telegram Command Centre menu button registration failed.");
     } else {
-      console.info("Telegram Command Centre menu button registered.");
+      console.info("Telegram command menu registered; private composer remains available.");
     }
   } catch {
     console.warn("Telegram Command Centre menu button registration failed.");
