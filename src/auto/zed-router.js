@@ -79,34 +79,35 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
         { id: "curve-pro", name: "Worldz Curve Pro™", url: "https://launchpad.cryptoworldz.xyz/curve-pro/" }
       ],
       feePolicy: {
-        version: "WORLDZ-FEE-FLOW-V2",
-        targetGrossTraderFeeBpsWhereProven: 75,
-        targetGrossTraderFeePercentWhereProven: 0.75,
+        version: "WORLDZ-FEE-FLOW-V3",
+        projectTradingFeeDefaultPercent: 1,
+        projectTradingFeeMaxPercent: 3,
+        preferredIncrementPercent: 0.25,
         dynamicFeeDefault: false,
-        worldzControlledSplitPercent: {
-          creator: 51,
-          referrer: 17,
-          legacyFlywheel: 15,
-          worldzLaunchPad: 8.5,
-          impact: 8.5
-        },
-        legacyAdapterProfileOnly: true,
         launchPadContributionChoicesPercent: [3, 5, 8],
         launchPadContributionDefaultPercent: 5,
-        fixedSplitPercent: {
-          creatorDeveloper: 10,
-          launchReferrer: 15,
-          legacyCore: 15,
-          worldzCoreFamilyMarketBuys: 12,
-          lpGrowth: 10,
-          launchedTokenBuybackAndBurn: 8,
-          impactCharity: 5,
+        creatorRetentionByContributionPercent: { "3": 97, "5": 95, "8": 92 },
+        worldzInternalSplitPercent: {
+          operationsProductDevelopment: 20,
+          treasury: 20,
+          lpGrowth: 15,
+          legacyCore: 10,
+          worldzCoreFamilyMarketBuys: 10,
+          impactCharity: 10,
           teamBuilderRewards: 5,
-          futureTokenDeploymentReserve: 5
+          futureLaunchInfrastructure: 5,
+          launchReferrer: 5
         },
-        treasuryReserveByLaunchPadChoice: { "3": 12, "5": 10, "8": 7 },
+        treasuryLane: {
+          percentOfWorldzContribution: 20,
+          operationsPercent: 70,
+          miracleTeamPercent: 30,
+          operationsGovernance: "3-of-5",
+          miracleTeamGovernance: "4-of-7"
+        },
         legacyTokenCount: 12,
         coreFamilySymbols: ["WLDZ", "RVIV", "PNEX", "MRCL"],
+        legacyAdapterProfileOnly: true,
         externalVenueAndNetworkFeesSeparate: true,
         automaticMainnetRoutingEnabled: false
       },
