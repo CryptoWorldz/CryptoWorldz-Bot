@@ -32,7 +32,25 @@
         "Worldz Curve devnet",
         "Worldz Curve Pro devnet"
       ],
-      "mainnet": false
+      "mainnet": false,
+      "routeOverrides": {
+        "worldzFlash": {
+          "worldzProjectFeeDefaultPercent": 1,
+          "executionState": "CONFIG_SNAPSHOT_ONLY_FOR_FEE_ROUTING",
+          "venueFeeSeparate": true
+        },
+        "worldzCurve": {
+          "currentReviewedDevnetFeePercent": 2,
+          "creatorChoiceTemporarilyLocked": true,
+          "reason": "Current reviewed Raydium LaunchLab Devnet config requires its proven 2.00% profile; do not pretend the generic 1% choice is executable on this route yet."
+        },
+        "worldzCurvePro": {
+          "worldzProjectFeeDefaultPercent": 1,
+          "minPercent": 0.5,
+          "maxPercent": 3,
+          "stepPercent": 0.25
+        }
+      }
     },
     "xrpl": {
       "world": "XRPWorldz",
@@ -48,7 +66,8 @@
         "nativeMaximumPercent": 1,
         "nativePrecisionPercent": 0.001,
         "worldzUiIncrementPercent": 0.25,
-        "rule": "XRPL AMM TradingFee cannot exceed 1%. Worldz deliberately presents four simple choices instead of exposing unnecessary fine-grained complexity."
+        "rule": "XRPL AMM TradingFee cannot exceed 1%. Worldz deliberately presents four simple choices instead of exposing unnecessary fine-grained complexity.",
+        "note": "XRPL protocol supports 0.001% fee precision and a 1% maximum. Worldz uses 0.25% public UI steps for simplicity, not because the protocol requires that step."
       },
       "clob": {
         "projectTradingFeeSlider": false,
