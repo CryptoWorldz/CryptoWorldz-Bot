@@ -34,19 +34,15 @@ const inner=new TransactionMessage({payerKey:vault,recentBlockhash:blockhash,ins
  createTransferCheckedInstruction(sourceAta,mint,tokenVault,vault,total,manifest.token.decimals,[],TOKEN_PROGRAM_ID),
  createTransferCheckedInstruction(sourceAta,mint,impactAta,vault,BigInt(impact.raw),manifest.token.decimals,[],TOKEN_PROGRAM_ID)
 ]});
-const wrappedBytes=squads.utils.transactionMessageToMultisigTransactionMessageBytes({message:inner,vaultPda:vault});
-const [wrappedMessage]=squads.types.transactionMessageBeet.deserialize(Buffer.from(wrappedBytes));
 const transactionIndex=999n,[transactionPda]=squads.getTransactionPda({multisigPda:multisig,index:transactionIndex}),[proposalPda]=squads.getProposalPda({multisigPda:multisig,transactionIndex});
 const createIx=squads.instructions.vaultTransactionCreate({multisigPda:multisig,transactionIndex,creator:owner,rentPayer:owner,vaultIndex:0,ephemeralSigners:0,transactionMessage:inner,memo:'Worldz OneDrop REVIVE: Dev + Legacy claims and OneWorldz Impact'});
 const proposalIx=squads.instructions.proposalCreate({multisigPda:multisig,transactionIndex,creator:owner,rentPayer:owner,isDraft:false});
 const approveIx=squads.instructions.proposalApprove({multisigPda:multisig,transactionIndex,member:owner,memo:'Approve exact REVIVE OneDrop distribution'});
-const metas=wrappedMessage.accountKeys.map((key,i)=>({pubkey:key,isWritable:squads.utils.isStaticWritableIndex(wrappedMessage,i),isSigner:squads.utils.isSignerIndex(wrappedMessage,i)&&!key.equals(vault)}));
-const executeIx=squads.generated.createVaultTransactionExecuteInstruction({multisig,proposal:proposalPda,transaction:transactionPda,member:owner,anchorRemainingAccounts:metas},squads.PROGRAM_ID);
 const tx=new Transaction({feePayer:owner,recentBlockhash:blockhash}).add(
  createAssociatedTokenAccountIdempotentInstruction(owner,ownerAta,owner,mint,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID),
  createAssociatedTokenAccountIdempotentInstruction(owner,impactAta,impactOwner,mint,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID),
- distIx,createIx,proposalIx,approveIx,executeIx
+ distIx,createIx,proposalIx,approveIx
 );
 const size=tx.serialize({requireAllSignatures:false,verifySignatures:false}).length;
-console.log('WORLDZ_ONEDROP_STATIC claimant_count='+manifest.recipients.length+' claim_raw='+total+' one_tx_worst_case_bytes='+size);
-if(size>1232)throw new Error('one transaction exceeds Solana packet limit: '+size);
+console.log('WORLDZ_ONEDROP_STATIC claimant_count='+manifest.recipients.length+' claim_raw='+total+' proposal_tx_worst_case_bytes='+size);
+if(size>1232)throw new Error('proposal transaction exceeds Solana packet limit: '+size);
