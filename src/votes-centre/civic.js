@@ -17,6 +17,10 @@ const CIVIC_PRINCIPLES = Object.freeze([
   "transparent-count",
   "source-backed-information",
   "politically-neutral-platform",
+  "worldwide-nonbinding-public-voice",
+  "no-geographic-allowlist-for-general-voice",
+  "age-inclusive-general-voice-with-safeguards",
+  "no-demographic-or-wealth-vote-weighting",
   "jurisdiction-law-gate",
   "no-false-official-authority"
 ]);
