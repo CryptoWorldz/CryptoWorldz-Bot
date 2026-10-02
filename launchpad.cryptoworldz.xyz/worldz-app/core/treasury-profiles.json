@@ -17,22 +17,47 @@
         "xrpl": "SignerList",
         "sui": "Native weighted multisig"
       },
-      "state": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_3_MORE_VERIFIED_SIGNERS",
+      "state": "SIGNER_SET_LOCKED__PENDING_SQUADS_DEPLOYMENT_AND_LIVE_4_OF_8_PROOF",
       "mainnetExecution": false,
       "signerPolicy": {
-        "confirmedDocumentedCandidates": [
-          "JayJayTeamDev",
-          "Stepper",
-          "Savage",
-          "SolMusic",
-          "Mahammad"
+        "signers": [
+          {
+            "label": "JayJayTeamDev",
+            "solanaPublicKey": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u"
+          },
+          {
+            "label": "Stepper",
+            "solanaPublicKey": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ"
+          },
+          {
+            "label": "Savage",
+            "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
+          },
+          {
+            "label": "SolMusic",
+            "solanaPublicKey": "FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ"
+          },
+          {
+            "label": "Mahammad",
+            "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
+          },
+          {
+            "label": "Zephyr",
+            "solanaPublicKey": "JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc"
+          },
+          {
+            "label": "Troll George",
+            "solanaPublicKey": "GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc"
+          },
+          {
+            "label": "Annabel",
+            "solanaPublicKey": "2fnb5CeAtvgUxz1R46e4DQJ8q99M5bn5oEgQMTYS1fa"
+          }
         ],
-        "confirmedCandidateCount": 5,
-        "remainingSignerSlots": 3,
-        "remainingSignerSource": "Three distinct consenting verified Worldz Legend/Admin/Miracle Team public wallets",
+        "signerCount": 8,
+        "threshold": 4,
         "noInventedWallets": true,
-        "noSamePersonMultiKeyThresholdPadding": true,
-        "ownerControlledExtraWalletsMayBeAllocationCustodyButNotIndependentHumanSigners": true
+        "samePersonMultiKeyThresholdPadding": false
       },
       "revenueRouting": {
         "scope": "TREASURY_BOUND_REVENUE_ONLY",
@@ -75,5 +100,5 @@
       "note": "No separate Worldz Reserve Treasury is currently required. Reserve sweeps are disabled; funds remain in the Operations Treasury until a future explicit decision."
     }
   ],
-  "rule": "Worldz Operations uses permanent 3-of-5 governance. The separate Miracle Team Treasury targets 4-of-8 and receives 30% only of treasury-bound revenue after live deployment proof; Operations receives the other 70%. Five documented signer candidates are known and three distinct consenting signer wallets remain pending. Reserve remains disabled/not deployed."
+  "rule": "Worldz Operations uses permanent 3-of-5 governance. The separate Miracle Team Treasury uses the locked eight-wallet roster and target 4-of-8 governance. After live Squads deployment proof, 30% of treasury-bound revenue routes to Miracle Team and 70% remains Operations. Reserve remains disabled/not deployed."
 }
