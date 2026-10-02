@@ -33,7 +33,8 @@
     "feePolicy": "worldzpad-omnichain/fee-policy.v1.json",
     "launchIntentSchema": "worldzpad-omnichain/schemas/launch-intent.schema.json",
     "worldzProofSchema": "worldzpad-omnichain/schemas/worldz-proof.schema.json",
-    "researchLedProduct": "worldzpad-omnichain/research-led-product-policy.v1.json"
+    "researchLedProduct": "worldzpad-omnichain/research-led-product-policy.v1.json",
+    "liquidityIntelligence": "worldzpad-omnichain/liquidity-intelligence.v1.json"
   },
   "pipeline": [
     "CREATE_PROJECT",
@@ -85,7 +86,8 @@
     "A verified success state requires chain confirmation; submitted is never displayed as confirmed.",
     "Beginner and Pro experiences share the same proof rules while exposing different levels of complexity.",
     "Raw token creation count is not a primary success metric; survival, retained liquidity, holders, creator activity and security outcomes are tracked.",
-    "Jackpot, lottery, Powerball and casino-style launch models are not WorldzLaunchPad product modes."
+    "Jackpot, lottery, Powerball and casino-style launch models are not WorldzLaunchPad product modes.",
+    "Observed liquidity is never presented as proof that LP is locked or cannot be removed."
   ],
   "buildPhases": [
     {
