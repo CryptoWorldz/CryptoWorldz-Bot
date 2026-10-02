@@ -1,0 +1,40 @@
+{
+  "version": "WORLDZPARTY-STAGING-2026-09-25-A",
+  "publicTarget": "staging.hodlergalaxy.xyz",
+  "productionDomainUntouched": "hodlergalaxy.xyz",
+  "product": "WorldzParTyPlatform™",
+  "districts": [
+    "Hodlerz Paradise™",
+    "DevCity™",
+    "InvestmentCity™",
+    "Worldz Launch Rooms™",
+    "Worldz Passport™",
+    "Worldz Academy / RECAP",
+    "Worldz Impact™"
+  ],
+  "operatingLayer": [
+    "ZED",
+    "AUTO",
+    "G.R.A.C.E.",
+    "MAX",
+    "WorldPing",
+    "WorldzCast",
+    "WorldzLaunchPad",
+    "Trust Orbit",
+    "Founding 100"
+  ],
+  "communityRule": "Contribution, learning and proof outrank wallet size.",
+  "economicsRule": "No promise of token value or investment return. Protocol, creator, referrer, platform and impact economics must be disclosed separately where applicable.",
+  "founding100": {
+    "positions": 100,
+    "wldzPoolTokens": 10000000,
+    "wldzPerQualifiedMainnetTeam": 100000,
+    "testnetEligible": false
+  },
+  "imageryRule": "Original Worldz-built visual environment only. No generic stock hero imagery.",
+  "deployment": {
+    "enabled": false,
+    "stagingOnly": true,
+    "productionOverwriteAllowed": false
+  }
+}
