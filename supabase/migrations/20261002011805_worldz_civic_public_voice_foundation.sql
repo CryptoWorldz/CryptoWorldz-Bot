@@ -1,10 +1,6 @@
--- WORLDZ VOTES CENTRE™ civic schema reference.
--- Canonical production migration: supabase/migrations/20261002011805_worldz_civic_public_voice_foundation.sql
--- Applied to connected Supabase project on 2026-10-02.
--- Binding civic voting remains intentionally disabled until legal, privacy,
--- identity and independent security/audit gates are complete.
---
--- Keep this reference aligned with the production migration below.
+-- WORLDZ VOTES CENTRE™ worldwide civic/public-voice foundation.
+-- Applied to production Supabase as migration 20261002011805.
+-- Additive schema only. Binding civic voting remains structurally disabled.
 
 create table if not exists public.worldz_civic_ballots (
   id uuid primary key default gen_random_uuid(),
