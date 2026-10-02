@@ -52,6 +52,7 @@ test("Create Your Own Money campaign is accurate, connected and non-misleading",
   assert.match(html,/not automatically legal tender/i);
   assert.match(html,/does not guarantee value|not automatically.*valuable/i);
   assert.match(html,/BUILD MY TOKEN PLAN/);
+  assert.match(html,/brand-logo-official/);
   assert.match(html,/\/launch-station\//);
   assert.match(html,/\/community\//);
   assert.match(html,/\/advertise\//);
