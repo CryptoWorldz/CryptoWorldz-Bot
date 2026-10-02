@@ -77,7 +77,9 @@
       "name": "DEVCITY_100",
       "raw": "20000000000000",
       "tokens": "20000000",
-      "status": "RESERVED_PENDING_APPROVED_100_WALLET_ROSTER"
+      "status": "RESERVED_PENDING_APPROVED_100_WALLET_ROSTER",
+      "destination": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
+      "destinationRole": "DEVCITY_STAGING_POOL"
     },
     {
       "name": "TEAM_VESTING",
@@ -109,7 +111,10 @@
     "oneWorldzDirectRaw": "20000000000000",
     "totalMovedFromSquadsRaw": "69999999999948",
     "expectedRemainingSquadsRaw": "100000000000052",
-    "governance": "3-of-5 Squads approval required before vault execution"
+    "governance": "3-of-5 Squads approval required before vault execution",
+    "expectedPreOneDropSquadsRaw": "170000000000000",
+    "reconciliationRequiredIfSourceDiffers": true,
+    "rule": "Do not create a new OneDrop distributor if the live Squads RVIV source is not the frozen pre-execution amount. A lower source can mean earlier direct distributions already occurred and must be reconciled before any new transfer."
   },
   "sourceEvidence": {
     "legacySourceVersion": "REVIVE-EQUAL-LEGACY-2026-09-26-A",
