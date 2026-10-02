@@ -6,7 +6,7 @@ const REQUIRED_RUNTIME_COMMANDS = [
   "zedstart","zed","help","commands","commandtree","directory","acknowledgements","supportjay",
   "start","register","profile","rewards","leaderboard","raaiiidd","raids","wallet","cancel","kitty","impact","donate","points",
   "fullscope","worldzfullbuild","fullscopechains","fullscopetokens","worldzwatch","worldzlock","worldzvest",
-  "worldzvotes","vote","tokenvote","worldztrending","worldzrankings",
+  "worldzvotes","vote","tokenvote","worldztrending","worldzrankings","worldzvoice","worldzballots","worldzballot","worldzresults",
   "raid","next","raidprogress","stopraid","admin","admingrace","zedsettings","newmission","editmission","endmission","pending","approve","reject","member","admins","permissions","setkitty","setrole","setpermission","setpartner","broadcast","stats","activity",
   "causes","cause","cause_add","shilllink","shill","shillpoints","pendingshills","approveshill","rejectshill","referrals","rewardplan","website","websites","worldzlinks","worldzlive","solworldz","tg","tglinks","x","xlinks","identify","setx",
   "workstart","workstop","evidence","workevidence","rewardbudget","specialreward","rewardasset","fundingplan","funded","contribute","walletplan","setprojectwallet","investmentfunded",
@@ -47,14 +47,21 @@ test("Ronald Raider is exposed as RAIDS, not Missions", () => {
   assert.equal(names.has("missions"), false);
 });
 
-test("Worldz Votes Centre is the only public voting group", () => {
+test("Worldz Votes Centre keeps hourly token voting and civic public voice separate", () => {
   const groups = groupsForRole("member");
   const votes = groups.find((group) => group.key === "worldz-votes-centre");
+  const civic = groups.find((group) => group.key === "worldz-civic-voice");
   assert.ok(votes);
+  assert.ok(civic);
   assert.equal(Boolean(groups.find((group) => group.key === "worldz-govern")), false);
-  const names = new Set(votes.commands.map((item) => item.command));
-  assert.ok(names.has("vote"));
-  assert.ok(names.has("tokenvote"));
+  const tokenNames = new Set(votes.commands.map((item) => item.command));
+  const civicNames = new Set(civic.commands.map((item) => item.command));
+  assert.ok(tokenNames.has("vote"));
+  assert.ok(tokenNames.has("tokenvote"));
+  for (const command of ["worldzvoice","worldzballots","worldzballot","worldzresults"]) {
+    assert.ok(civicNames.has(command), command);
+    assert.equal(tokenNames.has(command), false, command);
+  }
 });
 
 test("Community Suite command groups expose member tools without leaking owner controls", () => {
