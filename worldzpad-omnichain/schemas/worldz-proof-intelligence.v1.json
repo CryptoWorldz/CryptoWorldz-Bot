@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://launchpad.cryptoworldz.xyz/schemas/worldz-proof-intelligence.v1.json",
+  "title": "WorldzProof Intelligence Packet v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "chain",
+    "tokenId",
+    "proofState",
+    "dataSources",
+    "checkedAt"
+  ],
+  "properties": {
+    "version": {
+      "const": "WORLDZ-PROOF-INTELLIGENCE-V1"
+    },
+    "chain": {
+      "type": "string"
+    },
+    "tokenId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proofState": {
+      "enum": [
+        "DRAFT",
+        "PARTIAL",
+        "CONFIRMED",
+        "FAILED",
+        "UNKNOWN"
+      ]
+    },
+    "creatorHistory": {
+      "anyOf": [
+        {
+          "$ref": "worldz-creator-history.v1.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rexIntelligence": {
+      "anyOf": [
+        {
+          "$ref": "rex-token-intelligence.v1.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "transactionSupport": {
+      "anyOf": [
+        {
+          "$ref": "worldz-transaction-support.v1.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "dataSources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "provider",
+          "status"
+        ],
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "CONFIRMED",
+              "PARTIAL",
+              "UNAVAILABLE",
+              "DISAGREES"
+            ]
+          },
+          "reference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "checkedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
