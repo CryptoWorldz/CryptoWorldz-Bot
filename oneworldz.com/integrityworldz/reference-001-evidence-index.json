@@ -1,0 +1,24 @@
+{
+  "version": "WORLDZ-REFERENCE-001-PUBLIC-1",
+  "updated": "2026-10-03",
+  "title": "No.1 Relatable Problem — Financial management and essential needs",
+  "publication": "privacy-safe-public-index",
+  "principles": [
+    "evidence-before-accusation",
+    "separate-official-record-from-personal-statement",
+    "preserve-originals-privately",
+    "redact-sensitive-identifiers",
+    "record-what-happened-after-written-notice"
+  ],
+  "evidence_categories": [
+    "official-financial-management-records",
+    "agency-correspondence",
+    "written-risk-notices",
+    "written-safeguard-budget-proposal",
+    "government-payment-records",
+    "bank-and-payment-records",
+    "rent-and-essential-expense-receipts",
+    "complaint-review-and-oversight-correspondence"
+  ],
+  "public_note": "The public index intentionally omits raw private identifiers and unverified allegations. Originals are preserved separately for legitimate evidentiary use."
+}
