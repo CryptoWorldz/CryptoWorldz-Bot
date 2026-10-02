@@ -71,5 +71,24 @@
   "futureExecution": {
     "enabled": false,
     "rule": "Buying, selling, DCA execution or automated rebalancing require separate provider, legal, custody, best-execution and chain-specific proof before activation."
+  },
+  "researchStandard": {
+    "factVsThesisSeparated": true,
+    "userConvictionAllowed": true,
+    "opposingEvidenceFieldRequiredForSavedThesis": true,
+    "priceTargetRequired": false,
+    "rule": "A strong community belief or investment thesis can be recorded, but Worldz labels it as thesis until measurable evidence supports the underlying claim."
+  },
+  "xrpResearch": {
+    "watch": [
+      "Ripple/XRP escrow balance",
+      "monthly escrow releases",
+      "amount returned to escrow",
+      "XRPL activity",
+      "DEX/AMM liquidity",
+      "institutional/tokenization usage"
+    ],
+    "escrowRule": "Do not describe the scheduled escrow release as one billion XRP automatically flooding the market. Track actual released, retained/transferred and re-escrowed amounts separately.",
+    "pricePrediction": false
   }
 }
