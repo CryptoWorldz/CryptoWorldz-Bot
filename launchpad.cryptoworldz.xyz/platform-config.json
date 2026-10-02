@@ -810,7 +810,7 @@
     "rule": "Fixed-supply token deployment is executable on listed testnets. Chain-specific liquidity, 90/10 fee routing, LP lock and Worldz mainnet launch verification remain fail-closed."
   },
   "xrplNative": {
-    "status": "PUBLIC_TESTNET_BETA_NATIVE_AMM_CLOB_PROOF",
+    "status": "PUBLIC_TESTNET_BETA",
     "path": "/xrpl/",
     "tokenStandard": "XRPL trust-line token",
     "reason": "Trust-line tokens are used for the launch adapter because they currently support XRPL DEX and AMM execution.",
@@ -848,7 +848,8 @@
       "no Delegate objects"
     ],
     "tokenEscrow": "FEATURE_GATED_BY_XRPL_AMENDMENT_EVIDENCE",
-    "submittedIsConfirmed": false
+    "submittedIsConfirmed": false,
+    "nativeDepthStatus": "AMM_CLOB_ISSUER_PROOF_INTEGRATED"
   },
   "temporaryCoreWldzCustody": {
     "active": false,
