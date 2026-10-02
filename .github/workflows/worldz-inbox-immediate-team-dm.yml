@@ -59,8 +59,7 @@ jobs:
           print("::add-mask::"+token)
 
           recipients=[
-              (5978625584,"Savage"),
-              (5457233387,"SolMusic"),
+              (7615025841,"Stepper"),
           ]
 
           message=(
