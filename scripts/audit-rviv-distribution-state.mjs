@@ -1,4 +1,5 @@
 const RPC='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';
+const HIST_RPC='https://api.mainnet-beta.solana.com';
 const MINT='DnpNayNJqzoXnz1tHgJpCq345kNdxzJPo8RAdCeNqx9R';
 const SOURCE_ATA='28CwdVt2y997WZqTzEuBpuwoyVYAj6JcaD4qDMzyCdtn';
 const owners=[
@@ -18,6 +19,12 @@ async function rpc(method,params=[]){
  if(!r.ok||j.error)throw new Error(method+' failed '+JSON.stringify(j.error||r.status));
  return j.result;
 }
+async function histRpc(method,params=[]){
+ const r=await fetch(HIST_RPC,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:method,method,params})});
+ const j=await r.json();
+ if(!r.ok||j.error)throw new Error('history '+method+' failed '+JSON.stringify(j.error||r.status));
+ return j.result;
+}
 async function ownerRaw(owner){
  const out=await rpc('getTokenAccountsByOwner',[owner,{mint:MINT},{encoding:'jsonParsed',commitment:'confirmed'}]);
  return (out?.value||[]).reduce((n,x)=>n+BigInt(x?.account?.data?.parsed?.info?.tokenAmount?.amount||'0'),0n);
@@ -33,9 +40,9 @@ for(const [label,owner] of owners){
 }
 console.log('RVIV_AUDITED_OWNER_BALANCES_RAW='+known);
 
-const signatures=await rpc('getSignaturesForAddress',[SOURCE_ATA,{limit:50,commitment:'confirmed'}]);
+const signatures=await histRpc('getSignaturesForAddress',[SOURCE_ATA,{limit:50,commitment:'confirmed'}]);
 for(const row of signatures){
- const tx=await rpc('getTransaction',[row.signature,{encoding:'jsonParsed',commitment:'confirmed',maxSupportedTransactionVersion:0}]);
+ const tx=await histRpc('getTransaction',[row.signature,{encoding:'jsonParsed',commitment:'confirmed',maxSupportedTransactionVersion:0}]);
  const groups=[...(tx?.transaction?.message?.instructions||[])];
  for(const inner of (tx?.meta?.innerInstructions||[])) groups.push(...(inner.instructions||[]));
  for(const ix of groups){
