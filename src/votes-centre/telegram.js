@@ -14,8 +14,15 @@ function safeMessage(error) {
     .slice(0, 220);
 }
 
-function registerCivicVotesHandlers({ bot, supabase }) {
+function registerCivicVotesHandlers({ bot, supabase, config }) {
   const send = (msg, text) => bot.sendMessage(msg.chat.id, text);
+  const isAdmin = (msg) => {
+    const id = String(msg?.from?.id || "");
+    return Boolean(id) && (
+      id === String(config?.ownerTelegramId || "") ||
+      Boolean(config?.adminTelegramIds?.has && config.adminTelegramIds.has(id))
+    );
+  };
 
   bot.onText(/^\/worldzvoice(?:@\w+)?$/, (msg) => {
     const global = getGlobalPublicVoiceStatus();
@@ -42,12 +49,129 @@ function registerCivicVotesHandlers({ bot, supabase }) {
       "People can document priorities about hunger, preventable disease, healthcare, water, shelter, education and public/community resources.",
       "Worldz does not claim legal authority over government budgets and civic results never execute Worldz treasury actions.",
       "",
-      "⚠️ Current civic build is NON-BINDING. Public concern submission remains gated until moderation/privacy/safety controls are active.",
+      "⚠️ Current civic build is NON-BINDING. Public concerns can be submitted for human review; nothing is published automatically.",
       "",
       "/worldzballots — public civic ballot list",
       "/worldzballot SLUG — ballot details",
       "/worldzresults SLUG — closed/audited public result"
     ].join("\n"));
+  });
+
+  bot.onText(/^\/worldzconcerns(?:@\w+)?$/, async (msg) => {
+    if (!isAdmin(msg)) return send(msg, "❌ Worldz civic review queue is admin-only.");
+    try {
+      const { data, error } = await supabase
+        .from("worldz_civic_concerns")
+        .select("public_id,place_label,topic,title,created_at")
+        .eq("status", "review")
+        .order("created_at", { ascending: true })
+        .limit(10);
+      if (error) throw error;
+      if (!(data || []).length) return send(msg, "🌐 Worldz Public Voice review queue is clear.");
+      return send(msg, [
+        "🌐 WORLDZ PUBLIC VOICE — HUMAN REVIEW QUEUE",
+        "",
+        "Review for privacy, safety, relevance and publication quality. Do not approve/reject based on political viewpoint.",
+        "",
+        ...(data || []).map((row) => [
+          row.public_id,
+          `${row.place_label} • ${row.topic}`,
+          row.title,
+          `/worldzconcern ${row.public_id}`
+        ].join("\n"))
+      ].join("\n\n"));
+    } catch (error) {
+      console.warn("Worldz civic concern queue unavailable:", safeMessage(error));
+      return send(msg, "❌ Worldz concern review queue is unavailable.");
+    }
+  });
+
+  bot.onText(/^\/worldzconcern(?:@\w+)?(?:\s+(WZC-[A-Za-z0-9-]+))?$/, async (msg, match) => {
+    if (!isAdmin(msg)) return send(msg, "❌ Worldz civic review queue is admin-only.");
+    const publicId = String(match && match[1] || "").trim();
+    if (!publicId) return send(msg, "Use: /worldzconcern WZC-ID");
+    try {
+      const { data: row, error } = await supabase
+        .from("worldz_civic_concerns")
+        .select("public_id,place_label,location_scope,country_or_territory_code,topic,title,summary,language_code,status,source_bundle,created_at")
+        .eq("public_id", publicId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!row) return send(msg, "❌ Concern not found.");
+      const sources = Array.isArray(row.source_bundle)
+        ? row.source_bundle.map((item) => item?.url).filter(Boolean).slice(0, 5)
+        : [];
+      return send(msg, [
+        "🌐 WORLDZ PUBLIC VOICE — REVIEW",
+        "",
+        `ID: ${row.public_id}`,
+        `Status: ${String(row.status).toUpperCase()}`,
+        `Place: ${row.place_label} • ${row.location_scope}${row.country_or_territory_code ? " • " + row.country_or_territory_code : ""}`,
+        `Topic: ${row.topic}${row.language_code ? " • " + row.language_code : ""}`,
+        "",
+        row.title,
+        "",
+        String(row.summary || "").slice(0, 2500),
+        ...(sources.length ? ["", "Sources:", ...sources] : []),
+        "",
+        "Moderate for privacy/safety/process quality, not political viewpoint.",
+        `Publish: /worldzpublish ${row.public_id}`,
+        `Reject: /worldzreject ${row.public_id}`
+      ].join("\n"));
+    } catch (error) {
+      console.warn("Worldz civic concern unavailable:", safeMessage(error));
+      return send(msg, "❌ Worldz concern is unavailable.");
+    }
+  });
+
+  bot.onText(/^\/worldzpublish(?:@\w+)?(?:\s+(WZC-[A-Za-z0-9-]+))?$/, async (msg, match) => {
+    if (!isAdmin(msg)) return send(msg, "❌ Worldz civic publishing is admin-only.");
+    const publicId = String(match && match[1] || "").trim();
+    if (!publicId) return send(msg, "Use: /worldzpublish WZC-ID");
+    try {
+      const { data, error } = await supabase
+        .from("worldz_civic_concerns")
+        .update({
+          status: "published",
+          moderation_note: "human-review-approved",
+          updated_at: new Date().toISOString()
+        })
+        .eq("public_id", publicId)
+        .eq("status", "review")
+        .select("public_id")
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return send(msg, "❌ Concern is not in review state or was not found.");
+      return send(msg, `✅ Published ${publicId}. It is now eligible for the public concern register.`);
+    } catch (error) {
+      console.warn("Worldz civic concern publish failed:", safeMessage(error));
+      return send(msg, "❌ Concern publish failed.");
+    }
+  });
+
+  bot.onText(/^\/worldzreject(?:@\w+)?(?:\s+(WZC-[A-Za-z0-9-]+))?$/, async (msg, match) => {
+    if (!isAdmin(msg)) return send(msg, "❌ Worldz civic moderation is admin-only.");
+    const publicId = String(match && match[1] || "").trim();
+    if (!publicId) return send(msg, "Use: /worldzreject WZC-ID");
+    try {
+      const { data, error } = await supabase
+        .from("worldz_civic_concerns")
+        .update({
+          status: "rejected",
+          moderation_note: "human-review-rejected",
+          updated_at: new Date().toISOString()
+        })
+        .eq("public_id", publicId)
+        .eq("status", "review")
+        .select("public_id")
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return send(msg, "❌ Concern is not in review state or was not found.");
+      return send(msg, `🗂 Rejected ${publicId}. It will not appear in the public register.`);
+    } catch (error) {
+      console.warn("Worldz civic concern rejection failed:", safeMessage(error));
+      return send(msg, "❌ Concern rejection failed.");
+    }
   });
 
   bot.onText(/^\/worldzballots(?:@\w+)?$/, async (msg) => {
