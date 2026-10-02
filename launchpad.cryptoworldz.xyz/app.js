@@ -197,7 +197,13 @@ function applyLaunchRecipe(id){
   if(!recipe)return;
   setRecipeSelection(recipe.id);
   if(recipe.allocations){
-    for(const [key,value] of Object.entries(recipe.allocations)){
+    const values={...recipe.allocations};
+    if(build.chain==='base'&&Number(values.creatorTeam)>5){
+      const delta=Number(values.creatorTeam)-5;
+      values.creatorTeam=5;
+      values.growthEcosystem=Number(values.growthEcosystem||0)+delta;
+    }
+    for(const [key,value] of Object.entries(values)){
       const input=$('[data-allocation="'+key+'"]');if(input)input.value=String(value);
     }
   }
@@ -425,6 +431,8 @@ function validatePlatformConfig(candidate){
   if(candidate.confidenceCurve?.version!=='WORLDZ-CONFIDENCE-CURVE-1'||candidate.confidenceCurve?.mainnetExecutionEnabled!==false||candidate.confidenceCurve?.feePolicy?.worldzSharePercentOfCollectedSupportedProjectTradingFee!==10)throw new Error('Confidence Curve contract mismatch');
   if(candidate.confidencePulse?.version!=='WORLDZ-CONFIDENCE-PULSE-1'||candidate.confidencePulse?.systemTradesCountTowardConfidence!==false)throw new Error('Confidence Pulse contract mismatch');
   if(candidate.confidenceConstellation?.version!=='WORLDZ-CONFIDENCE-CONSTELLATION-1'||candidate.confidenceConstellation?.opaqueSafetyScore!==false)throw new Error('Confidence Constellation contract mismatch');
+  if(candidate.launchRecipes?.version!=='WORLDZ-LAUNCH-RECIPES-V1'||!Array.isArray(candidate.launchRecipes?.recipes)||candidate.launchRecipes.recipes.length<7)throw new Error('Launch Recipes contract mismatch');
+  if(candidate.intelligenceStack?.rexTokenIntelligence?.overallSafetyScore!==false)throw new Error('REX evidence-only contract mismatch');
   return candidate;
 }
 async function fetchPlatformConfig(){
