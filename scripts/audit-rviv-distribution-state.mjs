@@ -40,7 +40,7 @@ for(const [label,owner] of owners){
 }
 console.log('RVIV_AUDITED_OWNER_BALANCES_RAW='+known);
 
-const signatures=await histRpc('getSignaturesForAddress',[SOURCE_ATA,{limit:50,commitment:'confirmed'}]);
+try{\nconst signatures=await histRpc('getSignaturesForAddress',[SOURCE_ATA,{limit:50,commitment:'confirmed'}]);
 for(const row of signatures){
  const tx=await histRpc('getTransaction',[row.signature,{encoding:'jsonParsed',commitment:'confirmed',maxSupportedTransactionVersion:0}]);
  const groups=[...(tx?.transaction?.message?.instructions||[])];
@@ -54,3 +54,4 @@ for(const row of signatures){
   console.log('RVIV_SOURCE_OUTFLOW signature='+row.signature+' blockTime='+String(row.blockTime||'')+' type='+p.type+' raw='+raw+' destination='+String(info.destination||''));
  }
 }
+\n}catch(e){console.log('RVIV_HISTORY_AUDIT_UNAVAILABLE '+(e?.message||e));}\n
