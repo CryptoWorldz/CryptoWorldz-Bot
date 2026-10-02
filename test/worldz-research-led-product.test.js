@@ -35,3 +35,18 @@ test('gambling-style launch models stay prohibited', () => {
 test('omnichain config points at research-led product policy', () => {
   assert.equal(omni.policyPaths.researchLedProduct, 'worldzpad-omnichain/research-led-product-policy.v1.json');
 });
+
+const launchHtml = fs.readFileSync(path.join(root, 'launchpad.cryptoworldz.xyz/index.html'), 'utf8');
+const launchJs = fs.readFileSync(path.join(root, 'launchpad.cryptoworldz.xyz/app.js'), 'utf8');
+
+test('launchpad ships Beginner and Pro experience entry', () => {
+  assert.match(launchHtml, /id="experience-mode"/);
+  assert.match(launchHtml, /NEW TO CRYPTO/);
+  assert.match(launchHtml, /I KNOW CRYPTO/);
+  assert.match(launchJs, /function setExperienceMode\(mode\)/);
+});
+
+test('launchpad preserves XRP-native guidance', () => {
+  assert.match(launchJs, /XRPWorldz: native XRPL DEX, AMM, issuer controls/);
+  assert.match(launchJs, /Submitted is not confirmed/);
+});
