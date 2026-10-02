@@ -227,7 +227,7 @@ async function providerResult(provider,fn,reference){
 async function aggregateSolanaTokenEvidence(address,{rpcUrl=DEFAULT_SOLANA_RPC,fetchImpl=fetch,creatorPages=3}={}){
   const encoded=encodeURIComponent(address);
   const refs={
-    jupiter:'https://api.jup.ag/tokens/v2/search?query='+encoded,
+    jupiter:'https://lite-api.jup.ag/tokens/v2/search?query='+encoded,
     dex:'https://api.dexscreener.com/token-pairs/v1/solana/'+encoded,
     gecko:'https://api.geckoterminal.com/api/v2/networks/solana/tokens/'+encoded,
     rugcheck:'https://api.rugcheck.xyz/v1/tokens/'+encoded+'/report'
