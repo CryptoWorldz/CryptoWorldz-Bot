@@ -1,0 +1,115 @@
+{
+  "version": "WORLDZ-RELATION-PROBLEM-001-v1",
+  "published": "2026-10-03",
+  "title": "Financial Management & Essential Needs",
+  "privacy": "Public register omits addresses, DOB, government/customer references, bank details, card identifiers, login/security data and unrelated third-party private information.",
+  "legalStatus": "Public evidence register; not a court finding of unlawful conduct.",
+  "records": [
+    {
+      "date": "2025-12-16",
+      "type": "verified-agency-record",
+      "source": "NSW Trustee & Guardian",
+      "summary": "Onboarding stated that TAG would prepare a budget and pay bills."
+    },
+    {
+      "date": "2026-01-19",
+      "type": "verified-agency-record",
+      "source": "NSW Trustee & Guardian",
+      "summary": "Allowance documented as $360/week: Tue 40, Wed 40, Thu 200, Fri 40, Sat 40."
+    },
+    {
+      "date": "2026-03-14",
+      "type": "user-contemporaneous-disclosure",
+      "summary": "Customer disclosed gambling loss affecting allowance and phone money."
+    },
+    {
+      "date": "2026-05-25",
+      "type": "user-request-and-agency-response",
+      "summary": "Customer disclosed continuing gambling and proposed smaller regular payments; TAG response showed direct board/rent payment mechanism where payee details could be established."
+    },
+    {
+      "date": "2026-09-15",
+      "type": "verified-agency-record",
+      "source": "NSW Trustee & Guardian",
+      "summary": "TAG said allocated funds would need to be used by customer to pay rent."
+    },
+    {
+      "date": "2026-09-16",
+      "type": "user-contemporaneous-request",
+      "summary": "Customer reported gambling every cent and asked TAG to pay rent using his money."
+    },
+    {
+      "date": "2026-09-17",
+      "type": "verified-agency-record",
+      "source": "NSW Trustee & Guardian",
+      "summary": "One-off $175 accommodation payment; direct-payment option offered if park payment details could be arranged."
+    },
+    {
+      "date": "2026-09-18",
+      "type": "user-contemporaneous-proposal",
+      "summary": "Direct rent + pharmacy/health + phone + five equal daily living shares + one savings share proposed in writing."
+    },
+    {
+      "date": "2026-09-24",
+      "type": "government-payment-screen",
+      "summary": "Services Australia screen shows net $1,252.42, compared with $1,150.90 on several earlier fortnights."
+    },
+    {
+      "date": "2026-10-01",
+      "type": "user-contemporaneous-request",
+      "summary": "Customer asked TAG to stop giving unrestricted money after another gambling loss and to pay rent."
+    },
+    {
+      "date": "2026-10-02",
+      "type": "verified-agency-record",
+      "source": "NSW Trustee & Guardian",
+      "summary": "TAG listed Tue 80, Wed 70, Thu 200, Fri 80, Sat 80; stated total allowances $1,050, phone $27, remainder $73. Listed daily figures equal $510/week; if weekly, $1,020/fortnight."
+    },
+    {
+      "date": "2026-10-03",
+      "type": "client-reported-pending-verification",
+      "summary": "Customer reports Friday $160 and Saturday $80 lost entirely online, no money used for essentials, rent arrears around $100-$150 and no money for food."
+    }
+  ],
+  "accommodationReceipts": [
+    {
+      "date": "2026-09-11",
+      "amountAUD": 50
+    },
+    {
+      "date": "2026-09-15",
+      "amountAUD": 25
+    },
+    {
+      "date": "2026-09-18",
+      "amountAUD": 100
+    },
+    {
+      "date": "2026-09-23",
+      "amountAUD": 100
+    },
+    {
+      "date": "2026-09-24",
+      "amountAUD": 25
+    },
+    {
+      "date": "2026-09-30",
+      "amountAUD": 150
+    }
+  ],
+  "accommodationReceiptTotalAUD": 450,
+  "betterSystem": [
+    "rent",
+    "essential-bills",
+    "health-and-pharmacy",
+    "phone-and-communications",
+    "daily-living-allowance",
+    "protected-savings-share"
+  ],
+  "exclusions": [
+    "No claim that NSW Trustee & Guardian has been judicially found to have acted unlawfully.",
+    "No claim that any money is proven missing.",
+    "No claim that the caravan park is proven to have committed tax evasion or another offence.",
+    "No unverified observation about an individual is presented as established fact."
+  ]
+}
