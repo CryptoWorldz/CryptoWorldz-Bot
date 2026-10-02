@@ -1,78 +1,91 @@
-# Worldz Fee Flow™ V2 — New Launch Intake Standard
+# Worldz Fee Flow™ V3 — Canonical New Launch Economics
 
-Version: `WORLDZ-FEE-FLOW-V2-2026-10-01-A`  
+Version: `WORLDZ-FEE-FLOW-V3-2026-10-02-A`  
 Status: **LOCKED FOR NEW WORLDZLAUNCHPAD INTAKES — MAINNET EXECUTION GATED**
 
-Machine policy: `worldzpad-mainnet/fairfee/worldz-fee-flow.v2.json`
+Machine policy: `worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json`
 
-## Creator choice
+## Creator-first outer split
 
-At launch, the creator voluntarily selects the WorldzLaunchPad contribution:
+After disclosed external protocol, venue and network deductions, the creator chooses how much eligible creator fee revenue is contributed to Worldz:
 
-- **BUILD — 3%**
-- **GROW — 5%** *(default)*
-- **BOOST — 8%**
+| Profile | Creator retains | Worldz contribution |
+|---|---:|---:|
+| BUILD | **97%** | **3%** |
+| GROW | **95%** | **5%** |
+| BOOST | **92%** | **8%** |
 
-The choice is snapshotted in the launch manifest. A later change requires a new disclosed signed route/migration.
+GROW 5% is the default. The choice is voluntary and snapshotted at launch. A later change requires a new disclosed signed route or migration.
 
-## Fixed fee-revenue flywheel
+The 3% / 5% / 8% is **not** a 3% / 5% / 8% trading fee. The project trading fee is configured separately under the Worldz Fair Fee Builder™.
 
-The following percentages are allocations of **eligible collected supported trading-fee revenue** after disclosed external protocol/network deductions. They are not token-supply allocations and are not wallet-transfer taxes.
+## Worldz internal split
 
-- **10%** Creator / Developer
-- **15%** Launch Referrer
-- **15%** Legacy Core — permanently closed 12-token set, **1.25% each**
-- **12%** Worldz Core Family market-buy ledger — **3% each to WLDZ / RVIV / PNEX / MRCL**
-- **10%** LP Growth
-- **8%** Launched-token Buyback + Burn
-- **5%** Impact / Charity
+Only the Worldz contribution is split internally. The creator-retained 97% / 95% / 92% is not touched by these percentages.
+
+- **20%** Operations / Product Development
+- **20%** Treasury
+- **15%** LP Growth
+- **10%** Legacy Core
+- **10%** WLDZ / RVIV / PNEX / MRCL market-buy lane
+- **10%** Impact / Charity
 - **5%** Team / Builder Rewards
-- **5%** Future Token Deployment Reserve
+- **5%** Future Launch / Infrastructure
+- **5%** Launch Referrer
 
-Fixed subtotal: **85%**.
+Internal subtotal: **100% of the Worldz contribution**.
 
-The selected WorldzLaunchPad contribution and Operations Treasury allocation finish the 100%:
+## Treasury lane — 70 / 30
 
-| Profile | WorldzLaunchPad | Operations Treasury | Total |
-|---|---:|---:|---:|
-| BUILD | 3% | 12% | 100% |
-| GROW | 5% | 10% | 100% |
-| BOOST | 8% | 7% | 100% |
+The 20% Treasury lane is split:
 
-## Legacy Core lock
+- **70% of Treasury lane → Worldz Operations Treasury — 3-of-5**
+- **30% of Treasury lane → Worldz Miracle Team Treasury — 4-of-7**
 
-Legacy Core is **final at exactly 12 tokens**. No additions, removals, replacements or future Legacy designations are allowed.
+Because Treasury itself is 20% of the Worldz contribution, this equals:
 
-The same single 15% Legacy allocation is used here. It must **never be deducted twice**.
+- **14% of the Worldz contribution → Operations Treasury**
+- **6% of the Worldz contribution → Miracle Team Treasury**
 
-Automated Worldz routing does not fund historical distribution wallets. Owner-initiated manual transfers to those wallets remain outside Worldz automation.
+The Miracle Team Treasury does **not** receive 30% of creator revenue, trader volume, or the total Worldz contribution. It receives 30% of the Treasury lane only.
 
-## WLDZ / RVIV / PNEX / MRCL flywheel
+## MIRACLE separation
 
-The 12% family bucket is equal:
+The **20% MRCL Miracle Team Vault** is a token-supply allocation for MIRACLE.
 
-- **3% WLDZ**
-- **3% RVIV**
-- **3% PNEX**
-- **3% MRCL**
+The **30% Miracle Team Treasury revenue share** is ongoing revenue routing inside the Worldz Treasury lane.
 
-WLDZ and RVIV may execute only through verified routes. PNEX/MRCL allocations accrue until their canonical mint and live executable market route are verified. No mint may be guessed.
+These are separate accounting buckets and must never be combined.
+
+## Legacy and Worldz-family lanes
+
+Legacy Core remains the permanently closed 12-token set. Its new V3 allocation is **10% of the Worldz contribution**, shared within that lane.
+
+The Worldz Core Family market-buy lane is **10% of the Worldz contribution**, shared equally across:
+
+- WLDZ
+- RVIV
+- PNEX
+- MRCL
+
+That is **2.5% of the Worldz contribution per token** when executable. PNEX/MRCL allocations accrue until verified canonical mints and routes exist.
 
 ## Safety
 
-- 0% WorldzLaunchPad token-supply take
-- 0% WorldzLaunchPad initial-liquidity take
+- 0% Worldz token-supply take
+- 0% Worldz initial-liquidity take
 - 0% Worldz wallet-transfer tax
 - no wash trading or self-trading
-- market buys require real market data and price-impact checks
-- burn requires verifiable on-chain execution
-- LP additions require matching quote liquidity and treasury approval
-- production routing requires the approved Treasury Multisig
-- every confirmed production action requires WorldzProof evidence
-- if a gate fails, the allocation accrues instead of forcing execution
+- no automatic mainnet routing until treasury and route proof pass
+- no market buy without real market data and price-impact checks
+- no burn without verifiable on-chain proof
+- failed or unavailable routes accrue rather than forcing execution
+- WorldzProof required for confirmed production actions
 
-## Adapter migration
+## Historical policies
 
-Older `MagicFeeNumber™` / 51-17-15-8.5-8.5 and 90/10 adapter configurations remain historical/test-adapter references where required by existing code. They are **not the default economics for new WorldzLaunchPad intakes**.
+`WORLDZ-FEE-FLOW-V2`, MagicFeeNumber™ 51/17/15/8.5/8.5 and legacy 90/10 adapter profiles remain historical/test references where needed for auditability.
 
-New launch manifests inherit Worldz Fee Flow V2. A chain/venue adapter is not called V2-mainnet-ready until it can enforce and reconcile the V2 destinations on-chain.
+They are **not** the economics for new WorldzLaunchPad intakes.
+
+New launch manifests inherit **Worldz Fee Flow V3**.
