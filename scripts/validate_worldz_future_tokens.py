@@ -65,7 +65,7 @@ assert team["firstReleaseCliffDays"] == 30
 assert team["monthlyReleases"] == 24
 assert team["unassignedTokensRemainVaulted"] is True
 assert team["silentAutomaticReassignmentAllowed"] is False
-assert team["proposedMultisig"]["state"] == "PROPOSED_NOT_DEPLOYED"
+assert team["proposedMultisig"]["policy"] == "4-of-8"\nassert team["proposedMultisig"]["state"] == "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_VERIFIED_SIGNERS"\nassert team["proposedMultisig"]["requiredNamedSigners"] == ["JayJayTeamDev", "Stepper", "Savage"]\nassert team["proposedMultisig"]["additionalVerifiedSignerSlots"] == 5
 
 assert magic["percent"] == 20 and magic["tokens"] == 69_600_000
 assert magic["separateFromTeamVault"] is True
