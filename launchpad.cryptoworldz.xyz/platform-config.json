@@ -1085,7 +1085,7 @@
     "name": "Worldz Revenue Engine™",
     "status": "PUBLIC_CONTROL_SURFACE_LIVE__MAINNET_EXECUTION_GATED",
     "publicPath": "/revenue/",
-    "principle": "Revenue must come from disclosed platform usage and actually collected supported fees. New launch intakes use Worldz Fee Flow V2 with the creator-selected 3% / 5% / 8% LaunchPad contribution. Simulation is never reported as live revenue.",
+    "principle": "Revenue must come from disclosed platform usage and actually collected supported fees. New launch intakes use Worldz Fee Flow V3: creators retain 97% / 95% / 92% of eligible fee revenue and voluntarily contribute 3% / 5% / 8% to Worldz. Simulation is never reported as live revenue.",
     "launchFee": {
       "enabled": false,
       "amount": null,
@@ -1094,15 +1094,36 @@
       "activationRule": "Set a public amount, fee asset, same-chain treasury destination and executable-adapter enforcement before enabling a production launch fee."
     },
     "supportedTradingFee": {
-      "feeFlowVersion": "WORLDZ-FEE-FLOW-V2",
+      "feeFlowVersion": "WORLDZ-FEE-FLOW-V3",
       "contributionChoicesPercent": [
         3,
         5,
         8
       ],
       "defaultContributionPercent": 5,
-      "legacyCorePercent": 15,
-      "worldzCoreFamilyMarketBuyPercent": 12,
+      "creatorRetentionByContributionPercent": {
+        "3": 97,
+        "5": 95,
+        "8": 92
+      },
+      "worldzInternalSplitPercent": {
+        "operationsProductDevelopment": 20,
+        "treasury": 20,
+        "lpGrowth": 15,
+        "legacyCore": 10,
+        "worldzCoreFamilyMarketBuys": 10,
+        "impactCharity": 10,
+        "teamBuilderRewards": 5,
+        "futureLaunchInfrastructure": 5,
+        "launchReferrer": 5
+      },
+      "treasuryLane": {
+        "percentOfWorldzContribution": 20,
+        "operationsPercent": 70,
+        "miracleTeamPercent": 30
+      },
+      "legacyCorePercentOfWorldzContribution": 10,
+      "worldzCoreFamilyMarketBuyPercentOfWorldzContribution": 10,
       "walletTransferTaxPercent": 0,
       "tokenSupplyTakePercent": 0,
       "initialLiquidityTakePercent": 0,
@@ -1205,7 +1226,7 @@
   "launchRecipes": {
     "version": "WORLDZ-LAUNCH-RECIPES-V1",
     "source": "worldzpad-omnichain/launch-recipes.v1.json",
-    "rule": "Presets never bypass Safe Launch limits or change fixed Fee Flow V2 lanes.",
+    "rule": "Presets never bypass Safe Launch limits or change Fee Flow V3 creator retention or Worldz-internal routing.",
     "recipes": [
       {
         "id": "CREATOR",
