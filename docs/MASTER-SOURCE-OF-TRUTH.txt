@@ -316,6 +316,16 @@ Licensing shown:
 
 Human approval / control remains required for sensitive publishing and wallet actions.
 
+WORLDZ GLOBAL PUBLIC VOICE:
+- worldwide non-binding Public Voice; no country/territory allowlist
+- Australia is one dated jurisdiction compliance profile, not the boundary of Worldz
+- general Public Voice is age-inclusive with age-appropriate privacy/safety safeguards
+- no civic weighting by race/ethnicity, nationality, geography, wealth, token holdings or social status
+- structured public-concern registry design covers hunger, preventable disease, essential healthcare/medicines, water/sanitation, shelter/housing, education/opportunity and public/community resource priorities
+- public concern submissions remain gated pending moderation/privacy/abuse-prevention/age-safety review
+- Worldz does not claim official election or government budget authority
+- binding/official civic mode remains OFF unless lawful authority and jurisdiction-specific gates pass
+
 ======================================================================
 9. G.R.A.C.E. X / OAUTH — CURRENT STATUS
 ======================================================================
