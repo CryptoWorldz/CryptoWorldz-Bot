@@ -1,7 +1,7 @@
 {
-  "version": "2026-10-02-worldz-treasury-v3",
+  "version": "2026-10-02-worldz-treasury-v4",
   "product": "WorldzLaunchPad™",
-  "status": "OPERATIONS_3_OF_5_ONCHAIN_VERIFIED__MIRACLE_4_OF_8_PENDING__RESERVE_DISABLED__FEE_ROUTING_GATED",
+  "status": "OPERATIONS_3_OF_5_ONCHAIN_VERIFIED__MIRACLE_4_OF_8_PENDING_3_SIGNERS__RESERVE_DISABLED__FEE_ROUTING_GATED",
   "feeCollection": {
     "worldzSharePercentOfCollectedSupportedProjectTradingFee": 10,
     "projectRetainedPercentOfCollectedSupportedProjectTradingFee": 90,
@@ -26,7 +26,7 @@
     "maximumApprovalsRequiredByWorldzPolicy": 4,
     "miracleTeam": {
       "enabled": true,
-      "status": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_8_VERIFIED_SIGNERS",
+      "status": "OWNER_APPROVED__PENDING_DEPLOYMENT_AND_3_MORE_VERIFIED_SIGNERS",
       "signers": 8,
       "threshold": 4,
       "display": "4-of-8",
@@ -164,7 +164,7 @@
     "reserveSweepEnabled": false,
     "reserveTreasuryRequired": false,
     "miracleTeamFeeRoutingEnabled": false,
-    "miracleTeamRule": "Do not send the 30% treasury-bound share until a separate Squads Miracle Team vault is deployed, all 8 public signer keys are verified, 4-of-8 is read from live chain state, and the 70/30 route is simulated and explicitly approved."
+    "miracleTeamRule": "Do not send the 30% treasury-bound share until a separate Squads Miracle Team vault is deployed, all 8 public signer keys are verified and consented, 4-of-8 is read from live chain state, and the 70/30 route is simulated and explicitly approved."
   },
   "treasuryBoundRevenueRouting": {
     "status": "PENDING_MIRACLE_TREASURY_LIVE_PROOF",
@@ -182,7 +182,7 @@
     "doesNotOverrideExplicitImpactLegacyLpCreatorReferrerOrOtherFeeFlowLanes": true
   },
   "miracleTeamSignerPlan": {
-    "requiredNamedSigners": [
+    "confirmedDocumentedCandidates": [
       {
         "label": "JayJayTeamDev",
         "solanaPublicKey": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u"
@@ -194,11 +194,22 @@
       {
         "label": "Savage",
         "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
+      },
+      {
+        "label": "SolMusic",
+        "solanaPublicKey": "FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ"
+      },
+      {
+        "label": "Mahammad",
+        "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
       }
     ],
-    "additionalSignerSlots": 5,
-    "additionalSignerSource": "Verified Legend/Admin/Miracle Team public wallets",
+    "remainingDistinctSignerSlots": 3,
+    "remainingSignerSource": "Verified consenting Legend/Admin/Miracle Team public wallets",
     "exactAdditionalSigners": [],
-    "noInventedAddresses": true
+    "noInventedAddresses": true,
+    "samePersonMultipleWalletsCountAsIndependentSigners": false,
+    "ownerControlledExtraWalletsAllowedForAllocationCustody": true,
+    "ownerControlledExtraWalletsDoNotIncreaseHumanMultisigIndependence": true
   }
 }
