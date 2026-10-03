@@ -66,7 +66,7 @@
       "productionParity": "PASS",
       "platformConfigParity": "PASS",
       "worldzLaunchRegister": "WORLDZ-LAUNCH-REGISTER-V3 LIVE",
-      "worldzLaunchRegisterEdgeVersion": 8,
+      "worldzLaunchRegisterEdgeVersion": 9,
       "worldzMintJavaScript": "LIVE",
       "criticalRoutes": "PASS"
     },
@@ -112,6 +112,10 @@
     "worldzMintNoWalletSafetyBoundary": "LIVE",
     "worldzMintWalletConnection": "BUILT_NOT_VERIFIED",
     "launchPadProductionParity": "LIVE",
-    "launchPadChildRoutes": "LIVE"
-  }
+    "launchPadChildRoutes": "LIVE",
+    "dmRoundTrip": "BUILT_NOT_VERIFIED",
+    "worldzMintPage": "LIVE",
+    "launchRegisterV3": "LIVE"
+  },
+  "lastVerified": "2026-10-03"
 }
