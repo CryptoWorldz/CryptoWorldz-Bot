@@ -2,67 +2,123 @@
 
 **Canonical production status record**  
 **Rule effective:** 2026-10-03  
-**Owner direction:** JayJayTeamDev
+**Owner:** JayJayTeamDev  
+**Last verified:** 2026-10-03
 
 ## Status rules
 
 - ✅ **LIVE** — tested against the public production URL/current deployed service.
-- 🟡 **BUILT / NOT VERIFIED** — implementation exists and may have passing code tests, but current production proof is missing or incomplete.
+- 🟡 **BUILT / NOT VERIFIED** — implementation exists, but the exact current live end-to-end action has not been proven.
 - 🔵 **PLANNED** — not built yet.
-- 🔴 **BROKEN** — production test fails, deployment is stale, or the deployed version is known to be wrong.
+- 🔴 **BROKEN** — production test fails, deployment is stale, or deployed state is wrong.
 
-**A merge, commit, PR, local test or completed code change is never enough by itself to call something LIVE.**
+**A merge, commit, PR, local test, screenshot, or completed code change is never enough by itself to call something LIVE.**
 
 ## Phase 1 — Foundation proof
 
-| Surface / capability | Status | Current proof |
+| Surface / capability | Status | Production evidence |
 |---|---|---|
-| Command Centre static production deployment | ✅ LIVE | Current Mini App redeployed from main. GitHub Actions run `37112571949` completed successfully including its live production verification. |
-| Command Centre current branding / deployment parity | ✅ LIVE | Real headless-Chrome production proof confirmed `WorldzEcosystem™`, current Command Centre DOM and no stale OneWorldz/RECAP top-level deployment. Phase-1 run `37113037549` printed `COMMAND_CENTRE_BROWSER_PROOF=PASS`. |
-| Telegram secure-launch boundary | ✅ LIVE | Real browser outside Telegram fails closed with `Secure Launch Required`, status `Locked`, and Telegram reopen guidance. Phase-1 run `37113037549`. |
-| Raids UI surface | ✅ LIVE | Real production browser confirmed deployed `#raids` surface exists. |
-| Ronald Raider `/next` queue logic | 🟡 BUILT / NOT VERIFIED | Current-main regression tests pass, including `test/ronald-raider.test.js`; no fresh end-to-end live Telegram command execution recorded in this Phase-1 pass yet. |
-| Shill / ShillPoints logic | 🟡 BUILT / NOT VERIFIED | `test/shill-rewards.test.js` and automatic activity-reward tests pass on current main; fresh live Telegram execution still required for ✅. |
-| Legend Points / automatic activity rewards | 🟡 BUILT / NOT VERIFIED | Current-main regression tests pass; fresh production transaction/activity proof still required. |
-| Worldz Votes Centre UI | ✅ LIVE | Real production browser confirmed deployed `#worldz-votes` surface. |
-| Hourly `/vote` command flow | 🟡 BUILT / NOT VERIFIED | Current source/tests expose hourly favourite-token voting and no governance menu; fresh end-to-end Telegram vote proof still required. |
-| Worldz Inbox UI | ✅ LIVE | Real production browser confirmed deployed `#inbox` surface. |
-| Worldz Inbox backend/DM flow | 🟡 BUILT / NOT VERIFIED | Inbox + Mini App tests pass on current main; fresh live DM round-trip proof still required. |
-| REXSECURE client modules | ✅ LIVE | Real production browser confirmed REXSECURE scripts are deployed. |
-| REXSECURE enforcement flows | 🟡 BUILT / NOT VERIFIED | REX launchpad connection and SecureGuard tests pass; current live enforcement action proof still required. |
-| Admin UI boundary | ✅ LIVE | Real production browser confirmed deployed `#admin` surface while Telegram auth remains fail-closed. |
-| Admin create/approve/reject operations | 🟡 BUILT / NOT VERIFIED | Admin gateway tests pass; current live privileged action proof still required. |
-| WorldzMINT wallet UI | 🟡 BUILT / NOT VERIFIED | Public page loads, but the first no-wallet browser assertion ran while LaunchPad files were actively redeploying; must be rerun after deploy stability. |
-| Real wallet connect/sign boundary | 🟡 BUILT / NOT VERIFIED | Wallet Standard/Jupiter/injected-wallet implementation exists. No automated private-key signing is permitted; a current real-wallet production connection proof is still required. |
-| WorldzLaunchPad current-main production parity | 🟡 BUILT / NOT VERIFIED | Previous deploy failed on Hostinger stale `.in.index.html`; workflow was patched to clean exact stale temp files. Replacement production run `37112850112` is the current proof run. |
-| WorldzLaunchPad child-route sweep | 🟡 BUILT / NOT VERIFIED | Strong live verifier exists in `deploy-worldzlaunchpad.yml`; current production run must complete before routes return to ✅. |
+| Command Centre deployment | ✅ LIVE | Current Mini App redeployed from `main`; deploy run `37112571949` passed live verification. |
+| Command Centre current branding/parity | ✅ LIVE | Real Chrome proof passed in `37113524632`; current WorldzEcosystem branding and current DOM confirmed. |
+| Telegram secure-launch boundary | ✅ LIVE | Outside-Telegram browser access fails closed; signed Telegram bootstrap also passed in runtime audit `37113660864`. |
+| ZED Telegram bot/webhook | ✅ LIVE | Runtime restore `37112571962`: bot, webhook, command scopes and backlog control passed. |
+| DIPSHIT Telegram bot/webhook | ✅ LIVE | Runtime restore `37112571962`: @DipShitBossBot and webhook passed. |
+| Raids UI | ✅ LIVE | Real production browser confirmed deployed Raids surface. |
+| Ronald Raider `/next` | 🟡 BUILT / NOT VERIFIED | Command is live-registered in Telegram and current-main regression logic passes, but no fresh Phase-1 end-to-end `/next` action was recorded. |
+| Shill / ShillPoints | 🟡 BUILT / NOT VERIFIED | Commands are live-registered and regression tests pass; no fresh end-to-end Shill action recorded in this Phase-1 pass. |
+| Legend Points read | ✅ LIVE | Signed runtime audit `37113660864` returned live Legend Points successfully. |
+| Automatic Points awarding | 🟡 BUILT / NOT VERIFIED | Current-main reward tests pass; no new production award transaction was deliberately created for this audit. |
+| Worldz Votes Centre UI | ✅ LIVE | Real production browser confirmed deployed Votes surface. |
+| Worldz Public Voice | ✅ LIVE | Live proof `37113108091`: status, worldwide view, priorities, moderated intake, review queue and cleanup all passed. |
+| Hourly favourite-token `/vote` action | 🟡 BUILT / NOT VERIFIED | Command is live-registered and current-main tests pass; no fresh real hourly token vote was cast during Phase 1. |
+| Worldz Inbox UI | ✅ LIVE | Real production browser confirmed deployed Inbox surface. |
+| Worldz Inbox signed backend | ✅ LIVE | Signed runtime audit `37113660864` returned valid Inbox payload. |
+| Worldz DM round-trip | 🟡 BUILT / NOT VERIFIED | DM command/runtime exists; this audit did not deliberately send a new external DM solely for proof. |
+| REXSECURE client/UI | ✅ LIVE | Production browser and LaunchPad live audit confirm REXSECURE surfaces/scripts. |
+| REXSECURE enforcement | ✅ LIVE | Real Telegram Supergroup proof `37113108179`: licence deny gate, licence allow gate and SecureGuard OFF/ON/OFF action passed; original ON state restored. |
+| Community Suite | ✅ LIVE | Real Telegram Supergroup proof `37113108179` passed Suite initialization, authenticated Mini App API and support ticket flow. |
+| Admin UI | ✅ LIVE | Real production browser confirmed Admin surface. |
+| Admin authentication | ✅ LIVE | Signed runtime audit `37113660864` confirmed owner admin authorization. |
+| Privileged Admin create/approve/reject actions | 🟡 BUILT / NOT VERIFIED | Gateway/tests pass; no new privileged production record was created solely for this Phase-1 audit. |
+| Project Wallet directory | ✅ LIVE | Signed production runtime returned the wallet directory successfully. |
+| WorldzMINT public page | ✅ LIVE | Current deployed JS parity and browser route proof passed. |
+| WorldzMINT no-wallet safety boundary | ✅ LIVE | Real Chrome proof `37113524632`: no-wallet connection fails closed and sends no transaction. |
+| Real wallet connect/sign | 🟡 BUILT / NOT VERIFIED | Jupiter Wallet Standard/in-app/WalletConnect support is deployed, but a real external user wallet signature was not automated or fabricated. |
+| WorldzLaunchPad production parity | ✅ LIVE | Live audit `37113881838` passed homepage, platform-config parity, V3 public registry, WorldzMINT JS and critical routes. |
+| WorldzLaunchPad browser route sweep | ✅ LIVE | `37113524632`: 13/13 selected production routes passed in real Chrome. |
+| Worldz Launch Register V3 | ✅ LIVE | Supabase Edge Function production is active on version **9** and returns `WORLDZ-LAUNCH-REGISTER-V3` / `WORLDZ-FEE-FLOW-V3`. |
+| Fee Flow V3 policy gate | ✅ LIVE | Production registry + LaunchPad audit confirm 3/5/8 Worldz contribution and 97/95/92 creator retention; policy suite passed 190 anti-cheat scenarios before deployment. |
 
-## Evidence
+## Verified production route sweep
 
-### Command Centre redeploy
-- Commit: `6ec3edbe8e71a7ceda962ff4af2c03b5cc8e3dcb`
-- Deployment run: `37112571949`
-- Result: **SUCCESS**
-- Live verification step: **SUCCESS**
+The real-browser Phase-1 proof passed:
 
-### LaunchPad deployment repair
-- Root cause of prior production failure: Hostinger FTP temporary hidden-file collision:
-  `.in.index.html already exists`
-- Repair commit: `b70859338a55ae8f8dbae53f3719718f8007e053`
-- Current production run: `37112850112`
-- Local identity, public contract, JS syntax, 190 Fee Flow V3 anti-cheat scenarios, logo and public-brand gates: **PASS**
-- Production FTPS/live verification: **must complete before ✅ LIVE**
+1. `/`
+2. `/devnet/`
+3. `/curve/`
+4. `/curve-pro/`
+5. `/mainnet/`
+6. `/base/`
+7. `/fullscope/`
+8. `/community/`
+9. `/integrations/`
+10. `/ready/`
+11. `/wldz/`
+12. `/rviv/`
+13. `/create-your-own-money/`
 
-### Permanent Phase-1 browser gate
-- Workflow: `.github/workflows/worldz-phase1-production-proof.yml`
-- Initial run: `37113037549`
-- Requested-flow regression tests: **45/45 PASS**
-- Real Chrome Command Centre proof: **PASS**
-- Initial WorldzMINT wallet assertion: **not accepted as proof** because it overlapped the active LaunchPad production upload.
+## Important repaired faults
+
+### 1. Command Centre deployment drift — FIXED
+The live Mini App had been behind `main`. Current Command Centre was redeployed and independently browser-tested.
+
+### 2. Hostinger stale FTPS temp file — FIXED
+A stale `.in.index.html` blocked LaunchPad deployment. The workflow now removes only the exact stale Hostinger temporary file before replacing the target.
+
+### 3. Launch Register V2/V3 drift — FIXED
+Production Supabase was still serving Fee Flow V2 while LaunchPad expected V3. `worldz-launch-register` was updated from current `main`; production is now Edge Function version **9** with V3.
+
+### 4. Deep verifier variable collision — FIXED
+The LaunchPad verifier reused `registry` for two meanings. Current `main` uses a separate identity-registry variable.
+
+### 5. Browser race/readiness — FIXED
+The permanent browser gate now waits for production WorldzMINT JS SHA parity and a loaded non-empty DOM before assertions.
+
+## Permanent Phase-1 gates
+
+- `.github/workflows/worldz-phase1-production-proof.yml`
+- `.github/workflows/worldz-phase1-runtime-audit.yml`
+- `.github/workflows/worldz-launchpad-phase1-live-audit.yml`
+
+These prevent a future merge from being described as LIVE without deployed proof.
+
+## Evidence runs
+
+- Command Centre deploy/live verify: `37112571949`
+- Protected ZED/AUTO/G.R.A.C.E. restore: `37112571962`
+- Real Chrome Phase-1 proof: `37113524632`
+- Signed runtime audit: `37113660864`
+- Community Suite + REX live Supergroup proof: `37113108179`
+- Worldz Public Voice live proof: `37113108091`
+- LaunchPad V3 live audit: `37113881838`
+
+## Remaining Phase-1 🟡 items
+
+Only these requested areas still lack the exact end-to-end live action needed for ✅:
+
+- Ronald Raider `/next`
+- Shill / ShillPoints action
+- automatic Points award event
+- hourly favourite-token `/vote` action
+- external DM round-trip
+- privileged Admin create/approve/reject action
+- real external wallet connect/sign
+
+Everything else above has current production evidence.
 
 ## Regression rule
 
-Every future build-status decision follows this order:
+Every future Worldz status decision follows this order:
 
 1. **Public production proof**
 2. **On-chain proof where applicable**
@@ -70,12 +126,4 @@ Every future build-status decision follows this order:
 4. **Current-main tests**
 5. **Merged code / plans**
 
-A lower item cannot override a failed or missing higher-level proof.
-
-## Next Phase-1 closures
-
-1. Complete and pass current WorldzLaunchPad production deployment.
-2. Rerun the real-browser production gate after LaunchPad is stable.
-3. Record fresh live proof for `/next`, Shill, Points, hourly token vote, Inbox round-trip, REX enforcement and privileged Admin actions.
-4. Record a real user-wallet connection proof without exposing or storing private keys.
-5. Only then upgrade those 🟡 rows to ✅ LIVE.
+A lower layer can never override a failed or missing higher-level proof.
