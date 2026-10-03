@@ -60,7 +60,13 @@ function registerRoleProfileHandler({ bot, repository, config, supabase }) {
       if (!profile) return bot.sendMessage(msg.chat.id, "❌ You are not registered. Use /register first.");
 
       let teamRole = null;
+      let adminAccess = null;
       try {
+        adminAccess = await repository.getAdminAccess(
+          msg.from.id,
+          config.adminTelegramIds,
+          config.ownerTelegramId
+        );
         teamRole = await resolveTeamRole({
           telegramId: msg.from.id,
           repository,
@@ -78,7 +84,7 @@ function registerRoleProfileHandler({ bot, repository, config, supabase }) {
       const points = Number(user.points) || 0;
       const completed = Math.max(Number(user.raids) || 0, Number(user.raids_completed) || 0);
       const displayName = user.username ? `@${user.username}` : user.first_name || "Legend";
-      const responsibility = responsibilityLines({ user, adminAccess: teamRole ? { authorized: true, role: (await repository.getAdminAccess(msg.from.id, config.adminTelegramIds, config.ownerTelegramId)).role } : null });
+      const responsibility = responsibilityLines({ user, adminAccess });
       const responsibilityBlock = responsibility.length ? `\n${responsibility.join("\n")}` : "";
 
       return bot.sendMessage(
