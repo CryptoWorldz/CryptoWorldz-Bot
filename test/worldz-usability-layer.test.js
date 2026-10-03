@@ -16,7 +16,7 @@ test("Command Centre exposes simple onboarding and DIPSHIT guidance", () => {
   assert.match(centre, /ABOUT THE ZED-LED COMMAND CENTRE/);
   assert.match(profile, /ADD WALLET/);
   assert.match(profile, /RAID NOW/);
-  assert.match(profile, /Worldz Role/);
+  assert.match(profile, /responsibilityLines/);
   assert.match(dip, /LOST\? START HERE/);
   assert.match(dip, /ASK DIPSHIT/);
   assert.match(mini, /SCREEN_INSTRUCTIONS/);
