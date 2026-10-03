@@ -1,0 +1,132 @@
+name: REXSECURE Runtime Scoring Live Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rexsecure-runtime-scoring-live-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      BASE_URL: https://cryptobotz.cryptoworldz.xyz
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY || secrets.SUPABASE_KEY }}
+
+    steps:
+      - name: Prove deployed scorer through signed Mini App authentication
+        shell: python
+        run: |
+          import hashlib, hmac, json, os, time, urllib.error, urllib.parse, urllib.request
+
+          base=str(os.environ.get("BASE_URL","")).rstrip("/")
+          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          supabase=(str(os.environ.get("SUPABASE_URL","")).strip() or "https://hknymhhyqldtzmplzuzh.supabase.co").rstrip("/")
+          publishable=str(os.environ.get("SUPABASE_PUBLISHABLE_KEY","")).strip() or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+          if not token:
+              raise SystemExit("BOT_TOKEN missing")
+          print("::add-mask::"+token)
+
+          runtime_key=hashlib.sha256(("zed-runtime-v1:"+token).encode()).hexdigest()
+          runtime_headers={
+              "apikey":publishable,
+              "authorization":"Bearer "+publishable,
+              "x-zed-runtime-key":runtime_key,
+              "accept":"application/json",
+              "content-type":"application/json",
+              "user-agent":"REXSECURE-Runtime-Scoring-Proof/1.0"
+          }
+
+          def request_json(url, method="GET", headers=None, data=None, allow=(200,)):
+              req=urllib.request.Request(url,data=data,headers=headers or {},method=method)
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as response:
+                      body=response.read().decode("utf-8","ignore")
+                      parsed=json.loads(body) if body else None
+                      if response.status not in allow:
+                          raise RuntimeError("HTTP "+str(response.status))
+                      return response.status,parsed
+              except urllib.error.HTTPError as exc:
+                  body=exc.read().decode("utf-8","ignore")
+                  try: parsed=json.loads(body)
+                  except Exception: parsed={"raw":body[:500]}
+                  return exc.code,parsed
+
+          query=urllib.parse.urlencode({
+              "select":"telegram_id",
+              "role":"eq.owner",
+              "status":"eq.active",
+              "limit":"2"
+          },safe=",.*()-:")
+          code,owners=request_json(supabase+"/rest/v1/bot_admins?"+query,headers=runtime_headers)
+          if code!=200 or not isinstance(owners,list) or len(owners)!=1:
+              raise SystemExit("Permanent owner registry missing or ambiguous")
+          owner=int(owners[0]["telegram_id"])
+          print("::add-mask::"+str(owner))
+
+          started_at=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
+          user={"id":owner,"first_name":"Worldz ReX Proof","username":"JayJayTeamDev","language_code":"en"}
+          fields={
+              "auth_date":str(int(time.time())),
+              "query_id":"rex-runtime-proof-"+str(os.environ.get("GITHUB_RUN_ID","0")),
+              "user":json.dumps(user,separators=(",",":"),ensure_ascii=False)
+          }
+          check="\n".join(f"{k}={v}" for k,v in sorted(fields.items()))
+          secret=hmac.new(b"WebAppData",token.encode(),hashlib.sha256).digest()
+          fields["hash"]=hmac.new(secret,check.encode(),hashlib.sha256).hexdigest()
+          init_data=urllib.parse.urlencode(fields)
+
+          code,bootstrap=request_json(
+              base+"/api/mini/bootstrap",
+              headers={"X-Telegram-Init-Data":init_data,"Accept":"application/json","User-Agent":"REXSECURE-Runtime-Scoring-Proof/1.0"}
+          )
+          if code!=200 or not isinstance(bootstrap,dict) or bootstrap.get("ok") is not True:
+              raise SystemExit("Signed Mini App bootstrap failed")
+          print("REXSECURE_SIGNED_MINIAPP_PATH=PASS")
+
+          assessment_id=None
+          try:
+              query=urllib.parse.urlencode({
+                  "select":"id,risk_score,risk_band,recommended_action,source_count,independent_source_count,active_appeal,assessed_at",
+                  "subject_telegram_id":"eq."+str(owner),
+                  "assessed_at":"gte."+started_at,
+                  "order":"assessed_at.desc",
+                  "limit":"1"
+              },safe=",.*()-:")
+              code,rows=request_json(supabase+"/rest/v1/secureguard_assessments?"+query,headers=runtime_headers)
+              if code!=200 or not isinstance(rows,list) or len(rows)!=1:
+                  raise SystemExit("Deployed ReX scorer did not create a fresh assessment")
+              row=rows[0]
+              assessment_id=int(row["id"])
+              if not 0 <= int(row["risk_score"]) <= 100:
+                  raise SystemExit("Invalid ReX risk score")
+              if row["risk_band"] not in ("clear","watch","quarantine","block_candidate","blocked"):
+                  raise SystemExit("Invalid ReX risk band")
+              if row["recommended_action"] not in ("allow","watch","quarantine","local_block","network_block"):
+                  raise SystemExit("Invalid ReX recommendation")
+              if not isinstance(row["active_appeal"],bool):
+                  raise SystemExit("Invalid ReX appeal state")
+              print("REXSECURE_DEPLOYED_SCORER=PASS")
+              print("REXSECURE_RUNTIME_SCORING_LIVE_PROOF=PASS")
+          finally:
+              if assessment_id:
+                  query=urllib.parse.urlencode({"id":"eq."+str(assessment_id)},safe=",.*()-:")
+                  headers={**runtime_headers,"Prefer":"return=minimal"}
+                  code,_=request_json(
+                      supabase+"/rest/v1/secureguard_assessments?"+query,
+                      method="DELETE",
+                      headers=headers,
+                      allow=(200,204)
+                  )
+                  if code not in (200,204):
+                      raise SystemExit("Assessment proof cleanup failed")
+                  print("REXSECURE_RUNTIME_PROOF_CLEANUP=PASS")
