@@ -45,7 +45,8 @@ jobs:
             test/rex-threat-intel.test.js \
             test/admin-gateway.test.js \
             test/command-registry.test.js \
-            test/dipshit-profile.test.js
+            test/dipshit-profile.test.js \
+            test/worldz-usability-layer.test.js
 
       - name: Verify live WorldzLaunchPad V3 public registry
         shell: python
