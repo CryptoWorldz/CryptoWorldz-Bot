@@ -164,6 +164,80 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     "Never send a seed phrase or private key."
   ].join("\n");
 
+  const GUIDE_CONTEXTS = Object.freeze({
+    command: [
+      "🧠 COMMAND CENTRE — SIMPLE VERSION",
+      "You do not need to learn everything.",
+      "",
+      "1️⃣ /start — create/open your Legend Profile",
+      "2️⃣ Tap ADD WALLET — link your public Solana wallet",
+      "3️⃣ Tap RAID NOW — open the post, raid it, then tap I RAIDED ✅",
+      "",
+      "Ask me what you are trying to do and I'll point to the exact button."
+    ],
+    profile: [
+      "🏆 LEGEND PROFILE",
+      "Your Legend Rank is your activity status.",
+      "Treasury / Team / Admin roles are separate responsibility statuses on the same profile.",
+      "",
+      "If Wallet says No, tap ADD WALLET. If it says Yes ✅, you are ready for Raids."
+    ],
+    wallet: [
+      "👛 WALLET",
+      "Link only your PUBLIC Solana wallet address.",
+      "Never send a seed phrase or private key.",
+      "",
+      "Open /profile and tap ADD WALLET, or use /wallet."
+    ],
+    raid: [
+      "🤠 RONALD RAIDER",
+      "1️⃣ OPEN POST",
+      "2️⃣ Like + Repost + Reply genuinely",
+      "3️⃣ Come back and tap I RAIDED ✅",
+      "",
+      "The Likes/Reposts/Replies/Views numbers are community post targets — not a personal checklist."
+    ],
+    launch: [
+      "🚀 WORLDZLAUNCH™",
+      "Start with the simple builder. Pick the chain, token details, economics and proof path.",
+      "You do not need to understand every advanced control before starting.",
+      "",
+      "Tell me what token you want to make and I'll explain the next step in plain English."
+    ],
+    crypto: [
+      "🪙 CRYPTOWORLDZ",
+      "CryptoWorldz is the crypto/community doorway: WorldzLaunch, Command Centre, tokens, Raids, Worldz tools and chain worlds.",
+      "",
+      "Tell me what you came here to do and I'll route you."
+    ],
+    donate: [
+      "💜 DONATEWORLDZ",
+      "DonateWorldz keeps direct support pathways clear and separate from crypto activity.",
+      "",
+      "Tell me whether you want to support a person, a community cause, or understand where a pathway goes."
+    ],
+    hq: [
+      "🌐 WORLDZ HQ",
+      "WorldzHQ is the front door to the whole Worldz ecosystem.",
+      "From there you choose the World you actually need — DonateWorldz, CryptoWorldz, WorldzLaunch, FoodWorldz and more.",
+      "",
+      "Tell me your goal and I'll send you to the right place."
+    ]
+  });
+
+  const guideStart = (msg, rawContext) => {
+    const context = String(rawContext || "").toLowerCase().replace(/^guide[_-]?/, "");
+    const lines = GUIDE_CONTEXTS[context];
+    if (!lines) return null;
+    return send(msg.chat.id, [
+      "💙 DIPSHIT™ — YOUR WORLDZ GUIDE",
+      "",
+      ...lines,
+      "",
+      "Just type your question normally. That's what I'm here for."
+    ].join("\n"));
+  };
+
   const ownerRelay = async (msg, kind, body) => {
     const text = String(body || "").trim();
     if (!text) return send(msg.chat.id, `Use /${kind === "PAYMENT" ? "paysupport" : "report"} followed by your message.`);
@@ -180,10 +254,14 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     }
   };
 
-  bot.onText(/^\/start(?:@\w+)?$/, (msg) => send(
-    msg.chat.id,
-    "💙 DIPSHIT™ — WORLDZ DUDE\n\nInteractive QA, troubleshooting and Worldz navigation.\n\n💬 You can talk to me normally. In groups, mention @DipShitBossBot, reply to me, or start with “DipShit …”\n\nUse /help for commands or /subscribe for DIPSHIT™ Pro.\n\nNever send a seed phrase or private key."
-  ));
+  bot.onText(/^\/start(?:@\w+)?(?:\s+([A-Za-z0-9_-]+))?$/i, (msg, match) => {
+    const payload = String(match?.[1] || "").trim();
+    if (payload && guideStart(msg, payload)) return undefined;
+    return send(
+      msg.chat.id,
+      "💙 DIPSHIT™ — WORLDZ DUDE\n\nI'm the plain-English Worldz guide + troubleshooter. Tell me what you're trying to do and I'll give you the exact next step.\n\nQuick starts:\n• Command Centre → /ask how do I join?\n• Wallet → /ask how do I add my wallet?\n• Raid → /ask how do I raid?\n• WorldzLaunch → /ask help me create a token\n\nNever send a seed phrase or private key."
+    );
+  });
   bot.onText(/^\/help(?:@\w+)?$/, (msg) => send(msg.chat.id, helpText()));
   bot.onText(/^\/status(?:@\w+)?$/, (msg) => send(
     msg.chat.id,
