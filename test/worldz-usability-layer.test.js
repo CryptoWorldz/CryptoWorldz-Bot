@@ -9,6 +9,7 @@ test("Command Centre exposes simple onboarding and DIPSHIT guidance", () => {
   const centre = fs.readFileSync(path.join(ROOT, "src/command-centre.js"), "utf8");
   const profile = fs.readFileSync(path.join(ROOT, "src/referrals.js"), "utf8");
   const dip = fs.readFileSync(path.join(ROOT, "public/miniapp/dipshit.js"), "utf8");
+  const mini = fs.readFileSync(path.join(ROOT, "public/miniapp/app.js"), "utf8");
 
   assert.match(centre, /START HERE/);
   assert.match(centre, /howtojoin/);
@@ -18,6 +19,10 @@ test("Command Centre exposes simple onboarding and DIPSHIT guidance", () => {
   assert.match(profile, /Worldz Role/);
   assert.match(dip, /LOST\? START HERE/);
   assert.match(dip, /ASK DIPSHIT/);
+  assert.match(mini, /SCREEN_INSTRUCTIONS/);
+  assert.match(mini, /RAIDS — 3 STEPS/);
+  assert.match(mini, /PROFILE — WHAT NEXT/);
+  assert.match(mini, /ASK DIPSHIT/);
 });
 
 test("Ronald Raider member UX is one obvious action loop", () => {
