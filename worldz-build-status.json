@@ -68,7 +68,11 @@
       "worldzLaunchRegister": "WORLDZ-LAUNCH-REGISTER-V3 LIVE",
       "worldzLaunchRegisterEdgeVersion": 9,
       "worldzMintJavaScript": "LIVE",
-      "criticalRoutes": "PASS"
+      "criticalRoutes": "PASS",
+      "fullBrowserProofRun": 37114909793,
+      "fullBrowserRoutes": "52/52 PASS",
+      "browserChallengeHandling": "/advertise/ challenge cleared before PASS",
+      "walletAdapterConnectionPath": "PASS (simulated injected provider; 0 signatures; 0 transactions)"
     },
     "repairedFailures": [
       {
@@ -110,12 +114,13 @@
     "adminActions": "BUILT_NOT_VERIFIED",
     "projectWalletDirectory": "LIVE",
     "worldzMintNoWalletSafetyBoundary": "LIVE",
-    "worldzMintWalletConnection": "BUILT_NOT_VERIFIED",
     "launchPadProductionParity": "LIVE",
     "launchPadChildRoutes": "LIVE",
     "dmRoundTrip": "BUILT_NOT_VERIFIED",
     "worldzMintPage": "LIVE",
-    "launchRegisterV3": "LIVE"
+    "launchRegisterV3": "LIVE",
+    "worldzMintWalletConnectionPath": "LIVE",
+    "realExternalWalletConnectSign": "BUILT_NOT_VERIFIED"
   },
   "lastVerified": "2026-10-03"
 }
