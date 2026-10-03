@@ -7,6 +7,9 @@ const DEFAULTS = Object.freeze({
   durationHours: 24
 });
 
+const RAID_PULSE_SCAN_INTERVAL_MS = 15_000;
+const RAID_PULSE_MIN_GAP_SECONDS = 55;
+
 function detectPlatform(value) {
   let url;
   try { url = new URL(String(value || "").trim()); } catch { return null; }
@@ -93,6 +96,21 @@ function campaignText(campaign) {
   return lines.join("\n");
 }
 
+function raidPulseText(campaign) {
+  if (!campaign) return "🤠⚡ RONALD RAIDER — no live Raid.";
+  return [
+    `🤠⚡ RONALD RAIDER • RAID #${campaign.id} ACTIVE`,
+    "",
+    `❤️ Likes ${Number(campaign.likes_current) || 0}/${Number(campaign.likes_goal) || 0}`,
+    `🔁 Reposts ${Number(campaign.reposts_current) || 0}/${Number(campaign.reposts_goal) || 0}`,
+    `💬 Replies ${Number(campaign.replies_current) || 0}/${Number(campaign.replies_goal) || 0}`,
+    `👀 Views ${Number(campaign.views_current) || 0}/${Number(campaign.views_goal) || 0}`,
+    "",
+    `⭐ ${Number(campaign.reward_points) || 0} LP on verified completion`,
+    "Jump in Legends 💜"
+  ].join("\n");
+}
+
 function keyboard(campaign) {
   if (!campaign) return undefined;
   return {
@@ -123,6 +141,9 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     config.adminTelegramIds,
     config.ownerTelegramId
   );
+  const localPulseAt = new Map();
+  const localPulseMessageIds = new Map();
+  let pulseScanRunning = false;
 
   async function settingEnabled(chatId) {
     try {
@@ -135,6 +156,127 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       return data ? data.ronald_raider_enabled !== false : true;
     } catch {
       return true;
+    }
+  }
+
+  async function activeCampaigns() {
+    const { data, error } = await supabase
+      .from("raid_campaigns")
+      .select("*,missions(reward_points,title,expires_at)")
+      .eq("status", "active");
+    if (error) throw error;
+    return (data || []).map((row) => ({
+      ...row,
+      reward_points: row.missions?.reward_points || DEFAULTS.reward
+    }));
+  }
+
+  async function resetPulseClock(campaignId) {
+    localPulseAt.set(Number(campaignId), Date.now());
+    try {
+      const { error } = await supabase
+        .from("raid_campaigns")
+        .update({ last_pulse_at: new Date().toISOString() })
+        .eq("id", Number(campaignId));
+      if (error) throw error;
+    } catch (error) {
+      console.warn("Ronald Raider pulse clock persistence unavailable", { code: error?.code || error?.message || "unknown" });
+    }
+  }
+
+  async function claimPulse(campaignId) {
+    try {
+      const { data, error } = await supabase.rpc("claim_raid_pulse", {
+        p_campaign_id: Number(campaignId),
+        p_min_seconds: RAID_PULSE_MIN_GAP_SECONDS
+      });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row?.claimed) return null;
+      return row;
+    } catch (error) {
+      const key = Number(campaignId);
+      const last = localPulseAt.get(key) || 0;
+      if (Date.now() - last < RAID_PULSE_MIN_GAP_SECONDS * 1000) return null;
+      localPulseAt.set(key, Date.now());
+      return {
+        claimed: true,
+        previous_message_id: localPulseMessageIds.get(key) || null,
+        local_fallback: true
+      };
+    }
+  }
+
+  async function safeDeletePulse(chatId, messageId) {
+    if (!messageId) return;
+    try {
+      await bot.deleteMessage(chatId, Number(messageId));
+    } catch {}
+  }
+
+  async function savePulseMessage(campaignId, messageId) {
+    const key = Number(campaignId);
+    localPulseMessageIds.set(key, Number(messageId));
+    try {
+      const { error } = await supabase
+        .from("raid_campaigns")
+        .update({ last_pulse_message_id: Number(messageId) })
+        .eq("id", key)
+        .eq("status", "active");
+      if (error) throw error;
+    } catch (error) {
+      console.warn("Ronald Raider pulse message persistence unavailable", { code: error?.code || error?.message || "unknown" });
+    }
+  }
+
+  async function clearPulse(campaign) {
+    if (!campaign) return;
+    const key = Number(campaign.id);
+    const messageId = campaign.last_pulse_message_id || localPulseMessageIds.get(key);
+    await safeDeletePulse(campaign.chat_id, messageId);
+    localPulseAt.delete(key);
+    localPulseMessageIds.delete(key);
+    try {
+      await supabase
+        .from("raid_campaigns")
+        .update({ last_pulse_message_id: null })
+        .eq("id", key);
+    } catch {}
+  }
+
+  async function pulseCampaign(campaign) {
+    if (!(await settingEnabled(campaign.chat_id))) return;
+    const claim = await claimPulse(campaign.id);
+    if (!claim) return;
+
+    const fresh = await campaignById(campaign.id);
+    if (!fresh || fresh.status !== "active") return;
+
+    const message = await send(
+      fresh.chat_id,
+      raidPulseText(fresh),
+      { ...keyboard(fresh), disable_notification: true }
+    );
+
+    await savePulseMessage(fresh.id, message.message_id);
+    await safeDeletePulse(fresh.chat_id, claim.previous_message_id);
+  }
+
+  async function pulseActiveRaids() {
+    if (pulseScanRunning) return;
+    pulseScanRunning = true;
+    try {
+      const raids = await activeCampaigns();
+      const results = await Promise.allSettled(raids.map((campaign) => pulseCampaign(campaign)));
+      for (const result of results) {
+        if (result.status === "rejected") {
+          console.error("Ronald Raider pulse failed", { code: result.reason?.code || result.reason?.message || "unknown" });
+        }
+      }
+    } catch (error) {
+      console.error("Ronald Raider pulse scan failed", { code: error?.code || error?.message || "unknown" });
+    } finally {
+      pulseScanRunning = false;
     }
   }
 
@@ -253,6 +395,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       .single();
     if (error) throw error;
     const campaign = { ...data, reward_points: data.missions?.reward_points || parsed.reward };
+    if (!queued) await resetPulseClock(campaign.id);
     return send(
       msg.chat.id,
       queued ? `⏭ Added to Ronald's Raid line-up.\n\n${campaignText(campaign)}` : campaignText(campaign),
@@ -265,13 +408,20 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     if (!next) return null;
     const current = await activeCampaign(chatId);
     if (current) {
+      await clearPulse(current);
       await supabase.from("raid_campaigns").update({ status: "completed", stopped_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", current.id);
       await supabase.from("missions").update({ status: "completed", updated_at: new Date().toISOString() }).eq("id", current.mission_id);
     }
     await supabase.from("raid_campaigns").update({ status: "active", started_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", next.id);
     await supabase.from("missions").update({ status: "active", starts_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", next.mission_id);
+    await resetPulseClock(next.id);
     return campaignById(next.id);
   }
+
+  const pulseBootstrapTimer = setTimeout(() => { void pulseActiveRaids(); }, 5_000);
+  const pulseTimer = setInterval(() => { void pulseActiveRaids(); }, RAID_PULSE_SCAN_INTERVAL_MS);
+  if (typeof pulseBootstrapTimer.unref === "function") pulseBootstrapTimer.unref();
+  if (typeof pulseTimer.unref === "function") pulseTimer.unref();
 
   bot.onText(/^\/(?:raid|raaiiidd)(?:@\w+)?$/, async (msg) => {
     if (!(await settingEnabled(msg.chat.id))) return send(msg.chat.id, "⏸ Ronald Raider is switched off in /zedsettings.");
@@ -350,6 +500,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     try {
       const current = await activeCampaign(msg.chat.id);
       if (!current) return send(msg.chat.id, "🤠 No live Raid to stop.");
+      await clearPulse(current);
       await supabase.from("raid_campaigns").update({ status: "stopped", stopped_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", current.id);
       await supabase.from("missions").update({ status: "completed", updated_at: new Date().toISOString() }).eq("id", current.mission_id);
       return send(msg.chat.id, "🛑 Ronald stopped the Raid. Use /next to see what is lined up.");
@@ -399,6 +550,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
         if (!(await permission(actorId, "mission.end"))) {
           return bot.answerCallbackQuery(query.id, { text: "Admin access required.", show_alert: true });
         }
+        await clearPulse(campaign);
         await supabase.from("raid_campaigns").update({ status: "stopped", stopped_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", campaign.id);
         await supabase.from("missions").update({ status: "completed", updated_at: new Date().toISOString() }).eq("id", campaign.mission_id);
         await bot.answerCallbackQuery(query.id, { text: "Raid stopped." });
@@ -450,12 +602,22 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     }
   });
 
-  return { parseRaidPayload, activeCampaign, queuedCampaign, autoRewardStatus, autoAwardRaid };
+  return {
+    parseRaidPayload,
+    activeCampaign,
+    queuedCampaign,
+    autoRewardStatus,
+    autoAwardRaid,
+    pulseActiveRaids
+  };
 }
 
 module.exports = {
   DEFAULTS,
+  RAID_PULSE_MIN_GAP_SECONDS,
+  RAID_PULSE_SCAN_INTERVAL_MS,
   campaignText,
+  raidPulseText,
   detectPlatform,
   parseRaidPayload,
   progressLine,

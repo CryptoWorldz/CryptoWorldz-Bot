@@ -1,6 +1,14 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { campaignText, parseRaidPayload, progressLine, detectPlatform } = require("../src/ronald-raider");
+const {
+  RAID_PULSE_MIN_GAP_SECONDS,
+  RAID_PULSE_SCAN_INTERVAL_MS,
+  campaignText,
+  raidPulseText,
+  parseRaidPayload,
+  progressLine,
+  detectPlatform
+} = require("../src/ronald-raider");
 
 test("Ronald Raider short form loads safe defaults", () => {
   const result = parseRaidPayload("https://x.com/example/status/123");
@@ -49,4 +57,33 @@ test("Ronald Raider tells members RaidPoints are automatic with exception review
   });
   assert.match(text, /RaidPoints are awarded automatically/);
   assert.match(text, /Admin only handles exceptions/);
+});
+
+test("Ronald Raider pulse scans frequently but can only publish about once a minute", () => {
+  assert.equal(RAID_PULSE_SCAN_INTERVAL_MS, 15_000);
+  assert.equal(RAID_PULSE_MIN_GAP_SECONDS, 55);
+});
+
+test("Ronald Raider pulse card is compact and carries current Raid progress", () => {
+  const text = raidPulseText({
+    id: 7,
+    likes_current: 4,
+    likes_goal: 10,
+    reposts_current: 3,
+    reposts_goal: 5,
+    replies_current: 2,
+    replies_goal: 3,
+    views_current: 6,
+    views_goal: 8,
+    reward_points: 20
+  });
+
+  assert.match(text, /RONALD RAIDER • RAID #7 ACTIVE/);
+  assert.match(text, /Likes 4\/10/);
+  assert.match(text, /Reposts 3\/5/);
+  assert.match(text, /Replies 2\/3/);
+  assert.match(text, /Views 6\/8/);
+  assert.match(text, /20 LP on verified completion/);
+  assert.match(text, /Jump in Legends/);
+  assert.equal(text.includes("raidprogress"), false);
 });
