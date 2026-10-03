@@ -84,9 +84,83 @@ async function renderAdmin() {
     byId("admin-submissions").outerHTML = `<div id="admin-submissions"><div class="panel"><h3>Command Centre Stats</h3><p>Legends ${ops.stats.users} • Wallets ${ops.stats.wallets} • Active ${ops.stats.active} • Pending ${ops.stats.pending} • Points ${ops.stats.points}</p></div>${result.submissions.length ? result.submissions.map((item) => `<article class="panel review-card"><b>Submission #${escapeHtml(item.id)} • Raid #${escapeHtml(item.mission_id)}</b><p>${escapeHtml(item.users?.username ? `@${item.users.username}` : item.users?.first_name || item.telegram_id)}</p><p>${escapeHtml(item.proof_url || item.completion_text || "DONE")}</p><div class="form-row"><button class="button approve-submission" data-id="${item.id}">Approve</button><button class="button secondary reject-submission" data-id="${item.id}">Reject</button></div></article>`).join("") : empty("No pending submissions.")}<div class="panel"><h3>Team & Partner Foundation</h3><p>${ops.admins.length} active/configured team records.</p><p>${ops.partners.length ? `${ops.partners.length} approved partner profiles.` : "No partner profiles activated. Invitation-ready only."}</p></div></div>`;
   } catch { byId("admin-panel").innerHTML += empty("Admin operations could not be loaded."); }
 }
+const SCREEN_INSTRUCTIONS = Object.freeze({
+  profile: {
+    title: "👤 PROFILE — WHAT NEXT?",
+    body: "Your Legend Rank is activity status. Treasury / Team / Admin responsibilities are separate. If your wallet is not linked, open your Telegram /profile and tap ADD WALLET.",
+    dip: "guide_profile"
+  },
+  raids: {
+    title: "🤠 RAIDS — 3 STEPS",
+    body: "Open the post → Like/Repost/Reply genuinely → return and tap I RAIDED ✅. The social counters are community targets, not your personal checklist.",
+    dip: "guide_raid"
+  },
+  create: {
+    title: "🚀 CREATE — START SIMPLE",
+    body: "You do not need every advanced setting. Start with the token idea and chain, then let WorldzLaunch explain the next technical choice before any irreversible action.",
+    dip: "guide_launch"
+  },
+  inbox: {
+    title: "📥 INBOX — PRIVATE WORLDZ MESSAGES",
+    body: "Read or reply to Worldz messages here. Use the safety controls to block unwanted senders. Never share passwords, seed phrases or private keys.",
+    dip: "guide_command"
+  },
+  rewards: {
+    title: "⭐ REWARDS — WHAT COUNTS?",
+    body: "Legend Points come from eligible Worldz activity such as Raids, referrals and approved reward flows. Normal Raid completions auto-award when safety caps pass; exceptions are reviewed.",
+    dip: "guide_raid"
+  },
+  leaderboard: {
+    title: "🏆 LEADERBOARD",
+    body: "This ranks Legend Points. It is not the same as Treasury responsibility, Admin access or team authority.",
+    dip: "guide_profile"
+  },
+  fullscope: {
+    title: "🌐 FULLSCOPE — CHAIN VIEW",
+    body: "Use this when you want the multi-chain technical view. New users can ignore it until they need chain-specific tools.",
+    dip: "guide_command"
+  },
+  "worldz-votes": {
+    title: "🗳️ TOKEN VOTES",
+    body: "This is the simple hourly favourite-token popularity vote. It is separate from civic public voice and separate from Treasury governance.",
+    dip: "guide_command"
+  },
+  community: {
+    title: "💜 COMMUNITY",
+    body: "Use this for Worldz community activity, sharing and support tools. If you only want to join and Raid, Profile → Wallet → Raid is enough.",
+    dip: "guide_command"
+  },
+  "community-suite": {
+    title: "🌐 COMMUNITY SUITE",
+    body: "These are group/community owner tools. Ordinary Legends do not need to configure this to participate.",
+    dip: "guide_command"
+  },
+  admin: {
+    title: "🛡 ADMIN",
+    body: "Admin controls are responsibility tools, not a higher Legend Rank. Only use actions within your active access level.",
+    dip: "guide_command"
+  },
+  "admin-review": {
+    title: "✅ REVIEW QUEUE",
+    body: "This is for exceptions and protected approvals. Normal eligible Raid rewards should not require routine Admin approval.",
+    dip: "guide_raid"
+  }
+});
+
+function ensureScreenInstructions(id) {
+  const cfg = SCREEN_INSTRUCTIONS[id];
+  const screen = byId(id);
+  if (!cfg || !screen || screen.querySelector(".worldz-screen-instructions")) return;
+  const panel = document.createElement("div");
+  panel.className = "panel security worldz-screen-instructions";
+  panel.innerHTML = `<h3>${escapeHtml(cfg.title)}</h3><p>${escapeHtml(cfg.body)}</p><p><a class="button secondary" href="https://t.me/DipShitBossBot?start=${encodeURIComponent(cfg.dip)}" target="_blank" rel="noopener">💙 ASK DIPSHIT</a></p>`;
+  screen.prepend(panel);
+}
+
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach((screen) => screen.classList.toggle("active", screen.id === id));
   document.querySelectorAll(".nav button").forEach((button) => button.classList.toggle("active", button.dataset.screen === id));
+  ensureScreenInstructions(id);
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 function feedback(message) { if (tg && tg.showAlert) tg.showAlert(message); else alert(message); }
