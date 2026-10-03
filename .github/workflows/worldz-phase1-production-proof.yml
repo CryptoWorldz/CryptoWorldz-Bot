@@ -34,6 +34,7 @@ jobs:
           node --test \
             test/miniapp-auth.test.js \
             test/command-centre-static.test.js \
+            test/command-centre.test.js \
             test/ronald-raider.test.js \
             test/shill-rewards.test.js \
             test/auto-activity-rewards.test.js \
@@ -44,6 +45,28 @@ jobs:
             test/admin-gateway.test.js \
             test/command-registry.test.js \
             test/dipshit-profile.test.js
+
+      - name: Wait for deployed WorldzMINT JavaScript to match current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          local_sha="$(sha256sum launchpad.cryptoworldz.xyz/mint/app.js | awk '{print $1}')"
+          for attempt in $(seq 1 40); do
+            if curl -fsSL --connect-timeout 10 --max-time 30 \
+              -H 'Cache-Control: no-cache' \
+              "https://launchpad.cryptoworldz.xyz/mint/app.js?phase1=${GITHUB_SHA}&attempt=${attempt}" \
+              -o /tmp/live-worldzmint-app.js; then
+              live_sha="$(sha256sum /tmp/live-worldzmint-app.js | awk '{print $1}')"
+              echo "WORLDZMINT_PARITY attempt=${attempt} local=${local_sha} live=${live_sha}"
+              if [ "$local_sha" = "$live_sha" ]; then
+                echo "WORLDZMINT_PRODUCTION_PARITY=PASS"
+                exit 0
+              fi
+            fi
+            sleep 15
+          done
+          echo "WORLDZMINT_PRODUCTION_PARITY=FAIL"
+          exit 1
 
       - name: Start real headless Chrome
         shell: bash
