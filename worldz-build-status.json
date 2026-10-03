@@ -1,0 +1,49 @@
+{
+  "schema": "WORLDZ-BUILD-STATUS-1",
+  "effectiveDate": "2026-10-03",
+  "rules": {
+    "LIVE": "tested against public production URL/current deployed service",
+    "BUILT_NOT_VERIFIED": "implementation exists but current production proof is missing or incomplete",
+    "PLANNED": "not built yet",
+    "BROKEN": "production test fails, deployment is stale, or deployed version is wrong"
+  },
+  "evidence": {
+    "commandCentre": {
+      "status": "LIVE",
+      "commit": "6ec3edbe8e71a7ceda962ff4af2c03b5cc8e3dcb",
+      "deployRun": 37112571949,
+      "browserProofRun": 37113037549
+    },
+    "launchPad": {
+      "status": "BUILT_NOT_VERIFIED",
+      "repairCommit": "b70859338a55ae8f8dbae53f3719718f8007e053",
+      "currentDeployRun": 37112850112
+    },
+    "phase1Gate": {
+      "workflow": ".github/workflows/worldz-phase1-production-proof.yml",
+      "initialRun": 37113037549,
+      "regressionTests": "45/45 PASS",
+      "commandCentreBrowser": "PASS",
+      "worldzMintWallet": "RERUN_AFTER_STABLE_DEPLOY"
+    }
+  },
+  "capabilities": {
+    "commandCentreStatic": "LIVE",
+    "telegramSecureLaunch": "LIVE",
+    "raidsUi": "LIVE",
+    "ronaldNext": "BUILT_NOT_VERIFIED",
+    "shill": "BUILT_NOT_VERIFIED",
+    "points": "BUILT_NOT_VERIFIED",
+    "votesUi": "LIVE",
+    "hourlyVote": "BUILT_NOT_VERIFIED",
+    "inboxUi": "LIVE",
+    "inboxBackend": "BUILT_NOT_VERIFIED",
+    "rexClient": "LIVE",
+    "rexEnforcement": "BUILT_NOT_VERIFIED",
+    "adminUi": "LIVE",
+    "adminActions": "BUILT_NOT_VERIFIED",
+    "worldzMintWallet": "BUILT_NOT_VERIFIED",
+    "launchPadProductionParity": "BUILT_NOT_VERIFIED",
+    "launchPadChildRoutes": "BUILT_NOT_VERIFIED"
+  }
+}
