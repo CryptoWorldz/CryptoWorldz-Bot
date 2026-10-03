@@ -46,9 +46,9 @@ jobs:
 
           token=str(os.environ.get("BOT_TOKEN","")).strip()
           supabase=(str(os.environ.get("SUPABASE_URL","")).strip() or "https://hknymhhyqldtzmplzuzh.supabase.co").rstrip("/")
-          publishable=str(os.environ.get("SUPABASE_PUBLISHABLE_KEY","")).strip()
-          if not token or not publishable:
-              raise SystemExit("Protected runtime configuration missing.")
+          publishable=str(os.environ.get("SUPABASE_PUBLISHABLE_KEY","")).strip() or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+          if not token:
+              raise SystemExit("Protected bot runtime configuration missing.")
           print("::add-mask::"+token)
 
           runtime_key=hashlib.sha256(("zed-runtime-v1:"+token).encode()).hexdigest()
