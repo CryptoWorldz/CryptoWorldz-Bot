@@ -171,6 +171,31 @@ Use /help to open the Command Menu.
     }
   });
 
+  bot.on("callback_query", async (query) => {
+    if (String(query?.data || "") !== "profile:wallet" || !query.message) return;
+    const chatId = query.message.chat.id;
+    try {
+      const user = await repository.getUser(query.from.id);
+      if (!user) {
+        await bot.answerCallbackQuery(query.id, { text: "Use /start first.", show_alert: true });
+        return;
+      }
+      if (user.wallet) {
+        await bot.answerCallbackQuery(query.id, { text: "Wallet already linked ✅" });
+        return send(chatId, `👛 Wallet Connected ✅\n\n${shortenWallet(user.wallet)}\n\nTo replace it, use /wallet NEW_PUBLIC_ADDRESS.`);
+      }
+      pendingWalletRegistration.add(query.from.id);
+      await bot.answerCallbackQuery(query.id, { text: "Send your public Solana address next." });
+      return send(
+        chatId,
+        "👛 ADD YOUR WALLET\n\nSend your PUBLIC Solana wallet address in your next message.\n\n⚠️ Never send a seed phrase or private key.\nUse /cancel to stop."
+      );
+    } catch (error) {
+      safeError("Profile wallet button", error);
+      try { await bot.answerCallbackQuery(query.id, { text: "Wallet setup could not start.", show_alert: true }); } catch {}
+    }
+  });
+
   bot.onText(/^\/cancel(?:@\w+)?$/, async (msg) => {
     pendingWalletRegistration.delete(msg.from.id);
     await send(msg.chat.id, "✅ Wallet registration cancelled.");
