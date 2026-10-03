@@ -2,48 +2,116 @@
   "schema": "WORLDZ-BUILD-STATUS-1",
   "effectiveDate": "2026-10-03",
   "rules": {
-    "LIVE": "tested against public production URL/current deployed service",
-    "BUILT_NOT_VERIFIED": "implementation exists but current production proof is missing or incomplete",
-    "PLANNED": "not built yet",
-    "BROKEN": "production test fails, deployment is stale, or deployed version is wrong"
+    "LIVE": "tested on the public production URL/current deployed service",
+    "BUILT_NOT_VERIFIED": "code exists but production proof is missing or incomplete",
+    "PLANNED": "not built",
+    "BROKEN": "production test fails or deployment is stale"
   },
   "evidence": {
     "commandCentre": {
       "status": "LIVE",
-      "commit": "6ec3edbe8e71a7ceda962ff4af2c03b5cc8e3dcb",
-      "deployRun": 37112571949,
-      "browserProofRun": 37113037549
+      "deployCommit": "6ec3edbe8e71a7ceda962ff4af2c03b5cc8e3dcb",
+      "staticDeployRun": 37112571949,
+      "protectedRuntimeRun": 37112571962,
+      "browserProofRun": 37113524632,
+      "browserProof": "PASS",
+      "regressionTests": "51/51 PASS"
+    },
+    "telegramRuntime": {
+      "status": "LIVE",
+      "restoreRun": 37112571962,
+      "bot": "PASS",
+      "webhook": "PASS",
+      "publicCommands": 50,
+      "privateCommands": 57,
+      "backlogControl": "PASS"
+    },
+    "signedRuntimeAudit": {
+      "status": "LIVE",
+      "run": 37113660864,
+      "unsignedProtectedRoutes": "PASS (401)",
+      "signedBootstrap": "PASS",
+      "adminAuth": "PASS",
+      "legendPointsRead": "PASS",
+      "inboxBackend": "PASS",
+      "projectWalletDirectory": "PASS"
+    },
+    "communitySuiteRex": {
+      "status": "LIVE",
+      "run": 37113108179,
+      "realTelegramSupergroup": "PASS",
+      "signedMiniAppAuth": "PASS",
+      "ownerAdmin": "PASS",
+      "peerAdmin": "PASS",
+      "licenceDenyGate": "PASS",
+      "licenceAllowGate": "PASS",
+      "rexToggle": "PASS",
+      "restoredOriginalState": "PASS"
+    },
+    "worldzPublicVoice": {
+      "status": "LIVE",
+      "run": 37113108091,
+      "miniApp": "PASS",
+      "moderatedProductionIntake": "PASS",
+      "reviewQueue": "PASS",
+      "cleanup": "PASS",
+      "bindingVoteAuthority": false,
+      "treasuryExecution": false
     },
     "launchPad": {
-      "status": "BUILT_NOT_VERIFIED",
-      "repairCommit": "b70859338a55ae8f8dbae53f3719718f8007e053",
-      "currentDeployRun": 37112850112
+      "status": "LIVE",
+      "browserProofRun": 37113524632,
+      "browserRoutes": "13/13 PASS",
+      "productionParityRun": 37113881838,
+      "productionParity": "PASS",
+      "platformConfigParity": "PASS",
+      "worldzLaunchRegister": "WORLDZ-LAUNCH-REGISTER-V3 LIVE",
+      "worldzLaunchRegisterEdgeVersion": 8,
+      "worldzMintJavaScript": "LIVE",
+      "criticalRoutes": "PASS"
     },
-    "phase1Gate": {
-      "workflow": ".github/workflows/worldz-phase1-production-proof.yml",
-      "initialRun": 37113037549,
-      "regressionTests": "45/45 PASS",
-      "commandCentreBrowser": "PASS",
-      "worldzMintWallet": "RERUN_AFTER_STABLE_DEPLOY"
-    }
+    "repairedFailures": [
+      {
+        "run": 37113037549,
+        "area": "Phase 1 browser proof",
+        "result": "FAILURE",
+        "cause": "WorldzMINT browser readiness test ran before the module was ready",
+        "resolution": "Browser readiness gate stabilized; replacement run 37113524632 passed"
+      },
+      {
+        "run": 37112850112,
+        "area": "LaunchPad full live verifier",
+        "result": "FAILURE",
+        "cause": "Production worldz-launch-register was still V2 and verifier shadowed its registry URL variable",
+        "resolution": "Edge Function upgraded to V3/version 8; verifier variable collision fixed; production parity run 37113881838 passed"
+      }
+    ]
   },
   "capabilities": {
     "commandCentreStatic": "LIVE",
+    "commandCentreRuntime": "LIVE",
     "telegramSecureLaunch": "LIVE",
     "raidsUi": "LIVE",
     "ronaldNext": "BUILT_NOT_VERIFIED",
     "shill": "BUILT_NOT_VERIFIED",
     "points": "BUILT_NOT_VERIFIED",
+    "pointsRead": "LIVE",
     "votesUi": "LIVE",
-    "hourlyVote": "BUILT_NOT_VERIFIED",
+    "worldzPublicVoice": "LIVE",
+    "hourlyTokenVote": "BUILT_NOT_VERIFIED",
     "inboxUi": "LIVE",
-    "inboxBackend": "BUILT_NOT_VERIFIED",
+    "inboxBackend": "LIVE",
     "rexClient": "LIVE",
-    "rexEnforcement": "BUILT_NOT_VERIFIED",
+    "rexEnforcement": "LIVE",
+    "communitySuite": "LIVE",
     "adminUi": "LIVE",
+    "adminAuth": "LIVE",
+    "rexAdminToggle": "LIVE",
     "adminActions": "BUILT_NOT_VERIFIED",
-    "worldzMintWallet": "BUILT_NOT_VERIFIED",
-    "launchPadProductionParity": "BUILT_NOT_VERIFIED",
-    "launchPadChildRoutes": "BUILT_NOT_VERIFIED"
+    "projectWalletDirectory": "LIVE",
+    "worldzMintNoWalletSafetyBoundary": "LIVE",
+    "worldzMintWalletConnection": "BUILT_NOT_VERIFIED",
+    "launchPadProductionParity": "LIVE",
+    "launchPadChildRoutes": "LIVE"
   }
 }
