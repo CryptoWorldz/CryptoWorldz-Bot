@@ -1,4 +1,5 @@
 const { getRank, shortenWallet } = require("./core");
+const { responsibilityLines } = require("./member-responsibilities");
 
 const REFERRAL_COMMANDS = Object.freeze([
   { command: "shilllink", description: "Create your unique community link" },
@@ -205,9 +206,12 @@ function registerReferralTelegramHandlers({ bot, repository, supabase, config })
 
   bot.onText(PROFILE_PATTERN, async (msg) => {
     try {
-      const [profile, stats] = await Promise.all([
+      const [profile, stats, adminAccess] = await Promise.all([
         repository.getMemberDetails(msg.from.id),
-        referralStats(msg.from.id)
+        referralStats(msg.from.id),
+        typeof repository.getAdminAccess === "function"
+          ? repository.getAdminAccess(msg.from.id, config.adminTelegramIds, config.ownerTelegramId).catch(() => null)
+          : Promise.resolve(null)
       ]);
       if (!profile) return send(msg.chat.id, "❌ You are not registered. Use /register first.");
 
@@ -215,6 +219,8 @@ function registerReferralTelegramHandlers({ bot, repository, supabase, config })
       const points = Number(user.points) || 0;
       const completed = Math.max(Number(user.raids) || 0, Number(user.raids_completed) || 0);
       const displayName = user.username ? `@${user.username}` : user.first_name || "Legend";
+      const roleLines = responsibilityLines({ user, adminAccess });
+      const roleBlock = roleLines.length ? `\n${roleLines.join("\n")}` : "";
 
       return send(
         msg.chat.id,
@@ -222,11 +228,11 @@ function registerReferralTelegramHandlers({ bot, repository, supabase, config })
 
 👤 Username: ${displayName}
 🆔 Telegram ID: ${user.telegram_id}
-🎖 Rank: ${getRank(points)}
+🎖 Legend Rank: ${getRank(points)}${roleBlock}
 ⭐ Legend Points: ${points}
 🚀 Raaiiidds Completed: ${completed}
 📥 Pending Submissions: ${profile.pending}
-👛 Wallet Connected: ${user.wallet ? `Yes ✅\n${shortenWallet(user.wallet)}` : "No"}
+👛 Wallet Connected: ${user.wallet ? `Yes ✅\n${shortenWallet(user.wallet)}` : "No — tap ADD WALLET below"}
 🎁 Rewards Earned: ${rewardsEarned} Legend Points
 
 🔗 Unique Shill Links: ${stats.links.length}
@@ -237,7 +243,24 @@ function registerReferralTelegramHandlers({ bot, repository, supabase, config })
 
 📅 Member Since: ${user.registered_at || user.created_at}
 
-Use /shilllink inside an eligible CryptoWorldz group to create your unique link.`
+✅ SIMPLE NEXT STEP
+${user.wallet ? "Wallet linked ✅" : "1. Add your public Solana wallet."}
+2. Tap RAID NOW.
+3. Open the post → raid it → come back → tap I RAIDED ✅.`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: user.wallet ? "👛 WALLET ✅" : "👛 ADD WALLET", callback_data: "profile:wallet" },
+                { text: "🤠 RAID NOW", callback_data: "ronald:current" }
+              ],
+              [
+                { text: "❓ HOW TO JOIN", callback_data: "cc:howtojoin" },
+                { text: "🏆 LEADERBOARD", callback_data: "ronald:lb" }
+              ]
+            ]
+          }
+        }
       );
     } catch (error) {
       console.error("Enhanced profile command failed", {
