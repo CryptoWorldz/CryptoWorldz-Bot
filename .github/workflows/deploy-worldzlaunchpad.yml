@@ -715,6 +715,14 @@ jobs:
                       rel=local.relative_to(local_root).as_posix()
                       remote=PurePosixPath(remote_root)/rel
                       ensure_dir(ftp,str(remote.parent))
+                      # Hostinger uploads through a temporary .in.<filename> file.
+                      # A timed-out prior transfer can leave that file behind and
+                      # cause every later STOR to fail with FTP 550. Remove only
+                      # the stale temp file for the exact destination before upload.
+                      try:
+                          ftp.delete('.in.'+remote.name)
+                      except error_perm:
+                          pass
                       with local.open('rb') as handle:
                           ftp.storbinary(f'STOR {remote.name}',handle,blocksize=262144)
                       count+=1
