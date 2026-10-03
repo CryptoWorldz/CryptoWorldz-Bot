@@ -330,9 +330,13 @@ function createRepository(supabase) {
     const { data, error } = await supabase.from("mission_submissions").select("status,points_awarded").eq("telegram_id", telegramId);
     if (error) throw error;
     const submissions = data || [];
-    return { ...profile, pending: submissions.filter((r) => r.status === "pending").length,
+    return {
+      ...profile,
+      automationQueue: submissions.filter((r) => r.status === "deferred_auto").length,
+      pending: 0,
       approved: submissions.filter((r) => r.status === "approved").length,
-      rejected: submissions.filter((r) => r.status === "rejected").length };
+      rejected: submissions.filter((r) => r.status === "rejected").length
+    };
   }
 
   async function getStats() {
