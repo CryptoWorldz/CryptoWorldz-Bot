@@ -93,7 +93,8 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
     ok: true,
     product: "REXSECURE ULTIMATE™",
     tagline: "Security for Your Community",
-    protections: ["CAS threat intelligence","REX Network Shield","Number Match","External Bot Guard","Identity Guard","Pattern Guard","Anti-Flood","Link Guard","Under Attack mode"],
+    protections: ["CAS threat intelligence","REX Network Shield","Evidence Ledger","Confidence Scoring","Appeal / False-Positive Guard","Number Match","External Bot Guard","Identity Guard","Pattern Guard","Anti-Flood","Link Guard","Under Attack mode"],
+    decision_policy: { cas_alone: "quarantine_review", permanent_network_block: "human_adjudication_required", active_appeal: "freeze_escalation_above_quarantine" },
     attribution: { label: "Powered by CAS", url: "https://cas.chat" }
   }));
 
