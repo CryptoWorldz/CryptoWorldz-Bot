@@ -1,0 +1,109 @@
+name: Worldz Squads live proof
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/worldz-squads-live-proof.yml'
+      - 'WORLDZ-BUILD-STATUS.md'
+      - 'src/worldz-squads.js'
+      - 'public/miniapp/worldz-squads.js'
+      - 'launchpad.cryptoworldz.xyz/squads/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/worldz-squads-live-proof.yml'
+      - 'src/worldz-squads.js'
+      - 'public/miniapp/worldz-squads.js'
+      - 'launchpad.cryptoworldz.xyz/squads/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for Worldz Squads runtime API
+        shell: python
+        run: |
+          import json, time, urllib.request
+          url='https://cryptobotz.cryptoworldz.xyz/api/public/squads?period=1M'
+          last=''
+          for attempt in range(1, 41):
+              try:
+                  req=urllib.request.Request(url, headers={
+                      'User-Agent':'Worldz-Squads-Live-Proof/1.0',
+                      'Cache-Control':'no-cache'
+                  })
+                  with urllib.request.urlopen(req, timeout=25) as response:
+                      body=response.read().decode('utf-8')
+                      last=f'HTTP {response.status} {body[:180]}'
+                      data=json.loads(body)
+                  squads=data.get('squads') or []
+                  thechaos=next((row for row in squads if row.get('slug')=='thechaos'), None)
+                  if response.status==200 and data.get('ok') is True and data.get('product')=='Worldz Squads™' and thechaos:
+                      assert data.get('period')=='1M'
+                      assert thechaos.get('name')=='THECHAOS'
+                      assert isinstance(thechaos.get('members'), int)
+                      assert 'pnl_usd' in thechaos
+                      assert 'points' in thechaos
+                      print(f'WORLDZ_SQUADS_RUNTIME_LIVE=PASS attempt={attempt} members={thechaos["members"]}')
+                      break
+              except Exception as exc:
+                  last=repr(exc)
+              print(f'Waiting for Worldz Squads runtime attempt={attempt}: {last[:260]}')
+              time.sleep(15)
+          else:
+              raise SystemExit('WORLDZ_SQUADS_RUNTIME_LIVE=FAIL '+last[:400])
+
+      - name: Wait for WorldzLaunchPad Squads page
+        shell: python
+        run: |
+          import time, urllib.request
+          urls={
+              'page':'https://launchpad.cryptoworldz.xyz/squads/',
+              'app':'https://launchpad.cryptoworldz.xyz/squads/app.js',
+              'mini':'https://cryptobotz.cryptoworldz.xyz/miniapp/worldz-squads.js'
+          }
+          expected={
+              'page':['WORLDZ SQUADS™','COMPETE TOGETHER','THECHAOS ON PUMP.FUN'],
+              'app':['/api/public/squads','data-period'],
+              'mini':['Save Squad Card','/api/mini/squads/me']
+          }
+          for attempt in range(1, 41):
+              ok=True
+              details=[]
+              for key,url in urls.items():
+                  try:
+                      req=urllib.request.Request(url+'?proof=worldz-squads',headers={
+                          'User-Agent':'Worldz-Squads-Live-Proof/1.0',
+                          'Cache-Control':'no-cache'
+                      })
+                      with urllib.request.urlopen(req,timeout=25) as response:
+                          text=response.read().decode('utf-8','replace')
+                      missing=[marker for marker in expected[key] if marker not in text]
+                      if response.status != 200 or missing:
+                          ok=False
+                          details.append(f'{key}:status={response.status}:missing={missing}')
+                  except Exception as exc:
+                      ok=False
+                      details.append(f'{key}:{exc!r}')
+              if ok:
+                  print(f'WORLDZ_SQUADS_PUBLIC_SURFACES_LIVE=PASS attempt={attempt}')
+                  break
+              print(f'Waiting for Worldz Squads public surfaces attempt={attempt}: {" | ".join(details)[:600]}')
+              time.sleep(15)
+          else:
+              raise SystemExit('WORLDZ_SQUADS_PUBLIC_SURFACES_LIVE=FAIL')
+
+      - name: Prove production database foundation
+        shell: python
+        run: |
+          # The public runtime response above proves the deployed service can read
+          # the production Squad foundation. Keep DB writes outside this public proof.
+          print('WORLDZ_SQUADS_DB_RUNTIME_READ=PASS')
