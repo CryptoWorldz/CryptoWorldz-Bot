@@ -7,7 +7,9 @@ const {
   raidPulseText,
   parseRaidPayload,
   progressLine,
-  detectPlatform
+  detectPlatform,
+  extractXStatusId,
+  raidOpenUrl
 } = require("../src/ronald-raider");
 
 test("Ronald Raider short form loads safe defaults", () => {
@@ -36,6 +38,21 @@ test("Ronald Raider detects supported social platforms and rejects unsafe URLs",
 test("Ronald Raider progress is capped for display", () => {
   assert.match(progressLine("Likes", 5, 10), /50%/);
   assert.match(progressLine("Likes", 20, 10), /100%/);
+});
+
+test("Ronald Raider converts an X post into the protected direct-post launcher", () => {
+  const source = "https://x.com/PDCrew/status/2106328326755496140";
+  assert.equal(extractXStatusId(source), "2106328326755496140");
+  const target = raidOpenUrl({ platform: "X", source_url: source });
+  assert.match(target, /^https:\/\/cryptobotz\.cryptoworldz\.xyz\/miniapp\/open-x\.html\?/);
+  const parsed = new URL(target);
+  assert.equal(parsed.searchParams.get("id"), "2106328326755496140");
+  assert.equal(parsed.searchParams.get("src"), source);
+});
+
+test("Ronald Raider leaves non-X links unchanged", () => {
+  const source = "https://youtube.com/watch?v=abc";
+  assert.equal(raidOpenUrl({ platform: "YouTube", source_url: source }), source);
 });
 
 
