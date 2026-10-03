@@ -1,0 +1,202 @@
+name: REXSECURE Appeal Freeze Live Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rexsecure-appeal-freeze-live-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      BASE_URL: https://cryptobotz.cryptoworldz.xyz
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY || secrets.SUPABASE_KEY }}
+
+    steps:
+      - name: Prove live appeal freezes block escalation
+        shell: python
+        run: |
+          import hashlib, hmac, json, os, time, urllib.error, urllib.parse, urllib.request
+
+          base=str(os.environ.get("BASE_URL","")).rstrip("/")
+          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          supabase=(str(os.environ.get("SUPABASE_URL","")).strip() or "https://hknymhhyqldtzmplzuzh.supabase.co").rstrip("/")
+          publishable=str(os.environ.get("SUPABASE_PUBLISHABLE_KEY","")).strip() or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+          if not token:
+              raise SystemExit("BOT_TOKEN missing")
+          print("::add-mask::"+token)
+
+          # Telegram IDs are documented as at most 52 significant bits. This value
+          # is still a JS-safe integer but intentionally exceeds that space, so it
+          # cannot collide with a real Telegram account.
+          run_id=int(os.environ.get("GITHUB_RUN_ID","0") or 0)
+          subject=8_000_000_000_000_000 + (run_id % 100_000)
+          print("::add-mask::"+str(subject))
+
+          runtime_key=hashlib.sha256(("zed-runtime-v1:"+token).encode()).hexdigest()
+          runtime_headers={
+              "apikey":publishable,
+              "authorization":"Bearer "+publishable,
+              "x-zed-runtime-key":runtime_key,
+              "accept":"application/json",
+              "content-type":"application/json",
+              "user-agent":"REXSECURE-Appeal-Freeze-Live-Proof/1.0"
+          }
+
+          def request_json(url,method="GET",headers=None,payload=None,allow=(200,201,204)):
+              data=None if payload is None else json.dumps(payload,separators=(",",":")).encode()
+              req=urllib.request.Request(url,data=data,headers=headers or {},method=method)
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as response:
+                      body=response.read().decode("utf-8","ignore")
+                      parsed=json.loads(body) if body else None
+                      return response.status,parsed
+              except urllib.error.HTTPError as exc:
+                  body=exc.read().decode("utf-8","ignore")
+                  try: parsed=json.loads(body)
+                  except Exception: parsed={"raw":body[:500]}
+                  return exc.code,parsed
+
+          def signed_headers(label):
+              user={"id":subject,"first_name":"REX Live Proof","username":"rex_live_proof","language_code":"en"}
+              fields={
+                  "auth_date":str(int(time.time())),
+                  "query_id":label+"-"+str(run_id),
+                  "user":json.dumps(user,separators=(",",":"),ensure_ascii=False)
+              }
+              check="\n".join(f"{k}={v}" for k,v in sorted(fields.items()))
+              secret=hmac.new(b"WebAppData",token.encode(),hashlib.sha256).digest()
+              fields["hash"]=hmac.new(secret,check.encode(),hashlib.sha256).hexdigest()
+              return {
+                  "X-Telegram-Init-Data":urllib.parse.urlencode(fields),
+                  "Accept":"application/json",
+                  "User-Agent":"REXSECURE-Appeal-Freeze-Live-Proof/1.0"
+              }
+
+          def rest(table,params,method="GET",payload=None,prefer=None):
+              url=supabase+"/rest/v1/"+table+"?"+urllib.parse.urlencode(params,safe=",.*()-:")
+              headers=dict(runtime_headers)
+              if prefer: headers["Prefer"]=prefer
+              return request_json(url,method=method,headers=headers,payload=payload)
+
+          evidence_ids=[]
+          appeal_id=None
+          started=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
+
+          try:
+              signals=[
+                  ("pattern_match","synthetic-pattern",100,100),
+                  ("worldz_admin_report","synthetic-report",100,100),
+                  ("local_behavior","synthetic-behaviour",100,100)
+              ]
+              for source_key,reference,severity,confidence in signals:
+                  code,rows=request_json(
+                      supabase+"/rest/v1/secureguard_evidence",
+                      method="POST",
+                      headers={**runtime_headers,"Prefer":"return=representation"},
+                      payload={
+                          "subject_telegram_id":subject,
+                          "source_key":source_key,
+                          "source_reference":"live-proof:"+reference+":"+str(run_id),
+                          "signal_type":"live_proof",
+                          "severity":severity,
+                          "source_confidence":confidence,
+                          "evidence":"Synthetic ReX appeal-freeze production proof",
+                          "metadata":{"synthetic":True,"github_run_id":run_id},
+                          "status":"active"
+                      }
+                  )
+                  if code not in (200,201) or not isinstance(rows,list) or len(rows)!=1:
+                      raise SystemExit("Synthetic evidence insert failed")
+                  evidence_ids.append(int(rows[0]["id"]))
+
+              # Without appeal: 3 independent high-confidence signals must create
+              # a block candidate/local block and fail closed at Mini App auth.
+              code,body=request_json(
+                  base+"/api/mini/bootstrap",
+                  headers=signed_headers("rex-before-appeal"),
+                  allow=(403,)
+              )
+              if code!=403 or not isinstance(body,dict) or body.get("error")!="rexsecure_blocked":
+                  raise SystemExit("High-risk synthetic identity did not fail closed before appeal")
+
+              query={
+                  "select":"id,risk_score,risk_band,recommended_action,independent_source_count,active_appeal,rationale,assessed_at",
+                  "subject_telegram_id":"eq."+str(subject),
+                  "assessed_at":"gte."+started,
+                  "order":"assessed_at.desc",
+                  "limit":"1"
+              }
+              code,rows=rest("secureguard_assessments",query)
+              if code!=200 or not rows:
+                  raise SystemExit("Pre-appeal assessment missing")
+              before=rows[0]
+              if int(before["risk_score"])<80 or before["recommended_action"]!="local_block" or before["active_appeal"] is not False:
+                  raise SystemExit("Pre-appeal risk action mismatch")
+              print("REXSECURE_PRE_APPEAL_BLOCK=PASS")
+
+              code,rows=request_json(
+                  supabase+"/rest/v1/secureguard_appeals",
+                  method="POST",
+                  headers={**runtime_headers,"Prefer":"return=representation"},
+                  payload={
+                      "subject_telegram_id":subject,
+                      "appellant_telegram_id":subject,
+                      "reason":"Synthetic false-positive appeal freeze production proof",
+                      "evidence":"No real Telegram identity is involved.",
+                      "status":"pending"
+                  }
+              )
+              if code not in (200,201) or not isinstance(rows,list) or len(rows)!=1:
+                  raise SystemExit("Synthetic appeal insert failed")
+              appeal_id=int(rows[0]["id"])
+
+              # With appeal: the same evidence must no longer block authentication.
+              code,body=request_json(
+                  base+"/api/mini/bootstrap",
+                  headers=signed_headers("rex-with-appeal"),
+                  allow=(200,)
+              )
+              if code!=200 or not isinstance(body,dict) or body.get("ok") is not True:
+                  raise SystemExit("Active appeal did not freeze block escalation")
+
+              code,rows=rest("secureguard_assessments",{
+                  "select":"id,risk_score,risk_band,recommended_action,independent_source_count,active_appeal,rationale,assessed_at",
+                  "subject_telegram_id":"eq."+str(subject),
+                  "assessed_at":"gte."+started,
+                  "order":"assessed_at.desc",
+                  "limit":"1"
+              })
+              if code!=200 or not rows:
+                  raise SystemExit("Post-appeal assessment missing")
+              after=rows[0]
+              rationale=after.get("rationale") or {}
+              if after["recommended_action"]!="quarantine" or after["active_appeal"] is not True:
+                  raise SystemExit("Appeal did not cap recommendation at quarantine")
+              if rationale.get("escalation_frozen") is not True:
+                  raise SystemExit("Appeal freeze rationale missing")
+
+              print("REXSECURE_ACTIVE_APPEAL_FREEZE=PASS")
+              print("REXSECURE_FALSE_POSITIVE_GUARD_LIVE=PASS")
+          finally:
+              # Remove only synthetic proof rows; no real member or moderation state is changed.
+              for table in ("secureguard_assessments","secureguard_appeals","secureguard_evidence"):
+                  code,_=rest(
+                      table,
+                      {"subject_telegram_id":"eq."+str(subject)},
+                      method="DELETE",
+                      prefer="return=minimal"
+                  )
+                  if code not in (200,204):
+                      raise SystemExit("Synthetic proof cleanup failed for "+table)
+              print("REXSECURE_APPEAL_FREEZE_PROOF_CLEANUP=PASS")
