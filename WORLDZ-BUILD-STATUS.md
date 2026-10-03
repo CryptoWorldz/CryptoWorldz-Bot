@@ -3,7 +3,7 @@
 **Canonical production status record**  
 **Rule effective:** 2026-10-03  
 **Owner:** JayJayTeamDev  
-**Last verified:** 2026-10-03
+**Last verified:** 2026-10-04
 
 ## Status rules
 
@@ -37,6 +37,9 @@
 | Worldz DM round-trip | 🟡 BUILT / NOT VERIFIED | DM command/runtime exists; this audit did not deliberately send a new external DM solely for proof. |
 | REXSECURE client/UI | ✅ LIVE | Production browser and LaunchPad live audit confirm REXSECURE surfaces/scripts. |
 | REXSECURE enforcement | ✅ LIVE | Real Telegram Supergroup proof `37113108179`: licence deny gate, licence allow gate and SecureGuard OFF/ON/OFF action passed; original ON state restored. |
+| REXSECURE data-source policy + evidence ledger | ✅ LIVE | Production migration `20261003221922_rexsecure_confidence_appeals_v1` added protected source-policy, evidence, appeal and assessment tables; protected runtime bridge + public policy proof passed in `37158552287`. |
+| REXSECURE confidence scoring | ✅ LIVE | Production policy now scores evidence 0–100 with source weighting/corroboration. CAS alone is capped at quarantine/review; permanent Worldz network blocks require human adjudication. Phase-1 regression `37158355099`, public-policy proof `37158552287` and signed deployed scorer proof `37158670391` passed. |
+| REXSECURE appeal / false-positive guard | ✅ LIVE | Live synthetic proof `37158739353` created 3 independent high-risk signals: pre-appeal action correctly failed closed as local block; active appeal capped the same evidence to quarantine and restored access. Synthetic evidence/appeal/assessment rows were cleaned up after proof. |
 | Community Suite | ✅ LIVE | Real Telegram Supergroup proof `37113108179` passed Suite initialization, authenticated Mini App API and support ticket flow. |
 | Admin UI | ✅ LIVE | Real production browser confirmed Admin surface. |
 | Admin authentication | ✅ LIVE | Signed runtime audit `37113660864` confirmed owner admin authorization. |
@@ -78,12 +81,18 @@ The LaunchPad verifier reused `registry` for two meanings. Current `main` uses a
 ### 5. Browser race/readiness — FIXED
 The permanent browser gate now waits for production WorldzMINT JS SHA parity and a loaded non-empty DOM before assertions.
 
+### 6. ReX single-source auto-ban risk — FIXED
+A CAS/provider/database match is no longer treated as sufficient proof for a permanent Worldz-wide ban. ReX now separates source policy, evidence, scoring and adjudication; CAS alone is capped at quarantine/review, stronger local blocking requires corroboration, permanent network blocking requires explicit human adjudication, and an active appeal freezes escalation above quarantine.
+
 ## Permanent Phase-1 gates
 
 - `.github/workflows/worldz-phase1-production-proof.yml`
 - `.github/workflows/worldz-phase1-runtime-audit.yml`
 - `.github/workflows/worldz-launchpad-phase1-live-audit.yml`
 - `.github/workflows/worldz-launchpad-full-route-browser-audit.yml`
+- `.github/workflows/rexsecure-confidence-live-proof.yml`
+- `.github/workflows/rexsecure-runtime-scoring-live-proof.yml`
+- `.github/workflows/rexsecure-appeal-freeze-live-proof.yml`
 
 These prevent a future merge from being described as LIVE without deployed proof.
 
@@ -97,6 +106,11 @@ These prevent a future merge from being described as LIVE without deployed proof
 - Worldz Public Voice live proof: `37113108091`
 - LaunchPad V3 live audit: `37113881838`
 - LaunchPad exhaustive 52-route + wallet-adapter browser proof: `37114909793`
+- ReX confidence Phase-1 regression: `37158355099`
+- ReX protected runtime deploy/schema gate: `37158358202`
+- ReX confidence/source-policy public live proof: `37158552287`
+- ReX signed deployed scoring proof: `37158670391`
+- ReX live appeal / false-positive freeze proof: `37158739353`
 
 ## Remaining Phase-1 🟡 items
 
