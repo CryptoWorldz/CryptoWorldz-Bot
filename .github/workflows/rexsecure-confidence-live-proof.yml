@@ -1,0 +1,136 @@
+name: REXSECURE Confidence + Appeals Live Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rexsecure-confidence-live-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rexsecure-confidence-live-proof
+  cancel-in-progress: true
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cryptoworldz-production
+    env:
+      BASE_URL: https://cryptobotz.cryptoworldz.xyz
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY || secrets.SUPABASE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Prove ReX confidence policy in current source
+        run: |
+          npm ci --ignore-scripts
+          node --test test/rex-threat-intel.test.js test/rex-secureguard-ultimate.test.js
+
+      - name: Prove protected ReX confidence schema and source policy
+        shell: python
+        run: |
+          import hashlib, json, os, urllib.parse, urllib.request
+
+          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          supabase=(str(os.environ.get("SUPABASE_URL","")).strip() or "https://hknymhhyqldtzmplzuzh.supabase.co").rstrip("/")
+          publishable=str(os.environ.get("SUPABASE_PUBLISHABLE_KEY","")).strip()
+          if not token or not publishable:
+              raise SystemExit("Protected runtime configuration missing.")
+          print("::add-mask::"+token)
+
+          runtime_key=hashlib.sha256(("zed-runtime-v1:"+token).encode()).hexdigest()
+          headers={
+              "apikey":publishable,
+              "authorization":"Bearer "+publishable,
+              "x-zed-runtime-key":runtime_key,
+              "accept":"application/json",
+              "user-agent":"REXSECURE-Confidence-Live-Proof/1.0"
+          }
+
+          def rows(table, select, params=""):
+              url=supabase+"/rest/v1/"+table+"?select="+urllib.parse.quote(select,safe=",.*()-:")
+              if params: url += "&"+params
+              req=urllib.request.Request(url,headers=headers)
+              with urllib.request.urlopen(req,timeout=30) as response:
+                  if response.status!=200: raise RuntimeError(table+" HTTP "+str(response.status))
+                  data=json.load(response)
+              if not isinstance(data,list): raise RuntimeError(table+" invalid payload")
+              return data
+
+          sources=rows("secureguard_intel_sources","source_key,base_weight,max_auto_action,requires_corroboration,freshness_hours,enabled","order=source_key.asc")
+          expected={
+              "cas":(85,"quarantine",True),
+              "identity_match":(35,"watch",True),
+              "local_behavior":(30,"watch",True),
+              "pattern_match":(55,"quarantine",True),
+              "worldz_admin_report":(45,"watch",True),
+              "worldz_owner_adjudication":(100,"network_block",False)
+          }
+          actual={r["source_key"]:(int(r["base_weight"]),r["max_auto_action"],bool(r["requires_corroboration"])) for r in sources if r.get("enabled") is True}
+          for key,value in expected.items():
+              assert actual.get(key)==value,(key,actual.get(key),value)
+
+          # The runtime bridge must reach all four confidence/appeal tables.
+          rows("secureguard_evidence","id,subject_telegram_id,source_key,status","limit=1")
+          rows("secureguard_appeals","id,subject_telegram_id,status","limit=1")
+          rows("secureguard_assessments","id,subject_telegram_id,risk_score,recommended_action","limit=1")
+
+          print("REXSECURE_SOURCE_POLICY_LIVE=PASS sources="+str(len(expected)))
+          print("REXSECURE_CONFIDENCE_SCHEMA_BRIDGE=PASS tables=4")
+
+      - name: Prove deployed public ReX policy
+        shell: python
+        run: |
+          import json, os, time, urllib.request
+
+          base=str(os.environ.get("BASE_URL","")).rstrip("/")
+          last=""
+          for attempt in range(1,61):
+              try:
+                  req=urllib.request.Request(
+                      base+"/api/public/rexsecure?confidence-live-proof="+str(attempt),
+                      headers={
+                          "Accept":"application/json",
+                          "Cache-Control":"no-cache",
+                          "User-Agent":"REXSECURE-Confidence-Live-Proof/1.0"
+                      }
+                  )
+                  with urllib.request.urlopen(req,timeout=30) as response:
+                      body=response.read().decode("utf-8","ignore")
+                      data=json.loads(body)
+                  policy=data.get("decision_policy") or {}
+                  protections=data.get("protections") or []
+                  if (
+                      response.status==200
+                      and data.get("product")=="REXSECURE ULTIMATE™"
+                      and policy.get("cas_alone")=="quarantine_review"
+                      and policy.get("permanent_network_block")=="human_adjudication_required"
+                      and policy.get("active_appeal")=="freeze_escalation_above_quarantine"
+                      and "Confidence Scoring" in protections
+                      and "Appeal / False-Positive Guard" in protections
+                  ):
+                      print("REXSECURE_PUBLIC_POLICY_LIVE=PASS attempt="+str(attempt))
+                      print("REXSECURE_CONFIDENCE_APPEALS_LIVE_PROOF=PASS")
+                      raise SystemExit(0)
+                  last=json.dumps(data)[:600]
+              except SystemExit:
+                  raise
+              except Exception as exc:
+                  last=repr(exc)
+              print("REXSECURE_LIVE_RETRY attempt="+str(attempt)+" state="+last[:300])
+              time.sleep(10)
+
+          raise SystemExit("REXSECURE_PUBLIC_POLICY_LIVE=FAIL "+last)
