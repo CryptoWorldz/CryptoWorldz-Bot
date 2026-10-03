@@ -195,25 +195,45 @@ function registerRexSecureGuard({ bot, supabase, config }) {
   }
 
   async function enforceThreatProfile(chatId, user, cfg, { announce = true } = {}) {
-    if (!cfg.threatIntel || !user?.id) return false;
+    if (!cfg.threatIntel || !user?.id || cfg.networkShieldMode === "off") return false;
     const assessment = await threatIntel.assessUser(user.id, { casEnabled: cfg.casEnabled });
-    if (!assessment.blocked || cfg.networkShieldMode === "off") return false;
-    const reason = assessment.reason || "documented threat profile";
-    if (cfg.networkShieldMode === "quarantine") {
+    const action = assessment.recommendedAction || assessment.action || "allow";
+    if (!["quarantine", "local_block", "network_block"].includes(action)) return false;
+
+    const reason = assessment.reason || "documented threat intelligence";
+    let applied = "QUARANTINED";
+
+    // Confidence policy wins over the group's broad "ban" posture:
+    // a quarantine recommendation may never be escalated into a ban.
+    if (action === "quarantine" || cfg.networkShieldMode === "quarantine") {
       await quarantineMember(chatId, user.id, 3600, `threat_intel:${reason}`);
     } else {
       await banMember(chatId, user.id, `threat_intel:${reason}`);
+      applied = "BANNED";
     }
-    await logEvent(chatId, user.id, "threat_intel_block", `${assessment.sources.map((row) => row.source).join(",")}:${reason}`);
+
+    await logEvent(
+      chatId,
+      user.id,
+      "threat_intel_action",
+      `score=${assessment.riskScore || 0};band=${assessment.riskBand || "unknown"};recommended=${action};applied=${applied.toLowerCase()};sources=${assessment.signals?.map((row) => row.sourceKey).join(",") || ""}`
+    );
+
     if (announce) {
       try {
         await bot.sendMessage(chatId, [
-          "🛡 REXSECURE ULTIMATE™ — THREAT BLOCK",
+          action === "quarantine"
+            ? "🛡 REXSECURE ULTIMATE™ — REVIEW HOLD"
+            : "🛡 REXSECURE ULTIMATE™ — THREAT ACTION",
           "",
           `Telegram ID: ${user.id}`,
-          `Action: ${cfg.networkShieldMode === "quarantine" ? "QUARANTINED" : "BANNED"}`,
+          `Risk score: ${assessment.riskScore || 0}/100 • ${String(assessment.riskBand || "clear").toUpperCase()}`,
+          `Recommended: ${String(action).toUpperCase()}`,
+          `Applied: ${applied}`,
+          assessment.activeAppeal ? "Appeal: ACTIVE — permanent escalation is frozen." : "Appeal: none active",
           `Reason: ${reason}`,
           "",
+          "A database match alone is not treated as proof. ReX combines source quality, corroboration, evidence and review.",
           REX_BRAND.casAttribution
         ].join("\n"), { disable_web_page_preview: true });
       } catch {}
@@ -256,6 +276,19 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     try { await api("deleteMessage", { chat_id: msg.chat.id, message_id: msg.message_id }); } catch {}
     try { await quarantineMember(msg.chat.id, msg.from.id, cfg.underAttack ? 86400 : 3600, `pattern_similarity=${match.similarity.toFixed(2)}`); } catch {}
     await logEvent(msg.chat.id, msg.from.id, "pattern_guard_triggered", `pattern_id=${match.row.id};similarity=${match.similarity.toFixed(3)}`);
+    try {
+      await threatIntel.recordEvidence({
+        subjectTelegramId: msg.from.id,
+        sourceKey: "pattern_match",
+        sourceReference: `pattern:${match.row.id}`,
+        signalType: "message_pattern_match",
+        severity: Math.max(60, Math.min(95, Math.round(match.similarity * 100))),
+        sourceConfidence: 90,
+        evidence: `Pattern #${match.row.id} similarity ${match.similarity.toFixed(3)}`,
+        metadata: { chat_id: Number(msg.chat.id), message_id: Number(msg.message_id), pattern_id: Number(match.row.id) },
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      });
+    } catch {}
     try {
       await bot.sendMessage(msg.chat.id, `🛡 REX Pattern Guard removed a message matching a confirmed scam/spam pattern (${Math.round(match.similarity * 100)}%). Sender quarantined.`);
     } catch {}
@@ -402,6 +435,19 @@ function registerRexSecureGuard({ bot, supabase, config }) {
       ? "username matches a trusted identity"
       : "display name matches a trusted identity";
     await logEvent(msg.chat.id, actualId, "impersonation_signal", `${reason};trusted_id=${match.telegram_id}`);
+    try {
+      await threatIntel.recordEvidence({
+        subjectTelegramId: actualId,
+        sourceKey: "identity_match",
+        sourceReference: `trusted:${match.telegram_id}`,
+        signalType: "identity_similarity",
+        severity: 55,
+        sourceConfidence: 70,
+        evidence: reason,
+        metadata: { chat_id: Number(msg.chat.id), trusted_telegram_id: Number(match.telegram_id) },
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      });
+    } catch {}
 
     if (cfg.impersonationMode === "quarantine") {
       try {
@@ -501,17 +547,29 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     const telegramId = safeTelegramId(match?.[1]);
     if (!telegramId) return bot.sendMessage(msg.chat.id, "❌ Use /rexintel TELEGRAM_ID");
     const assessment = await threatIntel.assessUser(telegramId, { casEnabled: true });
-    const sourceLines = assessment.sources.map((row) =>
-      `• ${row.source}: ${row.blocked ? "BLOCKED" : row.available ? "clear/no block" : "unavailable"}${row.reason ? " — "+row.reason : ""}`
+    const sourceLines = (assessment.sources || []).map((row) =>
+      `• ${row.source}: ${row.blocked ? "MATCH" : row.available ? "no current block" : "unavailable"}${row.reason ? " — "+row.reason : ""}`
+    );
+    const signalLines = (assessment.signals || []).map((row) =>
+      `• ${row.sourceKey}: +${row.contribution} risk • severity ${row.severity}% • source confidence ${row.sourceConfidence}%`
     );
     return bot.sendMessage(msg.chat.id, [
       "🛡 REXSECURE ULTIMATE™ — PROFILE INTELLIGENCE",
       "",
       `Telegram ID: ${telegramId}`,
-      `Decision: ${assessment.blocked ? "⛔ BLOCK" : assessment.watch ? "⚠️ WATCH" : "✅ NO DOCUMENTED BLOCK"}`,
-      `Confidence: ${assessment.confidence || 0}%`,
+      `Risk score: ${assessment.riskScore || 0}/100`,
+      `Band: ${String(assessment.riskBand || "clear").toUpperCase()}`,
+      `Recommended action: ${String(assessment.recommendedAction || "allow").toUpperCase()}`,
+      `Independent sources: ${assessment.independentSourceCount || 0}`,
+      `Appeal: ${assessment.activeAppeal ? "ACTIVE — escalation frozen above quarantine" : "none active"}`,
+      "",
+      "Evidence signals:",
+      ...(signalLines.length ? signalLines : ["• No active risk evidence"]),
+      "",
+      "Provider / registry state:",
       ...sourceLines,
       "",
+      "Policy: one loose database entry cannot create a permanent Worldz-wide ban.",
       REX_BRAND.casAttribution
     ].join("\n"), { disable_web_page_preview: true });
   });
@@ -534,12 +592,68 @@ function registerRexSecureGuard({ bot, supabase, config }) {
     return bot.sendMessage(msg.chat.id, `🛡 REX report #${report.id} recorded for Telegram ID ${subjectTelegramId}. It is evidence for review — not an automatic network-wide ban.`);
   });
 
+  bot.onText(/^\/rexappeal(?:@\w+)?(?:\s+([\s\S]+))?$/i, async (msg, match) => {
+    const reason = String(match?.[1] || "").trim();
+    if (reason.length < 5) {
+      return bot.sendMessage(msg.chat.id, "🛡 Use /rexappeal REASON\nExplain why the ReX result may be wrong and include evidence where possible.");
+    }
+    try {
+      const appeal = await threatIntel.createAppeal({
+        subjectTelegramId: msg.from.id,
+        appellantTelegramId: msg.from.id,
+        chatId: msg.chat.id,
+        reason
+      });
+      await logEvent(msg.chat.id, msg.from.id, "appeal_created", `appeal_id=${appeal.id}`, msg.from.id);
+      return bot.sendMessage(msg.chat.id, appeal.existing
+        ? `🛡 ReX Appeal #${appeal.id} is already active. Permanent escalation remains frozen while it is reviewed.`
+        : `🛡 ReX Appeal #${appeal.id} recorded. Permanent escalation is frozen while the appeal is pending. Evidence is preserved for human review.`);
+    } catch (error) {
+      return bot.sendMessage(msg.chat.id, `❌ ReX could not record that appeal: ${error?.message || "appeal_failed"}`);
+    }
+  });
+
+  bot.onText(/^\/rexappeals(?:@\w+)?$/i, async (msg) => {
+    if (!isOwner(msg.from?.id)) return bot.sendMessage(msg.chat.id, "⛔ Worldz owner access required for the network appeal queue.");
+    try {
+      const rows = await threatIntel.listAppeals({ status: "active", limit: 30 });
+      if (!rows.length) return bot.sendMessage(msg.chat.id, "🛡 No active ReX appeals.");
+      return bot.sendMessage(msg.chat.id, [
+        "🛡 REXSECURE — ACTIVE APPEALS",
+        "",
+        ...rows.map((row) => `#${row.id} • Telegram ID ${row.subject_telegram_id} • ${row.status.toUpperCase()}\n${row.reason}\nResolve: /rexresolve ${row.id} | grant|deny | review note`)
+      ].join("\n\n"));
+    } catch {
+      return bot.sendMessage(msg.chat.id, "❌ ReX could not load the appeal queue.");
+    }
+  });
+
+  bot.onText(/^\/rexresolve(?:@\w+)?\s+(\d+)\s*\|\s*(grant|deny)(?:\s*\|\s*([\s\S]+))?$/i, async (msg, match) => {
+    if (!isOwner(msg.from?.id)) return bot.sendMessage(msg.chat.id, "⛔ Worldz owner access required to resolve network appeals.");
+    try {
+      const result = await threatIntel.resolveAppeal({
+        appealId: Number(match[1]),
+        decision: String(match[2]).toLowerCase(),
+        reviewerTelegramId: msg.from.id,
+        reviewNote: String(match[3] || "").trim()
+      });
+      await logEvent(msg.chat.id, result.subject_telegram_id, "appeal_resolved", `appeal_id=${result.id};status=${result.status}`, msg.from.id);
+      return bot.sendMessage(msg.chat.id, `🛡 ReX Appeal #${result.id} resolved: ${result.status.toUpperCase()}. ${result.status === "granted" ? "Worldz evidence was dismissed and the profile was cleared." : "Existing evidence remains available for future assessment."}`);
+    } catch (error) {
+      return bot.sendMessage(msg.chat.id, `❌ ReX could not resolve that appeal: ${error?.message || "appeal_resolution_failed"}`);
+    }
+  });
+
   bot.onText(/^\/rexglobalblock(?:@\w+)?\s+(\d+)\s*\|\s*([^|]+?)(?:\s*\|\s*(https?:\/\/\S+))?$/i, async (msg, match) => {
     if (!isOwner(msg.from?.id)) return bot.sendMessage(msg.chat.id, "⛔ Worldz owner access required for network-wide blocks.");
     const telegramId = safeTelegramId(match?.[1]);
     const reason = String(match?.[2] || "").trim();
     const evidenceUrl = String(match?.[3] || "").trim() || null;
     if (!telegramId || !reason) return bot.sendMessage(msg.chat.id, "❌ Use /rexglobalblock USER_ID | reason | optional evidence URL");
+    const activeAppeal = await threatIntel.getActiveAppeal(telegramId);
+    if (activeAppeal) {
+      return bot.sendMessage(msg.chat.id, `⏸ ReX Appeal #${activeAppeal.id} is active for Telegram ID ${telegramId}. Resolve it with /rexresolve before applying a permanent network block.`);
+    }
     await threatIntel.setRegistryProfile({
       telegramId,
       status: "blocked",
