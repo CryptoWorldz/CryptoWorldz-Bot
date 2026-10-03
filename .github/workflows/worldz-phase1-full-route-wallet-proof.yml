@@ -1,0 +1,208 @@
+name: Worldz Phase 1 full route + wallet proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/worldz-phase1-full-route-wallet-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start real headless Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME"
+          "$CHROME" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --remote-allow-origins='*' \
+            --remote-debugging-port=9222 \
+            --user-data-dir=/tmp/worldz-phase1-full-chrome \
+            about:blank >/tmp/worldz-phase1-full-chrome.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/worldz-phase1-full-chrome.log
+          exit 1
+
+      - name: Install Chrome DevTools websocket client
+        run: python -m pip install --disable-pip-version-check websocket-client==1.8.0
+
+      - name: Browser-test every LaunchPad index route + wallet connect boundary
+        shell: python
+        run: |
+          import json
+          import time
+          import urllib.parse
+          import urllib.request
+          from pathlib import Path
+          import websocket
+
+          DEVTOOLS='http://127.0.0.1:9222'
+          BASE='https://launchpad.cryptoworldz.xyz'
+          next_id=0
+
+          def new_target():
+              req=urllib.request.Request(DEVTOOLS+'/json/new?about%3Ablank', method='PUT')
+              with urllib.request.urlopen(req, timeout=10) as r:
+                  target=json.load(r)
+              ws=websocket.create_connection(target['webSocketDebuggerUrl'], timeout=20)
+              return ws
+
+          def rpc(ws, method, params=None):
+              global next_id
+              next_id += 1
+              msg_id=next_id
+              ws.send(json.dumps({'id':msg_id,'method':method,'params':params or {}}))
+              deadline=time.time()+30
+              while time.time()<deadline:
+                  msg=json.loads(ws.recv())
+                  if msg.get('id')==msg_id:
+                      if 'error' in msg:
+                          raise RuntimeError(msg['error'])
+                      return msg.get('result',{})
+              raise TimeoutError(method)
+
+          def eval_js(ws, expression):
+              out=rpc(ws,'Runtime.evaluate',{
+                  'expression':expression,
+                  'returnByValue':True,
+                  'awaitPromise':True
+              })
+              result=out.get('result',{})
+              if result.get('subtype')=='error':
+                  raise RuntimeError(result.get('description') or 'JavaScript evaluation failed')
+              return result.get('value')
+
+          def navigate(ws, url):
+              rpc(ws,'Page.navigate',{'url':url})
+              deadline=time.time()+35
+              while time.time()<deadline:
+                  time.sleep(0.35)
+                  state=eval_js(ws,'document.readyState')
+                  body_len=eval_js(ws,'document.body ? document.body.innerText.length : 0') or 0
+                  if state in ('interactive','complete') and int(body_len)>=20:
+                      return
+              raise AssertionError('PAGE_LOAD_TIMEOUT '+url)
+
+          # Discover every current public route from source instead of maintaining a hand list.
+          root=Path('launchpad.cryptoworldz.xyz')
+          paths=[]
+          for file in sorted(root.rglob('index.html')):
+              rel=file.relative_to(root)
+              if str(rel)=='index.html':
+                  route='/'
+              else:
+                  route='/'+str(rel.parent).replace('\\','/')+'/'
+              paths.append(route)
+
+          assert len(paths)>=50, 'Unexpectedly small route set: '+str(len(paths))
+
+          ws=new_target()
+          rpc(ws,'Page.enable')
+          rpc(ws,'Runtime.enable')
+
+          failures=[]
+          for i,route in enumerate(paths,1):
+              url=BASE+route
+              try:
+                  navigate(ws,url)
+                  # Prove the actual public route returns HTTP 200 from inside Chrome.
+                  status=eval_js(ws, f'''fetch({json.dumps(url+'?phase1-full-route='+str(i))},{{cache:"no-store"}}).then(r=>r.status).catch(()=>0)''')
+                  title=(eval_js(ws,'document.title') or '').strip()
+                  body_len=int(eval_js(ws,'document.body ? document.body.innerText.length : 0') or 0)
+                  if int(status)!=200:
+                      raise AssertionError('HTTP_'+str(status))
+                  if not title or body_len<20:
+                      raise AssertionError('EMPTY_RENDER')
+                  low=(title+' '+str(eval_js(ws,'document.body ? document.body.innerText.slice(0,300) : ""'))).lower()
+                  if '404 not found' in low or 'page not found' in low:
+                      raise AssertionError('NOT_FOUND_RENDER')
+                  print(f'LAUNCHPAD_ROUTE_PASS {i}/{len(paths)} {route} title={title[:90]!r} body={body_len}')
+              except Exception as exc:
+                  failures.append((route,repr(exc)))
+                  print('LAUNCHPAD_ROUTE_FAIL',route,repr(exc))
+
+          if failures:
+              raise SystemExit('WORLDZ_LAUNCHPAD_FULL_ROUTE_SWEEP=FAIL '+json.dumps(failures))
+          print('WORLDZ_LAUNCHPAD_FULL_ROUTE_SWEEP=PASS count='+str(len(paths)))
+          ws.close()
+
+          # Safe production wallet-adapter proof. Inject a fake provider before any page JS runs.
+          # It may connect and expose a public address, but any sign call is counted and rejected.
+          ws=new_target()
+          rpc(ws,'Page.enable')
+          rpc(ws,'Runtime.enable')
+          injected = r"""
+          (() => {
+            window.__worldzSignTxCalls = 0;
+            window.__worldzSignMessageCalls = 0;
+            window.alert = () => {};
+            const pk = { toString: () => '11111111111111111111111111111111' };
+            window.solana = {
+              publicKey: pk,
+              connect: async () => ({ publicKey: pk }),
+              signTransaction: async () => {
+                window.__worldzSignTxCalls++;
+                throw new Error('Phase1 proof forbids signing');
+              },
+              signMessage: async () => {
+                window.__worldzSignMessageCalls++;
+                throw new Error('Phase1 proof forbids signing');
+              }
+            };
+          })();
+          """
+          rpc(ws,'Page.addScriptToEvaluateOnNewDocument',{'source':injected})
+          navigate(ws,BASE+'/mint/?phase1-wallet-connect=1')
+
+          # Wait until WorldzMINT has rendered wallet choices.
+          deadline=time.time()+20
+          while time.time()<deadline:
+              ready=eval_js(ws,'!!document.getElementById("wallet-btn") && !!document.getElementById("wallet-choice")')
+              if ready:
+                  break
+              time.sleep(0.5)
+          assert ready is True, 'WorldzMINT wallet controls missing'
+
+          options=eval_js(ws,'[...document.getElementById("wallet-choice").options].map(o=>o.value)')
+          assert 'legacy' in (options or []), 'Injected provider was not detected by production WorldzMINT'
+          eval_js(ws,'document.getElementById("wallet-choice").value="legacy"; document.getElementById("wallet-btn").click(); true')
+
+          deadline=time.time()+15
+          status_text=''
+          while time.time()<deadline:
+              time.sleep(0.5)
+              status_text=eval_js(ws,'document.getElementById("status")?.innerText || ""') or ''
+              if 'CONNECTED' in status_text or 'FAILED' in status_text:
+                  break
+
+          address=eval_js(ws,'document.getElementById("creator-wallet")?.value || ""') or ''
+          tx_calls=int(eval_js(ws,'window.__worldzSignTxCalls || 0') or 0)
+          msg_calls=int(eval_js(ws,'window.__worldzSignMessageCalls || 0') or 0)
+
+          assert 'CONNECTED' in status_text, status_text
+          assert address=='11111111111111111111111111111111', address
+          assert tx_calls==0, tx_calls
+          assert msg_calls==0, msg_calls
+          assert 'No transaction has been requested.' in status_text, status_text
+          print('WORLDZMINT_WALLET_ADAPTER_CONNECT=PASS injected_provider=1 sign_tx=0 sign_message=0 transaction=0')
+          ws.close()
+
+          print('WORLDZ_PHASE1_FULL_ROUTE_WALLET_PROOF=PASS')
