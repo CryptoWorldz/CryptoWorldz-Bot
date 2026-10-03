@@ -678,7 +678,7 @@ jobs:
       - name: Deploy public WorldzLaunchPad to Hostinger
         shell: python
         run: |
-          import os, ssl, time, hashlib, io
+          import os, ssl, time, hashlib, io, secrets
           from ftplib import FTP_TLS, error_perm
           from pathlib import Path, PurePosixPath
 
@@ -711,20 +711,27 @@ jobs:
                   print(f'WORLDZLAUNCHPAD_FTPS attempt={attempt}/4')
                   ftp=connect()
                   count=0
-                  for local in files:
+                  for index,local in enumerate(files, start=1):
                       rel=local.relative_to(local_root).as_posix()
                       remote=PurePosixPath(remote_root)/rel
                       ensure_dir(ftp,str(remote.parent))
-                      # Hostinger uploads through a temporary .in.<filename> file.
-                      # A timed-out prior transfer can leave that file behind and
-                      # cause every later STOR to fail with FTP 550. Remove only
-                      # the stale temp file for the exact destination before upload.
-                      try:
-                          ftp.delete('.in.'+remote.name)
-                      except error_perm:
-                          pass
+
+                      # Never STOR directly to the final filename. Hostinger creates
+                      # .in.<filename> internally and stale hidden files from an
+                      # interrupted upload can permanently block that name with 550.
+                      # Upload to a unique name, then atomically rename into place.
+                      upload_name=f'.worldz-upload-{attempt}-{index}-{secrets.token_hex(4)}-{remote.name}'
                       with local.open('rb') as handle:
-                          ftp.storbinary(f'STOR {remote.name}',handle,blocksize=262144)
+                          ftp.storbinary(f'STOR {upload_name}',handle,blocksize=131072)
+
+                      try:
+                          ftp.rename(upload_name,remote.name)
+                      except error_perm:
+                          # Some FTP servers refuse overwrite-on-rename. Remove only
+                          # the intended final destination, then complete the rename.
+                          try: ftp.delete(remote.name)
+                          except error_perm: pass
+                          ftp.rename(upload_name,remote.name)
                       count+=1
 
                   for old in ['default.php','tokens.json','console-data.json','wldz-mainnet-plan.json']:
