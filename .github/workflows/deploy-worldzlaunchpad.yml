@@ -1047,7 +1047,7 @@ jobs:
                   assert wldz_cfg['execution']['publicCreatorGate'] is False
                   # Canonical identity must survive the actual Hostinger deployment.
                   assert tokenlist_code==200 and identity_code==200
-                  registry={t['symbol']:t for t in identity['tokens']}
+                  identity_registry={t['symbol']:t for t in identity['tokens']}
                   listed={t['symbol']:t for t in tokenlist['tokens']}
                   live_tokens=[t for t in identity['tokens'] if t.get('lifecycle')=='LIVE']
                   reserved=[t for t in identity['tokens'] if t.get('lifecycle') in ('PRELAUNCH','PLANNED')]
