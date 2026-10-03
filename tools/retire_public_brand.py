@@ -38,8 +38,8 @@ REPLACEMENTS = [
     ("http://www.oneworldz.com", "https://donateworldz.com"),
     ("https://oneworldz.com", "https://donateworldz.com"),
     ("http://oneworldz.com", "https://donateworldz.com"),
-    ("OneWorldz", "WorldzEcosystem"),
-    ("ONEWORLDZ", "WORLDZECOSYSTEM"),
+    ("OneWorldz", "WorldzHQ"),
+    ("ONEWORLDZ", "WORLDZHQ"),
     ("oneworldz.com", "donateworldz.com"),
 ]
 FORBIDDEN_PUBLIC_LITERALS = ("OneWorldz", "ONEWORLDZ", "oneworldz.com")
