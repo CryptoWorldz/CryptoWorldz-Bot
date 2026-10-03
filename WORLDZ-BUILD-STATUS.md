@@ -43,29 +43,22 @@
 | Project Wallet directory | ✅ LIVE | Signed production runtime returned the wallet directory successfully. |
 | WorldzMINT public page | ✅ LIVE | Current deployed JS parity and browser route proof passed. |
 | WorldzMINT no-wallet safety boundary | ✅ LIVE | Real Chrome proof `37113524632`: no-wallet connection fails closed and sends no transaction. |
-| Real wallet connect/sign | 🟡 BUILT / NOT VERIFIED | Jupiter Wallet Standard/in-app/WalletConnect support is deployed, but a real external user wallet signature was not automated or fabricated. |
+| WorldzMINT wallet adapter connection path | ✅ LIVE | Production browser audit `37114909793` connected through the deployed injected-wallet adapter using a simulated provider; no signature and no transaction were requested or sent. |
+| Real external wallet connect/sign | 🟡 BUILT / NOT VERIFIED | Jupiter Wallet Standard/in-app/WalletConnect support is deployed, but a real external user wallet signature was not automated or fabricated. |
 | WorldzLaunchPad production parity | ✅ LIVE | Live audit `37113881838` passed homepage, platform-config parity, V3 public registry, WorldzMINT JS and critical routes. |
-| WorldzLaunchPad browser route sweep | ✅ LIVE | `37113524632`: 13/13 selected production routes passed in real Chrome. |
+| WorldzLaunchPad full browser route sweep | ✅ LIVE | `37114909793`: **52/52** current production `index.html` routes rendered their actual Worldz page in real Chrome; `/advertise/` cleared its browser-security challenge before PASS. |
 | Worldz Launch Register V3 | ✅ LIVE | Supabase Edge Function production is active on version **9** and returns `WORLDZ-LAUNCH-REGISTER-V3` / `WORLDZ-FEE-FLOW-V3`. |
 | Fee Flow V3 policy gate | ✅ LIVE | Production registry + LaunchPad audit confirm 3/5/8 Worldz contribution and 97/95/92 creator retention; policy suite passed 190 anti-cheat scenarios before deployment. |
 
 ## Verified production route sweep
 
-The real-browser Phase-1 proof passed:
+The permanent real-browser audit enumerates every current `launchpad.cryptoworldz.xyz/**/index.html` route from the repository and verifies it against production.
 
-1. `/`
-2. `/devnet/`
-3. `/curve/`
-4. `/curve-pro/`
-5. `/mainnet/`
-6. `/base/`
-7. `/fullscope/`
-8. `/community/`
-9. `/integrations/`
-10. `/ready/`
-11. `/wldz/`
-12. `/rviv/`
-13. `/create-your-own-money/`
+- **52/52 current LaunchPad routes:** ✅ LIVE
+- **Evidence:** workflow run `37114909793`
+- **Browser:** real headless Chrome via DevTools protocol
+- **Challenge handling:** security/interstitial pages do **not** count as a pass; `/advertise/` was required to clear its browser challenge and render the actual Worldz page before PASS.
+- **Wallet adapter:** deployed WorldzMINT connection path also passed using a simulated injected provider with **0 signatures and 0 transactions**.
 
 ## Important repaired faults
 
@@ -89,6 +82,7 @@ The permanent browser gate now waits for production WorldzMINT JS SHA parity and
 - `.github/workflows/worldz-phase1-production-proof.yml`
 - `.github/workflows/worldz-phase1-runtime-audit.yml`
 - `.github/workflows/worldz-launchpad-phase1-live-audit.yml`
+- `.github/workflows/worldz-launchpad-full-route-browser-audit.yml`
 
 These prevent a future merge from being described as LIVE without deployed proof.
 
@@ -101,6 +95,7 @@ These prevent a future merge from being described as LIVE without deployed proof
 - Community Suite + REX live Supergroup proof: `37113108179`
 - Worldz Public Voice live proof: `37113108091`
 - LaunchPad V3 live audit: `37113881838`
+- LaunchPad exhaustive 52-route + wallet-adapter browser proof: `37114909793`
 
 ## Remaining Phase-1 🟡 items
 
