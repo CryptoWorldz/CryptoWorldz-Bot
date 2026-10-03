@@ -64,7 +64,7 @@ jobs:
           echo "CHAIN_GATEWAY_PROTECT=PASS count=8"
 
       - name: Compile mission builders
-        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/apply_heroes_worldz.py tools/apply_slice_of_hope_visual.py tools/apply_davis_page.py tools/apply_donateworldz_brand.py tools/deploy_hostinger_robust.py tools/prune_public_bloat.py tools/apply_pdc_five_page.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py tools/apply_verified_insights.py
+        run: python3 -m py_compile tools/apply_mission_worldz.py tools/apply_specialist_worldz.py tools/apply_heroes_worldz.py tools/apply_slice_of_hope_visual.py tools/apply_davis_page.py tools/apply_donateworldz_brand.py tools/deploy_hostinger_robust.py tools/prune_public_bloat.py tools/apply_pdc_five_page.py tools/repair_stage_1_writing.py tools/render_all_pages.py tools/full_site_audit_core.py tools/apply_verified_insights.py tools/apply_worldz_usability_layer.py
 
       - name: Build ecosystem baseline
         run: python3 tools/build_ecosystem.py
@@ -355,6 +355,9 @@ jobs:
           set -euo pipefail
           python3 tools/retire_public_brand.py --apply
           python3 tools/retire_public_brand.py --check
+
+      - name: Apply Worldz START HERE + DIPSHIT usability layer LAST
+        run: python3 tools/apply_worldz_usability_layer.py
 
       - name: Audit every page, stylesheet and image before deployment
         shell: bash
