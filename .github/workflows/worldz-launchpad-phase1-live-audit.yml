@@ -1,0 +1,84 @@
+name: WorldzLaunchPad Phase 1 live audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/worldz-launchpad-phase1-live-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prove current WorldzLaunchPad production parity
+        shell: python
+        run: |
+          import json, urllib.request
+          from pathlib import Path
+
+          base='https://launchpad.cryptoworldz.xyz'
+          registry='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register'
+
+          def get(url):
+              req=urllib.request.Request(url,headers={
+                  'User-Agent':'Worldz-LaunchPad-Phase1-Live-Audit/1.0',
+                  'Cache-Control':'no-cache',
+                  'Accept':'*/*'
+              })
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  return r.status,r.read().decode('utf-8','ignore')
+
+          code,home=get(base+'/?phase1-live-audit=1')
+          assert code==200 and 'PUBLIC TOKEN LAUNCHPAD' in home
+          assert 'WORLDZ FEE FLOW V3' in home
+          print('WORLDZLAUNCHPAD_HOME=PASS')
+
+          code,platform_body=get(base+'/platform-config.json?phase1-live-audit=1')
+          assert code==200
+          platform=json.loads(platform_body)
+          local=json.loads(Path('launchpad.cryptoworldz.xyz/platform-config.json').read_text())
+          for key in ('worldzMint','feePolicy','safeLaunchPolicy','founding100','treasuryStandard'):
+              assert platform[key]==local[key], 'LIVE_PLATFORM_CONFIG_MISMATCH '+key
+          assert platform['feePolicy']['feeFlowVersion']=='WORLDZ-FEE-FLOW-V3'
+          assert platform['feePolicy']['worldzLaunchPadContributionChoicesPercent']==[3,5,8]
+          print('WORLDZLAUNCHPAD_PLATFORM_CONFIG_PARITY=PASS')
+
+          code,reg_body=get(registry+'?phase1-live-audit=1')
+          assert code==200
+          reg=json.loads(reg_body)
+          assert reg.get('ok') is True
+          assert reg.get('standard')=='WORLDZ-LAUNCH-REGISTER-V3', reg.get('standard')
+          assert reg.get('feeFlowVersion')=='WORLDZ-FEE-FLOW-V3', reg.get('feeFlowVersion')
+          assert reg.get('worldzLaunchPadContributionChoicesPercent')==[3,5,8]
+          assert reg.get('worldzLaunchPadContributionDefaultPercent')==5
+          assert reg.get('creatorRetentionByContributionPercent')=={'3':97,'5':95,'8':92}
+          assert reg.get('tokenSupplyTakePercent')==0
+          assert reg.get('initialLiquidityTakePercent')==0
+          assert reg.get('walletTransferTaxPercent')==0
+          print('WORLDZ_LAUNCH_REGISTER_V3_LIVE=PASS')
+
+          code,mint_js=get(base+'/mint/app.js?phase1-live-audit=1')
+          assert code==200 and 'WORLDZMINT-1' in mint_js and "action:'FINALIZE'" in mint_js
+          print('WORLDZMINT_JS_LIVE=PASS')
+
+          markers=[
+              ('/ready/','WORLDZLAUNCH READINESS GATE'),
+              ('/fullscope/','WORLDZFULLSCOPE'),
+              ('/community/','WORLDZLAUNCH COMMUNITY'),
+              ('/integrations/','WORLDZLAUNCH INTEGRATIONS'),
+              ('/wldz/','SOLANA MAINNET'),
+              ('/rviv/','REVIVE')
+          ]
+          for path,marker in markers:
+              code,body=get(base+path+'?phase1-live-audit=1')
+              assert code==200 and marker in body.upper(), (path,code,marker)
+          print('WORLDZLAUNCHPAD_CRITICAL_ROUTES=PASS count='+str(len(markers)))
+
+          print('WORLDZLAUNCHPAD_PHASE1_LIVE_AUDIT=PASS')
