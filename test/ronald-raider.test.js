@@ -39,7 +39,7 @@ test("Ronald Raider progress is capped for display", () => {
 });
 
 
-test("Ronald Raider tells members RaidPoints are automatic with exception review", () => {
+test("Ronald Raider gives a simple three-step member flow and separates community targets", () => {
   const text = campaignText({
     id: 9,
     platform: "X",
@@ -53,10 +53,15 @@ test("Ronald Raider tells members RaidPoints are automatic with exception review
     views_current: 0,
     views_goal: 8,
     reward_points: 20,
+    participation_count: 3,
     source_url: "https://x.com/worldz/status/9"
   });
-  assert.match(text, /RaidPoints are awarded automatically/);
-  assert.match(text, /Admin only handles exceptions/);
+  assert.match(text, /RAID IN 3 EASY STEPS/);
+  assert.match(text, /Tap OPEN POST/);
+  assert.match(text, /I RAIDED ✅/);
+  assert.match(text, /Legends joined: 3/);
+  assert.match(text, /COMMUNITY POST TARGETS — not your personal checklist/);
+  assert.match(text, /automatic safety checks/);
 });
 
 test("Ronald Raider pulse scans frequently but can only publish about once a minute", () => {
@@ -64,7 +69,7 @@ test("Ronald Raider pulse scans frequently but can only publish about once a min
   assert.equal(RAID_PULSE_MIN_GAP_SECONDS, 55);
 });
 
-test("Ronald Raider pulse card is compact and carries current Raid progress", () => {
+test("Ronald Raider pulse card stays compact while telling a member exactly what to do", () => {
   const text = raidPulseText({
     id: 7,
     likes_current: 4,
@@ -75,15 +80,20 @@ test("Ronald Raider pulse card is compact and carries current Raid progress", ()
     replies_goal: 3,
     views_current: 6,
     views_goal: 8,
-    reward_points: 20
+    reward_points: 20,
+    participation_count: 3
   });
 
   assert.match(text, /RONALD RAIDER • RAID #7 ACTIVE/);
-  assert.match(text, /Likes 4\/10/);
-  assert.match(text, /Reposts 3\/5/);
-  assert.match(text, /Replies 2\/3/);
-  assert.match(text, /Views 6\/8/);
+  assert.match(text, /1️⃣ OPEN POST/);
+  assert.match(text, /2️⃣ Like \+ Repost \+ Reply/);
+  assert.match(text, /3️⃣ Come back → I RAIDED ✅/);
+  assert.match(text, /Legends joined: 3/);
+  assert.match(text, /❤️ 4\/10/);
+  assert.match(text, /🔁 3\/5/);
+  assert.match(text, /💬 2\/3/);
+  assert.match(text, /👀 6\/8/);
+  assert.match(text, /Community targets — NOT your personal checklist/);
   assert.match(text, /20 LP on verified completion/);
-  assert.match(text, /Jump in Legends/);
   assert.equal(text.includes("raidprogress"), false);
 });
