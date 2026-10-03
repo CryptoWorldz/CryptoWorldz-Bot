@@ -1,6 +1,8 @@
 const { groupsForRole, normalizeRole } = require("./command-registry");
 
 const BOT_MENU_COMMANDS = [
+  { command: "howtojoin", description: "Start Here — join Worldz in simple steps" },
+  { command: "about", description: "What the Command Centre does" },
   { command: "zedstart", description: "Open Command Centre MAX" },
   { command: "max", description: "Learn, research, interact and teach with MAX" },
   { command: "fullscope", description: "Open WorldzFullScope multi-chain command layer" },
@@ -121,6 +123,10 @@ function mainKeyboard() {
   return {
     reply_markup: {
       inline_keyboard: [
+        [
+          { text: "✅ START HERE", callback_data: "cc:howtojoin" },
+          { text: "ℹ️ ABOUT", callback_data: "cc:about" }
+        ],
         [{ text: "🧠 OPEN COMMAND CENTRE MAX™", web_app: { url: WEB_ROUTES.miniApp } }],
         [{ text: "🌐 WORLDZFULLSCOPE™", callback_data: "cc:menu:fullscope" }],
         [{ text: "📥 WORLDZ INBOX™", web_app: { url: `${WEB_ROUTES.miniApp}#inbox` } }],
@@ -261,6 +267,44 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
     for (const group of groups) await send(msg, groupText(group));
   }
 
+  const howToJoinText = () => [
+    "✅ WORLDZ — START HERE",
+    "",
+    "You do NOT need to learn the whole Command Centre.",
+    "",
+    "1️⃣ PROFILE",
+    "Use /start once. ZED creates your Legend Profile.",
+    "",
+    "2️⃣ WALLET",
+    "Tap ADD WALLET on your profile, or use /wallet.",
+    "Send only your PUBLIC Solana wallet address — never a seed phrase or private key.",
+    "",
+    "3️⃣ RAID",
+    "Tap RAID NOW → OPEN POST → Like/Repost/Reply → come back → tap I RAIDED ✅.",
+    "",
+    "4️⃣ STATUS",
+    "Your Legend Rank grows from activity. Treasury / Team / Admin responsibility is shown separately on the same profile.",
+    "",
+    "That is enough to get started. Everything else can be learned later."
+  ].join("\n");
+
+  const aboutText = () => [
+    "🌐 ABOUT THE ZED-LED COMMAND CENTRE",
+    "",
+    "ZED is the front door. The Command Centre is a collection of Worldz tools — you are not expected to understand every tool before joining.",
+    "",
+    "👤 Profile — who you are in Worldz",
+    "👛 Wallet — your public wallet association",
+    "🤠 Ronald Raider — easy community Raids + Legend Points",
+    "📣 Shill — share Worldz and track eligible activity",
+    "🏦 Treasury — separate responsibility for approved roster members",
+    "🛡 Admin — separate access for active Command Centre admins",
+    "",
+    "For most Legends: Profile → Wallet → Raid. That's it.",
+    "",
+    "Use /howtojoin anytime."
+  ].join("\n");
+
   const openHome = (msg) => send(msg, [
     "🧠 CryptoWorldz Command Centre MAX™",
     "",
@@ -274,6 +318,8 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
   ].join("\n"), mainKeyboard());
 
   bot.onText(/^\/zedstart(?:@\w+)?$/, openHome);
+  bot.onText(/^\/howtojoin(?:@\w+)?$/i, (msg) => send(msg, howToJoinText(), mainKeyboard()));
+  bot.onText(/^\/about(?:@\w+)?$/i, (msg) => send(msg, aboutText(), mainKeyboard()));
   bot.onText(/^\/zed(?:@\w+)?$/, (msg) => send(msg, menuText(MENUS.zed)));
   bot.onText(/^\/max(?:@\w+)?$/, (msg) => send(msg, [
     "🧠 COMMAND CENTRE MAX™",
@@ -355,6 +401,16 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
     const msg = query.message;
     if (!msg || !data.startsWith("cc:")) return;
     const actor = { ...msg, from: query.from };
+
+    if (data === "cc:howtojoin") {
+      await bot.answerCallbackQuery(query.id);
+      return send(actor, howToJoinText(), mainKeyboard());
+    }
+
+    if (data === "cc:about") {
+      await bot.answerCallbackQuery(query.id);
+      return send(actor, aboutText(), mainKeyboard());
+    }
 
     if (data === "cc:menu:settings" || data === "cc:settings:refresh") {
       if (!(await isAdmin(actor))) {
