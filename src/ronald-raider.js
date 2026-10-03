@@ -309,6 +309,20 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     return Array.isArray(data) ? data[0] : data;
   }
 
+  async function reconcilePendingRaidRewards() {
+    const { data, error } = await supabase.rpc("reconcile_pending_raid_rewards", { p_limit: 50 });
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (row && Number(row.processed) > 0) {
+      console.log("Ronald Raider pending reward reconciliation", {
+        processed: Number(row.processed) || 0,
+        awarded: Number(row.awarded) || 0,
+        held: Number(row.held) || 0
+      });
+    }
+    return row;
+  }
+
   function rewardStatusText(status) {
     return [
       "🤠⚡ WORLDZ RAIDPOINTS",
@@ -433,8 +447,16 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
 
   const pulseBootstrapTimer = setTimeout(() => { void pulseActiveRaids(); }, 5_000);
   const pulseTimer = setInterval(() => { void pulseActiveRaids(); }, RAID_PULSE_SCAN_INTERVAL_MS);
+  const rewardReconcileBootstrapTimer = setTimeout(() => {
+    void reconcilePendingRaidRewards().catch((error) => console.error("Ronald reward reconciliation failed", { code: error?.code || error?.message || "unknown" }));
+  }, 12_000);
+  const rewardReconcileTimer = setInterval(() => {
+    void reconcilePendingRaidRewards().catch((error) => console.error("Ronald reward reconciliation failed", { code: error?.code || error?.message || "unknown" }));
+  }, 5 * 60 * 1000);
   if (typeof pulseBootstrapTimer.unref === "function") pulseBootstrapTimer.unref();
   if (typeof pulseTimer.unref === "function") pulseTimer.unref();
+  if (typeof rewardReconcileBootstrapTimer.unref === "function") rewardReconcileBootstrapTimer.unref();
+  if (typeof rewardReconcileTimer.unref === "function") rewardReconcileTimer.unref();
 
   bot.onText(/^\/(?:raid|raaiiidd)(?:@\w+)?$/, async (msg) => {
     if (!(await settingEnabled(msg.chat.id))) return send(msg.chat.id, "⏸ Ronald Raider is switched off in /zedsettings.");
@@ -621,6 +643,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     queuedCampaign,
     autoRewardStatus,
     autoAwardRaid,
+    reconcilePendingRaidRewards,
     pulseActiveRaids
   };
 }
