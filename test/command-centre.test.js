@@ -2,10 +2,10 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { BOT_MENU_COMMANDS, MENUS, WEB_ROUTES } = require("../src/command-centre");
 
-test("gateway commands stay simple and ordered", () => {
+test("gateway commands put simple onboarding before advanced controls", () => {
   assert.deepEqual(
     BOT_MENU_COMMANDS.map((item) => item.command),
-    ["zedstart", "max", "fullscope", "zed", "auto", "grace", "admin", "admingrace", "zedsettings", "help"]
+    ["howtojoin", "about", "zedstart", "max", "fullscope", "zed", "auto", "grace", "admin", "admingrace", "zedsettings", "help"]
   );
 });
 
