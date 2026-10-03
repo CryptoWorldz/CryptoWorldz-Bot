@@ -16,7 +16,10 @@ test("DIPSHIT Worldz Dude profile is wired into the Mini App with no financial a
   assert.match(js, /walletSigning:\s*false/);
   assert.match(js, /treasury:\s*false/);
   assert.match(js, /mainnetBroadcast:\s*false/);
-  assert.match(js, /Run DIPSHIT System Check/);
+  assert.match(js, /LOST\? START HERE/);
+  assert.match(js, /ASK DIPSHIT/);
+  assert.match(js, /guide_command/);
+  assert.match(js, /Run System Check/);
   assert.match(avatar, /WORLDZ DUDE/);
   assert.match(avatar, /#168dff/);
 });
