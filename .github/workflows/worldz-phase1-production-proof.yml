@@ -1,0 +1,181 @@
+name: Worldz Phase 1 production proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/miniapp/**'
+      - 'launchpad.cryptoworldz.xyz/**'
+      - 'src/**'
+      - 'test/**'
+      - '.github/workflows/worldz-phase1-production-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase1-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts
+
+      - name: Command Centre requested-flow regression tests
+        run: |
+          node --test \
+            test/miniapp-auth.test.js \
+            test/command-centre-static.test.js \
+            test/ronald-raider.test.js \
+            test/shill-rewards.test.js \
+            test/auto-activity-rewards.test.js \
+            test/worldz-inbox.test.js \
+            test/worldz-inbox-miniapp.test.js \
+            test/rex-launchpad-connection.test.js \
+            test/rex-secureguard-ultimate.test.js \
+            test/admin-gateway.test.js \
+            test/command-registry.test.js \
+            test/dipshit-profile.test.js
+
+      - name: Start real headless Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME"
+          echo "CHROME=$CHROME" >> "$GITHUB_ENV"
+          "$CHROME" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --remote-allow-origins='*' \
+            --remote-debugging-port=9222 \
+            --user-data-dir=/tmp/worldz-phase1-chrome \
+            about:blank >/tmp/worldz-chrome.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/worldz-chrome.log
+          exit 1
+
+      - name: Install Chrome DevTools websocket client
+        run: python -m pip install --disable-pip-version-check websocket-client==1.8.0
+
+      - name: Browser-test production Command Centre and LaunchPad
+        shell: python
+        run: |
+          import json, time, urllib.parse, urllib.request
+          import websocket
+
+          DEVTOOLS='http://127.0.0.1:9222'
+          next_id=0
+
+          def new_target(url):
+              req=urllib.request.Request(
+                  DEVTOOLS+'/json/new?'+urllib.parse.quote(url, safe=''),
+                  method='PUT'
+              )
+              with urllib.request.urlopen(req, timeout=10) as r:
+                  target=json.load(r)
+              ws=websocket.create_connection(target['webSocketDebuggerUrl'], timeout=15)
+              return ws
+
+          def rpc(ws, method, params=None):
+              global next_id
+              next_id += 1
+              msg_id=next_id
+              ws.send(json.dumps({'id':msg_id,'method':method,'params':params or {}}))
+              deadline=time.time()+20
+              while time.time()<deadline:
+                  msg=json.loads(ws.recv())
+                  if msg.get('id')==msg_id:
+                      if 'error' in msg:
+                          raise RuntimeError(msg['error'])
+                      return msg.get('result',{})
+              raise TimeoutError(method)
+
+          def eval_js(ws, expression):
+              out=rpc(ws,'Runtime.evaluate',{
+                  'expression':expression,
+                  'returnByValue':True,
+                  'awaitPromise':True
+              })
+              return out.get('result',{}).get('value')
+
+          def open_page(url, wait=4):
+              ws=new_target('about:blank')
+              rpc(ws,'Page.enable')
+              rpc(ws,'Runtime.enable')
+              rpc(ws,'Page.navigate',{'url':url})
+              time.sleep(wait)
+              return ws
+
+          def assert_text(ws, needle):
+              body=eval_js(ws,'document.body ? document.body.innerText : ""') or ''
+              assert needle in body, (needle, body[:1000])
+
+          # Command Centre: real browser, outside Telegram must fail closed.
+          ws=open_page('https://cryptobotz.cryptoworldz.xyz/miniapp/',5)
+          assert_text(ws,'Secure Launch Required')
+          locked=eval_js(ws,'document.getElementById("status")?.textContent')
+          assert locked=='Locked', locked
+          error_text=eval_js(ws,'document.getElementById("error-text")?.textContent') or ''
+          assert 'Telegram' in error_text, error_text
+          ids=eval_js(ws,'["raids","worldz-votes","inbox","admin"].every(id=>!!document.getElementById(id))')
+          assert ids is True
+          rex_count=eval_js(ws,'[...document.scripts].filter(s=>String(s.src).includes("rexsecure")).length')
+          assert int(rex_count or 0)>=1
+          brand=eval_js(ws,'document.querySelector(".splash-kicker")?.textContent') or ''
+          assert 'WorldzEcosystem' in brand, brand
+          ws.close()
+          print('COMMAND_CENTRE_BROWSER_PROOF=PASS telegram_fail_closed=1 current_brand=1 raids=1 votes=1 inbox=1 admin=1 rex=1')
+
+          # WorldzMINT wallet boundary: in a browser with no wallet injected,
+          # force the legacy branch and prove it fails without sending a tx.
+          ws=open_page('https://launchpad.cryptoworldz.xyz/mint/',5)
+          assert_text(ws,'WorldzMINT')
+          assert_text(ws,'Connect Wallet')
+          eval_js(ws,'window.alert=()=>{}; const s=document.getElementById("wallet-choice"); const o=document.createElement("option"); o.value="legacy"; o.textContent="Injected Solana wallet"; s.appendChild(o); s.value="legacy"; true')
+          eval_js(ws,'document.getElementById("wallet-btn").click(); true')
+          time.sleep(2)
+          wallet_status=eval_js(ws,'document.getElementById("status")?.innerText') or ''
+          assert 'WALLET CONNECTION FAILED' in wallet_status, wallet_status
+          assert 'No transaction was sent.' in wallet_status, wallet_status
+          ws.close()
+          print('WORLDZMINT_BROWSER_WALLET_BOUNDARY=PASS no_wallet_fail_closed=1 no_transaction=1')
+
+          routes=[
+              ('https://launchpad.cryptoworldz.xyz/','PUBLIC TOKEN LAUNCHPAD'),
+              ('https://launchpad.cryptoworldz.xyz/devnet/','Create Devnet Token'),
+              ('https://launchpad.cryptoworldz.xyz/curve/','Worldz Curve'),
+              ('https://launchpad.cryptoworldz.xyz/curve-pro/','Worldz Curve Pro'),
+              ('https://launchpad.cryptoworldz.xyz/mainnet/','PUBLIC MAINNET ROUTE'),
+              ('https://launchpad.cryptoworldz.xyz/base/','BASE SEPOLIA'),
+              ('https://launchpad.cryptoworldz.xyz/fullscope/','WORLDZFULLSCOPE'),
+              ('https://launchpad.cryptoworldz.xyz/community/','WORLDZLAUNCH COMMUNITY'),
+              ('https://launchpad.cryptoworldz.xyz/integrations/','WORLDZLAUNCH INTEGRATIONS'),
+              ('https://launchpad.cryptoworldz.xyz/ready/','WORLDZLAUNCH READINESS GATE'),
+              ('https://launchpad.cryptoworldz.xyz/wldz/','SOLANA MAINNET'),
+              ('https://launchpad.cryptoworldz.xyz/rviv/','REVIVE'),
+              ('https://launchpad.cryptoworldz.xyz/create-your-own-money/','CREATE')
+          ]
+          for url,marker in routes:
+              ws=open_page(url,3)
+              assert_text(ws,marker)
+              title=eval_js(ws,'document.title')
+              print('BROWSER_ROUTE_PASS',url,title)
+              ws.close()
+
+          print('WORLDZ_PHASE1_BROWSER_ROUTES=PASS count='+str(len(routes)))
