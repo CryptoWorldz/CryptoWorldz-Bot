@@ -1,0 +1,19 @@
+{
+  "version": "2026-10-04-A",
+  "product": "WorldzLaunch™",
+  "currentCompatibilityHost": "launchpad.cryptoworldz.xyz",
+  "futurePrimaryHost": "worldzlaunch.com",
+  "status": "PREPARED_NOT_PROVEN_LIVE",
+  "preserveCompatibilityHost": true,
+  "cutoverChecklist": [
+    "confirm domain ownership",
+    "attach production hosting",
+    "DNS",
+    "TLS",
+    "mirror executable build",
+    "update canonical origins/CORS",
+    "301 compatibility policy",
+    "run full route/wallet/proof regression",
+    "mark LIVE"
+  ]
+}
