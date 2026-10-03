@@ -73,26 +73,28 @@ function progressLine(label, current, goal) {
 }
 
 function campaignText(campaign) {
-  if (!campaign) return "🤠 RONALD RAIDER\n\nNo live Raid right now. Admins can start one with /raid <post URL>.";
+  if (!campaign) return "🤠 RONALD RAIDER\n\nNo live Raid right now.";
   const status = String(campaign.status || "").toUpperCase();
   const lines = [
     "🤠⚡ RONALD RAIDER",
     `Raid #${campaign.id} • ${campaign.platform} • ${status}`,
     "",
+    "🔥 RAID IN 3 EASY STEPS",
+    "1️⃣ Tap OPEN POST.",
+    "2️⃣ Like + Repost + Reply genuinely.",
+    "3️⃣ Come back here and tap I RAIDED ✅.",
+    "",
+    `👥 Legends joined: ${Number(campaign.participation_count) || 0}`,
+    `⭐ Reward: ${Number(campaign.reward_points) || 0} LP when the completion passes automatic safety checks.`,
+    "",
+    "🎯 COMMUNITY POST TARGETS — not your personal checklist",
     progressLine("Likes", campaign.likes_current, campaign.likes_goal),
     progressLine("Reposts", campaign.reposts_current, campaign.reposts_goal),
     progressLine("Replies", campaign.replies_current, campaign.replies_goal),
     progressLine("Views", campaign.views_current, campaign.views_goal),
     "",
-    `⭐ Verified completion: ${Number(campaign.reward_points) || 0} LP`,
-    `🔗 ${campaign.source_url}`,
-    "",
-    "Open the post → do the genuine actions → tap ✅ DONE.",
-    "⚡ RaidPoints are awarded automatically when the activity and safety caps pass. Admin only handles exceptions."
+    "The shared counters can lag. Your participation is recorded when you tap I RAIDED ✅."
   ];
-  if (campaign.platform === "X") {
-    lines.push("", "📊 X targets are stored with the Raid. Current counters can be updated with /raidprogress until the X metrics read-scope adapter is connected.");
-  }
   return lines.join("\n");
 }
 
@@ -101,13 +103,15 @@ function raidPulseText(campaign) {
   return [
     `🤠⚡ RONALD RAIDER • RAID #${campaign.id} ACTIVE`,
     "",
-    `❤️ Likes ${Number(campaign.likes_current) || 0}/${Number(campaign.likes_goal) || 0}`,
-    `🔁 Reposts ${Number(campaign.reposts_current) || 0}/${Number(campaign.reposts_goal) || 0}`,
-    `💬 Replies ${Number(campaign.replies_current) || 0}/${Number(campaign.replies_goal) || 0}`,
-    `👀 Views ${Number(campaign.views_current) || 0}/${Number(campaign.views_goal) || 0}`,
+    "1️⃣ OPEN POST",
+    "2️⃣ Like + Repost + Reply",
+    "3️⃣ Come back → I RAIDED ✅",
     "",
+    `👥 Legends joined: ${Number(campaign.participation_count) || 0}`,
     `⭐ ${Number(campaign.reward_points) || 0} LP on verified completion`,
-    "Jump in Legends 💜"
+    "",
+    "🎯 Community targets — NOT your personal checklist:",
+    `❤️ ${Number(campaign.likes_current) || 0}/${Number(campaign.likes_goal) || 0} • 🔁 ${Number(campaign.reposts_current) || 0}/${Number(campaign.reposts_goal) || 0} • 💬 ${Number(campaign.replies_current) || 0}/${Number(campaign.replies_goal) || 0} • 👀 ${Number(campaign.views_current) || 0}/${Number(campaign.views_goal) || 0}`
   ].join("\n");
 }
 
@@ -116,17 +120,11 @@ function keyboard(campaign) {
   return {
     reply_markup: {
       inline_keyboard: [
-        [
-          { text: "𝕏 Open Post ↗", url: campaign.source_url },
-          { text: "✅ DONE", callback_data: `ronald:done:${campaign.id}` }
-        ],
+        [{ text: "𝕏 OPEN POST ↗", url: campaign.source_url }],
+        [{ text: "✅ I RAIDED", callback_data: `ronald:done:${campaign.id}` }],
         [
           { text: "🔄 Refresh", callback_data: `ronald:refresh:${campaign.id}` },
-          { text: "🏆 LB", callback_data: "ronald:lb" }
-        ],
-        [
-          { text: "⏭ Next", callback_data: "ronald:next" },
-          { text: "🛑 Stop", callback_data: `ronald:stop:${campaign.id}` }
+          { text: "🏆 Leaderboard", callback_data: "ronald:lb" }
         ]
       ]
     }
@@ -159,16 +157,31 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     }
   }
 
+  async function withParticipation(campaign) {
+    if (!campaign?.mission_id) return campaign;
+    try {
+      const { count, error } = await supabase
+        .from("mission_submissions")
+        .select("id", { count: "exact", head: true })
+        .eq("mission_id", Number(campaign.mission_id))
+        .in("status", ["pending", "approved"]);
+      if (error) throw error;
+      return { ...campaign, participation_count: Number(count) || 0 };
+    } catch {
+      return { ...campaign, participation_count: 0 };
+    }
+  }
+
   async function activeCampaigns() {
     const { data, error } = await supabase
       .from("raid_campaigns")
       .select("*,missions(reward_points,title,expires_at)")
       .eq("status", "active");
     if (error) throw error;
-    return (data || []).map((row) => ({
+    return Promise.all((data || []).map((row) => withParticipation({
       ...row,
       reward_points: row.missions?.reward_points || DEFAULTS.reward
-    }));
+    })));
   }
 
   async function resetPulseClock(campaignId) {
@@ -322,7 +335,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       .maybeSingle();
     if (error) throw error;
     if (!data) return null;
-    return { ...data, reward_points: data.missions?.reward_points || DEFAULTS.reward };
+    return withParticipation({ ...data, reward_points: data.missions?.reward_points || DEFAULTS.reward });
   }
 
   async function activeCampaign(chatId) {
@@ -336,7 +349,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       .maybeSingle();
     if (error) throw error;
     if (!data) return null;
-    return { ...data, reward_points: data.missions?.reward_points || DEFAULTS.reward };
+    return withParticipation({ ...data, reward_points: data.missions?.reward_points || DEFAULTS.reward });
   }
 
   async function queuedCampaign(chatId) {
@@ -350,7 +363,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       .maybeSingle();
     if (error) throw error;
     if (!data) return null;
-    return { ...data, reward_points: data.missions?.reward_points || DEFAULTS.reward };
+    return withParticipation({ ...data, reward_points: data.missions?.reward_points || DEFAULTS.reward });
   }
 
   async function createCampaign(msg, parsed, queued) {
@@ -394,7 +407,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       .select("*,missions(reward_points,title,expires_at)")
       .single();
     if (error) throw error;
-    const campaign = { ...data, reward_points: data.missions?.reward_points || parsed.reward };
+    const campaign = await withParticipation({ ...data, reward_points: data.missions?.reward_points || parsed.reward });
     if (!queued) await resetPulseClock(campaign.id);
     return send(
       msg.chat.id,
@@ -560,7 +573,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       const claim = await repository.submitMissionClaim({
         missionId: campaign.mission_id,
         telegramId: actorId,
-        completionText: "Ronald Raider DONE button",
+        completionText: "Ronald Raider I RAIDED button",
         proofUrl: ""
       });
       if (claim.duplicate) {
