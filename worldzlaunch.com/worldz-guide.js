@@ -2,7 +2,8 @@
   "use strict";
   if (document.getElementById("worldz-guide-button")) return;
   const host=location.hostname.toLowerCase(), path=location.pathname.toLowerCase();
-  const type=(host==="worldzhq.com"||host.includes("oneworldz.com"))?"hq":(host==="worldzlaunch.com"||host.includes("launchpad.cryptoworldz.xyz"))?"launch":host.includes("donateworldz.com")?"donate":"crypto";
+  const forced=String(window.WORLDZ_GUIDE_CONTEXT||"").toLowerCase();
+  const type=["hq","launch","donate","crypto"].includes(forced)?forced:(host==="worldzhq.com"?"hq":(host==="worldzlaunch.com"||host.includes("launchpad.cryptoworldz.xyz"))?"launch":host.includes("donateworldz.com")?"donate":"crypto");
   const base={
     hq:{title:"🌐 WORLDZHQ — START HERE",payload:"guide_hq",intro:"WorldzHQ is the front door to the whole Worldz ecosystem.",steps:["Choose what you actually came here to do.","Crypto or token building → CryptoWorldz / WorldzLaunch.","Direct support and causes → DonateWorldz.","If you are unsure, ask DipShit and describe your goal."],next:"https://cryptoworldz.xyz/",nextLabel:"🪙 OPEN CRYPTOWORLDZ"},
     launch:{title:"🚀 WORLDZLAUNCH — START HERE",payload:"guide_launch",intro:"You do not need to understand every advanced control before you start.",steps:["Choose a chain or start with the simple token builder.","Enter the token basics.","Read the plain-English explanation before advanced settings.","Use proof/review screens before any irreversible action."],next:"/create-your-own-money/",nextLabel:"💡 CREATE YOUR OWN MONEY"},
