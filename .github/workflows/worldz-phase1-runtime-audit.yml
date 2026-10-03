@@ -1,0 +1,124 @@
+name: Worldz Phase 1 runtime audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/worldz-phase1-runtime-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: cryptoworldz-production
+    env:
+      BASE_URL: https://cryptobotz.cryptoworldz.xyz
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY || secrets.SUPABASE_KEY }}
+
+    steps:
+      - name: Audit signed and unsigned production boundaries
+        shell: python
+        run: |
+          import hashlib, hmac, json, os, time, urllib.error, urllib.parse, urllib.request
+
+          base=str(os.environ.get("BASE_URL","")).rstrip("/")
+          token=str(os.environ.get("BOT_TOKEN","")).strip()
+          supabase=(str(os.environ.get("SUPABASE_URL","")).strip() or "https://hknymhhyqldtzmplzuzh.supabase.co").rstrip("/")
+          publishable=str(os.environ.get("SUPABASE_PUBLISHABLE_KEY","")).strip() or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+          if not token:
+              raise SystemExit("BOT_TOKEN missing")
+          print("::add-mask::"+token)
+
+          def request_json(url, headers=None, allow=(200,)):
+              req=urllib.request.Request(url,headers={"Accept":"application/json","User-Agent":"Worldz-Phase1-Runtime-Audit/1.0",**(headers or {})})
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as response:
+                      body=response.read().decode("utf-8","ignore")
+                      parsed=json.loads(body) if body else None
+                      if response.status not in allow:
+                          raise RuntimeError("HTTP "+str(response.status))
+                      return response.status,parsed
+              except urllib.error.HTTPError as exc:
+                  body=exc.read().decode("utf-8","ignore")
+                  try: parsed=json.loads(body)
+                  except Exception: parsed={"raw":body[:500]}
+                  return exc.code,parsed
+
+          runtime_key=hashlib.sha256(("zed-runtime-v1:"+token).encode()).hexdigest()
+          runtime_headers={
+              "apikey":publishable,
+              "authorization":"Bearer "+publishable,
+              "x-zed-runtime-key":runtime_key,
+              "accept":"application/json"
+          }
+          query=urllib.parse.urlencode({
+              "select":"telegram_id",
+              "role":"eq.owner",
+              "status":"eq.active",
+              "limit":"2"
+          },safe=",.*()-:")
+          code,owners=request_json(supabase+"/rest/v1/bot_admins?"+query,headers=runtime_headers)
+          if code!=200 or not isinstance(owners,list) or len(owners)!=1:
+              raise SystemExit("Permanent owner registry missing or ambiguous")
+          owner=int(owners[0]["telegram_id"])
+          print("::add-mask::"+str(owner))
+
+          user={"id":owner,"first_name":"Worldz Phase 1","username":"JayJayTeamDev","language_code":"en"}
+          fields={
+              "auth_date":str(int(time.time())),
+              "query_id":"phase1-runtime-"+str(os.environ.get("GITHUB_RUN_ID","0")),
+              "user":json.dumps(user,separators=(",",":"),ensure_ascii=False)
+          }
+          check="\n".join(f"{k}={v}" for k,v in sorted(fields.items()))
+          secret=hmac.new(b"WebAppData",token.encode(),hashlib.sha256).digest()
+          fields["hash"]=hmac.new(secret,check.encode(),hashlib.sha256).hexdigest()
+          init_data=urllib.parse.urlencode(fields)
+          signed={"X-Telegram-Init-Data":init_data}
+
+          protected=[
+              "/api/mini/bootstrap",
+              "/api/mini/inbox",
+              "/api/mini/project-wallets"
+          ]
+          for path in protected:
+              code,payload=request_json(base+path,allow=(401,))
+              if code!=401:
+                  raise SystemExit("Unsigned route failed closed boundary: "+path+" HTTP="+str(code))
+          print("TELEGRAM_UNSIGNED_PROTECTED_ROUTES=PASS count=3")
+
+          code,bootstrap=request_json(base+"/api/mini/bootstrap",headers=signed)
+          if code!=200 or not isinstance(bootstrap,dict) or bootstrap.get("ok") is not True or bootstrap.get("secure") is not True:
+              raise SystemExit("Signed bootstrap failed")
+          if bootstrap.get("admin") is not True or not (bootstrap.get("admin_access") or {}).get("authorized"):
+              raise SystemExit("Owner admin authorization failed")
+          print("COMMAND_CENTRE_SIGNED_BOOTSTRAP=PASS")
+          print("COMMAND_CENTRE_ADMIN_AUTH=PASS")
+
+          profile=bootstrap.get("profile")
+          if bootstrap.get("registered") is not True or not isinstance(profile,dict):
+              raise SystemExit("Owner Legend profile missing; Points cannot be production-proven")
+          points=profile.get("points")
+          if not isinstance(points,(int,float)):
+              raise SystemExit("Legend Points value is not numeric")
+          print("LEGEND_POINTS_READ=PASS value="+str(points))
+
+          code,inbox=request_json(base+"/api/mini/inbox",headers=signed)
+          if code!=200 or not isinstance(inbox,dict) or inbox.get("ok") is not True:
+              raise SystemExit("Signed Inbox backend failed")
+          if not isinstance(inbox.get("incoming"),list) or not isinstance(inbox.get("sent"),list) or not isinstance(inbox.get("unread"),int):
+              raise SystemExit("Inbox payload shape mismatch")
+          print("WORLDZ_INBOX_SIGNED_BACKEND=PASS unread="+str(inbox.get("unread")))
+
+          code,wallets=request_json(base+"/api/mini/project-wallets",headers=signed)
+          if code!=200 or not isinstance(wallets,dict) or wallets.get("ok") is not True or not isinstance(wallets.get("wallets"),list):
+              raise SystemExit("Signed project-wallet directory failed")
+          print("PROJECT_WALLET_DIRECTORY_SIGNED=PASS wallets="+str(len(wallets.get("wallets") or [])))
+
+          print("WORLDZ_PHASE1_RUNTIME_AUDIT=PASS")
