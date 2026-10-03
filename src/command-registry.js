@@ -39,6 +39,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["zed", "Open ZED profile, wallet and Raid controls"], ["start", "Start or reopen ZED"],
     ["register", "Register as a CryptoWorldz Legend"], ["profile", "View your Legend profile"],
     ["points", "View Legend Points"], ["rewards", "View reward activity"], ["leaderboard", "View the leaderboard"],
+    ["squads", "View Worldz Squads leaderboard"], ["squad", "View your Worldz Squad"], ["createsquad", "Create a Worldz Squad"], ["joinsquad", "Join an open Worldz Squad"], ["leavesquad", "Leave your Worldz Squad"],
     ["wallet", "Register or view your public wallet association"], ["cancel", "Cancel the current guided action"],
     ["legendstatus", "View Legend recognition status"], ["specialtiers", "View Special Request tiers"],
     ["uniquelegend", "Apply for Unique Legend review"], ["boostshill", "Boost an eligible referred Legend"]
