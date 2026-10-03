@@ -46,6 +46,25 @@ jobs:
             test/command-registry.test.js \
             test/dipshit-profile.test.js
 
+      - name: Verify live WorldzLaunchPad V3 public registry
+        shell: python
+        run: |
+          import json, urllib.request
+          url='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register?phase1=v3'
+          req=urllib.request.Request(url,headers={'User-Agent':'Worldz-Phase1-Proof/1.0','Cache-Control':'no-cache'})
+          with urllib.request.urlopen(req,timeout=30) as response:
+              assert response.status==200
+              data=json.load(response)
+          assert data.get('ok') is True
+          assert data.get('standard')=='WORLDZ-LAUNCH-REGISTER-V3', data.get('standard')
+          assert data.get('feeFlowVersion')=='WORLDZ-FEE-FLOW-V3', data.get('feeFlowVersion')
+          assert data.get('worldzLaunchPadContributionChoicesPercent')==[3,5,8]
+          assert data.get('creatorRetentionByContributionPercent')=={'3':97,'5':95,'8':92}
+          assert data.get('tokenSupplyTakePercent')==0
+          assert data.get('initialLiquidityTakePercent')==0
+          assert data.get('walletTransferTaxPercent')==0
+          print('WORLDZ_LAUNCH_REGISTRY_V3_LIVE=PASS')
+
       - name: Wait for deployed WorldzMINT JavaScript to match current main
         shell: bash
         run: |
