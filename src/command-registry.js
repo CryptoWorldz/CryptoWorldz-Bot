@@ -4,7 +4,7 @@ const group = (key, label, minimumRole, rows) => Object.freeze({ key, label, min
 
 const COMMAND_GROUPS = Object.freeze([
   group("start", "🌐 Start & Navigation", "public", [
-    ["zedstart", "Open the complete CryptoWorldz Command Centre"], ["help", "Simple command help"],
+    ["zedstart", "Open the complete CryptoWorldz Command Centre"], ["howtojoin", "Simple Start Here guide"], ["about", "Explain Command Centre in plain English"], ["help", "Simple command help"],
     ["dipshit", "Meet DIPSHIT, the blue Worldz Dude"],
     ["commands", "Show commands available to your access level"], ["commandtree", "Show the Command Centre structural tree"],
     ["directory", "Open the Worldz directory"], ["acknowledgements", "Open DonateWorldz acknowledgements"],
