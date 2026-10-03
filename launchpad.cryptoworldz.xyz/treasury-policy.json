@@ -44,7 +44,52 @@
       "status": "FUNDING_PENDING_NOT_DEPLOYED",
       "revenueSharePercentOfTreasuryLane": 30,
       "revenueSharePercentOfWorldzContribution": 6,
-      "automaticRoutingEnabled": false
+      "automaticRoutingEnabled": false,
+      "roster": [
+        {
+          "label": "JayJayTeamDev",
+          "telegramId": 8029135300,
+          "solanaPublicKey": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
+          "status": "ROSTER_CONFIRMED__ACTIVATION_PENDING"
+        },
+        {
+          "label": "Stepper",
+          "telegramId": 7615025841,
+          "solanaPublicKey": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
+          "status": "ROSTER_CONFIRMED__ACTIVATION_PENDING"
+        },
+        {
+          "label": "Savage",
+          "telegramId": 5978625584,
+          "solanaPublicKey": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn",
+          "status": "ROSTER_CONFIRMED__ACTIVATION_PENDING"
+        },
+        {
+          "label": "Mahammad",
+          "telegramId": 7491984495,
+          "solanaPublicKey": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok",
+          "status": "ROSTER_CONFIRMED__ACTIVATION_PENDING"
+        },
+        {
+          "label": "Zephyr",
+          "telegramId": 5862006298,
+          "solanaPublicKey": "JDaTy19tZZLEuMnLgg5mfGbyhgEPnsizqJnMEAUvK8cc",
+          "status": "ROSTER_CONFIRMED__ACTIVATION_PENDING"
+        },
+        {
+          "label": "Troll George",
+          "telegramId": 1928516800,
+          "solanaPublicKey": "GCDEywsF5XtNuH7Jv2gdetEr5oCX4yBRLRHwjSVutFKc",
+          "status": "ROSTER_CONFIRMED__ACTIVATION_PENDING"
+        },
+        {
+          "label": "Jackson Dave",
+          "telegramId": 8416247671,
+          "solanaPublicKey": "99M5ZwVSFBPztU1Sds4eZcda24H9LwiQVxk6nLMyTPvc",
+          "status": "ROSTER_CONFIRMED__ACTIVATION_PENDING"
+        }
+      ],
+      "rosterRule": "Membership is a confirmed Worldz responsibility/status. On-chain signer authority remains pending until the 4-of-7 Squads multisig is deployed and each signer activates/accepts."
     }
   },
   "signerSlots": [
@@ -57,7 +102,8 @@
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02"
+      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02",
+      "telegramId": 8029135300
     },
     {
       "slot": "SIGNER_02",
@@ -68,7 +114,8 @@
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02"
+      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02",
+      "telegramId": 7615025841
     },
     {
       "slot": "SIGNER_03",
@@ -79,7 +126,8 @@
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02"
+      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02",
+      "telegramId": 5978625584
     },
     {
       "slot": "SIGNER_04",
@@ -90,7 +138,8 @@
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02"
+      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02",
+      "telegramId": 6406874841
     },
     {
       "slot": "SIGNER_05",
@@ -101,7 +150,8 @@
       "evmAddress": null,
       "xrplAddress": null,
       "suiPublicKey": null,
-      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02"
+      "status": "VERIFIED_SQUADS_V4_MEMBER_2026_10_02",
+      "telegramId": 7491984495
     }
   ],
   "chains": {
