@@ -30,8 +30,9 @@
     root.innerHTML = `<section class="panel experience-launchpad"><p class="eyebrow">WORLDZ • BUILD • RAID • LAUNCH</p><h2>What do you want to do?</h2><div class="experience-grid">
       <button class="experience-tile" data-exp-open="zed-guide"><span>🤖</span><b>Ask ZED</b><small>Guided Command Centre</small></button>
       <button class="experience-tile" data-exp-open="missions"><span>🚀</span><b>Raids</b><small>Ronald Raider • active queue</small></button>
+      <button class="experience-tile" data-exp-open="squads"><span>🌐</span><b>Worldz Squads</b><small>1D • 1W • 1M • PNL • Raids • Shills</small></button>
       <a class="experience-tile" href="${LAUNCH}" target="_blank" rel="noopener"><span>🌐</span><b>Launch Token</b><small>Mint New • Import Existing</small></a>
-      <a class="experience-tile" href="${LAUNCH_COMMUNITY}" target="_blank" rel="noopener"><span>💜</span><b>Launch Community</b><small>Telegram • X • Pump Squad</small></a>
+      <a class="experience-tile" href="${LAUNCH_COMMUNITY}" target="_blank" rel="noopener"><span>💜</span><b>Launch Community</b><small>Telegram • X • Worldz Squads • Pump rail</small></a>
       <button class="experience-tile" data-exp-open="create"><span>🎨</span><b>Create</b><small>Post + artwork + review</small></button>
       <a class="experience-tile" href="${LEARN}" target="_blank" rel="noopener"><span>📚</span><b>Learn</b><small>Skills and knowledge</small></a>
     </div></section>`;
@@ -130,7 +131,7 @@
         if (adminPanel && !$("experience-review-button")) adminPanel.insertAdjacentHTML("afterbegin", `<button id="experience-review-button" class="button" type="button" data-exp-open="admin-review">✅ Open Human Review Queue</button>`);
       }
       const requested = location.hash.replace(/^#/, "");
-      if (["home","missions","zed-guide","create","heroes","profile","community","admin-review"].includes(requested)) openScreen(requested);
+      if (["home","missions","squads","zed-guide","create","heroes","profile","community","admin-review"].includes(requested)) openScreen(requested);
     } catch (error) { console.warn("Participant experience bootstrap unavailable", error.message); }
   }
 
