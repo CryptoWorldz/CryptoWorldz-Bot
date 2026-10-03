@@ -96,7 +96,8 @@ const COMMAND_GROUPS = Object.freeze([
   group("admin-missions", "🛡 Admin • Raids, Reviews, Members & Settings", "admin", [
     ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"], ["secureguard", "Open REXSECURE ULTIMATE security controls"],
     ["rexwelcome", "Resend the REXSECURE ULTIMATE branded welcome"],
-    ["rexintel", "Check a Telegram ID against REX Network Shield and CAS"], ["rexreport", "Record evidence about a suspicious Telegram profile"],
+    ["rexintel", "Score a Telegram ID from evidence, source quality and corroboration"], ["rexreport", "Record evidence about a suspicious Telegram profile"],
+    ["rexappeal", "Appeal your own REX risk result"], ["rexappeals", "Worldz owner: view active REX appeals"], ["rexresolve", "Worldz owner: grant or deny a REX appeal"],
     ["rexpatternban", "Reply to confirmed scam/spam and add its message pattern"], ["rexunderattack", "Turn strict REX raid posture on or off"],
     ["reviewqueue", "Open Raid, Creator and Hero human-review queues"],
     ["newmission", "Create a Ronald Raider Raid (legacy command)"], ["editmission", "Edit a Raid (legacy command)"], ["endmission", "End a Raid (legacy command)"],
