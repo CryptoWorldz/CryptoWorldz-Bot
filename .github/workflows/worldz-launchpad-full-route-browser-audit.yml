@@ -24,6 +24,8 @@ jobs:
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$CHROME"
           "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
+            --disable-blink-features=AutomationControlled \
+            --user-agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/141.0.0.0 Safari/537.36' \
             --remote-allow-origins='*' --remote-debugging-port=9222 \
             --user-data-dir=/tmp/worldz-full-route-chrome about:blank >/tmp/chrome.log 2>&1 &
           for i in $(seq 1 30); do
@@ -80,8 +82,12 @@ jobs:
                   state=ev(ws,'document.readyState')
                   body=ev(ws,'document.body ? document.body.innerText : ""') or ''
                   if state in ('interactive','complete') and len(body.strip())>20:
+                      low=body.lower()
+                      if 'checking your browser' in low or 'just a moment' in low:
+                          time.sleep(1)
+                          continue
                       return ws,body
-              raise AssertionError('PAGE_DID_NOT_LOAD '+url)
+              raise AssertionError('PAGE_DID_NOT_CLEAR_CHALLENGE '+url)
 
           root=Path('launchpad.cryptoworldz.xyz')
           routes=[]
