@@ -42,6 +42,7 @@ jobs:
             test/worldz-inbox-miniapp.test.js \
             test/rex-launchpad-connection.test.js \
             test/rex-secureguard-ultimate.test.js \
+            test/rex-threat-intel.test.js \
             test/admin-gateway.test.js \
             test/command-registry.test.js \
             test/dipshit-profile.test.js
