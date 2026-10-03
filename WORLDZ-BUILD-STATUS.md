@@ -26,7 +26,7 @@
 | Raids UI | ✅ LIVE | Real production browser confirmed deployed Raids surface. |
 | Ronald Raider `/next` | 🟡 BUILT / NOT VERIFIED | Command is live-registered in Telegram and current-main regression logic passes, but no fresh Phase-1 end-to-end `/next` action was recorded. |
 | Shill / ShillPoints | 🟡 BUILT / NOT VERIFIED | Commands are live-registered and regression tests pass; no fresh end-to-end Shill action recorded in this Phase-1 pass. |
-| Worldz Squads™ | 🟡 BUILT / NOT VERIFIED | Production database foundation is applied with THECHAOS seeded; native runtime/API, Command Centre UI, 1D/1W/1M leaderboards and share cards are built on `feat/worldz-squads-competition-20261004` pending production deployment proof. |
+| Worldz Squads™ | ✅ LIVE | Production proof run `37146111886` verified the Worldz Squads runtime API, native THECHAOS production row, WorldzLaunchPad `/squads/` page and Command Centre Squads client. 1D/1W/1M rankings, Raids/Shills/Legend Points and share cards are deployed; trading PNL remains fail-closed until trusted performance indexing supplies verified data. |
 | Legend Points read | ✅ LIVE | Signed runtime audit `37113660864` returned live Legend Points successfully. |
 | Automatic Points awarding | 🟡 BUILT / NOT VERIFIED | Current-main reward tests pass; no new production award transaction was deliberately created for this audit. |
 | Worldz Votes Centre UI | ✅ LIVE | Real production browser confirmed deployed Votes surface. |
