@@ -100,6 +100,7 @@ jobs:
                   status_text=(ev(ws,'document.body ? document.body.innerText.slice(0,300) : ""') or '').lower()
                   if not title.strip(): raise AssertionError('EMPTY_TITLE')
                   if '404 not found' in status_text or '404 page' in status_text: raise AssertionError('404_SURFACE')
+                  if 'checking your browser' in status_text or 'just a moment' in status_text: raise AssertionError('BROWSER_CHALLENGE')
                   print('ROUTE_PASS',route,title,href)
                   ws.close()
               except Exception as exc:
