@@ -1,0 +1,148 @@
+name: WorldzLaunchPad Full Route Browser Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/worldz-launchpad-full-route-browser-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-browser-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start real headless Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME"
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
+            --remote-allow-origins='*' --remote-debugging-port=9222 \
+            --user-data-dir=/tmp/worldz-full-route-chrome about:blank >/tmp/chrome.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:9222/json/version >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/chrome.log
+          exit 1
+
+      - name: Install DevTools websocket client
+        run: python -m pip install --disable-pip-version-check websocket-client==1.8.0
+
+      - name: Browser sweep every LaunchPad index route and wallet adapter
+        shell: python
+        run: |
+          import json, time, urllib.parse, urllib.request
+          from pathlib import Path
+          import websocket
+
+          DEVTOOLS='http://127.0.0.1:9222'
+          BASE='https://launchpad.cryptoworldz.xyz'
+          next_id=0
+
+          def new_target(url='about:blank'):
+              req=urllib.request.Request(DEVTOOLS+'/json/new?'+urllib.parse.quote(url,safe=''),method='PUT')
+              with urllib.request.urlopen(req,timeout=10) as r:
+                  target=json.load(r)
+              return websocket.create_connection(target['webSocketDebuggerUrl'],timeout=20)
+
+          def rpc(ws,method,params=None):
+              global next_id
+              next_id+=1
+              mid=next_id
+              ws.send(json.dumps({'id':mid,'method':method,'params':params or {}}))
+              deadline=time.time()+25
+              while time.time()<deadline:
+                  msg=json.loads(ws.recv())
+                  if msg.get('id')==mid:
+                      if 'error' in msg: raise RuntimeError(msg['error'])
+                      return msg.get('result',{})
+              raise TimeoutError(method)
+
+          def ev(ws,expr):
+              out=rpc(ws,'Runtime.evaluate',{'expression':expr,'returnByValue':True,'awaitPromise':True})
+              return out.get('result',{}).get('value')
+
+          def open_page(url):
+              ws=new_target()
+              rpc(ws,'Page.enable'); rpc(ws,'Runtime.enable')
+              rpc(ws,'Page.navigate',{'url':url})
+              deadline=time.time()+35
+              while time.time()<deadline:
+                  time.sleep(.5)
+                  state=ev(ws,'document.readyState')
+                  body=ev(ws,'document.body ? document.body.innerText : ""') or ''
+                  if state in ('interactive','complete') and len(body.strip())>20:
+                      return ws,body
+              raise AssertionError('PAGE_DID_NOT_LOAD '+url)
+
+          root=Path('launchpad.cryptoworldz.xyz')
+          routes=[]
+          for index in sorted(root.rglob('index.html')):
+              rel=index.parent.relative_to(root).as_posix()
+              route='/' if rel=='.' else '/'+rel.strip('/')+'/'
+              routes.append(route)
+
+          failures=[]
+          for route in routes:
+              url=BASE+route+'?full-route-audit='+urllib.parse.quote(str(int(time.time())))
+              try:
+                  ws,body=open_page(url)
+                  title=ev(ws,'document.title') or ''
+                  href=ev(ws,'location.href') or ''
+                  status_text=(ev(ws,'document.body ? document.body.innerText.slice(0,300) : ""') or '').lower()
+                  if not title.strip(): raise AssertionError('EMPTY_TITLE')
+                  if '404 not found' in status_text or '404 page' in status_text: raise AssertionError('404_SURFACE')
+                  print('ROUTE_PASS',route,title,href)
+                  ws.close()
+              except Exception as exc:
+                  failures.append((route,repr(exc)))
+                  print('ROUTE_FAIL',route,repr(exc))
+
+          print('WORLDZ_LAUNCHPAD_ROUTE_COUNT='+str(len(routes)))
+          if failures:
+              raise SystemExit('WORLDZ_LAUNCHPAD_FULL_ROUTE_BROWSER=FAIL '+json.dumps(failures))
+          print('WORLDZ_LAUNCHPAD_FULL_ROUTE_BROWSER=PASS count='+str(len(routes)))
+
+          ws,body=open_page(BASE+'/mint/?wallet-adapter-proof=1')
+          assert 'WorldzMINT' in body
+          address='11111111111111111111111111111111'
+          injected=ev(ws,"""
+            (()=>{
+              window.alert=()=>{};
+              const pk={toString:()=>'%s'};
+              window.solana={
+                publicKey:pk,
+                connect:async()=>({publicKey:pk}),
+                signTransaction:async(tx)=>tx,
+                signMessage:async()=>({signature:new Uint8Array(64)})
+              };
+              if(typeof renderWallets==='function') renderWallets();
+              const s=document.getElementById('wallet-choice');
+              if(!s) return {ok:false,reason:'no-selector'};
+              if(![...s.options].some(o=>o.value==='legacy')){
+                const o=document.createElement('option'); o.value='legacy'; o.textContent='Injected Solana wallet'; s.appendChild(o);
+              }
+              s.value='legacy';
+              document.getElementById('wallet-btn')?.click();
+              return {ok:true};
+            })()
+          """ % address)
+          assert injected and injected.get('ok') is True, injected
+          time.sleep(2)
+          wallet_status=ev(ws,'document.getElementById("status")?.innerText') or ''
+          creator=ev(ws,'document.getElementById("creator-wallet")?.value') or ''
+          connected=ev(ws,'document.getElementById("wallet-btn")?.classList.contains("connected")')
+          assert 'SOLANA WALLET CONNECTED' in wallet_status, wallet_status
+          assert 'No transaction has been requested.' in wallet_status, wallet_status
+          assert creator==address, (creator,address)
+          assert connected is True
+          ws.close()
+          print('WORLDZMINT_WALLET_ADAPTER_CONNECT_PATH=PASS simulated_provider=1 transaction=0 signature=0')
