@@ -25,7 +25,7 @@ begin
 
   select * into v_submission from public.mission_submissions where id=p_submission_id for update;
   if not found then return query select 'not_found'::text,p_submission_id,null::bigint,0,0,'submission_not_found'::text; return; end if;
-  select * into v_user from public.users where telegram_id=v_submission.telegram_id;
+  select * into v_user from public.users u where u.telegram_id=v_submission.telegram_id;
   if not found then return query select 'review_required'::text,v_submission.id,v_submission.telegram_id,0,0,'registration_required'::text; return; end if;
   if v_submission.status='approved' then
     return query select 'already_awarded'::text,v_submission.id,v_submission.telegram_id,coalesce(v_submission.points_awarded,0),coalesce(v_user.points,0),null::text; return;
