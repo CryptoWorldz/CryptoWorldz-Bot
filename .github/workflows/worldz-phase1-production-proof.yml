@@ -142,8 +142,19 @@ jobs:
               rpc(ws,'Page.enable')
               rpc(ws,'Runtime.enable')
               rpc(ws,'Page.navigate',{'url':url})
-              time.sleep(wait)
-              return ws
+              deadline=time.time()+30
+              retried=False
+              while time.time()<deadline:
+                  time.sleep(1)
+                  state=eval_js(ws,'document.readyState')
+                  body_len=eval_js(ws,'document.body ? document.body.innerText.length : 0') or 0
+                  if state in ('interactive','complete') and int(body_len)>0:
+                      time.sleep(max(0,wait-1))
+                      return ws
+                  if not retried and time.time()>deadline-18:
+                      rpc(ws,'Page.navigate',{'url':url})
+                      retried=True
+              raise AssertionError('BROWSER_PAGE_DID_NOT_LOAD '+url)
 
           def assert_text(ws, needle):
               body=eval_js(ws,'document.body ? document.body.innerText : ""') or ''
