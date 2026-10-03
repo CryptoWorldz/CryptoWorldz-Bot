@@ -1,0 +1,333 @@
+{
+  "schema": "WORLDZ-TOKEN-DNA-V1",
+  "version": "2026-10-04",
+  "status": "DESIGN_LOCKED__IMPLEMENTATION_AND_MAINNET_EXECUTION_GATED",
+  "purpose": "Turn token creation into guided economic design while preserving Worldz Safe Launch, Fee Flow V3, chain-native execution and proof requirements.",
+  "inherits": [
+    "WORLDZLAUNCHPAD-SAFE-LAUNCH-STANDARD.md",
+    "WORLDZ-FEE-FLOW.md",
+    "launchpad.cryptoworldz.xyz/platform-config.json"
+  ],
+  "researchPrinciples": {
+    "demandBeforeScarcity": "A token needs a reason to be acquired, used or held; scarcity alone is not treated as value.",
+    "activityLinkedEconomics": "Prefer economics where real product/network activity funds liquidity, security, treasury or verifiable buyback/burn lanes.",
+    "transparentFloat": "Show real circulating float and unlock schedules at launch, day 30, day 90, year 1 and year 2.",
+    "dilutionDisclosure": "Never hide future unlocks behind headline market cap or low initial float.",
+    "liquidityMatters": "Liquidity depth, LP protection and sell-path proof are part of token design.",
+    "communityDistribution": "Prefer broad disclosed distribution over hidden insider concentration.",
+    "utilityIsSpecific": "Utility must name an actual function such as fees, access, staking/security, settlement, collateral, rewards or product use.",
+    "noGuaranteedValue": "Worldz does not promise price appreciation, yield, returns or a top-token outcome.",
+    "proofOverClaims": "Every supply, lock, vesting, treasury and burn statement must be backed by WorldzProof/on-chain evidence when executed."
+  },
+  "publicDefaults": {
+    "fixedSupply": true,
+    "mintAuthorityRevokedAfterGenesis": true,
+    "freezeAuthorityAbsentOrRevoked": true,
+    "walletTransferTaxPercent": 0,
+    "projectTradingFeePercent": {
+      "min": 0.5,
+      "default": 1,
+      "max": 3
+    },
+    "creatorTeamPercentMax": 15,
+    "creatorTeamLiquidAtGenesisPercentMax": 5,
+    "founderMinimumCliffDays": 90,
+    "founderMinimumVestingMonths": 18,
+    "liquidityAllocationPercent": {
+      "min": 25,
+      "max": 60
+    },
+    "creatorControlledLpLockPercent": 100,
+    "creatorControlledLpMinimumLockDays": 365,
+    "communityPublicPercentMin": 20,
+    "treasuryReservePercentMax": 15,
+    "worldzContributionChoicesPercent": [
+      3,
+      5,
+      8
+    ],
+    "worldzContributionDefaultPercent": 5
+  },
+  "creatorModes": [
+    {
+      "id": "BEGINNER",
+      "name": "Make Your Own Money — Beginner",
+      "audience": "First-time token creator",
+      "promise": "Learn what each choice means while Worldz keeps the launch inside the Safe Launch Standard.",
+      "experience": [
+        "plain-English explanations before every economic choice",
+        "purpose-first wizard before supply settings",
+        "safe presets for Community/Meme, Utility, Impact and Creator projects",
+        "visual allocation pie and wallet/vault explanation",
+        "day-0/day-30/day-90/year-1/year-2 circulating-supply timeline",
+        "plain-English fee, LP, vesting and treasury explanations",
+        "simulation and readable review before signature",
+        "WorldzProof receipt after confirmed actions"
+      ],
+      "advancedControlsHidden": true,
+      "canBreakSafeLaunchLimits": false
+    },
+    {
+      "id": "INTERMEDIATE",
+      "name": "Make Your Own Money — Intermediate",
+      "audience": "Everyday crypto creator with a token idea",
+      "promise": "More control over allocation, vesting, launch curve, liquidity and fee design without losing Worldz safety rails.",
+      "experience": [
+        "editable allocations within platform limits",
+        "vesting and cliff editor",
+        "quote-asset and chain selection",
+        "Worldz Flash / Curve / Curve Pro route selection where supported",
+        "project trading-fee builder",
+        "BUILD/GROW/BOOST Worldz contribution selection",
+        "liquidity and graduation targets",
+        "unlock-pressure and concentration warnings",
+        "creator/referrer economics disclosure",
+        "WorldzProof manifest preview"
+      ],
+      "advancedControlsHidden": false,
+      "canBreakSafeLaunchLimits": false
+    },
+    {
+      "id": "ADVANCED",
+      "name": "Make Your Own Money — ADVANCED: Worldz Leaders",
+      "audience": "Advanced builders, protocols and future Worldz ecosystem leaders",
+      "promise": "Expose professional token-economy and multichain controls while preserving immutable safety and disclosure gates.",
+      "experience": [
+        "custom Token DNA composition",
+        "Meteora DBC curve and supported fee-scheduler controls",
+        "chain-native adapter selection across the eight WorldzFullScope rails",
+        "advanced vesting, treasury and multisig topology",
+        "custom project-side revenue destinations within disclosed policy",
+        "cross-chain identity and supply-invariant planning",
+        "WorldzConnect routing and settlement planning",
+        "payment/card compatibility planning",
+        "machine-readable manifest export",
+        "full WorldzProof and security-gate checklist"
+      ],
+      "dangerousControls": {
+        "permanentDelegate": "OFF_BY_DEFAULT__SPECIAL_REVIEW_ONLY",
+        "hiddenBlacklist": "PROHIBITED",
+        "sellRestrictionHoneypot": "PROHIBITED",
+        "hiddenPrivateDiscount": "PROHIBITED",
+        "undisclosedMintAuthority": "PROHIBITED"
+      },
+      "canBreakSafeLaunchLimits": false
+    }
+  ],
+  "tokenHealthChecks": [
+    "real_float_percent",
+    "mc_to_fdv_context",
+    "next_30_90_365_day_unlock_percent",
+    "founder_liquid_percent",
+    "top_wallet_concentration",
+    "liquidity_percent_and_depth",
+    "lp_lock_or_non_custodial_equivalent",
+    "named_real_demand_sources",
+    "activity_linked_value_capture",
+    "treasury_multisig_and_runway",
+    "buy_and_sell_path_proof",
+    "cross_chain_supply_invariant",
+    "privileged_authority_disclosure"
+  ],
+  "worldzCoreFamily": {
+    "rule": "Do not remint WLDZ or RVIV to improve tokenomics. Improve demand, utility, distribution visibility, fee routing and proof around canonical assets. PNEX and MRCL inherit this research before mint.",
+    "WLDZ": {
+      "order": 1,
+      "supply": 100000000,
+      "lifecycle": "LIVE_CANONICAL",
+      "canRemint": false,
+      "preserve": [
+        "fixed supply",
+        "revoked mint authority",
+        "revoked freeze authority",
+        "0% wallet transfer tax",
+        "canonical Solana identity"
+      ],
+      "strengthenWith": [
+        "Worldz ecosystem utility and access uses where technically and legally appropriate",
+        "Fee Flow V3 core-family market-buy lane only when executable with market-data and price-impact checks",
+        "cross-chain identity/passport without silently multiplying global supply",
+        "WorldzProof transparency for liquidity, routing and treasury actions"
+      ]
+    },
+    "RVIV": {
+      "order": 2,
+      "supply": 200000000,
+      "lifecycle": "LIVE_CANONICAL",
+      "canRemint": false,
+      "preserve": [
+        "fixed supply",
+        "revoked mint authority",
+        "revoked freeze authority",
+        "canonical Solana identity",
+        "existing venue economics where already immutable/proven"
+      ],
+      "strengthenWith": [
+        "REVIVE/Legacy utility and community use rather than new inflation",
+        "Fee Flow V3 core-family market-buy lane when executable",
+        "clear separation between historical 75-bps adapter economics and economics for new LaunchPad intakes",
+        "WorldzProof for distribution, fee claims, locks and future cross-chain representations"
+      ]
+    },
+    "PNEX": {
+      "order": 3,
+      "supply": 250000000,
+      "lifecycle": "PRELAUNCH_SPEC_LOCKED",
+      "canRemint": false,
+      "researchVerdict": "KEEP_CORE_ALLOCATION_MODEL__ADD_TOKEN_DNA_AND_FLOAT_DISCLOSURE",
+      "preserve": [
+        "10% PHENIX Chance immediate",
+        "15% PHENIX Chance vested over 12 monthly releases",
+        "45% liquidity allocation with 5% genesis target and 40% staged reserve",
+        "10% developer allocation with 0% immediate, 90-day cliff and 24 monthly releases",
+        "1% Purple Diamond Handz",
+        "19% PHENIX Total Supply FlyWheel"
+      ],
+      "strengthenBeforeMint": [
+        "publish full real-float timeline before signature",
+        "bind every staged-liquidity and FlyWheel release to public proof",
+        "make ProofBurn activity/approval driven rather than a marketing burn promise",
+        "define concrete PNEX utility before public mainnet launch",
+        "show unlock-to-liquidity pressure in the launch review"
+      ]
+    },
+    "MRCL": {
+      "order": 4,
+      "supply": 348000000,
+      "lifecycle": "PLANNED_SPEC_LOCKED",
+      "canRemint": false,
+      "researchVerdict": "PRESERVE_COMMITTED_46_PERCENT__DO_NOT_INVENT_REMAINING_54_PERCENT",
+      "preserve": [
+        "20% Miracle Team Vault with opt-in, verified wallets, 0% immediate and 24 monthly releases",
+        "20% MiracleMagicSupply for verified people in need",
+        "5% genesis-liquidity target",
+        "1% Purple Diamond Handz inherited bucket"
+      ],
+      "remainingSupply": {
+        "percent": 54,
+        "tokens": 187920000,
+        "status": "MUST_BE_EXPLICITLY_ALLOCATED_AND_TIMELINED_BEFORE_MINT",
+        "rules": [
+          "no hidden insider allocation",
+          "no surprise unlock",
+          "publish float and unlock schedule before launch",
+          "prefer mission, community, liquidity and long-horizon ecosystem uses over new liquid team supply"
+        ]
+      },
+      "strengthenBeforeMint": [
+        "define actual MRCL usage inside Miracle mission flows",
+        "keep Team Vault separate from Worldz Miracle Team Treasury revenue routing",
+        "publish 4-of-7 treasury signer proof before activating treasury routing",
+        "show charitable/impact transfers as transparent mission accounting, not investment-return promises"
+      ]
+    }
+  },
+  "futureArchitecture": {
+    "notation": "Worldz Layer 1 + Layer 1.5 + 8",
+    "layer1": {
+      "name": "Worldz Chain",
+      "state": "FUTURE_RESEARCH_AND_SPEC",
+      "nativeAssetDecision": "OPEN__WDC_CONCEPT_REMAINS_SEPARATE_FROM_EXISTING_WLDZ_RVIV_PNEX_MRCL_FAMILY_UNTIL_EXPLICITLY_FINALIZED",
+      "tokenomicsPrimitives": [
+        "Token DNA registry",
+        "fixed/max supply controller",
+        "vesting and lock primitives",
+        "fee router",
+        "liquidity and market adapters",
+        "staking/security module if adopted by consensus design",
+        "treasury multisig registry",
+        "WorldzProof receipts",
+        "upgrade and privileged-authority disclosure"
+      ]
+    },
+    "layer1_5": {
+      "name": "WorldzConnect",
+      "state": "FUTURE_RESEARCH_AND_SPEC",
+      "responsibilities": [
+        "chain abstraction",
+        "verified asset identity",
+        "cross-chain messaging",
+        "supply-invariant accounting",
+        "bridge/NTT/OFT-style adapter support after independent security review",
+        "gas abstraction",
+        "quote and route discovery",
+        "payment settlement adapters",
+        "Worldz Card settlement orchestration",
+        "proof and reconciliation across chains"
+      ],
+      "hardRule": "No wrapped/bridged asset is described as native and no cross-chain token is described as 1:1 fungible without an audited mint/burn/escrow and global-supply invariant."
+    },
+    "eightRails": [
+      {
+        "id": "solana",
+        "world": "SolWorldz",
+        "execution": "Solana"
+      },
+      {
+        "id": "ethereum",
+        "world": "EthWorldz",
+        "execution": "Ethereum"
+      },
+      {
+        "id": "base",
+        "world": "BaseWorldz",
+        "execution": "Base"
+      },
+      {
+        "id": "bnb",
+        "world": "BNBWorldz",
+        "execution": "BNB Chain"
+      },
+      {
+        "id": "robinhood",
+        "world": "RobinWorldz",
+        "execution": "Robinhood Chain"
+      },
+      {
+        "id": "hyper",
+        "world": "HyperWorldz",
+        "execution": "HyperEVM"
+      },
+      {
+        "id": "xrpl",
+        "world": "XRPWorldz",
+        "execution": "XRP Ledger"
+      },
+      {
+        "id": "sui",
+        "world": "SuiWorldz",
+        "execution": "Sui"
+      }
+    ]
+  },
+  "payments": {
+    "worldzCard": {
+      "state": "ARCHITECTURE_TARGET",
+      "principle": "Merchant acceptance should not require the merchant to understand or hold a volatile Worldz token.",
+      "preferredFlow": "user-approved asset -> compliant conversion/settlement asset -> licensed card/payment partner -> ordinary merchant acceptance",
+      "stablecoinSettlementReady": true,
+      "tokenUtilityMayInclude": [
+        "optional fees or discounts",
+        "rewards/access",
+        "ecosystem identity",
+        "treasury/payment routing"
+      ],
+      "requires": [
+        "licensed issuer/BIN sponsor or equivalent provider",
+        "KYC/AML and sanctions controls where required",
+        "consumer protection and disputes",
+        "custody/key model",
+        "real-time quote/slippage disclosure",
+        "settlement reconciliation"
+      ]
+    },
+    "xMoney": {
+      "state": "ADAPTER_PLACEHOLDER__NO_PUBLIC_X_MONEY_PAYMENT_API_VERIFIED_2026_10_04",
+      "rule": "Do not claim X Money/X Payments integration or partnership until X exposes a supported partner/API route and Worldz has approval.",
+      "now": [
+        "keep X social/API features separate from money movement",
+        "design WorldzPay/WorldzConnect provider adapter interface so X Money can be added later without redesigning token economics"
+      ]
+    }
+  }
+}
