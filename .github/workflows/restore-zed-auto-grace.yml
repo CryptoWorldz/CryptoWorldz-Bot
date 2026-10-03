@@ -10,6 +10,7 @@ on:
       - "src/**"
       - "supabase/migrations/*worldz_fullscope*.sql"
       - "supabase/migrations/*dipshit*.sql"
+      - "supabase/migrations/*rexsecure*.sql"
       - "public/**"
       - ".well-known/**"
       - ".github/full-current-zed-runtime.sh"
@@ -182,7 +183,11 @@ jobs:
               ("worldz_fullscope_events","event_type,chain_key,amount_raw,quote_value,observed_at"),
               ("worldz_fullscope_action_intents","id,action_type,state,mainnet_execution_enabled"),
               ("worldz_fullscope_locks","id,lock_kind,status"),
-              ("worldz_fullscope_vesting","id,schedule_kind,status")
+              ("worldz_fullscope_vesting","id,schedule_kind,status"),
+              ("secureguard_intel_sources","source_key,base_weight,max_auto_action,enabled"),
+              ("secureguard_evidence","id,subject_telegram_id,source_key,status"),
+              ("secureguard_appeals","id,subject_telegram_id,status"),
+              ("secureguard_assessments","id,subject_telegram_id,risk_score,recommended_action")
           ]
           for table,columns in probes:
               url=base+"/rest/v1/"+table+"?select="+urllib.parse.quote(columns,safe=",")+"&limit=1"
