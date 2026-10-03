@@ -24,6 +24,24 @@ function detectPlatform(value) {
   return { platform: "Website", url: url.href };
 }
 
+function extractXStatusId(value) {
+  let url;
+  try { url = new URL(String(value || "").trim()); } catch { return null; }
+  const host = url.hostname.toLowerCase().replace(/^www\./, "");
+  if (!["x.com", "twitter.com"].includes(host)) return null;
+  const match = url.pathname.match(/\/(?:i\/web\/)?status(?:es)?\/(\d{5,25})(?:\/|$)/i);
+  return match ? match[1] : null;
+}
+
+function raidOpenUrl(campaign) {
+  const source = String(campaign?.source_url || "").trim();
+  if (String(campaign?.platform || "").toUpperCase() !== "X") return source;
+  const statusId = extractXStatusId(source);
+  if (!statusId) return source;
+  const params = new URLSearchParams({ id: statusId, src: source });
+  return `https://cryptobotz.cryptoworldz.xyz/miniapp/open-x.html?${params.toString()}`;
+}
+
 function numberOr(value, fallback, min = 0, max = 10000000) {
   if (value === undefined || value === null || value === "") return fallback;
   const parsed = Number(value);
@@ -120,7 +138,7 @@ function keyboard(campaign) {
   return {
     reply_markup: {
       inline_keyboard: [
-        [{ text: "𝕏 OPEN POST ↗", url: campaign.source_url }],
+        [{ text: "𝕏 OPEN RAID POST ↗", url: raidOpenUrl(campaign) }],
         [{ text: "✅ I RAIDED", callback_data: `ronald:done:${campaign.id}` }],
         [
           { text: "🔄 Refresh", callback_data: `ronald:refresh:${campaign.id}` },
@@ -655,6 +673,8 @@ module.exports = {
   campaignText,
   raidPulseText,
   detectPlatform,
+  extractXStatusId,
+  raidOpenUrl,
   parseRaidPayload,
   progressLine,
   registerRonaldRaider
