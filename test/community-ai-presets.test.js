@@ -12,7 +12,7 @@ test("Auto Picks include No.5, specialist presets and Custom Build", () => {
   assert.equal(AUTO_PICK_PRESETS.no5.displayName, "No.5");
   assert.equal(AUTO_PICK_PRESETS.custom.displayName, "Custom Build");
   assert.equal(AUTO_PICK_PRESETS.rex.displayName, "REXSECURE ULTIMATE™");
-  assert.equal(AUTO_PICK_PRESETS.rex.roleLabel, "Security for Your Community");
+  assert.equal(AUTO_PICK_PRESETS.rex.roleLabel, "Community Security + Moderation AI");
   assert.match(formatAutoPicks("no5"), /No\.5/);
   assert.match(formatAutoPicks("no5"), /Custom Build/);
 });
@@ -21,7 +21,8 @@ test("ready-made presets define identity while Custom preserves customer identit
   const no5 = presetUpdate("no5");
   assert.equal(no5.preset_key, "no5");
   assert.equal(no5.display_name, "No.5");
-  assert.match(no5.personality, /practical/i);
+  assert.equal(no5.role_label, "Alive + Community + Raid Energy AI");
+  assert.match(no5.personality, /playful|adaptive/i);
 
   const custom = presetUpdate("custom", { role_label: "My Own Role", display_name: "MINE" });
   assert.equal(custom.preset_key, "custom");

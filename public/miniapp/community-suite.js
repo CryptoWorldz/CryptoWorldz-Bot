@@ -3,10 +3,10 @@
   const root = () => document.getElementById("community-suite-root");
   const REX_BRAND_IMAGE = window.REXSECURE_BRAND_IMAGE || {};
   const AI_PRESETS = [
-    ["no5","No.5","Smart Operator"],
-    ["dipshit","DipShit","Cheeky Troubleshooter"],
+    ["no5","No.5","Alive + Community + Raid Energy AI"],
+    ["dipshit","DipShit","Cheeky QA + Troubleshooting AI"],
     ["alice","ALICE","Support + Organisation"],
-    ["rex","REXSECURE ULTIMATE™","Security for Your Community"],
+    ["rex","REXSECURE ULTIMATE™","Community Security + Moderation AI"],
     ["grace","G.R.A.C.E.","Communications + Campaigns"],
     ["max","MAX","Knowledge + Learning"],
     ["custom","Custom Build","Your Name + Personality + Purpose"]
@@ -88,7 +88,7 @@
         <img src="${escapeHtml(REX_BRAND_IMAGE.dataUrl || "")}" alt="REXSECURE ULTIMATE — Security for Your Community" style="width:100%;max-width:180px;border-radius:14px;display:block">
         <div>
           <p class="eyebrow">🛡 REXSECURE ULTIMATE™</p>
-          <h3 style="margin:.2rem 0">Security for Your Community</h3>
+          <h3 style="margin:.2rem 0">Community Security + Moderation AI</h3>
           <p>Telegram-ID threat intelligence • Network Shield • Number Match • External Bot Guard • Identity Guard • Pattern Guard • Anti-Flood • Link Guard • Under Attack mode.</p>
           <p><small><a href="https://cas.chat" target="_blank" rel="noopener">Powered by CAS</a></small></p>
         </div>
