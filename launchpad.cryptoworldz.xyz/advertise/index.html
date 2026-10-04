@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#05020b">
-<meta name="description" content="WorldzLaunchPad Spotlight — low-cost, human-reviewed crypto advertising from A$5 per day.">
+<meta name="description" content="WorldzLaunchPad Spotlight — low-cost, automation-checked sponsored crypto placements from A$5 per day.">
 <title>Advertise | WorldzLaunchPad™</title>
 <link rel="stylesheet" href="/style.css?v=20261002-ads-v1">
 <style>
@@ -20,14 +20,14 @@
 <section class="ad-hero">
 <div class="kicker">WORLDZ SPOTLIGHT™ • LOW-COST SPONSORED PLACEMENTS</div>
 <h1>GET SEEN.<br><span>DON'T TAKE OVER THE PAGE.</span></h1>
-<p>WorldzLaunchPad advertising is deliberately more subdued than giant takeover banners. Every placement is clearly labelled <b>Sponsored</b>, human-reviewed and positioned around the launch experience instead of covering it.</p>
+<p>WorldzLaunchPad advertising is deliberately more subdued than giant takeover banners. Every placement is clearly labelled <b>Sponsored</b>, checked by the Worldz validation stack and positioned around the launch experience instead of covering it.</p>
 <div class="packages">
 <div class="package"><span>1 DAY</span><b>A$5</b><small>Quick spotlight</small></div>
 <div class="package"><span>3 DAYS</span><b>A$12</b><small>Short campaign</small></div>
 <div class="package hot"><span>7 DAYS</span><b>A$22</b><small>Best-value week</small></div>
 <div class="package"><span>30 DAYS</span><b>A$75</b><small>Monthly presence</small></div>
 </div>
-<div class="payment"><b>Payment happens after approval.</b> Approved ads receive a SOL/USDC quote tied to the Worldz Operations Treasury. No ad activates from payment alone; review + payment proof + scheduled activation are separate.</div>
+<div class="payment"><b>Payment happens after Worldz validation.</b> ReX + G.R.A.C.E. + ZED + AUTO check the destination, content and placement rules first. Passing ads receive a 24-hour USDC quote tied to the Worldz Operations Treasury; finalized on-chain payment proof is then checked automatically before activation.</div>
 </section>
 
 <section class="ad-panel">
@@ -43,7 +43,7 @@
 
 <section class="ad-panel">
 <div class="kicker">SUBMIT YOUR AD</div>
-<h2>Send it for review.</h2>
+<h2>Send it for automatic validation.</h2>
 <form id="ad-form">
 <div class="ad-grid">
 <div class="field"><label>Project / token name</label><input name="project_name" maxlength="80" required placeholder="Example: Purple Diamond Crew"></div>
@@ -56,7 +56,7 @@
 <div class="field wide"><label>Banner — JPG / PNG / GIF / WEBP • max 5MB</label><input id="banner" name="banner" type="file" accept="image/jpeg,image/png,image/gif,image/webp" required></div>
 <div class="field wide"><div class="preview" id="preview">600×240 recommended • 5:2 ratio</div></div>
 </div>
-<div class="submit"><button type="submit">SUBMIT FOR REVIEW</button><span class="tiny">No payment is requested at submission.</span></div>
+<div class="submit"><button type="submit">RUN WORLDZ VALIDATION</button><span class="tiny">No payment is requested until Worldz validation passes.</span></div>
 <div class="status" id="status">Ready.</div>
 </form>
 </section>
@@ -69,7 +69,7 @@
 <div class="field wide"><label>Order ID</label><input id="order-id" placeholder="Paste your order UUID"></div>
 </div>
 <div class="submit"><button id="check-order" type="button">CHECK ORDER</button></div>
-<div class="status" id="order-status">Pending review orders do not need payment. When approved, the exact SOL/USDC quote and Operations Treasury destination appear here.</div>
+<div class="status" id="order-status">New orders are checked automatically. When validation passes, the exact USDC quote and Operations Treasury destination appear here.</div>
 <div class="order-facts" id="order-facts" hidden></div>
 <a class="paylink" id="pay-link" href="#" hidden>OPEN SOLANA PAYMENT →</a>
 <form id="receipt-form" hidden>
@@ -118,7 +118,7 @@ async function loadOrder(id){
   const payload=await response.json();
   if(!response.ok||payload.ok!==true)throw new Error(payload.error||"Order lookup failed");
   const o=payload.order;currentOrder=o;orderId.value=o.id;
-  const labels={pending_review:"PENDING HUMAN REVIEW",approved:"APPROVED — PAYMENT DUE",payment_review:"PAYMENT RECEIPT UNDER REVIEW",active:"ACTIVE",rejected:"REJECTED",expired:"EXPIRED",cancelled:"CANCELLED"};
+  const labels={auto_check:"WORLDZ VALIDATION RUNNING",deferred_auto:"AUTOMATIC RETRY HOLD",approved:"VALIDATED — PAYMENT DUE",payment_review:"VERIFYING PAYMENT ON-CHAIN",active:"ACTIVE",auto_rejected:"AUTOMATICALLY REJECTED",rejected:"REJECTED",expired:"EXPIRED",cancelled:"CANCELLED"};
   orderStatus.className="status "+(o.status==="active"?"good":"");
   orderStatus.textContent=(labels[o.status]||String(o.status).toUpperCase())+(o.reviewer_note?"\n"+o.reviewer_note:"");
   orderFacts.replaceChildren(
@@ -126,7 +126,7 @@ async function loadOrder(id){
    fact("Package","A$"+Number(o.price_aud).toFixed(2)+" • "+o.duration_days+" day(s)"),
    fact("Placement",String(o.slot||"").replaceAll("_"," ")),
    fact("Payment",o.payment_currency&&o.payment_amount?o.payment_amount+" "+o.payment_currency:"Not requested yet"),
-   fact("Operations Treasury",o.payment_destination||"Shown after approval"),
+   fact("Operations Treasury",o.payment_destination||"Shown after validation"),
    fact("Dates",o.start_at?(o.start_at+" → "+(o.end_at||"")):"Starts after payment verification")
   );
   orderFacts.hidden=false;
@@ -146,13 +146,13 @@ banner.addEventListener("change",()=>{
  const img=document.createElement("img");img.alt="Banner preview";img.src=URL.createObjectURL(file);preview.appendChild(img);
 });
 form.addEventListener("submit",async(e)=>{
- e.preventDefault();statusBox.className="status";statusBox.textContent="Submitting for Worldz review…";
+ e.preventDefault();statusBox.className="status";statusBox.textContent="Running Worldz validation…";
  try{
   const response=await fetch(API,{method:"POST",body:new FormData(form)});
   const payload=await response.json();
   if(!response.ok||payload.ok!==true)throw new Error(payload.error||"Submission failed");
   statusBox.className="status good";
-  statusBox.textContent="SUBMITTED ✅\nOrder: "+payload.ad.id+"\nPrice: A$"+payload.ad.price_aud+" • "+payload.ad.duration_days+" day(s)\nStatus: PENDING REVIEW\n\nNo payment is due yet. Approved ads receive SOL/USDC payment instructions.";
+  statusBox.textContent="SUBMITTED ✅\nOrder: "+payload.ad.id+"\nPrice: A$"+payload.ad.price_aud+" • "+payload.ad.duration_days+" day(s)\nStatus: WORLDZ VALIDATION RUNNING\n\nNo payment is due yet. Passing ads receive an automatic USDC quote." ;
   form.reset();preview.textContent="600×240 recommended • 5:2 ratio";orderId.value=payload.ad.id;await loadOrder(payload.ad.id);
  }catch(err){
   statusBox.className="status bad";statusBox.textContent="SUBMISSION FAILED\n"+(err&&err.message?err.message:String(err));
@@ -162,7 +162,7 @@ document.getElementById("check-order").addEventListener("click",()=>loadOrder(or
 receiptForm.addEventListener("submit",async(e)=>{
  e.preventDefault();
  if(!currentOrder)return;
- orderStatus.className="status";orderStatus.textContent="Submitting payment receipt…";
+ orderStatus.className="status";orderStatus.textContent="Submitting receipt for automatic on-chain verification…";
  try{
   const data=new FormData();data.set("action","receipt");data.set("order_id",currentOrder.id);data.set("payment_signature",receiptSignature.value.trim());
   const response=await fetch(API,{method:"POST",body:data});

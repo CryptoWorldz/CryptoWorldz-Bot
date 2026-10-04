@@ -619,6 +619,7 @@ function createRepository(supabase) {
     listRegisteredTelegramIds,
     listTreasuryAccounts,
     recordHistory,
+    recordBotDecision,
     recordVerifiedContribution,
     registerUser,
     rejectSubmission,
