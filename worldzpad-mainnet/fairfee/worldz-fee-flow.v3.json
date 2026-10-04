@@ -101,5 +101,20 @@
     "worldzFeeFlowV2": "SUPERSEDED_FOR_NEW_INTAKES__HISTORICAL_AUDIT_ONLY",
     "magicFeeNumber75Bps": "HISTORICAL_OR_ADAPTER_SPECIFIC",
     "legacy90_10Adapter": "TEST_ADAPTER_ONLY__NOT_NEW_LAUNCH_ECONOMICS"
+  },
+  "tokenBoundaries": {
+    "tokenSupplyTakePercent": 0.6,
+    "genesisSupplyPolicy": {
+      "totalWorldzPercent": 0.6,
+      "creatorProjectPercent": 99.4,
+      "splitPercent": {
+        "operations": 0.25,
+        "communityTeam": 0.2,
+        "purpleDiamondCrew": 0.15
+      },
+      "disclosedBeforeSignature": true,
+      "failClosedIfDestinationUnverified": true,
+      "note": "This token-supply allocation is separate from the 3% / 5% / 8% Worldz share of eligible fee revenue."
+    }
   }
 }
