@@ -33,7 +33,7 @@ Worldz requirements remain stricter than the underlying launch primitive:
 6. No wallet-transfer tax.
 7. No sell blacklist / honeypot / hidden private allocation.
 8. Creator/team limits must satisfy the current Worldz Safe Launch Standard.
-9. WorldzLaunchPad uses a disclosed 0.60% genesis token-supply allocation (0.25% Operations / 0.20% Community Team / 0.15% Purple Diamond Crew) and 0% initial-liquidity take. Supported project trading-fee revenue remains a separate route.
+9. WorldzLaunchPad uses a disclosed 0.60% genesis token-supply allocation (0.30% Operations / 0.18% Miricle Team / 0.12% Purple Diamond Crew) and 0% initial-liquidity take. Supported project trading-fee revenue remains a separate route.
 10. Creator-controlled post-graduation LP must be locked under the applicable Worldz launch policy.
 
 No public mainnet route may be enabled until the adapter, fee route, liquidity migration, locks, authority state and Treasury route are proven end-to-end.
