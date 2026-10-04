@@ -233,7 +233,7 @@ async function start() {
   startupStage = "register_command_centre";
   registerCommandCentreHandlers({ bot, repository, config, supabase });
   startupStage = "register_launchpad_ads";
-  registerLaunchpadAds({ bot, config, supabase });
+  registerLaunchpadAds({ bot, config, supabase, repository });
   startupStage = "register_community_suite";
   registerCommunitySuiteHandlers({ bot, config, supabase });
   startupStage = "register_community_social";
