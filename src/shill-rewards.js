@@ -123,10 +123,10 @@ function registerShillRewards({ bot, repository, supabase, config }) {
         "Current Worldz campaign: /shillpack",
         "",
         "Submit: /shill TOKEN | https://your-proof-link",
-        "Example: /shill RECAP | https://x.com/yourname/status/123",
+        "Example: /shill WLDZ | https://x.com/yourname/status/123",
         "",
         "⚡ Eligible submissions that pass the automatic checks are awarded immediately.",
-        "🛡 Only cap hits, anomalies and other exceptions go to Admin review.",
+        "🛡 Caps, budget limits and anomalies are handled by automatic rules or automatic retry holds.",
         "🏦 Reward funding: Treasury → ring-fenced Reward Wallet → capped weekly member allocation.",
         "Spam, bots, duplicate links and fake engagement earn nothing."
       ].join("\n"));
