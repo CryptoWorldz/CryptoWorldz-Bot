@@ -22,6 +22,21 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
     return send(msg, "⛔ Permanent Owner or Executive Leader access required.");
   }
 
+  function publicAutoText() {
+    return [
+      "🤖 AUTO Market Planner™",
+      "",
+      "Available every day to every Worldz user.",
+      "Default funding source: YOUR OWN WALLET — Treasury is not required.",
+      "",
+      "AUTO planning can compare budget, market liquidity, slippage and price-impact limits before you spend.",
+      "It does not hold your keys, move funds or sign for you.",
+      "",
+      "Use /autosimulate for a planning-only check.",
+      "Owner-only DCA/Treasury controls remain separate from the public planner."
+    ].join("\n");
+  }
+
   function formatStatus(payload) {
     const status = payload.status || {};
     const limits = status.limits || {};
@@ -86,16 +101,15 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
 
   bot.onText(/^\/auto(?:@\w+)?$/, async (msg) => {
     try {
-      if (!(await isAutoExecutive(msg))) return executiveRequired(msg);
-      return send(msg, formatStatus(await autoClient.status()));
+      if (!(await isAutoExecutive(msg))) return send(msg, publicAutoText());
+      return send(msg, publicAutoText() + "\n\n" + formatStatus(await autoClient.status()));
     } catch (error) {
-      if (error.code === "AUTO_NOT_CONFIGURED") return send(msg, "💎 Auto is prepared but not connected to its separate service yet.");
-      return send(msg, "❌ Auto status could not be loaded. No trading action was attempted.");
+      if (error.code === "AUTO_NOT_CONFIGURED") return send(msg, publicAutoText() + "\n\n⚠️ Live AUTO simulation service is temporarily unavailable.");
+      return send(msg, publicAutoText());
     }
   });
 
   bot.onText(/^\/autosimulate(?:@\w+)?(?:\s+([\s\S]+))?$/, async (msg, match) => {
-    if (!isOwner(msg)) return ownerRequired(msg);
     const values = String(match?.[1] || "").trim().split(/\s+/);
     if (values.length !== 8) {
       return send(msg, [
@@ -107,7 +121,7 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
         "Example:",
         "/autosimulate MINT 5 USDC 6 240 150 250 25000",
         "",
-        "This creates a simulation record only."
+        "This creates a planning record only. It uses your personal-wallet budget by default; no Treasury funding is assumed."
       ].join("\n"));
     }
 
@@ -122,10 +136,13 @@ function registerAutoTelegramHandlers({ bot, config, autoClient, supabase }) {
         interval_minutes: intervalMinutes,
         slippage_bps: slippageBps,
         price_impact_bps: priceImpactBps,
-        liquidity_usd: liquidityUsd
+        liquidity_usd: liquidityUsd,
+        funding_source: isOwner(msg) ? "JAYJAYTEAMDEV_PERSONAL" : "USER_PERSONAL_WALLET",
+        requested_by: String(msg.from?.id || ""),
+        execution_requested: false
       });
       const proposal = payload.result?.proposal || {};
-      return send(msg, `✅ Auto Simulation Accepted\n\nToken: ${proposal.token_mint}\nOrders: ${proposal.order_count}\nAmount: ${proposal.amount_per_order} ${proposal.currency}\nTotal: ${proposal.total_amount} ${proposal.currency}\nInterval: ${proposal.interval_minutes} minutes\n\nNo transaction was attempted.`);
+      return send(msg, `✅ AUTO Personal-Wallet Simulation\n\nFunding: ${isOwner(msg) ? "JayJayTeamDev personal funds" : "Your personal wallet"}\nToken: ${proposal.token_mint}\nOrders: ${proposal.order_count}\nAmount: ${proposal.amount_per_order} ${proposal.currency}\nTotal: ${proposal.total_amount} ${proposal.currency}\nInterval: ${proposal.interval_minutes} minutes\n\nNo Treasury funding was assumed. No transaction was attempted.`);
     } catch (error) {
       const errors = error.payload?.result?.errors;
       return send(msg, `⚠️ Auto Simulation Rejected\n\n${Array.isArray(errors) && errors.length ? errors.join("\n") : "The proposed settings did not pass the AUTO rules."}\n\nNo transaction was attempted.`);
