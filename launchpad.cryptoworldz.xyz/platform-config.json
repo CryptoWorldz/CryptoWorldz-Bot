@@ -1503,5 +1503,35 @@
       "paymentDestinationLabel": "Worldz Operations Treasury Multisig",
       "mainnetPaymentRequired": true
     }
+  },
+  "autoMarketPlanner": {
+    "version": "AUTO-MARKET-PLANNER-1",
+    "status": "PUBLIC_DAILY_READ_ONLY_BETA",
+    "audience": "ALL_WORLDZ_USERS",
+    "availability": "EVERY_DAY_ON_DEMAND",
+    "defaultFundingSource": "USER_PERSONAL_WALLET",
+    "jayJayTeamDevFundingSourceLabel": "JAYJAYTEAMDEV_PERSONAL",
+    "treasuryRequired": false,
+    "buyAnalysis": {
+      "provider": "Jupiter Ultra V3",
+      "mode": "LIVE_READ_ONLY_QUOTE",
+      "executionEnabled": false
+    },
+    "lpAnalysis": {
+      "provider": "Meteora DAMM v2",
+      "status": "FAIL_CLOSED_UNTIL_LIVE_DEPOSIT_QUOTE_ADAPTER",
+      "executionEnabled": false
+    },
+    "hybridAnalysis": {
+      "status": "FAIL_CLOSED_UNTIL_BUY_AND_LP_QUOTES_ARE_BOTH_VERIFIED",
+      "executionEnabled": false
+    },
+    "safety": [
+      "No private keys or seed phrases",
+      "No automatic wallet signing",
+      "No Treasury assumption",
+      "No wash trading or fake volume",
+      "Re-quote immediately before any future signature"
+    ]
   }
 }
