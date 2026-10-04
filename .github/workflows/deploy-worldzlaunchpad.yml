@@ -72,6 +72,16 @@ jobs:
           assert fee['treasuryLane']['worldzOperationsTreasuryPercent']==70
           assert fee['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
           assert fee['worldzLaunchPadShareOfTokenSupplyPercent']==0.6
+          assert fee['worldzLaunchPadTokenSupplySplitPercent']=={
+            'worldzOperationsTreasury':0.25,'worldzCommunityTeamTreasury':0.2,'purpleDiamondCrewTreasury':0.15
+          }
+          assert fee['worldzLaunchPadTokenSupplyAllocationMandatory'] is True
+          assert platform['tokenSupplyRouting']['basisPoints']==60
+          assert platform['tokenSupplyRouting']['activation']['mainnetEnabled'] is False
+          assert platform['watermarkPolicy']['enabled'] is True
+          assert platform['watermarkPolicy']['opacity']==0.35
+          assert platform['watermarkPolicy']['removal']['priceSol']==0.05
+          assert platform['watermarkPolicy']['removal']['paymentDestination']=='n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB'
           assert fee['worldzLaunchPadShareOfInitialLiquidityPercent']==0
           assert fee['walletTransferTaxPercent']==0
 
@@ -361,6 +371,14 @@ jobs:
           assert platform['worldzMint']['version']=='WORLDZMINT-1'
           assert platform['worldzMint']['status']=='PUBLIC_MAINNET_MINT_BETA'
           assert platform['worldzMint']['platformTokenSupplyTakePercent']==0.6
+          assert platform['worldzMint']['platformTokenSupplySplitPercent']=={'operations':0.25,'communityTeam':0.2,'purpleDiamondCrew':0.15}
+          assert 'WATERMARK_ASSET' in mint_js
+          assert 'WATERMARK_REMOVAL_LAMPORTS=50000000' in mint_js
+          assert 'ctx.globalAlpha=0.35' in mint_js
+          assert "SystemProgram.transfer" in mint_js
+          assert "worldzOperations:0.25" in mint_js
+          assert "worldzCommunityTeam:0.20" in mint_js
+          assert "purpleDiamondCrew:0.15" in mint_js
           assert platform['worldzMint']['walletTransferTaxPercent']==0
           assert platform['worldzMint']['compulsory']['revokeMintAuthorityAfterGenesis'] is True
           assert platform['worldzMint']['compulsory']['revokeFreezeAuthorityAfterGenesis'] is True
