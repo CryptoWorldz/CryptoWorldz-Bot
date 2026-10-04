@@ -139,10 +139,12 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
         },
         treasuryLane: {
           percentOfWorldzContribution: 20,
-          operationsPercent: 70,
+          operationsPercent: 50,
           miracleTeamPercent: 30,
+          purpleDiamondCrewPercent: 20,
           operationsGovernance: "3-of-5",
-          miracleTeamGovernance: "4-of-7"
+          miracleTeamGovernance: "4-of-7",
+          purpleDiamondCrewGovernance: "MULTISIG_REQUIRED"
         },
         legacyTokenCount: 12,
         coreFamilySymbols: ["WLDZ", "RVIV", "PNEX", "MRCL"],
