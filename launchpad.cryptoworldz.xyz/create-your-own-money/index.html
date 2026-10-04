@@ -193,7 +193,7 @@ $("#make-plan").addEventListener("click",()=>{
  ];
  const allocation=lanes.map(([label,pct])=>`${pct}% ${label}: ${fmt(Math.floor(supply*pct/100))} ${symbol}`).join("\n");
  $("#plan-output").textContent=
-`${name} (${symbol})
+`WORLDZ CREATOR MODE: ${mode}\n\n${name} (${symbol})
 Preferred chain: ${chain}
 Total supply: ${fmt(supply)} ${symbol}
 
