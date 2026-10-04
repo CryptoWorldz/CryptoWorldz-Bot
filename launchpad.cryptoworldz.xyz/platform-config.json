@@ -45,7 +45,7 @@
       "MRCL"
     ],
     "description": "Worldz Fee Flow V3 lets creators keep 97%, 95% or 92% of eligible fee revenue after external venue/network deductions. The creator voluntarily contributes 3%, 5% or 8% to Worldz. Only that Worldz contribution is internally split across operations, treasury, LP growth, Legacy, Worldz-family buys, impact, builders, future infrastructure and referral.",
-    "publicPromise": "Creators keep 99.40% of token supply under the public WorldzMINT route. A mandatory disclosed 0.60% WorldzLaunchPad genesis allocation is split 0.25% Worldz Operations Treasury, 0.20% Worldz Community Team Treasury and 0.15% Purple Diamond Crew Treasury. Worldz takes 0% of initial liquidity and 0% wallet-transfer tax. Fee Flow V3 creator-selected 3% / 5% / 8% applies separately to eligible fee revenue.",
+    "publicPromise": "Creators keep 99.40% of token supply under the public WorldzMINT route. A mandatory disclosed 0.60% WorldzLaunchPad genesis allocation is split 0.30% Worldz Operations Treasury, 0.18% Miricle Team Multisig Treasury and 0.12% Purple Diamond Crew Multisig Treasury. Worldz takes 0% of initial liquidity and 0% wallet-transfer tax. Fee Flow V3 creator-selected 3% / 5% / 8% applies separately to eligible fee revenue.",
     "projectTradingFeeDefaultPercent": 1,
     "publicFeeBuilderPolicy": "worldzpad-omnichain/chain-native-fee-builder.v1.json",
     "publicFeeRule": "1.00% Worldz default; 3.00% hard public cap; prefer 0.25% steps only where the selected chain/venue supports that setting truthfully. Native venue fees and network costs stay separate.",
@@ -104,17 +104,19 @@
     },
     "treasuryLane": {
       "percentOfWorldzContribution": 20,
-      "worldzOperationsTreasuryPercent": 70,
+      "worldzOperationsTreasuryPercent": 50,
       "worldzMiracleTeamTreasuryPercent": 30,
+      "purpleDiamondCrewTreasuryPercent": 20,
       "operationsGovernance": "3-of-5",
-      "miracleTeamGovernance": "4-of-7"
+      "miracleTeamGovernance": "4-of-7",
+      "purpleDiamondCrewGovernance": "MULTISIG_REQUIRED"
     },
     "legacyCorePercentOfWorldzContribution": 10,
     "coreFamilyMarketBuyPercentOfWorldzContribution": 10,
     "worldzLaunchPadTokenSupplySplitPercent": {
-      "worldzOperationsTreasury": 0.25,
-      "worldzCommunityTeamTreasury": 0.2,
-      "purpleDiamondCrewTreasury": 0.15
+      "worldzOperationsTreasury": 0.3,
+      "worldzCommunityTeamTreasury": 0.18,
+      "purpleDiamondCrewTreasury": 0.12
     },
     "worldzLaunchPadTokenSupplyAllocationMandatory": true,
     "worldzLaunchPadTokenSupplyAllocationDisclosedBeforeMint": true,
@@ -1138,8 +1140,9 @@
       },
       "treasuryLane": {
         "percentOfWorldzContribution": 20,
-        "operationsPercent": 70,
-        "miracleTeamPercent": 30
+        "operationsPercent": 50,
+        "miracleTeamPercent": 30,
+        "purpleDiamondCrewPercent": 20
       },
       "legacyCorePercentOfWorldzContribution": 10,
       "worldzCoreFamilyMarketBuyPercentOfWorldzContribution": 10,
@@ -1454,24 +1457,24 @@
     "disclosedBeforeSignature": true,
     "routes": {
       "worldzOperationsTreasury": {
-        "percent": 0.25,
-        "basisPoints": 25,
+        "percent": 0.3,
+        "basisPoints": 30,
         "governance": "3-of-5",
         "vaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
         "status": "ONCHAIN_VERIFIED"
       },
       "worldzCommunityTeamTreasury": {
-        "percent": 0.2,
-        "basisPoints": 20,
+        "percent": 0.18,
+        "basisPoints": 18,
         "governance": "4-of-7",
         "vaultAddress": null,
         "status": "NOT_DEPLOYED",
-        "publicLabel": "Worldz Community Team Multisig",
+        "publicLabel": "Miricle Team Multisig Treasury",
         "affiliationRule": "Independent Worldz team treasury; no Miracle Church partnership or endorsement is implied."
       },
       "purpleDiamondCrewTreasury": {
-        "percent": 0.15,
-        "basisPoints": 15,
+        "percent": 0.12,
+        "basisPoints": 12,
         "governance": "MULTISIG_REQUIRED",
         "vaultAddress": null,
         "status": "NOT_DEPLOYED"
@@ -1480,7 +1483,7 @@
     "activation": {
       "mainnetEnabled": false,
       "unavailableDestinationRule": "FAIL_CLOSED_DO_NOT_REDIRECT",
-      "rule": "The 0.60% split may not execute on mainnet until all three required multisig destinations are verified. Missing Team or Purple Diamond Crew vaults are never redirected to Operations or a personal wallet."
+      "rule": "The 0.60% split is 50/30/20 across Operations, Miricle Team and Purple Diamond Crew (0.30% / 0.18% / 0.12% of genesis supply) and may not execute until all three multisig destinations are verified."
     }
   },
   "watermarkPolicy": {
