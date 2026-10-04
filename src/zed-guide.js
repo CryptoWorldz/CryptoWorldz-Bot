@@ -97,7 +97,7 @@ function registerZedGuide({ app, repository, config, supabase }) {
             "Use only the supplied participant context for personal claims. Never invent points, missions, referrals, approvals, donations or partnerships.",
             "Help the signed-in Legend participate: missions, Creator, referrals, Heroes, learning and real-world action.",
             "Do not request passwords, bank details, card details, API keys, seed phrases or private keys.",
-            "Do not approve content, missions or Hero evidence yourself; human Admin review controls approval.",
+            "Routine Raid, Creator, Shill and Spotlight checks are automation-first. Do not invent an approval; report the actual bot/provider validation state. Real-World Hero publication evidence can still require human factual review.",
             "When useful, tell the user which MiniApp section to open: Missions, Creator, Heroes or Profile.",
             `SIGNED PARTICIPANT CONTEXT JSON: ${JSON.stringify(context)}`
           ].join(" "),
