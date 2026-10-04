@@ -372,14 +372,14 @@ jobs:
           assert platform['worldzMint']['version']=='WORLDZMINT-1'
           assert platform['worldzMint']['status']=='PUBLIC_MAINNET_MINT_BETA'
           assert platform['worldzMint']['platformTokenSupplyTakePercent']==0.6
-          assert platform['worldzMint']['platformTokenSupplySplitPercent']=={'operations':0.25,'communityTeam':0.2,'purpleDiamondCrew':0.15}
+          assert platform['worldzMint']['platformTokenSupplySplitPercent']=={'operations':0.3,'communityTeam':0.18,'purpleDiamondCrew':0.12}
           assert 'WATERMARK_ASSET' in mint_js
           assert 'WATERMARK_REMOVAL_LAMPORTS=50000000' in mint_js
           assert 'ctx.globalAlpha=0.35' in mint_js
           assert "SystemProgram.transfer" in mint_js
-          assert "worldzOperations:0.25" in mint_js
-          assert "worldzCommunityTeam:0.20" in mint_js
-          assert "purpleDiamondCrew:0.15" in mint_js
+          assert "worldzOperations:0.30" in mint_js
+          assert "worldzCommunityTeam:0.18" in mint_js
+          assert "purpleDiamondCrew:0.12" in mint_js
           assert platform['worldzMint']['walletTransferTaxPercent']==0
           assert platform['worldzMint']['compulsory']['revokeMintAuthorityAfterGenesis'] is True
           assert platform['worldzMint']['compulsory']['revokeFreezeAuthorityAfterGenesis'] is True
@@ -510,7 +510,7 @@ jobs:
           assert "treasury:20" in app
           assert "worldzMiracleTeamTreasury:30" in app
 
-          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_flow=v3 creator_retention=97/95/92 worldz_contribution=3/5/8 legacy=10_of_worldz_share core_buys=10_of_worldz_share treasury_lane=20 treasury_split=70/30 treasury_ops=3of5 community_team=4of7 community_routing=off_unless_deployed max_approvals=4 supply_take=0.6 liquidity_take=0 watermark=35pct remove=0.05SOL founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
+          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_flow=v3 creator_retention=97/95/92 worldz_contribution=3/5/8 legacy=10_of_worldz_share core_buys=10_of_worldz_share treasury_lane=20 treasury_split=50/30/20 treasury_ops=3of5 community_team=4of7 community_routing=off_unless_deployed max_approvals=4 supply_take=0.6 liquidity_take=0 watermark=35pct remove=0.05SOL founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
 
       - name: Syntax-check browser JavaScript
         shell: bash
