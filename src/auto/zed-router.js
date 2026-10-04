@@ -45,6 +45,42 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
     return next();
   }
 
+  function authenticatePublicAuto(req, res, next) {
+    const result = validateTelegramInitData(
+      req.get("x-telegram-init-data") || "",
+      config.botToken,
+      { maxAgeSeconds: miniInitDataMaxAgeSeconds }
+    );
+    if (!result.ok) return res.status(401).json({ ok: false, error: result.error });
+    if (!allowRequest(`public:${result.user.id}:${req.ip}`)) return res.status(429).json({ ok: false, error: "rate_limited" });
+    if (!autoClient.configured()) return res.status(503).json({ ok: false, error: "auto_not_configured" });
+    req.telegramUser = result.user;
+    return next();
+  }
+
+  function publicPlannerPayload() {
+    return {
+      ok: true,
+      name: "AUTO Market Planner™",
+      access: "ALL_SIGNED_WORLDZ_USERS",
+      availability: "EVERY_DAY",
+      defaultFundingSource: "USER_PERSONAL_WALLET",
+      treasuryRequired: false,
+      treasuryExecutionIsSeparate: true,
+      executionEnabled: false,
+      walletCustody: false,
+      privateKeysStored: false,
+      modes: ["BUY_ANALYSIS", "LP_ANALYSIS", "HYBRID_ANALYSIS"],
+      liveRules: [
+        "Use the user's own selected wallet and budget by default.",
+        "Show live route, price impact, fees, liquidity evidence and expected output before any signature.",
+        "Never assume Treasury funding.",
+        "Never claim LP or hybrid optimisation until the live Meteora pool adapter has supplied a verified quote.",
+        "No wash trading, fake volume, wallet rotation or hidden execution."
+      ]
+    };
+  }
+
   function proxyError(res, error, fallback, validationStatus = 502) {
     const payload = error.payload || { ok: false, error: error.code || fallback };
     const status = error.payload ? validationStatus : 502;
@@ -137,6 +173,39 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
       }
     };
   }
+
+  app.get("/api/mini/auto/public", authenticatePublicAuto, async (req, res) => {
+    return res.json(publicPlannerPayload());
+  });
+
+  app.post("/api/mini/auto/public/simulate", authenticatePublicAuto, async (req, res) => {
+    try {
+      const body = req.body || {};
+      const fundingSource = String(body.funding_source || "USER_PERSONAL_WALLET").toUpperCase();
+      const allowedFundingSources = new Set(["USER_PERSONAL_WALLET", "JAYJAYTEAMDEV_PERSONAL", "AUTHORIZED_MULTISIG"]);
+      if (!allowedFundingSources.has(fundingSource)) {
+        return res.status(400).json({ ok: false, error: "invalid_funding_source" });
+      }
+      const result = await autoClient.simulate({
+        ...body,
+        funding_source: fundingSource,
+        requested_by: String(req.telegramUser.id),
+        execution_requested: false
+      });
+      return res.json({
+        ...result,
+        publicPlanner: {
+          fundingSource,
+          treasuryRequired: false,
+          executionEnabled: false,
+          walletSignatureRequiredForAnyFutureExecution: true,
+          note: "Planning only. This route cannot move funds or sign a transaction."
+        }
+      });
+    } catch (error) {
+      return proxyError(res, error, "auto_public_simulation_failed", 400);
+    }
+  });
 
   app.get("/api/mini/auto/status", authenticateAuto, async (req, res) => {
     try { return res.json({ ...(await autoClient.status()), access: req.autoAuthority }); }
