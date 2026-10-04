@@ -72,7 +72,7 @@ That is **2.5% of the Worldz contribution per token** when executable. PNEX/MRCL
 
 ## Safety
 
-- 0% Worldz token-supply take
+- 0.60% disclosed Worldz genesis token-supply allocation: 0.25% Operations + 0.20% Community Team + 0.15% Purple Diamond Crew (separate from Fee Flow revenue)
 - 0% Worldz initial-liquidity take
 - 0% Worldz wallet-transfer tax
 - no wash trading or self-trading
