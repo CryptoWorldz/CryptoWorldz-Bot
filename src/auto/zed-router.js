@@ -54,7 +54,6 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
     );
     if (!result.ok) return res.status(401).json({ ok: false, error: result.error });
     if (!allowRequest(`public:${result.user.id}:${req.ip}`)) return res.status(429).json({ ok: false, error: "rate_limited" });
-    if (!autoClient.configured()) return res.status(503).json({ ok: false, error: "auto_not_configured" });
     req.telegramUser = result.user;
     return next();
   }
@@ -185,6 +184,7 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
 
   app.post("/api/mini/auto/public/simulate", authenticatePublicAuto, async (req, res) => {
     try {
+      if (!autoClient.configured()) return res.status(503).json({ ok: false, error: "auto_not_configured" });
       const body = req.body || {};
       const fundingSource = String(body.funding_source || "USER_PERSONAL_WALLET").toUpperCase();
       const allowedFundingSources = new Set(["USER_PERSONAL_WALLET", "JAYJAYTEAMDEV_PERSONAL", "AUTHORIZED_MULTISIG"]);
@@ -243,9 +243,11 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
         taker: walletAddress
       });
       const headers = { "accept": "application/json" };
-      if (process.env.JUPITER_API_KEY) headers["x-api-key"] = process.env.JUPITER_API_KEY;
+      const hasJupiterKey = Boolean(process.env.JUPITER_API_KEY);
+      if (hasJupiterKey) headers["x-api-key"] = process.env.JUPITER_API_KEY;
+      const jupiterBase = hasJupiterKey ? "https://api.jup.ag" : "https://lite-api.jup.ag";
       const [quoteResponse, intelligenceResponse] = await Promise.all([
-        fetch("https://api.jup.ag/ultra/v1/order?" + params.toString(), { headers, signal: controller.signal }),
+        fetch(jupiterBase + "/ultra/v1/order?" + params.toString(), { headers, signal: controller.signal }),
         fetch("https://launchpad.cryptoworldz.xyz/intelligence.php?mint=" + encodeURIComponent(tokenMint), {
           headers: { "accept": "application/json", "user-agent": "Worldz-AUTO-Public/1.0" },
           signal: controller.signal
