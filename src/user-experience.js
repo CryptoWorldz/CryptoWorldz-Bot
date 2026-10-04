@@ -25,6 +25,30 @@ function inferPlatform(url) {
   } catch {}
   return "Community";
 }
+
+function safeExternalHttps(value) {
+  try {
+    const url = new URL(String(value || ""));
+    if (url.protocol !== "https:" || url.username || url.password) return false;
+    const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+    if (!host || host === "localhost" || host.endsWith(".local") || host === "::1") return false;
+    const ipv4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+    if (ipv4) {
+      const octets = ipv4.slice(1).map(Number);
+      if (octets.some((n) => n > 255)) return false;
+      if (octets[0] === 10 || octets[0] === 127 || octets[0] === 0) return false;
+      if (octets[0] === 169 && octets[1] === 254) return false;
+      if (octets[0] === 192 && octets[1] === 168) return false;
+      if (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+function creatorCredentialRisk(text) {
+  return /\b(seed phrase|private key|recovery phrase|secret key|password|bank login|wallet phrase)\b/i.test(String(text || ""));
+}
 function extractResponseText(payload) {
   const out = [];
   for (const item of payload && payload.output || []) {
@@ -60,7 +84,7 @@ async function generatePostCopy(openaiKey, idea) {
       store: false,
       max_output_tokens: 420,
       instructions: [
-        "You are ZED helping a CryptoWorldz Legend prepare a proposed Raaiiidd post for human admin review.",
+        "You are ZED helping a CryptoWorldz Legend prepare a proposed Raaiiidd for automated Worldz validation.",
         "Write energetic but factual social copy. Do not invent donations, partnerships, results, endorsements or live deployment claims.",
         "Do not request money, private keys, seed phrases, passwords or bank credentials.",
         "Return exactly two sections: TITLE: one short title, then POST: the complete copy. No markdown headings."
@@ -80,7 +104,7 @@ async function generateImage(openaiKey, idea) {
   if (!openaiKey) throw new Error("openai_api_not_configured");
   await moderate(openaiKey, idea);
   const prompt = [
-    "Create a square social-media Raaiiidd artwork for the OneWorldz / CryptoWorldz ecosystem.",
+    "Create a square social-media Raaiiidd artwork for the Worldz / CryptoWorldz ecosystem.",
     "Visual language: cinematic purposeful digital artwork, deep space depth, premium chrome highlights, electric purple and blue energy, strong readable focal composition, hopeful people-first tone.",
     "Never fabricate a real person's likeness, endorsement, donation result, government seal, partner logo or token price.",
     "Do not include wallet addresses, QR codes, payment claims or tiny unreadable text.",
@@ -143,6 +167,158 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
     return rows;
   }
 
+  async function recordCreatorDecision(requestId, decision, reason, outcome = decision) {
+    if (typeof repository.recordBotDecision !== "function") return;
+    await repository.recordBotDecision({
+      subjectType: "creator_request",
+      subjectKey: String(requestId),
+      decision,
+      reason,
+      rex: { checked: true, role: "credential_link_security", decision },
+      zed: { checked: true, role: "creator_rules", decision },
+      auto: { checked: true, role: "reward_limits", decision, outcome },
+      grace: { checked: true, role: "content_destination", decision },
+      dipshit: { checked: true, role: "creator_usability", decision }
+    });
+  }
+
+  async function autoValidateCreatorRequest(id) {
+    const { data: request, error } = await supabase
+      .from("raaiiidd_creator_requests")
+      .select("*,grace_posts(*)")
+      .eq("id", Number(id))
+      .maybeSingle();
+    if (error) throw error;
+    if (!request) return { outcome: "not_found" };
+    if (request.status === "approved") return { outcome: "already_approved", request, mission_id: request.mission_id };
+    if (request.status === "rejected") return { outcome: "already_rejected", request, reason: request.review_note || "rejected" };
+
+    const post = request.grace_posts || {};
+    const now = new Date().toISOString();
+    const combined = [post.title, post.body, request.target_url].filter(Boolean).join("\n");
+
+    try {
+      if (creatorCredentialRisk(combined)) throw new Error("credential_request_blocked");
+      if (request.target_url && !safeExternalHttps(request.target_url)) throw new Error("unsafe_target_url");
+      await moderate(openaiKey, [post.title, post.body].filter(Boolean).join("\n"));
+
+      if (!request.target_url) {
+        await supabase.from("grace_posts").update({
+          status: "approved",
+          approved_by: null,
+          approved_at: now,
+          updated_at: now
+        }).eq("id", request.grace_post_id);
+        const { data: waiting, error: waitingError } = await supabase
+          .from("raaiiidd_creator_requests")
+          .update({
+            status: "awaiting_target",
+            review_note: "waiting_for_published_https_destination",
+            reviewed_by: null,
+            reviewed_at: now,
+            updated_at: now
+          })
+          .eq("id", request.id)
+          .select("*")
+          .single();
+        if (waitingError) throw waitingError;
+        await recordCreatorDecision(request.id, "deferred", "waiting_for_published_https_destination", "awaiting_target");
+        return { outcome: "awaiting_target", request: waiting };
+      }
+
+      const duplicate = await repository.findMissionByUrl(request.target_url);
+      if (duplicate) throw new Error("duplicate_raid_destination");
+
+      const mission = await repository.createMission({
+        title: cleanText(post.title, 140),
+        platform: inferPlatform(request.target_url),
+        target_url: request.target_url,
+        reward_points: Math.max(0, Math.min(Number(request.desired_reward_points) || 10, 100)),
+        status: "active",
+        description: cleanText(post.body, 1200),
+        instructions: "Open the Raaiiidd. Complete the requested genuine action. Submit DONE with an optional HTTPS proof link. RaidPoints are checked automatically.",
+        link: request.target_url,
+        starts_at: now,
+        expires_at: null,
+        difficulty: "standard",
+        max_submissions: null
+      }, request.creator_telegram_id);
+
+      await supabase.from("grace_posts").update({
+        status: "approved",
+        approved_by: null,
+        approved_at: now,
+        link_url: request.target_url,
+        updated_at: now
+      }).eq("id", request.grace_post_id);
+
+      const { data: approved, error: approvedError } = await supabase
+        .from("raaiiidd_creator_requests")
+        .update({
+          status: "approved",
+          mission_id: mission.id,
+          review_note: "worldz_bot_stack_auto_validated",
+          reviewed_by: null,
+          reviewed_at: now,
+          updated_at: now
+        })
+        .eq("id", request.id)
+        .select("*")
+        .single();
+      if (approvedError) throw approvedError;
+
+      await recordCreatorDecision(request.id, "approved", "worldz_bot_stack_auto_validated", "activated");
+      await bot.sendMessage(
+        request.creator_telegram_id,
+        `✅ WORLDZ VALIDATION PASSED\n\nYour Raaiiidd Creator request #${request.id} is active as Raid #${mission.id}.\n\nZED • ReX • AUTO • G.R.A.C.E. • DipShit handled the routine checks. No Admin approval queue.`
+      ).catch(() => undefined);
+      return { outcome: "activated", request: approved, mission };
+    } catch (validationError) {
+      const reason = String(validationError?.message || "automatic_validation_retry");
+      const hardReject = ["content_not_supported","credential_request_blocked","unsafe_target_url","duplicate_raid_destination"].includes(reason);
+      if (hardReject) {
+        await supabase.from("grace_posts").update({
+          status: "rejected",
+          rejected_by: null,
+          rejected_at: now,
+          rejection_reason: reason,
+          updated_at: now
+        }).eq("id", request.grace_post_id);
+        const { data: rejected, error: rejectedError } = await supabase
+          .from("raaiiidd_creator_requests")
+          .update({
+            status: "rejected",
+            review_note: reason,
+            reviewed_by: null,
+            reviewed_at: now,
+            updated_at: now
+          })
+          .eq("id", request.id)
+          .select("*")
+          .single();
+        if (rejectedError) throw rejectedError;
+        await recordCreatorDecision(request.id, "rejected", reason, "auto_rejected");
+        return { outcome: "auto_rejected", request: rejected, reason };
+      }
+
+      const { data: held, error: heldError } = await supabase
+        .from("raaiiidd_creator_requests")
+        .update({
+          status: "deferred_auto",
+          review_note: reason,
+          reviewed_by: null,
+          reviewed_at: null,
+          updated_at: now
+        })
+        .eq("id", request.id)
+        .select("*")
+        .single();
+      if (heldError) throw heldError;
+      await recordCreatorDecision(request.id, "deferred", reason, "deferred_auto");
+      return { outcome: "deferred_auto", request: held, reason };
+    }
+  }
+
   app.get("/api/mini/referral-progress", authenticate, async (req, res) => {
     try {
       const telegramId = Number(req.telegramUser.id);
@@ -186,7 +362,7 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
       const idea = cleanText(req.body?.idea, 1200);
       if (idea.length < 10) return res.status(400).json({ ok: false, error: "idea_required" });
       const draft = await generatePostCopy(openaiKey, idea);
-      return res.json({ ok: true, draft, approval_required: true, auto_publish: false });
+      return res.json({ ok: true, draft, approval_required: false, validation_required: true, auto_publish: false });
     } catch (error) {
       return res.status(400).json({ ok: false, error: String(error?.message || "draft_failed") });
     }
@@ -202,7 +378,7 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
       const objectPath = `${req.telegramUser.id}/${Date.now()}-${crypto.randomUUID()}.webp`;
       const { error } = await supabase.storage.from(DRAFT_BUCKET).upload(objectPath, image, { contentType: "image/webp", cacheControl: "3600", upsert: false });
       if (error) throw error;
-      return res.status(201).json({ ok: true, image_path: objectPath, image_url: await signImage(objectPath), approval_required: true });
+      return res.status(201).json({ ok: true, image_path: objectPath, image_url: await signImage(objectPath), approval_required: false, validation_required: true });
     } catch (error) {
       console.error("Raaiiidd image generation failed", { name: error?.name || "Error" });
       return res.status(400).json({ ok: false, error: String(error?.message || "image_generation_failed") });
@@ -219,7 +395,7 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
       const targetUrl = cleanText(req.body?.target_url, 1000);
       const reward = Math.max(0, Math.min(Number(req.body?.reward_points) || 10, 100));
       if (title.length < 3 || body.length < 10) return res.status(400).json({ ok: false, error: "draft_required" });
-      if (targetUrl && !validHttps(targetUrl)) return res.status(400).json({ ok: false, error: "invalid_target_url" });
+      if (targetUrl && !safeExternalHttps(targetUrl)) return res.status(400).json({ ok: false, error: "invalid_target_url" });
       if (imagePath && !imagePath.startsWith(`${telegramId}/`)) return res.status(403).json({ ok: false, error: "image_owner_mismatch" });
       const ws = await workspace();
       const { data: post, error: postError } = await supabase.from("grace_posts").insert({
@@ -228,9 +404,9 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
         campaign: "member_raaiiidd_creator",
         body,
         platform_overrides: {},
-        media: imagePath ? { storage_bucket: DRAFT_BUCKET, storage_path: imagePath, generated_for_review: true, creator_telegram_id: telegramId } : { generated_for_review: false, creator_telegram_id: telegramId },
+        media: imagePath ? { storage_bucket: DRAFT_BUCKET, storage_path: imagePath, generated_for_validation: true, creator_telegram_id: telegramId } : { generated_for_validation: false, creator_telegram_id: telegramId },
         link_url: targetUrl || null,
-        status: "pending_approval",
+        status: "draft",
         created_by: telegramId
       }).select("id,title,status").single();
       if (postError) throw postError;
@@ -239,13 +415,14 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
         creator_telegram_id: telegramId,
         desired_reward_points: reward,
         target_url: targetUrl || null,
-        status: "pending"
+        status: "deferred_auto",
+        review_note: "queued_for_worldz_validation"
       }).select("id,status,created_at").single();
       if (requestError) throw requestError;
-      await bot.sendMessage(STEPPER_TELEGRAM_ID, `🛡️ New Raaiiidd Creator Review\n\nRequest #${request.id}\nCreator: ${telegramId}\nTitle: ${title}\n\nApproval is required before publication or mission activation.`, { reply_markup: { inline_keyboard: [[{ text: "Open Review Queue", web_app: { url: `${MINIAPP_URL}#admin-review` } }]] } }).catch(() => undefined);
-      return res.status(201).json({ ok: true, request, post, approval_required: true, auto_publish: false });
+      const validation = await autoValidateCreatorRequest(request.id);
+      return res.status(201).json({ ok: true, request: validation.request || request, post, validation, approval_required: false, auto_publish: false });
     } catch (error) {
-      console.error("Raaiiidd creator submission failed", { name: error?.name || "Error" });
+      console.error("Raaiiidd creator submission failed", { name: error?.name || "Error", message: error?.message || "unknown" });
       return res.status(500).json({ ok: false, error: "creator_submission_failed" });
     }
   });
@@ -255,91 +432,50 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
     catch { return res.status(500).json({ ok: false, error: "creator_history_failed" }); }
   });
 
-  app.get("/api/mini/admin/creator", authenticate, async (req, res) => {
+  app.post("/api/mini/creator/:id/target", authenticate, async (req, res) => {
     try {
-      if (!await repository.hasPermission(req.telegramUser.id, "mission.create", config.adminTelegramIds, config.ownerTelegramId)) return res.status(403).json({ ok: false, error: "admin_required" });
-      return res.json({ ok: true, requests: await creatorRows(supabase.from("raaiiidd_creator_requests").eq("status", "pending")) });
-    } catch { return res.status(500).json({ ok: false, error: "creator_review_failed" }); }
-  });
-
-  app.post("/api/mini/admin/creator/:id/approve", authenticate, async (req, res) => {
-    try {
-      const reviewer = Number(req.telegramUser.id);
-      if (!await repository.hasPermission(reviewer, "mission.create", config.adminTelegramIds, config.ownerTelegramId)) return res.status(403).json({ ok: false, error: "admin_required" });
+      const telegramId = Number(req.telegramUser.id);
       const id = Number(req.params.id);
-      const { data: request, error } = await supabase.from("raaiiidd_creator_requests").select("*,grace_posts(*)").eq("id", id).maybeSingle();
+      const targetUrl = cleanText(req.body?.target_url, 1000);
+      if (!safeExternalHttps(targetUrl)) return res.status(400).json({ ok: false, error: "valid_public_https_target_required" });
+      const { data: request, error } = await supabase
+        .from("raaiiidd_creator_requests")
+        .select("id,creator_telegram_id,status,mission_id,grace_post_id")
+        .eq("id", id)
+        .maybeSingle();
       if (error) throw error;
-      if (!request) return res.status(404).json({ ok: false, error: "not_found" });
-      if (request.status !== "pending") return res.status(409).json({ ok: false, error: "already_reviewed" });
-      const now = new Date().toISOString();
-      const post = request.grace_posts;
-      await supabase.from("grace_posts").update({ status: "approved", approved_by: reviewer, approved_at: now, updated_at: now }).eq("id", post.id);
-      let mission = null;
-      if (request.target_url && validHttps(request.target_url)) {
-        mission = await repository.createMission({
-          title: cleanText(post.title, 140),
-          platform: inferPlatform(request.target_url),
-          target_url: request.target_url,
-          reward_points: request.desired_reward_points,
-          status: "active",
-          description: cleanText(post.body, 1200),
-          instructions: "Open the approved Raaiiidd. Complete the requested genuine action. Submit DONE with an optional HTTPS proof link for Admin review.",
-          link: request.target_url,
-          starts_at: now,
-          expires_at: null,
-          difficulty: "standard",
-          max_submissions: null
-        }, reviewer);
-      }
-      const { data: updated, error: updateError } = await supabase.from("raaiiidd_creator_requests").update({ status: "approved", mission_id: mission?.id || null, review_note: cleanText(req.body?.note, 500) || null, reviewed_by: reviewer, reviewed_at: now, updated_at: now }).eq("id", id).eq("status", "pending").select("*").single();
-      if (updateError) throw updateError;
-      await bot.sendMessage(request.creator_telegram_id, mission ? `✅ Your Raaiiidd Creator request #${id} was approved.\n\nMission #${mission.id} is now active.` : `✅ Your Raaiiidd Creator request #${id} was approved.\n\nThe creative is approved and is waiting for a real published HTTPS destination before the Raaiiidd mission can be activated.`).catch(() => undefined);
-      return res.json({ ok: true, request: updated, mission, awaiting_publication_url: !mission });
+      if (!request || Number(request.creator_telegram_id) !== telegramId) return res.status(404).json({ ok: false, error: "creator_request_not_found" });
+      if (request.mission_id) return res.status(409).json({ ok: false, error: "already_active" });
+      if (!["awaiting_target","deferred_auto","pending"].includes(String(request.status || ""))) return res.status(409).json({ ok: false, error: "request_not_activatable" });
+      await supabase.from("raaiiidd_creator_requests").update({
+        target_url: targetUrl,
+        status: "deferred_auto",
+        review_note: "target_added_revalidate",
+        updated_at: new Date().toISOString()
+      }).eq("id", id);
+      await supabase.from("grace_posts").update({ link_url: targetUrl, updated_at: new Date().toISOString() }).eq("id", request.grace_post_id);
+      const validation = await autoValidateCreatorRequest(id);
+      return res.json({ ok: true, validation });
     } catch (error) {
-      console.error("Creator approval failed", { name: error?.name || "Error" });
-      return res.status(409).json({ ok: false, error: "creator_approval_failed" });
+      return res.status(409).json({ ok: false, error: "creator_target_validation_failed" });
     }
   });
 
-  app.post("/api/mini/admin/creator/:id/activate", authenticate, async (req, res) => {
+  app.get("/api/mini/admin/creator", authenticate, async (req, res) => {
     try {
-      const reviewer = Number(req.telegramUser.id);
-      if (!await repository.hasPermission(reviewer, "mission.create", config.adminTelegramIds, config.ownerTelegramId)) return res.status(403).json({ ok: false, error: "admin_required" });
-      const url = cleanText(req.body?.target_url, 1000);
-      if (!validHttps(url)) return res.status(400).json({ ok: false, error: "valid_https_target_required" });
-      const id = Number(req.params.id);
-      const { data: request, error } = await supabase.from("raaiiidd_creator_requests").select("*,grace_posts(*)").eq("id", id).maybeSingle();
-      if (error) throw error;
-      if (!request || request.status !== "approved") return res.status(409).json({ ok: false, error: "approval_required" });
-      if (request.mission_id) return res.status(409).json({ ok: false, error: "already_active" });
-      const mission = await repository.createMission({
-        title: cleanText(request.grace_posts.title, 140), platform: inferPlatform(url), target_url: url,
-        reward_points: request.desired_reward_points, status: "active", description: cleanText(request.grace_posts.body, 1200),
-        instructions: "Open the approved Raaiiidd. Complete the requested genuine action. Submit DONE with an optional HTTPS proof link for Admin review.",
-        link: url, starts_at: new Date().toISOString(), expires_at: null, difficulty: "standard", max_submissions: null
-      }, reviewer);
-      await supabase.from("raaiiidd_creator_requests").update({ target_url: url, mission_id: mission.id, updated_at: new Date().toISOString() }).eq("id", id);
-      await supabase.from("grace_posts").update({ link_url: url, updated_at: new Date().toISOString() }).eq("id", request.grace_post_id);
-      await bot.sendMessage(request.creator_telegram_id, `🚀 Your approved Creator request #${id} is now live as Raaiiidd Mission #${mission.id}.`).catch(() => undefined);
-      return res.json({ ok: true, mission });
-    } catch { return res.status(409).json({ ok: false, error: "creator_activation_failed" }); }
+      if (!await repository.hasPermission(req.telegramUser.id, "mission.create", config.adminTelegramIds, config.ownerTelegramId)) return res.status(403).json({ ok: false, error: "protected_operations_required" });
+      return res.json({ ok: true, requests: await creatorRows(supabase.from("raaiiidd_creator_requests").eq("status", "deferred_auto")) });
+    } catch { return res.status(500).json({ ok: false, error: "creator_auto_holds_failed" }); }
   });
 
-  app.post("/api/mini/admin/creator/:id/reject", authenticate, async (req, res) => {
+  app.post("/api/mini/admin/creator/:id/recheck", authenticate, async (req, res) => {
     try {
-      const reviewer = Number(req.telegramUser.id);
-      if (!await repository.hasPermission(reviewer, "mission.create", config.adminTelegramIds, config.ownerTelegramId)) return res.status(403).json({ ok: false, error: "admin_required" });
-      const reason = cleanText(req.body?.reason, 500);
-      if (reason.length < 2) return res.status(400).json({ ok: false, error: "reason_required" });
-      const id = Number(req.params.id);
-      const { data: request } = await supabase.from("raaiiidd_creator_requests").select("*").eq("id", id).maybeSingle();
-      if (!request || request.status !== "pending") return res.status(409).json({ ok: false, error: "not_pending" });
-      const now = new Date().toISOString();
-      await supabase.from("grace_posts").update({ status: "rejected", rejected_by: reviewer, rejected_at: now, rejection_reason: reason, updated_at: now }).eq("id", request.grace_post_id);
-      await supabase.from("raaiiidd_creator_requests").update({ status: "rejected", review_note: reason, reviewed_by: reviewer, reviewed_at: now, updated_at: now }).eq("id", id);
-      await bot.sendMessage(request.creator_telegram_id, `❌ Raaiiidd Creator request #${id} was not approved.\n\nReason: ${reason}`).catch(() => undefined);
-      return res.json({ ok: true });
-    } catch { return res.status(409).json({ ok: false, error: "creator_rejection_failed" }); }
+      if (!await repository.hasPermission(req.telegramUser.id, "mission.create", config.adminTelegramIds, config.ownerTelegramId)) return res.status(403).json({ ok: false, error: "protected_operations_required" });
+      const validation = await autoValidateCreatorRequest(Number(req.params.id));
+      return res.json({ ok: true, validation });
+    } catch {
+      return res.status(409).json({ ok: false, error: "creator_automatic_recheck_failed" });
+    }
   });
 
   app.post("/api/mini/heroes/apply", authenticate, async (req, res) => {
@@ -441,6 +577,25 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
     return bot.sendMessage(msg.chat.id, "🛡️ Command Centre Review Queue\n\nMission evidence, participant-created Raaiiidds and Real-World Hero evidence are reviewed here.", { reply_markup: { inline_keyboard: [[{ text: "Open Review Queue", web_app: { url: `${MINIAPP_URL}#admin-review` } }]] } });
   });
   bot.onText(/^\/supportreagan(?:@\w+)?$/i, (msg) => bot.sendMessage(msg.chat.id, `💜 Reagan & Children\n\nUse the current dedicated DonateWorldz pathway:\n${DONATE_REAGAN_URL}`));
+
+  const reconcileCreatorRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("raaiiidd_creator_requests")
+        .select("id")
+        .in("status", ["pending","deferred_auto"])
+        .order("updated_at", { ascending: true })
+        .limit(20);
+      if (error) throw error;
+      for (const row of data || []) await autoValidateCreatorRequest(row.id);
+    } catch (error) {
+      console.warn("Creator automatic reconciliation unavailable", { name: error?.name || "Error" });
+    }
+  };
+  const creatorBootstrapTimer = setTimeout(() => { void reconcileCreatorRequests(); }, 12_000);
+  const creatorReconcileTimer = setInterval(() => { void reconcileCreatorRequests(); }, 60_000);
+  creatorBootstrapTimer.unref?.();
+  creatorReconcileTimer.unref?.();
 
   const firstDigest = setTimeout(reviewDigest, 60 * 1000);
   const hourlyDigest = setInterval(reviewDigest, 60 * 60 * 1000);
