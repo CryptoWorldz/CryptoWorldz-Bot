@@ -441,19 +441,23 @@ function createHttpApp({ bot, config, repository, supabase = null }) {
     } catch (error) { const safe = ["invalid_signature","invalid_asset","transaction_not_confirmed","wrong_recipient","no_matching_transfer"].includes(error.message) ? error.message : "verification_failed"; return res.status(400).json({ ok: false, error: safe }); }
   });
 
-  app.post("/api/mini/admin/submissions/:id/approve", authenticateMiniApp, async (req, res) => {
-    try { if (!await repository.hasPermission(req.telegramUser.id, "submission.approve", config.adminTelegramIds, config.ownerTelegramId)) return res.status(403).json({ ok: false, error: "admin_required" }); const result = await repository.approveSubmission(Number(req.params.id), req.telegramUser.id); if (!result.already_awarded) bot.sendMessage(result.telegram_id, `✅ Raaiiidd Complete!\n\n🎯 ${result.mission_title}\n⭐ ${result.awarded_points} Legend Points awarded\n🏆 New total: ${result.total_points}\n🎖 Rank: ${getRank(result.total_points)}\n\nYour contribution has been recorded.`).catch(() => undefined); return res.json({ ok: true, result }); }
-    catch { return res.status(409).json({ ok: false, error: "approval_failed" }); }
-  });
-
-  app.post("/api/mini/admin/submissions/:id/reject", authenticateMiniApp, async (req, res) => {
-    try { if (!await repository.hasPermission(req.telegramUser.id, "submission.reject", config.adminTelegramIds, config.ownerTelegramId)) return res.status(403).json({ ok: false, error: "admin_required" }); const reason = String(req.body && req.body.reason || "").trim(); if (reason.length < 2 || reason.length > 500) return res.status(400).json({ ok: false, error: "reason_required" }); const result = await repository.rejectSubmission(Number(req.params.id), req.telegramUser.id, reason); if (result.outcome === "rejected") bot.sendMessage(result.submission.telegram_id, `❌ Submission Not Approved\n\n🎯 Mission #${result.submission.mission_id}\n📝 Reason: ${reason}\n\nYou may contact the Admin Team if you believe this needs review.`).catch(() => undefined); return res.json({ ok: true, result }); }
-    catch { return res.status(409).json({ ok: false, error: "rejection_failed" }); }
-  });
-
-  app.get("/api/mini/admin/operations", authenticateMiniApp, async (req, res) => {
-    try { if (!await repository.hasPermission(req.telegramUser.id, "report.view", config.adminTelegramIds, config.ownerTelegramId)) return res.status(403).json({ ok: false, error: "admin_required" }); const [stats, activity, admins, partners] = await Promise.all([repository.getStats(), repository.listActivity(15), repository.listAdmins(), repository.listPartners()]); return res.json({ ok: true, stats, activity, admins, partners }); }
-    catch { return res.status(500).json({ ok: false, error: "operations_failed" }); }
+  app.post("/api/mini/admin/submissions/:id/recheck", authenticateMiniApp, async (req, res) => {
+    try {
+      if (!await repository.hasPermission(req.telegramUser.id, "submission.view", config.adminTelegramIds, config.ownerTelegramId)) {
+        return res.status(403).json({ ok: false, error: "protected_operations_required" });
+      }
+      const submissionId=Number(req.params.id);
+      const submission=await repository.getSubmission(submissionId);
+      if (!submission) return res.status(404).json({ ok:false, error:"submission_not_found" });
+      if (!["pending","deferred_auto"].includes(String(submission.status || ""))) {
+        return res.json({ ok:true, result:{ outcome:"already_final", status:submission.status } });
+      }
+      const result=await repository.autoAwardRaidSubmission(submissionId);
+      return res.json({ ok:true, result });
+    } catch (error) {
+      console.error("Automatic Raid recheck failed", { code:error?.code || error?.message || "unknown" });
+      return res.status(400).json({ ok:false, error:"automatic_recheck_failed" });
+    }
   });
 
   app.post("/api/mini/owner/contribution-rules", authenticateMiniApp, async (req, res) => {
