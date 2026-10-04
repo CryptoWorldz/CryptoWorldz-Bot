@@ -154,6 +154,6 @@ test("Zed Mini App AUTO keeps execution protected while public planning is avail
     body: JSON.stringify({ network: "solana", amount: 1 })
   });
   assert.equal(simulation.status, 200);
-  assert.equal(calls.length, 1);
-  assert.equal(calls[0].network, "solana");
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].network, "solana");
 });
