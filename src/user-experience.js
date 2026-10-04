@@ -522,7 +522,7 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
       const { data: hero, error: heroError } = await supabase.from("real_world_heroes").insert({ application_id: id, telegram_id: application.telegram_id, slug, display_name: application.display_name, summary, status: "published", approved_by: reviewer, approved_at: now }).select("id,slug,display_name,summary,approved_at").single();
       if (heroError) throw heroError;
       await supabase.from("real_world_hero_applications").update({ status: "approved", review_note: cleanText(req.body?.note, 500) || null, reviewed_by: reviewer, reviewed_at: now, updated_at: now }).eq("id", id);
-      await bot.sendMessage(application.telegram_id, `🦸 Real-World Hero Recognition Approved\n\n${application.display_name}\nYour verified recognition has been added to the OneWorldz Heroes register.\n${HEROES_URL}`).catch(() => undefined);
+      await bot.sendMessage(application.telegram_id, `🦸 Real-World Hero Recognition Approved\n\n${application.display_name}\nYour verified recognition has been added to the Worldz Heroes register.\n${HEROES_URL}`).catch(() => undefined);
       return res.json({ ok: true, hero });
     } catch { return res.status(409).json({ ok: false, error: "hero_approval_failed" }); }
   });
@@ -554,27 +554,27 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
 
   async function reviewDigest() {
     try {
-      const [{ count: creatorCount, error: creatorError }, { count: heroCount, error: heroError }, pendingMissions] = await Promise.all([
-        supabase.from("raaiiidd_creator_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      const [{ count: creatorCount, error: creatorError }, { count: heroCount, error: heroError }, raidHolds] = await Promise.all([
+        supabase.from("raaiiidd_creator_requests").select("id", { count: "exact", head: true }).eq("status", "deferred_auto"),
         supabase.from("real_world_hero_applications").select("id", { count: "exact", head: true }).eq("status", "pending"),
         repository.listPending(50)
       ]);
       if (creatorError) throw creatorError;
       if (heroError) throw heroError;
-      const missionCount = (pendingMissions || []).length;
-      const total = Number(creatorCount || 0) + Number(heroCount || 0) + missionCount;
+      const raidHoldCount = (raidHolds || []).length;
+      const total = Number(creatorCount || 0) + Number(heroCount || 0) + raidHoldCount;
       if (!total) return;
-      await bot.sendMessage(STEPPER_TELEGRAM_ID, `✅ Stepper Hourly Approval Check\n\n🚀 Creator Raaiiidds: ${creatorCount || 0}\n📥 Mission evidence: ${missionCount}\n🦸 Hero evidence: ${heroCount || 0}\n\nTotal waiting: ${total}\n\nNothing is auto-approved. Human review remains required.`, { reply_markup: { inline_keyboard: [[{ text: "Open Command Centre Review", web_app: { url: `${MINIAPP_URL}#admin-review` } }]] } });
+      await bot.sendMessage(STEPPER_TELEGRAM_ID, `🛡 Worldz Protected Exceptions\n\n🤖 Creator automatic holds: ${creatorCount || 0}\n⚡ Raid automatic holds: ${raidHoldCount}\n🦸 Hero evidence reviews: ${heroCount || 0}\n\nCreator/Raid holds retry automatically. Human evidence review remains only where publication accuracy genuinely needs it.`, { reply_markup: { inline_keyboard: [[{ text: "Open Protected Exceptions", web_app: { url: `${MINIAPP_URL}#admin-review` } }]] } });
     } catch (error) {
       console.error("Stepper hourly review digest failed", { name: error?.name || "Error" });
     }
   }
 
-  bot.onText(/^\/creator(?:@\w+)?$/i, async (msg) => bot.sendMessage(msg.chat.id, "🎨 ZED Raaiiidd Creator\n\nDraft the post, generate approved-theme artwork, preview it and submit it for Admin review. Nothing auto-publishes.", { reply_markup: { inline_keyboard: [[{ text: "Open Raaiiidd Creator", web_app: { url: `${MINIAPP_URL}#create` } }]] } }));
-  bot.onText(/^\/heroes(?:@\w+)?$/i, async (msg) => bot.sendMessage(msg.chat.id, `🦸 OneWorldz Heroes\n\nAlready helping people in the real world? Submit evidence for human review and recognition.\n\n${HEROES_URL}`, { reply_markup: { inline_keyboard: [[{ text: "Submit Hero Evidence", web_app: { url: `${MINIAPP_URL}#heroes` } }], [{ text: "Public Heroes", url: HEROES_URL }]] } }));
+  bot.onText(/^\/creator(?:@\w+)?$/i, async (msg) => bot.sendMessage(msg.chat.id, "🎨 ZED Raaiiidd Creator\n\nDraft the post, generate Worldz artwork, add the real HTTPS destination and run Worldz validation. Safe complete Raids activate automatically; no routine Admin approval queue.", { reply_markup: { inline_keyboard: [[{ text: "Open Raaiiidd Creator", web_app: { url: `${MINIAPP_URL}#create` } }]] } }));
+  bot.onText(/^\/heroes(?:@\w+)?$/i, async (msg) => bot.sendMessage(msg.chat.id, `🦸 Worldz Heroes\n\nAlready helping people in the real world? Submit evidence for human review and recognition.\n\n${HEROES_URL}`, { reply_markup: { inline_keyboard: [[{ text: "Submit Hero Evidence", web_app: { url: `${MINIAPP_URL}#heroes` } }], [{ text: "Public Heroes", url: HEROES_URL }]] } }));
   bot.onText(/^\/reviewqueue(?:@\w+)?$/i, async (msg) => {
     if (!await repository.hasPermission(msg.from.id, "submission.view", config.adminTelegramIds, config.ownerTelegramId)) return bot.sendMessage(msg.chat.id, "⛔ Admin access required.");
-    return bot.sendMessage(msg.chat.id, "🛡️ Command Centre Review Queue\n\nMission evidence, participant-created Raaiiidds and Real-World Hero evidence are reviewed here.", { reply_markup: { inline_keyboard: [[{ text: "Open Review Queue", web_app: { url: `${MINIAPP_URL}#admin-review` } }]] } });
+    return bot.sendMessage(msg.chat.id, "🛡️ Worldz Protected Exceptions\n\nCreator/Raid automation holds can be rechecked here. Real-World Hero evidence remains a publication-accuracy review.", { reply_markup: { inline_keyboard: [[{ text: "Open Review Queue", web_app: { url: `${MINIAPP_URL}#admin-review` } }]] } });
   });
   bot.onText(/^\/supportreagan(?:@\w+)?$/i, (msg) => bot.sendMessage(msg.chat.id, `💜 Reagan & Children\n\nUse the current dedicated DonateWorldz pathway:\n${DONATE_REAGAN_URL}`));
 
