@@ -14,14 +14,14 @@ test("token shill proof supports requested social platforms", () => {
 });
 
 test("shill proof normalizes tickers and requires HTTPS proof", () => {
-  const good = parseShillProof("$recap | https://x.com/me/status/123");
+  const good = parseShillProof("$wldz | https://x.com/me/status/123");
   assert.equal(good.ok, true);
-  assert.equal(good.symbol, "RECAP");
+  assert.equal(good.symbol, "WLDZ");
   assert.equal(good.platform, "X");
   assert.equal(normalizeSymbol("$pnex"), "PNEX");
 
-  assert.equal(parseShillProof("RECAP | http://x.com/me/status/123").ok, false);
-  assert.equal(parseShillProof("RECAP").ok, false);
+  assert.equal(parseShillProof("WLDZ | http://x.com/me/status/123").ok, false);
+  assert.equal(parseShillProof("WLDZ").ok, false);
 });
 
 
