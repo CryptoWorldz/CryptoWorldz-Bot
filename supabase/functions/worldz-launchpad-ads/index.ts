@@ -66,7 +66,7 @@ Deno.serve(async (req: Request) => {
       if (!ORDER_ID.test(orderId)) return json(req, { ok: false, error: "invalid_order_id" }, 400);
       const { data, error } = await supabase
         .from("worldz_launchpad_ads")
-        .select("id,project_name,token_symbol,chain,status,slot,package_code,price_aud,duration_days,payment_currency,payment_amount,payment_destination,payment_submitted_at,payment_verified_at,approved_at,activated_at,start_at,end_at,reviewer_note")
+        .select("id,project_name,token_symbol,chain,status,slot,package_code,price_aud,duration_days,payment_currency,payment_amount,payment_destination,payment_submitted_at,payment_verified_at,approved_at,activated_at,start_at,end_at,quote_fx_rate,quote_source,quote_expires_at,reviewer_note")
         .eq("id", orderId)
         .maybeSingle();
       if (error) return json(req, { ok: false, error: "order_read_failed" }, 500);
@@ -115,7 +115,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: order, error: orderError } = await supabase
       .from("worldz_launchpad_ads")
-      .select("id,status,payment_currency,payment_amount,payment_destination,payment_signature")
+      .select("id,status,payment_currency,payment_amount,payment_destination,payment_signature,quote_expires_at")
       .eq("id", orderId)
       .maybeSingle();
     if (orderError) return json(req, { ok: false, error: "order_read_failed" }, 500);
@@ -123,11 +123,14 @@ Deno.serve(async (req: Request) => {
     if (!["approved","payment_review"].includes(String(order.status))) {
       return json(req, { ok: false, error: "order_not_awaiting_payment" }, 409);
     }
+    if (order.status === "approved" && order.quote_expires_at && Date.parse(order.quote_expires_at) <= Date.now()) {
+      return json(req, { ok: false, error: "payment_quote_expired_retry_automatic" }, 409);
+    }
     if (!order.payment_currency || !Number(order.payment_amount) || !order.payment_destination) {
       return json(req, { ok: false, error: "payment_quote_not_ready" }, 409);
     }
     if (order.payment_signature && order.payment_signature === signature && order.status === "payment_review") {
-      return json(req, { ok: true, order: { id: order.id, status: order.status }, note: "Receipt already submitted and awaiting on-chain review." });
+      return json(req, { ok: true, order: { id: order.id, status: order.status }, note: "Receipt already submitted and awaiting automatic on-chain verification." });
     }
 
     const now = new Date().toISOString();
@@ -151,7 +154,7 @@ Deno.serve(async (req: Request) => {
     return json(req, {
       ok: true,
       order: data,
-      note: "Receipt recorded. Worldz will verify the finalized on-chain transfer before the sponsored placement is activated."
+      note: "Receipt recorded. Worldz automation will verify the finalized on-chain transfer and activate the sponsored placement when the proof passes."
     });
   }
 
@@ -182,7 +185,7 @@ Deno.serve(async (req: Request) => {
     .select("id", { count: "exact", head: true })
     .eq("contact", contact)
     .gte("created_at", cutoff)
-    .in("status", ["pending_review","approved","payment_review","active"]);
+    .in("status", ["auto_check","deferred_auto","approved","payment_review","active"]);
   if ((count || 0) >= 3) return json(req, { ok: false, error: "submission_limit_reached" }, 429);
 
   const extension = banner.type === "image/jpeg" ? "jpg" : banner.type.split("/")[1];
@@ -207,7 +210,7 @@ Deno.serve(async (req: Request) => {
     package_code: packageCode,
     price_aud: pkg.priceAud,
     duration_days: pkg.days,
-    status: "pending_review"
+    status: "auto_check"
   }).select("id,price_aud,duration_days,status").single();
 
   if (error) {
@@ -220,8 +223,8 @@ Deno.serve(async (req: Request) => {
     ad: data,
     pricing: { currency: "AUD", package: packageCode, label: pkg.label },
     payment: {
-      state: "AFTER_HUMAN_APPROVAL",
-      note: "No payment is requested until the ad passes Worldz review. Approved ads receive a SOL/USDC payment quote tied to the Worldz Operations Treasury."
+      state: "AFTER_WORLDZ_VALIDATION",
+      note: "No payment is requested at submission. ReX + G.R.A.C.E. + ZED + AUTO validate the sponsored placement first; passing orders receive an automatic USDC quote tied to the Worldz Operations Treasury."
     }
   }, 201);
 });
