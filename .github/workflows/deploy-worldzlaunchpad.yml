@@ -71,7 +71,7 @@ jobs:
           }
           assert fee['treasuryLane']['worldzOperationsTreasuryPercent']==70
           assert fee['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
-          assert fee['worldzLaunchPadShareOfTokenSupplyPercent']==0
+          assert fee['worldzLaunchPadShareOfTokenSupplyPercent']==0.6
           assert fee['worldzLaunchPadShareOfInitialLiquidityPercent']==0
           assert fee['walletTransferTaxPercent']==0
 
@@ -360,7 +360,7 @@ jobs:
           assert all(term not in genesis_html and term not in genesis_js for term in private_terms)
           assert platform['worldzMint']['version']=='WORLDZMINT-1'
           assert platform['worldzMint']['status']=='PUBLIC_MAINNET_MINT_BETA'
-          assert platform['worldzMint']['platformTokenSupplyTakePercent']==0
+          assert platform['worldzMint']['platformTokenSupplyTakePercent']==0.6
           assert platform['worldzMint']['walletTransferTaxPercent']==0
           assert platform['worldzMint']['compulsory']['revokeMintAuthorityAfterGenesis'] is True
           assert platform['worldzMint']['compulsory']['revokeFreezeAuthorityAfterGenesis'] is True
@@ -891,7 +891,7 @@ jobs:
                   assert platform['feePolicy']['worldzInternalSplitPercent']['treasury']==20
                   assert platform['feePolicy']['treasuryLane']['worldzOperationsTreasuryPercent']==70
                   assert platform['feePolicy']['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
-                  assert platform['feePolicy']['worldzLaunchPadShareOfTokenSupplyPercent']==0
+                  assert platform['feePolicy']['worldzLaunchPadShareOfTokenSupplyPercent']==0.6
                   assert platform['feePolicy']['worldzLaunchPadShareOfInitialLiquidityPercent']==0
                   assert platform['publicMainnetCreatorLaunchesEnabled'] is False
                   assert platform['worldzMint']['version']=='WORLDZMINT-1'
@@ -1093,7 +1093,7 @@ jobs:
                   assert reg_code==200 and public_registry['ok'] is True
                   assert mint_reg_code==200 and public_mint_registry['ok'] is True
                   assert public_mint_registry['standard']=='WORLDZMINT-1'
-                  assert public_mint_registry['platformTokenSupplyTakePercent']==0
+                  assert public_mint_registry['platformTokenSupplyTakePercent']==0.6
                   assert public_mint_registry['walletTransferTaxPercent']==0
                   assert public_registry['standard']=='WORLDZ-LAUNCH-REGISTER-V3'
                   assert public_registry['feeFlowVersion']=='WORLDZ-FEE-FLOW-V3'
@@ -1108,7 +1108,7 @@ jobs:
                   assert public_registry['worldzCoreFamily']['percentOfWorldzContribution']==10
                   assert public_registry['worldzCoreFamily']['equalShareWithinLanePercent']==25
                   assert public_registry['worldzCoreFamily']['symbols']==['WLDZ','RVIV','PNEX','MRCL']
-                  assert public_registry['tokenSupplyTakePercent']==0
+                  assert public_registry['tokenSupplyTakePercent']==0.6
                   assert public_registry['initialLiquidityTakePercent']==0
                   assert public_registry['walletTransferTaxPercent']==0
                   assert public_registry['legacyAdapter']['profileOnly'] is True
