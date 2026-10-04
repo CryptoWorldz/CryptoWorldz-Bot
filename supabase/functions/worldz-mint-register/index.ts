@@ -23,7 +23,7 @@ const RPCS={
 const PROJECT_KEYS=["creator","liquidity","community","treasury","growth"];
 const WORLDZ_KEYS=["worldzOperations","worldzCommunityTeam","purpleDiamondCrew"];
 const ALL_KEYS=[...PROJECT_KEYS,...WORLDZ_KEYS];
-const FIXED_WORLDZ_ALLOCATIONS:any={worldzOperations:0.25,worldzCommunityTeam:0.20,purpleDiamondCrew:0.15};
+const FIXED_WORLDZ_ALLOCATIONS:any={worldzOperations:0.30,worldzCommunityTeam:0.18,purpleDiamondCrew:0.12};
 const WORLDZ_OPS_TREASURY="n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB";
 const WORLDZ_COMMUNITY_TEAM_TREASURY="";
 const PURPLE_DIAMOND_CREW_TREASURY="";
@@ -239,7 +239,7 @@ Deno.serve(async(req:Request)=>{
     return json({
       ok:true,standard:"WORLDZMINT-1",
       platformTokenSupplyTakePercent:0.6,
-      platformTokenSupplySplitPercent:{operations:0.25,communityTeam:0.20,purpleDiamondCrew:0.15},
+      platformTokenSupplySplitPercent:{operations:0.30,communityTeam:0.18,purpleDiamondCrew:0.12},
       tokenSupplyRoutingReady:Boolean(WORLDZ_COMMUNITY_TEAM_TREASURY&&PURPLE_DIAMOND_CREW_TREASURY),
       watermark:{defaultApplied:true,opacity:0.35,removePriceSol:0.05,paymentDestination:WORLDZ_OPS_TREASURY},
       walletTransferTaxPercent:0,
@@ -336,7 +336,7 @@ Deno.serve(async(req:Request)=>{
         creatorWallet:row.wallet_address,network:row.environment,
         fixedSupplyVerified:true,mintAuthorityRevoked:true,freezeAuthorityRevoked:true,
         walletTransferTaxPercent:0,worldzTokenSupplyTakePercent:0.6,worldzInitialLiquidityTakePercent:0,
-        worldzTokenSupplySplitPercent:{operations:0.25,communityTeam:0.20,purpleDiamondCrew:0.15},
+        worldzTokenSupplySplitPercent:{operations:0.30,communityTeam:0.18,purpleDiamondCrew:0.12},
         watermark:{removed:row.watermark_removed===true,removalPriceSol:row.watermark_removed===true?0.05:0,paymentSignature:row.watermark_removal_tx_signature||null},
         allocationsPolicyVerified:true,distributionVerified:true,distribution:dist,
         createMintTransactionSlot:createProof.slot,distributionTransactionSlot:distributionTxProof.slot,
