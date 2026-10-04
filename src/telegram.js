@@ -135,7 +135,7 @@ Use /help to open the Command Menu.
 🎖 Rank: ${getRank(points)}
 ⭐ Legend Points: ${points}
 🚀 Raaiiidds Completed: ${completed}
-📥 Pending Submissions: ${profile.pending}
+🛡 Automation Holds: ${profile.automationQueue || 0}
 👛 Wallet Connected: ${user.wallet ? `Yes ✅\n${shortenWallet(user.wallet)}` : "No"}
 🎁 Rewards Earned: ${rewardsEarned} Legend Points
 📅 Member Since: ${user.registered_at || user.created_at}`
@@ -380,7 +380,7 @@ Use /help to open the Command Menu.
   bot.onText(/^\/pending(?:@\w+)?$/, async (msg) => {
     if (!(await permissionAllowed(msg, "submission.view"))) return denyAdmin(msg);
     try { const rows = await repository.listPending(); if (!rows.length) return send(msg.chat.id, "📥 No pending submissions.");
-      return sendLong(msg.chat.id, `📥 Pending Submissions\n\n${rows.map((r) => `#${r.id} • Mission #${r.mission_id}\n👤 ${r.users?.username ? `@${r.users.username}` : r.users?.first_name || "Legend"} (${r.telegram_id})\n🎯 ${r.missions?.title || "Mission"}\n🕒 ${r.submitted_at}\n📝 ${r.proof_url || r.completion_text || "DONE"}\nStatus: ${r.status}`).join("\n\n")}\n\n/approve submission_id\n/reject submission_id reason`); }
+      return sendLong(msg.chat.id, `📥 Pending Submissions\n\n${rows.map((r) => `#${r.id} • Raid #${r.mission_id}\n👤 ${r.users?.username ? `@${r.users.username}` : r.users?.first_name || "Legend"} (${r.telegram_id})\n🎯 ${r.missions?.title || "Mission"}\n🕒 ${r.submitted_at}\n📝 ${r.proof_url || r.completion_text || "DONE"}\nStatus: ${r.status}`).join("\n\n")}\n\n/approve submission_id\n/reject submission_id reason`); }
     catch { return send(msg.chat.id, "❌ I couldn't load pending submissions."); }
   });
 
@@ -395,7 +395,7 @@ Use /help to open the Command Menu.
     try { const user = await repository.getUser(msg.from.id); if (!user) return send(msg.chat.id, "❌ You are not registered. Use /register first.");
       const claim = await repository.submitMissionClaim({ missionId, telegramId: msg.from.id, completionText: "Proof submitted", proofUrl: proof });
       if (claim.duplicate) return send(msg.chat.id, "⚠️ You have already submitted this mission.");
-      return send(msg.chat.id, `✅ Raaiiidd Submission Received!\n\n🎯 Mission #${missionId}\n📥 Submission #${claim.submission.id}\n⏳ Status: Pending Review\n\nAn Admin Team member will review it.`); }
+      return send(msg.chat.id, `✅ Raaiiidd Submission Received!\n\n🎯 Raid #${missionId}\n📥 Submission #${claim.submission.id}\n⏳ Status: Pending Review\n\nAn Admin Team member will review it.`); }
     catch { return send(msg.chat.id, "❌ I couldn't record that proof submission."); }
   });
 
@@ -407,7 +407,7 @@ Use /help to open the Command Menu.
     catch { return send(msg.chat.id, "❌ I couldn't load that member."); }
   });
 
-  bot.onText(/^\/stats(?:@\w+)?$/, async (msg) => { if (!(await adminAllowed(msg))) return denyAdmin(msg); try { const s = await repository.getStats(); return send(msg.chat.id, `📊 CryptoWorldz Command Centre Stats\n\n👥 Registered Legends: ${s.users}\n👛 Connected Wallets: ${s.wallets}\n🚀 Active Raaiiidds: ${s.active}\n✅ Completed Raaiiidds: ${s.completed}\n📥 Pending Submissions: ${s.pending}\n⭐ Total Legend Points Awarded: ${s.points}`); } catch { return send(msg.chat.id, "❌ I couldn't load stats."); } });
+  bot.onText(/^\/stats(?:@\w+)?$/, async (msg) => { if (!(await adminAllowed(msg))) return denyAdmin(msg); try { const s = await repository.getStats(); return send(msg.chat.id, `📊 CryptoWorldz Command Centre Stats\n\n👥 Registered Legends: ${s.users}\n👛 Connected Wallets: ${s.wallets}\n🚀 Active Raaiiidds: ${s.active}\n✅ Completed Raaiiidds: ${s.completed}\n🛡 Automation Holds: ${s.pending}\n⭐ Total Legend Points Awarded: ${s.points}`); } catch { return send(msg.chat.id, "❌ I couldn't load stats."); } });
   bot.onText(/^\/activity(?:@\w+)?$/, async (msg) => { if (!(await adminAllowed(msg))) return denyAdmin(msg); try { const rows = await repository.listActivity(); return send(msg.chat.id, `📊 Recent Safe Activity\n\n${rows.map((r) => `${r.created_at} — ${r.action} — ${r.actor_telegram_id || "system"}`).join("\n") || "No activity yet."}`); } catch { return send(msg.chat.id, "❌ I couldn't load activity."); } });
 
   bot.onText(/^\/newmission(?:@\w+)?(?:\s+([\s\S]+))?$/, async (msg, match) => {
@@ -421,9 +421,9 @@ Use /help to open the Command Menu.
     }
     try {
       const mission = await repository.createMission(parsed.mission, msg.from.id);
-      return send(msg.chat.id, `✅ Mission #${mission.id} created.\n\n${mission.title}`);
+      return send(msg.chat.id, `✅ Raid #${mission.id} created.\n\n${mission.title}`);
     } catch (error) {
-      safeError("New mission command", error);
+      safeError("New Raid command", error);
       return send(msg.chat.id, "❌ I couldn't create that mission.");
     }
   });
@@ -445,10 +445,10 @@ Use /help to open the Command Menu.
         msg.from.id
       );
       return mission
-        ? send(msg.chat.id, `✅ Mission #${mission.id} updated: ${parsed.field}.`)
-        : send(msg.chat.id, "❌ Mission not found.");
+        ? send(msg.chat.id, `✅ Raid #${mission.id} updated: ${parsed.field}.`)
+        : send(msg.chat.id, "❌ Raid not found.");
     } catch (error) {
-      safeError("Edit mission command", error);
+      safeError("Edit Raid command", error);
       return send(msg.chat.id, "❌ I couldn't update that mission.");
     }
   });
@@ -460,8 +460,8 @@ Use /help to open the Command Menu.
     try {
       const mission = await repository.endMission(missionId, msg.from.id);
       return mission
-        ? send(msg.chat.id, `✅ Mission #${mission.id} completed. Previous rewards remain recorded.`)
-        : send(msg.chat.id, "❌ Mission not found.");
+        ? send(msg.chat.id, `✅ Raid #${mission.id} completed. Previous rewards remain recorded.`)
+        : send(msg.chat.id, "❌ Raid not found.");
     } catch (error) {
       safeError("End mission command", error);
       return send(msg.chat.id, "❌ I couldn't end that mission.");
@@ -512,7 +512,7 @@ Use /help to open the Command Menu.
       try {
         await send(
           result.submission.telegram_id,
-          `❌ Submission Not Approved\n\n🎯 Mission #${result.submission.mission_id}\n📝 Reason: ${reason}\n\nYou may contact the Admin Team if you believe this needs review.`
+          `❌ Submission Not Approved\n\n🎯 Raid #${result.submission.mission_id}\n📝 Reason: ${reason}\n\nYou may contact the Admin Team if you believe this needs review.`
         );
       } catch (notifyError) {
         safeError("Rejection notification", notifyError);
