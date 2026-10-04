@@ -1,6 +1,6 @@
 {
   "schema": "WORLDZ-FEE-FLOW-V3",
-  "version": "2026-10-02-A",
+  "version": "2026-10-05-A",
   "status": "LOCKED_FOR_NEW_WORLDZ_LAUNCH_INTAKES__MAINNET_EXECUTION_GATED",
   "name": "Worldz Fee Flow™ V3",
   "basis": "ELIGIBLE_CREATOR_FEE_REVENUE_AFTER_EXTERNAL_PROTOCOL_NETWORK_AND_VENUE_DEDUCTIONS",
@@ -48,18 +48,21 @@
   "treasuryLane": {
     "percentOfWorldzContribution": 20,
     "split": {
-      "worldzOperationsTreasuryPercent": 70,
-      "worldzMiracleTeamTreasuryPercent": 30
+      "worldzOperationsTreasuryPercent": 50,
+      "worldzMiracleTeamTreasuryPercent": 30,
+      "purpleDiamondCrewTreasuryPercent": 20
     },
     "effectivePercentOfWorldzContribution": {
-      "worldzOperationsTreasury": 14,
-      "worldzMiracleTeamTreasury": 6
+      "worldzOperationsTreasury": 10,
+      "worldzMiracleTeamTreasury": 6,
+      "purpleDiamondCrewTreasury": 4
     },
     "governance": {
       "worldzOperationsTreasury": "3-of-5",
-      "worldzMiracleTeamTreasury": "4-of-7"
+      "worldzMiracleTeamTreasury": "4-of-7",
+      "purpleDiamondCrewTreasury": "MULTISIG_REQUIRED"
     },
-    "rule": "The 70/30 split is inside the Treasury lane only. It is not 30% of creator revenue, not 30% of trader volume, and not 30% of the full Worldz contribution."
+    "rule": "The Treasury lane is split 50% Worldz Operations / 30% Miricle Team / 20% Purple Diamond Crew. The split applies inside the Treasury lane only, not to trader volume or the creator-retained portion."
   },
   "miracleSeparation": {
     "mrclMiracleTeamTokenVaultPercent": 20,
@@ -108,13 +111,13 @@
       "totalWorldzPercent": 0.6,
       "creatorProjectPercent": 99.4,
       "splitPercent": {
-        "operations": 0.25,
-        "communityTeam": 0.2,
-        "purpleDiamondCrew": 0.15
+        "operations": 0.3,
+        "communityTeam": 0.18,
+        "purpleDiamondCrew": 0.12
       },
       "disclosedBeforeSignature": true,
       "failClosedIfDestinationUnverified": true,
-      "note": "This token-supply allocation is separate from the 3% / 5% / 8% Worldz share of eligible fee revenue."
+      "note": "The mandatory 0.60% genesis token-supply allocation is separate from Fee Flow revenue and is split 50/30/20 across Worldz Operations, Miricle Team and Purple Diamond Crew: 0.30% / 0.18% / 0.12% of total genesis supply."
     }
   }
 }
