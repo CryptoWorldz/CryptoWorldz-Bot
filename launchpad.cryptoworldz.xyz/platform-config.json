@@ -475,10 +475,12 @@
       },
       "treasuryLane": {
         "percentOfWorldzContribution": 20,
-        "worldzOperationsTreasuryPercent": 70,
+        "worldzOperationsTreasuryPercent": 50,
         "worldzMiracleTeamTreasuryPercent": 30,
         "operationsGovernance": "3-of-5",
-        "miracleTeamGovernance": "4-of-7"
+        "miracleTeamGovernance": "4-of-7",
+        "purpleDiamondCrewTreasuryPercent": 20,
+        "purpleDiamondCrewGovernance": "MULTISIG_REQUIRED"
       },
       "totalWorldzInternalPercent": 100,
       "walletTransferTaxPercent": 0,
@@ -752,9 +754,9 @@
       "note": "Private launch details are returned only by the Edge function for a valid unexpired preset code. Public static files do not contain the private token plan."
     },
     "platformTokenSupplySplitPercent": {
-      "operations": 0.25,
-      "communityTeam": 0.2,
-      "purpleDiamondCrew": 0.15
+      "operations": 0.3,
+      "communityTeam": 0.18,
+      "purpleDiamondCrew": 0.12
     }
   },
   "confidenceCurve": {
