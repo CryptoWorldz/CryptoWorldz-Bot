@@ -23,7 +23,8 @@ test("WorldzLaunchPad new-launch economics are Fee Flow V3",()=>{
   assert.equal(p.feePolicy.worldzInternalSplitPercent.treasury,20);
   assert.equal(p.feePolicy.treasuryLane.worldzOperationsTreasuryPercent,70);
   assert.equal(p.feePolicy.treasuryLane.worldzMiracleTeamTreasuryPercent,30);
-  assert.equal(p.feePolicy.worldzLaunchPadShareOfTokenSupplyPercent,0);
+  assert.equal(p.feePolicy.worldzLaunchPadShareOfTokenSupplyPercent,0.6);
+  assert.deepEqual(p.feePolicy.worldzLaunchPadTokenSupplySplitPercent,{worldzOperationsTreasury:0.25,worldzCommunityTeamTreasury:0.20,purpleDiamondCrewTreasury:0.15});
   assert.equal(p.feePolicy.worldzLaunchPadShareOfInitialLiquidityPercent,0);
   assert.equal(p.feePolicy.walletTransferTaxPercent,0);
 });
