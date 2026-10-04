@@ -377,11 +377,13 @@ Use /help to open the Command Menu.
     catch { return send(msg.chat.id, "❌ I couldn't configure that partner profile."); }
   });
 
-  bot.onText(/^\/pending(?:@\w+)?$/, async (msg) => {
+  bot.onText(/^\/(?:autoholds|pending)(?:@\w+)?$/, async (msg) => {
     if (!(await permissionAllowed(msg, "submission.view"))) return denyAdmin(msg);
-    try { const rows = await repository.listPending(); if (!rows.length) return send(msg.chat.id, "📥 No pending submissions.");
-      return sendLong(msg.chat.id, `📥 Pending Submissions\n\n${rows.map((r) => `#${r.id} • Raid #${r.mission_id}\n👤 ${r.users?.username ? `@${r.users.username}` : r.users?.first_name || "Legend"} (${r.telegram_id})\n🎯 ${r.missions?.title || "Mission"}\n🕒 ${r.submitted_at}\n📝 ${r.proof_url || r.completion_text || "DONE"}\nStatus: ${r.status}`).join("\n\n")}\n\n/approve submission_id\n/reject submission_id reason`); }
-    catch { return send(msg.chat.id, "❌ I couldn't load pending submissions."); }
+    try {
+      const rows = await repository.listPending();
+      if (!rows.length) return send(msg.chat.id, "✅ No Raid automation holds. Routine Raid rewards are handled automatically.");
+      return sendLong(msg.chat.id, `🛡 RAID AUTOMATION HOLDS\n\n${rows.map((r) => `#${r.id} • Raid #${r.mission_id}\n👤 ${r.users?.username ? `@${r.users.username}` : r.users?.first_name || "Legend"} (${r.telegram_id})\n🎯 ${r.missions?.title || "Raid"}\n🕒 ${r.submitted_at}\n📝 ${r.proof_url || r.completion_text || "DONE"}\nStatus: ${r.status}`).join("\n\n")}\n\nZED + AUTO retry these automatically. Human Admin approval is not the normal path.`);
+    } catch { return send(msg.chat.id, "❌ I couldn't load Raid automation holds."); }
   });
 
   bot.onText(/^\/rewards(?:@\w+)?$/, async (msg) => {
@@ -391,19 +393,30 @@ Use /help to open the Command Menu.
 
   bot.onText(/^\/submit(?:@\w+)?(?:\s+(\d+)\s+(https:\/\/\S+))?$/, async (msg, match) => {
     const missionId = parsePositiveId(match && match[1]); const proof = match && match[2];
-    if (!missionId || !proof) return send(msg.chat.id, "❌ Use: /submit mission_id proof_link");
-    try { const user = await repository.getUser(msg.from.id); if (!user) return send(msg.chat.id, "❌ You are not registered. Use /register first.");
+    if (!missionId || !proof) return send(msg.chat.id, "❌ Use: /submit raid_id proof_link");
+    try {
+      const user = await repository.getUser(msg.from.id);
+      if (!user) return send(msg.chat.id, "❌ You are not registered. Use /register first.");
       const claim = await repository.submitMissionClaim({ missionId, telegramId: msg.from.id, completionText: "Proof submitted", proofUrl: proof });
-      if (claim.duplicate) return send(msg.chat.id, "⚠️ You have already submitted this mission.");
-      return send(msg.chat.id, `✅ Raaiiidd Submission Received!\n\n🎯 Raid #${missionId}\n📥 Submission #${claim.submission.id}\n⏳ Status: Pending Review\n\nAn Admin Team member will review it.`); }
-    catch { return send(msg.chat.id, "❌ I couldn't record that proof submission."); }
+      if (claim.duplicate) return send(msg.chat.id, "⚠️ You have already submitted this Raid.");
+      const award = typeof repository.autoAwardRaidSubmission === "function"
+        ? await repository.autoAwardRaidSubmission(claim.submission.id)
+        : null;
+      if (["awarded","already_awarded"].includes(String(award?.outcome || ""))) {
+        return send(msg.chat.id, `✅ RAID COMPLETE — AUTO-AWARDED\n\n🎯 Raid #${missionId}\n⭐ +${Number(award?.points_awarded) || 0} Legend Points\n🏆 Total: ${Number(award?.total_points) || 0}\n\nValidated automatically by the Worldz bot stack. No Admin approval needed.`);
+      }
+      if (["deferred_auto","budget_deferred"].includes(String(award?.outcome || ""))) {
+        return send(msg.chat.id, `🛡 RAID RECORDED\n\n🎯 Raid #${missionId}\nYour reward is on an automatic safety/budget hold and will be retried by ZED + AUTO.\n\nNo routine Admin approval is required.`);
+      }
+      return send(msg.chat.id, `⚠️ Raid #${missionId} was checked automatically but did not qualify for points.\nReason: ${award?.review_reason || award?.outcome || "automatic_rule_check"}`);
+    } catch { return send(msg.chat.id, "❌ I couldn't record that Raid proof."); }
   });
 
   bot.onText(/^\/member(?:@\w+)?(?:\s+(\d+))?$/, async (msg, match) => {
     if (!(await permissionAllowed(msg, "member.view"))) return denyAdmin(msg); const id = parsePositiveId(match && match[1]);
     if (!id) return send(msg.chat.id, "❌ Use: /member telegram_id");
     try { const p = await repository.getMemberDetails(id); if (!p) return send(msg.chat.id, "❌ Legend not found."); const u = p.user; const points = Number(u.points) || 0;
-      return send(msg.chat.id, `👤 Legend Member\n\n🆔 Telegram ID: ${u.telegram_id}\n👤 ${u.username ? `@${u.username}` : u.first_name || "Legend"}\n📅 Registered: ${u.registered_at || u.created_at}\n👛 Wallet: ${u.wallet ? shortenWallet(u.wallet) : "Not connected"}\n⭐ Points: ${points}\n🎖 Rank: ${getRank(points)}\n✅ Approved: ${p.approved}\n📥 Pending: ${p.pending}\n❌ Rejected: ${p.rejected}\n🎁 Rewards earned: ${p.rewardsEarned} LP`); }
+      return send(msg.chat.id, `👤 Legend Member\n\n🆔 Telegram ID: ${u.telegram_id}\n👤 ${u.username ? `@${u.username}` : u.first_name || "Legend"}\n📅 Registered: ${u.registered_at || u.created_at}\n👛 Wallet: ${u.wallet ? shortenWallet(u.wallet) : "Not connected"}\n⭐ Points: ${points}\n🎖 Rank: ${getRank(points)}\n✅ Auto-awarded: ${p.approved}\n🛡 Automation holds: ${p.automationQueue || 0}\n❌ Auto-rejected: ${p.rejected}\n🎁 Rewards earned: ${p.rewardsEarned} LP`); }
     catch { return send(msg.chat.id, "❌ I couldn't load that member."); }
   });
 
