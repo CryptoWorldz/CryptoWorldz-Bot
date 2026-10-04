@@ -171,7 +171,7 @@ Deno.serve(async (req: Request) => {
       legacyCore: { percentOfWorldzContribution: 10, tokenCount: 12, closed: true },
       worldzCoreFamily: { percentOfWorldzContribution: 10, equalShareWithinLanePercent: 25, symbols: ["WLDZ","RVIV","PNEX","MRCL"] },
       tokenSupplyTakePercent: 0.6,
-      tokenSupplySplitPercent: { operations: 0.25, communityTeam: 0.20, purpleDiamondCrew: 0.15 },
+      tokenSupplySplitPercent: { operations: 0.30, communityTeam: 0.18, purpleDiamondCrew: 0.12 },
       tokenSupplyDestinationRule: "FAIL_CLOSED_IF_REQUIRED_MULTISIG_UNVERIFIED",
       initialLiquidityTakePercent: 0,
       walletTransferTaxPercent: 0,
