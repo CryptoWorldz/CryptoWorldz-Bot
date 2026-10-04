@@ -57,7 +57,8 @@ assert public["worldzLaunchPadContributionChoicesPercent"]==policy["worldzLaunch
 assert public["worldzLaunchPadContributionDefaultPercent"]==policy["worldzLaunchPadContributionDefaultPercent"]==5
 assert public["creatorRetentionByContributionPercent"]==policy["creatorRetentionByContribution"]=={"3":97,"5":95,"8":92}
 assert public["walletTransferTaxPercent"]==policy["walletTransferTaxPercent"]==0
-assert inheritance["tokenAllocationBoundary"]["publicCreatorRoute"]["implicitWorldzTokenSupplySharePercent"]==policy["worldzLaunchPadShareOfTokenSupplyPercent"]==0
+assert inheritance["tokenAllocationBoundary"]["publicCreatorRoute"]["implicitWorldzTokenSupplySharePercent"]==0
+assert inheritance["tokenAllocationBoundary"]["publicCreatorRoute"]["mandatoryDisclosedWorldzTokenSupplySharePercent"]==policy["worldzLaunchPadShareOfTokenSupplyPercent"]==0.6
 
 v2=inheritance["economicsProfiles"]["worldzFeeFlowV2"]
 assert v2["selection"]=="HISTORICAL_AUDIT_ONLY__SUPERSEDED_BY_V3"
