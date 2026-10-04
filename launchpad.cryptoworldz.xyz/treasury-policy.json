@@ -280,5 +280,15 @@
     "mainnetTokenSupplyRoutingEnabled": false,
     "purpleDiamondCrewRoutingEnabled": false,
     "tokenSupplyRoutingRule": "The 0.60% genesis allocation is 0.30% Operations / 0.18% Miricle Team / 0.12% Purple Diamond Crew. It remains fail-closed until all three multisig destinations are verified on-chain."
+  },
+  "fundingOriginPolicy": {
+    "version": "WORLDZ-FUNDING-ORIGIN-2026-10-05",
+    "currentPrimaryFunder": "JayJayTeamDev",
+    "currentPrimaryFundingType": "PERSONAL_CONTRIBUTION",
+    "rule": "Worldz must not describe JayJayTeamDev-funded money as pre-existing or independently generated Treasury capital. When JayJayTeamDev sends personal funds into a Worldz multisig, the multisig becomes the custody/governance destination while the funding provenance remains JayJayTeamDev personal contribution. Future third-party, fee, grant or revenue funding must be separately evidenced and labelled.",
+    "autoDefaultForJayJayTeamDev": "JAYJAYTEAMDEV_PERSONAL",
+    "autoDefaultForPublicUsers": "USER_PERSONAL_WALLET",
+    "treasuryRequiredForPublicAutoPlanning": false,
+    "treasuryUseRequiresExplicitSelectionAndApplicableMultisigApproval": true
   }
 }
