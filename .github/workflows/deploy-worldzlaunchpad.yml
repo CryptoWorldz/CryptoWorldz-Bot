@@ -69,11 +69,12 @@ jobs:
             'worldzCoreFamilyMarketBuys':10,'impactCharity':10,'teamBuilderRewards':5,
             'futureLaunchInfrastructure':5,'launchReferrer':5
           }
-          assert fee['treasuryLane']['worldzOperationsTreasuryPercent']==70
+          assert fee['treasuryLane']['worldzOperationsTreasuryPercent']==50
           assert fee['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
+          assert fee['treasuryLane']['purpleDiamondCrewTreasuryPercent']==20
           assert fee['worldzLaunchPadShareOfTokenSupplyPercent']==0.6
           assert fee['worldzLaunchPadTokenSupplySplitPercent']=={
-            'worldzOperationsTreasury':0.25,'worldzCommunityTeamTreasury':0.2,'purpleDiamondCrewTreasury':0.15
+            'worldzOperationsTreasury':0.3,'worldzCommunityTeamTreasury':0.18,'purpleDiamondCrewTreasury':0.12
           }
           assert fee['worldzLaunchPadTokenSupplyAllocationMandatory'] is True
           assert platform['tokenSupplyRouting']['basisPoints']==60
@@ -246,7 +247,7 @@ jobs:
           assert '3% • 5% • 8%' in home
           assert '97% • 95% • 92%' in home
           assert 'WORLDZ FEE FLOW V3' in home
-          assert '70% Operations / 30% Community Team' in home
+          assert '50% Operations / 30% Miricle Team / 20% Purple Diamond Crew' in home
           assert 'Legacy Core' in home
           assert 'WLDZ • RVIV • PNEX • MRCL' in home
           assert '0.60%</b> disclosed genesis supply' in home and '<b>0%</b> initial LP taken' in home
