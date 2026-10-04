@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+CANONICAL_UMBRELLA = "WorldzEcosystem"
 PUBLIC_ROOTS = [
     "oneworldz.com",
     "impactbased.oneworldz.com",
@@ -38,8 +39,8 @@ REPLACEMENTS = [
     ("http://www.oneworldz.com", "https://donateworldz.com"),
     ("https://oneworldz.com", "https://donateworldz.com"),
     ("http://oneworldz.com", "https://donateworldz.com"),
-    ("OneWorldz", "WorldzHQ"),
-    ("ONEWORLDZ", "WORLDZHQ"),
+    ("OneWorldz", CANONICAL_UMBRELLA),
+    ("ONEWORLDZ", CANONICAL_UMBRELLA.upper()),
     ("oneworldz.com", "donateworldz.com"),
 ]
 FORBIDDEN_PUBLIC_LITERALS = ("OneWorldz", "ONEWORLDZ", "oneworldz.com")
