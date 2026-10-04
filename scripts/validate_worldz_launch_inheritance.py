@@ -81,10 +81,17 @@ assert v3["worldzInternalSplitPercent"]=={
 assert sum(v3["worldzInternalSplitPercent"].values())==100
 assert v3["treasuryLane"]=={
     "percentOfWorldzContribution":20,
-    "operationsPercent":70,
+    "operationsPercent":50,
     "miracleTeamPercent":30,
+    "purpleDiamondCrewPercent":20,
     "operationsGovernance":"3-of-5",
     "miracleTeamGovernance":"4-of-7",
+    "purpleDiamondCrewGovernance":"MULTISIG_REQUIRED",
+}
+assert inheritance["tokenAllocationBoundary"]["publicCreatorRoute"]["worldzTokenSupplySplitPercent"]=={
+    "operations":0.30,
+    "communityTeam":0.18,
+    "purpleDiamondCrew":0.12,
 }
 
 assert product["creatorEconomics"]["worldzContributionChoicesPercent"]==[3,5,8]
