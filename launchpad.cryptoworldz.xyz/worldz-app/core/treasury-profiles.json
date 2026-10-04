@@ -3,7 +3,7 @@
   "profiles": [
     {
       "id": "miracle-church",
-      "label": "Worldz Community Team Treasury",
+      "label": "Miricle Team Multisig Treasury",
       "token": "MRCL",
       "governance": {
         "threshold": 4,
@@ -32,7 +32,7 @@
       "legacyInternalId": "miracle-church",
       "affiliation": "INDEPENDENT_WORLDZ_TEAM__NO_MIRACLE_CHURCH_PARTNERSHIP",
       "tokenSupplyRouting": {
-        "sharePercent": 0.2,
+        "sharePercent": 0.18,
         "state": "NOT_DEPLOYED",
         "automaticRoutingEnabled": false
       }
@@ -55,9 +55,15 @@
         "Mahammad"
       ],
       "tokenSupplyRouting": {
-        "sharePercent": 0.25,
+        "sharePercent": 0.3,
         "state": "ONCHAIN_VERIFIED",
         "solanaVaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB"
+      },
+      "revenueRouting": {
+        "source": "WORLDZ_FEE_FLOW_V3_TREASURY_LANE",
+        "shareOfTreasuryLanePercent": 50,
+        "shareOfWorldzContributionPercent": 10,
+        "automaticRoutingEnabled": false
       }
     },
     {
@@ -75,7 +81,7 @@
     },
     {
       "id": "purple-diamond-crew",
-      "label": "Purple Diamond Crew Treasury",
+      "label": "Purple Diamond Crew Multisig Treasury",
       "governance": {
         "threshold": null,
         "signers": null,
@@ -84,14 +90,20 @@
       "state": "NOT_DEPLOYED",
       "mainnetExecution": false,
       "tokenSupplyRouting": {
-        "sharePercent": 0.15,
+        "sharePercent": 0.12,
         "automaticRoutingEnabled": false
       },
       "custody": {
         "solana": "Squads v4 planned"
       },
-      "note": "Legacy distribution wallets are not treasury substitutes. A verified multisig vault must be deployed before this route activates."
+      "note": "Legacy distribution wallets are not treasury substitutes. A verified multisig vault must be deployed before this route activates.",
+      "revenueRouting": {
+        "source": "WORLDZ_FEE_FLOW_V3_TREASURY_LANE",
+        "shareOfTreasuryLanePercent": 20,
+        "shareOfWorldzContributionPercent": 4,
+        "automaticRoutingEnabled": false
+      }
     }
   ],
-  "rule": "Worldz Operations is 3-of-5 and receives 0.25% of public WorldzMINT genesis supply. Worldz Community Team is planned 4-of-7 and receives 0.20%; Purple Diamond Crew receives 0.15% only after its official multisig is deployed. The total 0.60% route fails closed if either pending multisig is unavailable. No Miracle Church partnership or endorsement is implied."
+  "rule": "Treasury revenue splits 50% Worldz Operations / 30% Miricle Team / 20% Purple Diamond Crew inside the Worldz Treasury lane. The mandatory 0.60% WorldzMINT genesis allocation uses the same ratio: 0.30% / 0.18% / 0.12% of total supply. Missing multisig destinations fail closed."
 }
