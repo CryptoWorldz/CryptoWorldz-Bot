@@ -203,10 +203,12 @@
       },
       "treasuryLane": {
         "percentOfWorldzContribution": 20,
-        "operationsPercent": 70,
+        "operationsPercent": 50,
         "miracleTeamPercent": 30,
         "operationsGovernance": "3-of-5",
-        "miracleTeamGovernance": "4-of-7"
+        "miracleTeamGovernance": "4-of-7",
+        "purpleDiamondCrewPercent": 20,
+        "purpleDiamondCrewGovernance": "MULTISIG_REQUIRED"
       },
       "walletTransferTaxPercent": 0,
       "tokenSupplyTakePercent": 0,
@@ -223,12 +225,12 @@
     },
     "publicCreatorRoute": {
       "implicitWorldzTokenSupplySharePercent": 0,
-      "rule": "Public creator launches disclose a mandatory 0.60% WorldzLaunchPad genesis allocation before signature. It is not implicit: 0.25% Operations, 0.20% Worldz Community Team and 0.15% Purple Diamond Crew. Missing multisig destinations fail closed.",
+      "rule": "Public creator launches disclose a mandatory 0.60% WorldzLaunchPad genesis allocation before signature. It is split 50/30/20 across three multisigs: 0.30% Operations, 0.18% Miricle Team and 0.12% Purple Diamond Crew. Missing multisig destinations fail closed.",
       "mandatoryDisclosedWorldzTokenSupplySharePercent": 0.6,
       "worldzTokenSupplySplitPercent": {
-        "operations": 0.25,
-        "communityTeam": 0.2,
-        "purpleDiamondCrew": 0.15
+        "operations": 0.3,
+        "communityTeam": 0.18,
+        "purpleDiamondCrew": 0.12
       }
     }
   },

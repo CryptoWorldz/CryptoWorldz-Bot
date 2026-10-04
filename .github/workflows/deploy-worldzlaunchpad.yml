@@ -69,11 +69,12 @@ jobs:
             'worldzCoreFamilyMarketBuys':10,'impactCharity':10,'teamBuilderRewards':5,
             'futureLaunchInfrastructure':5,'launchReferrer':5
           }
-          assert fee['treasuryLane']['worldzOperationsTreasuryPercent']==70
+          assert fee['treasuryLane']['worldzOperationsTreasuryPercent']==50
           assert fee['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
+          assert fee['treasuryLane']['purpleDiamondCrewTreasuryPercent']==20
           assert fee['worldzLaunchPadShareOfTokenSupplyPercent']==0.6
           assert fee['worldzLaunchPadTokenSupplySplitPercent']=={
-            'worldzOperationsTreasury':0.25,'worldzCommunityTeamTreasury':0.2,'purpleDiamondCrewTreasury':0.15
+            'worldzOperationsTreasury':0.3,'worldzCommunityTeamTreasury':0.18,'purpleDiamondCrewTreasury':0.12
           }
           assert fee['worldzLaunchPadTokenSupplyAllocationMandatory'] is True
           assert platform['tokenSupplyRouting']['basisPoints']==60
@@ -166,8 +167,9 @@ jobs:
             'futureLaunchInfrastructure':5,'launchReferrer':5
           }
           assert fee_routes['treasuryLane']['percentOfWorldzContribution']==20
-          assert fee_routes['treasuryLane']['worldzOperationsTreasuryPercent']==70
+          assert fee_routes['treasuryLane']['worldzOperationsTreasuryPercent']==50
           assert fee_routes['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
+          assert fee_routes['treasuryLane']['purpleDiamondCrewTreasuryPercent']==20
           assert fee_routes['totalWorldzInternalPercent']==100
           assert fee_routes['walletTransferTaxPercent']==0
 
@@ -246,7 +248,7 @@ jobs:
           assert '3% • 5% • 8%' in home
           assert '97% • 95% • 92%' in home
           assert 'WORLDZ FEE FLOW V3' in home
-          assert '70% Operations / 30% Community Team' in home
+          assert '50% Operations / 30% Miricle Team / 20% Purple Diamond Crew' in home
           assert 'Legacy Core' in home
           assert 'WLDZ • RVIV • PNEX • MRCL' in home
           assert '0.60%</b> disclosed genesis supply' in home and '<b>0%</b> initial LP taken' in home
@@ -371,14 +373,14 @@ jobs:
           assert platform['worldzMint']['version']=='WORLDZMINT-1'
           assert platform['worldzMint']['status']=='PUBLIC_MAINNET_MINT_BETA'
           assert platform['worldzMint']['platformTokenSupplyTakePercent']==0.6
-          assert platform['worldzMint']['platformTokenSupplySplitPercent']=={'operations':0.25,'communityTeam':0.2,'purpleDiamondCrew':0.15}
+          assert platform['worldzMint']['platformTokenSupplySplitPercent']=={'operations':0.3,'communityTeam':0.18,'purpleDiamondCrew':0.12}
           assert 'WATERMARK_ASSET' in mint_js
           assert 'WATERMARK_REMOVAL_LAMPORTS=50000000' in mint_js
           assert 'ctx.globalAlpha=0.35' in mint_js
           assert "SystemProgram.transfer" in mint_js
-          assert "worldzOperations:0.25" in mint_js
-          assert "worldzCommunityTeam:0.20" in mint_js
-          assert "purpleDiamondCrew:0.15" in mint_js
+          assert "worldzOperations:0.30" in mint_js
+          assert "worldzCommunityTeam:0.18" in mint_js
+          assert "purpleDiamondCrew:0.12" in mint_js
           assert platform['worldzMint']['walletTransferTaxPercent']==0
           assert platform['worldzMint']['compulsory']['revokeMintAuthorityAfterGenesis'] is True
           assert platform['worldzMint']['compulsory']['revokeFreezeAuthorityAfterGenesis'] is True
@@ -507,9 +509,11 @@ jobs:
           assert "worldzCoreFamilyMarketBuys:10" in app
           assert "operationsProductDevelopment:20" in app
           assert "treasury:20" in app
+          assert "worldzOperationsTreasury:50" in app
           assert "worldzMiracleTeamTreasury:30" in app
+          assert "purpleDiamondCrewTreasury:20" in app
 
-          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_flow=v3 creator_retention=97/95/92 worldz_contribution=3/5/8 legacy=10_of_worldz_share core_buys=10_of_worldz_share treasury_lane=20 treasury_split=70/30 treasury_ops=3of5 community_team=4of7 community_routing=off_unless_deployed max_approvals=4 supply_take=0.6 liquidity_take=0 watermark=35pct remove=0.05SOL founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
+          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_flow=v3 creator_retention=97/95/92 worldz_contribution=3/5/8 legacy=10_of_worldz_share core_buys=10_of_worldz_share treasury_lane=20 treasury_split=50/30/20 treasury_ops=3of5 community_team=4of7 community_routing=off_unless_deployed max_approvals=4 supply_take=0.6 liquidity_take=0 watermark=35pct remove=0.05SOL founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
 
       - name: Syntax-check browser JavaScript
         shell: bash
@@ -559,8 +563,9 @@ jobs:
           assert R['worldzInternalSplitPercent']==EXPECTED_INTERNAL
           assert sum(R['worldzInternalSplitPercent'].values())==100
           assert R['treasuryLane']['percentOfWorldzContribution']==20
-          assert R['treasuryLane']['worldzOperationsTreasuryPercent']==70
+          assert R['treasuryLane']['worldzOperationsTreasuryPercent']==50
           assert R['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
+          assert R['treasuryLane']['purpleDiamondCrewTreasuryPercent']==20
           assert R['totalWorldzInternalPercent']==100
           assert R['walletTransferTaxPercent']==0
 
@@ -908,8 +913,9 @@ jobs:
                   assert platform['feePolicy']['coreFamilyMarketBuyPercentOfWorldzContribution']==10
                   assert platform['feePolicy']['coreFamilySymbols']==['WLDZ','RVIV','PNEX','MRCL']
                   assert platform['feePolicy']['worldzInternalSplitPercent']['treasury']==20
-                  assert platform['feePolicy']['treasuryLane']['worldzOperationsTreasuryPercent']==70
+                  assert platform['feePolicy']['treasuryLane']['worldzOperationsTreasuryPercent']==50
                   assert platform['feePolicy']['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
+                  assert platform['feePolicy']['treasuryLane']['purpleDiamondCrewTreasuryPercent']==20
                   assert platform['feePolicy']['worldzLaunchPadShareOfTokenSupplyPercent']==0.6
                   assert platform['feePolicy']['worldzLaunchPadShareOfInitialLiquidityPercent']==0
                   assert platform['publicMainnetCreatorLaunchesEnabled'] is False

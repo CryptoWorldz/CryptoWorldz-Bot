@@ -279,7 +279,7 @@ function manifestBase(){
       creatorRetentionPercent:100-selectedLaunchPadContribution(),
       worldzLaunchPadContributionChoicesPercent:[3,5,8],
       worldzInternalDistributionPercent:currentRoutes(),
-      treasuryLaneSplitPercent:{worldzOperationsTreasury:70,worldzMiracleTeamTreasury:30},
+      treasuryLaneSplitPercent:{worldzOperationsTreasury:50,worldzMiracleTeamTreasury:30,purpleDiamondCrewTreasury:20},
       legacyCorePercentOfWorldzContribution:10,
       legacyCoreTokenCount:12,
       worldzCoreFamilyMarketBuyPercentOfWorldzContribution:10,
@@ -356,7 +356,7 @@ async function runPreflight(){
     ['Worldz contribution',[3,5,8].includes(m.feePolicy.worldzLaunchPadContributionPercent),m.feePolicy.worldzLaunchPadContributionPercent+'% • CREATOR SELECTED'],
     ['Operations / Product lane',r.operationsProductDevelopment===20,'20% OF WORLDZ SHARE'],
     ['Treasury lane',r.treasury===20,'20% OF WORLDZ SHARE'],
-    ['Treasury 70/30 split',m.feePolicy.treasuryLaneSplitPercent.worldzOperationsTreasury===70&&m.feePolicy.treasuryLaneSplitPercent.worldzMiracleTeamTreasury===30,'70% OPERATIONS • 30% MIRACLE TEAM'],
+    ['Treasury 50/30/20 split',m.feePolicy.treasuryLaneSplitPercent.worldzOperationsTreasury===50&&m.feePolicy.treasuryLaneSplitPercent.worldzMiracleTeamTreasury===30&&m.feePolicy.treasuryLaneSplitPercent.purpleDiamondCrewTreasury===20,'50% OPERATIONS • 30% MIRICLE TEAM • 20% PURPLE DIAMOND CREW'],
     ['LP Growth lane',r.lpGrowth===15,'15% OF WORLDZ SHARE'],
     ['Legacy Core lane',r.legacyCore===10&&m.feePolicy.legacyCoreTokenCount===12,'10% OF WORLDZ SHARE • CLOSED 12 TOKEN SET'],
     ['WLDZ/RVIV/PNEX/MRCL lane',r.worldzCoreFamilyMarketBuys===10,'10% OF WORLDZ SHARE • 2.5% EACH'],
@@ -454,8 +454,9 @@ function validatePlatformConfig(candidate){
     candidate.feePolicy?.coreFamilyMarketBuyPercentOfWorldzContribution!==10||
     candidate.feePolicy?.worldzInternalSplitPercent?.operationsProductDevelopment!==20||
     candidate.feePolicy?.worldzInternalSplitPercent?.treasury!==20||
-    candidate.feePolicy?.treasuryLane?.worldzOperationsTreasuryPercent!==70||
-    candidate.feePolicy?.treasuryLane?.worldzMiracleTeamTreasuryPercent!==30
+    candidate.feePolicy?.treasuryLane?.worldzOperationsTreasuryPercent!==50||
+    candidate.feePolicy?.treasuryLane?.worldzMiracleTeamTreasuryPercent!==30||
+    candidate.feePolicy?.treasuryLane?.purpleDiamondCrewTreasuryPercent!==20
   )throw new Error('Worldz Fee Flow V3 contract mismatch');
   if(candidate.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent!==0.6||candidate.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent!==0||candidate.feePolicy?.walletTransferTaxPercent!==0)throw new Error('Worldz 0.60% genesis / zero-liquidity / zero-transfer-tax contract mismatch');
   const p=candidate.safeLaunchPolicy;

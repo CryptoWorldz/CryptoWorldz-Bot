@@ -1,5 +1,5 @@
 {
-  "version": "WORLDZLAUNCH-READINESS-2026-10-02-B",
+  "version": "WORLDZLAUNCH-READINESS-2026-10-05-A",
   "status": "PUBLIC_PRODUCT_READY__MAINNET_MARKET_EXECUTION_GATED",
   "currentHost": "launchpad.cryptoworldz.xyz",
   "futureHost": {
@@ -32,10 +32,21 @@
       "launchReferrer": 5
     },
     "treasuryLane": {
-      "operationsPercent": 70,
+      "operationsPercent": 50,
       "miracleTeamPercent": 30,
+      "purpleDiamondCrewPercent": 20,
       "operationsGovernance": "3-of-5",
-      "miracleTeamGovernance": "4-of-7"
+      "miracleTeamGovernance": "4-of-7",
+      "purpleDiamondCrewGovernance": "MULTISIG_REQUIRED"
+    },
+    "genesisSupplyShare": {
+      "totalPercent": 0.6,
+      "splitPercent": {
+        "operations": 0.3,
+        "miricleTeam": 0.18,
+        "purpleDiamondCrew": 0.12
+      },
+      "destinationRule": "FAIL_CLOSED_IF_ANY_REQUIRED_MULTISIG_DESTINATION_IS_UNVERIFIED"
     }
   },
   "launchPaths": {

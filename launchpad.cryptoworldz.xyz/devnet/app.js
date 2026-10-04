@@ -492,7 +492,7 @@ function loadQuery(){
   if(q.get('engine'))meta.push('Engine: '+q.get('engine'));
   meta.push('Quote: '+selectedQuote);
   if(q.get('fee'))meta.push('Project fee design: '+q.get('fee')+'%');
-  if(feeFlowV3)meta.push('Fee Flow: V3 • Creator keeps '+creatorRetention+'% • Worldz '+worldzContribution+'% • internal Treasury 20% → 70% Operations / 30% Miracle Team');
+  if(feeFlowV3)meta.push('Fee Flow: V3 • Creator keeps '+creatorRetention+'% • Worldz '+worldzContribution+'% • internal Treasury 20% → 50% Operations / 30% Miricle Team / 20% Purple Diamond Crew');
   if(meta.length)setStatus('#status','WORLDZLAUNCHPAD MANIFEST LOADED\n'+meta.join('\n')+'\n\nRun Local Checks before creating the Devnet mint.');
   updateRoutes();renderProof();
 }

@@ -64,7 +64,7 @@ test("Auto service rejects incorrect owner credentials and reports locked status
   assert.equal(payload.status.active_schedules, 0);
 });
 
-test("Zed Mini App Auto routes require signed primary-owner identity", async (t) => {
+test("Zed Mini App AUTO keeps execution protected while public planning is available to signed users", async (t) => {
   const botToken = "123456:test-secret";
   const ownerId = 123;
   const app = express();
@@ -89,6 +89,29 @@ test("Zed Mini App Auto routes require signed primary-owner identity", async (t)
   });
   assert.equal(nonOwner.status, 403);
 
+  const publicHeaders = { "x-telegram-init-data": signedInitData({ id: 999, first_name: "Legend" }, botToken) };
+  const publicPlanner = await fetch(`${base}/api/mini/auto/public`, { headers: publicHeaders });
+  assert.equal(publicPlanner.status, 200);
+  const publicPayload = await publicPlanner.json();
+  assert.equal(publicPayload.access, "ALL_SIGNED_WORLDZ_USERS");
+  assert.equal(publicPayload.availability, "EVERY_DAY");
+  assert.equal(publicPayload.defaultFundingSource, "USER_PERSONAL_WALLET");
+  assert.equal(publicPayload.treasuryRequired, false);
+  assert.equal(publicPayload.executionEnabled, false);
+
+  const publicSimulation = await fetch(`${base}/api/mini/auto/public/simulate`, {
+    method: "POST",
+    headers: { "content-type": "application/json", ...publicHeaders },
+    body: JSON.stringify({ network: "solana", amount: 1 })
+  });
+  assert.equal(publicSimulation.status, 200);
+  const publicSimulationPayload = await publicSimulation.json();
+  assert.equal(publicSimulationPayload.publicPlanner.fundingSource, "USER_PERSONAL_WALLET");
+  assert.equal(publicSimulationPayload.publicPlanner.treasuryRequired, false);
+  assert.equal(publicSimulationPayload.publicPlanner.executionEnabled, false);
+  assert.equal(calls.at(-1).funding_source, "USER_PERSONAL_WALLET");
+  assert.equal(calls.at(-1).execution_requested, false);
+
   const ownerHeaders = { "x-telegram-init-data": signedInitData({ id: ownerId, first_name: "Owner" }, botToken) };
   const owner = await fetch(`${base}/api/mini/auto/status`, { headers: ownerHeaders });
   assert.equal(owner.status, 200);
@@ -112,8 +135,9 @@ test("Zed Mini App Auto routes require signed primary-owner identity", async (t)
   assert.deepEqual(ultimatePayload.ultimate.launchPolicy.feePolicy.launchPadContributionChoicesPercent, [3, 5, 8]);
   assert.deepEqual(ultimatePayload.ultimate.launchPolicy.feePolicy.creatorRetentionByContributionPercent, { "3": 97, "5": 95, "8": 92 });
   assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.worldzInternalSplitPercent.treasury, 20);
-  assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.treasuryLane.operationsPercent, 70);
+  assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.treasuryLane.operationsPercent, 50);
   assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.treasuryLane.miracleTeamPercent, 30);
+  assert.equal(ultimatePayload.ultimate.launchPolicy.feePolicy.treasuryLane.purpleDiamondCrewPercent, 20);
   assert.equal(ultimatePayload.ultimate.signers.find((signer) => signer.role === "owner").immutable, true);
 
   const deniedUltimate = await fetch(`${base}/api/mini/auto/ultimate`, {
@@ -130,6 +154,6 @@ test("Zed Mini App Auto routes require signed primary-owner identity", async (t)
     body: JSON.stringify({ network: "solana", amount: 1 })
   });
   assert.equal(simulation.status, 200);
-  assert.equal(calls.length, 1);
-  assert.equal(calls[0].network, "solana");
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].network, "solana");
 });

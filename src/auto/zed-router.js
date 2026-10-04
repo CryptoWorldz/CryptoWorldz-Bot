@@ -8,6 +8,7 @@ const {
 
 function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
   const allowRequest = createRequestLimiter({ maxEvents: 30, intervalMs: 60000 });
+  const allowPublicQuote = createRequestLimiter({ maxEvents: 1, intervalMs: 2500 });
 
   const miniInitDataMaxAgeSeconds = Math.min(
     86400,
@@ -43,6 +44,43 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
   function ownerOnly(req, res, next) {
     if (!req.autoAuthority?.owner) return res.status(403).json({ ok: false, error: "owner_required" });
     return next();
+  }
+
+  function authenticatePublicAuto(req, res, next) {
+    const result = validateTelegramInitData(
+      req.get("x-telegram-init-data") || "",
+      config.botToken,
+      { maxAgeSeconds: miniInitDataMaxAgeSeconds }
+    );
+    if (!result.ok) return res.status(401).json({ ok: false, error: result.error });
+    if (!allowRequest(`public:${result.user.id}:${req.ip}`)) return res.status(429).json({ ok: false, error: "rate_limited" });
+    req.telegramUser = result.user;
+    return next();
+  }
+
+  function publicPlannerPayload() {
+    return {
+      ok: true,
+      name: "AUTO Market Planner™",
+      access: "ALL_SIGNED_WORLDZ_USERS",
+      availability: "EVERY_DAY",
+      defaultFundingSource: "USER_PERSONAL_WALLET",
+      treasuryRequired: false,
+      treasuryExecutionIsSeparate: true,
+      executionEnabled: false,
+      walletCustody: false,
+      privateKeysStored: false,
+      modes: ["BUY_ANALYSIS", "LP_ANALYSIS", "HYBRID_ANALYSIS"],
+      buyQuoteProvider: "JUPITER_ULTRA_V3",
+      lpQuoteState: "FAIL_CLOSED_UNTIL_LIVE_METEORA_ADAPTER",
+      liveRules: [
+        "Use the user's own selected wallet and budget by default.",
+        "Show live route, price impact, fees, liquidity evidence and expected output before any signature.",
+        "Never assume Treasury funding.",
+        "Never claim LP or hybrid optimisation until the live Meteora pool adapter has supplied a verified quote.",
+        "No wash trading, fake volume, wallet rotation or hidden execution."
+      ]
+    };
   }
 
   function proxyError(res, error, fallback, validationStatus = 502) {
@@ -100,10 +138,12 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
         },
         treasuryLane: {
           percentOfWorldzContribution: 20,
-          operationsPercent: 70,
+          operationsPercent: 50,
           miracleTeamPercent: 30,
+          purpleDiamondCrewPercent: 20,
           operationsGovernance: "3-of-5",
-          miracleTeamGovernance: "4-of-7"
+          miracleTeamGovernance: "4-of-7",
+          purpleDiamondCrewGovernance: "MULTISIG_REQUIRED"
         },
         legacyTokenCount: 12,
         coreFamilySymbols: ["WLDZ", "RVIV", "PNEX", "MRCL"],
@@ -137,6 +177,129 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
       }
     };
   }
+
+  app.get("/api/mini/auto/public", authenticatePublicAuto, async (req, res) => {
+    return res.json(publicPlannerPayload());
+  });
+
+  app.post("/api/mini/auto/public/simulate", authenticatePublicAuto, async (req, res) => {
+    try {
+      if (!autoClient.configured()) return res.status(503).json({ ok: false, error: "auto_not_configured" });
+      const body = req.body || {};
+      const fundingSource = String(body.funding_source || "USER_PERSONAL_WALLET").toUpperCase();
+      const allowedFundingSources = new Set(["USER_PERSONAL_WALLET", "JAYJAYTEAMDEV_PERSONAL", "AUTHORIZED_MULTISIG"]);
+      if (!allowedFundingSources.has(fundingSource)) {
+        return res.status(400).json({ ok: false, error: "invalid_funding_source" });
+      }
+      const result = await autoClient.simulate({
+        ...body,
+        funding_source: fundingSource,
+        requested_by: String(req.telegramUser.id),
+        execution_requested: false
+      });
+      return res.json({
+        ...result,
+        publicPlanner: {
+          fundingSource,
+          treasuryRequired: false,
+          executionEnabled: false,
+          walletSignatureRequiredForAnyFutureExecution: true,
+          note: "Planning only. This route cannot move funds or sign a transaction."
+        }
+      });
+    } catch (error) {
+      return proxyError(res, error, "auto_public_simulation_failed", 400);
+    }
+  });
+
+  app.get("/api/mini/auto/public/quote", authenticatePublicAuto, async (req, res) => {
+    if (!allowPublicQuote("jupiter-public-quote")) {
+      return res.status(429).json({ ok: false, error: "quote_rate_limited", retry: "Try again in a few seconds." });
+    }
+    const tokenMint = String(req.query.token_mint || "").trim();
+    const walletAddress = String(req.query.wallet_address || "").trim();
+    const currency = String(req.query.currency || "SOL").toUpperCase();
+    const amount = Number(req.query.amount);
+    const keyPattern = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+    if (!keyPattern.test(tokenMint)) return res.status(400).json({ ok: false, error: "invalid_token_mint" });
+    if (!keyPattern.test(walletAddress)) return res.status(400).json({ ok: false, error: "invalid_wallet_address" });
+    if (!Number.isFinite(amount) || amount <= 0 || amount > 100000) return res.status(400).json({ ok: false, error: "invalid_amount" });
+    const inputMint = currency === "SOL"
+      ? "So11111111111111111111111111111111111111112"
+      : currency === "USDC"
+        ? "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        : null;
+    if (!inputMint) return res.status(400).json({ ok: false, error: "unsupported_currency", allowed: ["SOL", "USDC"] });
+    const rawAmount = currency === "SOL" ? Math.floor(amount * 1e9) : Math.floor(amount * 1e6);
+    if (!Number.isSafeInteger(rawAmount) || rawAmount < 1) return res.status(400).json({ ok: false, error: "amount_too_small_or_large" });
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    try {
+      const params = new URLSearchParams({
+        inputMint,
+        outputMint: tokenMint,
+        amount: String(rawAmount),
+        taker: walletAddress
+      });
+      const headers = { "accept": "application/json" };
+      const hasJupiterKey = Boolean(process.env.JUPITER_API_KEY);
+      if (hasJupiterKey) headers["x-api-key"] = process.env.JUPITER_API_KEY;
+      const jupiterBase = hasJupiterKey ? "https://api.jup.ag" : "https://lite-api.jup.ag";
+      const [quoteResponse, intelligenceResponse] = await Promise.all([
+        fetch(jupiterBase + "/ultra/v1/order?" + params.toString(), { headers, signal: controller.signal }),
+        fetch("https://launchpad.cryptoworldz.xyz/intelligence.php?mint=" + encodeURIComponent(tokenMint), {
+          headers: { "accept": "application/json", "user-agent": "Worldz-AUTO-Public/1.0" },
+          signal: controller.signal
+        }).catch(() => null)
+      ]);
+      const quote = await quoteResponse.json().catch(() => ({}));
+      const intelligence = intelligenceResponse && intelligenceResponse.ok
+        ? await intelligenceResponse.json().catch(() => null)
+        : null;
+      if (!quoteResponse.ok || quote.errorCode || quote.error) {
+        return res.status(422).json({
+          ok: false,
+          error: quote.errorMessage || quote.error || quote.errorCode || "no_executable_quote",
+          provider: "Jupiter Ultra V3",
+          intelligence
+        });
+      }
+      const sanitizedQuote = {
+        requestId: quote.requestId ?? null,
+        inputMint: quote.inputMint ?? inputMint,
+        outputMint: quote.outputMint ?? tokenMint,
+        inAmount: quote.inAmount ?? String(rawAmount),
+        outAmount: quote.outAmount ?? null,
+        priceImpactPct: quote.priceImpactPct ?? null,
+        swapType: quote.swapType ?? null,
+        router: quote.router ?? null,
+        slippageBps: quote.slippageBps ?? null,
+        feeBps: quote.feeBps ?? null,
+        gasless: quote.gasless ?? null,
+        totalTime: quote.totalTime ?? null
+      };
+      return res.json({
+        ok: true,
+        checkedAt: new Date().toISOString(),
+        mode: "READ_ONLY_QUOTE",
+        fundingSource: String(req.query.funding_source || "USER_PERSONAL_WALLET").toUpperCase(),
+        treasuryRequired: false,
+        provider: "Jupiter Ultra V3",
+        quote: sanitizedQuote,
+        intelligence,
+        executionEnabled: false,
+        note: "Live quote snapshot only. Prices and routes can change before a wallet signs. No transaction was submitted."
+      });
+    } catch (error) {
+      return res.status(error.name === "AbortError" ? 504 : 502).json({
+        ok: false,
+        error: error.name === "AbortError" ? "quote_timeout" : "quote_provider_unavailable"
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+  });
 
   app.get("/api/mini/auto/status", authenticateAuto, async (req, res) => {
     try { return res.json({ ...(await autoClient.status()), access: req.autoAuthority }); }

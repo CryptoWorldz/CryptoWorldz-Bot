@@ -36,6 +36,7 @@ jobs:
           test -s public/miniapp/index.html
           test -s public/miniapp/app.js
           test -s public/miniapp/auto-owner.js
+          test -s public/miniapp/auto-public.js
           test -s public/miniapp/max.js
           test -s public/miniapp/max.css
           test -s public/miniapp/dipshit.js
@@ -48,6 +49,7 @@ jobs:
           node --check public/miniapp/app.js
           node --check public/miniapp/max.js
           node --check public/miniapp/auto-owner.js
+          node --check public/miniapp/auto-public.js
           node --check public/miniapp/dipshit.js
           node --check public/miniapp/inbox.js
           node --check public/miniapp/community-suite.js
@@ -61,6 +63,9 @@ jobs:
           grep -Fq 'data-open="raids"' public/miniapp/max.js
           grep -Fq 'WORLDZLAUNCHPAD™' public/miniapp/index.html
           grep -Fq 'WorldzLaunchPad™' public/miniapp/auto-owner.js
+          grep -Fq 'AUTO MARKET PLANNER™ • EVERY DAY' public/miniapp/auto-public.js
+          grep -Fq 'Treasury is optional and never assumed' public/miniapp/auto-public.js
+          grep -Fq '/api/mini/auto/public/quote' public/miniapp/auto-public.js
           grep -Fq 'zed-miniapp-rescue' public/miniapp/app.js
           grep -Fq 'DIPSHIT™' public/miniapp/dipshit.js
           grep -Fq 'WORLDZ DUDE' public/miniapp/dipshit.js
@@ -161,6 +166,7 @@ jobs:
                   hcode,html=get('/miniapp/?verify=worldzlaunchpad-rescue')
                   jcode,js=get('/miniapp/app.js?verify=worldzlaunchpad-rescue')
                   acode,auto=get('/miniapp/auto-owner.js?verify=worldzlaunchpad-rescue')
+                  pcode,publicauto=get('/miniapp/auto-public.js?verify=auto-market-planner')
                   dcode,dipshit=get('/miniapp/dipshit.js?verify=dipshit-worldz-dude')
                   ncode,inbox=get('/miniapp/inbox.js?verify=worldz-inbox')
                   ccode,inboxcss=get('/miniapp/inbox.css?verify=worldz-inbox')
@@ -173,6 +179,7 @@ jobs:
                   assert 'BASED.BID' not in html.upper()
                   assert jcode==200 and 'zed-miniapp-rescue' in js
                   assert acode==200 and 'WorldzLaunchPad™' in auto and 'Command Centre MAX™' in auto
+                  assert pcode==200 and 'AUTO MARKET PLANNER™ • EVERY DAY' in publicauto and 'Treasury is optional and never assumed' in publicauto and '/api/mini/auto/public/quote' in publicauto
                   assert dcode==200 and 'DIPSHIT™' in dipshit and 'WORLDZ DUDE' in dipshit and 'walletSigning: false' in dipshit
                   assert ncode==200 and '/api/mini/inbox' in inbox and 'Worldz Inbox' in inbox
                   assert ccode==200 and '.worldz-inbox-shell' in inboxcss
@@ -181,7 +188,7 @@ jobs:
                   assert xcode==200 and '.max-home-card' in maxcss
                   assert scode==200 and '/api/mini/community-suite' in suite and 'WorldzCommunitySuite' in suite
                   assert ocode==200 and 'twitter://status?status_id=' in openx and 'package=com.twitter.android' in openx and 'OPEN EXACT POST IN BROWSER' in openx
-                  print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 max=1 worldzlaunchpad=1 dipshit=1 inbox=1 community_suite=1 direct_x_raid=1 basedbid=0')
+                  print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 max=1 worldzlaunchpad=1 auto_public=1 dipshit=1 inbox=1 community_suite=1 direct_x_raid=1 basedbid=0')
                   raise SystemExit(0)
               except SystemExit:
                   raise

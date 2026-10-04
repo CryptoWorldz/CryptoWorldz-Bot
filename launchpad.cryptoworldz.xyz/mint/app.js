@@ -21,7 +21,7 @@ const WATERMARK_REMOVAL_LAMPORTS=50000000;
 const PROJECT_KEYS=['creator','liquidity','community','treasury','growth'];
 const WORLDZ_KEYS=['worldzOperations','worldzCommunityTeam','purpleDiamondCrew'];
 const ALL_KEYS=[...PROJECT_KEYS,...WORLDZ_KEYS];
-const FIXED_WORLDZ_ALLOCATIONS={worldzOperations:0.25,worldzCommunityTeam:0.20,purpleDiamondCrew:0.15};
+const FIXED_WORLDZ_ALLOCATIONS={worldzOperations:0.30,worldzCommunityTeam:0.18,purpleDiamondCrew:0.12};
 let connection=new Connection(clusterApiUrl('devnet'),'confirmed');
 let walletCtx=null,preflightOk=false,busy=false,pending=null;
 let platformPolicy=null,systemRoutingReady=false,lastImageFile=null;
@@ -515,7 +515,7 @@ async function runPreflight(){
   if(!check.ok){$('#mint-btn').disabled=false;setStatus('WORLDZMINT PREFLIGHT BLOCKED\n• '+check.errors.join('\n• '),'bad');renderProof();return false;}
   try{await ensureRpcReady();}catch(error){preflightOk=false;$('#mint-btn').disabled=false;setStatus('WORLDZMINT RPC PREFLIGHT BLOCKED\n'+(error?.message||String(error))+'\n\nNo wallet signature or transaction was requested.','bad');renderProof();return false;}
   if(network()==='mainnet-beta'){
-    setStatus('WORLDZMINT MAINNET PREFLIGHT PASS ✅\nFixed supply: '+Number(check.v.fixed_supply).toLocaleString()+'\nCreator liquid: '+check.v.allocations.creator+'%\nLiquidity reserve: '+check.v.allocations.liquidity+'%\nCommunity: '+check.v.allocations.community+'%\nProject Treasury: '+check.v.allocations.treasury+'%\nWorldz genesis share: 0.60% → 0.25% Operations / 0.20% Community Team / 0.15% Purple Diamond Crew\nWatermark: '+(check.v.watermark_removed?'REMOVED • 0.05 SOL PAID':'INCLUDED • 35% OPACITY')+'\nWallet-transfer tax: 0%\n\nMAINNET is real and irreversible. No mint transaction has been signed yet.','good');
+    setStatus('WORLDZMINT MAINNET PREFLIGHT PASS ✅\nFixed supply: '+Number(check.v.fixed_supply).toLocaleString()+'\nCreator liquid: '+check.v.allocations.creator+'%\nLiquidity reserve: '+check.v.allocations.liquidity+'%\nCommunity: '+check.v.allocations.community+'%\nProject Treasury: '+check.v.allocations.treasury+'%\nWorldz genesis share: 0.60% → 0.30% Operations / 0.18% Miricle Team / 0.12% Purple Diamond Crew\nWatermark: '+(check.v.watermark_removed?'REMOVED • 0.05 SOL PAID':'INCLUDED • 35% OPACITY')+'\nWallet-transfer tax: 0%\n\nMAINNET is real and irreversible. No mint transaction has been signed yet.','good');
   }else setStatus('WORLDZMINT DEVNET PREFLIGHT PASS ✅\nRehearsal network only. No transaction has been signed yet.','good');
   $('#mint-btn').disabled=false;renderProof();return true;
 }
@@ -617,7 +617,7 @@ async function mintFlow(){
   }
   if(!await runPreflight())return;
   if(network()==='mainnet-beta'&&!pending){
-    const ok=confirm('REAL SOLANA MAINNET\n\nWorldzMINT will create a permanent fixed-supply token. 99.40% follows your disclosed project allocations. The mandatory WorldzLaunchPad 0.60% genesis share is split 0.25% Operations / 0.20% Community Team / 0.15% Purple Diamond Crew. Mint and Freeze authority will be permanently revoked after metadata.\n\nContinue?');
+    const ok=confirm('REAL SOLANA MAINNET\n\nWorldzMINT will create a permanent fixed-supply token. 99.40% follows your disclosed project allocations. The mandatory WorldzLaunchPad 0.60% genesis share is split 0.30% Operations / 0.18% Miricle Team / 0.12% Purple Diamond Crew. Mint and Freeze authority will be permanently revoked after metadata.\n\nContinue?');
     if(!ok)return;
   }
   busy=true;$('#mint-btn').disabled=true;

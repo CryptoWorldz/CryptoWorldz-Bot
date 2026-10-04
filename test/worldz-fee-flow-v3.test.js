@@ -35,15 +35,18 @@ test("Only the Worldz contribution is internally split and the lanes total 100",
   assert.match(v3.scopeRule,/creator retains the remaining 97%, 95% or 92%/);
 });
 
-test("Treasury lane is 20 percent of Worldz share and splits 70/30",()=>{
+test("Treasury lane is 20 percent of Worldz share and splits 50/30/20",()=>{
   const v3=json("worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json");
   assert.equal(v3.treasuryLane.percentOfWorldzContribution,20);
-  assert.equal(v3.treasuryLane.split.worldzOperationsTreasuryPercent,70);
+  assert.equal(v3.treasuryLane.split.worldzOperationsTreasuryPercent,50);
   assert.equal(v3.treasuryLane.split.worldzMiracleTeamTreasuryPercent,30);
-  assert.equal(v3.treasuryLane.effectivePercentOfWorldzContribution.worldzOperationsTreasury,14);
+  assert.equal(v3.treasuryLane.split.purpleDiamondCrewTreasuryPercent,20);
+  assert.equal(v3.treasuryLane.effectivePercentOfWorldzContribution.worldzOperationsTreasury,10);
   assert.equal(v3.treasuryLane.effectivePercentOfWorldzContribution.worldzMiracleTeamTreasury,6);
+  assert.equal(v3.treasuryLane.effectivePercentOfWorldzContribution.purpleDiamondCrewTreasury,4);
   assert.equal(v3.treasuryLane.governance.worldzOperationsTreasury,"3-of-5");
   assert.equal(v3.treasuryLane.governance.worldzMiracleTeamTreasury,"4-of-7");
+  assert.equal(v3.treasuryLane.governance.purpleDiamondCrewTreasury,"MULTISIG_REQUIRED");
 });
 
 test("Miracle revenue treasury and MRCL 20 percent token vault are separate accounting buckets",()=>{
@@ -89,7 +92,7 @@ test("Public LaunchPad explains the creator-first V3 economics",()=>{
   const revenue=read("launchpad.cryptoworldz.xyz/revenue/index.html");
   assert.match(home,/97% \/ 95% \/ 92%/);
   assert.match(home,/WORLDZ FEE FLOW V3/);
-  assert.match(home,/70% Operations \/ 30% Community Team/);
+  assert.match(home,/50% Operations \/ 30% Miricle Team \/ 20% Purple Diamond Crew/);
   assert.match(economics,/Creator 97% • Worldz 3%/);
   assert.match(economics,/Creator 95% • Worldz 5%/);
   assert.match(economics,/Creator 92% • Worldz 8%/);
