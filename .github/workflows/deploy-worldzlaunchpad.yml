@@ -167,8 +167,9 @@ jobs:
             'futureLaunchInfrastructure':5,'launchReferrer':5
           }
           assert fee_routes['treasuryLane']['percentOfWorldzContribution']==20
-          assert fee_routes['treasuryLane']['worldzOperationsTreasuryPercent']==70
+          assert fee_routes['treasuryLane']['worldzOperationsTreasuryPercent']==50
           assert fee_routes['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
+          assert fee_routes['treasuryLane']['purpleDiamondCrewTreasuryPercent']==20
           assert fee_routes['totalWorldzInternalPercent']==100
           assert fee_routes['walletTransferTaxPercent']==0
 
@@ -508,7 +509,9 @@ jobs:
           assert "worldzCoreFamilyMarketBuys:10" in app
           assert "operationsProductDevelopment:20" in app
           assert "treasury:20" in app
+          assert "worldzOperationsTreasury:50" in app
           assert "worldzMiracleTeamTreasury:30" in app
+          assert "purpleDiamondCrewTreasury:20" in app
 
           print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_flow=v3 creator_retention=97/95/92 worldz_contribution=3/5/8 legacy=10_of_worldz_share core_buys=10_of_worldz_share treasury_lane=20 treasury_split=50/30/20 treasury_ops=3of5 community_team=4of7 community_routing=off_unless_deployed max_approvals=4 supply_take=0.6 liquidity_take=0 watermark=35pct remove=0.05SOL founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
 
@@ -560,8 +563,9 @@ jobs:
           assert R['worldzInternalSplitPercent']==EXPECTED_INTERNAL
           assert sum(R['worldzInternalSplitPercent'].values())==100
           assert R['treasuryLane']['percentOfWorldzContribution']==20
-          assert R['treasuryLane']['worldzOperationsTreasuryPercent']==70
+          assert R['treasuryLane']['worldzOperationsTreasuryPercent']==50
           assert R['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
+          assert R['treasuryLane']['purpleDiamondCrewTreasuryPercent']==20
           assert R['totalWorldzInternalPercent']==100
           assert R['walletTransferTaxPercent']==0
 
@@ -909,8 +913,9 @@ jobs:
                   assert platform['feePolicy']['coreFamilyMarketBuyPercentOfWorldzContribution']==10
                   assert platform['feePolicy']['coreFamilySymbols']==['WLDZ','RVIV','PNEX','MRCL']
                   assert platform['feePolicy']['worldzInternalSplitPercent']['treasury']==20
-                  assert platform['feePolicy']['treasuryLane']['worldzOperationsTreasuryPercent']==70
+                  assert platform['feePolicy']['treasuryLane']['worldzOperationsTreasuryPercent']==50
                   assert platform['feePolicy']['treasuryLane']['worldzMiracleTeamTreasuryPercent']==30
+                  assert platform['feePolicy']['treasuryLane']['purpleDiamondCrewTreasuryPercent']==20
                   assert platform['feePolicy']['worldzLaunchPadShareOfTokenSupplyPercent']==0.6
                   assert platform['feePolicy']['worldzLaunchPadShareOfInitialLiquidityPercent']==0
                   assert platform['publicMainnetCreatorLaunchesEnabled'] is False
