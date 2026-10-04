@@ -246,10 +246,10 @@ jobs:
           assert '3% • 5% • 8%' in home
           assert '97% • 95% • 92%' in home
           assert 'WORLDZ FEE FLOW V3' in home
-          assert '70% Operations / 30% Miracle Team' in home
+          assert '70% Operations / 30% Community Team' in home
           assert 'Legacy Core' in home
           assert 'WLDZ • RVIV • PNEX • MRCL' in home
-          assert 'token supply / initial LP taken by WorldzLaunchPad' in home
+          assert '0.60%</b> disclosed genesis supply' in home and '<b>0%</b> initial LP taken' in home
           assert 'WORLDZ SAFE LAUNCH STANDARD' in home
           assert 'FIRST PUBLIC LAUNCH SLOT OPEN' in app
           assert 'WORLDZLAUNCHPAD FOUNDING 100' in home

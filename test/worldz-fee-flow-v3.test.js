@@ -89,7 +89,7 @@ test("Public LaunchPad explains the creator-first V3 economics",()=>{
   const revenue=read("launchpad.cryptoworldz.xyz/revenue/index.html");
   assert.match(home,/97% \/ 95% \/ 92%/);
   assert.match(home,/WORLDZ FEE FLOW V3/);
-  assert.match(home,/70% Operations \/ 30% Miracle Team/);
+  assert.match(home,/70% Operations \/ 30% Community Team/);
   assert.match(economics,/Creator 97% • Worldz 3%/);
   assert.match(economics,/Creator 95% • Worldz 5%/);
   assert.match(economics,/Creator 92% • Worldz 8%/);
