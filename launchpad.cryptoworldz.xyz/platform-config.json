@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-01-public-launchpad-v22-treasury-3of5",
+  "version": "2026-10-04-public-launchpad-v23-full-update",
   "product": "WorldzLaunchPad™",
   "status": "PUBLIC_LAUNCHPAD_LIVE_DEVNET_MAINNET_GATE",
   "publicMainnetCreatorLaunchesEnabled": false,
@@ -1079,7 +1079,10 @@
     "currentIntegrationBranch": "main",
     "decisionRule": "LATEST_EXPLICIT_OWNER_INSTRUCTION_WINS_FOR_DECISIONS",
     "factualStatusRule": "EVIDENCE_DRIVEN",
-    "mainnetExecutionGrantedByThisContract": false
+    "mainnetExecutionGrantedByThisContract": false,
+    "lastCanonicalUpdate": "2026-10-04",
+    "automationFirst": "WORLDZ-AUTOMATION-FIRST-V1",
+    "creatorExperience": "WORLDZ-CREATOR-EXPERIENCE-V1"
   },
   "revenueEngine": {
     "name": "Worldz Revenue Engine™",
@@ -1369,5 +1372,62 @@
       "BTC"
     ],
     "rule": "Research, education, portfolio modelling and proof are live product directions. Buying, selling, DCA execution and auto-rebalancing stay separately gated."
+  },
+  "creatorExperience": {
+    "version": "WORLDZ-CREATOR-EXPERIENCE-V1",
+    "defaultMode": "beginner",
+    "modes": [
+      {
+        "id": "beginner",
+        "label": "Make Your Own Money — Beginner",
+        "purpose": "plain_english_learning_safe_defaults"
+      },
+      {
+        "id": "intermediate",
+        "label": "Intermediate — Everyday Crypto Joe",
+        "purpose": "custom_tokenomics_liquidity_vesting_with_guardrails"
+      },
+      {
+        "id": "advanced",
+        "label": "Advanced — Worldz Leaders",
+        "purpose": "full_token_dna_multisig_treasury_crosspair_omnichain_worldzproof"
+      }
+    ],
+    "safeLaunchStandardCannotBeBypassed": true,
+    "futureArchitecture": [
+      "Worldz Layer 1",
+      "Worldz Layer 1.5",
+      "8-module ecosystem"
+    ],
+    "paymentReadiness": [
+      "Worldz Card",
+      "WorldzConnect",
+      "X Payments compatible integration path when provider rules and APIs permit"
+    ]
+  },
+  "automationFirst": {
+    "version": "WORLDZ-AUTOMATION-FIRST-V1",
+    "routineHumanAdminApprovalRequired": false,
+    "validators": {
+      "rex": "security_evidence",
+      "zed": "membership_rules",
+      "auto": "caps_budget_treasury_boundaries",
+      "grace": "content_destination_scheduling",
+      "dipshit": "usability_completion"
+    },
+    "routineAutoValidated": [
+      "Raid completion",
+      "RaidPoints",
+      "eligible ShillPoints",
+      "profile onboarding",
+      "wallet onboarding checks"
+    ],
+    "protectedActions": [
+      "wallet signature",
+      "multisig threshold approval",
+      "provider authorization",
+      "irreversible treasury movement"
+    ],
+    "decisionLedger": "worldz_bot_decision_ledger"
   }
 }
