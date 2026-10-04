@@ -199,7 +199,8 @@ jobs:
           creator_campaign_html=(root/'create-your-own-money/index.html').read_text()
           assert 'data-worldz-ad-slot="home_spotlight"' in home
           assert all(price in advertise_html for price in ('A$5','A$12','A$22','A$75'))
-          assert 'SUBMIT FOR REVIEW' in advertise_html
+          assert 'RUN WORLDZ VALIDATION' in advertise_html
+          assert 'PENDING HUMAN REVIEW' not in advertise_html
           assert 'worldz-launchpad-ads' in advertise_html and 'worldz-launchpad-ads' in ads_js
           assert 'SPONSORED' in ads_js and 'rel = "noopener sponsored"' in ads_js
           assert 'CREATE' in creator_campaign_html and 'YOUR OWN' in creator_campaign_html and 'MONEY' in creator_campaign_html
