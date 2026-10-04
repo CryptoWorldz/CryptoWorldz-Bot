@@ -40,9 +40,11 @@ const checks={
     && Number(liveGate.worldzCoreFamily?.percentOfWorldzContribution)===Number(platform.feePolicy.coreFamilyMarketBuyPercentOfWorldzContribution)
     && JSON.stringify(liveGate.worldzCoreFamily?.symbols||[])===JSON.stringify(platform.feePolicy.coreFamilySymbols||[])
     && JSON.stringify(liveGate.worldzInternalDistributionPercent||{})===JSON.stringify(platform.feePolicy.worldzInternalSplitPercent||{})
-    && Number(liveGate.treasuryLane?.operationsPercent)===70
+    && Number(liveGate.treasuryLane?.operationsPercent)===50
     && Number(liveGate.treasuryLane?.miracleTeamPercent)===30
-    && Number(liveGate.tokenSupplyTakePercent)===0
+    && Number(liveGate.treasuryLane?.purpleDiamondCrewPercent)===20
+    && Number(liveGate.tokenSupplyTakePercent)===0.6
+    && JSON.stringify(liveGate.tokenSupplySplitPercent||{})===JSON.stringify({operations:0.30,communityTeam:0.18,purpleDiamondCrew:0.12})
     && Number(liveGate.initialLiquidityTakePercent)===0
     && Number(liveGate.walletTransferTaxPercent)===0,
   legacyAdapterDeclared:liveGate.legacyAdapter?.profileOnly===true
