@@ -87,7 +87,7 @@
     const root = $("creator-history"); if (!root) return;
     try {
       const data = await request("/api/mini/creator/mine");
-      root.innerHTML = data.requests.length ? `<section class="panel"><h3>Your Creator Requests</h3>${data.requests.slice(0,8).map((r) => `<div class="profile-row"><span>#${r.id} ${escape(r.grace_posts?.title || "Raaiiidd")}</span><b>${escape(r.status)}${r.mission_id ? ` • Raid #${r.mission_id}` : ""}</b></div>`).join("")}</section>` : "";
+      root.innerHTML = data.requests.length ? `<section class="panel"><h3>Your Creator Requests</h3>${data.requests.slice(0,8).map((r) => `<div class="profile-row" style="display:grid;gap:8px"><div><span>#${r.id} ${escape(r.grace_posts?.title || "Raaiiidd")}</span><b style="float:right">${escape(r.status)}${r.mission_id ? ` • Raid #${r.mission_id}` : ""}</b></div>${r.status === "awaiting_target" ? `<div class="form-row"><input type="url" data-creator-target-input="${r.id}" placeholder="https://x.com/... published Raid destination"><button class="button secondary" type="button" data-creator-target="${r.id}">Add Link + Validate</button></div>` : ""}${r.status === "deferred_auto" ? `<small>🛡 Automatic retry: ${escape(r.review_note || "Worldz validation hold")}</small>` : ""}</div>`).join("")}</section>` : "";
     } catch { root.innerHTML = ""; }
   }
 
@@ -107,14 +107,14 @@
 
   async function renderAdminReview() {
     const root = $("admin-review-root"); if (!root) return;
-    if (!experience.bootstrap?.admin) { root.innerHTML = `<div class="panel empty">Admin review access required.</div>`; return; }
-    root.innerHTML = `<div class="panel loading"><div class="orb"></div><p>Loading review queues…</p></div>`;
+    if (!experience.bootstrap?.admin) { root.innerHTML = `<div class="panel empty">Protected operations access required.</div>`; return; }
+    root.innerHTML = `<div class="panel loading"><div class="orb"></div><p>Loading protected exceptions…</p></div>`;
     try {
       const [creator, heroes, missions] = await Promise.all([request("/api/mini/admin/creator"), request("/api/mini/admin/heroes"), request("/api/mini/admin/submissions")]);
-      const creatorCards = creator.requests.map((r) => `<article class="panel review-card"><span class="hero-mark">RAAIIIDD CREATOR</span><h3>#${r.id} ${escape(r.grace_posts?.title || "Draft")}</h3><p>${escape(r.grace_posts?.body || "")}</p>${r.image_url ? `<img src="${escape(r.image_url)}" alt="Creator artwork awaiting review">` : ""}<p><small>Creator ${r.creator_telegram_id} • proposed ${r.desired_reward_points} LP</small></p><div class="review-actions"><button class="button" data-creator-approve="${r.id}">Approve</button><button class="button secondary" data-creator-reject="${r.id}">Reject</button></div></article>`).join("");
+      const creatorCards = creator.requests.map((r) => `<article class="panel review-card"><span class="hero-mark">RAAIIIDD AUTO HOLD</span><h3>#${r.id} ${escape(r.grace_posts?.title || "Draft")}</h3><p>${escape(r.grace_posts?.body || "")}</p>${r.image_url ? `<img src="${escape(r.image_url)}" alt="Creator artwork held for automatic recheck">` : ""}<p><small>Creator ${r.creator_telegram_id} • proposed ${r.desired_reward_points} LP • ${escape(r.review_note || "automatic retry")}</small></p><div class="review-actions"><button class="button secondary" data-creator-recheck="${r.id}">Retry Automatic Check</button></div></article>`).join("");
       const heroCards = heroes.applications.map((a) => `<article class="panel review-card"><span class="hero-mark">REAL-WORLD HERO</span><h3>#${a.id} ${escape(a.display_name)}</h3><p>${escape(a.story)}</p><a class="button secondary" href="${escape(a.evidence_url)}" target="_blank" rel="noopener">Open Evidence</a><div class="review-actions"><button class="button" data-hero-approve="${a.id}">Approve</button><button class="button secondary" data-hero-reject="${a.id}">Reject</button></div></article>`).join("");
-      const missionCards = missions.submissions.map((m) => `<article class="panel review-card"><span class="hero-mark">RAID EVIDENCE</span><h3>Submission #${m.id}</h3><p>Raid #${m.mission_id} • ${escape(m.users?.username ? `@${m.users.username}` : m.users?.first_name || m.telegram_id)}</p><p>${escape(m.proof_url || m.completion_text || "DONE")}</p><div class="review-actions"><button class="button approve-submission" data-id="${m.id}">Approve</button><button class="button secondary reject-submission" data-id="${m.id}">Reject</button></div></article>`).join("");
-      root.innerHTML = `<section class="panel"><p class="eyebrow">WORLDZ PROTECTED EXCEPTIONS</p><h3>${creator.requests.length + heroes.applications.length + missions.submissions.length} held</h3><p>Routine Raid rewards are automated. This surface is for protected creative/security exceptions and evidence disputes only.</p></section>${creatorCards || ""}${heroCards || ""}${missionCards || ""}${creatorCards || heroCards || missionCards ? "" : `<div class="panel empty">No protected exceptions.</div>`}`;
+      const missionCards = missions.submissions.map((m) => `<article class="panel review-card"><span class="hero-mark">RAID AUTO HOLD</span><h3>Submission #${m.id}</h3><p>Raid #${m.mission_id} • ${escape(m.users?.username ? `@${m.users.username}` : m.users?.first_name || m.telegram_id)}</p><p>${escape(m.proof_url || m.completion_text || "DONE")}</p><div class="review-actions"><button class="button secondary" data-raid-recheck="${m.id}">Retry Automatic Check</button></div></article>`).join("");
+      root.innerHTML = `<section class="panel"><p class="eyebrow">WORLDZ PROTECTED EXCEPTIONS</p><h3>${creator.requests.length + heroes.applications.length + missions.submissions.length} held</h3><p>Routine Creator + Raid workflows are automated. This surface shows automatic holds plus Hero evidence that genuinely needs publication review.</p></section>${creatorCards || ""}${heroCards || ""}${missionCards || ""}${creatorCards || heroCards || missionCards ? "" : `<div class="panel empty">No protected exceptions.</div>`}`;
     } catch (error) { root.innerHTML = `<div class="panel empty">Review queue unavailable: ${escape(error.message)}</div>`; }
   }
 
@@ -128,7 +128,7 @@
       await loadReferral();
       if (experience.bootstrap.admin) {
         const adminPanel = $("admin-panel");
-        if (adminPanel && !$("experience-review-button")) adminPanel.insertAdjacentHTML("afterbegin", `<button id="experience-review-button" class="button" type="button" data-exp-open="admin-review">✅ Open Human Review Queue</button>`);
+        if (adminPanel && !$("experience-review-button")) adminPanel.insertAdjacentHTML("afterbegin", `<button id="experience-review-button" class="button" type="button" data-exp-open="admin-review">🛡 Open Protected Exceptions</button>`);
       }
       const requested = location.hash.replace(/^#/, "");
       if (["home","missions","squads","zed-guide","create","heroes","profile","community","admin-review"].includes(requested)) openScreen(requested);
@@ -144,26 +144,63 @@
     if (quick) { localZed(quick.dataset.zedQuick); return; }
     if (event.target.closest("#creator-draft")) {
       const idea = $("creator-idea").value.trim(); if (idea.length < 10) return notify("Tell ZED a little more about the Raaiiidd first.");
-      try { const data = await request("/api/mini/creator/draft", { method: "POST", body: JSON.stringify({ idea }) }); experience.draft.title = data.draft.title; experience.draft.body = data.draft.body; renderCreator(); notify("✅ ZED drafted the post. Edit anything before review."); } catch (e) { notify(`Draft failed: ${e.message}`); }
+      try { const data = await request("/api/mini/creator/draft", { method: "POST", body: JSON.stringify({ idea }) }); experience.draft.title = data.draft.title; experience.draft.body = data.draft.body; renderCreator(); notify("✅ ZED drafted the post. Edit anything before Worldz validation."); } catch (e) { notify(`Draft failed: ${e.message}`); }
       return;
     }
     if (event.target.closest("#creator-image")) {
       const idea = $("creator-idea").value.trim(); if (idea.length < 10) return notify("Tell ZED what the artwork should communicate first.");
-      try { notify("Creating approved-theme artwork…"); const data = await request("/api/mini/creator/image", { method: "POST", body: JSON.stringify({ idea }) }); experience.draft.image_path = data.image_path; experience.draft.image_url = data.image_url; renderCreator(); notify("✅ Artwork created for preview and Admin review."); } catch (e) { notify(`Artwork failed: ${e.message}`); }
+      try { notify("Creating approved-theme artwork…"); const data = await request("/api/mini/creator/image", { method: "POST", body: JSON.stringify({ idea }) }); experience.draft.image_path = data.image_path; experience.draft.image_url = data.image_url; renderCreator(); notify("✅ Artwork created for preview and automated Worldz validation."); } catch (e) { notify(`Artwork failed: ${e.message}`); }
       return;
     }
     if (event.target.closest("#creator-submit")) {
       try {
         const payload = { title: $("creator-title").value, body: $("creator-body").value, image_path: experience.draft.image_path, target_url: $("creator-target").value, reward_points: $("creator-reward").value };
         const data = await request("/api/mini/creator/submit", { method: "POST", body: JSON.stringify(payload) });
-        experience.draft = { title: "", body: "", image_path: "", image_url: "" }; renderCreator(); notify(`✅ Request #${data.request.id} sent to human Admin review.`);
+        const validation = data.validation || {};
+        experience.draft = { title: "", body: "", image_path: "", image_url: "" };
+        renderCreator();
+        if (validation.outcome === "activated") notify(`✅ Worldz validation passed — Raid #${validation.mission?.id || validation.request?.mission_id} is active.`);
+        else if (validation.outcome === "awaiting_target") notify(`🔗 Request #${data.request.id} passed content checks. Add the real published HTTPS destination to activate it.`);
+        else if (validation.outcome === "auto_rejected") notify(`⚠️ Worldz validation rejected this request: ${validation.reason || "automatic safety rule"}.`);
+        else notify(`🛡 Request #${data.request.id} is on an automatic retry hold. No routine Admin approval is required.`);
       } catch (e) { notify(`Submission failed: ${e.message}`); }
       return;
     }
-    const creatorApprove = event.target.closest("[data-creator-approve]");
-    if (creatorApprove) { try { const r = await request(`/api/mini/admin/creator/${creatorApprove.dataset.creatorApprove}/approve`, { method: "POST", body: "{}" }); notify(r.mission ? `✅ Approved and Raid #${r.mission.id} activated.` : "✅ Creative approved. Add the real published HTTPS link to activate its mission."); await renderAdminReview(); } catch (e) { notify(`Approval failed: ${e.message}`); } return; }
-    const creatorReject = event.target.closest("[data-creator-reject]");
-    if (creatorReject) { const reason = prompt("Why is this Raaiiidd not approved?"); if (!reason) return; try { await request(`/api/mini/admin/creator/${creatorReject.dataset.creatorReject}/reject`, { method: "POST", body: JSON.stringify({ reason }) }); notify("✅ Rejection recorded."); await renderAdminReview(); } catch (e) { notify(`Rejection failed: ${e.message}`); } return; }
+    const creatorTarget = event.target.closest("[data-creator-target]");
+    if (creatorTarget) {
+      const id = creatorTarget.dataset.creatorTarget;
+      const input = document.querySelector(`[data-creator-target-input="${id}"]`);
+      const target_url = input?.value?.trim() || "";
+      if (!target_url) return notify("Add the published HTTPS Raid destination first.");
+      try {
+        const result = await request(`/api/mini/creator/${id}/target`, { method: "POST", body: JSON.stringify({ target_url }) });
+        const validation = result.validation || {};
+        if (validation.outcome === "activated") notify(`✅ Worldz validation passed — Raid #${validation.mission?.id || validation.request?.mission_id} is active.`);
+        else if (validation.outcome === "auto_rejected") notify(`⚠️ Automatic validation rejected the destination: ${validation.reason || "rule check"}.`);
+        else notify("🛡 Destination saved. Worldz automation will retry validation.");
+        await loadCreatorHistory();
+      } catch (e) { notify(`Destination not accepted: ${e.message}`); }
+      return;
+    }
+    const creatorRecheck = event.target.closest("[data-creator-recheck]");
+    if (creatorRecheck) {
+      try {
+        const result = await request(`/api/mini/admin/creator/${creatorRecheck.dataset.creatorRecheck}/recheck`, { method: "POST", body: "{}" });
+        notify(result.validation?.outcome === "activated" ? "✅ Creator Raid activated automatically." : `🛡 Automatic result: ${result.validation?.reason || result.validation?.outcome || "retry hold"}.`);
+        await renderAdminReview();
+      } catch (e) { notify(`Creator automatic recheck failed: ${e.message}`); }
+      return;
+    }
+    const raidRecheck = event.target.closest("[data-raid-recheck]");
+    if (raidRecheck) {
+      try {
+        const response = await request(`/api/mini/admin/submissions/${raidRecheck.dataset.raidRecheck}/recheck`, { method: "POST", body: "{}" });
+        const result = response.result || {};
+        notify(["awarded","already_awarded"].includes(String(result.outcome || "")) ? "✅ Raid reward auto-awarded." : `🛡 Automatic Raid result: ${result.review_reason || result.outcome || result.status || "retry hold"}.`);
+        await renderAdminReview();
+      } catch (e) { notify(`Raid automatic recheck failed: ${e.message}`); }
+      return;
+    }
     const heroApprove = event.target.closest("[data-hero-approve]");
     if (heroApprove) { const summary = prompt("Public Hero summary — keep it factual") || ""; try { await request(`/api/mini/admin/heroes/${heroApprove.dataset.heroApprove}/approve`, { method: "POST", body: JSON.stringify({ summary }) }); notify("✅ Hero recognition approved."); await renderAdminReview(); } catch (e) { notify(`Hero approval failed: ${e.message}`); } return; }
     const heroReject = event.target.closest("[data-hero-reject]");
