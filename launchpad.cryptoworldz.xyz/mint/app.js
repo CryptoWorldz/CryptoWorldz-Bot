@@ -27,6 +27,7 @@ let walletCtx=null,preflightOk=false,busy=false,pending=null;
 let platformPolicy=null,systemRoutingReady=false,lastImageFile=null;
 let watermarkRemoved=false,watermarkRemovalTxSignature='';
 const DRAFT_KEY='worldzmint-draft-v2';
+const LEGACY_DRAFT_KEY='worldzmint-draft-v1';
 let restoringDraft=false;
 
 function setStatus(text,type=''){const el=$('#status');el.textContent=text;el.className='status'+(type?' '+type:'');}
@@ -92,7 +93,7 @@ function saveDraft(){
 function restoreDraft(){
   let restored=false;
   try{
-    const raw=localStorage.getItem(DRAFT_KEY);if(!raw)return false;
+    const raw=localStorage.getItem(DRAFT_KEY)||localStorage.getItem(LEGACY_DRAFT_KEY);if(!raw)return false;
     const d=JSON.parse(raw);if(!d||d.version!==1)return false;
     restoringDraft=true;
     if(['devnet','mainnet-beta'].includes(d.environment))$('#network').value=d.environment;
@@ -215,7 +216,7 @@ function renderProof(extra={}){
     ['Wallet connected',!!walletCtx,walletCtx?short(walletCtx.address):'PENDING'],
     ['Safe tokenomics preflight',preflightOk,preflightOk?'PASS':'PENDING'],
     ['Worldz 0.60% genesis route',systemRoutingReady,systemRoutingReady?'0.25 / 0.20 / 0.15 READY':'TREASURY VAULTS PENDING'],
-    ['Token image watermark',watermarkRemoved,watermarkRemoved?'REMOVED • 0.05 SOL PAID':'35% OPACITY • INCLUDED'],
+    ['Token image watermark',true,watermarkRemoved?'REMOVED • 0.05 SOL PAID':'35% OPACITY • INCLUDED'],
     ['Mint account created',!!p.createSig,p.createSig?short(p.mint):'PENDING'],
     ['Exact supply distributed',!!p.distributeSig,p.distributeSig?'ON-CHAIN':'PENDING'],
     ['Metadata + authorities finalised',!!p.finalizeSig,p.finalizeSig?'ON-CHAIN':'PENDING'],
@@ -439,11 +440,12 @@ function removeTokenImage(){
 function updateWatermarkUi(){
   const b=$('#watermark-remove');
   const s=$('#watermark-state');
-  if(b){b.disabled=busy||watermarkRemoved;b.textContent=watermarkRemoved?'WATERMARK REMOVED ✓':'REMOVE WATERMARK — 0.05 SOL';}
+  if(b){b.disabled=busy||watermarkRemoved||!systemRoutingReady;b.textContent=watermarkRemoved?'WATERMARK REMOVED ✓':(!systemRoutingReady?'REMOVE WATERMARK — 0.05 SOL • ROUTE PENDING':'REMOVE WATERMARK — 0.05 SOL');}
   if(s)s.textContent=watermarkRemoved?('Paid • '+short(watermarkRemovalTxSignature)):'Included by default • bottom-right • 35% opacity';
 }
 async function payToRemoveWatermark(){
   if(watermarkRemoved){updateWatermarkUi();return;}
+  if(!systemRoutingReady){setStatus('WATERMARK REMOVAL NOT CHARGED\nThe 0.60% multisig route is not fully deployed yet. No SOL will be taken until the mint route is actually ready.','warn');return;}
   if(network()!=='mainnet-beta'){setStatus('WATERMARK REMOVAL PAYMENT\nSwitch Network to Solana Mainnet to pay 0.05 SOL. Devnet never charges real SOL.','warn');return;}
   if(!walletCtx){await connectWallet();if(!walletCtx)return;}
   const from=new PublicKey(walletCtx.address);
