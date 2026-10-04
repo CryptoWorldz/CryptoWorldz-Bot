@@ -582,7 +582,7 @@
     "purpose": "Chain-native WorldzLaunchPad treasury governance for the 10% Worldz share of collected supported project trading-fee revenue.",
     "feePolicy": {
       "worldzSharePercentOfCollectedProjectTradingFee": 10,
-      "tokenSupplyTakePercent": 0,
+      "tokenSupplyTakePercent": 0.6,
       "initialLiquidityTakePercent": 0,
       "walletTransferTaxPercent": 0
     },
@@ -660,7 +660,7 @@
     "decimals": 6,
     "mintOnly": true,
     "createsTradingMarket": false,
-    "platformTokenSupplyTakePercent": 0,
+    "platformTokenSupplyTakePercent": 0.6,
     "platformInitialLiquidityTakePercent": 0,
     "walletTransferTaxPercent": 0,
     "compulsory": {
@@ -748,6 +748,11 @@
       "queryParameter": "launch",
       "codeRemovedFromVisibleUrlAfterLoad": true,
       "note": "Private launch details are returned only by the Edge function for a valid unexpired preset code. Public static files do not contain the private token plan."
+    },
+    "platformTokenSupplySplitPercent": {
+      "operations": 0.25,
+      "communityTeam": 0.2,
+      "purpleDiamondCrew": 0.15
     }
   },
   "confidenceCurve": {
@@ -1139,7 +1144,7 @@
       "legacyCorePercentOfWorldzContribution": 10,
       "worldzCoreFamilyMarketBuyPercentOfWorldzContribution": 10,
       "walletTransferTaxPercent": 0,
-      "tokenSupplyTakePercent": 0,
+      "tokenSupplyTakePercent": 0.6,
       "initialLiquidityTakePercent": 0,
       "execution": "GATED_UNTIL_CHAIN_NATIVE_ROUTING_PROOF"
     },
