@@ -36,7 +36,7 @@ It is deliberately separate from a trading launch.
 
 ## Fees
 
-WorldzMINT v1 takes **0% of token supply** and **0% of initial liquidity**.
+WorldzMINT v1 assigns **0.60% of genesis token supply** to disclosed Worldz multisig routes — **0.25% Operations + 0.20% Community Team + 0.15% Purple Diamond Crew** — and takes **0% of initial liquidity**. The 0.60% route fails closed until every required multisig destination is verified.
 
 The WorldzLaunchPad **10% rule applies only when a project separately enters a supported Worldz market-launch/fee route** such as Worldz Confidence Curve™:
 

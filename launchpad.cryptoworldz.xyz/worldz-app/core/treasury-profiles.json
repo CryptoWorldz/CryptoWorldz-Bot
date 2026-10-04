@@ -3,7 +3,7 @@
   "profiles": [
     {
       "id": "miracle-church",
-      "label": "Worldz Miracle Team Treasury",
+      "label": "Worldz Community Team Treasury",
       "token": "MRCL",
       "governance": {
         "threshold": 4,
@@ -28,6 +28,13 @@
         "allocationPercent": 20,
         "accountingSeparateFromRevenueRouting": true,
         "note": "20% MRCL token allocation is not the same bucket as the 30% share of the Worldz Treasury revenue lane."
+      },
+      "legacyInternalId": "miracle-church",
+      "affiliation": "INDEPENDENT_WORLDZ_TEAM__NO_MIRACLE_CHURCH_PARTNERSHIP",
+      "tokenSupplyRouting": {
+        "sharePercent": 0.2,
+        "state": "NOT_DEPLOYED",
+        "automaticRoutingEnabled": false
       }
     },
     {
@@ -46,7 +53,12 @@
         "Savage",
         "SolMusic",
         "Mahammad"
-      ]
+      ],
+      "tokenSupplyRouting": {
+        "sharePercent": 0.25,
+        "state": "ONCHAIN_VERIFIED",
+        "solanaVaultAddress": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB"
+      }
     },
     {
       "id": "worldz-reserve",
@@ -60,7 +72,26 @@
       "mainnetExecution": false,
       "enabled": false,
       "note": "No separate Worldz Reserve Treasury is currently required. Reserve sweeps are disabled; funds remain in the Operations Treasury until a future explicit decision."
+    },
+    {
+      "id": "purple-diamond-crew",
+      "label": "Purple Diamond Crew Treasury",
+      "governance": {
+        "threshold": null,
+        "signers": null,
+        "display": "MULTISIG REQUIRED"
+      },
+      "state": "NOT_DEPLOYED",
+      "mainnetExecution": false,
+      "tokenSupplyRouting": {
+        "sharePercent": 0.15,
+        "automaticRoutingEnabled": false
+      },
+      "custody": {
+        "solana": "Squads v4 planned"
+      },
+      "note": "Legacy distribution wallets are not treasury substitutes. A verified multisig vault must be deployed before this route activates."
     }
   ],
-  "rule": "Worldz Operations uses permanent 3-of-5 governance. Worldz Miracle Team Treasury is 4-of-7 and receives 30% of the Fee Flow V3 Treasury lane only when routing is activated. MRCL's 20% Miracle Team token vault remains a separate token-supply bucket. Reserve is disabled/not deployed."
+  "rule": "Worldz Operations is 3-of-5 and receives 0.25% of public WorldzMINT genesis supply. Worldz Community Team is planned 4-of-7 and receives 0.20%; Purple Diamond Crew receives 0.15% only after its official multisig is deployed. The total 0.60% route fails closed if either pending multisig is unavailable. No Miracle Church partnership or endorsement is implied."
 }

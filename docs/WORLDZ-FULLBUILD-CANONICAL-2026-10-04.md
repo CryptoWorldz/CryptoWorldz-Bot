@@ -60,7 +60,7 @@ No creator mode can bypass the Worldz Safe Launch Standard.
   - BUILD — 3% Worldz / 97% creator retention.
   - GROW — 5% Worldz / 95% creator retention.
   - BOOST — 8% Worldz / 92% creator retention.
-- Worldz takes 0% of token supply.
+- Public WorldzLaunchPad mints use a disclosed mandatory 0.60% genesis token-supply share: 0.25% Worldz Operations Multisig, 0.20% Worldz Community Team Multisig, 0.15% Purple Diamond Crew Multisig. The route fails closed until all required multisig destinations are verified.
 - Worldz takes 0% of initial liquidity.
 - Worldz imposes 0% wallet transfer tax.
 - Treasury lane from the Worldz share: 70% Operations / 30% Miracle Team.

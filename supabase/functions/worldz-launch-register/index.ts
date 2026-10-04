@@ -170,7 +170,9 @@ Deno.serve(async (req: Request) => {
       treasuryLane: { percentOfWorldzContribution: 20, operationsPercent: 70, miracleTeamPercent: 30, operationsGovernance: "3-of-5", miracleTeamGovernance: "4-of-7" },
       legacyCore: { percentOfWorldzContribution: 10, tokenCount: 12, closed: true },
       worldzCoreFamily: { percentOfWorldzContribution: 10, equalShareWithinLanePercent: 25, symbols: ["WLDZ","RVIV","PNEX","MRCL"] },
-      tokenSupplyTakePercent: 0,
+      tokenSupplyTakePercent: 0.6,
+      tokenSupplySplitPercent: { operations: 0.25, communityTeam: 0.20, purpleDiamondCrew: 0.15 },
+      tokenSupplyDestinationRule: "FAIL_CLOSED_IF_REQUIRED_MULTISIG_UNVERIFIED",
       initialLiquidityTakePercent: 0,
       walletTransferTaxPercent: 0,
       legacyAdapter: {

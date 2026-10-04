@@ -163,7 +163,7 @@ function renderProof(){
   const checks=[
     ['Public creator platform',platform.publicLaunchPad===true,'LIVE'],
     ['3 / 5 / 8 LaunchPad contribution',JSON.stringify(platform.feePolicy?.worldzLaunchPadContributionChoicesPercent)==='[3,5,8]','CREATOR CHOICE'],
-    ['0% platform token-supply share',platform.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent===0,'HARD RULE'],
+    ['0.60% disclosed platform genesis share',platform.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent===0.6,'0.25 / 0.20 / 0.15'],
     ['0% platform initial-liquidity share',platform.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent===0,'HARD RULE'],
     ['Base Sepolia token adapter',platform.baseEvmFair?.status==='BASE_SEPOLIA_BETA','TESTNET'],
     ['Sui native fixed-supply adapter',platform.suiNative?.status==='DEVNET_BETA','DEVNET'],
@@ -283,7 +283,7 @@ function manifestBase(){
       legacyCorePercentOfWorldzContribution:10,
       legacyCoreTokenCount:12,
       worldzCoreFamilyMarketBuyPercentOfWorldzContribution:10,
-      worldzLaunchPadShareOfTokenSupplyPercent:0,
+      worldzLaunchPadShareOfTokenSupplyPercent:0.6,
       worldzLaunchPadShareOfInitialLiquidityPercent:0,
       walletTransferTax:false
     },
@@ -364,7 +364,7 @@ async function runPreflight(){
     ['Team / Builder lane',r.teamBuilderRewards===5,'5% OF WORLDZ SHARE'],
     ['Future Launch / Infrastructure lane',r.futureLaunchInfrastructure===5,'5% OF WORLDZ SHARE'],
     ['Launch Referrer lane',r.launchReferrer===5,'5% OF WORLDZ SHARE'],
-    ['0% supply / initial LP take',m.feePolicy.worldzLaunchPadShareOfTokenSupplyPercent===0&&m.feePolicy.worldzLaunchPadShareOfInitialLiquidityPercent===0,'HARD LOCK'],
+    ['0.60% genesis share / 0% initial LP take',m.feePolicy.worldzLaunchPadShareOfTokenSupplyPercent===0.6&&m.feePolicy.worldzLaunchPadShareOfInitialLiquidityPercent===0,'DISCLOSED HARD RULE'],
     ['Wallet transfer tax',m.feePolicy.walletTransferTax===false,'0% • HARD LOCK'],
     ['Mainnet enforcement',m.execution.publicMainnetCreatorLaunch===false,'FAIL-CLOSED UNTIL ON-CHAIN PROOF']
   ];
@@ -457,14 +457,14 @@ function validatePlatformConfig(candidate){
     candidate.feePolicy?.treasuryLane?.worldzOperationsTreasuryPercent!==70||
     candidate.feePolicy?.treasuryLane?.worldzMiracleTeamTreasuryPercent!==30
   )throw new Error('Worldz Fee Flow V3 contract mismatch');
-  if(candidate.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent!==0||candidate.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent!==0||candidate.feePolicy?.walletTransferTaxPercent!==0)throw new Error('Worldz zero-supply/liquidity/transfer-tax contract mismatch');
+  if(candidate.feePolicy?.worldzLaunchPadShareOfTokenSupplyPercent!==0.6||candidate.feePolicy?.worldzLaunchPadShareOfInitialLiquidityPercent!==0||candidate.feePolicy?.walletTransferTaxPercent!==0)throw new Error('Worldz 0.60% genesis / zero-liquidity / zero-transfer-tax contract mismatch');
   const p=candidate.safeLaunchPolicy;
   if(!p||p.version!=='WORLDZ-SAFE-LAUNCH-1'||p.compulsory.fixedSupply!==true||p.compulsory.revokeMintAuthorityAfterGenesis!==true||p.compulsory.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('Safe Launch Standard contract mismatch');
   if(candidate.baseEvmFair?.status!=='BASE_SEPOLIA_BETA'||candidate.baseEvmFair?.mainnetExecution!==false)throw new Error('Base testnet adapter contract mismatch');
   if(candidate.founding100?.totalPositions!==100||candidate.founding100?.futureWorldzPoolPercent!==10||candidate.founding100?.equalAllocationPerQualifiedPositionPercent!==0.1)throw new Error('Founding 100 contract mismatch');
   if(candidate.trustOrbit?.version!=='WORLDZ-TRUST-ORBIT-1'||candidate.trustOrbit?.status!=='PUBLIC_BETA_LIVE'||candidate.trustOrbit?.jupiterIntegration?.officialJupiterEndorsement!==false)throw new Error('Trust Orbit contract mismatch');
   if(candidate.investmentCentre?.status!=='READ_ONLY_PORTFOLIO_RESEARCH_BETA'||candidate.investmentCentre?.executionEnabled!==false||candidate.investmentCentre?.guaranteeOfReturns!==false)throw new Error('Investment Centre contract mismatch');
-  if(candidate.worldzMint?.version!=='WORLDZMINT-1'||candidate.worldzMint?.platformTokenSupplyTakePercent!==0||candidate.worldzMint?.compulsory?.revokeMintAuthorityAfterGenesis!==true||candidate.worldzMint?.compulsory?.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('WorldzMINT contract mismatch');
+  if(candidate.worldzMint?.version!=='WORLDZMINT-1'||candidate.worldzMint?.platformTokenSupplyTakePercent!==0.6||candidate.worldzMint?.compulsory?.revokeMintAuthorityAfterGenesis!==true||candidate.worldzMint?.compulsory?.revokeFreezeAuthorityAfterGenesis!==true)throw new Error('WorldzMINT contract mismatch');
   if(candidate.confidenceCurve?.version!=='WORLDZ-CONFIDENCE-CURVE-1'||candidate.confidenceCurve?.mainnetExecutionEnabled!==false||candidate.confidenceCurve?.feePolicy?.worldzSharePercentOfCollectedSupportedProjectTradingFee!==10)throw new Error('Confidence Curve contract mismatch');
   if(candidate.confidencePulse?.version!=='WORLDZ-CONFIDENCE-PULSE-1'||candidate.confidencePulse?.systemTradesCountTowardConfidence!==false)throw new Error('Confidence Pulse contract mismatch');
   if(candidate.confidenceConstellation?.version!=='WORLDZ-CONFIDENCE-CONSTELLATION-1'||candidate.confidenceConstellation?.opaqueSafetyScore!==false)throw new Error('Confidence Constellation contract mismatch');

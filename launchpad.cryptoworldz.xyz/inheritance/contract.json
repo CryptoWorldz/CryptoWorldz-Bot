@@ -223,7 +223,13 @@
     },
     "publicCreatorRoute": {
       "implicitWorldzTokenSupplySharePercent": 0,
-      "rule": "The existing public creator promise remains zero implicit WorldzLaunchPad token-supply allocation. Any creator-approved legacy/community allocation must be explicit before signature."
+      "rule": "Public creator launches disclose a mandatory 0.60% WorldzLaunchPad genesis allocation before signature. It is not implicit: 0.25% Operations, 0.20% Worldz Community Team and 0.15% Purple Diamond Crew. Missing multisig destinations fail closed.",
+      "mandatoryDisclosedWorldzTokenSupplySharePercent": 0.6,
+      "worldzTokenSupplySplitPercent": {
+        "operations": 0.25,
+        "communityTeam": 0.2,
+        "purpleDiamondCrew": 0.15
+      }
     }
   },
   "chainGate": {

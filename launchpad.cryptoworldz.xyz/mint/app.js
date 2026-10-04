@@ -15,9 +15,19 @@ const METADATA_PROGRAM=new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1
 const STANDARD_VERSION='WORLDZMINT-1';
 const WORLDZ_MAINNET_RPC='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-solana-rpc';
 const PUBLIC_MAINNET_RPC='https://api.mainnet-beta.solana.com';
+const WORLDZ_OPS_TREASURY=new PublicKey('n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB');
+const WATERMARK_ASSET='/assets/worldzlaunchpad-watermark.svg';
+const WATERMARK_REMOVAL_LAMPORTS=50000000;
+const PROJECT_KEYS=['creator','liquidity','community','treasury','growth'];
+const WORLDZ_KEYS=['worldzOperations','worldzCommunityTeam','purpleDiamondCrew'];
+const ALL_KEYS=[...PROJECT_KEYS,...WORLDZ_KEYS];
+const FIXED_WORLDZ_ALLOCATIONS={worldzOperations:0.25,worldzCommunityTeam:0.20,purpleDiamondCrew:0.15};
 let connection=new Connection(clusterApiUrl('devnet'),'confirmed');
 let walletCtx=null,preflightOk=false,busy=false,pending=null;
-const DRAFT_KEY='worldzmint-draft-v1';
+let platformPolicy=null,systemRoutingReady=false,lastImageFile=null;
+let watermarkRemoved=false,watermarkRemovalTxSignature='';
+const DRAFT_KEY='worldzmint-draft-v2';
+const LEGACY_DRAFT_KEY='worldzmint-draft-v1';
 let restoringDraft=false;
 
 function setStatus(text,type=''){const el=$('#status');el.textContent=text;el.className='status'+(type?' '+type:'');}
@@ -35,17 +45,30 @@ async function ensureRpcReady(){
     catch(fallbackError){throw new Error('Mainnet RPC is unavailable. Please try again shortly. '+(fallbackError?.message||String(fallbackError)));}
   }
 }
-function allocations(){const o={};$$('.allocation').forEach(x=>o[x.dataset.key]=Number(x.value));return o;}
+function allocations(){
+  const o={};$('.allocation').forEach(x=>o[x.dataset.key]=Number(x.value));
+  return {...o,...FIXED_WORLDZ_ALLOCATIONS};
+}
+function systemRecipients(){
+  const r=platformPolicy?.tokenSupplyRouting?.routes||{};
+  return {
+    worldzOperations:String(r.worldzOperationsTreasury?.vaultAddress||''),
+    worldzCommunityTeam:String(r.worldzCommunityTeamTreasury?.vaultAddress||''),
+    purpleDiamondCrew:String(r.purpleDiamondCrewTreasury?.vaultAddress||'')
+  };
+}
 function recipients(){return {
   creator:$('#creator-wallet').value.trim(),liquidity:$('#liquidity-wallet').value.trim(),
   community:$('#community-wallet').value.trim(),treasury:$('#treasury-wallet').value.trim(),
-  growth:$('#growth-wallet').value.trim()
+  growth:$('#growth-wallet').value.trim(),...systemRecipients()
 };}
 function values(){return {
   environment:network(),token_name:$('#name').value.trim(),symbol:$('#symbol').value.trim().toUpperCase(),
   fixed_supply:$('#supply').value.trim(),decimals:6,description:$('#description').value.trim(),
   image_url:$('#image').value.trim(),website:$('#website').value.trim(),
-  allocations:allocations(),recipients:recipients()
+  allocations:allocations(),recipients:recipients(),
+  watermark_removed:watermarkRemoved,
+  watermark_removal_tx_signature:watermarkRemovalTxSignature
 };}
 function draftSnapshot(){
   return {
@@ -58,7 +81,9 @@ function draftSnapshot(){
     image_url:$('#image').value,
     website:$('#website').value,
     allocations:allocations(),
-    recipients:recipients()
+    recipients:recipients(),
+    watermark_removed:watermarkRemoved,
+    watermark_removal_tx_signature:watermarkRemovalTxSignature
   };
 }
 function saveDraft(){
@@ -68,7 +93,7 @@ function saveDraft(){
 function restoreDraft(){
   let restored=false;
   try{
-    const raw=localStorage.getItem(DRAFT_KEY);if(!raw)return false;
+    const raw=localStorage.getItem(DRAFT_KEY)||localStorage.getItem(LEGACY_DRAFT_KEY);if(!raw)return false;
     const d=JSON.parse(raw);if(!d||d.version!==1)return false;
     restoringDraft=true;
     if(['devnet','mainnet-beta'].includes(d.environment))$('#network').value=d.environment;
@@ -79,7 +104,12 @@ function restoreDraft(){
     $('#image').value=d.image_url||'';
     const preview=$('#image-preview');if(preview&&d.image_url){preview.src=d.image_url;preview.hidden=false;}
     $('#website').value=d.website||'';
-    for(const [k,val] of Object.entries(d.allocations||{})){const el=$('[data-key="'+k+'"]');if(el&&val!==null&&val!==undefined)el.value=String(val);}
+    watermarkRemoved=d.watermark_removed===true;
+    watermarkRemovalTxSignature=String(d.watermark_removal_tx_signature||'');
+    const da={...(d.allocations||{})};
+    const oldProjectTotal=PROJECT_KEYS.reduce((n,k)=>n+(Number(da[k])||0),0);
+    if(Math.abs(oldProjectTotal-100)<.001&&Number.isFinite(Number(da.growth)))da.growth=Number(da.growth)-0.6;
+    for(const [k,val] of Object.entries(da)){const el=$('[data-key="'+k+'"]');if(el&&val!==null&&val!==undefined)el.value=String(val);}
     for(const [k,id] of Object.entries({creator:'#creator-wallet',liquidity:'#liquidity-wallet',community:'#community-wallet',treasury:'#treasury-wallet',growth:'#growth-wallet'})){
       if(d.recipients?.[k])$(id).value=String(d.recipients[k]);
     }
@@ -100,9 +130,14 @@ function applyPrivatePreset(v){
     $('#description').value=String(v.description||'');
     $('#image').value=String(v.image_url||'');
     $('#website').value=String(v.website||'');
+    watermarkRemoved=v.watermark_removed===true;
+    watermarkRemovalTxSignature=String(v.watermark_removal_tx_signature||'');
     const preview=$('#image-preview');
     if(preview&&v.image_url){preview.src=String(v.image_url);preview.hidden=false;}
-    for(const [k,val] of Object.entries(v.allocations||{})){
+    const presetAlloc={...(v.allocations||{})};
+    const oldProjectTotal=PROJECT_KEYS.reduce((n,k)=>n+(Number(presetAlloc[k])||0),0);
+    if(Math.abs(oldProjectTotal-100)<.001&&Number.isFinite(Number(presetAlloc.growth)))presetAlloc.growth=Number(presetAlloc.growth)-0.6;
+    for(const [k,val] of Object.entries(presetAlloc)){
       const el=$('[data-key="'+k+'"]');if(el)el.value=String(val);
     }
     for(const [k,id] of Object.entries({creator:'#creator-wallet',liquidity:'#liquidity-wallet',community:'#community-wallet',treasury:'#treasury-wallet',growth:'#growth-wallet'})){
@@ -140,8 +175,10 @@ async function loadPrivatePreset(){
 function bpsMap(a){const out={};for(const [k,v] of Object.entries(a))out[k]=Math.round(Number(v)*100);return out;}
 function allocationMath(){
   const a=allocations(),total=Object.values(a).reduce((n,v)=>n+(Number.isFinite(v)?v:0),0);
-  $('#allocation-total').textContent=total.toFixed(1).replace('.0','')+'%';
+  const projectTotal=PROJECT_KEYS.reduce((n,k)=>n+(Number(a[k])||0),0);
+  $('#allocation-total').textContent=total.toFixed(2).replace(/\.00$/,'')+'%';
   $('#allocation-total').style.color=Math.abs(total-100)<.001?'#7be8b8':'#ff9caf';
+  const pt=$('#project-allocation-total');if(pt)pt.textContent=projectTotal.toFixed(2).replace(/\.00$/,'')+'%';
   preflightOk=false;if(!busy&& !pending?.registered)$('#mint-btn').disabled=false;
 }
 function isPk(s){try{new PublicKey(s);return true}catch{return false}}
@@ -158,13 +195,17 @@ function validate(){
   if(v.website&&!/^https:\/\//i.test(v.website))e.push('Website must use HTTPS.');
   if(Object.values(a).some(x=>!Number.isFinite(x)||x<0||x>100))e.push('Every allocation must be 0–100%.');
   const total=Object.values(a).reduce((n,x)=>n+x,0);
-  if(Math.abs(total-100)>.001)e.push('Genesis allocations must total exactly 100%.');
+  if(Math.abs(total-100)>.001)e.push('Genesis allocations including the fixed Worldz 0.60% share must total exactly 100%.');
+  const projectTotal=PROJECT_KEYS.reduce((n,k)=>n+(Number(a[k])||0),0);
+  if(Math.abs(projectTotal-99.4)>.001)e.push('Creator/project allocations must total exactly 99.40%; the fixed Worldz share is 0.60%.');
+  if(Math.abs(a.worldzOperations-.25)>.0001||Math.abs(a.worldzCommunityTeam-.20)>.0001||Math.abs(a.purpleDiamondCrew-.15)>.0001)e.push('Worldz genesis share must remain fixed at 0.25% / 0.20% / 0.15%.');
   if(a.creator>5)e.push('Creator liquid allocation cannot exceed 5%.');
   if(a.liquidity<25||a.liquidity>60)e.push('Liquidity reserve must be 25–60%.');
   if(a.community<20)e.push('Community allocation must be at least 20%.');
-  if(a.treasury>15)e.push('Treasury allocation cannot exceed 15%.');
+  if(a.treasury>15)e.push('Project Treasury allocation cannot exceed 15%.');
   for(const [k,x] of Object.entries(r))if(!isPk(x))e.push(k+' recipient is not a valid Solana address.');
-  if(Object.values(r).filter(isPk).length===5&&new Set(Object.values(r)).size!==5)e.push('All five genesis destination wallets must be distinct.');
+  if(Object.values(r).filter(isPk).length===ALL_KEYS.length&&new Set(Object.values(r)).size!==ALL_KEYS.length)e.push('All project and Worldz genesis destination wallets must be distinct.');
+  if(!systemRoutingReady)e.push('Worldz 0.60% treasury route is fail-closed until the Community Team and Purple Diamond Crew multisig vaults are verified.');
   if(walletCtx&&r.creator!==walletCtx.address)e.push('Creator wallet must equal the connected wallet.');
   const bp=bpsMap(a);if(Object.values(bp).reduce((n,x)=>n+x,0)!==10000)e.push('Allocations must resolve to exactly 10,000 basis points.');
   if(pending&&pending.config?.environment!==v.environment)e.push('Pending mint network does not match the selected network.');
@@ -174,6 +215,8 @@ function renderProof(extra={}){
   const p=pending||{},items=[
     ['Wallet connected',!!walletCtx,walletCtx?short(walletCtx.address):'PENDING'],
     ['Safe tokenomics preflight',preflightOk,preflightOk?'PASS':'PENDING'],
+    ['Worldz 0.60% genesis route',systemRoutingReady,systemRoutingReady?'0.25 / 0.20 / 0.15 READY':'TREASURY VAULTS PENDING'],
+    ['Token image watermark',true,watermarkRemoved?'REMOVED • 0.05 SOL PAID':'35% OPACITY • INCLUDED'],
     ['Mint account created',!!p.createSig,p.createSig?short(p.mint):'PENDING'],
     ['Exact supply distributed',!!p.distributeSig,p.distributeSig?'ON-CHAIN':'PENDING'],
     ['Metadata + authorities finalised',!!p.finalizeSig,p.finalizeSig?'ON-CHAIN':'PENDING'],
@@ -355,21 +398,36 @@ async function resizeTokenImage(file){
   const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
   const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Image processing is unavailable in this browser.');
   ctx.drawImage(img,0,0,width,height);
+  if(!watermarkRemoved){
+    const mark=await loadImage(WATERMARK_ASSET);
+    const size=Math.max(28,Math.round(Math.min(width,height)*0.17));
+    const inset=Math.max(5,Math.round(Math.min(width,height)*0.025));
+    ctx.save();ctx.globalAlpha=0.35;
+    ctx.drawImage(mark,width-size-inset,height-size-inset,size,size);
+    ctx.restore();
+  }
   const dataUrl=canvas.toDataURL('image/jpeg',0.9);
   const base64=dataUrl.split(',')[1]||'';
   if(!base64)throw new Error('Image conversion failed.');
   return {image_base64:base64,mime_type:'image/jpeg',width,height};
 }
 async function uploadTokenImage(file){
-  setStatus('PREPARING TOKEN IMAGE…\nNo wallet connection or signature is required.','warn');
+  lastImageFile=file;
+  setStatus('PREPARING TOKEN IMAGE…\n'+(watermarkRemoved?'Clean image selected — paid watermark removal active.':'WorldzLaunchPad watermark: bottom-right • 35% opacity.'),'warn');
   const image=await resizeTokenImage(file);
-  setStatus('UPLOADING TOKEN IMAGE…\nNo signing. No blockchain transaction.','warn');
-  const out=await api({action:'UPLOAD_IMAGE',...image});
+  setStatus('UPLOADING TOKEN IMAGE…\nNo mint transaction is being signed.','warn');
+  const out=await api({
+    action:'UPLOAD_IMAGE',...image,
+    wallet:walletCtx?.address||null,environment:network(),
+    watermark_removed:watermarkRemoved,
+    watermark_removal_tx_signature:watermarkRemovalTxSignature||null
+  });
   $('#image').value=out.imageUrl;
   const preview=$('#image-preview');if(preview){preview.src=out.imageUrl;preview.hidden=false;}
   saveDraft();
   preflightOk=false;if(!pending?.registered)$('#mint-btn').disabled=false;
-  setStatus('TOKEN IMAGE READY ✅\n'+out.imageUrl+'\n\nNo wallet signature and no blockchain transaction were used.','good');
+  setStatus('TOKEN IMAGE READY ✅\n'+out.imageUrl+'\n\n'+(watermarkRemoved?'Watermark removed — payment proof attached.':'WorldzLaunchPad watermark applied at 35% opacity.'),'good');
+  updateWatermarkUi();
   return out.imageUrl;
 }
 function removeTokenImage(){
@@ -378,6 +436,31 @@ function removeTokenImage(){
   const file=$('#image-file');if(file)file.value='';
   saveDraft();preflightOk=false;if(!pending?.registered)$('#mint-btn').disabled=false;
   setStatus('TOKEN IMAGE REMOVED. Upload another image whenever you want — no signing required.','good');
+}
+function updateWatermarkUi(){
+  const b=$('#watermark-remove');
+  const s=$('#watermark-state');
+  if(b){b.disabled=busy||watermarkRemoved||!systemRoutingReady;b.textContent=watermarkRemoved?'WATERMARK REMOVED ✓':(!systemRoutingReady?'REMOVE WATERMARK — 0.05 SOL • ROUTE PENDING':'REMOVE WATERMARK — 0.05 SOL');}
+  if(s)s.textContent=watermarkRemoved?('Paid • '+short(watermarkRemovalTxSignature)):'Included by default • bottom-right • 35% opacity';
+}
+async function payToRemoveWatermark(){
+  if(watermarkRemoved){updateWatermarkUi();return;}
+  if(!systemRoutingReady){setStatus('WATERMARK REMOVAL NOT CHARGED\nThe 0.60% multisig route is not fully deployed yet. No SOL will be taken until the mint route is actually ready.','warn');return;}
+  if(network()!=='mainnet-beta'){setStatus('WATERMARK REMOVAL PAYMENT\nSwitch Network to Solana Mainnet to pay 0.05 SOL. Devnet never charges real SOL.','warn');return;}
+  if(!walletCtx){await connectWallet();if(!walletCtx)return;}
+  const from=new PublicKey(walletCtx.address);
+  const tx=new Transaction().add(SystemProgram.transfer({fromPubkey:from,toPubkey:WORLDZ_OPS_TREASURY,lamports:WATERMARK_REMOVAL_LAMPORTS}));
+  tokenBusy('OPTIONAL WATERMARK REMOVAL — 0.05 SOL\nDestination: verified Worldz Operations Treasury multisig.\nApprove only if you want the LaunchPad mark removed.');
+  const sig=await signTransaction(tx);
+  watermarkRemoved=true;watermarkRemovalTxSignature=sig;saveDraft();updateWatermarkUi();
+  if(lastImageFile){
+    await uploadTokenImage(lastImageFile);
+  }else{
+    $('#image').value='';
+    const preview=$('#image-preview');if(preview){preview.removeAttribute('src');preview.hidden=true;}
+    setStatus('WATERMARK REMOVAL PAID ✅\nRe-upload the original token image once. The clean image will replace the watermarked copy.\nPayment: '+sig,'good');
+  }
+  renderProof();
 }
 async function signTransaction(tx,partialSigners=[]){
   const latest=await connection.getLatestBlockhash('confirmed');
@@ -432,7 +515,7 @@ async function runPreflight(){
   if(!check.ok){$('#mint-btn').disabled=false;setStatus('WORLDZMINT PREFLIGHT BLOCKED\n• '+check.errors.join('\n• '),'bad');renderProof();return false;}
   try{await ensureRpcReady();}catch(error){preflightOk=false;$('#mint-btn').disabled=false;setStatus('WORLDZMINT RPC PREFLIGHT BLOCKED\n'+(error?.message||String(error))+'\n\nNo wallet signature or transaction was requested.','bad');renderProof();return false;}
   if(network()==='mainnet-beta'){
-    setStatus('WORLDZMINT MAINNET PREFLIGHT PASS ✅\nFixed supply: '+Number(check.v.fixed_supply).toLocaleString()+'\nCreator liquid: '+check.v.allocations.creator+'%\nLiquidity reserve: '+check.v.allocations.liquidity+'%\nCommunity: '+check.v.allocations.community+'%\nTreasury: '+check.v.allocations.treasury+'%\nWorldz supply take: 0%\nWallet-transfer tax: 0%\n\nMAINNET is real and irreversible. No transaction has been signed yet.','good');
+    setStatus('WORLDZMINT MAINNET PREFLIGHT PASS ✅\nFixed supply: '+Number(check.v.fixed_supply).toLocaleString()+'\nCreator liquid: '+check.v.allocations.creator+'%\nLiquidity reserve: '+check.v.allocations.liquidity+'%\nCommunity: '+check.v.allocations.community+'%\nProject Treasury: '+check.v.allocations.treasury+'%\nWorldz genesis share: 0.60% → 0.25% Operations / 0.20% Community Team / 0.15% Purple Diamond Crew\nWatermark: '+(check.v.watermark_removed?'REMOVED • 0.05 SOL PAID':'INCLUDED • 35% OPACITY')+'\nWallet-transfer tax: 0%\n\nMAINNET is real and irreversible. No mint transaction has been signed yet.','good');
   }else setStatus('WORLDZMINT DEVNET PREFLIGHT PASS ✅\nRehearsal network only. No transaction has been signed yet.','good');
   $('#mint-btn').disabled=false;renderProof();return true;
 }
@@ -467,10 +550,10 @@ async function createMintStage(v){
 async function distributeStage(){
   const v=pending.config,mint=new PublicKey(pending.mint),owner=new PublicKey(walletCtx.address),a=v.allocations,r=v.recipients,bps=bpsMap(a);
   const total=BigInt(v.fixed_supply)*1000000n,amounts={},atas={};let allocated=0n;
-  for(const k of ['creator','liquidity','community','treasury']){amounts[k]=total*BigInt(bps[k])/10000n;allocated+=amounts[k];}
-  amounts.growth=total-allocated;
+  for(const k of ALL_KEYS){amounts[k]=total*BigInt(bps[k])/10000n;allocated+=amounts[k];}
+  if(allocated!==total)throw new Error('Genesis distribution math does not equal the fixed supply.');
   const tx=new Transaction();
-  for(const k of ['creator','liquidity','community','treasury','growth']){
+  for(const k of ALL_KEYS){
     const recipient=new PublicKey(r[k]),ata=await getAssociatedTokenAddress(mint,recipient,true,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID);
     atas[k]=ata.toBase58();
     tx.add(createAssociatedTokenAccountIdempotentInstruction(owner,ata,recipient,mint,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID));
@@ -534,7 +617,7 @@ async function mintFlow(){
   }
   if(!await runPreflight())return;
   if(network()==='mainnet-beta'&&!pending){
-    const ok=confirm('REAL SOLANA MAINNET\n\nWorldzMINT will create a permanent fixed-supply token and send its full genesis supply directly to the disclosed wallets. Mint and Freeze authority will be permanently revoked after metadata.\n\nContinue?');
+    const ok=confirm('REAL SOLANA MAINNET\n\nWorldzMINT will create a permanent fixed-supply token. 99.40% follows your disclosed project allocations. The mandatory WorldzLaunchPad 0.60% genesis share is split 0.25% Operations / 0.20% Community Team / 0.15% Purple Diamond Crew. Mint and Freeze authority will be permanently revoked after metadata.\n\nContinue?');
     if(!ok)return;
   }
   busy=true;$('#mint-btn').disabled=true;
@@ -570,6 +653,7 @@ $('#image-file').addEventListener('change',async e=>{
   }
 });
 $('#image-remove')?.addEventListener('click',removeTokenImage);
+$('#watermark-remove')?.addEventListener('click',async()=>{try{await payToRemoveWatermark()}catch(err){console.error(err);setStatus('WATERMARK REMOVAL STOPPED\n'+(err?.message||String(err)),'bad');}});
 $('#preflight').addEventListener('click',runPreflight);
 $('#mint-btn').addEventListener('click',mintFlow);
 $('#network').addEventListener('change',()=>{refreshConnection();saveDraft();preflightOk=false;if(!pending?.registered)$('#mint-btn').disabled=false;if(pending&&pending.config?.environment!==network())setStatus('Pending mint exists on '+pending.config.environment+'. Switch back to that network to continue.','warn');});
@@ -581,7 +665,23 @@ $$('input,textarea,select').forEach(x=>{
 });
 window.addEventListener('pagehide',saveDraft);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveDraft();});
+async function loadPlatformPolicy(){
+  try{
+    platformPolicy=await fetch('/platform-config.json?mintPolicy='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()});
+    const routes=platformPolicy?.tokenSupplyRouting?.routes||{};
+    systemRoutingReady=Boolean(
+      routes.worldzOperationsTreasury?.status==='ONCHAIN_VERIFIED'&&isPk(String(routes.worldzOperationsTreasury?.vaultAddress||''))&&
+      /VERIFIED/.test(String(routes.worldzCommunityTeamTreasury?.status||''))&&isPk(String(routes.worldzCommunityTeamTreasury?.vaultAddress||''))&&
+      /VERIFIED/.test(String(routes.purpleDiamondCrewTreasury?.status||''))&&isPk(String(routes.purpleDiamondCrewTreasury?.vaultAddress||''))
+    );
+  }catch(error){
+    platformPolicy=null;systemRoutingReady=false;
+    console.warn('Worldz token-supply routing config unavailable',error);
+  }
+  renderProof();updateWatermarkUi();
+}
 renderWallets();
+await loadPlatformPolicy();
 getWallets().on('register',()=>{
   const before=$('#wallet-choice').value;
   renderWallets();
@@ -605,7 +705,7 @@ if(!privatePresetCode&&!pending&&['devnet','mainnet-beta'].includes(requestedNet
   $('#network').value=requestedNetwork;
   saveDraft();
 }
-allocationMath();renderProof();loadRegistry();
+allocationMath();updateWatermarkUi();renderProof();loadRegistry();
 if(draftRestored&&!pending&&!privatePresetCode){
   setStatus('WORLDZMINT DRAFT RESTORED ✅\nYour token details were saved on this device. Reconnect the wallet and continue where you left off.','good');
 }
