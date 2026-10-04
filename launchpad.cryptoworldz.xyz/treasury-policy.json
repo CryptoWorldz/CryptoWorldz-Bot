@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-02-worldz-treasury-v3",
+  "version": "2026-10-04-worldz-treasury-v4-genesis-share",
   "product": "WorldzLaunchPad™",
   "status": "OPERATIONS_3_OF_5_ONCHAIN_VERIFIED__MIRACLE_TEAM_4_OF_7_FUNDING_PENDING__V3_ROUTING_GATED",
   "feeCollection": {
@@ -15,10 +15,15 @@
       "8": 92
     },
     "worldzTreasuryLanePercentOfWorldzContribution": 20,
-    "worldzTokenSupplyTakePercent": 0,
+    "worldzTokenSupplyTakePercent": 0.6,
     "worldzInitialLiquidityTakePercent": 0,
     "walletTransferTaxPercent": 0,
-    "rule": "Only the creator-selected 3% / 5% / 8% Worldz contribution enters Worldz internal routing. The Treasury lane is 20% of that Worldz contribution."
+    "rule": "Fee Flow V3 revenue routing remains separate. Public WorldzMINT launches also use a disclosed mandatory 0.60% genesis token-supply allocation: 0.25% Operations, 0.20% Worldz Community Team, 0.15% Purple Diamond Crew.",
+    "worldzTokenSupplySplitPercent": {
+      "operations": 0.25,
+      "communityTeam": 0.2,
+      "purpleDiamondCrew": 0.15
+    }
   },
   "governance": {
     "operations": {
@@ -89,7 +94,17 @@
           "status": "ROSTER_CONFIRMED__ACTIVATION_PENDING"
         }
       ],
-      "rosterRule": "Membership is a confirmed Worldz responsibility/status. On-chain signer authority remains pending until the 4-of-7 Squads multisig is deployed and each signer activates/accepts."
+      "rosterRule": "Membership is a confirmed Worldz responsibility/status. On-chain signer authority remains pending until the 4-of-7 Squads multisig is deployed and each signer activates/accepts.",
+      "publicLabel": "Worldz Community Team Treasury",
+      "affiliationRule": "Independent Worldz team treasury; no Miracle Church partnership or endorsement is implied."
+    },
+    "purpleDiamondCrew": {
+      "signers": null,
+      "threshold": null,
+      "display": "MULTISIG REQUIRED",
+      "status": "NOT_DEPLOYED",
+      "tokenSupplySharePercent": 0.15,
+      "automaticRoutingEnabled": false
     }
   },
   "signerSlots": [
@@ -176,7 +191,15 @@
         "targetGovernance": "4-of-7",
         "multisigConfigAddress": null,
         "vaultAddress": null,
-        "status": "FUNDING_PENDING_NOT_DEPLOYED"
+        "status": "FUNDING_PENDING_NOT_DEPLOYED",
+        "publicLabel": "Worldz Community Team Treasury"
+      },
+      "purpleDiamondCrew": {
+        "provider": "Squads v4",
+        "targetGovernance": "MULTISIG_REQUIRED",
+        "multisigConfigAddress": null,
+        "vaultAddress": null,
+        "status": "NOT_DEPLOYED"
       }
     },
     "evm": {
@@ -250,6 +273,9 @@
     "reserveTreasuryRequired": false,
     "miracleTeamRoutingEnabled": false,
     "miracleTeamFundingPending": true,
-    "unavailableDestinationRule": "ACCRUE_DO_NOT_REDIRECT"
+    "unavailableDestinationRule": "ACCRUE_DO_NOT_REDIRECT",
+    "mainnetTokenSupplyRoutingEnabled": false,
+    "purpleDiamondCrewRoutingEnabled": false,
+    "tokenSupplyRoutingRule": "The 0.60% genesis allocation remains fail-closed until Operations, Worldz Community Team and Purple Diamond Crew multisig destinations are all verified on-chain. Missing destinations are never redirected."
   }
 }
