@@ -438,7 +438,8 @@ jobs:
           assert "UPLOAD_IMAGE" in mint_js
           assert "resizeTokenImage" in mint_js
           assert "WORLDZMINT_UPLOAD_IMAGE_V1" not in mint_js
-          assert "No wallet connection or signature is required." in mint_js
+          assert "WorldzLaunchPad watermark: bottom-right • 35% opacity." in mint_js
+          assert "REMOVE WATERMARK — 0.05 SOL" in mint_js
           assert 'id="image-remove"' in mint_html
           assert 'NO SIGNING REQUIRED' in mint_html
           assert "worldzmint-draft-v1" in mint_js
@@ -508,7 +509,7 @@ jobs:
           assert "treasury:20" in app
           assert "worldzMiracleTeamTreasury:30" in app
 
-          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_flow=v3 creator_retention=97/95/92 worldz_contribution=3/5/8 legacy=10_of_worldz_share core_buys=10_of_worldz_share treasury_lane=20 treasury_split=70/30 treasury_ops=3of5 miracle_team=4of7 miracle_routing=off_unless_deployed max_approvals=4 supply_take=0 liquidity_take=0 founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
+          print('WORLDZLAUNCHPAD_PUBLIC_CONTRACT=PASS public=1 fee_flow=v3 creator_retention=97/95/92 worldz_contribution=3/5/8 legacy=10_of_worldz_share core_buys=10_of_worldz_share treasury_lane=20 treasury_split=70/30 treasury_ops=3of5 community_team=4of7 community_routing=off_unless_deployed max_approvals=4 supply_take=0.6 liquidity_take=0 watermark=35pct remove=0.05SOL founding100=1 base_sepolia=1 trust_orbit=1 private_plan_exposure=0 mainnet_adapter_prepared=1 mainnet=0')
 
       - name: Syntax-check browser JavaScript
         shell: bash
