@@ -481,59 +481,28 @@ Use /help to open the Command Menu.
     }
   });
 
-  bot.onText(/^\/approve(?:@\w+)?(?:\s+(\d+))?$/, async (msg, match) => {
-    if (!(await permissionAllowed(msg, "submission.approve"))) return denyAdmin(msg);
+  bot.onText(/^\/recheck(?:@\w+)?(?:\s+(\d+))?$/, async (msg, match) => {
+    if (!(await permissionAllowed(msg, "submission.view"))) return denyAdmin(msg);
     const submissionId = parsePositiveId(match && match[1]);
-    if (!submissionId) return send(msg.chat.id, "❌ Use: /approve submission_id");
+    if (!submissionId) return send(msg.chat.id, "❌ Use: /recheck submission_id");
     try {
-      const result = await repository.approveSubmission(submissionId, msg.from.id);
-      if (result.already_awarded) {
-        return send(msg.chat.id, "⚠️ This submission has already been awarded.");
+      const submission = await repository.getSubmission(submissionId);
+      if (!submission) return send(msg.chat.id, "❌ Raid submission not found.");
+      if (!["pending","deferred_auto"].includes(String(submission.status || ""))) {
+        return send(msg.chat.id, `ℹ️ Submission #${submissionId} is already ${submission.status}. No manual approval action is available.`);
       }
-      await send(
-        msg.chat.id,
-        `✅ Submission Approved!\n\n📥 Submission #${submissionId}\n👤 ${result.telegram_id}\n🎯 ${result.mission_title}\n⭐ ${result.awarded_points} Legend Points awarded\n🏆 New total: ${result.total_points}`
-      );
-      try {
-        await send(
-          result.telegram_id,
-          `✅ Raaiiidd Complete!\n\n🎯 ${result.mission_title}\n⭐ ${result.awarded_points} Legend Points awarded\n🏆 New total: ${result.total_points}\n🎖 Rank: ${getRank(result.total_points)}\n\nYour contribution has been recorded.`
-        );
-      } catch (notifyError) {
-        safeError("Approval notification", notifyError);
+      const result = await repository.autoAwardRaidSubmission(submissionId);
+      const outcome = String(result?.outcome || "deferred_auto");
+      if (["awarded","already_awarded"].includes(outcome)) {
+        return send(msg.chat.id, `✅ Automatic recheck complete — Submission #${submissionId} is auto-awarded.`);
       }
-      return undefined;
+      if (outcome === "auto_rejected") {
+        return send(msg.chat.id, `⚠️ Automatic recheck complete — Submission #${submissionId} did not pass: ${result?.review_reason || "automatic rule"}.`);
+      }
+      return send(msg.chat.id, `🛡 Submission #${submissionId} remains on automatic hold: ${result?.review_reason || outcome}. ZED + AUTO will retry it again.`);
     } catch (error) {
-      safeError("Approve command", error);
-      return send(msg.chat.id, "❌ I couldn't approve that submission.");
-    }
-  });
-
-  bot.onText(/^\/reject(?:@\w+)?(?:\s+(\d+)\s+([\s\S]+))?$/, async (msg, match) => {
-    if (!(await permissionAllowed(msg, "submission.reject"))) return denyAdmin(msg);
-    const submissionId = parsePositiveId(match && match[1]);
-    const reason = match && match[2] ? match[2].trim() : "";
-    if (!submissionId || !reason) return send(msg.chat.id, "❌ Use: /reject submission_id reason");
-    if (reason.length > 500) return send(msg.chat.id, "❌ Rejection reasons must be 500 characters or fewer.");
-    try {
-      const result = await repository.rejectSubmission(submissionId, msg.from.id, reason);
-      if (result.outcome === "not_found") return send(msg.chat.id, "❌ Submission not found.");
-      if (result.outcome === "already_reviewed") {
-        return send(msg.chat.id, "⚠️ This submission has already been reviewed.");
-      }
-      await send(msg.chat.id, `✅ Submission Reviewed\n\n📥 Submission #${submissionId}\n❌ Rejected\n📝 Reason: ${reason}`);
-      try {
-        await send(
-          result.submission.telegram_id,
-          `❌ Submission Not Approved\n\n🎯 Raid #${result.submission.mission_id}\n📝 Reason: ${reason}\n\nYou may contact the Admin Team if you believe this needs review.`
-        );
-      } catch (notifyError) {
-        safeError("Rejection notification", notifyError);
-      }
-      return undefined;
-    } catch (error) {
-      safeError("Reject command", error);
-      return send(msg.chat.id, "❌ I couldn't reject that submission.");
+      safeError("Automatic Raid recheck", error);
+      return send(msg.chat.id, "❌ I couldn't run the automatic Raid recheck.");
     }
   });
 
@@ -634,32 +603,24 @@ Use /help to open the Command Menu.
 
       if (typeof repository.autoAwardRaidSubmission === "function") {
         const auto = await repository.autoAwardRaidSubmission(claim.submission.id);
-        if (auto?.outcome === "awarded") {
+        if (["awarded","already_awarded"].includes(String(auto?.outcome || ""))) {
           return send(
             msg.chat.id,
             `⚡ Raaiiidd Complete — RaidPoints Auto-Awarded!\n\n⭐ +${auto.points_awarded} Legend Points\n🏆 New total: ${auto.total_points} LP\n\nNo Admin approval needed.`
           );
         }
-        if (auto?.outcome === "budget_deferred") {
-          return send(msg.chat.id, "⏳ Raid completion recorded. The protected weekly reward pool is full, so no extra points were issued.");
+        if (["budget_deferred","deferred_auto"].includes(String(auto?.outcome || ""))) {
+          return send(msg.chat.id, "🛡 Raid completion recorded. ZED + AUTO will retry the protected reward automatically; no routine Admin approval is required.");
         }
         return send(
           msg.chat.id,
-          `🛡 Raaiiidd recorded — exception review only.\n\nSubmission #${claim.submission.id}\nReason: ${auto?.review_reason || "automatic safety check"}\n\nNormal RaidPoints are automatic.`
+          `⚠️ Raaiiidd automatic check complete.\n\nSubmission #${claim.submission.id}\nReason: ${auto?.review_reason || auto?.outcome || "automatic safety check"}\n\nNo routine Admin approval queue is used.`
         );
       }
 
-      if (!config.autoApproveMissionClaims) {
-        return send(
-          msg.chat.id,
-          `✅ Raaiiidd Submission Received!\n\n🎯 ${mission.title}\n📥 Submission #${claim.submission.id}\n⏳ Status: Pending Review\n⭐ Potential Reward: ${mission.reward_points} Legend Points\n\nAutomatic RaidPoints are not available on this runtime yet.`
-        );
-      }
-
-      const approved = await repository.approveSubmission(claim.submission.id, null);
       return send(
         msg.chat.id,
-        `✅ Raaiiidd Complete!\n\n⭐ ${approved.awarded_points} Legend Points awarded.\n🏆 Your leaderboard total has been updated.`
+        "🛡 Raid completion was recorded, but the automatic reward engine is unavailable on this runtime. No Admin approval queue was created; retry when automation is healthy."
       );
     } catch (error) {
       safeError("Mission claim", error);
