@@ -93,6 +93,10 @@ const COMMAND_GROUPS = Object.freeze([
     ["worldping", "Send a visible group WorldPing"], ["worldpingmode", "Group admin: AdminsOnlyPing or FullMemberPing"],
     ["zedmaxprice", "View ZED MAX SOL licence prices"], ["zedmaxreceipt", "Submit a SOL payment receipt"]
   ]),
+  group("auto-market-planner", "🤖 AUTO Market Planner™ • Personal Wallet Planning", "member", [
+    ["auto", "Open AUTO daily personal-wallet market planning"],
+    ["autosimulate", "Run a planning-only AUTO simulation with your own budget"]
+  ]),
   group("admin-missions", "🛡 Admin • Raids, Reviews, Members & Settings", "admin", [
     ["admin", "Open Admin controls"], ["admingrace", "Open Grace Admin controls"], ["zedsettings", "Open Command Centre settings"], ["secureguard", "Open REXSECURE ULTIMATE security controls"],
     ["rexwelcome", "Resend the REXSECURE ULTIMATE branded welcome"],
@@ -153,7 +157,7 @@ const COMMAND_GROUPS = Object.freeze([
     ["campaigns", "List Grace campaigns"], ["graceanalytics", "View Grace campaign analytics"]
   ]),
   group("owner-auto", "💎 Owner • AUTO Diamond Buy™", "owner", [
-    ["auto", "View AUTO status"], ["autosimulate", "Run an AUTO simulation"], ["autodca", "View DCA plans"],
+    ["autodca", "View owner DCA plans"],
     ["autodcanew", "Create an owner DCA plan"], ["autodcastart", "Start an approved DCA plan"],
     ["autodcapause", "Pause a DCA plan"], ["autodcaresume", "Resume a DCA plan"], ["autodcacancel", "Cancel a DCA plan"],
     ["autodcawallet", "Set the owner DCA wallet boundary"], ["autodcaenable", "Enable AUTO DCA execution after gates"],
