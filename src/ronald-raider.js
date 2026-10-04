@@ -320,6 +320,9 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
   }
 
   async function autoAwardRaid(submissionId) {
+    if (typeof repository.autoAwardRaidSubmission === "function") {
+      return repository.autoAwardRaidSubmission(Number(submissionId));
+    }
     const { data, error } = await supabase.rpc("auto_award_raid_submission", {
       p_submission_id: Number(submissionId)
     });
@@ -622,7 +625,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       }
 
       const award = await autoAwardRaid(claim.submission.id);
-      if (award?.outcome === "awarded") {
+      if (["awarded","already_awarded"].includes(String(award?.outcome || ""))) {
         await bot.answerCallbackQuery(query.id, { text: `⚡ +${award.points_awarded} RaidPoints` });
         return send(chatId, [
           "⚡ RAIDPOINTS AUTO-AWARDED",
@@ -635,19 +638,19 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
         ].join("\n"));
       }
 
-      if (award?.outcome === "budget_deferred") {
+      if (["budget_deferred","deferred_auto"].includes(String(award?.outcome || ""))) {
         await bot.answerCallbackQuery(query.id, { text: "Weekly reward pool is full.", show_alert: true });
-        return send(chatId, "⏳ Raid completion recorded. The protected weekly reward pool is currently full, so no extra points were issued.");
+        return send(chatId, "🛡 Raid completion recorded. ZED + AUTO will retry the protected reward automatically. No routine Admin approval is required.");
       }
 
-      await bot.answerCallbackQuery(query.id, { text: "Recorded — safety review only.", show_alert: true });
+      await bot.answerCallbackQuery(query.id, { text: "Automatic check complete.", show_alert: true });
       return send(chatId, [
         "🛡 RAIDPOINTS SAFETY HOLD",
         "",
         `Submission #${claim.submission.id}`,
         `Reason: ${award?.review_reason || "automatic safety check"}`,
         "",
-        "Normal completions auto-award. Only exceptions enter review."
+        "Normal completions auto-award. This result came from the automatic rules — not an Admin approval queue."
       ].join("\n"));
     } catch (error) {
       console.error("Ronald Raider callback failed", { code: error?.code || error?.message || "unknown" });

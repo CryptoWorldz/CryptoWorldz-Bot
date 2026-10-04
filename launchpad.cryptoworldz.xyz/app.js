@@ -25,6 +25,22 @@ const BEGINNER_HELP=Object.freeze({
   5:'Choose distribution and fees inside the published Worldz limits. Nothing hidden should appear after you sign.',
   6:'Review the evidence before anything signs. Submitted is not confirmed; Worldz only treats chain-confirmed execution as success.'
 });
+const INTERMEDIATE_HELP=Object.freeze({
+  1:'Choose a chain with its native execution model visible. Unsupported routes remain gated.',
+  2:'Choose the market engine and graduation path. Worldz shows venue/protocol limits before signing.',
+  3:'Set fixed supply, decimals and disclosed authorities with custom allocation controls.',
+  4:'Choose the quote asset and liquidity relationship you want the market to use.',
+  5:'Tune vesting, allocations and fees inside the 1.00% default / 3.00% hard-cap policy and disclosed venue rules.',
+  6:'Review the manifest, proof gates and transaction simulation before any wallet approval.'
+});
+const ADVANCED_HELP=Object.freeze({
+  1:'Worldz Leaders: select the sovereign chain rail while preserving chain-native execution and future Layer 1 + Layer 1.5 + 8 portability.',
+  2:'Choose Flash, Curve, Curve Pro or verified chain-native architecture with graduation and liquidity topology exposed.',
+  3:'Engineer full Token DNA: supply, utility, emissions/burn policy, authorities, vesting and concentration proof.',
+  4:'Configure native or verified CrossPair quote architecture, including XRP/wXRP routes where proof exists.',
+  5:'Configure multisig/treasury topology, creator economics, routing manifests and cross-chain constraints without bypassing Safe Launch rules.',
+  6:'Inspect raw WorldzProof, adapter status, simulations, signer requirements and fail-closed release gates.'
+});
 const PUBLIC_REGISTRY_URL='https://hknymhhyqldtzmplzuzh.supabase.co/functions/v1/worldz-launch-register';
 
 
@@ -34,15 +50,23 @@ function step(n){
   $$('.wizard-step').forEach(x=>x.classList.toggle('active',x.dataset.panel===String(n)));
   $$('.step-tab').forEach(x=>x.classList.toggle('active',x.dataset.step===String(n)));
   const help=$('#experience-help');
-  if(help) help.textContent=experienceMode==='beginner'?'Beginner Mode: '+(BEGINNER_HELP[Number(n)]||'Worldz explains the choice before you sign.'):'Pro Mode: technical controls and raw proof remain visible.';
+  if(help){
+    const messages=experienceMode==='beginner'?BEGINNER_HELP:experienceMode==='intermediate'?INTERMEDIATE_HELP:ADVANCED_HELP;
+    const label=experienceMode==='beginner'?'Beginner':experienceMode==='intermediate'?'Intermediate':'Advanced • Worldz Leaders';
+    help.textContent=label+' Mode: '+(messages[Number(n)]||'Worldz keeps the choice explicit before you sign.');
+  }
   const target=$('.builder'); if(target&&window.innerWidth<720)target.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function setExperienceMode(mode){
-  experienceMode=mode==='pro'?'pro':'beginner';
+  experienceMode=['beginner','intermediate','advanced'].includes(mode)?mode:'beginner';
   document.body.dataset.experience=experienceMode;
   $$('.experience-choice').forEach(x=>x.classList.toggle('hero-card',x.dataset.experience===experienceMode));
   $$('.experience-choice').forEach(x=>x.classList.toggle('active',x.dataset.experience===experienceMode));
-  const labels=experienceMode==='beginner'?['World','Launch Style','Token','Trading Pair','Setup','Review']:['World','Engine','Token','Pair','Economics','Proof'];
+  const labels=experienceMode==='beginner'
+    ? ['World','Launch Style','Token','Trading Pair','Setup','Review']
+    : experienceMode==='intermediate'
+      ? ['Chain','Engine','Token','Pair','Economics','Proof']
+      : ['Sovereign Rail','Architecture','Token DNA','CrossPair','Treasury + Economics','WorldzProof'];
   $$('.step-tab span').forEach((x,i)=>{if(labels[i])x.textContent=labels[i];});
   const active=$('.wizard-step.active');
   step(active?active.dataset.panel:1);

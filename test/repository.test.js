@@ -84,9 +84,9 @@ test("repository maps the transactional points RPC total", async () => {
   assert.equal(result.new_points, 90);
 });
 
-test("repository loads pending submission details without an embedded users relationship", async () => {
+test("repository loads automatic Raid hold details without an embedded users relationship", async () => {
   const submissions = [
-    { id: 16, mission_id: 8, telegram_id: 7615025841, status: "pending", submitted_at: "2026-08-01T08:07:00Z" }
+    { id: 16, mission_id: 8, telegram_id: 7615025841, status: "deferred_auto", submitted_at: "2026-08-01T08:07:00Z" }
   ];
   const calls = [];
   const supabase = {
@@ -98,7 +98,7 @@ test("repository loads pending submission details without an embedded users rela
             assert.equal(columns, "*");
             return {
               eq(column, value) {
-                assert.deepEqual([column, value], ["status", "pending"]);
+                assert.deepEqual([column, value], ["status", "deferred_auto"]);
                 return {
                   order(column, options) {
                     assert.deepEqual([column, options], ["submitted_at", { ascending: false }]);

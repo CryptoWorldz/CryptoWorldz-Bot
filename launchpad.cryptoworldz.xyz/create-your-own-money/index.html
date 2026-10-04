@@ -95,6 +95,16 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:#
 </div>
 </section>
 
+<section class="section">
+<div class="kicker">CHOOSE YOUR WORLDZ CREATOR LEVEL</div>
+<h2>Learn it. Build it. Engineer it.</h2>
+<div class="grid">
+<article class="card"><span class="num">🌱 BEGINNER • MAKE YOUR OWN MONEY</span><h3>Worldz teaches each choice.</h3><p>Plain-English explanations, safe defaults and a guided token plan for people creating their first crypto token.</p></article>
+<article class="card"><span class="num">⚡ INTERMEDIATE • EVERYDAY CRYPTO JOE</span><h3>More control, still guided.</h3><p>Custom allocations, vesting, chain, quote asset, curves, fees and liquidity with the Worldz Safe Launch guardrails still enforced.</p></article>
+<article class="card"><span class="num">🌐 ADVANCED • WORLDZ LEADERS</span><h3>Full Token DNA + architecture.</h3><p>Multisig, treasury topology, CrossPair, Omnichain, raw proof, advanced liquidity and future Layer 1 + Layer 1.5 + 8 portability.</p></article>
+</div>
+</section>
+
 <section class="section" id="planner">
 <div class="kicker">TOKEN PLAN BUILDER</div>
 <h2>Invent it before you mint it.</h2>
@@ -102,6 +112,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:#
 <div class="planner">
 <section class="panel">
 <h3>Your token</h3>
+<div class="field"><label for="creator-mode">Creator mode</label><select id="creator-mode"><option value="Beginner">Beginner — Make Your Own Money</option><option value="Intermediate">Intermediate — Everyday Crypto Joe</option><option value="Advanced">Advanced — Worldz Leaders</option></select></div>
 <div class="field"><label for="token-name">Token name</label><input id="token-name" maxlength="50" placeholder="Family Token"></div>
 <div class="field"><label for="token-symbol">Symbol</label><input id="token-symbol" maxlength="12" placeholder="FAM"></div>
 <div class="field"><label for="token-supply">Total supply</label><input id="token-supply" type="number" min="1" step="1" placeholder="1000000"></div>
@@ -170,6 +181,7 @@ You decide the real structure before any launch.</div>
 const $=s=>document.querySelector(s);
 function fmt(n){try{return new Intl.NumberFormat().format(n)}catch{return String(n)}}
 $("#make-plan").addEventListener("click",()=>{
+ const mode=$("#creator-mode").value;
  const name=$("#token-name").value.trim()||"My Token";
  const symbol=($("#token-symbol").value.trim()||"TOKEN").toUpperCase();
  const supply=Math.floor(Number($("#token-supply").value||1000000));
@@ -181,7 +193,7 @@ $("#make-plan").addEventListener("click",()=>{
  ];
  const allocation=lanes.map(([label,pct])=>`${pct}% ${label}: ${fmt(Math.floor(supply*pct/100))} ${symbol}`).join("\n");
  $("#plan-output").textContent=
-`${name} (${symbol})
+`WORLDZ CREATOR MODE: ${mode}\n\n${name} (${symbol})
 Preferred chain: ${chain}
 Total supply: ${fmt(supply)} ${symbol}
 

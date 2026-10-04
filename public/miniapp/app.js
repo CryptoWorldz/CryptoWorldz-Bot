@@ -54,14 +54,14 @@ function render() {
   byId("points").textContent = profile ? profile.points : "—";
   byId("rank").textContent = profile ? profile.rank : "Register First";
   byId("completed").textContent = profile ? profile.missions_completed : "—";
-  byId("pending").textContent = profile ? profile.pending_submissions : "—";
+  byId("pending").textContent = profile ? (profile.automation_holds || 0) : "—";
   byId("fullscope-home-card").innerHTML = `<article class="panel"><p class="eyebrow">🌐 ZED LED • WORLDZFULLSCOPE™</p><h3>One command layer across every supported WorldzLaunchPad chain.</h3><p>Watch tokens, locks, vesting and proof — plus DEX-style favourite-token voting every hour.</p><div class="form-row"><button class="button" type="button" data-open="fullscope">Open FullScope</button><button class="button secondary" type="button" data-open="worldz-votes">🗳️ Hourly Token Votes</button></div></article>`;
   byId("current-mission").innerHTML = data.missions.length ? `<div class="section-title"><h2>🔥 Current Raid</h2></div>${missionCard(data.missions[0], true)}` : empty("No active Raid right now.");
   byId("mission-list").innerHTML = data.missions.length ? data.missions.map((mission) => missionCard(mission)).join("") : empty("No active Raids right now.");
   byId("home-rewards").innerHTML = `<div class="section-title"><h2>🎁 Recent Rewards</h2><button class="button secondary" data-open="rewards">View All</button></div>${renderRewards(data.rewards.slice(0, 3))}`;
   byId("reward-list").innerHTML = renderRewards(data.rewards);
   byId("leaderboard-list").innerHTML = data.leaderboard.length ? data.leaderboard.map((legend, index) => `<div class="leader"><span>${["🥇","🥈","🥉"][index] || index + 1}</span><span>${escapeHtml(legend.username ? `@${legend.username}` : legend.first_name || "Legend")}</span><strong>${Number(legend.points) || 0} LP</strong></div>`).join("") : empty("Leaderboard data is not available yet.");
-  byId("profile-card").innerHTML = profile ? [["Telegram ID",profile.telegram_id],["Username",profile.username ? `@${profile.username}` : "Not Set"],["Rank",profile.rank],["Legend Points",profile.points],["Raaiiidds Complete",profile.missions_completed],["Pending",profile.pending_submissions],["Wallet",profile.wallet_connected ? profile.wallet : "Not Connected"],["Member Since",formatDate(profile.member_since)]].map(([label,value]) => `<div class="profile-row"><span>${escapeHtml(label)}</span><b>${escapeHtml(value)}</b></div>`).join("") + `<div class="panel security"><p>⚠️ Zed will never ask for your seed phrase or private key.</p></div>` : empty("Use /register with Zed before opening your Legend Profile.");
+  byId("profile-card").innerHTML = profile ? [["Telegram ID",profile.telegram_id],["Username",profile.username ? `@${profile.username}` : "Not Set"],["Rank",profile.rank],["Legend Points",profile.points],["Raaiiidds Complete",profile.missions_completed],["Automation Holds",profile.automation_holds || 0],["Wallet",profile.wallet_connected ? profile.wallet : "Not Connected"],["Member Since",formatDate(profile.member_since)]].map(([label,value]) => `<div class="profile-row"><span>${escapeHtml(label)}</span><b>${escapeHtml(value)}</b></div>`).join("") + `<div class="panel security"><p>⚠️ Zed will never ask for your seed phrase or private key.</p></div>` : empty("Use /register with Zed before opening your Legend Profile.");
   byId("kitty-list").innerHTML = data.treasury.length ? data.treasury.map((account) => `<article class="panel kitty-card"><h3>💰 ${escapeHtml(account.asset)} on Solana</h3><p>${escapeHtml(account.label)}</p><div class="kitty-address"><span>Public Address</span><code title="${escapeHtml(account.public_address)}">${escapeHtml(shortenAddress(account.public_address))}</code></div><label>Contribution Amount<input class="payment-amount" inputmode="decimal" type="number" min="0" step="any" placeholder="Optional amount"></label><img class="payment-qr" alt="${escapeHtml(account.asset)} payment QR" hidden><button class="button show-qr" type="button" data-asset="${escapeHtml(account.asset)}">Generate Secure QR</button><button class="button secondary wallet-link" type="button" data-address="${escapeHtml(account.public_address)}" data-asset="${escapeHtml(account.asset)}">Copy Payment Request</button><button class="button secondary copy-address" type="button" data-address="${escapeHtml(account.public_address)}" data-asset="${escapeHtml(account.asset)}">Copy Address</button><label>Transaction Signature<input class="claim-signature" placeholder="Paste signature after sending"></label><button class="button claim-contribution" data-asset="${escapeHtml(account.asset)}" type="button">Verify Contribution</button></article>`).join("") + `<div class="panel security"><p>Points are issued only after finalized on-chain verification and an enabled owner rule.</p><p>⚠️ Zed never asks for private keys and never moves funds automatically.</p></div>` : empty("The Community Kitty is being prepared. No contribution address is active yet.");
   renderCommunity();
   if (data.admin) { renderAdmin(); setTimeout(ensureOwnerTeamControls, 0); }
@@ -78,10 +78,10 @@ function renderCommunity() {
 async function renderAdmin() {
   const access = state.data.admin_access || {};
   const rules = access.role === "owner" ? `<form id="points-rule" class="panel"><h3>Contribution Points Rule</h3><select name="asset"><option>SOL</option><option>USDC</option></select><div class="form-row"><input name="points_per_unit" type="number" min="0" step="any" placeholder="Points per unit" required><input name="minimum_amount" type="number" min="0" step="any" placeholder="Minimum" required></div><input name="max_points" type="number" min="0" max="10000" placeholder="Maximum Points" required><label class="toggle"><input name="enabled" type="checkbox"> Enable verified auto-awards</label><button class="button">Save Rule</button></form>` : "";
-  byId("admin-panel").innerHTML = `<div class="panel"><h3>Role: ${escapeHtml(access.role || "Admin")}</h3><p>${(access.permissions || []).map(escapeHtml).join(" • ")}</p></div><button id="experience-review-button" class="button" type="button" data-open="admin-review">✅ Open Human Review Queue</button><form id="mission-create" class="panel"><h3>Create Raaiiidd</h3><input name="url" type="url" required placeholder="https://x.com/…"><div class="form-row"><input name="reward" type="number" min="0" max="10000" value="10"><input name="duration" placeholder="24h (optional)"></div><button class="button">Create Raid</button></form>${rules}<div id="admin-submissions" class="panel loading"><div class="orb"></div><p>Loading operations…</p></div>`;
+  byId("admin-panel").innerHTML = `<div class="panel"><h3>Role: ${escapeHtml(access.role || "Admin")}</h3><p>${(access.permissions || []).map(escapeHtml).join(" • ")}</p></div><button id="experience-review-button" class="button" type="button" data-open="admin-review">🛡 Open Protected Exceptions</button><form id="mission-create" class="panel"><h3>Create Raaiiidd</h3><input name="url" type="url" required placeholder="https://x.com/…"><div class="form-row"><input name="reward" type="number" min="0" max="10000" value="10"><input name="duration" placeholder="24h (optional)"></div><button class="button">Create Raid</button></form>${rules}<div id="admin-submissions" class="panel loading"><div class="orb"></div><p>Loading operations…</p></div>`;
   try {
     const [result, ops] = await Promise.all([api("/api/mini/admin/submissions"), api("/api/mini/admin/operations")]);
-    byId("admin-submissions").outerHTML = `<div id="admin-submissions"><div class="panel"><h3>Command Centre Stats</h3><p>Legends ${ops.stats.users} • Wallets ${ops.stats.wallets} • Active ${ops.stats.active} • Pending ${ops.stats.pending} • Points ${ops.stats.points}</p></div>${result.submissions.length ? result.submissions.map((item) => `<article class="panel review-card"><b>Submission #${escapeHtml(item.id)} • Raid #${escapeHtml(item.mission_id)}</b><p>${escapeHtml(item.users?.username ? `@${item.users.username}` : item.users?.first_name || item.telegram_id)}</p><p>${escapeHtml(item.proof_url || item.completion_text || "DONE")}</p><div class="form-row"><button class="button approve-submission" data-id="${item.id}">Approve</button><button class="button secondary reject-submission" data-id="${item.id}">Reject</button></div></article>`).join("") : empty("No pending submissions.")}<div class="panel"><h3>Team & Partner Foundation</h3><p>${ops.admins.length} active/configured team records.</p><p>${ops.partners.length ? `${ops.partners.length} approved partner profiles.` : "No partner profiles activated. Invitation-ready only."}</p></div></div>`;
+    byId("admin-submissions").outerHTML = `<div id="admin-submissions"><div class="panel"><h3>Command Centre Stats</h3><p>Legends ${ops.stats.users} • Wallets ${ops.stats.wallets} • Active ${ops.stats.active} • Auto Holds ${ops.stats.pending} • Points ${ops.stats.points}</p></div>${result.submissions.length ? result.submissions.map((item) => `<article class="panel review-card"><b>Submission #${escapeHtml(item.id)} • Raid #${escapeHtml(item.mission_id)}</b><p>${escapeHtml(item.users?.username ? `@${item.users.username}` : item.users?.first_name || item.telegram_id)}</p><p>${escapeHtml(item.proof_url || item.completion_text || "DONE")}</p><div class="notice">ZED + AUTO retry this automatically. Manual approval is not the normal Raid path.</div></article>`).join("") : empty("No Raid automation holds.")}<div class="panel"><h3>Team & Partner Foundation</h3><p>${ops.admins.length} active/configured team records.</p><p>${ops.partners.length ? `${ops.partners.length} approved partner profiles.` : "No partner profiles activated. Invitation-ready only."}</p></div></div>`;
   } catch { byId("admin-panel").innerHTML += empty("Admin operations could not be loaded."); }
 }
 const SCREEN_INSTRUCTIONS = Object.freeze({
@@ -107,7 +107,7 @@ const SCREEN_INSTRUCTIONS = Object.freeze({
   },
   rewards: {
     title: "⭐ REWARDS — WHAT COUNTS?",
-    body: "Legend Points come from eligible Worldz activity such as Raids, referrals and approved reward flows. Normal Raid completions auto-award when safety caps pass; exceptions are reviewed.",
+    body: "Legend Points come from eligible Worldz activity such as Raids, referrals and approved reward flows. Normal Raid completions auto-award when safety caps pass; technical or budget exceptions stay on an automatic retry hold.",
     dip: "guide_raid"
   },
   leaderboard: {
@@ -142,7 +142,7 @@ const SCREEN_INSTRUCTIONS = Object.freeze({
   },
   "admin-review": {
     title: "✅ REVIEW QUEUE",
-    body: "This is for exceptions and protected approvals. Normal eligible Raid rewards should not require routine Admin approval.",
+    body: "This is for protected exceptions only. Normal eligible Raid rewards are validated and awarded by the Worldz automation stack.",
     dip: "guide_raid"
   }
 });
@@ -189,7 +189,21 @@ document.addEventListener("click", async (event) => {
   const copy = event.target.closest(".copy-address");
   if (copy) { try { await navigator.clipboard.writeText(copy.dataset.address); feedback(`✅ ${copy.dataset.asset} address copied.`); } catch { copy.textContent = "Press and hold the address to copy"; } return; }
   const submit = event.target.closest(".submit-mission");
-  if (submit) { const proof = submit.parentElement.querySelector("input").value.trim(); try { const result = await api(`/api/mini/missions/${submit.dataset.missionId}/submit`, { method:"POST", body:JSON.stringify({ proof_url:proof }) }); feedback(`✅ Submission #${result.submission.id} received for review.`); } catch (error) { feedback(`Submission not accepted: ${error.message}`); } return; }
+  if (submit) {
+      const proof = submit.parentElement.querySelector("input").value.trim();
+      try {
+        const result = await api(`/api/mini/missions/${submit.dataset.missionId}/submit`, { method:"POST", body:JSON.stringify({ proof_url:proof }) });
+        const award = result.award || {};
+        if (["awarded","already_awarded"].includes(String(award.outcome || ""))) {
+          feedback(`✅ Raid complete — +${Number(award.points_awarded) || 0} Legend Points auto-awarded. No Admin approval needed.`);
+        } else if (["deferred_auto","budget_deferred"].includes(String(award.outcome || ""))) {
+          feedback("🛡 Raid recorded. ZED + AUTO will retry the reward automatically; no routine Admin approval is required.");
+        } else {
+          feedback(`⚠️ Raid checked automatically: ${award.review_reason || award.outcome || "no points awarded"}.`);
+        }
+      } catch (error) { feedback(`Raid not accepted: ${error.message}`); }
+      return;
+    }
   const qr = event.target.closest(".show-qr");
   if (qr) { const card = qr.closest(".kitty-card"); const amount = card.querySelector(".payment-amount").value; const image = card.querySelector(".payment-qr"); image.hidden = true; try { const response = await fetch(`/api/mini/kitty/qr?asset=${encodeURIComponent(qr.dataset.asset)}&amount=${encodeURIComponent(amount)}`, { headers:{ "X-Telegram-Init-Data":tg.initData } }); if (!response.ok || !response.headers.get("content-type")?.startsWith("image/")) throw new Error(); if (image.dataset.objectUrl) URL.revokeObjectURL(image.dataset.objectUrl); const objectUrl = URL.createObjectURL(await response.blob()); image.dataset.objectUrl = objectUrl; image.src = objectUrl; image.hidden = false; } catch { image.removeAttribute("src"); image.hidden = true; feedback("QR could not be generated."); } return; }
   const wallet = event.target.closest(".wallet-link");
