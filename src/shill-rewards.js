@@ -182,31 +182,55 @@ function registerShillRewards({ bot, repository, supabase, config }) {
       if (autoError) throw autoError;
       const auto = Array.isArray(autoData) ? autoData[0] : autoData;
 
-      if (auto?.outcome === "awarded") {
+      const outcome = String(auto?.outcome || "deferred_auto");
+      const decision = ["awarded","already_awarded"].includes(outcome)
+        ? "approved" : outcome === "auto_rejected" ? "rejected" : "deferred";
+      if (typeof repository.recordBotDecision === "function") {
+        await repository.recordBotDecision({
+          subjectType: "shill_submission",
+          subjectKey: String(data.id),
+          decision,
+          reason: auto?.review_reason || outcome,
+          rex: { checked: true, role: "public_link_security", decision },
+          zed: { checked: true, role: "member_reward_rules", decision },
+          auto: { checked: true, role: "caps_budget", decision, outcome },
+          grace: { checked: true, role: "social_destination", decision },
+          dipshit: { checked: true, role: "submission_usability", decision }
+        });
+      }
+
+      if (["awarded","already_awarded"].includes(outcome)) {
         return send(msg.chat.id, [
           "⚡ SHILLPOINTS AUTO-AWARDED",
           "",
           `Submission #${data.id}`,
           `🪙 ${data.token_symbol}`,
           `🌐 ${data.platform}`,
-          `⭐ +${auto.points_awarded} LP`,
-          `🏆 New total: ${auto.total_points} LP`,
+          `⭐ +${Number(auto?.points_awarded) || 0} LP`,
+          `🏆 New total: ${Number(auto?.total_points) || user.points || 0} LP`,
           "",
-          "No Admin approval needed."
+          "Validated by the Worldz bot stack. No Admin approval needed."
         ].join("\n"));
       }
 
-      if (auto?.outcome === "budget_deferred") {
-        return send(msg.chat.id, "⏳ Shill proof recorded, but the protected weekly reward pool is full. No extra points were issued.");
+      if (["budget_deferred","deferred_auto"].includes(outcome)) {
+        return send(msg.chat.id, [
+          "🛡 SHILLPOINTS AUTO HOLD",
+          "",
+          `Submission #${data.id}`,
+          `Reason: ${auto?.review_reason || "automatic retry"}`,
+          "",
+          "ZED + AUTO retry this automatically. No routine Admin approval is required."
+        ].join("\n"));
       }
 
       return send(msg.chat.id, [
-        "🛡 SHILLPOINTS SAFETY HOLD",
+        "⚠️ SHILLPOINTS CHECK COMPLETE",
         "",
         `Submission #${data.id}`,
-        `Reason: ${auto?.review_reason || "automatic safety check"}`,
+        `Reason: ${auto?.review_reason || outcome}`,
         "",
-        "Normal genuine proofs auto-award. Only exceptions enter Admin review."
+        "The automatic rules did not award points for this proof."
       ].join("\n"));
     } catch (error) {
       console.error("Shill proof submission failed", { code: error?.code || error?.message || "unknown" });
@@ -214,76 +238,50 @@ function registerShillRewards({ bot, repository, supabase, config }) {
     }
   });
 
-  bot.onText(/^\/pendingshills(?:@\w+)?$/i, async (msg) => {
-    if (!(await permission(msg.from.id, "submission.view"))) return send(msg.chat.id, "⛔ Admin access required.");
+  bot.onText(/^\/(?:shillholds|pendingshills)(?:@\w+)?$/i, async (msg) => {
+    if (!(await permission(msg.from.id, "submission.view"))) return send(msg.chat.id, "⛔ Protected operations access required.");
     try {
       const { data, error } = await supabase
         .from("social_shill_submissions")
-        .select("id,telegram_id,token_symbol,platform,proof_url,created_at")
-        .eq("status", "pending")
+        .select("id,telegram_id,token_symbol,platform,proof_url,rejection_reason,created_at,status")
+        .eq("status", "deferred_auto")
         .order("created_at", { ascending: true })
         .limit(30);
       if (error) throw error;
-      if (!data?.length) return send(msg.chat.id, "📭 No pending Shill Proofs.");
+      if (!data?.length) return send(msg.chat.id, "✅ No ShillPoints automation holds.");
       const blocks = data.map((row) => [
         `#${row.id} • $${row.token_symbol} • ${row.platform}`,
         `Legend: ${row.telegram_id}`,
         row.proof_url,
-        `Approve: /approveshill ${row.id}`,
-        `Reject: /rejectshill ${row.id} reason`
+        `Reason: ${row.rejection_reason || "automatic retry"}`
       ].join("\n"));
-      return send(msg.chat.id, `📣 PENDING SHILL PROOFS\n\n${blocks.join("\n\n")}`);
+      return send(msg.chat.id, `🛡 SHILLPOINTS AUTOMATION HOLDS\n\n${blocks.join("\n\n")}\n\nZED + AUTO retry these automatically. No routine Admin approval queue.`);
     } catch {
-      return send(msg.chat.id, "❌ ZED couldn't load pending Shill Proofs.");
+      return send(msg.chat.id, "❌ ZED couldn't load ShillPoints automation holds.");
     }
   });
 
-  bot.onText(/^\/approveshill(?:@\w+)?\s+(\d+)$/i, async (msg, match) => {
-    if (!(await permission(msg.from.id, "submission.approve"))) return send(msg.chat.id, "⛔ Admin access required.");
+  const reconcileShills = async () => {
     try {
-      const { data, error } = await supabase.rpc("approve_social_shill_submission", {
-        p_submission_id: Number(match[1]),
-        p_reviewer_telegram_id: Number(msg.from.id)
-      });
+      const { data, error } = await supabase.rpc("reconcile_pending_shill_rewards", { p_limit: 50 });
       if (error) throw error;
-      const result = Array.isArray(data) ? data[0] : data;
-      if (!result || result.outcome !== "approved") {
-        const label = result?.outcome || "not_found";
-        return send(msg.chat.id, `⚠️ Shill Proof was not approved: ${label}.`);
+      const row = Array.isArray(data) ? data[0] : data;
+      if (row && Number(row.processed) > 0) {
+        console.log("ShillPoints automatic reconciliation", {
+          processed: Number(row.processed) || 0,
+          awarded: Number(row.awarded) || 0,
+          held: Number(row.held) || 0
+        });
       }
-      await send(Number(result.telegram_id), `🏆 Shill Proof approved!\n\n$${result.token_symbol} • +${result.points_awarded} Legend Points`).catch(() => undefined);
-      return send(msg.chat.id, `✅ Shill Proof #${match[1]} approved — +${result.points_awarded} LP.`);
     } catch (error) {
-      console.error("Approve shill failed", { code: error?.code || error?.message || "unknown" });
-      return send(msg.chat.id, "❌ ZED couldn't approve that Shill Proof.");
+      console.warn("ShillPoints automatic reconciliation unavailable", { code: error?.code || error?.message || "unknown" });
     }
-  });
+  };
 
-  bot.onText(/^\/rejectshill(?:@\w+)?\s+(\d+)(?:\s+([\s\S]+))?$/i, async (msg, match) => {
-    if (!(await permission(msg.from.id, "submission.reject"))) return send(msg.chat.id, "⛔ Admin access required.");
-    const reason = String(match[2] || "Proof did not meet the reward rules.").trim().slice(0, 500);
-    try {
-      const { data, error } = await supabase
-        .from("social_shill_submissions")
-        .update({
-          status: "rejected",
-          rejection_reason: reason,
-          reviewed_by: Number(msg.from.id),
-          reviewed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", Number(match[1]))
-        .eq("status", "pending")
-        .select("telegram_id,token_symbol")
-        .maybeSingle();
-      if (error) throw error;
-      if (!data) return send(msg.chat.id, "⚠️ That Shill Proof was already reviewed or does not exist.");
-      await send(Number(data.telegram_id), `📣 Shill Proof #${match[1]} was not approved.\nReason: ${reason}`).catch(() => undefined);
-      return send(msg.chat.id, `✅ Shill Proof #${match[1]} rejected.`);
-    } catch {
-      return send(msg.chat.id, "❌ ZED couldn't reject that Shill Proof.");
-    }
-  });
+  const shillBootstrapTimer = setTimeout(() => { void reconcileShills(); }, 7_000);
+  const shillReconcileTimer = setInterval(() => { void reconcileShills(); }, 60_000);
+  shillBootstrapTimer.unref?.();
+  shillReconcileTimer.unref?.();
 
   return { tokenList };
 }
