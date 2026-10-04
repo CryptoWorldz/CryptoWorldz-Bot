@@ -25,8 +25,13 @@ test("Command Centre registry contains the audited runtime and gateway command i
   }
 });
 
-test("member command guide cannot expose protected controls", () => {
-  const memberNames = new Set(groupsForRole("member").flatMap((group) => group.commands.map((item) => item.command)));
+test("member command guide exposes AUTO planning but not protected execution controls", () => {
+  const memberGroups = groupsForRole("member");
+  const memberNames = new Set(memberGroups.flatMap((group) => group.commands.map((item) => item.command)));
+  const autoPlanner = memberGroups.find((group) => group.key === "auto-market-planner");
+  assert.ok(autoPlanner, "public AUTO planner group missing");
+  assert.ok(memberNames.has("auto"), "member AUTO planner command missing");
+  assert.ok(memberNames.has("autosimulate"), "member AUTO simulation command missing");
   for (const command of ["setprojectwallet","autoemergency","appointexecutive","metacheck","adapprove","setrole","pending","approve","reject"]) {
     assert.equal(memberNames.has(command), false, `member guide exposed /${command}`);
   }
