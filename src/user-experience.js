@@ -226,10 +226,18 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
         return { outcome: "awaiting_target", request: waiting };
       }
 
-      const duplicate = await repository.findMissionByUrl(request.target_url);
-      if (duplicate) throw new Error("duplicate_raid_destination");
+      const { data: existingRows, error: existingError } = await supabase
+        .from("missions")
+        .select("id,status,created_by,target_url")
+        .eq("target_url", request.target_url)
+        .limit(1);
+      if (existingError) throw existingError;
+      const existing = (existingRows || [])[0] || null;
+      if (existing && Number(existing.created_by) !== Number(request.creator_telegram_id)) {
+        throw new Error("duplicate_raid_destination");
+      }
 
-      const mission = await repository.createMission({
+      const mission = existing || await repository.createMission({
         title: cleanText(post.title, 140),
         platform: inferPlatform(request.target_url),
         target_url: request.target_url,
