@@ -59,7 +59,7 @@ jobs:
           assert reg.get('worldzLaunchPadContributionChoicesPercent')==[3,5,8]
           assert reg.get('worldzLaunchPadContributionDefaultPercent')==5
           assert reg.get('creatorRetentionByContributionPercent')=={'3':97,'5':95,'8':92}
-          assert reg.get('tokenSupplyTakePercent')==0
+          assert reg.get('tokenSupplyTakePercent')==0.6
           assert reg.get('initialLiquidityTakePercent')==0
           assert reg.get('walletTransferTaxPercent')==0
           print('WORLDZ_LAUNCH_REGISTER_V3_LIVE=PASS')
