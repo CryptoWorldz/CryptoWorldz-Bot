@@ -83,11 +83,62 @@ function createRepository(supabase) {
     return { duplicate: false, submission: data };
   }
 
+  async function recordBotDecision({
+    subjectType,
+    subjectKey,
+    decision,
+    reason = "",
+    rex = {},
+    zed = {},
+    auto = {},
+    grace = {},
+    dipshit = {}
+  }) {
+    try {
+      const { error } = await supabase.rpc("record_worldz_bot_decision", {
+        p_subject_type: String(subjectType),
+        p_subject_key: String(subjectKey),
+        p_decision: String(decision),
+        p_rex: rex,
+        p_zed: zed,
+        p_auto: auto,
+        p_grace: grace,
+        p_dipshit: dipshit,
+        p_reason: String(reason || "")
+      });
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.warn("Worldz bot decision ledger unavailable", {
+        subject_type: subjectType,
+        subject_key: subjectKey,
+        code: error?.code || error?.message || "unknown"
+      });
+      return false;
+    }
+  }
+
   async function autoAwardRaidSubmission(submissionId) {
     const { data, error } = await supabase
       .rpc("auto_award_raid_submission", { p_submission_id: Number(submissionId) });
     if (error) throw error;
-    return Array.isArray(data) ? data[0] : data;
+    const result = Array.isArray(data) ? data[0] : data;
+    const outcome = String(result?.outcome || "deferred_auto");
+    const decision = ["awarded", "already_awarded"].includes(outcome)
+      ? "approved"
+      : outcome === "auto_rejected" ? "rejected" : "deferred";
+    await recordBotDecision({
+      subjectType: "raid_submission",
+      subjectKey: String(submissionId),
+      decision,
+      reason: result?.review_reason || outcome,
+      rex: { checked: true, role: "security_evidence", decision },
+      zed: { checked: true, role: "member_rules", decision },
+      auto: { checked: true, role: "caps_budget", decision, outcome },
+      grace: { checked: true, role: "destination_schedule", decision },
+      dipshit: { checked: true, role: "completion_usability", decision }
+    });
+    return result;
   }
 
   async function getMission(missionId) {
@@ -289,7 +340,7 @@ function createRepository(supabase) {
     const { data, error } = await supabase
       .from("mission_submissions")
       .select("*")
-      .eq("status", "pending")
+      .eq("status", "deferred_auto")
       .order("submitted_at", { ascending: false })
       .limit(limit);
     if (error) throw error;
@@ -345,7 +396,7 @@ function createRepository(supabase) {
       supabase.from("users").select("id", { count: "exact", head: true }).not("wallet", "is", null),
       supabase.from("missions").select("id", { count: "exact", head: true }).in("status", ["active", "open"]),
       supabase.from("missions").select("id", { count: "exact", head: true }).in("status", ["completed", "closed"]),
-      supabase.from("mission_submissions").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      supabase.from("mission_submissions").select("id", { count: "exact", head: true }).eq("status", "deferred_auto"),
       supabase.from("reward_transactions").select("amount")
     ]);
     for (const result of [users, wallets, missions, completed, pending, rewards]) if (result.error) throw result.error;
