@@ -81,7 +81,7 @@ async function renderAdmin() {
   byId("admin-panel").innerHTML = `<div class="panel"><h3>Role: ${escapeHtml(access.role || "Admin")}</h3><p>${(access.permissions || []).map(escapeHtml).join(" • ")}</p></div><button id="experience-review-button" class="button" type="button" data-open="admin-review">🛡 Open Protected Exceptions</button><form id="mission-create" class="panel"><h3>Create Raaiiidd</h3><input name="url" type="url" required placeholder="https://x.com/…"><div class="form-row"><input name="reward" type="number" min="0" max="10000" value="10"><input name="duration" placeholder="24h (optional)"></div><button class="button">Create Raid</button></form>${rules}<div id="admin-submissions" class="panel loading"><div class="orb"></div><p>Loading operations…</p></div>`;
   try {
     const [result, ops] = await Promise.all([api("/api/mini/admin/submissions"), api("/api/mini/admin/operations")]);
-    byId("admin-submissions").outerHTML = `<div id="admin-submissions"><div class="panel"><h3>Command Centre Stats</h3><p>Legends ${ops.stats.users} • Wallets ${ops.stats.wallets} • Active ${ops.stats.active} • Auto Holds ${ops.stats.pending} • Points ${ops.stats.points}</p></div>${result.submissions.length ? result.submissions.map((item) => `<article class="panel review-card"><b>Submission #${escapeHtml(item.id)} • Raid #${escapeHtml(item.mission_id)}</b><p>${escapeHtml(item.users?.username ? `@${item.users.username}` : item.users?.first_name || item.telegram_id)}</p><p>${escapeHtml(item.proof_url || item.completion_text || "DONE")}</p><div class="notice">ZED + AUTO retry this automatically. Manual approval is not the normal Raid path.</div></article>`).join("") : empty("No Raid automation holds.")}<div class="panel"><h3>Team & Partner Foundation</h3><p>${ops.admins.length} active/configured team records.</p><p>${ops.partners.length ? `${ops.partners.length} approved partner profiles.` : "No partner profiles activated. Invitation-ready only."}</p></div></div>`;
+    byId("admin-submissions").outerHTML = `<div id="admin-submissions"><div class="panel"><h3>Command Centre Stats</h3><p>Legends ${ops.stats.users} • Wallets ${ops.stats.wallets} • Active ${ops.stats.active} • Auto Holds ${ops.stats.pending} • Points ${ops.stats.points}</p></div>${result.submissions.length ? result.submissions.map((item) => `<article class="panel review-card"><b>Submission #${escapeHtml(item.id)} • Raid #${escapeHtml(item.mission_id)}</b><p>${escapeHtml(item.users?.username ? `@${item.users.username}` : item.users?.first_name || item.telegram_id)}</p><p>${escapeHtml(item.proof_url || item.completion_text || "DONE")}</p><div class="notice">ZED + AUTO retry this automatically. Manual approval is not the Raid path.</div><button class="button secondary recheck-submission" data-id="${item.id}" type="button">Retry Automatic Check</button></article>`).join("") : empty("No Raid automation holds.")}<div class="panel"><h3>Team & Partner Foundation</h3><p>${ops.admins.length} active/configured team records.</p><p>${ops.partners.length ? `${ops.partners.length} approved partner profiles.` : "No partner profiles activated. Invitation-ready only."}</p></div></div>`;
   } catch { byId("admin-panel").innerHTML += empty("Admin operations could not be loaded."); }
 }
 const SCREEN_INSTRUCTIONS = Object.freeze({
@@ -210,10 +210,20 @@ document.addEventListener("click", async (event) => {
   if (wallet) { const amount = wallet.closest(".kitty-card").querySelector(".payment-amount").value; const params = new URLSearchParams({ label:"CryptoWorldz Community Kitty", message:`CryptoWorldz ${wallet.dataset.asset} Community Kitty contribution` }); if (amount) params.set("amount", amount); if (wallet.dataset.asset === "USDC") params.set("spl-token", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"); const paymentRequest = `solana:${wallet.dataset.address}?${params}`; try { await navigator.clipboard.writeText(paymentRequest); feedback(`✅ ${wallet.dataset.asset} payment request copied. Open your Solana wallet and paste it.`); } catch { feedback("Could not copy the payment request. Use Copy Address instead."); } return; }
   const claim = event.target.closest(".claim-contribution");
   if (claim) { const signature = claim.closest(".kitty-card").querySelector(".claim-signature").value.trim(); try { const result = await api("/api/mini/kitty/claim", { method:"POST", body:JSON.stringify({ asset:claim.dataset.asset, signature }) }); feedback(`✅ Verified ${result.verified_amount} ${result.asset}. ${result.contribution.points_awarded} Legend Points awarded.`); } catch (error) { feedback(`Could not verify: ${error.message}`); } return; }
-  const approve = event.target.closest(".approve-submission");
-  if (approve) { try { await api(`/api/mini/admin/submissions/${approve.dataset.id}/approve`, { method:"POST", body:"{}" }); feedback("✅ Submission approved."); await renderAdmin(); } catch (error) { feedback(`Approval failed: ${error.message}`); } return; }
-  const reject = event.target.closest(".reject-submission");
-  if (reject) { const reason = prompt("Rejection reason"); if (!reason) return; try { await api(`/api/mini/admin/submissions/${reject.dataset.id}/reject`, { method:"POST", body:JSON.stringify({ reason }) }); feedback("✅ Submission rejected."); await renderAdmin(); } catch (error) { feedback(`Rejection failed: ${error.message}`); } return; }
+  const recheck = event.target.closest(".recheck-submission");
+  if (recheck) {
+    try {
+      const response = await api(`/api/mini/admin/submissions/${recheck.dataset.id}/recheck`, { method:"POST", body:"{}" });
+      const result=response.result || {};
+      feedback(["awarded","already_awarded"].includes(String(result.outcome || ""))
+        ? "✅ Automatic Raid recheck awarded the submission."
+        : result.outcome === "auto_rejected"
+          ? `⚠️ Automatic rules rejected it: ${result.review_reason || "rule check"}.`
+          : `🛡 Automatic hold remains: ${result.review_reason || result.outcome || result.status || "retry later"}.`);
+      await renderAdmin();
+    } catch (error) { feedback(`Automatic recheck failed: ${error.message}`); }
+    return;
+  }
   const target = event.target.closest("[data-screen],[data-open]");
   if (target) showScreen(target.dataset.screen || target.dataset.open);
 });
