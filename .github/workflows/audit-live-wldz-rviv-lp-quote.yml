@@ -1,0 +1,28 @@
+name: Audit live WLDZ RVIV LP quote
+
+on:
+  push:
+    branches:
+      - audit-live-wldz-rviv-lp-quote
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: worldzpad-mainnet/package-lock.json
+      - name: Install pinned mainnet dependencies
+        working-directory: worldzpad-mainnet
+        run: npm ci --ignore-scripts
+      - name: Read-only live DAMM v2 deposit quotes
+        working-directory: worldzpad-mainnet
+        run: node scripts/audit-live-lp-deposit-quote.mjs
