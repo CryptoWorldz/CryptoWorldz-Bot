@@ -144,21 +144,18 @@
         const output = formatTokenAmount(quote.outAmount, payload.outputDecimals);
         const mark = valuation.notionalMarkValueUsd;
         const status = gate.status || 'UNKNOWN';
-        result.innerHTML = `<b>REALIZABLE VALUE CHECK • READ ONLY</b>
-          <div class="profile-row"><span>Token amount checked</span><b>${esc(payload.tokenAmount)}</b></div>
-          <div class="profile-row"><span>Notional mark value</span><b>${mark == null ? 'Not returned' : '
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
-  else mount();
-  setTimeout(mount, 500);
-})(); + Number(mark).toLocaleString('en-AU',{maximumFractionDigits:2})}</b></div>
-          <div class="profile-row"><span>Executable quote now</span><b>${esc(output)} ${esc(payload.outputCurrency || 'USDC')}</b></div>
-          <div class="profile-row"><span>Price impact</span><b>${esc(quote.priceImpactPct ?? 'Not returned')}%</b></div>
-          <div class="profile-row"><span>Your impact limit</span><b>${esc(gate.maxPriceImpactPct ?? '—')}%</b></div>
-          <div class="profile-row"><span>Impact gate</span><b>${esc(status)}</b></div>
-          <div class="profile-row"><span>Router</span><b>${esc(quote.router || quote.swapType || 'Provider selected')}</b></div>
-          <p><b>Capital rule:</b> ${esc(payload.capitalRule || '')}</p>
-          <p><small>Snapshot: ${esc(payload.checkedAt || '')}. Re-quote before any future signature because liquidity and routes move.</small></p>
-          <p><b>No transaction was submitted.</b></p>`;
+        const markText = mark == null ? 'Not returned' : '$' + Number(mark).toLocaleString('en-AU',{maximumFractionDigits:2});
+        result.innerHTML = '<b>REALIZABLE VALUE CHECK • READ ONLY</b>' +
+          '<div class="profile-row"><span>Token amount checked</span><b>' + esc(payload.tokenAmount) + '</b></div>' +
+          '<div class="profile-row"><span>Notional mark value</span><b>' + esc(markText) + '</b></div>' +
+          '<div class="profile-row"><span>Executable quote now</span><b>' + esc(output) + ' ' + esc(payload.outputCurrency || 'USDC') + '</b></div>' +
+          '<div class="profile-row"><span>Price impact</span><b>' + esc(quote.priceImpactPct ?? 'Not returned') + '%</b></div>' +
+          '<div class="profile-row"><span>Your impact limit</span><b>' + esc(gate.maxPriceImpactPct ?? '—') + '%</b></div>' +
+          '<div class="profile-row"><span>Impact gate</span><b>' + esc(status) + '</b></div>' +
+          '<div class="profile-row"><span>Router</span><b>' + esc(quote.router || quote.swapType || 'Provider selected') + '</b></div>' +
+          '<p><b>Capital rule:</b> ' + esc(payload.capitalRule || '') + '</p>' +
+          '<p><small>Snapshot: ' + esc(payload.checkedAt || '') + '. Re-quote before any future signature because liquidity and routes move.</small></p>' +
+          '<p><b>No transaction was submitted.</b></p>';
       } catch (error) {
         result.innerHTML = `<b>EXIT CHECK FAILED</b><p>${esc(error.message || error)}</p><p>No transaction attempted.</p>`;
       }
