@@ -52,6 +52,9 @@ for (const market of MARKETS) {
   console.log(`tokenB=${state.tokenBMint.toBase58()} decimalsB=${bDecimals}`);
   console.log(`expectedBaseMintMatch=${state.tokenAMint.equals(mintPk)}`);
   console.log(`collectFeeMode=${Number(state.collectFeeMode)}`);
+  console.log(`poolStatus=${Number(state.poolStatus)}`);
+  console.log(`activationType=${Number(state.activationType)} activationPoint=${state.activationPoint?.toString?.() ?? String(state.activationPoint)}`);
+  console.log(`currentSlot=${await connection.getSlot("confirmed")} currentUnix=${Math.floor(Date.now()/1000)}`);
   console.log(`poolTokenA=${human(state.tokenAAmount, aDecimals)}`);
   console.log(`poolTokenB=${human(state.tokenBAmount, bDecimals)}`);
   console.log(`sqrtPrice=${state.sqrtPrice.toString()}`);
