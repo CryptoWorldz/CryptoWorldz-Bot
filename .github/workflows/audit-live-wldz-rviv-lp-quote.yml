@@ -18,11 +18,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: worldzpad-mainnet/package-lock.json
       - name: Install pinned mainnet dependencies
         working-directory: worldzpad-mainnet
-        run: npm ci --ignore-scripts
+        run: npm install --ignore-scripts --no-audit --no-fund
       - name: Read-only live DAMM v2 deposit quotes
         working-directory: worldzpad-mainnet
         run: node scripts/audit-live-lp-deposit-quote.mjs
