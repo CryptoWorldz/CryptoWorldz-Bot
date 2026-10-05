@@ -20,6 +20,7 @@ const MARKETS = [
 ];
 
 const SOL_INPUTS = [0.05, 0.1, 0.135, 0.2, 0.25, 0.27, 0.28];
+const BUY_INPUTS = [0.000001,0.0000025,0.000005,0.00001,0.000025,0.00005,0.0001,0.00025,0.0005,0.001,0.0025,0.005,0.01,0.02,0.05,0.1,0.2,0.27];
 
 function human(raw, decimals) {
   const n = BigInt(raw.toString());
@@ -73,5 +74,21 @@ for (const market of MARKETS) {
     console.log(
       `depositQuote market=${market.symbol} requestedSOL=${sol} consumedSOL=${human(quote.consumedInputAmount, bDecimals)} requiredBase=${human(quote.outputAmount, aDecimals)} liquidityDelta=${quote.liquidityDelta.toString()}`
     );
+  for (const sol of BUY_INPUTS) {
+    const lamports = BigInt(Math.round(sol * 1e9));
+    try {
+      const quote = cpAmm.getQuote({
+        inAmount: new BN(lamports.toString()),
+        inputTokenMint: state.tokenBMint,
+        slippageBps: 100,
+        poolState: state
+      });
+      console.log(
+        `buyQuote market=${market.symbol} inputSOL=${sol} consumedSOL=${human(quote.consumedInAmount, bDecimals)} outputBase=${human(quote.swapOutAmount, aDecimals)} feeSOL=${human(quote.totalFee, bDecimals)} priceImpactPct=${quote.priceImpact.toString()}`
+      );
+    } catch (error) {
+      console.log(`buyQuote market=${market.symbol} inputSOL=${sol} error=${String(error?.message || error).replace(/\s+/g,"_")}`);
+    }
+  }
   }
 }
