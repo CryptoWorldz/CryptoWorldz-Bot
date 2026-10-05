@@ -6,6 +6,20 @@ const {
   ultimatePublicBlueprint
 } = require("./ultimate-blueprint");
 
+function decimalToRawAmount(value, decimals) {
+  const input = String(value ?? "").trim();
+  if (!/^\d+(?:\.\d+)?$/.test(input)) throw Object.assign(new Error("invalid_decimal_amount"), { code: "invalid_decimal_amount" });
+  const places = Number(decimals);
+  if (!Number.isInteger(places) || places < 0 || places > 18) throw Object.assign(new Error("invalid_token_decimals"), { code: "invalid_token_decimals" });
+  const [whole, fraction = ""] = input.split(".");
+  if (fraction.length > places) throw Object.assign(new Error("too_many_decimal_places"), { code: "too_many_decimal_places" });
+  const base = 10n ** BigInt(places);
+  const fractional = places === 0 ? 0n : BigInt((fraction + "0".repeat(places)).slice(0, places) || "0");
+  const raw = (BigInt(whole) * base) + fractional;
+  if (raw <= 0n) throw Object.assign(new Error("amount_too_small"), { code: "amount_too_small" });
+  return raw.toString();
+}
+
 function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
   const allowRequest = createRequestLimiter({ maxEvents: 30, intervalMs: 60000 });
   const allowPublicQuote = createRequestLimiter({ maxEvents: 1, intervalMs: 2500 });
@@ -73,6 +87,12 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
       modes: ["BUY_ANALYSIS", "LP_ANALYSIS", "HYBRID_ANALYSIS"],
       buyQuoteProvider: "JUPITER_ULTRA_V3",
       lpQuoteState: "FAIL_CLOSED_UNTIL_LIVE_METEORA_ADAPTER",
+      realizableValueGate: {
+        enabled: true,
+        exitQuoteProvider: "JUPITER_ULTRA_V3",
+        defaultExitAsset: "USDC",
+        rule: "Displayed market cap and mark-to-market position value are not liquid capital. AUTO requires a live exit quote before treating a token holding as realizable value."
+      },
       liveRules: [
         "Use the user's own selected wallet and budget by default.",
         "Show live route, price impact, fees, liquidity evidence and expected output before any signature.",
@@ -301,6 +321,146 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
     }
   });
 
+  app.get("/api/mini/auto/public/exit-quote", authenticatePublicAuto, async (req, res) => {
+    if (!allowPublicQuote(`jupiter-public-exit:${req.telegramUser.id}`)) {
+      return res.status(429).json({ ok: false, error: "quote_rate_limited", retry: "Try again in a few seconds." });
+    }
+
+    const tokenMint = String(req.query.token_mint || "").trim();
+    const walletAddress = String(req.query.wallet_address || "").trim();
+    const tokenAmount = String(req.query.token_amount || "").trim();
+    const outputCurrency = String(req.query.output_currency || "USDC").toUpperCase();
+    const maxPriceImpactPct = Number(req.query.max_price_impact_pct ?? 1);
+    const keyPattern = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+
+    if (!keyPattern.test(tokenMint)) return res.status(400).json({ ok: false, error: "invalid_token_mint" });
+    if (!keyPattern.test(walletAddress)) return res.status(400).json({ ok: false, error: "invalid_wallet_address" });
+    if (!/^\d+(?:\.\d+)?$/.test(tokenAmount)) return res.status(400).json({ ok: false, error: "invalid_token_amount" });
+    if (!Number.isFinite(maxPriceImpactPct) || maxPriceImpactPct <= 0 || maxPriceImpactPct > 50) {
+      return res.status(400).json({ ok: false, error: "invalid_max_price_impact_pct" });
+    }
+
+    const outputMint = outputCurrency === "USDC"
+      ? "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+      : outputCurrency === "SOL"
+        ? "So11111111111111111111111111111111111111112"
+        : null;
+    const outputDecimals = outputCurrency === "USDC" ? 6 : outputCurrency === "SOL" ? 9 : null;
+    if (!outputMint) return res.status(400).json({ ok: false, error: "unsupported_output_currency", allowed: ["USDC", "SOL"] });
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
+    try {
+      const intelligenceResponse = await fetch(
+        "https://launchpad.cryptoworldz.xyz/intelligence.php?mint=" + encodeURIComponent(tokenMint),
+        {
+          headers: { "accept": "application/json", "user-agent": "Worldz-AUTO-Exitability/1.0" },
+          signal: controller.signal
+        }
+      );
+      const intelligence = intelligenceResponse.ok
+        ? await intelligenceResponse.json().catch(() => null)
+        : null;
+      const tokenDecimals = Number(intelligence?.onchain?.decimals);
+      if (!Number.isInteger(tokenDecimals)) {
+        return res.status(422).json({
+          ok: false,
+          error: "token_decimals_unverified",
+          capitalRule: "Displayed market cap or position value is not liquid capital without a verified executable exit quote."
+        });
+      }
+
+      let rawAmount;
+      try {
+        rawAmount = decimalToRawAmount(tokenAmount, tokenDecimals);
+      } catch (error) {
+        return res.status(400).json({ ok: false, error: error.code || "invalid_token_amount" });
+      }
+
+      const params = new URLSearchParams({
+        inputMint: tokenMint,
+        outputMint,
+        amount: rawAmount,
+        taker: walletAddress
+      });
+      const headers = { "accept": "application/json" };
+      const hasJupiterKey = Boolean(process.env.JUPITER_API_KEY);
+      if (hasJupiterKey) headers["x-api-key"] = process.env.JUPITER_API_KEY;
+      const jupiterBase = hasJupiterKey ? "https://api.jup.ag" : "https://lite-api.jup.ag";
+      const quoteResponse = await fetch(jupiterBase + "/ultra/v1/order?" + params.toString(), { headers, signal: controller.signal });
+      const quote = await quoteResponse.json().catch(() => ({}));
+
+      if (!quoteResponse.ok || quote.errorCode || quote.error || !quote.outAmount) {
+        return res.status(422).json({
+          ok: false,
+          error: quote.errorMessage || quote.error || quote.errorCode || "no_executable_exit_quote",
+          provider: "Jupiter Ultra V3",
+          intelligence,
+          capitalRule: "No executable exit quote means AUTO does not count the displayed position value as realizable capital."
+        });
+      }
+
+      const impact = Number(quote.priceImpactPct);
+      const impactVerified = Number.isFinite(impact);
+      const withinPriceImpactLimit = impactVerified ? impact <= maxPriceImpactPct : null;
+      const markPriceUsd = Number(intelligence?.jupiter?.usdPrice ?? intelligence?.liquidity?.deepestPair?.priceUsd);
+      const numericTokenAmount = Number(tokenAmount);
+      const notionalMarkValueUsd = Number.isFinite(markPriceUsd) && Number.isFinite(numericTokenAmount)
+        ? markPriceUsd * numericTokenAmount
+        : null;
+
+      return res.json({
+        ok: true,
+        checkedAt: new Date().toISOString(),
+        mode: "READ_ONLY_EXIT_QUOTE",
+        provider: "Jupiter Ultra V3",
+        tokenMint,
+        tokenAmount,
+        tokenDecimals,
+        outputCurrency,
+        outputDecimals,
+        quote: {
+          requestId: quote.requestId ?? null,
+          inAmount: quote.inAmount ?? rawAmount,
+          outAmount: quote.outAmount,
+          priceImpactPct: quote.priceImpactPct ?? null,
+          swapType: quote.swapType ?? null,
+          router: quote.router ?? null,
+          slippageBps: quote.slippageBps ?? null,
+          feeBps: quote.feeBps ?? null
+        },
+        priceImpactGate: {
+          maxPriceImpactPct,
+          impactVerified,
+          withinLimit: withinPriceImpactLimit,
+          status: !impactVerified
+            ? "IMPACT_NOT_RETURNED__DO_NOT_ASSUME"
+            : withinPriceImpactLimit
+              ? "WITHIN_LIMIT"
+              : "ABOVE_LIMIT"
+        },
+        valuation: {
+          markPriceUsd: Number.isFinite(markPriceUsd) ? markPriceUsd : null,
+          notionalMarkValueUsd,
+          rule: "Notional mark value is informational only. The executable exit quote is the realizable-value evidence."
+        },
+        intelligence,
+        executionEnabled: false,
+        treasuryRequired: false,
+        capitalRule: "Displayed market cap and token position value are not treated as liquid capital unless an executable exit quote exists.",
+        note: "Read-only quote. Re-quote immediately before any future wallet signature. No transaction was submitted."
+      });
+    } catch (error) {
+      return res.status(error.name === "AbortError" ? 504 : 502).json({
+        ok: false,
+        error: error.name === "AbortError" ? "quote_timeout" : "quote_provider_unavailable"
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+  });
+
   app.get("/api/mini/auto/status", authenticateAuto, async (req, res) => {
     try { return res.json({ ...(await autoClient.status()), access: req.autoAuthority }); }
     catch (error) { return res.status(502).json({ ok: false, error: error.code || "auto_status_failed" }); }
@@ -367,4 +527,4 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
   });
 }
 
-module.exports = { registerAutoMiniRoutes };
+module.exports = { registerAutoMiniRoutes, decimalToRawAmount };

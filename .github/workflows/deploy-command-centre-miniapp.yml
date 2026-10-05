@@ -66,6 +66,8 @@ jobs:
           grep -Fq 'AUTO MARKET PLANNER™ • EVERY DAY' public/miniapp/auto-public.js
           grep -Fq 'Treasury is optional and never assumed' public/miniapp/auto-public.js
           grep -Fq '/api/mini/auto/public/quote' public/miniapp/auto-public.js
+          grep -Fq 'REALIZABLE VALUE GATE' public/miniapp/auto-public.js
+          grep -Fq '/api/mini/auto/public/exit-quote' public/miniapp/auto-public.js
           grep -Fq 'zed-miniapp-rescue' public/miniapp/app.js
           grep -Fq 'DIPSHIT™' public/miniapp/dipshit.js
           grep -Fq 'WORLDZ DUDE' public/miniapp/dipshit.js
@@ -179,7 +181,7 @@ jobs:
                   assert 'BASED.BID' not in html.upper()
                   assert jcode==200 and 'zed-miniapp-rescue' in js
                   assert acode==200 and 'WorldzLaunchPad™' in auto and 'Command Centre MAX™' in auto
-                  assert pcode==200 and 'AUTO MARKET PLANNER™ • EVERY DAY' in publicauto and 'Treasury is optional and never assumed' in publicauto and '/api/mini/auto/public/quote' in publicauto
+                  assert pcode==200 and 'AUTO MARKET PLANNER™ • EVERY DAY' in publicauto and 'Treasury is optional and never assumed' in publicauto and '/api/mini/auto/public/quote' in publicauto and 'REALIZABLE VALUE GATE' in publicauto and '/api/mini/auto/public/exit-quote' in publicauto
                   assert dcode==200 and 'DIPSHIT™' in dipshit and 'WORLDZ DUDE' in dipshit and 'walletSigning: false' in dipshit
                   assert ncode==200 and '/api/mini/inbox' in inbox and 'Worldz Inbox' in inbox
                   assert ccode==200 and '.worldz-inbox-shell' in inboxcss

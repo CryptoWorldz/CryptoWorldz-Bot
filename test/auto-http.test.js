@@ -3,7 +3,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const express = require("express");
 const { createAutoHttpApp, safeEqual } = require("../src/auto/http");
-const { registerAutoMiniRoutes } = require("../src/auto/zed-router");
+const { registerAutoMiniRoutes, decimalToRawAmount } = require("../src/auto/zed-router");
 
 function signedInitData(user, botToken) {
   const params = new URLSearchParams({
@@ -26,6 +26,12 @@ async function listen(app, t) {
   t.after(() => server.close());
   return `http://127.0.0.1:${server.address().port}`;
 }
+
+test("AUTO converts human token amounts to exact raw units", () => {
+  assert.equal(decimalToRawAmount("8000000", 6), "8000000000000");
+  assert.equal(decimalToRawAmount("4.29", 6), "4290000");
+  assert.throws(() => decimalToRawAmount("1.0000001", 6), /too_many_decimal_places/);
+});
 
 test("Auto internal token comparison accepts exact values only", () => {
   assert.equal(safeEqual("same", "same"), true);
@@ -98,6 +104,8 @@ test("Zed Mini App AUTO keeps execution protected while public planning is avail
   assert.equal(publicPayload.defaultFundingSource, "USER_PERSONAL_WALLET");
   assert.equal(publicPayload.treasuryRequired, false);
   assert.equal(publicPayload.executionEnabled, false);
+  assert.equal(publicPayload.realizableValueGate.enabled, true);
+  assert.match(publicPayload.realizableValueGate.rule, /not liquid capital/i);
 
   const publicSimulation = await fetch(`${base}/api/mini/auto/public/simulate`, {
     method: "POST",
