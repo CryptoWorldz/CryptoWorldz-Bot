@@ -71,6 +71,7 @@ a{color:inherit}.shell{max-width:1240px;margin:auto;padding:18px 18px 90px}.top{
 </div>
 <div class="actions"><button class="primary" id="hybrid-run" type="button">COMPARE LIVE OPTIONS</button></div>
 <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Plan</th><th>SOL Buy</th><th>SOL LP</th><th>Tokens Bought</th><th>Tokens Required for LP</th><th>Buy Price Impact</th><th>Feasible?</th></tr></thead><tbody id="hybrid-body"><tr><td colspan="7">Run the comparison.</td></tr></tbody></table></div>
+<div class="note"><b>Hybrid truth rule:</b> the BUY and LP legs are quoted against the same current pool snapshot for comparison only. A real BUY changes the pool. Before any LP transaction, Worldz must fetch the new pool state and re-quote the LP leg. No stale hybrid quote should ever be signed.</div>
 </section>
 
 <section class="calc" id="price">
