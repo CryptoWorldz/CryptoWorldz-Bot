@@ -54,7 +54,8 @@ for (const market of MARKETS) {
   console.log(`collectFeeMode=${Number(state.collectFeeMode)}`);
   console.log(`poolStatus=${Number(state.poolStatus)}`);
   console.log(`activationType=${Number(state.activationType)} activationPoint=${state.activationPoint?.toString?.() ?? String(state.activationPoint)}`);
-  console.log(`currentSlot=${await connection.getSlot("confirmed")} currentUnix=${Math.floor(Date.now()/1000)}`);
+  const currentUnix = Math.floor(Date.now()/1000);
+  console.log(`currentUnix=${currentUnix}`);
   console.log(`poolTokenA=${human(state.tokenAAmount, aDecimals)}`);
   console.log(`poolTokenB=${human(state.tokenBAmount, bDecimals)}`);
   console.log(`sqrtPrice=${state.sqrtPrice.toString()}`);
@@ -83,7 +84,12 @@ for (const market of MARKETS) {
       const quote = cpAmm.getQuote({
         inAmount: new BN(lamports.toString()),
         inputTokenMint: state.tokenBMint,
-        slippageBps: 100,
+        slippage: 1,
+        currentPoint: new BN(currentUnix.toString()),
+        currentTime: currentUnix,
+        currentSlot: 0,
+        tokenADecimal: aDecimals,
+        tokenBDecimal: bDecimals,
         poolState: state
       });
       console.log(
