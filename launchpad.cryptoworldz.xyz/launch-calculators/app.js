@@ -107,7 +107,7 @@ $('#hybrid-run').addEventListener('click',async()=>{
    try{if(buySol>0)buy=quoteBuy(ctx,buySol,slip);}catch(e){buy={base:0,impact:NaN,error:String(e.message||e)}}
    try{if(lpSol>0)lp=quoteDeposit(ctx,lpSol);}catch(e){lp={base:Infinity,error:String(e.message||e)}}
    const available=owned+(Number.isFinite(buy.base)?buy.base:0);
-   const feasible=!lp.error&&lp.base<=available&&lp.base<=ctx.a.supply;
+   const feasible=!buy.error&&!lp.error&&lp.base<=available&&lp.base<=ctx.a.supply;
    rows.push('<tr><td>'+buyPct+'% BUY / '+(100-buyPct)+'% LP</td><td>'+fmt(buySol,8)+'</td><td>'+fmt(lpSol,8)+'</td><td>'+(buy.error?'QUOTE FAILED':fmt(buy.base,6))+'</td><td>'+(lp.error?'QUOTE FAILED':fmt(lp.base,6))+'</td><td>'+(Number.isFinite(buy.impact)?fmt(buy.impact,4)+'%':'—')+'</td><td class="'+(feasible?'ok':'bad')+'">'+(feasible?'YES':'NO')+'</td></tr>');
   }
   body.innerHTML=rows.join('');
