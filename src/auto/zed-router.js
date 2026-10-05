@@ -6,6 +6,20 @@ const {
   ultimatePublicBlueprint
 } = require("./ultimate-blueprint");
 
+function decimalToRawAmount(value, decimals) {
+  const input = String(value ?? "").trim();
+  if (!/^\d+(?:\.\d+)?$/.test(input)) throw Object.assign(new Error("invalid_decimal_amount"), { code: "invalid_decimal_amount" });
+  const places = Number(decimals);
+  if (!Number.isInteger(places) || places < 0 || places > 18) throw Object.assign(new Error("invalid_token_decimals"), { code: "invalid_token_decimals" });
+  const [whole, fraction = ""] = input.split(".");
+  if (fraction.length > places) throw Object.assign(new Error("too_many_decimal_places"), { code: "too_many_decimal_places" });
+  const base = 10n ** BigInt(places);
+  const fractional = places === 0 ? 0n : BigInt((fraction + "0".repeat(places)).slice(0, places) || "0");
+  const raw = (BigInt(whole) * base) + fractional;
+  if (raw <= 0n) throw Object.assign(new Error("amount_too_small"), { code: "amount_too_small" });
+  return raw.toString();
+}
+
 function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
   const allowRequest = createRequestLimiter({ maxEvents: 30, intervalMs: 60000 });
   const allowPublicQuote = createRequestLimiter({ maxEvents: 1, intervalMs: 2500 });
@@ -56,20 +70,6 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
     if (!allowRequest(`public:${result.user.id}:${req.ip}`)) return res.status(429).json({ ok: false, error: "rate_limited" });
     req.telegramUser = result.user;
     return next();
-  }
-
-  function decimalToRawAmount(value, decimals) {
-    const input = String(value ?? "").trim();
-    if (!/^\d+(?:\.\d+)?$/.test(input)) throw Object.assign(new Error("invalid_decimal_amount"), { code: "invalid_decimal_amount" });
-    const places = Number(decimals);
-    if (!Number.isInteger(places) || places < 0 || places > 18) throw Object.assign(new Error("invalid_token_decimals"), { code: "invalid_token_decimals" });
-    const [whole, fraction = ""] = input.split(".");
-    if (fraction.length > places) throw Object.assign(new Error("too_many_decimal_places"), { code: "too_many_decimal_places" });
-    const base = 10n ** BigInt(places);
-    const fractional = places === 0 ? 0n : BigInt((fraction + "0".repeat(places)).slice(0, places) || "0");
-    const raw = (BigInt(whole) * base) + fractional;
-    if (raw <= 0n) throw Object.assign(new Error("amount_too_small"), { code: "amount_too_small" });
-    return raw.toString();
   }
 
   function publicPlannerPayload() {
