@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08020d">
+<title>Worldz Launch Calculators™ | WorldzLaunchPad™</title>
+<meta name="description" content="Five live WorldzLaunchPad calculators for budget, DAMM v2 LP pairing, buy-vs-LP analysis, starting price and token distribution.">
+<link rel="stylesheet" href="/style.css?v=20261005-calculators-v1">
+<style>
+:root{--p:#a75cff;--b:#42c9ff;--g:#6ee7b7;--r:#ff7b91;--line:#ffffff18;--panel:#0d0714;--muted:#b5a6c0}
+*{box-sizing:border-box}body{margin:0;background:#06020b;color:#fff;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+a{color:inherit}.shell{max-width:1240px;margin:auto;padding:18px 18px 90px}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:8px 0 20px}.brand{font-weight:950;text-decoration:none}.nav{display:flex;gap:12px;flex-wrap:wrap;font-size:.82rem;color:#c9b9d5}
+.hero,.calc{border:1px solid var(--line);background:linear-gradient(145deg,#180a26,#09101a);border-radius:24px}.hero{padding:clamp(26px,6vw,70px);margin-bottom:18px}.eyebrow{font-size:.69rem;letter-spacing:.15em;text-transform:uppercase;color:#d4a7ff;font-weight:950}.hero h1{font-size:clamp(2.7rem,8vw,6.4rem);line-height:.92;letter-spacing:-.06em;margin:10px 0}.hero p{max-width:900px;color:#cabbd3}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn,button{border:1px solid var(--line);border-radius:12px;background:#ffffff09;color:#fff;font-weight:900;padding:12px 15px;text-decoration:none;cursor:pointer}.btn.primary,button.primary{background:linear-gradient(100deg,var(--p),#3d89ff);border-color:transparent}
+.grid{display:grid;gap:14px}.calc{padding:20px}.calc h2{margin:4px 0 7px;font-size:clamp(1.5rem,4vw,2.3rem)}.calc>p{color:var(--muted)}
+.fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0}.field{display:grid;gap:5px}.field label{font-size:.68rem;color:#bdaacb;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.field input,.field select{width:100%;background:#050208;color:#fff;border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}table{width:100%;border-collapse:collapse;min-width:700px}th,td{text-align:left;padding:11px;border-bottom:1px solid #ffffff10;vertical-align:top}th{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#b8a5c5;background:#ffffff05}td input{width:100%;min-width:90px;background:#06020b;color:#fff;border:1px solid var(--line);border-radius:8px;padding:8px}.ok{color:var(--g);font-weight:900}.bad{color:var(--r);font-weight:900}.warn{color:#ffd36e;font-weight:900}.note{padding:11px 13px;border-radius:12px;background:#ffffff06;border:1px solid var(--line);color:#cdbed6;margin-top:10px}.result{white-space:pre-wrap;background:#050208;border:1px solid var(--line);border-radius:13px;padding:13px;min-height:72px;color:#ddd1e5}.small{font-size:.78rem;color:#a995b6}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.footer{margin-top:30px;color:#8f8099;font-size:.76rem}
+@media(max-width:850px){.fields,.two{grid-template-columns:1fr 1fr}.nav{display:none}}
+@media(max-width:560px){.fields,.two{grid-template-columns:1fr}.calc{padding:14px}.hero{padding:28px 18px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="top"><a class="brand" href="/">WorldzLaunchPad™</a><nav class="nav"><a href="/create-your-own-money/">Create Your Own Money</a><a href="/chatgpt-token-design/">Launch with ChatGPT Design</a><a href="/launch-station/">Launch Station</a></nav></header>
+<section class="hero">
+<div class="eyebrow">WORLDZ REAL-TIME LAUNCH MATH 🧮</div>
+<h1>5 Launch Calculators.</h1>
+<p>Answer the questions before money moves: how much SOL do I actually have, what does this DAMM v2 pool require, should I buy or add LP, what starting price does the design imply, and where do the tokens go?</p>
+<div class="actions"><a class="btn primary" href="#lp">CHECK LIVE LP PAIR →</a><a class="btn" href="/chatgpt-token-design/">LAUNCH WITH CHATGPT DESIGN →</a></div>
+</section>
+
+<div class="grid">
+
+<section class="calc" id="budget">
+<div class="eyebrow">TABLE 1 • BUDGET → SOL</div>
+<h2>AUD Budget Calculator</h2>
+<p>Convert an AUD budget to SOL and keep an explicit transaction reserve instead of pretending every cent is spendable.</p>
+<div class="fields">
+<div class="field"><label>AUD budget</label><input id="aud-budget" type="number" min="0" step="0.01" value="50"></div>
+<div class="field"><label>SOL / AUD</label><input id="sol-aud" type="number" min="0" step="0.0001" placeholder="Fetch live price"></div>
+<div class="field"><label>SOL reserve</label><input id="sol-reserve" type="number" min="0" step="0.0001" value="0.01"></div>
+<div class="field"><label>&nbsp;</label><button id="fetch-sol" type="button">FETCH SOL/AUD</button></div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Budget</th><th>Gross SOL</th><th>Reserve</th><th>Spendable SOL</th><th>Status</th></tr></thead><tbody id="budget-body"></tbody></table></div>
+</section>
+
+<section class="calc" id="lp">
+<div class="eyebrow">TABLE 2 • EXACT DAMM V2 LP PAIR</div>
+<h2>How much token must I pair with my SOL?</h2>
+<p>This reads the live Meteora DAMM v2 pool and calls the same deposit-quote math used by the SDK. Tokens already inside the pool do <b>not</b> count as your new deposit.</p>
+<div class="fields">
+<div class="field"><label>Market</label><select id="lp-market"><option value="WLDZ">WLDZ</option><option value="RVIV">RVIV</option><option value="CUSTOM">Custom DAMM v2 pool</option></select></div>
+<div class="field"><label>Pool address</label><input id="lp-pool" autocomplete="off"></div>
+<div class="field"><label>SOL to add</label><input id="lp-sol" type="number" min="0.000000001" step="any" value="0.05"></div>
+<div class="field"><label>Tokens available in your wallet</label><input id="lp-owned" type="number" min="0" step="any" value="0"></div>
+</div>
+<div class="actions"><button class="primary" id="lp-quote" type="button">GET LIVE LP QUOTE</button></div>
+<div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Pool</th><th>Current Base in Pool</th><th>Current SOL in Pool</th><th>Your SOL Deposit</th><th>Base Tokens You Must Supply</th><th>Wallet Feasibility</th></tr></thead><tbody id="lp-body"><tr><td colspan="6">Run a live quote.</td></tr></tbody></table></div>
+<div class="note"><b>Rule:</b> adding LP is a new contribution from the wallet/position owner. Existing pool tokens stay in the pool. If the quote asks for more base tokens than you possess—or more than the token supply—the calculator marks it impossible instead of guessing.</div>
+</section>
+
+<section class="calc" id="hybrid">
+<div class="eyebrow">TABLE 3 • BUY vs LP vs HYBRID</div>
+<h2>What should the SOL actually do?</h2>
+<p>Compare five splits of the same SOL budget. BUY changes pool composition and gives you tokens. LP requires a matching base-token contribution and increases liquidity.</p>
+<div class="fields">
+<div class="field"><label>Market</label><select id="hybrid-market"><option value="WLDZ">WLDZ</option><option value="RVIV">RVIV</option></select></div>
+<div class="field"><label>Total SOL budget</label><input id="hybrid-sol" type="number" min="0.000000001" step="any" value="0.05"></div>
+<div class="field"><label>Base tokens already available</label><input id="hybrid-owned" type="number" min="0" step="any" value="0"></div>
+<div class="field"><label>Swap slippage limit</label><input id="hybrid-slip" type="number" min="1" max="5000" step="1" value="100"></div>
+</div>
+<div class="actions"><button class="primary" id="hybrid-run" type="button">COMPARE LIVE OPTIONS</button></div>
+<div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Plan</th><th>SOL Buy</th><th>SOL LP</th><th>Tokens Bought</th><th>Tokens Required for LP</th><th>Buy Price Impact</th><th>Feasible?</th></tr></thead><tbody id="hybrid-body"><tr><td colspan="7">Run the comparison.</td></tr></tbody></table></div>
+<div class="note"><b>Hybrid truth rule:</b> the BUY and LP legs are quoted against the same current pool snapshot for comparison only. A real BUY changes the pool. Before any LP transaction, Worldz must fetch the new pool state and re-quote the LP leg. No stale hybrid quote should ever be signed.</div>
+</section>
+
+<section class="calc" id="price">
+<div class="eyebrow">TABLE 4 • STARTING PRICE / MARKET CAP</div>
+<h2>Design the price from the economics.</h2>
+<p>For a two-sided pool, reserve ratio gives an observable price. For a one-sided launch, enter the intended initial price directly; zero quote liquidity does not mean the token's intended opening price is zero.</p>
+<div class="fields">
+<div class="field"><label>Total supply</label><input id="price-supply" type="number" min="1" step="1" value="348000000"></div>
+<div class="field"><label>Launch circulating supply</label><input id="price-circ" type="number" min="0" step="1" value="100000000"></div>
+<div class="field"><label>Target initial SOL / token</label><input id="price-sol-token" type="number" min="0" step="any" value="0.000001"></div>
+<div class="field"><label>SOL / AUD</label><input id="price-sol-aud" type="number" min="0" step="any" placeholder="Use Table 1 price"></div>
+</div>
+<div class="two">
+<div>
+<div class="eyebrow">TARGET-PRICE VIEW</div>
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Result</th></tr></thead><tbody id="price-body"></tbody></table></div>
+</div>
+<div>
+<div class="eyebrow">TWO-SIDED RESERVE CHECK</div>
+<div class="fields" style="grid-template-columns:1fr 1fr"><div class="field"><label>Base tokens seeded</label><input id="seed-base" type="number" min="0" step="any" value="1000000"></div><div class="field"><label>SOL seeded</label><input id="seed-sol" type="number" min="0" step="any" value="1"></div></div>
+<div class="result" id="reserve-result"></div>
+</div>
+</div>
+</section>
+
+<section class="calc" id="distribution">
+<div class="eyebrow">TABLE 5 • DISTRIBUTION + MULTICHAIN SUPPLY</div>
+<h2>Every token accounted for before launch.</h2>
+<p>Enter the total supply and distribution percentages. The table calculates token amounts, verifies the percentage total, and optionally reserves the WorldzLaunchPad 0.60% allocation using the 50/30/20 treasury split.</p>
+<div class="fields">
+<div class="field"><label>Total token supply</label><input id="dist-supply" type="number" min="1" step="1" value="348000000"></div>
+<div class="field"><label>WorldzLaunchPad 0.60%</label><select id="dist-worldz"><option value="yes">Include</option><option value="no">Do not include</option></select></div>
+<div class="field"><label>&nbsp;</label><button id="dist-calc" type="button">CALCULATE DISTRIBUTION</button></div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Allocation</th><th>% of Supply</th><th>Tokens</th></tr></thead><tbody id="dist-rows">
+<tr><td><input value="Community"></td><td><input class="dist-pct" type="number" value="30" step="0.01"></td><td class="dist-tokens">—</td></tr>
+<tr><td><input value="Team / Builders"></td><td><input class="dist-pct" type="number" value="15" step="0.01"></td><td class="dist-tokens">—</td></tr>
+<tr><td><input value="Liquidity"></td><td><input class="dist-pct" type="number" value="20" step="0.01"></td><td class="dist-tokens">—</td></tr>
+<tr><td><input value="Impact / Community Projects"></td><td><input class="dist-pct" type="number" value="15" step="0.01"></td><td class="dist-tokens">—</td></tr>
+<tr><td><input value="Reserve"></td><td><input class="dist-pct" type="number" value="19.4" step="0.01"></td><td class="dist-tokens">—</td></tr>
+</tbody><tfoot><tr><th>Total allocated</th><th id="dist-total-pct">—</th><th id="dist-total-tokens">—</th></tr></tfoot></table></div>
+<div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Worldz 0.60% destination</th><th>% of Total Supply</th><th>Tokens</th></tr></thead><tbody id="worldz-split"></tbody></table></div>
+<div class="note" id="dist-status"></div>
+<div class="eyebrow" style="margin-top:18px">CANONICAL MULTICHAIN SUPPLY CHECK</div>
+<div class="table-wrap"><table><thead><tr><th>Market / Chain</th><th>Native or Represented Supply</th></tr></thead><tbody id="chain-rows">
+<tr><td>Solana</td><td><input class="chain-amount" type="number" min="0" value="0"></td></tr>
+<tr><td>XRPL / XRP</td><td><input class="chain-amount" type="number" min="0" value="0"></td></tr>
+<tr><td>Base</td><td><input class="chain-amount" type="number" min="0" value="0"></td></tr>
+<tr><td>Ethereum</td><td><input class="chain-amount" type="number" min="0" value="0"></td></tr>
+<tr><td>Sui</td><td><input class="chain-amount" type="number" min="0" value="0"></td></tr>
+</tbody><tfoot><tr><th>Represented / allocated total</th><th id="chain-total">—</th></tr></tfoot></table></div>
+<div class="note" id="chain-status">Wrapped/bridged representations must be backed by locked/burned canonical supply so the economic supply is not multiplied across chains.</div>
+</section>
+
+</div>
+<div class="footer">WorldzLaunchPad™ calculators are planning tools. Live pool quotes can change between calculation and signing. No calculator signs, sends or moves funds.</div>
+</div>
+<script type="module" src="/launch-calculators/app.js?v=20261005-1"></script>
+<script src="/worldz-guide.js?v=20261004" defer></script>
+</body>
+</html>

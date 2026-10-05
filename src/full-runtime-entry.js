@@ -63,6 +63,7 @@ const { registerWorldzCastSystem } = require("./worldzcast");
 const { registerWorldzInboxSystem } = require("./worldz-inbox");
 const { registerWorldPingHandlers } = require("./worldping");
 const { registerWorldzSquads } = require("./worldz-squads");
+const { registerWorldzTokenDesigner } = require("./worldz-token-designer");
 const { registerZedGuide } = require("./zed-guide");
 
 const RUNTIME_BUILD = "2026-08-19-oneworldz-participant-experience";
@@ -230,6 +231,8 @@ async function start() {
   registerUserExperienceSystem({ app, bot, repository, config, supabase });
   startupStage = "register_zed_guide";
   registerZedGuide({ app, repository, config, supabase });
+  startupStage = "register_worldz_token_designer";
+  registerWorldzTokenDesigner({ app });
   startupStage = "register_command_centre";
   registerCommandCentreHandlers({ bot, repository, config, supabase });
   startupStage = "register_launchpad_ads";

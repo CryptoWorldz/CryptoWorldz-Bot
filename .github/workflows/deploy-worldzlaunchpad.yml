@@ -193,6 +193,8 @@ jobs:
             root/'technology/index.html',root/'technology.html',
             root/'advertise/index.html',root/'ads.js',
             root/'create-your-own-money/index.html',
+            root/'launch-calculators/index.html',root/'launch-calculators/app.js',
+            root/'chatgpt-token-design/index.html',root/'chatgpt-token-design/app.js',
             root/'launch-station/index.html',root/'community/index.html',root/'integrations/index.html',root/'ready/index.html',
             root/'.well-known/worldzlaunch-readiness.json',root/'.well-known/worldzlaunch-domain-plan.json',
             root/'wldz/index.html',root/'wldz/app.js',root/'wldz/launch-config.json',
@@ -209,6 +211,10 @@ jobs:
           advertise_html=(root/'advertise/index.html').read_text()
           ads_js=(root/'ads.js').read_text()
           creator_campaign_html=(root/'create-your-own-money/index.html').read_text()
+          calculators_html=(root/'launch-calculators/index.html').read_text()
+          calculators_js=(root/'launch-calculators/app.js').read_text()
+          chatgpt_design_html=(root/'chatgpt-token-design/index.html').read_text()
+          chatgpt_design_js=(root/'chatgpt-token-design/app.js').read_text()
           assert 'data-worldz-ad-slot="home_spotlight"' in home
           assert all(price in advertise_html for price in ('A$5','A$12','A$22','A$75'))
           assert 'RUN WORLDZ VALIDATION' in advertise_html
@@ -220,8 +226,25 @@ jobs:
           assert 'not automatically legal tender' in creator_campaign_html.lower()
           assert 'BUILD MY TOKEN PLAN' in creator_campaign_html
           assert 'href="/launch-station/"' in creator_campaign_html
+          assert 'href="/chatgpt-token-design/"' in creator_campaign_html
+          assert 'href="/launch-calculators/"' in creator_campaign_html
+          assert '5 Launch Calculators' in calculators_html
+          assert 'EXACT DAMM V2 LP PAIR' in calculators_html
+          assert 'BUY vs LP vs HYBRID' in calculators_html
+          assert 'getDepositQuote' in calculators_js
+          assert 'getQuote' in calculators_js
+          assert 'GCFKk1H5Z8EfxFuAvDEXTHn8b28deUA7HxVRsipjfPiJ' in calculators_js
+          assert 'YWEMDsd6o3dm8uXNnmnWWU3c1UtFqDUKEMfbQ512i5c' in calculators_js
+          assert 'Launch a Token with ChatGPT Design' in chatgpt_design_html
+          assert 'Free-to-visitor beta' in chatgpt_design_html
+          assert '/api/worldz-token-designer' in chatgpt_design_js
+          assert 'BUILD FREE CHATGPT PROMPT' in chatgpt_design_html
+          assert 'href="/chatgpt-token-design/"' in home
+          assert 'href="/launch-calculators/"' in home
           print('WORLDZ_SPOTLIGHT_LOCAL=PASS pricing=5/12/22/75_AUD slots=3')
           print('WORLDZ_CREATE_YOUR_OWN_MONEY_LOCAL=PASS')
+          print('WORLDZ_LAUNCH_CALCULATORS_LOCAL=PASS tables=5 live_damm_v2=1')
+          print('WORLDZ_CHATGPT_TOKEN_DESIGN_LOCAL=PASS api_server_side=1 fallback_prompt=1')
           devnet=(root/'devnet/index.html').read_text()
           devnet_js=(root/'devnet/app.js').read_text()
           curve=(root/'curve/index.html').read_text()
@@ -531,6 +554,8 @@ jobs:
           node --check launchpad.cryptoworldz.xyz/curve/app.js
           node --check launchpad.cryptoworldz.xyz/curve-pro/app.js
           node --check launchpad.cryptoworldz.xyz/wldz/app.js
+          node --check launchpad.cryptoworldz.xyz/launch-calculators/app.js
+          node --check launchpad.cryptoworldz.xyz/chatgpt-token-design/app.js
 
       - name: Run 150+ Fee Flow V3 anti-cheat tokenomics scenarios
         shell: python
