@@ -51,3 +51,14 @@ footer{padding:28px clamp(18px,6vw,88px) 45px;display:flex;flex-wrap:wrap;justif
 .worldz-ad-empty span{margin-top:4px;color:#776a80;font-size:.7rem}
 @media(max-width:900px){.worldz-ad-grid{grid-template-columns:1fr}.worldz-ad-card{grid-template-columns:120px 1fr}}
 @media(max-width:560px){.worldz-ad-shell{padding:0 14px}.worldz-ad-card{grid-template-columns:96px 1fr}.worldz-ad-head{align-items:flex-start;flex-direction:column}}
+
+/* Small-phone readability: keep cards and fee notices legible, not clipped. */
+@media(max-width:480px){
+  .hero h1{font-size:clamp(2.1rem,10.5vw,3.3rem);line-height:1.05;overflow-wrap:break-word}
+  .hero,.section{padding-left:16px;padding-right:16px}
+  .truth-strip,.runtime-grid,.feature-grid,.choice-grid{grid-template-columns:minmax(0,1fr)}
+  .truth-strip span,.feature-card,.status-card{min-width:0;overflow-wrap:anywhere}
+  .section-heading h2{font-size:clamp(1.85rem,8.5vw,2.8rem);line-height:1.1}
+  input,select,textarea{max-width:100%;min-width:0}
+  footer{overflow-wrap:anywhere}
+}
