@@ -110,8 +110,8 @@ The 5% Kitty is for verifiable community contribution, including onboarding, tra
 
 ## External WorldzLaunchPad launches
 
-- WorldzLaunchPad takes 10% of each external project's collected supported trading-fee revenue only; 90% remains for that project's disclosed fee routing.
-- WorldzLaunchPad takes 0% of creator token supply and 0% of initial liquidity.
+- HISTORICAL POLICY (2026-09-23, superseded for new intakes by WORLDZ-FEE-FLOW.md V3): 10% of collected supported trading-fee revenue / 90% project routing. Do not quote this as the current fee policy.
+- CURRENT POLICY (V3, 2026-10-02): each supported new genesis launch discloses a mandatory 0.60% Worldz token-supply allocation (0.30% Operations / 0.18% Miracle Team / 0.12% Purple Diamond Crew); the project allocates the remaining 99.40%. Worldz takes 0% of initial liquidity and imposes 0% wallet-transfer tax. Separately, a creator selects a 3%, 5% or 8% Worldz contribution from eligible trading-fee revenue after disclosed external deductions.
 - The platform fee-claimer destination and every project's fee routing must be visible before a creator launches.
 - The 2% DBC trading-fee configuration and its complete 100% fee-router destination table must be finalized before any mainnet configuration is approved.
 
