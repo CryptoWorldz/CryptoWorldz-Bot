@@ -47,7 +47,7 @@ jobs:
               files=[p for p in site.rglob('*') if p.is_file() and p.suffix.lower() in allowed and not any(part.startswith('.') for part in p.relative_to(site).parts) and p.name not in ('domain-plan.json','package.json','package-lock.json')]
               if not files: raise RuntimeError('No public assets for '+domain)
               print(f'DEPLOY_START {domain} files={len(files)}',flush=True)
-              ftp=ftplib.FTP_TLS(context=ssl.create_default_context())
+              ftp=ftplib.FTP_TLS(context=ssl._create_unverified_context()) # Matches existing production deploy: FTP_HOST is an IP with a hostname-only TLS certificate
               ftp.connect(os.environ['FTP_HOST'],int(os.getenv('FTP_PORT','21')),timeout=40)
               ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
               ftp.prot_p()
