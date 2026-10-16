@@ -1,0 +1,82 @@
+name: Deploy WorldzHQ and Worldz Live to Hostinger
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-worldzhq-live.yml'
+      - 'worldzhq.com/**'
+      - 'worldz.live/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: worldz-two-domain-hostinger
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload only the two new domain homepages over FTPS
+        shell: python
+        run: |
+          import os, ssl, time
+          from ftplib import FTP_TLS
+          from pathlib import Path
+          required=('FTP_HOST','FTP_USERNAME','FTP_PASSWORD')
+          if not all(os.environ.get(x) for x in required):
+              raise SystemExit('Hostinger protected FTPS credentials are not configured in this environment')
+          ctx=ssl.create_default_context()
+          ftp=FTP_TLS(context=ctx)
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=35)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p()
+          try:
+              for domain in ('worldzhq.com','worldz.live'):
+                  remote='/domains/'+domain+'/public_html'
+                  # Never create guessed directories: the owner has already added both sites.
+                  ftp.cwd(remote)
+                  local=Path(domain)/'index.html'
+                  assert local.is_file(),domain
+                  staged='.worldz-new-homepage-'+str(int(time.time()))+'.html'
+                  with local.open('rb') as handle:
+                      ftp.storbinary('STOR '+staged,handle)
+                  try:
+                      ftp.rename(staged,'index.html')
+                  except Exception:
+                      ftp.delete('index.html')
+                      ftp.rename(staged,'index.html')
+                  print('FTPS_UPLOADED',domain,'index.html')
+          finally:
+              try: ftp.quit()
+              except Exception: ftp.close()
+      - name: Verify both public websites
+        shell: python
+        run: |
+          import urllib.request, time
+          checks={'worldzhq.com':'WorldzHQ™','worldz.live':'Woodstock Revival'}
+          failed=[]
+          for domain,marker in checks.items():
+              for attempt in range(3):
+                  try:
+                      req=urllib.request.Request('https://'+domain+'/?worldz_proof='+str(int(time.time())),headers={'User-Agent':'Worldz-Deploy-Verification/1.0','Cache-Control':'no-cache'})
+                      with urllib.request.urlopen(req,timeout=20) as r:
+                          text=r.read(200000).decode('utf-8','replace')
+                          if r.status==200 and marker in text:
+                              print('PUBLIC_LIVE_VERIFIED',domain,'HTTP',r.status)
+                              break
+                          raise RuntimeError('Expected deployed page marker missing')
+                  except Exception as e:
+                      if attempt==2:
+                          print('PUBLIC_NOT_VERIFIED',domain,type(e).__name__,str(e))
+                          failed.append(domain)
+                      else: time.sleep(10)
+          if failed: raise SystemExit('Hosting upload attempted, but DNS/SSL/public verification incomplete for: '+', '.join(failed))
