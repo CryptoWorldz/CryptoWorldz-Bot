@@ -1,0 +1,89 @@
+name: Deploy Worldz HQ and Live
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worldzhq.com/**'
+      - 'worldz.live/**'
+      - '.github/workflows/deploy-worldz-new-sites.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: worldz-new-sites-only
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate sites and FTP configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
+          for site in worldzhq.com worldz.live; do
+            test -s "$site/index.html"
+            grep -qi '<html' "$site/index.html"
+          done
+      - name: Upload only public assets to the two new domains
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os,ftplib,ssl,time
+          from pathlib import Path
+          from posixpath import join
+          root=Path.cwd()
+          for domain in ('worldzhq.com','worldz.live'):
+              site=root/domain
+              allowed={'.html','.css','.js','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.txt','.json'}
+              files=[p for p in site.rglob('*') if p.is_file() and p.suffix.lower() in allowed and not any(part.startswith('.') for part in p.relative_to(site).parts) and p.name not in ('domain-plan.json','package.json','package-lock.json')]
+              if not files: raise RuntimeError('No public assets for '+domain)
+              print(f'DEPLOY_START {domain} files={len(files)}',flush=True)
+              ftp=ftplib.FTP_TLS(context=ssl.create_default_context())
+              ftp.connect(os.environ['FTP_HOST'],int(os.getenv('FTP_PORT','21')),timeout=40)
+              ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+              ftp.prot_p()
+              ftp.set_pasv(True)
+              try:
+                  base='domains/'+domain+'/public_html'
+                  def ensure(path):
+                      ftp.cwd('/')
+                      for part in path.split('/'):
+                          if not part:continue
+                          try: ftp.cwd(part)
+                          except ftplib.error_perm:
+                              ftp.mkd(part);ftp.cwd(part)
+                  ensure(base)
+                  for p in files:
+                      rel=p.relative_to(site).as_posix()
+                      target=join(base,rel)
+                      ensure(target.rsplit('/',1)[0])
+                      with p.open('rb') as f: ftp.storbinary('STOR '+target.rsplit('/',1)[-1],f)
+                  print('DEPLOY_UPLOAD_COMPLETE '+domain,flush=True)
+              finally:
+                  try:ftp.quit()
+                  except Exception:ftp.close()
+          PY
+      - name: Public HTTPS checks
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request,urllib.error
+          for domain in ('worldzhq.com','worldz.live'):
+              try:
+                  with urllib.request.urlopen('https://'+domain+'/',timeout=20) as r:
+                      body=r.read(100000).lower()
+                      if r.status!=200 or b'<html' not in body: raise ValueError('bad response')
+                      print('PUBLIC_HTTPS_PASS '+domain)
+              except Exception as e:
+                  print('::error::PUBLIC_HTTPS_UNVERIFIED '+domain+' '+str(e))
+                  raise
+          PY
