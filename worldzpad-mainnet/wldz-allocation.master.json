@@ -1,6 +1,6 @@
 {
-  "version": "WLDZ-ALLOCATION-2026-09-25-D",
-  "status": "PARTIALLY_EXECUTED__8M_OWNER_AND_15M_LP_LIVE__REMAINDER_PENDING",
+  "version": "WLDZ-ALLOCATION-2026-10-02-E",
+  "status": "PARTIALLY_EXECUTED__8M_OWNER_AND_15M_LP_LIVE__3OF5_GOVERNANCE_ACTIVE__REMAINDER_PENDING",
   "network": "mainnet-beta",
   "token": {
     "name": "WORLDZ",
@@ -15,7 +15,32 @@
     "squadsMultisig": "B9S37HguduNZ5TXWCxMi7cZMCm89ExCB751N4bpMQ7bN",
     "vaultIndex": 0,
     "vault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-    "currentGovernance": "1-of-2 temporary"
+    "currentGovernance": "3-of-5 permanent",
+    "requiredApprovals": 3,
+    "memberCount": 5,
+    "runtimeThresholdVerificationRequired": true,
+    "signers": [
+      {
+        "label": "JayJayTeamDev",
+        "address": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u"
+      },
+      {
+        "label": "Stepper",
+        "address": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ"
+      },
+      {
+        "label": "Savage",
+        "address": "2DqyvXoA7VnyWH6n6yVV1XoS2pdBDHMKsj3tRRFaTpbn"
+      },
+      {
+        "label": "SolMusic",
+        "address": "FmFtkknYe3BaHJ2HJGquV2MqCrjX4c14jk4kbLHg27kJ"
+      },
+      {
+        "label": "Mahammad",
+        "address": "6VtCKsBA5pt5WcWF5sENEb9BM4FLp2Ezn5VYEcCY5Mok"
+      }
+    ]
   },
   "allocation": [
     {
@@ -77,7 +102,7 @@
       "percent": 10,
       "tokens": 10000000,
       "destination": "5HR1DFmgX23b3fmk8PADgCb1ejUAXnSSsjcAoGrGrGHW",
-      "destinationRole": "ONEWORLDZ_CHARITY_IMPACT_DISTRIBUTION",
+      "destinationRole": "WORLDZ_IMPACT_DISTRIBUTION",
       "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
     },
     {
@@ -92,9 +117,9 @@
       "id": "general_reserve",
       "percent": 5,
       "tokens": 5000000,
-      "destination": "5BbgurmtXVr1tohm6NTYU8pmM4n7xQVqp9DTKePN1UW9",
-      "destinationRole": "GENERAL_RESERVE_DISTRIBUTION",
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+      "destination": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
+      "destinationRole": "RESERVE_EARMARK_RETAINED_IN_OPERATIONS_TREASURY",
+      "state": "RETAINED_IN_OPERATIONS_TREASURY__RESERVE_DISABLED"
     },
     {
       "id": "stepper",
@@ -102,7 +127,7 @@
       "tokens": 1000000,
       "destination": "DwWj3EuyaL2ufZASdZ3DPGyaSEqnjzAPxfLAxq5MRLhJ",
       "destinationRole": "TEAM_STEPPER",
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+      "state": "RESERVED_PENDING_EARNED_TEAM_APPROVAL"
     },
     {
       "id": "future_team_reserve",
@@ -110,18 +135,18 @@
       "tokens": 4000000,
       "destination": "DgsWus6bxAMck9eXmS7V3tVNp8n7DinPQrEVexdju94j",
       "destinationRole": "VERIFIED_FUTURE_TEAM_RESERVE",
-      "state": "READY_FOR_VAULT_TRANSFER_PROPOSAL"
+      "state": "RESERVED_PENDING_EARNED_TEAM_APPROVAL"
     },
     {
       "id": "dev_city_verified_wallets",
       "percent": 5,
       "tokens": 5000000,
       "destination": "2b9kxWY6zNCYh6D3WzZBFsvzck9tSkscaiCbap7CSB1m",
-      "destinationRole": "DEV_CITY_50_WALLET_DISTRIBUTION_POOL",
-      "recipients": 50,
-      "tokensPerVerifiedWallet": 100000,
-      "percentPerVerifiedWallet": 0.1,
-      "state": "READY_FOR_POOL_TRANSFER__RECIPIENT_ASSOCIATION_REQUIRED_BEFORE_FANOUT"
+      "destinationRole": "DEV_CITY_100_WALLET_DISTRIBUTION_POOL",
+      "recipients": 100,
+      "tokensPerVerifiedWallet": 50000,
+      "percentPerVerifiedWallet": 0.05,
+      "state": "RESERVED_PENDING_APPROVED_100_WALLET_ROSTER"
     },
     {
       "id": "community_ecosystem_growth",
@@ -169,11 +194,12 @@
     "ordinaryWalletTransfersUntaxed": true
   },
   "feePolicy": {
-    "mode": "MEMBER_FEE_PAYER",
+    "mode": "MULTISIG_MEMBER_FEE_PAYER__EXACT_SIMULATION",
     "signerWallet": "Fap54GTCo4ZopkwmHtbSUJZTsjTybftJfN9sPG3MHp4u",
     "wldzSourceVault": "n9Jq3soh2ka22xNAy2syX96Pp3QZB7mc7kwysgNvhHB",
-    "minimumSignerSolForDistributionUi": 0.05,
+    "minimumSignerSolForDistributionUi": null,
     "feeRelayer": false,
-    "note": "WLDZ remains in Squads custody until execution. The JayJayTeamDev member wallet pays Solana proposal/rent/execution fees. Distribution UI will not start below 0.05 SOL."
+    "note": "WLDZ remains in Squads custody until approved execution. Each signer pays only the Solana fee/rent shown by the exact simulated transaction they personally approve. No fixed 0.05 SOL gate is used. Production execution requires the live 3-of-5 Squads threshold.",
+    "exactSimulationRequired": true
   }
 }

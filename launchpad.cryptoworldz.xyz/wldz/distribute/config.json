@@ -1,5 +1,5 @@
 {
-  "version": "WLDZ-DISTRIBUTION-SIGN-2026-09-23-D",
+  "version": "WLDZ-DISTRIBUTION-LEGACY-DIRECT-RETIRED-2026-10-02",
   "network": "mainnet-beta",
   "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
   "decimals": 6,
@@ -83,5 +83,13 @@
     "maximumTreasuryTopupSol": 0,
     "vaultSafetyReserveSol": 0,
     "source": "JAYJAY_SIGNER_ONLY"
+  },
+  "executionEnabled": false,
+  "executionState": "RETIRED_DIRECT_55M_PLAN__RECONCILIATION_REQUIRED",
+  "blockReason": "Do not execute the old 55M direct-wallet plan: 8M JayJayTeamDev is already live, Reserve is disabled, DevCity is now a 100-wallet target, team allocations require earned/approved beneficiaries, and permanent treasury governance is 3-of-5.",
+  "replacementSource": "worldzpad-mainnet/wldz-allocation.master.json",
+  "requiredGovernance": {
+    "memberCount": 5,
+    "threshold": 3
   }
 }

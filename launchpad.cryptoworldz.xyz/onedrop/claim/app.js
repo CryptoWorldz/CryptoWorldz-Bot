@@ -18,7 +18,7 @@ function cmp(a,b){for(let i=0;i<a.length;i++){if(a[i]!==b[i])return a[i]-b[i]}re
 function eq(a,b){return a.length===b.length&&a.every((v,i)=>v===b[i])}
 function hex(a){return [...a].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function amount(raw,d=6){const x=BigInt(raw),base=10n**BigInt(d),w=x/base,f=(x%base).toString().padStart(d,'0').replace(/0+$/,'');return f?w+'.'+f:w.toString()}
-async function leaf(row){const inner=await sha([new PublicKey(row.wallet).toBytes(),u64(row.amountRaw),u64(0)]);return sha([new Uint8Array([0]),inner])}
+async function leaf(row){const inner=await sha([new PublicKey(row.wallet).toBytes(),u64(row.amountUnlockedRaw??row.amountRaw),u64(row.amountLockedRaw??0)]);return sha([new Uint8Array([0]),inner])}
 async function treeAndProof(rows,index){
   let level=await Promise.all(rows.map(leaf)),idx=index,proof=[];
   const original=level[idx];
@@ -44,7 +44,7 @@ async function connectWallet(){
 }
 async function rpc(method,params){const r=await fetch(RPC,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});const j=await r.json();if(!r.ok||j.error)stop('RPC failed: '+JSON.stringify(j.error||r.status));return j.result}
 async function load(){
-  const r=await fetch('../revive-manifest.v1.json?v=20260926-a',{cache:'no-store'});if(!r.ok)stop('Frozen manifest unavailable.');manifest=await r.json();
+  const r=await fetch('../revive-manifest.v1.json?v=20261002-3of5-vesting',{cache:'no-store'});if(!r.ok)stop('Frozen manifest unavailable.');manifest=await r.json();
   if(manifest.recipients.length!==219)stop('Manifest recipient count mismatch.');
   const mint=new PublicKey(manifest.token.mint),version=BigInt(manifest.distributor.versionU64);
   const [distributor]=PublicKey.findProgramAddressSync([new TextEncoder().encode('MerkleDistributor'),mint.toBytes(),u64(version)],JITO);
@@ -66,37 +66,72 @@ async function prepare(){
   if(bytes.length<234)stop('Distributor account data is too short.');
   const chainRoot=bytes.slice(17,49);
   if(!eq(root,chainRoot))stop('Frozen manifest root does not match the live distributor. Claim refused.');
+
   const claimant=wallet.publicKey;
   const [claimStatus]=PublicKey.findProgramAddressSync([new TextEncoder().encode('ClaimStatus'),claimant.toBytes(),distributor.toBytes()],JITO);
-  if(await connection.getAccountInfo(claimStatus,'confirmed')){status('This wallet already has a REVIVE OneDrop claim record. No duplicate claim will be sent.','good');$('#review').textContent='Wallet: '+claimant.toBase58()+'\nClaim status: '+claimStatus.toBase58()+'\nAllocation: '+amount(row.amountRaw)+' RVIV\nStatus: CLAIM RECORD EXISTS';return}
+  const claimStatusInfo=await connection.getAccountInfo(claimStatus,'confirmed');
   const to=getAssociatedTokenAddressSync(mint,claimant,false,TOKEN_PROGRAM_ID);
   const toInfo=await connection.getAccountInfo(to,'confirmed');
   const before=toInfo?(await connection.getTokenAccountBalance(to,'confirmed')).value.amount:'0';
-  const disc=await discriminator('new_claim'),len=Buffer.alloc(4);len.writeUInt32LE(proof.length);
-  const data=Buffer.concat([Buffer.from(disc),u64(row.amountRaw),u64(0),len,...proof.map(Buffer.from)]);
-  const claimIx=new TransactionInstruction({programId:JITO,data,keys:[
-    {pubkey:distributor,isSigner:false,isWritable:true},
-    {pubkey:claimStatus,isSigner:false,isWritable:true},
-    {pubkey:vault,isSigner:false,isWritable:true},
-    {pubkey:to,isSigner:false,isWritable:true},
-    {pubkey:claimant,isSigner:true,isWritable:true},
-    {pubkey:TOKEN_PROGRAM_ID,isSigner:false,isWritable:false},
-    {pubkey:SystemProgram.programId,isSigner:false,isWritable:false}
-  ]});
   const latest=await connection.getLatestBlockhash('confirmed');
   const tx=new Transaction({feePayer:claimant,recentBlockhash:latest.blockhash});
   if(!toInfo)tx.add(createAssociatedTokenAccountIdempotentInstruction(claimant,to,claimant,mint,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID));
-  tx.add(claimIx);
+
+  let mode,expectedImmediate=null;
+  if(!claimStatusInfo){
+    const disc=await discriminator('new_claim'),len=Buffer.alloc(4);len.writeUInt32LE(proof.length);
+    const unlocked=BigInt(row.amountUnlockedRaw??row.amountRaw),locked=BigInt(row.amountLockedRaw??0);
+    const data=Buffer.concat([Buffer.from(disc),u64(unlocked),u64(locked),len,...proof.map(Buffer.from)]);
+    tx.add(new TransactionInstruction({programId:JITO,data,keys:[
+      {pubkey:distributor,isSigner:false,isWritable:true},
+      {pubkey:claimStatus,isSigner:false,isWritable:true},
+      {pubkey:vault,isSigner:false,isWritable:true},
+      {pubkey:to,isSigner:false,isWritable:true},
+      {pubkey:claimant,isSigner:true,isWritable:true},
+      {pubkey:TOKEN_PROGRAM_ID,isSigner:false,isWritable:false},
+      {pubkey:SystemProgram.programId,isSigner:false,isWritable:false}
+    ]}));
+    mode='NEW';
+    expectedImmediate=unlocked;
+  }else{
+    const disc=await discriminator('claim_locked');
+    tx.add(new TransactionInstruction({programId:JITO,data:Buffer.from(disc),keys:[
+      {pubkey:distributor,isSigner:false,isWritable:true},
+      {pubkey:claimStatus,isSigner:false,isWritable:true},
+      {pubkey:vault,isSigner:false,isWritable:true},
+      {pubkey:to,isSigner:false,isWritable:true},
+      {pubkey:claimant,isSigner:true,isWritable:true},
+      {pubkey:TOKEN_PROGRAM_ID,isSigner:false,isWritable:false}
+    ]}));
+    mode='VESTED';
+  }
+
   const raw=tx.serialize({requireAllSignatures:false,verifySignatures:false});
   if(raw.length>1232)stop('Claim transaction exceeds Solana packet limit.');
   const balance=await connection.getBalance(claimant,'confirmed');
   const sim=await rpc('simulateTransaction',[Buffer.from(raw).toString('base64'),{encoding:'base64',sigVerify:false,replaceRecentBlockhash:true,commitment:'confirmed',accounts:{encoding:'base64',addresses:[claimant.toBase58()]}}]);
-  if(sim?.value?.err)stop('Claim simulation failed: '+JSON.stringify(sim.value.err));
+  if(sim?.value?.err){
+    if(mode==='VESTED')stop('No additional vested RVIV is claimable right now, or the live distributor state changed. Simulation stopped safely: '+JSON.stringify(sim.value.err));
+    stop('Claim simulation failed: '+JSON.stringify(sim.value.err));
+  }
   const after=sim?.value?.accounts?.[0]?.lamports,debit=Number.isSafeInteger(after)?balance-after:null;
   if(debit!==null&&debit>balance)stop('Wallet has insufficient SOL for the simulated claim.');
-  plan={tx,latest,to,before,claimStatus,row,root,proof,debit};
-  $('#review').textContent='Wallet: '+claimant.toBase58()+'\nAllocation: '+amount(row.amountRaw)+' RVIV\nBuckets: '+row.buckets.join(' + ')+'\nMerkle root: '+hex(root)+'\nProof nodes: '+proof.length+'\nClaim transaction bytes: '+raw.length+' / 1232\nEstimated SOL debit: '+(debit===null?'RPC did not return':(debit/1e9).toFixed(9)+' SOL')+'\nSimulation: PASS';
-  status('Eligible allocation verified ✅ Review the amount, then claim.','good');$('#claim').disabled=false;
+  plan={mode,tx,latest,to,before,claimStatus,row,root,proof,debit,expectedImmediate};
+  const unlocked=BigInt(row.amountUnlockedRaw??row.amountRaw),locked=BigInt(row.amountLockedRaw??0),total=unlocked+locked;
+  $('#review').textContent='Wallet: '+claimant.toBase58()+
+    '\nTotal allocation: '+amount(total)+' RVIV'+
+    '\nUnlocked Legacy component: '+amount(unlocked)+' RVIV'+
+    '\n12-month vested Dev component: '+amount(locked)+' RVIV'+
+    '\nBuckets: '+row.buckets.join(' + ')+
+    '\nClaim mode: '+(mode==='NEW'?'INITIAL CLAIM / VESTING RECORD':'CLAIM CURRENTLY VESTED DEV AMOUNT')+
+    '\nMerkle root: '+hex(root)+
+    '\nProof nodes: '+proof.length+
+    '\nTransaction bytes: '+raw.length+' / 1232'+
+    '\nEstimated SOL debit: '+(debit===null?'RPC did not return':(debit/1e9).toFixed(9)+' SOL')+
+    '\nSimulation: PASS';
+  $('#claim').textContent=mode==='NEW'?'Claim / Start Vesting':'Claim Vested RVIV';
+  status(mode==='NEW'?'Eligible allocation verified ✅ Legacy RVIV is unlocked; Dev RVIV remains on 12-month linear vesting.':'Vested RVIV is available ✅ Review the transaction, then claim.','good');
+  $('#claim').disabled=false;
 }
 async function claim(){
   if(!plan||!wallet)stop('Verify the claim first.');$('#claim').disabled=true;$('#prepare').disabled=true;
@@ -106,8 +141,10 @@ async function claim(){
   const conf=await connection.confirmTransaction({signature:sig,blockhash:plan.latest.blockhash,lastValidBlockHeight:plan.latest.lastValidBlockHeight},'confirmed');
   if(conf.value.err)stop('Claim failed on-chain: '+JSON.stringify(conf.value.err)+'\nSignature: '+sig);
   const after=(await connection.getTokenAccountBalance(plan.to,'confirmed')).value.amount,delta=BigInt(after)-BigInt(plan.before);
-  if(delta!==BigInt(plan.row.amountRaw))stop('Claim confirmed but received amount differs from frozen allocation. DO NOT RETRY. Signature: '+sig);
-  status('REVIVE CLAIM CONFIRMED ✅\nReceived: '+amount(delta.toString())+' RVIV\nSignature: '+sig,'good');$('#review').textContent+='\n\nCONFIRMED: '+sig;
+  if(plan.mode==='NEW'&&delta!==plan.expectedImmediate)stop('Initial claim confirmed but received amount differs from the frozen unlocked allocation. DO NOT RETRY. Signature: '+sig);
+  if(plan.mode==='VESTED'&&delta<=0n)stop('Vested claim confirmed but no positive RVIV delta was observed. DO NOT RETRY. Signature: '+sig);
+  status('REVIVE CLAIM CONFIRMED ✅\nReceived now: '+amount(delta.toString())+' RVIV\nSignature: '+sig+(BigInt(plan.row.amountLockedRaw??0)>0n?'\n\nDev allocation continues vesting over 12 months. Re-verify later to claim additional vested RVIV.':''),'good');
+  $('#review').textContent+='\n\nCONFIRMED: '+sig+'\nReceived now: '+amount(delta.toString())+' RVIV';
 }
 $('#connect').addEventListener('click',async()=>{try{status('Connecting…');wallet=await connectWallet();await load();$('#connect').textContent='Connected: '+wallet.publicKey.toBase58().slice(0,5)+'…'+wallet.publicKey.toBase58().slice(-5);$('#connect').disabled=true;$('#prepare').disabled=false;status('Wallet connected. Verify your REVIVE allocation.','good')}catch(e){wallet=null;status('CONNECT STOPPED\n'+(e?.message||e),'bad')}});
 $('#prepare').addEventListener('click',async()=>{try{$('#prepare').disabled=true;status('Verifying frozen allocation + live distributor…');await prepare()}catch(e){plan=null;status('VERIFY STOPPED\n'+(e?.message||e),'bad')}finally{$('#prepare').disabled=false}});
