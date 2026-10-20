@@ -237,6 +237,7 @@ function feeMath(){
   const routes=currentRoutes(),launchPad=selectedLaunchPadContribution();
   const gross=vol*(fee/100),worldzAmount=gross*(launchPad/100),creatorRetained=gross-worldzAmount;
   $('#project-fee-value').textContent=fee.toFixed(2)+'%';
+  const slider=$('#project-fee');if(slider){const min=Number(slider.min),max=Number(slider.max);slider.style.setProperty('--worldz-progress',(((fee-min)/(max-min))*100).toFixed(3)+'%');slider.setAttribute('aria-valuetext',fee.toFixed(2)+' percent project trading fee');}
   const lpv=$('#launchpad-contribution-value');if(lpv)lpv.textContent=launchPad+'%';
   $('#gross-fee').textContent=fmt(gross);$('#worldz-fee').textContent=fmt(worldzAmount);$('#project-pool').textContent=fmt(creatorRetained);
   const total=Object.values(routes).reduce((s,x)=>s+(Number(x)||0),0);
