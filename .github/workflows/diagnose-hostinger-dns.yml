@@ -1,0 +1,46 @@
+name: Read-only Worldz Hostinger DNS diagnostics
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-hostinger-dns.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: cryptoworldz-production
+    env:
+      HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+    steps:
+      - name: Check Hostinger DNS API without changing records
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, urllib.request, urllib.error, json
+          token=os.environ.get('HOSTINGER_API_TOKEN','')
+          if not token:
+              print('::error::Hostinger API token unavailable in production environment')
+              raise SystemExit(1)
+          print('HOSTINGER_TOKEN_PRESENT=true')
+          for domain in ('worldzhq.com','worldz.live'):
+              url='https://developers.hostinger.com/api/dns/v1/zones/'+domain
+              req=urllib.request.Request(url,headers={'Authorization':'Bearer '+token,'Accept':'application/json'})
+              try:
+                  with urllib.request.urlopen(req,timeout=20) as response:
+                      data=json.load(response)
+                      print('DNS_API_'+domain+'=HTTP_'+str(response.status))
+                      if isinstance(data,list):
+                          for row in data:
+                              if row.get('type') in ('A','AAAA','ALIAS','CNAME','MX'):
+                                  print('DNS_RECORD '+domain+' '+str(row.get('name'))+' '+str(row.get('type'))+' '+','.join(str(v.get('content','')) for v in row.get('records',[])))
+                      else:
+                          print('DNS_RESPONSE_FORMAT_'+domain+'='+type(data).__name__)
+              except urllib.error.HTTPError as e:
+                  print('::error::DNS_API_'+domain+'_HTTP_'+str(e.code))
+              except Exception as e:
+                  print('::error::DNS_API_'+domain+'_CONNECTION_'+type(e).__name__)
+          PY
