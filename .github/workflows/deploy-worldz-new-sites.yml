@@ -54,8 +54,21 @@ jobs:
               import paramiko
               host=os.getenv('SFTP_HOST') or os.getenv('FTP_HOST')
               if not host: raise RuntimeError('SFTP host missing')
-              transport=paramiko.Transport((host,int(os.getenv('SFTP_PORT','65002'))))
-              transport.connect(username=os.environ['SFTP_USERNAME'],password=os.environ['SFTP_PASSWORD'])
+              import socket
+              last_error=None
+              for attempt in range(1,4):
+                  try:
+                      sock=socket.create_connection((host,int(os.getenv('SFTP_PORT','65002'))),timeout=18)
+                      transport=paramiko.Transport(sock)
+                      transport.connect(username=os.environ['SFTP_USERNAME'],password=os.environ['SFTP_PASSWORD'])
+                      break
+                  except (socket.timeout,OSError,paramiko.SSHException) as exc:
+                      last_error=exc
+                      print('SFTP_CONNECTION_ATTEMPT_FAILED '+str(attempt)+' '+type(exc).__name__,flush=True)
+                      try: transport.close()
+                      except (NameError,OSError): pass
+                      if attempt==3: raise RuntimeError('SFTP connection failed after three attempts') from last_error
+                      time.sleep(5)
               sftp=paramiko.SFTPClient.from_transport(transport)
               def upload_sftp(domain,files,site):
                   home=sftp.normalize('.')
