@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "method": "Public Pump.fun creator profiles showing explicit coins created count",
+  "capturedOn": "2026-10-21",
+  "status": "public token creators, not Solfate-verified software developers",
+  "count": 5,
+  "creators": [
+    {
+      "chain": "solana",
+      "address": "G9fG1QKV2Hjvw1XDbXNJg5bacYfBUcpYHFchtr",
+      "coinsCreated": 89,
+      "platform": "pump.fun",
+      "profile": "logans",
+      "source": "https://pump.fun/profile/G9fG1QKV2Hjvw1XDbXNJg5bacYfBUcpYHFchtr?tab=coins",
+      "evidence": "Pump.fun profile explicitly displays created coin count",
+      "developerIdentityVerified": false,
+      "distributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "Au1Dbw9im1obKuoKjw34easQPQgkLiE1MapnzWie3ReT",
+      "coinsCreated": 26,
+      "platform": "pump.fun",
+      "profile": "emperor100",
+      "source": "https://pump.fun/profile/Au1Dbw9im1obKuoKjw34easQPQgkLiE1MapnzWie3ReT?tab=coins",
+      "evidence": "Pump.fun profile explicitly displays created coin count",
+      "developerIdentityVerified": false,
+      "distributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "AMt8JoMHQxEneuwBLcFcs2t61D7fahAftoB9CmTQUJSR",
+      "coinsCreated": 18,
+      "platform": "pump.fun",
+      "profile": "acin",
+      "source": "https://pump.fun/profile/AMt8JoMHQxEneuwBLcFcs2t61D7fahAftoB9CmTQUJSR?tab=coins",
+      "evidence": "Pump.fun profile explicitly displays created coin count",
+      "developerIdentityVerified": false,
+      "distributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "57rXqaQsvgyBKwebP2StfqQeCBjBS4jsrZFJN5aU2V9b",
+      "coinsCreated": 274,
+      "platform": "pump.fun",
+      "profile": "ram",
+      "source": "https://pump.fun/profile/57rXqaQsvgyBKwebP2StfqQeCBjBS4jsrZFJN5aU2V9b?tab=coins",
+      "evidence": "Pump.fun profile explicitly displays created coin count",
+      "developerIdentityVerified": false,
+      "distributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "EAbuAjF6R6GYTtiHrvXF261ot4mPAsmQ8mkBuwYrAcdS",
+      "coinsCreated": 103,
+      "platform": "pump.fun",
+      "profile": "chadmidas",
+      "source": "https://pump.fun/profile/EAbuAjF6R6GYTtiHrvXF261ot4mPAsmQ8mkBuwYrAcdS?tab=coins",
+      "evidence": "Pump.fun profile explicitly displays created coin count",
+      "developerIdentityVerified": false,
+      "distributionApproved": false
+    }
+  ]
+}
