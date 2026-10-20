@@ -377,7 +377,12 @@ async function runPreflight(){
   const adapterReady=solanaAdapter||baseAdapter;
   const quoteReady=baseAdapter?m.quoteAsset==='ETH':(m.launchEngine==='flash'||m.quoteAsset==='SOL');
   const decimalsReady=baseAdapter?m.token.decimals===18:(m.launchEngine==='flash'||m.token.decimals===6);
-  const creatorCap=baseAdapter?5:p.allocations.creatorTeamMaxPercent;
+  const creatorCap=baseAdapter?5:(worldzModePolicy()?.creatorAllocationMaxPercent??p.allocations.creatorTeamMaxPercent);
+  const strict=experienceMode==='advanced';
+  const modeCliffMin=strict?p.allocations.founderCliffMinDays:0;
+  const modeVestingMin=strict?p.allocations.founderVestingMinMonths:0;
+  const modeUnlockedMax=strict?p.allocations.creatorTeamUnlockedAtGenesisMaxPercent:creatorCap;
+  const friends=worldzFriendsPlan();
   const checks=[
     ['Chain selected',!!m.network,m.network],
     ['Executable public test adapter',adapterReady,baseAdapter?'Base Sepolia • Worldz EVM Fair':solanaAdapter?'Solana Devnet • '+m.launchEngine:'Adapter not enabled yet'],
@@ -393,14 +398,16 @@ async function runPreflight(){
     ['Freeze authority revocation',m.token.freezeAuthority===false,'COMPULSORY'],
     ['Decimals',Number.isInteger(m.token.decimals)&&m.token.decimals>=p.token.decimalsMin&&m.token.decimals<=p.token.decimalsMax,String(m.token.decimals)],
     ['Genesis allocations = 100%',Math.abs(allocTotal-100)<.001,allocTotal.toFixed(0)+'%'],
+    ['Family & friends planning list',friends.valid&&(!friends.enabled||friends.totalPercent<=alloc.creatorTeam),friends.enabled?friends.recipients.length+' recipients • planning only':'Not selected'],
+    ['Mode-aware disclosure',strict||alloc.creatorTeam<=15||m.safetyPolicy.creatorUnlockedAtGenesisPercent<=5,'High concentration disclosed — review before any public launch'],
     ['Allocation values valid',Object.values(alloc).every(v=>Number.isFinite(v)&&v>=0&&v<=100),'No negative or >100% allocation'],
     ['Creator/team allocation cap',alloc.creatorTeam>=0&&alloc.creatorTeam<=creatorCap,alloc.creatorTeam.toFixed(1)+'% / max '+creatorCap+'%'+(baseAdapter?' (Base v1 has no vesting adapter yet)':'')],
-    ['Creator liquid-at-genesis cap',m.safetyPolicy.creatorUnlockedAtGenesisPercent>=0&&m.safetyPolicy.creatorUnlockedAtGenesisPercent<=p.allocations.creatorTeamUnlockedAtGenesisMaxPercent&&m.safetyPolicy.creatorUnlockedAtGenesisPercent<=alloc.creatorTeam,m.safetyPolicy.creatorUnlockedAtGenesisPercent.toFixed(1)+'% / max '+Math.min(p.allocations.creatorTeamUnlockedAtGenesisMaxPercent,alloc.creatorTeam)+'%'],
+    ['Creator liquid-at-genesis cap',m.safetyPolicy.creatorUnlockedAtGenesisPercent>=0&&m.safetyPolicy.creatorUnlockedAtGenesisPercent<=modeUnlockedMax&&m.safetyPolicy.creatorUnlockedAtGenesisPercent<=alloc.creatorTeam,m.safetyPolicy.creatorUnlockedAtGenesisPercent.toFixed(1)+'% / max '+Math.min(modeUnlockedMax,alloc.creatorTeam)+'%'],
     ['Liquidity allocation range',alloc.liquidity>=p.allocations.liquidityMinPercent&&alloc.liquidity<=p.allocations.liquidityMaxPercent,alloc.liquidity.toFixed(1)+'%'],
     ['Community/public minimum',alloc.communityPublic>=p.allocations.communityPublicMinPercent,alloc.communityPublic.toFixed(1)+'% / min '+p.allocations.communityPublicMinPercent+'%'],
     ['Operations Treasury cap',alloc.treasuryReserve<=p.allocations.treasuryReserveMaxPercent,alloc.treasuryReserve.toFixed(1)+'% / max '+p.allocations.treasuryReserveMaxPercent+'%'],
-    ['Founder cliff',m.safetyPolicy.founderCliffDays>=p.allocations.founderCliffMinDays,m.safetyPolicy.founderCliffDays+' days'],
-    ['Founder vesting',m.safetyPolicy.founderVestingMonths>=p.allocations.founderVestingMinMonths,m.safetyPolicy.founderVestingMonths+' months'],
+    ['Founder cliff',m.safetyPolicy.founderCliffDays>=modeCliffMin,m.safetyPolicy.founderCliffDays+' days'],
+    ['Founder vesting',m.safetyPolicy.founderVestingMonths>=modeVestingMin,m.safetyPolicy.founderVestingMonths+' months'],
     ['Creator-controlled LP lock',m.safetyPolicy.creatorControlledLpLockPercent===100&&m.safetyPolicy.lpLockDays>=p.allocations.lpLockMinDays,'100% • '+m.safetyPolicy.lpLockDays+' days'],
     ['Project trading fee',m.feePolicy.projectTradingFeePercent>=platform.feePolicy.projectTradingFeeMinPercent&&m.feePolicy.projectTradingFeePercent<=platform.feePolicy.projectTradingFeeMaxPercent,m.feePolicy.projectTradingFeePercent.toFixed(2)+'%'],
     ['Project fee increment',Math.abs(((m.feePolicy.projectTradingFeePercent-platform.feePolicy.projectTradingFeeMinPercent)/platform.feePolicy.stepPercent)-Math.round((m.feePolicy.projectTradingFeePercent-platform.feePolicy.projectTradingFeeMinPercent)/platform.feePolicy.stepPercent))<1e-9,'0.25% steps'],
