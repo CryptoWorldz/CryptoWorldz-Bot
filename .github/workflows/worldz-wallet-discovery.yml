@@ -1,5 +1,9 @@
 name: Worldz public wallet discovery
 on:
+  push:
+    paths:
+      - 'tools/worldz-solana-top-holders.mjs'
+      - '.github/workflows/worldz-wallet-discovery.yml'
   workflow_dispatch:
     inputs:
       xrpl_token_ids:
@@ -24,7 +28,7 @@ jobs:
           node-version: '22'
       - name: Solana public holder snapshot
         env:
-          SOLANA_MINTS: ${{ inputs.solana_mints }}
+          SOLANA_MINTS: ${{ inputs.solana_mints || 'AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U,DF4zASfiDBr3uuAz4s2Sxtsjo7tDFZiQ2nLeKJGfBAGS' }}
         run: node tools/worldz-solana-top-holders.mjs
       - name: XRPL public holder snapshot
         if: ${{ inputs.xrpl_token_ids != '' }}
