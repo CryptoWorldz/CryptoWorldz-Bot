@@ -1,0 +1,190 @@
+{
+  "version": 1,
+  "goal": "Discover 50 attributable Solana token-creator wallet addresses per launch platform for Dev City research",
+  "selection": "20 researched Solana launch platforms, NOT a verified top-20 usage ranking",
+  "rankingStatus": "unranked; requires comparable 24h active creator or launch counts",
+  "sources": [
+    "https://solanacompass.com/projects/category/community/launchpads",
+    "https://freefloat.io/launchpads",
+    "https://www.codex.io/launchpads"
+  ],
+  "targetPerPlatform": 50,
+  "potentialRawRecords": 1000,
+  "platforms": [
+    {
+      "name": "Pump.fun",
+      "url": "https://pump.fun",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "BONK.fun",
+      "url": "https://bonk.fun",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Raydium LaunchLab",
+      "url": "https://raydium.io/launchpad",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Bags.fm",
+      "url": "https://bags.fm",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Meteora DBC",
+      "url": "https://meteora.ag",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Jupiter Studio",
+      "url": "https://jup.ag",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Moonshot",
+      "url": "https://moonshot.money",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Believe",
+      "url": "https://believe.app",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Heaven",
+      "url": "https://heaven.xyz",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Boop.fun",
+      "url": "https://boop.fun",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Orca Wavebreak",
+      "url": "https://www.orca.so",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "StonkFun",
+      "url": "https://stonk.fun",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "RevShare",
+      "url": "https://revshare.ltd",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "PinkSale",
+      "url": "https://www.pinksale.finance",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "SolanaForge",
+      "url": "https://solanaforge.app",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Smithii",
+      "url": "https://smithii.io",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Solminter",
+      "url": "https://solminter.com",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "CoinFactory",
+      "url": "https://coinfactory.app",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "auto.fun",
+      "url": "https://auto.fun",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    },
+    {
+      "name": "Jupiter LFG",
+      "url": "https://jup.ag",
+      "creatorWalletsRecorded": 0,
+      "sourceMethod": "pending creator-profile or on-chain launch-transaction attribution",
+      "verificationStatus": "pending",
+      "includedAsTop20ByVolume": false
+    }
+  ],
+  "verificationRules": {
+    "walletMustBeExplicitlyAttributedToTokenCreation": true,
+    "noTraderWalletsAsDevelopers": true,
+    "excludeProgramAddresses": true,
+    "deduplicateAgainstDevList191": true,
+    "noWorldzPartnershipAssumed": true,
+    "noAutomaticDistribution": true
+  },
+  "existingEvidence": {
+    "solfateVerifiedWallets": 191,
+    "pumpfunPublicCreatorCandidates": 5,
+    "revsharePageAddressMentions": 13,
+    "bonkPageAddressMentions": 0
+  },
+  "note": "20-platform research universe, not proof all platforms are currently active or top-20 by volume."
+}
