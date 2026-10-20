@@ -1,0 +1,115 @@
+{
+  "generatedAt": "2026-10-20T23:23:08.679Z",
+  "results": [
+    {
+      "platform": "bonk.fun",
+      "url": "https://www.bonk.fun/",
+      "httpStatus": 200,
+      "htmlBytes": 579,
+      "publicAddressesFound": 0,
+      "candidates": [],
+      "note": "Raw addresses in a page do NOT establish creator attribution. Do not count as verified Dev City recipients."
+    },
+    {
+      "platform": "revshare.ltd",
+      "url": "https://app.revshare.ltd/",
+      "httpStatus": 200,
+      "htmlBytes": 113438,
+      "publicAddressesFound": 13,
+      "candidates": [
+        {
+          "address": "EyWrMXBb5DXppWs5uNa6repSEDoDSachbjeixU9KREVS",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "3iodstfu18uxoggmmjud6tztkvw72uqapddbjes42ppk",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "GFJbQ7WDQry73iTaGkJcXKjvi1ViFTFmHSENgz92jFPP",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "2a8yumrxksw5fdsntfxtixzzas4tgvjkcfq46vpshgpy",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "GGoGk1EKpmN73T9M65dmuNAcQQBTmraMXEcSbKtSHREV",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "6uUU2z5GBasaxnkcqiQVHa2SXL68mAXDsq1zYN5Qxrm7",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "HygNWegGFjQqNMCsQmXbFgr3ViybkEN6fQtmvLXVXJmd",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "9xzmB67zWX8PJiGpQFbWuNBXTqyPpu2qV3mxQfhqUREV",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "45kzxdGHXaPpQXTQT14zdw6eQXS8YQrdsiSRCf6mQ43E",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "44sHXMkPeciUpqhecfCysVs7RcaxeM24VPMauQouBREV",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "de469kjo5cpbgepqkmamkyecbgmcgr2jsrhzdkyrqfvz",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "imE1nbjWM9QGUzxH2WHYNjcrUqgh9tT8RFYoj9UnMj3",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        },
+        {
+          "address": "ESsCdmGyPK9sostFbWV5iM6owxcqsGNfBQaj3xkAkREV",
+          "chain": "solana",
+          "source": "https://app.revshare.ltd/",
+          "role": "unverified page mention",
+          "creatorVerified": false
+        }
+      ],
+      "note": "Raw addresses in a page do NOT establish creator attribution. Do not count as verified Dev City recipients."
+    }
+  ]
+}
