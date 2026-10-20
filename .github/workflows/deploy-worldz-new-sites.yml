@@ -25,8 +25,8 @@ jobs:
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
       SFTP_HOST: ${{ vars.SFTP_HOST }}
       SFTP_PORT: ${{ vars.SFTP_PORT || '65002' }}
-      SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
-      SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+      SFTP_USERNAME: ${{ secrets.SFTP_USERNAME || secrets.FTP_USERNAME }}
+      SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD || secrets.FTP_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - name: Validate sites and FTP configuration
