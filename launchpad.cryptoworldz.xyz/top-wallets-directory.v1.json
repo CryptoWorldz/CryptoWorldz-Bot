@@ -678,5 +678,53 @@
       "cross-chain ownership from address resemblance"
     ],
     "ingestionStatus": "public RPC rate limited for Solana; no completed eight-chain snapshots yet"
+  },
+  "directoryPurpose": "PUBLIC_LAUNCH_DISTRIBUTION_RECIPIENT_CANDIDATES_NOT_TOKEN_HOLDER_SNAPSHOTS",
+  "programs": {
+    "chainTop100": {
+      "chains": [
+        "solana",
+        "xrpl",
+        "base",
+        "bitcoin",
+        "ethereum",
+        "hyperliquid",
+        "sui",
+        "robinhood"
+      ],
+      "slotsPerChain": 100,
+      "uses": [
+        "WorldzLaunchPad token launch distribution candidate selection"
+      ],
+      "selection": "publicly sourced wallet address; cross-chain-compatible distribution only",
+      "requiresWalletOwnershipConsentForPromotionalEndorsement": true
+    },
+    "worldzSolanaTop100": {
+      "sourceDirectory": "chainTop100.solana",
+      "slots": 100,
+      "uses": [
+        "Worldz-issued Solana token launches"
+      ],
+      "separateAllocationPolicy": true
+    },
+    "devCityTop100": {
+      "directory": "dev-city-top-100.v1.json",
+      "slots": 100,
+      "independentOfChainTop100": true,
+      "uses": [
+        "Dev City developer distribution"
+      ],
+      "requiresDeveloperEvidence": true
+    }
+  },
+  "collectionPriorities": [
+    "publicly attributable top holders on each chain",
+    "launchpad developers and creators",
+    "public institutional/protocol wallets",
+    "public community wallets"
+  ],
+  "legacyHolderCollectors": {
+    "status": "optional_research_sources_only",
+    "notLaunchDistributionRoster": true
   }
 }
