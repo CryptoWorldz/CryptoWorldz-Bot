@@ -307,9 +307,19 @@
           </div>
           <div class="worldz-mode-guidance" id="worldz-mode-guidance" role="status" aria-live="polite"></div>
           <div class="worldz-friends" id="worldz-friends">
-            <label class="worldz-friends-toggle"><input id="friends-enabled" type="checkbox"> Share tokens with family and friends?</label>
+            <label class="worldz-friends-toggle"><input id="friends-enabled" type="checkbox"> <span id="friends-toggle-label">Share tokens with family and friends?</span></label>
+            <div id="intermediate-wallet-options" hidden>
+              <label for="wallet-group-type">Recipient group</label>
+              <select id="wallet-group-type">
+                <option value="developer">Developers &amp; builders</option>
+                <option value="featured">Featured crypto wallets (invitation only)</option>
+                <option value="collaborator">Collaborators &amp; contributors</option>
+                <option value="community">Community rewards</option>
+              </select>
+              <p class="micro">Suggest recipients by role, not by impersonating well-known wallets. No affiliation or endorsement is implied. Obtain recipient consent before advertising an allocation as a partnership.</p>
+            </div>
             <div id="friends-details" hidden>
-              <p class="micro">Up to 100 recipient wallet addresses. Enter one address and token percentage per line, separated by a comma. This is a planning list, not an automatic on-chain transfer.</p>
+              <p class="micro">Up to 100 recipient wallet addresses. Enter one address and token percentage per line, separated by a comma. Allocations must fit inside your creator share. This is a planning list, not an automatic on-chain transfer.</p>
               <textarea id="friends-addresses" rows="4" maxlength="12000" placeholder="Wallet address, 1.5"></textarea>
               <p class="micro" id="friends-status">0 of 100 recipients</p>
             </div>
@@ -466,7 +476,7 @@
   <p>WorldzLaunchPad™ is a public creator platform. Mainnet execution is enabled only after the selected route passes its published proof gate. WorldzLaunchPad uses the disclosed 0.60% genesis supply allocation plus its separate supported fee-revenue model; it takes 0% of initial liquidity and 0% wallet-transfer tax.</p>
 </footer>
 
-<script src="/app.js?v=20261021-creator-modes-v2" defer></script>
+<script src="/app.js?v=20261021-featured-wallets-v3" defer></script>
 <script src="/ads.js?v=20261002-ads-v1" defer></script>
 <script src="/worldz-guide.js?v=20261004" defer></script></body>
 </html>
