@@ -107,3 +107,10 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .worldz-friends [hidden],.form-grid label[hidden],#worldz-friends[hidden]{display:none!important}
 body[data-experience="beginner"] .worldz-mode-guidance{border-color:rgba(214,217,231,.4)}
 @media(max-width:720px){.worldz-mode-guidance,.worldz-friends{padding:13px;border-radius:14px}}
+
+/* Intermediate invitation-only featured-wallet allocations */
+#intermediate-wallet-options{margin-top:14px;padding:14px;border-radius:14px;border:1px solid rgba(214,217,231,.22);background:rgba(12,5,28,.68)}
+#intermediate-wallet-options[hidden]{display:none!important}
+#intermediate-wallet-options label{display:block;color:#d6d9e7;font-weight:750;margin-bottom:7px}
+#intermediate-wallet-options select{width:100%;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid rgba(205,178,240,.35);background:#170b2a;color:#f5eeff}
+#intermediate-wallet-options select:focus-visible{outline:2px solid #d0a2ff;outline-offset:2px}
