@@ -1395,23 +1395,37 @@
     "rule": "Research, education, portfolio modelling and proof are live product directions. Buying, selling, DCA execution and auto-rebalancing stay separately gated."
   },
   "creatorExperience": {
-    "version": "WORLDZ-CREATOR-EXPERIENCE-V1",
+    "version": "WORLDZ-CREATOR-EXPERIENCE-V2",
     "defaultMode": "beginner",
     "modes": [
       {
         "id": "beginner",
-        "label": "Make Your Own Money — Beginner",
-        "purpose": "plain_english_learning_safe_defaults"
+        "label": "Make Your Own Token — Beginner",
+        "purpose": "simple_visual_creation_family_friends",
+        "creatorAllocationMaxPercent": 100,
+        "familyFriendsMaxRecipients": 100,
+        "vestingVisible": false,
+        "requiresLiquidityForTrading": true
       },
       {
         "id": "intermediate",
-        "label": "Intermediate — Everyday Crypto Joe",
-        "purpose": "custom_tokenomics_liquidity_vesting_with_guardrails"
+        "label": "Intermediate — Creator Freedom",
+        "purpose": "flexible_tokenomics_with_best_practice_guidance",
+        "creatorAllocationMaxPercent": 50,
+        "familyFriendsMaxRecipients": 100,
+        "founderCliffMinDays": 0,
+        "founderVestingMinMonths": 0,
+        "educationPrompts": true
       },
       {
         "id": "advanced",
-        "label": "Advanced — Worldz Leaders",
-        "purpose": "full_token_dna_multisig_treasury_crosspair_omnichain_worldzproof"
+        "label": "Advanced — Worldz Verified Standard",
+        "purpose": "strict_token_dna_multisig_crosschain_readiness",
+        "creatorAllocationMaxPercent": 15,
+        "founderCliffMinDays": 90,
+        "founderVestingMinMonths": 18,
+        "crossChainOnlyWhenVerified": true,
+        "jupiterReadinessAdvisory": true
       }
     ],
     "safeLaunchStandardCannotBeBypassed": true,
@@ -1424,7 +1438,8 @@
       "Worldz Card",
       "WorldzConnect",
       "X Payments compatible integration path when provider rules and APIs permit"
-    ]
+    ],
+    "executionGate": "Mode preferences do not override chain adapters, liquidity rules, disclosure requirements, or verified launch execution"
   },
   "automationFirst": {
     "version": "WORLDZ-AUTOMATION-FIRST-V1",
