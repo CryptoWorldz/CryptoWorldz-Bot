@@ -67,3 +67,32 @@ footer{padding:28px clamp(18px,6vw,88px) 45px;display:flex;flex-wrap:wrap;justif
 .fee-control,.fee-example,.route-builder{border-color:rgba(174,104,241,.29);background:linear-gradient(150deg,rgba(111,44,168,.12),rgba(18,10,32,.48));box-shadow:0 8px 30px rgba(0,0,0,.12)}
 .form-grid input:not([type="range"]),.form-grid select,.route-inputs input,.fee-control select,.fee-example input{border-radius:12px;border:1px solid rgba(169,112,226,.35);background-color:rgba(29,15,43,.74);color:#f4e8ff;min-height:44px;transition:border-color .15s ease,box-shadow .15s ease}
 .form-grid input:focus-visible,.form-grid select:focus-visible,.route-inputs input:focus-visible,.fee-control select:focus-visible,.fee-example input:focus-visible{outline:2px solid #c48aff;outline-offset:2px;border-color:#b36aff;box-shadow:0 0 0 4px rgba(155,73,235,.13)}
+
+/* WORLDZ GALAXY DESIGN SYSTEM V1 — cosmic purple, silver, midnight black */
+:root{--worldz-midnight:#05020b;--worldz-galaxy:#16082d;--worldz-amethyst:#a44cff;--worldz-lavender:#d6b5ff;--worldz-silver:#d6d9e7;--worldz-ice:#f5f4ff;--line:rgba(214,217,231,.16);--muted:#bdb6cd}
+html{background:#05020b}
+body{position:relative;isolation:isolate;background:
+radial-gradient(ellipse 55% 35% at 75% 12%,rgba(146,64,234,.29),transparent 80%),
+radial-gradient(ellipse 60% 40% at 18% 37%,rgba(81,24,160,.27),transparent 85%),
+radial-gradient(ellipse 55% 32% at 80% 73%,rgba(111,51,194,.21),transparent 85%),
+linear-gradient(150deg,#05020b 0%,#120724 46%,#05020b 100%);background-attachment:fixed;color:var(--worldz-ice)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.76;background-image:
+radial-gradient(1px 1px at 17px 27px,#f5eeff 98%,transparent),
+radial-gradient(1.5px 1.5px at 88px 91px,#c8b7fa 98%,transparent),
+radial-gradient(1px 1px at 157px 48px,#e1e3ff 98%,transparent),
+radial-gradient(2px 2px at 233px 170px,#d6b2ff 98%,transparent),
+radial-gradient(1px 1px at 41px 188px,#ffffff 98%,transparent);
+background-size:277px 223px,331px 277px,397px 311px,461px 389px,211px 293px}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.55;background:radial-gradient(ellipse 48% 18% at 52% 32%,rgba(165,86,252,.18),transparent 75%),radial-gradient(ellipse 38% 14% at 28% 72%,rgba(101,64,209,.18),transparent 80%);filter:blur(28px)}
+.topbar{background:rgba(6,3,16,.89);border-bottom:1px solid rgba(214,217,231,.2)}
+.hero:before{background:linear-gradient(110deg,rgba(5,2,11,.28),transparent 58%),radial-gradient(ellipse at 78% 40%,rgba(149,68,234,.13),transparent 65%)}
+.hero h1 span{background:linear-gradient(95deg,#fff 0%,#d8dce9 29%,#c28dff 68%,#f3e7ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kicker,.section-kicker{color:#d2b0ff}
+.lead{color:#d3cbdc}
+.btn.primary{background:linear-gradient(135deg,#c17cff,#8535dc 65%,#56219e);border-color:rgba(226,200,255,.4);box-shadow:0 9px 30px rgba(120,45,219,.3)}
+.btn.secondary{background:linear-gradient(145deg,rgba(219,220,239,.12),rgba(88,56,130,.1));border-color:rgba(214,217,231,.29);color:#f1effb}
+.btn.ghost{background:rgba(142,101,207,.12);border-color:rgba(202,179,237,.3);color:#e0d0fa}
+.fee-control,.fee-example,.route-builder{backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-color:rgba(214,217,231,.2);box-shadow:0 16px 45px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.045)}
+.fee-control .fee-range-labels{color:var(--worldz-silver)}
+@media(prefers-reduced-transparency:reduce){.fee-control,.fee-example,.route-builder{backdrop-filter:none;background:#160d27}}
+@media(max-width:720px){body{background-attachment:scroll}body::after{filter:blur(18px)}}
