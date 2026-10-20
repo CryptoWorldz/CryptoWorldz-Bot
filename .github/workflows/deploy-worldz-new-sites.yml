@@ -58,7 +58,19 @@ jobs:
               transport.connect(username=os.environ['SFTP_USERNAME'],password=os.environ['SFTP_PASSWORD'])
               sftp=paramiko.SFTPClient.from_transport(transport)
               def upload_sftp(domain,files,site):
-                  base='domains/'+domain+'/public_html'
+                  home=sftp.normalize('.')
+                  print('SFTP_HOME '+home,flush=True)
+                  print('SFTP_ROOT_ENTRIES '+','.join(sftp.listdir('.')),flush=True)
+                  candidates=['domains/'+domain+'/public_html',domain+'/public_html','public_html']
+                  existing=[]
+                  for candidate in candidates:
+                      try:
+                          sftp.stat(candidate)
+                          existing.append(candidate)
+                      except OSError: pass
+                  if len(existing)!=1:
+                      raise RuntimeError('Ambiguous or missing SFTP target for '+domain+': '+','.join(existing)+'; refusing to create folders or overwrite wrong site')
+                  base=existing[0]
                   for p in files:
                       dest=posixpath.join(base,p.relative_to(site).as_posix())
                       parent=posixpath.dirname(dest)
