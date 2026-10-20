@@ -1,11 +1,7 @@
 name: Deploy WorldzHQ and Worldz Live to Hostinger
+# Manual-only legacy homepage uploader. The deploy-worldz-new-sites.yml workflow
+# is the single automatic deployment path for both sites and their public assets.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/deploy-worldzhq-live.yml'
-      - 'worldzhq.com/**'
-      - 'worldz.live/**'
   workflow_dispatch:
 permissions:
   contents: read
