@@ -3,30 +3,40 @@ on:
   workflow_dispatch:
     inputs:
       xrpl_token_ids:
-        description: 'Three verified XRPL token IDs (comma-separated)'
-        required: true
+        description: 'Verified XRPL token IDs, comma-separated (optional)'
+        required: false
+        type: string
+      solana_mints:
+        description: 'Solana mint addresses, comma-separated (optional)'
+        required: false
+        default: 'AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U,DF4zASfiDBr3uuAz4s2Sxtsjo7tDFZiQ2nLeKJGfBAGS'
         type: string
 permissions:
   contents: write
 jobs:
   discover:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Read public holder data
+      - name: Solana public holder snapshot
+        env:
+          SOLANA_MINTS: ${{ inputs.solana_mints }}
+        run: node tools/worldz-solana-top-holders.mjs
+      - name: XRPL public holder snapshot
+        if: ${{ inputs.xrpl_token_ids != '' }}
         env:
           XRPL_TOKEN_IDS: ${{ inputs.xrpl_token_ids }}
         run: node tools/worldz-wallet-discovery.mjs
-      - name: Commit dated public snapshot
+      - name: Commit public snapshots
         run: |
           git config user.name "worldz-discovery-bot"
           git config user.email "worldz-discovery-bot@users.noreply.github.com"
           git add launchpad.cryptoworldz.xyz/wallet-snapshots/
           if ! git diff --cached --quiet; then
-            git commit -m "Update read-only XRPL token-holder snapshot [cancel-full-deploy]"
+            git commit -m "Update public token-holder snapshots [cancel-full-deploy]"
             git push
           fi
