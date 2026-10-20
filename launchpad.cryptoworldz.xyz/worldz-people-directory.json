@@ -3,36 +3,31 @@
   "status": "CANDIDATE_DIRECTORY_NO_VERIFIED_PARTICIPANTS",
   "notes": "Public role directory. Never present a suggested wallet as endorsed, verified or accepted without consent and ownership proof. No payments or transfers are authorized by this directory.",
   "worldzDevCity": {
-    "totalSeats": 100,
-    "groups": [
-      {
-        "id": "finance-audit",
-        "name": "Finance & Audit",
-        "seats": 20
-      },
-      {
-        "id": "food-agriculture",
-        "name": "Food & Agriculture",
-        "seats": 20
-      },
-      {
-        "id": "housing-infrastructure",
-        "name": "Housing & Infrastructure",
-        "seats": 20
-      },
-      {
-        "id": "health-education",
-        "name": "Health & Education",
-        "seats": 20
-      },
-      {
-        "id": "technology-development",
-        "name": "Technology & Development",
-        "seats": 20
-      }
-    ],
+    "identity": "DevCity™ 100",
+    "purpose": "Verified developer / crypto wallet recipient roster for token distribution; separate from Worldz Treasury or Founding 100",
+    "capacity": 100,
     "filledSeats": 0,
-    "seatStatus": "OPEN_UNVERIFIED"
+    "rosterStatus": "PENDING_APPROVED_100_WALLET_ROSTER",
+    "revive": {
+      "token": "RVIV",
+      "plannedPoolTokens": 20000000,
+      "plannedRecipients": 100,
+      "distributionStatus": "RESERVED_NOT_EXECUTED",
+      "source": "launchpad.cryptoworldz.xyz/onedrop/revive-manifest.v1.json"
+    },
+    "worldz": {
+      "token": "WLDZ",
+      "plannedPoolTokens": 5000000,
+      "plannedRecipients": 50,
+      "plannedTokensPerRecipient": 100000,
+      "distributionStatus": "PLANNED_NOT_VERIFIED_EXECUTED",
+      "source": "worldzpad-mainnet/wldz-distribution.wallets.json"
+    },
+    "independentFrom": [
+      "Worldz Treasury 100 seats",
+      "Founding 100 launch programme",
+      "Beginner Family and Friends 100 recipient planner"
+    ]
   },
   "launchpadRecipientDirectory": {
     "maxWalletsPerLaunch": 100,
