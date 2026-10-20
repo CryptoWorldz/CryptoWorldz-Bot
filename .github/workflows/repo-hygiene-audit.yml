@@ -5,7 +5,16 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - ".github/workflows/repo-hygiene-audit.yml"
+      - ".github/workflows/**"
+      - "worldzhq.com/**"
+      - "worldz.live/**"
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - "worldzhq.com/**"
+      - "worldz.live/**"
+  schedule:
+    - cron: '17 3 * * 1'
 
 permissions:
   contents: read
