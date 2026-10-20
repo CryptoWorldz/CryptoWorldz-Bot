@@ -107,16 +107,21 @@ function updateWorldzModeControls(){
       ?'ADVANCED • Worldz Verified Standard: strict allocations, vesting, LP protection and proof. Cross-chain/Omni routes require verified adapters. Jupiter review/readiness is advisory, never guaranteed.'
       :'INTERMEDIATE • Up to 50% creator/team allocation, with optional zero-day cliff and zero-month vesting. Best practice: explain large holdings and consider a voluntary lock. Buyers will see concentration risks.';
   const friends=$('#worldz-friends');if(friends)friends.hidden=advanced;
+  const group=$('#intermediate-wallet-options');if(group)group.hidden=experienceMode!=='intermediate';
+  const toggle=$('#friends-toggle-label');if(toggle)toggle.textContent=experienceMode==='intermediate'
+    ?'Allocate tokens to developers, featured wallets or collaborators?'
+    :'Share tokens with family and friends?';
+  updateWorldzFriends();
   feeMath();
 }
 function worldzFriendsPlan(){
-  if(!$('#friends-enabled')?.checked)return {enabled:false,recipients:[],valid:true};
+  if(!$('#friends-enabled')?.checked)return {enabled:false,recipients:[],valid:true,group:experienceMode==='intermediate'?($('#wallet-group-type')?.value||'developer'):'familyFriends'};
   const rows=($('#friends-addresses')?.value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
   const recipients=rows.map(x=>{const parts=x.split(',');return {address:(parts[0]||'').trim(),percent:Number((parts[1]||'').trim())};});
   const unique=new Set(recipients.map(x=>x.address));
   const total=recipients.reduce((a,x)=>a+x.percent,0);
   const valid=recipients.length<=100&&unique.size===recipients.length&&recipients.every(x=>/^[A-Za-z0-9]{32,64}$/.test(x.address)&&Number.isFinite(x.percent)&&x.percent>0)&&total<=100;
-  return {enabled:true,recipients,valid,totalPercent:total};
+  return {enabled:true,recipients,valid,totalPercent:total,group:experienceMode==='intermediate'?($('#wallet-group-type')?.value||'developer'):'familyFriends'};
 }
 function updateWorldzFriends(){
   const details=$('#friends-details');if(details)details.hidden=!$('#friends-enabled')?.checked;
@@ -311,7 +316,7 @@ function manifestBase(){
     schema:'worldzlaunchpad.launch-intent.v1',
     platformVersion:platform.version,
     creatorExperienceMode:experienceMode,
-    familyFriendsPlan:{enabled:worldzFriendsPlan().enabled,recipientCount:worldzFriendsPlan().recipients.length,totalPercent:worldzFriendsPlan().totalPercent||0,distributionExecuted:false},
+    familyFriendsPlan:{enabled:worldzFriendsPlan().enabled,recipientGroup:worldzFriendsPlan().group,recipientCount:worldzFriendsPlan().recipients.length,totalPercent:worldzFriendsPlan().totalPercent||0,distributionExecuted:false,endorsementVerified:false},
     network:build.chain,
     launchEngine:build.engine,
     token:{
@@ -493,6 +498,7 @@ function bind(){
   $('.experience-choice').forEach(b=>b.addEventListener('click',()=>setExperienceMode(b.dataset.experience)));
   $('#friends-enabled')?.addEventListener('change',updateWorldzFriends);
   $('#friends-addresses')?.addEventListener('input',updateWorldzFriends);
+  $('#wallet-group-type')?.addEventListener('change',updateWorldzFriends);
   $$('.next-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.next)));
   $$('.prev-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.prev)));
   $$('.step-tab').forEach(b=>b.addEventListener('click',()=>step(b.dataset.step)));
