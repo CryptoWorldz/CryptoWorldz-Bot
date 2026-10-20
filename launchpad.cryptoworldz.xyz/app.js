@@ -310,6 +310,8 @@ function manifestBase(){
   return {
     schema:'worldzlaunchpad.launch-intent.v1',
     platformVersion:platform.version,
+    creatorExperienceMode:experienceMode,
+    familyFriendsPlan:{enabled:worldzFriendsPlan().enabled,recipientCount:worldzFriendsPlan().recipients.length,totalPercent:worldzFriendsPlan().totalPercent||0,distributionExecuted:false},
     network:build.chain,
     launchEngine:build.engine,
     token:{
