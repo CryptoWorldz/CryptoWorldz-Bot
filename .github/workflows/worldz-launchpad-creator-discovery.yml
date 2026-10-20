@@ -1,0 +1,29 @@
+name: Worldz Solana launchpad creator research
+on:
+  push:
+    paths:
+      - 'tools/worldz-launchpad-creator-discovery.mjs'
+      - '.github/workflows/worldz-launchpad-creator-discovery.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Collect public Pump.fun creator candidates
+        run: node tools/worldz-launchpad-creator-discovery.mjs
+      - name: Save public research snapshot
+        run: |
+          git config user.name "worldz-discovery-bot"
+          git config user.email "worldz-discovery-bot@users.noreply.github.com"
+          git add launchpad.cryptoworldz.xyz/wallet-snapshots/pumpfun-creator-candidates.latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record public Pump.fun creator wallet research [cancel-full-deploy]"
+            git push
+          fi
