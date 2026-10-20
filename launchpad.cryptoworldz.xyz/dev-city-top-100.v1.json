@@ -20,5 +20,41 @@
     "noAutomaticDistributions": true,
     "transactionApprovalRequired": true
   },
-  "note": "No developers are invented or marked approved. Existing RVIV DevCity and WLDZ Dev City allocations remain separate until reconciled."
+  "note": "No developers are invented or marked approved. Existing RVIV DevCity and WLDZ Dev City allocations remain separate until reconciled.",
+  "discoverySources": [
+    {
+      "name": "Solfate Solana DevList",
+      "url": "https://solfate.com/devlist",
+      "evidence": "https://solfate.com/blog/devlist-launch",
+      "type": "developer verified wallet directory",
+      "priority": 1,
+      "notes": "Wallet control and open-source contributions reviewed; independently retrieve membership wallet addresses and validate current state. No automatic Worldz affiliation."
+    },
+    {
+      "name": "Devnet Directory",
+      "url": "https://devnet.directory",
+      "type": "developer profile registry",
+      "priority": 2,
+      "notes": "Developer profiles are not sufficient to assert a distribution wallet; require explicit public recipient address."
+    },
+    {
+      "name": "Public open-source developer donation wallets",
+      "url": "https://github.com/0xTBV/solana-donation",
+      "type": "public developer-repository wallet",
+      "priority": 3,
+      "notes": "A published donation address alone does not prove the repository author controls it; manual verification required."
+    }
+  ],
+  "researchCandidates": [
+    {
+      "chain": "solana",
+      "address": "5aZcbVVRabShf3TWyr8tMPQA3JE39fuJz8pX5qdfkkyX",
+      "source": "https://github.com/0xTBV/solana-donation",
+      "evidence": "Public repository documents this as default donation wallet",
+      "developerAttribution": "unverified",
+      "recipientApproval": "pending",
+      "distributionReady": false
+    }
+  ],
+  "updatedAt": "2026-10-21"
 }
