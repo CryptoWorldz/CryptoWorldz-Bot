@@ -1,0 +1,24 @@
+{
+  "version": "WORLDZ-DEV-CITY-TOP-100-V1",
+  "purpose": "Developer-wallet distribution candidates, separate from eight-chain top-holder directories",
+  "targetSlots": 100,
+  "approvedWallets": 0,
+  "selectionCategories": [
+    "verified public protocol developer",
+    "open-source blockchain developer",
+    "verified launchpad developer",
+    "on-chain tooling developer",
+    "ecosystem maintainer"
+  ],
+  "candidates": [],
+  "validation": {
+    "publicAddressSourceRequired": true,
+    "developerEvidenceRequired": true,
+    "networkRequired": true,
+    "duplicatesProhibited": true,
+    "notAutomaticallyPartners": true,
+    "noAutomaticDistributions": true,
+    "transactionApprovalRequired": true
+  },
+  "note": "No developers are invented or marked approved. Existing RVIV DevCity and WLDZ Dev City allocations remain separate until reconciled."
+}
