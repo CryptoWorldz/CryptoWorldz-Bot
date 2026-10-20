@@ -1,0 +1,29 @@
+name: Worldz Dev City verified developer wallet discovery
+on:
+  push:
+    paths:
+      - 'tools/worldz-dev-city-discovery.mjs'
+      - '.github/workflows/worldz-dev-city-discovery.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import-devlist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Import Solfate verified developer wallets
+        run: node tools/worldz-dev-city-discovery.mjs
+      - name: Commit researched developer wallet snapshot
+        run: |
+          git config user.name "worldz-discovery-bot"
+          git config user.email "worldz-discovery-bot@users.noreply.github.com"
+          git add launchpad.cryptoworldz.xyz/wallet-snapshots/dev-city-developers.latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record independently verified Dev City developer wallets [cancel-full-deploy]"
+            git push
+          fi
