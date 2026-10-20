@@ -1,0 +1,32 @@
+name: Worldz public wallet discovery
+on:
+  workflow_dispatch:
+    inputs:
+      xrpl_token_ids:
+        description: 'Three verified XRPL token IDs (comma-separated)'
+        required: true
+        type: string
+permissions:
+  contents: write
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read public holder data
+        env:
+          XRPL_TOKEN_IDS: ${{ inputs.xrpl_token_ids }}
+        run: node tools/worldz-wallet-discovery.mjs
+      - name: Commit dated public snapshot
+        run: |
+          git config user.name "worldz-discovery-bot"
+          git config user.email "worldz-discovery-bot@users.noreply.github.com"
+          git add launchpad.cryptoworldz.xyz/wallet-snapshots/
+          if ! git diff --cached --quiet; then
+            git commit -m "Update read-only XRPL token-holder snapshot [cancel-full-deploy]"
+            git push
+          fi
