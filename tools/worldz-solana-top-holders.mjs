@@ -1,9 +1,11 @@
 // Public Solana RPC snapshot. Token-account rankings are NOT owner-aggregated rankings.
 import fs from 'node:fs/promises';
-const rpc=process.env.SOLANA_RPC_URL||'https://api.mainnet-beta.solana.com';
+const rpcs=[process.env.SOLANA_RPC_URL,'https://solana-rpc.publicnode.com','https://api.mainnet-beta.solana.com'].filter(Boolean);
 const mints=(process.env.SOLANA_MINTS||'').split(',').map(s=>s.trim()).filter(Boolean);
 const dir='launchpad.cryptoworldz.xyz/wallet-snapshots';
-async function call(method,params){const r=await fetch(rpc,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(20000)});if(!r.ok)throw Error('HTTP '+r.status);const j=await r.json();if(j.error)throw Error(JSON.stringify(j.error));return j.result}
+async function call(method,params){let last;for(const rpc of rpcs){try{const r=await fetch(rpc,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(12000)});if(!r.ok)throw Error('HTTP '+r.status+' at '+new URL(rpc).hostname);const j=await r.json();if(j.error)throw Error(JSON.stringify(j.error));return j.result}catch(e){last=e}}throw last}
 const snap={version:1,generatedAt:new Date().toISOString(),network:'solana-mainnet-beta',ranking:'top token accounts, not aggregated beneficial owners',tokens:[],warnings:[]};
 for(const mint of mints.slice(0,10)){try{if(!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(mint))throw Error('invalid mint');const r=await call('getTokenLargestAccounts',[mint,{commitment:'finalized'}]);const accounts=r.value||[];const records=[];for(let i=0;i<accounts.length;i+=10){const batch=accounts.slice(i,i+10);const details=await call('getMultipleAccounts',[batch.map(x=>x.address),{encoding:'jsonParsed',commitment:'finalized'}]);for(let j=0;j<batch.length;j++){const a=batch[j],v=details.value?.[j];const owner=v?.data?.parsed?.info?.owner||null;records.push({rank:i+j+1,tokenAccount:a.address,ownerWallet:owner,amountRaw:a.amount,uiAmountString:a.uiAmountString,sourceMethod:'getTokenLargestAccounts+getMultipleAccounts',ownerIdentity:'unattributed',consent:false})}}snap.tokens.push({mint,contextSlot:r.context?.slot,accounts:records})}catch(e){snap.warnings.push({mint,error:String(e.message)})}}
 await fs.mkdir(dir,{recursive:true});await fs.writeFile(dir+'/solana-token-holders.latest.json',JSON.stringify(snap,null,2)+'\n');console.log(JSON.stringify({tokens:snap.tokens.length,accounts:snap.tokens.reduce((n,t)=>n+t.accounts.length,0),warnings:snap.warnings},null,2));
+
+if(!snap.tokens.length)process.exitCode=1;
