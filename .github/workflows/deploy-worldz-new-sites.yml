@@ -48,7 +48,11 @@ jobs:
               files=[p for p in site.rglob('*') if p.is_file() and p.suffix.lower() in allowed and not any(part.startswith('.') for part in p.relative_to(site).parts) and p.name not in ('domain-plan.json','package.json','package-lock.json')]
               if not files: raise RuntimeError('No public assets for '+domain)
               print(f'DEPLOY_START {domain} files={len(files)}',flush=True)
-              ftp_host=os.environ.get('FTP_TLS_HOST') or os.environ['FTP_HOST']
+              # Hostinger support identified cryptoworldz.xyz as the account's FTPS hostname.
+              # Prefer the explicit environment setting, then the provider hostname;
+              # retain strict TLS certificate validation and never use the numeric IP.
+              ftp_host=os.environ.get('FTP_TLS_HOST') or 'cryptoworldz.xyz'
+              print('FTPS_HOST_SELECTED '+ftp_host,flush=True)
               if not ftp_host or all(ch.isdigit() or ch=='.' for ch in ftp_host):
                   raise RuntimeError('FTPS certificate verification requires a certificate-matching DNS hostname. Set FTP_TLS_HOST as a GitHub environment variable; no files were uploaded.')
               ftp=ftplib.FTP_TLS(context=ssl.create_default_context())
