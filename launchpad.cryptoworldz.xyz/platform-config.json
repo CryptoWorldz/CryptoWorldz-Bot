@@ -1415,7 +1415,17 @@
         "familyFriendsMaxRecipients": 100,
         "founderCliffMinDays": 0,
         "founderVestingMinMonths": 0,
-        "educationPrompts": true
+        "educationPrompts": true,
+        "recipientWalletMax": 100,
+        "recipientGroupChoices": [
+          "developer",
+          "featured",
+          "collaborator",
+          "community"
+        ],
+        "featuredWalletInvitationOnly": true,
+        "publicEndorsementRequiresConsent": true,
+        "walletAllocationIsPlanningOnly": true
       },
       {
         "id": "advanced",
