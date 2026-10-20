@@ -77,7 +77,7 @@ jobs:
                       current=''
                       for part in parent.split('/'):
                           if not part: continue
-                          current+='/'+part
+                          current=(current+'/' if current else '')+part
                           try: sftp.stat(current)
                           except FileNotFoundError: sftp.mkdir(current)
                       sftp.put(str(p),dest)
