@@ -61,7 +61,11 @@
   "selectionRule": "Research and independently verify 250 unique developer-controlled public wallets; shortlist 100 eligible Dev City recipients; no automatic transfer or endorsement.",
   "progressMetrics": {
     "researchTarget": 250,
-    "verifiedDeveloperWallets": 0,
-    "selectedDistributionSeats": 0
-  }
+    "verifiedDeveloperWallets": 191,
+    "selectedDistributionSeats": 0,
+    "remaining": 59
+  },
+  "verifiedResearchSnapshot": "wallet-snapshots/dev-city-developers.latest.json",
+  "verifiedSource": "https://solfate.com/api/lists/developers",
+  "verifiedSourceStatus": "191 active Solfate DevList members as of 2026-10-21; pending and unclaimed not counted"
 }
