@@ -68,9 +68,62 @@ function setExperienceMode(mode){
       ? ['Chain','Engine','Token','Pair','Economics','Proof']
       : ['Sovereign Rail','Architecture','Token DNA','CrossPair','Treasury + Economics','WorldzProof'];
   $$('.step-tab span').forEach((x,i)=>{if(labels[i])x.textContent=labels[i];});
+  updateWorldzModeControls();
   const active=$('.wizard-step.active');
   step(active?active.dataset.panel:1);
 }
+
+function worldzModePolicy(){
+  return platform?.creatorExperience?.modes?.find(x=>x.id===experienceMode)||null;
+}
+function updateWorldzModeControls(){
+  const mode=worldzModePolicy(),beginner=experienceMode==='beginner',advanced=experienceMode==='advanced';
+  const cap=mode?.creatorAllocationMaxPercent??15;
+  const creator=$('[data-allocation="creatorTeam"]');
+  if(creator){
+    creator.max=String(cap);
+    if(Number(creator.value)>cap){
+      const difference=Number(creator.value)-cap;
+      creator.value=String(cap);
+      const growth=$('[data-allocation="growthEcosystem"]');
+      if(growth)growth.value=String(Math.min(100,(Number(growth.value)||0)+difference));
+    }
+  }
+  const title=$('#creator-allocation-label');if(title)title.textContent=(beginner?'Your tokens': 'Creator / Team')+' — up to '+cap+'%';
+  const cliff=$('#founder-cliff'),vesting=$('#founder-vesting'),unlocked=$('#creator-unlocked');
+  if(cliff){cliff.min=advanced?'90':'0';if(Number(cliff.value)<Number(cliff.min))cliff.value=cliff.min;}
+  if(vesting){vesting.min=advanced?'18':'0';if(Number(vesting.value)<Number(vesting.min))vesting.value=vesting.min;}
+  if(unlocked){unlocked.max=String(advanced?5:cap);if(Number(unlocked.value)>Number(unlocked.max))unlocked.value=unlocked.max;}
+  const ul=$('#creator-unlocked-label');if(ul)ul.textContent='Creator immediately available — up to '+(advanced?5:cap)+'%';
+  const cl=$('#founder-cliff-label');if(cl)cl.textContent='Founder cliff — '+(advanced?'90+':'0+')+' days';
+  const vl=$('#founder-vesting-label');if(vl)vl.textContent='Founder vesting — '+(advanced?'18+':'0+')+' months';
+  for(const id of ['founder-cliff','founder-vesting','creator-unlocked']){
+    const input=$('#'+id);if(input?.closest('label'))input.closest('label').hidden=beginner;
+  }
+  const guidance=$('#worldz-mode-guidance');
+  if(guidance)guidance.textContent=beginner
+    ?'BEGINNER • Keep up to 100% of your tokens, or share with up to 100 family and friends. A tradable pool needs its own allocation. No complicated vesting setup.'
+    :advanced
+      ?'ADVANCED • Worldz Verified Standard: strict allocations, vesting, LP protection and proof. Cross-chain/Omni routes require verified adapters. Jupiter review/readiness is advisory, never guaranteed.'
+      :'INTERMEDIATE • Up to 50% creator/team allocation, with optional zero-day cliff and zero-month vesting. Best practice: explain large holdings and consider a voluntary lock. Buyers will see concentration risks.';
+  const friends=$('#worldz-friends');if(friends)friends.hidden=advanced;
+  feeMath();
+}
+function worldzFriendsPlan(){
+  if(!$('#friends-enabled')?.checked)return {enabled:false,recipients:[],valid:true};
+  const rows=($('#friends-addresses')?.value||'').split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+  const recipients=rows.map(x=>{const parts=x.split(',');return {address:(parts[0]||'').trim(),percent:Number((parts[1]||'').trim())};});
+  const unique=new Set(recipients.map(x=>x.address));
+  const total=recipients.reduce((a,x)=>a+x.percent,0);
+  const valid=recipients.length<=100&&unique.size===recipients.length&&recipients.every(x=>/^[A-Za-z0-9]{32,64}$/.test(x.address)&&Number.isFinite(x.percent)&&x.percent>0)&&total<=100;
+  return {enabled:true,recipients,valid,totalPercent:total};
+}
+function updateWorldzFriends(){
+  const details=$('#friends-details');if(details)details.hidden=!$('#friends-enabled')?.checked;
+  const plan=worldzFriendsPlan(),status=$('#friends-status');
+  if(status)status.textContent=plan.recipients.length+' of 100 recipients • '+(plan.totalPercent||0).toFixed(2)+'% requested'+(plan.valid?'':' • Review addresses, duplicates, amounts or recipient limit');
+}
+
 function updateChainCultureNote(chain){
   const note=$('#chain-culture-note');
   if(note)note.textContent=CHAIN_CULTURE_NOTES[chain]||'Worldz uses chain-native execution and keeps unsupported routes clearly gated.';
@@ -428,7 +481,9 @@ async function refreshRuntime(){
 }
 function bind(){
   $$('#launch-recipes .choice').forEach(b=>b.addEventListener('click',()=>applyLaunchRecipe(b.dataset.recipe)));
-  $$('.experience-choice').forEach(b=>b.addEventListener('click',()=>setExperienceMode(b.dataset.experience)));
+  $('.experience-choice').forEach(b=>b.addEventListener('click',()=>setExperienceMode(b.dataset.experience)));
+  $('#friends-enabled')?.addEventListener('change',updateWorldzFriends);
+  $('#friends-addresses')?.addEventListener('input',updateWorldzFriends);
   $$('.next-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.next)));
   $$('.prev-step').forEach(b=>b.addEventListener('click',()=>step(b.dataset.prev)));
   $$('.step-tab').forEach(b=>b.addEventListener('click',()=>step(b.dataset.step)));
