@@ -51,7 +51,7 @@ jobs:
               # Hostinger support identified cryptoworldz.xyz as the account's FTPS hostname.
               # Prefer the explicit environment setting, then the provider hostname;
               # retain strict TLS certificate validation and never use the numeric IP.
-              ftp_host=os.environ.get('FTP_TLS_HOST') or 'cryptoworldz.xyz'
+              ftp_host=os.environ.get('FTP_TLS_HOST') or os.environ.get('FTP_HOST')
               print('FTPS_HOST_SELECTED '+ftp_host,flush=True)
               if not ftp_host or all(ch.isdigit() or ch=='.' for ch in ftp_host):
                   raise RuntimeError('FTPS certificate verification requires a certificate-matching DNS hostname. Set FTP_TLS_HOST as a GitHub environment variable; no files were uploaded.')
