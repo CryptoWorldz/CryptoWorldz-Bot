@@ -22,7 +22,7 @@
     "atomicGenesisDistributionForMainnet": true
   },
   "feePolicy": {
-    "projectTradingFeeMinPercent": 0.5,
+    "projectTradingFeeMinPercent": 0.25,
     "projectTradingFeeMaxPercent": 3,
     "stepPercent": 0.25,
     "worldzFeeFlowPolicy": "worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json",
