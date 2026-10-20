@@ -640,5 +640,43 @@
       ],
       "note": "Top 100 holders are a token-holder cohort, not necessarily named bot-network partners."
     }
+  },
+  "publicHolderRankingPolicy": {
+    "identityNotRequired": true,
+    "publicWalletAddressesAllowed": true,
+    "rankingBasis": "verified on-chain balances at a recorded block/ledger snapshot",
+    "supportedChains": [
+      "solana",
+      "xrpl",
+      "base",
+      "bitcoin",
+      "ethereum",
+      "hyperliquid",
+      "sui",
+      "robinhood"
+    ],
+    "perChainTarget": 100,
+    "include": [
+      "publicly visible individual addresses",
+      "publicly labelled institutional accounts",
+      "exchange custody accounts",
+      "token treasury wallets",
+      "major-token holder addresses"
+    ],
+    "require": [
+      "chain",
+      "address",
+      "token or native asset",
+      "balance",
+      "snapshot timestamp",
+      "source explorer or API",
+      "rank within stated token or cohort"
+    ],
+    "doNotClaim": [
+      "beneficial ownership without attribution",
+      "partnership or endorsement",
+      "cross-chain ownership from address resemblance"
+    ],
+    "ingestionStatus": "public RPC rate limited for Solana; no completed eight-chain snapshots yet"
   }
 }
