@@ -111,7 +111,7 @@ function updateWorldzModeControls(){
 }
 function worldzFriendsPlan(){
   if(!$('#friends-enabled')?.checked)return {enabled:false,recipients:[],valid:true};
-  const rows=($('#friends-addresses')?.value||'').split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+  const rows=($('#friends-addresses')?.value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
   const recipients=rows.map(x=>{const parts=x.split(',');return {address:(parts[0]||'').trim(),percent:Number((parts[1]||'').trim())};});
   const unique=new Set(recipients.map(x=>x.address));
   const total=recipients.reduce((a,x)=>a+x.percent,0);
