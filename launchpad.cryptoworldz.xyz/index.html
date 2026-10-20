@@ -305,10 +305,19 @@
             </div>
             <p class="micro">Recipes are starting presets only. They never change the fixed Worldz Fee Flow V3 creator-retention or Worldz-internal routing rules, bypass Safe Launch limits, or imply a guaranteed market outcome.</p>
           </div>
+          <div class="worldz-mode-guidance" id="worldz-mode-guidance" role="status" aria-live="polite"></div>
+          <div class="worldz-friends" id="worldz-friends">
+            <label class="worldz-friends-toggle"><input id="friends-enabled" type="checkbox"> Share tokens with family and friends?</label>
+            <div id="friends-details" hidden>
+              <p class="micro">Up to 100 recipient wallet addresses. Enter one address and token percentage per line, separated by a comma. This is a planning list, not an automatic on-chain transfer.</p>
+              <textarea id="friends-addresses" rows="4" maxlength="12000" placeholder="Wallet address, 1.5"></textarea>
+              <p class="micro" id="friends-status">0 of 100 recipients</p>
+            </div>
+          </div>
           <div class="route-builder">
             <div class="route-head"><h4>Genesis supply allocation</h4><span id="allocation-total" class="pill safe">100%</span></div>
             <div class="route-inputs">
-              <label>Creator / Team ≤15% <input class="allocation-input" data-allocation="creatorTeam" type="number" min="0" max="15" step="1" value="15"></label>
+              <label><span id="creator-allocation-label">Creator / Team ≤15%</span> <input class="allocation-input" data-allocation="creatorTeam" type="number" min="0" max="15" step="1" value="15"></label>
               <label>Liquidity 25–60% <input class="allocation-input" data-allocation="liquidity" type="number" min="25" max="60" step="1" value="30"></label>
               <label>Community / Public ≥20% <input class="allocation-input" data-allocation="communityPublic" type="number" min="20" max="75" step="1" value="30"></label>
               <label>Operations Treasury ≤15% <input class="allocation-input" data-allocation="treasuryReserve" type="number" min="0" max="15" step="1" value="10"></label>
@@ -316,9 +325,9 @@
             </div>
           </div>
           <div class="form-grid" style="margin-top:12px">
-            <label><span>Creator liquid at genesis ≤5%</span><input id="creator-unlocked" type="number" min="0" max="5" step="0.5" value="5"></label>
-            <label><span>Founder cliff ≥90 days</span><input id="founder-cliff" type="number" min="90" max="3650" step="1" value="90"></label>
-            <label><span>Founder vesting ≥18 months</span><input id="founder-vesting" type="number" min="18" max="120" step="1" value="24"></label>
+            <label><span><span id="creator-unlocked-label">Creator liquid at genesis ≤5%</span></span><input id="creator-unlocked" type="number" min="0" max="5" step="0.5" value="5"></label>
+            <label><span><span id="founder-cliff-label">Founder cliff ≥90 days</span></span><input id="founder-cliff" type="number" min="90" max="3650" step="1" value="90"></label>
+            <label><span><span id="founder-vesting-label">Founder vesting ≥18 months</span></span><input id="founder-vesting" type="number" min="18" max="120" step="1" value="24"></label>
             <label><span>Creator-controlled LP lock</span><input id="lp-lock-percent" value="100%" disabled></label>
             <label><span>LP lock ≥365 days</span><input id="lp-lock-days" type="number" min="365" max="3650" step="1" value="365"></label>
             <label><span>Treasury / program multisig</span><input id="multisig-address" maxlength="64" placeholder="Required for mainnet verification"></label>
@@ -457,7 +466,7 @@
   <p>WorldzLaunchPad™ is a public creator platform. Mainnet execution is enabled only after the selected route passes its published proof gate. WorldzLaunchPad uses the disclosed 0.60% genesis supply allocation plus its separate supported fee-revenue model; it takes 0% of initial liquidity and 0% wallet-transfer tax.</p>
 </footer>
 
-<script src="/app.js?v=20261001-config-sync-v1" defer></script>
+<script src="/app.js?v=20261021-creator-modes-v2" defer></script>
 <script src="/ads.js?v=20261002-ads-v1" defer></script>
 <script src="/worldz-guide.js?v=20261004" defer></script></body>
 </html>
