@@ -1,0 +1,320 @@
+{
+  "version": "WORLDZ-TOP-100-PER-CHAIN-V1",
+  "targetPerChain": 100,
+  "chainCount": 8,
+  "totalTargetSlots": 800,
+  "rankingStatus": "SEED_CANDIDATES_NOT_RANKED",
+  "rankingCriteria": [
+    "documented ownership attribution",
+    "measured on-chain activity",
+    "ecosystem contribution",
+    "developer relevance",
+    "liquidity or investment footprint",
+    "recent activity"
+  ],
+  "chains": [
+    {
+      "id": "solana",
+      "name": "Solana",
+      "addressType": "solana",
+      "explorer": "https://solscan.io/account/",
+      "targetSlots": 100,
+      "candidateCount": 4,
+      "verifiedPartnerCount": 0
+    },
+    {
+      "id": "xrpl",
+      "name": "XRPL",
+      "addressType": "xrpl",
+      "explorer": "https://livenet.xrpl.org/accounts/",
+      "targetSlots": 100,
+      "candidateCount": 2,
+      "verifiedPartnerCount": 0
+    },
+    {
+      "id": "base",
+      "name": "Base",
+      "addressType": "evm",
+      "explorer": "https://basescan.org/address/",
+      "targetSlots": 100,
+      "candidateCount": 1,
+      "verifiedPartnerCount": 0
+    },
+    {
+      "id": "bitcoin",
+      "name": "Bitcoin",
+      "addressType": "bitcoin",
+      "explorer": "https://mempool.space/address/",
+      "targetSlots": 100,
+      "candidateCount": 6,
+      "verifiedPartnerCount": 0
+    },
+    {
+      "id": "ethereum",
+      "name": "Ethereum",
+      "addressType": "evm",
+      "explorer": "https://etherscan.io/address/",
+      "targetSlots": 100,
+      "candidateCount": 2,
+      "verifiedPartnerCount": 0
+    },
+    {
+      "id": "hyperliquid",
+      "name": "Hyperliquid",
+      "addressType": "evm",
+      "explorer": "https://hyperevmscan.io/address/",
+      "targetSlots": 100,
+      "candidateCount": 1,
+      "verifiedPartnerCount": 0
+    },
+    {
+      "id": "sui",
+      "name": "Sui",
+      "addressType": "sui",
+      "explorer": "https://suiscan.xyz/mainnet/account/",
+      "targetSlots": 100,
+      "candidateCount": 1,
+      "verifiedPartnerCount": 0
+    },
+    {
+      "id": "robinhood",
+      "name": "Robinhood Chain",
+      "addressType": "evm",
+      "explorer": "https://robinhoodchain.blockscout.com/address/",
+      "targetSlots": 100,
+      "candidateCount": 1,
+      "verifiedPartnerCount": 0
+    }
+  ],
+  "candidates": [
+    {
+      "name": "Strategy (Michael Saylor associated company)",
+      "chain": "bitcoin",
+      "category": "institutional_treasury",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://info.arkm.com/announcements/saylor-said-he-would-never-reveal-his-addresses-so-we-did",
+      "note": "Entity attribution only; not Saylor personal wallet"
+    },
+    {
+      "name": "Ansem",
+      "chain": "solana",
+      "category": "creator_trader",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://x.com/blknoiz06",
+      "note": "Address unverified"
+    },
+    {
+      "name": "Raydium protocol CLMM fee collector",
+      "chain": "solana",
+      "category": "protocol_fee_wallet",
+      "address": "projjosVCPQH49d5em7VYS7fJZzaqKixqKtus7yk416",
+      "addressStatus": "documented_protocol_account",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://github.com/raydium-io/raydium-docs-v1/blob/main/reference/program-addresses.mdx",
+      "note": "Protocol collection account; not an individual investor"
+    },
+    {
+      "name": "Raydium protocol CPMM fee collector",
+      "chain": "solana",
+      "category": "protocol_fee_wallet",
+      "address": "ProCXqRcXJjoUd1RNoo28bSizAA6EEqt9wURZYPDc5u",
+      "addressStatus": "documented_protocol_account",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://github.com/raydium-io/raydium-docs-v1/blob/main/reference/program-addresses.mdx",
+      "note": "Protocol collection account; not an individual investor"
+    },
+    {
+      "name": "Raydium protocol AMM v4 fee collector",
+      "chain": "solana",
+      "category": "protocol_fee_wallet",
+      "address": "PNLCQcVCD26aC7ZWgRyr5ptfaR7bBrWdTFgRWwu2tvF",
+      "addressStatus": "documented_protocol_account",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://github.com/raydium-io/raydium-docs-v1/blob/main/reference/program-addresses.mdx",
+      "note": "Protocol collection account; not an individual investor"
+    },
+    {
+      "name": "BlackRock digital asset fund entities",
+      "chain": "bitcoin",
+      "category": "institutional_custody",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://info.arkm.com/research/who-owns-the-most-bitcoin-top-btc-holders-2026",
+      "note": "Identify product and custody wallet before assigning address"
+    },
+    {
+      "name": "BlackRock digital asset fund entities",
+      "chain": "ethereum",
+      "category": "institutional_custody",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://info.arkm.com/",
+      "note": "Identify product and custody wallet before assigning address"
+    },
+    {
+      "name": "Robinhood exchange cold wallet",
+      "chain": "bitcoin",
+      "category": "exchange_custody",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://info.arkm.com/research/who-owns-the-most-bitcoin-top-btc-holders-2026",
+      "note": "Not Robinhood Chain; BTC custody"
+    },
+    {
+      "name": "Binance cold wallets",
+      "chain": "bitcoin",
+      "category": "exchange_custody",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://info.arkm.com/research/who-owns-the-most-bitcoin-top-btc-holders-2026",
+      "note": "Entity-level label"
+    },
+    {
+      "name": "Bitfinex cold wallet",
+      "chain": "bitcoin",
+      "category": "exchange_custody",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://info.arkm.com/research/who-owns-the-most-bitcoin-top-btc-holders-2026",
+      "note": "Entity-level label"
+    },
+    {
+      "name": "Tether Bitcoin reserves",
+      "chain": "bitcoin",
+      "category": "institutional_treasury",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://info.arkm.com/research/who-owns-the-most-bitcoin-top-btc-holders-2026",
+      "note": "Reserve wallet"
+    },
+    {
+      "name": "Ripple ecosystem / Ripple Labs",
+      "chain": "xrpl",
+      "category": "ecosystem_institution",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://xrpl.org/",
+      "note": "Research account ownership and public disclosures"
+    },
+    {
+      "name": "XRPL Foundation / ecosystem builders",
+      "chain": "xrpl",
+      "category": "developer_ecosystem",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://xrpl.org/",
+      "note": "Research entity-specific accounts"
+    },
+    {
+      "name": "Base ecosystem / Coinbase",
+      "chain": "base",
+      "category": "ecosystem_institution",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://docs.base.org/",
+      "note": "Research verified treasury addresses"
+    },
+    {
+      "name": "Ethereum Foundation",
+      "chain": "ethereum",
+      "category": "ecosystem_institution",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://ethereum.org/",
+      "note": "Research official publicly identified wallets"
+    },
+    {
+      "name": "Hyperliquid Foundation / ecosystem",
+      "chain": "hyperliquid",
+      "category": "ecosystem_institution",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://hyperliquid.gitbook.io/",
+      "note": "Research official chain accounts"
+    },
+    {
+      "name": "Sui Foundation / ecosystem",
+      "chain": "sui",
+      "category": "ecosystem_institution",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://sui.io/",
+      "note": "Research official chain accounts"
+    },
+    {
+      "name": "Robinhood Chain ecosystem",
+      "chain": "robinhood",
+      "category": "ecosystem_institution",
+      "address": null,
+      "addressStatus": "research_required",
+      "ownershipStatus": "not_consent_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://docs.robinhood.com/chain/connecting/",
+      "note": "Research verified Robinhood Chain mainnet accounts"
+    }
+  ],
+  "validationPolicy": {
+    "noInferredCrossChainOwnership": true,
+    "doNotTreatProtocolProgramAsPerson": true,
+    "doNotTreatExchangeCustodyAsIndividual": true,
+    "proofAndOptInRequiredBeforeEndorsement": true,
+    "publicAddressOnly": true,
+    "noAutomaticDistributions": true
+  },
+  "sources": [
+    "https://info.arkm.com/research/who-owns-the-most-bitcoin-top-btc-holders-2026",
+    "https://github.com/raydium-io/raydium-docs-v1/blob/main/reference/program-addresses.mdx",
+    "https://docs.robinhood.com/chain/connecting/"
+  ]
+}
