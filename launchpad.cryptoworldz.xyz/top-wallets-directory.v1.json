@@ -1,8 +1,8 @@
 {
   "version": "WORLDZ-TOP-100-PER-CHAIN-V1",
   "targetPerChain": 100,
-  "chainCount": 8,
-  "totalTargetSlots": 800,
+  "chainCount": 9,
+  "totalTargetSlots": 900,
   "rankingStatus": "SEED_CANDIDATES_NOT_RANKED",
   "rankingCriteria": [
     "documented ownership attribution",
@@ -83,6 +83,15 @@
       "explorer": "https://robinhoodchain.blockscout.com/address/",
       "targetSlots": 100,
       "candidateCount": 1,
+      "verifiedPartnerCount": 0
+    },
+    {
+      "id": "bnb",
+      "name": "BNB Chain",
+      "addressType": "evm",
+      "explorer": "https://bscscan.com/address/",
+      "targetSlots": 100,
+      "candidateCount": 0,
       "verifiedPartnerCount": 0
     }
   ],
@@ -462,5 +471,156 @@
       "note": "No verified public wallet attribution located; names not added as wallet owners"
     }
   ],
-  "updatedAt": "2026-10-21"
+  "updatedAt": "2026-10-21",
+  "launchpadDiscovery": {
+    "purpose": "Discover publicly documented launchpad creators, fee recipients, developers and notable on-chain traders. No guessed identities or allocations.",
+    "researchQueue": [
+      {
+        "name": "Pump.fun",
+        "chains": [
+          "solana"
+        ],
+        "source": "https://pump.fun/"
+      },
+      {
+        "name": "Bags",
+        "chains": [
+          "solana",
+          "robinhood"
+        ],
+        "source": "https://bags.fm/"
+      },
+      {
+        "name": "BONK.fun",
+        "chains": [
+          "solana"
+        ],
+        "source": "https://bonk.fun/"
+      },
+      {
+        "name": "Raydium LaunchLab",
+        "chains": [
+          "solana"
+        ],
+        "source": "https://raydium.io/launchpad/"
+      },
+      {
+        "name": "Moonshot",
+        "chains": [
+          "solana"
+        ],
+        "source": "https://moonshot.money/"
+      },
+      {
+        "name": "Heaven",
+        "chains": [
+          "solana"
+        ],
+        "source": null,
+        "status": "exact_product_and_public_feed_to_verify"
+      },
+      {
+        "name": "Meteora",
+        "chains": [
+          "solana"
+        ],
+        "source": "https://meteora.ag/"
+      },
+      {
+        "name": "Clanker",
+        "chains": [
+          "base",
+          "ethereum"
+        ],
+        "source": "https://www.clanker.world/"
+      },
+      {
+        "name": "Zora",
+        "chains": [
+          "base"
+        ],
+        "source": "https://zora.co/"
+      },
+      {
+        "name": "Four.meme",
+        "chains": [
+          "bnb"
+        ],
+        "source": "https://four.meme/"
+      },
+      {
+        "name": "Possum",
+        "chains": [],
+        "source": null,
+        "status": "exact_launchpad_to_identify"
+      },
+      {
+        "name": "Jupiter Studio",
+        "chains": [
+          "solana"
+        ],
+        "source": "https://jup.ag/"
+      },
+      {
+        "name": "RevShare",
+        "chains": [
+          "solana",
+          "base",
+          "ethereum"
+        ],
+        "source": "https://revshare.dev/",
+        "status": "chain_support_requires_current_verification"
+      },
+      {
+        "name": "Pons V2",
+        "chains": [
+          "robinhood"
+        ],
+        "source": null,
+        "status": "verify_operator_and_contracts"
+      }
+    ],
+    "holderDiscovery": {
+      "scope": "top tokens per supported chain",
+      "tokenSelection": "market-cap/liquidity/activity plus launchpad relevance",
+      "walletMetrics": [
+        "balance",
+        "share_of_supply",
+        "holder_rank",
+        "first_seen",
+        "last_active",
+        "attribution_source"
+      ],
+      "excludedFromIndividualRankings": [
+        "burn_addresses",
+        "liquidity_pools",
+        "smart_contracts",
+        "exchange_custody"
+      ],
+      "snapshotRequired": true
+    },
+    "companyDiscovery": {
+      "categories": [
+        "exchanges",
+        "asset_managers",
+        "market_makers",
+        "protocol_treasuries",
+        "launchpad_operators",
+        "custodians"
+      ],
+      "attribution": "publicly documented or verified explorer labels only"
+    },
+    "telegramDiscovery": {
+      "requestedHandles": [
+        "@CryptoWorldzHQ",
+        "@cryptoWorldsTg"
+      ],
+      "accessStatus": "NO_CONNECTED_TELEGRAM_ACCOUNT_READER",
+      "sourceCodeReferences": [
+        "src/websites-telegram.js",
+        "src/community-directory.js"
+      ],
+      "noAccountLoginPerformed": true
+    }
+  }
 }
