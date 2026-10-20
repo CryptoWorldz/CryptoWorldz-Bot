@@ -62,3 +62,8 @@ footer{padding:28px clamp(18px,6vw,88px) 45px;display:flex;flex-wrap:wrap;justif
 .fee-control .fee-number b{color:#eedaff;text-shadow:0 0 22px rgba(165,78,255,.22);font-variant-numeric:tabular-nums}
 @media(max-width:720px){.fee-control input[type="range"]{margin-top:22px}.fee-control .fee-range-labels{font-size:.78rem}}
 @media(prefers-reduced-motion:reduce){.fee-control input[type="range"]::-webkit-slider-thumb{transition:none}}
+
+/* Unified Worldz form controls: consistent purple focus, depth and spacing */
+.fee-control,.fee-example,.route-builder{border-color:rgba(174,104,241,.29);background:linear-gradient(150deg,rgba(111,44,168,.12),rgba(18,10,32,.48));box-shadow:0 8px 30px rgba(0,0,0,.12)}
+.form-grid input:not([type="range"]),.form-grid select,.route-inputs input,.fee-control select,.fee-example input{border-radius:12px;border:1px solid rgba(169,112,226,.35);background-color:rgba(29,15,43,.74);color:#f4e8ff;min-height:44px;transition:border-color .15s ease,box-shadow .15s ease}
+.form-grid input:focus-visible,.form-grid select:focus-visible,.route-inputs input:focus-visible,.fee-control select:focus-visible,.fee-example input:focus-visible{outline:2px solid #c48aff;outline-offset:2px;border-color:#b36aff;box-shadow:0 0 0 4px rgba(155,73,235,.13)}
