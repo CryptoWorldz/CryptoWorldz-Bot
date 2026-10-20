@@ -28,7 +28,7 @@
       "addressType": "xrpl",
       "explorer": "https://livenet.xrpl.org/accounts/",
       "targetSlots": 100,
-      "candidateCount": 2,
+      "candidateCount": 7,
       "verifiedPartnerCount": 0
     },
     {
@@ -302,6 +302,71 @@
       "worldzPartner": false,
       "source": "https://docs.robinhood.com/chain/connecting/",
       "note": "Research verified Robinhood Chain mainnet accounts"
+    },
+    {
+      "name": "Bithumb XRPL rich-list account",
+      "chain": "xrpl",
+      "category": "large_xrp_holder",
+      "address": "rPyCQm8E5j78PDbrfKF24fRC7qUAk1kDMZ",
+      "addressStatus": "public_explorer_account",
+      "ownershipStatus": "explorer_label_not_wallet_signature_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://xrpl.to/accounts",
+      "note": "Custodial/institutional wallet; not classified as XRP Army community member",
+      "snapshotRank": 1
+    },
+    {
+      "name": "Robinhood XRPL rich-list account",
+      "chain": "xrpl",
+      "category": "large_xrp_holder",
+      "address": "rJ9Ey7HbscSECamgDRzvw5wrVbFUgaUDt7",
+      "addressStatus": "public_explorer_account",
+      "ownershipStatus": "explorer_label_not_wallet_signature_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://xrpl.to/accounts",
+      "note": "Custodial/institutional wallet; not classified as XRP Army community member",
+      "snapshotRank": 2
+    },
+    {
+      "name": "Binance XRPL rich-list account",
+      "chain": "xrpl",
+      "category": "large_xrp_holder",
+      "address": "rs8ZPbYqgecRcDzQpJYAMhSxSi5htsjnza",
+      "addressStatus": "public_explorer_account",
+      "ownershipStatus": "explorer_label_not_wallet_signature_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://xrpl.to/accounts",
+      "note": "Custodial/institutional wallet; not classified as XRP Army community member",
+      "snapshotRank": 3
+    },
+    {
+      "name": "Upbit XRPL rich-list account",
+      "chain": "xrpl",
+      "category": "large_xrp_holder",
+      "address": "rDxJNbV23mu9xsWoQHoBqZQvc77YcbJXwb",
+      "addressStatus": "public_explorer_account",
+      "ownershipStatus": "explorer_label_not_wallet_signature_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://xrpl.to/accounts",
+      "note": "Custodial/institutional wallet; not classified as XRP Army community member",
+      "snapshotRank": 4
+    },
+    {
+      "name": "Ripple XRPL rich-list account",
+      "chain": "xrpl",
+      "category": "large_xrp_holder",
+      "address": "rMQ98K56yXJbDGv49ZSmW51sLn94Xe1mu1",
+      "addressStatus": "public_explorer_account",
+      "ownershipStatus": "explorer_label_not_wallet_signature_verified",
+      "invitationStatus": "not_contacted",
+      "worldzPartner": false,
+      "source": "https://xrpl.to/accounts",
+      "note": "Custodial/institutional wallet; not classified as XRP Army community member",
+      "snapshotRank": 5
     }
   ],
   "validationPolicy": {
@@ -316,5 +381,86 @@
     "https://info.arkm.com/research/who-owns-the-most-bitcoin-top-btc-holders-2026",
     "https://github.com/raydium-io/raydium-docs-v1/blob/main/reference/program-addresses.mdx",
     "https://docs.robinhood.com/chain/connecting/"
-  ]
+  ],
+  "discoveryGroups": [
+    {
+      "id": "xrp-army",
+      "chain": "xrpl",
+      "target": 50,
+      "kind": "community_wallets",
+      "source": "https://xrpl.to/accounts",
+      "status": "identity_research_pending",
+      "note": "XRP rich-list addresses are NOT automatically XRP Army members"
+    },
+    {
+      "id": "xrpl-top-3-token-holders",
+      "chain": "xrpl",
+      "targetPerToken": 50,
+      "tokens": [
+        {
+          "symbol": "RLUSD",
+          "issuerVerification": "pending"
+        },
+        {
+          "symbol": "FUZZY",
+          "issuerVerification": "pending"
+        },
+        {
+          "symbol": "BTC",
+          "issuerVerification": "pending",
+          "note": "Issued asset; issuer must be matched to Bitstamp before holder lookup"
+        }
+      ],
+      "source": "https://xpmarket.com/tokens/top",
+      "status": "issuer_and_holders_pending"
+    },
+    {
+      "id": "pumpfun-top-50",
+      "chain": "solana",
+      "target": 50,
+      "source": "https://pump.fun/callouts/leaderboard",
+      "status": "live_wallet_feed_pending",
+      "note": "Pump.fun has Solana-native and other displayed assets; verify actual launch chain rather than assume all displayed tokens are supported"
+    },
+    {
+      "id": "bags-top-wallets",
+      "chain": "solana",
+      "target": 100,
+      "source": "https://data-api.bags.fm/docs/guide",
+      "api": {
+        "partnerLeaderboard": "/v2/partners?limit=100",
+        "deployerLeaderboard": "/v2/deployers/launches?window=7d&launchpads=Bags&sort=launches&limit=100"
+      },
+      "status": "api_ingestion_pending"
+    },
+    {
+      "id": "revshare-top-wallets",
+      "chain": "multi",
+      "target": 100,
+      "source": "https://www.revshare.fun/",
+      "status": "per_chain_market_discovery_pending",
+      "note": "Do not confuse RevShare launchpad with the REVS token holder list"
+    },
+    {
+      "id": "recapthisbot-network",
+      "chain": "multi",
+      "target": 100,
+      "source": "https://recapthisbot.com/",
+      "status": "public_directory_research_pending",
+      "namedResearchCandidates": [
+        {
+          "name": "Edison",
+          "wallet": null,
+          "identityStatus": "unresolved"
+        },
+        {
+          "name": "Pepe Dude",
+          "wallet": null,
+          "identityStatus": "unresolved"
+        }
+      ],
+      "note": "No verified public wallet attribution located; names not added as wallet owners"
+    }
+  ],
+  "updatedAt": "2026-10-21"
 }
