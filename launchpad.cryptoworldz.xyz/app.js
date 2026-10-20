@@ -328,7 +328,7 @@ async function runPreflight(){
     ['Chain selected',!!m.network,m.network],
     ['Executable public test adapter',adapterReady,baseAdapter?'Base Sepolia • Worldz EVM Fair':solanaAdapter?'Solana Devnet • '+m.launchEngine:'Adapter not enabled yet'],
     ['Quote supported by selected test engine',quoteReady,baseAdapter?'ETH required on Base Sepolia':m.launchEngine==='flash'?m.quoteAsset+' • Flash disclosure rules':m.quoteAsset==='SOL'?'SOL supported':'Curve / Curve Pro Devnet currently require SOL'],
-    ['Engine fee contract',m.launchEngine!=='curve'||m.feePolicy.projectTradingFeePercent===2,m.launchEngine==='curve'?'Worldz Curve Devnet beta requires 2.00%':'0.50–3.00% configured project fee'],
+    ['Engine fee contract',m.launchEngine!=='curve'||m.feePolicy.projectTradingFeePercent===2,m.launchEngine==='curve'?'Worldz Curve Devnet beta requires 2.00%':'0.25–3.00% configured project fee'],
     ['Engine decimals contract',decimalsReady,baseAdapter?'Base EVM Fair v1 requires 18 decimals':m.launchEngine==='flash'?String(m.token.decimals):'Curve / Curve Pro Devnet beta require 6 decimals'],
     ['Raydium Curve preset supply',m.launchEngine!=='curve'||m.token.fixedSupply===1000000000,m.launchEngine==='curve'?'1,000,000,000 required by current reviewed GlobalConfig':'Not applicable'],
     ['Launch engine selected',!!m.launchEngine,m.launchEngine],
