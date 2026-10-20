@@ -23,6 +23,10 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      SFTP_HOST: ${{ vars.SFTP_HOST }}
+      SFTP_PORT: ${{ vars.SFTP_PORT || '65002' }}
+      SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
+      SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - name: Validate sites and FTP configuration
@@ -34,15 +38,40 @@ jobs:
             test -s "$site/index.html"
             grep -qi '<html' "$site/index.html"
           done
+      - name: Install SFTP client
+        if: env.SFTP_USERNAME != '' && env.SFTP_PASSWORD != ''
+        run: python3 -m pip install --quiet paramiko
       - name: Upload only public assets to the two new domains
         shell: bash
         run: |
           python3 - <<'PY'
-          import os,ftplib,ssl,time
+          import os,ftplib,ssl,time,posixpath
           from pathlib import Path
           from posixpath import join
           root=Path.cwd()
-          for domain in ('worldzhq.com','worldz.live'):
+          use_sftp=bool(os.getenv('SFTP_USERNAME') and os.getenv('SFTP_PASSWORD'))
+          if use_sftp:
+              import paramiko
+              host=os.getenv('SFTP_HOST') or os.getenv('FTP_HOST')
+              if not host: raise RuntimeError('SFTP host missing')
+              transport=paramiko.Transport((host,int(os.getenv('SFTP_PORT','65002'))))
+              transport.connect(username=os.environ['SFTP_USERNAME'],password=os.environ['SFTP_PASSWORD'])
+              sftp=paramiko.SFTPClient.from_transport(transport)
+              def upload_sftp(domain,files,site):
+                  base='domains/'+domain+'/public_html'
+                  for p in files:
+                      dest=posixpath.join(base,p.relative_to(site).as_posix())
+                      parent=posixpath.dirname(dest)
+                      current=''
+                      for part in parent.split('/'):
+                          if not part: continue
+                          current+='/'+part
+                          try: sftp.stat(current)
+                          except FileNotFoundError: sftp.mkdir(current)
+                      sftp.put(str(p),dest)
+              print('SFTP_SELECTED',flush=True)
+          try:
+           for domain in ('worldzhq.com','worldz.live'):
               site=root/domain
               allowed={'.html','.css','.js','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.txt','.json'}
               files=[p for p in site.rglob('*') if p.is_file() and p.suffix.lower() in allowed and not any(part.startswith('.') for part in p.relative_to(site).parts) and p.name not in ('domain-plan.json','package.json','package-lock.json')]
@@ -51,6 +80,10 @@ jobs:
               # Hostinger support identified cryptoworldz.xyz as the account's FTPS hostname.
               # Prefer the explicit environment setting, then the provider hostname;
               # retain strict TLS certificate validation and never use the numeric IP.
+              if use_sftp:
+                  upload_sftp(domain,files,site)
+                  print('DEPLOY_UPLOAD_COMPLETE '+domain,flush=True)
+                  continue
               ftp_host=os.environ.get('FTP_TLS_HOST') or os.environ.get('FTP_HOST')
               print('FTPS_HOST_SELECTED '+ftp_host,flush=True)
               if not ftp_host or all(ch.isdigit() or ch=='.' for ch in ftp_host):
@@ -79,6 +112,10 @@ jobs:
               finally:
                   try:ftp.quit()
                   except Exception:ftp.close()
+          finally:
+              if use_sftp:
+                  sftp.close()
+                  transport.close()
           PY
       - name: Public HTTPS checks
         shell: bash
