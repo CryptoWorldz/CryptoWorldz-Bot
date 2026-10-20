@@ -55,7 +55,8 @@ jobs:
             echo "GitHub Pages is enabled."
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::GitHub Pages is not enabled or accessible (HTTP $status). Build artifact is ready. Enable GitHub Actions publishing at repository Settings > Pages."
+            echo "::error::GitHub Pages publishing unavailable (HTTP $status). Enable GitHub Actions publishing at repository Settings > Pages. No deployment occurred."
+            exit 1
           fi
       - id: deployment
         if: steps.pages.outputs.enabled == 'true'
