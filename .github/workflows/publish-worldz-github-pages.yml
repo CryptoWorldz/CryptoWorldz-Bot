@@ -1,0 +1,47 @@
+name: Publish Worldz sites independently of Hostinger
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worldzhq.com/**'
+      - 'worldz.live/**'
+      - '.github/workflows/publish-worldz-github-pages.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: worldz-github-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble standalone static preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site/worldzhq.com _site/worldz.live
+          cp -R worldzhq.com/. _site/worldzhq.com/
+          cp -R worldz.live/. _site/worldz.live/
+          rm -f _site/worldzhq.com/domain-plan.json
+          test -s _site/worldzhq.com/index.html
+          test -s _site/worldz.live/index.html
+          cat > _site/index.html <<'HTML'
+          <!doctype html><html lang="en"><meta charset="utf-8"><title>Worldz preview</title><meta name="viewport" content="width=device-width,initial-scale=1"><h1>Worldz independent hosting preview</h1><p><a href="./worldzhq.com/">WorldzHQ</a></p><p><a href="./worldz.live/">Worldz Live</a></p></html>
+          HTML
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
