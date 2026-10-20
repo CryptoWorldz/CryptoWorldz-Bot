@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-20T22:38:26.154Z",
+  "network": "solana-mainnet-beta",
+  "ranking": "top token accounts, not aggregated beneficial owners",
+  "tokens": [],
+  "warnings": [
+    {
+      "mint": "AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U",
+      "error": "HTTP 429"
+    },
+    {
+      "mint": "DF4zASfiDBr3uuAz4s2Sxtsjo7tDFZiQ2nLeKJGfBAGS",
+      "error": "HTTP 429"
+    }
+  ]
+}
