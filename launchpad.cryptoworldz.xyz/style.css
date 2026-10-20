@@ -96,3 +96,14 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .fee-control .fee-range-labels{color:var(--worldz-silver)}
 @media(prefers-reduced-transparency:reduce){.fee-control,.fee-example,.route-builder{backdrop-filter:none;background:#160d27}}
 @media(max-width:720px){body{background-attachment:scroll}body::after{filter:blur(18px)}}
+
+/* Worldz creator mode V2 — uniform, branded controls */
+.worldz-mode-guidance,.worldz-friends{margin:14px 0;padding:16px 18px;border-radius:18px;border:1px solid rgba(211,181,255,.27);background:linear-gradient(135deg,rgba(72,27,119,.42),rgba(10,6,21,.85));box-shadow:0 10px 30px rgba(0,0,0,.2);color:#e9def6}
+.worldz-mode-guidance{font-weight:650;line-height:1.65}
+.worldz-friends-toggle{display:flex;align-items:center;gap:12px;font-weight:750;color:#eee4fb;cursor:pointer}
+.worldz-friends-toggle input{width:21px;height:21px;accent-color:#ac68f7}
+.worldz-friends textarea{display:block;width:100%;min-height:104px;resize:vertical;margin-top:12px;padding:13px;border:1px solid rgba(214,217,231,.3);border-radius:12px;background:#10071f;color:#f5efff;font:inherit}
+.worldz-friends textarea:focus-visible{outline:2px solid #d0a2ff;outline-offset:2px}
+.worldz-friends [hidden],.form-grid label[hidden],#worldz-friends[hidden]{display:none!important}
+body[data-experience="beginner"] .worldz-mode-guidance{border-color:rgba(214,217,231,.4)}
+@media(max-width:720px){.worldz-mode-guidance,.worldz-friends{padding:13px;border-radius:14px}}
