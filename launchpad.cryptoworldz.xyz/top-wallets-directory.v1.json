@@ -516,8 +516,9 @@
         "chains": [
           "solana"
         ],
-        "source": null,
-        "status": "exact_product_and_public_feed_to_verify"
+        "source": "https://heaven.xyz/",
+        "status": "identified_solana_launchpad",
+        "evidence": "https://defillama.com/protocol/heaven"
       },
       {
         "name": "Meteora",
@@ -549,10 +550,14 @@
         "source": "https://four.meme/"
       },
       {
-        "name": "Possum",
-        "chains": [],
-        "source": null,
-        "status": "exact_launchpad_to_identify"
+        "name": "PossumLabs",
+        "chains": [
+          "solana"
+        ],
+        "source": "https://docs.possumlab.wtf/",
+        "status": "identified_solana_raydium_sdk_launchpad",
+        "telegramPublic": "https://t.me/possumlabs",
+        "evidence": "https://docs.possumlab.wtf/advantages"
       },
       {
         "name": "Jupiter Studio",
@@ -621,6 +626,19 @@
         "src/community-directory.js"
       ],
       "noAccountLoginPerformed": true
+    },
+    "recapthisbot": {
+      "site": "https://recapthisbot.com/",
+      "chain": "solana",
+      "tokenMint": "DF4zASfiDBr3uuAz4s2Sxtsjo7tDFZiQ2nLeKJGfBAGS",
+      "candidateGroup": "RECAP token top 100 holders",
+      "source": "https://recapthisbot.com/",
+      "holderStatus": "not_fetched",
+      "walletOwnerIdentitiesUnverified": [
+        "Edison",
+        "Pepe Dude"
+      ],
+      "note": "Top 100 holders are a token-holder cohort, not necessarily named bot-network partners."
     }
   }
 }
