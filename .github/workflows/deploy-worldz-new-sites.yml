@@ -19,6 +19,7 @@ jobs:
     environment: cryptoworldz-production
     env:
       FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_TLS_HOST: ${{ vars.FTP_TLS_HOST }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
