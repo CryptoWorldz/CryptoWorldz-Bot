@@ -9,6 +9,7 @@ on:
       - "tools/**"
       - "oneworldz.com/**"
       - "cryptoworldz.xyz/**"
+      - "launchpad.cryptoworldz.xyz/**"
       - "solworldz.xyz/**"
       - "ethworldz.xyz/**"
       - "baseworldz.xyz/**"
