@@ -1,0 +1,27 @@
+name: Diagnose Worldz Live DNS and TLS
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/diagnose-worldz-live-tls.yml']
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Inspect DNS, TLS certificate and page independently
+        shell: bash
+        run: |
+          set +e
+          for domain in worldzhq.com worldz.live www.worldz.live; do
+            echo "=== DOMAIN $domain ==="
+            echo "DNS_A:"; dig +short A "$domain"
+            echo "DNS_AAAA:"; dig +short AAAA "$domain"
+            echo "DNS_CNAME:"; dig +short CNAME "$domain"
+            echo "HTTPS_HEADERS:"
+            curl --silent --show-error --location --max-time 15 --output /dev/null --write-out 'HTTP_STATUS=%{http_code} IP=%{remote_ip} TLS_VERIFY=%{ssl_verify_result} FINAL=%{url_effective}\n' "https://$domain/"
+            echo "TLS_HANDSHAKE:"
+            timeout 12 openssl s_client -connect "$domain:443" -servername "$domain" -verify_return_error </dev/null 2>&1 | grep -E 'subject=|issuer=|Verify return code:|verify error|alert |no peer certificate|CONNECTED' | head -20
+          done
+          echo "Diagnostic complete. No DNS, SSL or hosting changes made."
