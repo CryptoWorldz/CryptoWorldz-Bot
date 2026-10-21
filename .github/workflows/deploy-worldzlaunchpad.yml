@@ -52,7 +52,7 @@ jobs:
           assert platform['publicMainnetCreatorLaunchesEnabled'] is False
           assert platform['devnetTokenCreationEnabled'] is True
 
-          assert fee['projectTradingFeeMinPercent']==0.5
+          assert fee['projectTradingFeeMinPercent']==0.25  # Match platform-config.json; venue tiers remain bounded by max fee
           assert fee['projectTradingFeeMaxPercent']==3
           assert fee['worldzLaunchPadContributionChoicesPercent']==[3,5,8]
           assert fee['worldzLaunchPadContributionDefaultPercent']==5
