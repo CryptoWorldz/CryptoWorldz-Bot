@@ -12,6 +12,7 @@ permissions:
 concurrency:
   group: worldz-new-sites-only
   cancel-in-progress: false
+# Retry deployment after environment credentials were repaired
 jobs:
   deploy:
     runs-on: ubuntu-latest
