@@ -1,0 +1,53 @@
+name: Audit 18 Worldz domains and Hostinger deployment targets
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/audit-worldz-18-domains.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment: cryptoworldz-production
+    env:
+      SFTP_HOST: ${{ vars.SFTP_HOST || '145.223.108.40' }}
+      SFTP_PORT: ${{ vars.SFTP_PORT || '65002' }}
+      SFTP_USERNAME: ${{ secrets.SFTP_USERNAME || vars.SFTP_USERNAME || 'u643166328' }}
+      SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit HTTPS content for all registry domains
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib,urllib.request,urllib.error,ssl,concurrent.futures,json
+          domains=[s.strip() for s in pathlib.Path('DOMAINS.txt').read_text().splitlines() if s.strip()]
+          assert len(domains)==18 and len(set(domains))==18
+          def check(d):
+              req=urllib.request.Request('https://'+d+'/',headers={'User-Agent':'WorldzDomainAudit/1.0'})
+              try:
+                  with urllib.request.urlopen(req,timeout=15,context=ssl.create_default_context()) as r:
+                      body=r.read(130000).decode('utf-8','replace').lower()
+                      branded=('worldz' in body or 'purple diamond' in body)
+                      return {'domain':d,'status':r.status,'final_url':r.url,'worldz_content':branded,'result':'LIVE_WORLDZ_CONTENT' if r.status==200 and branded else 'REVIEW_CONTENT'}
+              except Exception as e:
+                  return {'domain':d,'result':'UNVERIFIED','error':str(e)[:190]}
+          with concurrent.futures.ThreadPoolExecutor(max_workers=9) as pool:
+              results=list(pool.map(check,domains))
+          for r in results: print('WORLDZ_DOMAIN_AUDIT '+json.dumps(r),flush=True)
+          pathlib.Path('domain-audit-results.json').write_text(json.dumps(results,indent=2))
+          PY
+      - name: Check SFTP environment availability without revealing secrets
+        shell: bash
+        run: |
+          if [[ -n "$SFTP_PASSWORD" && -n "$SFTP_USERNAME" && -n "$SFTP_HOST" ]]; then
+            echo 'SFTP_ENVIRONMENT=CONFIGURED'
+          else
+            echo 'SFTP_ENVIRONMENT=MISSING_CREDENTIALS'
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldz-18-domain-audit
+          path: domain-audit-results.json
