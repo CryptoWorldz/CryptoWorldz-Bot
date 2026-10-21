@@ -1,0 +1,51 @@
+name: Worldz Repository Integrity
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'tools/verify-deployment-structure.mjs'
+      - '.github/workflows/repository-integrity.yml'
+      - 'DOMAINS.txt'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Check repository structure and site roots
+        run: npm run check:structure
+      - name: Check JavaScript syntax
+        run: npm run check
+      - name: Check Auto control service syntax
+        run: npm run check:auto
+      - name: Compile Python tooling
+        run: |
+          python3 -m compileall -q tools scripts
+      - name: Run repository tests
+        run: |
+          npm ci --ignore-scripts --no-fund
+          npm test
+      - name: Check for accidentally committed private-key files
+        shell: python
+        run: |
+          from pathlib import Path
+          import subprocess
+          files=subprocess.check_output(['git','ls-files','-z']).decode().split('\0')
+          blocked=[]
+          exact={'.env','id_rsa','id_ed25519','secrets.json'}
+          for name in filter(None,files):
+              path=Path(name)
+              if path.name in exact or (path.name.startswith('.env.') and path.name!='.env.example') or path.suffix.lower() in {'.p12','.pfx','.pem'}:
+                  blocked.append(name)
+          if blocked:
+              raise SystemExit('Sensitive file names tracked: '+', '.join(blocked))
+          print('PRIVATE_FILE_NAME_SCAN=PASS')
