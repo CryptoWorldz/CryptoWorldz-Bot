@@ -114,3 +114,10 @@ body[data-experience="beginner"] .worldz-mode-guidance{border-color:rgba(214,217
 #intermediate-wallet-options label{display:block;color:#d6d9e7;font-weight:750;margin-bottom:7px}
 #intermediate-wallet-options select{width:100%;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid rgba(205,178,240,.35);background:#170b2a;color:#f5eeff}
 #intermediate-wallet-options select:focus-visible{outline:2px solid #d0a2ff;outline-offset:2px}
+
+/* WorldzLaunchPad original cosmic visual treatment — 2026-10-21 */
+.hero{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 68% 48%,rgba(147,30,255,.32),transparent 38%),radial-gradient(ellipse at 22% 68%,rgba(82,20,183,.3),transparent 42%),linear-gradient(145deg,#06020e,#150526 58%,#05020b)}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.8;background-image:radial-gradient(1px 1px at 12% 19%,#fff 95%,transparent),radial-gradient(2px 2px at 73% 27%,#dca6ff 95%,transparent),radial-gradient(1px 1px at 42% 76%,#fff 95%,transparent),radial-gradient(2px 2px at 86% 82%,#a64dff 95%,transparent);background-size:193px 211px,307px 277px,241px 199px,359px 311px}
+.hero-core .core{box-shadow:0 0 32px rgba(189,67,255,.65),0 0 110px rgba(122,23,255,.36);background:radial-gradient(circle at 35% 25%,#ad55fa,#5c159d 65%,#170629)}
+.hero-core .core-ring{border-color:rgba(195,94,255,.46);box-shadow:0 0 22px rgba(170,55,255,.15)}
+@media(max-width:720px){.hero{background-position:center}.hero::before{opacity:.55}.hero-core{max-width:100%;min-width:0}}
