@@ -23,9 +23,9 @@ jobs:
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-      SFTP_HOST: ${{ vars.SFTP_HOST }}
+      SFTP_HOST: ${{ vars.SFTP_HOST || '145.223.108.40' }}
       SFTP_PORT: ${{ vars.SFTP_PORT || '65002' }}
-      SFTP_USERNAME: ${{ secrets.SFTP_USERNAME || secrets.FTP_USERNAME }}
+      SFTP_USERNAME: ${{ secrets.SFTP_USERNAME || vars.SFTP_USERNAME || 'u643166328' }}
       SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD || secrets.FTP_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +33,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
+          if [[ -n "$SFTP_PASSWORD" && -n "$SFTP_USERNAME" && -n "$SFTP_HOST" ]]; then
+            echo 'SFTP credentials available; using SFTP deployment'
+          else
+            test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
+          fi
           for site in worldzhq.com worldz.live; do
             test -s "$site/index.html"
             grep -qi '<html' "$site/index.html"
