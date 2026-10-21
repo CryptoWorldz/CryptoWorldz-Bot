@@ -56,6 +56,31 @@ function safeError(context, error) {
 }
 
 function registerTelegramHandlers({ bot, repository, config }) {
+  // Natural @mention questions for ZED / Command Centre in Telegram groups.
+  // Resolve the real username from Telegram rather than assuming a historical alias.
+  let zedUsername = "";
+  if (typeof bot.getMe === "function") {
+    Promise.resolve().then(() => bot.getMe()).then((me) => {
+      zedUsername = String(me?.username || "").toLowerCase();
+    }).catch(() => {});
+  }
+  bot.on("message", async (msg) => {
+    const raw = String(msg?.text || "").trim();
+    if (!raw || raw.startsWith("/") || msg?.chat?.type === "private") return;
+    const mentions = Array.from(raw.matchAll(/@([A-Za-z0-9_]{5,32})/g), (match) => match[1].toLowerCase());
+    if (!zedUsername || !mentions.includes(zedUsername)) return;
+    const question = raw.replace(new RegExp("@" + zedUsername + "\\b", "ig"), "").trim();
+    if (!question) return bot.sendMessage(msg.chat.id, "💜 ZED Command Centre here. Ask me about raids, wallets, profiles or commands.");
+    const q = question.toLowerCase();
+    let answer;
+    if (/raid|post|comment|reply|group/.test(q)) answer = "🤠 To join a Raid: tap OPEN RAID POST, like/repost/reply on X, then return and tap I RAIDED ✅. Use /raid for the current Raid and /raids for the list.";
+    else if (/wallet/.test(q)) answer = "👛 Use /wallet to link your PUBLIC Solana address. Never send a seed phrase.";
+    else if (/profile|register|join/.test(q)) answer = "🏆 Use /register to join and /profile to see your Legend Profile.";
+    else if (/command|help|menu/.test(q)) answer = "🤖 Use /help to see Command Centre commands, or ask @DipShitBossBot for a natural-language explanation.";
+    else answer = "💜 I got your question. Use /help for Command Centre controls, or mention @DipShitBossBot for detailed troubleshooting.";
+    return bot.sendMessage(msg.chat.id, answer, { reply_to_message_id: msg.message_id }).catch(() => bot.sendMessage(msg.chat.id, answer));
+  });
+
   const pendingWalletRegistration = new Set();
   const pendingBroadcasts = new Map();
   const allowBroadcastDraft = createRateLimiter({ maxEvents: 2, intervalMs: 60000 });
