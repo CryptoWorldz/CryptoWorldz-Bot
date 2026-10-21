@@ -12,7 +12,6 @@ permissions:
 concurrency:
   group: worldz-new-sites-only
   cancel-in-progress: false
-# Retry deployment after environment credentials were repaired
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -29,7 +28,7 @@ jobs:
       SFTP_USERNAME: ${{ secrets.SFTP_USERNAME || vars.SFTP_USERNAME || 'u643166328' }}
       SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD || secrets.FTP_PASSWORD }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate sites and FTP configuration
         shell: bash
         run: |
@@ -156,7 +155,9 @@ jobs:
               try:
                   with urllib.request.urlopen('https://'+domain+'/',timeout=20) as r:
                       body=r.read(100000).lower()
-                      if r.status!=200 or b'<html' not in body: raise ValueError('bad response')
+                      expected_marker = b'worldz' if domain == 'worldzhq.com' else b'woodstock revival'
+                      if r.status != 200 or b'<html' not in body or expected_marker not in body:
+                          raise ValueError('Wrong or missing Worldz website content at ' + domain)
                       print('PUBLIC_HTTPS_PASS '+domain)
               except Exception as e:
                   print('::error::PUBLIC_HTTPS_UNVERIFIED '+domain+' '+str(e))

@@ -1,0 +1,39 @@
+# Secrets and local configuration (never commit credentials)
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+id_rsa
+id_ed25519
+*.credentials.json
+secrets.json
+known_hosts.local
+
+# Local dependencies and generated build output
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+playwright-report/
+test-results/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Local editor settings
+.vscode/
+.idea/

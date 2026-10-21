@@ -495,7 +495,7 @@ async function refreshRuntime(){
 }
 function bind(){
   $$('#launch-recipes .choice').forEach(b=>b.addEventListener('click',()=>applyLaunchRecipe(b.dataset.recipe)));
-  $('.experience-choice').forEach(b=>b.addEventListener('click',()=>setExperienceMode(b.dataset.experience)));
+  $$('.experience-choice').forEach(b=>b.addEventListener('click',()=>setExperienceMode(b.dataset.experience)));
   $('#friends-enabled')?.addEventListener('change',updateWorldzFriends);
   $('#friends-addresses')?.addEventListener('input',updateWorldzFriends);
   $('#wallet-group-type')?.addEventListener('change',updateWorldzFriends);
