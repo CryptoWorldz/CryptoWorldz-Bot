@@ -45,7 +45,7 @@ function shouldHandleDipshitConversation(msg, botUsername = DEFAULT_BOT_USERNAME
 
   const username = String(botUsername || DEFAULT_BOT_USERNAME).replace(/^@/, "");
   const mention = username && new RegExp(`(?:^|\\s)@${escapeRegex(username)}(?:\\b|$)`, "i").test(text);
-  const addressed = /^dip\s*shit\b[\s,:;.!?-]*/i.test(text);
+  const addressed = /^(?:dip\s*shit|@dipshit)\b[\s,:;.!?-]*/i.test(text);
   const replyUsername = String(msg && msg.reply_to_message && msg.reply_to_message.from && msg.reply_to_message.from.username || "");
   const replyToBot = Boolean(username && replyUsername && replyUsername.toLowerCase() === username.toLowerCase());
   return Boolean(mention || addressed || replyToBot);
@@ -55,7 +55,7 @@ function stripDipshitAddressing(text, botUsername = DEFAULT_BOT_USERNAME) {
   const username = String(botUsername || DEFAULT_BOT_USERNAME).replace(/^@/, "");
   let cleaned = String(text || "").trim();
   if (username) cleaned = cleaned.replace(new RegExp(`@${escapeRegex(username)}\\b`, "ig"), " ");
-  cleaned = cleaned.replace(/^dip\s*shit\b[\s,:;.!?-]*/i, "");
+  cleaned = cleaned.replace(/^(?:dip\s*shit|@dipshit)\b[\s,:;.!?-]*/i, "");
   return cleaned.replace(/\s{2,}/g, " ").trim();
 }
 
