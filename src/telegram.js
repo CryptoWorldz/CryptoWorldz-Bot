@@ -81,6 +81,24 @@ function registerTelegramHandlers({ bot, repository, config }) {
     return bot.sendMessage(msg.chat.id, answer, { reply_to_message_id: msg.message_id }).catch(() => bot.sendMessage(msg.chat.id, answer));
   });
 
+  // Explicit command route works even when Telegram treats a leading @bot as inline search.
+  // This is a transport fallback; BotFather controls inline mode on the client.
+  bot.onText(/^\\/(?:askzed|commandcentre)(?:@\\w+)?(?:\\s+([\\s\\S]+))?$/i, async (msg, match) => {
+    const question = String(match?.[1] || "").trim();
+    if (!question) return bot.sendMessage(msg.chat.id, "💜 Ask ZED: /askzed YOUR QUESTION — or write your question first and mention @CryptoWorldzBot at the end.");
+    const q = question.toLowerCase();
+    const answer = /raid|post|comment|reply/.test(q)
+      ? "🤠 Use /raid for the current Raid and /raids for all active Raids."
+      : /wallet/.test(q)
+        ? "👛 Use /wallet with your public Solana address. Never share private keys or recovery phrases."
+        : /profile|register|join/.test(q)
+          ? "🏆 Use /register and /profile to manage your Legend Profile."
+          : /security|rex|scam|spam/.test(q)
+            ? "🛡 REX SecureGuard: use /secureguard status for the current security controls. Report suspicious content to group admins."
+            : "💜 ZED received your question. Use /help for available commands or /ask@DipShitBossBot for detailed troubleshooting.";
+    return bot.sendMessage(msg.chat.id, answer, { reply_to_message_id: msg.message_id });
+  });
+
   const pendingWalletRegistration = new Set();
   const pendingBroadcasts = new Map();
   const allowBroadcastDraft = createRateLimiter({ maxEvents: 2, intervalMs: 60000 });
