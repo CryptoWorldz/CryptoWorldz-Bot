@@ -83,7 +83,7 @@ function registerTelegramHandlers({ bot, repository, config }) {
 
   // Explicit command route works even when Telegram treats a leading @bot as inline search.
   // This is a transport fallback; BotFather controls inline mode on the client.
-  bot.onText(/^\\/(?:askzed|commandcentre)(?:@\\w+)?(?:\\s+([\\s\\S]+))?$/i, async (msg, match) => {
+  bot.onText(new RegExp("^/(?:askzed|commandcentre)(?:@\\w+)?(?:\\s+([\\s\\S]+))?$", "i"), async (msg, match) => {
     const question = String(match?.[1] || "").trim();
     if (!question) return bot.sendMessage(msg.chat.id, "💜 Ask ZED: /askzed YOUR QUESTION — or write your question first and mention @CryptoWorldzBot at the end.");
     const q = question.toLowerCase();
