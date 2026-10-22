@@ -95,6 +95,7 @@ required = {
     "BOT_TOKEN": "" if managed_bot else (os.environ.get("BOT_TOKEN_SECRET", "").strip() or existing.get("BOT_TOKEN", "")),
     "SUPABASE_URL": os.environ.get("SUPABASE_URL_SECRET", "").strip() or existing.get("SUPABASE_URL", "") or "https://hknymhhyqldtzmplzuzh.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": os.environ.get("SUPABASE_PUBLISHABLE_KEY_SECRET", "").strip() or existing.get("SUPABASE_PUBLISHABLE_KEY", "") or "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV",
+    "SUPABASE_SERVICE_ROLE_KEY": os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET", "").strip() or existing.get("SUPABASE_SERVICE_ROLE_KEY", ""),
 }
 optional = {
     "DIPSHIT_BOT_TOKEN": os.environ.get("DIPSHIT_BOT_TOKEN_SECRET", "").strip() or existing.get("DIPSHIT_BOT_TOKEN", ""),
