@@ -145,7 +145,13 @@ function registerDipshitConversation({
 }) {
   const openaiKey = String(process.env.OPENAI_API_KEY || "").trim();
   const model = String(process.env.DIPSHIT_OPENAI_MODEL || process.env.ONEWORLDZ_OPENAI_MODEL || "gpt-4o-mini").trim();
-  const botUsername = String(process.env.DIPSHIT_BOT_USERNAME || DEFAULT_BOT_USERNAME).replace(/^@/, "");
+  let botUsername = String(process.env.DIPSHIT_BOT_USERNAME || DEFAULT_BOT_USERNAME).replace(/^@/, "");
+  if (typeof bot.getMe === "function") {
+    Promise.resolve().then(() => bot.getMe()).then((me) => {
+      const actual = String(me?.username || "").trim().replace(/^@/, "");
+      if (actual) botUsername = actual;
+    }).catch(() => {});
+  }
   const aiEnabled = Boolean(openaiKey);
   const conversations = new Map();
 
