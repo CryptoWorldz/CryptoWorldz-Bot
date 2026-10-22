@@ -70,7 +70,7 @@ function registerTelegramHandlers({ bot, repository, config }) {
     const mentions = Array.from(raw.matchAll(/@([A-Za-z0-9_]{5,32})/g), (match) => match[1].toLowerCase());
     if (!zedUsername || !mentions.includes(zedUsername)) return;
     const question = raw.replace(new RegExp("@" + zedUsername + "\\b", "ig"), "").trim();
-    if (!question) return bot.sendMessage(msg.chat.id, "💜 ZED Command Centre here. Ask me about raids, wallets, profiles or commands.");
+    if (!question) return bot.sendMessage(msg.chat.id, "💜 ZED Command Centre here. Ask me about raids, wallets, profiles or commands. To send normal questions, type your message first and add @CryptoWorldzBot at the end.");
     const q = question.toLowerCase();
     let answer;
     if (/raid|post|comment|reply|group/.test(q)) answer = "🤠 To join a Raid: tap OPEN RAID POST, like/repost/reply on X, then return and tap I RAIDED ✅. Use /raid for the current Raid and /raids for the list.";
@@ -113,7 +113,7 @@ I'm Zed — your guide to the CryptoWorldz Command Centre.
 Use /profile to view your Legend Profile.
 Use /help to open the Command Menu.
 
-🌍 One World • One Mission • One CryptoWorldz`
+💜 Worldz Incorporated™ • Helping the People Who Help the People`
       );
       recordStartReply({
         inputMessageId: msg.message_id,
