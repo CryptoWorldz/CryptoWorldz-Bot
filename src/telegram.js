@@ -68,8 +68,10 @@ function registerTelegramHandlers({ bot, repository, config }) {
     const raw = String(msg?.text || "").trim();
     if (!raw || raw.startsWith("/") || msg?.chat?.type === "private") return;
     const mentions = Array.from(raw.matchAll(/@([A-Za-z0-9_]{5,32})/g), (match) => match[1].toLowerCase());
-    if (!zedUsername || !mentions.includes(zedUsername)) return;
-    const question = raw.replace(new RegExp("@" + zedUsername + "\\b", "ig"), "").trim();
+    const directAddress = /^(?:command\\s*centre|command\\s*center|zed|@commandcentre)\\b[\\s,:;.!?-]*/i;
+    const addressedByName = directAddress.test(raw);
+    if (!addressedByName && (!zedUsername || !mentions.includes(zedUsername))) return;
+    const question = (addressedByName ? raw.replace(directAddress, "") : raw.replace(new RegExp("@" + zedUsername + "\\b", "ig"), "")).trim();
     if (!question) return bot.sendMessage(msg.chat.id, "💜 ZED Command Centre here. Ask me about raids, wallets, profiles or commands. To send normal questions, type your message first and add @CryptoWorldzBot at the end.");
     const q = question.toLowerCase();
     let answer;
