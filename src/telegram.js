@@ -326,6 +326,25 @@ Use /help to open the Command Menu.
     }
   });
 
+  // Opt-in Worldz ecosystem directory: no unsolicited advertisements or mass DMs.
+  bot.onText(/^\/(?:worldzinventory|worldzdirectory|worldzpromo)(?:@\w+)?$/, (msg) =>
+    send(msg.chat.id, [
+      "💜 WORLDZ ECOSYSTEM DIRECTORY",
+      "",
+      "🏛 Worldz HQ — https://worldzhq.com",
+      "🌐 Worldz Live — https://worldz.live",
+      "🚀 Worldz LaunchPad — https://launchpad.cryptoworldz.xyz",
+      "🤝 DonateWorldz — https://donateworldz.com",
+      "💜 Purple Diamond Crew — https://purplediamondcrew.com",
+      "🤖 CryptoWorldz Command Centre — https://cryptoworldz.xyz",
+      "🪙 WORLDZ WLDZ information — https://launchpad.cryptoworldz.xyz/wldz/",
+      "📣 Updates — https://x.com/WorldzLaunchPad",
+      "💬 Community — https://t.me/CryptoWLDZ",
+      "",
+      "Some Worldz projects are planned or under development; a listing is not a live-service guarantee.",
+      "Share this directory voluntarily. No unsolicited DMs or auto-posts."
+    ].join("\n"))
+  );
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(msg.chat.id, formatCommunity(config)));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, formatWebsite(config)));
   bot.onText(/^\/dipshit(?:@\w+)?$/, async (msg) => {
