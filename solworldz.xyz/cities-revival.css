@@ -1,0 +1,13 @@
+/* SolWorldz Cities Revival — inspired by user-provided original art */
+body{background:radial-gradient(circle at 15% 10%,#45117d77,transparent 35%),radial-gradient(circle at 90% 45%,#152b7d88,transparent 35%),#04010d;color:#fff}
+.hero,.card,.rule,.section-cities{border:2px solid transparent!important;background:linear-gradient(#0b0520ee,#080516ee) padding-box,linear-gradient(125deg,#f4c65d,#ad55ff 35%,#38cfff 70%,#d7d9e5) border-box!important;box-shadow:0 0 25px #982bff55,0 14px 40px #0009}
+h1,.section h2,.city-title{text-shadow:0 0 15px #af52ffb0,0 0 32px #1886ff77}
+.btn,.worlds a{border:1px solid #d7c9f4!important;border-radius:12px!important;background:linear-gradient(125deg,#54188fc9,#1043a4aa)!important;color:#fff!important;backdrop-filter:blur(12px);box-shadow:0 0 14px #8b39ec88}
+.btn:hover,.worlds a:hover,.city-card:hover{box-shadow:0 0 28px #46bdffbb;transform:translateY(-3px)}
+.section-cities{margin-top:35px;padding:clamp(16px,3vw,30px);border-radius:24px}
+.city-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.city-card{display:block;min-height:180px;padding:22px 16px;border:2px solid var(--city,#b95cff);border-radius:19px;background:radial-gradient(circle at 50% 0%,color-mix(in srgb,var(--city) 28%,transparent),transparent 72%),#08051ccc;text-align:center;transition:transform .2s,box-shadow .2s;box-shadow:inset 0 0 25px #0009,0 0 12px color-mix(in srgb,var(--city) 50%,transparent)}
+.city-icon{display:block;font-size:2.4rem}.city-title{display:block;font-size:clamp(1.1rem,2vw,1.65rem);font-weight:950;letter-spacing:.04em;color:var(--city)}.city-sub{display:block;font-size:.78rem;color:#f0e5ff}
+@media(max-width:760px){.city-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.city-card{min-height:160px}}
+@media(max-width:480px){.city-grid{grid-template-columns:1fr}.city-card{min-height:120px}}
+@media(prefers-reduced-motion:reduce){.city-card,.btn{transition:none}}
