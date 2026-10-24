@@ -1,0 +1,11 @@
+/* Worldz Galaxy V2 — optional theme, scoped and responsive */
+:root{--w-purple:#a64cff;--w-blue:#36b9ff;--w-silver:#dbe4f4;--w-black:#05030c}
+body.worldz-galaxy-v2{color:#f9f5ff;background:radial-gradient(ellipse at 18% 15%,#512080 0,transparent 39%),radial-gradient(ellipse at 85% 55%,#123d80 0,transparent 38%),linear-gradient(140deg,#05030c,#120726 65%,#030610);background-attachment:fixed}
+.worldz-galaxy-v2 .hero,.worldz-galaxy-v2 .card{position:relative;isolation:isolate;border:2px solid transparent;background:linear-gradient(#10091fdc,#080c20dc) padding-box,linear-gradient(135deg,#cfb4f7,#a64cff 30%,#38c8ff 70%,#e4e8f0) border-box;box-shadow:0 0 22px #a64cff33,0 20px 65px #000a;backdrop-filter:blur(12px)}
+.worldz-galaxy-v2 h1,.worldz-galaxy-v2 h2{line-height:1.12;text-shadow:0 0 28px #9a42ff99}
+.worldz-galaxy-v2 .btn{border:1px solid #d3dafa88;background:linear-gradient(120deg,#8b38d5aa,#1676b9a0);box-shadow:inset 0 1px #ffffff55,0 0 18px #8b38d555;backdrop-filter:blur(10px);transition:transform .2s,box-shadow .2s}
+.worldz-galaxy-v2 .btn:hover,.worldz-galaxy-v2 .btn:focus-visible{transform:translateY(-3px);box-shadow:0 0 28px #39c9ff99;outline:2px solid #dbe4f4}
+.worldz-galaxy-v2 .eyebrow{color:#d8c5ff}
+.worldz-galaxy-v2 .worldz-orbit{height:15px;margin:16px 0;border-radius:100%;background:radial-gradient(circle,#e5e9ff 0 2px,transparent 3px) 0 0/17px 12px,linear-gradient(90deg,#7d28b5,#287be6,#c9d0df);opacity:.8}
+@media(max-width:650px){.worldz-galaxy-v2 .shell{padding:16px 12px 45px}.worldz-galaxy-v2 .hero,.worldz-galaxy-v2 .card{border-radius:18px}.worldz-galaxy-v2 .btn{min-height:44px}}
+@media(prefers-reduced-motion:reduce){.worldz-galaxy-v2 *{transition:none!important}}
