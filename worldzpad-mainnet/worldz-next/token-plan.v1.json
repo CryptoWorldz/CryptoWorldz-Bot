@@ -1,0 +1,49 @@
+{
+  "schema": "WORLDZ-FLAGSHIP-TOKEN-PLAN-V1",
+  "status": "DRAFT_NOT_MINTED",
+  "name": "Worldz",
+  "symbol": "WORLDZ",
+  "mintAddress": null,
+  "chainOfOrigin": "solana",
+  "oldWldzMintStatus": "HISTORICAL_DO_NOT_USE_FOR_NEW_LAUNCH",
+  "reviveStatus": "DEFERRED",
+  "supplyTotal": null,
+  "launchPriceUSD": 0.045,
+  "launchPriceStatus": "TARGET_UNFUNDED_UNVERIFIED",
+  "allocationPercent": {
+    "initialLiquidity": 3,
+    "futureLiquidityReserve": 27,
+    "devCity100": 20,
+    "team": 8,
+    "partnerships": 10,
+    "communityAndFood": 12,
+    "ecosystemTreasury": 10,
+    "legacySupportReserve": 5,
+    "strategicReserve": 5
+  },
+  "devCity": {
+    "recipientCount": 100,
+    "percentEach": 0.2,
+    "vestingRequired": true,
+    "approvalRequired": true
+  },
+  "fees": {
+    "desiredCombinedPercentCeiling": 1.25,
+    "guaranteedAcrossDEXs": false,
+    "externalFeesMustBeMeasured": true,
+    "walletTransferTaxPercent": 0
+  },
+  "multichain": {
+    "status": "RESEARCH_ONLY",
+    "crossChainMintingDisabled": true
+  },
+  "safety": {
+    "noAutomaticMint": true,
+    "noAutomaticDistributions": true,
+    "noAutomaticTreasuryTransfers": true,
+    "noMainnetExecution": true,
+    "oldWalletMustNotBeReused": true,
+    "multisigRecoveryAuditRequired": true,
+    "legalReviewRequired": true
+  }
+}
