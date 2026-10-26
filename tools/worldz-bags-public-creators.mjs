@@ -1,0 +1,11 @@
+import fs from 'node:fs/promises';
+const base='https://data-api.bags.fm';
+const seedMints=[...new Set((process.env.BAGS_MINTS||'').split(/[\s,;]+/).filter(x=>/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(x)))];
+const seedCreators=[...new Set((process.env.BAGS_CREATORS||'').split(/[\s,;]+/).filter(x=>/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(x)))];
+const requests=[];
+async function read(path){try{const r=await fetch(base+path,{headers:{accept:'application/json'},signal:AbortSignal.timeout(12000)});const raw=await r.text();if(!r.ok)return {status:r.status,error:raw.slice(0,180)};try{return {status:r.status,data:JSON.parse(raw)}}catch{return {status:r.status,error:'Non-JSON response'}}}catch(e){return {error:String(e)}}}
+for(const mint of seedMints){const result=await read('/v2/tokens/'+mint+'/creation');requests.push({type:'mint_creation',mint,...result});}
+for(const creator of seedCreators){const result=await read('/v2/tokens/by-creator/'+creator);requests.push({type:'creator_launches',creator,...result});}
+const records=[];for(const item of requests){if(item.type!=='mint_creation'||item.status!==200)continue;const v=item.data?.data??item.data;const creator=v?.creator;const signature=v?.signature;if(typeof creator==='string'&&/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(creator)&&typeof signature==='string'){records.push({creator,mint:item.mint,signature,launchWallet:v.launchWallet??null,launchpad:v.launchpad??null,source:base+'/v2/tokens/'+item.mint+'/creation',status:'public launch-provenance evidence',developerIdentityVerified:false})}}
+const out={generatedAt:new Date().toISOString(),platform:'Bags.fm data API',method:'Public token creation provenance and creator-launch queries',seedMints:seedMints.length,seedCreators:seedCreators.length,verifiedCreationRecords:records.length,records,requests:requests.map(({data,...x})=>({...x,data:x.status===200?data:undefined})),note:'Only records with a creator AND launch transaction signature count as attributed launch records; no seed data means no invented wallets.'};
+await fs.mkdir('launchpad.cryptoworldz.xyz/wallet-snapshots',{recursive:true});await fs.writeFile('launchpad.cryptoworldz.xyz/wallet-snapshots/bags-public-creators.latest.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify({seedMints:seedMints.length,seedCreators:seedCreators.length,verifiedCreationRecords:records.length}));
