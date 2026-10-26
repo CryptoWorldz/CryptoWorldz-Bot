@@ -3,7 +3,7 @@
   "method": "Public Pump.fun creator profiles showing explicit coins created count",
   "capturedOn": "2026-10-21",
   "status": "public token creators, not Solfate-verified software developers",
-  "count": 5,
+  "count": 7,
   "creators": [
     {
       "chain": "solana",
@@ -59,6 +59,29 @@
       "evidence": "Pump.fun profile explicitly displays created coin count",
       "developerIdentityVerified": false,
       "distributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "C4tpxMTPQrsu8iEuTzgK4AG1dYn3DyKn6R1awKpB6kgt",
+      "coinsCreated": 54,
+      "platform": "pump.fun",
+      "profile": "ncatdev",
+      "source": "https://pump.fun/profile/C4tpxMTPQrsu8iEuTzgK4AG1dYn3DyKn6R1awKpB6kgt?tab=coins",
+      "evidence": "Public Pump.fun profile explicitly shows created coins",
+      "developerIdentityVerified": false,
+      "distributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "BdmShAzp8kX8H1dux28D7tJhxLVhpwCL7u93eun3nCuy",
+      "coinsCreated": 61,
+      "platform": "pump.fun",
+      "profile": "idleheftymum",
+      "source": "https://pump.fun/profile/BdmShAzp8kX8H1dux28D7tJhxLVhpwCL7u93eun3nCuy?tab=coins",
+      "evidence": "Public Pump.fun profile explicitly shows created coins",
+      "developerIdentityVerified": false,
+      "distributionApproved": false
     }
-  ]
+  ],
+  "lastExpanded": "2026-10-26"
 }
