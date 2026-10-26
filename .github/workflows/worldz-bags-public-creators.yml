@@ -1,0 +1,32 @@
+name: Worldz Bags public creator evidence
+on:
+  push:
+    paths:
+      - 'tools/worldz-bags-public-creators.mjs'
+      - '.github/workflows/worldz-bags-public-creators.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Query public Bags launch records
+        env:
+          BAGS_MINTS: ${{ vars.BAGS_MINTS }}
+          BAGS_CREATORS: ${{ vars.BAGS_CREATORS }}
+        run: node tools/worldz-bags-public-creators.mjs
+      - name: Commit public evidence
+        run: |
+          git config user.name worldz-discovery-bot
+          git config user.email worldz-discovery-bot@users.noreply.github.com
+          git add launchpad.cryptoworldz.xyz/wallet-snapshots/bags-public-creators.latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record Bags creator provenance [cancel-full-deploy]"
+            git push
+          fi
