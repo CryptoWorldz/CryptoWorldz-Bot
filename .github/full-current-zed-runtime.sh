@@ -24,6 +24,16 @@ grep -Fq 'registerDipshitMembershipSystem' src/full-runtime-entry.js
 for marker in 'id="splashback"' 'id="zed-guide"' 'id="create"' 'id="heroes"'; do
   grep -Fq "$marker" public/miniapp/index.html
 done
+# Verify the exact secret-free archive can resolve production modules before upload.
+# Hostinger's managed build must install these dependencies into its immutable release.
+node - <<'NODE'
+for (const name of ['express', 'node-telegram-bot-api', '@supabase/supabase-js', 'dotenv']) {
+  try { require.resolve(name); } catch (error) {
+    console.error('ZED_REQUIRED_MODULE_MISSING=' + name);
+    process.exitCode = 1;
+  }
+}
+NODE
 echo 'ZED_FULL_RUNTIME_LOCAL_VALIDATION=PASS'
 
 if ! command -v lftp >/dev/null 2>&1; then
