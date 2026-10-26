@@ -70,6 +70,16 @@ if (fullRuntimeConfigured) {
     return;
   } catch (error) {
     fullRuntimeLoadError = sanitizeRuntimeLoadError(error);
+    // A bare MODULE_NOT_FOUND code hides the broken dependency and causes
+    // repeated deployments without a useful diagnosis. Log only the module
+    // specifier (never environment variables, tokens, or filesystem contents).
+    if (error && error.code === "MODULE_NOT_FOUND") {
+      const match = String(error.message || "").match(/Cannot find module ['"]([^'"\\r\\n]+)['"]/);
+      const missing = match && match[1];
+      if (missing && /^[a-zA-Z0-9@._\\/-]{1,120}$/.test(missing)) {
+        fullRuntimeLoadError = "MODULE_NOT_FOUND:" + missing;
+      }
+    }
     console.error("Full runtime unavailable; starting protected public gateway", fullRuntimeLoadError);
   }
 }
