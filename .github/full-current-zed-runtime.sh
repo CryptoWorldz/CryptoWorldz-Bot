@@ -17,7 +17,9 @@ done
 npm ci
 node --test test/oneworldz-gpt.test.js test/hub-central-live-v1.test.js test/dipshit-membership.test.js
 node --check index.js
-find src -type f -name '*.js' -exec node --check {} +
+while IFS= read -r -d '' file; do
+  node --check "$file"
+done < <(find src -type f -name '*.js' -print0)
 node --check src/oneworldz-gpt/http.js
 grep -Fq 'registerProjectWalletSystem({ app, bot, config, supabase });' src/full-runtime-entry.js
 grep -Fq 'registerDipshitMembershipSystem' src/full-runtime-entry.js
@@ -130,7 +132,7 @@ import pathlib
 import re
 
 text = pathlib.Path(os.environ["PROTECTED_ENV"]).read_text(encoding="utf-8")
-keys = ["OPENAI_API_KEY", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"]
+keys = ["OPENAI_API_KEY", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_SERVICE_ROLE_KEY"]
 if os.environ.get("HOSTINGER_MANAGED_BOT_TOKEN", "").strip() != "1":
     keys.append("BOT_TOKEN")
 for key in keys:

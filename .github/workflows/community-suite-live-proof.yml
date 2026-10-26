@@ -1,9 +1,6 @@
 name: Community Suite Live Supergroup Proof
 
 on:
-  workflow_run:
-    workflows: ["Restore ZED AUTO GRACE Command Centre"]
-    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -15,7 +12,6 @@ concurrency:
 
 jobs:
   proof:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment:

@@ -8,7 +8,7 @@ on:
       - ".github/workflows/worldz-registry-watch.yml"
   workflow_dispatch:
   schedule:
-    - cron: '17 * * * *'
+    - cron: '17 */6 * * *'
 
 permissions:
   contents: read

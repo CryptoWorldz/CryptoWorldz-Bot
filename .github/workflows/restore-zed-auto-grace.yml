@@ -405,7 +405,7 @@ jobs:
               raise SystemExit("Telegram private composer/menu restore failed")
 
           owner_chat_id=str(env.get("OWNER_TELEGRAM_ID","")).strip()
-          if owner_chat_id.lstrip("-").isdigit():
+          if os.environ.get("ZED_SEND_OWNER_NOTICE") == "1" and owner_chat_id.lstrip("-").isdigit():
               try:
                   call("sendMessage",{
                     "chat_id":int(owner_chat_id),

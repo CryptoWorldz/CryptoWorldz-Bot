@@ -2,21 +2,22 @@ name: Worldz Phase 1 production proof
 # direct-x-raid-launcher-proof: 2026-10-04-v1
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Restore ZED AUTO GRACE Command Centre", "Deploy WorldzLaunchPad"]
+    types: [completed]
     branches: [main]
-    paths:
-      - 'public/miniapp/**'
-      - 'launchpad.cryptoworldz.xyz/**'
-      - 'src/**'
-      - 'test/**'
-      - '.github/workflows/worldz-phase1-production-proof.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: worldz-phase1-production-proof
+  cancel-in-progress: true
+
 jobs:
   phase1-proof:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

@@ -20,14 +20,16 @@ function loadConfig(env = process.env) {
   const supabaseUrl = String(
     env.SUPABASE_URL || "https://hknymhhyqldtzmplzuzh.supabase.co"
   ).trim().replace(/\/$/, "");
+  const serviceRoleKey = [env.SUPABASE_SERVICE_ROLE_KEY, env.SUPABASE_SERVICE_KEY, env.SUPABASE_SECRET_KEY]
+    .map(value => String(value || "").trim()).find(Boolean) || "";
   const supabaseApiKey = String(
-    env.SUPABASE_SERVICE_ROLE_KEY ||
+    serviceRoleKey ||
     env.SUPABASE_PUBLISHABLE_KEY ||
     env.SUPABASE_ANON_KEY ||
     "sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
   ).trim();
   if (!supabaseApiKey) throw new Error("A Supabase server or publishable API key is required.");
-  const usingServiceRole = Boolean(String(env.SUPABASE_SERVICE_ROLE_KEY || "").trim());
+  const usingServiceRole = Boolean(serviceRoleKey);
   const webhookUrl = String(
     env.TELEGRAM_WEBHOOK_URL ||
       "https://cryptobotz.cryptoworldz.xyz/telegram-webhook"

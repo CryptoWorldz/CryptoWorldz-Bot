@@ -1,13 +1,6 @@
 name: ZED Real Group Start Proof
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "src/telegram.js"
-      - "src/telegram-proof.js"
-      - "src/http.js"
-      - ".github/workflows/zed-start-real-group-proof.yml"
   workflow_dispatch:
 
 permissions:
@@ -25,6 +18,7 @@ jobs:
       name: cryptoworldz-production
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_SECRET_KEY }}
       FTP_HOST: ${{ secrets.FTP_HOST }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
@@ -72,12 +66,14 @@ jobs:
               # Use the same protected publishable-key bridge instead of failing
               # merely because OWNER_TELEGRAM_ID is absent from the .env file.
               supabase="https://hknymhhyqldtzmplzuzh.supabase.co"
-              publishable="sb_publishable_3ognbqSCTAcAnLHOeKZp8A_IgriwUJV"
+              service_key=os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+              if not service_key:
+                  raise SystemExit("SUPABASE_SERVICE_ROLE_KEY missing for protected owner lookup")
               req=urllib.request.Request(
                   supabase+"/rest/v1/bot_admins?select=telegram_id&role=eq.owner&status=eq.active&limit=2",
                   headers={
-                      "apikey":publishable,
-                      "authorization":"Bearer "+publishable,
+                      "apikey":service_key,
+                      "authorization":"Bearer "+service_key,
                       "x-zed-runtime-key":runtime_key,
                       "accept":"application/json",
                       "user-agent":"ZED-Real-Group-Owner-Resolve/1.0"
