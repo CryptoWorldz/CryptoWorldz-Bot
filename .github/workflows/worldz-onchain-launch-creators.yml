@@ -10,6 +10,7 @@ permissions:
 jobs:
   collect:
     runs-on: ubuntu-latest
+    environment: cryptoworldz-production
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4

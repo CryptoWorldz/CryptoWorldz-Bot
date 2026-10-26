@@ -1,11 +1,6 @@
 name: Publish Worldz sites independently of Hostinger
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'worldzhq.com/**'
-      - 'worldz.live/**'
-      - '.github/workflows/publish-worldz-github-pages.yml'
+  # Optional preview host; enable Pages before manually publishing.
   workflow_dispatch:
 permissions:
   contents: read
