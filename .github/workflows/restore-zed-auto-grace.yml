@@ -536,6 +536,29 @@ jobs:
               if dhook.get("url") != dipshit_hook_url: raise SystemExit("DIPSHIT Telegram webhook URL mismatch")
               print("DIPSHIT_TELEGRAM_BOT=PASS @"+str(dbot.get("username","")))
               print("DIPSHIT_TELEGRAM_COMMANDS="+str(len(dipshit_commands)))
+              # A configured Telegram URL is not proof that the application accepts updates.
+              # Fail the restore if the endpoint is missing, redirects, or accepts unauthenticated requests.
+              import urllib.error
+              probe=urllib.request.Request(
+                  dipshit_hook_url,
+                  data=b'{"update_id":0}',
+                  headers={"content-type":"application/json"},
+                  method="POST"
+              )
+              try:
+                  with urllib.request.urlopen(probe,timeout=20) as response:
+                      probe_status=response.status
+              except urllib.error.HTTPError as exc:
+                  probe_status=exc.code
+              if probe_status != 401:
+                  raise SystemExit("DIPSHIT webhook authentication probe failed HTTP="+str(probe_status))
+              print("DIPSHIT_WEBHOOK_ROUTE_AUTH=PASS")
+              pending=int(dhook.get("pending_update_count") or 0)
+              if pending or dhook.get("last_error_message"):
+                  print("DIPSHIT_WEBHOOK_PENDING="+str(pending))
+                  print("DIPSHIT_WEBHOOK_LAST_ERROR="+str(dhook.get("last_error_message") or "none")[:180])
+                  if dhook.get("last_error_message"):
+                      raise SystemExit("DIPSHIT webhook delivery error reported by Telegram")
               print("DIPSHIT_TELEGRAM_WEBHOOK=PASS")
           PY
 
