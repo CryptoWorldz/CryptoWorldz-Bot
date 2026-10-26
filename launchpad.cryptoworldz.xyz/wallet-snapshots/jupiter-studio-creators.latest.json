@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-10-26T06:19:56.632Z",
+  "platform": "Jupiter Studio",
+  "method": "Solana RPC program signatures and parsed transaction inspection; jups mint filter",
+  "programId": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+  "signaturesScanned": 40,
+  "candidateTransactions": 0,
+  "errors": 26,
+  "verifiedCreators": 0,
+  "launches": [],
+  "note": "The Meteora DBC program is shared by multiple launchpads. Signers are not automatically creators. No verified wallets are added without create-instruction decoding."
+}
