@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-10-26T06:16:12.024Z",
+  "platform": "Bags.fm data API",
+  "method": "Public token creation provenance and creator-launch queries",
+  "seedMints": 0,
+  "seedCreators": 0,
+  "verifiedCreationRecords": 0,
+  "records": [],
+  "requests": [],
+  "note": "Only records with a creator AND launch transaction signature count as attributed launch records; no seed data means no invented wallets."
+}
