@@ -42,12 +42,12 @@ test("production Community Suite proof restores the original REX enabled state",
 });
 
 
-test("Community Suite live proof waits for protected deployment before Telegram proof", () => {
-  const workflow = read(".github/workflows/community-suite-live-proof.yml");
-  assert.match(workflow, /workflow_run:/);
-  assert.match(workflow, /Restore ZED AUTO GRACE Command Centre/);
-  assert.match(workflow, /workflow_run\.conclusion == 'success'/);
-  assert.doesNotMatch(workflow, /\n  push:\n/);
+test("live group-message proofs require deliberate manual dispatch", () => {
+  for (const file of ["community-suite-live-proof.yml", "zed-start-real-group-proof.yml"]) {
+    const workflow = read(".github/workflows/" + file);
+    assert.match(workflow, /workflow_dispatch:/);
+    assert.doesNotMatch(workflow, /\n  (?:push|workflow_run|schedule):/);
+  }
 });
 
 test("latest REX Persona 4\/5 artwork is the one shared by MiniApp and Telegram", () => {

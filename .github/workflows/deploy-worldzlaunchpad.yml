@@ -541,21 +541,10 @@ jobs:
       - name: Syntax-check browser JavaScript
         shell: bash
         run: |
-          node --check launchpad.cryptoworldz.xyz/app.js
-          node --check launchpad.cryptoworldz.xyz/trust/app.js
-          node --check launchpad.cryptoworldz.xyz/mint/app.js
-          node --check launchpad.cryptoworldz.xyz/mint/jupiter-mobile.js
-          node --check launchpad.cryptoworldz.xyz/genesis/app.js
-          node --check launchpad.cryptoworldz.xyz/devnet/app.js
-          node --check launchpad.cryptoworldz.xyz/base/app.js
-          node --check launchpad.cryptoworldz.xyz/evm/app.js
-          node --check launchpad.cryptoworldz.xyz/xrpl/app.js
-          node --check launchpad.cryptoworldz.xyz/mainnet/app.js
-          node --check launchpad.cryptoworldz.xyz/curve/app.js
-          node --check launchpad.cryptoworldz.xyz/curve-pro/app.js
-          node --check launchpad.cryptoworldz.xyz/wldz/app.js
-          node --check launchpad.cryptoworldz.xyz/launch-calculators/app.js
-          node --check launchpad.cryptoworldz.xyz/chatgpt-token-design/app.js
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find launchpad.cryptoworldz.xyz -type f -name '*.js' -print0)
 
       - name: Run 150+ Fee Flow V3 anti-cheat tokenomics scenarios
         shell: python

@@ -2,6 +2,15 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
+// Managed hosting can inject empty credential slots. Fill these from the
+// protected file while preserving every nonblank managed value.
+const PROTECTED_CREDENTIAL_KEYS = new Set([
+  "OPENAI_API_KEY", "BOT_TOKEN", "TELEGRAM_BOT_TOKEN", "TELEGRAM_TOKEN",
+  "ZED_BOT_TOKEN", "CRYPTOWORLDZ_BOT_TOKEN", "DIPSHIT_BOT_TOKEN",
+  "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY",
+  "SUPABASE_SECRET_KEY", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_ANON_KEY"
+]);
+
 const PROTECTED_DOMAIN = "cryptobotz.cryptoworldz.xyz";
 
 function candidateEnvironmentFiles({ appRoot = path.join(__dirname, ".."), env = process.env, home = os.homedir() } = {}) {
@@ -46,8 +55,8 @@ function loadProtectedEnvironment(options = {}) {
     const values = parseEnvironment(text);
     for (const [key, value] of Object.entries(values)) {
       const missing = !Object.prototype.hasOwnProperty.call(env, key);
-      const blankProtectedOpenAi = key === "OPENAI_API_KEY" && !String(env[key] || "").trim();
-      if (missing || blankProtectedOpenAi) env[key] = value;
+      const blankProtectedCredential = PROTECTED_CREDENTIAL_KEYS.has(key) && !String(env[key] || "").trim();
+      if (missing || blankProtectedCredential) env[key] = value;
     }
     return { loaded: true, source: file === path.join(options.appRoot || path.join(__dirname, ".."), ".env") ? "release" : "protected" };
   }

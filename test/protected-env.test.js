@@ -45,3 +45,29 @@ test("candidate order prefers explicit override, then permanent protected root, 
     "/runtime/home/domains/cryptobotz.cryptoworldz.xyz/nodejs/.env"
   ]);
 });
+
+for (const managedValue of ["", "   "]) {
+  test(`restores blank managed Supabase and bot credentials (${JSON.stringify(managedValue)})`, () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "worldz-env-"));
+    try {
+      fs.writeFileSync(path.join(root, ".env"), "SUPABASE_SERVICE_ROLE_KEY=server-test-key\nDIPSHIT_BOT_TOKEN=test-dipshit\n");
+      const env = { SUPABASE_SERVICE_ROLE_KEY: managedValue, DIPSHIT_BOT_TOKEN: managedValue, BOT_TOKEN: "test-zed" };
+      loadProtectedEnvironment({ appRoot: root, env, home: root });
+      const config = require("../src/config").loadConfig(env);
+      assert.equal(config.usingServiceRole, true);
+      assert.equal(config.supabaseApiKey, "server-test-key");
+      assert.equal(config.dipshitBotToken, "test-dipshit");
+    } finally { fs.rmSync(root, { recursive: true, force: true }); }
+  });
+}
+
+test("server credential aliases match deployment preflight and outrank public keys", () => {
+  for (const alias of ["SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY", "SUPABASE_SECRET_KEY"]) {
+    const config = require("../src/config").loadConfig({
+      BOT_TOKEN: "test-bot", SUPABASE_SERVICE_ROLE_KEY: " ",
+      SUPABASE_PUBLISHABLE_KEY: "public-test-key", [alias]: "server-test-key"
+    });
+    assert.equal(config.usingServiceRole, true);
+    assert.equal(config.supabaseApiKey, "server-test-key");
+  }
+});

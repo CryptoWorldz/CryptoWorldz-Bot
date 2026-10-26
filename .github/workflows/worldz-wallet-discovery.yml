@@ -20,6 +20,7 @@ permissions:
 jobs:
   discover:
     runs-on: ubuntu-latest
+    environment: cryptoworldz-production
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +29,7 @@ jobs:
           node-version: '22'
       - name: Solana public holder snapshot
         env:
+          SOLANA_RPC_URL: ${{ secrets.SOLANA_RPC_URL || vars.SOLANA_RPC_URL }}
           SOLANA_MINTS: ${{ inputs.solana_mints || 'AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U,DF4zASfiDBr3uuAz4s2Sxtsjo7tDFZiQ2nLeKJGfBAGS' }}
         run: node tools/worldz-solana-top-holders.mjs
       - name: XRPL public holder snapshot
