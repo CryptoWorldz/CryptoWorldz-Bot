@@ -121,3 +121,30 @@ body[data-experience="beginner"] .worldz-mode-guidance{border-color:rgba(214,217
 .hero-core .core{box-shadow:0 0 32px rgba(189,67,255,.65),0 0 110px rgba(122,23,255,.36);background:radial-gradient(circle at 35% 25%,#ad55fa,#5c159d 65%,#170629)}
 .hero-core .core-ring{border-color:rgba(195,94,255,.46);box-shadow:0 0 22px rgba(170,55,255,.15)}
 @media(max-width:720px){.hero{background-position:center}.hero::before{opacity:.55}.hero-core{max-width:100%;min-width:0}}
+
+/* WORLDZ GALAXY MOBILE QUALITY — lightweight presentation layer, 2026-10-26 */
+html{scroll-behavior:auto}
+body{background-color:#06020e}
+.topbar{border-bottom:1px solid rgba(218,205,239,.7);box-shadow:0 2px 16px rgba(135,40,225,.25)}
+.wallet-mini{border:1px solid #d9c5ec;color:#fff;background:linear-gradient(125deg,#6418a5,#951ed2);box-shadow:0 0 12px #7722d666}
+.worldz-mobile-menu{border-color:rgba(210,193,230,.8)!important;box-shadow:inset 0 0 0 1px rgba(150,80,215,.2),0 0 22px rgba(128,42,220,.18)}
+.worldz-mobile-menu .mobile-link{border-color:#bba4d6!important;box-shadow:0 2px 12px rgba(132,51,208,.16)!important}
+@media(max-width:700px){
+ .topbar{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#0b0418!important;gap:8px;padding:8px 10px}
+ .topbar .brand{min-width:0;font-size:clamp(.75rem,3.6vw,1rem);white-space:normal}
+ .topbar .brand span:last-child{overflow-wrap:anywhere}
+ .wallet-mini{flex-shrink:0;font-size:.75rem;padding:10px}
+ .hero{min-height:0!important;padding:26px 15px 36px!important;display:block!important}
+ .hero h1{font-size:clamp(2.4rem,11vw,4rem)!important;line-height:1.06!important}
+ .hero .lead{font-size:1rem;line-height:1.55}
+ .hero-core{display:none!important}
+ .worldz-mobile-menu{margin:14px 0 4px!important;padding:18px 13px!important}
+ .worldz-mobile-menu .mobile-link{min-height:65px!important;margin:8px 0!important;padding:11px 13px!important}
+ .worldz-mobile-menu .mobile-icon{font-size:1.5rem!important;flex-basis:30px!important}
+ .worldz-mobile-menu .mobile-link strong{font-size:1.04rem!important}
+ .worldz-mobile-menu .mobile-link small{font-size:.79rem!important}
+ .hero .truth-strip{font-size:.8rem}
+ .section{content-visibility:auto;contain-intrinsic-size:auto 500px}
+ .hero,.topbar,footer{content-visibility:visible}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
