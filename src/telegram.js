@@ -68,7 +68,7 @@ function registerTelegramHandlers({ bot, repository, config }) {
     const raw = String(msg?.text || "").trim();
     if (!raw || raw.startsWith("/") || msg?.chat?.type === "private") return;
     const mentions = Array.from(raw.matchAll(/@([A-Za-z0-9_]{5,32})/g), (match) => match[1].toLowerCase());
-    const directAddress = /^(?:command\\s*centre|command\\s*center|zed|@commandcentre)\\b[\\s,:;.!?-]*/i;
+    const directAddress = /^(?:command\s*centre|command\s*center|zed|@commandcentre)\b[\s,:;.!?-]*/i;
     const addressedByName = directAddress.test(raw);
     if (!addressedByName && (!zedUsername || !mentions.includes(zedUsername))) return;
     const question = (addressedByName ? raw.replace(directAddress, "") : raw.replace(new RegExp("@" + zedUsername + "\\b", "ig"), "")).trim();
