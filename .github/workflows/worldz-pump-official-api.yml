@@ -1,0 +1,31 @@
+name: Worldz Pump.fun official API profiles
+on:
+  push:
+    paths:
+      - 'tools/worldz-pump-official-api.mjs'
+      - '.github/workflows/worldz-pump-official-api.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Query official Pump.fun API
+        env:
+          PUMP_API_KEY: ${{ secrets.PUMP_API_KEY }}
+        run: node tools/worldz-pump-official-api.mjs
+      - name: Commit results
+        run: |
+          git config user.name worldz-discovery-bot
+          git config user.email worldz-discovery-bot@users.noreply.github.com
+          git add launchpad.cryptoworldz.xyz/wallet-snapshots/pumpfun-api-profiles.latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record official Pump.fun API profile evidence [cancel-full-deploy]"
+            git push
+          fi
