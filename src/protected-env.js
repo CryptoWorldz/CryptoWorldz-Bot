@@ -3,6 +3,10 @@ const os = require("node:os");
 const path = require("node:path");
 
 const PROTECTED_DOMAIN = "cryptobotz.cryptoworldz.xyz";
+const RECOVERABLE_CREDENTIALS = new Set([
+  "OPENAI_API_KEY", "BOT_TOKEN", "DIPSHIT_BOT_TOKEN",
+  "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY", "SUPABASE_SECRET_KEY"
+]);
 
 function candidateEnvironmentFiles({ appRoot = path.join(__dirname, ".."), env = process.env, home = os.homedir() } = {}) {
   const files = [];
@@ -46,8 +50,8 @@ function loadProtectedEnvironment(options = {}) {
     const values = parseEnvironment(text);
     for (const [key, value] of Object.entries(values)) {
       const missing = !Object.prototype.hasOwnProperty.call(env, key);
-      const blankProtectedOpenAi = key === "OPENAI_API_KEY" && !String(env[key] || "").trim();
-      if (missing || blankProtectedOpenAi) env[key] = value;
+      const blankCredential = RECOVERABLE_CREDENTIALS.has(key) && !String(env[key] || "").trim();
+      if (missing || blankCredential) env[key] = value;
     }
     return { loaded: true, source: file === path.join(options.appRoot || path.join(__dirname, ".."), ".env") ? "release" : "protected" };
   }

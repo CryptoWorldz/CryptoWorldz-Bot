@@ -36,6 +36,19 @@ test("does not overwrite a nonblank managed OpenAI key", () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test("recovers blank server credentials without overriding managed values or blank feature settings", (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "zed-credentials-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const file = path.join(root, ".env");
+  fs.writeFileSync(file, "SUPABASE_SERVICE_ROLE_KEY=file-server-key\nBOT_TOKEN=file-bot\nDIPSHIT_BOT_TOKEN=file-dipshit\nAUTO_INTERNAL_TOKEN=file-auto\n");
+  const env = { ONEWORLDZ_ENV_FILE: file, SUPABASE_SERVICE_ROLE_KEY: "  ", BOT_TOKEN: "managed-bot", DIPSHIT_BOT_TOKEN: "", AUTO_INTERNAL_TOKEN: "" };
+  loadProtectedEnvironment({ appRoot: root, env, home: root });
+  assert.equal(env.SUPABASE_SERVICE_ROLE_KEY, "file-server-key");
+  assert.equal(env.BOT_TOKEN, "managed-bot");
+  assert.equal(env.DIPSHIT_BOT_TOKEN, "file-dipshit");
+  assert.equal(env.AUTO_INTERNAL_TOKEN, "");
+});
+
 test("candidate order prefers explicit override, then permanent protected root, then immutable release", () => {
   const env = { ONEWORLDZ_ENV_FILE: "/explicit/.env", HOME: "/runtime/home", USER: "account", LOGNAME: "account" };
   assert.deepEqual(candidateEnvironmentFiles({ appRoot: "/home/account/domains/cryptobotz.cryptoworldz.xyz/nodejs/.builds/release/source", env, home: "/home/account" }), [
