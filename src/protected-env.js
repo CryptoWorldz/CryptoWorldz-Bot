@@ -4,7 +4,7 @@ const path = require("node:path");
 
 const PROTECTED_DOMAIN = "cryptobotz.cryptoworldz.xyz";
 const RECOVERABLE_CREDENTIALS = new Set([
-  "OPENAI_API_KEY", "BOT_TOKEN", "DIPSHIT_BOT_TOKEN",
+  "OPENAI_API_KEY", "BOT_TOKEN", "DIPSHIT_BOT_TOKEN", "JUPITER_API_KEY",
   "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY", "SUPABASE_SECRET_KEY"
 ]);
 
@@ -44,18 +44,19 @@ function parseEnvironment(text) {
 
 function loadProtectedEnvironment(options = {}) {
   const env = options.env || process.env;
+  let firstSource = null;
   for (const file of candidateEnvironmentFiles({ ...options, env })) {
     let text;
     try { text = fs.readFileSync(file, "utf8"); } catch { continue; }
     const values = parseEnvironment(text);
+    if (!firstSource) firstSource = file === path.join(options.appRoot || path.join(__dirname, ".."), ".env") ? "release" : "protected";
     for (const [key, value] of Object.entries(values)) {
       const missing = !Object.prototype.hasOwnProperty.call(env, key);
       const blankCredential = RECOVERABLE_CREDENTIALS.has(key) && !String(env[key] || "").trim();
       if (missing || blankCredential) env[key] = value;
     }
-    return { loaded: true, source: file === path.join(options.appRoot || path.join(__dirname, ".."), ".env") ? "release" : "protected" };
   }
-  return { loaded: false, source: "none" };
+  return { loaded: Boolean(firstSource), source: firstSource || "none" };
 }
 
 module.exports = { PROTECTED_DOMAIN, candidateEnvironmentFiles, loadProtectedEnvironment, parseEnvironment };
