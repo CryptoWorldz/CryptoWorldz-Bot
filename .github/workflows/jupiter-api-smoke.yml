@@ -1,0 +1,48 @@
+name: Jupiter API read-only smoke test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  jupiter-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check Jupiter Price V3 API authentication (no swaps)
+        env:
+          JUPITER_API_KEY: ${{ secrets.JUPITER_API_KEY }}
+        run: |
+          node --input-type=module <<'NODE'
+          const key = process.env.JUPITER_API_KEY;
+          if (!key) {
+            console.error('JUPITER_API_KEY is not available to this workflow. Confirm repository/environment secret scope.');
+            process.exit(1);
+          }
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 15000);
+          try {
+            const url = 'https://api.jup.ag/price/v3?ids=So11111111111111111111111111111111111111112';
+            const response = await fetch(url, {
+              headers: { 'x-api-key': key, 'accept': 'application/json' },
+              signal: controller.signal
+            });
+            if (!response.ok) {
+              console.error('Jupiter Price V3 returned HTTP ' + response.status + '. No response body or key was logged.');
+              process.exit(1);
+            }
+            const data = await response.json();
+            if (!data || typeof data !== 'object' || !data['So11111111111111111111111111111111111111112']) {
+              console.error('Jupiter responded successfully, but expected SOL price data was missing.');
+              process.exit(1);
+            }
+            console.log('PASS: Jupiter API authenticated and SOL price data returned. No wallet, signing, or trade involved.');
+          } catch (error) {
+            console.error('Jupiter request failed: ' + (error?.name === 'AbortError' ? 'timeout' : 'network or response error'));
+            process.exit(1);
+          } finally {
+            clearTimeout(timer);
+          }
+          NODE
