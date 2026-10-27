@@ -2,6 +2,8 @@ name: Jupiter API read-only smoke test
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
   push:
     branches: [main]
     paths:
@@ -34,7 +36,7 @@ jobs:
               signal: controller.signal
             });
             if (!response.ok) {
-              console.error('Jupiter Price V3 returned HTTP ' + response.status + '. No response body or key was logged.');
+              console.error('Jupiter Price V3 HTTP ' + response.status + (response.status === 401 || response.status === 403 ? ': authentication or permission denied' : response.status === 429 ? ': rate limit reached' : response.status >= 500 ? ': upstream service error' : ': request rejected') + '. No response body or key was logged.');
               process.exit(1);
             }
             const data = await response.json();
