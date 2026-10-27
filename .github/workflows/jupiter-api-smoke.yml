@@ -2,6 +2,10 @@ name: Jupiter API read-only smoke test
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/jupiter-api-smoke.yml'
 
 permissions:
   contents: read
