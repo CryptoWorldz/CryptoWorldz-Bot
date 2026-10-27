@@ -7,12 +7,12 @@ const {
 
 const DEFAULT_RPC = "https://api.mainnet-beta.solana.com";
 
-async function getJson(url, timeoutMs = 12000) {
+async function getJson(url, timeoutMs = 12000, extraHeaders = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(url, {
-      headers: { "user-agent": "WorldzScan/1.0" },
+      headers: { "user-agent": "WorldzScan/1.0", ...extraHeaders },
       signal: controller.signal
     });
     const text = await response.text();
@@ -74,11 +74,13 @@ async function dexOrders(chain, address) {
   }
 }
 
-async function jupiterToken(address) {
+async function jupiterToken(address, apiKey = process.env.JUPITER_API_KEY) {
+  if (!apiKey) return null;
   try {
-    const rows = await getJson(`https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(address)}`);
+    const rows = await getJson(`https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(address)}`, 12000, { "x-api-key": apiKey });
     if (!Array.isArray(rows)) return null;
-    return rows.find((row) => row.id === address || row.address === address) || rows[0] || null;
+    // A search suggestion for another mint must never be assigned to the requested token.
+    return rows.find((row) => row.id === address || row.address === address) || null;
   } catch {
     return null;
   }
@@ -152,7 +154,7 @@ async function scanToken(target, options = {}) {
   const [pairs, orders, jupiter, mint] = await Promise.all([
     dexPairs(chain, address),
     dexOrders(chain, address),
-    chain === "solana" ? jupiterToken(address) : Promise.resolve(null),
+    chain === "solana" ? jupiterToken(address, options.jupiterApiKey ?? process.env.JUPITER_API_KEY) : Promise.resolve(null),
     chain === "solana" ? solanaMintEvidence(address, rpcUrl) : Promise.resolve(null)
   ]);
   const pair = bestPair(pairs);
@@ -234,7 +236,7 @@ function registerWorldzScan({ bot, config, supabase, env = process.env }) {
       if (!(await available(message))) return send(message, "⏸ WorldzScan is switched off or paused by Emergency Lockdown.");
       const target = parseScanTarget(match?.[1]);
       if (!target) return send(message, "🔎 Use /scan TOKEN_ADDRESS or /scan CHAIN TOKEN_ADDRESS\nExample: /scan solana MINT");
-      const scan = await scanToken(target, { rpcUrl });
+      const scan = await scanToken(target, { rpcUrl, jupiterApiKey: env.JUPITER_API_KEY });
       if (isGroup(message)) await recordAnalytics(supabase, message.chat.id, message.from.id, "token_scan", { chain: target.chain, address: target.address });
       return send(message, scanText(scan), pairKeyboard(scan));
     } catch (error) {
@@ -249,7 +251,7 @@ function registerWorldzScan({ bot, config, supabase, env = process.env }) {
       const raw = String(match?.[1] || "").trim();
       if (!raw) return send(message, "🔎 /scan20 accepts up to 20 items.\nUse CHAIN:ADDRESS separated by spaces/commas, or bare Solana mints.");
       const tokens = raw.split(/[\s,]+/).filter(Boolean).slice(0, 20).map((item) => parseScanTarget(item));
-      const rows = await mapLimit(tokens, 4, (target) => scanToken(target, { rpcUrl }));
+      const rows = await mapLimit(tokens, 4, (target) => scanToken(target, { rpcUrl, jupiterApiKey: env.JUPITER_API_KEY }));
       const lines = rows.map((row, index) => row?.error ? `${index + 1}. ❌ ${row.target?.address || "scan failed"}` : `${index + 1}. ${compactScan(row)}`);
       if (isGroup(message)) await recordAnalytics(supabase, message.chat.id, message.from.id, "token_scan20", { count: tokens.length });
       return send(message, `🔎 WORLDZSCAN™ ×${tokens.length}\n\n${lines.join("\n")}\n\nUse /scan ADDRESS for full evidence on one token.`);
