@@ -43,7 +43,7 @@ jobs:
           from pathlib import Path,PurePosixPath
           src=Path('launchpad.cryptoworldz.xyz')
           target=PurePosixPath('domains/worldzlaunch.com/public_html')
-          ftp=FTP_TLS(context=ssl.create_default_context())
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
           ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=30)
           ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
           ftp.prot_p();ftp.set_pasv(True)
