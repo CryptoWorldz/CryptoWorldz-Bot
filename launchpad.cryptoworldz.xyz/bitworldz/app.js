@@ -1,4 +1,8 @@
 const ROUTES = [
+  {key:"bitcoin-native",name:"Bitcoin L1",status:"RESEARCH",note:"Native BTC and UTXO settlement; separate token protocol required."},
+  {key:"bitcoin-runes",name:"Bitcoin Runes",status:"PROTOCOL EVALUATION",note:"Bitcoin-native fungible assets; no EVM contract assumption."},
+  {key:"bitcoin-stacks",name:"Stacks Bitcoin layer",status:"PROTOCOL EVALUATION",note:"Clarity contracts and distinct security model."},
+  {key:"bitcoin-lightning",name:"Lightning payments",status:"PAYMENT RESEARCH",note:"BTC payments, not a token launch mechanism."},
   {key:"solana",name:"Solana",status:"DEVNET FIRST",note:"BTC representation + Meteora/Raydium-compatible BitPair research."},
   {key:"ethereum",name:"Ethereum",status:"TESTNET RESEARCH",note:"Shared EVM adapter + approved ERC-20 BTC representation."},
   {key:"base",name:"Base",status:"TESTNET RESEARCH",note:"Shared EVM adapter + chain-local BTC quote asset."},
@@ -56,6 +60,8 @@ function buildIntent() {
       verificationStatus: id ? "UNVERIFIED_INPUT" : "MISSING_ID"
     },
     venue: clean(venue.value, 120) || null,
+    bitcoinNativeProtocolResearch: chain.value.startsWith("bitcoin-"),
+    tokenLaunchExecutionAvailable: false,
     economics: {
       targetGrossTraderFeeBps: 75,
       dynamicFee: false,

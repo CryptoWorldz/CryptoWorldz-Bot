@@ -1,0 +1,63 @@
+{
+  "version": "BITWORLDZ-BITCOIN-RAILS-V1",
+  "status": "RESEARCH_AND_TESTNET_ONLY",
+  "mainnetExecutionEnabled": false,
+  "routes": [
+    {
+      "key": "bitcoin-native",
+      "label": "Native Bitcoin",
+      "family": "UTXO",
+      "asset": "BTC",
+      "mechanism": "Bitcoin L1 transactions; token issuance requires separately selected protocol",
+      "phase": "RESEARCH",
+      "launchEnabled": false
+    },
+    {
+      "key": "bitcoin-lightning",
+      "label": "Lightning BTC payments",
+      "family": "Lightning",
+      "asset": "BTC",
+      "mechanism": "Bitcoin payment rail, not token creation or a BTC liquidity pool",
+      "phase": "RESEARCH",
+      "launchEnabled": false
+    },
+    {
+      "key": "bitcoin-stacks",
+      "label": "Stacks Bitcoin layer",
+      "family": "Stacks",
+      "asset": "STX gas / BTC-connected",
+      "mechanism": "Clarity smart contracts, distinct consensus/security and settlement assumptions",
+      "phase": "PROTOCOL_EVALUATION",
+      "launchEnabled": false
+    },
+    {
+      "key": "bitcoin-runes",
+      "label": "Bitcoin Runes",
+      "family": "UTXO protocol",
+      "asset": "BTC gas",
+      "mechanism": "Runes fungible asset issuance/transfer, not EVM contracts",
+      "phase": "PROTOCOL_EVALUATION",
+      "launchEnabled": false
+    },
+    {
+      "key": "bitcoin-wrapped",
+      "label": "Verified BTC representations",
+      "family": "SVM/EVM/Move/XRPL",
+      "asset": "CHAIN_SPECIFIC",
+      "mechanism": "Chain-local Bitcoin representation with custody, redemption and liquidity verification",
+      "phase": "EXISTING_BITPAIR_LAB",
+      "launchEnabled": false
+    }
+  ],
+  "proofRequired": [
+    "exact chain and network",
+    "asset contract/mint or native protocol identifier",
+    "verified asset provenance and redemption model",
+    "fee and gas estimates",
+    "simulation/testnet transaction IDs",
+    "token authority and supply proof",
+    "market liquidity and buy/sell receipts",
+    "independent security review",
+    "explicit mainnet release"
+  ]
+}
