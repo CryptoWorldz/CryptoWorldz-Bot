@@ -14,3 +14,18 @@ body{background:radial-gradient(ellipse at 50% 0%,#35105e 0%,#100720 42%,#05030b
 .worldz-mobile-menu .mobile-icon{font-size:1.5rem!important}
 .worldz-mobile-menu details{margin-top:14px!important}
 @media(min-width:701px){.worldz-mobile-menu{max-width:780px;margin:auto!important}.worldz-mobile-menu .mobile-link{max-width:650px;margin:10px auto!important}}
+
+/* Keep the app functional but make first-screen navigation immediate. */
+.topbar .brand-logo-official{width:48px!important;height:48px!important;background-size:contain!important}
+.worldz-mobile-menu .advanced-links{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.worldz-mobile-menu .advanced-links a{border:1px solid #806a9a!important}
+@media(max-width:700px){
+ .topbar{min-height:70px!important}
+ .topbar .brand{gap:8px!important}
+ .hero{padding-top:12px!important}
+ .worldz-mobile-menu{padding:18px 14px!important}
+ .worldz-mobile-menu h2{font-size:clamp(1.8rem,8vw,2.5rem)!important}
+ .worldz-mobile-menu .mobile-link{min-height:62px!important;padding:10px 14px!important}
+ .worldz-mobile-menu .mobile-link strong{font-size:1.08rem!important}
+ .worldz-mobile-menu .mobile-link small{font-size:.78rem!important}
+}
