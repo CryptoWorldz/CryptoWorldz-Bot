@@ -1,0 +1,87 @@
+name: Deploy WorldzLaunch.com Mirror
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'launchpad.cryptoworldz.xyz/**'
+      - '.github/workflows/deploy-worldzlaunch-com.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldzlaunch-com-mirror
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+      TARGET_DOMAIN: worldzlaunch.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify existing launchpad source
+        run: |
+          test -s launchpad.cryptoworldz.xyz/index.html
+          test -s launchpad.cryptoworldz.xyz/app.js
+          test -s launchpad.cryptoworldz.xyz/platform-config.json
+          python scripts/validate_worldz_token_identity.py
+      - name: Upload launchpad mirror to WorldzLaunch.com with FTPS
+        shell: python
+        run: |
+          import os,ssl,secrets,hashlib
+          from ftplib import FTP_TLS,error_perm
+          from pathlib import Path,PurePosixPath
+          src=Path('launchpad.cryptoworldz.xyz')
+          target=PurePosixPath('domains/worldzlaunch.com/public_html')
+          ftp=FTP_TLS(context=ssl.create_default_context())
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=30)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p();ftp.set_pasv(True)
+          def cd(path):
+              ftp.cwd('/')
+              for component in path.parts:
+                  if component in ('','/'):continue
+                  try:ftp.cwd(component)
+                  except error_perm:
+                      ftp.mkd(component);ftp.cwd(component)
+          count=0
+          for source in sorted(src.rglob('*')):
+              if not source.is_file():continue
+              rel=PurePosixPath(source.relative_to(src).as_posix())
+              cd(target/rel.parent)
+              tmp='.worldz-deploy-'+secrets.token_hex(8)+'-'+rel.name
+              with source.open('rb') as f:ftp.storbinary('STOR '+tmp,f)
+              try:ftp.rename(tmp,rel.name)
+              except error_perm:
+                  ftp.delete(rel.name);ftp.rename(tmp,rel.name)
+              count+=1
+          cd(target)
+          received=bytearray()
+          ftp.retrbinary('RETR index.html',received.extend)
+          expected=hashlib.sha256((src/'index.html').read_bytes()).hexdigest()
+          actual=hashlib.sha256(received).hexdigest()
+          assert expected==actual,'remote homepage differs from repository'
+          print(f'WORLDZLAUNCH_COM_UPLOAD=PASS count={count} sha256={actual}')
+          ftp.quit()
+      - name: Verify public HTTPS WorldzLaunch.com
+        shell: python
+        run: |
+          import urllib.request
+          base='https://worldzlaunch.com/'
+          for path in ('','app.js','platform-config.json'):
+              request=urllib.request.Request(base+path,headers={'User-Agent':'WorldzLaunch-Deploy-Verify/1.0','Cache-Control':'no-cache'})
+              with urllib.request.urlopen(request,timeout=25) as response:
+                  body=response.read()
+                  assert response.status==200 and len(body)>100,(path,response.status,len(body))
+                  if path=='':assert b'WORLDZ' in body.upper(),'missing Worldz homepage content'
+          print('WORLDZLAUNCH_COM_HTTPS=PASS')
