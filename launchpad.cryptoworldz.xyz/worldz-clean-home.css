@@ -1,0 +1,16 @@
+/* WORLDZ launchpad: concise mobile-first entry; preserve legacy app routes. */
+body{background:radial-gradient(ellipse at 50% 0%,#35105e 0%,#100720 42%,#05030b 100%)!important}
+.topbar{position:relative!important;display:flex!important;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px!important;background:#090513!important;border-bottom:1px solid #a18bb5!important}
+.topbar nav{display:none!important}.topbar .brand{font-size:clamp(15px,3.5vw,23px)!important}.topbar .wallet-mini{flex-shrink:0;max-width:45vw}
+.hero{min-height:0!important;padding:28px 16px 24px!important;display:block!important;background:radial-gradient(ellipse at top,#63209a33,transparent 65%)!important}
+.hero>*:not(.hero-copy){display:none!important}
+.hero-copy{width:100%!important;max-width:980px!important;margin:auto!important}
+.hero-copy>.kicker,.hero-copy>h1,.hero-copy>.lead,.hero-copy>.hero-actions{display:none!important}
+.worldz-mobile-menu{display:block!important;margin:0!important;padding:clamp(20px,5vw,44px)!important;border-radius:20px!important;background:linear-gradient(150deg,#240c40e8,#0c061bfa)!important;border:1px solid #9b83b9!important;box-shadow:0 15px 50px #0009!important}
+.worldz-mobile-menu h2{font-size:clamp(2rem,7vw,3.7rem)!important;line-height:1.08!important;color:#f8f4ff!important}
+.worldz-mobile-menu .mobile-subtitle{color:#b9dfff!important;letter-spacing:.05em!important}
+.worldz-mobile-menu .mobile-link{min-height:64px!important;margin:10px 0!important;border-radius:12px!important;border:1px solid #a28abb!important;background:#1c1033!important;box-shadow:none!important}
+.worldz-mobile-menu .mobile-link.primary{background:linear-gradient(100deg,#7927d2,#4b138a)!important;border-color:#c6a4ef!important}
+.worldz-mobile-menu .mobile-icon{font-size:1.5rem!important}
+.worldz-mobile-menu details{margin-top:14px!important}
+@media(min-width:701px){.worldz-mobile-menu{max-width:780px;margin:auto!important}.worldz-mobile-menu .mobile-link{max-width:650px;margin:10px auto!important}}
