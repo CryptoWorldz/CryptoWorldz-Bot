@@ -76,12 +76,21 @@ jobs:
       - name: Verify public HTTPS WorldzLaunch.com
         shell: python
         run: |
-          import urllib.request
+          import urllib.request, hashlib, json
+          from pathlib import Path
           base='https://worldzlaunch.com/'
-          for path in ('','app.js','platform-config.json'):
+          paths=('', 'app.js', 'platform-config.json', 'style.css', 'launch-station/index.html', 'mint/index.html')
+          for path in paths:
               request=urllib.request.Request(base+path,headers={'User-Agent':'WorldzLaunch-Deploy-Verify/1.0','Cache-Control':'no-cache'})
               with urllib.request.urlopen(request,timeout=25) as response:
                   body=response.read()
                   assert response.status==200 and len(body)>100,(path,response.status,len(body))
+                  local=Path('launchpad.cryptoworldz.xyz')/(path or 'index.html')
+                  assert local.is_file(),f'missing local source: {local}'
+                  expected=hashlib.sha256(local.read_bytes()).hexdigest()
+                  actual=hashlib.sha256(body).hexdigest()
+                  assert expected==actual,f'public file differs from repository: {path}'
                   if path=='':assert b'WORLDZ' in body.upper(),'missing Worldz homepage content'
-          print('WORLDZLAUNCH_COM_HTTPS=PASS')
+                  if path=='platform-config.json':assert json.loads(body)['publicLaunchPad'] is True
+                  print(f'WORLDZLAUNCH_PUBLIC_MATCH path={path or "index.html"} sha256={actual}')
+          print('WORLDZLAUNCH_COM_HTTPS=PASS files='+str(len(paths)))
