@@ -1,90 +1,53 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#05020b">
-  <meta name="description" content="WorldzLaunchPad™ — build, simulate, test and prepare token launches with transparent fees, locks, vesting, CrossPair and multi-chain architecture.">
-  <title>WorldzLaunchPad™ | Build • Prove • Launch</title>
-  <link rel="stylesheet" href="/style.css?v=20261026-worldz-mobile-quality-v2">
-  <style>
-  .worldz-mobile-menu{display:none}
-  @media(max-width:700px){
-    .hero .hero-actions{display:none!important}
-    .worldz-mobile-menu{display:block;padding:20px 14px 28px;margin:10px 0 20px;border-radius:24px;background:radial-gradient(circle at 50% 0%,#7e21d744,transparent 60%),linear-gradient(160deg,#1d073d,#100725 80%);border:1px solid #a76aff66;color:#fff}
-    .worldz-mobile-menu h2{text-align:center;font-size:clamp(1.8rem,8vw,2.6rem);margin:0;color:#f5eaff;letter-spacing:.02em}
-    .worldz-mobile-menu .mobile-subtitle{text-align:center;color:#e3c6ff;margin:6px 0 20px;font-weight:600;letter-spacing:.08em;font-size:.78rem}
-    .worldz-mobile-menu .mobile-link{display:flex;align-items:center;gap:16px;min-height:86px;padding:16px;margin:12px 0;border:1px solid #b76bff;border-radius:21px;background:linear-gradient(115deg,#41106f,#220a42);color:#fff;text-decoration:none;box-shadow:0 4px 20px #a335f622}
-    .worldz-mobile-menu .mobile-link.primary{background:linear-gradient(120deg,#aa27f5,#6510b9);border-color:#e2a3ff}
-    .worldz-mobile-menu .mobile-icon{font-size:2rem;flex:0 0 42px;text-align:center}
-    .worldz-mobile-menu .mobile-link strong{display:block;font-size:clamp(1.1rem,5vw,1.45rem);line-height:1.2}
-    .worldz-mobile-menu .mobile-link small{display:block;color:#e9d8f6;font-size:.87rem;margin-top:5px;line-height:1.3}
-    .worldz-mobile-menu details{margin-top:18px;border:1px solid #a76aff88;border-radius:14px;padding:12px}
-    .worldz-mobile-menu summary{cursor:pointer;font-weight:700;text-align:center}
-    .worldz-mobile-menu .advanced-links{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}
-    .worldz-mobile-menu .advanced-links a{padding:12px 8px;border-radius:10px;background:#351453;color:#fff;text-decoration:none;text-align:center;font-size:.85rem}
-  }
-  </style>
-  <style id="worldz-navigation-v1">
-    .topbar{gap:12px}
-    .topbar .worldz-nav{display:flex!important;justify-content:flex-end;gap:8px;flex:1;min-width:0}
-    .worldz-nav-primary{white-space:nowrap}
-    .worldz-menu{position:relative;order:3;flex-shrink:0}
-    .topbar .wallet-mini{order:2;flex-shrink:0}
-    .worldz-menu>summary{list-style:none;cursor:pointer;user-select:none;display:flex;align-items:center;gap:7px;padding:10px 13px;border:1px solid #b783ed80;border-radius:12px;background:#240b3f;color:#f9f3ff;font-weight:800}
-    .worldz-menu>summary::-webkit-details-marker{display:none}
-    .worldz-menu[open]>summary{border-color:#c990ff;background:#41146b}
-    .worldz-menu-panel{position:absolute;right:0;top:calc(100% + 12px);width:min(740px,calc(100vw - 24px));max-height:min(76vh,720px);overflow:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:20px;border:1px solid #a76aff99;border-radius:18px;background:linear-gradient(150deg,#1b0834,#080414);box-shadow:0 20px 60px #000b;z-index:250}
-    .worldz-menu-panel section{min-width:0}
-    .worldz-menu-panel h2{margin:0 0 8px;color:#e6caff;font-size:1rem}
-    .worldz-menu-panel a{display:block;padding:7px 4px;color:#eee7f7;text-decoration:none;font-size:.87rem;line-height:1.35;border-radius:5px}
-    .worldz-menu-panel a:hover,.worldz-menu-panel a:focus-visible{background:#7936ba55;color:white}
-    @media(max-width:850px){.topbar .worldz-nav{display:none!important}.topbar .brand{margin-right:auto}}
-    @media(max-width:560px){.topbar{gap:7px;padding-left:9px;padding-right:9px}.topbar .brand span:last-child{font-size:.72rem}.worldz-menu>summary{padding:9px}.worldz-menu>summary span{display:none}.worldz-menu-panel{width:calc(100vw - 18px);right:-9px;grid-template-columns:repeat(2,minmax(0,1fr));padding:14px;gap:15px}.topbar .wallet-mini{font-size:.67rem;padding:9px 8px}}
-    @media(max-width:370px){.topbar .brand span:last-child{font-size:.63rem}.worldz-menu-panel{grid-template-columns:1fr}}
-  </style>
-<style id="worldz-wallet-picker-style">
-.worldz-wallet-dialog{max-width:min(480px,calc(100vw - 24px));width:100%;max-height:85vh;overflow:auto;border:1px solid #ab69ef;border-radius:22px;background:linear-gradient(150deg,#240b42,#090413);color:#f9f4ff;padding:24px;box-shadow:0 25px 80px #000c}
-.worldz-wallet-dialog::backdrop{background:#020008b8}
-.worldz-wallet-dialog h2{margin:0 0 8px}.worldz-wallet-dialog h3{margin:15px 0 6px;font-size:1rem;color:#dfb8ff}
-.worldz-wallet-dialog p{color:#d3c3e0;line-height:1.4}
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090417">
+<meta name="description" content="WorldzLaunchPad — create a crypto token, explore launches, and build with transparent tools.">
+<title>WorldzLaunchPad™ — Create. Explore. Build.</title>
+<link rel="stylesheet" href="/style.css?v=20261030-clean-home">
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#090417;color:#f6f1ff;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+body{background:radial-gradient(ellipse at 50% 15%,#51238d66 0%,transparent 48%),radial-gradient(circle at 90% 80%,#153a7750,transparent 36%),#090417}
+.topbar{display:flex;align-items:center;gap:18px;padding:16px clamp(16px,4vw,64px);border-bottom:1px solid #bca6db40;background:#0d061bbd}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;font-weight:850;white-space:nowrap}
+.brand-logo-official{width:48px;height:48px;flex:0 0 48px}
+.main-nav{display:flex;align-items:center;gap:18px;margin-left:auto}
+.main-nav>a{color:#e9dafa;text-decoration:none;font-weight:700}
+.worldz-menu{position:relative}
+.worldz-menu summary{cursor:pointer;list-style:none;padding:10px 14px;border:1px solid #a88ac8;border-radius:10px;background:#281344;font-weight:700}
+.worldz-menu summary::-webkit-details-marker{display:none}
+.worldz-menu-panel{position:absolute;right:0;top:calc(100% + 10px);z-index:30;min-width:240px;max-height:70vh;overflow:auto;padding:12px;border:1px solid #a88ac8;border-radius:12px;background:#1b0b34;box-shadow:0 20px 40px #0009}
+.worldz-menu-panel a{display:block;padding:10px;color:#f6edff;text-decoration:none;border-radius:6px}
+.worldz-menu-panel a:hover{background:#52247e}
+.wallet-mini{padding:11px 15px;background:#5e2699;border:1px solid #bf9eea;border-radius:10px;color:#fff;font-weight:750;cursor:pointer}
+main{min-height:calc(100svh - 160px);display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 20px}
+.hero-copy{max-width:790px}
+.eyebrow{font-size:.82rem;letter-spacing:.19em;color:#c8a6fa;font-weight:800}
+h1{font-size:clamp(3.2rem,9vw,7rem);line-height:1.02;margin:20px 0;letter-spacing:-.055em;color:#fff}
+h1 span{color:#d3b2ff}
+.lead{max-width:610px;margin:0 auto 32px;font-size:clamp(1.05rem,2.4vw,1.3rem);line-height:1.6;color:#e0d4ee}
+.hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.hero-actions a{display:inline-flex;justify-content:center;align-items:center;min-width:195px;padding:16px 22px;border-radius:12px;font-weight:850;text-decoration:none}
+.primary-action{background:#8539dc;color:white;border:1px solid #c695ff}
+.secondary-action{background:#160b2b;color:#f7eeff;border:1px solid #a78bc9}
+footer{padding:20px;text-align:center;border-top:1px solid #bca6db40;color:#b9a8cb;font-size:.85rem}
+.worldz-wallet-dialog{max-width:min(480px,calc(100vw - 24px));width:100%;max-height:85vh;overflow:auto;border:1px solid #ab69ef;border-radius:22px;background:#240b42;color:#fff;padding:24px}
+.worldz-wallet-dialog::backdrop{background:#020008bb}
 .worldz-wallet-dialog .worldz-wallet-options{display:grid;gap:8px}
-.worldz-wallet-dialog .worldz-wallet-options button{width:100%;text-align:left;padding:12px 14px;border:1px solid #aa66dd70;border-radius:12px;background:#3b165d;color:white;font:inherit;cursor:pointer}
-.worldz-wallet-dialog .worldz-wallet-options button:hover:not(:disabled){background:#5d2789}
-.worldz-wallet-dialog .worldz-wallet-options button:disabled{opacity:.55;cursor:not-allowed}
-.worldz-wallet-dialog .worldz-wallet-close{float:right;background:transparent;color:white;border:1px solid #86619e;border-radius:9px;padding:7px 10px;cursor:pointer}
-</style><style id="worldz-clean-home-v1">
-/* Homepage only: keep the launch decision simple; detailed tools remain in Menu. */
-main#top > :not(.hero){display:none!important}
-.hero .truth-strip,.hero .worldz-mobile-menu{display:none!important}
-.hero{min-height:min(76vh,700px);display:flex;align-items:center;justify-content:center;padding:clamp(36px,7vw,100px) 20px!important;text-align:center}
-.hero-copy{width:min(100%,840px);max-width:840px;margin:auto}
-.hero h1{font-size:clamp(3rem,9vw,7rem);line-height:1.03}
-.hero .lead{max-width:620px;margin:20px auto 28px}
-.hero .hero-actions{display:flex!important;justify-content:center;flex-wrap:wrap;gap:12px}
-.hero .hero-actions .btn{min-width:170px}
-@media(max-width:700px){.hero{min-height:68vh}.hero .hero-actions{display:flex!important;flex-direction:column;align-items:stretch}.hero .hero-actions .btn{width:100%}}
-</style>
-</head>
-<body>
+.worldz-wallet-dialog .worldz-wallet-options button{padding:12px;text-align:left;border:1px solid #aa66dd70;border-radius:10px;background:#3b165d;color:white;cursor:pointer}
+.worldz-wallet-dialog button:disabled{opacity:.5}
+.worldz-wallet-close{float:right;background:transparent;color:#fff;border:1px solid #86619e;border-radius:9px;padding:7px 10px;cursor:pointer}
+@media(max-width:740px){.topbar{gap:8px;padding:12px}.brand span:last-child{font-size:.8rem}.brand-logo-official{width:38px;height:38px;flex-basis:38px}.main-nav>a{display:none}.main-nav{gap:8px}.wallet-mini{font-size:.75rem;padding:10px 8px}.worldz-menu summary{padding:10px 9px}main{padding:60px 18px}.hero-actions{flex-direction:column}.hero-actions a{width:100%}}
+@media(max-width:400px){.brand span:last-child{font-size:.67rem}}
+</style></head><body>
 <header class="topbar">
-  <a class="brand" href="#top" aria-label="WorldzLaunchPad home"><span class="brand-logo-official" aria-hidden="true"></span><span>WorldzLaunchPad™</span></a>
-  <nav class="worldz-nav" aria-label="Primary">
-    <a class="worldz-nav-primary" href="/create-your-own-money/">Create Token</a>
-    <a class="worldz-nav-primary" href="#explore">Explore Launches</a>
-  </nav>
-  <details class="worldz-menu" id="worldz-menu">
-    <summary aria-label="Open WorldzLaunchPad navigation">☰ <span>Menu</span></summary>
-    <div class="worldz-menu-panel" aria-label="WorldzLaunchPad sections">
-      <section><h2>🚀 Launch</h2><a href="/create-your-own-money/">Create Token</a><a href="/launch-station/">Launch Station</a><a href="/mint/">WorldzMINT</a><a href="/deploy/">Deploy Token</a><a href="/worldz-launch/">Launch Pack</a></section>
-      <section><h2>💎 Trade</h2><a href="/invest/">Explore &amp; Invest</a><a href="/revenue/">Revenue</a><a href="/worlddexpush/">WorldDexPush</a><a href="/economics/">Fee Flow</a></section>
-      <section><h2>🌐 Chains</h2><a href="/integrations/">Integrations</a><a href="/xrpl/">XRPL Testnet</a><a href="/evm/">EVM Testnet</a><a href="/omnichain/">OmniChain</a><a href="/bitworldz/">BitWorldz</a></section>
-      <section><h2>🛠️ Build</h2><a href="/developers/">Developers</a><a href="/worldz-people/">Dev City &amp; Wallets</a><a href="/fullbuild/">FullBuild</a><a href="/fullscope/">FullScope</a><a href="/devnet/">Devnet</a><a href="/curve/">Curve Devnet</a><a href="/curve-pro/">Curve Pro</a></section>
-      <section><h2>👥 Community</h2><a href="/community/">Community</a><a href="#founding100">Founding 100</a><a href="/community-suite/">Command Centre Plans</a><a href="/advertise/">Advertise</a><a href="/onedrop/">OneDrop</a><a href="/x-save/">X-SAVE</a></section>
-      <section><h2>📚 Learn &amp; Safety</h2><a href="/chatgpt-token-design/">Token Design</a><a href="/launch-calculators/">Calculators</a><a href="/trust/">Trust Orbit</a><a href="#safe-standard">Safe Launch Rules</a><a href="/capabilities/">Capabilities</a><a href="/transaction-help/">Transaction Help</a><a href="/technology.html">Technology</a><a href="/inheritance/">Inheritance</a><a href="#proof">Proof</a><a href="#crosspair">CrossPair</a></section>
-    </div>
-  </details>
-  <button class="wallet-mini" id="wallet-mini" type="button">Connect Wallet</button>
+<a class="brand" href="/" aria-label="WorldzLaunchPad home"><span class="brand-logo-official" aria-hidden="true"></span><span>WorldzLaunchPad™</span></a>
+<nav class="main-nav" aria-label="Navigation"><a href="/create-your-own-money/">Create Token</a><a href="/invest/">Explore Launches</a>
+<details class="worldz-menu" id="worldz-menu"><summary>☰ Menu</summary><div class="worldz-menu-panel">
+<a href="/launch-station/">Launch Station</a><a href="/integrations/">Networks &amp; Integrations</a><a href="/xrpl/">XRPL Testnet</a><a href="/developers/">Developers</a><a href="/worldz-people/">Dev City</a><a href="/community/">Community</a><a href="/trust/">Safety &amp; Proof</a><a href="/revenue/">Revenue Tools</a>
+</div></details></nav>
+<button class="wallet-mini" id="wallet-mini" type="button">Connect Wallet</button>
   <dialog id="worldz-wallet-dialog" class="worldz-wallet-dialog" aria-labelledby="worldz-wallet-title">
     <form method="dialog"><button class="worldz-wallet-close" aria-label="Close wallet chooser">✕</button></form>
     <h2 id="worldz-wallet-title">Connect your wallet</h2>
@@ -105,449 +68,12 @@ main#top > :not(.hero){display:none!important}
     <p id="worldz-wallet-feedback" role="status" aria-live="polite"></p>
   </dialog>
 </header>
-
-<main id="top">
-  <section class="hero">
-    <div class="hero-copy">
-      <div class="kicker">PUBLIC TOKEN LAUNCHPAD • MULTI-CHAIN BY VERIFIED ADAPTER • OPEN TO EVERYONE</div>
-      <h1>LAUNCH<br><span>YOUR WORLD.</span></h1>
-      <p class="lead">Create your token. Set your supported trading fee. Build transparent tokenomics. Run the proof checks. WorldzLaunchPad™ is built for public creators — your project, your token, your community.</p>
-
-      <div class="worldz-mobile-menu" aria-label="WorldzLaunchPad mobile navigation">
-        <h2>WORLDZ LAUNCHPAD</h2><p class="mobile-subtitle">LAUNCH • BUILD • LEARN • HELP PEOPLE</p>
-        <a class="mobile-link primary" href="/create-your-own-money/"><span class="mobile-icon" aria-hidden="true">🚀</span><span><strong>Create Your Own Money</strong><small>Launch your token, step by step</small></span></a>
-        <a class="mobile-link" href="/launch-station/"><span class="mobile-icon" aria-hidden="true">🛠️</span><span><strong>Launch Station</strong><small>Manage your projects</small></span></a>
-        <a class="mobile-link" href="/community/"><span class="mobile-icon" aria-hidden="true">👥</span><span><strong>Community</strong><small>Join, learn and get support</small></span></a>
-        <a class="mobile-link" href="/revenue/"><span class="mobile-icon" aria-hidden="true">📈</span><span><strong>Build &amp; Grow</strong><small>Tools, integrations and revenue</small></span></a>
-        <a class="mobile-link" href="/invest/"><span class="mobile-icon" aria-hidden="true">💎</span><span><strong>Invest &amp; Launches</strong><small>Discover and research projects</small></span></a>
-        <details><summary>⚙️ Advanced Tools &amp; Features</summary><div class="advanced-links"><a href="/integrations/">Integrations</a><a href="/onedrop/">OneDrop</a><a href="/worldz-launch/">Launch Pack</a><a href="/trust/">Trust Passport</a><a href="/fullbuild/">FullBuild</a><a href="/fullscope/">FullScope</a><a href="/developers/">Developers</a><a href="/devnet/">Devnet</a><a href="/economics/">Fee Flow</a><a href="/technology.html">Technology</a></div></details>
-      </div>
-      <div class="hero-actions">
-        <a class="btn primary" href="/create-your-own-money/">Create Token →</a>
-        <a class="btn secondary" href="/invest/">Explore Launches</a>
-      </div>
-      <div class="truth-strip">
-        <span><b>3% • 5% • 8%</b> creator-selected WorldzLaunchPad contribution</span>
-        <span><b>97% • 95% • 92%</b> creator retention on eligible fee revenue</span>
-        <span><b>20% of Worldz share</b> Treasury • 50% Operations / 30% Miricle Team / 20% Purple Diamond Crew</span>
-        <span><b>1.00%</b> Worldz default project fee • 3.00% hard public cap</span>
-        <span><b>0.60%</b> disclosed genesis supply to Worldz multisigs • <b>0%</b> initial LP taken</span>
-      </div>
-    </div>
-  </section>
-
-  <section data-worldz-ad-slot="home_spotlight" aria-label="Sponsored Worldz Spotlight"></section>
-
-  <section class="section feature-section" id="create-your-own-money">
-    <div class="section-heading with-action">
-      <div>
-        <div class="section-kicker">WORLDZ CREATOR CAMPAIGN • SHARE IT WITH FAMILY + FRIENDS 💜</div>
-        <h2>CREATE YOUR OWN MONEY‼️*</h2>
-        <p><b>Your idea. Your token. Your community.</b> Start with the basics: name + symbol, blockchain, fixed supply, distribution, liquidity, purpose and public proof. Then build a draft token plan before you mint anything.</p>
-        <p><small>*Create your own crypto token. A token you create is not automatically legal tender, valuable, liquid or accepted by anyone.</small></p>
-      </div>
-      <a class="btn primary" href="/create-your-own-money/">BUILD MY TOKEN PLAN →</a>
-    </div>
-    <div class="feature-grid">
-      <article class="feature-card hero-card"><span>LEARN IT</span><h3>Understand what a token actually is.</h3><p>No developer vocabulary needed for the first lesson. Learn supply, distribution, liquidity and authority basics in plain English.</p></article>
-      <article class="feature-card"><span>DESIGN IT</span><h3>Invent the token before you mint it.</h3><p>The campaign Token Plan Builder creates a draft identity, purpose and sample allocation without requesting a wallet signature or creating a transaction.</p></article>
-      <article class="feature-card"><span>BUILD IT</span><h3>Move into Worldz Launch Station™.</h3><p>When the plan is ready, choose Mint New or Import Existing and continue through the Worldz proof and release gates.</p></article>
-    </div>
-  </section>
-
-  <section class="section feature-section" id="worldz-launch-now">
-    <div class="section-heading with-action">
-      <div><div class="section-kicker">WORLDZLAUNCHPAD™ GLOBAL LAUNCH PACK</div><h2>Launch the token. Run the community. Show the proof.</h2><p>WorldzLaunchPad™ now connects the creator launch stack to ZED LED Command Centre MAX™, the WLDZ Founding 100 allocation, official Worldz social accounts and Telegram communities.</p></div>
-      <a class="btn primary" href="/worldz-launch/">OPEN THE FULL LAUNCH PACK →</a>
-    </div>
-    <div class="feature-grid">
-      <article class="feature-card hero-card"><span>FOUNDING 100™</span><h3>100,000 WLDZ per qualified position.</h3><p>10,000,000 WLDZ is reserved across the first 100 qualified verified mainnet launch teams. One verified team receives one position.</p></article>
-      <article class="feature-card"><span>COMMAND CENTRE MAX™</span><h3>ZED-led crypto community operations.</h3><p>ZED • Ronald Raider • WorldzFullScope • Worldz Votes Centre • AUTO • G.R.A.C.E. • MAX • WorldPing • WorldzCast • WorldzLaunchPad.</p></article>
-      <article class="feature-card"><span>JOIN THE WORLDZ</span><h3>@WorldzLaunchPad • @CryptoWorldzX</h3><p>Connect through the official X network, CryptoWLDZ Telegram and CryptoWorldz Command Centre.</p></article>
-    </div>
-  </section>
-
-  <section class="network-strip" aria-label="WorldzLaunchPad chains">
-    <span class="network active">◎ Solana <b>BUILDING</b></span>
-    <span class="network active">◆ Ethereum <b>SEPOLIA BETA</b></span>
-    <span class="network active">◉ Base <b>SEPOLIA BETA</b></span>
-    <span class="network active">⬡ BNB <b>TESTNET BETA</b></span>
-    <span class="network active">R Robinhood <b>TESTNET BETA</b></span>
-    <span class="network active">X XRP Ledger <b>TESTNET BETA</b></span>
-    <span class="network">S Sui <b>NATIVE ADAPTER</b></span>
-  </section>
-
-  <section id="revenue-engine" class="section feature-section">
-    <div class="section-heading with-action">
-      <div>
-        <div class="section-kicker">WORLDZ REVENUE ENGINE™</div>
-        <h2>Launch usage becomes a transparent revenue engine.</h2>
-        <p>Worldz Fee Flow™ V3 is creator-first: after disclosed external venue/network deductions, creators retain 97% / 95% / 92% of eligible fee revenue and voluntarily contribute 3% / 5% / 8% to Worldz. Only the Worldz contribution is internally routed to operations, Treasury, LP growth, Legacy Core, Worldz-family buys, impact, builders, future infrastructure and referral. Production money movement remains fail-closed until its chain-native route is verified.</p>
-      </div>
-      <a class="btn primary" href="/revenue/">OPEN REVENUE ENGINE →</a>
-    </div>
-    <div class="feature-grid">
-      <article class="feature-card hero-card"><span>PLATFORM USAGE</span><h3>Launch fee module.</h3><p>Built as a separate configurable revenue source. It remains off until a public amount, asset and destination are explicitly approved and enforced.</p></article>
-      <article class="feature-card"><span>WORLDZ FEE FLOW V3</span><h3>BUILD 97/3 • GROW 95/5 • BOOST 92/8.</h3><p>The creator keeps the larger share. Worldz internally routes only its 3% / 5% / 8% contribution. The Treasury lane is 20% of the Worldz share, split 50% Operations / 30% Miricle Team / 20% Purple Diamond Crew.</p></article>
-      <article class="feature-card"><span>NO HIDDEN TAKE</span><h3>0% supply • 0% initial LP • 0% transfer tax.</h3><p>The revenue engine earns from disclosed platform usage rather than silently taking creator supply, initial liquidity or ordinary wallet transfers.</p></article>
-    </div>
-  </section>
-
-  <section id="investment-centre" class="section feature-section">
-    <div class="section-heading with-action">
-      <div>
-        <div class="section-kicker">WORLDZ INVESTMENT CENTRE™</div>
-        <h2>Research it. Track it. Prove it.</h2>
-        <p>Worldz now has a privacy-first investment research lane for portfolio modelling, chain comparison, wrapped-asset reserve proof and plain-English crypto learning. It does not promise that an asset will rise, and transaction execution remains separately gated.</p>
-      </div>
-      <a class="btn primary" href="/invest/">OPEN INVESTMENT CENTRE →</a>
-    </div>
-    <div class="feature-grid">
-      <article class="feature-card hero-card"><span>PORTFOLIO LAB</span><h3>Your model stays in your browser.</h3><p>Model XRP, wXRP, SOL, HYPE, Base, Robinhood Chain and SUI exposure without handing Worldz a wallet seed, exchange login or private key.</p></article>
-      <article class="feature-card"><span>1:1 RESERVE PROOF</span><h3>Backing claims need receipts.</h3><p>Reserve amount, issued supply, redemption, issuer/mint control and burn/reconciliation evidence are separate proof fields.</p></article>
-      <article class="feature-card"><span>LEARN THE NEXT WAVE</span><h3>Wallets • liquidity • custody • proof.</h3><p>Worldz can teach new crypto users what the die-hard communities already understand while keeping each chain's native design visible.</p></article>
-    </div>
-  </section>
-
-  <section id="confidence" class="section feature-section">
-    <div class="section-heading">
-      <div class="section-kicker">WORLDZ CONFIDENCE STACK™</div>
-      <h2>Mint it. Launch it. Measure it. Prove it.</h2>
-      <p><b>WorldzMINT™</b> creates a fixed-supply token. <b>Worldz Confidence Curve™</b> is the market-launch path. <b>Worldz Confidence Pulse™</b> measures genuine market evidence. <b>Worldz Confidence Constellation™</b> displays independent evidence markers. Trust Orbit keeps the Six Proof Rings underneath it all.</p>
-    </div>
-    <div class="feature-grid">
-      <a class="feature-card hero-card" href="/mint/"><span>WORLDZMINT™</span><h3>Fixed supply. Public proof.</h3><p>99.40% project supply + disclosed 0.60% Worldz multisig genesis share, exact allocations, and permanent Mint + Freeze authority revocation.</p></a>
-      <a class="feature-card" href="/mainnet/"><span>CONFIDENCE CURVE™</span><h3>Virtual price discovery → real liquidity.</h3><p>Meteora DBC market-launch architecture with real quote accounting and Worldz Fee Flow V3 with creator retention of 97% / 95% / 92% and a creator-selected 3% / 5% / 8% Worldz contribution. Mainnet remains fail-closed until release proof passes.</p></a>
-      <a class="feature-card" href="/trust/"><span>CONFIDENCE PULSE™</span><h3>Measure genuine activity.</h3><p>Matched organic volume, organic buyers, liquidity, market cap, holder concentration and Jupiter market signals.</p></a>
-      <a class="feature-card" href="/trust/"><span>CONFIDENCE CONSTELLATION™</span><h3>Independent stars. No fake score.</h3><p>Authority, holder, dev, team, treasury, liquidity, market and identity evidence stays independently visible.</p></a>
-      <a class="feature-card" href="/worlddexpush/"><span>WORLDDEXPUSH™</span><h3>Jupiter + DEX Screener status.</h3><p>Canonical identity packaging, upstream indexing checks, profile/boost handoff and no fake provider approvals.</p></a>
-      <a class="feature-card hero-card" href="/fullbuild/"><span>WORLDZFULLBUILD™</span><h3>One Worldz. One Build.</h3><p>The master integration source of truth connects every proven Worldz module, current token identity, launch inheritance and release boundary.</p></a>
-      <a class="feature-card" href="/inheritance/"><span>WORLDZLAUNCHINHERITANCE™</span><h3>Build once. Inherit forever.</h3><p>Every launch inherits wallet safety, chain/environment gates, identity, FullScope, Proof and post-launch monitoring without turning gated mainnet features on.</p></a>
-      <a class="feature-card" href="/proof-receipt/"><span>WORLDZ PROOF RECEIPT™</span><h3>Signature → balances → PASS.</h3><p>Transaction reference, source, recipients, amounts, before/after balances and confirmation evidence in one receipt.</p></a>
-      <a class="feature-card" href="/bitworldz/"><span>BITWORLDZ OMNIBTC™</span><h3>BTC-paired research rail.</h3><p>Native, L2, wrapped and bridged BTC representations stay explicitly distinguished while BitPair, fee, liquidity and BitProof adapters are tested before any mainnet release.</p></a>
-    </div>
-  </section>
-
-  <section id="explore" class="section">
-    <div class="section-heading with-action">
-      <div><div class="section-kicker">PUBLIC LAUNCHES</div><h2>Who will be first?</h2><p>Every public creator launch that reaches Worldz Proof appears here with its token, mint, engine, fee and verification state.</p></div>
-      <span class="live-chip"><i></i> PUBLIC LAUNCHPAD LIVE</span>
-    </div>
-    <div class="launch-market" id="launch-market"></div>
-  </section>
-
-  <section id="founding100" class="section feature-section">
-    <div class="section-heading with-action">
-      <div>
-        <div class="section-kicker">WORLDZLAUNCHPAD FOUNDING 100™</div>
-        <h2>The first 100 verified teams become part of WorldzLaunchPad history.</h2>
-        <p>A permanent Founding 100 registry is now in place. A total of <b>10,000,000 WLDZ</b> is reserved for the 100 qualified Founding positions — <b>100,000 WLDZ per qualified position</b>. Devnet launches do not qualify.</p>
-      </div>
-      <span class="live-chip" id="founding-count"><i></i> 100 POSITIONS OPEN</span>
-    </div>
-    <div class="feature-grid">
-      <article class="feature-card hero-card"><span>QUALIFY</span><h3>Verified mainnet launch.</h3><p>The launch must pass the applicable Worldz Safe Launch rules, on-chain proof and the published mainnet release gate. Price and trading volume are not qualification tests.</p></article>
-      <article class="feature-card"><span>ANTI-SYBIL</span><h3>One verified team. One position.</h3><p>Creating extra wallets or spam tokens does not create extra Founding positions. Team identity is reviewed before a position is awarded.</p></article>
-      <article class="feature-card"><span>PERMANENT RECORD</span><h3>Documented for good.</h3><p>Candidate time, launch proof and qualified position are preserved. A fraud finding can forfeit an allocation, but the historical record is not silently erased.</p></article>
-      <article class="feature-card"><span>WLDZ POOL</span><h3>10,000,000 WLDZ • 100 equal positions.</h3><p>100,000 WLDZ is reserved per qualified Founding position. This token allocation is separate from WorldzLaunchPad's platform fee and is not company equity.</p></article>
-    </div>
-    <div class="launch-market" id="founding-market"><article class="market-card"><div><strong>Founding 100 registry ready</strong><small>Positions begin with qualifying verified mainnet launches.</small></div></article></div>
-  </section>
-
-  <section id="safe-standard" class="section feature-section">
-    <div class="section-heading">
-      <div class="section-kicker">WORLDZ SAFE LAUNCH STANDARD™</div>
-      <h2>Creators can build. Nobody gets to switch the safety rules off.</h2>
-      <p>These are platform limits, not suggested tokenomics. A creator may choose values inside the box; WorldzLaunchPad rejects manifests outside it. Mainnet remains fail-closed until the same rules are enforced on-chain.</p>
-    </div>
-    <div class="feature-grid">
-      <article class="feature-card hero-card"><span>HARD RULE 01</span><h3>Fixed supply.</h3><p>Mint authority revoked after genesis. Freeze authority revoked/absent. No later inflation switch.</p></article>
-      <article class="feature-card"><span>HARD RULE 02</span><h3>Founder cap.</h3><p>Creator/team ≤15% total; ≤5% liquid at genesis; ≥90-day cliff and ≥18-month vesting on the remainder.</p></article>
-      <article class="feature-card"><span>HARD RULE 03</span><h3>Liquidity cannot vanish.</h3><p>25–60% supply allocation to liquidity. 100% of creator-controlled LP must be locked ≥365 days for a verified mainnet launch.</p></article>
-      <article class="feature-card"><span>HARD RULE 04</span><h3>No tax trap.</h3><p>0% wallet-transfer tax. Supported project trading fee 0.25–3.00%, with 1.00% the Worldz default. Fee Flow V3 lets creators keep 97% / 95% / 92% of eligible fee revenue; only the selected 3% / 5% / 8% Worldz contribution enters the locked internal routing.</p></article>
-      <article class="feature-card"><span>HARD RULE 05</span><h3>Multisig control.</h3><p>Treasury and any program authority must be 2-of-3 or stronger multisig before mainnet verification.</p></article>
-      <article class="feature-card"><span>HARD RULE 06</span><h3>Everything disclosed.</h3><p>Tagged genesis wallets, public allocation manifest + hash, no hidden private allocations, no blacklist/sell restriction and no undisclosed private discount.</p></article>
-    </div>
-  </section>
-
-  <section id="create" class="section create-section">
-    <div class="section-heading">
-      <div class="section-kicker">CREATE</div>
-      <h2>Build your token. Worldz enforces the platform limits.</h2>
-      <p>The wizard creates a public launch manifest, validates tokenomics and carries the same rules into each executable chain adapter. Solana Devnet, five EVM testnets and XRPL Testnet now have executable routes. Mainnet remains chain-by-chain fail-closed until each release gate passes.</p>
-    </div>
-
-    <div class="feature-grid" id="experience-mode" aria-label="Choose WorldzLaunchPad experience">
-      <button class="feature-card hero-card experience-choice active" type="button" data-experience="beginner">
-        <span>🌱 NEW TO CRYPTO</span><h3>Show me what each choice means.</h3><p>Plain-English guidance appears as you build. Worldz keeps the same proof and safety rules underneath.</p>
-      </button>
-      <button class="feature-card experience-choice" type="button" data-experience="intermediate">
-        <span>⚡ INTERMEDIATE • EVERYDAY CRYPTO JOE</span><h3>Give me control without the overload.</h3><p>Custom allocations, vesting, chain, quote asset, fee and liquidity choices stay visible with plain-English guardrails.</p>
-      </button>
-      <button class="feature-card experience-choice" type="button" data-experience="advanced">
-        <span>🌐 ADVANCED • WORLDZ LEADERS</span><h3>Open the full Token DNA engine.</h3><p>Advanced Token DNA, multisig, treasury topology, cross-chain routing, proof manifests and chain-native architecture — never hidden-risk shortcuts.</p>
-      </button>
-    </div>
-    <div class="notice" id="experience-help">Beginner Mode: choose the blockchain community you already know — or explore a new one. Worldz keeps each chain's native strengths instead of forcing every launch into the same model.</div>
-
-    <div class="builder">
-      <aside class="builder-rail">
-        <button class="step-tab active" data-step="1"><b>01</b><span>World</span></button>
-        <button class="step-tab" data-step="2"><b>02</b><span>Engine</span></button>
-        <button class="step-tab" data-step="3"><b>03</b><span>Token</span></button>
-        <button class="step-tab" data-step="4"><b>04</b><span>Pair</span></button>
-        <button class="step-tab" data-step="5"><b>05</b><span>Economics</span></button>
-        <button class="step-tab" data-step="6"><b>06</b><span>Proof</span></button>
-      </aside>
-
-      <div class="builder-main">
-        <section class="wizard-step active" data-panel="1">
-          <div class="step-head"><span>01 / WORLD</span><h3>Where do you want to launch?</h3></div>
-          <div class="choice-grid chain-grid" id="chain-grid">
-            <button class="choice selected" data-chain="solana"><strong>◎ Solana</strong><small>Devnet creator launch enabled</small><em>SolWorldz</em></button>
-            <button class="choice" data-chain="ethereum"><strong>◆ Ethereum</strong><small>Sepolia fixed-supply mint live</small><em>EthWorldz • TESTNET</em></button>
-            <button class="choice" data-chain="base"><strong>◉ Base</strong><small>Base Sepolia token adapter live</small><em>BaseWorldz • TESTNET</em></button>
-            <button class="choice" data-chain="bnb"><strong>⬡ BNB Chain</strong><small>Testnet fixed-supply mint live</small><em>BNBWorldz • TESTNET</em></button>
-            <button class="choice" data-chain="robinhood"><strong>R Robinhood</strong><small>Chain Testnet fixed-supply mint live</small><em>RobinWorldz • TESTNET</em></button>
-            <button class="choice" data-chain="xrpl"><strong>X XRP Ledger</strong><small>Testnet native issue + AMM live</small><em>XRPWorldz • TESTNET</em></button>
-            <a class="choice" href="/sui/"><strong>S Sui</strong><small>Native fixed-supply Devnet creator console live</small><em>SuiWorldz • DEVNET BETA</em></a>
-          </div>
-          <div class="notice" id="chain-culture-note"><b>SolWorldz:</b> fast creator UX with Solana-native liquidity and proof. Worldz connects Solana without erasing Solana.</div>
-          <div class="step-actions"><button class="btn primary next-step" data-next="2">Choose Launch Engine →</button></div>
-        </section>
-
-        <section class="wizard-step" data-panel="2">
-          <div class="step-head"><span>02 / ENGINE</span><h3>How should the market begin?</h3></div>
-          <div class="choice-grid engine-grid" id="engine-grid">
-            <button class="choice selected" data-engine="flash"><strong>⚡ Worldz Flash™</strong><small>Direct liquidity. No bonding curve required.</small><em>DEVNET BETA • RAYDIUM CPMM</em></button>
-            <button class="choice" data-engine="curve"><strong>↗ Worldz Curve™</strong><small>Curated bonding curve → AMM graduation.</small><em>DEVNET BETA • RAYDIUM LAUNCHLAB</em></button>
-            <button class="choice" data-engine="curve-pro"><strong>⌁ Worldz Curve Pro™</strong><small>Advanced dynamic curve configuration.</small><em>DEVNET BETA • METEORA DBC</em></button><button class="choice" data-engine="evm-fixed"><strong>◉ Worldz EVM Mint™</strong><small>Fixed-supply EVM token with direct disclosed genesis allocation.</small><em>ETH • BASE • BNB • ROBINHOOD • HYPEREVM TESTNET</em></button>
-            <button class="choice" data-engine="liquidity"><strong>◫ Worldz Liquidity™</strong><small>Traditional fixed-supply + creator-funded LP.</small><em>PLANNED</em></button>
-            <button class="choice" data-engine="board"><strong>▦ Worldz Board™</strong><small>Branded launch surface for a creator/community.</small><em>PLANNED</em></button>
-          </div>
-          <div class="step-actions"><button class="btn secondary prev-step" data-prev="1">← Back</button><button class="btn primary next-step" data-next="3">Build Token →</button></div>
-        </section>
-
-        <section class="wizard-step" data-panel="3">
-          <div class="step-head"><span>03 / TOKEN</span><h3>Give the project its identity.</h3></div>
-          <div class="form-grid">
-            <label><span>Token name</span><input id="build-name" maxlength="32" placeholder="e.g. My Project Token"></label>
-            <label><span>Ticker</span><input id="build-symbol" maxlength="10" placeholder="SAVE"></label>
-            <label><span>Fixed supply</span><input id="build-supply" type="number" min="1000" max="1000000000000" step="1" placeholder="Enter supply"></label>
-            <label><span>Decimals</span><input id="build-decimals" type="number" min="0" max="9" step="1" value="9"></label>
-            <label class="wide"><span>Description</span><textarea id="build-description" maxlength="280" placeholder="What is this project for?"></textarea></label>
-          </div>
-          <div class="toggle-row"><label><input id="fixed-supply" type="checkbox" checked disabled> COMPULSORY — revoke mint authority after genesis</label><label><input id="freeze-off" type="checkbox" checked disabled> COMPULSORY — freeze authority revoked/absent</label></div>
-          <div class="step-actions"><button class="btn secondary prev-step" data-prev="2">← Back</button><button class="btn primary next-step" data-next="4">Choose Pair →</button></div>
-        </section>
-
-        <section class="wizard-step" data-panel="4">
-          <div class="step-head"><span>04 / CROSSPAIR</span><h3>What should your token trade against?</h3></div>
-          <div class="quote-grid">
-            <button class="quote selected" data-quote="SOL"><span class="quote-icon">◎</span><strong>SOL</strong><small>Native Solana quote</small><em>VERIFIED NATIVE</em></button>
-            <button class="quote" data-quote="wXRP"><span class="quote-icon">X</span><strong>wXRP</strong><small>Hex Trust wrapped XRP on Solana</small><em>VERIFIED • 1:1 XRP BACKING CLAIM</em></button><button class="quote" data-quote="ETH"><span class="quote-icon">◆</span><strong>ETH</strong><small>Native Base quote asset</small><em>BASE SEPOLIA NATIVE</em></button>
-          </div>
-          <article class="verified-asset" id="wxrp-proof">
-            <div class="proof-seal">✓</div>
-            <div><span>WORLDZ VERIFIED QUOTE ASSET #001</span><h4>wXRP • Solana</h4><p>Mint: <code>6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2</code></p><p>Issuer: Hex Trust • Cross-chain infrastructure: LayerZero • Pairing a project against wXRP does not mean the project token itself is backed by XRP.</p></div>
-            <a href="https://solscan.io/token/6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2" target="_blank" rel="noopener">Solscan ↗</a>
-          </article>
-          <div class="step-actions"><button class="btn secondary prev-step" data-prev="3">← Back</button><button class="btn primary next-step" data-next="5">Set Economics →</button></div>
-        </section>
-
-        <section class="wizard-step" data-panel="5">
-          <div class="step-head"><span>05 / SAFE TOKENOMICS</span><h3>Choose inside the limits. The limits cannot be switched off.</h3></div>
-          <div class="route-builder">
-            <div class="route-head"><h4>Launch Recipe™ — start simple, then customise</h4><span id="recipe-state" class="pill safe">CUSTOM</span></div>
-            <div class="choice-grid" id="launch-recipes">
-              <button class="choice" type="button" data-recipe="CREATOR"><strong>Creator</strong><small>Balanced creator + public launch</small></button>
-              <button class="choice" type="button" data-recipe="COMMUNITY"><strong>Community</strong><small>More supply for public/community</small></button>
-              <button class="choice" type="button" data-recipe="HOLDER_REWARDS"><strong>Holder Rewards</strong><small>Community-heavy starting allocation</small></button>
-              <button class="choice" type="button" data-recipe="LIQUIDITY_GROWTH"><strong>Liquidity Growth</strong><small>Higher genesis liquidity</small></button>
-              <button class="choice" type="button" data-recipe="BUYBACK"><strong>Buyback Focus</strong><small>Balanced genesis preset • any buyback route requires separate proof</small></button>
-              <button class="choice" type="button" data-recipe="IMPACT"><strong>Impact</strong><small>Growth capacity for disclosed impact work</small></button>
-              <button class="choice" type="button" data-recipe="FAIR_LAUNCH"><strong>Fair Launch</strong><small>Low creator • stronger public + liquidity</small></button>
-              <button class="choice selected" type="button" data-recipe="CUSTOM"><strong>Custom</strong><small>Edit everything inside Worldz limits</small></button>
-            </div>
-            <p class="micro">Recipes are starting presets only. They never change the fixed Worldz Fee Flow V3 creator-retention or Worldz-internal routing rules, bypass Safe Launch limits, or imply a guaranteed market outcome.</p>
-          </div>
-          <div class="worldz-mode-guidance" id="worldz-mode-guidance" role="status" aria-live="polite"></div>
-          <div class="worldz-friends" id="worldz-friends">
-            <label class="worldz-friends-toggle"><input id="friends-enabled" type="checkbox"> <span id="friends-toggle-label">Share tokens with family and friends?</span></label>
-            <div id="intermediate-wallet-options" hidden>
-              <label for="wallet-group-type">Recipient group</label>
-              <select id="wallet-group-type">
-                <option value="developer">Developers &amp; builders</option>
-                <option value="featured">Featured crypto wallets (invitation only)</option>
-                <option value="collaborator">Collaborators &amp; contributors</option>
-                <option value="community">Community rewards</option>
-              </select>
-              <p class="micro">Suggest recipients by role, not by impersonating well-known wallets. No affiliation or endorsement is implied. Obtain recipient consent before advertising an allocation as a partnership.</p>
-            </div>
-            <div id="friends-details" hidden>
-              <p class="micro">Up to 100 recipient wallet addresses. Enter one address and token percentage per line, separated by a comma. Allocations must fit inside your creator share. This is a planning list, not an automatic on-chain transfer.</p>
-              <textarea id="friends-addresses" rows="4" maxlength="12000" placeholder="Wallet address, 1.5"></textarea>
-              <p class="micro" id="friends-status">0 of 100 recipients</p>
-            </div>
-          </div>
-          <div class="route-builder">
-            <div class="route-head"><h4>Genesis supply allocation</h4><span id="allocation-total" class="pill safe">100%</span></div>
-            <div class="route-inputs">
-              <label><span id="creator-allocation-label">Creator / Team ≤15%</span> <input class="allocation-input" data-allocation="creatorTeam" type="number" min="0" max="15" step="1" value="15"></label>
-              <label>Liquidity 25–60% <input class="allocation-input" data-allocation="liquidity" type="number" min="25" max="60" step="1" value="30"></label>
-              <label>Community / Public ≥20% <input class="allocation-input" data-allocation="communityPublic" type="number" min="20" max="75" step="1" value="30"></label>
-              <label>Operations Treasury ≤15% <input class="allocation-input" data-allocation="treasuryReserve" type="number" min="0" max="15" step="1" value="10"></label>
-              <label>Growth / Ecosystem <input class="allocation-input" data-allocation="growthEcosystem" type="number" min="0" max="55" step="1" value="15"></label>
-            </div>
-          </div>
-          <div class="form-grid" style="margin-top:12px">
-            <label><span><span id="creator-unlocked-label">Creator liquid at genesis ≤5%</span></span><input id="creator-unlocked" type="number" min="0" max="5" step="0.5" value="5"></label>
-            <label><span><span id="founder-cliff-label">Founder cliff ≥90 days</span></span><input id="founder-cliff" type="number" min="90" max="3650" step="1" value="90"></label>
-            <label><span><span id="founder-vesting-label">Founder vesting ≥18 months</span></span><input id="founder-vesting" type="number" min="18" max="120" step="1" value="24"></label>
-            <label><span>Creator-controlled LP lock</span><input id="lp-lock-percent" value="100%" disabled></label>
-            <label><span>LP lock ≥365 days</span><input id="lp-lock-days" type="number" min="365" max="3650" step="1" value="365"></label>
-            <label><span>Treasury / program multisig</span><input id="multisig-address" maxlength="64" placeholder="Required for mainnet verification"></label>
-          </div>
-          <div class="economics-grid">
-            <div class="fee-control">
-              <label for="project-fee">Project trading fee</label>
-              <input id="project-fee" type="range" min="0.25" max="3" step="0.25" value="1">
-              <div class="fee-range-labels" aria-hidden="true"><span>0.25% minimum</span><span>3.00% maximum</span></div>
-              <div class="fee-number"><b id="project-fee-value">1.00%</b><span>WORLDZ DEFAULT • MAX 3.00%</span></div>
-              <label for="launchpad-contribution">WorldzLaunchPad contribution</label>
-              <select id="launchpad-contribution"><option value="3">BUILD • 3%</option><option value="5" selected>GROW • 5% (default)</option><option value="8">BOOST • 8%</option></select>
-              <div class="worldz-rule"><strong>WorldzLaunchPad</strong><b id="launchpad-contribution-value">5%</b><span>voluntary creator-selected contribution • snapshotted at launch</span></div>
-              <p class="micro"><b>Worldz Fair Fee Builder™:</b> 1.00% default • 3.00% hard public cap • 0.25% steps where the selected venue supports them truthfully. Chain-native venue/protocol fees stay separate. Fee Flow V3 lets the creator retain 97% / 95% / 92% of eligible fee revenue; Worldz receives only the chosen 3% / 5% / 8%. Worldz takes 0% of token supply and 0% of initial liquidity.</p>
-            </div>
-            <div class="fee-example">
-              <label>Example trading volume</label>
-              <div class="input-suffix"><input id="example-volume" type="number" min="0" value="100000"><span>quote units</span></div>
-              <div class="math-row"><span>Gross configured project fee</span><b id="gross-fee">1,000</b></div>
-              <div class="math-row worldz"><span>Worldz contribution</span><b id="worldz-fee">50</b></div>
-              <div class="math-row"><span>Creator retains</span><b id="project-pool">950</b></div>
-            </div>
-          </div>
-          <div class="route-builder">
-            <div class="route-head"><h4>Worldz Fee Flow™ V3 • internal routing of the Worldz share only</h4><span id="route-total" class="pill safe">100%</span></div>
-            <div class="route-inputs">
-              <label>Operations / Product Development <input value="20% of Worldz share" disabled></label>
-              <label>Treasury <input value="20% • 70% Ops / 30% Miracle Team" disabled></label>
-              <label>LP Growth <input value="15% of Worldz share" disabled></label>
-              <label>Legacy Core <input value="10% • closed 12-token lane" disabled></label>
-              <label>WLDZ • RVIV • PNEX • MRCL <input value="10% • 2.5% each of Worldz share" disabled></label>
-              <label>Impact / Charity <input value="10% of Worldz share" disabled></label>
-              <label>Team / Builder Rewards <input value="5% of Worldz share" disabled></label>
-              <label>Future Launch / Infrastructure <input value="5% of Worldz share" disabled></label>
-              <label>Launch Referrer <input value="5% of Worldz share" disabled></label>
-            </div>
-          </div>
-          <div class="step-actions"><button class="btn secondary prev-step" data-prev="4">← Back</button><button class="btn primary next-step" data-next="6">Run Proof Check →</button></div>
-        </section>
-
-        <section class="wizard-step" data-panel="6">
-          <div class="step-head"><span>06 / PRE-SIGN PROOF</span><h3>Nothing signs until the manifest adds up.</h3></div>
-          <div class="preflight-grid" id="preflight-grid"></div>
-          <div class="manifest-box">
-            <div class="manifest-head"><span>LAUNCH MANIFEST</span><b id="manifest-id">NOT GENERATED</b></div>
-            <pre id="manifest-preview">Complete the builder and run the pre-sign check.</pre>
-          </div>
-          <div class="step-actions">
-            <button class="btn secondary prev-step" data-prev="5">← Back</button>
-            <button class="btn secondary" id="run-preflight" type="button">Run Pre-Sign Check</button>
-            <button class="btn secondary" id="download-manifest" type="button" disabled>Download Manifest</button>
-            <a class="btn primary disabled-link" id="devnet-launch-link" href="/devnet/" aria-disabled="true">Open Executable Test Route →</a>
-          </div>
-          <div class="notice">MAINNET LAUNCH LOCKED UNTIL ENFORCED — not merely declared. Worldz requires atomic tagged allocations, 100% creator-controlled LP lock ≥365 days, founder vesting, multisig proof, revoked mint/freeze authority, simulation, disclosure and the remaining security/operational/legal release gates.</div>
-        </section>
-      </div>
-    </div>
-  </section>
-
-  <section id="crosspair" class="section feature-section">
-    <div class="section-heading">
-      <div class="section-kicker">WORLDZ CROSSPAIR™</div>
-      <h2>Don't force every launch into SOL or USDC.</h2>
-      <p>CrossPair is the verified quote-asset layer. A project can eventually choose a supported cross-chain asset as its market quote where the chain adapter and liquidity venue support it.</p>
-    </div>
-    <div class="feature-grid">
-      <article class="feature-card hero-card"><span class="serial">QUOTE #001</span><h3>Project / wXRP</h3><p>Verified Solana mint from Hex Trust. wXRP is described separately from the project token so backing claims cannot be confused.</p><code>6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2</code></article>
-      <article class="feature-card"><span>PUBLIC CREATOR CHOICE</span><h3>Your token / verified quote</h3><p>Creators choose from quote assets that the selected Worldz launch engine has actually verified. Unsupported or unverified pairs remain unavailable rather than being faked.</p></article>
-      <article class="feature-card"><span>WORLDZ QUOTE HUB™</span><h3>Verified assets only.</h3><p>Origin, network, issuer/custodian where applicable, contract/mint, proof source and redemption model are disclosed before an asset can be labelled verified.</p></article>
-    </div>
-  </section>
-
-  <section id="omnichain" class="section feature-section">
-    <div class="section-heading">
-      <div class="section-kicker">WORLDZ OMNICHAIN™</div>
-      <h2>One project. Multiple Worldz. One disclosed supply model.</h2>
-      <p>OmniChain is the shared project/proof architecture. Execution remains chain-native: Solana Devnet, Sui Devnet fixed-supply token creation and supported EVM/XRPL test routes are executable, while market adapters, cross-chain movement and mainnet routes remain separately gated.</p>
-      <div class="hero-actions"><a class="btn primary" href="/omnichain/">Open Interactive OmniChain Galaxy →</a><a class="btn secondary" href="/omnichain/#worlds">Explore Every World</a></div>
-    </div>
-    <div class="omni-map">
-      <div class="omni-center"><b>WORLDZ</b><span>OMNICHAIN</span></div>
-      <div class="omni-node n1">SOL</div><div class="omni-node n2">ETH</div><div class="omni-node n3">BASE</div><div class="omni-node n4">ROBIN</div><div class="omni-node n5">HYPER</div><div class="omni-node n6">SUI</div><div class="omni-node n7">XRPL*</div>
-      <p>*XRPL requires its own native architecture; interoperability is researched rather than assumed.</p>
-    </div>
-  </section>
-
-  <section id="command" class="section">
-    <div class="section-heading with-action">
-      <div><div class="section-kicker">ZED LED COMMAND CENTRE MAX™</div><h2>Minting isn't the end of a launch. It's the beginning.</h2><p>Every Worldz launch can plug into ZED, Ronald Raider, AUTO, G.R.A.C.E., MAX, WorldPing and WorldzCast — community operations, learning, Raids, communications and proof in one connected system.</p><p><a href="https://cryptoworldz.xyz/command-centre-max/">See the full Command Centre MAX™ showcase →</a></p></div>
-      <button class="btn secondary" id="refresh-runtime" type="button">Refresh Runtime</button>
-    </div>
-    <div class="runtime-grid">
-      <article class="status-card"><div class="status-head"><span>ZED</span><span class="state-dot idle" id="zed-dot"></span></div><strong id="zed-state">Checking…</strong><small id="zed-detail">Community, launches, Telegram, Raids, wallet/profile systems.</small></article>
-      <article class="status-card"><div class="status-head"><span>AUTO</span><span class="state-dot idle" id="auto-dot"></span></div><strong id="auto-state">Checking…</strong><small id="auto-detail">Fees, treasury, LP, vesting, rewards and accounting.</small></article>
-      <article class="status-card"><div class="status-head"><span>G.R.A.C.E.</span><span class="state-dot idle" id="grace-dot"></span></div><strong id="grace-state">Checking…</strong><small id="grace-detail">Distribution, communications, launch and milestone publishing.</small></article>
-    </div>
-    <div class="notice" id="runtime-notice">Loading read-only runtime status…</div>
-  </section>
-
-  <section id="proof" class="section">
-    <div class="section-heading">
-      <div class="section-kicker">WORLDZ PROOF™</div>
-      <h2>Every public launch shows its receipts.</h2>
-      <p>Worldz Proof publishes verifiable launch facts rather than hiding them behind a badge: supply, authorities, fee settings, allocations, liquidity, locks, vesting, launch transaction and registry state.</p>
-    </div>
-    <div class="proof-layout">
-      <article class="panel">
-        <div class="panel-top"><span>Public Launch Standard</span><span class="pill safe">MANDATORY</span></div>
-        <div class="proof-list">
-          <div class="proof-row"><span class="ok">✓</span><span>WorldzLaunchPad platform share = <b>exactly 10% of collected token fee revenue</b></span></div>
-          <div class="proof-row"><span class="ok">✓</span><span>WorldzLaunchPad genesis token-supply share = <b>0.60%</b> • 0.30% Operations • 0.18% Miricle Team • 0.12% Purple Diamond Crew</span></div>
-          <div class="proof-row"><span class="ok">✓</span><span>WorldzLaunchPad initial-liquidity share = <b>0%</b></span></div>
-          <div class="proof-row"><span class="ok">✓</span><span>Wallet-transfer tax = <b>0%</b></span></div>
-          <div class="proof-row"><span class="ok">✓</span><span>Creator/team, liquidity, vesting and fee-route limits checked before execution</span></div>
-          <div class="proof-row"><span class="ok">✓</span><span>Public launches registered with on-chain mint / pool / transaction proof where supported</span></div><div class="proof-row"><span class="ok">✓</span><span>Founding 100 candidates are created only from qualifying mainnet proof — never from devnet or price/volume hype</span></div>
-        </div>
-      </article>
-      <article class="panel">
-        <div class="panel-top"><span>Production Mainnet Route</span><span class="pill locked" id="mainnet-gate-pill">FINAL GATE</span></div>
-        <h3 id="mainnet-gate-title">Treasury Multisig + end-to-end routing proof required</h3>
-        <p id="mainnet-gate-copy">The public platform is live now. Mainnet execution will only be switched on after the verified Worldz Treasury Multisig vault address and the exact Fee Flow V3 route and both Treasury-lane accounting paths are proven end-to-end.</p>
-        <div class="gate-grid" id="public-gate-grid"></div>
-      </article>
-    </div>
-  </section>
-
-  <section class="section wisdom">
-    <blockquote>Build it. Document it. Lock it. Simulate it. Verify it. Then launch it.</blockquote>
-    <p>WorldzLaunchPad™ • CryptoWorldz • Many Chains • One Community • Real Impact</p>
-  </section>
-</main>
-
-<footer>
-  <div><b>WorldzLaunchPad™</b> • CryptoWorldz</div>
-  <div><a href="/technology.html">Technology & Meanings</a> • <a href="https://cryptoworldz.xyz">CryptoWorldz.xyz</a> • <a href="https://x.com/WorldzLaunchPad">@WorldzLaunchPad</a></div>
-  <p>WorldzLaunchPad™ is a public creator platform. Mainnet execution is enabled only after the selected route passes its published proof gate. WorldzLaunchPad uses the disclosed 0.60% genesis supply allocation plus its separate supported fee-revenue model; it takes 0% of initial liquidity and 0% wallet-transfer tax.</p>
-</footer>
-
-<script src="/app.js?v=20261021-featured-wallets-v3" defer></script>
-<script src="/ads.js?v=20261002-ads-v1" defer></script>
-<script src="/worldz-guide.js?v=20261004" defer></script><script>
-document.addEventListener('click',function(event){const menu=document.getElementById('worldz-menu');if(menu&&menu.open&&(!menu.contains(event.target)||event.target.closest('.worldz-menu-panel a')))menu.open=false;});
-document.addEventListener('keydown',function(event){if(event.key==='Escape'){const menu=document.getElementById('worldz-menu');if(menu&&menu.open){menu.open=false;menu.querySelector('summary').focus();}}});
-</script>
+<main id="top"><section class="hero-copy"><p class="eyebrow">WORLDZLAUNCHPAD™ · SOLANA FIRST</p><h1>LAUNCH<br><span>YOUR WORLD.</span></h1>
+<p class="lead">Create a token, explore projects and build your community. Simple to start. Transparent by design.</p>
+<div class="hero-actions"><a class="primary-action" href="/create-your-own-money/">Create Token →</a><a class="secondary-action" href="/invest/">Explore Launches</a></div>
+</section></main>
+<footer>WorldzLaunchPad™ · Helping the People Who Help the People · Token creation and trading carry risks.</footer>
+<script>document.addEventListener('click',e=>{const m=document.getElementById('worldz-menu');if(m&&m.open&&!m.contains(e.target))m.open=false;});</script>
 <script id="worldz-wallet-picker-script">
 (function(){
   const dialog=document.getElementById('worldz-wallet-dialog');
@@ -596,5 +122,4 @@ document.addEventListener('keydown',function(event){if(event.key==='Escape'){con
     }catch(error){feedback.textContent=error&&error.message?error.message:'Wallet connection was cancelled.';}
   });
 })();
-</script></body>
-</html>
+</script></body></html>
