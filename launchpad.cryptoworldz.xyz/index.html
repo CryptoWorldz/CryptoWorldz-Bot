@@ -53,7 +53,19 @@
 .worldz-wallet-dialog .worldz-wallet-options button:hover:not(:disabled){background:#5d2789}
 .worldz-wallet-dialog .worldz-wallet-options button:disabled{opacity:.55;cursor:not-allowed}
 .worldz-wallet-dialog .worldz-wallet-close{float:right;background:transparent;color:white;border:1px solid #86619e;border-radius:9px;padding:7px 10px;cursor:pointer}
-</style></head>
+</style><style id="worldz-clean-home-v1">
+/* Homepage only: keep the launch decision simple; detailed tools remain in Menu. */
+main#top > :not(.hero){display:none!important}
+.hero .truth-strip,.hero .worldz-mobile-menu{display:none!important}
+.hero{min-height:min(76vh,700px);display:flex;align-items:center;justify-content:center;padding:clamp(36px,7vw,100px) 20px!important;text-align:center}
+.hero-copy{width:min(100%,840px);max-width:840px;margin:auto}
+.hero h1{font-size:clamp(3rem,9vw,7rem);line-height:1.03}
+.hero .lead{max-width:620px;margin:20px auto 28px}
+.hero .hero-actions{display:flex!important;justify-content:center;flex-wrap:wrap;gap:12px}
+.hero .hero-actions .btn{min-width:170px}
+@media(max-width:700px){.hero{min-height:68vh}.hero .hero-actions{display:flex!important;flex-direction:column;align-items:stretch}.hero .hero-actions .btn{width:100%}}
+</style>
+</head>
 <body>
 <header class="topbar">
   <a class="brand" href="#top" aria-label="WorldzLaunchPad home"><span class="brand-logo-official" aria-hidden="true"></span><span>WorldzLaunchPad™</span></a>
@@ -111,18 +123,8 @@
         <details><summary>⚙️ Advanced Tools &amp; Features</summary><div class="advanced-links"><a href="/integrations/">Integrations</a><a href="/onedrop/">OneDrop</a><a href="/worldz-launch/">Launch Pack</a><a href="/trust/">Trust Passport</a><a href="/fullbuild/">FullBuild</a><a href="/fullscope/">FullScope</a><a href="/developers/">Developers</a><a href="/devnet/">Devnet</a><a href="/economics/">Fee Flow</a><a href="/technology.html">Technology</a></div></details>
       </div>
       <div class="hero-actions">
-        <a class="btn primary" href="/create-your-own-money/">CREATE YOUR OWN MONEY‼️* →</a><a class="btn secondary" href="/launch-station/">OPEN LAUNCH STATION™</a><a class="btn secondary" href="/community/">COMMUNITY</a><a class="btn secondary" href="/integrations/">INTEGRATIONS</a><a class="btn secondary" href="/onedrop/">Worldz OneDrop™</a><a class="btn secondary" href="/worldz-launch/">WORLDZ Launch Pack</a>
-        <a class="btn secondary" href="/wldz/">Open Core Launch Route</a>
-        <a class="btn secondary" href="#create">Build a Launch</a>
-        <a class="btn primary" href="/revenue/">Revenue Engine</a>
-        <a class="btn secondary" href="/invest/">Investment Centre</a>
-        <a class="btn secondary" href="#explore">Public Launches</a><a class="btn secondary" href="/developers/">Builders / Founding 100</a>
-        <a class="btn secondary" href="/trust/">Trust Passport</a>
-        <a class="btn secondary" href="/fullbuild/">WorldzFullBuild™</a>
-        <a class="btn secondary" href="/fullscope/">WorldzFullScope™</a>
-        <a class="btn ghost" href="/devnet/">Worldz Flash Devnet</a>
-        <a class="btn ghost" href="/curve/">Worldz Curve Devnet</a>
-        <a class="btn ghost" href="/curve-pro/">Curve Pro Devnet</a><a class="btn ghost" href="/technology.html">Technology & Meanings</a><a class="btn ghost" href="/evm/">EVM Testnet Mint</a><a class="btn ghost" href="/xrpl/">XRPL Testnet Launch</a><a class="btn ghost" href="/economics/">Worldz Fee Flow</a>
+        <a class="btn primary" href="/create-your-own-money/">Create Token →</a>
+        <a class="btn secondary" href="/invest/">Explore Launches</a>
       </div>
       <div class="truth-strip">
         <span><b>3% • 5% • 8%</b> creator-selected WorldzLaunchPad contribution</span>
@@ -131,11 +133,6 @@
         <span><b>1.00%</b> Worldz default project fee • 3.00% hard public cap</span>
         <span><b>0.60%</b> disclosed genesis supply to Worldz multisigs • <b>0%</b> initial LP taken</span>
       </div>
-    </div>
-    <div class="hero-core" aria-label="WorldzLaunchPad system">
-      <div class="core-ring r1"></div><div class="core-ring r2"></div><div class="core-ring r3"></div>
-      <div class="core"><b>W</b><span>LAUNCH</span></div>
-      <div class="orbit-label o1">ZED</div><div class="orbit-label o2">AUTO</div><div class="orbit-label o3">G.R.A.C.E.</div><div class="orbit-label o4">PROOF</div>
     </div>
   </section>
 
