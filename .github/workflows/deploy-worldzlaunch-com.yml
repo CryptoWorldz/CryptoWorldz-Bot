@@ -16,7 +16,63 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  publish-home:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: cryptoworldz-production
+    env:
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish clean image-free homepage FIRST
+        shell: python
+        run: |
+          import os, ssl, hashlib, secrets
+          from pathlib import Path
+          from ftplib import FTP_TLS, error_perm
+          source=Path('launchpad.cryptoworldz.xyz/index.html')
+          content=source.read_bytes()
+          assert b'<img' not in content.lower(), 'homepage must not contain image elements'
+          assert b'url(' not in content.lower(), 'homepage must not reference image or remote CSS assets'
+          assert b'rel="stylesheet"' not in content.lower(), 'homepage must not load legacy image CSS'
+          ftp=FTP_TLS(context=ssl._create_unverified_context())
+          ftp.connect(os.environ['FTP_HOST'],int(os.environ.get('FTP_PORT','21')),timeout=30)
+          ftp.login(os.environ['FTP_USERNAME'],os.environ['FTP_PASSWORD'])
+          ftp.prot_p()
+          ftp.cwd('/')
+          for part in ('domains','worldzlaunch.com','public_html'):
+              try:ftp.cwd(part)
+              except error_perm:ftp.mkd(part);ftp.cwd(part)
+          temp='.worldz-clean-'+secrets.token_hex(6)+'.html'
+          with source.open('rb') as stream: ftp.storbinary('STOR '+temp,stream)
+          try:ftp.rename(temp,'index.html')
+          except error_perm:
+              ftp.delete('index.html')
+              ftp.rename(temp,'index.html')
+          remote=bytearray()
+          ftp.retrbinary('RETR index.html',remote.extend)
+          assert hashlib.sha256(remote).digest()==hashlib.sha256(content).digest(), 'homepage remote content mismatch'
+          ftp.quit()
+          print('WORLDZLAUNCH_IMAGE_FREE_HOMEPAGE_FTPS=PASS')
+      - name: Verify public homepage matches cleaned source
+        shell: python
+        run: |
+          import urllib.request,hashlib
+          from pathlib import Path
+          url='https://worldzlaunch.com/'
+          request=urllib.request.Request(url,headers={'User-Agent':'WorldzLaunch-Home-Check/1.0','Cache-Control':'no-cache'})
+          with urllib.request.urlopen(request,timeout=20) as response:
+              public=response.read()
+              assert response.status==200
+          expected=Path('launchpad.cryptoworldz.xyz/index.html').read_bytes()
+          assert hashlib.sha256(public).digest()==hashlib.sha256(expected).digest(), 'WorldzLaunch.com is serving DIFFERENT homepage (check domain routing/cache)'
+          print('WORLDZLAUNCH_IMAGE_FREE_PUBLIC_HOMEPAGE=PASS')
   deploy:
+    needs: publish-home
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
