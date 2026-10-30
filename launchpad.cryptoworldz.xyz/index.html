@@ -43,7 +43,17 @@
     @media(max-width:560px){.topbar{gap:7px;padding-left:9px;padding-right:9px}.topbar .brand span:last-child{font-size:.72rem}.worldz-menu>summary{padding:9px}.worldz-menu>summary span{display:none}.worldz-menu-panel{width:calc(100vw - 18px);right:-9px;grid-template-columns:repeat(2,minmax(0,1fr));padding:14px;gap:15px}.topbar .wallet-mini{font-size:.67rem;padding:9px 8px}}
     @media(max-width:370px){.topbar .brand span:last-child{font-size:.63rem}.worldz-menu-panel{grid-template-columns:1fr}}
   </style>
-</head>
+<style id="worldz-wallet-picker-style">
+.worldz-wallet-dialog{max-width:min(480px,calc(100vw - 24px));width:100%;max-height:85vh;overflow:auto;border:1px solid #ab69ef;border-radius:22px;background:linear-gradient(150deg,#240b42,#090413);color:#f9f4ff;padding:24px;box-shadow:0 25px 80px #000c}
+.worldz-wallet-dialog::backdrop{background:#020008b8}
+.worldz-wallet-dialog h2{margin:0 0 8px}.worldz-wallet-dialog h3{margin:15px 0 6px;font-size:1rem;color:#dfb8ff}
+.worldz-wallet-dialog p{color:#d3c3e0;line-height:1.4}
+.worldz-wallet-dialog .worldz-wallet-options{display:grid;gap:8px}
+.worldz-wallet-dialog .worldz-wallet-options button{width:100%;text-align:left;padding:12px 14px;border:1px solid #aa66dd70;border-radius:12px;background:#3b165d;color:white;font:inherit;cursor:pointer}
+.worldz-wallet-dialog .worldz-wallet-options button:hover:not(:disabled){background:#5d2789}
+.worldz-wallet-dialog .worldz-wallet-options button:disabled{opacity:.55;cursor:not-allowed}
+.worldz-wallet-dialog .worldz-wallet-close{float:right;background:transparent;color:white;border:1px solid #86619e;border-radius:9px;padding:7px 10px;cursor:pointer}
+</style></head>
 <body>
 <header class="topbar">
   <a class="brand" href="#top" aria-label="WorldzLaunchPad home"><span class="brand-logo-official" aria-hidden="true"></span><span>WorldzLaunchPad™</span></a>
@@ -63,6 +73,25 @@
     </div>
   </details>
   <button class="wallet-mini" id="wallet-mini" type="button">Connect Wallet</button>
+  <dialog id="worldz-wallet-dialog" class="worldz-wallet-dialog" aria-labelledby="worldz-wallet-title">
+    <form method="dialog"><button class="worldz-wallet-close" aria-label="Close wallet chooser">✕</button></form>
+    <h2 id="worldz-wallet-title">Connect your wallet</h2>
+    <p>Choose your network and wallet. Connecting never authorises a trade or transfer.</p>
+    <div class="worldz-wallet-options">
+      <h3>🟣 Solana</h3>
+      <button type="button" data-worldz-wallet="phantom">Phantom</button>
+      <button type="button" data-worldz-wallet="solflare">Solflare</button>
+      <button type="button" data-worldz-wallet="backpack">Backpack</button>
+      <button type="button" data-worldz-wallet="jupiter">Jupiter Mobile</button>
+      <h3>🔵 XRP Ledger</h3>
+      <button type="button" data-worldz-wallet="xaman" disabled>Xaman — integration coming</button>
+      <button type="button" data-worldz-wallet="crossmark">Crossmark</button>
+      <h3>🔷 EVM (Ethereum, Base and compatible)</h3>
+      <button type="button" data-worldz-wallet="evm">Browser wallet (MetaMask, Coinbase etc.)</button>
+      <button type="button" disabled>WalletConnect — integration coming</button>
+    </div>
+    <p id="worldz-wallet-feedback" role="status" aria-live="polite"></p>
+  </dialog>
 </header>
 
 <main id="top">
@@ -522,5 +551,53 @@
 document.addEventListener('click',function(event){const menu=document.getElementById('worldz-menu');if(menu&&menu.open&&(!menu.contains(event.target)||event.target.closest('.worldz-menu-panel a')))menu.open=false;});
 document.addEventListener('keydown',function(event){if(event.key==='Escape'){const menu=document.getElementById('worldz-menu');if(menu&&menu.open){menu.open=false;menu.querySelector('summary').focus();}}});
 </script>
-</body>
+<script id="worldz-wallet-picker-script">
+(function(){
+  const dialog=document.getElementById('worldz-wallet-dialog');
+  const button=document.getElementById('wallet-mini');
+  const feedback=document.getElementById('worldz-wallet-feedback');
+  if(!dialog||!button||!window.HTMLDialogElement)return;
+  // Capture this button only: existing app.js continues to handle other launchpad actions.
+  button.addEventListener('click',function(event){event.stopImmediatePropagation();feedback.textContent='';dialog.showModal();},true);
+  function solanaProvider(id){
+    const providers={
+      phantom:window.phantom&&window.phantom.solana,
+      solflare:window.solflare,
+      backpack:window.backpack&&window.backpack.solana,
+      jupiter:window.jupiter&&window.jupiter.solana
+    };
+    const p=providers[id];
+    return p&&typeof p.connect==='function'?p:null;
+  }
+  dialog.addEventListener('click',async function(event){
+    const option=event.target.closest('[data-worldz-wallet]');
+    if(!option||option.disabled)return;
+    const id=option.dataset.worldzWallet;
+    feedback.textContent='Waiting for wallet approval…';
+    try{
+      let address='';
+      if(id==='evm'){
+        const provider=window.ethereum;
+        if(!provider||typeof provider.request!=='function')throw new Error('No compatible EVM browser wallet detected.');
+        const accounts=await provider.request({method:'eth_requestAccounts'});
+        address=accounts&&accounts[0];
+      }else if(id==='crossmark'){
+        const api=window.crossmark;
+        if(!api||typeof api.signInAndWait!=='function')throw new Error('Crossmark integration is not available in this browser yet.');
+        throw new Error('Crossmark sign-in needs its verified SDK integration before activation.');
+      }else{
+        const provider=solanaProvider(id);
+        if(!provider)throw new Error('Wallet not detected. Install it or open this page in its wallet browser.');
+        const result=await provider.connect();
+        address=String((result&&result.publicKey)||provider.publicKey||'');
+      }
+      if(!address)throw new Error('The wallet did not return an account.');
+      button.textContent=address.slice(0,6)+'…'+address.slice(-4);
+      button.classList.add('connected');
+      feedback.textContent='Wallet connected. No transaction was requested.';
+      dialog.close();
+    }catch(error){feedback.textContent=error&&error.message?error.message:'Wallet connection was cancelled.';}
+  });
+})();
+</script></body>
 </html>
