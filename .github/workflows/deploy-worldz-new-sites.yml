@@ -28,7 +28,7 @@ jobs:
       SFTP_HOST: ${{ vars.SFTP_HOST || '145.223.108.40' }}
       SFTP_PORT: ${{ vars.SFTP_PORT || '65002' }}
       SFTP_USERNAME: ${{ secrets.SFTP_USERNAME || vars.SFTP_USERNAME || 'u643166328' }}
-      SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD || secrets.FTP_PASSWORD }}
+      SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
     steps:
       - uses: actions/checkout@v5
       - name: Validate sites and FTP configuration
@@ -75,7 +75,7 @@ jobs:
           else:
               print('HOSTINGER_AUDIT SFTP_NOT_CONFIGURED',flush=True)
           PY
-      - name: Upload only public assets to the two new domains
+      - name: Upload public assets to verified Hostinger site directories
         shell: bash
         run: |
           python3 - <<'PY'
@@ -154,18 +154,19 @@ jobs:
               ftp.set_pasv(True)
               try:
                   base='domains/'+domain+'/public_html'
-                  def ensure(path):
+                  def ensure(path,create=False):
                       ftp.cwd('/')
                       for part in path.split('/'):
                           if not part:continue
                           try: ftp.cwd(part)
                           except ftplib.error_perm:
+                              if not create: raise RuntimeError('Hostinger site root not found: '+path)
                               ftp.mkd(part);ftp.cwd(part)
                   ensure(base)
                   for p in files:
                       rel=p.relative_to(site).as_posix()
                       target=join(base,rel)
-                      ensure(target.rsplit('/',1)[0])
+                      ensure(target.rsplit('/',1)[0],create=True)
                       with p.open('rb') as f: ftp.storbinary('STOR '+target.rsplit('/',1)[-1],f)
                   print('DEPLOY_UPLOAD_COMPLETE '+domain,flush=True)
               finally:
