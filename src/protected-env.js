@@ -11,12 +11,16 @@ const RECOVERABLE_CREDENTIALS = new Set([
 function candidateEnvironmentFiles({ appRoot = path.join(__dirname, ".."), env = process.env, home = os.homedir() } = {}) {
   const files = [];
   if (String(env.ONEWORLDZ_ENV_FILE || "").trim()) files.push(path.resolve(String(env.ONEWORLDZ_ENV_FILE).trim()));
+  // Managed releases live under <domain>/hbuilds/current/nodejs, outside
+  // <domain>/nodejs. HOME/USER may belong to the build runner, not the account.
+  const ancestors = [];
   for (let current = path.resolve(appRoot); current !== path.dirname(current); current = path.dirname(current)) {
-    if (path.basename(current) === "nodejs") {
-      files.push(path.join(current, ".env"));
-      break;
-    }
+    ancestors.push(current);
   }
+  const domainRoot = ancestors.find(current => path.basename(current) === PROTECTED_DOMAIN);
+  if (domainRoot) files.push(path.join(domainRoot, "nodejs", ".env"));
+  const nodeRoot = ancestors.find(current => path.basename(current) === "nodejs");
+  if (nodeRoot) files.push(path.join(nodeRoot, ".env"));
   files.push(path.join(appRoot, ".env"));
   for (const root of [String(env.HOME || "").trim(), String(home || "").trim()]) {
     if (root) files.push(path.join(root, "domains", PROTECTED_DOMAIN, "nodejs", ".env"));
