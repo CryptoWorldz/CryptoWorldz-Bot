@@ -21,7 +21,7 @@ const MENUS = {
     rows: [
       ["👤 Profile", "/profile"],
       ["👛 Wallet", "/wallet"],
-      ["🤠 Ronald Raider", "/raid"],
+      ["🌐💜 Worldz Raidz", "/raid"],
       ["📣 Shill Pack", "/shillpack"],
       ["📚 All Commands", "/commands"]
     ]
@@ -199,7 +199,7 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
   const isAdmin = async (msg) => ["admin", "executive", "owner"].includes(await roleFor(msg));
 
   const SETTING_ROWS = Object.freeze([
-    ["ronald_raider_enabled", "🤠 Ronald Raider"],
+    ["ronald_raider_enabled", "🌐💜 Worldz Raidz"],
     ["shill_rewards_enabled", "📣 Shill Rewards"],
     ["referral_links_enabled", "🔗 Shill Links"],
     ["secureguard_enabled", "🛡 REXSECURE ULTIMATE"],
@@ -295,7 +295,7 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
     "",
     "👤 Profile — who you are in Worldz",
     "👛 Wallet — your public wallet association",
-    "🤠 Ronald Raider — easy community Raids + Legend Points",
+    "🌐💜 Worldz Raidz — easy community Raids + Legend Points",
     "📣 Shill — share Worldz and track eligible activity",
     "🏦 Treasury — separate responsibility for approved roster members",
     "🛡 Admin — separate access for active Command Centre admins",
@@ -309,7 +309,7 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
     "🧠 CryptoWorldz Command Centre MAX™",
     "",
     "LEARN • RESEARCH • INTERACT • TEACH • BUILD • PROVE",
-    "ZED leads the Command Centre. Ronald Raider runs live Raid queues and points submissions. Shill Rewards tracks verified token sharing. WorldzFullScope watches the supported multi-chain token universe and hourly Worldz token votes. AUTO explains controlled finance workflows. G.R.A.C.E. coordinates approved communication. MAX keeps reviewed knowledge clear. WorldzLaunchPad builds and proves launches.",
+    "ZED leads the Command Centre. Worldz Raidz runs live Raid queues and points submissions. Shill Rewards tracks verified token sharing. WorldzFullScope watches the supported multi-chain token universe and hourly Worldz token votes. AUTO explains controlled finance workflows. G.R.A.C.E. coordinates approved communication. MAX keeps reviewed knowledge clear. WorldzLaunchPad builds and proves launches.",
     "",
     "Gateway commands:",
     "/zedstart • /worldzfullbuild • /fullscope • /worldzvotes • /vote • /commands • /commandtree",
