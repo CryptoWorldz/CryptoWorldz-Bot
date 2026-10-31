@@ -1,6 +1,8 @@
 name: WorldzHQ and PDC verified Hostinger deployment
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
   push:
     branches: [main]
     paths:
@@ -15,6 +17,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   deploy-and-verify:
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -34,3 +37,13 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           GITHUB_SHA: ${{ github.sha }}
         run: python3 tools/deploy_worldz_public_verified.py
+
+  public-health:
+    if: always()
+    needs: [deploy-and-verify]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independently compare public content against GitHub source
+        run: python3 tools/check_worldz_public_health.py
