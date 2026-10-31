@@ -1,0 +1,270 @@
+{
+  "schema_version": 1,
+  "policy": "Single inventory for planning and audits. Registration does not establish DNS, Hostinger attachment or deployability. Never create guessed remote roots.",
+  "last_review": "2026-11-01",
+  "sources": [
+    "Spaceship receipt 2026-10-15: seven registrations",
+    "Spaceship receipt 2026-10-29: seven registrations",
+    "GitHub legacy DOMAINS.txt: 18 entries"
+  ],
+  "domains": [
+    {
+      "domain": "worldz.website",
+      "ownership": "owned",
+      "purpose": "websites_hub",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldzhq.com",
+      "ownership": "owned",
+      "purpose": "headquarters",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldz.live",
+      "ownership": "owned",
+      "purpose": "events",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldz.site",
+      "ownership": "owned",
+      "purpose": "business_directory",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldz.online",
+      "ownership": "owned",
+      "purpose": "community",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldz.space",
+      "ownership": "owned",
+      "purpose": "innovation",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldz.store",
+      "ownership": "owned",
+      "purpose": "marketplace",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldz.autos",
+      "ownership": "owned",
+      "purpose": "automotive",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldz.shop",
+      "ownership": "owned",
+      "purpose": "shopping",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldz.support",
+      "ownership": "owned",
+      "purpose": "support",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldz.business",
+      "ownership": "owned",
+      "purpose": "business",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldzlaunch.com",
+      "ownership": "owned",
+      "purpose": "launchpad",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldz.help",
+      "ownership": "owned",
+      "purpose": "help",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "worldz.charity",
+      "ownership": "owned",
+      "purpose": "charity",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "donateworldz.com",
+      "ownership": "portfolio_reported",
+      "purpose": "humanitarian",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "foodworldz.com",
+      "ownership": "portfolio_reported",
+      "purpose": "food",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "purplediamondcrew.com",
+      "ownership": "portfolio_reported",
+      "purpose": "humanitarian_team",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "cryptoworldz.xyz",
+      "ownership": "legacy_registry",
+      "purpose": "crypto",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "solworldz.xyz",
+      "ownership": "legacy_registry",
+      "purpose": "solana",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "ethworldz.xyz",
+      "ownership": "legacy_registry",
+      "purpose": "ethereum",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "baseworldz.xyz",
+      "ownership": "legacy_registry",
+      "purpose": "base",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "bnbworldz.xyz",
+      "ownership": "legacy_registry",
+      "purpose": "bnb",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "xrpworldz.xyz",
+      "ownership": "legacy_registry",
+      "purpose": "xrpl",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "suiworldz.xyz",
+      "ownership": "legacy_registry",
+      "purpose": "sui",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "hyperworldz.xyz",
+      "ownership": "legacy_registry",
+      "purpose": "hyper",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "robinworldz.xyz",
+      "ownership": "legacy_registry",
+      "purpose": "robinhood",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "hodlerworldz.xyz",
+      "ownership": "legacy_registry",
+      "purpose": "hodler",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "hodlergalaxy.xyz",
+      "ownership": "legacy_registry",
+      "purpose": "hodler",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    },
+    {
+      "domain": "oneworldz.com",
+      "ownership": "retired_brand",
+      "purpose": "do_not_publish",
+      "deploy_enabled": false,
+      "hosting_verified": false,
+      "live_verified": false
+    }
+  ],
+  "subdomains": [
+    {
+      "domain": "launchpad.cryptoworldz.xyz",
+      "status": "repository_reference"
+    },
+    {
+      "domain": "cryptobotz.cryptoworldz.xyz",
+      "status": "repository_reference"
+    },
+    {
+      "domain": "spam2ham.cryptoworldz.xyz",
+      "status": "repository_reference"
+    },
+    {
+      "domain": "impactbased.oneworldz.com",
+      "status": "retired_brand"
+    },
+    {
+      "domain": "law.oneworldz.com",
+      "status": "retired_brand"
+    },
+    {
+      "domain": "learn.oneworldz.com",
+      "status": "retired_brand"
+    }
+  ]
+}
