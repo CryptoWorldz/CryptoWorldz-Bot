@@ -3,46 +3,14 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '17 */6 * * *'
-  push:
-    branches: [main]
-    paths:
-      - 'worldzhq.com/**'
-      - 'purplediamondcrew.com/**'
-      - 'tools/deploy_worldz_public_verified.py'
-      - '.github/workflows/worldz-public-verified.yml'
 permissions:
   contents: read
 concurrency:
   group: worldz-new-sites-only
   cancel-in-progress: false
 jobs:
-  deploy-and-verify:
-    if: github.event_name != 'schedule'
-    runs-on: ubuntu-latest
-    environment: cryptoworldz-production
-    timeout-minutes: 35
-    steps:
-      - uses: actions/checkout@v4
-      - name: Validate configuration
-        env:
-          FTP_HOST: ${{ vars.FTP_TLS_HOST || secrets.FTP_HOST }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_PORT: ${{ vars.FTP_PORT || '21' }}
-        run: |
-          test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD" || { echo "::error::Missing Hostinger FTPS secrets"; exit 1; }
-          python3 -m py_compile tools/deploy_worldz_public_verified.py
-      - name: Deploy and independently verify live pages
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          GITHUB_SHA: ${{ github.sha }}
-        run: python3 tools/deploy_worldz_public_verified.py
 
   public-health:
-    if: always()
-    needs: [deploy-and-verify]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
