@@ -1,0 +1,38 @@
+{
+  "schema": "WORLDZ-HARDWARE-WALLET-SECURITY-V1",
+  "status": "DESIGN_ONLY_NOT_INTEGRATED",
+  "model": "NON_CUSTODIAL_EXTERNAL_SIGNER",
+  "providers": [
+    {
+      "id": "tangem",
+      "label": "Tangem / future WorldzCard",
+      "status": "RESEARCH_ONLY",
+      "requirement": "Use an officially supported and independently reviewed Tangem SDK or handoff; branded card issuance requires separate provider agreement. Never claim NFC signing works until proven on real hardware."
+    }
+  ],
+  "security": {
+    "default": "DENY",
+    "keyHandling": "Keys, seed phrases, PINs, NFC secrets and hardware credentials never enter Worldz servers, logs, analytics or browser storage.",
+    "signing": "No signing or broadcasting until explicit per-chain user approval, transaction simulation, clear destination/amount/network/fees and independent security review.",
+    "treasury": "Separate personal wallets from treasury accounts; require approved multisignature policy and documented governance. No automatic allocation, transfer or trading.",
+    "chains": [
+      "SOLANA",
+      "XRPL",
+      "EVM",
+      "SUI"
+    ],
+    "crossChain": "No assumption that one hardware card supports every chain or signature scheme; verify support separately.",
+    "recovery": "Explain provider-supported backup and recovery; never collect recovery material.",
+    "mobile": "Android release requires verified package identity, signing, Digital Asset Links, app-link domain ownership and independent penetration testing."
+  },
+  "acceptanceGates": [
+    "Official Tangem integration feasibility documented",
+    "Chain-by-chain support and test vectors verified",
+    "Android device NFC/handoff integration tested on physical hardware",
+    "User-visible simulation and explicit signing confirmation tested",
+    "Threat model and independent security assessment completed",
+    "Treasury multisig and separation-of-duties verified",
+    "No secrets in telemetry or storage verified",
+    "Play Store policy, privacy and app-signing review passed"
+  ]
+}
