@@ -38,8 +38,7 @@ function raidOpenUrl(campaign) {
   if (String(campaign?.platform || "").toUpperCase() !== "X") return source;
   const statusId = extractXStatusId(source);
   if (!statusId) return source;
-  const params = new URLSearchParams({ id: statusId, src: source });
-  return `https://cryptobotz.cryptoworldz.xyz/miniapp/open-x.html?${params.toString()}`;
+  return `https://x.com/i/status/${statusId}`;
 }
 
 function numberOr(value, fallback, min = 0, max = 10000000) {
@@ -91,10 +90,10 @@ function progressLine(label, current, goal) {
 }
 
 function campaignText(campaign) {
-  if (!campaign) return "🤠 RONALD RAIDER\n\nNo live Raid right now.";
+  if (!campaign) return "🌐💜⚡ WORLDZ RAIDZ\n\nNo live Raid right now.";
   const status = String(campaign.status || "").toUpperCase();
   const lines = [
-    "🤠⚡ RONALD RAIDER",
+    "🌐💜⚡ WORLDZ RAIDZ",
     `Raid #${campaign.id} • ${campaign.platform} • ${status}`,
     "",
     "🔥 RAID IN 3 EASY STEPS",
@@ -117,9 +116,9 @@ function campaignText(campaign) {
 }
 
 function raidPulseText(campaign) {
-  if (!campaign) return "🤠⚡ RONALD RAIDER — no live Raid.";
+  if (!campaign) return "🌐💜⚡ WORLDZ RAIDZ — no live Raid.";
   return [
-    `🤠⚡ RONALD RAIDER • RAID #${campaign.id} ACTIVE`,
+    `🌐💜⚡ WORLDZ RAIDZ • RAID #${campaign.id} ACTIVE`,
     "",
     "1️⃣ OPEN POST",
     "2️⃣ Like + Repost + Reply",
@@ -406,12 +405,12 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       return send(msg.chat.id, "⚠️ That post is already in the ZED mission system.");
     }
     if (!queued && await activeCampaign(msg.chat.id)) {
-      return send(msg.chat.id, "🤠 Ronald already has a live Raid. Use /next <URL> to line the next one up, or /stopraid first.");
+      return send(msg.chat.id, "🌐 Worldz Raidz already has a live Raid. Use /next <URL> to line the next one up, or /stopraid first.");
     }
 
     const expiresAt = new Date(Date.now() + parsed.durationHours * 3600000).toISOString();
     const mission = await repository.createMission({
-      title: `Ronald Raider — ${parsed.target.platform} Raid`,
+      title: `Worldz Raidz — ${parsed.target.platform} Raid`,
       platform: parsed.target.platform,
       reward_points: parsed.reward,
       link: parsed.target.url,
