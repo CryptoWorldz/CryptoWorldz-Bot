@@ -5,15 +5,14 @@ on:
     branches: [main]
     paths:
       - 'public/miniapp/**'
-      - '.github/workflows/deploy-command-centre-miniapp.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: command-centre-miniapp-static
-  cancel-in-progress: true
+  group: restore-zed-auto-grace
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -53,8 +52,7 @@ jobs:
           node --check public/miniapp/dipshit.js
           node --check public/miniapp/inbox.js
           node --check public/miniapp/community-suite.js
-          grep -Fq 'twitter://status?status_id=' public/miniapp/open-x.html
-          grep -Fq 'package=com.twitter.android' public/miniapp/open-x.html
+          node --test test/raid-post-launcher.test.js
           grep -Fq 'OPEN EXACT POST IN BROWSER' public/miniapp/open-x.html
           grep -Fq 'Command Centre <span>MAX™</span>' public/miniapp/index.html
           grep -Fq 'command-centre-max' public/miniapp/max.js
@@ -189,7 +187,7 @@ jobs:
                   assert mcode==200 and 'command-centre-max' in maxjs and 'LEARN' in maxjs and 'RESEARCH' in maxjs
                   assert xcode==200 and '.max-home-card' in maxcss
                   assert scode==200 and '/api/mini/community-suite' in suite and 'WorldzCommunitySuite' in suite
-                  assert ocode==200 and 'twitter://status?status_id=' in openx and 'package=com.twitter.android' in openx and 'OPEN EXACT POST IN BROWSER' in openx
+                  assert ocode==200 and 'exact-web-v2' in openx and 'twitter://' not in openx and 'intent://' not in openx and 'OPEN EXACT POST IN BROWSER' in openx
                   print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 max=1 worldzlaunchpad=1 auto_public=1 dipshit=1 inbox=1 community_suite=1 direct_x_raid=1 basedbid=0')
                   raise SystemExit(0)
               except SystemExit:
