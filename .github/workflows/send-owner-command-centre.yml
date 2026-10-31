@@ -1,0 +1,41 @@
+name: Send owner Command Centre launch button
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/send-owner-command-centre.yml'
+permissions:
+  contents: read
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    environment: cryptoworldz-production
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_SECRET_KEY }}
+    steps:
+      - name: Send requested secure launch button to verified owner private chat
+        shell: python
+        run: |
+          import json,os,urllib.request
+          token=os.environ["BOT_TOKEN"].strip()
+          key=os.environ["SUPABASE_SERVICE_ROLE_KEY"].strip()
+          if not token or not key: raise SystemExit("Protected credentials missing")
+          for value in [token,key]: print("::add-mask::"+value)
+          def request(url,payload=None,headers=None):
+              req=urllib.request.Request(url,data=None if payload is None else json.dumps(payload).encode(),headers=headers or {"Content-Type":"application/json"})
+              try:
+                  with urllib.request.urlopen(req,timeout=20) as r: return json.load(r)
+              except Exception:
+                  raise SystemExit("Provider request failed; credential-bearing URL withheld")
+          rows=request("https://hknymhhyqldtzmplzuzh.supabase.co/rest/v1/bot_admins?select=telegram_id&role=eq.owner&status=eq.active&limit=2",headers={"apikey":key,"Authorization":"Bearer "+key})
+          if len(rows)!=1: raise SystemExit("Owner registry is missing or ambiguous")
+          owner=int(rows[0]["telegram_id"])
+          api="https://api.telegram.org/bot"+token+"/"
+          chat=request(api+"getChat",{"chat_id":owner})
+          if not chat.get("ok") or chat["result"].get("type")!="private" or int(chat["result"]["id"])!=owner: raise SystemExit("Verified owner private chat unavailable")
+          result=request(api+"sendMessage",{"chat_id":owner,"text":"JayJay — Command Centre is running again. Tap OPEN COMMAND CENTRE below inside Telegram to launch securely. Opening the website in a normal browser shows Secure Launch Required because it cannot verify your Telegram identity.","reply_markup":{"inline_keyboard":[[{"text":"OPEN COMMAND CENTRE","web_app":{"url":"https://cryptobotz.cryptoworldz.xyz/miniapp/"}}]]}})
+          if not result.get("ok") or not result.get("result",{}).get("message_id"): raise SystemExit("Telegram did not confirm delivery")
+          print("OWNER_SECURE_LAUNCH_BUTTON_SENT=PASS")
