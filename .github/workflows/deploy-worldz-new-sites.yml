@@ -108,7 +108,7 @@ jobs:
                   home=sftp.normalize('.')
                   print('SFTP_HOME '+home,flush=True)
                   print('SFTP_ROOT_ENTRIES '+','.join(sftp.listdir('.')),flush=True)
-                  candidates=['domains/'+domain+'/public_html',domain+'/public_html','public_html']
+                  candidates=['domains/'+domain+'/public_html',domain+'/public_html']
                   existing=[]
                   for candidate in candidates:
                       try:
