@@ -1,0 +1,99 @@
+name: Repair Ronald exact post links
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/repair-ronald-exact-post.yml']
+permissions:
+  contents: read
+concurrency:
+  group: restore-zed-auto-grace
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    environment: cryptoworldz-production
+    env:
+      SFTP_HOST: ${{ vars.SFTP_HOST || '145.223.108.40' }}
+      SFTP_PORT: ${{ vars.SFTP_PORT || '65002' }}
+      SFTP_USERNAME: ${{ secrets.SFTP_USERNAME || vars.SFTP_USERNAME || 'u643166328' }}
+      SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_SECRET_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install existing SFTP transport
+        run: python -m pip install paramiko==3.5.1
+      - name: Repair only launcher and existing raid message buttons
+        shell: python
+        run: |
+          import hashlib, io, json, os, time, urllib.request, urllib.error
+          import paramiko
+          domain="cryptobotz.cryptoworldz.xyz"
+          payload=open("public/miniapp/open-x.html","rb").read()
+          expected=hashlib.sha256(payload).hexdigest()
+          transport=paramiko.Transport((os.environ["SFTP_HOST"],int(os.environ["SFTP_PORT"])))
+          transport.connect(username=os.environ["SFTP_USERNAME"],password=os.environ["SFTP_PASSWORD"])
+          sftp=paramiko.SFTPClient.from_transport(transport)
+          targets=set()
+          for root in ["domains/"+domain,domain]:
+              for layout in ["/nodejs/public/miniapp/open-x.html","/hbuilds/current/nodejs/public/miniapp/open-x.html"]:
+                  path=root+layout
+                  try:
+                      sftp.stat(path)
+                      targets.add(sftp.normalize(path))
+                  except FileNotFoundError: pass
+          if not targets: raise SystemExit("No existing launcher found in known domain layouts; no files written")
+          for path in sorted(targets):
+              with sftp.open(path,"rb") as f: original=f.read()
+              if original==payload: continue
+              if b"Open Raid Post in X" not in original: raise SystemExit("Unexpected remote file; refusing overwrite")
+              backup=path+".before-exact-web-v2"
+              try: sftp.stat(backup)
+              except FileNotFoundError:
+                  with sftp.open(backup,"wb") as f: f.write(original)
+              with sftp.open(path,"wb") as f: f.write(payload)
+              with sftp.open(path,"rb") as f: assert hashlib.sha256(f.read()).hexdigest()==expected
+              print("STATIC_LAUNCHER_UPDATED",flush=True)
+          sftp.close();transport.close()
+          base="https://"+domain
+          url=base+"/miniapp/open-x.html?id=2116635766965092553&v=exact-web-v2"
+          with urllib.request.urlopen(urllib.request.Request(url,headers={"Cache-Control":"no-cache"}),timeout=25) as r:
+              assert hashlib.sha256(r.read()).hexdigest()==expected,"Live launcher does not match repair; buttons untouched"
+          print("LIVE_LAUNCHER_SHA256=PASS",flush=True)
+          with urllib.request.urlopen(base+"/health",timeout=20) as r:
+              health=json.load(r)
+              assert health.get("ok") is True and health.get("ready") is True
+          print("RUNTIME_HEALTH=PASS",flush=True)
+          token=os.environ["BOT_TOKEN"].strip();service=os.environ["SUPABASE_SERVICE_ROLE_KEY"].strip()
+          for secret in [token,service]: print("::add-mask::"+secret)
+          def db(path):
+              req=urllib.request.Request("https://hknymhhyqldtzmplzuzh.supabase.co/rest/v1/"+path,headers={"apikey":service,"Authorization":"Bearer "+service})
+              with urllib.request.urlopen(req,timeout=25) as r: return json.load(r)
+          raid=db("raid_campaigns?id=eq.2&select=id,source_url,status")
+          exact="https://x.com/JayJayTeamDev/status/2116635766965092553"
+          assert len(raid)==1 and raid[0]["source_url"]==exact
+          receipts=db("worldzcast_deliveries?post_id=eq.0fd3d59d-6203-404e-9faf-6f218ee12c37&status=eq.sent&select=chat_id,telegram_message_id")
+          assert len(receipts)==14
+          from urllib.parse import urlencode
+          launcher=base+"/miniapp/open-x.html?"+urlencode({"id":"2116635766965092553","src":exact,"v":"exact-web-v2"})
+          markup={"inline_keyboard":[[{"text":"OPEN EXACT RAID POST","url":launcher}],[{"text":"I RAIDED — submit proof","callback_data":"ronald:done:2"}]]}
+          ok=0
+          for receipt in receipts:
+              data={"chat_id":receipt["chat_id"],"message_id":receipt["telegram_message_id"],"reply_markup":markup}
+              req=urllib.request.Request("https://api.telegram.org/bot"+token+"/editMessageReplyMarkup",data=json.dumps(data).encode(),headers={"Content-Type":"application/json"})
+              try:
+                  with urllib.request.urlopen(req,timeout=25) as r:
+                      result=json.load(r);assert result.get("ok") is True
+                      assert result["result"]["reply_markup"]==markup
+                  ok+=1
+              except urllib.error.HTTPError as e:
+                  error=json.load(e)
+                  if "message is not modified" in error.get("description","").lower(): ok+=1
+                  else: print("BUTTON_EDIT_FAILED code="+str(e.code),flush=True)
+              time.sleep(.15)
+          print("EXISTING_RAID_BUTTONS_REPAIRED="+str(ok)+"/"+str(len(receipts)),flush=True)
+          assert ok==len(receipts)
+          print("ANDROID_TELEGRAM_TO_X_HANDOFF=UNVERIFIED: requires actual device tap",flush=True)
+          

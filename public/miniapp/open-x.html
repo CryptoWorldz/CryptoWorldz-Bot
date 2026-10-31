@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#08040e">
 <title>Open Raid Post in X</title>
+<meta name="worldz-raid-launcher" content="exact-web-v2">
 <style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 50% 0,#44207f,#120820 48%,#050208);color:#fff;font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:18px}
 .card{width:min(520px,100%);border:1px solid #ffffff24;border-radius:26px;padding:28px;background:#10091bea;box-shadow:0 25px 80px #000a}
@@ -14,8 +15,8 @@
 <body>
 <main class="card">
   <div class="logo">🤠⚡𝕏</div>
-  <h1>Opening the Raid post…</h1>
-  <p class="lead">Worldz is sending the exact X status ID to the installed X app so Telegram does not lose the post during the hand-off.</p>
+  <h1>Open the exact Raid post</h1>
+  <p class="lead">Tap below to open this specific post. The full link is shown so you can check or copy it.</p>
   <div id="status" class="status">Checking Raid link…</div>
   <div class="actions">
     <a id="open-app" class="btn" href="#">𝕏 OPEN RAID POST IN X APP</a>
@@ -51,19 +52,20 @@
   }
 
   const exactWeb = safeSource(raw) || ("https://x.com/i/web/status/" + id);
-  const nativeScheme = "twitter://status?status_id=" + encodeURIComponent(id);
-  const androidIntent = "intent://status?status_id=" + encodeURIComponent(id) +
-    "#Intent;scheme=twitter;package=com.twitter.android;S.browser_fallback_url=" +
-    encodeURIComponent(exactWeb) + ";end";
-
   const status = document.getElementById("status");
   const openApp = document.getElementById("open-app");
   const openWeb = document.getElementById("open-web");
   const copy = document.getElementById("copy");
 
   status.innerHTML = '<span class="ok">Exact Raid post locked:</span> ' + id;
-  openApp.href = nativeScheme;
+  openApp.href = exactWeb;
+  openApp.textContent = "𝕏 OPEN EXACT RAID POST";
   openWeb.href = exactWeb;
+  openWeb.target = "_blank";
+  const displayedLink = document.createElement("p");
+  displayedLink.textContent = exactWeb;
+  displayedLink.style.overflowWrap = "anywhere";
+  status.appendChild(displayedLink);
 
   copy.addEventListener("click", async () => {
     try {
@@ -80,31 +82,8 @@
     }
   });
 
-  let leftPage = false;
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) leftPage = true;
-  });
+  // Navigation requires a user click. Never auto-launch an app scheme.
 
-  // Android first: force the installed X package to receive the exact post ID.
-  // If Telegram's WebView blocks intent://, immediately try X's legacy native
-  // status scheme. We do NOT auto-send the user to Google Play.
-  const isAndroid = /Android/i.test(navigator.userAgent);
-  setTimeout(() => {
-    if (leftPage) return;
-    try {
-      location.href = isAndroid ? androidIntent : nativeScheme;
-    } catch {
-      try { location.href = nativeScheme; } catch {}
-    }
-  }, 180);
-
-  // Keep the page available as the safe fallback. A user can always press
-  // OPEN EXACT POST IN BROWSER without being sent to the Play Store.
-  setTimeout(() => {
-    if (!leftPage) {
-      status.innerHTML = '<span class="warn">X did not take the deep link automatically.</span> Press OPEN RAID POST IN X APP once. If X still refuses it, use OPEN EXACT POST IN BROWSER.';
-    }
-  }, 1800);
 })();
 </script>
 </body>
