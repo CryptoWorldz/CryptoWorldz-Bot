@@ -47,6 +47,34 @@ jobs:
       - name: Install SFTP client
         if: env.SFTP_USERNAME != '' && env.SFTP_PASSWORD != ''
         run: python3 -m pip install --quiet paramiko
+      - name: Inspect actual Hostinger folders before deployment
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import ftplib,ssl
+          domains=['worldzhq.com','worldz.live','purplediamondcrew.com','worldzlaunch.com','worldz.website','worldz.site','worldz.online','worldz.space','worldz.store','worldz.autos','worldz.shop','worldz.support','worldz.business','worldz.help','worldz.charity','donateworldz.com','foodworldz.com']
+          if os.getenv('SFTP_USERNAME') and os.getenv('SFTP_PASSWORD'):
+              import paramiko
+              transport=paramiko.Transport((os.environ['SFTP_HOST'],int(os.getenv('SFTP_PORT','65002'))))
+              transport.connect(username=os.environ['SFTP_USERNAME'],password=os.environ['SFTP_PASSWORD'])
+              sftp=paramiko.SFTPClient.from_transport(transport)
+              try:
+                  print('HOSTINGER_HOME '+sftp.normalize('.'),flush=True)
+                  for domain in domains:
+                      found=[]
+                      for path in ('domains/'+domain+'/public_html',domain+'/public_html'):
+                          try:
+                              sftp.stat(path)
+                              found.append(path)
+                          except OSError: pass
+                      print('HOSTINGER_SITE '+domain+' '+('READY '+','.join(found) if found else 'NO_SITE_DIRECTORY'),flush=True)
+              finally:
+                  sftp.close()
+                  transport.close()
+          else:
+              print('HOSTINGER_AUDIT SFTP_NOT_CONFIGURED',flush=True)
+          PY
       - name: Upload only public assets to the two new domains
         shell: bash
         run: |
