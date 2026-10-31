@@ -58,3 +58,20 @@ test("candidate order prefers explicit override, then permanent protected root, 
     "/runtime/home/domains/cryptobotz.cryptoworldz.xyz/nodejs/.env"
   ]);
 });
+
+
+test("managed hbuilds release recovers permanent credentials without account HOME or USER", (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "zed-hbuilds-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const domain = path.join(root, "domains", "cryptobotz.cryptoworldz.xyz");
+  const protectedRoot = path.join(domain, "nodejs");
+  const release = path.join(domain, "hbuilds", "current", "nodejs");
+  fs.mkdirSync(protectedRoot, {recursive:true});
+  fs.mkdirSync(release, {recursive:true});
+  fs.writeFileSync(path.join(protectedRoot, ".env"), "SUPABASE_SERVICE_ROLE_KEY=server-fixture\nJUPITER_API_KEY=quote-fixture\n");
+  fs.writeFileSync(path.join(release, ".env"), "SUPABASE_SERVICE_ROLE_KEY=\n");
+  const env = {SUPABASE_SERVICE_ROLE_KEY: "", HOME:path.join(root,"runner"), USER:"runner"};
+  loadProtectedEnvironment({appRoot:release, env, home:env.HOME});
+  assert.equal(env.SUPABASE_SERVICE_ROLE_KEY, "server-fixture");
+  assert.equal(env.JUPITER_API_KEY, "quote-fixture");
+});
