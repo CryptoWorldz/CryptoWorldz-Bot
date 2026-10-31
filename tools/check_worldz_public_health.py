@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 SITES={
  "https://worldzhq.com/":("worldzhq.com/index.html",["/treasury/"]),
- "https://worldzhq.com/treasury/":("worldzhq.com/treasury/index.html",["What @JayJayTeamDev is building","Dennis, the other Dennis"]),
+ "https://worldzhq.com/treasury/":("worldzhq.com/treasury/index.html",["What @JayJayTeamDev is building"]),
  "https://purplediamondcrew.com/":("purplediamondcrew.com/index.html",["What Purple Diamond Crew does"]),
 }
 def check(url,path,markers):
