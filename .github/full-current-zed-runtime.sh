@@ -10,7 +10,7 @@ set -Eeuo pipefail
 : "${HOSTINGER_API_TOKEN:?}"
 : "${OPENAI_API_KEY:?}"
 
-for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN" "$OPENAI_API_KEY" "$BOT_TOKEN_SECRET" "${DIPSHIT_BOT_TOKEN_SECRET:-}" "$SUPABASE_URL_SECRET" "$SUPABASE_SERVICE_ROLE_KEY_SECRET"; do
+for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN" "$OPENAI_API_KEY" "$BOT_TOKEN_SECRET" "${DIPSHIT_BOT_TOKEN_SECRET:-}" "${JUPITER_API_KEY_SECRET:-}" "$SUPABASE_URL_SECRET" "$SUPABASE_SERVICE_ROLE_KEY_SECRET"; do
   [ -n "$value" ] && echo "::add-mask::$value"
 done
 
@@ -108,6 +108,7 @@ required = {
     "SUPABASE_SERVICE_ROLE_KEY": os.environ.get("SUPABASE_SERVICE_ROLE_KEY_SECRET", "").strip() or existing.get("SUPABASE_SERVICE_ROLE_KEY", ""),
 }
 optional = {
+    "JUPITER_API_KEY": os.environ.get("JUPITER_API_KEY_SECRET", "").strip() or existing.get("JUPITER_API_KEY", ""),
     "DIPSHIT_BOT_TOKEN": os.environ.get("DIPSHIT_BOT_TOKEN_SECRET", "").strip() or existing.get("DIPSHIT_BOT_TOKEN", ""),
     "DIPSHIT_WEBHOOK_URL": os.environ.get("DIPSHIT_WEBHOOK_URL", "").strip() or existing.get("DIPSHIT_WEBHOOK_URL", "") or "https://cryptobotz.cryptoworldz.xyz/dipshit-telegram-webhook",
     "DIPSHIT_STARS_MONTHLY_PRICE": os.environ.get("DIPSHIT_STARS_MONTHLY_PRICE", "").strip() or existing.get("DIPSHIT_STARS_MONTHLY_PRICE", ""),
