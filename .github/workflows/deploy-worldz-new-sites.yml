@@ -6,6 +6,8 @@ on:
       - 'worldzhq.com/**'
       - 'worldz.live/**'
       - '.github/workflows/deploy-worldz-new-sites.yml'
+      - 'purplediamondcrew.com/**'
+      - 'tools/check_worldz_public_health.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -38,7 +40,7 @@ jobs:
           else
             test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
           fi
-          for site in worldzhq.com worldz.live; do
+          for site in worldzhq.com worldz.live purplediamondcrew.com; do
             test -s "$site/index.html"
             grep -qi '<html' "$site/index.html"
           done
@@ -100,7 +102,7 @@ jobs:
                       sftp.put(str(p),dest)
               print('SFTP_SELECTED',flush=True)
           try:
-           for domain in ('worldzhq.com','worldz.live'):
+           for domain in ('worldzhq.com','worldz.live','purplediamondcrew.com'):
               site=root/domain
               allowed={'.html','.css','.js','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.txt','.json'}
               files=[p for p in site.rglob('*') if p.is_file() and p.suffix.lower() in allowed and not any(part.startswith('.') for part in p.relative_to(site).parts) and p.name not in ('domain-plan.json','package.json','package-lock.json')]
@@ -151,11 +153,11 @@ jobs:
         run: |
           python3 - <<'PY'
           import urllib.request,urllib.error
-          for domain in ('worldzhq.com','worldz.live'):
+          for domain in ('worldzhq.com','worldz.live','purplediamondcrew.com'):
               try:
                   with urllib.request.urlopen('https://'+domain+'/',timeout=20) as r:
                       body=r.read(100000).lower()
-                      expected_marker = b'worldz' if domain == 'worldzhq.com' else b'woodstock revival'
+                      expected_marker = b'worldz' if domain == 'worldzhq.com' else (b'woodstock revival' if domain == 'worldz.live' else b'purple diamond crew')
                       if r.status != 200 or b'<html' not in body or expected_marker not in body:
                           raise ValueError('Wrong or missing Worldz website content at ' + domain)
                       print('PUBLIC_HTTPS_PASS '+domain)
@@ -163,3 +165,6 @@ jobs:
                   print('::error::PUBLIC_HTTPS_UNVERIFIED '+domain+' '+str(e))
                   raise
           PY
+
+      - name: Verify public site HTML matches committed source
+        run: python3 tools/check_worldz_public_health.py
