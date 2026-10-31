@@ -1,0 +1,102 @@
+name: Share live Worldz build raid
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/worldz-build-raid-live.yml']
+permissions:
+  contents: read
+concurrency:
+  group: jayjay-worldz-build-announcement
+  cancel-in-progress: false
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment: cryptoworldz-production
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_SECRET_KEY }}
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+    steps:
+      - name: Publish requested announcement and register real delivery receipts
+        shell: python
+        run: |
+          import io,json,os,re,time,urllib.request,urllib.error,datetime
+          from ftplib import FTP_TLS
+          base="https://hknymhhyqldtzmplzuzh.supabase.co/rest/v1/"
+          bot=os.environ["BOT_TOKEN"].strip(); service=os.environ["SUPABASE_SERVICE_ROLE_KEY"].strip()
+          for value in [bot,service]: print("::add-mask::"+value)
+          def req(url,method="GET",data=None,headers=None):
+              h=dict(headers or {})
+              if data is not None: h["Content-Type"]="application/json"
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(url,data=None if data is None else json.dumps(data).encode(),headers=h,method=method),timeout=25) as r: return r.status,json.load(r)
+              except urllib.error.HTTPError as e:
+                  try: result=json.load(e)
+                  except Exception: result={}
+                  return e.code,result
+              except Exception: return 0,{}
+          def db(path,method="GET",data=None):
+              code,out=req(base+path,method,data,{"apikey":service,"Authorization":"Bearer "+service,"Prefer":"return=representation"})
+              if code not in (200,201,204): raise SystemExit("Database operation failed HTTP="+str(code))
+              return out
+          def tg(method,data=None):
+              code,out=req("https://api.telegram.org/bot"+bot+"/"+method,"POST" if data is not None else "GET",data)
+              if code!=200 or not out.get("ok"): raise RuntimeError("Telegram "+method+" HTTP="+str(code)+" code="+str(out.get("error_code")))
+              return out["result"]
+          ownerrows=db("bot_admins?select=telegram_id&role=eq.owner&status=eq.active&limit=2")
+          if len(ownerrows)!=1: raise SystemExit("Owner ambiguous")
+          owner=int(ownerrows[0]["telegram_id"])
+          links=db("member_referral_links?select=invite_link,chat_id&telegram_id=eq."+str(owner)+"&status=eq.active&order=id&limit=2")
+          if len(links)!=2: raise SystemExit("Two existing owner shill links required")
+          me=tg("getMe")
+          targets=db("community_telegram_destinations?select=id,chat_id,title&status=eq.active&thread_id=eq.0&chat_type=in.(group,supergroup)&order=id")
+          settings={str(x["chat_id"]):x for x in db("zed_chat_settings?select=chat_id,points_enabled,ronald_raider_enabled")}
+          available=[]; failed=[]
+          for target in targets:
+              try:
+                  member=tg("getChatMember",{"chat_id":target["chat_id"],"user_id":me["id"]})
+                  if member.get("status") not in ("creator","administrator"): raise RuntimeError("bot_not_admin")
+                  if settings.get(str(target["chat_id"]),{}).get("points_enabled") is False: raise RuntimeError("points_disabled")
+                  available.append(target)
+              except Exception as e:
+                  failed.append(target["title"])
+                  print("GROUP_PREFLIGHT_FAILED "+target["title"]+" "+str(e),flush=True)
+          if len(available)<11: raise SystemExit("Fewer than 11 verified points-enabled groups; 10+ claim withheld")
+          post="WORLDZ build is going strong 🌐💜\nEarn Legend Points NOW through eligible tasks in our ZED-led Command Centre across 10+ Telegram groups.\nJoin my communities:\n"+links[0]["invite_link"]+"\n"+links[1]["invite_link"]+"\nPoints aren't cash."
+          if len(post)>280: raise SystemExit("Post too long")
+          print("VERIFIED_GROUPS="+str(len(available)),flush=True)
+          xurl="https://x.com/JayJayTeamDev/status/2116635766965092553"
+          raids=db("raid_campaigns?select=id,status,mission_id&source_url=eq."+urllib.parse.quote(xurl,safe="")+"&status=eq.active")
+          if len(raids)!=1 or raids[0]["id"]!=2: raise SystemExit("Verified active raid not found")
+          body="LIVE WORLDZ RAID 🌐💜\n"+xurl+"\n\nOpen the post, participate genuinely, then tap I RAIDED to submit for verification. Eligible verified completion: 20 Legend Points. Points are not cash."
+          previous=db("worldzcast_posts?select=id,status&body=eq."+urllib.parse.quote(body,safe="")+"&limit=1")
+          if previous: raise SystemExit("Announcement already recorded; refusing duplicate broadcast")
+          cast=db("worldzcast_posts","POST",{"created_by":owner,"body":body,"media_kind":"none","status":"sending","target_count":len(available)})[0]
+          sent=0; raidcount=1; now=datetime.datetime.now(datetime.timezone.utc); expiry=(now+datetime.timedelta(hours=24)).isoformat()
+          for target in available:
+              chat=target["chat_id"]; campaign=None
+              delivery={"post_id":cast["id"],"destination_id":target["id"],"chat_id":chat,"thread_id":0,"status":"pending"}
+              receipt=db("worldzcast_deliveries","POST",delivery)[0]
+              try:
+                  markup=None
+                  markup={"inline_keyboard":[[{"text":"OPEN X POST","url":xurl}],[{"text":"I RAIDED — submit proof","callback_data":"ronald:done:2"}]]}
+                  payload={"chat_id":chat,"text":body,"disable_web_page_preview":True}
+                  if markup: payload["reply_markup"]=markup
+                  message=tg("sendMessage",payload);sent+=1
+                  db("worldzcast_deliveries?id=eq."+str(receipt["id"]),"PATCH",{"status":"sent","telegram_message_id":message["message_id"],"sent_at":datetime.datetime.now(datetime.timezone.utc).isoformat()})
+                  print("GROUP_SENT "+target["title"],flush=True)
+              except Exception as e:
+                  failed.append(target["title"])
+                  db("worldzcast_deliveries?id=eq."+str(receipt["id"]),"PATCH",{"status":"failed","error_code":str(e)[:180]})
+                  print("GROUP_FAILED "+target["title"],flush=True)
+              time.sleep(1)
+          db("worldzcast_posts?id=eq."+cast["id"],"PATCH",{"status":"completed" if sent else "failed","sent_count":sent,"failed_count":len(available)-sent,"completed_at":datetime.datetime.now(datetime.timezone.utc).isoformat()})
+          summary="Worldz announcement: "+str(sent)+"/"+str(len(available))+" groups delivered. Raids registered: "+str(raidcount)+". X: "+(xurl or "blocked — posting credential needs connection")+"."
+          tg("sendMessage",{"chat_id":owner,"text":summary})
+          print(summary,flush=True)
+          if not xurl or failed: raise SystemExit("Partial completion; inspect delivery receipts and X credential status")
