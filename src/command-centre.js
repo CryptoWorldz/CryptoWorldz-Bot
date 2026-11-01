@@ -203,7 +203,7 @@ function registerCommandCentreHandlers({ bot, repository, config, supabase }) {
     ["shill_rewards_enabled", "📣 Shill Rewards"],
     ["referral_links_enabled", "🔗 Shill Links"],
     ["secureguard_enabled", "🛡 REXSECURE ULTIMATE"],
-    ["dipshit_enabled", "💙 DipShit"]
+    ["dipshit_enabled", "💙 Sparky"]
   ]);
   const SETTING_KEYS = new Set(SETTING_ROWS.map(([key]) => key));
 
