@@ -9,20 +9,20 @@ const DIPSHIT_PRIVACY_URL = "https://cryptoworldz.xyz/dipshit/privacy/";
 const DIPSHIT_TERMS_URL = "https://cryptoworldz.xyz/dipshit/terms/";
 
 const DIPSHIT_COMMANDS = Object.freeze([
-  { command: "start", description: "Wake up DIPSHIT™" },
+  { command: "start", description: "Wake up SPARKY™" },
   { command: "help", description: "Show the command menu" },
   { command: "status", description: "Check Worldz system status" },
   { command: "check", description: "Run Worldz QA checks" },
   { command: "fix", description: "Troubleshoot a problem" },
-  { command: "ask", description: "Talk to DIPSHIT™ in normal language" },
+  { command: "ask", description: "Talk to SPARKY™ in normal language" },
   { command: "report", description: "Report a bug or broken feature" },
   { command: "worldz", description: "Open the WorldzEcosystem™" },
   { command: "zed", description: "Open the ZED Command Centre" },
   { command: "inbox", description: "Open Worldz Inbox" },
-  { command: "dipshit", description: "Meet the WORLDZ DUDE" },
+  { command: "sparky", description: "Meet Sparky, your Worldz navigator" },
   { command: "website", description: "Open CryptoWorldz" },
   { command: "community", description: "Open Worldz community links" },
-  { command: "subscribe", description: "Join DIPSHIT™ Pro with Telegram Stars" },
+  { command: "subscribe", description: "Join SPARKY™ Pro with Telegram Stars" },
   { command: "membership", description: "Check your membership" },
   { command: "solmembership", description: "View the optional SOL month pass" },
   { command: "claimsol", description: "Verify a SOL membership payment" },
@@ -144,9 +144,9 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
   const aiEnabled = conversation.aiEnabled;
 
   const helpText = () => [
-    "💙 DIPSHIT™ — WORLDZ DUDE",
+    "💙 SPARKY™ — WORLDZ DUDE",
     "",
-    "💬 Talk normally in private chat. In groups, mention @DipShitBossBot, reply to me, or start with “DipShit …”",
+    "💬 Talk normally in private chat. In groups, mention @SparkyWorldzBot, reply to me, or start with “Sparky …”",
     "",
     "/status — runtime status",
     "/check — quick QA check",
@@ -230,7 +230,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     const lines = GUIDE_CONTEXTS[context];
     if (!lines) return null;
     return send(msg.chat.id, [
-      "💙 DIPSHIT™ — YOUR WORLDZ GUIDE",
+      "💙 SPARKY™ — YOUR WORLDZ GUIDE",
       "",
       ...lines,
       "",
@@ -246,7 +246,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     try {
       await bot.sendMessage(
         config.ownerTelegramId,
-        `💙 DIPSHIT™ ${kind}\nFrom: ${username}\nTelegram user: ${msg.from.id}\n\n${text.slice(0, 2500)}`
+        `💙 SPARKY™ ${kind}\nFrom: ${username}\nTelegram user: ${msg.from.id}\n\n${text.slice(0, 2500)}`
       );
       return send(msg.chat.id, "✅ Sent to the Worldz operator.");
     } catch {
@@ -259,22 +259,22 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     if (payload && guideStart(msg, payload)) return undefined;
     return send(
       msg.chat.id,
-      "💙 DIPSHIT™ — WORLDZ DUDE\n\nI'm the plain-English Worldz guide + troubleshooter. Tell me what you're trying to do and I'll give you the exact next step.\n\nQuick starts:\n• Command Centre → /ask how do I join?\n• Wallet → /ask how do I add my wallet?\n• Raid → /ask how do I raid?\n• WorldzLaunch → /ask help me create a token\n\nNever send a seed phrase or private key."
+      "💙 SPARKY™ — WORLDZ DUDE\n\nI'm the plain-English Worldz guide + troubleshooter. Tell me what you're trying to do and I'll give you the exact next step.\n\nQuick starts:\n• Command Centre → /ask how do I join?\n• Wallet → /ask how do I add my wallet?\n• Raid → /ask how do I raid?\n• WorldzLaunch → /ask help me create a token\n\nNever send a seed phrase or private key."
     );
   });
   bot.onText(/^\/help(?:@\w+)?$/, (msg) => send(msg.chat.id, helpText()));
   bot.onText(/^\/status(?:@\w+)?$/, (msg) => send(
     msg.chat.id,
-    `💙 DIPSHIT™ STATUS\n\nRuntime: ✅ ONLINE\nNatural chat listener: ✅ ACTIVE\nConversational AI: ${aiEnabled ? "✅ READY" : "⚙️ KEY NOT CONFIGURED"}\nSupport relay: ${config.ownerTelegramId ? "✅ READY" : "⚙️ NOT CONFIGURED"}\nPrivacy + Terms: ✅ READY\nTelegram Stars membership: ${starsEnabled ? "✅ READY" : "⚙️ PRICE NOT SET"}\nExternal SOL month pass: ${solEnabled ? "✅ READY" : "⚙️ NOT CONFIGURED"}\n\nPayments never require a seed phrase or private key.`
+    `💙 SPARKY™ STATUS\n\nRuntime: ✅ ONLINE\nNatural chat listener: ✅ ACTIVE\nConversational AI: ${aiEnabled ? "✅ READY" : "⚙️ KEY NOT CONFIGURED"}\nSupport relay: ${config.ownerTelegramId ? "✅ READY" : "⚙️ NOT CONFIGURED"}\nPrivacy + Terms: ✅ READY\nTelegram Stars membership: ${starsEnabled ? "✅ READY" : "⚙️ PRICE NOT SET"}\nExternal SOL month pass: ${solEnabled ? "✅ READY" : "⚙️ NOT CONFIGURED"}\n\nPayments never require a seed phrase or private key.`
   ));
   bot.onText(/^\/check(?:@\w+)?$/, (msg) => send(
     msg.chat.id,
-    `🧪 DIPSHIT™ QUICK CHECK\n\n✅ Bot runtime responding\n✅ Natural-language listener active\n${aiEnabled ? "✅" : "⚙️"} Conversational AI\n${config.ownerTelegramId ? "✅" : "⚙️"} Operator support relay\n✅ Privacy route defined\n✅ Terms route defined\n${starsEnabled ? "✅" : "⚙️"} Stars billing\n${solEnabled ? "✅" : "⚙️"} SOL verification\n\nTalk to me normally, or report a problem with /report <message>.`
+    `🧪 SPARKY™ QUICK CHECK\n\n✅ Bot runtime responding\n✅ Natural-language listener active\n${aiEnabled ? "✅" : "⚙️"} Conversational AI\n${config.ownerTelegramId ? "✅" : "⚙️"} Operator support relay\n✅ Privacy route defined\n✅ Terms route defined\n${starsEnabled ? "✅" : "⚙️"} Stars billing\n${solEnabled ? "✅" : "⚙️"} SOL verification\n\nTalk to me normally, or report a problem with /report <message>.`
   ));
   bot.onText(/^\/fix(?:@\w+)?(?:\s+([\s\S]+))?$/, (msg, match) => {
     const problem = String(match && match[1] || "").trim();
     return send(msg.chat.id, problem
-      ? `🔧 DIPSHIT™ TROUBLESHOOTING\n\nProblem received: ${problem.slice(0, 1500)}\n\nRun /check first. If it is still broken, send /report followed by the details.`
+      ? `🔧 SPARKY™ TROUBLESHOOTING\n\nProblem received: ${problem.slice(0, 1500)}\n\nRun /check first. If it is still broken, send /report followed by the details.`
       : "🔧 Tell me what is broken after /fix, or use /report to send it to the Worldz operator.");
   });
   bot.onText(/^\/report(?:@\w+)?(?:\s+([\s\S]+))?$/, (msg, match) => ownerRelay(msg, "BUG REPORT", match && match[1]));
@@ -282,14 +282,14 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
   bot.onText(/^\/worldz(?:@\w+)?$/, (msg) => send(msg.chat.id, "🌐 WorldzEcosystem™\nhttps://cryptoworldz.xyz/"));
   bot.onText(/^\/zed(?:@\w+)?$/, (msg) => send(msg.chat.id, "🤖 ZED Command Centre\nhttps://cryptobotz.cryptoworldz.xyz/miniapp/"));
   bot.onText(/^\/inbox(?:@\w+)?$/, (msg) => send(msg.chat.id, "📥 Worldz Inbox™\nhttps://cryptobotz.cryptoworldz.xyz/miniapp/#inbox"));
-  bot.onText(/^\/dipshit(?:@\w+)?$/, (msg) => send(msg.chat.id, "💙 DIPSHIT™ — WORLDZ DUDE\nhttps://cryptoworldz.xyz/dipshit/"));
+  bot.onText(/^\/(?:sparky|dipshit)(?:@\w+)?$/, (msg) => send(msg.chat.id, "💙 SPARKY™ — WORLDZ DUDE\nhttps://cryptoworldz.xyz/dipshit/"));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, "🌐 https://cryptoworldz.xyz/"));
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(
     msg.chat.id,
     config.communityTelegramUrl || config.communityWebsiteUrl || "https://cryptoworldz.xyz/"
   ));
-  bot.onText(/^\/privacy(?:@\w+)?$/, (msg) => send(msg.chat.id, `🔐 DIPSHIT™ Privacy Policy\n${DIPSHIT_PRIVACY_URL}`));
-  bot.onText(/^\/terms(?:@\w+)?$/, (msg) => send(msg.chat.id, `📜 DIPSHIT™ Membership Terms\n${DIPSHIT_TERMS_URL}`));
+  bot.onText(/^\/privacy(?:@\w+)?$/, (msg) => send(msg.chat.id, `🔐 SPARKY™ Privacy Policy\n${DIPSHIT_PRIVACY_URL}`));
+  bot.onText(/^\/terms(?:@\w+)?$/, (msg) => send(msg.chat.id, `📜 SPARKY™ Membership Terms\n${DIPSHIT_TERMS_URL}`));
 
   bot.onText(/^\/subscribe(?:@\w+)?$/, async (msg) => {
     if (!starsEnabled) {
@@ -297,16 +297,16 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     }
     try {
       const link = await telegramApi(config.dipshitBotToken, "createInvoiceLink", {
-        title: "DIPSHIT Pro",
-        description: "30-day recurring DIPSHIT™ Pro membership.",
+        title: "SPARKY Pro",
+        description: "30-day recurring SPARKY™ Pro membership.",
         payload: DIPSHIT_INVOICE_PAYLOAD,
         currency: "XTR",
-        prices: [{ label: "DIPSHIT Pro — 30 days", amount: starsPrice }],
+        prices: [{ label: "SPARKY Pro — 30 days", amount: starsPrice }],
         subscription_period: DIPSHIT_PERIOD_SECONDS
       }, fetchImpl);
       return send(
         msg.chat.id,
-        `💙 DIPSHIT™ PRO\n\nPrice: ⭐ ${starsPrice} Telegram Stars every 30 days.\nAuto-renews until cancelled.\n\nTerms: ${DIPSHIT_TERMS_URL}\nPrivacy: ${DIPSHIT_PRIVACY_URL}\n\nSubscribe:\n${link}`,
+        `💙 SPARKY™ PRO\n\nPrice: ⭐ ${starsPrice} Telegram Stars every 30 days.\nAuto-renews until cancelled.\n\nTerms: ${DIPSHIT_TERMS_URL}\nPrivacy: ${DIPSHIT_PRIVACY_URL}\n\nSubscribe:\n${link}`,
         { disable_web_page_preview: true }
       );
     } catch {
@@ -318,12 +318,12 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     try {
       const membership = await repository.getMembership(msg.from.id);
       if (!activeMembership(membership)) {
-        return send(msg.chat.id, "💙 DIPSHIT™ Membership\n\nStatus: INACTIVE\nUse /subscribe or /solmembership to view available options.");
+        return send(msg.chat.id, "💙 SPARKY™ Membership\n\nStatus: INACTIVE\nUse /subscribe or /solmembership to view available options.");
       }
       const until = new Date(membership.current_period_end).toLocaleString("en-AU", { timeZone: "Australia/Sydney" });
       return send(
         msg.chat.id,
-        `💙 DIPSHIT™ Membership\n\nStatus: ✅ ACTIVE\nMethod: ${membership.source === "stars" ? "Telegram Stars" : "SOL month pass"}\nActive until: ${until} AEST/AEDT\nAuto-renew: ${membership.auto_renew ? "ON" : "OFF"}`
+        `💙 SPARKY™ Membership\n\nStatus: ✅ ACTIVE\nMethod: ${membership.source === "stars" ? "Telegram Stars" : "SOL month pass"}\nActive until: ${until} AEST/AEDT\nAuto-renew: ${membership.auto_renew ? "ON" : "OFF"}`
       );
     } catch {
       return send(msg.chat.id, "❌ Membership status is temporarily unavailable.");
@@ -339,7 +339,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
       recipient: config.dipshitSolRecipient,
       asset: "SOL",
       amount,
-      label: "DIPSHIT Pro — 30-day month pass"
+      label: "SPARKY Pro — 30-day month pass"
     });
     return send(
       msg.chat.id,
@@ -382,7 +382,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
       const until = membership && membership.current_period_end
         ? new Date(membership.current_period_end).toLocaleString("en-AU", { timeZone: "Australia/Sydney" })
         : "30 days";
-      return send(msg.chat.id, `✅ SOL PAYMENT VERIFIED\n\nDIPSHIT™ Pro is active until ${until} AEST/AEDT.\nTransaction signatures can only be claimed once.`);
+      return send(msg.chat.id, `✅ SOL PAYMENT VERIFIED\n\nSPARKY™ Pro is active until ${until} AEST/AEDT.\nTransaction signatures can only be claimed once.`);
     } catch (error) {
       const safe = new Set(["invalid_signature", "transaction_not_confirmed", "wrong_recipient", "no_matching_transfer", "rpc_unavailable"]);
       return send(msg.chat.id, safe.has(error && error.message)
@@ -394,7 +394,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
   bot.onText(/^\/cancelmembership(?:@\w+)?$/, async (msg) => {
     try {
       const membership = await repository.getMembership(msg.from.id);
-      if (!activeMembership(membership)) return send(msg.chat.id, "There is no active DIPSHIT™ membership to cancel.");
+      if (!activeMembership(membership)) return send(msg.chat.id, "There is no active SPARKY™ membership to cancel.");
       if (membership.source !== "stars" || !membership.telegram_payment_charge_id) {
         return send(msg.chat.id, "Your SOL month pass does not auto-renew. Access simply ends at the current period expiry.");
       }
@@ -417,7 +417,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
       await telegramApi(config.dipshitBotToken, "answerPreCheckoutQuery", {
         pre_checkout_query_id: query.id,
         ok,
-        ...(ok ? {} : { error_message: "This DIPSHIT™ subscription invoice is not valid or is no longer available." })
+        ...(ok ? {} : { error_message: "This SPARKY™ subscription invoice is not valid or is no longer available." })
       }, fetchImpl);
     } catch {
       // Telegram requires a fast answer; failures are logged without leaking token details.
@@ -446,7 +446,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
         isRecurring: Boolean(payment.is_recurring),
         autoRenew: true
       });
-      await send(msg.chat.id, "✅ DIPSHIT™ Pro activated. Use /membership to view your current period.");
+      await send(msg.chat.id, "✅ SPARKY™ Pro activated. Use /membership to view your current period.");
     } catch {
       console.error("DIPSHIT successful payment persistence failed");
       await send(msg.chat.id, "⚠️ Payment was received but membership activation needs support. Use /paysupport <message>.");
