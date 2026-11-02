@@ -78,8 +78,8 @@ function registerTelegramHandlers({ bot, repository, config }) {
     if (/raid|post|comment|reply|group/.test(q)) answer = "🤠 To join a Raid: tap OPEN RAID POST, like/repost/reply on X, then return and tap I RAIDED ✅. Use /raid for the current Raid and /raids for the list.";
     else if (/wallet/.test(q)) answer = "👛 Use /wallet to link your PUBLIC Solana address. Never send a seed phrase.";
     else if (/profile|register|join/.test(q)) answer = "🏆 Use /register to join and /profile to see your Legend Profile.";
-    else if (/command|help|menu/.test(q)) answer = "🤖 Use /help to see Command Centre commands, or ask @DipShitBossBot for a natural-language explanation.";
-    else answer = "💜 I got your question. Use /help for Command Centre controls, or mention @DipShitBossBot for detailed troubleshooting.";
+    else if (/command|help|menu/.test(q)) answer = "🤖 Use /help to see Command Centre commands, or ask @SparkyWorldzBot for a natural-language explanation.";
+    else answer = "💜 I got your question. Use /help for Command Centre controls, or mention @SparkyWorldzBot for detailed troubleshooting.";
     return bot.sendMessage(msg.chat.id, answer, { reply_to_message_id: msg.message_id }).catch(() => bot.sendMessage(msg.chat.id, answer));
   });
 
@@ -97,7 +97,7 @@ function registerTelegramHandlers({ bot, repository, config }) {
           ? "🏆 Use /register and /profile to manage your Legend Profile."
           : /security|rex|scam|spam/.test(q)
             ? "🛡 REX SecureGuard: use /secureguard status for the current security controls. Report suspicious content to group admins."
-            : "💜 ZED received your question. Use /help for available commands or /ask@DipShitBossBot for detailed troubleshooting.";
+            : "💜 ZED received your question. Use /help for available commands or /ask@SparkyWorldzBot for detailed troubleshooting.";
     return bot.sendMessage(msg.chat.id, answer, { reply_to_message_id: msg.message_id });
   });
 
