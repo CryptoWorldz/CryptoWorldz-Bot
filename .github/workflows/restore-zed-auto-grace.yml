@@ -462,7 +462,7 @@ jobs:
           print("ZED_TELEGRAM_WEBHOOK=PASS")
           print("ZED_TELEGRAM_PRIVATE_COMPOSER_MENU=PASS type=commands")
 
-          dipshit_token=env.get("DIPSHIT_BOT_TOKEN","").strip()
+          dipshit_token=env.get("DIPSHIT_BOT_TOKEN_SECRET","").strip()
           if not dipshit_token:
               print("SPARKY_TELEGRAM=WAITING_FOR_BOT_TOKEN")
           else:
