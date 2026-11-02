@@ -41,7 +41,7 @@ const PUBLIC_COMMANDS = [
   { command: "cancel", description: "Cancel wallet registration" },
   { command: "community", description: "Open CryptoWorldz community links" },
   { command: "website", description: "Open CryptoWorldz.xyz" },
-  { command: "dipshit", description: "Meet Sparky, the blue Worldz Dude" }
+  { command: "sparky", description: "Meet Sparky, the blue Worldz Dude" }
 ];
 
 function wait(milliseconds) {
@@ -347,13 +347,13 @@ Use /help to open the Command Menu.
   );
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(msg.chat.id, formatCommunity(config)));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, formatWebsite(config)));
-  bot.onText(/^\/dipshit(?:@\w+)?$/, async (msg) => {
+  bot.onText(/^\/(?:sparky|dipshit)(?:@\w+)?$/, async (msg) => {
     const image = path.join(__dirname, "../public/miniapp/assets/dipshit-worldz-dude.png");
     const caption = "💙 SPARKY™ — WORLDZ DUDE\n\nCommand Centre QA + troubleshooting helper. Finds the dumb little problems before they become expensive big ones.\n\n🔐 No wallet signing • No treasury control • No governance execution • No mainnet broadcast.\n\nProfile: https://cryptoworldz.xyz/dipshit/\nUse /help for ZED commands.";
     try {
       return await bot.sendPhoto(msg.chat.id, image, { caption });
     } catch (error) {
-      safeError("DIPSHIT profile", error);
+      safeError("SPARKY profile", error);
       return send(msg.chat.id, "💙 SPARKY™ — WORLDZ DUDE\nProfile: https://cryptoworldz.xyz/dipshit/\nUse /help for ZED commands.\n\nNo wallet signing or treasury authority.");
     }
   });
@@ -369,7 +369,7 @@ Use /help to open the Command Menu.
   bot.onText(/^\/help(?:@\w+)?$/, (msg) =>
     send(
       msg.chat.id,
-      "🤖💜 ZED — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/next\n/raids\n/raaiiidd\n/wallet\n/kitty\n/worldzvotes — hourly token voting\n/vote SYMBOL [chain] — favourite token vote\n/worldzvoice — civic public voice\n/worldzballots — civic ballot list\n/cancel\n/community\n/website\n/dipshit — meet Sparky, the blue Worldz Dude\n\n⚠️ Never provide a private key or seed phrase."
+      "🤖💜 ZED — CryptoWorldz Command Centre\n\n/start\n/help\n/register\n/profile\n/points\n/leaderboard\n/raid\n/next\n/raids\n/raaiiidd\n/wallet\n/kitty\n/worldzvotes — hourly token voting\n/vote SYMBOL [chain] — favourite token vote\n/worldzvoice — civic public voice\n/worldzballots — civic ballot list\n/cancel\n/community\n/website\n/sparky — meet Sparky, the blue Worldz Dude\n\n⚠️ Never provide a private key or seed phrase."
     )
   );
 
