@@ -1,5 +1,5 @@
 const { buildAssistantCapabilityContext, deterministicCapabilityAnswer } = require("./assistant-capabilities");
-const DEFAULT_BOT_USERNAME = "DipShitBossBot";
+const DEFAULT_BOT_USERNAME = "SparkyWorldzBot";
 
 function extractDipshitResponseText(payload) {
   const chunks = [];
@@ -45,7 +45,7 @@ function shouldHandleDipshitConversation(msg, botUsername = DEFAULT_BOT_USERNAME
 
   const username = String(botUsername || DEFAULT_BOT_USERNAME).replace(/^@/, "");
   const mention = username && new RegExp(`(?:^|\\s)@${escapeRegex(username)}(?:\\b|$)`, "i").test(text);
-  const addressed = /^(?:dip\s*shit|@dipshit)\b[\s,:;.!?-]*/i.test(text);
+  const addressed = /^(?:sparky|@sparky)\b[\s,:;.!?-]*/i.test(text);
   const replyUsername = String(msg && msg.reply_to_message && msg.reply_to_message.from && msg.reply_to_message.from.username || "");
   const replyToBot = Boolean(username && replyUsername && replyUsername.toLowerCase() === username.toLowerCase());
   return Boolean(mention || addressed || replyToBot);
@@ -55,7 +55,7 @@ function stripDipshitAddressing(text, botUsername = DEFAULT_BOT_USERNAME) {
   const username = String(botUsername || DEFAULT_BOT_USERNAME).replace(/^@/, "");
   let cleaned = String(text || "").trim();
   if (username) cleaned = cleaned.replace(new RegExp(`@${escapeRegex(username)}\\b`, "ig"), " ");
-  cleaned = cleaned.replace(/^(?:dip\s*shit|@dipshit)\b[\s,:;.!?-]*/i, "");
+  cleaned = cleaned.replace(/^(?:sparky|@sparky)\b[\s,:;.!?-]*/i, "");
   return cleaned.replace(/\s{2,}/g, " ").trim();
 }
 
@@ -67,7 +67,7 @@ function localDipshitFallback(message) {
     return "To join as a CryptoWorldz Legend: use /register, then /wallet to link your public Solana wallet, /profile to view your Legend Profile, and /raid or /next to join active Raids and earn Legend Points.";
   }
   if (/\b(raid|raids|raider|next)\b/.test(text)) {
-    return "Ronald Raider is the Raid system. Use /raid for the active Raid, /next for the next queued Raid, and /raids to view all active Raids.";
+    return "Worldz Raidz is the Raid system. Use /raid for the active Raid, /next for the next queued Raid, and /raids to view all active Raids.";
   }
   if (/\b(vote|voting|token vote)\b/.test(text)) {
     return "Worldz voting is hourly token popularity voting. Use /worldzvotes to open it or /vote to vote for your favourite token this hour.";
@@ -95,7 +95,7 @@ async function callDipshitAI({ apiKey, model, message, history, context, fetchIm
   if (!moderation.ok) throw new Error("moderation_unavailable");
   const moderationResult = moderationPayload?.results?.[0];
   if (moderationResult?.flagged && moderationRequiresHardBlock(moderationResult)) {
-    return "Nah — that one crosses a line I can't help with. Give me the Worldz, ZED, Telegram, wallet-display or site problem instead and this DipShit will get useful.";
+    return "Nah — that one crosses a line I can't help with. Give me the Worldz, ZED, Telegram, wallet-display or site problem instead and Sparky will get useful.";
   }
 
   const response = await fetchImpl("https://api.openai.com/v1/responses", {
@@ -106,9 +106,9 @@ async function callDipshitAI({ apiKey, model, message, history, context, fetchIm
       store: false,
       max_output_tokens: 420,
       instructions: [
-        "You are DIPSHIT™, the blue WORLDZ DUDE inside CryptoWorldz.",
+        "You are SPARKY™, the blue WORLDZ DUDE inside CryptoWorldz.",
         "Your job is interactive QA, troubleshooting and Worldz navigation. Be concise, practical and genuinely useful.",
-        "Personality: you are a smart DipShit on purpose — cheeky, quick, self-aware, a little irreverent and comfortable with mild swearing when the user is clearly bantering. You can joke about yourself being a DipShit. Never become cruel, threatening, discriminatory or relentlessly insulting.",
+        "Personality: you are Sparky — cheeky, quick, helpful, and respectful, with mild humour when appropriate. Never become cruel, threatening, discriminatory or relentlessly insulting.",
         "Do not treat ordinary profanity, teasing or a user calling you slow or stupid as a safety refusal. Answer the substance and banter back lightly when appropriate.",
         "Diagnose symptoms step by step. Ask one useful follow-up only when necessary.",
         "Never claim you ran a live check unless the supplied runtime context proves it or the user ran /check.",
@@ -144,8 +144,8 @@ function registerDipshitConversation({
   fetchImpl = fetch
 }) {
   const openaiKey = String(process.env.OPENAI_API_KEY || "").trim();
-  const model = String(process.env.DIPSHIT_OPENAI_MODEL || process.env.ONEWORLDZ_OPENAI_MODEL || "gpt-4o-mini").trim();
-  let botUsername = String(process.env.DIPSHIT_BOT_USERNAME || DEFAULT_BOT_USERNAME).replace(/^@/, "");
+  const model = String(process.env.SPARKY_OPENAI_MODEL || process.env.DIPSHIT_OPENAI_MODEL || "gpt-4o-mini").trim();
+  let botUsername = String(process.env.SPARKY_BOT_USERNAME || DEFAULT_BOT_USERNAME).replace(/^@/, "");
   if (typeof bot.getMe === "function") {
     Promise.resolve().then(() => bot.getMe()).then((me) => {
       const actual = String(me?.username || "").trim().replace(/^@/, "");
@@ -218,7 +218,7 @@ function registerDipshitConversation({
       support_commands: ["/status", "/check", "/fix <problem>", "/report <problem>", "/paysupport <message>"],
       operational_shortcuts: {
         worldping: "/worldping alert | TITLE | MESSAGE",
-        ronald_raider: "/raid",
+        worldz_raidz: "/raid",
         shill_link: "/shilllink",
         shill_rewards: "/shillpoints",
         community_suite: "/suite",
@@ -235,7 +235,7 @@ function registerDipshitConversation({
       remember(key, "assistant", answer);
       return send(msg.chat.id, `💙 ${answer.slice(0, 3800)}`);
     } catch (error) {
-      console.error("DIPSHIT conversational reply failed", {
+      console.error("SPARKY conversational reply failed", {
         name: error?.name || "Error",
         code: error?.message || "unknown"
       });
