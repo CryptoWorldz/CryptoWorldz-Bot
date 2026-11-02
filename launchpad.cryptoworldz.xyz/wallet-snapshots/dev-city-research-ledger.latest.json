@@ -1,0 +1,2502 @@
+{
+  "schema": "WORLDZ-DEV-CITY-RESEARCH-LEDGER-V1",
+  "generatedAt": "2026-10-27T01:35:21.689Z",
+  "targetDeveloperWallets": 250,
+  "distributionSeats": 100,
+  "distributionApproved": 0,
+  "independentlyListedDeveloperWallets": 191,
+  "remainingToResearch": 59,
+  "jupiterStudio": {
+    "sourceGeneratedAt": "2026-10-26T06:19:56.632Z",
+    "scannedTransactions": 40,
+    "scanErrors": 26,
+    "verifiedCreators": 0,
+    "pendingTransactions": []
+  },
+  "walletResearch": [
+    {
+      "chain": "solana",
+      "address": "13z3Mh4wH4PoYfmv9U6ism5vh7NqEfsuarKt6tpVam3t",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "1qxYvBL57HTcoPqsx37zd6mvX181sheN9yUULUTp8E9",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "232Z5QNvQ4wRyraGWFpC5i3HEbqozEWgBCV95eWASaG1",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "26T5jE487Qsd4MinPvn5EcH6LCpUeaa2Fcfgrcyttjkm",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "2cN4CiRdsT3QeXAXoD9Q13nmrsc8S5UxfUCQf4EaJkqv",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "2EGGxj2qbNAJNgLCPKca8sxZYetyTjnoRspTPjzN2D67",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "2fquRXDqK1YLLC8E7z74CtLevw1ZiTtd6LG3L2bQsZdM",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "2kzQjnE5wC2X4zLLUcjWitYzQVG3HyqrLE93iMosbHAp",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "2P3GA5Be69mZzpzvkGseWt2y1qtEDDRSeAwmcQbABQ3k",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "2qLWeNrV7QkHQvKBoEvXrKeLqEB2ZhscZd4ds7X2JUhn",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "2VptbNFuUnZTJDy3rq5bsHiovaa5MStdnkWRMw2L6FGS",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "2wasKJTqicktCk64Zznikju6PWYQZPC2XD7UzzT8FDx3",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "2yWZ1iUyhmUUWfwKVXnSLXAFx4YhWWc8Lr129xQDVudw",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "31D2zpaAFqd61pWL2UowyjFmz5aZYmPgV9NDYeeDCtkk",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "3cELek1P2rC67QqgqhNeuJVjrZRD5b7Dm2o79vjZG4b1",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "3DEjA83G8z4CnTGBuynMeQNu8KNdsKutSUyhUBLxtpqW",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "3f5uFd91gacMC8ujQqAmGTnH1ofbjiBKZGyfoxDmfYB4",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "3FEoJPPeFcKbyes7prDQgexDKvbY9dyC9a8RRVQapm4e",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "3HxqsUguP6E7CNqjvpEAnJ8v86qbyJgWvN2idAKygLdD",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "3i9BRMtNwi8jFi5hEd3gAwJjhA87Ub8U1sAjbg8J4xjL",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "3irh8T6rYc8yrwn5YVd3vKYTLaXHsLFJah9zp8GJT7gB",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "3JnfMbmTtQQd6bdQ6ahNKYKdq4ujgMNbGaQpWZwQYqWh",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "3sTp9KRn5t7riVeqEg7gXK9uY6d4w4gRZJmmNTV2rhVi",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "3T5tom2DX5tTPWNG7FiPpEinAsNcnd2SgBXGsykQ1QJZ",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "41GgC1qWFSVJJgn1M7K34X4bY2bd9WTyy6J4iYpa3YCE",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "44n5CYX18L6p4VxVECE9ZNYrAGB9GKD477b78kPNq5Su",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "4FX7Jy65RcZYGD3U5USQfkymxHs4xtHtVWfArVSeNduL",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "4MSJUhmxaLmJivBpGcy3txwRXhFsAhogfVFWkapYdfuj",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "4pe1U6BTsmuXBrwruK8qCCLK1rsa8dANHnoqCuLRfPgf",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "4rjwBon5kAKoGJpgFCa7RcbbBiFYnzL4hUsqbTixHHmu",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "4teYs6wDLxtzz9x2nwdfgQsWH5ZUsSXWTFVvDLbh5yhe",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "4tzYKKvGKuayL4ythhaSMfVRVDrMY5CMCHeRUFtHYhXo",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "4UiMUmjVvnx4Za8Ria2s7ZPWKZKvEBrrpkRypm7Y3XNg",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "4vDHQPxjLsCWcAUCaWP8wqLFvv35FTCQZFf31nHCCCkF",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "4z76oeSPgfrA3DtuxKSsMciTs2fYmUaHmLoTMv1F5CAD",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "51srSWDQFQXNvGtuyB2X3RTciyacPx4hSkabwYo8oTA",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "52ZigEcKGg8tUH6mUGMvq7bUASw7YPa52qyPeRuvMQfR",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "53vUyd7iFntjgcwtmAZAhtyrWmssiRvs3AvWiUJfoXw5",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "5FCpTi8MKyfSk9GXeUhMsfCoi9r72qJnAgkKDCniovNk",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "5nmoLTjaCYxDY2iZEAHEnbkTyPRrqtF6mrGwXxuJGr4C",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "5ptVCoRVifSxjMZoKNPqznNb8PUqZg2QjmMT2PwquY6Q",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "5S8HqdDWMeB6gf2KP89oL66TiJ1z3uDnq32vKxHDeqbA",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "5V7ZUxLda3FvD9FKtrWXHNibcRa5G6aQzdEjKryzHC74",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "63CgiXpqYeziY9swqNw3oTuQy1TuNhcykGUy99q8X816",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "6cut9fD3qTbDRFara7sZo7tnBGi6y3unmZKSt96VhcDU",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "6eGKgDhFAaLYkxoDMyx2NU4RyrSKfCXdRmqtjT7zodxQ",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "6Jaifbr1u9L6DPWk2G3a7CvAPdwpQk95cQd3rwJyKp6d",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "6JEmNETqWbDGnXjqWQG7BLn889ZyeUA4qMMeMLoCotLb",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "6rF7ZEs84kAEA3bxcHeFJ2ej4vQxyhc5NrRpTvwkreTp",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "6TACjgKb6tPK5JQhxFmqGWhzA7hc1CqM7vmCQB4S2zNw",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "6xcTtJLTWmeG7deiV21ZA3jjnZvtfBzSbvMD2EAj36wk",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "6YgBWGzgawnYsG7o3o6yw7hNc14f7o2xDFxPxeHGmXVw",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "6ywHmRNhmiCPWk1H31bavNw3xcfeLEMGd2cG5jrFv4B5",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "6ZvF21AN98RkNsafkgoNjq6qz81v9CwfaELLj3HfdbTz",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7aLBCrbn4jDNSxLLJYRRnKbkqA5cuaeaAzn74xS7eKPD",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7bqM8DahM5YBCA25yfswX7PsdvjngiVf2tLGPtuqsR8f",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7DhUR2sgQCtCGYZw1RWvzKPJCDu2Qp2N9nkiGZZUMCfN",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7fTJPtzFKM7AuvWkrNyGzewEtpH8F7pinbT4gjz5Sxgb",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7ihN8QaTfNoDTRTQGULCzbUT3PHwPDTu5Brcu4iT2paP",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7JycUJPxYWbcmvKGF5k2daKvBKsWNVF1kyPZkauGJvFT",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7Q34nmDP1srbYSQJH5b43heZpPtsssiRZa17hLnx5Gqx",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7r69z47ioXTdW1Y6yQu7pL8FcsRY9Lttrs8xUrfpGHzz",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7wdcV2MX6yaCYYPaiaSG6PzRT2L7RMSdpT9uzRUzm91K",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7wdrwB6L3RriG8w3yGkjmpTGLQsRb4XZtjJwKcJ4naYE",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7wK3jPMYjpZHZAghjersW6hBNMgi9VAGr75AhYRqR2n",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7Xy3MSK6MNJ9SkRFTm9x8bFygrJvqCgG73ZGusRqSGjd",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7YYZE815j6bE3C1tgiAXKWh4FGwUagpxV9oUw6dgE1mU",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7Z3LJB2rxV4LiRBwgwTcufAWxnFTVJpcoCMiCo8Z5Ere",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7z7Q3UH4cMxSNDTATsQcC34rr4MVA9ydqpbeqnU4q7ba",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "7zND8YAtCYehNoa1JrfDLQZi44xJkEuPWK5b4CkiuFpo",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "81sWMLg1EgYps3nMwyeSW1JfjKgFqkGYPP85vTnkFzRn",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "82avTQhMG63b9Cb7RfwZvY3cnTjW5KoFuoYM5WSCZwR",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "82UV2Exn5FaS4Ys1fxiHBPW1tQVeU1R76BbVkAE7WaTL",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "83UBXmTNMXG2PEUAUtMtbeSqvAhMWgPPKFCeEoFTRF1Y",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "84pL2GAuv8XGVPyZre2xcgUNSGz9csYHBt5AW4PUcEe9",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "8dq7DkQY3EC1tpVxUkeFcH8wZtUWMRrh3KNr4wGdSCFa",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "8Dyk53RrtmN3MshQxxWdfTRco9sQJzUHSqkUg8chbe88",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "8DyNeQYMWY6NLpPN7S1nTcDy2WXLnm5rzrtdWA2H2t6Y",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "8jXEXeDfGjX8LSfHvSKikCcb87CwnYuyVjZQYotvXmKu",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "8nxM7WoVm77VYkMze7S1rNuv2adoVXuZu5VDrhQNWGnu",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "8SbqXLQEBvFD2rZSMuUizkJQZ9TN2dqwFRnRQzGp6Kax",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "8XKK2m2Jd7AXgeVd32jmq4zuq8rAcN4bx9SD19kovrAZ",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "8ZAPx318VmQEh9TKroCMLV2dD1SJ94iUD1RQYnLNZjff",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "941cCJXT8VHagLsT4kjTVXN3X22DcBXM99UTsBLBZvii",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "9apnHjEQ8enLaPLxP7z9VQTphWE4nWqZcyHJYocQMpSE",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "9E8rq8TFBbTJVw2ZCs58gEjxAuFGpQaS6rmYCRfvwUnL",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "9GcMPLQgF4UvLviEtiQ7w7qTs3Ty4TCLoaTyJX5uaWmc",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "9K6f7yQKQd84uuEAxS9KxYagWLv7WrWSSvQf4RxfDnmo",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "9psHNg12zVStC4CHbXS6WTYtLyRhZKdKY9YgdRLHFeYN",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "9q1dEzbmMk1Yk7cyvnXTrcpUv3quHgMa2dHB1pTp1bsm",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "9QkreA6FKVKSLRxVPwXYyuydsymdMyVQQCnDAGGMUVfp",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "9V9xnugDuEiHjcGjR3U1D2DhCHhJ8xMJorPXu7s7WqQj",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "A6bh5tngHgeXFbXopuqV2TcWPm7fyUA7RSU2yBPfZ4jN",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "A7QEhKyS2fpmafFC5gvhfogPJTRZsEQk9JDMfdHiZqnn",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "ACs2NBSCJfpsC3NyhjMfxSNuvsNN51EeFKbm7cd5baS3",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "AhFfjBPCoNRDExEDFYuNK2NXCWNa1gi2VUbdA7cF19CD",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "ALPKoGEbqBqRZqsSSWdUkBFBYgMFRZ4hoZf7YAmvHdQB",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "An4SnVnvcbZneqPUH1NMZ2MXW32e8ZHeme2GZ8F4BByD",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "AoJSKnWPyFg5MPDtCcP3Nb4FdGjAJuozyEgauAVjhrZc",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "ApxEjZoivoXwSDrnvXbh428pm1fi2xNfK4g7wYsefCAC",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "B3BhJ1nvPvEhx3hq3nfK8hx4WYcKZdbhavSobZEA44ai",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "B7zd9FETobZipB6aL1zaH1DeqpN2jfYH6kKgCxsq3mX8",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "BCg8fVr9FnjJChJZMediUG6zKvhhaznxW3gBypJzainY",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "BeEMuaaQCQPodQdaA7W6Rmsu7761vCabN4Tth6jA4VCP",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "BGfybQ2uFGPmCscCPAgJtBFXDWc5GNqzymSq3AAo6Nvi",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "BjmHbeBPj57DJGKFKM3MqbFAbpLHEHXGJ5shfGCZMZ6Z",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "BkemqqeY4986JYrqpMgHpieZM8xzdBmzmLYqrhzxNd5W",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "BmvEHJmgfEFFdtCSEupfSY8VkjJkT5LHDNiAjgSM2VoA",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "BpAGDoYVaukNihrAYHpNcopR6q7aceK9EKgoFKKpPZfg",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "C1pxz2YQQMPM2Xgh39zySVBwFc9CPLausF284LzJ2v8L",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "C3vfw3AeoXRP2XCUgW18dQBNLdtcdNMSzv7p8oo3i5dU",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "C4hyoU2FkYtCztomJfCu9pax98iTeaes4DxaS7vVK3jj",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "Ca2dWkDNySrsEifCte1MqbS4YaBU24eB8XtHKoUD9UZr",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "cardy1TfnZQAgAoaNjHcKLHroR1g7pQHQZhWuEKpvL6",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CBaYK2xr83MEQxZTy9vSjjJvsBA4eoxdHuZDSPbBGiVm",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CEF6JJn6Mu8u1u2AaPVfQ14kbdNs9kmVxktmGa7kpL3z",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CFKPo1TMz2Zok1tRztxSuwPBc2qMz6FsJH4oE7iD8xR9",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CikNWKAgwmu3CCkkcr9pGY1uepnWfUXUPMnthrwV8xtg",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CiTcZPnAgwEU4iHX1rVvsB4nT1nqupnL4xkMyV2HuyaW",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CjNUYXY62vrN5iE7dgzCbcKE6U4JSDhvmkotdHcJqoJ3",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CN5zRzJGNqp5GNyfWjwSKeg8BuG5XJezAHMHfV7e69TT",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CnHgKzTxKYqnSrDT5MtgGvbL4BPhPJn5x9qgyPi1NeJa",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CqC5dNspaUVbUz6QDbNcodpTfgbw1nZ4ra2nectDv1ak",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CSLRjLwb28v1KTQ2EGCMXLs5fUANVUUDtVVZ2KVWbWei",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CSzz2p3ScwQqa28ewLoB2E3ELCXniZQG1jP96h58ZwBc",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "CXfJMf3d8mm96RGtttztVcCwTGr1Dwnk6vypRAhZs6Yo",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "D3bfm4pPSVa2Hd2FtQqJSzYek2v4Voe1P2cQLJVhp4NU",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "De6K26PuzzugX8smx1DN9LwQVdK2yiAL1T51Seq5NvCx",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "dev9Gf7RdenqPgtssc15kRRcM9tAJxacWSEKUiMmecb",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "devEMCpvCxoVDagFXBmFXRZofMfbwN9HMzzvLurSS1p",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "devFWZNRKJdmrKbuSYNAik22RtbFqJuSgoNevhAi3JR",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "DfCHMeHfRYMBQwMje5bLSqimMWXhArYoTomX2vRr6Ty9",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "DoJxFsWLqoCht5t3jE8m7VvGhSR2fZpw92NuS4SLDiW2",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "DQ1jbKrjq4HSY7zqGHxn1DjQ4JTEx7KV4VubX78sbdH4",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "DRn7MFrrGPoPiDf8BquppXvZLqDdDkEa62bxZFVyjnh4",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "EjLMUG56iAGd3UDM82MXuA5NPHRsY6Z4VXQo2z8M47i3",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "ELxUQkWLMBCoMatry9qzQR6RHiUYmVndUpmPwhZ8PKJK",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "EmWLhhsstoQrNjyA91G15nUQ1256Lbjs87g9eSrLsreo",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "EQ7JnbMrkzjLLFaUwFDAVNFf1p3WvyBp98FzhZMBRQyQ",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "EUisgNmineB4u1WA8K1UDCZMGdXjuPjwGQuZq3RtLq1d",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "EuoVktg82q5oxEA6LvLXF4Xi9rKT1ZrjYqwcd9JA7X1B",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "EVa7c7XBXeRqLnuisfkvpXSw5VtTNVM8MNVJjaSgWm4i",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "EwrojgmqZZHM7FYmck9mstM4oM97bVcgsZ7bTU7HfT9p",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "Ey85NUDkZQkZRPP48TihWp5CdrnL6rvG2fdpLF8cK2wB",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "EYcJb2fGccgG8ChVrdUzC9Q6RfFEgbVfixCpQ4tctrzT",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "EZAdWMUWCKSPH6r6yNysspQsZULwT9zZPqQzRhrUNwDX",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "F1sV1WtUuXyLhxkccp5DB3setnXMSWG8pGthtQUUn3Nq",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "F5dsZyXQhyqZfcTDgRwCnTFdpFPvMGkL4kb6LoFebHN7",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "FceqDiyvfkxHtTN1QSKUDLJ6iY7VQHKbkARwcbUavq4W",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "FfEgKC1uvB5ctFDd38HpVTPHw2dbHSy7D6mntELpRDGt",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "Fn9A5Ge92QkwrYAASFv5R7nh9VMve9ssERPfhaNPF3Lj",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "FPqZPuc1dJcepaec4qyghHVQZbQSXHRWnFEQgcuUjKgi",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "FpscJFipKBoAFXjhXfrruWyhsoNFisu8H8kLDdw1k8yH",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "G5djAbi3DrZzrVmizfYteMpChyDV1nxqg2V77ftWpXKb",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "G6CQw1w5FkcmMCSxf4NNZYLRXMbx355d5pZXqrcsdiZV",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "GaxVqiQyJKQDRu6H4pfy9V6Xq19pHGr6HQKDQDv911Y4",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "GcfsCFes5GojdhQCecUegb84c7cUfH4hhYTrh9Ljyi94",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "GCMMv7JKUkeXs4AndTYtAKEx2eRKPi3A8oSqPddBELq7",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "GdSAxm17B3HsnZ4CVLEGd1p31yH99jj7qGiH8V1C8Sww",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "GoKEL4nB9HddWpCxpp8BesG4d9QNzns6jR4o2x2KQ2hP",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "GpeRcgTWLXfq5DUm6t24jWY4rmhZB2UofbwTU33255AB",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "Gq9a43j7rukWo9GZUWxbKqFtg77UR4rigSiC2DcniiVH",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "GsfNSuZFrT2r4xzSndnCSs9tTXwt47etPqU8yFVnDcXd",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "Gsv13oph2i6nkJvNkVfuzkcbHWchz6viUtEg2vsxQMtM",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "GsvY6rPFaipQ1qsACYFtQu7F9n3JxzBXFw8DDFnMkRpb",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "GYLkraPfvT3UtUbdxcHiVWV2EShBoZtqW1Bcq4VazUCt",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "Hj6EUEF2mNqe1cRTYQLzURaarD5RXF6WoKMWPne1YzH3",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "HjJQdfTHgC3EBX3471w4st8BXbBmtbaMyCAXNgcUb7dq",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "HJpzXv2MjS7bQEfepn8qyUYtD2TKj3b1QpYxFxAF1Ps9",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "HJYuLLogGW1yNzAXL96hrjunmyQtJcwwLehkKLTwzzRw",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "HN11n4MYLbnZPaEbAVX7Y83XM6PvNtQDSitUo9Z2A8Dq",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "HnjSESsM1AFx4c1fqk1ziCBMSAyjFKeVD7VqWYBeV1EJ",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "HPDqyja2ULbL4R9c6YDzpxUstbn5JGDtvDRm8PgtFEL1",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "Ht5NQThNf6ZSyry3q2JYckMXzpoFHRDRottgt1VJZQka",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "Htz1d8ynVkmBTpEULtiSytaKLF6jdMWxRASgF4XvHvnQ",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "HVPggyA8VWRxe98DXchRohsXCbhAoVGGZT4zaee5HqRq",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "JakevMAR7R4Evr4PZpTqNAb1KkVXAskzYohd1vxEUqj",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "JCapwSzWyHkjuVrT5ZTyKwBHzV9oYrTNhZguAMc9PiEc",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "JonasQ6kwFknJKQpVXbAs2d3fdVLy2DnXd13ynwhgV4",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "LptbYRq7UNXhmzXoKaa2fbeikF7hSoKFY65vzMCen1N",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "MiLZAcWZgMYvFnZqzJ6XRj4h5r47bgX64Vt5gRnBvqv",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "N4f6zftYsuu4yT7icsjLwh4i6pB1zvvKbseHj2NmSQw",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "RMCuMCgR5rW1MfZfRn9Ry3CZxQYhTtN35y1Z7WhXAS8",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "soapSeWTzmHfdkT42soGcb9vLubPV3tSzmfYhxA6YN9",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "stat1kFydLtXjmpPfJhRkenmXYGa1bNwzNAJ9qyiyht",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "svenafMgAFwWq5ZfoHBPRdxxCWbZtnnnA7S2bzppTYT",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "T1d3crwf5cYLcVU5ojNRgJbJUXJta2uBgbtev2xWLAW",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "triQem2gDXHXweNceTKWGfDfN6AnpCHmjR745LXcbix",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    },
+    {
+      "chain": "solana",
+      "address": "wba953abpL8wMfmX3WEZLd5UauUJJEYujxLar7roT5r",
+      "evidence": [
+        {
+          "source": "Solfate DevList",
+          "type": "third-party-developer-registry",
+          "reference": "https://solfate.com/api/lists/developers"
+        }
+      ],
+      "worldzPartner": false,
+      "worldzDistributionApproved": false
+    }
+  ],
+  "note": "Research only. Jupiter Studio signers are not developer attributions; no partnership, endorsement, or token transfer authorization is implied."
+}
