@@ -45,7 +45,8 @@ jobs:
       JUPITER_API_KEY_SECRET: ${{ secrets.JUPITER_API_KEY }}
       BOT_TOKEN_SECRET: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
       DIPSHIT_BOT_TOKEN_SECRET: ${{ secrets.SPARKY_BOT_TOKEN }}
-      DIPSHIT_WEBHOOK_URL: ${{ vars.DIPSHIT_WEBHOOK_URL }}
+      SPARKY_BOT_TOKEN: ${{ secrets.SPARKY_BOT_TOKEN }}
+      DIPSHIT_WEBHOOK_URL: ${{ vars.SPARKY_WEBHOOK_URL || vars.DIPSHIT_WEBHOOK_URL }}
       DIPSHIT_STARS_MONTHLY_PRICE: ${{ vars.DIPSHIT_STARS_MONTHLY_PRICE }}
       DIPSHIT_SOL_MONTHLY_AMOUNT: ${{ vars.DIPSHIT_SOL_MONTHLY_AMOUNT }}
       DIPSHIT_SOL_RECIPIENT: ${{ vars.DIPSHIT_SOL_RECIPIENT }}
@@ -462,7 +463,7 @@ jobs:
           print("ZED_TELEGRAM_WEBHOOK=PASS")
           print("ZED_TELEGRAM_PRIVATE_COMPOSER_MENU=PASS type=commands")
 
-          dipshit_token=env.get("DIPSHIT_BOT_TOKEN_SECRET","").strip()
+          dipshit_token=env.get("SPARKY_BOT_TOKEN","").strip()
           if not dipshit_token:
               print("SPARKY_TELEGRAM=WAITING_FOR_BOT_TOKEN")
           else:
