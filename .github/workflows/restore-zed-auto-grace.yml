@@ -464,7 +464,7 @@ jobs:
 
           dipshit_token=env.get("DIPSHIT_BOT_TOKEN","").strip()
           if not dipshit_token:
-              print("DIPSHIT_TELEGRAM=WAITING_FOR_DIPSHIT_BOT_TOKEN")
+              print("SPARKY_TELEGRAM=WAITING_FOR_BOT_TOKEN")
           else:
               print("::add-mask::"+dipshit_token)
               dapi="https://api.telegram.org/bot"+dipshit_token+"/"
@@ -479,8 +479,11 @@ jobs:
                   if out.get("ok") is not True: raise SystemExit("DIPSHIT Telegram "+method+" failed")
                   return out.get("result")
 
+              bot_identity=dcall("getMe")
+              if str(bot_identity.get("username","")).lower() != "sparkyworldzbot":
+                  raise SystemExit("SPARKY_IDENTITY_MISMATCH: token does not belong to @SparkyWorldzBot")
               dipshit_commands=[
-                {"command":"start","description":"Wake up DIPSHIT™"},
+                {"command":"start","description":"Start Sparky Worldz navigator"},
                 {"command":"help","description":"Show the command menu"},
                 {"command":"status","description":"Check Worldz system status"},
                 {"command":"check","description":"Run Worldz QA checks"},
@@ -489,10 +492,10 @@ jobs:
                 {"command":"worldz","description":"Open the WorldzEcosystem™"},
                 {"command":"zed","description":"Open the ZED Command Centre"},
                 {"command":"inbox","description":"Open Worldz Inbox"},
-                {"command":"dipshit","description":"Meet the WORLDZ DUDE"},
+                {"command":"sparky","description":"Meet your Worldz navigator"},
                 {"command":"website","description":"Open CryptoWorldz"},
                 {"command":"community","description":"Open Worldz community links"},
-                {"command":"subscribe","description":"Join DIPSHIT™ Pro with Telegram Stars"},
+                {"command":"subscribe","description":"Join SPARKY™ Pro with Telegram Stars"},
                 {"command":"membership","description":"Check your membership"},
                 {"command":"solmembership","description":"View the optional SOL month pass"},
                 {"command":"claimsol","description":"Verify a SOL membership payment"},
@@ -517,8 +520,8 @@ jobs:
                           print("DIPSHIT_COMMAND_SCOPE_CLEAR_WARN scope="+json.dumps(scope,separators=(",",":"))+" language="+str(language_code)+" error="+str(exc)[:120])
 
               dcall("setMyCommands",{"commands":dipshit_commands})
-              dcall("setMyDescription",{"description":"💙 DIPSHIT™ — WORLDZ DUDE\n\nThe WorldzEcosystem™ QA, troubleshooting and chat bot. Finds bugs, checks Worldz systems and supports optional paid membership. Never send seed phrases or private keys."})
-              dcall("setMyShortDescription",{"short_description":"💙 DIPSHIT™ — WORLDZ DUDE | QA, troubleshooting, chat & Worldz membership."})
+              dcall("setMyDescription",{"description":"💜 SPARKY™ — WORLDZ NAVIGATOR\n\nYour friendly Worldz guide. Navigate WorldzHQ, ZED, AUTO, GRACE, REX Security, Worldz Raidz, wallets, launchpad and support. Ask questions or report bugs. Never share private keys."})
+              dcall("setMyShortDescription",{"short_description":"💙 DIPSHIT™ — WORLDZ DUDE | Worldz help, navigation, troubleshooting & community."})
               dipshit_secret=hashlib.sha256(dipshit_token.encode()).hexdigest()
               dipshit_hook_url=env.get("DIPSHIT_WEBHOOK_URL","").strip() or "https://cryptobotz.cryptoworldz.xyz/dipshit-telegram-webhook"
               dcall("setWebhook",{
