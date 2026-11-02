@@ -44,7 +44,7 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       JUPITER_API_KEY_SECRET: ${{ secrets.JUPITER_API_KEY }}
       BOT_TOKEN_SECRET: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
-      DIPSHIT_BOT_TOKEN_SECRET: ${{ secrets.DIPSHIT_BOT_TOKEN }}
+      DIPSHIT_BOT_TOKEN_SECRET: ${{ secrets.SPARKY_BOT_TOKEN }}
       DIPSHIT_WEBHOOK_URL: ${{ vars.DIPSHIT_WEBHOOK_URL }}
       DIPSHIT_STARS_MONTHLY_PRICE: ${{ vars.DIPSHIT_STARS_MONTHLY_PRICE }}
       DIPSHIT_SOL_MONTHLY_AMOUNT: ${{ vars.DIPSHIT_SOL_MONTHLY_AMOUNT }}
@@ -86,7 +86,7 @@ jobs:
           HAS_TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN != '' }}
           HAS_ZED_BOT_TOKEN: ${{ secrets.ZED_BOT_TOKEN != '' }}
           HAS_CRYPTOWORLDZ_BOT_TOKEN: ${{ secrets.CRYPTOWORLDZ_BOT_TOKEN != '' }}
-          HAS_DIPSHIT_BOT_TOKEN: ${{ secrets.DIPSHIT_BOT_TOKEN != '' }}
+          HAS_DIPSHIT_BOT_TOKEN: ${{ secrets.SPARKY_BOT_TOKEN != '' }}
           HAS_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
           HAS_SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY != '' }}
           HAS_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY != '' }}
