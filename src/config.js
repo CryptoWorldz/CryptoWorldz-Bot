@@ -42,9 +42,9 @@ function loadConfig(env = process.env) {
     throw new Error("TELEGRAM_WEBHOOK_URL must be a valid HTTPS URL.");
   }
 
-  const dipshitBotToken = String(env.DIPSHIT_BOT_TOKEN || "").trim();
+  const dipshitBotToken = String(env.SPARKY_BOT_TOKEN || env.DIPSHIT_BOT_TOKEN || "").trim();
   const dipshitWebhookUrl = String(
-    env.DIPSHIT_WEBHOOK_URL || "https://cryptobotz.cryptoworldz.xyz/dipshit-telegram-webhook"
+    env.SPARKY_WEBHOOK_URL || env.DIPSHIT_WEBHOOK_URL || "https://cryptobotz.cryptoworldz.xyz/dipshit-telegram-webhook"
   ).trim();
   if (dipshitBotToken) {
     try {
@@ -54,14 +54,14 @@ function loadConfig(env = process.env) {
       throw new Error("DIPSHIT_WEBHOOK_URL must be a valid HTTPS URL.");
     }
   }
-  const dipshitStarsMonthlyPriceRaw = Number(env.DIPSHIT_STARS_MONTHLY_PRICE || 0);
+  const dipshitStarsMonthlyPriceRaw = Number(env.SPARKY_STARS_MONTHLY_PRICE || env.DIPSHIT_STARS_MONTHLY_PRICE || 0);
   const dipshitStarsMonthlyPrice =
     Number.isInteger(dipshitStarsMonthlyPriceRaw) &&
     dipshitStarsMonthlyPriceRaw >= 0 &&
     dipshitStarsMonthlyPriceRaw <= 10000
       ? dipshitStarsMonthlyPriceRaw
       : 0;
-  const dipshitSolMonthlyAmountRaw = Number(env.DIPSHIT_SOL_MONTHLY_AMOUNT || 0);
+  const dipshitSolMonthlyAmountRaw = Number(env.SPARKY_SOL_MONTHLY_AMOUNT || env.DIPSHIT_SOL_MONTHLY_AMOUNT || 0);
   const dipshitSolMonthlyAmount =
     Number.isFinite(dipshitSolMonthlyAmountRaw) && dipshitSolMonthlyAmountRaw >= 0
       ? dipshitSolMonthlyAmountRaw
@@ -95,7 +95,7 @@ function loadConfig(env = process.env) {
       : "",
     dipshitStarsMonthlyPrice,
     dipshitSolMonthlyAmount,
-    dipshitSolRecipient: String(env.DIPSHIT_SOL_RECIPIENT || "").trim(),
+    dipshitSolRecipient: String(env.SPARKY_SOL_RECIPIENT || env.DIPSHIT_SOL_RECIPIENT || "").trim(),
     autoApproveMissionClaims: parseBoolean(env.AUTO_APPROVE_MISSION_CLAIMS, false),
     autoServiceUrl,
     autoAuthToken,
