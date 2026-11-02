@@ -26,9 +26,9 @@
 | Command Centre current branding/parity | ✅ LIVE | Real Chrome proof passed in `37113524632`; current WorldzEcosystem branding and current DOM confirmed. |
 | Telegram secure-launch boundary | ✅ LIVE | Outside-Telegram browser access fails closed; signed Telegram bootstrap also passed in runtime audit `37113660864`. |
 | ZED Telegram bot/webhook | ✅ LIVE | Runtime restore `37112571962`: bot, webhook, command scopes and backlog control passed. |
-| DIPSHIT Telegram bot/webhook | ✅ LIVE | Runtime restore `37112571962`: @DipShitBossBot and webhook passed. |
-| DIPSHIT Mini App guide | ✅ LIVE | Command Centre static deploy `37160710927` published the visible `LOST? START HERE` / `ASK DIPSHIT` guide surface. |
-| DIPSHIT context-aware ecosystem guidance | 🟡 BUILT / NOT VERIFIED | Context guides for Command Centre, Profile, Wallet, Raid, WorldzLaunch, CryptoWorldz, DonateWorldz and WorldzHQ exist in `main`; latest bot/runtime rollout is still being proven. |
+| SPARKY Telegram bot/webhook | ✅ LIVE | Runtime restore `37112571962`: @SparkyBossBot and webhook passed. |
+| SPARKY Mini App guide | ✅ LIVE | Command Centre static deploy `37160710927` published the visible `LOST? START HERE` / `ASK SPARKY` guide surface. |
+| SPARKY context-aware ecosystem guidance | 🟡 BUILT / NOT VERIFIED | Context guides for Command Centre, Profile, Wallet, Raid, WorldzLaunch, CryptoWorldz, DonateWorldz and WorldzHQ exist in `main`; latest bot/runtime rollout is still being proven. |
 | Raids UI | ✅ LIVE | Real production browser confirmed deployed Raids surface. |
 | Ronald Raider simple member flow | ✅ LIVE | Production Telegram card observed 2026-10-04 with the new 3-step flow, real participant count, community-target clarification and `I RAIDED ✅` button. |
 | Ronald Raider direct X post launcher | 🟡 BUILT / NOT VERIFIED | Exact X status-ID launcher, native-app deep link and exact-post browser/copy fallbacks exist in `main`; Mini App + protected runtime deployments are still being proven. |
@@ -59,7 +59,7 @@
 | WorldzMINT wallet adapter connection path | ✅ LIVE | Production browser audit `37114909793` connected through the deployed injected-wallet adapter using a simulated provider; no signature and no transaction were requested or sent. |
 | Real external wallet connect/sign | 🟡 BUILT / NOT VERIFIED | Jupiter Wallet Standard/in-app/WalletConnect support is deployed, but a real external user wallet signature was not automated or fabricated. |
 | WorldzLaunchPad production parity | ✅ LIVE | Live audit `37113881838` passed homepage, platform-config parity, V3 public registry, WorldzMINT JS and critical routes. |
-| Worldz-wide START HERE usability layer | 🟡 BUILT / NOT VERIFIED | Reusable context-aware START HERE + ASK DIPSHIT layer exists and passes local build/audit; current Hostinger public-site deployment is running through hardened atomic uploads. |
+| Worldz-wide START HERE usability layer | 🟡 BUILT / NOT VERIFIED | Reusable context-aware START HERE + ASK SPARKY layer exists and passes local build/audit; current Hostinger public-site deployment is running through hardened atomic uploads. |
 | WorldzHQ.com front door | 🟡 BUILT / NOT VERIFIED | New WorldzHQ front-door build and domain cutover plan exist; status remains `PREPARED_NOT_PROVEN_LIVE` until DNS/TLS/hosting/public regression prove the new host. |
 | WorldzLaunch.com front door | 🟡 BUILT / NOT VERIFIED | New WorldzLaunch front-door build and domain cutover plan exist; current executable compatibility host remains `launchpad.cryptoworldz.xyz` until the new host is proven. |
 | WorldzLaunchPad full browser route sweep | ✅ LIVE | `37114909793`: **52/52** current production `index.html` routes rendered their actual Worldz page in real Chrome; `/advertise/` cleared its browser-security challenge before PASS. |
