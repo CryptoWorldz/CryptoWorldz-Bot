@@ -10,7 +10,7 @@ test("SPARKY Worldz Dude profile is wired into the Mini App with no financial au
   const js = fs.readFileSync(path.join(ROOT, "public/miniapp/sparky.js"), "utf8");
   const avatar = fs.readFileSync(path.join(ROOT, "public/miniapp/assets/sparky-worldz-dude.svg"), "utf8");
   assert.match(html, /id="sparky-worldz-dude"/);
-  assert.match(html, /\/miniapp\/dipshit\.js/);
+  assert.match(html, /\/miniapp\/sparky\.js/);
   assert.match(js, /SPARKY™/);
   assert.match(js, /WORLDZ DUDE/);
   assert.match(js, /walletSigning:\s*false/);
@@ -30,7 +30,7 @@ const { allRegisteredCommandNames } = require("../src/command-registry");
 
 test("SPARKY public profile and Telegram command use the blue Worldz Dude with no financial authority", async () => {
   const sourceImage = path.join(ROOT, "assets-source/dipshit/blue-worldz-dude.png");
-  const image = path.join(ROOT, "public/miniapp/assets/sparky-worldz-dude.png");
+  const image = path.join(ROOT, "public/miniapp/assets/dipshit-worldz-dude.png");
   const publicImage = path.join(ROOT, "cryptoworldz.xyz/dipshit/blue-worldz-dude.png");
   const page = fs.readFileSync(path.join(ROOT, "cryptoworldz.xyz/sparky/index.html"), "utf8");
 
