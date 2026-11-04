@@ -1,4 +1,5 @@
 const { buildAssistantCapabilityContext, deterministicCapabilityAnswer } = require("./assistant-capabilities");
+const { permissionsForRole } = require("./core");
 const DEFAULT_BOT_USERNAME = "SparkyWorldzBot";
 
 function extractDipshitResponseText(payload) {
@@ -121,6 +122,7 @@ async function callDipshitAI({ apiKey, model, message, history, context, fetchIm
         "If the user asks whether a listed feature exists, do not say you cannot confirm it. Say it exists, distinguish the group state if known, and give the exact command.",
         "Example: WorldPing exists. A normal alert route is /worldping alert | TITLE | MESSAGE. Group licence/mode still controls whether that command can run there.",
         "You can explain and prepare commands, but do not claim ZED or another subsystem executed an action unless the runtime result proves it.",
+        "The actor_access context describes only the current Telegram sender. Never disclose another person’s permissions or private admin data. Only provide crew/admin operational guidance appropriate to the sender role and listed permissions. Never execute privileged actions from conversation; route them to the authenticated Command Centre command and its own permission checks.",
         `RUNTIME CONTEXT JSON: ${JSON.stringify(context)}`
       ].join(" "),
       input: [...normalizeDipshitHistory(history), { role: "user", content: String(message || "").slice(0, 1200) }]
@@ -154,6 +156,35 @@ function registerDipshitConversation({
   }
   const aiEnabled = Boolean(openaiKey);
   const conversations = new Map();
+
+  async function actorAccess(msg) {
+    const telegramId = String(msg?.from?.id || "");
+    if (!telegramId) return { role: "member", permissions: [] };
+    if (telegramId === String(config.ownerTelegramId || "")) {
+      return { role: "owner", permissions: [...permissionsForRole("owner")] };
+    }
+    if (config.adminTelegramIds?.has?.(telegramId)) {
+      return { role: "admin", permissions: [...permissionsForRole("admin")] };
+    }
+    if (!supabase) return { role: "member", permissions: [] };
+    try {
+      const { data, error } = await supabase.from("bot_admins")
+        .select("role,status").eq("telegram_id", Number(telegramId)).maybeSingle();
+      if (error || !data || data.status !== "active") return { role: "member", permissions: [] };
+      const permissions = permissionsForRole(data.role);
+      const { data: overrides, error: overrideError } = await supabase.from("bot_admin_permissions")
+        .select("permission,enabled").eq("telegram_id", Number(telegramId));
+      if (!overrideError) {
+        for (const item of overrides || []) {
+          if (item.enabled) permissions.add(item.permission);
+          else permissions.delete(item.permission);
+        }
+      }
+      return { role: String(data.role || "member"), permissions: [...permissions].sort() };
+    } catch {
+      return { role: "member", permissions: [] };
+    }
+  }
 
   const remember = (key, role, content) => {
     if (!conversations.has(key) && conversations.size >= 500) {
@@ -199,7 +230,9 @@ function registerDipshitConversation({
       remember(key, "assistant", directCapability.text);
       return send(msg.chat.id, `💙 ${directCapability.text.slice(0, 3800)}`);
     }
+    const access = await actorAccess(msg);
     const context = {
+      actor_access: access,
       runtime_online: true,
       natural_chat_listener: true,
       conversational_ai: aiEnabled,
