@@ -22,7 +22,7 @@ Routine machine-provable workflow decisions use:
 - ZED — membership, workflow and rules.
 - AUTO — limits, reward budgets and treasury boundaries.
 - G.R.A.C.E. — content, destination and scheduling checks.
-- DipShit — user guidance, completion and usability.
+- Sparky — user guidance, completion and usability.
 
 The shared audit surface is `worldz_bot_decision_ledger`.
 
