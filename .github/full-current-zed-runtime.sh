@@ -20,7 +20,7 @@ node --check index.js
 find src -type f -name '*.js' -exec node --check {} +
 node --check src/oneworldz-gpt/http.js
 grep -Fq 'registerProjectWalletSystem({ app, bot, config, supabase });' src/full-runtime-entry.js
-grep -Fq 'registerDipshitMembershipSystem' src/full-runtime-entry.js
+grep -Fq 'registerSparkyMembershipSystem' src/full-runtime-entry.js
 for marker in 'id="splashback"' 'id="zed-guide"' 'id="create"' 'id="heroes"'; do
   grep -Fq "$marker" public/miniapp/index.html
 done
