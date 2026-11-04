@@ -84,6 +84,6 @@ test("DIPSHIT conversational routing is private-first and group-safe", () => {
 });
 
 test("DIPSHIT strips Telegram addressing before sending text to the AI", () => {
-  assert.equal(stripDipshitAddressing("@DipShitBossBot why is Zed broken?"), "why is Zed broken?");
+  assert.equal(stripDipshitAddressing("@SparkyWorldzBot why is Zed broken?"), "why is Zed broken?");
   assert.equal(stripDipshitAddressing("Sparky: run me through the problem"), "run me through the problem");
 });
