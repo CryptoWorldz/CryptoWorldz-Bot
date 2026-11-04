@@ -10,7 +10,7 @@ Routine Worldz workflows must not depend on a human Admin pressing an approval b
 - **ZED** — membership, workflow, mission and rules checks.
 - **AUTO** — reward caps, budgets and automated execution checks.
 - **G.R.A.C.E.** — content, destination, schedule and communication checks.
-- **DipShit** — member guidance, completion and handoff checks.
+- **Sparky** — member guidance, completion and handoff checks.
 
 Where the required automated checks pass, the workflow should proceed automatically and record the decision.
 
