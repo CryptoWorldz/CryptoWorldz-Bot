@@ -354,7 +354,7 @@ Use /help to open the Command Menu.
       return await bot.sendPhoto(msg.chat.id, image, { caption });
     } catch (error) {
       safeError("SPARKY profile", error);
-      return send(msg.chat.id, "💙 SPARKY™ — WORLDZ DUDE\nProfile: https://cryptoworldz.xyz/dipshit/\nUse /help for ZED commands.\n\nNo wallet signing or treasury authority.");
+      return send(msg.chat.id, "💙 SPARKY™ — WORLDZ DUDE\nProfile: https://cryptoworldz.xyz/sparky/\nUse /help for ZED commands.\n\nNo wallet signing or treasury authority.");
     }
   });
   bot.onText(/^\/kitty(?:@\w+)?$/, async (msg) => {
