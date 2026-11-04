@@ -169,11 +169,11 @@ function registerDipshitConversation({
     try {
       const { data, error } = await supabase
         .from("zed_chat_settings")
-        .select("dipshit_enabled")
+        .select("sparky_enabled,dipshit_enabled")
         .eq("chat_id", Number(msg.chat.id))
         .maybeSingle();
       if (error) throw error;
-      return data ? data.dipshit_enabled !== false : true;
+      return data ? (data.sparky_enabled ?? data.dipshit_enabled) !== false : true;
     } catch {
       return true;
     }
