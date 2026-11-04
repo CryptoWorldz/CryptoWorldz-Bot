@@ -2,7 +2,7 @@
   "version": "WORLDZ-CHAIN-NATIVE-FEE-BUILDER-V1",
   "date": "2026-10-02",
   "name": "Worldz Fair Fee Builder™",
-  "publicRule": "Worldz starts new creator launches at 1.00% where the selected venue can implement that fee accurately. Worldz public launch settings never expose a project trading fee above 3.00%. Use 0.25% increments where that maps truthfully to the chain or venue; otherwise show the venue's real discrete tiers or native market model.",
+  "publicRule": "Worldz public creator launches use a 0.25% minimum, 1.00% default, 0.25% increments and a 3.00% maximum where the selected chain/venue can implement that fee accurately. Otherwise show only truthful native venue tiers or models; never fabricate fee controls.",
   "defaultPercent": 1,
   "publicMaximumPercent": 3,
   "preferredIncrementPercent": 0.25,
