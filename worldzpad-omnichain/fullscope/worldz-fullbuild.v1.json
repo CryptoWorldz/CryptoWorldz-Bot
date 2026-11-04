@@ -219,9 +219,9 @@
         "state": "PLANNED_SPEC_LOCKED__MAINNET_OFF"
       },
       {
-        "id": "dipshit",
-        "name": "DIPSHIT™ / WORLDZ DUDE",
-        "source": "cryptoworldz.xyz/dipshit/index.html",
+        "id": "sparky",
+        "name": "SPARKY™ / WORLDZ DUDE",
+        "source": "cryptoworldz.xyz/sparky/index.html",
         "state": "QA_HELPER_BUILT__NO_FINANCIAL_AUTHORITY"
       }
     ]
@@ -316,7 +316,7 @@
       "Provider handoff compiler for every LIVE Solana token",
       "PHENIX prelaunch allocation/vesting/ProofBurn/OmniBuildz specification",
       "MIRACLE Team Vault / MiracleMagic / genesis-liquidity planned specification",
-      "DIPSHIT Worldz Dude QA profile and Telegram command"
+      "SPARKY Worldz Dude QA profile and Telegram command"
     ]
   },
   "executionBoundary": {
