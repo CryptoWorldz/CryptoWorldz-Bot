@@ -45,7 +45,7 @@ jobs:
               require(status==401,"AUTH_REQUIRED "+path)
           status,body=request(base+"/grace/health")
           require(status==200 and json.loads(body).get("ok") is True,"GRACE_HEALTH")
-          for label,key,path in [("ZED","BOT_TOKEN","/telegram-webhook"),("DIPSHIT","DIPSHIT_BOT_TOKEN","/dipshit-telegram-webhook")]:
+          for label,key,path in [("ZED","BOT_TOKEN","/telegram-webhook"),("SPARKY","SPARKY_BOT_TOKEN","/sparky-telegram-webhook")]:
               token=os.environ.get(key,"").strip()
               require(bool(token),label+"_TOKEN_PRESENT")
               print("::add-mask::"+token)
