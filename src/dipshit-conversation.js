@@ -240,6 +240,7 @@ function registerDipshitConversation({
       try {
         const { data, error } = await supabase.from("community_suite_ai_knowledge")
           .select("title,content,source_url,approved_at").eq("chat_id", Number(msg.chat.id))
+          .not("approved_by", "is", null)
           .order("approved_at", { ascending: false }).limit(30);
         if (!error) approvedCustomerKnowledge = (data || []).map((row) => ({
           title: String(row.title || "").slice(0, 160),
