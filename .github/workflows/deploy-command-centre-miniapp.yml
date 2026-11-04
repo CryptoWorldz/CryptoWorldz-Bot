@@ -38,18 +38,18 @@ jobs:
           test -s public/miniapp/auto-public.js
           test -s public/miniapp/max.js
           test -s public/miniapp/max.css
-          test -s public/miniapp/dipshit.js
+          test -s public/miniapp/sparky.js
           test -s public/miniapp/inbox.js
           test -s public/miniapp/inbox.css
           test -s public/miniapp/community-suite.js
           test -s public/miniapp/open-x.html
-          test -s public/miniapp/assets/dipshit-worldz-dude.svg
+          test -s public/miniapp/assets/sparky-worldz-dude.svg
           test -s public/miniapp/assets/dipshit-worldz-dude.png
           node --check public/miniapp/app.js
           node --check public/miniapp/max.js
           node --check public/miniapp/auto-owner.js
           node --check public/miniapp/auto-public.js
-          node --check public/miniapp/dipshit.js
+          node --check public/miniapp/sparky.js
           node --check public/miniapp/inbox.js
           node --check public/miniapp/community-suite.js
           node --test test/raid-post-launcher.test.js
@@ -67,9 +67,9 @@ jobs:
           grep -Fq 'REALIZABLE VALUE GATE' public/miniapp/auto-public.js
           grep -Fq '/api/mini/auto/public/exit-quote' public/miniapp/auto-public.js
           grep -Fq 'zed-miniapp-rescue' public/miniapp/app.js
-          grep -Fq 'DIPSHIT™' public/miniapp/dipshit.js
-          grep -Fq 'WORLDZ DUDE' public/miniapp/dipshit.js
-          grep -Fq 'walletSigning: false' public/miniapp/dipshit.js
+          grep -Fq 'SPARKY™' public/miniapp/sparky.js
+          grep -Fq 'WORLDZ DUDE' public/miniapp/sparky.js
+          grep -Fq 'walletSigning: false' public/miniapp/sparky.js
           grep -Fq 'Worldz Inbox™' public/miniapp/index.html
           grep -Fq '/api/mini/inbox' public/miniapp/inbox.js
           grep -Fq 'Exact @username' public/miniapp/inbox.js
@@ -167,10 +167,10 @@ jobs:
                   jcode,js=get('/miniapp/app.js?verify=worldzlaunchpad-rescue')
                   acode,auto=get('/miniapp/auto-owner.js?verify=worldzlaunchpad-rescue')
                   pcode,publicauto=get('/miniapp/auto-public.js?verify=auto-market-planner')
-                  dcode,dipshit=get('/miniapp/dipshit.js?verify=dipshit-worldz-dude')
+                  dcode,sparky=get('/miniapp/sparky.js?verify=sparky-worldz-dude')
                   ncode,inbox=get('/miniapp/inbox.js?verify=worldz-inbox')
                   ccode,inboxcss=get('/miniapp/inbox.css?verify=worldz-inbox')
-                  icode,avatar=get('/miniapp/assets/dipshit-worldz-dude.svg?verify=dipshit-worldz-dude')
+                  icode,avatar=get('/miniapp/assets/sparky-worldz-dude.svg?verify=sparky-worldz-dude')
                   mcode,maxjs=get('/miniapp/max.js?verify=command-centre-max')
                   xcode,maxcss=get('/miniapp/max.css?verify=command-centre-max')
                   scode,suite=get('/miniapp/community-suite.js?verify=community-suite')
@@ -180,7 +180,7 @@ jobs:
                   assert jcode==200 and 'zed-miniapp-rescue' in js
                   assert acode==200 and 'WorldzLaunchPad™' in auto and 'Command Centre MAX™' in auto
                   assert pcode==200 and 'AUTO MARKET PLANNER™ • EVERY DAY' in publicauto and 'Treasury is optional and never assumed' in publicauto and '/api/mini/auto/public/quote' in publicauto and 'REALIZABLE VALUE GATE' in publicauto and '/api/mini/auto/public/exit-quote' in publicauto
-                  assert dcode==200 and 'DIPSHIT™' in dipshit and 'WORLDZ DUDE' in dipshit and 'walletSigning: false' in dipshit
+                  assert dcode==200 and 'SPARKY™' in sparky and 'WORLDZ DUDE' in sparky and 'walletSigning: false' in sparky
                   assert ncode==200 and '/api/mini/inbox' in inbox and 'Worldz Inbox' in inbox
                   assert ccode==200 and '.worldz-inbox-shell' in inboxcss
                   assert icode==200 and '<svg' in avatar and 'WORLDZ DUDE' in avatar
@@ -188,7 +188,7 @@ jobs:
                   assert xcode==200 and '.max-home-card' in maxcss
                   assert scode==200 and '/api/mini/community-suite' in suite and 'WorldzCommunitySuite' in suite
                   assert ocode==200 and 'exact-web-v2' in openx and 'twitter://' not in openx and 'intent://' not in openx and 'OPEN EXACT POST IN BROWSER' in openx
-                  print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 max=1 worldzlaunchpad=1 auto_public=1 dipshit=1 inbox=1 community_suite=1 direct_x_raid=1 basedbid=0')
+                  print('COMMAND_CENTRE_STATIC_LIVE=PASS rescue=1 max=1 worldzlaunchpad=1 auto_public=1 sparky=1 inbox=1 community_suite=1 direct_x_raid=1 basedbid=0')
                   raise SystemExit(0)
               except SystemExit:
                   raise
