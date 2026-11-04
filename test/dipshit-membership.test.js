@@ -46,7 +46,7 @@ test("SOL month pass stays disabled without an explicit valid recipient and amou
 
 test("DIPSHIT command menu includes payment, privacy and cancellation controls", () => {
   const names = SPARKY_COMMANDS.map((item) => item.command);
-  for (const command of ["ask","subscribe","membership","solmembership","claimsol","cancelmembership","privacy","terms","paysupport"]) {
+  for (const command of ["ask","myaccess","fix","subscribe","membership","solmembership","claimsol","cancelmembership","privacy","terms","paysupport"]) {
     assert.ok(names.includes(command), command);
   }
 });
