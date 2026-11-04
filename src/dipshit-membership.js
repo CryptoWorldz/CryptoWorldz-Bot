@@ -149,6 +149,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     "💬 Talk normally in private chat. In groups, mention @SparkyWorldzBot, reply to me, or start with “Sparky …”",
     "",
     "/status — runtime status",
+    "/myaccess — view your own Worldz role and permissions",
     "/fix <problem> — troubleshoot a problem",
     "/check — quick QA check",
     "/ask <question> — normal-language troubleshooting",
