@@ -283,7 +283,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
   bot.onText(/^\/worldz(?:@\w+)?$/, (msg) => send(msg.chat.id, "🌐 WorldzEcosystem™\nhttps://cryptoworldz.xyz/"));
   bot.onText(/^\/zed(?:@\w+)?$/, (msg) => send(msg.chat.id, "🤖 ZED Command Centre\nhttps://cryptobotz.cryptoworldz.xyz/miniapp/"));
   bot.onText(/^\/inbox(?:@\w+)?$/, (msg) => send(msg.chat.id, "📥 Worldz Inbox™\nhttps://cryptobotz.cryptoworldz.xyz/miniapp/#inbox"));
-  bot.onText(/^\/(?:sparky|dipshit)(?:@\w+)?$/, (msg) => send(msg.chat.id, "💙 SPARKY™ — WORLDZ DUDE\nhttps://cryptoworldz.xyz/dipshit/"));
+  bot.onText(/^\/sparky(?:@\w+)?$/, (msg) => send(msg.chat.id, "💙 SPARKY™ — WORLDZ DUDE\nhttps://cryptoworldz.xyz/sparky/"));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, "🌐 https://cryptoworldz.xyz/"));
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(
     msg.chat.id,
