@@ -3,7 +3,7 @@
 ## Product
 A Worldz-hosted Telegram community platform built around two specialised bot roles:
 1. Operations Bot — ZED • AUTO • G.R.A.C.E. Command Centre functions, Raids, points, voting, scanning, alerts, settings and protected operations.
-2. AI Community Bot — choose a ready-made Auto Pick (No.5, DipShit, ALICE, REX, G.R.A.C.E. or MAX) or create a Custom Build with its own name, personality and purpose. Every option uses the same live Worldz capability registry plus customer-approved project knowledge.
+2. AI Community Bot — choose a ready-made Auto Pick (No.5, Sparky, ALICE, REX, G.R.A.C.E. or MAX) or create a Custom Build with its own name, personality and purpose. Every option uses the same live Worldz capability registry plus customer-approved project knowledge.
 
 Customers can purchase either bot alone or the complete two-bot suite.
 
@@ -42,7 +42,7 @@ Paid custom artwork, personality writing, bot naming, custom command labels and 
 ### AI Auto Pick + Custom Build
 Ready-made Auto Picks:
 - No.5 — Alive + Community + Raid Energy AI
-- DipShit — Cheeky QA + Troubleshooting AI
+- Sparky — Cheeky QA + Troubleshooting AI
 - ALICE — Support + Organisation
 - REXSECURE ULTIMATE™ — Community Security + Moderation AI
 - G.R.A.C.E. — Communications + Campaigns
@@ -159,7 +159,7 @@ The feature branch now contains:
 - secure Mini App Community Suite admin surface
 - REX number-match verification, anti-flood, domain rules, trusted Telegram IDs, impersonation modes, linked-channel posture and recovery guidance
 - ALICE tracked support tickets and admin queues
-- capability-aware customer AI profiles with approved knowledge, No.5/DipShit/ALICE/REX/G.R.A.C.E./MAX Auto Picks, deterministic named-feature routing, and Custom Build settings
+- capability-aware customer AI profiles with approved knowledge, No.5/Sparky/ALICE/REX/G.R.A.C.E./MAX Auto Picks, deterministic named-feature routing, and Custom Build settings
 - WorldzScan single-token and x20 scanning
 - authenticated provider/indexer market event ingest for real buy/whale/liquidity alerts
 - wallet watchlists
