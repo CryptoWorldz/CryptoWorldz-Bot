@@ -211,7 +211,7 @@ function registerDipshitConversation({
         cryptoworldz: "https://cryptoworldz.xyz/",
         command_centre: "https://cryptobotz.cryptoworldz.xyz/miniapp/",
         inbox: "https://cryptobotz.cryptoworldz.xyz/miniapp/#inbox",
-        dipshit: "https://cryptoworldz.xyz/dipshit/",
+        sparky: "https://cryptoworldz.xyz/sparky/",
         privacy: privacyUrl,
         terms: termsUrl
       },
