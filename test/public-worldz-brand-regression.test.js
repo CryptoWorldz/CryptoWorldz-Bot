@@ -26,7 +26,7 @@ test("WorldzLaunch Pack exposes current ZED-led modules and Spotlight",()=>{
   assert.match(html,/REXSECURE ULTIMATE™/);
   assert.match(html,/WORLDZ SPOTLIGHT™/);
   assert.equal(campaign.commandCentre.registeredCommandEntries,252);
-  for(const item of ["ZED","REXSECURE ULTIMATE™","DIPSHIT™","Ronald Raider","Worldz Spotlight™"]) {
+  for(const item of ["ZED","REXSECURE ULTIMATE™","SPARKY™","Ronald Raider","Worldz Spotlight™"]) {
     assert.ok(campaign.commandCentre.modules.includes(item),item);
   }
 });
