@@ -10,6 +10,7 @@ on:
       - "src/**"
       - "supabase/migrations/*worldz_fullscope*.sql"
       - "supabase/migrations/*dipshit*.sql"
+      - "supabase/migrations/*sparky*.sql"
       - "supabase/migrations/*rexsecure*.sql"
       - "public/**"
       - ".well-known/**"
@@ -494,6 +495,7 @@ jobs:
                 {"command":"status","description":"Check Worldz system status"},
                 {"command":"check","description":"Run Worldz QA checks"},
                 {"command":"ask","description":"Ask Sparky anything about Worldz"},
+                {"command":"myaccess","description":"View your own Worldz role and permissions"},
                 {"command":"fix","description":"Troubleshoot a problem"},
                 {"command":"report","description":"Report a bug or broken feature"},
                 {"command":"worldz","description":"Open the WorldzEcosystem™"},
