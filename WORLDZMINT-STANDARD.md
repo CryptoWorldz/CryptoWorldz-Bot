@@ -30,7 +30,7 @@ It is deliberately separate from a trading launch.
 - Create fake or virtual liquidity.
 - Guarantee Jupiter verification, listing or price availability.
 - Guarantee price appreciation.
-- Take any percentage of the token supply.
+- Take any **undisclosed or additional** percentage of the token supply. The separate, mandatory 0.60% genesis allocation is disclosed before signing and described under Fees below.
 - Take any percentage of initial liquidity.
 - Apply an ordinary-wallet transfer tax.
 
