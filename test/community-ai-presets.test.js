@@ -8,8 +8,9 @@ const {
 } = require("../src/community-ai-presets");
 
 test("Auto Picks include No.5, specialist presets and Custom Build", () => {
-  assert.deepEqual(presetKeys(), ["no5","dipshit","alice","rex","grace","max","custom"]);
+  assert.deepEqual(presetKeys(), ["no5","sparky","alice","rex","grace","max","custom"]);
   assert.equal(AUTO_PICK_PRESETS.no5.displayName, "No.5");
+  assert.equal(AUTO_PICK_PRESETS.sparky.displayName, "Sparky");
   assert.equal(AUTO_PICK_PRESETS.custom.displayName, "Custom Build");
   assert.equal(AUTO_PICK_PRESETS.rex.displayName, "REXSECURE ULTIMATE™");
   assert.equal(AUTO_PICK_PRESETS.rex.roleLabel, "Community Security + Moderation AI");
