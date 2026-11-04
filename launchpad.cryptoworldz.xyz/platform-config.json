@@ -1234,7 +1234,7 @@
     "telegram": {
       "status": "INTEGRATED",
       "commandCentre": true,
-      "dipshit": true,
+      "sparky": true,
       "raids": true,
       "launchNotifications": "APPROVAL_CONTROLLED"
     }
@@ -1459,7 +1459,7 @@
       "zed": "membership_rules",
       "auto": "caps_budget_treasury_boundaries",
       "grace": "content_destination_scheduling",
-      "dipshit": "usability_completion"
+      "sparky": "usability_completion"
     },
     "routineAutoValidated": [
       "Raid completion",
