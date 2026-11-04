@@ -48,7 +48,7 @@
     "publicPromise": "Creators keep 99.40% of token supply under the public WorldzMINT route. A mandatory disclosed 0.60% WorldzLaunchPad genesis allocation is split 0.30% Worldz Operations Treasury, 0.18% Miricle Team Multisig Treasury and 0.12% Purple Diamond Crew Multisig Treasury. Worldz takes 0% of initial liquidity and 0% wallet-transfer tax. Fee Flow V3 creator-selected 3% / 5% / 8% applies separately to eligible fee revenue.",
     "projectTradingFeeDefaultPercent": 1,
     "publicFeeBuilderPolicy": "worldzpad-omnichain/chain-native-fee-builder.v1.json",
-    "publicFeeRule": "1.00% Worldz default; 3.00% hard public cap; prefer 0.25% steps only where the selected chain/venue supports that setting truthfully. Native venue fees and network costs stay separate.",
+    "publicFeeRule": "0.25% minimum; 1.00% Worldz default; 0.25% increments; 3.00% hard public cap. Apply the selected fee only where the chain/venue supports it truthfully. Native venue fees and network costs stay separate.",
     "absurdHighFeeProfilesHidden": true,
     "sixToTenPercentProjectTradingFeesOffered": false,
     "chainNativeOverrides": {
