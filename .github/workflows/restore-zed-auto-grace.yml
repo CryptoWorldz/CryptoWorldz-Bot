@@ -231,7 +231,7 @@ jobs:
           grep -Fq 'registerAutoTelegramHandlers' src/full-runtime-entry.js
           grep -Fq 'registerGraceTelegramHandlers' src/full-runtime-entry.js
           grep -Fq 'registerProjectWalletSystem' src/full-runtime-entry.js
-          grep -Fq 'registerDipshitMembershipSystem' src/full-runtime-entry.js
+          grep -Fq 'registerSparkyMembershipSystem' src/full-runtime-entry.js
           grep -Fq 'registerCommunitySuiteHandlers' src/full-runtime-entry.js
           grep -Fq 'registerCommunityAI' src/full-runtime-entry.js
           grep -Fq 'registerAliceSupport' src/full-runtime-entry.js
