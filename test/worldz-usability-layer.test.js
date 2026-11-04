@@ -17,7 +17,7 @@ test("Command Centre exposes simple onboarding and SPARKY guidance", () => {
   assert.match(profile, /ADD WALLET/);
   assert.match(profile, /RAID NOW/);
   assert.match(profile, /responsibilityLines/);
-  assert.match(dip, /LOST\? START HERE/);
+  assert.match(sparky, /LOST\? START HERE/);
   assert.match(sparky, /ASK SPARKY/);
   assert.match(mini, /SCREEN_INSTRUCTIONS/);
   assert.match(mini, /RAIDS — 3 STEPS/);
