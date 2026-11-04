@@ -65,11 +65,12 @@ function loadConfig(env = process.env) {
       ? sparkyStarsMonthlyPriceRaw
       : 0;
   const dipshitStarsMonthlyPrice = sparkyStarsMonthlyPrice;
-  const dipshitSolMonthlyAmountRaw = Number(env.SPARKY_SOL_MONTHLY_AMOUNT || env.DIPSHIT_SOL_MONTHLY_AMOUNT || 0);
-  const dipshitSolMonthlyAmount =
-    Number.isFinite(dipshitSolMonthlyAmountRaw) && dipshitSolMonthlyAmountRaw >= 0
-      ? dipshitSolMonthlyAmountRaw
+  const sparkySolMonthlyAmountRaw = Number(env.SPARKY_SOL_MONTHLY_AMOUNT || env.DIPSHIT_SOL_MONTHLY_AMOUNT || 0);
+  const sparkySolMonthlyAmount =
+    Number.isFinite(sparkySolMonthlyAmountRaw) && sparkySolMonthlyAmountRaw >= 0
+      ? sparkySolMonthlyAmountRaw
       : 0;
+  const dipshitSolMonthlyAmount = sparkySolMonthlyAmount;
 
   const autoServiceUrl = String(
     env.AUTO_SERVICE_URL || `${supabaseUrl}/functions/v1/diamond-buy-auto`
