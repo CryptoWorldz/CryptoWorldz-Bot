@@ -5,7 +5,7 @@
     displayName: "SPARKY™",
     title: "WORLDZ DUDE",
     role: "Command Centre QA + Troubleshooting Helper",
-    avatar: "/miniapp/assets/dipshit-worldz-dude.svg",
+    avatar: "/miniapp/assets/sparky-worldz-dude.svg",
     authority: Object.freeze({
       walletSigning: false,
       treasury: false,
