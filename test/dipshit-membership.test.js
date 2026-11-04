@@ -62,6 +62,14 @@ test("public privacy and terms pages exist and keep retired branding out", () =>
   assert.doesNotMatch(privacy + terms, /OneWorldz|oneworldz\.com/i);
 });
 
+test("Sparky migration adds the canonical chat setting and allows the new AI preset", () => {
+  const sql = fs.readFileSync(path.join(ROOT, "supabase/migrations/20261104160000_sparky_canonical_settings.sql"), "utf8");
+  assert.match(sql, /add column if not exists sparky_enabled/i);
+  assert.match(sql, /drop constraint if exists community_suite_ai_profiles_preset_key_check/i);
+  assert.match(sql, /'sparky'/i);
+  assert.match(sql, /set preset_key = 'sparky'/i);
+});
+
 test("membership migration is private-by-default and idempotent", () => {
   const sql = fs.readFileSync(path.join(ROOT, "supabase/migrations/20260929113500_dipshit_memberships.sql"), "utf8");
   assert.match(sql, /enable row level security/i);
