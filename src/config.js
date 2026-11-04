@@ -42,25 +42,29 @@ function loadConfig(env = process.env) {
     throw new Error("TELEGRAM_WEBHOOK_URL must be a valid HTTPS URL.");
   }
 
-  const dipshitBotToken = String(env.SPARKY_BOT_TOKEN || env.DIPSHIT_BOT_TOKEN || "").trim();
-  const dipshitWebhookUrl = String(
-    env.SPARKY_WEBHOOK_URL || env.DIPSHIT_WEBHOOK_URL || "https://cryptobotz.cryptoworldz.xyz/dipshit-telegram-webhook"
+  const sparkyBotToken = String(env.SPARKY_BOT_TOKEN || env.DIPSHIT_BOT_TOKEN || "").trim();
+  const dipshitBotToken = sparkyBotToken;
+  const sparkyWebhookUrl = String(
+    env.SPARKY_WEBHOOK_URL || env.DIPSHIT_WEBHOOK_URL || "https://cryptobotz.cryptoworldz.xyz/sparky-telegram-webhook"
   ).trim();
-  if (dipshitBotToken) {
+  const dipshitWebhookUrl = sparkyWebhookUrl;
+  if (sparkyBotToken) {
     try {
-      const parsedDipshitWebhookUrl = new URL(dipshitWebhookUrl);
+      const parsedDipshitWebhookUrl = new URL(sparkyWebhookUrl);
       if (parsedDipshitWebhookUrl.protocol !== "https:") throw new Error();
     } catch {
-      throw new Error("DIPSHIT_WEBHOOK_URL must be a valid HTTPS URL.");
+      throw new Error("SPARKY_WEBHOOK_URL must be a valid HTTPS URL.");
     }
   }
-  const dipshitStarsMonthlyPriceRaw = Number(env.SPARKY_STARS_MONTHLY_PRICE || env.DIPSHIT_STARS_MONTHLY_PRICE || 0);
-  const dipshitStarsMonthlyPrice =
-    Number.isInteger(dipshitStarsMonthlyPriceRaw) &&
-    dipshitStarsMonthlyPriceRaw >= 0 &&
-    dipshitStarsMonthlyPriceRaw <= 10000
-      ? dipshitStarsMonthlyPriceRaw
+  const sparkyStarsMonthlyPriceRaw = Number(env.SPARKY_STARS_MONTHLY_PRICE || env.DIPSHIT_STARS_MONTHLY_PRICE || 0);
+  const dipshitStarsMonthlyPriceRaw = sparkyStarsMonthlyPriceRaw;
+  const sparkyStarsMonthlyPrice =
+    Number.isInteger(sparkyStarsMonthlyPriceRaw) &&
+    sparkyStarsMonthlyPriceRaw >= 0 &&
+    sparkyStarsMonthlyPriceRaw <= 10000
+      ? sparkyStarsMonthlyPriceRaw
       : 0;
+  const dipshitStarsMonthlyPrice = sparkyStarsMonthlyPrice;
   const dipshitSolMonthlyAmountRaw = Number(env.SPARKY_SOL_MONTHLY_AMOUNT || env.DIPSHIT_SOL_MONTHLY_AMOUNT || 0);
   const dipshitSolMonthlyAmount =
     Number.isFinite(dipshitSolMonthlyAmountRaw) && dipshitSolMonthlyAmountRaw >= 0
@@ -88,11 +92,17 @@ function loadConfig(env = process.env) {
     allowedChatIds: parseIdSet(env.ALLOWED_CHAT_IDS),
     adminTelegramIds: parseIdSet(env.ADMIN_TELEGRAM_IDS),
     ownerTelegramId: String(env.OWNER_TELEGRAM_ID || "").trim(),
+    sparkyBotToken,
+    sparkyWebhookUrl,
+    sparkyWebhookSecret: sparkyBotToken ? crypto.createHash("sha256").update(sparkyBotToken).digest("hex") : "",
     dipshitBotToken,
     dipshitWebhookUrl,
     dipshitWebhookSecret: dipshitBotToken
       ? crypto.createHash("sha256").update(dipshitBotToken).digest("hex")
       : "",
+    sparkyStarsMonthlyPrice,
+    sparkySolMonthlyAmount,
+    sparkySolRecipient: String(env.SPARKY_SOL_RECIPIENT || env.DIPSHIT_SOL_RECIPIENT || "").trim(),
     dipshitStarsMonthlyPrice,
     dipshitSolMonthlyAmount,
     dipshitSolRecipient: String(env.SPARKY_SOL_RECIPIENT || env.DIPSHIT_SOL_RECIPIENT || "").trim(),
@@ -124,9 +134,9 @@ function configWarnings(config) {
   if (config.adminTelegramIds.size === 0) warnings.push("ADMIN_TELEGRAM_IDS is empty; Telegram admin commands are disabled.");
   if (!config.ownerTelegramId) warnings.push("OWNER_TELEGRAM_ID is empty; owner-only commands are disabled.");
   if (!config.autoServiceUrl || !config.autoAuthToken) warnings.push("Auto SAFE LOCKED service is not connected; owner Auto commands will remain unavailable.");
-  if (config.dipshitBotToken && config.dipshitBotToken === config.botToken) warnings.push("DIPSHIT_BOT_TOKEN matches BOT_TOKEN; separate DIPSHIT runtime is disabled.");
-  if (config.dipshitBotToken && !config.dipshitStarsMonthlyPrice) warnings.push("DIPSHIT Stars billing is built but DIPSHIT_STARS_MONTHLY_PRICE is not set.");
-  if (config.dipshitSolMonthlyAmount && !config.dipshitSolRecipient) warnings.push("DIPSHIT SOL amount is set without DIPSHIT_SOL_RECIPIENT; SOL membership remains disabled.");
+  if (config.sparkyBotToken && config.sparkyBotToken === config.botToken) warnings.push("SPARKY_BOT_TOKEN matches BOT_TOKEN; separate Sparky runtime is disabled.");
+  if (config.sparkyBotToken && !config.sparkyStarsMonthlyPrice) warnings.push("Sparky Stars billing is built but SPARKY_STARS_MONTHLY_PRICE is not set.");
+  if (config.sparkySolMonthlyAmount && !config.sparkySolRecipient) warnings.push("Sparky SOL amount is set without SPARKY_SOL_RECIPIENT; SOL membership remains disabled.");
   return warnings;
 }
 
