@@ -300,6 +300,19 @@ function registerDipshitConversation({
     }
   };
 
+  bot.onText(/^\/myaccess(?:@\w+)?$/, async (msg) => {
+    const access = await actorAccess(msg);
+    const lines = [
+      "🔐 YOUR WORLDZ ACCESS",
+      "",
+      `Role: ${access.role}`,
+      `Permissions: ${access.permissions.length ? access.permissions.join(", ") : "Standard member access"}`,
+      "",
+      "Sparky can explain your available routes. Protected actions still require their normal Command Centre permission checks."
+    ];
+    return send(msg.chat.id, lines.join("\n"));
+  });
+
   bot.onText(/^\/ask(?:@\w+)?(?:\s+([\s\S]+))?$/, (msg, match) => {
     const question = String(match && match[1] || "").trim();
     return question
