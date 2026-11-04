@@ -139,7 +139,7 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
   }
 
   function configKeyboard(profile) {
-    const keys = ["no5","dipshit","alice","rex","grace","max"];
+    const keys = ["no5","sparky","alice","rex","grace","max"];
     const rows = [];
     for (let i = 0; i < keys.length; i += 2) {
       rows.push(keys.slice(i, i + 2).map((key) => ({
@@ -418,7 +418,7 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
         const context = await buildAssistantCapabilityContext({ supabase, chatId: query.message.chat.id });
         return send(actorMessage, formatCapabilitySummary(context));
       }
-      const match = data.match(/^ai:preset:(no5|dipshit|alice|rex|grace|max|custom)$/);
+      const match = data.match(/^ai:preset:(no5|sparky|dipshit|alice|rex|grace|max|custom)$/);
       if (!match) return;
       if (!(await requireAdmin(actorMessage))) {
         return bot.answerCallbackQuery(query.id, { text: "Group admin access required.", show_alert: true });
@@ -448,7 +448,7 @@ function registerCommunityAI({ bot, config, supabase, env = process.env, fetchIm
       return;
     }
 
-    const likelyNamed = /^(?:no\.?5|dip\s*shit|alice|rex|g\.?r\.?a\.?c\.?e\.?|grace|max)(?:\s*[:;,.-]\s*|\s+)/i.test(text)
+    const likelyNamed = /^(?:no\.?5|sparky|alice|rex|g\.?r\.?a\.?c\.?e\.?|grace|max)(?:\s*[:;,.-]\s*|\s+)/i.test(text)
       || /^[^:\n]{1,64}:\s+/.test(text);
     if (!likelyNamed) return;
     try {
