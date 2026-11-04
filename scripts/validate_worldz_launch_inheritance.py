@@ -53,6 +53,9 @@ public=inheritance["economicsProfiles"]["publicCreatorConfigurable"]
 policy=platform["feePolicy"]
 assert Decimal(str(public["projectTradingFeeMinPercent"]))==Decimal(str(policy["projectTradingFeeMinPercent"]))
 assert Decimal(str(public["projectTradingFeeMaxPercent"]))==Decimal(str(policy["projectTradingFeeMaxPercent"]))
+assert Decimal(str(public["projectTradingFeeDefaultPercent"]))==Decimal(str(policy["projectTradingFeeDefaultPercent"]))==Decimal("1")
+assert Decimal(str(public["projectTradingFeeStepPercent"]))==Decimal(str(policy["stepPercent"]))==Decimal("0.25")
+assert Decimal(str(public["projectTradingFeeMinPercent"]))==Decimal("0.25")
 assert public["worldzLaunchPadContributionChoicesPercent"]==policy["worldzLaunchPadContributionChoicesPercent"]==[3,5,8]
 assert public["worldzLaunchPadContributionDefaultPercent"]==policy["worldzLaunchPadContributionDefaultPercent"]==5
 assert public["creatorRetentionByContributionPercent"]==policy["creatorRetentionByContribution"]=={"3":97,"5":95,"8":92}
@@ -64,6 +67,10 @@ v2=inheritance["economicsProfiles"]["worldzFeeFlowV2"]
 assert v2["selection"]=="HISTORICAL_AUDIT_ONLY__SUPERSEDED_BY_V3"
 
 v3=inheritance["economicsProfiles"]["worldzFeeFlowV3"]
+assert v3["projectTradingFeeMinPercent"]==0.25
+assert v3["projectTradingFeeDefaultPercent"]==1
+assert v3["projectTradingFeeStepPercent"]==0.25
+assert v3["projectTradingFeeMaxPercent"]==3
 assert v3["worldzContributionChoicesPercent"]==[3,5,8]
 assert v3["worldzContributionDefaultPercent"]==5
 assert v3["creatorRetentionByContributionPercent"]=={"3":97,"5":95,"8":92}
