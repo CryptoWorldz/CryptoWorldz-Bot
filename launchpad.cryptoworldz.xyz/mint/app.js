@@ -185,8 +185,8 @@ function isPk(s){try{new PublicKey(s);return true}catch{return false}}
 function validate(){
   const v=values(),e=[],a=v.allocations,r=v.recipients;
   if(!walletCtx)e.push('Connect a wallet first.');
-  const canonicalTicker='WL'+'DZ';
-  if(v.token_name.toUpperCase()==='WORLDZ'||v.symbol===canonicalTicker)e.push('WORLDZ / '+canonicalTicker+' is already minted on Solana mainnet. Use canonical mint AHYnPvXMsdWxjQQrS9j5P631WWS8xBVYC57jXB6hrJ6U — a second WORLDZ mint is blocked.');
+  // Legacy WLDZ is a distinct historical token; it must not reserve the new WORLDZ identity.
+  // On-chain uniqueness is determined by mint address, not by ticker or token name.
   if(v.token_name.length<2||v.token_name.length>32)e.push('Token name must be 2–32 characters.');
   if(!/^[A-Z0-9_$]{2,10}$/.test(v.symbol))e.push('Ticker must be 2–10 letters/numbers/$/_.');
   if(!/^\d+$/.test(v.fixed_supply)||BigInt(v.fixed_supply)<1000n||BigInt(v.fixed_supply)>1000000000000n)e.push('Supply must be a whole number from 1,000 to 1,000,000,000,000.');
@@ -198,7 +198,7 @@ function validate(){
   if(Math.abs(total-100)>.001)e.push('Genesis allocations including the fixed Worldz 0.60% share must total exactly 100%.');
   const projectTotal=PROJECT_KEYS.reduce((n,k)=>n+(Number(a[k])||0),0);
   if(Math.abs(projectTotal-99.4)>.001)e.push('Creator/project allocations must total exactly 99.40%; the fixed Worldz share is 0.60%.');
-  if(Math.abs(a.worldzOperations-.25)>.0001||Math.abs(a.worldzCommunityTeam-.20)>.0001||Math.abs(a.purpleDiamondCrew-.15)>.0001)e.push('Worldz genesis share must remain fixed at 0.25% / 0.20% / 0.15%.');
+  if(Math.abs(a.worldzOperations-.30)>.0001||Math.abs(a.worldzCommunityTeam-.18)>.0001||Math.abs(a.purpleDiamondCrew-.12)>.0001)e.push('Worldz genesis share must remain fixed at 0.30% / 0.18% / 0.12%.');
   if(a.creator>5)e.push('Creator liquid allocation cannot exceed 5%.');
   if(a.liquidity<25||a.liquidity>60)e.push('Liquidity reserve must be 25–60%.');
   if(a.community<20)e.push('Community allocation must be at least 20%.');
@@ -215,7 +215,7 @@ function renderProof(extra={}){
   const p=pending||{},items=[
     ['Wallet connected',!!walletCtx,walletCtx?short(walletCtx.address):'PENDING'],
     ['Safe tokenomics preflight',preflightOk,preflightOk?'PASS':'PENDING'],
-    ['Worldz 0.60% genesis route',systemRoutingReady,systemRoutingReady?'0.25 / 0.20 / 0.15 READY':'TREASURY VAULTS PENDING'],
+    ['Worldz 0.60% genesis route',systemRoutingReady,systemRoutingReady?'0.30 / 0.18 / 0.12 READY':'TREASURY VAULTS PENDING'],
     ['Token image watermark',true,watermarkRemoved?'REMOVED • 0.05 SOL PAID':'35% OPACITY • INCLUDED'],
     ['Mint account created',!!p.createSig,p.createSig?short(p.mint):'PENDING'],
     ['Exact supply distributed',!!p.distributeSig,p.distributeSig?'ON-CHAIN':'PENDING'],
