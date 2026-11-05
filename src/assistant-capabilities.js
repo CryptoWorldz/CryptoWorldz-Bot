@@ -1,5 +1,13 @@
 const CAPABILITY_CATALOG = Object.freeze([
   {
+    key: "sparky",
+    label: "Sparky WorldzBot",
+    moduleKey: null,
+    summary: "Worldz navigation, conversational QA, troubleshooting, support routing and capability-aware guidance. Uses live Command Centre capabilities and approved community knowledge.",
+    memberCommands: ["/ask QUESTION", "/status", "/check", "/fix <problem>", "/report <problem>"],
+    adminCommands: ["/zed — open Command Centre for permission-checked crew/admin controls"]
+  },
+  {
     key: "command_centre",
     label: "ZED Command Centre",
     moduleKey: null,

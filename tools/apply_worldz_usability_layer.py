@@ -3,7 +3,7 @@
 
 Runs AFTER legacy content builders and public-brand retirement. It does not
 change protocol/runtime identifiers. It adds plain-English START HERE guidance,
-DIPSHIT handoffs, and the compatibility build marker expected by the existing
+SPARKY handoffs, and the compatibility build marker expected by the existing
 18-site visual audit.
 """
 from pathlib import Path
@@ -68,7 +68,7 @@ def main():
             if after != before:
                 page.write_text(after, encoding="utf-8")
                 changed += 1
-    print(f"WORLDZ_USABILITY_LAYER=PASS pages={pages} changed={changed} dipshit=1 start_here=1")
+    print(f"WORLDZ_USABILITY_LAYER=PASS pages={pages} changed={changed} sparky=1 start_here=1")
 
 if __name__ == "__main__":
     main()

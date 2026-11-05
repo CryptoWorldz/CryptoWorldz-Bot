@@ -9,7 +9,7 @@ const {
 } = require("../src/dipshit-conversation");
 
 const {
-  DIPSHIT_COMMANDS,
+  SPARKY_COMMANDS,
   DIPSHIT_INVOICE_PAYLOAD,
   DIPSHIT_PERIOD_SECONDS,
   activeMembership,
@@ -45,21 +45,29 @@ test("SOL month pass stays disabled without an explicit valid recipient and amou
 });
 
 test("DIPSHIT command menu includes payment, privacy and cancellation controls", () => {
-  const names = DIPSHIT_COMMANDS.map((item) => item.command);
-  for (const command of ["ask","subscribe","membership","solmembership","claimsol","cancelmembership","privacy","terms","paysupport"]) {
+  const names = SPARKY_COMMANDS.map((item) => item.command);
+  for (const command of ["ask","myaccess","fix","subscribe","membership","solmembership","claimsol","cancelmembership","privacy","terms","paysupport"]) {
     assert.ok(names.includes(command), command);
   }
 });
 
 test("public privacy and terms pages exist and keep retired branding out", () => {
-  const privacy = fs.readFileSync(path.join(ROOT, "cryptoworldz.xyz/dipshit/privacy/index.html"), "utf8");
-  const terms = fs.readFileSync(path.join(ROOT, "cryptoworldz.xyz/dipshit/terms/index.html"), "utf8");
+  const privacy = fs.readFileSync(path.join(ROOT, "cryptoworldz.xyz/sparky/privacy/index.html"), "utf8");
+  const terms = fs.readFileSync(path.join(ROOT, "cryptoworldz.xyz/sparky/terms/index.html"), "utf8");
   assert.match(privacy, /Privacy Policy/);
   assert.match(privacy, /seed phrase/);
   assert.match(terms, /Telegram Stars/);
   assert.match(terms, /SOL month pass/);
   assert.match(terms, /does not buy tokens/i);
   assert.doesNotMatch(privacy + terms, /OneWorldz|oneworldz\.com/i);
+});
+
+test("Sparky migration adds the canonical chat setting and allows the new AI preset", () => {
+  const sql = fs.readFileSync(path.join(ROOT, "supabase/migrations/20261104160000_sparky_canonical_settings.sql"), "utf8");
+  assert.match(sql, /add column if not exists sparky_enabled/i);
+  assert.match(sql, /drop constraint if exists community_suite_ai_profiles_preset_key_check/i);
+  assert.match(sql, /'sparky'/i);
+  assert.match(sql, /set preset_key = 'sparky'/i);
 });
 
 test("membership migration is private-by-default and idempotent", () => {
@@ -74,16 +82,16 @@ test("membership migration is private-by-default and idempotent", () => {
 test("DIPSHIT conversational routing is private-first and group-safe", () => {
   assert.equal(shouldHandleDipshitConversation({ text: "why is Zed broken?", chat: { type: "private" } }), true);
   assert.equal(shouldHandleDipshitConversation({ text: "random group chatter", chat: { type: "group" } }), false);
-  assert.equal(shouldHandleDipshitConversation({ text: "@DipShitBossBot why is Zed broken?", chat: { type: "group" } }), true);
-  assert.equal(shouldHandleDipshitConversation({ text: "DipShit, check Zed", chat: { type: "supergroup" } }), true);
+  assert.equal(shouldHandleDipshitConversation({ text: "@SparkyWorldzBot why is Zed broken?", chat: { type: "group" } }), true);
+  assert.equal(shouldHandleDipshitConversation({ text: "Sparky, check Zed", chat: { type: "supergroup" } }), true);
   assert.equal(shouldHandleDipshitConversation({
     text: "can you explain that?",
     chat: { type: "group" },
-    reply_to_message: { from: { username: "DipShitBossBot" } }
+    reply_to_message: { from: { username: "SparkyWorldzBot" } }
   }), true);
 });
 
 test("DIPSHIT strips Telegram addressing before sending text to the AI", () => {
-  assert.equal(stripDipshitAddressing("@DipShitBossBot why is Zed broken?"), "why is Zed broken?");
-  assert.equal(stripDipshitAddressing("DipShit: run me through the problem"), "run me through the problem");
+  assert.equal(stripDipshitAddressing("@SparkyWorldzBot why is Zed broken?"), "why is Zed broken?");
+  assert.equal(stripDipshitAddressing("Sparky: run me through the problem"), "run me through the problem");
 });

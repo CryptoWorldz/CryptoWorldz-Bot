@@ -15,7 +15,7 @@ A newer plan can supersede an older plan. It cannot retroactively create a trans
 
 ## Current architecture
 
-WorldzFullBuild connects WorldzEcosystem™, DonateWorldz, CryptoWorldz, WorldzLaunchPad™, WorldzFullScope™, ZED LED Command Centre MAX™, AUTO, G.R.A.C.E., DIPSHIT™, PurpleDiamondCrew, WorldzLinkz™ and BitWorldz™ while keeping support/humanitarian and crypto functions clearly distinguishable in public execution and messaging.
+WorldzFullBuild connects WorldzEcosystem™, DonateWorldz, CryptoWorldz, WorldzLaunchPad™, WorldzFullScope™, ZED LED Command Centre MAX™, AUTO, G.R.A.C.E., SPARKY™, PurpleDiamondCrew, WorldzLinkz™ and BitWorldz™ while keeping support/humanitarian and crypto functions clearly distinguishable in public execution and messaging.
 
 ### Canonical token family
 

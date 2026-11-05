@@ -14,7 +14,7 @@ jobs:
     environment: cryptoworldz-production
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
-      DIPSHIT_BOT_TOKEN: ${{ secrets.DIPSHIT_BOT_TOKEN }}
+      SPARKY_BOT_TOKEN: ${{ secrets.SPARKY_BOT_TOKEN }}
     steps:
       - name: Verify current runtime, authentication and Telegram delivery state
         shell: python
@@ -45,7 +45,7 @@ jobs:
               require(status==401,"AUTH_REQUIRED "+path)
           status,body=request(base+"/grace/health")
           require(status==200 and json.loads(body).get("ok") is True,"GRACE_HEALTH")
-          for label,key,path in [("ZED","BOT_TOKEN","/telegram-webhook"),("DIPSHIT","DIPSHIT_BOT_TOKEN","/dipshit-telegram-webhook")]:
+          for label,key,path in [("ZED","BOT_TOKEN","/telegram-webhook"),("SPARKY","SPARKY_BOT_TOKEN","/sparky-telegram-webhook")]:
               token=os.environ.get(key,"").strip()
               require(bool(token),label+"_TOKEN_PRESENT")
               print("::add-mask::"+token)

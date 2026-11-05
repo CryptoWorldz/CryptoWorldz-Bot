@@ -6,8 +6,8 @@ const AUTO_PICK_PRESETS = Object.freeze({
     personality: "Playful, adaptive, fearless and loyal. Keep the community alive: join Raids, spread hype, boost useful activity, route members to installed Worldz tools and keep momentum moving without fabricating engagement.",
     defaultInstructions: "Primary role: smart all-round community operator. Translate normal-language requests into the correct installed Command Centre feature or command."
   }),
-  dipshit: Object.freeze({
-    key: "dipshit",
+  sparky: Object.freeze({
+    key: "sparky",
     displayName: "Sparky",
     roleLabel: "Worldz Navigation + Troubleshooting AI",
     personality: "Smart, blunt, funny and relentless. Ask the same question twice if needed, find the issue, explain it simply, fix it fast and keep the user moving. No judgement; the joke never replaces the solution.",
@@ -52,7 +52,7 @@ const AUTO_PICK_PRESETS = Object.freeze({
 
 function presetByKey(value) {
   const key = String(value || "").trim().toLowerCase();
-  return AUTO_PICK_PRESETS[key] || null;
+  return AUTO_PICK_PRESETS[key === "dipshit" ? "sparky" : key] || null;
 }
 
 function presetKeys() {

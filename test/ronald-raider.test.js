@@ -40,7 +40,7 @@ test("Ronald Raider progress is capped for display", () => {
   assert.match(progressLine("Likes", 20, 10), /100%/);
 });
 
-test("Ronald Raider converts an X post into the protected direct-post launcher", () => {
+test("WORLDZ RAIDZ converts an X post into the protected direct-post launcher", () => {
   const source = "https://x.com/PDCrew/status/2106328326755496140";
   assert.equal(extractXStatusId(source), "2106328326755496140");
   const target = raidOpenUrl({ platform: "X", source_url: source });
@@ -86,7 +86,7 @@ test("Ronald Raider pulse scans frequently but can only publish about once a min
   assert.equal(RAID_PULSE_MIN_GAP_SECONDS, 55);
 });
 
-test("Ronald Raider pulse card stays compact while telling a member exactly what to do", () => {
+test("WORLDZ RAIDZ pulse card stays compact while telling a member exactly what to do", () => {
   const text = raidPulseText({
     id: 7,
     likes_current: 4,
@@ -101,7 +101,7 @@ test("Ronald Raider pulse card stays compact while telling a member exactly what
     participation_count: 3
   });
 
-  assert.match(text, /RONALD RAIDER • RAID #7 ACTIVE/);
+  assert.match(text, /WORLDZ RAIDZ • RAID #7 ACTIVE/);
   assert.match(text, /1️⃣ OPEN POST/);
   assert.match(text, /2️⃣ Like \+ Repost \+ Reply/);
   assert.match(text, /3️⃣ Come back → I RAIDED ✅/);

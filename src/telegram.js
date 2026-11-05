@@ -347,14 +347,14 @@ Use /help to open the Command Menu.
   );
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(msg.chat.id, formatCommunity(config)));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, formatWebsite(config)));
-  bot.onText(/^\/(?:sparky|dipshit)(?:@\w+)?$/, async (msg) => {
+  bot.onText(/^\/sparky(?:@\w+)?$/, async (msg) => {
     const image = path.join(__dirname, "../public/miniapp/assets/dipshit-worldz-dude.png");
-    const caption = "💙 SPARKY™ — WORLDZ DUDE\n\nCommand Centre QA + troubleshooting helper. Finds the dumb little problems before they become expensive big ones.\n\n🔐 No wallet signing • No treasury control • No governance execution • No mainnet broadcast.\n\nProfile: https://cryptoworldz.xyz/dipshit/\nUse /help for ZED commands.";
+    const caption = "💙 SPARKY™ — WORLDZ DUDE\n\nCommand Centre QA + troubleshooting helper. Finds the dumb little problems before they become expensive big ones.\n\n🔐 No wallet signing • No treasury control • No governance execution • No mainnet broadcast.\n\nProfile: https://cryptoworldz.xyz/sparky/\nUse /help for ZED commands.";
     try {
       return await bot.sendPhoto(msg.chat.id, image, { caption });
     } catch (error) {
       safeError("SPARKY profile", error);
-      return send(msg.chat.id, "💙 SPARKY™ — WORLDZ DUDE\nProfile: https://cryptoworldz.xyz/dipshit/\nUse /help for ZED commands.\n\nNo wallet signing or treasury authority.");
+      return send(msg.chat.id, "💙 SPARKY™ — WORLDZ DUDE\nProfile: https://cryptoworldz.xyz/sparky/\nUse /help for ZED commands.\n\nNo wallet signing or treasury authority.");
     }
   });
   bot.onText(/^\/kitty(?:@\w+)?$/, async (msg) => {

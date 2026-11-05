@@ -17,6 +17,10 @@ After disclosed external protocol, venue and network deductions, the creator cho
 
 GROW 5% is the default. The choice is voluntary and snapshotted at launch. A later change requires a new disclosed signed route or migration.
 
+> Worldz does not take 3%, 5% or 8% of project trading volume. Worldz receives the creator-selected 3%, 5% or 8% contribution from eligible creator fee revenue, after external protocol, network and venue deductions. The creator retains the remaining 97%, 95% or 92%.
+>
+> Execution qualification: automatic mainnet routing remains disabled and Fee Flow V3 execution remains gated. This describes the intended economics; it is not proof that live revenue is already being collected.
+
 The 3% / 5% / 8% is **not** a 3% / 5% / 8% trading fee. The project trading fee is configured separately under the Worldz Fair Fee Builder™.
 
 ## Worldz internal split

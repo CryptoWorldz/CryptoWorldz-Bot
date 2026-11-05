@@ -106,9 +106,9 @@ Around ZED:
 - **WorldPing™** — Telegram group alerts.
 - **WorldzCast™** — approved broadcasts and delivery records.
 
-### DIPSHIT™ — WORLDZ DUDE 💙
+### SPARKY™ — WORLDZ DUDE 💙
 
-DIPSHIT is the blue Worldz Dude — a cheeky Command Centre QA/troubleshooting helper built to find broken links, stale pages, failed checks and dumb little problems before they become expensive big ones.
+SPARKY is the blue Worldz Dude — a cheeky Command Centre QA/troubleshooting helper built to find broken links, stale pages, failed checks and dumb little problems before they become expensive big ones.
 
 He has **zero wallet-signing, treasury, governance-execution or mainnet-broadcast authority**.
 

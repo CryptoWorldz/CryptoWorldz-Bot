@@ -630,7 +630,7 @@ function registerCommunitySuiteHandlers({ bot, config, supabase, env = process.e
         "Community: https://launchpad.cryptoworldz.xyz/community/",
         "Readiness: https://launchpad.cryptoworldz.xyz/ready/",
         "",
-        "Use /scan TOKEN_ADDRESS for live market/authority evidence. Command Centre and DipShit can explain/read launch state; they do not gain authority to move launch funds."
+        "Use /scan TOKEN_ADDRESS for live market/authority evidence. Command Centre and Sparky can explain/read launch state; they do not gain authority to move launch funds."
       ].join("\n"));
     } catch {
       return send(message, "❌ Launch linkage could not be loaded.");

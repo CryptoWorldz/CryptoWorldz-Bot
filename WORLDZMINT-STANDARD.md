@@ -30,7 +30,7 @@ It is deliberately separate from a trading launch.
 - Create fake or virtual liquidity.
 - Guarantee Jupiter verification, listing or price availability.
 - Guarantee price appreciation.
-- Take any percentage of the token supply.
+- Take any **undisclosed or additional** percentage of the token supply. The separate, mandatory 0.60% genesis allocation is disclosed before signing and described under Fees below.
 - Take any percentage of initial liquidity.
 - Apply an ordinary-wallet transfer tax.
 
@@ -38,12 +38,13 @@ It is deliberately separate from a trading launch.
 
 WorldzMINT v1 assigns **0.60% of genesis token supply** to disclosed Worldz multisig routes — **0.30% Operations + 0.18% Miricle Team + 0.12% Purple Diamond Crew** — and takes **0% of initial liquidity**. The 0.60% route fails closed until every required multisig destination is verified.
 
-The WorldzLaunchPad **10% rule applies only when a project separately enters a supported Worldz market-launch/fee route** such as Worldz Confidence Curve™:
+For new WorldzLaunchPad intakes, the applicable policy is Worldz Fee Flow V3:
 
-- project side: 90% of collected supported project trading-fee revenue;
-- WorldzLaunchPad side: 10% of collected supported project trading-fee revenue.
+> Worldz does not take 3%, 5% or 8% of project trading volume. Worldz receives the creator-selected 3%, 5% or 8% contribution from eligible creator fee revenue, after external protocol, network and venue deductions. The creator retains the remaining 97%, 95% or 92%.
+>
+> Execution qualification: automatic mainnet routing remains disabled and Fee Flow V3 execution remains gated. This describes the intended economics; it is not proof that live revenue is already being collected.
 
-Minting alone does not activate this trading-fee route.
+The 3% / 5% / 8% contribution is calculated from eligible creator fee revenue after disclosed external protocol, network and venue deductions. It is not a share of trading volume and is not the project's trading-fee rate. The project's trading fee is configured separately in Worldz Fair Fee Builder™. Minting alone does not activate Fee Flow revenue routing. Historical 90/10 adapter references remain audit/legacy material and are not the new-intake V3 economics.
 
 ## Wallets
 

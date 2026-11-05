@@ -128,7 +128,7 @@
     "publicCreatorConfigurable": {
       "source": "launchpad.cryptoworldz.xyz/platform-config.json",
       "selection": "WORLDZ_FEE_FLOW_V3",
-      "projectTradingFeeMinPercent": 0.5,
+      "projectTradingFeeMinPercent": 0.25,
       "projectTradingFeeMaxPercent": 3,
       "worldzLaunchPadContributionChoicesPercent": [
         3,
@@ -141,7 +141,9 @@
         "5": 95,
         "8": 92
       },
-      "walletTransferTaxPercent": 0
+      "walletTransferTaxPercent": 0,
+      "projectTradingFeeDefaultPercent": 1,
+      "projectTradingFeeStepPercent": 0.25
     },
     "worldzFeeFlowV2": {
       "source": "worldzpad-mainnet/fairfee/worldz-fee-flow.v2.json",
@@ -177,7 +179,7 @@
     "worldzFeeFlowV3": {
       "source": "worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json",
       "selection": "DEFAULT_FOR_NEW_WORLDZ_LAUNCH_INTAKES__EXECUTION_REQUIRES_CHAIN_NATIVE_PROOF",
-      "projectTradingFeeMinPercent": 0.5,
+      "projectTradingFeeMinPercent": 0.25,
       "projectTradingFeeMaxPercent": 3,
       "worldzContributionChoicesPercent": [
         3,
@@ -212,7 +214,9 @@
       },
       "walletTransferTaxPercent": 0,
       "tokenSupplyTakePercent": 0,
-      "initialLiquidityTakePercent": 0
+      "initialLiquidityTakePercent": 0,
+      "projectTradingFeeDefaultPercent": 1,
+      "projectTradingFeeStepPercent": 0.25
     }
   },
   "tokenAllocationBoundary": {

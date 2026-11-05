@@ -162,7 +162,7 @@
     "publicPath": "/community/",
     "launchGetsCommunityProfile": true,
     "commandCentreHandoff": true,
-    "dipshitHandoff": true,
+    "sparkyHandoff": true,
     "telegramHandoff": true,
     "xHandoff": true,
     "pumpSquadExternalRail": true,
@@ -200,7 +200,7 @@
     },
     "telegram": {
       "commandCentre": true,
-      "dipshit": true,
+      "sparky": true,
       "raids": true,
       "approvalControlledAnnouncements": true
     }

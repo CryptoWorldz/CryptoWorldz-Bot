@@ -5,14 +5,15 @@ const { registerDipshitConversation } = require("./dipshit-conversation");
 
 const DIPSHIT_PERIOD_SECONDS = 30 * 24 * 60 * 60;
 const DIPSHIT_INVOICE_PAYLOAD = "dipshit_pro_monthly_v1";
-const DIPSHIT_PRIVACY_URL = "https://cryptoworldz.xyz/dipshit/privacy/";
-const DIPSHIT_TERMS_URL = "https://cryptoworldz.xyz/dipshit/terms/";
+const DIPSHIT_PRIVACY_URL = "https://cryptoworldz.xyz/sparky/privacy/";
+const DIPSHIT_TERMS_URL = "https://cryptoworldz.xyz/sparky/terms/";
 
 const DIPSHIT_COMMANDS = Object.freeze([
   { command: "start", description: "Wake up SPARKY™" },
   { command: "help", description: "Show the command menu" },
   { command: "status", description: "Check Worldz system status" },
   { command: "check", description: "Run Worldz QA checks" },
+  { command: "myaccess", description: "View your own Worldz role and permissions" },
   { command: "fix", description: "Troubleshoot a problem" },
   { command: "ask", description: "Talk to SPARKY™ in normal language" },
   { command: "report", description: "Report a bug or broken feature" },
@@ -148,10 +149,20 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     "",
     "💬 Talk normally in private chat. In groups, mention @SparkyWorldzBot, reply to me, or start with “Sparky …”",
     "",
+    "/start — open your Sparky guide",
+    "/help — show this command menu",
     "/status — runtime status",
+    "/myaccess — view your own Worldz role and permissions",
+    "/fix <problem> — troubleshoot a problem",
     "/check — quick QA check",
     "/ask <question> — normal-language troubleshooting",
     "/report <problem> — send a bug report",
+    "/worldz — open the Worldz ecosystem",
+    "/zed — open ZED Command Centre",
+    "/inbox — open Worldz Inbox",
+    "/sparky — meet Sparky",
+    "/website — open CryptoWorldz",
+    "/community — community links",
     "/subscribe — Telegram Stars monthly membership",
     "/membership — membership status",
     "/solmembership — optional external SOL month pass",
@@ -282,7 +293,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
   bot.onText(/^\/worldz(?:@\w+)?$/, (msg) => send(msg.chat.id, "🌐 WorldzEcosystem™\nhttps://cryptoworldz.xyz/"));
   bot.onText(/^\/zed(?:@\w+)?$/, (msg) => send(msg.chat.id, "🤖 ZED Command Centre\nhttps://cryptobotz.cryptoworldz.xyz/miniapp/"));
   bot.onText(/^\/inbox(?:@\w+)?$/, (msg) => send(msg.chat.id, "📥 Worldz Inbox™\nhttps://cryptobotz.cryptoworldz.xyz/miniapp/#inbox"));
-  bot.onText(/^\/(?:sparky|dipshit)(?:@\w+)?$/, (msg) => send(msg.chat.id, "💙 SPARKY™ — WORLDZ DUDE\nhttps://cryptoworldz.xyz/dipshit/"));
+  bot.onText(/^\/sparky(?:@\w+)?$/, (msg) => send(msg.chat.id, "💙 SPARKY™ — WORLDZ DUDE\nhttps://cryptoworldz.xyz/sparky/"));
   bot.onText(/^\/website(?:@\w+)?$/, (msg) => send(msg.chat.id, "🌐 https://cryptoworldz.xyz/"));
   bot.onText(/^\/community(?:@\w+)?$/, (msg) => send(
     msg.chat.id,
@@ -453,32 +464,41 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     }
   });
 
-  app.post("/dipshit-telegram-webhook", (req, res) => {
+  const handleSparkyWebhook = (req, res) => {
     const supplied = req.get("x-telegram-bot-api-secret-token") || "";
-    if (!safeSecretMatch(supplied, config.dipshitWebhookSecret)) {
+    if (!safeSecretMatch(supplied, (config.sparkyWebhookSecret || config.dipshitWebhookSecret))) {
       return res.status(401).json({ ok: false, error: "unauthorized" });
     }
     res.sendStatus(200);
     Promise.resolve(bot.processUpdate(req.body)).catch((error) => {
-      console.error("DIPSHIT Telegram update processing failed", {
+      console.error("SPARKY Telegram update processing failed", {
         name: error && error.name ? error.name : "Error"
       });
     });
     return undefined;
-  });
+  };
+  app.post("/sparky-telegram-webhook", handleSparkyWebhook);
+  // Temporary compatibility route: existing Telegram webhook deliveries keep working during cutover.
+  app.post("/dipshit-telegram-webhook", handleSparkyWebhook);
 
   return { enabled: true, aiEnabled, starsEnabled, solEnabled, commandCount: DIPSHIT_COMMANDS.length };
 }
 
 module.exports = {
   DIPSHIT_COMMANDS,
+  SPARKY_COMMANDS: DIPSHIT_COMMANDS,
   DIPSHIT_INVOICE_PAYLOAD,
+  SPARKY_INVOICE_PAYLOAD: DIPSHIT_INVOICE_PAYLOAD,
   DIPSHIT_PERIOD_SECONDS,
+  SPARKY_PERIOD_SECONDS: DIPSHIT_PERIOD_SECONDS,
   DIPSHIT_PRIVACY_URL,
+  SPARKY_PRIVACY_URL: DIPSHIT_PRIVACY_URL,
   DIPSHIT_TERMS_URL,
+  SPARKY_TERMS_URL: DIPSHIT_TERMS_URL,
   activeMembership,
   createMembershipRepository,
   registerDipshitMembershipSystem,
+  registerSparkyMembershipSystem: registerDipshitMembershipSystem,
   solMembershipEnabled,
   telegramApi,
   validateStarsCheckout

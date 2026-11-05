@@ -198,7 +198,7 @@ function validate(){
   if(Math.abs(total-100)>.001)e.push('Genesis allocations including the fixed Worldz 0.60% share must total exactly 100%.');
   const projectTotal=PROJECT_KEYS.reduce((n,k)=>n+(Number(a[k])||0),0);
   if(Math.abs(projectTotal-99.4)>.001)e.push('Creator/project allocations must total exactly 99.40%; the fixed Worldz share is 0.60%.');
-  if(Math.abs(a.worldzOperations-.25)>.0001||Math.abs(a.worldzCommunityTeam-.20)>.0001||Math.abs(a.purpleDiamondCrew-.15)>.0001)e.push('Worldz genesis share must remain fixed at 0.25% / 0.20% / 0.15%.');
+  if(Math.abs(a.worldzOperations-.30)>.0001||Math.abs(a.worldzCommunityTeam-.18)>.0001||Math.abs(a.purpleDiamondCrew-.12)>.0001)e.push('Worldz genesis share must remain fixed at 0.30% / 0.18% / 0.12% of total supply.');
   if(a.creator>5)e.push('Creator liquid allocation cannot exceed 5%.');
   if(a.liquidity<25||a.liquidity>60)e.push('Liquidity reserve must be 25–60%.');
   if(a.community<20)e.push('Community allocation must be at least 20%.');

@@ -25,7 +25,7 @@ const { registerCivicVotesHandlers } = require("./votes-centre/telegram");
 const { registerCivicVotesRoutes } = require("./votes-centre/http");
 const { registerCommunityDirectoryHandlers } = require("./community-directory");
 const { registerCurrentImpactHandlers } = require("./current-impact");
-const { registerDipshitMembershipSystem } = require("./dipshit-membership");
+const { registerSparkyMembershipSystem } = require("./dipshit-membership");
 const { registerExecutiveRoutes } = require("./executive/http");
 const { registerExecutiveTelegramHandlers } = require("./executive/telegram");
 const { createGracePublisher } = require("./grace/adapters");
@@ -152,8 +152,8 @@ async function start() {
   const supabase = createClient(config.supabaseUrl, config.supabaseApiKey, supabaseOptions);
   startupStage = "create_telegram_bot";
   const bot = new TelegramBot(config.botToken, { onlyFirstMatch: true });
-  const dipshitBot = config.dipshitBotToken && config.dipshitBotToken !== config.botToken
-    ? new TelegramBot(config.dipshitBotToken, { onlyFirstMatch: true })
+  const sparkyBot = config.sparkyBotToken && config.sparkyBotToken !== config.botToken
+    ? new TelegramBot(config.sparkyBotToken, { onlyFirstMatch: true })
     : null;
   startupStage = "create_repository";
   const repository = createRepository(supabase);
@@ -219,8 +219,8 @@ async function start() {
   startupStage = "create_http_app";
   const app = createHttpApp({ bot, repository, config, supabase });
 
-  startupStage = "register_dipshit_membership";
-  if (dipshitBot) registerDipshitMembershipSystem({ app, bot: dipshitBot, config, supabase });
+  startupStage = "register_sparky_membership";
+  if (sparkyBot) registerSparkyMembershipSystem({ app, bot: sparkyBot, config, supabase });
   startupStage = "register_oneworldz_cors";
   registerOneWorldzPublicCors(app);
   startupStage = "register_current_impact";

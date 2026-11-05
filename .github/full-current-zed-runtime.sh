@@ -10,7 +10,7 @@ set -Eeuo pipefail
 : "${HOSTINGER_API_TOKEN:?}"
 : "${OPENAI_API_KEY:?}"
 
-for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN" "$OPENAI_API_KEY" "$BOT_TOKEN_SECRET" "${DIPSHIT_BOT_TOKEN_SECRET:-}" "${JUPITER_API_KEY_SECRET:-}" "$SUPABASE_URL_SECRET" "$SUPABASE_SERVICE_ROLE_KEY_SECRET"; do
+for value in "$FTP_HOST" "$FTP_USERNAME" "$FTP_PASSWORD" "$HOSTINGER_API_TOKEN" "$OPENAI_API_KEY" "$BOT_TOKEN_SECRET" "${SPARKY_BOT_TOKEN_SECRET:-}" "${DIPSHIT_BOT_TOKEN_SECRET:-}" "${JUPITER_API_KEY_SECRET:-}" "$SUPABASE_URL_SECRET" "$SUPABASE_SERVICE_ROLE_KEY_SECRET"; do
   [ -n "$value" ] && echo "::add-mask::$value"
 done
 
@@ -20,7 +20,7 @@ node --check index.js
 find src -type f -name '*.js' -exec node --check {} +
 node --check src/oneworldz-gpt/http.js
 grep -Fq 'registerProjectWalletSystem({ app, bot, config, supabase });' src/full-runtime-entry.js
-grep -Fq 'registerDipshitMembershipSystem' src/full-runtime-entry.js
+grep -Fq 'registerSparkyMembershipSystem' src/full-runtime-entry.js
 for marker in 'id="splashback"' 'id="zed-guide"' 'id="create"' 'id="heroes"'; do
   grep -Fq "$marker" public/miniapp/index.html
 done
@@ -109,11 +109,11 @@ required = {
 }
 optional = {
     "JUPITER_API_KEY": os.environ.get("JUPITER_API_KEY_SECRET", "").strip() or existing.get("JUPITER_API_KEY", ""),
-    "DIPSHIT_BOT_TOKEN": os.environ.get("DIPSHIT_BOT_TOKEN_SECRET", "").strip() or existing.get("DIPSHIT_BOT_TOKEN", ""),
-    "DIPSHIT_WEBHOOK_URL": os.environ.get("DIPSHIT_WEBHOOK_URL", "").strip() or existing.get("DIPSHIT_WEBHOOK_URL", "") or "https://cryptobotz.cryptoworldz.xyz/dipshit-telegram-webhook",
-    "DIPSHIT_STARS_MONTHLY_PRICE": os.environ.get("DIPSHIT_STARS_MONTHLY_PRICE", "").strip() or existing.get("DIPSHIT_STARS_MONTHLY_PRICE", ""),
-    "DIPSHIT_SOL_MONTHLY_AMOUNT": os.environ.get("DIPSHIT_SOL_MONTHLY_AMOUNT", "").strip() or existing.get("DIPSHIT_SOL_MONTHLY_AMOUNT", ""),
-    "DIPSHIT_SOL_RECIPIENT": os.environ.get("DIPSHIT_SOL_RECIPIENT", "").strip() or existing.get("DIPSHIT_SOL_RECIPIENT", ""),
+    "SPARKY_BOT_TOKEN": os.environ.get("SPARKY_BOT_TOKEN_SECRET", "").strip() or existing.get("SPARKY_BOT_TOKEN", "") or existing.get("DIPSHIT_BOT_TOKEN", ""),
+    "SPARKY_WEBHOOK_URL": os.environ.get("SPARKY_WEBHOOK_URL", "").strip() or existing.get("SPARKY_WEBHOOK_URL", "") or existing.get("DIPSHIT_WEBHOOK_URL", "") or "https://cryptobotz.cryptoworldz.xyz/sparky-telegram-webhook",
+    "SPARKY_STARS_MONTHLY_PRICE": os.environ.get("SPARKY_STARS_MONTHLY_PRICE", "").strip() or existing.get("SPARKY_STARS_MONTHLY_PRICE", "") or existing.get("DIPSHIT_STARS_MONTHLY_PRICE", ""),
+    "SPARKY_SOL_MONTHLY_AMOUNT": os.environ.get("SPARKY_SOL_MONTHLY_AMOUNT", "").strip() or existing.get("SPARKY_SOL_MONTHLY_AMOUNT", "") or existing.get("DIPSHIT_SOL_MONTHLY_AMOUNT", ""),
+    "SPARKY_SOL_RECIPIENT": os.environ.get("SPARKY_SOL_RECIPIENT", "").strip() or existing.get("SPARKY_SOL_RECIPIENT", "") or existing.get("DIPSHIT_SOL_RECIPIENT", ""),
 }
 for key, value in required.items():
     if key == "BOT_TOKEN" and managed_bot:

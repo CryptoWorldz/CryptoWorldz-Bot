@@ -58,7 +58,7 @@ test("WorldzLaunch community contains real Worldz and Pump Squad surfaces",()=>{
   const page=read("launchpad.cryptoworldz.xyz/community/index.html");
   assert.match(page,/TheChaos/);
   assert.match(page,/https:\/\/join\.pump\.fun\/HSag\/rwtn4stv/);
-  assert.match(page,/DipShitBossBot/);
+  assert.match(page,/https:\/\/t\.me\/SparkyWorldzBot/);
   assert.match(page,/Command Centre MAX/);
   assert.match(page,/CryptoWLDZ/);
   assert.match(page,/@WorldzLaunchPad/);

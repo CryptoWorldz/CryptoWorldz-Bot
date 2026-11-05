@@ -150,7 +150,7 @@ function registerWorldzInboxSystem({app,bot,config,supabase}){
       "https://cryptobotz.cryptoworldz.xyz/miniapp/#worldz-civic-votes",
       "",
       "🛠️ BUILD WITH WORLDZ",
-      "WorldzLaunchPad connects creators with ZED, AUTO, G.R.A.C.E., REXSECURE, DIPSHIT, raids, ShillPoints, referral pathways and community tooling.",
+      "WorldzLaunchPad connects creators with ZED, AUTO, G.R.A.C.E., REXSECURE, SPARKY, raids, ShillPoints, referral pathways and community tooling.",
       "",
       "🔥 FOUNDING 100",
       "The first 100 qualified verified mainnet launch positions have 100,000 WLDZ reserved per position under the published program rules. Token allocation is not equity and does not guarantee value or liquidity.",
