@@ -1,8 +1,8 @@
 (() => {
   "use strict";
   const PROFILE = Object.freeze({
-    id: "dipshit",
-    displayName: "DIPSHIT™",
+    id: "sparky",
+    displayName: "SPARKY™",
     title: "WORLDZ DUDE",
     role: "Command Centre QA + Troubleshooting Helper",
     avatar: "/miniapp/assets/dipshit-worldz-dude.svg",
@@ -35,14 +35,14 @@
         .dipshit-start b{display:block;margin-bottom:5px}.dipshit-start small{color:var(--muted)}
         @media(max-width:480px){.dipshit-card{grid-template-columns:72px 1fr}.dipshit-card img{width:72px;height:72px;border-radius:19px}.dipshit-quick{grid-template-columns:1fr}}
       </style>
-      <img src="${PROFILE.avatar}" alt="Blue WORLDZ DUDE profile for DIPSHIT">
+      <img src="${PROFILE.avatar}" alt="Blue WORLDZ DUDE profile for SPARKY">
       <div><span class="dipshit-badge">SYSTEM DUDE • NO SIGNING AUTHORITY</span><h3>🔵 ${escapeHtml(PROFILE.displayName)} — ${escapeHtml(PROFILE.title)}</h3><p>${escapeHtml(PROFILE.role)}</p><small>Find the dumb little problems before they become expensive big ones.</small></div>
-      <div class="dipshit-start"><b>😵‍💫 LOST? START HERE.</b><small>You only need Profile → Wallet → Raid to get going. DipShit can explain anything else in plain English.</small></div>
+      <div class="dipshit-start"><b>😵‍💫 LOST? START HERE.</b><small>You only need Profile → Wallet → Raid to get going. Sparky can explain anything else in plain English.</small></div>
       <div class="dipshit-quick">
         <button class="button" type="button" data-open="profile">🏆 MY PROFILE</button>
         <button class="button" type="button" data-open="raids">🤠 RAID NOW</button>
         <a class="button secondary" href="https://launchpad.cryptoworldz.xyz/" target="_blank" rel="noopener">🚀 WORLDZLAUNCH</a>
-        <button class="button secondary dipshit-ask" type="button">💙 ASK DIPSHIT</button>
+        <button class="button secondary dipshit-ask" type="button">💙 ASK SPARKY</button>
       </div>
       <div class="dipshit-safety">Guide + QA helper only • no wallet signing • no treasury control • no governance execution • no mainnet broadcast.</div>
       <button class="button secondary dipshit-check" type="button">🧪 Run System Check</button>
@@ -51,7 +51,7 @@
 
     const askButton = root.querySelector(".dipshit-ask");
     askButton?.addEventListener("click", () => {
-      const url = "https://t.me/DipShitBossBot?start=guide_command";
+      const url = "https://t.me/SparkyWorldzBot?start=guide_command";
       if (window.Telegram?.WebApp?.openTelegramLink) window.Telegram.WebApp.openTelegramLink(url);
       else window.open(url, "_blank", "noopener");
     });
