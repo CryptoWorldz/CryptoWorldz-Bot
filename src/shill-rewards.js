@@ -28,30 +28,35 @@ function parseShillProof(value) {
 }
 
 const CURRENT_SHILL_CAMPAIGN = Object.freeze({
-  id: "CREATE_YOUR_OWN_MONEY_2026_10_02",
-  title: "CREATE YOUR OWN MONEY‼️*",
-  url: "https://launchpad.cryptoworldz.xyz/create-your-own-money/",
+  id: "WORLDZ_LAUNCH_COMMUNITY_2026_11_05",
+  title: "🚀 CREATE YOUR OWN CRYPTO TOKEN",
+  url: "https://worldzlaunch.com",
+  communityUrl: "https://t.me/WorldzHq",
+  hqUrl: "https://worldzhq.com",
   tagline: "Your Idea. Your Token. Your Community.",
-  shareLine: "Share it with your Family & Friends 💜",
-  truth: "*Create your own crypto token. Creating one does not automatically make it legal tender, valuable or liquid.",
-  footer: "WORLDZ 🌐 — A BETTER WORLD 🌏"
+  truth: "Creating a token does not guarantee it has value, liquidity or legal-tender status.",
+  footer: "🌐💜 WORLDZ — A BETTER WORLD"
 });
 
 function buildShillPackText(campaign = CURRENT_SHILL_CAMPAIGN) {
   return [
-    "📣 WORLDZ SHILL PACK",
+    "🌐💜 WORLDZ — A BETTER WORLD",
     "",
     campaign.title,
     campaign.tagline,
-    campaign.shareLine,
     "",
-    campaign.url,
+    "⚡ Solana-first WorldzLaunchPad",
+    "🏆 Worldz Raidz — Earn Legend Points",
+    "🤖 ZED • AUTO • GRACE • SPARKY",
+    "💜 People Helping the People",
+    "",
+    "🚀 " + campaign.url,
+    "🏛️ " + campaign.hqUrl,
+    "💬 JOIN WORLDZ HQ: " + campaign.communityUrl,
     "",
     campaign.truth,
-    "",
-    campaign.footer,
-    "",
-    "Share genuinely. No spam • No bots • No fake engagement."
+    "Share genuinely. No spam • No bots • No fake engagement.",
+    "Created by @JayJayTeamDev 🌐💜"
   ].join("\n");
 }
 
@@ -141,7 +146,8 @@ function registerShillRewards({ bot, repository, supabase, config }) {
       disable_web_page_preview: false,
       reply_markup: {
         inline_keyboard: [[
-          { text: "🌐 OPEN CREATE YOUR OWN MONEY", url: CURRENT_SHILL_CAMPAIGN.url }
+          { text: "🚀 WORLDZ LAUNCH", url: CURRENT_SHILL_CAMPAIGN.url },
+          { text: "💬 WORLDZ HQ", url: CURRENT_SHILL_CAMPAIGN.communityUrl }
         ]]
       }
     });
