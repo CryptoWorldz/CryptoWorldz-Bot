@@ -4,7 +4,7 @@
   const REX_BRAND_IMAGE = window.REXSECURE_BRAND_IMAGE || {};
   const AI_PRESETS = [
     ["no5","No.5","Alive + Community + Raid Energy AI"],
-    ["dipshit","DipShit","Cheeky QA + Troubleshooting AI"],
+    ["sparky","Sparky","Cheeky QA + Troubleshooting AI"],
     ["alice","ALICE","Support + Organisation"],
     ["rex","REXSECURE ULTIMATE™","Community Security + Moderation AI"],
     ["grace","G.R.A.C.E.","Communications + Campaigns"],
