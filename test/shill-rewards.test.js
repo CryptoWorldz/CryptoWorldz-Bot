@@ -31,12 +31,12 @@ test("current Worldz Shill Pack points to the central Worldz hub and launchpad",
   assert.equal(CURRENT_SHILL_CAMPAIGN.url, "https://worldzlaunch.com");
   assert.equal(CURRENT_SHILL_CAMPAIGN.communityUrl, "https://t.me/WorldzHq");
   assert.match(text, /CREATE YOUR OWN CRYPTO TOKEN/);
-  assert.match(text, /Your Idea\\. Your Token\\. Your Community\\./);
+  assert.match(text, /Your Idea\. Your Token\. Your Community\./);
   assert.match(text, /Worldz Raidz/);
   assert.match(text, /SPARKY/);
-  assert.match(text, /https:\\/\\/worldzhq\\.com/);
-  assert.match(text, /https:\\/\\/t\\.me\\/WorldzHq/);
+  assert.ok(text.includes("https://worldzhq.com"));
+  assert.ok(text.includes("https://t.me/WorldzHq"));
   assert.match(text, /does not guarantee it has value, liquidity or legal-tender status/);
   assert.doesNotMatch(text, /CREATE YOUR OWN MONEY/);
-  assert.doesNotMatch(text, /launchpad\\.cryptoworldz\\.xyz/);
+  assert.doesNotMatch(text, /launchpad\.cryptoworldz\.xyz/);
 });
