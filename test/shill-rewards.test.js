@@ -25,14 +25,18 @@ test("shill proof normalizes tickers and requires HTTPS proof", () => {
 });
 
 
-test("current Worldz Shill Pack exposes the approved Create Your Own Money campaign", () => {
+test("current Worldz Shill Pack points to the central Worldz hub and launchpad", () => {
   const text = buildShillPackText();
-  assert.equal(CURRENT_SHILL_CAMPAIGN.id, "CREATE_YOUR_OWN_MONEY_2026_10_02");
-  assert.equal(CURRENT_SHILL_CAMPAIGN.url, "https://launchpad.cryptoworldz.xyz/create-your-own-money/");
-  assert.match(text, /CREATE YOUR OWN MONEY/);
-  assert.match(text, /Your Idea\. Your Token\. Your Community\./);
-  assert.match(text, /Family & Friends/);
-  assert.match(text, /does not automatically make it legal tender, valuable or liquid/);
-  assert.match(text, /WORLDZ 🌐 — A BETTER WORLD 🌏/);
-  assert.match(text, /No spam • No bots • No fake engagement/);
+  assert.equal(CURRENT_SHILL_CAMPAIGN.id, "WORLDZ_LAUNCH_COMMUNITY_2026_11_05");
+  assert.equal(CURRENT_SHILL_CAMPAIGN.url, "https://worldzlaunch.com");
+  assert.equal(CURRENT_SHILL_CAMPAIGN.communityUrl, "https://t.me/WorldzHq");
+  assert.match(text, /CREATE YOUR OWN CRYPTO TOKEN/);
+  assert.match(text, /Your Idea\\. Your Token\\. Your Community\\./);
+  assert.match(text, /Worldz Raidz/);
+  assert.match(text, /SPARKY/);
+  assert.match(text, /https:\\/\\/worldzhq\\.com/);
+  assert.match(text, /https:\\/\\/t\\.me\\/WorldzHq/);
+  assert.match(text, /does not guarantee it has value, liquidity or legal-tender status/);
+  assert.doesNotMatch(text, /CREATE YOUR OWN MONEY/);
+  assert.doesNotMatch(text, /launchpad\\.cryptoworldz\\.xyz/);
 });
