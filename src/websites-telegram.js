@@ -28,7 +28,7 @@ const CONNECTING_WORLDZ = Object.freeze([
   "HodlerWorldz.xyz"
 ]);
 
-const HQ_URL = "https://t.me/CryptoWorldzHQ";
+const HQ_URL = "https://t.me/WorldzHq";
 const WORLDZLINKZ_URL = "https://cryptoworldz.xyz/worldzlinkz/";
 
 function buildWebsiteMessage(config = {}) {
@@ -121,7 +121,7 @@ function websiteKeyboard(url) {
         [{ text: "🌐 Open CryptoWorldz.xyz", url }],
         [{ text: "✅ Verified Live Directory", url: LIVE_DIRECTORY_URL }],
         [{ text: "🌍 Explore All Websites", callback_data: "worldz_websites_directory" }],
-        [{ text: "💬 Join CryptoWorldz HQ", url: HQ_URL }]
+        [{ text: "💬 Join Worldz HQ", url: HQ_URL }]
       ]
     }
   };
@@ -140,7 +140,7 @@ function directoryKeyboard() {
           { text: "⚡ SolWorldz", url: PRIMARY_WEBSITES[2].url },
           { text: "💜 Diamond Crew", url: PRIMARY_WEBSITES[3].url }
         ],
-        [{ text: "💬 CryptoWorldz HQ", url: HQ_URL }]
+        [{ text: "💬 Worldz HQ", url: HQ_URL }]
       ]
     }
   };
@@ -151,7 +151,7 @@ function liveDirectoryKeyboard() {
     reply_markup: {
       inline_keyboard: [
         [{ text: "✅ Open Worldz Live Directory", url: LIVE_DIRECTORY_URL }],
-        [{ text: "💬 CryptoWorldz HQ", url: HQ_URL }]
+        [{ text: "💬 Worldz HQ", url: HQ_URL }]
       ]
     }
   };
