@@ -5,7 +5,7 @@ const DIRECTORY_COMMANDS = Object.freeze([
   { command: "xlinks", description: "View all official CryptoWorldz X pages" }
 ]);
 
-const HQ_URL = "https://t.me/CryptoWorldzHQ";
+const HQ_URL = "https://t.me/WorldzHq";
 const GROUP_TYPES = new Set(["group", "supergroup", "channel"]);
 
 function normalizeHandle(value) {
@@ -384,7 +384,7 @@ function registerCommunityDirectoryHandlers({ bot, supabase, config }) {
       if (destination.public_url) buttons.push([{ text: "💬 Open This Telegram", url: destination.public_url }]);
       if (destination.linked_public_url) buttons.push([{ text: "🔄 Open Linked Telegram", url: destination.linked_public_url }]);
       if (account) buttons.push([{ text: `𝕏 @${account.handle}`, url: account.url }]);
-      buttons.push([{ text: "🌍 CryptoWorldz HQ", url: HQ_URL }]);
+      buttons.push([{ text: "💬 Worldz HQ", url: HQ_URL }]);
       return bot.sendMessage(msg.chat.id, buildTelegramMessage(destination, account), {
         reply_markup: { inline_keyboard: buttons }
       });
