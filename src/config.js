@@ -100,7 +100,7 @@ function loadConfig(env = process.env) {
     autoServiceUrl,
     autoAuthToken,
     autoInternalToken,
-    communityTelegramUrl: String(env.COMMUNITY_TELEGRAM_URL || "").trim(),
+    communityTelegramUrl: String(env.COMMUNITY_TELEGRAM_URL || "https://t.me/WorldzHq").trim(),
     communityXUrl: String(env.COMMUNITY_X_URL || "").trim(),
     communityWebsiteUrl: String(
       env.COMMUNITY_WEBSITE_URL || "https://CryptoWorldz.xyz"
