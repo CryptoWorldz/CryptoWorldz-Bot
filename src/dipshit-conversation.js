@@ -1,5 +1,6 @@
 const { buildAssistantCapabilityContext, deterministicCapabilityAnswer } = require("./assistant-capabilities");
 const DEFAULT_BOT_USERNAME = "SparkyWorldzBot";
+const LEGACY_BOT_USERNAMES = Object.freeze(["SparkyBossBot", "DipShitBossBot"]);
 
 function extractDipshitResponseText(payload) {
   const chunks = [];
@@ -36,6 +37,13 @@ function moderationRequiresHardBlock(result) {
     categories["harassment/threatening"]
   );
 }
+function candidateDipshitUsernames(botUsername = DEFAULT_BOT_USERNAME) {
+  const candidates = [botUsername, DEFAULT_BOT_USERNAME, ...LEGACY_BOT_USERNAMES]
+    .map(value => String(value || "").trim().replace(/^@/, ""))
+    .filter(Boolean);
+  return [...new Map(candidates.map(value => [value.toLowerCase(), value])).values()];
+}
+
 function shouldHandleDipshitConversation(msg, botUsername = DEFAULT_BOT_USERNAME) {
   const text = String(msg && msg.text || "").trim();
   if (!text || text.startsWith("/")) return false;
@@ -43,22 +51,24 @@ function shouldHandleDipshitConversation(msg, botUsername = DEFAULT_BOT_USERNAME
   const chatType = String(msg && msg.chat && msg.chat.type || "");
   if (chatType === "private") return true;
 
-  const username = String(botUsername || DEFAULT_BOT_USERNAME).replace(/^@/, "");
-  const mention = username && new RegExp(`(?:^|\\s)@${escapeRegex(username)}(?:\\b|$)`, "i").test(text);
-  const addressed = /^(?:sparky|@sparky)\b[\s,:;.!?-]*/i.test(text);
+  const usernames = candidateDipshitUsernames(botUsername);
+  const mention = usernames.some(username =>
+    new RegExp(\`(?:^|\\\\s)@\${escapeRegex(username)}(?:\\\\b|$)\`, "i").test(text)
+  );
+  const addressed = /^(?:sparky|dipshit)\\b[\\s,:;.!?-]*/i.test(text);
   const replyUsername = String(msg && msg.reply_to_message && msg.reply_to_message.from && msg.reply_to_message.from.username || "");
-  const replyToBot = Boolean(username && replyUsername && replyUsername.toLowerCase() === username.toLowerCase());
+  const replyToBot = usernames.some(username => replyUsername.toLowerCase() === username.toLowerCase());
   return Boolean(mention || addressed || replyToBot);
 }
 
 function stripDipshitAddressing(text, botUsername = DEFAULT_BOT_USERNAME) {
-  const username = String(botUsername || DEFAULT_BOT_USERNAME).replace(/^@/, "");
   let cleaned = String(text || "").trim();
-  if (username) cleaned = cleaned.replace(new RegExp(`@${escapeRegex(username)}\\b`, "ig"), " ");
-  cleaned = cleaned.replace(/^(?:sparky|@sparky)\b[\s,:;.!?-]*/i, "");
-  return cleaned.replace(/\s{2,}/g, " ").trim();
+  for (const username of candidateDipshitUsernames(botUsername)) {
+    cleaned = cleaned.replace(new RegExp(\`@\${escapeRegex(username)}\\\\b\`, "ig"), " ");
+  }
+  cleaned = cleaned.replace(/^(?:sparky|dipshit)\\b[\\s,:;.!?-]*/i, "");
+  return cleaned.replace(/\\s{2,}/g, " ").trim();
 }
-
 
 function localDipshitFallback(message) {
   const text = String(message || "").toLowerCase();
@@ -255,7 +265,7 @@ function registerDipshitConversation({
     return handleConversation(msg);
   });
 
-  return { aiEnabled, botUsername, handleConversation };
+  return { aiEnabled, get botUsername() { return botUsername; }, handleConversation };
 }
 
 module.exports = {
