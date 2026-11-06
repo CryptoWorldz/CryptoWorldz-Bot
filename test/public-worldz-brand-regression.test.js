@@ -85,4 +85,6 @@ test("Command Centre presents Worldz Raidz and Sparky, not retired public labels
   assert.match(registry,/Meet Sparky/);
   assert.match(registry,/Worldz Raidz/);
   assert.doesNotMatch(raidRuntime,/Ronald Raider|Ronald\x27s/);
+  assert.match(raidRuntime,/WORLDZ RAIDZ LEADERBOARD/);
+  assert.match(raidRuntime,/repository\.getLeaderboard\(\)/);
 });
