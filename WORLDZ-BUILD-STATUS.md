@@ -31,10 +31,10 @@
 | SPARKY Mini App guide | ✅ LIVE | Command Centre static deploy `37160710927` published the visible `LOST? START HERE` / `ASK SPARKY` guide surface. |
 | SPARKY context-aware ecosystem guidance | 🟡 BUILT / NOT VERIFIED | Context guides for Command Centre, Profile, Wallet, Raid, WorldzLaunch, CryptoWorldz, DonateWorldz and WorldzHQ exist in `main`; latest bot/runtime rollout is still being proven. |
 | Raids UI | ✅ LIVE | Real production browser confirmed deployed Raids surface. |
-| Ronald Raider simple member flow | ✅ LIVE | Production Telegram card observed 2026-10-04 with the new 3-step flow, real participant count, community-target clarification and `I RAIDED ✅` button. |
-| Ronald Raider direct X post launcher | 🟡 BUILT / NOT VERIFIED | Exact X status-ID launcher, native-app deep link and exact-post browser/copy fallbacks exist in `main`; Mini App + protected runtime deployments are still being proven. |
-| Ronald Raider pending reward reconciliation | 🟡 BUILT / NOT VERIFIED | Production database function now judges eligibility at submission time and reconciliation code exists; Raid #1 submissions 66/68/71 remain pending until the protected runtime successfully runs the reconciler. |
-| Ronald Raider `/next` | 🟡 BUILT / NOT VERIFIED | Command is live-registered in Telegram and current-main regression logic passes, but no fresh Phase-1 end-to-end `/next` action was recorded. |
+| Worldz Raidz simple member flow | ✅ LIVE | Production Telegram card observed 2026-10-04 with the new 3-step flow, real participant count, community-target clarification and `I RAIDED ✅` button. |
+| Worldz Raidz direct X post launcher | 🟡 BUILT / NOT VERIFIED | Exact X status-ID launcher, native-app deep link and exact-post browser/copy fallbacks exist in `main`; Mini App + protected runtime deployments are still being proven. |
+| Worldz Raidz pending reward reconciliation | 🟡 BUILT / NOT VERIFIED | Production database function now judges eligibility at submission time and reconciliation code exists; Raid #1 submissions 66/68/71 remain pending until the protected runtime successfully runs the reconciler. |
+| Worldz Raidz `/next` | 🟡 BUILT / NOT VERIFIED | Command is live-registered in Telegram and current-main regression logic passes, but no fresh Phase-1 end-to-end `/next` action was recorded. |
 | Shill / ShillPoints | 🟡 BUILT / NOT VERIFIED | Commands are live-registered and regression tests pass; no fresh end-to-end Shill action recorded in this Phase-1 pass. |
 | Worldz Squads™ | ✅ LIVE | Production proof run `37146111886` verified the Worldz Squads runtime API, native THECHAOS production row, WorldzLaunchPad `/squads/` page and Command Centre Squads client. 1D/1W/1M rankings, Raids/Shills/Legend Points and share cards are deployed; trading PNL remains fail-closed until trusted performance indexing supplies verified data. |
 | Legend Points read | ✅ LIVE | Signed runtime audit `37113660864` returned live Legend Points successfully. |
@@ -129,7 +129,7 @@ These prevent a future merge from being described as LIVE without deployed proof
 
 Only these requested areas still lack the exact end-to-end live action needed for ✅:
 
-- Ronald Raider `/next`
+- Worldz Raidz `/next`
 - Shill / ShillPoints action
 - automatic Points award event
 - hourly favourite-token `/vote` action
