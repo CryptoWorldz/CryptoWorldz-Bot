@@ -8,7 +8,7 @@ This checkpoint consolidates the build work requested across the previous 72 hou
 
 - DIPSHIT Pro privacy, Telegram Stars/SOL membership verification and conversational Worldz QA.
 - Purple Diamond PNEX/MRCL developer/rewards wallet registry.
-- Ronald Raider raid queue, Shill Link/rewards/settings and Command Centre raid controls.
+- Worldz Raidz raid queue, Shill Link/rewards/settings and Command Centre raid controls.
 - Worldz FullBuild™ Community Suite, licensing, AI Auto Picks/Custom Build and customer-admin proof.
 - REX SecureGuard foundation plus REXSECURE ULTIMATE™ threat intelligence, Network Shield, Pattern Guard, External Bot Guard, Under Attack mode and authenticated MiniApp gate.
 - WorldzLaunchPad real-mainnet front door, Revenue Engine, V2 fee-flow/anti-cheat, Pump/X/community connections and PNEX rehearsal.

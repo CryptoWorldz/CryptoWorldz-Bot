@@ -321,7 +321,7 @@ jobs:
             {"command":"rewards","description":"View reward history"},
             {"command":"points","description":"View your Legend Points"},
             {"command":"leaderboard","description":"View the Top 25 Legends"},
-            {"command":"raid","description":"Open Ronald Raider"},
+            {"command":"raid","description":"Open Worldz Raidz"},
             {"command":"next","description":"View the next Raid in line"},
             {"command":"raaiiidd","description":"View the newest active Raid"},
             {"command":"raids","description":"View every active Raid"},
@@ -463,7 +463,7 @@ jobs:
           print("ZED_TELEGRAM_WEBHOOK=PASS")
           print("ZED_TELEGRAM_PRIVATE_COMPOSER_MENU=PASS type=commands")
 
-          dipshit_token=env.get("SPARKY_BOT_TOKEN","").strip()
+          dipshit_token=env.get("SPARKY_BOT_TOKEN","").strip() or env.get("DIPSHIT_BOT_TOKEN","").strip()
           if not dipshit_token:
               raise SystemExit("SPARKY_BOT_TOKEN or legacy DIPSHIT_BOT_TOKEN secret is required; refusing a false-green deployment.")
           else:

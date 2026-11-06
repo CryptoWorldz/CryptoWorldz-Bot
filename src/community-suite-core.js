@@ -7,7 +7,7 @@ const MODULES = Object.freeze([
   ["rex_secureguard", "🛡 REXSECURE ULTIMATE™"],
   ["alice_support", "📥 ALICE™ Support"],
   ["custom_ai", "🤖 Custom AI Community Bot"],
-  ["ronald_raider", "🤠 Ronald Raider"],
+  ["ronald_raider", "🤠 Worldz Raidz"],
   ["shill_rewards", "📣 Shill Rewards"],
   ["votes", "🗳 Worldz Votes Centre™"],
   ["worldzscan", "🔎 WorldzScan™"],

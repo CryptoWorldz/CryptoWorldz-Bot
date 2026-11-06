@@ -38,7 +38,7 @@ function raidOpenUrl(campaign) {
   if (String(campaign?.platform || "").toUpperCase() !== "X") return source;
   const statusId = extractXStatusId(source);
   if (!statusId) return source;
-  return `https://x.com/i/status/${statusId}`;
+  return `https://cryptobotz.cryptoworldz.xyz/miniapp/open-x.html?id=${statusId}&src=${encodeURIComponent(source)}`;
 }
 
 function numberOr(value, fallback, min = 0, max = 10000000) {
@@ -210,7 +210,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
         .eq("id", Number(campaignId));
       if (error) throw error;
     } catch (error) {
-      console.warn("Ronald Raider pulse clock persistence unavailable", { code: error?.code || error?.message || "unknown" });
+      console.warn("Worldz Raidz pulse clock persistence unavailable", { code: error?.code || error?.message || "unknown" });
     }
   }
 
@@ -255,7 +255,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
         .eq("status", "active");
       if (error) throw error;
     } catch (error) {
-      console.warn("Ronald Raider pulse message persistence unavailable", { code: error?.code || error?.message || "unknown" });
+      console.warn("Worldz Raidz pulse message persistence unavailable", { code: error?.code || error?.message || "unknown" });
     }
   }
 
@@ -300,11 +300,11 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       const results = await Promise.allSettled(raids.map((campaign) => pulseCampaign(campaign)));
       for (const result of results) {
         if (result.status === "rejected") {
-          console.error("Ronald Raider pulse failed", { code: result.reason?.code || result.reason?.message || "unknown" });
+          console.error("Worldz Raidz pulse failed", { code: result.reason?.code || result.reason?.message || "unknown" });
         }
       }
     } catch (error) {
-      console.error("Ronald Raider pulse scan failed", { code: error?.code || error?.message || "unknown" });
+      console.error("Worldz Raidz pulse scan failed", { code: error?.code || error?.message || "unknown" });
     } finally {
       pulseScanRunning = false;
     }
@@ -334,7 +334,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     if (error) throw error;
     const row = Array.isArray(data) ? data[0] : data;
     if (row && Number(row.processed) > 0) {
-      console.log("Ronald Raider pending reward reconciliation", {
+      console.log("Worldz Raidz pending reward reconciliation", {
         processed: Number(row.processed) || 0,
         awarded: Number(row.awarded) || 0,
         held: Number(row.held) || 0
@@ -415,7 +415,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       reward_points: parsed.reward,
       link: parsed.target.url,
       target_url: parsed.target.url,
-      description: `Ronald Raider targets — Likes ${parsed.goals.likes} • Reposts ${parsed.goals.reposts} • Replies ${parsed.goals.replies} • Views ${parsed.goals.views}`,
+      description: `Worldz Raidz targets — Likes ${parsed.goals.likes} • Reposts ${parsed.goals.reposts} • Replies ${parsed.goals.replies} • Views ${parsed.goals.views}`,
       instructions: "Open the post. Complete genuine engagement only. Tap DONE and submit proof when requested. No spam, bots or fake engagement.",
       status: queued ? "open" : "active",
       starts_at: queued ? null : new Date().toISOString(),
@@ -445,7 +445,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     if (!queued) await resetPulseClock(campaign.id);
     return send(
       msg.chat.id,
-      queued ? `⏭ Added to Ronald's Raid line-up.\n\n${campaignText(campaign)}` : campaignText(campaign),
+      queued ? `⏭ Added to the Worldz Raidz queue.\n\n${campaignText(campaign)}` : campaignText(campaign),
       keyboard(campaign)
     );
   }
@@ -468,10 +468,10 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
   const pulseBootstrapTimer = setTimeout(() => { void pulseActiveRaids(); }, 5_000);
   const pulseTimer = setInterval(() => { void pulseActiveRaids(); }, RAID_PULSE_SCAN_INTERVAL_MS);
   const rewardReconcileBootstrapTimer = setTimeout(() => {
-    void reconcilePendingRaidRewards().catch((error) => console.error("Ronald reward reconciliation failed", { code: error?.code || error?.message || "unknown" }));
+    void reconcilePendingRaidRewards().catch((error) => console.error("Worldz Raidz reward reconciliation failed", { code: error?.code || error?.message || "unknown" }));
   }, 12_000);
   const rewardReconcileTimer = setInterval(() => {
-    void reconcilePendingRaidRewards().catch((error) => console.error("Ronald reward reconciliation failed", { code: error?.code || error?.message || "unknown" }));
+    void reconcilePendingRaidRewards().catch((error) => console.error("Worldz Raidz reward reconciliation failed", { code: error?.code || error?.message || "unknown" }));
   }, 5 * 60 * 1000);
   if (typeof pulseBootstrapTimer.unref === "function") pulseBootstrapTimer.unref();
   if (typeof pulseTimer.unref === "function") pulseTimer.unref();
@@ -479,13 +479,13 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
   if (typeof rewardReconcileTimer.unref === "function") rewardReconcileTimer.unref();
 
   bot.onText(/^\/(?:raid|raaiiidd)(?:@\w+)?$/, async (msg) => {
-    if (!(await settingEnabled(msg.chat.id))) return send(msg.chat.id, "⏸ Ronald Raider is switched off in /zedsettings.");
+    if (!(await settingEnabled(msg.chat.id))) return send(msg.chat.id, "⏸ Worldz Raidz is switched off in /zedsettings.");
     try {
       const live = await activeCampaign(msg.chat.id);
       return send(msg.chat.id, campaignText(live), live ? keyboard(live) : undefined);
     } catch (error) {
-      console.error("Ronald Raider load failed", { code: error?.code || error?.message || "unknown" });
-      return send(msg.chat.id, "❌ Ronald tripped over his own boots loading this Raid. Try again in a moment.");
+      console.error("Worldz Raidz load failed", { code: error?.code || error?.message || "unknown" });
+      return send(msg.chat.id, "❌ Worldz Raidz hit a snag loading this Raid. Try again in a moment.");
     }
   });
 
@@ -494,7 +494,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       return send(msg.chat.id, rewardStatusText(await autoRewardStatus(msg.from.id)));
     } catch (error) {
       console.error("RaidPoints status failed", { code: error?.code || error?.message || "unknown" });
-      return send(msg.chat.id, "❌ Ronald couldn't load the RaidPoints engine.");
+      return send(msg.chat.id, "❌ Worldz Raidz couldn't load the RaidPoints engine.");
     }
   });
 
@@ -504,8 +504,8 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     if (!parsed.ok) return send(msg.chat.id, "❌ Use: /raid URL | likes | reposts | replies | views | LP | 24h\nShort form works too: /raid URL");
     try { return await createCampaign(msg, parsed, false); }
     catch (error) {
-      console.error("Ronald Raider create failed", { code: error?.code || error?.message || "unknown" });
-      return send(msg.chat.id, "❌ Ronald couldn't start that Raid.");
+      console.error("Worldz Raidz create failed", { code: error?.code || error?.message || "unknown" });
+      return send(msg.chat.id, "❌ Worldz Raidz couldn't start that Raid.");
     }
   });
 
@@ -517,15 +517,15 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       if (!parsed.ok) return send(msg.chat.id, "❌ Use: /next URL | likes | reposts | replies | views | LP | 24h");
       try { return await createCampaign(msg, parsed, true); }
       catch (error) {
-        console.error("Ronald Raider queue failed", { code: error?.code || error?.message || "unknown" });
-        return send(msg.chat.id, "❌ Ronald couldn't add that Raid to the line-up.");
+        console.error("Worldz Raidz queue failed", { code: error?.code || error?.message || "unknown" });
+        return send(msg.chat.id, "❌ Worldz Raidz couldn't add that Raid to the line-up.");
       }
     }
     try {
       const next = await queuedCampaign(msg.chat.id);
-      return send(msg.chat.id, next ? `⏭ NEXT RAID IN LINE\n\n${campaignText(next)}` : "⏭ Ronald's line-up is empty.");
+      return send(msg.chat.id, next ? `⏭ NEXT RAID IN LINE\n\n${campaignText(next)}` : "⏭ The Worldz Raidz queue is empty.");
     } catch {
-      return send(msg.chat.id, "❌ Ronald couldn't load the next Raid.");
+      return send(msg.chat.id, "❌ Worldz Raidz couldn't load the next Raid.");
     }
   });
 
@@ -546,7 +546,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       const updated = await campaignById(current.id);
       return send(msg.chat.id, campaignText(updated), keyboard(updated));
     } catch {
-      return send(msg.chat.id, "❌ Ronald couldn't update those Raid counters.");
+      return send(msg.chat.id, "❌ Worldz Raidz couldn't update those Raid counters.");
     }
   });
 
@@ -558,9 +558,9 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
       await clearPulse(current);
       await supabase.from("raid_campaigns").update({ status: "stopped", stopped_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", current.id);
       await supabase.from("missions").update({ status: "completed", updated_at: new Date().toISOString() }).eq("id", current.mission_id);
-      return send(msg.chat.id, "🛑 Ronald stopped the Raid. Use /next to see what is lined up.");
+      return send(msg.chat.id, "🛑 Worldz Raidz stopped the Raid. Use /next to see what is lined up.");
     } catch {
-      return send(msg.chat.id, "❌ Ronald couldn't stop that Raid.");
+      return send(msg.chat.id, "❌ Worldz Raidz couldn't stop that Raid.");
     }
   });
 
@@ -574,7 +574,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
         await bot.answerCallbackQuery(query.id);
         const rows = await repository.getLeaderboard();
         const text = rows.slice(0, 10).map((row, index) => `${index + 1}. ${row.username ? "@" + row.username : row.first_name || "Legend"} — ${Number(row.points) || 0} LP`).join("\n");
-        return send(chatId, `🏆 RONALD RAIDER LEADERBOARD\n\n${text || "No points yet."}`);
+        return send(chatId, `🏆 WORLDZ RAIDZ LEADERBOARD\n\n${text || "No points yet."}`);
       }
 
       if (data === "ronald:next") {
@@ -609,13 +609,13 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
         await supabase.from("raid_campaigns").update({ status: "stopped", stopped_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", campaign.id);
         await supabase.from("missions").update({ status: "completed", updated_at: new Date().toISOString() }).eq("id", campaign.mission_id);
         await bot.answerCallbackQuery(query.id, { text: "Raid stopped." });
-        return send(chatId, "🛑 Ronald stopped the Raid.");
+        return send(chatId, "🛑 Worldz Raidz stopped the Raid.");
       }
 
       const claim = await repository.submitMissionClaim({
         missionId: campaign.mission_id,
         telegramId: actorId,
-        completionText: "Ronald Raider I RAIDED button",
+        completionText: "Worldz Raidz I RAIDED button",
         proofUrl: ""
       });
       if (claim.duplicate) {
@@ -652,8 +652,8 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
         "Normal completions auto-award. This result came from the automatic rules — not an Admin approval queue."
       ].join("\n"));
     } catch (error) {
-      console.error("Ronald Raider callback failed", { code: error?.code || error?.message || "unknown" });
-      try { await bot.answerCallbackQuery(query.id, { text: "Ronald hit an error.", show_alert: true }); } catch {}
+      console.error("Worldz Raidz callback failed", { code: error?.code || error?.message || "unknown" });
+      try { await bot.answerCallbackQuery(query.id, { text: "Worldz Raidz hit an error.", show_alert: true }); } catch {}
     }
   });
 
