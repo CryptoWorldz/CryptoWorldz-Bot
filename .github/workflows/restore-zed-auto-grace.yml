@@ -482,8 +482,8 @@ jobs:
 
               bot_identity=dcall("getMe")
               actual_username=str(bot_identity.get("username","")).strip().lower()
-              if actual_username not in ("sparkyworldzbot","sparkybossbot"):
-                  raise SystemExit("SPARKY_IDENTITY_MISMATCH: expected @SparkyWorldzBot or the previously used @SparkyBossBot")
+              if actual_username != "sparkyworldzbot":
+                  raise SystemExit("SPARKY_IDENTITY_MISMATCH: token must belong to @SparkyWorldzBot")
               dipshit_commands=[
                 {"command":"start","description":"Start Sparky Worldz navigator"},
                 {"command":"help","description":"Show the command menu"},
