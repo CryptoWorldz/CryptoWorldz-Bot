@@ -69,3 +69,18 @@ test("Create Your Own Money campaign is accurate, connected and non-misleading",
   assert.ok(social.creatorCampaign.x.length>=2);
   assert.match(sitemap,/https:\/\/launchpad\.cryptoworldz\.xyz\/create-your-own-money\//);
 });
+
+test("Command Centre presents Worldz Raidz and Sparky, not retired public labels",()=>{
+  const centre=read("cryptoworldz.xyz/command-centre-max/index.html");
+  const mini=read("public/miniapp/experience.js");
+  const guide=read("cryptoworldz.xyz/worldz-guide.js");
+  const registry=read("src/command-registry.js");
+  assert.match(centre,/Worldz Raidz/);
+  assert.doesNotMatch(centre,/Ronald Raider/);
+  assert.match(mini,/Worldz Raidz/);
+  assert.doesNotMatch(mini,/Ronald Raider/);
+  assert.match(guide,/Worldz Raidz/);
+  assert.match(guide,/SparkyWorldzBot/);
+  assert.match(registry,/Meet Sparky/);
+  assert.match(registry,/Worldz Raidz/);
+});
