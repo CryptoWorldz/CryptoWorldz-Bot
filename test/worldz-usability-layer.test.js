@@ -18,11 +18,11 @@ test("Command Centre exposes simple onboarding and DIPSHIT guidance", () => {
   assert.match(profile, /RAID NOW/);
   assert.match(profile, /responsibilityLines/);
   assert.match(dip, /LOST\? START HERE/);
-  assert.match(dip, /ASK DIPSHIT/);
+  assert.match(dip, /ASK SPARKY/);
   assert.match(mini, /SCREEN_INSTRUCTIONS/);
   assert.match(mini, /RAIDS — 3 STEPS/);
   assert.match(mini, /PROFILE — WHAT NEXT/);
-  assert.match(mini, /ASK DIPSHIT/);
+  assert.match(mini, /ASK SPARKY/);
 });
 
 test("Ronald Raider member UX is one obvious action loop", () => {
