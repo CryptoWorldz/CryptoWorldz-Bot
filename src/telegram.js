@@ -29,7 +29,7 @@ const PUBLIC_COMMANDS = [
   { command: "rewards", description: "View reward history" },
   { command: "points", description: "View your Legend Points" },
   { command: "leaderboard", description: "View the Top 25 Legends" },
-  { command: "raid", description: "Open Ronald Raider" },
+  { command: "raid", description: "Open Worldz Raidz" },
   { command: "next", description: "View the next Raid in line" },
   { command: "raids", description: "View all active Raids" },
   { command: "raaiiidd", description: "View the current Raid" },
@@ -123,7 +123,7 @@ function registerTelegramHandlers({ bot, repository, config }) {
 
 I'm Zed — your guide to the CryptoWorldz Command Centre.
 
-🚀 Ronald Raider Raids
+🤠 WORLDZ RAIDZ • RAIDS
 🏆 Leaderboards & Rewards
 👛 Wallet Registration
 🗳️ Hourly Token Voting
