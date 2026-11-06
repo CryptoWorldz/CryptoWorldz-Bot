@@ -5,7 +5,7 @@ const path = require("node:path");
 
 const ROOT = path.join(__dirname, "..");
 
-test("Command Centre exposes simple onboarding and DIPSHIT guidance", () => {
+test("Command Centre exposes simple onboarding and SPARKY guidance", () => {
   const centre = fs.readFileSync(path.join(ROOT, "src/command-centre.js"), "utf8");
   const profile = fs.readFileSync(path.join(ROOT, "src/referrals.js"), "utf8");
   const dip = fs.readFileSync(path.join(ROOT, "public/miniapp/dipshit.js"), "utf8");
