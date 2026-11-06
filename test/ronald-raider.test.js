@@ -44,10 +44,8 @@ test("Ronald Raider converts an X post into the protected direct-post launcher",
   const source = "https://x.com/PDCrew/status/2106328326755496140";
   assert.equal(extractXStatusId(source), "2106328326755496140");
   const target = raidOpenUrl({ platform: "X", source_url: source });
-  assert.match(target, /^https:\/\/cryptobotz\.cryptoworldz\.xyz\/miniapp\/open-x\.html\?/);
-  const parsed = new URL(target);
-  assert.equal(parsed.searchParams.get("id"), "2106328326755496140");
-  assert.equal(parsed.searchParams.get("src"), source);
+  assert.match(target, /^https:\/\/x\.com\/i\/status\/2106328326755496140$/);
+  assert.equal(target, "https://x.com/i/status/2106328326755496140");
 });
 
 test("Ronald Raider leaves non-X links unchanged", () => {
