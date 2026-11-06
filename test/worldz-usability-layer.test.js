@@ -43,7 +43,7 @@ test("Worldz public guide and future domain fronts are prepared without fake LIV
   ]) {
     const body = fs.readFileSync(path.join(ROOT, file), "utf8");
     assert.match(body, /START HERE/);
-    assert.match(body, /DipShitBossBot/);
+    assert.match(body, /SparkyWorldzBot/);
   }
 
   const hq = JSON.parse(fs.readFileSync(path.join(ROOT, "worldzhq.com/domain-plan.json"), "utf8"));
