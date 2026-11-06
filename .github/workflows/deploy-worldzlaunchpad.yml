@@ -992,7 +992,7 @@ jobs:
                   assert 'Mint New' in launch_station_body and 'Import Existing Mint' in launch_station_body
                   assert 'PHENIX' in launch_station_body and 'PNEX' in launch_station_body
                   assert community_code==200 and 'WORLDZLAUNCH COMMUNITY' in community_body
-                  assert 'TheChaos' in community_body and 'DipShitBossBot' in community_body and 'Command Centre MAX' in community_body
+                  assert 'TheChaos' in community_body and 'SparkyWorldzBot' in community_body and 'Command Centre MAX' in community_body
                   assert 'REXSECURE ULTIMATE™' in community_body
                   assert integrations_code==200 and 'WORLDZLAUNCH INTEGRATIONS' in integrations_body
                   assert 'X API v2' in integrations_body and 'pump.fun / PumpSwap' in integrations_body
