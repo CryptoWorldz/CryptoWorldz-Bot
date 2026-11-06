@@ -146,7 +146,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
   const helpText = () => [
     "💙 SPARKY™ — WORLDZ DUDE",
     "",
-    "💬 Talk normally in private chat. In groups, mention @SparkyWorldzBot, reply to me, or start with “Sparky …”",
+    `💬 Talk normally in private chat. In groups, mention @${String(conversation.botUsername || "SparkyWorldzBot").replace(/^@/, "")}, reply to me, or start with “Sparky …”`,
     "",
     "/status — runtime status",
     "/check — quick QA check",
