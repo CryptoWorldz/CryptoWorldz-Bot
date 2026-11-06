@@ -278,7 +278,7 @@ function registerUserExperienceSystem({ app, bot, repository, config, supabase }
       await recordCreatorDecision(request.id, "approved", "worldz_bot_stack_auto_validated", "activated");
       await bot.sendMessage(
         request.creator_telegram_id,
-        `✅ WORLDZ VALIDATION PASSED\n\nYour Raaiiidd Creator request #${request.id} is active as Raid #${mission.id}.\n\nZED • ReX • AUTO • G.R.A.C.E. • DipShit handled the routine checks. No Admin approval queue.`
+        `✅ WORLDZ VALIDATION PASSED\n\nYour Raaiiidd Creator request #${request.id} is active as Raid #${mission.id}.\n\nZED • ReX • AUTO • G.R.A.C.E. • Sparky handled the routine checks. No Admin approval queue.`
       ).catch(() => undefined);
       return { outcome: "activated", request: approved, mission };
     } catch (validationError) {
