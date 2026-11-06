@@ -17,7 +17,7 @@ const CAPABILITY_CATALOG = Object.freeze([
   },
   {
     key: "ronald_raider",
-    label: "Ronald Raider",
+    label: "Worldz Raidz",
     moduleKey: "ronald_raider",
     summary: "Interactive Raid queue, post targets, DONE submissions and Legend Points review flow.",
     memberCommands: ["/raid", "/next"],
