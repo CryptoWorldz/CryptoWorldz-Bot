@@ -5,7 +5,7 @@ const group = (key, label, minimumRole, rows) => Object.freeze({ key, label, min
 const COMMAND_GROUPS = Object.freeze([
   group("start", "🌐 Start & Navigation", "public", [
     ["zedstart", "Open the complete CryptoWorldz Command Centre"], ["howtojoin", "Simple Start Here guide"], ["about", "Explain Command Centre in plain English"], ["help", "Simple command help"],
-    ["dipshit", "Meet Sparky, the blue Worldz Dude"],
+    ["sparky", "Meet SPARKY, the blue Worldz Dude"], ["dipshit", "Legacy alias for SPARKY"],
     ["commands", "Show commands available to your access level"], ["commandtree", "Show the Command Centre structural tree"],
     ["directory", "Open the Worldz directory"], ["acknowledgements", "Open DonateWorldz acknowledgements"],
     ["supportjay", "Open JayJayTeamDev@DonateWorldz"], ["donate", "Open the current DonateWorldz support choices"]
@@ -44,11 +44,11 @@ const COMMAND_GROUPS = Object.freeze([
     ["legendstatus", "View Legend recognition status"], ["specialtiers", "View Special Request tiers"],
     ["uniquelegend", "Apply for Unique Legend review"], ["boostshill", "Boost an eligible referred Legend"]
   ]),
-  group("raids", "🤠 Ronald Raider • RAIDS", "member", [
-    ["raid", "Open Ronald Raider or view the live Raid"],
+  group("raids", "🤠 Worldz Raidz • RAIDS", "member", [
+    ["raid", "Open Worldz Raidz or view the live Raid"],
     ["next", "View the next Raid lined up"],
-    ["raaiiidd", "Open the current Ronald Raider Raid"],
-    ["raids", "List active Ronald Raider Raids"],
+    ["raaiiidd", "Open the current Worldz Raidz Raid"],
+    ["raids", "List active Worldz Raidz Raids"],
     ["raidpoints", "View automatic RaidPoints caps and Reward Wallet funding"],
     ["creator", "Open ZED Raid Creator for post, artwork, preview and Admin review"]
   ]),
@@ -104,8 +104,8 @@ const COMMAND_GROUPS = Object.freeze([
     ["rexappeal", "Appeal your own REX risk result"], ["rexappeals", "Worldz owner: view active REX appeals"], ["rexresolve", "Worldz owner: grant or deny a REX appeal"],
     ["rexpatternban", "Reply to confirmed scam/spam and add its message pattern"], ["rexunderattack", "Turn strict REX raid posture on or off"],
     ["reviewqueue", "Open Raid, Creator and Hero human-review queues"],
-    ["newmission", "Create a Ronald Raider Raid (legacy command)"], ["editmission", "Edit a Raid (legacy command)"], ["endmission", "End a Raid (legacy command)"],
-    ["raidprogress", "Update Ronald Raider likes/reposts/replies/views"], ["stopraid", "Stop the live Ronald Raider Raid"],
+    ["newmission", "Create a Worldz Raidz Raid (legacy command)"], ["editmission", "Edit a Raid (legacy command)"], ["endmission", "End a Raid (legacy command)"],
+    ["raidprogress", "Update Worldz Raidz likes/reposts/replies/views"], ["stopraid", "Stop the live Worldz Raidz Raid"],
     ["pending", "Review pending Raid submissions"], ["approve", "Approve an authorised pending action"],
     ["reject", "Reject an authorised pending action"], ["pendingshills", "Review pending token shill proofs"],
     ["approveshill", "Approve a verified token shill proof"], ["rejectshill", "Reject a token shill proof"],
