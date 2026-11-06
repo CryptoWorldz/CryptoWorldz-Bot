@@ -12,7 +12,7 @@ const {
   raidOpenUrl
 } = require("../src/ronald-raider");
 
-test("Ronald Raider short form loads safe defaults", () => {
+test("Worldz Raidz short form loads safe defaults", () => {
   const result = parseRaidPayload("https://x.com/example/status/123");
   assert.equal(result.ok, true);
   assert.equal(result.target.platform, "X");
@@ -101,7 +101,7 @@ test("Ronald Raider pulse card stays compact while telling a member exactly what
     participation_count: 3
   });
 
-  assert.match(text, /RONALD RAIDER • RAID #7 ACTIVE/);
+  assert.match(text, /WORLDZ RAIDZ • RAID #7 ACTIVE/);
   assert.match(text, /1️⃣ OPEN POST/);
   assert.match(text, /2️⃣ Like \+ Repost \+ Reply/);
   assert.match(text, /3️⃣ Come back → I RAIDED ✅/);
