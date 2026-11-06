@@ -12,7 +12,7 @@ const {
   raidOpenUrl
 } = require("../src/ronald-raider");
 
-test("Ronald Raider short form loads safe defaults", () => {
+test("Worldz Raidz short form loads safe defaults", () => {
   const result = parseRaidPayload("https://x.com/example/status/123");
   assert.equal(result.ok, true);
   assert.equal(result.target.platform, "X");
@@ -44,10 +44,8 @@ test("Ronald Raider converts an X post into the protected direct-post launcher",
   const source = "https://x.com/PDCrew/status/2106328326755496140";
   assert.equal(extractXStatusId(source), "2106328326755496140");
   const target = raidOpenUrl({ platform: "X", source_url: source });
-  assert.match(target, /^https:\/\/cryptobotz\.cryptoworldz\.xyz\/miniapp\/open-x\.html\?/);
-  const parsed = new URL(target);
-  assert.equal(parsed.searchParams.get("id"), "2106328326755496140");
-  assert.equal(parsed.searchParams.get("src"), source);
+  assert.match(target, /^https:\/\/x\.com\/i\/status\/2106328326755496140$/);
+  assert.equal(target, "https://x.com/i/status/2106328326755496140");
 });
 
 test("Ronald Raider leaves non-X links unchanged", () => {
@@ -101,7 +99,7 @@ test("Ronald Raider pulse card stays compact while telling a member exactly what
     participation_count: 3
   });
 
-  assert.match(text, /RONALD RAIDER • RAID #7 ACTIVE/);
+  assert.match(text, /WORLDZ RAIDZ • RAID #7 ACTIVE/);
   assert.match(text, /1️⃣ OPEN POST/);
   assert.match(text, /2️⃣ Like \+ Repost \+ Reply/);
   assert.match(text, /3️⃣ Come back → I RAIDED ✅/);
