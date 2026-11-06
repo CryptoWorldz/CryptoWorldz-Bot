@@ -51,7 +51,7 @@
 
     const askButton = root.querySelector(".dipshit-ask");
     askButton?.addEventListener("click", () => {
-      const url = "https://t.me/DipShitBossBot?start=guide_command";
+      const url = "https://t.me/SparkyWorldzBot?start=guide_command";
       if (window.Telegram?.WebApp?.openTelegramLink) window.Telegram.WebApp.openTelegramLink(url);
       else window.open(url, "_blank", "noopener");
     });
