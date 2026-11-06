@@ -12,7 +12,7 @@ const {
   raidOpenUrl
 } = require("../src/ronald-raider");
 
-test("Ronald Raider short form loads safe defaults", () => {
+test("Worldz Raidz short form loads safe defaults", () => {
   const result = parseRaidPayload("https://x.com/example/status/123");
   assert.equal(result.ok, true);
   assert.equal(result.target.platform, "X");
@@ -21,7 +21,7 @@ test("Ronald Raider short form loads safe defaults", () => {
   assert.equal(result.durationHours, 24);
 });
 
-test("Ronald Raider accepts explicit X goals, reward and duration", () => {
+test("Worldz Raidz accepts explicit X goals, reward and duration", () => {
   const result = parseRaidPayload("https://x.com/example/status/123 | 25 | 15 | 10 | 100 | 30 | 2d");
   assert.equal(result.ok, true);
   assert.deepEqual(result.goals, { likes: 25, reposts: 15, replies: 10, views: 100 });
@@ -29,18 +29,18 @@ test("Ronald Raider accepts explicit X goals, reward and duration", () => {
   assert.equal(result.durationHours, 48);
 });
 
-test("Ronald Raider detects supported social platforms and rejects unsafe URLs", () => {
+test("Worldz Raidz detects supported social platforms and rejects unsafe URLs", () => {
   assert.equal(detectPlatform("https://youtube.com/watch?v=abc").platform, "YouTube");
   assert.equal(detectPlatform("https://tiktok.com/@worldz/video/1").platform, "TikTok");
   assert.equal(detectPlatform("http://x.com/example/status/123"), null);
 });
 
-test("Ronald Raider progress is capped for display", () => {
+test("Worldz Raidz progress is capped for display", () => {
   assert.match(progressLine("Likes", 5, 10), /50%/);
   assert.match(progressLine("Likes", 20, 10), /100%/);
 });
 
-test("Ronald Raider converts an X post into the protected direct-post launcher", () => {
+test("Worldz Raidz converts an X post into the protected direct-post launcher", () => {
   const source = "https://x.com/PDCrew/status/2106328326755496140";
   assert.equal(extractXStatusId(source), "2106328326755496140");
   const target = raidOpenUrl({ platform: "X", source_url: source });
@@ -50,13 +50,13 @@ test("Ronald Raider converts an X post into the protected direct-post launcher",
   assert.equal(parsed.searchParams.get("src"), source);
 });
 
-test("Ronald Raider leaves non-X links unchanged", () => {
+test("Worldz Raidz leaves non-X links unchanged", () => {
   const source = "https://youtube.com/watch?v=abc";
   assert.equal(raidOpenUrl({ platform: "YouTube", source_url: source }), source);
 });
 
 
-test("Ronald Raider gives a simple three-step member flow and separates community targets", () => {
+test("Worldz Raidz gives a simple three-step member flow and separates community targets", () => {
   const text = campaignText({
     id: 9,
     platform: "X",
@@ -81,12 +81,12 @@ test("Ronald Raider gives a simple three-step member flow and separates communit
   assert.match(text, /automatic safety checks/);
 });
 
-test("Ronald Raider pulse scans frequently but can only publish about once a minute", () => {
+test("Worldz Raidz pulse scans frequently but can only publish about once a minute", () => {
   assert.equal(RAID_PULSE_SCAN_INTERVAL_MS, 15_000);
   assert.equal(RAID_PULSE_MIN_GAP_SECONDS, 55);
 });
 
-test("Ronald Raider pulse card stays compact while telling a member exactly what to do", () => {
+test("Worldz Raidz pulse card stays compact while telling a member exactly what to do", () => {
   const text = raidPulseText({
     id: 7,
     likes_current: 4,
@@ -101,7 +101,7 @@ test("Ronald Raider pulse card stays compact while telling a member exactly what
     participation_count: 3
   });
 
-  assert.match(text, /RONALD RAIDER • RAID #7 ACTIVE/);
+  assert.match(text, /WORLDZ RAIDZ • RAID #7 ACTIVE/);
   assert.match(text, /1️⃣ OPEN POST/);
   assert.match(text, /2️⃣ Like \+ Repost \+ Reply/);
   assert.match(text, /3️⃣ Come back → I RAIDED ✅/);
