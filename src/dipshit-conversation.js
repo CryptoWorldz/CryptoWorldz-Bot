@@ -1,6 +1,5 @@
 const { buildAssistantCapabilityContext, deterministicCapabilityAnswer } = require("./assistant-capabilities");
 const DEFAULT_BOT_USERNAME = "SparkyWorldzBot";
-const LEGACY_BOT_USERNAMES = Object.freeze(["SparkyBossBot", "DipShitBossBot"]);
 
 function extractDipshitResponseText(payload) {
   const chunks = [];
@@ -38,9 +37,7 @@ function moderationRequiresHardBlock(result) {
   );
 }
 function candidateDipshitUsernames(botUsername = DEFAULT_BOT_USERNAME) {
-  const candidates = [botUsername, DEFAULT_BOT_USERNAME, ...LEGACY_BOT_USERNAMES]
-    .map(value => String(value || "").trim().replace(/^@/, ""))
-    .filter(Boolean);
+  const candidates = [String(botUsername || DEFAULT_BOT_USERNAME).trim().replace(/^@/, "")].filter(Boolean);
   return [...new Map(candidates.map(value => [value.toLowerCase(), value])).values()];
 }
 
