@@ -9,7 +9,7 @@ This standard is deliberately separate from the tokenomics of WORLDZ, REVIVE, PH
 1. **Fixed supply** — initial supply is fixed; mint authority must be revoked after genesis; freeze authority must be absent/revoked.
 2. **Founder limits** — creator/team allocation may not exceed 15% of supply; no more than 5% of total supply may be liquid for creator/team at genesis; the remainder requires at least a 90-day cliff and 18-month vesting.
 3. **Liquidity protection** — 25–60% of supply must be designated for liquidity; 100% of creator-controlled LP ownership must be locked for at least 365 days before a mainnet launch can receive WorldzLaunchPad verified status.
-4. **Fee limits** — ordinary wallet transfer tax is 0%; supported project trading fee is 0.50–3.00%; creator may receive at most 20% of the project's routed fee pool; treasury at most 20%; LP Growth receives at least 20%; Holders + LP Growth + Community receive at least 60% combined.
+4. **Fee limits** — ordinary wallet transfer tax is 0%; supported project trading fee is 0.25–3.00% where venue-native tiers support 0.25%; otherwise disclose the supported venue minimum up to 3.00%; creator may receive at most 20% of the project's routed fee pool; treasury at most 20%; LP Growth receives at least 20%; Holders + LP Growth + Community receive at least 60% combined.
 5. **Multisig control** — treasury and any upgrade/program authority must be controlled by a 2-of-3 or stronger multisig for mainnet verification.
 6. **Public proof** — genesis allocation totals 100%; wallets/vaults are tagged; manifest + hash are public; no hidden private allocation, blacklist, sell restriction, honeypot behavior or undisclosed private discount is permitted through WorldzLaunchPad.
 
@@ -46,3 +46,7 @@ The public builder and Devnet are available for construction and testing while t
 ## Truth rule
 
 WorldzLaunchPad does not label a token “safe” simply because it was created here. It publishes verifiable facts and grants a **Worldz Policy Pass** only when compulsory controls are actually proven for that launch route.
+
+## 2026-11-06 launch policy clarification
+
+The new-launch target minimum is **0.25%**, only where actually supported by the chosen venue. Native venue/network costs are separate and must be displayed before signing. The old 2% Worldz platform route and legacy 90/10 route must not execute for new launches. Mainnet remains gated until three verified 50/30/20 treasury multisig destinations, enforceable LP locks, vesting, verified routing, security review and applicable legal checks are proven. Legacy WLDZ on-chain records must remain auditable; the new WORLDZ token is distinct.
