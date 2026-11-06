@@ -9,7 +9,7 @@
 ## Command Centre
 - ZED-led Command Centre MAX™.
 - Public engagement language is RAIDS, not Missions.
-- Ronald Raider opens the real Raid destination and supports /raid, /next and active Raid queues.
+- Worldz Raidz opens the real Raid destination and supports /raid, /next and active Raid queues.
 - Routine Raid completion and RaidPoints do not wait for Admin approval.
 - Routine ShillPoints do not wait for Admin approval.
 - Member-facing routine states are auto-awarded, auto-rejected or automation hold — not pending Admin review.
