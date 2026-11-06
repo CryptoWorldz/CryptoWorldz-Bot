@@ -11,7 +11,7 @@ test("DIPSHIT Worldz Dude profile is wired into the Mini App with no financial a
   const avatar = fs.readFileSync(path.join(ROOT, "public/miniapp/assets/dipshit-worldz-dude.svg"), "utf8");
   assert.match(html, /id="dipshit-worldz-dude"/);
   assert.match(html, /\/miniapp\/dipshit\.js/);
-  assert.match(js, /DIPSHIT™/);
+  assert.match(js, /SPARKY™/);
   assert.match(js, /WORLDZ DUDE/);
   assert.match(js, /walletSigning:\s*false/);
   assert.match(js, /treasury:\s*false/);
@@ -37,7 +37,7 @@ test("DIPSHIT public profile and Telegram command use the blue Worldz Dude with 
   assert.ok(fs.statSync(sourceImage).size > 1000);
   assert.ok(fs.statSync(image).size > 1000);
   assert.ok(fs.statSync(publicImage).size > 1000);
-  assert.match(page, /DIPSHIT™/);
+  assert.match(page, /SPARKY™/);
   assert.match(page, /WORLDZ DUDE/);
   assert.match(page, /no wallet-signing authority/i);
   assert.doesNotMatch(page, /OneWorldz|oneworldz\.com/);
