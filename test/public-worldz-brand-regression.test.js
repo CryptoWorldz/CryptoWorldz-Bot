@@ -34,6 +34,7 @@ test("WorldzLaunch Pack exposes current ZED-led modules and Spotlight",()=>{
 test("visible Raid experience does not present Missions as the primary system",()=>{
   const experience=read("public/miniapp/experience.js");
   const registry=read("src/command-registry.js");
+  const raidRuntime=read("src/ronald-raider.js");
   assert.doesNotMatch(experience,/My Missions|MISSION EVIDENCE|Mission #/);
   assert.match(experience,/My Raids|RAID EVIDENCE|Raid #/);
   assert.match(registry,/Admin • Raids, Reviews, Members & Settings/);
@@ -83,4 +84,5 @@ test("Command Centre presents Worldz Raidz and Sparky, not retired public labels
   assert.match(guide,/SparkyWorldzBot/);
   assert.match(registry,/Meet Sparky/);
   assert.match(registry,/Worldz Raidz/);
+  assert.doesNotMatch(raidRuntime,/Ronald Raider|Ronald\x27s/);
 });
