@@ -71,10 +71,13 @@ test("membership migration is private-by-default and idempotent", () => {
 });
 
 
-test("DIPSHIT conversational routing is private-first and group-safe", () => {
+test("Sparky conversational routing is private-first and group-safe", () => {
   assert.equal(shouldHandleDipshitConversation({ text: "why is Zed broken?", chat: { type: "private" } }), true);
   assert.equal(shouldHandleDipshitConversation({ text: "random group chatter", chat: { type: "group" } }), false);
+  assert.equal(shouldHandleDipshitConversation({ text: "@SparkyWorldzBot why is Zed broken?", chat: { type: "group" } }), true);
+  assert.equal(shouldHandleDipshitConversation({ text: "@SparkyBossBot why is Zed broken?", chat: { type: "group" } }), true);
   assert.equal(shouldHandleDipshitConversation({ text: "@DipShitBossBot why is Zed broken?", chat: { type: "group" } }), true);
+  assert.equal(shouldHandleDipshitConversation({ text: "Sparky, check Zed", chat: { type: "supergroup" } }), true);
   assert.equal(shouldHandleDipshitConversation({ text: "DipShit, check Zed", chat: { type: "supergroup" } }), true);
   assert.equal(shouldHandleDipshitConversation({
     text: "can you explain that?",
@@ -83,7 +86,10 @@ test("DIPSHIT conversational routing is private-first and group-safe", () => {
   }), true);
 });
 
-test("DIPSHIT strips Telegram addressing before sending text to the AI", () => {
+test("Sparky strips current and legacy Telegram addressing before sending text to the AI", () => {
+  assert.equal(stripDipshitAddressing("@SparkyWorldzBot why is Zed broken?"), "why is Zed broken?");
+  assert.equal(stripDipshitAddressing("@SparkyBossBot why is Zed broken?"), "why is Zed broken?");
   assert.equal(stripDipshitAddressing("@DipShitBossBot why is Zed broken?"), "why is Zed broken?");
+  assert.equal(stripDipshitAddressing("Sparky: run me through the problem"), "run me through the problem");
   assert.equal(stripDipshitAddressing("DipShit: run me through the problem"), "run me through the problem");
 });
