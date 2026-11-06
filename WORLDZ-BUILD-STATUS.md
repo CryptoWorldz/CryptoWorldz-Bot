@@ -27,7 +27,7 @@
 | Command Centre current branding/parity | ✅ LIVE | Real Chrome proof passed in `37113524632`; current WorldzEcosystem branding and current DOM confirmed. |
 | Telegram secure-launch boundary | ✅ LIVE | Outside-Telegram browser access fails closed; signed Telegram bootstrap also passed in runtime audit `37113660864`. |
 | ZED Telegram bot/webhook | ✅ LIVE | Runtime restore `37112571962`: bot, webhook, command scopes and backlog control passed. |
-| SPARKY Telegram bot/webhook | 🟡 BUILT / NOT VERIFIED | Historical restore `37112571962` proved the earlier @SparkyBossBot/webhook on 2026-10-04. A 2026-11-06 source audit found a stale-handle test, missing `/ask` menu registration and a renamed-token-secret compatibility gap. Fixes are committed to `main`; require a fresh deployment and a real Telegram message/reply proof before returning to LIVE. |
+| SPARKY Telegram bot/webhook | 🟡 BUILT / NOT VERIFIED | Historical restore `37112571962` proved the Sparky bot/webhook on 2026-10-04. A 2026-11-06 source audit found a stale-handle test, missing `/ask` menu registration and a renamed-token-secret compatibility gap. Fixes are committed to `main`; require a fresh deployment and a real Telegram message/reply proof before returning to LIVE. |
 | SPARKY Mini App guide | ✅ LIVE | Command Centre static deploy `37160710927` published the visible `LOST? START HERE` / `ASK SPARKY` guide surface. |
 | SPARKY context-aware ecosystem guidance | 🟡 BUILT / NOT VERIFIED | Context guides for Command Centre, Profile, Wallet, Raid, WorldzLaunch, CryptoWorldz, DonateWorldz and WorldzHQ exist in `main`; latest bot/runtime rollout is still being proven. |
 | Raids UI | ✅ LIVE | Real production browser confirmed deployed Raids surface. |
