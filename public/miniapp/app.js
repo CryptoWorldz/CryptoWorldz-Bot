@@ -153,7 +153,7 @@ function ensureScreenInstructions(id) {
   if (!cfg || !screen || screen.querySelector(".worldz-screen-instructions")) return;
   const panel = document.createElement("div");
   panel.className = "panel security worldz-screen-instructions";
-  panel.innerHTML = `<h3>${escapeHtml(cfg.title)}</h3><p>${escapeHtml(cfg.body)}</p><p><a class="button secondary" href="https://t.me/SparkyWorldzBot?start=${encodeURIComponent(cfg.dip)}" target="_blank" rel="noopener">💙 ASK DIPSHIT</a></p>`;
+  panel.innerHTML = `<h3>${escapeHtml(cfg.title)}</h3><p>${escapeHtml(cfg.body)}</p><p><a class="button secondary" href="https://t.me/SparkyWorldzBot?start=${encodeURIComponent(cfg.dip)}" target="_blank" rel="noopener">💙 ASK SPARKY</a></p>`;
   screen.prepend(panel);
 }
 
