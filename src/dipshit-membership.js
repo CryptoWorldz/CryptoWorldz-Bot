@@ -190,7 +190,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
       "Open /profile and tap ADD WALLET, or use /wallet."
     ],
     raid: [
-      "🤠 RONALD RAIDER",
+      "⚡ WORLDZ RAIDZ",
       "1️⃣ OPEN POST",
       "2️⃣ Like + Repost + Reply genuinely",
       "3️⃣ Come back and tap I RAIDED ✅",
@@ -421,7 +421,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
       }, fetchImpl);
     } catch {
       // Telegram requires a fast answer; failures are logged without leaking token details.
-      console.error("DIPSHIT pre-checkout response failed");
+      console.error("SPARKY pre-checkout response failed");
     }
   });
 
@@ -429,7 +429,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     const payment = msg && msg.successful_payment;
     if (!payment || payment.invoice_payload !== DIPSHIT_INVOICE_PAYLOAD) return;
     if (payment.currency !== "XTR" || Number(payment.total_amount) !== starsPrice) {
-      console.error("DIPSHIT successful payment rejected: invoice mismatch");
+      console.error("SPARKY successful payment rejected: invoice mismatch");
       return;
     }
     try {
@@ -448,7 +448,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
       });
       await send(msg.chat.id, "✅ SPARKY™ Pro activated. Use /membership to view your current period.");
     } catch {
-      console.error("DIPSHIT successful payment persistence failed");
+      console.error("SPARKY successful payment persistence failed");
       await send(msg.chat.id, "⚠️ Payment was received but membership activation needs support. Use /paysupport <message>.");
     }
   });
@@ -460,7 +460,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
     }
     res.sendStatus(200);
     Promise.resolve(bot.processUpdate(req.body)).catch((error) => {
-      console.error("DIPSHIT Telegram update processing failed", {
+      console.error("SPARKY Telegram update processing failed", {
         name: error && error.name ? error.name : "Error"
       });
     });
