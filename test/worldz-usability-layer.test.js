@@ -18,14 +18,14 @@ test("Command Centre exposes simple onboarding and DIPSHIT guidance", () => {
   assert.match(profile, /RAID NOW/);
   assert.match(profile, /responsibilityLines/);
   assert.match(dip, /LOST\? START HERE/);
-  assert.match(dip, /ASK DIPSHIT/);
+  assert.match(dip, /ASK SPARKY/);
   assert.match(mini, /SCREEN_INSTRUCTIONS/);
   assert.match(mini, /RAIDS — 3 STEPS/);
   assert.match(mini, /PROFILE — WHAT NEXT/);
-  assert.match(mini, /ASK DIPSHIT/);
+  assert.match(mini, /ASK SPARKY/);
 });
 
-test("Ronald Raider member UX is one obvious action loop", () => {
+test("Worldz Raidz member UX is one obvious action loop", () => {
   const ronald = fs.readFileSync(path.join(ROOT, "src/ronald-raider.js"), "utf8");
   assert.match(ronald, /RAID IN 3 EASY STEPS/);
   assert.match(ronald, /I RAIDED/);
