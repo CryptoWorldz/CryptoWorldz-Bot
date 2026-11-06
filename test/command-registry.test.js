@@ -44,7 +44,7 @@ test("owner command tree includes every role layer", () => {
   }
 });
 
-test("Ronald Raider is exposed as RAIDS, not Missions", () => {
+test("Worldz Raidz is exposed as RAIDS, not Missions", () => {
   const raids = groupsForRole("member").find((group) => group.key === "raids");
   assert.ok(raids);
   const names = new Set(raids.commands.map((item) => item.command));
