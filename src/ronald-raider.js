@@ -445,7 +445,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     if (!queued) await resetPulseClock(campaign.id);
     return send(
       msg.chat.id,
-      queued ? `⏭ Added to Ronald's Raid line-up.\n\n${campaignText(campaign)}` : campaignText(campaign),
+      queued ? `⏭ Added to the Worldz Raidz queue.\n\n${campaignText(campaign)}` : campaignText(campaign),
       keyboard(campaign)
     );
   }
@@ -468,10 +468,10 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
   const pulseBootstrapTimer = setTimeout(() => { void pulseActiveRaids(); }, 5_000);
   const pulseTimer = setInterval(() => { void pulseActiveRaids(); }, RAID_PULSE_SCAN_INTERVAL_MS);
   const rewardReconcileBootstrapTimer = setTimeout(() => {
-    void reconcilePendingRaidRewards().catch((error) => console.error("Ronald reward reconciliation failed", { code: error?.code || error?.message || "unknown" }));
+    void reconcilePendingRaidRewards().catch((error) => console.error("Worldz Raidz reward reconciliation failed", { code: error?.code || error?.message || "unknown" }));
   }, 12_000);
   const rewardReconcileTimer = setInterval(() => {
-    void reconcilePendingRaidRewards().catch((error) => console.error("Ronald reward reconciliation failed", { code: error?.code || error?.message || "unknown" }));
+    void reconcilePendingRaidRewards().catch((error) => console.error("Worldz Raidz reward reconciliation failed", { code: error?.code || error?.message || "unknown" }));
   }, 5 * 60 * 1000);
   if (typeof pulseBootstrapTimer.unref === "function") pulseBootstrapTimer.unref();
   if (typeof pulseTimer.unref === "function") pulseTimer.unref();
@@ -523,7 +523,7 @@ function registerRonaldRaider({ bot, repository, supabase, config }) {
     }
     try {
       const next = await queuedCampaign(msg.chat.id);
-      return send(msg.chat.id, next ? `⏭ NEXT RAID IN LINE\n\n${campaignText(next)}` : "⏭ Ronald's line-up is empty.");
+      return send(msg.chat.id, next ? `⏭ NEXT RAID IN LINE\n\n${campaignText(next)}` : "⏭ The Worldz Raidz queue is empty.");
     } catch {
       return send(msg.chat.id, "❌ Worldz Raidz couldn't load the next Raid.");
     }
