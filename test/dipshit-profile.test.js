@@ -28,7 +28,7 @@ test("SPARKY Worldz Dude profile is wired into the Mini App with no financial au
 const { registerTelegramHandlers, PUBLIC_COMMANDS } = require("../src/telegram");
 const { allRegisteredCommandNames } = require("../src/command-registry");
 
-test("DIPSHIT public profile and Telegram command use the blue Worldz Dude with no financial authority", async () => {
+test("SPARKY public profile and Telegram command use the blue Worldz Dude with no financial authority", async () => {
   const sourceImage = path.join(ROOT, "assets-source/dipshit/blue-worldz-dude.png");
   const image = path.join(ROOT, "public/miniapp/assets/dipshit-worldz-dude.png");
   const publicImage = path.join(ROOT, "cryptoworldz.xyz/dipshit/blue-worldz-dude.png");
@@ -42,8 +42,8 @@ test("DIPSHIT public profile and Telegram command use the blue Worldz Dude with 
   assert.match(page, /no wallet-signing authority/i);
   assert.doesNotMatch(page, /OneWorldz|oneworldz\.com/);
 
-  assert.ok(PUBLIC_COMMANDS.some((row) => row.command === "dipshit"));
-  assert.ok(allRegisteredCommandNames().includes("dipshit"));
+  assert.ok(PUBLIC_COMMANDS.some((row) => row.command === "sparky"));
+  assert.ok(allRegisteredCommandNames().includes("sparky"));
 
   const handlers = [];
   const photos = [];
@@ -54,7 +54,7 @@ test("DIPSHIT public profile and Telegram command use the blue Worldz Dude with 
     async sendMessage() { return { message_id: 1 }; }
   };
   registerTelegramHandlers({ bot, repository: {}, config: {} });
-  const route = handlers.find(([regex]) => regex.test("/dipshit"));
+  const route = handlers.find(([regex]) => regex.test("/sparky"));
   assert.ok(route);
   await route[1]({ chat: { id: 42 } });
   assert.equal(photos[0][0], 42);
