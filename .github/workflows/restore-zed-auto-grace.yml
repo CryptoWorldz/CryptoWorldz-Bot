@@ -44,8 +44,8 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       JUPITER_API_KEY_SECRET: ${{ secrets.JUPITER_API_KEY }}
       BOT_TOKEN_SECRET: ${{ secrets.BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN || secrets.ZED_BOT_TOKEN || secrets.CRYPTOWORLDZ_BOT_TOKEN }}
-      DIPSHIT_BOT_TOKEN_SECRET: ${{ secrets.SPARKY_BOT_TOKEN }}
-      SPARKY_BOT_TOKEN: ${{ secrets.SPARKY_BOT_TOKEN }}
+      DIPSHIT_BOT_TOKEN_SECRET: ${{ secrets.SPARKY_BOT_TOKEN || secrets.DIPSHIT_BOT_TOKEN }}
+      SPARKY_BOT_TOKEN: ${{ secrets.SPARKY_BOT_TOKEN || secrets.DIPSHIT_BOT_TOKEN }}
       DIPSHIT_WEBHOOK_URL: ${{ vars.SPARKY_WEBHOOK_URL || vars.DIPSHIT_WEBHOOK_URL }}
       DIPSHIT_STARS_MONTHLY_PRICE: ${{ vars.DIPSHIT_STARS_MONTHLY_PRICE }}
       DIPSHIT_SOL_MONTHLY_AMOUNT: ${{ vars.DIPSHIT_SOL_MONTHLY_AMOUNT }}
@@ -87,7 +87,7 @@ jobs:
           HAS_TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN != '' }}
           HAS_ZED_BOT_TOKEN: ${{ secrets.ZED_BOT_TOKEN != '' }}
           HAS_CRYPTOWORLDZ_BOT_TOKEN: ${{ secrets.CRYPTOWORLDZ_BOT_TOKEN != '' }}
-          HAS_DIPSHIT_BOT_TOKEN: ${{ secrets.SPARKY_BOT_TOKEN != '' }}
+          HAS_DIPSHIT_BOT_TOKEN: ${{ secrets.SPARKY_BOT_TOKEN != '' || secrets.DIPSHIT_BOT_TOKEN != '' }}
           HAS_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
           HAS_SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY != '' }}
           HAS_SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY != '' }}
@@ -465,7 +465,7 @@ jobs:
 
           dipshit_token=env.get("SPARKY_BOT_TOKEN","").strip()
           if not dipshit_token:
-              print("SPARKY_TELEGRAM=WAITING_FOR_BOT_TOKEN")
+              raise SystemExit("SPARKY_BOT_TOKEN or legacy DIPSHIT_BOT_TOKEN secret is required; refusing a false-green deployment.")
           else:
               print("::add-mask::"+dipshit_token)
               dapi="https://api.telegram.org/bot"+dipshit_token+"/"
@@ -481,13 +481,15 @@ jobs:
                   return out.get("result")
 
               bot_identity=dcall("getMe")
-              if str(bot_identity.get("username","")).lower() != "sparkyworldzbot":
-                  raise SystemExit("SPARKY_IDENTITY_MISMATCH: token does not belong to @SparkyWorldzBot")
+              actual_username=str(bot_identity.get("username","")).strip().lower()
+              if actual_username not in ("sparkyworldzbot","sparkybossbot"):
+                  raise SystemExit("SPARKY_IDENTITY_MISMATCH: expected @SparkyWorldzBot or the previously used @SparkyBossBot")
               dipshit_commands=[
                 {"command":"start","description":"Start Sparky Worldz navigator"},
                 {"command":"help","description":"Show the command menu"},
                 {"command":"status","description":"Check Worldz system status"},
                 {"command":"check","description":"Run Worldz QA checks"},
+                {"command":"ask","description":"Ask Sparky a Worldz question"},
                 {"command":"fix","description":"Troubleshoot a problem"},
                 {"command":"report","description":"Report a bug or broken feature"},
                 {"command":"worldz","description":"Open the WorldzEcosystem™"},
@@ -522,7 +524,7 @@ jobs:
 
               dcall("setMyCommands",{"commands":dipshit_commands})
               dcall("setMyDescription",{"description":"💜 SPARKY™ — WORLDZ NAVIGATOR\n\nYour friendly Worldz guide. Navigate WorldzHQ, ZED, AUTO, GRACE, REX Security, Worldz Raidz, wallets, launchpad and support. Ask questions or report bugs. Never share private keys."})
-              dcall("setMyShortDescription",{"short_description":"💙 DIPSHIT™ — WORLDZ DUDE | Worldz help, navigation, troubleshooting & community."})
+              dcall("setMyShortDescription",{"short_description":"💙 SPARKY™ — WORLDZ DUDE | Worldz help, navigation, troubleshooting & community."})
               dipshit_secret=hashlib.sha256(dipshit_token.encode()).hexdigest()
               dipshit_hook_url=env.get("DIPSHIT_WEBHOOK_URL","").strip() or "https://cryptobotz.cryptoworldz.xyz/dipshit-telegram-webhook"
               dcall("setWebhook",{
