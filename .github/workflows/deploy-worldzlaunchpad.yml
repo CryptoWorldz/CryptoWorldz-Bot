@@ -890,7 +890,7 @@ jobs:
                   assert 'data-worldz-ad-slot=' not in body
                   assert '<img' not in body.lower()
                   assert 'rel="stylesheet"' not in body.lower()
-                  assert 'CREATE YOUR OWN MONEY' in body
+                  assert 'Create Token' in body
                   assert 'href="/create-your-own-money/"' in body
                   assert creator_campaign_code==200
                   assert 'CREATE' in creator_campaign_body and 'YOUR OWN' in creator_campaign_body and 'MONEY' in creator_campaign_body
