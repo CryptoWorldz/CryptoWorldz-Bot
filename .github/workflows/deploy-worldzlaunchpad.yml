@@ -215,7 +215,13 @@ jobs:
           calculators_js=(root/'launch-calculators/app.js').read_text()
           chatgpt_design_html=(root/'chatgpt-token-design/index.html').read_text()
           chatgpt_design_js=(root/'chatgpt-token-design/app.js').read_text()
-          assert 'data-worldz-ad-slot="home_spotlight"' in home
+          # The 2026-10-30 homepage redesign is intentionally image-free and ad-free.
+          assert 'WORLDZLAUNCHPAD™ · SOLANA FIRST' in home
+          assert 'LAUNCH<br><span>YOUR WORLD.</span>' in home
+          assert 'href="/create-your-own-money/"' in home and 'href="/invest/"' in home
+          assert 'data-worldz-ad-slot=' not in home
+          assert '<img' not in home.lower()
+          assert 'rel="stylesheet"' not in home.lower()
           assert all(price in advertise_html for price in ('A$5','A$12','A$22','A$75'))
           assert 'RUN WORLDZ VALIDATION' in advertise_html
           assert 'PENDING HUMAN REVIEW' not in advertise_html
@@ -239,9 +245,7 @@ jobs:
           assert 'Free-to-visitor beta' in chatgpt_design_html
           assert '/api/worldz-token-designer' in chatgpt_design_js
           assert 'BUILD FREE CHATGPT PROMPT' in chatgpt_design_html
-          assert 'href="/chatgpt-token-design/"' in home
-          assert 'href="/launch-calculators/"' in home
-          print('WORLDZ_SPOTLIGHT_LOCAL=PASS pricing=5/12/22/75_AUD slots=3')
+          print('WORLDZ_SPOTLIGHT_LOCAL=PASS pricing=5/12/22/75_AUD active_slots=2')
           print('WORLDZ_CREATE_YOUR_OWN_MONEY_LOCAL=PASS')
           print('WORLDZ_LAUNCH_CALCULATORS_LOCAL=PASS tables=5 live_damm_v2=1')
           print('WORLDZ_CHATGPT_TOKEN_DESIGN_LOCAL=PASS api_server_side=1 fallback_prompt=1')
@@ -266,21 +270,7 @@ jobs:
           wldz_html=(root/'wldz'/'index.html').read_text()
           wldz_cfg=json.loads((root/'wldz'/'launch-config.json').read_text())
 
-          assert 'PUBLIC TOKEN LAUNCHPAD' in home
-          assert 'Who will be first?' in home
-          assert '3% • 5% • 8%' in home
-          assert '97% • 95% • 92%' in home
-          assert 'WORLDZ FEE FLOW V3' in home
-          assert '50% Operations / 30% Miricle Team / 20% Purple Diamond Crew' in home
-          assert 'Legacy Core' in home
-          assert 'WLDZ • RVIV • PNEX • MRCL' in home
-          assert '0.60%</b> disclosed genesis supply' in home and '<b>0%</b> initial LP taken' in home
-          assert 'WORLDZ SAFE LAUNCH STANDARD' in home
           assert 'FIRST PUBLIC LAUNCH SLOT OPEN' in app
-          assert 'WORLDZLAUNCHPAD FOUNDING 100' in home
-          assert '10,000,000 WLDZ' in home
-          assert '100,000 WLDZ per qualified position' in home
-          assert 'WORLDZLAUNCHPAD™ GLOBAL LAUNCH PACK' in home
           assert 'Founding 100 contract mismatch' in app
           assert 'WORLDZ-FEE-FLOW-V3' in app
           assert 'launchpad-contribution' in app
@@ -893,7 +883,13 @@ jobs:
                   assert identity==local_identity, 'LIVE_CANONICAL_REGISTRY_MISMATCH'
 
                   assert status==200
-                  assert 'PUBLIC TOKEN LAUNCHPAD' in body
+                  # Verify the compact homepage currently deployed from main, not the retired long-form page.
+                  assert 'WORLDZLAUNCHPAD™ · SOLANA FIRST' in body
+                  assert 'LAUNCH<br><span>YOUR WORLD.</span>' in body
+                  assert 'href="/create-your-own-money/"' in body and 'href="/invest/"' in body
+                  assert 'data-worldz-ad-slot=' not in body
+                  assert '<img' not in body.lower()
+                  assert 'rel="stylesheet"' not in body.lower()
                   assert 'CREATE YOUR OWN MONEY' in body
                   assert 'href="/create-your-own-money/"' in body
                   assert creator_campaign_code==200
@@ -902,7 +898,6 @@ jobs:
                   assert 'not automatically legal tender' in creator_campaign_body.lower()
                   assert 'BUILD MY TOKEN PLAN' in creator_campaign_body
                   assert 'href="/launch-station/"' in creator_campaign_body
-                  assert 'href="/x-save/"' in body
                   assert xsave_code==200
                   assert 'data-worldz-x-save="1"' in xsave_body
                   assert 'Worldz X-SAVE' in xsave_body
@@ -912,10 +907,6 @@ jobs:
                   assert 'Explore WorldzLaunchPad™' in xsave_body
                   assert 'Build with Worldz' in xsave_body
                   assert 'Read the GitHub Validation' in xsave_body
-                  assert 'Who will be first?' in body
-                  assert '3% • 5% • 8%' in body
-                  assert 'Legacy Core' in body
-                  assert 'WLDZ • RVIV • PNEX • MRCL' in body
                   assert all(term not in body for term in private_terms)
                   retired_public_terms=('OneWorldz','ONEWORLDZ','oneworldz.com')
                   for label,payload in {
@@ -983,10 +974,11 @@ jobs:
                   assert spotlight_feed.get('ok') is True and spotlight_feed.get('slot')=='home_spotlight'
                   assert isinstance(spotlight_feed.get('ads'),list)
                   print('WORLDZ_SPOTLIGHT_PAYMENT_FLOW_LIVE=PASS review_before_payment=1 receipt_intake=1 public_feed=1')
-                  assert 'data-worldz-ad-slot="home_spotlight"' in body
+                  assert 'data-worldz-ad-slot=' not in body
+                  assert '<img' not in body.lower()
                   assert 'data-worldz-ad-slot="community_spotlight"' in community_body
                   assert 'data-worldz-ad-slot="launch_station_spotlight"' in launch_station_body
-                  print('WORLDZ_SPOTLIGHT_LIVE=PASS pricing=AUD_5_DAY/AUD_22_WEEK slots=3')
+                  print('WORLDZ_SPOTLIGHT_LIVE=PASS pricing=AUD_5_DAY/AUD_22_WEEK active_slots=2')
 
                   assert launch_station_code==200 and 'WORLDZ LAUNCH STATION' in launch_station_body
                   assert 'Mint New' in launch_station_body and 'Import Existing Mint' in launch_station_body
