@@ -14,7 +14,7 @@ export function validateWorldzGenesisV2(m) {
     let total=0n;
     for(const x of a){
       if(!Number.isInteger(x.percent)||x.percent<0||x.percent>100)errors.push("invalid_percent_"+x.key);
-      if(!/^\\d+$/.test(String(x.tokens)))errors.push("invalid_tokens_"+x.key);
+      if(!/^\d+$/.test(String(x.tokens)))errors.push("invalid_tokens_"+x.key);
       else { const n=BigInt(x.tokens); total+=n; if(n!==BigInt(x.percent)*1000000n)errors.push("allocation_amount_mismatch_"+x.key); }
       if(x.recipient!==null&&typeof x.recipient!=="string")errors.push("invalid_recipient_"+x.key);
     }
