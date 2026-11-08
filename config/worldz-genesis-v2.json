@@ -12,7 +12,14 @@
     "mode": "developer-controlled",
     "multisigRequired": false,
     "primaryDevWallet": "8VZZ7j63E2ARRNho4SwqFthUjWnWK8S5BHPfmJCb4UHK",
-    "primaryDevWalletStatus": "USER_DESIGNATED_FULL_ADDRESS_SIGNER_CONTROL_UNVERIFIED"
+    "primaryDevWalletStatus": "USER_DESIGNATED_FULL_ADDRESS_SIGNER_CONTROL_UNVERIFIED",
+    "additionalWalletCandidates": [
+      {
+        "address": "qP2SAc8zbvokVHreSYDxtPdEALyFpwjaeNrNWTyirM1",
+        "status": "USER_REPORTED_OWNED_SIGNER_CONTROL_UNVERIFIED",
+        "allocationRole": null
+      }
+    ]
   },
   "execution": {
     "mintEnabled": false,
