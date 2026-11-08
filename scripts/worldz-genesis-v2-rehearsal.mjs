@@ -10,11 +10,12 @@ assert.equal(manifest.execution.transactionBroadcastEnabled,false);
 const conn=new Connection('https://api.devnet.solana.com','confirmed');
 const payer=Keypair.generate(),mint=Keypair.generate(),owners=manifest.allocations.map(()=>Keypair.generate());
 console.log('Devnet-only ephemeral payer:',payer.publicKey.toBase58());
-let funded=false;
-for(let attempt=0;attempt<6;attempt++){
- try{const sig=await conn.requestAirdrop(payer.publicKey,Math.floor(([1,0.5,0.25,1,0.5,0.25][attempt])*LAMPORTS_PER_SOL));await conn.confirmTransaction(sig,'confirmed');funded=true;break;}catch(e){console.log('Devnet faucet attempt',attempt+1,'failed:',String(e).slice(0,160));await new Promise(r=>setTimeout(r,5000));}
+// The public devnet RPC no longer offers requestAirdrop (HTTP 410).
+// Never ask for, log, or commit a production signer. This is a devnet-only test payer.
+const fundingBalance=await conn.getBalance(payer.publicKey,'confirmed');
+if(fundingBalance<0.15*LAMPORTS_PER_SOL){
+ throw Error('DEVNET_FUNDING_UNAVAILABLE: public RPC faucet is closed (410). No mint attempted. Configure an approved automated devnet-only funding provider before retrying.');
 }
-if(!funded)throw Error('Devnet faucet unavailable; no mint executed');
 const rent=await conn.getMinimumBalanceForRentExemption(MINT_SIZE);
 const create=new Transaction().add(
  (await import('@solana/web3.js')).SystemProgram.createAccount({fromPubkey:payer.publicKey,newAccountPubkey:mint.publicKey,space:MINT_SIZE,lamports:rent,programId:TOKEN_PROGRAM_ID}),
