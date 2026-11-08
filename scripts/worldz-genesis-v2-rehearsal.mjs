@@ -11,8 +11,8 @@ const conn=new Connection('https://api.devnet.solana.com','confirmed');
 const payer=Keypair.generate(),mint=Keypair.generate(),owners=manifest.allocations.map(()=>Keypair.generate());
 console.log('Devnet-only ephemeral payer:',payer.publicKey.toBase58());
 let funded=false;
-for(let attempt=0;attempt<4;attempt++){
- try{const sig=await conn.requestAirdrop(payer.publicKey,2*LAMPORTS_PER_SOL);await conn.confirmTransaction(sig,'confirmed');funded=true;break;}catch(e){console.log('Devnet faucet attempt',attempt+1,'failed:',String(e).slice(0,160));await new Promise(r=>setTimeout(r,2500));}
+for(let attempt=0;attempt<6;attempt++){
+ try{const sig=await conn.requestAirdrop(payer.publicKey,Math.floor(([1,0.5,0.25,1,0.5,0.25][attempt])*LAMPORTS_PER_SOL));await conn.confirmTransaction(sig,'confirmed');funded=true;break;}catch(e){console.log('Devnet faucet attempt',attempt+1,'failed:',String(e).slice(0,160));await new Promise(r=>setTimeout(r,5000));}
 }
 if(!funded)throw Error('Devnet faucet unavailable; no mint executed');
 const rent=await conn.getMinimumBalanceForRentExemption(MINT_SIZE);
