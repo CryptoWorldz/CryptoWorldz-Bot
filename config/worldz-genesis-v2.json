@@ -11,8 +11,8 @@
   "custody": {
     "mode": "developer-controlled",
     "multisigRequired": false,
-    "primaryDevWallet": "62kG6Szb2SAqJ4wT",
-    "primaryDevWalletStatus": "UNVERIFIED_PARTIAL_ADDRESS"
+    "primaryDevWallet": "8VZZ7j63E2ARRNho4SwqFthUjWnWK8S5BHPfmJCb4UHK",
+    "primaryDevWalletStatus": "USER_DESIGNATED_FULL_ADDRESS_SIGNER_CONTROL_UNVERIFIED"
   },
   "execution": {
     "mintEnabled": false,
