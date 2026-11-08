@@ -1,5 +1,10 @@
 name: Worldz Genesis V2 Devnet Mint Rehearsal
 on:
+  push:
+    branches: [worldz-genesis-v2-11-allocations]
+    paths:
+      - 'scripts/worldz-genesis-v2-rehearsal.mjs'
+      - '.github/workflows/worldz-genesis-v2-rehearsal.yml'
   pull_request:
     paths:
       - 'scripts/worldz-genesis-v2-rehearsal.mjs'
@@ -7,7 +12,7 @@ on:
   workflow_dispatch:
 jobs:
   devnet-rehearsal:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: read
