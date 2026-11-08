@@ -1,0 +1,27 @@
+name: Worldz Genesis V2 Devnet Rehearsal Launcher
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  devnet-rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout isolated V2 development branch
+        uses: actions/checkout@v4
+        with:
+          ref: worldz-genesis-v2-11-allocations
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm rehearsal remains devnet-only
+        run: |
+          grep -q "https://api.devnet.solana.com" scripts/worldz-genesis-v2-rehearsal.mjs
+          ! grep -Eq "mainnet-beta|api.mainnet-beta.solana.com" scripts/worldz-genesis-v2-rehearsal.mjs
+      - name: Install rehearsal dependencies
+        run: npm install --no-save --ignore-scripts --no-package-lock @solana/web3.js@1 @solana/spl-token@0.4
+      - name: Run devnet-only mint and distribution rehearsal
+        run: node scripts/worldz-genesis-v2-rehearsal.mjs
