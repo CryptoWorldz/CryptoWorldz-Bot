@@ -1,5 +1,9 @@
 name: Worldz Genesis V2 Devnet Rehearsal Launcher
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/worldz-genesis-v2-rehearsal-launcher.yml'
   workflow_dispatch:
 permissions:
   contents: read
