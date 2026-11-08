@@ -1,7 +1,7 @@
 // Worldz Genesis V2: preview and devnet connectivity only. NO transaction or DB writes.
 const KEYS=["founding100","devCity","legacyDevelopers","liquidityReserve","communityRewards","treasury","strategicReserve","impact","partnerships","securityContingency","legacyHolders"] as const;
 const PCTS=[10,15,5,30,8,3,5,12,5,2,5] as const;
-const cors={"access-control-allow-origin":"*","access-control-allow-methods":"GET,POST,OPTIONS","access-control-allow-headers":"content-type","cache-control":"no-store"};
+const cors={"access-control-allow-origin":"*","access-control-allow-methods":"GET,POST,OPTIONS","access-control-allow-headers":"content-type,authorization,apikey,x-client-info","cache-control":"no-store"};
 function response(value:unknown,status=200){return new Response(JSON.stringify(value),{status,headers:{...cors,"content-type":"application/json"}});}
 function validKey(s:string){try{const alphabet="123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";if(s.length<32||s.length>44)return false;let n=0n;for(const c of s){const i=alphabet.indexOf(c);if(i<0)return false;n=n*58n+BigInt(i);}let bytes=0;while(n>0n){bytes++;n>>=8n;}for(const c of s){if(c!=="1")break;bytes++;}return bytes===32;}catch{return false;}}
 export function validatePreview(body:any){
