@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {validateWorldzGenesisV2} from './worldz-genesis-v2-validator.mjs';
+const manifest=JSON.parse(readFileSync(new URL('../config/worldz-genesis-v2.json',import.meta.url),'utf8'));
+const copy=()=>structuredClone(manifest);
+test('approved 11 buckets total exactly 100 million',()=>{assert.deepEqual(validateWorldzGenesisV2(copy()),{ok:true,errors:[]});});
+test('all 11 bucket amounts match approved percentages',()=>{for(const a of manifest.allocations)assert.equal(BigInt(a.tokens),BigInt(a.percent)*1000000n);});
+test('reject overallocated supply',()=>{const m=copy();m.allocations[0].tokens='11000000';assert.equal(validateWorldzGenesisV2(m).ok,false);});
+test('reject duplicate buckets',()=>{const m=copy();m.allocations[1].key=m.allocations[0].key;assert.equal(validateWorldzGenesisV2(m).ok,false);});
+test('reject changed Founding 100 entitlement',()=>{const m=copy();m.commitments.founding100.tokensPerSlot='200000';assert.equal(validateWorldzGenesisV2(m).ok,false);});
+test('reject mainnet execution enabled',()=>{const m=copy();m.execution.transactionBroadcastEnabled=true;assert.equal(validateWorldzGenesisV2(m).ok,false);});
+test('reject multisig requirement',()=>{const m=copy();m.custody.multisigRequired=true;assert.equal(validateWorldzGenesisV2(m).ok,false);});
+test('reject nonnumeric token allocation',()=>{const m=copy();m.allocations[0].tokens='oops';assert.equal(validateWorldzGenesisV2(m).ok,false);});
