@@ -30,4 +30,11 @@ assert.match(studio,/DRAFT_ONLY_MAINNET_GATED/);
 assert.match(studio,/total!==100/);
 assert.match(studio,/navigator\.clipboard\.writeText/);
 assert.equal(fs.existsSync('worldzlaunch.com/assets/worldz-incorporated-profile.jpg'),true,'Worldz logo image must be committed');
-console.log('WorldzLaunchPad fee + treasury + navigation + asset checks passed');
+
+// New WorldzLaunch.com public experience must not publish RVIV/WLDZ
+// token documents, presentation copy or outbound navigation.
+for(const [page,html] of [['homepage',home],['fee studio',studio]]){
+  assert.doesNotMatch(html,/\b(?:RVIV|WLDZ)\b|\$RVIV|\$WLDZ|\/rviv(?:\/|["'])|\/wldz(?:\/|["'])/i,page+' must not expose RVIV/WLDZ');
+}
+
+console.log('WorldzLaunchPad fee + treasury + navigation + asset + RVIV/WLDZ exclusion checks passed');
