@@ -1,0 +1,77 @@
+{
+  "schema": "WORLDZ-LEGACY-BUY-AND-LEGEND-REWARDS-V1",
+  "status": "DESIGN_ONLY_EXECUTION_DISABLED",
+  "sourceOfTruth": "worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json",
+  "historicalAllocationRequiresReapproval": true,
+  "markets": {
+    "preferredChart": "DEX_SCREENER",
+    "chain": "solana",
+    "dexScreenerPairDiscovery": "verify token mint and live indexed pair before linking chart",
+    "fallback": "Solscan mint page until market verified",
+    "noUnverifiedBuyLinks": true
+  },
+  "execution": {
+    "quoteProvider": "JUPITER_SOLANA",
+    "mode": "USER_SIGNED_ONLY",
+    "automatedPurchasesEnabled": false,
+    "developerWallet": {
+      "separateFromLegendWallets": true,
+      "buyOnlyPolicy": true,
+      "requireExplicitHumanAuthorization": true,
+      "neverExportPrivateKeys": true
+    },
+    "legendWallet": {
+      "telegramIdentityBinding": "signed wallet ownership proof",
+      "custody": "NON_CUSTODIAL",
+      "requirePerTradeWalletSignature": true,
+      "allowUnattendedSigning": false
+    },
+    "riskControls": {
+      "mintAndTokenProgramVerification": true,
+      "liquidityAndSlippageLimits": true,
+      "quoteExpiryAndSimulation": true,
+      "allowlistApprovedMints": true,
+      "duplicateSignatureProtection": true,
+      "feeAccountingReconciliation": true
+    }
+  },
+  "ledger": {
+    "storage": "Supabase (proposed)",
+    "records": [
+      "legend_id",
+      "verified_wallet",
+      "chain",
+      "mint",
+      "transaction_signature",
+      "block_time",
+      "token_amount_raw",
+      "quote_amount_raw",
+      "source",
+      "verification_status",
+      "points_rule_version",
+      "points_awarded"
+    ],
+    "onChainVerificationRequired": true,
+    "uniqueKey": "chain+transaction_signature+legend_id",
+    "privacy": "public profiles must not expose wallet links without consent"
+  },
+  "points": {
+    "enabled": false,
+    "policy": "pending approval",
+    "awardOnlyAfterConfirmedOnChainBuy": true,
+    "noPointsForFailedOrReversedTransactions": true,
+    "excludeDevAndProjectWalletsFromPublicRewards": true,
+    "preventSelfReferralAndWashTradeGaming": true,
+    "notInvestmentReturns": true
+  },
+  "releaseGates": [
+    "Confirm current legacy token membership and allocations",
+    "Verify liquidity and DEX Screener pairs",
+    "Approve buy-only policy and authorized dev wallet",
+    "Build Jupiter quote/swap builder and wallet signing",
+    "Verify Solana signatures and ledger reconciliation",
+    "Test Telegram ownership proof and opt-in",
+    "Run testnet/local simulations and independent safety review",
+    "Enable public functionality only after production proof"
+  ]
+}
