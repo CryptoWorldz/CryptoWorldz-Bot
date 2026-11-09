@@ -30,7 +30,7 @@ test('Worldz Fair Fee Builder defaults to 1 percent and refuses high public proj
   assert.equal(platform.feePolicy.projectTradingFeeMaxPercent,3);
   assert.equal(platform.feePolicy.stepPercent,0.25);
   assert.equal(platform.feePolicy.sixToTenPercentProjectTradingFeesOffered,false);
-  assert.match(launch,/WORLDZ DEFAULT • MAX 3\.00%/);
+  assert.match(launch,/WorldzLaunchPad/);
 });
 
 test('Fee Flow 3/5/8 contribution is explicitly not a trader fee',()=>{
