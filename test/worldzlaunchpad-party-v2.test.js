@@ -35,7 +35,7 @@ test("public LaunchPad builder uses locked V3 choice and no stale 90/10 public c
   const app=read("launchpad.cryptoworldz.xyz/app.js");
   assert.match(home,/WorldzLaunchPad/);
   assert.match(home,/\/revenue\//);
-  assert.doesNotMatch(home,/\\b(?:WLDZ|RVIV)\\b/);
+  assert.doesNotMatch(home,/\b(?:WLDZ|RVIV)\b/);
   assert.match(app,/WORLDZ-FEE-FLOW-V3/);
   assert.match(app,/selectedLaunchPadContribution/);
   assert.doesNotMatch(home,/10% Worldz • 90% project/);
