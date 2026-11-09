@@ -42,7 +42,7 @@ test("Sparky public profile and Telegram command use the blue Worldz Dude with n
   assert.match(page, /no wallet-signing authority/i);
   assert.doesNotMatch(page, /OneWorldz|oneworldz\.com/);
 
-  assert.ok(PUBLIC_COMMANDS.some((row) => row.command === "dipshit"));
+  assert.ok(PUBLIC_COMMANDS.some((row) => row.command === "sparky"));
   assert.ok(allRegisteredCommandNames().includes("dipshit"));
 
   const handlers = [];
