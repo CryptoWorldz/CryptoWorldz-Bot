@@ -20,7 +20,7 @@ assert.equal(flow.treasuryLane.split.devWalletTreasuryPercent,100);
 assert.equal(flow.treasuryLane.percentOfWorldzContribution,20);
 assert.equal(flow.treasuryLane.effectivePercentOfWorldzContribution.devWalletTreasury,20);
 assert.match(home,/id="menu"/);assert.match(home,/id="drawer"/);
-assert.match(home,/\/assets\/worldz-incorporated-profile\.png/);
+assert.ok(home.includes("/assets/worldz-incorporated-profile.jpg"));
 assert.match(home,/\/fee-distribution-studio\//);
 assert.match(home,/SparkyWorldzBot/);
 assert.doesNotMatch(home,/DipShitBossBot|ASK DIPSHIT/i);
