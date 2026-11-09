@@ -37,4 +37,11 @@ for(const [page,html] of [['homepage',home],['fee studio',studio]]){
   assert.doesNotMatch(html,/\b(?:RVIV|WLDZ)\b|\$RVIV|\$WLDZ|\/rviv(?:\/|["'])|\/wldz(?:\/|["'])/i,page+' must not expose RVIV/WLDZ');
 }
 
-console.log('WorldzLaunchPad fee + treasury + navigation + asset + RVIV/WLDZ exclusion checks passed');
+
+// Verify public-facing Sparky branding without changing legacy internal identifiers.
+for(const path of ['public/miniapp/index.html','launchpad.cryptoworldz.xyz/ready/index.html','cryptoworldz.xyz/command-centre-max/index.html']){
+ const html=read(path);
+ assert.doesNotMatch(html,/>[^<]*dipshit[^<]*</i,path+' has visible legacy bot branding');
+}
+assert.match(home,/SparkyWorldzBot/);
+console.log('WorldzLaunchPad Studio, exclusions and public Sparky branding checks passed');
