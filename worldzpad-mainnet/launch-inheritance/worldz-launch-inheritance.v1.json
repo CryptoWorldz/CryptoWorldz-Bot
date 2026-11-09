@@ -128,7 +128,7 @@
     "publicCreatorConfigurable": {
       "source": "launchpad.cryptoworldz.xyz/platform-config.json",
       "selection": "WORLDZ_FEE_FLOW_V3",
-      "projectTradingFeeMinPercent": 0.5,
+      "projectTradingFeeMinPercent": 0.25,
       "projectTradingFeeMaxPercent": 3,
       "worldzLaunchPadContributionChoicesPercent": [
         3,

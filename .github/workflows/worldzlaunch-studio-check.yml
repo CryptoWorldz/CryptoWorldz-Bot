@@ -1,0 +1,21 @@
+name: WorldzLaunchPad Studio Checks
+on:
+  pull_request:
+    paths:
+      - 'worldzlaunch.com/**'
+      - 'worldzpad-omnichain/chain-native-fee-builder.v1.json'
+      - 'worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json'
+      - 'scripts/check-worldzlaunch-studio.cjs'
+      - '.github/workflows/worldzlaunch-studio-check.yml'
+  workflow_dispatch:
+jobs:
+  studio:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/check-worldzlaunch-studio.cjs

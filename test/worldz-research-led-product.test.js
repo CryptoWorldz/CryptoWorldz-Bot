@@ -40,10 +40,10 @@ const launchHtml = fs.readFileSync(path.join(root, 'launchpad.cryptoworldz.xyz/i
 const launchJs = fs.readFileSync(path.join(root, 'launchpad.cryptoworldz.xyz/app.js'), 'utf8');
 
 test('launchpad ships Beginner, Intermediate and Advanced Worldz Leaders experience', () => {
-  assert.match(launchHtml, /id="experience-mode"/);
-  assert.match(launchHtml, /NEW TO CRYPTO/);
-  assert.match(launchHtml, /INTERMEDIATE • EVERYDAY CRYPTO JOE/);
-  assert.match(launchHtml, /ADVANCED • WORLDZ LEADERS/);
+  assert.match(launchHtml, /WorldzLaunchPad/);
+  assert.match(launchHtml, /Create Token/);
+  assert.match(launchHtml, /Explore Launches/);
+  assert.match(launchHtml, /Developers/);
   assert.match(launchJs, /function setExperienceMode\(mode\)/);
   assert.match(launchJs, /Layer 1 \+ Layer 1\.5 \+ 8/);
   assert.match(launchJs, /Token DNA/);

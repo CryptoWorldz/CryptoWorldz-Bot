@@ -60,7 +60,7 @@ test("Create Your Own Money campaign is accurate, connected and non-misleading",
   assert.doesNotMatch(html,/guaranteed profit|guaranteed 1000×/i);
   assert.match(launch,/\/create-your-own-money\//);
   const home=read("launchpad.cryptoworldz.xyz/index.html");
-  assert.match(home,/CREATE YOUR OWN MONEY/);
+  assert.match(home,/Create Token/);
   assert.match(home,/\/create-your-own-money\//);
   assert.match(home,/not automatically legal tender/);
   assert.equal(campaign.creatorCampaign.id,"CREATE_YOUR_OWN_MONEY_2026_10_02");

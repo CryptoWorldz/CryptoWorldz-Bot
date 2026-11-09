@@ -48,21 +48,19 @@
   "treasuryLane": {
     "percentOfWorldzContribution": 20,
     "split": {
-      "worldzOperationsTreasuryPercent": 50,
-      "worldzMiracleTeamTreasuryPercent": 30,
-      "purpleDiamondCrewTreasuryPercent": 20
+      "devWalletTreasuryPercent": 100
     },
     "effectivePercentOfWorldzContribution": {
-      "worldzOperationsTreasury": 10,
-      "worldzMiracleTeamTreasury": 6,
-      "purpleDiamondCrewTreasury": 4
+      "devWalletTreasury": 20
     },
     "governance": {
-      "worldzOperationsTreasury": "3-of-5",
-      "worldzMiracleTeamTreasury": "4-of-7",
-      "purpleDiamondCrewTreasury": "MULTISIG_REQUIRED"
+      "mode": "DEV_WALLET_ONLY",
+      "operator": "JayJayTeamDev",
+      "multisigRequired": false,
+      "requiresWalletSignature": true,
+      "requiresVerifiedDestination": true
     },
-    "rule": "The Treasury lane is split 50% Worldz Operations / 30% Miricle Team / 20% Purple Diamond Crew. The split applies inside the Treasury lane only, not to trader volume or the creator-retained portion."
+    "rule": "Treasury allocation remains 20% of Worldz contribution. Treasury recipients are operator-controlled developer wallets only until an explicitly approved future policy change; legacy multisig splits are not executable."
   },
   "miracleSeparation": {
     "mrclMiracleTeamTokenVaultPercent": 20,
@@ -95,10 +93,11 @@
     "automaticMainnetRoutingEnabled": false,
     "automaticMarketBuysEnabled": false,
     "automaticBurnEnabled": false,
-    "treasuryMultisigRequired": true,
+    "treasuryMultisigRequired": false,
     "simulateBeforeSign": true,
     "worldzProofRequired": true,
-    "failClosed": true
+    "failClosed": true,
+    "treasuryAuthorityMode": "DEV_WALLET_ONLY"
   },
   "legacyPolicy": {
     "worldzFeeFlowV2": "SUPERSEDED_FOR_NEW_INTAKES__HISTORICAL_AUDIT_ONLY",

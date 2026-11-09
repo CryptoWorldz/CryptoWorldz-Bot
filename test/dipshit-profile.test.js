@@ -5,19 +5,19 @@ const path = require("node:path");
 
 const ROOT = path.join(__dirname, "..");
 
-test("DIPSHIT Worldz Dude profile is wired into the Mini App with no financial authority", () => {
+test("Sparky Worldz Dude profile is wired into the Mini App with no financial authority", () => {
   const html = fs.readFileSync(path.join(ROOT, "public/miniapp/index.html"), "utf8");
   const js = fs.readFileSync(path.join(ROOT, "public/miniapp/dipshit.js"), "utf8");
   const avatar = fs.readFileSync(path.join(ROOT, "public/miniapp/assets/dipshit-worldz-dude.svg"), "utf8");
   assert.match(html, /id="dipshit-worldz-dude"/);
   assert.match(html, /\/miniapp\/dipshit\.js/);
-  assert.match(js, /DIPSHIT™/);
+  assert.match(js, /SPARKY™/);
   assert.match(js, /WORLDZ DUDE/);
   assert.match(js, /walletSigning:\s*false/);
   assert.match(js, /treasury:\s*false/);
   assert.match(js, /mainnetBroadcast:\s*false/);
   assert.match(js, /LOST\? START HERE/);
-  assert.match(js, /ASK DIPSHIT/);
+  assert.match(js, /ASK SPARKY/);
   assert.match(js, /guide_command/);
   assert.match(js, /Run System Check/);
   assert.match(avatar, /WORLDZ DUDE/);
@@ -28,7 +28,7 @@ test("DIPSHIT Worldz Dude profile is wired into the Mini App with no financial a
 const { registerTelegramHandlers, PUBLIC_COMMANDS } = require("../src/telegram");
 const { allRegisteredCommandNames } = require("../src/command-registry");
 
-test("DIPSHIT public profile and Telegram command use the blue Worldz Dude with no financial authority", async () => {
+test("Sparky public profile and Telegram command use the blue Worldz Dude with no financial authority", async () => {
   const sourceImage = path.join(ROOT, "assets-source/dipshit/blue-worldz-dude.png");
   const image = path.join(ROOT, "public/miniapp/assets/dipshit-worldz-dude.png");
   const publicImage = path.join(ROOT, "cryptoworldz.xyz/dipshit/blue-worldz-dude.png");
@@ -37,12 +37,12 @@ test("DIPSHIT public profile and Telegram command use the blue Worldz Dude with 
   assert.ok(fs.statSync(sourceImage).size > 1000);
   assert.ok(fs.statSync(image).size > 1000);
   assert.ok(fs.statSync(publicImage).size > 1000);
-  assert.match(page, /DIPSHIT™/);
+  assert.match(page, /SPARKY™/);
   assert.match(page, /WORLDZ DUDE/);
   assert.match(page, /no wallet-signing authority/i);
   assert.doesNotMatch(page, /OneWorldz|oneworldz\.com/);
 
-  assert.ok(PUBLIC_COMMANDS.some((row) => row.command === "dipshit"));
+  assert.ok(PUBLIC_COMMANDS.some((row) => row.command === "sparky"));
   assert.ok(allRegisteredCommandNames().includes("dipshit"));
 
   const handlers = [];

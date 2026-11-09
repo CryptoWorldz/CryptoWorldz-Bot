@@ -1,0 +1,152 @@
+{
+  "version": "WORLDZ-RECOVERED-LEGACY-DEV-CANDIDATES-2026-11-09",
+  "purpose": "Non-executing record of user-reported recovered old developer wallet addresses; investigate token creation independently before attribution",
+  "status": "CANDIDATES_UNVERIFIED",
+  "network": "solana",
+  "automaticAllocationEnabled": false,
+  "automaticTransfersEnabled": false,
+  "tokenCreationAttributionVerified": false,
+  "notes": [
+    "This is not the retired WLDZ distribution and does not authorize payments, token minting, or any new allocation.",
+    "User explicitly marked first wallet as 'no token'; no on-chain creation history was independently verified for other addresses.",
+    "G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3 already appears as Purple PDC in historical wldz-distribution.wallets.json; historical labels do not prove current ownership.",
+    "All nine supplied recovered wallet addresses are now recorded; token-creation and ownership evidence remain unverified."
+  ],
+  "wallets": [
+    {
+      "address": "54JdNPppXNrq64Gb9J3yVL6o868aKHrTXm8MzXbNoML9",
+      "source": "user-reported recovered old developer wallets",
+      "role": "legacy_dev_candidate",
+      "tokenCreationStatus": "USER_REPORTED_NO_TOKEN",
+      "ownershipStatus": "USER_REPORTED_NOT_CRYPTOGRAPHICALLY_VERIFIED",
+      "existingHistoricalRecord": null,
+      "allocationPercent": null,
+      "executionEnabled": false,
+      "creatorAttribution": "UNVERIFIED",
+      "matchedLegacyMints": [],
+      "historicalRoleEvidence": null
+    },
+    {
+      "address": "AWbLmioqkAoa6ktfUZuY4FGJcLwueZqXZoTznavc3FVD",
+      "source": "user-reported recovered old developer wallets",
+      "role": "legacy_dev_candidate",
+      "tokenCreationStatus": "NOT_YET_VERIFIED",
+      "ownershipStatus": "USER_REPORTED_NOT_CRYPTOGRAPHICALLY_VERIFIED",
+      "existingHistoricalRecord": null,
+      "allocationPercent": null,
+      "executionEnabled": false,
+      "creatorAttribution": "UNVERIFIED",
+      "matchedLegacyMints": [],
+      "historicalRoleEvidence": null
+    },
+    {
+      "address": "uZBjpZNM5Gh1AHx9tme5EnCja7b3TDd4cABtNPXbDhh",
+      "source": "user-reported recovered old developer wallets",
+      "role": "legacy_dev_candidate",
+      "tokenCreationStatus": "NOT_YET_VERIFIED",
+      "ownershipStatus": "USER_REPORTED_NOT_CRYPTOGRAPHICALLY_VERIFIED",
+      "existingHistoricalRecord": null,
+      "allocationPercent": null,
+      "executionEnabled": false,
+      "creatorAttribution": "UNVERIFIED",
+      "matchedLegacyMints": [],
+      "historicalRoleEvidence": null
+    },
+    {
+      "address": "G35RixuDLj8NQJ7c8wnKF4Hc518nbYxp1cZwGL5wJTG3",
+      "source": "user-reported recovered old developer wallets",
+      "role": "legacy_dev_candidate",
+      "tokenCreationStatus": "NOT_YET_VERIFIED",
+      "ownershipStatus": "USER_REPORTED_NOT_CRYPTOGRAPHICALLY_VERIFIED",
+      "existingHistoricalRecord": "Purple PDC in historical WLDZ distribution file",
+      "allocationPercent": null,
+      "executionEnabled": false,
+      "creatorAttribution": "UNVERIFIED",
+      "matchedLegacyMints": [],
+      "historicalRoleEvidence": "HISTORICAL_DISTRIBUTION_WALLET_ONLY"
+    },
+    {
+      "address": "F6qhZDs4rj6EoeL9EQ9mZSLA1aNeXHdoAxAwRQz5TDoA",
+      "source": "user-reported recovered old developer wallets",
+      "role": "legacy_dev_candidate",
+      "tokenCreationStatus": "NOT_YET_VERIFIED",
+      "ownershipStatus": "USER_REPORTED_NOT_CRYPTOGRAPHICALLY_VERIFIED",
+      "existingHistoricalRecord": null,
+      "allocationPercent": null,
+      "executionEnabled": false,
+      "creatorAttribution": "UNVERIFIED",
+      "matchedLegacyMints": [],
+      "historicalRoleEvidence": null
+    },
+    {
+      "address": "HowCEzGV1pP7GBk628r2sh1geU9P1kQPr5LyxjCNjWny",
+      "source": "user-reported recovered old developer wallets",
+      "role": "legacy_dev_candidate",
+      "tokenCreationStatus": "NOT_YET_VERIFIED",
+      "ownershipStatus": "USER_REPORTED_NOT_CRYPTOGRAPHICALLY_VERIFIED",
+      "existingHistoricalRecord": null,
+      "allocationPercent": null,
+      "executionEnabled": false,
+      "creatorAttribution": "UNVERIFIED",
+      "matchedLegacyMints": [],
+      "historicalRoleEvidence": null
+    },
+    {
+      "address": "73EicnCnWbmwL8vxiigxuwcpuw187FxW68uitFkc1YXG",
+      "source": "user-reported recovered old developer wallets",
+      "role": "legacy_dev_candidate",
+      "tokenCreationStatus": "NOT_YET_VERIFIED",
+      "ownershipStatus": "USER_REPORTED_NOT_CRYPTOGRAPHICALLY_VERIFIED",
+      "existingHistoricalRecord": null,
+      "allocationPercent": null,
+      "executionEnabled": false,
+      "creatorAttribution": "UNVERIFIED",
+      "matchedLegacyMints": [],
+      "historicalRoleEvidence": null
+    },
+    {
+      "address": "B1KWC9cdjayEq3z7fEvAmzx2HHYk39njP4HLoSGRXDwr",
+      "source": "user-reported recovered old developer wallets",
+      "role": "legacy_dev_candidate",
+      "tokenCreationStatus": "NOT_YET_VERIFIED",
+      "ownershipStatus": "USER_REPORTED_NOT_CRYPTOGRAPHICALLY_VERIFIED",
+      "existingHistoricalRecord": null,
+      "allocationPercent": null,
+      "executionEnabled": false,
+      "creatorAttribution": "UNVERIFIED",
+      "matchedLegacyMints": [],
+      "historicalRoleEvidence": null
+    },
+    {
+      "address": "8MNdwhCVHtNb53FWkFyPApkgV5hr28iVcXRBvhAAJtpB",
+      "source": "user-reported recovered old developer wallets",
+      "role": "legacy_dev_candidate",
+      "tokenCreationStatus": "NOT_YET_VERIFIED",
+      "ownershipStatus": "USER_REPORTED_NOT_CRYPTOGRAPHICALLY_VERIFIED",
+      "existingHistoricalRecord": null,
+      "allocationPercent": null,
+      "executionEnabled": false,
+      "creatorAttribution": "UNVERIFIED",
+      "matchedLegacyMints": [],
+      "historicalRoleEvidence": null
+    }
+  ],
+  "audit": {
+    "status": "REPO_CROSS_REFERENCE_COMPLETE__ONCHAIN_CREATOR_VERIFICATION_PENDING",
+    "checkedAgainst": [
+      "worldzpad-mainnet/wldz-distribution.wallets.json",
+      "worldzpad-mainnet/legacy-flywheel/worldz-legacy-flywheel.v1.json"
+    ],
+    "legacyTokenCountInHistoricalFlywheel": 12,
+    "legacyTokenMintsRecorded": 11,
+    "legacyTokenMintMissing": 1,
+    "verifiedTokenCreatorMatches": 0,
+    "verificationMethodRequired": "For each known legacy mint, inspect its token creation transaction and transaction fee payer, mint authority and metadata update authority, then compare to candidate wallets; do not infer creator from token holder or distribution wallet.",
+    "notes": [
+      "Repository records identify a historical Purple PDC distribution wallet but do not prove it created a Legacy Token.",
+      "Public search produced no indexed creator attribution for sampled addresses; this is not proof of absence.",
+      "Legacy flywheel config includes retired multisig placeholders and must not be used as current treasury authorization.",
+      "No candidate receives an allocation or creator status until chain-level evidence is recorded."
+    ]
+  }
+}
