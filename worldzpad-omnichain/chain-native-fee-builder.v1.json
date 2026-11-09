@@ -2,7 +2,7 @@
   "version": "WORLDZ-CHAIN-NATIVE-FEE-BUILDER-V1",
   "date": "2026-10-02",
   "name": "Worldz Fair Fee Builder™",
-  "publicRule": "Worldz starts new creator launches at 1.00% where the selected venue can implement that fee accurately. Worldz public launch settings never expose a project trading fee above 3.00%. Use 0.25% increments where that maps truthfully to the chain or venue; otherwise show the venue's real discrete tiers or native market model.",
+  "publicRule": "Worldz creator-facing project trading-fee minimum is 0.25%, default 1.00%, maximum 3.00%; 0.25% steps only when the selected chain/venue adapter proves the exact setting. Unsupported selections must be disabled, never simulated as executable.",
   "defaultPercent": 1,
   "publicMaximumPercent": 3,
   "preferredIncrementPercent": 0.25,
@@ -22,7 +22,7 @@
       "world": "SolWorldz",
       "creatorExperience": {
         "defaultPercent": 1,
-        "minPercent": 0.5,
+        "minPercent": 0.25,
         "maxPercent": 3,
         "stepPercent": 0.25
       },
@@ -42,11 +42,11 @@
         "worldzCurve": {
           "currentReviewedDevnetFeePercent": 2,
           "creatorChoiceTemporarilyLocked": true,
-          "reason": "Current reviewed Raydium LaunchLab Devnet config requires its proven 2.00% profile; do not pretend the generic 1% choice is executable on this route yet."
+          "reason": "Current reviewed Raydium LaunchLab Devnet config requires its proven 2.00% profile; do not pretend the generic 1% choice is executable on this route yet. The 0.25% UI minimum does not override the locked reviewed devnet 2% route."
         },
         "worldzCurvePro": {
           "worldzProjectFeeDefaultPercent": 1,
-          "minPercent": 0.5,
+          "minPercent": 0.25,
           "maxPercent": 3,
           "stepPercent": 0.25
         }
@@ -81,7 +81,7 @@
       "world": "EthWorldz",
       "creatorExperience": {
         "defaultPercent": 1,
-        "minPercent": 0.5,
+        "minPercent": 0.25,
         "maxPercent": 3,
         "stepPercent": 0.25
       },
@@ -94,7 +94,7 @@
       "world": "BaseWorldz",
       "creatorExperience": {
         "defaultPercent": 1,
-        "minPercent": 0.5,
+        "minPercent": 0.25,
         "maxPercent": 3,
         "stepPercent": 0.25
       },
@@ -107,7 +107,7 @@
       "world": "BNBWorldz",
       "creatorExperience": {
         "defaultPercent": 1,
-        "minPercent": 0.5,
+        "minPercent": 0.25,
         "maxPercent": 3,
         "stepPercent": 0.25
       },
@@ -120,7 +120,7 @@
       "world": "HyperWorldz",
       "creatorExperience": {
         "defaultPercent": 1,
-        "minPercent": 0.5,
+        "minPercent": 0.25,
         "maxPercent": 3,
         "stepPercent": 0.25
       },
@@ -133,7 +133,7 @@
       "world": "RobinWorldz",
       "creatorExperience": {
         "defaultPercent": 1,
-        "minPercent": 0.5,
+        "minPercent": 0.25,
         "maxPercent": 3,
         "stepPercent": 0.25
       },
@@ -200,5 +200,14 @@
     "external protocol deduction",
     "Worldz-controlled amount",
     "creator/referrer/flywheel routes where applicable"
-  ]
+  ],
+  "publicMinimumPercent": 0.25,
+  "devWalletOnlyTreasury": {
+    "enabled": true,
+    "mode": "SINGLE_OPERATOR_DEV_WALLET",
+    "operator": "JayJayTeamDev",
+    "walletAddressRequiredBeforeExecution": true,
+    "doNotEmbedPrivateKeys": true,
+    "executionState": "CONFIG_ONLY_MAINNET_GATED"
+  }
 }
