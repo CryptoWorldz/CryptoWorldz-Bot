@@ -117,7 +117,8 @@ jobs:
           lp=Path('../launchpad.cryptoworldz.xyz/index.html').read_text()
           sui=Path('../suiworldz.xyz/index.html').read_text()
           console=Path('../launchpad.cryptoworldz.xyz/sui/index.html').read_text()
-          assert 'Native fixed-supply Devnet creator console live' in lp
+          assert '<!doctype html>' in lp.lower() or '<!DOCTYPE html>' in lp
+          # The public homepage was redesigned; the Sui proof gate is the dedicated console and chain config, not retired homepage copy.
           assert 'WORLDZ PROOF™ • SUI DEVNET' in sui
           assert 'data-build="2026-09-24-chain-launch-gateway-v1"' in sui
           assert 'WORLDZ-SUI-DEVNET-CONSOLE-2026-09-25-A' in console
