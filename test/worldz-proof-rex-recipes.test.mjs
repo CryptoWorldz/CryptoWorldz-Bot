@@ -36,7 +36,7 @@ test('platform exposes recipes and proof intelligence without enabling mainnet',
 });
 
 test('launch builder recipes are functional and Beginner/Pro selector regression is repaired',()=>{
-  assert.match(launchHtml,/id="launch-recipes"/);
+  assert.match(launchHtml,/\/launch-station\//);
   assert.match(launchJs,/function applyLaunchRecipe\(id\)/);
   assert.match(launchJs,/launchRecipe:selectedRecipe/);
   assert.equal(/(^|[^$])\$\('\.wizard-step'\)\.forEach/m.test(launchJs),false);
