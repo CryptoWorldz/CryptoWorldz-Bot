@@ -1,0 +1,79 @@
+{
+  "schema": "WORLDZ-UNIVERSAL-BTC-PAIRING-V1",
+  "status": "CONFIGURATION_ONLY_MAINNET_DISABLED",
+  "publicMainnetEnabled": false,
+  "requiresHumanApproval": true,
+  "requiresVerifiedAssetMintOrContract": true,
+  "requiresLiveLiquidityAndDexProof": true,
+  "requiresFeeEnforcementProof": true,
+  "requiresTokenCompatibilityCheck": true,
+  "requiresQuoteAndExecutionSimulation": true,
+  "requiresProofReceipt": true,
+  "creatorFundedLiquidity": true,
+  "defaultRouteEnabled": false,
+  "chains": [
+    {
+      "chain": "solana",
+      "family": "SVM",
+      "quotes": [
+        "cbBTC"
+      ],
+      "venue": "Jupiter-routable Solana DEX",
+      "enabled": false
+    },
+    {
+      "chain": "ethereum",
+      "family": "EVM",
+      "quotes": [
+        "WBTC",
+        "cbBTC"
+      ],
+      "venue": "verified EVM DEX",
+      "enabled": false
+    },
+    {
+      "chain": "base",
+      "family": "EVM",
+      "quotes": [
+        "cbBTC"
+      ],
+      "venue": "verified Base DEX",
+      "enabled": false
+    },
+    {
+      "chain": "bnb",
+      "family": "EVM",
+      "quotes": [],
+      "venue": "verified BNB DEX",
+      "enabled": false
+    },
+    {
+      "chain": "sui",
+      "family": "MOVE",
+      "quotes": [],
+      "venue": "verified Sui DEX",
+      "enabled": false
+    },
+    {
+      "chain": "xrpl",
+      "family": "XRPL",
+      "quotes": [],
+      "venue": "verified issued BTC asset or cross-chain provider",
+      "enabled": false
+    },
+    {
+      "chain": "hyperevm",
+      "family": "EVM",
+      "quotes": [],
+      "venue": "verified HyperEVM DEX",
+      "enabled": false
+    },
+    {
+      "chain": "bitcoin",
+      "family": "BTC",
+      "quotes": [],
+      "venue": "separate protocol-specific adapter",
+      "enabled": false
+    }
+  ]
+}
