@@ -88,9 +88,9 @@ test("Public LaunchPad explains the creator-first V3 economics",()=>{
   const home=read("launchpad.cryptoworldz.xyz/index.html");
   const economics=read("launchpad.cryptoworldz.xyz/economics/index.html");
   const revenue=read("launchpad.cryptoworldz.xyz/revenue/index.html");
-  assert.match(home,/97% \/ 95% \/ 92%/);
-  assert.match(home,/WORLDZ FEE FLOW V3/);
-  assert.match(home,/50% Operations \/ 30% Miricle Team \/ 20% Purple Diamond Crew/);
+  assert.match(home,/WorldzLaunchPad/);
+  assert.match(read("worldzlaunch.com/fee-distribution-studio/index.html"),/Fee Distribution/i);
+  assert.doesNotMatch(home,/MULTISIG_REQUIRED|3-of-5|4-of-7/);
   assert.match(economics,/Creator 97% • Worldz 3%/);
   assert.match(economics,/Creator 95% • Worldz 5%/);
   assert.match(economics,/Creator 92% • Worldz 8%/);
