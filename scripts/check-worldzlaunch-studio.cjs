@@ -29,5 +29,5 @@ assert.match(studio,/DEV_WALLET_ONLY/);
 assert.match(studio,/DRAFT_ONLY_MAINNET_GATED/);
 assert.match(studio,/total!==100/);
 assert.match(studio,/navigator\.clipboard\.writeText/);
-assert.equal(fs.existsSync('worldzlaunch.com/assets/worldz-incorporated-profile.png'),true,'Worldz logo image must be committed');
+assert.equal(fs.existsSync('worldzlaunch.com/assets/worldz-incorporated-profile.jpg'),true,'Worldz logo image must be committed');
 console.log('WorldzLaunchPad fee + treasury + navigation + asset checks passed');
