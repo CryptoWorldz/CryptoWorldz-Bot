@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm ci --ignore-scripts
+      - run: npm install --ignore-scripts --no-audit --no-fund
       - name: Execute isolated devnet mint and verify supply
         run: node scripts/08_worldz_isolated_devnet_mint.mjs
       - name: Upload public proof only
