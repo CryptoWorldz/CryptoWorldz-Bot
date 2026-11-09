@@ -1,0 +1,26 @@
+name: WORLDZ AUTO FullScope read-only gate
+on:
+  push:
+    branches:
+      - feature/worldz-fee-studio-dev-wallet-025
+    paths:
+      - 'src/auto/fullscope-candidates.js'
+      - 'src/auto/dca-core.js'
+      - 'test/auto-fullscope-candidates.test.js'
+      - '.github/workflows/worldz-auto-fullscope-readonly-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fullscope-auto-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check
+        run: node --check src/auto/fullscope-candidates.js && node --check test/auto-fullscope-candidates.test.js
+      - name: Run read-only integration tests
+        run: node --test test/auto-fullscope-candidates.test.js test/auto-dca-core.test.js
