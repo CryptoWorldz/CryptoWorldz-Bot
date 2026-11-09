@@ -35,18 +35,16 @@ test("Only the Worldz contribution is internally split and the lanes total 100",
   assert.match(v3.scopeRule,/creator retains the remaining 97%, 95% or 92%/);
 });
 
-test("Treasury lane is 20 percent of Worldz share and splits 50/30/20",()=>{
+test("Treasury lane is 20 percent of Worldz contribution, dev-wallet only and execution gated",()=>{
   const v3=json("worldzpad-mainnet/fairfee/worldz-fee-flow.v3.json");
   assert.equal(v3.treasuryLane.percentOfWorldzContribution,20);
-  assert.equal(v3.treasuryLane.split.worldzOperationsTreasuryPercent,50);
-  assert.equal(v3.treasuryLane.split.worldzMiracleTeamTreasuryPercent,30);
-  assert.equal(v3.treasuryLane.split.purpleDiamondCrewTreasuryPercent,20);
-  assert.equal(v3.treasuryLane.effectivePercentOfWorldzContribution.worldzOperationsTreasury,10);
-  assert.equal(v3.treasuryLane.effectivePercentOfWorldzContribution.worldzMiracleTeamTreasury,6);
-  assert.equal(v3.treasuryLane.effectivePercentOfWorldzContribution.purpleDiamondCrewTreasury,4);
-  assert.equal(v3.treasuryLane.governance.worldzOperationsTreasury,"3-of-5");
-  assert.equal(v3.treasuryLane.governance.worldzMiracleTeamTreasury,"4-of-7");
-  assert.equal(v3.treasuryLane.governance.purpleDiamondCrewTreasury,"MULTISIG_REQUIRED");
+  assert.equal(v3.treasuryLane.split.devWalletTreasuryPercent,100);
+  assert.equal(v3.treasuryLane.effectivePercentOfWorldzContribution.devWalletTreasury,20);
+  assert.equal(v3.treasuryLane.governance.mode,"DEV_WALLET_ONLY");
+  assert.equal(v3.treasuryLane.governance.multisigRequired,false);
+  assert.equal(v3.treasuryLane.governance.requiresWalletSignature,true);
+  assert.equal(v3.treasuryLane.governance.requiresVerifiedDestination,true);
+  assert.equal(v3.safety.automaticMainnetRoutingEnabled,false);
 });
 
 test("Miracle revenue treasury and MRCL 20 percent token vault are separate accounting buckets",()=>{
