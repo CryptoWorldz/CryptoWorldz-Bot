@@ -85,11 +85,11 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
       walletCustody: false,
       privateKeysStored: false,
       modes: ["BUY_ANALYSIS", "LP_ANALYSIS", "HYBRID_ANALYSIS"],
-      buyQuoteProvider: "JUPITER_ULTRA_V3",
+      buyQuoteProvider: "JUPITER_SWAP_V2",
       lpQuoteState: "FAIL_CLOSED_UNTIL_LIVE_METEORA_ADAPTER",
       realizableValueGate: {
         enabled: true,
-        exitQuoteProvider: "JUPITER_ULTRA_V3",
+        exitQuoteProvider: "JUPITER_SWAP_V2",
         defaultExitAsset: "USDC",
         rule: "Displayed market cap and mark-to-market position value are not liquid capital. AUTO requires a live exit quote before treating a token holding as realizable value."
       },
@@ -259,15 +259,14 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
       const params = new URLSearchParams({
         inputMint,
         outputMint: tokenMint,
-        amount: String(rawAmount),
-        taker: walletAddress
+        amount: String(rawAmount)
       });
       const headers = { "accept": "application/json" };
-      const hasJupiterKey = Boolean(process.env.JUPITER_API_KEY);
-      if (hasJupiterKey) headers["x-api-key"] = process.env.JUPITER_API_KEY;
-      const jupiterBase = hasJupiterKey ? "https://api.jup.ag" : "https://lite-api.jup.ag";
+      if (!process.env.JUPITER_API_KEY) return res.status(503).json({ ok: false, error: "jupiter_api_key_unconfigured" });
+      headers["x-api-key"] = process.env.JUPITER_API_KEY;
+      const jupiterBase = "https://api.jup.ag";
       const [quoteResponse, intelligenceResponse] = await Promise.all([
-        fetch(jupiterBase + "/ultra/v1/order?" + params.toString(), { headers, signal: controller.signal }),
+        fetch(jupiterBase + "/swap/v2/order?" + params.toString(), { headers, signal: controller.signal }),
         fetch("https://launchpad.cryptoworldz.xyz/intelligence.php?mint=" + encodeURIComponent(tokenMint), {
           headers: { "accept": "application/json", "user-agent": "Worldz-AUTO-Public/1.0" },
           signal: controller.signal
@@ -281,7 +280,7 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
         return res.status(422).json({
           ok: false,
           error: quote.errorMessage || quote.error || quote.errorCode || "no_executable_quote",
-          provider: "Jupiter Ultra V3",
+          provider: "Jupiter Swap V2",
           intelligence
         });
       }
@@ -305,7 +304,7 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
         mode: "READ_ONLY_QUOTE",
         fundingSource: String(req.query.funding_source || "USER_PERSONAL_WALLET").toUpperCase(),
         treasuryRequired: false,
-        provider: "Jupiter Ultra V3",
+        provider: "Jupiter Swap V2",
         quote: sanitizedQuote,
         intelligence,
         executionEnabled: false,
@@ -381,21 +380,20 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
       const params = new URLSearchParams({
         inputMint: tokenMint,
         outputMint,
-        amount: rawAmount,
-        taker: walletAddress
+        amount: rawAmount
       });
       const headers = { "accept": "application/json" };
-      const hasJupiterKey = Boolean(process.env.JUPITER_API_KEY);
-      if (hasJupiterKey) headers["x-api-key"] = process.env.JUPITER_API_KEY;
-      const jupiterBase = hasJupiterKey ? "https://api.jup.ag" : "https://lite-api.jup.ag";
-      const quoteResponse = await fetch(jupiterBase + "/ultra/v1/order?" + params.toString(), { headers, signal: controller.signal });
+      if (!process.env.JUPITER_API_KEY) return res.status(503).json({ ok: false, error: "jupiter_api_key_unconfigured" });
+      headers["x-api-key"] = process.env.JUPITER_API_KEY;
+      const jupiterBase = "https://api.jup.ag";
+      const quoteResponse = await fetch(jupiterBase + "/swap/v2/order?" + params.toString(), { headers, signal: controller.signal });
       const quote = await quoteResponse.json().catch(() => ({}));
 
       if (!quoteResponse.ok || quote.errorCode || quote.error || !quote.outAmount) {
         return res.status(422).json({
           ok: false,
           error: quote.errorMessage || quote.error || quote.errorCode || "no_executable_exit_quote",
-          provider: "Jupiter Ultra V3",
+          provider: "Jupiter Swap V2",
           intelligence,
           capitalRule: "No executable exit quote means AUTO does not count the displayed position value as realizable capital."
         });
@@ -414,7 +412,7 @@ function registerAutoMiniRoutes({ app, config, autoClient, supabase }) {
         ok: true,
         checkedAt: new Date().toISOString(),
         mode: "READ_ONLY_EXIT_QUOTE",
-        provider: "Jupiter Ultra V3",
+        provider: "Jupiter Swap V2",
         tokenMint,
         tokenAmount,
         tokenDecimals,
