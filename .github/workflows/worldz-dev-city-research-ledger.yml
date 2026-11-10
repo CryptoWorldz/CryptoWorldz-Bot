@@ -1,0 +1,31 @@
+name: Worldz Dev City consolidated research ledger
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'tools/worldz-dev-city-research-ledger.mjs'
+      - '.github/workflows/worldz-dev-city-research-ledger.yml'
+      - 'launchpad.cryptoworldz.xyz/wallet-snapshots/dev-city-developers.latest.json'
+      - 'launchpad.cryptoworldz.xyz/wallet-snapshots/jupiter-studio-creators.latest.json'
+permissions:
+  contents: write
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assemble research ledger
+        run: node tools/worldz-dev-city-research-ledger.mjs
+      - name: Commit research snapshot
+        run: |
+          git config user.name worldz-discovery-bot
+          git config user.email worldz-discovery-bot@users.noreply.github.com
+          git add launchpad.cryptoworldz.xyz/wallet-snapshots/dev-city-research-ledger.latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh Dev City research ledger [cancel-full-deploy]"
+            git push
+          fi
