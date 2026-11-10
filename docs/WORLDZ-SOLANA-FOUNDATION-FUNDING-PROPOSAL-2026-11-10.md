@@ -1,7 +1,8 @@
 # WORLDZ / WorldzLaunchPad — Solana Foundation funding proposal
 Date: 2026-11-10
 Status: DRAFT — not submitted, no funding committed
-Applicant: Jason Allen Wright — individual founder and developer of WORLDZ / WorldzLaunchPad, Australia. WORLDZ Pty Ltd is a possible future entity, not the current applicant. No ABN or company registration is claimed.
+Applicant: Jason Allen Wright — individual founder and developer of WORLDZ / WorldzLaunchPad, Australia.
+Application contact email: JayJayTeamDev@gmail.com WORLDZ Pty Ltd is a possible future entity, not the current applicant. No ABN or company registration is claimed.
 Mission: Ending World Hunger — INVEST • BUILD • HELP
 
 ## Project overview
@@ -46,4 +47,18 @@ Solana Foundation official grants and funding: https://solana.org/grants-funding
 The Foundation considers milestone-based public-good grants and convertible grants where a commercial component exists. The application requires project overview, public-good contribution, budget and milestones. Application not yet submitted.
 
 ## Outstanding before submitting
-Confirm preferred contact email and whether the application requires a mailing address (the founder has no fixed address); current GitHub open-source license; precise public-good deliverable ownership; realistic time/cost assumptions; team capabilities; and whether the grant should be standard or convertible. Review application terms before submission.
+Confirm whether the application requires a mailing address (the founder has no fixed address); current GitHub open-source license; precise public-good deliverable ownership; realistic time/cost assumptions; team capabilities; and whether the grant should be standard or convertible. Review application terms before submission.
+
+## Application-ready short answers (draft; confirm before submitting)
+**Project:** WorldzLaunchPad — Open Solana Launch Proof Tools
+**Applicant:** Jason Allen Wright (individual founder, Australia)
+**Email:** JayJayTeamDev@gmail.com
+**Website:** https://oneworldz.com (confirm current preferred canonical WORLDZ site before submission)
+**Requested amount:** USD 25,000 (proposed, subject to review)
+**Project overview:** WorldzLaunchPad is developing reusable verification tooling for Solana token launches. We propose to release open developer-facing checks for SPL Token/Token-2022 mint supply, mint/freeze authority status, proof receipts, and safe read-only wallet identity connections. The objective is to make launch evidence independently reproducible rather than asking users to trust promotional claims.
+**Public-good contribution:** Public verification scripts, documented proof schemas, sample receipts, threat models and tests intended for any Solana developer or community to reuse, including developers who do not use WorldzLaunchPad's commercial services. License and publication scope to be confirmed before submission.
+**Why Solana:** SPL Token and Token-2022 mint authorities, token accounts, transaction signatures and RPC verification require Solana-native validation. The deliverables will use chain-native proofs rather than generic marketing badges.
+**Existing progress:** GitHub repository with Solana rehearsal code, CI-tested read-only wallet and AUTO guards, and a working authenticated Jupiter price-read smoke test. The devnet mint rehearsal is not yet proven successful. No production launch, mainnet mint or trading execution is claimed.
+**Budget and milestones:** 12 weeks; $25,000 USD total. Weeks 1–4: supply/authority checker and tests ($8,000). Weeks 5–8: receipt verification, safety checks and integration examples ($9,000). Weeks 9–12: docs, accessibility, independent review and final CI evidence ($8,000). Detailed cost categories above; allocations by phase are provisional.
+**Commercial distinction:** Commercial WorldzLaunchPad services, token issuance, trading and liquidity are excluded from this public-good grant budget. The Foundation may determine a convertible grant is more appropriate if the commercial component is material.
+**Submission state:** NOT SUBMITTED. Do not enter an invented mailing address or claim a registered company, audit, funding, official token launch, or external endorsement.
