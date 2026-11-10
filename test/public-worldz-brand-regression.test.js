@@ -37,7 +37,7 @@ test("visible Raid experience does not present Missions as the primary system",(
   assert.doesNotMatch(experience,/My Missions|MISSION EVIDENCE|Mission #/);
   assert.match(experience,/My Raids|RAID EVIDENCE|Raid #/);
   assert.match(registry,/Admin • Raids, Reviews, Members & Settings/);
-  assert.match(registry,/Ronald Raider Raid/);
+  assert.match(registry,/Worldz Raidz Raid/);
 });
 
 
