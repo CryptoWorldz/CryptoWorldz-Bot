@@ -1,0 +1,26 @@
+name: Worldz Genesis V2 Devnet Mint Rehearsal
+on:
+  push:
+    branches: [worldz-genesis-v2-11-allocations]
+    paths:
+      - 'scripts/worldz-genesis-v2-rehearsal.mjs'
+      - '.github/workflows/worldz-genesis-v2-rehearsal.yml'
+  pull_request:
+    paths:
+      - 'scripts/worldz-genesis-v2-rehearsal.mjs'
+      - '.github/workflows/worldz-genesis-v2-rehearsal.yml'
+  workflow_dispatch:
+jobs:
+  devnet-rehearsal:
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --ignore-scripts --no-package-lock @solana/web3.js@1 @solana/spl-token@0.4
+      - run: node scripts/worldz-genesis-v2-rehearsal.mjs

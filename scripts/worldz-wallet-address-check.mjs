@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {PublicKey,Connection} from '@solana/web3.js';
+const config=JSON.parse(readFileSync(new URL('../config/worldz-genesis-v2.json',import.meta.url),'utf8'));
+const expected='8VZZ7j63E2ARRNho4SwqFthUjWnWK8S5BHPfmJCb4UHK';
+assert.equal(config.custody.primaryDevWallet,expected);
+const key=new PublicKey(expected);
+assert.equal(key.toBytes().length,32);
+assert.equal(key.toBase58(),expected);
+assert.equal(config.execution.mintEnabled,false);
+assert.equal(config.execution.transactionBroadcastEnabled,false);
+console.log('PASS: configured developer address is a valid Solana 32-byte public key');
+const conn=new Connection('https://api.mainnet-beta.solana.com','confirmed');
+const info=await conn.getAccountInfo(key,'confirmed');
+const lamports=await conn.getBalance(key,'confirmed');
+console.log(JSON.stringify({address:expected,accountExists:info!==null,lamports,sol:lamports/1e9,owner:info?.owner?.toBase58()??null,signerControl:'NOT_VERIFIED',mintEnabled:false,broadcastEnabled:false}));

@@ -1,0 +1,24 @@
+name: Worldz Genesis V2 Policy Tests
+on:
+  pull_request:
+    paths:
+      - 'config/worldz-genesis-v2.json'
+      - 'scripts/worldz-genesis-v2-*'
+      - 'launchpad.cryptoworldz.xyz/worldz-genesis-v2/**'
+      - 'supabase/functions/worldz-genesis-v2-preview/**'
+      - '.github/workflows/worldz-genesis-v2-policy.yml'
+  workflow_dispatch:
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/worldz-genesis-v2.test.mjs
+      - run: |
+          ! grep -Eq 'sendRawTransaction|sendTransaction|createMintToInstruction|signTransaction' supabase/functions/worldz-genesis-v2-preview/index.ts
+          ! grep -Eq 'sendRawTransaction|sendTransaction|signTransaction' launchpad.cryptoworldz.xyz/worldz-genesis-v2/index.html

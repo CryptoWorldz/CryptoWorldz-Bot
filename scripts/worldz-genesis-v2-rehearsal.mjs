@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {Connection,Keypair,LAMPORTS_PER_SOL,PublicKey,Transaction,sendAndConfirmTransaction} from '@solana/web3.js';
+import {TOKEN_PROGRAM_ID,createInitializeMintInstruction,createMintToInstruction,createAssociatedTokenAccountInstruction,getAssociatedTokenAddressSync,getAccount,getMint,MINT_SIZE,createSetAuthorityInstruction,AuthorityType} from '@solana/spl-token';
+const manifest=JSON.parse(readFileSync(new URL('../config/worldz-genesis-v2.json',import.meta.url),'utf8'));
+assert.equal(manifest.allocations.length,11);
+assert.equal(manifest.allocations.reduce((n,a)=>n+BigInt(a.tokens),0n),100000000n);
+assert.equal(manifest.execution.mintEnabled,false);
+assert.equal(manifest.execution.transactionBroadcastEnabled,false);
+const conn=new Connection('https://api.devnet.solana.com','confirmed');
+const payer=Keypair.generate(),mint=Keypair.generate(),owners=manifest.allocations.map(()=>Keypair.generate());
+console.log('Devnet-only ephemeral payer:',payer.publicKey.toBase58());
+// The public devnet RPC no longer offers requestAirdrop (HTTP 410).
+// Never ask for, log, or commit a production signer. This is a devnet-only test payer.
+const fundingBalance=await conn.getBalance(payer.publicKey,'confirmed');
+if(fundingBalance<0.15*LAMPORTS_PER_SOL){
+ throw Error('DEVNET_FUNDING_UNAVAILABLE: public RPC faucet is closed (410). No mint attempted. Configure an approved automated devnet-only funding provider before retrying.');
+}
+const rent=await conn.getMinimumBalanceForRentExemption(MINT_SIZE);
+const create=new Transaction().add(
+ (await import('@solana/web3.js')).SystemProgram.createAccount({fromPubkey:payer.publicKey,newAccountPubkey:mint.publicKey,space:MINT_SIZE,lamports:rent,programId:TOKEN_PROGRAM_ID}),
+ createInitializeMintInstruction(mint.publicKey,6,payer.publicKey,payer.publicKey));
+await sendAndConfirmTransaction(conn,create,[payer,mint],{commitment:'confirmed'});
+const addresses=[];
+for(let i=0;i<11;i++){
+ const owner=owners[i].publicKey;
+ const ata=getAssociatedTokenAddressSync(mint.publicKey,owner);
+ const units=BigInt(manifest.allocations[i].tokens)*1000000n;
+ const tx=new Transaction().add(createAssociatedTokenAccountInstruction(payer.publicKey,ata,owner,mint.publicKey),createMintToInstruction(mint.publicKey,ata,payer.publicKey,units));
+ const signature=await sendAndConfirmTransaction(conn,tx,[payer],{commitment:'confirmed'});
+ const account=await getAccount(conn,ata,'confirmed');
+ assert.equal(account.amount,units);
+ addresses.push({key:manifest.allocations[i].key,owner:owner.toBase58(),tokenAccount:ata.toBase58(),tokens:manifest.allocations[i].tokens,signature});
+ console.log('PASS allocation',manifest.allocations[i].key,manifest.allocations[i].tokens,'signature',signature);
+}
+const revoke=new Transaction().add(createSetAuthorityInstruction(mint.publicKey,payer.publicKey,AuthorityType.MintTokens,null),createSetAuthorityInstruction(mint.publicKey,payer.publicKey,AuthorityType.FreezeAccount,null));
+const revokeSig=await sendAndConfirmTransaction(conn,revoke,[payer],{commitment:'confirmed'});
+const state=await getMint(conn,mint.publicKey,'confirmed');
+assert.equal(state.supply,100000000n*1000000n);
+assert.equal(state.decimals,6);
+assert.equal(state.mintAuthority,null);
+assert.equal(state.freezeAuthority,null);
+console.log('PASS mint:',mint.publicKey.toBase58(),'supply:',state.supply.toString(),'authority revoke:',revokeSig);
+console.log('RESULT_JSON='+JSON.stringify({network:'devnet',mint:mint.publicKey.toBase58(),supply:state.supply.toString(),decimals:state.decimals,mintAuthority:null,freezeAuthority:null,allocations:addresses,revokeSig}));

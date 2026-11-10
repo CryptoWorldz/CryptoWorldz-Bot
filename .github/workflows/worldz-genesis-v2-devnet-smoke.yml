@@ -1,0 +1,22 @@
+name: Worldz Genesis V2 Devnet Smoke
+on:
+  pull_request:
+    paths:
+      - 'config/worldz-genesis-v2.json'
+      - 'scripts/worldz-genesis-v2-smoke.mjs'
+      - 'launchpad.cryptoworldz.xyz/worldz-genesis-v2/**'
+      - 'supabase/functions/worldz-genesis-v2-preview/**'
+      - '.github/workflows/worldz-genesis-v2-devnet-smoke.yml'
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/worldz-genesis-v2-smoke.mjs

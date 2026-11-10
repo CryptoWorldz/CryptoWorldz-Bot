@@ -1,0 +1,21 @@
+name: Worldz Mainnet Wallet Read-Only Check
+on:
+  pull_request:
+    paths:
+      - 'config/worldz-genesis-v2.json'
+      - 'scripts/worldz-wallet-address-check.mjs'
+      - '.github/workflows/worldz-wallet-address-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --ignore-scripts --no-package-lock @solana/web3.js@1
+      - run: node scripts/worldz-wallet-address-check.mjs

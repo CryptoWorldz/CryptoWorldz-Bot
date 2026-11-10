@@ -1,0 +1,105 @@
+{
+  "version": "WORLDZ-GENESIS-V2-2026-11-09",
+  "status": "planning-only",
+  "network": "solana-mainnet-beta",
+  "token": {
+    "name": "Worldz",
+    "symbol": "Worldz",
+    "decimals": 6,
+    "fixedSupply": "100000000"
+  },
+  "custody": {
+    "mode": "developer-controlled",
+    "multisigRequired": false,
+    "primaryDevWallet": "8VZZ7j63E2ARRNho4SwqFthUjWnWK8S5BHPfmJCb4UHK",
+    "primaryDevWalletStatus": "USER_DESIGNATED_FULL_ADDRESS_SIGNER_CONTROL_UNVERIFIED",
+    "additionalWalletCandidates": [
+      {
+        "address": "qP2SAc8zbvokVHreSYDxtPdEALyFpwjaeNrNWTyirM1",
+        "status": "USER_REPORTED_OWNED_SIGNER_CONTROL_UNVERIFIED",
+        "allocationRole": null
+      }
+    ]
+  },
+  "execution": {
+    "mintEnabled": false,
+    "transactionBroadcastEnabled": false,
+    "requireWalletSignature": true,
+    "requireFullAddressVerification": true
+  },
+  "allocations": [
+    {
+      "key": "founding100",
+      "percent": 10,
+      "tokens": "10000000",
+      "recipient": null
+    },
+    {
+      "key": "devCity",
+      "percent": 15,
+      "tokens": "15000000",
+      "recipient": null
+    },
+    {
+      "key": "legacyDevelopers",
+      "percent": 5,
+      "tokens": "5000000",
+      "recipient": null
+    },
+    {
+      "key": "liquidityReserve",
+      "percent": 30,
+      "tokens": "30000000",
+      "recipient": null
+    },
+    {
+      "key": "communityRewards",
+      "percent": 8,
+      "tokens": "8000000",
+      "recipient": null
+    },
+    {
+      "key": "treasury",
+      "percent": 3,
+      "tokens": "3000000",
+      "recipient": null
+    },
+    {
+      "key": "strategicReserve",
+      "percent": 5,
+      "tokens": "5000000",
+      "recipient": null
+    },
+    {
+      "key": "impact",
+      "percent": 12,
+      "tokens": "12000000",
+      "recipient": null
+    },
+    {
+      "key": "partnerships",
+      "percent": 5,
+      "tokens": "5000000",
+      "recipient": null
+    },
+    {
+      "key": "securityContingency",
+      "percent": 2,
+      "tokens": "2000000",
+      "recipient": null
+    },
+    {
+      "key": "legacyHolders",
+      "percent": 5,
+      "tokens": "5000000",
+      "recipient": null
+    }
+  ],
+  "commitments": {
+    "founding100": {
+      "slots": 100,
+      "tokensPerSlot": "100000"
+    },
+    "legacyHolderSnapshot": "Requires separate entitlement reconciliation; do not imply previous WLDZ entitlements automatically transfer."
+  }
+}
