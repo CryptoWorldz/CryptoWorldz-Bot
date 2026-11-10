@@ -1,0 +1,26 @@
+name: WORLDZ Wallet AUTO read-only gate
+on:
+  push:
+    branches:
+      - feature/worldz-fee-studio-dev-wallet-025
+    paths:
+      - 'launchpad.cryptoworldz.xyz/worldz-app/wallet-auto-bridge.js'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/app.js'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/index.html'
+      - 'test/worldz-wallet-auto-readonly.test.js'
+      - '.github/workflows/worldz-wallet-auto-readonly-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  wallet-auto:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check launchpad.cryptoworldz.xyz/worldz-app/wallet-auto-bridge.js
+      - run: node --check launchpad.cryptoworldz.xyz/worldz-app/app.js
+      - run: node --test test/worldz-wallet-auto-readonly.test.js
