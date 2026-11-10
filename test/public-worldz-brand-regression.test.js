@@ -76,6 +76,7 @@ test("Command Centre presents Worldz Raidz and Sparky, not retired public labels
   const mini=read("public/miniapp/experience.js");
   const guide=read("cryptoworldz.xyz/worldz-guide.js");
   const registry=read("src/command-registry.js");
+  const raidRuntime=read("src/ronald-raider.js");
   assert.match(centre,/Worldz Raidz/);
   assert.doesNotMatch(centre,/Ronald Raider/);
   assert.match(mini,/Worldz Raidz/);
