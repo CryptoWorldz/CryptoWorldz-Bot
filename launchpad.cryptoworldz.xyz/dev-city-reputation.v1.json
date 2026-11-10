@@ -1,0 +1,36 @@
+{
+  "schema": "WORLDZ-DEV-CITY-REPUTATION-V1",
+  "status": "RESEARCH_ONLY",
+  "researchTarget": 250,
+  "distributionSeats": 100,
+  "selectionStatus": "NONE_APPROVED",
+  "sourceFiles": [
+    "dev-city-top-100.v1.json",
+    "dev-city-launchpad-20-research.v1.json",
+    "wallet-snapshots/dev-city-developers.latest.json",
+    "wallet-snapshots/onchain-launch-creators.latest.json"
+  ],
+  "candidateRequirements": [
+    "public Solana address",
+    "verifiable attribution source",
+    "on-chain launch signature or independent developer proof",
+    "deduplicate addresses",
+    "separate creator activity from identity verification",
+    "manual approval for rewards",
+    "signature proof of wallet control before claiming"
+  ],
+  "indicators": [
+    "launch count",
+    "graduation evidence",
+    "liquidity continuity",
+    "concentration",
+    "documented suspicious patterns with sources"
+  ],
+  "prohibited": [
+    "invented addresses",
+    "automated blacklisting based on unreviewed heuristics",
+    "automatic endorsements",
+    "automatic distributions"
+  ],
+  "candidates": []
+}
