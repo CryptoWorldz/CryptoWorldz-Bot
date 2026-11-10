@@ -5,15 +5,15 @@
 </style></head><body><main>
 <a href="../">← Worldz OneDrop™</a>
 <h1>REVIVE<br><span>Claim</span></h1>
-<p>Connect the Solana wallet contained in the frozen REVIVE distribution manifest. The page verifies your Merkle proof locally before asking you to sign.</p>
+<p>Connect the Solana wallet contained in the frozen REVIVE distribution manifest. The page verifies your Merkle proof locally before asking you to sign. Legacy RVIV is unlocked; Dev RVIV uses zero immediate unlock with 12-month linear vesting.</p>
 <section class="card">
 <div class="metric"><b>Token</b><strong>REVIVE • $RVIV</strong></div>
 <div class="metric"><b>Claim vault</b><strong id="vault">Waiting for live distributor…</strong></div>
 <button id="connect" class="connect">1. Connect Wallet</button>
 <button id="prepare" class="claim" disabled>2. Verify My Allocation</button>
-<button id="claim" class="claim" disabled>3. CLAIM RVIV</button>
+<button id="claim" class="claim" disabled>3. CLAIM / START VESTING</button>
 <div id="status" class="status">Nothing signed.</div>
 <pre id="review" class="status mono">Connect your wallet to check eligibility.</pre>
-<p class="mini">If your RVIV associated token account does not exist, this claim transaction creates it using your wallet as payer. The Worldz owner does not pay every recipient's token-account rent.</p>
+<p class="mini">If your RVIV associated token account does not exist, your wallet creates it and pays only the simulated rent/fee. Dev recipients can return later and claim additional RVIV as the 12-month vesting schedule unlocks.</p>
 </section>
-</main><script type="module" src="./app.js?v=20260926-vanilla-reown-c"></script></body></html>
+</main><script type="module" src="./app.js?v=20261002-vesting"></script></body></html>

@@ -99,7 +99,7 @@ const exists=(connection,key)=>connection.getAccountInfo(key,'confirmed').then(B
 async function state(connection,d){
  const member=new d.web3.PublicKey(ctx.address),ms=new d.web3.PublicKey(cfg.multisig),vault=new d.web3.PublicKey(cfg.vault),mint=new d.web3.PublicKey(cfg.mint);
  const ma=await d.sqds.accounts.Multisig.fromAccountAddress(connection,ms,'confirmed');
- if(Number(ma.threshold)!==1)fail('Squads threshold is not 1.');
+ if(Number(ma.threshold)!==3||ma.members.length!==5)fail('Squads governance is not the required permanent 3-of-5.');
  const mm=ma.members.find(x=>x.key.equals(member));if(!mm)fail('JayJayTeamDev is not a live Squad member.');
  if((Number(mm.permissions.mask)&1)!==1)fail('JayJayTeamDev cannot initiate this Squad transaction.');
  if(!d.sqds.getVaultPda({multisigPda:ms,index:Number(cfg.vaultIndex)})[0].equals(vault))fail('Squads vault mismatch.');
@@ -131,6 +131,7 @@ function transferInstructions(d,s){
 }
 
 async function preflight(){
+ if(cfg?.executionEnabled!==true)fail('This legacy 55M direct distribution is retired and cannot execute. '+(cfg?.blockReason||'Use the current 3-of-5 distribution model.'));
  await connect();
  const d=await deps(),connection=new d.web3.Connection(RPC,'confirmed'),s=await state(connection,d);
  if(s.sourceWldz<BigInt(cfg.totalWldz)*1000000n)fail('Squads vault does not contain the full 55,000,000 WLDZ.');
