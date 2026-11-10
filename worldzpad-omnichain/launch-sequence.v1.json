@@ -1,0 +1,62 @@
+{
+  "version": "WORLDZ-LAUNCH-SEQUENCE-V1",
+  "execution": "TESTNET_ONLY",
+  "mainnetExecutionEnabled": false,
+  "priority": [
+    {
+      "order": 1,
+      "chain": "solana",
+      "nextProof": "Devnet SPL mint + authority state + liquidity simulation + buy/sell receipt",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "order": 2,
+      "chain": "xrpl",
+      "nextProof": "Testnet issued token + issuer flags + trustline + CLOB/AMM receipts",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "order": 3,
+      "chain": "bitcoin",
+      "nextProof": "Select Runes vs Stacks protocol; testnet issue/transfer proof; BTC payments separate",
+      "status": "RESEARCH"
+    },
+    {
+      "order": 4,
+      "chain": "hyperevm",
+      "nextProof": "EVM testnet token factory + AMM proof",
+      "status": "PLANNED"
+    },
+    {
+      "order": 5,
+      "chain": "base",
+      "nextProof": "Base Sepolia factory + liquidity proof",
+      "status": "PLANNED"
+    },
+    {
+      "order": 6,
+      "chain": "sui",
+      "nextProof": "Move testnet token + market proof",
+      "status": "PLANNED"
+    },
+    {
+      "order": 7,
+      "chain": "robinhood",
+      "nextProof": "Chain testnet factory + market proof",
+      "status": "PLANNED"
+    },
+    {
+      "order": 8,
+      "chain": "ethereum",
+      "nextProof": "Sepolia factory + liquidity proof",
+      "status": "PLANNED"
+    }
+  ],
+  "rules": [
+    "Complete one network's testnet evidence before advancing its release gate",
+    "Parallel development allowed but no unsupported launch claims",
+    "No secret keys in GitHub",
+    "Never deploy mainnet without owner approval and audit",
+    "Preserve 0.25% minimum slider requirement while separately disclosing actual venue fees"
+  ]
+}
