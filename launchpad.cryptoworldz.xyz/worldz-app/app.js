@@ -20,6 +20,15 @@ function renderAdapters(){
   qs("#adapter-grid").innerHTML=readAdapters.adapters.map(adapter=>'<article class="card"><span>'+escapeHtml(adapter.family)+'</span><h3>'+escapeHtml(adapter.id.toUpperCase())+'</h3><p>'+escapeHtml(adapter.custody)+'</p><div class="meta"><span class="chip '+stateClass(adapter.state)+'">'+escapeHtml(adapter.state.replaceAll("_"," "))+'</span><span class="chip">'+(adapter.execution?"EXECUTION":"READ ONLY")+'</span></div><p>'+escapeHtml(adapter.plannedReads.join(" • "))+'</p></article>').join("");
 }
 function shortAddress(value){const text=String(value||"");return text.length>18?text.slice(0,8)+"…"+text.slice(-7):text}
+function renderWalletAutoReadiness(){
+  const target=qs("#wallet-auto-readiness");
+  if(!target)return;
+  const bridge=window.WorldzWalletAutoBridge;
+  if(!bridge){target.textContent="Wallet readiness bridge unavailable • AUTO not connected";return;}
+  // No privileged AUTO endpoint is queried from the public wallet page.
+  const state=bridge.status();
+  target.textContent=state.connectedSolanaWallets.length+" Solana wallet(s) connected • AUTO trading remains unlinked and locked • signing unavailable • owner approval required";
+}
 function renderConnections(){
   const api=window.WorldzWalletConnect;
   const detected=api?api.detected():{solana:false,evm:false,external:{}};
@@ -38,6 +47,7 @@ function renderConnections(){
     else if(builtin) action='<span class="btn module-action disabled">Wallet not detected</span>';
     return '<article class="card"><span>'+escapeHtml(connector.family)+'</span><h3>'+escapeHtml(connector.label)+'</h3><p>'+escapeHtml(connector.standard.replaceAll("_"," "))+'</p><div class="meta"><span class="chip '+stateClass(connector.state)+'">'+escapeHtml(connector.state.replaceAll("_"," "))+'</span><span class="chip">NO SIGNING</span></div>'+(current?'<div class="wallet-address"><b>'+escapeHtml(shortAddress(current.publicAddress))+'</b><small>'+escapeHtml(current.provider)+(current.network?" • "+escapeHtml(current.network):"")+'</small></div>':'<p>Public address appears here only after you approve the connection in your wallet.</p>')+action+'</article>'
   }).join("");
+  renderWalletAutoReadiness();
   qsa("[data-wallet-action]").forEach(button=>button.addEventListener("click",async()=>{
     const id=button.dataset.connector,action=button.dataset.walletAction;
     try{
