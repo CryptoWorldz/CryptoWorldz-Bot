@@ -99,7 +99,7 @@ function campaignText(campaign) {
     "🔥 RAID IN 3 EASY STEPS",
     "1️⃣ Tap OPEN POST.",
     "2️⃣ Like + Repost + Reply genuinely.",
-    "3️⃣ Come back here and tap I RAIDED ✅.",
+    "3️⃣ Verified participation is credited only when attributable X API evidence is available; otherwise it remains pending.",
     "",
     `👥 Legends joined: ${Number(campaign.participation_count) || 0}`,
     `⭐ Reward: ${Number(campaign.reward_points) || 0} LP when the completion passes automatic safety checks.`,
@@ -110,7 +110,7 @@ function campaignText(campaign) {
     progressLine("Replies", campaign.replies_current, campaign.replies_goal),
     progressLine("Views", campaign.views_current, campaign.views_goal),
     "",
-    "The shared counters can lag. Your participation is recorded when you tap I RAIDED ✅."
+    "Shared counters can lag. Opening a post alone does not verify individual participation or earn points."
   ];
   return lines.join("\n");
 }
@@ -122,7 +122,7 @@ function raidPulseText(campaign) {
     "",
     "1️⃣ OPEN POST",
     "2️⃣ Like + Repost + Reply",
-    "3️⃣ Come back → I RAIDED ✅",
+    "3️⃣ Verification pending until attributable evidence is available",
     "",
     `👥 Legends joined: ${Number(campaign.participation_count) || 0}`,
     `⭐ ${Number(campaign.reward_points) || 0} LP on verified completion`,
@@ -138,7 +138,6 @@ function keyboard(campaign) {
     reply_markup: {
       inline_keyboard: [
         [{ text: "𝕏 OPEN RAID POST ↗", url: raidOpenUrl(campaign) }],
-        [{ text: "✅ I RAIDED", callback_data: `ronald:done:${campaign.id}` }],
         [
           { text: "🔄 Refresh", callback_data: `ronald:refresh:${campaign.id}` },
           { text: "🏆 Leaderboard", callback_data: "ronald:lb" }

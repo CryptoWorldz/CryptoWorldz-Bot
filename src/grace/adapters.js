@@ -85,9 +85,13 @@ function createGracePublisher(options = {}) {
         || responseBody?.title
         || responseBody?.errors?.[0]?.detail
         || `X returned HTTP ${response.status}.`;
-      const permanent = [400, 401, 403, 404, 422].includes(response.status);
+      // X developer credit exhaustion cannot be resolved by retrying this target.
+      // Block it rather than repeatedly issuing paid requests until an operator reviews it.
+      const creditExhausted = /(?:credits? (?:depleted|exhausted)|insufficient credits?|out of credits?|usage cap exceeded)/i.test(detail)
+        || responseBody?.type === "https://api.x.com/2/problems/usage-capped";
+      const permanent = creditExhausted || [400, 401, 403, 404, 422].includes(response.status);
       throw new GracePublishError(detail, {
-        code: "X_API_ERROR",
+        code: creditExhausted ? "X_CREDITS_EXHAUSTED" : "X_API_ERROR",
         permanent,
         status: response.status
       });

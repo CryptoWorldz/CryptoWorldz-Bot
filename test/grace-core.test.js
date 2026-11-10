@@ -78,3 +78,18 @@ test("Grace API secret comparison is timing-safe and rejects blanks", () => {
   assert.equal(safeEqual("same", "different"), false);
   assert.equal(safeEqual("", ""), false);
 });
+
+test("Grace blocks X credit exhaustion without scheduling paid retries", async () => {
+  const publisher = createGracePublisher({
+    env: { GRACE_X_TOKEN_TEST: "token" },
+    fetchImpl: async () => ({
+      ok: false,
+      status: 429,
+      json: async () => ({ detail: "X API credits depleted" })
+    })
+  });
+  await assert.rejects(
+    publisher.publish({ platform: "x", credential_secret_ref: "GRACE_X_TOKEN_TEST", caption: "Hello" }),
+    (error) => error.code === "X_CREDITS_EXHAUSTED" && error.permanent === true && error.status === 429
+  );
+});
