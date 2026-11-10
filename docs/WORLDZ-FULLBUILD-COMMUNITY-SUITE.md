@@ -62,7 +62,7 @@ All choices share the live capability registry. The assistant should know that i
 - ZED member guide / profiles / points
 - AUTO controlled financial automation
 - G.R.A.C.E. social communications
-- Ronald Raider raids + /next queue
+- Worldz Raidz raids + /next queue
 - Shill proof + rewards
 - leaderboards / referrals
 - Worldz Inbox

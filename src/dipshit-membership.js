@@ -190,7 +190,7 @@ function registerDipshitMembershipSystem({ app, bot, config, supabase, fetchImpl
       "Open /profile and tap ADD WALLET, or use /wallet."
     ],
     raid: [
-      "🤠 RONALD RAIDER",
+      "🤠 WORLDZ RAIDZ",
       "1️⃣ OPEN POST",
       "2️⃣ Like + Repost + Reply genuinely",
       "3️⃣ Come back and tap I RAIDED ✅",

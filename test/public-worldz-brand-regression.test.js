@@ -26,7 +26,7 @@ test("WorldzLaunch Pack exposes current ZED-led modules and Spotlight",()=>{
   assert.match(html,/REXSECURE ULTIMATE™/);
   assert.match(html,/WORLDZ SPOTLIGHT™/);
   assert.equal(campaign.commandCentre.registeredCommandEntries,252);
-  for(const item of ["ZED","REXSECURE ULTIMATE™","DIPSHIT™","Ronald Raider","Worldz Spotlight™"]) {
+  for(const item of ["ZED","REXSECURE ULTIMATE™","SPARKY™","Worldz Raidz","Worldz Spotlight™"]) {
     assert.ok(campaign.commandCentre.modules.includes(item),item);
   }
 });
@@ -34,10 +34,11 @@ test("WorldzLaunch Pack exposes current ZED-led modules and Spotlight",()=>{
 test("visible Raid experience does not present Missions as the primary system",()=>{
   const experience=read("public/miniapp/experience.js");
   const registry=read("src/command-registry.js");
+  const raidRuntime=read("src/ronald-raider.js");
   assert.doesNotMatch(experience,/My Missions|MISSION EVIDENCE|Mission #/);
   assert.match(experience,/My Raids|RAID EVIDENCE|Raid #/);
   assert.match(registry,/Admin • Raids, Reviews, Members & Settings/);
-  assert.match(registry,/Ronald Raider Raid/);
+  assert.match(registry,/Worldz Raidz Raid/);
 });
 
 
@@ -68,4 +69,23 @@ test("Create Your Own Money campaign is accurate, connected and non-misleading",
   assert.ok(Array.isArray(social.creatorCampaign.x));
   assert.ok(social.creatorCampaign.x.length>=2);
   assert.match(sitemap,/https:\/\/launchpad\.cryptoworldz\.xyz\/create-your-own-money\//);
+});
+
+test("Command Centre presents Worldz Raidz and Sparky, not retired public labels",()=>{
+  const centre=read("cryptoworldz.xyz/command-centre-max/index.html");
+  const mini=read("public/miniapp/experience.js");
+  const guide=read("cryptoworldz.xyz/worldz-guide.js");
+  const registry=read("src/command-registry.js");
+  const raidRuntime=read("src/ronald-raider.js");
+  assert.match(centre,/Worldz Raidz/);
+  assert.doesNotMatch(centre,/Ronald Raider/);
+  assert.match(mini,/Worldz Raidz/);
+  assert.doesNotMatch(mini,/Ronald Raider/);
+  assert.match(guide,/Worldz Raidz/);
+  assert.match(guide,/SparkyWorldzBot/);
+  assert.match(registry,/Meet Sparky/);
+  assert.match(registry,/Worldz Raidz/);
+  assert.doesNotMatch(raidRuntime,/Ronald Raider|Ronald\x27s/);
+  assert.match(raidRuntime,/WORLDZ RAIDZ LEADERBOARD/);
+  assert.match(raidRuntime,/repository\.getLeaderboard\(\)/);
 });

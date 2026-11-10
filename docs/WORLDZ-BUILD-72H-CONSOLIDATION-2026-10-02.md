@@ -62,7 +62,7 @@ Current locked policy:
 ### Command Centre / Telegram
 - ZED remains the lead Command Centre.
 - RECAP control is retired.
-- Ronald Raider is **RAIDS**, not Missions-first.
+- Worldz Raidz is **RAIDS**, not Missions-first.
 - /next remains the Raid queue route.
 - Shill/referral links and points remain connected to the community/raid system.
 - Worldz Votes Centre current production voting is DEX-style favourite-token voting, one vote per user per rolling hour.
