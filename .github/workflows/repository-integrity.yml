@@ -25,6 +25,11 @@ jobs:
         run: npm run check:structure
       - name: Check JavaScript syntax
         run: npm run check
+      - name: Syntax-check all tracked JavaScript including launchpad frontends
+        shell: bash
+        run: |
+          set -euo pipefail
+          git ls-files -z -- '*.js' '*.mjs' '*.cjs' | xargs -0 -r -P 8 -n 1 node --check
       - name: Check Auto control service syntax
         run: npm run check:auto
       - name: Compile Python tooling
