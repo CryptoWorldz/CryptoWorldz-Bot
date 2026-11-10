@@ -1,0 +1,61 @@
+name: Validate WorldzParTy staging
+
+on:
+  push:
+    branches:
+      - worldzparty-staging-2026-09-25
+    paths:
+      - 'staging.hodlergalaxy.xyz/**'
+      - '.github/workflows/validate-worldzparty-staging.yml'
+  pull_request:
+    paths:
+      - 'staging.hodlergalaxy.xyz/**'
+      - '.github/workflows/validate-worldzparty-staging.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: node --check staging.hodlergalaxy.xyz/app.js
+      - name: Validate WorldzParTy product contract
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          root=Path('staging.hodlergalaxy.xyz')
+          html=(root/'index.html').read_text()
+          css=(root/'style.css').read_text()
+          cfg=json.loads((root/'worldzparty-config.json').read_text())
+          assert cfg['publicTarget']=='staging.hodlergalaxy.xyz'
+          assert cfg['productionDomainUntouched']=='hodlergalaxy.xyz'
+          assert cfg['deployment']['enabled'] is False
+          assert cfg['deployment']['stagingOnly'] is True
+          assert cfg['deployment']['productionOverwriteAllowed'] is False
+          assert cfg['founding100']=={
+            'positions':100,
+            'wldzPoolTokens':10000000,
+            'wldzPerQualifiedMainnetTeam':100000,
+            'testnetEligible':False,
+          }
+          for required in (
+            'WorldzParTyPlatform™','Hodlerz Paradise','DevCity™','InvestmentCity™',
+            'Worldz Launch Rooms™','WORLDZ PASSPORT','WORLDZ ACADEMY','Worldz Impact™',
+            'Hold • Learn • Build • Participate • Prove • Help.'
+          ):
+              assert required in html, required
+          for system in ('ZED','AUTO','G.R.A.C.E.','MAX','LaunchPad','Trust Orbit'):
+              assert system in html, system
+          assert 'No promise of token value or investment return.' in html
+          assert 'stock' not in html.lower()
+          assert '.paradise-art' in css and '.city' in css and '.pool' in css and '.palm' in css and '.portal' in css
+          assert 'data-build="WORLDZPARTY-STAGING-2026-09-25-A"' in html
+          print('WORLDZPARTY_STAGING=PASS districts=7 founding100=100 production_overwrite=OFF stock_hero=OFF')
