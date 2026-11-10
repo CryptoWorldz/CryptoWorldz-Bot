@@ -75,7 +75,7 @@ function registerTelegramHandlers({ bot, repository, config }) {
     if (!question) return bot.sendMessage(msg.chat.id, "💜 ZED Command Centre here. Ask me about raids, wallets, profiles or commands. To send normal questions, type your message first and add @CryptoWorldzBot at the end.");
     const q = question.toLowerCase();
     let answer;
-    if (/raid|post|comment|reply|group/.test(q)) answer = "🤠 To join a Raid: tap OPEN RAID POST, like/repost/reply on X, then return and tap I RAIDED ✅. Use /raid for the current Raid and /raids for the list.";
+    if (/raid|post|comment|reply|group/.test(q)) answer = "🤠 To join a Raid: open the post and participate genuinely on X. Individual RaidPoints require attributable verification; if X API evidence is unavailable, rewards remain pending. Use /raid or /raids.";
     else if (/wallet/.test(q)) answer = "👛 Use /wallet to link your PUBLIC Solana address. Never send a seed phrase.";
     else if (/profile|register|join/.test(q)) answer = "🏆 Use /register to join and /profile to see your Legend Profile.";
     else if (/command|help|menu/.test(q)) answer = "🤖 Use /help to see Command Centre commands, or ask @SparkyWorldzBot for a natural-language explanation.";
@@ -337,7 +337,7 @@ Use /help to open the Command Menu.
       "🤝 DonateWorldz — https://donateworldz.com",
       "💜 Purple Diamond Crew — https://purplediamondcrew.com",
       "🤖 CryptoWorldz Command Centre — https://cryptoworldz.xyz",
-      "🪙 WORLDZ WLDZ information — https://launchpad.cryptoworldz.xyz/wldz/",
+      "🪙 Historical WLDZ archive (not the new $Worldz flagship) — https://launchpad.cryptoworldz.xyz/wldz/",
       "📣 Updates — https://x.com/WorldzLaunchPad",
       "💬 Community — https://t.me/CryptoWLDZ",
       "",
