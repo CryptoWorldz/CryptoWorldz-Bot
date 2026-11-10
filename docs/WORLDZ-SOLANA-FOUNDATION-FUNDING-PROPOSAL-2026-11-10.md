@@ -1,7 +1,7 @@
 # WORLDZ / WorldzLaunchPad — Solana Foundation funding proposal
 Date: 2026-11-10
 Status: DRAFT — not submitted, no funding committed
-Applicant: Worldz Incorporated / WorldzLaunchPad (legal entity and ABN to be confirmed)
+Applicant: Jason Allen Wright — individual founder and developer of WORLDZ / WorldzLaunchPad, Australia. WORLDZ Pty Ltd is a possible future entity, not the current applicant. No ABN or company registration is claimed.
 Mission: Ending World Hunger — INVEST • BUILD • HELP
 
 ## Project overview
@@ -38,9 +38,12 @@ Total requested: $25,000 USD. This is a proposed ask, not a funding commitment o
 - Determine Australian legal entity, ABN, ownership of IP, open-source licensing and token/regulatory implications before submission.
 - No unsupported claims of existing grants, partnerships, endorsements, beneficiaries, or independently audited security.
 
+## Applicant status
+Apply as an individual founder, not as WORLDZ Pty Ltd. The Solana Foundation explicitly permits individuals to apply. Do not imply the founder has a registered company, ABN, office, or fixed mailing address. Check required contact/address fields in the actual application and seek an accepted alternative if needed; never invent an address.
+
 ## Source and submission
 Solana Foundation official grants and funding: https://solana.org/grants-funding
 The Foundation considers milestone-based public-good grants and convertible grants where a commercial component exists. The application requires project overview, public-good contribution, budget and milestones. Application not yet submitted.
 
 ## Outstanding before submitting
-Confirm applicant legal name and jurisdiction; primary contact; current GitHub open-source license; precise public-good deliverable ownership; realistic time/cost assumptions; team capabilities; and whether the grant should be standard or convertible. Review application terms before submission.
+Confirm preferred contact email and whether the application requires a mailing address (the founder has no fixed address); current GitHub open-source license; precise public-good deliverable ownership; realistic time/cost assumptions; team capabilities; and whether the grant should be standard or convertible. Review application terms before submission.
