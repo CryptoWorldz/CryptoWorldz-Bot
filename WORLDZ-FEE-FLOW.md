@@ -35,17 +35,19 @@ Only the Worldz contribution is split internally. The creator-retained 97% / 95%
 
 Internal subtotal: **100% of the Worldz contribution**.
 
-## Treasury lane — 70 / 30
+## Treasury lane — 50 / 30 / 20
 
 The 20% Treasury lane is split:
 
-- **70% of Treasury lane → Worldz Operations Treasury — 3-of-5**
+- **50% of Treasury lane → Worldz Operations Treasury — 3-of-5**
 - **30% of Treasury lane → Worldz Miracle Team Treasury — 4-of-7**
+- **20% of Treasury lane → Purple Diamond Crew Treasury — multisig required (minimum 2-of-3)**
 
 Because Treasury itself is 20% of the Worldz contribution, this equals:
 
-- **14% of the Worldz contribution → Operations Treasury**
+- **10% of the Worldz contribution → Operations Treasury**
 - **6% of the Worldz contribution → Miracle Team Treasury**
+- **4% of the Worldz contribution → Purple Diamond Crew Treasury**
 
 The Miracle Team Treasury does **not** receive 30% of creator revenue, trader volume, or the total Worldz contribution. It receives 30% of the Treasury lane only.
 

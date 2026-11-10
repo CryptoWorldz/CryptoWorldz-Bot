@@ -48,7 +48,7 @@
     "publicPromise": "Creators keep 99.40% of token supply under the public WorldzMINT route. A mandatory disclosed 0.60% WorldzLaunchPad genesis allocation is split 0.30% Worldz Operations Treasury, 0.18% Miricle Team Multisig Treasury and 0.12% Purple Diamond Crew Multisig Treasury. Worldz takes 0% of initial liquidity and 0% wallet-transfer tax. Fee Flow V3 creator-selected 3% / 5% / 8% applies separately to eligible fee revenue.",
     "projectTradingFeeDefaultPercent": 1,
     "publicFeeBuilderPolicy": "worldzpad-omnichain/chain-native-fee-builder.v1.json",
-    "publicFeeRule": "1.00% Worldz default; 3.00% hard public cap; prefer 0.25% steps only where the selected chain/venue supports that setting truthfully. Native venue fees and network costs stay separate.",
+    "publicFeeRule": "0.25% minimum only on supported native venues; 1.00% default, 3.00% public maximum. External venue/network fees separately disclosed. Legacy 2% platform routes are not permitted for new launches.",
     "absurdHighFeeProfilesHidden": true,
     "sixToTenPercentProjectTradingFeesOffered": false,
     "chainNativeOverrides": {
@@ -109,7 +109,7 @@
       "purpleDiamondCrewTreasuryPercent": 20,
       "operationsGovernance": "3-of-5",
       "miracleTeamGovernance": "4-of-7",
-      "purpleDiamondCrewGovernance": "MULTISIG_REQUIRED"
+      "purpleDiamondCrewGovernance": "2-of-3 minimum multisig; final address and signer proof pending"
     },
     "legacyCorePercentOfWorldzContribution": 10,
     "coreFamilyMarketBuyPercentOfWorldzContribution": 10,
@@ -313,7 +313,8 @@
       "incident and recovery runbook",
       "accounting and recordkeeping runbook",
       "Australian regulatory and legal position for the exact service",
-      "human launch authorization"
+      "human launch authorization",
+      "all three 50/30/20 treasury multisig destinations independently verified with ownership and signer threshold proofs"
     ]
   },
   "worldzFlash": {
@@ -378,14 +379,17 @@
     "devnetQuote": "SOL",
     "launchSupply": 1000000000,
     "decimals": 6,
-    "platformFeePercent": 2,
+    "platformFeePercent": 0,
     "protocolTradeFeePercent": 0.25,
-    "downstreamWorldzSharePercent": 10,
-    "downstreamProjectSharePercent": 90,
+    "downstreamWorldzSharePercent": 0,
+    "downstreamProjectSharePercent": 100,
     "downstreamAutoRouterExecuting": false,
     "postGraduationLp": "100% platform locked share",
     "nativeVesting": true,
-    "publicMainnetExecution": false
+    "publicMainnetExecution": false,
+    "platformFeeLegacyPercent": 2,
+    "platformFeePolicy": "LEGACY_2_PERCENT_DISABLED_FOR_NEW_LAUNCHES; external Raydium fees separate; mainnet remains gated pending verified adapter",
+    "downstreamPolicy": "No legacy 90/10 route for new launches; use independently verified Fee Flow V3 where executable"
   },
   "worldzCurvePro": {
     "status": "DEVNET_BETA",
