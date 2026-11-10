@@ -51,6 +51,25 @@
     <a href="/technology.html">Technology</a>
   </nav>
   <button class="wallet-mini" id="wallet-mini" type="button">Connect Wallet</button>
+<dialog id="worldz-wallet-dialog" class="worldz-wallet-dialog" aria-labelledby="worldz-wallet-title">
+    <form method="dialog"><button class="worldz-wallet-close" aria-label="Close wallet chooser">✕</button></form>
+    <h2 id="worldz-wallet-title">Connect your wallet</h2>
+    <p>Choose your network and wallet. Connecting never authorises a trade or transfer.</p>
+    <div class="worldz-wallet-options">
+      <h3>🟣 Solana</h3>
+      <button type="button" data-worldz-wallet="phantom">Phantom</button>
+      <button type="button" data-worldz-wallet="solflare">Solflare</button>
+      <button type="button" data-worldz-wallet="backpack">Backpack</button>
+      <button type="button" data-worldz-wallet="jupiter">Jupiter Mobile</button>
+      <h3>🔵 XRP Ledger</h3>
+      <button type="button" data-worldz-wallet="xaman" disabled>Xaman — integration coming</button>
+      <button type="button" data-worldz-wallet="crossmark">Crossmark</button>
+      <h3>🔷 EVM (Ethereum, Base and compatible)</h3>
+      <button type="button" data-worldz-wallet="evm">Browser wallet (MetaMask, Coinbase etc.)</button>
+      <button type="button" disabled>WalletConnect — integration coming</button>
+    </div>
+    <p id="worldz-wallet-feedback" role="status" aria-live="polite"></p>
+  </dialog>
 </header>
 
 <main id="top">
@@ -506,5 +525,55 @@
 
 <script src="/app.js?v=20261021-featured-wallets-v3" defer></script>
 <script src="/ads.js?v=20261002-ads-v1" defer></script>
-<script src="/worldz-guide.js?v=20261004" defer></script></body>
+<script src="/worldz-guide.js?v=20261004" defer></script><style>.worldz-wallet-dialog{max-width:min(95vw,540px);border:1px solid #a88ac8;border-radius:16px;background:#170c2c;color:white;padding:24px}.worldz-wallet-dialog::backdrop{background:#000b}.worldz-wallet-options{display:grid;gap:9px}.worldz-wallet-options button{padding:10px;border-radius:8px;cursor:pointer}.worldz-wallet-options button:disabled{opacity:.55;cursor:not-allowed}.worldz-wallet-close{float:right}</style>
+<script id="worldz-wallet-picker-script">
+(function(){
+  const dialog=document.getElementById('worldz-wallet-dialog');
+  const button=document.getElementById('wallet-mini');
+  const feedback=document.getElementById('worldz-wallet-feedback');
+  if(!dialog||!button||!window.HTMLDialogElement)return;
+  // Capture this button only: existing app.js continues to handle other launchpad actions.
+  button.addEventListener('click',function(event){event.stopImmediatePropagation();feedback.textContent='';dialog.showModal();},true);
+  function solanaProvider(id){
+    const providers={
+      phantom:window.phantom&&window.phantom.solana,
+      solflare:window.solflare,
+      backpack:window.backpack&&window.backpack.solana,
+      jupiter:window.jupiter&&window.jupiter.solana
+    };
+    const p=providers[id];
+    return p&&typeof p.connect==='function'?p:null;
+  }
+  dialog.addEventListener('click',async function(event){
+    const option=event.target.closest('[data-worldz-wallet]');
+    if(!option||option.disabled)return;
+    const id=option.dataset.worldzWallet;
+    feedback.textContent='Waiting for wallet approval…';
+    try{
+      let address='';
+      if(id==='evm'){
+        const provider=window.ethereum;
+        if(!provider||typeof provider.request!=='function')throw new Error('No compatible EVM browser wallet detected.');
+        const accounts=await provider.request({method:'eth_requestAccounts'});
+        address=accounts&&accounts[0];
+      }else if(id==='crossmark'){
+        const api=window.crossmark;
+        if(!api||typeof api.signInAndWait!=='function')throw new Error('Crossmark integration is not available in this browser yet.');
+        throw new Error('Crossmark sign-in needs its verified SDK integration before activation.');
+      }else{
+        const provider=solanaProvider(id);
+        if(!provider)throw new Error('Wallet not detected. Install it or open this page in its wallet browser.');
+        const result=await provider.connect();
+        address=String((result&&result.publicKey)||provider.publicKey||'');
+      }
+      if(!address)throw new Error('The wallet did not return an account.');
+      button.textContent=address.slice(0,6)+'…'+address.slice(-4);
+      button.classList.add('connected');
+      feedback.textContent='Wallet connected. No transaction was requested.';
+      dialog.close();
+    }catch(error){feedback.textContent=error&&error.message?error.message:'Wallet connection was cancelled.';}
+  });
+})();
+</script>
+</body>
 </html>
