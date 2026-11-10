@@ -76,6 +76,8 @@
       <div class="section-head"><span>EXTERNAL WALLET CONNECTIONS</span><h2>Your wallet comes to WorldzApp™.</h2><p>Connection-only adapters may read a public address and network after approval. Stage 3B adds a guarded bridge for XRPL/Sui provider integrations and mobile handoff preparation without enabling transaction signatures.</p></div>
       <div id="connection-summary" class="wallet-status"></div>
       <div id="connection-grid" class="grid"></div>
+      <div class="section-head"><span>WORLDZ WALLET + AUTO</span><h2>Connection readiness • trading locked</h2><p>Public address observation only. This does not connect a signer, approve a token or enable AUTO.</p></div>
+      <div id="wallet-auto-readiness" class="wallet-status" role="status" aria-live="polite">Checking wallet connection…</div>
     </section>
 
     <section id="identity" class="panel">
@@ -120,6 +122,7 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/worldz-app/mobile-handoff.js?v=20260927-6" defer></script>
   <script src="/worldz-app/wallet-connect.js?v=20260927-6" defer></script>
-  <script src="/worldz-app/app.js?v=20260927-6" defer></script>
+  <script src="/worldz-app/wallet-auto-bridge.js?v=20261110-1" defer></script>
+  <script src="/worldz-app/app.js?v=20261110-1" defer></script>
 </body>
 </html>
