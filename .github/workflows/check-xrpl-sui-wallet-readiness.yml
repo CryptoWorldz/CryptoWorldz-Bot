@@ -1,0 +1,35 @@
+name: XRPL and Sui wallet safety gates
+on:
+  push:
+    paths:
+      - 'scripts/check_xrpl_sui_wallet_readiness.py'
+      - '.github/workflows/check-xrpl-sui-wallet-readiness.yml'
+      - 'worldzpad-omnichain/adapters/xrpl/**'
+      - 'worldzpad-omnichain/adapters/sui/**'
+      - 'worldzpad-sui-testnet/sui-native-adapter.v1.json'
+      - 'launchpad.cryptoworldz.xyz/sui/config.json'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/config.json'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/core/wallet-connectors.json'
+  pull_request:
+    paths:
+      - 'scripts/check_xrpl_sui_wallet_readiness.py'
+      - '.github/workflows/check-xrpl-sui-wallet-readiness.yml'
+      - 'worldzpad-omnichain/adapters/xrpl/**'
+      - 'worldzpad-omnichain/adapters/sui/**'
+      - 'worldzpad-sui-testnet/sui-native-adapter.v1.json'
+      - 'launchpad.cryptoworldz.xyz/sui/config.json'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/config.json'
+      - 'launchpad.cryptoworldz.xyz/worldz-app/core/wallet-connectors.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify XRPL/Sui gates without keys or network
+        run: python scripts/check_xrpl_sui_wallet_readiness.py
