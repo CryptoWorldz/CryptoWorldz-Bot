@@ -98,6 +98,38 @@ public final class MainActivity extends Activity {
       @Override public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) { showSaved(); }
       @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
     });
+    action("Solana derivation paths • preview", v -> {
+      android.widget.LinearLayout preview = new android.widget.LinearLayout(this);
+      preview.setOrientation(android.widget.LinearLayout.VERTICAL);
+      preview.setPadding(28, 16, 28, 16);
+      android.widget.Spinner pathSelector = new android.widget.Spinner(this);
+      pathSelector.setAdapter(new ArrayAdapter<>(this,
+        android.R.layout.simple_spinner_dropdown_item, SolanaDerivationPaths.LABELS));
+      preview.addView(pathSelector);
+      EditText accountIndex = new EditText(this);
+      accountIndex.setHint("Account index (0–1000)");
+      accountIndex.setInputType(InputType.TYPE_CLASS_NUMBER);
+      accountIndex.setText("0");
+      preview.addView(accountIndex);
+      new AlertDialog.Builder(this)
+        .setTitle("Solana derivation path preview")
+        .setMessage("Path selection only. This beta does not accept recovery phrases or derive keys.")
+        .setView(preview)
+        .setNegativeButton("Cancel", null)
+        .setPositiveButton("Show path", (dialog, which) -> {
+          try {
+            int account = Integer.parseInt(accountIndex.getText().toString());
+            String path = SolanaDerivationPaths.path(pathSelector.getSelectedItemPosition(), account);
+            new AlertDialog.Builder(this).setTitle("Selected Solana path")
+              .setMessage(path + "\\n\\nNo keys have been derived or imported.")
+              .setPositiveButton("OK", null).show();
+          } catch (IllegalArgumentException ex) {
+            new AlertDialog.Builder(this).setTitle("Invalid account index")
+              .setMessage("Choose an account index from 0 to 1000. The root path supports index 0 only.")
+              .setPositiveButton("OK", null).show();
+          }
+        }).show();
+    });
     action("Import existing wallet • recovery phrase / private key (coming soon)", v ->
       new AlertDialog.Builder(this)
         .setTitle("Secure wallet import — not available yet")
