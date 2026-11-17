@@ -3,40 +3,45 @@ on:
   workflow_dispatch:
   push:
     branches: [feat/worldz-wallet-android-beta-apk]
-    paths: ['apps/worldz-wallet-android/**', '.github/workflows/worldz-wallet-android-beta.yml']
+    paths:
+      - 'apps/worldz-wallet-android/**'
+      - '.github/workflows/worldz-wallet-android-beta.yml'
   pull_request:
-    paths: ['apps/worldz-wallet-android/**', '.github/workflows/worldz-wallet-android-beta.yml']
+    paths:
+      - 'apps/worldz-wallet-android/**'
+      - '.github/workflows/worldz-wallet-android-beta.yml'
 permissions:
   contents: read
 jobs:
   apk:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 35
-    defaults:
-      run:
-        working-directory: apps/worldz-wallet-android
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
-      - uses: gradle/actions/setup-gradle@v4
+      - name: Install Android SDK
+        run: |
+          test -n "$ANDROID_SDK_ROOT"
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
-      - name: Install Android SDK 36
-        run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
-      - name: Build debug APK
+      - name: Compile Android APK
+        working-directory: apps/worldz-wallet-android
         run: gradle :app:assembleDebug --no-daemon --stacktrace
-      - name: Record checksum
-        run: sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/SHA256SUMS.txt
+      - name: Generate SHA256
+        run: |
+          cd apps/worldz-wallet-android/app/build/outputs/apk/debug
+          sha256sum app-debug.apk > SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
           name: worldz-wallet-readonly-beta-debug-apk
           path: |
             apps/worldz-wallet-android/app/build/outputs/apk/debug/app-debug.apk
             apps/worldz-wallet-android/app/build/outputs/apk/debug/SHA256SUMS.txt
+          if-no-files-found: error
           retention-days: 14
