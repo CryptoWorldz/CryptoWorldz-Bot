@@ -64,13 +64,6 @@ public final class MainActivity extends Activity {
     saved.setText(value.isEmpty() ? "No public address saved for this chain." : "Saved public address: " + value);
     addressInput.setText(value);
   }
-  private boolean validAddress(int chain, String a) {
-    if (a.length() > 128 || a.contains(" ") || a.contains("\n")) return false;
-    if (chain == 0) return a.matches("[1-9A-HJ-NP-Za-km-z]{32,44}");
-    if (chain == 1) return a.matches("r[1-9A-HJ-NP-Za-km-z]{24,34}");
-    if (chain == 5) return a.matches("0x[0-9a-fA-F]{64}");
-    return a.matches("0x[0-9a-fA-F]{40}");
-  }
   @Override public void onCreate(Bundle state) {
     super.onCreate(state);
     preferences = getSharedPreferences("worldz_public_addresses_v1", MODE_PRIVATE);
@@ -107,9 +100,9 @@ public final class MainActivity extends Activity {
     });
     action("Save public address", v -> {
       String address = addressInput.getText().toString().trim();
-      if (!validAddress(chainPicker.getSelectedItemPosition(), address)) {
+      if (!PublicAddressValidator.isValidFormat(chainPicker.getSelectedItemPosition(), address)) {
         new AlertDialog.Builder(this).setTitle("Invalid address format")
-          .setMessage("Check the public address and selected blockchain. Never paste a seed phrase or private key.")
+          .setMessage("Check the public address and selected blockchain. Format checks do not prove ownership or transfer safety. Never paste a seed phrase or private key.")
           .setPositiveButton("OK", null).show();
         return;
       }
