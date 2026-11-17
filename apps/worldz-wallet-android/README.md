@@ -25,3 +25,8 @@ The versioned `welcome-rewards.v1.json` defines a **5,000,000 WORLDZ total cap**
 
 ## Next secure self-custody milestone
 Implement audited per-chain derivation and Android Keystore-backed encryption, device recovery/backup UX, biometric or device credential gating, wallet ownership signatures and transaction review. No mnemonic should be stored in plaintext, logs, clipboard or analytics. Gate every chain by independent tests before enabling transfers or minting.
+
+## Private-wallet foundation (in progress; NOT enabled)
+`EncryptedWalletVault.java` adds an isolated Android Keystore AES-GCM encryption/decryption component for a future Solana secret. It is deliberately **not connected** to the user interface and does not generate, import, expose or use keys. A successful compilation does not validate secure wallet behavior.
+
+Before any real private keys can be entrusted to it: implement vetted Ed25519 derivation and BIP-39 recovery with published test vectors; make an explicit recovery confirmation flow; gate secret decryption behind appropriate user authentication; add instrumented encryption/tamper/reinstall tests on physical devices; evaluate rooted-device and backup threat models; obtain independent security review. Android Keystore ciphertext cannot generally be restored after uninstall or device reset without a separate secure recovery design.
