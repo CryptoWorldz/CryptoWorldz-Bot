@@ -31,5 +31,27 @@ WorldzLaunchPad creators may eventually choose a native-chain WORLDZ quote asset
 ## Scope
 Do not deploy a new WORLDZ Layer 1 as a prerequisite. A future Layer 1 would be a separate high-cost research initiative. No automatic token wrapping, market making, pool deployment, or user spending is enabled by this specification.
 
+
+## Integration inventory — reuse existing code; do not duplicate
+- `launchpad.cryptoworldz.xyz/platform-config.json`: existing Worldz CrossPair™ rule and Worldz Omnichain™ chain adapter registry; extend verified quote assets there rather than creating a second creator pairing engine.
+- `worldzpad-mainnet/worldz-launch-capability-matrix.v1.json`: canonical chain-level status for token creation, pairing and market launch. Pairing currently lists SOL and verified wXRP targets for Solana, XRP AMM testnet for XRPL, and no production EVM/Sui/HyperEVM/Robinhood quote route. A planned WORLDZ quote must not be presented as LIVE or paired until independently proven.
+- `worldzpad-omnichain/chain-registry.v1.json`: existing eight chain-native market models and verified chain identifiers; reference rather than duplicate registry or RPC endpoints.
+- `worldzpad-omnichain/adapters/xrpl/xrpl.v1.json`: existing XRPL trust-line issuance, CLOB and AMM route design. Add WORLDZ as a verified issuer/currency quote only through this adapter and its testnet proof.
+- `worldzpad-omnichain/adapters/evm/shared-evm.v1.json`: reuse shared EVM contracts and chain-specific venue validation; Robinhood and HyperEVM are independent release gates.
+- `worldzpad-omnichain/README.md`: release gates and proof architecture remain authoritative; do not bypass them or auto-bridge funds.
+
+### Future WORLDZ quote integration acceptance criteria
+1. Chain-specific WORLDZ identity must be registered as an approved quote asset with verified mint/issuer/contract and backing details, never just by ticker.
+2. Pair selector must only show WORLDZ where the chosen chain AND market adapter supports it and where a verified funding and market-creation route exists.
+3. Creator must preview token and WORLDZ amounts, initial implied price, pool or order-book venue, fees, gas, trust line/account-reserve obligations if XRPL, and irreversible authorities before signing.
+4. Verify on-chain pool/AMM/order-book creation, trade execution in both directions, real reserves and WORLDZ Proof receipts on a per-chain test environment before mainnet.
+5. Do not promise that all pools share liquidity; market depth and slippage are chain-specific. Cross-chain representations require auditable backing and redemption.
+6. Keep launch/market/payout gates disabled by default; no mint, funding, signing or broadcast by this planning change.
+
+### Bridge research, separate from pair listings
+- Solana links can be facilitated by cross-chain transfer and swap routing infrastructure such as Wormhole, deBridge, Mayan and Relay. Route/asset support is dynamic and requires a live quote and contract verification before recommending execution.
+- Robinhood Chain official documentation describes its canonical bridge with Ethereum and additional third-party routes; **do not assume** a direct Solana ↔ Robinhood canonical bridge.
+- Hyperliquid has separate HyperCore, HyperEVM and bridge concepts. A Solana ↔ Hyperliquid user flow may use routing providers/intermediary networks; this does not establish a direct native bridge or automatically support WORLDZ.
+
 ## Existing repository reconciliation
 Older treasury documents still prescribe multisig and older platform configurations reference retired tokens and competing fee/supply policies. These are historical conflicts, not authorization to override the founder's newer developer-wallet decision. Resolve and test policies before any production implementation.
