@@ -121,7 +121,7 @@ public final class MainActivity extends Activity {
             int account = Integer.parseInt(accountIndex.getText().toString());
             String path = SolanaDerivationPaths.path(pathSelector.getSelectedItemPosition(), account);
             new AlertDialog.Builder(this).setTitle("Selected Solana path")
-              .setMessage(path + "\\n\\nNo keys have been derived or imported.")
+              .setMessage(path + "\n\nNo keys have been derived or imported.")
               .setPositiveButton("OK", null).show();
           } catch (IllegalArgumentException ex) {
             new AlertDialog.Builder(this).setTitle("Invalid account index")
@@ -140,9 +140,8 @@ public final class MainActivity extends Activity {
       new AlertDialog.Builder(this).setTitle("Choose wallet setup")
         .setItems(choices, (dialog, selected) -> {
           if (selected == 3) {
-            chainPicker.setSelection(0);
             addressInput.requestFocus();
-            Toast.makeText(this, "Paste your PUBLIC address only", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Select your blockchain and paste its PUBLIC address only", Toast.LENGTH_LONG).show();
           } else {
             new AlertDialog.Builder(this)
               .setTitle("Private wallet security gate")
