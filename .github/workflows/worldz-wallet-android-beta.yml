@@ -17,7 +17,30 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Check SDK root
-        run: test -n "$ANDROID_SDK_ROOT"
-      - name: Smoke
-        run: echo "All build prerequisites loaded"
+      - name: Install Android SDK 36
+        run: |
+          test -n "$ANDROID_SDK_ROOT"
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+      - name: Install verified Gradle 8.13 without setup-gradle action
+        run: |
+          curl --fail --location --silent --show-error --retry 3 \
+            https://services.gradle.org/distributions/gradle-8.13-bin.zip \
+            --output "$RUNNER_TEMP/gradle-8.13-bin.zip"
+          echo "20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78  $RUNNER_TEMP/gradle-8.13-bin.zip" | sha256sum --check --
+          unzip -q "$RUNNER_TEMP/gradle-8.13-bin.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/gradle-8.13/bin" >> "$GITHUB_PATH"
+      - name: Compile debug APK
+        working-directory: apps/worldz-wallet-android
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Record APK SHA256
+        run: |
+          cd apps/worldz-wallet-android/app/build/outputs/apk/debug
+          sha256sum app-debug.apk > SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldz-wallet-beta-debug-apk
+          path: |
+            apps/worldz-wallet-android/app/build/outputs/apk/debug/app-debug.apk
+            apps/worldz-wallet-android/app/build/outputs/apk/debug/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
