@@ -8,8 +8,8 @@
     "decimals": null
   },
   "allocation": {
-    "totalTokens": "1000000",
-    "tokensPerEligibleParticipant": "1000",
+    "totalTokens": "5000000",
+    "tokensPerEligibleParticipant": "5000",
     "maximumParticipants": 1000,
     "source": "existing-genesis-allocation-requires-reconciliation"
   },
@@ -30,7 +30,7 @@
   },
   "display": {
     "title": "Worldz Wallet Welcome Rewards",
-    "subtitle": "1,000 $WORLDZ for eligible new users after launch",
+    "subtitle": "5,000 $WORLDZ for each of 1,000 eligible participants after launch",
     "pendingText": "Coming soon — rewards are not yet available. No token distribution has started."
   }
 }
