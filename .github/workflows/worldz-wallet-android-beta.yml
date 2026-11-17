@@ -8,8 +8,35 @@ on:
 permissions:
   contents: read
 jobs:
-  workflow-smoke:
+  apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
-      - name: Verify GitHub Actions can start
-        run: echo "WORLDZ_WALLET_ACTIONS_STARTUP=PASS"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Android SDK status
+        run: |
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          test -n "$ANDROID_SDK_ROOT"
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Build Android debug APK
+        working-directory: apps/worldz-wallet-android
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Generate APK checksum
+        run: |
+          cd apps/worldz-wallet-android/app/build/outputs/apk/debug
+          sha256sum app-debug.apk > SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldz-wallet-beta-debug-apk
+          path: |
+            apps/worldz-wallet-android/app/build/outputs/apk/debug/app-debug.apk
+            apps/worldz-wallet-android/app/build/outputs/apk/debug/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
