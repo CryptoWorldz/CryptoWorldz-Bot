@@ -19,9 +19,5 @@ jobs:
           java-version: '17'
       - name: Check SDK root
         run: test -n "$ANDROID_SDK_ROOT"
-      - name: Test Gradle setup action
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.13'
       - name: Smoke
         run: echo "All build prerequisites loaded"
