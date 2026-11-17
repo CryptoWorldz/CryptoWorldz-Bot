@@ -19,3 +19,9 @@ For direct Worldz distribution, generate a dedicated long-lived release keystore
 
 ## Security
 Public addresses are stored in Android app preferences and are not secrets. Android backup is disabled. Never request, log, or store recovery phrases in this beta. All blockchain transactions and launch actions remain gated pending independently verified security and chain-specific tests.
+
+## Welcome Rewards (planned, disabled)
+The versioned `welcome-rewards.v1.json` defines a **1,000,000 WORLDZ total cap** and a **proposed 1,000 WORLDZ per eligible participant** (maximum 1,000), subject to approval against the canonical 100M WORLDZ genesis allocation. Wallet creation alone does not qualify a person; a verified signature and one-per-participant anti-Sybil enforcement are required. No mint address, distribution wallet, funding, claim endpoint or payout mechanism has been activated. Marketing must say "planned" until claims genuinely open.
+
+## Next secure self-custody milestone
+Implement audited per-chain derivation and Android Keystore-backed encryption, device recovery/backup UX, biometric or device credential gating, wallet ownership signatures and transaction review. No mnemonic should be stored in plaintext, logs, clipboard or analytics. Gate every chain by independent tests before enabling transfers or minting.
