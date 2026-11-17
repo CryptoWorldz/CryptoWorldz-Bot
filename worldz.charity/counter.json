@@ -1,0 +1,9 @@
+{
+  "schema": "worldzpool-counter-v1",
+  "verified": false,
+  "as_of": null,
+  "assets_aud": null,
+  "tokens_contributing": null,
+  "earnings_aud": null,
+  "note": "No verified public snapshot. These fields must only be populated by an approved reconciled source."
+}
