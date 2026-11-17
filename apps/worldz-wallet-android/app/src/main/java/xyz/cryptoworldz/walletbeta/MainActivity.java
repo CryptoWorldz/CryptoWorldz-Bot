@@ -2,67 +2,143 @@ package xyz.cryptoworldz.walletbeta;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.os.Bundle;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
-import android.webkit.SslErrorHandler;
-import android.net.http.SslError;
-import android.webkit.WebChromeClient;
-import android.widget.TextView;
+import android.os.Bundle;
+import android.text.InputType;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.graphics.Color;
+import android.content.SharedPreferences;
 
+/**
+ * WORLDZ Wallet: native public-address companion. No seed, private key, signing,
+ * trading or wallet creation is implemented. Never collect recovery phrases.
+ */
 public final class MainActivity extends Activity {
-  private static final String HOME = "https://launchpad.cryptoworldz.xyz/worldz-app/";
-  private WebView web;
-  private boolean allowed(Uri uri) {
-    return uri != null && "https".equalsIgnoreCase(uri.getScheme())
-      && "launchpad.cryptoworldz.xyz".equalsIgnoreCase(uri.getHost())
-      && (uri.getPort() == -1 || uri.getPort() == 443)
-      && uri.getUserInfo() == null;
+  private static final String[] CHAINS = {
+    "Solana", "XRP Ledger", "Base", "Ethereum", "BNB Chain", "Sui", "HyperEVM", "Robinhood"
+  };
+  private static final String LAUNCHPAD = "https://worldzlaunch.com/";
+  private static final String DEXSCREENER = "https://dexscreener.com/";
+  private LinearLayout content;
+  private Spinner chainPicker;
+  private EditText addressInput;
+  private TextView saved;
+  private SharedPreferences preferences;
+
+  private void openExternal(String url) {
+    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+  }
+  private TextView label(String value, int size) {
+    TextView view = new TextView(this);
+    view.setText(value);
+    view.setTextSize(size);
+    view.setTextColor(Color.WHITE);
+    view.setPadding(12, 12, 12, 12);
+    return view;
+  }
+  private Button action(String title, View.OnClickListener listener) {
+    Button b = new Button(this);
+    b.setText(title);
+    b.setAllCaps(false);
+    b.setOnClickListener(listener);
+    content.addView(b);
+    return b;
+  }
+  private String key() { return "address_" + chainPicker.getSelectedItemPosition(); }
+  private String current() { return preferences.getString(key(), ""); }
+  private void showSaved() {
+    String value = current();
+    saved.setText(value.isEmpty() ? "No public address saved for this chain." : "Saved public address: " + value);
+    addressInput.setText(value);
+  }
+  private boolean validAddress(int chain, String a) {
+    if (a.length() > 128 || a.contains(" ") || a.contains("\n")) return false;
+    if (chain == 0) return a.matches("[1-9A-HJ-NP-Za-km-z]{32,44}");
+    if (chain == 1) return a.matches("r[1-9A-HJ-NP-Za-km-z]{24,34}");
+    if (chain == 5) return a.matches("0x[0-9a-fA-F]{64}");
+    return a.matches("0x[0-9a-fA-F]{40}");
   }
   @Override public void onCreate(Bundle state) {
     super.onCreate(state);
-    LinearLayout root = new LinearLayout(this);
-    root.setOrientation(LinearLayout.VERTICAL);
-    TextView banner = new TextView(this);
-    banner.setText("WORLDZ WALLET • READ-ONLY BETA • NO TRANSFERS");
-    banner.setPadding(18, 16, 18, 16);
-    banner.setBackgroundColor(0xff5b21b6);
-    banner.setTextColor(0xffffffff);
-    root.addView(banner);
-    web = new WebView(this);
-    root.addView(web, new LinearLayout.LayoutParams(-1, 0, 1));
-    setContentView(root);
-    WebSettings settings = web.getSettings();
-    settings.setJavaScriptEnabled(true);
-    settings.setDomStorageEnabled(false);
-    settings.setAllowFileAccess(false);
-    settings.setAllowContentAccess(false);
-    settings.setJavaScriptCanOpenWindowsAutomatically(false);
-    settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-    web.setWebChromeClient(new WebChromeClient());
-    web.setWebViewClient(new WebViewClient() {
-      @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-        Uri uri = request.getUrl();
-        if (allowed(uri)) return false;
-        if (request.isForMainFrame() && "https".equalsIgnoreCase(uri.getScheme())) {
-          try { startActivity(new Intent(Intent.ACTION_VIEW, uri)); } catch (Exception ignored) {}
-        }
-        return true;
-      }
-      @Override public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) { handler.cancel(); }
+    preferences = getSharedPreferences("worldz_public_addresses_v1", MODE_PRIVATE);
+    ScrollView scroll = new ScrollView(this);
+    scroll.setFillViewport(true);
+    scroll.setBackgroundColor(Color.rgb(32, 13, 61));
+    content = new LinearLayout(this);
+    content.setOrientation(LinearLayout.VERTICAL);
+    content.setPadding(22, 22, 22, 32);
+    scroll.addView(content);
+    setContentView(scroll);
+
+    TextView heading = label("WORLDZ WALLET  💜", 26);
+    heading.setGravity(Gravity.CENTER);
+    content.addView(heading);
+    content.addView(label("Public-address companion • Direct Android beta", 15));
+    content.addView(label("Choose a blockchain and save an existing PUBLIC address. This app cannot create wallets, store private keys, sign or send transactions.", 14));
+    chainPicker = new Spinner(this);
+    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, CHAINS);
+    chainPicker.setAdapter(adapter);
+    content.addView(chainPicker);
+    addressInput = new EditText(this);
+    addressInput.setSingleLine(true);
+    addressInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+    addressInput.setTextColor(Color.WHITE);
+    addressInput.setHintTextColor(0xffc4b5fd);
+    addressInput.setHint("Paste your PUBLIC wallet address");
+    content.addView(addressInput);
+    saved = label("", 13);
+    content.addView(saved);
+    chainPicker.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+      @Override public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) { showSaved(); }
+      @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
     });
-    web.loadUrl(HOME);
-    new AlertDialog.Builder(this).setTitle("Worldz Wallet Beta")
-      .setMessage("This is a read-only preview of WorldzApp. It does not create wallets, hold keys, sign transactions or transfer assets. Never enter a recovery phrase.")
-      .setPositiveButton("Continue", (d,w) -> {}).show();
+    action("Save public address", v -> {
+      String address = addressInput.getText().toString().trim();
+      if (!validAddress(chainPicker.getSelectedItemPosition(), address)) {
+        new AlertDialog.Builder(this).setTitle("Invalid address format")
+          .setMessage("Check the public address and selected blockchain. Never paste a seed phrase or private key.")
+          .setPositiveButton("OK", null).show();
+        return;
+      }
+      preferences.edit().putString(key(), address).apply();
+      showSaved();
+      Toast.makeText(this, "Public address saved on this device", Toast.LENGTH_SHORT).show();
+    });
+    action("Copy saved address", v -> {
+      if (current().isEmpty()) { Toast.makeText(this, "Save an address first", Toast.LENGTH_SHORT).show(); return; }
+      ((ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE))
+        .setPrimaryClip(ClipData.newPlainText("WORLDZ public address", current()));
+      Toast.makeText(this, "Public address copied", Toast.LENGTH_SHORT).show();
+    });
+    action("Share saved address", v -> {
+      if (current().isEmpty()) { Toast.makeText(this, "Save an address first", Toast.LENGTH_SHORT).show(); return; }
+      Intent intent = new Intent(Intent.ACTION_SEND);
+      intent.setType("text/plain");
+      intent.putExtra(Intent.EXTRA_TEXT, CHAINS[chainPicker.getSelectedItemPosition()] + " public address: " + current());
+      startActivity(Intent.createChooser(intent, "Share public address"));
+    });
+    action("Remove saved address", v -> {
+      new AlertDialog.Builder(this).setTitle("Remove public address?")
+        .setMessage("This removes only the locally saved public address. No blockchain funds are affected.")
+        .setNegativeButton("Cancel", null)
+        .setPositiveButton("Remove", (dialog, which) -> { preferences.edit().remove(key()).apply(); showSaved(); })
+        .show();
+    });
+    action("WorldzLaunchPad • Beginner / Intermediate / Advanced", v -> openExternal(LAUNCHPAD));
+    action("DexScreener • View charts", v -> openExternal(DEXSCREENER));
+    content.addView(label("Security: public addresses only. No seed phrase, secret key, wallet recovery, transfers, swaps or token minting in this beta. Always verify external websites.", 13));
   }
-  @Override public void onBackPressed() {
-    if (web != null && web.canGoBack()) web.goBack(); else super.onBackPressed();
-  }
-  @Override protected void onDestroy() { if (web != null) web.destroy(); super.onDestroy(); }
 }
