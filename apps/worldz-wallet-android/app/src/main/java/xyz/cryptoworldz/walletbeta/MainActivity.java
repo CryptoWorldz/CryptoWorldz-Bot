@@ -98,6 +98,11 @@ public final class MainActivity extends Activity {
       @Override public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) { showSaved(); }
       @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
     });
+    action("Import existing wallet • recovery phrase / private key (coming soon)", v ->
+      new AlertDialog.Builder(this)
+        .setTitle("Secure wallet import — not available yet")
+        .setMessage("Future versions will support importing an existing Solana wallet using a recovery phrase or supported private key. Never enter your secret phrase or private key into this beta. For now, use a PUBLIC address for watch-only access.")
+        .setPositiveButton("OK", null).show());
     action("Save public address", v -> {
       String address = addressInput.getText().toString().trim();
       if (!PublicAddressValidator.isValidFormat(chainPicker.getSelectedItemPosition(), address)) {
