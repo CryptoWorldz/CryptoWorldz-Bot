@@ -47,19 +47,27 @@ final class EncryptedWalletVault {
   synchronized void seal(String recordId, byte[] secret) throws Exception {
     if (!"solana_primary".equals(recordId) || secret == null || secret.length == 0)
       throw new IllegalArgumentException("Invalid vault record");
+    // Never silently overwrite a wallet secret: accidental replacement can strand funds.
+    SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+    if (prefs.contains(recordId)) throw new IllegalStateException("Vault record already exists");
     Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
     cipher.init(Cipher.ENCRYPT_MODE, key());
     byte[] iv = cipher.getIV();
     if (iv.length != IV_LENGTH) throw new IllegalStateException("Unexpected GCM IV");
-    byte[] ciphertext = cipher.doFinal(secret);
-    byte[] envelope = new byte[iv.length + ciphertext.length];
-    System.arraycopy(iv, 0, envelope, 0, iv.length);
-    System.arraycopy(ciphertext, 0, envelope, iv.length, ciphertext.length);
-    boolean ok = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-        .putString(recordId, Base64.encodeToString(envelope, Base64.NO_WRAP)).commit();
-    Arrays.fill(ciphertext, (byte) 0);
-    Arrays.fill(envelope, (byte) 0);
-    if (!ok) throw new IllegalStateException("Vault write failed");
+    byte[] ciphertext = null;
+    byte[] envelope = null;
+    try {
+      ciphertext = cipher.doFinal(secret);
+      envelope = new byte[iv.length + ciphertext.length];
+      System.arraycopy(iv, 0, envelope, 0, iv.length);
+      System.arraycopy(ciphertext, 0, envelope, iv.length, ciphertext.length);
+      boolean ok = prefs.edit()
+          .putString(recordId, Base64.encodeToString(envelope, Base64.NO_WRAP)).commit();
+      if (!ok) throw new IllegalStateException("Vault write failed");
+    } finally {
+      if (ciphertext != null) Arrays.fill(ciphertext, (byte) 0);
+      if (envelope != null) Arrays.fill(envelope, (byte) 0);
+    }
   }
 
   /** Returns secret bytes; caller must zeroize returned array immediately after use. */
