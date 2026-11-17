@@ -1,15 +1,10 @@
 name: Worldz Wallet Android Beta APK
 on:
-  workflow_dispatch:
-  push:
-    branches: [feat/worldz-wallet-android-beta-apk]
-    paths:
-      - 'apps/worldz-wallet-android/**'
-      - '.github/workflows/worldz-wallet-android-beta.yml'
   pull_request:
     paths:
       - 'apps/worldz-wallet-android/**'
       - '.github/workflows/worldz-wallet-android-beta.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
