@@ -36,3 +36,34 @@ jobs:
         run: node --test test/worldping.test.js test/zed-hostinger-build-poll-timeouts.test.js
       - name: Full Node test suite
         run: npm test
+
+  worldz-wallet-apk:
+    name: Worldz Wallet APK compilation
+    if: github.event_name == 'pull_request' && github.head_ref == 'feat/worldz-wallet-android-beta-apk'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: apps/worldz-wallet-android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Install Android SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - name: Compile Android APK
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Generate SHA256
+        run: sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worldz-wallet-beta-apk
+          path: |
+            apps/worldz-wallet-android/app/build/outputs/apk/debug/app-debug.apk
+            apps/worldz-wallet-android/app/build/outputs/apk/debug/SHA256SUMS.txt
