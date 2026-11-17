@@ -130,6 +130,8 @@ public final class MainActivity extends Activity {
         .setPositiveButton("Remove", (dialog, which) -> { preferences.edit().remove(key()).apply(); showSaved(); })
         .show();
     });
+    content.addView(label("🎁 WORLDZ WALLET WELCOME REWARDS", 19));
+    content.addView(label("Planned: 1,000 $WORLDZ for each eligible new participant, from a capped 1,000,000-token pool. Coming soon — claims and payouts are disabled until the verified token launch, funding and anti-abuse checks.", 14));
     action("WorldzLaunchPad • Beginner / Intermediate / Advanced", v -> openExternal(LAUNCHPAD));
     action("DexScreener • View charts", v -> openExternal(DEXSCREENER));
     content.addView(label("Security: public addresses only. No seed phrase, secret key, wallet recovery, transfers, swaps or token minting in this beta. Always verify external websites.", 13));
