@@ -130,11 +130,27 @@ public final class MainActivity extends Activity {
           }
         }).show();
     });
-    action("Import existing wallet • recovery phrase / private key (coming soon)", v ->
-      new AlertDialog.Builder(this)
-        .setTitle("Secure wallet import — not available yet")
-        .setMessage("Future versions will support importing an existing Solana wallet using a recovery phrase or supported private key. Never enter your secret phrase or private key into this beta. For now, use a PUBLIC address for watch-only access.")
-        .setPositiveButton("OK", null).show());
+    action("Wallet setup • create / import / watch-only", v -> {
+      final String[] choices = {
+        "Create new private wallet (coming soon)",
+        "Import recovery phrase (coming soon)",
+        "Import private key (coming soon)",
+        "Add existing public address (watch-only)"
+      };
+      new AlertDialog.Builder(this).setTitle("Choose wallet setup")
+        .setItems(choices, (dialog, selected) -> {
+          if (selected == 3) {
+            chainPicker.setSelection(0);
+            addressInput.requestFocus();
+            Toast.makeText(this, "Paste your PUBLIC address only", Toast.LENGTH_LONG).show();
+          } else {
+            new AlertDialog.Builder(this)
+              .setTitle("Private wallet security gate")
+              .setMessage("This option is not enabled. We must finish audited Solana key derivation, secure backup/recovery, device authentication and signing tests first. NEVER enter a recovery phrase or private key in this beta.")
+              .setPositiveButton("OK", null).show();
+          }
+        }).show();
+    });
     action("Save public address", v -> {
       String address = addressInput.getText().toString().trim();
       if (!PublicAddressValidator.isValidFormat(chainPicker.getSelectedItemPosition(), address)) {
