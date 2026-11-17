@@ -1,0 +1,36 @@
+{
+  "schema": "worldz.wallet.welcome-rewards.v1",
+  "status": "planned_disabled",
+  "token": {
+    "symbol": "WORLDZ",
+    "chain": "solana-mainnet",
+    "mintAddress": null,
+    "decimals": null
+  },
+  "allocation": {
+    "totalTokens": "1000000",
+    "tokensPerEligibleParticipant": "1000",
+    "maximumParticipants": 1000,
+    "source": "existing-genesis-allocation-requires-reconciliation"
+  },
+  "eligibility": {
+    "walletOwnershipSignatureRequired": true,
+    "oneRewardPerVerifiedParticipant": true,
+    "addressCreationAloneInsufficient": true,
+    "antiSybilChecksRequired": true
+  },
+  "execution": {
+    "claimsEnabled": false,
+    "payoutsEnabled": false,
+    "distributionWallet": null,
+    "liveMintVerified": false,
+    "allocationApproved": false,
+    "treasuryFunded": false,
+    "securityReviewPassed": false
+  },
+  "display": {
+    "title": "Worldz Wallet Welcome Rewards",
+    "subtitle": "1,000 $WORLDZ for eligible new users after launch",
+    "pendingText": "Coming soon — rewards are not yet available. No token distribution has started."
+  }
+}
