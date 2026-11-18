@@ -1,5 +1,17 @@
-name: WorldzHQ and PDC verified Hostinger deployment
+name: WorldzHQ source and PDC NextGen public health
 on:
+  pull_request:
+    paths:
+      - 'tools/check_worldz_public_health.py'
+      - 'tools/audit_worldz_portfolio.py'
+      - 'worldzhq.com/**'
+      - 'ops/worldz-domain-registry.json'
+      - 'test/test_worldz_public_health_nextgen.py'
+      - 'test/test_worldzhq_public_policy.py'
+      - 'test/test_worldz_portfolio_audit.py'
+      - '.github/workflows/worldz-public-verified.yml'
+      - '.github/workflows/deploy-worldz-new-sites.yml'
+      - '.github/workflows/audit-worldz-18-domains.yml'
   workflow_dispatch:
   schedule:
     - cron: '17 */6 * * *'
@@ -9,11 +21,23 @@ concurrency:
   group: worldz-new-sites-only
   cancel-in-progress: false
 jobs:
+  offline-nextgen-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test PDC NextGen marker regression offline
+        run: |
+          python3 -m py_compile tools/check_worldz_public_health.py tools/deploy_worldz_public_verified.py
+          python3 -m py_compile tools/audit_worldz_portfolio.py
+          python3 -m unittest discover -s test -p 'test_world*_public*.py' -v
+          python3 -m unittest discover -s test -p 'test_worldz_portfolio_audit.py' -v
 
   public-health:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Independently compare public content against GitHub source
+      - name: Verify HQ source equality and PDC NextGen runtime markers
         run: python3 tools/check_worldz_public_health.py

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deploy two Worldz public sites with explicit Hostinger mapping and post-deploy proof."""
+"""Deploy HQ static pages only; PDC is owned by the NextGen publishing workflow."""
 import os,ssl,time,hashlib,urllib.request
 from ftplib import FTP_TLS,error_perm
 from pathlib import Path,PurePosixPath
@@ -7,7 +7,6 @@ from pathlib import Path,PurePosixPath
 ROOT=Path(__file__).resolve().parents[1]
 SITES={
  "worldzhq.com":{"remote":"domains/worldzhq.com/public_html","url":"https://worldzhq.com/treasury/","local":"treasury/index.html","marker":"What @JayJayTeamDev is building"},
- "purplediamondcrew.com":{"remote":"domains/purplediamondcrew.com/public_html","url":"https://purplediamondcrew.com/","local":"index.html","marker":"What Purple Diamond Crew does"},
 }
 def ftp_connect():
  host=os.environ["FTP_HOST"]

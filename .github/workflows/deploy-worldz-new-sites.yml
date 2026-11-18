@@ -6,7 +6,6 @@ on:
       - 'worldzhq.com/**'
       - 'worldz.live/**'
       - '.github/workflows/deploy-worldz-new-sites.yml'
-      - 'purplediamondcrew.com/**'
       - 'tools/check_worldz_public_health.py'
   workflow_dispatch:
 permissions:
@@ -40,7 +39,7 @@ jobs:
           else
             test -n "$FTP_HOST" && test -n "$FTP_USERNAME" && test -n "$FTP_PASSWORD"
           fi
-          for site in worldzhq.com worldz.live purplediamondcrew.com; do
+          for site in worldzhq.com worldz.live; do
             test -s "$site/index.html"
             grep -qi '<html' "$site/index.html"
           done
@@ -130,7 +129,8 @@ jobs:
                       sftp.put(str(p),dest)
               print('SFTP_SELECTED',flush=True)
           try:
-           for domain in ('worldzhq.com','worldz.live','purplediamondcrew.com'):
+           # PDC has a separate NextGen publisher; never overwrite it with stale static HTML.
+           for domain in ('worldzhq.com','worldz.live'):
               site=root/domain
               allowed={'.html','.css','.js','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.txt','.json'}
               files=[p for p in site.rglob('*') if p.is_file() and p.suffix.lower() in allowed and not any(part.startswith('.') for part in p.relative_to(site).parts) and p.name not in ('domain-plan.json','package.json','package-lock.json')]
