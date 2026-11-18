@@ -38,6 +38,13 @@
     session.walletConnections=session.walletConnections.filter(item=>!(item.chain===chain&&item.provider===provider));
     saveSession(session);return session;
   }
+  const SOLANA_BASE58=/^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+  const EVM_ADDRESS=/^0x[0-9a-fA-F]{40}$/;
+  function validPublicAddress(chain,address){
+    if(chain==="solana")return SOLANA_BASE58.test(address);
+    if(chain==="evm")return EVM_ADDRESS.test(address)&&!/^0x0{40}$/i.test(address);
+    return typeof address==="string"&&address.length>0&&address.length<=128;
+  }
   function solanaProvider(){return window.solana&&typeof window.solana.connect==="function"?window.solana:null}
   function evmProvider(){return window.ethereum&&typeof window.ethereum.request==="function"?window.ethereum:null}
   async function connectSolana(){
@@ -45,7 +52,7 @@
     if(!provider)throw new Error("No injected Solana wallet detected on this device/browser.");
     const response=await provider.connect();
     const address=String(response&&response.publicKey?response.publicKey:provider.publicKey||"");
-    if(!address)throw new Error("Solana wallet connected without a readable public address.");
+    if(!validPublicAddress("solana",address))throw new Error("Solana wallet returned an invalid public-address format.");
     const connection={connectorId:"solana_injected",chain:"solana",publicAddress:address,provider:provider.isPhantom?"Phantom":provider.isSolflare?"Solflare":"Injected Solana Wallet",connectionState:"CONNECTED",persistedByConsent:false,network:null,observedAt:now()};
     upsert(connection);return connection;
   }
@@ -54,7 +61,7 @@
     if(!provider)throw new Error("No EIP-1193 wallet detected on this device/browser.");
     const accounts=await provider.request({method:"eth_requestAccounts"});
     const address=String(accounts&&accounts[0]||"");
-    if(!address)throw new Error("EVM wallet connected without a readable public address.");
+    if(!validPublicAddress("evm",address))throw new Error("EVM wallet returned an invalid public-address format.");
     const chainId=await provider.request({method:"eth_chainId"});
     const connection={connectorId:"evm_eip1193",chain:"evm",publicAddress:address,provider:"EIP-1193 Wallet",connectionState:"CONNECTED",persistedByConsent:false,network:String(chainId||""),observedAt:now()};
     upsert(connection);return connection;
@@ -84,7 +91,7 @@
     if(record.adapter.detect&&!(await record.adapter.detect()))throw new Error(record.provider+" is not available on this device/browser.");
     const result=await record.adapter.connect();
     const address=String(await record.adapter.getPublicAddress(result)||"").trim();
-    if(!address)throw new Error(record.provider+" connected without a readable public address.");
+    if(!validPublicAddress(record.chain,address))throw new Error(record.provider+" returned an invalid public-address format.");
     const network=record.adapter.getNetwork?String(await record.adapter.getNetwork(result)||""):null;
     const connection={connectorId:record.id,chain:record.chain,publicAddress:address,provider:record.provider,connectionState:"CONNECTED",persistedByConsent:false,network,observedAt:now()};
     upsert(connection);return connection;
