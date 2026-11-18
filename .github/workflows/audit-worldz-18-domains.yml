@@ -1,5 +1,10 @@
 name: Audit Worldz portfolio DNS and HTTPS (read only)
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/audit-worldz-18-domains.yml'
+      - 'ops/worldz-domain-registry.json'
+      - 'tools/audit_worldz_portfolio.py'
   workflow_dispatch:
   schedule:
     - cron: '23 8 * * 0'
