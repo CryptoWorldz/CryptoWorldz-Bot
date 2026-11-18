@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
-import java.security.SecureRandom;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -77,7 +75,10 @@ final class EncryptedWalletVault {
     String stored = prefs.getString(recordId, null);
     if (stored == null) return null;
     byte[] envelope = Base64.decode(stored, Base64.NO_WRAP);
-    if (envelope.length <= IV_LENGTH + 16) throw new SecurityException("Invalid vault envelope");
+    if (envelope.length < IV_LENGTH + 16) {
+      Arrays.fill(envelope, (byte) 0);
+      throw new SecurityException("Invalid vault envelope");
+    }
     byte[] iv = Arrays.copyOfRange(envelope, 0, IV_LENGTH);
     byte[] ciphertext = Arrays.copyOfRange(envelope, IV_LENGTH, envelope.length);
     try {
