@@ -21,9 +21,8 @@ public final class Bip39SeedDerivation {
         new String(mnemonic), Normalizer.Form.NFKD).toCharArray();
     char[] normalizedPassphrase = Normalizer.normalize(
         new String(passphrase), Normalizer.Form.NFKD).toCharArray();
-    char[] salt = new char[8 + normalizedPassphrase.length];
-    "mnemonic".getChars(0, 8, salt, 0);
-    System.arraycopy(normalizedPassphrase, 0, salt, 8, normalizedPassphrase.length);
+    byte[] salt = ("mnemonic" + new String(normalizedPassphrase))
+        .getBytes(StandardCharsets.UTF_8);
     PBEKeySpec spec = new PBEKeySpec(normalizedMnemonic, salt, 2048, 512);
     try {
       return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512")
@@ -32,7 +31,7 @@ public final class Bip39SeedDerivation {
       spec.clearPassword();
       Arrays.fill(normalizedMnemonic, '\0');
       Arrays.fill(normalizedPassphrase, '\0');
-      Arrays.fill(salt, '\0');
+      Arrays.fill(salt, (byte) 0);
     }
   }
 }
