@@ -1,4 +1,4 @@
-name: WorldzHQ and PDC verified Hostinger deployment
+name: WorldzHQ source and PDC NextGen public health
 on:
   workflow_dispatch:
   schedule:
@@ -15,5 +15,5 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Independently compare public content against GitHub source
+      - name: Verify HQ source equality and PDC NextGen runtime markers
         run: python3 tools/check_worldz_public_health.py
