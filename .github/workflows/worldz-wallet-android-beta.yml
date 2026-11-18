@@ -37,10 +37,13 @@ jobs:
             apps/worldz-wallet-android/tests/AddressValidationSmoke.java \
             apps/worldz-wallet-android/app/src/main/java/xyz/cryptoworldz/walletbeta/SolanaDerivationPaths.java \
             apps/worldz-wallet-android/tests/SolanaDerivationPathsSmoke.java \
-            apps/worldz-wallet-android/tests/WalletSecurityGateSmoke.java
+            apps/worldz-wallet-android/tests/WalletSecurityGateSmoke.java \
+            apps/worldz-wallet-android/app/src/main/java/xyz/cryptoworldz/walletbeta/Bip39SeedDerivation.java \
+            apps/worldz-wallet-android/tests/Bip39SeedDerivationSmoke.java
           java -cp "$RUNNER_TEMP/worldz-wallet-validator-tests" AddressValidationSmoke
           java -cp "$RUNNER_TEMP/worldz-wallet-validator-tests" SolanaDerivationPathsSmoke
           java -cp "$RUNNER_TEMP/worldz-wallet-validator-tests" WalletSecurityGateSmoke
+          java -cp "$RUNNER_TEMP/worldz-wallet-validator-tests" Bip39SeedDerivationSmoke
       - name: Compile debug APK
         working-directory: apps/worldz-wallet-android
         run: gradle :app:assembleDebug --no-daemon --stacktrace
