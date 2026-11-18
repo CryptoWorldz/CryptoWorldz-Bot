@@ -1,5 +1,11 @@
 name: WorldzHQ source and PDC NextGen public health
 on:
+  pull_request:
+    paths:
+      - 'tools/check_worldz_public_health.py'
+      - 'test/test_worldz_public_health_nextgen.py'
+      - '.github/workflows/worldz-public-verified.yml'
+      - '.github/workflows/deploy-worldz-new-sites.yml'
   workflow_dispatch:
   schedule:
     - cron: '17 */6 * * *'
@@ -9,8 +15,18 @@ concurrency:
   group: worldz-new-sites-only
   cancel-in-progress: false
 jobs:
+  offline-nextgen-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test PDC NextGen marker regression offline
+        run: |
+          python3 -m py_compile tools/check_worldz_public_health.py tools/deploy_worldz_public_verified.py
+          python3 -m unittest discover -s test -p 'test_worldz_public_health_nextgen.py' -v
 
   public-health:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
